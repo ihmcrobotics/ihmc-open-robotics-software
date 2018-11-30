@@ -8,6 +8,9 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
+import controller_msgs.msg.dds.LocalizationPacket;
+import controller_msgs.msg.dds.PelvisPoseErrorPacket;
+import controller_msgs.msg.dds.StampedPosePacket;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationPlan;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.continuousIntegration.IntegrationCategory;
@@ -17,24 +20,23 @@ import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
-import us.ihmc.humanoidRobotics.communication.packets.StampedPosePacket;
-import us.ihmc.humanoidRobotics.communication.packets.sensing.LocalizationPacket;
-import us.ihmc.humanoidRobotics.communication.packets.sensing.PelvisPoseErrorPacket;
+import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.humanoidRobotics.communication.subscribers.PelvisPoseCorrectionCommunicatorInterface;
 import us.ihmc.humanoidRobotics.communication.subscribers.TimeStampedTransformBuffer;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.yoVariables.variable.YoBoolean;
-import us.ihmc.yoVariables.variable.YoDouble;
+import us.ihmc.mecano.multiBodySystem.RigidBody;
+import us.ihmc.mecano.multiBodySystem.SixDoFJoint;
+import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.robotics.kinematics.TimeStampedTransform3D;
-import us.ihmc.robotics.math.frames.YoFramePose;
 import us.ihmc.robotics.random.RandomGeometry;
-import us.ihmc.robotics.screwTheory.RigidBody;
-import us.ihmc.robotics.screwTheory.SixDoFJoint;
 import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.SimulationConstructionSetParameters;
 import us.ihmc.simulationconstructionset.util.simulationTesting.SimulationTestingParameters;
 import us.ihmc.tools.MemoryTools;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoBoolean;
+import us.ihmc.yoVariables.variable.YoDouble;
+import us.ihmc.yoVariables.variable.YoFramePoseUsingYawPitchRoll;
 
 @ContinuousIntegrationPlan(categories={IntegrationCategory.FAST})
 public class NewPelvisPoseHistoryCorrectionTest
@@ -101,7 +103,7 @@ public class NewPelvisPoseHistoryCorrectionTest
             transformToParent.set(pelvisTransformInWorldFrame);
          }
       };
-      RigidBody rigidBody = new RigidBody("pelvis", pelvisReferenceFrame);
+      RigidBodyBasics rigidBody = new RigidBody("pelvis", pelvisReferenceFrame);
       sixDofPelvisJoint = new SixDoFJoint("pelvis", rigidBody);
    }
 
@@ -243,7 +245,7 @@ public class NewPelvisPoseHistoryCorrectionTest
    private YoDouble maximumErrorTranslation;
    private YoDouble maximumErrorAngleInDegrees;
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.8, categoriesOverride = {IntegrationCategory.IN_DEVELOPMENT})
+   @ContinuousIntegrationTest(estimatedDuration = 0.8, categoriesOverride = {IntegrationCategory.EXCLUDE})
    @Test(timeout = 30000)
    public void testTranslationCorrectionOnlyWithPelvisFollowingAKnownPathAndRandomLocalizationOffsets()
    {
@@ -266,7 +268,7 @@ public class NewPelvisPoseHistoryCorrectionTest
       RigidBodyTransform pelvisExpectedCorrection = new RigidBodyTransform();
 
       FramePose3D correctedPelvisverify = new FramePose3D(worldFrame);
-      YoFramePose correctedPelvisToVerifyTheTest = new YoFramePose("correctedPelvisToVerifyTheTest", worldFrame, registry);
+      YoFramePoseUsingYawPitchRoll correctedPelvisToVerifyTheTest = new YoFramePoseUsingYawPitchRoll("correctedPelvisToVerifyTheTest", worldFrame, registry);
 
 
       for (long timeStamp = 0; timeStamp < numberOfTimeStamps; timeStamp++)
@@ -275,7 +277,7 @@ public class NewPelvisPoseHistoryCorrectionTest
          pelvisTransformInWorldFrame.set(pelvisTimeStampedTransform3D.getTransform3D());
          pelvisReferenceFrame.update();
 
-         sixDofPelvisJoint.setPositionAndRotation(pelvisTimeStampedTransform3D.getTransform3D());
+         sixDofPelvisJoint.setJointConfiguration(pelvisTimeStampedTransform3D.getTransform3D());
          sixDofPelvisJoint.updateFramesRecursively();
          pelvisBeforeCorrection_Translation.set(pelvisTimeStampedTransform3D.getTransform3D());
          pelvisBeforeCorrection_Translation.setRotationToZero();
@@ -283,7 +285,7 @@ public class NewPelvisPoseHistoryCorrectionTest
          pelvisBeforeCorrection_Rotation.setTranslationToZero();
 
          pelvisCorrector.doControl(timeStamp);
-         pelvisAfterCorrection.set(sixDofPelvisJoint.getJointTransform3D());
+         sixDofPelvisJoint.getJointConfiguration(pelvisAfterCorrection);
 
          correctedPelvisverify.set(pelvisAfterCorrection);
          correctedPelvisToVerifyTheTest.set(correctedPelvisverify);
@@ -291,7 +293,7 @@ public class NewPelvisPoseHistoryCorrectionTest
          if ( timeStamp > 3000 && ((timeStamp - 80) % 3000) == 0)
          {
             icpTransformPoseBufferInWorldFrame.findTransform(timeStamp - 80, icpTimeStampedTransform3D);
-            StampedPosePacket newestStampedPosePacket = new StampedPosePacket("/pelvis", icpTimeStampedTransform3D, 1.0);
+            StampedPosePacket newestStampedPosePacket = HumanoidMessageTools.createStampedPosePacket("/pelvis", icpTimeStampedTransform3D, 1.0);
             externalPelvisPoseCreator.setNewestPose(newestStampedPosePacket);
          }
 
@@ -319,7 +321,7 @@ public class NewPelvisPoseHistoryCorrectionTest
       }
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 1.0, categoriesOverride = {IntegrationCategory.IN_DEVELOPMENT}) // This test used to hack the rootBody and 6-DoF joint in a way that is not possible since the feature 'feature/moving-reference-frame'.
+   @ContinuousIntegrationTest(estimatedDuration = 1.0, categoriesOverride = {IntegrationCategory.EXCLUDE}) // This test used to hack the rootBody and 6-DoF joint in a way that is not possible since the feature 'feature/moving-reference-frame'.
    @Test(timeout = 30000)
    public void testTooBigAngleErrorAreDetectedAndPacketIsSent()
    {
@@ -334,7 +336,7 @@ public class NewPelvisPoseHistoryCorrectionTest
       RigidBodyTransform pelvisAfterCorrection = new RigidBodyTransform();
 
       FramePose3D correctedPelvisverify = new FramePose3D(worldFrame);
-      YoFramePose correctedPelvisToVerifyTheTest = new YoFramePose("correctedPelvisToVerifyTheTest", worldFrame, registry);
+      YoFramePoseUsingYawPitchRoll correctedPelvisToVerifyTheTest = new YoFramePoseUsingYawPitchRoll("correctedPelvisToVerifyTheTest", worldFrame, registry);
 
 
       for (long timeStamp = 0; timeStamp < numberOfTimeStamps; timeStamp++)
@@ -343,12 +345,12 @@ public class NewPelvisPoseHistoryCorrectionTest
          pelvisTransformInWorldFrame.set(pelvisTimeStampedTransform3D.getTransform3D());
          pelvisReferenceFrame.update();
 
-         sixDofPelvisJoint.setPositionAndRotation(pelvisTimeStampedTransform3D.getTransform3D());
+         sixDofPelvisJoint.setJointConfiguration(pelvisTimeStampedTransform3D.getTransform3D());
          sixDofPelvisJoint.updateFramesRecursively();
          pelvisBeforeCorrection.set(pelvisTimeStampedTransform3D.getTransform3D());
 
          pelvisCorrector.doControl(timeStamp);
-         pelvisAfterCorrection.set(sixDofPelvisJoint.getJointTransform3D());
+         sixDofPelvisJoint.getJointConfiguration(pelvisAfterCorrection);
          if(checkPacketHasBeenSentNextLoopIteration)
          {
             assertTrue(angleErrorTooBigDetectedAndPacketSent);
@@ -359,7 +361,7 @@ public class NewPelvisPoseHistoryCorrectionTest
          if ( timeStamp > 3000 && ((timeStamp - 80) % 3000) == 0)
          {
             icpTransformPoseBufferInWorldFrame.findTransform(timeStamp - 80, icpTimeStampedTransform3D);
-            StampedPosePacket newestStampedPosePacket = new StampedPosePacket("/pelvis", icpTimeStampedTransform3D, 1.0);
+            StampedPosePacket newestStampedPosePacket = HumanoidMessageTools.createStampedPosePacket("/pelvis", icpTimeStampedTransform3D, 1.0);
             externalPelvisPoseCreator.setNewestPose(newestStampedPosePacket);
             checkPacketHasBeenSentNextLoopIteration = true;
          }

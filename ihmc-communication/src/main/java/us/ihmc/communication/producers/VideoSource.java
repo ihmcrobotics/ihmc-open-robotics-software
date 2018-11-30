@@ -58,4 +58,14 @@ public enum VideoSource
          throw new RuntimeException(this.name() + " is not associated with a side");
       }
    }
+
+   public byte toByte()
+   {
+      return (byte) ordinal();
+   }
+
+   public static VideoSource fromByte(byte enumAsByte)
+   {
+      return values[enumAsByte];
+   }
 }

@@ -1,28 +1,26 @@
 package us.ihmc.valkyrie.parameters;
 
+import us.ihmc.avatar.drcRobot.RobotTarget;
 import us.ihmc.commonWalkingControlModules.configurations.CoPPointName;
 import us.ihmc.commonWalkingControlModules.configurations.ContinuousCMPICPPlannerParameters;
 import us.ihmc.euclid.tuple2D.Vector2D;
 
-import java.util.ArrayList;
 import java.util.EnumMap;
-import java.util.List;
 
 /** {@inheritDoc} */
 public class ValkyrieCapturePointPlannerParameters extends ContinuousCMPICPPlannerParameters
 {
-   private final boolean runningOnRealRobot;
    private final boolean useTwoCMPsPerSupport;
 
-   private final CoPPointName exitCoPName = CoPPointName.TOE_COP;
-   private final CoPPointName entryCoPName = CoPPointName.HEEL_COP;
+   private final CoPPointName exitCoPName = CoPPointName.EXIT_COP;
+   private final RobotTarget target;
 
    private EnumMap<CoPPointName, Vector2D> copOffsets;
    private EnumMap<CoPPointName, Vector2D> copForwardOffsetBounds;
 
-   public ValkyrieCapturePointPlannerParameters(boolean runningOnRealRobot)
+   public ValkyrieCapturePointPlannerParameters(RobotTarget target)
    {
-      this.runningOnRealRobot = runningOnRealRobot;
+      this.target = target;
       useTwoCMPsPerSupport = true;
    }
 
@@ -43,12 +41,6 @@ public class ValkyrieCapturePointPlannerParameters extends ContinuousCMPICPPlann
       return exitCoPName;
    }
 
-   /**{@inheritDoc} */
-   @Override
-   public CoPPointName getEntryCoPName()
-   {
-      return entryCoPName;
-   }
 
    /** {@inheritDoc} */
    @Override
@@ -58,15 +50,15 @@ public class ValkyrieCapturePointPlannerParameters extends ContinuousCMPICPPlann
          return copOffsets;
 
       Vector2D entryOffset, exitOffset;
-      if (runningOnRealRobot)
-         entryOffset = new Vector2D(0.01, 0.01);
+      if (target == RobotTarget.REAL_ROBOT)
+         entryOffset = new Vector2D(0.01, 0.0);
       else
          entryOffset = new Vector2D(0.0, 0.006);
 
       exitOffset = new Vector2D(0.0, 0.025);
 
       copOffsets = new EnumMap<>(CoPPointName.class);
-      copOffsets.put(entryCoPName, entryOffset);
+      copOffsets.put(CoPPointName.ENTRY_COP, entryOffset);
       copOffsets.put(exitCoPName, exitOffset);
 
       return copOffsets;
@@ -84,7 +76,7 @@ public class ValkyrieCapturePointPlannerParameters extends ContinuousCMPICPPlann
       Vector2D exitBounds = new Vector2D(-0.04, 0.06);
 
       copForwardOffsetBounds = new EnumMap<>(CoPPointName.class);
-      copForwardOffsetBounds.put(entryCoPName, entryBounds);
+      copForwardOffsetBounds.put(CoPPointName.ENTRY_COP, entryBounds);
       copForwardOffsetBounds.put(exitCoPName, exitBounds);
 
       return copForwardOffsetBounds;

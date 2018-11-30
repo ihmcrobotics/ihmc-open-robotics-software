@@ -1,70 +1,68 @@
 package us.ihmc.humanoidBehaviors.stateMachine;
 
 import us.ihmc.humanoidBehaviors.behaviors.simpleBehaviors.BehaviorAction;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.robotics.stateMachines.conditionBasedStateMachine.GenericStateMachine;
+import us.ihmc.robotics.stateMachine.core.StateMachine;
 
-public class BehaviorStateMachine<E extends Enum<E>> extends GenericStateMachine<E, BehaviorAction<E>>
+public class BehaviorStateMachine<E extends Enum<E>>
 {
+   private final StateMachine<E, BehaviorAction> stateMachine;
 
-   protected E startState;
-
-   public BehaviorStateMachine(String name, String switchTimeName, Class<E> enumType, YoDouble t, YoVariableRegistry registry)
+   public BehaviorStateMachine(StateMachine<E, BehaviorAction> stateMachine)
    {
-      super(name, switchTimeName, enumType, t, registry);
+      this.stateMachine = stateMachine;
    }
 
    public void initialize()
    {
-      try
-      {
-         if (startState == null)
-            throw new Exception(
-                  "Start State Not Set for" + getStateYoVariableName() + " use statemachine.setStartState(Enume state) when setting up the state machine");
-         setCurrentState(startState);
-
-      }
-      catch (Exception e)
-      {
-         // TODO Auto-generated catch block
-         e.printStackTrace();
-      }
+      stateMachine.resetToInitialState();
    }
 
-   public void setStartState(E state)
+   public void resetCurrentState()
    {
-      this.startState = state;
+      stateMachine.resetCurrentState();
    }
 
-   public void addStateWithDoneTransition(BehaviorAction<E> state, E nextState)
+   public void doControlAndTransitions()
    {
-      state.addDoneWithStateTransition(nextState);
-      addState(state);
+      stateMachine.doActionAndTransition();
    }
 
    public void pause()
    {
-      BehaviorAction<E> currentState = getCurrentState();
+      BehaviorAction currentState = stateMachine.getCurrentState();
       currentState.pause();
    }
 
    public void resume()
    {
-      BehaviorAction<E> currentState = getCurrentState();
+      BehaviorAction currentState = stateMachine.getCurrentState();
       currentState.resume();
    }
 
    public void stop()
    {
-      BehaviorAction<E> currentState = getCurrentState();
+      BehaviorAction currentState = stateMachine.getCurrentState();
       currentState.abort();
    }
 
    public void doPostBehaviorCleanup()
    {
-      BehaviorAction<E> currentState = getCurrentState();
+      BehaviorAction currentState = stateMachine.getCurrentState();
       currentState.doPostBehaviorCleanup();
    }
 
+   public BehaviorAction getCurrentBehavior()
+   {
+      return stateMachine.getCurrentState();
+   }
+
+   public E getCurrentBehaviorKey()
+   {
+      return stateMachine.getCurrentStateKey();
+   }
+
+   public boolean isCurrentBehaviorTerminal()
+   {
+      return stateMachine.isCurrentStateTerminal();
+   }
 }

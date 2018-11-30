@@ -1,22 +1,30 @@
 package us.ihmc.humanoidRobotics.communication.controllerAPI.command;
 
+import java.util.List;
+import java.util.Random;
+
+import controller_msgs.msg.dds.FrameInformation;
+import controller_msgs.msg.dds.SE3TrajectoryMessage;
+import controller_msgs.msg.dds.SE3TrajectoryPointMessage;
+import us.ihmc.commons.RandomNumbers;
 import us.ihmc.communication.controllerAPI.command.QueueableCommand;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.tools.EuclidFrameRandomTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.euclid.tuple4D.interfaces.QuaternionReadOnly;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.converter.FrameBasedCommand;
-import us.ihmc.humanoidRobotics.communication.packets.AbstractSE3TrajectoryMessage;
-import us.ihmc.humanoidRobotics.communication.packets.FrameInformation;
+import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.robotics.math.trajectories.waypoints.FrameSE3TrajectoryPoint;
 import us.ihmc.robotics.math.trajectories.waypoints.FrameSE3TrajectoryPointList;
+import us.ihmc.robotics.random.RandomGeometry;
 import us.ihmc.robotics.screwTheory.SelectionMatrix6D;
 import us.ihmc.robotics.weightMatrices.WeightMatrix6D;
 import us.ihmc.sensorProcessing.frames.ReferenceFrameHashCodeResolver;
 
-public abstract class SE3TrajectoryControllerCommand<T extends SE3TrajectoryControllerCommand<T, M>, M extends AbstractSE3TrajectoryMessage<M>>
-      extends QueueableCommand<T, M> implements FrameBasedCommand<M>
+public final class SE3TrajectoryControllerCommand extends QueueableCommand<SE3TrajectoryControllerCommand, SE3TrajectoryMessage>
+      implements FrameBasedCommand<SE3TrajectoryMessage>
 {
    private final FrameSE3TrajectoryPointList trajectoryPointList = new FrameSE3TrajectoryPointList();
    private final SelectionMatrix6D selectionMatrix = new SelectionMatrix6D();
@@ -26,10 +34,30 @@ public abstract class SE3TrajectoryControllerCommand<T extends SE3TrajectoryCont
    private boolean useCustomControlFrame = false;
    private final RigidBodyTransform controlFramePoseInBodyFrame = new RigidBodyTransform();
 
+   public SE3TrajectoryControllerCommand()
+   {
+      this(ReferenceFrame.getWorldFrame(), ReferenceFrame.getWorldFrame());
+   }
+
    public SE3TrajectoryControllerCommand(ReferenceFrame dataFrame, ReferenceFrame trajectoryFrame)
    {
       clear(dataFrame);
       this.trajectoryFrame = trajectoryFrame;
+   }
+
+   public SE3TrajectoryControllerCommand(Random random)
+   {
+      int randomNumberOfPoints = random.nextInt(16) + 1;
+      for (int i = 0; i < randomNumberOfPoints; i++)
+      {
+         trajectoryPointList.addTrajectoryPoint(RandomNumbers.nextDoubleWithEdgeCases(random, 0.01), RandomGeometry.nextPoint3D(random, -1.0, 1.0),
+                                                RandomGeometry.nextQuaternion(random), RandomGeometry.nextVector3D(random),
+                                                RandomGeometry.nextVector3D(random));
+      }
+
+      trajectoryFrame = EuclidFrameRandomTools.nextReferenceFrame("trajectoryFrame", random, ReferenceFrame.getWorldFrame());
+      controlFramePoseInBodyFrame.set(RandomGeometry.nextQuaternion(random), RandomGeometry.nextVector3D(random));
+      useCustomControlFrame = random.nextBoolean();
    }
 
    @Override
@@ -50,7 +78,7 @@ public abstract class SE3TrajectoryControllerCommand<T extends SE3TrajectoryCont
    }
 
    @Override
-   public void set(T other)
+   public void set(SE3TrajectoryControllerCommand other)
    {
       trajectoryPointList.setIncludingFrame(other.getTrajectoryPointList());
       setPropertiesOnly(other);
@@ -60,50 +88,64 @@ public abstract class SE3TrajectoryControllerCommand<T extends SE3TrajectoryCont
    }
 
    @Override
-   public void set(ReferenceFrameHashCodeResolver resolver, M message)
+   public void set(ReferenceFrameHashCodeResolver resolver, SE3TrajectoryMessage message)
    {
       FrameInformation frameInformation = message.getFrameInformation();
       long trajectoryFrameId = frameInformation.getTrajectoryReferenceFrameId();
-      long dataFrameId = FrameInformation.getDataFrameIDConsideringDefault(frameInformation);
-      this.trajectoryFrame = resolver.getReferenceFrameFromNameBaseHashCode(trajectoryFrameId);
-      ReferenceFrame dataFrame = resolver.getReferenceFrameFromNameBaseHashCode(dataFrameId);
+      long dataFrameId = HumanoidMessageTools.getDataFrameIDConsideringDefault(frameInformation);
+      this.trajectoryFrame = resolver.getReferenceFrameFromHashCode(trajectoryFrameId);
+      ReferenceFrame dataFrame = resolver.getReferenceFrameFromHashCode(dataFrameId);
 
       clear(dataFrame);
-      set(message);
+      setFromMessage(message);
 
-      ReferenceFrame angularSelectionFrame = resolver.getReferenceFrameFromNameBaseHashCode(message.getAngularSelectionFrameId());
-      ReferenceFrame linearSelectionFrame = resolver.getReferenceFrameFromNameBaseHashCode(message.getLinearSelectionFrameId());
+      ReferenceFrame angularSelectionFrame = resolver.getReferenceFrameFromHashCode(message.getAngularSelectionMatrix().getSelectionFrameId());
+      ReferenceFrame linearSelectionFrame = resolver.getReferenceFrameFromHashCode(message.getLinearSelectionMatrix().getSelectionFrameId());
       selectionMatrix.setSelectionFrames(angularSelectionFrame, linearSelectionFrame);
 
-      ReferenceFrame angularWeightFrame = resolver.getReferenceFrameFromNameBaseHashCode(message.getAngularWeightMatrixFrameId());
-      ReferenceFrame linearWeightFrame = resolver.getReferenceFrameFromNameBaseHashCode(message.getLinearWeightMatrixFrameId());
+      ReferenceFrame angularWeightFrame = resolver.getReferenceFrameFromHashCode(message.getAngularWeightMatrix().getWeightFrameId());
+      ReferenceFrame linearWeightFrame = resolver.getReferenceFrameFromHashCode(message.getLinearWeightMatrix().getWeightFrameId());
       weightMatrix.setWeightFrames(angularWeightFrame, linearWeightFrame);
    }
 
    @Override
-   public void set(M message)
+   public void setFromMessage(SE3TrajectoryMessage message)
    {
-      message.getTrajectoryPoints(trajectoryPointList);
-      setQueueableCommandVariables(message);
-      message.getSelectionMatrix(selectionMatrix);
-      message.getWeightMatrix(weightMatrix);
-      useCustomControlFrame = message.useCustomControlFrame();
-      message.getControlFramePose(controlFramePoseInBodyFrame);
+      HumanoidMessageTools.checkIfDataFrameIdsMatch(message.getFrameInformation(), trajectoryPointList.getReferenceFrame());
+      List<SE3TrajectoryPointMessage> trajectoryPointMessages = message.getTaskspaceTrajectoryPoints();
+      int numberOfPoints = trajectoryPointMessages.size();
+
+      for (int i = 0; i < numberOfPoints; i++)
+      {
+         SE3TrajectoryPointMessage se3TrajectoryPointMessage = trajectoryPointMessages.get(i);
+         trajectoryPointList.addTrajectoryPoint(se3TrajectoryPointMessage.getTime(), se3TrajectoryPointMessage.getPosition(), se3TrajectoryPointMessage.getOrientation(),
+                                                se3TrajectoryPointMessage.getLinearVelocity(), se3TrajectoryPointMessage.getAngularVelocity());
+      }
+      setQueueableCommandVariables(message.getQueueingProperties());
+      selectionMatrix.resetSelection();
+      selectionMatrix.setAngularAxisSelection(message.getAngularSelectionMatrix().getXSelected(), message.getAngularSelectionMatrix().getYSelected(), message.getAngularSelectionMatrix().getZSelected());
+      selectionMatrix.setLinearAxisSelection(message.getLinearSelectionMatrix().getXSelected(), message.getLinearSelectionMatrix().getYSelected(), message.getLinearSelectionMatrix().getZSelected());
+      weightMatrix.clear();
+      weightMatrix.setAngularWeights(message.getAngularWeightMatrix().getXWeight(), message.getAngularWeightMatrix().getYWeight(), message.getAngularWeightMatrix().getZWeight());
+      weightMatrix.setLinearWeights(message.getLinearWeightMatrix().getXWeight(), message.getLinearWeightMatrix().getYWeight(), message.getLinearWeightMatrix().getZWeight());
+      useCustomControlFrame = message.getUseCustomControlFrame();
+      message.getControlFramePose().get(controlFramePoseInBodyFrame);
    }
 
-   public void set(ReferenceFrame dataFrame, ReferenceFrame trajectoryFrame, M message)
+   public void set(ReferenceFrame dataFrame, ReferenceFrame trajectoryFrame, SE3TrajectoryMessage message)
    {
       this.trajectoryFrame = trajectoryFrame;
       clear(dataFrame);
-      set(message);
+      setFromMessage(message);
    }
 
    /**
-    * Same as {@link #set(T)} but does not change the trajectory points.
+    * Same as {@link #set(SE3TrajectoryControllerCommand)} but does not change the trajectory
+    * points.
     *
     * @param other
     */
-   public void setPropertiesOnly(T other)
+   public void setPropertiesOnly(SE3TrajectoryControllerCommand other)
    {
       setQueueableCommandVariables(other);
       selectionMatrix.set(other.getSelectionMatrix());
@@ -125,7 +167,7 @@ public abstract class SE3TrajectoryControllerCommand<T extends SE3TrajectoryCont
    {
       return weightMatrix;
    }
-   
+
    public void setWeightMatrix(WeightMatrix6D weightMatrix)
    {
       this.weightMatrix.set(weightMatrix);
@@ -145,6 +187,16 @@ public abstract class SE3TrajectoryControllerCommand<T extends SE3TrajectoryCont
    public boolean isCommandValid()
    {
       return executionModeValid() && trajectoryPointList.getNumberOfTrajectoryPoints() > 0;
+   }
+
+   public void setControlFramePose(RigidBodyTransform controlFramePose)
+   {
+      this.controlFramePoseInBodyFrame.set(controlFramePose);
+   }
+
+   public void setUseCustomControlFrame(boolean useCustomControlFrame)
+   {
+      this.useCustomControlFrame = useCustomControlFrame;
    }
 
    /** {@inheritDoc}} */
@@ -176,7 +228,8 @@ public abstract class SE3TrajectoryControllerCommand<T extends SE3TrajectoryCont
     * Convenience method for accessing {@link #trajectoryPointList}. To get the list use
     * {@link #getTrajectoryPointList()}.
     */
-   public void addTrajectoryPoint(double time, Point3DReadOnly position, QuaternionReadOnly orientation, Vector3DReadOnly linearVelocity, Vector3DReadOnly angularVelocity)
+   public void addTrajectoryPoint(double time, Point3DReadOnly position, QuaternionReadOnly orientation, Vector3DReadOnly linearVelocity,
+                                  Vector3DReadOnly angularVelocity)
    {
       trajectoryPointList.addTrajectoryPoint(time, position, orientation, linearVelocity, angularVelocity);
    }
@@ -245,6 +298,11 @@ public abstract class SE3TrajectoryControllerCommand<T extends SE3TrajectoryCont
       this.trajectoryFrame = trajectoryFrame;
    }
 
+   public RigidBodyTransform getControlFramePose()
+   {
+      return controlFramePoseInBodyFrame;
+   }
+
    public void getControlFramePose(RigidBodyTransform transformToPack)
    {
       transformToPack.set(controlFramePoseInBodyFrame);
@@ -253,5 +311,11 @@ public abstract class SE3TrajectoryControllerCommand<T extends SE3TrajectoryCont
    public boolean useCustomControlFrame()
    {
       return useCustomControlFrame;
+   }
+
+   @Override
+   public Class<SE3TrajectoryMessage> getMessageClass()
+   {
+      return SE3TrajectoryMessage.class;
    }
 }

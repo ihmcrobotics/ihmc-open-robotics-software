@@ -1,16 +1,20 @@
 package us.ihmc.commonWalkingControlModules.capturePoint.optimization;
 
-import java.util.ArrayList;
-import java.util.List;
-
+import org.ejml.data.DenseMatrix64F;
+import org.ejml.ops.CommonOps;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.BipedSupportPolygons;
-import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
+import us.ihmc.commonWalkingControlModules.capturePoint.ICPControlGainsReadOnly;
 import us.ihmc.commonWalkingControlModules.capturePoint.ICPControlPlane;
 import us.ihmc.commonWalkingControlModules.capturePoint.ICPControlPolygons;
+import us.ihmc.commonWalkingControlModules.capturePoint.ParameterizedICPControlGains;
+import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commons.PrintTools;
+import us.ihmc.commons.lists.RecyclingArrayList;
+import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.referenceFrame.*;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint2DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameVector2DReadOnly;
+import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
@@ -19,38 +23,46 @@ import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.humanoidRobotics.footstep.FootstepTiming;
 import us.ihmc.robotics.geometry.PlanarRegion;
-import us.ihmc.robotics.lists.RecyclingArrayList;
-import us.ihmc.robotics.math.frames.*;
+import us.ihmc.robotics.math.filters.GlitchFilteredYoBoolean;
+import us.ihmc.robotics.math.frames.YoMatrix;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.time.ExecutionTimer;
-import us.ihmc.tools.exceptions.NoConvergenceException;
+import us.ihmc.yoVariables.parameters.BooleanParameter;
+import us.ihmc.yoVariables.parameters.DoubleParameter;
+import us.ihmc.yoVariables.providers.BooleanProvider;
+import us.ihmc.yoVariables.providers.DoubleProvider;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.yoVariables.variable.YoBoolean;
-import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.yoVariables.variable.YoEnum;
-import us.ihmc.yoVariables.variable.YoInteger;
+import us.ihmc.yoVariables.variable.*;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public class ICPOptimizationController implements ICPOptimizationControllerInterface
 {
-   private static final boolean VISUALIZE = false;
-   private static final boolean DEBUG = false;
+   private static final boolean VISUALIZE = true;
+   private static final boolean DEBUG = true;
    private static final boolean COMPUTE_COST_TO_GO = false;
+
+   private static final boolean CONTINUOUSLY_UPDATE_DESIRED_POSITION = true;
 
    private static final String yoNamePrefix = "controller";
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
 
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
 
-   private final YoBoolean allowStepAdjustment = new YoBoolean(yoNamePrefix + "AllowStepAdjustment", registry);
+   private final BooleanProvider allowStepAdjustment;
+   private final YoBoolean includeFootsteps = new YoBoolean(yoNamePrefix + "IncludeFootsteps", registry);
    private final YoBoolean useStepAdjustment = new YoBoolean(yoNamePrefix + "UseStepAdjustment", registry);
-   private final YoBoolean useCMPFeedback = new YoBoolean(yoNamePrefix + "UseCMPFeedback", registry);
-   private final YoBoolean useAngularMomentum = new YoBoolean(yoNamePrefix + "UseAngularMomentum", registry);
+   private final YoBoolean footstepIsAdjustable = new YoBoolean(yoNamePrefix + "FootstepIsAdjustable", registry);
 
-   private final YoBoolean scaleStepRateWeightWithTime = new YoBoolean(yoNamePrefix + "ScaleStepRateWeightWithTime", registry);
-   private final YoBoolean scaleFeedbackWeightWithGain = new YoBoolean(yoNamePrefix + "ScaleFeedbackWeightWithGain", registry);
+   private final BooleanProvider useCMPFeedback;
+   private final BooleanProvider useAngularMomentum;
 
-   private final YoBoolean isStanding = new YoBoolean(yoNamePrefix + "IsStanding", registry);
+   private final BooleanProvider scaleStepRateWeightWithTime;
+   private final BooleanProvider scaleFeedbackWeightWithGain;
+
+   private final YoBoolean isStationary = new YoBoolean(yoNamePrefix + "IsStationary", registry);
    private final YoBoolean isInDoubleSupport = new YoBoolean(yoNamePrefix + "IsInDoubleSupport", registry);
 
    private final YoDouble swingDuration = new YoDouble(yoNamePrefix + "SwingDuration", registry);
@@ -58,7 +70,7 @@ public class ICPOptimizationController implements ICPOptimizationControllerInter
    private final YoDouble nextTransferDuration = new YoDouble(yoNamePrefix + "NextTransferDuration", registry);
    private final YoDouble finalTransferDuration = new YoDouble(yoNamePrefix + "FinalTransferDuration", registry);
 
-   private final YoDouble transferDurationSplitFraction = new YoDouble(yoNamePrefix + "TransferDurationSplitFraction", registry);
+   private final DoubleProvider transferDurationSplitFraction;
 
    private final YoEnum<RobotSide> transferToSide = new YoEnum<>(yoNamePrefix + "TransferToSide", registry, RobotSide.class, true);
    private final YoEnum<RobotSide> supportSide = new YoEnum<>(yoNamePrefix + "SupportSide", registry, RobotSide.class, true);
@@ -66,65 +78,85 @@ public class ICPOptimizationController implements ICPOptimizationControllerInter
    private final YoDouble initialTime = new YoDouble(yoNamePrefix + "InitialTime", registry);
    private final YoDouble timeInCurrentState = new YoDouble(yoNamePrefix + "TimeInCurrentState", registry);
    private final YoDouble timeRemainingInState = new YoDouble(yoNamePrefix + "TimeRemainingInState", registry);
-   private final YoDouble minimumTimeRemaining = new YoDouble(yoNamePrefix + "MinimumTimeRemaining", registry);
+   private final DoubleProvider minimumTimeRemaining;
 
-   private final YoFrameVector2d icpError = new YoFrameVector2d(yoNamePrefix + "ICPError", "", worldFrame, registry);
-   private final YoFramePoint2d feedbackCoP = new YoFramePoint2d(yoNamePrefix + "FeedbackCoPSolution", worldFrame, registry);
-   private final YoFramePoint2d feedbackCMP = new YoFramePoint2d(yoNamePrefix + "FeedbackCMPSolution", worldFrame, registry);
-   private final YoFramePoint2d yoPerfectCoP = new YoFramePoint2d(yoNamePrefix + "PerfectCoP", worldFrame, registry);
-   private final YoFramePoint2d yoPerfectCMP = new YoFramePoint2d(yoNamePrefix + "PerfectCMP", worldFrame, registry);
-   private final YoFramePoint2d predictedEndOfStateICP = new YoFramePoint2d(yoNamePrefix + "PredictedEndOfStateICP", worldFrame, registry);
+   private final YoFrameVector2D icpError = new YoFrameVector2D(yoNamePrefix + "ICPError", "", worldFrame, registry);
+   private final YoFramePoint2D feedbackCoP = new YoFramePoint2D(yoNamePrefix + "FeedbackCoPSolution", worldFrame, registry);
+   private final YoFramePoint2D feedbackCMP = new YoFramePoint2D(yoNamePrefix + "FeedbackCMPSolution", worldFrame, registry);
+   private final YoFramePoint2D yoPerfectCoP = new YoFramePoint2D(yoNamePrefix + "PerfectCoP", worldFrame, registry);
+   private final YoFramePoint2D yoPerfectCMP = new YoFramePoint2D(yoNamePrefix + "PerfectCMP", worldFrame, registry);
+   private final YoFramePoint2D predictedEndOfStateICP = new YoFramePoint2D(yoNamePrefix + "PredictedEndOfStateICP", worldFrame, registry);
 
-   private final YoFrameVector2d feedbackCoPDelta = new YoFrameVector2d(yoNamePrefix + "FeedbackCoPDeltaSolution", worldFrame, registry);
-   private final YoFrameVector2d feedbackCMPDelta = new YoFrameVector2d(yoNamePrefix + "FeedbackCMPDeltaSolution", worldFrame, registry);
+   private final YoFrameVector2D feedbackCoPDelta = new YoFrameVector2D(yoNamePrefix + "FeedbackCoPDeltaSolution", worldFrame, registry);
+   private final YoFrameVector2D feedbackCMPDelta = new YoFrameVector2D(yoNamePrefix + "FeedbackCMPDeltaSolution", worldFrame, registry);
+
+   private final YoFrameVector2D dynamicsError = new YoFrameVector2D(yoNamePrefix + "DynamicsError", worldFrame, registry);
 
    private final List<Footstep> upcomingFootsteps = new ArrayList<>();
 
-   private final YoFramePoseUsingQuaternions upcomingFootstepLocation = new YoFramePoseUsingQuaternions(yoNamePrefix + "UpcomingFootstepLocation", worldFrame, registry);
-   private final YoFramePoseUsingQuaternions footstepSolution = new YoFramePoseUsingQuaternions(yoNamePrefix + "FootstepSolutionLocation", worldFrame, registry);
-   private final YoFramePoint2d footstepLocationSubmitted = new YoFramePoint2d(yoNamePrefix + "FootstepLocationSubmitted", worldFrame, registry);
-   private final YoFramePoint2d unclippedFootstepSolution = new YoFramePoint2d(yoNamePrefix + "UnclippedFootstepSolutionLocation", worldFrame, registry);
+   private final YoFramePose3D upcomingFootstepLocation = new YoFramePose3D(yoNamePrefix + "UpcomingFootstepLocation", worldFrame, registry);
+   private final YoFramePose3D footstepSolution = new YoFramePose3D(yoNamePrefix + "FootstepSolutionLocation", worldFrame, registry);
+   private final YoFramePoint2D footstepLocationSubmitted = new YoFramePoint2D(yoNamePrefix + "FootstepLocationSubmitted", worldFrame, registry);
+   private final YoFramePoint2D unclippedFootstepSolution = new YoFramePoint2D(yoNamePrefix + "UnclippedFootstepSolutionLocation", worldFrame, registry);
 
-   private final YoDouble footstepAdjustmentSafetyFactor = new YoDouble(yoNamePrefix + "FootstepAdjustmentSafetyFactor", registry);
-   private final YoDouble forwardFootstepWeight = new YoDouble(yoNamePrefix + "ForwardFootstepWeight", registry);
-   private final YoDouble lateralFootstepWeight = new YoDouble(yoNamePrefix + "LateralFootstepWeight", registry);
-   private final YoFrameVector2d footstepWeights = new YoFrameVector2d(yoNamePrefix + "FootstepWeights", worldFrame, registry);
+   private final DoubleProvider minICPErrorForStepAdjustment;
+   private final DoubleProvider fractionThroughSwingForAdjustment;
 
-   private final YoDouble copFeedbackForwardWeight = new YoDouble(yoNamePrefix + "CoPFeedbackForwardWeight", registry);
-   private final YoDouble copFeedbackLateralWeight = new YoDouble(yoNamePrefix + "CoPFeedbackLateralWeight", registry);
-   private final YoDouble cmpFeedbackWeight = new YoDouble(yoNamePrefix + "CMPFeedbackWeight", registry);
-   private final YoFrameVector2d scaledCoPFeedbackWeight = new YoFrameVector2d(yoNamePrefix + "ScaledCoPFeedbackWeight", worldFrame, registry);
+   private final DoubleProvider footstepAdjustmentSafetyFactor;
+   private final DoubleProvider forwardFootstepWeight;
+   private final DoubleProvider lateralFootstepWeight;
+   private final YoMatrix yoFootstepWeights = new YoMatrix(yoNamePrefix + "FootstepWeights", 2, 2, registry);
+   private final DenseMatrix64F footstepWeights = new DenseMatrix64F(2, 2);
+
+   private final DoubleProvider copFeedbackForwardWeight;
+   private final DoubleProvider copFeedbackLateralWeight;
+   private final DoubleProvider cmpFeedbackWeight;
+   private final YoMatrix yoScaledCoPFeedbackWeight = new YoMatrix(yoNamePrefix + "ScaledCoPFeedbackWeight", 2, 2, registry);
    private final YoDouble scaledCMPFeedbackWeight = new YoDouble(yoNamePrefix + "ScaledCMPFeedbackWeight", registry);
+   private final DenseMatrix64F scaledCoPFeedbackWeight = new DenseMatrix64F(2, 2);
 
-   private final YoDouble maxAllowedDistanceCMPSupport = new YoDouble(yoNamePrefix + "MaxAllowedDistanceCMPSupport", registry);
-   private final YoDouble safeCoPDistanceToEdge = new YoDouble(yoNamePrefix + "SafeCoPDistanceToEdge", registry);
+   private final DoubleProvider maxAllowedDistanceCMPSupport;
+   private final DoubleProvider safeCoPDistanceToEdge;
 
-   private final YoDouble copFeedbackRateWeight = new YoDouble(yoNamePrefix + "CoPFeedbackRateWeight", registry);
-   private final YoDouble footstepRateWeight = new YoDouble(yoNamePrefix + "FootstepRateWeight", registry);
+   private final DoubleProvider feedbackRateWeight;
+   private final DoubleProvider copCMPFeedbackRateWeight;
+   private final DoubleProvider footstepRateWeight;
    private final YoDouble scaledFootstepRateWeight = new YoDouble(yoNamePrefix + "ScaledFootstepRateWeight", registry);
-   private final YoDouble dynamicsObjectiveWeight = new YoDouble(yoNamePrefix + "DynamicsObjectiveWeight", registry);
+   private final DoubleProvider dynamicsObjectiveWeight;
 
    private final YoDouble cumulativeAngularMomentum = new YoDouble(yoNamePrefix + "CumulativeAngularMomentum", registry);
 
-   private final YoBoolean limitReachabilityFromAdjustment = new YoBoolean(yoNamePrefix + "LimitReachabilityFromAdjustment", registry);
+   private final BooleanProvider limitReachabilityFromAdjustment;
 
-   private final YoBoolean useICPControlPolygons = new YoBoolean(yoNamePrefix + "UseICPControlPolygons", registry);
+   private final BooleanProvider useICPControlPolygons;
+   private final boolean hasICPControlPolygons;
 
-   private final YoDouble feedbackOrthogonalGain = new YoDouble(yoNamePrefix + "FeedbackOrthogonalGain", registry);
-   private final YoDouble feedbackParallelGain = new YoDouble(yoNamePrefix + "FeedbackParallelGain", registry);
+   private final ICPControlGainsReadOnly feedbackGains;
+   private final DenseMatrix64F transformedGains = new DenseMatrix64F(2, 2);
+   private final FrameVector2D transformedMagnitudeLimits = new FrameVector2D();
 
    private final YoInteger numberOfIterations = new YoInteger(yoNamePrefix + "NumberOfIterations", registry);
    private final YoBoolean hasNotConvergedInPast = new YoBoolean(yoNamePrefix + "HasNotConvergedInPast", registry);
    private final YoInteger hasNotConvergedCounts = new YoInteger(yoNamePrefix + "HasNotConvergedCounts", registry);
 
-   private final YoDouble footstepMultiplier = new YoDouble(yoNamePrefix + "FootstepMultiplier", registry);
+   private final YoDouble footstepMultiplier = new YoDouble(yoNamePrefix + "TotalFootstepMultiplier", registry);
+   private final YoDouble recursionTime = new YoDouble(yoNamePrefix + "RecursionTime", registry);
+   private final YoDouble recursionMultiplier = new YoDouble(yoNamePrefix + "RecursionMultiplier", registry);
+
+   private final DoubleProvider minimumFootstepMultiplier;
+   private final DoubleProvider maximumTimeFromTransfer;
 
    private final YoBoolean swingSpeedUpEnabled = new YoBoolean(yoNamePrefix + "SwingSpeedUpEnabled", registry);
    private final YoDouble speedUpTime = new YoDouble(yoNamePrefix + "SpeedUpTime", registry);
 
-   private final YoBoolean useAngularMomentumIntegrator = new YoBoolean(yoNamePrefix + "UseAngularMomentumIntegrator", registry);
-   private final YoDouble angularMomentumIntegratorGain = new YoDouble(yoNamePrefix + "AngularMomentumIntegratorGain", registry);
-   private final YoDouble angularMomentumIntegratorLeakRatio = new YoDouble(yoNamePrefix + "AngularMomentumIntegratorLeakRatio", registry);
+   private final BooleanProvider useAngularMomentumIntegrator;
+   private final DoubleProvider angularMomentumIntegratorGain;
+   private final DoubleProvider angularMomentumIntegratorLeakRatio;
+
+   private final BooleanProvider useSmartICPIntegrator;
+   private final GlitchFilteredYoBoolean isICPStuck;
+   private final DoubleProvider thresholdForStuck;
+   private final YoFrameVector2D feedbackCMPIntegral = new YoFrameVector2D(yoNamePrefix + "FeedbackCMPIntegral", worldFrame, registry);
 
    private final ICPOptimizationCoPConstraintHandler copConstraintHandler;
    private final ICPOptimizationReachabilityConstraintHandler reachabilityConstraintHandler;
@@ -138,8 +170,8 @@ public class ICPOptimizationController implements ICPOptimizationControllerInter
    private final ExecutionTimer qpSolverTimer = new ExecutionTimer("icpQPSolverTimer", 0.5, registry);
    private final ExecutionTimer controllerTimer = new ExecutionTimer("icpControllerTimer", 0.5, registry);
 
-   private final boolean useFootstepRate;
-   private final boolean useFeedbackRate;
+   private final BooleanProvider useFootstepRate;
+   private final BooleanProvider useFeedbackRate;
 
    private boolean localUseStepAdjustment;
 
@@ -153,15 +185,22 @@ public class ICPOptimizationController implements ICPOptimizationControllerInter
    private final FramePoint2D perfectCoP = new FramePoint2D();
    private final FrameVector2D perfectCMPOffset = new FrameVector2D();
    private final FramePoint2D currentICP = new FramePoint2D();
+   private final FrameVector2D currentICPVelocity = new FrameVector2D();
 
    private final double controlDT;
-   private final double dynamicsObjectiveDoubleSupportWeightModifier;
+   private final double controlDTSquare;
+   private final DoubleProvider dynamicsObjectiveDoubleSupportWeightModifier;
 
    private final ICPOptimizationControllerHelper helper = new ICPOptimizationControllerHelper();
 
+   private boolean initialized = false;
+
+   private final BooleanProvider considerAngularMomentumInAdjustment;
+   private final BooleanProvider considerFeedbackInAdjustment;
+
    public ICPOptimizationController(WalkingControllerParameters walkingControllerParameters, BipedSupportPolygons bipedSupportPolygons,
-                                    ICPControlPolygons icpControlPolygons, SideDependentList<? extends ContactablePlaneBody> contactableFeet,
-                                    double controlDT, YoVariableRegistry parentRegistry, YoGraphicsListRegistry yoGraphicsListRegistry)
+                                    ICPControlPolygons icpControlPolygons, SideDependentList<? extends ContactablePlaneBody> contactableFeet, double controlDT,
+                                    YoVariableRegistry parentRegistry, YoGraphicsListRegistry yoGraphicsListRegistry)
    {
       this(walkingControllerParameters, walkingControllerParameters.getICPOptimizationParameters(), bipedSupportPolygons, icpControlPolygons, contactableFeet,
            controlDT, parentRegistry, yoGraphicsListRegistry);
@@ -169,83 +208,115 @@ public class ICPOptimizationController implements ICPOptimizationControllerInter
 
    public ICPOptimizationController(WalkingControllerParameters walkingControllerParameters, ICPOptimizationParameters icpOptimizationParameters,
                                     BipedSupportPolygons bipedSupportPolygons, ICPControlPolygons icpControlPolygons,
-                                    SideDependentList<? extends ContactablePlaneBody> contactableFeet, double controlDT,
-                                    YoVariableRegistry parentRegistry, YoGraphicsListRegistry yoGraphicsListRegistry)
+                                    SideDependentList<? extends ContactablePlaneBody> contactableFeet, double controlDT, YoVariableRegistry parentRegistry,
+                                    YoGraphicsListRegistry yoGraphicsListRegistry)
    {
       this.controlDT = controlDT;
+      this.controlDTSquare = controlDT * controlDT;
       this.contactableFeet = contactableFeet;
 
       if (icpControlPolygons != null)
          this.icpControlPlane = icpControlPolygons.getIcpControlPlane();
       else
          this.icpControlPlane = null;
+      hasICPControlPolygons = this.icpControlPlane != null;
 
-      dynamicsObjectiveDoubleSupportWeightModifier = icpOptimizationParameters.getDynamicsObjectiveDoubleSupportWeightModifier();
+      dynamicsObjectiveDoubleSupportWeightModifier = new DoubleParameter(yoNamePrefix + "DynamicsObjectiveDoubleSupportWeightModifier", registry,
+                                                                         icpOptimizationParameters.getDynamicsObjectiveDoubleSupportWeightModifier());
 
-      useFootstepRate = icpOptimizationParameters.useFootstepRate();
-      useFeedbackRate = icpOptimizationParameters.useFeedbackRate();
+      useFootstepRate = new BooleanParameter(yoNamePrefix + "UseFootstepRate", registry, icpOptimizationParameters.useFootstepRate());
+      useFeedbackRate = new BooleanParameter(yoNamePrefix + "UseFeedbackRate", registry, icpOptimizationParameters.useFeedbackRate());
 
-      allowStepAdjustment.set(icpOptimizationParameters.allowStepAdjustment());
-      useCMPFeedback.set(icpOptimizationParameters.useCMPFeedback());
-      useAngularMomentum.set(icpOptimizationParameters.useAngularMomentum());
+      allowStepAdjustment = new BooleanParameter(yoNamePrefix + "AllowStepAdjustment", registry, icpOptimizationParameters.allowStepAdjustment());
+      useCMPFeedback = new BooleanParameter(yoNamePrefix + "UseCMPFeedback", registry, icpOptimizationParameters.useCMPFeedback());
+      useAngularMomentum = new BooleanParameter(yoNamePrefix + "UseAngularMomentum", registry, icpOptimizationParameters.useAngularMomentum());
 
-      scaleStepRateWeightWithTime.set(icpOptimizationParameters.scaleStepRateWeightWithTime());
-      scaleFeedbackWeightWithGain.set(icpOptimizationParameters.scaleFeedbackWeightWithGain());
+      scaleStepRateWeightWithTime = new BooleanParameter(yoNamePrefix + "ScaleStepRateWeightWithTime", registry,
+                                                         icpOptimizationParameters.scaleStepRateWeightWithTime());
+      scaleFeedbackWeightWithGain = new BooleanParameter(yoNamePrefix + "ScaleFeedbackWeightWithGain", registry,
+                                                         icpOptimizationParameters.scaleFeedbackWeightWithGain());
 
-      footstepAdjustmentSafetyFactor.set(icpOptimizationParameters.getFootstepAdjustmentSafetyFactor());
-      forwardFootstepWeight.set(icpOptimizationParameters.getForwardFootstepWeight());
-      lateralFootstepWeight.set(icpOptimizationParameters.getLateralFootstepWeight());
-      footstepRateWeight.set(icpOptimizationParameters.getFootstepRateWeight());
+      minICPErrorForStepAdjustment = new DoubleParameter(yoNamePrefix + "MinICPErrorForStepAdjustment", registry,
+                                                         icpOptimizationParameters.getMinICPErrorForStepAdjustment());
+      fractionThroughSwingForAdjustment = new DoubleParameter(yoNamePrefix + "FractionThroughSwingForAdjustment", registry,
+                                                              icpOptimizationParameters.getFractionThroughSwingForAdjustment());
 
-      copFeedbackForwardWeight.set(icpOptimizationParameters.getFeedbackForwardWeight());
-      copFeedbackLateralWeight.set(icpOptimizationParameters.getFeedbackLateralWeight());
-      copFeedbackRateWeight.set(icpOptimizationParameters.getFeedbackRateWeight());
-      feedbackOrthogonalGain.set(icpOptimizationParameters.getFeedbackOrthogonalGain());
-      feedbackParallelGain.set(icpOptimizationParameters.getFeedbackParallelGain());
+      footstepAdjustmentSafetyFactor = new DoubleParameter(yoNamePrefix + "FootstepAdjustmentSafetyFactor", registry,
+                                                           icpOptimizationParameters.getFootstepAdjustmentSafetyFactor());
+      forwardFootstepWeight = new DoubleParameter(yoNamePrefix + "ForwardFootstepWeight", registry, icpOptimizationParameters.getForwardFootstepWeight());
+      lateralFootstepWeight = new DoubleParameter(yoNamePrefix + "LateralFootstepWeight", registry, icpOptimizationParameters.getLateralFootstepWeight());
+      footstepRateWeight = new DoubleParameter(yoNamePrefix + "FootstepRateWeight", registry, icpOptimizationParameters.getFootstepRateWeight());
 
-      dynamicsObjectiveWeight.set(icpOptimizationParameters.getDynamicsObjectiveWeight());
+      copFeedbackForwardWeight = new DoubleParameter(yoNamePrefix + "CoPFeedbackForwardWeight", registry, icpOptimizationParameters.getFeedbackForwardWeight());
+      copFeedbackLateralWeight = new DoubleParameter(yoNamePrefix + "CoPFeedbackLateralWeight", registry, icpOptimizationParameters.getFeedbackLateralWeight());
 
-      cmpFeedbackWeight.set(icpOptimizationParameters.getAngularMomentumMinimizationWeight());
-      scaledCMPFeedbackWeight.set(icpOptimizationParameters.getAngularMomentumMinimizationWeight());
+      copCMPFeedbackRateWeight = new DoubleParameter(yoNamePrefix + "CoPCMPFeedbackRateWeight", registry,
+                                                     icpOptimizationParameters.getCoPCMPFeedbackRateWeight());
+      feedbackRateWeight = new DoubleParameter(yoNamePrefix + "FeedbackRateWeight", registry, icpOptimizationParameters.getFeedbackRateWeight());
 
-      limitReachabilityFromAdjustment.set(icpOptimizationParameters.getLimitReachabilityFromAdjustment());
+      feedbackGains = new ParameterizedICPControlGains("", icpOptimizationParameters.getICPFeedbackGains(), registry);
+      useSmartICPIntegrator = new BooleanParameter("useSmartICPIntegrator", registry, icpOptimizationParameters.useSmartICPIntegrator());
+      thresholdForStuck = new DoubleParameter(yoNamePrefix + "ThresholdForStuck", registry, icpOptimizationParameters.getICPVelocityThresholdForStuck());
 
-      transferDurationSplitFraction.set(icpOptimizationParameters.getTransferSplitFraction());
-
-      useAngularMomentumIntegrator.set(icpOptimizationParameters.getUseAngularMomentumIntegrator());
-      angularMomentumIntegratorGain.set(icpOptimizationParameters.getAngularMomentumIntegratorGain());
-      angularMomentumIntegratorLeakRatio.set(icpOptimizationParameters.getAngularMomentumIntegratorLeakRatio());
-
-      useICPControlPolygons.set(icpOptimizationParameters.getUseICPControlPolygons() && icpControlPlane != null);
-
-      safeCoPDistanceToEdge.set(icpOptimizationParameters.getSafeCoPDistanceToEdge());
+      dynamicsObjectiveWeight = new DoubleParameter(yoNamePrefix + "DynamicsObjectiveWeight", registry, icpOptimizationParameters.getDynamicsObjectiveWeight());
       if (walkingControllerParameters != null)
-         maxAllowedDistanceCMPSupport.set(walkingControllerParameters.getMaxAllowedDistanceCMPSupport());
-      else
-         maxAllowedDistanceCMPSupport.setToNaN();
+         swingSpeedUpEnabled.set(walkingControllerParameters.allowDisturbanceRecoveryBySpeedingUpSwing());
 
-      minimumTimeRemaining.set(icpOptimizationParameters.getMinimumTimeRemaining());
+      cmpFeedbackWeight = new DoubleParameter(yoNamePrefix + "CMPFeedbackWeight", registry, icpOptimizationParameters.getAngularMomentumMinimizationWeight());
+
+      limitReachabilityFromAdjustment = new BooleanParameter(yoNamePrefix + "LimitReachabilityFromAdjustment", registry,
+                                                             icpOptimizationParameters.getLimitReachabilityFromAdjustment());
+
+      transferDurationSplitFraction = new DoubleParameter(yoNamePrefix + "TransferDurationSplitFraction", registry,
+                                                          icpOptimizationParameters.getTransferSplitFraction());
+
+      useAngularMomentumIntegrator = new BooleanParameter(yoNamePrefix + "UseAngularMomentumIntegrator", registry,
+                                                          icpOptimizationParameters.getUseAngularMomentumIntegrator());
+      angularMomentumIntegratorGain = new DoubleParameter(yoNamePrefix + "AngularMomentumIntegratorGain", registry,
+                                                          icpOptimizationParameters.getAngularMomentumIntegratorGain());
+      angularMomentumIntegratorLeakRatio = new DoubleParameter(yoNamePrefix + "AngularMomentumIntegratorLeakRatio", registry,
+                                                               icpOptimizationParameters.getAngularMomentumIntegratorLeakRatio());
+
+      useICPControlPolygons = new BooleanParameter(yoNamePrefix + "UseICPControlPolygons", registry, icpOptimizationParameters.getUseICPControlPolygons());
+
+      safeCoPDistanceToEdge = new DoubleParameter(yoNamePrefix + "SafeCoPDistanceToEdge", registry, icpOptimizationParameters.getSafeCoPDistanceToEdge());
+      double defaultMaxAllowedDistanceCMPSupport =
+            walkingControllerParameters != null ? walkingControllerParameters.getMaxAllowedDistanceCMPSupport() : Double.NaN;
+      maxAllowedDistanceCMPSupport = new DoubleParameter(yoNamePrefix + "MaxAllowedDistanceCMPSupport", registry, defaultMaxAllowedDistanceCMPSupport);
+
+      isICPStuck = new GlitchFilteredYoBoolean(yoNamePrefix + "IsICPStuck", registry, (int) (0.03 / controlDT));
+
+      minimumTimeRemaining = new DoubleParameter(yoNamePrefix + "MinimumTimeRemaining", registry, icpOptimizationParameters.getMinimumTimeRemaining());
+      minimumFootstepMultiplier = new DoubleParameter(yoNamePrefix + "MinimumFootstepMultiplier", registry,
+                                                      icpOptimizationParameters.getMinimumFootstepMultiplier());
+      maximumTimeFromTransfer = new DoubleParameter(yoNamePrefix + "MaximumTimeFromTransfer", registry,
+                                                    icpOptimizationParameters.maximumTimeFromTransferInFootstepMultiplier());
 
       int totalVertices = 0;
       for (RobotSide robotSide : RobotSide.values)
          totalVertices += contactableFeet.get(robotSide).getTotalNumberOfContactPoints();
 
       boolean updateRateAutomatically = true;
-      solver = new ICPOptimizationQPSolver(icpOptimizationParameters, totalVertices, COMPUTE_COST_TO_GO, updateRateAutomatically);
-      solver.setConsiderAngularMomentumInAdjustment(icpOptimizationParameters.considerAngularMomentumInAdjustment());
-      solver.setConsiderFeedbackInAdjustment(icpOptimizationParameters.considerFeedbackInAdjustment());
+      solver = new ICPOptimizationQPSolver(totalVertices, COMPUTE_COST_TO_GO, updateRateAutomatically);
+
+      considerAngularMomentumInAdjustment = new BooleanParameter(yoNamePrefix + "ConsiderAngularMomentumInAdjustment", registry,
+                                                                 icpOptimizationParameters.considerAngularMomentumInAdjustment());
+      considerFeedbackInAdjustment = new BooleanParameter(yoNamePrefix + "ConsiderFeedbackInAdjustment", registry,
+                                                          icpOptimizationParameters.considerFeedbackInAdjustment());
 
       solutionHandler = new ICPOptimizationSolutionHandler(icpControlPlane, icpOptimizationParameters, useICPControlPolygons, DEBUG, yoNamePrefix, registry);
 
-      copConstraintHandler = new ICPOptimizationCoPConstraintHandler(bipedSupportPolygons, icpControlPolygons, useICPControlPolygons, registry);
-      reachabilityConstraintHandler = new ICPOptimizationReachabilityConstraintHandler(bipedSupportPolygons, icpOptimizationParameters, yoNamePrefix, VISUALIZE,
-                                                                                       registry, yoGraphicsListRegistry);
+      copConstraintHandler = new ICPOptimizationCoPConstraintHandler(bipedSupportPolygons, icpControlPolygons, useICPControlPolygons, hasICPControlPolygons,
+                                                                     registry);
+      reachabilityConstraintHandler = new ICPOptimizationReachabilityConstraintHandler(bipedSupportPolygons, icpOptimizationParameters,
+                                                                                       walkingControllerParameters.getSteppingParameters(), yoNamePrefix,
+                                                                                       VISUALIZE, upcomingFootsteps, registry, yoGraphicsListRegistry);
       if (walkingControllerParameters != null)
          planarRegionConstraintProvider = new PlanarRegionConstraintProvider(icpControlPlane, walkingControllerParameters, icpOptimizationParameters,
-                                                                             bipedSupportPolygons, contactableFeet, yoNamePrefix, VISUALIZE, registry, yoGraphicsListRegistry);
+                                                                             bipedSupportPolygons, contactableFeet, yoNamePrefix, VISUALIZE, registry,
+                                                                             yoGraphicsListRegistry);
       else
          planarRegionConstraintProvider = null;
-
 
       if (yoGraphicsListRegistry != null)
          setupVisualizers(yoGraphicsListRegistry);
@@ -257,11 +328,12 @@ public class ICPOptimizationController implements ICPOptimizationControllerInter
    {
       ArtifactList artifactList = new ArtifactList(getClass().getSimpleName());
 
-      YoGraphicPosition predictedEndOfStateICP = new YoGraphicPosition(yoNamePrefix + "PredictedEndOfStateICP", this.predictedEndOfStateICP, 0.005, YoAppearance.MidnightBlue(),
-                                                                       YoGraphicPosition.GraphicType.BALL);
+      YoGraphicPosition predictedEndOfStateICP = new YoGraphicPosition(yoNamePrefix + "PredictedEndOfStateICP", this.predictedEndOfStateICP, 0.005,
+                                                                       YoAppearance.MidnightBlue(), YoGraphicPosition.GraphicType.BALL);
       YoGraphicPosition clippedFootstepSolution = new YoGraphicPosition(yoNamePrefix + "ClippedFootstepSolution", this.footstepSolution.getPosition(), 0.005,
-                                                                        YoAppearance.ForestGreen(), YoGraphicPosition.GraphicType.BALL);
-      YoGraphicPosition feedbackCoP = new YoGraphicPosition(yoNamePrefix + "FeedbackCoP", this.feedbackCoP, 0.005, YoAppearance.Darkorange(), YoGraphicPosition.GraphicType.BALL_WITH_CROSS);
+                                                                        YoAppearance.DarkRed(), YoGraphicPosition.GraphicType.BALL);
+      YoGraphicPosition feedbackCoP = new YoGraphicPosition(yoNamePrefix + "FeedbackCoP", this.feedbackCoP, 0.005, YoAppearance.Darkorange(),
+                                                            YoGraphicPosition.GraphicType.BALL_WITH_CROSS);
 
       artifactList.add(predictedEndOfStateICP.createArtifact());
       artifactList.add(clippedFootstepSolution.createArtifact());
@@ -273,6 +345,7 @@ public class ICPOptimizationController implements ICPOptimizationControllerInter
       yoGraphicsListRegistry.registerArtifactList(artifactList);
    }
 
+   /** {@inheritDoc} */
    @Override
    public void clearPlan()
    {
@@ -284,30 +357,35 @@ public class ICPOptimizationController implements ICPOptimizationControllerInter
       nextTransferDuration.setToNaN();
    }
 
+   /** {@inheritDoc} */
    @Override
    public void setTransferDuration(double duration)
    {
       transferDuration.set(duration);
    }
 
+   /** {@inheritDoc} */
    @Override
    public void setSwingDuration(double duration)
    {
       swingDuration.set(duration);
    }
 
+   /** {@inheritDoc} */
    @Override
    public void setNextTransferDuration(double duration)
    {
       nextTransferDuration.set(duration);
    }
 
+   /** {@inheritDoc} */
    @Override
    public void setFinalTransferDuration(double finalTransferDuration)
    {
       this.finalTransferDuration.set(finalTransferDuration);
    }
 
+   /** {@inheritDoc} */
    @Override
    public void addFootstepToPlan(Footstep footstep, FootstepTiming timing)
    {
@@ -326,7 +404,8 @@ public class ICPOptimizationController implements ICPOptimizationControllerInter
                swingDuration.set(timing.getSwingTime());
                transferDuration.set(timing.getTransferTime());
 
-               useStepAdjustment.set(allowStepAdjustment.getBooleanValue() && footstep.getIsAdjustable());
+               footstepIsAdjustable.set(footstep.getIsAdjustable());
+               useStepAdjustment.set(allowStepAdjustment.getValue() && footstepIsAdjustable.getBooleanValue());
             }
             else if (upcomingFootsteps.size() == 1)
             {
@@ -342,19 +421,30 @@ public class ICPOptimizationController implements ICPOptimizationControllerInter
       }
    }
 
+   /** {@inheritDoc} */
    @Override
    public void initializeForStanding(double initialTime)
    {
       this.initialTime.set(initialTime);
-      isStanding.set(true);
+      isStationary.set(true);
       isInDoubleSupport.set(true);
+      isICPStuck.set(false);
 
       localUseStepAdjustment = useStepAdjustment.getBooleanValue();
 
-      copConstraintHandler.updateCoPConstraintForDoubleSupport(solver);
-      reachabilityConstraintHandler.initializeReachabilityConstraintForDoubleSupport(solver);
+      solver.resetCoPLocationConstraint();
+      solver.resetReachabilityConstraint();
+      solver.resetPlanarRegionConstraint();
+
+      solver.addSupportPolygon(copConstraintHandler.updateCoPConstraintForDoubleSupport());
+      solver.addReachabilityPolygon(reachabilityConstraintHandler.initializeReachabilityConstraintForDoubleSupport());
+
       if (planarRegionConstraintProvider != null)
-         planarRegionConstraintProvider.updatePlanarRegionConstraintForDoubleSupport(solver);
+      {
+         planarRegionConstraintProvider.updatePlanarRegionConstraintForDoubleSupport();
+      }
+
+      solver.notifyResetActiveSet();
 
       transferDuration.set(finalTransferDuration.getDoubleValue());
 
@@ -364,11 +454,14 @@ public class ICPOptimizationController implements ICPOptimizationControllerInter
       speedUpTime.set(0.0);
    }
 
+   /** {@inheritDoc} */
    @Override
-   public void initializeForTransfer(double initialTime, RobotSide transferToSide, double omega0)
+   public void initializeForTransfer(double initialTime, RobotSide transferToSide)
    {
       this.transferToSide.set(transferToSide);
       isInDoubleSupport.set(true);
+      isStationary.set(false);
+      isICPStuck.set(false);
 
       if (upcomingFootsteps.size() < 2)
          nextTransferDuration.set(finalTransferDuration.getDoubleValue());
@@ -378,34 +471,52 @@ public class ICPOptimizationController implements ICPOptimizationControllerInter
       footstepSolution.setToNaN();
       unclippedFootstepSolution.setToNaN();
 
-      copConstraintHandler.updateCoPConstraintForDoubleSupport(solver);
-      reachabilityConstraintHandler.initializeReachabilityConstraintForDoubleSupport(solver);
+      solver.resetCoPLocationConstraint();
+      solver.resetReachabilityConstraint();
+      solver.resetPlanarRegionConstraint();
+
+      solver.addSupportPolygon(copConstraintHandler.updateCoPConstraintForDoubleSupport());
+      solver.addReachabilityPolygon(reachabilityConstraintHandler.initializeReachabilityConstraintForDoubleSupport());
+
       if (planarRegionConstraintProvider != null)
-         planarRegionConstraintProvider.updatePlanarRegionConstraintForDoubleSupport(solver);
+         planarRegionConstraintProvider.updatePlanarRegionConstraintForDoubleSupport();
+
+      solver.notifyResetActiveSet();
    }
 
+   /** {@inheritDoc} */
    @Override
    public void initializeForSingleSupport(double initialTime, RobotSide supportSide, double omega0)
    {
       this.supportSide.set(supportSide);
-      isStanding.set(false);
+      isStationary.set(false);
       isInDoubleSupport.set(false);
+      isICPStuck.set(false);
 
       if (upcomingFootsteps.size() < 2)
          nextTransferDuration.set(finalTransferDuration.getDoubleValue());
 
       initializeOnContactChange(initialTime);
 
-      copConstraintHandler.updateCoPConstraintForSingleSupport(supportSide, solver);
-      reachabilityConstraintHandler.initializeReachabilityConstraintForSingleSupport(supportSide, solver);
+      solver.resetCoPLocationConstraint();
+      solver.resetReachabilityConstraint();
+      solver.resetPlanarRegionConstraint();
+
+      solver.addSupportPolygon(copConstraintHandler.updateCoPConstraintForSingleSupport(supportSide));
+      solver.addReachabilityPolygon(reachabilityConstraintHandler.initializeReachabilityConstraintForSingleSupport(supportSide));
 
       Footstep upcomingFootstep = upcomingFootsteps.get(0);
 
       if (planarRegionConstraintProvider != null)
       {
          planarRegionConstraintProvider.computeDistanceFromEdgeForNoOverhang(upcomingFootstep);
-         planarRegionConstraintProvider.updatePlanarRegionConstraintForSingleSupport(upcomingFootstep, timeRemainingInState.getDoubleValue(), currentICP, omega0, solver);
+         ConvexPolygon2D planarRegion = planarRegionConstraintProvider
+               .updatePlanarRegionConstraintForSingleSupport(upcomingFootstep, timeRemainingInState.getDoubleValue(), currentICP, omega0);
+
+         solver.setPlanarRegionConstraint(planarRegion);
       }
+
+      solver.notifyResetActiveSet();
    }
 
    private void initializeOnContactChange(double initialTime)
@@ -416,11 +527,11 @@ public class ICPOptimizationController implements ICPOptimizationControllerInter
 
       this.initialTime.set(initialTime);
 
-      if (useFootstepRate)
+      if (useFootstepRate.getValue())
       {
          upcomingFootsteps.get(0).getPosition(tempPoint3d);
 
-         if (useICPControlPolygons.getBooleanValue())
+         if (useICPControlPolygons.getValue() && hasICPControlPolygons)
             icpControlPlane.projectPointOntoControlPlane(worldFrame, tempPoint3d, projectedTempPoint3d);
          else
             projectedTempPoint3d.set(tempPoint3d);
@@ -431,68 +542,112 @@ public class ICPOptimizationController implements ICPOptimizationControllerInter
 
    private boolean computeWhetherToIncludeFootsteps()
    {
-      if (!localUseStepAdjustment || isInDoubleSupport.getBooleanValue() || isStanding.getBooleanValue())
+      if (!localUseStepAdjustment || isInDoubleSupport.getBooleanValue() || isStationary.getBooleanValue())
+         return false;
+
+      if (timeInCurrentState.getDoubleValue() / swingDuration.getDoubleValue() < fractionThroughSwingForAdjustment.getValue())
+         return false;
+
+      if (icpError.length() < Math.abs(minICPErrorForStepAdjustment.getValue()) && !includeFootsteps.getBooleanValue())
          return false;
 
       return upcomingFootsteps.size() > 0;
    }
 
+   /** {@inheritDoc} */
    @Override
    public boolean useStepAdjustment()
    {
       return useStepAdjustment.getBooleanValue();
    }
 
+   /** {@inheritDoc} */
    @Override
    public void getDesiredCMP(FramePoint2D desiredCMPToPack)
    {
-      desiredCMPToPack.set(feedbackCMP);
+      desiredCMPToPack.setIncludingFrame(feedbackCMP);
    }
 
+   /** {@inheritDoc} */
+   @Override
+   public void getDesiredCoP(FramePoint2D desiredCoPToPack)
+   {
+      desiredCoPToPack.setIncludingFrame(feedbackCoP);
+   }
+
+   /** {@inheritDoc} */
    @Override
    public void getFootstepSolution(Footstep footstepSolutionToPack)
    {
       footstepSolutionToPack.setPose(footstepSolution);
    }
 
+   /** {@inheritDoc} */
    @Override
    public boolean wasFootstepAdjusted()
    {
       return solutionHandler.wasFootstepAdjusted();
    }
 
+   private final FrameVector3D scaledAdjustment = new FrameVector3D();
+
+   /** {@inheritDoc} */
+   @Override
+   public FrameVector3DReadOnly getICPShiftFromStepAdjustment()
+   {
+      scaledAdjustment.setIncludingFrame(solutionHandler.getTotalFootstepAdjustment(), 0.0);
+      scaledAdjustment.scale(footstepMultiplier.getDoubleValue());
+
+      return scaledAdjustment;
+   }
+
+   /** {@inheritDoc} */
    @Override
    public boolean useAngularMomentum()
    {
-      return useAngularMomentum.getBooleanValue();
+      return useAngularMomentum.getValue();
    }
 
    private final FrameVector2D desiredCMPOffsetToThrowAway = new FrameVector2D();
+
+   /** {@inheritDoc} */
    @Override
    public void compute(double currentTime, FramePoint2DReadOnly desiredICP, FrameVector2DReadOnly desiredICPVelocity, FramePoint2DReadOnly perfectCoP,
-                       FramePoint2DReadOnly currentICP, double omega0)
+                       FramePoint2DReadOnly currentICP, FrameVector2DReadOnly currentICPVelocity, double omega0)
    {
       desiredCMPOffsetToThrowAway.setToZero(worldFrame);
-      compute(currentTime, desiredICP, desiredICPVelocity, perfectCoP, desiredCMPOffsetToThrowAway, currentICP, omega0);
+      compute(currentTime, desiredICP, desiredICPVelocity, perfectCoP, desiredCMPOffsetToThrowAway, currentICP, currentICPVelocity, omega0);
    }
 
+   /** {@inheritDoc} */
    @Override
    public void compute(double currentTime, FramePoint2DReadOnly desiredICP, FrameVector2DReadOnly desiredICPVelocity, FramePoint2DReadOnly perfectCoP,
-                       FrameVector2DReadOnly perfectCMPOffset, FramePoint2DReadOnly currentICP, double omega0)
+                       FrameVector2DReadOnly perfectCMPOffset, FramePoint2DReadOnly currentICP, FrameVector2DReadOnly currentICPVelocity, double omega0)
    {
       controllerTimer.startMeasurement();
+
+      if (!initialized)
+      {
+         initialize();
+         initialized = true;
+      }
+
+      solver.setConsiderAngularMomentumInAdjustment(considerAngularMomentumInAdjustment.getValue());
+      solver.setConsiderFeedbackInAdjustment(considerFeedbackInAdjustment.getValue());
 
       this.desiredICP.set(desiredICP);
       this.desiredICPVelocity.set(desiredICPVelocity);
       this.perfectCoP.set(perfectCoP);
       this.perfectCMPOffset.set(perfectCMPOffset);
       this.currentICP.set(currentICP);
+      this.currentICPVelocity.set(currentICPVelocity);
 
       this.desiredICP.changeFrame(worldFrame);
       this.desiredICPVelocity.changeFrame(worldFrame);
       this.perfectCoP.changeFrame(worldFrame);
       this.perfectCMPOffset.changeFrame(worldFrame);
       this.currentICP.changeFrame(worldFrame);
+      this.currentICPVelocity.changeFrame(worldFrame);
 
       this.yoPerfectCoP.set(this.perfectCoP);
       this.yoPerfectCMP.add(this.perfectCoP, this.perfectCMPOffset);
@@ -503,6 +658,12 @@ public class ICPOptimizationController implements ICPOptimizationControllerInter
       computeTimeRemainingInState();
 
       boolean includeFootsteps = computeWhetherToIncludeFootsteps();
+      // if we are switching between including footsteps and not, the decision variables are changing, so the active set needs resetting
+      if (includeFootsteps != this.includeFootsteps.getBooleanValue())
+      {
+         solver.notifyResetActiveSet();
+         this.includeFootsteps.set(includeFootsteps);
+      }
 
       scaleStepRateWeightWithTime();
       scaleFeedbackWeightWithGain();
@@ -510,16 +671,22 @@ public class ICPOptimizationController implements ICPOptimizationControllerInter
       submitSolverTaskConditions(omega0, includeFootsteps);
 
       qpSolverTimer.startMeasurement();
-      NoConvergenceException noConvergenceException = solveQP();
+      boolean converged = solveQP();
       qpSolverTimer.stopMeasurement();
 
-      extractSolutionsFromSolver(noConvergenceException, includeFootsteps);
+      extractSolutionsFromSolver(converged, includeFootsteps);
 
       modifyCMPFeedbackWeightUsingIntegral();
 
       controllerTimer.stopMeasurement();
    }
 
+   private void initialize()
+   {
+      scaledCMPFeedbackWeight.set(cmpFeedbackWeight.getValue());
+   }
+
+   /** {@inheritDoc} */
    @Override
    public void submitRemainingTimeInSwingUnderDisturbance(double remainingTimeForSwing)
    {
@@ -534,13 +701,32 @@ public class ICPOptimizationController implements ICPOptimizationControllerInter
    {
       if (isInDoubleSupport.getBooleanValue())
       {
-         copConstraintHandler.updateCoPConstraintForDoubleSupport(solver);
+         solver.resetCoPLocationConstraint();
+         solver.addSupportPolygon(copConstraintHandler.updateCoPConstraintForDoubleSupport());
+
+         if (copConstraintHandler.hasSupportPolygonChanged())
+            solver.notifyResetActiveSet();
       }
       else
       {
-         copConstraintHandler.updateCoPConstraintForSingleSupport(supportSide.getEnumValue(), solver);
+         solver.resetCoPLocationConstraint();
+         solver.addSupportPolygon(copConstraintHandler.updateCoPConstraintForSingleSupport(supportSide.getEnumValue()));
+
+         boolean resetActiveSet = copConstraintHandler.hasSupportPolygonChanged();
+
          if (planarRegionConstraintProvider != null)
-            planarRegionConstraintProvider.updatePlanarRegionConstraintForSingleSupport(upcomingFootsteps.get(0), timeRemainingInState.getDoubleValue(), currentICP, omega0, solver);
+         {
+            ConvexPolygon2D planarRegionConstraint = planarRegionConstraintProvider
+                  .updatePlanarRegionConstraintForSingleSupport(upcomingFootsteps.get(0), timeRemainingInState.getDoubleValue(), currentICP, omega0);
+
+            solver.resetPlanarRegionConstraint();
+            solver.setPlanarRegionConstraint(planarRegionConstraint);
+
+            resetActiveSet = resetActiveSet || planarRegionConstraintProvider.hasConstraintChanged();
+         }
+
+         if (resetActiveSet)
+            solver.notifyResetActiveSet();
       }
 
       solver.resetFootstepConditions();
@@ -548,7 +734,9 @@ public class ICPOptimizationController implements ICPOptimizationControllerInter
       if (localUseStepAdjustment && !isInDoubleSupport.getBooleanValue())
       {
          submitFootstepTaskConditionsToSolver(omega0, includeFootsteps);
-         reachabilityConstraintHandler.updateReachabilityConstraint(solver);
+
+         solver.resetReachabilityConstraint();
+         solver.addReachabilityPolygon(reachabilityConstraintHandler.updateReachabilityConstraint());
       }
       else
       {
@@ -556,25 +744,32 @@ public class ICPOptimizationController implements ICPOptimizationControllerInter
       }
 
       submitCoPFeedbackTaskConditionsToSolver();
-      if (useCMPFeedback.getBooleanValue())
+      if (useCMPFeedback.getValue())
          submitCMPFeedbackTaskConditionsToSolver();
    }
 
    private void submitCoPFeedbackTaskConditionsToSolver()
    {
-      helper.transformFromDynamicsFrame(tempVector2d, desiredICPVelocity, feedbackParallelGain.getDoubleValue(), feedbackOrthogonalGain.getDoubleValue());
+      helper.transformGainsFromDynamicsFrame(transformedGains, desiredICPVelocity, feedbackGains.getKpParallelToMotion(),
+                                             feedbackGains.getKpOrthogonalToMotion());
+      helper.transformFromDynamicsFrame(transformedMagnitudeLimits, desiredICPVelocity, feedbackGains.getFeedbackPartMaxValueParallelToMotion(),
+                                        feedbackGains.getFeedbackPartMaxValueOrthogonalToMotion());
 
-      double dynamicsObjectiveWeight = this.dynamicsObjectiveWeight.getDoubleValue();
+      double dynamicsObjectiveWeight = this.dynamicsObjectiveWeight.getValue();
       if (isInDoubleSupport.getBooleanValue())
-         dynamicsObjectiveWeight = dynamicsObjectiveWeight / dynamicsObjectiveDoubleSupportWeightModifier;
+         dynamicsObjectiveWeight = dynamicsObjectiveWeight / dynamicsObjectiveDoubleSupportWeightModifier.getValue();
 
+      yoScaledCoPFeedbackWeight.get(scaledCoPFeedbackWeight);
       solver.resetCoPFeedbackConditions();
-      solver.setFeedbackConditions(scaledCoPFeedbackWeight.getX(), scaledCoPFeedbackWeight.getY(), tempVector2d.getX(), tempVector2d.getY(), dynamicsObjectiveWeight);
-      solver.setMaxCMPDistanceFromEdge(maxAllowedDistanceCMPSupport.getDoubleValue());
-      solver.setCopSafeDistanceToEdge(safeCoPDistanceToEdge.getDoubleValue());
+      solver.setFeedbackConditions(scaledCoPFeedbackWeight, transformedGains, dynamicsObjectiveWeight);
+      solver.setMaxCMPDistanceFromEdge(maxAllowedDistanceCMPSupport.getValue());
+      solver.setCopSafeDistanceToEdge(safeCoPDistanceToEdge.getValue());
 
-      if (useFeedbackRate)
-         solver.setFeedbackRateWeight(copFeedbackRateWeight.getDoubleValue() / controlDT);
+      solver.setMaximumFeedbackMagnitude(transformedMagnitudeLimits);
+      solver.setMaximumFeedbackRate(feedbackGains.getFeedbackPartMaxRate(), controlDT);
+
+      if (useFeedbackRate.getValue())
+         solver.setFeedbackRateWeight(copCMPFeedbackRateWeight.getValue() / controlDTSquare, feedbackRateWeight.getValue() / controlDTSquare);
    }
 
    private void submitCMPFeedbackTaskConditionsToSolver()
@@ -582,7 +777,7 @@ public class ICPOptimizationController implements ICPOptimizationControllerInter
       double cmpFeedbackWeight = this.scaledCMPFeedbackWeight.getDoubleValue();
 
       solver.resetCMPFeedbackConditions();
-      solver.setCMPFeedbackConditions(cmpFeedbackWeight, useAngularMomentum.getBooleanValue());
+      solver.setCMPFeedbackConditions(cmpFeedbackWeight, useAngularMomentum.getValue());
    }
 
    private void submitFootstepTaskConditionsToSolver(double omega0, boolean includeFootsteps)
@@ -590,57 +785,63 @@ public class ICPOptimizationController implements ICPOptimizationControllerInter
       if (includeFootsteps)
       {
          ReferenceFrame soleFrame = contactableFeet.get(supportSide.getEnumValue()).getSoleFrame();
-         helper.transformToWorldFrame(footstepWeights, forwardFootstepWeight.getDoubleValue(), lateralFootstepWeight.getDoubleValue(), soleFrame);
+         helper.transformToWorldFrame(footstepWeights, forwardFootstepWeight.getValue(), lateralFootstepWeight.getValue(), soleFrame);
+         yoFootstepWeights.set(footstepWeights);
 
-         double recursionTime = timeRemainingInState.getDoubleValue() + transferDurationSplitFraction.getDoubleValue() * nextTransferDuration.getDoubleValue();
-         double recursionMultiplier = Math.exp(-omega0 * recursionTime);
-         this.footstepMultiplier.set(recursionMultiplier);
+         this.footstepMultiplier.set(computeFootstepAdjustmentMultiplier(omega0));
 
          predictedEndOfStateICP.sub(desiredICP, yoPerfectCMP);
          predictedEndOfStateICP.scaleAdd(Math.exp(omega0 * timeRemainingInState.getDoubleValue()), yoPerfectCMP);
 
-         if (useICPControlPolygons.getBooleanValue())
+         if (useICPControlPolygons.getValue() && hasICPControlPolygons)
             icpControlPlane.projectPointOntoControlPlane(worldFrame, upcomingFootstepLocation.getPosition(), projectedTempPoint3d);
          else
             projectedTempPoint3d.set(upcomingFootstepLocation.getPosition());
 
          footstepLocationSubmitted.set(projectedTempPoint3d);
-         solver.setFootstepAdjustmentConditions(recursionMultiplier, footstepWeights.getX(), footstepWeights.getY(), footstepAdjustmentSafetyFactor.getDoubleValue(), projectedTempPoint3d);
+         solver.setFootstepAdjustmentConditions(footstepMultiplier.getDoubleValue(), footstepWeights, footstepAdjustmentSafetyFactor.getValue(),
+                                                projectedTempPoint3d);
       }
 
-      if (useFootstepRate)
-         solver.setFootstepRateWeight(scaledFootstepRateWeight.getDoubleValue() / controlDT);
+      if (useFootstepRate.getValue())
+         solver.setFootstepRateWeight(scaledFootstepRateWeight.getDoubleValue() / controlDTSquare);
    }
 
-   private NoConvergenceException solveQP()
+   private double computeFootstepAdjustmentMultiplier(double omega0)
    {
-      NoConvergenceException noConvergenceException = null;
-      try
-      {
-         perfectCoP.set(yoPerfectCoP);
-         solver.compute(icpError, perfectCoP, perfectCMPOffset);
-      }
-      catch (NoConvergenceException e)
+      double timeInTransferForShifting = Math
+            .min(maximumTimeFromTransfer.getValue(), transferDurationSplitFraction.getValue() * nextTransferDuration.getDoubleValue());
+      recursionTime.set(Math.max(timeRemainingInState.getDoubleValue(), 0.0) + timeInTransferForShifting);
+      recursionMultiplier.set(Math.exp(-omega0 * recursionTime.getDoubleValue()));
+
+      double finalRecursionMultiplier = Math.exp(-omega0 * timeInTransferForShifting);
+
+      double minimumFootstepMultiplier = Math.min(this.minimumFootstepMultiplier.getValue(), finalRecursionMultiplier);
+      return minimumFootstepMultiplier + (1 - minimumFootstepMultiplier / finalRecursionMultiplier) * recursionMultiplier.getDoubleValue();
+   }
+
+   private boolean solveQP()
+   {
+      perfectCoP.set(yoPerfectCoP);
+      boolean converged = solver.compute(icpError, perfectCoP, perfectCMPOffset);
+      if (!converged)
       {
          if (!hasNotConvergedInPast.getBooleanValue())
          {
-            e.printStackTrace();
-            PrintTools.warn(this, "Only showing the stack trace of the first " + e.getClass().getSimpleName() + ". This may be happening more than once.");
+            PrintTools.warn(this, "The QP has not converged. Only showing this once if it happens repeatedly.");
          }
 
          hasNotConvergedInPast.set(true);
          hasNotConvergedCounts.increment();
-
-         noConvergenceException = e;
       }
 
-      return noConvergenceException;
+      return converged;
    }
 
-   private void extractSolutionsFromSolver(NoConvergenceException noConvergenceException, boolean includeFootsteps)
+   private void extractSolutionsFromSolver(boolean converged, boolean includeFootsteps)
    {
-      // don't pole the new solutions if there's a no convergence exception
-      if (noConvergenceException == null)
+      // Don't pole the new solutions if the solver has not converged.
+      if (converged)
       {
          numberOfIterations.set(solver.getNumberOfIterations());
 
@@ -661,22 +862,38 @@ public class ICPOptimizationController implements ICPOptimizationControllerInter
          }
 
          if (isInDoubleSupport.getBooleanValue())
-            solutionHandler.zeroAdjustment();
+            solutionHandler.resetAdjustment();
 
          solutionHandler.updateVisualizers(desiredICP, footstepMultiplier.getDoubleValue());
 
          solver.getCoPFeedbackDifference(feedbackCoPDelta);
          solver.getCMPFeedbackDifference(feedbackCMPDelta);
+         solver.getDynamicsError(dynamicsError);
 
          if (COMPUTE_COST_TO_GO)
             solutionHandler.updateCostsToGo(solver);
       }
+      else
+      {
+         numberOfIterations.set(solver.getNumberOfIterations());
+
+         if (localUseStepAdjustment && includeFootsteps)
+            solutionHandler.zeroAdjustment();
+      }
+
+      isICPStuck.update(computeIsStuck());
+      computeICPIntegralTerm();
 
       feedbackCoP.add(yoPerfectCoP, feedbackCoPDelta);
-      feedbackCMP.add(feedbackCoP, feedbackCMPDelta);
+      feedbackCMP.add(feedbackCoP, perfectCMPOffset);
+      feedbackCMP.add(feedbackCMPDelta);
+      feedbackCMP.add(feedbackCMPIntegral);
 
-      if (limitReachabilityFromAdjustment.getBooleanValue() && localUseStepAdjustment && includeFootsteps)
+      if (limitReachabilityFromAdjustment.getValue() && localUseStepAdjustment && includeFootsteps)
          updateReachabilityRegionFromAdjustment();
+
+      if (wasFootstepAdjusted() && CONTINUOUSLY_UPDATE_DESIRED_POSITION)
+         upcomingFootstepLocation.set(footstepSolution);
    }
 
    private void updateReachabilityRegionFromAdjustment()
@@ -691,7 +908,7 @@ public class ICPOptimizationController implements ICPOptimizationControllerInter
 
    private void computeTimeRemainingInState()
    {
-      if (isStanding.getBooleanValue())
+      if (isStationary.getBooleanValue())
       {
          timeRemainingInState.set(0.0);
       }
@@ -706,33 +923,39 @@ public class ICPOptimizationController implements ICPOptimizationControllerInter
 
    private void scaleStepRateWeightWithTime()
    {
-      if (scaleStepRateWeightWithTime.getBooleanValue())
+      if (scaleStepRateWeightWithTime.getValue())
       {
-         double alpha = Math.max(timeRemainingInState.getDoubleValue(), minimumTimeRemaining.getDoubleValue()) / swingDuration.getDoubleValue();
-         scaledFootstepRateWeight.set(footstepRateWeight.getDoubleValue() / alpha);
+         double alpha = Math.max(timeRemainingInState.getDoubleValue(), minimumTimeRemaining.getValue()) / swingDuration.getDoubleValue();
+         scaledFootstepRateWeight.set(footstepRateWeight.getValue() / alpha);
       }
       else
       {
-         scaledFootstepRateWeight.set(footstepRateWeight.getDoubleValue());
+         scaledFootstepRateWeight.set(footstepRateWeight.getValue());
       }
    }
 
    private void scaleFeedbackWeightWithGain()
    {
-      helper.transformFromDynamicsFrame(scaledCoPFeedbackWeight, desiredICPVelocity, copFeedbackForwardWeight.getDoubleValue(), copFeedbackLateralWeight.getDoubleValue());
+      helper.transformFromDynamicsFrame(scaledCoPFeedbackWeight, desiredICPVelocity, copFeedbackForwardWeight.getValue(), copFeedbackLateralWeight.getValue());
+      yoScaledCoPFeedbackWeight.set(scaledCoPFeedbackWeight);
 
-      if (scaleFeedbackWeightWithGain.getBooleanValue())
+      if (scaleFeedbackWeightWithGain.getValue())
       {
-         helper.transformFromDynamicsFrame(tempVector2d, desiredICPVelocity, feedbackParallelGain.getDoubleValue(), feedbackOrthogonalGain.getDoubleValue());
-         scaledCoPFeedbackWeight.scale(1.0 / tempVector2d.length());
+         double parallel = feedbackGains.getKpParallelToMotion();
+         double orthogonal = feedbackGains.getKpOrthogonalToMotion();
+         double magnitude = helper.transformGainsFromDynamicsFrame(transformedGains, desiredICPVelocity, parallel, orthogonal);
+         CommonOps.scale(1.0 / magnitude, scaledCoPFeedbackWeight);
       }
+
+      yoScaledCoPFeedbackWeight.set(scaledCoPFeedbackWeight);
+
    }
 
    private void modifyCMPFeedbackWeightUsingIntegral()
    {
-      double cmpFeedbackWeight = this.cmpFeedbackWeight.getDoubleValue();
+      double cmpFeedbackWeight = this.cmpFeedbackWeight.getValue();
 
-      if (!useAngularMomentumIntegrator.getBooleanValue())
+      if (!useAngularMomentumIntegrator.getValue())
       {
          scaledCMPFeedbackWeight.set(cmpFeedbackWeight);
          return;
@@ -740,15 +963,53 @@ public class ICPOptimizationController implements ICPOptimizationControllerInter
 
       double angularMomentumFeedbackMagnitude = feedbackCMPDelta.length() - perfectCMPOffset.length();
 
-      double cumulativeAngularMomentumAfterLeak = angularMomentumFeedbackMagnitude * controlDT +
-            angularMomentumIntegratorLeakRatio.getDoubleValue() * cumulativeAngularMomentum.getDoubleValue();
+      double cumulativeAngularMomentumAfterLeak =
+            angularMomentumFeedbackMagnitude * controlDT + angularMomentumIntegratorLeakRatio.getValue() * cumulativeAngularMomentum.getDoubleValue();
       cumulativeAngularMomentum.set(cumulativeAngularMomentumAfterLeak);
 
-      double multiplier = 1.0 + angularMomentumIntegratorGain.getDoubleValue() * cumulativeAngularMomentumAfterLeak;
+      double multiplier = 1.0 + angularMomentumIntegratorGain.getValue() * cumulativeAngularMomentumAfterLeak;
 
       scaledCMPFeedbackWeight.set(multiplier * cmpFeedbackWeight);
    }
 
+   private boolean computeIsStuck()
+   {
+      if (!isInDoubleSupport.getBooleanValue() || isStationary.getBooleanValue())
+         return false;
+
+      if (isICPStuck.getBooleanValue())
+         return true;
+
+      if ((currentICPVelocity.length() < thresholdForStuck.getValue()) && (timeRemainingInState.getDoubleValue() <= minimumTimeRemaining.getValue()))
+         return true;
+
+      return false;
+   }
+
+   private void computeICPIntegralTerm()
+   {
+      if (useSmartICPIntegrator.getValue() && isICPStuck.getBooleanValue())
+      {
+         tempVector2d.set(icpError);
+         tempVector2d.scale(controlDT * feedbackGains.getKi());
+
+         feedbackCMPIntegral.scale(Math.pow(feedbackGains.getIntegralLeakRatio(), controlDT));
+         feedbackCMPIntegral.add(tempVector2d);
+
+         double length = feedbackCMPIntegral.length();
+         double maxLength = feedbackGains.getMaxIntegralError();
+         if (length > maxLength)
+            feedbackCMPIntegral.scale(maxLength / length);
+         if (Math.abs(feedbackGains.getKi()) < 1e-10)
+            feedbackCMPIntegral.setToZero();
+      }
+      else
+      {
+         feedbackCMPIntegral.setToZero();
+      }
+   }
+
+   /** {@inheritDoc} */
    @Override
    public void submitCurrentPlanarRegions(RecyclingArrayList<PlanarRegion> planarRegions)
    {
@@ -756,6 +1017,7 @@ public class ICPOptimizationController implements ICPOptimizationControllerInter
          planarRegionConstraintProvider.setPlanarRegions(planarRegions);
    }
 
+   /** {@inheritDoc} */
    @Override
    public void setKeepCoPInsideSupportPolygon(boolean keepCoPInsideSupportPolygon)
    {

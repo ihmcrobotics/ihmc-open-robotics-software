@@ -1,7 +1,14 @@
 package us.ihmc.avatar.roughTerrainWalking;
 
+import static junit.framework.TestCase.assertTrue;
+
 import org.junit.After;
 import org.junit.Before;
+
+import controller_msgs.msg.dds.FootstepDataListMessage;
+import controller_msgs.msg.dds.PlanarRegionsListMessage;
+import controller_msgs.msg.dds.RequestPlanarRegionsListMessage;
+import org.junit.Test;
 import us.ihmc.avatar.MultiRobotTestInterface;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.testTools.DRCSimulationTestHelper;
@@ -9,20 +16,19 @@ import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParam
 import us.ihmc.commonWalkingControlModules.controlModules.foot.FootControlModule;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.walkingController.states.WalkingStateEnum;
 import us.ihmc.commons.thread.ThreadTools;
-import us.ihmc.communication.net.PacketConsumer;
 import us.ihmc.communication.packets.PlanarRegionMessageConverter;
-import us.ihmc.communication.packets.PlanarRegionsListMessage;
-import us.ihmc.communication.packets.RequestPlanarRegionsListMessage;
+import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
+import us.ihmc.continuousIntegration.IntegrationCategory;
 import us.ihmc.euclid.geometry.BoundingBox3D;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
-import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataListMessage;
-import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessage;
+import us.ihmc.graphicsDescription.appearance.YoAppearance;
+import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
-import us.ihmc.robotics.stateMachines.conditionBasedStateMachine.StateTransitionCondition;
+import us.ihmc.robotics.stateMachine.core.StateTransitionCondition;
 import us.ihmc.simulationConstructionSetTools.bambooTools.BambooTools;
 import us.ihmc.simulationConstructionSetTools.util.environments.planarRegionEnvironments.PlanarRegionEnvironmentInterface;
 import us.ihmc.simulationToolkit.controllers.PushRobotController;
@@ -30,8 +36,6 @@ import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
 import us.ihmc.simulationconstructionset.util.simulationTesting.SimulationTestingParameters;
 import us.ihmc.yoVariables.variable.YoEnum;
-
-import static junit.framework.TestCase.assertTrue;
 
 public abstract class AvatarPushRecoveryOverGapTest implements MultiRobotTestInterface
 {
@@ -68,16 +72,8 @@ public abstract class AvatarPushRecoveryOverGapTest implements MultiRobotTestInt
 
       PlanarRegionsList planarRegionsList = environment.getPlanarRegionsList();
       PlanarRegionsListMessage planarRegionsListMessage = PlanarRegionMessageConverter.convertToPlanarRegionsListMessage(planarRegionsList);
-      planarRegionsListMessage.setUniqueId(5L);
 
-      drcSimulationTestHelper.getControllerCommunicator().attachListener(RequestPlanarRegionsListMessage.class, new PacketConsumer<RequestPlanarRegionsListMessage>()
-      {
-         @Override
-         public void receivedPacket(RequestPlanarRegionsListMessage packet)
-         {
-            drcSimulationTestHelper.send(planarRegionsListMessage);
-         }
-      });
+      drcSimulationTestHelper.createSubscriberFromController(RequestPlanarRegionsListMessage.class, packet -> drcSimulationTestHelper.publishToController(planarRegionsListMessage));
 
       double z = getForcePointOffsetZInChestFrame();
       pushRobotController = new PushRobotController(drcSimulationTestHelper.getRobot(), robotModel.createFullRobotModel().getChest().getParentJoint().getName(),
@@ -90,9 +86,9 @@ public abstract class AvatarPushRecoveryOverGapTest implements MultiRobotTestInt
          String sidePrefix = robotSide.getCamelCaseNameForStartOfExpression();
          String footPrefix = sidePrefix + "Foot";
          @SuppressWarnings("unchecked")
-         final YoEnum<FootControlModule.ConstraintType> footConstraintType = (YoEnum<FootControlModule.ConstraintType>) scs.getVariable(sidePrefix + "FootControlModule", footPrefix + "State");
+         final YoEnum<FootControlModule.ConstraintType> footConstraintType = (YoEnum<FootControlModule.ConstraintType>) scs.getVariable(sidePrefix + "FootControlModule", footPrefix + "CurrentState");
          @SuppressWarnings("unchecked")
-         final YoEnum<WalkingStateEnum> walkingState = (YoEnum<WalkingStateEnum>) scs.getVariable("WalkingHighLevelHumanoidController", "walkingState");
+         final YoEnum<WalkingStateEnum> walkingState = (YoEnum<WalkingStateEnum>) scs.getVariable("WalkingHighLevelHumanoidController", "walkingCurrentState");
          singleSupportStartConditions.put(robotSide, new SingleSupportStartCondition(footConstraintType));
          doubleSupportStartConditions.put(robotSide, new DoubleSupportStartCondition(walkingState, robotSide));
       }
@@ -107,14 +103,19 @@ public abstract class AvatarPushRecoveryOverGapTest implements MultiRobotTestInt
       swingTime = walkingControllerParameters.getDefaultSwingTime();
       transferTime = walkingControllerParameters.getDefaultTransferTime();
 
+      ThreadTools.sleep(1000);
+      assertTrue(drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(0.5));
+
       FootstepDataListMessage footsteps = createFootstepDataListMessage(swingTime, transferTime);
-      drcSimulationTestHelper.send(footsteps);
-      drcSimulationTestHelper.send(planarRegionsListMessage);
+      drcSimulationTestHelper.publishToController(footsteps);
+      drcSimulationTestHelper.publishToController(planarRegionsListMessage);
 
       drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(1.0);
    }
 
 
+   @ContinuousIntegrationTest(estimatedDuration = 33.4)
+   @Test(timeout = 170000)
    public void testNoPush() throws SimulationExceededMaximumTimeException
    {
       setupTest();
@@ -128,6 +129,8 @@ public abstract class AvatarPushRecoveryOverGapTest implements MultiRobotTestInt
       drcSimulationTestHelper.assertRobotsRootJointIsInBoundingBox(boundingBox);
    }
 
+   @ContinuousIntegrationTest(estimatedDuration = 34.9)
+   @Test(timeout = 170000)
    public void testForwardPush() throws SimulationExceededMaximumTimeException
    {
       setupTest();
@@ -150,6 +153,8 @@ public abstract class AvatarPushRecoveryOverGapTest implements MultiRobotTestInt
       drcSimulationTestHelper.assertRobotsRootJointIsInBoundingBox(boundingBox);
    }
 
+   @ContinuousIntegrationTest(estimatedDuration = 30.0)
+   @Test(timeout = 70000)
    public void testSidePush() throws SimulationExceededMaximumTimeException
    {
       setupTest();
@@ -174,18 +179,19 @@ public abstract class AvatarPushRecoveryOverGapTest implements MultiRobotTestInt
 
    private FootstepDataListMessage createFootstepDataListMessage(double swingTime, double transferTime)
    {
-      FootstepDataListMessage message = new FootstepDataListMessage(swingTime, transferTime);
+      FootstepDataListMessage message = HumanoidMessageTools.createFootstepDataListMessage(swingTime, transferTime);
+      message.setAreFootstepsAdjustable(true);
       Point3D location = new Point3D(0.3, 0.15, 0.0);
       Quaternion orientation = new Quaternion(0.0, 0.0, 0.0, 1.0);
-      message.add(new FootstepDataMessage(RobotSide.LEFT, location, orientation));
+      message.getFootstepDataList().add().set(HumanoidMessageTools.createFootstepDataMessage(RobotSide.LEFT, location, orientation));
 
       location = new Point3D(0.75, -0.15, 0.0);
-      message.add(new FootstepDataMessage(RobotSide.RIGHT, location, orientation));
+      message.getFootstepDataList().add().set(HumanoidMessageTools.createFootstepDataMessage(RobotSide.RIGHT, location, orientation));
 
       location = new Point3D(1.05, 0.15, 0.0);
-      message.add(new FootstepDataMessage(RobotSide.LEFT, location, orientation));
+      message.getFootstepDataList().add().set(HumanoidMessageTools.createFootstepDataMessage(RobotSide.LEFT, location, orientation));
       location = new Point3D(1.05, -0.15, 0.0);
-      message.add(new FootstepDataMessage(RobotSide.RIGHT, location, orientation));
+      message.getFootstepDataList().add().set(HumanoidMessageTools.createFootstepDataMessage(RobotSide.RIGHT, location, orientation));
 
       return message;
    }
@@ -238,8 +244,8 @@ public abstract class AvatarPushRecoveryOverGapTest implements MultiRobotTestInt
          double distanceToCenter = 0.5 * sideLength - 0.5 * platform1Length;
          generator.translate(-platform2Center + distanceToCenter, 0.5 * platformWidth  + sideGapSize + 0.5 * sideWidth, 0.0);
          generator.addCubeReferencedAtBottomMiddle(sideLength, sideWidth, 0.01); // ground
+         addPlanarRegionsToTerrain(YoAppearance.Grey());
       }
-
    }
 
    private class SingleSupportStartCondition implements StateTransitionCondition
@@ -252,7 +258,7 @@ public abstract class AvatarPushRecoveryOverGapTest implements MultiRobotTestInt
       }
 
       @Override
-      public boolean checkCondition()
+      public boolean testCondition(double time)
       {
          return footConstraintType.getEnumValue() == FootControlModule.ConstraintType.SWING;
       }
@@ -271,7 +277,7 @@ public abstract class AvatarPushRecoveryOverGapTest implements MultiRobotTestInt
       }
 
       @Override
-      public boolean checkCondition()
+      public boolean testCondition(double time)
       {
          if (side == RobotSide.LEFT)
          {

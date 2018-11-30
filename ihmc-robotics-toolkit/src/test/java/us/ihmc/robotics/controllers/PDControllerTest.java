@@ -14,7 +14,7 @@ import us.ihmc.yoVariables.registry.YoVariableRegistry;
 @ContinuousIntegrationPlan(categories = {IntegrationCategory.FAST})
 public class PDControllerTest
 {
-   @ContinuousIntegrationTest(estimatedDuration = 0.1)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testComputerForAngles()
    {

@@ -2,6 +2,7 @@ package us.ihmc.footstepPlanning.simplePlanners;
 
 import java.util.ArrayList;
 
+import us.ihmc.commons.PrintTools;
 import us.ihmc.euclid.referenceFrame.FramePoint2D;
 import us.ihmc.euclid.referenceFrame.FramePose2D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
@@ -18,6 +19,8 @@ import us.ihmc.robotics.robotSide.RobotSide;
 
 public class TurnWalkTurnPlanner implements FootstepPlanner
 {
+   private static final boolean debug = false;
+   private static final RobotSide defaultStartNodeSide = RobotSide.LEFT;
 
    private static final String STRAIGHT_PATH_NAME = "Forward Path";
    private static final double STRAIGHT_STEP_LENGTH = 0.45; // For Steppr: 0.30;
@@ -49,6 +52,14 @@ public class TurnWalkTurnPlanner implements FootstepPlanner
    @Override
    public void setInitialStanceFoot(FramePose3D stanceFootPose, RobotSide side)
    {
+      if (side == null)
+      {
+         if (debug)
+            PrintTools.info("Start node needs a side, but trying to set it to null. Setting it to " + defaultStartNodeSide);
+
+         side = defaultStartNodeSide;
+      }
+
       this.initialStanceFootPose.set(FlatGroundPlanningUtils.pose2dFormPose(stanceFootPose));
       this.initialStanceFootPose.changeFrame(ReferenceFrame.getWorldFrame());
       this.initialStanceSide = side;
@@ -267,4 +278,15 @@ public class TurnWalkTurnPlanner implements FootstepPlanner
    {
 
    }
+
+   @Override
+   public double getPlanningDuration()
+   {
+      return -1;
+   }
+
+   @Override
+   public void setPlanningHorizonLength(double planningHorizonLength)
+   {}
+
 }

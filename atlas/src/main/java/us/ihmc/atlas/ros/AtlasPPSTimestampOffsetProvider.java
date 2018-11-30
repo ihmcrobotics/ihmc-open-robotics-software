@@ -2,11 +2,11 @@ package us.ihmc.atlas.ros;
 
 import java.util.concurrent.atomic.AtomicLong;
 
+import controller_msgs.msg.dds.RobotConfigurationData;
 import multisense_ros.StampedPps;
 import us.ihmc.atlas.parameters.AtlasSensorInformation;
 import us.ihmc.avatar.ros.DRCROSPPSTimestampOffsetProvider;
 import us.ihmc.commons.Conversions;
-import us.ihmc.sensorProcessing.communication.packets.dataobjects.RobotConfigurationData;
 import us.ihmc.utilities.ros.RosMainNode;
 import us.ihmc.utilities.ros.subscriber.RosTimestampSubscriber;
 
@@ -99,7 +99,7 @@ public class AtlasPPSTimestampOffsetProvider implements DRCROSPPSTimestampOffset
       {
          if (rosMainNode != null)// && rosMainNode.isStarted()
          {
-            long lastPPSTimestampFromRobot = packet.getSensorHeadPPSTimestamp();
+            long lastPPSTimestampFromRobot = packet.getSensorHeadPpsTimestamp();
 
             long ppsFromRobotAge = packet.getTimestamp() - lastPPSTimestampFromRobot;
             long ppsFromROSAge = rosMainNode.getCurrentTime().totalNsecs() - multisensePPSTimestamp;

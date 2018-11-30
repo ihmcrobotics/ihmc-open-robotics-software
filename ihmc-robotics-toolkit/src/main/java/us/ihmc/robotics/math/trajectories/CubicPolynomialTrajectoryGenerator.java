@@ -3,7 +3,7 @@ package us.ihmc.robotics.math.trajectories;
 import org.apache.commons.math3.util.Precision;
 
 import us.ihmc.robotics.trajectories.providers.ConstantDoubleProvider;
-import us.ihmc.robotics.trajectories.providers.DoubleProvider;
+import us.ihmc.yoVariables.providers.DoubleProvider;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 
 public class CubicPolynomialTrajectoryGenerator extends PolynomialTrajectoryGenerator

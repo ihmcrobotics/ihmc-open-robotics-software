@@ -8,11 +8,12 @@ import us.ihmc.commonWalkingControlModules.controllerCore.WholeBodyControllerCor
 import us.ihmc.commonWalkingControlModules.controllerCore.command.ControllerCoreCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.ControllerCoreCommandType;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.SpatialFeedbackControlCommand;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.virtualModelControl.VirtualModelControlCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.parameters.JointAccelerationIntegrationParameters;
 import us.ihmc.commonWalkingControlModules.controllerCore.parameters.JointAccelerationIntegrationParametersReadOnly;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.JointAccelerationIntegrationCalculator;
-import us.ihmc.robotics.lists.RecyclingArrayList;
-import us.ihmc.robotics.screwTheory.OneDoFJoint;
+import us.ihmc.commons.lists.RecyclingArrayList;
+import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 
 /**
  * {@link SpatialFeedbackControlCommand} is a command meant to be submitted to the
@@ -26,15 +27,16 @@ import us.ihmc.robotics.screwTheory.OneDoFJoint;
  * double step integration off of the desired joint acceleration to first compute the desired joint
  * velocity and finally the desired joint position.
  * </p>
- * 
+ *
  * @author Sylvain Bertrand
  *
  */
-public class JointAccelerationIntegrationCommand implements InverseDynamicsCommand<JointAccelerationIntegrationCommand>
+public class JointAccelerationIntegrationCommand
+      implements InverseDynamicsCommand<JointAccelerationIntegrationCommand>, VirtualModelControlCommand<JointAccelerationIntegrationCommand>
 {
    private final int initialCapacity = 15;
    private final List<String> jointNamesToComputeDesiredPositionFor = new ArrayList<>(initialCapacity);
-   private final List<OneDoFJoint> jointsToComputeDesiredPositionFor = new ArrayList<>(initialCapacity);
+   private final List<OneDoFJointBasics> jointsToComputeDesiredPositionFor = new ArrayList<>(initialCapacity);
    private final RecyclingArrayList<JointAccelerationIntegrationParameters> jointParameters = new RecyclingArrayList<>(initialCapacity,
                                                                                                                        JointAccelerationIntegrationParameters.class);
 
@@ -68,11 +70,11 @@ public class JointAccelerationIntegrationCommand implements InverseDynamicsComma
     * {@link #setJointAlphas(int, double, double)} and {@link #setJointMaxima(int, double, double)}.
     * If not provided, the calculator will use a default set.
     * </p>
-    * 
+    *
     * @param joint the joint for which the desired acceleration is to be integrated to desired
     *           velocity and desired acceleration.
     */
-   public void addJointToComputeDesiredPositionFor(OneDoFJoint joint)
+   public void addJointToComputeDesiredPositionFor(OneDoFJointBasics joint)
    {
       jointNamesToComputeDesiredPositionFor.add(joint.getName());
       jointsToComputeDesiredPositionFor.add(joint);
@@ -82,7 +84,7 @@ public class JointAccelerationIntegrationCommand implements InverseDynamicsComma
    /**
     * Sets the acceleration integration parameters for the {@code jointIndex}<sup>th</sup> of this
     * command to {@code jointParameters}.
-    * 
+    *
     * @param jointIndex the index of the joint to provide parameters for.
     * @param jointParameters the set of parameters to use for the joint. Not modified.
     */
@@ -95,40 +97,18 @@ public class JointAccelerationIntegrationCommand implements InverseDynamicsComma
     * Provides to the {@link JointAccelerationIntegrationCalculator} specific parameter values for
     * the {@code jointIndex}<sup>th</sup> of this command.
     * <p>
-    * The two alpha parameters are used as leak ratios for each integration: <br>
-    * Desired velocity:<br>
-    * qDot<sub>des</sub><sup>t</sup> = &alpha;<sub>V</sub> qDot<sub>des</sub><sup>t - &Delta;t</sup>
-    * + &Delta;t qDDot<sub>des</sub><sup>t</sup> <br>
-    * Desired position:<br>
-    * q<sub>des</sub><sup>t</sup> = (1 - &alpha;<sub>P</sub>) q<sub>cur</sub><sup>t</sup> +
-    * &alpha;<sub>P</sub> (q<sub>des</sub><sup>t - &Delta;t</sup> + &Delta;t
-    * qDot<sub>des</sub><sup>t</sup>)
+    * For the usage of these parameters see<br>
+    * {@link JointAccelerationIntegrationParametersReadOnly#getPositionBreakFrequency()}<br>
+    * {@link JointAccelerationIntegrationParametersReadOnly#getVelocityBreakFrequency()}
     * </p>
-    * <p>
-    * Both leak ratios have to be &in; [0, 1].
-    * </p>
-    * <p>
-    * Decreasing the leak ratio &alpha;<sub>V</sub> used to compute the desired velocity appears to
-    * be equivalent to inserting damping to the joint. A low value will cause a loss of precision on
-    * the resulting q<sub>des</sub> such it does impair the tracking that high-level controller is
-    * performing. If not specified otherwise, &alpha;<sub>V</sub> =
-    * {@link JointAccelerationIntegrationCalculator#DEFAULT_ALPHA_VELOCITY}.
-    * </p>
-    * <p>
-    * A high value for the leak ratio &alpha;<sub>P</sup> used to compute the desired position will
-    * cause the joint to never settle by having stick-slip behavior around the "true" desired
-    * position the high-level controller is trying to achieve. It can simply be downtuned until this
-    * undesirable effect disappear. If not specified otherwise, &alpha;<sub>P</sup> =
-    * {@link JointAccelerationIntegrationCalculator#DEFAUTL_ALPHA_POSITION}.
-    * </p>
-    * 
+    *
     * @param jointIndex the index of the joint to provide parameters for.
-    * @param alphaPosition the leak ratio &alpha;<sub>P</sup> used to compute the desired position.
-    * @param alphaVelocity the leak ratio &alpha;<sub>V</sup> used to compute the desired velocity.
+    * @param positionBreakFrequency the break frequency used to compute the desired position.
+    * @param velocityBreakFrequency the break frequency used to compute the desired velocity.
     */
-   public void setJointAlphas(int jointIndex, double alphaPosition, double alphaVelocity)
+   public void setBreakFrequencies(int jointIndex, double positionBreakFrequency, double velocityBreakFrequency)
    {
-      jointParameters.get(jointIndex).setAlphas(alphaPosition, alphaVelocity);
+      jointParameters.get(jointIndex).setBreakFrequencies(positionBreakFrequency, velocityBreakFrequency);
    }
 
    /**
@@ -153,7 +133,7 @@ public class JointAccelerationIntegrationCommand implements InverseDynamicsComma
     * {@code maxPositionError} =
     * {@link JointAccelerationIntegrationCalculator#DEFAULT_MAX_POSITION_ERROR}.
     * </p>
-    * 
+    *
     * @param jointIndex the index of the joint to provide parameters for.
     * @param maxPositionError limits the gap between the desired joint position and the actual joint
     *           position.
@@ -178,7 +158,7 @@ public class JointAccelerationIntegrationCommand implements InverseDynamicsComma
       }
    }
 
-   public void retrieveJointsFromName(Map<String, ? extends OneDoFJoint> nameToJointMap)
+   public void retrieveJointsFromName(Map<String, ? extends OneDoFJointBasics> nameToJointMap)
    {
       for (int i = 0; i < getNumberOfJointsToComputeDesiredPositionFor(); i++)
       {
@@ -186,7 +166,7 @@ public class JointAccelerationIntegrationCommand implements InverseDynamicsComma
       }
    }
 
-   public OneDoFJoint getJointToComputeDesiredPositionFor(int jointIndex)
+   public OneDoFJointBasics getJointToComputeDesiredPositionFor(int jointIndex)
    {
       return jointsToComputeDesiredPositionFor.get(jointIndex);
    }

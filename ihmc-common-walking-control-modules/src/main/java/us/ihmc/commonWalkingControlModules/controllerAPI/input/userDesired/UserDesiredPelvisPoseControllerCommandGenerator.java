@@ -15,8 +15,8 @@ import us.ihmc.yoVariables.listener.VariableChangedListener;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
+import us.ihmc.yoVariables.variable.YoFramePoseUsingYawPitchRoll;
 import us.ihmc.yoVariables.variable.YoVariable;
-import us.ihmc.robotics.math.frames.YoFramePose;
 import us.ihmc.sensorProcessing.frames.CommonHumanoidReferenceFrames;
 
 public class UserDesiredPelvisPoseControllerCommandGenerator
@@ -31,7 +31,7 @@ public class UserDesiredPelvisPoseControllerCommandGenerator
    private final YoBoolean userStreamPelvisOrientation = new YoBoolean("userStreamPelvisOrientation", registry);
    private final YoBoolean userUpdateDesiredPelvisPose = new YoBoolean("userUpdateDesiredPelvisPose", registry);
    private final YoDouble userDesiredPelvisPoseTrajectoryTime = new YoDouble("userDesiredPelvisPoseTrajectoryTime", registry);
-   private final YoFramePose userDesiredPelvisPose;
+   private final YoFramePoseUsingYawPitchRoll userDesiredPelvisPose;
 
    private final ReferenceFrame midFeetZUpFrame, pelvisFrame;
 
@@ -45,7 +45,7 @@ public class UserDesiredPelvisPoseControllerCommandGenerator
       this.controllerCommandInputManager = controllerCommandInputManager;
       midFeetZUpFrame = commonHumanoidReferenceFrames.getMidFeetZUpFrame();
       pelvisFrame = commonHumanoidReferenceFrames.getPelvisFrame();
-      userDesiredPelvisPose = new YoFramePose("userDesiredPelvisPose", midFeetZUpFrame, registry);
+      userDesiredPelvisPose = new YoFramePoseUsingYawPitchRoll("userDesiredPelvisPose", midFeetZUpFrame, registry);
 
       userUpdateDesiredPelvisPose.addVariableChangedListener(new VariableChangedListener()
       {
@@ -140,11 +140,11 @@ public class UserDesiredPelvisPoseControllerCommandGenerator
 
       double time = userDesiredPelvisPoseTrajectoryTime.getDoubleValue();
       framePose.get(position, orientation);
-      poseCommand.clear(worldFrame);
-      poseCommand.setTrajectoryFrame(worldFrame);
-      poseCommand.addTrajectoryPoint(time, position, orientation, zeroVelocity, zeroVelocity);
-      poseCommand.setExecutionMode(ExecutionMode.OVERRIDE);
-      poseCommand.setCommandId(Packet.VALID_MESSAGE_DEFAULT_ID);
+      poseCommand.getSE3Trajectory().clear(worldFrame);
+      poseCommand.getSE3Trajectory().setTrajectoryFrame(worldFrame);
+      poseCommand.getSE3Trajectory().addTrajectoryPoint(time, position, orientation, zeroVelocity, zeroVelocity);
+      poseCommand.getSE3Trajectory().setExecutionMode(ExecutionMode.OVERRIDE);
+      poseCommand.getSE3Trajectory().setCommandId(Packet.VALID_MESSAGE_DEFAULT_ID);
       if (DEBUG)
          System.out.println("Submitting " + poseCommand);
       controllerCommandInputManager.submitCommand(poseCommand);
@@ -157,11 +157,11 @@ public class UserDesiredPelvisPoseControllerCommandGenerator
 
       double time = userDesiredPelvisPoseTrajectoryTime.getDoubleValue();
       orientation.set(framePose.getOrientation());
-      orientationCommand.clear(worldFrame);
-      orientationCommand.setTrajectoryFrame(worldFrame);
-      orientationCommand.addTrajectoryPoint(time, orientation, zeroVelocity);
-      orientationCommand.setExecutionMode(ExecutionMode.OVERRIDE);
-      orientationCommand.setCommandId(Packet.VALID_MESSAGE_DEFAULT_ID);
+      orientationCommand.getSO3Trajectory().clear(worldFrame);
+      orientationCommand.getSO3Trajectory().setTrajectoryFrame(worldFrame);
+      orientationCommand.getSO3Trajectory().addTrajectoryPoint(time, orientation, zeroVelocity);
+      orientationCommand.getSO3Trajectory().setExecutionMode(ExecutionMode.OVERRIDE);
+      orientationCommand.getSO3Trajectory().setCommandId(Packet.VALID_MESSAGE_DEFAULT_ID);
       if (DEBUG)
          System.out.println("Submitting " + orientationCommand);
       controllerCommandInputManager.submitCommand(orientationCommand);

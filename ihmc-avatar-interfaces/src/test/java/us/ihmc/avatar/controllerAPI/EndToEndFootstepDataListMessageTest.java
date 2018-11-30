@@ -1,6 +1,7 @@
 package us.ihmc.avatar.controllerAPI;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -9,6 +10,9 @@ import java.util.Random;
 import org.junit.After;
 import org.junit.Before;
 
+import controller_msgs.msg.dds.FootstepDataListMessage;
+import controller_msgs.msg.dds.FootstepDataMessage;
+import org.junit.Test;
 import us.ihmc.avatar.DRCObstacleCourseStartingLocation;
 import us.ihmc.avatar.DRCStartingLocation;
 import us.ihmc.avatar.MultiRobotTestInterface;
@@ -16,24 +20,25 @@ import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.initialSetup.OffsetAndYawRobotInitialSetup;
 import us.ihmc.avatar.testTools.DRCSimulationTestHelper;
 import us.ihmc.commonWalkingControlModules.messageHandlers.WalkingMessageHandler;
+import us.ihmc.commons.thread.ThreadTools;
+import us.ihmc.communication.packets.ExecutionMode;
+import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
-import us.ihmc.communication.packets.ExecutionMode;
-import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataListMessage;
-import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessage;
+import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
+import us.ihmc.mecano.frames.MovingReferenceFrame;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.robotSide.RobotSide;
-import us.ihmc.robotics.screwTheory.MovingReferenceFrame;
 import us.ihmc.simulationConstructionSetTools.util.environments.CommonAvatarEnvironmentInterface;
 import us.ihmc.simulationConstructionSetTools.util.environments.FlatGroundEnvironment;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
 import us.ihmc.simulationconstructionset.util.simulationTesting.SimulationTestingParameters;
 import us.ihmc.tools.MemoryTools;
-import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.yoVariables.variable.YoVariable;
 
 public abstract class EndToEndFootstepDataListMessageTest implements MultiRobotTestInterface
@@ -44,6 +49,8 @@ public abstract class EndToEndFootstepDataListMessageTest implements MultiRobotT
 
    private DRCSimulationTestHelper drcSimulationTestHelper;
 
+   @ContinuousIntegrationAnnotations.ContinuousIntegrationTest(estimatedDuration = 64.9)
+   @Test(timeout = 320000)
    public void testQueuing() throws SimulationExceededMaximumTimeException
    {
       DRCRobotModel robotModel = getRobotModel();
@@ -83,12 +90,13 @@ public abstract class EndToEndFootstepDataListMessageTest implements MultiRobotT
          frameLocation.changeFrame(ReferenceFrame.getWorldFrame());
          FrameQuaternion frameOrientation = new FrameQuaternion(midFeetFrame);
          frameOrientation.changeFrame(ReferenceFrame.getWorldFrame());
-         FootstepDataMessage footstep = new FootstepDataMessage(stepSide, frameLocation, frameOrientation);
+         FootstepDataMessage footstep = HumanoidMessageTools.createFootstepDataMessage(stepSide, frameLocation, frameOrientation);
 
          // between 0.75 and 1.25 times the nominal time:
          double swingTime = (1.0 + 0.5 * (random.nextDouble() + 0.5)) * nominalSwingTime;
          double transferTime = (1.0 + 0.5 * (random.nextDouble() + 0.5)) * nominalTransferTime;
-         footstep.setTimings(swingTime, transferTime);
+         footstep.setSwingDuration(swingTime);
+         footstep.setTransferDuration(transferTime);
 
          footstepList.add(footstep);
          totalTime += swingTime + transferTime;
@@ -107,13 +115,16 @@ public abstract class EndToEndFootstepDataListMessageTest implements MultiRobotT
                break;
             }
 
-            message.add(footstepList.get(stepsPackedInMessage));
+            message.getFootstepDataList().add().set(footstepList.get(stepsPackedInMessage));
             stepsPackedInMessage++;
          }
-         message.setExecutionMode(ExecutionMode.QUEUE);
+         message.getQueueingProperties().setExecutionMode(ExecutionMode.QUEUE.toByte());
+         message.getQueueingProperties().setPreviousMessageId(FootstepDataListMessage.VALID_MESSAGE_DEFAULT_ID);
          messages.add(message);
       }
-      messages.get(0).setExecutionMode(ExecutionMode.OVERRIDE);
+      FootstepDataListMessage r = messages.get(0);
+      r.getQueueingProperties().setExecutionMode(ExecutionMode.OVERRIDE.toByte());
+      r.getQueueingProperties().setPreviousMessageId(FootstepDataListMessage.VALID_MESSAGE_DEFAULT_ID);
 
       YoVariable<?> numberOfStepsInController = drcSimulationTestHelper.getSimulationConstructionSet().getVariable(WalkingMessageHandler.class.getSimpleName(), "currentNumberOfFootsteps");
       int expectedNumberOfSteps = 0;
@@ -122,8 +133,8 @@ public abstract class EndToEndFootstepDataListMessageTest implements MultiRobotT
       double timeUntilDone = totalTime;
       for (int messageIdx = 0; messageIdx < messages.size(); messageIdx++)
       {
-         drcSimulationTestHelper.send(messages.get(messageIdx));
-         expectedNumberOfSteps += messages.get(messageIdx).getDataList().size();
+         drcSimulationTestHelper.publishToController(messages.get(messageIdx));
+         expectedNumberOfSteps += messages.get(messageIdx).getFootstepDataList().size();
          assertTrue(drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(timeBetweenSendingMessages));
          assertEquals(expectedNumberOfSteps, (int) numberOfStepsInController.getValueAsLongBits());
          timeUntilDone -= timeBetweenSendingMessages;
@@ -131,6 +142,41 @@ public abstract class EndToEndFootstepDataListMessageTest implements MultiRobotT
 
       assertTrue(drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(timeUntilDone + 0.25));
       assertEquals(0, (int) numberOfStepsInController.getValueAsLongBits());
+   }
+
+   protected void testMessageIsHandled(FootstepDataListMessage messageInMidFeetZUp) throws SimulationExceededMaximumTimeException
+   {
+      DRCRobotModel robotModel = getRobotModel();
+      CommonAvatarEnvironmentInterface environment = new FlatGroundEnvironment();
+      DRCStartingLocation location = DRCObstacleCourseStartingLocation.DEFAULT_BUT_ALMOST_PI;
+      drcSimulationTestHelper = new DRCSimulationTestHelper(simulationTestingParameters, robotModel, environment);
+      drcSimulationTestHelper.setStartingLocation(location);
+      drcSimulationTestHelper.createSimulation("MessageTest");
+      ThreadTools.sleep(1000);
+      assertTrue(drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(0.25));
+
+      MovingReferenceFrame messageFrame = drcSimulationTestHelper.getReferenceFrames().getMidFeetZUpFrame();
+      transformMessageToWorld(messageFrame, messageInMidFeetZUp);
+
+      drcSimulationTestHelper.publishToController(messageInMidFeetZUp);
+      assertTrue(drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(0.25));
+
+      int steps = (int) drcSimulationTestHelper.getYoVariable("currentNumberOfFootsteps").getValueAsDouble();
+      assertEquals(messageInMidFeetZUp.getFootstepDataList().size(), steps);
+   }
+
+   private static void transformMessageToWorld(ReferenceFrame messageFrame, FootstepDataListMessage message)
+   {
+      int steps = message.getFootstepDataList().size();
+      FramePose3D stepPose = new FramePose3D();
+      for (int i = 0; i < steps; i++)
+      {
+         FootstepDataMessage footstep = message.getFootstepDataList().get(i);
+         stepPose.setIncludingFrame(messageFrame, footstep.getLocation(), footstep.getOrientation());
+         stepPose.changeFrame(ReferenceFrame.getWorldFrame());
+         footstep.getLocation().set(stepPose.getPosition());
+         footstep.getOrientation().set(stepPose.getOrientation());
+      }
    }
 
    private static void setupCamera(DRCSimulationTestHelper drcSimulationTestHelper)

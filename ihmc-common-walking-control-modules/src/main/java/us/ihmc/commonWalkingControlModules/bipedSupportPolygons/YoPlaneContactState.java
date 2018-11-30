@@ -5,26 +5,26 @@ import java.util.HashMap;
 import java.util.List;
 
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.PlaneContactStateCommand;
-import us.ihmc.euclid.geometry.ConvexPolygon2D;
+import us.ihmc.commons.lists.RecyclingArrayList;
+import us.ihmc.euclid.geometry.interfaces.ConvexPolygon2DReadOnly;
+import us.ihmc.euclid.referenceFrame.FrameConvexPolygon2D;
 import us.ihmc.euclid.referenceFrame.FramePoint2D;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple2D.Point2D;
-import us.ihmc.robotics.geometry.FrameConvexPolygon2d;
+import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.robotics.lists.FrameTuple2dArrayList;
-import us.ihmc.robotics.lists.RecyclingArrayList;
-import us.ihmc.robotics.math.frames.YoFramePoint2d;
-import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
+import us.ihmc.yoVariables.variable.YoFramePoint2D;
 
 public class YoPlaneContactState implements PlaneContactState, ModifiableContactState
 {
    private static final double THRESHOLD = 1e-7;
-   private final YoVariableRegistry registry;
-   private final RigidBody rigidBody;
+   protected final YoVariableRegistry registry;
+   private final RigidBodyBasics rigidBody;
    private final ReferenceFrame planeFrame;
    private final YoBoolean inContact;
    private final YoDouble coefficientOfFriction;
@@ -33,18 +33,18 @@ public class YoPlaneContactState implements PlaneContactState, ModifiableContact
    private final List<YoContactPoint> contactPoints;
    private final HashMap<YoContactPoint, YoDouble> rhoWeights = new HashMap<>();
    private final HashMap<YoContactPoint, YoDouble> maxContactPointNormalForces = new HashMap<>();
-   private final FrameConvexPolygon2d contactPointsPolygon = new FrameConvexPolygon2d();
-   private final YoFramePoint2d contactPointCentroid;
+   private final FrameConvexPolygon2D contactPointsPolygon = new FrameConvexPolygon2D();
+   private final YoFramePoint2D contactPointCentroid;
 
    private final YoBoolean hasContactStateChanged;
 
-   public YoPlaneContactState(String namePrefix, RigidBody rigidBody, ReferenceFrame planeFrame, List<FramePoint2D> contactFramePoints,
+   public YoPlaneContactState(String namePrefix, RigidBodyBasics rigidBody, ReferenceFrame planeFrame, List<FramePoint2D> contactFramePoints,
          double coefficientOfFriction, YoVariableRegistry parentRegistry)
    {
       this(namePrefix, rigidBody, planeFrame, contactFramePoints, coefficientOfFriction, Double.NaN, parentRegistry);
    }
 
-   public YoPlaneContactState(String namePrefix, RigidBody rigidBody, ReferenceFrame planeFrame, List<FramePoint2D> contactFramePoints,
+   public YoPlaneContactState(String namePrefix, RigidBodyBasics rigidBody, ReferenceFrame planeFrame, List<FramePoint2D> contactFramePoints,
          double coefficientOfFriction, double defaultRhoWeight, YoVariableRegistry parentRegistry)
    {
       this.registry = new YoVariableRegistry(namePrefix + getClass().getSimpleName());
@@ -78,7 +78,7 @@ public class YoPlaneContactState implements PlaneContactState, ModifiableContact
 
       totalNumberOfContactPoints = contactPoints.size();
 
-      contactPointCentroid = new YoFramePoint2d(namePrefix + "ContactPointCentroid", planeFrame, registry);
+      contactPointCentroid = new YoFramePoint2D(namePrefix + "ContactPointCentroid", planeFrame, registry);
       contactPointCentroid.setToNaN();
 
       hasContactStateChanged = new YoBoolean(namePrefix + "HasChanged", registry);
@@ -202,7 +202,10 @@ public class YoPlaneContactState implements PlaneContactState, ModifiableContact
          yoContactPoint.setPosition2d(contactPointLocation);
       }
 
-      contactPointsPolygon.setIncludingFrameAndUpdate(planeFrame, contactPointLocations);
+      contactPointsPolygon.clear(planeFrame);
+      for (int i = 0; i < contactPointLocations.size(); i++)
+         contactPointsPolygon.addVertex(contactPointLocations.get(i));
+      contactPointsPolygon.update();
       this.contactPointCentroid.set(contactPointsPolygon.getCentroid());
    }
 
@@ -221,7 +224,10 @@ public class YoPlaneContactState implements PlaneContactState, ModifiableContact
          yoContactPoint.setPosition(contactPointLocation);
       }
 
-      contactPointsPolygon.setIncludingFrameAndUpdate(contactPointLocations);
+      contactPointsPolygon.clear(contactPointLocations.get(0).getReferenceFrame());
+      for (int i = 0; i < contactPointLocations.size(); i++)
+         contactPointsPolygon.addVertex(contactPointLocations.get(i));
+      contactPointsPolygon.update();
       this.contactPointCentroid.set(contactPointsPolygon.getCentroid());
    }
 
@@ -412,7 +418,7 @@ public class YoPlaneContactState implements PlaneContactState, ModifiableContact
       for (int i = 0; i < getTotalNumberOfContactPoints(); i++)
       {
          contactPoints.get(i).getPosition(tempContactPointPosition);
-         contactPointsPolygon.addVertexByProjectionOntoXYPlane(tempContactPointPosition);
+         contactPointsPolygon.addVertexMatchingFrame(tempContactPointPosition);
       }
       contactPointsPolygon.update();
    }
@@ -422,9 +428,9 @@ public class YoPlaneContactState implements PlaneContactState, ModifiableContact
       return contactPointsPolygon.getArea();
    }
 
-   public ConvexPolygon2D getSupportPolygonInPlaneFrame()
+   public ConvexPolygon2DReadOnly getSupportPolygonInPlaneFrame()
    {
-      return contactPointsPolygon.getConvexPolygon2d();
+      return contactPointsPolygon;
    }
 
    @Override
@@ -520,7 +526,13 @@ public class YoPlaneContactState implements PlaneContactState, ModifiableContact
    }
 
    @Override
-   public RigidBody getRigidBody()
+   public boolean peekContactHasChangedNotification()
+   {
+      return hasContactStateChanged.getValue();
+   }
+
+   @Override
+   public RigidBodyBasics getRigidBody()
    {
       return rigidBody;
    }

@@ -26,14 +26,14 @@ import us.ihmc.graphicsDescription.yoGraphics.plotting.ArtifactList;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.humanoidRobotics.footstep.FootstepTiming;
-import us.ihmc.robotics.math.frames.YoFramePoint;
-import us.ihmc.robotics.math.frames.YoFramePoint2d;
 import us.ihmc.robotics.math.frames.YoFramePointInMultipleFrames;
-import us.ihmc.robotics.math.frames.YoFrameVector;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
+import us.ihmc.yoVariables.variable.YoFramePoint2D;
+import us.ihmc.yoVariables.variable.YoFramePoint3D;
+import us.ihmc.yoVariables.variable.YoFrameVector3D;
 
 /**
  * Implementation of the ICP (Instantaneous Capture Point) planners introduced by Johannes
@@ -96,13 +96,13 @@ import us.ihmc.yoVariables.variable.YoBoolean;
  * <ul>
  * <li>To get the ICP position, use either {@link #getDesiredCapturePointPosition(FramePoint3D)},
  * {@link #getDesiredCapturePointPosition(FramePoint2D)}, or
- * {@link #getDesiredCapturePointPosition(YoFramePoint)}.
+ * {@link #getDesiredCapturePointPosition(YoFramePoint3D)}.
  * <li>To get the ICP velocity, use either {@link #getDesiredCapturePointVelocity(FrameVector3D)},
  * {@link #getDesiredCapturePointVelocity(FrameVector2D)}, or
- * {@link #getDesiredCapturePointVelocity(YoFrameVector)}.
+ * {@link #getDesiredCapturePointVelocity(YoFrameVector3D)}.
  * <li>To get the CoM position, use either {@link #getDesiredCenterOfMassPosition(FramePoint3D)},
  * {@link #getDesiredCenterOfMassPosition(FramePoint3D)}, or
- * {@link #getDesiredCenterOfMassPosition(YoFramePoint)}.
+ * {@link #getDesiredCenterOfMassPosition(YoFramePoint3D)}.
  * <li>To get the CMP position, use either
  * {@link #getDesiredCentroidalMomentumPivotPosition(FramePoint3D)}, or
  * {@link #getDesiredCentroidalMomentumPivotPosition(FramePoint2D)}.
@@ -123,8 +123,8 @@ public class ContinuousCMPBasedICPPlanner extends AbstractICPPlanner
 
    private final YoBoolean useTwoConstantCMPsPerSupport = new YoBoolean(namePrefix + "UseTwoConstantCMPsPerSupport", registry);
 
-   private final YoFramePoint yoSingleSupportInitialCoM;
-   private final YoFramePoint yoSingleSupportFinalCoM;
+   private final YoFramePoint3D yoSingleSupportInitialCoM;
+   private final YoFramePoint3D yoSingleSupportFinalCoM;
    private final FramePoint3D singleSupportInitialCoM = new FramePoint3D();
    private final FramePoint3D singleSupportFinalCoM = new FramePoint3D();
 
@@ -164,8 +164,8 @@ public class ContinuousCMPBasedICPPlanner extends AbstractICPPlanner
       referenceCMPsCalculator = new ReferenceCentroidalMomentumPivotLocationsCalculator(namePrefix, bipedSupportPolygons, contactableFeet,
                                                                                         numberOfFootstepsToConsider, registry);
 
-      yoSingleSupportInitialCoM = new YoFramePoint(namePrefix + "SingleSupportInitialCoM", worldFrame, registry);
-      yoSingleSupportFinalCoM = new YoFramePoint(namePrefix + "SingleSupportFinalCoM", worldFrame, registry);
+      yoSingleSupportInitialCoM = new YoFramePoint3D(namePrefix + "SingleSupportInitialCoM", worldFrame, registry);
+      yoSingleSupportFinalCoM = new YoFramePoint3D(namePrefix + "SingleSupportFinalCoM", worldFrame, registry);
 
       ReferenceFrame[] framesToRegister = new ReferenceFrame[] {worldFrame, midFeetZUpFrame, soleZUpFrames.get(RobotSide.LEFT),
             soleZUpFrames.get(RobotSide.RIGHT)};
@@ -217,14 +217,14 @@ public class ContinuousCMPBasedICPPlanner extends AbstractICPPlanner
 
       for (int i = 0; i < numberFootstepsToConsider.getIntegerValue() - 1; i++)
       {
-         YoFramePoint entryCornerPointInWorld = entryCornerPoints.get(i).buildUpdatedYoFramePointForVisualizationOnly();
+         YoFramePoint3D entryCornerPointInWorld = entryCornerPoints.get(i).buildUpdatedYoFramePointForVisualizationOnly();
          YoGraphicPosition icpEarlyCornerPointsViz = new YoGraphicPosition("EntryCornerPoints" + i, entryCornerPointInWorld, ICP_CORNER_POINT_SIZE,
                                                                            YoAppearance.Blue(), GraphicType.SOLID_BALL);
 
          yoGraphicsList.add(icpEarlyCornerPointsViz);
          artifactList.add(icpEarlyCornerPointsViz.createArtifact());
 
-         YoFramePoint exitCornerPointInWorld = exitCornerPoints.get(i).buildUpdatedYoFramePointForVisualizationOnly();
+         YoFramePoint3D exitCornerPointInWorld = exitCornerPoints.get(i).buildUpdatedYoFramePointForVisualizationOnly();
          YoGraphicPosition lateCornerPointsViz = new YoGraphicPosition("ExitCornerPoints" + i, exitCornerPointInWorld, ICP_CORNER_POINT_SIZE,
                                                                        YoAppearance.Blue(), GraphicType.BALL);
 
@@ -232,13 +232,13 @@ public class ContinuousCMPBasedICPPlanner extends AbstractICPPlanner
          artifactList.add(lateCornerPointsViz.createArtifact());
       }
 
-      YoFramePoint initialICPInWorld = singleSupportInitialICP.buildUpdatedYoFramePointForVisualizationOnly();
+      YoFramePoint3D initialICPInWorld = singleSupportInitialICP.buildUpdatedYoFramePointForVisualizationOnly();
       YoGraphicPosition singleSupportInitialICPViz = new YoGraphicPosition("singleSupportInitialICP", initialICPInWorld, 0.004, YoAppearance.Chocolate(),
                                                                            GraphicType.SOLID_BALL);
       yoGraphicsList.add(singleSupportInitialICPViz);
       artifactList.add(singleSupportInitialICPViz.createArtifact());
 
-      YoFramePoint finalICPInWorld = singleSupportFinalICP.buildUpdatedYoFramePointForVisualizationOnly();
+      YoFramePoint3D finalICPInWorld = singleSupportFinalICP.buildUpdatedYoFramePointForVisualizationOnly();
       YoGraphicPosition singleSupportFinalICPViz = new YoGraphicPosition("singleSupportFinalICP", finalICPInWorld, 0.004, YoAppearance.Chocolate(),
                                                                          GraphicType.BALL);
       yoGraphicsList.add(singleSupportFinalICPViz);
@@ -282,6 +282,9 @@ public class ContinuousCMPBasedICPPlanner extends AbstractICPPlanner
          swingDurationAlphas.get(i).setToNaN();
          transferDurationAlphas.get(i).setToNaN();
       }
+
+      finalTransferDuration.set(defaultFinalTransferDuration.getDoubleValue());
+      finalTransferDurationAlpha.set(defaultTransferDurationAlpha.getDoubleValue());
    }
 
    /** {@inheritDoc} */
@@ -314,7 +317,7 @@ public class ContinuousCMPBasedICPPlanner extends AbstractICPPlanner
       this.initialTime.set(initialTime);
       transferDurations.get(0).set(finalTransferDuration.getDoubleValue());
       transferDurationAlphas.get(0).set(finalTransferDurationAlpha.getDoubleValue());
-      updateTransferPlan();
+      updateTransferPlan(false);
    }
 
    /** {@inheritDoc} */
@@ -331,7 +334,7 @@ public class ContinuousCMPBasedICPPlanner extends AbstractICPPlanner
          transferDurationAlphas.get(numberOfFootstepRegistered).set(finalTransferDurationAlpha.getDoubleValue());
       }
 
-      updateTransferPlan();
+      updateTransferPlan(false);
    }
 
 
@@ -375,13 +378,13 @@ public class ContinuousCMPBasedICPPlanner extends AbstractICPPlanner
 
       yoSingleSupportInitialCoM.set(desiredCoMPosition);
       singleSupportInitialCoM.set(desiredCoMPosition);
-      updateSingleSupportPlan();
+      updateSingleSupportPlan(false);
    }
 
 
    /** {@inheritDoc} */
    @Override
-   protected void updateTransferPlan()
+   protected void updateTransferPlan(boolean maintainContinuity)
    {
       RobotSide transferToSide = this.transferToSide.getEnumValue();
       if (transferToSide == null)
@@ -402,7 +405,7 @@ public class ContinuousCMPBasedICPPlanner extends AbstractICPPlanner
 
    /** {@inheritDoc} */
    @Override
-   protected void updateSingleSupportPlan()
+   protected void updateSingleSupportPlan(boolean maintainContinuity)
    {
       RobotSide supportSide = this.supportSide.getEnumValue();
 
@@ -494,8 +497,8 @@ public class ContinuousCMPBasedICPPlanner extends AbstractICPPlanner
       ReferenceFrame transferFromSoleFrame = soleZUpFrames.get(transferFromSide);
       ReferenceFrame transferToSoleFrame = soleZUpFrames.get(transferToSide);
 
-      List<YoFramePoint> entryCMPs = referenceCMPsCalculator.getEntryCMPs();
-      List<YoFramePoint> exitCMPs = referenceCMPsCalculator.getExitCMPs();
+      List<YoFramePoint3D> entryCMPs = referenceCMPsCalculator.getEntryCMPs();
+      List<YoFramePoint3D> exitCMPs = referenceCMPsCalculator.getExitCMPs();
       switchCornerPointsToWorldFrame();
       singleSupportInitialICP.switchCurrentReferenceFrame(worldFrame);
       singleSupportFinalICP.switchCurrentReferenceFrame(worldFrame);
@@ -652,8 +655,8 @@ public class ContinuousCMPBasedICPPlanner extends AbstractICPPlanner
 
    private ReferenceFrame initializeSwingTrajectory()
    {
-      List<YoFramePoint> entryCMPs = referenceCMPsCalculator.getEntryCMPs();
-      List<YoFramePoint> exitCMPs = referenceCMPsCalculator.getExitCMPs();
+      List<YoFramePoint3D> entryCMPs = referenceCMPsCalculator.getEntryCMPs();
+      List<YoFramePoint3D> exitCMPs = referenceCMPsCalculator.getExitCMPs();
 
       double transferAlpha = transferDurationAlphas.get(0).getDoubleValue();
       double swingAlpha = swingDurationAlphas.get(0).getDoubleValue();
@@ -715,7 +718,7 @@ public class ContinuousCMPBasedICPPlanner extends AbstractICPPlanner
          }
          else
          {
-            List<YoFramePoint> entryCMPs = referenceCMPsCalculator.getEntryCMPs();
+            List<YoFramePoint3D> entryCMPs = referenceCMPsCalculator.getEntryCMPs();
             singleSupportInitialICP.changeFrame(worldFrame);
             integrateCoMPositionUsingConstantCMP(swingDuration, omega0.getDoubleValue(), entryCMPs.get(0), singleSupportInitialICP, singleSupportInitialCoM,
                   singleSupportFinalCoM);
@@ -800,7 +803,7 @@ public class ContinuousCMPBasedICPPlanner extends AbstractICPPlanner
 
    /** {@inheritDoc} */
    @Override
-   public void getFinalDesiredCapturePointPosition(YoFramePoint2d finalDesiredCapturePointPositionToPack)
+   public void getFinalDesiredCapturePointPosition(YoFramePoint2D finalDesiredCapturePointPositionToPack)
    {
       if (isStanding.getBooleanValue())
       {
@@ -892,7 +895,7 @@ public class ContinuousCMPBasedICPPlanner extends AbstractICPPlanner
    @Override
    public void getDesiredCenterOfPressurePosition(FramePoint2D desiredCenterOfPressurePositionToPack)
    {
-      desiredCenterOfPressurePositionToPack.setToNaN();
+      getDesiredCentroidalMomentumPivotPosition(desiredCenterOfPressurePositionToPack);
    }
 
    /**

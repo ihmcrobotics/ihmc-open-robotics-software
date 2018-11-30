@@ -2,14 +2,14 @@ package us.ihmc.robotics.geometry;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Random;
 
 import us.ihmc.euclid.geometry.BoundingBox3D;
-import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.geometry.LineSegment2D;
+import us.ihmc.euclid.geometry.interfaces.ConvexPolygon2DReadOnly;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
-import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 
 public class PlanarRegionsList
@@ -48,35 +48,6 @@ public class PlanarRegionsList
       regions.clear();
    }
 
-   /**
-    * Find all the planar regions that intersect with the given convex polygon. The algorithm is
-    * equivalent to projecting all the regions onto the XY-plane and then finding the regions
-    * intersecting with the given convex polygon.
-    * 
-    * @param convexPolygon the query.
-    * @return the list of planar regions intersecting with the given polygon. Returns null when no
-    *         region intersects.
-    */
-   public List<PlanarRegion> findPlanarRegionsIntersectingPolygon(ConvexPolygon2D convexPolygon)
-   {
-      List<PlanarRegion> containers = null;
-
-      for (int i = 0; i < regions.size(); i++)
-      {
-         PlanarRegion candidateRegion = regions.get(i);
-         if (candidateRegion.isVertical())
-            continue;
-
-         if (candidateRegion.isPolygonIntersecting(convexPolygon))
-         {
-            if (containers == null)
-               containers = new ArrayList<>();
-            containers.add(candidateRegion);
-         }
-      }
-
-      return containers;
-   }
 
    /**
     * Find all the planar regions that intersect with the given 2d line segment. The algorithm is
@@ -172,7 +143,7 @@ public class PlanarRegionsList
     * @return the list of planar regions containing the query. Returns null when no region contains
     *         the query.
     */
-   public List<PlanarRegion> findPlanarRegionsContainingPointByProjectionOntoXYPlane(Point2D point)
+   public List<PlanarRegion> findPlanarRegionsContainingPointByProjectionOntoXYPlane(Point2DReadOnly point)
    {
       return findPlanarRegionsContainingPointByProjectionOntoXYPlane(point.getX(), point.getY());
    }
@@ -203,6 +174,45 @@ public class PlanarRegionsList
       }
 
       return containers;
+   }
+
+   /**
+    * Find the closest planar region to the given point. The algorithm is equivalent to
+    * projecting all the regions onto the XY-plane and then finding the closest one to the point.
+    *
+    * @param point the query coordinates.
+    * @return the planar regions closest to the query.
+    */
+   public PlanarRegion findClosestPlanarRegionToPointByProjectionOntoXYPlane(Point2DReadOnly point)
+   {
+      return findClosestPlanarRegionToPointByProjectionOntoXYPlane(point.getX(), point.getY());
+   }
+
+   /**
+    * Find the closest planar region to the given point. The algorithm is equivalent to
+    * projecting all the regions onto the XY-plane and then finding the closest one to the point.
+    *
+    * @param x the query x-coordinate.
+    * @param y the query y-coordinate.
+    * @return the planar regions closest to the query.
+    */
+   public PlanarRegion findClosestPlanarRegionToPointByProjectionOntoXYPlane(double x, double y)
+   {
+      double shortestDistanceToPoint = Double.POSITIVE_INFINITY;
+      PlanarRegion closestRegion = null;
+
+      for (int i = 0; i < regions.size(); i++)
+      {
+         PlanarRegion candidateRegion = regions.get(i);
+         double distanceToRegion = candidateRegion.distanceToPointByProjectionOntoXYPlane(x, y);
+         if (distanceToRegion < shortestDistanceToPoint)
+         {
+            shortestDistanceToPoint = distanceToRegion;
+            closestRegion = candidateRegion;
+         }
+      }
+
+      return closestRegion;
    }
 
    /** Returns true if this list of planar regions is empty (contains no planar regions). */
@@ -284,5 +294,21 @@ public class PlanarRegionsList
       {
          regions.get(i).transform(rigidBodyTransform);
       }
+   }
+
+   public static PlanarRegionsList generatePlanarRegionsListFromRandomPolygonsWithRandomTransform(Random random, int numberOfRandomlyGeneratedPolygons,
+                                                                                                  double maxAbsoluteXYForPolygons,
+                                                                                                  int numberOfPossiblePointsForPolygons,
+                                                                                                  int numberOfPossiblePlanarRegions)
+   {
+      PlanarRegionsList planarRegionsList = new PlanarRegionsList();
+      int numberOfPlanarRegions = random.nextInt(numberOfPossiblePlanarRegions) + 1;
+      while (planarRegionsList.getNumberOfPlanarRegions() < numberOfPlanarRegions)
+      {
+         planarRegionsList.addPlanarRegion(PlanarRegion.generatePlanarRegionFromRandomPolygonsWithRandomTransform(random, numberOfRandomlyGeneratedPolygons,
+                                                                                                                  maxAbsoluteXYForPolygons,
+                                                                                                                  numberOfPossiblePointsForPolygons));
+      }
+      return planarRegionsList;
    }
 }

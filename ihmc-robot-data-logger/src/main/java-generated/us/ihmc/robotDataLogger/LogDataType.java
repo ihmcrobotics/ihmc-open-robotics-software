@@ -1,4 +1,5 @@
 package us.ihmc.robotDataLogger;
+
 /**
 * 
 * Definition of the enum "LogDataType" defined in LogData.idl. 
@@ -7,16 +8,21 @@ package us.ihmc.robotDataLogger;
 * Do not update this file directly, edit LogData.idl instead.
 *
 */
+import us.ihmc.idl.IDLTools;
+
 public enum LogDataType
 {
-        	KEEP_ALIVE_PACKET,
-        
-        	DATA_PACKET,
-        
-        	VIDEO_PACKET,
-        
-	;
-	
-	public static LogDataType[] values = values();
+         KEEP_ALIVE_PACKET,
+      
+         DATA_PACKET,
+      
+         VIDEO_PACKET,
+      
+   ;
+   public static LogDataType[] values = values();
 
+   public boolean epsilonEquals(LogDataType other, double epsilon)
+   {
+      return IDLTools.epsilonEqualsEnum(this, other, epsilon);
+   }
 }

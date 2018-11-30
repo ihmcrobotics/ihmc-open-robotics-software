@@ -13,8 +13,8 @@ public class SphereIntersectionToolsTest
    private static final double epsilon = 0.000001;
    private static final int iters = 1000;
 
-   @ContinuousIntegrationTest(estimatedDuration = 2.0)
-   @Test(timeout = 2000)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
+   @Test(timeout = 30000)
    public void testFlatCenterComputation()
    {
       Random random = new Random();
@@ -37,8 +37,8 @@ public class SphereIntersectionToolsTest
       }
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 2.0)
-   @Test(timeout = 2000)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
+   @Test(timeout = 30000)
    public void testComputation()
    {
       Random random = new Random();
@@ -49,8 +49,8 @@ public class SphereIntersectionToolsTest
          double radius2 = EuclidCoreRandomTools.nextDouble(random, 0.0, 5.0);
 
          double sphereSeparationZ = EuclidCoreRandomTools.nextDouble(random, 0.0, 1.0);
-         double sphereSeparationX = EuclidCoreRandomTools
-               .generateRandomDouble(random, 0.0, Math.sqrt(Math.pow(radius1 + radius2, 2.0) - Math.pow(sphereSeparationZ, 2.0)));
+         double sphereSeparationX = EuclidCoreRandomTools.nextDouble(random, 0.0,
+                                                                     Math.sqrt(Math.pow(radius1 + radius2, 2.0) - Math.pow(sphereSeparationZ, 2.0)));
 
          double sphereSeparation = Math.sqrt(Math.pow(sphereSeparationX, 2.0) + Math.pow(sphereSeparationZ, 2.0));
          double angleOfSeparation = Math.atan(sphereSeparationZ / sphereSeparationX);
@@ -92,8 +92,8 @@ public class SphereIntersectionToolsTest
       }
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 2.0)
-   @Test(timeout = 2000)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
+   @Test(timeout = 30000)
    public void testRadiusOfIntersection()
    {
       Random random = new Random();

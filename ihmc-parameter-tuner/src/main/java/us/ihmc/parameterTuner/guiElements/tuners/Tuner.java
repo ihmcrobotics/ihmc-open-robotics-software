@@ -1,51 +1,45 @@
 package us.ihmc.parameterTuner.guiElements.tuners;
 
-import java.io.IOException;
+import org.apache.commons.lang3.StringUtils;
 
-import javafx.event.ActionEvent;
-import javafx.event.EventHandler;
-import javafx.fxml.FXML;
-import javafx.fxml.FXMLLoader;
-import javafx.scene.control.Button;
+import javafx.application.Platform;
+import javafx.geometry.Pos;
+import javafx.scene.Node;
+import javafx.scene.control.ContextMenu;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
+import javafx.scene.control.TitledPane;
+import javafx.scene.control.Tooltip;
+import javafx.scene.layout.HBox;
+import javafx.scene.layout.Priority;
+import javafx.scene.layout.Region;
 import javafx.scene.layout.VBox;
-import us.ihmc.commons.PrintTools;
+import javafx.scene.text.Text;
+import us.ihmc.javaFXToolkit.TextFormatterTools;
 import us.ihmc.parameterTuner.ParameterTuningTools;
+import us.ihmc.parameterTuner.guiElements.GuiElement;
 import us.ihmc.parameterTuner.guiElements.GuiParameter;
+import us.ihmc.parameterTuner.guiElements.ParameterChangeListener;
+import us.ihmc.robotics.sliderboard.SliderboardListener;
 
-public class Tuner extends VBox
+public class Tuner extends VBox implements SliderboardListener
 {
-   private static final String FXML_PATH = "tuner.fxml";
+   private static final int MAX_DESCRIPTION_CHARACTERS = 255;
 
-   @FXML
-   private Label name;
+   private final Label name = new Label();
+   private final TitledPane descriptionPane = new TitledPane();
+   private final TextField description = new TextField();
+   private final InputNode inputNode;
 
-   @FXML
-   private TextField description;
-
-   @FXML
-   private Button remove;
+   private final GuiParameter parameter;
 
    public Tuner(GuiParameter parameter)
    {
-      FXMLLoader loader = new FXMLLoader(getClass().getResource(FXML_PATH));
-      loader.setRoot(this);
-      loader.setController(this);
-      try
-      {
-         loader.load();
-      }
-      catch (IOException e)
-      {
-         e.printStackTrace();
-      }
-
-      setId("tuner-window");
-      name.setId("parameter-name-in-tuner");
+      this.parameter = parameter;
 
       name.setText(parameter.getName());
       description.setText(parameter.getCurrentDescription());
+      description.setTextFormatter(TextFormatterTools.maxLengthTextFormatter(MAX_DESCRIPTION_CHARACTERS));
       ParameterTuningTools.addThreadSafeListeners(description, () -> parameter.setDescription(description.getText()));
 
       parameter.addChangedListener(p -> {
@@ -56,24 +50,95 @@ public class Tuner extends VBox
       switch (parameter.getType())
       {
       case "DoubleParameter":
-         getChildren().add(new DoubleTuner(parameter));
+         inputNode = new DoubleTuner(parameter);
          break;
       case "IntegerParameter":
-         getChildren().add(new IntegerTuner(parameter));
+         inputNode = new IntegerTuner(parameter);
          break;
       case "BooleanParameter":
-         getChildren().add(new BooleanTuner(parameter));
+         inputNode = new BooleanTuner(parameter);
          break;
       case "EnumParameter":
-         getChildren().add(new EnumTuner(parameter));
+         inputNode = new EnumTuner(parameter);
          break;
       default:
-         PrintTools.info("Implement me.");
+         throw new RuntimeException("Implement tuner type: " + parameter.getType());
       }
+
+      setupNode(parameter);
    }
 
-   public void setCloseHandler(EventHandler<ActionEvent> closeHandler)
+   public ContextMenu getContextMenu()
    {
-      remove.setOnAction(closeHandler);
+      return descriptionPane.getContextMenu();
+   }
+
+   private void setupNode(GuiParameter parameter)
+   {
+      Tooltip tooltip = new Tooltip(StringUtils.replaceAll(parameter.getUniqueName(), GuiElement.SEPERATOR, "\n"));
+      Tooltip.install(descriptionPane, tooltip);
+      ContextMenu contextMenu = new ContextMenu();
+      descriptionPane.setContextMenu(contextMenu);
+
+      HBox.setHgrow(this, Priority.ALWAYS);
+      HBox.setHgrow(name, Priority.ALWAYS);
+      HBox.setHgrow(description, Priority.ALWAYS);
+
+      HBox parameterDescriptionBox = new HBox();
+      parameterDescriptionBox.setSpacing(10.0);
+      parameterDescriptionBox.setAlignment(Pos.CENTER_LEFT);
+      parameterDescriptionBox.getChildren().add(new Text("Description"));
+      parameterDescriptionBox.getChildren().add(description);
+      HBox.setHgrow(parameterDescriptionBox, Priority.ALWAYS);
+
+      VBox extendedOptionsBox = new VBox();
+      extendedOptionsBox.setSpacing(10.0);
+      extendedOptionsBox.getChildren().add(parameterDescriptionBox);
+      extendedOptionsBox.getChildren().add(inputNode.getFullInputNode());
+
+      HBox dropdownGraphic = new HBox();
+      dropdownGraphic.setSpacing(10.0);
+      dropdownGraphic.setAlignment(Pos.CENTER_LEFT);
+      dropdownGraphic.getChildren().add(name);
+      Region spacer = new Region();
+      HBox.setHgrow(spacer, Priority.ALWAYS);
+      dropdownGraphic.getChildren().add(spacer);
+      dropdownGraphic.getChildren().add(inputNode.getSimpleInputNode(120.0, 20.0));
+      dropdownGraphic.minWidthProperty().bind(descriptionPane.widthProperty().subtract(40));
+
+      descriptionPane.setContent(extendedOptionsBox);
+      descriptionPane.setAlignment(Pos.CENTER_LEFT);
+      descriptionPane.setGraphic(dropdownGraphic);
+      descriptionPane.setExpanded(false);
+      getChildren().add(descriptionPane);
+
+      setId("tuner-window");
+      name.setId("parameter-name-in-tuner");
+   }
+
+   public Node getSimpleInputNode()
+   {
+      return inputNode.getSimpleInputNode(100.0, 20.0);
+   }
+
+   @Override
+   public void sliderMoved(double sliderPercentage)
+   {
+      Platform.runLater(() -> inputNode.setValueFromPercent(sliderPercentage));
+   }
+
+   public void addChangeListener(ParameterChangeListener listener)
+   {
+      parameter.addChangedListener(listener);
+   }
+
+   public void removeChangeListener(ParameterChangeListener listener)
+   {
+      parameter.removeChangeListener(listener);
+   }
+
+   public double getValuePercent()
+   {
+      return inputNode.getValuePercent();
    }
 }

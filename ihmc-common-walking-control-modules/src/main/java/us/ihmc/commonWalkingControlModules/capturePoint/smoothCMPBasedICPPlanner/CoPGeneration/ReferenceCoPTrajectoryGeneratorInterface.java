@@ -12,9 +12,9 @@ import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsList;
 import us.ihmc.graphicsDescription.yoGraphics.plotting.ArtifactList;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.humanoidRobotics.footstep.FootstepTiming;
-import us.ihmc.robotics.math.frames.YoFramePoint;
-import us.ihmc.robotics.math.frames.YoFrameVector;
 import us.ihmc.robotics.robotSide.RobotSide;
+import us.ihmc.yoVariables.variable.YoFramePoint3D;
+import us.ihmc.yoVariables.variable.YoFrameVector3D;
 
 import java.util.List;
 
@@ -30,12 +30,6 @@ public interface ReferenceCoPTrajectoryGeneratorInterface
 
    void clear();
 
-   /**
-    * Add footstep location to planned
-    * @param footstep
-    */
-   void addFootstepToPlan(Footstep footstep, FootstepTiming timing);
-
    int getNumberOfFootstepsRegistered();
 
    void update(double currentTime);
@@ -43,11 +37,7 @@ public interface ReferenceCoPTrajectoryGeneratorInterface
    void getDesiredCenterOfPressure(FixedFramePoint3DBasics desiredCoPToPack);
    void getDesiredCenterOfPressure(FixedFramePoint3DBasics desiredCoPToPack, FixedFrameVector3DBasics desiredCoPVelocityToPack);
 
-   void initializeForTransfer(double currentTime);
-
-   void initializeForSwing(double currentTime);
-
-   void computeReferenceCoPsStartingFromDoubleSupport(boolean atAStop, RobotSide transferToSide);
+   void computeReferenceCoPsStartingFromDoubleSupport(boolean atAStop, RobotSide transferToSide, RobotSide previousTransferToSide);
 
    void computeReferenceCoPsStartingFromSingleSupport(RobotSide supportSide);
 

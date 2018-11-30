@@ -19,7 +19,9 @@ import us.ihmc.robotics.geometry.interfaces.SE3WaypointInterface;
 import us.ihmc.robotics.geometry.transformables.EuclideanWaypoint;
 import us.ihmc.robotics.geometry.transformables.SE3Waypoint;
 import us.ihmc.robotics.geometry.transformables.SO3Waypoint;
+import us.ihmc.robotics.math.trajectories.waypoints.interfaces.EuclideanTrajectoryPointInterface;
 import us.ihmc.robotics.math.trajectories.waypoints.interfaces.SE3TrajectoryPointInterface;
+import us.ihmc.robotics.math.trajectories.waypoints.interfaces.SO3TrajectoryPointInterface;
 
 public class FrameSE3TrajectoryPoint extends FrameTrajectoryPoint<FrameSE3TrajectoryPoint, SimpleSE3TrajectoryPoint>
       implements SE3TrajectoryPointInterface<FrameSE3TrajectoryPoint>
@@ -149,6 +151,27 @@ public class FrameSE3TrajectoryPoint extends FrameTrajectoryPoint<FrameSE3Trajec
    public void set(SE3TrajectoryPointInterface<?> se3TrajectoryPoint)
    {
       geometryObject.set(se3TrajectoryPoint);
+   }
+
+   public void setToRotation(double time, QuaternionReadOnly orientation, Vector3DReadOnly angularVelocity)
+   {
+      geometryObject.setTime(time);
+      geometryObject.waypointData.getEuclideanWaypoint().setToZero();
+      geometryObject.waypointData.getSO3Waypoint().set(orientation, angularVelocity);
+   }
+
+   public void setToRotation(SO3TrajectoryPointInterface<?> so3TrajectoryPoint)
+   {
+      geometryObject.setTime(so3TrajectoryPoint.getTime());
+      geometryObject.waypointData.getEuclideanWaypoint().setToZero();
+      geometryObject.waypointData.getSO3Waypoint().set(so3TrajectoryPoint);
+   }
+
+   public void setToPosition(EuclideanTrajectoryPointInterface<?> euclideantrajectoryPoint)
+   {
+      geometryObject.setTime(euclideantrajectoryPoint.getTime());
+      geometryObject.waypointData.getEuclideanWaypoint().set(euclideantrajectoryPoint);
+      geometryObject.waypointData.getSO3Waypoint().setToZero();
    }
 
    public void setIncludingFrame(ReferenceFrame referenceFrame, SE3TrajectoryPointInterface<?> se3TrajectoryPoint)

@@ -9,8 +9,8 @@ import us.ihmc.yoVariables.listener.VariableChangedListener;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
+import us.ihmc.yoVariables.variable.YoFrameYawPitchRoll;
 import us.ihmc.yoVariables.variable.YoVariable;
-import us.ihmc.robotics.math.frames.YoFrameOrientation;
 
 public class UserDesiredChestOrientationControllerCommandGenerator
 {
@@ -19,13 +19,13 @@ public class UserDesiredChestOrientationControllerCommandGenerator
    private final YoBoolean userDesiredChestGoToHomeOrientation = new YoBoolean("userDesiredChestGoToHomeOrientation", registry);
    private final YoDouble userDesiredChestTrajectoryTime = new YoDouble("userDesiredChestTrajectoryTime", registry);
    private final YoBoolean userDoChestOrientation = new YoBoolean("userDoChestOrientation", registry);
-   private final YoFrameOrientation userDesiredChestOrientation;
+   private final YoFrameYawPitchRoll userDesiredChestOrientation;
 
    private final FrameQuaternion frameOrientation = new FrameQuaternion();
 
    public UserDesiredChestOrientationControllerCommandGenerator(final CommandInputManager controllerCommandInputManager, double defaultTrajectoryTime, YoVariableRegistry parentRegistry)
    {
-      userDesiredChestOrientation = new YoFrameOrientation("userDesiredChest", ReferenceFrame.getWorldFrame(), registry);
+      userDesiredChestOrientation = new YoFrameYawPitchRoll("userDesiredChest", ReferenceFrame.getWorldFrame(), registry);
 
       userDoChestOrientation.addVariableChangedListener(new VariableChangedListener()
       {
@@ -36,7 +36,7 @@ public class UserDesiredChestOrientationControllerCommandGenerator
                userDesiredChestOrientation.getFrameOrientationIncludingFrame(frameOrientation);
 
                ChestTrajectoryCommand chestTrajectoryControllerCommand = new ChestTrajectoryCommand();
-               chestTrajectoryControllerCommand.addTrajectoryPoint(userDesiredChestTrajectoryTime.getDoubleValue(), frameOrientation, new Vector3D());
+               chestTrajectoryControllerCommand.getSO3Trajectory().addTrajectoryPoint(userDesiredChestTrajectoryTime.getDoubleValue(), frameOrientation, new Vector3D());
                controllerCommandInputManager.submitCommand(chestTrajectoryControllerCommand);
 
                userDoChestOrientation.set(false);

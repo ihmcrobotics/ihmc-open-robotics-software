@@ -8,31 +8,32 @@ import java.util.Map;
 import org.ejml.data.DenseMatrix64F;
 import org.ejml.ops.CommonOps;
 
+import us.ihmc.commons.MathTools;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
-import us.ihmc.commons.MathTools;
-import us.ihmc.robotics.screwTheory.RigidBody;
-import us.ihmc.robotics.screwTheory.SpatialForceVector;
-import us.ihmc.robotics.screwTheory.Wrench;
+import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
+import us.ihmc.mecano.spatial.SpatialForce;
+import us.ihmc.mecano.spatial.Wrench;
+import us.ihmc.mecano.spatial.interfaces.WrenchReadOnly;
 
 /**
  * @author twan Date: 5/2/13
  */
 public class ExternalWrenchHandler
 {
-   private final SpatialForceVector gravitationalWrench;
+   private final SpatialForce gravitationalWrench;
    private final DenseMatrix64F gravitationalWrenchMatrix = new DenseMatrix64F(Wrench.SIZE, 1);
    private final DenseMatrix64F wrenchEquationRightHandSide = new DenseMatrix64F(Wrench.SIZE, 1);
-   private final Map<RigidBody, Wrench> externalWrenchesToCompensateFor = new LinkedHashMap<RigidBody, Wrench>();
+   private final Map<RigidBodyBasics, Wrench> externalWrenchesToCompensateFor = new LinkedHashMap<RigidBodyBasics, Wrench>();
    /** For garbage free iteration */
    private final List<Wrench> externalWrenchesToCompensateForList = new ArrayList<Wrench>();
-   private final SpatialForceVector totalWrenchAlreadyApplied; // gravity plus external wrenches to compensate for
+   private final SpatialForce totalWrenchAlreadyApplied; // gravity plus external wrenches to compensate for
    private final DenseMatrix64F totalWrenchAlreadyAppliedMatrix = new DenseMatrix64F(Wrench.SIZE, 1);
    private final List<? extends ContactablePlaneBody> contactablePlaneBodies;
-   private final List<RigidBody> rigidBodiesWithWrenchToCompensateFor = new ArrayList<>();
-   private final List<RigidBody> rigidBodiesWithExternalWrench = new ArrayList<>();
-   private final Map<RigidBody, Wrench> externalWrenches = new LinkedHashMap<RigidBody, Wrench>();
-   private final SpatialForceVector tempWrench = new SpatialForceVector();
+   private final List<RigidBodyBasics> rigidBodiesWithWrenchToCompensateFor = new ArrayList<>();
+   private final List<RigidBodyBasics> rigidBodiesWithExternalWrench = new ArrayList<>();
+   private final Map<RigidBodyBasics, Wrench> externalWrenches = new LinkedHashMap<RigidBodyBasics, Wrench>();
+   private final SpatialForce tempWrench = new SpatialForce();
    private final ReferenceFrame centerOfMassFrame;
 
    public ExternalWrenchHandler(double gravityZ, ReferenceFrame centerOfMassFrame, double robotTotalMass,
@@ -43,13 +44,13 @@ public class ExternalWrenchHandler
 
       this.contactablePlaneBodies = new ArrayList<>(contactablePlaneBodies);
 
-      gravitationalWrench = new SpatialForceVector(centerOfMassFrame);
+      gravitationalWrench = new SpatialForce(centerOfMassFrame);
       gravitationalWrench.setLinearPartZ(-gravityZ * robotTotalMass);
-      totalWrenchAlreadyApplied = new SpatialForceVector(centerOfMassFrame);
+      totalWrenchAlreadyApplied = new SpatialForce(centerOfMassFrame);
 
       for (int i = 0; i < contactablePlaneBodies.size(); i++)
       {
-         RigidBody rigidBody = this.contactablePlaneBodies.get(i).getRigidBody();
+         RigidBodyBasics rigidBody = this.contactablePlaneBodies.get(i).getRigidBody();
          externalWrenches.put(rigidBody, new Wrench(rigidBody.getBodyFixedFrame(), rigidBody.getBodyFixedFrame()));
       }
    }
@@ -58,13 +59,13 @@ public class ExternalWrenchHandler
    {
       for (int i = 0; i < contactablePlaneBodies.size(); i++)
       {
-         RigidBody rigidBody = contactablePlaneBodies.get(i).getRigidBody();
+         RigidBodyBasics rigidBody = contactablePlaneBodies.get(i).getRigidBody();
          externalWrenches.get(rigidBody).setToZero(rigidBody.getBodyFixedFrame(), rigidBody.getBodyFixedFrame());
       }
 
       for (int i = 0; i < rigidBodiesWithWrenchToCompensateFor.size(); i++)
       {
-         RigidBody rigidBody = rigidBodiesWithWrenchToCompensateFor.get(i);
+         RigidBodyBasics rigidBody = rigidBodiesWithWrenchToCompensateFor.get(i);
          externalWrenches.get(rigidBody).setToZero(rigidBody.getBodyFixedFrame(), rigidBody.getBodyFixedFrame());
       }
    }
@@ -77,15 +78,15 @@ public class ExternalWrenchHandler
     */
    public final DenseMatrix64F computeWrenchEquationRightHandSide(DenseMatrix64F momentumConvectiveTerm, DenseMatrix64F b, DenseMatrix64F bHat)
    {
-      totalWrenchAlreadyApplied.set(gravitationalWrench);
+      totalWrenchAlreadyApplied.setIncludingFrame(gravitationalWrench);
       for (int i = 0; i < externalWrenchesToCompensateForList.size(); i++)
       {
-         tempWrench.set(externalWrenchesToCompensateForList.get(i));
-         tempWrench.changeFrame(gravitationalWrench.getExpressedInFrame());
+         tempWrench.setIncludingFrame(externalWrenchesToCompensateForList.get(i));
+         tempWrench.changeFrame(gravitationalWrench.getReferenceFrame());
          totalWrenchAlreadyApplied.add(tempWrench);
       }
 
-      totalWrenchAlreadyApplied.getMatrix(wrenchEquationRightHandSide);
+      totalWrenchAlreadyApplied.get(wrenchEquationRightHandSide);
       CommonOps.changeSign(wrenchEquationRightHandSide);
       CommonOps.addEquals(wrenchEquationRightHandSide, momentumConvectiveTerm);
       CommonOps.addEquals(wrenchEquationRightHandSide, b);
@@ -99,16 +100,16 @@ public class ExternalWrenchHandler
 
       for (int i = 0; i < externalWrenchesToCompensateForList.size(); i++)
       {
-         tempWrench.set(externalWrenchesToCompensateForList.get(i));
+         tempWrench.setIncludingFrame(externalWrenchesToCompensateForList.get(i));
          tempWrench.changeFrame(centerOfMassFrame);
          totalWrenchAlreadyApplied.add(tempWrench);
       }
 
-      totalWrenchAlreadyApplied.getMatrix(totalWrenchAlreadyAppliedMatrix);
+      totalWrenchAlreadyApplied.get(totalWrenchAlreadyAppliedMatrix);
       return totalWrenchAlreadyAppliedMatrix;
    }
 
-   public void setExternalWrenchToCompensateFor(RigidBody rigidBody, Wrench wrench)
+   public void setExternalWrenchToCompensateFor(RigidBodyBasics rigidBody, WrenchReadOnly wrench)
    {
       boolean containsRigidBody = externalWrenchesToCompensateFor.get(rigidBody) != null;
       if (!containsRigidBody)
@@ -120,16 +121,16 @@ public class ExternalWrenchHandler
       }
       ReferenceFrame bodyFixedFrame = rigidBody.getBodyFixedFrame();
       wrench.getBodyFrame().checkReferenceFrameMatch(bodyFixedFrame);
-      wrench.getExpressedInFrame().checkReferenceFrameMatch(bodyFixedFrame);
+      wrench.getReferenceFrame().checkReferenceFrameMatch(bodyFixedFrame);
 
-      externalWrenchesToCompensateFor.get(rigidBody).set(wrench);
+      externalWrenchesToCompensateFor.get(rigidBody).setIncludingFrame(wrench);
    }
 
-   public void computeExternalWrenches(Map<RigidBody, Wrench> groundReactionWrenches)
+   public void computeExternalWrenches(Map<RigidBodyBasics, Wrench> groundReactionWrenches)
    {
       for (int i = 0; i < contactablePlaneBodies.size(); i++)
       {
-         RigidBody rigidBody = contactablePlaneBodies.get(i).getRigidBody();
+         RigidBodyBasics rigidBody = contactablePlaneBodies.get(i).getRigidBody();
          Wrench externalWrench = externalWrenches.get(rigidBody);
          if (groundReactionWrenches.containsKey(rigidBody))
             externalWrench.add(groundReactionWrenches.get(rigidBody));
@@ -139,7 +140,7 @@ public class ExternalWrenchHandler
 
       for (int i = 0; i < rigidBodiesWithWrenchToCompensateFor.size(); i++)
       {
-         RigidBody rigidBody = rigidBodiesWithWrenchToCompensateFor.get(i);
+         RigidBodyBasics rigidBody = rigidBodiesWithWrenchToCompensateFor.get(i);
          Wrench externalWrench = externalWrenches.get(rigidBody);
          externalWrench.add(externalWrenchesToCompensateFor.get(rigidBody));
          if (!rigidBodiesWithExternalWrench.contains(rigidBody))
@@ -147,19 +148,19 @@ public class ExternalWrenchHandler
       }
    }
 
-   public Map<RigidBody, Wrench> getExternalWrenchMap()
+   public Map<RigidBodyBasics, Wrench> getExternalWrenchMap()
    {
       return externalWrenches;
    }
 
-   public List<RigidBody> getRigidBodiesWithExternalWrench()
+   public List<RigidBodyBasics> getRigidBodiesWithExternalWrench()
    {
       return rigidBodiesWithExternalWrench;
    }
 
    public DenseMatrix64F getGravitationalWrench()
    {
-      gravitationalWrench.getMatrix(gravitationalWrenchMatrix);
+      gravitationalWrench.get(gravitationalWrenchMatrix);
       return gravitationalWrenchMatrix;
    }
 }

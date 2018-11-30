@@ -4,6 +4,7 @@ import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.geometry.Line2D;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple2D.Vector2D;
+import us.ihmc.euclid.tuple2D.interfaces.Point2DBasics;
 
 /**
  * A Point2d in ConvexPolygon coordinate is defined by  (eccentricity, angle) similar to the polar coordinate system
@@ -40,7 +41,7 @@ public class Point2dInConvexPolygon2d extends Point2D
 
    public void setAngle(double angle)
    {
-      Point2D point = findEdgePoint(angle);
+      Point2DBasics point = findEdgePoint(angle);
       point.scale(getEccentricity());
       set(point);
    }
@@ -53,21 +54,21 @@ public class Point2dInConvexPolygon2d extends Point2D
 
    public double getEccentricity()
    {
-      Point2D edgePoint = findEdgePoint(getX(), getY());
+      Point2DBasics edgePoint = findEdgePoint(getX(), getY());
       return Math.max(1e-3, distance(origin) / edgePoint.distance(origin));
    }
 
-   private Point2D findEdgePoint(double angle)
+   private Point2DBasics findEdgePoint(double angle)
    {
       return findEdgePoint(Math.cos(angle), Math.sin(angle));
    }
 
-   private Point2D findEdgePoint(double x, double y)
+   private Point2DBasics findEdgePoint(double x, double y)
    {
       if (x==0 && y==0)
          x=1; //as eccentricity=0
       Line2D ray = new Line2D(new Point2D(0,0), new Vector2D(x,y));
-      Point2D[] edgePoints = polygon.intersectionWithRay(ray);
+      Point2DBasics[] edgePoints = polygon.intersectionWithRay(ray);
       if(edgePoints.length!=1)
          throw new RuntimeException("intersecting points should be 1, but we get" + edgePoints.length);
       return edgePoints[0];

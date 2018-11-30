@@ -31,16 +31,11 @@ public class IntraprocessObjectCommunicator implements NetworkedObjectCommunicat
    public IntraprocessObjectCommunicator(int port, NetClassList classList)
    {
       this.port = port;
+      classList.registerWithKryo(kryo);
 
       for (Class<?> clazz : classList.getPacketClassList())
       {
-         kryo.register(clazz);
          listeners.put(clazz, new ArrayList<ObjectConsumer<?>>());
-      }
-
-      for (Class<?> type : classList.getPacketFieldList())
-      {
-         kryo.register(type);
       }
    }
 

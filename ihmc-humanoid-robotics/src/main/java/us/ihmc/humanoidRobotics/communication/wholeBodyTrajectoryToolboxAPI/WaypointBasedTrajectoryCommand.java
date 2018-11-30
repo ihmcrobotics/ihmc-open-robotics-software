@@ -2,15 +2,15 @@ package us.ihmc.humanoidRobotics.communication.wholeBodyTrajectoryToolboxAPI;
 
 import java.util.Map;
 
+import controller_msgs.msg.dds.SelectionMatrix3DMessage;
+import controller_msgs.msg.dds.WaypointBasedTrajectoryMessage;
 import gnu.trove.list.array.TDoubleArrayList;
+import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.communication.controllerAPI.command.Command;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.euclid.utils.NameBasedHashCodeTools;
-import us.ihmc.humanoidRobotics.communication.packets.manipulation.wholeBodyTrajectory.WaypointBasedTrajectoryMessage;
-import us.ihmc.robotics.lists.RecyclingArrayList;
-import us.ihmc.robotics.screwTheory.RigidBody;
+import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.robotics.screwTheory.SelectionMatrix6D;
 import us.ihmc.sensorProcessing.frames.ReferenceFrameHashCodeResolver;
 
@@ -18,9 +18,9 @@ public class WaypointBasedTrajectoryCommand
       implements Command<WaypointBasedTrajectoryCommand, WaypointBasedTrajectoryMessage>, WholeBodyTrajectoryToolboxAPI<WaypointBasedTrajectoryMessage>
 {
    /** This is the unique hash code of the end-effector to be solved for. */
-   private long endEffectorNameBasedHashCode;
+   private int endEffectorHashCode;
    /** This is the end-effector to be solved for. */
-   private RigidBody endEffector;
+   private RigidBodyBasics endEffector;
 
    private final TDoubleArrayList waypointTimes = new TDoubleArrayList();
    private final RecyclingArrayList<Pose3D> waypoints = new RecyclingArrayList<>(Pose3D.class);
@@ -33,7 +33,7 @@ public class WaypointBasedTrajectoryCommand
    @Override
    public void clear()
    {
-      endEffectorNameBasedHashCode = NameBasedHashCodeTools.NULL_HASHCODE;
+      endEffectorHashCode = 0;
       endEffector = null;
       waypointTimes.clear();
       waypoints.clear();
@@ -47,7 +47,7 @@ public class WaypointBasedTrajectoryCommand
    {
       clear();
 
-      endEffectorNameBasedHashCode = other.endEffectorNameBasedHashCode;
+      endEffectorHashCode = other.endEffectorHashCode;
       endEffector = other.endEffector;
 
       for (int i = 0; i < other.getNumberOfWaypoints(); i++)
@@ -64,36 +64,41 @@ public class WaypointBasedTrajectoryCommand
    }
 
    @Override
-   public void set(WaypointBasedTrajectoryMessage message)
+   public void setFromMessage(WaypointBasedTrajectoryMessage message)
    {
       set(message, null, null);
    }
 
    @Override
-   public void set(WaypointBasedTrajectoryMessage message, Map<Long, RigidBody> rigidBodyNamedBasedHashMap,
+   public void set(WaypointBasedTrajectoryMessage message, Map<Integer, RigidBodyBasics> rigidBodyNamedBasedHashMap,
                    ReferenceFrameHashCodeResolver referenceFrameResolver)
    {
       clear();
 
-      endEffectorNameBasedHashCode = message.getEndEffectorNameBasedHashCode();
+      endEffectorHashCode = message.getEndEffectorHashCode();
       if (rigidBodyNamedBasedHashMap == null)
          endEffector = null;
       else
-         endEffector = rigidBodyNamedBasedHashMap.get(endEffectorNameBasedHashCode);
+         endEffector = rigidBodyNamedBasedHashMap.get(endEffectorHashCode);
 
-      for (int i = 0; i < message.getNumberOfWaypoints(); i++)
+      for (int i = 0; i < message.getWaypoints().size(); i++)
       {
-         waypointTimes.add(message.getWaypointTime(i));
-         waypoints.add().set(message.getWaypoint(i));
+         waypointTimes.add(message.getWaypointTimes().get(i));
+         waypoints.add().set(message.getWaypoints().get(i));
       }
 
-      message.getControlFramePose(endEffector, controlFramePose);
-      message.getSelectionMatrix(selectionMatrix);
+      ReferenceFrame referenceFrame = endEffector == null ? null : endEffector.getBodyFixedFrame();
+      controlFramePose.setIncludingFrame(referenceFrame, message.getControlFramePositionInEndEffector(), message.getControlFrameOrientationInEndEffector());
+      selectionMatrix.resetSelection();
+      SelectionMatrix3DMessage angularSelection = message.getAngularSelectionMatrix();
+      SelectionMatrix3DMessage linearSelection = message.getLinearSelectionMatrix();
+      selectionMatrix.setAngularAxisSelection(angularSelection.getXSelected(), angularSelection.getYSelected(), angularSelection.getZSelected());
+      selectionMatrix.setLinearAxisSelection(linearSelection.getXSelected(), linearSelection.getYSelected(), linearSelection.getZSelected());
       
-      weight = message.weight;
+      weight = message.getWeight();
    }
 
-   public RigidBody getEndEffector()
+   public RigidBodyBasics getEndEffector()
    {
       return endEffector;
    }

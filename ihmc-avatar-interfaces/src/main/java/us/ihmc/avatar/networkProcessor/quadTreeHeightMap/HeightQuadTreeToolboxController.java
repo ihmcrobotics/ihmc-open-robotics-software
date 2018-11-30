@@ -5,38 +5,38 @@ import java.util.concurrent.atomic.AtomicReference;
 
 import org.apache.commons.lang3.mutable.MutableBoolean;
 
+import controller_msgs.msg.dds.CapturabilityBasedStatus;
+import controller_msgs.msg.dds.RobotConfigurationData;
+import gnu.trove.list.array.TFloatArrayList;
 import us.ihmc.avatar.networkProcessor.modules.ToolboxController;
 import us.ihmc.commons.PrintTools;
 import us.ihmc.communication.controllerAPI.CommandInputManager;
 import us.ihmc.communication.controllerAPI.StatusMessageOutputManager;
-import us.ihmc.communication.net.PacketConsumer;
-import us.ihmc.communication.packetCommunicator.PacketCommunicator;
-import us.ihmc.communication.packets.RequestLidarScanMessage;
+import us.ihmc.euclid.referenceFrame.FrameConvexPolygon2D;
 import us.ihmc.euclid.referenceFrame.FramePoint2D;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple3D.Point3D;
-import us.ihmc.euclid.tuple3D.Vector3D32;
-import us.ihmc.euclid.tuple4D.Quaternion32;
-import us.ihmc.humanoidRobotics.communication.packets.walking.CapturabilityBasedStatus;
+import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.euclid.tuple4D.Quaternion;
+import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.humanoidRobotics.communication.toolbox.heightQuadTree.command.HeightQuadTreeToolboxRequestCommand;
 import us.ihmc.humanoidRobotics.communication.toolbox.heightQuadTree.command.LidarScanCommand;
+import us.ihmc.mecano.multiBodySystem.interfaces.FloatingJointBasics;
+import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotModels.FullRobotModelUtils;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.robotics.geometry.FrameConvexPolygon2d;
 import us.ihmc.robotics.lists.FrameTupleArrayList;
 import us.ihmc.robotics.quadTree.Box;
 import us.ihmc.robotics.quadTree.QuadTreeForGroundParameters;
 import us.ihmc.robotics.robotSide.RobotSide;
-import us.ihmc.robotics.screwTheory.FloatingInverseDynamicsJoint;
-import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.robotics.sensors.ForceSensorDefinition;
 import us.ihmc.robotics.sensors.IMUDefinition;
-import us.ihmc.sensorProcessing.communication.packets.dataobjects.RobotConfigurationData;
+import us.ihmc.sensorProcessing.communication.packets.dataobjects.RobotConfigurationDataFactory;
 import us.ihmc.sensorProcessing.pointClouds.combinationQuadTreeOctTree.QuadTreeForGroundHeightMap;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
 
 public class HeightQuadTreeToolboxController extends ToolboxController
 {
@@ -63,36 +63,36 @@ public class HeightQuadTreeToolboxController extends ToolboxController
    private final FrameTupleArrayList<FramePoint3D> contactPoints = FrameTupleArrayList.createFramePointArrayList();
    private final int expectedRobotConfigurationDataHash;
    private final FullHumanoidRobotModel fullRobotModel;
-   private final FloatingInverseDynamicsJoint rootJoint;
-   private final OneDoFJoint[] oneDoFJoints;
-   private final PacketCommunicator packetCommunicator;
+   private final FloatingJointBasics rootJoint;
+   private final OneDoFJointBasics[] oneDoFJoints;
 
    private final Point2D robotPosition2d = new Point2D();
    private final double quadTreeMessageMaxRadius = 5.0;
 
-   public HeightQuadTreeToolboxController(FullHumanoidRobotModel fullRobotModel, PacketCommunicator packetCommunicator, CommandInputManager commandInputManager,
-         StatusMessageOutputManager statusOutputManager, YoVariableRegistry parentRegistry)
+   public HeightQuadTreeToolboxController(FullHumanoidRobotModel fullRobotModel, CommandInputManager commandInputManager,
+                                          StatusMessageOutputManager statusOutputManager, YoVariableRegistry parentRegistry)
    {
       super(statusOutputManager, parentRegistry);
       this.fullRobotModel = fullRobotModel;
-      this.packetCommunicator = packetCommunicator;
       rootJoint = fullRobotModel.getRootJoint();
       this.commandInputManager = commandInputManager;
 
       oneDoFJoints = FullRobotModelUtils.getAllJointsExcludingHands(fullRobotModel);
       ForceSensorDefinition[] forceSensorDefinitions = fullRobotModel.getForceSensorDefinitions();
       IMUDefinition[] imuDefinitions = fullRobotModel.getIMUDefinitions();
-      expectedRobotConfigurationDataHash = RobotConfigurationData.calculateJointNameHash(oneDoFJoints, forceSensorDefinitions, imuDefinitions);
+      expectedRobotConfigurationDataHash = RobotConfigurationDataFactory.calculateJointNameHash(oneDoFJoints, forceSensorDefinitions, imuDefinitions);
 
       Box bounds = new Box(-QUAD_TREE_EXTENT, -QUAD_TREE_EXTENT, QUAD_TREE_EXTENT, QUAD_TREE_EXTENT);
       QuadTreeForGroundParameters quadTreeParameters = new QuadTreeForGroundParameters(RESOLUTION, quadtreeHeightThreshold,
-            quadTreeMaxMultiLevelZChangeToFilterNoise, maxSameHeightPointsPerNode, maxAllowableXYDistanceForAPointToBeConsideredClose, maximumNumberOfPoints);
+                                                                                       quadTreeMaxMultiLevelZChangeToFilterNoise, maxSameHeightPointsPerNode,
+                                                                                       maxAllowableXYDistanceForAPointToBeConsideredClose,
+                                                                                       maximumNumberOfPoints);
 
       quadTree = new QuadTreeForGroundHeightMap(bounds, quadTreeParameters);
    }
 
    @Override
-   protected boolean initialize()
+   public boolean initialize()
    {
       return true;
    }
@@ -101,10 +101,8 @@ public class HeightQuadTreeToolboxController extends ToolboxController
    private final MutableBoolean quadTreeUpdateRequested = new MutableBoolean(false);
 
    @Override
-   protected void updateInternal()
+   public void updateInternal()
    {
-      packetCommunicator.send(new RequestLidarScanMessage());
-
       updateRobotContactPoints();
 
       // Wait until we receive some contact points.
@@ -122,7 +120,7 @@ public class HeightQuadTreeToolboxController extends ToolboxController
          {
             PrintTools.info("clearing the quad tree!");
             quadTree.clearTree(Double.NaN);
-            commandInputManager.flushAllCommands();
+            commandInputManager.clearAllCommands();
             return;
          }
       }
@@ -177,7 +175,7 @@ public class HeightQuadTreeToolboxController extends ToolboxController
          if (DEBUG)
             PrintTools.debug("QuadTree has changed, sending packet");
          Point3D rootJointPosition = new Point3D();
-         rootJoint.getTranslation(rootJointPosition);
+         rootJointPosition.set(rootJoint.getJointPose().getPosition());
          robotPosition2d.set(rootJointPosition.getX(), rootJointPosition.getY());
          reportMessage(HeightQuadTreeMessageConverter.convertQuadTreeForGround(quadTree, robotPosition2d, quadTreeMessageMaxRadius));
          quadTreeUpdateRequested.setValue(false);
@@ -191,19 +189,19 @@ public class HeightQuadTreeToolboxController extends ToolboxController
       RobotConfigurationData robotConfigurationData = robotConfigurationDataToProcess.getAndSet(null);
       if (robotConfigurationData != null)
       {
-         if (expectedRobotConfigurationDataHash != robotConfigurationData.jointNameHash)
+         if (expectedRobotConfigurationDataHash != robotConfigurationData.getJointNameHash())
             throw new RuntimeException("Received a " + RobotConfigurationData.class.getSimpleName() + " that does not match the fullRobotModel.");
 
-         float[] newJointAngles = robotConfigurationData.getJointAngles();
-         for (int i = 0; i < newJointAngles.length; i++)
+         TFloatArrayList newJointAngles = robotConfigurationData.getJointAngles();
+         for (int i = 0; i < newJointAngles.size(); i++)
          {
-            oneDoFJoints[i].setQ(newJointAngles[i]);
+            oneDoFJoints[i].setQ(newJointAngles.get(i));
          }
 
-         Vector3D32 translation = robotConfigurationData.getPelvisTranslation();
-         rootJoint.setPosition(translation.getX(), translation.getY(), translation.getZ());
-         Quaternion32 orientation = robotConfigurationData.getPelvisOrientation();
-         rootJoint.setRotation(orientation.getX(), orientation.getY(), orientation.getZ(), orientation.getS());
+         Vector3D translation = robotConfigurationData.getRootTranslation();
+         rootJoint.getJointPose().setPosition(translation.getX(), translation.getY(), translation.getZ());
+         Quaternion orientation = robotConfigurationData.getRootOrientation();
+         rootJoint.getJointPose().getOrientation().setQuaternion(orientation.getX(), orientation.getY(), orientation.getZ(), orientation.getS());
          rootJoint.getPredecessor().updateFramesRecursively();
       }
 
@@ -215,10 +213,10 @@ public class HeightQuadTreeToolboxController extends ToolboxController
          for (RobotSide robotSide : RobotSide.values)
          {
             ReferenceFrame soleFrame = fullRobotModel.getSoleFrame(robotSide);
-            FrameConvexPolygon2d footSupportPolygon = capturabilityBasedStatus.getFootSupportPolygon(robotSide);
+            FrameConvexPolygon2D footSupportPolygon = HumanoidMessageTools.unpackFootSupportPolygon(capturabilityBasedStatus, robotSide);
             for (int contactPointIndex = 0; contactPointIndex < footSupportPolygon.getNumberOfVertices(); contactPointIndex++)
             {
-               footSupportPolygon.getFrameVertex(contactPointIndex, contactPoint2d);
+               contactPoint2d.setIncludingFrame(footSupportPolygon.getVertex(contactPointIndex));
                findProjectionOntoPlaneFrame(soleFrame, contactPoint2d, contactPoints.add());
             }
          }
@@ -251,34 +249,20 @@ public class HeightQuadTreeToolboxController extends ToolboxController
       return z;
    }
 
-   PacketConsumer<RobotConfigurationData> robotConfigurationDataConsumer()
+   public void receivedPacket(RobotConfigurationData packet)
    {
-      return new PacketConsumer<RobotConfigurationData>()
-      {
-         @Override
-         public void receivedPacket(RobotConfigurationData packet)
-         {
-            if (packet != null)
-               robotConfigurationDataToProcess.set(packet);
-         }
-      };
+      if (packet != null)
+         robotConfigurationDataToProcess.set(packet);
    }
 
-   PacketConsumer<CapturabilityBasedStatus> capturabilityBasedStatusConsumer()
+   public void receivedPacket(CapturabilityBasedStatus packet)
    {
-      return new PacketConsumer<CapturabilityBasedStatus>()
-      {
-         @Override
-         public void receivedPacket(CapturabilityBasedStatus packet)
-         {
-            if (packet != null)
-               capturabilityBasedStatusToProcess.set(packet);
-         }
-      };
+      if (packet != null)
+         capturabilityBasedStatusToProcess.set(packet);
    }
 
    @Override
-   protected boolean isDone()
+   public boolean isDone()
    {
       return false;
    }

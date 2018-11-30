@@ -5,7 +5,9 @@ import org.ejml.data.DenseMatrix64F;
 import us.ihmc.euclid.matrix.RotationMatrix;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DBasics;
-import us.ihmc.robotics.screwTheory.RigidBody;
+import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
+import us.ihmc.euclid.tuple4D.interfaces.QuaternionReadOnly;
+import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 
 public interface IMUSensorReadOnly
 {
@@ -13,13 +15,37 @@ public interface IMUSensorReadOnly
 
    public abstract ReferenceFrame getMeasurementFrame();
 
-   public abstract RigidBody getMeasurementLink();
+   public abstract RigidBodyBasics getMeasurementLink();
 
-   public abstract void getOrientationMeasurement(RotationMatrix orientationToPack);
+   public abstract QuaternionReadOnly getOrientationMeasurement();
 
-   public abstract void getAngularVelocityMeasurement(Vector3DBasics angularVelocityToPack);
+   /**
+    * @deprecated use {@link #getOrientationMeasurement()} instead.
+    */
+   public default void getOrientationMeasurement(RotationMatrix orientationToPack)
+   {
+      orientationToPack.set(getOrientationMeasurement());
+   }
 
-   public abstract void getLinearAccelerationMeasurement(Vector3DBasics linearAccelerationToPack);
+   public abstract Vector3DReadOnly getAngularVelocityMeasurement();
+
+   /**
+    * @deprecated use {@link #getAngularVelocityMeasurement()} instead.
+    */
+   public default void getAngularVelocityMeasurement(Vector3DBasics angularVelocityToPack)
+   {
+      angularVelocityToPack.set(getAngularVelocityMeasurement());
+   }
+
+   public abstract Vector3DReadOnly getLinearAccelerationMeasurement();
+
+   /**
+    * @deprecated use {@link #getLinearAccelerationMeasurement()} instead.
+    */
+   public default void getLinearAccelerationMeasurement(Vector3DBasics linearAccelerationToPack)
+   {
+      linearAccelerationToPack.set(getLinearAccelerationMeasurement());
+   }
 
    public abstract void getOrientationNoiseCovariance(DenseMatrix64F noiseCovarianceToPack);
 

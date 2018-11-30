@@ -6,6 +6,7 @@ import javafx.animation.AnimationTimer;
 import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Scene;
+import javafx.scene.image.Image;
 import javafx.scene.layout.Pane;
 import javafx.stage.Stage;
 import us.ihmc.parameterTuner.guiElements.GuiParameter;
@@ -13,18 +14,18 @@ import us.ihmc.parameterTuner.guiElements.GuiRegistry;
 
 public abstract class ParameterTuningApplication extends Application
 {
-   private static final String FXML_FILE = "gui.fxml";
-   private static final String CSS_FILE = "gui.css";
+   private static final String FXML_FILE = "/gui.fxml";
 
    @Override
    public void start(Stage primaryStage) throws Exception
    {
+      primaryStage.getIcons().add(new Image(ParameterTuningApplication.class.getResourceAsStream("/icon.png")));
+
       ParameterGuiInterface guiInterface = createInputManager();
 
       FXMLLoader mainLoader = new FXMLLoader();
       mainLoader.setLocation(ParameterTuningApplication.class.getResource(FXML_FILE));
       Scene mainScene = new Scene(mainLoader.<Pane> load());
-      mainScene.getStylesheets().add(ParameterTuningApplication.class.getResource(CSS_FILE).toString());
 
       GuiController controller = mainLoader.getController();
       controller.addInputNode(guiInterface.getInputManagerNode());
@@ -37,8 +38,14 @@ public abstract class ParameterTuningApplication extends Application
             // Check if registry structure needs to be reloaded.
             if (guiInterface.pollReloadAll())
             {
-               GuiRegistry fullRegistry = guiInterface.getFullRegistryCopy();
-               controller.setRegistry(fullRegistry);
+               List<GuiRegistry> fullRegistries = guiInterface.getRegistriesCopy();
+               controller.setRegistries(fullRegistries);
+            }
+
+            // Check if the user changed the root registries.
+            if (controller.areRootRegistriesChanged())
+            {
+               guiInterface.changeRootRegistries(controller.pollRootRegistryNames());
             }
 
             // If parameters were changed in the GUI forward copies to the interface.
@@ -61,6 +68,7 @@ public abstract class ParameterTuningApplication extends Application
       primaryStage.setOnCloseRequest(event -> {
          animationTimer.stop();
          guiInterface.shutdown();
+         controller.close();
       });
 
       primaryStage.setTitle(getClass().getSimpleName());

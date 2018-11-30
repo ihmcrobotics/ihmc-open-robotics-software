@@ -3,6 +3,7 @@ package us.ihmc.robotEnvironmentAwareness.ui.graphicsBuilders;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 
+import controller_msgs.msg.dds.LidarScanMessage;
 import javafx.collections.ObservableList;
 import javafx.scene.Group;
 import javafx.scene.Node;
@@ -10,7 +11,7 @@ import javafx.scene.paint.Color;
 import javafx.scene.paint.Material;
 import javafx.scene.paint.PhongMaterial;
 import javafx.scene.shape.MeshView;
-import us.ihmc.communication.packets.LidarScanMessage;
+import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.euclid.tuple3D.Point3D32;
 import us.ihmc.graphicsDescription.MeshDataGenerator;
 import us.ihmc.javaFXToolkit.shapes.JavaFXMultiColorMeshBuilder;
@@ -39,11 +40,8 @@ public class LidarScanViewer implements Runnable
    private final AtomicReference<Integer> numberOfScans;
    private final AtomicInteger currentScanIndex = new AtomicInteger(0);
 
-   private final REAUIMessager uiMessager;
-
    public LidarScanViewer(REAUIMessager uiMessager)
    {
-      this.uiMessager = uiMessager;
       newMessageToRender = uiMessager.createInput(REAModuleAPI.LidarScanState);
       enable = uiMessager.createInput(REAModuleAPI.UILidarScanShow, false);
       clear = uiMessager.createInput(REAModuleAPI.UILidarScanClear, false);
@@ -88,19 +86,18 @@ public class LidarScanViewer implements Runnable
 
       LidarScanMessage message = newMessageToRender.getAndSet(null);
 
-      uiMessager.submitStateRequestToModule(REAModuleAPI.RequestLidarScan);
-
       if (message == null)
          return;
 
       Point3D32 scanPoint = new Point3D32();
       meshBuilder.clear();
-      for (int i = 0; i < message.getNumberOfScanPoints(); i++)
+      int numberOfScanPoints = message.getScan().size() / 3;
+      for (int i = 0; i < numberOfScanPoints; i++)
       {
-         double alpha = i / (double) message.getNumberOfScanPoints();
+         double alpha = i / (double) numberOfScanPoints;
          Color color = Color.hsb(alpha * 240.0, 1.0, 1.0);
 
-         message.getScanPoint(i, scanPoint);
+         MessageTools.unpackScanPoint(message, i, scanPoint);
 
          meshBuilder.addMesh(MeshDataGenerator.Tetrahedron(SCAN_POINT_SIZE), scanPoint, color);
       }

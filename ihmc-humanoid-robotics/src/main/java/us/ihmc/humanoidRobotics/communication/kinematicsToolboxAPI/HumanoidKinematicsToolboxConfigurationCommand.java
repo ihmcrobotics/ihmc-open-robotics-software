@@ -1,7 +1,7 @@
 package us.ihmc.humanoidRobotics.communication.kinematicsToolboxAPI;
 
+import controller_msgs.msg.dds.HumanoidKinematicsToolboxConfigurationMessage;
 import us.ihmc.communication.controllerAPI.command.Command;
-import us.ihmc.communication.packets.HumanoidKinematicsToolboxConfigurationMessage;
 
 public class HumanoidKinematicsToolboxConfigurationCommand
       implements Command<HumanoidKinematicsToolboxConfigurationCommand, HumanoidKinematicsToolboxConfigurationMessage>
@@ -24,10 +24,10 @@ public class HumanoidKinematicsToolboxConfigurationCommand
    }
 
    @Override
-   public void set(HumanoidKinematicsToolboxConfigurationMessage message)
+   public void setFromMessage(HumanoidKinematicsToolboxConfigurationMessage message)
    {
-      holdCurrentCenterOfMassXYPosition = message.holdCurrentCenterOfMassXYPosition();
-      holdSupportFootPositions = message.holdSupportFootPositions();
+      holdCurrentCenterOfMassXYPosition = message.getHoldCurrentCenterOfMassXyPosition();
+      holdSupportFootPositions = message.getHoldSupportFootPositions();
    }
 
    public boolean holdCurrentCenterOfMassXYPosition()

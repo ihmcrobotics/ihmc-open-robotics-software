@@ -2,13 +2,13 @@ package us.ihmc.avatar.sensors.microphone;
 
 import java.io.IOException;
 
+import controller_msgs.msg.dds.DrillDetectionPacket;
+import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.communication.net.ConnectionStateListener;
 import us.ihmc.communication.packetCommunicator.PacketCommunicator;
 import us.ihmc.communication.packets.PacketDestination;
 import us.ihmc.communication.util.NetworkPorts;
-import us.ihmc.humanoidRobotics.communication.packets.sensing.DrillDetectionPacket;
 import us.ihmc.humanoidRobotics.kryo.IHMCCommunicationKryoNetClassList;
-import us.ihmc.commons.thread.ThreadTools;
 
 public class DrillDetectionProcess extends DrillDetectionThread implements ConnectionStateListener
 {
@@ -43,8 +43,8 @@ public class DrillDetectionProcess extends DrillDetectionThread implements Conne
       if (now - lastSentPacketTimestamp < SEND_PERIOD_MS) { return; }
 
       DrillDetectionPacket packet = new DrillDetectionPacket();
-      packet.setDestination(PacketDestination.UI);
-      packet.isDrillOn = result.isOn;
+      packet.setDestination(PacketDestination.UI.ordinal());
+      packet.setIsDrillOn(result.isOn);
 //      packet.averageValues = result.averageValues;
 
       packetCommunicator.send(packet);

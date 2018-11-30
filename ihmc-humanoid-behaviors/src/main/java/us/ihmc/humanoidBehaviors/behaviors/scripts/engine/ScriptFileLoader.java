@@ -17,7 +17,6 @@ import com.thoughtworks.xstream.mapper.MapperWrapper;
 
 import us.ihmc.commons.PrintTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
-import us.ihmc.humanoidRobotics.communication.TransformableDataObject;
 
 public class ScriptFileLoader
 {
@@ -120,10 +119,7 @@ public class ScriptFileLoader
       try
       {
          object = inputStream.readObject();
-         if (object instanceof TransformableDataObject)
-         {
-            object = ((TransformableDataObject) object).transform(transform);
-         }
+         MessageTransformer.transform(object, transform);
          return object;
       }
       catch (ClassNotFoundException e)

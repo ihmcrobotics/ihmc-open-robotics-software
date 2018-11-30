@@ -5,6 +5,7 @@ import org.ejml.data.DenseMatrix64F;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.mecano.spatial.SpatialVector;
 
 /**
  * Jacobian that maps joint velocities to the velocity of a point fixed
@@ -44,7 +45,7 @@ public class PointJacobian
       translation.set(point);
 
       int angularPartStartRow = 0;
-      int linearPartStartRow = SpatialMotionVector.SIZE / 2;
+      int linearPartStartRow = SpatialVector.SIZE / 2;
 
       for (int i = 0; i < geometricJacobian.getNumberOfColumns(); i++)
       {

@@ -1,5 +1,8 @@
 package us.ihmc.robotEnvironmentAwareness.updaters;
 
+import static us.ihmc.robotEnvironmentAwareness.communication.REACommunicationProperties.publisherTopicNameGenerator;
+import static us.ihmc.robotEnvironmentAwareness.communication.REACommunicationProperties.subscriberTopicNameGenerator;
+
 import java.io.File;
 import java.io.IOException;
 import java.util.concurrent.ScheduledExecutorService;
@@ -9,20 +12,22 @@ import java.util.concurrent.atomic.AtomicReference;
 
 import com.google.common.util.concurrent.AtomicDouble;
 
+import controller_msgs.msg.dds.LidarScanMessage;
 import us.ihmc.commons.PrintTools;
-import us.ihmc.communication.configuration.NetworkParameterKeys;
-import us.ihmc.communication.configuration.NetworkParameters;
-import us.ihmc.communication.packetCommunicator.PacketCommunicator;
+import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.util.NetworkPorts;
 import us.ihmc.jOctoMap.ocTree.NormalOcTree;
 import us.ihmc.jOctoMap.tools.JOctoMapTools;
-import us.ihmc.robotEnvironmentAwareness.communication.REACommunicationKryoNetClassLists;
-import us.ihmc.robotEnvironmentAwareness.communication.REAMessager;
-import us.ihmc.robotEnvironmentAwareness.communication.REAMessagerOverNetwork;
+import us.ihmc.javaFXToolkit.messager.Messager;
+import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
+import us.ihmc.pubsub.subscriber.Subscriber;
+import us.ihmc.robotEnvironmentAwareness.communication.KryoMessager;
+import us.ihmc.robotEnvironmentAwareness.communication.REACommunicationProperties;
 import us.ihmc.robotEnvironmentAwareness.communication.REAModuleAPI;
 import us.ihmc.robotEnvironmentAwareness.io.FilePropertyHelper;
 import us.ihmc.robotEnvironmentAwareness.tools.ExecutorServiceTools;
 import us.ihmc.robotEnvironmentAwareness.tools.ExecutorServiceTools.ExceptionHandling;
+import us.ihmc.ros2.Ros2Node;
 
 public class LIDARBasedREAModule
 {
@@ -38,8 +43,7 @@ public class LIDARBasedREAModule
    private static final double OCTREE_RESOLUTION = 0.02;
    protected static final boolean DEBUG = true;
 
-   private final String networkManagerHost = NetworkParameters.getHost(NetworkParameterKeys.networkManager);
-   private final PacketCommunicator publicPacketCommunicator;
+   private final Ros2Node ros2Node = ROS2Tools.createRos2Node(PubSubImplementation.FAST_RTPS, "REA_module");
 
    private final NormalOcTree mainOctree = new NormalOcTree(OCTREE_RESOLUTION);
 
@@ -54,30 +58,38 @@ public class LIDARBasedREAModule
 
    private ScheduledExecutorService executorService = ExecutorServiceTools.newScheduledThreadPool(3, getClass(), ExceptionHandling.CATCH_AND_REPORT);
    private ScheduledFuture<?> scheduled;
-   private final REAMessager reaMessager;
+   private final Messager reaMessager;
 
-   private LIDARBasedREAModule(REAMessager reaMessager, File configurationFile) throws IOException
+   private LIDARBasedREAModule(Messager reaMessager, File configurationFile) throws IOException
    {
       this.reaMessager = reaMessager;
 
-      publicPacketCommunicator = PacketCommunicator.createTCPPacketCommunicatorClient(networkManagerHost, NetworkPorts.REA_MODULE_PORT, REACommunicationKryoNetClassLists.getPublicNetClassList());
-      publicPacketCommunicator.connect();
-
-      moduleStateReporter = new REAModuleStateReporter(reaMessager, publicPacketCommunicator);
-
-      bufferUpdater = new REAOcTreeBuffer(mainOctree.getResolution(), reaMessager, moduleStateReporter, publicPacketCommunicator);
-      mainUpdater = new REAOcTreeUpdater(mainOctree, bufferUpdater, reaMessager, publicPacketCommunicator);
+      moduleStateReporter = new REAModuleStateReporter(reaMessager);
+      bufferUpdater = new REAOcTreeBuffer(mainOctree.getResolution(), reaMessager, moduleStateReporter);
+      mainUpdater = new REAOcTreeUpdater(mainOctree, bufferUpdater, reaMessager);
       planarRegionFeatureUpdater = new REAPlanarRegionFeatureUpdater(mainOctree, reaMessager);
+
+      ROS2Tools.createCallbackSubscription(ros2Node, LidarScanMessage.class, "/ihmc/lidar_scan", this::dispatchLidarScanMessage);
 
       FilePropertyHelper filePropertyHelper = new FilePropertyHelper(configurationFile);
       loadConfigurationFile(filePropertyHelper);
 
       reaMessager.registerTopicListener(REAModuleAPI.SaveBufferConfiguration, (content) -> bufferUpdater.saveConfiguration(filePropertyHelper));
       reaMessager.registerTopicListener(REAModuleAPI.SaveMainUpdaterConfiguration, (content) -> mainUpdater.saveConfiguration(filePropertyHelper));
-      reaMessager.registerTopicListener(REAModuleAPI.SaveRegionUpdaterConfiguration, (content) -> planarRegionFeatureUpdater.saveConfiguration(filePropertyHelper));
+      reaMessager.registerTopicListener(REAModuleAPI.SaveRegionUpdaterConfiguration,
+                                        (content) -> planarRegionFeatureUpdater.saveConfiguration(filePropertyHelper));
 
-      planarRegionNetworkProvider = new REAPlanarRegionPublicNetworkProvider(planarRegionFeatureUpdater, publicPacketCommunicator);
+      planarRegionNetworkProvider = new REAPlanarRegionPublicNetworkProvider(planarRegionFeatureUpdater, ros2Node, publisherTopicNameGenerator,
+                                                                             subscriberTopicNameGenerator);
       clearOcTree = reaMessager.createInput(REAModuleAPI.OcTreeClear, false);
+   }
+
+   private void dispatchLidarScanMessage(Subscriber<LidarScanMessage> subscriber)
+   {
+      LidarScanMessage message = subscriber.takeNextData();
+      moduleStateReporter.registerLidarScanMessage(message);
+      bufferUpdater.handleLidarScanMessage(message);
+      mainUpdater.handleLidarScanMessage(message);
    }
 
    private void loadConfigurationFile(FilePropertyHelper filePropertyHelper)
@@ -158,13 +170,12 @@ public class LIDARBasedREAModule
       }
    }
 
-   public void stop()
+   public void stop() throws Exception
    {
       PrintTools.info("REA Module is going down.");
-      publicPacketCommunicator.closeConnection();
-      publicPacketCommunicator.disconnect();
 
       reaMessager.closeMessager();
+      ros2Node.destroy();
 
       if (scheduled != null)
       {
@@ -179,16 +190,17 @@ public class LIDARBasedREAModule
       }
    }
 
-   public static LIDARBasedREAModule createRemoteModule(String configurationFilePath) throws IOException
+   public static LIDARBasedREAModule createRemoteModule(String configurationFilePath) throws Exception
    {
-      REAMessager server = REAMessagerOverNetwork.createTCPServer(REAModuleAPI.API, NetworkPorts.REA_MODULE_UI_PORT, REACommunicationKryoNetClassLists.getPrivateNetClassList());
+      Messager server = KryoMessager.createTCPServer(REAModuleAPI.API, NetworkPorts.REA_MODULE_UI_PORT, REACommunicationProperties.getPrivateNetClassList());
       server.startMessager();
       return new LIDARBasedREAModule(server, new File(configurationFilePath));
    }
 
-   public static LIDARBasedREAModule createIntraprocessModule(String configurationFilePath) throws IOException
+   public static LIDARBasedREAModule createIntraprocessModule(String configurationFilePath) throws Exception
    {
-      REAMessager messager = REAMessagerOverNetwork.createIntraprocess(REAModuleAPI.API, NetworkPorts.REA_MODULE_UI_PORT, REACommunicationKryoNetClassLists.getPrivateNetClassList());
+      Messager messager = KryoMessager.createIntraprocess(REAModuleAPI.API, NetworkPorts.REA_MODULE_UI_PORT,
+                                                          REACommunicationProperties.getPrivateNetClassList());
       messager.startMessager();
       return new LIDARBasedREAModule(messager, new File(configurationFilePath));
    }

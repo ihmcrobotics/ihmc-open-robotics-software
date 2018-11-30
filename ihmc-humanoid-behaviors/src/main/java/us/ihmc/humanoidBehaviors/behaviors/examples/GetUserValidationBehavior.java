@@ -1,10 +1,10 @@
 package us.ihmc.humanoidBehaviors.behaviors.examples;
 
-import us.ihmc.communication.packets.TextToSpeechPacket;
+import controller_msgs.msg.dds.SimpleCoactiveBehaviorDataPacket;
 import us.ihmc.humanoidBehaviors.behaviors.AbstractBehavior;
 import us.ihmc.humanoidBehaviors.communication.CoactiveDataListenerInterface;
 import us.ihmc.humanoidBehaviors.communication.CommunicationBridge;
-import us.ihmc.humanoidRobotics.communication.packets.behaviors.SimpleCoactiveBehaviorDataPacket;
+import us.ihmc.ros2.Ros2Node;
 
 public class GetUserValidationBehavior extends AbstractBehavior implements CoactiveDataListenerInterface
 {
@@ -14,11 +14,11 @@ public class GetUserValidationBehavior extends AbstractBehavior implements Coact
    CommunicationBridge coactiveBehaviorsNetworkManager;
    private boolean recievedMessage = false;
 
-   public GetUserValidationBehavior(CommunicationBridge communicationBridge)
+   public GetUserValidationBehavior(String robotName, Ros2Node ros2Node)
    {
-      super(communicationBridge);
-      coactiveBehaviorsNetworkManager = communicationBridge;
-      coactiveBehaviorsNetworkManager.addListeners(this);
+      super(robotName, ros2Node);
+      //      coactiveBehaviorsNetworkManager = ros2Node; // FIXME I broke it when switching to pub-sub (Sylvain)
+      //      coactiveBehaviorsNetworkManager.addListeners(this);
    }
 
    @Override
@@ -42,9 +42,7 @@ public class GetUserValidationBehavior extends AbstractBehavior implements Coact
    public void onBehaviorEntered()
    {
       //reset necessary values so this behavior can run again properly
-      TextToSpeechPacket p1 = new TextToSpeechPacket("Waiting For User Validation");
-      sendPacket(p1);
-
+      publishTextToSpeack("Waiting For User Validation");
       validated = false;
       recievedMessage = false;
       //maybe let the UI know this specific behavior has started
@@ -55,8 +53,7 @@ public class GetUserValidationBehavior extends AbstractBehavior implements Coact
    @Override
    public void onBehaviorExited()
    {
-      TextToSpeechPacket p1 = new TextToSpeechPacket("Got User Validation");
-      sendPacket(p1);
+      publishTextToSpeack("Got User Validation");
       //let the UI know this specific behavior has ended
       coactiveBehaviorsNetworkManager.sendToUI("GetLidarScanExampleBehavior", 0);
       coactiveBehaviorsNetworkManager.sendToUI("WaitingForValidation", 0);
@@ -66,9 +63,9 @@ public class GetUserValidationBehavior extends AbstractBehavior implements Coact
    @Override
    public void coactiveDataRecieved(SimpleCoactiveBehaviorDataPacket data)
    {
-      if (data.key.equalsIgnoreCase("validate"))
+      if (data.getKeyAsString().equalsIgnoreCase("validate"))
       {
-         if (data.value == 1)
+         if (data.getValue() == 1)
          {
             validated = true;
          }

@@ -4,16 +4,15 @@ import java.io.IOException;
 
 import org.junit.After;
 import org.junit.Before;
-import org.junit.Test;
 
 import junit.framework.AssertionFailedError;
+import org.junit.Test;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
-import us.ihmc.quadrupedRobotics.QuadrupedForceTestYoVariables;
-import us.ihmc.quadrupedRobotics.QuadrupedMultiRobotTestInterface;
-import us.ihmc.quadrupedRobotics.QuadrupedTestBehaviors;
-import us.ihmc.quadrupedRobotics.QuadrupedTestFactory;
+import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.quadrupedRobotics.*;
 import us.ihmc.quadrupedRobotics.controller.QuadrupedControlMode;
-import us.ihmc.robotics.dataStructures.parameter.ParameterRegistry;
+import us.ihmc.quadrupedRobotics.model.QuadrupedInitialPositionParameters;
+import us.ihmc.quadrupedRobotics.input.managers.QuadrupedTeleopManager;
 import us.ihmc.robotics.testing.YoVariableTestGoal;
 import us.ihmc.simulationconstructionset.util.InclinedGroundProfile;
 import us.ihmc.simulationconstructionset.util.ground.RampsGroundProfile;
@@ -24,135 +23,143 @@ public abstract class QuadrupedXGaitWalkingOverRampsTest implements QuadrupedMul
 {
    protected GoalOrientedTestConductor conductor;
    protected QuadrupedForceTestYoVariables variables;
+   private QuadrupedTeleopManager stepTeleopManager;
+   private QuadrupedTestFactory quadrupedTestFactory;
 
    @Before
    public void setup()
    {
-      ParameterRegistry.destroyAndRecreateInstance();
       MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " before test.");
+      quadrupedTestFactory = createQuadrupedTestFactory();
    }
    
    @After
    public void tearDown()
    {
+      quadrupedTestFactory.close();
+      conductor.concludeTesting();
       conductor = null;
       variables = null;
+      stepTeleopManager = null;
       
       MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " after test.");
    }
-   
-   @ContinuousIntegrationTest(estimatedDuration = 30.0)
-   @Test(timeout = 100000)
+
+   @ContinuousIntegrationTest(estimatedDuration = 80.0)
+   @Test(timeout = 2200000)
    public void testWalkingOverShallowRamps() throws IOException
    {
       RampsGroundProfile groundProfile = new RampsGroundProfile(0.075, 0.75, 1.2);
       
-      walkOverRamps(groundProfile);
+      walkOverRamps(groundProfile, getComHeightForRoughTerrain());
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 30.0)
-   @Test(timeout = 100000)
+   @ContinuousIntegrationTest(estimatedDuration = 80.0)
+   @Test(timeout = 2000000)
    public void testWalkingOverAggressiveRamps() throws IOException
    {
       RampsGroundProfile groundProfile = new RampsGroundProfile(0.15, 0.75, 1.2);
-      
-      walkOverRamps(groundProfile);
+      walkOverRamps(groundProfile, getComHeightForRoughTerrain());
    }
 
-   private void walkOverRamps(RampsGroundProfile groundProfile) throws IOException, AssertionFailedError
+   private void walkOverRamps(RampsGroundProfile groundProfile, double comHeightForRoughTerrain) throws IOException, AssertionFailedError
    {
-      QuadrupedTestFactory quadrupedTestFactory = createQuadrupedTestFactory();
       quadrupedTestFactory.setGroundProfile3D(groundProfile);
       quadrupedTestFactory.setControlMode(QuadrupedControlMode.FORCE);
+      quadrupedTestFactory.setUseNetworking(true);
       conductor = quadrupedTestFactory.createTestConductor();
       variables = new QuadrupedForceTestYoVariables(conductor.getScs());
+      stepTeleopManager = quadrupedTestFactory.getStepTeleopManager();
 
-      variables.getXGaitEndDoubleSupportDurationInput().set(0.05);
-      variables.getXGaitStanceLengthInput().set(1.00);
-      variables.getXGaitStanceWidthInput().set(0.30);
-      variables.getXGaitStepDurationInput().set(0.35);
-      variables.getXGaitStepGroundClearanceInput().set(0.1);
-      variables.getYoComPositionInputZ().set(0.575);
+      stepTeleopManager.getXGaitSettings().setEndDoubleSupportDuration(0.05);
+      stepTeleopManager.getXGaitSettings().setStanceLength(1.00);
+      stepTeleopManager.getXGaitSettings().setStanceWidth(0.30);
+      stepTeleopManager.getXGaitSettings().setStepDuration(0.35);
+      stepTeleopManager.getXGaitSettings().setStepGroundClearance(0.1);
+      stepTeleopManager.setDesiredBodyHeight(comHeightForRoughTerrain);
+      stepTeleopManager.setStepSnapper((x, y, minZ) -> new Point3D(x, y, groundProfile.heightAt(x, y, 0.0)));
 
-      QuadrupedTestBehaviors.readyXGait(conductor, variables);
-      QuadrupedTestBehaviors.enterXGait(conductor, variables);
-      
-      variables.getYoPlanarVelocityInputX().set(0.0);
+      QuadrupedTestBehaviors.readyXGait(conductor, variables, stepTeleopManager);
+
+      stepTeleopManager.setDesiredVelocity(0.0, 0.0, 0.0);
+      stepTeleopManager.requestXGait();
       conductor.addTerminalGoal(YoVariableTestGoal.doubleGreaterThan(variables.getYoTime(), variables.getYoTime().getDoubleValue() + 1.0));
       conductor.simulate();
-      
-      variables.getYoPlanarVelocityInputX().set(0.5);
-      conductor.addTimeLimit(variables.getYoTime(), 20.0);
+
+      stepTeleopManager.setDesiredVelocity(0.5, 0.0, 0.0);
+      conductor.addTimeLimit(variables.getYoTime(), 25.0);
       conductor.addTerminalGoal(YoVariableTestGoal.doubleGreaterThan(variables.getRobotBodyX(), 5.0));
       conductor.simulate();
-      
-      variables.getYoPlanarVelocityInputX().set(0.0);
+
+      stepTeleopManager.setDesiredVelocity(0.0, 0.0, 0.0);
       conductor.addTerminalGoal(YoVariableTestGoal.doubleGreaterThan(variables.getYoTime(), variables.getYoTime().getDoubleValue() + 1.0));
       conductor.simulate();
-      
-      variables.getYoPlanarVelocityInputX().set(-0.5);
-      conductor.addTimeLimit(variables.getYoTime(), 20.0);
+
+      stepTeleopManager.setDesiredVelocity(-0.5, 0.0, 0.0);
+      conductor.addTimeLimit(variables.getYoTime(), 25.0);
       conductor.addTerminalGoal(YoVariableTestGoal.doubleLessThan(variables.getRobotBodyX(), 0.0));
       conductor.simulate();
       
       conductor.concludeTesting();
    }
-   
-   @ContinuousIntegrationTest(estimatedDuration = 30.0)
-   @Test(timeout = 100000)
+
+   @ContinuousIntegrationTest(estimatedDuration = 45.0)
+   @Test(timeout = 1200000)
    public void testWalkingDownSlope() throws IOException
    {
-      walkSlope(0.2);
+      walkSlope(0.2, getWalkingDownSlopePosition());
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 30.0)
-   @Test(timeout = 100000)
+   @ContinuousIntegrationTest(estimatedDuration = 50.0)
+   @Test(timeout = 980000)
    public void testWalkingUpSlope() throws IOException
    {
-      walkSlope(-0.1);
+      walkSlope(-0.1, getWalkingUpSlopePosition());
    }
 
-   private void walkSlope(double slope) throws IOException, AssertionFailedError
+   private void walkSlope(double slope, QuadrupedInitialPositionParameters initialPosition) throws IOException, AssertionFailedError
    {
       InclinedGroundProfile groundProfile = new InclinedGroundProfile(slope);
-      
-      QuadrupedTestFactory quadrupedTestFactory = createQuadrupedTestFactory();
+      quadrupedTestFactory.setInitialPosition(initialPosition);
       quadrupedTestFactory.setGroundProfile3D(groundProfile);
       quadrupedTestFactory.setControlMode(QuadrupedControlMode.FORCE);
       quadrupedTestFactory.setUseStateEstimator(false);
+      quadrupedTestFactory.setUseNetworking(true);
       conductor = quadrupedTestFactory.createTestConductor();
       variables = new QuadrupedForceTestYoVariables(conductor.getScs());
+      stepTeleopManager = quadrupedTestFactory.getStepTeleopManager();
 
-      variables.getXGaitEndDoubleSupportDurationInput().set(0.05);
-      variables.getXGaitStanceLengthInput().set(1.00);
-      variables.getXGaitStanceWidthInput().set(0.30);
-      variables.getXGaitStepDurationInput().set(0.35);
-      variables.getXGaitStepGroundClearanceInput().set(0.1);
-      variables.getYoComPositionInputZ().set(0.575);
+      QuadrupedTestBehaviors.readyXGait(conductor, variables, stepTeleopManager);
 
-      QuadrupedTestBehaviors.readyXGait(conductor, variables);
-      QuadrupedTestBehaviors.enterXGait(conductor, variables);
-      
-      variables.getYoPlanarVelocityInputX().set(0.0);
+      stepTeleopManager.setDesiredVelocity(0.0, 0.0, 0.0);
+      stepTeleopManager.requestXGait();
       conductor.addTimeLimit(variables.getYoTime(), 5.0);
-      conductor.addTerminalGoal(YoVariableTestGoal.doubleGreaterThan(variables.getYoTime(), variables.getYoTime().getDoubleValue() + 1.0));
+      conductor.addTerminalGoal(QuadrupedTestGoals.timeInFuture(variables, 1.0));
       conductor.simulate();
-      
-      variables.getYoPlanarVelocityInputX().set(0.75);
-      conductor.addTimeLimit(variables.getYoTime(), 8.0);
-      conductor.addTerminalGoal(YoVariableTestGoal.doubleGreaterThan(variables.getRobotBodyX(), 5.0));
+
+      stepTeleopManager.setDesiredVelocity(getDesiredWalkingVelocity(), 0.0, 0.0);
+      conductor.addTimeLimit(variables.getYoTime(), 7.0);
+      conductor.addTerminalGoal(YoVariableTestGoal.doubleGreaterThan(variables.getRobotBodyX(), 2.0));
       conductor.simulate();
-      
-      variables.getYoPlanarVelocityInputX().set(0.0);
+
+      stepTeleopManager.setDesiredVelocity(0.0, 0.0, 0.0);
       conductor.addTimeLimit(variables.getYoTime(), 5.0);
-      conductor.addTerminalGoal(YoVariableTestGoal.doubleGreaterThan(variables.getYoTime(), variables.getYoTime().getDoubleValue() + 1.0));
+      conductor.addTerminalGoal(QuadrupedTestGoals.timeInFuture(variables, 1.0));
       conductor.simulate();
-      
-      variables.getYoPlanarVelocityInputX().set(-0.75);
-      conductor.addTimeLimit(variables.getYoTime(), 8.0);
+
+      stepTeleopManager.setDesiredVelocity(-getDesiredWalkingVelocity(), 0.0, 0.0);
+      conductor.addTimeLimit(variables.getYoTime(), 9.0);
       conductor.addTerminalGoal(YoVariableTestGoal.doubleLessThan(variables.getRobotBodyX(), 0.0));
       conductor.simulate();
       
       conductor.concludeTesting();
    }
+
+   public abstract double getDesiredWalkingVelocity();
+
+   public abstract double getComHeightForRoughTerrain();
+
+   public abstract QuadrupedInitialPositionParameters getWalkingDownSlopePosition();
+
+   public abstract QuadrupedInitialPositionParameters getWalkingUpSlopePosition();
 }

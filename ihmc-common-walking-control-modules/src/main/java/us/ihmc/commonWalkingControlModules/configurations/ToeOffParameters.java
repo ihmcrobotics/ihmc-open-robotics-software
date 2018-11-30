@@ -11,6 +11,15 @@ public abstract class ToeOffParameters
    public abstract boolean doToeOffIfPossibleInSingleSupport();
 
    /**
+    * When doing toe off in double support, look not only at the upcoming support foot, but also the next footstep location
+    * to determine the required ICP polygonal area.
+    */
+   public boolean lookAtTwoStepCapturabilityForToeOff()
+   {
+      return true;
+   }
+
+   /**
     * Whether or not the location of the ECMP must be close enough to the support polygon before allowing toe off.
     *
     * @return whether or not to check the ECMP location.
@@ -114,18 +123,35 @@ public abstract class ToeOffParameters
    /**
     * To enable that feature, {@link ToeOffParameters#doToeOffIfPossible()} return true is required.
     */
-   public boolean doToeOffWhenHittingKneeLimit()
+   public boolean doToeOffWhenHittingLeadingKneeUpperLimit()
    {
       return false;
    }
 
    /**
-    * Knee limit that triggers {@link ToeOffParameters#doToeOffWhenHittingKneeLimit()}.
+    * To enable that feature, {@link ToeOffParameters#doToeOffIfPossible()} return true is required.
+    */
+   public boolean doToeOffWhenHittingTrailingKneeLowerLimit()
+   {
+      return false;
+   }
+
+   /**
+    * Knee limit that triggers {@link ToeOffParameters#doToeOffWhenHittingLeadingKneeUpperLimit()}.
     * The maximum limit is taken between the returned value and the joint limit.
     */
    public double getKneeUpperLimitToTriggerToeOff()
    {
       return 1.2;
+   }
+
+   /**
+    * Knee limit that triggers {@link ToeOffParameters#doToeOffWhenHittingLeadingKneeUpperLimit()}.
+    * The maximum limit is taken between the returned value and the joint limit.
+    */
+   public double getKneeLowerLimitToTriggerToeOff()
+   {
+      return 0.0;
    }
 
    /**

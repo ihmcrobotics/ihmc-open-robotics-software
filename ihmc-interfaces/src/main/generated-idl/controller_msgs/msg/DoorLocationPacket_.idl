@@ -1,0 +1,28 @@
+#ifndef __controller_msgs__msg__DoorLocationPacket__idl__
+#define __controller_msgs__msg__DoorLocationPacket__idl__
+
+#include "geometry_msgs/msg/./Pose_.idl"
+module controller_msgs
+{
+  module msg
+  {
+    module dds
+    {
+
+      /**
+       * This message is part of the IHMC humanoid behavior module.
+       */
+      @TypeCode(type="controller_msgs::msg::dds_::DoorLocationPacket_")
+      struct DoorLocationPacket
+      {
+        /**
+         * Unique ID used to identify this message, should preferably be consecutively increasing.
+         */
+        unsigned long sequence_id;
+        geometry_msgs::msg::dds::Pose door_transform_to_world;
+      };
+    };
+  };
+};
+
+#endif

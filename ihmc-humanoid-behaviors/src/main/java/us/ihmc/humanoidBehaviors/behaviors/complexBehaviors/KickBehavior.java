@@ -2,6 +2,7 @@ package us.ihmc.humanoidBehaviors.behaviors.complexBehaviors;
 
 import java.util.ArrayList;
 
+import controller_msgs.msg.dds.FootLoadBearingMessage;
 import us.ihmc.euclid.referenceFrame.FramePoint2D;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
@@ -13,18 +14,18 @@ import us.ihmc.humanoidBehaviors.behaviors.AbstractBehavior;
 import us.ihmc.humanoidBehaviors.behaviors.primitives.FootLoadBearingBehavior;
 import us.ihmc.humanoidBehaviors.behaviors.primitives.FootTrajectoryBehavior;
 import us.ihmc.humanoidBehaviors.behaviors.simpleBehaviors.BehaviorAction;
-import us.ihmc.humanoidBehaviors.communication.CommunicationBridgeInterface;
 import us.ihmc.humanoidBehaviors.taskExecutor.FootTrajectoryTask;
-import us.ihmc.humanoidRobotics.communication.packets.walking.FootLoadBearingMessage;
-import us.ihmc.humanoidRobotics.communication.packets.walking.FootLoadBearingMessage.LoadBearingRequest;
+import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
+import us.ihmc.humanoidRobotics.communication.packets.walking.LoadBearingRequest;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
+import us.ihmc.mecano.frames.MovingReferenceFrame;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
-import us.ihmc.yoVariables.variable.YoBoolean;
-import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
-import us.ihmc.robotics.screwTheory.MovingReferenceFrame;
+import us.ihmc.ros2.Ros2Node;
 import us.ihmc.tools.taskExecutor.PipeLine;
+import us.ihmc.yoVariables.variable.YoBoolean;
+import us.ihmc.yoVariables.variable.YoDouble;
 
 public class KickBehavior extends AbstractBehavior
 {
@@ -42,17 +43,17 @@ public class KickBehavior extends AbstractBehavior
    private final YoDouble trajectoryTime;
    private final SideDependentList<MovingReferenceFrame> ankleZUpFrames;
 
-   public KickBehavior(CommunicationBridgeInterface outgoingCommunicationBridge, YoDouble yoTime, YoBoolean yoDoubleSupport,
-         FullHumanoidRobotModel fullRobotModel, HumanoidReferenceFrames referenceFrames)
+   public KickBehavior(String robotName, Ros2Node ros2Node, YoDouble yoTime, YoBoolean yoDoubleSupport,
+                       FullHumanoidRobotModel fullRobotModel, HumanoidReferenceFrames referenceFrames)
    {
-      super(outgoingCommunicationBridge);
+      super(robotName, ros2Node);
       this.yoTime = yoTime;
       midZupFrame = referenceFrames.getMidFeetZUpFrame();
       trajectoryTime = new YoDouble("kickTrajectoryTime", registry);
       trajectoryTime.set(0.5);
       ankleZUpFrames = referenceFrames.getAnkleZUpReferenceFrames();
 
-      footTrajectoryBehavior = new FootTrajectoryBehavior(outgoingCommunicationBridge, yoTime, yoDoubleSupport);
+      footTrajectoryBehavior = new FootTrajectoryBehavior(robotName, ros2Node, yoTime, yoDoubleSupport);
       registry.addChild(footTrajectoryBehavior.getYoVariableRegistry());
    }
 
@@ -117,14 +118,14 @@ public class KickBehavior extends AbstractBehavior
 
       submitFootPosition(kickFoot, new FramePoint3D(ankleZUpFrames.get(kickFoot.getOppositeSide()), 0.0, kickFoot.negateIfRightSide(0.25), 0));
 
-      final FootLoadBearingBehavior footStateBehavior = new FootLoadBearingBehavior(communicationBridge);
+      final FootLoadBearingBehavior footStateBehavior = new FootLoadBearingBehavior(robotName, ros2Node);
       pipeLine.submitSingleTaskStage(new BehaviorAction(footStateBehavior)
       {
 
          @Override
          protected void setBehaviorInput()
          {
-            FootLoadBearingMessage message = new FootLoadBearingMessage(kickFoot, LoadBearingRequest.LOAD);
+            FootLoadBearingMessage message = HumanoidMessageTools.createFootLoadBearingMessage(kickFoot, LoadBearingRequest.LOAD);
             footStateBehavior.setInput(message);
 
          }
@@ -145,7 +146,7 @@ public class KickBehavior extends AbstractBehavior
       Quaternion desiredFootOrientation = new Quaternion();
       desiredFootPose.get(desiredFootPosition, desiredFootOrientation);
       FootTrajectoryTask task = new FootTrajectoryTask(robotSide, desiredFootPosition, desiredFootOrientation, footTrajectoryBehavior,
-            trajectoryTime.getDoubleValue());
+                                                       trajectoryTime.getDoubleValue());
       pipeLine.submitSingleTaskStage(task);
    }
 
@@ -200,8 +201,6 @@ public class KickBehavior extends AbstractBehavior
          behavior.onBehaviorResumed();
       }
    }
-
-
 
    public boolean hasInputBeenSet()
    {

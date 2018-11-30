@@ -1,5 +1,6 @@
 package us.ihmc.parameterTuner.guiElements.tuners;
 
+import java.util.List;
 import java.util.function.UnaryOperator;
 
 import javafx.application.Platform;
@@ -20,6 +21,8 @@ public abstract class NumericSpinner<T extends Number> extends Spinner<T>
       super(valueFactory);
 
       setEditable(true);
+      setPrefWidth(120.0);
+      setMinWidth(80.0);
 
       // Add formatter that will prevent any input that is not a number with a few exceptions (e.g. '-').
       UnaryOperator<TextFormatter.Change> filter = new UnaryOperator<TextFormatter.Change>()
@@ -79,16 +82,16 @@ public abstract class NumericSpinner<T extends Number> extends Spinner<T>
       });
 
       // Add options for strings that are not allowed to type such as "Infinity" for Double.
-      ContextMenu contextMenu = new ContextMenu();
-      String[] specialStringOptions = getSpecialStringOptions();
-      for (String option : specialStringOptions)
+      List<MenuItem> contextMenuOptions = getContextMenuOptions();
+      if (contextMenuOptions != null)
       {
-         MenuItem menuItem = new MenuItem(option);
-         T number = getValueFactory().getConverter().fromString(option);
-         menuItem.setOnAction(actionEvent -> setValue(number));
-         contextMenu.getItems().add(menuItem);
+         ContextMenu contextMenu = new ContextMenu();
+         for (MenuItem menuItem : contextMenuOptions)
+         {
+            contextMenu.getItems().add(menuItem);
+         }
+         getEditor().setContextMenu(contextMenu);
       }
-      getEditor().setContextMenu(contextMenu);
    }
 
    public void setValue(T newValue)
@@ -107,7 +110,7 @@ public abstract class NumericSpinner<T extends Number> extends Spinner<T>
       valueProperty().addListener(listener);
    }
 
-   private boolean isValidString(String numberString)
+   public boolean isValidString(String numberString)
    {
       try
       {
@@ -124,5 +127,32 @@ public abstract class NumericSpinner<T extends Number> extends Spinner<T>
 
    public abstract String convertNumberToString(T number);
 
-   public abstract String[] getSpecialStringOptions();
+   public List<MenuItem> getContextMenuOptions()
+   {
+      return null;
+   }
+
+   public NumericSpinner<T> createLinkedDuplicate()
+   {
+      return new NumericSpinner<T>(getValueFactory())
+      {
+         @Override
+         public List<MenuItem> getContextMenuOptions()
+         {
+            return NumericSpinner.this.getContextMenuOptions();
+         }
+
+         @Override
+         public T convertStringToNumber(String numberString)
+         {
+            return NumericSpinner.this.convertStringToNumber(numberString);
+         }
+
+         @Override
+         public String convertNumberToString(T number)
+         {
+            return NumericSpinner.this.convertNumberToString(number);
+         }
+      };
+   }
 }

@@ -5,9 +5,10 @@ import us.ihmc.commonWalkingControlModules.controllerCore.command.lowLevel.RootJ
 import us.ihmc.euclid.referenceFrame.FramePoint2D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
 import us.ihmc.humanoidRobotics.model.CenterOfPressureDataHolder;
-import us.ihmc.robotics.screwTheory.OneDoFJoint;
-import us.ihmc.robotics.screwTheory.RigidBody;
+import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
+import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutputList;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutputListReadOnly;
 
@@ -18,30 +19,33 @@ public class ControllerCoreOutput implements ControllerCoreOutputReadOnly
    private final RootJointDesiredConfigurationData rootJointDesiredConfigurationData = new RootJointDesiredConfigurationData();
    private final JointDesiredOutputList lowLevelOneDoFJointDesiredDataHolder;
 
-   public ControllerCoreOutput(CenterOfPressureDataHolder centerOfPressureDataHolder, OneDoFJoint[] controlledOneDoFJoints, JointDesiredOutputList lowLevelControllerOutput)
+   public ControllerCoreOutput(CenterOfPressureDataHolder centerOfPressureDataHolder, OneDoFJointBasics[] controlledOneDoFJoints, JointDesiredOutputList lowLevelControllerOutput)
    {
       this.centerOfPressureDataHolder = centerOfPressureDataHolder;
       linearMomentumRate.setToNaN(ReferenceFrame.getWorldFrame());
-      lowLevelOneDoFJointDesiredDataHolder = lowLevelControllerOutput;
+      if (lowLevelControllerOutput != null)
+         lowLevelOneDoFJointDesiredDataHolder = lowLevelControllerOutput;
+      else
+         lowLevelOneDoFJointDesiredDataHolder = new JointDesiredOutputList(controlledOneDoFJoints);
    }
 
-   public void setDesiredCenterOfPressure(FramePoint2D cop, RigidBody rigidBody)
+   public void setDesiredCenterOfPressure(FramePoint2D cop, RigidBodyBasics rigidBody)
    {
       centerOfPressureDataHolder.setCenterOfPressure(cop, rigidBody);
    }
 
    @Override
-   public void getDesiredCenterOfPressure(FramePoint2D copToPack, RigidBody rigidBody)
+   public void getDesiredCenterOfPressure(FramePoint2D copToPack, RigidBodyBasics rigidBody)
    {
       centerOfPressureDataHolder.getCenterOfPressure(copToPack, rigidBody);
    }
 
-   public void setLinearMomentumRate(FrameVector3D linearMomentumRate)
+   public void setLinearMomentumRate(FrameVector3DReadOnly linearMomentumRate)
    {
       this.linearMomentumRate.set(linearMomentumRate);
    }
 
-   public void setAndMatchFrameLinearMomentumRate(FrameVector3D linearMomentumRate)
+   public void setAndMatchFrameLinearMomentumRate(FrameVector3DReadOnly linearMomentumRate)
    {
       this.linearMomentumRate.setIncludingFrame(linearMomentumRate);
       this.linearMomentumRate.changeFrame(ReferenceFrame.getWorldFrame());

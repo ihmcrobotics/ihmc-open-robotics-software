@@ -3,11 +3,12 @@ package us.ihmc.avatar.sensors.blackfly;
 import java.util.HashMap;
 import java.util.Map;
 
+import controller_msgs.msg.dds.BlackFlyParameterPacket;
+import controller_msgs.msg.dds.UIConnectedPacket;
 import us.ihmc.commons.PrintTools;
 import us.ihmc.communication.net.PacketConsumer;
 import us.ihmc.communication.packetCommunicator.PacketCommunicator;
-import us.ihmc.humanoidRobotics.communication.packets.sensing.BlackFlyParameterPacket;
-import us.ihmc.humanoidRobotics.communication.packets.sensing.UIConnectedPacket;
+import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.utilities.ros.RosDynamicReconfigure;
 import us.ihmc.utilities.ros.RosMainNode;
@@ -34,7 +35,7 @@ public class BlackFlyParameterSetter implements PacketConsumer<BlackFlyParameter
 
    public void sendDeviceSettingToUI(Map<String, Object> params)
    {
-      BlackFlyParameterPacket packet = new BlackFlyParameterPacket(false, (Double) params.get("gain"), (Double) params.get("exposure"),
+      BlackFlyParameterPacket packet = HumanoidMessageTools.createBlackFlyParameterPacket(false, (Double) params.get("gain"), (Double) params.get("exposure"),
             (Double) params.get("frame_rate"), (Double) params.get("shutter_speed"), (Boolean) params.get("auto_exposure"), (Boolean) params.get("auto_gain"),
             (Boolean) params.get("auto_shutter"), side);
       packetCommunicator.send(packet);
@@ -46,9 +47,9 @@ public class BlackFlyParameterSetter implements PacketConsumer<BlackFlyParameter
 
       PrintTools.debug(DEBUG, this, "packet fr UI " + packet);
       Map<String, Object> parameters = new HashMap<>();
-      parameters.put("auto_exposure", packet.isAutoExposure());
-      parameters.put("auto_gain", packet.isAutoGain());
-      parameters.put("auto_shutter", packet.isAutoShutter());
+      parameters.put("auto_exposure", packet.getAutoExposure());
+      parameters.put("auto_gain", packet.getAutoGain());
+      parameters.put("auto_shutter", packet.getAutoShutter());
       parameters.put("exposure", packet.getExposure());
       parameters.put("gain", packet.getGain());
       parameters.put("shutter_speed", packet.getShutter());
@@ -75,7 +76,7 @@ public class BlackFlyParameterSetter implements PacketConsumer<BlackFlyParameter
 
       if (dynamicReconfigureClient.isConnected())
       {
-         if (packet.isFromUI() && packet.getSide() == BlackFlyParameterSetter.this.side) //avoid hearing my own packet
+         if (packet.getFromUi() && packet.getRobotSide() == BlackFlyParameterSetter.this.side.toByte()) //avoid hearing my own packet
          {
             new Thread("BlackflyDynamicReconfigureSetter")
             {

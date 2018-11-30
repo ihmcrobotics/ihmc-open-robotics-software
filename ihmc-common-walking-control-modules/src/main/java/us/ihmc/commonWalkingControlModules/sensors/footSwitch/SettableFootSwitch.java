@@ -3,19 +3,19 @@ package us.ihmc.commonWalkingControlModules.sensors.footSwitch;
 import us.ihmc.euclid.referenceFrame.FramePoint2D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
+import us.ihmc.mecano.spatial.Wrench;
+import us.ihmc.robotics.robotSide.RobotQuadrant;
+import us.ihmc.robotics.sensors.FootSwitchInterface;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
-import us.ihmc.robotics.math.frames.YoFramePoint2d;
-import us.ihmc.robotics.robotSide.RobotQuadrant;
-import us.ihmc.robotics.screwTheory.Wrench;
-import us.ihmc.robotics.sensors.FootSwitchInterface;
+import us.ihmc.yoVariables.variable.YoFramePoint2D;
 
 public class SettableFootSwitch implements FootSwitchInterface
 {
    YoBoolean hasFootHitGround;
    private final ContactablePlaneBody foot;
    private final double totalRobotWeight;
-   private final YoFramePoint2d yoResolvedCoP;
+   private final YoFramePoint2D yoResolvedCoP;
 
    public SettableFootSwitch(ContactablePlaneBody foot, RobotQuadrant quadrant, double totalRobotWeight, YoVariableRegistry registry)
    {
@@ -23,7 +23,7 @@ public class SettableFootSwitch implements FootSwitchInterface
       this.totalRobotWeight = totalRobotWeight;
       this.foot = foot;
       hasFootHitGround.set(false);
-      yoResolvedCoP = new YoFramePoint2d(foot.getName() + "ResolvedCoP", "", foot.getSoleFrame(), registry);
+      yoResolvedCoP = new YoFramePoint2D(foot.getName() + "ResolvedCoP", "", foot.getSoleFrame(), registry);
    }
    
    @Override

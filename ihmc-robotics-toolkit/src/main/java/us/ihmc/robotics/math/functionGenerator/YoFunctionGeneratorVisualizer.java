@@ -1,10 +1,10 @@
 package us.ihmc.robotics.math.functionGenerator;
 
+import us.ihmc.simulationconstructionset.util.RobotController;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoEnum;
-import us.ihmc.robotics.robotController.RobotController;
 
 public class YoFunctionGeneratorVisualizer implements RobotController
 {

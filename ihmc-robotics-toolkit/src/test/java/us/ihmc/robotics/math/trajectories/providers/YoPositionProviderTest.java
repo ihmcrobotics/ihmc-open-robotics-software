@@ -10,15 +10,16 @@ import org.junit.Test;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.tools.ReferenceFrameTools;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.robotics.math.frames.YoFramePoint;
+import us.ihmc.yoVariables.variable.YoFramePoint3D;
 
 
 public class YoPositionProviderTest
 {
    private static final double EPSILON = 1e-10;
    
-   private YoFramePoint yoFramePoint;
+   private YoFramePoint3D yoFramePoint;
    private String namePrefix = "namePrefixTEST";
    private ReferenceFrame referenceFrame;
    private YoVariableRegistry registry;
@@ -34,7 +35,7 @@ public class YoPositionProviderTest
    {
       referenceFrame = ReferenceFrame.constructARootFrame("rootNameTEST");
       registry = new YoVariableRegistry("parentRegistryTEST");
-      yoFramePoint = new YoFramePoint(namePrefix, referenceFrame, registry);
+      yoFramePoint = new YoFramePoint3D(namePrefix, referenceFrame, registry);
       yoFramePoint.set(xValue, yValue, zValue);
    }
    
@@ -44,6 +45,7 @@ public class YoPositionProviderTest
       referenceFrame = null;
       registry = null;
       yoFramePoint = null;
+      ReferenceFrameTools.clearWorldFrameTree();
    }
 
 	@ContinuousIntegrationTest(estimatedDuration = 0.0)

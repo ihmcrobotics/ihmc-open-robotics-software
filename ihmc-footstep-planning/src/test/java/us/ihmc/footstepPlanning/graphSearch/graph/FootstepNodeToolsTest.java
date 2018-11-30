@@ -20,7 +20,7 @@ public class FootstepNodeToolsTest
    private final Random random = new Random(456789L);
    private final double epsilon = 1e-8;
 
-   @ContinuousIntegrationAnnotations.ContinuousIntegrationTest(estimatedDuration = 0.1)
+   @ContinuousIntegrationAnnotations.ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testGetNodeTransform()
    {
@@ -65,7 +65,7 @@ public class FootstepNodeToolsTest
       assertEquals(rotationYawPitchRoll[2], 0.0, epsilon);
    }
 
-   @ContinuousIntegrationAnnotations.ContinuousIntegrationTest(estimatedDuration = 0.1)
+   @ContinuousIntegrationAnnotations.ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testGetSnappedNodeTransform()
    {

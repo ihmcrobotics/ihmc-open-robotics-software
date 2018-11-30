@@ -1,15 +1,16 @@
 package us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories;
 
+import java.util.EnumMap;
+
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.HighLevelControllerFactoryHelper;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.HighLevelControllerState;
-import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.StandTransitionControllerState;
+import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.SmoothTransitionControllerState;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelControllerName;
-
-import java.util.EnumMap;
+import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 
 public class StandTransitionControllerStateFactory implements HighLevelControllerStateFactory
 {
-   private StandTransitionControllerState standTransitionControllerState;
+   private SmoothTransitionControllerState standTransitionControllerState;
 
    @Override
    public HighLevelControllerState getOrCreateControllerState(HighLevelControllerFactoryHelper controllerFactoryHelper)
@@ -22,10 +23,11 @@ public class StandTransitionControllerStateFactory implements HighLevelControlle
 
          HighLevelControllerState standReadyControllerState = standReadyControllerStateFactory.getOrCreateControllerState(controllerFactoryHelper);
          HighLevelControllerState walkingControllerState = walkingControllerStateFactory.getOrCreateControllerState(controllerFactoryHelper);
+         OneDoFJointBasics[] controlledJoints = controllerFactoryHelper.getHighLevelHumanoidControllerToolbox().getControlledOneDoFJoints();
 
-         standTransitionControllerState = new  StandTransitionControllerState(standReadyControllerState, walkingControllerState,
-                                                                              controllerFactoryHelper.getHighLevelHumanoidControllerToolbox(),
-                                                                              controllerFactoryHelper.getHighLevelControllerParameters());
+         standTransitionControllerState = new SmoothTransitionControllerState("toWalking", HighLevelControllerName.STAND_TRANSITION_STATE,
+                                                                              standReadyControllerState, walkingControllerState,
+                                                                              controlledJoints, controllerFactoryHelper.getHighLevelControllerParameters());
       }
 
       return standTransitionControllerState;

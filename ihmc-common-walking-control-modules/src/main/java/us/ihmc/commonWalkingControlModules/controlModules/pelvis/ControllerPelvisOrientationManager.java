@@ -9,10 +9,13 @@ import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHuma
 import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.interfaces.FrameQuaternionReadOnly;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
+import us.ihmc.mecano.frames.MovingReferenceFrame;
+import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.controllers.pidGains.PID3DGainsReadOnly;
 import us.ihmc.robotics.geometry.AngleTools;
@@ -20,14 +23,16 @@ import us.ihmc.robotics.math.trajectories.SimpleOrientationTrajectoryGenerator;
 import us.ihmc.robotics.referenceFrames.ZUpFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
-import us.ihmc.robotics.screwTheory.MovingReferenceFrame;
-import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.robotics.screwTheory.SelectionMatrix3D;
 import us.ihmc.sensorProcessing.frames.CommonHumanoidReferenceFrames;
+import us.ihmc.yoVariables.parameters.BooleanParameter;
+import us.ihmc.yoVariables.parameters.DoubleParameter;
+import us.ihmc.yoVariables.providers.BooleanProvider;
+import us.ihmc.yoVariables.providers.DoubleProvider;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 
-public class ControllerPelvisOrientationManager extends PelvisOrientationControlState
+public class ControllerPelvisOrientationManager implements PelvisOrientationControlState
 {
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
 
@@ -71,12 +76,15 @@ public class ControllerPelvisOrientationManager extends PelvisOrientationControl
 
    private final PelvisOffsetTrajectoryWhileWalking offsetTrajectoryWhileWalking;
 
+   private final BooleanProvider useManualRotations = new BooleanParameter("UseManualPelvisRotation", registry, false);
+   private final DoubleProvider desiredYawOffset = new DoubleParameter("UserDesiredYawOffset", registry, 0.0);
+   private final DoubleProvider desiredPitchOffset = new DoubleParameter("UserDesiredPitchOffset", registry, 0.0);
+   private final DoubleProvider desiredRollOffset = new DoubleParameter("UserDesiredRollOffset", registry, 0.0);
+
    public ControllerPelvisOrientationManager(PID3DGainsReadOnly gains, PelvisOffsetWhileWalkingParameters pelvisOffsetWhileWalkingParameters,
                                              LeapOfFaithParameters leapOfFaithParameters, HighLevelHumanoidControllerToolbox controllerToolbox,
                                              YoVariableRegistry parentRegistry)
    {
-      super(PelvisOrientationControlMode.WALKING_CONTROLLER);
-
       yoTime = controllerToolbox.getYoTime();
       CommonHumanoidReferenceFrames referenceFrames = controllerToolbox.getReferenceFrames();
       midFeetZUpGroundFrame = referenceFrames.getMidFootZUpGroundFrame();
@@ -90,8 +98,8 @@ public class ControllerPelvisOrientationManager extends PelvisOrientationControl
 
       this.gains = gains;
       FullHumanoidRobotModel fullRobotModel = controllerToolbox.getFullRobotModel();
-      RigidBody elevator = fullRobotModel.getElevator();
-      RigidBody pelvis = fullRobotModel.getPelvis();
+      RigidBodyBasics elevator = fullRobotModel.getElevator();
+      RigidBodyBasics pelvis = fullRobotModel.getPelvis();
       orientationFeedbackControlCommand.set(elevator, pelvis);
       selectionMatrix.resetSelection();
 
@@ -100,7 +108,7 @@ public class ControllerPelvisOrientationManager extends PelvisOrientationControl
          @Override
          protected void updateTransformToParent(RigidBodyTransform transformToParent)
          {
-            pelvisFrame.getTransformToDesiredFrame(transformToParent, parentFrame);
+            pelvisFrame.getTransformToDesiredFrame(transformToParent, getParent());
             transformToParent.setRotation(desiredPelvisOrientation);
          }
       };
@@ -112,7 +120,7 @@ public class ControllerPelvisOrientationManager extends PelvisOrientationControl
          @Override
          protected void updateTransformToParent(RigidBodyTransform transformToParent)
          {
-            nextFootstep.getSoleReferenceFrame().getTransformToDesiredFrame(transformToParent, parentFrame);
+            nextFootstep.getSoleReferenceFrame().getTransformToDesiredFrame(transformToParent, getParent());
          }
       };
       nextSoleZUpFrame = new ZUpFrame(worldFrame, nextSoleFrame, "nextAnkleZUp");
@@ -130,6 +138,10 @@ public class ControllerPelvisOrientationManager extends PelvisOrientationControl
 
    public void setTrajectoryTime(double trajectoryTime)
    {
+      if (trajectoryTime < 0.0)
+      {
+         throw new RuntimeException("Negative trajectory time: " + trajectoryTime);
+      }
       pelvisOrientationTrajectoryGenerator.setTrajectoryTime(trajectoryTime);
    }
 
@@ -160,7 +172,7 @@ public class ControllerPelvisOrientationManager extends PelvisOrientationControl
    }
 
    @Override
-   public void doAction()
+   public void doAction(double timeInState)
    {
       double deltaTime = yoTime.getDoubleValue() - initialPelvisOrientationTime.getDoubleValue();
       pelvisOrientationTrajectoryGenerator.compute(deltaTime);
@@ -174,6 +186,13 @@ public class ControllerPelvisOrientationManager extends PelvisOrientationControl
       double deltaTimeOffset = yoTime.getDoubleValue() - initialPelvisOrientationOffsetTime.getDoubleValue();
       pelvisOrientationOffsetTrajectoryGenerator.compute(deltaTimeOffset);
       pelvisOrientationOffsetTrajectoryGenerator.getAngularData(tempOrientation, tempAngularVelocity, tempAngularAcceleration);
+
+      if (useManualRotations.getValue())
+      {
+         tempOrientation.prependRollRotation(desiredRollOffset.getValue());
+         tempOrientation.prependPitchRotation(desiredPitchOffset.getValue());
+         tempOrientation.prependYawRotation(desiredYawOffset.getValue());
+      }
 
       tempOrientation.changeFrame(worldFrame);
       tempAngularVelocity.changeFrame(worldFrame);
@@ -192,7 +211,8 @@ public class ControllerPelvisOrientationManager extends PelvisOrientationControl
       desiredPelvisAngularVelocity.add(tempAngularVelocity);
       desiredPelvisAngularAcceleration.add(tempAngularAcceleration);
 
-      orientationFeedbackControlCommand.set(desiredPelvisOrientationWithOffset, desiredPelvisAngularVelocity, desiredPelvisAngularAcceleration);
+      orientationFeedbackControlCommand.set(desiredPelvisOrientationWithOffset, desiredPelvisAngularVelocity);
+      orientationFeedbackControlCommand.setFeedForwardAction(desiredPelvisAngularAcceleration);
       orientationFeedbackControlCommand.setWeightsForSolver(tempWeight);
       orientationFeedbackControlCommand.setGains(gains);
       orientationFeedbackControlCommand.setSelectionMatrix(selectionMatrix);
@@ -214,7 +234,7 @@ public class ControllerPelvisOrientationManager extends PelvisOrientationControl
       pelvisOrientationOffsetTrajectoryGenerator.initialize();
    }
 
-   public void setOffset(FrameQuaternion offset)
+   public void setOffset(FrameQuaternionReadOnly offset)
    {
       tempOrientation.setIncludingFrame(offset);
       tempOrientation.changeFrame(desiredPelvisFrame);
@@ -349,7 +369,7 @@ public class ControllerPelvisOrientationManager extends PelvisOrientationControl
 
    public void initializeStanding()
    {
-      initializeTiming();
+      setToHoldCurrentDesiredInMidFeetZUpFrame();
       offsetTrajectoryWhileWalking.initializeStanding();
       leapOfFaithModule.initializeStanding();
    }
@@ -377,11 +397,5 @@ public class ControllerPelvisOrientationManager extends PelvisOrientationControl
    public FeedbackControlCommand<?> getFeedbackControlCommand()
    {
       return orientationFeedbackControlCommand;
-   }
-
-   @Override
-   public void getCurrentDesiredOrientation(FrameQuaternion orientationToPack)
-   {
-      orientationToPack.setIncludingFrame(desiredPelvisOrientationWithOffset);
    }
 }

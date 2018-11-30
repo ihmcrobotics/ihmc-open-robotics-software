@@ -1,0 +1,40 @@
+#ifndef __controller_msgs__msg__QuadrupedStepMessage__idl__
+#define __controller_msgs__msg__QuadrupedStepMessage__idl__
+
+#include "geometry_msgs/msg/./Point_.idl"
+module controller_msgs
+{
+  module msg
+  {
+    module dds
+    {
+      const octet FRONT_LEFT =
+      0;
+
+      const octet FRONT_RIGHT =
+      1;
+
+      const octet HIND_RIGHT =
+      2;
+
+      const octet HIND_LEFT =
+      3;
+
+
+      @TypeCode(type="controller_msgs::msg::dds_::QuadrupedStepMessage_")
+      struct QuadrupedStepMessage
+      {
+        /**
+         * Unique ID used to identify this message, should preferably be consecutively increasing.
+         */
+        unsigned long sequence_id;
+        @defaultValue(value=255)
+        octet robot_quadrant;
+        geometry_msgs::msg::dds::Point goal_position;
+        double ground_clearance;
+      };
+    };
+  };
+};
+
+#endif

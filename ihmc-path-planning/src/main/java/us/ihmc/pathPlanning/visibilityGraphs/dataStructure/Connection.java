@@ -39,6 +39,11 @@ public class Connection implements Transformable, EpsilonComparable<Connection>
       this.target = new ConnectionPoint3D(target, targetRegionId);
    }
 
+   public Connection getCopy()
+   {
+      return new Connection(this);
+   }
+
    public ConnectionPoint3D getSourcePoint()
    {
       return source;
@@ -87,6 +92,13 @@ public class Connection implements Transformable, EpsilonComparable<Connection>
       ConnectionPoint3D temp = source;
       source = target;
       target = temp;
+   }
+
+   public ConnectionPoint3D getOppositePoint(ConnectionPoint3D point)
+   {
+      if(point.equals(source)) return target;
+      else if (point.equals(target)) return source;
+      return null;
    }
 
    public double length()

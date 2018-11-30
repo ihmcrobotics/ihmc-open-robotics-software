@@ -1,6 +1,9 @@
 package us.ihmc.quadrupedRobotics.util;
 
 import us.ihmc.commons.MathTools;
+import us.ihmc.euclid.tools.EuclidCoreIOTools;
+import us.ihmc.euclid.tuple2D.Point2D;
+import us.ihmc.humanoidRobotics.communication.controllerAPI.command.TimeIntervalCommand;
 
 public class TimeInterval
 {
@@ -74,8 +77,25 @@ public class TimeInterval
       setEndTime(timeInterval.getEndTime());
    }
 
+   public void set(TimeIntervalCommand command)
+   {
+      setStartTime(command.getStartTime());
+      setEndTime(command.getEndTime());
+   }
+
    public boolean epsilonEquals(TimeInterval other, double epsilon)
    {
       return MathTools.epsilonEquals(getStartTime(), other.getStartTime(), epsilon) && MathTools.epsilonEquals(getEndTime(), other.getEndTime(), epsilon);
+   }
+
+   public boolean intervalContains(double time)
+   {
+      return MathTools.intervalContains(time, getStartTime(), getEndTime());
+   }
+
+   @Override
+   public String toString()
+   {
+      return EuclidCoreIOTools.getStringOf("(", " )", ", ", startTime, endTime);
    }
 }

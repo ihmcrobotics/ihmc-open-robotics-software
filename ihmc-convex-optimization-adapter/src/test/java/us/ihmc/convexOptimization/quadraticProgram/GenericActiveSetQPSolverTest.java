@@ -446,7 +446,7 @@ public class GenericActiveSetQPSolverTest
       
    }
 
-	@ContinuousIntegrationTest(estimatedDuration = 0.3)
+	@ContinuousIntegrationTest(estimatedDuration = 0.2)
    @Test(timeout = 30000) 
    public void testSingularQuadraticCostFunction()
    {
@@ -781,7 +781,7 @@ public class GenericActiveSetQPSolverTest
      testCaseFromQPS("DUALC1.yaml",solver); 
    }
 
-	@ContinuousIntegrationTest(estimatedDuration = 0.1)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000) 
    public void testQPS_DUALC8() throws FileNotFoundException
    {
@@ -790,7 +790,7 @@ public class GenericActiveSetQPSolverTest
      testCaseFromQPS("DUALC8.yaml",solver); 
    }
 
-	@ContinuousIntegrationTest(estimatedDuration = 1.7)
+	@ContinuousIntegrationTest(estimatedDuration = 1.5)
    @Test(timeout = 30000) 
    public void testQPS_PRIMAL1() throws FileNotFoundException
    {
@@ -798,24 +798,24 @@ public class GenericActiveSetQPSolverTest
      testCaseFromQPS("PRIMAL1.yaml",solver); 
    }
 
-	@ContinuousIntegrationTest(estimatedDuration = 11.1)
-   @Test(timeout = 55000) 
+	@ContinuousIntegrationTest(estimatedDuration = 10.1)
+   @Test(timeout = 51000) 
    public void testQPS_PRIMALC2() throws FileNotFoundException
    {
      GenericActiveSetQPSolver solver = new GenericActiveSetQPSolver();
      testCaseFromQPS("PRIMALC2.yaml",solver); 
    }
 
-	@ContinuousIntegrationTest(estimatedDuration = 11.7)
-   @Test(timeout = 59000) 
+	@ContinuousIntegrationTest(estimatedDuration = 11.1)
+   @Test(timeout = 56000) 
    public void testQPS_PRIMALC1() throws FileNotFoundException
    {
      GenericActiveSetQPSolver solver = new GenericActiveSetQPSolver();
      testCaseFromQPS("PRIMALC1.yaml",solver); 
    }
 
-	@ContinuousIntegrationTest(estimatedDuration = 26.0)
-   @Test(timeout = 130000) 
+	@ContinuousIntegrationTest(estimatedDuration = 24.1)
+   @Test(timeout = 120000) 
    public void testQPS_PRIMALC5() throws FileNotFoundException
    {
      GenericActiveSetQPSolver solver = new GenericActiveSetQPSolver();

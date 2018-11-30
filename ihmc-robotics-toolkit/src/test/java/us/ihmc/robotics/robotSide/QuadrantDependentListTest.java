@@ -17,7 +17,7 @@ public class QuadrantDependentListTest
    {
       QuadrantDependentList<String> quadrantDependentList = new QuadrantDependentList<>();
       
-      for (RobotQuadrant robotQuadrant : quadrantDependentList.quadrants())
+      for (RobotQuadrant robotQuadrant : quadrantDependentList.keySet())
       {
          System.out.println(quadrantDependentList.get(robotQuadrant));
       }
@@ -27,7 +27,7 @@ public class QuadrantDependentListTest
       quadrantDependentList.set(RobotQuadrant.HIND_RIGHT, "third");
       quadrantDependentList.set(RobotQuadrant.HIND_LEFT, "fourth");
       
-      for (RobotQuadrant robotQuadrant : quadrantDependentList.quadrants())
+      for (RobotQuadrant robotQuadrant : quadrantDependentList.keySet())
       {
          System.out.println(quadrantDependentList.get(robotQuadrant));
       }
@@ -44,7 +44,7 @@ public class QuadrantDependentListTest
       quadrantDependentList.set(RobotQuadrant.HIND_LEFT, "fourth");
       
       int i = 0;
-      for (RobotQuadrant robotQuadrant : quadrantDependentList.quadrants())
+      for (RobotQuadrant robotQuadrant : quadrantDependentList.keySet())
       {
          switch (i++)
          {
@@ -70,7 +70,7 @@ public class QuadrantDependentListTest
       quadrantDependentList.set(RobotQuadrant.HIND_RIGHT, "third");
       
       i = 0;
-      for (RobotQuadrant robotQuadrant : quadrantDependentList.quadrants())
+      for (RobotQuadrant robotQuadrant : quadrantDependentList.keySet())
       {
          switch (i++)
          {
@@ -96,7 +96,7 @@ public class QuadrantDependentListTest
       quadrantDependentList.set(RobotQuadrant.HIND_RIGHT, "third");
       
       i = 0;
-      for (RobotQuadrant robotQuadrant : quadrantDependentList.quadrants())
+      for (RobotQuadrant robotQuadrant : quadrantDependentList.keySet())
       {
          switch (i++)
          {
@@ -121,7 +121,7 @@ public class QuadrantDependentListTest
       quadrantDependentList.set(RobotQuadrant.HIND_RIGHT, "third");
       
       i = 0;
-      for (RobotQuadrant robotQuadrant : quadrantDependentList.quadrants())
+      for (RobotQuadrant robotQuadrant : quadrantDependentList.keySet())
       {
          switch (i++)
          {

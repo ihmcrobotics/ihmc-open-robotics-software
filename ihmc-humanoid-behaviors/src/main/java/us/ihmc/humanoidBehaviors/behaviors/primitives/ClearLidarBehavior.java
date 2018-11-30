@@ -1,40 +1,41 @@
 package us.ihmc.humanoidBehaviors.behaviors.primitives;
 
 import us.ihmc.humanoidBehaviors.behaviors.AbstractBehavior;
-import us.ihmc.humanoidBehaviors.communication.CommunicationBridgeInterface;
-import us.ihmc.humanoidRobotics.communication.packets.sensing.DepthDataClearCommand;
-import us.ihmc.humanoidRobotics.communication.packets.sensing.DepthDataClearCommand.DepthDataTree;
+import us.ihmc.ros2.Ros2Node;
 import us.ihmc.yoVariables.variable.YoBoolean;
 
+/**
+ * @deprecated The lidar stuff is broken. What about implement a centralized LidarBufferBehavior that records lidar in an internal buffer.
+ */
 public class ClearLidarBehavior extends AbstractBehavior
 {
    private final YoBoolean packetHasBeenSent = new YoBoolean("packetHasBeenSent" + behaviorName, registry);
-   private DepthDataClearCommand clearLidarPacket;
+//   private DepthDataClearCommand clearLidarPacket;
 
-   public ClearLidarBehavior(CommunicationBridgeInterface outgoingCommunicationBridge)
+   public ClearLidarBehavior(String robotName, Ros2Node ros2Node)
    {
-      super(outgoingCommunicationBridge);
+      super(robotName, ros2Node);
 
    }
 
    @Override
    public void doControl()
    {
-      clearLidarPacket = new DepthDataClearCommand(DepthDataTree.DECAY_POINT_CLOUD);
-
-      //      clearLidarPacket.setDestination(PacketDestination.NETWORK_PROCESSOR);
-
-      if (!packetHasBeenSent.getBooleanValue() && (clearLidarPacket != null))
-      {
-         sendPacketToNetworkProcessor();
-      }
+//      clearLidarPacket = new DepthDataClearCommand(DepthDataTree.DECAY_POINT_CLOUD);
+//
+//      //      clearLidarPacket.setDestination(PacketDestination.NETWORK_PROCESSOR);
+//
+//      if (!packetHasBeenSent.getBooleanValue() && (clearLidarPacket != null))
+//      {
+//         sendPacketToNetworkProcessor();
+//      }
    }
 
    private void sendPacketToNetworkProcessor()
    {
       if (!isPaused.getBooleanValue() && !isAborted.getBooleanValue())
       {
-         sendPacket(clearLidarPacket);
+//         sendPacket(clearLidarPacket);
          packetHasBeenSent.set(true);
       }
    }
@@ -60,9 +61,9 @@ public class ClearLidarBehavior extends AbstractBehavior
 
    public boolean hasInputBeenSet()
    {
-      if (clearLidarPacket != null)
-         return true;
-      else
+//      if (clearLidarPacket != null)
+//         return true;
+//      else
          return false;
    }
 

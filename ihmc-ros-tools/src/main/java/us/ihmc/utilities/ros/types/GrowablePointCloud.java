@@ -6,7 +6,7 @@ import java.util.ArrayList;
 import org.apache.commons.lang3.ArrayUtils;
 
 import us.ihmc.euclid.tuple3D.Point3D;
-import us.ihmc.robotics.dataStructures.MutableColor;
+import us.ihmc.graphicsDescription.color.MutableColor;
 
 public class GrowablePointCloud
 {

@@ -1,13 +1,13 @@
 package us.ihmc.humanoidRobotics.communication.controllerAPI.command;
 
-import java.util.ArrayList;
+import java.util.List;
 
+import controller_msgs.msg.dds.FootstepDataListMessage;
+import controller_msgs.msg.dds.FootstepDataMessage;
 import us.ihmc.communication.controllerAPI.command.QueueableCommand;
-import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.communication.packets.ExecutionTiming;
-import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataListMessage;
-import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessage;
-import us.ihmc.robotics.lists.RecyclingArrayList;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.commons.lists.RecyclingArrayList;
 
 public class FootstepDataListCommand extends QueueableCommand<FootstepDataListCommand, FootstepDataListMessage>
 {
@@ -17,10 +17,6 @@ public class FootstepDataListCommand extends QueueableCommand<FootstepDataListCo
    private ExecutionTiming executionTiming = ExecutionTiming.CONTROL_DURATIONS;
    private final RecyclingArrayList<FootstepDataCommand> footsteps = new RecyclingArrayList<>(30, FootstepDataCommand.class);
 
-   /** the time to delay this command on the controller side before being executed **/
-   private double executionDelayTime;
-   /** the execution time. This number is set if the execution delay is non zero**/
-   private double adjustedExecutionTime;
    /** If {@code false} the controller adjust each footstep height to be at the support sole height. */
    private boolean trustHeightOfFootsteps = true;
    /** If {@code false} the controller can adjust the footsteps. */
@@ -44,26 +40,25 @@ public class FootstepDataListCommand extends QueueableCommand<FootstepDataListCo
    }
 
    @Override
-   public void set(FootstepDataListMessage message)
+   public void setFromMessage(FootstepDataListMessage message)
    {
       clear();
 
-      defaultSwingDuration = message.defaultSwingDuration;
-      defaultTransferDuration = message.defaultTransferDuration;
-      finalTransferDuration = message.finalTransferDuration;
-      executionTiming = message.executionTiming;
-      executionDelayTime = message.executionDelayTime;
-      trustHeightOfFootsteps = message.trustHeightOfFootsteps;
-      areFootstepsAdjustable = message.areFootstepsAdjustable;
-      offsetFootstepsWithExecutionError = message.isOffsetFootstepsWithExecutionError();
-      ArrayList<FootstepDataMessage> dataList = message.getDataList();
+      defaultSwingDuration = message.getDefaultSwingDuration();
+      defaultTransferDuration = message.getDefaultTransferDuration();
+      finalTransferDuration = message.getFinalTransferDuration();
+      executionTiming = ExecutionTiming.fromByte(message.getExecutionTiming());
+      trustHeightOfFootsteps = message.getTrustHeightOfFootsteps();
+      areFootstepsAdjustable = message.getAreFootstepsAdjustable();
+      offsetFootstepsWithExecutionError = message.getOffsetFootstepsWithExecutionError();
+      List<FootstepDataMessage> dataList = message.getFootstepDataList();
       ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
       if (dataList != null)
       {
          for (int i = 0; i < dataList.size(); i++)
             footsteps.add().set(worldFrame, dataList.get(i));
       }
-      setQueueableCommandVariables(message);
+      setQueueableCommandVariables(message.getQueueingProperties());
    }
 
    @Override
@@ -75,7 +70,6 @@ public class FootstepDataListCommand extends QueueableCommand<FootstepDataListCo
       defaultTransferDuration = other.defaultTransferDuration;
       finalTransferDuration = other.finalTransferDuration;
       executionTiming = other.executionTiming;
-      executionDelayTime = other.executionDelayTime;
       adjustedExecutionTime = other.adjustedExecutionTime;
       trustHeightOfFootsteps = other.trustHeightOfFootsteps;
       areFootstepsAdjustable = other.areFootstepsAdjustable;
@@ -159,56 +153,6 @@ public class FootstepDataListCommand extends QueueableCommand<FootstepDataListCo
    public boolean isCommandValid()
    {
       return getNumberOfFootsteps() > 0 && executionModeValid();
-   }
-
-   /**
-    * returns the amount of time this command is delayed on the controller side before executing
-    * @return the time to delay this command in seconds
-    */
-   @Override
-   public double getExecutionDelayTime()
-   {
-      return executionDelayTime;
-   }
-
-   /**
-    * sets the amount of time this command is delayed on the controller side before executing
-    * @param delayTime the time in seconds to delay after receiving the command before executing
-    */
-   @Override
-   public void setExecutionDelayTime(double delayTime)
-   {
-      this.executionDelayTime = delayTime;
-   }
-   /**
-    * returns the expected execution time of this command. The execution time will be computed when the controller
-    * receives the command using the controllers time plus the execution delay time.
-    * This is used when {@code getExecutionDelayTime} is non-zero
-    */
-   @Override
-   public double getExecutionTime()
-   {
-      return adjustedExecutionTime;
-   }
-
-   /**
-    * sets the execution time for this command. This is called by the controller when the command is received.
-    */
-   @Override
-   public void setExecutionTime(double adjustedExecutionTime)
-   {
-      this.adjustedExecutionTime = adjustedExecutionTime;
-   }
-
-   /**
-    * tells the controller if this command supports delayed execution
-    * (Spoiler alert: It does)
-    * @return
-    */
-   @Override
-   public boolean isDelayedExecutionSupported()
-   {
-      return true;
    }
 
    public boolean isTrustHeightOfFootsteps()

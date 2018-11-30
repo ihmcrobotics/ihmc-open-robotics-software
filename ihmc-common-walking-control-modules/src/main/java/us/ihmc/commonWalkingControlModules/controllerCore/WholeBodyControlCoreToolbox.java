@@ -1,15 +1,15 @@
 package us.ihmc.commonWalkingControlModules.controllerCore;
 
-import static us.ihmc.commonWalkingControlModules.visualizer.WrenchVisualizer.*;
+import static us.ihmc.commonWalkingControlModules.visualizer.WrenchVisualizer.createWrenchVisualizerWithContactableBodies;
 
 import java.util.List;
 
 import us.ihmc.commonWalkingControlModules.configurations.JointPrivilegedConfigurationParameters;
 import us.ihmc.commonWalkingControlModules.inverseKinematics.JointPrivilegedConfigurationHandler;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.PlaneContactWrenchProcessor;
-import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.CentroidalMomentumHandler;
+import us.ihmc.commonWalkingControlModules.momentumBasedController.WholeBodyControllerBoundCalculator;
+import us.ihmc.commonWalkingControlModules.momentumBasedController.feedbackController.FeedbackControllerSettings;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.ControllerCoreOptimizationSettings;
-import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.InverseDynamicsQPBoundCalculator;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.JointIndexHandler;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.MotionQPInputCalculator;
 import us.ihmc.commonWalkingControlModules.visualizer.WrenchVisualizer;
@@ -20,15 +20,18 @@ import us.ihmc.graphicsDescription.yoGraphics.YoGraphic;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.humanoidRobotics.model.CenterOfPressureDataHolder;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.robotics.math.frames.YoFrameVector;
-import us.ihmc.robotics.screwTheory.FloatingInverseDynamicsJoint;
-import us.ihmc.robotics.screwTheory.InverseDynamicsCalculator;
-import us.ihmc.robotics.screwTheory.InverseDynamicsJoint;
-import us.ihmc.robotics.screwTheory.RigidBody;
+import us.ihmc.mecano.algorithms.CentroidalMomentumRateCalculator;
+import us.ihmc.mecano.algorithms.InverseDynamicsCalculator;
+import us.ihmc.mecano.algorithms.interfaces.RigidBodyAccelerationProvider;
+import us.ihmc.mecano.multiBodySystem.interfaces.FloatingJointBasics;
+import us.ihmc.mecano.multiBodySystem.interfaces.JointBasics;
+import us.ihmc.mecano.multiBodySystem.interfaces.MultiBodySystemReadOnly;
+import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
+import us.ihmc.mecano.tools.MultiBodySystemTools;
 import us.ihmc.robotics.screwTheory.ScrewTools;
-import us.ihmc.robotics.screwTheory.SpatialAccelerationCalculator;
 import us.ihmc.robotics.screwTheory.TotalMassCalculator;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoFrameVector3D;
 
 public class WholeBodyControlCoreToolbox
 {
@@ -38,20 +41,20 @@ public class WholeBodyControlCoreToolbox
 
    private final double controlDT;
    private final double gravityZ;
-   private final FloatingInverseDynamicsJoint rootJoint;
-   private final RigidBody rootBody;
+   private final FloatingJointBasics rootJoint;
+   private final RigidBodyBasics rootBody;
    private final ReferenceFrame centerOfMassFrame;
    private final ControllerCoreOptimizationSettings optimizationSettings;
+   private FeedbackControllerSettings feedbackControllerSettings = FeedbackControllerSettings.getDefault();
    private final YoGraphicsListRegistry yoGraphicsListRegistry;
 
    private final JointIndexHandler jointIndexHandler;
    private final double totalRobotMass;
-   private final CentroidalMomentumHandler centroidalMomentumHandler;
+   private final CentroidalMomentumRateCalculator centroidalMomentumRateCalculator;
    private final InverseDynamicsCalculator inverseDynamicsCalculator;
-   private final SpatialAccelerationCalculator spatialAccelerationCalculator;
+   private final RigidBodyAccelerationProvider rigidBodyAccelerationProvider;
 
-   private RigidBody vmcMainBody;
-   private RigidBody[] controlledBodies;
+   private RigidBodyBasics vmcMainBody;
 
    private List<? extends ContactablePlaneBody> contactablePlaneBodies;
 
@@ -60,16 +63,21 @@ public class WholeBodyControlCoreToolbox
    private PlaneContactWrenchProcessor planeContactWrenchProcessor;
    private WrenchVisualizer wrenchVisualizer;
 
-   private YoFrameVector yoDesiredMomentumRateLinear;
-   private YoFrameVector yoAchievedMomentumRateLinear;
-   private YoFrameVector yoDesiredMomentumRateAngular;
-   private YoFrameVector yoAchievedMomentumRateAngular;
+   private YoFrameVector3D yoDesiredMomentumRateLinear;
+   private YoFrameVector3D yoAchievedMomentumRateLinear;
+   private YoFrameVector3D yoDesiredMomentumRateAngular;
+   private YoFrameVector3D yoAchievedMomentumRateAngular;
 
-   private YoFrameVector yoResidualRootJointForce;
-   private YoFrameVector yoResidualRootJointTorque;
+   private YoFrameVector3D yoDesiredMomentumLinear;
+   private YoFrameVector3D yoDesiredMomentumAngular;
+   private YoFrameVector3D yoAchievedMomentumLinear;
+   private YoFrameVector3D yoAchievedMomentumAngular;
+
+   private YoFrameVector3D yoResidualRootJointForce;
+   private YoFrameVector3D yoResidualRootJointTorque;
 
    private MotionQPInputCalculator motionQPInputCalculator;
-   private InverseDynamicsQPBoundCalculator qpBoundCalculator;
+   private WholeBodyControllerBoundCalculator qpBoundCalculator;
    private WrenchMatrixCalculator wrenchMatrixCalculator;
 
    private boolean enableInverseDynamicsModule = false;
@@ -90,13 +98,13 @@ public class WholeBodyControlCoreToolbox
     * sufficient to run the inverse kinematics module. Not that at the moment this method is empty,
     * it should be called wherever the inverse kinematics module is called in case in the future new
     * parameters are added.
-    * <li>{@link #setupForVirtualModelControlSolver(RigidBody, RigidBody[])} to complete the
+    * <li>{@link #setupForVirtualModelControlSolver(RigidBodyBasics)} to complete the
     * parameters necessary and sufficient to run the virtual model control module.
     * </ul>
     * Calling these methods will also notice the {@link WholeBodyControllerCore} at construction
     * time which module is to be created.
     * </p>
-    * 
+    *
     * @param controlDT duration of one control tick.
     * @param gravityZ magnitude of the gravity assumed to be along the z-axis. The parameter is
     *           assumed to be positive.
@@ -111,7 +119,7 @@ public class WholeBodyControlCoreToolbox
     *           {@link Artifact}s of the controller core are registered.
     * @param parentRegistry registry to which this toolbox will attach its own registry.
     */
-   public WholeBodyControlCoreToolbox(double controlDT, double gravityZ, FloatingInverseDynamicsJoint rootJoint, InverseDynamicsJoint[] controlledJoints,
+   public WholeBodyControlCoreToolbox(double controlDT, double gravityZ, FloatingJointBasics rootJoint, JointBasics[] controlledJoints,
                                       ReferenceFrame centerOfMassFrame, ControllerCoreOptimizationSettings controllerCoreOptimizationSettings,
                                       YoGraphicsListRegistry yoGraphicsListRegistry, YoVariableRegistry parentRegistry)
    {
@@ -122,12 +130,13 @@ public class WholeBodyControlCoreToolbox
       this.optimizationSettings = controllerCoreOptimizationSettings;
       this.yoGraphicsListRegistry = yoGraphicsListRegistry;
 
-      rootBody = ScrewTools.getRootBody(controlledJoints[0].getPredecessor());
+      rootBody = MultiBodySystemTools.getRootBody(controlledJoints[0].getPredecessor());
       jointIndexHandler = new JointIndexHandler(controlledJoints);
       totalRobotMass = TotalMassCalculator.computeSubTreeMass(rootBody);
-      centroidalMomentumHandler = new CentroidalMomentumHandler(rootBody, centerOfMassFrame);
-      inverseDynamicsCalculator = new InverseDynamicsCalculator(rootBody, gravityZ);
-      spatialAccelerationCalculator = inverseDynamicsCalculator.getSpatialAccelerationCalculator();
+      centroidalMomentumRateCalculator = new CentroidalMomentumRateCalculator(MultiBodySystemReadOnly.toMultiBodySystemInput(controlledJoints), centerOfMassFrame);
+      inverseDynamicsCalculator = new InverseDynamicsCalculator(MultiBodySystemReadOnly.toMultiBodySystemInput(controlledJoints));
+      inverseDynamicsCalculator.setGravitionalAcceleration(-gravityZ); // Watch out for the sign here, it changed with the switch to Mecano.
+      rigidBodyAccelerationProvider = inverseDynamicsCalculator.getAccelerationProvider();
 
       parentRegistry.addChild(registry);
    }
@@ -141,7 +150,7 @@ public class WholeBodyControlCoreToolbox
     * control but is highly beneficial to keep the system in a safe state even if most of it is
     * uncontrolled and is also useful to escape singularity configurations.
     * </p>
-    * 
+    *
     * @param jointPrivilegedConfigurationParameters the set of parameters necessary to initialize
     *           the {@link JointPrivilegedConfigurationHandler}.
     */
@@ -151,13 +160,27 @@ public class WholeBodyControlCoreToolbox
    }
 
    /**
+    * Provides the settings to use for configuring the {@code WholeBodyFeedbackController}.
+    * <p>
+    * This has to be provided before creating the controller core.
+    * </p>
+    * 
+    * @param feedbackControllerSettings the settings to use.
+    */
+   public void setFeedbackControllerSettings(FeedbackControllerSettings feedbackControllerSettings)
+   {
+      if (feedbackControllerSettings != null)
+         this.feedbackControllerSettings = feedbackControllerSettings;
+   }
+
+   /**
     * Adds the missing information necessary to enable the inverse dynamics module and notices the
     * {@link WholeBodyControllerCore} at construction time that the inverse dynamics module has to
     * be created.
     * <p>
     * WARNING: This method has be to called BEFORE creating the {@link WholeBodyControllerCore}.
     * </p>
-    * 
+    *
     * @param contactablePlaneBodies the list of rigid-body which can be used to bear the robot
     *           weight.
     */
@@ -188,26 +211,24 @@ public class WholeBodyControlCoreToolbox
     * <p>
     * WARNING: This method has be to called BEFORE creating the {@link WholeBodyControllerCore}.
     * </p>
-    * 
+    *
     * @param vmcMainBody the main rigid-body of the robot.
     * @param controlledBodies the set of rigid-bodies that are to be controllable.
     * @param contactablePlaneBodies the list of rigid-body which can be used to bear the robot
     *           weight.
     */
-   public void setupForVirtualModelControlSolver(RigidBody vmcMainBody, RigidBody[] controlledBodies,
-                                                 List<? extends ContactablePlaneBody> contactablePlaneBodies)
+   public void setupForVirtualModelControlSolver(RigidBodyBasics vmcMainBody, List<? extends ContactablePlaneBody> contactablePlaneBodies)
    {
       enableVirtualModelControlModule = true;
       // TODO add tools specific to the virtual model control module here.
       this.vmcMainBody = vmcMainBody;
-      this.controlledBodies = controlledBodies;
       this.contactablePlaneBodies = contactablePlaneBodies;
    }
 
    /**
     * Informs whereas the inverse dynamics module is setup for the controller core using this
     * toolbox.
-    * 
+    *
     * @return {@code true} if the inverse dynamics module is setup, {@code false} otherwise.
     */
    public boolean isEnableInverseDynamicsModule()
@@ -218,7 +239,7 @@ public class WholeBodyControlCoreToolbox
    /**
     * Informs whereas the inverse kinematics module is setup for the controller core using this
     * toolbox.
-    * 
+    *
     * @return {@code true} if the inverse kinematics module is setup, {@code false} otherwise.
     */
    public boolean isEnableInverseKinematicsModule()
@@ -229,7 +250,7 @@ public class WholeBodyControlCoreToolbox
    /**
     * Informs whereas the virtual model control module is setup for the controller core using this
     * toolbox.
-    * 
+    *
     * @return {@code true} if the virtual model control module is setup, {@code false} otherwise.
     */
    public boolean isEnableVirtualModelControlModule()
@@ -241,18 +262,18 @@ public class WholeBodyControlCoreToolbox
    {
       if (motionQPInputCalculator == null)
       {
-         motionQPInputCalculator = new MotionQPInputCalculator(centerOfMassFrame, centroidalMomentumHandler, jointIndexHandler,
+         motionQPInputCalculator = new MotionQPInputCalculator(centerOfMassFrame, centroidalMomentumRateCalculator, jointIndexHandler,
                                                                jointPrivilegedConfigurationParameters, registry);
       }
       return motionQPInputCalculator;
    }
 
-   public InverseDynamicsQPBoundCalculator getQPBoundCalculator()
+   public WholeBodyControllerBoundCalculator getQPBoundCalculator()
    {
       if (qpBoundCalculator == null)
       {
          boolean areJointVelocityLimitsConsidered = optimizationSettings.areJointVelocityLimitsConsidered();
-         qpBoundCalculator = new InverseDynamicsQPBoundCalculator(jointIndexHandler, controlDT, areJointVelocityLimitsConsidered, registry);
+         qpBoundCalculator = new WholeBodyControllerBoundCalculator(jointIndexHandler, controlDT, areJointVelocityLimitsConsidered, registry);
       }
       return qpBoundCalculator;
    }
@@ -269,14 +290,19 @@ public class WholeBodyControlCoreToolbox
       return optimizationSettings;
    }
 
+   public FeedbackControllerSettings getFeedbackControllerSettings()
+   {
+      return feedbackControllerSettings;
+   }
+
    public JointPrivilegedConfigurationParameters getJointPrivilegedConfigurationParameters()
    {
       return jointPrivilegedConfigurationParameters;
    }
 
-   public SpatialAccelerationCalculator getSpatialAccelerationCalculator()
+   public RigidBodyAccelerationProvider getRigidBodyAccelerationProvider()
    {
-      return spatialAccelerationCalculator;
+      return rigidBodyAccelerationProvider;
    }
 
    public InverseDynamicsCalculator getInverseDynamicsCalculator()
@@ -285,10 +311,10 @@ public class WholeBodyControlCoreToolbox
    }
 
    /**
-    * <b>Important note</b>: the {@code CentroidalMomentumHandler} is updated every control tick in
+    * <b>Important note</b>: the {@code CentroidalMomentumRateCalculator} is updated every control tick in
     * {@link MotionQPInputCalculator#initialize()}.
     * <p>
-    * Gets the {@code CentroidalMomentumHandler} which allows to calculate:
+    * Gets the {@code CentroidalMomentumRateCalculator} which allows to calculate:
     * <ul>
     * <li>the robot momentum, often denoted 'h', and center of mass velocity.
     * <li>the centroidal momentum matrix, often denoted 'A', which is the N-by-6 Jacobian matrix
@@ -300,32 +326,27 @@ public class WholeBodyControlCoreToolbox
     * The convective term is: ADot * v.
     * </ul>
     * </p>
-    * 
+    *
     * @return the centroidalMomentumHandler.
     */
-   public CentroidalMomentumHandler getCentroidalMomentumHandler()
+   public CentroidalMomentumRateCalculator getCentroidalMomentumRateCalculator()
    {
-      return centroidalMomentumHandler;
+      return centroidalMomentumRateCalculator;
    }
 
-   public FloatingInverseDynamicsJoint getRootJoint()
+   public FloatingJointBasics getRootJoint()
    {
       return rootJoint;
    }
 
-   public RigidBody getRootBody()
+   public RigidBodyBasics getRootBody()
    {
       return rootBody;
    }
 
-   public RigidBody getVirtualModelControlMainBody()
+   public RigidBodyBasics getVirtualModelControlMainBody()
    {
       return vmcMainBody;
-   }
-
-   public RigidBody[] getControlledBodies()
-   {
-      return controlledBodies;
    }
 
    public double getControlDT()
@@ -372,50 +393,80 @@ public class WholeBodyControlCoreToolbox
 
    public WrenchVisualizer getWrenchVisualizer()
    {
+      if (yoGraphicsListRegistry == null)
+         return null;
       if (wrenchVisualizer == null)
          wrenchVisualizer = createWrenchVisualizerWithContactableBodies("DesiredExternalWrench", contactablePlaneBodies, 1.0, yoGraphicsListRegistry, registry);
       return wrenchVisualizer;
    }
 
-   public YoFrameVector getYoDesiredMomentumRateLinear()
+   public YoFrameVector3D getYoDesiredMomentumRateLinear()
    {
       if (yoDesiredMomentumRateLinear == null)
-         yoDesiredMomentumRateLinear = new YoFrameVector("desiredMomentumRateLinear", worldFrame, registry);
+         yoDesiredMomentumRateLinear = new YoFrameVector3D("desiredMomentumRateLinear", worldFrame, registry);
       return yoDesiredMomentumRateLinear;
    }
 
-   public YoFrameVector getYoAchievedMomentumRateLinear()
+   public YoFrameVector3D getYoAchievedMomentumRateLinear()
    {
       if (yoAchievedMomentumRateLinear == null)
-         yoAchievedMomentumRateLinear = new YoFrameVector("achievedMomentumRateLinear", worldFrame, registry);
+         yoAchievedMomentumRateLinear = new YoFrameVector3D("achievedMomentumRateLinear", worldFrame, registry);
       return yoAchievedMomentumRateLinear;
    }
 
-   public YoFrameVector getYoDesiredMomentumRateAngular()
+   public YoFrameVector3D getYoDesiredMomentumRateAngular()
    {
       if (yoDesiredMomentumRateAngular == null)
-         yoDesiredMomentumRateAngular = new YoFrameVector("desiredMomentumRateAngular", worldFrame, registry);
+         yoDesiredMomentumRateAngular = new YoFrameVector3D("desiredMomentumRateAngular", worldFrame, registry);
       return yoDesiredMomentumRateAngular;
    }
 
-   public YoFrameVector getYoAchievedMomentumRateAngular()
+   public YoFrameVector3D getYoAchievedMomentumRateAngular()
    {
       if (yoAchievedMomentumRateAngular == null)
-         yoAchievedMomentumRateAngular = new YoFrameVector("achievedMomentumRateAngular", worldFrame, registry);
+         yoAchievedMomentumRateAngular = new YoFrameVector3D("achievedMomentumRateAngular", worldFrame, registry);
       return yoAchievedMomentumRateAngular;
    }
 
-   public YoFrameVector getYoResidualRootJointForce()
+   public YoFrameVector3D getYoDesiredMomentumLinear()
+   {
+      if (yoDesiredMomentumLinear == null)
+         yoDesiredMomentumLinear = new YoFrameVector3D("desiredMomentumLinear", worldFrame, registry);
+      return yoDesiredMomentumLinear;
+   }
+
+   public YoFrameVector3D getYoDesiredMomentumAngular()
+   {
+      if (yoDesiredMomentumAngular == null)
+         yoDesiredMomentumAngular = new YoFrameVector3D("desiredMomentumAngular", worldFrame, registry);
+      return yoDesiredMomentumAngular;
+   }
+
+   public YoFrameVector3D getYoAchievedMomentumLinear()
+   {
+      if (yoAchievedMomentumLinear == null)
+         yoAchievedMomentumLinear = new YoFrameVector3D("achievedMomentumLinear", worldFrame, registry);
+      return yoAchievedMomentumLinear;
+   }
+
+   public YoFrameVector3D getYoAchievedMomentumAngular()
+   {
+      if (yoAchievedMomentumAngular == null)
+         yoAchievedMomentumAngular = new YoFrameVector3D("achievedMomentumAngular", worldFrame, registry);
+      return yoAchievedMomentumAngular;
+   }
+
+   public YoFrameVector3D getYoResidualRootJointForce()
    {
       if (yoResidualRootJointForce == null)
-         yoResidualRootJointForce = new YoFrameVector("residualRootJointForce", worldFrame, registry);
+         yoResidualRootJointForce = new YoFrameVector3D("residualRootJointForce", worldFrame, registry);
       return yoResidualRootJointForce;
    }
 
-   public YoFrameVector getYoResidualRootJointTorque()
+   public YoFrameVector3D getYoResidualRootJointTorque()
    {
       if (yoResidualRootJointTorque == null)
-         yoResidualRootJointTorque = new YoFrameVector("residualRootJointTorque", worldFrame, registry);
+         yoResidualRootJointTorque = new YoFrameVector3D("residualRootJointTorque", worldFrame, registry);
       return yoResidualRootJointTorque;
    }
 

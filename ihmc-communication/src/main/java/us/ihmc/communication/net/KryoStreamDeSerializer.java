@@ -51,16 +51,7 @@ public class KryoStreamDeSerializer
     */
    public void registerClasses(NetClassList netClassList)
    {
-      for(Class<?> clazz : netClassList.getPacketClassList())
-      {
-         kryo.register(clazz);
-      }
-      
-      for(Class<?> clazz : netClassList.getPacketFieldList())
-      {
-         kryo.register(clazz);
-      }
-      
+      netClassList.registerWithKryo(kryo);
    }
 
    /**

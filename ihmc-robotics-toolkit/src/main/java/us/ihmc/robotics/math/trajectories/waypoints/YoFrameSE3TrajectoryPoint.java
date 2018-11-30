@@ -11,22 +11,22 @@ import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.euclid.tuple4D.interfaces.QuaternionBasics;
 import us.ihmc.euclid.tuple4D.interfaces.QuaternionReadOnly;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoFramePoint3D;
+import us.ihmc.yoVariables.variable.YoFrameQuaternion;
+import us.ihmc.yoVariables.variable.YoFrameVector3D;
 import us.ihmc.robotics.geometry.transformables.EuclideanWaypoint;
 import us.ihmc.robotics.geometry.transformables.SO3Waypoint;
 import us.ihmc.robotics.geometry.yoFrameObjects.YoFrameEuclideanWaypoint;
 import us.ihmc.robotics.geometry.yoFrameObjects.YoFrameSO3Waypoint;
-import us.ihmc.robotics.math.frames.YoFramePoint;
-import us.ihmc.robotics.math.frames.YoFrameQuaternion;
-import us.ihmc.robotics.math.frames.YoFrameVector;
 import us.ihmc.robotics.math.trajectories.waypoints.interfaces.SE3TrajectoryPointInterface;
 
 public class YoFrameSE3TrajectoryPoint extends YoFrameTrajectoryPoint<YoFrameSE3TrajectoryPoint, FrameSE3TrajectoryPoint, SimpleSE3TrajectoryPoint>
       implements SE3TrajectoryPointInterface<YoFrameSE3TrajectoryPoint>
 {
-   private final YoFramePoint position;
+   private final YoFramePoint3D position;
    private final YoFrameQuaternion orientation;
-   private final YoFrameVector linearVelocity;
-   private final YoFrameVector angularVelocity;
+   private final YoFrameVector3D linearVelocity;
+   private final YoFrameVector3D angularVelocity;
 
    public YoFrameSE3TrajectoryPoint(String namePrefix, String nameSuffix, YoVariableRegistry registry, ReferenceFrame... referenceFrames)
    {
@@ -107,7 +107,7 @@ public class YoFrameSE3TrajectoryPoint extends YoFrameTrajectoryPoint<YoFrameSE3
       this.angularVelocity.set(angularVelocity);
    }
 
-   public void set(double time, YoFramePoint position, YoFrameQuaternion orientation, YoFrameVector linearVelocity, YoFrameVector angularVelocity)
+   public void set(double time, YoFramePoint3D position, YoFrameQuaternion orientation, YoFrameVector3D linearVelocity, YoFrameVector3D angularVelocity)
    {
       this.time.set(time);
       this.position.set(position);
@@ -254,7 +254,7 @@ public class YoFrameSE3TrajectoryPoint extends YoFrameTrajectoryPoint<YoFrameSE3
       angularVelocityToPack.setIncludingFrame(angularVelocity);
    }
 
-   public void getPosition(YoFramePoint positionToPack)
+   public void getPosition(YoFramePoint3D positionToPack)
    {
       positionToPack.set(position);
    }
@@ -264,12 +264,12 @@ public class YoFrameSE3TrajectoryPoint extends YoFrameTrajectoryPoint<YoFrameSE3
       orientationToPack.set(orientation);
    }
 
-   public void getLinearVelocity(YoFrameVector linearVelocityToPack)
+   public void getLinearVelocity(YoFrameVector3D linearVelocityToPack)
    {
       linearVelocityToPack.set(linearVelocity);
    }
 
-   public void getAngularVelocity(YoFrameVector angularVelocityToPack)
+   public void getAngularVelocity(YoFrameVector3D angularVelocityToPack)
    {
       angularVelocityToPack.set(angularVelocity);
    }
@@ -277,7 +277,7 @@ public class YoFrameSE3TrajectoryPoint extends YoFrameTrajectoryPoint<YoFrameSE3
    /**
     * Return the original position held by this trajectory point.
     */
-   public YoFramePoint getPosition()
+   public YoFramePoint3D getPosition()
    {
       return position;
    }
@@ -293,7 +293,7 @@ public class YoFrameSE3TrajectoryPoint extends YoFrameTrajectoryPoint<YoFrameSE3
    /**
     * Return the original linearVelocity held by this trajectory point.
     */
-   public YoFrameVector getLinearVelocity()
+   public YoFrameVector3D getLinearVelocity()
    {
       return linearVelocity;
    }
@@ -301,7 +301,7 @@ public class YoFrameSE3TrajectoryPoint extends YoFrameTrajectoryPoint<YoFrameSE3
    /**
     * Return the original angularVelocity held by this trajectory point.
     */
-   public YoFrameVector getAngularVelocity()
+   public YoFrameVector3D getAngularVelocity()
    {
       return angularVelocity;
    }

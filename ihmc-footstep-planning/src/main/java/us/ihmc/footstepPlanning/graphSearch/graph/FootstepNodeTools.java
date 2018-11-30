@@ -53,7 +53,7 @@ public class FootstepNodeTools
     */
    public static void getFootPolygon(FootstepNode node, ConvexPolygon2D footPolygonInSoleFrame, ConvexPolygon2D footPolygonToPack)
    {
-      footPolygonToPack.setAndUpdate(footPolygonInSoleFrame);
+      footPolygonToPack.set(footPolygonInSoleFrame);
 
       RigidBodyTransform nodeTransform = new RigidBodyTransform();
       FootstepNodeTools.getNodeTransform(node, nodeTransform);

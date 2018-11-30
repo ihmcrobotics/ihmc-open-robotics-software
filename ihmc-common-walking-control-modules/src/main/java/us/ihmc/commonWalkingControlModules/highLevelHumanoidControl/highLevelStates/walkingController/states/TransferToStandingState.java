@@ -1,15 +1,17 @@
 package us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.walkingController.states;
 
+import us.ihmc.commonWalkingControlModules.capturePoint.BalanceManager;
+import us.ihmc.commonWalkingControlModules.capturePoint.CenterOfMassHeightManager;
 import us.ihmc.commonWalkingControlModules.controlModules.WalkingFailureDetectionControlModule;
 import us.ihmc.commonWalkingControlModules.controlModules.foot.FeetManager;
 import us.ihmc.commonWalkingControlModules.controlModules.legConfiguration.LegConfigurationManager;
 import us.ihmc.commonWalkingControlModules.controlModules.pelvis.PelvisOrientationManager;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.TransferToAndNextFootstepsData;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.HighLevelControlManagerFactory;
-import us.ihmc.commonWalkingControlModules.capturePoint.BalanceManager;
-import us.ihmc.commonWalkingControlModules.capturePoint.CenterOfMassHeightManager;
 import us.ihmc.commonWalkingControlModules.messageHandlers.WalkingMessageHandler;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHumanoidControllerToolbox;
+import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
@@ -31,6 +33,8 @@ public class TransferToStandingState extends WalkingState
    private final FeetManager feetManager;
    private final LegConfigurationManager legConfigurationManager;
 
+   private final Point3D midFootPosition = new Point3D();
+
    public TransferToStandingState(WalkingMessageHandler walkingMessageHandler, HighLevelHumanoidControllerToolbox controllerToolbox,
          HighLevelControlManagerFactory managerFactory, WalkingFailureDetectionControlModule failureDetectionControlModule, YoVariableRegistry parentRegistry)
    {
@@ -51,14 +55,14 @@ public class TransferToStandingState extends WalkingState
    }
 
    @Override
-   public void doAction()
+   public void doAction(double timeInState)
    {
       // Always do this so that when a foot slips or is loaded in the air, the height gets adjusted.
       comHeightManager.setSupportLeg(RobotSide.LEFT);
    }
 
    @Override
-   public boolean isDone()
+   public boolean isDone(double timeInState)
    {
       if (!balanceManager.isICPPlanDone())
          return false;
@@ -67,15 +71,22 @@ public class TransferToStandingState extends WalkingState
    }
 
    @Override
-   public void doTransitionIntoAction()
+   public void onEntry()
    {
       balanceManager.clearICPPlan();
       balanceManager.resetPushRecovery();
 
       feetManager.initializeContactStatesForDoubleSupport(null);
 
-      WalkingState previousState = (WalkingState) getPreviousState();
-      RobotSide previousSupportSide = previousState.getSupportSide();
+      WalkingStateEnum previousStateEnum = getPreviousWalkingStateEnum();
+      RobotSide previousSupportSide = null;
+      if (previousStateEnum != null)
+      {
+         if (previousStateEnum.getSupportSide() != null)
+            previousSupportSide = previousStateEnum.getSupportSide();
+         else if (previousStateEnum.getTransferToSide() != null)
+            previousSupportSide = previousStateEnum.getTransferToSide();
+      }
 
       if (doFootExplorationInTransferToStanding.getBooleanValue())
       {
@@ -94,11 +105,16 @@ public class TransferToStandingState extends WalkingState
       double extraToeOffHeight = 0.0;
       comHeightManager.initialize(transferToAndNextFootstepsDataForDoubleSupport, extraToeOffHeight);
 
-      // Just standing in double support, do nothing
       double finalTransferTime = walkingMessageHandler.getFinalTransferTime();
+      Footstep footstepLeft = walkingMessageHandler.getFootstepAtCurrentLocation(RobotSide.LEFT);
+      Footstep footstepRight = walkingMessageHandler.getFootstepAtCurrentLocation(RobotSide.LEFT);
+      midFootPosition.interpolate(footstepLeft.getFootstepPose().getPosition(), footstepRight.getFootstepPose().getPosition(), 0.5);
+      comHeightManager.transfer(midFootPosition, finalTransferTime);
+
+      // Just standing in double support, do nothing
       pelvisOrientationManager.centerInMidFeetZUpFrame(finalTransferTime);
       balanceManager.setICPPlanTransferFromSide(previousSupportSide);
-      balanceManager.initializeICPPlanForStanding(finalTransferTime);
+      balanceManager.initializeICPPlanForTransferToStanding(finalTransferTime);
 
       if (previousSupportSide != null)
       {
@@ -117,7 +133,7 @@ public class TransferToStandingState extends WalkingState
    }
 
    @Override
-   public void doTransitionOutOfAction()
+   public void onExit()
    {
    }
 }

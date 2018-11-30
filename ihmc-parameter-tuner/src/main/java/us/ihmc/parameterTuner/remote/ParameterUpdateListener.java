@@ -4,7 +4,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.atomic.AtomicReference;
 
 import gnu.trove.map.TObjectIntMap;
@@ -29,13 +29,15 @@ public class ParameterUpdateListener implements YoVariablesUpdatedListener
 {
    private YoVariableClientInterface yoVariableClientInterface;
 
-   private final AtomicReference<GuiRegistry> guiRegistryCopy = new AtomicReference<>(null);
+   private final AtomicReference<List<GuiRegistry>> guiRegistriesCopy = new AtomicReference<>(null);
 
    private final Map<String, GuiParameter> guiParametersByYoName = new HashMap<>();
    private final Map<String, YoVariable<?>> yoVariablesByGuiName = new HashMap<>();
 
-   private final ConcurrentHashMap<String, GuiParameter> serverChangedParameters = new ConcurrentHashMap<>();
-   private final ConcurrentHashMap<String, GuiParameter> userChangedParameters = new ConcurrentHashMap<>();
+   private final ConcurrentLinkedQueue<GuiParameter> serverChangedParameters = new ConcurrentLinkedQueue<>();
+   private final ConcurrentLinkedQueue<GuiParameter> userChangedParameters = new ConcurrentLinkedQueue<>();
+
+   private boolean isUpdatingYoVariables = false;
 
    @Override
    public void receivedTimestampOnly(long timestamp)
@@ -76,18 +78,23 @@ public class ParameterUpdateListener implements YoVariablesUpdatedListener
    public void start(YoVariableClientInterface yoVariableClientInterface, LogHandshake handshake, YoVariableHandshakeParser handshakeParser)
    {
       this.yoVariableClientInterface = yoVariableClientInterface;
-      YoVariableRegistry yoRegistry = handshakeParser.getRootRegistry();
+      YoVariableRegistry yoRootRegistry = handshakeParser.getRootRegistry();
 
-      yoRegistry.getAllParameters().stream().forEach(parameter -> {
+      yoRootRegistry.getAllParameters().stream().forEach(parameter -> {
          parameter.addParameterChangedListener(new ParameterChangedListener()
          {
             @Override
             public void notifyOfParameterChange(YoParameter<?> changedParameter)
             {
+               if (isUpdatingYoVariables)
+               {
+                  return;
+               }
+
                String yoName = getUniqueName(changedParameter);
-               GuiParameter newGuiParameter = guiParametersByYoName.get(yoName).createCopy();
+               GuiParameter newGuiParameter = new GuiParameter(guiParametersByYoName.get(yoName));
                newGuiParameter.setValue(changedParameter.getValueAsString());
-               serverChangedParameters.put(newGuiParameter.getUniqueName(), newGuiParameter);
+               serverChangedParameters.add(newGuiParameter);
             }
          });
       });
@@ -95,9 +102,14 @@ public class ParameterUpdateListener implements YoVariablesUpdatedListener
       guiParametersByYoName.clear();
       yoVariablesByGuiName.clear();
 
-      GuiRegistry guiRegistry = new GuiRegistry(yoRegistry.getName(), null);
-      createGuiRegistryRecursive(guiRegistry, yoRegistry);
-      this.guiRegistryCopy.set(guiRegistry.createFullCopy());
+      List<GuiRegistry> registriesCopy = new ArrayList<>();
+      ArrayList<YoVariableRegistry> yoRegistries = yoRootRegistry.getChildren();
+      yoRegistries.stream().forEach(yoRegistry -> {
+         GuiRegistry guiRegistry = new GuiRegistry(yoRegistry.getName(), null);
+         createGuiRegistryRecursive(guiRegistry, yoRegistry);
+         registriesCopy.add(guiRegistry.createFullCopy());
+      });
+      this.guiRegistriesCopy.set(registriesCopy);
    }
 
    @Override
@@ -114,12 +126,20 @@ public class ParameterUpdateListener implements YoVariablesUpdatedListener
    @Override
    public void receivedTimestampAndData(long timestamp)
    {
-      List<GuiParameter> parametersToUpdate = new ArrayList<>(userChangedParameters.values());
-      userChangedParameters.clear();
-      parametersToUpdate.stream().forEach(guiParameter -> {
-         YoVariable<?> yoVariable = yoVariablesByGuiName.get(guiParameter.getUniqueName());
+      GuiParameter userChangedParameter;
+      Map<String, GuiParameter> parametersToUpdate = new HashMap<>();
+      while ((userChangedParameter = userChangedParameters.poll()) != null)
+      {
+         parametersToUpdate.put(userChangedParameter.getUniqueName(), userChangedParameter);
+      }
+
+      isUpdatingYoVariables = true;
+      parametersToUpdate.values().forEach(guiParameter -> {
+         String uniqueName = guiParameter.getUniqueName();
+         YoVariable<?> yoVariable = yoVariablesByGuiName.get(uniqueName);
          setYoVariableFromGuiParameter(yoVariable, guiParameter);
       });
+      isUpdatingYoVariables = false;
    }
 
    @Override
@@ -155,31 +175,42 @@ public class ParameterUpdateListener implements YoVariablesUpdatedListener
 
    public boolean hasNewGuiRegistry()
    {
-      return guiRegistryCopy.get() != null;
+      return guiRegistriesCopy.get() != null;
    }
 
-   public GuiRegistry pollGuiRegistry()
+   public List<GuiRegistry> pollGuiRegistries()
    {
-      return guiRegistryCopy.getAndSet(null);
+      return guiRegistriesCopy.getAndSet(null);
    }
 
    public List<GuiParameter> getChangedParametersAndClear()
    {
-      List<GuiParameter> list = new ArrayList<>(serverChangedParameters.values());
-      serverChangedParameters.clear();
-      return list;
+      GuiParameter serverChangedParameter;
+      Map<String, GuiParameter> parametersToUpdate = new HashMap<>();
+      while ((serverChangedParameter = serverChangedParameters.poll()) != null)
+      {
+         parametersToUpdate.put(serverChangedParameter.getUniqueName(), serverChangedParameter);
+      }
+      return new ArrayList<>(parametersToUpdate.values());
    }
 
    public void changeVariables(List<GuiParameter> changedParameters)
    {
       changedParameters.stream().forEach(guiParameter -> {
-         userChangedParameters.put(guiParameter.getUniqueName(), guiParameter);
+         userChangedParameters.add(guiParameter);
       });
    }
 
+   /**
+    * Note, that here the YoVariables are set twice:</br>
+    * First to the new value triggering the change listeners that will send the value to the server.</br>
+    * Second to the old value without sending it such that the value of the YoVariable will be updated properly once
+    * it received the change back from the server.
+    */
    private static void setYoVariableFromGuiParameter(YoVariable<?> yoVariable, GuiParameter guiParameter)
    {
       doChecks(guiParameter, yoVariable);
+      long oldValue = yoVariable.getValueAsLongBits();
 
       switch (yoVariable.getYoVariableType())
       {
@@ -199,13 +230,16 @@ public class ParameterUpdateListener implements YoVariablesUpdatedListener
          yoBoolean.set(booleanValue);
          break;
       case ENUM:
-         YoEnum<?> yoEnum = (YoEnum<?>) yoVariable;
          TObjectIntMap<String> valueOptions = guiParameter.getValueOptions();
-         yoEnum.set(valueOptions.get(guiParameter.getCurrentValue()));
+         int ordinalValue = valueOptions.get(guiParameter.getCurrentValue());
+         YoEnum<?> yoEnum = (YoEnum<?>) yoVariable;
+         yoEnum.set(ordinalValue);
          break;
       default:
          throw new RuntimeException("Unhandled parameter type: " + yoVariable.getYoVariableType());
       }
+
+      yoVariable.setValueFromLongBits(oldValue, false);
    }
 
    private static void setGuiParameterFromYoVariable(GuiParameter guiParameter, YoVariable<?> yoVariable)
@@ -216,6 +250,7 @@ public class ParameterUpdateListener implements YoVariablesUpdatedListener
       guiParameter.setValue(yoParameter.getValueAsString());
       yoVariable.getManualScalingMin();
       guiParameter.setDescription(yoParameter.getDescription());
+      guiParameter.setLoadStatus(yoParameter.getLoadStatus());
 
       switch (yoVariable.getYoVariableType())
       {

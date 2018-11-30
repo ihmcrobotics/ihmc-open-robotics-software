@@ -203,6 +203,10 @@ public class BambooTools
 
    private static String determineEraseableBambooDataAndVideosRootDirectoryToUse()
    {
+      Path path = Paths.get(System.getProperty("create.videos.dir"));
+
+      PrintTools.info("Bamboo videos path from create.videos.dir: " + path.toString());
+
       String rootDirectoryToTry = System.getProperty("create.videos.dir");
       if(rootDirectoryToTry != null)
       {
@@ -484,7 +488,7 @@ public class BambooTools
 
    public static void reportErrorMessage(String errorMessage, boolean showGUI)
    {
-      System.err.println(errorMessage);
+      PrintTools.error(BambooTools.class, errorMessage);
 
       if (showGUI)
       {

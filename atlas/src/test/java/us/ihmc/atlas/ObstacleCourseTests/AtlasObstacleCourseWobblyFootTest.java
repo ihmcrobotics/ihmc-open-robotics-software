@@ -17,7 +17,7 @@ import us.ihmc.wholeBodyController.FootContactPoints;
 import us.ihmc.wholeBodyController.WobblySimulationContactPoints;
 import us.ihmc.yoVariables.variable.YoDouble;
 
-@ContinuousIntegrationPlan(categories = {IntegrationCategory.SLOW, IntegrationCategory.VIDEO})
+@ContinuousIntegrationPlan(categories = {IntegrationCategory.FAST, IntegrationCategory.VIDEO})
 public class AtlasObstacleCourseWobblyFootTest extends DRCObstacleCourseWobblyFootTest
 {
    private static final double footZWobbleForTests = 0.01;
@@ -37,8 +37,8 @@ public class AtlasObstacleCourseWobblyFootTest extends DRCObstacleCourseWobblyFo
    }
 
    @Override
-   @ContinuousIntegrationTest(estimatedDuration = 20.5)
-   @Test(timeout = 30000)
+   @ContinuousIntegrationTest(estimatedDuration = 23.5)
+   @Test(timeout = 120000)
    public void testStandingForACoupleSecondsWithWobblyFeet() throws SimulationExceededMaximumTimeException
    {
       super.testStandingForACoupleSecondsWithWobblyFeet();
@@ -46,7 +46,7 @@ public class AtlasObstacleCourseWobblyFootTest extends DRCObstacleCourseWobblyFo
 
    @Override
    @ContinuousIntegrationTest(estimatedDuration = 47.9, categoriesOverride = {IntegrationCategory.FLAKY, IntegrationCategory.VIDEO})
-   @Test(timeout = 30000)
+   @Test(timeout = 100000)
    public void testTurningInPlaceAndPassingPIWithWobblyFeet() throws SimulationExceededMaximumTimeException
    {
       super.testTurningInPlaceAndPassingPIWithWobblyFeet();
@@ -54,7 +54,7 @@ public class AtlasObstacleCourseWobblyFootTest extends DRCObstacleCourseWobblyFo
 
    @Override
    @ContinuousIntegrationTest(estimatedDuration = 44.4, categoriesOverride = {IntegrationCategory.FLAKY, IntegrationCategory.VIDEO})
-   @Test(timeout = 30000)
+   @Test(timeout = 100000)
    public void testWalkingUpToRampWithShortStepsWithWobblyFeet() throws SimulationExceededMaximumTimeException
    {
       super.testWalkingUpToRampWithShortStepsWithWobblyFeet();

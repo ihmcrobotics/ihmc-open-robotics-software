@@ -3,19 +3,19 @@ package us.ihmc.commonWalkingControlModules.capturePoint.optimization;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.junit.After;
 import org.junit.Assert;
 import org.junit.Test;
 
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.BipedSupportPolygons;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.YoPlaneContactState;
-import us.ihmc.commonWalkingControlModules.capturePoint.optimization.ICPOptimizationController;
+import us.ihmc.commonWalkingControlModules.capturePoint.ICPControlGains;
+import us.ihmc.commonWalkingControlModules.capturePoint.ICPControlGainsReadOnly;
 import us.ihmc.commonWalkingControlModules.configurations.ICPAngularMomentumModifierParameters;
 import us.ihmc.commonWalkingControlModules.configurations.SteppingParameters;
 import us.ihmc.commonWalkingControlModules.configurations.SwingTrajectoryParameters;
 import us.ihmc.commonWalkingControlModules.configurations.ToeOffParameters;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
-import us.ihmc.commonWalkingControlModules.capturePoint.ICPControlGains;
-import us.ihmc.commonWalkingControlModules.capturePoint.optimization.ICPOptimizationParameters;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.MomentumOptimizationSettings;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationPlan;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
@@ -24,15 +24,17 @@ import us.ihmc.euclid.referenceFrame.FramePoint2D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.FrameVector2D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.tools.ReferenceFrameTools;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.humanoidRobotics.footstep.FootSpoof;
-import us.ihmc.robotics.controllers.pidGains.PIDSE3Gains;
+import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.robotics.controllers.pidGains.implementations.PDGains;
+import us.ihmc.robotics.controllers.pidGains.implementations.PIDSE3Configuration;
 import us.ihmc.robotics.referenceFrames.MidFrameZUpFrame;
 import us.ihmc.robotics.referenceFrames.ZUpFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
-import us.ihmc.robotics.screwTheory.RigidBody;
+import us.ihmc.yoVariables.parameters.DefaultParameterReader;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 
 @ContinuousIntegrationPlan(categories = {IntegrationCategory.FAST})
@@ -47,8 +49,14 @@ public class ICPOptimizationControllerTest
    private final SideDependentList<FramePose3D> footPosesAtTouchdown = new SideDependentList<>(new FramePose3D(), new FramePose3D());
    private final SideDependentList<ReferenceFrame> ankleFrames = new SideDependentList<>();
 
-   @ContinuousIntegrationTest(estimatedDuration = 1.0)
-   @Test(timeout = 21000)
+   @After
+   public void tearDown()
+   {
+      ReferenceFrameTools.clearWorldFrameTree();
+   }
+
+   @ContinuousIntegrationTest(estimatedDuration = 0.1)
+   @Test(timeout = 30000)
    public void testStandingWithPerfectTracking() throws Exception
    {
       YoVariableRegistry registry = new YoVariableRegistry("robert");
@@ -57,15 +65,13 @@ public class ICPOptimizationControllerTest
       TestICPOptimizationParameters optimizationParameters = new TestICPOptimizationParameters()
       {
          @Override
-         public double getFeedbackParallelGain()
+         public ICPControlGainsReadOnly getICPFeedbackGains()
          {
-            return feedbackGain;
-         }
+            ICPControlGains gains = new ICPControlGains();
+            gains.setKpParallelToMotion(feedbackGain);
+            gains.setKpOrthogonalToMotion(feedbackGain);
 
-         @Override
-         public double getFeedbackOrthogonalGain()
-         {
-            return feedbackGain;
+            return gains;
          }
 
          @Override
@@ -93,7 +99,7 @@ public class ICPOptimizationControllerTest
       double controlDT = 0.001;
       ICPOptimizationController controller = new ICPOptimizationController(walkingControllerParameters, optimizationParameters, bipedSupportPolygons,
                                                                            null, contactableFeet, controlDT, registry, null);
-
+      new DefaultParameterReader().readParametersInRegistry(registry);
 
       double omega = walkingControllerParameters.getOmega0();
 
@@ -107,11 +113,12 @@ public class ICPOptimizationControllerTest
 
       FrameVector2D icpError = new FrameVector2D();
       FramePoint2D currentICP = new FramePoint2D();
+      FrameVector2D currentICPVelocity = new FrameVector2D();
       currentICP.set(desiredICP);
       currentICP.add(icpError);
 
       controller.initializeForStanding(0.0);
-      controller.compute(0.04, desiredICP, desiredICPVelocity, perfectCMP, currentICP, omega);
+      controller.compute(0.04, desiredICP, desiredICPVelocity, perfectCMP, currentICP, currentICPVelocity, omega);
 
       FramePoint2D desiredCMP = new FramePoint2D();
       controller.getDesiredCMP(desiredCMP);
@@ -119,8 +126,8 @@ public class ICPOptimizationControllerTest
       Assert.assertTrue(desiredCMP.epsilonEquals(perfectCMP, epsilon));
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 1.0)
-   @Test(timeout = 21000)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
+   @Test(timeout = 30000)
    public void testTransferWithPerfectTracking() throws Exception
    {
       YoVariableRegistry registry = new YoVariableRegistry("robert");
@@ -129,15 +136,13 @@ public class ICPOptimizationControllerTest
       TestICPOptimizationParameters optimizationParameters = new TestICPOptimizationParameters()
       {
          @Override
-         public double getFeedbackParallelGain()
+         public ICPControlGainsReadOnly getICPFeedbackGains()
          {
-            return feedbackGain;
-         }
+            ICPControlGains gains = new ICPControlGains();
+            gains.setKpParallelToMotion(feedbackGain);
+            gains.setKpOrthogonalToMotion(feedbackGain);
 
-         @Override
-         public double getFeedbackOrthogonalGain()
-         {
-            return feedbackGain;
+            return gains;
          }
 
          @Override
@@ -165,7 +170,7 @@ public class ICPOptimizationControllerTest
       double controlDT = 0.001;
       ICPOptimizationController controller = new ICPOptimizationController(walkingControllerParameters, optimizationParameters, bipedSupportPolygons,
                                                                            null, contactableFeet, controlDT, registry, null);
-
+      new DefaultParameterReader().readParametersInRegistry(registry);
 
       double omega = walkingControllerParameters.getOmega0();
 
@@ -179,11 +184,12 @@ public class ICPOptimizationControllerTest
 
       FrameVector2D icpError = new FrameVector2D();
       FramePoint2D currentICP = new FramePoint2D();
+      FrameVector2D currentICPVelocity = new FrameVector2D();
       currentICP.set(desiredICP);
       currentICP.add(icpError);
 
-      controller.initializeForTransfer(0.0, RobotSide.LEFT, omega);
-      controller.compute(0.04, desiredICP, desiredICPVelocity, perfectCMP, currentICP, omega);
+      controller.initializeForTransfer(0.0, RobotSide.LEFT);
+      controller.compute(0.04, desiredICP, desiredICPVelocity, perfectCMP, currentICP, currentICPVelocity, omega);
 
       FramePoint2D desiredCMP = new FramePoint2D();
       controller.getDesiredCMP(desiredCMP);
@@ -191,8 +197,8 @@ public class ICPOptimizationControllerTest
       Assert.assertTrue(desiredCMP.epsilonEquals(perfectCMP, epsilon));
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 1.0)
-   @Test(timeout = 21000)
+   @ContinuousIntegrationTest(estimatedDuration = 0.1)
+   @Test(timeout = 30000)
    public void testStandingConstrained() throws Exception
    {
       YoVariableRegistry registry = new YoVariableRegistry("robert");
@@ -201,15 +207,13 @@ public class ICPOptimizationControllerTest
       TestICPOptimizationParameters optimizationParameters = new TestICPOptimizationParameters()
       {
          @Override
-         public double getFeedbackParallelGain()
+         public ICPControlGainsReadOnly getICPFeedbackGains()
          {
-            return feedbackGain;
-         }
+            ICPControlGains gains = new ICPControlGains();
+            gains.setKpParallelToMotion(feedbackGain);
+            gains.setKpOrthogonalToMotion(feedbackGain);
 
-         @Override
-         public double getFeedbackOrthogonalGain()
-         {
-            return feedbackGain;
+            return gains;
          }
 
          @Override
@@ -237,6 +241,7 @@ public class ICPOptimizationControllerTest
       double controlDT = 0.001;
       ICPOptimizationController controller = new ICPOptimizationController(walkingControllerParameters, optimizationParameters, bipedSupportPolygons,
                                                                            null, contactableFeet, controlDT, registry, null);
+      new DefaultParameterReader().readParametersInRegistry(registry);
 
       double omega = walkingControllerParameters.getOmega0();
 
@@ -250,11 +255,12 @@ public class ICPOptimizationControllerTest
 
       FrameVector2D icpError = new FrameVector2D(worldFrame, 0.03, 0.06);
       FramePoint2D currentICP = new FramePoint2D();
+      FrameVector2D currentICPVelocity = new FrameVector2D();
       currentICP.set(desiredICP);
       currentICP.add(icpError);
 
       controller.initializeForStanding(0.0);
-      controller.compute(0.04, desiredICP, desiredICPVelocity, perfectCMP, currentICP, omega);
+      controller.compute(0.04, desiredICP, desiredICPVelocity, perfectCMP, currentICP, currentICPVelocity, omega);
 
       FramePoint2D desiredCMP = new FramePoint2D();
       controller.getDesiredCMP(desiredCMP);
@@ -273,8 +279,8 @@ public class ICPOptimizationControllerTest
       Assert.assertTrue(desiredCMP.epsilonEquals(desiredCMPExpected, epsilon));
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 1.0)
-   @Test(timeout = 21000)
+   @ContinuousIntegrationTest(estimatedDuration = 0.1)
+   @Test(timeout = 30000)
    public void testStandingConstrainedWithAngularMomentum() throws Exception
    {
       YoVariableRegistry registry = new YoVariableRegistry("robert");
@@ -283,15 +289,12 @@ public class ICPOptimizationControllerTest
       TestICPOptimizationParameters optimizationParameters = new TestICPOptimizationParameters()
       {
          @Override
-         public double getFeedbackParallelGain()
+         public ICPControlGainsReadOnly getICPFeedbackGains()
          {
-            return feedbackGain;
-         }
-
-         @Override
-         public double getFeedbackOrthogonalGain()
-         {
-            return feedbackGain;
+            ICPControlGains gains = new ICPControlGains();
+            gains.setKpOrthogonalToMotion(feedbackGain);
+            gains.setKpParallelToMotion(feedbackGain);
+            return gains;
          }
 
          @Override
@@ -325,6 +328,7 @@ public class ICPOptimizationControllerTest
       double controlDT = 0.001;
       ICPOptimizationController controller = new ICPOptimizationController(walkingControllerParameters, optimizationParameters, bipedSupportPolygons,
                                                                            null, contactableFeet, controlDT, registry, null);
+      new DefaultParameterReader().readParametersInRegistry(registry);
 
       double omega = walkingControllerParameters.getOmega0();
 
@@ -338,11 +342,12 @@ public class ICPOptimizationControllerTest
 
       FrameVector2D icpError = new FrameVector2D(worldFrame, 0.03, 0.06);
       FramePoint2D currentICP = new FramePoint2D();
+      FrameVector2D currentICPVelocity = new FrameVector2D();
       currentICP.set(desiredICP);
       currentICP.add(icpError);
 
       controller.initializeForStanding(0.0);
-      controller.compute(0.04, desiredICP, desiredICPVelocity, perfectCMP, currentICP, omega);
+      controller.compute(0.04, desiredICP, desiredICPVelocity, perfectCMP, currentICP, currentICPVelocity, omega);
 
       FramePoint2D desiredCMP = new FramePoint2D();
       controller.getDesiredCMP(desiredCMP);
@@ -397,7 +402,7 @@ public class ICPOptimizationControllerTest
          ankleZUpFrames.put(robotSide, new ZUpFrame(worldFrame, ankleFrame, robotSide.getCamelCaseNameForStartOfExpression() + "ZUp"));
 
          String sidePrefix = robotSide.getCamelCaseNameForStartOfExpression();
-         RigidBody foot = contactableFoot.getRigidBody();
+         RigidBodyBasics foot = contactableFoot.getRigidBody();
          ReferenceFrame soleFrame = contactableFoot.getSoleFrame();
          List<FramePoint2D> contactFramePoints = contactableFoot.getContactPoints2d();
          double coefficientOfFriction = contactableFoot.getCoefficientOfFriction();
@@ -409,7 +414,7 @@ public class ICPOptimizationControllerTest
       ReferenceFrame midFeetZUpFrame = new MidFrameZUpFrame("midFeetZupFrame", worldFrame, ankleZUpFrames.get(RobotSide.LEFT), ankleZUpFrames.get(RobotSide.RIGHT));
       midFeetZUpFrame.update();
 
-      BipedSupportPolygons bipedSupportPolygons = new BipedSupportPolygons(ankleZUpFrames, midFeetZUpFrame, ankleZUpFrames, registry, null);
+      BipedSupportPolygons bipedSupportPolygons = new BipedSupportPolygons(midFeetZUpFrame, ankleZUpFrames, registry, null);
       bipedSupportPolygons.updateUsingContactStates(contactStates);
 
       return bipedSupportPolygons;
@@ -454,17 +459,14 @@ public class ICPOptimizationControllerTest
       }
 
       @Override
-      public double getFeedbackParallelGain()
+      public ICPControlGainsReadOnly getICPFeedbackGains()
       {
-         return 3.0;
-      }
+         ICPControlGains gains = new ICPControlGains();
+         gains.setKpParallelToMotion(3.0);
+         gains.setKpOrthogonalToMotion(2.5);
 
-      @Override
-      public double getFeedbackOrthogonalGain()
-      {
-         return 2.5;
+         return gains;
       }
-
       @Override
       public double getDynamicsObjectiveWeight()
       {
@@ -602,19 +604,19 @@ public class ICPOptimizationControllerTest
       }
 
       @Override
-      public PIDSE3Gains getSwingFootControlGains()
+      public PIDSE3Configuration getSwingFootControlGains()
       {
          return null;
       }
 
       @Override
-      public PIDSE3Gains getHoldPositionFootControlGains()
+      public PIDSE3Configuration getHoldPositionFootControlGains()
       {
          return null;
       }
 
       @Override
-      public PIDSE3Gains getToeOffFootControlGains()
+      public PIDSE3Configuration getToeOffFootControlGains()
       {
          return null;
       }

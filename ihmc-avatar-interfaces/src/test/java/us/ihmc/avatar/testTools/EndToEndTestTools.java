@@ -3,8 +3,7 @@ package us.ihmc.avatar.testTools;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
-import us.ihmc.commonWalkingControlModules.controlModules.rigidBody.RigidBodyControlMode;
-import us.ihmc.commonWalkingControlModules.controlModules.rigidBody.RigidBodyControlState;
+import controller_msgs.msg.dds.SO3TrajectoryPointMessage;
 import us.ihmc.commonWalkingControlModules.controlModules.rigidBody.RigidBodyTaskspaceControlState;
 import us.ihmc.commonWalkingControlModules.controllerCore.FeedbackControllerDataReadOnly.Space;
 import us.ihmc.commonWalkingControlModules.controllerCore.FeedbackControllerDataReadOnly.Type;
@@ -16,11 +15,10 @@ import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Tuple3DBasics;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.euclid.tuple4D.interfaces.QuaternionReadOnly;
-import us.ihmc.humanoidRobotics.communication.packets.SO3TrajectoryPointMessage;
+import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.robotics.math.frames.YoFrameVariableNameTools;
 import us.ihmc.robotics.math.trajectories.waypoints.MultipleWaypointsOrientationTrajectoryGenerator;
 import us.ihmc.robotics.math.trajectories.waypoints.SimpleSO3TrajectoryPoint;
-import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 
 public class EndToEndTestTools
@@ -29,17 +27,17 @@ public class EndToEndTestTools
 
    /**
     * This method will assert the number of waypoints used by a {@link RigidBodyTaskspaceControlState} that is
-    * controlling the {@link RigidBody} with given name. The number of waypoints checked is the total number
+    * controlling the {@link RigidBodyBasics} with given name. The number of waypoints checked is the total number
     * of trajectory points (in queue and in generator) of the controller.
     */
-   public static void assertNumberOfPoints(String bodyName, int points, SimulationConstructionSet scs)
+   public static void assertNumberOfPoints(String bodyName, String postfix, int points, SimulationConstructionSet scs)
    {
-      assertEquals("Unexpected number of waypoints:", points, findControllerNumberOfWaypoints(bodyName, scs));
+      assertEquals("Unexpected number of waypoints:", points, findControllerNumberOfWaypoints(bodyName, postfix, scs));
    }
 
    public static void assertCurrentDesiredsMatchWaypoint(String bodyName, SO3TrajectoryPointMessage waypoint, SimulationConstructionSet scs, double epsilon)
    {
-      assertCurrentDesiredsMatch(bodyName, waypoint.orientation, waypoint.angularVelocity, scs, epsilon);
+      assertCurrentDesiredsMatch(bodyName, waypoint.getOrientation(), waypoint.getAngularVelocity(), scs, epsilon);
    }
 
    public static void assertCurrentDesiredsMatch(String bodyName, QuaternionReadOnly expectedOrientation, Vector3D expectedAngularVelocity, SimulationConstructionSet scs, double epsilon)
@@ -55,8 +53,8 @@ public class EndToEndTestTools
       assertTrue("Index too high: " + index, index < RigidBodyTaskspaceControlState.maxPointsInGenerator);
       SimpleSO3TrajectoryPoint actualWaypoint = findOrientationTrajectoryPoint(bodyName, index, scs);
       assertEquals("Time", waypoint.getTime(), actualWaypoint.getTime(), epsilon);
-      EuclidCoreTestTools.assertQuaternionGeometricallyEquals("Orientation", waypoint.orientation, actualWaypoint.getOrientationCopy(), epsilon, FORMAT);
-      EuclidCoreTestTools.assertTuple3DEquals("Angular Velocity", waypoint.angularVelocity, actualWaypoint.getAngularVelocityCopy(), epsilon, FORMAT);
+      EuclidCoreTestTools.assertQuaternionGeometricallyEquals("Orientation", waypoint.getOrientation(), actualWaypoint.getOrientationCopy(), epsilon, FORMAT);
+      EuclidCoreTestTools.assertTuple3DEquals("Angular Velocity", waypoint.getAngularVelocity(), actualWaypoint.getAngularVelocityCopy(), epsilon, FORMAT);
    }
 
    public static SimpleSO3TrajectoryPoint findOrientationTrajectoryPoint(String bodyName, int index, SimulationConstructionSet scs)
@@ -77,11 +75,10 @@ public class EndToEndTestTools
     * Finds the number of waypoints in a {@link RigidBodyTaskspaceControlState} for the body with the
     * given name.
     */
-   public static int findControllerNumberOfWaypoints(String bodyName, SimulationConstructionSet scs)
+   public static int findControllerNumberOfWaypoints(String bodyName, String postfix, SimulationConstructionSet scs)
    {
-      String namespace = RigidBodyControlState.createRegistryName(bodyName, RigidBodyControlMode.TASKSPACE);
-      String variableName = bodyName + "TaskspaceNumberOfPoints";
-      return (int) scs.getVariable(namespace, variableName).getValueAsLongBits();
+      String variableName = bodyName + postfix + "TaskspaceNumberOfPoints";
+      return (int) scs.getVariable(variableName).getValueAsLongBits();
    }
 
    /**

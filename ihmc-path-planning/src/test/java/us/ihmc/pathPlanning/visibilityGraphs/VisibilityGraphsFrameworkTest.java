@@ -1,6 +1,5 @@
 package us.ihmc.pathPlanning.visibilityGraphs;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -28,18 +27,20 @@ import us.ihmc.euclid.geometry.LineSegment3D;
 import us.ihmc.euclid.geometry.Plane3D;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple2D.Point2D;
+import us.ihmc.euclid.tuple2D.interfaces.Point2DBasics;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DBasics;
+import us.ihmc.javaFXToolkit.messager.JavaFXMessager;
+import us.ihmc.javaFXToolkit.messager.SharedMemoryJavaFXMessager;
 import us.ihmc.pathPlanning.visibilityGraphs.interfaces.NavigableExtrusionDistanceCalculator;
 import us.ihmc.pathPlanning.visibilityGraphs.interfaces.VisibilityGraphsParameters;
 import us.ihmc.pathPlanning.visibilityGraphs.tools.PlanarRegionTools;
 import us.ihmc.pathPlanning.visibilityGraphs.tools.VisibilityGraphsIOTools;
 import us.ihmc.pathPlanning.visibilityGraphs.tools.VisibilityGraphsIOTools.VisibilityGraphsUnitTestDataset;
 import us.ihmc.pathPlanning.visibilityGraphs.ui.VisibilityGraphsDataExporter;
-import us.ihmc.pathPlanning.visibilityGraphs.ui.messager.SimpleUIMessager;
 import us.ihmc.pathPlanning.visibilityGraphs.ui.messager.UIVisibilityGraphsTopics;
 import us.ihmc.pathPlanning.visibilityGraphs.visualizer.VisibilityGraphsTestVisualizer;
 import us.ihmc.robotEnvironmentAwareness.geometry.ConcaveHullDecomposition;
@@ -57,10 +58,10 @@ public class VisibilityGraphsFrameworkTest extends Application
    // Whether to start the UI or not.
    private static boolean VISUALIZE = false;
    // For enabling helpful prints.
-   private static boolean DEBUG = true;
+   private static boolean DEBUG = false;
 
    // Because we use JavaFX, there will be two instance of VisibilityGraphsFrameworkTest, one for running the test and one starting the ui. The messager has to be static so both the ui and test use the same instance.
-   private static SimpleUIMessager messager = null;
+   private static JavaFXMessager messager = null;
    // Because JavaFX will create a fresh new instance of VisibilityGraphsFrameworkTest, the ui has to be static so there is only one instance and we can refer to it in the test part.
    private static VisibilityGraphsTestVisualizer ui;
 
@@ -83,44 +84,18 @@ public class VisibilityGraphsFrameworkTest extends Application
 
    private static VisibilityGraphsParameters createTestParameters()
    {
-      return new DefaultVisibilityGraphParameters()
-      {
-         @Override
-         public double getTooHighToStepDistance()
-         {
-            return 0.4;
-         }
-
-         @Override
-         public double getExtrusionDistance()
-         {
-            return 0.4;
-         }
-
-         @Override
-         public NavigableExtrusionDistanceCalculator getNavigableExtrusionDistanceCalculator()
-         {
-            return new NavigableExtrusionDistanceCalculator()
-            {
-               @Override
-               public double computeExtrusionDistance(PlanarRegion navigableRegionToBeExtruded)
-               {
-                  return 0.01;
-               }
-            };
-         }
-      };
+      return new DefaultVisibilityGraphParameters();
    }
 
    @Before
-   public void setup() throws InterruptedException, IOException
+   public void setup() throws InterruptedException, Exception
    {
       VISUALIZE = VISUALIZE && !ContinuousIntegrationTools.isRunningOnContinuousIntegrationServer();
       DEBUG = (VISUALIZE || (DEBUG && !ContinuousIntegrationTools.isRunningOnContinuousIntegrationServer()));
 
       if (VISUALIZE)
       {
-         messager = new SimpleUIMessager(UIVisibilityGraphsTopics.API);
+         messager = new SharedMemoryJavaFXMessager(UIVisibilityGraphsTopics.API);
          messager.startMessager();
 
          // Did not find a better solution for starting JavaFX and still be able to move on.
@@ -150,7 +125,7 @@ public class VisibilityGraphsFrameworkTest extends Application
    }
 
    @Test(timeout = TIMEOUT)
-   @ContinuousIntegrationTest(estimatedDuration = 13.0, categoriesOverride = {IntegrationCategory.IN_DEVELOPMENT})
+   @ContinuousIntegrationTest(estimatedDuration = 13.0)
    public void testDatasetsWithoutOcclusion() throws Exception
    {
       if (VISUALIZE)
@@ -247,8 +222,8 @@ public class VisibilityGraphsFrameworkTest extends Application
             messager.submitMessage(UIVisibilityGraphsTopics.ReloadDatasetRequest, false);
             messager.submitMessage(UIVisibilityGraphsTopics.PreviousDatasetRequest, false);
 
-            while (!nextDatasetRequested.get() && !reloadDatasetRequested.get() && !previousDatasetRequested.get()
-                  && dataset.getDatasetName().equals(requestedDatasetPathReference.get()))
+            while (!nextDatasetRequested.get() && !reloadDatasetRequested.get() && !previousDatasetRequested.get() && dataset.getDatasetName().equals(
+                  requestedDatasetPathReference.get()))
             {
                if (!messager.isMessagerOpen())
                   return; // The ui has been closed
@@ -303,6 +278,53 @@ public class VisibilityGraphsFrameworkTest extends Application
 
       Assert.assertTrue("Number of failing datasets: " + numberOfFailingDatasets + " out of " + allDatasets.size() + ". Errors:" + errorMessages,
                         errorMessages.isEmpty());
+   }
+
+   private void runAssertionsOnDataset(DatasetTestRunner datasetTestRunner, String datasetname) throws Exception
+   {
+      List<VisibilityGraphsUnitTestDataset> allDatasets = VisibilityGraphsIOTools.loadAllDatasets(VisibilityGraphsDataExporter.class);
+
+      if (DEBUG)
+      {
+         PrintTools.info("Unit test files found: " + allDatasets.size());
+      }
+
+
+
+      if (VISUALIZE)
+      {
+         List<String> allDatasetNames = allDatasets.stream().map(VisibilityGraphsUnitTestDataset::getDatasetName).collect(Collectors.toList());
+         messager.submitMessage(UIVisibilityGraphsTopics.AllDatasetPaths, allDatasetNames);
+
+      }
+
+
+      if (allDatasets.isEmpty())
+         Assert.fail("Did not find any datasets to test.");
+
+      // Randomizing the regionIds so the viz is better
+      Random random = new Random(324);
+      allDatasets.stream().map(VisibilityGraphsUnitTestDataset::getPlanarRegionsList).map(PlanarRegionsList::getPlanarRegionsAsList)
+                 .forEach(regionsList -> regionsList.forEach(region -> region.setRegionId(random.nextInt())));
+
+      VisibilityGraphsUnitTestDataset dataset = allDatasets.stream().filter(d -> d.getDatasetName().equals(datasetname)).findFirst().orElse(null);
+
+      if (VISUALIZE)
+      {
+         messager.submitMessage(UIVisibilityGraphsTopics.GlobalReset, true);
+         messager.submitMessage(UIVisibilityGraphsTopics.CurrentDatasetPath, dataset.getDatasetName());
+      }
+
+      if (DEBUG)
+      {
+         PrintTools.info("Processing file: " + dataset.getDatasetName());
+      }
+
+      String errorMessages = datasetTestRunner.testDataset(dataset);
+
+
+      Assert.assertTrue("Errors: " + errorMessages, errorMessages.isEmpty());
+      ThreadTools.sleepForever(); // Apparently need to give some time for the prints to appear in the right order.
    }
 
    private String runAssertionsWithoutOcclusion(VisibilityGraphsUnitTestDataset dataset)
@@ -553,7 +575,7 @@ public class VisibilityGraphsFrameworkTest extends Application
          for (int i = 0; i < planarRegion.getNumberOfConvexPolygons(); i++)
          {
             ConvexPolygon2D convexPolygon = planarRegion.getConvexPolygon(i);
-            Point2D closestPoint2D = convexPolygon.orthogonalProjectionCopy(walkerPosition2D);
+            Point2DBasics closestPoint2D = convexPolygon.orthogonalProjectionCopy(walkerPosition2D);
             if (closestPoint2D == null)
             {
                if (convexPolygon.isPointInside(walkerPosition2D))
@@ -570,7 +592,7 @@ public class VisibilityGraphsFrameworkTest extends Application
 
             if (walkerShapeLocal.isInsideOrOnSurface(closestPoint))
             {
-               Point2D intersectionLocal = closestPoint2D;
+               Point2DBasics intersectionLocal = closestPoint2D;
                Point3D intersectionWorld = new Point3D(intersectionLocal);
                planarRegion.transformFromLocalToWorld(intersectionWorld);
                errorMessages += fail(datasetName, "Body path is going through a region at: " + intersectionWorld);
@@ -743,18 +765,35 @@ public class VisibilityGraphsFrameworkTest extends Application
    @Override
    public void start(Stage primaryStage) throws Exception
    {
-      ui = new VisibilityGraphsTestVisualizer(primaryStage, messager);
-      ui.show();
+      if (VISUALIZE)
+      {
+         ui = new VisibilityGraphsTestVisualizer(primaryStage, messager);
+         ui.show();
+      }
    }
 
    @Override
    public void stop() throws Exception
    {
-      ui.stop();
+      if (VISUALIZE)
+      {
+         ui.stop();
+      }
    }
 
-   private static interface DatasetTestRunner
+private static interface DatasetTestRunner
+{
+   String testDataset(VisibilityGraphsUnitTestDataset dataset);
+
+}
+
+   public static void main(String[] args) throws Exception
    {
-      String testDataset(VisibilityGraphsUnitTestDataset dataset);
+      VisibilityGraphsFrameworkTest test = new VisibilityGraphsFrameworkTest();
+      String prefix = "unitTestData/testable/";
+      test.setup();
+      test.runAssertionsOnDataset(dataset -> test.runAssertionsWithoutOcclusion(dataset), prefix + "20171218_205120_BodyPathPlannerEnvironment");
+      test.tearDown();
+
    }
 }

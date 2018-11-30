@@ -8,6 +8,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
+import org.junit.After;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -19,13 +20,17 @@ import us.ihmc.euclid.geometry.BoundingBox3D;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.geometry.LineSegment2D;
 import us.ihmc.euclid.geometry.LineSegment3D;
+import us.ihmc.euclid.geometry.interfaces.ConvexPolygon2DBasics;
+import us.ihmc.euclid.geometry.interfaces.ConvexPolygon2DReadOnly;
 import us.ihmc.euclid.referenceFrame.FramePoint2D;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.tools.ReferenceFrameTools;
 import us.ihmc.euclid.tools.EuclidCoreTestTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple2D.Vector2D;
+import us.ihmc.euclid.tuple2D.interfaces.Point2DBasics;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
@@ -35,6 +40,12 @@ import us.ihmc.robotics.random.RandomGeometry;
 @ContinuousIntegrationPlan(categories = {IntegrationCategory.FAST})
 public class PlanarRegionTest
 {
+   @After
+   public void tearDown()
+   {
+      ReferenceFrameTools.clearWorldFrameTree();
+   }
+
    @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testIntersections()
@@ -110,9 +121,44 @@ public class PlanarRegionTest
       }
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.6)
    @Test(timeout = 30000)
-   public void testIsPointOnOrSlightlyAbove()
+   public void testIsPointInWorld2DInside()
+   {
+      Random random = new Random(1776L);
+
+      RigidBodyTransform transformToWorld = new RigidBodyTransform();
+      Point3D regionTranslation = new Point3D();
+      Point3D pointAbove = new Point3D();
+      Point3D pointBelow = new Point3D();
+      Vector3D regionNormal = new Vector3D();
+
+      for (int i = 0; i < 10000; i++)
+      {
+         PlanarRegion planarRegion = PlanarRegion.generatePlanarRegionFromRandomPolygonsWithRandomTransform(random, 1, 10.0, 5);
+         planarRegion.getTransformToWorld(transformToWorld);
+
+         Point2DReadOnly centroid = planarRegion.getLastConvexPolygon().getCentroid();
+         regionTranslation.set(centroid.getX(), centroid.getY(), 0.0);
+         transformToWorld.transform(regionTranslation);
+         regionTranslation.setZ(planarRegion.getPlaneZGivenXY(regionTranslation.getX(), regionTranslation.getY()));
+
+         planarRegion.getNormal(regionNormal);
+
+         regionNormal.normalize();
+         regionNormal.scale(1e-6);
+
+         pointAbove.add(regionTranslation, regionNormal);
+         pointBelow.sub(regionTranslation, regionNormal);
+
+         assertTrue(planarRegion.isPointInWorld2DInside(pointAbove));
+         assertTrue(planarRegion.isPointInWorld2DInside(pointBelow));
+      }
+   }
+
+   @ContinuousIntegrationTest(estimatedDuration = 0.6)
+   @Test(timeout = 30000)
+   public void testIsPointOn()
    {
       Random random = new Random(1776L);
 
@@ -145,7 +191,7 @@ public class PlanarRegionTest
       }
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.4)
    @Test(timeout = 30000)
    public void testIsPointOnOrSlightlyBelow()
    {
@@ -459,7 +505,7 @@ public class PlanarRegionTest
       // Do a bunch of trivial queries with isLineSegmentIntersecting(LineSegment2d) method.
       LineSegment2D lineSegment = new LineSegment2D(0.0, 0.0, 2.0, 2.0);
       assertTrue(planarRegion.isLineSegmentIntersecting(lineSegment));
-      ArrayList<Point2D[]> intersectionsInPlaneFrame = new ArrayList<>();
+      List<Point2DBasics[]> intersectionsInPlaneFrame = new ArrayList<>();
       planarRegion.getLineSegmentIntersectionsWhenProjectedVertically(lineSegment, intersectionsInPlaneFrame);
       assertEquals(3, intersectionsInPlaneFrame.size());
 
@@ -474,7 +520,7 @@ public class PlanarRegionTest
       intersectionsInPlaneFrame.clear();
       planarRegion.getLineSegmentIntersectionsWhenProjectedVertically(lineSegment, intersectionsInPlaneFrame);
       assertEquals(2, intersectionsInPlaneFrame.size());
-      Point2D[] points = intersectionsInPlaneFrame.get(0);
+      Point2DBasics[] points = intersectionsInPlaneFrame.get(0);
       assertEquals(1, points.length);
       EuclidCoreTestTools.assertTuple2DEquals(new Point2D(0.0, 1.0), points[0], 1e-7);
       points = intersectionsInPlaneFrame.get(1);
@@ -763,7 +809,8 @@ public class PlanarRegionTest
 
          for (ConvexPolygon2D convexPolygon2d : regionConvexPolygons)
          {
-            ConvexPolygon2D convexPolygon2dInWorld = convexPolygon2d.applyTransformAndProjectToXYPlaneCopy(transformToWorld);
+            ConvexPolygon2D convexPolygon2dInWorld = new ConvexPolygon2D(convexPolygon2d);
+            convexPolygon2dInWorld.applyTransform(transformToWorld, false);
             for (int i = 0; i < convexPolygon2dInWorld.getNumberOfVertices(); i++)
             {
                Point2DReadOnly vertex = convexPolygon2dInWorld.getVertex(i);
@@ -853,16 +900,16 @@ public class PlanarRegionTest
       assertTrue(planarRegion.isPointInside(new Point3D(0.0, 0.0, 0.5), 1e-7));
    }
 
-   static ConvexPolygon2D translateConvexPolygon(double xTranslation, double yTranslation, ConvexPolygon2D convexPolygon)
+   static ConvexPolygon2DBasics translateConvexPolygon(double xTranslation, double yTranslation, ConvexPolygon2DReadOnly convexPolygon)
    {
       Vector2D translation = new Vector2D(xTranslation, yTranslation);
       return convexPolygon.translateCopy(translation);
    }
 
-   private static ConvexPolygon2D transformConvexPolygon(RigidBodyTransform transform, ConvexPolygon2D convexPolygon)
+   private static ConvexPolygon2D transformConvexPolygon(RigidBodyTransform transform, ConvexPolygon2DReadOnly convexPolygon2D)
    {
-      ConvexPolygon2D transformedConvexPolygon = new ConvexPolygon2D(convexPolygon);
-      transformedConvexPolygon.applyTransformAndProjectToXYPlane(transform);
+      ConvexPolygon2D transformedConvexPolygon = new ConvexPolygon2D(convexPolygon2D);
+      transformedConvexPolygon.applyTransform(transform, false);
       return transformedConvexPolygon;
    }
 

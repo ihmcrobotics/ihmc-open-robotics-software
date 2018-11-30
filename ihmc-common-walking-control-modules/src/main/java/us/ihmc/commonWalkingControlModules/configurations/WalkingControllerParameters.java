@@ -6,21 +6,22 @@ import java.util.List;
 import java.util.Map;
 
 import gnu.trove.map.hash.TObjectDoubleHashMap;
+import us.ihmc.commonWalkingControlModules.capturePoint.ICPControlGains;
+import us.ihmc.commonWalkingControlModules.capturePoint.optimization.ICPOptimizationParameters;
 import us.ihmc.commonWalkingControlModules.controlModules.PelvisICPBasedTranslationManager;
 import us.ihmc.commonWalkingControlModules.controlModules.foot.ToeSlippingDetector;
 import us.ihmc.commonWalkingControlModules.controlModules.pelvis.PelvisOffsetTrajectoryWhileWalking;
 import us.ihmc.commonWalkingControlModules.controlModules.rigidBody.RigidBodyControlMode;
 import us.ihmc.commonWalkingControlModules.dynamicReachability.DynamicReachabilityCalculator;
-import us.ihmc.commonWalkingControlModules.capturePoint.ICPControlGains;
-import us.ihmc.commonWalkingControlModules.capturePoint.optimization.ICPOptimizationParameters;
+import us.ihmc.commonWalkingControlModules.momentumBasedController.feedbackController.FeedbackControllerSettings;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.JointLimitParameters;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.MomentumOptimizationSettings;
 import us.ihmc.euclid.geometry.Pose3D;
-import us.ihmc.robotics.controllers.pidGains.PID3DGainsReadOnly;
+import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.robotics.controllers.pidGains.PIDGainsReadOnly;
-import us.ihmc.robotics.controllers.pidGains.PIDSE3Gains;
 import us.ihmc.robotics.controllers.pidGains.implementations.PDGains;
-import us.ihmc.robotics.screwTheory.RigidBody;
+import us.ihmc.robotics.controllers.pidGains.implementations.PID3DConfiguration;
+import us.ihmc.robotics.controllers.pidGains.implementations.PIDSE3Configuration;
 import us.ihmc.sensorProcessing.stateEstimation.FootSwitchType;
 
 public abstract class WalkingControllerParameters
@@ -48,6 +49,18 @@ public abstract class WalkingControllerParameters
     * @return the value for omega0 that is used in the controller for ICP related computations.
     */
    public abstract double getOmega0();
+
+   /**
+    * Specifies if the desired ground reaction force for the force that is about to swing should
+    * smoothly be brought to zero by adding a inequality constraint on the z-force.
+    * 
+    * @return whether to perform smooth unloading before swing or not. Default value is
+    *         {@code false}.
+    */
+   public boolean enforceSmoothFootUnloading()
+   {
+      return false;
+   }
 
    /**
     * Specifies if the controller should attempt at detecting foot slipping during toe off when
@@ -178,7 +191,7 @@ public abstract class WalkingControllerParameters
     *
     * @return list containing orientation PID gains and the corresponding rigid bodies
     */
-   public List<GroupParameter<PID3DGainsReadOnly>> getTaskspaceOrientationControlGains()
+   public List<GroupParameter<PID3DConfiguration>> getTaskspaceOrientationControlGains()
    {
       return new ArrayList<>();
    }
@@ -198,7 +211,7 @@ public abstract class WalkingControllerParameters
     *
     * @return list containing position PID gains and the corresponding rigid bodies
     */
-   public List<GroupParameter<PID3DGainsReadOnly>> getTaskspacePositionControlGains()
+   public List<GroupParameter<PID3DConfiguration>> getTaskspacePositionControlGains()
    {
       return new ArrayList<>();
    }
@@ -237,7 +250,7 @@ public abstract class WalkingControllerParameters
     * If the particular body does not support full pose control but only orientation control the position part of the
     * pose will be disregarded.
     * <p>
-    * The key of the map is the name of the rigid body that can be obtained with {@link RigidBody#getName()}. If a
+    * The key of the map is the name of the rigid body that can be obtained with {@link RigidBodyBasics#getName()}. If a
     * body is not contained in this map but a default control mode of {@link RigidBodyControlMode#TASKSPACE} is not
     * supported for that body.
     *
@@ -251,20 +264,20 @@ public abstract class WalkingControllerParameters
    /**
     * Returns the gains used for the foot pose when in swing.
     */
-   public abstract PIDSE3Gains getSwingFootControlGains();
+   public abstract PIDSE3Configuration getSwingFootControlGains();
 
    /**
     * Returns the gains used for the foot when in support. Note that these gains are only used when the foot
     * is not loaded or close to tipping. Of that is not the case the foot pose when in support is not controlled
     * using a feedback controller.
     */
-   public abstract PIDSE3Gains getHoldPositionFootControlGains();
+   public abstract PIDSE3Configuration getHoldPositionFootControlGains();
 
    /**
     * Returns the gains used for the foot when in the toe off state. Note that some parts of the foot orientation
     * will not use these gains. The foot pitch for example is usually not controlled explicitly during tow off.
     */
-   public abstract PIDSE3Gains getToeOffFootControlGains();
+   public abstract PIDSE3Configuration getToeOffFootControlGains();
 
    /**
     * Specifies if the arm controller should be switching
@@ -407,6 +420,7 @@ public abstract class WalkingControllerParameters
     * This will be used if the foot switch type as defined in {@link #getFootSwitchType()} is set to
     * {@link FootSwitchType#WrenchBased}
     */
+   @Deprecated // this is duplicated in the state estimator parameters
    public abstract double getContactThresholdForce();
 
    /**
@@ -418,6 +432,7 @@ public abstract class WalkingControllerParameters
     * This will be used if the foot switch type as defined in {@link #getFootSwitchType()} is set to
     * {@link FootSwitchType#WrenchBased}
     */
+   @Deprecated // move this to the state estimator parameters
    public abstract double getSecondContactThresholdForceIgnoringCoP();
 
    /**
@@ -429,6 +444,7 @@ public abstract class WalkingControllerParameters
     * This will be used if the foot switch type as defined in {@link #getFootSwitchType()} is set to
     * {@link FootSwitchType#WrenchBased}
     */
+   @Deprecated // this is duplicated in the state estimator parameters
    public abstract double getCoPThresholdFraction();
 
    /**
@@ -439,6 +455,7 @@ public abstract class WalkingControllerParameters
     * This will be used if the foot switch type as defined in {@link #getFootSwitchType()} is set to
     * {@link FootSwitchType#KinematicBased}
     */
+   @Deprecated // this is duplicated in the state estimator parameters
    public double getContactThresholdHeight()
    {
       return 0.05;
@@ -454,6 +471,17 @@ public abstract class WalkingControllerParameters
     * given to the objectives of the walking controller in the QP.
     */
    public abstract MomentumOptimizationSettings getMomentumOptimizationSettings();
+
+   /**
+    * Returns the {@link FeedbackControllerSettings} for this robot. These parameters additional
+    * configuration options for the the {@code WholeBodyFeedbackController}.
+    * 
+    * @return the feedback controller settings.
+    */
+   public FeedbackControllerSettings getFeedbackControllerSettings()
+   {
+      return null;
+   }
 
    /**
     * Returns the {@link ICPAngularMomentumModifierParameters} for this robot. The parameters are used when
@@ -782,5 +810,27 @@ public abstract class WalkingControllerParameters
    public double getMinSwingTrajectoryClearanceFromStanceFoot()
    {
       return Double.NEGATIVE_INFINITY;
+   }
+
+   /**
+    * A robot can implement an ankle IK solver. Optionally, the walking controller will add desired
+    * joint angles and velocities for the ankle to the output of the controller core. Depending on the
+    * implementation of the robots joint control this can be used to better track the foot pose on a
+    * robot. The desired torque and acceleration computed by the whole body controller will still
+    * be available. Note, that the output of this module might be inconsistent with the output of the
+    * whole body controller as it does not consider other objectives such as balancing.
+    */
+   public AnkleIKSolver getAnkleIKSolver()
+   {
+      return null;
+   }
+
+   /**
+    * A boolean to determine whether the CoM height manager should be created or not. If this returns true
+    * the robot will use a rigid body manager to control the pelvis height only.
+    */
+   public boolean usePelvisHeightControllerOnly()
+   {
+      return false;
    }
 }

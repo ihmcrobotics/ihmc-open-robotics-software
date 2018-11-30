@@ -7,16 +7,16 @@ import java.util.Map;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
 
+import controller_msgs.msg.dds.HighLevelStateChangeStatusMessage;
 import us.ihmc.commons.Conversions;
 import us.ihmc.commons.PrintTools;
 import us.ihmc.communication.controllerAPI.CommandInputManager;
 import us.ihmc.communication.controllerAPI.StatusMessageOutputManager;
 import us.ihmc.communication.controllerAPI.StatusMessageOutputManager.StatusMessageListener;
-import us.ihmc.communication.packetCommunicator.PacketCommunicator;
-import us.ihmc.humanoidRobotics.communication.packets.HighLevelStateChangeStatusMessage;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelControllerName;
+import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.robotics.robotSide.RobotSide;
-import us.ihmc.robotics.screwTheory.OneDoFJoint;
+import us.ihmc.ros2.RealtimeRos2Node;
 import us.ihmc.tools.TimestampProvider;
 import us.ihmc.valkyrie.fingers.ValkyrieFingerController;
 import us.ihmc.valkyrie.fingers.ValkyrieHandJointName;
@@ -33,8 +33,10 @@ public class ValkyrieRosControlLowLevelController
 
    private final TimestampProvider timestampProvider;
 
-   private final ArrayList<ValkyrieRosControlEffortJointControlCommandCalculator> effortControlCommandCalculators = new ArrayList<>();
+   private final List<ValkyrieRosControlEffortJointControlCommandCalculator> effortControlCommandCalculators = new ArrayList<>();
    private final LinkedHashMap<String, ValkyrieRosControlEffortJointControlCommandCalculator> effortJointToControlCommandCalculatorMap = new LinkedHashMap<>();
+
+   private final List<ValkyrieRosControlPositionJointControlCommandCalculator> positionControlCommandCalculators = new ArrayList<>();
 
    private final YoDouble yoTime = new YoDouble("lowLevelControlTime", registry);
    private final YoDouble wakeUpTime = new YoDouble("lowLevelControlWakeUpTime", registry);
@@ -46,14 +48,19 @@ public class ValkyrieRosControlLowLevelController
    private JointTorqueOffsetEstimator jointTorqueOffsetEstimator;
 
    public ValkyrieRosControlLowLevelController(TimestampProvider timestampProvider, final double updateDT,
+                                               ValkyrieRosControlFingerStateEstimator fingerStateEstimator,
                                                List<YoEffortJointHandleHolder> yoEffortJointHandleHolders,
-                                               List<YoPositionJointHandleHolder> yoPositionJointHandleHolders, ValkyrieJointMap jointMap, YoVariableRegistry parentRegistry)
+                                               List<YoPositionJointHandleHolder> yoPositionJointHandleHolders, ValkyrieJointMap jointMap,
+                                               YoVariableRegistry parentRegistry)
    {
       this.timestampProvider = timestampProvider;
 
       wakeUpTime.set(Double.NaN);
 
-      fingerController = new ValkyrieFingerController(yoTime, updateDT, yoEffortJointHandleHolders, registry);
+      if (ValkyrieRosControlController.ENABLE_FINGER_JOINTS)
+         fingerController = new ValkyrieFingerController(yoTime, updateDT, fingerStateEstimator, yoEffortJointHandleHolders, registry);
+      else
+         fingerController = null;
 
       // Remove the finger joints to let the finger controller be the only controlling them
       yoEffortJointHandleHolders = yoEffortJointHandleHolders.stream().filter(h -> !isFingerJoint(h)).collect(Collectors.toList());
@@ -76,6 +83,13 @@ public class ValkyrieRosControlLowLevelController
          effortJointToControlCommandCalculatorMap.put(jointName, controlCommandCalculator);
       }
 
+      for (YoPositionJointHandleHolder positionJointHandleHolder : yoPositionJointHandleHolders)
+      {
+         ValkyrieRosControlPositionJointControlCommandCalculator controlCommandCalculator = new ValkyrieRosControlPositionJointControlCommandCalculator(positionJointHandleHolder,
+                                                                                                                                                        registry);
+         positionControlCommandCalculators.add(controlCommandCalculator);
+      }
+
       parentRegistry.addChild(registry);
    }
 
@@ -88,25 +102,25 @@ public class ValkyrieRosControlLowLevelController
 
       yoTime.set(Conversions.nanosecondsToSeconds(timestamp) - wakeUpTime.getDoubleValue());
 
-      fingerController.doControl();
+      if (ValkyrieRosControlController.ENABLE_FINGER_JOINTS)
+         fingerController.doControl();
       updateCommandCalculators();
    }
 
    public void updateCommandCalculators()
    {
       for (int i = 0; i < effortControlCommandCalculators.size(); i++)
-      {
-         ValkyrieRosControlEffortJointControlCommandCalculator commandCalculator = effortControlCommandCalculators.get(i);
-         commandCalculator.computeAndUpdateJointTorque();
-      }
+         effortControlCommandCalculators.get(i).computeAndUpdateJointTorque();
+      for (int i = 0; i < positionControlCommandCalculators.size(); i++)
+         positionControlCommandCalculators.get(i).computeAndUpdateJointPosition();
    }
 
    private void writeTorqueOffsets()
    {
-      List<OneDoFJoint> oneDoFJoints = jointTorqueOffsetEstimator.getOneDoFJoints();
+      List<OneDoFJointBasics> oneDoFJoints = jointTorqueOffsetEstimator.getOneDoFJoints();
       for (int i = 0; i < oneDoFJoints.size(); i++)
       {
-         OneDoFJoint joint = oneDoFJoints.get(i);
+         OneDoFJointBasics joint = oneDoFJoints.get(i);
          if (jointTorqueOffsetEstimator.hasTorqueOffsetForJoint(joint))
          {
             subtractTorqueOffset(joint, jointTorqueOffsetEstimator.getEstimatedJointTorqueOffset(joint));
@@ -115,7 +129,7 @@ public class ValkyrieRosControlLowLevelController
       }
    }
 
-   public void subtractTorqueOffset(OneDoFJoint oneDoFJoint, double torqueOffset)
+   public void subtractTorqueOffset(OneDoFJointBasics oneDoFJoint, double torqueOffset)
    {
       ValkyrieRosControlEffortJointControlCommandCalculator jointCommandCalculator = effortJointToControlCommandCalculatorMap.get(oneDoFJoint.getName());
       if (jointCommandCalculator != null)
@@ -133,10 +147,16 @@ public class ValkyrieRosControlLowLevelController
          {
             if (statusMessage != null)
             {
-               currentHighLevelControllerState.set(statusMessage.endState);
+               currentHighLevelControllerState.set(HighLevelControllerName.fromByte(statusMessage.getEndHighLevelControllerName()));
 
-               if (statusMessage.initialState == HighLevelControllerName.CALIBRATION)
+               if (statusMessage.getInitialHighLevelControllerName() == HighLevelControllerName.CALIBRATION.toByte())
                   writeTorqueOffsets();
+
+               if (ValkyrieRosControlController.ENABLE_FINGER_JOINTS)
+               {
+                  if (statusMessage.getEndHighLevelControllerName() == HighLevelControllerName.CALIBRATION.toByte())
+                     fingerController.goToInitialConfiguration();
+               }
             }
          }
       };
@@ -148,9 +168,10 @@ public class ValkyrieRosControlLowLevelController
       this.jointTorqueOffsetEstimator = jointTorqueOffsetEstimator;
    }
 
-   public void setupLowLevelControlWithPacketCommunicator(PacketCommunicator packetCommunicator)
+   public void setupLowLevelControlCommunication(String robotName, RealtimeRos2Node realtimeRos2Node)
    {
-      fingerController.setupCommunication(packetCommunicator);
+      if (ValkyrieRosControlController.ENABLE_FINGER_JOINTS)
+         fingerController.setupCommunication(robotName, realtimeRos2Node);
    }
 
    /**

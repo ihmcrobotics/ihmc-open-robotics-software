@@ -3,14 +3,15 @@ package us.ihmc.sensorProcessing.imu;
 import org.ejml.data.DenseMatrix64F;
 import org.ejml.ops.CommonOps;
 
-import us.ihmc.euclid.matrix.RotationMatrix;
+import us.ihmc.commons.MathTools;
 import us.ihmc.euclid.matrix.interfaces.RotationMatrixReadOnly;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DBasics;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
-import us.ihmc.commons.MathTools;
-import us.ihmc.robotics.screwTheory.RigidBody;
+import us.ihmc.euclid.tuple4D.Quaternion;
+import us.ihmc.euclid.tuple4D.interfaces.QuaternionReadOnly;
+import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.robotics.sensors.IMUDefinition;
 import us.ihmc.sensorProcessing.simulatedSensors.SensorNoiseParameters;
 import us.ihmc.sensorProcessing.stateEstimation.IMUSensorReadOnly;
@@ -20,9 +21,9 @@ public class IMUSensor implements IMUSensorReadOnly
    private final String sensorName;
 
    private final ReferenceFrame measurementFrame;
-   private final RigidBody measurementLink;
+   private final RigidBodyBasics measurementLink;
 
-   private final RotationMatrix orientationMeasurement = new RotationMatrix();
+   private final Quaternion orientationMeasurement = new Quaternion();
    private final Vector3D angularVelocityMeasurement = new Vector3D();
    private final Vector3D linearAccelerationMeasurement = new Vector3D();
 
@@ -74,7 +75,7 @@ public class IMUSensor implements IMUSensorReadOnly
    }
 
    @Override
-   public RigidBody getMeasurementLink()
+   public RigidBodyBasics getMeasurementLink()
    {
       return measurementLink;
    }
@@ -95,21 +96,21 @@ public class IMUSensor implements IMUSensorReadOnly
    }
 
    @Override
-   public void getAngularVelocityMeasurement(Vector3DBasics angularVelocityToPack)
+   public Vector3DReadOnly getAngularVelocityMeasurement()
    {
-      angularVelocityToPack.set(angularVelocityMeasurement);
+      return angularVelocityMeasurement;
    }
 
    @Override
-   public void getLinearAccelerationMeasurement(Vector3DBasics linearAccelerationToPack)
+   public Vector3DReadOnly getLinearAccelerationMeasurement()
    {
-      linearAccelerationToPack.set(linearAccelerationMeasurement);
+      return linearAccelerationMeasurement;
    }
 
    @Override
-   public void getOrientationMeasurement(RotationMatrix orientationToPack)
+   public QuaternionReadOnly getOrientationMeasurement()
    {
-      orientationToPack.set(orientationMeasurement);
+      return orientationMeasurement;
    }
 
    public void getAngularVelocityMeasurement(Vector3D angularVelocityToPack)

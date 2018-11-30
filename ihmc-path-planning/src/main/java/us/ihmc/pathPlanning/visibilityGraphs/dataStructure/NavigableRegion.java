@@ -51,6 +51,16 @@ public class NavigableRegion implements VisibilityMapHolder
       visibilityMapInLocal = visibilityMap;
    }
 
+   public void setVisibilityMapInWorld(VisibilityMap visibilityMap)
+   {
+      if (visibilityMapInLocal == null)
+         visibilityMapInLocal = new VisibilityMap();
+
+      visibilityMapInLocal.copy(visibilityMap);
+      transformFromWorldToLocal(visibilityMapInLocal);
+      visibilityMapInLocal.computeVertices();
+   }
+
    public PlanarRegion getHomeRegion()
    {
       return homeRegion;
@@ -103,7 +113,8 @@ public class NavigableRegion implements VisibilityMapHolder
    {
       if (visibilityMapInWorld == null)
       {
-         visibilityMapInWorld = new VisibilityMap(visibilityMapInLocal.getConnections());
+         visibilityMapInWorld = new VisibilityMap();
+         visibilityMapInWorld.copy(visibilityMapInLocal);
          transformFromLocalToWorld(visibilityMapInWorld);
          visibilityMapInWorld.computeVertices();
       }

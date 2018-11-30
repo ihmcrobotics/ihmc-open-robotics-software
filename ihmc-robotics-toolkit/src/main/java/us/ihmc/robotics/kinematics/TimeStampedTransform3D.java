@@ -1,5 +1,6 @@
 package us.ihmc.robotics.kinematics;
 
+import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 
 public class TimeStampedTransform3D
@@ -20,6 +21,11 @@ public class TimeStampedTransform3D
    public void setTransform3D(RigidBodyTransform transform3D)
    {
       this.transform3D.set(transform3D);
+   }
+   
+   public void setTransform3D(Pose3D pose3D)
+   {
+      pose3D.get(transform3D);
    }
 
    public void setTimeStamp(long timeStamp)

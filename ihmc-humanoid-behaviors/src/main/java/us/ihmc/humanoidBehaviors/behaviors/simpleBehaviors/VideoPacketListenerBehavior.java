@@ -1,12 +1,15 @@
 package us.ihmc.humanoidBehaviors.behaviors.simpleBehaviors;
 
+import controller_msgs.msg.dds.VideoPacket;
+import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.producers.CompressedVideoDataClient;
 import us.ihmc.communication.producers.CompressedVideoDataFactory;
+import us.ihmc.communication.producers.VideoSource;
 import us.ihmc.communication.video.VideoCallback;
 import us.ihmc.humanoidBehaviors.behaviors.AbstractBehavior;
-import us.ihmc.humanoidBehaviors.communication.CommunicationBridge;
 import us.ihmc.humanoidBehaviors.communication.ConcurrentListeningQueue;
-import us.ihmc.humanoidRobotics.communication.packets.sensing.VideoPacket;
+import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
+import us.ihmc.ros2.Ros2Node;
 
 public abstract class VideoPacketListenerBehavior extends AbstractBehavior implements VideoCallback
 {
@@ -14,13 +17,13 @@ public abstract class VideoPacketListenerBehavior extends AbstractBehavior imple
 
    private final CompressedVideoDataClient videoDataClient;
 
-   public VideoPacketListenerBehavior(String namePrefix, CommunicationBridge communicationBridge)
+   public VideoPacketListenerBehavior(String robotName, String namePrefix, Ros2Node ros2Node)
    {
-      super(namePrefix, communicationBridge);
+      super(robotName, namePrefix, ros2Node);
 
       videoDataClient = CompressedVideoDataFactory.createCompressedVideoDataClient(this);
 
-      attachNetworkListeningQueue(cameraData, VideoPacket.class);
+      createSubscriber(VideoPacket.class, ROS2Tools.getDefaultTopicNameGenerator(), cameraData::put);
    }
 
    @Override
@@ -29,7 +32,8 @@ public abstract class VideoPacketListenerBehavior extends AbstractBehavior imple
       if (cameraData.isNewPacketAvailable())
       {
          VideoPacket packet = cameraData.poll();
-         videoDataClient.onFrame(packet.getVideoSource(), packet.getData(), packet.getTimeStamp(), packet.getPosition(), packet.getOrientation(), packet.getIntrinsicParameters());
+         videoDataClient.onFrame(VideoSource.fromByte(packet.getVideoSource()), packet.getData().toArray(), packet.getTimestamp(), packet.getPosition(),
+                                 packet.getOrientation(), HumanoidMessageTools.toIntrinsicParameters(packet.getIntrinsicParameters()));
       }
    }
 }

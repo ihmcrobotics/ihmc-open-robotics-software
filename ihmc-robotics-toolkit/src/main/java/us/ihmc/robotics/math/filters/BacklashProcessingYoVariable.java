@@ -1,6 +1,7 @@
 package us.ihmc.robotics.math.filters;
 
 import us.ihmc.commons.MathTools;
+import us.ihmc.yoVariables.providers.DoubleProvider;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
@@ -17,18 +18,18 @@ public class BacklashProcessingYoVariable extends YoDouble implements Processing
    private final YoBoolean hasBeenCalled;
 
    private final YoEnum<BacklashState> backlashState;
-   private final YoDouble slopTime;
+   private final DoubleProvider slopTime;
 
    private final YoDouble timeSinceSloppy;
 
    private final double dt;
 
-   public BacklashProcessingYoVariable(String name, String description, double dt, YoDouble slopTime, YoVariableRegistry registry)
+   public BacklashProcessingYoVariable(String name, String description, double dt, DoubleProvider slopTime, YoVariableRegistry registry)
    {
       this(name, description, null, dt, slopTime, registry);
    }
 
-   public BacklashProcessingYoVariable(String name, String description, YoDouble velocityVariable, double dt, YoDouble slopTime,
+   public BacklashProcessingYoVariable(String name, String description, YoDouble velocityVariable, double dt, DoubleProvider slopTime,
          YoVariableRegistry registry)
    {
       super(name, description, registry);
@@ -54,6 +55,7 @@ public class BacklashProcessingYoVariable extends YoDouble implements Processing
       backlashState.set(null);
    }
 
+   @Override
    public void update()
    {
       if (velocity == null)
@@ -111,7 +113,7 @@ public class BacklashProcessingYoVariable extends YoDouble implements Processing
             timeSinceSloppy.set(0.0);
             backlashState.set(BacklashState.FORWARD_SLOP);
          }
-         else if (timeSinceSloppy.getDoubleValue() > slopTime.getDoubleValue())
+         else if (timeSinceSloppy.getDoubleValue() > slopTime.getValue())
          {
             backlashState.set(BacklashState.BACKWARD_OK);
          }
@@ -126,7 +128,7 @@ public class BacklashProcessingYoVariable extends YoDouble implements Processing
             timeSinceSloppy.set(0.0);
             backlashState.set(BacklashState.BACKWARD_SLOP);
          }
-         else if (timeSinceSloppy.getDoubleValue() > slopTime.getDoubleValue())
+         else if (timeSinceSloppy.getDoubleValue() > slopTime.getValue())
          {
             backlashState.set(BacklashState.FORWARD_OK);
          }
@@ -135,17 +137,12 @@ public class BacklashProcessingYoVariable extends YoDouble implements Processing
       }
       }
 
-      double percent = timeSinceSloppy.getDoubleValue() / slopTime.getDoubleValue();
+      double percent = timeSinceSloppy.getDoubleValue() / slopTime.getValue();
       percent = MathTools.clamp(percent, 0.0, 1.0);
-      if (Double.isNaN(percent) || slopTime.getDoubleValue() < dt)
+      if (Double.isNaN(percent) || slopTime.getValue() < dt)
          percent = 1.0;
 
       this.set(percent * currentVelocity);
-   }
-
-   public void setSlopTime(double slopTime)
-   {
-      this.slopTime.set(slopTime);
    }
 
    private enum BacklashState

@@ -32,7 +32,7 @@ public class AtlasNumericalInverseKinematicsCalculatorWithRobotTest extends Nume
       return BambooTools.getSimpleRobotNameFor(BambooTools.SimpleRobotNameKeys.ATLAS);
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.0, categoriesOverride = IntegrationCategory.IN_DEVELOPMENT)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0, categoriesOverride = IntegrationCategory.EXCLUDE)
    @Test(timeout = 120000)
    public void testTroublesomeCaseOne()
    {
@@ -49,8 +49,8 @@ public class AtlasNumericalInverseKinematicsCalculatorWithRobotTest extends Nume
    }
 
    @Override
-   @ContinuousIntegrationTest(estimatedDuration = 13.2)
-   @Test(timeout = 30000)
+   @ContinuousIntegrationTest(estimatedDuration = 16.2)
+   @Test(timeout = 81000)
    public void testRandomFeasibleRobotPoses()
    {
       super.testRandomFeasibleRobotPoses();

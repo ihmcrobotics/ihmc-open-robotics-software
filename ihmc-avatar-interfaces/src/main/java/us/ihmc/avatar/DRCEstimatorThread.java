@@ -1,50 +1,42 @@
 package us.ihmc.avatar;
 
-import java.util.LinkedHashMap;
+import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
+import controller_msgs.msg.dds.ControllerCrashNotificationPacket;
+import controller_msgs.msg.dds.RequestWristForceSensorCalibrationPacket;
+import controller_msgs.msg.dds.StateEstimatorModePacket;
 import us.ihmc.commonWalkingControlModules.controlModules.ForceSensorToJointTorqueProjector;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.ContactableBodiesFactory;
-import us.ihmc.commonWalkingControlModules.sensors.footSwitch.KinematicsBasedFootSwitch;
-import us.ihmc.commonWalkingControlModules.sensors.footSwitch.WrenchAndContactSensorFusedFootSwitch;
-import us.ihmc.commonWalkingControlModules.sensors.footSwitch.WrenchBasedFootSwitch;
-import us.ihmc.communication.packets.ControllerCrashNotificationPacket.CrashLocation;
+import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.ControllerAPIDefinition;
+import us.ihmc.commons.Conversions;
+import us.ihmc.communication.IHMCRealtimeROS2Publisher;
+import us.ihmc.communication.ROS2Tools;
+import us.ihmc.communication.ROS2Tools.MessageTopicNameGenerator;
+import us.ihmc.communication.packets.ControllerCrashLocation;
+import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
-import us.ihmc.euclid.tuple3D.Point3D;
-import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
-import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
-import us.ihmc.humanoidRobotics.communication.packets.sensing.RequestWristForceSensorCalibrationPacket;
-import us.ihmc.humanoidRobotics.communication.packets.sensing.StateEstimatorModePacket;
-import us.ihmc.humanoidRobotics.communication.packets.sensing.StateEstimatorModePacket.StateEstimatorMode;
-import us.ihmc.humanoidRobotics.communication.streamingData.HumanoidGlobalDataProducer;
 import us.ihmc.humanoidRobotics.communication.subscribers.PelvisPoseCorrectionCommunicatorInterface;
 import us.ihmc.humanoidRobotics.communication.subscribers.RequestWristForceSensorCalibrationSubscriber;
 import us.ihmc.humanoidRobotics.communication.subscribers.StateEstimatorModeSubscriber;
-import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
-import us.ihmc.humanoidRobotics.kryo.IHMCCommunicationKryoNetClassList;
 import us.ihmc.humanoidRobotics.model.CenterOfPressureDataHolder;
+import us.ihmc.mecano.multiBodySystem.interfaces.FloatingJointBasics;
+import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.robotDataLogger.RobotVisualizer;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.robotController.ModularRobotController;
-import us.ihmc.robotics.robotController.RobotController;
 import us.ihmc.robotics.robotSide.RobotSide;
-import us.ihmc.robotics.robotSide.SideDependentList;
-import us.ihmc.robotics.screwTheory.FloatingInverseDynamicsJoint;
-import us.ihmc.robotics.screwTheory.RigidBody;
-import us.ihmc.robotics.screwTheory.TotalMassCalculator;
 import us.ihmc.robotics.sensors.CenterOfMassDataHolder;
 import us.ihmc.robotics.sensors.ContactSensorHolder;
-import us.ihmc.robotics.sensors.FootSwitchInterface;
 import us.ihmc.robotics.sensors.ForceSensorData;
 import us.ihmc.robotics.sensors.ForceSensorDataHolder;
 import us.ihmc.robotics.sensors.ForceSensorDataHolderReadOnly;
-import us.ihmc.robotics.sensors.ForceSensorDataReadOnly;
 import us.ihmc.robotics.sensors.ForceSensorDefinition;
 import us.ihmc.robotics.sensors.IMUDefinition;
 import us.ihmc.robotics.time.ExecutionTimer;
+import us.ihmc.ros2.RealtimeRos2Node;
 import us.ihmc.sensorProcessing.communication.producers.DRCPoseCommunicator;
 import us.ihmc.sensorProcessing.model.RobotMotionStatusHolder;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutputList;
@@ -59,18 +51,19 @@ import us.ihmc.sensorProcessing.simulatedSensors.SensorReader;
 import us.ihmc.sensorProcessing.simulatedSensors.SensorReaderFactory;
 import us.ihmc.sensorProcessing.stateEstimation.IMUSensorReadOnly;
 import us.ihmc.sensorProcessing.stateEstimation.StateEstimatorParameters;
-import us.ihmc.sensorProcessing.stateEstimation.evaluation.FullInverseDynamicsStructure;
 import us.ihmc.simulationConstructionSetTools.robotController.MultiThreadedRobotControlElement;
-import us.ihmc.stateEstimation.humanoid.kinematicsBasedStateEstimation.DRCKinematicsBasedStateEstimator;
+import us.ihmc.simulationconstructionset.util.RobotController;
+import us.ihmc.stateEstimation.humanoid.StateEstimatorController;
 import us.ihmc.stateEstimation.humanoid.kinematicsBasedStateEstimation.ForceSensorCalibrationModule;
-import us.ihmc.util.PeriodicThreadScheduler;
-import us.ihmc.wholeBodyController.DRCControllerThread;
+import us.ihmc.stateEstimation.humanoid.kinematicsBasedStateEstimation.ForceSensorStateUpdater;
+import us.ihmc.stateEstimation.humanoid.kinematicsBasedStateEstimation.KinematicsBasedStateEstimatorFactory;
 import us.ihmc.wholeBodyController.RobotContactPointParameters;
 import us.ihmc.wholeBodyController.WholeBodyControllerParameters;
 import us.ihmc.wholeBodyController.concurrent.ThreadDataSynchronizerInterface;
 import us.ihmc.wholeBodyController.parameters.ParameterLoaderHelper;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
+import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoLong;
 
 public class DRCEstimatorThread implements MultiThreadedRobotControlElement
@@ -85,7 +78,7 @@ public class DRCEstimatorThread implements MultiThreadedRobotControlElement
    private final ContactSensorHolder contactSensorHolder;
    private final ModularRobotController estimatorController;
    private final YoGraphicsListRegistry yoGraphicsListRegistry = new YoGraphicsListRegistry();
-   private final DRCKinematicsBasedStateEstimator drcStateEstimator;
+   private final StateEstimatorController stateEstimator;
 
    private final ThreadDataSynchronizerInterface threadDataSynchronizer;
    private final SensorReader sensorReader;
@@ -99,7 +92,8 @@ public class DRCEstimatorThread implements MultiThreadedRobotControlElement
    private final YoLong startClockTime = new YoLong("startTime", estimatorRegistry);
    private final ExecutionTimer estimatorTimer = new ExecutionTimer("estimatorTimer", 10.0, estimatorRegistry);
 
-   private final YoLong actualEstimatorDT = new YoLong("actualEstimatorDT", estimatorRegistry);
+   private long lastReadSystemTime = 0L;
+   private final YoDouble actualEstimatorDT = new YoDouble("actualEstimatorDTInMillis", estimatorRegistry);
 
    private final SensorOutputMapReadOnly sensorOutputMapReadOnly;
    private final SensorRawOutputMapReadOnly sensorRawOutputMapReadOnly;
@@ -107,22 +101,25 @@ public class DRCEstimatorThread implements MultiThreadedRobotControlElement
    private final RobotMotionStatusHolder robotMotionStatusFromController;
    private final DRCPoseCommunicator poseCommunicator;
 
-   private final HumanoidGlobalDataProducer globalDataProducer;
-
    private final RigidBodyTransform rootToWorldTransform = new RigidBodyTransform();
    private final ReferenceFrame rootFrame;
 
    private final JointDesiredOutputWriter outputWriter;
 
-   public DRCEstimatorThread(DRCRobotSensorInformation sensorInformation, RobotContactPointParameters contactPointParameters, WholeBodyControllerParameters wholeBodyControllerParameters,
-         StateEstimatorParameters stateEstimatorParameters, SensorReaderFactory sensorReaderFactory, ThreadDataSynchronizerInterface threadDataSynchronizer,
-         PeriodicThreadScheduler poseCommunicatorScheduler, HumanoidGlobalDataProducer dataProducer, JointDesiredOutputWriter outputWriter, RobotVisualizer robotVisualizer, double gravity)
+   private final IHMCRealtimeROS2Publisher<ControllerCrashNotificationPacket> controllerCrashPublisher;
+
+   private final ForceSensorStateUpdater forceSensorStateUpdater;
+
+   public DRCEstimatorThread(String robotName, DRCRobotSensorInformation sensorInformation, RobotContactPointParameters<RobotSide> contactPointParameters,
+                             WholeBodyControllerParameters<RobotSide> wholeBodyControllerParameters, StateEstimatorParameters stateEstimatorParameters,
+                             SensorReaderFactory sensorReaderFactory, ThreadDataSynchronizerInterface threadDataSynchronizer, RealtimeRos2Node realtimeRos2Node,
+                             PelvisPoseCorrectionCommunicatorInterface externalPelvisPoseSubscriber, JointDesiredOutputWriter outputWriter,
+                             RobotVisualizer robotVisualizer, double gravity)
    {
       this.threadDataSynchronizer = threadDataSynchronizer;
       this.robotVisualizer = robotVisualizer;
-      this.globalDataProducer = dataProducer;
       estimatorFullRobotModel = threadDataSynchronizer.getEstimatorFullRobotModel();
-      FloatingInverseDynamicsJoint rootJoint = estimatorFullRobotModel.getRootJoint();
+      FloatingJointBasics rootJoint = estimatorFullRobotModel.getRootJoint();
       rootFrame = rootJoint.getFrameAfterJoint();
 
       forceSensorDataHolderForEstimator = threadDataSynchronizer.getEstimatorForceSensorDataHolder();
@@ -136,7 +133,7 @@ public class DRCEstimatorThread implements MultiThreadedRobotControlElement
       JointDesiredOutputList estimatorDesiredJointDataHolder = threadDataSynchronizer.getEstimatorDesiredJointDataHolder();
 
       sensorReaderFactory.build(rootJoint, imuDefinitions, forceSensorDefinitions, estimatorContactSensorHolder, estimatorRawJointSensorDataHolderMap,
-            estimatorDesiredJointDataHolder, estimatorRegistry);
+                                estimatorDesiredJointDataHolder, estimatorRegistry);
 
       sensorReader = sensorReaderFactory.getSensorReader();
 
@@ -148,30 +145,71 @@ public class DRCEstimatorThread implements MultiThreadedRobotControlElement
       sensorOutputMapReadOnly = sensorReader.getSensorOutputMapReadOnly();
       sensorRawOutputMapReadOnly = sensorReader.getSensorRawOutputMapReadOnly();
 
+      if (realtimeRos2Node != null)
+         controllerCrashPublisher = ROS2Tools.createPublisher(realtimeRos2Node, ControllerCrashNotificationPacket.class,
+                                                              ControllerAPIDefinition.getPublisherTopicNameGenerator(robotName));
+      else
+         controllerCrashPublisher = null;
+
       if (sensorReaderFactory.useStateEstimator())
       {
-         drcStateEstimator = createStateEstimator(estimatorFullRobotModel, sensorInformation, sensorOutputMapReadOnly, gravity, stateEstimatorParameters,
-               contactPointParameters, forceSensorDataHolderForEstimator,
-               centerOfMassDataHolderForEstimator, contactSensorHolder,
-               centerOfPressureDataHolderFromController,
-               robotMotionStatusFromController, yoGraphicsListRegistry, estimatorRegistry);
+         KinematicsBasedStateEstimatorFactory estimatorFactory = new KinematicsBasedStateEstimatorFactory();
+         ArrayList<String> additionalContactRigidBodyNames = contactPointParameters.getAdditionalContactRigidBodyNames();
+         ArrayList<String> additionalContactNames = contactPointParameters.getAdditionalContactNames();
+         ArrayList<RigidBodyTransform> additionalContactTransforms = contactPointParameters.getAdditionalContactTransforms();
 
-         if (globalDataProducer != null)
+         ContactableBodiesFactory<RobotSide> contactableBodiesFactory = new ContactableBodiesFactory<>();
+         contactableBodiesFactory.setFootContactPoints(contactPointParameters.getFootContactPoints());
+         contactableBodiesFactory.setToeContactParameters(contactPointParameters.getControllerToeContactPoints(),
+                                                          contactPointParameters.getControllerToeContactLines());
+         for (int i = 0; i < contactPointParameters.getAdditionalContactNames().size(); i++)
+            contactableBodiesFactory.addAdditionalContactPoint(additionalContactRigidBodyNames.get(i), additionalContactNames.get(i),
+                                                               additionalContactTransforms.get(i));
+
+         estimatorFactory.setEstimatorFullRobotModel(estimatorFullRobotModel).setSensorInformation(sensorInformation)
+                         .setSensorOutputMapReadOnly(sensorOutputMapReadOnly).setGravity(gravity).setStateEstimatorParameters(stateEstimatorParameters)
+                         .setContactableBodiesFactory(contactableBodiesFactory).setEstimatorForceSensorDataHolderToUpdate(forceSensorDataHolderForEstimator)
+                         .setEstimatorCenterOfMassDataHolderToUpdate(centerOfMassDataHolderForEstimator).setContactSensorHolder(contactSensorHolder)
+                         .setCenterOfPressureDataHolderFromController(centerOfPressureDataHolderFromController)
+                         .setRobotMotionStatusFromController(robotMotionStatusFromController);
+
+         if (externalPelvisPoseSubscriber != null)
+         {
+            estimatorFactory.setExternalPelvisCorrectorSubscriber(externalPelvisPoseSubscriber);
+         }
+
+         if (forceSensorDataHolderForEstimator != null)
+         {
+            forceSensorStateUpdater = new ForceSensorStateUpdater(sensorOutputMapReadOnly, forceSensorDataHolderForEstimator, stateEstimatorParameters, gravity,
+                                                                  yoGraphicsListRegistry, estimatorRegistry);
+         }
+         else
+         {
+            forceSensorStateUpdater = null;
+         }
+
+         if (realtimeRos2Node != null)
          {
             StateEstimatorModeSubscriber stateEstimatorModeSubscriber = new StateEstimatorModeSubscriber();
             RequestWristForceSensorCalibrationSubscriber requestWristForceSensorCalibrationSubscriber = new RequestWristForceSensorCalibrationSubscriber();
-            globalDataProducer.attachListener(StateEstimatorModePacket.class, stateEstimatorModeSubscriber);
-            dataProducer.attachListener(RequestWristForceSensorCalibrationPacket.class, requestWristForceSensorCalibrationSubscriber);
 
-            drcStateEstimator.setOperatingModeSubscriber(stateEstimatorModeSubscriber);
-            drcStateEstimator.setRequestWristForceSensorCalibrationSubscriber(requestWristForceSensorCalibrationSubscriber);
+            MessageTopicNameGenerator subscriberTopicNameGenerator = ControllerAPIDefinition.getSubscriberTopicNameGenerator(robotName);
+            ROS2Tools.createCallbackSubscription(realtimeRos2Node, StateEstimatorModePacket.class, subscriberTopicNameGenerator,
+                                                 subscriber -> stateEstimatorModeSubscriber.receivedPacket(subscriber.takeNextData()));
+            ROS2Tools.createCallbackSubscription(realtimeRos2Node, RequestWristForceSensorCalibrationPacket.class, subscriberTopicNameGenerator,
+                                                 subscriber -> requestWristForceSensorCalibrationSubscriber.receivedPacket(subscriber.takeNextData()));
+
+            estimatorFactory.setOperatingModeSubscriber(stateEstimatorModeSubscriber);
+            forceSensorStateUpdater.setRequestWristForceSensorCalibrationSubscriber(requestWristForceSensorCalibrationSubscriber);
          }
 
-         estimatorController.addRobotController(drcStateEstimator);
+         stateEstimator = estimatorFactory.createStateEstimator(estimatorRegistry, yoGraphicsListRegistry);
+         estimatorController.addRobotController(stateEstimator);
       }
       else
       {
-         drcStateEstimator = null;
+         stateEstimator = null;
+         forceSensorStateUpdater = null;
       }
 
       RobotJointLimitWatcher robotJointLimitWatcher = new RobotJointLimitWatcher(estimatorFullRobotModel.getOneDoFJoints(), sensorRawOutputMapReadOnly);
@@ -182,33 +220,33 @@ public class DRCEstimatorThread implements MultiThreadedRobotControlElement
          for (ForceSensorDefinition forceSensorDefinition : forceSensorDataHolderForEstimator.getForceSensorDefinitions())
          {
             String sensorName = forceSensorDefinition.getSensorName();
-            RigidBody sensorLink = forceSensorDefinition.getRigidBody();
+            RigidBodyBasics sensorLink = forceSensorDefinition.getRigidBody();
             ForceSensorData forceSensorData = forceSensorDataHolderForEstimator.get(forceSensorDefinition);
             ForceSensorToJointTorqueProjector footSensorToJointTorqueProjector = new ForceSensorToJointTorqueProjector(sensorName, forceSensorData, sensorLink);
             estimatorController.addRobotController(footSensorToJointTorqueProjector);
          }
       }
 
-      if (dataProducer != null)
+      if (realtimeRos2Node != null)
       {
          ForceSensorDataHolderReadOnly forceSensorDataHolderToSend;
-         if (drcStateEstimator != null && drcStateEstimator.getForceSensorOutputWithGravityCancelled() != null)
-            forceSensorDataHolderToSend = drcStateEstimator.getForceSensorOutputWithGravityCancelled();
+         if (stateEstimator != null && forceSensorStateUpdater.getForceSensorOutputWithGravityCancelled() != null)
+            forceSensorDataHolderToSend = forceSensorStateUpdater.getForceSensorOutputWithGravityCancelled();
          else
             forceSensorDataHolderToSend = forceSensorDataHolderForEstimator;
 
          JointConfigurationGatherer jointConfigurationGathererAndProducer = new JointConfigurationGatherer(estimatorFullRobotModel,
-               forceSensorDataHolderToSend);
+                                                                                                           forceSensorDataHolderToSend);
 
-         poseCommunicator = new DRCPoseCommunicator(estimatorFullRobotModel, jointConfigurationGathererAndProducer, sensorReader, dataProducer,
-               sensorOutputMapReadOnly, sensorRawOutputMapReadOnly, robotMotionStatusFromController, sensorInformation, poseCommunicatorScheduler, new IHMCCommunicationKryoNetClassList());
+         poseCommunicator = new DRCPoseCommunicator(estimatorFullRobotModel, jointConfigurationGathererAndProducer, sensorReader,
+                                                    ControllerAPIDefinition.getPublisherTopicNameGenerator(robotName), realtimeRos2Node,
+                                                    sensorOutputMapReadOnly, sensorRawOutputMapReadOnly, robotMotionStatusFromController, sensorInformation);
          estimatorController.setRawOutputWriter(poseCommunicator);
       }
       else
       {
          poseCommunicator = null;
       }
-
 
       firstTick.set(true);
       outputWriterInitialized.set(false);
@@ -217,11 +255,11 @@ public class DRCEstimatorThread implements MultiThreadedRobotControlElement
       estimatorRegistry.addChild(estimatorController.getYoVariableRegistry());
 
       this.outputWriter = outputWriter;
-      if(this.outputWriter != null)
+      if (this.outputWriter != null)
       {
          this.outputWriter.setForceSensorDataHolder(forceSensorDataHolderForEstimator);
          this.outputWriter.setJointDesiredOutputList(estimatorDesiredJointDataHolder);
-         if(this.outputWriter.getYoVariableRegistry() != null)
+         if (this.outputWriter.getYoVariableRegistry() != null)
          {
             estimatorRegistry.addChild(this.outputWriter.getYoVariableRegistry());
          }
@@ -258,16 +296,19 @@ public class DRCEstimatorThread implements MultiThreadedRobotControlElement
    {
       try
       {
-         actualEstimatorDT.set(currentClockTime - startClockTime.getLongValue());
+         long nanoTime = System.nanoTime();
+         actualEstimatorDT.set(Conversions.nanosecondsToMilliseconds((double) (nanoTime - lastReadSystemTime)));
+         lastReadSystemTime = nanoTime;
+
          startClockTime.set(currentClockTime);
 
          controllerDataValid.set(threadDataSynchronizer.receiveControllerDataForEstimator());
 
-         if(outputWriter != null)
+         if (outputWriter != null)
          {
-            if(controllerDataValid.getBooleanValue())
+            if (controllerDataValid.getBooleanValue())
             {
-               if(!outputWriterInitialized.getBooleanValue())
+               if (!outputWriterInitialized.getBooleanValue())
                {
                   outputWriter.initialize();
                   outputWriterInitialized.set(true);
@@ -280,17 +321,12 @@ public class DRCEstimatorThread implements MultiThreadedRobotControlElement
          sensorReader.read();
 
          estimatorTime.set(sensorOutputMapReadOnly.getTimestamp());
-
-         if(globalDataProducer != null)
-         {
-            globalDataProducer.setRobotTime(estimatorTime.getLongValue());
-         }
       }
       catch (Throwable e)
       {
-         if(globalDataProducer != null)
+         if (controllerCrashPublisher != null)
          {
-            globalDataProducer.notifyControllerCrash(CrashLocation.ESTIMATOR_READ, e.getMessage());
+            controllerCrashPublisher.publish(MessageTools.createControllerCrashNotificationPacket(ControllerCrashLocation.ESTIMATOR_READ, e.getMessage()));
          }
          throw new RuntimeException(e);
       }
@@ -304,18 +340,26 @@ public class DRCEstimatorThread implements MultiThreadedRobotControlElement
          if (firstTick.getBooleanValue())
          {
             estimatorController.initialize();
+            if (forceSensorStateUpdater != null)
+            {
+               forceSensorStateUpdater.initialize();
+            }
             firstTick.set(false);
          }
 
          estimatorTimer.startMeasurement();
          estimatorController.doControl();
+         if (forceSensorStateUpdater != null)
+         {
+            forceSensorStateUpdater.updateForceSensorState();
+         }
          estimatorTimer.stopMeasurement();
       }
       catch (Throwable e)
       {
-         if (globalDataProducer != null)
+         if (controllerCrashPublisher != null)
          {
-            globalDataProducer.notifyControllerCrash(CrashLocation.ESTIMATOR_RUN, e.getMessage());
+            controllerCrashPublisher.publish(MessageTools.createControllerCrashNotificationPacket(ControllerCrashLocation.ESTIMATOR_RUN, e.getMessage()));
          }
          throw new RuntimeException(e);
       }
@@ -326,14 +370,13 @@ public class DRCEstimatorThread implements MultiThreadedRobotControlElement
    {
       try
       {
-         if(outputWriter != null)
+         if (outputWriter != null)
          {
-            if(controllerDataValid.getBooleanValue())
+            if (controllerDataValid.getBooleanValue())
             {
                outputWriter.writeAfter();
             }
          }
-
 
          long startTimestamp = estimatorTime.getLongValue();
          threadDataSynchronizer.publishEstimatorState(startTimestamp, estimatorTick.getLongValue(), startClockTime.getLongValue());
@@ -348,86 +391,12 @@ public class DRCEstimatorThread implements MultiThreadedRobotControlElement
       }
       catch (Throwable e)
       {
-         if (globalDataProducer != null)
+         if (controllerCrashPublisher != null)
          {
-            globalDataProducer.notifyControllerCrash(CrashLocation.ESTIMATOR_WRITE, e.getMessage());
+            controllerCrashPublisher.publish(MessageTools.createControllerCrashNotificationPacket(ControllerCrashLocation.ESTIMATOR_WRITE, e.getMessage()));
          }
          throw new RuntimeException(e);
       }
-   }
-
-   private DRCKinematicsBasedStateEstimator createStateEstimator(FullHumanoidRobotModel estimatorFullRobotModel, DRCRobotSensorInformation sensorInformation,
-         SensorOutputMapReadOnly sensorOutputMapReadOnly, double gravity, StateEstimatorParameters stateEstimatorParameters,
-         RobotContactPointParameters contactPointParamaters, ForceSensorDataHolder estimatorForceSensorDataHolderToUpdate,
-         CenterOfMassDataHolder estimatorCenterOfMassDataHolderToUpdate,
-         ContactSensorHolder contactSensorHolder,
-         CenterOfPressureDataHolder centerOfPressureDataHolderFromController, RobotMotionStatusHolder robotMotionStatusFromController,
-         YoGraphicsListRegistry yoGraphicsListRegistry, YoVariableRegistry registry)
-   {
-      FullInverseDynamicsStructure inverseDynamicsStructure = DRCControllerThread.createInverseDynamicsStructure(estimatorFullRobotModel);
-
-      HumanoidReferenceFrames estimatorReferenceFrames = new HumanoidReferenceFrames(estimatorFullRobotModel);
-      ContactableBodiesFactory contactableBodiesFactory = contactPointParamaters.getContactableBodiesFactory();
-      SideDependentList<? extends ContactablePlaneBody> bipedFeet = contactableBodiesFactory.createFootContactableBodies(estimatorFullRobotModel,
-            estimatorReferenceFrames);
-
-      double gravityMagnitude = Math.abs(gravity);
-      double totalRobotWeight = TotalMassCalculator.computeSubTreeMass(estimatorFullRobotModel.getElevator()) * gravityMagnitude;
-
-//      SideDependentList<FootSwitchInterface> footSwitchesForEstimator = new SideDependentList<>();
-
-      Map<RigidBody, FootSwitchInterface> footSwitchMap = new LinkedHashMap<RigidBody, FootSwitchInterface>();
-      Map<RigidBody, ContactablePlaneBody> bipedFeetMap = new LinkedHashMap<RigidBody, ContactablePlaneBody>();
-
-      for (RobotSide robotSide : RobotSide.values)
-      {
-         String footForceSensorName = sensorInformation.getFeetForceSensorNames().get(robotSide);
-         String footContactSensorName = sensorInformation.getFeetContactSensorNames().get(robotSide);
-         ForceSensorDataReadOnly footForceSensorForEstimator = estimatorForceSensorDataHolderToUpdate.getByName(footForceSensorName);
-         String namePrefix = bipedFeet.get(robotSide).getName() + "StateEstimator";
-
-         //         double footSwitchCoPThresholdFraction = 0.01;
-         double footSwitchCoPThresholdFraction = stateEstimatorParameters.getFootSwitchCoPThresholdFraction();
-         double contactThresholdForce = stateEstimatorParameters.getContactThresholdForce();
-
-         RigidBody foot = bipedFeet.get(robotSide).getRigidBody();
-         bipedFeetMap.put(foot, bipedFeet.get(robotSide));
-
-         switch (stateEstimatorParameters.getFootSwitchType())
-         {
-            case KinematicBased:
-
-               KinematicsBasedFootSwitch footSwitch = new KinematicsBasedFootSwitch(namePrefix, bipedFeet,
-                     stateEstimatorParameters.getContactThresholdHeight(), totalRobotWeight, robotSide, registry);
-               footSwitchMap.put(foot, footSwitch);
-               break;
-            case WrenchBased:
-               WrenchBasedFootSwitch wrenchBasedFootSwitchForEstimator = new WrenchBasedFootSwitch(namePrefix, footForceSensorForEstimator,
-                     footSwitchCoPThresholdFraction, totalRobotWeight, bipedFeet.get(robotSide), null, contactThresholdForce, registry);
-               footSwitchMap.put(foot, wrenchBasedFootSwitchForEstimator);
-               break;
-
-            case WrenchAndContactSensorFused:
-               WrenchAndContactSensorFusedFootSwitch wrenchAndContactSensorBasedFootswitch = new WrenchAndContactSensorFusedFootSwitch(namePrefix,
-                     footForceSensorForEstimator, contactSensorHolder.getByName(footContactSensorName), footSwitchCoPThresholdFraction, totalRobotWeight,
-                     bipedFeet.get(robotSide), null, contactThresholdForce, registry);
-               footSwitchMap.put(foot, wrenchAndContactSensorBasedFootswitch);
-               break;
-            default:
-               throw new Error("unknown foot switch type");
-         }
-
-      }
-
-      String[] imuSensorsToUseInStateEstimator = sensorInformation.getIMUSensorsToUseInStateEstimator();
-
-      // Create the sensor readers and state estimator here:
-      DRCKinematicsBasedStateEstimator drcStateEstimator = new DRCKinematicsBasedStateEstimator(inverseDynamicsStructure, stateEstimatorParameters,
-            sensorOutputMapReadOnly, estimatorForceSensorDataHolderToUpdate, estimatorCenterOfMassDataHolderToUpdate,
-            imuSensorsToUseInStateEstimator, gravityMagnitude, footSwitchMap,
-            centerOfPressureDataHolderFromController, robotMotionStatusFromController, bipedFeetMap, yoGraphicsListRegistry);
-
-      return drcStateEstimator;
    }
 
    @Override
@@ -438,7 +407,7 @@ public class DRCEstimatorThread implements MultiThreadedRobotControlElement
 
    public ForceSensorCalibrationModule getForceSensorCalibrationModule()
    {
-      return drcStateEstimator.getForceSensorCalibrationModule();
+      return forceSensorStateUpdater;
    }
 
    @Override
@@ -447,22 +416,17 @@ public class DRCEstimatorThread implements MultiThreadedRobotControlElement
       throw new RuntimeException("Estimator thread should not wake up based on clock");
    }
 
-   public void initializeEstimatorToActual(Point3D initialCoMPosition, Quaternion initialEstimationLinkOrientation)
+   public void initializeEstimator(RigidBodyTransform rootJointTransform)
    {
-      if (drcStateEstimator != null)
-         drcStateEstimator.initializeEstimatorToActual(initialCoMPosition, initialEstimationLinkOrientation);
+      if (stateEstimator != null)
+         stateEstimator.initializeEstimator(rootJointTransform);
    }
 
-   public void setExternalPelvisCorrectorSubscriber(PelvisPoseCorrectionCommunicatorInterface externalPelvisPoseSubscriber)
+   // Used by the Atlas stand prep state.
+   @Deprecated
+   public StateEstimatorController getStateEstimator()
    {
-      if (drcStateEstimator != null)
-         drcStateEstimator.setExternalPelvisCorrectorSubscriber(externalPelvisPoseSubscriber);
-   }
-
-   public void requestStateEstimatorMode(StateEstimatorMode stateEstimatorMode)
-   {
-      if (drcStateEstimator != null)
-         drcStateEstimator.requestStateEstimatorMode(stateEstimatorMode);
+      return stateEstimator;
    }
 
    public List<? extends IMUSensorReadOnly> getSimulatedIMUOutput()
@@ -472,10 +436,6 @@ public class DRCEstimatorThread implements MultiThreadedRobotControlElement
 
    public void dispose()
    {
-      if (poseCommunicator != null)
-      {
-         poseCommunicator.stop();
-      }
    }
 
    /**

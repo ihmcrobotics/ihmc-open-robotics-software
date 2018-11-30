@@ -1,5 +1,7 @@
 package us.ihmc.commonWalkingControlModules.capturePoint.optimization;
 
+import us.ihmc.commonWalkingControlModules.capturePoint.ICPControlGainsReadOnly;
+
 /**
  * Parameters to tune the ICP Optimization based controller for each robot.
  * The ICP Optimization based controller encodes the ICP plan based on the upcoming footsteps, and can either do control
@@ -13,6 +15,23 @@ public abstract class ICPOptimizationParameters
    public double getFootstepAdjustmentSafetyFactor()
    {
       return 1.0;
+   }
+
+   /**
+    * Specifies the amount of ICP error (the 2D distance in XY from desired to current) that is required for the controller to consider step adjustment.
+    */
+   public double getMinICPErrorForStepAdjustment()
+   {
+      return 0.0;
+   }
+
+   /**
+    * Specifies how long the controller must have been in the swing date (as a function of the swing duration) before it will allow step adjustment.
+    * By default, this is set to 0.0, meaning the controller can immediately adjust the desired step at the start of swing.
+    */
+   public double getFractionThroughSwingForAdjustment()
+   {
+      return 0.0;
    }
 
    /**
@@ -48,21 +67,41 @@ public abstract class ICPOptimizationParameters
    public abstract double getFeedbackLateralWeight();
 
    /**
-    * Penalization on changes feedback CMP between control ticks.
+    * Penalization on changes in the feedback CoP and CMP between control ticks.
+    * This weight is normalized by the control DT.
+    */
+   public double getCoPCMPFeedbackRateWeight()
+   {
+      return 0.0;
+   }
+
+   /**
+    * Penalization on changes in the total feedback between control ticks.
     * This weight is normalized by the control DT.
     */
    public abstract double getFeedbackRateWeight();
 
    /**
-    * Feedback gain for ICP error parallel to the desired ICP dynamics.
+    * Gains for the proportional ICP controller that is encoded into the optimization. Also includes gains for the smart
+    * integrator that is used when the controller is stuck.
     */
-   public abstract double getFeedbackParallelGain();
+   public abstract ICPControlGainsReadOnly getICPFeedbackGains();
 
    /**
-    * Feedback gain for ICP error orthogonal to the desired ICP dynamics.
-    * When the desired ICP dynamics are zero, this is the gain that is used for all directions.
+    * Sets whether the integration gains returned by {@link #getICPFeedbackGains()} is used to perform a smart integration when the robot is stuck.
     */
-   public abstract double getFeedbackOrthogonalGain();
+   public boolean useSmartICPIntegrator()
+   {
+      return false;
+   }
+
+   /**
+    * Sets the maximum ICP velocity for it to be considered "stuck".
+    */
+   public double getICPVelocityThresholdForStuck()
+   {
+      return 0.01;
+   }
 
    /**
     * Weight on the slack variable introduced for the ICP dynamics.
@@ -151,6 +190,38 @@ public abstract class ICPOptimizationParameters
    public abstract double getAdjustmentDeadband();
 
    /**
+    * Gets the maximum amount of step adjustment allowed in the forward direction.
+    */
+   public double getMaximumStepAdjustmentForward()
+   {
+      return Double.POSITIVE_INFINITY;
+   }
+
+   /**
+    * Gets the maximum amount of step adjustment allowed in the backward direction.
+    */
+   public double getMaximumStepAdjustmentBackward()
+   {
+      return Double.POSITIVE_INFINITY;
+   }
+
+   /**
+    * Gets the maximum amount of step adjustment allowed in the inward direction.
+    */
+   public double getMaximumStepAdjustmentInward()
+   {
+      return Double.POSITIVE_INFINITY;
+   }
+
+   /**
+    * Gets the maximum amount of step adjustment allowed in the outward direction.
+    */
+   public double getMaximumStepAdjustmentOutward()
+   {
+      return Double.POSITIVE_INFINITY;
+   }
+
+   /**
     * This method sets what the minimum change in the current footstep is allowed to be.
     * Works in tandem with the footstep rate parameter.
     */
@@ -165,47 +236,6 @@ public abstract class ICPOptimizationParameters
    public double getSafeCoPDistanceToEdge()
    {
       return 0.002;
-   }
-
-   /**
-    * @return The maximum lateral limit that the swing foot can reach w.r.t. the stance foot.
-    */
-   public double getLateralReachabilityOuterLimit()
-   {
-      return 0.5;
-   }
-
-   /**
-    * @return The minimum lateral limit that the swing foot can reach w.r.t. the stance foot.
-    */
-   public double getLateralReachabilityInnerLimit()
-   {
-      return 0.1;
-   }
-
-   /**
-    * @return The forward limit that the swing foot can reach w.r.t. the stance foot.
-    */
-   public double getForwardReachabilityLimit()
-   {
-      return 0.5;
-   }
-
-   /**
-    * @return The backward limit that the swing foot can reach w.r.t. the stance foot.
-    */
-   public double getBackwardReachabilityLimit()
-   {
-      return -0.3;
-   }
-
-   /**
-    * Sets whether or not to use a warm start in the active set solver. This exploits that the active set doesn't change often.
-    * @return Whether or not to use a warm start in the solver
-    */
-   public boolean useWarmStartInSolver()
-   {
-      return false;
    }
 
    /**
@@ -249,11 +279,21 @@ public abstract class ICPOptimizationParameters
    }
 
    /**
-    * Specifies the transfer split fraction to use for the ICP value recursion multiplier.
+    * Specifies the transfer split fraction to use for the ICP value recursion multiplier. This value is added to the time remaining
+    * to compute the recursion multiplier. Increasing this value effectively causes more step adjustment to occur.
     */
    public double getTransferSplitFraction()
    {
-      return 0.3;
+      return 0.1;
+   }
+
+   /**
+    * Specifies the maximum duration that can be included in the footstep multiplier by the {@link #getTransferSplitFraction()}.
+    * This is useful when the robot by default has long split fractions.
+    */
+   public double maximumTimeFromTransferInFootstepMultiplier()
+   {
+      return 0.1;
    }
 
    /**
@@ -261,7 +301,7 @@ public abstract class ICPOptimizationParameters
     */
    public boolean considerAngularMomentumInAdjustment()
    {
-      return false;
+      return true;
    }
 
    /**
@@ -280,6 +320,11 @@ public abstract class ICPOptimizationParameters
       return false;
    }
 
+   public boolean allowUsePlanarRegionConstraints()
+   {
+      return true;
+   }
+
    /**
     * Sets whether or not the ICP optimization algorithm will switch the planar region if it starts to lose balance.
     */
@@ -287,4 +332,16 @@ public abstract class ICPOptimizationParameters
    {
       return true;
    }
+   
+   /**
+    * Specifies the minimum footstep multiplier that the robot will use to compute the desired step adjustment. This is
+    * particularly useful when walking slowly or when recovering early in the, to avoid extremely large
+    * footstep adjustment magnitudes.
+    */
+   public double getMinimumFootstepMultiplier()
+   {
+      return 0.33;
+   }
+
+
 }

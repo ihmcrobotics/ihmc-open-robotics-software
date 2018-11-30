@@ -1,10 +1,10 @@
 package us.ihmc.robotics.math.trajectories;
 
 import us.ihmc.commons.MathTools;
+import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
+import us.ihmc.yoVariables.providers.DoubleProvider;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.robotics.screwTheory.OneDoFJoint;
-import us.ihmc.robotics.trajectories.providers.DoubleProvider;
 
 public class OneDoFJointQuinticTrajectoryGenerator implements OneDoFJointTrajectoryGenerator
 {
@@ -17,9 +17,9 @@ public class OneDoFJointQuinticTrajectoryGenerator implements OneDoFJointTraject
    private final YoDouble trajectoryTime;
    private final DoubleProvider trajectoryTimeProvider;
    private final YoDouble currentTime;
-   private final OneDoFJoint joint;
+   private final OneDoFJointBasics joint;
 
-   public OneDoFJointQuinticTrajectoryGenerator(String namePrefix, OneDoFJoint joint, DoubleProvider trajectoryTimeProvider, YoVariableRegistry parentRegistry)
+   public OneDoFJointQuinticTrajectoryGenerator(String namePrefix, OneDoFJointBasics joint, DoubleProvider trajectoryTimeProvider, YoVariableRegistry parentRegistry)
    {
       this.registry = new YoVariableRegistry(namePrefix + getClass().getSimpleName());
       this.joint = joint;

@@ -5,10 +5,11 @@ import java.io.InputStream;
 import us.ihmc.commonWalkingControlModules.configurations.ICPWithTimeFreezingPlannerParameters;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.humanoidRobotics.footstep.footstepGenerator.QuadTreeFootstepPlanningParameters;
+import us.ihmc.robotics.robotSide.RobotSegment;
 import us.ihmc.sensorProcessing.parameters.DRCRobotSensorInformation;
 import us.ihmc.sensorProcessing.stateEstimation.StateEstimatorParameters;
 
-public interface WholeBodyControllerParameters
+public interface WholeBodyControllerParameters<E extends Enum<E> & RobotSegment<E>>
 {
    public double getControllerDT();
 
@@ -26,7 +27,7 @@ public interface WholeBodyControllerParameters
 
 	public WalkingControllerParameters getWalkingControllerParameters();
 
-	public RobotContactPointParameters getContactPointParameters();
+	public RobotContactPointParameters<E> getContactPointParameters();
 
    public DRCRobotSensorInformation getSensorInformation();
 

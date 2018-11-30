@@ -24,8 +24,8 @@ public class RobotAllJointsDataCheckerTest
       }
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 4.9)
-   @Test(timeout = 30000)
+   @ContinuousIntegrationTest(estimatedDuration = 7.2)
+   @Test(timeout = 36000)
    public void test()
    {
       TwoLinkRobotForTesting twoLinkRobotForTesting = new TwoLinkRobotForTesting();

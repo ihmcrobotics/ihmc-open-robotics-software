@@ -4,11 +4,8 @@ import java.net.URI;
 import java.util.LinkedHashMap;
 import java.util.concurrent.ArrayBlockingQueue;
 
-import us.ihmc.communication.net.PacketConsumer;
-import us.ihmc.humanoidRobotics.communication.packets.dataobjects.AtlasAuxiliaryRobotData;
+import controller_msgs.msg.dds.AtlasAuxiliaryRobotData;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.AtlasElectricMotorPacketEnum;
-import us.ihmc.sensorProcessing.communication.packets.dataobjects.AuxiliaryRobotData;
-import us.ihmc.sensorProcessing.communication.packets.dataobjects.RobotConfigurationData;
 import us.ihmc.utilities.ros.RosMainNode;
 import us.ihmc.utilities.ros.publisher.RosBoolPublisher;
 import us.ihmc.utilities.ros.publisher.RosDoublePublisher;
@@ -18,7 +15,7 @@ import us.ihmc.utilities.ros.publisher.RosInt64Publisher;
  *
  * @author Doug Stephen <a href="mailto:dstephen@ihmc.us">(dstephen@ihmc.us)</a>
  */
-public class RosAtlasAuxiliaryRobotDataPublisher implements PacketConsumer<RobotConfigurationData>, Runnable
+public class RosAtlasAuxiliaryRobotDataPublisher implements Runnable
 {
    private final ArrayBlockingQueue<AtlasAuxiliaryRobotData> availableAtlasAuxiliaryData = new ArrayBlockingQueue<>(30);
    private final RosMainNode rosMainNode;
@@ -54,7 +51,7 @@ public class RosAtlasAuxiliaryRobotDataPublisher implements PacketConsumer<Robot
       this.rosMainNode = new RosMainNode(rosuri, nameSpace + getClass().getName());
       initialize(rosMainNode, nameSpace);
    }
-   
+
    private void initialize(RosMainNode rosMainNode, String rosNameSpace)
    {
       setupElectricForearmPublishers(rosNameSpace);
@@ -105,7 +102,8 @@ public class RosAtlasAuxiliaryRobotDataPublisher implements PacketConsumer<Robot
       }
    }
 
-   @Override public void run()
+   @Override
+   public void run()
    {
       while (true)
       {
@@ -119,7 +117,7 @@ public class RosAtlasAuxiliaryRobotDataPublisher implements PacketConsumer<Robot
             // Continue on
             continue;
          }
-         if(rosMainNode.isStarted())
+         if (rosMainNode.isStarted())
          {
             publishElectricForearmData(auxiliaryRobotData);
 
@@ -135,48 +133,43 @@ public class RosAtlasAuxiliaryRobotDataPublisher implements PacketConsumer<Robot
       for (AtlasElectricMotorPacketEnum value : AtlasElectricMotorPacketEnum.values)
       {
          RosBoolPublisher rosBoolPublisher = electricForearmEnabledPublishers.get(value);
-         rosBoolPublisher.publish(auxiliaryRobotData.electricJointEnabledArray[value.getId()]);
+         rosBoolPublisher.publish(auxiliaryRobotData.getElectricJointEnabledArray().get(value.getId()) == 1);
 
          RosDoublePublisher temperaturePublisher = electricForearmTemperaturePublishers.get(value);
-         temperaturePublisher.publish(auxiliaryRobotData.electricJointTemperatures[value.getId()]);
+         temperaturePublisher.publish(auxiliaryRobotData.getElectricJointTemperatures().get(value.getId()));
 
          RosDoublePublisher currentPublisher = electricForearmCurrentPublishers.get(value);
-         currentPublisher.publish(auxiliaryRobotData.electricJointCurrents[value.getId()]);
+         currentPublisher.publish(auxiliaryRobotData.getElectricJointCurrents().get(value.getId()));
       }
    }
 
    private void publishPumpData(AtlasAuxiliaryRobotData auxiliaryRobotData)
    {
-      pumpInletPressurePublisher.publish(auxiliaryRobotData.pumpInletPressure);
-      pumpSupplyPressurePublisher.publish(auxiliaryRobotData.pumpSupplyPressure);
-      airSumpPressurePublisher.publish(auxiliaryRobotData.airSumpPressure);
-      pumpSupplyTemperaturePublisher.publish(auxiliaryRobotData.pumpSupplyTemperature);
-      pumpRPMPublisher.publish(auxiliaryRobotData.pumpRPM);
-      motorTemperaturePublisher.publish(auxiliaryRobotData.motorTemperature);
-      motorDriverTemperaturePublisher.publish(auxiliaryRobotData.motorDriverTemperature);
+      pumpInletPressurePublisher.publish(auxiliaryRobotData.getPumpInletPressure());
+      pumpSupplyPressurePublisher.publish(auxiliaryRobotData.getPumpSupplyPressure());
+      airSumpPressurePublisher.publish(auxiliaryRobotData.getAirSumpPressure());
+      pumpSupplyTemperaturePublisher.publish(auxiliaryRobotData.getPumpSupplyTemperature());
+      pumpRPMPublisher.publish(auxiliaryRobotData.getPumpRpm());
+      motorTemperaturePublisher.publish(auxiliaryRobotData.getMotorTemperature());
+      motorDriverTemperaturePublisher.publish(auxiliaryRobotData.getMotorDriverTemperature());
    }
 
    private void publishBatteryData(AtlasAuxiliaryRobotData auxiliaryRobotData)
    {
-      batteryChargingPublisher.publish(auxiliaryRobotData.batteryCharging);
-      batteryVoltagePublisher.publish(auxiliaryRobotData.batteryVoltage);
-      batteryCurrentPublisher.publish(auxiliaryRobotData.batteryCurrent);
-      remainingBatteryTimePublisher.publish(auxiliaryRobotData.remainingBatteryTime);
-      remainingAmpHoursPublisher.publish(auxiliaryRobotData.remainingAmpHours);
-      remainingChargePercentagePublisher.publish(auxiliaryRobotData.remainingChargePercentage);
-      cycleCountPublisher.publish(auxiliaryRobotData.batteryCycleCount);
+      batteryChargingPublisher.publish(auxiliaryRobotData.getBatteryCharging());
+      batteryVoltagePublisher.publish(auxiliaryRobotData.getBatteryVoltage());
+      batteryCurrentPublisher.publish(auxiliaryRobotData.getBatteryCurrent());
+      remainingBatteryTimePublisher.publish(auxiliaryRobotData.getRemainingBatteryTime());
+      remainingAmpHoursPublisher.publish(auxiliaryRobotData.getRemainingAmpHours());
+      remainingChargePercentagePublisher.publish(auxiliaryRobotData.getRemainingChargePercentage());
+      cycleCountPublisher.publish(auxiliaryRobotData.getBatteryCycleCount());
    }
 
-   @Override public void receivedPacket(RobotConfigurationData packet)
+   public void receivedPacket(AtlasAuxiliaryRobotData auxiliaryRobotData)
    {
-      AuxiliaryRobotData auxiliaryRobotData = packet.getAuxiliaryRobotData();
-
-      if(auxiliaryRobotData != null && auxiliaryRobotData instanceof AtlasAuxiliaryRobotData)
+      if (!availableAtlasAuxiliaryData.offer(auxiliaryRobotData))
       {
-         if(!availableAtlasAuxiliaryData.offer((AtlasAuxiliaryRobotData) auxiliaryRobotData))
-         {
-            availableAtlasAuxiliaryData.clear();
-         }
+         availableAtlasAuxiliaryData.clear();
       }
    }
 }

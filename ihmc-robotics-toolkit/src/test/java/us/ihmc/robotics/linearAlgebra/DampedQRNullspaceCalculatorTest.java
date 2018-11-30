@@ -48,7 +48,7 @@ public class DampedQRNullspaceCalculatorTest extends DampedNullspaceCalculatorTe
    }
 
    @ContinuousIntegrationAnnotations.ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(timeout = 100000000)
+   @Test(timeout = 30000)
    public void testInnerProductMultiply()
    {
       for (int size = 2; size < 20; size++)

@@ -1,17 +1,26 @@
 package us.ihmc.avatar.obstacleCourseTests;
 
+import static org.junit.Assert.assertTrue;
+
+import java.util.ArrayList;
+import java.util.List;
+
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
+
+import controller_msgs.msg.dds.FootstepDataListMessage;
+import controller_msgs.msg.dds.FootstepDataMessage;
+import controller_msgs.msg.dds.PlanarRegionMessage;
+import controller_msgs.msg.dds.PlanarRegionsListMessage;
+import controller_msgs.msg.dds.RequestPlanarRegionsListMessage;
 import us.ihmc.avatar.DRCObstacleCourseStartingLocation;
 import us.ihmc.avatar.MultiRobotTestInterface;
 import us.ihmc.avatar.testTools.DRCSimulationTestHelper;
 import us.ihmc.commonWalkingControlModules.controlModules.foot.FootControlModule;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.walkingController.states.WalkingStateEnum;
 import us.ihmc.commons.thread.ThreadTools;
-import us.ihmc.communication.net.PacketConsumer;
-import us.ihmc.communication.packetCommunicator.PacketCommunicator;
-import us.ihmc.communication.packets.*;
+import us.ihmc.communication.packets.PlanarRegionMessageConverter;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.euclid.geometry.BoundingBox3D;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
@@ -21,14 +30,13 @@ import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
-import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataListMessage;
-import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessage;
+import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.geometry.PlanarRegion;
 import us.ihmc.robotics.referenceFrames.TranslationReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
-import us.ihmc.robotics.stateMachines.conditionBasedStateMachine.StateTransitionCondition;
+import us.ihmc.robotics.stateMachine.core.StateTransitionCondition;
 import us.ihmc.simulationConstructionSetTools.bambooTools.BambooTools;
 import us.ihmc.simulationToolkit.controllers.PushRobotController;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
@@ -36,11 +44,6 @@ import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulatio
 import us.ihmc.simulationconstructionset.util.simulationTesting.SimulationTestingParameters;
 import us.ihmc.tools.MemoryTools;
 import us.ihmc.yoVariables.variable.YoEnum;
-
-import java.util.ArrayList;
-import java.util.List;
-
-import static org.junit.Assert.assertTrue;
 
 public abstract class AvatarPushRecoveryOverSteppingStonesTest implements MultiRobotTestInterface
 {
@@ -94,15 +97,7 @@ public abstract class AvatarPushRecoveryOverSteppingStonesTest implements MultiR
       drcSimulationTestHelper.createSimulation("DRCSimpleFlatGroundScriptTest");
 
       PlanarRegionsListMessage planarRegionsListMessage = createPlanarRegionsListMessage();
-      PacketCommunicator packetCommunication = drcSimulationTestHelper.getControllerCommunicator();
-      packetCommunication.attachListener(RequestPlanarRegionsListMessage.class, new PacketConsumer<RequestPlanarRegionsListMessage>()
-      {
-         @Override
-         public void receivedPacket(RequestPlanarRegionsListMessage packet)
-         {
-            drcSimulationTestHelper.send(planarRegionsListMessage);
-         }
-      });
+      drcSimulationTestHelper.createSubscriberFromController(RequestPlanarRegionsListMessage.class, packet -> drcSimulationTestHelper.publishToController(planarRegionsListMessage));
 
       FullHumanoidRobotModel fullRobotModel = getRobotModel().createFullRobotModel();
       double z = getForcePointOffsetZInChestFrame();
@@ -118,9 +113,9 @@ public abstract class AvatarPushRecoveryOverSteppingStonesTest implements MultiR
          String sidePrefix = robotSide.getCamelCaseNameForStartOfExpression();
          String footPrefix = sidePrefix + "Foot";
          @SuppressWarnings("unchecked")
-         final YoEnum<FootControlModule.ConstraintType> footConstraintType = (YoEnum<FootControlModule.ConstraintType>) scs.getVariable(sidePrefix + "FootControlModule", footPrefix + "State");
+         final YoEnum<FootControlModule.ConstraintType> footConstraintType = (YoEnum<FootControlModule.ConstraintType>) scs.getVariable(sidePrefix + "FootControlModule", footPrefix + "CurrentState");
          @SuppressWarnings("unchecked")
-         final YoEnum<WalkingStateEnum> walkingState = (YoEnum<WalkingStateEnum>) scs.getVariable("WalkingHighLevelHumanoidController", "walkingState");
+         final YoEnum<WalkingStateEnum> walkingState = (YoEnum<WalkingStateEnum>) scs.getVariable("WalkingHighLevelHumanoidController", "walkingCurrentState");
          singleSupportStartConditions.put(robotSide, new SingleSupportStartCondition(footConstraintType));
          doubleSupportStartConditions.put(robotSide, new DoubleSupportStartCondition(walkingState, robotSide));
       }
@@ -132,8 +127,11 @@ public abstract class AvatarPushRecoveryOverSteppingStonesTest implements MultiR
       double transferTime = getRobotModel().getWalkingControllerParameters().getDefaultTransferTime();
       totalMass = fullRobotModel.getTotalMass();
 
+      assertTrue(drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(0.25));
+
       FootstepDataListMessage footstepDataList = createFootstepsForWalkingOverEasySteppingStones(swingTime, transferTime);
-      drcSimulationTestHelper.send(footstepDataList);
+      footstepDataList.setAreFootstepsAdjustable(true);
+      drcSimulationTestHelper.publishToController(footstepDataList);
       assertTrue(drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(1.0));
    }
 
@@ -144,6 +142,12 @@ public abstract class AvatarPushRecoveryOverSteppingStonesTest implements MultiR
    public void testWalkingOverSteppingStonesForwardPush() throws SimulationExceededMaximumTimeException
    {
       setupTest();
+      double transferTime = getRobotModel().getWalkingControllerParameters().getDefaultTransferTime();
+
+
+      FootstepDataListMessage footstepDataList = createFootstepsForWalkingOverEasySteppingStones(swingTime, transferTime);
+      footstepDataList.setAreFootstepsAdjustable(true);
+      drcSimulationTestHelper.publishToController(footstepDataList);
 
       StateTransitionCondition firstPushCondition = singleSupportStartConditions.get(RobotSide.RIGHT);
       double delay = 0.5 * swingTime;
@@ -153,7 +157,8 @@ public abstract class AvatarPushRecoveryOverSteppingStonesTest implements MultiR
       double duration = 0.1;
       pushRobotController.applyForceDelayed(firstPushCondition, delay, firstForceDirection, magnitude, duration);
 
-      boolean success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(13.0);
+      double stepDuration = swingTime + transferTime;
+      boolean success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(footstepDataList.getFootstepDataList().size() * stepDuration + 1.5);
 
       drcSimulationTestHelper.createVideo(getSimpleRobotName(), 1);
       drcSimulationTestHelper.checkNothingChanged();
@@ -161,7 +166,7 @@ public abstract class AvatarPushRecoveryOverSteppingStonesTest implements MultiR
       Point3D center = new Point3D(-10.241987629532595, -0.8330256660954483, 1.0893768421917251);
       Vector3D plusMinusVector = new Vector3D(0.2, 0.2, 0.5);
       BoundingBox3D boundingBox = BoundingBox3D.createUsingCenterAndPlusMinusVector(center, plusMinusVector);
-      //drcSimulationTestHelper.assertRobotsRootJointIsInBoundingBox(boundingBox);
+      drcSimulationTestHelper.assertRobotsRootJointIsInBoundingBox(boundingBox);
 
       assertTrue(success);
 
@@ -184,7 +189,7 @@ public abstract class AvatarPushRecoveryOverSteppingStonesTest implements MultiR
 
    private FootstepDataListMessage createFootstepsForWalkingOverEasySteppingStones(double swingTime, double transferTime)
    {
-      FootstepDataListMessage message = new FootstepDataListMessage(swingTime, transferTime);
+      FootstepDataListMessage message = HumanoidMessageTools.createFootstepDataListMessage(swingTime, transferTime);
       List<Point3D> locations = new ArrayList<>();
       locations.add(new Point3D(-7.75, -0.55, 0.3));
       locations.add(new Point3D(-8.25, -0.95, 0.3));
@@ -208,7 +213,7 @@ public abstract class AvatarPushRecoveryOverSteppingStonesTest implements MultiR
       {
          FramePoint3D placeToStep = new FramePoint3D(ReferenceFrame.getWorldFrame(), locations.get(i));
          FootstepDataMessage data = createFootstepDataMessage(robotSides[i], placeToStep, orientations.get(i));
-         message.add(data);
+         message.getFootstepDataList().add().set(data);
       }
 
       return message;
@@ -248,8 +253,7 @@ public abstract class AvatarPushRecoveryOverSteppingStonesTest implements MultiR
             planarRegionsAsMessages.add(PlanarRegionMessageConverter.convertToPlanarRegionMessage(planarRegion));
       }
 
-      PlanarRegionsListMessage messageList = new PlanarRegionsListMessage(planarRegionsAsMessages);
-      messageList.uniqueId = 5L;
+      PlanarRegionsListMessage messageList = PlanarRegionMessageConverter.createPlanarRegionsListMessage(planarRegionsAsMessages);
 
       return messageList;
    }
@@ -261,9 +265,9 @@ public abstract class AvatarPushRecoveryOverSteppingStonesTest implements MultiR
       FramePoint3D placeToStepInWorld = new FramePoint3D(placeToStep);
       placeToStepInWorld.changeFrame(ReferenceFrame.getWorldFrame());
 
-      footstepData.setLocation(placeToStepInWorld);
-      footstepData.setOrientation(orientation);
-      footstepData.setRobotSide(robotSide);
+      footstepData.getLocation().set(placeToStepInWorld);
+      footstepData.getOrientation().set(orientation);
+      footstepData.setRobotSide(robotSide.toByte());
 
       return footstepData;
    }
@@ -337,7 +341,7 @@ public abstract class AvatarPushRecoveryOverSteppingStonesTest implements MultiR
       }
 
       @Override
-      public boolean checkCondition()
+      public boolean testCondition(double time)
       {
          return footConstraintType.getEnumValue() == FootControlModule.ConstraintType.SWING;
       }
@@ -356,7 +360,7 @@ public abstract class AvatarPushRecoveryOverSteppingStonesTest implements MultiR
       }
 
       @Override
-      public boolean checkCondition()
+      public boolean testCondition(double time)
       {
          if (side == RobotSide.LEFT)
          {

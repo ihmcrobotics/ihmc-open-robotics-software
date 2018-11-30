@@ -46,16 +46,22 @@ public class AlphaFilteredYoVariableTest
 	@Test(timeout=300000)
    public void testAlphaAndBreakFrequencyComputations()
    {
-      double DT = 0.1;
-      double randomAlpha = rng.nextDouble();
-      double computedBreakFrequency = AlphaFilteredYoVariable.computeBreakFrequencyGivenAlpha(randomAlpha, DT);
-      double computedAlpha = AlphaFilteredYoVariable.computeAlphaGivenBreakFrequencyProperly(computedBreakFrequency, DT);
+      for (int i = 0; i < 1000; i++)
+      {
+         double dt = rng.nextDouble();
 
-      assertEquals(randomAlpha, computedAlpha, 1e-7);
-      assertEquals(computedBreakFrequency, AlphaFilteredYoVariable.computeBreakFrequencyGivenAlpha(computedAlpha, DT), 1e-7);
+         double expectedAlpha = rng.nextDouble();
+         double breakFrequency = AlphaFilteredYoVariable.computeBreakFrequencyGivenAlpha(expectedAlpha, dt);
+         double actualAlpha = AlphaFilteredYoVariable.computeAlphaGivenBreakFrequencyProperly(breakFrequency, dt);
 
-      System.out.println("Random Alpha: " + randomAlpha);
-      System.out.println("Computed Alpha: " + AlphaFilteredYoVariable.computeAlphaGivenBreakFrequencyProperly(computedBreakFrequency, DT));
+         assertEquals(expectedAlpha, actualAlpha, 1e-10);
 
+         double maxFrequency = 0.5 * 0.5 / dt;
+         double expectedBreakFrequency = maxFrequency * rng.nextDouble();
+         double alpha = AlphaFilteredYoVariable.computeAlphaGivenBreakFrequencyProperly(expectedBreakFrequency, dt);
+         double actualBreakFrequency = AlphaFilteredYoVariable.computeBreakFrequencyGivenAlpha(alpha, dt);
+
+         assertEquals(expectedBreakFrequency, actualBreakFrequency, 1e-7);
+      }
    }
 }

@@ -5,8 +5,8 @@ import java.util.Random;
 
 import org.junit.After;
 import org.junit.Before;
-import org.junit.Test;
 
+import org.junit.Test;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.continuousIntegration.IntegrationCategory;
 import us.ihmc.quadrupedRobotics.QuadrupedForceTestYoVariables;
@@ -15,10 +15,10 @@ import us.ihmc.quadrupedRobotics.QuadrupedTestBehaviors;
 import us.ihmc.quadrupedRobotics.QuadrupedTestFactory;
 import us.ihmc.quadrupedRobotics.QuadrupedTestGoals;
 import us.ihmc.quadrupedRobotics.controller.QuadrupedControlMode;
+import us.ihmc.quadrupedRobotics.input.managers.QuadrupedTeleopManager;
 import us.ihmc.quadrupedRobotics.simulation.QuadrupedGroundContactModelType;
-import us.ihmc.robotics.controllers.ControllerFailureException;
-import us.ihmc.robotics.dataStructures.parameter.ParameterRegistry;
 import us.ihmc.robotics.testing.YoVariableTestGoal;
+import us.ihmc.simulationconstructionset.util.ControllerFailureException;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
 import us.ihmc.simulationConstructionSetTools.util.simulationrunner.GoalOrientedTestConductor;
 import us.ihmc.tools.MemoryTools;
@@ -27,20 +27,23 @@ public abstract class QuadrupedXGaitRandomWalkingTest implements QuadrupedMultiR
 {
    private GoalOrientedTestConductor conductor;
    private QuadrupedForceTestYoVariables variables;
+   private QuadrupedTeleopManager stepTeleopManager;
+   private QuadrupedTestFactory quadrupedTestFactory;
 
    @Before
    public void setup()
    {
       try
       {
-         ParameterRegistry.destroyAndRecreateInstance();
          MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " before test.");
 
-         QuadrupedTestFactory quadrupedTestFactory = createQuadrupedTestFactory();
+         quadrupedTestFactory = createQuadrupedTestFactory();
          quadrupedTestFactory.setControlMode(QuadrupedControlMode.FORCE);
          quadrupedTestFactory.setGroundContactModelType(QuadrupedGroundContactModelType.FLAT);
+         quadrupedTestFactory.setUseNetworking(true);
          conductor = quadrupedTestFactory.createTestConductor();
          variables = new QuadrupedForceTestYoVariables(conductor.getScs());
+         stepTeleopManager = quadrupedTestFactory.getStepTeleopManager();
       }
       catch (IOException e)
       {
@@ -51,8 +54,11 @@ public abstract class QuadrupedXGaitRandomWalkingTest implements QuadrupedMultiR
    @After
    public void tearDown()
    {
+      quadrupedTestFactory.close();
+      conductor.concludeTesting();
       conductor = null;
       variables = null;
+      stepTeleopManager = null;
 
       MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " after test.");
    }
@@ -73,13 +79,12 @@ public abstract class QuadrupedXGaitRandomWalkingTest implements QuadrupedMultiR
       return random.nextDouble() * 2.0 + 0.25;
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 100.0, categoriesOverride = {IntegrationCategory.IN_DEVELOPMENT, IntegrationCategory.VIDEO})
+   @ContinuousIntegrationTest(estimatedDuration = 45.0)
    @Test(timeout = 500000)
    public void testExtremeRandomWalking() throws SimulationExceededMaximumTimeException, ControllerFailureException, IOException
    {
-      QuadrupedTestBehaviors.readyXGait(conductor, variables);
-
-      variables.getUserTrigger().set(QuadrupedForceControllerRequestedEvent.REQUEST_XGAIT);
+      QuadrupedTestBehaviors.readyXGait(conductor, variables, stepTeleopManager);
+      stepTeleopManager.requestXGait();
 
       Random random = new Random(1447L);
       double runningDuration = variables.getYoTime().getDoubleValue();
@@ -87,23 +92,18 @@ public abstract class QuadrupedXGaitRandomWalkingTest implements QuadrupedMultiR
       for (int i = 0; i < 10; i++)
       {
          runningDuration += randomSimulationDuration(random);
-         variables.getYoPlanarVelocityInputX().set(randomValidVelocity(random) * 2.0);
-         variables.getYoPlanarVelocityInputZ().set(randomValidYawRate(random) * 2.0);
+         stepTeleopManager.setDesiredVelocity(randomValidVelocity(random) * 2.0, 0.0, randomValidYawRate(random) * 2.0);
          conductor.addSustainGoal(QuadrupedTestGoals.notFallen(variables));
          conductor.addTerminalGoal(YoVariableTestGoal.doubleGreaterThan(variables.getYoTime(), runningDuration));
          conductor.simulate();
       }
-
-      conductor.concludeTesting();
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 100.0)
-   @Test(timeout = 500000)
+   @ContinuousIntegrationTest(estimatedDuration = 45.0)
+   @Test(timeout = 1200000)
    public void testWalkingRandomly() throws SimulationExceededMaximumTimeException, ControllerFailureException, IOException
    {
-      QuadrupedTestBehaviors.readyXGait(conductor, variables);
-
-      variables.getUserTrigger().set(QuadrupedForceControllerRequestedEvent.REQUEST_XGAIT);
+      QuadrupedTestBehaviors.readyXGait(conductor, variables, stepTeleopManager);
 
       Random random = new Random(1547L);
       double runningDuration = variables.getYoTime().getDoubleValue();
@@ -111,62 +111,54 @@ public abstract class QuadrupedXGaitRandomWalkingTest implements QuadrupedMultiR
       for (int i = 0; i < 10; i++)
       {
          runningDuration += randomSimulationDuration(random);
-         variables.getYoPlanarVelocityInputX().set(randomValidVelocity(random));
-         variables.getYoPlanarVelocityInputZ().set(randomValidYawRate(random));
+         stepTeleopManager.setDesiredVelocity(randomValidVelocity(random), 0.0, randomValidYawRate(random));
          conductor.addSustainGoal(QuadrupedTestGoals.notFallen(variables));
          conductor.addTerminalGoal(YoVariableTestGoal.doubleGreaterThan(variables.getYoTime(), runningDuration));
          conductor.simulate();
 
          runningDuration += 1.0;
-         variables.getYoPlanarVelocityInputX().set(0.0);
-         variables.getYoPlanarVelocityInputZ().set(0.0);
+         stepTeleopManager.setDesiredVelocity(0.0, 0.0, 0.0);
          conductor.addSustainGoal(QuadrupedTestGoals.notFallen(variables));
          conductor.addTerminalGoal(YoVariableTestGoal.doubleGreaterThan(variables.getYoTime(), runningDuration));
          conductor.simulate();
       }
-
-      conductor.concludeTesting();
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 75.0)
-   @Test(timeout = 600000)
+   @ContinuousIntegrationTest(estimatedDuration = 60.0)
+   @Test(timeout = 860000)
    public void testWalkingAtRandomSpeedsWithStops() throws SimulationExceededMaximumTimeException, ControllerFailureException, IOException
    {
-      QuadrupedTestBehaviors.readyXGait(conductor, variables);
-
-      variables.getUserTrigger().set(QuadrupedForceControllerRequestedEvent.REQUEST_XGAIT);
+      QuadrupedTestBehaviors.readyXGait(conductor, variables, stepTeleopManager);
 
       Random random = new Random(2456L);
       double runningDuration = variables.getYoTime().getDoubleValue();
+
+      stepTeleopManager.requestXGait();
 
       for (int i = 0; i < 6; i++)
       {
          double randomSimulationDuration = randomSimulationDuration(random);
          double randomValidVelocity = randomValidVelocity(random);
          runningDuration += randomSimulationDuration;
-         variables.getYoPlanarVelocityInputX().set(randomValidVelocity);
+         stepTeleopManager.setDesiredVelocity(randomValidVelocity, 0.0, 0.0);
          conductor.addSustainGoal(QuadrupedTestGoals.notFallen(variables));
          conductor.addTerminalGoal(YoVariableTestGoal.doubleGreaterThan(variables.getYoTime(), runningDuration));
          conductor.simulate();
 
          runningDuration += 1.0;
-         variables.getYoPlanarVelocityInputX().set(0.0);
-         variables.getYoPlanarVelocityInputZ().set(0.0);
+         stepTeleopManager.setDesiredVelocity(0.0, 0.0, 0.0);
          conductor.addSustainGoal(QuadrupedTestGoals.notFallen(variables));
          conductor.addTerminalGoal(YoVariableTestGoal.doubleGreaterThan(variables.getYoTime(), runningDuration));
          conductor.simulate();
       }
-
-      conductor.concludeTesting();
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 100.0)
-   @Test(timeout = 600000)
+   @ContinuousIntegrationTest(estimatedDuration = 65.0)
+   @Test(timeout = 1200000)
    public void testWalkingRandomVelocitiesStoppingAndTurning() throws SimulationExceededMaximumTimeException, ControllerFailureException, IOException
    {
-      QuadrupedTestBehaviors.readyXGait(conductor, variables);
-
-      variables.getUserTrigger().set(QuadrupedForceControllerRequestedEvent.REQUEST_XGAIT);
+      QuadrupedTestBehaviors.readyXGait(conductor, variables, stepTeleopManager);
+      stepTeleopManager.requestXGait();
 
       Random random = new Random(1557L);
       double runningDuration = variables.getYoTime().getDoubleValue();
@@ -176,14 +168,13 @@ public abstract class QuadrupedXGaitRandomWalkingTest implements QuadrupedMultiR
          double randomSimulationDuration = randomSimulationDuration(random);
          double randomValidVelocity = randomValidVelocity(random);
          runningDuration += randomSimulationDuration;
-         variables.getYoPlanarVelocityInputX().set(randomValidVelocity);
+         stepTeleopManager.setDesiredVelocity(randomValidVelocity, 0.0, 0.0);
          conductor.addSustainGoal(QuadrupedTestGoals.notFallen(variables));
          conductor.addTerminalGoal(YoVariableTestGoal.doubleGreaterThan(variables.getYoTime(), runningDuration));
          conductor.simulate();
 
          runningDuration += 1.0;
-         variables.getYoPlanarVelocityInputX().set(0.0);
-         variables.getYoPlanarVelocityInputZ().set(0.0);
+         stepTeleopManager.setDesiredVelocity(0.0, 0.0, 0.0);
          conductor.addSustainGoal(QuadrupedTestGoals.notFallen(variables));
          conductor.addTerminalGoal(YoVariableTestGoal.doubleGreaterThan(variables.getYoTime(), runningDuration));
          conductor.simulate();
@@ -191,12 +182,10 @@ public abstract class QuadrupedXGaitRandomWalkingTest implements QuadrupedMultiR
          randomSimulationDuration = randomSimulationDuration(random);
          double randomValidYawRate = randomValidYawRate(random);
          runningDuration += randomSimulationDuration;
-         variables.getYoPlanarVelocityInputZ().set(randomValidYawRate);
+         stepTeleopManager.setDesiredVelocity(0.0, 0.0, randomValidYawRate);
          conductor.addSustainGoal(QuadrupedTestGoals.notFallen(variables));
          conductor.addTerminalGoal(YoVariableTestGoal.doubleGreaterThan(variables.getYoTime(), runningDuration));
          conductor.simulate();
       }
-
-      conductor.concludeTesting();
    }
 }

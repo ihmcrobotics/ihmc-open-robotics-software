@@ -2,7 +2,7 @@ package us.ihmc.pathPlanning.visibilityGraphs.ui.controllers;
 
 import javafx.fxml.FXML;
 import javafx.scene.control.ToggleButton;
-import us.ihmc.pathPlanning.visibilityGraphs.ui.messager.SimpleUIMessager;
+import us.ihmc.javaFXToolkit.messager.JavaFXMessager;
 
 import static us.ihmc.pathPlanning.visibilityGraphs.ui.messager.UIVisibilityGraphsTopics.*;
 
@@ -29,9 +29,9 @@ public class VisibilityGraphsAnchorPaneController
    @FXML
    private ToggleButton showWalkerToggleButton;
 
-   private SimpleUIMessager messager;
+   private JavaFXMessager messager;
 
-   public void attachMessager(SimpleUIMessager messager)
+   public void attachMessager(JavaFXMessager messager)
    {
       this.messager = messager;
    }

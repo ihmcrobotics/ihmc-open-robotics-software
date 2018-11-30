@@ -1,19 +1,26 @@
 package us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.manipulation.individual.states;
 
+import static us.ihmc.communication.packets.Packet.INVALID_MESSAGE_ID;
+
+import java.util.HashMap;
+import java.util.LinkedHashMap;
+import java.util.Map;
+
 import us.ihmc.commonWalkingControlModules.controlModules.ControllerCommandValidationTools;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.JointspaceFeedbackControlCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.InverseDynamicsCommand;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.manipulation.individual.HandControlMode;
 import us.ihmc.commons.PrintTools;
+import us.ihmc.commons.lists.RecyclingArrayDeque;
+import us.ihmc.commons.lists.RecyclingArrayList;
+import us.ihmc.communication.packets.ExecutionMode;
 import us.ihmc.communication.packets.Packet;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.ArmTrajectoryCommand;
+import us.ihmc.humanoidRobotics.communication.controllerAPI.command.JointspaceTrajectoryCommand;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.OneDoFJointTrajectoryCommand;
-import us.ihmc.communication.packets.ExecutionMode;
+import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.robotics.controllers.pidGains.implementations.YoPIDGains;
-import us.ihmc.robotics.lists.RecyclingArrayDeque;
-import us.ihmc.robotics.lists.RecyclingArrayList;
 import us.ihmc.robotics.math.trajectories.waypoints.MultipleWaypointsTrajectoryGenerator;
-import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.robotics.weightMatrices.SolverWeightLevels;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
@@ -21,17 +28,11 @@ import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoInteger;
 import us.ihmc.yoVariables.variable.YoLong;
 
-import java.util.HashMap;
-import java.util.LinkedHashMap;
-import java.util.Map;
-
-import static us.ihmc.communication.packets.Packet.INVALID_MESSAGE_ID;
-
 public class JointSpaceHandControlState extends HandControlState
 {
-   private final OneDoFJoint[] controlledJoints;
-   private final Map<OneDoFJoint, Double> homeConfiguration;
-   private final Map<OneDoFJoint, MultipleWaypointsTrajectoryGenerator> jointTrajectoryGenerators;
+   private final OneDoFJointBasics[] controlledJoints;
+   private final Map<OneDoFJointBasics, Double> homeConfiguration;
+   private final Map<OneDoFJointBasics, MultipleWaypointsTrajectoryGenerator> jointTrajectoryGenerators;
    private final JointspaceFeedbackControlCommand jointspaceFeedbackControlCommand = new JointspaceFeedbackControlCommand();
 
    private final YoVariableRegistry registry;
@@ -42,10 +43,10 @@ public class JointSpaceHandControlState extends HandControlState
    private final YoLong lastCommandId;
 
    private final YoBoolean isReadyToHandleQueuedCommands;
-   private final Map<OneDoFJoint, YoInteger> numberOfQueuedCommands = new HashMap<>();
-   private final Map<OneDoFJoint, RecyclingArrayDeque<OneDoFJointTrajectoryCommand>> commandQueues = new LinkedHashMap<>();
+   private final Map<OneDoFJointBasics, YoInteger> numberOfQueuedCommands = new HashMap<>();
+   private final Map<OneDoFJointBasics, RecyclingArrayDeque<OneDoFJointTrajectoryCommand>> commandQueues = new LinkedHashMap<>();
 
-   public JointSpaceHandControlState(String namePrefix, Map<OneDoFJoint, Double> homeConfiguration, OneDoFJoint[] controlledJoints, YoPIDGains gains,
+   public JointSpaceHandControlState(String namePrefix, Map<OneDoFJointBasics, Double> homeConfiguration, OneDoFJointBasics[] controlledJoints, YoPIDGains gains,
          YoVariableRegistry parentRegistry)
    {
       super(HandControlMode.JOINTSPACE);
@@ -64,19 +65,19 @@ public class JointSpaceHandControlState extends HandControlState
 
       for (int i = 0; i < controlledJoints.length; i++)
       {
-         OneDoFJoint joint = controlledJoints[i];
+         OneDoFJointBasics joint = controlledJoints[i];
          jointspaceFeedbackControlCommand.addJoint(joint, Double.NaN, Double.NaN, Double.NaN);
       }
 
       jointTrajectoryGenerators = new LinkedHashMap<>();
 
-      for (OneDoFJoint joint : controlledJoints)
+      for (OneDoFJointBasics joint : controlledJoints)
       {
          MultipleWaypointsTrajectoryGenerator multiWaypointTrajectoryGenerator = new MultipleWaypointsTrajectoryGenerator(joint.getName(), registry);
          jointTrajectoryGenerators.put(joint, multiWaypointTrajectoryGenerator);
 
          numberOfQueuedCommands.put(joint, new YoInteger(joint.getName() + "NumberOfQueuedCommands", registry));
-         commandQueues.put(joint, new RecyclingArrayDeque<>(OneDoFJointTrajectoryCommand.class));
+         commandQueues.put(joint, new RecyclingArrayDeque<>(OneDoFJointTrajectoryCommand.class, OneDoFJointTrajectoryCommand::set));
       }
 
       isReadyToHandleQueuedCommands = new YoBoolean(namePrefix + "IsReadyToHandleQueuedArmTrajectoryCommands", registry);
@@ -96,7 +97,7 @@ public class JointSpaceHandControlState extends HandControlState
    {
       for (int jointIndex = 0; jointIndex < controlledJoints.length; jointIndex++)
       {
-         OneDoFJoint joint = controlledJoints[jointIndex];
+         OneDoFJointBasics joint = controlledJoints[jointIndex];
          MultipleWaypointsTrajectoryGenerator trajectory = jointTrajectoryGenerators.get(joint);
          double initialPosition = initializeToCurrent ? joint.getQ() : trajectory.getValue();
          double initialVelocity = initializeToCurrent ? joint.getQd() : trajectory.getVelocity();
@@ -112,7 +113,7 @@ public class JointSpaceHandControlState extends HandControlState
 
    public void holdCurrentConfiguration()
    {
-      for (OneDoFJoint oneDoFJoint : controlledJoints)
+      for (OneDoFJointBasics oneDoFJoint : controlledJoints)
       {
          MultipleWaypointsTrajectoryGenerator trajectory = jointTrajectoryGenerators.get(oneDoFJoint);
          trajectory.clear();
@@ -130,10 +131,11 @@ public class JointSpaceHandControlState extends HandControlState
          return false;
 
       isReadyToHandleQueuedCommands.set(true);
-      clearCommandQueues(command.getCommandId());
+      JointspaceTrajectoryCommand jointspaceTrajectory = command.getJointspaceTrajectory();
+      clearCommandQueues(jointspaceTrajectory.getCommandId());
 
-      RecyclingArrayList<OneDoFJointTrajectoryCommand> jointTrajectoryCommands = command.getTrajectoryPointLists();
-      int numberOfJoints = command.getNumberOfJoints();
+      RecyclingArrayList<OneDoFJointTrajectoryCommand> jointTrajectoryCommands = jointspaceTrajectory.getTrajectoryPointLists();
+      int numberOfJoints = jointspaceTrajectory.getNumberOfJoints();
 
       for (int jointIndex = 0; jointIndex < numberOfJoints; jointIndex++)
       {
@@ -152,7 +154,8 @@ public class JointSpaceHandControlState extends HandControlState
          return false;
       }
 
-      long previousCommandId = command.getPreviousCommandId();
+      JointspaceTrajectoryCommand jointspaceTrajectory = command.getJointspaceTrajectory();
+      long previousCommandId = jointspaceTrajectory.getPreviousCommandId();
 
       if (previousCommandId != INVALID_MESSAGE_ID && lastCommandId.getLongValue() != INVALID_MESSAGE_ID && lastCommandId.getLongValue() != previousCommandId)
       {
@@ -164,13 +167,13 @@ public class JointSpaceHandControlState extends HandControlState
          return false;
       }
 
-      for (int jointIndex = 0; jointIndex < command.getNumberOfJoints(); jointIndex++)
+      for (int jointIndex = 0; jointIndex < jointspaceTrajectory.getNumberOfJoints(); jointIndex++)
       {
-         OneDoFJoint joint = controlledJoints[jointIndex];
+         OneDoFJointBasics joint = controlledJoints[jointIndex];
          OneDoFJointTrajectoryCommand localCommand = commandQueues.get(joint).addLast();
          numberOfQueuedCommands.get(joint).increment();
 
-         OneDoFJointTrajectoryCommand jointTrajectoryCommand = command.getJointTrajectoryPointList(jointIndex);
+         OneDoFJointTrajectoryCommand jointTrajectoryCommand = jointspaceTrajectory.getJointTrajectoryPointList(jointIndex);
 
          if (jointTrajectoryCommand.getTrajectoryPoint(0).getTime() < 1.0e-5)
          {
@@ -182,10 +185,9 @@ public class JointSpaceHandControlState extends HandControlState
          }
 
          localCommand.set(jointTrajectoryCommand);
-         localCommand.setCommandId(command.getCommandId());
       }
 
-      lastCommandId.set(command.getCommandId());
+      lastCommandId.set(jointspaceTrajectory.getCommandId());
 
       return true;
    }
@@ -195,7 +197,7 @@ public class JointSpaceHandControlState extends HandControlState
    {
       for (int i = 0; i < controlledJoints.length; i++)
       {
-         OneDoFJoint joint = controlledJoints[i];
+         OneDoFJointBasics joint = controlledJoints[i];
 
          MultipleWaypointsTrajectoryGenerator trajectoryGenerator = jointTrajectoryGenerators.get(joint);
          RecyclingArrayDeque<OneDoFJointTrajectoryCommand> commandQueue = commandQueues.get(joint);
@@ -224,7 +226,7 @@ public class JointSpaceHandControlState extends HandControlState
    private void initializeTrajectoryGenerator(boolean initializeToCurrent, double firstWaypointTime, int jointIndex,
          OneDoFJointTrajectoryCommand jointTrajectoryCommand)
    {
-      OneDoFJoint joint = controlledJoints[jointIndex];
+      OneDoFJointBasics joint = controlledJoints[jointIndex];
       MultipleWaypointsTrajectoryGenerator trajectoryGenerator = jointTrajectoryGenerators.get(joint);
 
       jointTrajectoryCommand.addTimeOffset(firstWaypointTime);
@@ -263,7 +265,7 @@ public class JointSpaceHandControlState extends HandControlState
    {
       int numberOfTrajectoryPoints = command.getNumberOfTrajectoryPoints();
 
-      OneDoFJoint joint = controlledJoints[jointIndex];
+      OneDoFJointBasics joint = controlledJoints[jointIndex];
       MultipleWaypointsTrajectoryGenerator jointTrajectoryGenerator = jointTrajectoryGenerators.get(joint);
       int maximumNumberOfWaypoints = jointTrajectoryGenerator.getMaximumNumberOfWaypoints();
       maximumNumberOfWaypoints -= jointTrajectoryGenerator.getCurrentNumberOfWaypoints();
@@ -274,7 +276,6 @@ public class JointSpaceHandControlState extends HandControlState
       OneDoFJointTrajectoryCommand commandForExcedent = commandQueues.get(joint).addFirst();
       numberOfQueuedCommands.get(joint).increment();
       commandForExcedent.clear();
-      commandForExcedent.setCommandId(command.getCommandId());
 
       for (int trajectoryPointIndex = maximumNumberOfWaypoints; trajectoryPointIndex < numberOfTrajectoryPoints; trajectoryPointIndex++)
       {
@@ -302,7 +303,7 @@ public class JointSpaceHandControlState extends HandControlState
    {
       for (int i = 0; i < controlledJoints.length; i++)
       {
-         OneDoFJoint joint = controlledJoints[i];
+         OneDoFJointBasics joint = controlledJoints[i];
          commandQueues.get(joint).clear();
          numberOfQueuedCommands.get(joint).set(0);
       }
@@ -323,7 +324,7 @@ public class JointSpaceHandControlState extends HandControlState
 
    private boolean areTrajectoriesDone()
    {
-      for (OneDoFJoint oneDoFJoint : controlledJoints)
+      for (OneDoFJointBasics oneDoFJoint : controlledJoints)
       {
          if (!jointTrajectoryGenerators.get(oneDoFJoint).isDone())
             return false;
@@ -343,12 +344,12 @@ public class JointSpaceHandControlState extends HandControlState
       return isReadyToHandleQueuedCommands.getBooleanValue();
    }
 
-   public double getJointDesiredPosition(OneDoFJoint joint)
+   public double getJointDesiredPosition(OneDoFJointBasics joint)
    {
       return jointTrajectoryGenerators.get(joint).getValue();
    }
 
-   public double getJointDesiredVelocity(OneDoFJoint joint)
+   public double getJointDesiredVelocity(OneDoFJointBasics joint)
    {
       return jointTrajectoryGenerators.get(joint).getVelocity();
    }

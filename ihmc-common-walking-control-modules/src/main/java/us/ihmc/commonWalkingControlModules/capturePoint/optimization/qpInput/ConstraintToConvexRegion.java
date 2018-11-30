@@ -4,11 +4,13 @@ import org.ejml.data.DenseMatrix64F;
 import org.ejml.ops.CommonOps;
 
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
+import us.ihmc.euclid.geometry.interfaces.ConvexPolygon2DReadOnly;
 import us.ihmc.euclid.referenceFrame.FramePoint2D;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.interfaces.FramePoint2DReadOnly;
+import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
 import us.ihmc.footstepPlanning.polygonWiggling.PolygonWiggler;
-import us.ihmc.robotics.geometry.FrameConvexPolygon2d;
 import us.ihmc.robotics.geometry.PlanarRegion;
 import us.ihmc.robotics.linearAlgebra.MatrixTools;
 
@@ -23,15 +25,10 @@ import us.ihmc.robotics.linearAlgebra.MatrixTools;
  * Higher complexity convex regions can be represented, but may require more complex constraints. As
  * an example, the variable can be constrained to a circle, but this requires a quadratic constraint.
  */
-public class ConstraintToConvexRegion
+public class ConstraintToConvexRegion extends ICPInequalityInput
 {
    /** position offset of the constrained variable. */
    public final DenseMatrix64F positionOffset;
-
-   /** matrix multiplier of the constrained variable. */
-   public final DenseMatrix64F Aineq;
-   /** desired convex region for the constrained variable. */
-   public final DenseMatrix64F bineq;
 
    /** distance inside the convex region required for the constrained variable. */
    private double deltaInside = 0.0;
@@ -46,10 +43,8 @@ public class ConstraintToConvexRegion
     */
    public ConstraintToConvexRegion(int maximumNumberOfVertices)
    {
+      super(maximumNumberOfVertices, maximumNumberOfVertices);
       positionOffset = new DenseMatrix64F(2, 1);
-
-      Aineq = new DenseMatrix64F(maximumNumberOfVertices, maximumNumberOfVertices);
-      bineq = new DenseMatrix64F(maximumNumberOfVertices, 1);
    }
 
    /**
@@ -58,11 +53,9 @@ public class ConstraintToConvexRegion
     */
    public void reset()
    {
+      super.reset();
       positionOffset.zero();
       convexPolygon.clear();
-
-      Aineq.zero();
-      bineq.zero();
    }
 
    /**
@@ -70,16 +63,16 @@ public class ConstraintToConvexRegion
     *
     * @param vertex vertex to add.
     */
-   public void addVertex(FramePoint2D vertex)
+   public void addVertex(FramePoint2DReadOnly vertex)
    {
       vertex.checkReferenceFrameMatch(ReferenceFrame.getWorldFrame());
 
       convexPolygon.addVertex(vertex);
    }
 
-   public void addPolygon(FrameConvexPolygon2d polygon)
+   public void addPolygon(ConvexPolygon2DReadOnly polygon)
    {
-      convexPolygon.addVertices(polygon.getConvexPolygon2d());
+      convexPolygon.addVertices(polygon);
    }
 
    /**
@@ -87,11 +80,11 @@ public class ConstraintToConvexRegion
     *
     * @param vertex vertex to add.
     */
-   public void addVertex(FramePoint3D vertex)
+   public void addVertex(FramePoint3DReadOnly vertex)
    {
       vertex.checkReferenceFrameMatch(ReferenceFrame.getWorldFrame());
 
-      convexPolygon.addVertex(vertex.getX(), vertex.getY());
+      convexPolygon.addVertex(vertex);
    }
 
    /**
@@ -110,7 +103,7 @@ public class ConstraintToConvexRegion
       return true;
    }
 
-   public boolean addPlanarRegion(ConvexPolygon2D convexPolygon, double deltaInside)
+   public boolean addPlanarRegion(ConvexPolygon2DReadOnly convexPolygon, double deltaInside)
    {
       if (convexPolygon == null)
          return false;
@@ -120,7 +113,7 @@ public class ConstraintToConvexRegion
       return true;
    }
 
-   public boolean addPlanarRegion(ConvexPolygon2D convexPolygon)
+   public boolean addPlanarRegion(ConvexPolygon2DReadOnly convexPolygon)
    {
       if (convexPolygon == null)
          return false;

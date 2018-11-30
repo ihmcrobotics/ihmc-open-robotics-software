@@ -7,7 +7,6 @@ import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.graphicsDescription.appearance.AppearanceDefinition;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
-import us.ihmc.robotics.Plane;
 import us.ihmc.robotics.robotDescription.CameraSensorDescription;
 import us.ihmc.robotics.robotDescription.FloatingPlanarJointDescription;
 import us.ihmc.robotics.robotDescription.GroundContactPointDescription;
@@ -17,6 +16,7 @@ import us.ihmc.robotics.robotDescription.JointWrenchSensorDescription;
 import us.ihmc.robotics.robotDescription.LinkDescription;
 import us.ihmc.robotics.robotDescription.LinkGraphicsDescription;
 import us.ihmc.robotics.robotDescription.PinJointDescription;
+import us.ihmc.robotics.robotDescription.Plane;
 import us.ihmc.robotics.robotDescription.RobotDescription;
 
 public class SpringFlamingoRobotDescription extends RobotDescription

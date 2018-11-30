@@ -1,12 +1,14 @@
 package us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics;
 
 import us.ihmc.commonWalkingControlModules.controllerCore.command.ControllerCoreCommandType;
-import us.ihmc.robotics.screwTheory.RigidBody;
-import us.ihmc.robotics.screwTheory.Wrench;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.virtualModelControl.VirtualModelControlCommand;
+import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
+import us.ihmc.mecano.spatial.Wrench;
+import us.ihmc.mecano.spatial.interfaces.WrenchReadOnly;
 
-public class ExternalWrenchCommand implements InverseDynamicsCommand<ExternalWrenchCommand>
+public class ExternalWrenchCommand implements InverseDynamicsCommand<ExternalWrenchCommand>, VirtualModelControlCommand<ExternalWrenchCommand>
 {
-   private RigidBody rigidBody;
+   private RigidBodyBasics rigidBody;
    private String rigidBodyName;
    private final Wrench externalWrenchAppliedOnRigidBody = new Wrench();
 
@@ -14,20 +16,20 @@ public class ExternalWrenchCommand implements InverseDynamicsCommand<ExternalWre
    {
    }
 
-   public void setRigidBody(RigidBody rigidBody)
+   public void setRigidBody(RigidBodyBasics rigidBody)
    {
       this.rigidBody = rigidBody;
       rigidBodyName = rigidBody.getName();
    }
 
-   public void set(RigidBody rigidBody, Wrench externalWrench)
+   public void set(RigidBodyBasics rigidBody, WrenchReadOnly externalWrench)
    {
       setRigidBody(rigidBody);
-      externalWrenchAppliedOnRigidBody.set(externalWrench);
+      externalWrenchAppliedOnRigidBody.setIncludingFrame(externalWrench);
       externalWrenchAppliedOnRigidBody.changeFrame(rigidBody.getBodyFixedFrame());
    }
 
-   public RigidBody getRigidBody()
+   public RigidBodyBasics getRigidBody()
    {
       return rigidBody;
    }
@@ -37,7 +39,7 @@ public class ExternalWrenchCommand implements InverseDynamicsCommand<ExternalWre
       return rigidBodyName;
    }
 
-   public Wrench getExternalWrench()
+   public WrenchReadOnly getExternalWrench()
    {
       return externalWrenchAppliedOnRigidBody;
    }
@@ -47,7 +49,7 @@ public class ExternalWrenchCommand implements InverseDynamicsCommand<ExternalWre
    {
       rigidBody = other.rigidBody;
       rigidBodyName = other.rigidBodyName;
-      externalWrenchAppliedOnRigidBody.set(other.externalWrenchAppliedOnRigidBody);
+      externalWrenchAppliedOnRigidBody.setIncludingFrame(other.externalWrenchAppliedOnRigidBody);
    }
 
    @Override

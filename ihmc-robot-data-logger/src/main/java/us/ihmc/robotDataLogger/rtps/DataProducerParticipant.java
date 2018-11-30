@@ -76,19 +76,12 @@ public class DataProducerParticipant
       {
          VariableChangeRequest msg = new VariableChangeRequest();
          SampleInfo info = new SampleInfo();
-         try
+         if (subscriber.takeNextData(msg, info))
          {
-            if (subscriber.takeNextData(msg, info))
+            if (dataProducerListener != null && activated)
             {
-               if (dataProducerListener != null && activated)
-               {
-                  dataProducerListener.changeVariable(msg.getVariableID(), msg.getRequestedValue());
-               }
+               dataProducerListener.changeVariable(msg.getVariableID(), msg.getRequestedValue());
             }
-         }
-         catch (IOException e)
-         {
-            e.printStackTrace();
          }
       }
 
@@ -118,9 +111,10 @@ public class DataProducerParticipant
       guidString = LogParticipantTools.createGuidString(participant.getGuid());
 
       partition = getUniquePartition();
-      handshakePublisher = createPersistentPublisher(partition, LogParticipantSettings.handshakeTopic, new HandshakePubSubType());
-      announcementPublisher = createPersistentPublisher(LogParticipantSettings.partition, LogParticipantSettings.annoucementTopic,
-                                                        new AnnouncementPubSubType());
+      handshakePublisher = createPublisher(partition, LogParticipantSettings.handshake.getKey(), LogParticipantSettings.handshake.getValue(),
+                                           new HandshakePubSubType());
+      announcementPublisher = createPublisher(LogParticipantSettings.partition, LogParticipantSettings.annoucement.getKey(),
+                                              LogParticipantSettings.annoucement.getValue(), new AnnouncementPubSubType());
 
       if (logModelProvider != null)
       {
@@ -136,7 +130,8 @@ public class DataProducerParticipant
          }
 
          ByteBuffer modelBuffer = ByteBuffer.wrap(model);
-         Publisher logModelFilePublisher = createPersistentPublisher(partition, LogParticipantSettings.modelFileTopic, modelFilePubSubType);
+         Publisher logModelFilePublisher = createPublisher(partition, LogParticipantSettings.modelFile.getKey(),
+                                                           LogParticipantSettings.modelFile.getValue(), modelFilePubSubType);
          logModelFilePublisher.write(modelBuffer);
 
          byte[] resourceZip = logModelProvider.getResourceZip();
@@ -144,7 +139,8 @@ public class DataProducerParticipant
          {
             ByteBufferPubSubType resourcesPubSubType = new ByteBufferPubSubType(LogParticipantSettings.resourceBundleTypeName, resourceZip.length);
             ByteBuffer resourcesBuffer = ByteBuffer.wrap(resourceZip);
-            Publisher resourcesPublisher = createPersistentPublisher(partition, LogParticipantSettings.resourceBundleTopic, resourcesPubSubType);
+            Publisher resourcesPublisher = createPublisher(partition, LogParticipantSettings.resourceBundle.getKey(),
+                                                           LogParticipantSettings.resourceBundle.getValue(), resourcesPubSubType);
             resourcesPublisher.write(resourcesBuffer);
 
             announcement.getModelFileDescription().setHasResourceZip(true);
@@ -159,16 +155,16 @@ public class DataProducerParticipant
 
       TimestampPubSubType timestampPubSubType = new TimestampPubSubType();
       PublisherAttributes timestampPublisherAttributes = domain.createPublisherAttributes(participant, timestampPubSubType,
-                                                                                          LogParticipantSettings.timestampTopic, ReliabilityKind.BEST_EFFORT,
-                                                                                          partition);
+                                                                                          LogParticipantSettings.timestamp.getKey(),
+                                                                                          LogParticipantSettings.timestamp.getValue(), partition);
       timestampPublisher = domain.createPublisher(participant, timestampPublisherAttributes);
 
       if (dataProducerListener != null)
       {
          VariableChangeRequestPubSubType variableChangeRequestPubSubType = new VariableChangeRequestPubSubType();
          SubscriberAttributes subscriberAttributes = domain.createSubscriberAttributes(participant, variableChangeRequestPubSubType,
-                                                                                       LogParticipantSettings.variableChangeTopic, ReliabilityKind.RELIABLE,
-                                                                                       partition);
+                                                                                       LogParticipantSettings.variableChange.getKey(),
+                                                                                       LogParticipantSettings.variableChange.getValue(), partition);
          subscriberAttributes.getQos().setReliabilityKind(ReliabilityKind.RELIABLE);
          domain.createSubscriber(participant, subscriberAttributes, new VariableChangeSubscriberListener());
       }
@@ -201,11 +197,11 @@ public class DataProducerParticipant
       return LogParticipantSettings.partition + LogParticipantSettings.namespaceSeperator + guidString;
    }
 
-   private <T> Publisher createPersistentPublisher(String partition, String topicName, TopicDataType<T> topicDataType) throws IOException
+   private <T> Publisher createPublisher(String partition, String topicName, ReliabilityKind reliabilityKind,TopicDataType<T> topicDataType) throws IOException
    {
-      PublisherAttributes publisherAttributes = domain.createPublisherAttributes(participant, topicDataType, topicName, ReliabilityKind.RELIABLE, partition);
+      PublisherAttributes publisherAttributes = domain.createPublisherAttributes(participant, topicDataType, topicName, reliabilityKind, partition);
 
-      publisherAttributes.getQos().setReliabilityKind(ReliabilityKind.RELIABLE);
+      publisherAttributes.getQos().setReliabilityKind(reliabilityKind);
       publisherAttributes.getQos().setDurabilityKind(DurabilityKind.TRANSIENT_LOCAL_DURABILITY_QOS);
       publisherAttributes.getTopic().getHistoryQos().setKind(HistoryQosPolicyKind.KEEP_LAST_HISTORY_QOS);
       publisherAttributes.getTopic().getHistoryQos().setDepth(1);
@@ -315,9 +311,12 @@ public class DataProducerParticipant
    }
    
    
-   public RegistryPublisher createRegistryPublisher(CustomLogDataPublisherType type, PeriodicThreadSchedulerFactory schedulerFactory, RegistrySendBufferBuilder builder) throws IOException
+   public RegistryPublisher createRegistryPublisher(CustomLogDataPublisherType type, PeriodicThreadSchedulerFactory schedulerFactory,
+                                                    RegistrySendBufferBuilder builder)
+         throws IOException
    {
-      PublisherAttributes attr = domain.createPublisherAttributes(participant, type, LogParticipantSettings.dataTopic, ReliabilityKind.RELIABLE, partition);
+      PublisherAttributes attr = domain.createPublisherAttributes(participant, type, LogParticipantSettings.data.getKey(),
+                                                                  LogParticipantSettings.data.getValue(), partition);
       attr.getQos().setPublishMode(PublishModeKind.SYNCHRONOUS_PUBLISH_MODE);
       Publisher publisher = domain.createPublisher(participant, attr);
 
@@ -328,7 +327,8 @@ public class DataProducerParticipant
    public void sendKeepAlive(PeriodicThreadSchedulerFactory schedulerFactory) throws IOException
    {
       CustomLogDataPublisherType type = new CustomLogDataPublisherType(0, 0);
-      PublisherAttributes attr = domain.createPublisherAttributes(participant, type, LogParticipantSettings.dataTopic, ReliabilityKind.RELIABLE, partition);
+      PublisherAttributes attr = domain.createPublisherAttributes(participant, type, LogParticipantSettings.data.getKey(),
+                                                                  LogParticipantSettings.data.getValue(), partition);
       attr.getQos().setPublishMode(PublishModeKind.SYNCHRONOUS_PUBLISH_MODE);
       Publisher publisher = domain.createPublisher(participant, attr);
       new KeepAlivePublisher(schedulerFactory, publisher).start();

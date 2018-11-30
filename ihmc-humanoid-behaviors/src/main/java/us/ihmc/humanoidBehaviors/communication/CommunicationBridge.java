@@ -5,12 +5,13 @@ import java.util.HashMap;
 
 import javax.swing.SwingUtilities;
 
+import controller_msgs.msg.dds.SimpleCoactiveBehaviorDataPacket;
 import us.ihmc.communication.net.PacketConsumer;
 import us.ihmc.communication.packetCommunicator.PacketCommunicator;
 import us.ihmc.communication.packetCommunicator.interfaces.GlobalPacketConsumer;
 import us.ihmc.communication.packets.Packet;
 import us.ihmc.communication.packets.PacketDestination;
-import us.ihmc.humanoidRobotics.communication.packets.behaviors.SimpleCoactiveBehaviorDataPacket;
+import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.yoVariables.listener.VariableChangedListener;
 import us.ihmc.yoVariables.variable.YoVariable;
 
@@ -39,6 +40,11 @@ public class CommunicationBridge implements CommunicationBridgeInterface
    public void consumeObjectFromNetwork(Object object)
    {
       notifyNetworkListeners(object);
+   }
+   
+   public void freezeCommunications(boolean freeze)
+   {
+     packetCommunicator.freezeCommunication(freeze);
    }
 
    private void notifyNetworkListeners(Object object)
@@ -201,26 +207,13 @@ public class CommunicationBridge implements CommunicationBridgeInterface
 
    public void sendToUI(String key, double value)
    {
-      SimpleCoactiveBehaviorDataPacket newPacket = new SimpleCoactiveBehaviorDataPacket(key, value);
-      sendPacketToUI(newPacket);
-   }
-
-   public void sendToUI(String key, Object data)
-   {
-      SimpleCoactiveBehaviorDataPacket newPacket = new SimpleCoactiveBehaviorDataPacket(key, data);
+      SimpleCoactiveBehaviorDataPacket newPacket = HumanoidMessageTools.createSimpleCoactiveBehaviorDataPacket(key, value);
       sendPacketToUI(newPacket);
    }
 
    public void sendToBehavior(String key, double value)
    {
-      SimpleCoactiveBehaviorDataPacket newPacket = new SimpleCoactiveBehaviorDataPacket(key, value);
+      SimpleCoactiveBehaviorDataPacket newPacket = HumanoidMessageTools.createSimpleCoactiveBehaviorDataPacket(key, value);
       sendPacketToBehavior(newPacket);
    }
-
-   public void sendToBehavior(String key, Object data)
-   {
-      SimpleCoactiveBehaviorDataPacket newPacket = new SimpleCoactiveBehaviorDataPacket(key, data);
-      sendPacketToBehavior(newPacket);
-   }
-
 }

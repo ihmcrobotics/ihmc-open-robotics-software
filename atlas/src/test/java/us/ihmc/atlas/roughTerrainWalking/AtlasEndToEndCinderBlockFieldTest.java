@@ -26,7 +26,7 @@ public class AtlasEndToEndCinderBlockFieldTest extends EndToEndCinderBlockFieldT
    @Override
    public double getPelvisOffsetHeight()
    {
-      return 0.08;
+      return 0.0;
    }
 
    @Override
@@ -42,8 +42,8 @@ public class AtlasEndToEndCinderBlockFieldTest extends EndToEndCinderBlockFieldT
    }
 
    @Override
-   @ContinuousIntegrationTest(estimatedDuration = 167.7)
-   @Test(timeout = 1200000)
+   @ContinuousIntegrationTest(estimatedDuration = 209.4)
+   @Test(timeout = 1000000)
    public void testWalkingOverCinderBlockField() throws Exception
    {
       super.testWalkingOverCinderBlockField();

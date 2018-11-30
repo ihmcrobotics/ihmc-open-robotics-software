@@ -4,7 +4,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 import us.ihmc.humanoidBehaviors.behaviors.AbstractBehavior;
-import us.ihmc.humanoidBehaviors.communication.CommunicationBridgeInterface;
+import us.ihmc.ros2.Ros2Node;
 import us.ihmc.yoVariables.variable.YoBoolean;
 
 public class WaitForUserValidationBehavior extends AbstractBehavior
@@ -15,10 +15,9 @@ public class WaitForUserValidationBehavior extends AbstractBehavior
 
    ExecutorService executorService = Executors.newFixedThreadPool(2);
 
-   public WaitForUserValidationBehavior(CommunicationBridgeInterface outgoingCommunicationBridge, YoBoolean validClicked,
-         YoBoolean validAcknoledged)
+   public WaitForUserValidationBehavior(String robotName, Ros2Node ros2Node, YoBoolean validClicked, YoBoolean validAcknoledged)
    {
-      super(outgoingCommunicationBridge);
+      super(robotName, ros2Node);
       this.validAcknoledged = validAcknoledged;
       this.validClicked = validClicked;
 
@@ -41,13 +40,9 @@ public class WaitForUserValidationBehavior extends AbstractBehavior
    @Override
    public boolean isDone()
    {
-     // return true;
+      // return true;
       return validAcknoledged.getBooleanValue();
    }
-
-
-
-  
 
    @Override
    public void onBehaviorEntered()

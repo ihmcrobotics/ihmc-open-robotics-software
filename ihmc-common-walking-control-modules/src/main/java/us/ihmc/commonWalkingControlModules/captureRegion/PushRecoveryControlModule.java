@@ -3,17 +3,19 @@ package us.ihmc.commonWalkingControlModules.captureRegion;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.BipedSupportPolygons;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHumanoidControllerToolbox;
+import us.ihmc.euclid.referenceFrame.FrameConvexPolygon2D;
 import us.ihmc.euclid.referenceFrame.FramePoint2D;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.interfaces.FramePoint2DReadOnly;
+import us.ihmc.euclid.referenceFrame.interfaces.FrameVertex2DSupplier;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
-import us.ihmc.robotics.geometry.FrameConvexPolygon2d;
+import us.ihmc.mecano.frames.MovingReferenceFrame;
 import us.ihmc.robotics.math.filters.GlitchFilteredYoBoolean;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
-import us.ihmc.robotics.screwTheory.MovingReferenceFrame;
 import us.ihmc.sensorProcessing.frames.CommonHumanoidReferenceFrames;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
@@ -57,7 +59,7 @@ public class PushRecoveryControlModule
    private final ReferenceFrame midFeetZUp;
    private final SideDependentList<MovingReferenceFrame> soleFrames;
 
-   private final FrameConvexPolygon2d footPolygon = new FrameConvexPolygon2d();
+   private final FrameConvexPolygon2D footPolygon = new FrameConvexPolygon2D();
 
    private final double controlDT;
    private double omega0;
@@ -68,7 +70,7 @@ public class PushRecoveryControlModule
    private final FramePoint2D projectedCapturePoint2d = new FramePoint2D();
 
    public PushRecoveryControlModule(BipedSupportPolygons bipedSupportPolygons, HighLevelHumanoidControllerToolbox controllerToolbox,
-         WalkingControllerParameters walkingControllerParameters, YoVariableRegistry parentRegistry)
+                                    WalkingControllerParameters walkingControllerParameters, YoVariableRegistry parentRegistry)
    {
       controlDT = controllerToolbox.getControlDT();
       this.bipedSupportPolygon = bipedSupportPolygons;
@@ -106,27 +108,21 @@ public class PushRecoveryControlModule
          distanceICPToFeet.put(robotSide, distanceICPToFoot);
       }
 
-      footPolygon.setIncludingFrameAndUpdate(feet.get(RobotSide.LEFT).getContactPoints2d());
+      footPolygon.setIncludingFrame(FrameVertex2DSupplier.asFrameVertex2DSupplier(feet.get(RobotSide.LEFT).getContactPoints2d()));
 
       parentRegistry.addChild(registry);
 
       reset();
    }
 
-   public void updateCaptureRegion(double swingTimeRemaining, double omega0, RobotSide swingSide, FramePoint2D capturePoint2d)
-   {
-      footPolygon.setIncludingFrameAndUpdate(bipedSupportPolygon.getFootPolygonInAnkleZUp(swingSide.getOppositeSide()));
-      captureRegionCalculator.calculateCaptureRegion(swingSide, swingTimeRemaining, capturePoint2d, omega0, footPolygon);
-   }
-
-   public FrameConvexPolygon2d getCaptureRegion()
+   public FrameConvexPolygon2D getCaptureRegion()
    {
       return captureRegionCalculator.getCaptureRegion();
    }
 
    /**
-    * Return null if the robot is not falling.
-    * If the robot is falling, it returns the suggested swingSide to recover.
+    * Return null if the robot is not falling. If the robot is falling, it returns the suggested
+    * swingSide to recover.
     */
    public RobotSide isRobotFallingFromDoubleSupport()
    {
@@ -146,7 +142,7 @@ public class PushRecoveryControlModule
       this.omega0 = omega0;
       this.capturePoint2d.setIncludingFrame(capturePoint2d);
       this.desiredCapturePoint2d.setIncludingFrame(desiredCapturePoint2d);
-      FrameConvexPolygon2d supportPolygonInMidFeetZUp = bipedSupportPolygon.getSupportPolygonInMidFeetZUp();
+      FrameConvexPolygon2D supportPolygonInMidFeetZUp = bipedSupportPolygon.getSupportPolygonInMidFeetZUp();
 
       // Initialize variables
       closestFootToICP.set(null);
@@ -174,7 +170,7 @@ public class PushRecoveryControlModule
       {
          ReferenceFrame soleFrame = soleFrames.get(robotSide);
          projectedCapturePoint.changeFrame(soleFrame);
-         footPolygon.setIncludingFrameAndUpdate(bipedSupportPolygon.getFootPolygonInSoleFrame(robotSide));
+         footPolygon.setIncludingFrame(bipedSupportPolygon.getFootPolygonInSoleFrame(robotSide));
          projectedCapturePoint2d.setIncludingFrame(projectedCapturePoint);
 
          distanceICPToFeet.get(robotSide).set(projectedCapturePoint2d.distance(footPolygon.getCentroid()));
@@ -202,7 +198,7 @@ public class PushRecoveryControlModule
    {
       RobotSide supportSide = swingSide.getOppositeSide();
       double preferredSwingTime = swingTimeRemaining;
-      footPolygon.setIncludingFrameAndUpdate(bipedSupportPolygon.getFootPolygonInAnkleZUp(supportSide));
+      footPolygon.setIncludingFrame(bipedSupportPolygon.getFootPolygonInSoleZUpFrame(supportSide));
       captureRegionCalculator.calculateCaptureRegion(swingSide, preferredSwingTime, capturePoint2d, omega0, footPolygon);
       double captureRegionArea = captureRegionCalculator.getCaptureRegionArea();
 
@@ -234,9 +230,18 @@ public class PushRecoveryControlModule
     */
    public boolean checkAndUpdateFootstep(double swingTimeRemaining, Footstep nextFootstep)
    {
+      /*
+       * TODO The swing time remaining is being provided from the ICP planner. When standing the
+       * remaining time is NaN, and since the planner is only updated after this module, well we get
+       * a NaN for one tick which is enough to prevent capture region to be properly estimated. The
+       * actual duration is arbitrary and does not need to be accurate here.
+       */
+      if (Double.isNaN(swingTimeRemaining))
+         swingTimeRemaining = 1.0;
+
       RobotSide swingSide = nextFootstep.getRobotSide();
       RobotSide supportSide = swingSide.getOppositeSide();
-      footPolygon.setIncludingFrameAndUpdate(bipedSupportPolygon.getFootPolygonInAnkleZUp(supportSide));
+      footPolygon.setIncludingFrame(bipedSupportPolygon.getFootPolygonInSoleZUpFrame(supportSide));
 
       double preferredSwingTimeForRecovering = computePreferredSwingTimeForRecovering(swingTimeRemaining, swingSide);
       captureRegionCalculator.calculateCaptureRegion(swingSide, preferredSwingTimeForRecovering, capturePoint2d, omega0, footPolygon);
@@ -253,8 +258,8 @@ public class PushRecoveryControlModule
          return false;
       }
 
-      FramePoint2D footCentroid = footPolygon.getCentroid();
-      FrameConvexPolygon2d captureRegion = captureRegionCalculator.getCaptureRegion();
+      FramePoint2DReadOnly footCentroid = footPolygon.getCentroid();
+      FrameConvexPolygon2D captureRegion = captureRegionCalculator.getCaptureRegion();
       isCaptureRegionEmpty.set(captureRegion.isEmpty());
       if (!recovering.getBooleanValue())
       {
@@ -299,7 +304,7 @@ public class PushRecoveryControlModule
    {
       footstepToPack.setRobotSide(robotSide);
       footstepToPack.setTrustHeight(true);
-      footstepToPack.setIsAdjustable(true);
+      footstepToPack.setIsAdjustable(false);
       footstepToPack.getFootstepPose().setToZero(soleFrames.get(robotSide));
       footstepToPack.getFootstepPose().changeFrame(worldFrame);
    }

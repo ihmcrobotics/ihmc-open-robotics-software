@@ -9,8 +9,4 @@ public interface QuadrupedPostureInputProviderInterface
    Point3D getComPositionInput();
 
    Vector3D getComVelocityInput();
-
-   Quaternion getBodyOrientationInput();
-
-   Vector3D getBodyAngularRateInput();
 }

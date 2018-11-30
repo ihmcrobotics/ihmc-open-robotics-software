@@ -7,24 +7,30 @@ import static org.junit.Assert.fail;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 
+import org.junit.Test;
+
+import controller_msgs.msg.dds.RobotConfigurationData;
+import us.ihmc.commons.thread.ThreadTools;
+import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations;
+import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotModels.FullRobotModelUtils;
-import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.robotics.sensors.ForceSensorDefinition;
 import us.ihmc.robotics.sensors.IMUDefinition;
-import us.ihmc.sensorProcessing.communication.packets.dataobjects.RobotConfigurationData;
-import us.ihmc.commons.thread.ThreadTools;
+import us.ihmc.sensorProcessing.communication.packets.dataobjects.RobotConfigurationDataFactory;
 
 public abstract class RobotConfigurationDataBufferTest
 {
+   @ContinuousIntegrationAnnotations.ContinuousIntegrationTest(estimatedDuration = 0.5)
+   @Test(timeout = 30000)
    public void testAddingStuff()
    {
       RobotConfigurationDataBuffer buffer = new RobotConfigurationDataBuffer();
       FullHumanoidRobotModel setterFullRobotModel = getFullRobotModel();
       FullHumanoidRobotModel getterFullRobotModel = getFullRobotModel();
 
-      OneDoFJoint[] setterJoints = FullRobotModelUtils.getAllJointsExcludingHands(setterFullRobotModel);
-      OneDoFJoint[] getterJoints = FullRobotModelUtils.getAllJointsExcludingHands(getterFullRobotModel);
+      OneDoFJointBasics[] setterJoints = FullRobotModelUtils.getAllJointsExcludingHands(setterFullRobotModel);
+      OneDoFJointBasics[] getterJoints = FullRobotModelUtils.getAllJointsExcludingHands(getterFullRobotModel);
       ForceSensorDefinition[] forceSensorDefinitions = setterFullRobotModel.getForceSensorDefinitions();
       IMUDefinition[] imuDefinitions = setterFullRobotModel.getIMUDefinitions();
 
@@ -32,9 +38,9 @@ public abstract class RobotConfigurationDataBufferTest
 
       for (int i = 0; i < RobotConfigurationDataBuffer.BUFFER_SIZE * 2; i++)
       {
-         RobotConfigurationData test = new RobotConfigurationData(setterJoints, forceSensorDefinitions, null, imuDefinitions);
-         test.timestamp = i * 10;
-         test.jointAngles[0] = i * 10;
+         RobotConfigurationData test = RobotConfigurationDataFactory.create(setterJoints, forceSensorDefinitions, imuDefinitions);
+         test.setTimestamp(i * 10);
+         test.getJointAngles().add(i * 10);
          buffer.receivedPacket(test);
       }
 
@@ -51,6 +57,8 @@ public abstract class RobotConfigurationDataBufferTest
       }
    }
 
+   @ContinuousIntegrationAnnotations.ContinuousIntegrationTest(estimatedDuration = 100.0)
+   @Test(timeout = 30000)
    public void testWaitForTimestamp()
    {
 	   for (int numberOfTestIterations = 0; numberOfTestIterations < 100; numberOfTestIterations++)
@@ -81,7 +89,7 @@ public abstract class RobotConfigurationDataBufferTest
          {
             ThreadTools.sleep(100);
             RobotConfigurationData data = new RobotConfigurationData();
-            data.timestamp = i * (TEST_COUNT * 10) + i;
+            data.setTimestamp(i * (TEST_COUNT * 10) + i);
             robotConfigurationDataBuffer.receivedPacket(data);
          }
 
@@ -95,7 +103,7 @@ public abstract class RobotConfigurationDataBufferTest
          }
          assertEquals(1, countdownB.getCount());
          RobotConfigurationData data = new RobotConfigurationData();
-         data.timestamp = TEST_COUNT * (TEST_COUNT * 10);
+         data.setTimestamp(TEST_COUNT * (TEST_COUNT * 10));
          robotConfigurationDataBuffer.receivedPacket(data);
 
          try

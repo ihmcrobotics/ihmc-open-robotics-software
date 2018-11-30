@@ -1,4 +1,5 @@
 package us.ihmc.robotDataLogger;
+
 /**
 * 
 * Definition of the enum "YoType" defined in Handshake.idl. 
@@ -7,20 +8,25 @@ package us.ihmc.robotDataLogger;
 * Do not update this file directly, edit Handshake.idl instead.
 *
 */
+import us.ihmc.idl.IDLTools;
+
 public enum YoType
 {
-        	DoubleYoVariable,
-        
-        	BooleanYoVariable,
-        
-        	IntegerYoVariable,
-        
-        	LongYoVariable,
-        
-        	EnumYoVariable,
-        
-	;
-	
-	public static YoType[] values = values();
+         DoubleYoVariable,
+      
+         BooleanYoVariable,
+      
+         IntegerYoVariable,
+      
+         LongYoVariable,
+      
+         EnumYoVariable,
+      
+   ;
+   public static YoType[] values = values();
 
+   public boolean epsilonEquals(YoType other, double epsilon)
+   {
+      return IDLTools.epsilonEqualsEnum(this, other, epsilon);
+   }
 }

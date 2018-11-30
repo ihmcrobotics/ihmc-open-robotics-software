@@ -1,11 +1,11 @@
 package us.ihmc.robotics.testing;
 
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
-import us.ihmc.robotics.math.frames.YoFramePoint;
+import us.ihmc.yoVariables.variable.YoFramePoint3D;
 
 public class YoGeometryTestGoals
 {
-   public static YoVariableTestGoal boundingBox(YoFramePoint yoFramePoint, Point3DReadOnly boxCenter, double boxEpsilon)
+   public static YoVariableTestGoal boundingBox(YoFramePoint3D yoFramePoint, Point3DReadOnly boxCenter, double boxEpsilon)
    {
       YoVariableTestGoal goalX = YoVariableTestGoal.doubleWithinEpsilon(yoFramePoint.getYoX(), boxCenter.getX(), boxEpsilon);
       YoVariableTestGoal goalY = YoVariableTestGoal.doubleWithinEpsilon(yoFramePoint.getYoY(), boxCenter.getY(), boxEpsilon);

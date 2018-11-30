@@ -3,10 +3,10 @@ package us.ihmc.humanoidRobotics.communication.blackoutGenerators;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicLong;
 
+import controller_msgs.msg.dds.RobotConfigurationData;
 import us.ihmc.communication.blackoutGenerators.CommunicationBlackoutGenerator;
 import us.ihmc.communication.blackoutGenerators.StandardBlackoutSimulator;
 import us.ihmc.communication.net.PacketConsumer;
-import us.ihmc.sensorProcessing.communication.packets.dataobjects.RobotConfigurationData;
 
 public class SimulationTimeBasedBlackoutSimulator extends StandardBlackoutSimulator implements PacketConsumer<RobotConfigurationData>
 {

@@ -5,7 +5,7 @@ import java.awt.image.BufferedImage;
 import boofcv.struct.calib.IntrinsicParameters;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.euclid.tuple4D.interfaces.QuaternionReadOnly;
-import us.ihmc.tools.image.ImageCallback;
+import us.ihmc.graphicsDescription.image.ImageCallback;
 
 public class VideoDataServerImageCallback implements ImageCallback
 {

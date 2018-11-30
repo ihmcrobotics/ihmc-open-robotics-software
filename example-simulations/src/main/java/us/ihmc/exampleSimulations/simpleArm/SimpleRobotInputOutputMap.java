@@ -1,7 +1,7 @@
 package us.ihmc.exampleSimulations.simpleArm;
 
 import us.ihmc.exampleSimulations.simpleArm.SimpleArmRobot.ArmJoint;
-import us.ihmc.robotics.screwTheory.OneDoFJoint;
+import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 
 public class SimpleRobotInputOutputMap
 {
@@ -39,19 +39,19 @@ public class SimpleRobotInputOutputMap
 
    public void addYawTorque(double yawTorque)
    {
-      OneDoFJoint joint = robot.getJoint(ArmJoint.YAW);
+      OneDoFJointBasics joint = robot.getJoint(ArmJoint.YAW);
       joint.setTau(joint.getTau() + yawTorque);
    }
 
    public void addPitch1Torque(double pitch1Torque)
    {
-      OneDoFJoint joint = robot.getJoint(ArmJoint.PITCH_1);
+      OneDoFJointBasics joint = robot.getJoint(ArmJoint.PITCH_1);
       joint.setTau(joint.getTau() + pitch1Torque);
    }
 
    public void addPitch2Torque(double pitch2Torque)
    {
-      OneDoFJoint joint = robot.getJoint(ArmJoint.PITCH_2);
+      OneDoFJointBasics joint = robot.getJoint(ArmJoint.PITCH_2);
       joint.setTau(joint.getTau() + pitch2Torque);
    }
 }

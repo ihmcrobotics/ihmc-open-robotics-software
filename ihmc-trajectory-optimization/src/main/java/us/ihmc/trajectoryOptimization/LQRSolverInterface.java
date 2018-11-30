@@ -1,7 +1,7 @@
 package us.ihmc.trajectoryOptimization;
 
 import org.ejml.data.DenseMatrix64F;
-import us.ihmc.robotics.lists.RecyclingArrayList;
+import us.ihmc.commons.lists.RecyclingArrayList;
 
 public interface LQRSolverInterface<E extends Enum>
 {

@@ -1,7 +1,7 @@
 package us.ihmc.humanoidBehaviors.behaviors.simpleBehaviors;
 
 import us.ihmc.humanoidBehaviors.behaviors.AbstractBehavior;
-import us.ihmc.humanoidBehaviors.communication.CommunicationBridgeInterface;
+import us.ihmc.ros2.Ros2Node;
 
 public class CountByNumberBehavior extends AbstractBehavior
 {
@@ -13,14 +13,14 @@ public class CountByNumberBehavior extends AbstractBehavior
    int timeToCount;
    double result = 0;
 
-   public CountByNumberBehavior(CommunicationBridgeInterface outgoingCommunicationBridge)
+   public CountByNumberBehavior(String robotName, Ros2Node ros2Node)
    {
-      super(outgoingCommunicationBridge);
+      super(robotName, ros2Node);
    }
 
-   public CountByNumberBehavior(CommunicationBridgeInterface outgoingCommunicationBridge, double numberToCountBy, int timeToCount)
+   public CountByNumberBehavior(String robotName, Ros2Node ros2Node, double numberToCountBy, int timeToCount)
    {
-      super(outgoingCommunicationBridge);
+      super(robotName, ros2Node);
 
       setInput(numberToCountBy, timeToCount);
    }

@@ -1,9 +1,11 @@
 package us.ihmc.robotEnvironmentAwareness.communication.converters;
 
+import us.ihmc.jOctoMap.key.OcTreeKeyReadOnly;
 import us.ihmc.jOctoMap.node.NormalOcTreeNode;
 import us.ihmc.jOctoMap.ocTree.NormalOcTree;
 import us.ihmc.robotEnvironmentAwareness.communication.packets.NormalOcTreeMessage;
 import us.ihmc.robotEnvironmentAwareness.communication.packets.NormalOcTreeNodeMessage;
+import us.ihmc.robotEnvironmentAwareness.communication.packets.OcTreeKeyMessage;
 
 public class OcTreeMessageConverter
 {
@@ -59,5 +61,21 @@ public class OcTreeMessageConverter
             fullDepthCopy(childOriginal, childCopy);
          }
       }
+   }
+
+   public static OcTreeKeyMessage createOcTreeKeyMessage(int k0, int k1, int k2)
+   {
+      OcTreeKeyMessage message = new OcTreeKeyMessage();
+      if (message.k == null)
+         message.k = new int[3];
+      message.k[0] = k0;
+      message.k[1] = k1;
+      message.k[2] = k2;
+      return message;
+   }
+
+   public static OcTreeKeyMessage createOcTreeKeyMessage(OcTreeKeyReadOnly other)
+   {
+      return createOcTreeKeyMessage(other.getKey(0), other.getKey(1), other.getKey(2));
    }
 }

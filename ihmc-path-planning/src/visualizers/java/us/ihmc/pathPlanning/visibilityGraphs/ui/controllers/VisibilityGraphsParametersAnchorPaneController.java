@@ -3,13 +3,13 @@ package us.ihmc.pathPlanning.visibilityGraphs.ui.controllers;
 import javafx.fxml.FXML;
 import javafx.scene.control.Slider;
 import us.ihmc.javaFXToolkit.StringConverterTools;
+import us.ihmc.javaFXToolkit.messager.JavaFXMessager;
+import us.ihmc.javaFXToolkit.messager.MessageBidirectionalBinding.PropertyToMessageTypeConverter;
 import us.ihmc.pathPlanning.visibilityGraphs.DefaultVisibilityGraphParameters;
 import us.ihmc.pathPlanning.visibilityGraphs.interfaces.VisibilityGraphsParameters;
-import us.ihmc.pathPlanning.visibilityGraphs.ui.messager.SimpleUIMessager;
 import us.ihmc.pathPlanning.visibilityGraphs.ui.messager.UIVisibilityGraphsTopics;
+import us.ihmc.pathPlanning.visibilityGraphs.ui.properties.SettableVisibilityGraphsParameters;
 import us.ihmc.pathPlanning.visibilityGraphs.ui.properties.VisibilityGraphsParametersProperty;
-import us.ihmc.pathPlanning.visibilityGraphs.ui.properties.VisibilityGraphsParametersProperty.SettableVisibilityGraphsParameters;
-import us.ihmc.robotEnvironmentAwareness.communication.MessageBidirectionalBinding.PropertyToMessageTypeConverter;
 
 public class VisibilityGraphsParametersAnchorPaneController
 {
@@ -35,13 +35,13 @@ public class VisibilityGraphsParametersAnchorPaneController
    private Slider planarRegionMinSizeSlider;
 
    private final VisibilityGraphsParametersProperty property = new VisibilityGraphsParametersProperty(this, "visibilityGraphsParameters");
-   private SimpleUIMessager messager;
+   private JavaFXMessager messager;
 
    public VisibilityGraphsParametersAnchorPaneController()
    {
    }
 
-   public void attachMessager(SimpleUIMessager messager)
+   public void attachMessager(JavaFXMessager messager)
    {
       this.messager = messager;
    }
@@ -51,16 +51,16 @@ public class VisibilityGraphsParametersAnchorPaneController
       maxInterRegionConnectionLengthSlider.setLabelFormatter(StringConverterTools.metersToRoundedCentimeters());
       regionOrthogonalAngleSlider.setLabelFormatter(StringConverterTools.radiansToRoundedDegrees());
 
-      property.binBidirectionalMaxInterRegionConnectionLength(maxInterRegionConnectionLengthSlider.valueProperty());
-      property.binBidirectionalNormalZThresholdForAccessibleRegions(normalZThresholdForAccessibleRegionsSlider.valueProperty());
-      property.binBidirectionalRegionOrthogonalAngle(regionOrthogonalAngleSlider.valueProperty());
-      property.binBidirectionalExtrusionDistance(extrusionDistanceSlider.valueProperty());
-      property.binBidirectionalExtrusionDistanceIfNotTooHighToStep(extrusionDistanceIfNotTooHighToStepSlider.valueProperty());
-      property.binBidirectionalTooHighToStepDistance(tooHighToStepDistanceSlider.valueProperty());
-      property.binBidirectionalClusterResolution(clusterResolutionSlider.valueProperty());
-      property.binBidirectionalExplorationDistanceFromStartGoal(explorationDistanceFromStartGoalSlider.valueProperty());
-      property.binBidirectionalPlanarRegionMinArea(planarRegionMinAreaSlider.valueProperty());
-      property.binBidirectionalPlanarRegionMinSize(planarRegionMinSizeSlider.valueProperty());
+      property.bidirectionalBindMaxInterRegionConnectionLength(maxInterRegionConnectionLengthSlider.valueProperty());
+      property.bidirectionalBindNormalZThresholdForAccessibleRegions(normalZThresholdForAccessibleRegionsSlider.valueProperty());
+      property.bidirectionalBindRegionOrthogonalAngle(regionOrthogonalAngleSlider.valueProperty());
+      property.bidirectionalBindExtrusionDistance(extrusionDistanceSlider.valueProperty());
+      property.bidirectionalBindExtrusionDistanceIfNotTooHighToStep(extrusionDistanceIfNotTooHighToStepSlider.valueProperty());
+      property.bidirectionalBindTooHighToStepDistance(tooHighToStepDistanceSlider.valueProperty());
+      property.bidirectionalBindClusterResolution(clusterResolutionSlider.valueProperty());
+      property.bidirectionalBindExplorationDistanceFromStartGoal(explorationDistanceFromStartGoalSlider.valueProperty());
+      property.bidirectionalBindPlanarRegionMinArea(planarRegionMinAreaSlider.valueProperty());
+      property.bidirectionalBindPlanarRegionMinSize(planarRegionMinSizeSlider.valueProperty());
 
       property.set(new SettableVisibilityGraphsParameters(new DefaultVisibilityGraphParameters())); // Make sure the sliders are to the default values
 

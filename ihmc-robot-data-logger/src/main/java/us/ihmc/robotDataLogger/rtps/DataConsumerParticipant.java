@@ -82,30 +82,23 @@ public class DataConsumerParticipant
       {
          Announcement announcement = new Announcement();
          SampleInfo info = new SampleInfo();
-         try
+         if (subscriber.takeNextData(announcement, info))
          {
-            if (subscriber.takeNextData(announcement, info))
+            announcementLock.lock();
+            GuidPrefix guid = info.getSampleIdentity().getGuid().getGuidPrefix();
+            if (announcements.containsKey(guid))
             {
-               announcementLock.lock();
-               GuidPrefix guid = info.getSampleIdentity().getGuid().getGuidPrefix();
-               if (announcements.containsKey(guid))
-               {
-                  // Ignore duplicate announcements
-               }
-               else
-               {
-                  announcements.put(guid, announcement);
-                  if (logAnnouncementListener != null)
-                  {
-                     logAnnouncementListener.logSessionCameOnline(announcement);
-                  }
-               }
-               announcementLock.unlock();
+               // Ignore duplicate announcements
             }
-         }
-         catch (IOException e)
-         {
-            e.printStackTrace();
+            else
+            {
+               announcements.put(guid, announcement);
+               if (logAnnouncementListener != null)
+               {
+                  logAnnouncementListener.logSessionCameOnline(announcement);
+               }
+            }
+            announcementLock.unlock();
          }
       }
 
@@ -180,7 +173,8 @@ public class DataConsumerParticipant
 
       AnnouncementPubSubType announcementPubSubType = new AnnouncementPubSubType();
       SubscriberAttributes subscriberAttributes = domain.createSubscriberAttributes(participant, announcementPubSubType,
-                                                                                    LogParticipantSettings.annoucementTopic, ReliabilityKind.RELIABLE,
+                                                                                    LogParticipantSettings.annoucement.getKey(),
+                                                                                    LogParticipantSettings.annoucement.getValue(),
                                                                                     LogParticipantSettings.partition);
       subscriberAttributes.getQos().setDurabilityKind(DurabilityKind.TRANSIENT_LOCAL_DURABILITY_QOS);
       domain.createSubscriber(participant, subscriberAttributes, new AnnouncementListener());
@@ -238,7 +232,7 @@ public class DataConsumerParticipant
       byte[] data = new byte[announcement.getModelFileDescription().getModelFileSize()];
       ByteBufferPubSubType byteBufferPubSubType = new ByteBufferPubSubType(LogParticipantSettings.modelFileTypeName, data.length);
 
-      getData(ByteBuffer.wrap(data), byteBufferPubSubType, announcement, LogParticipantSettings.modelFileTopic, timeout);
+      getData(ByteBuffer.wrap(data), byteBufferPubSubType, announcement, LogParticipantSettings.modelFile.getKey(), timeout);
 
       return data;
 
@@ -264,7 +258,7 @@ public class DataConsumerParticipant
       byte[] data = new byte[announcement.getModelFileDescription().getResourceZipSize()];
       ByteBufferPubSubType byteBufferPubSubType = new ByteBufferPubSubType(LogParticipantSettings.resourceBundleTypeName, data.length);
 
-      getData(ByteBuffer.wrap(data), byteBufferPubSubType, announcement, LogParticipantSettings.resourceBundleTopic, timeout);
+      getData(ByteBuffer.wrap(data), byteBufferPubSubType, announcement, LogParticipantSettings.resourceBundle.getKey(), timeout);
 
       return data;
 
@@ -283,7 +277,7 @@ public class DataConsumerParticipant
    public Handshake getHandshake(Announcement announcement, int timeout) throws IOException
    {
       HandshakePubSubType handshakePubSubType = new HandshakePubSubType();
-      return getData(new Handshake(), handshakePubSubType, announcement, LogParticipantSettings.handshakeTopic, timeout);
+      return getData(new Handshake(), handshakePubSubType, announcement, LogParticipantSettings.handshake.getKey(), timeout);
    }
 
    /**

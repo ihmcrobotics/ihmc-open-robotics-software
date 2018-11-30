@@ -11,9 +11,9 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.commons.MathTools;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
+import us.ihmc.yoVariables.variable.YoFramePoint3D;
+import us.ihmc.yoVariables.variable.YoFrameVector3D;
 import us.ihmc.yoVariables.variable.YoInteger;
-import us.ihmc.robotics.math.frames.YoFramePoint;
-import us.ihmc.robotics.math.frames.YoFrameVector;
 
 public class YoConcatenatedSplines
 {
@@ -25,9 +25,9 @@ public class YoConcatenatedSplines
    private final List<ImmutablePair<YoDouble, YoDouble>> rangeList;
    private final YoDouble arcLength;
    
-   private final YoFramePoint position;
-   private final YoFrameVector velocity;
-   private final YoFrameVector acceleration;
+   private final YoFramePoint3D position;
+   private final YoFrameVector3D velocity;
+   private final YoFrameVector3D acceleration;
    private final ReferenceFrame referenceFrame;
    
    private final YoInteger currentSplineIndex;
@@ -51,9 +51,9 @@ public class YoConcatenatedSplines
                                 new YoDouble(namePrefix + "Range" + i + "Second", registry)));
       }
 
-      position = new YoFramePoint(namePrefix + "Position", referenceFrame, registry);
-      velocity = new YoFrameVector(namePrefix + "Velocity", referenceFrame, registry);
-      acceleration = new YoFrameVector(namePrefix + "Acceleration", referenceFrame, registry);
+      position = new YoFramePoint3D(namePrefix + "Position", referenceFrame, registry);
+      velocity = new YoFrameVector3D(namePrefix + "Velocity", referenceFrame, registry);
+      acceleration = new YoFrameVector3D(namePrefix + "Acceleration", referenceFrame, registry);
       arcLength = new YoDouble(namePrefix + "ArcLength", registry);
       
       currentSplineIndex = new YoInteger(namePrefix + "CurrentSplineIndex", registry);
@@ -720,17 +720,17 @@ public class YoConcatenatedSplines
       return new FrameVector3D(acceleration);
    }
 
-   public void getPosition(YoFramePoint positionToPack)
+   public void getPosition(YoFramePoint3D positionToPack)
    {
       positionToPack.set(position);
    }
 
-   public void getVelocity(YoFrameVector velocityToPack)
+   public void getVelocity(YoFrameVector3D velocityToPack)
    {
       velocityToPack.set(velocity);
    }
 
-   public void getAcceleration(YoFrameVector accelerationToPack)
+   public void getAcceleration(YoFrameVector3D accelerationToPack)
    {
       accelerationToPack.set(acceleration);
    }

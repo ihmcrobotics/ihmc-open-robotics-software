@@ -27,6 +27,40 @@ public class NormalOcTreeNodeMessage extends Packet<NormalOcTreeNodeMessage>
    {
    }
 
+   @Override
+   public void set(NormalOcTreeNodeMessage other)
+   {
+      size = other.size;
+      depth = other.depth;
+      key0 = other.key0;
+      key1 = other.key1;
+      key2 = other.key2;
+      normalX = other.normalX;
+      normalY = other.normalY;
+      normalZ = other.normalZ;
+      normalAverageDeviation = other.normalAverageDeviation;
+      normalConsensusSize = other.normalConsensusSize;
+      hitLocationX = other.hitLocationX;
+      hitLocationY = other.hitLocationY;
+      hitLocationZ = other.hitLocationZ;
+      numberOfHits = other.numberOfHits;
+
+      if (other.children != null)
+      {
+         children = new NormalOcTreeNodeMessage[other.children.length];
+
+         for (int i = 0; i < children.length; i++)
+         {
+            if (other.children[i] != null)
+            {
+               children[i] = new NormalOcTreeNodeMessage();
+               children[i].set(other.children[i]);
+            }
+         }
+      }
+      setPacketInformation(other);
+   }
+
    public int getNumberOfChildren()
    {
       if (children == null)

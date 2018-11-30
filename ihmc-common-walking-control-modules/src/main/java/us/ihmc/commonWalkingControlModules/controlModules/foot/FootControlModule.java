@@ -1,16 +1,21 @@
 package us.ihmc.commonWalkingControlModules.controlModules.foot;
 
-import java.util.ArrayList;
+import static us.ihmc.commonWalkingControlModules.controllerCore.command.ConstraintType.GEQ_INEQUALITY;
+import static us.ihmc.commonWalkingControlModules.controllerCore.command.ConstraintType.LEQ_INEQUALITY;
+
 import java.util.Arrays;
 import java.util.EnumMap;
-import java.util.List;
 
+import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.YoPlaneContactState;
+import us.ihmc.commonWalkingControlModules.configurations.AnkleIKSolver;
 import us.ihmc.commonWalkingControlModules.configurations.SwingTrajectoryParameters;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.controlModules.foot.toeOffCalculator.ToeOffCalculator;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.FeedbackControlCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.FeedbackControlCommandList;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.ContactWrenchCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.InverseDynamicsCommand;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.InverseDynamicsCommandList;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.DesiredFootstepCalculatorTools;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHumanoidControllerToolbox;
 import us.ihmc.commonWalkingControlModules.trajectories.CoMHeightTimeDerivativesData;
@@ -23,12 +28,14 @@ import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.FootTrajectoryCommand;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
+import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.controllers.pidGains.PIDSE3GainsReadOnly;
-import us.ihmc.robotics.math.frames.YoFrameVector;
-import us.ihmc.robotics.math.trajectories.providers.YoVelocityProvider;
+import us.ihmc.robotics.dataStructures.parameters.FrameParameterVector3D;
 import us.ihmc.robotics.robotSide.RobotSide;
-import us.ihmc.robotics.stateMachines.conditionBasedStateMachine.GenericStateMachine;
-import us.ihmc.robotics.stateMachines.conditionBasedStateMachine.StateMachineTools;
+import us.ihmc.robotics.stateMachine.core.StateMachine;
+import us.ihmc.robotics.stateMachine.factories.StateMachineFactory;
+import us.ihmc.sensorProcessing.outputData.JointDesiredOutputListReadOnly;
+import us.ihmc.yoVariables.providers.DoubleProvider;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
@@ -43,7 +50,7 @@ public class FootControlModule
    {
       FULL, TOES, SWING, MOVE_VIA_WAYPOINTS, TOUCHDOWN;
 
-      public boolean isLoaded()
+      public boolean isLoadBearing()
       {
          switch (this)
          {
@@ -58,7 +65,7 @@ public class FootControlModule
 
    private static final double coefficientOfFriction = 0.8;
 
-   private final GenericStateMachine<ConstraintType, AbstractFootControlState> stateMachine;
+   private final StateMachine<ConstraintType, AbstractFootControlState> stateMachine;
    private final YoEnum<ConstraintType> requestedState;
    private final EnumMap<ConstraintType, boolean[]> contactStatesMap = new EnumMap<ConstraintType, boolean[]>(ConstraintType.class);
 
@@ -84,10 +91,23 @@ public class FootControlModule
    private final FrameVector3D desiredLinearVelocity = new FrameVector3D();
    private final FrameVector3D desiredAngularVelocity = new FrameVector3D();
 
+   private final InverseDynamicsCommandList inverseDynamicsCommandList = new InverseDynamicsCommandList();
+   private final UnloadedAnkleControlModule ankleControlModule;
+
+   private final DoubleProvider maxWeightFractionPerFoot;
+   private final DoubleProvider minWeightFractionPerFoot;
+   private final YoDouble minZForce;
+   private final YoDouble maxZForce;
+   private final double robotWeightFz;
+   private final ContactWrenchCommand maxWrenchCommand;
+   private final ContactWrenchCommand minWrenchCommand;
+   private final int numberOfBasisVectors;
+
    public FootControlModule(RobotSide robotSide, ToeOffCalculator toeOffCalculator, WalkingControllerParameters walkingControllerParameters,
                             PIDSE3GainsReadOnly swingFootControlGains, PIDSE3GainsReadOnly holdPositionFootControlGains,
                             PIDSE3GainsReadOnly toeOffFootControlGains, HighLevelHumanoidControllerToolbox controllerToolbox,
-                            ExplorationParameters explorationParameters, YoVariableRegistry parentRegistry)
+                            ExplorationParameters explorationParameters, DoubleProvider minWeightFractionPerFoot, DoubleProvider maxWeightFractionPerFoot,
+                            YoVariableRegistry parentRegistry)
    {
       contactableFoot = controllerToolbox.getContactableFeet().get(robotSide);
       controllerToolbox.setFootContactCoefficientOfFriction(robotSide, coefficientOfFriction);
@@ -108,46 +128,72 @@ public class FootControlModule
       
       legSingularityAndKneeCollapseAvoidanceControlModule = footControlHelper.getLegSingularityAndKneeCollapseAvoidanceControlModule();
 
-      // set up states and state machine
-      YoDouble time = controllerToolbox.getYoTime();
-      stateMachine = new GenericStateMachine<>(namePrefix + "State", namePrefix + "SwitchTime", ConstraintType.class, time, registry);
       requestedState = YoEnum.create(namePrefix + "RequestedState", "", ConstraintType.class, registry, true);
       requestedState.set(null);
 
       setupContactStatesMap();
 
-      Vector3D touchdownVelocity = new Vector3D(0.0, 0.0, swingTrajectoryParameters.getDesiredTouchdownVelocity());
-      YoFrameVector yoTouchdownVelocity = new YoFrameVector(namePrefix + "TouchdownVelocity", ReferenceFrame.getWorldFrame(), registry);
-      yoTouchdownVelocity.set(touchdownVelocity);
+      Vector3D defaultTouchdownVelocity = new Vector3D(0.0, 0.0, swingTrajectoryParameters.getDesiredTouchdownVelocity());
+      FrameParameterVector3D touchdownVelocity = new FrameParameterVector3D(namePrefix + "TouchdownVelocity", ReferenceFrame.getWorldFrame(),
+                                                                            defaultTouchdownVelocity, registry);
 
-      Vector3D touchdownAcceleration = new Vector3D(0.0, 0.0, swingTrajectoryParameters.getDesiredTouchdownAcceleration());
-      YoFrameVector yoTouchdownAcceleration = new YoFrameVector(namePrefix + "TouchdownAcceleration", ReferenceFrame.getWorldFrame(), registry);
-      yoTouchdownAcceleration.set(touchdownAcceleration);
-
-      YoVelocityProvider touchdownVelocityProvider = new YoVelocityProvider(yoTouchdownVelocity);
-      YoVelocityProvider touchdownAccelerationProvider = new YoVelocityProvider(yoTouchdownAcceleration);
-
-      List<AbstractFootControlState> states = new ArrayList<AbstractFootControlState>();
+      Vector3D defaultTouchdownAcceleration = new Vector3D(0.0, 0.0, swingTrajectoryParameters.getDesiredTouchdownAcceleration());
+      FrameParameterVector3D touchdownAcceleration = new FrameParameterVector3D(namePrefix + "TouchdownAcceleration", ReferenceFrame.getWorldFrame(),
+                                                                                defaultTouchdownAcceleration, registry);
 
       onToesState = new OnToesState(footControlHelper, toeOffCalculator, toeOffFootControlGains, registry);
-      states.add(onToesState);
-
       supportState = new SupportState(footControlHelper, holdPositionFootControlGains, registry);
-      states.add(supportState);
-
-      swingState = new SwingState(footControlHelper, yoTouchdownVelocity, yoTouchdownAcceleration, swingFootControlGains, registry);
-      states.add(swingState);
-      
+      swingState = new SwingState(footControlHelper, touchdownVelocity, touchdownAcceleration, swingFootControlGains, registry);
       touchdownState = new TouchDownState(footControlHelper, swingFootControlGains, registry);
-      states.add(touchdownState);
+      moveViaWaypointsState = new MoveViaWaypointsState(footControlHelper, touchdownVelocity, touchdownAcceleration, swingFootControlGains, registry);
 
-      moveViaWaypointsState = new MoveViaWaypointsState(footControlHelper, touchdownVelocityProvider, touchdownAccelerationProvider, swingFootControlGains, registry);
-      states.add(moveViaWaypointsState);
-
-      setupStateMachine(states);
+      stateMachine = setupStateMachine(namePrefix);
 
       requestExploration = new YoBoolean(namePrefix + "RequestExploration", registry);
       resetFootPolygon = new YoBoolean(namePrefix + "ResetFootPolygon", registry);
+
+      AnkleIKSolver ankleIKSolver = walkingControllerParameters.getAnkleIKSolver();
+      if (ankleIKSolver != null)
+      {
+         FullHumanoidRobotModel fullRobotModel = controllerToolbox.getFullRobotModel();
+         ankleControlModule = new UnloadedAnkleControlModule(fullRobotModel, robotSide, ankleIKSolver, registry);
+      }
+      else
+      {
+         ankleControlModule = null;
+      }
+
+      this.maxWeightFractionPerFoot = maxWeightFractionPerFoot;
+      this.minWeightFractionPerFoot = minWeightFractionPerFoot;
+      robotWeightFz = controllerToolbox.getFullRobotModel().getTotalMass() * controllerToolbox.getGravityZ();
+
+      if (minWeightFractionPerFoot != null && maxWeightFractionPerFoot != null)
+      {
+         maxWrenchCommand = new ContactWrenchCommand(LEQ_INEQUALITY);
+         minWrenchCommand = new ContactWrenchCommand(GEQ_INEQUALITY);
+         setupWrenchCommand(maxWrenchCommand);
+         setupWrenchCommand(minWrenchCommand);
+         minZForce = new YoDouble(robotSide.getLowerCaseName() + "MinZForce", registry);
+         maxZForce = new YoDouble(robotSide.getLowerCaseName() + "MaxZForce", registry);
+      }
+      else
+      {
+         maxWrenchCommand = null;
+         minWrenchCommand = null;
+         minZForce = null;
+         maxZForce = null;
+      }
+
+      numberOfBasisVectors = walkingControllerParameters.getMomentumOptimizationSettings().getNumberOfBasisVectorsPerContactPoint();
+   }
+
+   private void setupWrenchCommand(ContactWrenchCommand command)
+   {
+      command.setRigidBody(contactableFoot.getRigidBody());
+      command.getSelectionMatrix().clearSelection();
+      command.getSelectionMatrix().setSelectionFrame(ReferenceFrame.getWorldFrame());
+      command.getSelectionMatrix().selectLinearZ(true);
+      command.getWrench().setToZero(contactableFoot.getRigidBody().getBodyFixedFrame(), ReferenceFrame.getWorldFrame());
    }
 
    private void setupContactStatesMap()
@@ -160,26 +206,28 @@ public class FootControlModule
       contactStatesMap.put(ConstraintType.SWING, falses);
       contactStatesMap.put(ConstraintType.MOVE_VIA_WAYPOINTS, falses);
       contactStatesMap.put(ConstraintType.FULL, trues);
-      contactStatesMap.put(ConstraintType.TOES, getOnEdgeContactPointStates(contactableFoot, ConstraintType.TOES));
+//      contactStatesMap.put(ConstraintType.TOES, getOnEdgeContactPointStates(contactableFoot, ConstraintType.TOES));
+      contactStatesMap.put(ConstraintType.TOES, trues);
       contactStatesMap.put(ConstraintType.TOUCHDOWN, falses);
    }
 
-   private void setupStateMachine(List<AbstractFootControlState> states)
+   private StateMachine<ConstraintType, AbstractFootControlState> setupStateMachine(String namePrefix)
    {
-      // TODO Clean that up (Sylvain)
-      for (AbstractFootControlState fromState : states)
+      StateMachineFactory<ConstraintType, AbstractFootControlState> factory = new StateMachineFactory<>(ConstraintType.class);
+      factory.setNamePrefix(namePrefix).setRegistry(registry).buildYoClock(footControlHelper.getHighLevelHumanoidControllerToolbox().getYoTime());
+      factory.addState(ConstraintType.TOES, onToesState);
+      factory.addState(ConstraintType.FULL, supportState);
+      factory.addState(ConstraintType.SWING, swingState);
+      factory.addState(ConstraintType.TOUCHDOWN, touchdownState);
+      factory.addState(ConstraintType.MOVE_VIA_WAYPOINTS, moveViaWaypointsState);
+      
+      for (ConstraintType from : ConstraintType.values())
       {
-         for (AbstractFootControlState toState : states)
-         {
-            StateMachineTools.addRequestedStateTransition(requestedState, false, fromState, toState);
-         }
+         factory.addRequestedTransition(from, requestedState);
+         factory.addRequestedTransition(from, from, requestedState);
       }
       
-      for (AbstractFootControlState state : states)
-      {
-         stateMachine.addState(state);
-      }
-      stateMachine.setCurrentState(ConstraintType.FULL);
+      return factory.build(ConstraintType.FULL);
    }
 
    public void setWeights(Vector3DReadOnly loadedFootAngularWeight, Vector3DReadOnly loadedFootLinearWeight, Vector3DReadOnly footAngularWeight,
@@ -200,12 +248,12 @@ public class FootControlModule
    public void requestTouchdownForDisturbanceRecovery()
    {
       if (stateMachine.getCurrentState() == moveViaWaypointsState)
-         moveViaWaypointsState.requestTouchdownForDisturbanceRecovery();
+         moveViaWaypointsState.requestTouchdownForDisturbanceRecovery(stateMachine.getTimeInCurrentState());
    }
    
    public void requestTouchdown()
    {
-    if(stateMachine.isCurrentState(ConstraintType.SWING))
+    if(stateMachine.getCurrentStateKey() == ConstraintType.SWING)
     {
        setContactState(ConstraintType.TOUCHDOWN);
        swingState.getDesireds(desiredPose, desiredLinearVelocity, desiredAngularVelocity);
@@ -241,12 +289,13 @@ public class FootControlModule
 
    public ConstraintType getCurrentConstraintType()
    {
-      return stateMachine.getCurrentStateEnum();
+      return stateMachine.getCurrentStateKey();
    }
 
    public void initialize()
    {
-      stateMachine.setCurrentState(ConstraintType.FULL);
+      stateMachine.resetToInitialState();
+      resetLoadConstraints();
    }
 
    public void doControl()
@@ -268,19 +317,24 @@ public class FootControlModule
          requestExploration();
       }
       
-      stateMachine.checkTransitionConditions();
+      stateMachine.doTransitions();
 
       if (!isInFlatSupportState() && footControlHelper.getPartialFootholdControlModule() != null)
          footControlHelper.getPartialFootholdControlModule().reset();
       
 
       stateMachine.doAction();
+
+      if (ankleControlModule != null)
+      {
+         ankleControlModule.compute(stateMachine.getCurrentStateKey(), stateMachine.getCurrentState());
+      }
    }
 
    // Used to restart the current state reseting the current state time
    public void resetCurrentState()
    {
-      stateMachine.setCurrentState(getCurrentConstraintType());
+      stateMachine.resetCurrentState();
    }
    
    public boolean isInFlatSupportState()
@@ -385,12 +439,32 @@ public class FootControlModule
 
    public InverseDynamicsCommand<?> getInverseDynamicsCommand()
    {
-      return stateMachine.getCurrentState().getInverseDynamicsCommand();
+      inverseDynamicsCommandList.clear();
+      inverseDynamicsCommandList.addCommand(stateMachine.getCurrentState().getInverseDynamicsCommand());
+      if (ankleControlModule != null)
+      {
+         inverseDynamicsCommandList.addCommand(ankleControlModule.getInverseDynamicsCommand());
+      }
+      if (maxWrenchCommand != null && stateMachine.getCurrentStateKey().isLoadBearing())
+      {
+         inverseDynamicsCommandList.addCommand(maxWrenchCommand);
+         inverseDynamicsCommandList.addCommand(minWrenchCommand);
+      }
+      return inverseDynamicsCommandList;
    }
 
    public FeedbackControlCommand<?> getFeedbackControlCommand()
    {
       return stateMachine.getCurrentState().getFeedbackControlCommand();
+   }
+
+   public JointDesiredOutputListReadOnly getJointDesiredData()
+   {
+      if (ankleControlModule != null)
+      {
+         return ankleControlModule.getJointDesiredOutputList();
+      }
+      return null;
    }
 
    public FeedbackControlCommandList createFeedbackControlTemplate()
@@ -440,5 +514,53 @@ public class FootControlModule
          footControlHelper.getPartialFootholdControlModule().reset();
       }
       controllerToolbox.resetFootSupportPolygon(robotSide);
+   }
+
+   public void unload(double percentInUnloading, double rhoMin)
+   {
+      if (minWrenchCommand == null)
+         return;
+      minZForce.set((1.0 - percentInUnloading) * minWeightFractionPerFoot.getValue() * robotWeightFz);
+      maxZForce.set((1.0 - percentInUnloading) * maxWeightFractionPerFoot.getValue() * robotWeightFz);
+
+      // Make sure the max force is always a little larger then the min force required by the rhoMin value. This is to avoid sending conflicting constraints.
+      maxZForce.set(Math.max(maxZForce.getValue(), computeMinZForceBasedOnRhoMin(rhoMin) + 1.0E-5));
+
+      updateWrenchCommands();
+   }
+
+   private final FrameVector3D normalVector = new FrameVector3D();
+
+   private double computeMinZForceBasedOnRhoMin(double rhoMin)
+   {
+      YoPlaneContactState contactState = controllerToolbox.getFootContactState(robotSide);
+
+      contactState.getContactNormalFrameVector(normalVector);
+      normalVector.changeFrame(ReferenceFrame.getWorldFrame());
+      normalVector.normalize();
+
+      double friction = contactState.getCoefficientOfFriction();
+      int points = contactState.getNumberOfContactPointsInContact();
+
+      return normalVector.getZ() * rhoMin * numberOfBasisVectors * points / Math.sqrt(1.0 + friction * friction);
+   }
+
+   public void resetLoadConstraints()
+   {
+      if (minWrenchCommand == null)
+         return;
+      minZForce.set(minWeightFractionPerFoot.getValue() * robotWeightFz);
+      maxZForce.set(maxWeightFractionPerFoot.getValue() * robotWeightFz);
+
+      updateWrenchCommands();
+   }
+
+   private void updateWrenchCommands()
+   {
+      // Make sure the max force is always a little larger then the min force. This is to avoid sending conflicting constraints.
+      maxZForce.set(Math.max(maxZForce.getValue(), minZForce.getValue() + 1.0E-5));
+
+      minWrenchCommand.getWrench().setLinearPartZ(minZForce.getValue());
+      maxWrenchCommand.getWrench().setLinearPartZ(maxZForce.getValue());
    }
 }

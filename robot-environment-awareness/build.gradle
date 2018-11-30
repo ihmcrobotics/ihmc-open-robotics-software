@@ -1,14 +1,8 @@
-buildscript {
-   repositories {
-      maven { url "https://plugins.gradle.org/m2/" }
-      mavenLocal()
-   }
-   dependencies {
-      classpath "us.ihmc:ihmc-build:0.12.5"
-   }
+plugins {
+   id("us.ihmc.ihmc-build") version "0.15.3"
+   id("us.ihmc.ihmc-ci-plugin") version "0.18.0"
+   id("us.ihmc.log-tools") version "0.2.2"
 }
-apply plugin: "us.ihmc.ihmc-build"
-
 
 ihmc {
    loadProductProperties("../product.properties")
@@ -25,30 +19,31 @@ testSuites {
 }
 
 mainDependencies {
-   compile group: 'com.vividsolutions', name: 'jts', version: '1.13'
-   compile group: 'org.apache.commons', name: 'commons-lang3', version: '3.7'
-   compile group: 'us.ihmc', name: 'euclid', version: '0.7.9'
-   compile group: 'us.ihmc', name: 'joctomap', version: '1.6.7'
-   compile group: "us.ihmc", name: "ihmc-commons", version: "0.17.3"
-   compile group: 'us.ihmc', name: 'ihmc-yovariables', version: '0.2.7'
+   compile group: "com.vividsolutions", name: "jts", version: "1.13"
+   compile group: "org.apache.commons", name: "commons-lang3", version: "3.8.1"
    
-   compile group: 'us.ihmc', name: 'ihmc-communication', version: "source"
-   compile group: 'us.ihmc', name: 'ihmc-robotics-toolkit', version: "source"
-   compile group: 'us.ihmc', name: 'ihmc-javafx-toolkit', version: "source"
+   compile group: "us.ihmc", name: "euclid", version: "0.9.3"
+   compile group: "us.ihmc", name: "joctomap", version: "1.6.9"
+   compile group: "us.ihmc", name: "ihmc-commons", version: "0.24.0"
+   compile group: "us.ihmc", name: "ihmc-yovariables", version: "0.3.5"
+   compile group: "us.ihmc", name: "ihmc-javafx-toolkit", version: "0.12.4"
+   compile group: "us.ihmc", name: "ihmc-communication", version: "source"
+   compile group: "us.ihmc", name: "ihmc-robotics-toolkit", version: "source"
 }
 
 applicationDependencies {
    compile ihmc.sourceSetProject("main")
-   compile group: 'us.ihmc', name: 'ihmc-ros-tools', version: "source"
-   compile group: 'us.ihmc', name: 'ihmc-jmonkey-engine-toolkit', version: "source"
-   compile group: 'us.ihmc', name: 'simulation-construction-set', version: "source"
-   compile group: 'us.ihmc', name: 'simulation-construction-set-tools', version: "source"
+
+   compile group: "us.ihmc", name: "ihmc-ros-tools", version: "source"
+   compile group: "us.ihmc", name: "ihmc-jmonkey-engine-toolkit", version: "0.12.2"
+   compile group: "us.ihmc", name: "simulation-construction-set", version: "0.12.6"
+   compile group: "us.ihmc", name: "simulation-construction-set-tools", version: "source"
 }
 
-
 testDependencies {
-   compile group: 'junit', name: 'junit', version: '4.12'
-   compile group: "us.ihmc", name: "ihmc-ci-core-api", version: "0.17.3"
+   compile group: "junit", name: "junit", version: "4.12"
+
+   compile group: "us.ihmc", name: "ihmc-ci-core-api", version: "0.18.0"
 }
 
 visualizersDependencies {

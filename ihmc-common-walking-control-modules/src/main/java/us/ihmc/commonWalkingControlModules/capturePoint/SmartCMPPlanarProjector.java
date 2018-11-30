@@ -1,10 +1,10 @@
 package us.ihmc.commonWalkingControlModules.capturePoint;
 
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.yoVariables.variable.YoBoolean;
+import us.ihmc.euclid.referenceFrame.FrameConvexPolygon2D;
 import us.ihmc.euclid.referenceFrame.FramePoint2D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.robotics.geometry.FrameConvexPolygon2d;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoBoolean;
 
 public class SmartCMPPlanarProjector extends CMPProjector
 {
@@ -23,7 +23,7 @@ public class SmartCMPPlanarProjector extends CMPProjector
    }
 
    @Override
-   public void projectCMPIntoSupportPolygonIfOutside(FramePoint2D capturePoint, FrameConvexPolygon2d supportPolygon,
+   public void projectCMPIntoSupportPolygonIfOutside(FramePoint2D capturePoint, FrameConvexPolygon2D supportPolygon,
          FramePoint2D finalDesiredCapturePoint, FramePoint2D desiredCMPToPack)
    {
       ReferenceFrame returnFrame = desiredCMPToPack.getReferenceFrame();
@@ -41,13 +41,13 @@ public class SmartCMPPlanarProjector extends CMPProjector
       capturePoint.changeFrame(returnFrame);
    }
 
-   private void projectCMPIntoSupportPolygonIfOutsideLocal(FrameConvexPolygon2d supportPolygon, FramePoint2D desiredCMPToPack)
+   private void projectCMPIntoSupportPolygonIfOutsideLocal(FrameConvexPolygon2D supportPolygon, FramePoint2D desiredCMPToPack)
    {
       cmpProjected.set(false);
 
       if (supportPolygon.getArea() < 1.0e-3)
       {
-         supportPolygon.getCentroid(desiredCMPToPack);
+         desiredCMPToPack.setIncludingFrame(supportPolygon.getCentroid());
          return;
       }
 

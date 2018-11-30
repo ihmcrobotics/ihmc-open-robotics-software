@@ -13,7 +13,6 @@ import org.junit.runners.Suite.SuiteClasses;
    us.ihmc.communication.streamingData.StreamingDataProducerConsumerTest.class, 
    us.ihmc.communication.streamingData.StreamingDataTCPServerTest.class,
    us.ihmc.communication.net.KryoObjectCommunicatorTest.class, 
-   us.ihmc.humanoidRobotics.communication.remote.serialization.JointConfigurationDataSenderTest.class, 
    
    us.ihmc.humanoidRobotics.communication.networkProcessor.NetworkProcessorTest.class,   
 })

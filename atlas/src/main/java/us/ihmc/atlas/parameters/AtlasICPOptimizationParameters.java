@@ -1,13 +1,15 @@
 package us.ihmc.atlas.parameters;
 
+import us.ihmc.commonWalkingControlModules.capturePoint.ICPControlGains;
+import us.ihmc.commonWalkingControlModules.capturePoint.ICPControlGainsReadOnly;
 import us.ihmc.commonWalkingControlModules.capturePoint.optimization.ICPOptimizationParameters;
 
 /** {@inheritDoc} */
 public class AtlasICPOptimizationParameters extends ICPOptimizationParameters
 {
    private final boolean runningOnRealRobot;
-   private final boolean useAngularMomentum = false;
-   private final boolean useStepAdjustment = false;
+   private final boolean useAngularMomentum = true;
+   private final boolean useStepAdjustment = true;
 
    public AtlasICPOptimizationParameters(boolean runningOnRealRobot)
    {
@@ -32,69 +34,64 @@ public class AtlasICPOptimizationParameters extends ICPOptimizationParameters
    @Override
    public double getFootstepRateWeight()
    {
-      return runningOnRealRobot ? 0.001 : 0.001;
+      return runningOnRealRobot ? 4e-9 : 4e-7;
    }
 
    /** {@inheritDoc} */
    @Override
    public double getFeedbackLateralWeight()
    {
-      return runningOnRealRobot ? 0.5 : 0.5;
+      return runningOnRealRobot ? 1.5 : 1.5;
    }
 
    /** {@inheritDoc} */
    @Override
    public double getFeedbackForwardWeight()
    {
-      return runningOnRealRobot ? 0.5 : 0.5;
+      return runningOnRealRobot ? 1.5 : 1.5;
    }
 
    /** {@inheritDoc} */
    @Override
    public double getFeedbackRateWeight()
    {
-      return runningOnRealRobot ? 0.00001 : 0.000001;
+      return 5e-8;
    }
 
    /** {@inheritDoc} */
    @Override
-   public double getFeedbackParallelGain()
+   public double getCoPCMPFeedbackRateWeight()
    {
-      return runningOnRealRobot ? 2.5 : 2.5;
+      return 0.0;
    }
 
    /** {@inheritDoc} */
    @Override
-   public double getFeedbackOrthogonalGain()
+   public ICPControlGainsReadOnly getICPFeedbackGains()
    {
-      return runningOnRealRobot ? 1.5 : 1.5;
+      ICPControlGains gains = new ICPControlGains();
+      gains.setKpOrthogonalToMotion(1.5);
+      gains.setKpParallelToMotion(2.5);
+
+      gains.setIntegralLeakRatio(0.97);
+      gains.setMaxIntegralError(0.05);
+      gains.setKi(1.0);
+
+      return gains;
    }
 
    /** {@inheritDoc} */
    @Override
    public double getDynamicsObjectiveWeight()
    {
-      if (runningOnRealRobot)
-         return 10000.0;
-      else if (useAngularMomentum)
-         return 100000.0;
-      else if (useStepAdjustment)
-         return 1000.0;
-      else
-         return 10000.0;
-      //return runningOnRealRobot ? 10000.0 : (useAngularMomentum ? 100000.0 : 1000.0);
+      return 10000.0;
    }
 
    /** {@inheritDoc} */
    @Override
    public double getDynamicsObjectiveDoubleSupportWeightModifier()
    {
-      if (useAngularMomentum)
-         return runningOnRealRobot ? 50.0 : 100.0;
-      else if (useStepAdjustment)
-         return runningOnRealRobot ? 1.0 : 4.0;
-      else
-         return 1.0;
+      return 1.0;
    }
 
    /** {@inheritDoc} */
@@ -122,7 +119,7 @@ public class AtlasICPOptimizationParameters extends ICPOptimizationParameters
    @Override
    public boolean useFeedbackRate()
    {
-      return !runningOnRealRobot;
+      return true;
    }
 
    /** {@inheritDoc} */
@@ -150,7 +147,7 @@ public class AtlasICPOptimizationParameters extends ICPOptimizationParameters
    @Override
    public boolean useFootstepRate()
    {
-      return false;
+      return true;
    }
 
    /** {@inheritDoc} */
@@ -183,36 +180,20 @@ public class AtlasICPOptimizationParameters extends ICPOptimizationParameters
 
    /** {@inheritDoc} */
    @Override
-   public double getLateralReachabilityOuterLimit()
-   {
-      return runningOnRealRobot ? 0.5 : 0.85;
-   }
-
-   /** {@inheritDoc} */
-   @Override
-   public double getLateralReachabilityInnerLimit()
-   {
-      return 0.18;
-   }
-
-   /** {@inheritDoc} */
-   @Override
-   public double getForwardReachabilityLimit()
-   {
-      return runningOnRealRobot ? 0.65 : 0.9;
-   }
-
-   /** {@inheritDoc} */
-   @Override
-   public double getBackwardReachabilityLimit()
-   {
-      return runningOnRealRobot ? -0.3 : -0.5;
-   }
-
-   /** {@inheritDoc} */
-   @Override
    public boolean getLimitReachabilityFromAdjustment()
    {
       return false;
+   }
+
+   @Override
+   public double getTransferSplitFraction()
+   {
+      return 0.2;
+   }
+
+   @Override
+   public double getMinimumFootstepMultiplier()
+   {
+      return 0.25;
    }
 }

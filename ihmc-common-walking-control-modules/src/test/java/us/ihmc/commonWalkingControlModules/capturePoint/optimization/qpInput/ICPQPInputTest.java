@@ -35,7 +35,7 @@ public class ICPQPInputTest
       }
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.1)
    @Test(timeout = 30000)
    public void testReshape()
    {
@@ -65,7 +65,7 @@ public class ICPQPInputTest
       }
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.1)
    @Test(timeout = 30000)
    public void testReset()
    {
@@ -171,7 +171,7 @@ public class ICPQPInputTest
       Assert.assertEquals(shouldBe, cost, 1e-7);
 
       icpqpInput.linearTerm.set(linear);
-      shouldBe += 21.0;
+      shouldBe -= 21.0;
       cost = icpqpInput.computeCost(solution);
       Assert.assertEquals(shouldBe, cost, 1e-7);
 

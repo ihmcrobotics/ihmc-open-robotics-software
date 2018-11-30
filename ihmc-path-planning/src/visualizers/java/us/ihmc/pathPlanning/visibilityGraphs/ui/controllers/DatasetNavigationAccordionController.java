@@ -1,6 +1,13 @@
 package us.ihmc.pathPlanning.visibilityGraphs.ui.controllers;
 
+import static us.ihmc.pathPlanning.visibilityGraphs.ui.messager.UIVisibilityGraphsTopics.RandomizePlanarRegionIDRequest;
+
+import java.io.File;
+import java.net.URISyntaxException;
+import java.net.URL;
+
 import com.sun.javafx.scene.control.skin.LabeledText;
+
 import javafx.fxml.FXML;
 import javafx.scene.control.Accordion;
 import javafx.scene.control.ListView;
@@ -9,18 +16,12 @@ import javafx.scene.input.MouseEvent;
 import javafx.stage.DirectoryChooser;
 import javafx.stage.Window;
 import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.javaFXToolkit.messager.JavaFXMessager;
 import us.ihmc.pathPlanning.visibilityGraphs.tools.VisibilityGraphsIOTools;
 import us.ihmc.pathPlanning.visibilityGraphs.tools.VisibilityGraphsIOTools.VisibilityGraphsUnitTestDataset;
-import us.ihmc.pathPlanning.visibilityGraphs.ui.messager.SimpleUIMessager;
 import us.ihmc.pathPlanning.visibilityGraphs.ui.messager.UIVisibilityGraphsTopics;
 import us.ihmc.robotics.PlanarRegionFileTools;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
-
-import java.io.File;
-import java.net.URISyntaxException;
-import java.net.URL;
-
-import static us.ihmc.pathPlanning.visibilityGraphs.ui.messager.UIVisibilityGraphsTopics.RandomizePlanarRegionIDRequest;
 
 public class DatasetNavigationAccordionController
 {
@@ -33,7 +34,7 @@ public class DatasetNavigationAccordionController
    @FXML
    private ListView<String> visualizerDataListView, testDataListView, inDevelopmentTestDataListView, customDataListView;
 
-   private SimpleUIMessager messager;
+   private JavaFXMessager messager;
    private Window ownerWindow;
 
    public DatasetNavigationAccordionController() throws URISyntaxException
@@ -54,7 +55,7 @@ public class DatasetNavigationAccordionController
          throw new RuntimeException("Wrong path to the in development test data folder, please update me");
    }
 
-   public void attachMessager(SimpleUIMessager messager)
+   public void attachMessager(JavaFXMessager messager)
    {
       this.messager = messager;
    }
@@ -140,7 +141,7 @@ public class DatasetNavigationAccordionController
 
       if (VisibilityGraphsIOTools.isVisibilityGraphsDataset(file))
       {
-         VisibilityGraphsUnitTestDataset dataset = VisibilityGraphsIOTools.loadDataset(selectedDatasetResource);
+         VisibilityGraphsUnitTestDataset dataset = VisibilityGraphsIOTools.loadDataset(getClass(), selectedDatasetResource);
          messager.submitMessage(UIVisibilityGraphsTopics.GlobalReset, true);
          messager.submitMessage(UIVisibilityGraphsTopics.PlanarRegionData, dataset.getPlanarRegionsList());
          messager.submitMessage(UIVisibilityGraphsTopics.StartPosition, dataset.getStart());

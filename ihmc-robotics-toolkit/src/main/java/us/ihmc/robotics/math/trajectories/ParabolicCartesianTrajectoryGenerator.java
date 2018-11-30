@@ -1,14 +1,14 @@
 package us.ihmc.robotics.math.trajectories;
 
+import us.ihmc.commons.MathTools;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
-import us.ihmc.commons.MathTools;
+import us.ihmc.yoVariables.providers.DoubleProvider;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.robotics.trajectories.providers.DoubleProvider;
 
 public class ParabolicCartesianTrajectoryGenerator implements CartesianTrajectoryGenerator
 {
@@ -40,12 +40,6 @@ public class ParabolicCartesianTrajectoryGenerator implements CartesianTrajector
    @Override
    public void initialize(FramePoint3D initialPosition, FrameVector3D initialVelocity, FrameVector3D initialAcceleration, FramePoint3D finalDesiredPosition,
                           FrameVector3D finalDesiredVelocity)
-   {
-      this.initialize(initialPosition, initialVelocity, initialAcceleration, finalDesiredPosition, finalDesiredVelocity);
-   }
-
-   public void initialize(FramePoint3D initialPosition, FrameVector3DReadOnly initialVelocity, FrameVector3DReadOnly initialAcceleration,
-                          FramePoint3DReadOnly finalDesiredPosition, FrameVector3D finalDesiredVelocity)
    {
       timeIntoStep.set(0.0);
       this.stepTime.set(stepTimeProvider.getValue());

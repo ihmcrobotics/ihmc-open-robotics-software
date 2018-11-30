@@ -8,8 +8,8 @@ import org.ros.node.AbstractNodeMain;
 import org.ros.node.ConnectedNode;
 import org.ros.node.topic.Publisher;
 
+import controller_msgs.msg.dds.HandDesiredConfigurationMessage;
 import handle_msgs.HandleControl;
-import us.ihmc.humanoidRobotics.communication.packets.manipulation.HandDesiredConfigurationMessage;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 
@@ -87,7 +87,7 @@ public class ROSiRobotCommunicator extends AbstractNodeMain
 
    public void sendHandCommand(HandDesiredConfigurationMessage packet)
    {
-      HandDesiredConfigurationMessageToHandleControlMessageConverter.convertHandDesiredConfigurationMessage(packet, handControlMessages.get(packet.getRobotSide()));
-      handCommandPublishers.get(packet.getRobotSide()).publish(handControlMessages.get(packet.getRobotSide()));
+      HandDesiredConfigurationMessageToHandleControlMessageConverter.convertHandDesiredConfigurationMessage(packet, handControlMessages.get(RobotSide.fromByte(packet.getRobotSide())));
+      handCommandPublishers.get(RobotSide.fromByte(packet.getRobotSide())).publish(handControlMessages.get(RobotSide.fromByte(packet.getRobotSide())));
    }
 }

@@ -2,27 +2,43 @@ package us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelSt
 
 import us.ihmc.commonWalkingControlModules.configurations.HighLevelControllerParameters;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.JointAccelerationIntegrationCommand;
-import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHumanoidControllerToolbox;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelControllerName;
-import us.ihmc.robotics.screwTheory.OneDoFJoint;
-import us.ihmc.robotics.screwTheory.ScrewTools;
-import us.ihmc.robotics.stateMachines.conditionBasedStateMachine.FinishableState;
+import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
+import us.ihmc.robotics.stateMachine.core.State;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutputList;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutputListReadOnly;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 
-public abstract class HighLevelControllerState extends FinishableState<HighLevelControllerName> implements JointLoadStatusProvider
+public abstract class HighLevelControllerState implements State, JointLoadStatusProvider
 {
-   protected final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
+   protected final YoVariableRegistry registry;
 
    private final JointSettingsHelper jointSettingsHelper;
 
+   private final HighLevelControllerName highLevelControllerName;
+   protected final OneDoFJointBasics[] controlledJoints;
+
    public HighLevelControllerState(HighLevelControllerName stateEnum, HighLevelControllerParameters parameters,
-                                   HighLevelHumanoidControllerToolbox controllerToolbox)
+                                   OneDoFJointBasics[] controlledJoints)
    {
-      super(stateEnum);
-      OneDoFJoint[] controlledJoints = ScrewTools.filterJoints(controllerToolbox.getControlledJoints(), OneDoFJoint.class);
+      this("", stateEnum, parameters, controlledJoints);
+   }
+
+   public HighLevelControllerState(String namePrefix, HighLevelControllerName stateEnum, HighLevelControllerParameters parameters,
+                                   OneDoFJointBasics[] controlledJoints)
+   {
+      registry = new YoVariableRegistry(namePrefix + getClass().getSimpleName());
+      this.highLevelControllerName = stateEnum;
+      this.controlledJoints = controlledJoints;
       jointSettingsHelper = new JointSettingsHelper(parameters, controlledJoints, this, stateEnum, registry);
+   }
+
+   public HighLevelControllerState(String namePrefix, HighLevelControllerName stateEnum, OneDoFJointBasics[] controlledJoints)
+   {
+      registry = new YoVariableRegistry(namePrefix + getClass().getSimpleName());
+      this.highLevelControllerName = stateEnum;
+      this.controlledJoints = controlledJoints;
+      jointSettingsHelper = null;
    }
 
    public YoVariableRegistry getYoVariableRegistry()
@@ -48,7 +64,7 @@ public abstract class HighLevelControllerState extends FinishableState<HighLevel
    public abstract JointDesiredOutputListReadOnly getOutputForLowLevelController();
 
    @Override
-   public boolean isDone()
+   public boolean isDone(double timeInState)
    {
       return false;
    }
@@ -58,8 +74,13 @@ public abstract class HighLevelControllerState extends FinishableState<HighLevel
     * the joint behavior based on whether a joint is loaded or not.
     */
    @Override
-   public boolean isJointLoaded(String jointName)
+   public boolean isJointLoadBearing(String jointName)
    {
       return false;
+   }
+
+   public HighLevelControllerName getHighLevelControllerName()
+   {
+      return highLevelControllerName;
    }
 }

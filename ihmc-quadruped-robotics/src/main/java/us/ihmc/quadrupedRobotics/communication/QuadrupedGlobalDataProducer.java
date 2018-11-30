@@ -1,8 +1,8 @@
 package us.ihmc.quadrupedRobotics.communication;
 
+import controller_msgs.msg.dds.RobotConfigurationData;
 import us.ihmc.communication.packetCommunicator.PacketCommunicator;
 import us.ihmc.communication.streamingData.GlobalDataProducer;
-import us.ihmc.sensorProcessing.communication.packets.dataobjects.RobotConfigurationData;
 
 public class QuadrupedGlobalDataProducer extends GlobalDataProducer
 {

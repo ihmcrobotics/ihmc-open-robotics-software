@@ -6,19 +6,25 @@ import java.util.ArrayList;
 import java.util.EnumMap;
 import java.util.Random;
 
+import org.junit.After;
+import org.junit.Test;
+
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.jointAnglesWriter.JointAnglesWriter;
 import us.ihmc.commons.PrintTools;
 import us.ihmc.commons.RandomNumbers;
+import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.euclid.axisAngle.AxisAngle;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.tools.ReferenceFrameTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
+import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.kinematics.DdoglegInverseKinematicsCalculator;
 import us.ihmc.robotics.kinematics.InverseKinematicsCalculator;
@@ -26,16 +32,15 @@ import us.ihmc.robotics.kinematics.InverseKinematicsStepListener;
 import us.ihmc.robotics.kinematics.KinematicSolver;
 import us.ihmc.robotics.kinematics.NumericalInverseKinematicsCalculator;
 import us.ihmc.robotics.kinematics.RandomRestartInverseKinematicsCalculator;
-import us.ihmc.robotics.math.frames.YoFrameOrientation;
-import us.ihmc.robotics.math.frames.YoFramePoint;
 import us.ihmc.robotics.partNames.ArmJointName;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.screwTheory.GeometricJacobian;
-import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.simulationconstructionset.FloatingRootJointRobot;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
+import us.ihmc.yoVariables.variable.YoFramePoint3D;
+import us.ihmc.yoVariables.variable.YoFrameYawPitchRoll;
 
 public abstract class NumericalInverseKinematicsCalculatorWithRobotTest implements MultiRobotTestInterface
 {
@@ -52,7 +57,7 @@ public abstract class NumericalInverseKinematicsCalculatorWithRobotTest implemen
    private static final ArrayList<Double> wristPitchLimits = new ArrayList<Double>();
    private static final boolean DEBUG = true;
 
-   private final EnumMap<JointNames, OneDoFJoint> oneDoFJoints = new EnumMap<JointNames, OneDoFJoint>(JointNames.class);
+   private final EnumMap<JointNames, OneDoFJointBasics> oneDoFJoints = new EnumMap<JointNames, OneDoFJointBasics>(JointNames.class);
    private final EnumMap<JointNames, ArrayList<Double>> jointLimits = new EnumMap<JointNames, ArrayList<Double>>(JointNames.class);
    private final EnumMap<JointNames, Double> jointAngles = new EnumMap<JointNames, Double>(JointNames.class);
    private final EnumMap<JointNames, Double> jointAnglesInitial = new EnumMap<JointNames, Double>(JointNames.class);
@@ -68,8 +73,8 @@ public abstract class NumericalInverseKinematicsCalculatorWithRobotTest implemen
    private FloatingRootJointRobot sdfRobot;
    private JointAnglesWriter jointAnglesWriter;
 
-   private final YoFramePoint testPositionForwardKinematics = new YoFramePoint("testPositionForwardKinematics", ReferenceFrame.getWorldFrame(), registry);
-   private final YoFrameOrientation testOrientationForwardKinematics = new YoFrameOrientation("testOrientationForwardKinematics",
+   private final YoFramePoint3D testPositionForwardKinematics = new YoFramePoint3D("testPositionForwardKinematics", ReferenceFrame.getWorldFrame(), registry);
+   private final YoFrameYawPitchRoll testOrientationForwardKinematics = new YoFrameYawPitchRoll("testOrientationForwardKinematics",
                                                                           ReferenceFrame.getWorldFrame(), registry);
    private final YoDouble yoErrorScalar = new YoDouble("errorScalar", registry);
    private final YoDouble positionError = new YoDouble("positionError", registry);
@@ -77,8 +82,8 @@ public abstract class NumericalInverseKinematicsCalculatorWithRobotTest implemen
 
    private final YoDouble numberOfIterations = new YoDouble("numberOfIterations", registry);
 
-   private final YoFramePoint testPositionInverseKinematics = new YoFramePoint("testPositionInverseKinematics", ReferenceFrame.getWorldFrame(), registry);
-   private final YoFrameOrientation testOrientationInverseKinematics = new YoFrameOrientation("testOrientationInverseKinematics",
+   private final YoFramePoint3D testPositionInverseKinematics = new YoFramePoint3D("testPositionInverseKinematics", ReferenceFrame.getWorldFrame(), registry);
+   private final YoFrameYawPitchRoll testOrientationInverseKinematics = new YoFrameYawPitchRoll("testOrientationInverseKinematics",
                                                                           ReferenceFrame.getWorldFrame(), registry);
 
    private enum InverseKinematicsSolver {TWAN_SOLVER, PETER_SOLVER, MAARTEN_SOLVER;}
@@ -191,6 +196,14 @@ public abstract class NumericalInverseKinematicsCalculatorWithRobotTest implemen
       }
    }
 
+   @After
+   public void tearDown()
+   {
+      ReferenceFrameTools.clearWorldFrameTree();
+   }
+
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
+   @Test(timeout = 30000)
    public void testSimpleCase()
    {
       Random random = new Random(1984L);
@@ -207,6 +220,8 @@ public abstract class NumericalInverseKinematicsCalculatorWithRobotTest implemen
       assertTrue(success);
    }
 
+   @ContinuousIntegrationTest(estimatedDuration = 16.2)
+   @Test(timeout = 81000)
    public void testRandomFeasibleRobotPoses()
    {
       Random random = new Random(1776L);

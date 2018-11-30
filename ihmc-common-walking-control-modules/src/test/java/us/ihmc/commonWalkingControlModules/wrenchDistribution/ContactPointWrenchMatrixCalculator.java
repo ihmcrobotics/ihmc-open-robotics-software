@@ -14,8 +14,8 @@ import us.ihmc.euclid.referenceFrame.FramePoint2D;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.robotics.screwTheory.RigidBody;
-import us.ihmc.robotics.screwTheory.Wrench;
+import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
+import us.ihmc.mecano.spatial.Wrench;
 
 /**
  * @author twan
@@ -26,7 +26,7 @@ public class ContactPointWrenchMatrixCalculator
    private final ReferenceFrame centerOfMassFrame;
 
    private final DenseMatrix64F q;
-   private final Map<RigidBody, Wrench> wrenches = new LinkedHashMap<RigidBody, Wrench>();
+   private final Map<RigidBodyBasics, Wrench> wrenches = new LinkedHashMap<RigidBodyBasics, Wrench>();
 
    // intermediate result storage:
    private final ArrayList<FrameVector3D> normalizedSupportVectors = new ArrayList<FrameVector3D>(4);
@@ -102,11 +102,11 @@ public class ContactPointWrenchMatrixCalculator
       return q;
    }
 
-   public Map<RigidBody, Wrench> computeWrenches(LinkedHashMap<RigidBody, ? extends PlaneContactState> contactStates, DenseMatrix64F rho)
+   public Map<RigidBodyBasics, Wrench> computeWrenches(LinkedHashMap<RigidBodyBasics, ? extends PlaneContactState> contactStates, DenseMatrix64F rho)
    {
       wrenches.clear();
       int columnNumber = 0;
-      for (RigidBody rigidBody : contactStates.keySet())
+      for (RigidBodyBasics rigidBody : contactStates.keySet())
       {
          PlaneContactState contactState = contactStates.get(rigidBody);
 
@@ -122,7 +122,7 @@ public class ContactPointWrenchMatrixCalculator
             CommonOps.mult(qBlock, rhoBlock, wrenchMatrix);
 
             Wrench wrench = new Wrench(rigidBody.getBodyFixedFrame(), centerOfMassFrame);
-            wrench.set(centerOfMassFrame, wrenchMatrix);
+            wrench.setIncludingFrame(centerOfMassFrame, wrenchMatrix);
             wrench.changeFrame(rigidBody.getBodyFixedFrame());
             wrenches.put(rigidBody, wrench);
             columnNumber += nColumns;

@@ -6,7 +6,7 @@ import us.ihmc.euclid.tuple2D.Vector2D;
 public class RobotArmControllerCoreOptimizationSettings implements ControllerCoreOptimizationSettings
 {
    private double jointAccelerationWeight = 0.005;
-   private double jointJerkWeight = 0.1;
+   private double jointJerkWeight = 2.5E-10;
 
    @Override
    public double getJointAccelerationWeight()
@@ -39,12 +39,6 @@ public class RobotArmControllerCoreOptimizationSettings implements ControllerCor
    }
 
    @Override
-   public double getRhoRateHighWeight()
-   {
-      return 0;
-   }
-
-   @Override
    public Vector2D getCoPWeight()
    {
       return new Vector2D();
@@ -52,12 +46,6 @@ public class RobotArmControllerCoreOptimizationSettings implements ControllerCor
 
    @Override
    public Vector2D getCoPRateDefaultWeight()
-   {
-      return new Vector2D();
-   }
-
-   @Override
-   public Vector2D getCoPRateHighWeight()
    {
       return new Vector2D();
    }
@@ -76,12 +64,6 @@ public class RobotArmControllerCoreOptimizationSettings implements ControllerCor
 
    @Override
    public int getNumberOfContactableBodies()
-   {
-      return 0;
-   }
-
-   @Override
-   public int getRhoSize()
    {
       return 0;
    }

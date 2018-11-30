@@ -1,9 +1,10 @@
 package us.ihmc.sensorProcessing.sensorProcessors;
 
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.yoVariables.variable.YoDouble;
+import us.ihmc.robotics.dataStructures.PolynomialReadOnly;
 import us.ihmc.robotics.math.filters.ProcessingYoVariable;
 import us.ihmc.robotics.math.trajectories.YoPolynomial;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoDouble;
 
 /**
  * Processing YoVariable that computes the output by applying a {@link YoPolynomial} to an input variable.
@@ -11,9 +12,9 @@ import us.ihmc.robotics.math.trajectories.YoPolynomial;
 public class PolynomialProcessorYoVariable extends YoDouble implements ProcessingYoVariable
 {
    private final YoDouble input;
-   private final YoPolynomial polynomial;
+   private final PolynomialReadOnly polynomial;
 
-   public PolynomialProcessorYoVariable(String name, YoDouble input, YoPolynomial polynomial, YoVariableRegistry registry)
+   public PolynomialProcessorYoVariable(String name, YoDouble input, PolynomialReadOnly polynomial, YoVariableRegistry registry)
    {
       super(name, registry);
 

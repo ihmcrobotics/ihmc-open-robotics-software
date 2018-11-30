@@ -9,6 +9,13 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
+import controller_msgs.msg.dds.ArmTrajectoryMessage;
+import controller_msgs.msg.dds.ChestTrajectoryMessage;
+import controller_msgs.msg.dds.FootstepDataListMessage;
+import controller_msgs.msg.dds.FootstepDataMessage;
+import controller_msgs.msg.dds.OneDoFJointTrajectoryMessage;
+import controller_msgs.msg.dds.SO3TrajectoryMessage;
+import controller_msgs.msg.dds.SO3TrajectoryPointMessage;
 import us.ihmc.atlas.AtlasRobotModel;
 import us.ihmc.atlas.AtlasRobotVersion;
 import us.ihmc.atlas.parameters.AtlasWalkingControllerParameters;
@@ -35,11 +42,14 @@ import us.ihmc.commons.PrintTools;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.communication.controllerAPI.CommandInputManager;
 import us.ihmc.communication.controllerAPI.StatusMessageOutputManager;
+import us.ihmc.communication.packets.MessageTools;
+import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.euclid.geometry.BoundingBox3D;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.tools.ReferenceFrameTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
@@ -49,36 +59,35 @@ import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactableFoot;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.converter.FrameMessageCommandConverter;
-import us.ihmc.humanoidRobotics.communication.packets.manipulation.ArmTrajectoryMessage;
-import us.ihmc.humanoidRobotics.communication.packets.walking.ChestTrajectoryMessage;
-import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataListMessage;
-import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessage;
+import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
+import us.ihmc.mecano.frames.MovingReferenceFrame;
+import us.ihmc.mecano.multiBodySystem.interfaces.FloatingJointBasics;
+import us.ihmc.mecano.multiBodySystem.interfaces.JointBasics;
+import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
+import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
+import us.ihmc.mecano.spatial.Twist;
+import us.ihmc.mecano.tools.MultiBodySystemTools;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.geometry.RotationTools;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
-import us.ihmc.robotics.screwTheory.FloatingInverseDynamicsJoint;
-import us.ihmc.robotics.screwTheory.InverseDynamicsJoint;
-import us.ihmc.robotics.screwTheory.MovingReferenceFrame;
-import us.ihmc.robotics.screwTheory.OneDoFJoint;
-import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.robotics.screwTheory.ScrewTools;
 import us.ihmc.robotics.screwTheory.TotalMassCalculator;
-import us.ihmc.robotics.screwTheory.Twist;
 import us.ihmc.robotics.sensors.FootSwitchInterface;
 import us.ihmc.sensorProcessing.frames.ReferenceFrameHashCodeResolver;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutputList;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutputReadOnly;
+import us.ihmc.simulationConstructionSetTools.util.HumanoidFloatingRootJointRobot;
 import us.ihmc.simulationToolkit.outputWriters.PerfectSimulatedOutputWriter;
 import us.ihmc.simulationconstructionset.FloatingJoint;
-import us.ihmc.simulationconstructionset.HumanoidFloatingRootJointRobot;
 import us.ihmc.simulationconstructionset.OneDegreeOfFreedomJoint;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.SimulationConstructionSetParameters;
 import us.ihmc.simulationconstructionset.gui.tools.SimulationOverheadPlotterFactory;
 import us.ihmc.tools.MemoryTools;
 import us.ihmc.wholeBodyController.DRCControllerThread;
+import us.ihmc.wholeBodyController.RobotContactPointParameters;
 import us.ihmc.wholeBodyController.parameters.ParameterLoaderHelper;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
@@ -139,7 +148,7 @@ public class WalkingControllerTest
    private FullHumanoidRobotModel fullRobotModel;
    private HumanoidReferenceFrames referenceFrames;
    private PerfectSimulatedOutputWriter writer;
-   private OneDoFJoint[] oneDoFJoints;
+   private OneDoFJointBasics[] oneDoFJoints;
 
    private WalkingHighLevelHumanoidController walkingController;
    private WholeBodyControllerCore controllerCore;
@@ -147,7 +156,8 @@ public class WalkingControllerTest
 
    private static final double maxDriftRate = 0.2;
 
-   @Test(timeout = 30000)
+   @ContinuousIntegrationTest(estimatedDuration = 17.4)
+   @Test(timeout = 87000)
    public void testForGarbage()
    {
       walkingController.initialize();
@@ -189,7 +199,7 @@ public class WalkingControllerTest
          }
          else
          {
-            Tuple3DReadOnly rootPosition = fullRobotModel.getRootJoint().getTranslationForReading();
+            Tuple3DReadOnly rootPosition = fullRobotModel.getRootJoint().getJointPose().getPosition();
             Point3D min = new Point3D(-0.1, -0.1, 0.5);
             Point3D max = new Point3D(0.1, 0.1, 1.0);
             Vector3D drift = new Vector3D(maxDriftRate, maxDriftRate, maxDriftRate);
@@ -205,7 +215,7 @@ public class WalkingControllerTest
 
    private void sendFootsteps()
    {
-      FootstepDataListMessage footsteps = new FootstepDataListMessage(0.3, 0.2);
+      FootstepDataListMessage footsteps = HumanoidMessageTools.createFootstepDataListMessage(0.3, 0.2);
       MovingReferenceFrame stanceFrame = referenceFrames.getSoleZUpFrame(RobotSide.LEFT);
 
       for (RobotSide robotSide : RobotSide.values)
@@ -220,21 +230,28 @@ public class WalkingControllerTest
 
          location.changeFrame(ReferenceFrame.getWorldFrame());
          orientation.changeFrame(ReferenceFrame.getWorldFrame());
-         FootstepDataMessage footstep = new FootstepDataMessage(robotSide, location, orientation);
-         footsteps.add(footstep);
+         FootstepDataMessage footstep = HumanoidMessageTools.createFootstepDataMessage(robotSide, location, orientation);
+         footsteps.getFootstepDataList().add().set(footstep);
       }
       commandInputManager.submitMessage(footsteps);
    }
 
    private void sendChestTrajectory()
    {
-      ChestTrajectoryMessage message = new ChestTrajectoryMessage(2);
+      ChestTrajectoryMessage message = new ChestTrajectoryMessage();
       Quaternion orientation = new Quaternion();
       orientation.appendYawRotation(Math.toRadians(-10.0));
       orientation.appendRollRotation(Math.toRadians(10.0));
-      message.getFrameInformation().setTrajectoryReferenceFrame(referenceFrames.getPelvisZUpFrame());
-      message.setTrajectoryPoint(0, 0.5, orientation, new Vector3D(), referenceFrames.getPelvisZUpFrame());
-      message.setTrajectoryPoint(1, 1.0, new Quaternion(), new Vector3D(), referenceFrames.getPelvisZUpFrame());
+      SO3TrajectoryMessage so3Trajectory = message.getSo3Trajectory();
+      so3Trajectory.getFrameInformation().setTrajectoryReferenceFrameId(MessageTools.toFrameId(referenceFrames.getPelvisZUpFrame()));
+      SO3TrajectoryPointMessage trajectoryPoint = so3Trajectory.getTaskspaceTrajectoryPoints().add();
+      trajectoryPoint.setTime(0.5);
+      trajectoryPoint.getOrientation().set(orientation);
+      trajectoryPoint.getAngularVelocity().set(new Vector3D());
+      trajectoryPoint = so3Trajectory.getTaskspaceTrajectoryPoints().add();
+      trajectoryPoint.setTime(1.0);
+      trajectoryPoint.getOrientation().set(new Quaternion());
+      trajectoryPoint.getAngularVelocity().set(new Vector3D());
       commandInputManager.submitMessage(message);
    }
 
@@ -242,17 +259,19 @@ public class WalkingControllerTest
    {
       for (RobotSide robotSide : RobotSide.values)
       {
-         RigidBody chest = fullRobotModel.getChest();
-         RigidBody hand = fullRobotModel.getHand(robotSide);
-         OneDoFJoint[] joints = ScrewTools.createOneDoFJointPath(chest, hand);
-         ArmTrajectoryMessage message = new ArmTrajectoryMessage(robotSide, joints.length, 2);
+         RigidBodyBasics chest = fullRobotModel.getChest();
+         RigidBodyBasics hand = fullRobotModel.getHand(robotSide);
+         OneDoFJointBasics[] joints = MultiBodySystemTools.createOneDoFJointPath(chest, hand);
+         ArmTrajectoryMessage message = HumanoidMessageTools.createArmTrajectoryMessage(robotSide);
+
          for (int jointIdx = 0; jointIdx < joints.length; jointIdx++)
          {
-            OneDoFJoint joint = joints[jointIdx];
+            OneDoFJointBasics joint = joints[jointIdx];
             double angle1 = MathTools.clamp(Math.toRadians(45.0), joint.getJointLimitLower() + 0.05, joint.getJointLimitUpper() - 0.05);
             double angle2 = MathTools.clamp(0.0, joint.getJointLimitLower() + 0.05, joint.getJointLimitUpper() - 0.05);
-            message.setTrajectoryPoint(jointIdx, 0, 0.5, angle1, 0.0);
-            message.setTrajectoryPoint(jointIdx, 1, 1.0, angle2, 0.0);
+            OneDoFJointTrajectoryMessage jointTrajectoryMessage = message.getJointspaceTrajectory().getJointTrajectoryMessages().add();
+            jointTrajectoryMessage.getTrajectoryPoints().add().set(HumanoidMessageTools.createTrajectoryPoint1DMessage(0.5, angle1, 0.0));
+            jointTrajectoryMessage.getTrajectoryPoints().add().set(HumanoidMessageTools.createTrajectoryPoint1DMessage(1.0, angle2, 0.0));
          }
          commandInputManager.submitMessage(message);
       }
@@ -309,7 +328,7 @@ public class WalkingControllerTest
 
       for (int i = 0; i < oneDoFJoints.length; i++)
       {
-         OneDoFJoint joint = oneDoFJoints[i];
+         OneDoFJointBasics joint = oneDoFJoints[i];
          JointDesiredOutputReadOnly jointDesireds = controllerOutput.getJointDesiredOutput(joint);
 
          if (jointDesireds.hasDesiredAcceleration())
@@ -331,9 +350,9 @@ public class WalkingControllerTest
       desiredAngularAcceleration.set(desiredAcceleration.get(0), desiredAcceleration.get(1), desiredAcceleration.get(2));
       desiredLinearAcceleration.set(desiredAcceleration.get(3), desiredAcceleration.get(4), desiredAcceleration.get(5));
 
-      FloatingInverseDynamicsJoint rootJoint = fullRobotModel.getRootJoint();
-      rootJoint.getTranslation(position);
-      rootJoint.getLinearVelocity(linearVelocity);
+      FloatingJointBasics rootJoint = fullRobotModel.getRootJoint();
+      position.set(rootJoint.getJointPose().getPosition());
+      linearVelocity.set(rootJoint.getJointTwist().getLinearPart());
 
       newPosition.set(desiredLinearAcceleration);
       newPosition.scale(0.5 * controlDT);
@@ -352,8 +371,8 @@ public class WalkingControllerTest
 
       newPosition.addZ(-zCorrection);
 
-      rootJoint.setRotation(newOrientation);
-      rootJoint.setPosition(newPosition);
+      rootJoint.setJointOrientation(newOrientation);
+      rootJoint.setJointPosition(newPosition);
       rootJoint.updateFramesRecursively();
       frameLinearVelocity.setIncludingFrame(ReferenceFrame.getWorldFrame(), newLinearVelocity);
       frameAngularVelocity.setIncludingFrame(ReferenceFrame.getWorldFrame(), newAngularVelocity);
@@ -361,8 +380,8 @@ public class WalkingControllerTest
       frameAngularVelocity.scale(velocityDecay);
       frameLinearVelocity.changeFrame(rootJoint.getFrameAfterJoint());
       frameAngularVelocity.changeFrame(rootJoint.getFrameAfterJoint());
-      rootJointTwist.set(rootJoint.getFrameAfterJoint(), rootJoint.getFrameBeforeJoint(), rootJoint.getFrameAfterJoint(), frameLinearVelocity,
-                         frameAngularVelocity);
+      rootJointTwist.setIncludingFrame(rootJoint.getFrameAfterJoint(), rootJoint.getFrameBeforeJoint(), rootJoint.getFrameAfterJoint(), frameAngularVelocity,
+                         frameLinearVelocity);
       rootJoint.setJointTwist(rootJointTwist);
    }
 
@@ -393,10 +412,10 @@ public class WalkingControllerTest
 
    private void createControllerCore()
    {
-      InverseDynamicsJoint[] jointsToIgnore = DRCControllerThread.createListOfJointsToIgnore(fullRobotModel, robotModel, robotModel.getSensorInformation());
-      InverseDynamicsJoint[] jointsToOptimizeFor = HighLevelHumanoidControllerToolbox.computeJointsToOptimizeFor(fullRobotModel, jointsToIgnore);
+      JointBasics[] jointsToIgnore = DRCControllerThread.createListOfJointsToIgnore(fullRobotModel, robotModel, robotModel.getSensorInformation());
+      JointBasics[] jointsToOptimizeFor = HighLevelHumanoidControllerToolbox.computeJointsToOptimizeFor(fullRobotModel, jointsToIgnore);
 
-      FloatingInverseDynamicsJoint rootJoint = fullRobotModel.getRootJoint();
+      FloatingJointBasics rootJoint = fullRobotModel.getRootJoint();
       ReferenceFrame centerOfMassFrame = referenceFrames.getCenterOfMassFrame();
 
       WalkingControllerParameters walkingControllerParameters = robotModel.getWalkingControllerParameters();
@@ -425,16 +444,24 @@ public class WalkingControllerTest
 
       double omega0 = walkingControllerParameters.getOmega0();
 
-      ContactableBodiesFactory contactableBodiesFactory = robotModel.getContactPointParameters().getContactableBodiesFactory();
-      SideDependentList<ContactableFoot> feet = contactableBodiesFactory.createFootContactableBodies(fullRobotModel, referenceFrames);
-      SideDependentList<String> footNames = new SideDependentList<>();
-      List<ContactablePlaneBody> addidionalContacts = contactableBodiesFactory.createAdditionalContactPoints(fullRobotModel);
+      RobotContactPointParameters<RobotSide> contactPointParameters = robotModel.getContactPointParameters();
+      ArrayList<String> additionalContactRigidBodyNames = contactPointParameters.getAdditionalContactRigidBodyNames();
+      ArrayList<String> additionalContactNames = contactPointParameters.getAdditionalContactNames();
+      ArrayList<RigidBodyTransform> additionalContactTransforms = contactPointParameters.getAdditionalContactTransforms();
+
+      ContactableBodiesFactory<RobotSide> contactableBodiesFactory = new ContactableBodiesFactory<>();
+      contactableBodiesFactory.setFootContactPoints(contactPointParameters.getFootContactPoints());
+      contactableBodiesFactory.setToeContactParameters(contactPointParameters.getControllerToeContactPoints(), contactPointParameters.getControllerToeContactLines());
+      for (int i = 0; i < contactPointParameters.getAdditionalContactNames().size(); i++)
+         contactableBodiesFactory.addAdditionalContactPoint(additionalContactRigidBodyNames.get(i), additionalContactNames.get(i), additionalContactTransforms.get(i));
+      contactableBodiesFactory.setFullRobotModel(fullRobotModel);
+      contactableBodiesFactory.setReferenceFrames(referenceFrames);
+      SideDependentList<ContactableFoot> feet = new SideDependentList<>(contactableBodiesFactory.createFootContactableFeet());
+      List<ContactablePlaneBody> additionalContacts = contactableBodiesFactory.createAdditionalContactPoints();
       for (RobotSide robotSide : RobotSide.values)
-      {
          contactableBodies.add(feet.get(robotSide));
-         footNames.put(robotSide, feet.get(robotSide).getName());
-      }
-      contactableBodies.addAll(addidionalContacts);
+      contactableBodies.addAll(additionalContacts);
+      contactableBodiesFactory.disposeFactory();
 
       double totalRobotWeight = TotalMassCalculator.computeSubTreeMass(fullRobotModel.getElevator()) * gravityZ;
       updatableFootSwitches = TestFootSwitch.createFootSwitches(feet, totalRobotWeight, referenceFrames.getSoleZUpFrames());
@@ -491,7 +518,7 @@ public class WalkingControllerTest
          variable = (YoBoolean) registry.getVariable(name);
          variable.set(true);
 
-         name = robotSide.getCamelCaseNameForStartOfExpression() + "FootState";
+         name = robotSide.getCamelCaseNameForStartOfExpression() + "FootCurrentState";
          YoEnum<ConstraintType> footState = (YoEnum<ConstraintType>) registry.getVariable(name);
          footStates.put(robotSide, footState);
       }
@@ -524,7 +551,7 @@ public class WalkingControllerTest
 
       writer = new PerfectSimulatedOutputWriter(robot, fullRobotModel);
 
-      for (OneDoFJoint revoluteJoint : fullRobotModel.getOneDoFJoints())
+      for (OneDoFJointBasics revoluteJoint : fullRobotModel.getOneDoFJoints())
       {
          String name = revoluteJoint.getName();
          OneDegreeOfFreedomJoint oneDoFJoint = robot.getOneDegreeOfFreedomJoint(name);
@@ -534,10 +561,10 @@ public class WalkingControllerTest
       }
 
       FloatingJoint floatingJoint = robot.getRootJoint();
-      FloatingInverseDynamicsJoint sixDoFJoint = fullRobotModel.getRootJoint();
+      FloatingJointBasics sixDoFJoint = fullRobotModel.getRootJoint();
       RigidBodyTransform transform = new RigidBodyTransform();
       floatingJoint.getTransformToWorld(transform);
-      sixDoFJoint.setPositionAndRotation(transform);
+      sixDoFJoint.setJointConfiguration(transform);
 
       fullRobotModel.updateFrames();
       referenceFrames.updateFrames();
@@ -562,6 +589,7 @@ public class WalkingControllerTest
          scs = null;
       }
 
+      ReferenceFrameTools.clearWorldFrameTree();
       MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " after test.");
    }
 }

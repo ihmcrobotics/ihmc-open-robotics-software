@@ -6,6 +6,7 @@ import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.graphicsDescription.Graphics3DObject;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.robotics.lidar.LidarScanParameters;
+import us.ihmc.robotics.robotDescription.LidarSensorDescription;
 import us.ihmc.simulationconstructionset.CameraMount;
 import us.ihmc.simulationconstructionset.GimbalJoint;
 import us.ihmc.simulationconstructionset.Link;
@@ -39,7 +40,13 @@ public class ExampleLidarRobot extends Robot
       RigidBodyTransform transform = new RigidBodyTransform();
       transform.setTranslation(new Vector3D(radius + 0.001, 0.0, height / 2.0));
       lidarScanParameters = new LidarScanParameters(720, (float) (-Math.PI / 2), (float) (Math.PI / 2), 0f, 0.1f, 30.0f, 0f);
-      LidarMount lidarMount = new LidarMount(transform, lidarScanParameters, "lidar");
+      LidarSensorDescription lidarSensorDescription = new LidarSensorDescription("lidar", transform);
+      lidarSensorDescription.setPointsPerSweep(lidarScanParameters.getPointsPerSweep());
+      lidarSensorDescription.setScanHeight(lidarScanParameters.getScanHeight());
+      lidarSensorDescription.setSweepYawLimits(lidarScanParameters.getSweepYawMin(), lidarScanParameters.getSweepYawMax());
+      lidarSensorDescription.setHeightPitchLimits(lidarScanParameters.heightPitchMin, lidarScanParameters.heightPitchMax);
+      lidarSensorDescription.setRangeLimits(lidarScanParameters.getMinRange(), lidarScanParameters.getMaxRange());
+      LidarMount lidarMount = new LidarMount(lidarSensorDescription);
 
       gimbalJoint.addLidarMount(lidarMount);
 

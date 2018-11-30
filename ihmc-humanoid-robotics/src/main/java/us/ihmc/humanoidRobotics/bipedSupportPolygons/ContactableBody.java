@@ -3,14 +3,14 @@ package us.ihmc.humanoidRobotics.bipedSupportPolygons;
 import java.util.List;
 
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
-import us.ihmc.robotics.screwTheory.MovingReferenceFrame;
-import us.ihmc.robotics.screwTheory.RigidBody;
+import us.ihmc.mecano.frames.MovingReferenceFrame;
+import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 
 public interface ContactableBody
 {
    public abstract String getName();
 
-   public abstract RigidBody getRigidBody();
+   public abstract RigidBodyBasics getRigidBody();
 
    public abstract MovingReferenceFrame getFrameAfterParentJoint();
 

@@ -4,20 +4,19 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+import controller_msgs.msg.dds.RigidBodyExplorationConfigurationMessage;
 import gnu.trove.list.array.TDoubleArrayList;
 import us.ihmc.communication.controllerAPI.command.Command;
-import us.ihmc.euclid.utils.NameBasedHashCodeTools;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.wholeBodyTrajectory.ConfigurationSpaceName;
-import us.ihmc.humanoidRobotics.communication.packets.manipulation.wholeBodyTrajectory.RigidBodyExplorationConfigurationMessage;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.wholeBodyTrajectory.WholeBodyTrajectoryToolboxMessageTools;
-import us.ihmc.robotics.screwTheory.RigidBody;
+import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.sensorProcessing.frames.ReferenceFrameHashCodeResolver;
 
 public class RigidBodyExplorationConfigurationCommand implements Command<RigidBodyExplorationConfigurationCommand, RigidBodyExplorationConfigurationMessage>,
       WholeBodyTrajectoryToolboxAPI<RigidBodyExplorationConfigurationMessage>
 {
-   private long rigidBodyNameBasedashCode;
-   private RigidBody rigidBody;
+   private int rigidBodyHashCode;
+   private RigidBodyBasics rigidBody;
    private final List<ConfigurationSpaceName> degreesOfFreedomToExplore = new ArrayList<>();
 
    private final TDoubleArrayList explorationRangeUpperLimits = new TDoubleArrayList();
@@ -27,11 +26,11 @@ public class RigidBodyExplorationConfigurationCommand implements Command<RigidBo
    {
    }
 
-   public RigidBodyExplorationConfigurationCommand(RigidBody rigidBody, ConfigurationSpaceName... configurationSpaces)
+   public RigidBodyExplorationConfigurationCommand(RigidBodyBasics rigidBody, ConfigurationSpaceName... configurationSpaces)
    {
       clear();
       this.rigidBody = rigidBody;
-      this.rigidBodyNameBasedashCode = rigidBody.getNameBasedHashCode();
+      this.rigidBodyHashCode = rigidBody.hashCode();
       for (int i = 0; i < configurationSpaces.length; i++)
          this.degreesOfFreedomToExplore.add(configurationSpaces[i]);
       this.explorationRangeUpperLimits.addAll(WholeBodyTrajectoryToolboxMessageTools.createDefaultExplorationUpperLimitArray(configurationSpaces));
@@ -41,7 +40,7 @@ public class RigidBodyExplorationConfigurationCommand implements Command<RigidBo
    @Override
    public void clear()
    {
-      rigidBodyNameBasedashCode = NameBasedHashCodeTools.NULL_HASHCODE;
+      rigidBodyHashCode = 0;
       rigidBody = null;
       degreesOfFreedomToExplore.clear();
       explorationRangeUpperLimits.reset();
@@ -53,7 +52,7 @@ public class RigidBodyExplorationConfigurationCommand implements Command<RigidBo
    {
       clear();
 
-      rigidBodyNameBasedashCode = other.rigidBodyNameBasedashCode;
+      rigidBodyHashCode = other.rigidBodyHashCode;
       rigidBody = other.rigidBody;
 
       for (int i = 0; i < other.getNumberOfDegreesOfFreedomToExplore(); i++)
@@ -65,32 +64,32 @@ public class RigidBodyExplorationConfigurationCommand implements Command<RigidBo
    }
 
    @Override
-   public void set(RigidBodyExplorationConfigurationMessage message)
+   public void setFromMessage(RigidBodyExplorationConfigurationMessage message)
    {
       set(message, null, null);
    }
 
    @Override
-   public void set(RigidBodyExplorationConfigurationMessage message, Map<Long, RigidBody> rigidBodyNamedBasedHashMap,
+   public void set(RigidBodyExplorationConfigurationMessage message, Map<Integer, RigidBodyBasics> rigidBodyHashMap,
                    ReferenceFrameHashCodeResolver referenceFrameResolver)
    {
       clear();
 
-      rigidBodyNameBasedashCode = message.getRigidBodyNameBasedHashCode();
-      if (rigidBodyNamedBasedHashMap == null)
+      rigidBodyHashCode = message.getRigidBodyHashCode();
+      if (rigidBodyHashMap == null)
          rigidBody = null;
       else
-         rigidBody = rigidBodyNamedBasedHashMap.get(rigidBodyNameBasedashCode);
+         rigidBody = rigidBodyHashMap.get(rigidBodyHashCode);
 
-      for (int i = 0; i < message.getNumberOfDegreesOfFreedomToExplore(); i++)
+      for (int i = 0; i < message.getConfigurationSpaceNamesToExplore().size(); i++)
       {
-         degreesOfFreedomToExplore.add(message.getDegreeOfFreedomToExplore(i));
-         explorationRangeUpperLimits.add(message.getExplorationRangeUpperLimits(i));
-         explorationRangeLowerLimits.add(message.getExplorationRangeLowerLimits(i));
+         degreesOfFreedomToExplore.add(ConfigurationSpaceName.fromByte(message.getConfigurationSpaceNamesToExplore().get(i)));
+         explorationRangeUpperLimits.add(message.getExplorationRangeUpperLimits().get(i));
+         explorationRangeLowerLimits.add(message.getExplorationRangeLowerLimits().get(i));
       }
    }
 
-   public RigidBody getRigidBody()
+   public RigidBodyBasics getRigidBody()
    {
       return rigidBody;
    }
@@ -124,6 +123,6 @@ public class RigidBodyExplorationConfigurationCommand implements Command<RigidBo
    @Override
    public boolean isCommandValid()
    {
-      return false;
+      return rigidBody != null;
    }
 }

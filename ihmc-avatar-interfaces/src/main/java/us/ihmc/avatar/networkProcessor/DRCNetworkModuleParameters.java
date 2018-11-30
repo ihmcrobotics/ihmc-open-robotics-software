@@ -2,11 +2,8 @@ package us.ihmc.avatar.networkProcessor;
 
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.util.HashMap;
 
 import us.ihmc.communication.net.LocalObjectCommunicator;
-import us.ihmc.communication.packets.PacketDestination;
-import us.ihmc.communication.util.NetworkPorts;
 
 public class DRCNetworkModuleParameters
 {
@@ -27,8 +24,8 @@ public class DRCNetworkModuleParameters
    private boolean runAutomaticDiagnostic;
    private boolean useMultisenseManualTestModule;
    private boolean useDrillDetectionModule;
-   private boolean useConstrainedWholeBodyPlanningToolbox;
-   private boolean useConstrainedWholeBodyPlanningToolboxVisualizer;
+   private boolean useWholeBodyTrajectoryToolbox;
+   private boolean useWholeBodyTrajectoryToolboxVisualizer;
    private boolean useKinematicsToolbox;
    private boolean useFootstepPlanningToolbox;
    private boolean useKinematicsToolboxVisualizer;
@@ -38,10 +35,11 @@ public class DRCNetworkModuleParameters
    private boolean useHeightQuadTreeToolbox;
    private boolean useRemoteObjectDetectionFeedback;
    private boolean useLidarScanLogger;
+   private boolean filterControllerInputMessages;
+   private boolean enableJoystickBasedStepping;
 
    private LocalObjectCommunicator simulatedSensorCommunicator;
 
-   private HashMap<NetworkPorts, PacketDestination> extraIntraProcessCommunicatorPorts = new HashMap<NetworkPorts, PacketDestination>();
    private URI rosUri;
 
    private double timeToWaitBeforeStartingDiagnostics = Double.NaN;
@@ -66,9 +64,9 @@ public class DRCNetworkModuleParameters
       return useBehaviorVisualizer;
    }
    
-   public boolean isConstrainedWholeBodyPlanningToolboxEnabled()
+   public boolean isWholeBodyTrajectoryToolboxEnabled()
    {
-      return useConstrainedWholeBodyPlanningToolbox;
+      return useWholeBodyTrajectoryToolbox;
    }
 
    public boolean isKinematicsToolboxEnabled()
@@ -86,9 +84,9 @@ public class DRCNetworkModuleParameters
       return useKinematicsToolboxVisualizer;
    }
    
-   public boolean isConstrainedWholeBodyToolboxVisualizerEnabled()
+   public boolean isWholeBodyTrajectoryToolboxVisualizerEnabled()
    {
-      return useConstrainedWholeBodyPlanningToolboxVisualizer;
+      return useWholeBodyTrajectoryToolboxVisualizer;
    }
 
    public boolean isFootstepPlanningToolboxVisualizerEnabled()
@@ -172,7 +170,7 @@ public class DRCNetworkModuleParameters
    
    public void enableWholeBodyTrajectoryToolbox(boolean useConstrainedWholeBodyPlanningToolbox)
    {
-      this.useConstrainedWholeBodyPlanningToolbox = useConstrainedWholeBodyPlanningToolbox;
+      this.useWholeBodyTrajectoryToolbox = useConstrainedWholeBodyPlanningToolbox;
    }
    
    public void enableFootstepPlanningToolbox(boolean useFootstepPlanningToolbox)
@@ -187,7 +185,7 @@ public class DRCNetworkModuleParameters
    
    public void enableConstrainedWholeBodyPlanningToolboxVisualizer(boolean useConstrainedWholeBodyPlanningToolboxVisualizer)
    {
-      this.useConstrainedWholeBodyPlanningToolboxVisualizer = useConstrainedWholeBodyPlanningToolboxVisualizer;
+      this.useWholeBodyTrajectoryToolboxVisualizer = useConstrainedWholeBodyPlanningToolboxVisualizer;
    }
 
    public void enableFootstepPlanningToolboxVisualizer(boolean useFootstepPlanningToolboxVisualizer)
@@ -383,13 +381,23 @@ public class DRCNetworkModuleParameters
             + "\n rosUri=" + rosUri + "]";
    }
 
-   public void addRobotSpecificModuleCommunicatorPort(NetworkPorts networkPort, PacketDestination communicatorId)
+   public boolean isFilterControllerInputMessages()
    {
-      extraIntraProcessCommunicatorPorts.put(networkPort, communicatorId);
+      return filterControllerInputMessages;
    }
 
-   public HashMap<NetworkPorts, PacketDestination> getRobotSpecificModuleCommunicatorPorts()
+   public void setFilterControllerInputMessages(boolean filterControllerInputMessages)
    {
-      return extraIntraProcessCommunicatorPorts;
+      this.filterControllerInputMessages = filterControllerInputMessages;
+   }
+
+   public boolean isEnableJoystickBasedStepping()
+   {
+      return enableJoystickBasedStepping;
+   }
+
+   public void setEnableJoystickBasedStepping(boolean enableJoystickBasedStepping)
+   {
+      this.enableJoystickBasedStepping = enableJoystickBasedStepping;
    }
 }

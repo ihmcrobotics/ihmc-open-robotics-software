@@ -9,9 +9,7 @@ import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameQuaternionReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
-import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
-import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.euclid.tuple4D.interfaces.QuaternionReadOnly;
 import us.ihmc.robotics.math.trajectories.HermiteCurveBasedOrientationTrajectoryGenerator;
 import us.ihmc.robotics.math.trajectories.OrientationTrajectoryGeneratorInMultipleFrames;
@@ -225,19 +223,13 @@ public class MultipleWaypointsOrientationTrajectoryGenerator extends Orientation
       }
 
       currentWaypointIndex.set(0);
-
-      if (numberOfWaypoints.getIntegerValue() == 1)
-      {
-         subTrajectory.setTrajectoryParameters(waypoints.get(0), waypoints.get(0));
-         subTrajectory.initialize();
-      }
-      else
-         initializeSubTrajectory(0);
+      initializeSubTrajectory(0);
    }
 
    private void initializeSubTrajectory(int waypointIndex)
    {
-      subTrajectory.setTrajectoryParameters(waypoints.get(waypointIndex), waypoints.get(waypointIndex + 1));
+      int secondWaypointIndex = Math.min(waypointIndex + 1, numberOfWaypoints.getValue() - 1);
+      subTrajectory.setTrajectoryParameters(waypoints.get(waypointIndex), waypoints.get(secondWaypointIndex));
       subTrajectory.initialize();
    }
 

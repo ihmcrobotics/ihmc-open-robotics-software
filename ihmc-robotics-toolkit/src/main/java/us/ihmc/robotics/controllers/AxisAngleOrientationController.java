@@ -7,23 +7,24 @@ import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple4D.Quaternion;
+import us.ihmc.mecano.spatial.Twist;
+import us.ihmc.mecano.spatial.interfaces.TwistReadOnly;
 import us.ihmc.robotics.controllers.pidGains.GainCoupling;
 import us.ihmc.robotics.controllers.pidGains.PID3DGainsReadOnly;
 import us.ihmc.robotics.controllers.pidGains.YoPID3DGains;
 import us.ihmc.robotics.controllers.pidGains.implementations.DefaultYoPID3DGains;
 import us.ihmc.robotics.geometry.AngleTools;
 import us.ihmc.robotics.math.filters.RateLimitedYoFrameVector;
-import us.ihmc.robotics.math.frames.YoFrameVector;
-import us.ihmc.robotics.screwTheory.Twist;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoFrameVector3D;
 
 public class AxisAngleOrientationController
 {
    private final YoVariableRegistry registry;
 
-   private final YoFrameVector rotationErrorInBody;
-   private final YoFrameVector rotationErrorCumulated;
-   private final YoFrameVector velocityError;
+   private final YoFrameVector3D rotationErrorInBody;
+   private final YoFrameVector3D rotationErrorCumulated;
+   private final YoFrameVector3D velocityError;
 
    private final Matrix3D tempGainMatrix = new Matrix3D();
 
@@ -40,7 +41,7 @@ public class AxisAngleOrientationController
    private final AxisAngle errorAngleAxis = new AxisAngle();
    private final Quaternion errorQuaternion = new Quaternion();
 
-   private final YoFrameVector feedbackAngularAction;
+   private final YoFrameVector3D feedbackAngularAction;
    private final RateLimitedYoFrameVector rateLimitedFeedbackAngularAction;
 
    private final double dt;
@@ -64,15 +65,15 @@ public class AxisAngleOrientationController
 
       this.gains = gains;
 
-      rotationErrorInBody = new YoFrameVector(prefix + "RotationErrorInBody", bodyFrame, registry);
-      rotationErrorCumulated = new YoFrameVector(prefix + "RotationErrorCumulated", bodyFrame, registry);
-      velocityError = new YoFrameVector(prefix + "AngularVelocityError", bodyFrame, registry);
+      rotationErrorInBody = new YoFrameVector3D(prefix + "RotationErrorInBody", bodyFrame, registry);
+      rotationErrorCumulated = new YoFrameVector3D(prefix + "RotationErrorCumulated", bodyFrame, registry);
+      velocityError = new YoFrameVector3D(prefix + "AngularVelocityError", bodyFrame, registry);
 
       proportionalTerm = new FrameVector3D(bodyFrame);
       derivativeTerm = new FrameVector3D(bodyFrame);
       integralTerm = new FrameVector3D(bodyFrame);
 
-      feedbackAngularAction = new YoFrameVector(prefix + "FeedbackAngularAction", bodyFrame, registry);
+      feedbackAngularAction = new YoFrameVector3D(prefix + "FeedbackAngularAction", bodyFrame, registry);
       rateLimitedFeedbackAngularAction = new RateLimitedYoFrameVector(prefix + "RateLimitedFeedbackAngularAction", "", registry,
                                                                       gains.getYoMaximumFeedbackRate(), dt, feedbackAngularAction);
 
@@ -122,7 +123,7 @@ public class AxisAngleOrientationController
    /**
     * Computes using Twists, ignores linear part
     */
-   public void compute(Twist twistToPack, FramePose3D desiredPose, Twist desiredTwist)
+   public void compute(Twist twistToPack, FramePose3D desiredPose, TwistReadOnly desiredTwist)
    {
       checkBodyFrames(desiredTwist, twistToPack);
       checkBaseFrames(desiredTwist, twistToPack);
@@ -131,27 +132,27 @@ public class AxisAngleOrientationController
       twistToPack.setToZero(bodyFrame, desiredTwist.getBaseFrame(), bodyFrame);
 
       desiredOrientation.setIncludingFrame(desiredPose.getOrientation());
-      desiredTwist.getAngularPart(desiredAngularVelocity);
-      desiredTwist.getAngularPart(feedForwardAngularAction);
+      desiredAngularVelocity.setIncludingFrame(desiredTwist.getAngularPart());
+      feedForwardAngularAction.setIncludingFrame(desiredTwist.getAngularPart());
       compute(angularActionFromOrientationController, desiredOrientation, desiredAngularVelocity, null, feedForwardAngularAction);
-      twistToPack.setAngularPart(angularActionFromOrientationController);
+      twistToPack.getAngularPart().set(angularActionFromOrientationController);
    }
 
-   private void checkBodyFrames(Twist desiredTwist, Twist currentTwist)
+   private void checkBodyFrames(TwistReadOnly desiredTwist, TwistReadOnly currentTwist)
    {
       desiredTwist.getBodyFrame().checkReferenceFrameMatch(bodyFrame);
       currentTwist.getBodyFrame().checkReferenceFrameMatch(bodyFrame);
    }
 
-   private void checkBaseFrames(Twist desiredTwist, Twist currentTwist)
+   private void checkBaseFrames(TwistReadOnly desiredTwist, TwistReadOnly currentTwist)
    {
       desiredTwist.getBaseFrame().checkReferenceFrameMatch(currentTwist.getBaseFrame());
    }
 
-   private void checkExpressedInFrames(Twist desiredTwist, Twist currentTwist)
+   private void checkExpressedInFrames(TwistReadOnly desiredTwist, TwistReadOnly currentTwist)
    {
-      desiredTwist.getExpressedInFrame().checkReferenceFrameMatch(bodyFrame);
-      currentTwist.getExpressedInFrame().checkReferenceFrameMatch(bodyFrame);
+      desiredTwist.getReferenceFrame().checkReferenceFrameMatch(bodyFrame);
+      currentTwist.getReferenceFrame().checkReferenceFrameMatch(bodyFrame);
    }
 
    private void computeProportionalTerm(FrameQuaternion desiredOrientation)

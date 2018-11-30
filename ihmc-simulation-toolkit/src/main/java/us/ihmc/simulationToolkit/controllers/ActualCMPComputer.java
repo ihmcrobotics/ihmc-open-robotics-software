@@ -10,13 +10,13 @@ import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition.GraphicType;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.graphicsDescription.yoGraphics.plotting.YoArtifactPosition;
-import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.robotics.math.filters.FilteredVelocityYoFrameVector;
-import us.ihmc.robotics.math.frames.YoFrameVector;
-import us.ihmc.robotics.math.frames.YoFrameVector2d;
 import us.ihmc.simulationConstructionSetTools.robotController.SimpleRobotController;
-import us.ihmc.simulationconstructionset.HumanoidFloatingRootJointRobot;
+import us.ihmc.simulationconstructionset.FloatingRootJointRobot;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
+import us.ihmc.yoVariables.variable.YoDouble;
+import us.ihmc.yoVariables.variable.YoFrameVector2D;
+import us.ihmc.yoVariables.variable.YoFrameVector3D;
 
 public class ActualCMPComputer extends SimpleRobotController
 {
@@ -25,7 +25,7 @@ public class ActualCMPComputer extends SimpleRobotController
 
    private final YoGraphicsListRegistry yoGraphicsListRegistry;
 
-   private final HumanoidFloatingRootJointRobot simulatedRobot;
+   private final FloatingRootJointRobot simulatedRobot;
    private final double simulateDT;
    private final double gravity;
 
@@ -37,12 +37,12 @@ public class ActualCMPComputer extends SimpleRobotController
    private final Point2D cmp = new Point2D();
 
    private final YoDouble alpha = new YoDouble("momentumRateAlpha", registry);
-   private final YoFrameVector yoLinearMomentum = new YoFrameVector("linearMomentum", worldFrame, registry);
+   private final YoFrameVector3D yoLinearMomentum = new YoFrameVector3D("linearMomentum", worldFrame, registry);
    private final FilteredVelocityYoFrameVector momentumChange;
 
-   private final YoFrameVector2d yoCmp = new YoFrameVector2d("actualCMP", worldFrame, registry);
+   private final YoFrameVector2D yoCmp = new YoFrameVector2D("actualCMP", worldFrame, registry);
 
-   public ActualCMPComputer(boolean createViz, SimulationConstructionSet scs, HumanoidFloatingRootJointRobot simulatedRobot)
+   public ActualCMPComputer(boolean createViz, SimulationConstructionSet scs, FloatingRootJointRobot simulatedRobot)
    {
       this.simulatedRobot = simulatedRobot;
       simulateDT = scs.getDT();

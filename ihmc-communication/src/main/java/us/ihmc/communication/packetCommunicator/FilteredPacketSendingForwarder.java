@@ -12,15 +12,16 @@ import us.ihmc.communication.packets.Packet;
  * If you send from the source it will filter the packet then call send on the destination
  * communicator.
  */
+@SuppressWarnings("rawtypes")
 public class FilteredPacketSendingForwarder implements GlobalPacketConsumer
 {
    private static final boolean DEBUG = false;
    
    private final PacketCommunicator communicatorToForwardFrom;
    private final PacketCommunicator communicatorToForwardTo;
-   private final HashMap<Class, TimedElapsedChecker> inclusiveClassesWithElapsedTimeTriggers = new HashMap<Class, FilteredPacketSendingForwarder.TimedElapsedChecker>();
-   private final HashSet<Class> classesToInclude = new HashSet<Class>();
-   private final HashSet<Class> classesToExclude = new HashSet<Class>();
+   private final HashMap<Class, TimedElapsedChecker> inclusiveClassesWithElapsedTimeTriggers = new HashMap<>();
+   private final HashSet<Class> classesToInclude = new HashSet<>();
+   private final HashSet<Class> classesToExclude = new HashSet<>();
    private enum ForwarderMode { INCLUSIVE, EXCLUSIVE, DISABLED };
    private final AtomicSettableTimestampProvider timestampProvider;
    private ForwarderMode mode;

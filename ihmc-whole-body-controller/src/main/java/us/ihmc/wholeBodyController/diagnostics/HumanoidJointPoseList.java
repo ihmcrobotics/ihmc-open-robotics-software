@@ -2,17 +2,17 @@ package us.ihmc.wholeBodyController.diagnostics;
 
 import java.util.ArrayList;
 
+import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotModels.FullRobotModel;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.yoVariables.variable.YoEnum;
-import us.ihmc.yoVariables.variable.YoInteger;
 import us.ihmc.robotics.partNames.ArmJointName;
 import us.ihmc.robotics.partNames.LegJointName;
 import us.ihmc.robotics.partNames.SpineJointName;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
-import us.ihmc.robotics.screwTheory.OneDoFJoint;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoEnum;
+import us.ihmc.yoVariables.variable.YoInteger;
 
 public class HumanoidJointPoseList
 {
@@ -35,13 +35,13 @@ public class HumanoidJointPoseList
       parentRegistry.addChild(registry);
    }
    
-   public SideDependentList<ArrayList<OneDoFJoint>> getArmJoints(FullHumanoidRobotModel fullRobotModel)
+   public SideDependentList<ArrayList<OneDoFJointBasics>> getArmJoints(FullHumanoidRobotModel fullRobotModel)
    {
-      SideDependentList<ArrayList<OneDoFJoint>> ret = new SideDependentList<ArrayList<OneDoFJoint>>();
+      SideDependentList<ArrayList<OneDoFJointBasics>> ret = new SideDependentList<ArrayList<OneDoFJointBasics>>();
 
       for (RobotSide robotSide : RobotSide.values)
       {
-         ArrayList<OneDoFJoint> armJoints = new ArrayList<OneDoFJoint>();
+         ArrayList<OneDoFJointBasics> armJoints = new ArrayList<OneDoFJointBasics>();
          
          addIfNotNull(armJoints, fullRobotModel.getArmJoint(robotSide, ArmJointName.SHOULDER_PITCH));
          addIfNotNull(armJoints, fullRobotModel.getArmJoint(robotSide, ArmJointName.SHOULDER_ROLL));
@@ -54,18 +54,18 @@ public class HumanoidJointPoseList
       return ret;
    }
    
-   private void addIfNotNull(ArrayList<OneDoFJoint> oneDoFJoints, OneDoFJoint oneDoFJoint)
+   private void addIfNotNull(ArrayList<OneDoFJointBasics> oneDoFJoints, OneDoFJointBasics oneDoFJoint)
    {
       if (oneDoFJoint != null) oneDoFJoints.add(oneDoFJoint);
    }
    
-   public SideDependentList<ArrayList<OneDoFJoint>> getLegJoints(FullHumanoidRobotModel fullRobotModel)
+   public SideDependentList<ArrayList<OneDoFJointBasics>> getLegJoints(FullHumanoidRobotModel fullRobotModel)
    {
-      SideDependentList<ArrayList<OneDoFJoint>> ret = new SideDependentList<ArrayList<OneDoFJoint>>();
+      SideDependentList<ArrayList<OneDoFJointBasics>> ret = new SideDependentList<ArrayList<OneDoFJointBasics>>();
 
       for (RobotSide robotSide : RobotSide.values)
       {
-         ArrayList<OneDoFJoint> legJoints = new ArrayList<OneDoFJoint>();
+         ArrayList<OneDoFJointBasics> legJoints = new ArrayList<OneDoFJointBasics>();
          
          legJoints.add(fullRobotModel.getLegJoint(robotSide, LegJointName.HIP_YAW));
          legJoints.add(fullRobotModel.getLegJoint(robotSide, LegJointName.HIP_ROLL));
@@ -80,9 +80,9 @@ public class HumanoidJointPoseList
       return ret;
    }
    
-   public ArrayList<OneDoFJoint> getSpineJoints(FullRobotModel fullRobotModel)
+   public ArrayList<OneDoFJointBasics> getSpineJoints(FullRobotModel fullRobotModel)
    {
-      ArrayList<OneDoFJoint> spineJoints = new ArrayList<OneDoFJoint>();
+      ArrayList<OneDoFJointBasics> spineJoints = new ArrayList<OneDoFJointBasics>();
 
       spineJoints.add(fullRobotModel.getSpineJoint(SpineJointName.SPINE_YAW));
       spineJoints.add(fullRobotModel.getSpineJoint(SpineJointName.SPINE_PITCH));

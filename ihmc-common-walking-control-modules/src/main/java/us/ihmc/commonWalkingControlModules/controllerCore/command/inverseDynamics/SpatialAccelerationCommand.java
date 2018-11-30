@@ -14,13 +14,15 @@ import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.exceptions.ReferenceFrameMismatchException;
+import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DReadOnly;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
+import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
+import us.ihmc.mecano.spatial.SpatialAcceleration;
+import us.ihmc.mecano.spatial.interfaces.SpatialAccelerationReadOnly;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
-import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.robotics.screwTheory.SelectionMatrix3D;
 import us.ihmc.robotics.screwTheory.SelectionMatrix6D;
-import us.ihmc.robotics.screwTheory.SpatialAccelerationVector;
 import us.ihmc.robotics.weightMatrices.SolverWeightLevels;
 import us.ihmc.robotics.weightMatrices.WeightMatrix3D;
 import us.ihmc.robotics.weightMatrices.WeightMatrix6D;
@@ -78,13 +80,13 @@ public class SpatialAccelerationCommand implements InverseDynamicsCommand<Spatia
     * The base is the rigid-body located right before the first joint to be used for controlling the
     * end-effector.
     */
-   private RigidBody base;
+   private RigidBodyBasics base;
    /** The end-effector is the rigid-body to be controlled. */
-   private RigidBody endEffector;
+   private RigidBodyBasics endEffector;
    /**
     * Intermediate base located between the {@code base} and {@code endEffector}. It can be null.
     */
-   private RigidBody optionalPrimaryBase;
+   private RigidBodyBasics optionalPrimaryBase;
 
    private String baseName;
    private String endEffectorName;
@@ -148,7 +150,7 @@ public class SpatialAccelerationCommand implements InverseDynamicsCommand<Spatia
     *           end-effector.
     * @param endEffector the rigid-body to be controlled.
     */
-   public void set(RigidBody base, RigidBody endEffector)
+   public void set(RigidBodyBasics base, RigidBodyBasics endEffector)
    {
       this.base = base;
       this.endEffector = endEffector;
@@ -176,7 +178,7 @@ public class SpatialAccelerationCommand implements InverseDynamicsCommand<Spatia
     * 
     * @param primaryBase the rigid-body to use as the primary base. Optional.
     */
-   public void setPrimaryBase(RigidBody primaryBase)
+   public void setPrimaryBase(RigidBodyBasics primaryBase)
    {
       optionalPrimaryBase = primaryBase;
       optionalPrimaryBaseName = primaryBase.getName();
@@ -249,16 +251,16 @@ public class SpatialAccelerationCommand implements InverseDynamicsCommand<Spatia
     *            {@code baseFrame = base.getBodyFixedFrame()},
     *            {@code expressedInFrame = controlFrame}.
     */
-   public void setSpatialAcceleration(ReferenceFrame controlFrame, SpatialAccelerationVector desiredSpatialAcceleration)
+   public void setSpatialAcceleration(ReferenceFrame controlFrame, SpatialAccelerationReadOnly desiredSpatialAcceleration)
    {
       desiredSpatialAcceleration.getBodyFrame().checkReferenceFrameMatch(endEffector.getBodyFixedFrame());
       desiredSpatialAcceleration.getBaseFrame().checkReferenceFrameMatch(base.getBodyFixedFrame());
-      desiredSpatialAcceleration.getExpressedInFrame().checkReferenceFrameMatch(controlFrame);
+      desiredSpatialAcceleration.getReferenceFrame().checkReferenceFrameMatch(controlFrame);
 
       controlFramePose.setToZero(controlFrame);
       controlFramePose.changeFrame(endEffector.getBodyFixedFrame());
-      desiredSpatialAcceleration.getAngularPart(desiredAngularAcceleration);
-      desiredSpatialAcceleration.getLinearPart(desiredLinearAcceleration);
+      desiredAngularAcceleration.set(desiredSpatialAcceleration.getAngularPart());
+      desiredLinearAcceleration.set(desiredSpatialAcceleration.getLinearPart());
    }
 
    /**
@@ -693,11 +695,11 @@ public class SpatialAccelerationCommand implements InverseDynamicsCommand<Spatia
     * @param desiredSpatialAccelerationToPack the desired spatial acceleration of the end-effector
     *           with respect to the base, expressed in the control frame. Modified.
     */
-   public void getDesiredSpatialAcceleration(PoseReferenceFrame controlFrameToPack, SpatialAccelerationVector desiredSpatialAccelerationToPack)
+   public void getDesiredSpatialAcceleration(PoseReferenceFrame controlFrameToPack, SpatialAcceleration desiredSpatialAccelerationToPack)
    {
       getControlFrame(controlFrameToPack);
-      desiredSpatialAccelerationToPack.set(endEffector.getBodyFixedFrame(), base.getBodyFixedFrame(), controlFrameToPack, desiredLinearAcceleration,
-                                           desiredAngularAcceleration);
+      desiredSpatialAccelerationToPack.setIncludingFrame(endEffector.getBodyFixedFrame(), base.getBodyFixedFrame(), controlFrameToPack, desiredAngularAcceleration,
+                                           desiredLinearAcceleration);
    }
 
    /**
@@ -749,6 +751,16 @@ public class SpatialAccelerationCommand implements InverseDynamicsCommand<Spatia
    }
 
    /**
+    * Gets a read only view of the pose of the control frame expressed in {@code endEffector.getBodyFixedFrame()}.
+    *
+    * @return the pose of the control frame.
+    */
+   public FramePose3DReadOnly getControlFramePose()
+   {
+      return controlFramePose;
+   }
+
+   /**
     * Packs the position and orientation of the control frame expressed in
     * {@code endEffector.getBodyFixedFrame()}.
     * 
@@ -759,6 +771,16 @@ public class SpatialAccelerationCommand implements InverseDynamicsCommand<Spatia
    {
       positionToPack.setIncludingFrame(controlFramePose.getPosition());
       orientationToPack.setIncludingFrame(controlFramePose.getOrientation());
+   }
+
+   /**
+    * Gets the internal reference to the selection matrix to use with this command.
+    * 
+    * @return the selection matrix.
+    */
+   public SelectionMatrix6D getSelectionMatrix()
+   {
+      return selectionMatrix;
    }
 
    /**
@@ -787,6 +809,28 @@ public class SpatialAccelerationCommand implements InverseDynamicsCommand<Spatia
    }
 
    /**
+    * Packs the linear value of the selection matrix carried by this command into the given
+    * {@code selectionMatrixToPack}.
+    *
+    * @param selectionMatrixToPack the linear selection matrix to pack.
+    */
+   public void getLinearSelectionMatrix(SelectionMatrix3D selectionMatrixToPack)
+   {
+      selectionMatrixToPack.set(selectionMatrix.getLinearPart());
+   }
+
+   /**
+    * Packs the angular value of the selection matrix carried by this command into the given
+    * {@code selectionMatrixToPack}.
+    *
+    * @param selectionMatrixToPack the linear selection matrix to pack.
+    */
+   public void getAngularSelectionMatrix(SelectionMatrix3D selectionMatrixToPack)
+   {
+      selectionMatrixToPack.set(selectionMatrix.getAngularPart());
+   }
+
+   /**
     * Gets the reference to the base of this command.
     * <p>
     * The joint path going from the {@code base} to the {@code endEffector} specifies the joints
@@ -796,7 +840,7 @@ public class SpatialAccelerationCommand implements InverseDynamicsCommand<Spatia
     * @return the rigid-body located right before the first joint to be used for controlling the
     *         end-effector.
     */
-   public RigidBody getBase()
+   public RigidBodyBasics getBase()
    {
       return base;
    }
@@ -820,7 +864,7 @@ public class SpatialAccelerationCommand implements InverseDynamicsCommand<Spatia
     * 
     * @return the rigid-body to be controlled.
     */
-   public RigidBody getEndEffector()
+   public RigidBodyBasics getEndEffector()
    {
       return endEffector;
    }
@@ -845,7 +889,7 @@ public class SpatialAccelerationCommand implements InverseDynamicsCommand<Spatia
     * 
     * @return the rigid-body to use as the primary base. Optional.
     */
-   public RigidBody getPrimaryBase()
+   public RigidBodyBasics getPrimaryBase()
    {
       return optionalPrimaryBase;
    }

@@ -6,6 +6,7 @@ import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.graphicsDescription.Graphics3DObject;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.robotics.lidar.LidarScanParameters;
+import us.ihmc.robotics.robotDescription.LidarSensorDescription;
 import us.ihmc.simulationconstructionset.FloatingJoint;
 import us.ihmc.simulationconstructionset.Link;
 import us.ihmc.simulationconstructionset.PinJoint;
@@ -43,7 +44,13 @@ public class SimpleLidarRobot extends Robot
       RigidBodyTransform transform = new RigidBodyTransform();
       transform.setTranslation(new Vector3D(radius + 0.001, 0.0, height / 2.0));
       lidarScanParameters = new LidarScanParameters(720, -Math.PI / 2.0f, Math.PI / 2.0f, 0f, 0.1f, 30.0f, 0f);
-      LidarMount lidarMount = new LidarMount(transform, lidarScanParameters, "lidar");
+      LidarSensorDescription lidarSensorDescription = new LidarSensorDescription("lidar", transform);
+      lidarSensorDescription.setPointsPerSweep(lidarScanParameters.getPointsPerSweep());
+      lidarSensorDescription.setScanHeight(lidarScanParameters.getScanHeight());
+      lidarSensorDescription.setSweepYawLimits(lidarScanParameters.getSweepYawMin(), lidarScanParameters.getSweepYawMax());
+      lidarSensorDescription.setSweepYawLimits(lidarScanParameters.getMinRange(), lidarScanParameters.getMaxRange());
+      lidarSensorDescription.setHeightPitchLimits(lidarScanParameters.heightPitchMin, lidarScanParameters.heightPitchMax);
+      LidarMount lidarMount = new LidarMount(lidarSensorDescription);
       lidarJoint.addLidarMount(lidarMount);
 
       linkGraphics.addModelFile("models/hokuyo.dae", YoAppearance.Black());

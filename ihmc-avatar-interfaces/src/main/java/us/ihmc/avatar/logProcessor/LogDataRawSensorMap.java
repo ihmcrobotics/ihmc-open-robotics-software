@@ -4,20 +4,19 @@ import java.util.LinkedHashMap;
 
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
+import us.ihmc.mecano.multiBodySystem.interfaces.JointBasics;
+import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.robotModels.FullRobotModel;
-import us.ihmc.yoVariables.dataBuffer.YoVariableHolder;
-import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.yoVariables.variable.YoLong;
-import us.ihmc.robotics.math.frames.YoFrameQuaternion;
 import us.ihmc.robotics.math.frames.YoFrameVariableNameTools;
-import us.ihmc.robotics.math.frames.YoFrameVector;
-import us.ihmc.robotics.screwTheory.InverseDynamicsJoint;
-import us.ihmc.robotics.screwTheory.OneDoFJoint;
-import us.ihmc.robotics.screwTheory.ScrewTools;
 import us.ihmc.robotics.sensors.ForceSensorDefinition;
 import us.ihmc.robotics.sensors.IMUDefinition;
 import us.ihmc.sensorProcessing.sensorProcessors.SensorProcessing;
 import us.ihmc.sensorProcessing.simulatedSensors.StateEstimatorSensorDefinitions;
+import us.ihmc.yoVariables.dataBuffer.YoVariableHolder;
+import us.ihmc.yoVariables.variable.YoDouble;
+import us.ihmc.yoVariables.variable.YoFrameQuaternion;
+import us.ihmc.yoVariables.variable.YoFrameVector3D;
+import us.ihmc.yoVariables.variable.YoLong;
 
 public class LogDataRawSensorMap
 {
@@ -32,8 +31,8 @@ public class LogDataRawSensorMap
    private final LinkedHashMap<String, YoDouble> rawJointTauMap = new LinkedHashMap<>();
 
    private final LinkedHashMap<String, YoFrameQuaternion> rawIMUOrientationMap = new LinkedHashMap<>();
-   private final LinkedHashMap<String, YoFrameVector> rawIMUAngularVelocityMap = new LinkedHashMap<>();
-   private final LinkedHashMap<String, YoFrameVector> rawIMULinearAccelerationMap = new LinkedHashMap<>();
+   private final LinkedHashMap<String, YoFrameVector3D> rawIMUAngularVelocityMap = new LinkedHashMap<>();
+   private final LinkedHashMap<String, YoFrameVector3D> rawIMULinearAccelerationMap = new LinkedHashMap<>();
 
    public LogDataRawSensorMap(FullRobotModel fullRobotModel, YoVariableHolder yoVariableHolder)
    {
@@ -42,7 +41,7 @@ public class LogDataRawSensorMap
       timestamp = (YoLong) yoVariableHolder.getVariable(sensorProcessingName, "timestamp");
       visionSensorTimestamp = (YoLong) yoVariableHolder.getVariable(sensorProcessingName, "visionSensorTimestamp");
       
-      for (OneDoFJoint joint : stateEstimatorSensorDefinitions.getJointSensorDefinitions())
+      for (OneDoFJointBasics joint : stateEstimatorSensorDefinitions.getJointSensorDefinitions())
       {
          String jointName = joint.getName();
          YoDouble rawJointPosition = (YoDouble) yoVariableHolder.getVariable(sensorProcessingName, "raw_q_" + jointName);
@@ -73,7 +72,7 @@ public class LogDataRawSensorMap
          YoDouble qd_wz = (YoDouble) yoVariableHolder.getVariable(sensorProcessingName, YoFrameVariableNameTools.createZName("raw_qd_w", imuName));
          if (qd_wx != null && qd_wy != null && qd_wz != null)
          {
-            YoFrameVector rawAngularVelocity = new YoFrameVector(qd_wx, qd_wy, qd_wz, null);
+            YoFrameVector3D rawAngularVelocity = new YoFrameVector3D(qd_wx, qd_wy, qd_wz, null);
             rawIMUAngularVelocityMap.put(imuName, rawAngularVelocity);
          }
          
@@ -82,7 +81,7 @@ public class LogDataRawSensorMap
          YoDouble qdd_z = (YoDouble) yoVariableHolder.getVariable(sensorProcessingName, YoFrameVariableNameTools.createZName("raw_qdd_", imuName));
          if (qdd_x != null && qdd_y != null && qdd_z != null)
          {
-            YoFrameVector rawLinearAcceleration = new YoFrameVector(qdd_x, qdd_y, qdd_z, null);
+            YoFrameVector3D rawLinearAcceleration = new YoFrameVector3D(qdd_x, qdd_y, qdd_z, null);
             rawIMULinearAccelerationMap.put(imuName, rawLinearAcceleration);
          }
       }
@@ -90,17 +89,17 @@ public class LogDataRawSensorMap
 
    private StateEstimatorSensorDefinitions buildStateEstimatorSensorDefinitions(FullRobotModel fullRobotModel)
    {
-      InverseDynamicsJoint rootJoint = fullRobotModel.getRootJoint();
+      JointBasics rootJoint = fullRobotModel.getRootJoint();
       IMUDefinition[] imuDefinitions = fullRobotModel.getIMUDefinitions();
       ForceSensorDefinition[] forceSensorDefinitions = fullRobotModel.getForceSensorDefinitions();
 
       StateEstimatorSensorDefinitions stateEstimatorSensorDefinitions = new StateEstimatorSensorDefinitions();
 
-      for (InverseDynamicsJoint joint : ScrewTools.computeSubtreeJoints(rootJoint.getSuccessor()))
+      for (JointBasics joint : rootJoint.subtreeIterable())
       {
-         if (joint instanceof OneDoFJoint)
+         if (joint instanceof OneDoFJointBasics)
          {
-            OneDoFJoint oneDoFJoint = (OneDoFJoint) joint;
+            OneDoFJointBasics oneDoFJoint = (OneDoFJointBasics) joint;
             stateEstimatorSensorDefinitions.addJointSensorDefinition(oneDoFJoint);
          }
       }

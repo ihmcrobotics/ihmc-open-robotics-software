@@ -1,44 +1,56 @@
 package us.ihmc.avatar.networkProcessor.modules;
 
+import java.io.IOException;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ScheduledFuture;
+
+import javax.management.RuntimeErrorException;
+
 import us.ihmc.communication.controllerAPI.StatusMessageOutputManager;
-import us.ihmc.communication.packets.PacketDestination;
-import us.ihmc.communication.packets.SettablePacket;
+import us.ihmc.euclid.interfaces.Settable;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoBoolean;
 
 public abstract class ToolboxController
 {
-   private static final boolean DEBUG = false;
+   protected static final boolean DEBUG = false;
 
    protected final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
-   private final StatusMessageOutputManager statusOutputManager;
-
-   private boolean initialize = true;
-   // TODO Figure out to do multiple destination. Would be useful for modules like the quad-tree.
-   private PacketDestination packetDestination = null;
+   protected final StatusMessageOutputManager statusOutputManager;
+   private final YoBoolean initialize = new YoBoolean("initialize" + registry.getName(), registry);
+   
+   private ScheduledFuture<?> futureToListenTo;
 
    public ToolboxController(StatusMessageOutputManager statusOutputManager, YoVariableRegistry parentRegistry)
    {
       this.statusOutputManager = statusOutputManager;
       parentRegistry.addChild(registry);
+      requestInitialize();
    }
 
+   /**
+    * Request this toolbox controller to run {@link #initialize} on the next call of
+    * {@link #update()}.
+    */
    public void requestInitialize()
    {
-      initialize = true;
+      initialize.set(true);
    }
 
-   public void setPacketDestination(PacketDestination packetDestination)
+   /**
+    * Initializes once and run the {@link #updateInternal()} of this toolbox controller only if the
+    * initialization succeeded.
+    * @throws Exception 
+    * 
+    * @see #hasBeenInitialized() The initialization state of this toolbox controller.
+    */
+   public void update() 
    {
-      this.packetDestination = packetDestination;
-   }
-
-   public void update()
-   {
-      if (initialize)
+      if (initialize.getBooleanValue())
       {
          if (!initialize()) // Return until the initialization succeeds
             return;
-         initialize = false;
+         initialize.set(false);
       }
 
       try
@@ -52,18 +64,76 @@ public abstract class ToolboxController
             e.printStackTrace();
          }
       }
+      
+      if (futureToListenTo != null)
+      {
+         if (futureToListenTo.isDone())
+         {
+            try
+            {
+               futureToListenTo.get();
+            }
+            catch (ExecutionException e)
+            {
+               e.getCause().printStackTrace();
+            }
+            catch (InterruptedException exception)
+            {
+               exception.getCause().printStackTrace();
+            }
+            
+            throw new RuntimeException("Toolbox controller thread crashed.");
+         }
+      }
+   }
+   
+   public void setFutureToListenTo(ScheduledFuture<?> future)
+   {
+      futureToListenTo = future;
    }
 
-   protected <T extends SettablePacket<T>> void reportMessage(T statusMessage)
+   /**
+    * Get the initialization state of this toolbox controller:
+    * <ul>
+    * <li>{@code true}: this toolbox controller has been initialized properly and is ready for doing
+    * some computation!
+    * <li>{@code false}: this toolbox controller has either not been initialized yet or the
+    * initialization process failed.
+    * </ul>
+    * 
+    * @return the initialization state of this toolbox controller.
+    */
+   public boolean hasBeenInitialized()
    {
-      if (packetDestination == null)
-         return;
+      return !initialize.getValue();
+   }
 
-      statusMessage.setDestination(packetDestination);
+   /**
+    * Publishes the given status message. It used for sending the result computed by this toolbox
+    * controller.
+    * 
+    * @param statusMessage the message to publish.
+    */
+   public <S extends Settable<S>> void reportMessage(S statusMessage)
+   {
       statusOutputManager.reportStatusMessage(statusMessage);
    }
 
-   abstract protected void updateInternal() throws Exception;
-   abstract protected boolean initialize();
-   abstract protected boolean isDone();
+   /**
+    * Internal initialization method for preparing this toolbox controller before running
+    * {@link #updateInternal()}.
+    * 
+    * @return {@code true} if the initialization succeeded, {@code false} otherwise.
+    */
+   abstract public boolean initialize();
+
+   /**
+    * Internal update method that should perform the computation for this toolbox controller. It is
+    * called only if {@link #initialize()} has succeeded.
+    * 
+    * @throws Exception
+    */
+   abstract public void updateInternal() throws Exception;
+
+   abstract public boolean isDone();
 }

@@ -9,12 +9,12 @@ import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
 import us.ihmc.robotics.math.filters.AlphaFilteredYoFrameVector;
-import us.ihmc.robotics.math.frames.YoFramePoint;
-import us.ihmc.robotics.math.frames.YoFrameVector;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
+import us.ihmc.yoVariables.variable.YoFramePoint3D;
+import us.ihmc.yoVariables.variable.YoFrameVector3D;
 
 public class ICPPlannerWithAngularMomentumOffsetWrapper extends ICPPlannerWithTimeFreezerWrapper implements ICPPlannerWithAngularMomentumOffsetInterface
 {
@@ -24,14 +24,14 @@ public class ICPPlannerWithAngularMomentumOffsetWrapper extends ICPPlannerWithTi
 
    private final YoBoolean modifyICPPlanByAngularMomentum;
 
-   private final YoFrameVector modifiedICPVelocity;
-   private final YoFrameVector modifiedICPAcceleration;
+   private final YoFrameVector3D modifiedICPVelocity;
+   private final YoFrameVector3D modifiedICPAcceleration;
 
-   private final YoFramePoint modifiedCMPPosition;
-   private final YoFrameVector modifiedCMPVelocity;
+   private final YoFramePoint3D modifiedCMPPosition;
+   private final YoFrameVector3D modifiedCMPVelocity;
 
    private final FrameVector3D cmpOffsetFromCoP = new FrameVector3D();
-   private final YoFrameVector cmpOffset;
+   private final YoFrameVector3D cmpOffset;
    private final AlphaFilteredYoFrameVector filteredCMPOffset;
 
    private final YoDouble modifiedTimeInCurrentState;
@@ -52,15 +52,15 @@ public class ICPPlannerWithAngularMomentumOffsetWrapper extends ICPPlannerWithTi
 
       modifyICPPlanByAngularMomentum = new YoBoolean(namePrefix + "ModifyICPPlanByAngularMomentum", registry);
 
-      modifiedICPVelocity = new YoFrameVector(namePrefix + "ModifiedCapturePointVelocity", worldFrame, registry);
-      modifiedICPAcceleration = new YoFrameVector(namePrefix + "ModifiedCapturePointAcceleration", worldFrame, registry);
+      modifiedICPVelocity = new YoFrameVector3D(namePrefix + "ModifiedCapturePointVelocity", worldFrame, registry);
+      modifiedICPAcceleration = new YoFrameVector3D(namePrefix + "ModifiedCapturePointAcceleration", worldFrame, registry);
 
-      modifiedCMPPosition = new YoFramePoint(namePrefix + "ModifiedCMPPosition", worldFrame, registry);
-      modifiedCMPVelocity = new YoFrameVector(namePrefix + "ModifiedCMPVelocity", worldFrame, registry);
+      modifiedCMPPosition = new YoFramePoint3D(namePrefix + "ModifiedCMPPosition", worldFrame, registry);
+      modifiedCMPVelocity = new YoFrameVector3D(namePrefix + "ModifiedCMPVelocity", worldFrame, registry);
 
       cmpOffsetAlphaFilter = new YoDouble(namePrefix + "CMPOffsetAlphaFilter", registry);
 
-      cmpOffset = new YoFrameVector(namePrefix + "CMPOffset", worldFrame, registry);
+      cmpOffset = new YoFrameVector3D(namePrefix + "CMPOffset", worldFrame, registry);
       filteredCMPOffset = AlphaFilteredYoFrameVector.createAlphaFilteredYoFrameVector(namePrefix + "FilteredCMPOffset", "", registry,
                                                                                       cmpOffsetAlphaFilter, cmpOffset);
 
@@ -183,7 +183,7 @@ public class ICPPlannerWithAngularMomentumOffsetWrapper extends ICPPlannerWithTi
 
    /** {@inheritDoc} */
    @Override
-   public void getDesiredCapturePointVelocity(YoFrameVector desiredCapturePointVelocityToPack)
+   public void getDesiredCapturePointVelocity(YoFrameVector3D desiredCapturePointVelocityToPack)
    {
       desiredCapturePointVelocityToPack.set(modifiedICPVelocity);
    }

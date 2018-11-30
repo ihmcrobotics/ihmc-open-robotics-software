@@ -13,7 +13,7 @@ public class NonRealTimePeriodicThread implements Runnable
    
    public void createAndStartThread()
    {
-      Thread thread = new Thread(this);
+      Thread thread = new Thread(this, "IHMC-NonRealtimePeriodicThread");
       thread.start();
    }
    

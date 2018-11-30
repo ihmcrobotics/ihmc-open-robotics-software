@@ -11,9 +11,9 @@ import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamic
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.MomentumRateCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.PlaneContactStateCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.SpatialAccelerationCommand;
-import us.ihmc.robotics.lists.RecyclingArrayList;
-import us.ihmc.robotics.screwTheory.OneDoFJoint;
-import us.ihmc.robotics.screwTheory.RigidBody;
+import us.ihmc.commons.lists.RecyclingArrayList;
+import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
+import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 
 public class InverseDynamicsCommandDataCopier
 {
@@ -34,7 +34,7 @@ public class InverseDynamicsCommandDataCopier
       clear();
    }
 
-   public void retrieveRigidBodiesFromName(Map<String, RigidBody> nameToRigidBodyMap)
+   public void retrieveRigidBodiesFromName(Map<String, RigidBodyBasics> nameToRigidBodyMap)
    {
       for (int i = 0; i < externalWrenchCommands.size(); i++)
       {
@@ -51,19 +51,19 @@ public class InverseDynamicsCommandDataCopier
       for (int i = 0; i < centerOfPressureCommands.size(); i++)
       {
          CenterOfPressureCommand command = centerOfPressureCommands.get(i);
-         command.setContactingRigidBody(nameToRigidBodyMap.get(command.getContactingRigidBodyName()));
+         command.setContactingRigidBody(nameToRigidBodyMap.get(command.getContactingRigidBody().getName()));
       }
 
       for (int i = 0; i < spatialAccelerationCommands.size(); i++)
       {
          SpatialAccelerationCommand command = spatialAccelerationCommands.get(i);
-         RigidBody base = nameToRigidBodyMap.get(command.getBaseName());
-         RigidBody endEffector = nameToRigidBodyMap.get(command.getEndEffectorName());
+         RigidBodyBasics base = nameToRigidBodyMap.get(command.getBaseName());
+         RigidBodyBasics endEffector = nameToRigidBodyMap.get(command.getEndEffectorName());
          command.set(base, endEffector);
       }
    }
 
-   public void retrieveJointsFromName(Map<String, OneDoFJoint> nameToJointMap)
+   public void retrieveJointsFromName(Map<String, OneDoFJointBasics> nameToJointMap)
    {
       for (int i = 0; i < jointspaceAccelerationCommands.size(); i++)
       {

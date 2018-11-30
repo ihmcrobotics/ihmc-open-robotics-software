@@ -1,91 +1,58 @@
 package us.ihmc.robotModels;
 
-import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.mecano.frames.MovingReferenceFrame;
+import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
+import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.robotics.partNames.ArmJointName;
-import us.ihmc.robotics.partNames.LegJointName;
 import us.ihmc.robotics.partNames.LimbName;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
-import us.ihmc.robotics.screwTheory.MovingReferenceFrame;
-import us.ihmc.robotics.screwTheory.OneDoFJoint;
-import us.ihmc.robotics.screwTheory.RigidBody;
 
-public interface FullHumanoidRobotModel extends FullRobotModel
+public interface FullHumanoidRobotModel extends FullLeggedRobotModel<RobotSide>
 {
    /**
-    *  Returns the {@link ReferenceFrame} attached right after the specified leg joint.
-    *  Its origin is at the joint location.
-    *  When all the joints are at 0, the {@link ReferenceFrame} is oriented: x = forward, y = left, and z = up.
-    *
-    * @param robotSide Refers to which leg the frame's joint belongs to (assuming there is only one left leg and one right leg).
-    * @param legJointName Refers to which joint the frame is attached to.
+    * Returns the {@link RigidBodyBasics} describing the chest (or trunk) of this robot.
+    * The chest is considered to be located right after the spine joints, and right before the arms and head.
     */
-   public abstract MovingReferenceFrame getFrameAfterLegJoint(RobotSide robotSide, LegJointName legJointName);
+   RigidBodyBasics getChest();
 
    /**
-    * Return the {@link OneDoFJoint} describing the the corresponding leg joint.
-    * @param robotSide Refers to which leg the joint belongs to (assuming there is only one left leg and one right leg).
-    * @param legJointName Refers to the joint's name.
+    * Returns the {@link RigidBodyBasics} describing the pelvis of this robot.
+    * In the current framework (on the day: 3/1/2018), the pelvis is the the first successor of the root joint.
     */
-   public abstract OneDoFJoint getLegJoint(RobotSide robotSide, LegJointName legJointName);
+   RigidBodyBasics getPelvis();
 
    /**
-    * Return the {@link OneDoFJoint} describing the the corresponding arm joint.
+    * Return the {@link OneDoFJointBasics} describing the the corresponding arm joint.
     * @param robotSide Refers to which arm the joint belongs to (assuming there is only one left arm and one right arm).
     * @param armJointName Refers to the joint's name.
     */
-   public abstract OneDoFJoint getArmJoint(RobotSide robotSide, ArmJointName armJointName);
+   OneDoFJointBasics getArmJoint(RobotSide robotSide, ArmJointName armJointName);
 
    /**
-    * Returns the {@link RigidBody} describing the left or right foot of this robot.
-    * A foot is considered as the end-effector (thus the last {@RigidBody}) of the leg to which it belongs to.
-    *
-    * @param robotSide Refers to which side the foot belongs to (assuming there is only one left foot and one right foot).
-    */
-   public abstract RigidBody getFoot(RobotSide robotSide);
-
-   /**
-    * Returns the {@link RigidBody} describing the left or right hand of this robot.
+    * Returns the {@link RigidBodyBasics} describing the left or right hand of this robot.
     * A hand is most of the time considered as the end-effector of the leg to which it belongs to.
     * However, hand palm and fingers are located after the hand.
     *
     * @param robotSide Refers to which side the foot belongs to (assuming there is only one left foot and one right foot).
     */
-   public abstract RigidBody getHand(RobotSide robotSide);
-
-   /**
-    * This method is equivalent to:
-    * <p>{@link FullHumanoidRobotModel#getFoot(RobotSide)} when {@code limbName == LimbName.LEG},</p>
-    * <p>{@link FullHumanoidRobotModel#getHand(RobotSide)} when {@code limbName == LimbName.ARM}.</p>
-    * @param robotSide refers to the end-effector side.
-    * @param limbName refers to the limb the end-effector is attached to (either a leg or an arm).
-    */
-   public abstract RigidBody getEndEffector(RobotSide robotSide, LimbName limbName);
-
-   /**
-    * This methods returns the frame located right after the parent joint of this end-effector (see {@link FullHumanoidRobotModel#getEndEffector(RobotSide, LimbName)}).
-    */
-   public abstract MovingReferenceFrame getEndEffectorFrame(RobotSide robotSide, LimbName limbName);
+   RigidBodyBasics getHand(RobotSide robotSide);
 
    /**
     * Returns a control frame attached to the right or left hand that the controller uses to control the hand in taskspace.
     * @param robotSide
     * @return
     */
-   public abstract MovingReferenceFrame getHandControlFrame(RobotSide robotSide);
+   MovingReferenceFrame getHandControlFrame(RobotSide robotSide);
 
-   /**
-    * Returns the left or right sole reference frame.
-    * A sole frame is attached to a foot and is generally used to put the foot contact points.
-    * Its origin is right in the middle of the bottom of the foot.
-    * @param robotSide
-    * @return
-    */
-   public abstract MovingReferenceFrame getSoleFrame(RobotSide robotSide);
+   @Override
+   default RobotSide[] getRobotSegments()
+   {
+      return RobotSide.values;
+   }
 
-   public abstract SideDependentList<MovingReferenceFrame> getSoleFrames();
+   @Override
+   SideDependentList<MovingReferenceFrame> getSoleFrames();
 
-   public abstract void setJointAngles(RobotSide side, LimbName limb, double[] q);
-
-
+   void setJointAngles(RobotSide side, LimbName limb, double[] q);
 }

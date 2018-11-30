@@ -2,18 +2,27 @@ package us.ihmc.humanoidRobotics.communication.packets;
 
 import java.awt.image.BufferedImage;
 
-import boofcv.struct.calib.IntrinsicParameters;
+import controller_msgs.msg.dds.IntrinsicParametersMessage;
 import us.ihmc.communication.packets.Packet;
 
 public class LocalVideoPacket extends Packet<LocalVideoPacket>
 {
    public long timeStamp;
    public BufferedImage image;
-   public IntrinsicParameters intrinsicParameters;
+   public IntrinsicParametersMessage intrinsicParameters;
 
    public LocalVideoPacket()
    {
 
+   }
+
+   @Override
+   public void set(LocalVideoPacket other)
+   {
+      timeStamp = other.timeStamp;
+      image = other.image;
+      intrinsicParameters =  other.intrinsicParameters;
+      setPacketInformation(other);
    }
 
    public long getTimeStamp()
@@ -26,20 +35,13 @@ public class LocalVideoPacket extends Packet<LocalVideoPacket>
       return image;
    }
 
-   public IntrinsicParameters getIntrinsicParameters()
+   public IntrinsicParametersMessage getIntrinsicParameters()
    {
       return intrinsicParameters;
    }
 
-   public void setIntrinsicParameters(IntrinsicParameters intrinsicParameters)
+   public void setIntrinsicParameters(IntrinsicParametersMessage intrinsicParameters)
    {
-      this.intrinsicParameters = intrinsicParameters;
-   }
-
-   public LocalVideoPacket(long timeStamp, BufferedImage image, IntrinsicParameters intrinsicParameters)
-   {
-      this.timeStamp = timeStamp;
-      this.image = image;
       this.intrinsicParameters = intrinsicParameters;
    }
 
@@ -51,11 +53,4 @@ public class LocalVideoPacket extends Packet<LocalVideoPacket>
       ret &= intrinsicParameters.equals(other.intrinsicParameters);
       return ret;
    }
-
-   @Override
-   public boolean isClonable()
-   {
-      return false;
-   }
-
 }

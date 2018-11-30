@@ -3,9 +3,11 @@ package us.ihmc.footstepPlanning.polygonSnapping;
 import java.util.List;
 
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
+import us.ihmc.euclid.geometry.interfaces.ConvexPolygon2DBasics;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.pathPlanning.visibilityGraphs.tools.PlanarRegionTools;
 import us.ihmc.robotics.geometry.PlanarRegion;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 
@@ -32,10 +34,15 @@ public class PlanarRegionsListPolygonSnapper
     * @param regionToPack the planar region that this snaps to will be packed here (can be null).
     * @return RigidBodyTransform Transform required to snap the polygon down onto the PlanarRegion.
     */
-   public static RigidBodyTransform snapPolygonToPlanarRegionsList(ConvexPolygon2D polygonToSnap, PlanarRegionsList planarRegionsListToSnapTo, PlanarRegion regionToPack)
+   public static RigidBodyTransform snapPolygonToPlanarRegionsList(ConvexPolygon2DBasics polygonToSnap, PlanarRegionsList planarRegionsListToSnapTo, PlanarRegion regionToPack)
+   {
+      return snapPolygonToPlanarRegionsList(polygonToSnap, planarRegionsListToSnapTo.getPlanarRegionsAsList(), regionToPack);
+   }
+
+   public static RigidBodyTransform snapPolygonToPlanarRegionsList(ConvexPolygon2DBasics polygonToSnap, List<PlanarRegion> planarRegionsListToSnapTo, PlanarRegion regionToPack)
    {
       double allowableExtraZ = 0.003; // For close ones. When close, take one that is flatter...
-      List<PlanarRegion> intersectingRegions = planarRegionsListToSnapTo.findPlanarRegionsIntersectingPolygon(polygonToSnap);
+      List<PlanarRegion> intersectingRegions = PlanarRegionTools.findPlanarRegionsIntersectingPolygon(polygonToSnap, planarRegionsListToSnapTo);
 
       if ((intersectingRegions == null) || (intersectingRegions.isEmpty()))
       {

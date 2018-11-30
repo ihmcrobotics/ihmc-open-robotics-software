@@ -1,4 +1,5 @@
 package us.ihmc.robotDataLogger;
+
 /**
 * 
 * Definition of the enum "CameraType" defined in Announcement.idl. 
@@ -7,14 +8,19 @@ package us.ihmc.robotDataLogger;
 * Do not update this file directly, edit Announcement.idl instead.
 *
 */
+import us.ihmc.idl.IDLTools;
+
 public enum CameraType
 {
-        	CAPTURE_CARD,
-        
-        	NETWORK_STREAM,
-        
-	;
-	
-	public static CameraType[] values = values();
+         CAPTURE_CARD,
+      
+         NETWORK_STREAM,
+      
+   ;
+   public static CameraType[] values = values();
 
+   public boolean epsilonEquals(CameraType other, double epsilon)
+   {
+      return IDLTools.epsilonEqualsEnum(this, other, epsilon);
+   }
 }

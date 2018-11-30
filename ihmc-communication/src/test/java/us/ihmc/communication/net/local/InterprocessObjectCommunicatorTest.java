@@ -9,13 +9,14 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Random;
 
-import org.apache.commons.lang3.mutable.MutableDouble;
-import org.apache.commons.lang3.mutable.MutableInt;
 import org.junit.After;
 import org.junit.Test;
 
+import std_msgs.msg.dds.Float64;
+import std_msgs.msg.dds.Int32;
 import us.ihmc.communication.net.NetClassList;
 import us.ihmc.communication.net.ObjectConsumer;
+import us.ihmc.communication.packets.Packet;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 
 public class InterprocessObjectCommunicatorTest
@@ -54,22 +55,22 @@ public class InterprocessObjectCommunicatorTest
       IntraprocessObjectCommunicator port256Client = new IntraprocessObjectCommunicator(256, new TestNetClassList());
 
       // Check for not getting packets back I sent
-      port128ClientA.attachListener(MutableInt.class, new FailConsumer<MutableInt>());
+      port128ClientA.attachListener(Int32.class, new FailConsumer<Int32>());
       // Check if no packets arrive at a disconnected listener
-      port128ClientDisconnected.attachListener(MutableInt.class, new FailConsumer<MutableInt>());
+      port128ClientDisconnected.attachListener(Int32.class, new FailConsumer<Int32>());
       // Check if no packets arrive at a different port
-      port256Client.attachListener(MutableInt.class, new FailConsumer<MutableInt>());
+      port256Client.attachListener(Int32.class, new FailConsumer<Int32>());
       // Check if no packets of the wrong type get received
-      port128ClientB.attachListener(MutableDouble.class, new FailConsumer<MutableDouble>());
+      port128ClientB.attachListener(Float64.class, new FailConsumer<Float64>());
 
-      port128ClientB.attachListener(MutableInt.class, new ObjectConsumer<MutableInt>()
+      port128ClientB.attachListener(Int32.class, new ObjectConsumer<Int32>()
       {
          Random random = new Random(1511358L);
 
          @Override
-         public void consumeObject(MutableInt object)
+         public void consumeObject(Int32 object)
          {
-            assertEquals(random.nextInt(), object.intValue());
+            assertEquals(random.nextInt(), object.getData());
          }
       });
 
@@ -81,7 +82,8 @@ public class InterprocessObjectCommunicatorTest
       int iterations = 1200000;
       for (int i = 0; i < iterations; i++)
       {
-         MutableInt object = new MutableInt(random.nextInt());
+         Int32 object = new Int32();
+         object.setData(random.nextInt());
          port128ClientA.consumeObject(object);
       }
 
@@ -100,7 +102,7 @@ public class InterprocessObjectCommunicatorTest
       IntraprocessCommunicationNetwork.closeAllConnectionsForMyJUnitTests();
    }
 
-   private final class FailConsumer<T extends Number> implements ObjectConsumer<T>
+   private final class FailConsumer<T extends Packet<T>> implements ObjectConsumer<T>
    {
       @Override
       public void consumeObject(T object)
@@ -113,8 +115,8 @@ public class InterprocessObjectCommunicatorTest
    {
       public TestNetClassList()
       {
-         registerPacketClass(MutableInt.class);
-         registerPacketClass(MutableDouble.class);
+         registerPacketClass(Int32.class);
+         registerPacketClass(Float64.class);
       }
    }
 }

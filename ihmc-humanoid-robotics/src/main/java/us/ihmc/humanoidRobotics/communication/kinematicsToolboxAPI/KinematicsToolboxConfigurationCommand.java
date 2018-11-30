@@ -1,9 +1,9 @@
 package us.ihmc.humanoidRobotics.communication.kinematicsToolboxAPI;
 
+import controller_msgs.msg.dds.KinematicsToolboxConfigurationMessage;
 import gnu.trove.list.array.TFloatArrayList;
-import gnu.trove.list.array.TLongArrayList;
+import gnu.trove.list.array.TIntArrayList;
 import us.ihmc.communication.controllerAPI.command.Command;
-import us.ihmc.communication.packets.KinematicsToolboxConfigurationMessage;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 
@@ -15,7 +15,7 @@ public class KinematicsToolboxConfigurationCommand implements Command<Kinematics
    private final Quaternion privilegedRootJointOrientation = new Quaternion();
 
    private boolean hasPrivilegedJointAngles = false;
-   private final TLongArrayList jointNameBasedHashCodes = new TLongArrayList();
+   private final TIntArrayList jointHashCodes = new TIntArrayList();
    private final TFloatArrayList privilegedJointAngles = new TFloatArrayList();
 
    @Override
@@ -43,18 +43,18 @@ public class KinematicsToolboxConfigurationCommand implements Command<Kinematics
          privilegedRootJointOrientation.setToNaN();
 
       hasPrivilegedJointAngles = other.hasPrivilegedJointAngles;
-      jointNameBasedHashCodes.reset();
+      jointHashCodes.reset();
       privilegedJointAngles.reset();
 
       if (hasPrivilegedJointAngles)
       {
-         jointNameBasedHashCodes.addAll(other.getJointNameBasedHashCodes());
+         jointHashCodes.addAll(other.getJointHashCodes());
          privilegedJointAngles.addAll(other.getPrivilegedJointAngles());
       }
    }
 
    @Override
-   public void set(KinematicsToolboxConfigurationMessage message)
+   public void setFromMessage(KinematicsToolboxConfigurationMessage message)
    {
       hasPrivilegedRootJointPosition = message.getPrivilegedRootJointPosition() != null;
       if (hasPrivilegedRootJointPosition)
@@ -68,16 +68,16 @@ public class KinematicsToolboxConfigurationCommand implements Command<Kinematics
       else
          privilegedRootJointOrientation.setToNaN();
 
-      long[] messageHashCodes = message.getPrivilegedJointNameBasedHashCodes();
-      float[] messageJointAngles = message.getPrivilegedJointAngles();
+      TIntArrayList messageHashCodes = message.getPrivilegedJointHashCodes();
+      TFloatArrayList messageJointAngles = message.getPrivilegedJointAngles();
 
       hasPrivilegedJointAngles = messageHashCodes != null && messageJointAngles != null;
-      jointNameBasedHashCodes.reset();
+      jointHashCodes.reset();
       privilegedJointAngles.reset();
 
       if (hasPrivilegedJointAngles)
       {
-         jointNameBasedHashCodes.addAll(messageHashCodes);
+         jointHashCodes.addAll(messageHashCodes);
          privilegedJointAngles.addAll(messageJointAngles);
       }
    }
@@ -107,9 +107,9 @@ public class KinematicsToolboxConfigurationCommand implements Command<Kinematics
       return privilegedRootJointOrientation;
    }
 
-   public TLongArrayList getJointNameBasedHashCodes()
+   public TIntArrayList getJointHashCodes()
    {
-      return jointNameBasedHashCodes;
+      return jointHashCodes;
    }
 
    public TFloatArrayList getPrivilegedJointAngles()

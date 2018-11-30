@@ -23,12 +23,13 @@ public class ValkyrieNetworkProcessor
       networkModuleParams.enableControllerCommunicator(true);
       networkModuleParams.enableLocalControllerCommunicator(false);
       networkModuleParams.enableUiModule(true);
-      networkModuleParams.enableBehaviorModule(false);
-      networkModuleParams.enableBehaviorVisualizer(false);
-      networkModuleParams.enableRobotEnvironmentAwerenessModule(true);
+      networkModuleParams.enableBehaviorModule(true);
+      networkModuleParams.enableBehaviorVisualizer(true);
+      networkModuleParams.enableRobotEnvironmentAwerenessModule(false);
       networkModuleParams.enableKinematicsToolbox(true);
       networkModuleParams.enableFootstepPlanningToolbox(true);
-      networkModuleParams.enableFootstepPlanningToolboxVisualizer(true);
+      networkModuleParams.enableFootstepPlanningToolboxVisualizer(false);
+      networkModuleParams.setEnableJoystickBasedStepping(true);
 
 //      uncomment these for the sensors
       URI rosuri = NetworkParameters.getROSURI();

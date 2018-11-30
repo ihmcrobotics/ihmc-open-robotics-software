@@ -5,22 +5,22 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
-import org.junit.Assert;
-import org.junit.Ignore;
-import org.junit.Rule;
-import org.junit.Test;
+import org.junit.After;
+import org.junit.*;
 import org.junit.rules.TestName;
 
 import us.ihmc.commons.MathTools;
 import us.ihmc.commons.PrintTools;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
+import us.ihmc.continuousIntegration.ContinuousIntegrationTools;
 import us.ihmc.continuousIntegration.IntegrationCategory;
 import us.ihmc.euclid.Axis;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.geometry.LineSegment3D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.tools.ReferenceFrameTools;
 import us.ihmc.euclid.tools.RotationMatrixTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple2D.Point2D;
@@ -40,15 +40,16 @@ import us.ihmc.robotics.geometry.PlanarRegion;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.geometry.PlanarRegionsListGenerator;
 import us.ihmc.robotics.geometry.SpiralBasedAlgorithm;
-import us.ihmc.robotics.math.frames.YoFrameConvexPolygon2d;
-import us.ihmc.robotics.math.frames.YoFramePoint;
-import us.ihmc.robotics.math.frames.YoFramePose;
+import us.ihmc.robotics.graphics.Graphics3DObjectTools;
 import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.util.simulationTesting.SimulationTestingParameters;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
+import us.ihmc.yoVariables.variable.YoFrameConvexPolygon2D;
+import us.ihmc.yoVariables.variable.YoFramePoint3D;
+import us.ihmc.yoVariables.variable.YoFramePoseUsingYawPitchRoll;
 
 public class VisibilityGraphsOcclusionTest
 {
@@ -65,14 +66,14 @@ public class VisibilityGraphsOcclusionTest
 
    private static final boolean VERBOSE = false;
    private static final SimulationTestingParameters simulationTestingParameters = SimulationTestingParameters.createFromSystemProperties();
-   private static final boolean visualize = true;//simulationTestingParameters.getKeepSCSUp();
+   private boolean visualize = true;
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
 
    private static final int rays = 5000;
    private static final double rayLengthSquared = MathTools.square(5.0);
    private static final int maxPolygonsToVisualize = 10;
    private static final int maxPolygonsVertices = 100;
-   private static final double defaultMaxAllowedSolveTime = 1.0;
+   private static final double defaultMaxAllowedSolveTime = 1.5;
    private static final int bodyPathVisualizationResolution = 500;
    private static final double defaultMarchingSpeedInMetersPerTick = 0.50;
    private static final double maximumFlyingDistance = 0.05;
@@ -80,11 +81,23 @@ public class VisibilityGraphsOcclusionTest
 
    private enum OcclusionMethod {OCCLUSION, OCCLUSION_PLUS_GROUND, NO_OCCLUSION};
 
+   @Before
+   public void setup()
+   {
+      visualize = visualize && !ContinuousIntegrationTools.isRunningOnContinuousIntegrationServer();
+   }
+
    @Rule
    public TestName name = new TestName();
 
+   @After
+   public void tearDown()
+   {
+      ReferenceFrameTools.clearWorldFrameTree();
+   }
+
    @Test(timeout = TIMEOUT)
-   @ContinuousIntegrationTest(estimatedDuration = 10.0, categoriesOverride = {IntegrationCategory.IN_DEVELOPMENT})
+   @ContinuousIntegrationTest(estimatedDuration = 10.0)
    public void testFlatGround()
    {
       Point3D startPose = new Point3D();
@@ -94,7 +107,7 @@ public class VisibilityGraphsOcclusionTest
    }
 
    @Test(timeout = TIMEOUT)
-   @ContinuousIntegrationTest(estimatedDuration = 10.0, categoriesOverride = {IntegrationCategory.IN_DEVELOPMENT})
+   @ContinuousIntegrationTest(estimatedDuration = 10.0)
    public void testFlatGroundWithWall()
    {
       Point3D startPose = new Point3D(-4.805, 0.001, 0.0);
@@ -113,7 +126,7 @@ public class VisibilityGraphsOcclusionTest
    }
 
    @Test(timeout = TIMEOUT)
-   @ContinuousIntegrationTest(estimatedDuration = 10.0, categoriesOverride = {IntegrationCategory.IN_DEVELOPMENT})
+   @ContinuousIntegrationTest(estimatedDuration = 10.0)
    public void testSimpleOcclusions()
    {
       Point3D startPose = new Point3D();
@@ -123,7 +136,7 @@ public class VisibilityGraphsOcclusionTest
    }
 
    @Test(timeout = TIMEOUT)
-   @Ignore
+   @ContinuousIntegrationTest(estimatedDuration = 0.5)
    public void testMazeWithOcclusions()
    {
       Point3D startPose = new Point3D();
@@ -157,13 +170,13 @@ public class VisibilityGraphsOcclusionTest
 
       SimulationConstructionSet scs = null;
 
-      YoFramePoint currentPosition = new YoFramePoint("CurrentPosition", worldFrame, registry);
+      YoFramePoint3D currentPosition = new YoFramePoint3D("CurrentPosition", worldFrame, registry);
       currentPosition.set(start);
 
-      YoFramePoint observerPoint = null;
-      List<YoFramePoint> rayIntersectionVisualizations = null;
-      List<YoFrameConvexPolygon2d> visiblePolygons = null;
-      List<YoFramePose> visiblePolygonPoses = null;
+      YoFramePoint3D observerPoint = null;
+      List<YoFramePoint3D> rayIntersectionVisualizations = null;
+      List<YoFrameConvexPolygon2D> visiblePolygons = null;
+      List<YoFramePoseUsingYawPitchRoll> visiblePolygonPoses = null;
       List<YoGraphicPolygon> polygonVisualizations = null;
 
       BagOfBalls bodyPathViz = null;
@@ -174,9 +187,9 @@ public class VisibilityGraphsOcclusionTest
 
       if (visualize)
       {
-         YoFramePoint yoStart = new YoFramePoint("start", worldFrame, registry);
+         YoFramePoint3D yoStart = new YoFramePoint3D("start", worldFrame, registry);
          yoStart.set(start);
-         YoFramePoint yoGoal = new YoFramePoint("goal", worldFrame, registry);
+         YoFramePoint3D yoGoal = new YoFramePoint3D("goal", worldFrame, registry);
          yoGoal.set(start);
 
          visiblePolygons = new ArrayList<>();
@@ -184,8 +197,8 @@ public class VisibilityGraphsOcclusionTest
          polygonVisualizations = new ArrayList<>();
          for (int i = 0; i < maxPolygonsToVisualize; i++)
          {
-            YoFrameConvexPolygon2d polygon = new YoFrameConvexPolygon2d("Polygon" + i, worldFrame, maxPolygonsVertices, registry);
-            YoFramePose pose = new YoFramePose("PolygonPose" + i, worldFrame, registry);
+            YoFrameConvexPolygon2D polygon = new YoFrameConvexPolygon2D("Polygon" + i, worldFrame, maxPolygonsVertices, registry);
+            YoFramePoseUsingYawPitchRoll pose = new YoFramePoseUsingYawPitchRoll("PolygonPose" + i, worldFrame, registry);
             pose.setToNaN();
             visiblePolygons.add(polygon);
             visiblePolygonPoses.add(pose);
@@ -201,7 +214,7 @@ public class VisibilityGraphsOcclusionTest
             rayIntersectionVisualizations = new ArrayList<>();
             for (int i = 0; i < rays; i++)
             {
-               YoFramePoint point = new YoFramePoint("RayIntersection" + i, ReferenceFrame.getWorldFrame(), registry);
+               YoFramePoint3D point = new YoFramePoint3D("RayIntersection" + i, ReferenceFrame.getWorldFrame(), registry);
                point.setToNaN();
                YoGraphicPosition visualization = new YoGraphicPosition("RayIntersection" + i, point, 0.0025, YoAppearance.Blue());
                rayIntersectionVisualizations.add(point);
@@ -209,7 +222,7 @@ public class VisibilityGraphsOcclusionTest
             }
          }
 
-         observerPoint = new YoFramePoint("Observer", worldFrame, registry);
+         observerPoint = new YoFramePoint3D("Observer", worldFrame, registry);
          observerPoint.setToNaN();
          YoGraphicPosition observerVisualization = new YoGraphicPosition("Observer", observerPoint, 0.05, YoAppearance.Red());
          graphicsListRegistry.registerYoGraphic("viz", observerVisualization);
@@ -286,7 +299,7 @@ public class VisibilityGraphsOcclusionTest
                planarRegion.getTransformToWorld(transformToWorld);
                pose.set(transformToWorld);
                visiblePolygonPoses.get(polygonIdx).set(pose);
-               visiblePolygons.get(polygonIdx).setConvexPolygon2d(planarRegion.getConvexHull());
+               visiblePolygons.get(polygonIdx).set(planarRegion.getConvexHull());
             }
          }
 
@@ -391,7 +404,7 @@ public class VisibilityGraphsOcclusionTest
       }
       else
       {
-         Assert.assertTrue("Planner took too long: " + maxSolveTime + "s.", maxSolveTime < maxAllowedSolveTime);
+         Assert.assertTrue("Planner took too long: " + maxSolveTime + "s, should be less than " + maxAllowedSolveTime + " s.", maxSolveTime < maxAllowedSolveTime);
          Assert.assertFalse("Planner failed at iteration: " + iteration, plannerFailed.getBooleanValue());
       }
    }
@@ -455,7 +468,7 @@ public class VisibilityGraphsOcclusionTest
       graphics3DObject.addCoordinateSystem(0.8);
       if (regions != null)
       {
-         graphics3DObject.addPlanarRegionsList(regions, YoAppearance.White(), YoAppearance.Grey(), YoAppearance.DarkGray());
+         Graphics3DObjectTools.addPlanarRegionsList(graphics3DObject, regions, YoAppearance.White(), YoAppearance.Grey(), YoAppearance.DarkGray());
          scs.setGroundVisible(false);
       }
 
@@ -478,7 +491,7 @@ public class VisibilityGraphsOcclusionTest
    }
 
    private PlanarRegionsList createVisibleRegions(PlanarRegionsList regions, Point3D observer, PlanarRegionsList knownRegions,
-                                                  List<YoFramePoint> rayPointsToPack)
+                                                  List<YoFramePoint3D> rayPointsToPack)
    {
       Point3D[] pointsOnSphere = SpiralBasedAlgorithm.generatePointsOnSphere(observer, 1.0, rays);
       List<ConvexPolygon2D> visiblePolygons = new ArrayList<>();
@@ -595,10 +608,10 @@ public class VisibilityGraphsOcclusionTest
       PlanarRegionsListGenerator generator = new PlanarRegionsListGenerator();
       generator.addRectangle(50.0, 5.0);
 
-      startPoseToPack.set(-23.005, -2.001, 0.0);
+      startPoseToPack.set(-18.005, -2.001, 0.0);
       //      RotationMatrixTools.applyRollRotation(Math.toRadians(10.0), startPoseToPack, startPoseToPack);
 
-      goalPoseToPack.set(23.005, 2.001, 0.0);
+      goalPoseToPack.set(18.005, 2.001, 0.0);
       //      RotationMatrixTools.applyRollRotation(Math.toRadians(10.0), goalPoseToPack, goalPoseToPack);
 
       return generator.getPlanarRegionsList();

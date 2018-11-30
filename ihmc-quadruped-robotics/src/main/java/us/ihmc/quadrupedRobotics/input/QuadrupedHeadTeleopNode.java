@@ -15,27 +15,27 @@ import us.ihmc.communication.net.NetClassList;
 import us.ihmc.communication.packetCommunicator.PacketCommunicator;
 import us.ihmc.communication.util.NetworkPorts;
 import us.ihmc.quadrupedRobotics.communication.packets.QuadrupedNeckJointPositionPacket;
-import us.ihmc.robotics.dataStructures.parameter.DoubleParameter;
-import us.ihmc.robotics.dataStructures.parameter.ParameterFactory;
 import us.ihmc.tools.inputDevices.joystick.Joystick;
 import us.ihmc.tools.inputDevices.joystick.JoystickCustomizationFilter;
 import us.ihmc.tools.inputDevices.joystick.JoystickEventListener;
 import us.ihmc.tools.inputDevices.joystick.mapping.XBoxOneMapping;
+import us.ihmc.yoVariables.parameters.DoubleParameter;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
 
 public class QuadrupedHeadTeleopNode implements JoystickEventListener
 {
+   private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
    /**
     * Period at which to send control packets.
     */
    private static final double DT = 0.01;
 
-   private final ParameterFactory parameterFactory = ParameterFactory.createWithoutRegistry(getClass());
-   private final DoubleParameter proximalNeckYawScaleParameter = parameterFactory.createDouble("proximalNeckYawScale", 0.9);
-   private final DoubleParameter proximalNeckPitchScaleParameter = parameterFactory.createDouble("proximalNeckPitchScale", 0.9);
-   private final DoubleParameter proximalNeckRollScaleParameter = parameterFactory.createDouble("proximalNeckRollScale", 0.5);
-   private final DoubleParameter distalNeckYawScaleParameter = parameterFactory.createDouble("distalNeckYawScale", 0.8);
-   private final DoubleParameter distalNeckPitchScaleParameter = parameterFactory.createDouble("distalNeckPitchScale", 0.8);
-   private final DoubleParameter distalNeckRollScaleParameter = parameterFactory.createDouble("distalNeckRollScale", 0.5);
+   private final DoubleParameter proximalNeckYawScaleParameter = new DoubleParameter("proximalNeckYawScale", registry, 0.9);
+   private final DoubleParameter proximalNeckPitchScaleParameter = new DoubleParameter("proximalNeckPitchScale", registry, 0.9);
+   private final DoubleParameter proximalNeckRollScaleParameter = new DoubleParameter("proximalNeckRollScale", registry, 0.5);
+   private final DoubleParameter distalNeckYawScaleParameter = new DoubleParameter("distalNeckYawScale", registry, 0.8);
+   private final DoubleParameter distalNeckPitchScaleParameter = new DoubleParameter("distalNeckPitchScale", registry, 0.8);
+   private final DoubleParameter distalNeckRollScaleParameter = new DoubleParameter("distalNeckRollScale", registry, 0.5);
 
    private final Joystick device;
    private final ScheduledExecutorService executorService = Executors.newSingleThreadScheduledExecutor();
@@ -45,7 +45,7 @@ public class QuadrupedHeadTeleopNode implements JoystickEventListener
    private boolean teleopEnabled = true;
    private HashMap<QuadrupedJointName, Double> neckJointPositionSetpoints = new HashMap<>();
 
-   public QuadrupedHeadTeleopNode(String host, NetworkPorts port, NetClassList netClassList, Joystick device) throws IOException
+   public QuadrupedHeadTeleopNode(String host, NetworkPorts port, NetClassList netClassList, Joystick device, YoVariableRegistry parentRegistry) throws IOException
    {
 
       // TODO: Don't hardcode localhost
@@ -57,6 +57,8 @@ public class QuadrupedHeadTeleopNode implements JoystickEventListener
       {
          channels.put(channel, 0.0);
       }
+
+      parentRegistry.addChild(registry);
    }
 
    public void start() throws IOException
@@ -93,12 +95,12 @@ public class QuadrupedHeadTeleopNode implements JoystickEventListener
    {
       try
       {
-         double distalNeckYaw = get(XBoxOneMapping.RIGHT_STICK_X) * distalNeckYawScaleParameter.get();
-         double distalNeckPitch = get(XBoxOneMapping.RIGHT_STICK_Y) * distalNeckPitchScaleParameter.get();
-         double distalNeckRoll = (get(XBoxOneMapping.RIGHT_TRIGGER) - get(XBoxOneMapping.LEFT_TRIGGER)) * distalNeckRollScaleParameter.get();
-         double proximalNeckYaw = get(XBoxOneMapping.LEFT_STICK_X) * proximalNeckYawScaleParameter.get();
-         double proximalNeckPitch = get(XBoxOneMapping.LEFT_STICK_Y) * proximalNeckPitchScaleParameter.get();
-         double proximalNeckRoll = 0.0 * proximalNeckRollScaleParameter.get();
+         double distalNeckYaw = get(XBoxOneMapping.RIGHT_STICK_X) * distalNeckYawScaleParameter.getValue();
+         double distalNeckPitch = get(XBoxOneMapping.RIGHT_STICK_Y) * distalNeckPitchScaleParameter.getValue();
+         double distalNeckRoll = (get(XBoxOneMapping.RIGHT_TRIGGER) - get(XBoxOneMapping.LEFT_TRIGGER)) * distalNeckRollScaleParameter.getValue();
+         double proximalNeckYaw = get(XBoxOneMapping.LEFT_STICK_X) * proximalNeckYawScaleParameter.getValue();
+         double proximalNeckPitch = get(XBoxOneMapping.LEFT_STICK_Y) * proximalNeckPitchScaleParameter.getValue();
+         double proximalNeckRoll = 0.0 * proximalNeckRollScaleParameter.getValue();
 
          neckJointPositionSetpoints.put(QuadrupedJointName.DISTAL_NECK_YAW, distalNeckYaw);
          neckJointPositionSetpoints.put(QuadrupedJointName.DISTAL_NECK_PITCH, distalNeckPitch);
