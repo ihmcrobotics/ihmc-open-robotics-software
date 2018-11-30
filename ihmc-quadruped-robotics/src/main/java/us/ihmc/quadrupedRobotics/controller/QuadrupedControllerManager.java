@@ -321,6 +321,7 @@ public class QuadrupedControllerManager implements RobotController, CloseableAnd
       {
          factory.addState(HighLevelControllerName.CALIBRATION, calibrationState);
          factory.addTransition(HighLevelControllerName.FREEZE_STATE, HighLevelControllerName.CALIBRATION, createRequestedTransition(HighLevelControllerName.CALIBRATION));
+         factory.addTransition(HighLevelControllerName.CALIBRATION, HighLevelControllerName.FREEZE_STATE, createRequestedTransition(HighLevelControllerName.FREEZE_STATE));
          factory.addDoneTransition(HighLevelControllerName.CALIBRATION, HighLevelControllerName.FREEZE_STATE);
       }
 
