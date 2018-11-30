@@ -4,7 +4,6 @@ import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.net.NetClassList;
 import us.ihmc.continuousIntegration.ContinuousIntegrationTools;
-import us.ihmc.exampleSimulations.genericQuadruped.model.GenericQuadrupedJointNameMapAndContactDefinition;
 import us.ihmc.exampleSimulations.genericQuadruped.model.GenericQuadrupedModelFactory;
 import us.ihmc.exampleSimulations.genericQuadruped.model.GenericQuadrupedPhysicalProperties;
 import us.ihmc.exampleSimulations.genericQuadruped.model.GenericQuadrupedSensorInformation;
@@ -15,7 +14,6 @@ import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelContr
 import us.ihmc.jMonkeyEngineToolkit.GroundProfile3D;
 import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
 import us.ihmc.quadrupedRobotics.QuadrupedTestFactory;
-import us.ihmc.quadrupedRobotics.communication.QuadrupedNetClassList;
 import us.ihmc.quadrupedRobotics.controller.QuadrupedControlMode;
 import us.ihmc.quadrupedRobotics.controller.states.QuadrupedPositionBasedCrawlControllerParameters;
 import us.ihmc.quadrupedRobotics.estimator.referenceFrames.QuadrupedReferenceFrames;
@@ -99,7 +97,6 @@ public class GenericQuadrupedTestFactory implements QuadrupedTestFactory
 
       QuadrupedModelFactory modelFactory = new GenericQuadrupedModelFactory();
       QuadrupedPhysicalProperties physicalProperties = new GenericQuadrupedPhysicalProperties();
-      NetClassList netClassList = new QuadrupedNetClassList();
       QuadrupedInitialPositionParameters initialPositionParameters = initialPosition.get();
       GroundContactParameters groundContactParameters = new GenericQuadrupedGroundContactParameters();
       QuadrupedSensorInformation sensorInformation = new GenericQuadrupedSensorInformation();
@@ -152,7 +149,6 @@ public class GenericQuadrupedTestFactory implements QuadrupedTestFactory
       simulationFactory.setSensorInformation(sensorInformation);
       simulationFactory.setReferenceFrames(referenceFrames);
       simulationFactory.setJointDesiredOutputList(jointDesiredOutputList);
-      simulationFactory.setNetClassList(netClassList);
       simulationFactory.setControlMode(controlMode.get());
       simulationFactory.setInitialForceControlState(HighLevelControllerName.DO_NOTHING_BEHAVIOR);
       simulationFactory.setUseLocalCommunicator(useNetworking.get());
