@@ -26,6 +26,7 @@ import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.humanoidRobotics.communication.kinematicsToolboxAPI.KinematicsToolboxCenterOfMassCommand;
 import us.ihmc.humanoidRobotics.communication.kinematicsToolboxAPI.KinematicsToolboxConfigurationCommand;
 import us.ihmc.humanoidRobotics.communication.kinematicsToolboxAPI.KinematicsToolboxRigidBodyCommand;
+import us.ihmc.mecano.multiBodySystem.OneDoFJoint;
 import us.ihmc.mecano.multiBodySystem.interfaces.FloatingJointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
@@ -103,7 +104,7 @@ public class KinematicsToolboxHelper
       {
          if (output.hasDataForJoint(joint))
          {
-            JointDesiredOutputReadOnly data = output.getJointDesiredOutput(joint); 
+            JointDesiredOutputReadOnly data = output.getJointDesiredOutput(joint);
 
             joint.setQ(data.getDesiredPosition());
             joint.setQd(data.getDesiredVelocity());
@@ -128,8 +129,8 @@ public class KinematicsToolboxHelper
     * @param rootJoint the floating joint to update. Modified.
     * @param oneDoFJoints the one degree-of-freedom joints to update. Modified.
     */
-   static void setRobotStateFromRobotConfigurationData(RobotConfigurationData robotConfigurationData, FloatingJointBasics desiredRootJoint,
-                                                       OneDoFJointBasics[] oneDoFJoints)
+   public static void setRobotStateFromRobotConfigurationData(RobotConfigurationData robotConfigurationData, FloatingJointBasics desiredRootJoint,
+                                                              OneDoFJointBasics[] oneDoFJoints)
    {
       TFloatArrayList newJointAngles = robotConfigurationData.getJointAngles();
 
@@ -146,7 +147,7 @@ public class KinematicsToolboxHelper
          Quaternion orientation = robotConfigurationData.getRootOrientation();
          desiredRootJoint.getJointPose().getOrientation().setQuaternion(orientation.getX(), orientation.getY(), orientation.getZ(), orientation.getS());
          desiredRootJoint.setJointVelocity(0, new DenseMatrix64F(6, 1));
-         
+
          desiredRootJoint.getPredecessor().updateFramesRecursively();
       }
    }

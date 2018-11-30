@@ -137,4 +137,48 @@ public class KinematicsPlanningToolboxRigidBodyCommand implements Command<Kinema
             && waypointTimes.size() == allowablePositionDisplacement.size() && allowablePositionDisplacement.size() == allowableOrientationDisplacement.size();
    }
 
+   public RigidBodyBasics getEndEffector()
+   {
+      return endEffector;
+   }
+
+   public int getNumberOfWayPoints()
+   {
+      return waypoints.size();
+   }
+
+   public double getWayPointTime(int i)
+   {
+      return waypointTimes.get(i);
+   }
+
+   public Pose3D getWayPoint(int i)
+   {
+      return waypoints.get(i);
+   }
+
+   public SelectionMatrix6D getSelectionMatrix()
+   {
+      return selectionMatrix;
+   }
+
+   public WeightMatrix6D getWeightMatrix()
+   {
+      return weightMatrix;
+   }
+
+   public FramePose3D getControlFramePose()
+   {
+      return controlFramePose;
+   }
+
+   public double getAllowablePositionDisplacement(int i)
+   {
+      return allowablePositionDisplacement.get(i);
+   }
+
+   public double getAllowableOrientationDisplacement(int i)
+   {
+      return allowableOrientationDisplacement.get(i);
+   }
 }

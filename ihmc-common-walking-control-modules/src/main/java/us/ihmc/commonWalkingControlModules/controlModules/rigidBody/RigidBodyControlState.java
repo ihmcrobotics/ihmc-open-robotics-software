@@ -6,7 +6,6 @@ import org.apache.commons.lang3.StringUtils;
 
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.FeedbackControlCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.InverseDynamicsCommand;
-import us.ihmc.commons.PrintTools;
 import us.ihmc.communication.controllerAPI.command.Command;
 import us.ihmc.communication.controllerAPI.command.QueueableCommand;
 import us.ihmc.communication.packets.ExecutionMode;
@@ -16,6 +15,7 @@ import us.ihmc.graphicsDescription.yoGraphics.YoGraphicCoordinateSystem;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicReferenceFrame;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicVector;
+import us.ihmc.log.LogTools;
 import us.ihmc.robotics.stateMachine.core.State;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
@@ -44,7 +44,12 @@ public abstract class RigidBodyControlState implements State
       warningPrefix = getClass().getSimpleName() + " for " + bodyName + ": ";
       registry = new YoVariableRegistry(createRegistryName(bodyName, controlMode));
 
-      String prefix = bodyName + StringUtils.capitalize(controlMode.toString().toLowerCase());
+      String prefix;
+      if (controlMode != null)
+         prefix = bodyName + StringUtils.capitalize(controlMode.toString().toLowerCase());
+      else
+         prefix = bodyName;
+
       lastCommandId = new YoLong(prefix + "LastCommandId", registry);
       lastCommandId.set(Packet.INVALID_MESSAGE_ID);
 
@@ -62,7 +67,7 @@ public abstract class RigidBodyControlState implements State
 
          if (queueableCommand.getCommandId() == Packet.INVALID_MESSAGE_ID)
          {
-            PrintTools.warn(warningPrefix + "Recieved packet with invalid ID.");
+            LogTools.warn(warningPrefix + "Recieved packet with invalid ID.");
             return false;
          }
 
@@ -71,7 +76,8 @@ public abstract class RigidBodyControlState implements State
 
          if (!isEmpty() && wantToQueue && !previousIdMatch)
          {
-            PrintTools.warn(warningPrefix + "Unexpected command ID. Msg previous id: " + queueableCommand.getPreviousCommandId() + " but was " + lastCommandId.getLongValue());
+            LogTools.warn(warningPrefix + "Unexpected command ID. Msg previous id: " + queueableCommand.getPreviousCommandId() + " but was "
+                  + lastCommandId.getLongValue());
             return false;
          }
 
@@ -168,7 +174,11 @@ public abstract class RigidBodyControlState implements State
 
    public static String createRegistryName(String bodyName, RigidBodyControlMode stateEnum)
    {
-      String prefix = bodyName + StringUtils.capitalize(stateEnum.toString().toLowerCase());
+      String prefix;
+      if (stateEnum != null)
+         prefix = bodyName + StringUtils.capitalize(stateEnum.toString().toLowerCase());
+      else
+         prefix = bodyName;
       return prefix + "ControlModule";
    }
 

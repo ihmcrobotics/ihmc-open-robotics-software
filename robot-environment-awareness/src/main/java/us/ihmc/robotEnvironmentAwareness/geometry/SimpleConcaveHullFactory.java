@@ -32,11 +32,11 @@ import com.vividsolutions.jts.triangulate.quadedge.Vertex;
 
 import us.ihmc.commons.Conversions;
 import us.ihmc.commons.Epsilons;
-import us.ihmc.commons.PrintTools;
+import us.ihmc.commons.lists.ListWrappingIndexTools;
 import us.ihmc.euclid.geometry.LineSegment2D;
 import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
 import us.ihmc.euclid.tuple2D.Point2D;
-import us.ihmc.commons.lists.ListWrappingIndexTools;
+import us.ihmc.log.LogTools;
 
 /**
  * Computes the concave hull of a 2D point cloud based on the paper
@@ -246,7 +246,7 @@ public abstract class SimpleConcaveHullFactory
       catch (ConstraintEnforcementException e)
       { // Adding the line segments as constraints failed, removing them.
          if (VERBOSE)
-            PrintTools.warn(SimpleConcaveHullFactory.class, "Delaunay triangulation failed, removing line segment constraints.");
+            LogTools.warn("Delaunay triangulation failed, removing line segment constraints.");
          conformingDelaunayTriangulationBuilder.setConstraints(null);
          subdivision = conformingDelaunayTriangulationBuilder.getSubdivision();
       }

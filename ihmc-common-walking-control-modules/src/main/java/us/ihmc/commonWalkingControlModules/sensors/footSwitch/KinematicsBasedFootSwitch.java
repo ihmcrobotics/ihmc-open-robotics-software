@@ -1,11 +1,13 @@
 package us.ihmc.commonWalkingControlModules.sensors.footSwitch;
 
+import java.util.Collection;
+
 import us.ihmc.euclid.referenceFrame.FramePoint2D;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
-import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.mecano.spatial.Wrench;
+import us.ihmc.robotics.contactable.ContactablePlaneBody;
 import us.ihmc.robotics.robotSide.QuadrantDependentList;
 import us.ihmc.robotics.robotSide.RobotQuadrant;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -36,6 +38,24 @@ public class KinematicsBasedFootSwitch implements FootSwitchInterface
       foot = bipedFeet.get(side);
       ContactablePlaneBody oppositeFoot = bipedFeet.get(side.getOppositeSide());
       otherFeet = new ContactablePlaneBody[] {oppositeFoot};
+      this.totalRobotWeight = totalRobotWeight;
+      hitGround = new YoBoolean(footName + "hitGround", registry);
+      fixedOnGround = new YoBoolean(footName + "fixedOnGround", registry);
+      soleZ = new YoDouble(footName + "soleZ", registry);
+      ankleZ = new YoDouble(footName + "ankleZ", registry);
+      this.switchZThreshold = switchZThreshold;
+
+      yoResolvedCoP = new YoFramePoint2D(footName + "ResolvedCoP", "", foot.getSoleFrame(), registry);
+
+      parentRegistry.addChild(registry);
+   }
+
+   public KinematicsBasedFootSwitch(String footName, ContactablePlaneBody foot, Collection<? extends ContactablePlaneBody> otherFeet, DoubleProvider switchZThreshold,
+                                    double totalRobotWeight, YoVariableRegistry parentRegistry)
+   {
+      registry = new YoVariableRegistry(footName + getClass().getSimpleName());
+      this.foot = foot;
+      this.otherFeet = otherFeet.toArray(new ContactablePlaneBody[otherFeet.size()]);
       this.totalRobotWeight = totalRobotWeight;
       hitGround = new YoBoolean(footName + "hitGround", registry);
       fixedOnGround = new YoBoolean(footName + "fixedOnGround", registry);

@@ -19,6 +19,7 @@ import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParam
 import us.ihmc.commonWalkingControlModules.controlModules.rigidBody.RigidBodyControlMode;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.feedbackController.FeedbackControllerSettings;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.MomentumOptimizationSettings;
+import us.ihmc.commonWalkingControlModules.sensors.footSwitch.WrenchBasedFootSwitchFactory;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.robotics.controllers.pidGains.GainCoupling;
@@ -34,7 +35,7 @@ import us.ihmc.robotics.partNames.NeckJointName;
 import us.ihmc.robotics.partNames.SpineJointName;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
-import us.ihmc.sensorProcessing.stateEstimation.FootSwitchType;
+import us.ihmc.robotics.sensors.FootSwitchFactory;
 import us.ihmc.valkyrieRosControl.ValkyrieRosControlController;
 
 public class ValkyrieWalkingControllerParameters extends WalkingControllerParameters
@@ -571,28 +572,13 @@ public class ValkyrieWalkingControllerParameters extends WalkingControllerParame
    }
 
    @Override
-   public double getContactThresholdForce()
+   public FootSwitchFactory getFootSwitchFactory()
    {
-      switch(target)
-      {
-      case REAL_ROBOT:
-      case GAZEBO:
-         return 50.0;
-      default:
-         return 5.0;
-      }
-   }
-
-   @Override
-   public double getSecondContactThresholdForceIgnoringCoP()
-   {
-      return 75.0;
-   }
-
-   @Override
-   public double getCoPThresholdFraction()
-   {
-      return 0.01;
+      WrenchBasedFootSwitchFactory factory = new WrenchBasedFootSwitchFactory();
+      factory.setDefaultContactThresholdForce(target == RobotTarget.SCS ? 5.0 : 50.0);
+      factory.setDefaultCoPThresholdFraction(0.01);
+      factory.setDefaultSecondContactThresholdForceIgnoringCoP(75.0);
+      return factory;
    }
 
    @Override
@@ -650,19 +636,6 @@ public class ValkyrieWalkingControllerParameters extends WalkingControllerParame
    public ICPAngularMomentumModifierParameters getICPAngularMomentumModifierParameters()
    {
       return new ICPAngularMomentumModifierParameters();
-   }
-
-   @Override
-   public double getContactThresholdHeight()
-   {
-      return 0.05;
-   }
-
-   @Override
-   public FootSwitchType getFootSwitchType()
-   {
-      return FootSwitchType.WrenchBased;
-      //      return runningOnRealRobot ? FootSwitchType.WrenchAndContactSensorFused : FootSwitchType.WrenchBased;
    }
 
    @Override

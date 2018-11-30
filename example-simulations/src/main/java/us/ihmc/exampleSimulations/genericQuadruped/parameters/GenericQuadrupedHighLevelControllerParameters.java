@@ -85,7 +85,6 @@ public class GenericQuadrupedHighLevelControllerParameters implements HighLevelC
       switch(state)
       {
       case WALKING:
-      case STAND_TRANSITION_STATE:
          return walkingJointBehavior;
       default:
          return nonWalkingJointBehavior;
@@ -123,22 +122,22 @@ public class GenericQuadrupedHighLevelControllerParameters implements HighLevelC
 
    private void setUpWalkingJointBehavior()
    {
-      configureSymmetricBehavior(walkingJointBehavior, jointMap, LegJointName.HIP_ROLL, JointDesiredControlMode.EFFORT, 0.0, 0.0);
-      configureSymmetricBehavior(walkingJointBehavior, jointMap, LegJointName.HIP_PITCH, JointDesiredControlMode.EFFORT, 0.0, 0.0);
-      configureSymmetricBehavior(walkingJointBehavior, jointMap, LegJointName.KNEE_PITCH, JointDesiredControlMode.EFFORT, 0.0, 0.0);
+      configureSymmetricBehavior(walkingJointBehavior, jointMap, LegJointName.HIP_ROLL, JointDesiredControlMode.EFFORT, 0.0, 1.0, 0.1);
+      configureSymmetricBehavior(walkingJointBehavior, jointMap, LegJointName.HIP_PITCH, JointDesiredControlMode.EFFORT, 0.0, 1.0, 0.1);
+      configureSymmetricBehavior(walkingJointBehavior, jointMap, LegJointName.KNEE_PITCH, JointDesiredControlMode.EFFORT, 0.0, 1.0, 0.1);
    }
 
    private void setUpNonWalkingJointBehavior()
    {
-      configureSymmetricBehavior(nonWalkingJointBehavior, jointMap, LegJointName.HIP_ROLL, JointDesiredControlMode.EFFORT, 500.0, 25.0);
-      configureSymmetricBehavior(nonWalkingJointBehavior, jointMap, LegJointName.HIP_PITCH, JointDesiredControlMode.EFFORT, 500.0, 25.0);
-      configureSymmetricBehavior(nonWalkingJointBehavior, jointMap, LegJointName.KNEE_PITCH, JointDesiredControlMode.EFFORT, 500.0, 25.0);
+      configureSymmetricBehavior(nonWalkingJointBehavior, jointMap, LegJointName.HIP_ROLL, JointDesiredControlMode.EFFORT, 500.0, 25.0, 1.0);
+      configureSymmetricBehavior(nonWalkingJointBehavior, jointMap, LegJointName.HIP_PITCH, JointDesiredControlMode.EFFORT, 500.0, 25.0, 1.0);
+      configureSymmetricBehavior(nonWalkingJointBehavior, jointMap, LegJointName.KNEE_PITCH, JointDesiredControlMode.EFFORT, 500.0, 25.0, 1.0);
    }
 
    private static void configureSymmetricBehavior(List<GroupParameter<JointDesiredBehaviorReadOnly>> behaviorParameterList, QuadrupedJointNameMap jointMap,
-                                                  LegJointName jointName, JointDesiredControlMode controlMode, double stiffness, double damping)
+                                                  LegJointName jointName, JointDesiredControlMode controlMode, double stiffness, double damping, double velocityScaling)
    {
-      JointDesiredBehavior jointBehavior = new JointDesiredBehavior(controlMode, stiffness, damping);
+      JointDesiredBehavior jointBehavior = new JointDesiredBehavior(controlMode, stiffness, damping, 1.0, velocityScaling);
       behaviorParameterList.add(new GroupParameter<>(jointName.toString(), jointBehavior, getJointNamesForEachQuadrant(jointMap, jointName)));
    }
 

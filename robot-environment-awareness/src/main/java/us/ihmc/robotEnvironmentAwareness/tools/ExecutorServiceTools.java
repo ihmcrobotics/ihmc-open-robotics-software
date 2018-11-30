@@ -7,8 +7,8 @@ import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.TimeUnit;
 
-import us.ihmc.commons.PrintTools;
 import us.ihmc.commons.thread.ThreadTools;
+import us.ihmc.log.LogTools;
 
 public class ExecutorServiceTools
 {
@@ -98,7 +98,7 @@ public class ExecutorServiceTools
 
                if (!exceptionHandling.isCatchExceptionsEnabled())
                {
-                  PrintTools.warn(ExecutorServiceTools.class, "Current task is cancelled.");
+                  LogTools.warn("Current task is cancelled.");
                   throw e;
                }
 
@@ -126,7 +126,7 @@ public class ExecutorServiceTools
 
                if (!exceptionHandling.isCatchExceptionsEnabled())
                {
-                  PrintTools.warn(ExecutorServiceTools.class, "Current task is cancelled.");
+                  LogTools.warn("Current task is cancelled.");
                   throw e;
                }
             }

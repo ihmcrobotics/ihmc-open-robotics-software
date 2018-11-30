@@ -134,6 +134,11 @@ public class PelvisHeightControlState implements PelvisAndCenterOfMassHeightCont
       parentRegistry.addChild(registry);
    }
 
+   @Override
+   public void initialize()
+   {
+   }
+
    public void setGains(PIDGainsReadOnly gains)
    {
       symmetric3DGains.setGains(gains);

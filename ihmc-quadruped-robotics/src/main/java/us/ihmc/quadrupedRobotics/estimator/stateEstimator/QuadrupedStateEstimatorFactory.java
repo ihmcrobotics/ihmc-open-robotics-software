@@ -4,11 +4,13 @@ import java.util.HashMap;
 import java.util.Map;
 
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
-import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
+import us.ihmc.humanoidRobotics.communication.packets.sensing.StateEstimatorMode;
+import us.ihmc.humanoidRobotics.communication.subscribers.StateEstimatorModeSubscriber;
 import us.ihmc.humanoidRobotics.model.CenterOfPressureDataHolder;
 import us.ihmc.mecano.multiBodySystem.interfaces.FloatingJointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.robotModels.FullRobotModel;
+import us.ihmc.robotics.contactable.ContactablePlaneBody;
 import us.ihmc.robotics.robotSide.QuadrantDependentList;
 import us.ihmc.robotics.robotSide.RobotQuadrant;
 import us.ihmc.robotics.sensors.CenterOfMassDataHolder;
@@ -21,6 +23,7 @@ import us.ihmc.sensorProcessing.stateEstimation.evaluation.FullInverseDynamicsSt
 import us.ihmc.stateEstimation.humanoid.StateEstimatorController;
 import us.ihmc.stateEstimation.humanoid.kinematicsBasedStateEstimation.DRCKinematicsBasedStateEstimator;
 import us.ihmc.tools.factories.FactoryTools;
+import us.ihmc.tools.factories.OptionalFactoryField;
 import us.ihmc.tools.factories.RequiredFactoryField;
 
 public class QuadrupedStateEstimatorFactory
@@ -35,6 +38,8 @@ public class QuadrupedStateEstimatorFactory
    private final RequiredFactoryField<Double> estimatorDT = new RequiredFactoryField<>("estimatorDT");
    private final RequiredFactoryField<CenterOfMassDataHolder> centerOfMassDataHolder = new RequiredFactoryField<>("centerOfMassDataHolder");
    private final RequiredFactoryField<YoGraphicsListRegistry> yoGraphicsListRegistry = new RequiredFactoryField<>("yoGraphicsListRegistry");
+
+   private final OptionalFactoryField<StateEstimatorModeSubscriber> stateEstimatorModeSubscriber = new OptionalFactoryField<>("stateEstimatorModeSubscriber");
 
    public StateEstimatorController createStateEstimator()
    {
@@ -67,6 +72,11 @@ public class QuadrupedStateEstimatorFactory
                                                                                      sensorOutputMapReadOnly.get(), centerOfMassDataHolder.get(),
                                                                                      imuSensorsToUseInStateEstimator, gravityMagnitude, footSwitchMap,
                                                                                      centerOfPressureDataHolder, robotMotionStatusFromController, feetMap, yoGraphicsListRegistry.get());
+
+      if (stateEstimatorModeSubscriber.hasValue())
+      {
+         ((DRCKinematicsBasedStateEstimator) stateEstimator).setOperatingModeSubscriber(stateEstimatorModeSubscriber.get());
+      }
 
       FactoryTools.disposeFactory(this);
 
@@ -121,5 +131,10 @@ public class QuadrupedStateEstimatorFactory
    public void setCenterOfMassDataHolder(CenterOfMassDataHolder centerOfMassDataHolder)
    {
       this.centerOfMassDataHolder.set(centerOfMassDataHolder);
+   }
+
+   public void setStateEstimatorModeSubscriber(StateEstimatorModeSubscriber stateEstimatorModeSubscriber)
+   {
+      this.stateEstimatorModeSubscriber.set(stateEstimatorModeSubscriber);
    }
 }

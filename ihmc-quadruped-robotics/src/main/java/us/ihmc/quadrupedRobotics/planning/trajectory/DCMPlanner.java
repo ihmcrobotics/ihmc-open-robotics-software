@@ -102,8 +102,7 @@ public class DCMPlanner
       piecewiseConstantCopTrajectory.setupVisualizers(yoGraphicsList, artifactList, POINT_SIZE);
       dcmTrajectory.setupVisualizers(yoGraphicsList, artifactList, POINT_SIZE);
 
-      YoGraphicPosition perfectCMPPositionViz = new YoGraphicPosition("Perfect CMP Position", perfectCMPPosition, 0.005, YoAppearance.Black(),
-                                                                  YoGraphicPosition.GraphicType.SOLID_BALL);
+      YoGraphicPosition perfectCMPPositionViz = new YoGraphicPosition("Perfect CMP Position", perfectCMPPosition, 0.002, YoAppearance.BlueViolet());
 
       artifactList.setVisible(VISUALIZE);
       yoGraphicsList.setVisible(VISUALIZE);
