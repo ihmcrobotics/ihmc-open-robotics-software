@@ -1,6 +1,8 @@
 package us.ihmc.quadrupedRobotics.controlModules;
 
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.FeedbackControlCommand;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.InverseDynamicsCommand;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.JointLimitEnforcementMethodCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.virtualModelControl.JointLimitEnforcementCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.virtualModelControl.VirtualModelControlCommand;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
@@ -18,6 +20,7 @@ public class QuadrupedJointSpaceManager
    private final OneDoFJointBasics[] controlledJoints;
 
    private final JointLimitEnforcementCommand jointLimitEnforcementCommand = new JointLimitEnforcementCommand();
+   private final JointLimitEnforcementMethodCommand jointLimitEnforcementMethodCommand = new JointLimitEnforcementMethodCommand();
 
    private final YoDouble jointPositionLimitDamping = new YoDouble("jointPositionLimitDamping", registry);
    private final YoDouble jointPositionLimitStiffness = new YoDouble("jointPositionLimitStiffness", registry);
@@ -28,6 +31,7 @@ public class QuadrupedJointSpaceManager
 
       jointPositionLimitDamping.set(POSITION_LIMIT_DAMPING);
       jointPositionLimitStiffness.set(POSITION_LIMIT_STIFFNESS);
+
 
       parentRegistry.addChild(registry);
    }
@@ -55,5 +59,10 @@ public class QuadrupedJointSpaceManager
    public VirtualModelControlCommand<?> getVirtualModelControlCommand()
    {
       return jointLimitEnforcementCommand;
+   }
+
+   public InverseDynamicsCommand<?> getInverseDynamicsCommand()
+   {
+      return jointLimitEnforcementMethodCommand;
    }
 }

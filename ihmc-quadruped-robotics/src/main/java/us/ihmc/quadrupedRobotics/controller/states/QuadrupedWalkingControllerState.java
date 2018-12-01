@@ -54,6 +54,8 @@ import us.ihmc.robotics.time.ExecutionTimer;
 import us.ihmc.sensorProcessing.outputData.JointDesiredControlMode;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutputList;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutputListReadOnly;
+import us.ihmc.yoVariables.parameters.EnumParameter;
+import us.ihmc.yoVariables.providers.EnumProvider;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoEnum;
@@ -118,7 +120,8 @@ public class QuadrupedWalkingControllerState extends HighLevelControllerState im
    private final YoBoolean yoRequestingIntegratorReset = new YoBoolean("RequestingIntegratorReset", registry);
 
    private final ExecutionTimer controllerCoreTimer = new ExecutionTimer("controllerCoreTimer", 1.0, registry);
-   private final ControllerCoreCommand controllerCoreCommand = new ControllerCoreCommand(WholeBodyControllerCoreMode.VIRTUAL_MODEL);
+   private final EnumProvider<WholeBodyControllerCoreMode> controllerCoreMode;
+   private final ControllerCoreCommand controllerCoreCommand = new ControllerCoreCommand(WholeBodyControllerCoreMode.INVERSE_DYNAMICS);
    private final WholeBodyControllerCore controllerCore;
 
    public QuadrupedWalkingControllerState(QuadrupedRuntimeEnvironment runtimeEnvironment, QuadrupedControllerToolbox controllerToolbox,
@@ -131,6 +134,8 @@ public class QuadrupedWalkingControllerState extends HighLevelControllerState im
       this.commandInputManager = commandInputManager;
       this.statusMessageOutputManager = statusMessageOutputManager;
       this.controlManagerFactory = controlManagerFactory;
+
+      controllerCoreMode = new EnumParameter<>("controllerCoreMode", registry, WholeBodyControllerCoreMode.class, false, WholeBodyControllerCoreMode.VIRTUAL_MODEL);
 
       balanceManager = controlManagerFactory.getOrCreateBalanceManager();
       feetManager = controlManagerFactory.getOrCreateFeetManager();
@@ -150,11 +155,12 @@ public class QuadrupedWalkingControllerState extends HighLevelControllerState im
 
       WholeBodyControlCoreToolbox controlCoreToolbox = new WholeBodyControlCoreToolbox(runtimeEnvironment.getControlDT(), runtimeEnvironment.getGravity(),
                                                                                        fullRobotModel.getRootJoint(),
-                                                                                       fullRobotModel.getControllableOneDoFJoints(),
+                                                                                       fullRobotModel.getRootJoint().subtreeArray(),
                                                                                        controllerToolbox.getReferenceFrames().getCenterOfMassFrame(),
                                                                                        runtimeEnvironment.getControllerCoreOptimizationSettings(),
                                                                                        runtimeEnvironment.getGraphicsListRegistry(), registry);
       controlCoreToolbox.setupForVirtualModelControlSolver(fullRobotModel.getBody(), controllerToolbox.getContactablePlaneBodies());
+      controlCoreToolbox.setupForInverseDynamicsSolver(controllerToolbox.getContactablePlaneBodies());
       FeedbackControlCommandList feedbackTemplate = controlManagerFactory.createFeedbackControlTemplate();
       controllerCore = new WholeBodyControllerCore(controlCoreToolbox, feedbackTemplate, runtimeEnvironment.getJointDesiredOutputList(), registry);
       controllerCoreOutput = controllerCore.getControllerCoreOutput();
@@ -383,6 +389,8 @@ public class QuadrupedWalkingControllerState extends HighLevelControllerState im
 
       handleChangeInContactState();
 
+      controllerCoreCommand.setControllerCoreMode(controllerCoreMode.getValue());
+
       submitControllerCoreCommands();
 
       JointDesiredOutputList stateSpecificJointSettings = getStateSpecificJointSettings();
@@ -400,7 +408,10 @@ public class QuadrupedWalkingControllerState extends HighLevelControllerState im
 
       JointAccelerationIntegrationCommand accelerationIntegrationCommand = getAccelerationIntegrationCommand();
       if (!deactivateAccelerationIntegrationInWBC)
+      {
          controllerCoreCommand.addVirtualModelControlCommand(accelerationIntegrationCommand);
+         controllerCoreCommand.addInverseDynamicsCommand(accelerationIntegrationCommand);
+      }
       controllerCoreCommand.completeLowLevelJointData(stateSpecificJointSettings);
 
       controllerCoreTimer.startMeasurement();
@@ -463,20 +474,25 @@ public class QuadrupedWalkingControllerState extends HighLevelControllerState im
       {
          controllerCoreCommand.addFeedbackControlCommand(feetManager.getFeedbackControlCommand(robotQuadrant));
          controllerCoreCommand.addVirtualModelControlCommand(feetManager.getVirtualModelControlCommand(robotQuadrant));
+         controllerCoreCommand.addInverseDynamicsCommand(feetManager.getInverseDynamicsCommand(robotQuadrant));
 
          YoPlaneContactState contactState = controllerToolbox.getFootContactState(robotQuadrant);
          PlaneContactStateCommand planeContactStateCommand = planeContactStateCommandPool.add();
          contactState.getPlaneContactStateCommand(planeContactStateCommand);
          controllerCoreCommand.addVirtualModelControlCommand(planeContactStateCommand);
+         controllerCoreCommand.addInverseDynamicsCommand(planeContactStateCommand);
       }
 
       controllerCoreCommand.addFeedbackControlCommand(bodyOrientationManager.getFeedbackControlCommand());
       controllerCoreCommand.addVirtualModelControlCommand(bodyOrientationManager.getVirtualModelControlCommand());
+      controllerCoreCommand.addInverseDynamicsCommand(bodyOrientationManager.getInverseDynamicsCommand());
 
       controllerCoreCommand.addVirtualModelControlCommand(balanceManager.getVirtualModelControlCommand());
+      controllerCoreCommand.addInverseDynamicsCommand(balanceManager.getInverseDynamicsCommand());
 
       controllerCoreCommand.addFeedbackControlCommand(jointSpaceManager.getFeedbackControlCommand());
       controllerCoreCommand.addVirtualModelControlCommand(jointSpaceManager.getVirtualModelControlCommand());
+      controllerCoreCommand.addInverseDynamicsCommand(jointSpaceManager.getInverseDynamicsCommand());
    }
 
    @Override
