@@ -12,8 +12,6 @@ import us.ihmc.robotics.robotDescription.RobotDescription;
 
 public abstract class QuadrupedModelFactory implements FullQuadrupedRobotModelFactory
 {
-   public abstract RobotDescription createSdfRobot();
-
    @Override
    public abstract FullQuadrupedRobotModel createFullRobotModel();
 
