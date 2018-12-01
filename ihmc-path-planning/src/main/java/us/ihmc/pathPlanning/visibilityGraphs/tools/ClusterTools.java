@@ -81,15 +81,7 @@ public class ClusterTools
          }
          else
          {
-            Vector2D extrusionDirection = new Vector2D();
-            extrusionDirection.interpolate(edgePrev.getDirection(), edgeNext.getDirection(), 0.5);
-            extrusionDirection = EuclidGeometryTools.perpendicularVector2D(extrusionDirection);
-            if (!extrudeToTheLeft)
-               extrusionDirection.negate();
-
-            Point2D extrusion = new Point2D();
-            extrusion.scaleAdd(extrusionDistance, extrusionDirection, pointToExtrude);
-            extrusions.add(extrusion);
+            extrudeSinglePointAtInsideCorner(extrusions, pointToExtrude, extrusionDistance, edgePrev, edgeNext, extrudeToTheLeft);
          }
       }
 
@@ -107,6 +99,7 @@ public class ClusterTools
 
    /**
     * Enlarges the area around a multi-point line segment to create a closed polygon and returns the polygon as a list of points.
+    * Resulting polygon is in clockwise ordering.
     */
    public static List<Point2D> extrudeMultiLine(List<Point2DReadOnly> pointsToExtrude, double[] extrusionDistances, int numberOfExtrusionsAtEndpoints)
    {
@@ -140,7 +133,7 @@ public class ClusterTools
          }
          else
          {
-            extrudeSinglePointAtInsideCorner(extrusions, pointToExtrude, extrusionDistance, edgePrev, edgeNext);
+            extrudeSinglePointAtInsideCorner(extrusions, pointToExtrude, extrusionDistance, edgePrev, edgeNext, true);
          }
       }
 
@@ -173,15 +166,20 @@ public class ClusterTools
          }
          else
          {
-            extrudeSinglePointAtInsideCorner(extrusions, pointToExtrude, extrusionDistance, edgePrev, edgeNext);
+            extrudeSinglePointAtInsideCorner(extrusions, pointToExtrude, extrusionDistance, edgePrev, edgeNext, true);
          }
       }
 
       return extrusions;
    }
 
-   private static void extrudeSinglePointAtInsideCorner(List<Point2D> extrusions, Point2DReadOnly pointToExtrude, double extrusionDistance,
-                                                       Line2D edgePrev, Line2D edgeNext)
+   /**
+    * Extrudes a single point at the extrusionDistance. If this is to the inside of a corner (angle is less than 180), 
+    * then the two new lines will be moved by the extrusionDistance. 
+    * If it is to the outside, then you should use extrudeMultiplePointsAtOutsideCorner() instead.
+    */
+   public static void extrudeSinglePointAtInsideCorner(List<Point2D> extrusions, Point2DReadOnly pointToExtrude, double extrusionDistance,
+                                                       Line2D edgePrev, Line2D edgeNext, boolean extrudeToTheLeft)
    {
       Vector2DBasics previousEdgeDirection = edgePrev.getDirection();
       Vector2DBasics nextEdgeDirection = edgeNext.getDirection();
@@ -192,6 +190,8 @@ public class ClusterTools
       
       double cosTheta = -previousEdgeDirection.dot(nextEdgeDirection);
       double oneMinusCosThetaOverTwo = (1.0 - cosTheta)/2.0;
+      
+      // Just in case. This should never happen, but with roundoff errors, sometimes it does.
       if (oneMinusCosThetaOverTwo < Double.MIN_VALUE)
       {
          oneMinusCosThetaOverTwo = Double.MIN_VALUE;
@@ -207,6 +207,10 @@ public class ClusterTools
       extrusionDistance = extrusionDistance * extrusionMultiplier;
 
       extrusionDirection = EuclidGeometryTools.perpendicularVector2D(extrusionDirection);
+      if (!extrudeToTheLeft)
+      {
+         extrusionDirection.negate();
+      }
 
       Point2D extrusion = new Point2D();
       extrusion.scaleAdd(extrusionDistance, extrusionDirection, pointToExtrude);
