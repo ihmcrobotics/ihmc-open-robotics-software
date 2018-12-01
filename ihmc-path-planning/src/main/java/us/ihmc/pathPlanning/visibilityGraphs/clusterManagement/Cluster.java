@@ -13,6 +13,12 @@ import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.pathPlanning.visibilityGraphs.tools.PlanarRegionTools;
 
+/**
+ * A Cluster typically represents an obstacle over a planar region.
+ * It consists of the 3D points of the obstacle, the 2D points of the navigable spots on the planar region 
+ * and the 2D points of the nonNavigable spots on the planar region resulting from the obstacle.
+ * It contains the RigidBodyTransform for moving the points from local to world coordinates.
+ */
 public class Cluster
 {
    private final RigidBodyTransform transformToWorld = new RigidBodyTransform();
