@@ -90,7 +90,9 @@ public class NavigableRegionsManager
 
       long startBodyPathComputation = System.currentTimeMillis();
 
-      navigableRegions = VisibilityGraphsFactory.createNavigableRegions(regions, parameters);
+      navigableRegions = VisibilityGraphsFactory.createNavigableRegionButNotVisibilityMaps(regions, parameters);
+      VisibilityGraphsFactory.createStaticVisibilityMapsForNavigableRegions(navigableRegions);
+
       interRegionVisibilityMap = VisibilityGraphsFactory.createInterRegionVisibilityMap(navigableRegions, parameters.getInterRegionConnectionFilter());
       double searchHostEpsilon = parameters.getSearchHostRegionEpsilon();
       startMap = VisibilityGraphsFactory.createSingleSourceVisibilityMap(start, navigableRegions, searchHostEpsilon,

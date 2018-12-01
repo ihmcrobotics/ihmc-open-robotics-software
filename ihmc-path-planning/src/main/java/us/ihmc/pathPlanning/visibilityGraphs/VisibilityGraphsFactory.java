@@ -39,6 +39,17 @@ public class VisibilityGraphsFactory
       if (allRegions.isEmpty())
          return null;
 
+      List<NavigableRegion> navigableRegions = createNavigableRegionButNotVisibilityMaps(allRegions, parameters);
+      createStaticVisibilityMapsForNavigableRegions(navigableRegions);
+
+      return navigableRegions;
+   }
+
+   public static List<NavigableRegion> createNavigableRegionButNotVisibilityMaps(List<PlanarRegion> allRegions, VisibilityGraphsParameters parameters)
+   {
+      if (allRegions.isEmpty())
+         return null;
+
       List<NavigableRegion> navigableRegions = new ArrayList<>(allRegions.size());
 
       NavigableRegionFilter navigableRegionFilter = parameters.getNavigableRegionFilter();
@@ -54,13 +65,15 @@ public class VisibilityGraphsFactory
          if (!navigableRegionFilter.isPlanarRegionNavigable(candidate, otherRegions))
             continue;
 
-         navigableRegions.add(createNavigableRegion(candidate, otherRegions, parameters));
+         NavigableRegion navigableRegion = createNavigableRegionButNotVisibilityMaps(candidate, otherRegions, parameters);
+         navigableRegions.add(navigableRegion);
       }
 
       return navigableRegions;
    }
 
-   public static NavigableRegion createNavigableRegion(PlanarRegion region, List<PlanarRegion> otherRegions, VisibilityGraphsParameters parameters)
+   public static NavigableRegion createNavigableRegionButNotVisibilityMaps(PlanarRegion region, List<PlanarRegion> otherRegions,
+                                                                           VisibilityGraphsParameters parameters)
    {
       PlanarRegionFilter planarRegionFilter = parameters.getPlanarRegionFilter();
       double orthogonalAngle = parameters.getRegionOrthogonalAngle();
@@ -68,14 +81,26 @@ public class VisibilityGraphsFactory
       NavigableExtrusionDistanceCalculator navigableCalculator = parameters.getNavigableExtrusionDistanceCalculator();
       ObstacleExtrusionDistanceCalculator obstacleCalculator = parameters.getObstacleExtrusionDistanceCalculator();
       ObstacleRegionFilter obstacleRegionFilter = parameters.getObstacleRegionFilter();
-      return createNavigableRegion(region, otherRegions, orthogonalAngle, clusterResolution, obstacleRegionFilter, planarRegionFilter, navigableCalculator,
-                                   obstacleCalculator);
+      return createNavigableRegionButNotVisibilityMaps(region, otherRegions, orthogonalAngle, clusterResolution, obstacleRegionFilter, planarRegionFilter,
+                                                       navigableCalculator, obstacleCalculator);
    }
 
    public static NavigableRegion createNavigableRegion(PlanarRegion region, List<PlanarRegion> otherRegions, double orthogonalAngle, double clusterResolution,
                                                        ObstacleRegionFilter obstacleRegionFilter, PlanarRegionFilter filter,
                                                        NavigableExtrusionDistanceCalculator navigableCalculator,
                                                        ObstacleExtrusionDistanceCalculator obstacleCalculator)
+   {
+      NavigableRegion navigableRegion = createNavigableRegionButNotVisibilityMaps(region, otherRegions, orthogonalAngle, clusterResolution,
+                                                                                  obstacleRegionFilter, filter, navigableCalculator, obstacleCalculator);
+      createStaticVisibilityMapsForNavigableRegion(navigableRegion);
+
+      return navigableRegion;
+   }
+
+   private static NavigableRegion createNavigableRegionButNotVisibilityMaps(PlanarRegion region, List<PlanarRegion> otherRegions, double orthogonalAngle,
+                                                                            double clusterResolution, ObstacleRegionFilter obstacleRegionFilter,
+                                                                            PlanarRegionFilter filter, NavigableExtrusionDistanceCalculator navigableCalculator,
+                                                                            ObstacleExtrusionDistanceCalculator obstacleCalculator)
    {
       NavigableRegion navigableRegion = new NavigableRegion(region);
       PlanarRegion homeRegion = navigableRegion.getHomeRegion();
@@ -90,15 +115,32 @@ public class VisibilityGraphsFactory
       navigableRegion.addObstacleClusters(ClusterTools.createObstacleClusters(homeRegion, obstacleRegions, orthogonalAngle, obstacleCalculator));
 
       for (Cluster cluster : navigableRegion.getAllClusters())
-      {         
+      {
          List<Point2DReadOnly> expandListOf2DPoints = PointCloudTools.addPointsAlongPolygon(cluster.getNavigableExtrusionsInLocal(), clusterResolution);
          cluster.setNavigableExtrusionsInLocal(expandListOf2DPoints);
       }
+      return navigableRegion;
+   }
 
+   public static void createStaticVisibilityMapsForNavigableRegions(List<NavigableRegion> navigableRegions)
+   {
+      if (navigableRegions == null)
+         return;
+
+      for (int navigableRegionIndex = 0; navigableRegionIndex < navigableRegions.size(); navigableRegionIndex++)
+      {
+         NavigableRegion navigableRegion = navigableRegions.get(navigableRegionIndex);
+         createStaticVisibilityMapsForNavigableRegion(navigableRegion);
+      }
+   }
+
+   private static void createStaticVisibilityMapsForNavigableRegion(NavigableRegion navigableRegion)
+   {
       Collection<Connection> connectionsForMap = VisibilityTools.createStaticVisibilityMap(navigableRegion.getAllClusters(), navigableRegion);
 
       if (ENABLE_GREEDY_FILTERS)
       {
+         PlanarRegion homeRegion = navigableRegion.getHomeRegion();
          connectionsForMap = VisibilityTools.removeConnectionsFromExtrusionsOutsideRegions(connectionsForMap, homeRegion);
          connectionsForMap = VisibilityTools.removeConnectionsFromExtrusionsInsideNoGoZones(connectionsForMap, navigableRegion.getAllClusters());
       }
@@ -106,8 +148,6 @@ public class VisibilityGraphsFactory
       VisibilityMap visibilityMap = new VisibilityMap();
       visibilityMap.setConnections(connectionsForMap);
       navigableRegion.setVisibilityMapInLocal(visibilityMap);
-
-      return navigableRegion;
    }
 
    /**
@@ -269,7 +309,8 @@ public class VisibilityGraphsFactory
       }
    }
 
-   public static SingleSourceVisibilityMap connectToClosestPoints(ConnectionPoint3D source, int maximumNumberOfConnections, List<NavigableRegion> navigableRegions, int mapId)
+   public static SingleSourceVisibilityMap connectToClosestPoints(ConnectionPoint3D source, int maximumNumberOfConnections,
+                                                                  List<NavigableRegion> navigableRegions, int mapId)
    {
       List<Connection> allConnections = new ArrayList<>();
 
@@ -284,8 +325,7 @@ public class VisibilityGraphsFactory
          }
       }
 
-      Collections.sort(allConnections, (c1, c2) ->
-      {
+      Collections.sort(allConnections, (c1, c2) -> {
          double c1LengthSquared = c1.lengthSquared();
          double c2LengthSquared = c2.lengthSquared();
 
