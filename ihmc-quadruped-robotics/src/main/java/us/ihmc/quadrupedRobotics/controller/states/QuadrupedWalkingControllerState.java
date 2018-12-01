@@ -162,7 +162,7 @@ public class QuadrupedWalkingControllerState extends HighLevelControllerState im
                                                                                        runtimeEnvironment.getGraphicsListRegistry(), registry);
       controlCoreToolbox.setupForVirtualModelControlSolver(fullRobotModel.getBody(), controllerToolbox.getContactablePlaneBodies());
       controlCoreToolbox.setupForInverseDynamicsSolver(controllerToolbox.getContactablePlaneBodies());
-      controlCoreToolbox.setJointPrivilegedConfigurationParameters(new JointPrivilegedConfigurationParameters());
+      controlCoreToolbox.setJointPrivilegedConfigurationParameters(runtimeEnvironment.getPrivilegedConfigurationParameters());
       FeedbackControlCommandList feedbackTemplate = controlManagerFactory.createFeedbackControlTemplate();
       controllerCore = new WholeBodyControllerCore(controlCoreToolbox, feedbackTemplate, runtimeEnvironment.getJointDesiredOutputList(), registry);
       controllerCoreOutput = controllerCore.getControllerCoreOutput();
