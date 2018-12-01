@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import us.ihmc.commons.MathTools;
+import us.ihmc.commons.lists.ListWrappingIndexTools;
 import us.ihmc.euclid.geometry.Line2D;
 import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
 import us.ihmc.euclid.tools.EuclidCoreTools;
@@ -14,6 +15,7 @@ import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple2D.Vector2D;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
+import us.ihmc.euclid.tuple2D.interfaces.Vector2DBasics;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
@@ -24,7 +26,6 @@ import us.ihmc.pathPlanning.visibilityGraphs.interfaces.NavigableExtrusionDistan
 import us.ihmc.pathPlanning.visibilityGraphs.interfaces.ObstacleExtrusionDistanceCalculator;
 import us.ihmc.robotics.geometry.PlanarRegion;
 import us.ihmc.robotics.linearAlgebra.PrincipalComponentAnalysis3D;
-import us.ihmc.commons.lists.ListWrappingIndexTools;
 
 public class ClusterTools
 {
@@ -42,7 +43,7 @@ public class ClusterTools
       return extrudePolygon(extrudeToTheLeft, rawPoints, extrusionDistances);
    }
 
-   static List<Point2D> extrudePolygon(boolean extrudeToTheLeft, List<Point2DReadOnly> pointsToExtrude, double[] extrusionDistances)
+   public static List<Point2D> extrudePolygon(boolean extrudeToTheLeft, List<Point2DReadOnly> pointsToExtrude, double[] extrusionDistances)
    {
       if (pointsToExtrude.size() == 2)
       {
@@ -75,7 +76,8 @@ public class ClusterTools
 
          if (shouldExtrudeCorner)
          {
-            extrusions.addAll(extrudeCorner(pointToExtrude, edgePrev, edgeNext, extrudeToTheLeft, 3, extrusionDistance));
+            int numberOfExtrusionsAtEndpoints = 3;
+            extrusions.addAll(extrudeMultiplePointsAtOutsideCorner(pointToExtrude, edgePrev, edgeNext, extrudeToTheLeft, numberOfExtrusionsAtEndpoints, extrusionDistance));
          }
          else
          {
@@ -103,22 +105,27 @@ public class ClusterTools
       return extrudeMultiLine(rawPoints, extrusionDistances, numberOfExtrusionsAtEndpoints);
    }
 
-   private static List<Point2D> extrudeMultiLine(List<Point2DReadOnly> pointsToExtrude, double[] extrusionDistances, int numberOfExtrusionsAtEndpoints)
+   /**
+    * Enlarges the area around a multi-point line segment to create a closed polygon and returns the polygon as a list of points.
+    */
+   public static List<Point2D> extrudeMultiLine(List<Point2DReadOnly> pointsToExtrude, double[] extrusionDistances, int numberOfExtrusionsAtEndpoints)
    {
       List<Point2D> extrusions = new ArrayList<>();
 
       if (pointsToExtrude.size() >= 2)
-      { // Start
+      { 
+         // Start
          Point2DReadOnly pointToExtrude = pointsToExtrude.get(0);
          double extrusionDistance = extrusionDistances[0];
 
          Line2D edgePrev = new Line2D(pointsToExtrude.get(1), pointToExtrude);
          Line2D edgeNext = new Line2D(pointToExtrude, pointsToExtrude.get(1));
-         extrusions.addAll(extrudeCorner(pointToExtrude, edgePrev, edgeNext, true, numberOfExtrusionsAtEndpoints, extrusionDistance));
+         extrusions.addAll(extrudeMultiplePointsAtOutsideCorner(pointToExtrude, edgePrev, edgeNext, true, numberOfExtrusionsAtEndpoints, extrusionDistance));
       }
 
       for (int i = 1; i < pointsToExtrude.size() - 1; i++)
-      { // Go from start to end
+      { 
+         // Go from start to end
          Point2DReadOnly pointToExtrude = pointsToExtrude.get(i);
          double extrusionDistance = extrusionDistances[i];
 
@@ -129,34 +136,29 @@ public class ClusterTools
 
          if (shouldExtrudeCorner)
          {
-            extrusions.addAll(extrudeCorner(pointToExtrude, edgePrev, edgeNext, true, 3, extrusionDistance));
+            extrusions.addAll(extrudeMultiplePointsAtOutsideCorner(pointToExtrude, edgePrev, edgeNext, true, 3, extrusionDistance));
          }
          else
          {
-            Vector2D extrusionDirection = new Vector2D();
-            extrusionDirection.interpolate(edgePrev.getDirection(), edgeNext.getDirection(), 0.5);
-            extrusionDirection.normalize();
-            extrusionDirection = EuclidGeometryTools.perpendicularVector2D(extrusionDirection);
-
-            Point2D extrusion = new Point2D();
-            extrusion.scaleAdd(extrusionDistance, extrusionDirection, pointToExtrude);
-            extrusions.add(extrusion);
+            extrudeSinglePointAtInsideCorner(extrusions, pointToExtrude, extrusionDistance, edgePrev, edgeNext);
          }
       }
 
       if (pointsToExtrude.size() >= 2)
-      { // End
+      { 
+         // End
          int lastIndex = pointsToExtrude.size() - 1;
          Point2DReadOnly pointToExtrude = pointsToExtrude.get(lastIndex);
          double extrusionDistance = extrusionDistances[lastIndex];
 
          Line2D edgePrev = new Line2D(pointsToExtrude.get(lastIndex - 1), pointToExtrude);
          Line2D edgeNext = new Line2D(pointToExtrude, pointsToExtrude.get(lastIndex - 1));
-         extrusions.addAll(extrudeCorner(pointToExtrude, edgePrev, edgeNext, true, numberOfExtrusionsAtEndpoints, extrusionDistance));
+         extrusions.addAll(extrudeMultiplePointsAtOutsideCorner(pointToExtrude, edgePrev, edgeNext, true, numberOfExtrusionsAtEndpoints, extrusionDistance));
       }
 
       for (int i = pointsToExtrude.size() - 2; i >= 1; i--)
-      { // Go from end back to start
+      { 
+         // Go from end back to start
          Point2DReadOnly pointToExtrude = pointsToExtrude.get(i);
          double extrusionDistance = extrusionDistances[i];
 
@@ -167,25 +169,48 @@ public class ClusterTools
 
          if (shouldExtrudeCorner)
          {
-            extrusions.addAll(extrudeCorner(pointToExtrude, edgePrev, edgeNext, true, 3, extrusionDistance));
+            extrusions.addAll(extrudeMultiplePointsAtOutsideCorner(pointToExtrude, edgePrev, edgeNext, true, 3, extrusionDistance));
          }
          else
          {
-            Vector2D extrusionDirection = new Vector2D();
-            extrusionDirection.interpolate(edgePrev.getDirection(), edgeNext.getDirection(), 0.5);
-            extrusionDirection.normalize();
-            extrusionDirection = EuclidGeometryTools.perpendicularVector2D(extrusionDirection);
-
-            Point2D extrusion = new Point2D();
-            extrusion.scaleAdd(extrusionDistance, extrusionDirection, pointToExtrude);
-            extrusions.add(extrusion);
+            extrudeSinglePointAtInsideCorner(extrusions, pointToExtrude, extrusionDistance, edgePrev, edgeNext);
          }
       }
 
-      if (!extrusions.isEmpty())
-         extrusions.add(extrusions.get(0));
-
       return extrusions;
+   }
+
+   private static void extrudeSinglePointAtInsideCorner(List<Point2D> extrusions, Point2DReadOnly pointToExtrude, double extrusionDistance,
+                                                       Line2D edgePrev, Line2D edgeNext)
+   {
+      Vector2DBasics previousEdgeDirection = edgePrev.getDirection();
+      Vector2DBasics nextEdgeDirection = edgeNext.getDirection();
+      
+      Vector2D extrusionDirection = new Vector2D();
+      extrusionDirection.interpolate(previousEdgeDirection, nextEdgeDirection, 0.5);
+      extrusionDirection.normalize();
+      
+      double cosTheta = -previousEdgeDirection.dot(nextEdgeDirection);
+      double oneMinusCosThetaOverTwo = (1.0 - cosTheta)/2.0;
+      if (oneMinusCosThetaOverTwo < Double.MIN_VALUE)
+      {
+         oneMinusCosThetaOverTwo = Double.MIN_VALUE;
+      }
+      
+      double sinThetaOverTwo = Math.sqrt(oneMinusCosThetaOverTwo);      
+      double extrusionMultiplier = 1.0 / sinThetaOverTwo;
+      
+      //TODO: Hackish here. Maybe pass in magic number as a parameter.
+      // But without this, could blow up to near infinity.
+      if (extrusionMultiplier > 3.0) extrusionMultiplier = 3.0;
+      
+      extrusionDistance = extrusionDistance * extrusionMultiplier;
+
+      extrusionDirection = EuclidGeometryTools.perpendicularVector2D(extrusionDirection);
+
+      Point2D extrusion = new Point2D();
+      extrusion.scaleAdd(extrusionDistance, extrusionDirection, pointToExtrude);
+      extrusions.add(extrusion);
    }
 
    public static List<Point2D> extrudeLine(Point2DReadOnly endpoint1, Point2DReadOnly endpoint2, double extrusionDistance, int numberOfExtrusionsAtEndpoints)
@@ -200,15 +225,15 @@ public class ClusterTools
       Line2D edge1 = new Line2D(endpoint1, endpoint2);
       Line2D edge2 = new Line2D(endpoint2, endpoint1);
 
-      List<Point2D> extrusions1 = extrudeCorner(endpoint1, edge2, edge1, true, numberOfExtrusionsAtEndpoints, extrusionDistance1);
-      List<Point2D> extrusions2 = extrudeCorner(endpoint2, edge1, edge2, true, numberOfExtrusionsAtEndpoints, extrusionDistance2);
+      List<Point2D> extrusions1 = extrudeMultiplePointsAtOutsideCorner(endpoint1, edge2, edge1, true, numberOfExtrusionsAtEndpoints, extrusionDistance1);
+      List<Point2D> extrusions2 = extrudeMultiplePointsAtOutsideCorner(endpoint2, edge1, edge2, true, numberOfExtrusionsAtEndpoints, extrusionDistance2);
       extrusions.addAll(extrusions1);
       extrusions.addAll(extrusions2);
 
       return extrusions;
    }
 
-   public static List<Point2D> extrudeCorner(Point2DReadOnly cornerPointToExtrude, Line2D previousEdge, Line2D nextEdge, boolean extrudeToTheLeft,
+   public static List<Point2D> extrudeMultiplePointsAtOutsideCorner(Point2DReadOnly cornerPointToExtrude, Line2D previousEdge, Line2D nextEdge, boolean extrudeToTheLeft,
                                              int numberOfExtrusions, double extrusionDistance)
    {
       List<Point2D> extrusions = new ArrayList<>();
@@ -376,12 +401,14 @@ public class ClusterTools
          }
 
          if (Math.abs(otherNormal.dot(referenceNormal)) < zThresholdBeforeOrthogonal)
-         { // Project region as a line
+         { 
+            // Project region as a line
             cluster.setType(Type.MULTI_LINE);
             cluster.addRawPointsInLocal3D(filterVerticalPolygonForMultiLineExtrusion(rawPointsInLocal, POPPING_MULTILINE_POINTS_THRESHOLD));
          }
          else
-         { // Project region as a polygon
+         { 
+            // Project region as a polygon
             cluster.setType(Type.POLYGON);
             cluster.addRawPointsInLocal3D(rawPointsInLocal);
          }
