@@ -60,9 +60,9 @@ public class QuadrupedJointSpaceManager
       }
 
 
-      privilegedConfigurationWeight = new DoubleParameter("kneePrivWeight", registry, privilegedConfigurationParameters.getDefaultWeight());
-      privilegedConfigurationGain = new DoubleParameter("kneePrivGain", registry, privilegedConfigurationParameters.getDefaultConfigurationGain());
-      privilegedConfigurationVelocityGain = new DoubleParameter("kneePrivVelocityGain", registry, privilegedConfigurationParameters.getDefaultVelocityGain());
+      privilegedConfigurationWeight = new DoubleParameter("kneePrivWeight", registry, privilegedConfigurationParameters.getKneeWeight());
+      privilegedConfigurationGain = new DoubleParameter("kneePrivGain", registry, privilegedConfigurationParameters.getKneeConfigurationGain());
+      privilegedConfigurationVelocityGain = new DoubleParameter("kneePrivVelocityGain", registry, privilegedConfigurationParameters.getKneeConfigurationVelocityGain());
 
       jointPositionLimitDamping.set(POSITION_LIMIT_DAMPING);
       jointPositionLimitStiffness.set(POSITION_LIMIT_STIFFNESS);

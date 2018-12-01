@@ -28,4 +28,19 @@ public class GenericQuadrupedPrivilegedConfigurationParameters extends Quadruped
    {
       return 5.0;
    }
+
+   public double getKneeConfigurationGain()
+   {
+      return 150.0;
+   }
+
+   public double getKneeConfigurationVelocityGain()
+   {
+      return 6.0;
+   }
+
+   public double getKneeWeight()
+   {
+      return 5.0;
+   }
 }
