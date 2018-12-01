@@ -89,7 +89,7 @@ public abstract class AvatarEndToEndForwadDynamicsCalculatorTest implements Mult
       MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " after test.");
    }
 
-   @Test
+   @Test(timeout = 300000)
    public void testStanding() throws Exception
    {
       BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
@@ -108,7 +108,7 @@ public abstract class AvatarEndToEndForwadDynamicsCalculatorTest implements Mult
       BambooTools.reportTestFinishedMessage(simulationTestingParameters.getShowWindows());
    }
 
-   @Test
+   @Test(timeout = 300000)
    public void testWalking() throws Exception
    {
       BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
@@ -130,7 +130,7 @@ public abstract class AvatarEndToEndForwadDynamicsCalculatorTest implements Mult
       BambooTools.reportTestFinishedMessage(simulationTestingParameters.getShowWindows());
    }
 
-   @Test
+   @Test(timeout = 300000)
    public void testFloating() throws Exception
    {
       BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
