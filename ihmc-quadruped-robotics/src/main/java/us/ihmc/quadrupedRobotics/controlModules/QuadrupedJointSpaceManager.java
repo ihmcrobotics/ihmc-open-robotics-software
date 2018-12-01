@@ -9,10 +9,17 @@ import us.ihmc.commonWalkingControlModules.controllerCore.command.virtualModelCo
 import us.ihmc.commonWalkingControlModules.controllerCore.command.virtualModelControl.VirtualModelControlCommand;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.quadrupedRobotics.controller.QuadrupedControllerToolbox;
+import us.ihmc.quadrupedRobotics.parameters.QuadrupedPrivilegedConfigurationParameters;
+import us.ihmc.robotics.partNames.LegJointName;
+import us.ihmc.robotics.robotSide.QuadrantDependentList;
+import us.ihmc.robotics.robotSide.RobotQuadrant;
 import us.ihmc.yoVariables.parameters.DoubleParameter;
 import us.ihmc.yoVariables.providers.DoubleProvider;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public class QuadrupedJointSpaceManager
 {
@@ -33,13 +40,29 @@ public class QuadrupedJointSpaceManager
    private final YoDouble jointPositionLimitDamping = new YoDouble("jointPositionLimitDamping", registry);
    private final YoDouble jointPositionLimitStiffness = new YoDouble("jointPositionLimitStiffness", registry);
 
-   private final DoubleProvider privilegedConfigurationWeight = new DoubleParameter("privilegedConfigurationWeight", registry, 5.0);
-   private final DoubleProvider privilegedConfigurationStiffness = new DoubleParameter("privilegedConfigurationStiffness", registry, 40.0);
-   private final DoubleProvider privilegedConfigurationDamping = new DoubleParameter("privilegedConfigurationDamping", registry, 6.0);
+   private final DoubleProvider privilegedConfigurationWeight;
+   private final DoubleProvider privilegedConfigurationGain;
+   private final DoubleProvider privilegedConfigurationVelocityGain;
+
+   private final List<DoubleProvider> privilegedConfigurations = new ArrayList<>();
+   private final List<OneDoFJointBasics> kneeJoints = new ArrayList<>();
 
    public QuadrupedJointSpaceManager(QuadrupedControllerToolbox controllerToolbox, YoVariableRegistry parentRegistry)
    {
       controlledJoints = controllerToolbox.getFullRobotModel().getControllableOneDoFJoints();
+      QuadrupedPrivilegedConfigurationParameters privilegedConfigurationParameters = controllerToolbox.getRuntimeEnvironment().getPrivilegedConfigurationParameters();
+
+      for (RobotQuadrant quadrant : RobotQuadrant.values)
+      {
+         OneDoFJointBasics joint = controllerToolbox.getFullRobotModel().getLegJoint(quadrant, LegJointName.KNEE_PITCH);
+         kneeJoints.add(joint);
+         privilegedConfigurations.add(new DoubleParameter(joint.getName() + "_PrivilegedConfiguration", registry, privilegedConfigurationParameters.getPrivilegedConfiguration(quadrant)));
+      }
+
+
+      privilegedConfigurationWeight = new DoubleParameter("kneePrivWeight", registry, privilegedConfigurationParameters.getDefaultWeight());
+      privilegedConfigurationGain = new DoubleParameter("kneePrivGain", registry, privilegedConfigurationParameters.getDefaultConfigurationGain());
+      privilegedConfigurationVelocityGain = new DoubleParameter("kneePrivVelocityGain", registry, privilegedConfigurationParameters.getDefaultVelocityGain());
 
       jointPositionLimitDamping.set(POSITION_LIMIT_DAMPING);
       jointPositionLimitStiffness.set(POSITION_LIMIT_STIFFNESS);
@@ -58,11 +81,13 @@ public class QuadrupedJointSpaceManager
 
       privilegedConfigurationCommand.clear();
 
-      privilegedConfigurationCommand.setDefaultWeight(privilegedConfigurationWeight.getValue());
-      privilegedConfigurationCommand.setDefaultConfigurationGain(privilegedConfigurationStiffness.getValue());
-      privilegedConfigurationCommand.setDefaultVelocityGain(privilegedConfigurationDamping.getValue());
-      for (OneDoFJointBasics joint : controlledJoints)
-         privilegedConfigurationCommand.addJoint(joint, PrivilegedConfigurationCommand.PrivilegedConfigurationOption.AT_MID_RANGE);
+      for (int i = 0; i < kneeJoints.size(); i++)
+      {
+         privilegedConfigurationCommand.addJoint(kneeJoints.get(i), privilegedConfigurations.get(i).getValue());
+         privilegedConfigurationCommand.setConfigurationGains(privilegedConfigurationGain.getValue());
+         privilegedConfigurationCommand.setVelocityGains(privilegedConfigurationVelocityGain.getValue());
+         privilegedConfigurationCommand.setWeight(i, privilegedConfigurationWeight.getValue());
+      }
    }
 
    public FeedbackControlCommand<?> createFeedbackControlTemplate()

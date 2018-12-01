@@ -1,7 +1,7 @@
 package us.ihmc.exampleSimulations.genericQuadruped.parameters;
 
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.WholeBodySetpointParameters;
-import us.ihmc.quadrupedRobotics.controller.states.QuadrupedSitDownParameters;
+import us.ihmc.quadrupedRobotics.parameters.QuadrupedSitDownParameters;
 
 public class GenericQuadrupedSitDownParameters implements QuadrupedSitDownParameters
 {

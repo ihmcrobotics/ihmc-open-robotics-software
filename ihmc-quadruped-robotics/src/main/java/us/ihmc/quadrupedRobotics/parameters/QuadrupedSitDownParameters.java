@@ -1,4 +1,4 @@
-package us.ihmc.quadrupedRobotics.controller.states;
+package us.ihmc.quadrupedRobotics.parameters;
 
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.WholeBodySetpointParameters;
 
