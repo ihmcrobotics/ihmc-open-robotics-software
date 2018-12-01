@@ -24,6 +24,7 @@ import us.ihmc.quadrupedRobotics.controller.QuadrupedControlMode;
 import us.ihmc.quadrupedRobotics.controller.QuadrupedControllerManager;
 import us.ihmc.quadrupedRobotics.controller.QuadrupedSimulationController;
 import us.ihmc.quadrupedRobotics.parameters.QuadrupedPositionBasedCrawlControllerParameters;
+import us.ihmc.quadrupedRobotics.parameters.QuadrupedPrivilegedConfigurationParameters;
 import us.ihmc.quadrupedRobotics.parameters.QuadrupedSitDownParameters;
 import us.ihmc.quadrupedRobotics.estimator.SimulatedQuadrupedFootSwitchFactory;
 import us.ihmc.quadrupedRobotics.estimator.referenceFrames.QuadrupedReferenceFrames;
@@ -109,6 +110,7 @@ public class QuadrupedSimulationFactory
    private final RequiredFactoryField<JointDesiredOutputList> jointDesiredOutputList = new RequiredFactoryField<>("jointDesiredOutputList");
    private final RequiredFactoryField<HighLevelControllerParameters> highLevelControllerParameters = new RequiredFactoryField<>("highLevelControllerParameters");
    private final RequiredFactoryField<QuadrupedSitDownParameters> sitDownParameters = new RequiredFactoryField<>("sitDownParameters");
+   private final RequiredFactoryField<QuadrupedPrivilegedConfigurationParameters> privilegedConfigurationParameters = new RequiredFactoryField<>("privilegedConfigurationParameters");
 
    private final OptionalFactoryField<SimulatedElasticityParameters> simulatedElasticityParameters = new OptionalFactoryField<>("simulatedElasticityParameters");
    private final OptionalFactoryField<QuadrupedGroundContactModelType> groundContactModelType = new OptionalFactoryField<>("groundContactModelType");
@@ -311,7 +313,7 @@ public class QuadrupedSimulationFactory
                                                                                        yoGraphicsListRegistryForDetachedOverhead, contactableFeet,
                                                                                        contactablePlaneBodies, centerOfMassDataHolder, footSwitches,
                                                                                        gravity.get(), highLevelControllerParameters.get(),
-                                                                                       sitDownParameters.get());
+                                                                                       sitDownParameters.get(), privilegedConfigurationParameters.get());
 
       if(controlMode.get() == QuadrupedControlMode.POSITION)
       {
@@ -608,6 +610,11 @@ public class QuadrupedSimulationFactory
    public void setSitDownParameters(QuadrupedSitDownParameters sitDownParameters)
    {
       this.sitDownParameters.set(sitDownParameters);
+   }
+
+   public void setPrivilegedConfigurationParameters(QuadrupedPrivilegedConfigurationParameters privilegedConfigurationParameters)
+   {
+      this.privilegedConfigurationParameters.set(privilegedConfigurationParameters);
    }
 
    public void setGravity(double gravity)
