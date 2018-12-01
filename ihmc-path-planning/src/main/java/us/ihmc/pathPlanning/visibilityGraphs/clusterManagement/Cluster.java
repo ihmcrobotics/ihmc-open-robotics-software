@@ -47,6 +47,8 @@ public class Cluster
 
    public enum Type
    {
+      // Multi-Line means open at the end, not closed. 
+      // Polygon is a closed, perhaps concave, polygon.
       LINE, MULTI_LINE, POLYGON;
 
       public static Type[] values = values();

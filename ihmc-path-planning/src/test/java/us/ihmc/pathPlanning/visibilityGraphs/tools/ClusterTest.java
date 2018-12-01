@@ -5,6 +5,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import org.junit.Test;
 
+import us.ihmc.commons.MutationTestFacilitator;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.pathPlanning.visibilityGraphs.clusterManagement.Cluster;
@@ -32,6 +33,11 @@ public class ClusterTest
       assertTrue(obstacleCluster.isInsideNonNavigableZone(pointB));
       assertTrue(obstacleCluster.isInsideNonNavigableZone(pointC));
       assertFalse(obstacleCluster.isInsideNonNavigableZone(pointD));
+   }
+
+   public static void main(String[] args)
+   {
+      MutationTestFacilitator.facilitateMutationTestForClass(Cluster.class, ClusterTest.class);
    }
 
 }
