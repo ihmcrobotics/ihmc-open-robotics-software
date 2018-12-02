@@ -3,7 +3,8 @@ package us.ihmc.quadrupedRobotics.model;
 import us.ihmc.commonWalkingControlModules.configurations.HighLevelControllerParameters;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.ControllerCoreOptimizationSettings;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
-import us.ihmc.quadrupedRobotics.controller.states.QuadrupedSitDownParameters;
+import us.ihmc.quadrupedRobotics.parameters.QuadrupedPrivilegedConfigurationParameters;
+import us.ihmc.quadrupedRobotics.parameters.QuadrupedSitDownParameters;
 import us.ihmc.robotModels.FullQuadrupedRobotModel;
 import us.ihmc.robotics.contactable.ContactablePlaneBody;
 import us.ihmc.robotics.robotSide.QuadrantDependentList;
@@ -28,6 +29,7 @@ public class QuadrupedRuntimeEnvironment
    private final CenterOfMassDataHolderReadOnly centerOfMassDataHolder;
    private final HighLevelControllerParameters highLevelControllerParameters;
    private final QuadrupedSitDownParameters sitDownParameters;
+   private final QuadrupedPrivilegedConfigurationParameters privilegedConfigurationParameters;
 
    private final double gravityZ;
 
@@ -42,7 +44,8 @@ public class QuadrupedRuntimeEnvironment
                                       YoGraphicsListRegistry graphicsListRegistryForDetachedOverhead,
                                       QuadrantDependentList<ContactablePlaneBody> contactableFeet, List<ContactablePlaneBody> contactablePlaneBodies,
                                       CenterOfMassDataHolderReadOnly centerOfMassDataHolder, QuadrantDependentList<FootSwitchInterface> footSwitches,
-                                      double gravity, HighLevelControllerParameters highLevelControllerParameters, QuadrupedSitDownParameters sitDownParameters)
+                                      double gravity, HighLevelControllerParameters highLevelControllerParameters, QuadrupedSitDownParameters sitDownParameters,
+                                      QuadrupedPrivilegedConfigurationParameters privilegedConfigurationParameters)
    {
       this.controlDT = controlDT;
       this.robotTimestamp = robotTimestamp;
@@ -59,6 +62,7 @@ public class QuadrupedRuntimeEnvironment
       this.centerOfMassDataHolder = centerOfMassDataHolder;
       this.highLevelControllerParameters = highLevelControllerParameters;
       this.sitDownParameters = sitDownParameters;
+      this.privilegedConfigurationParameters = privilegedConfigurationParameters;
    }
 
    public double getControlDT()
@@ -134,5 +138,10 @@ public class QuadrupedRuntimeEnvironment
    public QuadrupedSitDownParameters getSitDownParameters()
    {
       return sitDownParameters;
+   }
+
+   public QuadrupedPrivilegedConfigurationParameters getPrivilegedConfigurationParameters()
+   {
+      return privilegedConfigurationParameters;
    }
 }
