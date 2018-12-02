@@ -5,6 +5,7 @@ import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.quadrupedRobotics.planning.QuadrupedTimedOrientedStep;
@@ -18,7 +19,7 @@ import java.util.List;
 public class QuadrupedMessageTools
 {
 
-   public static QuadrupedTimedStepMessage createQuadrupedTimedStepMessage(RobotQuadrant robotQuadrant, Point3D goalPosition, double groundClearance,
+   public static QuadrupedTimedStepMessage createQuadrupedTimedStepMessage(RobotQuadrant robotQuadrant, Point3DReadOnly goalPosition, double groundClearance,
                                                                            TimeInterval timeInterval)
    {
       QuadrupedTimedStepMessage message = new QuadrupedTimedStepMessage();
@@ -31,7 +32,7 @@ public class QuadrupedMessageTools
       return message;
    }
 
-   public static QuadrupedTimedStepMessage createQuadrupedTimedStepMessage(RobotQuadrant robotQuadrant, Point3D goalPosition, double groundClearance,
+   public static QuadrupedTimedStepMessage createQuadrupedTimedStepMessage(RobotQuadrant robotQuadrant, Point3DReadOnly goalPosition, double groundClearance,
                                                                            double startTime, double endTime)
    {
       QuadrupedTimedStepMessage message = new QuadrupedTimedStepMessage();
