@@ -17,6 +17,7 @@ import us.ihmc.humanoidRobotics.communication.subscribers.StateEstimatorModeSubs
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.quadrupedRobotics.communication.QuadrupedControllerAPIDefinition;
 import us.ihmc.quadrupedRobotics.controlModules.QuadrupedControlManagerFactory;
+import us.ihmc.quadrupedRobotics.controller.states.QuadrupedExitWalkingControllerState;
 import us.ihmc.quadrupedRobotics.controller.states.QuadrupedSitDownControllerState;
 import us.ihmc.quadrupedRobotics.parameters.QuadrupedSitDownParameters;
 import us.ihmc.quadrupedRobotics.controller.states.QuadrupedWalkingControllerState;
@@ -256,8 +257,8 @@ public class QuadrupedControllerManager implements RobotController, CloseableAnd
       SmoothTransitionControllerState standTransitionState = new SmoothTransitionControllerState("toWalking", HighLevelControllerName.STAND_TRANSITION_STATE,
                                                                                                  standReadyState, walkingState, controlledJoints,
                                                                                                  highLevelControllerParameters);
-      SmoothTransitionControllerState exitWalkingState = new SmoothTransitionControllerState("exitWalking", HighLevelControllerName.EXIT_WALKING, walkingState,
-                                                                                             freezeState, controlledJoints, highLevelControllerParameters);
+      SmoothTransitionControllerState exitWalkingState = new QuadrupedExitWalkingControllerState(walkingState, freezeState, controlledJoints,
+                                                                                                 highLevelControllerParameters);
 
       QuadrupedSitDownControllerState sitDownState = new QuadrupedSitDownControllerState(sitDownStateName, controlledJoints, highLevelControllerParameters,
                                                                                          sitDownParameters, jointDesiredOutputList);
