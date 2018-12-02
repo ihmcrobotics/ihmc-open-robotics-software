@@ -43,7 +43,6 @@ public class QuadrupedBodyOrientationManager
    private final MovingReferenceFrame bodyFrame;
    private final YoFrameYawPitchRoll yoBodyOrientationSetpoint;
    private final YoFrameVector3D yoBodyAngularVelocitySetpoint;
-   private final YoFrameVector3D yoComTorqueFeedforwardSetpoint;
 
    private final FrameQuaternion desiredBodyOrientation;
    private final FrameQuaternion desiredBodyOrientationOffset;
@@ -77,7 +76,6 @@ public class QuadrupedBodyOrientationManager
       ReferenceFrame bodyFrame = controllerToolbox.getReferenceFrames().getBodyFrame();
       yoBodyOrientationSetpoint = new YoFrameYawPitchRoll("bodyOrientationSetpoint", worldFrame, registry);
       yoBodyAngularVelocitySetpoint = new YoFrameVector3D("bodyAngularVelocitySetpoint", worldFrame, registry);
-      yoComTorqueFeedforwardSetpoint = new YoFrameVector3D("comTorqueFeedforwardSetpoint", worldFrame, registry);
 
       feedbackControlCommand.setGains(bodyOrientationDefaultGains);
       feedbackControlCommand.set(controllerToolbox.getFullRobotModel().getElevator(), controllerToolbox.getFullRobotModel().getBody());
@@ -210,10 +208,7 @@ public class QuadrupedBodyOrientationManager
       double bodyOrientationRoll = desiredBodyOrientation.getRoll();
       desiredBodyOrientation.setYawPitchRoll(bodyOrientationYaw, bodyOrientationPitch, bodyOrientationRoll);
 
-      yoComTorqueFeedforwardSetpoint.setToZero();
-
       feedbackControlCommand.setGains(bodyOrientationGainsParameter);
-//      feedbackControlCommand.setFeedForwardAction(yoComTorqueFeedforwardSetpoint);
       feedbackControlCommand.setFeedForwardAction(desiredBodyAngularAcceleration);
       feedbackControlCommand.set(desiredBodyOrientation, desiredBodyAngularVelocity);
       feedbackControlCommand.setWeightsForSolver(bodyAngularWeight);
