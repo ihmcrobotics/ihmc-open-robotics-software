@@ -205,7 +205,7 @@ public class WholeBodyVirtualModelControlSolver
       }
 
       // put the joint torque solutions into the holders
-      MultiBodySystemTools.insertJointsState(controlledOneDoFJoints, JointStateType.EFFORT, jointTorquesSolution);
+      MultiBodySystemTools.insertJointsState(jointsToCompute, JointStateType.EFFORT, jointTorquesSolution);
       lowLevelOneDoFJointDesiredDataHolder.setDesiredTorqueFromJoints(controlledOneDoFJoints);
       boundCalculator.enforceJointTorqueLimits(lowLevelOneDoFJointDesiredDataHolder);
 

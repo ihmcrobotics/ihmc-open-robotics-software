@@ -15,7 +15,7 @@ import us.ihmc.jMonkeyEngineToolkit.GroundProfile3D;
 import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
 import us.ihmc.quadrupedRobotics.QuadrupedTestFactory;
 import us.ihmc.quadrupedRobotics.controller.QuadrupedControlMode;
-import us.ihmc.quadrupedRobotics.controller.states.QuadrupedPositionBasedCrawlControllerParameters;
+import us.ihmc.quadrupedRobotics.parameters.QuadrupedPositionBasedCrawlControllerParameters;
 import us.ihmc.quadrupedRobotics.estimator.referenceFrames.QuadrupedReferenceFrames;
 import us.ihmc.quadrupedRobotics.estimator.stateEstimator.QuadrupedSensorInformation;
 import us.ihmc.quadrupedRobotics.input.QuadrupedTestTeleopScript;
@@ -25,6 +25,7 @@ import us.ihmc.quadrupedRobotics.model.QuadrupedInitialPositionParameters;
 import us.ihmc.quadrupedRobotics.model.QuadrupedModelFactory;
 import us.ihmc.quadrupedRobotics.model.QuadrupedPhysicalProperties;
 import us.ihmc.quadrupedRobotics.output.SimulatedQuadrupedOutputWriter;
+import us.ihmc.quadrupedRobotics.parameters.QuadrupedPrivilegedConfigurationParameters;
 import us.ihmc.quadrupedRobotics.simulation.GroundContactParameters;
 import us.ihmc.quadrupedRobotics.simulation.QuadrupedGroundContactModelType;
 import us.ihmc.quadrupedRobotics.simulation.QuadrupedSimulationFactory;
@@ -106,6 +107,7 @@ public class GenericQuadrupedTestFactory implements QuadrupedTestFactory
       GenericQuadrupedHighLevelControllerParameters highLevelControllerParameters = new GenericQuadrupedHighLevelControllerParameters(
             modelFactory.getJointMap());
       GenericQuadrupedSitDownParameters sitDownParameters = new GenericQuadrupedSitDownParameters();
+      QuadrupedPrivilegedConfigurationParameters privilegedConfigurationParameters = new GenericQuadrupedPrivilegedConfigurationParameters();
 
       fullRobotModel = modelFactory.createFullRobotModel();
       FloatingRootJointRobot sdfRobot = new FloatingRootJointRobot(modelFactory.getRobotDescription());
@@ -154,6 +156,7 @@ public class GenericQuadrupedTestFactory implements QuadrupedTestFactory
       simulationFactory.setUseLocalCommunicator(useNetworking.get());
       simulationFactory.setHighLevelControllerParameters(highLevelControllerParameters);
       simulationFactory.setSitDownParameters(sitDownParameters);
+      simulationFactory.setPrivilegedConfigurationParameters(privilegedConfigurationParameters);
 
       if (groundContactModelType.hasValue())
       {
