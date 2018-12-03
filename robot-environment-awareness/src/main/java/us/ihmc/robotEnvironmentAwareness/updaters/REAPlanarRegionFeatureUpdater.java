@@ -52,6 +52,7 @@ public class REAPlanarRegionFeatureUpdater implements RegionFeaturesProvider
    private final AtomicReference<Boolean> clearPolygonizer;
    private final AtomicReference<Boolean> enableIntersectionCalulator;
    private final AtomicReference<PlanarRegionSegmentationParameters> planarRegionSegmentationParameters;
+   private final AtomicReference<PlanarRegionSegmentationParameters> customRegionMergingParameters;
    private final AtomicReference<ConcaveHullFactoryParameters> concaveHullFactoryParameters;
    private final AtomicReference<PolygonizerParameters> polygonizerParameters;
    private final AtomicReference<IntersectionEstimationParameters> intersectionEstimationParameters;
@@ -69,6 +70,7 @@ public class REAPlanarRegionFeatureUpdater implements RegionFeaturesProvider
       clearPolygonizer = reaMessager.createInput(REAModuleAPI.PlanarRegionsPolygonizerClear, false);
       enableIntersectionCalulator = reaMessager.createInput(REAModuleAPI.PlanarRegionsIntersectionEnable, false);
       planarRegionSegmentationParameters = reaMessager.createInput(REAModuleAPI.PlanarRegionsSegmentationParameters, new PlanarRegionSegmentationParameters());
+      customRegionMergingParameters = reaMessager.createInput(REAModuleAPI.CustomRegionsMergingParameters, new PlanarRegionSegmentationParameters());
       concaveHullFactoryParameters = reaMessager.createInput(REAModuleAPI.PlanarRegionsConcaveHullParameters, new ConcaveHullFactoryParameters());
       polygonizerParameters = reaMessager.createInput(REAModuleAPI.PlanarRegionsPolygonizerParameters, new PolygonizerParameters());
       intersectionEstimationParameters = reaMessager.createInput(REAModuleAPI.PlanarRegionsIntersectionParameters, new IntersectionEstimationParameters());
@@ -83,6 +85,7 @@ public class REAPlanarRegionFeatureUpdater implements RegionFeaturesProvider
       reaMessager.submitMessage(REAModuleAPI.PlanarRegionsIntersectionEnable, enableIntersectionCalulator.get());
 
       reaMessager.submitMessage(REAModuleAPI.PlanarRegionsSegmentationParameters, planarRegionSegmentationParameters.get());
+      reaMessager.submitMessage(REAModuleAPI.CustomRegionsMergingParameters, customRegionMergingParameters.get());
       reaMessager.submitMessage(REAModuleAPI.PlanarRegionsConcaveHullParameters, concaveHullFactoryParameters.get());
       reaMessager.submitMessage(REAModuleAPI.PlanarRegionsPolygonizerParameters, polygonizerParameters.get());
       reaMessager.submitMessage(REAModuleAPI.PlanarRegionsIntersectionParameters, intersectionEstimationParameters.get());
@@ -107,6 +110,10 @@ public class REAPlanarRegionFeatureUpdater implements RegionFeaturesProvider
       if (planarRegionSegmentationParametersFile != null)
          planarRegionSegmentationParameters.set(PlanarRegionSegmentationParameters.parse(planarRegionSegmentationParametersFile));
 
+      String customRegionMergingParametersFile = filePropertyHelper.loadProperty(REAModuleAPI.CustomRegionsMergingParameters.getName());
+      if (customRegionMergingParametersFile != null)
+         customRegionMergingParameters.set(PlanarRegionSegmentationParameters.parse(customRegionMergingParametersFile));
+
       String planarRegionConcaveHullFactoryParametersFile = filePropertyHelper.loadProperty(REAModuleAPI.PlanarRegionsConcaveHullParameters.getName());
       if (planarRegionConcaveHullFactoryParametersFile != null)
          concaveHullFactoryParameters.set(ConcaveHullFactoryParameters.parse(planarRegionConcaveHullFactoryParametersFile));
@@ -127,6 +134,7 @@ public class REAPlanarRegionFeatureUpdater implements RegionFeaturesProvider
       filePropertyHelper.saveProperty(REAModuleAPI.PlanarRegionsIntersectionEnable.getName(), enableIntersectionCalulator.get());
 
       filePropertyHelper.saveProperty(REAModuleAPI.PlanarRegionsSegmentationParameters.getName(), planarRegionSegmentationParameters.get().toString());
+      filePropertyHelper.saveProperty(REAModuleAPI.CustomRegionsMergingParameters.getName(), customRegionMergingParameters.get().toString());
       filePropertyHelper.saveProperty(REAModuleAPI.PlanarRegionsConcaveHullParameters.getName(), concaveHullFactoryParameters.get().toString());
       filePropertyHelper.saveProperty(REAModuleAPI.PlanarRegionsPolygonizerParameters.getName(), polygonizerParameters.get().toString());
       filePropertyHelper.saveProperty(REAModuleAPI.PlanarRegionsIntersectionParameters.getName(), intersectionEstimationParameters.get().toString());
