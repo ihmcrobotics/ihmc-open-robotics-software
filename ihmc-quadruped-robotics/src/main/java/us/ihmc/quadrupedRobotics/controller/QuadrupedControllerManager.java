@@ -194,7 +194,7 @@ public class QuadrupedControllerManager implements RobotController, CloseableAnd
       default:
          for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
          {
-            runtimeEnvironment.getFootSwitches().get(robotQuadrant).trustFootSwitch(true);
+            runtimeEnvironment.getFootSwitches().get(robotQuadrant).trustFootSwitch(false);
             boolean inContact = controllerToolbox.getContactState(robotQuadrant) == ContactState.IN_CONTACT;
             runtimeEnvironment.getFootSwitches().get(robotQuadrant).setFootContactState(inContact);
          }
