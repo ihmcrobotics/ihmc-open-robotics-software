@@ -39,7 +39,7 @@ public class ContactSensorHolder
             return contactSensors.get(definition);
          }
       }
-      throw new RuntimeException("Contact sensor not found " + name);
+      return null;
    }
    
    public ContactSensor getByDefinition(ContactSensorDefinition definition)

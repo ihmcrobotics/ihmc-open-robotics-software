@@ -1,6 +1,7 @@
 package us.ihmc.quadrupedRobotics.controlModules;
 
 import org.apache.commons.lang3.mutable.MutableInt;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.InverseDynamicsCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.virtualModelControl.VirtualModelControlCommand;
 import us.ihmc.commons.MathTools;
 import us.ihmc.euclid.referenceFrame.*;
@@ -26,6 +27,8 @@ import us.ihmc.quadrupedRobotics.planning.trajectory.DCMPlanner;
 import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.robotics.robotSide.QuadrantDependentList;
 import us.ihmc.robotics.robotSide.RobotQuadrant;
+import us.ihmc.yoVariables.parameters.BooleanParameter;
+import us.ihmc.yoVariables.providers.BooleanProvider;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.*;
 
@@ -57,13 +60,14 @@ public class QuadrupedBalanceManager
 
    private final YoFramePoint3D yoDesiredDCMPosition = new YoFramePoint3D("desiredDCMPosition", worldFrame, registry);
    private final YoFrameVector3D yoDesiredDCMVelocity = new YoFrameVector3D("desiredDCMVelocity", worldFrame, registry);
-   private final YoFramePoint3D yoTransitionFinalDCM = new YoFramePoint3D("desiredDCMPositionAtEndOfTransition", worldFrame, registry);
    private final YoFramePoint3D yoFinalDesiredDCM = new YoFramePoint3D("finalDesiredDCMPosition", worldFrame, registry);
    private final YoFramePoint3D yoVrpPositionSetpoint = new YoFramePoint3D("vrpPositionSetpoint", ReferenceFrame.getWorldFrame(), registry);
-   private final YoFramePoint3D yoDesiredCMP = new YoFramePoint3D("desiredCMP", ReferenceFrame.getWorldFrame(), registry);
-   private final YoFramePoint2D yoAchievedCMP = new YoFramePoint2D("achievedCMP", worldFrame, registry);
+   private final YoFramePoint3D yoDesiredECMP = new YoFramePoint3D("desiredECMP", ReferenceFrame.getWorldFrame(), registry);
+   private final YoFramePoint3D yoAchievedECMP = new YoFramePoint3D("achievedECMP", worldFrame, registry);
 
    private final YoInteger numberOfStepsToConsider = new YoInteger("numberOfStepsToConsider", registry);
+
+   private final BooleanProvider updateLipmHeightFromDesireds = new BooleanParameter("updateLipmHeightFromDesireds", registry, true);
 
    private final ReferenceFrame supportFrame;
 
@@ -127,21 +131,19 @@ public class QuadrupedBalanceManager
                                                               YoGraphicPosition.GraphicType.BALL_WITH_ROTATED_CROSS);
       YoGraphicPosition finalDesiredDCMViz = new YoGraphicPosition("Final Desired DCM", yoFinalDesiredDCM, 0.01, Beige(),
                                                                    YoGraphicPosition.GraphicType.BALL_WITH_ROTATED_CROSS);
-      YoGraphicPosition yoCmpPositionSetpointViz = new YoGraphicPosition("Desired CMP", yoDesiredCMP, 0.012, YoAppearance.Purple(), BALL_WITH_CROSS);
-      YoGraphicPosition achievedCMPViz = new YoGraphicPosition("Achieved CMP", yoAchievedCMP, 0.005, DarkRed(), YoGraphicPosition.GraphicType.BALL_WITH_CROSS);
-      YoGraphicPosition spedUpDcmViz = new YoGraphicPosition("Sped Up Desired DCM", yoDesiredDCMPosition, 0.01, PaleGoldenRod(),
-                                                              YoGraphicPosition.GraphicType.BALL_WITH_ROTATED_CROSS);
+      YoGraphicPosition yoCmpPositionSetpointViz = new YoGraphicPosition("Desired eCMP", yoDesiredECMP, 0.012, YoAppearance.Purple(), BALL_WITH_CROSS);
+      YoGraphicPosition yoVRPPositionSetpointViz = new YoGraphicPosition("Desired VRP", yoVrpPositionSetpoint, 0.012, YoAppearance.Purple());
+      YoGraphicPosition achievedCMPViz = new YoGraphicPosition("Achieved eCMP", yoAchievedECMP, 0.005, DarkRed(), YoGraphicPosition.GraphicType.BALL_WITH_CROSS);
 
       graphicsList.add(desiredDCMViz);
       graphicsList.add(finalDesiredDCMViz);
       graphicsList.add(yoCmpPositionSetpointViz);
-      graphicsList.add(spedUpDcmViz);
+      graphicsList.add(yoVRPPositionSetpointViz);
 
       artifactList.add(desiredDCMViz.createArtifact());
       artifactList.add(finalDesiredDCMViz.createArtifact());
       artifactList.add(yoCmpPositionSetpointViz.createArtifact());
       artifactList.add(achievedCMPViz.createArtifact());
-      artifactList.add(spedUpDcmViz.createArtifact());
 
       for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
       {
@@ -234,7 +236,8 @@ public class QuadrupedBalanceManager
 
       // update model
       centerOfMassHeightManager.update();
-      linearInvertedPendulumModel.setComHeight(centerOfMassHeightManager.getDesiredHeight(supportFrame));
+      if (updateLipmHeightFromDesireds.getValue())
+         linearInvertedPendulumModel.setLipmHeight(centerOfMassHeightManager.getDesiredHeight(supportFrame));
 
       // update dcm estimate
       controllerToolbox.getDCMPositionEstimate(dcmPositionEstimate);
@@ -251,7 +254,8 @@ public class QuadrupedBalanceManager
    {
       // update model
       centerOfMassHeightManager.update();
-      linearInvertedPendulumModel.setComHeight(centerOfMassHeightManager.getDesiredHeight(supportFrame));
+      if (updateLipmHeightFromDesireds.getValue())
+         linearInvertedPendulumModel.setLipmHeight(centerOfMassHeightManager.getDesiredHeight(supportFrame));
 
       dcmPlanner.initializeForStepping(controllerToolbox.getContactStates(), dcmPositionEstimate);
    }
@@ -264,13 +268,13 @@ public class QuadrupedBalanceManager
    public void compute()
    {
       centerOfMassHeightManager.update();
-      linearInvertedPendulumModel.setComHeight(centerOfMassHeightManager.getDesiredHeight(supportFrame));
+      if (updateLipmHeightFromDesireds.getValue())
+         linearInvertedPendulumModel.setLipmHeight(centerOfMassHeightManager.getDesiredHeight(supportFrame));
 
       // update dcm estimate
       controllerToolbox.getDCMPositionEstimate(dcmPositionEstimate);
-      dcmPlanner.setCoMHeight(linearInvertedPendulumModel.getComHeight());
+      dcmPlanner.setCoMHeight(linearInvertedPendulumModel.getLipmHeight());
 
-      dcmPlanner.computeDcmSetpoints(controllerToolbox.getContactStates(), yoDesiredDCMPosition, yoDesiredDCMVelocity);
       dcmPlanner.computeDcmSetpoints(controllerToolbox.getContactStates(), yoDesiredDCMPosition, yoDesiredDCMVelocity);
       dcmPlanner.getFinalDCMPosition(yoFinalDesiredDCM);
 
@@ -282,7 +286,7 @@ public class QuadrupedBalanceManager
       momentumRateOfChangeModule.setDCMEstimate(dcmPositionEstimate);
       momentumRateOfChangeModule.setDCMSetpoints(yoDesiredDCMPosition, yoDesiredDCMVelocity);
       momentumRateOfChangeModule.setDesiredCenterOfMassHeightAcceleration(desiredCenterOfMassHeightAcceleration);
-      momentumRateOfChangeModule.compute(yoVrpPositionSetpoint, yoDesiredCMP);
+      momentumRateOfChangeModule.compute(yoVrpPositionSetpoint, yoDesiredECMP);
    }
 
    private void runDebugChecks()
@@ -379,10 +383,15 @@ public class QuadrupedBalanceManager
 
    public void computeAchievedCMP(FrameVector3DReadOnly achievedLinearMomentumRate)
    {
-      momentumRateOfChangeModule.computeAchievedCMP(achievedLinearMomentumRate, yoAchievedCMP);
+      momentumRateOfChangeModule.computeAchievedECMP(achievedLinearMomentumRate, yoAchievedECMP);
    }
 
    public VirtualModelControlCommand<?> getVirtualModelControlCommand()
+   {
+      return momentumRateOfChangeModule.getMomentumRateCommand();
+   }
+
+   public InverseDynamicsCommand<?> getInverseDynamicsCommand()
    {
       return momentumRateOfChangeModule.getMomentumRateCommand();
    }

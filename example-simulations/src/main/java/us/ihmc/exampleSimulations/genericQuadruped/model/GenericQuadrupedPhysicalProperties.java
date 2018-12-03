@@ -51,4 +51,10 @@ public class GenericQuadrupedPhysicalProperties implements QuadrupedPhysicalProp
    {
       return NOMINAL_COM_HEIGHT;
    }
+
+   @Override
+   public boolean trustFootSwitches()
+   {
+      return true;
+   }
 }

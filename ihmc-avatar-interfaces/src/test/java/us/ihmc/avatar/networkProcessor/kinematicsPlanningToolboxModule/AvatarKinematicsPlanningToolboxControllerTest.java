@@ -205,7 +205,8 @@ public abstract class AvatarKinematicsPlanningToolboxControllerTest implements M
          pose.interpolate(desiredPose, alpha);
          keyFramePoses.add(pose);
          desiredCOMPoints.add(new Point3D());
-         scs.addStaticLinkGraphics(createEndEffectorKeyFrameVisualization(pose));
+         if (visualize)
+            scs.addStaticLinkGraphics(createEndEffectorKeyFrameVisualization(pose));
       }
 
       KinematicsPlanningToolboxRigidBodyMessage endEffectorMessage = HumanoidMessageTools.createKinematicsPlanningToolboxRigidBodyMessage(endEffector,
@@ -260,7 +261,8 @@ public abstract class AvatarKinematicsPlanningToolboxControllerTest implements M
       keyFrameTimes.add(trajectoryTime);
       Pose3D pose = new Pose3D(desiredPose);
       keyFramePoses.add(pose);
-      scs.addStaticLinkGraphics(createEndEffectorKeyFrameVisualization(pose));
+      if (visualize)
+         scs.addStaticLinkGraphics(createEndEffectorKeyFrameVisualization(pose));
 
       KinematicsPlanningToolboxRigidBodyMessage endEffectorMessage = HumanoidMessageTools.createKinematicsPlanningToolboxRigidBodyMessage(endEffector,
                                                                                                                                           keyFrameTimes,
@@ -313,7 +315,8 @@ public abstract class AvatarKinematicsPlanningToolboxControllerTest implements M
       keyFramePoses.add(wayPointThree);
 
       for (int i = 0; i < keyFramePoses.size(); i++)
-         scs.addStaticLinkGraphics(createEndEffectorKeyFrameVisualization(keyFramePoses.get(i)));
+         if (visualize)
+            scs.addStaticLinkGraphics(createEndEffectorKeyFrameVisualization(keyFramePoses.get(i)));
 
       KinematicsPlanningToolboxRigidBodyMessage endEffectorMessage = HumanoidMessageTools.createKinematicsPlanningToolboxRigidBodyMessage(endEffector,
                                                                                                                                           keyFrameTimes,
@@ -355,7 +358,8 @@ public abstract class AvatarKinematicsPlanningToolboxControllerTest implements M
       if (visualize)
       {
          for (int i = 0; !toolboxController.isDone() && i < numberOfIterations; i++)
-            scs.simulateOneTimeStep();
+            if (visualize)
+               scs.simulateOneTimeStep();
       }
       else
       {

@@ -19,11 +19,11 @@ import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.graphicsDescription.yoGraphics.plotting.YoArtifactPosition;
-import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.humanoidRobotics.model.CenterOfPressureDataHolder;
 import us.ihmc.mecano.multiBodySystem.interfaces.FloatingJointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.mecano.spatial.Twist;
+import us.ihmc.robotics.contactable.ContactablePlaneBody;
 import us.ihmc.robotics.math.filters.AlphaFilteredYoFramePoint2d;
 import us.ihmc.robotics.math.filters.AlphaFilteredYoFrameVector;
 import us.ihmc.robotics.math.filters.AlphaFilteredYoVariable;
@@ -94,6 +94,8 @@ public class PelvisKinematicsBasedLinearStateCalculator
    private final YoBoolean kinematicsIsUpToDate = new YoBoolean("kinematicsIsUpToDate", registry);
    private final BooleanProvider useControllerDesiredCoP;
    private final BooleanProvider trustCoPAsNonSlippingContactPoint;
+
+   private final BooleanParameter assumeTrustedFootAtZeroHeight = new BooleanParameter("assumeTrustedFootAtZeroHeight", registry, false);
 
    // temporary variables
    private final FramePoint3D tempFramePoint = new FramePoint3D();
@@ -448,6 +450,14 @@ public class PelvisKinematicsBasedLinearStateCalculator
    {
       if (!kinematicsIsUpToDate.getBooleanValue())
          throw new RuntimeException("Leg kinematics needs to be updated before trying to estimate the pelvis position/linear velocity.");
+
+      if (assumeTrustedFootAtZeroHeight.getValue())
+      {
+         for (int i = 0; i < trustedFeet.size(); i++)
+         {
+            footPositionsInWorld.get(trustedFeet.get(i)).setZ(0.0);
+         }
+      }
 
       for(int i = 0; i < trustedFeet.size(); i++)
       {

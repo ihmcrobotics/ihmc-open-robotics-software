@@ -182,6 +182,13 @@ public class QuadrupedTeleopManager
       this.desiredVelocity.set(desiredVelocityX, desiredVelocityY, desiredVelocityZ);
    }
 
+   public void requestStandPrep()
+   {
+      HighLevelStateMessage controllerMessage = new HighLevelStateMessage();
+      controllerMessage.setHighLevelControllerName(HighLevelStateMessage.STAND_PREP_STATE);
+      controllerStatePublisher.publish(controllerMessage);
+   }
+
    public void requestSteppingState()
    {
       HighLevelStateMessage controllerMessage = new HighLevelStateMessage();
