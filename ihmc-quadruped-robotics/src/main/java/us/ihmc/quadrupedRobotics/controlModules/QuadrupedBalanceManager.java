@@ -204,6 +204,7 @@ public class QuadrupedBalanceManager
    public void handleBodyTrajectoryCommand(QuadrupedBodyTrajectoryCommand command)
    {
       bodyICPBasedTranslationManager.handleBodyTrajectoryCommand(command);
+      centerOfMassHeightManager.handleBodyTrajectoryCommand(command);
    }
 
 
