@@ -72,7 +72,7 @@ public class LIDARBasedREAModule
       planarRegionFeatureUpdater = new REAPlanarRegionFeatureUpdater(mainOctree, reaMessager);
 
       ROS2Tools.createCallbackSubscription(ros2Node, LidarScanMessage.class, "/ihmc/lidar_scan", this::dispatchLidarScanMessage);
-      ROS2Tools.createCallbackSubscription(ros2Node, PlanarRegionsListMessage.class, subscriberTopicNameGenerator, this::dispatchCustomPlanarRegion);
+      ROS2Tools.createCallbackSubscription(ros2Node, PlanarRegionsListMessage.class, subscriberCustomRegionsTopicNameGenerator, this::dispatchCustomPlanarRegion);
 
       FilePropertyHelper filePropertyHelper = new FilePropertyHelper(configurationFile);
       loadConfigurationFile(filePropertyHelper);
