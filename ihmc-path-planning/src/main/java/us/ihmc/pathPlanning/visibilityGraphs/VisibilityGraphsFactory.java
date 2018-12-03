@@ -357,11 +357,11 @@ public class VisibilityGraphsFactory
    {
       if (CREATE_INTER_REGIONS_USING_CLUSTER_POINTS)
       {
-         return createInterRegionVisibilityMapUsingInnerVisibilityMaps(navigableRegions, filter);
+         return createInterRegionVisibilityMapUsingClusterPoints(navigableRegions, filter);
       }
       else
       {
-         return createInterRegionVisibilityMapUsingClusterPoints(navigableRegions, filter);
+         return createInterRegionVisibilityMapUsingInnerVisibilityMaps(navigableRegions, filter);
       }
    }
 
