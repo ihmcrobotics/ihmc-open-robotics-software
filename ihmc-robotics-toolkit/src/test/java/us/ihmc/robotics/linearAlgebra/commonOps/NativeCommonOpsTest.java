@@ -17,19 +17,29 @@ import us.ihmc.robotics.testing.JUnitTools;
 
 public class NativeCommonOpsTest
 {
+   private static final int maxSize = 80;
+   private static final int warmumIterations = 0;
+   private static final int iterations = 5000;
+   private static final double epsilon = 1.0e-9;
+
    @Test
    public void testMult()
    {
       Random random = new Random(40L);
-      double epsilon = 1.0e-10;
-      int iterations = 3000;
-      int maxSize = 150;
 
       System.out.println("Testing matrix multiplications with random matrices...");
 
       long nativeTime = 0;
       long ejmlTime = 0;
       double matrixSizes = 0.0;
+
+      for (int i = 0; i < warmumIterations; i++)
+      {
+         DenseMatrix64F A = RandomMatrices.createRandom(maxSize, maxSize, random);
+         DenseMatrix64F B = RandomMatrices.createRandom(maxSize, maxSize, random);
+         DenseMatrix64F AB = new DenseMatrix64F(maxSize, maxSize);
+         CommonOps.mult(A, B, AB);
+      }
 
       for (int i = 0; i < iterations; i++)
       {
@@ -56,22 +66,30 @@ public class NativeCommonOpsTest
 
       System.out.println("Native took " + Precision.round(Conversions.nanosecondsToMilliseconds((double) (nativeTime / iterations)), 3) + " ms on average");
       System.out.println("EJML took " + Precision.round(Conversions.nanosecondsToMilliseconds((double) (ejmlTime / iterations)), 3) + " ms on average");
-      System.out.println("Average matrix size was " + Precision.round(matrixSizes / iterations, 1) + "\n");
+      System.out.println("Average matrix size was " + Precision.round(matrixSizes / iterations, 1));
+      System.out.println("Native takes " + Precision.round((100.0 * nativeTime / ejmlTime), 0) + "% of EJML time.\n");
    }
 
    @Test
    public void testMultQuad()
    {
       Random random = new Random(40L);
-      double epsilon = 1.0e-10;
-      int iterations = 3000;
-      int maxSize = 150;
 
       System.out.println("Testing computing quadratic form with random matrices...");
 
       long nativeTime = 0;
       long ejmlTime = 0;
       double matrixSizes = 0.0;
+
+      for (int i = 0; i < warmumIterations; i++)
+      {
+         DenseMatrix64F A = RandomMatrices.createRandom(maxSize, maxSize, random);
+         DenseMatrix64F B = RandomMatrices.createRandom(maxSize, maxSize, random);
+         DenseMatrix64F tempBA = new DenseMatrix64F(maxSize, maxSize);
+         DenseMatrix64F AtBA = new DenseMatrix64F(maxSize, maxSize);
+         CommonOps.mult(B, A, tempBA);
+         CommonOps.multTransA(A, tempBA, AtBA);
+      }
 
       for (int i = 0; i < iterations; i++)
       {
@@ -99,16 +117,14 @@ public class NativeCommonOpsTest
 
       System.out.println("Native took " + Precision.round(Conversions.nanosecondsToMilliseconds((double) (nativeTime / iterations)), 3) + " ms on average");
       System.out.println("EJML took " + Precision.round(Conversions.nanosecondsToMilliseconds((double) (ejmlTime / iterations)), 3) + " ms on average");
-      System.out.println("Average matrix size was " + Precision.round(matrixSizes / iterations, 1) + "\n");
+      System.out.println("Average matrix size was " + Precision.round(matrixSizes / iterations, 1));
+      System.out.println("Native takes " + Precision.round((100.0 * nativeTime / ejmlTime), 0) + "% of EJML time.\n");
    }
 
    @Test
    public void testSolve()
    {
       Random random = new Random(40L);
-      double epsilon = 1.0e-9;
-      int iterations = 3000;
-      int maxSize = 150;
 
       System.out.println("Testing solving linear equations with random matrices...");
 
@@ -116,6 +132,16 @@ public class NativeCommonOpsTest
       long ejmlTime = 0;
       double matrixSizes = 0;
       LinearSolver<DenseMatrix64F> solver = LinearSolverFactory.lu(maxSize);
+
+      for (int i = 0; i < warmumIterations; i++)
+      {
+         DenseMatrix64F A = RandomMatrices.createRandom(maxSize, maxSize, random);
+         DenseMatrix64F x = RandomMatrices.createRandom(maxSize, 1, random);
+         DenseMatrix64F b = new DenseMatrix64F(maxSize, 1);
+         CommonOps.mult(A, x, b);
+         solver.setA(A);
+         solver.solve(b, x);
+      }
 
       for (int i = 0; i < iterations; i++)
       {
@@ -145,16 +171,14 @@ public class NativeCommonOpsTest
 
       System.out.println("Native took " + Precision.round(Conversions.nanosecondsToMilliseconds((double) (nativeTime / iterations)), 3) + " ms on average");
       System.out.println("EJML took " + Precision.round(Conversions.nanosecondsToMilliseconds((double) (ejmlTime / iterations)), 3) + " ms on average");
-      System.out.println("Average matrix size was " + Precision.round(matrixSizes / iterations, 1) + "\n");
+      System.out.println("Average matrix size was " + Precision.round(matrixSizes / iterations, 1));
+      System.out.println("Native takes " + Precision.round((100.0 * nativeTime / ejmlTime), 0) + "% of EJML time.\n");
    }
 
    @Test
    public void testSolveLeastSquare()
    {
       Random random = new Random(40L);
-      double epsilon = 1.0e-11;
-      int iterations = 3000;
-      int maxSize = 200;
 
       System.out.println("Testing solving least square problem with random matrices...");
 
@@ -164,12 +188,25 @@ public class NativeCommonOpsTest
       long ejmlUndampedTime = 0;
       double matrixSizes = 0;
       double alpha = 0.01;
-      LinearSolver<DenseMatrix64F> dampedSolver = new DampedLeastSquaresSolver(maxSize, alpha);
+      int localMaxSize = (int) (maxSize * 4.0 / 3.0);
+      LinearSolver<DenseMatrix64F> dampedSolver = new DampedLeastSquaresSolver(localMaxSize, alpha);
       LinearSolver<DenseMatrix64F> undampedSolver = new LinearSolverQrHouseCol_D64();
+
+      for (int i = 0; i < warmumIterations; i++)
+      {
+         DenseMatrix64F A = RandomMatrices.createRandom(maxSize, maxSize, random);
+         DenseMatrix64F x = RandomMatrices.createRandom(maxSize, 1, random);
+         DenseMatrix64F b = new DenseMatrix64F(maxSize, 1);
+         CommonOps.mult(A, x, b);
+         dampedSolver.setA(A);
+         dampedSolver.solve(b, x);
+         undampedSolver.setA(A);
+         undampedSolver.solve(b, x);
+      }
 
       for (int i = 0; i < iterations; i++)
       {
-         int aRows = random.nextInt(maxSize) + 2;
+         int aRows = random.nextInt(localMaxSize) + 2;
          int aCols = random.nextInt(aRows - 1) + 1;
          matrixSizes += (aRows + aCols) / 2.0;
 
@@ -210,16 +247,17 @@ public class NativeCommonOpsTest
       System.out.println("Native undamped took " + Precision.round(Conversions.nanosecondsToMilliseconds((double) (nativeUndampedTime / iterations)), 3) + " ms on average");
       System.out.println("EJML damped took " + Precision.round(Conversions.nanosecondsToMilliseconds((double) (ejmlDampedTime / iterations)), 3) + " ms on average");
       System.out.println("EJML undamped took " + Precision.round(Conversions.nanosecondsToMilliseconds((double) (ejmlUndampedTime / iterations)), 3) + " ms on average");
-      System.out.println("Average matrix size was " + Precision.round(matrixSizes / iterations, 1) + "\n");
+      System.out.println("Average matrix size was " + Precision.round(matrixSizes / iterations, 1));
+      System.out.println("Native damped takes " + Precision.round((100.0 * nativeDampedTime / ejmlDampedTime), 0) + "% of EJML time.");
+      System.out.println("Native undamped takes " + Precision.round((100.0 * nativeUndampedTime / ejmlUndampedTime), 0) + "% of EJML time.\n");
    }
 
    public static void main(String[] args)
    {
       Random random = new Random(40L);
-      int size = 150;
-      DenseMatrix64F A = RandomMatrices.createRandom(size, size, random);
-      DenseMatrix64F B = RandomMatrices.createRandom(size, size, random);
-      DenseMatrix64F AtBA = new DenseMatrix64F(size, size);
+      DenseMatrix64F A = RandomMatrices.createRandom(maxSize, maxSize, random);
+      DenseMatrix64F B = RandomMatrices.createRandom(maxSize, maxSize, random);
+      DenseMatrix64F AtBA = new DenseMatrix64F(maxSize, maxSize);
 
       System.out.println("Running...");
 
