@@ -49,9 +49,11 @@ import javafx.scene.paint.Color;
 import javafx.scene.paint.PhongMaterial;
 import javafx.scene.shape.MeshView;
 import javafx.stage.Stage;
+import us.ihmc.commons.lists.ListWrappingIndexTools;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.geometry.LineSegment2D;
 import us.ihmc.euclid.geometry.LineSegment3D;
+import us.ihmc.euclid.geometry.interfaces.Vertex2DSupplier;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple3D.Point3D;
@@ -66,15 +68,17 @@ import us.ihmc.javaFXToolkit.shapes.JavaFXMultiColorMeshBuilder;
 import us.ihmc.javaFXToolkit.shapes.TextureColorAdaptivePalette;
 import us.ihmc.robotEnvironmentAwareness.geometry.SimpleConcaveHullFactory.ConcaveHullFactoryResult;
 import us.ihmc.robotEnvironmentAwareness.geometry.SimpleConcaveHullFactory.ConcaveHullVariables;
+import us.ihmc.robotEnvironmentAwareness.planarRegion.CustomPlanarRegionHandler;
 import us.ihmc.robotEnvironmentAwareness.planarRegion.IntersectionEstimationParameters;
 import us.ihmc.robotEnvironmentAwareness.planarRegion.PlanarRegionIntersectionCalculator;
+import us.ihmc.robotEnvironmentAwareness.planarRegion.PlanarRegionSegmentationParameters;
 import us.ihmc.robotEnvironmentAwareness.planarRegion.PlanarRegionSegmentationRawData;
 import us.ihmc.robotEnvironmentAwareness.planarRegion.PolygonizerParameters;
 import us.ihmc.robotEnvironmentAwareness.planarRegion.PolygonizerTools;
 import us.ihmc.robotEnvironmentAwareness.ui.graphicsBuilders.OcTreeMeshBuilder;
 import us.ihmc.robotEnvironmentAwareness.ui.io.PlanarRegionSegmentationRawDataImporter;
+import us.ihmc.robotics.geometry.PlanarRegion;
 import us.ihmc.robotics.linearAlgebra.PrincipalComponentAnalysis3D;
-import us.ihmc.commons.lists.ListWrappingIndexTools;
 
 public class PolygonizerVisualizer extends Application
 {
@@ -97,7 +101,7 @@ public class PolygonizerVisualizer extends Application
 
    private static final int[] onlyRegionWithId = {};
 
-   private File defaultFile = null;// new File("../../Data/Segmentation/20161210_185643_PlanarRegionSegmentation_Atlas_CB");
+   private File defaultFile = null; //new File("../../Data/Segmentation/20161210_184102_PlanarRegionSegmentation_Sim_CB");
 
    private final Random random = new Random(54645L);
    private final ConcaveHullFactoryParameters parameters = new ConcaveHullFactoryParameters();
@@ -132,6 +136,19 @@ public class PolygonizerVisualizer extends Application
          Platform.exit();
       dataImporter.loadPlanarRegionSegmentationData();
       List<PlanarRegionSegmentationRawData> regionsRawData = dataImporter.getPlanarRegionSegmentationRawData();
+
+      //      { // Custom region for new File("../../Data/Segmentation/20161210_184102_PlanarRegionSegmentation_Sim_CB")
+      //         PlanarRegion planarRegion = new PlanarRegion(new RigidBodyTransform(new Quaternion(), new Vector3D(4.0, 5.0, 0.0)),
+      //                                                      new ConvexPolygon2D(Vertex2DSupplier.asVertex2DSupplier(new Point2D(0.0, 0.0), new Point2D(1.0, 0.0),
+      //                                                                                                              new Point2D(1.0, 1.0), new Point2D(0.0, 1.0))));
+      //         PlanarRegionSegmentationParameters blahParams = new PlanarRegionSegmentationParameters();
+      //         blahParams.setMaxDistanceFromPlane(0.20);
+      //         blahParams.setMaxAngleFromPlane(Math.toRadians(30.0));
+      //         blahParams.setSearchRadius(0.27);
+      //         List<PlanarRegionSegmentationRawData> blah = CustomPlanarRegionHandler.mergeCustomRegionToEstimatedRegions(planarRegion, regionsRawData, blahParams);
+      //         System.out.println(blah);
+      //      }
+
       regionsRawData.forEach(rawData -> idToRawData.put(rawData.getRegionId(), rawData));
 
       View3DFactory view3dFactory = View3DFactory.createSubscene();
@@ -299,9 +316,11 @@ public class PolygonizerVisualizer extends Application
       standardDeviationProperty.addListener((Observable o) -> stdy.setText(formatter2.format(standardDeviationProperty.get().getY())));
       standardDeviationProperty.addListener((Observable o) -> stdz.setText(formatter2.format(standardDeviationProperty.get().getZ())));
       standardDeviationProperty.addListener((Observable o) -> stdVolume.setText(formatter2.format(ellipsoidVolume(standardDeviationProperty.get()))));
-      standardDeviationProperty.addListener((Observable o) -> stdDensity.setText(formatter2.format(idToRawData.get(currentRegionIdProperty.get()).size() / ellipsoidVolume(standardDeviationProperty.get()))));
+      standardDeviationProperty.addListener((Observable o) -> stdDensity.setText(formatter2.format(idToRawData.get(currentRegionIdProperty.get()).size()
+            / ellipsoidVolume(standardDeviationProperty.get()))));
 
-      dataPane.getChildren().addAll(regionIdLabel, regionId, stdXLabel, stdx, stdYLabel, stdy, stdZLabel, stdz, stdVolumeLabel, stdVolume, stdDensityLabel, stdDensity);
+      dataPane.getChildren().addAll(regionIdLabel, regionId, stdXLabel, stdx, stdYLabel, stdy, stdZLabel, stdz, stdVolumeLabel, stdVolume, stdDensityLabel,
+                                    stdDensity);
 
       return dataPane;
    }
@@ -513,8 +532,7 @@ public class PolygonizerVisualizer extends Application
       return meshView;
    }
 
-   private Node createDelaunayTriangulationGraphics(PlanarRegionSegmentationRawData rawData,
-                                                    ConcaveHullFactoryResult concaveHullFactoryResult)
+   private Node createDelaunayTriangulationGraphics(PlanarRegionSegmentationRawData rawData, ConcaveHullFactoryResult concaveHullFactoryResult)
    {
       JavaFXMultiColorMeshBuilder meshBuilder = new JavaFXMultiColorMeshBuilder(new TextureColorAdaptivePalette(512));
 
@@ -543,8 +561,7 @@ public class PolygonizerVisualizer extends Application
       return trianglesMeshView;
    }
 
-   private Node createBorderTrianglesGraphics(PlanarRegionSegmentationRawData rawData,
-                                              ConcaveHullFactoryResult concaveHullFactoryResult)
+   private Node createBorderTrianglesGraphics(PlanarRegionSegmentationRawData rawData, ConcaveHullFactoryResult concaveHullFactoryResult)
    {
       JavaFXMultiColorMeshBuilder meshBuilder = new JavaFXMultiColorMeshBuilder(new TextureColorAdaptivePalette(512));
 
@@ -558,7 +575,7 @@ public class PolygonizerVisualizer extends Application
          for (QuadEdgeTriangle borderTriangle : borderTriangles)
          {
             List<Point2D> triangleVerticesLocal = Arrays.stream(borderTriangle.getVertices()).map(v -> new Point2D(v.getX(), v.getY()))
-                  .collect(Collectors.toList());
+                                                        .collect(Collectors.toList());
             List<Point3D> triangleVerticesWorld = PolygonizerTools.toPointsInWorld(triangleVerticesLocal, planeOrigin, planeNormal);
             double hue = 360.0 * random.nextDouble();
             double saturation = 0.8 * random.nextDouble() + 0.1;
@@ -611,8 +628,7 @@ public class PolygonizerVisualizer extends Application
       return trianglesMeshView;
    }
 
-   private Node createConvexDecompositionGraphics(PlanarRegionSegmentationRawData rawData,
-                                                  ConcaveHullFactoryResult concaveHullFactoryResult)
+   private Node createConvexDecompositionGraphics(PlanarRegionSegmentationRawData rawData, ConcaveHullFactoryResult concaveHullFactoryResult)
    {
       ConcaveHullCollection concaveHullCollection = concaveHullFactoryResult.getConcaveHullCollection();
       double depthThreshold = polygonizerParameters.getDepthThreshold();
@@ -637,8 +653,7 @@ public class PolygonizerVisualizer extends Application
       return meshView;
    }
 
-   private static Node createOrderedBorderEdgesGraphics(PlanarRegionSegmentationRawData rawData,
-                                                        ConcaveHullFactoryResult concaveHullFactoryResult)
+   private static Node createOrderedBorderEdgesGraphics(PlanarRegionSegmentationRawData rawData, ConcaveHullFactoryResult concaveHullFactoryResult)
    {
       JavaFXMultiColorMeshBuilder meshBuilder = new JavaFXMultiColorMeshBuilder(orderedBorderEdgesColorPalette);
       Point3D planeOrigin = rawData.getOrigin();
