@@ -60,7 +60,7 @@ public abstract class SimpleConcaveHullFactory
 
    public static ConcaveHullCollection createConcaveHullCollection(List<Point2D> pointCloud2d, ConcaveHullFactoryParameters parameters)
    {
-      return createConcaveHullCollection(pointCloud2d, null, parameters);
+      return createConcaveHullCollection(pointCloud2d, Collections.emptyList(), parameters);
    }
 
    public static ConcaveHullCollection createConcaveHullCollection(List<Point2D> pointCloud2d, List<LineSegment2D> lineConstraints, ConcaveHullFactoryParameters parameters)
@@ -73,7 +73,7 @@ public abstract class SimpleConcaveHullFactory
 
    public static ConcaveHullFactoryResult createConcaveHull(List<Point2D> pointCloud2d, ConcaveHullFactoryParameters parameters)
    {
-      return createConcaveHull(pointCloud2d, null, parameters);
+      return createConcaveHull(pointCloud2d, Collections.emptyList(), parameters);
    }
 
    public static ConcaveHullFactoryResult createConcaveHull(List<Point2D> pointCloud2d, List<LineSegment2D> lineConstraints, ConcaveHullFactoryParameters parameters)
