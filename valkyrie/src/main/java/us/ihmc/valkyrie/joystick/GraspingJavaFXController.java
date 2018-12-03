@@ -24,12 +24,17 @@ import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.Co
 import us.ihmc.communication.IHMCROS2Publisher;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.ROS2Tools.MessageTopicNameGenerator;
+import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.communication.packets.PacketDestination;
+import us.ihmc.communication.packets.ToolboxState;
+import us.ihmc.euclid.geometry.Pose3D;
+import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.interfaces.Tuple3DBasics;
 import us.ihmc.euclid.tuple4D.Quaternion;
+import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.humanoidRobotics.communication.packets.KinematicsPlanningToolboxOutputConverter;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.javaFXToolkit.JavaFXTools;
@@ -38,6 +43,7 @@ import us.ihmc.javaFXToolkit.shapes.JavaFXCoordinateSystem;
 import us.ihmc.javaFXVisualizers.JavaFXRobotHandVisualizer;
 import us.ihmc.javaFXVisualizers.JavaFXRobotVisualizer;
 import us.ihmc.log.LogTools;
+import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotModels.FullHumanoidRobotModelFactory;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -72,9 +78,11 @@ public class GraspingJavaFXController
    private final Group rootNode = new Group();
 
    private final static double timeDurationForFinger = 5.0;
+   private final static double timeDurationForMotion = 10.0;
    private final static double ratioJoyStickToPosition = 0.02;
    private final static double ratioJoyStickToRotation = 0.04;
    private final static double lengthOfkeyFrameReferenceFrame = 0.15;
+   private final static double defaultWeightForRigidBodyMessage = 20.0;
 
    private final HandFingerTrajectoryMessagePublisher handFingerTrajectoryMessagePublisher;
    private final IHMCROS2Publisher<WholeBodyTrajectoryMessage> wholeBodyTrajectoryPublisher;
@@ -234,72 +242,128 @@ public class GraspingJavaFXController
    {
       if (state == ButtonState.RELEASED)
       {
-         //         if (selectedSide != null)
-         //         {
-         //            if (keyFramePoses.size() > 0)
-         //            {
-         //               motionPreviewVisualizer.enable(false);
-         //               toolboxStatePublisher.publish(MessageTools.createToolboxStateMessage(ToolboxState.WAKE_UP));
-         //
-         //               LogTools.info("KinematicsPlanningToolboxMessage is created as...");
-         //               System.out.println("selectedSide " + selectedSide);
-         //               System.out.println("keyFramePoses.size() " + keyFramePoses.size());
-         //
-         //               for (int i = 0; i < keyFramePoses.size(); i++)
-         //               {
-         //                  System.out.println("keyFramePoses " + i);
-         //                  System.out.println(keyFramePoses.get(i));
-         //               }
-         //
-         //               RigidBodyBasics endEffector = fullRobotModel.getHand(selectedSide);
-         //               double trajectoryTime = 10.0;
-         //               int numberOfWayPointsBetweenKeyFrames = 1;
-         //               if (keyFramePoses.size() < 3)
-         //                  numberOfWayPointsBetweenKeyFrames = 3;
-         //               TDoubleArrayList keyFrameTimesForMessage = new TDoubleArrayList();
-         //               List<Pose3DReadOnly> keyFramePosesForMessage = new ArrayList<Pose3DReadOnly>();
-         //
-         //               for (int i = 0; i < keyFramePoses.size(); i++)
-         //               {
-         //                  Pose3D keyFramePose = new Pose3D();
-         //                  keyFramePose.set(keyFramePoses.get(i));
-         //                  double keyFrameTimePrevious = trajectoryTime * (i) / (double) keyFramePoses.size();
-         //                  double keyFrameTime = trajectoryTime * (i + 1) / (double) keyFramePoses.size();
-         //                  Pose3D posePrevious;
-         //                  if (i == 0)
-         //                     posePrevious = new Pose3D(endEffector.getBodyFixedFrame().getTransformToWorldFrame());
-         //                  else
-         //                     posePrevious = new Pose3D(keyFramePoses.get(i - 1));
-         //                  Pose3D pose = new Pose3D(keyFramePoses.get(i));
-         //
-         //                  for (int j = 0; j < numberOfWayPointsBetweenKeyFrames; j++)
-         //                  {
-         //                     double alpha = (j + 1) / (double) numberOfWayPointsBetweenKeyFrames;
-         //                     keyFrameTimesForMessage.add(keyFrameTimePrevious + alpha * (keyFrameTime - keyFrameTimePrevious));
-         //                     Pose3D poseToAppend = new Pose3D(posePrevious);
-         //                     poseToAppend.interpolate(pose, alpha);
-         //                     keyFramePosesForMessage.add(poseToAppend);
-         //                  }
-         //               }
-         //
-         //               System.out.println("keyFramePosesForMessage " + keyFramePosesForMessage.size());
-         //
-         //               KinematicsPlanningToolboxRigidBodyMessage endEffectorMessage = HumanoidMessageTools.createKinematicsPlanningToolboxRigidBodyMessage(endEffector,
-         //                                                                                                                                                   keyFrameTimesForMessage,
-         //                                                                                                                                                   keyFramePosesForMessage);
-         //
-         //               endEffectorMessage.getAngularWeightMatrix().set(MessageTools.createWeightMatrix3DMessage(20.0)); // TODO : use static final value.
-         //               endEffectorMessage.getLinearWeightMatrix().set(MessageTools.createWeightMatrix3DMessage(20.0));
-         //
-         //               toolboxMessagePublisher.publish(endEffectorMessage);
-         //
-         //               selectedSide = null;
-         //            }
-         //            else
-         //               System.out.println("there is no key frame created");
-         //         }
-         //         else
-         //            System.out.println("robot side is not selected");
+         SideDependentList<List<Pose3DReadOnly>> sideDependentKeyFramePosesForMessage = new SideDependentList<>(new ArrayList<Pose3DReadOnly>(),
+                                                                                                                new ArrayList<Pose3DReadOnly>());
+         TDoubleArrayList keyFrameTimesForMessage = new TDoubleArrayList();
+
+         List<RigidBodyTransform> rightPoses = sideDependentKeyFramePoses.get(RobotSide.RIGHT);
+         List<RigidBodyTransform> leftPoses = sideDependentKeyFramePoses.get(RobotSide.LEFT);
+         if (rightPoses.size() == 0)
+         {
+            System.out.println("only left side is selected.");
+         }
+         else if (leftPoses.size() == 0)
+         {
+            System.out.println("only right side is selected.");
+         }
+         else
+         {
+            if (rightPoses.size() == 1 && leftPoses.size() == 1)
+            {
+               System.out.println("left and right sides are selected (single way point). ");
+            }
+            else if (rightPoses.size() == 1)
+            {
+               System.out.println("right side is fixed ");
+            }
+            else if (leftPoses.size() == 1)
+            {
+               System.out.println("left side is fixed ");
+            }
+            else if (rightPoses.size() == leftPoses.size() && rightPoses.size() != 0)
+            {
+               System.out.println("left and right sides are selected (" + rightPoses.size() + " way point). ");
+
+            }
+            else
+            {
+               System.out.println("the key frame sizes for left and right side are different. ");
+            }
+         }
+
+         for (RobotSide robotSide : RobotSide.values)
+         {
+            if (sideDependentKeyFramePoses.get(robotSide).size() != 0)
+            {
+               RigidBodyBasics endEffector = fullRobotModel.getHand(robotSide);
+
+               KinematicsPlanningToolboxRigidBodyMessage endEffectorMessage = HumanoidMessageTools.createKinematicsPlanningToolboxRigidBodyMessage(endEffector,
+                                                                                                                                                   keyFrameTimesForMessage,
+                                                                                                                                                   sideDependentKeyFramePosesForMessage.get(robotSide));
+
+               endEffectorMessage.getAngularWeightMatrix().set(MessageTools.createWeightMatrix3DMessage(defaultWeightForRigidBodyMessage));
+               endEffectorMessage.getLinearWeightMatrix().set(MessageTools.createWeightMatrix3DMessage(defaultWeightForRigidBodyMessage));
+
+               toolboxMessagePublisher.publish(endEffectorMessage);
+            }
+         }
+
+         if (selectedSide != null)
+         {
+            if (keyFramePoses.size() > 0)
+            {
+               motionPreviewVisualizer.enable(false);
+               toolboxStatePublisher.publish(MessageTools.createToolboxStateMessage(ToolboxState.WAKE_UP));
+
+               LogTools.info("KinematicsPlanningToolboxMessage is created as...");
+               System.out.println("selectedSide " + selectedSide);
+               System.out.println("keyFramePoses.size() " + keyFramePoses.size());
+
+               for (int i = 0; i < keyFramePoses.size(); i++)
+               {
+                  System.out.println("keyFramePoses " + i);
+                  System.out.println(keyFramePoses.get(i));
+               }
+
+               RigidBodyBasics endEffector = fullRobotModel.getHand(selectedSide);
+               double trajectoryTime = 10.0;
+               int numberOfWayPointsBetweenKeyFrames = 1;
+               if (keyFramePoses.size() < 3)
+                  numberOfWayPointsBetweenKeyFrames = 3;
+               TDoubleArrayList keyFrameTimesForMessage = new TDoubleArrayList();
+               List<Pose3DReadOnly> keyFramePosesForMessage = new ArrayList<Pose3DReadOnly>();
+
+               for (int i = 0; i < keyFramePoses.size(); i++)
+               {
+                  Pose3D keyFramePose = new Pose3D();
+                  keyFramePose.set(keyFramePoses.get(i));
+                  double keyFrameTimePrevious = trajectoryTime * (i) / (double) keyFramePoses.size();
+                  double keyFrameTime = trajectoryTime * (i + 1) / (double) keyFramePoses.size();
+                  Pose3D posePrevious;
+                  if (i == 0)
+                     posePrevious = new Pose3D(endEffector.getBodyFixedFrame().getTransformToWorldFrame());
+                  else
+                     posePrevious = new Pose3D(keyFramePoses.get(i - 1));
+                  Pose3D pose = new Pose3D(keyFramePoses.get(i));
+
+                  for (int j = 0; j < numberOfWayPointsBetweenKeyFrames; j++)
+                  {
+                     double alpha = (j + 1) / (double) numberOfWayPointsBetweenKeyFrames;
+                     keyFrameTimesForMessage.add(keyFrameTimePrevious + alpha * (keyFrameTime - keyFrameTimePrevious));
+                     Pose3D poseToAppend = new Pose3D(posePrevious);
+                     poseToAppend.interpolate(pose, alpha);
+                     keyFramePosesForMessage.add(poseToAppend);
+                  }
+               }
+
+               System.out.println("keyFramePosesForMessage " + keyFramePosesForMessage.size());
+
+               KinematicsPlanningToolboxRigidBodyMessage endEffectorMessage = HumanoidMessageTools.createKinematicsPlanningToolboxRigidBodyMessage(endEffector,
+                                                                                                                                                   keyFrameTimesForMessage,
+                                                                                                                                                   keyFramePosesForMessage);
+
+               endEffectorMessage.getAngularWeightMatrix().set(MessageTools.createWeightMatrix3DMessage(20.0)); // TODO : use static final value.
+               endEffectorMessage.getLinearWeightMatrix().set(MessageTools.createWeightMatrix3DMessage(20.0));
+
+               toolboxMessagePublisher.publish(endEffectorMessage);
+
+               selectedSide = null;
+            }
+            else
+               System.out.println("there is no key frame created");
+         }
+         else
+            System.out.println("robot side is not selected");
       }
    }
 
