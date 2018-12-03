@@ -171,7 +171,8 @@ public class PlanarRegionTools
       pointOnLineInLocal.applyInverseTransform(regionToWorld);
       directionOfLineInLocal.applyInverseTransform(regionToWorld);
 
-      Point3D intersectionWithPlaneInLocal = EuclidGeometryTools.intersectionBetweenLine3DAndPlane3D(pointOnPlane, planeNormal, pointOnLineInLocal, directionOfLineInLocal);
+      Point3D intersectionWithPlaneInLocal = EuclidGeometryTools.intersectionBetweenLine3DAndPlane3D(pointOnPlane, planeNormal, pointOnLineInLocal,
+                                                                                                     directionOfLineInLocal);
       if (intersectionWithPlaneInLocal == null)
       {
          return null;
@@ -340,15 +341,61 @@ public class PlanarRegionTools
          return false;
       if (MathTools.epsilonEquals(0.0, epsilon, 1.0e-10))
       {
-         return isPointInsidePolygon(planarRegion.getConcaveHull(), pointInLocalToCheck);
+
+         //TODO: +++JEP: Discuss this one with Sylvain. Do we want to check inside the concave hull, or check each planar region individually?
+         List<ConvexPolygon2D> convexPolygons = planarRegion.getConvexPolygons();
+         for (ConvexPolygon2D convexPolygon : convexPolygons)
+         {
+            //+++JEP: Not sure if this one is faster or not. Discuss with Sylvain best way to do point inside convex polygon check.
+            // Seems like you should be able to do a binary search on the distance to vertices, since it should be monotonic, right?
+//            boolean isInsidePolygon = convexPolygon.isPointInside(pointInLocalToCheck);
+            boolean isInsidePolygon = isPointInsideConvexPolygon2D(convexPolygon, pointInLocalToCheck);
+            
+            if (isInsidePolygon)
+               return true;
+         }
+         return false;
+
+         //         return isPointInsidePolygon(planarRegion.getConcaveHull(), pointInLocalToCheck);
       }
       else
       {
          double[] epsilons = new double[planarRegion.getConcaveHullSize()];
          Arrays.fill(epsilons, epsilon);
          List<Point2D> concaveHull = ClusterTools.extrudePolygon(true, Arrays.asList(planarRegion.getConcaveHull()), epsilons);
+
          return isPointInsidePolygon(concaveHull, pointInLocalToCheck);
       }
+   }
+
+   /**
+    * Return true if the given point is contained inside the boundary.
+    * See: http://www.ecse.rpi.edu/Homepages/wrf/Research/Short_Notes/pnpoly.html
+    * https://stackoverflow.com/questions/8721406/how-to-determine-if-a-point-is-inside-a-2d-convex-polygon
+    * @param test The point to check
+    * @return true if the point is inside the boundary, false otherwise
+    *
+    */
+   public static boolean isPointInsideConvexPolygon2D(ConvexPolygon2D polygon, Point2DReadOnly test)
+   {
+      int numberOfVertices = polygon.getNumberOfVertices();
+
+      int i;
+      int j;
+      boolean result = false;
+
+      for (i = 0, j = numberOfVertices - 1; i < numberOfVertices; j = i++)
+      {
+         Point2DReadOnly iVertex = polygon.getVertex(i);
+         Point2DReadOnly jVertex = polygon.getVertex(j);
+
+         if ((iVertex.getY() > test.getY()) != (jVertex.getY() > test.getY())
+               && (test.getX() < (jVertex.getX() - iVertex.getX()) * (test.getY() - iVertex.getY()) / (jVertex.getY() - iVertex.getY()) + iVertex.getX()))
+         {
+            result = !result;
+         }
+      }
+      return result;
    }
 
    public static boolean isPointInsidePolygon(Point2DReadOnly[] polygon, Point2DReadOnly pointToCheck)
@@ -622,7 +669,6 @@ public class PlanarRegionTools
       return minDistanceToEdge <= capsuleRadius;
    }
 
-
    public static double getDistanceFromLineSegment3DToConvexPolygon(Point3DReadOnly firstEndPointInLocal, Point3DReadOnly secondEndPointInLocal,
                                                                     List<Point3D> convexPolygon3D)
    {
@@ -664,8 +710,9 @@ public class PlanarRegionTools
          }
          else if (!pointsAllAbove || !pointsAllBelow)
          { // points are on opposite sides of the plane
-            Point3DReadOnly intersectionWithPlane = EuclidGeometryTools
-                  .intersectionBetweenLineSegment3DAndPlane3D(convexPolygon3D.get(0), new Vector3D(0.0, 0.0, 1.0), firstEndPointInLocal, secondEndPointInLocal);
+            Point3DReadOnly intersectionWithPlane = EuclidGeometryTools.intersectionBetweenLineSegment3DAndPlane3D(convexPolygon3D.get(0),
+                                                                                                                   new Vector3D(0.0, 0.0, 1.0),
+                                                                                                                   firstEndPointInLocal, secondEndPointInLocal);
 
             // checking convex hull here - might be better to check all polygons to avoid false positive
             if (intersectionWithPlane != null)
@@ -792,8 +839,8 @@ public class PlanarRegionTools
             {
                Vector3D edgeDirection = new Vector3D();
                edgeDirection.sub(vertex3D, previousVertex3D);
-               Point3D intersection = EuclidGeometryTools
-                     .intersectionBetweenLineSegment3DAndPlane3D(pointOnPlaneInRegionFrame, planeNormalInRegionFrame, vertex3D, previousVertex3D);
+               Point3D intersection = EuclidGeometryTools.intersectionBetweenLineSegment3DAndPlane3D(pointOnPlaneInRegionFrame, planeNormalInRegionFrame,
+                                                                                                     vertex3D, previousVertex3D);
 
                truncatedConcaveHullVertices.add(new Point2D(intersection));
             }
@@ -815,8 +862,8 @@ public class PlanarRegionTools
          return null; // The region is completely underneath
 
       List<ConvexPolygon2D> truncatedConvexPolygons = new ArrayList<>();
-      ConcaveHullDecomposition
-            .recursiveApproximateDecomposition(new ArrayList<>(truncatedConcaveHullVertices), depthThresholdForConvexDecomposition, truncatedConvexPolygons);
+      ConcaveHullDecomposition.recursiveApproximateDecomposition(new ArrayList<>(truncatedConcaveHullVertices), depthThresholdForConvexDecomposition,
+                                                                 truncatedConvexPolygons);
 
       Point2D[] concaveHullVertices = new Point2D[truncatedConcaveHullVertices.size()];
       truncatedConcaveHullVertices.toArray(concaveHullVertices);
