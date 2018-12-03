@@ -24,6 +24,7 @@ import us.ihmc.robotics.dataStructures.parameters.ParameterVector3D;
 import us.ihmc.robotics.math.trajectories.waypoints.FrameEuclideanTrajectoryPoint;
 import us.ihmc.robotics.math.trajectories.waypoints.FrameSE3TrajectoryPoint;
 import us.ihmc.robotics.math.trajectories.waypoints.MultipleWaypointsPositionTrajectoryGenerator;
+import us.ihmc.robotics.screwTheory.SelectionMatrix3D;
 import us.ihmc.yoVariables.parameters.DoubleParameter;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
@@ -159,6 +160,10 @@ public class QuadrupedCenterOfMassHeightManager
 
    public void handleBodyTrajectoryCommand(QuadrupedBodyTrajectoryCommand command)
    {
+      SelectionMatrix3D linearSelectionMatrix = command.getSE3Trajectory().getSelectionMatrix().getLinearPart();
+
+      if (!linearSelectionMatrix.isZSelected())
+         return; // The user does not want to control the height, do nothing.
 
       controlBodyHeight.set(true);
 

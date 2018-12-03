@@ -396,6 +396,16 @@ public class QuadrupedBalanceManager
          return Math.log(distanceRatio) / linearInvertedPendulumModel.getNaturalFrequency();
    }
 
+   public void enableBodyXYControl()
+   {
+      bodyICPBasedTranslationManager.enable();
+   }
+
+   public void disableBodyXYControl()
+   {
+      bodyICPBasedTranslationManager.disable();
+   }
+
    public void computeAchievedCMP(FrameVector3DReadOnly achievedLinearMomentumRate)
    {
       momentumRateOfChangeModule.computeAchievedECMP(achievedLinearMomentumRate, yoAchievedECMP);
