@@ -43,9 +43,9 @@ public class QuadrupedControllerAPIDefinition
 //      quadrupedCommands.add(GoHomeCommand.class); // todo
 //      quadrupedCommands.add(QuadrupedBodyTranslationCommand.class); // todo
 //      quadrupedCommands.add(QuadrupedBodyPositionCommand.class); // todo
-//      quadrupedCommands.add(QuadrupedBodyTrajectoryCommand.class); // todo
-//      quadrupedCommands.add(CenterOfMassTrajectoryCommand.class); // todo
-//      quadrupedCommands.add(AbortWalkingCommand.class);// todo
+      quadrupedCommands.add(QuadrupedBodyTrajectoryCommand.class);
+      ////      quadrupedCommands.add(CenterOfMassTrajectoryCommand.class); // todo
+      ////      quadrupedCommands.add(AbortWalkingCommand.class);// todo
 //      quadrupedCommands.add(PauseWalkingCommand.class); // todo
 
       quadrupedSupportedCommands = Collections.unmodifiableList(quadrupedCommands);
