@@ -90,10 +90,16 @@ public class NavigableRegionsManager
 
       long startBodyPathComputation = System.currentTimeMillis();
 
+      //TODO: Do this stuff lazily, rather than all up front for efficiency.
       navigableRegions = VisibilityGraphsFactory.createNavigableRegionButNotVisibilityMaps(regions, parameters);
-      VisibilityGraphsFactory.createStaticVisibilityMapsForNavigableRegions(navigableRegions);
+
+      //Note: This has to be done before inter regions if the inter regions are computed using inner regions.
+      // Otherwise, the ordering does not matter.
+      //      VisibilityGraphsFactory.createStaticVisibilityMapsForNavigableRegions(navigableRegions);
 
       interRegionVisibilityMap = VisibilityGraphsFactory.createInterRegionVisibilityMap(navigableRegions, parameters.getInterRegionConnectionFilter());
+      VisibilityGraphsFactory.createStaticVisibilityMapsForNavigableRegions(navigableRegions);
+
       double searchHostEpsilon = parameters.getSearchHostRegionEpsilon();
       startMap = VisibilityGraphsFactory.createSingleSourceVisibilityMap(start, navigableRegions, searchHostEpsilon,
                                                                          interRegionVisibilityMap.getVisibilityMapInLocal());
@@ -119,7 +125,7 @@ public class NavigableRegionsManager
       {
          startMap = VisibilityGraphsFactory.connectToFallbackMap(start, START_GOAL_ID, 1.0e-3, interRegionVisibilityMap.getVisibilityMapInLocal());
 
-         if(startMap == null)
+         if (startMap == null)
             startMap = VisibilityGraphsFactory.connectToClosestPoints(new ConnectionPoint3D(start, START_GOAL_ID), 1, navigableRegions, START_GOAL_ID);
       }
 
@@ -160,7 +166,7 @@ public class NavigableRegionsManager
       {
          if (!OcclusionTools.isTheGoalIntersectingAnyObstacles(navigableRegions.get(0), start, goal))
          {
-            if(debug)
+            if (debug)
             {
                PrintTools.info("StraightLine available");
             }
