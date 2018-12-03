@@ -292,12 +292,13 @@ public class QuadrupedBodyICPBasedTranslationManager
          if (isRunning.getBooleanValue())
             positionTrajectoryGenerator.getPosition(tempPosition);
          else
-            tempPosition.setToZero(bodyZUpFrame);
-         tempPosition.changeFrame(worldFrame);
+            tempPosition.setToZero(centerFeetZUpFrame);
+         tempPosition.changeFrame(centerFeetZUpFrame);
          tempVelocity.setToZero(worldFrame);
+         tempVelocity.changeFrame(centerFeetZUpFrame);
 
          positionTrajectoryGenerator.clear();
-         positionTrajectoryGenerator.changeFrame(worldFrame);
+         positionTrajectoryGenerator.changeFrame(centerFeetZUpFrame);
          positionTrajectoryGenerator.appendWaypoint(0.0, tempPosition, tempVelocity);
       }
       else
@@ -312,11 +313,6 @@ public class QuadrupedBodyICPBasedTranslationManager
       {
          positionTrajectoryGenerator.appendWaypoint(se3Trajectory.getTrajectoryPoint(trajectoryPointIndex));
       }
-
-      if (centerFeetZUpFrame != null)
-         positionTrajectoryGenerator.changeFrame(centerFeetZUpFrame);
-      else
-         positionTrajectoryGenerator.changeFrame(worldFrame);
 
       positionTrajectoryGenerator.initialize();
 
