@@ -9,6 +9,8 @@ import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.EuclideanTrajectoryControllerCommand;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.QuadrupedBodyHeightCommand;
+import us.ihmc.humanoidRobotics.communication.controllerAPI.command.QuadrupedBodyTrajectoryCommand;
+import us.ihmc.humanoidRobotics.communication.controllerAPI.command.SE3TrajectoryControllerCommand;
 import us.ihmc.mecano.frames.MovingReferenceFrame;
 import us.ihmc.quadrupedRobotics.controller.QuadrupedControllerToolbox;
 import us.ihmc.quadrupedRobotics.estimator.GroundPlaneEstimator;
@@ -20,6 +22,7 @@ import us.ihmc.robotics.controllers.pidGains.implementations.PIDGains;
 import us.ihmc.robotics.controllers.pidGains.implementations.ParameterizedPIDGains;
 import us.ihmc.robotics.dataStructures.parameters.ParameterVector3D;
 import us.ihmc.robotics.math.trajectories.waypoints.FrameEuclideanTrajectoryPoint;
+import us.ihmc.robotics.math.trajectories.waypoints.FrameSE3TrajectoryPoint;
 import us.ihmc.robotics.math.trajectories.waypoints.MultipleWaypointsPositionTrajectoryGenerator;
 import us.ihmc.yoVariables.parameters.DoubleParameter;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
@@ -145,6 +148,46 @@ public class QuadrupedCenterOfMassHeightManager
       for (int i = 0; i < euclideanTrajectory.getNumberOfTrajectoryPoints(); i++)
       {
          FrameEuclideanTrajectoryPoint trajectoryPoint = euclideanTrajectory.getTrajectoryPoint(i);
+         trajectoryPoint.changeFrame(supportFrame);
+
+         centerOfMassHeightTrajectory.appendWaypoint(trajectoryPoint);
+      }
+
+      centerOfMassHeightTrajectory.initialize();
+      heightCommandHasBeenReceived.set(true);
+   }
+
+   public void handleBodyTrajectoryCommand(QuadrupedBodyTrajectoryCommand command)
+   {
+
+      controlBodyHeight.set(true);
+
+      double currentTime = controllerTime.getDoubleValue();
+      double timeShift = command.isExpressedInAbsoluteTime() ? 0.0 : currentTime;
+      SE3TrajectoryControllerCommand se3Trajectory = command.getSE3Trajectory();
+      se3Trajectory.getTrajectoryPointList().addTimeOffset(timeShift);
+
+      command.setIsExpressedInAbsoluteTime(true);
+
+      if (se3Trajectory.getTrajectoryPoint(0).getTime() > 1.0e-5 + currentTime)
+      {
+         centerOfMassHeightTrajectory.getPosition(desiredPosition);
+         desiredVelocity.setToZero(worldFrame);
+
+         desiredPosition.changeFrame(supportFrame);
+         desiredVelocity.changeFrame(supportFrame);
+
+         centerOfMassHeightTrajectory.clear();
+         centerOfMassHeightTrajectory.appendWaypoint(currentTime, desiredPosition, desiredVelocity);
+      }
+      else
+      {
+         centerOfMassHeightTrajectory.clear();
+      }
+
+      for (int i = 0; i < se3Trajectory.getNumberOfTrajectoryPoints(); i++)
+      {
+         FrameSE3TrajectoryPoint trajectoryPoint = se3Trajectory.getTrajectoryPoint(i);
          trajectoryPoint.changeFrame(supportFrame);
 
          centerOfMassHeightTrajectory.appendWaypoint(trajectoryPoint);
