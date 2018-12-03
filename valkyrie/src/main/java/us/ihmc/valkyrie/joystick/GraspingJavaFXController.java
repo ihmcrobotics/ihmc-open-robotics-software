@@ -79,8 +79,8 @@ public class GraspingJavaFXController
    private final Group rootNode = new Group();
 
    private final static double timeDurationForFinger = 5.0;
-   private final static double ratioJoyStickToPosition = 0.01;
-   private final static double ratioJoyStickToRotation = 0.02;
+   private final static double ratioJoyStickToPosition = 0.02;
+   private final static double ratioJoyStickToRotation = 0.04;
    private final static double lengthOfControlFrame = 0.3;
    private final static double lengthOfkeyFrameReferenceFrame = 0.15;
 
@@ -404,6 +404,7 @@ public class GraspingJavaFXController
          controlTransform.set(transformToCreateKeyFrame);
          keyFramePoses.add(transformToCreateKeyFrame);
          indexOfSelectedKeyFrame = keyFramePoses.size() - 1;
+         motionPreviewVisualizer.enable(false);
       }
    }
 

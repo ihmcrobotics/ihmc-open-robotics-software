@@ -33,7 +33,7 @@ public class ValkyrieJavaFXMotionPreviewVisualizer
    private double localTime = 0.0;
    private KinematicsPlanningToolboxOutputStatus packetInProgress = null;
 
-   private final double onetickTime = 0.05;
+   private final double onetickTime = 0.2;
 
    private final AnimationTimer animationTimer;
 
