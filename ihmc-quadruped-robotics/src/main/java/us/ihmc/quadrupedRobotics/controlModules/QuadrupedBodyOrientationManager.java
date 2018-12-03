@@ -10,7 +10,9 @@ import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
+import us.ihmc.humanoidRobotics.communication.controllerAPI.command.PelvisOrientationTrajectoryCommand;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.QuadrupedBodyOrientationCommand;
+import us.ihmc.humanoidRobotics.communication.controllerAPI.command.QuadrupedBodyTrajectoryCommand;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.SO3TrajectoryControllerCommand;
 import us.ihmc.mecano.frames.MovingReferenceFrame;
 import us.ihmc.quadrupedRobotics.controller.QuadrupedControllerToolbox;
@@ -20,6 +22,7 @@ import us.ihmc.robotics.controllers.pidGains.implementations.DefaultPID3DGains;
 import us.ihmc.robotics.controllers.pidGains.implementations.ParameterizedPID3DGains;
 import us.ihmc.robotics.dataStructures.parameters.ParameterVector3D;
 import us.ihmc.robotics.math.trajectories.waypoints.MultipleWaypointsOrientationTrajectoryGenerator;
+import us.ihmc.robotics.screwTheory.SelectionMatrix3D;
 import us.ihmc.sensorProcessing.simulatedSensors.Vector3DProvider;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
@@ -127,6 +130,19 @@ public class QuadrupedBodyOrientationManager
       {
          handleAbsoluteOrientationCommand(so3Trajectory);
          useAbsoluteBodyOrientationTrajectory.set(true);
+      }
+   }
+
+   private final QuadrupedBodyOrientationCommand tempBodyOrientationTrajectoryCommand = new QuadrupedBodyOrientationCommand();
+
+   public void handleBodyTrajectoryCommand(QuadrupedBodyTrajectoryCommand command)
+   {
+      SelectionMatrix3D angularSelectionMatrix = command.getSE3Trajectory().getSelectionMatrix().getAngularPart();
+
+      if (angularSelectionMatrix.isXSelected() || angularSelectionMatrix.isYSelected() || angularSelectionMatrix.isZSelected())
+      { // At least one axis is to be controlled, process the command
+         tempBodyOrientationTrajectoryCommand.set(command);
+         handleBodyOrientationCommand(tempBodyOrientationTrajectoryCommand);
       }
    }
 
