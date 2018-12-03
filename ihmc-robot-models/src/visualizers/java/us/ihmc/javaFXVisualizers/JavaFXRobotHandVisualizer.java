@@ -3,6 +3,8 @@ package us.ihmc.javaFXVisualizers;
 import javafx.scene.Group;
 import javafx.scene.Node;
 import javafx.scene.transform.Affine;
+import us.ihmc.graphicsDescription.appearance.AppearanceDefinition;
+import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.graphicsDescription.structure.Graphics3DNode;
 import us.ihmc.javaFXToolkit.node.JavaFXGraphics3DNode;
 import us.ihmc.mecano.multiBodySystem.interfaces.JointBasics;
@@ -64,7 +66,12 @@ public class JavaFXRobotHandVisualizer
 
    private void addNodesRecursively(Graphics3DNode graphics3dNode, JavaFXGraphics3DNode parentNode)
    {
-      JavaFXGraphics3DNode node = new JavaFXGraphics3DNode(graphics3dNode);
+      AppearanceDefinition appearance;
+      if (robotSide == RobotSide.RIGHT)
+         appearance = YoAppearance.YellowGreen();
+      else
+         appearance = YoAppearance.Crimson();
+      JavaFXGraphics3DNode node = new JavaFXGraphics3DNode(graphics3dNode, appearance);
       parentNode.addChild(node);
       graphics3dNode.getChildrenNodes().forEach(child -> addNodesRecursively(child, node));
    }

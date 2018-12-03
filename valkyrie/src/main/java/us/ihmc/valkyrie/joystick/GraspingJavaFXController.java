@@ -82,7 +82,7 @@ public class GraspingJavaFXController
    private final static double ratioJoyStickToPosition = 0.01;
    private final static double ratioJoyStickToRotation = 0.02;
    private final static double lengthOfControlFrame = 0.3;
-   private final static double lengthOfkeyFrameReferenceFrame = 0.2;
+   private final static double lengthOfkeyFrameReferenceFrame = 0.15;
 
    private final HandFingerTrajectoryMessagePublisher handFingerTrajectoryMessagePublisher;
    private final IHMCROS2Publisher<WholeBodyTrajectoryMessage> wholeBodyTrajectoryPublisher;
