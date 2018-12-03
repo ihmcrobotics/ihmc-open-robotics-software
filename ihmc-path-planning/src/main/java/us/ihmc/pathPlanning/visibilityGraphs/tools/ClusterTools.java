@@ -356,22 +356,29 @@ public class ClusterTools
       RigidBodyTransform transformToWorld = new RigidBodyTransform();
       homeRegion.getTransformToWorld(transformToWorld);
 
-      Cluster cluster = new Cluster();
-      cluster.setType(Type.POLYGON);
-      cluster.setTransformToWorld(transformToWorld);
-      cluster.addRawPointsInLocal2D(homeRegion.getConcaveHull());
-      cluster.setExtrusionSide(ExtrusionSide.INSIDE);
+      Cluster homeRegionCluster = new Cluster();
+      homeRegionCluster.setType(Type.POLYGON);
+      homeRegionCluster.setTransformToWorld(transformToWorld);
+      homeRegionCluster.addRawPointsInLocal2D(homeRegion.getConcaveHull());
+      homeRegionCluster.setExtrusionSide(ExtrusionSide.INSIDE);
 
       double extrusionDistance = calculator.computeExtrusionDistance(homeRegion);
 
       ObstacleExtrusionDistanceCalculator nonNavigableCalculator = (p, h) -> extrusionDistance - NAV_TO_NON_NAV_DISTANCE;
       ObstacleExtrusionDistanceCalculator navigableCalculator = (p, h) -> extrusionDistance;
 
-      boolean extrudeToTheLeft = cluster.getExtrusionSide() != ExtrusionSide.INSIDE;
-      cluster.addNonNavigableExtrusionsInLocal(extrudePolygon(extrudeToTheLeft, cluster, nonNavigableCalculator));
-      cluster.addNavigableExtrusionsInLocal(extrudePolygon(extrudeToTheLeft, cluster, navigableCalculator));
-      cluster.updateBoundingBox();
-      return cluster;
+      boolean extrudeToTheLeft = homeRegionCluster.getExtrusionSide() != ExtrusionSide.INSIDE;
+      
+      //TODO: JEP+++: Why do we add a NonNavigableExtrusion to a home region cluster?
+      // I guess it's for inner region cionnections that cross over empty space.
+      // Need to make sure they don't. But then also need to make sure these 
+      // NonNavigable regions are not treated as boundaries when making 
+      // inter region connections...
+
+      homeRegionCluster.addNonNavigableExtrusionsInLocal(extrudePolygon(extrudeToTheLeft, homeRegionCluster, nonNavigableCalculator));
+      homeRegionCluster.addNavigableExtrusionsInLocal(extrudePolygon(extrudeToTheLeft, homeRegionCluster, navigableCalculator));
+      homeRegionCluster.updateBoundingBox();
+      return homeRegionCluster;
    }
 
    public static List<Cluster> createObstacleClusters(PlanarRegion homeRegion, List<PlanarRegion> obstacleRegions, double orthogonalAngle,

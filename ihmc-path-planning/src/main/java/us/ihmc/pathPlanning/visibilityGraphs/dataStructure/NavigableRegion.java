@@ -5,13 +5,11 @@ import java.util.List;
 
 import us.ihmc.euclid.interfaces.Transformable;
 import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.pathPlanning.visibilityGraphs.clusterManagement.Cluster;
 import us.ihmc.pathPlanning.visibilityGraphs.interfaces.VisibilityMapHolder;
 import us.ihmc.robotics.geometry.PlanarRegion;
 
-/**
- * User: Matt Date: 1/14/13
- */
 public class NavigableRegion implements VisibilityMapHolder
 {
    private final PlanarRegion homeRegion;
@@ -120,5 +118,10 @@ public class NavigableRegion implements VisibilityMapHolder
       }
 
       return visibilityMapInWorld;
+   }
+
+   public List<Point3DReadOnly> getHomeRegionNavigableExtrusionsInWorld()
+   {
+      return homeRegionCluster.getNavigableExtrusionsInWorld();
    }
 }
