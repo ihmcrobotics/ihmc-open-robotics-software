@@ -79,13 +79,17 @@ public class Cluster
    }
 
    public void updateBoundingBox()
-   {
+   { 
+      //TODO: First reset the bounding box to zero or null or something?
       nonNavigableExtrusionsInLocal.forEach(nonNavigableExtrusionsBoundingBox::updateToIncludePoint);
       nonNavigableExtrusionsBoundingBoxIsDirty = false;
    }
 
    public boolean isInsideNonNavigableZone(Point2DReadOnly query)
    {
+      if (nonNavigableExtrusionsInLocal.isEmpty()) 
+         return false; 
+
       BoundingBox2D boundingBox = getNonNavigableExtrusionsBoundingBox();
       
       if (extrusionSide == ExtrusionSide.INSIDE)
