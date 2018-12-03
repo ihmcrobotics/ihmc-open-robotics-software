@@ -24,10 +24,6 @@ public class QuadrupedBodyTrajectoryMessage extends Packet<QuadrupedBodyTrajecto
             */
    public boolean is_expressed_in_absolute_time_ = true;
    /**
-            * Indicates if the given trajectory should be considered an "absolute" trajectory or an "offset" trajectory
-            */
-   public boolean is_an_offset_orientation_ = true;
-   /**
             * The position/orientation trajectory information.
             */
    public controller_msgs.msg.dds.SE3TrajectoryMessage se3_trajectory_;
@@ -48,8 +44,6 @@ public class QuadrupedBodyTrajectoryMessage extends Packet<QuadrupedBodyTrajecto
       sequence_id_ = other.sequence_id_;
 
       is_expressed_in_absolute_time_ = other.is_expressed_in_absolute_time_;
-
-      is_an_offset_orientation_ = other.is_an_offset_orientation_;
 
       controller_msgs.msg.dds.SE3TrajectoryMessagePubSubType.staticCopy(other.se3_trajectory_, se3_trajectory_);
    }
@@ -84,21 +78,6 @@ public class QuadrupedBodyTrajectoryMessage extends Packet<QuadrupedBodyTrajecto
       return is_expressed_in_absolute_time_;
    }
 
-   /**
-            * Indicates if the given trajectory should be considered an "absolute" trajectory or an "offset" trajectory
-            */
-   public void setIsAnOffsetOrientation(boolean is_an_offset_orientation)
-   {
-      is_an_offset_orientation_ = is_an_offset_orientation;
-   }
-   /**
-            * Indicates if the given trajectory should be considered an "absolute" trajectory or an "offset" trajectory
-            */
-   public boolean getIsAnOffsetOrientation()
-   {
-      return is_an_offset_orientation_;
-   }
-
 
    /**
             * The position/orientation trajectory information.
@@ -130,8 +109,6 @@ public class QuadrupedBodyTrajectoryMessage extends Packet<QuadrupedBodyTrajecto
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsBoolean(this.is_expressed_in_absolute_time_, other.is_expressed_in_absolute_time_, epsilon)) return false;
 
-      if (!us.ihmc.idl.IDLTools.epsilonEqualsBoolean(this.is_an_offset_orientation_, other.is_an_offset_orientation_, epsilon)) return false;
-
       if (!this.se3_trajectory_.epsilonEquals(other.se3_trajectory_, epsilon)) return false;
 
       return true;
@@ -150,8 +127,6 @@ public class QuadrupedBodyTrajectoryMessage extends Packet<QuadrupedBodyTrajecto
 
       if(this.is_expressed_in_absolute_time_ != otherMyClass.is_expressed_in_absolute_time_) return false;
 
-      if(this.is_an_offset_orientation_ != otherMyClass.is_an_offset_orientation_) return false;
-
       if (!this.se3_trajectory_.equals(otherMyClass.se3_trajectory_)) return false;
 
       return true;
@@ -167,8 +142,6 @@ public class QuadrupedBodyTrajectoryMessage extends Packet<QuadrupedBodyTrajecto
       builder.append(this.sequence_id_);      builder.append(", ");
       builder.append("is_expressed_in_absolute_time=");
       builder.append(this.is_expressed_in_absolute_time_);      builder.append(", ");
-      builder.append("is_an_offset_orientation=");
-      builder.append(this.is_an_offset_orientation_);      builder.append(", ");
       builder.append("se3_trajectory=");
       builder.append(this.se3_trajectory_);
       builder.append("}");

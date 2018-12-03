@@ -5,10 +5,6 @@ uint32 sequence_id
 # Field default value True
 bool is_expressed_in_absolute_time
 
-# Indicates if the given trajectory should be considered an "absolute" trajectory or an "offset" trajectory
-# Field default value True
-bool is_an_offset_orientation
-
 # The position/orientation trajectory information.
 controller_msgs/SE3TrajectoryMessage se3_trajectory
 
