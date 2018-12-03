@@ -94,6 +94,16 @@ public class VisibilityTools
       return connections;
    }
 
+   private static boolean isInsideANonNavigableZone(Point2DReadOnly query, List<Cluster> clusters)
+   {
+      for (Cluster cluster : clusters)
+      {
+         if (cluster.isInsideNonNavigableZone(query))
+            return true;
+      }
+      return false;
+   }
+
    /**
     * Finds all the possible and valid connections using only the vertices from a single cluster,
     * i.e. {@code clusterToBuildMapOf} while considering all the clusters, including
@@ -126,7 +136,14 @@ public class VisibilityTools
          boolean isNavigable = PlanarRegionTools.isPointInLocalInsidePlanarRegion(homeRegion, query);
 
          if (isNavigable)
+         {
+            //TODO: Consider which of these two is better to use.
+            //            if (isInsideANonNavigableZone(query, allClusters))
+            //            {
+            //               isNavigable = false;
+            //            }
             isNavigable = allClusters.stream().noneMatch(cluster -> cluster.isInsideNonNavigableZone(query));
+         }
 
          arePointsActuallyNavigable[i] = isNavigable;
       }
@@ -350,8 +367,10 @@ public class VisibilityTools
          {
             BoundingBox2D boundingBox = cluster.getNonNavigableExtrusionsBoundingBox();
 
-            // If both the target and observer are in the bounding box, we have to do the thorough check.
-            if (!boundingBox.isInsideInclusive(observer) || !boundingBox.isInsideInclusive(targetPoint))
+            // If either the target or observer or both are in the bounding box, we have to do the thorough check.
+            // If both are outside the bounding box, then we can check if the line segment does not intersect.
+            // If that is the case, then the point is visible and we can check the next one.
+            if (!boundingBox.isInsideInclusive(observer) && !boundingBox.isInsideInclusive(targetPoint))
             {
                if (!boundingBox.doesIntersectWithLineSegment2D(observer, targetPoint))
                   continue;
@@ -374,6 +393,7 @@ public class VisibilityTools
 
    public static List<Connection> removeConnectionsFromExtrusionsInsideNoGoZones(Collection<Connection> connectionsToClean, List<Cluster> clusters)
    {
+      //TODO: +++JEP: This seems buggy to me. It doesn't seem to do the 2D / 3D thing wrong. Should be easy to make a failing test case I think...
       List<Connection> validConnections = new ArrayList<>(connectionsToClean);
 
       for (Cluster cluster : clusters)
