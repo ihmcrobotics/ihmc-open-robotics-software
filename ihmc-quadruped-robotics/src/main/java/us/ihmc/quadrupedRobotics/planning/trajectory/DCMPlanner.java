@@ -21,10 +21,7 @@ import us.ihmc.robotics.math.trajectories.FrameTrajectory3D;
 import us.ihmc.robotics.robotSide.QuadrantDependentList;
 import us.ihmc.yoVariables.parameters.DoubleParameter;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.yoVariables.variable.YoBoolean;
-import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.yoVariables.variable.YoFramePoint3D;
-import us.ihmc.yoVariables.variable.YoInteger;
+import us.ihmc.yoVariables.variable.*;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -61,7 +58,9 @@ public class DCMPlanner
 
    private final ReferenceFrame supportFrame;
    private final YoFramePoint3D dcmPositionAtStartOfState = new YoFramePoint3D("dcmPositionAtStartOfState", ReferenceFrame.getWorldFrame(), registry);
+   private final YoFramePoint3D dcmPositionAtEndOfTransition = new YoFramePoint3D("dcmPositionAtEndOfTransition", ReferenceFrame.getWorldFrame(), registry);
    private final YoDouble timeAtStartOfState = new YoDouble("timeAtStartOfState", registry);
+   private final FramePoint3D initialTransitionDCM = new FramePoint3D();
    private final FramePoint3D finalTransitionDCM = new FramePoint3D();
    private final FramePoint3D finalDCM = new FramePoint3D();
 
@@ -139,7 +138,7 @@ public class DCMPlanner
       dcmTrajectory.resetVariables();
    }
 
-   public void initializeForStepping(QuadrantDependentList<ContactState> currentContactStates, FramePoint3DReadOnly dcmPosition)
+   public void initializeForStepping(QuadrantDependentList<YoEnum<ContactState>> currentContactStates, FramePoint3DReadOnly dcmPosition)
    {
       isStanding.set(false);
 
@@ -157,7 +156,7 @@ public class DCMPlanner
       }
    }
 
-   private void computeDcmTrajectory(QuadrantDependentList<ContactState> currentContactStates)
+   private void computeDcmTrajectory(QuadrantDependentList<YoEnum<ContactState>> currentContactStates)
    {
       // compute piecewise constant center of pressure plan
       double currentTime = controllerTime.getDoubleValue();
@@ -184,11 +183,12 @@ public class DCMPlanner
       dcmTrajectory.computeTrajectory(transitionEndTime);
       dcmTrajectory.getPosition(finalTransitionDCM);
 
-      tempPoint.setIncludingFrame(dcmPositionAtStartOfState);
-      tempPoint.changeFrame(dcmTransitionTrajectory.getReferenceFrame());
+      initialTransitionDCM.setIncludingFrame(dcmPositionAtStartOfState);
+      initialTransitionDCM.changeFrame(dcmTransitionTrajectory.getReferenceFrame());
       finalTransitionDCM.changeFrame(dcmTransitionTrajectory.getReferenceFrame());
 
-      dcmTransitionTrajectory.setQuinticWithZeroTerminalVelocityAndAcceleration(transitionStartTime, transitionEndTime, tempPoint, finalTransitionDCM);
+      dcmPositionAtEndOfTransition.setMatchingFrame(finalTransitionDCM);
+      dcmTransitionTrajectory.setQuinticWithZeroTerminalVelocityAndAcceleration(transitionStartTime, transitionEndTime, initialTransitionDCM, finalTransitionDCM);
 
       if (debug)
          runTransitionDebugChecks(transitionStartTime, transitionEndTime);
@@ -213,7 +213,7 @@ public class DCMPlanner
    private final FramePoint3D desiredDCMPosition = new FramePoint3D();
    private final FrameVector3D desiredDCMVelocity = new FrameVector3D();
 
-   public void computeDcmSetpoints(QuadrantDependentList<ContactState> currentContactStates, FixedFramePoint3DBasics desiredDCMPositionToPack,
+   public void computeDcmSetpoints(QuadrantDependentList<YoEnum<ContactState>> currentContactStates, FixedFramePoint3DBasics desiredDCMPositionToPack,
                                    FixedFrameVector3DBasics desiredDCMVelocityToPack)
    {
       if (isStanding.getBooleanValue())
@@ -227,12 +227,12 @@ public class DCMPlanner
          computeDcmTrajectory(currentContactStates);
 
          double currentTime = controllerTime.getDoubleValue();
-         dcmTrajectory.computeTrajectory(controllerTime.getDoubleValue());
+         dcmTrajectory.computeTrajectory(currentTime);
          if (currentTime <= dcmTransitionTrajectory.getFinalTime())
          {
             computeTransitionTrajectory();
 
-            dcmTransitionTrajectory.compute(controllerTime.getDoubleValue());
+            dcmTransitionTrajectory.compute(currentTime);
             dcmTransitionTrajectory.getFramePosition(desiredDCMPosition);
             dcmTransitionTrajectory.getFrameVelocity(desiredDCMVelocity);
 

@@ -5,6 +5,7 @@ import static us.ihmc.humanoidRobotics.footstep.FootstepUtils.worldFrame;
 import java.awt.Color;
 import java.util.List;
 
+import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.QuadrupedSupportPolygons;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.YoPlaneContactState;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
@@ -22,6 +23,7 @@ import us.ihmc.quadrupedRobotics.controller.toolbox.QuadrupedSoleForceEstimator;
 import us.ihmc.quadrupedRobotics.estimator.GroundPlaneEstimator;
 import us.ihmc.quadrupedRobotics.estimator.YoGroundPlaneEstimator;
 import us.ihmc.quadrupedRobotics.estimator.referenceFrames.QuadrupedReferenceFrames;
+import us.ihmc.quadrupedRobotics.geometry.supportPolygon.QuadrupedSupportPolygon;
 import us.ihmc.quadrupedRobotics.model.QuadrupedPhysicalProperties;
 import us.ihmc.quadrupedRobotics.model.QuadrupedRuntimeEnvironment;
 import us.ihmc.quadrupedRobotics.planning.ContactState;
@@ -31,6 +33,7 @@ import us.ihmc.robotics.robotSide.QuadrantDependentList;
 import us.ihmc.robotics.robotSide.RobotQuadrant;
 import us.ihmc.robotics.sensors.CenterOfMassDataHolderReadOnly;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoEnum;
 import us.ihmc.yoVariables.variable.YoFrameConvexPolygon2D;
 import us.ihmc.yoVariables.variable.YoFramePoint3D;
 import us.ihmc.yoVariables.variable.YoFrameVector3D;
@@ -46,7 +49,6 @@ public class QuadrupedControllerToolbox
    private final QuadrantDependentList<YoFramePoint3D> groundPlanePositions;
    private final QuadrantDependentList<YoFramePoint3D> upcomingGroundPlanePositions;
 
-
    private final QuadrupedSoleForceEstimator soleForceEstimator;
    private final QuadrupedFallDetector fallDetector;
 
@@ -57,14 +59,12 @@ public class QuadrupedControllerToolbox
 
    private final FullQuadrupedRobotModel fullRobotModel;
 
-   private final QuadrantDependentList<ContactState> contactStates = new QuadrantDependentList<>();
+   private final QuadrantDependentList<YoEnum<ContactState>> contactStates = new QuadrantDependentList<>();
    private final QuadrantDependentList<YoPlaneContactState> footContactStates = new QuadrantDependentList<>();
    private final List<ContactablePlaneBody> contactablePlaneBodies;
 
-   private final YoFrameConvexPolygon2D supportPolygon;
-   private final YoArtifactPolygon supportPolygonVisualizer;
+   private final QuadrupedSupportPolygons supportPolygon;
 
-   private final FramePoint3D tempPoint = new FramePoint3D();
    private final FrameVector3D comVelocityEstimate = new FrameVector3D();
 
    private final YoFrameVector3D yoCoMVelocityEstimate;
@@ -84,9 +84,6 @@ public class QuadrupedControllerToolbox
       footControlModuleParameters = new QuadrupedFootControlModuleParameters();
       registry.addChild(footControlModuleParameters.getYoVariableRegistry());
 
-      supportPolygon = new YoFrameConvexPolygon2D("supportPolygon", ReferenceFrame.getWorldFrame(), 4, registry);
-      supportPolygonVisualizer = new YoArtifactPolygon("supportPolygonVisualizer", supportPolygon, Color.black, false, 1);
-      yoGraphicsListRegistry.registerArtifact("supportPolygon", supportPolygonVisualizer);
 
 
       // create controllers and estimators
@@ -121,12 +118,20 @@ public class QuadrupedControllerToolbox
       {
          ContactablePlaneBody contactableFoot = contactableFeet.get(robotQuadrant);
          RigidBodyBasics rigidBody = contactableFoot.getRigidBody();
-         YoPlaneContactState contactState = new YoPlaneContactState(contactableFoot.getSoleFrame().getName(), rigidBody, contactableFoot.getSoleFrame(),
-                                                                    contactableFoot.getContactPoints2d(), coefficientOfFriction, registry);
+         String name = contactableFoot.getSoleFrame().getName();
+         YoPlaneContactState planeContactState = new YoPlaneContactState(name, rigidBody, contactableFoot.getSoleFrame(),
+                                                                         contactableFoot.getContactPoints2d(), coefficientOfFriction, registry);
+         YoEnum<ContactState> contactState = new YoEnum<>(name, registry, ContactState.class);
 
-         footContactStates.put(robotQuadrant, contactState);
-         contactStates.put(robotQuadrant, ContactState.IN_CONTACT);
+
+         footContactStates.put(robotQuadrant, planeContactState);
+         contactStates.put(robotQuadrant, contactState);
       }
+
+
+      supportPolygon = new QuadrupedSupportPolygons(referenceFrames.getCenterOfFeetZUpFrameAveragingLowestZHeightsAcrossEnds(), footContactStates,
+                                                    referenceFrames.getSoleZUpFrames(), registry, yoGraphicsListRegistry);
+
 
       update(); 
    }
@@ -135,7 +140,7 @@ public class QuadrupedControllerToolbox
    {
       referenceFrames.updateFrames();
       soleForceEstimator.compute();
-      updateSupportPolygon();
+      supportPolygon.updateUsingContactStates(footContactStates);
 
       if(centerOfMassDataHolder == null)
       {
@@ -149,22 +154,6 @@ public class QuadrupedControllerToolbox
 
       yoCoMVelocityEstimate.setMatchingFrame(comVelocityEstimate);
       dcmPositionEstimator.compute(comVelocityEstimate);
-   }
-
-   private void updateSupportPolygon()
-   {
-      supportPolygon.clear();
-
-      for(RobotQuadrant quadrant : RobotQuadrant.values)
-      {
-         if(contactStates.get(quadrant) == ContactState.IN_CONTACT)
-         {
-            tempPoint.setToZero(referenceFrames.getSoleFrame(quadrant));
-            supportPolygon.addVertexMatchingFrame(tempPoint);
-         }
-      }
-
-      supportPolygon.update();
    }
 
    public FullQuadrupedRobotModel getFullRobotModel()
@@ -239,10 +228,10 @@ public class QuadrupedControllerToolbox
 
    public ContactState getContactState(RobotQuadrant robotQuadrant)
    {
-      return contactStates.get(robotQuadrant);
+      return contactStates.get(robotQuadrant).getEnumValue();
    }
 
-   public QuadrantDependentList<ContactState> getContactStates()
+   public QuadrantDependentList<YoEnum<ContactState>> getContactStates()
    {
       return contactStates;
    }
