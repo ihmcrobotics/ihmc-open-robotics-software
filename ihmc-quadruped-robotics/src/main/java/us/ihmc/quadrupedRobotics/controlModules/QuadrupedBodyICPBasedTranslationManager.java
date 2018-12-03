@@ -6,9 +6,9 @@ import us.ihmc.commons.lists.RecyclingArrayDeque;
 import us.ihmc.communication.packets.ExecutionMode;
 import us.ihmc.communication.packets.Packet;
 import us.ihmc.euclid.referenceFrame.*;
+import us.ihmc.euclid.referenceFrame.interfaces.FixedFramePoint3DBasics;
 import us.ihmc.euclid.tuple2D.Vector2D;
 import us.ihmc.euclid.tuple2D.interfaces.Vector2DReadOnly;
-import us.ihmc.humanoidRobotics.communication.controllerAPI.command.PelvisTrajectoryCommand;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.QuadrupedBodyTrajectoryCommand;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.SE3TrajectoryControllerCommand;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.StopAllTrajectoryCommand;
@@ -20,6 +20,7 @@ import us.ihmc.robotics.dataStructures.parameters.ParameterVector2D;
 import us.ihmc.robotics.geometry.ConvexPolygonScaler;
 import us.ihmc.robotics.math.trajectories.waypoints.MultipleWaypointsPositionTrajectoryGenerator;
 import us.ihmc.robotics.robotSide.QuadrantDependentList;
+import us.ihmc.robotics.robotSide.RobotQuadrant;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.screwTheory.SelectionMatrix3D;
 import us.ihmc.yoVariables.listener.ParameterChangedListener;
@@ -39,8 +40,8 @@ public class QuadrupedBodyICPBasedTranslationManager
    private final YoDouble supportPolygonSafeMargin = new YoDouble("supportPolygonSafeMargin", registry);
    private final YoDouble frozenOffsetDecayAlpha = new YoDouble("frozenOffsetDecayAlpha", registry);
 
-   private final YoFramePoint2D desiredPelvisPosition = new YoFramePoint2D("desiredBody", worldFrame, registry);
-   private final YoFramePoint2D currentPelvisPosition = new YoFramePoint2D("currentBody", worldFrame, registry);
+   private final YoFramePoint2D desiredBodyPosition = new YoFramePoint2D("desiredBody", worldFrame, registry);
+   private final YoFramePoint2D currentBodyPosition = new YoFramePoint2D("currentBody", worldFrame, registry);
 
    private final YoDouble initialBodyPositionTime = new YoDouble("initialBodyPositionTime", registry);
 
@@ -79,8 +80,8 @@ public class QuadrupedBodyICPBasedTranslationManager
    private final FrameVector3D tempVelocity = new FrameVector3D();
    private final FramePoint2D tempPosition2d = new FramePoint2D();
    private final FrameVector2D tempError2d = new FrameVector2D();
-   private final FrameVector2D tempICPOffset = new FrameVector2D();
-   private final FrameVector2D icpOffsetForFreezing = new FrameVector2D();
+   private final FrameVector3D tempICPOffset = new FrameVector3D();
+   private final FrameVector3D icpOffsetForFreezing = new FrameVector3D();
 
    private final YoLong lastCommandId;
 
@@ -89,10 +90,9 @@ public class QuadrupedBodyICPBasedTranslationManager
    private final YoLong numberOfQueuedCommands;
    private final RecyclingArrayDeque<QuadrupedBodyTrajectoryCommand> commandQueue = new RecyclingArrayDeque<>(QuadrupedBodyTrajectoryCommand.class, QuadrupedBodyTrajectoryCommand::set);
 
-   public QuadrupedBodyICPBasedTranslationManager(QuadrupedControllerToolbox controllerToolbox, double pelvisTranslationICPSupportPolygonSafeMargin,
-                                                  QuadrupedSupportPolygons quadrupedSupportPolygons, YoVariableRegistry parentRegistry)
+   public QuadrupedBodyICPBasedTranslationManager(QuadrupedControllerToolbox controllerToolbox, double bodyTranslationICPSupportPolygonSafeMargin, YoVariableRegistry parentRegistry)
    {
-      supportPolygonSafeMargin.set(pelvisTranslationICPSupportPolygonSafeMargin);
+      supportPolygonSafeMargin.set(bodyTranslationICPSupportPolygonSafeMargin);
       frozenOffsetDecayAlpha.set(0.998);
 
       QuadrupedRuntimeEnvironment runtimeEnvironment = controllerToolbox.getRuntimeEnvironment();
@@ -102,14 +102,14 @@ public class QuadrupedBodyICPBasedTranslationManager
       centerFeetZUpFrame = controllerToolbox.getReferenceFrames().getCenterOfFeetZUpFrameAveragingLowestZHeightsAcrossEnds();
       soleZUpFrames = controllerToolbox.getReferenceFrames().getSoleZUpFrames();
 
-      this.quadrupedSupportPolygons = quadrupedSupportPolygons;
+      this.quadrupedSupportPolygons = controllerToolbox.getSupportPolygons();
 
       boolean allowMultipleFrames = true;
       positionTrajectoryGenerator = new MultipleWaypointsPositionTrajectoryGenerator("bodyOffset", RigidBodyTaskspaceControlState.maxPointsInGenerator, allowMultipleFrames, worldFrame, registry);
 
       positionTrajectoryGenerator.registerNewTrajectoryFrame(centerFeetZUpFrame);
-      for (RobotSide robotSide : RobotSide.values)
-         positionTrajectoryGenerator.registerNewTrajectoryFrame(soleZUpFrames.get(robotSide));
+      for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
+         positionTrajectoryGenerator.registerNewTrajectoryFrame(soleZUpFrames.get(robotQuadrant));
 
       proportionalGain.set(0.5);
       integralGain.set(1.5);
@@ -138,7 +138,7 @@ public class QuadrupedBodyICPBasedTranslationManager
    {
       tempPosition2d.setToZero(bodyZUpFrame);
       tempPosition2d.changeFrame(worldFrame);
-      currentPelvisPosition.set(tempPosition2d);
+      currentBodyPosition.set(tempPosition2d);
 
       if (isFrozen.getBooleanValue())
       {
@@ -174,8 +174,8 @@ public class QuadrupedBodyICPBasedTranslationManager
             }
          }
          positionTrajectoryGenerator.getPosition(tempPosition);
-         tempPosition.changeFrame(desiredPelvisPosition.getReferenceFrame());
-         desiredPelvisPosition.set(tempPosition);
+         tempPosition.changeFrame(desiredBodyPosition.getReferenceFrame());
+         desiredBodyPosition.set(tempPosition);
       }
 
       if (!isRunning.getBooleanValue())
@@ -219,7 +219,7 @@ public class QuadrupedBodyICPBasedTranslationManager
       SelectionMatrix3D linearSelectionMatrix = se3Trajectory.getSelectionMatrix().getLinearPart();
 
       if (!linearSelectionMatrix.isXSelected() && !linearSelectionMatrix.isYSelected())
-         return; // The user does not want to control the x and y of the pelvis, do nothing.
+         return; // The user does not want to control the x and y, do nothing.
 
       if (se3Trajectory.getExecutionMode() == ExecutionMode.OVERRIDE)
       {
@@ -371,7 +371,7 @@ public class QuadrupedBodyICPBasedTranslationManager
 
    private void computeDesiredICPOffset()
    {
-      bodyPositionError.set(desiredPelvisPosition);
+      bodyPositionError.set(desiredBodyPosition);
       tempPosition2d.setToZero(bodyZUpFrame);
       tempPosition2d.changeFrame(worldFrame);
       bodyPositionError.sub(tempPosition2d);
@@ -399,61 +399,53 @@ public class QuadrupedBodyICPBasedTranslationManager
    private final ConvexPolygonScaler convexPolygonShrinker = new ConvexPolygonScaler();
    private final FrameConvexPolygon2D safeSupportPolygonToConstrainICPOffset = new FrameConvexPolygon2D();
 
-   private final FramePoint2D originalICPToModify = new FramePoint2D();
+   private final FramePoint3D originalDCMToModify = new FramePoint3D();
 
-   public void addICPOffset(FramePoint2D desiredICPToModify, FrameVector2D desiredICPVelocityToModify, FramePoint2D desiredCoPToModify)
+   public void addDCMOffset(FixedFramePoint3DBasics desiredICPToModify)
    {
-      desiredICPToModify.changeFrame(centerFeetZUpFrame);
-      desiredICPVelocityToModify.changeFrame(centerFeetZUpFrame);
-      desiredCoPToModify.changeFrame(centerFeetZUpFrame);
-
-      originalICPToModify.setIncludingFrame(desiredICPToModify);
+      originalDCMToModify.setIncludingFrame(desiredICPToModify);
+      originalDCMToModify.changeFrame(centerFeetZUpFrame);
 
       if (!isEnabled.getBooleanValue() || (!isRunning.getBooleanValue() && !manualMode.getValue()))
       {
          desiredICPOffset.setToZero();
          icpOffsetForFreezing.setToZero();
-         desiredICPToModify.changeFrame(worldFrame);
-         desiredICPVelocityToModify.changeFrame(worldFrame);
-         desiredCoPToModify.changeFrame(worldFrame);
          return;
       }
 
       if (manualMode.getValue())
       {
-         tempICPOffset.setIncludingFrame(centerFeetZUpFrame, userOffset.getX(), userOffset.getY());
+         tempICPOffset.setIncludingFrame(centerFeetZUpFrame, userOffset.getX(), userOffset.getY(), 0.0);
       }
       else
       {
-         tempICPOffset.setIncludingFrame(desiredICPOffset);
+         tempICPOffset.setIncludingFrame(desiredICPOffset.getReferenceFrame(), desiredICPOffset.getX(), desiredICPOffset.getY(), 0.0);
          tempICPOffset.changeFrame(centerFeetZUpFrame);
       }
 
       if (isFrozen.getBooleanValue())
       {
-         desiredICPOffset.setMatchingFrame(icpOffsetForFreezing);
-         desiredICPToModify.changeFrame(icpOffsetForFreezing.getReferenceFrame());
-         desiredCoPToModify.changeFrame(icpOffsetForFreezing.getReferenceFrame());
+         icpOffsetForFreezing.changeFrame(desiredICPOffset.getReferenceFrame());
+         desiredICPOffset.set(icpOffsetForFreezing);
+         icpOffsetForFreezing.changeFrame(desiredICPToModify.getReferenceFrame());
          desiredICPToModify.add(icpOffsetForFreezing);
-         desiredCoPToModify.add(icpOffsetForFreezing);
       }
 
       else
       {
+         tempICPOffset.changeFrame(desiredICPToModify.getReferenceFrame());
          desiredICPToModify.add(tempICPOffset);
-         desiredCoPToModify.add(tempICPOffset);
 
-         convexPolygonShrinker.scaleConvexPolygon(quadrupedSupportPolygons.getSupportPolygonInMidFeetZUp(), supportPolygonSafeMargin.getDoubleValue(), safeSupportPolygonToConstrainICPOffset);
-         safeSupportPolygonToConstrainICPOffset.orthogonalProjection(desiredICPToModify);
-         safeSupportPolygonToConstrainICPOffset.orthogonalProjection(desiredCoPToModify);
+         convexPolygonShrinker.scaleConvexPolygon(quadrupedSupportPolygons.getSupportPolygonInMidFeetZUp(), supportPolygonSafeMargin.getDoubleValue(),
+                                                  safeSupportPolygonToConstrainICPOffset);
+         tempPosition2d.setIncludingFrame(desiredICPToModify);
+         safeSupportPolygonToConstrainICPOffset.orthogonalProjection(tempPosition2d);
+         desiredICPToModify.set(tempPosition2d);
 
          icpOffsetForFreezing.setIncludingFrame(desiredICPToModify);
-         icpOffsetForFreezing.sub(originalICPToModify);
+         icpOffsetForFreezing.sub(originalDCMToModify);
       }
 
-      desiredICPToModify.changeFrame(worldFrame);
-      desiredICPVelocityToModify.changeFrame(worldFrame);
-      desiredCoPToModify.changeFrame(worldFrame);
    }
 
    public void disable()

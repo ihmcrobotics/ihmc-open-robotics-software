@@ -15,6 +15,7 @@ import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsList;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.graphicsDescription.yoGraphics.plotting.ArtifactList;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.QuadrupedBodyHeightCommand;
+import us.ihmc.humanoidRobotics.communication.controllerAPI.command.QuadrupedBodyTrajectoryCommand;
 import us.ihmc.quadrupedRobotics.controller.QuadrupedControllerToolbox;
 import us.ihmc.quadrupedRobotics.controller.toolbox.LinearInvertedPendulumModel;
 import us.ihmc.quadrupedRobotics.estimator.referenceFrames.QuadrupedReferenceFrames;
@@ -53,6 +54,8 @@ public class QuadrupedBalanceManager
    private final QuadrupedCenterOfMassHeightManager centerOfMassHeightManager;
    private final QuadrupedMomentumRateOfChangeModule momentumRateOfChangeModule;
    private final QuadrupedStepAdjustmentController stepAdjustmentController;
+
+   private final QuadrupedBodyICPBasedTranslationManager bodyICPBasedTranslationManager;
 
    private final DCMPlanner dcmPlanner;
 
@@ -106,6 +109,8 @@ public class QuadrupedBalanceManager
                                   yoGraphicsListRegistry, debug);
 
       linearInvertedPendulumModel = controllerToolbox.getLinearInvertedPendulumModel();
+
+      bodyICPBasedTranslationManager = new QuadrupedBodyICPBasedTranslationManager(controllerToolbox, 0.05, registry);
 
       centerOfMassHeightManager = new QuadrupedCenterOfMassHeightManager(controllerToolbox, physicalProperties, parentRegistry);
       momentumRateOfChangeModule = new QuadrupedMomentumRateOfChangeModule(controllerToolbox, registry);
@@ -196,6 +201,12 @@ public class QuadrupedBalanceManager
       centerOfMassHeightManager.handleBodyHeightCommand(command);
    }
 
+   public void handleBodyTrajectoryCommand(QuadrupedBodyTrajectoryCommand command)
+   {
+      bodyICPBasedTranslationManager.handleBodyTrajectoryCommand(command);
+   }
+
+
    public void clearStepSequence()
    {
       dcmPlanner.clearStepSequence();
@@ -277,6 +288,9 @@ public class QuadrupedBalanceManager
 
       dcmPlanner.computeDcmSetpoints(controllerToolbox.getContactStates(), yoDesiredDCMPosition, yoDesiredDCMVelocity);
       dcmPlanner.getFinalDCMPosition(yoFinalDesiredDCM);
+
+      bodyICPBasedTranslationManager.compute();
+      bodyICPBasedTranslationManager.addDCMOffset(yoDesiredDCMPosition);
 
       if (debug)
          runDebugChecks();
