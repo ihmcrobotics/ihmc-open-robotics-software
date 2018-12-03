@@ -62,7 +62,8 @@ public class PlanarRegionSegmentationRawData
       this.origin = new Point3D(origin);
       this.pointCloud = streamToConvert.map(Point3D::new).collect(Collectors.toList());
       orientation = PolygonizerTools.getQuaternionFromZUpToVector(normal);
-      intersections.forEach(this::addIntersection);
+      if (intersections != null)
+         intersections.forEach(this::addIntersection);
 
       getPointCloudInPlane().forEach(boundingBoxLocal::updateToIncludePoint);
       getPointCloudInWorld().forEach(boundingBoxWorld::updateToIncludePoint);
