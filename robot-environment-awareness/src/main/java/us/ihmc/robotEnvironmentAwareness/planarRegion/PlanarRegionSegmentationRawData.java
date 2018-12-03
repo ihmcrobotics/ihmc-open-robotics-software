@@ -7,7 +7,10 @@ import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import us.ihmc.euclid.geometry.BoundingBox2D;
+import us.ihmc.euclid.geometry.BoundingBox3D;
 import us.ihmc.euclid.geometry.LineSegment2D;
+import us.ihmc.euclid.geometry.LineSegment3D;
 import us.ihmc.euclid.geometry.interfaces.LineSegment2DReadOnly;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple2D.Point2D;
@@ -27,7 +30,9 @@ public class PlanarRegionSegmentationRawData
    private final Point3D origin;
    private final List<Point3D> pointCloud;
    private final Quaternion orientation;
-   private final List<LineSegment2D> intersections;
+   private final List<LineSegment2D> intersections = new ArrayList<>();
+   private final BoundingBox2D boundingBoxLocal = new BoundingBox2D();
+   private final BoundingBox3D boundingBoxWorld = new BoundingBox3D();
 
    public PlanarRegionSegmentationRawData(int regionId, Vector3DReadOnly normal, Point3DReadOnly origin)
    {
@@ -57,10 +62,10 @@ public class PlanarRegionSegmentationRawData
       this.origin = new Point3D(origin);
       this.pointCloud = streamToConvert.map(Point3D::new).collect(Collectors.toList());
       orientation = PolygonizerTools.getQuaternionFromZUpToVector(normal);
-      if (intersections == null)
-         this.intersections = new ArrayList<>();
-      else
-         this.intersections = intersections.stream().map(LineSegment2D::new).collect(Collectors.toList());
+      intersections.forEach(this::addIntersection);
+
+      getPointCloudInPlane().forEach(boundingBoxLocal::updateToIncludePoint);
+      getPointCloudInWorld().forEach(boundingBoxWorld::updateToIncludePoint);
    }
 
    public int getRegionId()
@@ -136,11 +141,31 @@ public class PlanarRegionSegmentationRawData
    public void addIntersection(LineSegment2DReadOnly intersectionToAdd)
    {
       intersections.add(new LineSegment2D(intersectionToAdd));
+
+      boundingBoxLocal.updateToIncludePoint(intersectionToAdd.getFirstEndpoint());
+      boundingBoxLocal.updateToIncludePoint(intersectionToAdd.getSecondEndpoint());
+
+      LineSegment3D intersectionWorld = new LineSegment3D();
+      intersectionWorld.getFirstEndpoint().set(PolygonizerTools.toPointInWorld(intersectionToAdd.getFirstEndpoint(), origin, orientation));
+      intersectionWorld.getSecondEndpoint().set(PolygonizerTools.toPointInWorld(intersectionToAdd.getSecondEndpoint(), origin, orientation));
+
+      boundingBoxWorld.updateToIncludePoint(intersectionWorld.getFirstEndpoint());
+      boundingBoxWorld.updateToIncludePoint(intersectionWorld.getSecondEndpoint());
    }
 
    public List<LineSegment2D> getIntersections()
    {
       return intersections;
+   }
+
+   public BoundingBox3D getBoundingBoxInWorld()
+   {
+      return boundingBoxWorld;
+   }
+
+   public BoundingBox2D getBoundingBoxInPlane()
+   {
+      return boundingBoxLocal;
    }
 
    public PlanarRegionSegmentationMessage toMessage()
