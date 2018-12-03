@@ -18,11 +18,6 @@ public class QuadrupedBodyTrajectoryCommand
     */
    private final SE3TrajectoryControllerCommand se3Trajectory;
 
-   /**
-    * Indicates if the given trajectory should be considered an "absolute" orientation or an "offset" orientation
-    */
-   private boolean isAnOffsetOrientation;
-
    public QuadrupedBodyTrajectoryCommand()
    {
       se3Trajectory = new SE3TrajectoryControllerCommand();
@@ -37,7 +32,6 @@ public class QuadrupedBodyTrajectoryCommand
    public void clear()
    {
       isExpressedInAbsoluteTime = true;
-      isAnOffsetOrientation = true;
       se3Trajectory.clear();
    }
 
@@ -45,7 +39,6 @@ public class QuadrupedBodyTrajectoryCommand
    public void set(QuadrupedBodyTrajectoryCommand other)
    {
       isExpressedInAbsoluteTime = other.isExpressedInAbsoluteTime;
-      isAnOffsetOrientation = other.isAnOffsetOrientation;
       se3Trajectory.set(other.se3Trajectory);
    }
 
@@ -53,7 +46,6 @@ public class QuadrupedBodyTrajectoryCommand
    public void set(ReferenceFrameHashCodeResolver resolver, QuadrupedBodyTrajectoryMessage message)
    {
       isExpressedInAbsoluteTime = message.getIsExpressedInAbsoluteTime();
-      isAnOffsetOrientation = message.getIsAnOffsetOrientation();
       se3Trajectory.set(resolver, message.getSe3Trajectory());
    }
 
@@ -61,7 +53,6 @@ public class QuadrupedBodyTrajectoryCommand
    public void setFromMessage(QuadrupedBodyTrajectoryMessage message)
    {
       isExpressedInAbsoluteTime = message.getIsExpressedInAbsoluteTime();
-      isAnOffsetOrientation = message.getIsAnOffsetOrientation();
       se3Trajectory.setFromMessage(message.getSe3Trajectory());
    }
 
@@ -71,9 +62,9 @@ public class QuadrupedBodyTrajectoryCommand
       return isExpressedInAbsoluteTime;
    }
 
-   public boolean isAnOffsetOrientation()
+   public void setIsExpressedInAbsoluteTime(boolean isExpressedInAbsoluteTime)
    {
-      return isAnOffsetOrientation;
+      this.isExpressedInAbsoluteTime = isExpressedInAbsoluteTime;
    }
 
    public SE3TrajectoryControllerCommand getSE3Trajectory()
