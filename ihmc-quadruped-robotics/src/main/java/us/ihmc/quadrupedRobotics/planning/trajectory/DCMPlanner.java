@@ -58,7 +58,9 @@ public class DCMPlanner
 
    private final ReferenceFrame supportFrame;
    private final YoFramePoint3D dcmPositionAtStartOfState = new YoFramePoint3D("dcmPositionAtStartOfState", ReferenceFrame.getWorldFrame(), registry);
+   private final YoFramePoint3D dcmPositionAtEndOfTransition = new YoFramePoint3D("dcmPositionAtEndOfTransition", ReferenceFrame.getWorldFrame(), registry);
    private final YoDouble timeAtStartOfState = new YoDouble("timeAtStartOfState", registry);
+   private final FramePoint3D initialTransitionDCM = new FramePoint3D();
    private final FramePoint3D finalTransitionDCM = new FramePoint3D();
    private final FramePoint3D finalDCM = new FramePoint3D();
 
@@ -181,11 +183,12 @@ public class DCMPlanner
       dcmTrajectory.computeTrajectory(transitionEndTime);
       dcmTrajectory.getPosition(finalTransitionDCM);
 
-      tempPoint.setIncludingFrame(dcmPositionAtStartOfState);
-      tempPoint.changeFrame(dcmTransitionTrajectory.getReferenceFrame());
+      initialTransitionDCM.setIncludingFrame(dcmPositionAtStartOfState);
+      initialTransitionDCM.changeFrame(dcmTransitionTrajectory.getReferenceFrame());
       finalTransitionDCM.changeFrame(dcmTransitionTrajectory.getReferenceFrame());
 
-      dcmTransitionTrajectory.setQuinticWithZeroTerminalVelocityAndAcceleration(transitionStartTime, transitionEndTime, tempPoint, finalTransitionDCM);
+      dcmPositionAtEndOfTransition.setMatchingFrame(finalTransitionDCM);
+      dcmTransitionTrajectory.setQuinticWithZeroTerminalVelocityAndAcceleration(transitionStartTime, transitionEndTime, initialTransitionDCM, finalTransitionDCM);
 
       if (debug)
          runTransitionDebugChecks(transitionStartTime, transitionEndTime);
@@ -224,12 +227,12 @@ public class DCMPlanner
          computeDcmTrajectory(currentContactStates);
 
          double currentTime = controllerTime.getDoubleValue();
-         dcmTrajectory.computeTrajectory(controllerTime.getDoubleValue());
+         dcmTrajectory.computeTrajectory(currentTime);
          if (currentTime <= dcmTransitionTrajectory.getFinalTime())
          {
             computeTransitionTrajectory();
 
-            dcmTransitionTrajectory.compute(controllerTime.getDoubleValue());
+            dcmTransitionTrajectory.compute(currentTime);
             dcmTransitionTrajectory.getFramePosition(desiredDCMPosition);
             dcmTransitionTrajectory.getFrameVelocity(desiredDCMVelocity);
 
