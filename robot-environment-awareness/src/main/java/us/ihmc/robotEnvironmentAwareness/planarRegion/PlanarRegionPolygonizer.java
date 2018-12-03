@@ -4,11 +4,11 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import us.ihmc.commons.PrintTools;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.geometry.LineSegment2D;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple2D.Point2D;
+import us.ihmc.log.LogTools;
 import us.ihmc.robotEnvironmentAwareness.geometry.ConcaveHull;
 import us.ihmc.robotEnvironmentAwareness.geometry.ConcaveHullCollection;
 import us.ihmc.robotEnvironmentAwareness.geometry.ConcaveHullDecomposition;
@@ -104,7 +104,7 @@ public abstract class PlanarRegionPolygonizer
          }
          else
          {
-            PrintTools.error("Caught following exception: " + e.getMessage() + ", exporting segmentation data.");
+            LogTools.error("Caught following exception: " + e.getMessage() + ", exporting segmentation data.");
             dataExporter.exportSegmentationRawData(rawData);
          }
          return null;

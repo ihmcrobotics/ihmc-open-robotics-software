@@ -34,6 +34,7 @@ import us.ihmc.robotics.referenceFrames.MidFrameZUpFrame;
 import us.ihmc.robotics.referenceFrames.ZUpFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
+import us.ihmc.robotics.sensors.FootSwitchFactory;
 import us.ihmc.yoVariables.parameters.DefaultParameterReader;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 
@@ -634,21 +635,9 @@ public class ICPOptimizationControllerTest
       }
 
       @Override
-      public double getContactThresholdForce()
+      public FootSwitchFactory getFootSwitchFactory()
       {
-         return 0;
-      }
-
-      @Override
-      public double getSecondContactThresholdForceIgnoringCoP()
-      {
-         return 0;
-      }
-
-      @Override
-      public double getCoPThresholdFraction()
-      {
-         return 0;
+         return null;
       }
 
       @Override

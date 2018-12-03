@@ -70,6 +70,14 @@ public class ValkyrieObstacleCourseRampsTest extends DRCObstacleCourseRampsTest
    }
 
    @Override
+   @Test(timeout = 500000)
+   @ContinuousIntegrationTest(estimatedDuration = 50.0)
+   public void testHeightReinitialization() throws SimulationExceededMaximumTimeException
+   {
+      super.testHeightReinitialization();
+   }
+
+   @Override
    protected double getMaxRotationCorruption()
    {
       return 0.0;

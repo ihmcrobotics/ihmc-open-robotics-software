@@ -65,7 +65,7 @@ public class SimpleOcclusionTests
    private static final int maxPolygonsToVisualize = 10;
    private static final int maxPolygonsVertices = 50;
    private static final int stepsPerSideToVisualize = 4;
-   private static final double defaultMaxAllowedSolveTime = 1.0;
+   private static final double defaultMaxAllowedSolveTime = 5.0;
 
    @Rule
    public TestName name = new TestName();

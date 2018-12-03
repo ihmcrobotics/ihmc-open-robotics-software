@@ -107,9 +107,21 @@ public class JointLowLevelJointControlSimulator implements RobotController
       if (jointDesiredOutput != null && jointDesiredOutput.getControlMode() == JointDesiredControlMode.POSITION)
       {
          double currentPosition = simulatedJoint.getQYoVariable().getDoubleValue();
-         double desiredPosition = jointDesiredOutput.getDesiredPosition();
+         double desiredPosition = jointDesiredOutput.hasDesiredPosition() ? jointDesiredOutput.getDesiredPosition() : currentPosition;
          double currentRate = simulatedJoint.getQDYoVariable().getDoubleValue();
-         double desiredRate = jointDesiredOutput.getDesiredVelocity();
+
+         double desiredRate = jointDesiredOutput.hasDesiredVelocity() ? jointDesiredOutput.getDesiredVelocity() : 0.0;
+         if (jointDesiredOutput.hasStiffness())
+            jointPositionController.setProportionalGain(jointDesiredOutput.getStiffness());
+         if (jointDesiredOutput.hasDamping())
+            jointPositionController.setDerivativeGain(jointDesiredOutput.getDamping());
+
+         if (jointDesiredOutput.hasStiffness() || jointDesiredOutput.hasDamping())
+         {
+            jointPositionController.setIntegralGain(0.0);
+            jointPositionController.setMaximumOutputLimit(Double.POSITIVE_INFINITY);
+         }
+
          double desiredTau = jointPositionController.compute(currentPosition, desiredPosition, currentRate, desiredRate, controlDT);
          simulatedJoint.setTau(desiredTau);
       }

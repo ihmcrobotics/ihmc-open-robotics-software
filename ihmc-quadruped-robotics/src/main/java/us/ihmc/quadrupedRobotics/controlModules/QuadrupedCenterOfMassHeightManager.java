@@ -5,6 +5,8 @@ import us.ihmc.commons.MathTools;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.EuclideanTrajectoryControllerCommand;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.QuadrupedBodyHeightCommand;
 import us.ihmc.mecano.frames.MovingReferenceFrame;
@@ -16,12 +18,14 @@ import us.ihmc.quadrupedRobotics.planning.QuadrupedTimedStep;
 import us.ihmc.robotics.controllers.PIDController;
 import us.ihmc.robotics.controllers.pidGains.implementations.PIDGains;
 import us.ihmc.robotics.controllers.pidGains.implementations.ParameterizedPIDGains;
+import us.ihmc.robotics.dataStructures.parameters.ParameterVector3D;
 import us.ihmc.robotics.math.trajectories.waypoints.FrameEuclideanTrajectoryPoint;
 import us.ihmc.robotics.math.trajectories.waypoints.MultipleWaypointsPositionTrajectoryGenerator;
 import us.ihmc.yoVariables.parameters.DoubleParameter;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
+import us.ihmc.yoVariables.variable.YoFramePoint3D;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -32,7 +36,6 @@ public class QuadrupedCenterOfMassHeightManager
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
 
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
-   private final DoubleParameter initializationDuration = new DoubleParameter("heightInitializationDuration", registry, 0.5);
 
    private final YoDouble controllerTime;
 
@@ -69,7 +72,8 @@ public class QuadrupedCenterOfMassHeightManager
    private final YoDouble desiredVelocityInWorld;
    private final YoDouble currentVelocityInWorld;
 
-   private final FramePoint3D nominalPosition;
+   private final Vector3DReadOnly nominalPosition;
+   private final FramePoint3D nominalFramePosition;
    private final FrameVector3D nominalVelocity;
 
    private final double controlDT;
@@ -89,6 +93,7 @@ public class QuadrupedCenterOfMassHeightManager
       supportFrame = groundPlaneEstimator.getGroundPlaneFrame();
       bodyFrame = referenceFrames.getBodyFrame();
       centerOfMassFrame = referenceFrames.getCenterOfMassFrame();
+      nominalFramePosition = new FramePoint3D(supportFrame);
 
       PIDGains defaultComPositionGains = new PIDGains();
       defaultComPositionGains.setKp(50.0);
@@ -99,7 +104,7 @@ public class QuadrupedCenterOfMassHeightManager
       controlBodyHeight.set(true);
       heightCommandHasBeenReceived.set(false);
 
-      nominalPosition = new FramePoint3D(supportFrame, 0.0, 0.0, physicalProperties.getNominalCoMHeight());
+      nominalPosition = new ParameterVector3D("nominalCoMPosition", new Vector3D(0.0, 0.0, physicalProperties.getNominalCoMHeight()), registry);
       nominalVelocity = new FrameVector3D(supportFrame);
 
       centerOfMassHeightTrajectory = new MultipleWaypointsPositionTrajectoryGenerator("centerOfMassHeight", supportFrame, registry);
@@ -158,11 +163,10 @@ public class QuadrupedCenterOfMassHeightManager
          currentPosition.changeFrame(supportFrame);
          currentVelocity.changeFrame(supportFrame);
 
+         nominalFramePosition.setIncludingFrame(supportFrame, nominalPosition);
          double startTime = controllerTime.getDoubleValue();
-         double endTime = startTime + initializationDuration.getValue();
          centerOfMassHeightTrajectory.clear();
-         centerOfMassHeightTrajectory.appendWaypoint(startTime, currentPosition, currentVelocity);
-         centerOfMassHeightTrajectory.appendWaypoint(endTime, nominalPosition, nominalVelocity);
+         centerOfMassHeightTrajectory.appendWaypoint(startTime, nominalFramePosition, nominalVelocity);
          centerOfMassHeightTrajectory.initialize();
       }
 

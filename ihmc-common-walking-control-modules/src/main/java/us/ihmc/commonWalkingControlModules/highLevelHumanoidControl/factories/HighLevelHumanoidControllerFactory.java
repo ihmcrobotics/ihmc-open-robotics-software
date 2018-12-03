@@ -1,6 +1,7 @@
 package us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.EnumMap;
 import java.util.List;
 import java.util.concurrent.ConcurrentLinkedQueue;
@@ -19,9 +20,6 @@ import us.ihmc.commonWalkingControlModules.desiredFootStep.footstepGenerator.Hea
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.HumanoidHighLevelControllerManager;
 import us.ihmc.commonWalkingControlModules.messageHandlers.WalkingMessageHandler;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHumanoidControllerToolbox;
-import us.ihmc.commonWalkingControlModules.sensors.footSwitch.KinematicsBasedFootSwitch;
-import us.ihmc.commonWalkingControlModules.sensors.footSwitch.WrenchAndContactSensorFusedFootSwitch;
-import us.ihmc.commonWalkingControlModules.sensors.footSwitch.WrenchBasedFootSwitch;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.controllerAPI.CommandInputManager;
 import us.ihmc.communication.controllerAPI.MessageUnpackingTools;
@@ -30,7 +28,6 @@ import us.ihmc.communication.controllerAPI.command.Command;
 import us.ihmc.graphicsDescription.HeightMap;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactableFoot;
-import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.converter.ClearDelayQueueConverter;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.converter.FrameMessageCommandConverter;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelControllerName;
@@ -38,6 +35,7 @@ import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.humanoidRobotics.model.CenterOfPressureDataHolder;
 import us.ihmc.mecano.multiBodySystem.interfaces.JointBasics;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
+import us.ihmc.robotics.contactable.ContactablePlaneBody;
 import us.ihmc.robotics.controllers.ControllerFailureListener;
 import us.ihmc.robotics.controllers.ControllerStateChangedListener;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -46,6 +44,7 @@ import us.ihmc.robotics.screwTheory.TotalMassCalculator;
 import us.ihmc.robotics.sensors.CenterOfMassDataHolderReadOnly;
 import us.ihmc.robotics.sensors.ContactSensor;
 import us.ihmc.robotics.sensors.ContactSensorHolder;
+import us.ihmc.robotics.sensors.FootSwitchFactory;
 import us.ihmc.robotics.sensors.FootSwitchInterface;
 import us.ihmc.robotics.sensors.ForceSensorDataHolderReadOnly;
 import us.ihmc.robotics.sensors.ForceSensorDataReadOnly;
@@ -55,12 +54,9 @@ import us.ihmc.sensorProcessing.frames.ReferenceFrameHashCodeResolver;
 import us.ihmc.sensorProcessing.model.RobotMotionStatusChangedListener;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutputList;
 import us.ihmc.sensorProcessing.parameters.DRCRobotSensorInformation;
-import us.ihmc.sensorProcessing.stateEstimation.FootSwitchType;
 import us.ihmc.simulationconstructionset.util.RobotController;
 import us.ihmc.tools.thread.CloseableAndDisposable;
 import us.ihmc.tools.thread.CloseableAndDisposableRegistry;
-import us.ihmc.yoVariables.parameters.DoubleParameter;
-import us.ihmc.yoVariables.providers.DoubleProvider;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoEnum;
@@ -429,39 +425,16 @@ public class HighLevelHumanoidControllerFactory implements CloseableAndDisposabl
    {
       SideDependentList<FootSwitchInterface> footSwitches = new SideDependentList<FootSwitchInterface>();
 
-      DoubleProvider contactThresholdForce = new DoubleParameter("ContactThresholdForce", registry, walkingControllerParameters.getContactThresholdForce());
-      DoubleProvider copThresholdFraction = new DoubleParameter("CoPThresholdFraction", registry, walkingControllerParameters.getCoPThresholdFraction());
-      DoubleProvider secondContactThresholdForce = new DoubleParameter("SecondContactThresholdForce", registry,
-                                                                       walkingControllerParameters.getSecondContactThresholdForceIgnoringCoP());
-      DoubleProvider contactThresholdHeight = new DoubleParameter("ContactThresholdHeight", registry, walkingControllerParameters.getContactThresholdHeight());
+      FootSwitchFactory footSwitchFactory = walkingControllerParameters.getFootSwitchFactory();
 
       for (RobotSide robotSide : RobotSide.values)
       {
-         FootSwitchInterface footSwitch = null;
          String footName = bipedFeet.get(robotSide).getName();
          ForceSensorDataReadOnly footForceSensor = forceSensorDataHolder.getByName(footSensorNames.get(robotSide));
-
-         FootSwitchType footSwitchType = walkingControllerParameters.getFootSwitchType();
-         switch (footSwitchType)
-         {
-         case KinematicBased:
-            footSwitch = new KinematicsBasedFootSwitch(footName, bipedFeet, contactThresholdHeight, totalRobotWeight, robotSide, registry); //controller switch doesnt need com
-            break;
-         case WrenchBased:
-            footSwitch = new WrenchBasedFootSwitch(footName, footForceSensor, totalRobotWeight, bipedFeet.get(robotSide), contactThresholdForce,
-                                                   secondContactThresholdForce, copThresholdFraction, yoGraphicsListRegistry, registry);
-            break;
-         case WrenchAndContactSensorFused:
-            ContactSensor footContactSensor = contactSensorHolder.getByName(footContactSensorNames.get(robotSide));
-            footSwitch = new WrenchAndContactSensorFusedFootSwitch(footName, footForceSensor, footContactSensor, totalRobotWeight, bipedFeet.get(robotSide),
-                                                                   contactThresholdForce, secondContactThresholdForce, copThresholdFraction,
-                                                                   yoGraphicsListRegistry, registry);
-            break;
-         default:
-            throw new RuntimeException("Implement foot switch type: " + footSwitchType);
-         }
-
-         assert footSwitch != null;
+         ContactSensor footContactSensor = contactSensorHolder == null ? null : contactSensorHolder.getByName(footContactSensorNames.get(robotSide));
+         FootSwitchInterface footSwitch = footSwitchFactory.newFootSwitch(footName, bipedFeet.get(robotSide),
+                                                                          Collections.singleton(bipedFeet.get(robotSide.getOppositeSide())), footForceSensor,
+                                                                          footContactSensor, totalRobotWeight, yoGraphicsListRegistry, registry);
          footSwitches.put(robotSide, footSwitch);
       }
 
@@ -562,13 +535,6 @@ public class HighLevelHumanoidControllerFactory implements CloseableAndDisposabl
    public HighLevelControllerName getCurrentHighLevelControlState()
    {
       return humanoidHighLevelControllerManager.getCurrentHighLevelControlState();
-   }
-
-   public void reinitializeWalking(boolean keepPosition)
-   {
-      humanoidHighLevelControllerManager.requestHighLevelControllerState(HighLevelControllerName.WALKING);
-      if (keepPosition)
-         humanoidHighLevelControllerManager.reinitializeWalking();
    }
 
    public void setListenToHighLevelStatePackets(boolean isListening)

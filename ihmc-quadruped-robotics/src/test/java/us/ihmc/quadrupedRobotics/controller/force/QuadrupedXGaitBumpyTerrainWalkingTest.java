@@ -49,7 +49,12 @@ public abstract class QuadrupedXGaitBumpyTerrainWalkingTest implements Quadruped
 
    @ContinuousIntegrationTest(estimatedDuration = 30.0)
    @Test(timeout = 520000)
-   public void testWalkingOverShallowBumpyTerrain() throws SimulationExceededMaximumTimeException, ControllerFailureException, IOException
+   public void testWalkingOverShallowBumpyTerrain() throws IOException
+   {
+      testWalkingOverShallowBumpyTerrain(1.0);
+   }
+
+   protected void testWalkingOverShallowBumpyTerrain(double speed) throws IOException
    {
       double xAmp1 = 0.01, xFreq1 = 0.5, xAmp2 = 0.01, xFreq2 = 0.5;
       double yAmp1 = 0.01, yFreq1 = 0.07, yAmp2 = 0.01, yFreq2 = 0.37;
@@ -60,12 +65,13 @@ public abstract class QuadrupedXGaitBumpyTerrainWalkingTest implements Quadruped
       QuadrupedTestBehaviors.readyXGait(conductor, variables, stepTeleopManager);
 
       stepTeleopManager.requestXGait();
-      stepTeleopManager.setDesiredVelocity(1.0, 0.0, 0.0);
+      stepTeleopManager.setDesiredVelocity(speed, 0.0, 0.0);
       conductor.addSustainGoal(QuadrupedTestGoals.notFallen(variables));
       conductor.addTimeLimit(variables.getYoTime(), 5.0);
       conductor.addTerminalGoal(YoVariableTestGoal.doubleGreaterThan(variables.getRobotBodyX(), 2.0));
       conductor.simulate();
    }
+
 
    private void setup(BumpyGroundProfile groundProfile) throws IOException
    {

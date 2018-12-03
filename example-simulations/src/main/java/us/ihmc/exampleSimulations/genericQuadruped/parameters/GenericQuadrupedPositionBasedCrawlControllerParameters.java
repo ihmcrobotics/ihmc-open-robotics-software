@@ -1,7 +1,7 @@
 package us.ihmc.exampleSimulations.genericQuadruped.parameters;
 
 import us.ihmc.euclid.tuple2D.Vector2D;
-import us.ihmc.quadrupedRobotics.controller.states.QuadrupedPositionBasedCrawlControllerParameters;
+import us.ihmc.quadrupedRobotics.parameters.QuadrupedPositionBasedCrawlControllerParameters;
 
 public class GenericQuadrupedPositionBasedCrawlControllerParameters implements QuadrupedPositionBasedCrawlControllerParameters
 {
