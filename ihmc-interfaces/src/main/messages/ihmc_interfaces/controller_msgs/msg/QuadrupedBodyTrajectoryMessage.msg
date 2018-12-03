@@ -9,7 +9,5 @@ uint32 sequence_id
 
 # If true, the times are expressed in absolute time relative to the robot start
 bool is_expressed_in_absolute_time true
-# Indicates if the given trajectory should be considered an "absolute" trajectory or an "offset" trajectory
-bool is_an_offset_orientation true
 # The position/orientation trajectory information.
 SE3TrajectoryMessage se3_trajectory
