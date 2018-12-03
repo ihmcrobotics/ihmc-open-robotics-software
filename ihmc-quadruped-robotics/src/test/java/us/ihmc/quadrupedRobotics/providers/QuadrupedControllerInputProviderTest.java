@@ -305,5 +305,11 @@ public class QuadrupedControllerInputProviderTest
       {
          return 0.0;
       }
+
+      @Override
+      public boolean trustFootSwitches()
+      {
+         return true;
+      }
    }
 }
