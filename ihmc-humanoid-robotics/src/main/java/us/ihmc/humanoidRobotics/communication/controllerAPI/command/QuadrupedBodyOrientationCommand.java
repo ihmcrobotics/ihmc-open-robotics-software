@@ -71,7 +71,7 @@ public class QuadrupedBodyOrientationCommand implements Command<QuadrupedBodyOri
    public void set(QuadrupedBodyTrajectoryCommand command)
    {
       isExpressedInAbsoluteTime = command.isExpressedInAbsoluteTime();
-      isAnOffsetOrientation = command.isAnOffsetOrientation();
+      isAnOffsetOrientation = true;
       CommandConversionTools.convertToSO3(command.getSE3Trajectory(), so3Trajectory);
    }
 
