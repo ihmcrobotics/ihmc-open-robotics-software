@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
@@ -18,7 +19,13 @@ import us.ihmc.pathPlanning.visibilityGraphs.dataStructure.InterRegionVisibility
 import us.ihmc.pathPlanning.visibilityGraphs.dataStructure.NavigableRegion;
 import us.ihmc.pathPlanning.visibilityGraphs.dataStructure.SingleSourceVisibilityMap;
 import us.ihmc.pathPlanning.visibilityGraphs.dataStructure.VisibilityMap;
-import us.ihmc.pathPlanning.visibilityGraphs.interfaces.*;
+import us.ihmc.pathPlanning.visibilityGraphs.interfaces.InterRegionConnectionFilter;
+import us.ihmc.pathPlanning.visibilityGraphs.interfaces.NavigableExtrusionDistanceCalculator;
+import us.ihmc.pathPlanning.visibilityGraphs.interfaces.NavigableRegionFilter;
+import us.ihmc.pathPlanning.visibilityGraphs.interfaces.ObstacleExtrusionDistanceCalculator;
+import us.ihmc.pathPlanning.visibilityGraphs.interfaces.ObstacleRegionFilter;
+import us.ihmc.pathPlanning.visibilityGraphs.interfaces.PlanarRegionFilter;
+import us.ihmc.pathPlanning.visibilityGraphs.interfaces.VisibilityGraphsParameters;
 import us.ihmc.pathPlanning.visibilityGraphs.tools.ClusterTools;
 import us.ihmc.pathPlanning.visibilityGraphs.tools.PlanarRegionTools;
 import us.ihmc.pathPlanning.visibilityGraphs.tools.PointCloudTools;
@@ -31,8 +38,16 @@ public class VisibilityGraphsFactory
    /**
     * I believe these filters are now not useful anymore, but I haven't had the time to make sure
     * they're obsolete. When disabled, everything still looks good.
+    * 
+    * +++JEP: Pretty sure they are obsolete now. Turning them off.
     */
-   private static final boolean ENABLE_GREEDY_FILTERS = true;
+   private static final boolean ENABLE_GREEDY_FILTERS = false;
+   
+   // Whether to create the inter regions using the cluster points or , if false, to create them
+   // after the inner regions are created, using the inner region maps,
+   // The former (true) I believe is preferable since I think we should be creating inter regions first, then inner regions.
+   // Also, could then do the two in parallel instead of sequentially.
+   private static final boolean CREATE_INTER_REGIONS_USING_CLUSTER_POINTS = true;
 
    public static List<NavigableRegion> createNavigableRegions(List<PlanarRegion> allRegions, VisibilityGraphsParameters parameters)
    {
@@ -340,6 +355,126 @@ public class VisibilityGraphsFactory
 
    public static InterRegionVisibilityMap createInterRegionVisibilityMap(List<NavigableRegion> navigableRegions, InterRegionConnectionFilter filter)
    {
+      if (CREATE_INTER_REGIONS_USING_CLUSTER_POINTS)
+      {
+         return createInterRegionVisibilityMapUsingInnerVisibilityMaps(navigableRegions, filter);
+      }
+      else
+      {
+         return createInterRegionVisibilityMapUsingClusterPoints(navigableRegions, filter);
+      }
+   }
+
+   public static InterRegionVisibilityMap createInterRegionVisibilityMapUsingClusterPoints(List<NavigableRegion> navigableRegions,
+                                                                                           InterRegionConnectionFilter filter)
+   {
+      InterRegionVisibilityMap map = new InterRegionVisibilityMap();
+
+      for (int sourceMapIndex = 0; sourceMapIndex < navigableRegions.size(); sourceMapIndex++)
+      {
+         NavigableRegion sourceRegion = navigableRegions.get(sourceMapIndex);
+         for (int targetMapIndex = sourceMapIndex + 1; targetMapIndex < navigableRegions.size(); targetMapIndex++)
+         {
+            NavigableRegion targetRegion = navigableRegions.get(targetMapIndex);
+
+            ArrayList<Connection> connectionsBetweenTwoNavigableRegions = createInterRegionVisibilityConnectionsUsingClusterPoints(sourceRegion, targetRegion,
+                                                                                                                                   filter);
+            map.addConnections(connectionsBetweenTwoNavigableRegions);
+         }
+      }
+
+      return map;
+   }
+
+   public static ArrayList<Connection> createInterRegionVisibilityConnectionsUsingClusterPoints(NavigableRegion sourceRegion, NavigableRegion targetRegion,
+                                                                                                InterRegionConnectionFilter filter)
+   {
+      ArrayList<Connection> connections = new ArrayList<Connection>();
+
+      int sourceId = sourceRegion.getMapId();
+      int targetId = targetRegion.getMapId();
+
+      if (sourceId == targetId)
+         return connections;
+
+      List<Cluster> sourceClusters = sourceRegion.getAllClusters();
+      List<Cluster> sourceObstacleClusters = sourceRegion.getObstacleClusters();
+      for (Cluster sourceCluster : sourceClusters)
+      {
+         List<Point3DReadOnly> sourcePoints = sourceCluster.getNavigableExtrusionsInWorld();
+
+         List<Cluster> targetClusters = targetRegion.getAllClusters();
+         List<Cluster> targetObstacleClusters = targetRegion.getObstacleClusters();
+         for (Cluster targetCluster : targetClusters)
+         {
+            List<Point3DReadOnly> targetPoints = targetCluster.getNavigableExtrusionsInWorld();
+
+            for (Point3DReadOnly sourcePoint3D : sourcePoints)
+            {
+               for (Point3DReadOnly targetPoint3D : targetPoints)
+               {
+                  ConnectionPoint3D source = new ConnectionPoint3D(sourcePoint3D, targetId);
+                  ConnectionPoint3D target = new ConnectionPoint3D(targetPoint3D, targetId);
+
+                  if (filter.isConnectionValid(source, target))
+                  {
+                     //TODO: +++JEP: Taking up lots of time, but necessary
+                     Point2D sourcePoint2DInLocal = getPoint2DInLocal(sourceRegion, sourcePoint3D);
+
+                     PlanarRegion sourceHomeRegion = sourceRegion.getHomeRegion();
+                     PlanarRegion targetHomeRegion = targetRegion.getHomeRegion();
+
+                     if (!PlanarRegionTools.isPointInLocalInsidePlanarRegion(sourceHomeRegion, sourcePoint2DInLocal))
+                        continue;
+
+                     //TODO: +++JEP: Taking up lots of time, but necessary
+                     Point2D targetPoint2DInLocal = getPoint2DInLocal(targetRegion, targetPoint3D);
+                     if (!PlanarRegionTools.isPointInLocalInsidePlanarRegion(targetHomeRegion, targetPoint2DInLocal))
+                        continue;
+
+                     Connection connection = new Connection(source, target);
+                     //+++JEP
+
+                     boolean sourceIsInsideNoGoZone = isInsideANonNavigableZone(sourcePoint2DInLocal, sourceObstacleClusters);
+                     if (sourceIsInsideNoGoZone)
+                        continue;
+
+                     boolean targetIsInsideNoGoZone = isInsideANonNavigableZone(targetPoint2DInLocal, targetObstacleClusters);
+                     if (targetIsInsideNoGoZone)
+                        continue;
+
+                     connections.add(connection);
+                  }
+               }
+            }
+         }
+      }
+
+      return connections;
+   }
+
+   private static boolean isInsideANonNavigableZone(Point2D pointInLocal, List<Cluster> clusters)
+   {
+      for (Cluster cluster : clusters)
+      {
+         if (cluster.isInsideNonNavigableZone(pointInLocal))
+            return true;
+      }
+      return false;
+   }
+
+   private static Point2D getPoint2DInLocal(NavigableRegion region, Point3DReadOnly point3DInWorld)
+   {
+      Point3D pointInLocal = new Point3D();
+      pointInLocal.set(point3DInWorld);
+      region.transformFromWorldToLocal(pointInLocal);
+      Point2D pointInLocal2D = new Point2D(pointInLocal.getX(), pointInLocal.getY());
+      return pointInLocal2D;
+   }
+
+   public static InterRegionVisibilityMap createInterRegionVisibilityMapUsingInnerVisibilityMaps(List<NavigableRegion> navigableRegions,
+                                                                                                 InterRegionConnectionFilter filter)
+   {
       InterRegionVisibilityMap map = new InterRegionVisibilityMap();
 
       for (int sourceMapIndex = 0; sourceMapIndex < navigableRegions.size(); sourceMapIndex++)
@@ -351,14 +486,17 @@ public class VisibilityGraphsFactory
          {
             for (int targetMapIndex = sourceMapIndex + 1; targetMapIndex < navigableRegions.size(); targetMapIndex++)
             {
-               VisibilityMap targetMap = navigableRegions.get(targetMapIndex).getVisibilityMapInWorld();
+               NavigableRegion targetRegion = navigableRegions.get(targetMapIndex);
 
+               VisibilityMap targetMap = targetRegion.getVisibilityMapInWorld();
                Set<ConnectionPoint3D> targetPoints = targetMap.getVertices();
 
                for (ConnectionPoint3D target : targetPoints)
                {
                   if (source.getRegionId() == target.getRegionId())
+                  {
                      continue;
+                  }
 
                   if (filter.isConnectionValid(source, target))
                   {
