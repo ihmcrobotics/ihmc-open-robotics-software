@@ -1,6 +1,7 @@
 package us.ihmc.robotEnvironmentAwareness.updaters;
 
 import java.io.File;
+import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
 
@@ -48,6 +49,8 @@ public class REAPlanarRegionFeatureUpdater implements RegionFeaturesProvider
    private final AtomicReference<Boolean> isOcTreeEnabled;
    private final AtomicReference<Boolean> enableSegmentation;
    private final AtomicReference<Boolean> clearSegmentation;
+   private final AtomicReference<Boolean> enableCustomRegions;
+   private final AtomicReference<Boolean> clearCustomRegions;
    private final AtomicReference<Boolean> enablePolygonizer;
    private final AtomicReference<Boolean> clearPolygonizer;
    private final AtomicReference<Boolean> enableIntersectionCalulator;
@@ -66,6 +69,8 @@ public class REAPlanarRegionFeatureUpdater implements RegionFeaturesProvider
       isOcTreeEnabled = reaMessager.createInput(REAModuleAPI.OcTreeEnable, true);
       enableSegmentation = reaMessager.createInput(REAModuleAPI.PlanarRegionsSegmentationEnable, true);
       clearSegmentation = reaMessager.createInput(REAModuleAPI.PlanarRegionsSegmentationClear, false);
+      enableCustomRegions = reaMessager.createInput(REAModuleAPI.CustomRegionsMergingEnable, true);
+      clearCustomRegions = reaMessager.createInput(REAModuleAPI.CustomRegionsClear, false);
       enablePolygonizer = reaMessager.createInput(REAModuleAPI.PlanarRegionsPolygonizerEnable, true);
       clearPolygonizer = reaMessager.createInput(REAModuleAPI.PlanarRegionsPolygonizerClear, false);
       enableIntersectionCalulator = reaMessager.createInput(REAModuleAPI.PlanarRegionsIntersectionEnable, false);
@@ -81,6 +86,7 @@ public class REAPlanarRegionFeatureUpdater implements RegionFeaturesProvider
    private void sendCurrentState()
    {
       reaMessager.submitMessage(REAModuleAPI.PlanarRegionsSegmentationEnable, enableSegmentation.get());
+      reaMessager.submitMessage(REAModuleAPI.CustomRegionsMergingEnable, enableCustomRegions.get());
       reaMessager.submitMessage(REAModuleAPI.PlanarRegionsPolygonizerEnable, enablePolygonizer.get());
       reaMessager.submitMessage(REAModuleAPI.PlanarRegionsIntersectionEnable, enableIntersectionCalulator.get());
 
@@ -99,6 +105,9 @@ public class REAPlanarRegionFeatureUpdater implements RegionFeaturesProvider
       Boolean enableSegmentationFile = filePropertyHelper.loadBooleanProperty(REAModuleAPI.PlanarRegionsSegmentationEnable.getName());
       if (enableSegmentationFile != null)
          enableSegmentation.set(enableSegmentationFile);
+      Boolean enableCustomRegionsFile = filePropertyHelper.loadBooleanProperty(REAModuleAPI.CustomRegionsMergingEnable.getName());
+      if (enableCustomRegionsFile != null)
+         enableCustomRegions.set(enableCustomRegionsFile);
       Boolean enablePolygonizerFile = filePropertyHelper.loadBooleanProperty(REAModuleAPI.PlanarRegionsPolygonizerEnable.getName());
       if (enablePolygonizerFile != null)
          enablePolygonizer.set(enablePolygonizerFile);
@@ -130,6 +139,7 @@ public class REAPlanarRegionFeatureUpdater implements RegionFeaturesProvider
    public void saveConfiguration(FilePropertyHelper filePropertyHelper)
    {
       filePropertyHelper.saveProperty(REAModuleAPI.PlanarRegionsSegmentationEnable.getName(), enableSegmentation.get());
+      filePropertyHelper.saveProperty(REAModuleAPI.CustomRegionsMergingEnable.getName(), enableCustomRegions.get());
       filePropertyHelper.saveProperty(REAModuleAPI.PlanarRegionsPolygonizerEnable.getName(), enablePolygonizer.get());
       filePropertyHelper.saveProperty(REAModuleAPI.PlanarRegionsIntersectionEnable.getName(), enableIntersectionCalulator.get());
 
@@ -164,9 +174,22 @@ public class REAPlanarRegionFeatureUpdater implements RegionFeaturesProvider
 
       List<PlanarRegionSegmentationRawData> rawData = segmentationCalculator.getSegmentationRawData();
 
-      List<PlanarRegion> unmergedCustomPlanarRegions = CustomPlanarRegionHandler.mergeCustomRegionsToEstimatedRegions(customPlanarRegions.valueCollection(),
-                                                                                                                      rawData,
-                                                                                                                      planarRegionSegmentationParameters.get());
+      List<PlanarRegion> unmergedCustomPlanarRegions;
+
+      if (clearCustomRegions.getAndSet(false))
+      {
+         customPlanarRegions.clear();
+         unmergedCustomPlanarRegions = Collections.emptyList();
+      }
+      else if (enableCustomRegions.get())
+      {
+         unmergedCustomPlanarRegions = CustomPlanarRegionHandler.mergeCustomRegionsToEstimatedRegions(customPlanarRegions.valueCollection(), rawData,
+                                                                                                      planarRegionSegmentationParameters.get());
+      }
+      else
+      {
+         unmergedCustomPlanarRegions = Collections.emptyList();
+      }
 
       if (enableIntersectionCalulator.get())
          timeReporter.run(() -> updateIntersections(rawData), intersectionsTimeReport);

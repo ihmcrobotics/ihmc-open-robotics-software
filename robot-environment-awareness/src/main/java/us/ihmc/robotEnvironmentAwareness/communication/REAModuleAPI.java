@@ -85,6 +85,8 @@ public class REAModuleAPI
    public static final Topic<Boolean> PlanarRegionsSegmentationEnable = PlanarRegionsCategory.child(Segmentation).topic(Enable);
    public static final Topic<Boolean> PlanarRegionsSegmentationClear = PlanarRegionsCategory.child(Segmentation).topic(Clear);
    public static final Topic<PlanarRegionSegmentationParameters> PlanarRegionsSegmentationParameters = PlanarRegionsCategory.child(Segmentation).topic(Parameters);
+   public static final Topic<Boolean> CustomRegionsMergingEnable = PlanarRegionsCategory.child(Custom).topic(Enable);
+   public static final Topic<Boolean> CustomRegionsClear = PlanarRegionsCategory.child(Custom).topic(Clear);
    public static final Topic<PlanarRegionSegmentationParameters> CustomRegionsMergingParameters = PlanarRegionsCategory.child(Custom).topic(Parameters);
    public static final Topic<Boolean> PlanarRegionsPolygonizerEnable = PlanarRegionsCategory.child(Polygonizer).topic(Enable);
    public static final Topic<Boolean> PlanarRegionsPolygonizerClear = PlanarRegionsCategory.child(Polygonizer).topic(Clear);
