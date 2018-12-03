@@ -21,10 +21,7 @@ import us.ihmc.robotics.math.trajectories.FrameTrajectory3D;
 import us.ihmc.robotics.robotSide.QuadrantDependentList;
 import us.ihmc.yoVariables.parameters.DoubleParameter;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.yoVariables.variable.YoBoolean;
-import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.yoVariables.variable.YoFramePoint3D;
-import us.ihmc.yoVariables.variable.YoInteger;
+import us.ihmc.yoVariables.variable.*;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -139,7 +136,7 @@ public class DCMPlanner
       dcmTrajectory.resetVariables();
    }
 
-   public void initializeForStepping(QuadrantDependentList<ContactState> currentContactStates, FramePoint3DReadOnly dcmPosition)
+   public void initializeForStepping(QuadrantDependentList<YoEnum<ContactState>> currentContactStates, FramePoint3DReadOnly dcmPosition)
    {
       isStanding.set(false);
 
@@ -157,7 +154,7 @@ public class DCMPlanner
       }
    }
 
-   private void computeDcmTrajectory(QuadrantDependentList<ContactState> currentContactStates)
+   private void computeDcmTrajectory(QuadrantDependentList<YoEnum<ContactState>> currentContactStates)
    {
       // compute piecewise constant center of pressure plan
       double currentTime = controllerTime.getDoubleValue();
@@ -213,7 +210,7 @@ public class DCMPlanner
    private final FramePoint3D desiredDCMPosition = new FramePoint3D();
    private final FrameVector3D desiredDCMVelocity = new FrameVector3D();
 
-   public void computeDcmSetpoints(QuadrantDependentList<ContactState> currentContactStates, FixedFramePoint3DBasics desiredDCMPositionToPack,
+   public void computeDcmSetpoints(QuadrantDependentList<YoEnum<ContactState>> currentContactStates, FixedFramePoint3DBasics desiredDCMPositionToPack,
                                    FixedFrameVector3DBasics desiredDCMVelocityToPack)
    {
       if (isStanding.getBooleanValue())

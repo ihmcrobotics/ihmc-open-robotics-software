@@ -33,6 +33,7 @@ import us.ihmc.robotics.robotSide.QuadrantDependentList;
 import us.ihmc.robotics.robotSide.RobotQuadrant;
 import us.ihmc.robotics.sensors.CenterOfMassDataHolderReadOnly;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoEnum;
 import us.ihmc.yoVariables.variable.YoFrameConvexPolygon2D;
 import us.ihmc.yoVariables.variable.YoFramePoint3D;
 import us.ihmc.yoVariables.variable.YoFrameVector3D;
@@ -58,7 +59,7 @@ public class QuadrupedControllerToolbox
 
    private final FullQuadrupedRobotModel fullRobotModel;
 
-   private final QuadrantDependentList<ContactState> contactStates = new QuadrantDependentList<>();
+   private final QuadrantDependentList<YoEnum<ContactState>> contactStates = new QuadrantDependentList<>();
    private final QuadrantDependentList<YoPlaneContactState> footContactStates = new QuadrantDependentList<>();
    private final List<ContactablePlaneBody> contactablePlaneBodies;
 
@@ -117,11 +118,14 @@ public class QuadrupedControllerToolbox
       {
          ContactablePlaneBody contactableFoot = contactableFeet.get(robotQuadrant);
          RigidBodyBasics rigidBody = contactableFoot.getRigidBody();
-         YoPlaneContactState contactState = new YoPlaneContactState(contactableFoot.getSoleFrame().getName(), rigidBody, contactableFoot.getSoleFrame(),
-                                                                    contactableFoot.getContactPoints2d(), coefficientOfFriction, registry);
+         String name = contactableFoot.getSoleFrame().getName();
+         YoPlaneContactState planeContactState = new YoPlaneContactState(name, rigidBody, contactableFoot.getSoleFrame(),
+                                                                         contactableFoot.getContactPoints2d(), coefficientOfFriction, registry);
+         YoEnum<ContactState> contactState = new YoEnum<>(name, registry, ContactState.class);
 
-         footContactStates.put(robotQuadrant, contactState);
-         contactStates.put(robotQuadrant, ContactState.IN_CONTACT);
+
+         footContactStates.put(robotQuadrant, planeContactState);
+         contactStates.put(robotQuadrant, contactState);
       }
 
 
@@ -224,10 +228,10 @@ public class QuadrupedControllerToolbox
 
    public ContactState getContactState(RobotQuadrant robotQuadrant)
    {
-      return contactStates.get(robotQuadrant);
+      return contactStates.get(robotQuadrant).getEnumValue();
    }
 
-   public QuadrantDependentList<ContactState> getContactStates()
+   public QuadrantDependentList<YoEnum<ContactState>> getContactStates()
    {
       return contactStates;
    }
