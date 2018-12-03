@@ -161,7 +161,6 @@ public class QuadrupedBodyICPBasedTranslationManager
          {
             double deltaTime = yoTime.getDoubleValue() - initialBodyPositionTime.getDoubleValue();
 
-
             positionTrajectoryGenerator.compute(deltaTime);
 
             if (positionTrajectoryGenerator.isDone() && !commandQueue.isEmpty())
@@ -440,9 +439,11 @@ public class QuadrupedBodyICPBasedTranslationManager
                                                   safeSupportPolygonToConstrainICPOffset);
          tempPosition2d.setIncludingFrame(desiredICPToModify);
          safeSupportPolygonToConstrainICPOffset.orthogonalProjection(tempPosition2d);
+         tempPosition2d.changeFrame(desiredICPToModify.getReferenceFrame());
          desiredICPToModify.set(tempPosition2d);
 
          icpOffsetForFreezing.setIncludingFrame(desiredICPToModify);
+         originalDCMToModify.changeFrame(desiredICPToModify.getReferenceFrame());
          icpOffsetForFreezing.sub(originalDCMToModify);
       }
 

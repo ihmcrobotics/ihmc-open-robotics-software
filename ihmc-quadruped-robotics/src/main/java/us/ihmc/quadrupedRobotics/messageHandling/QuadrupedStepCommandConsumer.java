@@ -53,8 +53,9 @@ public class QuadrupedStepCommandConsumer
       }
       if (commandConsumerWithDelayBuffers.isNewCommandAvailable(QuadrupedBodyTrajectoryCommand.class))
       {
-         balanceManager.handleBodyTrajectoryCommand(commandConsumerWithDelayBuffers.pollNewestCommand(QuadrupedBodyTrajectoryCommand.class));
-         bodyOrientationManager.handleBodyTrajectoryCommand(commandConsumerWithDelayBuffers.pollNewestCommand(QuadrupedBodyTrajectoryCommand.class));
+         QuadrupedBodyTrajectoryCommand command = commandConsumerWithDelayBuffers.pollNewestCommand(QuadrupedBodyTrajectoryCommand.class);
+         balanceManager.handleBodyTrajectoryCommand(command);
+         bodyOrientationManager.handleBodyTrajectoryCommand(command);
       }
       if (commandConsumerWithDelayBuffers.isNewCommandAvailable(QuadrupedBodyHeightCommand.class))
       {
