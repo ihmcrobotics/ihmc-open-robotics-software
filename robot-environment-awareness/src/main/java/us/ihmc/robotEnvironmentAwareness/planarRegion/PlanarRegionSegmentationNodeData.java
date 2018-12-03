@@ -18,6 +18,7 @@ import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.jOctoMap.node.NormalOcTreeNode;
 import us.ihmc.robotEnvironmentAwareness.geometry.PointMean;
+import us.ihmc.robotEnvironmentAwareness.geometry.REAGeometryTools;
 import us.ihmc.robotEnvironmentAwareness.geometry.VectorMean;
 import us.ihmc.robotics.geometry.PlanarRegion;
 import us.ihmc.robotics.linearAlgebra.PrincipalComponentAnalysis3D;
@@ -164,10 +165,12 @@ public class PlanarRegionSegmentationNodeData implements Iterable<NormalOcTreeNo
 
    public double distanceSquaredFromOtherRegionBoundingBox(PlanarRegionSegmentationNodeData other)
    {
-      double dx = EuclidCoreTools.max(min.getX() - other.max.getX(), 0.0, other.min.getX() - max.getX());
-      double dy = EuclidCoreTools.max(min.getY() - other.max.getY(), 0.0, other.min.getY() - max.getY());
-      double dz = EuclidCoreTools.max(min.getZ() - other.max.getZ(), 0.0, other.min.getZ() - max.getZ());
-      return dx * dx + dy * dy + dz * dz;
+      return distanceSquaredFromOtherBoundingBox(other.min, other.max);
+   }
+
+   public double distanceSquaredFromOtherBoundingBox(Point3DReadOnly otherMin, Point3DReadOnly otherMax)
+   {
+      return REAGeometryTools.distanceSquaredBetweenTwoBoundingBox3Ds(min, max, otherMin, otherMax);
    }
 
    private void updateBoundingBoxWithNewNode(NormalOcTreeNode newNode)
