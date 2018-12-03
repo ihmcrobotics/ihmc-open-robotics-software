@@ -11,6 +11,7 @@ import us.ihmc.robotics.robotSide.QuadrantDependentList;
 import us.ihmc.robotics.robotSide.RobotQuadrant;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoFrameConvexPolygon2D;
+import us.ihmc.yoVariables.variable.YoFramePoint2D;
 
 import java.awt.*;
 
@@ -42,6 +43,7 @@ public class QuadrupedSupportPolygons
    private final FrameConvexPolygon2D supportPolygonInWorld = new FrameConvexPolygon2D();
 
    private final YoFrameConvexPolygon2D supportPolygonViz;
+   private final YoFramePoint2D supportPolygonCentroid;
    private final QuadrantDependentList<YoFrameConvexPolygon2D> footPolygonsViz = new QuadrantDependentList<>();
 
    public QuadrupedSupportPolygons(ReferenceFrame centerOfFeetZUpFrame, QuadrantDependentList<YoPlaneContactState> contactStates,
@@ -53,6 +55,7 @@ public class QuadrupedSupportPolygons
 
       supportPolygonViz = new YoFrameConvexPolygon2D("combinedPolygon", "", worldFrame, 4 * contactStates.get(RobotQuadrant.FRONT_LEFT).getTotalNumberOfContactPoints(),
                                                      registry);
+      supportPolygonCentroid = new YoFramePoint2D("supportPolygonCentroid", worldFrame, registry);
 
       ArtifactList artifactList = new ArtifactList(getClass().getSimpleName());
 
@@ -122,6 +125,7 @@ public class QuadrupedSupportPolygons
       }
 
       updateSupportPolygon(contactStates);
+      supportPolygonCentroid.set(supportPolygonInWorld.getCentroid());
 
       if (VISUALIZE)
          visualize();
