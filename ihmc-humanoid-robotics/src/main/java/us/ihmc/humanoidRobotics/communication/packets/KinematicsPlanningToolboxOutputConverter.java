@@ -24,7 +24,7 @@ import us.ihmc.robotics.robotSide.RobotSide;
 public class KinematicsPlanningToolboxOutputConverter
 {
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
-   private static final boolean debug = true;
+   private static final boolean debug = false;
 
    private WholeBodyTrajectoryMessage wholeBodyTrajectoryMessage;
    private final KinematicsToolboxOutputConverter converter;
