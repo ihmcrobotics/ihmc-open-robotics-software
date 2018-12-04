@@ -61,12 +61,13 @@ public class CustomPlanarRegionHandler
 
       while (atLeastOneRegionWasMerged)
       {
-         currentUnmergedRegions = previousUnmergedRegions.parallelStream()
+         currentUnmergedRegions = previousUnmergedRegions.stream()
                                                          .filter(customRegion -> mergeCustomRegionToEstimatedRegions(customRegion, estimatedRegions,
                                                                                                                      parameters) == null)
                                                          .collect(Collectors.toList());
 
          atLeastOneRegionWasMerged = currentUnmergedRegions.size() < previousUnmergedRegions.size();
+         previousUnmergedRegions = currentUnmergedRegions;
       }
 
       return currentUnmergedRegions;
@@ -109,13 +110,15 @@ public class CustomPlanarRegionHandler
    {
       double maxDistanceFromPlane = parameters.getMaxDistanceFromPlane();
 
-      if (EuclidGeometryTools.distanceFromPoint3DToPlane3D(customRegion.getPlane().getPoint(), estimatedRegion.getOrigin(),
-                                                           estimatedRegion.getNormal()) > maxDistanceFromPlane)
+      double distanceFromPlane = EuclidGeometryTools.distanceFromPoint3DToPlane3D(customRegion.getPlane().getPoint(), estimatedRegion.getOrigin(),
+                                                                                  estimatedRegion.getNormal());
+      if (distanceFromPlane > maxDistanceFromPlane)
          return false;
 
       double dotThreshold = Math.cos(parameters.getMaxAngleFromPlane());
 
-      if (Math.abs(estimatedRegion.getNormal().dot(customRegion.getNormal())) < dotThreshold)
+      double normalDotProduct = Math.abs(estimatedRegion.getNormal().dot(customRegion.getNormal()));
+      if (normalDotProduct < dotThreshold)
          return false;
 
       double searchRadius = parameters.getSearchRadius();
@@ -123,11 +126,13 @@ public class CustomPlanarRegionHandler
 
       BoundingBox3D customRegionBBX = customRegion.getBoundingBox3dInWorld();
 
-      if (REAGeometryTools.distanceSquaredBetweenTwoBoundingBox3Ds(estimatedRegion.getBoundingBoxInWorld().getMinPoint(),
-                                                                   estimatedRegion.getBoundingBoxInWorld().getMaxPoint(), customRegionBBX.getMinPoint(),
-                                                                   customRegionBBX.getMaxPoint()) > searchRadiusSquared)
+      double bbxDistance = REAGeometryTools.distanceSquaredBetweenTwoBoundingBox3Ds(estimatedRegion.getBoundingBoxInWorld().getMinPoint(),
+                                                                                    estimatedRegion.getBoundingBoxInWorld().getMaxPoint(),
+                                                                                    customRegionBBX.getMinPoint(), customRegionBBX.getMaxPoint());
+      if (bbxDistance > searchRadiusSquared)
          return false;
 
-      return estimatedRegion.getPointCloudInWorld().parallelStream().anyMatch(point -> customRegion.isPointInside(point, maxDistanceFromPlane));
+      return estimatedRegion.getPointCloudInWorld().parallelStream().map(Point3D::new).peek(customRegion::transformFromWorldToLocal).map(Point2D::new)
+                            .anyMatch(point -> customRegion.distanceToPoint(point) < searchRadius);
    }
 }
