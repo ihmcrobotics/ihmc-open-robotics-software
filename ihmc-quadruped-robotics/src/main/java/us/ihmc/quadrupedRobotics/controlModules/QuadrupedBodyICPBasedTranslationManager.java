@@ -106,9 +106,9 @@ public class QuadrupedBodyICPBasedTranslationManager
       this.quadrupedSupportPolygons = controllerToolbox.getSupportPolygons();
 
       boolean allowMultipleFrames = true;
-      positionTrajectoryGenerator = new MultipleWaypointsPositionTrajectoryGenerator("bodyOffset", RigidBodyTaskspaceControlState.maxPointsInGenerator, allowMultipleFrames, worldFrame, registry);
+      positionTrajectoryGenerator = new MultipleWaypointsPositionTrajectoryGenerator("bodyOffset", RigidBodyTaskspaceControlState.maxPointsInGenerator, allowMultipleFrames, centerFeetZUpFrame, registry);
 
-      positionTrajectoryGenerator.registerNewTrajectoryFrame(centerFeetZUpFrame);
+      positionTrajectoryGenerator.registerNewTrajectoryFrame(worldFrame);
       for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
          positionTrajectoryGenerator.registerNewTrajectoryFrame(soleZUpFrames.get(robotQuadrant));
 
@@ -312,6 +312,7 @@ public class QuadrupedBodyICPBasedTranslationManager
 
       for (int trajectoryPointIndex = 0; trajectoryPointIndex < numberOfTrajectoryPoints; trajectoryPointIndex++)
       {
+         positionTrajectoryGenerator.changeFrame(centerFeetZUpFrame);
          FrameSE3TrajectoryPoint trajectoryPoint = se3Trajectory.getTrajectoryPoint(trajectoryPointIndex);
          tempPosition.changeFrame(worldFrame);
          tempVelocity.changeFrame(worldFrame);
