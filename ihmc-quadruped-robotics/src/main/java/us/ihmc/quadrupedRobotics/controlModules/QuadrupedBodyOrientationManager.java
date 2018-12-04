@@ -46,6 +46,7 @@ public class QuadrupedBodyOrientationManager
    private final MovingReferenceFrame bodyFrame;
    private final YoFrameYawPitchRoll yoBodyOrientationSetpoint;
    private final YoFrameVector3D yoBodyAngularVelocitySetpoint;
+   private final YoFrameVector3D yoBodyAngularAccelerationSetpoint;
 
    private final FrameQuaternion desiredBodyOrientation;
    private final FrameQuaternion desiredBodyOrientationOffset;
@@ -72,13 +73,14 @@ public class QuadrupedBodyOrientationManager
       bodyOrientationDefaultGains.setProportionalGains(1000.0, 1000.0, 1000.0);
       bodyOrientationDefaultGains.setDerivativeGains(250.0, 250.0, 250.0);
       bodyOrientationDefaultGains.setIntegralGains(0.0, 0.0, 0.0, 0.0);
-      bodyOrientationGainsParameter = new ParameterizedPID3DGains("_bodyOrientation", GainCoupling.NONE, false, bodyOrientationDefaultGains, registry);
+      bodyOrientationGainsParameter = new ParameterizedPID3DGains("_bodyOrientation", GainCoupling.NONE, true, bodyOrientationDefaultGains, registry);
 
       bodyAngularWeight = new ParameterVector3D("bodyAngularWeight", new Vector3D(2.5, 2.5, 1.0), registry);
 
       ReferenceFrame bodyFrame = controllerToolbox.getReferenceFrames().getBodyFrame();
       yoBodyOrientationSetpoint = new YoFrameYawPitchRoll("bodyOrientationSetpoint", worldFrame, registry);
       yoBodyAngularVelocitySetpoint = new YoFrameVector3D("bodyAngularVelocitySetpoint", worldFrame, registry);
+      yoBodyAngularAccelerationSetpoint = new YoFrameVector3D("bodyAngularAccelerationSetpoint", worldFrame, registry);
 
       feedbackControlCommand.setGains(bodyOrientationDefaultGains);
       feedbackControlCommand.set(controllerToolbox.getFullRobotModel().getElevator(), controllerToolbox.getFullRobotModel().getBody());
@@ -225,12 +227,13 @@ public class QuadrupedBodyOrientationManager
       desiredBodyOrientation.setYawPitchRoll(bodyOrientationYaw, bodyOrientationPitch, bodyOrientationRoll);
 
       feedbackControlCommand.setGains(bodyOrientationGainsParameter);
-      feedbackControlCommand.setFeedForwardAction(desiredBodyAngularAcceleration);
       feedbackControlCommand.set(desiredBodyOrientation, desiredBodyAngularVelocity);
+      feedbackControlCommand.setFeedForwardAction(desiredBodyAngularAcceleration);
       feedbackControlCommand.setWeightsForSolver(bodyAngularWeight);
 
       yoBodyOrientationSetpoint.set(desiredBodyOrientation);
       yoBodyAngularVelocitySetpoint.set(desiredBodyAngularVelocity);
+      yoBodyAngularAccelerationSetpoint.set(desiredBodyAngularAcceleration);
    }
 
    private void handleAbsoluteYawOrientationCommand()
