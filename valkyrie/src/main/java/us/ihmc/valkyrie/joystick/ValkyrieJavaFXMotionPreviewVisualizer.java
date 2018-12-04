@@ -112,8 +112,6 @@ public class ValkyrieJavaFXMotionPreviewVisualizer
    public void submitKinematicsPlanningToolboxOutputStatus(KinematicsPlanningToolboxOutputStatus outputStatus)
    {
       packetInProgress = outputStatus;
-      System.out.println("submitWholeBodyTrajectoryToolboxOutputStatus");
-      System.out.println("robot_configurations_ " + packetInProgress.robot_configurations_.size());
    }
 
    public FullHumanoidRobotModel getFullRobotModel()

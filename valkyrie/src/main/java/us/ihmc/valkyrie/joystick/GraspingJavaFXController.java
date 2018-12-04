@@ -29,6 +29,7 @@ import us.ihmc.communication.packets.PacketDestination;
 import us.ihmc.communication.packets.ToolboxState;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
+import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
@@ -43,7 +44,6 @@ import us.ihmc.javaFXToolkit.shapes.JavaFXCoordinateSystem;
 import us.ihmc.javaFXVisualizers.JavaFXRobotHandVisualizer;
 import us.ihmc.javaFXVisualizers.JavaFXRobotVisualizer;
 import us.ihmc.log.LogTools;
-import us.ihmc.mecano.frames.MovingReferenceFrame;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotModels.FullHumanoidRobotModelFactory;
@@ -305,7 +305,7 @@ public class GraspingJavaFXController
                {
                   Pose3D posePrevious;
                   if (i == 0)
-                     posePrevious = new Pose3D(endEffector.getBodyFixedFrame().getTransformToWorldFrame());
+                     posePrevious = new Pose3D(fullRobotModel.getHandControlFrame(robotSide).getTransformToWorldFrame());
                   else
                      posePrevious = new Pose3D(selectedKeyFramePoses.get(i - 1));
                   Pose3D pose = new Pose3D(selectedKeyFramePoses.get(i));
@@ -315,6 +315,7 @@ public class GraspingJavaFXController
                      double alpha = (j + 1) / (double) (sideDependentNumberOfWayPointsForMessage.get(robotSide) + 1);
                      Pose3D poseToAppend = new Pose3D(posePrevious);
                      poseToAppend.interpolate(pose, alpha);
+                     System.out.println(poseToAppend);
                      sideDependentKeyFramePosesForMessage.get(robotSide).add(poseToAppend);
                   }
                }
@@ -328,12 +329,12 @@ public class GraspingJavaFXController
                endEffectorMessage.getAngularWeightMatrix().set(MessageTools.createWeightMatrix3DMessage(defaultWeightForRigidBodyMessage));
                endEffectorMessage.getLinearWeightMatrix().set(MessageTools.createWeightMatrix3DMessage(defaultWeightForRigidBodyMessage));
 
-               MovingReferenceFrame handControlFrame = fullRobotModel.getHandControlFrame(robotSide);
-               System.out.println(handControlFrame.getTransformToParent().getTranslationVector());
-               System.out.println(handControlFrame.getTransformToParent().getRotationMatrix());
+               RigidBodyTransform controlFrameToWrist = fullRobotModel.getHandControlFrame(robotSide).getTransformToWorldFrame();
+               FramePose3D controlFrameToHand = new FramePose3D(ReferenceFrame.getWorldFrame(), controlFrameToWrist);
+               controlFrameToHand.changeFrame(fullRobotModel.getHand(robotSide).getBodyFixedFrame());
 
-               endEffectorMessage.getControlFramePositionInEndEffector().set(handControlFrame.getTransformToParent().getTranslationVector());
-               endEffectorMessage.getControlFrameOrientationInEndEffector().set(handControlFrame.getTransformToParent().getRotationMatrix());
+               endEffectorMessage.getControlFramePositionInEndEffector().set(controlFrameToHand.getPosition());
+               endEffectorMessage.getControlFrameOrientationInEndEffector().set(controlFrameToHand.getOrientation());
 
                toolboxMessagePublisher.publish(endEffectorMessage);
                System.out.println(robotSide + " message sent ");
@@ -434,18 +435,7 @@ public class GraspingJavaFXController
          RigidBodyTransform transformToCreateKeyFrame = new RigidBodyTransform();
          int numberOfKeyFrames = keyFramePoses.size();
 
-         //         RigidBodyTransform currentWristTransform = new RigidBodyTransform(fullRobotModel.getHand(preferredSide).getParentJoint().getPredecessor().getBodyFixedFrame().getTransformToWorldFrame());
-         //         
-         RigidBodyTransform currentHandTransform = new RigidBodyTransform(fullRobotModel.getHand(preferredSide).getBodyFixedFrame().getTransformToWorldFrame());
-         //         RigidBodyTransform controlFrameToParent = new RigidBodyTransform(fullRobotModel.getHandControlFrame(preferredSide).getTransformToParent());
          RigidBodyTransform controlFrameToWorld = new RigidBodyTransform(fullRobotModel.getHandControlFrame(preferredSide).getTransformToWorldFrame());
-         //         
-         //         System.out.println("");
-         //         System.out.println(controlFrameToParent);
-         //         System.out.println("");
-         //         System.out.println(controlFrameToWorld);
-         //         System.out.println("");
-         //         System.out.println(currentHandTransform);
 
          if (numberOfKeyFrames == 0)
             transformToCreateKeyFrame.set(controlFrameToWorld);
