@@ -286,11 +286,15 @@ public class GraspingJavaFXController
           */
          int numberOfKeyFramesForMessage = -1;
          for (RobotSide robotSide : RobotSide.values)
+         {
             if (sideDependentNumberOfWayPointsForMessage.get(robotSide) != null)
                numberOfKeyFramesForMessage = sideDependentKeyFramePoses.get(robotSide).size() * (sideDependentNumberOfWayPointsForMessage.get(robotSide) + 1);
+         }
          if (numberOfKeyFramesForMessage > 0)
+         {
             for (int i = 0; i < numberOfKeyFramesForMessage; i++)
                keyFrameTimesForMessage.add((i + 1) / (double) numberOfKeyFramesForMessage * timeDurationForMotion);
+         }
 
          /*
           * generate key frames for sending message.
@@ -339,8 +343,6 @@ public class GraspingJavaFXController
                toolboxMessagePublisher.publish(endEffectorMessage);
                System.out.println(robotSide + " message sent ");
             }
-            else
-               ;
          }
       }
    }
