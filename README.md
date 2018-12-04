@@ -1,16 +1,16 @@
 # IHMC Open Robotics Software
 
 **Compile:** ![Compile](https://bamboo.ihmc.us/plugins/servlet/wittified/build-status/LIBS-IHMCOPENROBOTICSSOFTWARE)
-**Test (2900+ tests):** ![Test](https://bamboo.ihmc.us/plugins/servlet/wittified/build-status/LIBS-IHMCOPENROBOTICSSOFTWAREFAST)
+**Test (3000+ tests):** ![Test](https://bamboo.ihmc.us/plugins/servlet/wittified/build-status/LIBS-IHMCOPENROBOTICSSOFTWAREFAST)
 
- [ ![Download](https://api.bintray.com/packages/ihmcrobotics/maven-release/ihmc-common-walking-control-modules/images/download.svg?version=0.11.0) ](https://bintray.com/ihmcrobotics/maven-release/ihmc-common-walking-control-modules/0.11.0/link) <-- Latest version on Bintray
+ [ ![Download](https://api.bintray.com/packages/ihmcrobotics/maven-release/ihmc-common-walking-control-modules/images/download.svg?version=0.11.0) ](https://bintray.com/ihmcrobotics/maven-release/ihmc-common-walking-control-modules/0.11.0/link) <-- Download from Bintray
 
 ### Tested Platforms
 
 #### Robots
 
 - Atlas
-   * This release is fully tested on Atlas hardware. See [0.11 Release Notes](docs/release-notes/0.11%20Release%20Notes.md) for detailed results.
+- Valkyrie
 
 #### Developers
 
