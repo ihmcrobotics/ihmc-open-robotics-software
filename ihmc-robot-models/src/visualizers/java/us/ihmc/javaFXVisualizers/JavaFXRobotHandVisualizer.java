@@ -3,9 +3,13 @@ package us.ihmc.javaFXVisualizers;
 import javafx.scene.Group;
 import javafx.scene.Node;
 import javafx.scene.transform.Affine;
+import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.graphicsDescription.appearance.AppearanceDefinition;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.graphicsDescription.structure.Graphics3DNode;
+import us.ihmc.javaFXToolkit.JavaFXTools;
 import us.ihmc.javaFXToolkit.node.JavaFXGraphics3DNode;
 import us.ihmc.mecano.multiBodySystem.interfaces.JointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
@@ -57,6 +61,17 @@ public class JavaFXRobotHandVisualizer
 
          rootNode.getChildren().add(robotRootNode);
       }
+   }
+
+   public void updateTransform(RigidBodyTransform transform)
+   {
+      RigidBodyTransform transformToViz = new RigidBodyTransform(transform);
+
+      Affine affine = JavaFXTools.createAffineFromQuaternionAndTuple(new Quaternion(transformToViz.getRotationMatrix()),
+                                                                     new Point3D(transformToViz.getTranslationVector()));
+
+      rootNode.getTransforms().clear();
+      rootNode.getTransforms().add(affine);
    }
 
    public void updateTransform(Affine transform)
