@@ -60,7 +60,6 @@ import us.ihmc.ros2.Ros2Node;
  */
 public class GraspingJavaFXController
 {
-   private final JavaFXMessager messager;
    private final FullHumanoidRobotModel fullRobotModel;
 
    private final KinematicsPlanningToolboxOutputConverter outputConverter;
@@ -95,8 +94,6 @@ public class GraspingJavaFXController
 
    private final ReferenceFrame pelvisZUpFrame;
 
-   //private RobotSide selectedSide = null;
-
    private final DoubleProperty velocityXProperty = new SimpleDoubleProperty(this, "velocityXProperty", 0.0);
    private final DoubleProperty velocityYProperty = new SimpleDoubleProperty(this, "velocityYProperty", 0.0);
    private final DoubleProperty velocityZProperty = new SimpleDoubleProperty(this, "velocityZProperty", 0.0);
@@ -105,7 +102,6 @@ public class GraspingJavaFXController
    private final DoubleProperty velocityYawProperty = new SimpleDoubleProperty(this, "velocityYawProperty", 0.0);
 
    private int indexOfSelectedKeyFrame = 0;
-   //private final List<RigidBodyTransform> keyFramePoses = new ArrayList<>();
    private final SideDependentList<List<RigidBodyTransform>> sideDependentKeyFramePoses = new SideDependentList<>();
 
    private final AtomicReference<KinematicsPlanningToolboxOutputStatus> toolboxOutputPacket = new AtomicReference<>(null);
@@ -120,7 +116,6 @@ public class GraspingJavaFXController
       fullRobotModel = javaFXRobotVisualizer.getFullRobotModel();
       outputConverter = new KinematicsPlanningToolboxOutputConverter(fullRobotModelFactory);
 
-      this.messager = messager;
       motionPreviewVisualizer = new ValkyrieJavaFXMotionPreviewVisualizer(fullRobotModelFactory);
       motionPreviewVisualizer.enable(false);
 
@@ -197,12 +192,10 @@ public class GraspingJavaFXController
    {
       LogTools.info("packet arrived");
       toolboxOutputPacket.set(packet);
-      LogTools.info("key frame robot configurations " + toolboxOutputPacket.get().getRobotConfigurations());
-      LogTools.info("solution quality " + toolboxOutputPacket.get().getSolutionQuality());
 
-      LogTools.info("motion previewed ");
       if (toolboxOutputPacket.get().getSolutionQuality() > 0.0)
       {
+         LogTools.info("motion previewed ");
          motionPreviewVisualizer.enable(true);
          motionPreviewVisualizer.submitKinematicsPlanningToolboxOutputStatus(toolboxOutputPacket.get());
       }
@@ -242,50 +235,85 @@ public class GraspingJavaFXController
    {
       if (state == ButtonState.RELEASED)
       {
+         motionPreviewVisualizer.enable(false);
+         toolboxStatePublisher.publish(MessageTools.createToolboxStateMessage(ToolboxState.WAKE_UP));
          SideDependentList<List<Pose3DReadOnly>> sideDependentKeyFramePosesForMessage = new SideDependentList<>(new ArrayList<Pose3DReadOnly>(),
                                                                                                                 new ArrayList<Pose3DReadOnly>());
+         SideDependentList<Integer> sideDependentNumberOfWayPointsForMessage = new SideDependentList<>(0, 0);
          TDoubleArrayList keyFrameTimesForMessage = new TDoubleArrayList();
 
-         List<RigidBodyTransform> rightPoses = sideDependentKeyFramePoses.get(RobotSide.RIGHT);
-         List<RigidBodyTransform> leftPoses = sideDependentKeyFramePoses.get(RobotSide.LEFT);
-         if (rightPoses.size() == 0)
+         final int minimumNumberOfWayPointsThatGeneratorRequiring = 3;
+
+         /*
+          * for the case that single side is selected. set number of way points
+          * between selected key frames for single side.
+          */
+         if (sideDependentKeyFramePoses.get(RobotSide.LEFT).size() == 0 || sideDependentKeyFramePoses.get(RobotSide.RIGHT).size() == 0)
          {
-            System.out.println("only left side is selected.");
+            for (RobotSide robotSide : RobotSide.values)
+            {
+               int numberOfSelectedKeyFrames = sideDependentKeyFramePoses.get(robotSide).size();
+               if (numberOfSelectedKeyFrames == 0)
+                  sideDependentNumberOfWayPointsForMessage.put(robotSide, null);
+               else if (numberOfSelectedKeyFrames < minimumNumberOfWayPointsThatGeneratorRequiring)
+                  sideDependentNumberOfWayPointsForMessage.put(robotSide, minimumNumberOfWayPointsThatGeneratorRequiring - 1);
+            }
          }
-         else if (leftPoses.size() == 0)
-         {
-            System.out.println("only right side is selected.");
-         }
+         /*
+          * set number of way points between selected key frames for both sides.
+          */
          else
          {
-            if (rightPoses.size() == 1 && leftPoses.size() == 1)
+            for (RobotSide robotSide : RobotSide.values)
             {
-               System.out.println("left and right sides are selected (single way point). ");
-            }
-            else if (rightPoses.size() == 1)
-            {
-               System.out.println("right side is fixed ");
-            }
-            else if (leftPoses.size() == 1)
-            {
-               System.out.println("left side is fixed ");
-            }
-            else if (rightPoses.size() == leftPoses.size() && rightPoses.size() != 0)
-            {
-               System.out.println("left and right sides are selected (" + rightPoses.size() + " way point). ");
-
-            }
-            else
-            {
-               System.out.println("the key frame sizes for left and right side are different. ");
+               int numberOfSelectedKeyFrames = sideDependentKeyFramePoses.get(robotSide).size();
+               int lcm = getLeastCommonMultiple(numberOfSelectedKeyFrames, sideDependentKeyFramePoses.get(robotSide.getOppositeSide()).size());
+               if (lcm < minimumNumberOfWayPointsThatGeneratorRequiring)
+                  lcm = lcm * minimumNumberOfWayPointsThatGeneratorRequiring;
+               int numberOfWayPointsBetweenKeyFrames = (lcm / numberOfSelectedKeyFrames);
+               sideDependentNumberOfWayPointsForMessage.put(robotSide, numberOfWayPointsBetweenKeyFrames - 1);
             }
          }
 
+         /*
+          * check and create key frame times
+          */
+         int numberOfKeyFramesForMessage = -1;
+         for (RobotSide robotSide : RobotSide.values)
+            if (sideDependentNumberOfWayPointsForMessage.get(robotSide) != null)
+               numberOfKeyFramesForMessage = sideDependentKeyFramePoses.get(robotSide).size() * (sideDependentNumberOfWayPointsForMessage.get(robotSide) + 1);
+         if (numberOfKeyFramesForMessage > 0)
+            for (int i = 0; i < numberOfKeyFramesForMessage; i++)
+               keyFrameTimesForMessage.add((i + 1) / (double) numberOfKeyFramesForMessage * timeDurationForMotion);
+
+         /*
+          * generate key frames for sending message.
+          */
          for (RobotSide robotSide : RobotSide.values)
          {
-            if (sideDependentKeyFramePoses.get(robotSide).size() != 0)
+            List<RigidBodyTransform> selectedKeyFramePoses = sideDependentKeyFramePoses.get(robotSide);
+            if (selectedKeyFramePoses.size() != 0)
             {
                RigidBodyBasics endEffector = fullRobotModel.getHand(robotSide);
+               for (int i = 0; i < selectedKeyFramePoses.size(); i++)
+               {
+                  Pose3D posePrevious;
+                  if (i == 0)
+                     posePrevious = new Pose3D(endEffector.getBodyFixedFrame().getTransformToWorldFrame());
+                  else
+                     posePrevious = new Pose3D(selectedKeyFramePoses.get(i - 1));
+                  Pose3D pose = new Pose3D(selectedKeyFramePoses.get(i));
+
+                  for (int j = 0; j < sideDependentNumberOfWayPointsForMessage.get(robotSide) + 1; j++)
+                  {
+                     double alpha = (j + 1) / (double) (sideDependentNumberOfWayPointsForMessage.get(robotSide) + 1);
+                     Pose3D poseToAppend = new Pose3D(posePrevious);
+                     poseToAppend.interpolate(pose, alpha);
+                     sideDependentKeyFramePosesForMessage.get(robotSide).add(poseToAppend);
+                  }
+               }
+
+               System.out.println(robotSide + " keyFramePosesForMessage " + sideDependentKeyFramePosesForMessage.get(robotSide).size());
 
                KinematicsPlanningToolboxRigidBodyMessage endEffectorMessage = HumanoidMessageTools.createKinematicsPlanningToolboxRigidBodyMessage(endEffector,
                                                                                                                                                    keyFrameTimesForMessage,
@@ -295,75 +323,11 @@ public class GraspingJavaFXController
                endEffectorMessage.getLinearWeightMatrix().set(MessageTools.createWeightMatrix3DMessage(defaultWeightForRigidBodyMessage));
 
                toolboxMessagePublisher.publish(endEffectorMessage);
-            }
-         }
-
-         if (selectedSide != null)
-         {
-            if (keyFramePoses.size() > 0)
-            {
-               motionPreviewVisualizer.enable(false);
-               toolboxStatePublisher.publish(MessageTools.createToolboxStateMessage(ToolboxState.WAKE_UP));
-
-               LogTools.info("KinematicsPlanningToolboxMessage is created as...");
-               System.out.println("selectedSide " + selectedSide);
-               System.out.println("keyFramePoses.size() " + keyFramePoses.size());
-
-               for (int i = 0; i < keyFramePoses.size(); i++)
-               {
-                  System.out.println("keyFramePoses " + i);
-                  System.out.println(keyFramePoses.get(i));
-               }
-
-               RigidBodyBasics endEffector = fullRobotModel.getHand(selectedSide);
-               double trajectoryTime = 10.0;
-               int numberOfWayPointsBetweenKeyFrames = 1;
-               if (keyFramePoses.size() < 3)
-                  numberOfWayPointsBetweenKeyFrames = 3;
-               TDoubleArrayList keyFrameTimesForMessage = new TDoubleArrayList();
-               List<Pose3DReadOnly> keyFramePosesForMessage = new ArrayList<Pose3DReadOnly>();
-
-               for (int i = 0; i < keyFramePoses.size(); i++)
-               {
-                  Pose3D keyFramePose = new Pose3D();
-                  keyFramePose.set(keyFramePoses.get(i));
-                  double keyFrameTimePrevious = trajectoryTime * (i) / (double) keyFramePoses.size();
-                  double keyFrameTime = trajectoryTime * (i + 1) / (double) keyFramePoses.size();
-                  Pose3D posePrevious;
-                  if (i == 0)
-                     posePrevious = new Pose3D(endEffector.getBodyFixedFrame().getTransformToWorldFrame());
-                  else
-                     posePrevious = new Pose3D(keyFramePoses.get(i - 1));
-                  Pose3D pose = new Pose3D(keyFramePoses.get(i));
-
-                  for (int j = 0; j < numberOfWayPointsBetweenKeyFrames; j++)
-                  {
-                     double alpha = (j + 1) / (double) numberOfWayPointsBetweenKeyFrames;
-                     keyFrameTimesForMessage.add(keyFrameTimePrevious + alpha * (keyFrameTime - keyFrameTimePrevious));
-                     Pose3D poseToAppend = new Pose3D(posePrevious);
-                     poseToAppend.interpolate(pose, alpha);
-                     keyFramePosesForMessage.add(poseToAppend);
-                  }
-               }
-
-               System.out.println("keyFramePosesForMessage " + keyFramePosesForMessage.size());
-
-               KinematicsPlanningToolboxRigidBodyMessage endEffectorMessage = HumanoidMessageTools.createKinematicsPlanningToolboxRigidBodyMessage(endEffector,
-                                                                                                                                                   keyFrameTimesForMessage,
-                                                                                                                                                   keyFramePosesForMessage);
-
-               endEffectorMessage.getAngularWeightMatrix().set(MessageTools.createWeightMatrix3DMessage(20.0)); // TODO : use static final value.
-               endEffectorMessage.getLinearWeightMatrix().set(MessageTools.createWeightMatrix3DMessage(20.0));
-
-               toolboxMessagePublisher.publish(endEffectorMessage);
-
-               selectedSide = null;
+               System.out.println(robotSide + " message sent ");
             }
             else
-               System.out.println("there is no key frame created");
+               ;
          }
-         else
-            System.out.println("robot side is not selected");
       }
    }
 
@@ -465,14 +429,6 @@ public class GraspingJavaFXController
          controlTransform.set(transformToCreateKeyFrame);
          keyFramePoses.add(transformToCreateKeyFrame);
          indexOfSelectedKeyFrame = keyFramePoses.size() - 1;
-
-         for (RobotSide robotSide : RobotSide.values)
-         {
-            List<RigidBodyTransform> poses = sideDependentKeyFramePoses.get(robotSide);
-            System.out.println("" + robotSide + " " + poses.size());
-            for (int i = 0; i < poses.size(); i++)
-               System.out.println("" + i + " " + poses.get(i).getTranslationVector());
-         }
       }
    }
 
@@ -499,6 +455,7 @@ public class GraspingJavaFXController
    {
       if (state == ButtonState.RELEASED)
       {
+         motionPreviewVisualizer.enable(false);
          List<RigidBodyTransform> keyFramePoses = sideDependentKeyFramePoses.get(controlSide);
          if (keyFramePoses.size() > 0)
          {
@@ -564,6 +521,21 @@ public class GraspingJavaFXController
          handViz.updateTransform(controlTransform);
          rootNode.getChildren().add(handViz.getRootNode());
       }
+   }
+
+   private int getLeastCommonMultiple(int numberOne, int numberTwo)
+   {
+      int reminder = 1;
+      int multiple = numberOne * numberTwo;
+      while (reminder != 0)
+      {
+         reminder = numberTwo % numberOne;
+         numberTwo = numberOne;
+         numberOne = reminder;
+      }
+      int greatestCommonDivisor = numberTwo;
+      int leastCommonMultiple = multiple / greatestCommonDivisor;
+      return leastCommonMultiple;
    }
 
    public void start()
