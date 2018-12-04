@@ -26,8 +26,8 @@ JNIEXPORT void JNICALL Java_us_ihmc_robotics_linearAlgebra_commonOps_NativeCommo
 	Eigen::Map<Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic, Eigen::RowMajor>>(resultDataArray, aRows, bCols) = AB;
 	env->SetDoubleArrayRegion(result, 0, aRows * bCols, resultDataArray);
 
-	delete aDataArray;
-	delete bDataArray;
+	env->ReleaseDoubleArrayElements(aData, aDataArray, 0);
+	env->ReleaseDoubleArrayElements(bData, bDataArray, 0);
 	delete resultDataArray;
 }
 
@@ -45,8 +45,8 @@ JNIEXPORT void JNICALL Java_us_ihmc_robotics_linearAlgebra_commonOps_NativeCommo
 	Eigen::Map<Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic, Eigen::RowMajor>>(resultDataArray, aCols, aCols) = AtBA;
 	env->SetDoubleArrayRegion(result, 0, aCols * aCols, resultDataArray);
 
-	delete aDataArray;
-	delete bDataArray;
+	env->ReleaseDoubleArrayElements(aData, aDataArray, 0);
+	env->ReleaseDoubleArrayElements(bData, bDataArray, 0);
 	delete resultDataArray;
 }
 
@@ -64,8 +64,8 @@ JNIEXPORT void JNICALL Java_us_ihmc_robotics_linearAlgebra_commonOps_NativeCommo
 	Eigen::Map<Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic, Eigen::RowMajor>>(resultDataArray, aRows, 1) = x;
 	env->SetDoubleArrayRegion(result, 0, aRows, resultDataArray);
 
-	delete aDataArray;
-	delete bDataArray;
+	env->ReleaseDoubleArrayElements(aData, aDataArray, 0);
+	env->ReleaseDoubleArrayElements(bData, bDataArray, 0);
 	delete resultDataArray;
 }
 
@@ -83,8 +83,8 @@ JNIEXPORT void JNICALL Java_us_ihmc_robotics_linearAlgebra_commonOps_NativeCommo
 	Eigen::Map<Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic, Eigen::RowMajor>>(resultDataArray, aCols, 1) = x;
 	env->SetDoubleArrayRegion(result, 0, aCols, resultDataArray);
 
-	delete aDataArray;
-	delete bDataArray;
+	env->ReleaseDoubleArrayElements(aData, aDataArray, 0);
+	env->ReleaseDoubleArrayElements(bData, bDataArray, 0);
 	delete resultDataArray;
 }
 
@@ -103,7 +103,7 @@ JNIEXPORT void JNICALL Java_us_ihmc_robotics_linearAlgebra_commonOps_NativeCommo
 	Eigen::Map<Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic, Eigen::RowMajor>>(resultDataArray, aCols, 1) = x;
 	env->SetDoubleArrayRegion(result, 0, aCols, resultDataArray);
 
-	delete aDataArray;
-	delete bDataArray;
+	env->ReleaseDoubleArrayElements(aData, aDataArray, 0);
+	env->ReleaseDoubleArrayElements(bData, bDataArray, 0);
 	delete resultDataArray;
 }
