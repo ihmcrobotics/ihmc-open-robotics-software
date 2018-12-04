@@ -41,6 +41,7 @@ mainDependencies {
    compile group: "us.ihmc", name: "ihmc-sensor-processing", version: "source"
    compile group: "us.ihmc", name: "ihmc-state-estimation", version: "source"
    compile group: "us.ihmc", name: "ihmc-simulation-toolkit", version: "source"
+   compile group: "us.ihmc", name: "ihmc-system-identification", version: "source"
 }
 
 testDependencies {

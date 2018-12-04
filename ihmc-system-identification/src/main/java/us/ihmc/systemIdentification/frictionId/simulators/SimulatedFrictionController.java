@@ -30,7 +30,7 @@ public class SimulatedFrictionController implements RobotController
 
    public SimulatedFrictionController(FloatingRootJointRobot robot, CoulombViscousStribeckFrictionParameters parameters)
    {
-      this(robot, parameters.getViscousDamping(), parameters.getDynamciFriction(), parameters.getStribeckValue(), parameters.getCoulombFriction());
+      this(robot, parameters.getViscousDamping(), parameters.getDynamicFriction(), parameters.getStribeckValue(), parameters.getCoulombFriction());
    }
 
    public SimulatedFrictionController(FloatingRootJointRobot robot, double viscousValue, double dynamicValue, double stribeckValue, double coulombValue)
@@ -90,7 +90,7 @@ public class SimulatedFrictionController implements RobotController
          frictionModel.updateParameters(parameters);
          frictionModel.computeFrictionForce(qd);
          frictionForces.get(simulatedJoint).set(frictionModel.getFrictionForce());
-         simulatedJoint.setTau(torque + frictionForces.get(simulatedJoint).getDoubleValue());
+         simulatedJoint.setTau(torque - frictionForces.get(simulatedJoint).getDoubleValue());
       }
    }
 

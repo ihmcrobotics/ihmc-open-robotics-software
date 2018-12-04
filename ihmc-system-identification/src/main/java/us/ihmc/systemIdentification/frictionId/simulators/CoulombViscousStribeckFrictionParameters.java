@@ -3,7 +3,7 @@ package us.ihmc.systemIdentification.frictionId.simulators;
 public interface CoulombViscousStribeckFrictionParameters
 {
    double getViscousDamping();
-   double getDynamciFriction();
+   double getDynamicFriction();
    double getStribeckValue();
    double getCoulombFriction();
 }
