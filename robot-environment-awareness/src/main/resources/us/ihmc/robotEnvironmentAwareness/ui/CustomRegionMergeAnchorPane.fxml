@@ -18,7 +18,7 @@
          <children>
             <VBox alignment="CENTER" spacing="5.0">
                <children>
-                  <ToggleButton fx:id="enableSegmentationButton" maxWidth="1.7976931348623157E308" mnemonicParsing="false" text="Enable" />
+                  <ToggleButton fx:id="enableMergeButton" maxWidth="1.7976931348623157E308" mnemonicParsing="false" text="Enable" />
                   <Button maxWidth="1.7976931348623157E308" mnemonicParsing="false" onAction="#clear" text="Clear" />
                   <Button maxWidth="1.7976931348623157E308" mnemonicParsing="false" onAction="#save" text="Save" />
                </children>
