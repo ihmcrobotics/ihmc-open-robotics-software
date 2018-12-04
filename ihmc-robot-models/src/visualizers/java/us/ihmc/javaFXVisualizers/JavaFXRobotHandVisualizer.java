@@ -3,6 +3,8 @@ package us.ihmc.javaFXVisualizers;
 import javafx.scene.Group;
 import javafx.scene.Node;
 import javafx.scene.transform.Affine;
+import us.ihmc.euclid.referenceFrame.FramePose3D;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
@@ -30,6 +32,7 @@ public class JavaFXRobotHandVisualizer
    private final FullHumanoidRobotModel fullRobotModel;
 
    private final Group rootNode = new Group();
+   private FramePose3D handBodyPoseToControlFrame;
 
    public JavaFXRobotHandVisualizer(FullHumanoidRobotModelFactory fullRobotModelFactory, RobotSide robotSide)
    {
@@ -41,12 +44,18 @@ public class JavaFXRobotHandVisualizer
 
    private void loadRobotModelAndGraphics(FullHumanoidRobotModelFactory fullRobotModelFactory)
    {
+      RigidBodyTransform handControlFrameToWorld = new RigidBodyTransform();
+      handControlFrameToWorld.set(fullRobotModel.getHandControlFrame(robotSide).getTransformToWorldFrame());
+      RigidBodyTransform rootNodeToWorld = new RigidBodyTransform();
+
       RobotDescription robotDescription = fullRobotModelFactory.getRobotDescription();
 
       RigidBodyBasics handBody = fullRobotModel.getHand(robotSide).getParentJoint().getPredecessor();
       if (handBody != null)
       {
          JointBasics parentJoint = handBody.getParentJoint();
+         rootNodeToWorld.set(handBody.getBodyFixedFrame().getTransformToWorldFrame());
+
          LinkDescription linkDescription = robotDescription.getLinkDescription(parentJoint.getName());
          if (linkDescription.getLinkGraphics() == null)
          {
@@ -61,22 +70,24 @@ public class JavaFXRobotHandVisualizer
 
          rootNode.getChildren().add(robotRootNode);
       }
+
+      handBodyPoseToControlFrame = new FramePose3D(ReferenceFrame.getWorldFrame(), rootNodeToWorld);
+      handBodyPoseToControlFrame.changeFrame(fullRobotModel.getHandControlFrame(robotSide));
    }
 
    public void updateTransform(RigidBodyTransform transform)
    {
-      RigidBodyTransform transformToViz = new RigidBodyTransform(transform);
+      FramePose3D transformFromXboxController = new FramePose3D(ReferenceFrame.getWorldFrame(), transform);
+      RigidBodyTransform transformControlFrameToHandBodyPose = new RigidBodyTransform(handBodyPoseToControlFrame.getOrientation(), handBodyPoseToControlFrame.getPosition());
+      transformFromXboxController.appendTransform(transformControlFrameToHandBodyPose);
+
+      RigidBodyTransform transformToViz = new RigidBodyTransform(transformFromXboxController.getOrientation(), transformFromXboxController.getPosition());
 
       Affine affine = JavaFXTools.createAffineFromQuaternionAndTuple(new Quaternion(transformToViz.getRotationMatrix()),
                                                                      new Point3D(transformToViz.getTranslationVector()));
 
       rootNode.getTransforms().clear();
       rootNode.getTransforms().add(affine);
-   }
-
-   public void updateTransform(Affine transform)
-   {
-      rootNode.getTransforms().add(transform);
    }
 
    private void addNodesRecursively(Graphics3DNode graphics3dNode, JavaFXGraphics3DNode parentNode)
