@@ -18,6 +18,7 @@ import us.ihmc.quadrupedRobotics.controller.QuadrupedControllerToolbox;
 import us.ihmc.quadrupedRobotics.model.QuadrupedRuntimeEnvironment;
 import us.ihmc.robotics.dataStructures.parameters.ParameterVector2D;
 import us.ihmc.robotics.geometry.ConvexPolygonScaler;
+import us.ihmc.robotics.math.trajectories.waypoints.FrameSE3TrajectoryPoint;
 import us.ihmc.robotics.math.trajectories.waypoints.MultipleWaypointsPositionTrajectoryGenerator;
 import us.ihmc.robotics.robotSide.QuadrantDependentList;
 import us.ihmc.robotics.robotSide.RobotQuadrant;
@@ -311,7 +312,14 @@ public class QuadrupedBodyICPBasedTranslationManager
 
       for (int trajectoryPointIndex = 0; trajectoryPointIndex < numberOfTrajectoryPoints; trajectoryPointIndex++)
       {
-         positionTrajectoryGenerator.appendWaypoint(se3Trajectory.getTrajectoryPoint(trajectoryPointIndex));
+         FrameSE3TrajectoryPoint trajectoryPoint = se3Trajectory.getTrajectoryPoint(trajectoryPointIndex);
+         tempPosition.changeFrame(worldFrame);
+         tempVelocity.changeFrame(worldFrame);
+         tempPosition.set(trajectoryPoint.getPositionX(), trajectoryPoint.getPositionY(), 0.0);
+         tempVelocity.set(trajectoryPoint.getLinearVelocityX(), trajectoryPoint.getLinearVelocityY(), 0.0);
+         tempPosition.changeFrame(centerFeetZUpFrame);
+         tempVelocity.changeFrame(centerFeetZUpFrame);
+         positionTrajectoryGenerator.appendWaypoint(trajectoryPoint.getTime(), tempPosition, tempVelocity);
       }
 
       positionTrajectoryGenerator.initialize();
