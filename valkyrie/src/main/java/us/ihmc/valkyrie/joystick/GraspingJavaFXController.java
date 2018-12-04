@@ -43,6 +43,7 @@ import us.ihmc.javaFXToolkit.shapes.JavaFXCoordinateSystem;
 import us.ihmc.javaFXVisualizers.JavaFXRobotHandVisualizer;
 import us.ihmc.javaFXVisualizers.JavaFXRobotVisualizer;
 import us.ihmc.log.LogTools;
+import us.ihmc.mecano.frames.MovingReferenceFrame;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotModels.FullHumanoidRobotModelFactory;
@@ -103,6 +104,7 @@ public class GraspingJavaFXController
 
    private int indexOfSelectedKeyFrame = 0;
    private final SideDependentList<List<RigidBodyTransform>> sideDependentKeyFramePoses = new SideDependentList<>();
+   private final SideDependentList<JavaFXRobotHandVisualizer> sideDependentHandVizs = new SideDependentList<>();
 
    private final AtomicReference<KinematicsPlanningToolboxOutputStatus> toolboxOutputPacket = new AtomicReference<>(null);
    private final ValkyrieJavaFXMotionPreviewVisualizer motionPreviewVisualizer;
@@ -185,7 +187,11 @@ public class GraspingJavaFXController
       };
 
       for (RobotSide robotSide : RobotSide.values)
+      {
          sideDependentKeyFramePoses.put(robotSide, new ArrayList<>());
+         sideDependentHandVizs.put(robotSide, new JavaFXRobotHandVisualizer(fullRobotModelFactory, robotSide));
+      }
+
    }
 
    private void consumeToolboxOutputStatus(KinematicsPlanningToolboxOutputStatus packet)
@@ -322,6 +328,13 @@ public class GraspingJavaFXController
                endEffectorMessage.getAngularWeightMatrix().set(MessageTools.createWeightMatrix3DMessage(defaultWeightForRigidBodyMessage));
                endEffectorMessage.getLinearWeightMatrix().set(MessageTools.createWeightMatrix3DMessage(defaultWeightForRigidBodyMessage));
 
+               MovingReferenceFrame handControlFrame = fullRobotModel.getHandControlFrame(robotSide);
+               System.out.println(handControlFrame.getTransformToParent().getTranslationVector());
+               System.out.println(handControlFrame.getTransformToParent().getRotationMatrix());
+
+               endEffectorMessage.getControlFramePositionInEndEffector().set(handControlFrame.getTransformToParent().getTranslationVector());
+               endEffectorMessage.getControlFrameOrientationInEndEffector().set(handControlFrame.getTransformToParent().getRotationMatrix());
+
                toolboxMessagePublisher.publish(endEffectorMessage);
                System.out.println(robotSide + " message sent ");
             }
@@ -420,8 +433,22 @@ public class GraspingJavaFXController
 
          RigidBodyTransform transformToCreateKeyFrame = new RigidBodyTransform();
          int numberOfKeyFrames = keyFramePoses.size();
+
+         //         RigidBodyTransform currentWristTransform = new RigidBodyTransform(fullRobotModel.getHand(preferredSide).getParentJoint().getPredecessor().getBodyFixedFrame().getTransformToWorldFrame());
+         //         
+         RigidBodyTransform currentHandTransform = new RigidBodyTransform(fullRobotModel.getHand(preferredSide).getBodyFixedFrame().getTransformToWorldFrame());
+         //         RigidBodyTransform controlFrameToParent = new RigidBodyTransform(fullRobotModel.getHandControlFrame(preferredSide).getTransformToParent());
+         RigidBodyTransform controlFrameToWorld = new RigidBodyTransform(fullRobotModel.getHandControlFrame(preferredSide).getTransformToWorldFrame());
+         //         
+         //         System.out.println("");
+         //         System.out.println(controlFrameToParent);
+         //         System.out.println("");
+         //         System.out.println(controlFrameToWorld);
+         //         System.out.println("");
+         //         System.out.println(currentHandTransform);
+
          if (numberOfKeyFrames == 0)
-            transformToCreateKeyFrame.set(fullRobotModel.getHand(preferredSide).getBodyFixedFrame().getTransformToWorldFrame());
+            transformToCreateKeyFrame.set(controlFrameToWorld);
          else
             transformToCreateKeyFrame.set(keyFramePoses.get(numberOfKeyFrames - 1));
 
@@ -464,6 +491,8 @@ public class GraspingJavaFXController
 
             if (keyFramePoses.size() > 0)
                snapControlTransformToSelectedKeyFrame();
+            if (indexOfSelectedKeyFrame < 0)
+               snapControlTransformToCurrentHand();
          }
       }
    }
@@ -472,6 +501,12 @@ public class GraspingJavaFXController
    {
       List<RigidBodyTransform> keyFramePoses = sideDependentKeyFramePoses.get(controlSide);
       controlTransform.set(keyFramePoses.get(indexOfSelectedKeyFrame));
+   }
+
+   private void snapControlTransformToCurrentHand()
+   {
+      RigidBodyTransform currentHandTransform = new RigidBodyTransform(fullRobotModel.getHand(controlSide).getBodyFixedFrame().getTransformToWorldFrame());
+      controlTransform.set(currentHandTransform);
    }
 
    private void updateVisualizedKeyFrames()
@@ -513,11 +548,8 @@ public class GraspingJavaFXController
    {
       if (controlSide != null)
       {
-         Tuple3DBasics translation = new Point3D(controlTransform.getTranslationVector());
-         Quaternion orientation = new Quaternion(controlTransform.getRotationMatrix());
+         JavaFXRobotHandVisualizer handViz = sideDependentHandVizs.get(controlSide);
 
-         Affine controlTransform = JavaFXTools.createAffineFromQuaternionAndTuple(new Quaternion(orientation), translation);
-         JavaFXRobotHandVisualizer handViz = new JavaFXRobotHandVisualizer(fullRobotModelFactory, controlSide);
          handViz.updateTransform(controlTransform);
          rootNode.getChildren().add(handViz.getRootNode());
       }
