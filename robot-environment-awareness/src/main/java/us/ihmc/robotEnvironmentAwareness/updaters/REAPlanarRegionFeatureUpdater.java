@@ -184,7 +184,7 @@ public class REAPlanarRegionFeatureUpdater implements RegionFeaturesProvider
       else if (enableCustomRegions.get())
       {
          unmergedCustomPlanarRegions = CustomPlanarRegionHandler.mergeCustomRegionsToEstimatedRegions(customPlanarRegions.valueCollection(), rawData,
-                                                                                                      planarRegionSegmentationParameters.get());
+                                                                                                      customRegionMergingParameters.get());
       }
       else
       {
