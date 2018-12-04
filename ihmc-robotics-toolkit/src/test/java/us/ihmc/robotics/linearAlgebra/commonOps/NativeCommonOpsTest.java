@@ -12,6 +12,7 @@ import org.ejml.ops.RandomMatrices;
 import org.junit.Test;
 
 import us.ihmc.commons.Conversions;
+import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.robotics.functionApproximation.DampedLeastSquaresSolver;
 import us.ihmc.robotics.testing.JUnitTools;
 
@@ -22,7 +23,8 @@ public class NativeCommonOpsTest
    private static final int iterations = 5000;
    private static final double epsilon = 1.0e-9;
 
-   @Test
+   @ContinuousIntegrationTest(estimatedDuration = 1.0)
+   @Test(timeout = 10000)
    public void testMult()
    {
       Random random = new Random(40L);
@@ -70,7 +72,8 @@ public class NativeCommonOpsTest
       System.out.println("Native takes " + Precision.round((100.0 * nativeTime / ejmlTime), 0) + "% of EJML time.\n");
    }
 
-   @Test
+   @ContinuousIntegrationTest(estimatedDuration = 1.0)
+   @Test(timeout = 10000)
    public void testMultQuad()
    {
       Random random = new Random(40L);
@@ -121,7 +124,8 @@ public class NativeCommonOpsTest
       System.out.println("Native takes " + Precision.round((100.0 * nativeTime / ejmlTime), 0) + "% of EJML time.\n");
    }
 
-   @Test
+   @ContinuousIntegrationTest(estimatedDuration = 1.0)
+   @Test(timeout = 10000)
    public void testSolve()
    {
       Random random = new Random(40L);
@@ -175,7 +179,8 @@ public class NativeCommonOpsTest
       System.out.println("Native takes " + Precision.round((100.0 * nativeTime / ejmlTime), 0) + "% of EJML time.\n");
    }
 
-   @Test
+   @ContinuousIntegrationTest(estimatedDuration = 1.0)
+   @Test(timeout = 10000)
    public void testSolveLeastSquare()
    {
       Random random = new Random(40L);
@@ -254,10 +259,11 @@ public class NativeCommonOpsTest
 
    public static void main(String[] args)
    {
+      int size = 500;
       Random random = new Random(40L);
-      DenseMatrix64F A = RandomMatrices.createRandom(maxSize, maxSize, random);
-      DenseMatrix64F B = RandomMatrices.createRandom(maxSize, maxSize, random);
-      DenseMatrix64F AtBA = new DenseMatrix64F(maxSize, maxSize);
+      DenseMatrix64F A = RandomMatrices.createRandom(size, size, random);
+      DenseMatrix64F B = RandomMatrices.createRandom(size, size, random);
+      DenseMatrix64F AtBA = new DenseMatrix64F(size, size);
 
       System.out.println("Running...");
 
