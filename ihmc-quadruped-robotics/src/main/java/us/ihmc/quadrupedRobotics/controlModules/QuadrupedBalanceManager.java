@@ -290,8 +290,8 @@ public class QuadrupedBalanceManager
       dcmPlanner.computeDcmSetpoints(controllerToolbox.getContactStates(), yoDesiredDCMPosition, yoDesiredDCMVelocity);
       dcmPlanner.getFinalDCMPosition(yoFinalDesiredDCM);
 
-      bodyICPBasedTranslationManager.compute();
-      bodyICPBasedTranslationManager.addDCMOffset(yoDesiredDCMPosition);
+//      bodyICPBasedTranslationManager.compute();
+//      bodyICPBasedTranslationManager.addDCMOffset(yoDesiredDCMPosition);
 
       if (debug)
          runDebugChecks();
