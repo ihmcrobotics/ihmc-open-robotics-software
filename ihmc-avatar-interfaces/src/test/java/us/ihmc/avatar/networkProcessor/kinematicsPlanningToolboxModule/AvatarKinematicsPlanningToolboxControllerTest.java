@@ -147,7 +147,7 @@ public abstract class AvatarKinematicsPlanningToolboxControllerTest implements M
    @After
    public void tearDown()
    {
-      if (true)
+      if (simulationTestingParameters.getKeepSCSUp())
          ThreadTools.sleepForever();
 
       if (mainRegistry != null)
@@ -252,9 +252,9 @@ public abstract class AvatarKinematicsPlanningToolboxControllerTest implements M
 
       Pose3D desiredPose = new Pose3D();
       desiredPose.setPosition(0.5, 0.3, 1.0);
-      //desiredPose.appendYawRotation(-0.5 * Math.PI);
+      desiredPose.appendYawRotation(-0.5 * Math.PI);
       desiredPose.appendPitchRotation(0.5 * Math.PI);
-      //desiredPose.appendYawRotation(0.2 * Math.PI);
+      desiredPose.appendYawRotation(0.2 * Math.PI);
       TDoubleArrayList keyFrameTimes = new TDoubleArrayList();
       List<Pose3DReadOnly> keyFramePoses = new ArrayList<Pose3DReadOnly>();
 
@@ -270,9 +270,6 @@ public abstract class AvatarKinematicsPlanningToolboxControllerTest implements M
 
       endEffectorMessage.getAngularWeightMatrix().set(MessageTools.createWeightMatrix3DMessage(20.0));
       endEffectorMessage.getLinearWeightMatrix().set(MessageTools.createWeightMatrix3DMessage(20.0));
-      
-      endEffectorMessage.getControlFramePositionInEndEffector().set(initialFullRobotModel.getHandControlFrame(robotSide).getTransformToParent().getTranslationVector());
-      endEffectorMessage.getControlFrameOrientationInEndEffector().set(initialFullRobotModel.getHandControlFrame(robotSide).getTransformToParent().getRotationMatrix());
 
       commandInputManager.submitMessage(endEffectorMessage);
 
