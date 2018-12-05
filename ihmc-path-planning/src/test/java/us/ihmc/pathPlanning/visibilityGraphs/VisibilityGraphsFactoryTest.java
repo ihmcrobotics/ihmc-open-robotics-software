@@ -19,7 +19,7 @@ import us.ihmc.pathPlanning.visibilityGraphs.clusterManagement.Cluster;
 import us.ihmc.pathPlanning.visibilityGraphs.dataStructure.Connection;
 import us.ihmc.pathPlanning.visibilityGraphs.dataStructure.ConnectionPoint3D;
 import us.ihmc.pathPlanning.visibilityGraphs.dataStructure.InterRegionVisibilityMap;
-import us.ihmc.pathPlanning.visibilityGraphs.dataStructure.NavigableRegion;
+import us.ihmc.pathPlanning.visibilityGraphs.dataStructure.VisibilityMapWithNavigableRegion;
 import us.ihmc.pathPlanning.visibilityGraphs.dataStructure.VisibilityMap;
 import us.ihmc.pathPlanning.visibilityGraphs.interfaces.NavigableExtrusionDistanceCalculator;
 import us.ihmc.pathPlanning.visibilityGraphs.interfaces.ObstacleExtrusionDistanceCalculator;
@@ -56,7 +56,7 @@ public class VisibilityGraphsFactoryTest
       NavigableExtrusionDistanceCalculator navigableCalculator = createConstantNavigableExtrusionDistanceCalculator(0.01);
       ObstacleExtrusionDistanceCalculator obstacleCalculator = createConstantObstacleExtrusionDistanceCalculator(0.02);
 
-      NavigableRegion navigableRegion = VisibilityGraphsFactory.createNavigableRegion(planarRegion, otherRegions, orthogonalAngle, clusterResolution,
+      VisibilityMapWithNavigableRegion navigableRegion = VisibilityGraphsFactory.createNavigableRegion(planarRegion, otherRegions, orthogonalAngle, clusterResolution,
                                                                                       obstacleRegionFilter, filter, navigableCalculator, obstacleCalculator);
 
       List<Cluster> obstacleClusters = navigableRegion.getObstacleClusters();
@@ -191,7 +191,7 @@ public class VisibilityGraphsFactoryTest
       planarRegionTwo.setRegionId(2);
       allRegions.add(planarRegionTwo);
 
-      List<NavigableRegion> navigableRegions = VisibilityGraphsFactory.createNavigableRegionButNotVisibilityMaps(allRegions, parameters);
+      List<VisibilityMapWithNavigableRegion> navigableRegions = VisibilityGraphsFactory.createNavigableRegionButNotVisibilityMaps(allRegions, parameters);
       //      VisibilityGraphsFactory.createStaticVisibilityMapsForNavigableRegions(navigableRegions);
       InterRegionVisibilityMap interRegionVisibilityMap = VisibilityGraphsFactory.createInterRegionVisibilityMap(navigableRegions,
                                                                                                                  parameters.getInterRegionConnectionFilter());
@@ -261,7 +261,7 @@ public class VisibilityGraphsFactoryTest
       planarRegionThree.setRegionId(3);
       allRegions.add(planarRegionThree);
 
-      List<NavigableRegion> navigableRegions = VisibilityGraphsFactory.createNavigableRegionButNotVisibilityMaps(allRegions, parameters);
+      List<VisibilityMapWithNavigableRegion> navigableRegions = VisibilityGraphsFactory.createNavigableRegionButNotVisibilityMaps(allRegions, parameters);
       //      VisibilityGraphsFactory.createStaticVisibilityMapsForNavigableRegions(navigableRegions);
       InterRegionVisibilityMap interRegionVisibilityMap = VisibilityGraphsFactory.createInterRegionVisibilityMap(navigableRegions,
                                                                                                                  parameters.getInterRegionConnectionFilter());
@@ -305,7 +305,7 @@ public class VisibilityGraphsFactoryTest
       allRegions = PlanarRegionTools.ensureClockwiseOrder(allRegions);
 
       //      List<NavigableRegion> navigableRegions = VisibilityGraphsFactory.createNavigableRegions(allRegions, parameters);
-      List<NavigableRegion> navigableRegions = VisibilityGraphsFactory.createNavigableRegionButNotVisibilityMaps(allRegions, parameters);
+      List<VisibilityMapWithNavigableRegion> navigableRegions = VisibilityGraphsFactory.createNavigableRegionButNotVisibilityMaps(allRegions, parameters);
       VisibilityGraphsFactory.createStaticVisibilityMapsForNavigableRegions(navigableRegions);
       InterRegionVisibilityMap interRegionVisibilityMap = VisibilityGraphsFactory.createInterRegionVisibilityMap(navigableRegions,
                                                                                                                  parameters.getInterRegionConnectionFilter());
@@ -314,8 +314,8 @@ public class VisibilityGraphsFactoryTest
 
       assertEquals(2, navigableRegions.size());
 
-      NavigableRegion navigableRegionOne = navigableRegions.get(0);
-      NavigableRegion navigableRegionTwo = navigableRegions.get(1);
+      VisibilityMapWithNavigableRegion navigableRegionOne = navigableRegions.get(0);
+      VisibilityMapWithNavigableRegion navigableRegionTwo = navigableRegions.get(1);
 
       assertTrue(navigableRegionOne.getObstacleClusters().isEmpty());
       assertTrue(navigableRegionTwo.getObstacleClusters().isEmpty());

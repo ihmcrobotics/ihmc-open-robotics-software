@@ -17,7 +17,7 @@ import us.ihmc.pathPlanning.visibilityGraphs.VisibilityGraphTestTools;
 import us.ihmc.pathPlanning.visibilityGraphs.clusterManagement.Cluster;
 import us.ihmc.pathPlanning.visibilityGraphs.dataStructure.Connection;
 import us.ihmc.pathPlanning.visibilityGraphs.dataStructure.ConnectionPoint3D;
-import us.ihmc.pathPlanning.visibilityGraphs.dataStructure.NavigableRegion;
+import us.ihmc.pathPlanning.visibilityGraphs.dataStructure.VisibilityMapWithNavigableRegion;
 import us.ihmc.pathPlanning.visibilityGraphs.dataStructure.SingleSourceVisibilityMap;
 import us.ihmc.pathPlanning.visibilityGraphs.dataStructure.VisibilityMap;
 import us.ihmc.pathPlanning.visibilityGraphs.interfaces.VisibilityMapHolder;
@@ -174,10 +174,10 @@ public class VisibilityGraphMessagesConverterTest
       Random random = new Random(1738L);
       for (int iter = 0; iter < iters; iter++)
       {
-         NavigableRegion navigableRegionToConvert = VisibilityGraphRandomTools.getRandomNavigableRegion(random);
+         VisibilityMapWithNavigableRegion navigableRegionToConvert = VisibilityGraphRandomTools.getRandomNavigableRegion(random);
          NavigableRegionMessage message = VisibilityGraphMessagesConverter.convertToNavigableRegionMessage(navigableRegionToConvert);
 
-         NavigableRegion convertedNavigableRegion = VisibilityGraphMessagesConverter.convertToNavigableRegion(message);
+         VisibilityMapWithNavigableRegion convertedNavigableRegion = VisibilityGraphMessagesConverter.convertToNavigableRegion(message);
 
          VisibilityGraphTestTools.assertNavigableRegionsEqual(navigableRegionToConvert, convertedNavigableRegion, epsilon);
       }
@@ -210,7 +210,7 @@ public class VisibilityGraphMessagesConverterTest
          VisibilityMapHolder goalMap = VisibilityGraphRandomTools.getRandomSingleSourceVisibilityMap(random);
          VisibilityMapHolder interRegionsMap = VisibilityGraphRandomTools.getRandomInterRegionVisibilityMap(random);
 
-         List<NavigableRegion> navigableRegions = new ArrayList<>();
+         List<VisibilityMapWithNavigableRegion> navigableRegions = new ArrayList<>();
          int planId = RandomNumbers.nextInt(random, 0, 1000);
          int numberOfNavigableRegions = RandomNumbers.nextInt(random, 2, 10);
          for (int i = 0; i < numberOfNavigableRegions; i++)

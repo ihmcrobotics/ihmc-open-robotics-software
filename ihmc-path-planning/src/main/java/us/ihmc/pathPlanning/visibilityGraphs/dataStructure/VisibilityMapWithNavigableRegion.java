@@ -10,7 +10,7 @@ import us.ihmc.pathPlanning.visibilityGraphs.clusterManagement.Cluster;
 import us.ihmc.pathPlanning.visibilityGraphs.interfaces.VisibilityMapHolder;
 import us.ihmc.robotics.geometry.PlanarRegion;
 
-public class NavigableRegion implements VisibilityMapHolder
+public class VisibilityMapWithNavigableRegion implements VisibilityMapHolder
 {
    private final PlanarRegion homePlanarRegion;
    
@@ -23,7 +23,7 @@ public class NavigableRegion implements VisibilityMapHolder
    private VisibilityMap visibilityMapInLocal = null;
    private VisibilityMap visibilityMapInWorld = null;
 
-   public NavigableRegion(PlanarRegion homePlanarRegion)
+   public VisibilityMapWithNavigableRegion(PlanarRegion homePlanarRegion)
    {
       this.homePlanarRegion = homePlanarRegion;
       homePlanarRegion.getTransformToWorld(transformToWorld);

@@ -8,7 +8,7 @@ import us.ihmc.pathPlanning.statistics.VisibilityGraphStatistics;
 import us.ihmc.pathPlanning.visibilityGraphs.clusterManagement.Cluster;
 import us.ihmc.pathPlanning.visibilityGraphs.dataStructure.Connection;
 import us.ihmc.pathPlanning.visibilityGraphs.dataStructure.ConnectionPoint3D;
-import us.ihmc.pathPlanning.visibilityGraphs.dataStructure.NavigableRegion;
+import us.ihmc.pathPlanning.visibilityGraphs.dataStructure.VisibilityMapWithNavigableRegion;
 import us.ihmc.pathPlanning.visibilityGraphs.dataStructure.VisibilityMap;
 import us.ihmc.pathPlanning.visibilityGraphs.interfaces.VisibilityMapHolder;
 import us.ihmc.robotics.geometry.PlanarRegionTestTools;
@@ -286,7 +286,7 @@ public class VisibilityGraphTestTools
       }
    }
 
-   public static void assertNavigableRegionsEqual(NavigableRegion expected, NavigableRegion actual, double epsilon)
+   public static void assertNavigableRegionsEqual(VisibilityMapWithNavigableRegion expected, VisibilityMapWithNavigableRegion actual, double epsilon)
    {
       assertEquals(expected.getMapId(), actual.getMapId());
       assertClustersEqual(expected.getHomeRegionCluster(), actual.getHomeRegionCluster(), epsilon);

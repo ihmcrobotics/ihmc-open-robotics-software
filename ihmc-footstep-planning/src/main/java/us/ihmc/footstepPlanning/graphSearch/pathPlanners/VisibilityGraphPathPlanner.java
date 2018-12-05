@@ -12,7 +12,7 @@ import us.ihmc.footstepPlanning.FootstepPlanningResult;
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParameters;
 import us.ihmc.pathPlanning.statistics.VisibilityGraphStatistics;
 import us.ihmc.pathPlanning.visibilityGraphs.NavigableRegionsManager;
-import us.ihmc.pathPlanning.visibilityGraphs.dataStructure.NavigableRegion;
+import us.ihmc.pathPlanning.visibilityGraphs.dataStructure.VisibilityMapWithNavigableRegion;
 import us.ihmc.pathPlanning.visibilityGraphs.interfaces.VisibilityGraphsParameters;
 import us.ihmc.pathPlanning.visibilityGraphs.interfaces.VisibilityMapHolder;
 import us.ihmc.pathPlanning.visibilityGraphs.tools.PlanarRegionTools;
@@ -132,7 +132,7 @@ public class VisibilityGraphPathPlanner extends AbstractWaypointsForFootstepsPla
       VisibilityMapHolder startMap = navigableRegionsManager.getStartMap();
       VisibilityMapHolder goalMap = navigableRegionsManager.getGoalMap();
       VisibilityMapHolder interRegionsMap = navigableRegionsManager.getInterRegionConnections();
-      List<NavigableRegion> navigableRegions = navigableRegionsManager.getNavigableRegionsList();
+      List<VisibilityMapWithNavigableRegion> navigableRegions = navigableRegionsManager.getNavigableRegionsList();
 
       statistics.setStartVisibilityMapInWorld(startMap.getMapId(), startMap.getVisibilityMapInWorld());
       statistics.setGoalVisibilityMapInWorld(goalMap.getMapId(), goalMap.getVisibilityMapInWorld());

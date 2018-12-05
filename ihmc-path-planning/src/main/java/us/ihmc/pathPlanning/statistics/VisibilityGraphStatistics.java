@@ -3,7 +3,7 @@ package us.ihmc.pathPlanning.statistics;
 import java.util.ArrayList;
 import java.util.List;
 
-import us.ihmc.pathPlanning.visibilityGraphs.dataStructure.NavigableRegion;
+import us.ihmc.pathPlanning.visibilityGraphs.dataStructure.VisibilityMapWithNavigableRegion;
 import us.ihmc.pathPlanning.visibilityGraphs.dataStructure.VisibilityMap;
 
 public class VisibilityGraphStatistics implements PlannerStatistics<VisibilityGraphStatistics>
@@ -16,7 +16,7 @@ public class VisibilityGraphStatistics implements PlannerStatistics<VisibilityGr
    private VisibilityMap goalMap = new VisibilityMap();
    private VisibilityMap interRegionsMap = new VisibilityMap();
 
-   private final List<NavigableRegion> navigableRegions = new ArrayList<>();
+   private final List<VisibilityMapWithNavigableRegion> navigableRegions = new ArrayList<>();
 
    @Override
    public StatisticsType getStatisticsType()
@@ -61,19 +61,19 @@ public class VisibilityGraphStatistics implements PlannerStatistics<VisibilityGr
       this.interRegionsMap = interRegionsMap;
    }
 
-   public void setNavigableRegions(List<NavigableRegion> navigableRegions)
+   public void setNavigableRegions(List<VisibilityMapWithNavigableRegion> navigableRegions)
    {
       this.navigableRegions.clear();
       addNavigableRegions(navigableRegions);
    }
 
-   public void addNavigableRegions(List<NavigableRegion> navigableRegions)
+   public void addNavigableRegions(List<VisibilityMapWithNavigableRegion> navigableRegions)
    {
       for (int i = 0; i < navigableRegions.size(); i++)
          addNavigableRegion(navigableRegions.get(i));
    }
 
-   public void addNavigableRegion(NavigableRegion navigableRegion)
+   public void addNavigableRegion(VisibilityMapWithNavigableRegion navigableRegion)
    {
       navigableRegions.add(navigableRegion);
    }
@@ -113,7 +113,7 @@ public class VisibilityGraphStatistics implements PlannerStatistics<VisibilityGr
       return navigableRegions.size();
    }
 
-   public NavigableRegion getNavigableRegion(int regionNumber)
+   public VisibilityMapWithNavigableRegion getNavigableRegion(int regionNumber)
    {
       return navigableRegions.get(regionNumber);
    }

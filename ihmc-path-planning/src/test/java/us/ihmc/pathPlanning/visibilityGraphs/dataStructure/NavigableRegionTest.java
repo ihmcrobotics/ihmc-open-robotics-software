@@ -38,7 +38,7 @@ public class NavigableRegionTest
             obstacleClusters.add(VisibilityGraphRandomTools.getRandomCluster(random));
          }
 
-         NavigableRegion navigableRegion = new NavigableRegion(planarRegion);
+         VisibilityMapWithNavigableRegion navigableRegion = new VisibilityMapWithNavigableRegion(planarRegion);
          navigableRegion.setVisibilityMapInLocal(visibilityMapHolder.getVisibilityMapInLocal());
          navigableRegion.setHomeRegionCluster(homeRegionCluster);
          for (int i = 0; i < numberOfObstacleClusters; i++)
@@ -51,7 +51,7 @@ public class NavigableRegionTest
          for (int i = 0; i < numberOfObstacleClusters; i++)
             VisibilityGraphTestTools.assertClustersEqual(obstacleClusters.get(i), navigableRegion.getObstacleClusters().get(i), epsilon);
 
-         navigableRegion = new NavigableRegion(planarRegion);
+         navigableRegion = new VisibilityMapWithNavigableRegion(planarRegion);
          navigableRegion.setVisibilityMapInWorld(visibilityMapHolder.getVisibilityMapInWorld());
          navigableRegion.setHomeRegionCluster(homeRegionCluster);
          for (int i = 0; i < numberOfObstacleClusters; i++)

@@ -6,7 +6,7 @@ import java.util.stream.Collectors;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.pathPlanning.visibilityGraphs.clusterManagement.Cluster;
-import us.ihmc.pathPlanning.visibilityGraphs.dataStructure.NavigableRegion;
+import us.ihmc.pathPlanning.visibilityGraphs.dataStructure.VisibilityMapWithNavigableRegion;
 import us.ihmc.pathPlanning.visibilityGraphs.interfaces.VisibilityGraphsParameters;
 import us.ihmc.pathPlanning.visibilityGraphs.tools.PlanarRegionTools;
 import us.ihmc.robotics.geometry.PlanarRegion;
@@ -14,7 +14,7 @@ import us.ihmc.robotics.geometry.PlanarRegion;
 public class NavigableRegions
 {
    private List<PlanarRegion> regions;
-   private List<NavigableRegion> navigableRegions;
+   private List<VisibilityMapWithNavigableRegion> navigableRegions;
 
    private final VisibilityGraphsParameters parameters;
 
@@ -35,7 +35,7 @@ public class NavigableRegions
       this.regions = regions;
    }
 
-   public List<NavigableRegion> getNavigableRegions()
+   public List<VisibilityMapWithNavigableRegion> getNavigableRegions()
    {
       return navigableRegions;
    }
@@ -46,7 +46,7 @@ public class NavigableRegions
 
       for (int i = 0; i < navigableRegions.size(); i++)
       {
-         NavigableRegion localPlanner = navigableRegions.get(i);
+         VisibilityMapWithNavigableRegion localPlanner = navigableRegions.get(i);
          Point3DReadOnly[] navigableExtrusions = new Point3D[localPlanner.getAllClusters().size()];
 
          for (Cluster cluster : localPlanner.getAllClusters())
@@ -73,7 +73,7 @@ public class NavigableRegions
       navigableRegions = VisibilityGraphsFactory.createNavigableRegionButNotVisibilityMaps(regions, parameters);
    }
 
-   public List<NavigableRegion> getNaviableRegionsList()
+   public List<VisibilityMapWithNavigableRegion> getNaviableRegionsList()
    {
       return navigableRegions;
    }

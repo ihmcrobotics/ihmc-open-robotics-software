@@ -70,7 +70,7 @@ public class VisibilityGraphMessagesConverter
       return message;
    }
 
-   public static NavigableRegionMessage convertToNavigableRegionMessage(NavigableRegion navigableRegion)
+   public static NavigableRegionMessage convertToNavigableRegionMessage(VisibilityMapWithNavigableRegion navigableRegion)
    {
       NavigableRegionMessage message = new NavigableRegionMessage();
 
@@ -164,9 +164,9 @@ public class VisibilityGraphMessagesConverter
       return mapHolder;
    }
 
-   public static List<NavigableRegion> convertToNavigableRegionsList(List<NavigableRegionMessage> message)
+   public static List<VisibilityMapWithNavigableRegion> convertToNavigableRegionsList(List<NavigableRegionMessage> message)
    {
-      List<NavigableRegion> navigableRegionList = new ArrayList<>();
+      List<VisibilityMapWithNavigableRegion> navigableRegionList = new ArrayList<>();
 
       for (int i = 0; i < message.size(); i++)
          navigableRegionList.add(convertToNavigableRegion(message.get(i)));
@@ -174,9 +174,9 @@ public class VisibilityGraphMessagesConverter
       return navigableRegionList;
    }
 
-   public static NavigableRegion convertToNavigableRegion(NavigableRegionMessage message)
+   public static VisibilityMapWithNavigableRegion convertToNavigableRegion(NavigableRegionMessage message)
    {
-      NavigableRegion navigableRegion = new NavigableRegion(PlanarRegionMessageConverter.convertToPlanarRegion(message.getHomeRegion()));
+      VisibilityMapWithNavigableRegion navigableRegion = new VisibilityMapWithNavigableRegion(PlanarRegionMessageConverter.convertToPlanarRegion(message.getHomeRegion()));
 
       navigableRegion.setHomeRegionCluster(convertToCluster(message.getHomeRegionCluster()));
       navigableRegion.setVisibilityMapInWorld(convertToVisibilityMap(message.getVisibilityMapInWorld()));

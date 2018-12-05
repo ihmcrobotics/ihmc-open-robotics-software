@@ -13,11 +13,11 @@ public class SingleSourceVisibilityMap implements VisibilityMapHolder
    private final Point3D sourceInWorld, sourceInLocal;
    private final int mapId;
    private final RigidBodyTransform transformToWorld;
-   private final NavigableRegion hostRegion;
+   private final VisibilityMapWithNavigableRegion hostRegion;
    private final VisibilityMap visibilityMapInLocal;
    private final VisibilityMap visibilityMapInWorld;
 
-   public SingleSourceVisibilityMap(Point3DReadOnly sourceInWorld, Collection<Connection> connectionsInLocal, NavigableRegion hostRegion)
+   public SingleSourceVisibilityMap(Point3DReadOnly sourceInWorld, Collection<Connection> connectionsInLocal, VisibilityMapWithNavigableRegion hostRegion)
    {
       this.hostRegion = hostRegion;
       this.sourceInWorld = new Point3D(sourceInWorld);
@@ -71,7 +71,7 @@ public class SingleSourceVisibilityMap implements VisibilityMapHolder
       return new Point2D(sourceInLocal);
    }
 
-   public NavigableRegion getHostRegion()
+   public VisibilityMapWithNavigableRegion getHostRegion()
    {
       return hostRegion;
    }
