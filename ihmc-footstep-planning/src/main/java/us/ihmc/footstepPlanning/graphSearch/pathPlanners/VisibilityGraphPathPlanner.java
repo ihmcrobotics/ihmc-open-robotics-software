@@ -132,7 +132,7 @@ public class VisibilityGraphPathPlanner extends AbstractWaypointsForFootstepsPla
       VisibilityMapHolder startMap = navigableRegionsManager.getStartMap();
       VisibilityMapHolder goalMap = navigableRegionsManager.getGoalMap();
       VisibilityMapHolder interRegionsMap = navigableRegionsManager.getInterRegionConnections();
-      List<NavigableRegion> navigableRegions = navigableRegionsManager.getNavigableRegions();
+      List<NavigableRegion> navigableRegions = navigableRegionsManager.getNavigableRegionsList();
 
       statistics.setStartVisibilityMapInWorld(startMap.getMapId(), startMap.getVisibilityMapInWorld());
       statistics.setGoalVisibilityMapInWorld(goalMap.getMapId(), goalMap.getVisibilityMapInWorld());

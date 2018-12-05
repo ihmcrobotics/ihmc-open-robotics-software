@@ -13,6 +13,8 @@ import us.ihmc.robotics.geometry.PlanarRegion;
 public class NavigableRegion implements VisibilityMapHolder
 {
    private final PlanarRegion homePlanarRegion;
+   
+   //TODO: +++JEP: Is this transform redundant since we have the homePlanarRegion?
    private final RigidBodyTransform transformToWorld = new RigidBodyTransform();
 
    private Cluster homeRegionCluster = null;

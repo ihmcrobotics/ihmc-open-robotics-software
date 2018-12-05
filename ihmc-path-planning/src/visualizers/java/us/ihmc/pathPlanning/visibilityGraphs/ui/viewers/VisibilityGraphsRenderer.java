@@ -166,9 +166,9 @@ public class VisibilityGraphsRenderer
          messager.submitMessage(BodyPathData, bodyPath);
          messager.submitMessage(StartVisibilityMap, navigableRegionsManager.getStartMap());
          messager.submitMessage(GoalVisibilityMap, navigableRegionsManager.getGoalMap());
-         messager.submitMessage(NavigableRegionVisibilityMap, navigableRegionsManager.getNavigableRegions());
+         messager.submitMessage(NavigableRegionVisibilityMap, navigableRegionsManager.getNavigableRegionsList());
          messager.submitMessage(InterRegionVisibilityMap, navigableRegionsManager.getInterRegionConnections());
-         messager.submitMessage(NavigableRegionData, navigableRegionsManager.getNavigableRegions());
+         messager.submitMessage(NavigableRegionData, navigableRegionsManager.getNavigableRegionsList());
       }
       catch (Exception e)
       {
