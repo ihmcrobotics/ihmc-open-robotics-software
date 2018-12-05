@@ -13,7 +13,7 @@ public class LogSettings
    public static final LogSettings STEPPR_IHMC = new LogSettings(true, "StepprIHMCGUI");
    public static final LogSettings SIMULATION = new LogSettings(false, "SimulationGUI");
    public static final LogSettings TEST_LOGGER = new LogSettings(true);
-   public static final LogSettings BEHAVIOR = new LogSettings(true);
+   public static final LogSettings BEHAVIOR = new LogSettings(false);
    public static final LogSettings TOOLBOX = new LogSettings(false);
    public static final LogSettings EXO_X1A = new LogSettings(false);
    public static final LogSettings EXO_HOPPER = new LogSettings(false);
@@ -23,7 +23,7 @@ public class LogSettings
    public static final LogSettings BABY_BEAST = new LogSettings(true);
    public static final LogSettings V2EXO = new LogSettings(true);
    public static final LogSettings MEGABOTS = new LogSettings(true, "MegaBOTSGUI");
-   public static final LogSettings FOOTSTEP_PLANNER = new LogSettings(true);
+   public static final LogSettings FOOTSTEP_PLANNER = new LogSettings(false);
    public static final LogSettings LLAMA = new LogSettings(true);
    public static final LogSettings THOR = new LogSettings(false);
 
