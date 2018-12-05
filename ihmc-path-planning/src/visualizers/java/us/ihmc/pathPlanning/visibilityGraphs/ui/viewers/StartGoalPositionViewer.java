@@ -10,8 +10,8 @@ import javafx.scene.paint.Color;
 import javafx.scene.paint.PhongMaterial;
 import javafx.scene.shape.Sphere;
 import us.ihmc.euclid.tuple3D.Point3D;
-import us.ihmc.javaFXToolkit.messager.Messager;
-import us.ihmc.javaFXToolkit.messager.MessagerAPIFactory.Topic;
+import us.ihmc.messager.Messager;
+import us.ihmc.messager.MessagerAPIFactory.Topic;
 
 public class StartGoalPositionViewer extends AnimationTimer
 {

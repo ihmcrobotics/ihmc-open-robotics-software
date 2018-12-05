@@ -31,7 +31,7 @@ public class KinematicsToolboxCenterOfMassCommand implements Command<KinematicsT
    }
 
    @Override
-   public void set(KinematicsToolboxCenterOfMassMessage message)
+   public void setFromMessage(KinematicsToolboxCenterOfMassMessage message)
    {
       if (message == null)
       {

@@ -30,12 +30,6 @@ public interface ReferenceCoPTrajectoryGeneratorInterface
 
    void clear();
 
-   /**
-    * Add footstep location to planned
-    * @param footstep
-    */
-   void addFootstepToPlan(Footstep footstep, FootstepTiming timing);
-
    int getNumberOfFootstepsRegistered();
 
    void update(double currentTime);
@@ -43,11 +37,7 @@ public interface ReferenceCoPTrajectoryGeneratorInterface
    void getDesiredCenterOfPressure(FixedFramePoint3DBasics desiredCoPToPack);
    void getDesiredCenterOfPressure(FixedFramePoint3DBasics desiredCoPToPack, FixedFrameVector3DBasics desiredCoPVelocityToPack);
 
-   void initializeForTransfer(double currentTime);
-
-   void initializeForSwing(double currentTime);
-
-   void computeReferenceCoPsStartingFromDoubleSupport(boolean atAStop, RobotSide transferToSide);
+   void computeReferenceCoPsStartingFromDoubleSupport(boolean atAStop, RobotSide transferToSide, RobotSide previousTransferToSide);
 
    void computeReferenceCoPsStartingFromSingleSupport(RobotSide supportSide);
 

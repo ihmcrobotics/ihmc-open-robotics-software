@@ -13,10 +13,10 @@ import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.graphicsDescription.yoGraphics.BagOfBalls;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicReferenceFrame;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
-import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
+import us.ihmc.mecano.spatial.Wrench;
+import us.ihmc.robotics.contactable.ContactablePlaneBody;
 import us.ihmc.robotics.math.filters.AlphaFilteredYoVariable;
 import us.ihmc.robotics.math.filters.GlitchFilteredYoBoolean;
-import us.ihmc.robotics.screwTheory.Wrench;
 import us.ihmc.robotics.sensors.ForceSensorDataReadOnly;
 import us.ihmc.yoVariables.providers.DoubleProvider;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
@@ -105,9 +105,9 @@ public class WrenchBasedFootSwitch implements HeelSwitch, ToeSwitch
       if (showForceSensorFrames && yoGraphicsListRegistry != null)
       {
          final double scale = 1.0;
-         yoGraphicForceSensorMeasurementFrame = new YoGraphicReferenceFrame(forceSensorData.getMeasurementFrame(), registry, .6 * scale,
+         yoGraphicForceSensorMeasurementFrame = new YoGraphicReferenceFrame(forceSensorData.getMeasurementFrame(), registry, false, .6 * scale,
                YoAppearance.Yellow());
-         yoGraphicForceSensorFootFrame = new YoGraphicReferenceFrame(contactablePlaneBody.getFrameAfterParentJoint(), registry, scale,
+         yoGraphicForceSensorFootFrame = new YoGraphicReferenceFrame(contactablePlaneBody.getFrameAfterParentJoint(), registry, false, scale,
                YoAppearance.AliceBlue());
          yoGraphicsListRegistry.registerYoGraphic(namePrefix + "MeasFrame", yoGraphicForceSensorMeasurementFrame);
          yoGraphicsListRegistry.registerYoGraphic(namePrefix + "FootFrame", yoGraphicForceSensorFootFrame);
@@ -323,25 +323,25 @@ public class WrenchBasedFootSwitch implements HeelSwitch, ToeSwitch
       forceSensorData.getWrench(footWrenchToPack);
 
       // First in measurement frame for all the frames...
-      footForce.setToZero(footWrenchToPack.getExpressedInFrame());
-      footWrenchToPack.getLinearPart(footForce);
+      footForce.setToZero(footWrenchToPack.getReferenceFrame());
+      footForce.set(footWrenchToPack.getLinearPart());
       yoFootForce.set(footForce);
 
-      footTorque.setToZero(footWrenchToPack.getExpressedInFrame());
-      footWrenchToPack.getAngularPart(footTorque);
+      footTorque.setToZero(footWrenchToPack.getReferenceFrame());
+      footTorque.set(footWrenchToPack.getAngularPart());
       yoFootTorque.set(footTorque);
 
       // magnitude of force part is independent of frame
       footForceMagnitude.set(footForce.length());
 
       // Now change to frame after the parent joint (ankle or wrist for example):
-      footWrenchInBodyFixedFrame.set(footWrenchToPack);
+      footWrenchInBodyFixedFrame.setIncludingFrame(footWrenchToPack);
       footWrenchInBodyFixedFrame.changeFrame(contactablePlaneBody.getRigidBody().getBodyFixedFrame());
 
-      footForce.setToZero(footWrenchInBodyFixedFrame.getExpressedInFrame());
-      footWrenchInBodyFixedFrame.getLinearPart(footForce);
-      footTorque.setToZero(footWrenchInBodyFixedFrame.getExpressedInFrame());
-      footWrenchInBodyFixedFrame.getAngularPart(footTorque);
+      footForce.setToZero(footWrenchInBodyFixedFrame.getReferenceFrame());
+      footForce.set(footWrenchInBodyFixedFrame.getLinearPart());
+      footTorque.setToZero(footWrenchInBodyFixedFrame.getReferenceFrame());
+      footTorque.set(footWrenchInBodyFixedFrame.getAngularPart());
 
       footForce.changeFrame(contactablePlaneBody.getFrameAfterParentJoint());
       yoFootForceInFoot.set(footForce);

@@ -6,6 +6,7 @@ import us.ihmc.quadrupedRobotics.input.managers.QuadrupedTeleopManager;
 import us.ihmc.quadrupedRobotics.model.QuadrupedInitialOffsetAndYaw;
 import us.ihmc.quadrupedRobotics.model.QuadrupedInitialPositionParameters;
 import us.ihmc.quadrupedRobotics.simulation.QuadrupedGroundContactModelType;
+import us.ihmc.robotModels.FullRobotModel;
 import us.ihmc.simulationConstructionSetTools.util.simulationrunner.GoalOrientedTestConductor;
 import us.ihmc.simulationconstructionset.SimulationConstructionSetParameters;
 import us.ihmc.simulationconstructionset.util.ground.TerrainObject3D;
@@ -37,4 +38,10 @@ public interface QuadrupedTestFactory
    void setScsParameters(SimulationConstructionSetParameters scsParameters);
 
    void setInitialOffset(QuadrupedInitialOffsetAndYaw initialOffset);
+
+   String getRobotName();
+
+   FullRobotModel getFullRobotModel();
+
+   void close();
 }

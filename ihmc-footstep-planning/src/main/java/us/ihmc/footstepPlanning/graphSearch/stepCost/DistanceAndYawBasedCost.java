@@ -1,26 +1,32 @@
 package us.ihmc.footstepPlanning.graphSearch.stepCost;
 
-import us.ihmc.euclid.tuple2D.Point2D;
-import us.ihmc.footstepPlanning.graphSearch.FootstepPlannerParameters;
 import us.ihmc.footstepPlanning.graphSearch.graph.FootstepNode;
-import us.ihmc.robotics.geometry.AngleTools;
+import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerCostParameters;
+import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParameters;
 
 public class DistanceAndYawBasedCost implements FootstepCost
 {
    private final FootstepPlannerParameters parameters;
+   private final FootstepPlannerCostParameters costParameters;
+
+   private final EuclideanDistanceAndYawBasedCost euclideanCost;
+   private final QuadraticDistanceAndYawCost quadraticCost;
 
    public DistanceAndYawBasedCost(FootstepPlannerParameters parameters)
    {
       this.parameters = parameters;
+      costParameters = parameters.getCostParameters();
+
+      euclideanCost = new EuclideanDistanceAndYawBasedCost(parameters);
+      quadraticCost = new QuadraticDistanceAndYawCost(parameters);
    }
 
    @Override
    public double compute(FootstepNode startNode, FootstepNode endNode)
    {
-      Point2D startPoint = startNode.getOrComputeMidFootPoint(parameters.getIdealFootstepWidth());
-      Point2D endPoint = endNode.getOrComputeMidFootPoint(parameters.getIdealFootstepWidth());
-      double euclideanDistance = startPoint.distance(endPoint);
-      double yaw = AngleTools.computeAngleDifferenceMinusPiToPi(startNode.getYaw(), endNode.getYaw());
-      return euclideanDistance + parameters.getYawWeight() * Math.abs(yaw) + parameters.getCostPerStep();
+      if (costParameters.useQuadraticDistanceCost())
+         return quadraticCost.compute(startNode, endNode);
+      else
+         return euclideanCost.compute(startNode, endNode);
    }
 }

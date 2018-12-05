@@ -22,9 +22,9 @@ import us.ihmc.graphicsDescription.instructions.ArcTorusGraphics3DInstruction;
 import us.ihmc.graphicsDescription.structure.Graphics3DNode;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicVector;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
+import us.ihmc.mecano.spatial.SpatialInertia;
 import us.ihmc.robotics.geometry.RotationalInertiaCalculator;
 import us.ihmc.robotics.geometry.shapes.FrameTorus3d;
-import us.ihmc.robotics.screwTheory.RigidBodyInertia;
 import us.ihmc.simulationConstructionSetTools.util.environments.SelectableObject;
 import us.ihmc.simulationConstructionSetTools.util.environments.SelectableObjectListener;
 import us.ihmc.simulationconstructionset.GroundContactPoint;
@@ -88,10 +88,10 @@ public class ContactableToroidRobot extends ContactablePinJointRobot implements 
       
       Matrix3D inertia = RotationalInertiaCalculator.getRotationalInertiaMatrixOfTorus(mass, wheelTorus.getRadius(), wheelTorus.getThickness());
       
-      RigidBodyInertia rigidBodyInertia = new RigidBodyInertia(ReferenceFrame.getWorldFrame(), inertia, mass);
+      SpatialInertia rigidBodyInertia = new SpatialInertia(ReferenceFrame.getWorldFrame(), ReferenceFrame.getWorldFrame(), inertia, mass);
       ReferenceFrame jointFrame = ReferenceFrame.constructFrameWithUnchangingTransformToParent("toroidFrame", ReferenceFrame.getWorldFrame(), pinJointTransform);
       rigidBodyInertia.changeFrame(jointFrame);
-      wheelLink.setMomentOfInertia(rigidBodyInertia.getMassMomentOfInertiaPartCopy());
+      wheelLink.setMomentOfInertia(new Matrix3D(rigidBodyInertia.getMomentOfInertia()));
 
       linkGraphics = new Graphics3DObject();
       linkGraphics.rotate(rotation);

@@ -7,16 +7,32 @@ import java.util.Map.Entry;
 import java.util.Random;
 import java.util.Set;
 
+import org.junit.After;
 import org.junit.Test;
 
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.tools.ReferenceFrameTools;
 import us.ihmc.euclid.tools.EuclidCoreTestTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.mecano.frames.MovingReferenceFrame;
+import us.ihmc.mecano.multiBodySystem.OneDoFJoint;
+import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
+import us.ihmc.mecano.spatial.Twist;
+import us.ihmc.mecano.tools.JointStateType;
+import us.ihmc.mecano.tools.MecanoTestTools;
+import us.ihmc.mecano.tools.MultiBodySystemRandomTools;
+import us.ihmc.mecano.tools.MultiBodySystemStateIntegrator;
 import us.ihmc.robotics.referenceFrames.MidFrameZUpFrame;
 
 public class MovingMidFrameZUpFrameTest
 {
+   @After
+   public void tearDown()
+   {
+      ReferenceFrameTools.clearWorldFrameTree();
+   }
+
    @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testAgainstFiniteDifferenceWithChainRobot()
@@ -24,8 +40,9 @@ public class MovingMidFrameZUpFrameTest
       Random random = new Random(3452345L);
       int numberOfJoints = 20;
       double updateDT = 1.0e-8;
+      MultiBodySystemStateIntegrator integrator = new MultiBodySystemStateIntegrator(updateDT);
 
-      List<OneDoFJoint> joints = ScrewTestTools.createRandomChainRobotWithOneDoFJoints(numberOfJoints, random);
+      List<OneDoFJoint> joints = MultiBodySystemRandomTools.nextOneDoFJointChain(random, numberOfJoints);
 
       Map<MovingMidFrameZUpFrame, NumericalMovingReferenceFrame> jointFramesToFDFrames = new HashMap<>();
       for (int i = 0; i < 5; i++)
@@ -46,8 +63,8 @@ public class MovingMidFrameZUpFrameTest
       Twist actualTwist = new Twist();
       Twist expectedTwist = new Twist();
 
-      ScrewTestTools.setRandomPositions(joints, random);
-      ScrewTestTools.setRandomVelocities(joints, random);
+      MultiBodySystemRandomTools.nextState(random, JointStateType.CONFIGURATION, -Math.PI / 2.0, Math.PI / 2.0, joints);
+      MultiBodySystemRandomTools.nextState(random, JointStateType.VELOCITY, joints);
       joints.get(0).getPredecessor().updateFramesRecursively();
 
       jointFramesToFDFrames.keySet().forEach(MovingReferenceFrame::update);
@@ -55,7 +72,7 @@ public class MovingMidFrameZUpFrameTest
 
       for (int i = 0; i < 100; i++)
       {
-         ScrewTestTools.integrateVelocities(joints, updateDT);
+         integrator.integrateFromVelocity(joints);
          joints.get(0).getPredecessor().updateFramesRecursively();
          jointFramesToFDFrames.keySet().forEach(MovingReferenceFrame::update);
          jointFramesToFDFrames.values().forEach(MovingReferenceFrame::update);
@@ -65,10 +82,10 @@ public class MovingMidFrameZUpFrameTest
          {
             entry.getKey().getTwistOfFrame(expectedTwist);
             entry.getValue().getTwistOfFrame(actualTwist);
-            expectedTwist.changeBodyFrameNoRelativeTwist(entry.getValue());
+            expectedTwist.setBodyFrame(entry.getValue());
             expectedTwist.changeFrame(entry.getValue());
 
-            TwistCalculatorTest.assertTwistEquals(expectedTwist, actualTwist, 1.0e-5);
+            MecanoTestTools.assertTwistEquals(expectedTwist, actualTwist, 1.0e-5);
          }
       }
    }
@@ -80,7 +97,7 @@ public class MovingMidFrameZUpFrameTest
       Random random = new Random(3452345L);
       int numberOfJoints = 20;
 
-      List<OneDoFJoint> joints = ScrewTestTools.createRandomChainRobotWithOneDoFJoints(numberOfJoints, random);
+      List<OneDoFJoint> joints = MultiBodySystemRandomTools.nextOneDoFJointChain(random, numberOfJoints);
 
       Map<MidFrameZUpFrame, MovingMidFrameZUpFrame> zUpFramesToMovingZUpFrames = new HashMap<>();
       for (int i = 0; i < 5; i++)
@@ -103,7 +120,7 @@ public class MovingMidFrameZUpFrameTest
 
       for (int i = 0; i < 100; i++)
       {
-         ScrewTestTools.setRandomPositions(joints, random);
+         MultiBodySystemRandomTools.nextState(random, JointStateType.CONFIGURATION, -Math.PI / 2.0, Math.PI / 2.0, joints);
          joints.get(0).getPredecessor().updateFramesRecursively();
          zUpFramesToMovingZUpFrames.keySet().forEach(ReferenceFrame::update);
          zUpFramesToMovingZUpFrames.values().forEach(ReferenceFrame::update);

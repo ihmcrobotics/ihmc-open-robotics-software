@@ -40,11 +40,8 @@ public class LidarScanViewer implements Runnable
    private final AtomicReference<Integer> numberOfScans;
    private final AtomicInteger currentScanIndex = new AtomicInteger(0);
 
-   private final REAUIMessager uiMessager;
-
    public LidarScanViewer(REAUIMessager uiMessager)
    {
-      this.uiMessager = uiMessager;
       newMessageToRender = uiMessager.createInput(REAModuleAPI.LidarScanState);
       enable = uiMessager.createInput(REAModuleAPI.UILidarScanShow, false);
       clear = uiMessager.createInput(REAModuleAPI.UILidarScanClear, false);
@@ -88,8 +85,6 @@ public class LidarScanViewer implements Runnable
          return;
 
       LidarScanMessage message = newMessageToRender.getAndSet(null);
-
-      uiMessager.submitStateRequestToModule(REAModuleAPI.RequestLidarScan);
 
       if (message == null)
          return;

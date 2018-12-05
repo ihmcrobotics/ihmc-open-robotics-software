@@ -14,11 +14,9 @@ import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.robotics.geometry.transformables.EuclideanWaypoint;
 import us.ihmc.robotics.geometry.yoFrameObjects.YoFrameEuclideanWaypoint;
 import us.ihmc.robotics.math.trajectories.waypoints.interfaces.EuclideanTrajectoryPointInterface;
-import us.ihmc.yoVariables.listener.VariableChangedListener;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoFramePoint3D;
 import us.ihmc.yoVariables.variable.YoFrameVector3D;
-import us.ihmc.yoVariables.variable.YoVariable;
 
 public class YoFrameEuclideanTrajectoryPoint
       extends YoFrameTrajectoryPoint<YoFrameEuclideanTrajectoryPoint, FrameEuclideanTrajectoryPoint, SimpleEuclideanTrajectoryPoint>
@@ -104,7 +102,6 @@ public class YoFrameEuclideanTrajectoryPoint
    @Override
    public void setToNaN()
    {
-      super.setToNaN();
       setTimeToNaN();
       setPositionToNaN();
       setLinearVelocityToNaN();
@@ -113,7 +110,7 @@ public class YoFrameEuclideanTrajectoryPoint
    @Override
    public void setToNaN(ReferenceFrame referenceFrame)
    {
-      super.setToNaN(referenceFrame);
+      switchCurrentReferenceFrame(referenceFrame);
       setToNaN();
    }
 

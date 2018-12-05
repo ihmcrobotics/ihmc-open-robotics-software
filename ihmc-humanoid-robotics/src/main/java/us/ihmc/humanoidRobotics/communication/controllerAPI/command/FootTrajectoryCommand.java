@@ -33,9 +33,9 @@ public class FootTrajectoryCommand implements Command<FootTrajectoryCommand, Foo
    }
 
    @Override
-   public void set(FootTrajectoryMessage message)
+   public void setFromMessage(FootTrajectoryMessage message)
    {
-      se3Trajectory.set(message.getSe3Trajectory());
+      se3Trajectory.setFromMessage(message.getSe3Trajectory());
       robotSide = RobotSide.fromByte(message.getRobotSide());
    }
 

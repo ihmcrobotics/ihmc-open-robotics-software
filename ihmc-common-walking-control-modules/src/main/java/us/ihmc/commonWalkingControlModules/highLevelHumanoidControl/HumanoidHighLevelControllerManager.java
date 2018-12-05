@@ -12,19 +12,19 @@ import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.Co
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.HighLevelControlManagerFactory;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.HighLevelControllerStateFactory;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.HighLevelControllerState;
-import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.WalkingControllerState;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHumanoidControllerToolbox;
 import us.ihmc.communication.controllerAPI.CommandInputManager;
 import us.ihmc.communication.controllerAPI.StatusMessageOutputManager;
 import us.ihmc.euclid.referenceFrame.FramePoint2D;
-import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.HighLevelControllerStateCommand;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelControllerName;
 import us.ihmc.humanoidRobotics.model.CenterOfPressureDataHolder;
+import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
+import us.ihmc.mecano.tools.MultiBodySystemTools;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
+import us.ihmc.robotics.contactable.ContactablePlaneBody;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
-import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.robotics.sensors.ForceSensorDataHolderReadOnly;
 import us.ihmc.robotics.stateMachine.core.StateChangedListener;
 import us.ihmc.robotics.stateMachine.core.StateMachine;
@@ -103,7 +103,8 @@ public class HumanoidHighLevelControllerManager implements RobotController
          this.registry.addChild(highLevelControllerState.getYoVariableRegistry());
       }
 
-      yoLowLevelOneDoFJointDesiredDataHolder = new YoLowLevelOneDoFJointDesiredDataHolder(controllerToolbox.getFullRobotModel().getOneDoFJoints(), registry);
+      OneDoFJointBasics[] controlledOneDoFJoints = MultiBodySystemTools.filterJoints(controllerToolbox.getControlledJoints(), OneDoFJointBasics.class);
+      yoLowLevelOneDoFJointDesiredDataHolder = new YoLowLevelOneDoFJointDesiredDataHolder(controlledOneDoFJoints, registry);
    }
 
    public void addYoVariableRegistry(YoVariableRegistry registryToAdd)
@@ -236,7 +237,7 @@ public class HumanoidHighLevelControllerManager implements RobotController
       JointDesiredOutputListReadOnly lowLevelOneDoFJointDesiredDataHolder = stateMachine.getCurrentState().getOutputForLowLevelController();
       for (int jointIndex = 0; jointIndex < lowLevelOneDoFJointDesiredDataHolder.getNumberOfJointsWithDesiredOutput(); jointIndex++)
       {
-         OneDoFJoint controlledJoint = lowLevelOneDoFJointDesiredDataHolder.getOneDoFJoint(jointIndex);
+         OneDoFJointBasics controlledJoint = lowLevelOneDoFJointDesiredDataHolder.getOneDoFJoint(jointIndex);
          JointDesiredOutputReadOnly lowLevelJointData = lowLevelOneDoFJointDesiredDataHolder.getJointDesiredOutput(controlledJoint);
 
          if (!lowLevelJointData.hasControlMode())
@@ -250,18 +251,5 @@ public class HumanoidHighLevelControllerManager implements RobotController
    public HighLevelControllerName getCurrentHighLevelControlState()
    {
       return stateMachine.getCurrentStateKey();
-   }
-
-   public void reinitializeWalking()
-   {
-      WalkingControllerState walkingControllerState = (WalkingControllerState) stateMachine.getState(HighLevelControllerName.WALKING);
-      if (walkingControllerState != null)
-      {
-         walkingControllerState.initializeDesiredHeightToCurrent();
-         walkingControllerState.reinitializePelvisOrientation(false);
-      }
-
-      if (managerFactory != null)
-         managerFactory.getOrCreatePelvisOrientationManager().setToHoldCurrentInWorldFrame();
    }
 }

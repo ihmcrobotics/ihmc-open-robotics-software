@@ -84,7 +84,7 @@ public class ScriptBasedControllerCommandGenerator
       {
          FootstepDataListMessage message = (FootstepDataListMessage) scriptObject;
          FootstepDataListCommand command = new FootstepDataListCommand();
-         command.set(message);
+         command.setFromMessage(message);
          controllerCommands.add(command);
       }
       else if (scriptObject instanceof FootTrajectoryMessage)
@@ -110,14 +110,14 @@ public class ScriptBasedControllerCommandGenerator
       {
          PelvisHeightTrajectoryMessage message = (PelvisHeightTrajectoryMessage) scriptObject;
          PelvisHeightTrajectoryCommand command = new PelvisHeightTrajectoryCommand();
-         command.set(message);
+         command.setFromMessage(message);
          controllerCommands.add(command);
       }
       else if (scriptObject instanceof PauseWalkingMessage)
       {
          PauseWalkingMessage message = (PauseWalkingMessage) scriptObject;
          PauseWalkingCommand command = new PauseWalkingCommand();
-         command.set(message);
+         command.setFromMessage(message);
          controllerCommands.add(command);
       }
 

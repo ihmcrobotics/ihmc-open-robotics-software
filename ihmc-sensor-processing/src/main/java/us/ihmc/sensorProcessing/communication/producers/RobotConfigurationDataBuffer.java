@@ -11,12 +11,12 @@ import gnu.trove.list.array.TFloatArrayList;
 import us.ihmc.communication.net.PacketConsumer;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
+import us.ihmc.mecano.multiBodySystem.interfaces.FloatingJointBasics;
+import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
+import us.ihmc.mecano.spatial.Twist;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotModels.FullRobotModel;
 import us.ihmc.robotModels.FullRobotModelUtils;
-import us.ihmc.robotics.screwTheory.FloatingInverseDynamicsJoint;
-import us.ihmc.robotics.screwTheory.OneDoFJoint;
-import us.ihmc.robotics.screwTheory.Twist;
 import us.ihmc.robotics.sensors.ForceSensorDataHolder;
 import us.ihmc.sensorProcessing.communication.packets.dataobjects.RobotConfigurationDataFactory;
 
@@ -171,7 +171,7 @@ public class RobotConfigurationDataBuffer implements PacketConsumer<RobotConfigu
    {
       FullRobotModelCache fullRobotModelCache = getFullRobotModelCache(model);
 
-      FloatingInverseDynamicsJoint rootJoint = model.getRootJoint();
+      FloatingJointBasics rootJoint = model.getRootJoint();
       if (robotConfigurationData.getJointNameHash() != fullRobotModelCache.jointNameHash)
       {
          System.out.println(robotConfigurationData.getJointNameHash());
@@ -189,16 +189,16 @@ public class RobotConfigurationDataBuffer implements PacketConsumer<RobotConfigu
       }
 
       Vector3D translation = robotConfigurationData.getRootTranslation();
-      rootJoint.setPosition(translation.getX(), translation.getY(), translation.getZ());
+      rootJoint.getJointPose().setPosition(translation.getX(), translation.getY(), translation.getZ());
       Quaternion orientation = robotConfigurationData.getRootOrientation();
-      rootJoint.setRotation(orientation.getX(), orientation.getY(), orientation.getZ(), orientation.getS());
+      rootJoint.getJointPose().getOrientation().setQuaternion(orientation.getX(), orientation.getY(), orientation.getZ(), orientation.getS());
 
       Twist rootJointTwist = new Twist();
-      rootJoint.getJointTwist(rootJointTwist);
+      rootJointTwist.setIncludingFrame(rootJoint.getJointTwist());
       Vector3D pelvisAngularVelocity = robotConfigurationData.getPelvisAngularVelocity();
       Vector3D pelvisLinearVelocity = robotConfigurationData.getPelvisLinearVelocity();
-      rootJointTwist.setAngularPart(pelvisAngularVelocity);
-      rootJointTwist.setLinearPart(pelvisLinearVelocity);
+      rootJointTwist.getAngularPart().set(pelvisAngularVelocity);
+      rootJointTwist.getLinearPart().set(pelvisLinearVelocity);
       rootJoint.setJointTwist(rootJointTwist);
 
       rootJoint.getPredecessor().updateFramesRecursively();
@@ -230,7 +230,7 @@ public class RobotConfigurationDataBuffer implements PacketConsumer<RobotConfigu
 
    private static class FullRobotModelCache
    {
-      private final OneDoFJoint[] allJoints;
+      private final OneDoFJointBasics[] allJoints;
       private final long jointNameHash;
 
       private FullRobotModelCache(FullRobotModel fullRobotModel)

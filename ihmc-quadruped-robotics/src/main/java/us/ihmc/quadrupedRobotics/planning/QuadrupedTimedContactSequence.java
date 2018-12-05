@@ -6,11 +6,12 @@ import java.util.List;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.Point3D;
-import us.ihmc.quadrupedRobotics.util.PreallocatedList;
+import us.ihmc.commons.lists.PreallocatedList;
 import us.ihmc.quadrupedRobotics.util.TimeIntervalTools;
 import us.ihmc.robotics.robotSide.QuadrantDependentList;
 import us.ihmc.robotics.robotSide.RobotQuadrant;
 import us.ihmc.tools.lists.ArraySorter;
+import us.ihmc.yoVariables.variable.YoEnum;
 
 public class QuadrupedTimedContactSequence extends PreallocatedList<QuadrupedTimedContactPhase>
 {
@@ -52,7 +53,7 @@ public class QuadrupedTimedContactSequence extends PreallocatedList<QuadrupedTim
 
    public QuadrupedTimedContactSequence(int pastContactPhaseCapacity, int futureContactPhaseCapacity)
    {
-      super(pastContactPhaseCapacity + futureContactPhaseCapacity + 1, QuadrupedTimedContactPhase.class);
+      super(QuadrupedTimedContactPhase.class, QuadrupedTimedContactPhase::new, pastContactPhaseCapacity + futureContactPhaseCapacity + 1);
       this.pastContactPhaseCapacity = pastContactPhaseCapacity;
 
       if (capacity() < 1)
@@ -83,19 +84,19 @@ public class QuadrupedTimedContactSequence extends PreallocatedList<QuadrupedTim
    /**
     * compute piecewise center of pressure plan given an array of upcoming steps
     * @param stepSequence list of upcoming steps (input)
-    * @param currentSolePosition current sole positions (input)
+    * @param soleFrames current sole frames (input)
     * @param currentContactState current sole contact state (input)
     * @param currentTime current time (input)
     */
    public void update(List<? extends QuadrupedTimedStep> stepSequence, QuadrantDependentList<? extends ReferenceFrame> soleFrames,
-         QuadrantDependentList<ContactState> currentContactState, double currentTime)
+                      QuadrantDependentList<YoEnum<ContactState>> currentContactState, double currentTime)
    {
       // initialize contact state and sole positions
       for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
       {
          solePosition.get(robotQuadrant).setToZero(soleFrames.get(robotQuadrant));
          solePosition.get(robotQuadrant).changeFrame(ReferenceFrame.getWorldFrame());
-         contactState.set(robotQuadrant, currentContactState.get(robotQuadrant));
+         contactState.set(robotQuadrant, currentContactState.get(robotQuadrant).getEnumValue());
       }
 
       // initialize step transitions
@@ -190,11 +191,11 @@ public class QuadrupedTimedContactSequence extends PreallocatedList<QuadrupedTim
       contactPhase.getTimeInterval().setEndTime(contactPhase.getTimeInterval().getStartTime() + 1.0);
    }
 
-   private boolean isEqualContactState(QuadrantDependentList<ContactState> contactStateA, QuadrantDependentList<ContactState> contactStateB)
+   private boolean isEqualContactState(QuadrantDependentList<ContactState> contactStateA, QuadrantDependentList<YoEnum<ContactState>> contactStateB)
    {
       for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
       {
-         if (contactStateA.get(robotQuadrant) != contactStateB.get(robotQuadrant))
+         if (contactStateA.get(robotQuadrant) != contactStateB.get(robotQuadrant).getEnumValue())
             return false;
       }
       return true;
@@ -202,10 +203,9 @@ public class QuadrupedTimedContactSequence extends PreallocatedList<QuadrupedTim
 
    private QuadrupedTimedContactPhase createNewContactPhase(double startTime, QuadrantDependentList<ContactState> contactState, QuadrantDependentList<FramePoint3D> solePosition)
    {
-      if (super.add())
+      if (remaining() > 0)
       {
-         QuadrupedTimedContactPhase contactPhase;
-         contactPhase = super.get(super.size() - 1);
+         QuadrupedTimedContactPhase contactPhase = add();
          contactPhase.getTimeInterval().setStartTime(startTime);
          contactPhase.setContactState(contactState);
          contactPhase.setSolePosition(solePosition);

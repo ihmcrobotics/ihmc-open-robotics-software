@@ -13,12 +13,14 @@ import us.ihmc.euclid.matrix.RotationMatrix;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.mecano.multiBodySystem.interfaces.JointBasics;
+import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
+import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
+import us.ihmc.mecano.spatial.SpatialVector;
+import us.ihmc.mecano.tools.MultiBodySystemFactories;
+import us.ihmc.mecano.tools.MultiBodySystemTools;
 import us.ihmc.robotics.screwTheory.GeometricJacobian;
-import us.ihmc.robotics.screwTheory.InverseDynamicsJoint;
-import us.ihmc.robotics.screwTheory.OneDoFJoint;
-import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.robotics.screwTheory.ScrewTools;
-import us.ihmc.robotics.screwTheory.SpatialMotionVector;
 
 /**
  * @author twan
@@ -28,7 +30,7 @@ public class NumericalInverseKinematicsCalculator implements InverseKinematicsCa
 {
    private final InverseJacobianSolver inverseJacobianCalculator;
    
-   private final OneDoFJoint[] oneDoFJoints;
+   private final OneDoFJointBasics[] oneDoFJoints;
    private final double tolerance;
    private final int maxIterations;
    private final double maxStepSize;
@@ -46,7 +48,7 @@ public class NumericalInverseKinematicsCalculator implements InverseKinematicsCa
    private final Vector3D axis = new Vector3D();
    private final Vector3D errorTranslationVector = new Vector3D();
 
-   private final DenseMatrix64F spatialError = new DenseMatrix64F(SpatialMotionVector.SIZE, 1);
+   private final DenseMatrix64F spatialError = new DenseMatrix64F(SpatialVector.SIZE, 1);
    private final DenseMatrix64F jointAnglesCorrection;
    private final DenseMatrix64F jointAnglesMinimumError;
    
@@ -62,12 +64,12 @@ public class NumericalInverseKinematicsCalculator implements InverseKinematicsCa
    private final GeometricJacobian jacobian;
    private final double lambdaLeastSquares;
    
-   public static NumericalInverseKinematicsCalculator createIKCalculator(InverseDynamicsJoint[] jointsToControl, int maxIterations)
+   public static NumericalInverseKinematicsCalculator createIKCalculator(JointBasics[] jointsToControl, int maxIterations)
    {
-      InverseDynamicsJoint[] cloneOfControlledJoints = ScrewTools.cloneJointPath(jointsToControl);
+      JointBasics[] cloneOfControlledJoints = MultiBodySystemFactories.cloneKinematicChain(jointsToControl);
 
       int numberOfDoFs = cloneOfControlledJoints.length;
-      RigidBody cloneOfEndEffector = cloneOfControlledJoints[numberOfDoFs - 1].getSuccessor();
+      RigidBodyBasics cloneOfEndEffector = cloneOfControlledJoints[numberOfDoFs - 1].getSuccessor();
       ReferenceFrame cloneOfEndEffectorFrame = cloneOfEndEffector.getBodyFixedFrame();
       GeometricJacobian jacobian = new GeometricJacobian(cloneOfControlledJoints, cloneOfEndEffectorFrame);
 
@@ -88,11 +90,11 @@ public class NumericalInverseKinematicsCalculator implements InverseKinematicsCa
          throw new RuntimeException("jacobian.getJacobianFrame() != jacobian.getEndEffectorFrame()");
       
       this.jacobian = jacobian;
-      numberOfConstraints = SpatialMotionVector.SIZE;
+      numberOfConstraints = SpatialVector.SIZE;
       numberOfDoF = jacobian.getNumberOfColumns();
       inverseJacobianCalculator = InverseJacobianSolver.createInverseJacobianSolver(numberOfConstraints, numberOfDoF, false);
 
-      oneDoFJoints = ScrewTools.filterJoints(jacobian.getJointsInOrder(), OneDoFJoint.class);
+      oneDoFJoints = MultiBodySystemTools.filterJoints(jacobian.getJointsInOrder(), OneDoFJointBasics.class);
       if (oneDoFJoints.length != jacobian.getJointsInOrder().length)
          throw new RuntimeException("Can currently only handle OneDoFJoints");
 
@@ -120,7 +122,7 @@ public class NumericalInverseKinematicsCalculator implements InverseKinematicsCa
    
    public void setSelectionMatrix(DenseMatrix64F selectionMatrix)
    {
-      if (selectionMatrix.getNumCols() != SpatialMotionVector.SIZE)
+      if (selectionMatrix.getNumCols() != SpatialVector.SIZE)
          throw new RuntimeException("The selection matrix must have 6 columns, the argument has: " + selectionMatrix.getNumCols());
 
       inverseJacobianCalculator.setSelectionMatrix(selectionMatrix);
@@ -167,7 +169,7 @@ public class NumericalInverseKinematicsCalculator implements InverseKinematicsCa
       bestToPack.set(jointAnglesMinimumError);
    }
    
-   public void getBest(LinkedHashMap<OneDoFJoint, Double> bestToPack)
+   public void getBest(LinkedHashMap<OneDoFJointBasics, Double> bestToPack)
    {
       for (int i = 0; i < oneDoFJoints.length; i++)
          bestToPack.put(oneDoFJoints[i], jointAnglesMinimumError.get(i, 0));
@@ -244,7 +246,7 @@ public class NumericalInverseKinematicsCalculator implements InverseKinematicsCa
    {
       for (int i = 0; i < oneDoFJoints.length; i++)
       {
-         OneDoFJoint oneDoFJoint = oneDoFJoints[i];
+         OneDoFJointBasics oneDoFJoint = oneDoFJoints[i];
          double newQ = oneDoFJoint.getQ() - jointAnglesCorrection.get(i, 0);
          if (limitJointAngles) 
             newQ = Math.min(oneDoFJoint.getJointLimitUpper(), Math.max(newQ, oneDoFJoint.getJointLimitLower()));

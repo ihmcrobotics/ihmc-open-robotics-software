@@ -42,7 +42,7 @@ public class KinematicsToolboxRigidBodyMessagePubSubType implements us.ihmc.pubs
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 
-      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 
       current_alignment += geometry_msgs.msg.dds.PointPubSubType.getMaxCdrSerializedSize(current_alignment);
 
@@ -76,7 +76,7 @@ public class KinematicsToolboxRigidBodyMessagePubSubType implements us.ihmc.pubs
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 
 
-      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 
 
       current_alignment += geometry_msgs.msg.dds.PointPubSubType.getCdrSerializedSize(data.getDesiredPositionInWorld(), current_alignment);
@@ -103,7 +103,7 @@ public class KinematicsToolboxRigidBodyMessagePubSubType implements us.ihmc.pubs
    {
       cdr.write_type_4(data.getSequenceId());
 
-      cdr.write_type_11(data.getEndEffectorNameBasedHashCode());
+      cdr.write_type_2(data.getEndEffectorHashCode());
 
       geometry_msgs.msg.dds.PointPubSubType.write(data.getDesiredPositionInWorld(), cdr);
       geometry_msgs.msg.dds.QuaternionPubSubType.write(data.getDesiredOrientationInWorld(), cdr);
@@ -119,7 +119,7 @@ public class KinematicsToolboxRigidBodyMessagePubSubType implements us.ihmc.pubs
    {
       data.setSequenceId(cdr.read_type_4());
       	
-      data.setEndEffectorNameBasedHashCode(cdr.read_type_11());
+      data.setEndEffectorHashCode(cdr.read_type_2());
       	
       geometry_msgs.msg.dds.PointPubSubType.read(data.getDesiredPositionInWorld(), cdr);	
       geometry_msgs.msg.dds.QuaternionPubSubType.read(data.getDesiredOrientationInWorld(), cdr);	
@@ -136,7 +136,7 @@ public class KinematicsToolboxRigidBodyMessagePubSubType implements us.ihmc.pubs
    public final void serialize(controller_msgs.msg.dds.KinematicsToolboxRigidBodyMessage data, us.ihmc.idl.InterchangeSerializer ser)
    {
       ser.write_type_4("sequence_id", data.getSequenceId());
-      ser.write_type_11("end_effector_name_based_hash_code", data.getEndEffectorNameBasedHashCode());
+      ser.write_type_2("end_effector_hash_code", data.getEndEffectorHashCode());
       ser.write_type_a("desired_position_in_world", new geometry_msgs.msg.dds.PointPubSubType(), data.getDesiredPositionInWorld());
 
       ser.write_type_a("desired_orientation_in_world", new geometry_msgs.msg.dds.QuaternionPubSubType(), data.getDesiredOrientationInWorld());
@@ -159,7 +159,7 @@ public class KinematicsToolboxRigidBodyMessagePubSubType implements us.ihmc.pubs
    public final void deserialize(us.ihmc.idl.InterchangeSerializer ser, controller_msgs.msg.dds.KinematicsToolboxRigidBodyMessage data)
    {
       data.setSequenceId(ser.read_type_4("sequence_id"));
-      data.setEndEffectorNameBasedHashCode(ser.read_type_11("end_effector_name_based_hash_code"));
+      data.setEndEffectorHashCode(ser.read_type_2("end_effector_hash_code"));
       ser.read_type_a("desired_position_in_world", new geometry_msgs.msg.dds.PointPubSubType(), data.getDesiredPositionInWorld());
 
       ser.read_type_a("desired_orientation_in_world", new geometry_msgs.msg.dds.QuaternionPubSubType(), data.getDesiredOrientationInWorld());

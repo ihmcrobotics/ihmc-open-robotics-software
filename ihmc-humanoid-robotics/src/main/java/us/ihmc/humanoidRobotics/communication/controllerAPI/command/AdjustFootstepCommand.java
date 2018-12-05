@@ -10,7 +10,7 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
-import us.ihmc.robotics.lists.RecyclingArrayList;
+import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.robotics.robotSide.RobotSide;
 
 public class AdjustFootstepCommand implements Command<AdjustFootstepCommand, AdjustFootstepMessage>
@@ -41,7 +41,7 @@ public class AdjustFootstepCommand implements Command<AdjustFootstepCommand, Adj
    }
 
    @Override
-   public void set(AdjustFootstepMessage message)
+   public void setFromMessage(AdjustFootstepMessage message)
    {
       robotSide = RobotSide.fromByte(message.getRobotSide());
       adjustedPosition.setIncludingFrame(ReferenceFrame.getWorldFrame(), message.getLocation());

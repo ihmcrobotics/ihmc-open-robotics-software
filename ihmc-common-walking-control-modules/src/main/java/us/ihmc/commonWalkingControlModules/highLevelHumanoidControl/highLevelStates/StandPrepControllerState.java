@@ -1,17 +1,19 @@
 package us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates;
 
+import com.google.common.base.CaseFormat;
+
 import us.ihmc.commonWalkingControlModules.configurations.HighLevelControllerParameters;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.lowLevel.LowLevelOneDoFJointDesiredDataHolder;
-import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHumanoidControllerToolbox;
 import us.ihmc.commons.MathTools;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelControllerName;
+import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.robotics.math.trajectories.YoPolynomial;
-import us.ihmc.robotics.screwTheory.OneDoFJoint;
-import us.ihmc.robotics.screwTheory.ScrewTools;
-import us.ihmc.sensorProcessing.outputData.JointDesiredOutput;
+import us.ihmc.sensorProcessing.outputData.JointDesiredOutputBasics;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutputListReadOnly;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutputReadOnly;
 import us.ihmc.tools.lists.PairList;
+import us.ihmc.yoVariables.parameters.DoubleParameter;
+import us.ihmc.yoVariables.providers.DoubleProvider;
 import us.ihmc.yoVariables.variable.YoDouble;
 
 public class StandPrepControllerState extends HighLevelControllerState
@@ -21,40 +23,38 @@ public class StandPrepControllerState extends HighLevelControllerState
 
    private final LowLevelOneDoFJointDesiredDataHolder lowLevelOneDoFJointDesiredDataHolder = new LowLevelOneDoFJointDesiredDataHolder();
 
-   private final PairList<OneDoFJoint, TrajectoryData> jointsData = new PairList<>();
+   private final PairList<OneDoFJointBasics, TrajectoryData> jointsData = new PairList<>();
 
    private final YoDouble timeToPrepareForStanding = new YoDouble("timeToPrepareForStanding", registry);
    private final YoDouble minimumTimeDoneWithStandPrep = new YoDouble("minimumTimeDoneWithStandPrep", registry);
    private final JointDesiredOutputListReadOnly highLevelControlOutput;
 
-   public StandPrepControllerState(HighLevelHumanoidControllerToolbox controllerToolbox, HighLevelControllerParameters highLevelControllerParameters,
+   public StandPrepControllerState(OneDoFJointBasics[] controlledJoints, HighLevelControllerParameters highLevelControllerParameters,
                                    JointDesiredOutputListReadOnly highLevelControlOutput)
    {
-      this(controllerToolbox, highLevelControllerParameters, highLevelControlOutput, MINIMUM_TIME_DONE_WITH_STAND_PREP);
+      this(controlledJoints, highLevelControllerParameters, highLevelControlOutput, MINIMUM_TIME_DONE_WITH_STAND_PREP);
    }
 
-   public StandPrepControllerState(HighLevelHumanoidControllerToolbox controllerToolbox, HighLevelControllerParameters highLevelControllerParameters,
+   public StandPrepControllerState(OneDoFJointBasics[] controlledJoints, HighLevelControllerParameters highLevelControllerParameters,
                                    JointDesiredOutputListReadOnly highLevelControlOutput, double minimumTimeDoneWithStandPrep)
    {
-      super(controllerState, highLevelControllerParameters, controllerToolbox);
+      super(controllerState, highLevelControllerParameters, controlledJoints);
       this.highLevelControlOutput = highLevelControlOutput;
 
       this.timeToPrepareForStanding.set(highLevelControllerParameters.getTimeToMoveInStandPrep());
       this.minimumTimeDoneWithStandPrep.set(minimumTimeDoneWithStandPrep);
 
       WholeBodySetpointParameters standPrepParameters = highLevelControllerParameters.getStandPrepParameters();
-      OneDoFJoint[] controlledJoints = ScrewTools.filterJoints(controllerToolbox.getControlledJoints(), OneDoFJoint.class);
       lowLevelOneDoFJointDesiredDataHolder.registerJointsWithEmptyData(controlledJoints);
 
-      for (OneDoFJoint controlledJoint : controlledJoints)
+      for (OneDoFJointBasics controlledJoint : controlledJoints)
       {
          String jointName = controlledJoint.getName();
+         String namePrefix = CaseFormat.UPPER_UNDERSCORE.to(CaseFormat.LOWER_CAMEL, jointName);
 
-         YoPolynomial trajectory = new YoPolynomial(jointName + "_StandPrepTrajectory", 4, registry);
-         YoDouble standPrepFinalConfiguration = new YoDouble(jointName + "_StandPrepFinalConfiguration", registry);
-         YoDouble standPrepDesiredConfiguration = new YoDouble(jointName + "_StandPrepDesiredConfiguration", registry);
-
-         standPrepFinalConfiguration.set(standPrepParameters.getSetpoint(jointName));
+         YoPolynomial trajectory = new YoPolynomial(namePrefix + "StandPrepTrajectory", 4, registry);
+         DoubleProvider standPrepFinalConfiguration = new DoubleParameter(namePrefix + "StandPrepPosition", registry, standPrepParameters.getSetpoint(jointName));
+         YoDouble standPrepDesiredConfiguration = new YoDouble(namePrefix + "StandPrepCurrentDesired", registry);
 
          TrajectoryData jointData = new TrajectoryData(standPrepFinalConfiguration, standPrepDesiredConfiguration, trajectory);
          jointsData.add(controlledJoint, jointData);
@@ -67,12 +67,12 @@ public class StandPrepControllerState extends HighLevelControllerState
    {
       for (int jointIndex = 0; jointIndex < jointsData.size(); jointIndex++)
       {
-         OneDoFJoint joint = jointsData.get(jointIndex).getLeft();
+         OneDoFJointBasics joint = jointsData.get(jointIndex).getLeft();
          TrajectoryData trajectoryData = jointsData.get(jointIndex).getRight();
-         YoDouble standPrepFinal = trajectoryData.getFinalJointConfiguration();
+         DoubleProvider standPrepFinal = trajectoryData.getFinalJointConfiguration();
          YoPolynomial trajectory = trajectoryData.getJointTrajectory();
 
-         double desiredFinalPosition = standPrepFinal.getDoubleValue();
+         double desiredFinalPosition = standPrepFinal.getValue();
          double desiredFinalVelocity = 0.0;
 
          JointDesiredOutputReadOnly jointDesiredOutput = highLevelControlOutput.getJointDesiredOutput(joint);
@@ -94,7 +94,7 @@ public class StandPrepControllerState extends HighLevelControllerState
 
       for (int jointIndex = 0; jointIndex < jointsData.size(); jointIndex++)
       {
-         OneDoFJoint joint = jointsData.get(jointIndex).getLeft();
+         OneDoFJointBasics joint = jointsData.get(jointIndex).getLeft();
          TrajectoryData trajectoryData = jointsData.get(jointIndex).getRight();
 
          YoPolynomial trajectory = trajectoryData.getJointTrajectory();
@@ -103,7 +103,7 @@ public class StandPrepControllerState extends HighLevelControllerState
          trajectory.compute(timeInTrajectory);
          desiredPosition.set(trajectory.getPosition());
 
-         JointDesiredOutput lowLevelJointData = lowLevelOneDoFJointDesiredDataHolder.getJointDesiredOutput(joint);
+         JointDesiredOutputBasics lowLevelJointData = lowLevelOneDoFJointDesiredDataHolder.getJointDesiredOutput(joint);
          lowLevelJointData.clear();
          lowLevelJointData.setDesiredPosition(desiredPosition.getDoubleValue());
          lowLevelJointData.setDesiredVelocity(trajectory.getVelocity());
@@ -134,18 +134,18 @@ public class StandPrepControllerState extends HighLevelControllerState
 
    private class TrajectoryData
    {
-      private final YoDouble finalJointConfiguration;
+      private final DoubleProvider finalJointConfiguration;
       private final YoDouble desiredJointConfiguration;
       private final YoPolynomial jointTrajectory;
 
-      public TrajectoryData(YoDouble finalJointConfiguration, YoDouble desiredJointConfiguration, YoPolynomial jointTrajectory)
+      public TrajectoryData(DoubleProvider finalJointConfiguration, YoDouble desiredJointConfiguration, YoPolynomial jointTrajectory)
       {
          this.finalJointConfiguration = finalJointConfiguration;
          this.desiredJointConfiguration = desiredJointConfiguration;
          this.jointTrajectory = jointTrajectory;
       }
 
-      public YoDouble getFinalJointConfiguration()
+      public DoubleProvider getFinalJointConfiguration()
       {
          return finalJointConfiguration;
       }

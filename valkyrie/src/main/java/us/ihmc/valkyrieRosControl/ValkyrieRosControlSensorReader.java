@@ -8,10 +8,10 @@ import org.ejml.data.DenseMatrix64F;
 import controller_msgs.msg.dds.AtlasAuxiliaryRobotData;
 import us.ihmc.communication.controllerAPI.CommandInputManager;
 import us.ihmc.communication.controllerAPI.StatusMessageOutputManager;
-import us.ihmc.communication.packetCommunicator.PacketCommunicator;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
-import us.ihmc.robotics.screwTheory.OneDoFJoint;
+import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
+import us.ihmc.ros2.RealtimeRos2Node;
 import us.ihmc.sensorProcessing.sensorProcessors.SensorOutputMapReadOnly;
 import us.ihmc.sensorProcessing.sensorProcessors.SensorProcessing;
 import us.ihmc.sensorProcessing.sensorProcessors.SensorRawOutputMapReadOnly;
@@ -60,10 +60,18 @@ public class ValkyrieRosControlSensorReader implements SensorReader, JointTorque
                                          List<YoForceTorqueSensorHandle> yoForceTorqueSensorHandles, ValkyrieJointMap jointMap, YoVariableRegistry registry)
    {
 
-      fingerStateEstimator = new ValkyrieRosControlFingerStateEstimator(yoEffortJointHandleHolders, yoPositionJointHandleHolders, yoJointStateHandleHolders,
-                                                                        timestampProvider, stateEstimatorSensorDefinitions, sensorProcessingConfiguration,
-                                                                        registry);
-      this.sensorProcessing = new SensorProcessing(stateEstimatorSensorDefinitions, fingerStateEstimator, registry);
+      if (ValkyrieRosControlController.ENABLE_FINGER_JOINTS)
+      {
+         fingerStateEstimator = new ValkyrieRosControlFingerStateEstimator(yoEffortJointHandleHolders, yoPositionJointHandleHolders, yoJointStateHandleHolders,
+                                                                           timestampProvider, stateEstimatorSensorDefinitions, sensorProcessingConfiguration,
+                                                                           registry);
+         this.sensorProcessing = new SensorProcessing(stateEstimatorSensorDefinitions, fingerStateEstimator, registry);
+      }
+      else
+      {
+         fingerStateEstimator = null;
+         this.sensorProcessing = new SensorProcessing(stateEstimatorSensorDefinitions, sensorProcessingConfiguration, registry);
+      }
       this.timestampProvider = timestampProvider;
       // Remove the handles that do not have a joint associated. This is useful to remove the finger motors.
       this.yoEffortJointHandleHolders = yoEffortJointHandleHolders.stream().filter(h -> h.getOneDoFJoint() != null).collect(Collectors.toList());
@@ -101,7 +109,7 @@ public class ValkyrieRosControlSensorReader implements SensorReader, JointTorque
          YoEffortJointHandleHolder yoEffortJointHandleHolder = yoEffortJointHandleHolders.get(i);
          yoEffortJointHandleHolder.update();
 
-         OneDoFJoint joint = yoEffortJointHandleHolder.getOneDoFJoint();
+         OneDoFJointBasics joint = yoEffortJointHandleHolder.getOneDoFJoint();
 
          sensorProcessing.setJointPositionSensorValue(joint, yoEffortJointHandleHolder.getQ());
          sensorProcessing.setJointVelocitySensorValue(joint, yoEffortJointHandleHolder.getQd());
@@ -113,7 +121,7 @@ public class ValkyrieRosControlSensorReader implements SensorReader, JointTorque
          YoPositionJointHandleHolder yoPositionJointHandleHolder = yoPositionJointHandleHolders.get(i);
          yoPositionJointHandleHolder.update();
 
-         OneDoFJoint joint = yoPositionJointHandleHolder.getOneDoFJoint();
+         OneDoFJointBasics joint = yoPositionJointHandleHolder.getOneDoFJoint();
          sensorProcessing.setJointPositionSensorValue(joint, yoPositionJointHandleHolder.getQ());
          sensorProcessing.setJointVelocitySensorValue(joint, yoPositionJointHandleHolder.getQd());
          sensorProcessing.setJointTauSensorValue(joint, 0.0); // TODO: Should be NaN eventually as the position control joints won't be able to return a measured torque
@@ -124,7 +132,7 @@ public class ValkyrieRosControlSensorReader implements SensorReader, JointTorque
          YoJointStateHandleHolder yoJointStateHandleHolder = yoJointStateHandleHolders.get(i);
          yoJointStateHandleHolder.update();
 
-         OneDoFJoint joint = yoJointStateHandleHolder.getOneDoFJoint();
+         OneDoFJointBasics joint = yoJointStateHandleHolder.getOneDoFJoint();
          sensorProcessing.setJointPositionSensorValue(joint, yoJointStateHandleHolder.getQ());
          sensorProcessing.setJointVelocitySensorValue(joint, yoJointStateHandleHolder.getQd());
          sensorProcessing.setJointTauSensorValue(joint, yoJointStateHandleHolder.getTauMeasured());
@@ -154,7 +162,8 @@ public class ValkyrieRosControlSensorReader implements SensorReader, JointTorque
       }
 
       long timestamp = timestampProvider.getTimestamp();
-      fingerStateEstimator.update();
+      if (ValkyrieRosControlController.ENABLE_FINGER_JOINTS)
+         fingerStateEstimator.update();
       sensorProcessing.startComputation(timestamp, timestamp, -1);
    }
 
@@ -177,14 +186,15 @@ public class ValkyrieRosControlSensorReader implements SensorReader, JointTorque
    }
 
    @Override
-   public void subtractTorqueOffset(OneDoFJoint oneDoFJoint, double torqueOffset)
+   public void subtractTorqueOffset(OneDoFJointBasics oneDoFJoint, double torqueOffset)
    {
       lowlLevelController.subtractTorqueOffset(oneDoFJoint, torqueOffset);
    }
 
    public void attachControllerAPI(CommandInputManager commandInputManager, StatusMessageOutputManager statusOutputManager)
    {
-      fingerStateEstimator.attachControllerAPI(commandInputManager, statusOutputManager);
+      if (ValkyrieRosControlController.ENABLE_FINGER_JOINTS)
+         fingerStateEstimator.attachControllerAPI(commandInputManager, statusOutputManager);
       lowlLevelController.attachControllerAPI(commandInputManager, statusOutputManager);
    }
 
@@ -193,8 +203,8 @@ public class ValkyrieRosControlSensorReader implements SensorReader, JointTorque
       lowlLevelController.attachJointTorqueOffsetEstimator(jointTorqueOffsetEstimator);
    }
 
-   public void setupLowLevelControlWithPacketCommunicator(PacketCommunicator packetCommunicator)
+   public void setupLowLevelControlCommunication(String robotName, RealtimeRos2Node realtimeRos2Node)
    {
-      lowlLevelController.setupLowLevelControlWithPacketCommunicator(packetCommunicator);
+      lowlLevelController.setupLowLevelControlCommunication(robotName, realtimeRos2Node);
    }
 }

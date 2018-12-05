@@ -11,18 +11,19 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
+import us.ihmc.mecano.frames.MovingReferenceFrame;
 import us.ihmc.quadrupedRobotics.controller.toolbox.DivergentComponentOfMotionEstimator;
 import us.ihmc.quadrupedRobotics.controller.toolbox.LinearInvertedPendulumModel;
 import us.ihmc.quadrupedRobotics.planning.ContactState;
 import us.ihmc.quadrupedRobotics.planning.QuadrupedTimedContactSequence;
 import us.ihmc.quadrupedRobotics.planning.QuadrupedTimedStep;
 import us.ihmc.quadrupedRobotics.planning.trajectory.QuadrupedPiecewiseConstantCopTrajectory;
-import us.ihmc.quadrupedRobotics.util.PreallocatedList;
+import us.ihmc.commons.lists.PreallocatedList;
 import us.ihmc.robotics.robotSide.QuadrantDependentList;
 import us.ihmc.robotics.robotSide.RobotQuadrant;
-import us.ihmc.robotics.screwTheory.MovingReferenceFrame;
 import us.ihmc.tools.exceptions.NoConvergenceException;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoEnum;
 import us.ihmc.yoVariables.variable.YoFramePoint3D;
 import us.ihmc.yoVariables.variable.YoFrameVector3D;
 
@@ -88,7 +89,7 @@ public class QuadrupedDcmBasedMpcOptimizationWithLaneChange implements Quadruped
 
    @Override
    public void compute(FrameVector3D stepAdjustmentVector, FramePoint3D cmpPositionSetpoint, PreallocatedList<QuadrupedTimedStep> queuedSteps,
-                       QuadrantDependentList<MovingReferenceFrame> soleFrames, QuadrantDependentList<ContactState> currentContactState, FramePoint3D currentComPosition,
+                       QuadrantDependentList<MovingReferenceFrame> soleFrames, QuadrantDependentList<YoEnum<ContactState>> currentContactState, FramePoint3D currentComPosition,
                        FrameVector3D currentComVelocity, double currentTime, QuadrupedMpcOptimizationWithLaneChangeSettings settings)
    {
       // Compute step adjustment and contact pressure by solving the following QP:
@@ -114,7 +115,7 @@ public class QuadrupedDcmBasedMpcOptimizationWithLaneChange implements Quadruped
       numberOfContacts = 0;
       for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
       {
-         if (currentContactState.get(robotQuadrant) == ContactState.IN_CONTACT)
+         if (currentContactState.get(robotQuadrant).getEnumValue() == ContactState.IN_CONTACT)
          {
             numberOfContacts++;
          }
@@ -164,7 +165,7 @@ public class QuadrupedDcmBasedMpcOptimizationWithLaneChange implements Quadruped
       cmpPositionSetpoint.setToZero();
       for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
       {
-         if (currentContactState.get(robotQuadrant) == ContactState.IN_CONTACT)
+         if (currentContactState.get(robotQuadrant).getEnumValue() == ContactState.IN_CONTACT)
          {
             double normalizedContactPressure = u.get(rowOffset++, 0);
             currentSolePosition.setToZero(soleFrames.get(robotQuadrant));
@@ -180,7 +181,7 @@ public class QuadrupedDcmBasedMpcOptimizationWithLaneChange implements Quadruped
       yoStepAdjustmentVector.setMatchingFrame(stepAdjustmentVector);
    }
 
-   private void initializeCostTerms(QuadrantDependentList<ContactState> currentContactState, QuadrupedMpcOptimizationWithLaneChangeSettings settings)
+   private void initializeCostTerms(QuadrantDependentList<YoEnum<ContactState>> currentContactState, QuadrupedMpcOptimizationWithLaneChangeSettings settings)
    {
       // Initialize cost terms. (min_u u'Au + b'u)
       DenseMatrix64F A = qpCostMatrix;
@@ -202,7 +203,7 @@ public class QuadrupedDcmBasedMpcOptimizationWithLaneChange implements Quadruped
       int rowOffset = 0;
       for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
       {
-         if (currentContactState.get(robotQuadrant) == ContactState.IN_CONTACT)
+         if (currentContactState.get(robotQuadrant).getEnumValue() == ContactState.IN_CONTACT)
          {
             b.set(rowOffset++, 0, piecewiseConstantCopTrajectory.getNormalizedPressureAtStartOfInterval(0).get(robotQuadrant).doubleValue());
          }
@@ -212,7 +213,7 @@ public class QuadrupedDcmBasedMpcOptimizationWithLaneChange implements Quadruped
    }
 
    private final FramePoint3D currentSolePosition = new FramePoint3D();
-   private void initializeEqualityConstraints(QuadrantDependentList<ContactState> currentContactState, QuadrantDependentList<? extends ReferenceFrame> soleFrames)
+   private void initializeEqualityConstraints(QuadrantDependentList<YoEnum<ContactState>> currentContactState, QuadrantDependentList<? extends ReferenceFrame> soleFrames)
    {
       // Initialize equality constraints. (Aeq u = beq)
       x0.reshape(2 * numberOfIntervals, 1);                    // center of pressure offset
@@ -231,7 +232,7 @@ public class QuadrupedDcmBasedMpcOptimizationWithLaneChange implements Quadruped
          columnOffset = 0;
          for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
          {
-            if (currentContactState.get(robotQuadrant) == ContactState.IN_CONTACT)
+            if (currentContactState.get(robotQuadrant).getEnumValue() == ContactState.IN_CONTACT)
             {
                currentSolePosition.setToZero(soleFrames.get(robotQuadrant));
                currentSolePosition.changeFrame(ReferenceFrame.getWorldFrame());

@@ -21,9 +21,9 @@ public class StereoVisionPointCloudMessage extends Packet<StereoVisionPointCloud
 
    public StereoVisionPointCloudMessage()
    {
-      point_cloud_ = new us.ihmc.idl.IDLSequence.Float (100, "type_5");
+      point_cloud_ = new us.ihmc.idl.IDLSequence.Float (600000, "type_5");
 
-      colors_ = new us.ihmc.idl.IDLSequence.Integer (100, "type_2");
+      colors_ = new us.ihmc.idl.IDLSequence.Integer (200000, "type_2");
 
    }
 

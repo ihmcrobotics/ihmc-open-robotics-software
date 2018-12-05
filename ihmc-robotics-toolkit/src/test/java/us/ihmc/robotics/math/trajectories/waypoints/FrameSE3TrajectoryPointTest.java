@@ -6,6 +6,7 @@ import static org.junit.Assert.assertTrue;
 
 import java.util.Random;
 
+import org.junit.After;
 import org.junit.Test;
 
 import us.ihmc.commons.RandomNumbers;
@@ -20,6 +21,7 @@ import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameQuaternionReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
 import us.ihmc.euclid.referenceFrame.tools.EuclidFrameRandomTools;
+import us.ihmc.euclid.referenceFrame.tools.ReferenceFrameTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
@@ -31,6 +33,11 @@ import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 
 public class FrameSE3TrajectoryPointTest
 {
+   @After
+   public void tearDown()
+   {
+      ReferenceFrameTools.clearWorldFrameTree();
+   }
 
    @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
@@ -390,7 +397,7 @@ public class FrameSE3TrajectoryPointTest
       assertTrue(expectedFrame == testedFrameSE3TrajectoryPoint.getReferenceFrame());
       assertEquals(expectedTime, testedFrameSE3TrajectoryPoint.getTime(), epsilon);
       assertTrue(expectedPosition.epsilonEquals(testedFrameSE3TrajectoryPoint.getGeometryObject().getEuclideanWaypoint().getPosition(), epsilon));
-      assertTrue(expectedOrientation.epsilonEquals(testedFrameSE3TrajectoryPoint.getGeometryObject().getSO3Waypoint().getOrientation(), epsilon));
+      assertTrue(expectedOrientation.geometricallyEquals(testedFrameSE3TrajectoryPoint.getGeometryObject().getSO3Waypoint().getOrientation(), epsilon));
       assertTrue(expectedLinearVelocity.epsilonEquals(testedFrameSE3TrajectoryPoint.getGeometryObject().getEuclideanWaypoint().getLinearVelocity(), epsilon));
       assertTrue(expectedAngularVelocity.epsilonEquals(testedFrameSE3TrajectoryPoint.getGeometryObject().getSO3Waypoint().getAngularVelocity(), epsilon));
 
@@ -405,7 +412,7 @@ public class FrameSE3TrajectoryPointTest
       testedFrameSE3TrajectoryPoint.getAngularVelocity(actualAngularVelocity);
 
       assertTrue(expectedPosition.epsilonEquals(actualPosition, epsilon));
-      assertTrue(expectedOrientation.epsilonEquals(actualOrientation, epsilon));
+      assertTrue(expectedOrientation.geometricallyEquals(actualOrientation, epsilon));
       assertTrue(expectedLinearVelocity.epsilonEquals(actualLinearVelocity, epsilon));
       assertTrue(expectedAngularVelocity.epsilonEquals(actualAngularVelocity, epsilon));
 
@@ -420,7 +427,7 @@ public class FrameSE3TrajectoryPointTest
       testedFrameSE3TrajectoryPoint.getAngularVelocityIncludingFrame(actualFrameAngularVelocity);
 
       assertTrue(expectedPosition.epsilonEquals(actualFramePosition, epsilon));
-      assertTrue(expectedOrientation.epsilonEquals(actualFrameOrientation, epsilon));
+      assertTrue(expectedOrientation.geometricallyEquals(actualFrameOrientation, epsilon));
       assertTrue(expectedLinearVelocity.epsilonEquals(actualFrameLinearVelocity, epsilon));
       assertTrue(expectedAngularVelocity.epsilonEquals(actualFrameAngularVelocity, epsilon));
 
@@ -435,7 +442,7 @@ public class FrameSE3TrajectoryPointTest
       testedFrameSE3TrajectoryPoint.getAngularVelocity(actualFrameAngularVelocity);
 
       assertTrue(expectedPosition.epsilonEquals(actualFramePosition, epsilon));
-      assertTrue(expectedOrientation.epsilonEquals(actualFrameOrientation, epsilon));
+      assertTrue(expectedOrientation.geometricallyEquals(actualFrameOrientation, epsilon));
       assertTrue(expectedLinearVelocity.epsilonEquals(actualFrameLinearVelocity, epsilon));
       assertTrue(expectedAngularVelocity.epsilonEquals(actualFrameAngularVelocity, epsilon));
    }

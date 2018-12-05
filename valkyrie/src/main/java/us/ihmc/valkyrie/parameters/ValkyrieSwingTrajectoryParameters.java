@@ -53,7 +53,15 @@ public class ValkyrieSwingTrajectoryParameters extends SwingTrajectoryParameters
    @Override
    public double getDesiredTouchdownVelocity()
    {
-      return -0.3;
+      switch (target)
+      {
+      case SCS:
+         return -0.3;
+      case GAZEBO:
+      case REAL_ROBOT:
+      default:
+         return -0.1;
+      }
    }
 
    /** {@inheritDoc} */

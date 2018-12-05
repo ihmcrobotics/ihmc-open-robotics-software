@@ -7,13 +7,13 @@ import gnu.trove.list.array.TDoubleArrayList;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.ControllerCoreCommandType;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.InverseDynamicsCommand;
 import us.ihmc.commons.MathTools;
-import us.ihmc.robotics.screwTheory.OneDoFJoint;
+import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 
 public class JointLimitReductionCommand implements InverseKinematicsCommand<JointLimitReductionCommand>, InverseDynamicsCommand<JointLimitReductionCommand>
 {
    private final int initialCapacity = 40;
    private final List<String> jointNames = new ArrayList<>(initialCapacity);
-   private final List<OneDoFJoint> joints = new ArrayList<>(initialCapacity);
+   private final List<OneDoFJointBasics> joints = new ArrayList<>(initialCapacity);
    private final TDoubleArrayList jointReductionFactors = new TDoubleArrayList(initialCapacity);
 
    public JointLimitReductionCommand()
@@ -27,7 +27,7 @@ public class JointLimitReductionCommand implements InverseKinematicsCommand<Join
       jointReductionFactors.reset();
    }
 
-   public void addReductionFactor(OneDoFJoint joint, double reductionFactor)
+   public void addReductionFactor(OneDoFJointBasics joint, double reductionFactor)
    {
       MathTools.checkIntervalContains(reductionFactor, 0.0, 1.0);
       jointNames.add(joint.getName());
@@ -58,7 +58,7 @@ public class JointLimitReductionCommand implements InverseKinematicsCommand<Join
       return joints.size();
    }
 
-   public OneDoFJoint getJoint(int jointIndex)
+   public OneDoFJointBasics getJoint(int jointIndex)
    {
       return joints.get(jointIndex);
    }

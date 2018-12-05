@@ -30,6 +30,7 @@ public class ParameterSavingNode extends HBox
 
    private File activeFile;
    private List<GuiRegistry> registries;
+   private List<String> rootRegistryNames;
 
    private final List<ParameterFileSavedListener> listeners = new ArrayList<>();
 
@@ -69,6 +70,11 @@ public class ParameterSavingNode extends HBox
    public void setRegistries(List<GuiRegistry> registries)
    {
       this.registries = registries;
+   }
+
+   public void setRootRegistries(List<String> rootRegistryNames)
+   {
+      this.rootRegistryNames = rootRegistryNames;
    }
 
    private void setupNode(boolean showFile, boolean enableSave)
@@ -118,14 +124,16 @@ public class ParameterSavingNode extends HBox
 
    private void handleSave(ActionEvent event) throws IOException
    {
+      List<GuiRegistry> rootRegistries = ParameterSavingTools.findRootRegistries(registries, rootRegistryNames);
+
       List<GuiRegistry> registriesAfterModified;
       if (modified.isSelected())
       {
-         registriesAfterModified = ParameterSavingTools.filterModified(registries);
+         registriesAfterModified = ParameterSavingTools.filterModified(rootRegistries);
       }
       else
       {
-         registriesAfterModified = registries;
+         registriesAfterModified = rootRegistries;
       }
 
       List<GuiRegistry> registriesAfterMerge;

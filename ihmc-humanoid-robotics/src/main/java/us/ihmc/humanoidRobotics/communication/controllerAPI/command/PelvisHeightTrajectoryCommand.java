@@ -80,9 +80,9 @@ public class PelvisHeightTrajectoryCommand implements Command<PelvisHeightTrajec
     * @param message the message that has trajectory data
     */
    @Override
-   public void set(PelvisHeightTrajectoryMessage message)
+   public void setFromMessage(PelvisHeightTrajectoryMessage message)
    {
-      euclideanTrajectory.set(message.getEuclideanTrajectory());
+      euclideanTrajectory.setFromMessage(message.getEuclideanTrajectory());
       enableUserPelvisControl = message.getEnableUserPelvisControl();
       enableUserPelvisControlDuringWalking = message.getEnableUserPelvisControlDuringWalking();
    }
@@ -97,7 +97,7 @@ public class PelvisHeightTrajectoryCommand implements Command<PelvisHeightTrajec
    public void set(ReferenceFrame dataFrame, ReferenceFrame trajectoryFrame, PelvisHeightTrajectoryMessage message)
    {
       clear(dataFrame);
-      set(message);
+      setFromMessage(message);
       enableUserPelvisControl = message.getEnableUserPelvisControl();
       enableUserPelvisControlDuringWalking = message.getEnableUserPelvisControlDuringWalking();
    }

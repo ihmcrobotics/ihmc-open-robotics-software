@@ -29,7 +29,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.EnumMap;
-import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Predicate;
@@ -39,14 +39,14 @@ import org.yaml.snakeyaml.Yaml;
 
 import controller_msgs.msg.dds.HighLevelStateChangeStatusMessage;
 import us.ihmc.commons.Conversions;
-import us.ihmc.commons.PrintTools;
 import us.ihmc.communication.controllerAPI.CommandInputManager;
 import us.ihmc.communication.controllerAPI.StatusMessageOutputManager;
 import us.ihmc.communication.controllerAPI.StatusMessageOutputManager.StatusMessageListener;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelControllerName;
+import us.ihmc.log.LogTools;
+import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
-import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.sensorProcessing.sensorProcessors.SensorProcessing;
 import us.ihmc.sensorProcessing.simulatedSensors.SensorNoiseParameters;
 import us.ihmc.sensorProcessing.simulatedSensors.StateEstimatorSensorDefinitions;
@@ -75,7 +75,7 @@ public class ValkyrieRosControlFingerStateEstimator implements SensorProcessingC
    private final SideDependentList<EnumMap<ValkyrieHandJointName, YoDouble>> sideDependentBiases = SideDependentList.createListOfEnumMaps(ValkyrieHandJointName.class);
    private final SideDependentList<EnumMap<ValkyrieHandJointName, DoubleProvider>> sideDependentMotorBasedFingerJointPositions = SideDependentList.createListOfEnumMaps(ValkyrieHandJointName.class);
    private final SideDependentList<EnumMap<ValkyrieFingerMotorName, YoEffortJointHandleHolder>> sideDependentFingerMotorHandles = SideDependentList.createListOfEnumMaps(ValkyrieFingerMotorName.class);
-   private final SideDependentList<EnumMap<ValkyrieHandJointName, OneDoFJoint>> sideDependentFingerJoints = SideDependentList.createListOfEnumMaps(ValkyrieHandJointName.class);
+   private final SideDependentList<EnumMap<ValkyrieHandJointName, OneDoFJointBasics>> sideDependentFingerJoints = SideDependentList.createListOfEnumMaps(ValkyrieHandJointName.class);
 
    private final YoBoolean forceMotorBasedPositionSwitch;
    private final YoEnum<RobotSide> doZeroFingerCalibrationNow;
@@ -94,7 +94,7 @@ public class ValkyrieRosControlFingerStateEstimator implements SensorProcessingC
    {
       this.timestampProvider = timestampProvider;
       this.sensorProcessingConfiguration = sensorProcessingConfiguration;
-      List<OneDoFJoint> allJoints = stateEstimatorSensorDefinitions.getJointSensorDefinitions();
+      List<OneDoFJointBasics> allJoints = stateEstimatorSensorDefinitions.getJointSensorDefinitions();
 
       forceMotorBasedPositionSwitch = new YoBoolean("forceMotorBasedPositionSwitch", registry);
       doZeroFingerCalibrationNow = new YoEnum<>("doZeroFingerCalibrationNow", registry, RobotSide.class, true);
@@ -111,7 +111,7 @@ public class ValkyrieRosControlFingerStateEstimator implements SensorProcessingC
          EnumMap<ValkyrieHandJointName, YoDouble> scales = sideDependentScales.get(robotSide);
          EnumMap<ValkyrieHandJointName, YoDouble> biases = sideDependentBiases.get(robotSide);
          EnumMap<ValkyrieHandJointName, YoBoolean> encoderDeadMap = sideDependentEncoderDeadMap.get(robotSide);
-         EnumMap<ValkyrieHandJointName, OneDoFJoint> fingerJoints = sideDependentFingerJoints.get(robotSide);
+         EnumMap<ValkyrieHandJointName, OneDoFJointBasics> fingerJoints = sideDependentFingerJoints.get(robotSide);
 
          for (ValkyrieHandJointName fingerJoint : ValkyrieHandJointName.values)
          {
@@ -234,7 +234,7 @@ public class ValkyrieRosControlFingerStateEstimator implements SensorProcessingC
       }
       else
       {
-         PrintTools.info(this, "Did not find: \"" + fingerTransmissionFile + "\", setting coeffs to default.");
+         LogTools.info("Did not find: \"" + fingerTransmissionFile + "\", setting coeffs to default.");
       }
       return areCoeffsLoaded;
    }
@@ -323,12 +323,10 @@ public class ValkyrieRosControlFingerStateEstimator implements SensorProcessingC
    private void performZeroCalibrationNow(RobotSide sideToCalibrateNow)
    {
       EnumMap<ValkyrieHandJointName, YoDouble> biases = sideDependentBiases.get(sideToCalibrateNow);
-      EnumMap<ValkyrieHandJointName, DoubleProvider> motorBasedFingerJointPositions = sideDependentMotorBasedFingerJointPositions.get(sideToCalibrateNow);
 
       for (ValkyrieHandJointName jointName : ValkyrieHandJointName.values)
       {
-         double offset = motorBasedFingerJointPositions.get(jointName).getValue();
-         biases.get(jointName).sub(offset);
+         biases.get(jointName).set(0.0);
       }
 
       saveTransmissionCoeffsToFile(FINGER_TRANSMISSION_FILE);
@@ -360,7 +358,7 @@ public class ValkyrieRosControlFingerStateEstimator implements SensorProcessingC
       {
          EnumMap<ValkyrieHandJointName, YoBoolean> encoderDeadMap = sideDependentEncoderDeadMap.get(robotSide);
          EnumMap<ValkyrieHandJointName, Mean> fingerPositionMeans = sideDependentFingerPositionMeans.get(robotSide);
-         EnumMap<ValkyrieHandJointName, OneDoFJoint> fingerJoints = sideDependentFingerJoints.get(robotSide);
+         EnumMap<ValkyrieHandJointName, OneDoFJointBasics> fingerJoints = sideDependentFingerJoints.get(robotSide);
 
          for (ValkyrieHandJointName jointEnum : ValkyrieHandJointName.values)
          {
@@ -407,12 +405,12 @@ public class ValkyrieRosControlFingerStateEstimator implements SensorProcessingC
          Files.createDirectories(transmissionFilePath.getParent());
          File file = transmissionFilePath.toFile();
          Yaml yaml = new Yaml();
-         Map<String, Map<String, Double>> coeffs = new HashMap<>();
+         Map<String, Map<String, Double>> coeffs = new LinkedHashMap<>();
          for (RobotSide robotSide : RobotSide.values)
          {
             for (ValkyrieHandJointName jointName : ValkyrieHandJointName.values)
             {
-               Map<String, Double> jointCoeffs = new HashMap<>();
+               Map<String, Double> jointCoeffs = new LinkedHashMap<>();
                jointCoeffs.put("scale", sideDependentScales.get(robotSide).get(jointName).getDoubleValue());
                jointCoeffs.put("bias", sideDependentBiases.get(robotSide).get(jointName).getDoubleValue());
                coeffs.put(jointName.getJointName(robotSide), jointCoeffs);
@@ -439,6 +437,11 @@ public class ValkyrieRosControlFingerStateEstimator implements SensorProcessingC
                startFingerCalibration.set(true);
          }
       });
+   }
+   
+   public double getFingerMotorPosition(RobotSide robotSide, ValkyrieFingerMotorName motorName)
+   {
+      return sideDependentFingerMotorHandles.get(robotSide).get(motorName).getQ();
    }
 
    public double getMotorBasedFingerJointPosition(RobotSide robotSide, ValkyrieHandJointName jointName)

@@ -6,6 +6,7 @@ import static org.junit.Assert.assertTrue;
 
 import java.util.ArrayList;
 
+import org.junit.After;
 import org.junit.Test;
 
 import us.ihmc.commonWalkingControlModules.capturePoint.ICPControlGains;
@@ -18,6 +19,7 @@ import us.ihmc.euclid.referenceFrame.FramePoint2D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.FrameVector2D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.tools.ReferenceFrameTools;
 import us.ihmc.euclid.tools.TupleTools;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
@@ -37,6 +39,12 @@ public class ICPOptimizationSolutionHandlerTest
    private ICPOptimizationSolutionHandler solutionHandler;
    private ICPOptimizationQPSolver solver;
 
+   @After
+   public void tearDown()
+   {
+      ReferenceFrameTools.clearWorldFrameTree();
+   }
+
    private void setupTest(double deadbandSize)
    {
       setupTest(deadbandSize, 0.02);
@@ -47,8 +55,6 @@ public class ICPOptimizationSolutionHandlerTest
       parameters = new TestICPOptimizationParameters(deadbandSize, resolution);
       solutionHandler = new ICPOptimizationSolutionHandler(parameters, new YoBoolean("useICPControlPolygons", registry), "test", registry);
       solver = new ICPOptimizationQPSolver(4, false);
-      solver.setMinimumFeedbackWeight(parameters.getMinimumFeedbackWeight());
-      solver.setMinimumFootstepWeight(parameters.getMinimumFootstepWeight());
       new DefaultParameterReader().readParametersInRegistry(registry);
    }
 

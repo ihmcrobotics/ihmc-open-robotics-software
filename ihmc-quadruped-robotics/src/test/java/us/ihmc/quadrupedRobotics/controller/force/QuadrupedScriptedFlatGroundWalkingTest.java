@@ -3,21 +3,18 @@ package us.ihmc.quadrupedRobotics.controller.force;
 import controller_msgs.msg.dds.*;
 import org.junit.After;
 import org.junit.Before;
-import us.ihmc.communication.packetCommunicator.PacketCommunicator;
-import us.ihmc.communication.util.NetworkPorts;
+import org.junit.Test;
+import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.euclid.tuple3D.Point3D;
-import us.ihmc.quadrupedRobotics.QuadrupedForceTestYoVariables;
-import us.ihmc.quadrupedRobotics.QuadrupedMultiRobotTestInterface;
-import us.ihmc.quadrupedRobotics.QuadrupedTestFactory;
-import us.ihmc.quadrupedRobotics.QuadrupedTestGoals;
+import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelControllerName;
+import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
+import us.ihmc.quadrupedRobotics.*;
 import us.ihmc.quadrupedRobotics.communication.QuadrupedMessageTools;
-import us.ihmc.quadrupedRobotics.communication.QuadrupedNetClassList;
 import us.ihmc.quadrupedRobotics.controller.QuadrupedControlMode;
-import us.ihmc.quadrupedRobotics.controller.QuadrupedControllerEnum;
-import us.ihmc.quadrupedRobotics.controller.QuadrupedControllerRequestedEvent;
 import us.ihmc.quadrupedRobotics.controller.QuadrupedSteppingStateEnum;
 import us.ihmc.quadrupedRobotics.input.managers.QuadrupedTeleopManager;
 import us.ihmc.quadrupedRobotics.simulation.QuadrupedGroundContactModelType;
+import us.ihmc.robotics.testing.YoVariableTestGoal;
 import us.ihmc.simulationConstructionSetTools.util.simulationrunner.GoalOrientedTestConductor;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner;
 import us.ihmc.tools.MemoryTools;
@@ -26,24 +23,31 @@ import java.io.IOException;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
-
 public abstract class QuadrupedScriptedFlatGroundWalkingTest implements QuadrupedMultiRobotTestInterface
 {
    private GoalOrientedTestConductor conductor;
    private QuadrupedForceTestYoVariables variables;
    private QuadrupedTeleopManager stepTeleopManager;
+   private QuadrupedTestFactory quadrupedTestFactory;
 
    @Before
-   public void setup()
+   public void setup() throws IOException
    {
       MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " before test.");
+
+      quadrupedTestFactory = createQuadrupedTestFactory();
+      quadrupedTestFactory.setControlMode(QuadrupedControlMode.FORCE);
+      quadrupedTestFactory.setGroundContactModelType(QuadrupedGroundContactModelType.FLAT);
+      quadrupedTestFactory.setUseNetworking(true);
+      conductor = quadrupedTestFactory.createTestConductor();
+      variables = new QuadrupedForceTestYoVariables(conductor.getScs());
+      stepTeleopManager = quadrupedTestFactory.getStepTeleopManager();
    }
 
    @After
    public void tearDown()
    {
+      quadrupedTestFactory.close();
       conductor.concludeTesting();
       conductor = null;
       variables = null;
@@ -52,59 +56,32 @@ public abstract class QuadrupedScriptedFlatGroundWalkingTest implements Quadrupe
       MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " after test.");
    }
 
-   public void testScriptedFlatGroundWalking() throws IOException, BlockingSimulationRunner.SimulationExceededMaximumTimeException
+   @ContinuousIntegrationTest(estimatedDuration = 74.7)
+   @Test(timeout = 370000)
+   public void testScriptedFlatGroundWalking() throws BlockingSimulationRunner.SimulationExceededMaximumTimeException
    {
-      QuadrupedTestFactory quadrupedTestFactory = createQuadrupedTestFactory();
-      quadrupedTestFactory.setControlMode(QuadrupedControlMode.FORCE);
-      quadrupedTestFactory.setGroundContactModelType(QuadrupedGroundContactModelType.FLAT);
-      quadrupedTestFactory.setUseNetworking(true);
-      conductor = quadrupedTestFactory.createTestConductor();
-      variables = new QuadrupedForceTestYoVariables(conductor.getScs());
-      stepTeleopManager = quadrupedTestFactory.getStepTeleopManager();
+      QuadrupedTestBehaviors.standUp(conductor, variables);
+      QuadrupedTestBehaviors.startBalancing(conductor, variables, stepTeleopManager);
 
-      PacketCommunicator packetCommunicator = PacketCommunicator
-            .createIntraprocessPacketCommunicator(NetworkPorts.CONTROLLER_PORT, new QuadrupedNetClassList());
-      AtomicReference<QuadrupedControllerEnum> controllerState = new AtomicReference<>();
-      AtomicReference<QuadrupedSteppingStateEnum> steppingState = new AtomicReference<>();
-      packetCommunicator.attachListener(QuadrupedControllerStateChangeMessage.class,
-                                        packet -> controllerState.set(QuadrupedControllerEnum.fromByte(packet.getEndControllerName())));
+      stepTeleopManager.requestSteppingState();
 
-      packetCommunicator.attachListener(QuadrupedSteppingStateChangeMessage.class,
-                                        packet -> steppingState.set(QuadrupedSteppingStateEnum.fromByte(packet.getEndSteppingControllerName())));
-      packetCommunicator.connect();
-
-      QuadrupedRequestedControllerStateMessage controllerMessage = new QuadrupedRequestedControllerStateMessage();
-      controllerMessage.setQuadrupedControllerName(QuadrupedControllerRequestedEvent.REQUEST_STEPPING.toByte());
-      packetCommunicator.send(controllerMessage);
       conductor.addTerminalGoal(QuadrupedTestGoals.timeInFuture(variables, 1.0));
       conductor.simulate();
 
       List<QuadrupedTimedStepMessage> steps = getSteps();
       QuadrupedTimedStepListMessage message = QuadrupedMessageTools.createQuadrupedTimedStepListMessage(steps, false);
-      packetCommunicator.send(message);
-
-      boolean isStanding = true;
-      while (isStanding)
-      {
-         conductor.addTerminalGoal(QuadrupedTestGoals.timeInFuture(variables, 1.0));
-         conductor.simulate();
-         isStanding = steppingState.get() == QuadrupedSteppingStateEnum.STAND;
-      }
-
-      boolean isStepping = true;
-      while (isStepping)
-      {
-         conductor.addTerminalGoal(QuadrupedTestGoals.timeInFuture(variables, 1.0));
-         conductor.simulate();
-         isStepping = steppingState.get() == QuadrupedSteppingStateEnum.STEP;
-      }
+      stepTeleopManager.publishTimedStepListToController(message);
 
       // check robot is still upright and walked forward
       Point3D expectedFinalPlanarPosition = getFinalPlanarPosition();
-      assertEquals(variables.getRobotBodyX().getDoubleValue(), expectedFinalPlanarPosition.getX(), 0.1);
-      assertEquals(variables.getRobotBodyY().getDoubleValue(), expectedFinalPlanarPosition.getY(), 0.1);
-      assertEquals(variables.getRobotBodyYaw().getDoubleValue(), expectedFinalPlanarPosition.getZ(), 0.1);
-      assertTrue(variables.getRobotBodyZ().getDoubleValue() > 0.0);
+      conductor.addTerminalGoal(YoVariableTestGoal.doubleWithinEpsilon(variables.getRobotBodyX(), expectedFinalPlanarPosition.getX(), 0.1));
+      conductor.addTerminalGoal(YoVariableTestGoal.doubleWithinEpsilon(variables.getRobotBodyY(), expectedFinalPlanarPosition.getY(), 0.1));
+      conductor.addTerminalGoal(YoVariableTestGoal.doubleWithinEpsilon(variables.getRobotBodyYaw(), expectedFinalPlanarPosition.getZ(), 0.1));
+      conductor.addTerminalGoal(QuadrupedTestGoals.timeInFuture(variables, message.getQuadrupedStepList().getLast().getTimeInterval().getEndTime() + 2.0));
+      conductor.addSustainGoal(QuadrupedTestGoals.notFallen(variables));
+
+      conductor.simulate();
+
       conductor.concludeTesting();
    }
 

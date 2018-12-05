@@ -22,7 +22,7 @@ public class PointXAxisAtPositionFrame extends ReferenceFrame
 
    public void setPositionToPointAt(FramePoint3D positionToPointAt)
    {
-      positionToPointAt.changeFrame(parentFrame);
+      positionToPointAt.changeFrame(getParent());
       this.positionToPointAt.set(positionToPointAt);
    }
    

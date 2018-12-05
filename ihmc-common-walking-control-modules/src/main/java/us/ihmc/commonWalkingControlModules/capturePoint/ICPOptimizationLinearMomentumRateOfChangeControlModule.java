@@ -11,7 +11,7 @@ import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactableFoot;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.humanoidRobotics.footstep.FootstepTiming;
 import us.ihmc.robotics.geometry.PlanarRegion;
-import us.ihmc.robotics.lists.RecyclingArrayList;
+import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.robotics.robotSide.SideDependentList;
@@ -29,17 +29,7 @@ public class ICPOptimizationLinearMomentumRateOfChangeControlModule extends Legg
                                                                  double gravityZ, double controlDT, YoVariableRegistry parentRegistry,
                                                                  YoGraphicsListRegistry yoGraphicsListRegistry)
    {
-      this(referenceFrames, bipedSupportPolygons, icpControlPolygons, contactableFeet, walkingControllerParameters, yoTime, totalMass, gravityZ, controlDT,
-           parentRegistry, yoGraphicsListRegistry, true);
-   }
-
-   public ICPOptimizationLinearMomentumRateOfChangeControlModule(ReferenceFrames referenceFrames, BipedSupportPolygons bipedSupportPolygons,
-                                                                 ICPControlPolygons icpControlPolygons, SideDependentList<ContactableFoot> contactableFeet,
-                                                                 WalkingControllerParameters walkingControllerParameters, YoDouble yoTime, double totalMass,
-                                                                 double gravityZ, double controlDT, YoVariableRegistry parentRegistry,
-                                                                 YoGraphicsListRegistry yoGraphicsListRegistry, boolean use2DProjection)
-   {
-      super("", referenceFrames, gravityZ, totalMass, parentRegistry, yoGraphicsListRegistry, use2DProjection);
+      super("", referenceFrames, gravityZ, totalMass, parentRegistry, yoGraphicsListRegistry);
 
       this.yoTime = yoTime;
 
@@ -80,7 +70,7 @@ public class ICPOptimizationLinearMomentumRateOfChangeControlModule extends Legg
    @Override
    public void initializeForTransfer()
    {
-      icpOptimizationController.initializeForTransfer(yoTime.getDoubleValue(), transferToSide, omega0);
+      icpOptimizationController.initializeForTransfer(yoTime.getDoubleValue(), transferToSide);
    }
 
    @Override
@@ -100,6 +90,7 @@ public class ICPOptimizationLinearMomentumRateOfChangeControlModule extends Legg
       }
 
       icpOptimizationController.getDesiredCMP(desiredCMP);
+      icpOptimizationController.getDesiredCoP(desiredCoP);
 
       yoUnprojectedDesiredCMP.set(desiredCMP);
    }

@@ -6,7 +6,7 @@ import java.util.Random;
 import controller_msgs.msg.dds.JointspaceTrajectoryMessage;
 import controller_msgs.msg.dds.OneDoFJointTrajectoryMessage;
 import us.ihmc.communication.controllerAPI.command.QueueableCommand;
-import us.ihmc.robotics.lists.RecyclingArrayList;
+import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.robotics.math.trajectories.waypoints.SimpleTrajectoryPoint1D;
 
 public final class JointspaceTrajectoryCommand extends QueueableCommand<JointspaceTrajectoryCommand, JointspaceTrajectoryMessage>
@@ -44,7 +44,7 @@ public final class JointspaceTrajectoryCommand extends QueueableCommand<Jointspa
    }
 
    @Override
-   public void set(JointspaceTrajectoryMessage message)
+   public void setFromMessage(JointspaceTrajectoryMessage message)
    {
       setQueueableCommandVariables(message.getQueueingProperties());
       set(message.getJointTrajectoryMessages());
@@ -66,7 +66,7 @@ public final class JointspaceTrajectoryCommand extends QueueableCommand<Jointspa
          OneDoFJointTrajectoryMessage oneJointTrajectoryMessage = trajectoryPointListArray.get(i);
          if (oneJointTrajectoryMessage != null)
          {
-            oneDoFJointTrajectoryCommand.set(oneJointTrajectoryMessage);
+            oneDoFJointTrajectoryCommand.setFromMessage(oneJointTrajectoryMessage);
             oneDoFJointTrajectoryCommand.setWeight(oneJointTrajectoryMessage.getWeight());
          }
       }

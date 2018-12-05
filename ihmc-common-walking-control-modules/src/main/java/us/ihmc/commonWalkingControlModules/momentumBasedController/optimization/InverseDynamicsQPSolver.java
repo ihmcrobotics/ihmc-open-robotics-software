@@ -4,9 +4,8 @@ import org.ejml.data.DenseMatrix64F;
 import org.ejml.ops.CommonOps;
 
 import us.ihmc.convexOptimization.quadraticProgram.ActiveSetQPSolverWithInactiveVariablesInterface;
-import us.ihmc.robotics.linearAlgebra.DiagonalMatrixTools;
+import us.ihmc.mecano.spatial.Wrench;
 import us.ihmc.robotics.linearAlgebra.MatrixTools;
-import us.ihmc.robotics.screwTheory.Wrench;
 import us.ihmc.robotics.time.ExecutionTimer;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
@@ -25,7 +24,7 @@ public class InverseDynamicsQPSolver
    private final YoFrameVector3D wrenchEquilibriumForceError;
    private final YoFrameVector3D wrenchEquilibriumTorqueError;
 
-   private final YoBoolean firstCall = new YoBoolean("firstCall", registry);
+   private final YoBoolean addRateRegularization = new YoBoolean("AddRateRegularization", registry);
    private final ActiveSetQPSolverWithInactiveVariablesInterface qpSolver;
 
    private final DenseMatrix64F solverInput_H;
@@ -62,11 +61,6 @@ public class InverseDynamicsQPSolver
    private final DenseMatrix64F regularizationMatrix;
 
    private final DenseMatrix64F tempJtW;
-   private final DenseMatrix64F tempMotionTask_H;
-   private final DenseMatrix64F tempMotionTask_f;
-   private final DenseMatrix64F tempRhoTask_H;
-   private final DenseMatrix64F tempRhoTask_f;
-   private final DenseMatrix64F tempTorqueTask_H;
 
    private final int numberOfDoFs;
    private final int rhoSize;
@@ -78,16 +72,19 @@ public class InverseDynamicsQPSolver
    private boolean useWarmStart = false;
    private int maxNumberOfIterations = 100;
 
+   private final double dt;
+
    public InverseDynamicsQPSolver(ActiveSetQPSolverWithInactiveVariablesInterface qpSolver, int numberOfDoFs, int rhoSize, boolean hasFloatingBase,
-                                  YoVariableRegistry parentRegistry)
+                                  double dt, YoVariableRegistry parentRegistry)
    {
       this.qpSolver = qpSolver;
       this.numberOfDoFs = numberOfDoFs;
       this.rhoSize = rhoSize;
       this.hasFloatingBase = hasFloatingBase;
       this.problemSize = numberOfDoFs + rhoSize;
+      this.dt = dt;
 
-      firstCall.set(true);
+      addRateRegularization.set(false);
 
       solverInput_H = new DenseMatrix64F(problemSize, problemSize);
       solverInput_f = new DenseMatrix64F(problemSize, 1);
@@ -117,13 +114,6 @@ public class InverseDynamicsQPSolver
       solverOutput_rhos = new DenseMatrix64F(rhoSize, 1);
 
       tempJtW = new DenseMatrix64F(problemSize, problemSize);
-      tempMotionTask_H = new DenseMatrix64F(numberOfDoFs, numberOfDoFs);
-      tempMotionTask_f = new DenseMatrix64F(numberOfDoFs, 1);
-
-      tempRhoTask_H = new DenseMatrix64F(rhoSize, rhoSize);
-      tempRhoTask_f = new DenseMatrix64F(rhoSize, 1);
-
-      tempTorqueTask_H = new DenseMatrix64F(numberOfDoFs, problemSize);
 
       jointAccelerationRegularization.set(0.005);
       jointJerkRegularization.set(0.1);
@@ -206,26 +196,34 @@ public class InverseDynamicsQPSolver
 
       solverInput_Ain.reshape(0, problemSize);
       solverInput_bin.reshape(0, 1);
-
-      if (!firstCall.getBooleanValue())
-         addJointJerkRegularization();
    }
 
    private void addRegularization()
    {
       CommonOps.addEquals(solverInput_H, regularizationMatrix);
+
+      if (addRateRegularization.getBooleanValue())
+      {
+         addJointJerkRegularization();
+      }
+   }
+
+   public void resetRateRegularization()
+   {
+      addRateRegularization.set(false);
    }
 
    private void addJointJerkRegularization()
    {
+      double factor = dt * dt / jointJerkRegularization.getDoubleValue();
       for (int i = 0; i < numberOfDoFs; i++)
       {
-         solverInput_H.add(i, i, jointJerkRegularization.getDoubleValue());
-         solverInput_f.add(i, 0, -jointJerkRegularization.getDoubleValue() * solverOutput_jointAccelerations.get(i, 0));
+         solverInput_H.add(i, i, 1.0 / factor);
+         solverInput_f.add(i, 0, -solverOutput_jointAccelerations.get(i, 0) / factor);
       }
    }
 
-   public void addMotionInput(MotionQPInput input)
+   public void addMotionInput(QPInput input)
    {
       switch (input.getConstraintType())
       {
@@ -249,15 +247,50 @@ public class InverseDynamicsQPSolver
       }
    }
 
-   public void addMotionTask(DenseMatrix64F taskJ, DenseMatrix64F taskObjective, double taskWeight)
+   public void addRhoInput(QPInput input)
    {
-      int taskSize = taskJ.getNumRows();
+      switch (input.getConstraintType())
+      {
+      case OBJECTIVE:
+         if (input.useWeightScalar())
+         {
+            addRhoTask(input.getTaskJacobian(), input.getTaskObjective(), input.getWeightScalar());
+         }
+         else
+         {
+            addRhoTask(input.getTaskJacobian(), input.getTaskObjective(), input.getTaskWeightMatrix());
+         }
+         break;
+      case EQUALITY:
+         addRhoEqualityConstraint(input.getTaskJacobian(), input.getTaskObjective());
+         break;
+      case LEQ_INEQUALITY:
+         addRhoLesserOrEqualInequalityConstraint(input.getTaskJacobian(), input.getTaskObjective());
+         break;
+      case GEQ_INEQUALITY:
+         addRhoGreaterOrEqualInequalityConstraint(input.getTaskJacobian(), input.getTaskObjective());
+         break;
+      default:
+         throw new RuntimeException("Unexpected constraint type: " + input.getConstraintType());
+      }
+   }
 
-      // J^T W
-      tempJtW.reshape(numberOfDoFs, taskSize);
-      CommonOps.transpose(taskJ, tempJtW);
+   public void addMotionTask(DenseMatrix64F taskJacobian, DenseMatrix64F taskObjective, double taskWeight)
+   {
+      if (taskJacobian.getNumCols() != numberOfDoFs)
+      {
+         throw new RuntimeException("Motion task needs to have size macthing the DoFs of the robot.");
+      }
+      addTaskInternal(taskJacobian, taskObjective, taskWeight, 0);
+   }
 
-      addMotionTaskInternal(taskWeight, tempJtW, taskJ, taskObjective);
+   public void addRhoTask(DenseMatrix64F taskJacobian, DenseMatrix64F taskObjective, double taskWeight)
+   {
+      if (taskJacobian.getNumCols() != rhoSize)
+      {
+         throw new RuntimeException("Rho task needs to have size macthing the number of rhos of the robot.");
+      }
+      addTaskInternal(taskJacobian, taskObjective, taskWeight, numberOfDoFs);
    }
 
    /**
@@ -271,49 +304,131 @@ public class InverseDynamicsQPSolver
     */
    public void addMotionTask(DenseMatrix64F taskJacobian, DenseMatrix64F taskObjective, DenseMatrix64F taskWeight)
    {
+      if (taskJacobian.getNumCols() != numberOfDoFs)
+      {
+         throw new RuntimeException("Motion task needs to have size macthing the DoFs of the robot.");
+      }
+      addTaskInternal(taskJacobian, taskObjective, taskWeight, 0);
+   }
+
+   /**
+    * Sets up a motion objective for the generalized contact forces (rhos).
+    * <p>
+    *    min (J rho - b)^T * W * (J rho - b)
+    * </p>
+    * @param taskJacobian jacobian to map rho to the objective space. J in the above equation.
+    * @param taskObjective matrix of the desired objective for the rho task. b in the above equation.
+    * @param taskWeight weight for the desired objective. W in the above equation. Assumed to be diagonal.
+    */
+   public void addRhoTask(DenseMatrix64F taskJacobian, DenseMatrix64F taskObjective, DenseMatrix64F taskWeight)
+   {
+      if (taskJacobian.getNumCols() != rhoSize)
+      {
+         throw new RuntimeException("Rho task needs to have size macthing the number of rhos of the robot.");
+      }
+      addTaskInternal(taskJacobian, taskObjective, taskWeight, numberOfDoFs);
+   }
+
+   /**
+    * Sets up a motion objective for the generalized contact forces (rhos).
+    * <p>
+    *    min (rho - b)^T * W * (rho - b)
+    * </p>
+    * @param taskObjective matrix of the desired objective for the rho task. b in the above equation.
+    * @param taskWeight weight for the desired objective. W in the above equation. Assumed to be diagonal.
+    */
+   public void addRhoTask(DenseMatrix64F taskObjective, DenseMatrix64F taskWeight)
+   {
+      addTaskInternal(taskObjective, taskWeight, numberOfDoFs, rhoSize);
+   }
+
+   public void addMotionTask(DenseMatrix64F taskObjective, DenseMatrix64F taskWeight)
+   {
+      addTaskInternal(taskObjective, taskWeight, 0, numberOfDoFs);
+   }
+
+   public void addTaskInternal(DenseMatrix64F taskObjective, DenseMatrix64F taskWeight, int offset, int variables)
+   {
+      if (offset + variables > problemSize)
+      {
+         throw new RuntimeException("This task does not fit.");
+      }
+
+      MatrixTools.addMatrixBlock(solverInput_H, offset, offset, taskWeight, 0, 0, variables, variables, 1.0);
+      MatrixTools.multAddBlock(-1.0, taskWeight, taskObjective, solverInput_f, offset, 0);
+   }
+
+   private void addTaskInternal(DenseMatrix64F taskJacobian, DenseMatrix64F taskObjective, DenseMatrix64F taskWeight, int offset)
+   {
       int taskSize = taskJacobian.getNumRows();
+      int variables = taskJacobian.getNumCols();
+      if (offset + variables > problemSize)
+      {
+         throw new RuntimeException("This task does not fit.");
+      }
+
+      tempJtW.reshape(variables, taskSize);
 
       // J^T W
-      tempJtW.reshape(numberOfDoFs, taskSize);
-      DiagonalMatrixTools.postMultTransA(taskJacobian, taskWeight, tempJtW);
+      CommonOps.multTransA(taskJacobian, taskWeight, tempJtW);
 
-      addMotionTaskInternal(tempJtW, taskJacobian, taskObjective);
-   }
-
-   // new, and hopefully faster
-   private void addMotionTaskInternal(double weight, DenseMatrix64F taskJt, DenseMatrix64F taskJacobian, DenseMatrix64F taskObjective)
-   {
       // Compute: H += J^T W J
-      CommonOps.multInner(taskJacobian, tempMotionTask_H);
-      MatrixTools.addMatrixBlock(solverInput_H, 0, 0, tempMotionTask_H, 0, 0, numberOfDoFs, numberOfDoFs, weight);
+      MatrixTools.multAddBlock(tempJtW, taskJacobian, solverInput_H, offset, offset);
 
       // Compute: f += - J^T W Objective
-      CommonOps.mult(taskJt, taskObjective, tempMotionTask_f);
-      MatrixTools.addMatrixBlock(solverInput_f, 0, 0, tempMotionTask_f, 0, 0, numberOfDoFs, 1, -weight);
+      MatrixTools.multAddBlock(-1.0, tempJtW, taskObjective, solverInput_f, offset, 0);
    }
 
-   private void addMotionTaskInternal(DenseMatrix64F taskJtW, DenseMatrix64F taskJacobian, DenseMatrix64F taskObjective)
+   private void addTaskInternal(DenseMatrix64F taskJacobian, DenseMatrix64F taskObjective, double taskWeight, int offset)
    {
+      int variables = taskJacobian.getNumCols();
+      if (offset + variables > problemSize)
+      {
+         throw new RuntimeException("This task does not fit.");
+      }
+
       // Compute: H += J^T W J
-      CommonOps.mult(taskJtW, taskJacobian, tempMotionTask_H);
-      MatrixTools.addMatrixBlock(solverInput_H, 0, 0, tempMotionTask_H, 0, 0, numberOfDoFs, numberOfDoFs, 1.0);
+      MatrixTools.multAddBlockInner(taskWeight, taskJacobian, solverInput_H, offset, offset);
 
       // Compute: f += - J^T W Objective
-      CommonOps.mult(taskJtW, taskObjective, tempMotionTask_f);
-      MatrixTools.addMatrixBlock(solverInput_f, 0, 0, tempMotionTask_f, 0, 0, numberOfDoFs, 1, -1.0);
+      MatrixTools.multAddBlockTransA(-taskWeight, taskJacobian, taskObjective, solverInput_f, offset, 0);
    }
 
    public void addMotionEqualityConstraint(DenseMatrix64F taskJacobian, DenseMatrix64F taskObjective)
    {
+      if (taskJacobian.getNumCols() != numberOfDoFs)
+      {
+         throw new RuntimeException("Motion task needs to have size macthing the DoFs of the robot.");
+      }
+      addEqualityConstraintInternal(taskJacobian, taskObjective, 0);
+   }
+
+   public void addRhoEqualityConstraint(DenseMatrix64F taskJacobian, DenseMatrix64F taskObjective)
+   {
+      if (taskJacobian.getNumCols() != rhoSize)
+      {
+         throw new RuntimeException("Rho task needs to have size macthing the number of rhos of the robot.");
+      }
+      addEqualityConstraintInternal(taskJacobian, taskObjective, numberOfDoFs);
+   }
+
+   private void addEqualityConstraintInternal(DenseMatrix64F taskJacobian, DenseMatrix64F taskObjective, int offset)
+   {
       int taskSize = taskJacobian.getNumRows();
+      int variables = taskJacobian.getNumCols();
+      if (offset + variables > problemSize)
+      {
+         throw new RuntimeException("This task does not fit.");
+      }
+
       int previousSize = solverInput_beq.getNumRows();
 
       // Careful on that one, it works as long as matrices are row major and that the number of columns is not changed.
       solverInput_Aeq.reshape(previousSize + taskSize, problemSize, true);
       solverInput_beq.reshape(previousSize + taskSize, 1, true);
 
-      CommonOps.insert(taskJacobian, solverInput_Aeq, previousSize, 0);
-      CommonOps.insert(taskObjective, solverInput_beq, previousSize, 0);
+      CommonOps.insert(taskJacobian, solverInput_Aeq, previousSize, offset);
+      CommonOps.insert(taskObjective, solverInput_beq, previousSize, offset);
    }
 
    public void addMotionLesserOrEqualInequalityConstraint(DenseMatrix64F taskJacobian, DenseMatrix64F taskObjective)
@@ -326,44 +441,63 @@ public class InverseDynamicsQPSolver
       addMotionInequalityConstraintInternal(taskJacobian, taskObjective, -1.0);
    }
 
+   private void addRhoLesserOrEqualInequalityConstraint(DenseMatrix64F taskJacobian, DenseMatrix64F taskObjective)
+   {
+      addRhoInequalityConstraintInternal(taskJacobian, taskObjective, 1.0);
+   }
+
+   private void addRhoGreaterOrEqualInequalityConstraint(DenseMatrix64F taskJacobian, DenseMatrix64F taskObjective)
+   {
+      addRhoInequalityConstraintInternal(taskJacobian, taskObjective, -1.0);
+   }
+
    private void addMotionInequalityConstraintInternal(DenseMatrix64F taskJacobian, DenseMatrix64F taskObjective, double sign)
    {
+      addInequalityConstraintInternal(taskJacobian, taskObjective, sign, 0);
+   }
+
+   private void addRhoInequalityConstraintInternal(DenseMatrix64F taskJacobian, DenseMatrix64F taskObjective, double sign)
+   {
+      addInequalityConstraintInternal(taskJacobian, taskObjective, sign, numberOfDoFs);
+   }
+
+   private void addInequalityConstraintInternal(DenseMatrix64F taskJacobian, DenseMatrix64F taskObjective, double sign, int offset)
+   {
       int taskSize = taskJacobian.getNumRows();
+      int variables = taskJacobian.getNumCols();
+      if (offset + variables > problemSize)
+      {
+         throw new RuntimeException("This task does not fit.");
+      }
+
       int previousSize = solverInput_bin.getNumRows();
 
       // Careful on that one, it works as long as matrices are row major and that the number of columns is not changed.
       solverInput_Ain.reshape(previousSize + taskSize, problemSize, true);
       solverInput_bin.reshape(previousSize + taskSize, 1, true);
 
-      MatrixTools.setMatrixBlock(solverInput_Ain, previousSize, 0, taskJacobian, 0, 0, taskSize, problemSize, sign);
+      MatrixTools.setMatrixBlock(solverInput_Ain, previousSize, offset, taskJacobian, 0, 0, taskSize, variables, sign);
       MatrixTools.setMatrixBlock(solverInput_bin, previousSize, 0, taskObjective, 0, 0, taskSize, 1, sign);
    }
 
    public void addTorqueMinimizationObjective(DenseMatrix64F torqueJacobian, DenseMatrix64F torqueObjective)
    {
-      int taskSize = torqueObjective.getNumRows();
-      int controlSize = torqueJacobian.getNumCols();
-
-      // J^T W
-      tempJtW.reshape(controlSize, taskSize);
-      MatrixTools.scaleTranspose(jointTorqueWeight.getDoubleValue(), torqueJacobian, tempJtW);
-
       // Compute: H += J^T W J
-      CommonOps.multAdd(tempJtW, torqueJacobian, solverInput_H);
+      MatrixTools.multAddInner(jointTorqueWeight.getDoubleValue(), torqueJacobian, solverInput_H);
 
       // Compute: f += - J^T W Objective
-      CommonOps.multAdd(-1.0, tempJtW, torqueObjective, solverInput_f);
+      CommonOps.multTransA(-jointTorqueWeight.getDoubleValue(), torqueJacobian, torqueObjective, solverInput_f);
    }
 
    public void addTorqueMinimizationObjective(DenseMatrix64F torqueQddotJacobian, DenseMatrix64F torqueRhoJacobian, DenseMatrix64F torqueObjective)
    {
       int taskSize = torqueObjective.getNumRows();
 
-      tempTorqueTask_H.reshape(taskSize, problemSize);
-      CommonOps.insert(torqueQddotJacobian, tempTorqueTask_H, 0, 0);
-      CommonOps.insert(torqueRhoJacobian, tempTorqueTask_H, 0, numberOfDoFs);
+      tempJtW.reshape(taskSize, problemSize);
+      CommonOps.insert(torqueQddotJacobian, tempJtW, 0, 0);
+      CommonOps.insert(torqueRhoJacobian, tempJtW, 0, numberOfDoFs);
 
-      addTorqueMinimizationObjective(tempTorqueTask_H, torqueObjective);
+      addTorqueMinimizationObjective(tempJtW, torqueObjective);
    }
 
    /**
@@ -377,7 +511,7 @@ public class InverseDynamicsQPSolver
     * <li>[-A Q] * [qDDot<sup>T</sup> &rho;<sup>T</sup>]<sup>T</sup> = ADot * qDot -
     * &sum;W<sub>user</sub> - W<sub>gravity</sub>
     * </p>
-    * 
+    *
     * @param centroidalMomentumMatrix refers to A in the equation.
     * @param rhoJacobian refers to Q in the equation. Q&rho; represents external wrench to be
     *           optimized for.
@@ -408,14 +542,9 @@ public class InverseDynamicsQPSolver
          CommonOps.insert(rhoJacobian, tempWrenchConstraint_J, 0, numberOfDoFs);
 
          double weight = 150.0;
-         tempWrenchConstraint_H.reshape(problemSize, problemSize);
-         CommonOps.multInner(tempWrenchConstraint_J, tempWrenchConstraint_H);
-         CommonOps.scale(weight, tempWrenchConstraint_H);
-         CommonOps.addEquals(solverInput_H, tempWrenchConstraint_H);
+         MatrixTools.multAddInner(weight, tempWrenchConstraint_J, solverInput_H);
 
-         tempWrenchConstraint_f.reshape(problemSize, 1);
-         CommonOps.multTransA(weight, tempWrenchConstraint_J, tempWrenchConstraint_RHS, tempWrenchConstraint_f);
-         CommonOps.subtractEquals(solverInput_f, tempWrenchConstraint_f);
+         CommonOps.multAddTransA(-weight, tempWrenchConstraint_J, tempWrenchConstraint_RHS, solverInput_f);
       }
       else
       {
@@ -435,52 +564,9 @@ public class InverseDynamicsQPSolver
       hasWrenchesEquilibriumConstraintBeenSetup = true;
    }
 
-   private final DenseMatrix64F tempWrenchConstraint_H = new DenseMatrix64F(200, 200);
    private final DenseMatrix64F tempWrenchConstraint_J = new DenseMatrix64F(Wrench.SIZE, 200);
-   private final DenseMatrix64F tempWrenchConstraint_f = new DenseMatrix64F(Wrench.SIZE, 200);
    private final DenseMatrix64F tempWrenchConstraint_LHS = new DenseMatrix64F(Wrench.SIZE, 1);
    private final DenseMatrix64F tempWrenchConstraint_RHS = new DenseMatrix64F(Wrench.SIZE, 1);
-
-   /**
-    * Sets up a motion objective for the generalized contact forces (rhos).
-    * <p>
-    *    min (rho - b)^T * W * (rho - b)
-    * </p>
-    * @param taskObjective matrix of the desired objective for the rho task. b in the above equation.
-    * @param taskWeight weight for the desired objective. W in the above equation. Assumed to be diagonal.
-    */
-   public void addRhoTask(DenseMatrix64F taskObjective, DenseMatrix64F taskWeight)
-   {
-      MatrixTools.addMatrixBlock(solverInput_H, numberOfDoFs, numberOfDoFs, taskWeight, 0, 0, rhoSize, rhoSize, 1.0);
-
-      DiagonalMatrixTools.preMult(taskWeight, taskObjective, tempRhoTask_f);
-      MatrixTools.addMatrixBlock(solverInput_f, numberOfDoFs, 0, tempRhoTask_f, 0, 0, rhoSize, 1, -1.0);
-   }
-
-   /**
-    * Sets up a motion objective for the generalized contact forces (rhos).
-    * <p>
-    *    min (J rho - b)^T * W * (J rho - b)
-    * </p>
-    * @param taskJacobian jacobian to map rho to the objective space. J in the above equation.
-    * @param taskObjective matrix of the desired objective for the rho task. b in the above equation.
-    * @param taskWeight weight for the desired objective. W in the above equation. Assumed to be diagonal.
-    */
-   public void addRhoTask(DenseMatrix64F taskJacobian, DenseMatrix64F taskObjective, DenseMatrix64F taskWeight)
-   {
-      int taskSize = taskJacobian.getNumRows();
-      // J^T W
-      tempJtW.reshape(rhoSize, taskSize);
-      DiagonalMatrixTools.postMultTransA(taskJacobian, taskWeight, tempJtW);
-
-      // Compute: H += J^T W J
-      CommonOps.mult(tempJtW, taskJacobian, tempRhoTask_H);
-      MatrixTools.addMatrixBlock(solverInput_H, numberOfDoFs, numberOfDoFs, tempRhoTask_H, 0, 0, rhoSize, rhoSize, 1.0);
-
-      // Compute: f += - J^T W Objective
-      CommonOps.mult(tempJtW, taskObjective, tempRhoTask_f);
-      MatrixTools.addMatrixBlock(solverInput_f, numberOfDoFs, 0, tempRhoTask_f, 0, 0, rhoSize, 1, -1.0);
-   }
 
    public boolean solve()
    {
@@ -524,7 +610,7 @@ public class InverseDynamicsQPSolver
       CommonOps.extract(solverOutput, 0, numberOfDoFs, 0, 1, solverOutput_jointAccelerations, 0, 0);
       CommonOps.extract(solverOutput, numberOfDoFs, problemSize, 0, 1, solverOutput_rhos, 0, 0);
 
-      firstCall.set(false);
+      addRateRegularization.set(true);
 
       if (SETUP_WRENCHES_CONSTRAINT_AS_OBJECTIVE)
       {

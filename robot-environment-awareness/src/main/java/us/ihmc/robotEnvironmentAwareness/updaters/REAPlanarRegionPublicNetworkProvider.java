@@ -1,60 +1,44 @@
 package us.ihmc.robotEnvironmentAwareness.updaters;
 
-import java.util.HashSet;
-import java.util.Set;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import controller_msgs.msg.dds.PlanarRegionsListMessage;
 import controller_msgs.msg.dds.RequestPlanarRegionsListMessage;
-import us.ihmc.communication.packetCommunicator.PacketCommunicator;
-import us.ihmc.communication.packets.PacketDestination;
+import us.ihmc.communication.IHMCROS2Publisher;
+import us.ihmc.communication.ROS2Tools;
+import us.ihmc.communication.ROS2Tools.MessageTopicNameGenerator;
 import us.ihmc.communication.packets.PlanarRegionMessageConverter;
 import us.ihmc.communication.packets.PlanarRegionsRequestType;
+import us.ihmc.pubsub.subscriber.Subscriber;
+import us.ihmc.ros2.Ros2Node;
 
 public class REAPlanarRegionPublicNetworkProvider
 {
-   private final Set<PacketDestination> listenersForContinuousUpdate = new HashSet<>();
-   private final Set<PacketDestination> listenersForSingleUpdate = new HashSet<>();
+   private final IHMCROS2Publisher<PlanarRegionsListMessage> publisher;
+
    private final AtomicBoolean hasReceivedClearRequest = new AtomicBoolean(false);
-   private final PacketCommunicator publicPacketCommunicator;
    private final RegionFeaturesProvider regionFeaturesProvider;
 
-   public REAPlanarRegionPublicNetworkProvider(RegionFeaturesProvider regionFeaturesProvider, PacketCommunicator publicPacketCommunicator)
+   public REAPlanarRegionPublicNetworkProvider(RegionFeaturesProvider regionFeaturesProvider, Ros2Node ros2Node,
+                                               MessageTopicNameGenerator publisherTopicNameGenerator, MessageTopicNameGenerator subscriberTopicNameGenerator)
    {
       this.regionFeaturesProvider = regionFeaturesProvider;
-      this.publicPacketCommunicator = publicPacketCommunicator;
-      publicPacketCommunicator.attachListener(RequestPlanarRegionsListMessage.class, this::handlePacket);
+      publisher = ROS2Tools.createPublisher(ros2Node, PlanarRegionsListMessage.class, publisherTopicNameGenerator);
+      ROS2Tools.createCallbackSubscription(ros2Node, RequestPlanarRegionsListMessage.class, subscriberTopicNameGenerator, this::handlePacket);
    }
-   
+
    public void update(boolean planarRegionsHaveBeenUpdated)
    {
       processRequests();
 
-      boolean hasAtLeastOneListener = !listenersForContinuousUpdate.isEmpty() || !listenersForSingleUpdate.isEmpty();
-
-      if (!hasAtLeastOneListener || regionFeaturesProvider.getPlanarRegionsList() == null)
+      if (regionFeaturesProvider.getPlanarRegionsList() == null)
          return;
 
-      // By doing so, this module does not flood the network with useless data.
-      if (planarRegionsHaveBeenUpdated)
-      {
-         for (PacketDestination packetDestination : listenersForContinuousUpdate)
-         {
-            PlanarRegionsListMessage planarRegionsListMessage = PlanarRegionMessageConverter.convertToPlanarRegionsListMessage(regionFeaturesProvider.getPlanarRegionsList());
-            planarRegionsListMessage.setDestination(packetDestination.ordinal());
-            publicPacketCommunicator.send(planarRegionsListMessage);
-         }
-      }
+      if (regionFeaturesProvider.getPlanarRegionsList().isEmpty())
+         return;
 
-      for (PacketDestination packetDestination : listenersForSingleUpdate)
-      {
-         PlanarRegionsListMessage planarRegionsListMessage = PlanarRegionMessageConverter.convertToPlanarRegionsListMessage(regionFeaturesProvider.getPlanarRegionsList());
-         planarRegionsListMessage.setDestination(packetDestination.ordinal());
-         publicPacketCommunicator.send(planarRegionsListMessage);
-      }
-
-      listenersForSingleUpdate.clear();
+      publisher.publish(PlanarRegionMessageConverter.convertToPlanarRegionsListMessage(regionFeaturesProvider.getPlanarRegionsList()));
    }
 
    private void processRequests()
@@ -62,25 +46,9 @@ public class REAPlanarRegionPublicNetworkProvider
       while (!requestsToProcess.isEmpty())
       {
          RequestPlanarRegionsListMessage request = requestsToProcess.poll();
-         PacketDestination source = PacketDestination.fromOrdinal(request.getSource());
          PlanarRegionsRequestType requestType = PlanarRegionsRequestType.fromByte(request.getPlanarRegionsRequestType());
-         switch (requestType)
-         {
-         case CONTINUOUS_UPDATE:
-            listenersForContinuousUpdate.add(source);
-            break;
-         case SINGLE_UPDATE:
-            listenersForSingleUpdate.add(source);
-            break;
-         case STOP_UPDATE:
-            listenersForContinuousUpdate.remove(source);
-            break;
-         case CLEAR:
+         if (requestType == PlanarRegionsRequestType.CLEAR)
             hasReceivedClearRequest.set(true);
-            break;
-         default:
-            break;
-         }
       }
    }
 
@@ -91,9 +59,8 @@ public class REAPlanarRegionPublicNetworkProvider
 
    private final ConcurrentLinkedQueue<RequestPlanarRegionsListMessage> requestsToProcess = new ConcurrentLinkedQueue<>();
 
-   private void handlePacket(RequestPlanarRegionsListMessage packet)
+   private void handlePacket(Subscriber<RequestPlanarRegionsListMessage> subscriber)
    {
-      if (packet != null)
-         requestsToProcess.offer(packet);
+      requestsToProcess.offer(subscriber.takeNextData());
    }
 }

@@ -9,7 +9,7 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Point3D32;
 import us.ihmc.euclid.tuple4D.Quaternion;
-import us.ihmc.robotics.lists.RecyclingArrayList;
+import us.ihmc.commons.lists.RecyclingArrayList;
 
 public class LidarScanCommand implements Command<LidarScanCommand, LidarScanMessage>
 {
@@ -37,7 +37,7 @@ public class LidarScanCommand implements Command<LidarScanCommand, LidarScanMess
    }
 
    @Override
-   public void set(LidarScanMessage message)
+   public void setFromMessage(LidarScanMessage message)
    {
       timestamp = message.getRobotTimestamp();
       lidarPose.setIncludingFrame(ReferenceFrame.getWorldFrame(), message.getLidarPosition(), message.getLidarOrientation());

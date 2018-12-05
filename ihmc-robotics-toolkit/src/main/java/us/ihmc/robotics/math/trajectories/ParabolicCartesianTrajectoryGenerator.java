@@ -41,12 +41,6 @@ public class ParabolicCartesianTrajectoryGenerator implements CartesianTrajector
    public void initialize(FramePoint3D initialPosition, FrameVector3D initialVelocity, FrameVector3D initialAcceleration, FramePoint3D finalDesiredPosition,
                           FrameVector3D finalDesiredVelocity)
    {
-      this.initialize(initialPosition, initialVelocity, initialAcceleration, finalDesiredPosition, finalDesiredVelocity);
-   }
-
-   public void initialize(FramePoint3D initialPosition, FrameVector3DReadOnly initialVelocity, FrameVector3DReadOnly initialAcceleration,
-                          FramePoint3DReadOnly finalDesiredPosition, FrameVector3D finalDesiredVelocity)
-   {
       timeIntoStep.set(0.0);
       this.stepTime.set(stepTimeProvider.getValue());
 

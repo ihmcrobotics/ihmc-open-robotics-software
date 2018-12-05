@@ -1,11 +1,12 @@
 package us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories;
 
+import java.util.EnumMap;
+
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.HighLevelControllerFactoryHelper;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.HighLevelControllerState;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.SmoothTransitionControllerState;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelControllerName;
-
-import java.util.EnumMap;
+import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 
 public class StandTransitionControllerStateFactory implements HighLevelControllerStateFactory
 {
@@ -22,11 +23,11 @@ public class StandTransitionControllerStateFactory implements HighLevelControlle
 
          HighLevelControllerState standReadyControllerState = standReadyControllerStateFactory.getOrCreateControllerState(controllerFactoryHelper);
          HighLevelControllerState walkingControllerState = walkingControllerStateFactory.getOrCreateControllerState(controllerFactoryHelper);
+         OneDoFJointBasics[] controlledJoints = controllerFactoryHelper.getHighLevelHumanoidControllerToolbox().getControlledOneDoFJoints();
 
          standTransitionControllerState = new SmoothTransitionControllerState("toWalking", HighLevelControllerName.STAND_TRANSITION_STATE,
                                                                               standReadyControllerState, walkingControllerState,
-                                                                              controllerFactoryHelper.getHighLevelHumanoidControllerToolbox(),
-                                                                              controllerFactoryHelper.getHighLevelControllerParameters());
+                                                                              controlledJoints, controllerFactoryHelper.getHighLevelControllerParameters());
       }
 
       return standTransitionControllerState;

@@ -107,11 +107,11 @@ public class PosePlaybackSCSBridge
          yoGraphicsListRegistry.registerYoGraphic(listName, new YoGraphicPosition(sidePrefix + "AnkleViz", anklePositions.get(robotSide), 0.05, appearance.get(robotSide)));
          yoGraphicsListRegistry.registerYoGraphic(listName, new YoGraphicPosition(sidePrefix + "WristViz", wristPositions.get(robotSide), 0.05, appearance.get(robotSide)));
          
-         YoGraphicCoordinateSystem footCoordinateSystem = new YoGraphicCoordinateSystem(sidePrefix + "Foot", "", registry, 0.25);
+         YoGraphicCoordinateSystem footCoordinateSystem = new YoGraphicCoordinateSystem(sidePrefix + "Foot", "", registry, true, 0.25);
          yoGraphicsListRegistry.registerYoGraphic(listName, footCoordinateSystem);
          feetCoordinateSystems.put(robotSide, footCoordinateSystem);
 
-         YoGraphicCoordinateSystem handCoordinateSystem = new YoGraphicCoordinateSystem(sidePrefix + "Hand", "", registry, 0.25);
+         YoGraphicCoordinateSystem handCoordinateSystem = new YoGraphicCoordinateSystem(sidePrefix + "Hand", "", registry, true, 0.25);
          yoGraphicsListRegistry.registerYoGraphic(listName, handCoordinateSystem);
          handCoordinateSystems.put(robotSide, handCoordinateSystem);
       }

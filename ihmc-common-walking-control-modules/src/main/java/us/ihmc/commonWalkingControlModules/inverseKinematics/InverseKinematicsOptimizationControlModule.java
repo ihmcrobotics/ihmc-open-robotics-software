@@ -6,38 +6,45 @@ import java.util.Map;
 import org.ejml.data.DenseMatrix64F;
 
 import us.ihmc.commonWalkingControlModules.controllerCore.WholeBodyControlCoreToolbox;
-import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.*;
-import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.ControllerCoreOptimizationSettings;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.InverseKinematicsSolution;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.JointLimitReductionCommand;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.JointspaceVelocityCommand;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.MomentumCommand;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.PrivilegedConfigurationCommand;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.PrivilegedJointSpaceCommand;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.SpatialVelocityCommand;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.WholeBodyControllerBoundCalculator;
+import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.ControllerCoreOptimizationSettings;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.JointIndexHandler;
-import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.MotionQPInput;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.MotionQPInputCalculator;
+import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.QPInput;
 import us.ihmc.commons.PrintTools;
 import us.ihmc.convexOptimization.quadraticProgram.ActiveSetQPSolver;
 import us.ihmc.convexOptimization.quadraticProgram.SimpleEfficientActiveSetQPSolver;
+import us.ihmc.mecano.multiBodySystem.interfaces.JointBasics;
+import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
+import us.ihmc.mecano.spatial.interfaces.MomentumReadOnly;
+import us.ihmc.mecano.tools.MultiBodySystemTools;
+import us.ihmc.tools.exceptions.NoConvergenceException;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoInteger;
-import us.ihmc.robotics.screwTheory.InverseDynamicsJoint;
-import us.ihmc.robotics.screwTheory.OneDoFJoint;
-import us.ihmc.robotics.screwTheory.ScrewTools;
-import us.ihmc.tools.exceptions.NoConvergenceException;
 
 public class InverseKinematicsOptimizationControlModule
 {
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
    private final InverseKinematicsQPSolver qpSolver;
-   private final MotionQPInput motionQPInput;
+   private final QPInput motionQPInput;
    private final MotionQPInputCalculator motionQPInputCalculator;
    private final WholeBodyControllerBoundCalculator boundCalculator;
 
-   private final OneDoFJoint[] oneDoFJoints;
-   private final InverseDynamicsJoint[] jointsToOptimizeFor;
+   private final OneDoFJointBasics[] oneDoFJoints;
+   private final JointBasics[] jointsToOptimizeFor;
    private final int numberOfDoFs;
 
-   private final Map<OneDoFJoint, YoDouble> jointMaximumVelocities = new HashMap<>();
-   private final Map<OneDoFJoint, YoDouble> jointMinimumVelocities = new HashMap<>();
+   private final Map<OneDoFJointBasics, YoDouble> jointMaximumVelocities = new HashMap<>();
+   private final Map<OneDoFJointBasics, YoDouble> jointMinimumVelocities = new HashMap<>();
    private final DenseMatrix64F qDotMinMatrix, qDotMaxMatrix;
    private final JointIndexHandler jointIndexHandler;
 
@@ -50,8 +57,8 @@ public class InverseKinematicsOptimizationControlModule
       jointsToOptimizeFor = jointIndexHandler.getIndexedJoints();
       oneDoFJoints = jointIndexHandler.getIndexedOneDoFJoints();
 
-      numberOfDoFs = ScrewTools.computeDegreesOfFreedom(jointsToOptimizeFor);
-      motionQPInput = new MotionQPInput(numberOfDoFs);
+      numberOfDoFs = MultiBodySystemTools.computeDegreesOfFreedom(jointsToOptimizeFor);
+      motionQPInput = new QPInput(numberOfDoFs);
 
       motionQPInputCalculator = toolbox.getMotionQPInputCalculator();
       boundCalculator = toolbox.getQPBoundCalculator();
@@ -61,7 +68,7 @@ public class InverseKinematicsOptimizationControlModule
 
       for (int i = 0; i < oneDoFJoints.length; i++)
       {
-         OneDoFJoint joint = oneDoFJoints[i];
+         OneDoFJointBasics joint = oneDoFJoints[i];
          jointMaximumVelocities.put(joint, new YoDouble("qd_max_qp_" + joint.getName(), registry));
          jointMinimumVelocities.put(joint, new YoDouble("qd_min_qp_" + joint.getName(), registry));
       }
@@ -72,7 +79,9 @@ public class InverseKinematicsOptimizationControlModule
          activeSetQPSolver = new SimpleEfficientActiveSetQPSolver();
       else
          activeSetQPSolver = optimizationSettings.getActiveSetQPSolver();
-      qpSolver = new InverseKinematicsQPSolver(activeSetQPSolver, numberOfDoFs, registry);
+
+      double controlDT = toolbox.getControlDT();
+      qpSolver = new InverseKinematicsQPSolver(activeSetQPSolver, numberOfDoFs, controlDT, registry);
 
       if (optimizationSettings != null)
       {
@@ -117,7 +126,9 @@ public class InverseKinematicsOptimizationControlModule
       }
 
       DenseMatrix64F jointVelocities = qpSolver.getJointVelocities();
+      MomentumReadOnly centroidalMomentumSoltuion = motionQPInputCalculator.computeCentroidalMomentumFromSolution(jointVelocities);
       InverseKinematicsSolution inverseKinematicsSolution = new InverseKinematicsSolution(jointsToOptimizeFor, jointVelocities);
+      inverseKinematicsSolution.setCentroidalMomentumSolution(centroidalMomentumSoltuion);
 
       if (noConvergenceException != null)
          throw new InverseKinematicsOptimizationException(noConvergenceException, inverseKinematicsSolution);
@@ -131,7 +142,7 @@ public class InverseKinematicsOptimizationControlModule
 
       for (int i = 0; i < oneDoFJoints.length; i++)
       {
-         OneDoFJoint joint = oneDoFJoints[i];
+         OneDoFJointBasics joint = oneDoFJoints[i];
 
          int jointIndex = jointIndexHandler.getOneDoFJointIndex(joint);
          double qDDotMin = qDotMinMatrix.get(jointIndex, 0);

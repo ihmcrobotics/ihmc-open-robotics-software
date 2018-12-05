@@ -3,6 +3,7 @@ package us.ihmc.commonWalkingControlModules.capturePoint.optimization;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.junit.After;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -23,15 +24,17 @@ import us.ihmc.euclid.referenceFrame.FramePoint2D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.FrameVector2D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.tools.ReferenceFrameTools;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.humanoidRobotics.footstep.FootSpoof;
+import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.robotics.controllers.pidGains.implementations.PDGains;
 import us.ihmc.robotics.controllers.pidGains.implementations.PIDSE3Configuration;
 import us.ihmc.robotics.referenceFrames.MidFrameZUpFrame;
 import us.ihmc.robotics.referenceFrames.ZUpFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
-import us.ihmc.robotics.screwTheory.RigidBody;
+import us.ihmc.robotics.sensors.FootSwitchFactory;
 import us.ihmc.yoVariables.parameters.DefaultParameterReader;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 
@@ -46,6 +49,12 @@ public class ICPOptimizationControllerTest
 
    private final SideDependentList<FramePose3D> footPosesAtTouchdown = new SideDependentList<>(new FramePose3D(), new FramePose3D());
    private final SideDependentList<ReferenceFrame> ankleFrames = new SideDependentList<>();
+
+   @After
+   public void tearDown()
+   {
+      ReferenceFrameTools.clearWorldFrameTree();
+   }
 
    @ContinuousIntegrationTest(estimatedDuration = 0.1)
    @Test(timeout = 30000)
@@ -180,7 +189,7 @@ public class ICPOptimizationControllerTest
       currentICP.set(desiredICP);
       currentICP.add(icpError);
 
-      controller.initializeForTransfer(0.0, RobotSide.LEFT, omega);
+      controller.initializeForTransfer(0.0, RobotSide.LEFT);
       controller.compute(0.04, desiredICP, desiredICPVelocity, perfectCMP, currentICP, currentICPVelocity, omega);
 
       FramePoint2D desiredCMP = new FramePoint2D();
@@ -394,7 +403,7 @@ public class ICPOptimizationControllerTest
          ankleZUpFrames.put(robotSide, new ZUpFrame(worldFrame, ankleFrame, robotSide.getCamelCaseNameForStartOfExpression() + "ZUp"));
 
          String sidePrefix = robotSide.getCamelCaseNameForStartOfExpression();
-         RigidBody foot = contactableFoot.getRigidBody();
+         RigidBodyBasics foot = contactableFoot.getRigidBody();
          ReferenceFrame soleFrame = contactableFoot.getSoleFrame();
          List<FramePoint2D> contactFramePoints = contactableFoot.getContactPoints2d();
          double coefficientOfFriction = contactableFoot.getCoefficientOfFriction();
@@ -406,7 +415,7 @@ public class ICPOptimizationControllerTest
       ReferenceFrame midFeetZUpFrame = new MidFrameZUpFrame("midFeetZupFrame", worldFrame, ankleZUpFrames.get(RobotSide.LEFT), ankleZUpFrames.get(RobotSide.RIGHT));
       midFeetZUpFrame.update();
 
-      BipedSupportPolygons bipedSupportPolygons = new BipedSupportPolygons(ankleZUpFrames, midFeetZUpFrame, ankleZUpFrames, registry, null);
+      BipedSupportPolygons bipedSupportPolygons = new BipedSupportPolygons(midFeetZUpFrame, ankleZUpFrames, registry, null);
       bipedSupportPolygons.updateUsingContactStates(contactStates);
 
       return bipedSupportPolygons;
@@ -626,21 +635,9 @@ public class ICPOptimizationControllerTest
       }
 
       @Override
-      public double getContactThresholdForce()
+      public FootSwitchFactory getFootSwitchFactory()
       {
-         return 0;
-      }
-
-      @Override
-      public double getSecondContactThresholdForceIgnoringCoP()
-      {
-         return 0;
-      }
-
-      @Override
-      public double getCoPThresholdFraction()
-      {
-         return 0;
+         return null;
       }
 
       @Override

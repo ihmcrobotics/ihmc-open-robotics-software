@@ -1,11 +1,11 @@
 package us.ihmc.humanoidBehaviors.behaviors.examples;
 
-import controller_msgs.msg.dds.TextToSpeechPacket;
 import controller_msgs.msg.dds.VideoPacket;
-import us.ihmc.communication.packets.MessageTools;
+import us.ihmc.communication.ROS2Tools;
 import us.ihmc.humanoidBehaviors.behaviors.AbstractBehavior;
 import us.ihmc.humanoidBehaviors.communication.CommunicationBridge;
 import us.ihmc.humanoidBehaviors.communication.ConcurrentListeningQueue;
+import us.ihmc.ros2.Ros2Node;
 
 public class GetVideoPacketExampleBehavior extends AbstractBehavior
 {
@@ -17,11 +17,11 @@ public class GetVideoPacketExampleBehavior extends AbstractBehavior
 
    CommunicationBridge coactiveBehaviorsNetworkManager;
 
-   public GetVideoPacketExampleBehavior(CommunicationBridge communicationBridge)
+   public GetVideoPacketExampleBehavior(String robotName, Ros2Node ros2Node)
    {
-      super(communicationBridge);
-      coactiveBehaviorsNetworkManager = communicationBridge;
-      this.attachNetworkListeningQueue(videoPacketQueue, VideoPacket.class);
+      super(robotName, ros2Node);
+//      coactiveBehaviorsNetworkManager = ros2Node; FIXME
+      createSubscriber(VideoPacket.class, ROS2Tools.getDefaultTopicNameGenerator(), videoPacketQueue::put);
    }
 
    @Override
@@ -50,8 +50,7 @@ public class GetVideoPacketExampleBehavior extends AbstractBehavior
    {
       //reset necessary values so this behavior can run again properly
       frameNumber = 0;
-      TextToSpeechPacket p1 = MessageTools.createTextToSpeechPacket("Getting Video Packets");
-      sendPacket(p1);
+      publishTextToSpeack("Getting Video Packets");
       //let the UI know this specific behavior has started
       coactiveBehaviorsNetworkManager.sendToUI("GetVideoPacketExampleBehavior", 1);
    }

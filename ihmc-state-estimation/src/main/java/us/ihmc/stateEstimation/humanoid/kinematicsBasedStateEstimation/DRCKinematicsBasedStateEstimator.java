@@ -6,36 +6,27 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicReference;
 
-import org.ejml.data.DenseMatrix64F;
-
+import us.ihmc.commonWalkingControlModules.visualizer.EstimatedFromTorquesWrenchVisualizer;
 import us.ihmc.commons.Conversions;
 import us.ihmc.commons.PrintTools;
-import us.ihmc.euclid.referenceFrame.FramePoint3D;
-import us.ihmc.euclid.referenceFrame.FrameQuaternion;
-import us.ihmc.euclid.referenceFrame.FrameVector3D;
-import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
-import us.ihmc.euclid.tuple4D.interfaces.QuaternionReadOnly;
+import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicReferenceFrame;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
-import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.humanoidRobotics.communication.packets.sensing.StateEstimatorMode;
 import us.ihmc.humanoidRobotics.communication.subscribers.PelvisPoseCorrectionCommunicatorInterface;
-import us.ihmc.humanoidRobotics.communication.subscribers.RequestWristForceSensorCalibrationSubscriber;
 import us.ihmc.humanoidRobotics.communication.subscribers.StateEstimatorModeSubscriber;
 import us.ihmc.humanoidRobotics.model.CenterOfPressureDataHolder;
-import us.ihmc.robotics.screwTheory.RigidBody;
+import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
+import us.ihmc.robotics.contactable.ContactablePlaneBody;
 import us.ihmc.robotics.sensors.CenterOfMassDataHolder;
 import us.ihmc.robotics.sensors.FootSwitchInterface;
-import us.ihmc.robotics.sensors.ForceSensorDataHolder;
-import us.ihmc.robotics.sensors.ForceSensorDataHolderReadOnly;
 import us.ihmc.sensorProcessing.imu.FusedIMUSensor;
 import us.ihmc.sensorProcessing.model.RobotMotionStatusHolder;
 import us.ihmc.sensorProcessing.sensorProcessors.SensorOutputMapReadOnly;
 import us.ihmc.sensorProcessing.stateEstimation.IMUSensorReadOnly;
-import us.ihmc.sensorProcessing.stateEstimation.StateEstimator;
 import us.ihmc.sensorProcessing.stateEstimation.StateEstimatorParameters;
 import us.ihmc.sensorProcessing.stateEstimation.evaluation.FullInverseDynamicsStructure;
-import us.ihmc.stateEstimation.humanoid.DRCStateEstimatorInterface;
+import us.ihmc.stateEstimation.humanoid.StateEstimatorController;
 import us.ihmc.yoVariables.parameters.BooleanParameter;
 import us.ihmc.yoVariables.providers.BooleanProvider;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
@@ -43,11 +34,12 @@ import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoEnum;
 
-public class DRCKinematicsBasedStateEstimator implements DRCStateEstimatorInterface, StateEstimator
+public class DRCKinematicsBasedStateEstimator implements StateEstimatorController
 {
    public static final boolean INITIALIZE_HEIGHT_WITH_FOOT = true;
    public static final boolean USE_NEW_PELVIS_POSE_CORRECTOR = true;
    public static final boolean ENABLE_JOINT_TORQUES_FROM_FORCE_SENSORS_VIZ = false;
+   private static final boolean ENABLE_ESTIMATED_WRENCH_VISUALIZER = false;
 
    private final String name = getClass().getSimpleName();
    private final YoVariableRegistry registry = new YoVariableRegistry(name);
@@ -59,15 +51,16 @@ public class DRCKinematicsBasedStateEstimator implements DRCStateEstimatorInterf
    private final JointStateUpdater jointStateUpdater;
    private final PelvisRotationalStateUpdaterInterface pelvisRotationalStateUpdater;
    private final PelvisLinearStateUpdater pelvisLinearStateUpdater;
-   private final ForceSensorStateUpdater forceSensorStateUpdater;
    private final IMUBiasStateEstimator imuBiasStateEstimator;
    private final IMUYawDriftEstimator imuYawDriftEstimator;
+
+   private final EstimatedFromTorquesWrenchVisualizer estimatedWrenchVisualizer;
 
    private final PelvisPoseHistoryCorrectionInterface pelvisPoseHistoryCorrection;
 
    private final double estimatorDT;
 
-   private boolean visualizeMeasurementFrames = false;
+   private boolean visualizeMeasurementFrames = true;
    private final ArrayList<YoGraphicReferenceFrame> yoGraphicMeasurementFrames = new ArrayList<>();
 
    private final CenterOfPressureVisualizer copVisualizer;
@@ -82,30 +75,25 @@ public class DRCKinematicsBasedStateEstimator implements DRCStateEstimatorInterf
    private final YoBoolean reinitializeStateEstimator = new YoBoolean("reinitializeStateEstimator", registry);
 
    public DRCKinematicsBasedStateEstimator(FullInverseDynamicsStructure inverseDynamicsStructure, StateEstimatorParameters stateEstimatorParameters,
-         SensorOutputMapReadOnly sensorOutputMapReadOnly, ForceSensorDataHolder forceSensorDataHolderToUpdate,
-         CenterOfMassDataHolder estimatorCenterOfMassDataHolderToUpdate, String[] imuSensorsToUseInStateEstimator,
-         double gravitationalAcceleration, Map<RigidBody, FootSwitchInterface> footSwitches,
-         CenterOfPressureDataHolder centerOfPressureDataHolderFromController, RobotMotionStatusHolder robotMotionStatusFromController,
-         Map<RigidBody, ? extends ContactablePlaneBody> feet, YoGraphicsListRegistry yoGraphicsListRegistry)
+                                           SensorOutputMapReadOnly sensorOutputMapReadOnly, CenterOfMassDataHolder estimatorCenterOfMassDataHolderToUpdate,
+                                           String[] imuSensorsToUseInStateEstimator, double gravitationalAcceleration,
+                                           Map<RigidBodyBasics, FootSwitchInterface> footSwitches,
+                                           CenterOfPressureDataHolder centerOfPressureDataHolderFromController,
+                                           RobotMotionStatusHolder robotMotionStatusFromController, Map<RigidBodyBasics, ? extends ContactablePlaneBody> feet,
+                                           YoGraphicsListRegistry yoGraphicsListRegistry)
    {
       estimatorDT = stateEstimatorParameters.getEstimatorDT();
       this.sensorOutputMapReadOnly = sensorOutputMapReadOnly;
 
       usePelvisCorrector = new YoBoolean("useExternalPelvisCorrector", registry);
       usePelvisCorrector.set(true);
-      if(forceSensorDataHolderToUpdate != null)
-      {
-         forceSensorStateUpdater = new ForceSensorStateUpdater(sensorOutputMapReadOnly, forceSensorDataHolderToUpdate, stateEstimatorParameters, gravitationalAcceleration, yoGraphicsListRegistry, registry);
-      }
-      else
-      {
-         forceSensorStateUpdater = null;
-      }
 
-      if(USE_NEW_PELVIS_POSE_CORRECTOR)
-         this.pelvisPoseHistoryCorrection = new NewPelvisPoseHistoryCorrection(inverseDynamicsStructure, stateEstimatorParameters.getEstimatorDT(), registry, yoGraphicsListRegistry, 1000);
+      if (USE_NEW_PELVIS_POSE_CORRECTOR)
+         this.pelvisPoseHistoryCorrection = new NewPelvisPoseHistoryCorrection(inverseDynamicsStructure, stateEstimatorParameters.getEstimatorDT(), registry,
+                                                                               yoGraphicsListRegistry, 1000);
       else
-         this.pelvisPoseHistoryCorrection = new PelvisPoseHistoryCorrection(inverseDynamicsStructure, stateEstimatorParameters.getEstimatorDT(), registry, 1000);
+         this.pelvisPoseHistoryCorrection = new PelvisPoseHistoryCorrection(inverseDynamicsStructure, stateEstimatorParameters.getEstimatorDT(), registry,
+                                                                            1000);
 
       List<IMUSensorReadOnly> imuProcessedOutputs = new ArrayList<>();
       List<String> imuSensorsToUse = Arrays.asList(imuSensorsToUseInStateEstimator);
@@ -130,16 +118,19 @@ public class DRCKinematicsBasedStateEstimator implements DRCStateEstimatorInterf
          imusToUse.addAll(imuProcessedOutputs);
       }
 
-      BooleanProvider cancelGravityFromAccelerationMeasurement = new BooleanParameter("cancelGravityFromAccelerationMeasurement", registry, stateEstimatorParameters.cancelGravityFromAccelerationMeasurement());
-      
+      BooleanProvider cancelGravityFromAccelerationMeasurement = new BooleanParameter("cancelGravityFromAccelerationMeasurement", registry,
+                                                                                      stateEstimatorParameters.cancelGravityFromAccelerationMeasurement());
+
       imuBiasStateEstimator = new IMUBiasStateEstimator(imuProcessedOutputs, feet.keySet(), gravitationalAcceleration, cancelGravityFromAccelerationMeasurement,
                                                         estimatorDT, stateEstimatorParameters, registry);
-      imuYawDriftEstimator = new IMUYawDriftEstimator(inverseDynamicsStructure, footSwitches, feet, stateEstimatorParameters, registry);
+      imuYawDriftEstimator = new IMUYawDriftEstimator(inverseDynamicsStructure, footSwitches, feet, robotMotionStatusFromController, stateEstimatorParameters,
+                                                      registry);
 
       jointStateUpdater = new JointStateUpdater(inverseDynamicsStructure, sensorOutputMapReadOnly, stateEstimatorParameters, registry);
       if (imusToUse.size() > 0)
       {
-         pelvisRotationalStateUpdater = new IMUBasedPelvisRotationalStateUpdater(inverseDynamicsStructure, imusToUse, imuBiasStateEstimator, imuYawDriftEstimator, estimatorDT, registry);
+         pelvisRotationalStateUpdater = new IMUBasedPelvisRotationalStateUpdater(inverseDynamicsStructure, imusToUse, imuBiasStateEstimator,
+                                                                                 imuYawDriftEstimator, estimatorDT, registry);
       }
       else
       {
@@ -147,11 +138,10 @@ public class DRCKinematicsBasedStateEstimator implements DRCStateEstimatorInterf
          pelvisRotationalStateUpdater = new ConstantPelvisRotationalStateUpdater(inverseDynamicsStructure, registry);
       }
 
-      pelvisLinearStateUpdater = new PelvisLinearStateUpdater(inverseDynamicsStructure, imusToUse, imuBiasStateEstimator, cancelGravityFromAccelerationMeasurement, footSwitches,
-            estimatorCenterOfMassDataHolderToUpdate,
-            centerOfPressureDataHolderFromController, feet, gravitationalAcceleration, stateEstimatorParameters,
-            yoGraphicsListRegistry, registry);
-
+      pelvisLinearStateUpdater = new PelvisLinearStateUpdater(inverseDynamicsStructure, imusToUse, imuBiasStateEstimator,
+                                                              cancelGravityFromAccelerationMeasurement, footSwitches, estimatorCenterOfMassDataHolderToUpdate,
+                                                              centerOfPressureDataHolderFromController, feet, gravitationalAcceleration,
+                                                              stateEstimatorParameters, yoGraphicsListRegistry, registry);
 
       if (yoGraphicsListRegistry != null)
       {
@@ -181,22 +171,33 @@ public class DRCKinematicsBasedStateEstimator implements DRCStateEstimatorInterf
          operatingMode.set(StateEstimatorMode.FROZEN);
       else
          operatingMode.set(StateEstimatorMode.NORMAL);
+
+      if (ENABLE_ESTIMATED_WRENCH_VISUALIZER)
+      {
+         List<ContactablePlaneBody> contactablePlaneBodies = new ArrayList<>();
+         for (RigidBodyBasics rigidBody : feet.keySet())
+         {
+            ContactablePlaneBody contactableBody = feet.get(rigidBody);
+            contactablePlaneBodies.add(contactableBody);
+         }
+         estimatedWrenchVisualizer = EstimatedFromTorquesWrenchVisualizer
+               .createWrenchVisualizerWithContactableBodies("EstimatedExternalWrenches", inverseDynamicsStructure.getRootJoint().getSuccessor(),
+                                                            contactablePlaneBodies, 1.0, yoGraphicsListRegistry, registry);
+      }
+      else
+      {
+         estimatedWrenchVisualizer = null;
+      }
    }
 
    private void setupYoGraphics(YoGraphicsListRegistry yoGraphicsListRegistry, List<? extends IMUSensorReadOnly> imuProcessedOutputs)
    {
       for (int i = 0; i < imuProcessedOutputs.size(); i++)
       {
-         YoGraphicReferenceFrame yoGraphicMeasurementFrame = new YoGraphicReferenceFrame(imuProcessedOutputs.get(i).getMeasurementFrame(), registry, 1.0);
+         YoGraphicReferenceFrame yoGraphicMeasurementFrame = new YoGraphicReferenceFrame(imuProcessedOutputs.get(i).getMeasurementFrame(), registry, false, 1.0);
          yoGraphicMeasurementFrames.add(yoGraphicMeasurementFrame);
       }
       yoGraphicsListRegistry.registerYoGraphics("imuFrame", yoGraphicMeasurementFrames);
-   }
-
-   @Override
-   public StateEstimator getStateEstimator()
-   {
-      return this;
    }
 
    @Override
@@ -213,10 +214,6 @@ public class DRCKinematicsBasedStateEstimator implements DRCStateEstimatorInterf
          else
             pelvisRotationalStateUpdater.initialize();
       }
-      if(forceSensorStateUpdater != null)
-      {
-         forceSensorStateUpdater.initialize();
-      }
       pelvisLinearStateUpdater.initialize();
 
       imuBiasStateEstimator.initialize();
@@ -225,7 +222,7 @@ public class DRCKinematicsBasedStateEstimator implements DRCStateEstimatorInterf
    @Override
    public void doControl()
    {
-      if(reinitializeStateEstimator.getBooleanValue())
+      if (reinitializeStateEstimator.getBooleanValue())
       {
          reinitializeStateEstimator.set(false);
          initialize();
@@ -247,34 +244,25 @@ public class DRCKinematicsBasedStateEstimator implements DRCStateEstimatorInterf
 
       switch (operatingMode.getEnumValue())
       {
-         case FROZEN:
-            if (pelvisRotationalStateUpdater != null)
-            {
-               pelvisRotationalStateUpdater.updateForFrozenState();
-            }
-            if(forceSensorStateUpdater != null)
-            {
-               forceSensorStateUpdater.updateForceSensorState();
-            }
-            pelvisLinearStateUpdater.updateForFrozenState();
-            break;
+      case FROZEN:
+         if (pelvisRotationalStateUpdater != null)
+         {
+            pelvisRotationalStateUpdater.updateForFrozenState();
+         }
+         pelvisLinearStateUpdater.updateForFrozenState();
+         break;
 
-         case NORMAL:
-         default:
-            if (pelvisRotationalStateUpdater != null)
-            {
-               pelvisRotationalStateUpdater.updateRootJointOrientationAndAngularVelocity();
-            }
+      case NORMAL:
+      default:
+         if (pelvisRotationalStateUpdater != null)
+         {
+            pelvisRotationalStateUpdater.updateRootJointOrientationAndAngularVelocity();
+         }
+         pelvisLinearStateUpdater.updateRootJointPositionAndLinearVelocity();
 
-            if(forceSensorStateUpdater != null)
-            {
-               forceSensorStateUpdater.updateForceSensorState();
-            }
-            pelvisLinearStateUpdater.updateRootJointPositionAndLinearVelocity();
-
-            List<RigidBody> trustedFeet = pelvisLinearStateUpdater.getCurrentListOfTrustedFeet();
-            imuBiasStateEstimator.compute(trustedFeet);
-            break;
+         List<RigidBodyBasics> trustedFeet = pelvisLinearStateUpdater.getCurrentListOfTrustedFeet();
+         imuBiasStateEstimator.compute(trustedFeet);
+         break;
       }
 
       if (usePelvisCorrector.getBooleanValue() && pelvisPoseHistoryCorrection != null)
@@ -298,12 +286,15 @@ public class DRCKinematicsBasedStateEstimator implements DRCStateEstimatorInterf
 
       if (ENABLE_JOINT_TORQUES_FROM_FORCE_SENSORS_VIZ)
          jointTorqueFromForceSensorVisualizer.update();
+
+      if (ENABLE_ESTIMATED_WRENCH_VISUALIZER)
+         estimatedWrenchVisualizer.update();
    }
 
    @Override
-   public void initializeEstimatorToActual(Tuple3DReadOnly initialCoMPosition, QuaternionReadOnly initialEstimationLinkOrientation)
+   public void initializeEstimator(RigidBodyTransform initialRootJointTranform)
    {
-      pelvisLinearStateUpdater.initializeCoMPositionToActual(initialCoMPosition);
+      pelvisLinearStateUpdater.initializeRootJointPosition(initialRootJointTranform.getTranslationVector());
       // Do nothing for the orientation since the IMU is trusted
    }
 
@@ -325,98 +316,6 @@ public class DRCKinematicsBasedStateEstimator implements DRCStateEstimatorInterf
       return getName();
    }
 
-   @Override
-   public void getEstimatedOrientation(FrameQuaternion estimatedOrientationToPack)
-   {
-      pelvisRotationalStateUpdater.getEstimatedOrientation(estimatedOrientationToPack);
-   }
-
-   @Override
-   public void setEstimatedOrientation(FrameQuaternion estimatedOrientation)
-   {
-      // Do nothing, IMU is trusted
-   }
-
-   @Override
-   public void getEstimatedAngularVelocity(FrameVector3D estimatedAngularVelocityToPack)
-   {
-      pelvisRotationalStateUpdater.getEstimatedAngularVelocity(estimatedAngularVelocityToPack);
-   }
-
-   @Override
-   public void setEstimatedAngularVelocity(FrameVector3D estimatedAngularVelocity)
-   {
-      // Do nothing, IMU is trusted
-   }
-
-   @Override
-   public void getEstimatedCoMPosition(FramePoint3D estimatedCoMPositionToPack)
-   {
-      pelvisLinearStateUpdater.getEstimatedCoMPosition(estimatedCoMPositionToPack);
-   }
-
-   @Override
-   public void setEstimatedCoMPosition(FramePoint3D estimatedCoMPosition)
-   {
-      pelvisLinearStateUpdater.initializeCoMPositionToActual(estimatedCoMPosition);
-   }
-
-   @Override
-   public void getEstimatedCoMVelocity(FrameVector3D estimatedCoMVelocityToPack)
-   {
-      pelvisLinearStateUpdater.getEstimatedCoMVelocity(estimatedCoMVelocityToPack);
-   }
-
-   @Override
-   public void setEstimatedCoMVelocity(FrameVector3D estimatedCoMVelocity)
-   {
-   }
-
-   @Override
-   public void getEstimatedPelvisPosition(FramePoint3D estimatedPelvisPositionToPack)
-   {
-      pelvisLinearStateUpdater.getEstimatedPelvisPosition(estimatedPelvisPositionToPack);
-   }
-
-   @Override
-   public void getEstimatedPelvisLinearVelocity(FrameVector3D estimatedPelvisLinearVelocityToPack)
-   {
-      pelvisLinearStateUpdater.getEstimatedPelvisLinearVelocity(estimatedPelvisLinearVelocityToPack);
-   }
-
-   @Override
-   public DenseMatrix64F getCovariance()
-   {
-      return null;
-   }
-
-   @Override
-   public DenseMatrix64F getState()
-   {
-      return null;
-   }
-
-   @Override
-   public void setState(DenseMatrix64F x, DenseMatrix64F covariance)
-   {
-   }
-
-   @Override
-   public void initializeOrientationEstimateToMeasurement()
-   {
-      // Do nothing
-   }
-
-   public ForceSensorDataHolderReadOnly getForceSensorOutput()
-   {
-      return forceSensorStateUpdater.getForceSensorOutput();
-   }
-
-   public ForceSensorDataHolderReadOnly getForceSensorOutputWithGravityCancelled()
-   {
-      return forceSensorStateUpdater.getForceSensorOutputWithGravityCancelled();
-   }
-
    public void setExternalPelvisCorrectorSubscriber(PelvisPoseCorrectionCommunicatorInterface externalPelvisPoseSubscriber)
    {
       pelvisPoseHistoryCorrection.setExternalPelvisCorrectorSubscriber(externalPelvisPoseSubscriber);
@@ -425,16 +324,6 @@ public class DRCKinematicsBasedStateEstimator implements DRCStateEstimatorInterf
    public void setOperatingModeSubscriber(StateEstimatorModeSubscriber stateEstimatorModeSubscriber)
    {
       this.stateEstimatorModeSubscriber = stateEstimatorModeSubscriber;
-   }
-
-   public void setRequestWristForceSensorCalibrationSubscriber(RequestWristForceSensorCalibrationSubscriber requestWristForceSensorCalibrationSubscriber)
-   {
-      forceSensorStateUpdater.setRequestWristForceSensorCalibrationSubscriber(requestWristForceSensorCalibrationSubscriber);
-   }
-
-   public ForceSensorCalibrationModule getForceSensorCalibrationModule()
-   {
-      return forceSensorStateUpdater;
    }
 
    public void requestStateEstimatorMode(StateEstimatorMode stateEstimatorMode)

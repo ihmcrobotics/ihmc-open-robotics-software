@@ -1,5 +1,6 @@
 package us.ihmc.atlas.behaviorTests;
 
+import org.junit.Ignore;
 import org.junit.Test;
 
 import us.ihmc.atlas.AtlasRobotModel;
@@ -44,24 +45,24 @@ public class AtlasHeadTrajectoryBehaviorTest extends DRCHeadTrajectoryBehaviorTe
    }
 
    @Override
-   //@ContinuousIntegrationTest(estimatedDuration = 37.6)
-   //@Test(timeout = 950000)
+   @ContinuousIntegrationTest(estimatedDuration = 37.6, categoriesOverride = IntegrationCategory.EXCLUDE)
+   @Test(timeout = 950000)
    public void testHeadRoll() throws SimulationExceededMaximumTimeException
    {
       super.testHeadRoll();
    }
 
    @Override
-   //@ContinuousIntegrationTest(estimatedDuration = 37.6)
-   //@Test(timeout = 950000)
+   @ContinuousIntegrationTest(estimatedDuration = 37.6, categoriesOverride = IntegrationCategory.EXCLUDE)
+   @Test(timeout = 950000)
    public void testHeadYaw() throws SimulationExceededMaximumTimeException
    {
       super.testHeadYaw();
    }
 
    @Override
-   //@ContinuousIntegrationTest(estimatedDuration = 37.6)
-   //@Test(timeout = 950000)
+   @ContinuousIntegrationTest(estimatedDuration = 37.6, categoriesOverride = IntegrationCategory.EXCLUDE)
+   @Test(timeout = 950000)
    public void testRandomOrientation() throws SimulationExceededMaximumTimeException
    {
       super.testRandomOrientation();

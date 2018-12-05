@@ -32,7 +32,7 @@ module controller_msgs
          * Specifies the which state the controller should transition into.
          */
         @defaultValue(value=255)
-        octet quadruped_stepping_state;
+        octet quadruped_stepping_requested_event;
       };
     };
   };

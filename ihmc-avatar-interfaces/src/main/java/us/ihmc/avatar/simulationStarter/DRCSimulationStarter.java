@@ -3,7 +3,6 @@ package us.ihmc.avatar.simulationStarter;
 import static us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelControllerName.DO_NOTHING_BEHAVIOR;
 import static us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelControllerName.WALKING;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ConcurrentLinkedQueue;
@@ -29,25 +28,21 @@ import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.Co
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.HighLevelControllerStateFactory;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.HighLevelHumanoidControllerFactory;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHumanoidControllerToolbox;
-import us.ihmc.communication.PacketRouter;
+import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.controllerAPI.command.Command;
 import us.ihmc.communication.net.LocalObjectCommunicator;
-import us.ihmc.communication.packetCommunicator.PacketCommunicator;
-import us.ihmc.communication.packets.PacketDestination;
 import us.ihmc.communication.producers.VideoDataServerImageCallback;
-import us.ihmc.communication.util.NetworkPorts;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.humanoidBehaviors.behaviors.scripts.engine.ScriptBasedControllerCommandGenerator;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelControllerName;
 import us.ihmc.humanoidRobotics.communication.producers.RawVideoDataServer;
-import us.ihmc.humanoidRobotics.communication.streamingData.HumanoidGlobalDataProducer;
 import us.ihmc.humanoidRobotics.communication.subscribers.PelvisPoseCorrectionCommunicatorInterface;
-import us.ihmc.humanoidRobotics.kryo.IHMCCommunicationKryoNetClassList;
 import us.ihmc.jMonkeyEngineToolkit.Graphics3DAdapter;
 import us.ihmc.jMonkeyEngineToolkit.GroundProfile3D;
 import us.ihmc.jMonkeyEngineToolkit.camera.CameraConfiguration;
+import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
 import us.ihmc.robotDataVisualizer.logger.BehaviorVisualizer;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.controllers.ControllerFailureListener;
@@ -59,17 +54,16 @@ import us.ihmc.sensorProcessing.parameters.DRCRobotLidarParameters;
 import us.ihmc.sensorProcessing.parameters.DRCRobotSensorInformation;
 import us.ihmc.simulationConstructionSetTools.util.HumanoidFloatingRootJointRobot;
 import us.ihmc.simulationConstructionSetTools.util.environments.CommonAvatarEnvironmentInterface;
-import us.ihmc.simulationToolkit.SCSPlaybackListener;
-import us.ihmc.simulationconstructionset.PlaybackListener;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.tools.TimestampProvider;
 import us.ihmc.tools.processManagement.JavaProcessSpawner;
-import us.ihmc.util.PeriodicNonRealtimeThreadScheduler;
 import us.ihmc.wholeBodyController.DRCRobotJointMap;
 import us.ihmc.wholeBodyController.RobotContactPointParameters;
 
 public class DRCSimulationStarter implements SimulationStarterInterface
 {
+   private static final String IHMC_SIMULATION_STARTER_NODE_NAME = "ihmc_simulation_starter";
+
    private static final boolean DEBUG = false;
 
    private final DRCRobotModel robotModel;
@@ -96,11 +90,7 @@ public class DRCSimulationStarter implements SimulationStarterInterface
    private PelvisPoseCorrectionCommunicatorInterface externalPelvisCorrectorSubscriber;
    private HeadingAndVelocityEvaluationScriptParameters walkingScriptParameters;
 
-   /**
-    * The PacketCommunicator used as input of the controller is either equal to the output PacketCommunicator of the network processor or the behavior module if any.
-    * It is bidirectional meaning that it carries commands to be executed by the controller and that the controller is able to send feedback the other way to whoever is listening to the PacketCommunicator.
-    */
-   private PacketCommunicator controllerPacketCommunicator;
+   private RealtimeRos2Node realtimeRos2Node;
 
    /** The output PacketCommunicator of the simulation carries sensor information (LIDAR, camera, etc.) and is used as input of the network processor. */
    private LocalObjectCommunicator scsSensorOutputPacketCommunicator;
@@ -117,8 +107,6 @@ public class DRCSimulationStarter implements SimulationStarterInterface
 
    private final List<HighLevelControllerStateFactory> highLevelControllerFactories = new ArrayList<>();
    private final List<ControllerStateTransitionFactory<HighLevelControllerName>> controllerTransitionFactories = new ArrayList<>();
-   private DRCNetworkProcessor networkProcessor;
-
    private final ArrayList<ControllerFailureListener> controllerFailureListeners = new ArrayList<>();
 
    private final ConcurrentLinkedQueue<Command<?, ?>> controllerCommands = new ConcurrentLinkedQueue<>();
@@ -168,11 +156,13 @@ public class DRCSimulationStarter implements SimulationStarterInterface
     */
    public void registerHighLevelControllerState(HighLevelControllerStateFactory controllerFactory)
    {
+      checkIfSimulationIsAlreadyCreated();
       this.highLevelControllerFactories.add(controllerFactory);
    }
 
    public void registerControllerStateTransition(ControllerStateTransitionFactory<HighLevelControllerName> controllerStateTransitionFactory)
    {
+      checkIfSimulationIsAlreadyCreated();
       this.controllerTransitionFactories.add(controllerStateTransitionFactory);
    }
 
@@ -208,11 +198,13 @@ public class DRCSimulationStarter implements SimulationStarterInterface
     */
    public void setRunMultiThreaded(boolean runMultiThreaded)
    {
+      checkIfSimulationIsAlreadyCreated();
       scsInitialSetup.setRunMultiThreaded(runMultiThreaded);
    }
 
    public void setupControllerNetworkSubscriber(boolean setup)
    {
+      checkIfSimulationIsAlreadyCreated();
       setupControllerNetworkSubscriber = setup;
    }
 
@@ -223,6 +215,7 @@ public class DRCSimulationStarter implements SimulationStarterInterface
     */
    public void setUsePerfectSensors(boolean usePerfectSensors)
    {
+      checkIfSimulationIsAlreadyCreated();
       scsInitialSetup.setUsePerfectSensors(usePerfectSensors);
    }
 
@@ -232,6 +225,7 @@ public class DRCSimulationStarter implements SimulationStarterInterface
     */
    public void setInitializeEstimatorToActual(boolean initializeEstimatorToActual)
    {
+      checkIfSimulationIsAlreadyCreated();
       scsInitialSetup.setInitializeEstimatorToActual(initializeEstimatorToActual);
    }
 
@@ -241,10 +235,8 @@ public class DRCSimulationStarter implements SimulationStarterInterface
     */
    public void setExternalPelvisCorrectorSubscriber(PelvisPoseCorrectionCommunicatorInterface externalPelvisCorrectorSubscriber)
    {
-      if (avatarSimulation != null)
-         avatarSimulation.setExternalPelvisCorrectorSubscriber(externalPelvisCorrectorSubscriber);
-      else
-         this.externalPelvisCorrectorSubscriber = externalPelvisCorrectorSubscriber;
+      checkIfSimulationIsAlreadyCreated();
+      this.externalPelvisCorrectorSubscriber = externalPelvisCorrectorSubscriber;
    }
 
    /**
@@ -252,6 +244,7 @@ public class DRCSimulationStarter implements SimulationStarterInterface
     */
    public void setGuiInitialSetup(DRCGuiInitialSetup guiInitialSetup)
    {
+      checkIfSimulationIsAlreadyCreated();
       this.guiInitialSetup = guiInitialSetup;
    }
 
@@ -260,6 +253,7 @@ public class DRCSimulationStarter implements SimulationStarterInterface
     */
    public void setCreateYoVariableServer(boolean createYoVariableServer)
    {
+      checkIfSimulationIsAlreadyCreated();
       this.createYoVariableServer = createYoVariableServer;
    }
 
@@ -269,6 +263,7 @@ public class DRCSimulationStarter implements SimulationStarterInterface
     */
    public void setRobotInitialSetup(DRCRobotInitialSetup<HumanoidFloatingRootJointRobot> robotInitialSetup)
    {
+      checkIfSimulationIsAlreadyCreated();
       this.robotInitialSetup = robotInitialSetup;
    }
 
@@ -278,6 +273,7 @@ public class DRCSimulationStarter implements SimulationStarterInterface
    @Override
    public void setStartingLocation(DRCStartingLocation startingLocation)
    {
+      checkIfSimulationIsAlreadyCreated();
       setStartingLocationOffset(startingLocation.getStartingLocationOffset());
    }
 
@@ -286,6 +282,7 @@ public class DRCSimulationStarter implements SimulationStarterInterface
     */
    public void setStartingLocationOffset(OffsetAndYawRobotInitialSetup startingLocationOffset)
    {
+      checkIfSimulationIsAlreadyCreated();
       robotInitialSetup.setInitialYaw(startingLocationOffset.getYaw());
       robotInitialSetup.setInitialGroundHeight(startingLocationOffset.getGroundHeight());
       robotInitialSetup.setOffset(startingLocationOffset.getAdditionalOffset());
@@ -296,6 +293,7 @@ public class DRCSimulationStarter implements SimulationStarterInterface
     */
    public void setStartingLocationOffset(Vector3D robotInitialPosition, double yaw)
    {
+      checkIfSimulationIsAlreadyCreated();
       setStartingLocationOffset(new OffsetAndYawRobotInitialSetup(robotInitialPosition, yaw));
    }
 
@@ -307,6 +305,7 @@ public class DRCSimulationStarter implements SimulationStarterInterface
     */
    public void setSCSCameraPosition(double positionX, double positionY, double positionZ)
    {
+      checkIfSimulationIsAlreadyCreated();
       scsCameraPosition.set(positionX, positionY, positionZ);
    }
 
@@ -318,6 +317,7 @@ public class DRCSimulationStarter implements SimulationStarterInterface
     */
    public void setSCSCameraFix(double fixX, double fixY, double fixZ)
    {
+      checkIfSimulationIsAlreadyCreated();
       scsCameraFix.set(fixX, fixY, fixZ);
    }
 
@@ -342,18 +342,13 @@ public class DRCSimulationStarter implements SimulationStarterInterface
          return;
       alreadyCreatedCommunicator = true;
 
-      networkParameters.enableLocalControllerCommunicator(true);
+      PubSubImplementation pubSubImplementation;
+      if (networkParameters.isLocalControllerCommunicatorEnabled())
+         pubSubImplementation = PubSubImplementation.INTRAPROCESS;
+      else
+         pubSubImplementation = PubSubImplementation.FAST_RTPS;
 
-      controllerPacketCommunicator = PacketCommunicator
-            .createIntraprocessPacketCommunicator(NetworkPorts.CONTROLLER_PORT, new IHMCCommunicationKryoNetClassList());
-      try
-      {
-         controllerPacketCommunicator.connect();
-      }
-      catch (IOException e)
-      {
-         throw new RuntimeException(e);
-      }
+      realtimeRos2Node = ROS2Tools.createRealtimeRos2Node(pubSubImplementation, IHMC_SIMULATION_STARTER_NODE_NAME);
    }
 
    /**
@@ -391,6 +386,9 @@ public class DRCSimulationStarter implements SimulationStarterInterface
       if (automaticallySpawnSimulation)
          avatarSimulation.start();
 
+      if (realtimeRos2Node != null)
+         realtimeRos2Node.spin();
+
       if (automaticallySpawnSimulation && automaticallySimulate)
          avatarSimulation.simulate();
 
@@ -407,17 +405,12 @@ public class DRCSimulationStarter implements SimulationStarterInterface
 
    public void setFlatGroundWalkingScriptParameters(HeadingAndVelocityEvaluationScriptParameters walkingScriptParameters)
    {
+      checkIfSimulationIsAlreadyCreated();
       this.walkingScriptParameters = walkingScriptParameters;
    }
 
    private AvatarSimulation createAvatarSimulation()
    {
-      HumanoidGlobalDataProducer dataProducer = null;
-      if (controllerPacketCommunicator != null)
-      {
-         dataProducer = new HumanoidGlobalDataProducer(controllerPacketCommunicator);
-      }
-
       ContactableBodiesFactory<RobotSide> contactableBodiesFactory = new ContactableBodiesFactory<>();
       ArrayList<String> additionalContactRigidBodyNames = contactPointParameters.getAdditionalContactRigidBodyNames();
       ArrayList<String> additionaContactNames = contactPointParameters.getAdditionalContactNames();
@@ -439,8 +432,7 @@ public class DRCSimulationStarter implements SimulationStarterInterface
 
       controllerFactory.attachControllerFailureListeners(controllerFailureListeners);
       if (setupControllerNetworkSubscriber)
-         controllerFactory.createControllerNetworkSubscriber(new PeriodicNonRealtimeThreadScheduler("CapturabilityBasedStatusProducer"),
-                                                             controllerPacketCommunicator);
+         controllerFactory.createControllerNetworkSubscriber(robotModel.getSimpleRobotName(), realtimeRos2Node);
 
       for (int i = 0; i < highLevelControllerFactories.size(); i++)
          controllerFactory.addCustomControlState(highLevelControllerFactories.get(i));
@@ -465,17 +457,16 @@ public class DRCSimulationStarter implements SimulationStarterInterface
       avatarSimulationFactory.setRobotInitialSetup(robotInitialSetup);
       avatarSimulationFactory.setSCSInitialSetup(scsInitialSetup);
       avatarSimulationFactory.setGuiInitialSetup(guiInitialSetup);
-      avatarSimulationFactory.setHumanoidGlobalDataProducer(dataProducer);
+      avatarSimulationFactory.setRealtimeRos2Node(realtimeRos2Node);
       avatarSimulationFactory.setCreateYoVariableServer(createYoVariableServer);
       avatarSimulationFactory.setShapeCollision(robotModel.useShapeCollision());
+      if (externalPelvisCorrectorSubscriber != null)
+         avatarSimulationFactory.setExternalPelvisCorrectorSubscriber(externalPelvisCorrectorSubscriber);
       AvatarSimulation avatarSimulation = avatarSimulationFactory.createAvatarSimulation();
 
       HighLevelHumanoidControllerToolbox highLevelHumanoidControllerToolbox = controllerFactory.getHighLevelHumanoidControllerToolbox();
       FullHumanoidRobotModel fullRobotModel = highLevelHumanoidControllerToolbox.getFullRobotModel();
       scriptBasedControllerCommandGenerator = new ScriptBasedControllerCommandGenerator(controllerCommands, fullRobotModel);
-
-      if (externalPelvisCorrectorSubscriber != null)
-         avatarSimulation.setExternalPelvisCorrectorSubscriber(externalPelvisCorrectorSubscriber);
 
       simulationConstructionSet = avatarSimulation.getSimulationConstructionSet();
       sdfRobot = avatarSimulation.getHumanoidFloatingRootJointRobot();
@@ -483,10 +474,15 @@ public class DRCSimulationStarter implements SimulationStarterInterface
       simulationConstructionSet.setCameraPosition(scsCameraPosition.getX(), scsCameraPosition.getY(), scsCameraPosition.getZ());
       simulationConstructionSet.setCameraFix(scsCameraFix.getX(), scsCameraFix.getY(), scsCameraFix.getZ());
 
-      PlaybackListener playbackListener = new SCSPlaybackListener(dataProducer);
-      simulationConstructionSet.attachPlaybackListener(playbackListener);
-
       return avatarSimulation;
+   }
+
+   private void checkIfSimulationIsAlreadyCreated()
+   {
+      if (avatarSimulation != null)
+      {
+         throw new RuntimeException("Too bad - you are late. Try again.");
+      }
    }
 
    public void setupHighLevelStates(HighLevelHumanoidControllerFactory controllerFactory)
@@ -561,7 +557,7 @@ public class DRCSimulationStarter implements SimulationStarterInterface
          networkModuleParams.setSimulatedSensorCommunicator(simulatedSensorCommunicator);
       }
 
-      networkProcessor = new DRCNetworkProcessor(robotModel, networkModuleParams);
+      new DRCNetworkProcessor(robotModel, networkModuleParams);
    }
 
    public AvatarSimulation getAvatarSimulation()
@@ -579,11 +575,6 @@ public class DRCSimulationStarter implements SimulationStarterInterface
       return sdfRobot;
    }
 
-   public PacketRouter<PacketDestination> getPacketRouter()
-   {
-      return networkProcessor.getPacketRouter();
-   }
-
    public LocalObjectCommunicator getSimulatedSensorsPacketCommunicator()
    {
       if (scsSensorOutputPacketCommunicator == null)
@@ -596,9 +587,9 @@ public class DRCSimulationStarter implements SimulationStarterInterface
    @Override
    public void close()
    {
-      if (controllerPacketCommunicator != null)
+      if (realtimeRos2Node != null)
       {
-         controllerPacketCommunicator.disconnect();
+         realtimeRos2Node.destroy();
       }
    }
 

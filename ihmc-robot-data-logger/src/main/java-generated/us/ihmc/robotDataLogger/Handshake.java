@@ -19,12 +19,12 @@ public class Handshake extends Packet<Handshake> implements Settable<Handshake>,
 
    public Handshake()
    {
-      registries_ = new us.ihmc.idl.IDLSequence.Object<us.ihmc.robotDataLogger.YoRegistryDefinition> (1024, us.ihmc.robotDataLogger.YoRegistryDefinition.class, new us.ihmc.robotDataLogger.YoRegistryDefinitionPubSubType());
-      variables_ = new us.ihmc.idl.IDLSequence.Object<us.ihmc.robotDataLogger.YoVariableDefinition> (32767, us.ihmc.robotDataLogger.YoVariableDefinition.class, new us.ihmc.robotDataLogger.YoVariableDefinitionPubSubType());
-      joints_ = new us.ihmc.idl.IDLSequence.Object<us.ihmc.robotDataLogger.JointDefinition> (128, us.ihmc.robotDataLogger.JointDefinition.class, new us.ihmc.robotDataLogger.JointDefinitionPubSubType());
-      graphicObjects_ = new us.ihmc.idl.IDLSequence.Object<us.ihmc.robotDataLogger.GraphicObjectMessage> (2048, us.ihmc.robotDataLogger.GraphicObjectMessage.class, new us.ihmc.robotDataLogger.GraphicObjectMessagePubSubType());
-      artifacts_ = new us.ihmc.idl.IDLSequence.Object<us.ihmc.robotDataLogger.GraphicObjectMessage> (2048, us.ihmc.robotDataLogger.GraphicObjectMessage.class, new us.ihmc.robotDataLogger.GraphicObjectMessagePubSubType());
-      enumTypes_ = new us.ihmc.idl.IDLSequence.Object<us.ihmc.robotDataLogger.EnumType> (1024, us.ihmc.robotDataLogger.EnumType.class, new us.ihmc.robotDataLogger.EnumTypePubSubType());
+      registries_ = new us.ihmc.idl.IDLSequence.Object<us.ihmc.robotDataLogger.YoRegistryDefinition> (1024, new us.ihmc.robotDataLogger.YoRegistryDefinitionPubSubType());
+      variables_ = new us.ihmc.idl.IDLSequence.Object<us.ihmc.robotDataLogger.YoVariableDefinition> (32767, new us.ihmc.robotDataLogger.YoVariableDefinitionPubSubType());
+      joints_ = new us.ihmc.idl.IDLSequence.Object<us.ihmc.robotDataLogger.JointDefinition> (128, new us.ihmc.robotDataLogger.JointDefinitionPubSubType());
+      graphicObjects_ = new us.ihmc.idl.IDLSequence.Object<us.ihmc.robotDataLogger.GraphicObjectMessage> (2048, new us.ihmc.robotDataLogger.GraphicObjectMessagePubSubType());
+      artifacts_ = new us.ihmc.idl.IDLSequence.Object<us.ihmc.robotDataLogger.GraphicObjectMessage> (2048, new us.ihmc.robotDataLogger.GraphicObjectMessagePubSubType());
+      enumTypes_ = new us.ihmc.idl.IDLSequence.Object<us.ihmc.robotDataLogger.EnumType> (1024, new us.ihmc.robotDataLogger.EnumTypePubSubType());
       summary_ = new us.ihmc.robotDataLogger.Summary();
 
    }

@@ -71,7 +71,7 @@ public class QuadrupedRequestedSteppingStateMessagePubSubType implements us.ihmc
    {
       cdr.write_type_4(data.getSequenceId());
 
-      cdr.write_type_9(data.getQuadrupedSteppingState());
+      cdr.write_type_9(data.getQuadrupedSteppingRequestedEvent());
 
    }
 
@@ -79,7 +79,7 @@ public class QuadrupedRequestedSteppingStateMessagePubSubType implements us.ihmc
    {
       data.setSequenceId(cdr.read_type_4());
       	
-      data.setQuadrupedSteppingState(cdr.read_type_9());
+      data.setQuadrupedSteppingRequestedEvent(cdr.read_type_9());
       	
 
    }
@@ -88,14 +88,14 @@ public class QuadrupedRequestedSteppingStateMessagePubSubType implements us.ihmc
    public final void serialize(controller_msgs.msg.dds.QuadrupedRequestedSteppingStateMessage data, us.ihmc.idl.InterchangeSerializer ser)
    {
       ser.write_type_4("sequence_id", data.getSequenceId());
-      ser.write_type_9("quadruped_stepping_state", data.getQuadrupedSteppingState());
+      ser.write_type_9("quadruped_stepping_requested_event", data.getQuadrupedSteppingRequestedEvent());
    }
 
    @Override
    public final void deserialize(us.ihmc.idl.InterchangeSerializer ser, controller_msgs.msg.dds.QuadrupedRequestedSteppingStateMessage data)
    {
       data.setSequenceId(ser.read_type_4("sequence_id"));
-      data.setQuadrupedSteppingState(ser.read_type_9("quadruped_stepping_state"));
+      data.setQuadrupedSteppingRequestedEvent(ser.read_type_9("quadruped_stepping_requested_event"));
    }
 
    public static void staticCopy(controller_msgs.msg.dds.QuadrupedRequestedSteppingStateMessage src, controller_msgs.msg.dds.QuadrupedRequestedSteppingStateMessage dest)

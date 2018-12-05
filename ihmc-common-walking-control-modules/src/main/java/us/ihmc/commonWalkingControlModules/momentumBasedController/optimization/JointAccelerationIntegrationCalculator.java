@@ -9,9 +9,9 @@ import us.ihmc.commonWalkingControlModules.controllerCore.command.lowLevel.LowLe
 import us.ihmc.commonWalkingControlModules.controllerCore.parameters.JointAccelerationIntegrationParametersReadOnly;
 import us.ihmc.commons.MathTools;
 import us.ihmc.commons.PrintTools;
+import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.robotics.math.filters.AlphaFilteredYoVariable;
-import us.ihmc.robotics.screwTheory.OneDoFJoint;
-import us.ihmc.sensorProcessing.outputData.JointDesiredOutput;
+import us.ihmc.sensorProcessing.outputData.JointDesiredOutputBasics;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 
@@ -24,7 +24,7 @@ public class JointAccelerationIntegrationCalculator
 
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
 
-   private final List<OneDoFJoint> jointsToComputeDesiredPositionFor = new ArrayList<>();
+   private final List<OneDoFJointBasics> jointsToComputeDesiredPositionFor = new ArrayList<>();
    private final TDoubleArrayList jointSpecificPositionBreakFrequency = new TDoubleArrayList();
    private final TDoubleArrayList jointSpecificVelocityBreakFrequency = new TDoubleArrayList();
    private final TDoubleArrayList jointSpecificMaxPositionError = new TDoubleArrayList();
@@ -52,7 +52,7 @@ public class JointAccelerationIntegrationCalculator
    {
       for (int commandJointIndex = 0; commandJointIndex < command.getNumberOfJointsToComputeDesiredPositionFor(); commandJointIndex++)
       {
-         OneDoFJoint jointToComputeDesierdPositionFor = command.getJointToComputeDesiredPositionFor(commandJointIndex);
+         OneDoFJointBasics jointToComputeDesierdPositionFor = command.getJointToComputeDesiredPositionFor(commandJointIndex);
          int localJointIndex = jointsToComputeDesiredPositionFor.indexOf(jointToComputeDesierdPositionFor);
          JointAccelerationIntegrationParametersReadOnly jointParameters = command.getJointParameters(commandJointIndex);
 
@@ -94,14 +94,16 @@ public class JointAccelerationIntegrationCalculator
    {
       for (int jointIndex = 0; jointIndex < jointsToComputeDesiredPositionFor.size(); jointIndex++)
       {
-         OneDoFJoint joint = jointsToComputeDesiredPositionFor.get(jointIndex);
+         OneDoFJointBasics joint = jointsToComputeDesiredPositionFor.get(jointIndex);
 
-         JointDesiredOutput lowLevelJointData = lowLevelJointDataHolderToUpdate.getJointDesiredOutput(joint);
+         JointDesiredOutputBasics lowLevelJointData = lowLevelJointDataHolderToUpdate.getJointDesiredOutput(joint);
          if (lowLevelJointData == null || !lowLevelJointData.hasDesiredAcceleration())
         	 continue;
-         if (!lowLevelJointData.hasDesiredVelocity())
+
+         boolean resetIntegrators = lowLevelJointData.pollResetIntegratorsRequest();
+         if (!lowLevelJointData.hasDesiredVelocity() || resetIntegrators)
             lowLevelJointData.setDesiredVelocity(joint.getQd());
-         if (!lowLevelJointData.hasDesiredPosition())
+         if (!lowLevelJointData.hasDesiredPosition() || resetIntegrators)
             lowLevelJointData.setDesiredPosition(joint.getQ());
 
          double desiredAcceleration = lowLevelJointData.getDesiredAcceleration();
@@ -127,7 +129,9 @@ public class JointAccelerationIntegrationCalculator
 
          // Limit the desired position to the joint range and recompute the desired velocity.
          desiredPosition = MathTools.clamp(desiredPosition, joint.getJointLimitLower(), joint.getJointLimitUpper());
-         desiredVelocity = (desiredPosition - lowLevelJointData.getDesiredPosition()) / controlDT;
+
+         // June 20, 2018: Removed this as is seems to cause instability.
+//         desiredVelocity = (desiredPosition - lowLevelJointData.getDesiredPosition()) / controlDT;
 
          lowLevelJointData.setDesiredVelocity(desiredVelocity);
          lowLevelJointData.setDesiredPosition(desiredPosition);

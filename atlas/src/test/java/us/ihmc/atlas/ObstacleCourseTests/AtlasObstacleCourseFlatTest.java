@@ -16,6 +16,8 @@ import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.simulationConstructionSetTools.bambooTools.BambooTools;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
 
+import static us.ihmc.continuousIntegration.IntegrationCategory.SLOW;
+
 @ContinuousIntegrationPlan(categories = {IntegrationCategory.FAST, IntegrationCategory.VIDEO})
 public class AtlasObstacleCourseFlatTest extends DRCObstacleCourseFlatTest
 {
@@ -34,7 +36,7 @@ public class AtlasObstacleCourseFlatTest extends DRCObstacleCourseFlatTest
    }
 
    @Override
-   @ContinuousIntegrationTest(estimatedDuration = 76.7)
+   @ContinuousIntegrationTest(estimatedDuration = 76.7, categoriesOverride = SLOW)
    @Test(timeout = 380000)
    public void testACoupleMoreQueuedControllerCommands() throws SimulationExceededMaximumTimeException
    {
@@ -83,39 +85,7 @@ public class AtlasObstacleCourseFlatTest extends DRCObstacleCourseFlatTest
    }
 
    @Override
-   @ContinuousIntegrationTest(estimatedDuration = 84.6)
-   @Test(timeout = 420000)
-   public void testSideStepsWithRandomSlipping() throws SimulationExceededMaximumTimeException
-   {
-      super.testSideStepsWithRandomSlipping();
-   }
-
-   @Override
-   @ContinuousIntegrationTest(estimatedDuration = 74.6)
-   @Test(timeout = 370000)
-   public void testSideStepsWithSlipping() throws SimulationExceededMaximumTimeException
-   {
-      super.testSideStepsWithSlipping();
-   }
-
-   @Override
-   @ContinuousIntegrationTest(estimatedDuration = 92.6)
-   @Test(timeout = 460000)
-   public void testSimpleFlatGroundScriptWithOscillatingFeet() throws SimulationExceededMaximumTimeException
-   {
-      super.testSimpleFlatGroundScriptWithOscillatingFeet();
-   }
-
-   @Override
-   @ContinuousIntegrationTest(estimatedDuration = 82.6)
-   @Test(timeout = 410000)
-   public void testSimpleFlatGroundScriptWithRandomFootSlip() throws SimulationExceededMaximumTimeException
-   {
-      super.testSimpleFlatGroundScriptWithRandomFootSlip();
-   }
-
-   @Override
-   @ContinuousIntegrationTest(estimatedDuration = 85.5)
+   @ContinuousIntegrationTest(estimatedDuration = 85.5, categoriesOverride = SLOW)
    @Test(timeout = 430000)
    public void testSimpleScripts() throws SimulationExceededMaximumTimeException, IOException
    {
@@ -123,7 +93,7 @@ public class AtlasObstacleCourseFlatTest extends DRCObstacleCourseFlatTest
    }
 
    @Override
-   @ContinuousIntegrationTest(estimatedDuration = 26.1)
+   @ContinuousIntegrationTest(estimatedDuration = 26.1, categoriesOverride = SLOW)
    @Test(timeout = 130000)
    public void testStandingForACoupleSeconds() throws SimulationExceededMaximumTimeException
    {
@@ -132,7 +102,7 @@ public class AtlasObstacleCourseFlatTest extends DRCObstacleCourseFlatTest
 
    @Override
    // TODO re-enable that test when we have polygon to polygon contact model for SCS
-   @ContinuousIntegrationTest(estimatedDuration = 50.0, categoriesOverride = IntegrationCategory.EXCLUDE)
+   @ContinuousIntegrationTest(estimatedDuration = 50.0, categoriesOverride = IntegrationCategory.IN_DEVELOPMENT)
    @Test(timeout = 160000)
    public void testStandingOnUnevenTerrainForACoupleSeconds() throws SimulationExceededMaximumTimeException
    {
@@ -145,14 +115,6 @@ public class AtlasObstacleCourseFlatTest extends DRCObstacleCourseFlatTest
    public void testStandingTooHighToCheckIfSingularityStuffIsWorkingProperly() throws SimulationExceededMaximumTimeException
    {
       super.testStandingTooHighToCheckIfSingularityStuffIsWorkingProperly();
-   }
-
-   @Override
-   @ContinuousIntegrationTest(estimatedDuration = 43.2)
-   @Test(timeout = 220000)
-   public void testStandingWithOscillatingFeet() throws SimulationExceededMaximumTimeException
-   {
-      super.testStandingWithOscillatingFeet();
    }
 
    @Override
@@ -177,17 +139,5 @@ public class AtlasObstacleCourseFlatTest extends DRCObstacleCourseFlatTest
    public void testWalkingUpToRampWithShortSteps() throws SimulationExceededMaximumTimeException
    {
       super.testWalkingUpToRampWithShortSteps();
-   }
-
-   @Override
-   protected Vector3D getFootSlipVector()
-   {
-      return new Vector3D(0.05, -0.05, 0.0);//(0.06, -0.06, 0.0);
-   }
-
-   @Override
-   protected double getFootSlipTimeDeltaAfterTouchdown()
-   {
-      return 0.025;
    }
 }

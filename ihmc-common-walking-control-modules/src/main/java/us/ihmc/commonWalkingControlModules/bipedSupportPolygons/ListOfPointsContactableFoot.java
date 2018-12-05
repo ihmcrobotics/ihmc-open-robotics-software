@@ -8,14 +8,14 @@ import us.ihmc.euclid.referenceFrame.FramePoint2D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactableFoot;
-import us.ihmc.robotics.screwTheory.RigidBody;
+import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 
 public class ListOfPointsContactableFoot extends ListOfPointsContactablePlaneBody implements ContactableFoot
 {
    private final FramePoint2D toeOffContactPoint;
    private final FrameLineSegment2D toeOffContactLine;
 
-   public ListOfPointsContactableFoot(RigidBody rigidBody, ReferenceFrame soleFrame, List<Point2D> contactPointsInSoleFrame, Point2D toeOffContactPointInSoleFrame,
+   public ListOfPointsContactableFoot(RigidBodyBasics rigidBody, ReferenceFrame soleFrame, List<Point2D> contactPointsInSoleFrame, Point2D toeOffContactPointInSoleFrame,
          LineSegment2D toeOffContactLineInSoleFrame)
    {
       super(rigidBody, soleFrame, contactPointsInSoleFrame);

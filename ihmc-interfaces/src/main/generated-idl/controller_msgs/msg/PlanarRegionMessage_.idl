@@ -1,7 +1,6 @@
 #ifndef __controller_msgs__msg__PlanarRegionMessage__idl__
 #define __controller_msgs__msg__PlanarRegionMessage__idl__
 
-#include "controller_msgs/msg/./Polygon2DMessage_.idl"
 #include "geometry_msgs/msg/./Point_.idl"
 #include "geometry_msgs/msg/./Vector3_.idl"
 module controller_msgs
@@ -31,8 +30,10 @@ module controller_msgs
         long region_id;
         geometry_msgs::msg::dds::Point region_origin;
         geometry_msgs::msg::dds::Vector3 region_normal;
-        controller_msgs::msg::dds::Polygon2DMessage concave_hull;
-        sequence<controller_msgs::msg::dds::Polygon2DMessage, 1> convex_polygons;
+        sequence<geometry_msgs::msg::dds::Point, 1000> vertex_buffer;
+        long concave_hull_size;
+        long number_of_convex_polygons;
+        sequence<long, 20> convex_polygons_size;
       };
     };
   };

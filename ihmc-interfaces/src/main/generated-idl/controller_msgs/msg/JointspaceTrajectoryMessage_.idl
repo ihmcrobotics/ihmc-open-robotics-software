@@ -25,7 +25,7 @@ module controller_msgs
          */
         unsigned long sequence_id;
         /**
-         * Trajectory for each.
+         * Trajectory for each joint.
          */
         sequence<controller_msgs::msg::dds::OneDoFJointTrajectoryMessage> joint_trajectory_messages;
         /**

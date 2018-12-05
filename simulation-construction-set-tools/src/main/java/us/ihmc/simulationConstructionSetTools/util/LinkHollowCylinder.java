@@ -12,9 +12,9 @@ import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.graphicsDescription.Graphics3DObject;
 import us.ihmc.graphicsDescription.appearance.AppearanceDefinition;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
+import us.ihmc.mecano.spatial.SpatialInertia;
 import us.ihmc.robotics.geometry.GeometryTools;
 import us.ihmc.robotics.geometry.RotationalInertiaCalculator;
-import us.ihmc.robotics.screwTheory.RigidBodyInertia;
 import us.ihmc.simulationconstructionset.Joint;
 import us.ihmc.simulationconstructionset.Link;
 
@@ -107,11 +107,11 @@ public class LinkHollowCylinder extends Link
       }
       else
       {
-         RigidBodyInertia inertia = new RigidBodyInertia(cylinderReferenceFrame, moiInCylinderFrame, mass);
+         SpatialInertia inertia = new SpatialInertia(cylinderReferenceFrame, cylinderReferenceFrame, moiInCylinderFrame, mass);
          inertia.changeFrame(ReferenceFrame.getWorldFrame());
 
          this.setMass(mass);
-         setMomentOfInertia(inertia.getMassMomentOfInertiaPartCopy());
+         setMomentOfInertia(new Matrix3D(inertia.getMomentOfInertia()));
          setComOffset(comOffset);
       }
 

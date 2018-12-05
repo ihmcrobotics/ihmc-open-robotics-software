@@ -10,11 +10,14 @@ import org.junit.Before;
 
 import controller_msgs.msg.dds.FootstepDataListMessage;
 import controller_msgs.msg.dds.PelvisHeightTrajectoryMessage;
+import org.junit.Test;
 import us.ihmc.avatar.DRCObstacleCourseStartingLocation;
 import us.ihmc.avatar.MultiRobotTestInterface;
 import us.ihmc.avatar.testTools.DRCSimulationTestHelper;
 import us.ihmc.avatar.testTools.ScriptedFootstepGenerator;
 import us.ihmc.commons.thread.ThreadTools;
+import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations;
+import us.ihmc.continuousIntegration.IntegrationCategory;
 import us.ihmc.euclid.geometry.BoundingBox3D;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameQuaternion;
@@ -68,6 +71,8 @@ public abstract class DRCObstacleCoursePlatformTest implements MultiRobotTestInt
       MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " after test.");
    }
 
+   @ContinuousIntegrationAnnotations.ContinuousIntegrationTest(estimatedDuration = 48.6)
+   @Test(timeout = 180000)
    public void testRunsTheSameWayTwiceJustStanding() throws UnreasonableAccelerationException, SimulationExceededMaximumTimeException
    {
       simulationTestingParameters = SimulationTestingParameters.createFromSystemProperties();
@@ -149,6 +154,8 @@ public abstract class DRCObstacleCoursePlatformTest implements MultiRobotTestInt
       BambooTools.reportTestFinishedMessage(simulationTestingParameters.getShowWindows());
    }
 
+   @ContinuousIntegrationAnnotations.ContinuousIntegrationTest(estimatedDuration = 39.4)
+   @Test(timeout = 200000)
    public void testWalkingOverSmallPlatformQuickly() throws SimulationExceededMaximumTimeException
    {
       simulationTestingParameters = SimulationTestingParameters.createFromSystemProperties();
@@ -171,10 +178,10 @@ public abstract class DRCObstacleCoursePlatformTest implements MultiRobotTestInt
       FramePoint3D pelvisPosition = new FramePoint3D(rootFrame);
       pelvisPosition.changeFrame(ReferenceFrame.getWorldFrame());
       PelvisHeightTrajectoryMessage message = HumanoidMessageTools.createPelvisHeightTrajectoryMessage(0.5, pelvisPosition.getZ() + 0.10);
-      drcSimulationTestHelper.send(message);
+      drcSimulationTestHelper.publishToController(message);
 
       FootstepDataListMessage footstepDataList = createFootstepsForSteppingPastSmallPlatform(scriptedFootstepGenerator);
-      drcSimulationTestHelper.send(footstepDataList);
+      drcSimulationTestHelper.publishToController(footstepDataList);
 
       success = success && drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(4.0);
 
@@ -192,6 +199,8 @@ public abstract class DRCObstacleCoursePlatformTest implements MultiRobotTestInt
       BambooTools.reportTestFinishedMessage(simulationTestingParameters.getShowWindows());
    }
 
+   @ContinuousIntegrationAnnotations.ContinuousIntegrationTest(estimatedDuration = 67.5)
+   @Test(timeout = 340000)
    public void testSidestepOverSmallPlatform() throws SimulationExceededMaximumTimeException
    {
       simulationTestingParameters = SimulationTestingParameters.createFromSystemProperties();
@@ -210,7 +219,7 @@ public abstract class DRCObstacleCoursePlatformTest implements MultiRobotTestInt
       boolean success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(2.0); //2.0);
 
       FootstepDataListMessage footstepDataList = createFootstepsForSideSteppingOverSmallPlatform();
-      drcSimulationTestHelper.send(footstepDataList);
+      drcSimulationTestHelper.publishToController(footstepDataList);
 
       success = success && drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(11.0);
 
@@ -227,6 +236,8 @@ public abstract class DRCObstacleCoursePlatformTest implements MultiRobotTestInt
       BambooTools.reportTestFinishedMessage(simulationTestingParameters.getShowWindows());
    }
 
+   @ContinuousIntegrationAnnotations.ContinuousIntegrationTest(estimatedDuration = 65.5)
+   @Test(timeout = 330000)
    public void testSidestepOverSmallWall() throws SimulationExceededMaximumTimeException
    {
       simulationTestingParameters = SimulationTestingParameters.createFromSystemProperties();
@@ -245,7 +256,7 @@ public abstract class DRCObstacleCoursePlatformTest implements MultiRobotTestInt
       boolean success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(2.0); //2.0);
 
       FootstepDataListMessage footstepDataList = createFootstepsForSideSteppingOverSmallWall();
-      drcSimulationTestHelper.send(footstepDataList);
+      drcSimulationTestHelper.publishToController(footstepDataList);
 
       success = success && drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(11.0);
 
@@ -262,6 +273,8 @@ public abstract class DRCObstacleCoursePlatformTest implements MultiRobotTestInt
       BambooTools.reportTestFinishedMessage(simulationTestingParameters.getShowWindows());
    }
 
+   @ContinuousIntegrationAnnotations.ContinuousIntegrationTest(estimatedDuration = 59.6)
+   @Test(timeout = 300000)
    public void testWalkingOverSmallPlatform() throws SimulationExceededMaximumTimeException
    {
       simulationTestingParameters = SimulationTestingParameters.createFromSystemProperties();
@@ -281,14 +294,14 @@ public abstract class DRCObstacleCoursePlatformTest implements MultiRobotTestInt
       boolean success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(2.0); //2.0);
 
       FootstepDataListMessage footstepDataList = createFootstepsForSteppingOntoSmallPlatform(scriptedFootstepGenerator);
-      drcSimulationTestHelper.send(footstepDataList);
+      drcSimulationTestHelper.publishToController(footstepDataList);
 
       success = success && drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(4.0);
 
       if (success)
       {
          footstepDataList = createFootstepsForSteppingOffOfSmallPlatform(scriptedFootstepGenerator);
-         drcSimulationTestHelper.send(footstepDataList);
+         drcSimulationTestHelper.publishToController(footstepDataList);
 
          success = success && drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(4.0);
       }
@@ -307,6 +320,8 @@ public abstract class DRCObstacleCoursePlatformTest implements MultiRobotTestInt
       BambooTools.reportTestFinishedMessage(simulationTestingParameters.getShowWindows());
    }
 
+   @ContinuousIntegrationAnnotations.ContinuousIntegrationTest(estimatedDuration = 39.0)
+   @Test(timeout = 190000)
    public void testWalkingOntoMediumPlatformToesTouching() throws SimulationExceededMaximumTimeException
    {
       simulationTestingParameters = SimulationTestingParameters.createFromSystemProperties();
@@ -326,7 +341,7 @@ public abstract class DRCObstacleCoursePlatformTest implements MultiRobotTestInt
       boolean success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(2.0);
 
       FootstepDataListMessage footstepDataList = createFootstepsForSteppingOntoMediumPlatform(scriptedFootstepGenerator);
-      drcSimulationTestHelper.send(footstepDataList);
+      drcSimulationTestHelper.publishToController(footstepDataList);
 
       success = success && drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(4.0);
 
@@ -344,6 +359,8 @@ public abstract class DRCObstacleCoursePlatformTest implements MultiRobotTestInt
    }
 
 
+   @ContinuousIntegrationAnnotations.ContinuousIntegrationTest(estimatedDuration = 38.5)
+   @Test(timeout = 190000)
    public void testWalkingOffOfMediumPlatform() throws SimulationExceededMaximumTimeException
    {
       simulationTestingParameters = SimulationTestingParameters.createFromSystemProperties();
@@ -363,7 +380,7 @@ public abstract class DRCObstacleCoursePlatformTest implements MultiRobotTestInt
       boolean success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(2.0);
 
       FootstepDataListMessage footstepDataList = createFootstepsForSteppingOffOfMediumPlatform(scriptedFootstepGenerator);
-      drcSimulationTestHelper.send(footstepDataList);
+      drcSimulationTestHelper.publishToController(footstepDataList);
 
       success = success && drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(4.0);
 
@@ -381,6 +398,8 @@ public abstract class DRCObstacleCoursePlatformTest implements MultiRobotTestInt
    }
 
 
+   @ContinuousIntegrationAnnotations.ContinuousIntegrationTest(estimatedDuration = 58.5)
+   @Test(timeout = 290000)
 	public void testWalkingOffOfMediumPlatformSlowSteps() throws SimulationExceededMaximumTimeException
 	{
 	   simulationTestingParameters = SimulationTestingParameters.createFromSystemProperties();
@@ -409,7 +428,7 @@ public abstract class DRCObstacleCoursePlatformTest implements MultiRobotTestInt
       Quaternion desiredChestQuat = new Quaternion(desiredChestFrameOrientation);
 
       double trajectoryTime = 0.5;
-      drcSimulationTestHelper.send(HumanoidMessageTools.createChestTrajectoryMessage(trajectoryTime, desiredChestQuat, ReferenceFrame.getWorldFrame(), pelvisZUpFrame));
+      drcSimulationTestHelper.publishToController(HumanoidMessageTools.createChestTrajectoryMessage(trajectoryTime, desiredChestQuat, ReferenceFrame.getWorldFrame(), pelvisZUpFrame));
 
       success = success && drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(0.5);
 
@@ -423,7 +442,7 @@ public abstract class DRCObstacleCoursePlatformTest implements MultiRobotTestInt
 	   double swingTime = 1.0;
       double transferTime = 0.6;
       FootstepDataListMessage footstepDataList = createFootstepsForSteppingOffOfMediumPlatformNarrowFootSpacing(scriptedFootstepGenerator, swingTime, transferTime);
-	   drcSimulationTestHelper.send(footstepDataList);
+	   drcSimulationTestHelper.publishToController(footstepDataList);
 
 	   success = success && drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(7.0);
 

@@ -1,6 +1,6 @@
 package us.ihmc.simulationconstructionset.simulatedSensors;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -12,12 +12,12 @@ import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Vector3D;
-import us.ihmc.robotics.screwTheory.InverseDynamicsJoint;
-import us.ihmc.robotics.screwTheory.RigidBody;
-import us.ihmc.robotics.screwTheory.ScrewTools;
-import us.ihmc.robotics.screwTheory.SixDoFJoint;
-import us.ihmc.robotics.screwTheory.SpatialAccelerationVector;
-import us.ihmc.robotics.screwTheory.Twist;
+import us.ihmc.mecano.multiBodySystem.RigidBody;
+import us.ihmc.mecano.multiBodySystem.SixDoFJoint;
+import us.ihmc.mecano.multiBodySystem.interfaces.JointBasics;
+import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
+import us.ihmc.mecano.spatial.SpatialAcceleration;
+import us.ihmc.mecano.spatial.Twist;
 import us.ihmc.robotics.sensors.RawIMUSensorsInterface;
 import us.ihmc.simulationConstructionSetTools.simulatedSensors.PerfectSimulatedIMURawSensorReader;
 import us.ihmc.simulationConstructionSetTools.simulatedSensors.SimulatedIMURawSensorReader;
@@ -26,7 +26,7 @@ public class SimulatedIMURawSensorReaderTest
 {
    private final RawSensors rawSensors = new RawSensors();
    private final TestingRobotModel fullRobotModel = new TestingRobotModel();
-   private final RigidBody rigidBody = fullRobotModel.getBodyLink();
+   private final RigidBodyBasics rigidBody = fullRobotModel.getBodyLink();
    private final ReferenceFrame bodyFrame = fullRobotModel.getBodyFrame();
 
    private final RotationMatrix actualIMUOrientation = new RotationMatrix();
@@ -73,8 +73,8 @@ public class SimulatedIMURawSensorReaderTest
       Vector3D linearAcceleration = new Vector3D(0.0, 0.0, GRAVITY);
       Vector3D angularAcceleration = new Vector3D();
       ReferenceFrame rootBodyFrame = fullRobotModel.getElevatorFrame();
-      SpatialAccelerationVector rootAcceleration = new SpatialAccelerationVector(rootBodyFrame, ReferenceFrame.getWorldFrame(), rootBodyFrame,
-                                                                                 linearAcceleration, angularAcceleration);
+      SpatialAcceleration rootAcceleration = new SpatialAcceleration(rootBodyFrame, ReferenceFrame.getWorldFrame(), rootBodyFrame,
+                                                                                 angularAcceleration, linearAcceleration);
       simulatedIMURawSensorReader = new PerfectSimulatedIMURawSensorReader(rawSensors, IMU_INDEX, rigidBody, imuFrame, fullRobotModel.getElevator(),
                                                                            rootAcceleration);
 
@@ -296,8 +296,8 @@ public class SimulatedIMURawSensorReaderTest
 
    private static class TestingRobotModel
    {
-      private final RigidBody elevator;
-      private final RigidBody body;
+      private final RigidBodyBasics elevator;
+      private final RigidBodyBasics body;
 
       private final SixDoFJoint rootJoint;
       private final ReferenceFrame worldFrame;
@@ -320,7 +320,7 @@ public class SimulatedIMURawSensorReaderTest
 
          rootJoint = new SixDoFJoint("rootJoint", elevator);
 
-         body = ScrewTools.addRigidBody("body", rootJoint, Ixx, Iyy, Izz, mass, comOffset);
+         body = new RigidBody("body", rootJoint, Ixx, Iyy, Izz, mass, comOffset);
 
          bodyFrame = rootJoint.getFrameAfterJoint();
       }
@@ -329,19 +329,19 @@ public class SimulatedIMURawSensorReaderTest
                          FrameVector3D angularAcceleration)
       {
          // Update Body Pose
-         rootJoint.setPositionAndRotation(transformBodyToWorld); // TODO correct?
+         rootJoint.setJointConfiguration(transformBodyToWorld); // TODO correct?
          updateFrames();
 
          // Update Body Velocity
-         Twist bodyTwist = new Twist(bodyFrame, elevatorFrame, bodyFrame, linearVelocity, angularVelocity);
+         Twist bodyTwist = new Twist(bodyFrame, elevatorFrame, bodyFrame, angularVelocity, linearVelocity);
          rootJoint.setJointTwist(bodyTwist);
 
          // Update Body Acceleration
-         SpatialAccelerationVector accelerationOfChestWithRespectToWorld = new SpatialAccelerationVector(bodyFrame, worldFrame, bodyFrame,
-                                                                                                         linearAcceleration,
-                                                                                                         angularAcceleration);
-         accelerationOfChestWithRespectToWorld.changeBaseFrameNoRelativeAcceleration(getElevatorFrame());
-         rootJoint.setAcceleration(accelerationOfChestWithRespectToWorld);
+         SpatialAcceleration accelerationOfChestWithRespectToWorld = new SpatialAcceleration(bodyFrame, worldFrame, bodyFrame,
+                                                                                                         angularAcceleration,
+                                                                                                         linearAcceleration);
+         accelerationOfChestWithRespectToWorld.setBaseFrame(getElevatorFrame());
+         rootJoint.setJointAcceleration(accelerationOfChestWithRespectToWorld);
 
          updateFrames();
       }
@@ -351,7 +351,7 @@ public class SimulatedIMURawSensorReaderTest
          elevator.updateFramesRecursively();
       }
 
-      public RigidBody getBodyLink()
+      public RigidBodyBasics getBodyLink()
       {
          return body;
       }
@@ -371,7 +371,7 @@ public class SimulatedIMURawSensorReaderTest
          return elevator.getBodyFixedFrame();
       }
 
-      public RigidBody getElevator()
+      public RigidBodyBasics getElevator()
       {
          return elevator;
       }
@@ -384,7 +384,7 @@ public class SimulatedIMURawSensorReaderTest
          return ret;
       }
 
-      private ReferenceFrame createOffsetFrame(InverseDynamicsJoint previousJoint, RigidBodyTransform transformToParent, String frameName)
+      private ReferenceFrame createOffsetFrame(JointBasics previousJoint, RigidBodyTransform transformToParent, String frameName)
       {
          ReferenceFrame parentFrame = previousJoint.getFrameAfterJoint();
          ReferenceFrame beforeJointFrame = ReferenceFrame.constructFrameWithUnchangingTransformToParent(frameName, parentFrame, transformToParent);

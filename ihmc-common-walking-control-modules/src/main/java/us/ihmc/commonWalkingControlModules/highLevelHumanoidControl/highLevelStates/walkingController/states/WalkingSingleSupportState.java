@@ -15,6 +15,7 @@ import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.interfaces.FixedFramePoint3DBasics;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.humanoidRobotics.footstep.FootstepTiming;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -36,6 +37,7 @@ public class WalkingSingleSupportState extends SingleSupportState
    private final FootstepTiming[] footstepTimings = FootstepTiming.createTimings(additionalFootstepsToConsider);
 
    private final FramePose3D actualFootPoseInWorld = new FramePose3D(worldFrame);
+   private final FramePoint3D adjustedFootstepPositionInWorld = new FramePoint3D(worldFrame);
    private final FramePose3D desiredFootPoseInWorld = new FramePose3D(worldFrame);
    private final FramePoint3D nextExitCMP = new FramePoint3D();
 
@@ -131,6 +133,9 @@ public class WalkingSingleSupportState extends SingleSupportState
             balanceManager.updateCurrentICPPlan();
             //legConfigurationManager.prepareForLegBracing(swingSide);
          }
+
+         // if the footstep was adjusted, shift the CoM plan, if there is one.
+         walkingMessageHandler.setPlanOffsetFromAdjustment(balanceManager.getEffectiveICPAdjustment());
       }
       else if (balanceManager.isPushRecoveryEnabled())
       {
@@ -218,6 +223,9 @@ public class WalkingSingleSupportState extends SingleSupportState
          walkingMessageHandler.poll(nextFootstep, footstepTiming);
       }
 
+      /** 1/08/2018 RJG this has to be done before calling #updateFootstepParameters() to make sure the contact points are up to date */
+      feetManager.setContactStateForSwing(swingSide);
+
       updateFootstepParameters();
 
       balanceManager.minimizeAngularMomentumRateZ(minimizeAngularMomentumRateZDuringSwing.getBooleanValue());
@@ -255,7 +263,7 @@ public class WalkingSingleSupportState extends SingleSupportState
          {
             double nextSwingTime = footstepTimings[0].getSwingTime();
             footstepTimings[0].setTimings(nextSwingTime, currentTouchdownDuration, nextTransferDuration);
-            walkingMessageHandler.adjustTimings(0, nextSwingTime, currentTouchdownDuration, nextTransferDuration);
+            walkingMessageHandler.adjustTiming(nextSwingTime, currentTouchdownDuration, nextTransferDuration);
          }
       }
 
@@ -282,6 +290,8 @@ public class WalkingSingleSupportState extends SingleSupportState
          pelvisOrientationManager.initializeSwing(supportSide, swingTime, nextTiming.getTransferTime(), nextTiming.getSwingTime());
       }
 
+      balanceManager.computeICPPlan(supportSide);
+
       nextFootstep.getPose(desiredFootPoseInWorld);
       desiredFootPoseInWorld.changeFrame(worldFrame);
 
@@ -303,7 +313,7 @@ public class WalkingSingleSupportState extends SingleSupportState
       actualFootPoseInWorld.checkReferenceFrameMatch(desiredFootPoseInWorld);
       touchdownErrorVector.sub(actualFootPoseInWorld.getPosition(), desiredFootPoseInWorld.getPosition());
       touchdownErrorVector.setZ(0.0);
-      walkingMessageHandler.addOffsetVector(touchdownErrorVector);
+      walkingMessageHandler.addOffsetVectorOnTouchdown(touchdownErrorVector);
 
       walkingMessageHandler.reportFootstepCompleted(swingSide, actualFootPoseInWorld);
       walkingMessageHandler.registerCompletedDesiredFootstep(nextFootstep);
@@ -343,10 +353,10 @@ public class WalkingSingleSupportState extends SingleSupportState
 
    /**
     * Request the swing trajectory to speed up using
-    * {@link us.ihmc.commonWalkingControlModules.capturePoint.ICPPlannerInterface#estimateTimeRemainingForStateUnderDisturbance(FramePoint2d)}.
+    * {@link us.ihmc.commonWalkingControlModules.capturePoint.ICPPlannerInterface#estimateTimeRemainingForStateUnderDisturbance(FramePoint2D)}.
     * It is clamped w.r.t. to
     * {@link WalkingControllerParameters#getMinimumSwingTimeForDisturbanceRecovery()}.
-    * 
+    *
     * @return the current swing time remaining for the swing foot trajectory
     */
    private double requestSwingSpeedUpIfNeeded()
@@ -370,6 +380,10 @@ public class WalkingSingleSupportState extends SingleSupportState
 
    private void updateFootstepParameters()
    {
+      // Update the contact states based on the footstep. If the footstep doesn't have any predicted contact points, then use the default ones in the ContactablePlaneBodies.
+      controllerToolbox.updateContactPointsForUpcomingFootstep(nextFootstep);
+      controllerToolbox.updateBipedSupportPolygons();
+
       feetManager.adjustHeightIfNeeded(nextFootstep);
 
       pelvisOrientationManager.setTrajectoryTime(swingTime);
@@ -384,9 +398,10 @@ public class WalkingSingleSupportState extends SingleSupportState
          extraToeOffHeight = feetManager.getToeOffManager().getExtraCoMMaxHeightWithToes();
       comHeightManager.initialize(transferToAndNextFootstepsData, extraToeOffHeight);
 
-      // Update the contact states based on the footstep. If the footstep doesn't have any predicted contact points, then use the default ones in the ContactablePlaneBodies.
-      controllerToolbox.updateContactPointsForUpcomingFootstep(nextFootstep);
-      controllerToolbox.updateBipedSupportPolygons();
+      FixedFramePoint3DBasics stanceFootPosition = walkingMessageHandler.getFootstepAtCurrentLocation(swingSide.getOppositeSide()).getFootstepPose().getPosition();
+      FixedFramePoint3DBasics touchdownPosition = nextFootstep.getFootstepPose().getPosition();
+      double swingTime = footstepTiming.getSwingTime(); // TODO: Should be swing time remaining for step adjustments.
+      comHeightManager.step(stanceFootPosition, touchdownPosition, swingTime, swingSide, extraToeOffHeight);
    }
 
    @Override

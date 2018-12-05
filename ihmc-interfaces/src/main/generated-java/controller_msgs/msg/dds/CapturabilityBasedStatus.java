@@ -18,10 +18,25 @@ public class CapturabilityBasedStatus extends Packet<CapturabilityBasedStatus> i
             * Unique ID used to identify this message, should preferably be consecutively increasing.
             */
    public long sequence_id_;
+   /**
+            * This is the measured position in world of the robot's capture point. Only x and y coordinates are relevant.
+            */
    public us.ihmc.euclid.tuple3D.Point3D capture_point_2d_;
+   /**
+            * This is the desired position in world for the robot's capture point. Only x and y coordinates are relevant.
+            */
    public us.ihmc.euclid.tuple3D.Point3D desired_capture_point_2d_;
+   /**
+            * This is the measured position in world of the robot's center of mass.
+            */
    public us.ihmc.euclid.tuple3D.Point3D center_of_mass_3d_;
+   /**
+            * List of the active contact points used for the left foot. The coordinates are in world frame. Only x and y coordinates are relevant.
+            */
    public us.ihmc.idl.IDLSequence.Object<us.ihmc.euclid.tuple3D.Point3D>  left_foot_support_polygon_2d_;
+   /**
+            * List of the active contact points used for the right foot. The coordinates are in world frame. Only x and y coordinates are relevant.
+            */
    public us.ihmc.idl.IDLSequence.Object<us.ihmc.euclid.tuple3D.Point3D>  right_foot_support_polygon_2d_;
 
    public CapturabilityBasedStatus()
@@ -29,8 +44,8 @@ public class CapturabilityBasedStatus extends Packet<CapturabilityBasedStatus> i
       capture_point_2d_ = new us.ihmc.euclid.tuple3D.Point3D();
       desired_capture_point_2d_ = new us.ihmc.euclid.tuple3D.Point3D();
       center_of_mass_3d_ = new us.ihmc.euclid.tuple3D.Point3D();
-      left_foot_support_polygon_2d_ = new us.ihmc.idl.IDLSequence.Object<us.ihmc.euclid.tuple3D.Point3D> (8, us.ihmc.euclid.tuple3D.Point3D.class, new geometry_msgs.msg.dds.PointPubSubType());
-      right_foot_support_polygon_2d_ = new us.ihmc.idl.IDLSequence.Object<us.ihmc.euclid.tuple3D.Point3D> (8, us.ihmc.euclid.tuple3D.Point3D.class, new geometry_msgs.msg.dds.PointPubSubType());
+      left_foot_support_polygon_2d_ = new us.ihmc.idl.IDLSequence.Object<us.ihmc.euclid.tuple3D.Point3D> (8, new geometry_msgs.msg.dds.PointPubSubType());
+      right_foot_support_polygon_2d_ = new us.ihmc.idl.IDLSequence.Object<us.ihmc.euclid.tuple3D.Point3D> (8, new geometry_msgs.msg.dds.PointPubSubType());
 
    }
 
@@ -67,30 +82,45 @@ public class CapturabilityBasedStatus extends Packet<CapturabilityBasedStatus> i
    }
 
 
+   /**
+            * This is the measured position in world of the robot's capture point. Only x and y coordinates are relevant.
+            */
    public us.ihmc.euclid.tuple3D.Point3D getCapturePoint2d()
    {
       return capture_point_2d_;
    }
 
 
+   /**
+            * This is the desired position in world for the robot's capture point. Only x and y coordinates are relevant.
+            */
    public us.ihmc.euclid.tuple3D.Point3D getDesiredCapturePoint2d()
    {
       return desired_capture_point_2d_;
    }
 
 
+   /**
+            * This is the measured position in world of the robot's center of mass.
+            */
    public us.ihmc.euclid.tuple3D.Point3D getCenterOfMass3d()
    {
       return center_of_mass_3d_;
    }
 
 
+   /**
+            * List of the active contact points used for the left foot. The coordinates are in world frame. Only x and y coordinates are relevant.
+            */
    public us.ihmc.idl.IDLSequence.Object<us.ihmc.euclid.tuple3D.Point3D>  getLeftFootSupportPolygon2d()
    {
       return left_foot_support_polygon_2d_;
    }
 
 
+   /**
+            * List of the active contact points used for the right foot. The coordinates are in world frame. Only x and y coordinates are relevant.
+            */
    public us.ihmc.idl.IDLSequence.Object<us.ihmc.euclid.tuple3D.Point3D>  getRightFootSupportPolygon2d()
    {
       return right_foot_support_polygon_2d_;

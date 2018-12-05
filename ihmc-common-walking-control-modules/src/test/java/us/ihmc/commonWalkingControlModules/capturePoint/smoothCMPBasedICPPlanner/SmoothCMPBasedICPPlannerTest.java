@@ -1,5 +1,6 @@
 package us.ihmc.commonWalkingControlModules.capturePoint.smoothCMPBasedICPPlanner;
 
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
 import java.awt.Color;
@@ -9,27 +10,34 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import org.junit.After;
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.BipedSupportPolygons;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.YoPlaneContactState;
+import us.ihmc.commonWalkingControlModules.capturePoint.smoothCMPBasedICPPlanner.CMPGeneration.CMPTrajectory;
+import us.ihmc.commonWalkingControlModules.capturePoint.smoothCMPBasedICPPlanner.CMPGeneration.ReferenceCMPTrajectoryGenerator;
 import us.ihmc.commonWalkingControlModules.capturePoint.smoothCMPBasedICPPlanner.CoPGeneration.CoPPointsInFoot;
+import us.ihmc.commonWalkingControlModules.capturePoint.smoothCMPBasedICPPlanner.CoPGeneration.CoPTrajectoryPoint;
+import us.ihmc.commonWalkingControlModules.capturePoint.smoothCMPBasedICPPlanner.ICPGeneration.ReferenceICPTrajectoryGenerator;
 import us.ihmc.commonWalkingControlModules.configurations.SmoothCMPPlannerParameters;
 import us.ihmc.commonWalkingControlModules.controllers.Updatable;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.footstepGenerator.FootstepTestHelper;
 import us.ihmc.commons.Epsilons;
-import us.ihmc.commons.PrintTools;
+import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationPlan;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.continuousIntegration.IntegrationCategory;
-import us.ihmc.euclid.referenceFrame.FrameConvexPolygon2D;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
+import us.ihmc.euclid.referenceFrame.tools.EuclidFrameTestTools;
+import us.ihmc.euclid.referenceFrame.tools.ReferenceFrameTools;
+import us.ihmc.euclid.tools.EuclidCoreTestTools;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
@@ -45,14 +53,17 @@ import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.footstep.FootSpoof;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.humanoidRobotics.footstep.FootstepTiming;
+import us.ihmc.robotics.math.trajectories.FrameTrajectory3D;
+import us.ihmc.robotics.math.trajectories.Trajectory;
+import us.ihmc.robotics.math.trajectories.Trajectory3D;
 import us.ihmc.robotics.referenceFrames.MidFootZUpGroundFrame;
 import us.ihmc.robotics.referenceFrames.ZUpFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
-import us.ihmc.simulationconstructionset.SimulationConstructionSetParameters;
 import us.ihmc.simulationconstructionset.gui.tools.SimulationOverheadPlotterFactory;
+import us.ihmc.simulationconstructionset.util.simulationTesting.SimulationTestingParameters;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
@@ -65,12 +76,11 @@ public class SmoothCMPBasedICPPlannerTest
    private static final String testClassName = "UltimateSmoothCMPBasedICPPlannerTest";
    private static final double epsilon = Epsilons.ONE_TEN_MILLIONTH;
    private final static double spatialEpsilonForDiscontinuity = 0.003; // m //TODO this should depend on the simulation dt
-   private final static double spatialEpsilonForPlanningConsistency = 0.010; // m 
+   private final static double spatialEpsilonForPlanningConsistency = 0.010; // m
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
 
    private static final boolean visualize = false;
    private static final boolean keepSCSUp = false;
-   private static final boolean testAssertions = !keepSCSUp && true;
 
    // Simulation parameters
    private final double dt = 0.001;
@@ -99,33 +109,38 @@ public class SmoothCMPBasedICPPlannerTest
    private final double defaultInitialTransferTime = 0.2;
    private final double defaultFinalSwingTime = defaultSwingTime;
    private final double defaultFinalTransferTime = 0.2;
+   private final double defaultStandingTime = 0.2;
 
-   private final double stepWidth = 0.25;
+   private static final double stepWidth = 0.25;
    private final double stepLength = 0.5;
    private final int numberOfFootstepsToConsider = 3;
-   private final int numberOfFootstepsForTest = 10;
    private final int numberOfPointsToCheckForConsistencyWhenAddingFootsteps = 3;
    private final int numberOfFootstepsToTestForConsistency = Math.min(numberOfFootstepsToConsider, 3);
-   private final List<Point2D> contactPointsInFootFrame = Stream.of(new Point2D(footLengthForward, toeWidth / 2.0),
-                                                                    new Point2D(footLengthForward, -toeWidth / 2.0),
-                                                                    new Point2D(-footLengthBack, -heelWidth / 2.0),
-                                                                    new Point2D(-footLengthBack, heelWidth / 2.0))
-                                                                .collect(Collectors.toList());
+   private final List<Point2D> contactPointsInFootFrame = Stream
+         .of(new Point2D(footLengthForward, toeWidth / 2.0), new Point2D(footLengthForward, -toeWidth / 2.0), new Point2D(-footLengthBack, -heelWidth / 2.0),
+             new Point2D(-footLengthBack, heelWidth / 2.0)).collect(Collectors.toList());
 
-   // Variables for testing and simulation
-   private final FramePoint3D comPosition = new FramePoint3D();
-   private final FrameVector3D comVelocity = new FrameVector3D();
-   private final FrameVector3D comAcceleration = new FrameVector3D();
-   private final FramePoint3D icpPosition = new FramePoint3D();
-   private final FrameVector3D icpVelocity = new FrameVector3D();
-   private final FrameVector3D icpAcceleration = new FrameVector3D();
-   private final FramePoint3D cmpPosition = new FramePoint3D();
-   private final FrameVector3D cmpVelocity = new FrameVector3D();
-   private final FrameVector3D centroidalAngularMomentum = new FrameVector3D();
-   private final FrameVector3D centroidalTorque = new FrameVector3D();
-   private final FramePoint3D copPosition = new FramePoint3D();
-   private final FrameVector3D copVelocity = new FrameVector3D();
-   private final FrameVector3D copAcceleration = new FrameVector3D();
+   // Struct for testing and simulation
+   private class ICPPlannerData
+   {
+      final FramePoint3D comPosition = new FramePoint3D();
+      final FrameVector3D comVelocity = new FrameVector3D();
+      final FrameVector3D comAcceleration = new FrameVector3D();
+      final FramePoint3D icpPosition = new FramePoint3D();
+      final FrameVector3D icpVelocity = new FrameVector3D();
+      final FrameVector3D icpAcceleration = new FrameVector3D();
+      final FramePoint3D cmpPosition = new FramePoint3D();
+      final FrameVector3D cmpVelocity = new FrameVector3D();
+      final FrameVector3D centroidalAngularMomentum = new FrameVector3D();
+      final FrameVector3D centroidalTorque = new FrameVector3D();
+      final FramePoint3D copPosition = new FramePoint3D();
+      final FrameVector3D copVelocity = new FrameVector3D();
+      final FrameVector3D copAcceleration = new FrameVector3D();
+   }
+
+   private final ICPPlannerData icpPlannerData1 = new ICPPlannerData();
+   private final ICPPlannerData icpPlannerData2 = new ICPPlannerData();
+   private final FramePose3D swingFootPose = new FramePose3D();
 
    private YoVariableRegistry registry;
    private YoDouble yoTime;
@@ -142,9 +157,8 @@ public class SmoothCMPBasedICPPlannerTest
    private List<FootstepTiming> timingList;
    private boolean newTestStartDiscontinuity, newTestStartConsistency;
    private List<CoPPointsInFoot> copWaypointsFromPreviousPlan;
-   private List<FramePoint3D> icpCornerPointsFromPreviousPlan;
-   private List<FramePoint3D> comCornerPointsFromPreviousPlan;
-   private List<FramePoint3D> cmpCornerPointsFromPreviousPlan;
+   private RecyclingArrayList<FramePoint3D> icpCornerPointsFromPreviousPlan;
+   private RecyclingArrayList<FramePoint3D> comCornerPointsFromPreviousPlan;
    private ArrayList<Updatable> updatables;
 
    // Variables for visualization
@@ -168,6 +182,8 @@ public class SmoothCMPBasedICPPlannerTest
    private Color icpPointsColor = Color.RED;
    private Color cmpPointsColor = Color.YELLOW;
    private Color copPointsColor = Color.ORANGE;
+
+   private int numberOfFootstepsForTest;
 
    @Before
    public void setupTest()
@@ -200,7 +216,7 @@ public class SmoothCMPBasedICPPlannerTest
          this.contactStates.put(side, contactState);
       }
       this.midFeetZUpFrame = new MidFootZUpGroundFrame("MidFeetFrame", soleZUpFrames.get(RobotSide.LEFT), soleZUpFrames.get(RobotSide.RIGHT));
-      this.bipedSupportPolygons = new BipedSupportPolygons(ankleZUpFrames, midFeetZUpFrame, soleZUpFrames, registry, graphicsListRegistry);
+      this.bipedSupportPolygons = new BipedSupportPolygons(midFeetZUpFrame, soleZUpFrames, registry, graphicsListRegistry);
       this.bipedSupportPolygons.updateUsingContactStates(contactStates);
 
       updatables.add(new Updatable()
@@ -242,10 +258,11 @@ public class SmoothCMPBasedICPPlannerTest
 
    private void setupSCS()
    {
-      SimulationConstructionSetParameters scsParameters = new SimulationConstructionSetParameters(true, SCS_BUFFER_SIZE);
+      SimulationTestingParameters simulationTestingParameters = SimulationTestingParameters.createFromSystemProperties();
+      simulationTestingParameters.setKeepSCSUp(visualize);
       Robot robot = new Robot("Dummy");
       yoTime = robot.getYoTime();
-      scs = new SimulationConstructionSet(robot, scsParameters);
+      scs = new SimulationConstructionSet(robot, simulationTestingParameters);
    }
 
    private void startSCS()
@@ -310,8 +327,8 @@ public class SmoothCMPBasedICPPlannerTest
          nextFootstepGraphic.addExtrudedPolygon(contactPointsInFootFrame, footstepHeight, nextFootstepColor);
          YoFramePoseUsingYawPitchRoll nextFootstepPose = new YoFramePoseUsingYawPitchRoll("NextFootstep" + i + "Pose", worldFrame, registry);
          nextFootstepPoses.add(nextFootstepPose);
-         graphicsListRegistry.registerYoGraphic("UpcomingFootsteps",
-                                                new YoGraphicShape("NextFootstep" + i + "Viz", nextFootstepGraphic, nextFootstepPose, 1.0));
+         graphicsListRegistry
+               .registerYoGraphic("UpcomingFootsteps", new YoGraphicShape("NextFootstep" + i + "Viz", nextFootstepGraphic, nextFootstepPose, 1.0));
       }
    }
 
@@ -340,16 +357,23 @@ public class SmoothCMPBasedICPPlannerTest
    @After
    public void cleanUpTest()
    {
-      if (scs != null)
+      if (keepSCSUp)
+      {
+         ThreadTools.sleepForever();
+      }
+
+      if (scs != null && !keepSCSUp)
          scs.closeAndDispose();
+      ReferenceFrameTools.clearWorldFrameTree();
    }
 
    @ContinuousIntegrationTest(estimatedDuration = 0.9)
    @Test(timeout = 30000)
    public void testForDiscontinuitiesWithoutAngularMomentum()
    {
+      numberOfFootstepsForTest = 10;
       boolean isAMOn = false;
-      setupPlanner(isAMOn);
+      this.planner = createPlanner(isAMOn, false, registry);
       simulate(true, false, true);
    }
 
@@ -357,17 +381,19 @@ public class SmoothCMPBasedICPPlannerTest
    @Test(timeout = 30000)
    public void testForDiscontinuitiesWithAngularMomentum()
    {
+      numberOfFootstepsForTest = 10;
       boolean isAMOn = true;
-      setupPlanner(isAMOn);
+      this.planner = createPlanner(isAMOn, false, registry);
       simulate(true, false, true);
    }
 
    @ContinuousIntegrationTest(estimatedDuration = 1.0)
-   @Test(timeout = 30000)
+   @Test(timeout = 3000000)
    public void testForPlanningConsistencyWithoutAngularMomentum()
    {
+      numberOfFootstepsForTest = 10;
       boolean isAMOn = false;
-      setupPlanner(isAMOn);
+      this.planner = createPlanner(isAMOn, false, registry);
       simulate(false, true, true);
    }
 
@@ -375,123 +401,144 @@ public class SmoothCMPBasedICPPlannerTest
    @Test(timeout = 30000)
    public void testForPlanningConsistencyWithAngularMomentum()
    {
+      numberOfFootstepsForTest = 10;
+
       boolean isAMOn = true;
-      setupPlanner(isAMOn);
+      this.planner = createPlanner(isAMOn, false, registry);
       simulate(false, true, true);
    }
 
-   private void setupPlanner(boolean isAMOn)
+   @ContinuousIntegrationTest(estimatedDuration = 1.5)
+   @Test(timeout = 30000)
+   public void testForPlanningConsistencyWithAndWithoutContinuousReplanning()
+   {
+      numberOfFootstepsForTest = 10;
+
+      boolean isAMOn = false;
+      SmoothCMPBasedICPPlanner planner1 = createPlanner(isAMOn, false, new YoVariableRegistry("TestRegistry1"));
+      SmoothCMPBasedICPPlanner planner2 = createPlanner(isAMOn, true, new YoVariableRegistry("TestRegistry2"));
+      simulateAndAssertSamePlan(planner1, planner2);
+   }
+
+   private SmoothCMPBasedICPPlanner createPlanner(boolean isAMOn, boolean doContinuousReplanning, YoVariableRegistry parentRegistry)
    {
       plannerParameters = new SmoothCMPPlannerParameters()
       {
          @Override
-         public boolean planWithAngularMomentum()
+         public boolean planSwingAngularMomentum()
          {
             return isAMOn;
-         };
+         }
+
+         @Override
+         public boolean planTransferAngularMomentum()
+         {
+            return isAMOn;
+         }
 
          @Override
          public int getNumberOfFootstepsToConsider()
          {
             return numberOfFootstepsToConsider;
          }
+
+         @Override
+         public boolean doContinuousReplanningForTransfer()
+         {
+            return doContinuousReplanning;
+         }
+
+         @Override
+         public boolean doContinuousReplanningForSwing()
+         {
+            return doContinuousReplanning;
+         }
       };
-      this.planner = new SmoothCMPBasedICPPlanner(robotMass, bipedSupportPolygons, feet, plannerParameters.getNumberOfFootstepsToConsider(),
-                                                  registry, graphicsListRegistry, gravity);
-      this.planner.initializeParameters(plannerParameters);
-      this.planner.setFinalTransferDuration(defaultFinalTransferTime);
-      this.planner.setOmega0(omega);
-      this.planner.ensureContinuityEnteringEachTransfer(true);
+
+      SmoothCMPBasedICPPlanner planner = new SmoothCMPBasedICPPlanner(robotMass, bipedSupportPolygons, feet, plannerParameters.getNumberOfFootstepsToConsider(),
+                                                                      null, null, parentRegistry, graphicsListRegistry, gravity);
+      planner.initializeParameters(plannerParameters);
+      planner.setFinalTransferDuration(defaultFinalTransferTime);
+      planner.setOmega0(omega);
+      planner.ensureContinuityEnteringEachTransfer(true);
+      return planner;
    }
 
-   // Variables for storing values 
+   // Variables for storing values
    private final FramePoint3D comPositionForDiscontinuity = new FramePoint3D();
    private final FramePoint3D icpPositionForDiscontinuity = new FramePoint3D();
    private final FramePoint3D cmpPositionForDiscontinuity = new FramePoint3D();
    private final FramePoint3D copPositionForDiscontinuity = new FramePoint3D();
 
-   private void testForDiscontinuities()
+   private int tick = 0;
+
+   private void testForDiscontinuities(ICPPlannerData plannerData)
    {
       if (!newTestStartDiscontinuity)
       {
-         assertTrueLocal(comPositionForDiscontinuity.epsilonEquals(comPosition, spatialEpsilonForDiscontinuity));
-         assertTrueLocal(icpPositionForDiscontinuity.epsilonEquals(icpPosition, spatialEpsilonForDiscontinuity));
-         assertTrueLocal(cmpPositionForDiscontinuity.epsilonEquals(cmpPosition, spatialEpsilonForDiscontinuity * 4));
-         assertTrueLocal(copPositionForDiscontinuity.epsilonEquals(copPosition, spatialEpsilonForDiscontinuity * 4));
+         EuclidCoreTestTools.assertPoint3DGeometricallyEquals("CoM position doesn't pass continuity test on tick " + tick + ".", comPositionForDiscontinuity,
+                                                              plannerData.comPosition, spatialEpsilonForDiscontinuity);
+         EuclidCoreTestTools.assertPoint3DGeometricallyEquals("ICP position doesn't pass continuity test on tick " + tick + ".", icpPositionForDiscontinuity,
+                                                              plannerData.icpPosition, spatialEpsilonForDiscontinuity);
+         EuclidCoreTestTools.assertPoint3DGeometricallyEquals("CMP position doesn't pass continuity test on tick " + tick + ".", cmpPositionForDiscontinuity,
+                                                              plannerData.cmpPosition, spatialEpsilonForDiscontinuity * 4);
+         EuclidCoreTestTools.assertPoint3DGeometricallyEquals("CoP position doesn't pass continuity test on tick " + tick + ".", copPositionForDiscontinuity,
+                                                              plannerData.copPosition, spatialEpsilonForDiscontinuity * 4);
       }
       else
+      {
          newTestStartDiscontinuity = false;
-      getPredictedValue(comPositionForDiscontinuity, comPosition, comVelocity, dt);
-      getPredictedValue(icpPositionForDiscontinuity, icpPosition, icpVelocity, dt);
-      getPredictedValue(cmpPositionForDiscontinuity, cmpPosition, cmpVelocity, dt);
-      getPredictedValue(copPositionForDiscontinuity, copPosition, copVelocity, dt);
-   }
+      }
 
-   private void getPredictedValue(FramePoint3D predictedValueToPack, FramePoint3D currentValue, FrameVector3D rateOfChange, double deltaT)
-   {
-      predictedValueToPack.setIncludingFrame(rateOfChange);
-      predictedValueToPack.scale(deltaT);
-      predictedValueToPack.changeFrame(currentValue.getReferenceFrame());
-      predictedValueToPack.add(currentValue);
+      comPositionForDiscontinuity.scaleAdd(dt, plannerData.comVelocity, plannerData.comPosition);
+      icpPositionForDiscontinuity.scaleAdd(dt, plannerData.icpVelocity, plannerData.icpPosition);
+      cmpPositionForDiscontinuity.scaleAdd(dt, plannerData.cmpVelocity, plannerData.cmpPosition);
+      copPositionForDiscontinuity.scaleAdd(dt, plannerData.copVelocity, plannerData.copPosition);
+      tick++;
    }
 
    private void setupConsistencyChecks()
    {
       newTestStartConsistency = true;
-      comCornerPointsFromPreviousPlan = new ArrayList<>();
-      icpCornerPointsFromPreviousPlan = new ArrayList<>();
-      cmpCornerPointsFromPreviousPlan = new ArrayList<>();
       copWaypointsFromPreviousPlan = new ArrayList<>();
       CoPPointsInFoot copPointsInFoot = new CoPPointsInFoot(testClassName, 0, new ReferenceFrame[] {worldFrame, feet.get(RobotSide.LEFT).getSoleFrame(),
             feet.get(RobotSide.RIGHT).getSoleFrame()}, registry);
       copWaypointsFromPreviousPlan.add(copPointsInFoot);
-      for (int j = 0; j < 2; j++)
-      {
-         FramePoint3D newPoint = new FramePoint3D();
-         comCornerPointsFromPreviousPlan.add(newPoint);
-         newPoint = new FramePoint3D();
-         icpCornerPointsFromPreviousPlan.add(newPoint);
-         newPoint = new FramePoint3D();
-         cmpCornerPointsFromPreviousPlan.add(newPoint);
-      }
+
+      icpCornerPointsFromPreviousPlan = new RecyclingArrayList<>(FramePoint3D::new);
+      comCornerPointsFromPreviousPlan = new RecyclingArrayList<>(FramePoint3D::new);
 
       for (int i = 0; i < numberOfFootstepsToTestForConsistency; i++)
       {
-         copPointsInFoot = new CoPPointsInFoot(testClassName, i
-               + 1, new ReferenceFrame[] {worldFrame, feet.get(RobotSide.LEFT).getSoleFrame(), feet.get(RobotSide.RIGHT).getSoleFrame()}, registry);
+         copPointsInFoot = new CoPPointsInFoot(testClassName, i + 1, new ReferenceFrame[] {worldFrame, feet.get(RobotSide.LEFT).getSoleFrame(),
+               feet.get(RobotSide.RIGHT).getSoleFrame()}, registry);
          copWaypointsFromPreviousPlan.add(copPointsInFoot);
-
-         for (int j = 0; j < plannerParameters.getNumberOfCoPWayPointsPerFoot(); j++)
-         {
-            FramePoint3D newPoint = new FramePoint3D();
-            comCornerPointsFromPreviousPlan.add(newPoint);
-            newPoint = new FramePoint3D();
-            icpCornerPointsFromPreviousPlan.add(newPoint);
-            newPoint = new FramePoint3D();
-            cmpCornerPointsFromPreviousPlan.add(newPoint);
-         }
       }
    }
 
    private void testForPlanningConsistency(boolean isDoubleSupport, int stepNumber)
    {
-      List<CoPPointsInFoot> copWaypointsFromPlanner = planner.getCoPWaypoints();
-      List<? extends FramePoint3DReadOnly> icpInitialCornerPointsFromPlanner = planner.getInitialDesiredCapturePointPositions();
-      List<? extends FramePoint3DReadOnly> icpFinalCornerPointsFromPlanner = planner.getFinalDesiredCapturePointPositions();
-      List<? extends FramePoint3DReadOnly> comInitialCornerPointsFromPlanner = planner.getInitialDesiredCenterOfMassPositions();
-      List<? extends FramePoint3DReadOnly> comFinalCornerPointsFromPlanner = planner.getFinalDesiredCenterOfMassPositions();
+      List<CoPPointsInFoot> copWaypointsFromPlanner = planner.getReferenceCoPGenerator().getWaypoints();
+      List<? extends FramePoint3DReadOnly> icpInitialCornerPointsFromPlanner = planner.getReferenceICPGenerator().getICPPositionDesiredInitialList();
+      List<? extends FramePoint3DReadOnly> icpFinalCornerPointsFromPlanner = planner.getReferenceICPGenerator().getICPPositionDesiredFinalList();
+      List<? extends FramePoint3DReadOnly> comInitialCornerPointsFromPlanner = planner.getReferenceCoMGenerator().getCoMPositionDesiredInitialList();
+      List<? extends FramePoint3DReadOnly> comFinalCornerPointsFromPlanner = planner.getReferenceCoMGenerator().getCoMPositionDesiredFinalList();
 
       if (!newTestStartConsistency)
       {
-         int numberOfStepsToCheck = (numberOfFootstepsToTestForConsistency < (numberOfFootstepsForTest - stepNumber) ? numberOfFootstepsToTestForConsistency
-               : (numberOfFootstepsForTest - stepNumber));
+
+         int numberOfStepsToCheck = (numberOfFootstepsToTestForConsistency < (numberOfFootstepsForTest - stepNumber) ?
+               numberOfFootstepsToTestForConsistency :
+               (numberOfFootstepsForTest - stepNumber));
 
          testCoPConsistency(isDoubleSupport, stepNumber, numberOfStepsToCheck, copWaypointsFromPlanner);
          testICPConsistency(stepNumber, icpInitialCornerPointsFromPlanner, icpFinalCornerPointsFromPlanner, numberOfStepsToCheck);
          testCoMConsistency(stepNumber, comInitialCornerPointsFromPlanner, comFinalCornerPointsFromPlanner, numberOfStepsToCheck);
       }
       else
+      {
          newTestStartConsistency = false;
+      }
 
       updateCoPsStoredForConsistencyCheck(isDoubleSupport, copWaypointsFromPlanner);
       updateICPsForConsistencyCheck(isDoubleSupport, icpInitialCornerPointsFromPlanner, icpFinalCornerPointsFromPlanner);
@@ -501,71 +548,69 @@ public class SmoothCMPBasedICPPlannerTest
    private void updateICPsForConsistencyCheck(boolean isDoubleSupport, List<? extends FramePoint3DReadOnly> icpInitialCornerPointsFromPlanner,
                                               List<? extends FramePoint3DReadOnly> icpFinalCornerPointsFromPlanner)
    {
+      icpCornerPointsFromPreviousPlan.clear();
       int indexDifference = isDoubleSupport ? plannerParameters.getTransferCoPPointsToPlan().length : (plannerParameters.getSwingCoPPointsToPlan().length + 1);
-      icpCornerPointsFromPreviousPlan.get(0).set(icpInitialCornerPointsFromPlanner.get(indexDifference));
-      for (int i = 1; i < icpCornerPointsFromPreviousPlan.size(); i++)
+      icpCornerPointsFromPreviousPlan.add().set(icpInitialCornerPointsFromPlanner.get(Math.min(indexDifference, icpInitialCornerPointsFromPlanner.size() - 1)));
+      for (int i = 1; i < icpFinalCornerPointsFromPlanner.size() - (indexDifference - 1); i++)
       {
-         icpCornerPointsFromPreviousPlan.get(i).set(icpFinalCornerPointsFromPlanner.get(i + indexDifference - 1));
+         icpCornerPointsFromPreviousPlan.add().set(icpFinalCornerPointsFromPlanner.get(i + indexDifference - 1));
       }
    }
 
    private void updateCoMsForConsistencyCheck(boolean isDoubleSupport, List<? extends FramePoint3DReadOnly> comInitialCornerPointsFromPlanner,
                                               List<? extends FramePoint3DReadOnly> comFinalCornerPointsFromPlanner)
    {
+      comCornerPointsFromPreviousPlan.clear();
       int indexDifference = isDoubleSupport ? plannerParameters.getTransferCoPPointsToPlan().length : (plannerParameters.getSwingCoPPointsToPlan().length + 1);
-      comCornerPointsFromPreviousPlan.get(0).set(comInitialCornerPointsFromPlanner.get(indexDifference));
-      for (int i = 1; i < comCornerPointsFromPreviousPlan.size(); i++)
+      comCornerPointsFromPreviousPlan.add().set(comInitialCornerPointsFromPlanner.get(indexDifference));
+      for (int i = 1; i < comInitialCornerPointsFromPlanner.size() - (indexDifference - 1); i++)
       {
-         comCornerPointsFromPreviousPlan.get(i).set(comFinalCornerPointsFromPlanner.get(i + indexDifference - 1));
+         comCornerPointsFromPreviousPlan.add().set(comFinalCornerPointsFromPlanner.get(i + indexDifference - 1));
       }
    }
 
    private void testICPConsistency(int stepNumber, List<? extends FramePoint3DReadOnly> icpInitialCornerPointsFromPlanner,
                                    List<? extends FramePoint3DReadOnly> icpFinalCornerPointsFromPlanner, int numberOfStepsToCheck)
    {
-      assertTrueLocal("Plan number: " + stepNumber + " " + 0 + " Required: " + icpCornerPointsFromPreviousPlan.get(0).toString() + " Got: "
-            + icpInitialCornerPointsFromPlanner.get(0).toString(),
-                      icpCornerPointsFromPreviousPlan.get(0).epsilonEquals(icpInitialCornerPointsFromPlanner.get(0), spatialEpsilonForPlanningConsistency));
+      EuclidCoreTestTools.assertPoint3DGeometricallyEquals("Plan number: " + stepNumber + " " + 0, icpCornerPointsFromPreviousPlan.get(0),
+                                                           icpInitialCornerPointsFromPlanner.get(0), spatialEpsilonForPlanningConsistency);
 
-      int numberOfICPPointsToCheck = (numberOfStepsToCheck >= numberOfFootstepsToConsider) ? numberOfPointsToCheckForConsistencyWhenAddingFootsteps
-            : numberOfStepsToCheck * plannerParameters.getNumberOfCoPWayPointsPerFoot() + 3;
+      int numberOfICPPointsToCheck = (numberOfStepsToCheck >= numberOfFootstepsToConsider) ?
+            numberOfPointsToCheckForConsistencyWhenAddingFootsteps :
+            numberOfStepsToCheck * plannerParameters.getNumberOfCoPWayPointsPerFoot() + 3;
       for (int i = 1; i < numberOfICPPointsToCheck - 1; i++)
       {
-         assertTrueLocal("Plan number: " + stepNumber + " " + i + " Required: " + icpCornerPointsFromPreviousPlan.get(i).toString() + " Got: "
-               + icpInitialCornerPointsFromPlanner.get(i).toString(),
-                         icpCornerPointsFromPreviousPlan.get(i).epsilonEquals(icpInitialCornerPointsFromPlanner.get(i), spatialEpsilonForPlanningConsistency));
-         assertTrueLocal("Plan number: " + stepNumber + " " + i + " Required: " + icpCornerPointsFromPreviousPlan.get(i).toString() + " Got: "
-               + icpFinalCornerPointsFromPlanner.get(i - 1).toString(),
-                         icpCornerPointsFromPreviousPlan.get(i).epsilonEquals(icpFinalCornerPointsFromPlanner.get(i - 1),
-                                                                              spatialEpsilonForPlanningConsistency));
+         EuclidCoreTestTools.assertPoint3DGeometricallyEquals("Plan number: " + stepNumber + " " + i, icpCornerPointsFromPreviousPlan.get(i),
+                                                              icpInitialCornerPointsFromPlanner.get(i), spatialEpsilonForPlanningConsistency);
+         EuclidCoreTestTools.assertPoint3DGeometricallyEquals("Plan number: " + stepNumber + " " + i, icpCornerPointsFromPreviousPlan.get(i),
+                                                              icpInitialCornerPointsFromPlanner.get(i), spatialEpsilonForPlanningConsistency);
+         EuclidCoreTestTools.assertPoint3DGeometricallyEquals("Plan number: " + stepNumber + " " + i, icpCornerPointsFromPreviousPlan.get(i),
+                                                              icpFinalCornerPointsFromPlanner.get(i - 1), spatialEpsilonForPlanningConsistency);
       }
-      assertTrueLocal(icpCornerPointsFromPreviousPlan.get(numberOfICPPointsToCheck - 1)
-                                                     .epsilonEquals(icpFinalCornerPointsFromPlanner.get(numberOfICPPointsToCheck - 2),
-                                                                    spatialEpsilonForPlanningConsistency));
+      EuclidCoreTestTools.assertPoint3DGeometricallyEquals(icpCornerPointsFromPreviousPlan.get(numberOfICPPointsToCheck - 1),
+                                                           icpFinalCornerPointsFromPlanner.get(numberOfICPPointsToCheck - 2),
+                                                           spatialEpsilonForPlanningConsistency);
    }
 
    private void testCoMConsistency(int stepNumber, List<? extends FramePoint3DReadOnly> comInitialCornerPointsFromPlanner,
                                    List<? extends FramePoint3DReadOnly> comFinalCornerPointsFromPlanner, int numberOfStepsToCheck)
    {
-      assertTrueLocal("Plan number: " + stepNumber + " " + 0 + " Required: " + comCornerPointsFromPreviousPlan.get(0).toString() + " Got: "
-            + comInitialCornerPointsFromPlanner.get(0).toString(),
-                      comCornerPointsFromPreviousPlan.get(0).epsilonEquals(comInitialCornerPointsFromPlanner.get(0), spatialEpsilonForPlanningConsistency));
+      EuclidCoreTestTools.assertPoint3DGeometricallyEquals("Plan number: " + stepNumber + " " + 0, comCornerPointsFromPreviousPlan.get(0),
+                                                           comInitialCornerPointsFromPlanner.get(0), spatialEpsilonForPlanningConsistency);
 
-      int numberOfICPPointsToCheck = (numberOfStepsToCheck >= numberOfFootstepsToConsider) ? numberOfPointsToCheckForConsistencyWhenAddingFootsteps
-            : numberOfStepsToCheck * plannerParameters.getNumberOfCoPWayPointsPerFoot() + 3;
+      int numberOfICPPointsToCheck = (numberOfStepsToCheck >= numberOfFootstepsToConsider) ?
+            numberOfPointsToCheckForConsistencyWhenAddingFootsteps :
+            numberOfStepsToCheck * plannerParameters.getNumberOfCoPWayPointsPerFoot() + 3;
       for (int i = 1; i < numberOfICPPointsToCheck - 1; i++)
       {
-         assertTrueLocal("Plan number: " + stepNumber + " " + i + " Required: " + comCornerPointsFromPreviousPlan.get(i).toString() + " Got: "
-               + comInitialCornerPointsFromPlanner.get(i).toString(),
-                         comCornerPointsFromPreviousPlan.get(i).epsilonEquals(comInitialCornerPointsFromPlanner.get(i), spatialEpsilonForPlanningConsistency));
-         assertTrueLocal("Plan number: " + stepNumber + " " + i + " Required: " + comCornerPointsFromPreviousPlan.get(i).toString() + " Got: "
-               + comFinalCornerPointsFromPlanner.get(i - 1).toString(),
-                         comCornerPointsFromPreviousPlan.get(i).epsilonEquals(comFinalCornerPointsFromPlanner.get(i - 1),
-                                                                              spatialEpsilonForPlanningConsistency));
+         EuclidCoreTestTools.assertPoint3DGeometricallyEquals("Plan number: " + stepNumber + " " + i, comCornerPointsFromPreviousPlan.get(i),
+                                                              comInitialCornerPointsFromPlanner.get(i), spatialEpsilonForPlanningConsistency);
+         EuclidCoreTestTools.assertPoint3DGeometricallyEquals("Plan number: " + stepNumber + " " + i, comCornerPointsFromPreviousPlan.get(i),
+                                                              comFinalCornerPointsFromPlanner.get(i - 1), spatialEpsilonForPlanningConsistency);
       }
-      assertTrueLocal(comCornerPointsFromPreviousPlan.get(numberOfICPPointsToCheck - 1)
-                                                     .epsilonEquals(comFinalCornerPointsFromPlanner.get(numberOfICPPointsToCheck - 2),
-                                                                    spatialEpsilonForPlanningConsistency));
+      EuclidCoreTestTools.assertPoint3DGeometricallyEquals(comCornerPointsFromPreviousPlan.get(numberOfICPPointsToCheck - 1),
+                                                           comFinalCornerPointsFromPlanner.get(numberOfICPPointsToCheck - 2),
+                                                           spatialEpsilonForPlanningConsistency);
    }
 
    private void updateCoPsStoredForConsistencyCheck(boolean isDoubleSupport, List<CoPPointsInFoot> copWaypointsFromPlanner)
@@ -580,10 +625,10 @@ public class SmoothCMPBasedICPPlannerTest
 
       int finalCoPIndex = copWaypointsFromPlanner.get(indexDifference).getNumberOfCoPPoints() - 1;
       copWaypointsFromPlanner.get(indexDifference).getFinalCoPPosition(tempFramePoint1);
-      copWaypointsFromPreviousPlan.get(0).addAndSetIncludingFrame(copWaypointsFromPlanner.get(indexDifference).getCoPPointList().get(finalCoPIndex), 0.0,
-                                                                  tempFramePoint1);
-      for (int i = 1; i < numberOfFootstepsToTestForConsistency + 1; i++)
-         copWaypointsFromPreviousPlan.get(i).setIncludingFrame(copWaypointsFromPlanner.get(i + indexDifference));
+      copWaypointsFromPreviousPlan.get(0).addWaypoint(copWaypointsFromPlanner.get(indexDifference).getCoPPointList().get(finalCoPIndex), 0.0, tempFramePoint1);
+      int numberToCheck = Math.min(numberOfFootstepsToTestForConsistency + 1, copWaypointsFromPlanner.size() - indexDifference);
+      for (int i = 1; i < numberToCheck; i++)
+         copWaypointsFromPreviousPlan.get(i).set(copWaypointsFromPlanner.get(i + indexDifference));
    }
 
    private void testCoPConsistency(boolean isDoubleSupport, int stepNumber, int numberOfStepsToCheck, List<CoPPointsInFoot> copWaypointsFromPlanner)
@@ -591,30 +636,33 @@ public class SmoothCMPBasedICPPlannerTest
       // Test CoPs and footsteps
       for (int i = (isDoubleSupport ? 0 : 1); i < numberOfStepsToCheck; i++)
       {
-         CoPPointsInFoot requiredCoPs = copWaypointsFromPreviousPlan.get(i);
-         CoPPointsInFoot gotCoPs = copWaypointsFromPlanner.get(i);
-         assertTrueLocal("Step number: " + (stepNumber + i) + " Required: " + requiredCoPs.getNumberOfCoPPoints() + " Got: " + gotCoPs.getNumberOfCoPPoints(),
-                         requiredCoPs.getNumberOfCoPPoints() == gotCoPs.getNumberOfCoPPoints());
+         CoPPointsInFoot previousPlannedCoPWaypoints = copWaypointsFromPreviousPlan.get(i);
+         CoPPointsInFoot actualPlannedCoPWaypoints = copWaypointsFromPlanner.get(i);
+         assertEquals(
+               "Step number: " + (stepNumber + i) + " Required: " + previousPlannedCoPWaypoints.getNumberOfCoPPoints() + " Got: " + actualPlannedCoPWaypoints
+                     .getNumberOfCoPPoints(), previousPlannedCoPWaypoints.getNumberOfCoPPoints(), actualPlannedCoPWaypoints.getNumberOfCoPPoints());
 
-         requiredCoPs.getSwingFootLocation(tempFramePoint1);
-         gotCoPs.getSwingFootLocation(tempFramePoint2);
-         assertTrueLocal("Plan number: " + stepNumber + " StepNumber: " + numberOfStepsToCheck + " Required: " + tempFramePoint1.toString() + " Got: "
-               + tempFramePoint2.toString(), tempFramePoint1.epsilonEquals(tempFramePoint2, spatialEpsilonForPlanningConsistency));
-         requiredCoPs.getSupportFootLocation(tempFramePoint1);
-         gotCoPs.getSupportFootLocation(tempFramePoint2);
-         assertTrueLocal("Plan number: " + stepNumber + " StepNumber: " + numberOfStepsToCheck + " Required: " + tempFramePoint1.toString() + " Got: "
-               + tempFramePoint2.toString(), tempFramePoint1.epsilonEquals(tempFramePoint2, spatialEpsilonForPlanningConsistency));
+         previousPlannedCoPWaypoints.getSwingFootLocation(tempFramePoint1);
+         actualPlannedCoPWaypoints.getSwingFootLocation(tempFramePoint2);
+         EuclidCoreTestTools
+               .assertPoint3DGeometricallyEquals("Plan number: " + stepNumber + " StepNumber: " + numberOfStepsToCheck, tempFramePoint1, tempFramePoint2,
+                                                 spatialEpsilonForPlanningConsistency);
+         previousPlannedCoPWaypoints.getSupportFootLocation(tempFramePoint1);
+         actualPlannedCoPWaypoints.getSupportFootLocation(tempFramePoint2);
+         EuclidCoreTestTools
+               .assertPoint3DGeometricallyEquals("Plan number: " + stepNumber + " StepNumber: " + numberOfStepsToCheck, tempFramePoint1, tempFramePoint2,
+                                                 spatialEpsilonForPlanningConsistency);
 
-         for (int j = 0; j < requiredCoPs.getNumberOfCoPPoints(); j++)
+         for (int j = 0; j < previousPlannedCoPWaypoints.getNumberOfCoPPoints(); j++)
          {
-            assertTrueLocal("Step number: " + (stepNumber + i) + " Required : " + requiredCoPs.getCoPPointList().get(j).toString() + " Got: "
-                  + gotCoPs.getCoPPointList().get(j).toString(), requiredCoPs.getCoPPointList().get(j) == gotCoPs.getCoPPointList().get(j));
-            assertTrueLocal("Step number: " + (stepNumber + i) + " Required : " + requiredCoPs.get(j).toString() + " Got: " + gotCoPs.get(j).toString(),
-                            requiredCoPs.get(j).epsilonEquals(gotCoPs.get(j), spatialEpsilonForPlanningConsistency));
+            assertEquals("Step number: " + (stepNumber + i) + ", waypoint number: " + j, previousPlannedCoPWaypoints.getCoPPointList().get(j),
+                         actualPlannedCoPWaypoints.getCoPPointList().get(j));
+            assertTrajectoryPointEquals("Step number: " + (stepNumber + i) + ", waypoint number: " + j, previousPlannedCoPWaypoints.get(j),
+                                        actualPlannedCoPWaypoints.get(j), spatialEpsilonForPlanningConsistency);
          }
       }
 
-      // Consistency of plans shorter than consideration needs this 
+      // Consistency of plans shorter than consideration needs this
       if (numberOfStepsToCheck < numberOfFootstepsToConsider)
       {
          CoPPointsInFoot requiredCoPs = copWaypointsFromPreviousPlan.get(numberOfStepsToCheck);
@@ -622,19 +670,20 @@ public class SmoothCMPBasedICPPlannerTest
 
          requiredCoPs.getSwingFootLocation(tempFramePoint1);
          gotCoPs.getSwingFootLocation(tempFramePoint2);
-         assertTrueLocal("Plan number: " + stepNumber + " StepNumber: " + numberOfStepsToCheck + " Required: " + tempFramePoint1.toString() + " Got: "
-               + tempFramePoint2.toString(), tempFramePoint1.epsilonEquals(tempFramePoint2, spatialEpsilonForPlanningConsistency));
+         EuclidCoreTestTools
+               .assertPoint3DGeometricallyEquals("Plan number: " + stepNumber + " StepNumber: " + numberOfStepsToCheck, tempFramePoint1, tempFramePoint2,
+                                                 spatialEpsilonForPlanningConsistency);
          requiredCoPs.getSupportFootLocation(tempFramePoint1);
          gotCoPs.getSupportFootLocation(tempFramePoint2);
-         assertTrueLocal("Plan number: " + stepNumber + " StepNumber: " + numberOfStepsToCheck + " Required: " + tempFramePoint1.toString() + " Got: "
-               + tempFramePoint2.toString(), tempFramePoint1.epsilonEquals(tempFramePoint2, spatialEpsilonForPlanningConsistency));
+         EuclidCoreTestTools
+               .assertPoint3DGeometricallyEquals("Plan number: " + stepNumber + " StepNumber: " + numberOfStepsToCheck, tempFramePoint1, tempFramePoint2,
+                                                 spatialEpsilonForPlanningConsistency);
 
          for (int j = 0; j < requiredCoPs.getNumberOfCoPPoints(); j++)
          {
-            assertTrueLocal("Step number: " + (stepNumber + numberOfStepsToCheck) + " Required : " + requiredCoPs.getCoPPointList().get(j).toString() + " Got: "
-                  + gotCoPs.getCoPPointList().get(j).toString(), requiredCoPs.getCoPPointList().get(j) == gotCoPs.getCoPPointList().get(j));
-            assertTrueLocal("Step number: " + (stepNumber + numberOfStepsToCheck) + " Required : " + requiredCoPs.get(j).toString() + " Got: "
-                  + gotCoPs.get(j).toString(), requiredCoPs.get(j).epsilonEquals(gotCoPs.get(j), spatialEpsilonForPlanningConsistency));
+            assertEquals("Step number: " + (stepNumber + numberOfStepsToCheck), requiredCoPs.getCoPPointList().get(j), gotCoPs.getCoPPointList().get(j));
+            assertTrajectoryPointEquals("Step number: " + (stepNumber + numberOfStepsToCheck), requiredCoPs.get(j), gotCoPs.get(j),
+                                        spatialEpsilonForPlanningConsistency);
          }
       }
    }
@@ -659,30 +708,30 @@ public class SmoothCMPBasedICPPlannerTest
 
    private void updateCoMTrack()
    {
-      comTrack.setBallLoop(comPosition);
+      comTrack.setBallLoop(icpPlannerData1.comPosition);
    }
 
    private void updateICPTrack()
    {
-      icpTrack.setBallLoop(icpPosition);
+      icpTrack.setBallLoop(icpPlannerData1.icpPosition);
    }
 
    private void updateCMPTrack()
    {
-      cmpTrack.setBallLoop(cmpPosition);
+      cmpTrack.setBallLoop(icpPlannerData1.cmpPosition);
    }
 
    private void updateCoPTrack()
    {
-      copTrack.setBallLoop(copPosition);
+      copTrack.setBallLoop(icpPlannerData1.copPosition);
    }
 
    private void updatePositionGraphics()
    {
-      comPositionGraphic.setPosition(comPosition);
-      icpPositionGraphic.setPosition(icpPosition);
-      cmpPositionGraphic.setPosition(cmpPosition);
-      copPositionGraphic.setPosition(copPosition);
+      comPositionGraphic.setPosition(icpPlannerData1.comPosition);
+      icpPositionGraphic.setPosition(icpPlannerData1.icpPosition);
+      cmpPositionGraphic.setPosition(icpPlannerData1.cmpPosition);
+      copPositionGraphic.setPosition(icpPlannerData1.copPosition);
    }
 
    private void updateVisualization(int stepIndex)
@@ -710,12 +759,10 @@ public class SmoothCMPBasedICPPlannerTest
       }
    }
 
-   FrameConvexPolygon2D tempConvexPolygon = new FrameConvexPolygon2D();
-
    private void updateNextFootsteps(int stepIndex)
    {
-      int numberOfStepToUpdate = (numberOfFootstepsForTest - stepIndex) < numberOfFootstepsToConsider ? (numberOfFootstepsForTest - stepIndex)
-            : numberOfFootstepsToConsider;
+      int numberOfStepToUpdate =
+            (numberOfFootstepsForTest - stepIndex) < numberOfFootstepsToConsider ? (numberOfFootstepsForTest - stepIndex) : numberOfFootstepsToConsider;
       int nextStepIndex;
       for (nextStepIndex = 0; nextStepIndex < numberOfStepToUpdate; nextStepIndex++)
       {
@@ -730,8 +777,8 @@ public class SmoothCMPBasedICPPlannerTest
 
    private void updateCoMCornerPoints()
    {
-      List<? extends FramePoint3DReadOnly> comInitialDesiredPositions = planner.getInitialDesiredCenterOfMassPositions();
-      List<? extends FramePoint3DReadOnly> comFinalDesiredPositions = planner.getFinalDesiredCenterOfMassPositions();
+      List<? extends FramePoint3DReadOnly> comInitialDesiredPositions = planner.getReferenceCoMGenerator().getCoMPositionDesiredInitialList();
+      List<? extends FramePoint3DReadOnly> comFinalDesiredPositions = planner.getReferenceCoMGenerator().getCoMPositionDesiredFinalList();
       comInitialCornerPoints.reset();
       for (int i = 0; i < comInitialDesiredPositions.size(); i++)
       {
@@ -746,8 +793,8 @@ public class SmoothCMPBasedICPPlannerTest
 
    private void updateICPCornerPoints()
    {
-      List<? extends FramePoint3DReadOnly> icpInitialDesiredPositions = planner.getInitialDesiredCapturePointPositions();
-      List<? extends FramePoint3DReadOnly> icpFinalDesiredPositions = planner.getFinalDesiredCapturePointPositions();
+      List<? extends FramePoint3DReadOnly> icpInitialDesiredPositions = planner.getReferenceICPGenerator().getICPPositionDesiredInitialList();
+      List<? extends FramePoint3DReadOnly> icpFinalDesiredPositions = planner.getReferenceICPGenerator().getICPPositionDesiredFinalList();
       icpInitialCornerPoints.reset();
       for (int i = 0; i < icpInitialDesiredPositions.size(); i++)
       {
@@ -765,20 +812,78 @@ public class SmoothCMPBasedICPPlannerTest
 
    private void updateCoPCornerPoints()
    {
-      List<CoPPointsInFoot> copCornerPointPositions = planner.getCoPWaypoints();
+      List<CoPPointsInFoot> copCornerPointPositions = planner.getReferenceCoPGenerator().getWaypoints();
       copCornerPoints.reset();
       for (int i = 0; i < copCornerPointPositions.size(); i++)
       {
          CoPPointsInFoot copPoints = copCornerPointPositions.get(i);
-         for (int j = 0; j < copPoints.getCoPPointList().size(); j++)
+         for (int j = 0; j < copPoints.getNumberOfCoPPoints(); j++)
          {
-            copCornerPoints.setBall(copPoints.getWaypointInWorldFrameReadOnly(j));
+            copCornerPoints.setBall(copPoints.getWaypointInWorld(j));
          }
       }
    }
 
    @SuppressWarnings("unused")
-   private void simulate(boolean checkForDiscontinuities, boolean checkForPlanningConsistency, boolean checkIfDyanmicsAreSatisfied)
+   private void simulateAndAssertSamePlan(SmoothCMPBasedICPPlanner planner1, SmoothCMPBasedICPPlanner planner2)
+   {
+      planFootsteps();
+
+      inDoubleSupport = new YoBoolean("inDoubleSupport", registry);
+      inDoubleSupport.set(true);
+
+      for (RobotSide side : RobotSide.values)
+         contactStates.get(side).setFullyConstrained();
+      bipedSupportPolygons.updateUsingContactStates(contactStates);
+
+      for (int currentStepCount = 0; currentStepCount < numberOfFootstepsForTest; )
+      {
+         addFootsteps(currentStepCount, footstepList, timingList, planner1);
+         addFootsteps(currentStepCount, footstepList, timingList, planner2);
+
+         updateContactState(currentStepCount, 0.0);
+         for (RobotSide robotSide : RobotSide.values)
+         {
+            bipedSupportPolygons.getSoleZUpFrames().get(robotSide).update();
+         }
+
+         if (inDoubleSupport.getBooleanValue())
+         {
+            planner1.setTransferToSide(footstepList.get(currentStepCount).getRobotSide().getOppositeSide());
+            planner1.initializeForTransfer(yoTime.getDoubleValue());
+
+            planner2.setTransferToSide(footstepList.get(currentStepCount).getRobotSide().getOppositeSide());
+            planner2.initializeForTransfer(yoTime.getDoubleValue());
+         }
+         else
+         {
+            planner1.setSupportLeg(footstepList.get(currentStepCount).getRobotSide().getOppositeSide());
+            planner1.initializeForSingleSupport(yoTime.getDoubleValue());
+
+            planner2.setSupportLeg(footstepList.get(currentStepCount).getRobotSide().getOppositeSide());
+            planner2.initializeForSingleSupport(yoTime.getDoubleValue());
+         }
+
+         simulateTicksAndAssertSamePlan(
+               (inDoubleSupport.getBooleanValue() ? timingList.get(currentStepCount).getTransferTime() : timingList.get(currentStepCount).getSwingTime()),
+               currentStepCount, planner1, planner2);
+         currentStepCount = updateStateMachine(currentStepCount);
+      }
+
+      addFootsteps(numberOfFootstepsForTest, footstepList, timingList, planner1);
+      addFootsteps(numberOfFootstepsForTest, footstepList, timingList, planner2);
+
+      updateContactState(-1, 0.0);
+
+      planner1.setTransferToSide(footstepList.get(numberOfFootstepsForTest - 1).getRobotSide());
+      planner1.initializeForStanding(yoTime.getDoubleValue());
+      planner2.setTransferToSide(footstepList.get(numberOfFootstepsForTest - 1).getRobotSide());
+      planner2.initializeForStanding(yoTime.getDoubleValue());
+      simulateTicksAndAssertSamePlan(defaultFinalTransferTime, -1, planner1, planner2);
+   }
+
+   @SuppressWarnings("unused")
+   private void simulate(boolean checkForDiscontinuities, boolean checkForPlanningConsistency, boolean checkIfDynamicsAreSatisfied)
    {
       if (visualize)
          startSCS();
@@ -794,10 +899,17 @@ public class SmoothCMPBasedICPPlannerTest
          contactStates.get(side).setFullyConstrained();
       bipedSupportPolygons.updateUsingContactStates(contactStates);
 
-      for (int currentStepCount = 0; currentStepCount < numberOfFootstepsForTest;)
+      // setting the initial conditions
+      planner.setFinalTransferDuration(defaultFinalTransferTime);
+      planner.setDefaultPhaseTimes(defaultSwingTime, defaultTransferTime);
+      planner.holdCurrentICP(new FramePoint3D(bipedSupportPolygons.getSupportPolygonInWorld().getCentroid()));
+      planner.initializeForStanding(yoTime.getDoubleValue());
+      simulateTicks(checkForDiscontinuities, checkIfDynamicsAreSatisfied, defaultStandingTime, -1);
+
+      for (int currentStepCount = 0; currentStepCount < numberOfFootstepsForTest; )
       {
-         addFootsteps(currentStepCount, footstepList, timingList);
-         updateContactState(currentStepCount);
+         addFootsteps(currentStepCount, footstepList, timingList, planner);
+         updateContactState(currentStepCount, 0.0);
          if (inDoubleSupport.getBooleanValue())
          {
             planner.setTransferToSide(footstepList.get(currentStepCount).getRobotSide().getOppositeSide());
@@ -813,21 +925,22 @@ public class SmoothCMPBasedICPPlannerTest
             updateVisualization(currentStepCount);
          if (checkForPlanningConsistency)
             testForPlanningConsistency(inDoubleSupport.getBooleanValue(), currentStepCount);
-         simulateTicks(checkForDiscontinuities, checkIfDyanmicsAreSatisfied, (inDoubleSupport.getBooleanValue()
-               ? timingList.get(currentStepCount).getTransferTime() : timingList.get(currentStepCount).getSwingTime()));
+         simulateTicks(checkForDiscontinuities, checkIfDynamicsAreSatisfied, (inDoubleSupport.getBooleanValue() ?
+               timingList.get(currentStepCount).getTransferTime() :
+               timingList.get(currentStepCount).getSwingTime()), currentStepCount);
          currentStepCount = updateStateMachine(currentStepCount);
       }
 
-      addFootsteps(numberOfFootstepsForTest, footstepList, timingList);
-      updateContactState(-1);
+      addFootsteps(numberOfFootstepsForTest, footstepList, timingList, planner);
+      updateContactState(-1, 0.0);
       planner.setTransferToSide(footstepList.get(numberOfFootstepsForTest - 1).getRobotSide());
-      planner.initializeForStanding(yoTime.getDoubleValue());
+      planner.initializeForTransfer(yoTime.getDoubleValue());
 
       if (visualize)
          updateVisualization(numberOfFootstepsForTest);
       if (checkForPlanningConsistency)
          testForPlanningConsistency(true, numberOfFootstepsForTest);
-      simulateTicks(checkForDiscontinuities, checkIfDyanmicsAreSatisfied, defaultFinalTransferTime);
+      simulateTicks(checkForDiscontinuities, checkIfDynamicsAreSatisfied, defaultFinalTransferTime, -1);
 
       if (visualize && keepSCSUp)
          ThreadTools.sleepForever();
@@ -847,15 +960,30 @@ public class SmoothCMPBasedICPPlannerTest
       return currentStepCount;
    }
 
-   private void simulateTicks(boolean checkForDiscontinuities, boolean checkIfDyanmicsAreSatisfied, double totalTime)
+   private void simulateTicksAndAssertSamePlan(double totalTime, int currentStepCount, SmoothCMPBasedICPPlanner planner1, SmoothCMPBasedICPPlanner planner2)
    {
       for (double timeInState = 0.0; timeInState < totalTime; timeInState += dt)
       {
+         updateContactState(currentStepCount, timeInState / totalTime);
+         for (RobotSide robotSide : RobotSide.values)
+         {
+            bipedSupportPolygons.getSoleZUpFrames().get(robotSide).update();
+         }
+
+         simulateOneTickAndAssertSamePlan(planner1, planner2);
+      }
+   }
+
+   private void simulateTicks(boolean checkForDiscontinuities, boolean checkIfDyanmicsAreSatisfied, double totalTime, int currentStepCount)
+   {
+      for (double timeInState = 0.0; timeInState < totalTime; timeInState += dt)
+      {
+         updateContactState(currentStepCount, timeInState / totalTime);
          simulateOneTick(checkForDiscontinuities, checkIfDyanmicsAreSatisfied);
       }
    }
 
-   private void updateContactState(int currentStepCount)
+   private void updateContactState(int currentStepCount, double percentageOfPhase)
    {
       if (inDoubleSupport.getBooleanValue())
       {
@@ -867,41 +995,186 @@ public class SmoothCMPBasedICPPlannerTest
          RobotSide swingSide = footstepList.get(currentStepCount).getRobotSide();
          contactStates.get(swingSide).clear();
          contactStates.get(swingSide.getOppositeSide()).setFullyConstrained();
+
+         if (currentStepCount > 0)
+         {
+            swingFootPose.set(footstepList.get(currentStepCount - 1).getFootstepPose());
+         }
+         else
+         {
+            swingFootPose.set(initialPose);
+            swingFootPose.appendTranslation(0.0, swingSide.negateIfRightSide(stepWidth / 2.0), 0.0);
+         }
+
+         FramePose3D endOfSwing = footstepList.get(currentStepCount).getFootstepPose();
+         swingFootPose.interpolate(endOfSwing, percentageOfPhase);
+
          FootSpoof foot = feet.get(swingSide);
-         foot.setSoleFrame(footstepList.get(currentStepCount).getFootstepPose());
+         foot.setSoleFrame(swingFootPose);
       }
+
       bipedSupportPolygons.updateUsingContactStates(contactStates);
+   }
+
+   private void simulateOneTickAndAssertSamePlan(SmoothCMPBasedICPPlanner planner1, SmoothCMPBasedICPPlanner planner2)
+   {
+      yoTime.add(dt);
+      getAllVariablesFromPlanner(planner1, icpPlannerData1);
+      getAllVariablesFromPlanner(planner2, icpPlannerData2);
+
+      assertCoPWaypointsAreEqual(planner1, planner2, 1e-10);
+      assertCMPWaypointsAreEqual(planner1, planner2, 1e-10);
+      assertICPWaypointsAreEqual(planner1, planner2, 1e-10);
+      assertCoMPlansAreEqual(planner1, planner2, 1e-10);
+      assertPlansAreEqual(icpPlannerData1, icpPlannerData2, 1e-10);
+   }
+
+   private static void assertCoPWaypointsAreEqual(SmoothCMPBasedICPPlanner planner1, SmoothCMPBasedICPPlanner planner2, double epsilon)
+   {
+      List<CoPPointsInFoot> waypoints1 = planner1.getReferenceCoPGenerator().getWaypoints();
+      List<CoPPointsInFoot> waypoints2 = planner2.getReferenceCoPGenerator().getWaypoints();
+
+      for (int i = 0; i < waypoints1.size(); i++)
+      {
+         CoPPointsInFoot pointsInFoot1 = waypoints1.get(i);
+         CoPPointsInFoot pointsInFoot2 = waypoints2.get(i);
+
+         for (int j = 0; j < pointsInFoot1.getNumberOfCoPPoints(); j++)
+         {
+            CoPTrajectoryPoint coPTrajectoryPoint1 = pointsInFoot1.get(j);
+            CoPTrajectoryPoint coPTrajectoryPoint2 = pointsInFoot2.get(j);
+            Assert.assertTrue(coPTrajectoryPoint1.epsilonEquals(coPTrajectoryPoint2, epsilon));
+         }
+      }
+   }
+
+   private static void assertCMPWaypointsAreEqual(SmoothCMPBasedICPPlanner planner1, SmoothCMPBasedICPPlanner planner2, double epsilon)
+   {
+      List<CMPTrajectory> swingCMPTrajectories1 = planner1.getReferenceCMPGenerator().getSwingCMPTrajectories();
+      List<CMPTrajectory> swingCMPTrajectories2 = planner2.getReferenceCMPGenerator().getSwingCMPTrajectories();
+      assertCMPTrajectoryListsAreEqual(epsilon, swingCMPTrajectories1, swingCMPTrajectories2);
+
+      List<CMPTrajectory> transferCMPTrajectories1 = planner1.getReferenceCMPGenerator().getTransferCMPTrajectories();
+      List<CMPTrajectory> transferCMPTrajectories2 = planner2.getReferenceCMPGenerator().getTransferCMPTrajectories();
+      assertCMPTrajectoryListsAreEqual(epsilon, transferCMPTrajectories1, transferCMPTrajectories2);
+   }
+
+   private static void assertCMPTrajectoryListsAreEqual(double epsilon, List<CMPTrajectory> cmpTrajectories1, List<CMPTrajectory> cmpTrajectories2)
+   {
+      for (int i = 0; i < cmpTrajectories1.size(); i++)
+      {
+         CMPTrajectory cmpTrajectory1 = cmpTrajectories1.get(i);
+         CMPTrajectory cmpTrajectory2 = cmpTrajectories2.get(i);
+
+         for (int j = 0; j < cmpTrajectory1.getNumberOfSegments(); j++)
+         {
+            Trajectory3D segment1 = cmpTrajectory1.getSegment(j);
+            Trajectory3D segment2 = cmpTrajectory2.getSegment(j);
+            Assert.assertEquals(segment1.getInitialTime(), segment2.getInitialTime(), epsilon);
+            Assert.assertEquals(segment1.getFinalTime(), segment2.getFinalTime(), epsilon);
+
+            for (int k = 0; k < 3; k++)
+            {
+               Trajectory trajectory1 = segment1.getTrajectory(k);
+               Trajectory trajectory2 = segment2.getTrajectory(k);
+
+               for (int l = 0; l < trajectory1.getNumberOfCoefficients(); l++)
+               {
+                  Assert.assertEquals(trajectory1.getCoefficient(l), trajectory2.getCoefficient(l), epsilon);
+               }
+            }
+         }
+      }
+   }
+
+   private static void assertICPWaypointsAreEqual(SmoothCMPBasedICPPlanner planner1, SmoothCMPBasedICPPlanner planner2, double epsilon)
+   {
+      List<? extends FramePoint3DReadOnly> icpPositionDesiredInitialList1 = planner1.getReferenceICPGenerator().getICPPositionDesiredInitialList();
+      List<? extends FramePoint3DReadOnly> icpPositionDesiredInitialList2 = planner2.getReferenceICPGenerator().getICPPositionDesiredInitialList();
+      assertFramePointListsAreEqual(icpPositionDesiredInitialList1, icpPositionDesiredInitialList2, epsilon);
+
+      List<? extends FramePoint3DReadOnly> icpPositionDesiredFinalList1 = planner1.getReferenceICPGenerator().getICPPositionDesiredFinalList();
+      List<? extends FramePoint3DReadOnly> icpPositionDesiredFinalList2 = planner2.getReferenceICPGenerator().getICPPositionDesiredFinalList();
+      assertFramePointListsAreEqual(icpPositionDesiredFinalList1, icpPositionDesiredFinalList2, epsilon);
+   }
+
+   private static void assertCoMPlansAreEqual(SmoothCMPBasedICPPlanner planner1, SmoothCMPBasedICPPlanner planner2, double epsilon)
+   {
+      List<? extends FramePoint3DReadOnly> coMPositionDesiredInitialList1 = planner1.getReferenceCoMGenerator().getCoMPositionDesiredInitialList();
+      List<? extends FramePoint3DReadOnly> coMPositionDesiredInitialList2 = planner2.getReferenceCoMGenerator().getCoMPositionDesiredInitialList();
+      assertFramePointListsAreEqual(coMPositionDesiredInitialList1, coMPositionDesiredInitialList2, epsilon);
+
+      List<? extends FramePoint3DReadOnly> coMPositionDesiredFinalList1 = planner1.getReferenceCoMGenerator().getCoMPositionDesiredFinalList();
+      List<? extends FramePoint3DReadOnly> coMPositionDesiredFinalList2 = planner2.getReferenceCoMGenerator().getCoMPositionDesiredFinalList();
+      assertFramePointListsAreEqual(coMPositionDesiredFinalList1, coMPositionDesiredFinalList2, epsilon);
+   }
+
+   private static void assertFramePointListsAreEqual(List<? extends FramePoint3DReadOnly> waypointList1, List<? extends FramePoint3DReadOnly> waypointList2,
+                                                     double epsilon)
+   {
+      for (int i = 0; i < waypointList1.size(); i++)
+      {
+         FramePoint3DReadOnly icpWaypoint1 = waypointList1.get(i);
+         FramePoint3DReadOnly icpWaypoint2 = waypointList2.get(i);
+         EuclidFrameTestTools.assertFrameTuple3DEquals(icpWaypoint1, icpWaypoint2, epsilon);
+      }
+   }
+
+   private static void assertPlansAreEqual(ICPPlannerData planData1, ICPPlannerData planData2, double epsilon)
+   {
+      // cop data
+      EuclidCoreTestTools.assertTuple3DEquals(planData1.copPosition, planData2.copPosition, epsilon);
+      EuclidCoreTestTools.assertTuple3DEquals(planData1.copVelocity, planData2.copVelocity, epsilon);
+      EuclidCoreTestTools.assertTuple3DEquals(planData1.copAcceleration, planData2.copAcceleration, epsilon);
+
+      // angular momentum data
+      EuclidCoreTestTools.assertTuple3DEquals(planData1.centroidalAngularMomentum, planData2.centroidalAngularMomentum, epsilon);
+      EuclidCoreTestTools.assertTuple3DEquals(planData1.centroidalTorque, planData2.centroidalTorque, epsilon);
+
+      // cmp data
+      EuclidCoreTestTools.assertTuple3DEquals(planData1.cmpPosition, planData2.cmpPosition, epsilon);
+      EuclidCoreTestTools.assertTuple3DEquals(planData1.cmpVelocity, planData2.cmpVelocity, epsilon);
+
+      // icp data
+      EuclidCoreTestTools.assertTuple3DEquals(planData1.icpPosition, planData2.icpPosition, epsilon);
+      EuclidCoreTestTools.assertTuple3DEquals(planData1.icpVelocity, planData2.icpVelocity, epsilon);
+      EuclidCoreTestTools.assertTuple3DEquals(planData1.icpAcceleration, planData2.icpAcceleration, epsilon);
+
+      // com data
+      EuclidCoreTestTools.assertTuple3DEquals(planData1.comPosition, planData2.comPosition, epsilon);
+      EuclidCoreTestTools.assertTuple3DEquals(planData1.comVelocity, planData2.comVelocity, epsilon);
+      EuclidCoreTestTools.assertTuple3DEquals(planData1.comAcceleration, planData2.comAcceleration, epsilon);
    }
 
    private void simulateOneTick(boolean checkForDiscontinuities, boolean checkIfDyanmicsAreSatisfied)
    {
-      getAllVariablesFromPlanner();
+      yoTime.add(dt);
+      getAllVariablesFromPlanner(planner, icpPlannerData1);
       updateUpdatables(yoTime.getDoubleValue());
       if (checkForDiscontinuities)
-         testForDiscontinuities();
+         testForDiscontinuities(icpPlannerData1);
       if (checkIfDyanmicsAreSatisfied)
-         testIfDynamicsAreSatisified();
+         testIfDynamicsAreSatisfied();
       if (visualize)
          updateVisualizePerTick();
    }
 
-   private void getAllVariablesFromPlanner()
+   private void getAllVariablesFromPlanner(SmoothCMPBasedICPPlanner planner, ICPPlannerData plannerData)
    {
-      yoTime.add(dt);
       planner.compute(yoTime.getDoubleValue());
-      planner.getDesiredCenterOfPressurePosition(copPosition);
-      planner.getDesiredCenterOfPressureVelocity(copVelocity);
-      planner.getDesiredCenterOfPressureVelocity(copAcceleration);
-      planner.getDesiredCentroidalAngularMomentum(centroidalAngularMomentum);
-      planner.getDesiredCentroidalTorque(centroidalTorque);
-      planner.getDesiredCentroidalMomentumPivotPosition(cmpPosition);
-      planner.getDesiredCentroidalMomentumPivotVelocity(cmpVelocity);
-      planner.getDesiredCapturePointPosition(icpPosition);
-      planner.getDesiredCapturePointVelocity(icpVelocity);
-      planner.getDesiredCapturePointAcceleration(icpAcceleration);
-      planner.getDesiredCenterOfMassPosition(comPosition);
-      planner.getDesiredCenterOfMassVelocity(comVelocity);
-      planner.getDesiredCenterOfMassAcceleration(comAcceleration);
+      planner.getDesiredCenterOfPressurePosition(plannerData.copPosition);
+      planner.getDesiredCenterOfPressureVelocity(plannerData.copVelocity);
+      planner.getDesiredCenterOfPressureVelocity(plannerData.copAcceleration);
+      plannerData.centroidalAngularMomentum.setIncludingFrame(planner.desiredCentroidalAngularMomentum);
+      plannerData.centroidalTorque.setIncludingFrame(planner.desiredCentroidalTorque);
+      planner.getDesiredCentroidalMomentumPivotPosition(plannerData.cmpPosition);
+      planner.getDesiredCentroidalMomentumPivotVelocity(plannerData.cmpVelocity);
+      planner.getDesiredCapturePointPosition(plannerData.icpPosition);
+      planner.getDesiredCapturePointVelocity(plannerData.icpVelocity);
+      planner.getDesiredCapturePointAcceleration(plannerData.icpAcceleration);
+      planner.getDesiredCenterOfMassPosition(plannerData.comPosition);
+      plannerData.comVelocity.setIncludingFrame(planner.desiredCoMVelocity);
+      plannerData.comAcceleration.setIncludingFrame(planner.desiredCoMAcceleration);
    }
 
    private void planFootsteps()
@@ -914,7 +1187,7 @@ public class SmoothCMPBasedICPPlannerTest
          timingList.add(new FootstepTiming(defaultSwingTime, defaultTransferTime));
    }
 
-   private void addFootsteps(int currentFootstepIndex, List<Footstep> footstepList, List<FootstepTiming> timingList)
+   private void addFootsteps(int currentFootstepIndex, List<Footstep> footstepList, List<FootstepTiming> timingList, SmoothCMPBasedICPPlanner planner)
    {
       planner.clearPlan();
       for (int i = currentFootstepIndex; i < Math.min(footstepList.size(), currentFootstepIndex + numberOfFootstepsToConsider); i++)
@@ -923,42 +1196,39 @@ public class SmoothCMPBasedICPPlannerTest
       }
    }
 
-   private void testIfDynamicsAreSatisified()
+   private void testIfDynamicsAreSatisfied()
    {
-      assertTrueLocal("CoM dynamics not satisfied, t: " + yoTime.getDoubleValue() + " COM Position: " + comPosition.toString() + " ICP Velocity: "
-            + comVelocity.toString() + " ICP Position: " + icpPosition.toString(), checkCoMDynamics(comPosition, comVelocity, icpPosition));
-      assertTrueLocal("ICP dynamics not satisfied, t: " + yoTime.getDoubleValue() + " ICP Position: " + icpPosition.toString() + " ICP Velocity: "
-            + icpVelocity.toString() + " CMP Position: " + cmpPosition.toString(), checkICPDynamics(icpPosition, icpVelocity, cmpPosition));
+      assertTrue("CoM dynamics not satisfied, t: " + yoTime.getDoubleValue() + " COM Position: " + icpPlannerData1.comPosition.toString() + " ICP Velocity: "
+                       + icpPlannerData1.comVelocity.toString() + " ICP Position: " + icpPlannerData1.icpPosition.toString(),
+                 checkCoMDynamics(icpPlannerData1.comPosition, icpPlannerData1.comVelocity, icpPlannerData1.icpPosition));
+      assertTrue("ICP dynamics not satisfied, t: " + yoTime.getDoubleValue() + " ICP Position: " + icpPlannerData1.icpPosition.toString() + " ICP Velocity: "
+                       + icpPlannerData1.icpVelocity.toString() + " CMP Position: " + icpPlannerData1.cmpPosition.toString(),
+                 checkICPDynamics(icpPlannerData1.icpPosition, icpPlannerData1.icpVelocity, icpPlannerData1.cmpPosition));
    }
-
-   FrameVector3D icpVelocityFromDynamics = new FrameVector3D();
 
    private boolean checkICPDynamics(FramePoint3D icpPosition, FrameVector3D icpVelocity, FramePoint3D cmpPosition)
    {
+      FrameVector3D icpVelocityFromDynamics = new FrameVector3D();
+
       icpVelocityFromDynamics.sub(icpPosition, cmpPosition);
       icpVelocityFromDynamics.scale(omega);
       return icpVelocity.epsilonEquals(icpVelocityFromDynamics, epsilon);
    }
 
-   FrameVector3D comVelocityFromDynamics = new FrameVector3D();
-
    private boolean checkCoMDynamics(FramePoint3D comPosition, FrameVector3D comVelocity, FramePoint3D icpPosition)
    {
+      FrameVector3D comVelocityFromDynamics = new FrameVector3D();
+
       comVelocityFromDynamics.sub(icpPosition, comPosition);
       comVelocityFromDynamics.scale(omega);
+
       return comVelocity.epsilonEquals(comVelocityFromDynamics, epsilon);
    }
 
-   private void assertTrueLocal(boolean assertion)
+   private static void assertTrajectoryPointEquals(String prefix, CoPTrajectoryPoint expected, CoPTrajectoryPoint actual, double epsilon)
    {
-      assertTrueLocal(null, assertion);
-   }
-
-   private void assertTrueLocal(String statement, boolean assertion)
-   {
-      if (testAssertions)
-         assertTrue(statement, assertion);
-      else if (!assertion)
-         PrintTools.error(statement);
+      Assert.assertEquals(prefix, expected.getTime(), actual.getTime(), epsilon);
+      EuclidCoreTestTools.assertPoint3DGeometricallyEquals(prefix, expected.getPosition(), actual.getPosition(), epsilon);
+      EuclidCoreTestTools.assertVector3DGeometricallyEquals(prefix, expected.getLinearVelocity(), actual.getLinearVelocity(), epsilon);
    }
 }

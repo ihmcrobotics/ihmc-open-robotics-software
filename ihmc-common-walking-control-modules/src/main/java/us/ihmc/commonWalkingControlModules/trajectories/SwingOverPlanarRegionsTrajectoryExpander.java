@@ -22,7 +22,7 @@ import us.ihmc.robotics.geometry.PlanarRegion;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.geometry.algorithms.SphereWithConvexPolygonIntersector;
 import us.ihmc.robotics.geometry.shapes.FrameSphere3d;
-import us.ihmc.robotics.lists.RecyclingArrayList;
+import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.robotics.math.YoCounter;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 import us.ihmc.robotics.referenceFrames.TransformReferenceFrame;
@@ -121,7 +121,11 @@ public class SwingOverPlanarRegionsTrajectoryExpander
       trajectoryPosition = new YoFramePoint3D(namePrefix + "TrajectoryPosition", WORLD, parentRegistry);
       solePoseReferenceFrame = new PoseReferenceFrame(namePrefix + "SolePoseReferenceFrame", WORLD);
       originalWaypoints = new RecyclingArrayList<>(2, FramePoint3D.class);
+      originalWaypoints.add();
+      originalWaypoints.add();
       adjustedWaypoints = new RecyclingArrayList<>(2, FramePoint3D.class);
+      adjustedWaypoints.add();
+      adjustedWaypoints.add();
 
       sphereWithConvexPolygonIntersector = new SphereWithConvexPolygonIntersector();
       closestPolygonPointMap = new HashMap<SwingOverPlanarRegionsTrajectoryCollisionType, FramePoint3D>();

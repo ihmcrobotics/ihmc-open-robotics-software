@@ -1,8 +1,8 @@
 package us.ihmc.valkyrieRosControl.sliderBoardControl;
 
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.robotics.screwTheory.OneDoFJoint;
+import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.rosControl.EffortJointHandle;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
 
 /**
  * @author Doug Stephen <a href="mailto:dstephen@ihmc.us">(dstephen@ihmc.us)</a>
@@ -11,7 +11,7 @@ class EffortJointHolder extends ValkyrieSliderBoardJointHolder
 {
    private final EffortJointHandle handle;
 
-   public EffortJointHolder(ValkyrieRosControlSliderBoard valkyrieRosControlSliderBoard, OneDoFJoint joint, EffortJointHandle handle,
+   public EffortJointHolder(ValkyrieRosControlSliderBoard valkyrieRosControlSliderBoard, OneDoFJointBasics joint, EffortJointHandle handle,
          YoVariableRegistry parentRegistry, double dt)
    {
       super(valkyrieRosControlSliderBoard, joint, parentRegistry, dt);
@@ -26,11 +26,11 @@ class EffortJointHolder extends ValkyrieSliderBoardJointHolder
       joint.setQ(handle.getPosition());
       joint.setQd(handle.getVelocity());
       bl_qd.update();
-      joint.setTauMeasured(handle.getEffort());
+      joint.setTau(handle.getEffort());
 
       q.set(joint.getQ());
       qd.set(joint.getQd());
-      tau.set(joint.getTauMeasured());
+      tau.set(joint.getTau());
 
       double pdOutput = pdController.compute(q.getDoubleValue(), q_d.getDoubleValue(), qd.getDoubleValue(), qd_d.getDoubleValue());
       jointCommand_pd.set(pdOutput);

@@ -16,17 +16,17 @@ import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.humanoidBehaviors.behaviors.AbstractBehavior;
 import us.ihmc.humanoidBehaviors.coactiveDesignFramework.CoactiveElement;
-import us.ihmc.humanoidBehaviors.communication.CommunicationBridgeInterface;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.humanoidRobotics.footstep.footstepGenerator.SimplePathParameters;
 import us.ihmc.humanoidRobotics.footstep.footstepGenerator.TurnStraightTurnFootstepGenerator;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
+import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotModels.FullRobotModel;
 import us.ihmc.robotics.referenceFrames.Pose2dReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
-import us.ihmc.robotics.screwTheory.RigidBody;
+import us.ihmc.ros2.Ros2Node;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoFramePoint3D;
@@ -69,15 +69,15 @@ public class WalkToLocationBehavior extends AbstractBehavior
    private ArrayList<Footstep> footsteps = new ArrayList<Footstep>();
    private FootstepListBehavior footstepListBehavior;
 
-   private final SideDependentList<RigidBody> feet = new SideDependentList<RigidBody>();
+   private final SideDependentList<RigidBodyBasics> feet = new SideDependentList<RigidBodyBasics>();
    private final SideDependentList<ReferenceFrame> soleFrames = new SideDependentList<ReferenceFrame>();
 
    private double minDistanceThresholdForWalking, minYawThresholdForWalking;
 
-   public WalkToLocationBehavior(CommunicationBridgeInterface outgoingCommunicationBridge, FullHumanoidRobotModel fullRobotModel,
-         HumanoidReferenceFrames referenceFrames, WalkingControllerParameters walkingControllerParameters)
+   public WalkToLocationBehavior(String robotName, Ros2Node ros2Node, FullHumanoidRobotModel fullRobotModel,
+                                 HumanoidReferenceFrames referenceFrames, WalkingControllerParameters walkingControllerParameters)
    {
-      super(outgoingCommunicationBridge);
+      super(robotName, ros2Node);
 
       this.fullRobotModel = fullRobotModel;
       this.referenceFrames = referenceFrames;
@@ -88,7 +88,7 @@ public class WalkToLocationBehavior extends AbstractBehavior
       this.pathType = new SimplePathParameters(walkingControllerParameters.getSteppingParameters().getMaxStepLength() / 2,
                                                walkingControllerParameters.getSteppingParameters().getInPlaceWidth(), 0.0, Math.toRadians(20.0),
                                                Math.toRadians(10.0), 0.4); // 10 5 0.4
-      footstepListBehavior = new FootstepListBehavior(outgoingCommunicationBridge, walkingControllerParameters);
+      footstepListBehavior = new FootstepListBehavior(robotName, ros2Node, walkingControllerParameters);
 
       for (RobotSide robotSide : RobotSide.values)
       {
@@ -239,7 +239,7 @@ public class WalkToLocationBehavior extends AbstractBehavior
          {
             pathType.setAngle(-pathType.getAngle());
             TurnStraightTurnFootstepGenerator footstepGeneratorFlippedInitialTurnDirection = new TurnStraightTurnFootstepGenerator(feet, soleFrames, endPose,
-                  pathType); //FIXME: should be able to re-use other footStepGenerator, but doesn't work so far..
+                                                                                                                                   pathType); //FIXME: should be able to re-use other footStepGenerator, but doesn't work so far..
             footstepGeneratorFlippedInitialTurnDirection.initialize();
             List<Footstep> footstepsFlippedOrientation = footstepGeneratorFlippedInitialTurnDirection.generateDesiredFootstepList();
             pathType.setAngle(-pathType.getAngle());

@@ -6,12 +6,12 @@ import us.ihmc.quadrupedRobotics.controlModules.QuadrupedBodyOrientationManager;
 import us.ihmc.quadrupedRobotics.controlModules.QuadrupedControlManagerFactory;
 import us.ihmc.quadrupedRobotics.controlModules.foot.QuadrupedFeetManager;
 import us.ihmc.quadrupedRobotics.controller.ControllerEvent;
-import us.ihmc.quadrupedRobotics.controller.QuadrupedController;
 import us.ihmc.quadrupedRobotics.controller.QuadrupedControllerToolbox;
 import us.ihmc.quadrupedRobotics.estimator.referenceFrames.QuadrupedReferenceFrames;
+import us.ihmc.robotics.stateMachine.extra.EventState;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 
-public class QuadrupedStandController implements QuadrupedController
+public class QuadrupedStandController implements EventState
 {
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
 
@@ -44,6 +44,14 @@ public class QuadrupedStandController implements QuadrupedController
    @Override
    public void doAction(double timeInState)
    {
+      // update desired horizontal com forces
+      balanceManager.compute();
+
+      // update desired body orientation, angular velocity, and torque
+      bodyOrientationManager.compute();
+
+      // update desired contact state and sole forces
+      feetManager.compute();
    }
 
    @Override
@@ -59,6 +67,7 @@ public class QuadrupedStandController implements QuadrupedController
 
       // initialize feedback controllers
       balanceManager.initializeForStanding();
+      balanceManager.enableBodyXYControl();
       bodyOrientationManager.initialize();
 
       feetManager.requestFullContact();
@@ -67,5 +76,6 @@ public class QuadrupedStandController implements QuadrupedController
    @Override
    public void onExit()
    {
+      balanceManager.disableBodyXYControl();
    }
 }

@@ -2,7 +2,7 @@ package us.ihmc.robotics.math.trajectories.waypoints;
 
 import java.util.Random;
 
-import us.ihmc.robotics.lists.RecyclingArrayList;
+import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.robotics.math.trajectories.waypoints.interfaces.OneDoFTrajectoryPointInterface;
 
 public class SimpleTrajectoryPoint1DList extends SimpleTrajectoryPointList<SimpleTrajectoryPoint1D>

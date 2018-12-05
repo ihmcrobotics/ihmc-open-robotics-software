@@ -6,10 +6,9 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import controller_msgs.msg.dds.HandJointAnglePacket;
-import us.ihmc.communication.packetCommunicator.PacketCommunicator;
+import us.ihmc.communication.IHMCRealtimeROS2Publisher;
 import us.ihmc.concurrent.Builder;
 import us.ihmc.concurrent.ConcurrentCopier;
-import us.ihmc.humanoidRobotics.communication.streamingData.HumanoidGlobalDataProducer;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.tools.thread.CloseableAndDisposable;
 import us.ihmc.tools.thread.CloseableAndDisposableRegistry;
@@ -18,9 +17,6 @@ public class HandJointAngleCommunicator implements CloseableAndDisposable
 {
    private final int WORKER_SLEEP_TIME_MILLIS = 500;
 
-   private final PacketCommunicator packetCommunicator;
-   private final HumanoidGlobalDataProducer dataProducer;
-
    private final ConcurrentCopier<HandJointAnglePacket> packetCopier;
    private double[] fingers;
    private final AtomicBoolean connected = new AtomicBoolean();
@@ -28,25 +24,17 @@ public class HandJointAngleCommunicator implements CloseableAndDisposable
    private final RobotSide side;
 
    private final ScheduledExecutorService executor;
-   
-   public HandJointAngleCommunicator(RobotSide side, PacketCommunicator packetCommunicator, CloseableAndDisposableRegistry closeableAndDisposableRegistry)
-   {
-      this(side, packetCommunicator, null, closeableAndDisposableRegistry);
-   }
 
-   public HandJointAngleCommunicator(RobotSide side, HumanoidGlobalDataProducer dataProducer, CloseableAndDisposableRegistry closeableAndDisposableRegistry)
-   {
-      this(side, null, dataProducer, closeableAndDisposableRegistry);
-   }
+   private final IHMCRealtimeROS2Publisher<HandJointAnglePacket> publisher;
 
-   private HandJointAngleCommunicator(RobotSide side, PacketCommunicator packetCommunicator, HumanoidGlobalDataProducer dataProducer, CloseableAndDisposableRegistry closeableAndDisposableRegistry)
+   public HandJointAngleCommunicator(RobotSide side, IHMCRealtimeROS2Publisher<HandJointAnglePacket> publisher,
+                                     CloseableAndDisposableRegistry closeableAndDisposableRegistry)
    {
       this.side = side;
-      this.packetCommunicator = packetCommunicator;
-      this.dataProducer = dataProducer;
+      this.publisher = publisher;
       packetCopier = new ConcurrentCopier<HandJointAnglePacket>(HandJointAngleCommunicator.builder);
       executor = startWriterThread();
-      
+
       closeableAndDisposableRegistry.registerCloseableAndDisposable(this);
    }
 
@@ -61,18 +49,14 @@ public class HandJointAngleCommunicator implements CloseableAndDisposable
             HandJointAnglePacket copyForReading = packetCopier.getCopyForReading();
             if (copyForReading != null)
             {
-               if (packetCommunicator != null)
+               if (publisher != null)
                {
-                  packetCommunicator.send(copyForReading);
-               }
-               else
-               {
-                  dataProducer.send(copyForReading);
+                  publisher.publish(copyForReading);
                }
             }
          }
       }, 0, WORKER_SLEEP_TIME_MILLIS, TimeUnit.MILLISECONDS);
-            
+
       return executor;
    }
 

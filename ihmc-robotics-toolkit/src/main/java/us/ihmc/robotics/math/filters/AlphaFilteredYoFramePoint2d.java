@@ -1,102 +1,156 @@
 package us.ihmc.robotics.math.filters;
 
-import us.ihmc.euclid.referenceFrame.FramePoint2D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.interfaces.FrameTuple2DReadOnly;
 import us.ihmc.euclid.tuple2D.Point2D;
-import us.ihmc.robotics.math.frames.YoFrameVariableNameTools;
+import us.ihmc.euclid.tuple2D.interfaces.Tuple2DReadOnly;
 import us.ihmc.yoVariables.providers.DoubleProvider;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoFramePoint2D;
 
 public class AlphaFilteredYoFramePoint2d extends YoFramePoint2D
 {
-   private final AlphaFilteredYoVariable x, y;
+   private final DoubleProvider alphaProvider;
 
-   private AlphaFilteredYoFramePoint2d(AlphaFilteredYoVariable x, AlphaFilteredYoVariable y, ReferenceFrame referenceFrame)
+   private final FrameTuple2DReadOnly position;
+   private final YoBoolean hasBeenCalled;
+
+   /**
+    * @deprecated Use
+    *             {@link #AlphaFilteredYoFramePoint2d(String, String, YoVariableRegistry, double, ReferenceFrame)}
+    *             instead.
+    */
+   @Deprecated
+   public static AlphaFilteredYoFramePoint2d createAlphaFilteredYoFramePoint2d(String namePrefix, String nameSuffix, YoVariableRegistry registry, double alpha,
+                                                                               ReferenceFrame referenceFrame)
    {
-      super(x, y, referenceFrame);
-
-      this.x = x;
-      this.y = y;
+      return new AlphaFilteredYoFramePoint2d(namePrefix, nameSuffix, registry, alpha, referenceFrame);
    }
 
-   public static AlphaFilteredYoFramePoint2d createAlphaFilteredYoFramePoint2d(String namePrefix, String nameSuffix, YoVariableRegistry registry, double alpha, ReferenceFrame referenceFrame)
-   {
-      // alpha is a double
-      AlphaFilteredYoVariable x = new AlphaFilteredYoVariable(YoFrameVariableNameTools.createXName(namePrefix, nameSuffix), registry, alpha);
-      AlphaFilteredYoVariable y = new AlphaFilteredYoVariable(YoFrameVariableNameTools.createYName(namePrefix, nameSuffix), registry, alpha);
-
-      AlphaFilteredYoFramePoint2d ret = new AlphaFilteredYoFramePoint2d(x, y, referenceFrame);
-
-      return ret;
-   }
-
-   public static AlphaFilteredYoFramePoint2d createAlphaFilteredYoFramePoint2d(String namePrefix, String nameSuffix, YoVariableRegistry registry, DoubleProvider alpha, ReferenceFrame referenceFrame)
+   /**
+    * @deprecated Use
+    *             {@link #AlphaFilteredYoFramePoint2d(String, String, YoVariableRegistry, DoubleProvider, ReferenceFrame)}
+    *             instead.
+    */
+   @Deprecated
+   public static AlphaFilteredYoFramePoint2d createAlphaFilteredYoFramePoint2d(String namePrefix, String nameSuffix, YoVariableRegistry registry,
+                                                                               DoubleProvider alpha, ReferenceFrame referenceFrame)
    {
       return createAlphaFilteredYoFramePoint2d(namePrefix, nameSuffix, "", registry, alpha, referenceFrame);
    }
 
-   public static AlphaFilteredYoFramePoint2d createAlphaFilteredYoFramePoint2d(String namePrefix, String nameSuffix, String description, YoVariableRegistry registry, DoubleProvider alpha, ReferenceFrame referenceFrame)
+   /**
+    * @deprecated Use
+    *             {@link #AlphaFilteredYoFramePoint2d(String, String, YoVariableRegistry, DoubleProvider, ReferenceFrame)}
+    *             instead.
+    */
+   @Deprecated
+   public static AlphaFilteredYoFramePoint2d createAlphaFilteredYoFramePoint2d(String namePrefix, String nameSuffix, String description,
+                                                                               YoVariableRegistry registry, DoubleProvider alpha, ReferenceFrame referenceFrame)
    {
-      // alpha is a double
-      AlphaFilteredYoVariable x = new AlphaFilteredYoVariable(YoFrameVariableNameTools.createXName(namePrefix, nameSuffix), description, registry, alpha);
-      AlphaFilteredYoVariable y = new AlphaFilteredYoVariable(YoFrameVariableNameTools.createYName(namePrefix, nameSuffix), description, registry, alpha);
-
-      AlphaFilteredYoFramePoint2d ret = new AlphaFilteredYoFramePoint2d(x, y, referenceFrame);
-
-      return ret;
+      return new AlphaFilteredYoFramePoint2d(namePrefix, nameSuffix, registry, alpha, referenceFrame);
    }
 
-   public static AlphaFilteredYoFramePoint2d createAlphaFilteredYoFramePoint2d(String namePrefix, String nameSuffix, YoVariableRegistry registry, double alpha, YoFramePoint2D unfilteredPoint)
+   /**
+    * @deprecated Use
+    *             {@link #AlphaFilteredYoFramePoint2d(String, String, YoVariableRegistry, double, FrameTuple2DReadOnly)}
+    *             instead.
+    */
+   @Deprecated
+   public static AlphaFilteredYoFramePoint2d createAlphaFilteredYoFramePoint2d(String namePrefix, String nameSuffix, YoVariableRegistry registry, double alpha,
+                                                                               FrameTuple2DReadOnly unfilteredFrameTuple2D)
    {
-      // alpha is a double
-      AlphaFilteredYoVariable x = new AlphaFilteredYoVariable(YoFrameVariableNameTools.createXName(namePrefix, nameSuffix), registry, alpha, unfilteredPoint.getYoX());
-      AlphaFilteredYoVariable y = new AlphaFilteredYoVariable(YoFrameVariableNameTools.createYName(namePrefix, nameSuffix), registry, alpha, unfilteredPoint.getYoY());
-
-      AlphaFilteredYoFramePoint2d ret = new AlphaFilteredYoFramePoint2d(x, y, unfilteredPoint.getReferenceFrame());
-
-      return ret;
+      return new AlphaFilteredYoFramePoint2d(namePrefix, nameSuffix, registry, alpha, unfilteredFrameTuple2D);
    }
 
-   public static AlphaFilteredYoFramePoint2d createAlphaFilteredYoFramePoint2d(String namePrefix, String nameSuffix, YoVariableRegistry registry, DoubleProvider alpha, YoFramePoint2D unfilteredPoint)
+   /**
+    * @deprecated Use
+    *             {@link #AlphaFilteredYoFramePoint2d(String, String, YoVariableRegistry, DoubleProvider, FrameTuple2DReadOnly)}
+    *             instead.
+    */
+   @Deprecated
+   public static AlphaFilteredYoFramePoint2d createAlphaFilteredYoFramePoint2d(String namePrefix, String nameSuffix, YoVariableRegistry registry,
+                                                                               DoubleProvider alpha, FrameTuple2DReadOnly unfilteredFrameTuple2D)
    {
-      // alpha is a YoVariable
-      AlphaFilteredYoVariable x = new AlphaFilteredYoVariable(YoFrameVariableNameTools.createXName(namePrefix, nameSuffix), registry, alpha, unfilteredPoint.getYoX());
-      AlphaFilteredYoVariable y = new AlphaFilteredYoVariable(YoFrameVariableNameTools.createYName(namePrefix, nameSuffix), registry, alpha, unfilteredPoint.getYoY());
-
-      AlphaFilteredYoFramePoint2d ret = new AlphaFilteredYoFramePoint2d(x, y, unfilteredPoint.getReferenceFrame());
-
-      return ret;
+      return new AlphaFilteredYoFramePoint2d(namePrefix, nameSuffix, registry, alpha, unfilteredFrameTuple2D);
    }
 
-   public void update()
+   public AlphaFilteredYoFramePoint2d(String namePrefix, String nameSuffix, YoVariableRegistry registry, double alpha, ReferenceFrame referenceFrame)
    {
-      x.update();
-      y.update();
+      this(namePrefix, nameSuffix, registry, AlphaFilteredYoVariable.createAlphaYoDouble(namePrefix + nameSuffix, alpha, registry), referenceFrame);
    }
 
-   public void update(double xUnfiltered, double yUnfiltered)
+   public AlphaFilteredYoFramePoint2d(String namePrefix, String nameSuffix, YoVariableRegistry registry, DoubleProvider alpha, ReferenceFrame referenceFrame)
    {
-      x.update(xUnfiltered);
-      y.update(yUnfiltered);
+      this(namePrefix, nameSuffix, registry, alpha, referenceFrame, null);
    }
 
-   public void update(Point2D point2dUnfiltered)
+   public AlphaFilteredYoFramePoint2d(String namePrefix, String nameSuffix, YoVariableRegistry registry, double alpha,
+                                      FrameTuple2DReadOnly unfilteredFrameTuple2D)
    {
-      x.update(point2dUnfiltered.getX());
-      y.update(point2dUnfiltered.getY());
+      this(namePrefix, nameSuffix, registry, AlphaFilteredYoVariable.createAlphaYoDouble(namePrefix + nameSuffix, alpha, registry),
+           unfilteredFrameTuple2D.getReferenceFrame(), unfilteredFrameTuple2D);
    }
 
-   public void update(FramePoint2D point2dUnfiltered)
+   public AlphaFilteredYoFramePoint2d(String namePrefix, String nameSuffix, YoVariableRegistry registry, DoubleProvider alpha,
+                                      FrameTuple2DReadOnly unfilteredFrameTuple2D)
    {
-      checkReferenceFrameMatch(point2dUnfiltered);
-      x.update(point2dUnfiltered.getX());
-      y.update(point2dUnfiltered.getY());
+      this(namePrefix, nameSuffix, registry, alpha, unfilteredFrameTuple2D.getReferenceFrame(), unfilteredFrameTuple2D);
+   }
+
+   private AlphaFilteredYoFramePoint2d(String namePrefix, String nameSuffix, YoVariableRegistry registry, DoubleProvider alpha, ReferenceFrame referenceFrame,
+                                       FrameTuple2DReadOnly unfilteredFrameTuple2D)
+   {
+      super(namePrefix, nameSuffix, referenceFrame, registry);
+
+      alphaProvider = alpha;
+
+      position = unfilteredFrameTuple2D;
+      hasBeenCalled = new YoBoolean(namePrefix + nameSuffix + "HasBeenCalled", registry);
+      reset();
    }
 
    public void reset()
    {
-      x.reset();
-      y.reset();
+      hasBeenCalled.set(false);
+   }
+
+   public void update()
+   {
+      if (position == null)
+      {
+         throw new NullPointerException(getClass().getSimpleName() + " must be constructed with a non null "
+               + "position variable to call update(), otherwise use update(double)");
+      }
+
+      update(position);
+   }
+
+   public void update(FrameTuple2DReadOnly unfilteredFrameTuple2D)
+   {
+      checkReferenceFrameMatch(unfilteredFrameTuple2D);
+      update((Tuple2DReadOnly) unfilteredFrameTuple2D);
+   }
+
+   public void update(Tuple2DReadOnly unfilteredTuple2D)
+   {
+      update(unfilteredTuple2D.getX(), unfilteredTuple2D.getY());
+   }
+
+   private final Point2D unfilteredPoint2D = new Point2D();
+
+   public void update(double xUnfiltered, double yUnfiltered)
+   {
+      if (!hasBeenCalled.getValue())
+      {
+         hasBeenCalled.set(true);
+         set(xUnfiltered, yUnfiltered);
+      }
+      else
+      {
+         unfilteredPoint2D.set(xUnfiltered, yUnfiltered);
+         interpolate(unfilteredPoint2D, this, alphaProvider.getValue());
+      }
    }
 }

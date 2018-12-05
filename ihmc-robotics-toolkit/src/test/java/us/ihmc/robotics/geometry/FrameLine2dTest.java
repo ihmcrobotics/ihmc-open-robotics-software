@@ -12,6 +12,7 @@ import us.ihmc.euclid.referenceFrame.FramePoint2D;
 import us.ihmc.euclid.referenceFrame.FrameVector2D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint2DBasics;
+import us.ihmc.euclid.referenceFrame.tools.ReferenceFrameTools;
 
 @ContinuousIntegrationPlan(categories = {IntegrationCategory.FAST})
 public class FrameLine2dTest
@@ -29,6 +30,7 @@ public class FrameLine2dTest
    @After
    public void tearDown() throws Exception
    {
+      ReferenceFrameTools.clearWorldFrameTree();
    }
 
 	@ContinuousIntegrationTest(estimatedDuration = 0.0)

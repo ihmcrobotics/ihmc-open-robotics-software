@@ -27,7 +27,7 @@ public class QuadrupedTimedStepListMessage extends Packet<QuadrupedTimedStepList
 
    public QuadrupedTimedStepListMessage()
    {
-      quadruped_step_list_ = new us.ihmc.idl.IDLSequence.Object<controller_msgs.msg.dds.QuadrupedTimedStepMessage> (100, controller_msgs.msg.dds.QuadrupedTimedStepMessage.class, new controller_msgs.msg.dds.QuadrupedTimedStepMessagePubSubType());
+      quadruped_step_list_ = new us.ihmc.idl.IDLSequence.Object<controller_msgs.msg.dds.QuadrupedTimedStepMessage> (100, new controller_msgs.msg.dds.QuadrupedTimedStepMessagePubSubType());
       queueing_properties_ = new controller_msgs.msg.dds.QueueableMessage();
 
    }

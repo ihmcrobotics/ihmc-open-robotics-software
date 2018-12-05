@@ -194,7 +194,7 @@ public class VelocityConstrainedPoseTrajectoryGenerator implements PoseTrajector
          protected void updateTransformToParent(RigidBodyTransform transformToParent)
          {
             localFrameOrientation.setIncludingFrame(initialOrientation);
-            localFrameOrientation.changeFrame(parentFrame);
+            localFrameOrientation.changeFrame(getParent());
             localRotation.set(localFrameOrientation);
             transformToParent.setRotationAndZeroTranslation(localRotation);
          }
@@ -209,7 +209,7 @@ public class VelocityConstrainedPoseTrajectoryGenerator implements PoseTrajector
          protected void updateTransformToParent(RigidBodyTransform transformToParent)
          {
             localFrameOrientation.setIncludingFrame(initialOrientation);
-            localFrameOrientation.changeFrame(parentFrame);
+            localFrameOrientation.changeFrame(getParent());
             localRotation.set(localFrameOrientation);
             transformToParent.setRotationAndZeroTranslation(localRotation);
          }
@@ -224,7 +224,7 @@ public class VelocityConstrainedPoseTrajectoryGenerator implements PoseTrajector
          protected void updateTransformToParent(RigidBodyTransform transformToParent)
          {
             localFrameOrientation.setIncludingFrame(currentOrientation);
-            localFrameOrientation.changeFrame(parentFrame);
+            localFrameOrientation.changeFrame(getParent());
             localRotation.set(localFrameOrientation);
             transformToParent.setRotationAndZeroTranslation(localRotation);
          }

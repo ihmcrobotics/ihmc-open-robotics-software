@@ -10,10 +10,12 @@ import org.junit.Before;
 
 import controller_msgs.msg.dds.FootstepDataListMessage;
 import controller_msgs.msg.dds.FootstepDataMessage;
+import org.junit.Test;
 import us.ihmc.avatar.MultiRobotTestInterface;
 import us.ihmc.avatar.testTools.DRCSimulationTestHelper;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commons.thread.ThreadTools;
+import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
@@ -60,6 +62,8 @@ public abstract class EndToEndCinderBlockFieldTest implements MultiRobotTestInte
       MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " after test.");
    }
 
+   @ContinuousIntegrationAnnotations.ContinuousIntegrationTest(estimatedDuration = 209.4)
+   @Test(timeout = 1000000)
    public void testWalkingOverCinderBlockField() throws Exception
    {
       BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
@@ -80,9 +84,9 @@ public abstract class EndToEndCinderBlockFieldTest implements MultiRobotTestInte
       pelvisPosition.changeFrame(ReferenceFrame.getWorldFrame());
       pelvisPosition.add(0.0, 0.0, getPelvisOffsetHeight());
       double desiredHeight = pelvisPosition.getZ();
-      simulationTestHelper.send(HumanoidMessageTools.createPelvisHeightTrajectoryMessage(0.5, desiredHeight));
+      simulationTestHelper.publishToController(HumanoidMessageTools.createPelvisHeightTrajectoryMessage(0.5, desiredHeight));
 
-      simulationTestHelper.send(footsteps);
+      simulationTestHelper.publishToController(footsteps);
 
       WalkingControllerParameters walkingControllerParameters = getRobotModel().getWalkingControllerParameters();
       double stepTime = walkingControllerParameters.getDefaultSwingTime() + walkingControllerParameters.getDefaultTransferTime();

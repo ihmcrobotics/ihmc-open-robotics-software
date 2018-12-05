@@ -1,6 +1,6 @@
 package us.ihmc.commonWalkingControlModules.trajectories;
 
-import static us.ihmc.communication.packets.Packet.INVALID_MESSAGE_ID;
+import static us.ihmc.communication.packets.Packet.*;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -8,6 +8,7 @@ import java.util.List;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.TransferToAndNextFootstepsData;
 import us.ihmc.commons.MathTools;
 import us.ihmc.commons.PrintTools;
+import us.ihmc.commons.lists.RecyclingArrayDeque;
 import us.ihmc.communication.packets.ExecutionMode;
 import us.ihmc.communication.packets.Packet;
 import us.ihmc.euclid.geometry.Line2D;
@@ -27,7 +28,6 @@ import us.ihmc.humanoidRobotics.communication.controllerAPI.command.PelvisTrajec
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.StopAllTrajectoryCommand;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.robotics.geometry.StringStretcher2d;
-import us.ihmc.robotics.lists.RecyclingArrayDeque;
 import us.ihmc.robotics.math.trajectories.providers.YoVariableDoubleProvider;
 import us.ihmc.robotics.math.trajectories.waypoints.FrameEuclideanTrajectoryPoint;
 import us.ihmc.robotics.math.trajectories.waypoints.MultipleWaypointsTrajectoryGenerator;
@@ -114,7 +114,7 @@ public class LookAheadCoMHeightTrajectoryGenerator
 
    private final YoBoolean isReadyToHandleQueuedCommands;
    private final YoLong numberOfQueuedCommands;
-   private final RecyclingArrayDeque<PelvisHeightTrajectoryCommand> commandQueue = new RecyclingArrayDeque<>(PelvisHeightTrajectoryCommand.class);
+   private final RecyclingArrayDeque<PelvisHeightTrajectoryCommand> commandQueue = new RecyclingArrayDeque<>(PelvisHeightTrajectoryCommand.class, PelvisHeightTrajectoryCommand::set);
 
    public LookAheadCoMHeightTrajectoryGenerator(double minimumHeightAboveGround, double nominalHeightAboveGround, double maximumHeightAboveGround,
          double defaultOffsetHeightAboveGround, double doubleSupportPercentageIn, ReferenceFrame centerOfMassFrame, ReferenceFrame pelvisFrame,
@@ -193,7 +193,7 @@ public class LookAheadCoMHeightTrajectoryGenerator
          pointDFMaxViz = new YoGraphicPosition("pointDFMax", "", registry, 0.9 * pointSize, YoAppearance.Azure());
          pointSNextMaxViz = new YoGraphicPosition("pointSNextMax", "", registry, 0.9 * pointSize, YoAppearance.Pink());
 
-         bagOfBalls = new BagOfBalls(registry, yoGraphicsListRegistry);
+         bagOfBalls = new BagOfBalls(15, registry, yoGraphicsListRegistry);
 
          YoGraphicPosition desiredCoMPositionViz = new YoGraphicPosition("desiredCoMPosition", desiredCoMPosition, 1.1 * pointSize, YoAppearance.Gold());
 
@@ -244,6 +244,15 @@ public class LookAheadCoMHeightTrajectoryGenerator
 
          bagOfBalls = null;
       }
+   }
+
+   public void reset()
+   {
+      hasBeenInitializedWithNextStep.set(false);
+      lastCommandId.set(Packet.INVALID_MESSAGE_ID);
+      isReadyToHandleQueuedCommands.set(false);
+      numberOfQueuedCommands.set(0);
+      offsetHeightAboveGround.set(0.0);
    }
 
    public void setMinimumHeightAboveGround(double minimumHeightAboveGround)
@@ -545,7 +554,7 @@ public class LookAheadCoMHeightTrajectoryGenerator
          }
 
          bagOfBalls.reset();
-         int numberOfPoints = 30;
+         int numberOfPoints = bagOfBalls.getNumberOfBalls();
 
          for (int i = 0; i < numberOfPoints; i++)
          {

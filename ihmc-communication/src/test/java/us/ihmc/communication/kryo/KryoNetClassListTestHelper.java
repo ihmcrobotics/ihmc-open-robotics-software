@@ -1,9 +1,6 @@
 package us.ihmc.communication.kryo;
 
-import us.ihmc.communication.net.NetClassList;
-import us.ihmc.communication.packets.Packet;
-import us.ihmc.idl.IDLSequence;
-import us.ihmc.pubsub.TopicDataType;
+import static org.junit.Assert.assertTrue;
 
 import java.lang.reflect.Array;
 import java.lang.reflect.Field;
@@ -11,8 +8,12 @@ import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Set;
+import java.util.function.Supplier;
 
-import static org.junit.Assert.assertTrue;
+import us.ihmc.communication.net.NetClassList;
+import us.ihmc.communication.packets.Packet;
+import us.ihmc.idl.IDLSequence;
+import us.ihmc.pubsub.TopicDataType;
 
 public class KryoNetClassListTestHelper
 {
@@ -81,9 +82,9 @@ public class KryoNetClassListTestHelper
          Class<? extends TopicDataType> topicDataType = ((IDLSequence.Object) fieldInstance).getTopicDataType().getClass();
          assertTrue("The class " + topicDataType.getSimpleName() + " is not registered.", setWithRegisteredFields.contains(topicDataType));
 
-         Field listClassField = typeToCheck.getSuperclass().getDeclaredField("clazz");
-         listClassField.setAccessible(true);
-         typeToCheck = (Class<?>) listClassField.get(fieldInstance);
+         Field listAllocatorField = typeToCheck.getSuperclass().getDeclaredField("allocator");
+         listAllocatorField.setAccessible(true);
+         typeToCheck = ((Supplier) listAllocatorField.get(fieldInstance)).get().getClass();
          fieldInstance = null;
 
          { // Also need to check the array version of the class

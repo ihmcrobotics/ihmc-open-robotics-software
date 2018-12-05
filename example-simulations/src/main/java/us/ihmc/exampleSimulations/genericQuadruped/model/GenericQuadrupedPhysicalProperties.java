@@ -11,7 +11,7 @@ import java.util.ArrayList;
 public class GenericQuadrupedPhysicalProperties implements QuadrupedPhysicalProperties
 {
    private static final double SHIN_LENGTH = 0.31;
-   private static final double NOMINAL_COM_HEIGHT = 0.55;
+   private static final double NOMINAL_COM_HEIGHT = 0.6;
 
    private final QuadrantDependentList<Vector3D> jointBeforeFootToSoleOffsets = new QuadrantDependentList<>();
    private final QuadrantDependentList<ArrayList<Point2D>> footGroundContactPoints = new QuadrantDependentList<>();
@@ -50,5 +50,11 @@ public class GenericQuadrupedPhysicalProperties implements QuadrupedPhysicalProp
    public double getNominalCoMHeight()
    {
       return NOMINAL_COM_HEIGHT;
+   }
+
+   @Override
+   public boolean trustFootSwitches()
+   {
+      return true;
    }
 }

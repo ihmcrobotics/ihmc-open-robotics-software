@@ -5,10 +5,10 @@ import org.apache.commons.lang3.StringUtils;
 import controller_msgs.msg.dds.GoHomeMessage;
 import controller_msgs.msg.dds.StopAllTrajectoryMessage;
 import us.ihmc.commons.PrintTools;
-import us.ihmc.communication.packets.PacketDestination;
+import us.ihmc.communication.IHMCROS2Publisher;
 import us.ihmc.humanoidBehaviors.behaviors.AbstractBehavior;
-import us.ihmc.humanoidBehaviors.communication.CommunicationBridgeInterface;
 import us.ihmc.humanoidRobotics.communication.packets.walking.HumanoidBodyPart;
+import us.ihmc.ros2.Ros2Node;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 
@@ -29,14 +29,17 @@ public class GoHomeBehavior extends AbstractBehavior
    protected final YoBoolean hasInputBeenSet;
    private final YoBoolean isDone;
 
-   public GoHomeBehavior(CommunicationBridgeInterface outgoingCommunicationBridge, YoDouble yoTime)
+   private final IHMCROS2Publisher<GoHomeMessage> goHomePublisher;
+   private final IHMCROS2Publisher<StopAllTrajectoryMessage> stopAllTrajectoryPublisher;
+
+   public GoHomeBehavior(String robotName, Ros2Node ros2Node, YoDouble yoTime)
    {
-      this(null, outgoingCommunicationBridge, yoTime);
+      this(robotName, null, ros2Node, yoTime);
    }
 
-   public GoHomeBehavior(String namePrefix, CommunicationBridgeInterface outgoingCommunicationBridge, YoDouble yoTime)
+   public GoHomeBehavior(String robotName, String namePrefix, Ros2Node ros2Node, YoDouble yoTime)
    {
-      super(namePrefix, outgoingCommunicationBridge);
+      super(robotName, namePrefix, ros2Node);
 
       this.yoTime = yoTime;
       String behaviorNameFirstLowerCase = StringUtils.uncapitalize(getName());
@@ -50,6 +53,9 @@ public class GoHomeBehavior extends AbstractBehavior
 
       hasInputBeenSet = new YoBoolean(behaviorNameFirstLowerCase + "HasInputBeenSet", registry);
       isDone = new YoBoolean(behaviorNameFirstLowerCase + "IsDone", registry);
+
+      goHomePublisher = createPublisherForController(GoHomeMessage.class);
+      stopAllTrajectoryPublisher = createPublisherForController(StopAllTrajectoryMessage.class);
    }
 
    public void setInput(GoHomeMessage goHomeMessage)
@@ -84,13 +90,10 @@ public class GoHomeBehavior extends AbstractBehavior
 
    private void sendOutgoingPacketToControllerAndNetworkProcessor()
    {
-      
+
       if (!isPaused.getBooleanValue() && !isAborted.getBooleanValue())
       {
-         outgoingMessage.setDestination(PacketDestination.BROADCAST.ordinal());
-
-         sendPacketToController(outgoingMessage);
-         sendPacket(outgoingMessage);
+         goHomePublisher.publish(outgoingMessage);
 
          hasPacketBeenSent.set(true);
 
@@ -103,9 +106,7 @@ public class GoHomeBehavior extends AbstractBehavior
    {
       if (outgoingMessage != null)
       {
-         StopAllTrajectoryMessage pausePacket = new StopAllTrajectoryMessage();
-         pausePacket.setDestination(PacketDestination.CONTROLLER.ordinal());
-         sendPacketToController(pausePacket);
+         stopAllTrajectoryPublisher.publish(new StopAllTrajectoryMessage());
       }
    }
 
@@ -186,7 +187,6 @@ public class GoHomeBehavior extends AbstractBehavior
    {
       return isDone.getBooleanValue();
    }
-
 
    public boolean hasInputBeenSet()
    {

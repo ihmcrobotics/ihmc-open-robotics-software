@@ -22,10 +22,10 @@ import us.ihmc.commonWalkingControlModules.momentumBasedController.feedbackContr
 import us.ihmc.commonWalkingControlModules.momentumBasedController.feedbackController.taskspace.OrientationFeedbackController;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.feedbackController.taskspace.PointFeedbackController;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.feedbackController.taskspace.SpatialFeedbackController;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.robotics.screwTheory.OneDoFJoint;
-import us.ihmc.robotics.screwTheory.RigidBody;
+import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
+import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.robotics.time.ExecutionTimer;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
 
 public class WholeBodyFeedbackController
 {
@@ -37,10 +37,10 @@ public class WholeBodyFeedbackController
    private final List<FeedbackControllerInterface> allControllers = new ArrayList<>();
 
    private CenterOfMassFeedbackController centerOfMassFeedbackController;
-   private final Map<RigidBody, SpatialFeedbackController> spatialFeedbackControllerMap = new HashMap<>();
-   private final Map<RigidBody, PointFeedbackController> pointFeedbackControllerMap = new HashMap<>();
-   private final Map<RigidBody, OrientationFeedbackController> orientationFeedbackControllerMap = new HashMap<>();
-   private final Map<OneDoFJoint, OneDoFJointFeedbackController> oneDoFJointFeedbackControllerMap = new HashMap<>();
+   private final Map<RigidBodyBasics, SpatialFeedbackController> spatialFeedbackControllerMap = new HashMap<>();
+   private final Map<RigidBodyBasics, PointFeedbackController> pointFeedbackControllerMap = new HashMap<>();
+   private final Map<RigidBodyBasics, OrientationFeedbackController> orientationFeedbackControllerMap = new HashMap<>();
+   private final Map<OneDoFJointBasics, OneDoFJointFeedbackController> oneDoFJointFeedbackControllerMap = new HashMap<>();
 
    private final WholeBodyControlCoreToolbox coreToolbox;
    private final FeedbackControllerToolbox feedbackControllerToolbox;
@@ -52,7 +52,7 @@ public class WholeBodyFeedbackController
                                       YoVariableRegistry parentRegistry)
    {
       this.coreToolbox = coreToolbox;
-      this.feedbackControllerToolbox = new FeedbackControllerToolbox(registry);
+      this.feedbackControllerToolbox = new FeedbackControllerToolbox(coreToolbox.getFeedbackControllerSettings(), registry);
 
       if (allPossibleCommands == null)
          return;
@@ -96,7 +96,7 @@ public class WholeBodyFeedbackController
 
    private void registerSpatialControllers(SpatialFeedbackControlCommand commandExample)
    {
-      RigidBody endEffector = commandExample.getEndEffector();
+      RigidBodyBasics endEffector = commandExample.getEndEffector();
 
       if (spatialFeedbackControllerMap.containsKey(endEffector))
          return;
@@ -108,7 +108,7 @@ public class WholeBodyFeedbackController
 
    private void registerPointControllers(PointFeedbackControlCommand commandExample)
    {
-      RigidBody endEffector = commandExample.getEndEffector();
+      RigidBodyBasics endEffector = commandExample.getEndEffector();
 
       if (pointFeedbackControllerMap.containsKey(endEffector))
          return;
@@ -120,7 +120,7 @@ public class WholeBodyFeedbackController
 
    private void registerOrientationControllers(OrientationFeedbackControlCommand commandExample)
    {
-      RigidBody endEffector = commandExample.getEndEffector();
+      RigidBodyBasics endEffector = commandExample.getEndEffector();
 
       if (orientationFeedbackControllerMap.containsKey(endEffector))
          return;
@@ -134,16 +134,11 @@ public class WholeBodyFeedbackController
    {
       for (int i = 0; i < commandExample.getNumberOfJoints(); i++)
       {
-         OneDoFJoint joint = commandExample.getJoint(i);
+         OneDoFJointBasics joint = commandExample.getJoint(i);
          if (oneDoFJointFeedbackControllerMap.containsKey(joint))
             continue;
 
-         double controlDT = coreToolbox.getControlDT();
-         boolean inverseDynamicsEnabled = coreToolbox.isEnableInverseDynamicsModule();
-         boolean inverseKinematicsEnabled = coreToolbox.isEnableInverseKinematicsModule();
-         boolean virtualModelControlEnabled = coreToolbox.isEnableVirtualModelControlModule();
-         OneDoFJointFeedbackController controller = new OneDoFJointFeedbackController(joint, controlDT, inverseDynamicsEnabled, inverseKinematicsEnabled,
-                                                                                      virtualModelControlEnabled, registry);
+         OneDoFJointFeedbackController controller = new OneDoFJointFeedbackController(joint, coreToolbox, feedbackControllerToolbox, registry);
          oneDoFJointFeedbackControllerMap.put(joint, controller);
          allControllers.add(controller);
       }
@@ -188,6 +183,10 @@ public class WholeBodyFeedbackController
             controller.computeInverseDynamics();
             inverseDynamicsOutput.addCommand(controller.getInverseDynamicsOutput());
          }
+         else
+         {
+            controller.initialize();
+         }
       }
       feedbackControllerTimer.stopMeasurement();
    }
@@ -204,6 +203,10 @@ public class WholeBodyFeedbackController
          {
             controller.computeInverseKinematics();
             inverseKinematicsOutput.addCommand(controller.getInverseKinematicsOutput());
+         }
+         else
+         {
+            controller.initialize();
          }
       }
       feedbackControllerToolbox.clearUnusedData();
@@ -222,6 +225,10 @@ public class WholeBodyFeedbackController
          {
             controller.computeVirtualModelControl();
             virtualModelControlOutput.addCommand(controller.getVirtualModelControlOutput());
+         }
+         else
+         {
+            controller.initialize();
          }
       }
       feedbackControllerToolbox.clearUnusedData();
@@ -276,7 +283,7 @@ public class WholeBodyFeedbackController
 
    private void submitSpatialFeedbackControlCommand(SpatialFeedbackControlCommand feedbackControlCommand)
    {
-      RigidBody endEffector = feedbackControlCommand.getEndEffector();
+      RigidBodyBasics endEffector = feedbackControlCommand.getEndEffector();
       SpatialFeedbackController controller = spatialFeedbackControllerMap.get(endEffector);
       if (controller.isEnabled())
          throw new RuntimeException("Cannot submit more than one feedback control command to the same controller. Controller end-effector: " + endEffector);
@@ -286,7 +293,7 @@ public class WholeBodyFeedbackController
 
    private void submitPointFeedbackControlCommand(PointFeedbackControlCommand feedbackControlCommand)
    {
-      RigidBody endEffector = feedbackControlCommand.getEndEffector();
+      RigidBodyBasics endEffector = feedbackControlCommand.getEndEffector();
       PointFeedbackController controller = pointFeedbackControllerMap.get(endEffector);
       if (controller.isEnabled())
          throw new RuntimeException("Cannot submit more than one feedback control command to the same controller. Controller end-effector: " + endEffector);
@@ -296,7 +303,7 @@ public class WholeBodyFeedbackController
 
    private void submitOrientationFeedbackControlCommand(OrientationFeedbackControlCommand feedbackControlCommand)
    {
-      RigidBody endEffector = feedbackControlCommand.getEndEffector();
+      RigidBodyBasics endEffector = feedbackControlCommand.getEndEffector();
       OrientationFeedbackController controller = orientationFeedbackControllerMap.get(endEffector);
       if (controller.isEnabled())
          throw new RuntimeException("Cannot submit more than one feedback control command to the same controller. Controller end-effector: " + endEffector);
@@ -308,7 +315,7 @@ public class WholeBodyFeedbackController
    {
       for (int i = 0; i < feedbackControlCommand.getNumberOfJoints(); i++)
       {
-         OneDoFJoint joint = feedbackControlCommand.getJoint(i);
+         OneDoFJointBasics joint = feedbackControlCommand.getJoint(i);
          double desiredPosition = feedbackControlCommand.getDesiredPosition(i);
          double desiredVelocity = feedbackControlCommand.getDesiredVelocity(i);
          double feedForwardAcceleration = feedbackControlCommand.getFeedForwardAcceleration(i);

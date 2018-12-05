@@ -5,15 +5,14 @@ import java.util.List;
 
 import org.ejml.data.DenseMatrix64F;
 
-import us.ihmc.euclid.referenceFrame.FramePoint2D;
+import us.ihmc.commons.MathTools;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint2DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
 import us.ihmc.euclid.tuple3D.Vector3D;
-import us.ihmc.commons.MathTools;
-import us.ihmc.robotics.screwTheory.Wrench;
+import us.ihmc.mecano.spatial.Wrench;
 
 public class WrenchDistributorTools
 {
@@ -28,7 +27,7 @@ public class WrenchDistributorTools
       torque.setY(-cop.getX() * force.getZ());
       torque.setZ(cop.getX() * force.getY() - cop.getY() * force.getX() + normalTorque);
 
-      groundReactionWrenchToPack.set(referenceFrame, force, torque);
+      groundReactionWrenchToPack.setIncludingFrame(referenceFrame, torque, force);
    }
 
    public static FramePoint3D computePseudoCMP3d(FramePoint3DReadOnly centerOfMass, FramePoint2DReadOnly cmp, double fZ, double totalMass, double omega0)

@@ -5,6 +5,7 @@ import java.util.HashMap;
 import java.util.List;
 
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.PlaneContactStateCommand;
+import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.euclid.geometry.interfaces.ConvexPolygon2DReadOnly;
 import us.ihmc.euclid.referenceFrame.FrameConvexPolygon2D;
 import us.ihmc.euclid.referenceFrame.FramePoint2D;
@@ -12,9 +13,8 @@ import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple2D.Point2D;
+import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.robotics.lists.FrameTuple2dArrayList;
-import us.ihmc.robotics.lists.RecyclingArrayList;
-import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
@@ -23,8 +23,8 @@ import us.ihmc.yoVariables.variable.YoFramePoint2D;
 public class YoPlaneContactState implements PlaneContactState, ModifiableContactState
 {
    private static final double THRESHOLD = 1e-7;
-   private final YoVariableRegistry registry;
-   private final RigidBody rigidBody;
+   protected final YoVariableRegistry registry;
+   private final RigidBodyBasics rigidBody;
    private final ReferenceFrame planeFrame;
    private final YoBoolean inContact;
    private final YoDouble coefficientOfFriction;
@@ -38,13 +38,13 @@ public class YoPlaneContactState implements PlaneContactState, ModifiableContact
 
    private final YoBoolean hasContactStateChanged;
 
-   public YoPlaneContactState(String namePrefix, RigidBody rigidBody, ReferenceFrame planeFrame, List<FramePoint2D> contactFramePoints,
+   public YoPlaneContactState(String namePrefix, RigidBodyBasics rigidBody, ReferenceFrame planeFrame, List<FramePoint2D> contactFramePoints,
          double coefficientOfFriction, YoVariableRegistry parentRegistry)
    {
       this(namePrefix, rigidBody, planeFrame, contactFramePoints, coefficientOfFriction, Double.NaN, parentRegistry);
    }
 
-   public YoPlaneContactState(String namePrefix, RigidBody rigidBody, ReferenceFrame planeFrame, List<FramePoint2D> contactFramePoints,
+   public YoPlaneContactState(String namePrefix, RigidBodyBasics rigidBody, ReferenceFrame planeFrame, List<FramePoint2D> contactFramePoints,
          double coefficientOfFriction, double defaultRhoWeight, YoVariableRegistry parentRegistry)
    {
       this.registry = new YoVariableRegistry(namePrefix + getClass().getSimpleName());
@@ -526,7 +526,13 @@ public class YoPlaneContactState implements PlaneContactState, ModifiableContact
    }
 
    @Override
-   public RigidBody getRigidBody()
+   public boolean peekContactHasChangedNotification()
+   {
+      return hasContactStateChanged.getValue();
+   }
+
+   @Override
+   public RigidBodyBasics getRigidBody()
    {
       return rigidBody;
    }

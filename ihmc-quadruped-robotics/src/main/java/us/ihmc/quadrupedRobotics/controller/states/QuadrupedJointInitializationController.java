@@ -2,14 +2,14 @@ package us.ihmc.quadrupedRobotics.controller.states;
 
 import java.util.BitSet;
 
+import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
+import us.ihmc.quadrupedRobotics.controller.ControllerEvent;
 import us.ihmc.quadrupedRobotics.controller.QuadrupedControlMode;
+import us.ihmc.quadrupedRobotics.model.QuadrupedRuntimeEnvironment;
 import us.ihmc.robotModels.FullQuadrupedRobotModel;
 import us.ihmc.robotModels.FullRobotModel;
 import us.ihmc.robotics.partNames.JointRole;
-import us.ihmc.quadrupedRobotics.controller.ControllerEvent;
-import us.ihmc.quadrupedRobotics.controller.QuadrupedController;
-import us.ihmc.quadrupedRobotics.model.QuadrupedRuntimeEnvironment;
-import us.ihmc.robotics.screwTheory.OneDoFJoint;
+import us.ihmc.robotics.stateMachine.core.State;
 import us.ihmc.sensorProcessing.outputData.JointDesiredControlMode;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutputList;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
@@ -18,7 +18,7 @@ import us.ihmc.yoVariables.variable.YoBoolean;
 /**
  * This controller sets desired joint angles to their actual values when the joint comes online.
  */
-public class QuadrupedJointInitializationController implements QuadrupedController
+public class QuadrupedJointInitializationController implements State
 {
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
 
@@ -48,10 +48,10 @@ public class QuadrupedJointInitializationController implements QuadrupedControll
    @Override
    public void onEntry()
    {
-      OneDoFJoint[] joints = fullRobotModel.getOneDoFJoints();
+      OneDoFJointBasics[] joints = fullRobotModel.getOneDoFJoints();
       for (int i = 0; i < joints.length; i++)
       {
-         OneDoFJoint joint = joints[i];
+         OneDoFJointBasics joint = joints[i];
          if (fullRobotModel.getNameForOneDoFJoint(joint).getRole() == JointRole.LEG)
          {
             if (forceFeedbackControlEnabled.getBooleanValue())
@@ -65,13 +65,13 @@ public class QuadrupedJointInitializationController implements QuadrupedControll
    @Override
    public void doAction(double timeInState)
    {
-      OneDoFJoint[] joints = fullRobotModel.getOneDoFJoints();
+      OneDoFJointBasics[] joints = fullRobotModel.getOneDoFJoints();
       for (int i = 0; i < joints.length; i++)
       {
-         OneDoFJoint joint = joints[i];
+         OneDoFJointBasics joint = joints[i];
 
          // Only set a desired if the actuator has just come online.
-         if (!initialized.get(i) && joint.isOnline())
+         if (!initialized.get(i)) //FIXME && joint.isOnline())
          {
             jointDesiredOutputList.getJointDesiredOutput(joint).setDesiredTorque(0.0);
             jointDesiredOutputList.getJointDesiredOutput(joint).setDesiredPosition(joint.getQ());
@@ -83,9 +83,9 @@ public class QuadrupedJointInitializationController implements QuadrupedControll
    }
 
    @Override
-   public ControllerEvent fireEvent(double timeInState)
+   public boolean isDone(double timeInState)
    {
-      return allJointsInitialized() ? ControllerEvent.DONE : null;
+      return allJointsInitialized();
    }
 
    @Override

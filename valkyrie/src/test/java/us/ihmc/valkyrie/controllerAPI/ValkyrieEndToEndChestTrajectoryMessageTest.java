@@ -136,4 +136,12 @@ public class ValkyrieEndToEndChestTrajectoryMessageTest extends EndToEndChestTra
    {
       super.testStopAllTrajectory();
    }
+
+   @Override
+   @ContinuousIntegrationTest(estimatedDuration = 37.7)
+   @Test(timeout = 190000)
+   public void testStopAllTrajectoryRepeatedly() throws Exception
+   {
+      super.testStopAllTrajectoryRepeatedly();
+   }
 }

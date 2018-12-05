@@ -21,7 +21,7 @@ public class TimeIntervalCommand implements Command<TimeIntervalCommand, TimeInt
    }
 
    @Override
-   public void set(TimeIntervalMessage message)
+   public void setFromMessage(TimeIntervalMessage message)
    {
       startTime = message.getStartTime();
       endTime = message.getEndTime();

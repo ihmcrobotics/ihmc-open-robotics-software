@@ -1,6 +1,13 @@
 package us.ihmc.pathPlanning.visibilityGraphs.ui.controllers;
 
+import static us.ihmc.pathPlanning.visibilityGraphs.ui.messager.UIVisibilityGraphsTopics.RandomizePlanarRegionIDRequest;
+
+import java.io.File;
+import java.net.URISyntaxException;
+import java.net.URL;
+
 import com.sun.javafx.scene.control.skin.LabeledText;
+
 import javafx.fxml.FXML;
 import javafx.scene.control.Accordion;
 import javafx.scene.control.ListView;
@@ -15,12 +22,6 @@ import us.ihmc.pathPlanning.visibilityGraphs.tools.VisibilityGraphsIOTools.Visib
 import us.ihmc.pathPlanning.visibilityGraphs.ui.messager.UIVisibilityGraphsTopics;
 import us.ihmc.robotics.PlanarRegionFileTools;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
-
-import java.io.File;
-import java.net.URISyntaxException;
-import java.net.URL;
-
-import static us.ihmc.pathPlanning.visibilityGraphs.ui.messager.UIVisibilityGraphsTopics.RandomizePlanarRegionIDRequest;
 
 public class DatasetNavigationAccordionController
 {
@@ -140,7 +141,7 @@ public class DatasetNavigationAccordionController
 
       if (VisibilityGraphsIOTools.isVisibilityGraphsDataset(file))
       {
-         VisibilityGraphsUnitTestDataset dataset = VisibilityGraphsIOTools.loadDataset(selectedDatasetResource);
+         VisibilityGraphsUnitTestDataset dataset = VisibilityGraphsIOTools.loadDataset(getClass(), selectedDatasetResource);
          messager.submitMessage(UIVisibilityGraphsTopics.GlobalReset, true);
          messager.submitMessage(UIVisibilityGraphsTopics.PlanarRegionData, dataset.getPlanarRegionsList());
          messager.submitMessage(UIVisibilityGraphsTopics.StartPosition, dataset.getStart());

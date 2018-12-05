@@ -2,11 +2,8 @@ package us.ihmc.avatar.networkProcessor;
 
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.util.HashMap;
 
 import us.ihmc.communication.net.LocalObjectCommunicator;
-import us.ihmc.communication.packets.PacketDestination;
-import us.ihmc.communication.util.NetworkPorts;
 
 public class DRCNetworkModuleParameters
 {
@@ -27,8 +24,8 @@ public class DRCNetworkModuleParameters
    private boolean runAutomaticDiagnostic;
    private boolean useMultisenseManualTestModule;
    private boolean useDrillDetectionModule;
-   private boolean useConstrainedWholeBodyPlanningToolbox;
-   private boolean useConstrainedWholeBodyPlanningToolboxVisualizer;
+   private boolean useWholeBodyTrajectoryToolbox;
+   private boolean useWholeBodyTrajectoryToolboxVisualizer;
    private boolean useKinematicsToolbox;
    private boolean useFootstepPlanningToolbox;
    private boolean useKinematicsToolboxVisualizer;
@@ -43,7 +40,6 @@ public class DRCNetworkModuleParameters
 
    private LocalObjectCommunicator simulatedSensorCommunicator;
 
-   private HashMap<NetworkPorts, PacketDestination> extraIntraProcessCommunicatorPorts = new HashMap<NetworkPorts, PacketDestination>();
    private URI rosUri;
 
    private double timeToWaitBeforeStartingDiagnostics = Double.NaN;
@@ -68,9 +64,9 @@ public class DRCNetworkModuleParameters
       return useBehaviorVisualizer;
    }
    
-   public boolean isConstrainedWholeBodyPlanningToolboxEnabled()
+   public boolean isWholeBodyTrajectoryToolboxEnabled()
    {
-      return useConstrainedWholeBodyPlanningToolbox;
+      return useWholeBodyTrajectoryToolbox;
    }
 
    public boolean isKinematicsToolboxEnabled()
@@ -88,9 +84,9 @@ public class DRCNetworkModuleParameters
       return useKinematicsToolboxVisualizer;
    }
    
-   public boolean isConstrainedWholeBodyToolboxVisualizerEnabled()
+   public boolean isWholeBodyTrajectoryToolboxVisualizerEnabled()
    {
-      return useConstrainedWholeBodyPlanningToolboxVisualizer;
+      return useWholeBodyTrajectoryToolboxVisualizer;
    }
 
    public boolean isFootstepPlanningToolboxVisualizerEnabled()
@@ -174,7 +170,7 @@ public class DRCNetworkModuleParameters
    
    public void enableWholeBodyTrajectoryToolbox(boolean useConstrainedWholeBodyPlanningToolbox)
    {
-      this.useConstrainedWholeBodyPlanningToolbox = useConstrainedWholeBodyPlanningToolbox;
+      this.useWholeBodyTrajectoryToolbox = useConstrainedWholeBodyPlanningToolbox;
    }
    
    public void enableFootstepPlanningToolbox(boolean useFootstepPlanningToolbox)
@@ -189,7 +185,7 @@ public class DRCNetworkModuleParameters
    
    public void enableConstrainedWholeBodyPlanningToolboxVisualizer(boolean useConstrainedWholeBodyPlanningToolboxVisualizer)
    {
-      this.useConstrainedWholeBodyPlanningToolboxVisualizer = useConstrainedWholeBodyPlanningToolboxVisualizer;
+      this.useWholeBodyTrajectoryToolboxVisualizer = useConstrainedWholeBodyPlanningToolboxVisualizer;
    }
 
    public void enableFootstepPlanningToolboxVisualizer(boolean useFootstepPlanningToolboxVisualizer)
@@ -383,16 +379,6 @@ public class DRCNetworkModuleParameters
             + useBehaviorVisualizer + "\n useHandModule=" + useHandModule + "\n usePerceptionModule=" + usePerceptionModule + "\n useRosModule="
             + useRosModule + "\n useDrillDetectionModule=" + useDrillDetectionModule + "\n simulatedSensorCommunicator=" + simulatedSensorCommunicator
             + "\n rosUri=" + rosUri + "]";
-   }
-
-   public void addRobotSpecificModuleCommunicatorPort(NetworkPorts networkPort, PacketDestination communicatorId)
-   {
-      extraIntraProcessCommunicatorPorts.put(networkPort, communicatorId);
-   }
-
-   public HashMap<NetworkPorts, PacketDestination> getRobotSpecificModuleCommunicatorPorts()
-   {
-      return extraIntraProcessCommunicatorPorts;
    }
 
    public boolean isFilterControllerInputMessages()

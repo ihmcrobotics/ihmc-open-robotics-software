@@ -22,12 +22,11 @@ import controller_msgs.msg.dds.SE3TrajectoryPointMessage;
 import controller_msgs.msg.dds.SE3TrajectoryPointMessagePubSubType;
 import geometry_msgs.msg.dds.PointPubSubType;
 import us.ihmc.commons.MathTools;
+import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.communication.net.NetClassList;
 import us.ihmc.communication.net.PacketConsumer;
 import us.ihmc.communication.packetCommunicator.PacketCommunicator;
-import us.ihmc.communication.packets.ExecutionMode;
-import us.ihmc.communication.packets.ExecutionTiming;
 import us.ihmc.communication.packets.Packet;
 import us.ihmc.communication.packets.PacketDestination;
 import us.ihmc.communication.util.NetworkPorts;
@@ -37,6 +36,7 @@ import us.ihmc.continuousIntegration.IntegrationCategory;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.tools.ReferenceFrameTools;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
@@ -45,13 +45,12 @@ import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepStatus;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.idl.IDLSequence;
-import us.ihmc.idl.RecyclingArrayListPubSub;
 import us.ihmc.pubsub.TopicDataType;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.trajectories.TrajectoryType;
 import us.ihmc.tools.MemoryTools;
 
-@ContinuousIntegrationPlan(categories = IntegrationCategory.FAST)
+@ContinuousIntegrationPlan(categories = IntegrationCategory.FLAKY)
 public class DesiredFootstepTest
 {
    private static final RobotSide robotSide = RobotSide.LEFT;
@@ -67,6 +66,7 @@ public class DesiredFootstepTest
    @After
    public void showMemoryUsageAfterTest()
    {
+      ReferenceFrameTools.clearWorldFrameTree();
       MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " after test.");
    }
 
@@ -75,7 +75,7 @@ public class DesiredFootstepTest
     * @throws IOException
     */
 
-   @ContinuousIntegrationTest(estimatedDuration = 1.6, categoriesOverride = IntegrationCategory.FLAKY)
+   @ContinuousIntegrationTest(estimatedDuration = 1.6)
    @Test(timeout = 30000)
    public void testPassingFootstepData() throws IOException
    {
@@ -140,7 +140,7 @@ public class DesiredFootstepTest
       compareFootstepsSentWithReceived(sentFootsteps, receivedFootsteps);
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 1.6, categoriesOverride = IntegrationCategory.FLAKY)
+   @ContinuousIntegrationTest(estimatedDuration = 1.6)
    @Test(timeout = 30000)
    public void testPassingPauseCommand() throws IOException
    {
@@ -303,7 +303,7 @@ public class DesiredFootstepTest
       netClassList.registerPacketField(FootstepDataMessage.class);
       netClassList.registerPacketField(FootstepDataMessage[].class);
       netClassList.registerPacketField(Class.class);
-      netClassList.registerPacketField(RecyclingArrayListPubSub.class);
+      netClassList.registerPacketField(RecyclingArrayList.class);
       netClassList.registerPacketField(SE3TrajectoryPointMessage.class);
       netClassList.registerPacketField(SE3TrajectoryPointMessage[].class);
       netClassList.registerPacketField(QueueableMessage.class);
@@ -328,7 +328,7 @@ public class DesiredFootstepTest
       netClassList.registerPacketField(IDLSequence.Long.class);
       netClassList.registerPacketField(IDLSequence.StringBuilderHolder.class);
       netClassList.registerPacketField(TopicDataType.class);
-      netClassList.registerPacketField(RecyclingArrayListPubSub.class);
+      netClassList.registerPacketField(RecyclingArrayList.class);
       netClassList.registerPacketField(us.ihmc.idl.CDR.class);
       netClassList.registerPacketField(PointPubSubType.class);
       netClassList.registerPacketField(SE3TrajectoryMessagePubSubType.class);

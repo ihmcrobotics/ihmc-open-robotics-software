@@ -3,10 +3,11 @@ package us.ihmc.humanoidRobotics.communication.subscribers;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
 import controller_msgs.msg.dds.HandDesiredConfigurationMessage;
-import us.ihmc.communication.net.PacketConsumer;
+import us.ihmc.pubsub.subscriber.Subscriber;
 import us.ihmc.robotics.robotSide.RobotSide;
+import us.ihmc.ros2.NewMessageListener;
 
-public class HandDesiredConfigurationMessageSubscriber implements PacketConsumer<HandDesiredConfigurationMessage>
+public class HandDesiredConfigurationMessageSubscriber implements NewMessageListener<HandDesiredConfigurationMessage>
 {
    private final ConcurrentLinkedQueue<HandDesiredConfigurationMessage> messageQueue = new ConcurrentLinkedQueue<HandDesiredConfigurationMessage>();
    private RobotSide robotSide;
@@ -14,6 +15,12 @@ public class HandDesiredConfigurationMessageSubscriber implements PacketConsumer
    public HandDesiredConfigurationMessageSubscriber(RobotSide robotSide)
    {
       this.robotSide = robotSide;
+   }
+
+   @Override
+   public void onNewDataMessage(Subscriber<HandDesiredConfigurationMessage> subscriber)
+   {
+      receivedPacket(subscriber.takeNextData());
    }
 
    public void receivedPacket(HandDesiredConfigurationMessage ihmcMessage)

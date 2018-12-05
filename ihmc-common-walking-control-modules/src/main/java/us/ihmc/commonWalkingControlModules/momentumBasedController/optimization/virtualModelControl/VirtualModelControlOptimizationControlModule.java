@@ -1,14 +1,18 @@
 package us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.virtualModelControl;
 
+import java.util.List;
+import java.util.Map;
+
 import org.ejml.data.DenseMatrix64F;
 import org.ejml.ops.CommonOps;
+
 import us.ihmc.commonWalkingControlModules.controllerCore.WholeBodyControlCoreToolbox;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.ConstraintType;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.MomentumRateCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.PlaneContactStateCommand;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.ControllerCoreOptimizationSettings;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.ExternalWrenchHandler;
-import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.MotionQPInput;
+import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.QPInput;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.groundContactForce.GroundContactForceMomentumQPSolver;
 import us.ihmc.commonWalkingControlModules.virtualModelControl.VirtualModelControlSolution;
 import us.ihmc.commonWalkingControlModules.visualizer.BasisVectorVisualizer;
@@ -17,18 +21,17 @@ import us.ihmc.commons.PrintTools;
 import us.ihmc.convexOptimization.quadraticProgram.ActiveSetQPSolverWithInactiveVariablesInterface;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
+import us.ihmc.mecano.spatial.SpatialForce;
+import us.ihmc.mecano.spatial.Wrench;
+import us.ihmc.mecano.spatial.interfaces.SpatialForceReadOnly;
+import us.ihmc.mecano.spatial.interfaces.WrenchReadOnly;
 import us.ihmc.robotics.linearAlgebra.DiagonalMatrixTools;
-import us.ihmc.robotics.screwTheory.RigidBody;
-import us.ihmc.robotics.screwTheory.SpatialForceVector;
-import us.ihmc.robotics.screwTheory.Wrench;
 import us.ihmc.tools.exceptions.NoConvergenceException;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoInteger;
-
-import java.util.List;
-import java.util.Map;
 
 public class VirtualModelControlOptimizationControlModule
 {
@@ -38,7 +41,7 @@ public class VirtualModelControlOptimizationControlModule
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
 
    private final ExternalWrenchHandler externalWrenchHandler;
-   private final SpatialForceVector centroidalMomentumRateSolution = new SpatialForceVector();
+   private final SpatialForce centroidalMomentumRateSolution = new SpatialForce();
 
    private final YoBoolean hasNotConvergedInPast = new YoBoolean("hasNotConvergedInPast", registry);
    private final YoInteger hasNotConvergedCounts = new YoInteger("hasNotConvergedCounts", registry);
@@ -56,18 +59,20 @@ public class VirtualModelControlOptimizationControlModule
 
    private final GroundContactForceMomentumQPSolver qpSolver;
 
-   private final MotionQPInput momentumQPInput;
+   private final QPInput momentumQPInput;
 
-   private final DenseMatrix64F identityMatrix = CommonOps.identity(SpatialForceVector.SIZE, SpatialForceVector.SIZE);
-   private final DenseMatrix64F tempSelectionMatrix = new DenseMatrix64F(SpatialForceVector.SIZE, SpatialForceVector.SIZE);
-   private final DenseMatrix64F tempTaskWeight = new DenseMatrix64F(SpatialForceVector.SIZE, SpatialForceVector.SIZE);
-   private final DenseMatrix64F tempTaskWeightSubspace = new DenseMatrix64F(SpatialForceVector.SIZE, SpatialForceVector.SIZE);
-   private final DenseMatrix64F fullMomentumObjective = new DenseMatrix64F(SpatialForceVector.SIZE, 1);
-   private final DenseMatrix64F totalWrench = new DenseMatrix64F(SpatialForceVector.SIZE, 1);
+   private final DenseMatrix64F identityMatrix = CommonOps.identity(SpatialForce.SIZE, SpatialForce.SIZE);
+   private final DenseMatrix64F tempSelectionMatrix = new DenseMatrix64F(SpatialForce.SIZE, SpatialForce.SIZE);
+   private final DenseMatrix64F tempTaskWeight = new DenseMatrix64F(SpatialForce.SIZE, SpatialForce.SIZE);
+   private final DenseMatrix64F tempTaskWeightSubspace = new DenseMatrix64F(SpatialForce.SIZE, SpatialForce.SIZE);
+   private final DenseMatrix64F fullMomentumObjective = new DenseMatrix64F(SpatialForce.SIZE, 1);
+   private final DenseMatrix64F totalWrench = new DenseMatrix64F(SpatialForce.SIZE, 1);
 
    private final FrameVector3D angularMomentum = new FrameVector3D();
    private final FrameVector3D linearMomentum = new FrameVector3D();
    private final ReferenceFrame centerOfMassFrame;
+
+   private final DenseMatrix64F zeroObjective = new DenseMatrix64F(0, 0);
 
    public VirtualModelControlOptimizationControlModule(WholeBodyControlCoreToolbox toolbox, YoVariableRegistry parentRegistry)
    {
@@ -76,7 +81,7 @@ public class VirtualModelControlOptimizationControlModule
 
       ControllerCoreOptimizationSettings optimizationSettings = toolbox.getOptimizationSettings();
       int rhoSize = optimizationSettings.getRhoSize();
-      momentumQPInput = new MotionQPInput(SpatialForceVector.SIZE);
+      momentumQPInput = new QPInput(SpatialForce.SIZE);
 
       if (VISUALIZE_RHO_BASIS_VECTORS)
          basisVectorVisualizer = new BasisVectorVisualizer("ContactBasisVectors", rhoSize, 1.0, toolbox.getYoGraphicsListRegistry(), registry);
@@ -95,6 +100,9 @@ public class VirtualModelControlOptimizationControlModule
 
       useWarmStart.set(optimizationSettings.useWarmStartInSolver());
       maximumNumberOfIterations.set(optimizationSettings.getMaxNumberOfSolverIterations());
+
+      zeroObjective.reshape(wrenchMatrixCalculator.getCopTaskSize(), 1);
+      zeroObjective.zero();
 
       parentRegistry.addChild(registry);
    }
@@ -150,12 +158,12 @@ public class VirtualModelControlOptimizationControlModule
 
       DenseMatrix64F rhoSolution = qpSolver.getRhos();
 
-      Map<RigidBody, Wrench> groundReactionWrenches = wrenchMatrixCalculator.computeWrenchesFromRho(rhoSolution);
+      Map<RigidBodyBasics, Wrench> groundReactionWrenches = wrenchMatrixCalculator.computeWrenchesFromRho(rhoSolution);
       externalWrenchHandler.computeExternalWrenches(groundReactionWrenches);
 
-      SpatialForceVector centroidalMomentumRateSolution = computeCentroidalMomentumRateSolution(rhoSolution);
-      Map<RigidBody, Wrench> externalWrenchSolution = externalWrenchHandler.getExternalWrenchMap();
-      List<RigidBody> rigidBodiesWithExternalWrench = externalWrenchHandler.getRigidBodiesWithExternalWrench();
+      SpatialForceReadOnly centroidalMomentumRateSolution = computeCentroidalMomentumRateSolution(rhoSolution);
+      Map<RigidBodyBasics, Wrench> externalWrenchSolution = externalWrenchHandler.getExternalWrenchMap();
+      List<RigidBodyBasics> rigidBodiesWithExternalWrench = externalWrenchHandler.getRigidBodiesWithExternalWrench();
 
       virtualModelControlSolution.setExternalWrenchSolution(rigidBodiesWithExternalWrench, externalWrenchSolution);
       virtualModelControlSolution.setCentroidalMomentumRateSolution(centroidalMomentumRateSolution);
@@ -181,17 +189,17 @@ public class VirtualModelControlOptimizationControlModule
       wrenchMatrixCalculator.submitPlaneContactStateCommand(command);
    }
 
-   public void submitExternalWrench(RigidBody rigidBody, Wrench wrench)
+   public void submitExternalWrench(RigidBodyBasics rigidBody, WrenchReadOnly wrench)
    {
       externalWrenchHandler.setExternalWrenchToCompensateFor(rigidBody, wrench);
    }
 
    /**
-    * Converts a {@link MomentumRateCommand} into a {@link MotionQPInput}.
+    * Converts a {@link MomentumRateCommand} into a {@link QPInput}.
     *
     * @return true if the command was successfully converted.
     */
-   private boolean convertMomentumRateCommand(MomentumRateCommand commandToConvert, MotionQPInput motionQPInputToPack)
+   private boolean convertMomentumRateCommand(MomentumRateCommand commandToConvert, QPInput motionQPInputToPack)
    {
       commandToConvert.getSelectionMatrix(centerOfMassFrame, tempSelectionMatrix);
       int taskSize = tempSelectionMatrix.getNumRows();
@@ -204,9 +212,9 @@ public class VirtualModelControlOptimizationControlModule
       motionQPInputToPack.setConstraintType(ConstraintType.OBJECTIVE);
 
       // Compute the weight: W = S * W * S^T
-      tempTaskWeight.reshape(SpatialForceVector.SIZE, SpatialForceVector.SIZE);
+      tempTaskWeight.reshape(SpatialForce.SIZE, SpatialForce.SIZE);
       commandToConvert.getWeightMatrix(tempTaskWeight);
-      tempTaskWeightSubspace.reshape(taskSize, SpatialForceVector.SIZE);
+      tempTaskWeightSubspace.reshape(taskSize, SpatialForce.SIZE);
       DiagonalMatrixTools.postMult(tempSelectionMatrix, tempTaskWeight, tempTaskWeightSubspace);
       CommonOps.multTransB(tempTaskWeightSubspace, tempSelectionMatrix, motionQPInputToPack.taskWeightMatrix);
 
@@ -233,7 +241,7 @@ public class VirtualModelControlOptimizationControlModule
       qpSolver.setupWrenchesEquilibriumConstraint(identityMatrix, rhoJacobian, additionalExternalWrench, gravityWrench);
    }
 
-   private SpatialForceVector computeCentroidalMomentumRateSolution(DenseMatrix64F rhoSolution)
+   private SpatialForceReadOnly computeCentroidalMomentumRateSolution(DenseMatrix64F rhoSolution)
    {
       DenseMatrix64F additionalExternalWrench = externalWrenchHandler.getSumOfExternalWrenches();
       DenseMatrix64F gravityWrench = externalWrenchHandler.getGravitationalWrench();
@@ -243,7 +251,7 @@ public class VirtualModelControlOptimizationControlModule
       CommonOps.addEquals(totalWrench, additionalExternalWrench);
       CommonOps.addEquals(totalWrench, gravityWrench);
 
-      centroidalMomentumRateSolution.set(centerOfMassFrame, totalWrench);
+      centroidalMomentumRateSolution.setIncludingFrame(centerOfMassFrame, totalWrench);
 
       return centroidalMomentumRateSolution;
    }
@@ -254,14 +262,12 @@ public class VirtualModelControlOptimizationControlModule
       DenseMatrix64F rhoRateWeight = wrenchMatrixCalculator.getRhoRateWeightMatrix();
       qpSolver.addRhoTask(rhoPrevious, rhoRateWeight);
 
-      DenseMatrix64F copJacobian = wrenchMatrixCalculator.getCopJacobianMatrix();
+      DenseMatrix64F copRegularizationWeight = wrenchMatrixCalculator.getCoPRegularizationWeight();
+      DenseMatrix64F copRegularizationJacobian = wrenchMatrixCalculator.getCoPRegularizationJacobian();
+      qpSolver.addRhoTask(copRegularizationJacobian, zeroObjective, copRegularizationWeight);
 
-      DenseMatrix64F previousCoP = wrenchMatrixCalculator.getPreviousCoPMatrix();
-      DenseMatrix64F copRateWeight = wrenchMatrixCalculator.getCopRateWeightMatrix();
-      qpSolver.addRhoTask(copJacobian, previousCoP, copRateWeight);
-
-      DenseMatrix64F desiredCoP = wrenchMatrixCalculator.getDesiredCoPMatrix();
-      DenseMatrix64F desiredCoPWeight = wrenchMatrixCalculator.getDesiredCoPWeightMatrix();
-      qpSolver.addRhoTask(copJacobian, desiredCoP, desiredCoPWeight);
+      DenseMatrix64F copRateRegularizationWeight = wrenchMatrixCalculator.getCoPRateRegularizationWeight();
+      DenseMatrix64F copRateRegularizationJacobian = wrenchMatrixCalculator.getCoPRateRegularizationJacobian();
+      qpSolver.addRhoTask(copRateRegularizationJacobian, zeroObjective, copRateRegularizationWeight);
    }
 }

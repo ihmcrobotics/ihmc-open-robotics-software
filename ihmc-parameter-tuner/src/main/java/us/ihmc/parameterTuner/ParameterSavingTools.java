@@ -5,19 +5,17 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Marshaller;
 
-import javafx.scene.control.Alert;
-import javafx.scene.control.Alert.AlertType;
-import javafx.scene.control.ButtonType;
 import javafx.stage.FileChooser;
+import us.ihmc.commons.PrintTools;
 import us.ihmc.parameterTuner.guiElements.GuiParameter;
 import us.ihmc.parameterTuner.guiElements.GuiParameterStatus;
 import us.ihmc.parameterTuner.guiElements.GuiRegistry;
@@ -76,15 +74,6 @@ public class ParameterSavingTools
 
    public static GuiRegistry merge(GuiRegistry registryA, GuiRegistry registryB)
    {
-      if (registryA != null && registryA.getParent() != null)
-      {
-         throw new RuntimeException("Can only merge root registries.");
-      }
-      if (registryB != null && registryB.getParent() != null)
-      {
-         throw new RuntimeException("Can only merge root registries.");
-      }
-
       if (registryA == null && registryB != null)
       {
          GuiRegistry merged = new GuiRegistry(registryB.getName(), null);
@@ -167,7 +156,7 @@ public class ParameterSavingTools
    public static List<GuiRegistry> filterModified(List<GuiRegistry> registries)
    {
       List<GuiRegistry> filteredRegistries = new ArrayList<>();
-      registries.stream().forEach(registry -> {
+      registries.forEach(registry -> {
          GuiRegistry filtered = filterModified(registry);
          if (!filtered.getAllParameters().isEmpty())
          {
@@ -180,5 +169,31 @@ public class ParameterSavingTools
    public static GuiRegistry filterModified(GuiRegistry registry)
    {
       return registry.createFullCopy(parameter -> parameter.getStatus() == GuiParameterStatus.MODIFIED);
+   }
+
+   public static List<GuiRegistry> findRootRegistries(List<GuiRegistry> registries, List<String> rootRegistryNames)
+   {
+      List<GuiRegistry> rootRegistries = new ArrayList<>();
+      registries.forEach(registry -> recursiveAddMatchingRoots(registry, rootRegistryNames, rootRegistries));
+
+      if (rootRegistries.size() != rootRegistryNames.size())
+      {
+         PrintTools.error("Could not find all root registries. Aborting save.");
+         return Collections.emptyList();
+      }
+
+      return rootRegistries;
+   }
+
+   public static void recursiveAddMatchingRoots(GuiRegistry registry, List<String> rootRegistryNames, List<GuiRegistry> matching)
+   {
+      if (rootRegistryNames.contains(registry.getUniqueName()))
+      {
+         matching.add(registry);
+      }
+      else
+      {
+         registry.getRegistries().forEach(child -> recursiveAddMatchingRoots(child, rootRegistryNames, matching));
+      }
    }
 }

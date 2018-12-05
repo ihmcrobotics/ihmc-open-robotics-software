@@ -48,18 +48,18 @@ public class HandHybridJointspaceTaskspaceTrajectoryCommand
    }
 
    @Override
-   public void set(HandHybridJointspaceTaskspaceTrajectoryMessage message)
+   public void setFromMessage(HandHybridJointspaceTaskspaceTrajectoryMessage message)
    {
       robotSide = RobotSide.fromByte(message.getRobotSide());
-      jointspaceTrajectoryCommand.set(message.getJointspaceTrajectoryMessage());
-      taskspaceTrajectoryCommand.set(message.getTaskspaceTrajectoryMessage());
+      jointspaceTrajectoryCommand.setFromMessage(message.getJointspaceTrajectoryMessage());
+      taskspaceTrajectoryCommand.setFromMessage(message.getTaskspaceTrajectoryMessage());
    }
 
    @Override
    public void set(ReferenceFrameHashCodeResolver resolver, HandHybridJointspaceTaskspaceTrajectoryMessage message)
    {
       robotSide = RobotSide.fromByte(message.getRobotSide());
-      jointspaceTrajectoryCommand.set(message.getJointspaceTrajectoryMessage());
+      jointspaceTrajectoryCommand.setFromMessage(message.getJointspaceTrajectoryMessage());
       taskspaceTrajectoryCommand.set(resolver, message.getTaskspaceTrajectoryMessage());
    }
 

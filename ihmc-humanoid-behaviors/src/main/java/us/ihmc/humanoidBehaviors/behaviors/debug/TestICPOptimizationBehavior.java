@@ -2,7 +2,7 @@ package us.ihmc.humanoidBehaviors.behaviors.debug;
 
 import controller_msgs.msg.dds.FootstepDataListMessage;
 import controller_msgs.msg.dds.FootstepDataMessage;
-import us.ihmc.communication.packets.MessageTools;
+import us.ihmc.communication.IHMCROS2Publisher;
 import us.ihmc.communication.packets.PacketDestination;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
@@ -10,11 +10,11 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.humanoidBehaviors.behaviors.AbstractBehavior;
-import us.ihmc.humanoidBehaviors.communication.CommunicationBridgeInterface;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.time.YoStopwatch;
+import us.ihmc.ros2.Ros2Node;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 
@@ -29,10 +29,11 @@ public class TestICPOptimizationBehavior extends AbstractBehavior
    private final YoBoolean abortBehavior = new YoBoolean("AbortBehavior", registry);
 
    private final YoStopwatch timer;
+   private final IHMCROS2Publisher<FootstepDataListMessage> publisher;
 
-   public TestICPOptimizationBehavior(CommunicationBridgeInterface communicationBridge, HumanoidReferenceFrames referenceFrames, YoDouble yoTime)
+   public TestICPOptimizationBehavior(String robotName, Ros2Node ros2Node, HumanoidReferenceFrames referenceFrames, YoDouble yoTime)
    {
-      super(communicationBridge);
+      super(robotName, ros2Node);
       this.referenceFrames = referenceFrames;
 
       swingTime.set(1.2);
@@ -41,6 +42,8 @@ public class TestICPOptimizationBehavior extends AbstractBehavior
       stepLength.set(0.3);
 
       timer = new YoStopwatch(yoTime);
+
+      publisher = createPublisherForController(FootstepDataListMessage.class);
    }
 
    @Override
@@ -61,16 +64,16 @@ public class TestICPOptimizationBehavior extends AbstractBehavior
 
       if (Math.abs(rightFoot.getX()) > 0.1)
       {
-         sendPacket(MessageTools.createTextToSpeechPacket("Squaring up."));
+         publishTextToSpeack("Squaring up.");
       }
       else if (!stepInPlace.getBooleanValue())
       {
-         sendPacket(MessageTools.createTextToSpeechPacket("Step forward."));
+         publishTextToSpeack("Step forward.");
          stepPose.setX(stepLength.getDoubleValue());
       }
       else
       {
-         sendPacket(MessageTools.createTextToSpeechPacket("Step in place."));
+         publishTextToSpeack("Step in place.");
       }
 
       stepPose.changeFrame(ReferenceFrame.getWorldFrame());
@@ -82,7 +85,7 @@ public class TestICPOptimizationBehavior extends AbstractBehavior
       FootstepDataMessage footstepData = HumanoidMessageTools.createFootstepDataMessage(RobotSide.RIGHT, location, orientation);
       footsteps.getFootstepDataList().add().set(footstepData);
 
-      sendPacket(footsteps);
+      publisher.publish(footsteps);
       timer.reset();
    }
 
@@ -91,7 +94,7 @@ public class TestICPOptimizationBehavior extends AbstractBehavior
    {
       abortBehavior.set(false);
       stepInPlace.set(true);
-      sendPacket(MessageTools.createTextToSpeechPacket("Starting to step forward and backward with the right foot."));
+      publishTextToSpeack("Starting to step forward and backward with the right foot.");
    }
 
    @Override

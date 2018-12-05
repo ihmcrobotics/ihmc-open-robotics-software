@@ -14,17 +14,17 @@ import us.ihmc.commonWalkingControlModules.wrenchDistribution.WrenchMatrixCalcul
 import us.ihmc.commons.PrintTools;
 import us.ihmc.convexOptimization.quadraticProgram.ActiveSetQPSolver;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
-import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
+import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
+import us.ihmc.mecano.spatial.SpatialAcceleration;
+import us.ihmc.mecano.spatial.Wrench;
+import us.ihmc.robotics.contactable.ContactablePlaneBody;
+import us.ihmc.robotics.math.frames.YoMatrix;
+import us.ihmc.tools.exceptions.NoConvergenceException;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoFrameVector3D;
 import us.ihmc.yoVariables.variable.YoInteger;
-import us.ihmc.robotics.math.frames.YoMatrix;
-import us.ihmc.robotics.screwTheory.RigidBody;
-import us.ihmc.robotics.screwTheory.SpatialAccelerationVector;
-import us.ihmc.robotics.screwTheory.Wrench;
-import us.ihmc.tools.exceptions.NoConvergenceException;
 
 public class GroundContactForceOptimizationControlModule
 {
@@ -58,6 +58,8 @@ public class GroundContactForceOptimizationControlModule
    private final DenseMatrix64F momentumJacobian = new DenseMatrix64F(Wrench.SIZE, 1);
    private final DenseMatrix64F momentumWeight = new DenseMatrix64F(Wrench.SIZE, 1);
 
+   private final DenseMatrix64F zeroObjective = new DenseMatrix64F(0, 0);
+
    public GroundContactForceOptimizationControlModule(WrenchMatrixCalculator wrenchMatrixCalculator, List<? extends ContactablePlaneBody> contactablePlaneBodies,
          ControllerCoreOptimizationSettings optimizationSettings, YoVariableRegistry parentRegistry, YoGraphicsListRegistry yoGraphicsListRegistry)
    {
@@ -86,6 +88,9 @@ public class GroundContactForceOptimizationControlModule
       qpSolver = new GroundContactForceQPSolver(activeSetQPSolver, rhoSize, registry);
       qpSolver.setMinRho(optimizationSettings.getRhoMin());
 
+      zeroObjective.reshape(wrenchMatrixCalculator.getCopTaskSize(), 1);
+      zeroObjective.zero();
+
       parentRegistry.addChild(registry);
    }
 
@@ -94,8 +99,8 @@ public class GroundContactForceOptimizationControlModule
       qpSolver.reset();
    }
 
-   private Map<RigidBody, Wrench> solutionWrenches;
-   public void compute(Map<RigidBody, Wrench> groundReactionWrenchesToPack) throws NoConvergenceException
+   private Map<RigidBodyBasics, Wrench> solutionWrenches;
+   public void compute(Map<RigidBodyBasics, Wrench> groundReactionWrenchesToPack) throws NoConvergenceException
    {
       qpSolver.setRhoRegularizationWeight(wrenchMatrixCalculator.getRhoWeightMatrix());
       qpSolver.addRegularization();
@@ -139,11 +144,11 @@ public class GroundContactForceOptimizationControlModule
       solutionWrenches = wrenchMatrixCalculator.computeWrenchesFromRho(rhoSolution);
       for (int i = 0; i < contactablePlaneBodies.size(); i++)
       {
-         RigidBody rigidBody = contactablePlaneBodies.get(i).getRigidBody();
+         RigidBodyBasics rigidBody = contactablePlaneBodies.get(i).getRigidBody();
          Wrench solutionWrench = solutionWrenches.get(rigidBody);
 
          if (groundReactionWrenchesToPack.containsKey(rigidBody))
-            groundReactionWrenchesToPack.get(rigidBody).set(solutionWrench);
+            groundReactionWrenchesToPack.get(rigidBody).setIncludingFrame(solutionWrench);
          else
             groundReactionWrenchesToPack.put(rigidBody, solutionWrench);
       }
@@ -155,15 +160,13 @@ public class GroundContactForceOptimizationControlModule
       DenseMatrix64F rhoRateWeight = wrenchMatrixCalculator.getRhoRateWeightMatrix();
       qpSolver.addRhoTask(rhoPrevious, rhoRateWeight);
 
-      DenseMatrix64F copJacobian = wrenchMatrixCalculator.getCopJacobianMatrix();
+      DenseMatrix64F copRegularizationWeight = wrenchMatrixCalculator.getCoPRegularizationWeight();
+      DenseMatrix64F copRegularizationJacobian = wrenchMatrixCalculator.getCoPRegularizationJacobian();
+      qpSolver.addRhoTask(copRegularizationJacobian, zeroObjective, copRegularizationWeight);
 
-      DenseMatrix64F previousCoP = wrenchMatrixCalculator.getPreviousCoPMatrix();
-      DenseMatrix64F copRateWeight = wrenchMatrixCalculator.getCopRateWeightMatrix();
-      qpSolver.addRhoTask(copJacobian, previousCoP, copRateWeight);
-
-      DenseMatrix64F desiredCoP = wrenchMatrixCalculator.getDesiredCoPMatrix();
-      DenseMatrix64F desiredCoPWeight = wrenchMatrixCalculator.getDesiredCoPWeightMatrix();
-      qpSolver.addRhoTask(copJacobian, desiredCoP, desiredCoPWeight);
+      DenseMatrix64F copRateRegularizationWeight = wrenchMatrixCalculator.getCoPRateRegularizationWeight();
+      DenseMatrix64F copRateRegularizationJacobian = wrenchMatrixCalculator.getCoPRateRegularizationJacobian();
+      qpSolver.addRhoTask(copRateRegularizationJacobian, zeroObjective, copRateRegularizationWeight);
    }
 
    public void submitMomentumRateCommand(MomentumRateCommand command)
@@ -183,9 +186,9 @@ public class GroundContactForceOptimizationControlModule
       yoMomentumSelectionMatrix.set(momentumSelectionMatrix);
    }
 
-   private final DenseMatrix64F tempTaskWeight = new DenseMatrix64F(SpatialAccelerationVector.SIZE, SpatialAccelerationVector.SIZE);
-   private final DenseMatrix64F tempTaskWeightSubspace = new DenseMatrix64F(SpatialAccelerationVector.SIZE, SpatialAccelerationVector.SIZE);
-   private final DenseMatrix64F fullMomentumObjective = new DenseMatrix64F(SpatialAccelerationVector.SIZE, 1);
+   private final DenseMatrix64F tempTaskWeight = new DenseMatrix64F(SpatialAcceleration.SIZE, SpatialAcceleration.SIZE);
+   private final DenseMatrix64F tempTaskWeightSubspace = new DenseMatrix64F(SpatialAcceleration.SIZE, SpatialAcceleration.SIZE);
+   private final DenseMatrix64F fullMomentumObjective = new DenseMatrix64F(SpatialAcceleration.SIZE, 1);
 
    public void processMomentumRateCommand(DenseMatrix64F additionalWrench)
    {
@@ -199,8 +202,8 @@ public class GroundContactForceOptimizationControlModule
          return;
 
       // Compute the weight: W = S * W * S^T
-      tempTaskWeight.reshape(SpatialAccelerationVector.SIZE, SpatialAccelerationVector.SIZE);
-      tempTaskWeightSubspace.reshape(taskSize, SpatialAccelerationVector.SIZE);
+      tempTaskWeight.reshape(SpatialAcceleration.SIZE, SpatialAcceleration.SIZE);
+      tempTaskWeightSubspace.reshape(taskSize, SpatialAcceleration.SIZE);
       momentumRateCommand.getWeightMatrix(tempTaskWeight);
       CommonOps.mult(momentumSelectionMatrix, tempTaskWeight, tempTaskWeightSubspace);
       CommonOps.multTransB(tempTaskWeightSubspace, momentumSelectionMatrix, momentumWeight);

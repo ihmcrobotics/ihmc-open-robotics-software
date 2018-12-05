@@ -6,10 +6,13 @@ import org.junit.After;
 import org.junit.Before;
 
 import controller_msgs.msg.dds.FootstepDataListMessage;
+import org.junit.Test;
 import us.ihmc.avatar.DRCObstacleCourseStartingLocation;
 import us.ihmc.avatar.MultiRobotTestInterface;
 import us.ihmc.avatar.testTools.DRCSimulationTestHelper;
 import us.ihmc.avatar.testTools.ScriptedFootstepGenerator;
+import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations;
+import us.ihmc.continuousIntegration.IntegrationCategory;
 import us.ihmc.euclid.geometry.BoundingBox3D;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
@@ -56,6 +59,8 @@ public abstract class DRCObstacleCourseWobblyFootTest implements MultiRobotTestI
    }
 
 
+   @ContinuousIntegrationAnnotations.ContinuousIntegrationTest(estimatedDuration = 23.5)
+   @Test(timeout = 120000)
    public void testStandingForACoupleSecondsWithWobblyFeet() throws SimulationExceededMaximumTimeException
    {
       simulationTestingParameters = SimulationTestingParameters.createFromSystemProperties();
@@ -89,6 +94,8 @@ public abstract class DRCObstacleCourseWobblyFootTest implements MultiRobotTestI
    }
 
 
+   @ContinuousIntegrationAnnotations.ContinuousIntegrationTest(estimatedDuration = 44.4)
+   @Test(timeout = 100000)
    public void testWalkingUpToRampWithShortStepsWithWobblyFeet() throws SimulationExceededMaximumTimeException
    {
       simulationTestingParameters = SimulationTestingParameters.createFromSystemProperties();
@@ -108,7 +115,7 @@ public abstract class DRCObstacleCourseWobblyFootTest implements MultiRobotTestI
       boolean success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(2.0);
 
       FootstepDataListMessage footstepDataList = createFootstepsForWalkingUpToRampShortSteps(scriptedFootstepGenerator);
-      drcSimulationTestHelper.send(footstepDataList);
+      drcSimulationTestHelper.publishToController(footstepDataList);
       success = success && drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(20.0);
 
       drcSimulationTestHelper.createVideo(getSimpleRobotName(), 1);
@@ -126,6 +133,8 @@ public abstract class DRCObstacleCourseWobblyFootTest implements MultiRobotTestI
 
 
 
+   @ContinuousIntegrationAnnotations.ContinuousIntegrationTest(estimatedDuration = 47.9)
+   @Test(timeout = 100000)
    public void testTurningInPlaceAndPassingPIWithWobblyFeet() throws SimulationExceededMaximumTimeException
    {
       simulationTestingParameters = SimulationTestingParameters.createFromSystemProperties();
@@ -148,7 +157,7 @@ public abstract class DRCObstacleCourseWobblyFootTest implements MultiRobotTestI
       boolean success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(2.0);
 
       FootstepDataListMessage footstepDataList = createFootstepsForTurningInPlaceAndPassingPI(scriptedFootstepGenerator);
-      drcSimulationTestHelper.send(footstepDataList);
+      drcSimulationTestHelper.publishToController(footstepDataList);
 
       final YoDouble pelvisOrientationError = getPelvisOrientationErrorVariableName(simulationConstructionSet);
 

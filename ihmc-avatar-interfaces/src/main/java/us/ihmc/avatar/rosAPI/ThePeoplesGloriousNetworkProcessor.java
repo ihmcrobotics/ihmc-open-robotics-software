@@ -155,11 +155,11 @@ public class ThePeoplesGloriousNetworkProcessor
 
       RosTfPublisher tfPublisher = new RosTfPublisher(rosMainNode, tfPrefix);
 
-      RosRobotConfigurationDataPublisher robotConfigurationPublisher = new RosRobotConfigurationDataPublisher(robotModel, controllerCommunicationBridge,
-            rosMainNode, ppsTimestampOffsetProvider, sensorInformation, jointMap, namespace, tfPublisher);
+//      RosRobotConfigurationDataPublisher robotConfigurationPublisher = new RosRobotConfigurationDataPublisher(robotModel, controllerCommunicationBridge,
+//            rosMainNode, ppsTimestampOffsetProvider, sensorInformation, jointMap, namespace, tfPublisher);
       if (scsSensorCommunicationBridge != null)
       {
-         publishSimulatedCameraAndLidar(fullRobotModel, sensorInformation, robotConfigurationPublisher);
+//         publishSimulatedCameraAndLidar(fullRobotModel, sensorInformation, robotConfigurationPublisher);
       }
 
       Set<Class<?>> outputTypes = GenericROSTranslationTools.getCoreOutputTopics();

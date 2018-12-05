@@ -5,6 +5,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import javafx.beans.property.BooleanProperty;
+import javafx.beans.property.SimpleBooleanProperty;
 import javafx.collections.ObservableList;
 import javafx.event.EventHandler;
 import javafx.fxml.FXML;
@@ -55,6 +57,9 @@ public class GuiController
    private TuningTabManager tuningTabManager;
 
    private final ParameterTree tree = new ParameterTree();
+
+   private final List<GuiRegistry> allRegistries = new ArrayList<>();
+   private final BooleanProperty rootRegistriesChanged = new SimpleBooleanProperty();
 
    public void initialize()
    {
@@ -162,13 +167,34 @@ public class GuiController
       changeCollector = new ChangeCollector();
       parameterMap.clear();
       List<GuiParameter> allParameters = new ArrayList<>();
-      registries.stream().forEach(registry -> allParameters.addAll(registry.getAllParameters()));
-      allParameters.stream().forEach(parameter -> {
+      registries.forEach(registry -> allParameters.addAll(registry.getAllParameters()));
+      allParameters.forEach(parameter -> {
          parameter.addChangedListener(changeCollector);
          parameter.addStatusUpdater();
          parameter.saveStateForReset();
          parameterMap.put(parameter.getUniqueName(), parameter);
       });
+
+      allRegistries.clear();
+      registries.stream().forEach(registry -> {
+         allRegistries.add(registry);
+         allRegistries.addAll(registry.getAllRegistries());
+      });
+      allRegistries.forEach(registry -> registry.isRoot().addListener((observable, oldValue, newValue) -> rootRegistriesChanged.set(true)));
+      rootRegistriesChanged.set(true);
+   }
+
+   public boolean areRootRegistriesChanged()
+   {
+      return rootRegistriesChanged.getValue();
+   }
+
+   public List<String> pollRootRegistryNames()
+   {
+      rootRegistriesChanged.set(false);
+      List<String> rootRegistries = new ArrayList<>();
+      allRegistries.stream().filter(registry -> registry.isRoot().get()).forEach(registry -> rootRegistries.add(registry.getUniqueName()));
+      return rootRegistries;
    }
 
    public List<GuiParameter> pollChangedParameters()

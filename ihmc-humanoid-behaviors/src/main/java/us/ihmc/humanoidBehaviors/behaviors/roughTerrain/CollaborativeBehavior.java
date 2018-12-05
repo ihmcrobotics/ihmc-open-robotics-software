@@ -8,40 +8,28 @@ import javax.imageio.ImageIO;
 
 import controller_msgs.msg.dds.VideoPacket;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
+import us.ihmc.communication.ROS2Tools;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidBehaviors.behaviors.AbstractBehavior;
-import us.ihmc.humanoidBehaviors.communication.CommunicationBridgeInterface;
 import us.ihmc.humanoidBehaviors.communication.ConcurrentListeningQueue;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
+import us.ihmc.ros2.Ros2Node;
 import us.ihmc.sensorProcessing.parameters.DRCRobotCameraParameters;
 import us.ihmc.sensorProcessing.parameters.DRCRobotSensorInformation;
 
 public class CollaborativeBehavior extends AbstractBehavior
 {
-
-   private FullHumanoidRobotModel fullHumanoidModel;
-   private WalkingControllerParameters walkingControllerParameters;
-   private HumanoidReferenceFrames referenceFrames;
-   private DRCRobotSensorInformation robotSensorInfo;
-   private int cameraID;
-   private String cameraName;
    private ConcurrentListeningQueue<VideoPacket> cameraData = new ConcurrentListeningQueue<>(20);
    private boolean testImage = false;
 
-   public CollaborativeBehavior(CommunicationBridgeInterface communicationBridge, HumanoidReferenceFrames referenceFrames,
+   public CollaborativeBehavior(String robotName, Ros2Node ros2Node, HumanoidReferenceFrames referenceFrames,
                                 FullHumanoidRobotModel fullHumanoidRobotModel, DRCRobotSensorInformation robotSensorInfo,
                                 WalkingControllerParameters walkingControllerParameters, YoGraphicsListRegistry graphicsListRegistry)
    {
-      super(communicationBridge);
-      this.attachNetworkListeningQueue(cameraData, VideoPacket.class);
-      this.fullHumanoidModel = fullHumanoidRobotModel;
-      this.walkingControllerParameters = walkingControllerParameters;
-      this.referenceFrames = referenceFrames;
-      this.robotSensorInfo = robotSensorInfo;
+      super(robotName, ros2Node);
+      createSubscriber(VideoPacket.class, ROS2Tools.getDefaultTopicNameGenerator(), cameraData::put);
       DRCRobotCameraParameters[] robotCameraParameters = robotSensorInfo.getCameraParameters();
-      this.cameraName = robotCameraParameters[0].getSensorNameInSdf();
-      //System.out.println(cameraName);
    }
 
    @Override

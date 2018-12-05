@@ -2,6 +2,7 @@ package us.ihmc.robotics.lists;
 
 import java.util.List;
 
+import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.euclid.referenceFrame.FramePoint2D;
 import us.ihmc.euclid.referenceFrame.FrameVector2D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
@@ -23,12 +24,7 @@ public class FrameTuple2dArrayList<T extends FrameTuple2DBasics> extends Recycli
 
    public void setOrCreate(int i, FrameTuple2DReadOnly frameTuple2d)
    {
-      if (i >= size)
-      {
-         size = i + 1;
-         ensureCapacity(size);
-      }
-      unsafeGet(i).setIncludingFrame(frameTuple2d);
+      getAndGrowIfNeeded(i).setIncludingFrame(frameTuple2d);
    }
 
    public void set(int i, FrameTuple2DReadOnly frameTuple2d)
@@ -48,34 +44,40 @@ public class FrameTuple2dArrayList<T extends FrameTuple2DBasics> extends Recycli
 
    public void copyFromListAndTrimSize(FrameTuple2dArrayList<?> otherList)
    {
-      ensureCapacity(otherList.size());
-      size = otherList.size;
-
-      for (int i = 0; i < size; i++)
+      for (int i = 0; i < otherList.size(); i++)
       {
-         unsafeSet(i, otherList.unsafeGet(i));
+         getAndGrowIfNeeded(i).setIncludingFrame(otherList.get(i));
+      }
+
+      while(size() > otherList.size())
+      {
+         remove(size() - 1);
       }
    }
 
    public void copyFromListAndTrimSize(List<? extends FrameTuple2DReadOnly> otherList)
    {
-      ensureCapacity(otherList.size());
-      size = otherList.size();
-
-      for (int i = 0; i < size; i++)
+      for (int i = 0; i < otherList.size(); i++)
       {
-         unsafeSet(i, otherList.get(i));
+         getAndGrowIfNeeded(i).setIncludingFrame(otherList.get(i));
+      }
+
+      while(size() > otherList.size())
+      {
+         remove(size() - 1);
       }
    }
 
    public void copyFromPoint2dListAndTrimSize(ReferenceFrame referenceFrame, List<? extends Tuple2DReadOnly> otherList)
    {
-      ensureCapacity(otherList.size());
-      size = otherList.size();
-
-      for (int i = 0; i < size; i++)
+      for (int i = 0; i < otherList.size(); i++)
       {
-         unsafeSet(i, referenceFrame, otherList.get(i));
+         getAndGrowIfNeeded(i).setIncludingFrame(referenceFrame, otherList.get(i));
+      }
+
+      while(size() > otherList.size())
+      {
+         remove(size() - 1);
       }
    }
 

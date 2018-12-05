@@ -1,19 +1,15 @@
 package us.ihmc.simulationToolkit.visualizers;
 
-import java.sql.Time;
 import java.util.ArrayList;
 
 import org.apache.commons.lang3.tuple.ImmutablePair;
 
-import us.ihmc.euclid.transform.RigidBodyTransform;
-import us.ihmc.euclid.tuple3D.Vector3D;
-import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
+import us.ihmc.mecano.multiBodySystem.interfaces.FloatingJointBasics;
+import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
+import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.robotDataLogger.RobotVisualizer;
 import us.ihmc.robotModels.FullRobotModel;
-import us.ihmc.robotics.screwTheory.FloatingInverseDynamicsJoint;
-import us.ihmc.robotics.screwTheory.OneDoFJoint;
-import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.simulationconstructionset.FloatingRootJointRobot;
 import us.ihmc.simulationconstructionset.OneDegreeOfFreedomJoint;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
@@ -35,31 +31,31 @@ public class FullRobotModelVisualizer implements RobotVisualizer
 
    private SimulationConstructionSet scs;
    private YoVariableRegistry robotRegistry;
-   private FloatingInverseDynamicsJoint rootJoint;
-   private final ArrayList<ImmutablePair<OneDegreeOfFreedomJoint,OneDoFJoint>> revoluteJoints = new ArrayList<ImmutablePair<OneDegreeOfFreedomJoint, OneDoFJoint>>();
+   private FloatingJointBasics rootJoint;
+   private final ArrayList<ImmutablePair<OneDegreeOfFreedomJoint,OneDoFJointBasics>> revoluteJoints = new ArrayList<ImmutablePair<OneDegreeOfFreedomJoint, OneDoFJointBasics>>();
   
    private volatile long latestTimestamp = 0;
    
    public FullRobotModelVisualizer(SimulationConstructionSet scs, FullRobotModel fullRobotModel, double updateDT)
    {   
-      this.fullRobot = fullRobotModel;
+      fullRobot = fullRobotModel;
       this.scs = scs;
-      this.robot = (FloatingRootJointRobot) scs.getRobots()[0];
-      this.name = robot.getName() + "Simulated";    
+      robot = (FloatingRootJointRobot) scs.getRobots()[0];
+      name = robot.getName() + "Simulated";    
       this.updateDT = updateDT;
-      this.robotRegistry = robot.getRobotsYoVariableRegistry();
-      this.rootJoint = fullRobotModel.getRootJoint();
+      robotRegistry = robot.getRobotsYoVariableRegistry();
+      rootJoint = fullRobotModel.getRootJoint();
       revoluteJoints.clear();
-      OneDoFJoint[] revoluteJointsArray = fullRobotModel.getOneDoFJoints();
-      for (OneDoFJoint revoluteJoint : revoluteJointsArray)
+      OneDoFJointBasics[] revoluteJointsArray = fullRobotModel.getOneDoFJoints();
+      for (OneDoFJointBasics revoluteJoint : revoluteJointsArray)
       {
          String name = revoluteJoint.getName();
          OneDegreeOfFreedomJoint oneDoFJoint = robot.getOneDegreeOfFreedomJoint(name);
          
-         ImmutablePair<OneDegreeOfFreedomJoint,OneDoFJoint> jointPair = new ImmutablePair<OneDegreeOfFreedomJoint, OneDoFJoint>(oneDoFJoint, revoluteJoint);
-         this.revoluteJoints.add(jointPair);
+         ImmutablePair<OneDegreeOfFreedomJoint,OneDoFJointBasics> jointPair = new ImmutablePair<OneDegreeOfFreedomJoint, OneDoFJointBasics>(oneDoFJoint, revoluteJoint);
+         revoluteJoints.add(jointPair);
       }
-      this.setMainRegistry(robotRegistry, null, null);
+      setMainRegistry(robotRegistry, null, null);
    }
 
    public FloatingRootJointRobot getSDFRobot()
@@ -83,7 +79,7 @@ public class FullRobotModelVisualizer implements RobotVisualizer
    }
    
    @Override
-   public void setMainRegistry(YoVariableRegistry registry, RigidBody rootBody, YoGraphicsListRegistry yoGraphicsListRegistry)
+   public void setMainRegistry(YoVariableRegistry registry, RigidBodyBasics rootBody, YoGraphicsListRegistry yoGraphicsListRegistry)
    {
             
       if( robot.getRobotsYoVariableRegistry() != registry)
@@ -102,27 +98,22 @@ public class FullRobotModelVisualizer implements RobotVisualizer
       return getName();
    }
 
-   
-   private final Vector3D tempPosition = new Vector3D();
-   private final Quaternion tempOrientation = new Quaternion();
-   
+   @Override
    public void update(long timestamp)
    {
       fullRobot.updateFrames();
-      this.latestTimestamp = timestamp;
+      latestTimestamp = timestamp;
       
       if(rootJoint != null)
       {
-         RigidBodyTransform rootTransform = rootJoint.getJointTransform3D();
-         rootTransform.get(tempOrientation, tempPosition);
-         robot.setOrientation(tempOrientation);
-         robot.setPositionInWorld(tempPosition);
+         robot.setOrientation(rootJoint.getJointPose().getOrientation());
+         robot.setPositionInWorld(rootJoint.getJointPose().getPosition());
       }
       
-      for (ImmutablePair<OneDegreeOfFreedomJoint, OneDoFJoint> jointPair : revoluteJoints)
+      for (ImmutablePair<OneDegreeOfFreedomJoint, OneDoFJointBasics> jointPair : revoluteJoints)
       {
          OneDegreeOfFreedomJoint pinJoint = jointPair.getLeft();
-         OneDoFJoint revoluteJoint = jointPair.getRight();
+         OneDoFJointBasics revoluteJoint = jointPair.getRight();
 
          pinJoint.setQ(revoluteJoint.getQ());
          pinJoint.setQd(revoluteJoint.getQd());
@@ -135,6 +126,7 @@ public class FullRobotModelVisualizer implements RobotVisualizer
       }
    }
 
+   @Override
    public void close()
    {
       // no-op

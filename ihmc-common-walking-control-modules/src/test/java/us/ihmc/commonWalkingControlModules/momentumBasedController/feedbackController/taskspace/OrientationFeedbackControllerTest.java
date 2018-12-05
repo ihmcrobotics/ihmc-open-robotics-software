@@ -9,6 +9,7 @@ import org.ejml.data.DenseMatrix64F;
 import org.ejml.ops.CommonOps;
 import org.ejml.ops.MatrixFeatures;
 import org.ejml.ops.NormOps;
+import org.junit.After;
 import org.junit.Test;
 
 import us.ihmc.commonWalkingControlModules.controllerCore.FeedbackControllerToolbox;
@@ -16,28 +17,36 @@ import us.ihmc.commonWalkingControlModules.controllerCore.WholeBodyControlCoreTo
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.OrientationFeedbackControlCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.SpatialFeedbackControlCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.SpatialAccelerationCommand;
-import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.MotionQPInput;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.MotionQPInputCalculator;
+import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.QPInput;
 import us.ihmc.commons.RandomNumbers;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.tools.ReferenceFrameTools;
 import us.ihmc.euclid.tools.EuclidCoreRandomTools;
+import us.ihmc.mecano.frames.CenterOfMassReferenceFrame;
+import us.ihmc.mecano.multiBodySystem.RevoluteJoint;
+import us.ihmc.mecano.multiBodySystem.interfaces.JointBasics;
+import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
+import us.ihmc.mecano.tools.JointStateType;
+import us.ihmc.mecano.tools.MultiBodySystemRandomTools;
+import us.ihmc.mecano.tools.MultiBodySystemRandomTools.RandomFloatingRevoluteJointChain;
+import us.ihmc.mecano.tools.MultiBodySystemTools;
 import us.ihmc.robotics.controllers.pidGains.PID3DGains;
 import us.ihmc.robotics.controllers.pidGains.implementations.DefaultPID3DGains;
-import us.ihmc.robotics.referenceFrames.CenterOfMassReferenceFrame;
-import us.ihmc.robotics.screwTheory.InverseDynamicsJoint;
-import us.ihmc.robotics.screwTheory.RevoluteJoint;
-import us.ihmc.robotics.screwTheory.RigidBody;
-import us.ihmc.robotics.screwTheory.ScrewTestTools;
-import us.ihmc.robotics.screwTheory.ScrewTestTools.RandomFloatingChain;
-import us.ihmc.robotics.screwTheory.ScrewTools;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 
 public class OrientationFeedbackControllerTest
 {
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
+
+   @After
+   public void tearDown()
+   {
+      ReferenceFrameTools.clearWorldFrameTree();
+   }
 
    @ContinuousIntegrationTest(estimatedDuration = 0.4)
    @Test(timeout = 30000)
@@ -47,13 +56,13 @@ public class OrientationFeedbackControllerTest
 
       YoVariableRegistry registry = new YoVariableRegistry("Dummy");
       int numberOfRevoluteJoints = 10;
-      RandomFloatingChain randomFloatingChain = new RandomFloatingChain(random, numberOfRevoluteJoints);
+      RandomFloatingRevoluteJointChain randomFloatingChain = new RandomFloatingRevoluteJointChain(random, numberOfRevoluteJoints);
       List<RevoluteJoint> joints = randomFloatingChain.getRevoluteJoints();
-      RigidBody elevator = randomFloatingChain.getElevator();
-      RigidBody endEffector = joints.get(joints.size() - 1).getSuccessor();
+      RigidBodyBasics elevator = randomFloatingChain.getElevator();
+      RigidBodyBasics endEffector = joints.get(joints.size() - 1).getSuccessor();
 
       ReferenceFrame centerOfMassFrame = new CenterOfMassReferenceFrame("centerOfMassFrame", worldFrame, elevator);
-      InverseDynamicsJoint[] jointsToOptimizeFor = ScrewTools.computeSupportAndSubtreeJoints(elevator);
+      JointBasics[] jointsToOptimizeFor = MultiBodySystemTools.collectSupportAndSubtreeJoints(elevator);
       double controlDT = 0.004;
 
       WholeBodyControlCoreToolbox toolbox = new WholeBodyControlCoreToolbox(controlDT, 0.0, null, jointsToOptimizeFor, centerOfMassFrame, null, null,
@@ -74,16 +83,16 @@ public class OrientationFeedbackControllerTest
       spatialFeedbackControlCommand.getSpatialAccelerationCommand().setSelectionMatrixForAngularControl();
 
       MotionQPInputCalculator motionQPInputCalculator = toolbox.getMotionQPInputCalculator();
-      MotionQPInput orientationMotionQPInput = new MotionQPInput(toolbox.getJointIndexHandler().getNumberOfDoFs());
-      MotionQPInput spatialMotionQPInput = new MotionQPInput(toolbox.getJointIndexHandler().getNumberOfDoFs());
+      QPInput orientationMotionQPInput = new QPInput(toolbox.getJointIndexHandler().getNumberOfDoFs());
+      QPInput spatialMotionQPInput = new QPInput(toolbox.getJointIndexHandler().getNumberOfDoFs());
 
       SpatialAccelerationCommand orientationControllerOutput = orientationFeedbackController.getInverseDynamicsOutput();
       SpatialAccelerationCommand spatialControllerOutput = spatialFeedbackController.getInverseDynamicsOutput();
 
       for (int i = 0; i < 300; i++)
       {
-         ScrewTestTools.setRandomPositions(joints, random);
-         ScrewTestTools.setRandomVelocities(joints, random);
+         MultiBodySystemRandomTools.nextState(random, JointStateType.CONFIGURATION, -Math.PI / 2.0, Math.PI / 2.0, joints);
+         MultiBodySystemRandomTools.nextState(random, JointStateType.VELOCITY, joints);
          joints.get(0).getPredecessor().updateFramesRecursively();
          centerOfMassFrame.update();
 

@@ -4,9 +4,9 @@ import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple2D.Point2D;
+import us.ihmc.mecano.algorithms.CenterOfMassJacobian;
 import us.ihmc.robotModels.FullRobotModel;
 import us.ihmc.robotics.controllers.PIDController;
-import us.ihmc.robotics.screwTheory.CenterOfMassJacobian;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoFramePoint2D;
@@ -81,7 +81,7 @@ public class BasicPlanarController
       centerOfMass.setToZero(centerOfMassFrame);
       centerOfMass.changeFrame(worldFrame);
 
-      centerOfMassJacobian.getCenterOfMassVelocity(centerOfMassVelocity);
+      centerOfMassVelocity.setIncludingFrame(centerOfMassJacobian.getCenterOfMassVelocity());
       centerOfMassVelocity.changeFrame(worldFrame);
 
       double xForce = xController.compute(centerOfMass.getX(), yoDesiredX.getDoubleValue(), centerOfMassVelocity.getX(), 0.0, controlDT);

@@ -1,9 +1,10 @@
 package us.ihmc.robotics.math.trajectories;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertTrue;
 
 import java.util.Random;
 
+import org.junit.After;
 import org.junit.Test;
 
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations;
@@ -14,19 +15,26 @@ import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.tools.EuclidFrameRandomTools;
 import us.ihmc.euclid.referenceFrame.tools.EuclidFrameTestTools;
+import us.ihmc.euclid.referenceFrame.tools.ReferenceFrameTools;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
+import us.ihmc.mecano.spatial.Twist;
 import us.ihmc.robotics.geometry.RotationTools;
 import us.ihmc.robotics.math.trajectories.waypoints.FrameEuclideanTrajectoryPoint;
 import us.ihmc.robotics.math.trajectories.waypoints.FrameSE3TrajectoryPoint;
 import us.ihmc.robotics.math.trajectories.waypoints.MultipleWaypointsPoseTrajectoryGenerator;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
-import us.ihmc.robotics.screwTheory.Twist;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 
 public class BlendedPoseTrajectoryGeneratorTest
 {
    private final double EPSILON = 1e-3;
+
+   @After
+   public void tearDown()
+   {
+      ReferenceFrameTools.clearWorldFrameTree();
+   }
 
    private void assertGeometricEquals(FramePose3D poseA, FramePose3D poseB, double epsilon)
    {
@@ -96,8 +104,8 @@ public class BlendedPoseTrajectoryGeneratorTest
          linearVelocity.changeFrame(expressedInFrame);
          angularVelocity.changeFrame(expressedInFrame);
          Twist twist = new Twist(bodyFrame, baseFrame, expressedInFrame);
-         twist.setLinearPart(linearVelocity);
-         twist.setAngularPart(angularVelocity);
+         twist.getLinearPart().set(linearVelocity);
+         twist.getAngularPart().set(angularVelocity);
          return twist;
       }
 

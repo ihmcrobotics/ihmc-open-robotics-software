@@ -4,27 +4,35 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
+import org.junit.After;
 import org.junit.Test;
 
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.euclid.matrix.RotationMatrix;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.tools.ReferenceFrameTools;
 import us.ihmc.euclid.tools.EuclidCoreTestTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.mecano.frames.MovingReferenceFrame;
+import us.ihmc.mecano.spatial.Twist;
+import us.ihmc.mecano.tools.MecanoTestTools;
 import us.ihmc.robotics.screwTheory.MovingMidFootZUpGroundFrame;
-import us.ihmc.robotics.screwTheory.MovingReferenceFrame;
 import us.ihmc.robotics.screwTheory.MovingZUpFrame;
 import us.ihmc.robotics.screwTheory.NumericalMovingReferenceFrame;
-import us.ihmc.robotics.screwTheory.Twist;
 import us.ihmc.robotics.screwTheory.TwistCalculatorTest;
 import us.ihmc.robotics.trajectories.providers.SettableDoubleProvider;
 import us.ihmc.yoVariables.providers.DoubleProvider;
 
 public class MovingWalkingReferenceFrameTest
 {
+   @After
+   public void tearDown()
+   {
+      ReferenceFrameTools.clearWorldFrameTree();
+   }
 
    @ContinuousIntegrationTest(estimatedDuration = 0.4)
    @Test(timeout = 30000)
@@ -95,10 +103,10 @@ public class MovingWalkingReferenceFrameTest
       expected.getTwistOfFrame(expectedTwist);
       actual.getTwistOfFrame(actualTwist);
 
-      expectedTwist.changeBodyFrameNoRelativeTwist(actual);
+      expectedTwist.setBodyFrame(actual);
       expectedTwist.changeFrame(actual);
 
-      TwistCalculatorTest.assertTwistEquals(expectedTwist, actualTwist, epsilon);
+      MecanoTestTools.assertTwistEquals(expectedTwist, actualTwist, epsilon);
    }
 
    private static MovingReferenceFrame createMovingReferenceFrame(String name, ReferenceFrame parentFrame, Random random, DoubleProvider timeProvider)
@@ -172,9 +180,9 @@ public class MovingWalkingReferenceFrameTest
          {
             twistRelativeToParentToPack.setToZero(this, parentFrame, this);
             linearVelocity.changeFrame(this);
-            twistRelativeToParentToPack.setLinearPart(linearVelocity);
+            twistRelativeToParentToPack.getLinearPart().set(linearVelocity);
             angularVelocity.changeFrame(this);
-            twistRelativeToParentToPack.setAngularPart(angularVelocity);
+            twistRelativeToParentToPack.getAngularPart().set(angularVelocity);
          }
       };
    }

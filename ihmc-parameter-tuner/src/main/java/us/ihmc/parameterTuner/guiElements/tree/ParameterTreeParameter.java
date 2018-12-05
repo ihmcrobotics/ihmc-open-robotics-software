@@ -81,6 +81,7 @@ public class ParameterTreeParameter implements ParameterTreeValue
          setAlignment(Pos.CENTER_LEFT);
          getChildren().add(treeTuner);
          getChildren().add(name);
+         setOnContextMenuRequested((event) -> contextMenu.show(name, event.getScreenX(), event.getScreenY()));
 
          // Setup context menu for copying name to system clipboard.
          contextMenu.getItems().add(copyName);
@@ -98,7 +99,6 @@ public class ParameterTreeParameter implements ParameterTreeValue
 
          // Setup context menu for discarding changes.
          contextMenu.getItems().add(discard);
-         setOnContextMenuRequested((event) -> contextMenu.show(name, event.getScreenX(), event.getScreenY()));
          discard.setOnAction(event -> {
             selectedItems.filtered(item -> !item.getValue().isRegistry()).forEach(item -> item.getValue().getParameter().reset());
          });

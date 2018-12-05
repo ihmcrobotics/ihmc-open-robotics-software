@@ -1,20 +1,22 @@
 package us.ihmc.quadrupedRobotics.controller.states;
 
+import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.quadrupedRobotics.controlModules.QuadrupedBalanceManager;
 import us.ihmc.quadrupedRobotics.controlModules.QuadrupedBodyOrientationManager;
 import us.ihmc.quadrupedRobotics.controlModules.QuadrupedControlManagerFactory;
 import us.ihmc.quadrupedRobotics.controlModules.foot.QuadrupedFeetManager;
 import us.ihmc.quadrupedRobotics.controller.ControllerEvent;
-import us.ihmc.quadrupedRobotics.controller.QuadrupedController;
 import us.ihmc.quadrupedRobotics.controller.QuadrupedControllerToolbox;
 import us.ihmc.quadrupedRobotics.messageHandling.QuadrupedStepMessageHandler;
-import us.ihmc.quadrupedRobotics.planning.ContactState;
 import us.ihmc.quadrupedRobotics.planning.QuadrupedStep;
-import us.ihmc.robotics.lists.RecyclingArrayList;
-import us.ihmc.robotics.robotSide.QuadrantDependentList;
+import us.ihmc.quadrupedRobotics.planning.QuadrupedTimedStep;
+import us.ihmc.robotics.stateMachine.extra.EventState;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoDouble;
 
-public class QuadrupedStepController implements QuadrupedController
+import java.util.List;
+
+public class QuadrupedStepController implements EventState
 {
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
 
@@ -26,13 +28,15 @@ public class QuadrupedStepController implements QuadrupedController
    private final QuadrupedBodyOrientationManager bodyOrientationManager;
 
    private final QuadrupedControllerToolbox controllerToolbox;
-   private final QuadrantDependentList<ContactState> contactStates;
+
+   private final YoDouble speedUpTime = new YoDouble("speedUpTime", registry);
+   private final YoDouble clampedSpeedUpTime = new YoDouble("clampedSpeedUpTime", registry);
+   private final YoDouble estimatedRemainingSwingTimeUnderDisturbance = new YoDouble("estimatedRemainingSwingTimeUnderDisturbance", registry);
 
    public QuadrupedStepController(QuadrupedControllerToolbox controllerToolbox, QuadrupedControlManagerFactory controlManagerFactory,
                                   QuadrupedStepMessageHandler stepMessageHandler, YoVariableRegistry parentRegistry)
    {
       this.controllerToolbox = controllerToolbox;
-      this.contactStates = controllerToolbox.getContactStates();
       this.stepMessageHandler = stepMessageHandler;
 
       // feedback controllers
@@ -58,13 +62,9 @@ public class QuadrupedStepController implements QuadrupedController
       feetManager.reset();
       feetManager.requestFullContact();
 
-      stepMessageHandler.process(balanceManager.getAccumulatedStepAdjustment());
+      stepMessageHandler.process();
       balanceManager.clearStepSequence();
       balanceManager.addStepsToSequence(stepMessageHandler.getStepSequence());
-
-      // compute step adjustment
-      RecyclingArrayList<QuadrupedStep> adjustedSteps = balanceManager.computeStepAdjustment(stepMessageHandler.getActiveSteps());
-      feetManager.adjustSteps(adjustedSteps);
 
       balanceManager.initializeForStepping();
    }
@@ -72,17 +72,56 @@ public class QuadrupedStepController implements QuadrupedController
    @Override
    public void doAction(double timeInState)
    {
-      stepMessageHandler.process(balanceManager.getAccumulatedStepAdjustment());
+      stepMessageHandler.process();
 
       // trigger step events
       feetManager.triggerSteps(stepMessageHandler.getActiveSteps());
 
+      // update desired contact state and sole forces
+      feetManager.compute();
+
       balanceManager.clearStepSequence();
       balanceManager.addStepsToSequence(stepMessageHandler.getStepSequence());
 
-      // update step adjustment
+      // update desired horizontal com forces
+      balanceManager.compute();
+
+      // update step adjustment and swing speed up
       RecyclingArrayList<QuadrupedStep> adjustedSteps = balanceManager.computeStepAdjustment(stepMessageHandler.getActiveSteps());
-      feetManager.adjustSteps(adjustedSteps);
+      if (balanceManager.stepHasBeenAdjusted())
+      {
+         feetManager.adjustSteps(adjustedSteps);
+
+         // update swing speed up
+         requestSwingSpeedUpIfNeeded();
+      }
+
+
+      // update desired body orientation, angular velocity, and torque
+      bodyOrientationManager.compute();
+   }
+
+   private void requestSwingSpeedUpIfNeeded()
+   {
+      List<? extends QuadrupedTimedStep> activeSteps = stepMessageHandler.getActiveSteps();
+      double speedUpTime = balanceManager.estimateSwingSpeedUpTimeUnderDisturbance();
+      this.speedUpTime.set(speedUpTime);
+
+      double minSpeedUpTime = speedUpTime;
+      for (int i = 0; i < activeSteps.size(); i++)
+      {
+         minSpeedUpTime = Math.min(minSpeedUpTime, feetManager.computeClampedSwingSpeedUpTime(activeSteps.get(i).getRobotQuadrant(), speedUpTime));
+      }
+      this.clampedSpeedUpTime.set(minSpeedUpTime);
+
+
+      double timeRemaining = Double.NEGATIVE_INFINITY;
+      for (int i = 0; i < activeSteps.size(); i++)
+      {
+         timeRemaining = Math.max(timeRemaining, feetManager.requestSwingSpeedUp(activeSteps.get(i).getRobotQuadrant(), minSpeedUpTime));
+      }
+
+      estimatedRemainingSwingTimeUnderDisturbance.set(timeRemaining);
    }
 
    @Override

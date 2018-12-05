@@ -9,7 +9,7 @@ import java.util.concurrent.atomic.AtomicReference;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.lowLevel.IntermediateDesiredJointDataHolder;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.humanoidRobotics.model.CenterOfPressureDataHolder;
-import us.ihmc.robotics.screwTheory.RigidBody;
+import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.sensorProcessing.model.RobotMotionStatus;
 import us.ihmc.sensorProcessing.model.RobotMotionStatusHolder;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutputList;
@@ -20,8 +20,8 @@ public class ControllerDataForEstimatorHolder
    private final Map<String, Point2D> centerOfPressure = new HashMap<String, Point2D>();
    private AtomicReference<RobotMotionStatus> robotMotionStatus = new AtomicReference<RobotMotionStatus>(null);
 
-   private final List<RigidBody> controllerFeet;
-   private final List<RigidBody> estimatorFeet;
+   private final List<RigidBodyBasics> controllerFeet;
+   private final List<RigidBodyBasics> estimatorFeet;
    private final CenterOfPressureDataHolder controllerCenterOfPressureDataHolder;
    private final CenterOfPressureDataHolder estimatorCenterOfPressureDataHolder;
 
@@ -48,7 +48,7 @@ public class ControllerDataForEstimatorHolder
       
       for (int i = 0; i < controllerFeet.size(); i++)
       {
-         RigidBody foot = controllerFeet.get(i);
+         RigidBodyBasics foot = controllerFeet.get(i);
          centerOfPressure.put(foot.getName(), new Point2D());
       }
    }
@@ -57,7 +57,7 @@ public class ControllerDataForEstimatorHolder
    {
       for (int i = 0; i < estimatorFeet.size(); i++)
       {
-         RigidBody foot = estimatorFeet.get(i);
+         RigidBodyBasics foot = estimatorFeet.get(i);
          estimatorCenterOfPressureDataHolder.setCenterOfPressure(centerOfPressure.get(foot.getName()), foot);
       }
 
@@ -71,7 +71,7 @@ public class ControllerDataForEstimatorHolder
    {
       for (int i = 0; i < controllerFeet.size(); i++)
       {
-         RigidBody foot = controllerFeet.get(i);
+         RigidBodyBasics foot = controllerFeet.get(i);
          controllerCenterOfPressureDataHolder.getCenterOfPressureByName(centerOfPressure.get(foot.getName()), foot);
       }
 

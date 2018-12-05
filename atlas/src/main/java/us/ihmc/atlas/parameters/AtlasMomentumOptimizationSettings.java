@@ -18,8 +18,8 @@ public class AtlasMomentumOptimizationSettings extends MomentumOptimizationSetti
    // defaults for unscaled model:
    private static final double defaultRhoWeight = 0.00001;
    private static final double defaultRhoMin = 4.0;
-   private static final double defaultRhoRateDefaultWeight = 0.002;
-   private static final double defaultRhoRateHighWeight = 0.05;
+   private static final double defaultRhoRateDefaultWeight = 3.2E-8;
+   private static final double defaultRhoRateHighWeight = 8.0E-7;
 
    private static final boolean useWarmStartInSolver = true;
    private static final boolean disableRhosWhenNotInContact = true;
@@ -29,11 +29,11 @@ public class AtlasMomentumOptimizationSettings extends MomentumOptimizationSetti
    private final int nContactableBodies;
 
    private final double jointAccelerationWeight = 0.005;
-   private final double jointJerkWeight = 0.1;
+   private final double jointJerkWeight = 1.6E-6;
    private final double jointTorqueWeight = 0.005;
-   private final Vector2D copWeight = new Vector2D(100.0, 200.0);
-   private final Vector2D copRateDefaultWeight = new Vector2D(20000.0, 20000.0);
-   private final Vector2D copRateHighWeight = new Vector2D(2500000.0, 10000000.0);
+   private final Vector2D copWeight = new Vector2D(0.001, 0.002);
+   private final Vector2D copRateDefaultWeight = new Vector2D(0.00000032, 0.00000032);
+   private final Vector2D copRateHighWeight = new Vector2D(0.00004, 0.00016);
 
    private final double rhoWeight;
    private final double rhoMin;

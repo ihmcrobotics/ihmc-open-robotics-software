@@ -10,8 +10,7 @@ import org.ejml.ops.CommonOps;
 
 import gnu.trove.list.array.TDoubleArrayList;
 import us.ihmc.commons.PrintTools;
-import us.ihmc.robotics.lists.GenericTypeBuilder;
-import us.ihmc.robotics.lists.RecyclingArrayList;
+import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.robotics.time.ExecutionTimer;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
@@ -69,14 +68,7 @@ public class TrajectoryPointOptimizer
    private final DenseMatrix64F saveIntervalTimes = new DenseMatrix64F(1, 1);
    private final TDoubleArrayList costs = new TDoubleArrayList(maxIterations + 1);
 
-   private final RecyclingArrayList<DenseMatrix64F> x = new RecyclingArrayList<>(new GenericTypeBuilder<DenseMatrix64F>()
-   {
-      @Override
-      public DenseMatrix64F newInstance()
-      {
-         return new DenseMatrix64F(1, 1);
-      }
-   });
+   private final RecyclingArrayList<DenseMatrix64F> x = new RecyclingArrayList<>(0, () -> new DenseMatrix64F(1, 1));
 
    private final DenseMatrix64F H = new DenseMatrix64F(1, 1);
    private final DenseMatrix64F f = new DenseMatrix64F(1, 1);

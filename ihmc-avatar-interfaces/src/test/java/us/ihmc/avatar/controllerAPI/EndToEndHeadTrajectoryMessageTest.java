@@ -8,11 +8,15 @@ import java.util.Random;
 
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Test;
 
 import controller_msgs.msg.dds.HeadTrajectoryMessage;
 import us.ihmc.avatar.DRCObstacleCourseStartingLocation;
 import us.ihmc.avatar.MultiRobotTestInterface;
 import us.ihmc.avatar.testTools.DRCSimulationTestHelper;
+import us.ihmc.commons.thread.ThreadTools;
+import us.ihmc.communication.packets.MessageTools;
+import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations;
 import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tools.EuclidCoreTestTools;
@@ -20,11 +24,13 @@ import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.euclid.tuple4D.interfaces.QuaternionReadOnly;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
+import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
+import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
+import us.ihmc.mecano.tools.JointStateType;
+import us.ihmc.mecano.tools.MultiBodySystemRandomTools;
+import us.ihmc.mecano.tools.MultiBodySystemTools;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.math.trajectories.waypoints.MultipleWaypointsOrientationTrajectoryGenerator;
-import us.ihmc.robotics.screwTheory.OneDoFJoint;
-import us.ihmc.robotics.screwTheory.RigidBody;
-import us.ihmc.robotics.screwTheory.ScrewTestTools;
 import us.ihmc.robotics.screwTheory.ScrewTools;
 import us.ihmc.simulationConstructionSetTools.bambooTools.BambooTools;
 import us.ihmc.simulationConstructionSetTools.util.environments.FlatGroundEnvironment;
@@ -32,8 +38,6 @@ import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
 import us.ihmc.simulationconstructionset.util.simulationTesting.SimulationTestingParameters;
 import us.ihmc.tools.MemoryTools;
-import us.ihmc.commons.thread.ThreadTools;
-import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.yoVariables.variable.YoInteger;
 
 public abstract class EndToEndHeadTrajectoryMessageTest implements MultiRobotTestInterface
@@ -43,11 +47,13 @@ public abstract class EndToEndHeadTrajectoryMessageTest implements MultiRobotTes
 
    private DRCSimulationTestHelper drcSimulationTestHelper;
 
-   private RigidBody head;
-   private RigidBody chest;
-   private OneDoFJoint[] neckJoints;
+   private RigidBodyBasics head;
+   private RigidBodyBasics chest;
+   private OneDoFJointBasics[] neckJoints;
    private int numberOfJoints;
 
+   @ContinuousIntegrationAnnotations.ContinuousIntegrationTest(estimatedDuration = 29.0)
+   @Test(timeout = 140000)
    public void testSingleWaypoint() throws SimulationExceededMaximumTimeException
    {
       setupTest();
@@ -55,8 +61,8 @@ public abstract class EndToEndHeadTrajectoryMessageTest implements MultiRobotTes
       Random random = new Random(564574L);
       double trajectoryTime = 1.0;
 
-      ScrewTestTools.setRandomPositionsWithinJointLimits(neckJoints, random);
-      RigidBody headClone = neckJoints[numberOfJoints - 1].getSuccessor();
+      MultiBodySystemRandomTools.nextStateWithinJointLimits(random, JointStateType.CONFIGURATION, neckJoints);
+      RigidBodyBasics headClone = neckJoints[numberOfJoints - 1].getSuccessor();
       FrameQuaternion desiredRandomChestOrientation = new FrameQuaternion(headClone.getBodyFixedFrame());
       desiredRandomChestOrientation.changeFrame(ReferenceFrame.getWorldFrame());
 
@@ -64,7 +70,7 @@ public abstract class EndToEndHeadTrajectoryMessageTest implements MultiRobotTes
       ReferenceFrame chestCoMFrame = chest.getBodyFixedFrame();
       HeadTrajectoryMessage headTrajectoryMessage = HumanoidMessageTools.createHeadTrajectoryMessage(trajectoryTime, desiredOrientation, chestCoMFrame);
       headTrajectoryMessage.getSo3Trajectory().getFrameInformation().setDataReferenceFrameId(MessageTools.toFrameId(ReferenceFrame.getWorldFrame()));
-      drcSimulationTestHelper.send(headTrajectoryMessage);
+      drcSimulationTestHelper.publishToController(headTrajectoryMessage);
 
       boolean success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(getRobotModel().getControllerDT()); // Trick to get frames synchronized with the controller.
       assertTrue(success);
@@ -114,18 +120,18 @@ public abstract class EndToEndHeadTrajectoryMessageTest implements MultiRobotTes
       ReferenceFrame chestCoMFrame = fullRobotModel.getChest().getBodyFixedFrame();
 
       HeadTrajectoryMessage lookStraightAheadMessage = HumanoidMessageTools.createHeadTrajectoryMessage(trajectoryTime, lookStraightAhead, ReferenceFrame.getWorldFrame(), chestCoMFrame);
-      drcSimulationTestHelper.send(lookStraightAheadMessage);
+      drcSimulationTestHelper.publishToController(lookStraightAheadMessage);
       assertTrue(drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(trajectoryTime + 0.1));
 
       HeadTrajectoryMessage lookLeftMessage = HumanoidMessageTools.createHeadTrajectoryMessage(trajectoryTime, lookLeft, ReferenceFrame.getWorldFrame(), chestCoMFrame);
-      drcSimulationTestHelper.send(lookLeftMessage);
+      drcSimulationTestHelper.publishToController(lookLeftMessage);
       assertTrue(drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(trajectoryTime + 0.1));
 
       HeadTrajectoryMessage lookRightMessage = HumanoidMessageTools.createHeadTrajectoryMessage(trajectoryTime, lookRight, ReferenceFrame.getWorldFrame(), chestCoMFrame);
-      drcSimulationTestHelper.send(lookRightMessage);
+      drcSimulationTestHelper.publishToController(lookRightMessage);
       assertTrue(drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(trajectoryTime + 0.1));
 
-      drcSimulationTestHelper.send(lookStraightAheadMessage);
+      drcSimulationTestHelper.publishToController(lookStraightAheadMessage);
       assertTrue(drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(trajectoryTime + 0.1));
       
       drcSimulationTestHelper.createVideo(getSimpleRobotName(), 2);
@@ -144,7 +150,7 @@ public abstract class EndToEndHeadTrajectoryMessageTest implements MultiRobotTes
       FullHumanoidRobotModel fullRobotModel = drcSimulationTestHelper.getControllerFullRobotModel();
       head = fullRobotModel.getHead();
       chest = fullRobotModel.getChest();
-      neckJoints = ScrewTools.createOneDoFJointPath(chest, head);
+      neckJoints = MultiBodySystemTools.createOneDoFJointPath(chest, head);
       numberOfJoints = neckJoints.length;
 
       drcSimulationTestHelper.getSimulationConstructionSet().hideAllYoGraphics();

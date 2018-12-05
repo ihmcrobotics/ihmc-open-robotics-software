@@ -9,18 +9,18 @@ import org.yaml.snakeyaml.Yaml;
 
 import us.ihmc.avatar.drcRobot.RobotTarget;
 import us.ihmc.commons.Conversions;
-import us.ihmc.commons.PrintTools;
-import us.ihmc.robotDataLogger.YoVariableServer;
-import us.ihmc.util.PeriodicNonRealtimeThreadSchedulerFactory;
-import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.commons.MathTools;
+import us.ihmc.commons.PrintTools;
+import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
+import us.ihmc.robotDataLogger.YoVariableServer;
+import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.math.filters.AlphaFilteredYoVariable;
 import us.ihmc.robotics.math.functionGenerator.YoFunctionGenerator;
 import us.ihmc.robotics.math.functionGenerator.YoFunctionGeneratorMode;
-import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.rosControl.EffortJointHandle;
 import us.ihmc.rosControl.wholeRobot.IHMCWholeRobotControlJavaBridge;
 import us.ihmc.rosControl.wholeRobot.PositionJointHandle;
+import us.ihmc.util.PeriodicNonRealtimeThreadSchedulerFactory;
 import us.ihmc.valkyrie.ValkyrieRobotModel;
 import us.ihmc.valkyrieRosControl.ValkyrieTorqueOffsetPrinter;
 import us.ihmc.yoVariables.listener.VariableChangedListener;
@@ -127,7 +127,7 @@ public class ValkyrieRosControlSliderBoard extends IHMCWholeRobotControlJavaBrid
       ArrayList<String> jointNames = new ArrayList<>();
       for (String jointName : torqueControlledJoints)
       {
-         OneDoFJoint joint = fullRobotModel.getOneDoFJointByName(jointName);
+         OneDoFJointBasics joint = fullRobotModel.getOneDoFJointByName(jointName);
          EffortJointHandle handle = createEffortJointHandle(jointName);
          jointHolders.add(new EffortJointHolder(this, joint, handle, registry, dt));
          jointNames.add(joint.getName());
@@ -135,7 +135,7 @@ public class ValkyrieRosControlSliderBoard extends IHMCWholeRobotControlJavaBrid
 
       for (String jointName : positionControlledJoints)
       {
-         OneDoFJoint joint = fullRobotModel.getOneDoFJointByName(jointName);
+         OneDoFJointBasics joint = fullRobotModel.getOneDoFJointByName(jointName);
          PositionJointHandle handle = createPositionJointHandle(jointName);
          jointHolders.add(new PositionJointHolder(this, joint, handle, registry, dt));
          jointNames.add(joint.getName());

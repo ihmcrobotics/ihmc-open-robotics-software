@@ -25,15 +25,10 @@ import us.ihmc.robotics.linearAlgebra.MatrixTools;
  * Higher complexity convex regions can be represented, but may require more complex constraints. As
  * an example, the variable can be constrained to a circle, but this requires a quadratic constraint.
  */
-public class ConstraintToConvexRegion
+public class ConstraintToConvexRegion extends ICPInequalityInput
 {
    /** position offset of the constrained variable. */
    public final DenseMatrix64F positionOffset;
-
-   /** matrix multiplier of the constrained variable. */
-   public final DenseMatrix64F Aineq;
-   /** desired convex region for the constrained variable. */
-   public final DenseMatrix64F bineq;
 
    /** distance inside the convex region required for the constrained variable. */
    private double deltaInside = 0.0;
@@ -48,10 +43,8 @@ public class ConstraintToConvexRegion
     */
    public ConstraintToConvexRegion(int maximumNumberOfVertices)
    {
+      super(maximumNumberOfVertices, maximumNumberOfVertices);
       positionOffset = new DenseMatrix64F(2, 1);
-
-      Aineq = new DenseMatrix64F(maximumNumberOfVertices, maximumNumberOfVertices);
-      bineq = new DenseMatrix64F(maximumNumberOfVertices, 1);
    }
 
    /**
@@ -60,11 +53,9 @@ public class ConstraintToConvexRegion
     */
    public void reset()
    {
+      super.reset();
       positionOffset.zero();
       convexPolygon.clear();
-
-      Aineq.zero();
-      bineq.zero();
    }
 
    /**

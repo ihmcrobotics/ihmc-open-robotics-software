@@ -1,18 +1,18 @@
 package us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories;
 
-import static org.junit.Assert.assertEquals;
-
-import java.util.List;
-import java.util.Random;
-
 import org.apache.commons.lang3.NotImplementedException;
 import org.junit.Test;
-
 import us.ihmc.communication.controllerAPI.command.Command;
 import us.ihmc.communication.controllerAPI.command.QueueableCommand;
 import us.ihmc.communication.packets.ExecutionMode;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
-import us.ihmc.robotics.lists.GenericTypeBuilder;
+import us.ihmc.commons.lists.SupplierBuilder;
+
+import java.util.List;
+import java.util.Random;
+import java.util.function.Supplier;
+
+import static org.junit.Assert.assertEquals;
 
 public class ControllerAPIDefinitionTest
 {
@@ -64,8 +64,8 @@ public class ControllerAPIDefinitionTest
    private Command<?, ?> getInstanceUsingEmptyConstructor(Class clazz)
    {
       Command<?, ?> command;
-      GenericTypeBuilder builder = GenericTypeBuilder.createBuilderWithEmptyConstructor(clazz);
-      command = (Command<?, ?>) builder.newInstance();
+      Supplier<?> builder = SupplierBuilder.createFromEmptyConstructor(clazz);
+      command = (Command<?, ?>) builder.get();
       return command;
    }
 

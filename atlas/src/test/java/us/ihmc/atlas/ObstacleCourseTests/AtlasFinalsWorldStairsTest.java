@@ -14,7 +14,7 @@ import us.ihmc.atlas.AtlasRobotModel;
 import us.ihmc.atlas.AtlasRobotVersion;
 import us.ihmc.avatar.DRCStartingLocation;
 import us.ihmc.avatar.drcRobot.RobotTarget;
-import us.ihmc.avatar.environments.DarpaRoboticsChallengeFinalsEnvironment;
+import us.ihmc.avatar.environments.DRCFinalsEnvironment;
 import us.ihmc.avatar.simulationStarter.DRCSCStartingLocations;
 import us.ihmc.avatar.testTools.DRCSimulationTestHelper;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
@@ -81,7 +81,7 @@ public class AtlasFinalsWorldStairsTest
 
       FootContactPoints<RobotSide> simulationContactPoints = new AdditionalSimulationContactPoints<>(RobotSide.values, 10, 2, true, true);
       AtlasRobotModel robotModel = new AtlasRobotModel(AtlasRobotVersion.ATLAS_UNPLUGGED_V5_NO_HANDS, RobotTarget.SCS, false, simulationContactPoints);
-      DarpaRoboticsChallengeFinalsEnvironment environment = new DarpaRoboticsChallengeFinalsEnvironment(false, false, false, false, true);
+      DRCFinalsEnvironment environment = new DRCFinalsEnvironment(false, false, false, false, true);
       drcSimulationTestHelper = new DRCSimulationTestHelper(simulationTestingParameters, robotModel);
       drcSimulationTestHelper.setTestEnvironment(environment);
       drcSimulationTestHelper.setStartingLocation(selectedLocation);
@@ -95,12 +95,12 @@ public class AtlasFinalsWorldStairsTest
       FramePoint3D pelvisPosition = new FramePoint3D(rootFrame);
       pelvisPosition.changeFrame(ReferenceFrame.getWorldFrame());
       PelvisHeightTrajectoryMessage message = HumanoidMessageTools.createPelvisHeightTrajectoryMessage(0.5, pelvisPosition.getZ() + 0.045);
-      drcSimulationTestHelper.send(message);
+      drcSimulationTestHelper.publishToController(message);
 
       success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(0.5);
 
       FootstepDataListMessage footstepDataList = createFootstepsWithHighSwing(robotModel.getWalkingControllerParameters());
-      drcSimulationTestHelper.send(footstepDataList);
+      drcSimulationTestHelper.publishToController(footstepDataList);
 
       success = success && drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(14.0);
 
@@ -129,7 +129,7 @@ public class AtlasFinalsWorldStairsTest
 
       FootContactPoints<RobotSide> simulationContactPoints = new AdditionalSimulationContactPoints<>(RobotSide.values, 8, 3, true, true);
       AtlasRobotModel robotModel = new AtlasRobotModel(AtlasRobotVersion.ATLAS_UNPLUGGED_V5_NO_HANDS, RobotTarget.SCS, false, simulationContactPoints);
-      DarpaRoboticsChallengeFinalsEnvironment environment = new DarpaRoboticsChallengeFinalsEnvironment(false, false, false, false, true);
+      DRCFinalsEnvironment environment = new DRCFinalsEnvironment(false, false, false, false, true);
       drcSimulationTestHelper = new DRCSimulationTestHelper(simulationTestingParameters, robotModel);
       drcSimulationTestHelper.setTestEnvironment(environment);
       drcSimulationTestHelper.setStartingLocation(selectedLocation);
@@ -143,12 +143,12 @@ public class AtlasFinalsWorldStairsTest
       FramePoint3D pelvisPosition = new FramePoint3D(rootFrame);
       pelvisPosition.changeFrame(ReferenceFrame.getWorldFrame());
       PelvisHeightTrajectoryMessage message = HumanoidMessageTools.createPelvisHeightTrajectoryMessage(0.5, pelvisPosition.getZ() + 0.07);
-      drcSimulationTestHelper.send(message);
+      drcSimulationTestHelper.publishToController(message);
 
       success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(0.5);
 
       FootstepDataListMessage footstepDataList = createFastFootstepsForStairs(robotModel.getWalkingControllerParameters());
-      drcSimulationTestHelper.send(footstepDataList);
+      drcSimulationTestHelper.publishToController(footstepDataList);
 
       success = success && drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(12.0);
 

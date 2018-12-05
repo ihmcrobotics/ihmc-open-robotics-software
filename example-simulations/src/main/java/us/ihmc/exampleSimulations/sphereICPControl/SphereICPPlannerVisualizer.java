@@ -47,13 +47,13 @@ import us.ihmc.humanoidBehaviors.behaviors.scripts.engine.ScriptObject;
 import us.ihmc.humanoidRobotics.footstep.FootSpoof;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.humanoidRobotics.footstep.FootstepTiming;
+import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.robotics.geometry.ConvexPolygonScaler;
 import us.ihmc.robotics.geometry.ConvexPolygonTools;
 import us.ihmc.robotics.referenceFrames.MidFrameZUpFrame;
 import us.ihmc.robotics.referenceFrames.ZUpFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
-import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.SimulationConstructionSetParameters;
@@ -655,7 +655,7 @@ public class SphereICPPlannerVisualizer
       {
          String sidePrefix = robotSide.getCamelCaseNameForStartOfExpression();
          FootSpoof contactableFoot = contactableFeet.get(robotSide);
-         RigidBody foot = contactableFoot.getRigidBody();
+         RigidBodyBasics foot = contactableFoot.getRigidBody();
          ReferenceFrame soleFrame = contactableFoot.getSoleFrame();
          List<FramePoint2D> contactFramePoints = contactableFoot.getContactPoints2d();
          double coefficientOfFriction = contactableFoot.getCoefficientOfFriction();
@@ -675,7 +675,7 @@ public class SphereICPPlannerVisualizer
 
       midFeetZUpFrame = new MidFrameZUpFrame("midFeetZupFrame", worldFrame, ankleZUpFrames.get(RobotSide.LEFT), ankleZUpFrames.get(RobotSide.RIGHT));
       midFeetZUpFrame.update();
-      bipedSupportPolygons = new BipedSupportPolygons(ankleZUpFrames, midFeetZUpFrame, ankleZUpFrames, registry, yoGraphicsListRegistry);
+      bipedSupportPolygons = new BipedSupportPolygons(midFeetZUpFrame, ankleZUpFrames, registry, yoGraphicsListRegistry);
 
       footstepTestHelper = new FootstepTestHelper(contactableFeet);
 
@@ -707,7 +707,7 @@ public class SphereICPPlannerVisualizer
             Vector2D exitBounds = new Vector2D(-0.04, 0.08);
 
             copForwardOffsetBounds = new EnumMap<>(CoPPointName.class);
-            copForwardOffsetBounds.put(entryCoPName, entryBounds);
+            copForwardOffsetBounds.put(CoPPointName.ENTRY_COP, entryBounds);
             copForwardOffsetBounds.put(exitCoPName, exitBounds);
 
             return copForwardOffsetBounds;
@@ -720,13 +720,6 @@ public class SphereICPPlannerVisualizer
             return exitCoPName;
          }
 
-         /**{@inheritDoc} */
-         @Override
-         public CoPPointName getEntryCoPName()
-         {
-            return entryCoPName;
-         }
-
          @Override
          public EnumMap<CoPPointName, Vector2D> getCoPOffsetsInFootFrame()
          {
@@ -736,8 +729,8 @@ public class SphereICPPlannerVisualizer
             Vector2D exitOffset = new Vector2D(0.0, 0.015); //FIXME 0.025);
 
             copOffsets = new EnumMap<CoPPointName, Vector2D>(CoPPointName.class);
-            copOffsets.put(entryCoPName, entryOffset);
-            copOffsets.put(entryCoPName, exitOffset);
+            copOffsets.put(CoPPointName.ENTRY_COP, entryOffset);
+            copOffsets.put(exitCoPName, exitOffset);
 
             return copOffsets;
          }

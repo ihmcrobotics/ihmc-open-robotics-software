@@ -1,12 +1,11 @@
 package us.ihmc.commonWalkingControlModules.controlModules;
 
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.euclid.referenceFrame.exceptions.ReferenceFrameMismatchException;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameQuaternionReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameTuple3DReadOnly;
 import us.ihmc.euclid.transform.RigidBodyTransform;
-import us.ihmc.robotics.screwTheory.MovingReferenceFrame;
-import us.ihmc.robotics.screwTheory.Twist;
+import us.ihmc.mecano.frames.MovingReferenceFrame;
+import us.ihmc.mecano.spatial.Twist;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoFrameQuaternion;
 import us.ihmc.yoVariables.variable.YoFrameVector3D;
@@ -88,6 +87,6 @@ public class YoSE3OffsetFrame extends MovingReferenceFrame
    @Override
    protected void updateTwistRelativeToParent(Twist twistRelativeToParentToPack)
    {
-      twistRelativeToParentToPack.setToZero(this, parentFrame, this);
+      twistRelativeToParentToPack.setToZero(this, getParent(), this);
    }
 }

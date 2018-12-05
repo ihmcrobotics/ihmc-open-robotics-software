@@ -1,7 +1,9 @@
 package us.ihmc.quadrupedRobotics.controlModules.foot;
 
+import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.FeedbackControlCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.FeedbackControlCommandList;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.InverseDynamicsCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.virtualModelControl.VirtualModelControlCommand;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
@@ -104,6 +106,22 @@ public class QuadrupedFeetManager
       footControlModules.get(robotQuadrant).adjustStep(adjustedStep);
    }
 
+   /**
+    * Request the swing trajectory to speed up using the given speed up factor.
+    * It is clamped w.r.t. to {@link QuadrupedSwingState#minSwingTimeForDisturbanceRecovery}.
+    * @param speedUpFactor multiplier on the current time
+    * @return the current swing time remaining for the swing foot trajectory
+    */
+   public double requestSwingSpeedUp(RobotQuadrant robotQuadrant, double speedUpTime)
+   {
+      return footControlModules.get(robotQuadrant).requestSwingSpeedUp(speedUpTime);
+   }
+
+   public double computeClampedSwingSpeedUpTime(RobotQuadrant robotQuadrant, double speedUpTime)
+   {
+      return footControlModules.get(robotQuadrant).computeClampedSwingSpeedUpTime(speedUpTime);
+   }
+
    public void reset()
    {
       for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
@@ -164,5 +182,10 @@ public class QuadrupedFeetManager
    public VirtualModelControlCommand<?> getVirtualModelControlCommand(RobotQuadrant robotQuadrant)
    {
       return footControlModules.get(robotQuadrant).getVirtualModelControlCommand();
+   }
+
+   public InverseDynamicsCommand<?> getInverseDynamicsCommand(RobotQuadrant robotQuadrant)
+   {
+      return footControlModules.get(robotQuadrant).getInverseDynamicsCommand();
    }
 }

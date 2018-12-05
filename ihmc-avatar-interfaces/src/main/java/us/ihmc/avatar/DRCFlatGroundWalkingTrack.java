@@ -3,6 +3,8 @@ package us.ihmc.avatar;
 import static us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelControllerName.DO_NOTHING_BEHAVIOR;
 import static us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelControllerName.WALKING;
 
+import java.util.ArrayList;
+
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.factory.AvatarSimulation;
 import us.ihmc.avatar.factory.AvatarSimulationFactory;
@@ -16,24 +18,28 @@ import us.ihmc.commonWalkingControlModules.desiredFootStep.footstepGenerator.Hea
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.ContactableBodiesFactory;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.HighLevelHumanoidControllerFactory;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.WalkingProvider;
+import us.ihmc.communication.ROS2Tools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.graphicsDescription.HeightMap;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelControllerName;
+import us.ihmc.humanoidRobotics.communication.subscribers.PelvisPoseCorrectionCommunicatorInterface;
+import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
 import us.ihmc.robotics.controllers.ControllerFailureListener;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
+import us.ihmc.ros2.RealtimeRos2Node;
 import us.ihmc.sensorProcessing.parameters.DRCRobotSensorInformation;
 import us.ihmc.simulationConstructionSetTools.util.HumanoidFloatingRootJointRobot;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.wholeBodyController.RobotContactPointParameters;
-
-import java.util.ArrayList;
 
 public class DRCFlatGroundWalkingTrack
 {
    // looking for CREATE_YOVARIABLE_WALKING_PROVIDERS ?  use the second constructor and pass in WalkingProvider = YOVARIABLE_PROVIDER
 
    private final AvatarSimulation avatarSimulation;
+
+   private final RealtimeRos2Node realtimeRos2Node = ROS2Tools.createRealtimeRos2Node(PubSubImplementation.INTRAPROCESS, "flat_ground_walking_track_simulation");
 
    private static boolean createYoVariableServer = System.getProperty("create.yovariable.server") != null
          && Boolean.parseBoolean(System.getProperty("create.yovariable.server"));
@@ -42,11 +48,29 @@ public class DRCFlatGroundWalkingTrack
                                     boolean useVelocityAndHeadingScript, boolean cheatWithGroundHeightAtForFootstep, DRCRobotModel model)
    {
       this(robotInitialSetup, guiInitialSetup, scsInitialSetup, useVelocityAndHeadingScript, cheatWithGroundHeightAtForFootstep, model,
-            WalkingProvider.VELOCITY_HEADING_COMPONENT, new HeadingAndVelocityEvaluationScriptParameters()); // should always be committed as VELOCITY_HEADING_COMPONENT
+           WalkingProvider.VELOCITY_HEADING_COMPONENT, new HeadingAndVelocityEvaluationScriptParameters(), null); // should always be committed as VELOCITY_HEADING_COMPONENT
    }
 
-   public DRCFlatGroundWalkingTrack(DRCRobotInitialSetup<HumanoidFloatingRootJointRobot> robotInitialSetup, DRCGuiInitialSetup guiInitialSetup, DRCSCSInitialSetup scsInitialSetup,
-                                    boolean useVelocityAndHeadingScript, boolean cheatWithGroundHeightAtForFootstep, DRCRobotModel model, WalkingProvider walkingProvider, HeadingAndVelocityEvaluationScriptParameters walkingScriptParameters)
+   public DRCFlatGroundWalkingTrack(DRCRobotInitialSetup<HumanoidFloatingRootJointRobot> robotInitialSetup, DRCGuiInitialSetup guiInitialSetup,
+                                    DRCSCSInitialSetup scsInitialSetup, boolean useVelocityAndHeadingScript, boolean cheatWithGroundHeightAtForFootstep,
+                                    DRCRobotModel model, PelvisPoseCorrectionCommunicatorInterface externalPelvisCorrectorSubscriber)
+   {
+      this(robotInitialSetup, guiInitialSetup, scsInitialSetup, useVelocityAndHeadingScript, cheatWithGroundHeightAtForFootstep, model,
+           WalkingProvider.VELOCITY_HEADING_COMPONENT, new HeadingAndVelocityEvaluationScriptParameters(), externalPelvisCorrectorSubscriber);
+   }
+
+   public DRCFlatGroundWalkingTrack(DRCRobotInitialSetup<HumanoidFloatingRootJointRobot> robotInitialSetup, DRCGuiInitialSetup guiInitialSetup,
+                                    DRCSCSInitialSetup scsInitialSetup, boolean useVelocityAndHeadingScript, boolean cheatWithGroundHeightAtForFootstep,
+                                    DRCRobotModel model, WalkingProvider walkingProvider, HeadingAndVelocityEvaluationScriptParameters walkingScriptParameters)
+   {
+      this(robotInitialSetup, guiInitialSetup, scsInitialSetup, useVelocityAndHeadingScript, cheatWithGroundHeightAtForFootstep, model, walkingProvider,
+           walkingScriptParameters, null);
+   }
+
+   public DRCFlatGroundWalkingTrack(DRCRobotInitialSetup<HumanoidFloatingRootJointRobot> robotInitialSetup, DRCGuiInitialSetup guiInitialSetup,
+                                    DRCSCSInitialSetup scsInitialSetup, boolean useVelocityAndHeadingScript, boolean cheatWithGroundHeightAtForFootstep,
+                                    DRCRobotModel model, WalkingProvider walkingProvider, HeadingAndVelocityEvaluationScriptParameters walkingScriptParameters,
+                                    PelvisPoseCorrectionCommunicatorInterface externalPelvisCorrectorSubscriber)
    {
       //    scsInitialSetup = new DRCSCSInitialSetup(TerrainType.FLAT);
 
@@ -79,7 +103,6 @@ public class DRCFlatGroundWalkingTrack
                                                                                                     wristForceSensorNames, highLevelControllerParameters,
                                                                                                     walkingControllerParameters, capturePointPlannerParameters);
       setupHighLevelStates(controllerFactory, feetForceSensorNames, highLevelControllerParameters.getFallbackControllerState());
-      controllerFactory.setInitialState(HighLevelControllerName.WALKING);
       controllerFactory.setHeadingAndVelocityEvaluationScriptParameters(walkingScriptParameters);
 
       HeightMap heightMapForFootstepZ = null;
@@ -97,8 +120,11 @@ public class DRCFlatGroundWalkingTrack
       avatarSimulationFactory.setRobotInitialSetup(robotInitialSetup);
       avatarSimulationFactory.setSCSInitialSetup(scsInitialSetup);
       avatarSimulationFactory.setGuiInitialSetup(guiInitialSetup);
-      avatarSimulationFactory.setHumanoidGlobalDataProducer(null);
+      avatarSimulationFactory.setRealtimeRos2Node(realtimeRos2Node);
       avatarSimulationFactory.setCreateYoVariableServer(createYoVariableServer);
+      if (externalPelvisCorrectorSubscriber != null)
+         avatarSimulationFactory.setExternalPelvisCorrectorSubscriber(externalPelvisCorrectorSubscriber);
+
       avatarSimulation = avatarSimulationFactory.createAvatarSimulation();
       initialize();
       avatarSimulation.start();
@@ -123,6 +149,8 @@ public class DRCFlatGroundWalkingTrack
 
       controllerFactory.addControllerFailureTransition(DO_NOTHING_BEHAVIOR, fallbackControllerState);
       controllerFactory.addControllerFailureTransition(WALKING, fallbackControllerState);
+
+      controllerFactory.setInitialState(HighLevelControllerName.WALKING);
    }
 
    public void attachControllerFailureListener(ControllerFailureListener listener)

@@ -3,13 +3,13 @@ package us.ihmc.robotEnvironmentAwareness.communication;
 import controller_msgs.msg.dds.LidarScanMessage;
 import controller_msgs.msg.dds.PlanarRegionsListMessage;
 import us.ihmc.jOctoMap.normalEstimation.NormalEstimationParameters;
-import us.ihmc.javaFXToolkit.messager.MessagerAPIFactory;
-import us.ihmc.javaFXToolkit.messager.MessagerAPIFactory.Category;
-import us.ihmc.javaFXToolkit.messager.MessagerAPIFactory.CategoryTheme;
-import us.ihmc.javaFXToolkit.messager.MessagerAPIFactory.MessagerAPI;
-import us.ihmc.javaFXToolkit.messager.MessagerAPIFactory.Topic;
-import us.ihmc.javaFXToolkit.messager.MessagerAPIFactory.TopicTheme;
-import us.ihmc.javaFXToolkit.messager.MessagerAPIFactory.TypedTopicTheme;
+import us.ihmc.messager.MessagerAPIFactory;
+import us.ihmc.messager.MessagerAPIFactory.Category;
+import us.ihmc.messager.MessagerAPIFactory.CategoryTheme;
+import us.ihmc.messager.MessagerAPIFactory.MessagerAPI;
+import us.ihmc.messager.MessagerAPIFactory.Topic;
+import us.ihmc.messager.MessagerAPIFactory.TopicTheme;
+import us.ihmc.messager.MessagerAPIFactory.TypedTopicTheme;
 import us.ihmc.robotEnvironmentAwareness.communication.packets.BoundingBoxParametersMessage;
 import us.ihmc.robotEnvironmentAwareness.communication.packets.BoxMessage;
 import us.ihmc.robotEnvironmentAwareness.communication.packets.LineSegment3DMessage;
@@ -115,7 +115,6 @@ public class REAModuleAPI
    public static final Topic<BoxMessage> OcTreeBoundingBoxState = OcTreeCategory.child(BoundingBox).topic(Data);
 
    public static final Topic<Boolean> RequestEntireModuleState = ModuleCategory.child(Request).topic(Data);
-   public static final Topic<Boolean> RequestLidarScan = ModuleCategory.child(Lidar).child(Request).topic(Data);
    public static final Topic<Boolean> RequestOctree = OcTreeCategory.child(Request).topic(Data);
    public static final Topic<Boolean> RequestBuffer = OcTreeCategory.child(Buffer).child(Request).topic(Data);
    public static final Topic<Boolean> RequestPlanarRegions = PlanarRegionsCategory.child(Request).topic(Data);

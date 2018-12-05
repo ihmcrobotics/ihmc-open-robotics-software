@@ -1,23 +1,32 @@
 package us.ihmc.quadrupedRobotics.communication;
 
+import static us.ihmc.humanoidRobotics.communication.packets.PacketValidityChecker.validateQuadrupedBodyHeightMessage;
+import static us.ihmc.humanoidRobotics.communication.packets.PacketValidityChecker.validateQuadrupedBodyOrientationMessage;
+import static us.ihmc.humanoidRobotics.communication.packets.PacketValidityChecker.validateQuadrupedTimedStepListMessage;
+import static us.ihmc.humanoidRobotics.communication.packets.PacketValidityChecker.validateSoleTrajectoryMessage;
+
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
 import controller_msgs.msg.dds.*;
 import us.ihmc.commonWalkingControlModules.controllerAPI.input.ControllerNetworkSubscriber;
 import us.ihmc.commonWalkingControlModules.controllerAPI.input.MessageCollector;
+import us.ihmc.communication.ROS2Tools;
+import us.ihmc.communication.ROS2Tools.MessageTopicNameGenerator;
+import us.ihmc.communication.ROS2Tools.ROS2TopicQualifier;
 import us.ihmc.communication.controllerAPI.command.Command;
-import us.ihmc.communication.packets.Packet;
+import us.ihmc.euclid.interfaces.Settable;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.*;
-import us.ihmc.quadrupedRobotics.communication.commands.QuadrupedRequestedControllerStateCommand;
+import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelControllerName;
 import us.ihmc.quadrupedRobotics.communication.commands.QuadrupedRequestedSteppingStateCommand;
-
-import java.util.*;
-
-import static us.ihmc.humanoidRobotics.communication.packets.PacketValidityChecker.*;
 
 public class QuadrupedControllerAPIDefinition
 {
-
    private static final List<Class<? extends Command<?, ?>>> quadrupedSupportedCommands;
-   private static final List<Class<? extends Packet<?>>> quadrupedSupportedStatusMessages;
+   private static final List<Class<? extends Settable<?>>> quadrupedSupportedStatusMessages;
 
    static
    {
@@ -26,26 +35,27 @@ public class QuadrupedControllerAPIDefinition
       quadrupedCommands.add(QuadrupedTimedStepListCommand.class);
       quadrupedCommands.add(SoleTrajectoryCommand.class);
       quadrupedCommands.add(QuadrupedRequestedSteppingStateCommand.class);
-      quadrupedCommands.add(QuadrupedRequestedControllerStateCommand.class);
       quadrupedCommands.add(QuadrupedBodyOrientationCommand.class);
       quadrupedCommands.add(QuadrupedBodyHeightCommand.class);
+      quadrupedCommands.add(HighLevelControllerStateCommand.class);
 //      quadrupedCommands.add(StopAllTrajectoryCommand.class); // TODO
 //      quadrupedCommands.add(FootLoadBearingCommand.class); // TODO
 //      quadrupedCommands.add(GoHomeCommand.class); // todo
 //      quadrupedCommands.add(QuadrupedBodyTranslationCommand.class); // todo
 //      quadrupedCommands.add(QuadrupedBodyPositionCommand.class); // todo
-//      quadrupedCommands.add(QuadrupedBodyTrajectoryCommand.class); // todo
-//      quadrupedCommands.add(CenterOfMassTrajectoryCommand.class); // todo
-//      quadrupedCommands.add(AbortWalkingCommand.class);// todo
+      quadrupedCommands.add(QuadrupedBodyTrajectoryCommand.class);
+      ////      quadrupedCommands.add(CenterOfMassTrajectoryCommand.class); // todo
+      ////      quadrupedCommands.add(AbortWalkingCommand.class);// todo
 //      quadrupedCommands.add(PauseWalkingCommand.class); // todo
 
       quadrupedSupportedCommands = Collections.unmodifiableList(quadrupedCommands);
 
-      List<Class<? extends Packet<?>>> quadrupedStatusMessages = new ArrayList<>();
+      List<Class<? extends Settable<?>>> quadrupedStatusMessages = new ArrayList<>();
       quadrupedStatusMessages.add(QuadrupedSteppingStateChangeMessage.class);
-      quadrupedStatusMessages.add(QuadrupedControllerStateChangeMessage.class);
+      quadrupedStatusMessages.add(HighLevelStateChangeStatusMessage.class);
       quadrupedStatusMessages.add(QuadrupedFootstepStatusMessage.class);
       quadrupedStatusMessages.add(QuadrupedGroundPlaneMessage.class);
+      quadrupedStatusMessages.add(WalkingControllerFailureStatusMessage.class);
 
       quadrupedSupportedStatusMessages = Collections.unmodifiableList(quadrupedStatusMessages);
 
@@ -56,14 +66,24 @@ public class QuadrupedControllerAPIDefinition
       return quadrupedSupportedCommands;
    }
 
-   public static List<Class<? extends Packet<?>>> getQuadrupedSupportedStatusMessages()
+   public static List<Class<? extends Settable<?>>> getQuadrupedSupportedStatusMessages()
    {
       return quadrupedSupportedStatusMessages;
    }
 
+   public static MessageTopicNameGenerator getSubscriberTopicNameGenerator(String robotName)
+   {
+      return ROS2Tools.getTopicNameGenerator(robotName, ROS2Tools.QUADRUPED_CONTROL_MODULE, ROS2TopicQualifier.INPUT);
+   }
+
+   public static MessageTopicNameGenerator getPublisherTopicNameGenerator(String robotName)
+   {
+      return ROS2Tools.getTopicNameGenerator(robotName, ROS2Tools.QUADRUPED_CONTROL_MODULE, ROS2TopicQualifier.OUTPUT);
+   }
+
    public static ControllerNetworkSubscriber.MessageValidator createDefaultMessageValidation()
    {
-      Map<Class<? extends Packet<?>>, ControllerNetworkSubscriber.MessageValidator> validators = new HashMap<>();
+      Map<Class<? extends Settable<?>>, ControllerNetworkSubscriber.MessageValidator> validators = new HashMap<>();
       validators.put(SoleTrajectoryMessage.class, message -> validateSoleTrajectoryMessage((SoleTrajectoryMessage) message));
       //      validators.put(PelvisTrajectoryMessage.class, message -> validatePelvisTrajectoryMessage((PelvisTrajectoryMessage) message));
       validators.put(QuadrupedBodyOrientationMessage.class, message -> validateQuadrupedBodyOrientationMessage((QuadrupedBodyOrientationMessage) message));
@@ -75,7 +95,7 @@ public class QuadrupedControllerAPIDefinition
       return new ControllerNetworkSubscriber.MessageValidator()
       {
          @Override
-         public String validate(Packet<?> message)
+         public String validate(Object message)
          {
             ControllerNetworkSubscriber.MessageValidator validator = validators.get(message.getClass());
             return validator == null ? null : validator.validate(message);
@@ -85,7 +105,7 @@ public class QuadrupedControllerAPIDefinition
 
    public static MessageCollector.MessageIDExtractor createDefaultMessageIDExtractor()
    {
-      Map<Class<? extends Packet<?>>, MessageCollector.MessageIDExtractor> extractors = new HashMap<>();
+      Map<Class<? extends Settable<?>>, MessageCollector.MessageIDExtractor> extractors = new HashMap<>();
       extractors.put(SoleTrajectoryMessage.class, m -> ((SoleTrajectoryMessage) m).getSequenceId());
       //      extractors.put(PelvisTrajectoryMessage.class, m -> ((PelvisTrajectoryMessage) m).getSequenceId());
       extractors.put(QuadrupedBodyOrientationMessage.class, m -> ((QuadrupedBodyOrientationMessage) m).getSequenceId());
@@ -95,7 +115,6 @@ public class QuadrupedControllerAPIDefinition
       //      extractors.put(GoHomeMessage.class, m -> ((GoHomeMessage) m).getSequenceId());
       //      extractors.put(FootLoadBearingMessage.class, m -> ((FootLoadBearingMessage) m).getSequenceId());
       extractors.put(QuadrupedRequestedSteppingStateMessage.class, m -> ((QuadrupedRequestedSteppingStateMessage) m).getSequenceId());
-      extractors.put(QuadrupedRequestedControllerStateMessage.class, m -> ((QuadrupedRequestedControllerStateMessage) m).getSequenceId());
       //      extractors.put(AbortWalkingMessage.class, m -> ((AbortWalkingMessage) m).getSequenceId());
       //      extractors.put(PauseWalkingMessage.class, m -> ((PauseWalkingMessage) m).getSequenceId());
       //      extractors.put(ChestHybridJointspaceTaskspaceTrajectoryMessage.class, m -> ((ChestHybridJointspaceTaskspaceTrajectoryMessage) m).getSequenceId());
@@ -107,7 +126,7 @@ public class QuadrupedControllerAPIDefinition
       return new MessageCollector.MessageIDExtractor()
       {
          @Override
-         public long getMessageID(Packet<?> message)
+         public long getMessageID(Object message)
          {
             MessageCollector.MessageIDExtractor extractor = extractors.get(message.getClass());
             return extractor == null ? NO_ID : extractor.getMessageID(message);

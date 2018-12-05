@@ -51,7 +51,7 @@ public class AtlasPointyRocksTest extends HumanoidPointyRocksTest
     * The robot walks continuously for a few steps with unknown half foot contacts.
     */
    @Override
-   @ContinuousIntegrationTest(estimatedDuration = 113.7)
+   @ContinuousIntegrationTest(estimatedDuration = 113.7, categoriesOverride = IntegrationCategory.IN_DEVELOPMENT)
    @Test(timeout = 570000)
    public void testWalkingForwardWithHalfFootContactChangesContinuousSteps() throws SimulationExceededMaximumTimeException
    {
@@ -164,6 +164,12 @@ public class AtlasPointyRocksTest extends HumanoidPointyRocksTest
       {
          super(atlasVersion, target, headless);
          walkingParameters = new TestWalkingParameters(target, getJointMap(), getContactPointParameters());
+      }
+
+      @Override
+      public double getSimulateDT()
+      { // TODO See if feet can behave better with partial foothold, it causes the joints and and sim to freak out, so need a lower DT.
+         return getEstimatorDT() / 4.0;
       }
 
       @Override

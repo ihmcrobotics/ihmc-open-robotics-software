@@ -79,36 +79,26 @@ public final class SO3TrajectoryControllerCommand extends QueueableCommand<SO3Tr
       other.getControlFramePose(controlFramePoseInBodyFrame);
    }
 
-   public void set(SE3TrajectoryControllerCommand other)
-   {
-      trajectoryPointList.setIncludingFrame(other.getTrajectoryPointList());
-      trajectoryFrame = other.getTrajectoryFrame();
-      useCustomControlFrame = other.useCustomControlFrame();
-      other.getControlFramePose(controlFramePoseInBodyFrame);
-      setQueueableCommandVariables(other);
-      selectionMatrix.set(other.getSelectionMatrix().getAngularPart());
-   }
-
    @Override
    public void set(ReferenceFrameHashCodeResolver resolver, SO3TrajectoryMessage message)
    {
       FrameInformation frameInformation = message.getFrameInformation();
       long trajectoryFrameId = frameInformation.getTrajectoryReferenceFrameId();
       long dataFrameId = HumanoidMessageTools.getDataFrameIDConsideringDefault(frameInformation);
-      this.trajectoryFrame = resolver.getReferenceFrameFromNameBaseHashCode(trajectoryFrameId);
-      ReferenceFrame dataFrame = resolver.getReferenceFrameFromNameBaseHashCode(dataFrameId);
+      this.trajectoryFrame = resolver.getReferenceFrameFromHashCode(trajectoryFrameId);
+      ReferenceFrame dataFrame = resolver.getReferenceFrameFromHashCode(dataFrameId);
 
       clear(dataFrame);
-      set(message);
+      setFromMessage(message);
 
-      ReferenceFrame selectionFrame = resolver.getReferenceFrameFromNameBaseHashCode(message.getSelectionMatrix().getSelectionFrameId());
+      ReferenceFrame selectionFrame = resolver.getReferenceFrameFromHashCode(message.getSelectionMatrix().getSelectionFrameId());
       selectionMatrix.setSelectionFrame(selectionFrame);
-      ReferenceFrame weightSelectionFrame = resolver.getReferenceFrameFromNameBaseHashCode(message.getWeightMatrix().getWeightFrameId());
+      ReferenceFrame weightSelectionFrame = resolver.getReferenceFrameFromHashCode(message.getWeightMatrix().getWeightFrameId());
       weightMatrix.setWeightFrame(weightSelectionFrame);
    }
 
    @Override
-   public void set(SO3TrajectoryMessage message)
+   public void setFromMessage(SO3TrajectoryMessage message)
    {
       HumanoidMessageTools.checkIfDataFrameIdsMatch(message.getFrameInformation(), trajectoryPointList.getReferenceFrame());
 
@@ -166,6 +156,16 @@ public final class SO3TrajectoryControllerCommand extends QueueableCommand<SO3Tr
    public void setWeightMatrix(WeightMatrix3D weightMatrix)
    {
       this.weightMatrix.set(weightMatrix);
+   }
+
+   public void setUseCustomControlFrame(boolean useCustomControlFrame)
+   {
+      this.useCustomControlFrame = useCustomControlFrame;
+   }
+
+   public void setControlFramePose(RigidBodyTransform controlFramePose)
+   {
+      this.controlFramePoseInBodyFrame.set(controlFramePose);
    }
 
    public FrameSO3TrajectoryPointList getTrajectoryPointList()
@@ -271,6 +271,11 @@ public final class SO3TrajectoryControllerCommand extends QueueableCommand<SO3Tr
    public void setTrajectoryFrame(ReferenceFrame trajectoryFrame)
    {
       this.trajectoryFrame = trajectoryFrame;
+   }
+
+   public RigidBodyTransform getControlFramePose()
+   {
+      return controlFramePoseInBodyFrame;
    }
 
    public void getControlFramePose(RigidBodyTransform transformToPack)

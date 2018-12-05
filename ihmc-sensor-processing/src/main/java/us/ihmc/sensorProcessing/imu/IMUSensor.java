@@ -11,7 +11,7 @@ import us.ihmc.euclid.tuple3D.interfaces.Vector3DBasics;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.euclid.tuple4D.interfaces.QuaternionReadOnly;
-import us.ihmc.robotics.screwTheory.RigidBody;
+import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.robotics.sensors.IMUDefinition;
 import us.ihmc.sensorProcessing.simulatedSensors.SensorNoiseParameters;
 import us.ihmc.sensorProcessing.stateEstimation.IMUSensorReadOnly;
@@ -21,7 +21,7 @@ public class IMUSensor implements IMUSensorReadOnly
    private final String sensorName;
 
    private final ReferenceFrame measurementFrame;
-   private final RigidBody measurementLink;
+   private final RigidBodyBasics measurementLink;
 
    private final Quaternion orientationMeasurement = new Quaternion();
    private final Vector3D angularVelocityMeasurement = new Vector3D();
@@ -75,7 +75,7 @@ public class IMUSensor implements IMUSensorReadOnly
    }
 
    @Override
-   public RigidBody getMeasurementLink()
+   public RigidBodyBasics getMeasurementLink()
    {
       return measurementLink;
    }

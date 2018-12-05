@@ -8,11 +8,13 @@ import org.junit.Before;
 
 import controller_msgs.msg.dds.FootLoadBearingMessage;
 import controller_msgs.msg.dds.FootTrajectoryMessage;
+import org.junit.Test;
 import us.ihmc.avatar.MultiRobotTestInterface;
 import us.ihmc.avatar.testTools.DRCSimulationTestHelper;
 import us.ihmc.commonWalkingControlModules.controlModules.foot.FootControlModule.ConstraintType;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.walkingController.states.WalkingStateEnum;
 import us.ihmc.commons.thread.ThreadTools;
+import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.Point3D;
@@ -35,6 +37,8 @@ public abstract class EndToEndEndFootBearingMessageTest implements MultiRobotTes
    private DRCSimulationTestHelper drcSimulationTestHelper;
 
    @SuppressWarnings("unchecked")
+   @ContinuousIntegrationAnnotations.ContinuousIntegrationTest(estimatedDuration = 17.3)
+   @Test(timeout = 87000)
    public void testSwitchFootToLoadBearing() throws Exception
    {
       BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
@@ -59,7 +63,7 @@ public abstract class EndToEndEndFootBearingMessageTest implements MultiRobotTes
          footPoseCloseToActual.get(desiredPosition, desiredOrientation);
 
          FootTrajectoryMessage footTrajectoryMessage = HumanoidMessageTools.createFootTrajectoryMessage(robotSide, 0.0, desiredPosition, desiredOrientation);
-         drcSimulationTestHelper.send(footTrajectoryMessage);
+         drcSimulationTestHelper.publishToController(footTrajectoryMessage);
 
          success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(0.5 + getRobotModel().getWalkingControllerParameters().getDefaultInitialTransferTime());
          assertTrue(success);
@@ -67,7 +71,7 @@ public abstract class EndToEndEndFootBearingMessageTest implements MultiRobotTes
          // Now we can do the usual test.
          FootLoadBearingMessage footLoadBearingMessage = HumanoidMessageTools.createFootLoadBearingMessage(robotSide, LoadBearingRequest.LOAD);
 
-         drcSimulationTestHelper.send(footLoadBearingMessage);
+         drcSimulationTestHelper.publishToController(footLoadBearingMessage);
 
          success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(2.5);
          assertTrue(success);

@@ -1,6 +1,7 @@
 package us.ihmc.parameterTuner.guiElements.tuners;
 
 import javafx.scene.control.SpinnerValueFactory.IntegerSpinnerValueFactory;
+import us.ihmc.commons.PrintTools;
 
 public class IntegerSpinner extends NumericSpinner<Integer>
 {
@@ -16,7 +17,23 @@ public class IntegerSpinner extends NumericSpinner<Integer>
       {
          return 0;
       }
-      return Integer.parseInt(numberString);
+      try
+      {
+         return Integer.parseInt(numberString);
+      }
+      catch (NumberFormatException e)
+      {
+         PrintTools.warn("Invalid integer string for IntegerParameter. Attempting to parse as double...");
+         double doubleValue = Double.parseDouble(numberString);
+         int intValue = (int) doubleValue;
+
+         if (doubleValue != intValue)
+         {
+            throw new RuntimeException("Integer parameter has floating point precision. Fix your file!");
+         }
+
+         return intValue;
+      }
    }
 
    @Override

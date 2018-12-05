@@ -49,7 +49,7 @@ public final class LoadBearingCommand implements Command<LoadBearingCommand, Loa
    }
 
    @Override
-   public void set(LoadBearingMessage message)
+   public void setFromMessage(LoadBearingMessage message)
    {
       load = message.getLoad();
       coefficientOfFriction = message.getCoefficientOfFriction();

@@ -34,15 +34,16 @@ import us.ihmc.avatar.sensors.DRCSensorSuiteManager;
 import us.ihmc.commonWalkingControlModules.configurations.HighLevelControllerParameters;
 import us.ihmc.commonWalkingControlModules.configurations.ICPWithTimeFreezingPlannerParameters;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
+import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.ControllerAPIDefinition;
 import us.ihmc.commons.Conversions;
 import us.ihmc.euclid.matrix.Matrix3D;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.footstepPlanning.PlanarRegionFootstepPlanningParameters;
-import us.ihmc.footstepPlanning.graphSearch.FootstepPlannerParameters;
-import us.ihmc.humanoidRobotics.communication.streamingData.HumanoidGlobalDataProducer;
+import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParameters;
 import us.ihmc.humanoidRobotics.footstep.footstepGenerator.QuadTreeFootstepPlanningParameters;
 import us.ihmc.ihmcPerception.depthData.CollisionBoxProvider;
 import us.ihmc.jMonkeyEngineToolkit.jme.util.JMEDataTypeUtils;
+import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.modelFileLoaders.ModelFileLoaderConversionsHelper;
 import us.ihmc.modelFileLoaders.SdfLoader.DRCRobotSDFLoader;
 import us.ihmc.modelFileLoaders.SdfLoader.GeneralizedSDFRobotModel;
@@ -58,15 +59,17 @@ import us.ihmc.modelFileLoaders.SdfLoader.xmlDescription.SDFSensor;
 import us.ihmc.modelFileLoaders.SdfLoader.xmlDescription.SDFVisual;
 import us.ihmc.multicastLogDataProtocol.modelLoaders.LogModelProvider;
 import us.ihmc.multicastLogDataProtocol.modelLoaders.SDFLogModelProvider;
+import us.ihmc.pathPlanning.visibilityGraphs.DefaultVisibilityGraphParameters;
+import us.ihmc.pathPlanning.visibilityGraphs.interfaces.VisibilityGraphsParameters;
 import us.ihmc.robotDataLogger.logger.LogSettings;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotModels.FullHumanoidRobotModelFromDescription;
 import us.ihmc.robotics.partNames.ArmJointName;
 import us.ihmc.robotics.robotDescription.RobotDescription;
 import us.ihmc.robotics.robotSide.RobotSide;
-import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.robotiq.model.RobotiqHandModel;
 import us.ihmc.robotiq.simulatedHand.SimulatedRobotiqHandsController;
+import us.ihmc.ros2.RealtimeRos2Node;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutputWriter;
 import us.ihmc.sensorProcessing.parameters.DRCRobotSensorInformation;
 import us.ihmc.sensorProcessing.stateEstimation.StateEstimatorParameters;
@@ -319,7 +322,7 @@ public class AtlasRobotModel implements DRCRobotModel, SDFDescriptionMutator
 
          for (ArmJointName armJointName : armJointNames)
          {
-            OneDoFJoint armJoint = fullRobotModel.getArmJoint(robotSide, armJointName);
+            OneDoFJointBasics armJoint = fullRobotModel.getArmJoint(robotSide, armJointName);
             if (armJoint == null)
                continue;
 
@@ -359,7 +362,7 @@ public class AtlasRobotModel implements DRCRobotModel, SDFDescriptionMutator
    @Override
    public double getSimulateDT()
    {
-      return 0.0001;
+      return 0.0005;
    }
 
    @Override
@@ -398,8 +401,8 @@ public class AtlasRobotModel implements DRCRobotModel, SDFDescriptionMutator
    @Override
    public DRCSensorSuiteManager getSensorSuiteManager()
    {
-      return new AtlasSensorSuiteManager(this, getCollisionBoxProvider(), getPPSTimestampOffsetProvider(), sensorInformation, getJointMap(),
-                                         getPhysicalProperties(), target);
+      return new AtlasSensorSuiteManager(getSimpleRobotName(), this, getCollisionBoxProvider(), getPPSTimestampOffsetProvider(), sensorInformation,
+                                         getJointMap(), getPhysicalProperties(), target);
    }
 
    @Override
@@ -417,13 +420,16 @@ public class AtlasRobotModel implements DRCRobotModel, SDFDescriptionMutator
    @Override
    public MultiThreadedRobotControlElement createSimulatedHandController(FloatingRootJointRobot simulatedRobot,
                                                                          ThreadDataSynchronizerInterface threadDataSynchronizer,
-                                                                         HumanoidGlobalDataProducer globalDataProducer,
+                                                                         RealtimeRos2Node realtimeRos2Node,
                                                                          CloseableAndDisposableRegistry closeableAndDisposableRegistry)
    {
       switch (selectedVersion.getHandModel())
       {
       case ROBOTIQ:
-         return new SimulatedRobotiqHandsController(simulatedRobot, this, threadDataSynchronizer, globalDataProducer, closeableAndDisposableRegistry);
+         return new SimulatedRobotiqHandsController(simulatedRobot, this, threadDataSynchronizer, realtimeRos2Node,
+                                                    ControllerAPIDefinition.getPublisherTopicNameGenerator(getSimpleRobotName()),
+                                                    ControllerAPIDefinition.getSubscriberTopicNameGenerator(getSimpleRobotName()),
+                                                    closeableAndDisposableRegistry);
 
       default:
          return null;
@@ -857,6 +863,12 @@ public class AtlasRobotModel implements DRCRobotModel, SDFDescriptionMutator
    public FootstepPlannerParameters getFootstepPlannerParameters()
    {
       return new AtlasFootstepPlannerParameters();
+   }
+
+   @Override
+   public VisibilityGraphsParameters getVisibilityGraphsParameters()
+   {
+      return new DefaultVisibilityGraphParameters();
    }
 
    @Override

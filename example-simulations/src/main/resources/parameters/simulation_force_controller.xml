@@ -4,7 +4,7 @@
         <registry name="QuadrupedControllerManager">
             <registry name="QuadrupedFootControlModule">
                 <parameter name="touchdownPressureLimit" type="DoubleParameter" min="0.0" max="1.0" value="50.0"/>
-                <parameter name="touchdownTriggerWindow" type="IntegerParameter" min="-10.0" max="10.0" value="1"/>
+                <parameter name="touchdownTriggerWindow" type="IntegerParameter" min="-10" max="10" value="1"/>
                 <parameter name="minimumStepAdjustmentTime" type="DoubleParameter" min="0.0" max="1.0" value="0.1"/>
                 <parameter name="stepGoalOffsetZ" type="DoubleParameter" min="0.0" max="1.0" value="0.0"/>
                 <parameter name="kpX_solePosition" type="DoubleParameter" min="0.0" max="1.0" value="10000.0"/>
@@ -22,7 +22,7 @@
                 <parameter name="maxPitchInRad" type="DoubleParameter" min="0.0" max="1.0" value="0.5"/>
                 <parameter name="maxRollInRad" type="DoubleParameter" min="0.0" max="1.0" value="0.5"/>
                 <parameter name="dcmDistanceOutsideSupportPolygonSupportThreshold" type="DoubleParameter" min="0.0" max="1.0" value="0.15"/>
-                <parameter name="fallDetectorGlitchFilterWindow" type="IntegerParameter" min="-10.0" max="10.0" value="1"/>
+                <parameter name="fallDetectorGlitchFilterWindow" type="IntegerParameter" min="-10" max="10" value="1"/>
             </registry>
             <registry name="QuadrupedPostureInputProvider">
                 <parameter name="comPositionLowerLimitX" type="DoubleParameter" min="0.0" max="1.0" value="-1.7E308"/>

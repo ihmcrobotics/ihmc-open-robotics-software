@@ -27,7 +27,7 @@ public class FootLoadBearingCommand implements Command<FootLoadBearingCommand, F
    }
 
    @Override
-   public void set(FootLoadBearingMessage message)
+   public void setFromMessage(FootLoadBearingMessage message)
    {
       clear();
       LoadBearingRequest request = LoadBearingRequest.fromByte(message.getLoadBearingRequest());
