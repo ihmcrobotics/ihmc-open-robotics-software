@@ -4,6 +4,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
+import org.jcodec.common.Assert;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -24,6 +25,7 @@ import us.ihmc.commonWalkingControlModules.controlModules.pelvis.PelvisOrientati
 import us.ihmc.commonWalkingControlModules.controlModules.pelvis.PelvisOrientationManager;
 import us.ihmc.commonWalkingControlModules.controlModules.rigidBody.RigidBodyTaskspaceControlState;
 import us.ihmc.commons.thread.ThreadTools;
+import us.ihmc.communication.packets.ExecutionMode;
 import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
@@ -124,6 +126,30 @@ public abstract class EndToEndPelvisOrientationTest implements MultiRobotTestInt
       EndToEndTestTools.assertCurrentDesiredsMatchWaypoint(pelvisName, waypoint, scs, epsilon);
 
       drcSimulationTestHelper.createVideo(getSimpleRobotName(), 2);
+   }
+
+   @ContinuousIntegrationAnnotations.ContinuousIntegrationTest(estimatedDuration = 25.5)
+   @Test(timeout = 130000)
+   public void testQueue() throws SimulationExceededMaximumTimeException
+   {
+      ReferenceFrame midFootZUpGroundFrame = humanoidReferenceFrames.getMidFootZUpGroundFrame();
+      FrameQuaternion pelvisOrientation = new FrameQuaternion(midFootZUpGroundFrame);
+      pelvisOrientation.changeFrame(worldFrame);
+
+      double trajectoryTime = 0.5;
+      PelvisOrientationTrajectoryMessage message = HumanoidMessageTools.createPelvisOrientationTrajectoryMessage(trajectoryTime, pelvisOrientation);
+
+      message.getSo3Trajectory().getQueueingProperties().setExecutionMode(ExecutionMode.QUEUE.toByte());
+      message.getSo3Trajectory().getQueueingProperties().setMessageId(1L);
+
+      drcSimulationTestHelper.publishToController(message);
+      Assert.assertTrue(drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(0.1));
+
+      message.getSo3Trajectory().getQueueingProperties().setPreviousMessageId(2L);
+      message.getSo3Trajectory().getQueueingProperties().setMessageId(3L);
+
+      drcSimulationTestHelper.publishToController(message);
+      Assert.assertTrue(drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(0.1));
    }
 
    @ContinuousIntegrationAnnotations.ContinuousIntegrationTest(estimatedDuration = 42.5)
