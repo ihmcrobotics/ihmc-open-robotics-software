@@ -16,7 +16,7 @@ public class VisibilityGraphStatistics implements PlannerStatistics<VisibilityGr
    private VisibilityMap goalMap = new VisibilityMap();
    private VisibilityMap interRegionsMap = new VisibilityMap();
 
-   private final List<VisibilityMapWithNavigableRegion> navigableRegions = new ArrayList<>();
+   private final List<VisibilityMapWithNavigableRegion> visibilityMapsWithNavigableRegions = new ArrayList<>();
 
    @Override
    public StatisticsType getStatisticsType()
@@ -30,7 +30,7 @@ public class VisibilityGraphStatistics implements PlannerStatistics<VisibilityGr
       setStartVisibilityMapInWorld(other.startMapId, other.startMap);
       setGoalVisibilityMapInWorld(other.goalMapId, other.goalMap);
       setInterRegionsVisibilityMapInWorld(other.interRegionsMapId, other.interRegionsMap);
-      setNavigableRegions(other.navigableRegions);
+      setVisibilityMapsWithNavigableRegions(other.visibilityMapsWithNavigableRegions);
    }
 
    public void setStartMapId(int mapId)
@@ -61,9 +61,9 @@ public class VisibilityGraphStatistics implements PlannerStatistics<VisibilityGr
       this.interRegionsMap = interRegionsMap;
    }
 
-   public void setNavigableRegions(List<VisibilityMapWithNavigableRegion> navigableRegions)
+   public void setVisibilityMapsWithNavigableRegions(List<VisibilityMapWithNavigableRegion> navigableRegions)
    {
-      this.navigableRegions.clear();
+      this.visibilityMapsWithNavigableRegions.clear();
       addNavigableRegions(navigableRegions);
    }
 
@@ -75,7 +75,7 @@ public class VisibilityGraphStatistics implements PlannerStatistics<VisibilityGr
 
    public void addNavigableRegion(VisibilityMapWithNavigableRegion navigableRegion)
    {
-      navigableRegions.add(navigableRegion);
+      visibilityMapsWithNavigableRegions.add(navigableRegion);
    }
 
    public VisibilityMap getGoalVisibilityMap()
@@ -110,11 +110,11 @@ public class VisibilityGraphStatistics implements PlannerStatistics<VisibilityGr
 
    public int getNumberOfNavigableRegions()
    {
-      return navigableRegions.size();
+      return visibilityMapsWithNavigableRegions.size();
    }
 
    public VisibilityMapWithNavigableRegion getNavigableRegion(int regionNumber)
    {
-      return navigableRegions.get(regionNumber);
+      return visibilityMapsWithNavigableRegions.get(regionNumber);
    }
 }

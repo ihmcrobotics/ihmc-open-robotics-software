@@ -242,7 +242,7 @@ public class RemoteUIMessageConverter
 
       messager.submitMessage(FootstepPlannerMessagerAPI.StartVisibilityMap, startVisibilityMap);
       messager.submitMessage(FootstepPlannerMessagerAPI.GoalVisibilityMap, goalVisibilityMap);
-      messager.submitMessage(FootstepPlannerMessagerAPI.NavigableRegionData, navigableRegionList);
+      messager.submitMessage(FootstepPlannerMessagerAPI.VisibilityMapWithNavigableRegionData, navigableRegionList);
       messager.submitMessage(FootstepPlannerMessagerAPI.InterRegionVisibilityMap, interRegionVisibilityMap);
    }
 

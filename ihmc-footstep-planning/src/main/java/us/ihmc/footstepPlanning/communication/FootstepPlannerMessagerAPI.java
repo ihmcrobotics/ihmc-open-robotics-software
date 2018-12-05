@@ -140,7 +140,7 @@ public class FootstepPlannerMessagerAPI
 
    public static final Topic<Boolean> ShowBodyPath = Root.child(BodyPath).topic(Show);
 
-   public static final Topic<List<VisibilityMapWithNavigableRegion>> NavigableRegionData = Root.child(VisibilityGraphs).topic(Data);
+   public static final Topic<List<VisibilityMapWithNavigableRegion>> VisibilityMapWithNavigableRegionData = Root.child(VisibilityGraphs).topic(Data);
 
    public static final Topic<VisibilityMapHolder> StartVisibilityMap = Root.child(VisibilityGraphs).child(Start).child(Map).topic(Data);
    public static final Topic<VisibilityMapHolder> GoalVisibilityMap = Root.child(VisibilityGraphs).child(Goal).child(Map).topic(Data);

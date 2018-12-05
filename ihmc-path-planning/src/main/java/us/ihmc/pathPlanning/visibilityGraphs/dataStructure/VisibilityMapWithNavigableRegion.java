@@ -1,6 +1,5 @@
 package us.ihmc.pathPlanning.visibilityGraphs.dataStructure;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import us.ihmc.euclid.interfaces.Transformable;

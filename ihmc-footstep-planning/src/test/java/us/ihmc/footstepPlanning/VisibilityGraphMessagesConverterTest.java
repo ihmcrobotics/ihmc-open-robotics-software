@@ -175,9 +175,9 @@ public class VisibilityGraphMessagesConverterTest
       for (int iter = 0; iter < iters; iter++)
       {
          VisibilityMapWithNavigableRegion navigableRegionToConvert = VisibilityGraphRandomTools.getRandomNavigableRegion(random);
-         NavigableRegionMessage message = VisibilityGraphMessagesConverter.convertToNavigableRegionMessage(navigableRegionToConvert);
+         VisibilityMapWithNavigableRegionMessage message = VisibilityGraphMessagesConverter.convertToNavigableRegionMessage(navigableRegionToConvert);
 
-         VisibilityMapWithNavigableRegion convertedNavigableRegion = VisibilityGraphMessagesConverter.convertToNavigableRegion(message);
+         VisibilityMapWithNavigableRegion convertedNavigableRegion = VisibilityGraphMessagesConverter.convertToVisibilityMapWithNavigableRegion(message);
 
          VisibilityGraphTestTools.assertNavigableRegionsEqual(navigableRegionToConvert, convertedNavigableRegion, epsilon);
       }
@@ -220,7 +220,7 @@ public class VisibilityGraphMessagesConverterTest
          statisticsToConvert.setGoalVisibilityMapInWorld(goalMap.getMapId(), goalMap.getVisibilityMapInWorld());
          statisticsToConvert.setStartVisibilityMapInWorld(startMap.getMapId(), startMap.getVisibilityMapInWorld());
          statisticsToConvert.setInterRegionsVisibilityMapInWorld(interRegionsMap.getMapId(), interRegionsMap.getVisibilityMapInWorld());
-         statisticsToConvert.setNavigableRegions(navigableRegions);
+         statisticsToConvert.setVisibilityMapsWithNavigableRegions(navigableRegions);
 
          BodyPathPlanStatisticsMessage message = VisibilityGraphMessagesConverter.convertToBodyPathPlanStatisticsMessage(planId, statisticsToConvert);
          VisibilityGraphStatistics convertedStatistics = VisibilityGraphMessagesConverter.convertToVisibilityGraphStatistics(message);
