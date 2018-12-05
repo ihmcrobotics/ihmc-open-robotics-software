@@ -27,6 +27,7 @@ public class DRCNetworkModuleParameters
    private boolean useWholeBodyTrajectoryToolbox;
    private boolean useWholeBodyTrajectoryToolboxVisualizer;
    private boolean useKinematicsToolbox;
+   private boolean useKinematicsPlanningToolbox;
    private boolean useFootstepPlanningToolbox;
    private boolean useKinematicsToolboxVisualizer;
    private boolean useFootstepPlanningToolboxVisualizer;
@@ -72,6 +73,11 @@ public class DRCNetworkModuleParameters
    public boolean isKinematicsToolboxEnabled()
    {
       return useKinematicsToolbox;
+   }
+   
+   public boolean isKinematicsPlanningToolboxEnabled()
+   {
+      return useKinematicsPlanningToolbox;
    }
 
    public boolean isFootstepPlanningToolboxEnabled()
@@ -166,6 +172,11 @@ public class DRCNetworkModuleParameters
    public void enableKinematicsToolbox(boolean useKinematicsToolbox)
    {
       this.useKinematicsToolbox = useKinematicsToolbox;
+   }
+   
+   public void enableKinematicsPlanningToolbox(boolean useKinematicsPlanningToolbox)
+   {
+      this.useKinematicsPlanningToolbox = useKinematicsPlanningToolbox;
    }
    
    public void enableWholeBodyTrajectoryToolbox(boolean useConstrainedWholeBodyPlanningToolbox)
