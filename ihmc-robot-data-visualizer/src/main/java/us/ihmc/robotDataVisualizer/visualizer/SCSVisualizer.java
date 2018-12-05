@@ -352,7 +352,7 @@ public class SCSVisualizer implements YoVariablesUpdatedListener, ExitActionList
          });
       }
 
-      new Thread(scs).start();
+      new Thread(scs, "SCSVisualizer").start();
    }
 
    @Override

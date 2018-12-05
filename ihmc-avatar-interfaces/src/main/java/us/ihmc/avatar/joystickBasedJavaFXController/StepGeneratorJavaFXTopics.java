@@ -1,11 +1,11 @@
 package us.ihmc.avatar.joystickBasedJavaFXController;
 
-import us.ihmc.javaFXToolkit.messager.MessagerAPIFactory;
-import us.ihmc.javaFXToolkit.messager.MessagerAPIFactory.Category;
-import us.ihmc.javaFXToolkit.messager.MessagerAPIFactory.CategoryTheme;
-import us.ihmc.javaFXToolkit.messager.MessagerAPIFactory.MessagerAPI;
-import us.ihmc.javaFXToolkit.messager.MessagerAPIFactory.Topic;
-import us.ihmc.javaFXToolkit.messager.MessagerAPIFactory.TypedTopicTheme;
+import us.ihmc.messager.MessagerAPIFactory;
+import us.ihmc.messager.MessagerAPIFactory.Category;
+import us.ihmc.messager.MessagerAPIFactory.CategoryTheme;
+import us.ihmc.messager.MessagerAPIFactory.MessagerAPI;
+import us.ihmc.messager.MessagerAPIFactory.Topic;
+import us.ihmc.messager.MessagerAPIFactory.TypedTopicTheme;
 
 public class StepGeneratorJavaFXTopics
 {

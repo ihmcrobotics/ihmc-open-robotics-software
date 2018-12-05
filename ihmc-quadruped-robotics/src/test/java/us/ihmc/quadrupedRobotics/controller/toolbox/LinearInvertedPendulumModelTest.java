@@ -2,15 +2,23 @@ package us.ihmc.quadrupedRobotics.controller.toolbox;
 
 import static org.junit.Assert.assertEquals;
 
+import org.junit.After;
 import org.junit.Test;
 
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.tools.ReferenceFrameTools;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.robotics.referenceFrames.TranslationReferenceFrame;
 
 public class LinearInvertedPendulumModelTest
 {
+   @After
+   public void tearDown()
+   {
+      ReferenceFrameTools.clearWorldFrameTree();
+   }
+
    @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testLinearInvertedPendulumModelGettersAndSetters()
@@ -25,17 +33,17 @@ public class LinearInvertedPendulumModelTest
       LinearInvertedPendulumModel lipModel = new LinearInvertedPendulumModel(comZUpFrame, mass, gravity, comHeight, registry);
       
       double epsilon = 1e-7;
-      assertEquals(lipModel.getComHeight(), comHeight, epsilon);
+      assertEquals(lipModel.getLipmHeight(), comHeight, epsilon);
       assertEquals(lipModel.getGravity(), gravity, epsilon);
       assertEquals(lipModel.getMass(), mass, epsilon);
       
       comHeight--;
-      lipModel.setComHeight(comHeight);
-      assertEquals(lipModel.getComHeight(), comHeight, epsilon);
+      lipModel.setLipmHeight(comHeight);
+      assertEquals(lipModel.getLipmHeight(), comHeight, epsilon);
       
-      gravity++;
-      lipModel.setGravity(gravity);
-      assertEquals(lipModel.getGravity(), gravity, epsilon);
+//      gravity++;
+//      lipModel.setGravity(gravity);
+//      assertEquals(lipModel.getGravity(), gravity, epsilon);
       
       mass++;
       lipModel.setMass(mass);
@@ -45,8 +53,8 @@ public class LinearInvertedPendulumModelTest
       assertEquals(lipModel.getNaturalFrequency(), Math.sqrt(gravity), epsilon);
       
       comHeight = 50;
-      lipModel.setComHeight(comHeight);
-      assertEquals(lipModel.getComHeight(), comHeight, epsilon);
+      lipModel.setLipmHeight(comHeight);
+      assertEquals(lipModel.getLipmHeight(), comHeight, epsilon);
       assertEquals(lipModel.getNaturalFrequency(), Math.sqrt(gravity / comHeight), epsilon);
       assertEquals(lipModel.getTimeConstant(), 1.0 / Math.sqrt(gravity / comHeight), epsilon);
    }

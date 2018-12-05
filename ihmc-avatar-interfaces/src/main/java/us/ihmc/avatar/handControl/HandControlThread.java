@@ -1,22 +1,19 @@
 package us.ihmc.avatar.handControl;
 
-import us.ihmc.communication.configuration.NetworkParameterKeys;
-import us.ihmc.communication.configuration.NetworkParameters;
-import us.ihmc.communication.packetCommunicator.PacketCommunicator;
-import us.ihmc.communication.util.NetworkPorts;
-import us.ihmc.humanoidRobotics.kryo.IHMCCommunicationKryoNetClassList;
+import com.google.common.base.CaseFormat;
+
+import us.ihmc.communication.ROS2Tools;
+import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
 import us.ihmc.robotics.robotSide.RobotSide;
+import us.ihmc.ros2.RealtimeRos2Node;
 
 public abstract class HandControlThread implements Runnable
 {
-   protected PacketCommunicator packetCommunicator;
-	
+   protected final RealtimeRos2Node realtimeRos2Node;
+
    public HandControlThread(RobotSide robotSide)
    {
-      NetworkPorts port = robotSide.equals(RobotSide.LEFT) ? NetworkPorts.LEFT_HAND_PORT : NetworkPorts.RIGHT_HAND_PORT;
-      String host = NetworkParameters.getHost(NetworkParameterKeys.networkManager);
-      packetCommunicator = PacketCommunicator.createTCPPacketCommunicatorClient(host, port, new IHMCCommunicationKryoNetClassList(), true);
+      String nodeName = robotSide.getLowerCaseName() + "_" + CaseFormat.UPPER_CAMEL.to(CaseFormat.LOWER_UNDERSCORE, getClass().getSimpleName());
+      realtimeRos2Node = ROS2Tools.createRealtimeRos2Node(PubSubImplementation.FAST_RTPS, nodeName);
    }
-   
-   public abstract void connect();
 }

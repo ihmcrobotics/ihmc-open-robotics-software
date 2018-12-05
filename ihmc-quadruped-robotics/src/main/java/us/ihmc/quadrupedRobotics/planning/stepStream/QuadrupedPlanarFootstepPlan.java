@@ -1,8 +1,8 @@
 package us.ihmc.quadrupedRobotics.planning.stepStream;
 
+import us.ihmc.commons.lists.PreallocatedList;
 import us.ihmc.quadrupedRobotics.planning.QuadrupedTimedOrientedStep;
 import us.ihmc.quadrupedRobotics.planning.QuadrupedTimedStep;
-import us.ihmc.quadrupedRobotics.util.PreallocatedList;
 import us.ihmc.robotics.robotSide.EndDependentList;
 import us.ihmc.robotics.robotSide.RobotEnd;
 
@@ -16,8 +16,8 @@ public class QuadrupedPlanarFootstepPlan
    public QuadrupedPlanarFootstepPlan(int planCapacity)
    {
       currentSteps = new EndDependentList<>(new QuadrupedTimedOrientedStep(), new QuadrupedTimedOrientedStep());
-      plannedSteps = new PreallocatedList<>(planCapacity, QuadrupedTimedOrientedStep::new);
-      completeStepSequence = new PreallocatedList<>(planCapacity + 2, QuadrupedTimedOrientedStep::new);
+      plannedSteps = new PreallocatedList<>(QuadrupedTimedOrientedStep.class, QuadrupedTimedOrientedStep::new, planCapacity);
+      completeStepSequence = new PreallocatedList<>(QuadrupedTimedOrientedStep.class, QuadrupedTimedOrientedStep::new, planCapacity + 2);
    }
 
    public void initializeCurrentStepsFromPlannedSteps()

@@ -10,6 +10,7 @@ import org.junit.Test;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.tools.ReferenceFrameTools;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoFramePoint3D;
 
@@ -44,6 +45,7 @@ public class YoPositionProviderTest
       referenceFrame = null;
       registry = null;
       yoFramePoint = null;
+      ReferenceFrameTools.clearWorldFrameTree();
    }
 
 	@ContinuousIntegrationTest(estimatedDuration = 0.0)

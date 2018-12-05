@@ -52,7 +52,7 @@ public class AdjustFootstepMessage extends Packet<AdjustFootstepMessage> impleme
    {
       location_ = new us.ihmc.euclid.tuple3D.Point3D();
       orientation_ = new us.ihmc.euclid.tuple4D.Quaternion();
-      predicted_contact_points_2d_ = new us.ihmc.idl.IDLSequence.Object<us.ihmc.euclid.tuple3D.Point3D> (100, us.ihmc.euclid.tuple3D.Point3D.class, new geometry_msgs.msg.dds.PointPubSubType());
+      predicted_contact_points_2d_ = new us.ihmc.idl.IDLSequence.Object<us.ihmc.euclid.tuple3D.Point3D> (100, new geometry_msgs.msg.dds.PointPubSubType());
 
    }
 

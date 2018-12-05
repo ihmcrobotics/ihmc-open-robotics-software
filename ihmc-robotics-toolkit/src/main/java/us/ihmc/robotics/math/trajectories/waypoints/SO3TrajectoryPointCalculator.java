@@ -6,7 +6,7 @@ import us.ihmc.euclid.rotationConversion.RotationVectorConversion;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
-import us.ihmc.robotics.lists.RecyclingArrayList;
+import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.robotics.math.trajectories.waypoints.interfaces.SO3TrajectoryPointInterface;
 
 public class SO3TrajectoryPointCalculator

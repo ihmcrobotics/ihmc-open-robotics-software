@@ -124,7 +124,7 @@ public abstract class DRCObstacleCourseEveryBuildTest implements MultiRobotTestI
       FootstepDataListMessage footstepDataList = createFootstepsForWalkingOnFlatLongSteps(scriptedFootstepGenerator);
 
       // FootstepDataList footstepDataList = createFootstepsForTwoLongFlatSteps(scriptedFootstepGenerator);
-      drcSimulationTestHelper.send(footstepDataList);
+      drcSimulationTestHelper.publishToController(footstepDataList);
 
       success = success && drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(10.0);
 

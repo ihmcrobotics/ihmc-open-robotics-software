@@ -7,7 +7,7 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DBasics;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.euclid.tuple4D.interfaces.QuaternionReadOnly;
-import us.ihmc.robotics.screwTheory.RigidBody;
+import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 
 public interface IMUSensorReadOnly
 {
@@ -15,7 +15,7 @@ public interface IMUSensorReadOnly
 
    public abstract ReferenceFrame getMeasurementFrame();
 
-   public abstract RigidBody getMeasurementLink();
+   public abstract RigidBodyBasics getMeasurementLink();
 
    public abstract QuaternionReadOnly getOrientationMeasurement();
 

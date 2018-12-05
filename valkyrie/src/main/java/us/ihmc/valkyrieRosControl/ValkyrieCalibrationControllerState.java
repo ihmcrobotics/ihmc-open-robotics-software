@@ -6,12 +6,13 @@ import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelSta
 import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHumanoidControllerToolbox;
 import us.ihmc.commons.MathTools;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelControllerName;
+import us.ihmc.mecano.multiBodySystem.OneDoFJoint;
+import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
+import us.ihmc.mecano.tools.MultiBodySystemTools;
 import us.ihmc.robotics.math.trajectories.YoPolynomial;
-import us.ihmc.robotics.screwTheory.OneDoFJoint;
-import us.ihmc.robotics.screwTheory.ScrewTools;
 import us.ihmc.robotics.stateMachine.core.StateMachine;
 import us.ihmc.robotics.stateMachine.factories.StateMachineFactory;
-import us.ihmc.sensorProcessing.outputData.JointDesiredOutput;
+import us.ihmc.sensorProcessing.outputData.JointDesiredOutputBasics;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutputListReadOnly;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutputReadOnly;
 import us.ihmc.stateEstimation.humanoid.kinematicsBasedStateEstimation.ForceSensorCalibrationModule;
@@ -36,7 +37,7 @@ public class ValkyrieCalibrationControllerState extends HighLevelControllerState
    private ForceSensorCalibrationModule forceSensorCalibrationModule;
    private final StateMachine<CalibrationStates, CalibrationState> stateMachine;
 
-   private final PairList<OneDoFJoint, TrajectoryData> jointsData = new PairList<>();
+   private final PairList<OneDoFJointBasics, TrajectoryData> jointsData = new PairList<>();
 
    private final JointTorqueOffsetEstimatorController jointTorqueOffsetEstimatorController;
    private final LowLevelOneDoFJointDesiredDataHolder lowLevelOneDoFJointDesiredDataHolder = new LowLevelOneDoFJointDesiredDataHolder();
@@ -50,21 +51,15 @@ public class ValkyrieCalibrationControllerState extends HighLevelControllerState
                                              JointDesiredOutputListReadOnly highLevelControlOutput,
                                              ValkyrieCalibrationParameters calibrationParameters, TorqueOffsetPrinter torqueOffsetPrinter)
    {
-      super(controllerState, highLevelControllerParameters, highLevelControllerToolbox);
+      super(controllerState, highLevelControllerParameters, MultiBodySystemTools.filterJoints(highLevelControllerToolbox.getControlledJoints(), OneDoFJoint.class));
       this.highLevelControlOutput = highLevelControlOutput;
 
-      OneDoFJoint[] controlledJoints = ScrewTools.filterJoints(highLevelControllerToolbox.getControlledJoints(), OneDoFJoint.class);
-
-      for (OneDoFJoint controlledJoint : controlledJoints)
+      for (OneDoFJointBasics controlledJoint : controlledJoints)
       {
          String jointName = controlledJoint.getName();
          YoPolynomial trajectory = new YoPolynomial(jointName + "_CalibrationTrajectory", 4, registry);
-         YoDouble calibrationPosition = new YoDouble(jointName + "_CalibrationPosition", registry);
          YoDouble initialPosition = new YoDouble(jointName + "_CalibrationInitialPosition", registry);
-
-         calibrationPosition.set(calibrationParameters.getSetpoint(jointName));
-
-         jointsData.add(controlledJoint, new TrajectoryData(initialPosition, calibrationPosition, trajectory));
+         jointsData.add(controlledJoint, new TrajectoryData(initialPosition, trajectory));
       }
 
       timeToMoveForCalibration.set(timeToMove);
@@ -151,7 +146,7 @@ public class ValkyrieCalibrationControllerState extends HighLevelControllerState
 
          for (int jointIndex = 0; jointIndex < jointsData.size(); jointIndex++)
          {
-            OneDoFJoint joint = jointsData.get(jointIndex).getLeft();
+            OneDoFJointBasics joint = jointsData.get(jointIndex).getLeft();
             TrajectoryData trajectoryData = jointsData.get(jointIndex).getRight();
 
             YoPolynomial trajectory = trajectoryData.getTrajectory();
@@ -159,7 +154,7 @@ public class ValkyrieCalibrationControllerState extends HighLevelControllerState
             trajectory.compute(timeInTrajectory);
             double desiredPosition = trajectory.getPosition();
 
-            JointDesiredOutput lowLevelJointData = lowLevelOneDoFJointDesiredDataHolder.getJointDesiredOutput(joint);
+            JointDesiredOutputBasics lowLevelJointData = lowLevelOneDoFJointDesiredDataHolder.getJointDesiredOutput(joint);
             lowLevelJointData.clear();
             lowLevelJointData.setDesiredPosition(desiredPosition);
             lowLevelJointData.setDesiredVelocity(trajectory.getVelocity());
@@ -182,11 +177,10 @@ public class ValkyrieCalibrationControllerState extends HighLevelControllerState
       {
          for (int i = 0; i < jointsData.size(); i++)
          {
-            OneDoFJoint joint = jointsData.get(i).getLeft();
+            OneDoFJointBasics joint = jointsData.get(i).getLeft();
             TrajectoryData trajectoryData = jointsData.get(i).getRight();
 
             YoDouble initialPosition = trajectoryData.getInitialPosition();
-            YoDouble calibrationPosition = trajectoryData.getCalibrationPosition();
             YoPolynomial trajectory = trajectoryData.getTrajectory();
 
             JointDesiredOutputReadOnly jointDesiredOutput = highLevelControlOutput.getJointDesiredOutput(joint);
@@ -194,7 +188,7 @@ public class ValkyrieCalibrationControllerState extends HighLevelControllerState
             double startAngle = jointDesiredOutput != null && jointDesiredOutput.hasDesiredPosition() ? jointDesiredOutput.getDesiredPosition() : joint.getQ();
             double startVelocity = 0.0;
 
-            double finalAngle = calibrationPosition.getDoubleValue();
+            double finalAngle = jointTorqueOffsetEstimatorController.getJointCalibrationPosition(joint);
             double finalVelocity = 0.0;
 
             initialPosition.set(startAngle);
@@ -268,7 +262,7 @@ public class ValkyrieCalibrationControllerState extends HighLevelControllerState
 
          for (int jointIndex = 0; jointIndex < jointsData.size(); jointIndex++)
          {
-            OneDoFJoint joint = jointsData.get(jointIndex).getLeft();
+            OneDoFJointBasics joint = jointsData.get(jointIndex).getLeft();
             TrajectoryData trajectoryData = jointsData.get(jointIndex).getRight();
 
             YoPolynomial trajectory = trajectoryData.getTrajectory();
@@ -276,7 +270,7 @@ public class ValkyrieCalibrationControllerState extends HighLevelControllerState
             trajectory.compute(timeInTrajectory);
             double desiredPosition = trajectory.getPosition();
 
-            JointDesiredOutput lowLevelJointData = lowLevelOneDoFJointDesiredDataHolder.getJointDesiredOutput(joint);
+            JointDesiredOutputBasics lowLevelJointData = lowLevelOneDoFJointDesiredDataHolder.getJointDesiredOutput(joint);
             lowLevelJointData.clear();
             lowLevelJointData.setDesiredPosition(desiredPosition);
             lowLevelJointData.setDesiredVelocity(trajectory.getVelocity());
@@ -299,13 +293,13 @@ public class ValkyrieCalibrationControllerState extends HighLevelControllerState
       {
          for (int i = 0; i < jointsData.size(); i++)
          {
+            OneDoFJointBasics joint = jointsData.get(i).getLeft();
             TrajectoryData trajectoryData = jointsData.get(i).getRight();
 
-            YoDouble calibrationPosition = trajectoryData.getCalibrationPosition();
             YoDouble initialPosition = trajectoryData.getInitialPosition();
             YoPolynomial trajectory = trajectoryData.getTrajectory();
 
-            double startAngle = calibrationPosition.getDoubleValue();
+            double startAngle = jointTorqueOffsetEstimatorController.getJointCalibrationPosition(joint);
             double startVelocity = 0.0;
 
             double finalAngle = initialPosition.getDoubleValue();
@@ -324,24 +318,17 @@ public class ValkyrieCalibrationControllerState extends HighLevelControllerState
    private class TrajectoryData
    {
       private final YoDouble initialPosition;
-      private final YoDouble calibrationPosition;
       private final YoPolynomial trajectory;
 
-      public TrajectoryData(YoDouble initialPosition, YoDouble calibrationPosition, YoPolynomial trajectory)
+      public TrajectoryData(YoDouble initialPosition, YoPolynomial trajectory)
       {
          this.initialPosition = initialPosition;
-         this.calibrationPosition = calibrationPosition;
          this.trajectory = trajectory;
       }
 
       public YoDouble getInitialPosition()
       {
          return initialPosition;
-      }
-
-      public YoDouble getCalibrationPosition()
-      {
-         return calibrationPosition;
       }
 
       public YoPolynomial getTrajectory()

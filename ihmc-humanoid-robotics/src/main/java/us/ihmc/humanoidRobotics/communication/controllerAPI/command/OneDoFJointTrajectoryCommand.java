@@ -38,7 +38,7 @@ public class OneDoFJointTrajectoryCommand extends SimpleTrajectoryPoint1DList im
    }
 
    @Override
-   public void set(OneDoFJointTrajectoryMessage message)
+   public void setFromMessage(OneDoFJointTrajectoryMessage message)
    {
       this.clear();
       

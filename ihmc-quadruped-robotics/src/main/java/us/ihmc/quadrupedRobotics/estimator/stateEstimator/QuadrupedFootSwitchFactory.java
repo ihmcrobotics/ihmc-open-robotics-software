@@ -4,10 +4,10 @@ import us.ihmc.commonWalkingControlModules.sensors.footSwitch.SettableFootSwitch
 import us.ihmc.commonWalkingControlModules.touchdownDetector.ForceBasedTouchDownDetection;
 import us.ihmc.commonWalkingControlModules.touchdownDetector.JointTorqueBasedTouchdownDetector;
 import us.ihmc.commons.PrintTools;
-import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.robotModels.FullQuadrupedRobotModel;
-import us.ihmc.yoVariables.parameters.DoubleParameter;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.robotics.contactable.ContactablePlaneBody;
+import us.ihmc.robotics.partNames.LegJointName;
 import us.ihmc.robotics.robotSide.QuadrantDependentList;
 import us.ihmc.robotics.robotSide.RobotQuadrant;
 import us.ihmc.robotics.screwTheory.TotalMassCalculator;
@@ -25,11 +25,10 @@ public class QuadrupedFootSwitchFactory
          "footContactableBodies");
    private final RequiredFactoryField<FullQuadrupedRobotModel> fullRobotModel = new RequiredFactoryField<>("fullRobotModel");
    private final RequiredFactoryField<FootSwitchType> footSwitchType = new RequiredFactoryField<>("footSwitchType");
+   private final RequiredFactoryField<QuadrantDependentList<Double>> kneeTorqueTouchdownThreshold = new RequiredFactoryField<>("kneeTorqueTouchdownThreshold");
 
    // Private fields
    protected final YoVariableRegistry registry = new YoVariableRegistry("QuadrupedFootSwitchManagerRegistry");
-
-   private final QuadrantDependentList<Double> defaultJointTorqueTouchdownThresholds = new QuadrantDependentList<>(5.0, 5.0, -5.0, -5.0);
 
    protected void setupTouchdownBasedFootSwitches(QuadrantDependentList<FootSwitchInterface> footSwitches, double totalRobotWeight)
    {
@@ -41,11 +40,10 @@ public class QuadrupedFootSwitchFactory
                                                                                                                                     footContactableBodies.get()
                                                                                                                                                          .get(robotQuadrant),
                                                                                                                                     totalRobotWeight, registry);
-
          JointTorqueBasedTouchdownDetector jointTorqueBasedTouchdownDetector;
-         jointTorqueBasedTouchdownDetector = new JointTorqueBasedTouchdownDetector(
-               fullRobotModel.get().getOneDoFJointByName(robotQuadrant.toString().toLowerCase() + "_knee_pitch"), registry);
-         jointTorqueBasedTouchdownDetector.setTorqueThreshold(defaultJointTorqueTouchdownThresholds.get(robotQuadrant));
+         boolean dontDetectTouchdownIfAtJointLimit = true;
+         jointTorqueBasedTouchdownDetector = new JointTorqueBasedTouchdownDetector(fullRobotModel.get().getLegJoint(robotQuadrant, LegJointName.KNEE_PITCH), dontDetectTouchdownIfAtJointLimit, registry);
+         jointTorqueBasedTouchdownDetector.setTorqueThreshold(kneeTorqueTouchdownThreshold.get().get(robotQuadrant));
          touchdownDetectorBasedFootSwitch.addTouchdownDetector(jointTorqueBasedTouchdownDetector);
 
          ForceBasedTouchDownDetection forceBasedTouchDownDetection = new ForceBasedTouchDownDetection(fullRobotModel.get(), robotQuadrant,
@@ -61,7 +59,6 @@ public class QuadrupedFootSwitchFactory
    {
       PrintTools.warn(this, "simulatedRobot is not set, creating touchdown based foot switches.");
       setupTouchdownBasedFootSwitches(footSwitches, totalRobotWeight);
-      return;
    }
 
    private void setupSettableFootSwitches(QuadrantDependentList<FootSwitchInterface> footSwitches, double totalRobotWeight)
@@ -125,5 +122,10 @@ public class QuadrupedFootSwitchFactory
    public void setFootSwitchType(FootSwitchType footSwitchType)
    {
       this.footSwitchType.set(footSwitchType);
+   }
+
+   public void setKneeTouchdownThresholds(QuadrantDependentList<Double> kneeTouchdownThresholds)
+   {
+      this.kneeTorqueTouchdownThreshold.set(kneeTouchdownThresholds);
    }
 }

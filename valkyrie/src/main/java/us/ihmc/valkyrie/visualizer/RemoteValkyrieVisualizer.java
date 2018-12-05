@@ -36,7 +36,7 @@ public class RemoteValkyrieVisualizer implements SCSVisualizerStateListener
       System.out.println("Connecting to host " + host);
 
       SCSVisualizer scsVisualizer = new SCSVisualizer(BUFFER_SIZE);
-      scsVisualizer.setDisplayOneInNPackets(5);
+      scsVisualizer.setDisplayOneInNPackets(15);
       scsVisualizer.addSCSVisualizerStateListener(this);
       scsVisualizer.setShowOverheadView(true);
 
@@ -107,10 +107,16 @@ public class RemoteValkyrieVisualizer implements SCSVisualizerStateListener
          @Override
          public void notifyOfVariableChange(YoVariable<?> v)
          {
-            int currentIndex = requestControlModeComboBox.getSelectedIndex();
-            int newIndex = fromEnumOrdinalToComboBoxIndexMap.get(requestHighLevelControlMode.getOrdinal());
-            if (currentIndex != newIndex)
-               requestControlModeComboBox.setSelectedIndex(newIndex);
+            try
+            {
+               int currentIndex = requestControlModeComboBox.getSelectedIndex();
+               int newIndex = fromEnumOrdinalToComboBoxIndexMap.get(requestHighLevelControlMode.getOrdinal());
+               if (currentIndex != newIndex)
+                  requestControlModeComboBox.setSelectedIndex(newIndex);
+            }
+            catch (NullPointerException e)
+            {
+            }
          }
       });
 

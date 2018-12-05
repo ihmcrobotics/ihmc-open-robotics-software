@@ -4,5 +4,5 @@
 uint32 sequence_id
 
 int64 robot_timestamp
-float32[] point_cloud
-int32[] colors
+float32[<=600000] point_cloud
+int32[<=200000] colors

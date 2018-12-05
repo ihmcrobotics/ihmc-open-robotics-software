@@ -1,10 +1,11 @@
 package us.ihmc.commonWalkingControlModules.controlModules;
 
-import static us.ihmc.communication.packets.Packet.INVALID_MESSAGE_ID;
+import static us.ihmc.communication.packets.Packet.*;
 
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.BipedSupportPolygons;
+import us.ihmc.commonWalkingControlModules.controlModules.rigidBody.RigidBodyTaskspaceControlState;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHumanoidControllerToolbox;
-import us.ihmc.commons.PrintTools;
+import us.ihmc.commons.lists.RecyclingArrayDeque;
 import us.ihmc.communication.packets.ExecutionMode;
 import us.ihmc.communication.packets.Packet;
 import us.ihmc.euclid.referenceFrame.FrameConvexPolygon2D;
@@ -13,24 +14,28 @@ import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameVector2D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.tuple2D.Vector2D;
+import us.ihmc.euclid.tuple2D.interfaces.Vector2DReadOnly;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.PelvisTrajectoryCommand;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.SE3TrajectoryControllerCommand;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.StopAllTrajectoryCommand;
+import us.ihmc.log.LogTools;
+import us.ihmc.mecano.frames.MovingReferenceFrame;
+import us.ihmc.robotics.dataStructures.parameters.ParameterVector2D;
 import us.ihmc.robotics.geometry.ConvexPolygonScaler;
-import us.ihmc.robotics.lists.RecyclingArrayDeque;
 import us.ihmc.robotics.math.trajectories.waypoints.MultipleWaypointsPositionTrajectoryGenerator;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
-import us.ihmc.robotics.screwTheory.MovingReferenceFrame;
 import us.ihmc.robotics.screwTheory.SelectionMatrix3D;
-import us.ihmc.yoVariables.listener.VariableChangedListener;
+import us.ihmc.yoVariables.listener.ParameterChangedListener;
+import us.ihmc.yoVariables.parameters.BooleanParameter;
+import us.ihmc.yoVariables.parameters.YoParameter;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoFramePoint2D;
 import us.ihmc.yoVariables.variable.YoFrameVector2D;
 import us.ihmc.yoVariables.variable.YoLong;
-import us.ihmc.yoVariables.variable.YoVariable;
 
 public class PelvisICPBasedTranslationManager
 {
@@ -58,12 +63,13 @@ public class PelvisICPBasedTranslationManager
    private final YoDouble maximumIntegralError = new YoDouble("maximumPelvisPositionIntegralError", registry);
 
    private final YoFrameVector2D desiredICPOffset = new YoFrameVector2D("desiredICPOffset", worldFrame, registry);
+   private final Vector2DReadOnly userOffset = new ParameterVector2D("userDesiredICPOffset", new Vector2D(), registry);
 
    private final YoBoolean isEnabled = new YoBoolean("isPelvisTranslationManagerEnabled", registry);
    private final YoBoolean isRunning = new YoBoolean("isPelvisTranslationManagerRunning", registry);
    private final YoBoolean isFrozen = new YoBoolean("isPelvisTranslationManagerFrozen", registry);
 
-   private final YoBoolean manualMode = new YoBoolean("manualModeICPOffset", registry);
+   private final BooleanParameter manualMode = new BooleanParameter("manualModeICPOffset", registry, false);
 
    private final YoDouble yoTime;
    private final double controlDT;
@@ -73,7 +79,7 @@ public class PelvisICPBasedTranslationManager
    private ReferenceFrame supportFrame;
    private final ReferenceFrame pelvisZUpFrame;
    private final ReferenceFrame midFeetZUpFrame;
-   private final SideDependentList<MovingReferenceFrame> ankleZUpFrames;
+   private final SideDependentList<MovingReferenceFrame> soleZUpFrames;
 
    private final BipedSupportPolygons bipedSupportPolygons;
    private FrameConvexPolygon2D supportPolygon;
@@ -89,7 +95,8 @@ public class PelvisICPBasedTranslationManager
 
    private final YoBoolean isReadyToHandleQueuedCommands;
    private final YoLong numberOfQueuedCommands;
-   private final RecyclingArrayDeque<PelvisTrajectoryCommand> commandQueue = new RecyclingArrayDeque<>(PelvisTrajectoryCommand.class);
+   private final PelvisTrajectoryCommand commandBeingProcessed = new PelvisTrajectoryCommand();
+   private final RecyclingArrayDeque<PelvisTrajectoryCommand> commandQueue = new RecyclingArrayDeque<>(PelvisTrajectoryCommand.class, PelvisTrajectoryCommand::set);
 
    public PelvisICPBasedTranslationManager(HighLevelHumanoidControllerToolbox controllerToolbox, double pelvisTranslationICPSupportPolygonSafeMargin, BipedSupportPolygons bipedSupportPolygons, YoVariableRegistry parentRegistry)
    {
@@ -100,24 +107,24 @@ public class PelvisICPBasedTranslationManager
       controlDT = controllerToolbox.getControlDT();
       pelvisZUpFrame = controllerToolbox.getPelvisZUpFrame();
       midFeetZUpFrame = controllerToolbox.getReferenceFrames().getMidFeetZUpFrame();
-      ankleZUpFrames = controllerToolbox.getReferenceFrames().getAnkleZUpReferenceFrames();
+      soleZUpFrames = controllerToolbox.getReferenceFrames().getSoleZUpFrames();
 
       this.bipedSupportPolygons = bipedSupportPolygons;
 
       boolean allowMultipleFrames = true;
-      positionTrajectoryGenerator = new MultipleWaypointsPositionTrajectoryGenerator("pelvisOffset", allowMultipleFrames, worldFrame, registry);
+      positionTrajectoryGenerator = new MultipleWaypointsPositionTrajectoryGenerator("pelvisOffset", RigidBodyTaskspaceControlState.maxPointsInGenerator, allowMultipleFrames, worldFrame, registry);
       positionTrajectoryGenerator.registerNewTrajectoryFrame(midFeetZUpFrame);
       for (RobotSide robotSide : RobotSide.values)
-         positionTrajectoryGenerator.registerNewTrajectoryFrame(ankleZUpFrames.get(robotSide));
+         positionTrajectoryGenerator.registerNewTrajectoryFrame(soleZUpFrames.get(robotSide));
 
       proportionalGain.set(0.5);
       integralGain.set(1.5);
       maximumIntegralError.set(0.08);
 
-      manualMode.addVariableChangedListener(new VariableChangedListener()
+      manualMode.addParameterChangedListener(new ParameterChangedListener()
       {
          @Override
-         public void notifyOfVariableChange(YoVariable<?> v)
+         public void notifyOfParameterChange(YoParameter<?> v)
          {
             initialize();
          }
@@ -152,8 +159,8 @@ public class PelvisICPBasedTranslationManager
       }
       else
       {
-         supportFrame = ankleZUpFrames.get(supportLeg);
-         supportPolygon = bipedSupportPolygons.getFootPolygonInAnkleZUp(supportLeg);
+         supportFrame = soleZUpFrames.get(supportLeg);
+         supportPolygon = bipedSupportPolygons.getFootPolygonInSoleZUpFrame(supportLeg);
       }
 
       if (!isEnabled.getBooleanValue())
@@ -162,7 +169,7 @@ public class PelvisICPBasedTranslationManager
          return;
       }
 
-      if (manualMode.getBooleanValue())
+      if (manualMode.getValue())
          return;
 
       if (isRunning.getBooleanValue())
@@ -175,9 +182,9 @@ public class PelvisICPBasedTranslationManager
             if (positionTrajectoryGenerator.isDone() && !commandQueue.isEmpty())
             {
                double firstTrajectoryPointTime = positionTrajectoryGenerator.getLastWaypointTime();
-               PelvisTrajectoryCommand command = commandQueue.poll();
+               commandBeingProcessed.set(commandQueue.poll());
                numberOfQueuedCommands.decrement();
-               initializeTrajectoryGenerator(command, firstTrajectoryPointTime);
+               initializeTrajectoryGenerator(commandBeingProcessed, firstTrajectoryPointTime);
                positionTrajectoryGenerator.compute(deltaTime);
             }
          }
@@ -250,7 +257,7 @@ public class PelvisICPBasedTranslationManager
       }
       else
       {
-         PrintTools.warn(this, "Unknown " + ExecutionMode.class.getSimpleName() + " value: " + se3Trajectory.getExecutionMode() + ". Command ignored.");
+         LogTools.warn("Unknown " + ExecutionMode.class.getSimpleName() + " value: " + se3Trajectory.getExecutionMode() + ". Command ignored.");
       }
    }
 
@@ -258,7 +265,7 @@ public class PelvisICPBasedTranslationManager
    {
       if (!isReadyToHandleQueuedCommands.getBooleanValue())
       {
-         PrintTools.warn(this, "The very first " + command.getClass().getSimpleName() + " of a series must be " + ExecutionMode.OVERRIDE + ". Aborting motion.");
+         LogTools.warn("The very first " + command.getClass().getSimpleName() + " of a series must be " + ExecutionMode.OVERRIDE + ". Aborting motion.");
          return false;
       }
 
@@ -267,14 +274,14 @@ public class PelvisICPBasedTranslationManager
 
       if (previousCommandId != INVALID_MESSAGE_ID && lastCommandId.getLongValue() != INVALID_MESSAGE_ID && lastCommandId.getLongValue() != previousCommandId)
       {
-         PrintTools.warn(this, "Previous command ID mismatch: previous ID from command = " + previousCommandId
+         LogTools.warn("Previous command ID mismatch: previous ID from command = " + previousCommandId
                + ", last message ID received by the controller = " + lastCommandId.getLongValue() + ". Aborting motion.");
          return false;
       }
 
       if (se3Trajectory.getTrajectoryPoint(0).getTime() < 1.0e-5)
       {
-         PrintTools.warn(this, "Time of the first trajectory point of a queued command must be greater than zero. Aborting motion.");
+         LogTools.warn("Time of the first trajectory point of a queued command must be greater than zero. Aborting motion.");
          return false;
       }
 
@@ -403,7 +410,7 @@ public class PelvisICPBasedTranslationManager
 
       originalICPToModify.setIncludingFrame(desiredICPToModify);
 
-      if (!isEnabled.getBooleanValue() || (!isRunning.getBooleanValue() && !manualMode.getBooleanValue()))
+      if (!isEnabled.getBooleanValue() || (!isRunning.getBooleanValue() && !manualMode.getValue()))
       {
          desiredICPOffset.setToZero();
          icpOffsetForFreezing.setToZero();
@@ -413,12 +420,10 @@ public class PelvisICPBasedTranslationManager
          return;
       }
 
-      if (manualMode.getBooleanValue())
+      if (manualMode.getValue())
       {
-         // Ignore the desiredICPOffset frame assuming the user wants to control the ICP in the supportFrame
-         tempICPOffset.setIncludingFrame(supportFrame, desiredICPOffset.getX(), desiredICPOffset.getY());
+         tempICPOffset.setIncludingFrame(supportFrame, userOffset.getX(), userOffset.getY());
       }
-
       else
       {
          tempICPOffset.setIncludingFrame(desiredICPOffset);

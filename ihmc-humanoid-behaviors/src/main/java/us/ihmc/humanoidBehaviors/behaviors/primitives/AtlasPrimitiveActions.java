@@ -2,10 +2,10 @@ package us.ihmc.humanoidBehaviors.behaviors.primitives;
 
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.humanoidBehaviors.behaviors.AbstractBehavior;
-import us.ihmc.humanoidBehaviors.communication.CommunicationBridge;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotModels.FullHumanoidRobotModelFactory;
+import us.ihmc.ros2.Ros2Node;
 import us.ihmc.wholeBodyController.WholeBodyControllerParameters;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
@@ -41,64 +41,64 @@ public class AtlasPrimitiveActions
 
    public HumanoidReferenceFrames referenceFrames;
 
-   public AtlasPrimitiveActions(CommunicationBridge outgoingCommunicationBridge, FullHumanoidRobotModel fullRobotModel,
-                                FullHumanoidRobotModelFactory fullRobotModelFactory, HumanoidReferenceFrames referenceFrames, YoDouble yoTime,
-                                WholeBodyControllerParameters wholeBodyControllerParameters, YoVariableRegistry behaviorRegistry)
+   public AtlasPrimitiveActions(String robotName, Ros2Node ros2Node,
+                                FullHumanoidRobotModel fullRobotModel, FullHumanoidRobotModelFactory fullRobotModelFactory, HumanoidReferenceFrames referenceFrames,
+                                YoDouble yoTime, WholeBodyControllerParameters wholeBodyControllerParameters, YoVariableRegistry behaviorRegistry)
    {
       this.referenceFrames = referenceFrames;
       this.behaviorRegistry = behaviorRegistry;
 
       WalkingControllerParameters walkingControllerParameters = wholeBodyControllerParameters.getWalkingControllerParameters();
 
-      walkToLocationPlannedBehavior = new WalkToLocationPlannedBehavior(outgoingCommunicationBridge, fullRobotModel, referenceFrames, walkingControllerParameters, yoTime);
+      walkToLocationPlannedBehavior = new WalkToLocationPlannedBehavior(robotName, ros2Node, fullRobotModel, referenceFrames, walkingControllerParameters, yoTime);
       addPrimitive(walkToLocationPlannedBehavior);
 
-      leftArmTrajectoryBehavior = new ArmTrajectoryBehavior("left", outgoingCommunicationBridge, yoTime);
+      leftArmTrajectoryBehavior = new ArmTrajectoryBehavior(robotName, "left", ros2Node, yoTime);
       addPrimitive(leftArmTrajectoryBehavior);
 
-      rightArmTrajectoryBehavior = new ArmTrajectoryBehavior("right", outgoingCommunicationBridge, yoTime);
+      rightArmTrajectoryBehavior = new ArmTrajectoryBehavior(robotName, "right", ros2Node, yoTime);
       addPrimitive(rightArmTrajectoryBehavior);
-      chestTrajectoryBehavior = new ChestTrajectoryBehavior(outgoingCommunicationBridge, yoTime);
+      chestTrajectoryBehavior = new ChestTrajectoryBehavior(robotName, ros2Node, yoTime);
       addPrimitive(chestTrajectoryBehavior);
-      clearLidarBehavior = new ClearLidarBehavior(outgoingCommunicationBridge);
+      clearLidarBehavior = new ClearLidarBehavior(robotName, ros2Node);
       addPrimitive(clearLidarBehavior);
-      enableLidarBehavior = new EnableLidarBehavior(outgoingCommunicationBridge);
+      enableLidarBehavior = new EnableLidarBehavior(robotName, ros2Node);
       addPrimitive(enableLidarBehavior);
-      leftFootEndEffectorLoadBearingBehavior = new FootLoadBearingBehavior("leftFoot", outgoingCommunicationBridge);
+      leftFootEndEffectorLoadBearingBehavior = new FootLoadBearingBehavior(robotName, "leftFoot", ros2Node);
       addPrimitive(leftFootEndEffectorLoadBearingBehavior);
-      rightFootEndEffectorLoadBearingBehavior = new FootLoadBearingBehavior("rightFoot", outgoingCommunicationBridge);
+      rightFootEndEffectorLoadBearingBehavior = new FootLoadBearingBehavior(robotName, "rightFoot", ros2Node);
       addPrimitive(rightFootEndEffectorLoadBearingBehavior);
-      footstepListBehavior = new FootstepListBehavior(outgoingCommunicationBridge, walkingControllerParameters);
+      footstepListBehavior = new FootstepListBehavior(robotName, ros2Node, walkingControllerParameters);
       addPrimitive(footstepListBehavior);
-      leftArmGoHomeBehavior = new GoHomeBehavior("leftArm", outgoingCommunicationBridge, yoTime);
+      leftArmGoHomeBehavior = new GoHomeBehavior(robotName, "leftArm", ros2Node, yoTime);
       addPrimitive(leftArmGoHomeBehavior);
-      rightArmGoHomeBehavior = new GoHomeBehavior("rightArm", outgoingCommunicationBridge, yoTime);
+      rightArmGoHomeBehavior = new GoHomeBehavior(robotName, "rightArm", ros2Node, yoTime);
       addPrimitive(rightArmGoHomeBehavior);
-      chestGoHomeBehavior = new GoHomeBehavior("chest", outgoingCommunicationBridge, yoTime);
+      chestGoHomeBehavior = new GoHomeBehavior(robotName, "chest", ros2Node, yoTime);
       addPrimitive(chestGoHomeBehavior);
-      pelvisGoHomeBehavior = new GoHomeBehavior("pelvis", outgoingCommunicationBridge, yoTime);
+      pelvisGoHomeBehavior = new GoHomeBehavior(robotName, "pelvis", ros2Node, yoTime);
       addPrimitive(pelvisGoHomeBehavior);
-      leftHandDesiredConfigurationBehavior = new HandDesiredConfigurationBehavior("leftHand", outgoingCommunicationBridge, yoTime);
+      leftHandDesiredConfigurationBehavior = new HandDesiredConfigurationBehavior(robotName, "leftHand", ros2Node, yoTime);
       addPrimitive(leftHandDesiredConfigurationBehavior);
-      rightHandDesiredConfigurationBehavior = new HandDesiredConfigurationBehavior("rigthHand", outgoingCommunicationBridge, yoTime);
+      rightHandDesiredConfigurationBehavior = new HandDesiredConfigurationBehavior(robotName, "rigthHand", ros2Node, yoTime);
       addPrimitive(rightHandDesiredConfigurationBehavior);
-      leftHandTrajectoryBehavior = new HandTrajectoryBehavior("left", outgoingCommunicationBridge, yoTime);
+      leftHandTrajectoryBehavior = new HandTrajectoryBehavior(robotName, "left", ros2Node, yoTime);
       addPrimitive(leftHandTrajectoryBehavior);
-      rightHandTrajectoryBehavior = new HandTrajectoryBehavior("right", outgoingCommunicationBridge, yoTime);
+      rightHandTrajectoryBehavior = new HandTrajectoryBehavior(robotName, "right", ros2Node, yoTime);
       addPrimitive(rightHandTrajectoryBehavior);
-      headTrajectoryBehavior = new HeadTrajectoryBehavior("", outgoingCommunicationBridge, yoTime);
+      headTrajectoryBehavior = new HeadTrajectoryBehavior(robotName, "", ros2Node, yoTime);
       addPrimitive(headTrajectoryBehavior);
-      pelvisHeightTrajectoryBehavior = new PelvisHeightTrajectoryBehavior(outgoingCommunicationBridge, yoTime);
+      pelvisHeightTrajectoryBehavior = new PelvisHeightTrajectoryBehavior(robotName, ros2Node, yoTime);
       addPrimitive(pelvisHeightTrajectoryBehavior);
-      pelvisOrientationTrajectoryBehavior = new PelvisOrientationTrajectoryBehavior(outgoingCommunicationBridge, yoTime);
+      pelvisOrientationTrajectoryBehavior = new PelvisOrientationTrajectoryBehavior(robotName, ros2Node, yoTime);
       addPrimitive(pelvisOrientationTrajectoryBehavior);
-      pelvisTrajectoryBehavior = new PelvisTrajectoryBehavior(outgoingCommunicationBridge, yoTime);
+      pelvisTrajectoryBehavior = new PelvisTrajectoryBehavior(robotName, ros2Node, yoTime);
       addPrimitive(pelvisTrajectoryBehavior);
-      setLidarParametersBehavior = new SetLidarParametersBehavior(outgoingCommunicationBridge);
+      setLidarParametersBehavior = new SetLidarParametersBehavior(robotName, ros2Node);
       addPrimitive(setLidarParametersBehavior);
-      walkToLocationBehavior = new WalkToLocationBehavior(outgoingCommunicationBridge, fullRobotModel, referenceFrames, walkingControllerParameters);
+      walkToLocationBehavior = new WalkToLocationBehavior(robotName, ros2Node, fullRobotModel, referenceFrames, walkingControllerParameters);
       addPrimitive(walkToLocationBehavior);
-      wholeBodyBehavior = new WholeBodyInverseKinematicsBehavior("atlas", fullRobotModelFactory, yoTime, outgoingCommunicationBridge, fullRobotModel);
+      wholeBodyBehavior = new WholeBodyInverseKinematicsBehavior(robotName, "atlas", fullRobotModelFactory, yoTime, ros2Node, fullRobotModel);
       addPrimitive(wholeBodyBehavior);
 
 

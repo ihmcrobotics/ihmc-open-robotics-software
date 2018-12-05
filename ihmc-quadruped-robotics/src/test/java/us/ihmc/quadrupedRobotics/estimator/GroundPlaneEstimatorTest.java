@@ -20,6 +20,7 @@ import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.tools.ReferenceFrameTools;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.commons.MathTools;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
@@ -41,6 +42,7 @@ public class GroundPlaneEstimatorTest
    @After
    public void destroySimulationAndRecycleMemory()
    {
+      ReferenceFrameTools.clearWorldFrameTree();
       MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " after test.");
    }
    

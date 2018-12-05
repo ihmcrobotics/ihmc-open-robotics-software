@@ -6,10 +6,15 @@ import us.ihmc.euclid.interfaces.EpsilonComparable;
 import java.util.function.Supplier;
 import us.ihmc.pubsub.TopicDataType;
 
+/**
+       * This message carries the general robot information such as the joints' state and IMU and force sensors' measurement.
+       * It is published frequently from the IHMC state estimator.
+       */
 public class RobotConfigurationData extends Packet<RobotConfigurationData> implements Settable<RobotConfigurationData>, EpsilonComparable<RobotConfigurationData>
 {
-   public static final byte ROBOT_MOTION_STATUS_STANDING = (byte) 0;
-   public static final byte ROBOT_MOTION_STATUS_IN_MOTION = (byte) 1;
+   public static final byte ROBOT_MOTION_STATUS_UNKNOWN = (byte) 0;
+   public static final byte ROBOT_MOTION_STATUS_STANDING = (byte) 1;
+   public static final byte ROBOT_MOTION_STATUS_IN_MOTION = (byte) 2;
    /**
             * Unique ID used to identify this message, should preferably be consecutively increasing.
             */
@@ -34,19 +39,19 @@ public class RobotConfigurationData extends Packet<RobotConfigurationData> imple
 
    public RobotConfigurationData()
    {
-      joint_angles_ = new us.ihmc.idl.IDLSequence.Float (1, "type_5");
+      joint_angles_ = new us.ihmc.idl.IDLSequence.Float (50, "type_5");
 
-      joint_velocities_ = new us.ihmc.idl.IDLSequence.Float (1, "type_5");
+      joint_velocities_ = new us.ihmc.idl.IDLSequence.Float (50, "type_5");
 
-      joint_torques_ = new us.ihmc.idl.IDLSequence.Float (1, "type_5");
+      joint_torques_ = new us.ihmc.idl.IDLSequence.Float (50, "type_5");
 
       root_translation_ = new us.ihmc.euclid.tuple3D.Vector3D();
       root_orientation_ = new us.ihmc.euclid.tuple4D.Quaternion();
       pelvis_linear_velocity_ = new us.ihmc.euclid.tuple3D.Vector3D();
       pelvis_angular_velocity_ = new us.ihmc.euclid.tuple3D.Vector3D();
       pelvis_linear_acceleration_ = new us.ihmc.euclid.tuple3D.Vector3D();
-      force_sensor_data_ = new us.ihmc.idl.IDLSequence.Object<controller_msgs.msg.dds.SpatialVectorMessage> (1, controller_msgs.msg.dds.SpatialVectorMessage.class, new controller_msgs.msg.dds.SpatialVectorMessagePubSubType());
-      imu_sensor_data_ = new us.ihmc.idl.IDLSequence.Object<controller_msgs.msg.dds.IMUPacket> (1, controller_msgs.msg.dds.IMUPacket.class, new controller_msgs.msg.dds.IMUPacketPubSubType());
+      force_sensor_data_ = new us.ihmc.idl.IDLSequence.Object<controller_msgs.msg.dds.SpatialVectorMessage> (50, new controller_msgs.msg.dds.SpatialVectorMessagePubSubType());
+      imu_sensor_data_ = new us.ihmc.idl.IDLSequence.Object<controller_msgs.msg.dds.IMUPacket> (50, new controller_msgs.msg.dds.IMUPacketPubSubType());
 
    }
 

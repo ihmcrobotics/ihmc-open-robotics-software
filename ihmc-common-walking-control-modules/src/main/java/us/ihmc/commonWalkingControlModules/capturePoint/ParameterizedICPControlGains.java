@@ -3,6 +3,7 @@ package us.ihmc.commonWalkingControlModules.capturePoint;
 import us.ihmc.yoVariables.parameters.DoubleParameter;
 import us.ihmc.yoVariables.providers.DoubleProvider;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoDouble;
 
 public class ParameterizedICPControlGains implements ICPControlGainsProvider
 {
@@ -13,22 +14,19 @@ public class ParameterizedICPControlGains implements ICPControlGainsProvider
    private final DoubleProvider integralLeakRatio;
    private final DoubleProvider maxIntegralError;
    private final DoubleProvider feedbackPartMaxRate;
+   private final DoubleProvider feedbackPartMaxValueParallelToMotion;
+   private final DoubleProvider feedbackPartMaxValueOrthogonalToMotion;
 
-   public ParameterizedICPControlGains(String suffix, boolean rateLimitFeedbackPart, YoVariableRegistry registry)
+   public ParameterizedICPControlGains(String suffix, YoVariableRegistry registry)
    {
       kpParallelToMotion = new DoubleParameter("captureKpParallel" + suffix, registry);
       kpOrthogonalToMotion = new DoubleParameter("captureKpOrthogonal" + suffix, registry);
       ki = new DoubleParameter("captureKi" + suffix, registry);
       integralLeakRatio = new DoubleParameter("captureIntegralLeakRatio" + suffix, registry, 1.0);
       maxIntegralError = new DoubleParameter("captureMaxIntegralError" + suffix, registry, Double.POSITIVE_INFINITY);
-      if (rateLimitFeedbackPart)
-      {
-         feedbackPartMaxRate = new DoubleParameter("feedbackPartMaxRate" + suffix, registry);
-      }
-      else
-      {
-         feedbackPartMaxRate = null;
-      }
+      feedbackPartMaxRate = new DoubleParameter("feedbackPartMaxRate" + suffix, registry, Double.POSITIVE_INFINITY);
+      feedbackPartMaxValueParallelToMotion = new DoubleParameter("feedbackPartMaxValueParallelToMotion" + suffix, registry, Double.POSITIVE_INFINITY);
+      feedbackPartMaxValueOrthogonalToMotion= new DoubleParameter("feedbackPartMaxValueOrthogonalToMotion" + suffix, registry, Double.POSITIVE_INFINITY);
    }
 
    public ParameterizedICPControlGains(String suffix, ICPControlGainsReadOnly defaults, YoVariableRegistry registry)
@@ -39,6 +37,8 @@ public class ParameterizedICPControlGains implements ICPControlGainsProvider
       integralLeakRatio = new DoubleParameter("captureIntegralLeakRatio" + suffix, registry, defaults.getIntegralLeakRatio());
       maxIntegralError = new DoubleParameter("captureMaxIntegralError" + suffix, registry, defaults.getMaxIntegralError());
       feedbackPartMaxRate = new DoubleParameter("feedbackPartMaxRate" + suffix, registry, defaults.getFeedbackPartMaxRate());
+      feedbackPartMaxValueParallelToMotion = new DoubleParameter("feedbackPartMaxValueParallelToMotion" + suffix, registry, defaults.getFeedbackPartMaxValueParallelToMotion());
+      feedbackPartMaxValueOrthogonalToMotion= new DoubleParameter("feedbackPartMaxValueOrthogonalToMotion" + suffix, registry, defaults.getFeedbackPartMaxValueOrthogonalToMotion());
    }
 
    @Override
@@ -75,6 +75,18 @@ public class ParameterizedICPControlGains implements ICPControlGainsProvider
    public DoubleProvider getYoFeedbackPartMaxRate()
    {
       return feedbackPartMaxRate;
+   }
+
+   @Override
+   public DoubleProvider getYoFeedbackPartMaxValueParallelToMotion()
+   {
+      return feedbackPartMaxValueParallelToMotion;
+   }
+
+   @Override
+   public DoubleProvider getYoFeedbackPartMaxValueOrthogonalToMotion()
+   {
+      return feedbackPartMaxValueOrthogonalToMotion;
    }
 
 }

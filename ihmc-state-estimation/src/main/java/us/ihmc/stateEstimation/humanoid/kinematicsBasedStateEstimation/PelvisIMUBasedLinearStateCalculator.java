@@ -6,8 +6,8 @@ import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
-import us.ihmc.robotics.screwTheory.FloatingInverseDynamicsJoint;
-import us.ihmc.robotics.screwTheory.Twist;
+import us.ihmc.mecano.multiBodySystem.interfaces.FloatingJointBasics;
+import us.ihmc.mecano.spatial.Twist;
 import us.ihmc.sensorProcessing.stateEstimation.IMUSensorReadOnly;
 import us.ihmc.sensorProcessing.stateEstimation.StateEstimatorParameters;
 import us.ihmc.sensorProcessing.stateEstimation.evaluation.FullInverseDynamicsStructure;
@@ -46,7 +46,7 @@ public class PelvisIMUBasedLinearStateCalculator
 
    private final ReferenceFrame measurementFrame;
 
-   private final FloatingInverseDynamicsJoint rootJoint;
+   private final FloatingJointBasics rootJoint;
 
    private final double estimatorDT;
 
@@ -201,8 +201,8 @@ public class PelvisIMUBasedLinearStateCalculator
 
    private void getCorrectionVelocityForMeasurementFrameOffset(FrameVector3D correctionTermToPack)
    {
-      rootJoint.getJointTwist(tempRootJointTwist);
-      tempRootJointTwist.getAngularPart(tempRootJointAngularVelocity);
+      tempRootJointTwist.setIncludingFrame(rootJoint.getJointTwist());
+      tempRootJointAngularVelocity.setIncludingFrame(tempRootJointTwist.getAngularPart());
 
       measurementOffset.setToZero(measurementFrame);
       measurementOffset.changeFrame(rootJoint.getFrameAfterJoint());

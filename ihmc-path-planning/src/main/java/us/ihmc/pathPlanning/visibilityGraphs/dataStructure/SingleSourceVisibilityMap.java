@@ -1,5 +1,7 @@
 package us.ihmc.pathPlanning.visibilityGraphs.dataStructure;
 
+import java.util.Collection;
+import java.util.Collections;
 import java.util.Set;
 
 import us.ihmc.euclid.transform.RigidBodyTransform;
@@ -17,7 +19,7 @@ public class SingleSourceVisibilityMap implements VisibilityMapHolder
    private final VisibilityMap visibilityMapInLocal;
    private final VisibilityMap visibilityMapInWorld;
 
-   public SingleSourceVisibilityMap(Point3DReadOnly sourceInWorld, Set<Connection> connectionsInLocal, NavigableRegion hostRegion)
+   public SingleSourceVisibilityMap(Point3DReadOnly sourceInWorld, Collection<Connection> connectionsInLocal, NavigableRegion hostRegion)
    {
       this.hostRegion = hostRegion;
       this.sourceInWorld = new Point3D(sourceInWorld);
@@ -33,7 +35,7 @@ public class SingleSourceVisibilityMap implements VisibilityMapHolder
       visibilityMapInWorld.computeVertices();
    }
 
-   public SingleSourceVisibilityMap(Point3DReadOnly source, int mapId, Set<Connection> connections)
+   public SingleSourceVisibilityMap(Point3DReadOnly source, int mapId, Collection<Connection> connections)
    {
       sourceInLocal = new Point3D(source);
       sourceInWorld = sourceInLocal;
@@ -56,15 +58,6 @@ public class SingleSourceVisibilityMap implements VisibilityMapHolder
       visibilityMapInLocal.computeVertices();
    }
 
-   public void addConnectionInLocal(Connection connectionInLocal)
-   {
-      visibilityMapInLocal.addConnection(connectionInLocal);
-      visibilityMapInLocal.computeVertices();
-      Connection connectionInWorld = new Connection(connectionInLocal);
-      hostRegion.transformFromLocalToWorld(connectionInWorld);
-      visibilityMapInWorld.addConnection(connectionInWorld);
-      visibilityMapInWorld.computeVertices();
-   }
 
    public Point3DReadOnly getSourceInWorld()
    {

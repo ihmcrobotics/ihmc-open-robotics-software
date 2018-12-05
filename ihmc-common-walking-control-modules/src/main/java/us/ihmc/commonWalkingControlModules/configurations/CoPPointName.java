@@ -2,11 +2,9 @@ package us.ihmc.commonWalkingControlModules.configurations;
 
 import java.util.EnumSet;
 
-import us.ihmc.robotics.robotSide.RobotSide;
-
 public enum CoPPointName
 {
-   MIDFEET_COP, HEEL_COP, BALL_COP, TOE_COP, START_COP, FINAL_COP, FLAMINGO_STANCE_FINAL_COP;
+   MIDFEET_COP, ENTRY_COP, MIDFOOT_COP, EXIT_COP, START_COP, FINAL_COP, FLAMINGO_STANCE_FINAL_COP;
 
    public static final EnumSet<CoPPointName> set = EnumSet.allOf(CoPPointName.class);
    public static final CoPPointName[] values = values();
@@ -15,12 +13,12 @@ public enum CoPPointName
    {
       switch (this)
       {
-      case HEEL_COP:
-         return "HeelCoP";
-      case BALL_COP:
-         return "BallCoP";
-      case TOE_COP:
-         return "ToeCoP";
+      case ENTRY_COP:
+         return "EntryCoP";
+      case MIDFOOT_COP:
+         return "MidfootCoP";
+      case EXIT_COP:
+         return "ExitCoP";
       case MIDFEET_COP:
          return "MidFeetCoP";
       case FINAL_COP:
@@ -30,11 +28,6 @@ public enum CoPPointName
       default:
          return "StartCoP";
       }
-   }
-
-   public boolean checkCoPPointMatch(CoPPointName other)
-   {
-      return this == other;
    }
 }
 

@@ -8,11 +8,8 @@ import java.util.Map;
 import gnu.trove.map.hash.TObjectDoubleHashMap;
 import us.ihmc.commonWalkingControlModules.capturePoint.ICPControlGains;
 import us.ihmc.commonWalkingControlModules.capturePoint.optimization.ICPOptimizationParameters;
-import us.ihmc.commonWalkingControlModules.controlModules.PelvisICPBasedTranslationManager;
-import us.ihmc.commonWalkingControlModules.controlModules.foot.ToeSlippingDetector;
-import us.ihmc.commonWalkingControlModules.controlModules.pelvis.PelvisOffsetTrajectoryWhileWalking;
 import us.ihmc.commonWalkingControlModules.controlModules.rigidBody.RigidBodyControlMode;
-import us.ihmc.commonWalkingControlModules.dynamicReachability.DynamicReachabilityCalculator;
+import us.ihmc.commonWalkingControlModules.momentumBasedController.feedbackController.FeedbackControllerSettings;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.JointLimitParameters;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.MomentumOptimizationSettings;
 import us.ihmc.euclid.geometry.Pose3D;
@@ -20,8 +17,7 @@ import us.ihmc.robotics.controllers.pidGains.PIDGainsReadOnly;
 import us.ihmc.robotics.controllers.pidGains.implementations.PDGains;
 import us.ihmc.robotics.controllers.pidGains.implementations.PID3DConfiguration;
 import us.ihmc.robotics.controllers.pidGains.implementations.PIDSE3Configuration;
-import us.ihmc.robotics.screwTheory.RigidBody;
-import us.ihmc.sensorProcessing.stateEstimation.FootSwitchType;
+import us.ihmc.robotics.sensors.FootSwitchFactory;
 
 public abstract class WalkingControllerParameters
 {
@@ -48,6 +44,18 @@ public abstract class WalkingControllerParameters
     * @return the value for omega0 that is used in the controller for ICP related computations.
     */
    public abstract double getOmega0();
+
+   /**
+    * Specifies if the desired ground reaction force for the force that is about to swing should
+    * smoothly be brought to zero by adding a inequality constraint on the z-force.
+    * 
+    * @return whether to perform smooth unloading before swing or not. Default value is
+    *         {@code false}.
+    */
+   public boolean enforceSmoothFootUnloading()
+   {
+      return false;
+   }
 
    /**
     * Specifies if the controller should attempt at detecting foot slipping during toe off when
@@ -237,7 +245,7 @@ public abstract class WalkingControllerParameters
     * If the particular body does not support full pose control but only orientation control the position part of the
     * pose will be disregarded.
     * <p>
-    * The key of the map is the name of the rigid body that can be obtained with {@link RigidBody#getName()}. If a
+    * The key of the map is the name of the rigid body that can be obtained with {@link RigidBodyBasics#getName()}. If a
     * body is not contained in this map but a default control mode of {@link RigidBodyControlMode#TASKSPACE} is not
     * supported for that body.
     *
@@ -387,66 +395,7 @@ public abstract class WalkingControllerParameters
       return 0.1;
    }
 
-   /**
-    * Determines the type of footswitch used with the robot. Usually this will be wrench based if the robot can
-    * sense the ground reaction forces.
-    */
-   public FootSwitchType getFootSwitchType()
-   {
-      return FootSwitchType.WrenchBased;
-   }
-
-   /**
-    * When determining that a foot has hit the floor after a step the z-force on the foot needs to be past the
-    * threshold defined by this method. In addition the center of pressure needs to be inside certain bounds of
-    * the foot (see {@link #getCoPThresholdFraction()}).
-    * </p>
-    * See also {@link #getSecondContactThresholdForceIgnoringCoP()}
-    * for another threshold on the contact force that does not require the CoP to be within bounds.
-    * </p>
-    * This will be used if the foot switch type as defined in {@link #getFootSwitchType()} is set to
-    * {@link FootSwitchType#WrenchBased}
-    */
-   @Deprecated // this is duplicated in the state estimator parameters
-   public abstract double getContactThresholdForce();
-
-   /**
-    * This threshold is a second boundary for the ground contact force required for the controller to assume
-    * foot contact after a step. If the ground contact force in z goes above this threshold the foot touchdown
-    * is triggered regardless of the position of the CoP within the foothold. See {@link #getContactThresholdForce}
-    * for the first threshold.
-    * </p>
-    * This will be used if the foot switch type as defined in {@link #getFootSwitchType()} is set to
-    * {@link FootSwitchType#WrenchBased}
-    */
-   @Deprecated // move this to the state estimator parameters
-   public abstract double getSecondContactThresholdForceIgnoringCoP();
-
-   /**
-    * When determining whether a foot has touched down after a step the controller will make sure that the CoP
-    * of the foot is within bounds before the touchdown is triggered. This fraction of the foot length is used
-    * to move these bounds in. In addition the ground reaction force needs to be above the threshold defined in
-    * {@link #getContactThresholdForce()}
-    * </p>
-    * This will be used if the foot switch type as defined in {@link #getFootSwitchType()} is set to
-    * {@link FootSwitchType#WrenchBased}
-    */
-   @Deprecated // this is duplicated in the state estimator parameters
-   public abstract double getCoPThresholdFraction();
-
-   /**
-    * When determining whether a foot has hit the ground the controller can use the height difference between the
-    * swing foot and the lowest of the feet of the robot. If the difference falls below this threshold foot-ground
-    * contact is assumed.
-    * </p>
-    * This will be used if the foot switch type as defined in {@link #getFootSwitchType()} is set to
-    * {@link FootSwitchType#KinematicBased}
-    */
-   @Deprecated // this is duplicated in the state estimator parameters
-   public double getContactThresholdHeight()
-   {
-      return 0.05;
-   }
+   public abstract FootSwitchFactory getFootSwitchFactory();
 
    /**
     * Returns a list of joints that will not be used by the controller.
@@ -458,6 +407,17 @@ public abstract class WalkingControllerParameters
     * given to the objectives of the walking controller in the QP.
     */
    public abstract MomentumOptimizationSettings getMomentumOptimizationSettings();
+
+   /**
+    * Returns the {@link FeedbackControllerSettings} for this robot. These parameters additional
+    * configuration options for the the {@code WholeBodyFeedbackController}.
+    * 
+    * @return the feedback controller settings.
+    */
+   public FeedbackControllerSettings getFeedbackControllerSettings()
+   {
+      return null;
+   }
 
    /**
     * Returns the {@link ICPAngularMomentumModifierParameters} for this robot. The parameters are used when
@@ -799,5 +759,14 @@ public abstract class WalkingControllerParameters
    public AnkleIKSolver getAnkleIKSolver()
    {
       return null;
+   }
+
+   /**
+    * A boolean to determine whether the CoM height manager should be created or not. If this returns true
+    * the robot will use a rigid body manager to control the pelvis height only.
+    */
+   public boolean usePelvisHeightControllerOnly()
+   {
+      return false;
    }
 }

@@ -36,7 +36,7 @@ public class WholeBodyTrajectoryToolboxConfigurationCommand
    }
 
    @Override
-   public void set(WholeBodyTrajectoryToolboxConfigurationMessage message)
+   public void setFromMessage(WholeBodyTrajectoryToolboxConfigurationMessage message)
    {
       clear();
       numberOfInitialGuesses = message.getNumberOfInitialGuesses();

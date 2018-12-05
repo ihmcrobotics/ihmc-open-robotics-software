@@ -16,7 +16,7 @@ import us.ihmc.euclid.tuple2D.Vector2D;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.graphicsDescription.yoGraphics.BagOfBalls;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
-import us.ihmc.robotics.lists.RecyclingArrayList;
+import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.robotics.math.trajectories.PositionTrajectoryGenerator;
 import us.ihmc.robotics.math.trajectories.waypoints.FrameEuclideanTrajectoryPoint;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -226,7 +226,7 @@ public class TwoWaypointSwingGenerator implements PositionTrajectoryGenerator
          for (int i = 0; i < numberWaypoints; i++)
          {
             waypointPositions.get(i).interpolate(initialPosition, finalPosition, waypointProportions.get(i).getValue());
-            waypointPositions.get(i).add(0.0, 0.0, swingHeight.getDoubleValue());
+            waypointPositions.get(i).addZ(swingHeight.getDoubleValue());
             if (needToAdjustedSwingForSelfCollision.getBooleanValue())
             {
                waypointPositions.get(i).add(swingOffset.getX(), swingOffset.getY(), 0.0);
@@ -239,7 +239,12 @@ public class TwoWaypointSwingGenerator implements PositionTrajectoryGenerator
          throw new RuntimeException("Trajectory type not implemented");
       }
 
-      double maxWaypointZ = Math.max(stanceFootPosition.getZ() + maxSwingHeight.getDoubleValue(), maxStepZ + minSwingHeight.getDoubleValue());
+      double maxWaypointZ;
+      if (stanceFootPosition.containsNaN())
+         maxWaypointZ = maxStepZ + maxSwingHeight.getDoubleValue();
+      else
+         maxWaypointZ = Math.max(stanceFootPosition.getZ() + maxSwingHeight.getDoubleValue(), maxStepZ + minSwingHeight.getDoubleValue());
+
       for (int i = 0; i < numberWaypoints; i++)
       {
          waypointPositions.get(i).setZ(Math.min(waypointPositions.get(i).getZ(), maxWaypointZ));

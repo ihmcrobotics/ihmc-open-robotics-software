@@ -159,18 +159,18 @@ public class PointCloudTools
       new PointCloudTools();
    }
 
-   public static void doBrakeDownOn2DPoints(List<Point2D> pointsToBrakeDown, double brakeDownThreshold)
+   public static void doBrakeDownOn2DPoints(List<Point2DReadOnly> pointsToBrakeDown, double brakeDownThreshold)
    {
       for (int i = 1; i < pointsToBrakeDown.size(); i++)
       {
-         Point2D point1 = pointsToBrakeDown.get(i - 1);
-         Point2D point2 = pointsToBrakeDown.get(i);
+         Point2DReadOnly point1 = pointsToBrakeDown.get(i - 1);
+         Point2DReadOnly point2 = pointsToBrakeDown.get(i);
 
          doBrakeDown2D(pointsToBrakeDown, i, point1, point2, brakeDownThreshold);
       }
    }
 
-   private static void doBrakeDown2D(List<Point2D> points, int index, Point2D point1, Point2D point2, double brakeDownThreshold)
+   private static void doBrakeDown2D(List<Point2DReadOnly> points, int index, Point2DReadOnly point1, Point2DReadOnly point2, double brakeDownThreshold)
    {
       double nOfPointsToAddToSegment = Math.floor(point2.distance(point1) / brakeDownThreshold);
       Vector2D direction = new Vector2D(point2.getX() - point1.getX(), point2.getY() - point1.getY());
@@ -180,7 +180,7 @@ public class PointCloudTools
       {
          double xPos = point1.getX() + direction.getX() * brakeDownThreshold * (i + 1);
          double yPos = point1.getY() + direction.getY() * brakeDownThreshold * (i + 1);
-         Point3D point = new Point3D(xPos, yPos, 0);
+
          points.add(index, new Point2D(xPos, yPos));
          index++;
       }
@@ -193,7 +193,7 @@ public class PointCloudTools
 
    public static void savePlanarRegionsToFile(PlanarRegionsList planarRegionsList, Point3D start, Point3D goal)
    {
-      Thread thread = new Thread()
+      Thread thread = new Thread("IHMC-SavePlanarRegions")
       {
          @Override
          public void run()
@@ -325,7 +325,7 @@ public class PointCloudTools
                if (!pointsTemp.isEmpty())
                {
                   //                  System.out.println("adding points");
-                  cluster.addRawPointsInWorld3D(pointsTemp);
+                  cluster.addRawPointsInWorld(pointsTemp);
                   pointsTemp.clear();
                }
 
@@ -406,7 +406,7 @@ public class PointCloudTools
          if (!pointsTemp.isEmpty())
          {
             //            System.out.println("adding points");
-            cluster.addRawPointsInWorld3D(pointsTemp);
+            cluster.addRawPointsInWorld(pointsTemp);
             pointsTemp.clear();
          }
 

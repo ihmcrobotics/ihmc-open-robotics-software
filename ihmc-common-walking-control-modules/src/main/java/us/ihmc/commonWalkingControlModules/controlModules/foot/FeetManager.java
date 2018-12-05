@@ -27,15 +27,15 @@ import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactableFoot;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.FootTrajectoryCommand;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.StopAllTrajectoryCommand;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
+import us.ihmc.mecano.frames.MovingReferenceFrame;
 import us.ihmc.robotics.controllers.pidGains.PIDSE3GainsReadOnly;
 import us.ihmc.robotics.robotSide.RobotSide;
-import us.ihmc.robotics.robotSide.SegmentDependentList;
 import us.ihmc.robotics.robotSide.SideDependentList;
-import us.ihmc.robotics.screwTheory.MovingReferenceFrame;
 import us.ihmc.robotics.sensors.FootSwitchInterface;
 import us.ihmc.sensorProcessing.frames.CommonHumanoidReferenceFrames;
-import us.ihmc.yoVariables.parameters.DoubleParameter;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutputListReadOnly;
+import us.ihmc.yoVariables.parameters.DoubleParameter;
+import us.ihmc.yoVariables.providers.DoubleProvider;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 
 public class FeetManager
@@ -98,10 +98,15 @@ public class FeetManager
          explorationParameters = new ExplorationParameters(registry);
       }
 
+      boolean enableSmoothUnloading = walkingControllerParameters.enforceSmoothFootUnloading();
+      DoubleProvider minWeightFractionPerFoot = enableSmoothUnloading ? new DoubleParameter("minWeightFractionPerFoot", registry, 0.0) : null;
+      DoubleProvider maxWeightFractionPerFoot = enableSmoothUnloading ? new DoubleParameter("maxWeightFractionPerFoot", registry, 2.0) : null;
+
       for (RobotSide robotSide : RobotSide.values)
       {
          FootControlModule footControlModule = new FootControlModule(robotSide, toeOffCalculator, walkingControllerParameters, swingFootGains, holdFootGains,
-                                                                     toeOffFootGains, controllerToolbox, explorationParameters, registry);
+                                                                     toeOffFootGains, controllerToolbox, explorationParameters, minWeightFractionPerFoot,
+                                                                     maxWeightFractionPerFoot, registry);
 
          footControlModules.put(robotSide, footControlModule);
       }
@@ -213,7 +218,7 @@ public class FeetManager
          footControlModules.get(robotSide).correctCoMHeightTrajectoryForUnreachableFootStep(comHeightData);
       }
    }
-   
+
    public void initializeContactStatesForTouchdown(RobotSide robotSide)
    {
       footControlModules.get(robotSide).requestTouchdown();
@@ -285,7 +290,7 @@ public class FeetManager
          controllerToolbox.restorePreviousFootContactPoints(robotSide);
    }
 
-   private void setContactStateForSwing(RobotSide robotSide)
+   public void setContactStateForSwing(RobotSide robotSide)
    {
       FootControlModule footControlModule = footControlModules.get(robotSide);
       footControlModule.setContactState(ConstraintType.SWING);
@@ -526,5 +531,15 @@ public class FeetManager
    public boolean isInTouchdown(RobotSide swingFoot)
    {
       return footControlModules.get(swingFoot).isInTouchdown();
+   }
+
+   public void unload(RobotSide sideToUnload, double percentInUnloading, double rhoMin)
+   {
+      footControlModules.get(sideToUnload).unload(percentInUnloading, rhoMin);
+   }
+
+   public void resetLoadConstraints(RobotSide sideToUnload)
+   {
+      footControlModules.get(sideToUnload).resetLoadConstraints();
    }
 }

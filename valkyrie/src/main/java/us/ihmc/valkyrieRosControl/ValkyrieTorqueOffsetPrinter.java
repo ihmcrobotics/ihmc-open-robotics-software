@@ -18,11 +18,12 @@ import javax.xml.bind.Unmarshaller;
 
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.mecano.multiBodySystem.RevoluteJoint;
+import us.ihmc.mecano.multiBodySystem.RigidBody;
+import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
+import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
+import us.ihmc.mecano.tools.MultiBodySystemRandomTools;
 import us.ihmc.robotics.random.RandomGeometry;
-import us.ihmc.robotics.screwTheory.OneDoFJoint;
-import us.ihmc.robotics.screwTheory.RevoluteJoint;
-import us.ihmc.robotics.screwTheory.RigidBody;
-import us.ihmc.robotics.screwTheory.ScrewTestTools;
 import us.ihmc.valkyrieRosControl.XMLJoints.XMLJointWithTorqueOffset;
 import us.ihmc.wholeBodyController.diagnostics.JointTorqueOffsetEstimator;
 import us.ihmc.wholeBodyController.diagnostics.TorqueOffsetPrinter;
@@ -47,14 +48,14 @@ public class ValkyrieTorqueOffsetPrinter implements TorqueOffsetPrinter
       {
          System.out.println();
          
-         List<OneDoFJoint> oneDoFJoints = jointTorqueOffsetEstimator.getOneDoFJoints();
+         List<OneDoFJointBasics> oneDoFJoints = jointTorqueOffsetEstimator.getOneDoFJoints();
          
          int maxNameLength = 0;
-         for (OneDoFJoint oneDoFJoint : oneDoFJoints)
+         for (OneDoFJointBasics oneDoFJoint : oneDoFJoints)
             if (jointTorqueOffsetEstimator.hasTorqueOffsetForJoint(oneDoFJoint))
                maxNameLength = Math.max(maxNameLength, oneDoFJoint.getName().length());
          
-         for (OneDoFJoint oneDoFJoint : oneDoFJoints)
+         for (OneDoFJointBasics oneDoFJoint : oneDoFJoints)
          {
             if (jointTorqueOffsetEstimator.hasTorqueOffsetForJoint(oneDoFJoint))
             {
@@ -87,9 +88,9 @@ public class ValkyrieTorqueOffsetPrinter implements TorqueOffsetPrinter
       xmlJoints.setRobotName(robotName);
       ArrayList<XMLJointWithTorqueOffset> jointsWithTorqueOffset = new ArrayList<>();
 
-      List<OneDoFJoint> oneDoFJoints = jointTorqueOffsetEstimator.getOneDoFJoints();
+      List<OneDoFJointBasics> oneDoFJoints = jointTorqueOffsetEstimator.getOneDoFJoints();
 
-      for (OneDoFJoint joint : oneDoFJoints)
+      for (OneDoFJointBasics joint : oneDoFJoints)
       {
          if (!jointTorqueOffsetEstimator.hasTorqueOffsetForJoint(joint))
             continue;
@@ -171,37 +172,37 @@ public class ValkyrieTorqueOffsetPrinter implements TorqueOffsetPrinter
       ValkyrieTorqueOffsetPrinter printer = new ValkyrieTorqueOffsetPrinter();
       
       List<RevoluteJoint> revoluteJoints = new ArrayList<>();
-      RigidBody rootBody = new RigidBody("elevator", ReferenceFrame.getWorldFrame());
+      RigidBodyBasics rootBody = new RigidBody("elevator", ReferenceFrame.getWorldFrame());
       final Random random = new Random();
       Vector3D[] jointAxes = new Vector3D[random.nextInt(10)];
       for (int i = 0; i < jointAxes.length; i++)
          jointAxes[i] = RandomGeometry.nextVector3D(random, 1.0);
-      ScrewTestTools.createRandomChainRobot("blop", revoluteJoints, rootBody, jointAxes, random);
-      final List<OneDoFJoint> oneDoFJoints = new ArrayList<>();
+      revoluteJoints.addAll(MultiBodySystemRandomTools.nextRevoluteJointChain(random, "blop", rootBody, jointAxes));
+      final List<OneDoFJointBasics> oneDoFJoints = new ArrayList<>();
       for (RevoluteJoint revoluteJoint : revoluteJoints)
          oneDoFJoints.add(revoluteJoint);
       
       JointTorqueOffsetEstimator jointTorqueOffsetEstimator = new JointTorqueOffsetEstimator()
       {
          @Override
-         public void resetEstimatedJointTorqueOffset(OneDoFJoint joint)
+         public void resetEstimatedJointTorqueOffset(OneDoFJointBasics joint)
          {
          }
          
          @Override
-         public boolean hasTorqueOffsetForJoint(OneDoFJoint joint)
+         public boolean hasTorqueOffsetForJoint(OneDoFJointBasics joint)
          {
             return oneDoFJoints.contains(joint);
          }
          
          @Override
-         public List<OneDoFJoint> getOneDoFJoints()
+         public List<OneDoFJointBasics> getOneDoFJoints()
          {
             return oneDoFJoints;
          }
          
          @Override
-         public double getEstimatedJointTorqueOffset(OneDoFJoint joint)
+         public double getEstimatedJointTorqueOffset(OneDoFJointBasics joint)
          {
             return random.nextDouble();
          }

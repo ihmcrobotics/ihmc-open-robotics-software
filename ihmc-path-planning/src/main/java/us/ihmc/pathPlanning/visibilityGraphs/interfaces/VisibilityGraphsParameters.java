@@ -11,17 +11,17 @@ import us.ihmc.robotics.geometry.PlanarRegion;
 
 public interface VisibilityGraphsParameters
 {
-   public double getMaxInterRegionConnectionLength();
+   double getMaxInterRegionConnectionLength();
 
-   public double getNormalZThresholdForAccessibleRegions();
+   double getNormalZThresholdForAccessibleRegions();
 
-   public double getExtrusionDistance();
+   double getExtrusionDistance();
 
-   public double getExtrusionDistanceIfNotTooHighToStep();
+   double getExtrusionDistanceIfNotTooHighToStep();
 
-   public double getTooHighToStepDistance();
+   double getTooHighToStepDistance();
 
-   public double getClusterResolution();
+   double getClusterResolution();
 
    default double getExplorationDistanceFromStartGoal()
    {

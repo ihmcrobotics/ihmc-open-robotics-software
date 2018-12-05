@@ -48,11 +48,11 @@ public class RobotConfigurationDataPubSubType implements us.ihmc.pubsub.TopicDat
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 
-      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);current_alignment += (1 * 4) + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);current_alignment += (50 * 4) + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 
-      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);current_alignment += (1 * 4) + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);current_alignment += (50 * 4) + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 
-      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);current_alignment += (1 * 4) + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);current_alignment += (50 * 4) + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 
       current_alignment += geometry_msgs.msg.dds.Vector3PubSubType.getMaxCdrSerializedSize(current_alignment);
 
@@ -64,10 +64,10 @@ public class RobotConfigurationDataPubSubType implements us.ihmc.pubsub.TopicDat
 
       current_alignment += geometry_msgs.msg.dds.Vector3PubSubType.getMaxCdrSerializedSize(current_alignment);
 
-      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);for(int i0 = 0; i0 < 1; ++i0)
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);for(int i0 = 0; i0 < 50; ++i0)
       {
           current_alignment += controller_msgs.msg.dds.SpatialVectorMessagePubSubType.getMaxCdrSerializedSize(current_alignment);}
-      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);for(int i0 = 0; i0 < 1; ++i0)
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);for(int i0 = 0; i0 < 50; ++i0)
       {
           current_alignment += controller_msgs.msg.dds.IMUPacketPubSubType.getMaxCdrSerializedSize(current_alignment);}
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
@@ -161,15 +161,15 @@ public class RobotConfigurationDataPubSubType implements us.ihmc.pubsub.TopicDat
 
       cdr.write_type_2(data.getJointNameHash());
 
-      if(data.getJointAngles().size() <= 1)
+      if(data.getJointAngles().size() <= 50)
       cdr.write_type_e(data.getJointAngles());else
           throw new RuntimeException("joint_angles field exceeds the maximum length");
 
-      if(data.getJointVelocities().size() <= 1)
+      if(data.getJointVelocities().size() <= 50)
       cdr.write_type_e(data.getJointVelocities());else
           throw new RuntimeException("joint_velocities field exceeds the maximum length");
 
-      if(data.getJointTorques().size() <= 1)
+      if(data.getJointTorques().size() <= 50)
       cdr.write_type_e(data.getJointTorques());else
           throw new RuntimeException("joint_torques field exceeds the maximum length");
 
@@ -178,11 +178,11 @@ public class RobotConfigurationDataPubSubType implements us.ihmc.pubsub.TopicDat
       geometry_msgs.msg.dds.Vector3PubSubType.write(data.getPelvisLinearVelocity(), cdr);
       geometry_msgs.msg.dds.Vector3PubSubType.write(data.getPelvisAngularVelocity(), cdr);
       geometry_msgs.msg.dds.Vector3PubSubType.write(data.getPelvisLinearAcceleration(), cdr);
-      if(data.getForceSensorData().size() <= 1)
+      if(data.getForceSensorData().size() <= 50)
       cdr.write_type_e(data.getForceSensorData());else
           throw new RuntimeException("force_sensor_data field exceeds the maximum length");
 
-      if(data.getImuSensorData().size() <= 1)
+      if(data.getImuSensorData().size() <= 50)
       cdr.write_type_e(data.getImuSensorData());else
           throw new RuntimeException("imu_sensor_data field exceeds the maximum length");
 

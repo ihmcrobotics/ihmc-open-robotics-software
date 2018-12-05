@@ -8,6 +8,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
+import org.junit.After;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -24,6 +25,7 @@ import us.ihmc.euclid.geometry.interfaces.ConvexPolygon2DReadOnly;
 import us.ihmc.euclid.referenceFrame.FramePoint2D;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.tools.ReferenceFrameTools;
 import us.ihmc.euclid.tools.EuclidCoreTestTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple2D.Point2D;
@@ -38,6 +40,12 @@ import us.ihmc.robotics.random.RandomGeometry;
 @ContinuousIntegrationPlan(categories = {IntegrationCategory.FAST})
 public class PlanarRegionTest
 {
+   @After
+   public void tearDown()
+   {
+      ReferenceFrameTools.clearWorldFrameTree();
+   }
+
    @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testIntersections()
@@ -115,7 +123,42 @@ public class PlanarRegionTest
 
    @ContinuousIntegrationTest(estimatedDuration = 0.6)
    @Test(timeout = 30000)
-   public void testIsPointOnOrSlightlyAbove()
+   public void testIsPointInWorld2DInside()
+   {
+      Random random = new Random(1776L);
+
+      RigidBodyTransform transformToWorld = new RigidBodyTransform();
+      Point3D regionTranslation = new Point3D();
+      Point3D pointAbove = new Point3D();
+      Point3D pointBelow = new Point3D();
+      Vector3D regionNormal = new Vector3D();
+
+      for (int i = 0; i < 10000; i++)
+      {
+         PlanarRegion planarRegion = PlanarRegion.generatePlanarRegionFromRandomPolygonsWithRandomTransform(random, 1, 10.0, 5);
+         planarRegion.getTransformToWorld(transformToWorld);
+
+         Point2DReadOnly centroid = planarRegion.getLastConvexPolygon().getCentroid();
+         regionTranslation.set(centroid.getX(), centroid.getY(), 0.0);
+         transformToWorld.transform(regionTranslation);
+         regionTranslation.setZ(planarRegion.getPlaneZGivenXY(regionTranslation.getX(), regionTranslation.getY()));
+
+         planarRegion.getNormal(regionNormal);
+
+         regionNormal.normalize();
+         regionNormal.scale(1e-6);
+
+         pointAbove.add(regionTranslation, regionNormal);
+         pointBelow.sub(regionTranslation, regionNormal);
+
+         assertTrue(planarRegion.isPointInWorld2DInside(pointAbove));
+         assertTrue(planarRegion.isPointInWorld2DInside(pointBelow));
+      }
+   }
+
+   @ContinuousIntegrationTest(estimatedDuration = 0.6)
+   @Test(timeout = 30000)
+   public void testIsPointOn()
    {
       Random random = new Random(1776L);
 

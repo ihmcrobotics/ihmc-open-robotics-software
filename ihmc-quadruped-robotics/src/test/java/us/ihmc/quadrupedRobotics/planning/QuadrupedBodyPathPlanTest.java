@@ -1,17 +1,16 @@
 package us.ihmc.quadrupedRobotics.planning;
 
-import controller_msgs.msg.dds.EuclideanTrajectoryMessage;
 import controller_msgs.msg.dds.EuclideanTrajectoryPointMessage;
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Test;
+import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.euclid.tuple3D.Vector3D;
-import us.ihmc.jMonkeyEngineToolkit.GroundProfile3D;
 import us.ihmc.quadrupedRobotics.*;
 import us.ihmc.quadrupedRobotics.controller.QuadrupedControlMode;
+import us.ihmc.quadrupedRobotics.environments.SimpleMazeEnvironment;
 import us.ihmc.quadrupedRobotics.input.managers.QuadrupedTeleopManager;
 import us.ihmc.quadrupedRobotics.simulation.QuadrupedGroundContactModelType;
-import us.ihmc.simulationConstructionSetTools.util.environments.SimpleBoxEnvironment;
-import us.ihmc.simulationConstructionSetTools.util.ground.CombinedTerrainObject3D;
 import us.ihmc.simulationConstructionSetTools.util.simulationrunner.GoalOrientedTestConductor;
 import us.ihmc.simulationconstructionset.util.ground.TerrainObject3D;
 import us.ihmc.tools.MemoryTools;
@@ -23,6 +22,7 @@ public abstract class QuadrupedBodyPathPlanTest implements QuadrupedMultiRobotTe
    private GoalOrientedTestConductor conductor;
    private QuadrupedForceTestYoVariables variables;
    private QuadrupedTeleopManager stepTeleopManager;
+   private QuadrupedTestFactory quadrupedTestFactory;
 
    @Before
    public void setup()
@@ -34,7 +34,7 @@ public abstract class QuadrupedBodyPathPlanTest implements QuadrupedMultiRobotTe
    {
       try
       {
-         QuadrupedTestFactory quadrupedTestFactory = createQuadrupedTestFactory();
+         quadrupedTestFactory = createQuadrupedTestFactory();
          quadrupedTestFactory.setControlMode(QuadrupedControlMode.FORCE);
          quadrupedTestFactory.setGroundContactModelType(QuadrupedGroundContactModelType.FLAT);
          quadrupedTestFactory.setUseNetworking(true);
@@ -56,13 +56,17 @@ public abstract class QuadrupedBodyPathPlanTest implements QuadrupedMultiRobotTe
    @After
    public void tearDown()
    {
+      quadrupedTestFactory.close();
       conductor.concludeTesting();
       conductor = null;
       variables = null;
+      stepTeleopManager = null;
 
       MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " after test.");
    }
 
+   @ContinuousIntegrationTest(estimatedDuration = 120)
+   @Test(timeout = 200000)
    public void testSimpleBodyPathPlan()
    {
       setUpSimulation(null);
@@ -93,7 +97,7 @@ public abstract class QuadrupedBodyPathPlanTest implements QuadrupedMultiRobotTe
     * This test will need to be updated as footstep tracking improves, i.e. if this test breaks it could be because step tracking has improved.
     * The last few points have been adjusted pretty heavily to compensate
     */
-   public void testBodyPathAroundABox()
+   public void testBodyPathAroundASimpleMaze()
    {
       setUpSimulation(new SimpleMazeEnvironment());
 
@@ -124,17 +128,17 @@ public abstract class QuadrupedBodyPathPlanTest implements QuadrupedMultiRobotTe
       time += 7.0;
       EuclideanTrajectoryPointMessage point5 = new EuclideanTrajectoryPointMessage();
       point5.setTime(time);
-      point5.position_.set(2.45, 0.8, 0.4 * Math.PI);
+      point5.position_.set(2.3, 0.7, 0.4 * Math.PI);
 
       time += 4.0;
       EuclideanTrajectoryPointMessage point6 = new EuclideanTrajectoryPointMessage();
       point6.setTime(time);
-      point6.position_.set(2.5, 1.0, 0.1);
+      point6.position_.set(2.4, 0.85, 0.1);
 
       time += 3.0;
       EuclideanTrajectoryPointMessage point7 = new EuclideanTrajectoryPointMessage();
       point7.setTime(time);
-      point7.position_.set(3.0, 1.0, 0.0);
+      point7.position_.set(2.7, 0.85, 0.0);
 
       time += 4.0;
       EuclideanTrajectoryPointMessage point8 = new EuclideanTrajectoryPointMessage();

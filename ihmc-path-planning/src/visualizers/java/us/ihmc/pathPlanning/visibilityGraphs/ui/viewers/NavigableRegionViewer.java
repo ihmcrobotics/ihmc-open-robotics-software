@@ -1,8 +1,5 @@
 package us.ihmc.pathPlanning.visibilityGraphs.ui.viewers;
 
-import static us.ihmc.pathPlanning.visibilityGraphs.ui.messager.UIVisibilityGraphsTopics.NavigableRegionVisibilityMap;
-import static us.ihmc.pathPlanning.visibilityGraphs.ui.messager.UIVisibilityGraphsTopics.ShowNavigableRegionVisibilityMaps;
-
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -19,13 +16,14 @@ import javafx.scene.paint.PhongMaterial;
 import javafx.scene.shape.MeshView;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
-import us.ihmc.javaFXToolkit.messager.Messager;
 import us.ihmc.javaFXToolkit.shapes.JavaFXMeshBuilder;
+import us.ihmc.messager.Messager;
+import us.ihmc.messager.MessagerAPIFactory.Topic;
 import us.ihmc.pathPlanning.visibilityGraphs.dataStructure.Connection;
+import us.ihmc.pathPlanning.visibilityGraphs.dataStructure.NavigableRegion;
 import us.ihmc.pathPlanning.visibilityGraphs.dataStructure.VisibilityMap;
 import us.ihmc.pathPlanning.visibilityGraphs.interfaces.VisibilityMapHolder;
 import us.ihmc.pathPlanning.visibilityGraphs.ui.VisualizationParameters;
-import us.ihmc.pathPlanning.visibilityGraphs.ui.messager.UIVisibilityGraphsTopics;
 
 public class NavigableRegionViewer extends AnimationTimer
 {
@@ -34,10 +32,12 @@ public class NavigableRegionViewer extends AnimationTimer
 
    private final Group root = new Group();
    private AtomicReference<Map<Integer, MeshView>> regionVisMapToRenderReference = new AtomicReference<>(null);
-   private final AtomicReference<Boolean> resetRequested;
-   private final AtomicReference<Boolean> show;
+   private AtomicReference<Boolean> resetRequested;
+   private AtomicReference<Boolean> show;
 
-   private final AtomicReference<List<? extends VisibilityMapHolder>> newRequestReference;
+   private AtomicReference<List<NavigableRegion>> newRequestReference;
+
+   private final Messager messager;
 
    public NavigableRegionViewer(Messager messager)
    {
@@ -46,6 +46,8 @@ public class NavigableRegionViewer extends AnimationTimer
 
    public NavigableRegionViewer(Messager messager, ExecutorService executorService)
    {
+      this.messager = messager;
+
       isExecutorServiceProvided = executorService == null;
 
       if (isExecutorServiceProvided)
@@ -53,10 +55,14 @@ public class NavigableRegionViewer extends AnimationTimer
       else
          this.executorService = executorService;
 
-      resetRequested = messager.createInput(UIVisibilityGraphsTopics.GlobalReset, false);
-      show = messager.createInput(ShowNavigableRegionVisibilityMaps, false);
-      newRequestReference = messager.createInput(NavigableRegionVisibilityMap, null);
       root.setMouseTransparent(true);
+   }
+
+   public void setTopics(Topic<Boolean> globalResetTopic, Topic<Boolean> showNavigableRegionVisibilityMapsTopic, Topic<List<NavigableRegion>> navigableRegionVisibilityMapTopic)
+   {
+      resetRequested = messager.createInput(globalResetTopic, false);
+      show = messager.createInput(showNavigableRegionVisibilityMapsTopic, false);
+      newRequestReference = messager.createInput(navigableRegionVisibilityMapTopic, null);
    }
 
    @Override
@@ -81,19 +87,19 @@ public class NavigableRegionViewer extends AnimationTimer
 
       if (show.get())
       {
-         List<? extends VisibilityMapHolder> newRequest = newRequestReference.getAndSet(null);
+         List<NavigableRegion> newRequest = newRequestReference.getAndSet(null);
 
          if (newRequest != null)
             processNavigableRegionsOnThread(newRequest);
       }
    }
 
-   private void processNavigableRegionsOnThread(List<? extends VisibilityMapHolder> newRequest)
+   private void processNavigableRegionsOnThread(List<NavigableRegion> newRequest)
    {
       executorService.execute(() -> processNavigableRegions(newRequest));
    }
 
-   private void processNavigableRegions(List<? extends VisibilityMapHolder> newRequest)
+   private void processNavigableRegions(List<NavigableRegion> newRequest)
    {
       Map<Integer, JavaFXMeshBuilder> meshBuilders = new HashMap<>();
       Map<Integer, Material> materials = new HashMap<>();

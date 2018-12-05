@@ -10,15 +10,16 @@ import java.io.IOException;
 import org.junit.After;
 import org.junit.Before;
 
+import org.junit.Test;
 import us.ihmc.avatar.MultiRobotTestInterface;
 import us.ihmc.avatar.controllerAPI.EndToEndChestTrajectoryMessageTest;
 import us.ihmc.avatar.controllerAPI.EndToEndHandTrajectoryMessageTest;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.networkProcessor.kinematicsToolboxModule.KinematicsToolboxModule;
 import us.ihmc.avatar.testTools.DRCBehaviorTestHelper;
-import us.ihmc.communication.packetCommunicator.PacketCommunicator;
-import us.ihmc.communication.packets.PacketDestination;
-import us.ihmc.communication.util.NetworkPorts;
+import us.ihmc.commons.thread.ThreadTools;
+import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
+import us.ihmc.continuousIntegration.IntegrationCategory;
 import us.ihmc.euclid.axisAngle.AxisAngle;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.FrameQuaternion;
@@ -28,10 +29,11 @@ import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.euclid.tuple4D.interfaces.QuaternionReadOnly;
 import us.ihmc.humanoidBehaviors.behaviors.primitives.WholeBodyInverseKinematicsBehavior;
+import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
+import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.geometry.AngleTools;
 import us.ihmc.robotics.robotSide.RobotSide;
-import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.simulationConstructionSetTools.bambooTools.BambooTools;
 import us.ihmc.simulationConstructionSetTools.util.environments.CommonAvatarEnvironmentInterface;
 import us.ihmc.simulationConstructionSetTools.util.environments.FlatGroundEnvironment;
@@ -39,7 +41,6 @@ import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
 import us.ihmc.simulationconstructionset.util.simulationTesting.SimulationTestingParameters;
 import us.ihmc.tools.MemoryTools;
-import us.ihmc.commons.thread.ThreadTools;
 
 public abstract class WholeBodyInverseKinematicsBehaviorTest implements MultiRobotTestInterface
 {
@@ -47,7 +48,6 @@ public abstract class WholeBodyInverseKinematicsBehaviorTest implements MultiRob
    private boolean isKinematicsToolboxVisualizerEnabled = false;
    private DRCBehaviorTestHelper drcBehaviorTestHelper;
    private KinematicsToolboxModule kinematicsToolboxModule;
-   private PacketCommunicator toolboxCommunicator;
 
    @Before
    public void showMemoryUsageBeforeTest()
@@ -76,13 +76,6 @@ public abstract class WholeBodyInverseKinematicsBehaviorTest implements MultiRob
          kinematicsToolboxModule = null;
       }
 
-      if (toolboxCommunicator != null)
-      {
-         toolboxCommunicator.disconnect();
-         toolboxCommunicator.closeConnection();
-         toolboxCommunicator = null;
-      }
-
       MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " after test.");
    }
 
@@ -98,6 +91,8 @@ public abstract class WholeBodyInverseKinematicsBehaviorTest implements MultiRob
       setupKinematicsToolboxModule();
    }
 
+   @ContinuousIntegrationTest(estimatedDuration = 46.9)
+   @Test(timeout = 230000)
    public void testSolvingForAHandPose() throws SimulationExceededMaximumTimeException, IOException
    {
       BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
@@ -113,14 +108,14 @@ public abstract class WholeBodyInverseKinematicsBehaviorTest implements MultiRob
 
       drcBehaviorTestHelper.updateRobotModel();
 
-      WholeBodyInverseKinematicsBehavior ik = new WholeBodyInverseKinematicsBehavior(getRobotModel(), drcBehaviorTestHelper.getYoTime(),
-                                                                                     drcBehaviorTestHelper.getBehaviorCommunicationBridge(),
+      WholeBodyInverseKinematicsBehavior ik = new WholeBodyInverseKinematicsBehavior(drcBehaviorTestHelper.getRobotName(), getRobotModel(),
+                                                                                     drcBehaviorTestHelper.getYoTime(), drcBehaviorTestHelper.getRos2Node(),
                                                                                      drcBehaviorTestHelper.getSDFFullRobotModel());
 
       ReferenceFrame handControlFrame = drcBehaviorTestHelper.getReferenceFrames().getHandFrame(robotSide);
 
       FullHumanoidRobotModel fullRobotModel = drcBehaviorTestHelper.getControllerFullRobotModel();
-      RigidBody chest = fullRobotModel.getChest();
+      RigidBodyBasics chest = fullRobotModel.getChest();
       ReferenceFrame chestControlFrame = chest.getBodyFixedFrame();
       FrameQuaternion initialChestOrientation = new FrameQuaternion(chestControlFrame);
       initialChestOrientation.changeFrame(ReferenceFrame.getWorldFrame());
@@ -173,11 +168,13 @@ public abstract class WholeBodyInverseKinematicsBehaviorTest implements MultiRob
       double positionEpsilon = 1.0e-4;
       double positionDifference = handPosition.distance(controllerDesiredHandPosition);
 
-      assertTrue("Position difference: " + positionDifference, positionDifference <positionEpsilon);
+      assertTrue("Position difference: " + positionDifference, positionDifference < positionEpsilon);
 
       BambooTools.reportTestFinishedMessage(simulationTestingParameters.getShowWindows());
    }
 
+   @ContinuousIntegrationTest(estimatedDuration = 46.5)
+   @Test(timeout = 230000)
    public void testSolvingForBothHandPoses() throws SimulationExceededMaximumTimeException, IOException
    {
       BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
@@ -190,8 +187,8 @@ public abstract class WholeBodyInverseKinematicsBehaviorTest implements MultiRob
       SimulationConstructionSet scs = drcBehaviorTestHelper.getSimulationConstructionSet();
       drcBehaviorTestHelper.updateRobotModel();
 
-      WholeBodyInverseKinematicsBehavior ik = new WholeBodyInverseKinematicsBehavior(getRobotModel(), drcBehaviorTestHelper.getYoTime(),
-                                                                                     drcBehaviorTestHelper.getBehaviorCommunicationBridge(),
+      WholeBodyInverseKinematicsBehavior ik = new WholeBodyInverseKinematicsBehavior(drcBehaviorTestHelper.getRobotName(), getRobotModel(),
+                                                                                     drcBehaviorTestHelper.getYoTime(), drcBehaviorTestHelper.getRos2Node(),
                                                                                      drcBehaviorTestHelper.getSDFFullRobotModel());
 
       ReferenceFrame handControlFrameR = drcBehaviorTestHelper.getReferenceFrames().getHandFrame(RobotSide.RIGHT);
@@ -252,12 +249,14 @@ public abstract class WholeBodyInverseKinematicsBehaviorTest implements MultiRob
 
       double positionEpsilon = 1.0e-4;
 
-      assertTrue("Position difference: " + rightDifference, rightDifference <positionEpsilon);
-      assertTrue("Position difference: " + leftDifference, leftDifference <positionEpsilon);
+      assertTrue("Position difference: " + rightDifference, rightDifference < positionEpsilon);
+      assertTrue("Position difference: " + leftDifference, leftDifference < positionEpsilon);
 
       BambooTools.reportTestFinishedMessage(simulationTestingParameters.getShowWindows());
    }
 
+   @ContinuousIntegrationTest(estimatedDuration = 47.0)
+   @Test(timeout = 230000)
    public void testSolvingForHandSelectionMatrix() throws SimulationExceededMaximumTimeException, IOException
    {
       BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
@@ -273,13 +272,13 @@ public abstract class WholeBodyInverseKinematicsBehaviorTest implements MultiRob
 
       drcBehaviorTestHelper.updateRobotModel();
 
-      WholeBodyInverseKinematicsBehavior ik = new WholeBodyInverseKinematicsBehavior(getRobotModel(), drcBehaviorTestHelper.getYoTime(),
-                                                                                     drcBehaviorTestHelper.getBehaviorCommunicationBridge(),
+      WholeBodyInverseKinematicsBehavior ik = new WholeBodyInverseKinematicsBehavior(drcBehaviorTestHelper.getRobotName(), getRobotModel(),
+                                                                                     drcBehaviorTestHelper.getYoTime(), drcBehaviorTestHelper.getRos2Node(),
                                                                                      drcBehaviorTestHelper.getSDFFullRobotModel());
 
       ReferenceFrame handControlFrame = drcBehaviorTestHelper.getReferenceFrames().getHandFrame(robotSide);
 
-      RigidBody chest = drcBehaviorTestHelper.getControllerFullRobotModel().getChest();
+      RigidBodyBasics chest = drcBehaviorTestHelper.getControllerFullRobotModel().getChest();
       ReferenceFrame chestControlFrame = chest.getBodyFixedFrame();
       FrameQuaternion initialChestOrientation = new FrameQuaternion(chestControlFrame);
       initialChestOrientation.changeFrame(ReferenceFrame.getWorldFrame());
@@ -334,11 +333,13 @@ public abstract class WholeBodyInverseKinematicsBehaviorTest implements MultiRob
       double positionEpsilon = 1.0e-4;
       double positionDifference = handPosition.distance(controllerDesiredHandPosition);
 
-      assertTrue("Position difference: " + positionDifference, positionDifference <positionEpsilon);
+      assertTrue("Position difference: " + positionDifference, positionDifference < positionEpsilon);
 
       BambooTools.reportTestFinishedMessage(simulationTestingParameters.getShowWindows());
    }
 
+   @ContinuousIntegrationTest(estimatedDuration = 48.8)
+   @Test(timeout = 240000)
    public void testSolvingForHandAngularLinearControl() throws SimulationExceededMaximumTimeException, IOException
    {
       BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
@@ -351,8 +352,8 @@ public abstract class WholeBodyInverseKinematicsBehaviorTest implements MultiRob
       SimulationConstructionSet scs = drcBehaviorTestHelper.getSimulationConstructionSet();
       drcBehaviorTestHelper.updateRobotModel();
 
-      WholeBodyInverseKinematicsBehavior ik = new WholeBodyInverseKinematicsBehavior(getRobotModel(), drcBehaviorTestHelper.getYoTime(),
-                                                                                     drcBehaviorTestHelper.getBehaviorCommunicationBridge(),
+      WholeBodyInverseKinematicsBehavior ik = new WholeBodyInverseKinematicsBehavior(drcBehaviorTestHelper.getRobotName(), getRobotModel(),
+                                                                                     drcBehaviorTestHelper.getYoTime(), drcBehaviorTestHelper.getRos2Node(),
                                                                                      drcBehaviorTestHelper.getSDFFullRobotModel());
 
       ReferenceFrame handControlFrameR = drcBehaviorTestHelper.getReferenceFrames().getHandFrame(RobotSide.RIGHT);
@@ -370,7 +371,6 @@ public abstract class WholeBodyInverseKinematicsBehaviorTest implements MultiRob
       ik.setTrajectoryTime(0.5);
       ik.setHandLinearControlOnly(RobotSide.RIGHT);
       ik.setDesiredHandPose(RobotSide.RIGHT, desiredHandPoseR);
-
 
       Quaternion offsetOrientationLeft = new Quaternion();
       offsetOrientationLeft.setYawPitchRoll(1.0, 1.0, 0.0);
@@ -440,6 +440,8 @@ public abstract class WholeBodyInverseKinematicsBehaviorTest implements MultiRob
       BambooTools.reportTestFinishedMessage(simulationTestingParameters.getShowWindows());
    }
 
+   @ContinuousIntegrationTest(estimatedDuration = 50.3)
+   @Test(timeout = 250000)
    public void testSolvingForHandRollConstraint() throws SimulationExceededMaximumTimeException, IOException
    {
       BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
@@ -451,8 +453,8 @@ public abstract class WholeBodyInverseKinematicsBehaviorTest implements MultiRob
 
       drcBehaviorTestHelper.updateRobotModel();
 
-      WholeBodyInverseKinematicsBehavior ik = new WholeBodyInverseKinematicsBehavior(getRobotModel(), drcBehaviorTestHelper.getYoTime(),
-                                                                                     drcBehaviorTestHelper.getBehaviorCommunicationBridge(),
+      WholeBodyInverseKinematicsBehavior ik = new WholeBodyInverseKinematicsBehavior(drcBehaviorTestHelper.getRobotName(), getRobotModel(),
+                                                                                     drcBehaviorTestHelper.getYoTime(), drcBehaviorTestHelper.getRos2Node(),
                                                                                      drcBehaviorTestHelper.getSDFFullRobotModel());
 
       ReferenceFrame handControlFrame = drcBehaviorTestHelper.getReferenceFrames().getHandFrame(RobotSide.RIGHT);
@@ -509,11 +511,13 @@ public abstract class WholeBodyInverseKinematicsBehaviorTest implements MultiRob
       double positionEpsilon = 1.0e-4;
       double positionDifference = handPosition.distance(controllerDesiredHandPosition);
 
-      assertTrue("Position difference: " + positionDifference, positionDifference <positionEpsilon);
+      assertTrue("Position difference: " + positionDifference, positionDifference < positionEpsilon);
 
       BambooTools.reportTestFinishedMessage(simulationTestingParameters.getShowWindows());
    }
 
+   @ContinuousIntegrationTest(estimatedDuration = 36.6)
+   @Test(timeout = 180000)
    public void testSolvingForChestAngularControl() throws SimulationExceededMaximumTimeException, IOException
    {
       BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
@@ -523,8 +527,8 @@ public abstract class WholeBodyInverseKinematicsBehaviorTest implements MultiRob
 
       drcBehaviorTestHelper.updateRobotModel();
 
-      WholeBodyInverseKinematicsBehavior ik = new WholeBodyInverseKinematicsBehavior(getRobotModel(), drcBehaviorTestHelper.getYoTime(),
-                                                                                     drcBehaviorTestHelper.getBehaviorCommunicationBridge(),
+      WholeBodyInverseKinematicsBehavior ik = new WholeBodyInverseKinematicsBehavior(drcBehaviorTestHelper.getRobotName(), getRobotModel(),
+                                                                                     drcBehaviorTestHelper.getYoTime(), drcBehaviorTestHelper.getRos2Node(),
                                                                                      drcBehaviorTestHelper.getSDFFullRobotModel());
 
       Quaternion offsetOrientationChest = new Quaternion();
@@ -560,13 +564,16 @@ public abstract class WholeBodyInverseKinematicsBehaviorTest implements MultiRob
 
       double angleEpsilon = Math.toRadians(1);
 
-      assertEquals("Expected: " + desiredChestOrientation.getRoll() + " Received: " + currentChestRoll, desiredChestOrientation.getRoll(), currentChestRoll, angleEpsilon);
+      assertEquals("Expected: " + desiredChestOrientation.getRoll() + " Received: " + currentChestRoll, desiredChestOrientation.getRoll(), currentChestRoll,
+                   angleEpsilon);
       assertEquals("Expected: " + initialChestYaw + " Received: " + currentChestYaw, initialChestYaw, currentChestYaw, angleEpsilon);
       assertEquals("Expected: " + initialChestPitch + " Received: " + currentChestPitch, initialChestPitch, currentChestPitch, angleEpsilon);
 
       BambooTools.reportTestFinishedMessage(simulationTestingParameters.getShowWindows());
    }
 
+   @ContinuousIntegrationTest(estimatedDuration = 35.8)
+   @Test(timeout = 180000)
    public void testSolvingForPelvisAngularControl() throws SimulationExceededMaximumTimeException, IOException
    {
       BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
@@ -576,8 +583,8 @@ public abstract class WholeBodyInverseKinematicsBehaviorTest implements MultiRob
 
       drcBehaviorTestHelper.updateRobotModel();
 
-      WholeBodyInverseKinematicsBehavior ik = new WholeBodyInverseKinematicsBehavior(getRobotModel(), drcBehaviorTestHelper.getYoTime(),
-                                                                                     drcBehaviorTestHelper.getBehaviorCommunicationBridge(),
+      WholeBodyInverseKinematicsBehavior ik = new WholeBodyInverseKinematicsBehavior(drcBehaviorTestHelper.getRobotName(), getRobotModel(),
+                                                                                     drcBehaviorTestHelper.getYoTime(), drcBehaviorTestHelper.getRos2Node(),
                                                                                      drcBehaviorTestHelper.getSDFFullRobotModel());
 
       Quaternion offsetOrientationPelvis = new Quaternion();
@@ -613,7 +620,8 @@ public abstract class WholeBodyInverseKinematicsBehaviorTest implements MultiRob
 
       double angleEpsilon = Math.toRadians(1.5);
 
-      assertEquals("Expected: " + desiredPelvisOrientation.getRoll() + " Received: " + currentPelvisRoll, desiredPelvisOrientation.getRoll(), currentPelvisRoll, angleEpsilon);
+      assertEquals("Expected: " + desiredPelvisOrientation.getRoll() + " Received: " + currentPelvisRoll, desiredPelvisOrientation.getRoll(), currentPelvisRoll,
+                   angleEpsilon);
       assertEquals("Expected: " + initialPelvisYaw + " Received: " + currentPelvisYaw, initialPelvisYaw, currentPelvisYaw, angleEpsilon);
       assertEquals("Expected: " + initialPelvisPitch + " Received: " + currentPelvisPitch, initialPelvisPitch, currentPelvisPitch, angleEpsilon);
 
@@ -635,7 +643,6 @@ public abstract class WholeBodyInverseKinematicsBehaviorTest implements MultiRob
    private void setupKinematicsToolboxModule() throws IOException
    {
       DRCRobotModel robotModel = getRobotModel();
-      kinematicsToolboxModule = new KinematicsToolboxModule(robotModel, isKinematicsToolboxVisualizerEnabled);
-      toolboxCommunicator = drcBehaviorTestHelper.createAndStartPacketCommunicator(NetworkPorts.KINEMATICS_TOOLBOX_MODULE_PORT, PacketDestination.KINEMATICS_TOOLBOX_MODULE);
+      kinematicsToolboxModule = new KinematicsToolboxModule(robotModel, isKinematicsToolboxVisualizerEnabled, PubSubImplementation.INTRAPROCESS);
    }
 }

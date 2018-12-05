@@ -1,20 +1,30 @@
 package us.ihmc.robotics.screwTheory;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
 
 import java.util.ArrayList;
 import java.util.Random;
 
+import org.junit.After;
 import org.junit.Test;
 
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.euclid.matrix.Matrix3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.tools.ReferenceFrameTools;
 import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.mecano.multiBodySystem.RevoluteJoint;
+import us.ihmc.mecano.multiBodySystem.RigidBody;
+import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.robotics.random.RandomGeometry;
 
 public class TotalMassCalculatorTest
 {
+   @After
+   public void tearDown()
+   {
+      ReferenceFrameTools.clearWorldFrameTree();
+   }
 
 	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
@@ -23,7 +33,7 @@ public class TotalMassCalculatorTest
       Random random = new Random(100L);
 
       ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
-      RigidBody elevator = new RigidBody("body", worldFrame);
+      RigidBodyBasics elevator = new RigidBody("body", worldFrame);
       int numberOfJoints = 100;
       double addedMass = createRandomRigidBodyTreeAndReturnTotalMass(worldFrame, elevator, numberOfJoints, random);
 
@@ -32,7 +42,7 @@ public class TotalMassCalculatorTest
 
    }
 
-   public static double createRandomRigidBodyTreeAndReturnTotalMass(ReferenceFrame worldFrame, RigidBody elevator, int numberOfJoints, Random random)
+   public static double createRandomRigidBodyTreeAndReturnTotalMass(ReferenceFrame worldFrame, RigidBodyBasics elevator, int numberOfJoints, Random random)
    {
       double totalMass = 0.0;
       boolean rootAdded = false;
@@ -50,7 +60,7 @@ public class TotalMassCalculatorTest
 
 
 
-         RigidBody inverseDynamicsParentBody;
+         RigidBodyBasics inverseDynamicsParentBody;
          if (!rootAdded)
          {
             rootAdded = true;
@@ -63,12 +73,12 @@ public class TotalMassCalculatorTest
             inverseDynamicsParentBody = inverseDynamicsParentJoint.getSuccessor();
          }
 
-         RevoluteJoint currentJoint = ScrewTools.addRevoluteJoint("jointID" + i, inverseDynamicsParentBody, jointOffset, jointAxis);
+         RevoluteJoint currentJoint = new RevoluteJoint("jointID" + i, inverseDynamicsParentBody, jointOffset, jointAxis);
          double jointPosition = random.nextDouble();
          currentJoint.setQ(jointPosition);
          currentJoint.setQd(0.0);
-         currentJoint.setQddDesired(0.0);
-         ScrewTools.addRigidBody("bodyID" + i, currentJoint, momentOfInertia, mass, comOffset);
+         currentJoint.setQdd(0.0);
+         new RigidBody("bodyID" + i, currentJoint, momentOfInertia, mass, comOffset);
 
          potentialInverseDynamicsParentJoints.add(currentJoint);
       }

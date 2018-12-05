@@ -5,20 +5,22 @@ import static org.junit.Assert.assertTrue;
 import org.junit.After;
 import org.junit.Before;
 
-import controller_msgs.msg.dds.ObjectWeightPacket;
+import org.junit.Ignore;
+import org.junit.Test;
 import us.ihmc.avatar.DRCObstacleCourseStartingLocation;
 import us.ihmc.avatar.MultiRobotTestInterface;
 import us.ihmc.avatar.testTools.DRCBehaviorTestHelper;
+import us.ihmc.commons.MathTools;
+import us.ihmc.commons.thread.ThreadTools;
+import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.humanoidBehaviors.behaviors.primitives.ObjectWeightBehavior;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
-import us.ihmc.commons.MathTools;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.simulationConstructionSetTools.bambooTools.BambooTools;
 import us.ihmc.simulationConstructionSetTools.util.environments.DefaultCommonAvatarEnvironment;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
 import us.ihmc.simulationconstructionset.util.simulationTesting.SimulationTestingParameters;
 import us.ihmc.tools.MemoryTools;
-import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.yoVariables.variable.YoDouble;
 
 public abstract class DRCObjectWeightBehaviorTest implements MultiRobotTestInterface
@@ -34,8 +36,8 @@ public abstract class DRCObjectWeightBehaviorTest implements MultiRobotTestInter
       BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
 
       DefaultCommonAvatarEnvironment testEnvironment = new DefaultCommonAvatarEnvironment();
-      drcBehaviorTestHelper = new DRCBehaviorTestHelper(testEnvironment, getSimpleRobotName(),
-            DRCObstacleCourseStartingLocation.DEFAULT, simulationTestingParameters, getRobotModel());
+      drcBehaviorTestHelper = new DRCBehaviorTestHelper(testEnvironment, getSimpleRobotName(), DRCObstacleCourseStartingLocation.DEFAULT,
+                                                        simulationTestingParameters, getRobotModel());
    }
 
    @After
@@ -56,19 +58,24 @@ public abstract class DRCObjectWeightBehaviorTest implements MultiRobotTestInter
       MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " after test.");
    }
 
+   @ContinuousIntegrationTest(estimatedDuration = 21.2)
+   @Test(timeout = 110000)
    public void testConstructorAndSetInput()
    {
-      ObjectWeightBehavior behavior = new ObjectWeightBehavior(drcBehaviorTestHelper.getBehaviorCommunicationBridge());
+      ObjectWeightBehavior behavior = new ObjectWeightBehavior(drcBehaviorTestHelper.getRobotName(), drcBehaviorTestHelper.getRos2Node());
       behavior.setInput(HumanoidMessageTools.createObjectWeightPacket(RobotSide.LEFT, 0.0));
       assertTrue(behavior.hasInputBeenSet());
    }
 
+   @Ignore("Needs to be reimplemented")
+   @ContinuousIntegrationTest(estimatedDuration = 19.6)
+   @Test(timeout = 98000)
    public void testSettingWeight() throws SimulationExceededMaximumTimeException
    {
       boolean success = drcBehaviorTestHelper.simulateAndBlockAndCatchExceptions(1.0);
       assertTrue(success);
 
-      ObjectWeightBehavior objectWeightBehavior = new ObjectWeightBehavior(drcBehaviorTestHelper.getBehaviorCommunicationBridge());
+      ObjectWeightBehavior objectWeightBehavior = new ObjectWeightBehavior(drcBehaviorTestHelper.getRobotName(), drcBehaviorTestHelper.getRos2Node());
       YoDouble rightMass = (YoDouble) drcBehaviorTestHelper.getSimulationConstructionSet().getVariable("rightTool", "rightToolObjectMass");
       YoDouble leftMass = (YoDouble) drcBehaviorTestHelper.getSimulationConstructionSet().getVariable("leftTool", "leftToolObjectMass");
 

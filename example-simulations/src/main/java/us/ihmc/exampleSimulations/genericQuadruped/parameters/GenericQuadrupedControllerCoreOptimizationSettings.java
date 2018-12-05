@@ -6,12 +6,12 @@ import us.ihmc.euclid.tuple2D.Vector2D;
 public class GenericQuadrupedControllerCoreOptimizationSettings implements ControllerCoreOptimizationSettings
 {
    private static final double jointAccelerationWeight = 0.005;
-   private static final double jointJerkWeight = 0.1;
+   private static final double jointJerkWeight = 1.0E-7;
 
    private static final double defaultRhoWeight = 0.00001;
    private static final double defaultRhoMin = 1.0;
-   private static final double defaultRhoRateDefaultWeight = 0.002;
-   private static final double defaultRhoRateHighWeight = 0.05;
+   private static final double defaultRhoRateDefaultWeight = 2.0E-9;
+   private static final double defaultRhoRateHighWeight = 5.0E-8;
 
    private final double rhoWeight;
    private final double rhoMin;

@@ -11,12 +11,15 @@ import org.junit.Before;
 
 import controller_msgs.msg.dds.FootstepDataListMessage;
 import controller_msgs.msg.dds.FootstepDataMessage;
+import org.junit.Test;
 import us.ihmc.avatar.DRCObstacleCourseStartingLocation;
 import us.ihmc.avatar.MultiRobotTestInterface;
 import us.ihmc.avatar.testTools.DRCSimulationTestHelper;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHumanoidControllerToolbox;
 import us.ihmc.commons.thread.ThreadTools;
+import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations;
+import us.ihmc.continuousIntegration.IntegrationCategory;
 import us.ihmc.euclid.geometry.BoundingBox3D;
 import us.ihmc.euclid.geometry.interfaces.Vertex2DSupplier;
 import us.ihmc.euclid.referenceFrame.FrameConvexPolygon2D;
@@ -90,6 +93,8 @@ public abstract class AvatarICPPlannerFlatGroundTest implements MultiRobotTestIn
    /**
     * This test will drop the floor out from underneath the sim randomly while standing. Tests if detection and hold position are working well.
     */
+   @ContinuousIntegrationAnnotations.ContinuousIntegrationTest(estimatedDuration = 74.3, categoriesOverride = {IntegrationCategory.EXCLUDE})
+   @Test(timeout = 370000)
    public void testChangeOfSupport() throws SimulationExceededMaximumTimeException, RuntimeException
    {
       BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
@@ -190,6 +195,8 @@ public abstract class AvatarICPPlannerFlatGroundTest implements MultiRobotTestIn
    /**
     * This test pauses walking after the first two steps to check that functionality, and then finishes the plan.
     */
+   @ContinuousIntegrationAnnotations.ContinuousIntegrationTest(estimatedDuration = 64.8, categoriesOverride = {IntegrationCategory.FAST})
+   @Test(timeout = 320000)
    public void testPauseWalkingInSwing() throws SimulationExceededMaximumTimeException, RuntimeException
    {
       BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
@@ -238,13 +245,13 @@ public abstract class AvatarICPPlannerFlatGroundTest implements MultiRobotTestIn
       double swingDuration = 1.0;
       double transferDuration = 0.3;
       FootstepDataListMessage message = createForwardWalkingFootsteps(numberOfSteps, 0.3, 0.3, swingDuration, transferDuration);
-      drcSimulationTestHelper.send(message);
+      drcSimulationTestHelper.publishToController(message);
 
       drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(2 * (swingDuration + transferDuration));
-      drcSimulationTestHelper.send(HumanoidMessageTools.createPauseWalkingMessage(true));
+      drcSimulationTestHelper.publishToController(HumanoidMessageTools.createPauseWalkingMessage(true));
 
       drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(3.0);
-      drcSimulationTestHelper.send(HumanoidMessageTools.createPauseWalkingMessage(false));
+      drcSimulationTestHelper.publishToController(HumanoidMessageTools.createPauseWalkingMessage(false));
 
       drcSimulationTestHelper.simulateAndBlockAndCatchExceptions((numberOfSteps) * (swingDuration + transferDuration));
 
@@ -258,6 +265,8 @@ public abstract class AvatarICPPlannerFlatGroundTest implements MultiRobotTestIn
    /**
     * This test pauses walking on the first step to check that functionality, and then finishes the plan.
     */
+   @ContinuousIntegrationAnnotations.ContinuousIntegrationTest(estimatedDuration = 69.9, categoriesOverride = {IntegrationCategory.FAST})
+   @Test(timeout = 350000)
    public void testPauseWalkingInTransferFirstStep() throws SimulationExceededMaximumTimeException, RuntimeException
    {
       BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
@@ -306,13 +315,13 @@ public abstract class AvatarICPPlannerFlatGroundTest implements MultiRobotTestIn
       double swingDuration = 1.0;
       double transferDuration = 0.3;
       FootstepDataListMessage message = createForwardWalkingFootsteps(numberOfSteps, 0.3, 0.3, swingDuration, transferDuration);
-      drcSimulationTestHelper.send(message);
+      drcSimulationTestHelper.publishToController(message);
 
       drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(0.8 * transferDuration);
-      drcSimulationTestHelper.send(HumanoidMessageTools.createPauseWalkingMessage(true));
+      drcSimulationTestHelper.publishToController(HumanoidMessageTools.createPauseWalkingMessage(true));
 
       drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(4.0);
-      drcSimulationTestHelper.send(HumanoidMessageTools.createPauseWalkingMessage(false));
+      drcSimulationTestHelper.publishToController(HumanoidMessageTools.createPauseWalkingMessage(false));
 
       drcSimulationTestHelper.simulateAndBlockAndCatchExceptions((numberOfSteps + 1) * (swingDuration + transferDuration));
 
@@ -326,6 +335,8 @@ public abstract class AvatarICPPlannerFlatGroundTest implements MultiRobotTestIn
    /**
     * This test pauses walking after the first two steps to check that functionality, and then finishes the plan.
     */
+   @ContinuousIntegrationAnnotations.ContinuousIntegrationTest(estimatedDuration = 68.1, categoriesOverride = {IntegrationCategory.FAST})
+   @Test(timeout = 340000)
    public void testPauseWalkingInTransfer() throws SimulationExceededMaximumTimeException, RuntimeException
    {
       BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
@@ -374,13 +385,13 @@ public abstract class AvatarICPPlannerFlatGroundTest implements MultiRobotTestIn
       double swingDuration = 1.0;
       double transferDuration = 0.3;
       FootstepDataListMessage message = createForwardWalkingFootsteps(numberOfSteps, 0.3, 0.3, swingDuration, transferDuration);
-      drcSimulationTestHelper.send(message);
+      drcSimulationTestHelper.publishToController(message);
 
       drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(2 * (swingDuration + transferDuration) + 0.8 * transferDuration);
-      drcSimulationTestHelper.send(HumanoidMessageTools.createPauseWalkingMessage(true));
+      drcSimulationTestHelper.publishToController(HumanoidMessageTools.createPauseWalkingMessage(true));
 
       drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(4.0);
-      drcSimulationTestHelper.send(HumanoidMessageTools.createPauseWalkingMessage(false));
+      drcSimulationTestHelper.publishToController(HumanoidMessageTools.createPauseWalkingMessage(false));
 
       drcSimulationTestHelper.simulateAndBlockAndCatchExceptions((numberOfSteps) * (swingDuration + transferDuration));
 
@@ -517,7 +528,7 @@ public abstract class AvatarICPPlannerFlatGroundTest implements MultiRobotTestIn
       FootstepDataMessage footstepData = createFootstepDataMessage(fullRobotModel, robotSide, predictedContactPointsInAnkleFrame, placeToStep, setPredictedContactPoints);
       message.getFootstepDataList().add().set(footstepData);
 
-      drcSimulationTestHelper.send(message);
+      drcSimulationTestHelper.publishToController(message);
       boolean success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(1.2);
       changeAppendageGroundContactPointsToNewOffsets(robot, contactPointsInAnkleFrame, jointName, robotSide);
       success = success && drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(2.0);

@@ -9,7 +9,7 @@ byte EXECUTION_TIMING_CONTROL_ABSOLUTE_TIMINGS = 1
 uint32 sequence_id
 
 # Defines the list of footstep to perform.
-FootstepDataMessage[<=1] footstep_data_list
+FootstepDataMessage[<=50] footstep_data_list
 # When CONTROL_DURATIONS is chosen:
 #   The controller will try to achieve the swing_duration and the transfer_duration specified in the message.
 #   If a footstep touches down early, the next step will not be affected by this and the whole trajectory might finish earlier than expected.

@@ -14,4 +14,5 @@ public interface QuadrupedPhysicalProperties
    ArrayList<Point2D> getFootGroundContactPoints(RobotQuadrant robotQuadrant);
    QuadrantDependentList<ArrayList<Point2D>> getFeetGroundContactPoints();
    double getNominalCoMHeight();
+   boolean trustFootSwitches();
 }

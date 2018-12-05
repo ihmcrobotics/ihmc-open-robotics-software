@@ -8,21 +8,21 @@ import org.ddogleg.optimization.UnconstrainedLeastSquares;
 import org.ddogleg.optimization.functions.FunctionNtoM;
 
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
+import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.yoVariables.variable.YoInteger;
-import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.simulationToolkit.visualizers.FullRobotModelVisualizer;
 import us.ihmc.simulationconstructionset.FloatingRootJointRobot;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.SimulationConstructionSetParameters;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoInteger;
 
 public class AtlasKinematicCalibrator
 {
    private final FloatingRootJointRobot robot;
    protected final FullHumanoidRobotModel fullRobotModel;
 
-   protected final OneDoFJoint[] joints;
+   protected final OneDoFJointBasics[] joints;
    protected final ArrayList<Map<String, Double>> q = new ArrayList<>();
    protected final ArrayList<Map<String, Double>> qout = new ArrayList<>();
    private FullRobotModelVisualizer visualizer = null;

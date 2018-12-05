@@ -1,8 +1,6 @@
 package us.ihmc.valkyrie.parameters;
 
-import static us.ihmc.valkyrie.parameters.ValkyriePhysicalProperties.footLength;
-import static us.ihmc.valkyrie.parameters.ValkyriePhysicalProperties.footWidth;
-import static us.ihmc.valkyrie.parameters.ValkyriePhysicalProperties.soleToAnkleFrameTransforms;
+import static us.ihmc.valkyrie.parameters.ValkyriePhysicalProperties.*;
 
 import java.util.ArrayList;
 
@@ -36,6 +34,25 @@ public class ValkyrieContactPointParameters extends RobotContactPointParameters<
          createDefaultFootContactPoints();
       else
          createFootContactPoints(footContactPoints);
+   }
+
+   public void createAdditionalHandContactPoints()
+   {
+      for (RobotSide robotSide : RobotSide.values)
+         createFistContactPoints(robotSide);
+   }
+
+   private void createFistContactPoints(RobotSide robotSide)
+   {
+      String wrist = jointMap.getJointBeforeHandName(robotSide);
+
+      Vector3D knuckleIndex1 = new Vector3D(-0.02, robotSide.negateIfRightSide(0.115), 0.03);
+      Vector3D knuckleMiddle1 = new Vector3D(-0.02, robotSide.negateIfRightSide(0.11), -0.015);
+      Vector3D knucklePinky1 = new Vector3D(-0.02, robotSide.negateIfRightSide(0.105), -0.06);
+
+      addSimulationContactPoint(wrist, knuckleIndex1);
+      addSimulationContactPoint(wrist, knuckleMiddle1);
+      addSimulationContactPoint(wrist, knucklePinky1);
    }
 
    private void checkJointChildren(SDFJointHolder joint)

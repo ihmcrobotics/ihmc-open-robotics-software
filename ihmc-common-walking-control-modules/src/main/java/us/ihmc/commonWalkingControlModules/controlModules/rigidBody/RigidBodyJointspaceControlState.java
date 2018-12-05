@@ -4,11 +4,10 @@ import java.util.Map;
 
 import gnu.trove.map.hash.TObjectDoubleHashMap;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.FeedbackControlCommand;
-import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.InverseDynamicsCommand;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.JointspaceTrajectoryCommand;
+import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.robotics.controllers.pidGains.PIDGainsReadOnly;
 import us.ihmc.robotics.controllers.pidGains.implementations.YoPIDGains;
-import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.yoVariables.providers.DoubleProvider;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
@@ -23,7 +22,7 @@ public class RigidBodyJointspaceControlState extends RigidBodyControlState
    private final int numberOfJoints;
    private final double[] jointsHomeConfiguration;
 
-   public RigidBodyJointspaceControlState(String bodyName, OneDoFJoint[] jointsToControl, TObjectDoubleHashMap<String> homeConfiguration,
+   public RigidBodyJointspaceControlState(String bodyName, OneDoFJointBasics[] jointsToControl, TObjectDoubleHashMap<String> homeConfiguration,
          YoDouble yoTime, RigidBodyJointControlHelper jointControlHelper, YoVariableRegistry parentRegistry)
    {
       super(RigidBodyControlMode.JOINTSPACE, bodyName, yoTime, parentRegistry);
@@ -33,7 +32,7 @@ public class RigidBodyJointspaceControlState extends RigidBodyControlState
       jointsHomeConfiguration = new double[numberOfJoints];
       for (int jointIdx = 0; jointIdx < numberOfJoints; jointIdx++)
       {
-         OneDoFJoint joint = jointsToControl[jointIdx];
+         OneDoFJointBasics joint = jointsToControl[jointIdx];
          String jointName = joint.getName();
          if (!homeConfiguration.contains(jointName))
             throw new RuntimeException(warningPrefix + "Can not create control manager since joint home configuration is not defined.");
@@ -69,6 +68,19 @@ public class RigidBodyJointspaceControlState extends RigidBodyControlState
       setTrajectoryStartTimeToCurrentTime();
 
       jointControlHelper.queueInitialPointsAtCurrent();
+
+      jointControlHelper.startTrajectoryExecution();
+      trajectoryDone.set(false);
+   }
+
+   public void holdCurrentDesired()
+   {
+      jointControlHelper.overrideTrajectory();
+      jointControlHelper.setWeightsToDefaults();
+      resetLastCommandId();
+      setTrajectoryStartTimeToCurrentTime();
+
+      jointControlHelper.queueInitialPointsAtCurrentDesired();
 
       jointControlHelper.startTrajectoryExecution();
       trajectoryDone.set(false);
@@ -152,20 +164,8 @@ public class RigidBodyJointspaceControlState extends RigidBodyControlState
    }
 
    @Override
-   public InverseDynamicsCommand<?> getInverseDynamicsCommand()
-   {
-      return null;
-   }
-
-   @Override
    public FeedbackControlCommand<?> getFeedbackControlCommand()
    {
       return jointControlHelper.getJointspaceCommand();
-   }
-
-   @Override
-   public FeedbackControlCommand<?> createFeedbackControlTemplate()
-   {
-      return getFeedbackControlCommand();
    }
 }

@@ -27,7 +27,7 @@ public class PrepareForLocomotionCommand implements Command<PrepareForLocomotion
    }
 
    @Override
-   public void set(PrepareForLocomotionMessage message)
+   public void setFromMessage(PrepareForLocomotionMessage message)
    {
       prepareManipulation = message.getPrepareManipulation();
       preparePelvis = message.getPreparePelvis();

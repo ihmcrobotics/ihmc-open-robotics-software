@@ -5,7 +5,7 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
-import us.ihmc.footstepPlanning.polygonSnapping.PlanarRegionsListExamples;
+import us.ihmc.simulationConstructionSetTools.util.planarRegions.PlanarRegionsListExamples;
 import us.ihmc.graphicsDescription.Graphics3DObject;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.graphicsDescription.structure.Graphics3DNodeType;
@@ -108,21 +108,7 @@ public class PlanarRegionsListDefinedEnvironmentExample
 
    public static void main(String[] args)
    {
-      double startX = 0.0;
-      double startY = 0.0;
-      double cinderBlockSize = 0.4;
-      double cinderBlockHeight = 0.15;
-      int courseWidthXInNumberOfBlocks = 21;
-      int courseLengthYInNumberOfBlocks = 6;
-      double heightVariation = 0.1;
-      //      Random random = new Random(1776L);
-
-//      PlanarRegionsList planarRegionsList = PlanarRegionsListExamples
-//            .generateCinderBlockField(startX, startY, cinderBlockSize, cinderBlockHeight, courseWidthXInNumberOfBlocks, courseLengthYInNumberOfBlocks, heightVariation);
-
-      PlanarRegionsList planarRegionsList = PlanarRegionsListExamples
-            .generateSteppingStonesEnvironment(3.5);
-
+      PlanarRegionsList planarRegionsList = PlanarRegionsListExamples.generateSteppingStonesEnvironment(3.5);
       startEnvironmentVisualizationForPlanarRegionsList(planarRegionsList, false, true, true, true, true);
    }
 }

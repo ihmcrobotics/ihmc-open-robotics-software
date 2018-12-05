@@ -10,6 +10,7 @@ import org.junit.AfterClass;
 import org.junit.Before;
 
 import controller_msgs.msg.dds.HeadTrajectoryMessage;
+import org.junit.Test;
 import us.ihmc.avatar.DRCObstacleCourseStartingLocation;
 import us.ihmc.avatar.MultiRobotTestInterface;
 import us.ihmc.avatar.testTools.DRCBehaviorTestHelper;
@@ -17,6 +18,7 @@ import us.ihmc.commons.PrintTools;
 import us.ihmc.commons.RandomNumbers;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.communication.packets.MessageTools;
+import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.euclid.axisAngle.AxisAngle;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
@@ -82,12 +84,14 @@ public abstract class DRCHeadTrajectoryBehaviorTest implements MultiRobotTestInt
       MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " before test.");
 
       DefaultCommonAvatarEnvironment testEnvironment = new DefaultCommonAvatarEnvironment();
-      drcBehaviorTestHelper = new DRCBehaviorTestHelper(testEnvironment, getSimpleRobotName(),
-            DRCObstacleCourseStartingLocation.DEFAULT, simulationTestingParameters, getRobotModel());
+      drcBehaviorTestHelper = new DRCBehaviorTestHelper(testEnvironment, getSimpleRobotName(), DRCObstacleCourseStartingLocation.DEFAULT,
+                                                        simulationTestingParameters, getRobotModel());
    }
 
    //TODO: Fix HeadOrienationManager() so that head actually tracks desired yaw and roll orientations.  Currently, only pitch orientation tracks properly.
 
+   @ContinuousIntegrationTest(estimatedDuration = 73.6)
+   @Test(timeout = 370000)
    public void testHeadPitch() throws SimulationExceededMaximumTimeException
    {
       BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
@@ -101,6 +105,8 @@ public abstract class DRCHeadTrajectoryBehaviorTest implements MultiRobotTestInt
       BambooTools.reportTestFinishedMessage(simulationTestingParameters.getShowWindows());
    }
 
+   @ContinuousIntegrationTest(estimatedDuration = 37.6)
+   @Test(timeout = 950000)
    public void testHeadRoll() throws SimulationExceededMaximumTimeException
    {
       BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
@@ -114,6 +120,8 @@ public abstract class DRCHeadTrajectoryBehaviorTest implements MultiRobotTestInt
       BambooTools.reportTestFinishedMessage(simulationTestingParameters.getShowWindows());
    }
 
+   @ContinuousIntegrationTest(estimatedDuration = 37.6)
+   @Test(timeout = 950000)
    public void testHeadYaw() throws SimulationExceededMaximumTimeException
    {
       BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
@@ -127,6 +135,8 @@ public abstract class DRCHeadTrajectoryBehaviorTest implements MultiRobotTestInt
       BambooTools.reportTestFinishedMessage(simulationTestingParameters.getShowWindows());
    }
 
+   @ContinuousIntegrationTest(estimatedDuration = 37.6)
+   @Test(timeout = 950000)
    public void testRandomOrientation() throws SimulationExceededMaximumTimeException
    {
       BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
@@ -161,8 +171,8 @@ public abstract class DRCHeadTrajectoryBehaviorTest implements MultiRobotTestInt
       boolean success = drcBehaviorTestHelper.simulateAndBlockAndCatchExceptions(1.0);
       assertTrue(success);
 
-      final HeadTrajectoryBehavior headTrajectoryBehavior = new HeadTrajectoryBehavior(drcBehaviorTestHelper.getBehaviorCommunicationBridge(),
-            drcBehaviorTestHelper.getYoTime());
+      final HeadTrajectoryBehavior headTrajectoryBehavior = new HeadTrajectoryBehavior(drcBehaviorTestHelper.getRobotName(),
+                                                                                       drcBehaviorTestHelper.getRos2Node(), drcBehaviorTestHelper.getYoTime());
 
       headTrajectoryBehavior.initialize();
       headTrajectoryBehavior.setInput(headTrajectoryMessage);
@@ -217,6 +227,7 @@ public abstract class DRCHeadTrajectoryBehaviorTest implements MultiRobotTestInt
 
          assertEquals(0.0, positionDistance, POSITION_THRESHOLD);
       }
-      assertEquals("Pose orientation error :" + orientationDistance + " exceeds threshold: " + ORIENTATION_THRESHOLD, 0.0, orientationDistance, ORIENTATION_THRESHOLD);
+      assertEquals("Pose orientation error :" + orientationDistance + " exceeds threshold: " + ORIENTATION_THRESHOLD, 0.0, orientationDistance,
+                   ORIENTATION_THRESHOLD);
    }
 }

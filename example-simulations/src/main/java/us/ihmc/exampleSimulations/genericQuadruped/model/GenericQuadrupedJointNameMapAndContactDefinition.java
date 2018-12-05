@@ -89,7 +89,7 @@ public class GenericQuadrupedJointNameMapAndContactDefinition implements Quadrup
       return quadrupedJointNameMap.values();
    }
 
-   private String getLegJointName(RobotQuadrant robotQuadrant, LegJointName legJointName)
+   public String getLegJointName(RobotQuadrant robotQuadrant, LegJointName legJointName)
    {
       return mapFromLegJointNameToJointId.get(robotQuadrant).get(legJointName);
    }

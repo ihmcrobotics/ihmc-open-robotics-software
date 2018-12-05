@@ -1,17 +1,16 @@
 # IHMC Open Robotics Software
 
-### 0.11 Build Info
-Build 4570
-https://bamboo.ihmc.us/browse/LIBS-IHMCOPENROBOTICSSOFTWARE-1067
+**Compile:** ![Compile](https://bamboo.ihmc.us/plugins/servlet/wittified/build-status/LIBS-IHMCOPENROBOTICSSOFTWARE)
+**Test (3000+ tests):** ![Test](https://bamboo.ihmc.us/plugins/servlet/wittified/build-status/LIBS-IHMCOPENROBOTICSSOFTWAREFAST)
+
+ [ ![Download](https://api.bintray.com/packages/ihmcrobotics/maven-release/atlas/images/download.svg?version=0.12.0) ](https://bintray.com/ihmcrobotics/maven-release/atlas/0.12.0/link) <-- Download from Bintray
 
 ### Tested Platforms
 
 #### Robots
 
 - Atlas
-   * This release is fully tested on Atlas hardware. See 0.11 Release Notes for detailed results.
-
-**This release DOES NOT support the Valkyrie hardware platform, as we do not have hardware to test on.**
+- Valkyrie
 
 #### Developers
 
@@ -48,16 +47,34 @@ repositories {
 ### Developing with *IHMC Open Robotics Software* from source
 
 #### Requirements
-*IHMC Open Robotics Software* uses the [Gradle](https://gradle.org) build system, and requires JDK 8 with JavaFX. We also strongly suggest an IDE, either Eclipse Mars.1
-or IntelliJ IDEA 2017.3+ (Ultimate or Community is fine). Currently, we require **Gradle 4.1+**. We provide a versioned [Gradle wrapper](https://docs.gradle.org/current/userguide/gradle_wrapper.html)
-for getting started quickly. The Gradle wrapper will always reflect the minimum version of Gradle required to build the software; if we adopt features only present
-in newer versions of Gradle as they are release we will update the wrapper. You can also install Gradle system-wide (local installation):
+*IHMC Open Robotics Software* uses the [Gradle](https://gradle.org) build system, and requires JDK 8 with JavaFX. We also strongly suggest an IDE, either Eclipse
+or IntelliJ (Ultimate or Community is fine). Currently, we require **Gradle 4.10+**.
 
 Installing Gradle: https://gradle.org/install/
 
+### Companion Software
+
+#### Other IHMC Libraries
+IHMC Open Robotics Software both depends on and is depended on by many other IHMC Robotics Libraries. A small sampling of our other software includes:
+
+- Simulation Construction Set, our own simulation environment with built-in analysis tools: https://github.com/ihmcrobotics/simulation-construction-set
+- Euclid, an alternative vector/geometry library for Java with support for additional structures common in 3D geometry without needing vecmath or Java3D: https://github.com/ihmcrobotics/euclid
+- Mecano, a rigid-body dynamics library built on top of Euclid and EJML: https://github.com/ihmcrobotics/mecano
+- IHMC YoVariables, our core data structures tools that enable the time-series tracing and analysis of Simulation Construction Set: https://github.com/ihmcrobotics/ihmc-yovariables
+- JOctoMap, a Java implementation of OctoMap: https://github.com/ihmcrobotics/joctomap
+- IHMC Realtime, a library for enabling soft real-time threading for Java on Linux using the RT_PREEMPT patches: https://github.com/ihmcrobotics/ihmc-realtime
+- IHMC EtherCAT Master, a Java library using IHMC Realtime and Simple Open EtherCAT Master (SOEM) that makes it simple to start a software EtherCAT Master and pure Java data structures that map to EtherCAT Slave defintions: https://github.com/ihmcrobotics/ihmc-ethercat-master
+
+You can find all of our other repositories as well as the ones above at https://github.com/ihmcrobotics
+
+#### ROS API's
+We provide a native ROS 2 API for many of the core components in our software stack. You can find the .msg definitions for use in your own projects here: https://github.com/ihmcrobotics/ihmc_interfaces
+
+We have ROS 1 support via the ROS 2 `ros1_bridge` package. You can find the ROS 1 message definitions and instructions on using the ROS 1 Bridge here: https://github.com/ihmcrobotics/ihmc_msgs
+
 #### IDE Support
-Our Gradle models are tested in IntelliJ IDEA 2017.3+ (both Community and Ultimate) with the Gradle plugin.
-Eclipse Oxygen+ or higher with the Buildship plugin. The Buildship plugin is bundled with the Eclipse IDE for Java Developers (but *not* Java EE Developers). It can always be manually installed to any version of Eclipse using the [installation instructions](https://github.com/eclipse/buildship/blob/master/docs/user/Installation.md).
+Our Gradle models are tested in IntelliJ IDEA 2018 (both Community and Ultimate) with the Gradle plugin.
+Eclipse 2018.09+ or higher with the Buildship plugin. The Buildship plugin is bundled with the Eclipse IDE for Java Developers (but *not* Java EE Developers). It can always be manually installed to any version of Eclipse using the [installation instructions](https://github.com/eclipse/buildship/blob/master/docs/user/Installation.md).
 
 #### Building .jars
 *IHMC Open Robotics Software* is pre-configured for generating Maven publications. You can publish directly from the source code right in to your local Maven
@@ -72,7 +89,7 @@ An example workflow for developing against a local clone of the software:
 **To publish jars to your local Maven repository:**  
 ```bash
 $ cd /path/to/ihmc-open-robotics-software
-$ ./gradlew compositeTask -PtaskName=publishToMavenLocal -PcompositeSearchHeight=0 -PpublishMode=LOCAL
+$ gradle publishAll -PcompositeSearchHeight=0
 ```
 
 **To depend on the jars in your local Maven repository:**
@@ -91,17 +108,24 @@ dependencies {
 }
 ```  
 
-#### Depending directly on the source
-For *IHMC Open Robotics Software* and [ihmc-build](https://github.com/ihmcrobotics/ihmc-build) to work correctly when depending directly on the source, your
+#### Creating a project
+To create a project that uses *IHMC Open Robotics Software*, your
 project hierarchy needs to take a particular form.
 
-1. In your system home folder (or C:/ drive in Windows), create a directory called `ihmc-workspace`.
-1. Initialize the `ihmc-workspace` directory as an IHMC repository group using the "Convert an existing project group" instructions in [this README] (https://github.com/ihmcrobotics/repository-group).
-1. This is also the directory where you'll put any of your own projects that need to depend
-on IHMC source code. Your directory structure should look something like:
+First be sure you have completed the section above titled "Clone repositories".
+
+Next, create your project folder:
 
 ```
-repository-group
+mkdir -p src/ihmc/my-project-a
+```
+
+Follow the project setup tutorial at https://github.com/ihmcrobotics/ihmc-build#quick-project-setup.
+
+Your directory structure should now look something like:
+
+```
+src/ihmc
 ├── my-project-a
 │   └── build.gradle
 │   └── gradle.properties
@@ -109,7 +133,6 @@ repository-group
 ├── my-project-b
 │   └── ...
 ├── ihmc-open-robotics-software
-│   └── acsell
 │   └── atlas
 │   └── common-walking-control-modules
 │   └── ...
@@ -124,25 +147,25 @@ repository-group
 └── settings.gradle
 ```
 
-If this is set up correctly, you can either [apply the `ihmc-build` plugin](https://github.com/ihmcrobotics/ihmc-build)
-and use the dependency resolver methods exposed by the build extension, or you can manually identify dependencies on projects using the normal Gradle syntax for
+If this is set up correctly, you will have applied the [`ihmc-build` plugin](https://github.com/ihmcrobotics/ihmc-build)
+and use the dependency resolver methods exposed by the build extension. Alternatively, you can manually identify dependencies on projects using the normal Gradle syntax for
 project dependencies. A sample build.gradle dependency block:
 
 ```gradle
+/* Normal Gradle way */
 dependencies {
-  compile project(':ihmc-open-robotics-software:ihmc-java-toolkit') // normal Gradle way of doing things
+  compile project(':ihmc-open-robotics-software:ihmc-java-toolkit')
+  testCompile project(':ihmc-open-robotics-software:ihmc-java-toolkit-test')
 }
 
-/* OR */
-
+/* ihmc-build way */
 mainDependencies {
-  compile group: "us.ihmc", name: "ihmc-java-toolkit", version: "source" // ihmc-build way of doing things
+  compile group: "us.ihmc", name: "ihmc-java-toolkit", version: "source"
+}
+testDependencies {
+  compile group: "us.ihmc", name: "ihmc-java-toolkit-test", version: "source"
 }
 ```
-
-## Support
-
-Chat support is provided via the [IHMC Robotics Slack](ihmcrobotics.slack.com) on the #help-desk channel.
 
 ## Maintainers
 

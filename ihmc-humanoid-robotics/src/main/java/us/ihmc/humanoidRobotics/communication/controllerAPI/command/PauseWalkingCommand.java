@@ -24,7 +24,7 @@ public class PauseWalkingCommand implements Command<PauseWalkingCommand, PauseWa
    }
 
    @Override
-   public void set(PauseWalkingMessage message)
+   public void setFromMessage(PauseWalkingMessage message)
    {
       isPauseRequested = message.getPause();
    }

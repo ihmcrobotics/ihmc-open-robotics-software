@@ -12,16 +12,17 @@ import us.ihmc.avatar.networkProcessor.stereoPointCloudPublisher.StereoVisionPoi
 import us.ihmc.avatar.ros.DRCROSPPSTimestampOffsetProvider;
 import us.ihmc.avatar.sensors.DRCSensorSuiteManager;
 import us.ihmc.avatar.sensors.multisense.MultiSenseSensorManager;
+import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.ControllerAPIDefinition;
 import us.ihmc.commons.thread.ThreadTools;
+import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.configuration.NetworkParameters;
 import us.ihmc.communication.net.ObjectCommunicator;
-import us.ihmc.communication.packetCommunicator.PacketCommunicator;
-import us.ihmc.communication.util.NetworkPorts;
-import us.ihmc.humanoidRobotics.kryo.IHMCCommunicationKryoNetClassList;
 import us.ihmc.ihmcPerception.camera.FisheyeCameraReceiver;
 import us.ihmc.ihmcPerception.camera.SCSCameraDataReceiver;
 import us.ihmc.ihmcPerception.depthData.CollisionBoxProvider;
+import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
 import us.ihmc.robotModels.FullHumanoidRobotModelFactory;
+import us.ihmc.ros2.Ros2Node;
 import us.ihmc.sensorProcessing.communication.producers.RobotConfigurationDataBuffer;
 import us.ihmc.sensorProcessing.parameters.DRCRobotCameraParameters;
 import us.ihmc.sensorProcessing.parameters.DRCRobotLidarParameters;
@@ -32,8 +33,7 @@ import us.ihmc.wholeBodyController.DRCRobotJointMap;
 
 public class AtlasSensorSuiteManager implements DRCSensorSuiteManager
 {
-   private final PacketCommunicator sensorSuitePacketCommunicator = PacketCommunicator.createIntraprocessPacketCommunicator(NetworkPorts.SENSOR_MANAGER,
-                                                                                                                            new IHMCCommunicationKryoNetClassList());
+   private final Ros2Node ros2Node = ROS2Tools.createRos2Node(PubSubImplementation.FAST_RTPS, "ihmc_atlas_sensor_suite_node");
 
    private final LidarScanPublisher lidarScanPublisher;
    private final StereoVisionPointCloudPublisher stereoVisionPointCloudPublisher;
@@ -43,10 +43,13 @@ public class AtlasSensorSuiteManager implements DRCSensorSuiteManager
    private final RobotConfigurationDataBuffer robotConfigurationDataBuffer;
    private final FullHumanoidRobotModelFactory modelFactory;
 
-   public AtlasSensorSuiteManager(FullHumanoidRobotModelFactory modelFactory, CollisionBoxProvider collisionBoxProvider,
+   private final String robotName;
+
+   public AtlasSensorSuiteManager(String robotName, FullHumanoidRobotModelFactory modelFactory, CollisionBoxProvider collisionBoxProvider,
                                   DRCROSPPSTimestampOffsetProvider ppsTimestampOffsetProvider, DRCRobotSensorInformation sensorInformation,
                                   DRCRobotJointMap jointMap, RobotPhysicalProperties physicalProperties, RobotTarget targetDeployment)
    {
+      this.robotName = robotName;
       this.ppsTimestampOffsetProvider = ppsTimestampOffsetProvider;
       this.sensorInformation = sensorInformation;
       this.robotConfigurationDataBuffer = new RobotConfigurationDataBuffer();
@@ -54,11 +57,12 @@ public class AtlasSensorSuiteManager implements DRCSensorSuiteManager
 
       DRCRobotLidarParameters multisenseLidarParameters = sensorInformation.getLidarParameters(AtlasSensorInformation.MULTISENSE_LIDAR_ID);
       String sensorName = multisenseLidarParameters.getSensorNameInSdf();
-      lidarScanPublisher = new LidarScanPublisher(sensorName, modelFactory, sensorSuitePacketCommunicator);
+      String rcdTopicName = ControllerAPIDefinition.getPublisherTopicNameGenerator(robotName).generateTopicName(RobotConfigurationData.class);
+      lidarScanPublisher = new LidarScanPublisher(sensorName, modelFactory, ros2Node, rcdTopicName);
       lidarScanPublisher.setPPSTimestampOffsetProvider(ppsTimestampOffsetProvider);
       lidarScanPublisher.setCollisionBoxProvider(collisionBoxProvider);
 
-      stereoVisionPointCloudPublisher = new StereoVisionPointCloudPublisher(modelFactory, sensorSuitePacketCommunicator);
+      stereoVisionPointCloudPublisher = new StereoVisionPointCloudPublisher(modelFactory, ros2Node, rcdTopicName);
       stereoVisionPointCloudPublisher.setPPSTimestampOffsetProvider(ppsTimestampOffsetProvider);
 
    }
@@ -66,11 +70,12 @@ public class AtlasSensorSuiteManager implements DRCSensorSuiteManager
    @Override
    public void initializeSimulatedSensors(ObjectCommunicator scsSensorsCommunicator)
    {
-      sensorSuitePacketCommunicator.attachListener(RobotConfigurationData.class, robotConfigurationDataBuffer);
+      ROS2Tools.createCallbackSubscription(ros2Node, RobotConfigurationData.class, ControllerAPIDefinition.getPublisherTopicNameGenerator(robotName),
+                                           s -> robotConfigurationDataBuffer.receivedPacket(s.takeNextData()));
 
       SCSCameraDataReceiver cameraDataReceiver = new SCSCameraDataReceiver(sensorInformation.getCameraParameters(0).getRobotSide(), modelFactory,
                                                                            sensorInformation.getCameraParameters(0).getSensorNameInSdf(),
-                                                                           robotConfigurationDataBuffer, scsSensorsCommunicator, sensorSuitePacketCommunicator,
+                                                                           robotConfigurationDataBuffer, scsSensorsCommunicator, ros2Node,
                                                                            ppsTimestampOffsetProvider);
       cameraDataReceiver.start();
 
@@ -85,7 +90,8 @@ public class AtlasSensorSuiteManager implements DRCSensorSuiteManager
       if (rosCoreURI == null)
          throw new RuntimeException(getClass().getSimpleName() + " Physical sensor requires rosURI to be set in " + NetworkParameters.defaultParameterFile);
 
-      sensorSuitePacketCommunicator.attachListener(RobotConfigurationData.class, robotConfigurationDataBuffer);
+      ROS2Tools.createCallbackSubscription(ros2Node, RobotConfigurationData.class, ControllerAPIDefinition.getPublisherTopicNameGenerator(robotName),
+                                           s -> robotConfigurationDataBuffer.receivedPacket(s.takeNextData()));
 
       RosMainNode rosMainNode = new RosMainNode(rosCoreURI, "atlas/sensorSuiteManager", true);
 
@@ -98,18 +104,18 @@ public class AtlasSensorSuiteManager implements DRCSensorSuiteManager
 
       stereoVisionPointCloudPublisher.receiveStereoPointCloudFromROS(multisenseStereoParameters.getRosTopic(), rosMainNode);
 
-      MultiSenseSensorManager multiSenseSensorManager = new MultiSenseSensorManager(modelFactory, robotConfigurationDataBuffer, rosMainNode,
-                                                                                    sensorSuitePacketCommunicator, ppsTimestampOffsetProvider,
-                                                                                    multisenseLeftEyeCameraParameters, multisenseLidarParameters,
-                                                                                    multisenseStereoParameters, sensorInformation.setupROSParameterSetters());
+      MultiSenseSensorManager multiSenseSensorManager = new MultiSenseSensorManager(modelFactory, robotConfigurationDataBuffer, rosMainNode, ros2Node,
+                                                                                    ppsTimestampOffsetProvider, multisenseLeftEyeCameraParameters,
+                                                                                    multisenseLidarParameters, multisenseStereoParameters,
+                                                                                    sensorInformation.setupROSParameterSetters());
 
       DRCRobotCameraParameters leftFishEyeCameraParameters = sensorInformation.getCameraParameters(AtlasSensorInformation.BLACKFLY_LEFT_CAMERA_ID);
       DRCRobotCameraParameters rightFishEyeCameraParameters = sensorInformation.getCameraParameters(AtlasSensorInformation.BLACKFLY_RIGHT_CAMERA_ID);
 
       FisheyeCameraReceiver leftFishEyeCameraReceiver = new FisheyeCameraReceiver(modelFactory, leftFishEyeCameraParameters, robotConfigurationDataBuffer,
-                                                                                  sensorSuitePacketCommunicator, ppsTimestampOffsetProvider, rosMainNode);
+                                                                                  ros2Node, ppsTimestampOffsetProvider, rosMainNode);
       FisheyeCameraReceiver rightFishEyeCameraReceiver = new FisheyeCameraReceiver(modelFactory, rightFishEyeCameraParameters, robotConfigurationDataBuffer,
-                                                                                   sensorSuitePacketCommunicator, ppsTimestampOffsetProvider, rosMainNode);
+                                                                                   ros2Node, ppsTimestampOffsetProvider, rosMainNode);
 
       leftFishEyeCameraReceiver.start();
       rightFishEyeCameraReceiver.start();
@@ -131,6 +137,5 @@ public class AtlasSensorSuiteManager implements DRCSensorSuiteManager
    @Override
    public void connect() throws IOException
    {
-      sensorSuitePacketCommunicator.connect();
    }
 }

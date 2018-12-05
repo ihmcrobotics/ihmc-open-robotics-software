@@ -1,9 +1,6 @@
 package us.ihmc.footstepPlanning.flatGroundPlanning;
 
-import org.junit.Test;
-
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations;
-import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.continuousIntegration.IntegrationCategory;
 import us.ihmc.footstepPlanning.FootstepPlanner;
 import us.ihmc.footstepPlanning.simplePlanners.TurnWalkTurnPlanner;
@@ -12,34 +9,13 @@ import us.ihmc.footstepPlanning.simplePlanners.TurnWalkTurnPlanner;
 public class TurnWalkTurnPlannerTest extends FootstepPlannerOnFlatGroundTest
 {
    private static final boolean visualize = false;
+   private static final boolean keepUp = false;
    private final TurnWalkTurnPlanner planner = new TurnWalkTurnPlanner();
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(timeout = 30000)
-   public void testJustStraightLine()
+   @Override
+   public boolean assertPlannerReturnedResult()
    {
-      super.testJustStraightLine();
-   }
-
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(timeout = 30000)
-   public void testStraightLineWithInitialTurn()
-   {
-      super.testStraightLineWithInitialTurn();
-   }
-
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(timeout = 30000)
-   public void testJustTurnInPlace()
-   {
-      super.testJustTurnInPlace();
-   }
-
-   @ContinuousIntegrationTest(estimatedDuration = 0.1)
-   @Test(timeout = 30000)
-   public void testRandomPoses()
-   {
-      super.testRandomPoses();
+      return true;
    }
 
    @Override
@@ -52,5 +28,11 @@ public class TurnWalkTurnPlannerTest extends FootstepPlannerOnFlatGroundTest
    public boolean visualize()
    {
       return visualize;
+   }
+
+   @Override
+   public boolean keepUp()
+   {
+      return keepUp;
    }
 }

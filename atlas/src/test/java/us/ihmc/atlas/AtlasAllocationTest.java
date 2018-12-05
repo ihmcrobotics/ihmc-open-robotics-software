@@ -1,6 +1,5 @@
 package us.ihmc.atlas;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
@@ -27,6 +26,9 @@ import us.ihmc.avatar.drcRobot.RobotTarget;
 import us.ihmc.avatar.testTools.DRCSimulationTestHelper;
 import us.ihmc.commons.PrintTools;
 import us.ihmc.commons.RandomNumbers;
+import us.ihmc.commons.allocations.AllocationProfiler;
+import us.ihmc.commons.allocations.AllocationRecord;
+import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.communication.controllerAPI.StatusMessageOutputManager;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
@@ -45,23 +47,25 @@ import us.ihmc.graphicsDescription.MeshDataGenerator;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.jMonkeyEngineToolkit.jme.JMEGraphicsObject;
+import us.ihmc.mecano.frames.MovingReferenceFrame;
+import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
+import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
+import us.ihmc.mecano.tools.JointStateType;
+import us.ihmc.mecano.tools.MultiBodySystemFactories;
+import us.ihmc.mecano.tools.MultiBodySystemRandomTools;
+import us.ihmc.mecano.tools.MultiBodySystemTools;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
-import us.ihmc.robotics.allocations.AllocationTest;
-import us.ihmc.robotics.lists.RecyclingArrayList;
 import us.ihmc.robotics.robotSide.RobotSide;
-import us.ihmc.robotics.screwTheory.MovingReferenceFrame;
-import us.ihmc.robotics.screwTheory.OneDoFJoint;
-import us.ihmc.robotics.screwTheory.RigidBody;
-import us.ihmc.robotics.screwTheory.ScrewTestTools;
 import us.ihmc.robotics.screwTheory.ScrewTools;
 import us.ihmc.simulationConstructionSetTools.bambooTools.BambooTools;
 import us.ihmc.simulationConstructionSetTools.util.environments.FlatGroundEnvironment;
 import us.ihmc.simulationconstructionset.dataBuffer.MirroredYoVariableRegistry;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
 import us.ihmc.simulationconstructionset.util.simulationTesting.SimulationTestingParameters;
+import us.ihmc.tools.MemoryTools;
 import us.ihmc.wholeBodyController.DRCControllerThread;
 
-public class AtlasAllocationTest implements AllocationTest
+public class AtlasAllocationTest
 {
    private static final SimulationTestingParameters simulationTestingParameters = SimulationTestingParameters.createFromSystemProperties();
    static
@@ -71,6 +75,40 @@ public class AtlasAllocationTest implements AllocationTest
    }
 
    private DRCSimulationTestHelper testHelper;
+   private AllocationProfiler allocationProfiler = new AllocationProfiler();
+   
+   @Before
+   public void before() throws SimulationExceededMaximumTimeException
+   {
+      MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " before test.");
+      
+      AllocationProfiler.checkInstrumentation();
+      
+      allocationProfiler.includeAllocationsInsideClass(DRCControllerThread.class.getName()); // only testing these classes!
+      allocationProfiler.includeAllocationsInsideClass(DRCEstimatorThread.class.getName()); // only testing these classes!
+      allocationProfiler.excludeAllocationsInsideClass(MirroredYoVariableRegistry.class.getName());
+      allocationProfiler.excludeAllocationsInsideClass(MeshDataGenerator.class.getName());
+      allocationProfiler.excludeAllocationsInsideClass(JMEGraphicsObject.class.getName());
+      allocationProfiler.excludeAllocationsInsideClass(StatusMessageOutputManager.class.getName()); // fix this
+
+      // These methods are "safe" as they will only allocate to increase their capacity.
+      allocationProfiler.excludeAllocationsInsideMethod(DenseMatrix64F.class.getName() + ".reshape");
+      allocationProfiler.excludeAllocationsInsideMethod(TIntArrayList.class.getName() + ".ensureCapacity");
+      allocationProfiler.excludeAllocationsInsideMethod(ConvexPolygon2D.class.getName() + ".setOrCreate");
+      allocationProfiler.excludeAllocationsInsideMethod(FrameConvexPolygon2D.class.getName() + ".setOrCreate");
+      allocationProfiler.excludeAllocationsInsideMethod(RecyclingArrayList.class.getName() + ".ensureCapacity");
+      allocationProfiler.excludeAllocationsInsideMethod(LUDecompositionBase_D64.class.getName() + ".decomposeCommonInit");
+      allocationProfiler.excludeAllocationsInsideMethod(CholeskyDecompositionCommon_D64.class.getName() + ".decompose");
+      allocationProfiler.excludeAllocationsInsideMethod(BidiagonalDecompositionRow_D64.class.getName() + ".init");
+
+      // Ignore the following methods as they are related to printouts.
+      allocationProfiler.excludeAllocationsInsideMethod(Throwable.class.getName() + ".printStackTrace");
+      allocationProfiler.excludeAllocationsInsideMethod(PrintTools.class.getName() + ".print");
+      
+      BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
+
+      setup();
+   }
 
    @ContinuousIntegrationTest(estimatedDuration = 300.0, categoriesOverride = {IntegrationCategory.SLOW})
    @Test(timeout = 600000)
@@ -89,14 +127,14 @@ public class AtlasAllocationTest implements AllocationTest
    }
 
    @ContinuousIntegrationTest(estimatedDuration = 300.0, categoriesOverride = {IntegrationCategory.SLOW})
-   @Test(timeout = 600000)
+   @Test(timeout = 900000)
    public void testForAllocationsWalking() throws SimulationExceededMaximumTimeException
    {
       double defaultSwingDuration = 0.5;
       double defaultTransferDuration = 0.1;
 
       int warmupSteps = 4;
-      testHelper.send(createFootsteps(warmupSteps, defaultSwingDuration, defaultTransferDuration, 0.0, 0.0));
+      testHelper.publishToController(createFootsteps(warmupSteps, defaultSwingDuration, defaultTransferDuration, 0.0, 0.0));
       testHelper.simulateAndBlockAndCatchExceptions(3.0);
 
       int steps = 4;
@@ -105,7 +143,7 @@ public class AtlasAllocationTest implements AllocationTest
       testInternal(() -> {
          try
          {
-            testHelper.send(footsteps);
+            testHelper.publishToController(footsteps);
             testHelper.simulateAndBlockAndCatchExceptions(4.0);
          }
          catch (SimulationExceededMaximumTimeException e)
@@ -130,7 +168,7 @@ public class AtlasAllocationTest implements AllocationTest
       testInternal(() -> {
          try
          {
-            testHelper.send(message);
+            testHelper.publishToController(message);
             testHelper.simulateAndBlockAndCatchExceptions(duration + 0.25);
          }
          catch (SimulationExceededMaximumTimeException e)
@@ -156,7 +194,7 @@ public class AtlasAllocationTest implements AllocationTest
       testInternal(() -> {
          try
          {
-            testHelper.send(message);
+            testHelper.publishToController(message);
             testHelper.simulateAndBlockAndCatchExceptions(duration + 0.25);
          }
          catch (SimulationExceededMaximumTimeException e)
@@ -177,7 +215,7 @@ public class AtlasAllocationTest implements AllocationTest
       testInternal(() -> {
          try
          {
-            testHelper.send(message);
+            testHelper.publishToController(message);
             testHelper.simulateAndBlockAndCatchExceptions(duration + 0.25);
          }
          catch (SimulationExceededMaximumTimeException e)
@@ -198,7 +236,7 @@ public class AtlasAllocationTest implements AllocationTest
       testInternal(() -> {
          try
          {
-            testHelper.send(message);
+            testHelper.publishToController(message);
             testHelper.simulateAndBlockAndCatchExceptions(duration + 0.25);
          }
          catch (SimulationExceededMaximumTimeException e)
@@ -215,11 +253,11 @@ public class AtlasAllocationTest implements AllocationTest
       ReferenceFrame pelvisZUpFrame = humanoidReferenceFrames.getPelvisZUpFrame();
       humanoidReferenceFrames.updateFrames();
 
-      RigidBody pelvis = fullRobotModel.getPelvis();
-      RigidBody chest = fullRobotModel.getChest();
-      OneDoFJoint[] spineClone = ScrewTools.cloneOneDoFJointPath(pelvis, chest);
-      ScrewTestTools.setRandomPositionsWithinJointLimits(spineClone, random);
-      RigidBody chestClone = spineClone[spineClone.length - 1].getSuccessor();
+      RigidBodyBasics pelvis = fullRobotModel.getPelvis();
+      RigidBodyBasics chest = fullRobotModel.getChest();
+      OneDoFJointBasics[] spineClone = MultiBodySystemFactories.cloneOneDoFJointKinematicChain(pelvis, chest);
+      MultiBodySystemRandomTools.nextStateWithinJointLimits(random, JointStateType.CONFIGURATION, spineClone);
+      RigidBodyBasics chestClone = spineClone[spineClone.length - 1].getSuccessor();
       FrameQuaternion desiredRandomChestOrientation = new FrameQuaternion(chestClone.getBodyFixedFrame());
       desiredRandomChestOrientation.changeFrame(ReferenceFrame.getWorldFrame());
 
@@ -232,13 +270,13 @@ public class AtlasAllocationTest implements AllocationTest
    private ArmTrajectoryMessage createArmTrajectory(Random random, double duration)
    {
       FullHumanoidRobotModel fullRobotModel = testHelper.getControllerFullRobotModel();
-      RigidBody chest = fullRobotModel.getChest();
-      RigidBody hand = fullRobotModel.getHand(RobotSide.LEFT);
-      OneDoFJoint[] armJoints = ScrewTools.createOneDoFJointPath(chest, hand);
+      RigidBodyBasics chest = fullRobotModel.getChest();
+      RigidBodyBasics hand = fullRobotModel.getHand(RobotSide.LEFT);
+      OneDoFJointBasics[] armJoints = MultiBodySystemTools.createOneDoFJointPath(chest, hand);
       double[] desiredJointPositions = new double[armJoints.length];
       for (int i = 0; i < armJoints.length; i++)
       {
-         OneDoFJoint joint = armJoints[i];
+         OneDoFJointBasics joint = armJoints[i];
          desiredJointPositions[i] = RandomNumbers.nextDouble(random, joint.getJointLimitLower(), joint.getJointLimitUpper());
       }
       ArmTrajectoryMessage message = HumanoidMessageTools.createArmTrajectoryMessage(RobotSide.LEFT, duration, desiredJointPositions);
@@ -247,7 +285,7 @@ public class AtlasAllocationTest implements AllocationTest
 
    private PelvisTrajectoryMessage createPelvisTrajectory(Random random, double minMax, double timeStep, double duration)
    {
-      RigidBody pelvis = testHelper.getControllerFullRobotModel().getPelvis();
+      RigidBodyBasics pelvis = testHelper.getControllerFullRobotModel().getPelvis();
       MovingReferenceFrame pelvisFrame = pelvis.getParentJoint().getFrameAfterJoint();
       SE3TrajectoryMessage trajectory = new SE3TrajectoryMessage();
       for (double time = 0.0; time <= duration; time += timeStep)
@@ -299,70 +337,13 @@ public class AtlasAllocationTest implements AllocationTest
 
    private void testInternal(Runnable whatToTestFor)
    {
-      List<Throwable> allocations = runAndCollectAllocations(whatToTestFor);
+      List<AllocationRecord> allocations = allocationProfiler.recordAllocations(whatToTestFor);
 
       if (!allocations.isEmpty())
       {
-         allocations.forEach(allocation -> allocation.printStackTrace());
+         allocations.forEach(allocation -> System.out.println(allocation));
          Assert.fail("Found allocations in the controller.");
       }
-   }
-
-   @Override
-   public List<Class<?>> getClassesOfInterest()
-   {
-      List<Class<?>> classesOfInterest = new ArrayList<>();
-      classesOfInterest.add(DRCControllerThread.class);
-      classesOfInterest.add(DRCEstimatorThread.class);
-      return classesOfInterest;
-   }
-
-   @Override
-   public List<Class<?>> getClassesToIgnore()
-   {
-      List<Class<?>> classesToIgnore = new ArrayList<>();
-
-      // These are places specific to the simulation and will not show up on the real robot.
-      classesToIgnore.add(MirroredYoVariableRegistry.class);
-      classesToIgnore.add(MeshDataGenerator.class);
-      classesToIgnore.add(JMEGraphicsObject.class);
-
-      // TODO: fix these!
-      classesToIgnore.add(StatusMessageOutputManager.class);
-
-      return classesToIgnore;
-   }
-
-   @Override
-   public List<String> getMethodsToIgnore()
-   {
-      List<String> methodsToIgnore = new ArrayList<>();
-
-      // These methods are "safe" as they will only allocate to increase their capacity.
-      methodsToIgnore.add(DenseMatrix64F.class.getName() + ".reshape");
-      methodsToIgnore.add(TIntArrayList.class.getName() + ".ensureCapacity");
-      methodsToIgnore.add(ConvexPolygon2D.class.getName() + ".setOrCreate");
-      methodsToIgnore.add(FrameConvexPolygon2D.class.getName() + ".setOrCreate");
-      methodsToIgnore.add(RecyclingArrayList.class.getName() + ".ensureCapacity");
-      methodsToIgnore.add(LUDecompositionBase_D64.class.getName() + ".decomposeCommonInit");
-      methodsToIgnore.add(CholeskyDecompositionCommon_D64.class.getName() + ".decompose");
-      methodsToIgnore.add(BidiagonalDecompositionRow_D64.class.getName() + ".init");
-
-      // Ignore the following methods as they are related to printouts.
-      methodsToIgnore.add(Throwable.class.getName() + ".printStackTrace");
-      methodsToIgnore.add(PrintTools.class.getName() + ".print");
-
-      return methodsToIgnore;
-   }
-
-   @Before
-   public void before() throws SimulationExceededMaximumTimeException
-   {
-      AllocationTest.checkInstrumentation();
-
-      BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
-
-      setup();
    }
 
    @After

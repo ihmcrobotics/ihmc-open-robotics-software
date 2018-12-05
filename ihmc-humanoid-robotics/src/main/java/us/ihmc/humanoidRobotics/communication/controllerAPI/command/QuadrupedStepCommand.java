@@ -28,7 +28,7 @@ public class QuadrupedStepCommand implements Command<QuadrupedStepCommand, Quadr
    }
 
    @Override
-   public void set(QuadrupedStepMessage message)
+   public void setFromMessage(QuadrupedStepMessage message)
    {
       robotQuadrant = RobotQuadrant.fromByte(message.getRobotQuadrant());
       groundClearance = message.getGroundClearance();

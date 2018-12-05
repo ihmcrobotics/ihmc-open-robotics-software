@@ -4,6 +4,7 @@ import us.ihmc.footstepPlanning.FootstepPlanner;
 
 public interface PlanningTest
 {
-   abstract public FootstepPlanner getPlanner();
-   abstract public boolean visualize();
+   FootstepPlanner getPlanner();
+   boolean visualize();
+   boolean keepUp();
 }

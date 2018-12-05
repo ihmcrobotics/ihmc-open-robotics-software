@@ -1,43 +1,54 @@
 package us.ihmc.quadrupedRobotics.simulation;
 
+import us.ihmc.commonWalkingControlModules.configurations.HighLevelControllerParameters;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.ContactableBodiesFactory;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.ControllerCoreOptimizationSettings;
 import us.ihmc.commons.PrintTools;
+import us.ihmc.communication.ROS2Tools;
+import us.ihmc.communication.ROS2Tools.MessageTopicNameGenerator;
 import us.ihmc.communication.net.NetClassList;
 import us.ihmc.communication.packetCommunicator.PacketCommunicator;
-import us.ihmc.communication.streamingData.GlobalDataProducer;
 import us.ihmc.communication.util.NetworkPorts;
+import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
-import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
-import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
+import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelControllerName;
+import us.ihmc.humanoidRobotics.communication.subscribers.StateEstimatorModeSubscriber;
 import us.ihmc.jMonkeyEngineToolkit.GroundProfile3D;
-import us.ihmc.quadrupedRobotics.communication.QuadrupedGlobalDataProducer;
+import us.ihmc.jMonkeyEngineToolkit.camera.CameraConfiguration;
+import us.ihmc.mecano.multiBodySystem.interfaces.FloatingJointBasics;
+import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
+import us.ihmc.quadrupedRobotics.communication.QuadrupedControllerAPIDefinition;
 import us.ihmc.quadrupedRobotics.controller.QuadrupedControlMode;
-import us.ihmc.quadrupedRobotics.controller.QuadrupedControllerEnum;
 import us.ihmc.quadrupedRobotics.controller.QuadrupedControllerManager;
 import us.ihmc.quadrupedRobotics.controller.QuadrupedSimulationController;
-import us.ihmc.quadrupedRobotics.controller.states.QuadrupedPositionBasedCrawlControllerParameters;
+import us.ihmc.quadrupedRobotics.parameters.QuadrupedPositionBasedCrawlControllerParameters;
+import us.ihmc.quadrupedRobotics.parameters.QuadrupedPrivilegedConfigurationParameters;
+import us.ihmc.quadrupedRobotics.parameters.QuadrupedSitDownParameters;
 import us.ihmc.quadrupedRobotics.estimator.SimulatedQuadrupedFootSwitchFactory;
 import us.ihmc.quadrupedRobotics.estimator.referenceFrames.QuadrupedReferenceFrames;
 import us.ihmc.quadrupedRobotics.estimator.sensorProcessing.simulatedSensors.SDFQuadrupedPerfectSimulatedSensor;
 import us.ihmc.quadrupedRobotics.estimator.stateEstimator.QuadrupedSensorInformation;
+import us.ihmc.quadrupedRobotics.estimator.stateEstimator.QuadrupedSensorReaderWrapper;
 import us.ihmc.quadrupedRobotics.estimator.stateEstimator.QuadrupedStateEstimatorFactory;
-import us.ihmc.quadrupedRobotics.factories.QuadrupedRobotControllerFactory;
 import us.ihmc.quadrupedRobotics.mechanics.inverseKinematics.QuadrupedInverseKinematicsCalculators;
 import us.ihmc.quadrupedRobotics.mechanics.inverseKinematics.QuadrupedLegInverseKinematicsCalculator;
 import us.ihmc.quadrupedRobotics.model.*;
+import us.ihmc.robotDataLogger.YoVariableServer;
+import us.ihmc.robotDataLogger.logger.LogSettings;
 import us.ihmc.robotModels.FullQuadrupedRobotModel;
 import us.ihmc.robotModels.OutputWriter;
+import us.ihmc.robotics.contactable.ContactablePlaneBody;
 import us.ihmc.robotics.partNames.QuadrupedJointName;
 import us.ihmc.robotics.robotSide.QuadrantDependentList;
 import us.ihmc.robotics.robotSide.RobotQuadrant;
-import us.ihmc.robotics.screwTheory.FloatingInverseDynamicsJoint;
+import us.ihmc.robotics.sensors.CenterOfMassDataHolder;
 import us.ihmc.robotics.sensors.ContactSensorHolder;
 import us.ihmc.robotics.sensors.FootSwitchInterface;
 import us.ihmc.robotics.sensors.ForceSensorDefinition;
 import us.ihmc.robotics.sensors.IMUDefinition;
+import us.ihmc.ros2.RealtimeRos2Node;
 import us.ihmc.sensorProcessing.communication.producers.DRCPoseCommunicator;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutputList;
 import us.ihmc.sensorProcessing.sensorData.JointConfigurationGatherer;
@@ -56,13 +67,13 @@ import us.ihmc.simulationconstructionset.gui.tools.SimulationOverheadPlotterFact
 import us.ihmc.simulationconstructionset.util.LinearGroundContactModel;
 import us.ihmc.simulationconstructionset.util.RobotController;
 import us.ihmc.simulationconstructionset.util.ground.*;
-import us.ihmc.stateEstimation.humanoid.kinematicsBasedStateEstimation.DRCKinematicsBasedStateEstimator;
+import us.ihmc.stateEstimation.humanoid.StateEstimatorController;
 import us.ihmc.tools.factories.FactoryTools;
 import us.ihmc.tools.factories.OptionalFactoryField;
 import us.ihmc.tools.factories.RequiredFactoryField;
-import us.ihmc.util.PeriodicNonRealtimeThreadScheduler;
-import us.ihmc.util.PeriodicThreadScheduler;
+import us.ihmc.util.PeriodicNonRealtimeThreadSchedulerFactory;
 import us.ihmc.wholeBodyController.parameters.ParameterLoaderHelper;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -73,8 +84,7 @@ import java.util.List;
 public class QuadrupedSimulationFactory
 {
    private final RequiredFactoryField<FullQuadrupedRobotModel> fullRobotModel = new RequiredFactoryField<>("fullRobotModel");
-   private final RequiredFactoryField<ControllerCoreOptimizationSettings> controllerCoreOptimizationSettings = new RequiredFactoryField<>(
-         "controllerCoreOptimizationSettings");
+   private final RequiredFactoryField<ControllerCoreOptimizationSettings> controllerCoreOptimizationSettings = new RequiredFactoryField<>("controllerCoreOptimizationSettings");
    private final RequiredFactoryField<QuadrupedPhysicalProperties> physicalProperties = new RequiredFactoryField<>("physicalProperties");
    private final RequiredFactoryField<QuadrupedControlMode> controlMode = new RequiredFactoryField<>("controlMode");
    private final RequiredFactoryField<FloatingRootJointRobot> sdfRobot = new RequiredFactoryField<>("sdfRobot");
@@ -91,38 +101,42 @@ public class QuadrupedSimulationFactory
    private final RequiredFactoryField<QuadrupedInitialOffsetAndYaw> initialOffset = new RequiredFactoryField<>("initialOffset");
    private final RequiredFactoryField<OutputWriter> outputWriter = new RequiredFactoryField<>("outputWriter");
    private final RequiredFactoryField<Boolean> useNetworking = new RequiredFactoryField<>("useNetworking");
-   private final RequiredFactoryField<NetClassList> netClassList = new RequiredFactoryField<>("netClassList");
    private final RequiredFactoryField<SensorTimestampHolder> timestampProvider = new RequiredFactoryField<>("timestampProvider");
    private final RequiredFactoryField<Boolean> useStateEstimator = new RequiredFactoryField<>("useStateEstimator");
    private final RequiredFactoryField<QuadrupedSensorInformation> sensorInformation = new RequiredFactoryField<>("sensorInformation");
    private final RequiredFactoryField<StateEstimatorParameters> stateEstimatorParameters = new RequiredFactoryField<>("stateEstimatorParameters");
    private final RequiredFactoryField<QuadrupedReferenceFrames> referenceFrames = new RequiredFactoryField<>("referenceFrames");
-   private final RequiredFactoryField<QuadrupedPositionBasedCrawlControllerParameters> positionBasedCrawlControllerParameters = new RequiredFactoryField<>(
-         "positionBasedCrawlControllerParameters");
+   private final RequiredFactoryField<QuadrupedPositionBasedCrawlControllerParameters> positionBasedCrawlControllerParameters = new RequiredFactoryField<>("positionBasedCrawlControllerParameters");
    private final RequiredFactoryField<JointDesiredOutputList> jointDesiredOutputList = new RequiredFactoryField<>("jointDesiredOutputList");
+   private final RequiredFactoryField<HighLevelControllerParameters> highLevelControllerParameters = new RequiredFactoryField<>("highLevelControllerParameters");
+   private final RequiredFactoryField<QuadrupedSitDownParameters> sitDownParameters = new RequiredFactoryField<>("sitDownParameters");
+   private final RequiredFactoryField<QuadrupedPrivilegedConfigurationParameters> privilegedConfigurationParameters = new RequiredFactoryField<>("privilegedConfigurationParameters");
 
-   private final OptionalFactoryField<SimulatedElasticityParameters> simulatedElasticityParameters = new OptionalFactoryField<>(
-         "simulatedElasticityParameters");
+   private final OptionalFactoryField<SimulatedElasticityParameters> simulatedElasticityParameters = new OptionalFactoryField<>("simulatedElasticityParameters");
    private final OptionalFactoryField<QuadrupedGroundContactModelType> groundContactModelType = new OptionalFactoryField<>("groundContactModelType");
-   private final OptionalFactoryField<QuadrupedRobotControllerFactory> headControllerFactory = new OptionalFactoryField<>("headControllerFactory");
    private final OptionalFactoryField<GroundProfile3D> providedGroundProfile3D = new OptionalFactoryField<>("providedGroundProfile3D");
    private final OptionalFactoryField<TerrainObject3D> providedTerrainObject3D = new OptionalFactoryField<>("providedTerrainObject3D");
    private final OptionalFactoryField<Boolean> usePushRobotController = new OptionalFactoryField<>("usePushRobotController");
    private final OptionalFactoryField<FootSwitchType> footSwitchType = new OptionalFactoryField<>("footSwitchType");
+   private final OptionalFactoryField<QuadrantDependentList<Double>> kneeTorqueTouchdownDetectionThreshold = new OptionalFactoryField<>("kneeTorqueTouchdownDetectionThreshold");
    private final OptionalFactoryField<Integer> scsBufferSize = new OptionalFactoryField<>("scsBufferSize");
-   private final OptionalFactoryField<QuadrupedControllerEnum> initialForceControlState = new OptionalFactoryField<>("initialForceControlState");
+   private final OptionalFactoryField<HighLevelControllerName> initialForceControlState = new OptionalFactoryField<>("initialForceControlState");
    private final OptionalFactoryField<Boolean> useLocalCommunicator = new OptionalFactoryField<>("useLocalCommunicator");
+   private final OptionalFactoryField<Boolean> createYoVariableServer = new OptionalFactoryField<>("createYoVariableServer");
+
 
    // TO CONSTRUCT
+   private YoVariableRegistry factoryRegistry;
    private YoGraphicsListRegistry yoGraphicsListRegistry;
    private YoGraphicsListRegistry yoGraphicsListRegistryForDetachedOverhead;
+   private QuadrupedSensorReaderWrapper sensorReaderWrapper;
    private SensorReader sensorReader;
    private QuadrantDependentList<ContactablePlaneBody> contactableFeet;
    private List<ContactablePlaneBody> contactablePlaneBodies;
    private QuadrantDependentList<FootSwitchInterface> footSwitches;
-   private DRCKinematicsBasedStateEstimator stateEstimator;
-   private PacketCommunicator packetCommunicator;
-   private GlobalDataProducer globalDataProducer;
+   private StateEstimatorController stateEstimator;
+   private CenterOfMassDataHolder centerOfMassDataHolder = null;
+   private RealtimeRos2Node realtimeRos2Node;
    private RobotController headController;
    private QuadrupedControllerManager controllerManager;
    private DRCPoseCommunicator poseCommunicator;
@@ -130,10 +144,15 @@ public class QuadrupedSimulationFactory
    private LinearGroundContactModel groundContactModel;
    private QuadrupedSimulationController simulationController;
    private QuadrupedLegInverseKinematicsCalculator legInverseKinematicsCalculator;
+   private List<CameraConfiguration> cameraConfigurations = new ArrayList<>();
+   private YoVariableServer yoVariableServer;
+   private StateEstimatorModeSubscriber stateEstimatorModeSubscriber = new StateEstimatorModeSubscriber();
 
    /**
-    * The PacketCommunicator used as input of the controller is either equal to the output PacketCommunicator of the network processor or the behavior module if any.
-    * It is bidirectional meaning that it carries commands to be executed by the controller and that the controller is able to send feedback the other way to whoever is listening to the PacketCommunicator.
+    * The PacketCommunicator used as input of the controller is either equal to the output
+    * PacketCommunicator of the network processor or the behavior module if any. It is bidirectional
+    * meaning that it carries commands to be executed by the controller and that the controller is
+    * able to send feedback the other way to whoever is listening to the PacketCommunicator.
     */
    private PacketCommunicator controllerPacketCommunicator;
 
@@ -141,6 +160,7 @@ public class QuadrupedSimulationFactory
 
    private void setupYoRegistries()
    {
+      factoryRegistry = new YoVariableRegistry("factoryRegistry");
       yoGraphicsListRegistry = new YoGraphicsListRegistry();
       yoGraphicsListRegistry.setYoGraphicsUpdatedRemotely(true);
       yoGraphicsListRegistryForDetachedOverhead = new YoGraphicsListRegistry();
@@ -153,13 +173,13 @@ public class QuadrupedSimulationFactory
          FloatingRootJointRobot pushableRobot = sdfRobot.get();
          String rootJointName = pushableRobot.getRootJoint().getName();
 
-         PushRobotController bodyPushRobotController = new PushRobotController(pushableRobot, rootJointName, new Vector3D(0.0, -0.00057633, 0.0383928));
+         PushRobotController bodyPushRobotController = new PushRobotController(pushableRobot, rootJointName, new Vector3D(0.0, -0.00057633, 0.0383928), 0.01);
          yoGraphicsListRegistry.registerYoGraphic("PushRobotControllers", bodyPushRobotController.getForceVisualizer());
 
          for (QuadrupedJointName quadrupedJointName : modelFactory.get().getQuadrupedJointNames())
          {
             String jointName = modelFactory.get().getSDFNameForJointName(quadrupedJointName);
-            PushRobotController jointPushRobotController = new PushRobotController(sdfRobot.get(), jointName, new Vector3D(0.0, 0.0, 0.0));
+            PushRobotController jointPushRobotController = new PushRobotController(sdfRobot.get(), jointName, new Vector3D(0.0, 0.0, 0.0), 0.01);
             yoGraphicsListRegistry.registerYoGraphic("PushRobotControllers", jointPushRobotController.getForceVisualizer());
          }
       }
@@ -167,10 +187,10 @@ public class QuadrupedSimulationFactory
 
    private void createSensorReader()
    {
+      SensorReader sensorReader;
       if (useStateEstimator.get())
       {
-
-         FloatingInverseDynamicsJoint rootInverseDynamicsJoint = fullRobotModel.get().getRootJoint();
+         FloatingJointBasics rootInverseDynamicsJoint = fullRobotModel.get().getRootJoint();
          IMUDefinition[] imuDefinitions = fullRobotModel.get().getIMUDefinitions();
          ForceSensorDefinition[] forceSensorDefinitions = fullRobotModel.get().getForceSensorDefinitions();
          ContactSensorHolder contactSensorHolder = null;
@@ -180,13 +200,23 @@ public class QuadrupedSimulationFactory
          SimulatedSensorHolderAndReaderFromRobotFactory sensorReaderFactory;
          sensorReaderFactory = new SimulatedSensorHolderAndReaderFromRobotFactory(sdfRobot.get(), stateEstimatorParameters.get());
          sensorReaderFactory.build(rootInverseDynamicsJoint, imuDefinitions, forceSensorDefinitions, contactSensorHolder, rawJointSensorDataHolderMap,
-                                   estimatorDesiredJointDataHolder, sdfRobot.get().getRobotsYoVariableRegistry());
+                                   estimatorDesiredJointDataHolder, factoryRegistry);
 
          sensorReader = sensorReaderFactory.getSensorReader();
       }
       else
       {
          sensorReader = new SDFQuadrupedPerfectSimulatedSensor(sdfRobot.get(), fullRobotModel.get(), referenceFrames.get());
+      }
+
+      if (this.sensorReaderWrapper != null)
+      {
+         this.sensorReaderWrapper.setSensorReader(sensorReader);
+         this.sensorReader = sensorReaderWrapper;
+      }
+      else
+      {
+         this.sensorReader = sensorReader;
       }
    }
 
@@ -216,6 +246,8 @@ public class QuadrupedSimulationFactory
       footSwitchFactory.setSimulatedRobot(sdfRobot.get());
       footSwitchFactory.setYoVariableRegistry(sdfRobot.get().getRobotsYoVariableRegistry());
       footSwitchFactory.setFootSwitchType(footSwitchType.get());
+      footSwitchFactory.setKneeTouchdownThresholds(kneeTorqueTouchdownDetectionThreshold.get());
+
       footSwitches = footSwitchFactory.createFootSwitches();
    }
 
@@ -223,6 +255,8 @@ public class QuadrupedSimulationFactory
    {
       if (useStateEstimator.get())
       {
+         centerOfMassDataHolder = new CenterOfMassDataHolder();
+
          QuadrupedStateEstimatorFactory stateEstimatorFactory = new QuadrupedStateEstimatorFactory();
          stateEstimatorFactory.setEstimatorDT(controlDT.get());
          stateEstimatorFactory.setFootContactableBodies(contactableFeet);
@@ -232,9 +266,11 @@ public class QuadrupedSimulationFactory
          stateEstimatorFactory.setSensorInformation(sensorInformation.get());
          stateEstimatorFactory.setSensorOutputMapReadOnly(sensorReader.getSensorOutputMapReadOnly());
          stateEstimatorFactory.setStateEstimatorParameters(stateEstimatorParameters.get());
+         stateEstimatorFactory.setCenterOfMassDataHolder(centerOfMassDataHolder);
          stateEstimatorFactory.setYoGraphicsListRegistry(yoGraphicsListRegistry);
-         stateEstimatorFactory.setYoVariableRegistry(sdfRobot.get().getRobotsYoVariableRegistry());
+         stateEstimatorFactory.setStateEstimatorModeSubscriber(stateEstimatorModeSubscriber);
          stateEstimator = stateEstimatorFactory.createStateEstimator();
+         factoryRegistry.addChild(stateEstimator.getYoVariableRegistry());
       }
       else
       {
@@ -242,49 +278,20 @@ public class QuadrupedSimulationFactory
       }
    }
 
-   private void createPacketCommunicator() throws IOException
+   private void setupYoVariableServer()
    {
-      if (useNetworking.get())
+      if (createYoVariableServer.get())
       {
-         try
-         {
-            if (useLocalCommunicator.get())
-            {
-               packetCommunicator = PacketCommunicator.createIntraprocessPacketCommunicator(NetworkPorts.CONTROLLER_PORT, netClassList.get());
-            }
-            else
-            {
-               packetCommunicator = PacketCommunicator.createTCPPacketCommunicatorServer(NetworkPorts.CONTROLLER_PORT, netClassList.get());
-            }
-
-            packetCommunicator.connect();
-         }
-         catch (BindException bindException)
-         {
-            PrintTools.error(this, bindException.getMessage());
-            PrintTools.warn(this, "Continuing without networking");
-            useNetworking.set(false);
-         }
+         yoVariableServer = new YoVariableServer(getClass(), new PeriodicNonRealtimeThreadSchedulerFactory(), null, LogSettings.SIMULATION, controlDT.get());
       }
    }
 
-   private void createGlobalDataProducer()
+   private void createRealtimeRos2Node()
    {
       if (useNetworking.get())
       {
-         globalDataProducer = new QuadrupedGlobalDataProducer(packetCommunicator);
-      }
-   }
-
-   private void createHeadController()
-   {
-      if (headControllerFactory.hasValue())
-      {
-         headControllerFactory.get().setControlDt(controlDT.get());
-         headControllerFactory.get().setFullRobotModel(fullRobotModel.get());
-         headControllerFactory.get().setGlobalDataProducer(globalDataProducer);
-
-         headController = headControllerFactory.get().createRobotController();
+         PubSubImplementation pubSubImplementation = useLocalCommunicator.get() ? PubSubImplementation.INTRAPROCESS : PubSubImplementation.FAST_RTPS;
+         realtimeRos2Node = ROS2Tools.createRealtimeRos2Node(pubSubImplementation, "ihmc_quadruped_simulation");
       }
    }
 
@@ -298,35 +305,27 @@ public class QuadrupedSimulationFactory
       }
    }
 
-   public void createControllerManager() throws IOException
+   public void createControllerManager()
    {
       QuadrupedRuntimeEnvironment runtimeEnvironment = new QuadrupedRuntimeEnvironment(controlDT.get(), sdfRobot.get().getYoTime(), fullRobotModel.get(),
                                                                                        controllerCoreOptimizationSettings.get(), jointDesiredOutputList.get(),
                                                                                        sdfRobot.get().getRobotsYoVariableRegistry(), yoGraphicsListRegistry,
-                                                                                       yoGraphicsListRegistryForDetachedOverhead, globalDataProducer,
-                                                                                       contactableFeet, contactablePlaneBodies, footSwitches, gravity.get());
-      switch (controlMode.get())
+                                                                                       yoGraphicsListRegistryForDetachedOverhead, contactableFeet,
+                                                                                       contactablePlaneBodies, centerOfMassDataHolder, footSwitches,
+                                                                                       gravity.get(), highLevelControllerParameters.get(),
+                                                                                       sitDownParameters.get(), privilegedConfigurationParameters.get());
+
+      if(controlMode.get() == QuadrupedControlMode.POSITION)
       {
-      case FORCE:
-         if (initialForceControlState.hasValue())
-            controllerManager = new QuadrupedControllerManager(runtimeEnvironment, physicalProperties.get(), initialPositionParameters.get(),
-                                                               initialForceControlState.get());
-         else
-            controllerManager = new QuadrupedControllerManager(runtimeEnvironment, physicalProperties.get(), initialPositionParameters.get());
-         break;
-      case POSITION:
-         if (initialForceControlState.hasValue())
-            controllerManager = new QuadrupedControllerManager(runtimeEnvironment, modelFactory.get(), physicalProperties.get(),
-                                                               positionBasedCrawlControllerParameters.get(), initialPositionParameters.get(),
-                                                               controlMode.get());
-         else
-            controllerManager = new QuadrupedControllerManager(runtimeEnvironment, modelFactory.get(), physicalProperties.get(),
-                                                               positionBasedCrawlControllerParameters.get(), initialPositionParameters.get(),
-                                                               initialForceControlState.get(), controlMode.get());
-         break;
-      default:
-         controllerManager = null;
-         break;
+         throw new RuntimeException("Position Control Mode currently not supported");
+      }
+
+      controllerManager = new QuadrupedControllerManager(runtimeEnvironment, physicalProperties.get(), initialForceControlState.get(), null);
+
+
+      if(useStateEstimator.get())
+      {
+         controllerManager.setStateEstimatorModeSubscriber(stateEstimatorModeSubscriber);
       }
    }
 
@@ -335,10 +334,10 @@ public class QuadrupedSimulationFactory
       if (useNetworking.get())
       {
          JointConfigurationGatherer jointConfigurationGathererAndProducer = new JointConfigurationGatherer(fullRobotModel.get());
-         PeriodicThreadScheduler scheduler = new PeriodicNonRealtimeThreadScheduler("PoseCommunicator");
-         poseCommunicator = new DRCPoseCommunicator(fullRobotModel.get(), jointConfigurationGathererAndProducer, null, globalDataProducer,
-                                                    timestampProvider.get(), sensorReader.getSensorRawOutputMapReadOnly(),
-                                                    controllerManager.getMotionStatusHolder(), null, scheduler, netClassList.get());
+         MessageTopicNameGenerator publisherTopicNameGenerator = QuadrupedControllerAPIDefinition.getPublisherTopicNameGenerator(sdfRobot.get().getName());
+         poseCommunicator = new DRCPoseCommunicator(fullRobotModel.get(), jointConfigurationGathererAndProducer, null, publisherTopicNameGenerator,
+                                                    realtimeRos2Node, timestampProvider.get(), sensorReader.getSensorRawOutputMapReadOnly(),
+                                                    controllerManager.getMotionStatusHolder(), null);
       }
       else
       {
@@ -349,7 +348,7 @@ public class QuadrupedSimulationFactory
    private void createControllerNetworkSubscriber()
    {
       if (useNetworking.get())
-         controllerManager.createControllerNetworkSubscriber(new PeriodicNonRealtimeThreadScheduler("controllerNetworkSubscriber"), packetCommunicator);
+         controllerManager.createControllerNetworkSubscriber(sdfRobot.get().getName(), realtimeRos2Node); // TODO Verify that it is the right name to use.
    }
 
    private void createGroundContactModel()
@@ -404,7 +403,8 @@ public class QuadrupedSimulationFactory
    private void createSimulationController()
    {
       simulationController = new QuadrupedSimulationController(sdfRobot.get(), sensorReader, outputWriter.get(), controllerManager, stateEstimator,
-                                                               poseCommunicator, headController);
+                                                               poseCommunicator, headController, yoVariableServer);
+      simulationController.getYoVariableRegistry().addChild(factoryRegistry);
    }
 
    private void setupSDFRobot()
@@ -441,9 +441,8 @@ public class QuadrupedSimulationFactory
 
       if (useStateEstimator.get())
       {
-         Quaternion initialEstimationLinkOrientation = new Quaternion();
-         sdfRobot.get().getRootJoint().getJointTransform3D().getRotation(initialEstimationLinkOrientation);
-         stateEstimator.initializeEstimatorToActual(initialCoMPosition, initialEstimationLinkOrientation);
+         RigidBodyTransform rootJointTransform = sdfRobot.get().getRootJoint().getJointTransform3D();
+         stateEstimator.initializeEstimator(rootJointTransform);
       }
 
       sdfRobot.get().setGravity(gravity.get());
@@ -451,12 +450,47 @@ public class QuadrupedSimulationFactory
       PrintTools.info(this, sdfRobot.get().getName() + " total mass: " + totalMass);
    }
 
-   public SimulationConstructionSet createSimulation() throws IOException
+   private void setupCameras()
+   {
+      FloatingRootJointRobot robot = sdfRobot.get();
+      RigidBodyTransform cameraTransform = new RigidBodyTransform();
+      List<CameraMount> cameraMounts = new ArrayList<>();
+
+      // straight behind
+      cameraTransform.setTranslation(-2.4, 0.0, 0.5);
+      cameraTransform.setRotationEuler(0.0, Math.toRadians(15.0), 0.0);
+      cameraMounts.add(new CameraMount("ThirdPersonViewBehind", cameraTransform, 1.4, 0.5, 20.0, robot));
+
+      // behind and to the side
+      cameraTransform.setTranslation(-2.0, 0.95, 1.0);
+      cameraTransform.setRotationEuler(0.0, Math.toRadians(25.0), Math.toRadians(-18.0));
+      cameraMounts.add(new CameraMount("ThirdPersonViewSide", cameraTransform, 1.4, 0.5, 20.0, robot));
+
+      // top-down
+      cameraTransform.setTranslation(0.5, 0.0, 3.5);
+      cameraTransform.setRotationEuler(0.0, Math.toRadians(90.0), 0.0);
+      cameraMounts.add(new CameraMount("TopDownView", cameraTransform, 1.4, 0.5, 20.0, robot));
+
+      for (int i = 0; i < cameraMounts.size(); i++)
+      {
+         robot.getRootJoint().addCameraMount(cameraMounts.get(i));
+         CameraConfiguration cameraConfiguration = new CameraConfiguration(cameraMounts.get(i).getName());
+         cameraConfiguration.setCameraMount(cameraMounts.get(i).getName());
+         cameraConfiguration.setCameraTracking(false, false, false, false);
+         cameraConfiguration.setCameraDolly(false, false, false, false);
+         cameraConfigurations.add(cameraConfiguration);
+      }
+   }
+
+   public SimulationConstructionSet createSimulation()
    {
       groundContactModelType.setDefaultValue(QuadrupedGroundContactModelType.FLAT);
       usePushRobotController.setDefaultValue(false);
       footSwitchType.setDefaultValue(FootSwitchType.TouchdownBased);
       useLocalCommunicator.setDefaultValue(false);
+      kneeTorqueTouchdownDetectionThreshold.setDefaultValue(new QuadrantDependentList<>(20.0, 20.0, 20.0, 20.0));
+      createYoVariableServer.setDefaultValue(false);
+
 
       FactoryTools.checkAllFactoryFieldsAreSet(this);
 
@@ -467,20 +501,24 @@ public class QuadrupedSimulationFactory
       createContactablePlaneBodies();
       createFootSwitches();
       createStateEstimator();
-      createPacketCommunicator();
-      createGlobalDataProducer();
-      createHeadController();
+      createRealtimeRos2Node();
       createInverseKinematicsCalculator();
       createControllerManager();
       createControllerNetworkSubscriber();
       createPoseCommunicator();
+      setupYoVariableServer();
 
       createGroundContactModel();
       createSimulationController();
       setupSDFRobot();
       setupJointElasticity();
+      setupCameras();
+
+      if (useNetworking.get())
+         realtimeRos2Node.spin();
 
       SimulationConstructionSet scs = new SimulationConstructionSet(sdfRobot.get(), scsParameters.get());
+
       if (groundContactModelType.get() == QuadrupedGroundContactModelType.ROTATABLE || providedTerrainObject3D.hasValue())
       {
          scs.setGroundVisible(false);
@@ -501,19 +539,35 @@ public class QuadrupedSimulationFactory
       {
          scs.setCameraTrackingVars("q_x", "q_y", "q_z");
          scs.setCameraDollyVars("q_x", "q_y", "q_z");
-         scs.setCameraTracking(useTrackAndDolly.get(), useTrackAndDolly.get(), useTrackAndDolly.get(), useTrackAndDolly.get());
-         scs.setCameraDolly(useTrackAndDolly.get(), useTrackAndDolly.get(), useTrackAndDolly.get(), false);
-         scs.setCameraDollyOffsets(4.0, 4.0, 1.0);
+         scs.setCameraTracking(useTrackAndDolly.get(), true, true, true);
+         scs.setCameraDolly(useTrackAndDolly.get(), true, true, false);
+         scs.setCameraDollyOffsets(4.0 * 0.66, -3.0 * 0.66 , 1 * 0.66);
+         scs.setCameraPosition(-2.5, -4.5, 1.5);
          SimulationOverheadPlotterFactory simulationOverheadPlotterFactory = scs.createSimulationOverheadPlotterFactory();
          simulationOverheadPlotterFactory.setVariableNameToTrack("centerOfMass");
          simulationOverheadPlotterFactory.addYoGraphicsListRegistries(yoGraphicsListRegistry);
          simulationOverheadPlotterFactory.setShowOnStart(showPlotter.get());
          simulationOverheadPlotterFactory.createOverheadPlotter();
+
+         for (int i = 0; i < cameraConfigurations.size(); i++)
+         {
+            scs.setupCamera(cameraConfigurations.get(i));
+         }
+
+         ViewportConfiguration viewportConfiguration = new ViewportConfiguration("Multi-View");
+         viewportConfiguration.addCameraView("ThirdPersonViewBehind", 0, 0, 1, 1);
+         viewportConfiguration.addCameraView("Right Side", 1, 0, 1, 1);
+         scs.setupViewport(viewportConfiguration);
       }
 
-      InputStream parameterFile = getClass().getResourceAsStream(modelFactory.get().getParameterResourceName(controlMode.get()));
-      ParameterLoaderHelper.loadParameters(this, parameterFile, simulationController.getYoVariableRegistry());
+      InputStream parameterFile = modelFactory.get().getParameterInputStream(controlMode.get());
+      ParameterLoaderHelper.loadParameters(this, parameterFile, simulationController.getYoVariableRegistry(), true);
       scs.setParameterRootPath(simulationController.getYoVariableRegistry().getParent());
+
+      if (yoVariableServer != null)
+      {
+         yoVariableServer.start();
+      }
 
       FactoryTools.disposeFactory(this);
 
@@ -546,6 +600,21 @@ public class QuadrupedSimulationFactory
    public void setJointDesiredOutputList(JointDesiredOutputList jointDesiredOutputList)
    {
       this.jointDesiredOutputList.set(jointDesiredOutputList);
+   }
+
+   public void setHighLevelControllerParameters(HighLevelControllerParameters highLevelControllerParameters)
+   {
+      this.highLevelControllerParameters.set(highLevelControllerParameters);
+   }
+
+   public void setSitDownParameters(QuadrupedSitDownParameters sitDownParameters)
+   {
+      this.sitDownParameters.set(sitDownParameters);
+   }
+
+   public void setPrivilegedConfigurationParameters(QuadrupedPrivilegedConfigurationParameters privilegedConfigurationParameters)
+   {
+      this.privilegedConfigurationParameters.set(privilegedConfigurationParameters);
    }
 
    public void setGravity(double gravity)
@@ -593,11 +662,6 @@ public class QuadrupedSimulationFactory
       this.groundContactParameters.set(groundContactParameters);
    }
 
-   public void setHeadControllerFactory(QuadrupedRobotControllerFactory headControllerFactory)
-   {
-      this.headControllerFactory.set(headControllerFactory);
-   }
-
    public void setOutputWriter(OutputWriter outputWriter)
    {
       this.outputWriter.set(outputWriter);
@@ -638,11 +702,6 @@ public class QuadrupedSimulationFactory
       this.useNetworking.set(useNetworking);
    }
 
-   public void setNetClassList(NetClassList netClassList)
-   {
-      this.netClassList.set(netClassList);
-   }
-
    public void setTimestampHolder(SensorTimestampHolder timestampProvider)
    {
       this.timestampProvider.set(timestampProvider);
@@ -651,6 +710,11 @@ public class QuadrupedSimulationFactory
    public void setSDFRobot(FloatingRootJointRobot sdfRobot)
    {
       this.sdfRobot.set(sdfRobot);
+   }
+
+   public void setKneeTorqueTouchdownDetectionThreshold(QuadrantDependentList<Double> kneeTorqueTouchdownDetectionThreshold)
+   {
+      this.kneeTorqueTouchdownDetectionThreshold.set(kneeTorqueTouchdownDetectionThreshold);
    }
 
    public void setUseStateEstimator(boolean useStateEstimator)
@@ -703,7 +767,7 @@ public class QuadrupedSimulationFactory
       this.scsBufferSize.set(scsBufferSize);
    }
 
-   public void setInitialForceControlState(QuadrupedControllerEnum initialForceControlState)
+   public void setInitialForceControlState(HighLevelControllerName initialForceControlState)
    {
       this.initialForceControlState.set(initialForceControlState);
    }
@@ -711,5 +775,23 @@ public class QuadrupedSimulationFactory
    public void setUseLocalCommunicator(boolean useLocalCommunicator)
    {
       this.useLocalCommunicator.set(useLocalCommunicator);
+   }
+
+   public void setSensorReaderWrapper(QuadrupedSensorReaderWrapper sensorReaderWrapper)
+   {
+      this.sensorReaderWrapper = sensorReaderWrapper;
+   }
+
+   public void setCreateYoVariableServer(boolean createYoVariableServer)
+   {
+      this.createYoVariableServer.set(createYoVariableServer);
+   }
+
+   public void close()
+   {
+      if(realtimeRos2Node != null)
+      {
+         realtimeRos2Node.destroy();
+      }
    }
 }

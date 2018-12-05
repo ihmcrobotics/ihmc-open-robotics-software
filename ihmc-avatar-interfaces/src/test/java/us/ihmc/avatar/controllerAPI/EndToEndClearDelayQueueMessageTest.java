@@ -9,6 +9,7 @@ import org.junit.Before;
 import controller_msgs.msg.dds.ClearDelayQueueMessage;
 import controller_msgs.msg.dds.FootstepDataListMessage;
 import controller_msgs.msg.dds.HandTrajectoryMessage;
+import org.junit.Test;
 import us.ihmc.avatar.DRCObstacleCourseStartingLocation;
 import us.ihmc.avatar.DRCStartingLocation;
 import us.ihmc.avatar.MultiRobotTestInterface;
@@ -17,6 +18,7 @@ import us.ihmc.avatar.initialSetup.OffsetAndYawRobotInitialSetup;
 import us.ihmc.avatar.testTools.DRCSimulationTestHelper;
 import us.ihmc.commonWalkingControlModules.messageHandlers.WalkingMessageHandler;
 import us.ihmc.commons.thread.ThreadTools;
+import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
@@ -39,6 +41,8 @@ public abstract class EndToEndClearDelayQueueMessageTest implements MultiRobotTe
 
    private DRCSimulationTestHelper drcSimulationTestHelper;
 
+   @ContinuousIntegrationAnnotations.ContinuousIntegrationTest(estimatedDuration = 17.3)
+   @Test(timeout = 87000)
    public void testClearingQueue() throws SimulationExceededMaximumTimeException
    {
       DRCRobotModel robotModel = getRobotModel();
@@ -66,8 +70,8 @@ public abstract class EndToEndClearDelayQueueMessageTest implements MultiRobotTe
       }
       handTrajectoryMessage.getSe3Trajectory().getQueueingProperties().setExecutionDelayTime(0.1);
       footstepDataListMessage.getQueueingProperties().setExecutionDelayTime(0.1);
-      drcSimulationTestHelper.send(handTrajectoryMessage);
-      drcSimulationTestHelper.send(footstepDataListMessage);
+      drcSimulationTestHelper.publishToController(handTrajectoryMessage);
+      drcSimulationTestHelper.publishToController(footstepDataListMessage);
       assertTrue(drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(0.05));
 
       assertEquals(0, (int) footsteps.getValueAsLongBits());
@@ -75,7 +79,7 @@ public abstract class EndToEndClearDelayQueueMessageTest implements MultiRobotTe
 
       // clear hand trajectory
       ClearDelayQueueMessage clearHandTrajectory = HumanoidMessageTools.createClearDelayQueueMessage(HandTrajectoryMessage.class);
-      drcSimulationTestHelper.send(clearHandTrajectory);
+      drcSimulationTestHelper.publishToController(clearHandTrajectory);
       assertTrue(drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(0.1));
 
       assertEquals(10, (int) footsteps.getValueAsLongBits());

@@ -19,7 +19,7 @@ public final class DesiredAccelerationsCommand extends QueueableCommand<DesiredA
    }
 
    @Override
-   public void set(DesiredAccelerationsMessage message)
+   public void setFromMessage(DesiredAccelerationsMessage message)
    {
       desiredJointAccelerations.reset();
       for (int i = 0; i < message.getDesiredJointAccelerations().size(); i++)

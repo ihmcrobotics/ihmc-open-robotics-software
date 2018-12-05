@@ -92,7 +92,7 @@ public class ArmTrajectoryCommandTest
       Random random = new Random();
       ArmTrajectoryCommand armTrajectoryCommand = new ArmTrajectoryCommand();
       ArmTrajectoryMessage message = RandomHumanoidMessages.nextArmTrajectoryMessage(random);
-      armTrajectoryCommand.set(message);
+      armTrajectoryCommand.setFromMessage(message);
 
       assertEquals(message.getJointspaceTrajectory().getQueueingProperties().getExecutionDelayTime(), armTrajectoryCommand.getExecutionDelayTime(), 1e-9);
       assertEquals(ExecutionMode.fromByte(message.getJointspaceTrajectory().getQueueingProperties().getExecutionMode()), armTrajectoryCommand.getJointspaceTrajectory().getExecutionMode());

@@ -8,10 +8,10 @@ import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactableFoot;
+import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
+import us.ihmc.mecano.spatial.SpatialAcceleration;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.robotSide.RobotSide;
-import us.ihmc.robotics.screwTheory.RigidBody;
-import us.ihmc.robotics.screwTheory.SpatialAccelerationVector;
 import us.ihmc.robotics.stateMachine.core.State;
 
 public abstract class AbstractFootControlState implements State
@@ -21,8 +21,8 @@ public abstract class AbstractFootControlState implements State
    protected final FootControlHelper footControlHelper;
 
    protected final RobotSide robotSide;
-   protected final RigidBody rootBody;
-   protected final RigidBody pelvis;
+   protected final RigidBodyBasics rootBody;
+   protected final RigidBodyBasics pelvis;
    protected final ContactableFoot contactableFoot;
 
    protected final FramePoint3D desiredPosition = new FramePoint3D(worldFrame);
@@ -31,7 +31,7 @@ public abstract class AbstractFootControlState implements State
    protected final FrameQuaternion desiredOrientation = new FrameQuaternion(worldFrame);
    protected final FrameVector3D desiredAngularVelocity = new FrameVector3D(worldFrame);
    protected final FrameVector3D desiredAngularAcceleration = new FrameVector3D(worldFrame);
-   protected final SpatialAccelerationVector footAcceleration = new SpatialAccelerationVector();
+   protected final SpatialAcceleration footAcceleration = new SpatialAcceleration();
 
    protected final HighLevelHumanoidControllerToolbox controllerToolbox;
 

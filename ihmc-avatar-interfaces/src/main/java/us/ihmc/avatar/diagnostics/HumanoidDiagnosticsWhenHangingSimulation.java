@@ -1,5 +1,8 @@
 package us.ihmc.avatar.diagnostics;
 
+import static us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelControllerName.DO_NOTHING_BEHAVIOR;
+import static us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelControllerName.WALKING;
+
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.ArrayList;
@@ -21,20 +24,20 @@ import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.Co
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.HighLevelHumanoidControllerFactory;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelControllerName;
-import us.ihmc.humanoidRobotics.communication.streamingData.HumanoidGlobalDataProducer;
 import us.ihmc.robotics.robotSide.RobotSide;
-import us.ihmc.wholeBodyController.RobotContactPointParameters;
-import us.ihmc.wholeBodyController.diagnostics.*;
-import us.ihmc.yoVariables.dataBuffer.DataProcessingFunction;
-import us.ihmc.yoVariables.variable.YoEnum;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.sensorProcessing.parameters.DRCRobotSensorInformation;
-import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationConstructionSetTools.util.HumanoidFloatingRootJointRobot;
 import us.ihmc.simulationConstructionSetTools.util.environments.FlatGroundEnvironment;
+import us.ihmc.simulationconstructionset.SimulationConstructionSet;
+import us.ihmc.wholeBodyController.RobotContactPointParameters;
+import us.ihmc.wholeBodyController.diagnostics.DiagnosticsWhenHangingControllerState;
 import us.ihmc.wholeBodyController.diagnostics.DiagnosticsWhenHangingControllerState.DiagnosticsWhenHangingState;
-
-import static us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelControllerName.*;
+import us.ihmc.wholeBodyController.diagnostics.DiagnosticsWhenHangingControllerStateFactory;
+import us.ihmc.wholeBodyController.diagnostics.HumanoidDiagnosticsWhenHangingAnalyzer;
+import us.ihmc.wholeBodyController.diagnostics.HumanoidJointPoseList;
+import us.ihmc.yoVariables.dataBuffer.DataProcessingFunction;
+import us.ihmc.yoVariables.variable.YoEnum;
 
 public class HumanoidDiagnosticsWhenHangingSimulation
 {
@@ -43,7 +46,9 @@ public class HumanoidDiagnosticsWhenHangingSimulation
    private final DiagnosticsWhenHangingControllerState controller;
    private final boolean computeTorqueOffsetsBasedOnAverages;
 
-   public HumanoidDiagnosticsWhenHangingSimulation(HumanoidJointPoseList humanoidJointPoseList, boolean useArms, boolean robotIsHanging, DRCRobotModel model, DRCRobotInitialSetup<HumanoidFloatingRootJointRobot> robotInitialSetup, boolean computeTorqueOffsetsBasedOnAverages)
+   public HumanoidDiagnosticsWhenHangingSimulation(HumanoidJointPoseList humanoidJointPoseList, boolean useArms, boolean robotIsHanging, DRCRobotModel model,
+                                                   DRCRobotInitialSetup<HumanoidFloatingRootJointRobot> robotInitialSetup,
+                                                   boolean computeTorqueOffsetsBasedOnAverages)
    {
       this.computeTorqueOffsetsBasedOnAverages = computeTorqueOffsetsBasedOnAverages;
 
@@ -62,9 +67,11 @@ public class HumanoidDiagnosticsWhenHangingSimulation
 
       ContactableBodiesFactory<RobotSide> contactableBodiesFactory = new ContactableBodiesFactory<>();
       contactableBodiesFactory.setFootContactPoints(contactPointParameters.getFootContactPoints());
-      contactableBodiesFactory.setToeContactParameters(contactPointParameters.getControllerToeContactPoints(), contactPointParameters.getControllerToeContactLines());
+      contactableBodiesFactory.setToeContactParameters(contactPointParameters.getControllerToeContactPoints(),
+                                                       contactPointParameters.getControllerToeContactLines());
       for (int i = 0; i < contactPointParameters.getAdditionalContactNames().size(); i++)
-         contactableBodiesFactory.addAdditionalContactPoint(additionalContactRigidBodyNames.get(i), additionalContactNames.get(i), additionalContactTransforms.get(i));
+         contactableBodiesFactory.addAdditionalContactPoint(additionalContactRigidBodyNames.get(i), additionalContactNames.get(i),
+                                                            additionalContactTransforms.get(i));
 
       DRCRobotSensorInformation sensorInformation = model.getSensorInformation();
       SideDependentList<String> footSensorNames = sensorInformation.getFeetForceSensorNames();
@@ -75,7 +82,7 @@ public class HumanoidDiagnosticsWhenHangingSimulation
       SideDependentList<String> wristForceSensorNames = sensorInformation.getWristForceSensorNames();
 
       HighLevelHumanoidControllerFactory controllerFactory = new HighLevelHumanoidControllerFactory(contactableBodiesFactory, footSensorNames,
-                                                                                                feetContactSensorNames, wristForceSensorNames,
+                                                                                                    feetContactSensorNames, wristForceSensorNames,
                                                                                                     highLevelControllerParameters, walkingControllerParameters,
                                                                                                     capturePointPlannerParameters);
       controllerFactory.useDefaultDoNothingControlState();
@@ -89,11 +96,12 @@ public class HumanoidDiagnosticsWhenHangingSimulation
       controllerFactory.addControllerFailureTransition(WALKING, fallbackControllerState);
       controllerFactory.setInitialState(HighLevelControllerName.DO_NOTHING_BEHAVIOR);
 
-      DiagnosticsWhenHangingControllerStateFactory diagnosticsWhenHangingControllerStateFactory = new DiagnosticsWhenHangingControllerStateFactory(humanoidJointPoseList, useArms, robotIsHanging, null);
+      DiagnosticsWhenHangingControllerStateFactory diagnosticsWhenHangingControllerStateFactory = new DiagnosticsWhenHangingControllerStateFactory(humanoidJointPoseList,
+                                                                                                                                                   useArms,
+                                                                                                                                                   robotIsHanging,
+                                                                                                                                                   null);
       diagnosticsWhenHangingControllerStateFactory.setTransitionRequested(true);
       controllerFactory.addCustomControlState(diagnosticsWhenHangingControllerStateFactory);
-
-      HumanoidGlobalDataProducer globalDataProducer = null;
 
       AvatarSimulationFactory avatarSimulationFactory = new AvatarSimulationFactory();
       avatarSimulationFactory.setRobotModel(model);
@@ -102,26 +110,24 @@ public class HumanoidDiagnosticsWhenHangingSimulation
       avatarSimulationFactory.setRobotInitialSetup(robotInitialSetup);
       avatarSimulationFactory.setSCSInitialSetup(scsInitialSetup);
       avatarSimulationFactory.setGuiInitialSetup(guiInitialSetup);
-      avatarSimulationFactory.setHumanoidGlobalDataProducer(globalDataProducer);
       AvatarSimulation avatarSimulation = avatarSimulationFactory.createAvatarSimulation();
 
       simulationConstructionSet = avatarSimulation.getSimulationConstructionSet();
 
       avatarSimulation.start();
-//      drcSimulation.simulate();
+      //      drcSimulation.simulate();
 
-//      if (DRCSimulationFactory.RUN_MULTI_THREADED)
-//      {
-//         throw new RuntimeException("This only works with single threaded right now. Change DRCSimulationFactory.RUN_MULTI_THREADED to false!");
-//      }
+      //      if (DRCSimulationFactory.RUN_MULTI_THREADED)
+      //      {
+      //         throw new RuntimeException("This only works with single threaded right now. Change DRCSimulationFactory.RUN_MULTI_THREADED to false!");
+      //      }
 
       FullRobotModelCorruptor fullRobotModelCorruptor = avatarSimulation.getFullRobotModelCorruptor();
-      if(fullRobotModelCorruptor == null)
-    	  throw new RuntimeException("This only works with model corruption on. Change DRCControllerThread.ALLOW_MODEL_CORRUPTION to true!");
+      if (fullRobotModelCorruptor == null)
+         throw new RuntimeException("This only works with model corruption on. Change DRCControllerThread.ALLOW_MODEL_CORRUPTION to true!");
 
       controller = diagnosticsWhenHangingControllerStateFactory.getController();
       analyzer = new HumanoidDiagnosticsWhenHangingAnalyzer(simulationConstructionSet, controller, fullRobotModelCorruptor);
-
 
       UpdateDiagnosticsWhenHangingHelpersButton updateDiagnosticsWhenHangingHelpersButton = new UpdateDiagnosticsWhenHangingHelpersButton(analyzer);
       simulationConstructionSet.addButton(updateDiagnosticsWhenHangingHelpersButton);
@@ -134,7 +140,6 @@ public class HumanoidDiagnosticsWhenHangingSimulation
 
       CopyMeasuredTorqueToAppliedTorqueButton copyMeasuredTorqueToAppliedTorqueButton = new CopyMeasuredTorqueToAppliedTorqueButton(analyzer);
       simulationConstructionSet.addButton(copyMeasuredTorqueToAppliedTorqueButton);
-
 
       analyzer.printOutAllCorruptorVariables();
    }
@@ -195,11 +200,11 @@ public class HumanoidDiagnosticsWhenHangingSimulation
       {
          simulationConstructionSet.cropBuffer();
 
-         while(true)
+         while (true)
          {
             simulationConstructionSet.gotoInPointNow();
 
-            while(true)
+            while (true)
             {
                if (diagnosticsState.getEnumValue() != DiagnosticsWhenHangingState.CHECK_DIAGNOSTICS)
                {
@@ -214,7 +219,7 @@ public class HumanoidDiagnosticsWhenHangingSimulation
                simulationConstructionSet.tick(1);
             }
 
-            while(true)
+            while (true)
             {
                if (diagnosticsState.getEnumValue() == DiagnosticsWhenHangingState.CHECK_DIAGNOSTICS)
                {
@@ -286,7 +291,7 @@ public class HumanoidDiagnosticsWhenHangingSimulation
       @Override
       public void actionPerformed(ActionEvent e)
       {
-//         analyzer.updateCorruptorAndAnalyzeDataInBuffer();
+         //         analyzer.updateCorruptorAndAnalyzeDataInBuffer();
          analyzer.updateDataAndComputeTorqueOffsetsBasedOnAverages(computeTorqueOffsetsBasedOnAverages);
       }
    }
@@ -319,9 +324,10 @@ public class HumanoidDiagnosticsWhenHangingSimulation
                   analyzer.optimizeCorruptorValues(computeTorqueOffsetsBasedOnAverages);
                   setText("Optimize");
                   return null;
-               }};
+               }
+            };
 
-               worker.execute();
+            worker.execute();
          }
          else
          {
@@ -330,6 +336,4 @@ public class HumanoidDiagnosticsWhenHangingSimulation
       }
    }
 
-
 }
-

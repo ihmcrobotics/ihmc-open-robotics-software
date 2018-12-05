@@ -21,7 +21,7 @@ public class SnapFootstepPacket extends Packet<SnapFootstepPacket> implements Se
 
    public SnapFootstepPacket()
    {
-      footstep_data_ = new us.ihmc.idl.IDLSequence.Object<controller_msgs.msg.dds.FootstepDataMessage> (100, controller_msgs.msg.dds.FootstepDataMessage.class, new controller_msgs.msg.dds.FootstepDataMessagePubSubType());
+      footstep_data_ = new us.ihmc.idl.IDLSequence.Object<controller_msgs.msg.dds.FootstepDataMessage> (100, new controller_msgs.msg.dds.FootstepDataMessagePubSubType());
       footstep_order_ = new us.ihmc.idl.IDLSequence.Integer (100, "type_2");
 
       flag_ = new us.ihmc.idl.IDLSequence.Byte (100, "type_9");

@@ -1,45 +1,47 @@
 package us.ihmc.footstepPlanning.roughTerrainPlanning;
 
-import org.junit.Before;
 import org.junit.Test;
-
+import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationPlan;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
-import us.ihmc.continuousIntegration.ContinuousIntegrationTools;
 import us.ihmc.continuousIntegration.IntegrationCategory;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
-import us.ihmc.euclid.tuple3D.Vector3D;
-import us.ihmc.footstepPlanning.DefaultFootstepPlanningParameters;
+import us.ihmc.footstepPlanning.graphSearch.parameters.DefaultFootstepPlanningParameters;
 import us.ihmc.footstepPlanning.FootstepPlanner;
-import us.ihmc.footstepPlanning.graphSearch.YoFootstepPlannerParameters;
+import us.ihmc.footstepPlanning.graphSearch.parameters.YoFootstepPlannerParameters;
 import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.FootstepNodeSnapAndWiggler;
-import us.ihmc.footstepPlanning.graphSearch.graph.visualization.PlanarRegionBipedalFootstepPlannerVisualizer;
 import us.ihmc.footstepPlanning.graphSearch.nodeChecking.SnapBasedNodeChecker;
 import us.ihmc.footstepPlanning.graphSearch.planners.DepthFirstFootstepPlanner;
 import us.ihmc.footstepPlanning.graphSearch.stepCost.ConstantFootstepCost;
-import us.ihmc.footstepPlanning.testTools.PlanningTestTools;
+import us.ihmc.footstepPlanning.tools.PlannerTools;
 import us.ihmc.robotics.robotSide.SideDependentList;
-import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 
 @ContinuousIntegrationPlan(categories = IntegrationCategory.FAST)
 public class DepthFirstFootstepPlannerTest extends FootstepPlannerOnRoughTerrainTest
 {
-   private YoVariableRegistry registry;
    private YoFootstepPlannerParameters parameters;
    private DepthFirstFootstepPlanner planner;
 
-   private static final boolean visualize = !ContinuousIntegrationTools.isRunningOnContinuousIntegrationServer();
    private static final boolean showPlannerVisualizer = false;
 
+   private static boolean keepUp = false;
+
+   @Override
+   public boolean assertPlannerReturnedResult()
+   {
+      return true;
+   }
+
+   @Override
    @ContinuousIntegrationTest(estimatedDuration = 10.0)
    @Test(timeout = 50000)
-   public void testOnStairCase()
+   public void testOnStaircase()
    {
       planner.setMaximumNumberOfNodesToExpand(Integer.MAX_VALUE);
       planner.setTimeout(10.0);
       planner.setExitAfterInitialSolution(false);
-      super.testOnStaircase(new Vector3D(), true);
+      super.testOnStaircase();
 
       if (showPlannerVisualizer)
          ThreadTools.sleepForever();
@@ -53,7 +55,7 @@ public class DepthFirstFootstepPlannerTest extends FootstepPlannerOnRoughTerrain
       planner.setMaximumNumberOfNodesToExpand(Integer.MAX_VALUE);
       planner.setTimeout(10.0);
       planner.setExitAfterInitialSolution(false);
-      super.testSimpleStepOnBox(true);
+      super.testSimpleStepOnBox();
    }
 
    @ContinuousIntegrationTest(estimatedDuration = 10.0)
@@ -63,7 +65,7 @@ public class DepthFirstFootstepPlannerTest extends FootstepPlannerOnRoughTerrain
       planner.setMaximumNumberOfNodesToExpand(Integer.MAX_VALUE);
       planner.setTimeout(10.0);
       planner.setExitAfterInitialSolution(false);
-      super.testSimpleStepOnBoxTwo(true);
+      super.testSimpleStepOnBoxTwo();
    }
 
    @Override
@@ -74,7 +76,7 @@ public class DepthFirstFootstepPlannerTest extends FootstepPlannerOnRoughTerrain
       planner.setMaximumNumberOfNodesToExpand(Integer.MAX_VALUE);
       planner.setTimeout(10.0);
       planner.setExitAfterInitialSolution(false);
-      super.testRandomEnvironment(true);
+      super.testRandomEnvironment();
    }
 
    @Override
@@ -85,7 +87,7 @@ public class DepthFirstFootstepPlannerTest extends FootstepPlannerOnRoughTerrain
       planner.setMaximumNumberOfNodesToExpand(Integer.MAX_VALUE);
       planner.setTimeout(10.0);
       planner.setExitAfterInitialSolution(false);
-      super.testSimpleGaps(true);
+      super.testSimpleGaps();
    }
 
    @Override
@@ -96,9 +98,10 @@ public class DepthFirstFootstepPlannerTest extends FootstepPlannerOnRoughTerrain
       planner.setMaximumNumberOfNodesToExpand(Integer.MAX_VALUE);
       planner.setTimeout(10.0);
       planner.setExitAfterInitialSolution(false);
-      super.testOverCinderBlockField(true);
+      super.testOverCinderBlockField();
    }
 
+   @Override
    @ContinuousIntegrationTest(estimatedDuration = 10.0)
    @Test(timeout = 50000)
    public void testStepAfterPitchedUp()
@@ -106,9 +109,10 @@ public class DepthFirstFootstepPlannerTest extends FootstepPlannerOnRoughTerrain
       planner.setMaximumNumberOfNodesToExpand(Integer.MAX_VALUE);
       planner.setTimeout(10.0);
       planner.setExitAfterInitialSolution(false);
-      super.testCompareAfterPitchedStep(!visualize, true);
+      super.testStepAfterPitchedUp();
    }
 
+   @Override
    @ContinuousIntegrationTest(estimatedDuration = 10.0)
    @Test(timeout = 50000)
    public void testStepAfterPitchedDown()
@@ -116,17 +120,18 @@ public class DepthFirstFootstepPlannerTest extends FootstepPlannerOnRoughTerrain
       planner.setMaximumNumberOfNodesToExpand(Integer.MAX_VALUE);
       planner.setTimeout(10.0);
       planner.setExitAfterInitialSolution(false);
-      super.testCompareAfterPitchedStep(!visualize, false);
+      super.testStepAfterPitchedDown();
    }
 
+   @Override
    @ContinuousIntegrationTest(estimatedDuration = 10.0)
    @Test(timeout = 50000)
-   public void testStepBeforeGap()
+   public void testCompareStepBeforeGap()
    {
       planner.setMaximumNumberOfNodesToExpand(Integer.MAX_VALUE);
       planner.setTimeout(10.0);
       planner.setExitAfterInitialSolution(false);
-      super.testCompareStepBeforeGap(!visualize);
+      super.testCompareStepBeforeGap();
    }
 
    @Override
@@ -140,39 +145,53 @@ public class DepthFirstFootstepPlannerTest extends FootstepPlannerOnRoughTerrain
       super.testWalkingAroundBox();
    }
 
+   @Override
+   @ContinuousIntegrationTest(estimatedDuration = 0.2)
+   @Test(timeout = 30000)
    public void testSteppingStones()
    {
       planner.setMaximumNumberOfNodesToExpand(Integer.MAX_VALUE);
       planner.setExitAfterInitialSolution(false);
       planner.setTimeout(15.0);
-      super.testSteppingStones(!visualize);
+      super.testSteppingStones();
    }
 
-   @Before
-   public void setupPlanner()
+   @Override
+   @ContinuousIntegrationTest(estimatedDuration = 10.2, categoriesOverride = {IntegrationCategory.EXCLUDE})
+   @Test(timeout = 51000)
+   public void testPartialGaps()
    {
-      registry = new YoVariableRegistry("test");
+      super.testPartialGaps();
+   }
+
+   @Override
+   @ContinuousIntegrationTest(estimatedDuration = 10.2, categoriesOverride = {IntegrationCategory.EXCLUDE})
+   @Test(timeout = 51000)
+   public void testSpiralStaircase()
+   {
+      super.testSpiralStaircase();
+   }
+
+   @Override
+   public void setupInternal()
+   {
+      YoVariableRegistry registry = new YoVariableRegistry("test");
       parameters = new YoFootstepPlannerParameters(registry, new DefaultFootstepPlanningParameters());
-      SideDependentList<ConvexPolygon2D> footPolygonsInSoleFrame = PlanningTestTools.createDefaultFootPolygons();
+      SideDependentList<ConvexPolygon2D> footPolygonsInSoleFrame = PlannerTools.createDefaultFootPolygons();
 
-      PlanarRegionBipedalFootstepPlannerVisualizer visualizer = null;
-      if (showPlannerVisualizer)
-         visualizer = SCSPlanarRegionBipedalFootstepPlannerVisualizer.createWithSimulationConstructionSet(1.0, footPolygonsInSoleFrame, registry);
-
-      FootstepNodeSnapAndWiggler snapper = new FootstepNodeSnapAndWiggler(footPolygonsInSoleFrame, parameters, visualizer);
+      FootstepNodeSnapAndWiggler snapper = new FootstepNodeSnapAndWiggler(footPolygonsInSoleFrame, parameters);
       SnapBasedNodeChecker nodeChecker = new SnapBasedNodeChecker(parameters, footPolygonsInSoleFrame, snapper);
       ConstantFootstepCost stepCostCalculator = new ConstantFootstepCost(1.0);
-
-      if(showPlannerVisualizer)
-      {
-         visualizer.setFootstepSnapper(snapper);
-         nodeChecker.addPlannerListener(visualizer);
-      }
 
       planner = new DepthFirstFootstepPlanner(parameters, snapper, nodeChecker, stepCostCalculator, registry);
       planner.setFeetPolygons(footPolygonsInSoleFrame);
       planner.setMaximumNumberOfNodesToExpand(100);
-      planner.setBipedalFootstepPlannerListener(visualizer);
+   }
+
+   @Override
+   public void destroyInternal()
+   {
+      planner = null;
    }
 
    @Override
@@ -185,5 +204,11 @@ public class DepthFirstFootstepPlannerTest extends FootstepPlannerOnRoughTerrain
    public boolean visualize()
    {
       return visualize;
+   }
+
+   @Override
+   public boolean keepUp()
+   {
+      return keepUp;
    }
 }

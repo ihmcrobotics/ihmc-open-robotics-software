@@ -30,7 +30,7 @@ module controller_msgs
         /**
          * List of body path waypoint
          */
-        sequence<controller_msgs::msg::dds::EuclideanTrajectoryPointMessage, 1> body_path_points;
+        sequence<controller_msgs::msg::dds::EuclideanTrajectoryPointMessage, 50> body_path_points;
       };
     };
   };

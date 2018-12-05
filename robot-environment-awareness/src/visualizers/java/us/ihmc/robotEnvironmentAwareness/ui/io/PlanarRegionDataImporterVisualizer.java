@@ -24,7 +24,7 @@ import us.ihmc.javaFXToolkit.shapes.TextureColorAdaptivePalette;
 import us.ihmc.robotEnvironmentAwareness.ui.graphicsBuilders.OcTreeMeshBuilder;
 import us.ihmc.robotics.geometry.PlanarRegion;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
-import us.ihmc.robotics.lists.ListWrappingIndexTools;
+import us.ihmc.commons.lists.ListWrappingIndexTools;
 
 public class PlanarRegionDataImporterVisualizer extends Application
 {

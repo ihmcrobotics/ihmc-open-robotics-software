@@ -23,7 +23,7 @@ public class HeightQuadTreeMessage extends Packet<HeightQuadTreeMessage> impleme
 
    public HeightQuadTreeMessage()
    {
-      leaves_ = new us.ihmc.idl.IDLSequence.Object<controller_msgs.msg.dds.HeightQuadTreeLeafMessage> (5000, controller_msgs.msg.dds.HeightQuadTreeLeafMessage.class, new controller_msgs.msg.dds.HeightQuadTreeLeafMessagePubSubType());
+      leaves_ = new us.ihmc.idl.IDLSequence.Object<controller_msgs.msg.dds.HeightQuadTreeLeafMessage> (5000, new controller_msgs.msg.dds.HeightQuadTreeLeafMessagePubSubType());
 
    }
 

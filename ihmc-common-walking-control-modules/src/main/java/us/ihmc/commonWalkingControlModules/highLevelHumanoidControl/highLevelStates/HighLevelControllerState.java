@@ -2,10 +2,8 @@ package us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelSt
 
 import us.ihmc.commonWalkingControlModules.configurations.HighLevelControllerParameters;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.JointAccelerationIntegrationCommand;
-import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHumanoidControllerToolbox;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelControllerName;
-import us.ihmc.robotics.screwTheory.OneDoFJoint;
-import us.ihmc.robotics.screwTheory.ScrewTools;
+import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.robotics.stateMachine.core.State;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutputList;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutputListReadOnly;
@@ -18,20 +16,29 @@ public abstract class HighLevelControllerState implements State, JointLoadStatus
    private final JointSettingsHelper jointSettingsHelper;
 
    private final HighLevelControllerName highLevelControllerName;
+   protected final OneDoFJointBasics[] controlledJoints;
 
    public HighLevelControllerState(HighLevelControllerName stateEnum, HighLevelControllerParameters parameters,
-                                   HighLevelHumanoidControllerToolbox controllerToolbox)
+                                   OneDoFJointBasics[] controlledJoints)
    {
-      this("", stateEnum, parameters, controllerToolbox);
+      this("", stateEnum, parameters, controlledJoints);
    }
 
    public HighLevelControllerState(String namePrefix, HighLevelControllerName stateEnum, HighLevelControllerParameters parameters,
-                                   HighLevelHumanoidControllerToolbox controllerToolbox)
+                                   OneDoFJointBasics[] controlledJoints)
    {
       registry = new YoVariableRegistry(namePrefix + getClass().getSimpleName());
       this.highLevelControllerName = stateEnum;
-      OneDoFJoint[] controlledJoints = ScrewTools.filterJoints(controllerToolbox.getControlledJoints(), OneDoFJoint.class);
+      this.controlledJoints = controlledJoints;
       jointSettingsHelper = new JointSettingsHelper(parameters, controlledJoints, this, stateEnum, registry);
+   }
+
+   public HighLevelControllerState(String namePrefix, HighLevelControllerName stateEnum, OneDoFJointBasics[] controlledJoints)
+   {
+      registry = new YoVariableRegistry(namePrefix + getClass().getSimpleName());
+      this.highLevelControllerName = stateEnum;
+      this.controlledJoints = controlledJoints;
+      jointSettingsHelper = null;
    }
 
    public YoVariableRegistry getYoVariableRegistry()

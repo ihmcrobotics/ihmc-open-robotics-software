@@ -24,8 +24,8 @@ import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition.GraphicType;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsList;
 import us.ihmc.graphicsDescription.yoGraphics.plotting.ArtifactList;
-import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
+import us.ihmc.robotics.contactable.ContactablePlaneBody;
 import us.ihmc.robotics.geometry.ConvexPolygonScaler;
 import us.ihmc.robotics.math.frames.YoFramePointInMultipleFrames;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -191,10 +191,9 @@ public class ReferenceCentroidalMomentumPivotLocationsCalculator
       safeDistanceFromCMPToSupportEdges.set(icpPlannerParameters.getCoPSafeDistanceAwayFromSupportEdges());
 
       CoPPointName exitCoPName = icpPlannerParameters.getExitCoPName();
-      CoPPointName entryCoPName = icpPlannerParameters.getEntryCoPName();
 
       EnumMap<CoPPointName, Vector2D> cmpForwardOffsetBounds = icpPlannerParameters.getCoPForwardOffsetBoundsInFoot();
-      Vector2D entryCMPForwardOffsetBounds = cmpForwardOffsetBounds.get(entryCoPName);
+      Vector2D entryCMPForwardOffsetBounds = cmpForwardOffsetBounds.get(CoPPointName.ENTRY_COP);
       Vector2D exitCMPForwardOffsetBounds = cmpForwardOffsetBounds.get(exitCoPName);
 
       minForwardEntryCMPOffset.set(entryCMPForwardOffsetBounds.getX());
@@ -206,7 +205,7 @@ public class ReferenceCentroidalMomentumPivotLocationsCalculator
       stepLengthToCMPOffsetFactor.set(icpPlannerParameters.getStepLengthToCoPOffsetFactors().get(exitCoPName));
 
       EnumMap<CoPPointName, Vector2D> cmpOffsets = icpPlannerParameters.getCoPOffsetsInFootFrame();
-      Vector2D entryCMPOffsets = cmpOffsets.get(entryCoPName);
+      Vector2D entryCMPOffsets = cmpOffsets.get(CoPPointName.ENTRY_COP);
       Vector2D exitCMPOffsets = cmpOffsets.get(exitCoPName);
       double entryCMPForwardOffset = entryCMPOffsets.getX();
       double entryCMPInsideOffset = entryCMPOffsets.getY();

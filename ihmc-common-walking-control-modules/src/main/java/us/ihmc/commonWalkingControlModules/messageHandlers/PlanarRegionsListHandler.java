@@ -8,7 +8,7 @@ import us.ihmc.communication.packets.PlanarRegionsRequestType;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.PlanarRegionsListCommand;
 import us.ihmc.robotics.geometry.PlanarRegion;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
-import us.ihmc.robotics.lists.RecyclingArrayList;
+import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoInteger;

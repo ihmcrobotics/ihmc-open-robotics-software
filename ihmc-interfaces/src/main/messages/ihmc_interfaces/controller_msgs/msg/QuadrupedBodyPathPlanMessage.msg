@@ -10,4 +10,4 @@ uint32 sequence_id
 bool is_expressed_in_absolute_time true
 
 # List of body path waypoint
-EuclideanTrajectoryPointMessage[<=1] body_path_points
+EuclideanTrajectoryPointMessage[<=50] body_path_points

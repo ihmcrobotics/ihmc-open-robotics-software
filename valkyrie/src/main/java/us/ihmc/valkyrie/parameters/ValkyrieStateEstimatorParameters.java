@@ -1,11 +1,6 @@
 package us.ihmc.valkyrie.parameters;
 
-import static us.ihmc.sensorProcessing.sensorProcessors.SensorProcessing.SensorType.IMU_ANGULAR_VELOCITY;
-import static us.ihmc.sensorProcessing.sensorProcessors.SensorProcessing.SensorType.IMU_LINEAR_ACCELERATION;
-import static us.ihmc.sensorProcessing.sensorProcessors.SensorProcessing.SensorType.IMU_ORIENTATION;
-import static us.ihmc.sensorProcessing.sensorProcessors.SensorProcessing.SensorType.JOINT_POSITION;
-import static us.ihmc.sensorProcessing.sensorProcessors.SensorProcessing.SensorType.JOINT_TAU;
-import static us.ihmc.sensorProcessing.sensorProcessors.SensorProcessing.SensorType.JOINT_VELOCITY;
+import static us.ihmc.sensorProcessing.sensorProcessors.SensorProcessing.SensorType.*;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -14,15 +9,17 @@ import java.util.Map;
 
 import org.apache.commons.lang3.tuple.ImmutablePair;
 
+import us.ihmc.avatar.drcRobot.RobotTarget;
+import us.ihmc.commonWalkingControlModules.sensors.footSwitch.WrenchBasedFootSwitchFactory;
+import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.robotics.math.filters.AlphaFilteredYoVariable;
 import us.ihmc.robotics.partNames.ArmJointName;
 import us.ihmc.robotics.partNames.LegJointName;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
-import us.ihmc.robotics.screwTheory.OneDoFJoint;
+import us.ihmc.robotics.sensors.FootSwitchFactory;
 import us.ihmc.sensorProcessing.sensorProcessors.SensorProcessing;
 import us.ihmc.sensorProcessing.simulatedSensors.SensorNoiseParameters;
-import us.ihmc.sensorProcessing.stateEstimation.FootSwitchType;
 import us.ihmc.sensorProcessing.stateEstimation.StateEstimatorParameters;
 import us.ihmc.valkyrie.fingers.ValkyrieHandJointName;
 import us.ihmc.yoVariables.parameters.DoubleParameter;
@@ -34,8 +31,7 @@ public class ValkyrieStateEstimatorParameters extends StateEstimatorParameters
 {
    private static final boolean DEBUG_VELOCITY_WITH_FD = false;
 
-   private final boolean runningOnRealRobot;
-
+   private final RobotTarget target;
    private final double estimatorDT;
 
    private final double kinematicsPelvisPositionFilterFreqInHertz;
@@ -73,17 +69,18 @@ public class ValkyrieStateEstimatorParameters extends StateEstimatorParameters
     * consistent, for instance joint velocity should be in phase with joint
     * position.
     */
-   public ValkyrieStateEstimatorParameters(boolean runningOnRealRobot, double estimatorDT, ValkyrieSensorInformation sensorInformation,
+   public ValkyrieStateEstimatorParameters(RobotTarget target, double estimatorDT, ValkyrieSensorInformation sensorInformation,
                                            ValkyrieJointMap jointMap)
    {
-      this.runningOnRealRobot = runningOnRealRobot;
-
+      this.target = target;
       this.estimatorDT = estimatorDT;
 
       this.sensorInformation = sensorInformation;
       this.jointMap = jointMap;
       this.footForceSensorNames = sensorInformation.getFeetForceSensorNames();
       this.wristForceSensorNames = sensorInformation.getWristForceSensorNames();
+
+      boolean runningOnRealRobot = target == RobotTarget.REAL_ROBOT;
 
       // Filtering done onboard at 20Hz
       // We might want to try to set them at around 30Hz to see if that gets rid of the shakies in single support when walking.
@@ -93,21 +90,22 @@ public class ValkyrieStateEstimatorParameters extends StateEstimatorParameters
       lowerBodyJointVelocityFilterFrequencyHz = runningOnRealRobot ? 25.0 : Double.POSITIVE_INFINITY;
       fingerPositionFilterFrequencyHz = runningOnRealRobot ? 2.5 : Double.POSITIVE_INFINITY;
 
-      // Somehow it's less shaky when these are low especially when pitching the chest forward.
-      // I still don't quite get it. Sylvain
+      // Somehow it's less shaky when these are low especially when pitching the chest forward. I still don't quite get it. Sylvain
+      // Update (2018-09-12 on Unit B): Tried 50Hz for IMU filters, it looks like 25Hz reduces shakies in single support while using 50Hz for joint filters.
+      // Unit A seems to be shakier in general, 25Hz works better.
       orientationFilterFrequencyHz = runningOnRealRobot ? 25.0 : Double.POSITIVE_INFINITY;
       angularVelocityFilterFrequencyHz = runningOnRealRobot ? 25.0 : Double.POSITIVE_INFINITY;
-      linearAccelerationFilterFrequencyHz = runningOnRealRobot ? 10.0 : Double.POSITIVE_INFINITY;
+      linearAccelerationFilterFrequencyHz = runningOnRealRobot ? 25.0 : Double.POSITIVE_INFINITY;
 
-      lowerBodyJointVelocityBacklashSlopTime = 0.03;
-      armJointVelocityBacklashSlopTime = 0.03;
+      lowerBodyJointVelocityBacklashSlopTime = 0.0;
+      armJointVelocityBacklashSlopTime = 0.0;
 
       doElasticityCompensation = runningOnRealRobot;
       jointElasticityFilterFrequencyHz = 20.0;
       maximumDeflection = 0.10;
       defaultJointStiffness = 10000.0;
       for (RobotSide robotSide : RobotSide.values)
-         jointSpecificStiffness.put(jointMap.getLegJointName(robotSide, LegJointName.HIP_ROLL), 8000.0);
+         jointSpecificStiffness.put(jointMap.getLegJointName(robotSide, LegJointName.HIP_ROLL), 9500.0);
 
       kinematicsPelvisPositionFilterFreqInHertz = Double.POSITIVE_INFINITY;
    }
@@ -126,33 +124,33 @@ public class ValkyrieStateEstimatorParameters extends StateEstimatorParameters
          sensorProcessing.computeJointVelocityFromFiniteDifference(dummyAlpha, true);
       }
 
-      DoubleProvider orientationAlphaFilter = sensorProcessing.createAlphaFilter("orientationAlphaFilter", orientationFilterFrequencyHz);
-      DoubleProvider angularVelocityAlphaFilter = sensorProcessing.createAlphaFilter("angularVelocityAlphaFilter", angularVelocityFilterFrequencyHz);
-      DoubleProvider linearAccelerationAlphaFilter = sensorProcessing.createAlphaFilter("linearAccelerationAlphaFilter", linearAccelerationFilterFrequencyHz);
+      DoubleProvider orientationAlphaFilter = sensorProcessing.createAlphaFilter("orientationBreakFrequency", orientationFilterFrequencyHz);
+      DoubleProvider angularVelocityAlphaFilter = sensorProcessing.createAlphaFilter("angularVelocityBreakFrequency", angularVelocityFilterFrequencyHz);
+      DoubleProvider linearAccelerationAlphaFilter = sensorProcessing.createAlphaFilter("linearAccelerationBreakFrequency", linearAccelerationFilterFrequencyHz);
 
       // Lower body: For the joints using the output encoders: Compute velocity from the joint position using finite difference.
-      DoubleProvider jointOutputEncoderVelocityAlphaFilter = sensorProcessing.createAlphaFilter("jointOutputEncoderVelocityAlphaFilter",
+      DoubleProvider jointOutputEncoderVelocityAlphaFilter = sensorProcessing.createAlphaFilter("jointOutputEncoderVelocityBreakFrequency",
                                                                                                 jointOutputEncoderVelocityFilterFrequencyHz);
       sensorProcessing.computeJointVelocityFromFiniteDifferenceOnlyForSpecifiedJoints(jointOutputEncoderVelocityAlphaFilter, false,
                                                                                       namesOfJointsUsingOutputEncoder);
 
       // Lower body: Then apply for all velocity: 1- alpha filter 2- backlash compensator 3- elasticity compensation.
-      DoubleProvider lowerBodyJointVelocityAlphaFilter = sensorProcessing.createAlphaFilter("lowerBodyJointVelocityAlphaFilter",
+      DoubleProvider lowerBodyJointVelocityAlphaFilter = sensorProcessing.createAlphaFilter("lowerBodyJointVelocityBreakFrequency",
                                                                                       lowerBodyJointVelocityFilterFrequencyHz);
       DoubleProvider lowerBodyJointVelocitySlopTime = new DoubleParameter("lowerBodyJointVelocityBacklashSlopTime", registry, lowerBodyJointVelocityBacklashSlopTime);
       sensorProcessing.addSensorAlphaFilterWithSensorsToIgnore(lowerBodyJointVelocityAlphaFilter, false, JOINT_VELOCITY, armJointNames);
       sensorProcessing.addJointVelocityBacklashFilterWithJointsToIgnore(lowerBodyJointVelocitySlopTime, false, armJointNames);
 
       // Lower body: Apply an alpha filter on the position to be in phase with the velocity
-      DoubleProvider lowerBodyJointPositionAlphaFilter = sensorProcessing.createAlphaFilter("lowerBodyJointPositionAlphaFilter",
+      DoubleProvider lowerBodyJointPositionAlphaFilter = sensorProcessing.createAlphaFilter("lowerBodyJointPositionBreakFrequency",
                                                                                             lowerBodyJointPositionFilterFrequencyHz);
       sensorProcessing.addSensorAlphaFilterWithSensorsToIgnore(lowerBodyJointPositionAlphaFilter, false, JOINT_POSITION, armJointNames);
 
       if (doElasticityCompensation)
       {
-         DoubleProvider elasticityAlphaFilter = sensorProcessing.createAlphaFilter("jointDeflectionDotAlphaFilter", jointElasticityFilterFrequencyHz);
+         DoubleProvider elasticityAlphaFilter = sensorProcessing.createAlphaFilter("jointDeflectionDotBreakFrequency", jointElasticityFilterFrequencyHz);
          DoubleProvider maxDeflection = sensorProcessing.createMaxDeflection("jointAngleMaxDeflection", maximumDeflection);
-         Map<OneDoFJoint, DoubleProvider> jointPositionStiffness = sensorProcessing.createStiffness("stiffness", defaultJointStiffness, jointSpecificStiffness);
+         Map<OneDoFJointBasics, DoubleProvider> jointPositionStiffness = sensorProcessing.createStiffness("stiffness", defaultJointStiffness, jointSpecificStiffness);
 
          Map<String, Integer> filteredTauForElasticity = sensorProcessing.addSensorAlphaFilter(elasticityAlphaFilter, true, JOINT_TAU);
          sensorProcessing.addJointPositionElasticyCompensatorWithJointsToIgnore(jointPositionStiffness, maxDeflection, filteredTauForElasticity, false,
@@ -166,11 +164,11 @@ public class ValkyrieStateEstimatorParameters extends StateEstimatorParameters
       sensorProcessing.addJointVelocityBacklashFilterOnlyForSpecifiedJoints(armJointVelocitySlopTime, false, armJointNames);
 
       // Arm joints: Apply an alpha filter on the position to be in phase with the velocity
-      DoubleProvider armJointPositionAlphaFilter = sensorProcessing.createAlphaFilter("armJointPositionAlphaFilter", armJointPositionFilterFrequencyHz);
+      DoubleProvider armJointPositionAlphaFilter = sensorProcessing.createAlphaFilter("armJointPositionBreakFrequency", armJointPositionFilterFrequencyHz);
       sensorProcessing.addSensorAlphaFilterOnlyForSpecifiedSensors(armJointPositionAlphaFilter, false, JOINT_POSITION, armJointNames);
 
       // Filter the finger joint position a lot as they're super noisy.
-      DoubleProvider fingerPositionAlphaFilter = sensorProcessing.createAlphaFilter("fingerPositionAlphaFilter", fingerPositionFilterFrequencyHz);
+      DoubleProvider fingerPositionAlphaFilter = sensorProcessing.createAlphaFilter("fingerPositionBreakFrequency", fingerPositionFilterFrequencyHz);
       sensorProcessing.addSensorAlphaFilterOnlyForSpecifiedSensors(fingerPositionAlphaFilter, false, JOINT_POSITION, createArrayWithFingerJointNames());
 
       //imu
@@ -224,7 +222,7 @@ public class ValkyrieStateEstimatorParameters extends StateEstimatorParameters
    @Override
    public boolean isRunningOnRealRobot()
    {
-      return runningOnRealRobot;
+      return target == RobotTarget.REAL_ROBOT;
    }
 
    @Override
@@ -300,7 +298,7 @@ public class ValkyrieStateEstimatorParameters extends StateEstimatorParameters
    @Override
    public double getIMUJointVelocityEstimationBacklashSlopTime()
    {
-      return lowerBodyJointVelocityBacklashSlopTime;
+      return 0.0;
    }
 
    @Override
@@ -328,21 +326,9 @@ public class ValkyrieStateEstimatorParameters extends StateEstimatorParameters
    }
 
    @Override
-   public double getContactThresholdForce()
-   {
-      return 120.0;
-   }
-
-   @Override
-   public double getFootSwitchCoPThresholdFraction()
-   {
-      return 0.02;
-   }
-
-   @Override
    public boolean useIMUsForSpineJointVelocityEstimation()
    {
-      return runningOnRealRobot;
+      return target == RobotTarget.REAL_ROBOT;
    }
 
    @Override
@@ -362,16 +348,13 @@ public class ValkyrieStateEstimatorParameters extends StateEstimatorParameters
    }
 
    @Override
-   public double getContactThresholdHeight()
+   public FootSwitchFactory getFootSwitchFactory()
    {
-      return 0.05;
-   }
-
-   @Override
-   public FootSwitchType getFootSwitchType()
-   {
-      return FootSwitchType.WrenchBased;
-      //      return runningOnRealRobot ? FootSwitchType.WrenchAndContactSensorFused : FootSwitchType.WrenchBased;
+      WrenchBasedFootSwitchFactory footSwitchFactory = new WrenchBasedFootSwitchFactory();
+      footSwitchFactory.setDefaultContactThresholdForce(120.0);
+      footSwitchFactory.setDefaultCoPThresholdFraction(0.02);
+      footSwitchFactory.setDefaultSecondContactThresholdForceIgnoringCoP(Double.POSITIVE_INFINITY);
+      return footSwitchFactory;
    }
 
    @Override
@@ -389,7 +372,7 @@ public class ValkyrieStateEstimatorParameters extends StateEstimatorParameters
    @Override
    public boolean requestFootForceSensorCalibrationAtStart()
    {
-      return runningOnRealRobot;
+      return target == RobotTarget.REAL_ROBOT;
    }
 
    @Override

@@ -6,6 +6,15 @@ import us.ihmc.euclid.tuple2D.Vector2D;
 
 public class SmoothCMPPlannerParameters extends AbstractICPPlannerParameters
 {
+   private static final boolean adjustPlanForSingleSupport = false;
+   private static final boolean adjustPlanForInitialDoubleSupport = true;
+   private static final boolean adjustPlanForEachDoubleSupport = true;
+   private static final boolean adjustPlanWhenGoingToStand = true;
+
+   private static final boolean doContinuousReplanningForStanding = false;
+   private static final boolean doContinuousReplanningForTransfer = false;
+   private static final boolean doContinuousReplanningForSwing = false;
+
    /**
     * Vector offsets relative to centroid of support polygon defined copOffsetFrames
     */
@@ -14,17 +23,7 @@ public class SmoothCMPPlannerParameters extends AbstractICPPlannerParameters
     * Bounds of the CoP offsets in the foot frame
     */
    protected final EnumMap<CoPPointName, Vector2D> copOffsetBoundsInFootFrame = new EnumMap<>(CoPPointName.class);
-   protected final EnumMap<CoPPointName, CoPSupportPolygonNames> copOffsetFrameNames = new EnumMap<>(CoPPointName.class);
 
-   /**
-    * Order list of flags indicating whether specified bounding boxes should be used to constrain the CoP point
-    */
-   protected final EnumMap<CoPPointName, Boolean> constrainToMinMax = new EnumMap<>(CoPPointName.class);
-   /**
-    * Order list of flags indicating whether CoP should reside within the support polygon specified in copOffsetFrames
-    */
-   protected final EnumMap<CoPPointName, Boolean> constrainToSupportPolygon = new EnumMap<>(CoPPointName.class);
-   protected final EnumMap<CoPPointName, CoPSupportPolygonNames> stepLengthOffsetPolygon = new EnumMap<>(CoPPointName.class);
    /**
     * Ordered list of fractions indicating whether CoP offset changes with step length
     */
@@ -52,49 +51,34 @@ public class SmoothCMPPlannerParameters extends AbstractICPPlannerParameters
    {
       super(modelScale);
 
-      this.swingCopPointsToPlan = new CoPPointName[] {CoPPointName.BALL_COP, CoPPointName.TOE_COP};
-      this.transferCoPPointsToPlan = new CoPPointName[] {CoPPointName.MIDFEET_COP, CoPPointName.HEEL_COP};
-      this.exitCoPName = CoPPointName.TOE_COP;
-      this.entryCoPName = CoPPointName.HEEL_COP;
+      this.swingCopPointsToPlan = new CoPPointName[] {CoPPointName.MIDFOOT_COP, CoPPointName.EXIT_COP};
+      this.transferCoPPointsToPlan = new CoPPointName[] {CoPPointName.MIDFEET_COP, CoPPointName.ENTRY_COP};
+      this.exitCoPName = CoPPointName.EXIT_COP;
+      this.entryCoPName = CoPPointName.ENTRY_COP;
       this.endCoPName = CoPPointName.MIDFEET_COP;
-      
-      copOffsetFrameNames.put(CoPPointName.HEEL_COP, CoPSupportPolygonNames.SUPPORT_FOOT_POLYGON);
-      copOffsetFrameNames.put(CoPPointName.BALL_COP, CoPSupportPolygonNames.SUPPORT_FOOT_POLYGON);
-      copOffsetFrameNames.put(CoPPointName.TOE_COP, CoPSupportPolygonNames.SUPPORT_FOOT_POLYGON);
-      copOffsetFrameNames.put(CoPPointName.MIDFEET_COP, CoPSupportPolygonNames.INITIAL_DOUBLE_SUPPORT_POLYGON);
-
-      stepLengthOffsetPolygon.put(CoPPointName.MIDFEET_COP, CoPSupportPolygonNames.NULL);
-      stepLengthOffsetPolygon.put(CoPPointName.HEEL_COP, CoPSupportPolygonNames.INITIAL_SWING_POLYGON);
-      stepLengthOffsetPolygon.put(CoPPointName.BALL_COP, CoPSupportPolygonNames.FINAL_SWING_POLYGON);
-      stepLengthOffsetPolygon.put(CoPPointName.TOE_COP, CoPSupportPolygonNames.FINAL_SWING_POLYGON);
-
-      constrainToMinMax.put(CoPPointName.MIDFEET_COP, false);
-      constrainToMinMax.put(CoPPointName.HEEL_COP, true);
-      constrainToMinMax.put(CoPPointName.BALL_COP, true);
-      constrainToMinMax.put(CoPPointName.TOE_COP, true);
-
-      constrainToSupportPolygon.put(CoPPointName.MIDFEET_COP, false);
-      constrainToSupportPolygon.put(CoPPointName.HEEL_COP, false);
-      constrainToSupportPolygon.put(CoPPointName.BALL_COP, false);
-      constrainToSupportPolygon.put(CoPPointName.TOE_COP, false);
 
       stepLengthToCoPOffsetFactor.put(CoPPointName.MIDFEET_COP, 0.0);
-      stepLengthToCoPOffsetFactor.put(CoPPointName.HEEL_COP, 1.0 / 3.0);
-      stepLengthToCoPOffsetFactor.put(CoPPointName.BALL_COP, 1.0 / 8.0);
-      stepLengthToCoPOffsetFactor.put(CoPPointName.TOE_COP, 1.0 / 3.0);
+      stepLengthToCoPOffsetFactor.put(CoPPointName.ENTRY_COP, 1.0 / 3.0);
+      stepLengthToCoPOffsetFactor.put(CoPPointName.MIDFOOT_COP, 1.0 / 8.0);
+      stepLengthToCoPOffsetFactor.put(CoPPointName.EXIT_COP, 1.0 / 3.0);
 
       copOffsetsInFootFrame.put(CoPPointName.MIDFEET_COP, new Vector2D(0.0, 0.0));
-      copOffsetsInFootFrame.put(CoPPointName.HEEL_COP, new Vector2D(0.0, -0.005));
-      copOffsetsInFootFrame.put(CoPPointName.BALL_COP, new Vector2D(0.0, 0.01));
-      copOffsetsInFootFrame.put(CoPPointName.TOE_COP, new Vector2D(0.0, 0.025));
+      copOffsetsInFootFrame.put(CoPPointName.ENTRY_COP, new Vector2D(0.0, -0.005));
+      copOffsetsInFootFrame.put(CoPPointName.MIDFOOT_COP, new Vector2D(0.0, 0.01));
+      copOffsetsInFootFrame.put(CoPPointName.EXIT_COP, new Vector2D(0.0, 0.025));
 
       copOffsetBoundsInFootFrame.put(CoPPointName.MIDFEET_COP, new Vector2D(Double.NEGATIVE_INFINITY, Double.POSITIVE_INFINITY));
-      copOffsetBoundsInFootFrame.put(CoPPointName.HEEL_COP, new Vector2D(-0.04, 0.03));
-      copOffsetBoundsInFootFrame.put(CoPPointName.BALL_COP, new Vector2D(0.0, 0.055));
-      copOffsetBoundsInFootFrame.put(CoPPointName.TOE_COP, new Vector2D(0.0, 0.08));
+      copOffsetBoundsInFootFrame.put(CoPPointName.ENTRY_COP, new Vector2D(-0.04, 0.03));
+      copOffsetBoundsInFootFrame.put(CoPPointName.MIDFOOT_COP, new Vector2D(0.0, 0.055));
+      copOffsetBoundsInFootFrame.put(CoPPointName.EXIT_COP, new Vector2D(0.0, 0.08));
    }
 
-   public boolean planWithAngularMomentum()
+   public boolean planSwingAngularMomentum()
+   {
+      return false;
+   }
+
+   public boolean planTransferAngularMomentum()
    {
       return false;
    }
@@ -167,26 +151,10 @@ public class SmoothCMPPlannerParameters extends AbstractICPPlannerParameters
       return copOffsetsInFootFrame;
    }
 
-   public EnumMap<CoPPointName, CoPSupportPolygonNames> getSupportPolygonNames()
-   {
-      return copOffsetFrameNames;
-   }
-
-   @Override
-   public CoPPointName getEntryCoPName()
-   {
-      return entryCoPName;
-   }
-
    @Override
    public CoPPointName getExitCoPName()
    {
       return exitCoPName;
-   }
-
-   public CoPPointName getEndCoPName()
-   {
-      return endCoPName;
    }
 
    public CoPPointName[] getSwingCoPPointsToPlan()
@@ -197,21 +165,6 @@ public class SmoothCMPPlannerParameters extends AbstractICPPlannerParameters
    public CoPPointName[] getTransferCoPPointsToPlan()
    {
       return transferCoPPointsToPlan;
-   }
-
-   public EnumMap<CoPPointName, Boolean> getIsConstrainedToMinMaxFlags()
-   {
-      return constrainToMinMax;
-   }
-
-   public EnumMap<CoPPointName, Boolean> getIsConstrainedToSupportPolygonFlags()
-   {
-      return constrainToSupportPolygon;
-   }
-
-   public EnumMap<CoPPointName, CoPSupportPolygonNames> getStepLengthCoPOffsetPolygons()
-   {
-      return stepLengthOffsetPolygon;
    }
 
    @Override
@@ -229,5 +182,40 @@ public class SmoothCMPPlannerParameters extends AbstractICPPlannerParameters
    public AngularMomentumEstimationParameters getAngularMomentumEstimationParameters()
    {
       return new AngularMomentumEstimationParameters();
+   }
+
+   public boolean adjustCoPPlanForSingleSupportContinuity()
+   {
+      return adjustPlanForSingleSupport;
+   }
+
+   public boolean adjustInitialCoPPlanForDoubleSupportContinuity()
+   {
+      return adjustPlanForInitialDoubleSupport;
+   }
+
+   public boolean adjustEveryCoPPlanForDoubleSupportContinuity()
+   {
+      return adjustPlanForEachDoubleSupport;
+   }
+
+   public boolean adjustCoPPlanForStandingContinuity()
+   {
+      return adjustPlanWhenGoingToStand;
+   }
+
+   public boolean doContinuousReplanningForStanding()
+   {
+      return doContinuousReplanningForStanding;
+   }
+
+   public boolean doContinuousReplanningForTransfer()
+   {
+      return doContinuousReplanningForTransfer;
+   }
+
+   public boolean doContinuousReplanningForSwing()
+   {
+      return doContinuousReplanningForSwing;
    }
 }

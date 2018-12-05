@@ -1,13 +1,20 @@
 package us.ihmc.avatar.testTools;
 
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.fail;
+import static org.junit.Assert.*;
 
-import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.concurrent.ConcurrentLinkedQueue;
+import java.util.concurrent.atomic.AtomicBoolean;
 
+import org.apache.commons.lang3.mutable.MutableInt;
+
+import controller_msgs.msg.dds.MessageCollection;
+import controller_msgs.msg.dds.ValkyrieHandFingerTrajectoryMessage;
+import controller_msgs.msg.dds.WholeBodyTrajectoryMessage;
 import us.ihmc.avatar.DRCStartingLocation;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.factory.AvatarSimulation;
@@ -20,30 +27,34 @@ import us.ihmc.avatar.obstacleCourseTests.ForceSensorHysteresisCreator;
 import us.ihmc.avatar.simulationStarter.DRCSimulationStarter;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.footstepGenerator.HeadingAndVelocityEvaluationScriptParameters;
+import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.ControllerAPIDefinition;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.ControllerStateTransitionFactory;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.HighLevelControllerStateFactory;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.HighLevelHumanoidControllerFactory;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHumanoidControllerToolbox;
 import us.ihmc.commons.PrintTools;
 import us.ihmc.commons.thread.ThreadTools;
+import us.ihmc.communication.IHMCROS2Publisher;
+import us.ihmc.communication.ROS2Tools;
+import us.ihmc.communication.ROS2Tools.MessageTopicNameGenerator;
 import us.ihmc.communication.controllerAPI.command.Command;
 import us.ihmc.communication.net.LocalObjectCommunicator;
-import us.ihmc.communication.net.PacketConsumer;
-import us.ihmc.communication.packetCommunicator.PacketCommunicator;
-import us.ihmc.communication.packets.Packet;
-import us.ihmc.communication.util.NetworkPorts;
+import us.ihmc.communication.net.ObjectConsumer;
 import us.ihmc.euclid.geometry.BoundingBox3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.tools.ReferenceFrameTools;
+import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.humanoidBehaviors.behaviors.scripts.engine.ScriptBasedControllerCommandGenerator;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelControllerName;
+import us.ihmc.humanoidRobotics.communication.subscribers.PelvisPoseCorrectionCommunicatorInterface;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
-import us.ihmc.humanoidRobotics.kryo.IHMCCommunicationKryoNetClassList;
 import us.ihmc.jMonkeyEngineToolkit.camera.CameraConfiguration;
+import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
-import us.ihmc.robotics.screwTheory.InverseDynamicsCalculatorListener;
+import us.ihmc.ros2.Ros2Node;
 import us.ihmc.sensorProcessing.frames.CommonHumanoidReferenceFrames;
 import us.ihmc.simulationConstructionSetTools.bambooTools.BambooTools;
 import us.ihmc.simulationConstructionSetTools.simulationTesting.NothingChangedVerifier;
@@ -57,7 +68,9 @@ import us.ihmc.simulationconstructionset.util.RobotController;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
 import us.ihmc.simulationconstructionset.util.simulationTesting.SimulationTestingParameters;
+import us.ihmc.yoVariables.listener.VariableChangedListener;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoVariable;
 
 public class DRCSimulationTestHelper
@@ -66,11 +79,11 @@ public class DRCSimulationTestHelper
    private HumanoidFloatingRootJointRobot sdfRobot;
    private AvatarSimulation avatarSimulation;
 
-   protected final PacketCommunicator controllerCommunicator = PacketCommunicator.createIntraprocessPacketCommunicator(NetworkPorts.CONTROLLER_PORT,
-         new IHMCCommunicationKryoNetClassList());
    private CommonAvatarEnvironmentInterface testEnvironment = new DefaultCommonAvatarEnvironment();
 
    private final SimulationTestingParameters simulationTestingParameters;
+
+   private final Ros2Node ros2Node = ROS2Tools.createRos2Node(PubSubImplementation.INTRAPROCESS, "ihmc_simulation_test_helper");
 
    private NothingChangedVerifier nothingChangedVerifier;
    private BlockingSimulationRunner blockingSimulationRunner;
@@ -88,24 +101,32 @@ public class DRCSimulationTestHelper
    private boolean addFootstepMessageGenerator = false;
    private boolean useHeadingAndVelocityScript = false;
    private boolean cheatWithGroundHeightAtFootstep = false;
-   private HighLevelControllerStateFactory controllerStateFactory = null;
-   private ControllerStateTransitionFactory<HighLevelControllerName> controllerStateTransitionFactory = null;
    private DRCRobotInitialSetup<HumanoidFloatingRootJointRobot> initialSetup = null;
    private HeadingAndVelocityEvaluationScriptParameters walkingScriptParameters = null;
+   private PelvisPoseCorrectionCommunicatorInterface externalPelvisCorrectorSubscriber = null;
    private final DRCGuiInitialSetup guiInitialSetup;
 
    private final boolean checkIfDesiredICPHasBeenInvalid = true;
+   private boolean checkForDesiredICPContinuity = false;
+   private double maxICPPlanError = 0.04;
+   protected final String robotName;
+
+   @SuppressWarnings("rawtypes")
+   private final Map<Class<?>, IHMCROS2Publisher> defaultControllerPublishers = new HashMap<>();
 
    public DRCSimulationTestHelper(SimulationTestingParameters simulationTestParameters, DRCRobotModel robotModel)
    {
       this(simulationTestParameters, robotModel, null);
    }
 
-   public DRCSimulationTestHelper(SimulationTestingParameters simulationTestParameters, DRCRobotModel robotModel, CommonAvatarEnvironmentInterface testEnvironment)
+   public DRCSimulationTestHelper(SimulationTestingParameters simulationTestParameters, DRCRobotModel robotModel,
+                                  CommonAvatarEnvironmentInterface testEnvironment)
    {
       this.robotModel = robotModel;
       this.walkingControlParameters = robotModel.getWalkingControllerParameters();
       this.simulationTestingParameters = simulationTestParameters;
+
+      robotName = robotModel.getSimpleRobotName();
 
       if (testEnvironment != null)
          this.testEnvironment = testEnvironment;
@@ -118,10 +139,27 @@ public class DRCSimulationTestHelper
       guiInitialSetup = new DRCGuiInitialSetup(false, false, simulationTestingParameters);
 
       networkProcessorParameters.enableNetworkProcessor(false);
+      networkProcessorParameters.enableLocalControllerCommunicator(true);
+
+      List<Class<? extends Command<?, ?>>> controllerSupportedCommands = ControllerAPIDefinition.getControllerSupportedCommands();
+
+      for (Class<? extends Command<?, ?>> command : controllerSupportedCommands)
+      {
+         Class<?> messageClass = ROS2Tools.newMessageInstance(command).getMessageClass();
+         IHMCROS2Publisher<?> defaultPublisher = createPublisherForController(messageClass);
+         defaultControllerPublishers.put(messageClass, defaultPublisher);
+      }
+
+      defaultControllerPublishers.put(WholeBodyTrajectoryMessage.class, createPublisherForController(WholeBodyTrajectoryMessage.class));
+      defaultControllerPublishers.put(MessageCollection.class, createPublisherForController(MessageCollection.class));
+      
+      defaultControllerPublishers.put(ValkyrieHandFingerTrajectoryMessage.class, createPublisherForController(ValkyrieHandFingerTrajectoryMessage.class));
    }
 
    /**
-    * Use {@link #DRCSimulationTestHelper(SimulationTestingParameters, DRCRobotModel, CommonAvatarEnvironmentInterface)} instead.
+    * Use
+    * {@link #DRCSimulationTestHelper(SimulationTestingParameters, DRCRobotModel, CommonAvatarEnvironmentInterface)}
+    * instead.
     */
    @Deprecated
    public void setTestEnvironment(CommonAvatarEnvironmentInterface testEnvironment)
@@ -139,29 +177,19 @@ public class DRCSimulationTestHelper
    {
       simulationStarter.setRunMultiThreaded(simulationTestingParameters.getRunMultiThreaded());
       simulationStarter.setUsePerfectSensors(simulationTestingParameters.getUsePefectSensors());
-      if (controllerStateFactory != null)
-         simulationStarter.registerHighLevelControllerState(controllerStateFactory);
-      if (controllerStateTransitionFactory != null)
-         simulationStarter.registerControllerStateTransition(controllerStateTransitionFactory);
       if (initialSetup != null)
          simulationStarter.setRobotInitialSetup(initialSetup);
       simulationStarter.setStartingLocationOffset(startingLocation);
       simulationStarter.setGuiInitialSetup(guiInitialSetup);
       simulationStarter.setInitializeEstimatorToActual(true);
       simulationStarter.setFlatGroundWalkingScriptParameters(walkingScriptParameters);
+      if (externalPelvisCorrectorSubscriber != null)
+         simulationStarter.setExternalPelvisCorrectorSubscriber(externalPelvisCorrectorSubscriber);
 
       if (addFootstepMessageGenerator)
          simulationStarter.addFootstepMessageGenerator(useHeadingAndVelocityScript, cheatWithGroundHeightAtFootstep);
 
-      try
-      {
-         controllerCommunicator.connect();
-      }
-      catch (IOException e)
-      {
-         throw new RuntimeException(e);
-      }
-
+      networkProcessorParameters.enableLocalControllerCommunicator(true);
       simulationStarter.createSimulation(networkProcessorParameters, automaticallySpawnSimulation, false);
 
       scs = simulationStarter.getSimulationConstructionSet();
@@ -171,6 +199,7 @@ public class DRCSimulationTestHelper
       {
          blockingSimulationRunner = new BlockingSimulationRunner(scs, 60.0 * 10.0);
          simulationStarter.attachControllerFailureListener(direction -> blockingSimulationRunner.notifyControllerHasFailed());
+         simulationStarter.attachControllerFailureListener(direction -> notifyControllerHasFailed());
          blockingSimulationRunner.createValidDesiredICPListener();
          blockingSimulationRunner.setCheckDesiredICPPosition(checkIfDesiredICPHasBeenInvalid);
       }
@@ -183,6 +212,9 @@ public class DRCSimulationTestHelper
       {
          nothingChangedVerifier = null;
       }
+
+      if (checkForDesiredICPContinuity)
+         setupPlanContinuityTesters();
    }
 
    public YoVariable<?> getYoVariable(String name)
@@ -224,12 +256,6 @@ public class DRCSimulationTestHelper
    public AvatarSimulation getAvatarSimulation()
    {
       return avatarSimulation;
-   }
-
-   public void setInverseDynamicsCalculatorListener(InverseDynamicsCalculatorListener inverseDynamicsCalculatorListener)
-   {
-      HighLevelHumanoidControllerFactory controllerFactory = avatarSimulation.getHighLevelHumanoidControllerFactory();
-      controllerFactory.setInverseDynamicsCalculatorListener(inverseDynamicsCalculatorListener);
    }
 
    public FullHumanoidRobotModel getControllerFullRobotModel()
@@ -308,6 +334,34 @@ public class DRCSimulationTestHelper
       }
    }
 
+   // TODO: move this into the blocking simulation runner.
+   public void simulateAndBlock(int simulationTicks) throws SimulationExceededMaximumTimeException, ControllerFailureException
+   {
+      double startTime = scs.getTime();
+      scs.simulate(simulationTicks);
+
+      BlockingSimulationRunner.waitForSimulationToFinish(scs, 600, true);
+      if (hasControllerFailed.get())
+      {
+         throw new ControllerFailureException("Controller failure has been detected.");
+      }
+
+      double endTime = scs.getTime();
+      double elapsedTime = endTime - startTime;
+
+      if (Math.abs(elapsedTime - scs.getDT() * simulationTicks) > 0.01)
+      {
+         throw new SimulationExceededMaximumTimeException("Elapsed time didn't equal requested. Sim probably crashed");
+      }
+   }
+
+   private final AtomicBoolean hasControllerFailed = new AtomicBoolean(false);
+   public void notifyControllerHasFailed()
+   {
+      hasControllerFailed.set(true);
+      scs.stop();
+   }
+
    public void destroySimulation()
    {
       if (blockingSimulationRunner != null)
@@ -327,14 +381,14 @@ public class DRCSimulationTestHelper
          {
             simulatedSensorCommunicator.disconnect();
          }
-
-      }
-      if (controllerCommunicator != null)
-      {
-         controllerCommunicator.disconnect();
       }
 
-      simulationStarter.close();
+      if (simulationStarter != null)
+         simulationStarter.close();
+      simulationStarter = null;
+
+      ros2Node.destroy();
+      ReferenceFrameTools.clearWorldFrameTree();
    }
 
    public boolean simulateAndBlockAndCatchExceptions(double simulationTime) throws SimulationExceededMaximumTimeException
@@ -342,6 +396,21 @@ public class DRCSimulationTestHelper
       try
       {
          simulateAndBlock(simulationTime);
+         return true;
+      }
+      catch (Exception e)
+      {
+         this.caughtException = e;
+         PrintTools.error(this, e.getMessage());
+         return false;
+      }
+   }
+
+   public boolean simulateAndBlockAndCatchExceptions(int simulationTicks) throws SimulationExceededMaximumTimeException
+   {
+      try
+      {
+         simulateAndBlock(simulationTicks);
          return true;
       }
       catch (Exception e)
@@ -369,7 +438,7 @@ public class DRCSimulationTestHelper
          BambooTools.createVideoWithDateTimeClassMethodAndShareOnSharedDriveIfAvailable(simplifiedRobotModelName, scs, callStackHeight);
       }
    }
-   
+
    public void createVideo(String videoName)
    {
       if (simulationTestingParameters.getCreateSCSVideos())
@@ -406,7 +475,7 @@ public class DRCSimulationTestHelper
    public void setupCameraForUnitTest(boolean enableTracking, Point3D cameraFix, Point3D cameraPosition)
    {
       CameraConfiguration cameraConfiguration = new CameraConfiguration("testCamera");
-      
+
       cameraConfiguration.setCameraFix(cameraFix);
       cameraConfiguration.setCameraPosition(cameraPosition);
       cameraConfiguration.setCameraTracking(enableTracking, true, true, false);
@@ -460,21 +529,6 @@ public class DRCSimulationTestHelper
       return caughtException;
    }
 
-   public void send(Packet<?> packet)
-   {
-      controllerCommunicator.send(packet);
-   }
-
-   public <T extends Packet<?>> void attachListener(Class<T> clazz, PacketConsumer<T> listener)
-   {
-      controllerCommunicator.attachListener(clazz, listener);
-   }
-
-   public PacketCommunicator getControllerCommunicator()
-   {
-      return controllerCommunicator;
-   }
-
    public ArrayList<RobotController> getFootForceSensorHysteresisCreators()
    {
       SideDependentList<ArrayList<WrenchCalculatorInterface>> footForceSensors = new SideDependentList<ArrayList<WrenchCalculatorInterface>>();
@@ -517,6 +571,17 @@ public class DRCSimulationTestHelper
       }
    }
 
+   public void setCheckForDesiredICPContinuity(boolean checkForDesiredICPContinuity, double maxICPPlanError)
+   {
+      this.checkForDesiredICPContinuity = checkForDesiredICPContinuity;
+      this.maxICPPlanError = maxICPPlanError;
+   }
+
+   public void setMaxICPPlanError(double maxICPPlanError)
+   {
+      this.maxICPPlanError = maxICPPlanError;
+   }
+
    public void setStartingLocation(DRCStartingLocation startingLocation)
    {
       if (startingLocation != null)
@@ -545,9 +610,14 @@ public class DRCSimulationTestHelper
       this.cheatWithGroundHeightAtFootstep = cheatWithGroundHeightAtFootstep;
    }
 
-   public void setHighLevelControllerStateFactory(HighLevelControllerStateFactory controllerStateFactory)
+   public void registerHighLevelControllerState(HighLevelControllerStateFactory controllerFactory)
    {
-      this.controllerStateFactory = controllerStateFactory;
+      simulationStarter.registerHighLevelControllerState(controllerFactory);
+   }
+
+   public void registerControllerStateTransition(ControllerStateTransitionFactory<HighLevelControllerName> controllerStateTransitionFactory)
+   {
+      simulationStarter.registerControllerStateTransition(controllerStateTransitionFactory);
    }
 
    public void setInitialSetup(DRCRobotInitialSetup<HumanoidFloatingRootJointRobot> initialSetup)
@@ -564,4 +634,110 @@ public class DRCSimulationTestHelper
    {
       this.networkProcessorParameters = networkProcessorParameters;
    }
+
+   public void setExternalPelvisCorrectorSubscriber(PelvisPoseCorrectionCommunicatorInterface externalPelvisCorrectorSubscriber)
+   {
+      this.externalPelvisCorrectorSubscriber = externalPelvisCorrectorSubscriber;
+   }
+
+   public String getRobotName()
+   {
+      return robotName;
+   }
+
+   public Ros2Node getRos2Node()
+   {
+      return ros2Node;
+   }
+
+   @SuppressWarnings("unchecked")
+   public void publishToController(Object message)
+   {
+      defaultControllerPublishers.get(message.getClass()).publish(message);
+   }
+
+   public <T> IHMCROS2Publisher<T> createPublisherForController(Class<T> messageType)
+   {
+      return createPublisher(messageType, ControllerAPIDefinition.getSubscriberTopicNameGenerator(robotName));
+   }
+
+   public <T> IHMCROS2Publisher<T> createPublisher(Class<T> messageType, MessageTopicNameGenerator generator)
+   {
+      return ROS2Tools.createPublisher(ros2Node, messageType, generator);
+   }
+
+   public <T> IHMCROS2Publisher<T> createPublisher(Class<T> messageType, String topicName)
+   {
+      return ROS2Tools.createPublisher(ros2Node, messageType, topicName);
+   }
+
+   public <T> void createSubscriberFromController(Class<T> messageType, ObjectConsumer<T> consumer)
+   {
+      createSubscriber(messageType, ControllerAPIDefinition.getPublisherTopicNameGenerator(robotName), consumer);
+   }
+
+   public <T> void createSubscriber(Class<T> messageType, MessageTopicNameGenerator generator, ObjectConsumer<T> consumer)
+   {
+      ROS2Tools.createCallbackSubscription(ros2Node, messageType, generator, s -> consumer.consumeObject(s.takeNextData()));
+   }
+
+   public <T> void createSubscriber(Class<T> messageType, String topicName, ObjectConsumer<T> consumer)
+   {
+      ROS2Tools.createCallbackSubscription(ros2Node, messageType, topicName, s -> consumer.consumeObject(s.takeNextData()));
+   }
+
+   private void setupPlanContinuityTesters()
+   {
+      final YoDouble desiredICPX = (YoDouble) getYoVariable("desiredICPX");
+      final YoDouble desiredICPY = (YoDouble) getYoVariable("desiredICPY");
+
+      final Point2D previousDesiredICP = new Point2D();
+      final Point2D desiredICP = new Point2D();
+
+      final int ticksToInitialize = 100;
+      final MutableInt xTicks = new MutableInt(0);
+      final MutableInt yTicks = new MutableInt(0);
+
+      desiredICPX.addVariableChangedListener(new VariableChangedListener()
+      {
+         @Override
+         public void notifyOfVariableChange(YoVariable<?> v)
+         {
+            if (scs == null || !scs.isSimulating())
+               return; // Do not perform this check if the sim is not running, so the user can scrub the data when sim is done.
+
+            desiredICP.setX(desiredICPX.getDoubleValue());
+            if (xTicks.getValue() > ticksToInitialize && yTicks.getValue() > ticksToInitialize)
+            {
+               assertTrue("ICP plan desired jumped from " + previousDesiredICP + " to " + desiredICP + " in one control DT.",
+                          previousDesiredICP.distance(desiredICP) < maxICPPlanError);
+            }
+            previousDesiredICP.set(desiredICP);
+
+            xTicks.setValue(xTicks.getValue() + 1);
+         }
+      });
+
+      desiredICPY.addVariableChangedListener(new VariableChangedListener()
+      {
+         @Override
+         public void notifyOfVariableChange(YoVariable<?> v)
+         {
+            if (scs == null || !scs.isSimulating())
+               return; // Do not perform this check if the sim is not running, so the user can scrub the data when sim is done.
+
+            desiredICP.setY(desiredICPY.getDoubleValue());
+            if (xTicks.getValue() > ticksToInitialize && yTicks.getValue() > ticksToInitialize)
+            {
+               assertTrue("ICP plan desired jumped from " + previousDesiredICP + " to " + desiredICP + " in one control DT.",
+                          previousDesiredICP.distance(desiredICP) < maxICPPlanError);
+            }
+            previousDesiredICP.set(desiredICP);
+
+            yTicks.setValue(yTicks.getValue() + 1);
+         }
+      });
+   }
+
+
 }

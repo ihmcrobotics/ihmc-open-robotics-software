@@ -11,8 +11,8 @@ import gnu.trove.map.hash.TObjectIntHashMap;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
+import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.robotModels.FullRobotModel;
-import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.robotics.sensors.ForceSensorDataHolder;
 import us.ihmc.robotics.sensors.ForceSensorDefinition;
 import us.ihmc.robotics.sensors.IMUDefinition;
@@ -29,11 +29,11 @@ public class SensorOutputMap implements SensorOutputMapReadOnly, RootJointPerfec
    private long timestamp;
    private long visionSensorTimestamp;
    private long sensorHeadPPSTimestamp;
-   private final TObjectDoubleMap<OneDoFJoint> jointPosition = new TObjectDoubleHashMap<>();
-   private final TObjectDoubleMap<OneDoFJoint> jointVelocity = new TObjectDoubleHashMap<>();
-   private final TObjectDoubleMap<OneDoFJoint> jointAcceleration = new TObjectDoubleHashMap<>();
-   private final TObjectDoubleMap<OneDoFJoint> jointTau = new TObjectDoubleHashMap<>();
-   private final TObjectIntMap<OneDoFJoint> jointEnabled = new TObjectIntHashMap<OneDoFJoint>();
+   private final TObjectDoubleMap<OneDoFJointBasics> jointPosition = new TObjectDoubleHashMap<>();
+   private final TObjectDoubleMap<OneDoFJointBasics> jointVelocity = new TObjectDoubleHashMap<>();
+   private final TObjectDoubleMap<OneDoFJointBasics> jointAcceleration = new TObjectDoubleHashMap<>();
+   private final TObjectDoubleMap<OneDoFJointBasics> jointTau = new TObjectDoubleHashMap<>();
+   private final TObjectIntMap<OneDoFJointBasics> jointEnabled = new TObjectIntHashMap<OneDoFJointBasics>();
    private final ArrayList<IMUSensor> imuSensors = new ArrayList<>();
    private final ForceSensorDataHolder forceSensorDataHolder;
    
@@ -47,7 +47,7 @@ public class SensorOutputMap implements SensorOutputMapReadOnly, RootJointPerfec
    public SensorOutputMap(FullRobotModel fullRobotModel, List<ForceSensorDefinition> forceSensorDefinitions)
    {
 
-      for (OneDoFJoint joint : fullRobotModel.getOneDoFJoints())
+      for (OneDoFJointBasics joint : fullRobotModel.getOneDoFJoints())
       {
          jointPosition.put(joint, Double.NaN);
          jointVelocity.put(joint, Double.NaN);
@@ -105,56 +105,56 @@ public class SensorOutputMap implements SensorOutputMapReadOnly, RootJointPerfec
    }
 
    @Override
-   public double getJointPositionProcessedOutput(OneDoFJoint oneDoFJoint)
+   public double getJointPositionProcessedOutput(OneDoFJointBasics oneDoFJoint)
    {
       return jointPosition.get(oneDoFJoint);
    }
 
-   public void setJointPositionProcessedOutput(OneDoFJoint oneDoFJoint, double position)
+   public void setJointPositionProcessedOutput(OneDoFJointBasics oneDoFJoint, double position)
    {
       this.jointPosition.put(oneDoFJoint, position);
    }
 
    @Override
-   public double getJointVelocityProcessedOutput(OneDoFJoint oneDoFJoint)
+   public double getJointVelocityProcessedOutput(OneDoFJointBasics oneDoFJoint)
    {
       return jointVelocity.get(oneDoFJoint);
    }
 
-   public void setJointVelocityProcessedOutput(OneDoFJoint oneDoFJoint, double velocity)
+   public void setJointVelocityProcessedOutput(OneDoFJointBasics oneDoFJoint, double velocity)
    {
       this.jointVelocity.put(oneDoFJoint, velocity);
    }
 
    @Override
-   public double getJointAccelerationProcessedOutput(OneDoFJoint oneDoFJoint)
+   public double getJointAccelerationProcessedOutput(OneDoFJointBasics oneDoFJoint)
    {
       return jointAcceleration.get(oneDoFJoint);
    }
 
-   public void setJointAccelerationProcessedOutput(OneDoFJoint oneDoFJoint, double acceleration)
+   public void setJointAccelerationProcessedOutput(OneDoFJointBasics oneDoFJoint, double acceleration)
    {
       this.jointAcceleration.put(oneDoFJoint, acceleration);
    }
 
    @Override
-   public double getJointTauProcessedOutput(OneDoFJoint oneDoFJoint)
+   public double getJointTauProcessedOutput(OneDoFJointBasics oneDoFJoint)
    {
       return jointTau.get(oneDoFJoint);
    }
 
-   public void setJointTauProcessedOutput(OneDoFJoint oneDoFJoint, double tau)
+   public void setJointTauProcessedOutput(OneDoFJointBasics oneDoFJoint, double tau)
    {
       this.jointTau.put(oneDoFJoint, tau);
    }
 
    @Override
-   public boolean isJointEnabled(OneDoFJoint oneDoFJoint)
+   public boolean isJointEnabled(OneDoFJointBasics oneDoFJoint)
    {
       return jointEnabled.get(oneDoFJoint) != 0;
    }
 
-   public void setJointEnabled(OneDoFJoint oneDoFJoint, boolean enabled)
+   public void setJointEnabled(OneDoFJointBasics oneDoFJoint, boolean enabled)
    {
       this.jointEnabled.put(oneDoFJoint, enabled ? 1 : 0);
    }

@@ -2,9 +2,8 @@ package us.ihmc.quadrupedRobotics.controlModules.foot;
 
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.FeedbackControlCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.FeedbackControlCommandList;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.InverseDynamicsCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.virtualModelControl.VirtualModelControlCommand;
-import us.ihmc.euclid.referenceFrame.FrameVector3D;
-import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.quadrupedRobotics.controller.QuadrupedControllerToolbox;
@@ -44,8 +43,15 @@ public class QuadrupedFootControlModule
    private final EventTrigger eventTrigger;
    private final StateMachine<QuadrupedFootStates, QuadrupedFootState> footStateMachine;
 
-   public QuadrupedFootControlModule(RobotQuadrant robotQuadrant, QuadrupedControllerToolbox controllerToolbox,
-                                     YoGraphicsListRegistry graphicsListRegistry, YoVariableRegistry parentRegistry)
+   // window after support is triggered by touchdown but before step time is up to make sure swing isn't triggered again
+   // TODO find a better solution. could be done by indexing steps
+   private static final double supportToSwingGlitchWindow = 0.15;
+   private final YoBoolean isFirstStep;
+
+   private final QuadrupedSwingState swingState;
+
+   public QuadrupedFootControlModule(RobotQuadrant robotQuadrant, QuadrupedControllerToolbox controllerToolbox, YoGraphicsListRegistry graphicsListRegistry,
+                                     YoVariableRegistry parentRegistry)
    {
       // control variables
       String prefix = robotQuadrant.getCamelCaseName();
@@ -54,10 +60,8 @@ public class QuadrupedFootControlModule
       this.stepCommandIsValid = new YoBoolean(prefix + "StepCommandIsValid", registry);
 
       // state machine
-      QuadrupedSupportState supportState = new QuadrupedSupportState(robotQuadrant, controllerToolbox.getFootContactState(robotQuadrant), stepCommandIsValid,
-                                                                     controllerToolbox.getRuntimeEnvironment().getRobotTimestamp(), currentStepCommand);
-      QuadrupedSwingState swingState = new QuadrupedSwingState(robotQuadrant, controllerToolbox, stepCommandIsValid, currentStepCommand, graphicsListRegistry,
-                                                               registry);
+      QuadrupedSupportState supportState = new QuadrupedSupportState(robotQuadrant, controllerToolbox, registry);
+      swingState = new QuadrupedSwingState(robotQuadrant, controllerToolbox, stepCommandIsValid, currentStepCommand, graphicsListRegistry, registry);
       moveViaWaypointsState = new QuadrupedMoveViaWaypointsState(robotQuadrant, controllerToolbox, registry);
 
       EventBasedStateMachineFactory<QuadrupedFootStates, QuadrupedFootState> factory = new EventBasedStateMachineFactory<>(QuadrupedFootStates.class);
@@ -82,6 +86,8 @@ public class QuadrupedFootControlModule
 
       eventTrigger = factory.buildEventTrigger();
       footStateMachine = factory.build(QuadrupedFootStates.SUPPORT);
+      isFirstStep = new YoBoolean(robotQuadrant.getShortName() + "_FirstStep", registry);
+      isFirstStep.set(true);
 
       parentRegistry.addChild(registry);
    }
@@ -133,20 +139,51 @@ public class QuadrupedFootControlModule
    {
       stepCommandIsValid.set(false);
       footStateMachine.resetToInitialState();
+      isFirstStep.set(true);
    }
 
    public void triggerStep(QuadrupedTimedStep stepCommand)
    {
-      if (footStateMachine.getCurrentStateKey() == QuadrupedFootStates.SUPPORT)
+      if (footStateMachine.getCurrentStateKey() == QuadrupedFootStates.SUPPORT && isValidTrigger())
       {
          this.currentStepCommand.set(stepCommand);
          this.stepCommandIsValid.set(true);
+         requestSwing();
+      }
+   }
+
+   private boolean isValidTrigger()
+   {
+      if (isFirstStep.getBooleanValue())
+      {
+         isFirstStep.set(false);
+         return true;
+      }
+      else
+      {
+         return footStateMachine.getTimeInCurrentState() > supportToSwingGlitchWindow;
       }
    }
 
    public void adjustStep(FramePoint3DReadOnly newGoalPosition)
    {
       this.currentStepCommand.setGoalPosition(newGoalPosition);
+   }
+
+   /**
+    * Request the swing trajectory to speed up using the given speed up factor.
+    * It is clamped w.r.t. to {@link QuadrupedSwingState#minSwingTimeForDisturbanceRecovery}.
+    * @param speedUpTime
+    * @return the current swing time remaining for the swing foot trajectory
+    */
+   public double requestSwingSpeedUp(double speedUpTime)
+   {
+      return swingState.requestSwingSpeedUp(speedUpTime);
+   }
+
+   public double computeClampedSwingSpeedUpTime(double requestedSpeedUpTime)
+   {
+      return swingState.computeClampedSpeedUpTime(requestedSpeedUpTime);
    }
 
    public ContactState getContactState()
@@ -166,7 +203,6 @@ public class QuadrupedFootControlModule
       footStateMachine.doTransitions();
    }
 
-
    public FeedbackControlCommandList createFeedbackControlTemplate()
    {
       FeedbackControlCommandList ret = new FeedbackControlCommandList();
@@ -183,6 +219,11 @@ public class QuadrupedFootControlModule
    public VirtualModelControlCommand<?> getVirtualModelControlCommand()
    {
       return footStateMachine.getCurrentState().getVirtualModelControlCommand();
+   }
+
+   public InverseDynamicsCommand<?> getInverseDynamicsCommand()
+   {
+      return footStateMachine.getCurrentState().getInverseDynamicsCommand();
    }
 
    public FeedbackControlCommand<?> getFeedbackControlCommand()

@@ -22,14 +22,15 @@ import us.ihmc.euclid.referenceFrame.FramePoint2D;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.tools.ReferenceFrameTools;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.humanoidRobotics.footstep.FootSpoof;
+import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.robotics.controllers.pidGains.implementations.PDGains;
 import us.ihmc.robotics.controllers.pidGains.implementations.PIDSE3Configuration;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
-import us.ihmc.robotics.screwTheory.RigidBody;
-import us.ihmc.sensorProcessing.stateEstimation.FootSwitchType;
+import us.ihmc.robotics.sensors.FootSwitchFactory;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 
 public class WrapperForMultipleToeOffCalculatorsTest
@@ -71,7 +72,7 @@ public class WrapperForMultipleToeOffCalculatorsTest
          contactableFoot.setSoleFrame(startingPose);
          contactableFeet.put(robotSide, contactableFoot);
 
-         RigidBody foot = contactableFoot.getRigidBody();
+         RigidBodyBasics foot = contactableFoot.getRigidBody();
          ReferenceFrame soleFrame = contactableFoot.getSoleFrame();
          List<FramePoint2D> contactFramePoints = contactableFoot.getContactPoints2d();
          double coefficientOfFriction = contactableFoot.getCoefficientOfFriction();
@@ -87,7 +88,7 @@ public class WrapperForMultipleToeOffCalculatorsTest
    @After
    public void tearDown()
    {
-
+      ReferenceFrameTools.clearWorldFrameTree();
    }
 
 
@@ -278,21 +279,9 @@ public class WrapperForMultipleToeOffCalculatorsTest
          }
 
          @Override
-         public double getContactThresholdForce()
+         public FootSwitchFactory getFootSwitchFactory()
          {
-            return 0;
-         }
-
-         @Override
-         public double getSecondContactThresholdForceIgnoringCoP()
-         {
-            return 0;
-         }
-
-         @Override
-         public double getCoPThresholdFraction()
-         {
-            return 0;
+            return null;
          }
 
          @Override
@@ -311,18 +300,6 @@ public class WrapperForMultipleToeOffCalculatorsTest
          public ICPAngularMomentumModifierParameters getICPAngularMomentumModifierParameters()
          {
             return null;
-         }
-
-         @Override
-         public FootSwitchType getFootSwitchType()
-         {
-            return null;
-         }
-
-         @Override
-         public double getContactThresholdHeight()
-         {
-            return 0;
          }
 
          @Override

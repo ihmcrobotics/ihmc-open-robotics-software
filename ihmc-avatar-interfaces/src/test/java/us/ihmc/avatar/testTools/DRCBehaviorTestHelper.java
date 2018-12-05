@@ -1,11 +1,5 @@
 package us.ihmc.avatar.testTools;
 
-import static org.junit.Assert.assertTrue;
-
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Arrays;
-
 import controller_msgs.msg.dds.BehaviorControlModePacket;
 import controller_msgs.msg.dds.CapturabilityBasedStatus;
 import controller_msgs.msg.dds.HumanoidBehaviorTypePacket;
@@ -14,27 +8,20 @@ import us.ihmc.avatar.DRCStartingLocation;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.networkProcessor.DRCNetworkModuleParameters;
 import us.ihmc.commonWalkingControlModules.controllers.Updatable;
+import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.ControllerAPIDefinition;
 import us.ihmc.commons.PrintTools;
 import us.ihmc.commons.thread.ThreadTools;
-import us.ihmc.communication.PacketRouter;
-import us.ihmc.communication.packetCommunicator.PacketCommunicator;
-import us.ihmc.communication.packets.Packet;
-import us.ihmc.communication.packets.PacketDestination;
-import us.ihmc.communication.util.NetworkPorts;
+import us.ihmc.communication.IHMCROS2Publisher;
+import us.ihmc.communication.ROS2Tools;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidBehaviors.IHMCHumanoidBehaviorManager;
 import us.ihmc.humanoidBehaviors.behaviors.AbstractBehavior;
-import us.ihmc.humanoidBehaviors.communication.CommunicationBridge;
 import us.ihmc.humanoidBehaviors.dispatcher.BehaviorControlModeSubscriber;
 import us.ihmc.humanoidBehaviors.dispatcher.BehaviorDispatcher;
 import us.ihmc.humanoidBehaviors.dispatcher.HumanoidBehaviorTypeSubscriber;
-import us.ihmc.humanoidBehaviors.utilities.CapturePointUpdatable;
-import us.ihmc.humanoidBehaviors.utilities.StopThreadUpdatable;
-import us.ihmc.humanoidBehaviors.utilities.TimeBasedStopThreadUpdatable;
-import us.ihmc.humanoidBehaviors.utilities.TrajectoryBasedStopThreadUpdatable;
-import us.ihmc.humanoidBehaviors.utilities.WristForceSensorFilteredUpdatable;
+import us.ihmc.humanoidBehaviors.utilities.*;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.humanoidRobotics.communication.packets.behaviors.BehaviorControlModeEnum;
 import us.ihmc.humanoidRobotics.communication.packets.behaviors.HumanoidBehaviorType;
@@ -42,12 +29,14 @@ import us.ihmc.humanoidRobotics.communication.subscribers.CapturabilityBasedStat
 import us.ihmc.humanoidRobotics.communication.subscribers.HumanoidRobotDataReceiver;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.humanoidRobotics.kryo.IHMCCommunicationKryoNetClassList;
+import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
 import us.ihmc.robotDataLogger.YoVariableServer;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotModels.FullRobotModel;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.sensors.ForceSensorDataHolder;
+import us.ihmc.ros2.Ros2Node;
 import us.ihmc.simulationConstructionSetTools.util.environments.CommonAvatarEnvironmentInterface;
 import us.ihmc.simulationConstructionSetTools.util.environments.DefaultCommonAvatarEnvironment;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
@@ -55,8 +44,16 @@ import us.ihmc.simulationconstructionset.util.simulationTesting.SimulationTestin
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 
-/** 
- * Do not execute more than one behavior thread at a time.  Instead, run multiple behaviors in a single thread.
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Optional;
+
+import static org.junit.Assert.assertTrue;
+
+/**
+ * Do not execute more than one behavior thread at a time. Instead, run multiple behaviors in a
+ * single thread.
+ * 
  * @author cschmidt
  *
  */
@@ -71,10 +68,6 @@ public class DRCBehaviorTestHelper extends DRCSimulationTestHelper
    private final DRCRobotModel drcRobotModel;
    private final FullHumanoidRobotModel fullRobotModel;
 
-   private final PacketRouter<PacketDestination> networkProcessor;
-   private final PacketCommunicator mockUIPacketCommunicatorServer;//send packets as if it was sent from the UI
-   private final PacketCommunicator behaviorCommunicatorServer;
-   private final CommunicationBridge behaviorCommunicationBridge;
    private final HumanoidRobotDataReceiver robotDataReceiver;
    private final HumanoidReferenceFrames referenceFrames;
 
@@ -84,33 +77,30 @@ public class DRCBehaviorTestHelper extends DRCSimulationTestHelper
 
    private final BehaviorDispatcher behaviorDispatcher;
 
-   
-   private final PacketCommunicator behaviorCommunicatorClient;
-   private final PacketCommunicator mockUIPacketCommunicatorClient;
+   private final Ros2Node ros2Node = ROS2Tools.createRos2Node(PubSubImplementation.INTRAPROCESS, "ihmc_behavior_test_helper");
+   private final IHMCROS2Publisher<HumanoidBehaviorTypePacket> humanoidBehabiorTypePublisher;
 
-   public DRCBehaviorTestHelper(String name, DRCStartingLocation selectedLocation,
-         SimulationTestingParameters simulationTestingParameters, DRCRobotModel robotModel)
+   public DRCBehaviorTestHelper(String name, DRCStartingLocation selectedLocation, SimulationTestingParameters simulationTestingParameters,
+                                DRCRobotModel robotModel)
    {
       this(new DefaultCommonAvatarEnvironment(), name, selectedLocation, simulationTestingParameters, robotModel, true);
    }
 
-   public DRCBehaviorTestHelper(CommonAvatarEnvironmentInterface commonAvatarEnvironmentInterface,
-                                String name, DRCStartingLocation selectedLocation, SimulationTestingParameters simulationTestingParameters,
-                                DRCRobotModel robotModel)
+   public DRCBehaviorTestHelper(CommonAvatarEnvironmentInterface commonAvatarEnvironmentInterface, String name, DRCStartingLocation selectedLocation,
+                                SimulationTestingParameters simulationTestingParameters, DRCRobotModel robotModel)
    {
       this(commonAvatarEnvironmentInterface, name, selectedLocation, simulationTestingParameters, robotModel, true);
    }
-   
-   public DRCBehaviorTestHelper(CommonAvatarEnvironmentInterface commonAvatarEnvironmentInterface,
-         String name, DRCStartingLocation selectedLocation, SimulationTestingParameters simulationTestingParameters,
-         DRCRobotModel robotModel, boolean automaticallySimulate)
+
+   public DRCBehaviorTestHelper(CommonAvatarEnvironmentInterface commonAvatarEnvironmentInterface, String name, DRCStartingLocation selectedLocation,
+                                SimulationTestingParameters simulationTestingParameters, DRCRobotModel robotModel, boolean automaticallySimulate)
    {
-	   this(commonAvatarEnvironmentInterface, name, selectedLocation, simulationTestingParameters, robotModel, null, automaticallySimulate);
+      this(commonAvatarEnvironmentInterface, name, selectedLocation, simulationTestingParameters, robotModel, null, automaticallySimulate);
    }
-   
-   public DRCBehaviorTestHelper(CommonAvatarEnvironmentInterface commonAvatarEnvironmentInterface,
-	         String name, DRCStartingLocation selectedLocation, SimulationTestingParameters simulationTestingParameters,
-	         DRCRobotModel robotModel, DRCNetworkModuleParameters networkModuleParameters, boolean automaticallySimulate)	   
+
+   public DRCBehaviorTestHelper(CommonAvatarEnvironmentInterface commonAvatarEnvironmentInterface, String name, DRCStartingLocation selectedLocation,
+                                SimulationTestingParameters simulationTestingParameters, DRCRobotModel robotModel,
+                                DRCNetworkModuleParameters networkModuleParameters, boolean automaticallySimulate)
    {
       super(simulationTestingParameters, robotModel);
       super.setTestEnvironment(commonAvatarEnvironmentInterface);
@@ -130,47 +120,37 @@ public class DRCBehaviorTestHelper extends DRCSimulationTestHelper
       this.fullRobotModel = robotModel.createFullRobotModel();
       yoTimeLastFullRobotModelUpdate = new YoDouble("yoTimeRobotModelUpdate", registry);
 
-      
-      this.mockUIPacketCommunicatorServer = PacketCommunicator.createIntraprocessPacketCommunicator(NetworkPorts.UI_MODULE, NET_CLASS_LIST);
-      mockUIPacketCommunicatorClient = PacketCommunicator.createIntraprocessPacketCommunicator(NetworkPorts.UI_MODULE, NET_CLASS_LIST);
-      
-      behaviorCommunicatorServer = PacketCommunicator.createIntraprocessPacketCommunicator(NetworkPorts.BEHAVIOUR_MODULE_PORT, NET_CLASS_LIST);
-      behaviorCommunicatorClient = PacketCommunicator.createIntraprocessPacketCommunicator(NetworkPorts.BEHAVIOUR_MODULE_PORT, NET_CLASS_LIST);
-
-      try
-      {
-         behaviorCommunicatorClient.connect();
-         behaviorCommunicatorServer.connect();
-         mockUIPacketCommunicatorServer.connect();
-         mockUIPacketCommunicatorClient.connect();
-      }
-      catch (IOException e)
-      {
-         throw new RuntimeException(e);
-      }
-      
-      networkProcessor = new PacketRouter<>(PacketDestination.class);
-      networkProcessor.attachPacketCommunicator(PacketDestination.UI, mockUIPacketCommunicatorClient);
-      networkProcessor.attachPacketCommunicator(PacketDestination.CONTROLLER, controllerCommunicator);
-      networkProcessor.attachPacketCommunicator(PacketDestination.BEHAVIOR_MODULE, behaviorCommunicatorClient);
-
-      behaviorCommunicationBridge = new CommunicationBridge(behaviorCommunicatorServer);
-
       ForceSensorDataHolder forceSensorDataHolder = new ForceSensorDataHolder(Arrays.asList(fullRobotModel.getForceSensorDefinitions()));
       robotDataReceiver = new HumanoidRobotDataReceiver(fullRobotModel, forceSensorDataHolder);
-      mockUIPacketCommunicatorServer.attachListener(RobotConfigurationData.class, robotDataReceiver);
+      ROS2Tools.createCallbackSubscription(ros2Node, RobotConfigurationData.class, ControllerAPIDefinition.getPublisherTopicNameGenerator(robotName),
+                                           s -> robotDataReceiver.receivedPacket(s.takeNextData()));
 
       YoGraphicsListRegistry yoGraphicsListRegistry = new YoGraphicsListRegistry();
 
       capturePointUpdatable = createCapturePointUpdateable(yoGraphicsListRegistry);
-      wristForceSensorUpdatables = createWristForceSensorUpdateables();
       updatables.add(capturePointUpdatable);
-      updatables.add(wristForceSensorUpdatables.get(RobotSide.LEFT));
-      updatables.add(wristForceSensorUpdatables.get(RobotSide.RIGHT));
 
-      behaviorDispatcher = setupBehaviorDispatcher(fullRobotModel, behaviorCommunicatorServer, robotDataReceiver, yoGraphicsListRegistry);
+      if (drcRobotModel.getSensorInformation().getWristForceSensorNames() != null && !drcRobotModel.getSensorInformation().getWristForceSensorNames().isEmpty())
+      {
+         wristForceSensorUpdatables = createWristForceSensorUpdateables();
+         updatables.add(wristForceSensorUpdatables.get(RobotSide.LEFT));
+         updatables.add(wristForceSensorUpdatables.get(RobotSide.RIGHT));
+      }
+      else
+      {
+         wristForceSensorUpdatables = null;
+      }
+
+      behaviorDispatcher = setupBehaviorDispatcher(fullRobotModel, ros2Node, robotDataReceiver, yoGraphicsListRegistry);
 
       referenceFrames = robotDataReceiver.getReferenceFrames();
+      humanoidBehabiorTypePublisher = ROS2Tools.createPublisher(ros2Node, HumanoidBehaviorTypePacket.class,
+                                                                IHMCHumanoidBehaviorManager.getSubscriberTopicNameGenerator(robotName));
+   }
+
+   public Ros2Node getRos2Node()
+   {
+      return ros2Node;
    }
 
    public FullHumanoidRobotModel getSDFFullRobotModel()
@@ -210,33 +190,23 @@ public class DRCBehaviorTestHelper extends DRCSimulationTestHelper
       return capturePointUpdatable;
    }
 
-   public WristForceSensorFilteredUpdatable getWristForceSensorUpdatable(RobotSide robotSide)
+   public Optional<WristForceSensorFilteredUpdatable> getWristForceSensorUpdatable(RobotSide robotSide)
    {
-      return wristForceSensorUpdatables.get(robotSide);
-   }
-   
-   public SideDependentList<WristForceSensorFilteredUpdatable> getWristForceSensorUpdatableSideDependentList()
-   {
-      return wristForceSensorUpdatables;
+      if (wristForceSensorUpdatables == null)
+         return Optional.empty();
+
+      return Optional.ofNullable(wristForceSensorUpdatables.get(robotSide));
    }
 
-   public CommunicationBridge getBehaviorCommunicationBridge()
+   public Optional<SideDependentList<WristForceSensorFilteredUpdatable>> getWristForceSensorUpdatableSideDependentList()
    {
-      return behaviorCommunicationBridge;
+      return Optional.ofNullable(wristForceSensorUpdatables);
    }
 
    public void updateRobotModel()
    {
       yoTimeLastFullRobotModelUpdate.set(yoTimeRobot.getDoubleValue());
       robotDataReceiver.updateRobotModel();
-   }
-
-   public PacketCommunicator createAndStartPacketCommunicator(NetworkPorts port, PacketDestination destination) throws IOException
-   {
-      PacketCommunicator packetCommunicator = PacketCommunicator.createIntraprocessPacketCommunicator(port, NET_CLASS_LIST);
-      networkProcessor.attachPacketCommunicator(destination, packetCommunicator);
-      packetCommunicator.connect();
-      return packetCommunicator;
    }
 
    public void dispatchBehavior(AbstractBehavior behaviorToTest) throws SimulationExceededMaximumTimeException
@@ -246,41 +216,48 @@ public class DRCBehaviorTestHelper extends DRCSimulationTestHelper
 
       behaviorDispatcher.start();
 
-
       HumanoidBehaviorTypePacket requestTestBehaviorPacket = HumanoidMessageTools.createHumanoidBehaviorTypePacket(testBehaviorType);
-      mockUIPacketCommunicatorServer.send(requestTestBehaviorPacket);
+      humanoidBehabiorTypePublisher.publish(requestTestBehaviorPacket);
 
       boolean success = simulateAndBlockAndCatchExceptions(1.0);
       assertTrue("Caught an exception when testing the behavior, the robot probably fell.", success);
    }
-   
+
    public void sendBehaviorToDispatcher(AbstractBehavior behaviorToTest) throws SimulationExceededMaximumTimeException
    {
       HumanoidBehaviorType testBehaviorType = HumanoidBehaviorType.TEST;
       behaviorDispatcher.addBehavior(testBehaviorType, behaviorToTest);
-      
+
       HumanoidBehaviorTypePacket requestTestBehaviorPacket = HumanoidMessageTools.createHumanoidBehaviorTypePacket(testBehaviorType);
-      mockUIPacketCommunicatorServer.send(requestTestBehaviorPacket);
+      humanoidBehabiorTypePublisher.publish(requestTestBehaviorPacket);
    }
 
-   private BehaviorDispatcher setupBehaviorDispatcher(FullRobotModel fullRobotModel, PacketCommunicator behaviorCommunicator,
-         HumanoidRobotDataReceiver robotDataReceiver, YoGraphicsListRegistry yoGraphicsListRegistry)
+   private BehaviorDispatcher setupBehaviorDispatcher(FullRobotModel fullRobotModel, Ros2Node ros2Node, HumanoidRobotDataReceiver robotDataReceiver,
+                                                      YoGraphicsListRegistry yoGraphicsListRegistry)
    {
       BehaviorControlModeSubscriber desiredBehaviorControlSubscriber = new BehaviorControlModeSubscriber();
-      behaviorCommunicator.attachListener(BehaviorControlModePacket.class, desiredBehaviorControlSubscriber);
+      ROS2Tools.createCallbackSubscription(ros2Node, BehaviorControlModePacket.class, IHMCHumanoidBehaviorManager.getSubscriberTopicNameGenerator(robotName),
+                                           s -> desiredBehaviorControlSubscriber.receivedPacket(s.takeNextData()));
 
       HumanoidBehaviorTypeSubscriber desiredBehaviorSubscriber = new HumanoidBehaviorTypeSubscriber();
-      behaviorCommunicator.attachListener(HumanoidBehaviorTypePacket.class, desiredBehaviorSubscriber);
+      ROS2Tools.createCallbackSubscription(ros2Node, HumanoidBehaviorTypePacket.class, IHMCHumanoidBehaviorManager.getSubscriberTopicNameGenerator(robotName),
+                                           s -> desiredBehaviorSubscriber.receivedPacket(s.takeNextData()));
 
       YoVariableServer yoVariableServer = null;
       yoGraphicsListRegistry.setYoGraphicsUpdatedRemotely(false);
 
-      BehaviorDispatcher<HumanoidBehaviorType> ret = new BehaviorDispatcher<>(yoTimeBehaviorDispatcher, robotDataReceiver, desiredBehaviorControlSubscriber, desiredBehaviorSubscriber,
-            behaviorCommunicationBridge, yoVariableServer, HumanoidBehaviorType.class, HumanoidBehaviorType.STOP, registry, yoGraphicsListRegistry);
+      BehaviorDispatcher<HumanoidBehaviorType> ret = new BehaviorDispatcher<>(robotName, yoTimeBehaviorDispatcher, robotDataReceiver,
+                                                                              desiredBehaviorControlSubscriber, desiredBehaviorSubscriber, ros2Node,
+                                                                              yoVariableServer, HumanoidBehaviorType.class, HumanoidBehaviorType.STOP, registry,
+                                                                              yoGraphicsListRegistry);
 
       ret.addUpdatable(capturePointUpdatable);
-      ret.addUpdatable(wristForceSensorUpdatables.get(RobotSide.LEFT));
-      ret.addUpdatable(wristForceSensorUpdatables.get(RobotSide.RIGHT));
+
+      if (wristForceSensorUpdatables != null)
+      {
+         ret.addUpdatable(wristForceSensorUpdatables.get(RobotSide.LEFT));
+         ret.addUpdatable(wristForceSensorUpdatables.get(RobotSide.RIGHT));
+      }
 
       ret.finalizeStateMachine();
 
@@ -293,9 +270,11 @@ public class DRCBehaviorTestHelper extends DRCSimulationTestHelper
 
       for (RobotSide robotSide : RobotSide.values)
       {
-         WristForceSensorFilteredUpdatable wristSensorUpdatable = new WristForceSensorFilteredUpdatable(robotSide, fullRobotModel,
-               drcRobotModel.getSensorInformation(), robotDataReceiver.getForceSensorDataHolder(), IHMCHumanoidBehaviorManager.BEHAVIOR_YO_VARIABLE_SERVER_DT,
-               controllerCommunicator, registry);
+         WristForceSensorFilteredUpdatable wristSensorUpdatable = new WristForceSensorFilteredUpdatable(drcRobotModel.getSimpleRobotName(), robotSide,
+                                                                                                        fullRobotModel, drcRobotModel.getSensorInformation(),
+                                                                                                        robotDataReceiver.getForceSensorDataHolder(),
+                                                                                                        IHMCHumanoidBehaviorManager.BEHAVIOR_YO_VARIABLE_SERVER_DT,
+                                                                                                        ros2Node, registry);
 
          ret.put(robotSide, wristSensorUpdatable);
       }
@@ -306,7 +285,8 @@ public class DRCBehaviorTestHelper extends DRCSimulationTestHelper
    private CapturePointUpdatable createCapturePointUpdateable(YoGraphicsListRegistry yoGraphicsListRegistry)
    {
       CapturabilityBasedStatusSubscriber capturabilityBasedStatusSubsrciber = new CapturabilityBasedStatusSubscriber();
-      controllerCommunicator.attachListener(CapturabilityBasedStatus.class, capturabilityBasedStatusSubsrciber);
+      ROS2Tools.createCallbackSubscription(ros2Node, CapturabilityBasedStatus.class, ControllerAPIDefinition.getPublisherTopicNameGenerator(robotName),
+                                           s -> capturabilityBasedStatusSubsrciber.receivedPacket(s.takeNextData()));
 
       CapturePointUpdatable ret = new CapturePointUpdatable(capturabilityBasedStatusSubsrciber, yoGraphicsListRegistry, registry);
 
@@ -318,32 +298,6 @@ public class DRCBehaviorTestHelper extends DRCSimulationTestHelper
       if (behaviorDispatcher != null)
       {
          behaviorDispatcher.closeAndDispose();
-      }
-
-      if (mockUIPacketCommunicatorServer != null)
-      {
-         mockUIPacketCommunicatorServer.disconnect();
-      }
-      
-      if (mockUIPacketCommunicatorClient != null)
-      {
-         mockUIPacketCommunicatorClient.disconnect();
-      }
-      
-
-      if (behaviorCommunicatorClient != null)
-      {
-         behaviorCommunicatorClient.disconnect();
-      }
-      
-      if (behaviorCommunicatorServer != null)
-      {
-         behaviorCommunicatorServer.disconnect();
-      }
-
-      if (controllerCommunicator != null)
-      {
-         controllerCommunicator.disconnect();
       }
 
       super.destroySimulation();
@@ -375,10 +329,11 @@ public class DRCBehaviorTestHelper extends DRCSimulationTestHelper
    }
 
    public StopThreadUpdatable executeBehaviorPauseAndResumeOrStop(final AbstractBehavior behavior, double pausePercent, double pauseDuration,
-         double stopPercent, FramePose3D poseAtTrajectoryEnd, ReferenceFrame frameToKeepTrackOf) throws SimulationExceededMaximumTimeException
+                                                                  double stopPercent, FramePose3D poseAtTrajectoryEnd, ReferenceFrame frameToKeepTrackOf)
+         throws SimulationExceededMaximumTimeException
    {
       StopThreadUpdatable stopThreadUpdatable = new TrajectoryBasedStopThreadUpdatable(robotDataReceiver, behavior, pausePercent, pauseDuration, stopPercent,
-            poseAtTrajectoryEnd, frameToKeepTrackOf);
+                                                                                       poseAtTrajectoryEnd, frameToKeepTrackOf);
 
       boolean success = executeBehaviorPauseAndResumeOrStop(behavior, stopThreadUpdatable);
       assertTrue(success);
@@ -387,10 +342,11 @@ public class DRCBehaviorTestHelper extends DRCSimulationTestHelper
    }
 
    public StopThreadUpdatable executeBehaviorPauseAndResumeOrStop(final AbstractBehavior behavior, double pauseTime, double pauseDuration, double stopTime,
-         ReferenceFrame frameToKeepTrackOf) throws SimulationExceededMaximumTimeException
+                                                                  ReferenceFrame frameToKeepTrackOf)
+         throws SimulationExceededMaximumTimeException
    {
       StopThreadUpdatable stopThreadUpdatable = new TimeBasedStopThreadUpdatable(robotDataReceiver, behavior, pauseTime, pauseDuration, stopTime,
-            frameToKeepTrackOf);
+                                                                                 frameToKeepTrackOf);
 
       boolean success = executeBehaviorPauseAndResumeOrStop(behavior, stopThreadUpdatable);
       assertTrue(success);
@@ -442,25 +398,22 @@ public class DRCBehaviorTestHelper extends DRCSimulationTestHelper
 
       return success;
    }
-   
+
    public boolean executeBehaviorUntilDoneUsingBehaviorDispatcher(final AbstractBehavior behavior) throws SimulationExceededMaximumTimeException
    {
       behaviorDispatcher.start();
 
-      
       boolean success = true;
       success = simulateAndBlockAndCatchExceptions(0.1);
       sendBehaviorToDispatcher(behavior);
-      
+
       while (!behavior.isDone() && success)
       {
          success = simulateAndBlockAndCatchExceptions(1.0);
       }
-      
+
       return success;
    }
-   
-   
 
    private BehaviorRunner startNewBehaviorRunnerThread(final ArrayList<AbstractBehavior> behaviors)
    {
@@ -495,7 +448,6 @@ public class DRCBehaviorTestHelper extends DRCSimulationTestHelper
       {
          this.behaviors = behaviors;
 
-        
       }
 
       public void run()
@@ -588,10 +540,5 @@ public class DRCBehaviorTestHelper extends DRCSimulationTestHelper
             ThreadTools.sleep(1);
          }
       }
-   }
-
-   public void sendPacketAsIfItWasFromUI(Packet<?> packet)
-   {
-      mockUIPacketCommunicatorServer.send(packet);
    }
 }

@@ -15,7 +15,7 @@ import com.martiansoftware.jsap.JSAPException;
 import ihmc_msgs.HandDesiredConfigurationRosMessage;
 import us.ihmc.avatar.DRCStartingLocation;
 import us.ihmc.avatar.drcRobot.RobotTarget;
-import us.ihmc.avatar.environments.DarpaRoboticsChallengeFinalsEnvironment;
+import us.ihmc.avatar.environments.DRCFinalsEnvironment;
 import us.ihmc.avatar.ros.ROSAPISimulator;
 import us.ihmc.avatar.ros.subscriber.IHMCMsgToPacketSubscriber;
 import us.ihmc.avatar.simulationStarter.DRCSCStartingLocations;
@@ -48,7 +48,7 @@ public class AtlasFinalsROSAPISimulator extends ROSAPISimulator
    @Override
    protected CommonAvatarEnvironmentInterface createEnvironment()
    {
-      return new DarpaRoboticsChallengeFinalsEnvironment(CREATE_DOOR, CREATE_DRILL, CREATE_VALVE, CREATE_WALKING, CREATE_STAIRS);
+      return new DRCFinalsEnvironment(CREATE_DOOR, CREATE_DRILL, CREATE_VALVE, CREATE_WALKING, CREATE_STAIRS);
    }
 
    @Override protected List<Map.Entry<String, RosTopicSubscriberInterface<? extends Message>>> createCustomSubscribers(String nameSpace, PacketCommunicator communicator)

@@ -3,6 +3,7 @@ package us.ihmc.valkyrie;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.InputStream;
+import java.util.List;
 import java.util.Map;
 
 import org.apache.commons.lang3.StringUtils;
@@ -21,10 +22,10 @@ import us.ihmc.commonWalkingControlModules.configurations.HighLevelControllerPar
 import us.ihmc.commonWalkingControlModules.configurations.ICPWithTimeFreezingPlannerParameters;
 import us.ihmc.commonWalkingControlModules.configurations.SliderBoardParameters;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
+import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.ControllerAPIDefinition;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.footstepPlanning.PlanarRegionFootstepPlanningParameters;
-import us.ihmc.footstepPlanning.graphSearch.FootstepPlannerParameters;
-import us.ihmc.humanoidRobotics.communication.streamingData.HumanoidGlobalDataProducer;
+import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParameters;
 import us.ihmc.humanoidRobotics.footstep.footstepGenerator.QuadTreeFootstepPlanningParameters;
 import us.ihmc.ihmcPerception.depthData.CollisionBoxProvider;
 import us.ihmc.modelFileLoaders.SdfLoader.DRCRobotSDFLoader;
@@ -36,15 +37,20 @@ import us.ihmc.modelFileLoaders.SdfLoader.SDFDescriptionMutator;
 import us.ihmc.modelFileLoaders.SdfLoader.SDFForceSensor;
 import us.ihmc.modelFileLoaders.SdfLoader.SDFJointHolder;
 import us.ihmc.modelFileLoaders.SdfLoader.SDFLinkHolder;
+import us.ihmc.modelFileLoaders.SdfLoader.xmlDescription.SDFGeometry;
 import us.ihmc.modelFileLoaders.SdfLoader.xmlDescription.SDFSensor;
+import us.ihmc.modelFileLoaders.SdfLoader.xmlDescription.SDFVisual;
 import us.ihmc.multicastLogDataProtocol.modelLoaders.LogModelProvider;
 import us.ihmc.multicastLogDataProtocol.modelLoaders.SDFLogModelProvider;
+import us.ihmc.pathPlanning.visibilityGraphs.DefaultVisibilityGraphParameters;
+import us.ihmc.pathPlanning.visibilityGraphs.interfaces.VisibilityGraphsParameters;
 import us.ihmc.robotDataLogger.logger.LogSettings;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotModels.FullHumanoidRobotModelFromDescription;
 import us.ihmc.robotics.robotDescription.RobotDescription;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
+import us.ihmc.ros2.RealtimeRos2Node;
 import us.ihmc.sensorProcessing.stateEstimation.StateEstimatorParameters;
 import us.ihmc.simulationConstructionSetTools.robotController.MultiThreadedRobotControlElement;
 import us.ihmc.simulationConstructionSetTools.util.HumanoidFloatingRootJointRobot;
@@ -52,6 +58,7 @@ import us.ihmc.simulationconstructionset.FloatingRootJointRobot;
 import us.ihmc.tools.thread.CloseableAndDisposableRegistry;
 import us.ihmc.valkyrie.configuration.ValkyrieConfigurationRoot;
 import us.ihmc.valkyrie.configuration.YamlWithIncludesLoader;
+import us.ihmc.valkyrie.fingers.SimulatedValkyrieFingerController;
 import us.ihmc.valkyrie.fingers.ValkyrieHandModel;
 import us.ihmc.valkyrie.parameters.ValkyrieCapturePointPlannerParameters;
 import us.ihmc.valkyrie.parameters.ValkyrieCollisionBoxProvider;
@@ -66,6 +73,7 @@ import us.ihmc.valkyrie.parameters.ValkyrieStateEstimatorParameters;
 import us.ihmc.valkyrie.parameters.ValkyrieUIParameters;
 import us.ihmc.valkyrie.parameters.ValkyrieWalkingControllerParameters;
 import us.ihmc.valkyrie.sensors.ValkyrieSensorSuiteManager;
+import us.ihmc.valkyrieRosControl.ValkyrieRosControlController;
 import us.ihmc.wholeBodyController.FootContactPoints;
 import us.ihmc.wholeBodyController.RobotContactPointParameters;
 import us.ihmc.wholeBodyController.UIParameters;
@@ -91,6 +99,7 @@ public class ValkyrieRobotModel implements DRCRobotModel, SDFDescriptionMutator
    private final ValkyrieCollisionMeshDefinitionDataHolder collisionMeshDefinitionDataHolder;
 
    private boolean useShapeCollision = false;
+   private final boolean useOBJGraphics;
 
    private final String[] resourceDirectories;
    {
@@ -119,19 +128,26 @@ public class ValkyrieRobotModel implements DRCRobotModel, SDFDescriptionMutator
    {
       this(target, headless, model, null, false);
    }
-   
+
    public ValkyrieRobotModel(RobotTarget target, boolean headless, String model, FootContactPoints<RobotSide> simulationContactPoints)
    {
       this(target, headless, model, simulationContactPoints, false);
    }
 
-   public ValkyrieRobotModel(RobotTarget target, boolean headless, String model, FootContactPoints<RobotSide> simulationContactPoints, boolean useShapeCollision)
+   public ValkyrieRobotModel(RobotTarget target, boolean headless, String model, FootContactPoints<RobotSide> simulationContactPoints,
+                             boolean useShapeCollision)
+   {
+      this(target, headless, model, simulationContactPoints, useShapeCollision, true);
+   }
+
+   public ValkyrieRobotModel(RobotTarget target, boolean headless, String model, FootContactPoints<RobotSide> simulationContactPoints, boolean useShapeCollision, boolean useOBJGraphics)
    {
       this.target = target;
+      this.useOBJGraphics = useOBJGraphics;
       jointMap = new ValkyrieJointMap();
       contactPointParameters = new ValkyrieContactPointParameters(jointMap, simulationContactPoints);
       sensorInformation = new ValkyrieSensorInformation(target);
-      highLevelControllerParameters = new ValkyrieHighLevelControllerParameters(target == RobotTarget.REAL_ROBOT, jointMap);
+      highLevelControllerParameters = new ValkyrieHighLevelControllerParameters(target, jointMap);
       calibrationParameters = new ValkyrieCalibrationParameters(jointMap);
       InputStream sdf = null;
 
@@ -187,11 +203,10 @@ public class ValkyrieRobotModel implements DRCRobotModel, SDFDescriptionMutator
          }
       }
 
-      boolean runningOnRealRobot = target == RobotTarget.REAL_ROBOT;
       planarRegionFootstepPlanningParameters = new ValkyriePlanarRegionFootstepPlannerParameters();
-      capturePointPlannerParameters = new ValkyrieCapturePointPlannerParameters(runningOnRealRobot);
+      capturePointPlannerParameters = new ValkyrieCapturePointPlannerParameters(target);
       walkingControllerParameters = new ValkyrieWalkingControllerParameters(jointMap, target);
-      stateEstimatorParamaters = new ValkyrieStateEstimatorParameters(runningOnRealRobot, getEstimatorDT(), sensorInformation, jointMap);
+      stateEstimatorParamaters = new ValkyrieStateEstimatorParameters(target, getEstimatorDT(), sensorInformation, jointMap);
       collisionMeshDefinitionDataHolder = new ValkyrieCollisionMeshDefinitionDataHolder(jointMap);
 
       this.useShapeCollision = useShapeCollision;
@@ -215,7 +230,7 @@ public class ValkyrieRobotModel implements DRCRobotModel, SDFDescriptionMutator
       }
       else
       {
-         robotDescription = descriptionLoader.loadRobotDescriptionFromSDF(generalizedSDFRobotModel, jointMap, contactPointParameters, useCollisionMeshes);
+         robotDescription = descriptionLoader.loadRobotDescriptionFromSDF(generalizedSDFRobotModel, jointMap, getContactPointParameters(), useCollisionMeshes);
       }
 
       return robotDescription;
@@ -226,7 +241,7 @@ public class ValkyrieRobotModel implements DRCRobotModel, SDFDescriptionMutator
    {
       return useShapeCollision;
    }
-   
+
    @Override
    public RobotDescription getRobotDescription()
    {
@@ -376,7 +391,7 @@ public class ValkyrieRobotModel implements DRCRobotModel, SDFDescriptionMutator
    @Override
    public double getSimulateDT()
    {
-      return 0.0001; //0.00003875;
+      return getEstimatorDT() / 3.0;
    }
 
    @Override
@@ -388,7 +403,10 @@ public class ValkyrieRobotModel implements DRCRobotModel, SDFDescriptionMutator
    @Override
    public double getControllerDT()
    {
-      return 0.004;
+      if (target == RobotTarget.SCS)
+         return 0.004;
+      else
+         return 0.006;
    }
 
    public GeneralizedSDFRobotModel getGeneralizedRobotModel()
@@ -405,17 +423,22 @@ public class ValkyrieRobotModel implements DRCRobotModel, SDFDescriptionMutator
    @Override
    public DRCSensorSuiteManager getSensorSuiteManager()
    {
-      return new ValkyrieSensorSuiteManager(this, getCollisionBoxProvider(), getPPSTimestampOffsetProvider(), sensorInformation, jointMap, target);
+      return new ValkyrieSensorSuiteManager(getSimpleRobotName(), this, getCollisionBoxProvider(), getPPSTimestampOffsetProvider(), sensorInformation, jointMap,
+                                            target);
    }
 
    @Override
    public MultiThreadedRobotControlElement createSimulatedHandController(FloatingRootJointRobot simulatedRobot,
                                                                          ThreadDataSynchronizerInterface threadDataSynchronizer,
-                                                                         HumanoidGlobalDataProducer globalDataProducer,
+                                                                         RealtimeRos2Node realtimeRos2Node,
                                                                          CloseableAndDisposableRegistry closeableAndDisposableRegistry)
    {
-      return null;
-      //return new ValkyrieFingerController(this, simulatedRobot, threadDataSynchronizer, globalDataProducer, null);
+      if (!ValkyrieConfigurationRoot.VALKYRIE_WITH_ARMS)
+         return null;
+      else
+         return new SimulatedValkyrieFingerController(simulatedRobot, threadDataSynchronizer, realtimeRos2Node, closeableAndDisposableRegistry, this,
+                                                      ControllerAPIDefinition.getPublisherTopicNameGenerator(getSimpleRobotName()),
+                                                      ControllerAPIDefinition.getSubscriberTopicNameGenerator(getSimpleRobotName()));
    }
 
    @Override
@@ -481,16 +504,49 @@ public class ValkyrieRobotModel implements DRCRobotModel, SDFDescriptionMutator
    {
       if (this.jointMap.getModelName().equals(model.getName()))
       {
+         if (useOBJGraphics)
+         {
+            List<SDFVisual> visuals = linkHolder.getVisuals();
+            if (visuals != null)
+            {
+               for (SDFVisual sdfVisual : visuals)
+               {
+                  SDFGeometry geometry = sdfVisual.getGeometry();
+                  if (geometry == null)
+                     continue;
+
+                  SDFGeometry.Mesh mesh = geometry.getMesh();
+                  if (mesh == null)
+                     continue;
+
+                  String meshUri = mesh.getUri();
+                  if (meshUri.contains("meshes"))
+                  {
+                     String replacedURI = meshUri.replace(".dae", ".obj");
+                     mesh.setUri(replacedURI);
+                  }
+               }
+            }
+         }
+
          switch (linkHolder.getName())
          {
          case "hokuyo_link":
             modifyHokuyoInertia(linkHolder);
             break;
+         case "torso":
+            modifyChestMass(linkHolder);
+            break;
          default:
             break;
          }
-
       }
+   }
+
+   private void modifyChestMass(SDFLinkHolder chestSDFLink)
+   {
+      if (ValkyrieRosControlController.HAS_LIGHTER_BACKPACK)
+         chestSDFLink.setMass(chestSDFLink.getMass() - 8.6);
    }
 
    @Override
@@ -561,6 +617,12 @@ public class ValkyrieRobotModel implements DRCRobotModel, SDFDescriptionMutator
    }
 
    @Override
+   public VisibilityGraphsParameters getVisibilityGraphsParameters()
+   {
+      return new DefaultVisibilityGraphParameters();
+   }
+
+   @Override
    public HighLevelControllerParameters getHighLevelControllerParameters()
    {
       return highLevelControllerParameters;
@@ -569,7 +631,16 @@ public class ValkyrieRobotModel implements DRCRobotModel, SDFDescriptionMutator
    @Override
    public InputStream getWholeBodyControllerParametersFile()
    {
-      return getClass().getResourceAsStream("/us/ihmc/valkyrie/parameters/controller.xml");
+      switch (target)
+      {
+      case SCS:
+         return getClass().getResourceAsStream("/us/ihmc/valkyrie/parameters/controller_simulation.xml");
+      case GAZEBO:
+      case REAL_ROBOT:
+         return getClass().getResourceAsStream("/us/ihmc/valkyrie/parameters/controller_hardware.xml");
+      default:
+         throw new UnsupportedOperationException("Unsupported target: " + target);
+      }
    }
 
    public ValkyrieCalibrationParameters getCalibrationParameters()

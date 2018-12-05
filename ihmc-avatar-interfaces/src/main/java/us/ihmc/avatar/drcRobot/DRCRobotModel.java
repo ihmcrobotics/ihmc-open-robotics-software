@@ -10,12 +10,13 @@ import us.ihmc.avatar.sensors.DRCSensorSuiteManager;
 import us.ihmc.commonWalkingControlModules.configurations.HighLevelControllerParameters;
 import us.ihmc.commonWalkingControlModules.configurations.SliderBoardParameters;
 import us.ihmc.footstepPlanning.PlanarRegionFootstepPlanningParameters;
-import us.ihmc.footstepPlanning.graphSearch.FootstepPlannerParameters;
-import us.ihmc.humanoidRobotics.communication.streamingData.HumanoidGlobalDataProducer;
+import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParameters;
 import us.ihmc.ihmcPerception.depthData.CollisionBoxProvider;
 import us.ihmc.multicastLogDataProtocol.modelLoaders.LogModelProvider;
+import us.ihmc.pathPlanning.visibilityGraphs.interfaces.VisibilityGraphsParameters;
 import us.ihmc.robotDataLogger.logger.LogSettings;
 import us.ihmc.robotics.robotSide.RobotSide;
+import us.ihmc.ros2.RealtimeRos2Node;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutputWriter;
 import us.ihmc.simulationConstructionSetTools.robotController.MultiThreadedRobotControlElement;
 import us.ihmc.simulationConstructionSetTools.util.HumanoidFloatingRootJointRobot;
@@ -49,8 +50,9 @@ public interface DRCRobotModel extends SimulatedFullHumanoidRobotModelFactory, W
    public abstract DRCSensorSuiteManager getSensorSuiteManager();
 
    public abstract MultiThreadedRobotControlElement createSimulatedHandController(FloatingRootJointRobot simulatedRobot,
-         ThreadDataSynchronizerInterface threadDataSynchronizer, HumanoidGlobalDataProducer globalDataProducer,
-         CloseableAndDisposableRegistry closeableAndDisposableRegistry);
+                                                                                  ThreadDataSynchronizerInterface threadDataSynchronizer,
+                                                                                  RealtimeRos2Node realtimeRos2Node,
+                                                                                  CloseableAndDisposableRegistry closeableAndDisposableRegistry);
 
    public abstract LogSettings getLogSettings();
 
@@ -70,7 +72,9 @@ public interface DRCRobotModel extends SimulatedFullHumanoidRobotModelFactory, W
     * <p>
     * <b> This output writer is meant to be used in simulation only.
     * </p>
-    * @param humanoidFloatingRootJointRobot Optional handle to the robot to allow directly writing to the joints.
+    * 
+    * @param humanoidFloatingRootJointRobot Optional handle to the robot to allow directly writing
+    *           to the joints.
     *
     * @return the custom output processor.
     */
@@ -84,7 +88,9 @@ public interface DRCRobotModel extends SimulatedFullHumanoidRobotModelFactory, W
     * <p>
     * <b> This output writer is meant to be used in simulation only.
     * </p>
-    * @param JointDesiredOutputWriter The outputWriter to use. If null is returned, no output writer is used.
+    * 
+    * @param JointDesiredOutputWriter The outputWriter to use. If null is returned, no output writer
+    *           is used.
     *
     * @return the custom output writer.
     */
@@ -111,8 +117,13 @@ public interface DRCRobotModel extends SimulatedFullHumanoidRobotModelFactory, W
       return null;
    }
 
+   default VisibilityGraphsParameters getVisibilityGraphsParameters()
+   {
+      return null;
+   }
+
    public HighLevelControllerParameters getHighLevelControllerParameters();
-   
+
    public default boolean useShapeCollision()
    {
       return false;

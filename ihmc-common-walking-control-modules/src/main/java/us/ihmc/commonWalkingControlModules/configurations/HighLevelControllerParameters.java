@@ -75,7 +75,7 @@ public interface HighLevelControllerParameters
     * </p>
     * @return list containing acceleration integration parameters and the corresponding joint groups
     */
-   public default List<GroupParameter<JointAccelerationIntegrationParametersReadOnly>> getJointAccelerationIntegrationParameters()
+   public default List<GroupParameter<JointAccelerationIntegrationParametersReadOnly>> getJointAccelerationIntegrationParameters(HighLevelControllerName state)
    {
       return null;
    }
@@ -88,7 +88,7 @@ public interface HighLevelControllerParameters
     *
     * @return list containing acceleration integration parameters to be used if a joint is loaded
     */
-   public default List<GroupParameter<JointAccelerationIntegrationParametersReadOnly>> getJointAccelerationIntegrationParametersUnderLoad()
+   public default List<GroupParameter<JointAccelerationIntegrationParametersReadOnly>> getJointAccelerationIntegrationParametersUnderLoad(HighLevelControllerName state)
    {
       return null;
    }

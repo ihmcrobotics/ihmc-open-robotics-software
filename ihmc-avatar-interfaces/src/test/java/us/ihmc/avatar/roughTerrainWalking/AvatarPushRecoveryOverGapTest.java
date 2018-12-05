@@ -3,12 +3,12 @@ package us.ihmc.avatar.roughTerrainWalking;
 import static junit.framework.TestCase.assertTrue;
 
 import org.junit.After;
-import org.junit.Assert;
 import org.junit.Before;
 
 import controller_msgs.msg.dds.FootstepDataListMessage;
 import controller_msgs.msg.dds.PlanarRegionsListMessage;
 import controller_msgs.msg.dds.RequestPlanarRegionsListMessage;
+import org.junit.Test;
 import us.ihmc.avatar.MultiRobotTestInterface;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.testTools.DRCSimulationTestHelper;
@@ -16,12 +16,14 @@ import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParam
 import us.ihmc.commonWalkingControlModules.controlModules.foot.FootControlModule;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.walkingController.states.WalkingStateEnum;
 import us.ihmc.commons.thread.ThreadTools;
-import us.ihmc.communication.net.PacketConsumer;
 import us.ihmc.communication.packets.PlanarRegionMessageConverter;
+import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
+import us.ihmc.continuousIntegration.IntegrationCategory;
 import us.ihmc.euclid.geometry.BoundingBox3D;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
+import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -71,14 +73,7 @@ public abstract class AvatarPushRecoveryOverGapTest implements MultiRobotTestInt
       PlanarRegionsList planarRegionsList = environment.getPlanarRegionsList();
       PlanarRegionsListMessage planarRegionsListMessage = PlanarRegionMessageConverter.convertToPlanarRegionsListMessage(planarRegionsList);
 
-      drcSimulationTestHelper.getControllerCommunicator().attachListener(RequestPlanarRegionsListMessage.class, new PacketConsumer<RequestPlanarRegionsListMessage>()
-      {
-         @Override
-         public void receivedPacket(RequestPlanarRegionsListMessage packet)
-         {
-            drcSimulationTestHelper.send(planarRegionsListMessage);
-         }
-      });
+      drcSimulationTestHelper.createSubscriberFromController(RequestPlanarRegionsListMessage.class, packet -> drcSimulationTestHelper.publishToController(planarRegionsListMessage));
 
       double z = getForcePointOffsetZInChestFrame();
       pushRobotController = new PushRobotController(drcSimulationTestHelper.getRobot(), robotModel.createFullRobotModel().getChest().getParentJoint().getName(),
@@ -112,13 +107,15 @@ public abstract class AvatarPushRecoveryOverGapTest implements MultiRobotTestInt
       assertTrue(drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(0.5));
 
       FootstepDataListMessage footsteps = createFootstepDataListMessage(swingTime, transferTime);
-      drcSimulationTestHelper.send(footsteps);
-      drcSimulationTestHelper.send(planarRegionsListMessage);
+      drcSimulationTestHelper.publishToController(footsteps);
+      drcSimulationTestHelper.publishToController(planarRegionsListMessage);
 
       drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(1.0);
    }
 
 
+   @ContinuousIntegrationTest(estimatedDuration = 33.4)
+   @Test(timeout = 170000)
    public void testNoPush() throws SimulationExceededMaximumTimeException
    {
       setupTest();
@@ -132,6 +129,8 @@ public abstract class AvatarPushRecoveryOverGapTest implements MultiRobotTestInt
       drcSimulationTestHelper.assertRobotsRootJointIsInBoundingBox(boundingBox);
    }
 
+   @ContinuousIntegrationTest(estimatedDuration = 34.9)
+   @Test(timeout = 170000)
    public void testForwardPush() throws SimulationExceededMaximumTimeException
    {
       setupTest();
@@ -154,6 +153,8 @@ public abstract class AvatarPushRecoveryOverGapTest implements MultiRobotTestInt
       drcSimulationTestHelper.assertRobotsRootJointIsInBoundingBox(boundingBox);
    }
 
+   @ContinuousIntegrationTest(estimatedDuration = 30.0)
+   @Test(timeout = 70000)
    public void testSidePush() throws SimulationExceededMaximumTimeException
    {
       setupTest();
@@ -243,8 +244,8 @@ public abstract class AvatarPushRecoveryOverGapTest implements MultiRobotTestInt
          double distanceToCenter = 0.5 * sideLength - 0.5 * platform1Length;
          generator.translate(-platform2Center + distanceToCenter, 0.5 * platformWidth  + sideGapSize + 0.5 * sideWidth, 0.0);
          generator.addCubeReferencedAtBottomMiddle(sideLength, sideWidth, 0.01); // ground
+         addPlanarRegionsToTerrain(YoAppearance.Grey());
       }
-
    }
 
    private class SingleSupportStartCondition implements StateTransitionCondition

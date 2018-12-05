@@ -4,11 +4,10 @@ import java.util.ArrayList;
 
 import org.apache.commons.lang3.tuple.ImmutablePair;
 
+import us.ihmc.mecano.multiBodySystem.interfaces.FloatingJointBasics;
+import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.robotModels.FullRobotModel;
 import us.ihmc.robotModels.OutputWriter;
-import us.ihmc.robotics.screwTheory.FloatingInverseDynamicsJoint;
-import us.ihmc.robotics.screwTheory.OneDoFJoint;
-import us.ihmc.sensorProcessing.outputData.JointDesiredOutputList;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutputListReadOnly;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutputReadOnly;
 import us.ihmc.simulationconstructionset.FloatingJoint;
@@ -19,8 +18,8 @@ public class PerfectPositionControlSimulatedOutputWriter implements OutputWriter
 {
    private final String name;
    protected final FloatingRootJointRobot robot;
-   protected ImmutablePair<FloatingJoint, FloatingInverseDynamicsJoint> rootJointPair;
-   protected final ArrayList<ImmutablePair<OneDegreeOfFreedomJoint, OneDoFJoint>> revoluteJoints = new ArrayList<ImmutablePair<OneDegreeOfFreedomJoint, OneDoFJoint>>();
+   protected ImmutablePair<FloatingJoint, FloatingJointBasics> rootJointPair;
+   protected final ArrayList<ImmutablePair<OneDegreeOfFreedomJoint, OneDoFJointBasics>> revoluteJoints = new ArrayList<ImmutablePair<OneDegreeOfFreedomJoint, OneDoFJointBasics>>();
    private final JointDesiredOutputListReadOnly jointDesiredOutputListReadOnly;
 
    public PerfectPositionControlSimulatedOutputWriter(FloatingRootJointRobot robot, FullRobotModel fullRobotModel,
@@ -42,18 +41,18 @@ public class PerfectPositionControlSimulatedOutputWriter implements OutputWriter
    public void setFullRobotModel(FullRobotModel fullRobotModel)
    {
       revoluteJoints.clear();
-      OneDoFJoint[] revoluteJointsArray = fullRobotModel.getOneDoFJoints();
+      OneDoFJointBasics[] revoluteJointsArray = fullRobotModel.getOneDoFJoints();
 
-      for (OneDoFJoint revoluteJoint : revoluteJointsArray)
+      for (OneDoFJointBasics revoluteJoint : revoluteJointsArray)
       {
          String name = revoluteJoint.getName();
          OneDegreeOfFreedomJoint oneDoFJoint = robot.getOneDegreeOfFreedomJoint(name);
 
-         ImmutablePair<OneDegreeOfFreedomJoint, OneDoFJoint> jointPair = new ImmutablePair<OneDegreeOfFreedomJoint, OneDoFJoint>(oneDoFJoint, revoluteJoint);
+         ImmutablePair<OneDegreeOfFreedomJoint, OneDoFJointBasics> jointPair = new ImmutablePair<OneDegreeOfFreedomJoint, OneDoFJointBasics>(oneDoFJoint, revoluteJoint);
          this.revoluteJoints.add(jointPair);
       }
 
-      rootJointPair = new ImmutablePair<FloatingJoint, FloatingInverseDynamicsJoint>(robot.getRootJoint(), fullRobotModel.getRootJoint());
+      rootJointPair = new ImmutablePair<FloatingJoint, FloatingJointBasics>(robot.getRootJoint(), fullRobotModel.getRootJoint());
    }
 
    public String getName()
@@ -71,9 +70,9 @@ public class PerfectPositionControlSimulatedOutputWriter implements OutputWriter
    {
       for (int i = 0; i < revoluteJoints.size(); i++)
       {
-         ImmutablePair<OneDegreeOfFreedomJoint, OneDoFJoint> jointPair = revoluteJoints.get(i);
+         ImmutablePair<OneDegreeOfFreedomJoint, OneDoFJointBasics> jointPair = revoluteJoints.get(i);
          OneDegreeOfFreedomJoint pinJoint = jointPair.getLeft();
-         OneDoFJoint revoluteJoint = jointPair.getRight();
+         OneDoFJointBasics revoluteJoint = jointPair.getRight();
 
          JointDesiredOutputReadOnly jointOutput = jointDesiredOutputListReadOnly.getJointDesiredOutput(revoluteJoint);
 

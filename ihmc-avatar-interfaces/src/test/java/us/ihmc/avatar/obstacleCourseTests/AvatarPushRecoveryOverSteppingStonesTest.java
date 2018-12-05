@@ -20,9 +20,6 @@ import us.ihmc.avatar.testTools.DRCSimulationTestHelper;
 import us.ihmc.commonWalkingControlModules.controlModules.foot.FootControlModule;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.walkingController.states.WalkingStateEnum;
 import us.ihmc.commons.thread.ThreadTools;
-import us.ihmc.communication.net.PacketConsumer;
-import us.ihmc.communication.packetCommunicator.PacketCommunicator;
-import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.communication.packets.PlanarRegionMessageConverter;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.euclid.geometry.BoundingBox3D;
@@ -100,15 +97,7 @@ public abstract class AvatarPushRecoveryOverSteppingStonesTest implements MultiR
       drcSimulationTestHelper.createSimulation("DRCSimpleFlatGroundScriptTest");
 
       PlanarRegionsListMessage planarRegionsListMessage = createPlanarRegionsListMessage();
-      PacketCommunicator packetCommunication = drcSimulationTestHelper.getControllerCommunicator();
-      packetCommunication.attachListener(RequestPlanarRegionsListMessage.class, new PacketConsumer<RequestPlanarRegionsListMessage>()
-      {
-         @Override
-         public void receivedPacket(RequestPlanarRegionsListMessage packet)
-         {
-            drcSimulationTestHelper.send(planarRegionsListMessage);
-         }
-      });
+      drcSimulationTestHelper.createSubscriberFromController(RequestPlanarRegionsListMessage.class, packet -> drcSimulationTestHelper.publishToController(planarRegionsListMessage));
 
       FullHumanoidRobotModel fullRobotModel = getRobotModel().createFullRobotModel();
       double z = getForcePointOffsetZInChestFrame();
@@ -138,10 +127,11 @@ public abstract class AvatarPushRecoveryOverSteppingStonesTest implements MultiR
       double transferTime = getRobotModel().getWalkingControllerParameters().getDefaultTransferTime();
       totalMass = fullRobotModel.getTotalMass();
 
-      assertTrue(drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(2.0));
+      assertTrue(drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(0.25));
 
       FootstepDataListMessage footstepDataList = createFootstepsForWalkingOverEasySteppingStones(swingTime, transferTime);
-      drcSimulationTestHelper.send(footstepDataList);
+      footstepDataList.setAreFootstepsAdjustable(true);
+      drcSimulationTestHelper.publishToController(footstepDataList);
       assertTrue(drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(1.0));
    }
 
@@ -152,6 +142,12 @@ public abstract class AvatarPushRecoveryOverSteppingStonesTest implements MultiR
    public void testWalkingOverSteppingStonesForwardPush() throws SimulationExceededMaximumTimeException
    {
       setupTest();
+      double transferTime = getRobotModel().getWalkingControllerParameters().getDefaultTransferTime();
+
+
+      FootstepDataListMessage footstepDataList = createFootstepsForWalkingOverEasySteppingStones(swingTime, transferTime);
+      footstepDataList.setAreFootstepsAdjustable(true);
+      drcSimulationTestHelper.publishToController(footstepDataList);
 
       StateTransitionCondition firstPushCondition = singleSupportStartConditions.get(RobotSide.RIGHT);
       double delay = 0.5 * swingTime;
@@ -161,7 +157,8 @@ public abstract class AvatarPushRecoveryOverSteppingStonesTest implements MultiR
       double duration = 0.1;
       pushRobotController.applyForceDelayed(firstPushCondition, delay, firstForceDirection, magnitude, duration);
 
-      boolean success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(13.0);
+      double stepDuration = swingTime + transferTime;
+      boolean success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(footstepDataList.getFootstepDataList().size() * stepDuration + 1.5);
 
       drcSimulationTestHelper.createVideo(getSimpleRobotName(), 1);
       drcSimulationTestHelper.checkNothingChanged();
@@ -256,7 +253,7 @@ public abstract class AvatarPushRecoveryOverSteppingStonesTest implements MultiR
             planarRegionsAsMessages.add(PlanarRegionMessageConverter.convertToPlanarRegionMessage(planarRegion));
       }
 
-      PlanarRegionsListMessage messageList = MessageTools.createPlanarRegionsListMessage(planarRegionsAsMessages);
+      PlanarRegionsListMessage messageList = PlanarRegionMessageConverter.createPlanarRegionsListMessage(planarRegionsAsMessages);
 
       return messageList;
    }

@@ -6,6 +6,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.function.Predicate;
 
+import javafx.beans.property.BooleanProperty;
+import javafx.beans.property.SimpleBooleanProperty;
+
 public class GuiRegistry extends GuiElement
 {
    private final List<GuiRegistry> registries = new ArrayList<>();
@@ -14,9 +17,12 @@ public class GuiRegistry extends GuiElement
    private final Map<String, GuiRegistry> registryMap = new LinkedHashMap<>();
    private final Map<String, GuiParameter> parameterMap = new LinkedHashMap<>();
 
+   private BooleanProperty isRoot = new SimpleBooleanProperty();
+
    public GuiRegistry(String name, GuiRegistry parent)
    {
       super(name, parent);
+      isRoot.set(parent == null);
    }
 
    public void addRegistry(GuiRegistry registry)
@@ -78,6 +84,19 @@ public class GuiRegistry extends GuiElement
       registries.stream().forEach(registry -> registry.packParametersRecursive(listToPack));
    }
 
+   public List<GuiRegistry> getAllRegistries()
+   {
+      List<GuiRegistry> ret = new ArrayList<>();
+      packRegistriesRecursive(ret);
+      return ret;
+   }
+
+   private void packRegistriesRecursive(List<GuiRegistry> listToPack)
+   {
+      listToPack.addAll(registries);
+      registries.stream().forEach(registry -> registry.packRegistriesRecursive(listToPack));
+   }
+
    public GuiRegistry createFullCopy()
    {
       return createFullCopy(p -> true);
@@ -109,5 +128,28 @@ public class GuiRegistry extends GuiElement
       ret += "\n" + parameters.size() + " parameters";
       ret += "\n" + registries.size() + " registries";
       return ret;
+   }
+
+   public BooleanProperty isRoot()
+   {
+      return isRoot;
+   }
+
+   public void makeRoot()
+   {
+      GuiRegistry parent = getParent();
+      while (parent != null)
+      {
+         parent.isRoot.set(false);
+         parent = parent.getParent();
+      }
+      removeRootRecusive();
+      isRoot.set(true);
+   }
+
+   private void removeRootRecusive()
+   {
+      isRoot.set(false);
+      registries.forEach(registry -> registry.removeRootRecusive());
    }
 }

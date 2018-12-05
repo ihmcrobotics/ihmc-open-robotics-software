@@ -13,18 +13,18 @@ import us.ihmc.avatar.initialSetup.DRCRobotInitialSetup;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.DiagnosticsWhenHangingHelper;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
-import us.ihmc.wholeBodyController.diagnostics.DiagnosticsWhenHangingControllerState;
-import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.robotics.screwTheory.OneDoFJoint;
-import us.ihmc.simulationconstructionset.Joint;
-import us.ihmc.simulationconstructionset.SimulationConstructionSet;
+import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.simulationConstructionSetTools.util.HumanoidFloatingRootJointRobot;
 import us.ihmc.simulationConstructionSetTools.util.virtualHoist.VirtualHoist;
+import us.ihmc.simulationconstructionset.Joint;
+import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.valkyrie.ValkyrieInitialSetup;
 import us.ihmc.valkyrie.ValkyrieRobotModel;
 import us.ihmc.valkyrie.configuration.ValkyrieConfigurationRoot;
 import us.ihmc.valkyrieRosControl.ValkyrieTorqueOffsetPrinter;
+import us.ihmc.wholeBodyController.diagnostics.DiagnosticsWhenHangingControllerState;
 import us.ihmc.wholeBodyController.diagnostics.HumanoidJointPoseList;
+import us.ihmc.yoVariables.variable.YoDouble;
 
 public class ValkyrieDiagnosticsWhenHangingSimulation
 {
@@ -125,9 +125,9 @@ public class ValkyrieDiagnosticsWhenHangingSimulation
 
       System.out.println();
 
-      ArrayList<OneDoFJoint> oneDoFJoints = diagnosticsWhenHangingController.getOneDoFJoints();
+      ArrayList<OneDoFJointBasics> oneDoFJoints = diagnosticsWhenHangingController.getOneDoFJoints();
       
-      for (OneDoFJoint oneDoFJoint : oneDoFJoints)
+      for (OneDoFJointBasics oneDoFJoint : oneDoFJoints)
       {
          DiagnosticsWhenHangingHelper diagnosticsWhenHangingHelper = diagnosticsWhenHangingController.getDiagnosticsWhenHangingHelper(oneDoFJoint);
 

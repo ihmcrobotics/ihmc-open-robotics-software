@@ -1,11 +1,12 @@
 package us.ihmc.robotics.screwTheory;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.HashSet;
-import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Random;
@@ -24,8 +25,21 @@ import us.ihmc.euclid.tools.EuclidCoreRandomTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
+import us.ihmc.mecano.multiBodySystem.PlanarJoint;
+import us.ihmc.mecano.multiBodySystem.PrismaticJoint;
+import us.ihmc.mecano.multiBodySystem.RevoluteJoint;
+import us.ihmc.mecano.multiBodySystem.RigidBody;
+import us.ihmc.mecano.multiBodySystem.SixDoFJoint;
+import us.ihmc.mecano.multiBodySystem.interfaces.JointBasics;
+import us.ihmc.mecano.multiBodySystem.interfaces.JointReadOnly;
+import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
+import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
+import us.ihmc.mecano.spatial.SpatialAcceleration;
+import us.ihmc.mecano.tools.JointStateType;
+import us.ihmc.mecano.tools.MultiBodySystemRandomTools;
+import us.ihmc.mecano.tools.MultiBodySystemRandomTools.RandomFloatingRevoluteJointChain;
+import us.ihmc.mecano.tools.MultiBodySystemTools;
 import us.ihmc.robotics.random.RandomGeometry;
-import us.ihmc.robotics.screwTheory.ScrewTestTools.RandomFloatingChain;
 
 public class ScrewToolsTest
 {
@@ -33,12 +47,12 @@ public class ScrewToolsTest
    private static final Vector3D Y = new Vector3D(0.0, 1.0, 0.0);
    private static final Vector3D Z = new Vector3D(0.0, 0.0, 1.0);
 
-   private RigidBody elevator;
+   private RigidBodyBasics elevator;
    private Random random;
-   private List<RigidBody> firstLevelSubTrees;
-   private List<RigidBody> secondLevelSubTrees;
-   private Set<RigidBody> exclusions;
-   private Set<InverseDynamicsJoint> exclusionsJoints;
+   private List<RigidBodyBasics> firstLevelSubTrees;
+   private List<RigidBodyBasics> secondLevelSubTrees;
+   private Set<RigidBodyBasics> exclusions;
+   private Set<JointBasics> exclusionsJoints;
    private ArrayList<RevoluteJoint> joints;
 
    protected static final double epsilon = 1e-10;
@@ -53,74 +67,73 @@ public class ScrewToolsTest
 
       setUpRandomTree(elevator);
 
-      firstLevelSubTrees = new ArrayList<RigidBody>();
+      firstLevelSubTrees = new ArrayList<RigidBodyBasics>();
 
-      for (InverseDynamicsJoint childJoint : elevator.getChildrenJoints())
+      for (JointBasics childJoint : elevator.getChildrenJoints())
       {
          firstLevelSubTrees.add(childJoint.getSuccessor());
       }
 
-      secondLevelSubTrees = new ArrayList<RigidBody>();
+      secondLevelSubTrees = new ArrayList<RigidBodyBasics>();
       for(int i = 0; i < 3; i++)
       {
-         for (InverseDynamicsJoint childJoint : firstLevelSubTrees.get(i).getChildrenJoints())
+         for (JointBasics childJoint : firstLevelSubTrees.get(i).getChildrenJoints())
          {
             secondLevelSubTrees.add(childJoint.getSuccessor());
          }
       }
 
-      exclusions = new LinkedHashSet<RigidBody>();
-      exclusionsJoints = new LinkedHashSet<InverseDynamicsJoint>();
+      exclusions = new LinkedHashSet<RigidBodyBasics>();
+      exclusionsJoints = new LinkedHashSet<JointBasics>();
       exclusions.add(firstLevelSubTrees.get(1));
 
-      for (InverseDynamicsJoint excludedJoint : firstLevelSubTrees.get(1).getChildrenJoints())
+      for (JointBasics excludedJoint : firstLevelSubTrees.get(1).getChildrenJoints())
       {
          exclusionsJoints.add(excludedJoint);
       }
-
-      InverseDynamicsJoint[] subtreeJoints = ScrewTools.computeSubtreeJoints(firstLevelSubTrees.get(2));
-      RigidBody[] lastSubTree = ScrewTools.computeSuccessors(subtreeJoints);
-      RigidBody halfwayDownLastSubTree = lastSubTree[3];
+      JointBasics[] subtreeJoints = MultiBodySystemTools.collectSubtreeJoints(firstLevelSubTrees.get(2));
+      RigidBodyBasics[] lastSubTree = MultiBodySystemTools.collectSuccessors(subtreeJoints);
+      RigidBodyBasics halfwayDownLastSubTree = lastSubTree[3];
       exclusions.add(halfwayDownLastSubTree);
 
-      for (InverseDynamicsJoint excludedJoint : halfwayDownLastSubTree.getChildrenJoints())
+      for (JointBasics excludedJoint : halfwayDownLastSubTree.getChildrenJoints())
       {
          exclusionsJoints.add(excludedJoint);
       }
    }
 
-   private void setUpRandomTree(RigidBody elevator)
+   private void setUpRandomTree(RigidBodyBasics elevator)
    {
       joints = new ArrayList<RevoluteJoint>();
 
       Vector3D[] jointAxes1 = {X, Y, Z, Y, X};
-      ScrewTestTools.createRandomChainRobot("chainA", joints, elevator, jointAxes1, random);
+      joints.addAll(MultiBodySystemRandomTools.nextRevoluteJointChain(random, "chainA", elevator, jointAxes1));
 
       Vector3D[] jointAxes2 = {Z, X, Y, X, X};
-      ScrewTestTools.createRandomChainRobot("chainB", joints, elevator, jointAxes2, random);
+      joints.addAll(MultiBodySystemRandomTools.nextRevoluteJointChain(random, "chainB", elevator, jointAxes2));
 
       Vector3D[] jointAxes3 = {Y, Y, X, X, X};
-      ScrewTestTools.createRandomChainRobot("chainC", joints, elevator, jointAxes3, random);
+      joints.addAll(MultiBodySystemRandomTools.nextRevoluteJointChain(random, "chainC", elevator, jointAxes3));
    }
 
-   private Set<RigidBody> getExcludedRigidBodies()
+   private Set<RigidBodyBasics> getExcludedRigidBodies()
    {
-      Set<RigidBody> excludedBodies = new LinkedHashSet<RigidBody>();
-      for (RigidBody rigidBody : exclusions)
+      Set<RigidBodyBasics> excludedBodies = new LinkedHashSet<RigidBodyBasics>();
+      for (RigidBodyBasics rigidBody : exclusions)
       {
          excludedBodies.add(rigidBody);
-         RigidBody[] subTree = ScrewTools.computeSuccessors(ScrewTools.computeSubtreeJoints(rigidBody));
+         RigidBodyBasics[] subTree = MultiBodySystemTools.collectSuccessors(MultiBodySystemTools.collectSubtreeJoints(rigidBody));
          excludedBodies.addAll(Arrays.asList(subTree));
       }
 
       return excludedBodies;
    }
 
-   private Set<InverseDynamicsJoint> getExcludedJoints()
+   private Set<JointBasics> getExcludedJoints()
    {
-      Set<RigidBody> excludedBodies = getExcludedRigidBodies();
-      Set<InverseDynamicsJoint> excludedJoints = new LinkedHashSet<InverseDynamicsJoint>();
-      for (RigidBody rigidBody : excludedBodies)
+      Set<RigidBodyBasics> excludedBodies = getExcludedRigidBodies();
+      Set<JointBasics> excludedJoints = new LinkedHashSet<JointBasics>();
+      for (RigidBodyBasics rigidBody : excludedBodies)
       {
          excludedJoints.addAll(rigidBody.getChildrenJoints());
       }
@@ -133,12 +146,13 @@ public class ScrewToolsTest
    public void testAddRevoluteJoint_String_RigidBody_Vector3d_Vector3d()
    {
       Vector3D[] jointAxes = {X, Y, Z, Y, X};
-      RandomFloatingChain chain = new RandomFloatingChain(random, jointAxes);
-      chain.setRandomPositionsAndVelocities(random);
+      RandomFloatingRevoluteJointChain chain = new RandomFloatingRevoluteJointChain(random, jointAxes);
+      chain.nextState(random, JointStateType.CONFIGURATION, JointStateType.VELOCITY);
+      RigidBodyBasics[] rootBodies = {chain.getElevator()};
 
-      InverseDynamicsJoint[] jointsArray = ScrewTools.computeSubtreeJoints(chain.getElevator());
-      RigidBody[] partialBodiesArray = ScrewTools.computeSubtreeSuccessors(chain.getElevator());
-      RigidBody[] bodiesArray = new RigidBody[partialBodiesArray.length + 1];
+      JointBasics[] jointsArray = MultiBodySystemTools.collectSubtreeJoints(rootBodies);
+      RigidBodyBasics[] partialBodiesArray = ScrewTools.computeSubtreeSuccessors(chain.getElevator());
+      RigidBodyBasics[] bodiesArray = new RigidBodyBasics[partialBodiesArray.length + 1];
       bodiesArray[0] = chain.getElevator();
       for(int i = 0; i < partialBodiesArray.length; i++)
       {
@@ -146,11 +160,11 @@ public class ScrewToolsTest
       }
 
       String jointName = "joint";
-      RigidBody parentBody = bodiesArray[bodiesArray.length - 1];
+      RigidBodyBasics parentBody = bodiesArray[bodiesArray.length - 1];
       Vector3D jointOffset = RandomGeometry.nextVector3D(random, 5.0);
       Vector3D jointAxis = RandomGeometry.nextVector3D(random, 5.0);
 
-      RevoluteJoint joint = ScrewTools.addRevoluteJoint(jointName, parentBody, jointOffset, jointAxis);
+      RevoluteJoint joint = new RevoluteJoint(jointName, parentBody, jointOffset, jointAxis);
 
       assertEquals("Should be equal", jointName, joint.getName());
       assertTrue(parentBody.equals(joint.getPredecessor()));
@@ -162,11 +176,11 @@ public class ScrewToolsTest
    public void testAddRevoluteJoint_String_RigidBody_Transform3D_Vector3d()
    {
       String jointName = "joint";
-      RigidBody parentBody = new RigidBody("body", ReferenceFrame.getWorldFrame());
+      RigidBodyBasics parentBody = new RigidBody("body", ReferenceFrame.getWorldFrame());
       RigidBodyTransform transformToParent = EuclidCoreRandomTools.nextRigidBodyTransform(random);
       Vector3D jointAxis = RandomGeometry.nextVector3D(random, 5.0);
 
-      RevoluteJoint joint = ScrewTools.addRevoluteJoint(jointName, parentBody, transformToParent, jointAxis);
+      RevoluteJoint joint = new RevoluteJoint(jointName, parentBody, transformToParent, jointAxis);
 
       assertEquals("Should be equal", jointName, joint.getName());
       assertTrue(parentBody.equals(joint.getPredecessor()));
@@ -178,11 +192,11 @@ public class ScrewToolsTest
    public void testAddPrismaticJoint_String_RigidBody_Vector3d_Vector3d()
    {
       String jointName = "joint";
-      RigidBody parentBody = new RigidBody("body", ReferenceFrame.getWorldFrame());
+      RigidBodyBasics parentBody = new RigidBody("body", ReferenceFrame.getWorldFrame());
       Vector3D jointOffset = RandomGeometry.nextVector3D(random, 5.0);
       Vector3D jointAxis = RandomGeometry.nextVector3D(random, 5.0);
 
-      PrismaticJoint joint = ScrewTools.addPrismaticJoint(jointName, parentBody, jointOffset, jointAxis);
+      PrismaticJoint joint = new PrismaticJoint(jointName, parentBody, jointOffset, jointAxis);
 
       assertEquals("Should be equal", jointName, joint.getName());
       assertTrue(parentBody.equals(joint.getPredecessor()));
@@ -193,11 +207,11 @@ public class ScrewToolsTest
    public void testAddPrismaticJoint_String_RigidBody_Transform3D_Vector3d()
    {
       String jointName = "joint";
-      RigidBody parentBody = new RigidBody("body", ReferenceFrame.getWorldFrame());
+      RigidBodyBasics parentBody = new RigidBody("body", ReferenceFrame.getWorldFrame());
       RigidBodyTransform transformToParent = EuclidCoreRandomTools.nextRigidBodyTransform(random);
       Vector3D jointAxis = RandomGeometry.nextVector3D(random, 5.0);
 
-      PrismaticJoint joint = ScrewTools.addPrismaticJoint(jointName, parentBody, transformToParent, jointAxis);
+      PrismaticJoint joint = new PrismaticJoint(jointName, parentBody, transformToParent, jointAxis);
 
       assertEquals("Should be equal", jointName, joint.getName());
       assertTrue(parentBody.equals(joint.getPredecessor()));
@@ -208,12 +222,12 @@ public class ScrewToolsTest
    public void testAddRigidBody_String_InverseDynamicsJoint_Matrix3d_double_Vector3d()
    {
       String name = "body";
-      RigidBody predecessor = new RigidBody("Predecessor", theFrame);
+      RigidBodyBasics predecessor = new RigidBody("Predecessor", theFrame);
       PlanarJoint parentJoint = new PlanarJoint(name, predecessor);
       Matrix3D momentOfInertia = new Matrix3D();
       double mass = random.nextDouble();
 
-      RigidBody body = ScrewTools.addRigidBody(name, parentJoint, momentOfInertia, mass, X);
+      RigidBodyBasics body = new RigidBody(name, parentJoint, momentOfInertia, mass, X);
 
       assertEquals("Should be equal", name, body.getName());
       assertTrue(parentJoint.equals(body.getParentJoint()));
@@ -224,13 +238,13 @@ public class ScrewToolsTest
    public void testAddRigidBody_String_InverseDynamicsJoint_Matrix3d_double_Transform3D()
    {
       String name = "body";
-      RigidBody predecessor = new RigidBody("Predecessor", theFrame);
+      RigidBodyBasics predecessor = new RigidBody("Predecessor", theFrame);
       PlanarJoint parentJoint = new PlanarJoint(name, predecessor);
       Matrix3D momentOfInertia = new Matrix3D();
       double mass = random.nextDouble();
       RigidBodyTransform inertiaPose = new RigidBodyTransform();
 
-      RigidBody body = ScrewTools.addRigidBody(name, parentJoint, momentOfInertia, mass, inertiaPose);
+      RigidBodyBasics body = new RigidBody(name, parentJoint, momentOfInertia, mass, inertiaPose);
 
       assertEquals("Should be equal", name, body.getName());
       assertTrue(parentJoint.equals(body.getParentJoint()));
@@ -241,14 +255,15 @@ public class ScrewToolsTest
    public void testComputeSuccessors()
    {  
       int numJoints = 3;
-      RigidBody[] bodyArray = new RigidBody[numJoints];
+      RigidBodyBasics[] bodyArray = new RigidBodyBasics[numJoints];
       for (int i = 0; i < numJoints; i++)
       {
-         InverseDynamicsJoint joint = joints.get(i);
+         JointBasics joint = joints.get(i);
          bodyArray[i] = joint.getSuccessor();
       }
+      JointBasics[] joints1 = {joints.get(0), joints.get(1), joints.get(2)};
 
-      RigidBody[] bodies = ScrewTools.computeSuccessors(joints.get(0), joints.get(1), joints.get(2));
+      RigidBodyBasics[] bodies = MultiBodySystemTools.collectSuccessors(joints1);
 
       assertEquals("Should be equal", bodyArray.length, bodies.length);
       for(int i = 0; i < bodies.length; i++)
@@ -259,66 +274,11 @@ public class ScrewToolsTest
 
 	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
-   public void testComputeSubtreeSuccessors_InverseDynamicsJoint_RigidBody()
-   {
-      RigidBody[] bodies = ScrewTools.computeSubtreeSuccessors(elevator);
-
-      Set<InverseDynamicsJoint> jointsToExclude = new HashSet<InverseDynamicsJoint>();
-      RigidBody[] subtreeSuccessors = ScrewTools.computeSubtreeSuccessors(jointsToExclude, elevator);
-      assertEquals("Should be equal", bodies.length, subtreeSuccessors.length);
-      for(int i = 0; i < bodies.length; i++)
-      {
-         assertTrue(bodies[i].equals(subtreeSuccessors[i]));
-      }
-
-      jointsToExclude.addAll(joints);
-      subtreeSuccessors = ScrewTools.computeSubtreeSuccessors(jointsToExclude, elevator);
-      assertEquals("Should be equal", 0.0, subtreeSuccessors.length, epsilon);
-   }
-
-	@ContinuousIntegrationTest(estimatedDuration = 0.0)
-	@Test(timeout = 30000)
-   public void testComputeSubtreeSuccessors_RigidBody()
-   {
-      RigidBody[] successors = ScrewTools.computeSubtreeSuccessors(elevator);
-
-      Set<InverseDynamicsJoint> jointsToExclude = new HashSet<InverseDynamicsJoint>();
-      RigidBody[] otherSuccessors = ScrewTools.computeSubtreeSuccessors(jointsToExclude, elevator);
-
-      assertEquals("Should be equal", successors.length, otherSuccessors.length);
-      for(int i = 0; i < successors.length; i++)
-      {
-         assertTrue(successors[i].equals(otherSuccessors[i]));
-      }
-   }
-
-	@ContinuousIntegrationTest(estimatedDuration = 0.0)
-	@Test(timeout = 30000)
-   public void testComputeSubtreeSuccessors_InverseDynamicsJoint()
-   {
-      List<InverseDynamicsJoint> jointsList = new ArrayList<InverseDynamicsJoint>();
-      jointsList.addAll(elevator.getChildrenJoints());
-
-      RigidBody[] successors = ScrewTools.computeSubtreeSuccessors(jointsList.get(0), jointsList.get(1));
-
-
-      Set<InverseDynamicsJoint> jointsToExclude = new HashSet<InverseDynamicsJoint>();
-      RigidBody[] otherSuccessors = ScrewTools.computeSubtreeSuccessors(jointsToExclude, elevator, elevator);
-
-      assertEquals("Should be equal", successors.length, otherSuccessors.length);
-      for(int i = 0; i < successors.length; i++)
-      {
-         assertTrue(successors[i].equals(otherSuccessors[i]));
-      }
-   }
-
-	@ContinuousIntegrationTest(estimatedDuration = 0.0)
-	@Test(timeout = 30000)
    public void testComputeSupportAndSubtreeSuccessors_RigidBody()
    {
       int numberOfBodiesOnChain = 6;
       int numberOfBodies = 16;
-      RigidBody[] successors = ScrewTools.computeSupportAndSubtreeSuccessors(secondLevelSubTrees.get(0));
+      RigidBodyBasics[] successors = ScrewTools.computeSupportAndSubtreeSuccessors(secondLevelSubTrees.get(0));
       assertEquals(numberOfBodiesOnChain - 1, successors.length);
 
       successors = ScrewTools.computeSupportAndSubtreeSuccessors(elevator);
@@ -331,10 +291,10 @@ public class ScrewToolsTest
    {
       int numberOfJointsOnChain = 5;
       int numberOfJoints = 15;
-      InverseDynamicsJoint [] successors = ScrewTools.computeSupportAndSubtreeJoints(secondLevelSubTrees.get(0));
+      JointBasics [] successors = MultiBodySystemTools.collectSupportAndSubtreeJoints(secondLevelSubTrees.get(0));
       assertEquals(numberOfJointsOnChain, successors.length);
 
-      successors = ScrewTools.computeSupportAndSubtreeJoints(elevator);
+      successors = MultiBodySystemTools.collectSupportAndSubtreeJoints(elevator);
       assertEquals(numberOfJoints, successors.length);
    }
 
@@ -342,13 +302,15 @@ public class ScrewToolsTest
 	@Test(timeout = 30000)
    public void testComputeSupportJoints_RigidBody()
    {
-      InverseDynamicsJoint[] supportJoints = ScrewTools.computeSupportJoints(elevator);
+      RigidBodyBasics[] bodies = {elevator};
+      JointBasics[] supportJoints = MultiBodySystemTools.collectSupportJoints(bodies);
       assertTrue(elevator.isRootBody());
       assertEquals(0, supportJoints.length);
 
       int jointsSupportingSecondLevelSubTree = 2, numberOfChainsUsed = 2;
+      RigidBodyBasics[] bodies1 = {secondLevelSubTrees.get(0), secondLevelSubTrees.get(1)};
 
-      supportJoints = ScrewTools.computeSupportJoints(secondLevelSubTrees.get(0), secondLevelSubTrees.get(1));
+      supportJoints = MultiBodySystemTools.collectSupportJoints(bodies1);
 
       assertEquals(jointsSupportingSecondLevelSubTree * numberOfChainsUsed, supportJoints.length);
    }
@@ -357,12 +319,11 @@ public class ScrewToolsTest
 	@Test(timeout = 30000)
    public void testComputeSubtreeJoints_RigidBody()
    {
-      List<RigidBody> bodies = new ArrayList<RigidBody>();
+      List<RigidBodyBasics> bodies = new ArrayList<RigidBodyBasics>();
       bodies.add(elevator);
       bodies.add(elevator);
-
-      InverseDynamicsJoint[] fromBodies = ScrewTools.computeSubtreeJoints(elevator, elevator);
-      InverseDynamicsJoint[] fromBodiesList = ScrewTools.computeSubtreeJoints(bodies);
+      JointBasics[] fromBodies = MultiBodySystemTools.collectSubtreeJoints(elevator, elevator);
+      JointReadOnly[] fromBodiesList = MultiBodySystemTools.collectSubtreeJoints(bodies);
 
       assertEquals("These should be equal", fromBodies.length, fromBodiesList.length);
       for(int i = 0; i < fromBodies.length; i++)
@@ -373,82 +334,10 @@ public class ScrewToolsTest
 
 	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
-   public void testComputeSubtreeJoints_RigidBodyLIST()
-   {
-      ArrayList<RigidBody> rootBodies = new ArrayList<RigidBody>();
-      rootBodies.add(elevator);
-      InverseDynamicsJoint[] subtreeJoints = ScrewTools.computeSubtreeJoints(rootBodies);
-
-      ArrayList<InverseDynamicsJoint> subtree = new ArrayList<InverseDynamicsJoint>();
-      ArrayList<RigidBody> rigidBodyStack = new ArrayList<RigidBody>();
-      rigidBodyStack.addAll(rootBodies);
-
-      while (!rigidBodyStack.isEmpty())
-      {
-         RigidBody currentBody = rigidBodyStack.remove(0);
-         List<InverseDynamicsJoint> childrenJoints = currentBody.getChildrenJoints();
-         for (InverseDynamicsJoint joint : childrenJoints)
-         {
-            RigidBody successor = joint.getSuccessor();
-            rigidBodyStack.add(successor);
-            subtree.add(joint);
-         }
-      }
-
-      assertEquals("These should be equal", subtreeJoints.length, subtree.size());
-      for(int i = 0; i < subtreeJoints.length; i++)
-      {
-         assertTrue(subtreeJoints[i].equals(subtree.get(i)));
-      }
-   }
-
-	@ContinuousIntegrationTest(estimatedDuration = 0.0)
-	@Test(timeout = 30000)
    public void testGetRootBody()
    {
-      RigidBody randomBody = ScrewTools.getRootBody(joints.get(joints.size() - 1).getPredecessor());
+      RigidBodyBasics randomBody = MultiBodySystemTools.getRootBody(joints.get(joints.size() - 1).getPredecessor());
       assertTrue(randomBody.isRootBody());
-   }
-
-	@ContinuousIntegrationTest(estimatedDuration = 0.0)
-	@Test(timeout = 30000)
-   public void testCreateParentMap()
-   {
-      int numberOfBodies = ScrewTools.computeSubtreeSuccessors(elevator).length + 1;
-      RigidBody[] mostBodies = ScrewTools.computeSubtreeSuccessors(elevator);
-      RigidBody[] allRigidBodiesInOrder = new RigidBody[numberOfBodies];
-      allRigidBodiesInOrder[0] = elevator;
-      for(int i = 0; i < numberOfBodies -1; i++)
-      {
-         allRigidBodiesInOrder[i+1] = mostBodies[i];
-      }
-
-      int[] parentMap = new int[allRigidBodiesInOrder.length];
-      parentMap = ScrewTools.createParentMap(allRigidBodiesInOrder);
-      assertEquals(-1, parentMap[0]); //root
-      assertEquals(0, parentMap[1]); //first subtree of bodies
-      assertEquals(0, parentMap[2]);
-      assertEquals(0, parentMap[3]);
-
-      for(int i = 4; i < 16; i++) //members of chains A, B, and C
-      {
-         assertEquals(i - 3, parentMap[i]);
-      }
-   }
-
-	@ContinuousIntegrationTest(estimatedDuration = 0.0)
-	@Test(timeout = 30000)
-   public void testGetTauMatrix()
-   {
-      InverseDynamicsJoint[] jointsInOrder = ScrewTools.computeSubtreeJoints(elevator);
-
-      DenseMatrix64F tauMatrix = ScrewTools.getTauMatrix(jointsInOrder);
-      assertEquals(jointsInOrder.length, tauMatrix.numRows);
-      assertEquals(1, tauMatrix.numCols);
-      for(int i = 0; i < jointsInOrder.length; i++)
-      {
-         assertEquals("These should be equal", jointsInOrder[i].getDegreesOfFreedom() - 1, tauMatrix.get(i, 0), epsilon);
-      }
    }
 
 	@ContinuousIntegrationTest(estimatedDuration = 0.0)
@@ -456,15 +345,15 @@ public class ScrewToolsTest
    public void testCreateJointPath()
    {
       int numberOfJoints = joints.size(), numberOfBodies = numberOfJoints + 1;
-      RigidBody[] allBodies = new RigidBody[numberOfBodies];
+      RigidBodyBasics[] allBodies = new RigidBodyBasics[numberOfBodies];
       allBodies[0] = elevator;
       for(int i = 0; i < numberOfJoints; i++)
       {
          allBodies[i+1] = joints.get(i).getSuccessor();
       }
 
-      RigidBody start = allBodies[0] , end = allBodies[allBodies.length - 1];
-      InverseDynamicsJoint[] jointPath = ScrewTools.createJointPath(start, end);
+      RigidBodyBasics start = allBodies[0] , end = allBodies[allBodies.length - 1];
+      JointBasics[] jointPath = MultiBodySystemTools.createJointPath(start, end);
       for(int i = 0; i < jointPath.length; i++)
       {
          assertTrue(jointPath[i].getName().equalsIgnoreCase("chainCjoint" + i));
@@ -476,21 +365,21 @@ public class ScrewToolsTest
    public void testIsAncestor()
    {
       int numberOfJoints = joints.size(), numberOfBodies = numberOfJoints + 1;
-      RigidBody[] allBodies = new RigidBody[numberOfBodies];
+      RigidBodyBasics[] allBodies = new RigidBodyBasics[numberOfBodies];
       allBodies[0] = elevator;
       for(int i = 0; i < numberOfJoints; i++)
       {
          allBodies[i+1] = joints.get(i).getSuccessor();
       }
 
-      RigidBody d0 = allBodies[0]; //elevator
-      RigidBody d1 = allBodies[1]; //chainAbody0
-      RigidBody d2 = allBodies[2]; //chainAbody1
-      RigidBody d3 = allBodies[3]; //chainAbody2
+      RigidBodyBasics d0 = allBodies[0]; //elevator
+      RigidBodyBasics d1 = allBodies[1]; //chainAbody0
+      RigidBodyBasics d2 = allBodies[2]; //chainAbody1
+      RigidBodyBasics d3 = allBodies[3]; //chainAbody2
 
-      assertTrue(ScrewTools.isAncestor(d0, d0)); //self
-      assertTrue(ScrewTools.isAncestor(d3, d0)); //ancestor
-      assertFalse(ScrewTools.isAncestor(d0, d3)); //descendant 
+      assertTrue(MultiBodySystemTools.isAncestor(d0, d0)); //self
+      assertTrue(MultiBodySystemTools.isAncestor(d3, d0)); //ancestor
+      assertFalse(MultiBodySystemTools.isAncestor(d0, d3)); //descendant 
    }
 
 	@ContinuousIntegrationTest(estimatedDuration = 0.0)
@@ -498,21 +387,21 @@ public class ScrewToolsTest
    public void testComputeDistanceToAncestor()
    {
       int numberOfJoints = joints.size(), numberOfBodies = numberOfJoints + 1;
-      RigidBody[] allBodies = new RigidBody[numberOfBodies];
+      RigidBodyBasics[] allBodies = new RigidBodyBasics[numberOfBodies];
       allBodies[0] = elevator;
       for(int i = 0; i < numberOfJoints; i++)
       {
          allBodies[i+1] = joints.get(i).getSuccessor();
       }
 
-      RigidBody d0 = allBodies[0]; //elevator
-      RigidBody d1 = allBodies[1]; //chainAbody0
-      RigidBody d2 = allBodies[2]; //chainAbody1
-      RigidBody d3 = allBodies[3]; //chainAbody2
+      RigidBodyBasics d0 = allBodies[0]; //elevator
+      RigidBodyBasics d1 = allBodies[1]; //chainAbody0
+      RigidBodyBasics d2 = allBodies[2]; //chainAbody1
+      RigidBodyBasics d3 = allBodies[3]; //chainAbody2
 
-      assertEquals(0, ScrewTools.computeDistanceToAncestor(d0, d0)); //self
-      assertEquals(3, ScrewTools.computeDistanceToAncestor(d3, d0)); //ancestor
-      assertEquals(-1, ScrewTools.computeDistanceToAncestor(d0, d3)); //descendant 
+      assertEquals(0, MultiBodySystemTools.computeDistanceToAncestor(d0, d0)); //self
+      assertEquals(3, MultiBodySystemTools.computeDistanceToAncestor(d3, d0)); //ancestor
+      assertEquals(-1, MultiBodySystemTools.computeDistanceToAncestor(d0, d3)); //descendant 
    }
 
 	@ContinuousIntegrationTest(estimatedDuration = 0.0)
@@ -520,18 +409,18 @@ public class ScrewToolsTest
    public void testPackJointVelocitiesMatrix_Array()
    {
       Vector3D[] jointAxes = {X, Y, Z, Y, X};
-      RandomFloatingChain chain = new RandomFloatingChain(random, jointAxes);
-      InverseDynamicsJoint[] jointsArray = ScrewTools.computeSubtreeJoints(chain.getElevator());
+      RandomFloatingRevoluteJointChain chain = new RandomFloatingRevoluteJointChain(random, jointAxes);
+      JointBasics[] jointsArray = MultiBodySystemTools.collectSubtreeJoints(chain.getElevator());
 
-      DenseMatrix64F originalVelocities = new DenseMatrix64F(ScrewTools.computeDegreesOfFreedom(jointsArray), 1);
+      DenseMatrix64F originalVelocities = new DenseMatrix64F(MultiBodySystemTools.computeDegreesOfFreedom(jointsArray), 1);
       for(int i = 0; i < originalVelocities.getNumRows() * originalVelocities.getNumCols(); i++)
       {       //create original matrix
          originalVelocities.set(i, random.nextDouble());
       }
-      ScrewTools.setVelocities(jointsArray, originalVelocities); //set velocities from matrix
-      DenseMatrix64F newVelocities = new DenseMatrix64F(ScrewTools.computeDegreesOfFreedom(jointsArray), 1);
+      MultiBodySystemTools.insertJointsState(jointsArray, JointStateType.VELOCITY, originalVelocities); //set velocities from matrix
+      DenseMatrix64F newVelocities = new DenseMatrix64F(MultiBodySystemTools.computeDegreesOfFreedom(jointsArray), 1);
 
-      ScrewTools.getJointVelocitiesMatrix(jointsArray, newVelocities);//pack new matrix
+      MultiBodySystemTools.extractJointsState(jointsArray, JointStateType.VELOCITY, newVelocities);//pack new matrix
       for(int i = 0; i < jointsArray.length; i++)
       {
          assertEquals("Should be equal velocities", originalVelocities.get(i), newVelocities.get(i), epsilon);
@@ -543,23 +432,23 @@ public class ScrewToolsTest
    public void testPackJointVelocitiesMatrix_Iterable()
    {
       Vector3D[] jointAxes = {X, Y, Z, Y, X};
-      RandomFloatingChain chain = new RandomFloatingChain(random, jointAxes);
-      InverseDynamicsJoint[] jointsArray = ScrewTools.computeSubtreeJoints(chain.getElevator());
-      ArrayList<InverseDynamicsJoint> jointsList = new ArrayList<InverseDynamicsJoint>();
+      RandomFloatingRevoluteJointChain chain = new RandomFloatingRevoluteJointChain(random, jointAxes);
+      JointBasics[] jointsArray = MultiBodySystemTools.collectSubtreeJoints(chain.getElevator());
+      ArrayList<JointBasics> jointsList = new ArrayList<JointBasics>();
       for(int i = 0; i < jointsArray.length; i++)
       {
          jointsList.add(jointsArray[i]);
       }
 
-      DenseMatrix64F originalVelocities = new DenseMatrix64F(ScrewTools.computeDegreesOfFreedom(jointsArray), 1);
+      DenseMatrix64F originalVelocities = new DenseMatrix64F(MultiBodySystemTools.computeDegreesOfFreedom(jointsArray), 1);
       for(int i = 0; i < originalVelocities.getNumRows() * originalVelocities.getNumCols(); i++)
       {       //create original matrix
          originalVelocities.set(i, random.nextDouble());
       }
-      ScrewTools.setVelocities(jointsArray, originalVelocities); //set velocities from matrix
-      DenseMatrix64F newVelocities = new DenseMatrix64F(ScrewTools.computeDegreesOfFreedom(jointsArray), 1);
+      MultiBodySystemTools.insertJointsState(jointsArray, JointStateType.VELOCITY, originalVelocities); //set velocities from matrix
+      DenseMatrix64F newVelocities = new DenseMatrix64F(MultiBodySystemTools.computeDegreesOfFreedom(jointsArray), 1);
 
-      ScrewTools.getJointVelocitiesMatrix(jointsList, newVelocities);//pack new matrix
+      MultiBodySystemTools.extractJointsState(jointsList, JointStateType.VELOCITY, newVelocities);//pack new matrix
       for(int i = 0; i < jointsArray.length; i++)
       {
          assertEquals("Should be equal velocities", originalVelocities.get(i), newVelocities.get(i), epsilon);
@@ -571,18 +460,18 @@ public class ScrewToolsTest
    public void testPackDesiredJointAccelerationsMatrix()
    {
       Vector3D[] jointAxes = {X, Y, Z, Y, X};
-      RandomFloatingChain chain = new RandomFloatingChain(random, jointAxes);
-      InverseDynamicsJoint[] jointsArray = ScrewTools.computeSubtreeJoints(chain.getElevator());
+      RandomFloatingRevoluteJointChain chain = new RandomFloatingRevoluteJointChain(random, jointAxes);
+      JointBasics[] jointsArray = MultiBodySystemTools.collectSubtreeJoints(chain.getElevator());
 
-      DenseMatrix64F originalAccel = new DenseMatrix64F(ScrewTools.computeDegreesOfFreedom(jointsArray), 1);
+      DenseMatrix64F originalAccel = new DenseMatrix64F(MultiBodySystemTools.computeDegreesOfFreedom(jointsArray), 1);
       for(int i = 0; i < originalAccel.getNumRows() * originalAccel.getNumCols(); i++)
       {       //create original matrix
          originalAccel.set(i, random.nextDouble());
       }
-      ScrewTools.setDesiredAccelerations(jointsArray, originalAccel); //set velocities from matrix
-      DenseMatrix64F newAccelerations = new DenseMatrix64F(ScrewTools.computeDegreesOfFreedom(jointsArray), 1);
+      MultiBodySystemTools.insertJointsState(jointsArray, JointStateType.ACCELERATION, originalAccel); //set velocities from matrix
+      DenseMatrix64F newAccelerations = new DenseMatrix64F(MultiBodySystemTools.computeDegreesOfFreedom(jointsArray), 1);
 
-      ScrewTools.getDesiredJointAccelerationsMatrix(jointsArray, newAccelerations);//pack new matrix
+      MultiBodySystemTools.extractJointsState(jointsArray, JointStateType.ACCELERATION, newAccelerations);//pack new matrix
       for(int i = 0; i < jointsArray.length; i++)
       {
          assertEquals("Should be equal velocities", originalAccel.get(i), newAccelerations.get(i), epsilon);
@@ -594,19 +483,20 @@ public class ScrewToolsTest
    public void testComputeDegreesOfFreedom_Array()
    {
       Vector3D[] jointAxes = {X, Y, Z, Y, X};
-      RandomFloatingChain chain = new RandomFloatingChain(random, jointAxes);
-      chain.setRandomPositionsAndVelocities(random);
+      RandomFloatingRevoluteJointChain chain = new RandomFloatingRevoluteJointChain(random, jointAxes);
+      chain.nextState(random, JointStateType.CONFIGURATION, JointStateType.VELOCITY);
+      RigidBodyBasics[] rootBodies = {chain.getElevator()};
 
-      InverseDynamicsJoint[] jointsArray = ScrewTools.computeSubtreeJoints(chain.getElevator());
-      RigidBody[] partialBodiesArray = ScrewTools.computeSubtreeSuccessors(chain.getElevator());
-      RigidBody[] bodiesArray = new RigidBody[partialBodiesArray.length + 1];
+      JointBasics[] jointsArray = MultiBodySystemTools.collectSubtreeJoints(rootBodies);
+      RigidBodyBasics[] partialBodiesArray = ScrewTools.computeSubtreeSuccessors(chain.getElevator());
+      RigidBodyBasics[] bodiesArray = new RigidBodyBasics[partialBodiesArray.length + 1];
       bodiesArray[0] = chain.getElevator();
       for(int i = 0; i < partialBodiesArray.length; i++)
       {
          bodiesArray[i+1] = partialBodiesArray[i];
       }
 
-      int result = ScrewTools.computeDegreesOfFreedom(jointsArray);
+      int result = MultiBodySystemTools.computeDegreesOfFreedom(jointsArray);
       assertEquals(11, result);
    }
 
@@ -615,21 +505,21 @@ public class ScrewToolsTest
    public void testComputeDegreesOfFreedom_Iterable()
    {
       Vector3D[] jointAxes = {X, Y, Z, Y, X};
-      RandomFloatingChain chain = new RandomFloatingChain(random, jointAxes);
-      chain.setRandomPositionsAndVelocities(random);
+      RandomFloatingRevoluteJointChain chain = new RandomFloatingRevoluteJointChain(random, jointAxes);
+      chain.nextState(random, JointStateType.CONFIGURATION, JointStateType.VELOCITY);
 
-      InverseDynamicsJoint[] jointsArray = ScrewTools.computeSubtreeJoints(chain.getElevator());
-      ArrayList<InverseDynamicsJoint> jointsList = new ArrayList<InverseDynamicsJoint>(jointsArray.length);
+      JointBasics[] jointsArray = MultiBodySystemTools.collectSubtreeJoints(chain.getElevator());
+      ArrayList<JointBasics> jointsList = new ArrayList<JointBasics>(jointsArray.length);
 
-      RigidBody[] partialBodiesArray = ScrewTools.computeSubtreeSuccessors(chain.getElevator());
-      RigidBody[] bodiesArray = new RigidBody[partialBodiesArray.length + 1];
+      RigidBodyBasics[] partialBodiesArray = ScrewTools.computeSubtreeSuccessors(chain.getElevator());
+      RigidBodyBasics[] bodiesArray = new RigidBodyBasics[partialBodiesArray.length + 1];
       bodiesArray[0] = chain.getElevator();
       for(int i = 0; i < partialBodiesArray.length; i++)
       {
          bodiesArray[i+1] = partialBodiesArray[i];
       }
 
-      ScrewTools.computeDegreesOfFreedom(jointsList);
+      MultiBodySystemTools.computeDegreesOfFreedom(jointsList);
    }
 
 	@ContinuousIntegrationTest(estimatedDuration = 0.0)
@@ -637,11 +527,11 @@ public class ScrewToolsTest
    public void testCreateGravitationalSpatialAcceleration()
    {
       Vector3D[] jointAxes = {X, Y, Z, Y, X};
-      RandomFloatingChain chain = new RandomFloatingChain(random, jointAxes);
-      chain.setRandomPositionsAndVelocities(random);
+      RandomFloatingRevoluteJointChain chain = new RandomFloatingRevoluteJointChain(random, jointAxes);
+      chain.nextState(random, JointStateType.CONFIGURATION, JointStateType.VELOCITY);
 
       double gravity = RandomNumbers.nextDouble(random, 100.0);
-      SpatialAccelerationVector result = ScrewTools.
+      SpatialAcceleration result = ScrewTools.
             createGravitationalSpatialAcceleration(chain.getElevator(), gravity);
 
       Vector3DReadOnly angularPart = result.getAngularPart();
@@ -660,30 +550,30 @@ public class ScrewToolsTest
    public void testSetDesiredAccelerations()
    {
       Vector3D[] jointAxes = {X, Y, Z, Y, X};
-      RandomFloatingChain chain = new RandomFloatingChain(random, jointAxes);
-      InverseDynamicsJoint[] jointsArray = ScrewTools.computeSubtreeJoints(chain.getElevator());
+      RandomFloatingRevoluteJointChain chain = new RandomFloatingRevoluteJointChain(random, jointAxes);
+      JointBasics[] jointsArray = MultiBodySystemTools.collectSubtreeJoints(chain.getElevator());
 
-      DenseMatrix64F jointAccelerations = new DenseMatrix64F(ScrewTools.computeDegreesOfFreedom(jointsArray), 1);
+      DenseMatrix64F jointAccelerations = new DenseMatrix64F(MultiBodySystemTools.computeDegreesOfFreedom(jointsArray), 1);
       for(int i = 0; i < jointAccelerations.getNumRows() * jointAccelerations.getNumCols(); i++)
       {
          jointAccelerations.set(i, random.nextDouble());
       }
 
-      ScrewTools.setDesiredAccelerations(jointsArray, jointAccelerations);
+      MultiBodySystemTools.insertJointsState(jointsArray, JointStateType.ACCELERATION, jointAccelerations);
 
       DenseMatrix64F sixDoFAccel = new DenseMatrix64F(6, 1);
-      jointsArray[0].getDesiredAccelerationMatrix(sixDoFAccel, 0);
+      jointsArray[0].getJointAcceleration(0, sixDoFAccel);
       for(int i = 0; i < 6; i++)
       {
          assertEquals("Should be equal accelerations", jointAccelerations.get(i), sixDoFAccel.get(i), epsilon);
       }
 
-      OneDoFJoint joint;
+      OneDoFJointBasics joint;
 
       for(int i = 6; i < jointAccelerations.getNumRows() * jointAccelerations.getNumCols(); i++)
       {
-         joint = (OneDoFJoint)jointsArray[i - 5]; //1 - 6
-         assertEquals("Should be equal accelerations", jointAccelerations.get(i), joint.getQddDesired(), epsilon);
+         joint = (OneDoFJointBasics)jointsArray[i - 5]; //1 - 6
+         assertEquals("Should be equal accelerations", jointAccelerations.get(i), joint.getQdd(), epsilon);
       }
    }
 
@@ -692,29 +582,29 @@ public class ScrewToolsTest
    public void testSetVelocities()
    {
       Vector3D[] jointAxes = {X, Y, Z, Y, X};
-      RandomFloatingChain chain = new RandomFloatingChain(random, jointAxes);
-      InverseDynamicsJoint[] jointsArray = ScrewTools.computeSubtreeJoints(chain.getElevator());
+      RandomFloatingRevoluteJointChain chain = new RandomFloatingRevoluteJointChain(random, jointAxes);
+      JointBasics[] jointsArray = MultiBodySystemTools.collectSubtreeJoints(chain.getElevator());
 
-      DenseMatrix64F jointVelocities = new DenseMatrix64F(ScrewTools.computeDegreesOfFreedom(jointsArray), 1);
+      DenseMatrix64F jointVelocities = new DenseMatrix64F(MultiBodySystemTools.computeDegreesOfFreedom(jointsArray), 1);
       for(int i = 0; i < jointVelocities.getNumRows() * jointVelocities.getNumCols(); i++)
       {
          jointVelocities.set(i, random.nextDouble());
       }
 
-      ScrewTools.setVelocities(jointsArray, jointVelocities);
+      MultiBodySystemTools.insertJointsState(jointsArray, JointStateType.VELOCITY, jointVelocities);
 
       DenseMatrix64F sixDoFVeloc = new DenseMatrix64F(6, 1);
-      jointsArray[0].getVelocityMatrix(sixDoFVeloc, 0);
+      jointsArray[0].getJointVelocity(0, sixDoFVeloc);
       for(int i = 0; i < 6; i++)
       {
          assertEquals("Should be equal velocitiess", jointVelocities.get(i), sixDoFVeloc.get(i), epsilon);
       }
 
-      OneDoFJoint joint;
+      OneDoFJointBasics joint;
 
       for(int i = 6; i < jointVelocities.getNumRows() * jointVelocities.getNumCols(); i++)
       {
-         joint = (OneDoFJoint)jointsArray[i - 5]; //1 - 6
+         joint = (OneDoFJointBasics)jointsArray[i - 5]; //1 - 6
          assertEquals("Should be equal velocities", jointVelocities.get(i), joint.getQd(), epsilon);
       }
    }
@@ -724,10 +614,10 @@ public class ScrewToolsTest
    public void testComputeIndicesForJoint()
    {
       Vector3D[] jointAxes = {X, Y, Z, Y, X};
-      RandomFloatingChain chain = new RandomFloatingChain(random, jointAxes);
-      InverseDynamicsJoint[] jointsArr = ScrewTools.computeSubtreeJoints(chain.getElevator());
-      InverseDynamicsJoint rootJoint = jointsArr[0];
-      InverseDynamicsJoint testJoint4 = jointsArr[5];
+      RandomFloatingRevoluteJointChain chain = new RandomFloatingRevoluteJointChain(random, jointAxes);
+      JointBasics[] jointsArr = MultiBodySystemTools.collectSubtreeJoints(chain.getElevator());
+      JointBasics rootJoint = jointsArr[0];
+      JointBasics testJoint4 = jointsArr[5];
 
       
       TIntArrayList indices = new TIntArrayList();
@@ -746,14 +636,14 @@ public class ScrewToolsTest
    public void testExtractRevoluteJoints()
    {
       Vector3D[] jointAxes = {X, Y, Z, Y, X};
-      RandomFloatingChain chain = new RandomFloatingChain(random, jointAxes);
-      InverseDynamicsJoint[] jointsArr = ScrewTools.computeSubtreeJoints(chain.getElevator());
+      RandomFloatingRevoluteJointChain chain = new RandomFloatingRevoluteJointChain(random, jointAxes);
+      JointBasics[] jointsArr = MultiBodySystemTools.collectSubtreeJoints(chain.getElevator());
 
-      RevoluteJoint[] revoluteJoints = ScrewTools.extractRevoluteJoints(jointsArr);
+      RevoluteJoint[] revoluteJoints = MultiBodySystemTools.filterJoints(jointsArr, RevoluteJoint.class);
       assertEquals(jointsArr.length - 1, revoluteJoints.length);
       for(int i = 0; i < revoluteJoints.length; i++)
       {
-         assertEquals("testjoint" + i, revoluteJoints[i].getName());
+         assertEquals("testJoint" + i, revoluteJoints[i].getName());
       }
    }
 
@@ -762,11 +652,11 @@ public class ScrewToolsTest
    public void testComputeNumberOfJointsOfType()
    {
       Vector3D[] jointAxes = {X, Y, Z, Y, X};
-      RandomFloatingChain chain = new RandomFloatingChain(random, jointAxes);
-      InverseDynamicsJoint[] jointsArr = ScrewTools.computeSubtreeJoints(chain.getElevator());
+      RandomFloatingRevoluteJointChain chain = new RandomFloatingRevoluteJointChain(random, jointAxes);
+      JointBasics[] jointsArr = MultiBodySystemTools.collectSubtreeJoints(chain.getElevator());
 
-      int number6DoF = ScrewTools.computeNumberOfJointsOfType(SixDoFJoint.class, jointsArr);
-      int numberRev = ScrewTools.computeNumberOfJointsOfType(RevoluteJoint.class, jointsArr);
+      int number6DoF = MultiBodySystemTools.computeNumberOfJointsOfType(SixDoFJoint.class, jointsArr);
+      int numberRev = MultiBodySystemTools.computeNumberOfJointsOfType(RevoluteJoint.class, jointsArr);
 
       assertEquals(1, number6DoF);
       assertEquals(jointsArr.length - 1, numberRev);      
@@ -777,18 +667,18 @@ public class ScrewToolsTest
    public void testFilterJoints()
    {
       Vector3D[] jointAxes = {X, Y, Z, Y, X};
-      RandomFloatingChain chain = new RandomFloatingChain(random, jointAxes);
-      InverseDynamicsJoint[] jointsArr = ScrewTools.computeSubtreeJoints(chain.getElevator());
+      RandomFloatingRevoluteJointChain chain = new RandomFloatingRevoluteJointChain(random, jointAxes);
+      JointBasics[] jointsArr = MultiBodySystemTools.collectSubtreeJoints(chain.getElevator());
 
-      RevoluteJoint[] justRevolutes = ScrewTools.filterJoints(jointsArr, RevoluteJoint.class);
+      RevoluteJoint[] justRevolutes = MultiBodySystemTools.filterJoints(jointsArr, RevoluteJoint.class);
       assertEquals(jointsArr.length - 1, justRevolutes.length);
 
-      SixDoFJoint[] justSix = ScrewTools.filterJoints(jointsArr, SixDoFJoint.class);
+      SixDoFJoint[] justSix = MultiBodySystemTools.filterJoints(jointsArr, SixDoFJoint.class);
       assertEquals(1, justSix.length);
       assertTrue(justSix[0] instanceof SixDoFJoint);
 
       Boolean clean = false;
-      for(InverseDynamicsJoint joint: justRevolutes)
+      for(JointBasics joint: justRevolutes)
       {
          if(joint instanceof RevoluteJoint)
          {
@@ -807,20 +697,20 @@ public class ScrewToolsTest
    public void testFilterJoints_dest()
    {
       Vector3D[] jointAxes = {X, Y, Z, Y, X};
-      RandomFloatingChain chain = new RandomFloatingChain(random, jointAxes);
-      InverseDynamicsJoint[] jointsArr = ScrewTools.computeSubtreeJoints(chain.getElevator());
+      RandomFloatingRevoluteJointChain chain = new RandomFloatingRevoluteJointChain(random, jointAxes);
+      JointBasics[] jointsArr = MultiBodySystemTools.collectSubtreeJoints(chain.getElevator());
 
       RevoluteJoint[] justRevolutes = new RevoluteJoint[jointsArr.length - 1];
-      ScrewTools.filterJoints(jointsArr, justRevolutes, RevoluteJoint.class);
+      MultiBodySystemTools.filterJoints(jointsArr, justRevolutes, RevoluteJoint.class);
       assertEquals(jointsArr.length - 1, justRevolutes.length);
 
       SixDoFJoint[] justSix = new SixDoFJoint[1];
-      ScrewTools.filterJoints(jointsArr, justSix, SixDoFJoint.class);
+      MultiBodySystemTools.filterJoints(jointsArr, justSix, SixDoFJoint.class);
       assertEquals(1, justSix.length);
       assertTrue(justSix[0] instanceof SixDoFJoint);
 
       Boolean clean = false;
-      for(InverseDynamicsJoint joint: justRevolutes)
+      for(JointBasics joint: justRevolutes)
       {
          if(joint instanceof RevoluteJoint)
          {
@@ -839,13 +729,13 @@ public class ScrewToolsTest
    public void testFindJointsWithNames()
    {
       int numberOfJoints = joints.size();
-      InverseDynamicsJoint[] allJoints = new InverseDynamicsJoint[joints.size()];
+      JointBasics[] allJoints = new JointBasics[joints.size()];
       for(int i = 0; i < numberOfJoints; i++)
       {
          allJoints[i] = joints.get(i);
       }
 
-      InverseDynamicsJoint[] matches;
+      JointBasics[] matches;
       try
       {
          matches = ScrewTools.findJointsWithNames(allJoints, "woof");
@@ -855,7 +745,7 @@ public class ScrewToolsTest
       {
          //good  
       }
-      matches = ScrewTools.findJointsWithNames(allJoints, "chainAjoint0");
+      matches = ScrewTools.findJointsWithNames(allJoints, "chainAJoint0");
    }
 
 	@ContinuousIntegrationTest(estimatedDuration = 0.0)
@@ -863,14 +753,14 @@ public class ScrewToolsTest
    public void testFindRigidBodiesWithNames_RigidBody_String()
    {
       int numberOfJoints = joints.size();
-      RigidBody[] allBodies = new RigidBody[joints.size() + 1];
+      RigidBodyBasics[] allBodies = new RigidBodyBasics[joints.size() + 1];
       allBodies[0] = elevator;
       for(int i = 0; i < numberOfJoints; i++)
       {
          allBodies[i+1] = joints.get(i).getSuccessor();
       }
 
-      RigidBody[] matches;
+      RigidBodyBasics[] matches;
       try
       {
          matches = ScrewTools.findRigidBodiesWithNames(allBodies, "elevatorOOPS");
@@ -880,54 +770,8 @@ public class ScrewToolsTest
       {
          //good  
       }
-      matches = ScrewTools.findRigidBodiesWithNames(allBodies, "elevator", "chainAbody0", 
-            "chainAbody1", "chainAbody2", "chainAbody4", "chainBbody0", "chainBbody1", "chainBbody2", 
-            "chainBbody3", "chainBbody4", "chainCbody0", "chainCbody1", "chainCbody2", "chainCbody3", "chainCbody4");
-   }
-
-	@ContinuousIntegrationTest(estimatedDuration = 0.0)
-	@Test(timeout = 30000)
-   public void testAddExternalWrenches()
-   {
-      Vector3D[] jointAxes = {X, Y, Z, Y, X};
-      RandomFloatingChain chain = new RandomFloatingChain(random, jointAxes);
-      InverseDynamicsJoint[] jointsArray = ScrewTools.computeSubtreeJoints(chain.getElevator());
-
-      LinkedHashMap<RigidBody, Wrench> external = new LinkedHashMap<RigidBody, Wrench>();
-      LinkedHashMap<RigidBody, Wrench> toAdd = new LinkedHashMap<RigidBody, Wrench>();
-
-      RigidBody rigidBody1 = jointsArray[2].getSuccessor(); //testBody1
-      RigidBody rigidBody2 = jointsArray[0].getSuccessor(); //rootBody
-      RigidBody rigidBody3 = jointsArray[4].getSuccessor(); //testBody3
-
-      ReferenceFrame frame1 = ReferenceFrame.constructFrameWithUnchangingTransformToParent("frame1", theFrame, EuclidCoreRandomTools.nextRigidBodyTransform(random));
-
-      Wrench externalWrench1 = new Wrench(rigidBody1.getBodyFixedFrame(), theFrame, RandomNumbers.nextDoubleArray(random, 6, 100.0));
-      Wrench externalWrench2 = new Wrench(rigidBody3.getBodyFixedFrame(), theFrame, RandomNumbers.nextDoubleArray(random, 6, 100.0));
-      Wrench addedWrench1 = new Wrench(rigidBody2.getBodyFixedFrame(), frame1, RandomNumbers.nextDoubleArray(random, 6, 100.0));
-      Wrench addedWrench2 = new Wrench(rigidBody3.getBodyFixedFrame(), theFrame, RandomNumbers.nextDoubleArray(random, 6, 100.0));
-
-      external.put(rigidBody1, new Wrench(externalWrench1));
-      external.put(rigidBody3, new Wrench(externalWrench2));
-      toAdd.put(rigidBody2, new Wrench(addedWrench1));
-      toAdd.put(rigidBody3, new Wrench(addedWrench2));
-
-      assertEquals(2, external.keySet().size());
-      assertTrue(external.keySet().contains(rigidBody1));
-      assertTrue(external.keySet().contains(rigidBody3));
-      
-      ScrewTools.addExternalWrenches(external, toAdd);
-
-      assertEquals(3, external.keySet().size());
-      assertTrue(external.keySet().contains(rigidBody1));
-      assertTrue(external.keySet().contains(rigidBody2));
-      assertTrue(external.keySet().contains(rigidBody3));
-
-      Wrench expectedWrench = new Wrench();
-      expectedWrench.set(externalWrench2);
-      expectedWrench.add(addedWrench2);
-      
-      assertTrue(expectedWrench.getAngularPartAsFrameVectorCopy().epsilonEquals(external.get(rigidBody3).getAngularPartAsFrameVectorCopy(), epsilon));
-      assertTrue(expectedWrench.getLinearPartAsFrameVectorCopy().epsilonEquals(external.get(rigidBody3).getLinearPartAsFrameVectorCopy(), epsilon));
+      matches = ScrewTools.findRigidBodiesWithNames(allBodies, "elevator", "chainABody0", 
+            "chainABody1", "chainABody2", "chainABody4", "chainBBody0", "chainBBody1", "chainBBody2", 
+            "chainBBody3", "chainBBody4", "chainCBody0", "chainCBody1", "chainCBody2", "chainCBody3", "chainCBody4");
    }
 }

@@ -1,7 +1,8 @@
 #ifndef __controller_msgs__msg__PlanarRegionsListMessage__idl__
 #define __controller_msgs__msg__PlanarRegionsListMessage__idl__
 
-#include "controller_msgs/msg/./PlanarRegionMessage_.idl"
+#include "geometry_msgs/msg/./Point_.idl"
+#include "geometry_msgs/msg/./Vector3_.idl"
 module controller_msgs
 {
   module msg
@@ -20,7 +21,13 @@ module controller_msgs
          * Unique ID used to identify this message, should preferably be consecutively increasing.
          */
         unsigned long sequence_id;
-        sequence<controller_msgs::msg::dds::PlanarRegionMessage, 1> planar_regions;
+        sequence<long, 300> region_id;
+        sequence<geometry_msgs::msg::dds::Point, 300> region_origin;
+        sequence<geometry_msgs::msg::dds::Vector3, 300> region_normal;
+        sequence<long, 300> concave_hulls_size;
+        sequence<long, 300> number_of_convex_polygons;
+        sequence<long, 1000> convex_polygons_size;
+        sequence<geometry_msgs::msg::dds::Point, 5000> vertex_buffer;
       };
     };
   };

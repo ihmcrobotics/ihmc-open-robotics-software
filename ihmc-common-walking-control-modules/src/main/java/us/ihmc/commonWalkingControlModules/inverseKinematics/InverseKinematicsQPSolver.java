@@ -3,7 +3,7 @@ package us.ihmc.commonWalkingControlModules.inverseKinematics;
 import org.ejml.data.DenseMatrix64F;
 import org.ejml.ops.CommonOps;
 
-import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.MotionQPInput;
+import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.QPInput;
 import us.ihmc.convexOptimization.quadraticProgram.ActiveSetQPSolver;
 import us.ihmc.robotics.linearAlgebra.MatrixTools;
 import us.ihmc.tools.exceptions.NoConvergenceException;
@@ -42,10 +42,13 @@ public class InverseKinematicsQPSolver
 
    private final int numberOfDoFs;
 
-   public InverseKinematicsQPSolver(ActiveSetQPSolver qpSolver, int numberOfDoFs, YoVariableRegistry parentRegistry)
+   private final double dt;
+
+   public InverseKinematicsQPSolver(ActiveSetQPSolver qpSolver, int numberOfDoFs, double dt, YoVariableRegistry parentRegistry)
    {
       this.qpSolver = qpSolver;
       this.numberOfDoFs = numberOfDoFs;
+      this.dt = dt;
 
       firstCall.set(true);
 
@@ -92,10 +95,11 @@ public class InverseKinematicsQPSolver
 
    private void addJointAccelerationRegularization()
    {
+      double factor = dt * dt / jointAccelerationRegularization.getDoubleValue();
       for (int i = 0; i < numberOfDoFs; i++)
       {
-         solverInput_H.add(i, i, jointAccelerationRegularization.getDoubleValue());
-         solverInput_f.add(i, 0, -jointAccelerationRegularization.getDoubleValue() * solverOutput.get(i, 0));
+         solverInput_H.add(i, i, 1.0 / factor);
+         solverInput_f.add(i, 0, -desiredJointVelocities.get(i, 0) / factor);
       }
    }
 
@@ -103,7 +107,7 @@ public class InverseKinematicsQPSolver
    private final DenseMatrix64F tempTask_H = new DenseMatrix64F(1, 1);
    private final DenseMatrix64F tempTask_f = new DenseMatrix64F(1, 1);
 
-   public void addMotionInput(MotionQPInput input)
+   public void addMotionInput(QPInput input)
    {
       switch (input.getConstraintType())
       {

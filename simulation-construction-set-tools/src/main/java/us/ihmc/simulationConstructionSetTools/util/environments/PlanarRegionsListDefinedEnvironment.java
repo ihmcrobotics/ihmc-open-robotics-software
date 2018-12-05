@@ -1,8 +1,8 @@
 package us.ihmc.simulationConstructionSetTools.util.environments;
 
-import java.util.List;
-
 import us.ihmc.commons.PrintTools;
+import us.ihmc.graphicsDescription.appearance.AppearanceDefinition;
+import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.robotics.geometry.PlanarRegion;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.simulationConstructionSetTools.util.ground.CombinedTerrainObject3D;
@@ -11,6 +11,8 @@ import us.ihmc.simulationconstructionset.ExternalForcePoint;
 import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.simulationconstructionset.util.ground.TerrainObject3D;
 
+import java.util.List;
+
 /**
  * @author Doug Stephen <a href="mailto:dstephen@ihmc.us">(dstephen@ihmc.us)</a>
  */
@@ -18,45 +20,61 @@ public class PlanarRegionsListDefinedEnvironment implements CommonAvatarEnvironm
 {
    private final CombinedTerrainObject3D combinedTerrainObject;
    private final String environmentName;
-   private final PlanarRegionsList planarRegionsList;
-
-   public PlanarRegionsListDefinedEnvironment(String environmentName, PlanarRegionsList planarRegionsList, double allowablePenetrationThickness, boolean generateGroundPlane)
-   {
-      this.environmentName = environmentName;
-      this.planarRegionsList = planarRegionsList;
-
-      combinedTerrainObject = createCombinedTerrainObjectFromPlanarRegionsList(this.environmentName, this.planarRegionsList, allowablePenetrationThickness);
-
-      if (generateGroundPlane)
-      {
-         combinedTerrainObject.addTerrainObject(DefaultCommonAvatarEnvironment.setUpGround("Ground"));
-
-      }
-   }
+   private final PlanarRegionsList[] planarRegionsLists;
+   private final AppearanceDefinition[] appearances;
 
    public PlanarRegionsListDefinedEnvironment(PlanarRegionsList planarRegionsList, double allowablePenetrationThickness, boolean generateGroundPlane)
    {
       this(PlanarRegionsListDefinedEnvironment.class.getSimpleName(), planarRegionsList, allowablePenetrationThickness, generateGroundPlane);
    }
 
-   public PlanarRegionsListDefinedEnvironment(String environmentName, PlanarRegionsList planarRegionsList, double allowablePenetrationThickness)
+   public PlanarRegionsListDefinedEnvironment(String name, PlanarRegionsList planarRegionsList, double allowablePenetrationThickness, boolean generateGroundPlane)
    {
-      this(environmentName, planarRegionsList, allowablePenetrationThickness,  true);
+      this(name, new PlanarRegionsList[]{planarRegionsList}, null, allowablePenetrationThickness, generateGroundPlane);
    }
 
-   public PlanarRegionsListDefinedEnvironment(PlanarRegionsList planarRegionsList, double allowablePenetrationThickness)
+   public PlanarRegionsListDefinedEnvironment(String environmentName, PlanarRegionsList[] planarRegionsList, AppearanceDefinition[] appearances, double allowablePenetrationThickness, boolean generateGroundPlane)
    {
-      this(planarRegionsList, allowablePenetrationThickness, true);
+      this.environmentName = environmentName;
+      this.planarRegionsLists = planarRegionsList;
+
+      if(appearances == null || appearances.length != planarRegionsList.length)
+      {
+         this.appearances = null;
+      }
+      else
+      {
+         this.appearances = appearances;
+      }
+
+      combinedTerrainObject = createCombinedTerrainObjectFromPlanarRegionsList(this.environmentName, allowablePenetrationThickness);
+
+      if (generateGroundPlane)
+      {
+         combinedTerrainObject.addTerrainObject(DefaultCommonAvatarEnvironment.setUpGround("Ground"));
+      }
    }
 
-   private CombinedTerrainObject3D createCombinedTerrainObjectFromPlanarRegionsList(String environmentName, PlanarRegionsList planarRegionsList, double allowablePenetrationThickness)
+   private CombinedTerrainObject3D createCombinedTerrainObjectFromPlanarRegionsList(String environmentName, double allowablePenetrationThickness)
    {
       CombinedTerrainObject3D combinedTerrainObject3D = new CombinedTerrainObject3D(environmentName);
 
-      for (int i = 0; i < planarRegionsList.getNumberOfPlanarRegions(); i++)
+      for (int i = 0; i < planarRegionsLists.length; i++)
       {
-         PlanarRegion planarRegion = planarRegionsList.getPlanarRegion(i);
-         combinedTerrainObject3D.addTerrainObject(new PlanarRegionTerrainObject(planarRegion, allowablePenetrationThickness));
+         PlanarRegionsList planarRegionsList = planarRegionsLists[i];
+         for (int j = 0; j < planarRegionsList.getNumberOfPlanarRegions(); j++)
+         {
+            PlanarRegion planarRegion = planarRegionsList.getPlanarRegion(j);
+
+            if(appearances == null)
+            {
+               combinedTerrainObject3D.addTerrainObject(new PlanarRegionTerrainObject(planarRegion, allowablePenetrationThickness));
+            }
+            else
+            {
+               combinedTerrainObject3D.addTerrainObject(new PlanarRegionTerrainObject(planarRegion, allowablePenetrationThickness, appearances[i]));
+            }
+         }
       }
 
       return combinedTerrainObject3D;

@@ -11,12 +11,14 @@ import org.junit.Before;
 
 import controller_msgs.msg.dds.FootstepDataListMessage;
 import controller_msgs.msg.dds.FootstepDataMessage;
+import org.junit.Test;
 import us.ihmc.avatar.MultiRobotTestInterface;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.initialSetup.OffsetAndYawRobotInitialSetup;
 import us.ihmc.avatar.testTools.DRCSimulationTestHelper;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commons.thread.ThreadTools;
+import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.euclid.geometry.BoundingBox3D;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.geometry.interfaces.Vertex2DSupplier;
@@ -31,11 +33,11 @@ import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
+import us.ihmc.mecano.frames.MovingReferenceFrame;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.geometry.ConvexPolygonScaler;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
-import us.ihmc.robotics.screwTheory.MovingReferenceFrame;
 import us.ihmc.robotics.trajectories.TrajectoryType;
 import us.ihmc.simulationConstructionSetTools.bambooTools.BambooTools;
 import us.ihmc.simulationConstructionSetTools.robotController.SimpleRobotController;
@@ -147,6 +149,8 @@ public abstract class DRCSwingTrajectoryTest implements MultiRobotTestInterface
    }
 
 
+   @ContinuousIntegrationTest(estimatedDuration = 130.4)
+   @Test(timeout = 650000)
    public void testMultipleHeightFootsteps() throws BlockingSimulationRunner.SimulationExceededMaximumTimeException
    {
       simulationTestingParameters = SimulationTestingParameters.createFromSystemProperties();
@@ -174,7 +178,7 @@ public abstract class DRCSwingTrajectoryTest implements MultiRobotTestInterface
          success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(2.0);    // 2.0);
 
          FootstepDataListMessage footstepDataList = createBasicFootstepFromDefaultForSwingHeightTest(currentHeight);
-         drcSimulationTestHelper.send(footstepDataList);
+         drcSimulationTestHelper.publishToController(footstepDataList);
          success = success && drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(4.0);
          maxHeights[i] = testController.getMaxFootHeight();
          assertTrue(success);
@@ -198,6 +202,8 @@ public abstract class DRCSwingTrajectoryTest implements MultiRobotTestInterface
       BambooTools.reportTestFinishedMessage(simulationTestingParameters.getShowWindows());
    }
 
+   @ContinuousIntegrationTest(estimatedDuration = 55.8)
+   @Test(timeout = 280000)
    public void testReallyHighFootstep() throws BlockingSimulationRunner.SimulationExceededMaximumTimeException
    {
       simulationTestingParameters = SimulationTestingParameters.createFromSystemProperties();
@@ -215,7 +221,7 @@ public abstract class DRCSwingTrajectoryTest implements MultiRobotTestInterface
       success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(2.0);    // 2.0);
 
       FootstepDataListMessage footstepDataList = createFootstepsForSwingHeightTest(currentHeight);
-      drcSimulationTestHelper.send(footstepDataList);
+      drcSimulationTestHelper.publishToController(footstepDataList);
       success = success && drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(8.0);
       assertTrue(success);
 
@@ -227,6 +233,8 @@ public abstract class DRCSwingTrajectoryTest implements MultiRobotTestInterface
       BambooTools.reportTestFinishedMessage(simulationTestingParameters.getShowWindows());
    }
 
+   @ContinuousIntegrationTest(estimatedDuration = 47.8)
+   @Test(timeout = 240000)
    public void testNegativeSwingHeight() throws BlockingSimulationRunner.SimulationExceededMaximumTimeException
    {
       simulationTestingParameters = SimulationTestingParameters.createFromSystemProperties();
@@ -244,7 +252,7 @@ public abstract class DRCSwingTrajectoryTest implements MultiRobotTestInterface
       success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(2.0);    // 2.0);
 
       FootstepDataListMessage footstepDataList = createFootstepsForSwingHeightTest(currentHeight);
-      drcSimulationTestHelper.send(footstepDataList);
+      drcSimulationTestHelper.publishToController(footstepDataList);
       success = success && drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(6.0);
       assertTrue(success);
 
@@ -287,6 +295,8 @@ public abstract class DRCSwingTrajectoryTest implements MultiRobotTestInterface
       return desiredFootsteps;
    }
 
+   @ContinuousIntegrationTest(estimatedDuration = 126.9)
+   @Test(timeout = 630000)
    public void testSelfCollisionAvoidance() throws SimulationExceededMaximumTimeException
    {
       simulationTestingParameters = SimulationTestingParameters.createFromSystemProperties();
@@ -356,7 +366,7 @@ public abstract class DRCSwingTrajectoryTest implements MultiRobotTestInterface
          swingSide = swingSide.getOppositeSide();
       }
 
-      drcSimulationTestHelper.send(message);
+      drcSimulationTestHelper.publishToController(message);
       double simulationTime = initialTransfer + steps * stepTime + 0.5;
       while (drcSimulationTestHelper.getYoVariable("t").getValueAsDouble() < simulationTime)
       {

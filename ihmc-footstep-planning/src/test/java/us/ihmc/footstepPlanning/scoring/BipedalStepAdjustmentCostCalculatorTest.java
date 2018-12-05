@@ -1,41 +1,42 @@
 package us.ihmc.footstepPlanning.scoring;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
-
-import java.awt.Color;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Random;
-
+import org.junit.After;
 import org.junit.Test;
-
+import us.ihmc.commons.MathTools;
 import us.ihmc.commons.RandomNumbers;
+import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.continuousIntegration.ContinuousIntegrationTools;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.tools.ReferenceFrameTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.footstepPlanning.tools.PlannerTools;
 import us.ihmc.footstepPlanning.graphSearch.stepCost.BipedalStepAdjustmentCostCalculator;
-import us.ihmc.footstepPlanning.testTools.PlanningTestTools;
 import us.ihmc.graphicsDescription.appearance.AppearanceDefinition;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.graphicsDescription.appearance.YoAppearanceRGBColor;
 import us.ihmc.graphicsDescription.color.Gradient;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPolygon;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
-import us.ihmc.commons.MathTools;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.yoVariables.variable.YoFramePoseUsingYawPitchRoll;
-import us.ihmc.yoVariables.variable.YoInteger;
 import us.ihmc.robotics.random.RandomGeometry;
 import us.ihmc.robotics.robotController.RobotControllerAdapter;
 import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.util.simulationTesting.SimulationTestingParameters;
-import us.ihmc.commons.thread.ThreadTools;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoDouble;
+import us.ihmc.yoVariables.variable.YoFramePoseUsingYawPitchRoll;
+import us.ihmc.yoVariables.variable.YoInteger;
+
+import java.awt.*;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Random;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 public class BipedalStepAdjustmentCostCalculatorTest
 {
@@ -54,6 +55,12 @@ public class BipedalStepAdjustmentCostCalculatorTest
    private double xMin = -0.8;
    private int numInX = (int) ((xMax - xMin) / incrementX);
    private int numInY = (int) ((xMax - yMin) / incrementY);
+
+   @After
+   public void tearDown()
+   {
+      ReferenceFrameTools.clearWorldFrameTree();
+   }
 
    @ContinuousIntegrationTest(estimatedDuration = 0.1)
    @Test(timeout = 30000)
@@ -145,7 +152,7 @@ public class BipedalStepAdjustmentCostCalculatorTest
       costColorGradient = Gradient.createGradient(Color.GREEN, Color.RED, 1000);
       stanceFootPitch.set(-0.2);
 
-      defaultFootPolygon = PlanningTestTools.createDefaultFootPolygon();
+      defaultFootPolygon = PlannerTools.createDefaultFootPolygon();
       FramePose3D idealFramePose = new FramePose3D(ReferenceFrame.getWorldFrame());
       idealFramePose.setPosition(0.45, 0.0, 0.31);
       createStaticFootstep("ideal", idealFramePose, YoAppearance.HotPink(), registry, yoGraphicsListRegistry);

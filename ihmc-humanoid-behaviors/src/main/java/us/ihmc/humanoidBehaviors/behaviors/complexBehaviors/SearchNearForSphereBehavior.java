@@ -2,8 +2,6 @@ package us.ihmc.humanoidBehaviors.behaviors.complexBehaviors;
 
 import controller_msgs.msg.dds.ChestTrajectoryMessage;
 import controller_msgs.msg.dds.HeadTrajectoryMessage;
-import controller_msgs.msg.dds.TextToSpeechPacket;
-import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.euclid.axisAngle.AxisAngle;
 import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
@@ -17,13 +15,13 @@ import us.ihmc.humanoidBehaviors.behaviors.primitives.AtlasPrimitiveActions;
 import us.ihmc.humanoidBehaviors.behaviors.simpleBehaviors.BehaviorAction;
 import us.ihmc.humanoidBehaviors.behaviors.simpleBehaviors.SphereDetectionBehavior;
 import us.ihmc.humanoidBehaviors.behaviors.simpleBehaviors.WaitForUserValidationBehavior;
-import us.ihmc.humanoidBehaviors.communication.CommunicationBridge;
 import us.ihmc.humanoidBehaviors.stateMachine.StateMachineBehavior;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.humanoidRobotics.communication.packets.sensing.DepthDataFilterParameters;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.stateMachine.factories.StateMachineFactory;
+import us.ihmc.ros2.Ros2Node;
 import us.ihmc.yoVariables.variable.YoDouble;
 
 public class SearchNearForSphereBehavior extends StateMachineBehavior<SearchNearState>
@@ -41,19 +39,18 @@ public class SearchNearForSphereBehavior extends StateMachineBehavior<SearchNear
    private final AtlasPrimitiveActions atlasPrimitiveActions;
    private final ReferenceFrame chestCoMFrame;
 
-   public SearchNearForSphereBehavior(YoDouble yoTime, PickUpBallBehaviorCoactiveElementBehaviorSide coactiveElement, HumanoidReferenceFrames referenceFrames,
-                                      FullHumanoidRobotModel fullRobotModel, CommunicationBridge outgoingCommunicationBridge, boolean requireUserValidation,
-                                      AtlasPrimitiveActions atlasPrimitiveActions)
+   public SearchNearForSphereBehavior(String robotName, YoDouble yoTime, PickUpBallBehaviorCoactiveElementBehaviorSide coactiveElement,
+                                      HumanoidReferenceFrames referenceFrames, FullHumanoidRobotModel fullRobotModel, Ros2Node ros2Node,
+                                      boolean requireUserValidation, AtlasPrimitiveActions atlasPrimitiveActions)
    {
-      super("SearchForSpehereNear", SearchNearState.class, yoTime, outgoingCommunicationBridge);
+      super(robotName, "SearchForSpehereNear", SearchNearState.class, yoTime, ros2Node);
       this.atlasPrimitiveActions = atlasPrimitiveActions;
       this.referenceFrames = referenceFrames;
       this.coactiveElement = coactiveElement;
       this.requireUserValidation = requireUserValidation;
 
-      initialSphereDetectionBehavior = new SphereDetectionBehavior(outgoingCommunicationBridge, referenceFrames);
-      waitForUserValidationBehavior = new WaitForUserValidationBehavior(outgoingCommunicationBridge, coactiveElement.validClicked,
-                                                                        coactiveElement.validAcknowledged);
+      initialSphereDetectionBehavior = new SphereDetectionBehavior(robotName, ros2Node, referenceFrames);
+      waitForUserValidationBehavior = new WaitForUserValidationBehavior(robotName, ros2Node, coactiveElement.validClicked, coactiveElement.validAcknowledged);
       chestCoMFrame = fullRobotModel.getChest().getBodyFixedFrame();
       setupStateMachine();
    }
@@ -121,8 +118,7 @@ public class SearchNearForSphereBehavior extends StateMachineBehavior<SearchNear
          @Override
          protected void setBehaviorInput()
          {
-            TextToSpeechPacket p1 = MessageTools.createTextToSpeechPacket("LOOKING FOR BALL");
-            sendPacket(p1);
+            publishTextToSpeack("LOOKING FOR BALL");
             coactiveElement.searchingForBall.set(true);
             coactiveElement.foundBall.set(false);
             coactiveElement.ballX.set(0);

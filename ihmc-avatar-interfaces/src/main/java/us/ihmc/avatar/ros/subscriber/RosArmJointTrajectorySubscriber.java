@@ -9,7 +9,7 @@ import us.ihmc.commons.Conversions;
 import us.ihmc.communication.packetCommunicator.PacketCommunicator;
 import us.ihmc.communication.packets.PacketDestination;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
-import us.ihmc.idl.RecyclingArrayListPubSub;
+import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.partNames.ArmJointName;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -59,7 +59,7 @@ public class RosArmJointTrajectorySubscriber extends AbstractRosTopicSubscriber<
       int numberOfWaypoints = rosMessage.getPoints().size();
       
       ArmTrajectoryMessage ihmcMessage = HumanoidMessageTools.createArmTrajectoryMessage(robotSide);
-      RecyclingArrayListPubSub<OneDoFJointTrajectoryMessage> jointTrajectoryMessages = ihmcMessage.getJointspaceTrajectory().getJointTrajectoryMessages();
+      RecyclingArrayList<OneDoFJointTrajectoryMessage> jointTrajectoryMessages = ihmcMessage.getJointspaceTrajectory().getJointTrajectoryMessages();
       for (int i = 0; i < numberOfJoints; i++)
          jointTrajectoryMessages.add();
 

@@ -6,8 +6,6 @@ import java.util.Random;
 import controller_msgs.msg.dds.FrameInformation;
 import controller_msgs.msg.dds.SE3TrajectoryMessage;
 import controller_msgs.msg.dds.SE3TrajectoryPointMessage;
-import controller_msgs.msg.dds.SO3TrajectoryMessage;
-import controller_msgs.msg.dds.SO3TrajectoryPointMessage;
 import us.ihmc.commons.RandomNumbers;
 import us.ihmc.communication.controllerAPI.command.QueueableCommand;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
@@ -89,64 +87,29 @@ public final class SE3TrajectoryControllerCommand extends QueueableCommand<SE3Tr
       other.getControlFramePose(controlFramePoseInBodyFrame);
    }
 
-   public void setToOrientationTrajectory(SO3TrajectoryControllerCommand orientationTrajectory)
-   {
-      trajectoryPointList.setToOrientationTrajectoryIncludingFrame(orientationTrajectory.getTrajectoryPointList());
-
-      setQueueableCommandVariables(orientationTrajectory);
-
-      selectionMatrix.setAngularPart(orientationTrajectory.getSelectionMatrix());
-      selectionMatrix.clearLinearSelection();
-      weightMatrix.setAngularPart(orientationTrajectory.getWeightMatrix());
-      weightMatrix.clearLinearWeights();
-
-      trajectoryFrame = orientationTrajectory.getTrajectoryFrame();
-      useCustomControlFrame = orientationTrajectory.useCustomControlFrame();
-      orientationTrajectory.getControlFramePose(controlFramePoseInBodyFrame);
-   }
-
    @Override
    public void set(ReferenceFrameHashCodeResolver resolver, SE3TrajectoryMessage message)
    {
       FrameInformation frameInformation = message.getFrameInformation();
       long trajectoryFrameId = frameInformation.getTrajectoryReferenceFrameId();
       long dataFrameId = HumanoidMessageTools.getDataFrameIDConsideringDefault(frameInformation);
-      this.trajectoryFrame = resolver.getReferenceFrameFromNameBaseHashCode(trajectoryFrameId);
-      ReferenceFrame dataFrame = resolver.getReferenceFrameFromNameBaseHashCode(dataFrameId);
+      this.trajectoryFrame = resolver.getReferenceFrameFromHashCode(trajectoryFrameId);
+      ReferenceFrame dataFrame = resolver.getReferenceFrameFromHashCode(dataFrameId);
 
       clear(dataFrame);
-      set(message);
+      setFromMessage(message);
 
-      ReferenceFrame angularSelectionFrame = resolver.getReferenceFrameFromNameBaseHashCode(message.getAngularSelectionMatrix().getSelectionFrameId());
-      ReferenceFrame linearSelectionFrame = resolver.getReferenceFrameFromNameBaseHashCode(message.getLinearSelectionMatrix().getSelectionFrameId());
+      ReferenceFrame angularSelectionFrame = resolver.getReferenceFrameFromHashCode(message.getAngularSelectionMatrix().getSelectionFrameId());
+      ReferenceFrame linearSelectionFrame = resolver.getReferenceFrameFromHashCode(message.getLinearSelectionMatrix().getSelectionFrameId());
       selectionMatrix.setSelectionFrames(angularSelectionFrame, linearSelectionFrame);
 
-      ReferenceFrame angularWeightFrame = resolver.getReferenceFrameFromNameBaseHashCode(message.getAngularWeightMatrix().getWeightFrameId());
-      ReferenceFrame linearWeightFrame = resolver.getReferenceFrameFromNameBaseHashCode(message.getLinearWeightMatrix().getWeightFrameId());
+      ReferenceFrame angularWeightFrame = resolver.getReferenceFrameFromHashCode(message.getAngularWeightMatrix().getWeightFrameId());
+      ReferenceFrame linearWeightFrame = resolver.getReferenceFrameFromHashCode(message.getLinearWeightMatrix().getWeightFrameId());
       weightMatrix.setWeightFrames(angularWeightFrame, linearWeightFrame);
    }
 
-   public void setToOrientationTrajectory(ReferenceFrameHashCodeResolver resolver, SO3TrajectoryMessage orientationMessage)
-   {
-      FrameInformation frameInformation = orientationMessage.getFrameInformation();
-      long trajectoryFrameId = frameInformation.getTrajectoryReferenceFrameId();
-      long dataFrameId = HumanoidMessageTools.getDataFrameIDConsideringDefault(frameInformation);
-      this.trajectoryFrame = resolver.getReferenceFrameFromNameBaseHashCode(trajectoryFrameId);
-      ReferenceFrame dataFrame = resolver.getReferenceFrameFromNameBaseHashCode(dataFrameId);
-
-      clear(dataFrame);
-      setToOrientationTrajectory(orientationMessage);
-
-      ReferenceFrame angularSelectionFrame = resolver.getReferenceFrameFromNameBaseHashCode(orientationMessage.getSelectionMatrix().getSelectionFrameId());
-      selectionMatrix.clearLinearSelection();
-      selectionMatrix.setSelectionFrames(angularSelectionFrame, null);
-
-      ReferenceFrame angularWeightFrame = resolver.getReferenceFrameFromNameBaseHashCode(orientationMessage.getWeightMatrix().getWeightFrameId());
-      weightMatrix.setWeightFrames(angularWeightFrame, null);
-   }
-
    @Override
-   public void set(SE3TrajectoryMessage message)
+   public void setFromMessage(SE3TrajectoryMessage message)
    {
       HumanoidMessageTools.checkIfDataFrameIdsMatch(message.getFrameInformation(), trajectoryPointList.getReferenceFrame());
       List<SE3TrajectoryPointMessage> trajectoryPointMessages = message.getTaskspaceTrajectoryPoints();
@@ -169,36 +132,11 @@ public final class SE3TrajectoryControllerCommand extends QueueableCommand<SE3Tr
       message.getControlFramePose().get(controlFramePoseInBodyFrame);
    }
 
-   public void setToOrientationTrajectory(SO3TrajectoryMessage orientationMessage)
-   {
-      HumanoidMessageTools.checkIfDataFrameIdsMatch(orientationMessage.getFrameInformation(), trajectoryPointList.getReferenceFrame());
-      List<SO3TrajectoryPointMessage> trajectoryPointMessages = orientationMessage.getTaskspaceTrajectoryPoints();
-      int numberOfPoints = trajectoryPointMessages.size();
-
-      for (int i = 0; i < numberOfPoints; i++)
-      {
-         SO3TrajectoryPointMessage se3TrajectoryPointMessage = trajectoryPointMessages.get(i);
-         trajectoryPointList.addOrientationTrajectoryPoint(se3TrajectoryPointMessage.getTime(), se3TrajectoryPointMessage.getOrientation(),
-                                                           se3TrajectoryPointMessage.getAngularVelocity());
-      }
-      setQueueableCommandVariables(orientationMessage.getQueueingProperties());
-      selectionMatrix.resetSelection();
-      selectionMatrix.setAngularAxisSelection(orientationMessage.getSelectionMatrix().getXSelected(), orientationMessage.getSelectionMatrix().getYSelected(),
-                                              orientationMessage.getSelectionMatrix().getZSelected());
-      selectionMatrix.clearLinearSelection();
-      weightMatrix.clear();
-      weightMatrix.setAngularWeights(orientationMessage.getWeightMatrix().getXWeight(), orientationMessage.getWeightMatrix().getYWeight(),
-                                     orientationMessage.getWeightMatrix().getZWeight());
-      weightMatrix.clearLinearWeights();
-      useCustomControlFrame = orientationMessage.getUseCustomControlFrame();
-      orientationMessage.getControlFramePose().get(controlFramePoseInBodyFrame);
-   }
-
    public void set(ReferenceFrame dataFrame, ReferenceFrame trajectoryFrame, SE3TrajectoryMessage message)
    {
       this.trajectoryFrame = trajectoryFrame;
       clear(dataFrame);
-      set(message);
+      setFromMessage(message);
    }
 
    /**
@@ -249,6 +187,16 @@ public final class SE3TrajectoryControllerCommand extends QueueableCommand<SE3Tr
    public boolean isCommandValid()
    {
       return executionModeValid() && trajectoryPointList.getNumberOfTrajectoryPoints() > 0;
+   }
+
+   public void setControlFramePose(RigidBodyTransform controlFramePose)
+   {
+      this.controlFramePoseInBodyFrame.set(controlFramePose);
+   }
+
+   public void setUseCustomControlFrame(boolean useCustomControlFrame)
+   {
+      this.useCustomControlFrame = useCustomControlFrame;
    }
 
    /** {@inheritDoc}} */
@@ -348,6 +296,11 @@ public final class SE3TrajectoryControllerCommand extends QueueableCommand<SE3Tr
    public void setTrajectoryFrame(ReferenceFrame trajectoryFrame)
    {
       this.trajectoryFrame = trajectoryFrame;
+   }
+
+   public RigidBodyTransform getControlFramePose()
+   {
+      return controlFramePoseInBodyFrame;
    }
 
    public void getControlFramePose(RigidBodyTransform transformToPack)

@@ -1,17 +1,23 @@
 package us.ihmc.robotDataLogger.dataBuffers;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
 
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
+import org.junit.After;
 import org.junit.Test;
 
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.tools.ReferenceFrameTools;
 import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.mecano.multiBodySystem.RevoluteJoint;
+import us.ihmc.mecano.multiBodySystem.RigidBody;
+import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
+import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.pubsub.common.SerializedPayload;
 import us.ihmc.robotDataLogger.jointState.JointHolder;
 import us.ihmc.robotDataLogger.jointState.JointState;
@@ -21,15 +27,18 @@ import us.ihmc.robotDataLogger.rtps.CustomLogDataPublisherType;
 import us.ihmc.robotDataLogger.rtps.CustomLogDataSubscriberType;
 import us.ihmc.robotDataLogger.rtps.DataProducerParticipant;
 import us.ihmc.robotDataLogger.rtps.LogParticipantTools;
-import us.ihmc.robotics.screwTheory.OneDoFJoint;
-import us.ihmc.robotics.screwTheory.RevoluteJoint;
-import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoLong;
 import us.ihmc.yoVariables.variable.YoVariable;
 
 public class RegistrySendBufferTest
 {
+   @After
+   public void tearDown()
+   {
+      ReferenceFrameTools.clearWorldFrameTree();
+   }
+
    @ContinuousIntegrationTest(estimatedDuration = 57.0)
    @Test(timeout = 280000)
    public void testYoVariables() throws IOException
@@ -45,12 +54,12 @@ public class RegistrySendBufferTest
          ArrayList<JointHolder> sendJointHolders = new ArrayList<>(); 
          ArrayList<JointState> receiveJointStates = new ArrayList<>();
          
-         RigidBody elevator = new RigidBody("elevator", ReferenceFrame.getWorldFrame());
+         RigidBodyBasics elevator = new RigidBody("elevator", ReferenceFrame.getWorldFrame());
          
          int numberOfJoints = random.nextInt(4000);
          for(int j = 0; j < numberOfJoints; j++)
          {
-            OneDoFJoint sendJoint = new RevoluteJoint("Joint" + j, elevator, new Vector3D(1, 0, 0));
+            OneDoFJointBasics sendJoint = new RevoluteJoint("Joint" + j, elevator, new Vector3D(1, 0, 0));
             sendJoint.setQ(random.nextDouble() * Math.PI * 2.0);
             sendJoint.setQd(random.nextDouble() * Math.PI * 2.0);
             sendJointHolders.add(new OneDoFJointHolder(sendJoint));

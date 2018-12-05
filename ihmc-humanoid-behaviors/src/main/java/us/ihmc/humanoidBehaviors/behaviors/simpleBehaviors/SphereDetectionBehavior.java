@@ -10,20 +10,23 @@ import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
+import controller_msgs.msg.dds.DetectedObjectPacket;
 import controller_msgs.msg.dds.PointCloudWorldPacket;
 import georegression.struct.point.Point3D_F64;
 import georegression.struct.shapes.Sphere3D_F64;
 import us.ihmc.commons.PrintTools;
+import us.ihmc.communication.IHMCROS2Publisher;
+import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.packets.PacketDestination;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Point3D32;
 import us.ihmc.humanoidBehaviors.behaviors.AbstractBehavior;
-import us.ihmc.humanoidBehaviors.communication.CommunicationBridgeInterface;
 import us.ihmc.humanoidBehaviors.communication.ConcurrentListeningQueue;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
+import us.ihmc.ros2.Ros2Node;
 import us.ihmc.sensorProcessing.bubo.clouds.FactoryPointCloudShape;
 import us.ihmc.sensorProcessing.bubo.clouds.detect.CloudShapeTypes;
 import us.ihmc.sensorProcessing.bubo.clouds.detect.PointCloudShapeFinder;
@@ -57,11 +60,13 @@ public class SphereDetectionBehavior extends AbstractBehavior
    // temp vars
    private final Point3D chestPosition = new Point3D();
 
-   public SphereDetectionBehavior(CommunicationBridgeInterface outgoingCommunicationBridge, HumanoidReferenceFrames referenceFrames)
+   private IHMCROS2Publisher<DetectedObjectPacket> detectedObjectPublisher;
+
+   public SphereDetectionBehavior(String robotName, Ros2Node ros2Node, HumanoidReferenceFrames referenceFrames)
    {
-      super(outgoingCommunicationBridge);
-      this.attachNetworkListeningQueue(pointCloudQueue, PointCloudWorldPacket.class);
-      System.out.println("SphereDetectionBehavior queue size "+communicationBridge.getListeningNetworkQueues().size());
+      super(robotName, ros2Node);
+      createSubscriber(PointCloudWorldPacket.class, ROS2Tools.getDefaultTopicNameGenerator(), pointCloudQueue::put);
+      detectedObjectPublisher = createBehaviorOutputPublisher(DetectedObjectPacket.class);
 
       this.humanoidReferenceFrames = referenceFrames;
    }
@@ -108,7 +113,7 @@ public class SphereDetectionBehavior extends AbstractBehavior
          id++;
          Pose3D t = new Pose3D();
          t.setPosition(ball.getCenter().x, ball.getCenter().y, ball.getCenter().z);
-         sendPacket(HumanoidMessageTools.createDetectedObjectPacket(t, 4));
+         detectedObjectPublisher.publish(HumanoidMessageTools.createDetectedObjectPacket(t, 4));
       }
 
       if (balls.size() > 0)
@@ -141,7 +146,7 @@ public class SphereDetectionBehavior extends AbstractBehavior
       groundQuadTree[0] = new Point3D();
       HumanoidMessageTools.setGroundQuadTreeSupport(groundQuadTree, pointCloudWorldPacket);
 
-      sendPacket(pointCloudWorldPacket);
+      //      sendPacket(pointCloudWorldPacket); FIXME I don't get what's going on here, I commented this code when switching to pub-sub (Sylvain)
    }
 
    public ArrayList<Sphere3D_F64> detectBalls(Point3D32[] fullPoints)
@@ -184,7 +189,8 @@ public class SphereDetectionBehavior extends AbstractBehavior
       final List<Shape> spheres = findSpheres.getFound();
       Collections.sort(spheres, new Comparator<Shape>()
       {
-         @Override public int compare(Shape shape0, Shape shape1)
+         @Override
+         public int compare(Shape shape0, Shape shape1)
          {
             Sphere3D_F64 sphereParams0 = (Sphere3D_F64) shape0.getParameters();
             Sphere3D_F64 sphereParams1 = (Sphere3D_F64) shape1.getParameters();
@@ -192,8 +198,10 @@ public class SphereDetectionBehavior extends AbstractBehavior
             Point3D_F64 center0 = sphereParams0.getCenter();
             Point3D_F64 center1 = sphereParams1.getCenter();
 
-            double distSq0 = (center0.x - chestPosition.getX()) * (center0.x - chestPosition.getX()) + (center0.y - chestPosition.getY()) * (center0.y - chestPosition.getY());
-            double distSq1 = (center1.x - chestPosition.getX()) * (center1.x - chestPosition.getX()) + (center1.y - chestPosition.getY()) * (center1.y - chestPosition.getY());
+            double distSq0 = (center0.x - chestPosition.getX()) * (center0.x - chestPosition.getX())
+                  + (center0.y - chestPosition.getY()) * (center0.y - chestPosition.getY());
+            double distSq1 = (center1.x - chestPosition.getX()) * (center1.x - chestPosition.getX())
+                  + (center1.y - chestPosition.getY()) * (center1.y - chestPosition.getY());
 
             return distSq0 < distSq1 ? 1 : -1;
          }
@@ -236,8 +244,6 @@ public class SphereDetectionBehavior extends AbstractBehavior
    {
       return smallestRadius;
    }
-
-
 
    @Override
    public boolean isDone()

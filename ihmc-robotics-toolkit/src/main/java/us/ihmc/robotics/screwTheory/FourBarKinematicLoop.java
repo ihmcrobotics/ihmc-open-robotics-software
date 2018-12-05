@@ -14,6 +14,8 @@ import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
+import us.ihmc.mecano.multiBodySystem.RevoluteJoint;
+import us.ihmc.mecano.multiBodySystem.interfaces.JointBasics;
 import us.ihmc.robotics.geometry.AngleTools;
 import us.ihmc.robotics.geometry.GeometryTools;
 import us.ihmc.robotics.kinematics.fourbar.ConstantSideFourBarCalculatorWithDerivatives;
@@ -84,16 +86,16 @@ public class FourBarKinematicLoop
       this.jointDInJointABeforeFrame = new Vector3D(jointDInJointABeforeFrame);
 
       // Rotation axis
-      FrameVector3D masterJointAxis = masterJointA.getJointAxis();
+      FrameVector3D masterJointAxis = new FrameVector3D(masterJointA.getJointAxis());
       masterJointAxis.changeFrame(masterJointA.getFrameBeforeJoint());
       frameBeforeFourBarWithZAlongJointAxis = GeometryTools
             .constructReferenceFrameFromPointAndAxis(name + "FrameWithZAlongJointAxis", new FramePoint3D(masterJointA.getFrameBeforeJoint()), Axis.Z,
                   masterJointAxis);
 
-      FrameVector3D masterAxis = masterJointA.getJointAxis();
-      FrameVector3D jointBAxis = passiveJointB.getJointAxis();
-      FrameVector3D jointCAxis = passiveJointC.getJointAxis();
-      FrameVector3D jointDAxis = passiveJointD.getJointAxis();
+      FrameVector3D masterAxis = new FrameVector3D(masterJointA.getJointAxis());
+      FrameVector3D jointBAxis = new FrameVector3D(passiveJointB.getJointAxis());
+      FrameVector3D jointCAxis = new FrameVector3D(passiveJointC.getJointAxis());
+      FrameVector3D jointDAxis = new FrameVector3D(passiveJointD.getJointAxis());
       FourBarKinematicLoopTools.checkJointAxesAreParallel(masterAxis, jointBAxis, jointCAxis, jointDAxis);
 
       // Joint order
@@ -104,6 +106,10 @@ public class FourBarKinematicLoop
       passiveJointB.setQ(0.0);
       passiveJointC.setQ(0.0);
       passiveJointD.setQ(0.0);
+      masterJointA.getFrameAfterJoint().update();
+      passiveJointB.getFrameAfterJoint().update();
+      passiveJointC.getFrameAfterJoint().update();
+      passiveJointD.getFrameAfterJoint().update();
 
       // Link lengths
       FrameVector2D vectorBCProjected = new FrameVector2D();
@@ -153,7 +159,7 @@ public class FourBarKinematicLoop
 
       if (DEBUG)
       {
-         System.out.println("\nOutput joint: " + fourBarOutputJoint.name + "\n");
+         System.out.println("\nOutput joint: " + fourBarOutputJoint.getName() + "\n");
          double qA = masterJointA.getQ();
          double qB = passiveJointB.getQ();
          double qC = passiveJointC.getQ();
@@ -235,9 +241,9 @@ public class FourBarKinematicLoop
    private void initializeInteriorAnglesAtZeroConfigurationAndJointSigns(FrameVector2D vectorDAProjected, FrameVector2D vectorABProjected,
          FrameVector2D vectorBCProjected, FrameVector2D vectorCDProjected)
    {
-      FrameVector3D jointBAxis = passiveJointB.getJointAxis();
-      FrameVector3D jointCAxis = passiveJointC.getJointAxis();
-      FrameVector3D jointDAxis = passiveJointD.getJointAxis();
+      FrameVector3D jointBAxis = new FrameVector3D(passiveJointB.getJointAxis());
+      FrameVector3D jointCAxis = new FrameVector3D(passiveJointC.getJointAxis());
+      FrameVector3D jointDAxis = new FrameVector3D(passiveJointD.getJointAxis());
 
       jointBAxis.changeFrame(frameBeforeFourBarWithZAlongJointAxis);
       jointCAxis.changeFrame(frameBeforeFourBarWithZAlongJointAxis);
@@ -512,7 +518,7 @@ public class FourBarKinematicLoop
    private class FourBarKinematicLoopJacobianSolver
    {
       private final GeometricJacobian geometricJacobian;
-      private final InverseDynamicsJoint[] jointsForJacobianCalculation;
+      private final JointBasics[] jointsForJacobianCalculation;
       private final ReferenceFrame geometricJacobianFrame;
       private final DenseMatrix64F geometricJacobianToColumnJacobian;
 
@@ -524,26 +530,26 @@ public class FourBarKinematicLoop
          this.geometricJacobian = new GeometricJacobian(jointsForJacobianCalculation, geometricJacobianFrame);
       }
 
-      private InverseDynamicsJoint[] getJointsForJacobianCalculation()
+      private JointBasics[] getJointsForJacobianCalculation()
       {
-         InverseDynamicsJoint[] joints;
+         JointBasics[] joints;
 
          if (fourBarOutputJoint == passiveJointD)
          {
-            joints = new InverseDynamicsJoint[3];
+            joints = new JointBasics[3];
             joints[0] = masterJointA;
             joints[1] = passiveJointB;
             joints[2] = passiveJointC;
          }
          else if (fourBarOutputJoint == passiveJointC)
          {
-            joints = new InverseDynamicsJoint[2];
+            joints = new JointBasics[2];
             joints[0] = masterJointA;
             joints[1] = passiveJointB;
          }
          else
          {
-            joints = new InverseDynamicsJoint[1];
+            joints = new JointBasics[1];
             joints[0] = masterJointA;
          }
 
@@ -586,7 +592,7 @@ public class FourBarKinematicLoop
          }
       }
 
-      private DenseMatrix64F createGeometricJacobianToColumnJacobianMatrix(InverseDynamicsJoint[] jointsForJacobianCalculation)
+      private DenseMatrix64F createGeometricJacobianToColumnJacobianMatrix(JointBasics[] jointsForJacobianCalculation)
       {
          int numberOfJointsForJacobianCalculation = jointsForJacobianCalculation.length;
 

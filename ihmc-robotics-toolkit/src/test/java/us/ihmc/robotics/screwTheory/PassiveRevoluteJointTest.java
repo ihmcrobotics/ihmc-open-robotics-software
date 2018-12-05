@@ -8,9 +8,12 @@ import org.junit.Test;
 
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationPlan;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
+import us.ihmc.continuousIntegration.IntegrationCategory;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.continuousIntegration.IntegrationCategory;
+import us.ihmc.mecano.multiBodySystem.RigidBody;
+import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
+import us.ihmc.mecano.spatial.Wrench;
 
 @ContinuousIntegrationPlan(categories = IntegrationCategory.FAST)
 public class PassiveRevoluteJointTest
@@ -18,7 +21,7 @@ public class PassiveRevoluteJointTest
    // Variables
    private ReferenceFrame referenceFrame = ReferenceFrame.getWorldFrame();
    private FrameVector3D frameVec = new FrameVector3D();
-   private RigidBody rigidBody = new RigidBody("rigidBody", referenceFrame);
+   private RigidBodyBasics rigidBody = new RigidBody("rigidBody", referenceFrame);
    private PassiveRevoluteJoint joint = null; // new PassiveRevoluteJoint("testJoint",rigidBody, referenceFrame, frameVec);
    private DenseMatrix64F matrix = new DenseMatrix64F();
    private int rowStart = 1;
@@ -42,7 +45,7 @@ public class PassiveRevoluteJointTest
    {
       try
       {
-         joint.getTauMatrix(null);
+         joint.getJointTau(0, null);
       }
       catch(RuntimeException e)
       {
@@ -57,7 +60,7 @@ public class PassiveRevoluteJointTest
    {
       try
       {
-         joint.setTorqueFromWrench(jointWrench);
+         joint.setJointWrench(jointWrench);
       }
       catch(RuntimeException e)
       {
@@ -72,7 +75,7 @@ public class PassiveRevoluteJointTest
    {
       try
       {
-         joint.setDesiredAcceleration(matrix, rowStart);
+         joint.setJointAcceleration(rowStart, matrix);
       }
       catch(RuntimeException e)
       {
@@ -128,21 +131,6 @@ public class PassiveRevoluteJointTest
    
    @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
-   public void testSetQddDesired()
-   {
-      try
-      {
-         joint.setQddDesired(qddDesired);
-      }
-      catch(RuntimeException e)
-      {
-         return; 
-      }     
-      Assert.fail();
-   }
-   
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(timeout = 30000)
    public void testSetTau()
    {
       try
@@ -162,7 +150,7 @@ public class PassiveRevoluteJointTest
    {
       try
       {
-         joint.setConfiguration(matrix, rowStart);
+         joint.setJointConfiguration(rowStart, matrix);
       }
       catch(RuntimeException e)
       {
@@ -177,7 +165,7 @@ public class PassiveRevoluteJointTest
    {
       try
       {
-         joint.setVelocity(matrix, rowStart);
+         joint.setJointVelocity(rowStart, matrix);
       }
       catch(RuntimeException e)
       {
@@ -192,22 +180,9 @@ public class PassiveRevoluteJointTest
    {
       try
       {
-         joint.setJointPositionVelocityAndAcceleration(joint);
-      }
-      catch(RuntimeException e)
-      {
-         return; 
-      }     
-      Assert.fail();
-   }
-    
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(timeout = 30000)
-   public void testSetQddDesiredFromJoint()
-   {
-      try
-      {
-         joint.setQddDesired(joint);
+         joint.setJointConfiguration(joint);
+         joint.setJointTwist(joint);
+         joint.setJointAcceleration(joint);
       }
       catch(RuntimeException e)
       {

@@ -31,7 +31,7 @@ public class TestCommand implements Command<TestCommand,AbortWalkingMessage>
    }
 
    @Override
-   public void set(AbortWalkingMessage message)
+   public void setFromMessage(AbortWalkingMessage message)
    {
       
    }

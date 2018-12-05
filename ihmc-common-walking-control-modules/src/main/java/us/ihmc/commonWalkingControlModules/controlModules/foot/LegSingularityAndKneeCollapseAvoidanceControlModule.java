@@ -13,21 +13,20 @@ import us.ihmc.euclid.referenceFrame.FrameVector2D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
-import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition.GraphicType;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicReferenceFrame;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicVector;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
-import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
+import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
+import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
+import us.ihmc.mecano.spatial.Twist;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
+import us.ihmc.robotics.contactable.ContactablePlaneBody;
 import us.ihmc.robotics.math.filters.AlphaFilteredYoVariable;
 import us.ihmc.robotics.partNames.LegJointName;
 import us.ihmc.robotics.robotSide.RobotSide;
-import us.ihmc.robotics.screwTheory.OneDoFJoint;
-import us.ihmc.robotics.screwTheory.RigidBody;
-import us.ihmc.robotics.screwTheory.Twist;
 import us.ihmc.yoVariables.parameters.BooleanParameter;
 import us.ihmc.yoVariables.parameters.DoubleParameter;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
@@ -95,7 +94,7 @@ public class LegSingularityAndKneeCollapseAvoidanceControlModule
    private final YoDouble currentLegLength;
    private final YoDouble correctedDesiredLegLength;
 
-   private final RigidBody pelvis;
+   private final RigidBodyBasics pelvis;
 
    private final FrameVector3D unachievedSwingTranslationTemp = new FrameVector3D();
    private final FrameVector3D unachievedSwingVelocityTemp = new FrameVector3D();
@@ -153,7 +152,7 @@ public class LegSingularityAndKneeCollapseAvoidanceControlModule
    private final AlphaFilteredYoVariable unachievedSwingAccelerationFiltered;
 
    private final double controlDT;
-   private final OneDoFJoint hipPitchJoint;
+   private final OneDoFJointBasics hipPitchJoint;
 
    public LegSingularityAndKneeCollapseAvoidanceControlModule(String namePrefix, ContactablePlaneBody contactablePlaneBody, final RobotSide robotSide,
          WalkingControllerParameters walkingControllerParameters, final HighLevelHumanoidControllerToolbox controllerToolbox, YoVariableRegistry parentRegistry)
@@ -276,7 +275,6 @@ public class LegSingularityAndKneeCollapseAvoidanceControlModule
       virtualLegTangentialFrameHipCentered = new ReferenceFrame(namePrefix + "VirtualLegTangentialFrameHipCentered", pelvisFrame)
       {
          private final AxisAngle hipPitchRotationToParentFrame = new AxisAngle();
-         private final Vector3D hipPitchToParentFrame = new Vector3D();
          private final FramePoint3D tempPoint = new FramePoint3D();
          private final FrameVector3D footToHipAxis = new FrameVector3D();
          private final FramePoint3D hipPitchPosition = new FramePoint3D();
@@ -291,17 +289,15 @@ public class LegSingularityAndKneeCollapseAvoidanceControlModule
             EuclidGeometryTools.axisAngleFromZUpToVector3D(footToHipAxis, hipPitchRotationToParentFrame);
             hipPitchPosition.setToZero(frameBeforeHipPitchJoint);
             hipPitchPosition.changeFrame(getParent());
-            hipPitchToParentFrame.set(hipPitchPosition);
 
             transformToParent.setRotationAndZeroTranslation(hipPitchRotationToParentFrame);
-            transformToParent.setTranslation(hipPitchToParentFrame);
+            transformToParent.setTranslation(hipPitchPosition);
          }
       };
 
       virtualLegTangentialFrameAnkleCentered = new ReferenceFrame(namePrefix + "VirtualLegTangentialFrameAnkleCentered", pelvisFrame)
       {
          private final AxisAngle anklePitchRotationToParentFrame = new AxisAngle();
-         private final Vector3D anklePitchToParentFrame = new Vector3D();
          private final FramePoint3D tempPoint = new FramePoint3D();
          private final FrameVector3D footToHipAxis = new FrameVector3D();
          private final FramePoint3D anklePitchPosition = new FramePoint3D();
@@ -316,10 +312,9 @@ public class LegSingularityAndKneeCollapseAvoidanceControlModule
             EuclidGeometryTools.axisAngleFromZUpToVector3D(footToHipAxis, anklePitchRotationToParentFrame);
             anklePitchPosition.setToZero(endEffectorFrame);
             anklePitchPosition.changeFrame(getParent());
-            anklePitchToParentFrame.set(anklePitchPosition);
 
             transformToParent.setRotationAndZeroTranslation(anklePitchRotationToParentFrame);
-            transformToParent.setTranslation(anklePitchToParentFrame);
+            transformToParent.setTranslation(anklePitchPosition);
          }
       };
 
@@ -354,8 +349,8 @@ public class LegSingularityAndKneeCollapseAvoidanceControlModule
 
       if (moreVisualizers)
       {
-         virtualLegTangentialFrameHipCenteredGraphics = new YoGraphicReferenceFrame(virtualLegTangentialFrameHipCentered, registry, 0.1);
-         virtualLegTangentialFrameAnkleCenteredGraphics = new YoGraphicReferenceFrame(virtualLegTangentialFrameAnkleCentered, registry, 0.1);
+         virtualLegTangentialFrameHipCenteredGraphics = new YoGraphicReferenceFrame(virtualLegTangentialFrameHipCentered, registry, false, 0.1);
+         virtualLegTangentialFrameAnkleCenteredGraphics = new YoGraphicReferenceFrame(virtualLegTangentialFrameAnkleCentered, registry, false, 0.1);
          yoGraphicsListRegistry.registerYoGraphic("SingularityCollapseAvoidance", virtualLegTangentialFrameHipCenteredGraphics);
          yoGraphicsListRegistry.registerYoGraphic("SingularityCollapseAvoidance", virtualLegTangentialFrameAnkleCenteredGraphics);
 
@@ -381,8 +376,7 @@ public class LegSingularityAndKneeCollapseAvoidanceControlModule
       virtualLegTangentialFrameAnkleCentered.update();
 
       anklePosition.setToZero(endEffectorFrame);
-      anklePosition.changeFrame(worldFrame);
-      yoCurrentFootPosition.set(anklePosition);
+      yoCurrentFootPosition.setMatchingFrame(anklePosition);
       anklePosition.changeFrame(virtualLegTangentialFrameHipCentered);
       currentLegLength.set(-anklePosition.getZ());
    }
@@ -479,7 +473,7 @@ public class LegSingularityAndKneeCollapseAvoidanceControlModule
       desiredFootLinearVelocity.changeFrame(virtualLegTangentialFrameAnkleCentered);
       pelvis.getBodyFixedFrame().getTwistOfFrame(pelvisTwist);
       //      pelvisTwist.changeFrame(virtualLegTangentialFrameAnkleCentered);
-      pelvisTwist.getLinearPart(pelvisLinearVelocity);
+      pelvisLinearVelocity.setIncludingFrame(pelvisTwist.getLinearPart());
       pelvisLinearVelocity.changeFrame(virtualLegTangentialFrameAnkleCentered);
 
       isSwingMechanicalLimitAvoidanceUsed.set(true);
@@ -584,7 +578,7 @@ public class LegSingularityAndKneeCollapseAvoidanceControlModule
 
       desiredFootLinearVelocity.changeFrame(virtualLegTangentialFrameAnkleCentered);
       pelvis.getBodyFixedFrame().getTwistOfFrame(pelvisTwist);
-      pelvisTwist.getLinearPart(pelvisLinearVelocity);
+      pelvisLinearVelocity.setIncludingFrame(pelvisTwist.getLinearPart());
       pelvisLinearVelocity.changeFrame(virtualLegTangentialFrameAnkleCentered);
 
       if (checkVelocityForSwingSingularityAvoidance.getBooleanValue() && (desiredFootLinearVelocity.getZ() - pelvisLinearVelocity.getZ() > -1e-10))

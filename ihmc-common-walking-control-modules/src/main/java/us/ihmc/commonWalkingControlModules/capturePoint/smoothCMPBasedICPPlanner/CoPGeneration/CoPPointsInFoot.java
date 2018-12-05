@@ -1,7 +1,7 @@
 package us.ihmc.commonWalkingControlModules.capturePoint.smoothCMPBasedICPPlanner.CoPGeneration;
 
 import us.ihmc.commonWalkingControlModules.configurations.CoPPointName;
-import us.ihmc.euclid.referenceFrame.FramePoint2D;
+import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
@@ -18,18 +18,19 @@ import us.ihmc.yoVariables.variable.YoFramePoint3D;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.Supplier;
 
 public class CoPPointsInFoot
 {
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
-   private static final FrameVector3D zeroVector = new FrameVector3D();
-   private static final FrameEuclideanTrajectoryPoint tempVariableForSetting = new FrameEuclideanTrajectoryPoint();
    private static final int maxNumberOfTrajectoryPoints = 10;
-   
-   private final List<CoPPointName> copPointsList = new ArrayList<>(maxNumberOfTrajectoryPoints); // List of CoP way points defined for this footstep. Hopefully this does not create garbage
 
-   private final List<CoPTrajectoryPoint> copLocations = new ArrayList<>(maxNumberOfTrajectoryPoints); // Location of CoP points defined 
-   private final List<YoFramePoint3D> copLocationsInWorldFrameReadOnly = new ArrayList<>(maxNumberOfTrajectoryPoints); // YoFramePoints for visualization
+   private final FrameVector3D zeroVector = new FrameVector3D();
+   private final FrameEuclideanTrajectoryPoint tempVariableForSetting = new FrameEuclideanTrajectoryPoint();
+
+   private final List<CoPPointName> copPointsList = new ArrayList<>(maxNumberOfTrajectoryPoints); // List of CoP way points defined for this footstep.
+
+   private final RecyclingArrayList<CoPTrajectoryPoint> copLocations; // Location of CoP points defined
 
    private final YoFramePointInMultipleFrames swingFootCentroid;
    private final YoFramePointInMultipleFrames supportFootCentroid;
@@ -37,34 +38,67 @@ public class CoPPointsInFoot
 
    public CoPPointsInFoot(String namePrefix, int stepNumber, ReferenceFrame[] framesToRegister, YoVariableRegistry registry)
    {
+      if (registry == null)
+         registry = new YoVariableRegistry("localRegistry");
+
       this.name = namePrefix + "Step" + stepNumber;
-      for (int i = 0; i < maxNumberOfTrajectoryPoints; i++)
-      {
-         CoPTrajectoryPoint constantCoP = new CoPTrajectoryPoint(name + "CoP" + i, "", registry, framesToRegister);
-         constantCoP.setToNaN();
-         copLocations.add(constantCoP);
-         copLocationsInWorldFrameReadOnly.add(constantCoP.buildUpdatedYoFramePointForVisualizationOnly());
-      }
+
+      copLocations = new RecyclingArrayList<>(maxNumberOfTrajectoryPoints, new CoPTrajectoryPointSupplier(framesToRegister, registry));
+      copLocations.clear();
+      pointsConstructed = true;
+
       swingFootCentroid = new YoFramePointInMultipleFrames(name + "SwingCentroid", registry, framesToRegister);
       supportFootCentroid = new YoFramePointInMultipleFrames(name + "SupportCentroid", registry, framesToRegister);
    }
 
+   private int pointNumber = 0;
+   private boolean pointsConstructed = false;
+
+   private class CoPTrajectoryPointSupplier implements Supplier<CoPTrajectoryPoint>
+   {
+      private final ReferenceFrame[] framesToRegister;
+      private final YoVariableRegistry registry;
+
+      public CoPTrajectoryPointSupplier(ReferenceFrame[] framesToRegister, YoVariableRegistry registry)
+      {
+         this.framesToRegister = framesToRegister;
+         this.registry = registry;
+      }
+
+      public CoPTrajectoryPoint get()
+      {
+         CoPTrajectoryPoint copPoint;
+         if (!pointsConstructed)
+         {
+            copPoint = new CoPTrajectoryPoint(name + "CoP" + pointNumber, "", registry, framesToRegister);
+         }
+         else
+         {
+            copPoint = new CoPTrajectoryPoint(name + "CoP" + pointNumber, "", null, framesToRegister);
+         }
+         copPoint.setToNaN();
+         pointNumber++;
+         return copPoint;
+      }
+   }
+
    public void setupVisualizers(YoGraphicsList graphicsList, ArtifactList artifactList, double pointSize)
    {
-      for (int i = 0; i < copLocationsInWorldFrameReadOnly.size(); i++)
+      for (int i = 0; i < maxNumberOfTrajectoryPoints; i++)
       {
-         YoFramePoint3D copLocation = copLocationsInWorldFrameReadOnly.get(i);
+         YoFramePoint3D copLocation = copLocations.getAndGrowIfNeeded(i).getPosition();
          YoGraphicPosition yoGraphicPosition = new YoGraphicPosition(copLocation.getNamePrefix(), copLocation, pointSize, YoAppearance.Green(),
                                                                      YoGraphicPosition.GraphicType.BALL_WITH_CROSS);
          graphicsList.add(yoGraphicPosition);
          artifactList.add(yoGraphicPosition.createArtifact());
       }
+      copLocations.clear();
    }
 
    public void notifyVariableChangedListeners()
    {
       for (int i = 0; i < copLocations.size(); i++)
-         copLocations.get(i).notifyVariableChangedListeners();
+         copLocations.get(i).getPosition().notifyVariableChangedListeners();
    }
 
    public void reset()
@@ -75,56 +109,49 @@ public class CoPPointsInFoot
       for (int i = 0; i < copLocations.size(); i++)
       {
          copLocations.get(i).setToNaN(worldFrame);
-         copLocationsInWorldFrameReadOnly.get(i).setToNaN();
       }
+      copLocations.clear();
    }
 
-   public void addWayPoint(CoPPointName copPointName)
+   public void addWaypoint(CoPPointName copPointName, double time, FramePoint3DReadOnly location)
+   {
+      zeroVector.setToZero(location.getReferenceFrame());
+      tempVariableForSetting.setIncludingFrame(time, location, zeroVector);
+
+      CoPTrajectoryPoint trajectoryPoint = copLocations.add();
+      trajectoryPoint.registerReferenceFrame(location.getReferenceFrame());
+      trajectoryPoint.setIncludingFrame(tempVariableForSetting);
+      trajectoryPoint.changeFrame(worldFrame);
+
+      addWayPointName(copPointName);
+   }
+
+   void addWaypoint(CoPPointName copPointName, double time, CoPTrajectoryPoint location)
+   {
+      tempVariableForSetting.setIncludingFrame(time, location.getPosition(), location.getLinearVelocity());
+
+      CoPTrajectoryPoint trajectoryPoint = copLocations.add();
+      trajectoryPoint.registerReferenceFrame(location.getReferenceFrame());
+      trajectoryPoint.setIncludingFrame(tempVariableForSetting);
+      addWayPointName(copPointName);
+   }
+
+   private void addWayPointName(CoPPointName copPointName)
    {
       this.copPointsList.add(copPointName);
    }
-   
-   public void setIncludingFrame(CoPPointsInFoot other)
+
+   public void set(CoPPointsInFoot other)
    {
       this.swingFootCentroid.setIncludingFrame(other.swingFootCentroid);
       this.supportFootCentroid.setIncludingFrame(other.supportFootCentroid);
       this.copPointsList.clear();
-      int index = 0;
-      for(index = 0; index < other.copPointsList.size(); index++)
+      this.copLocations.clear();
+      for (int index = 0; index < other.copPointsList.size(); index++)
       {
          this.copPointsList.add(other.copPointsList.get(index));
-         this.copLocations.get(index).setIncludingFrame(other.get(index));
+         this.copLocations.add().setIncludingFrame(other.get(index));
       }
-      for(; index < maxNumberOfTrajectoryPoints; index++)
-         this.copLocations.get(index).setToNaN();
-   }
-
-   public void setIncludingFrame(int waypointIndex, double time, FramePoint3DReadOnly location)
-   {
-      copLocations.get(waypointIndex).registerReferenceFrame(location.getReferenceFrame());
-      zeroVector.setToZero(location.getReferenceFrame());
-      tempVariableForSetting.setIncludingFrame(time, location, zeroVector);
-      copLocations.get(waypointIndex).setIncludingFrame(tempVariableForSetting);
-   }
-
-   public void setIncludingFrame(int waypointIndex, double time, CoPTrajectoryPoint location)
-   {
-      copLocations.get(waypointIndex).registerReferenceFrame(location.getReferenceFrame());
-      zeroVector.setToZero(location.getReferenceFrame());
-      tempVariableForSetting.setIncludingFrame(time, location.getPosition(), zeroVector);
-      copLocations.get(waypointIndex).setIncludingFrame(tempVariableForSetting);
-   }
-
-   public void addAndSetIncludingFrame(CoPPointName copPointName, double time, FramePoint3DReadOnly location)
-   {
-      setIncludingFrame(copPointsList.size(), time, location);
-      addWayPoint(copPointName);
-   }
-
-   public void addAndSetIncludingFrame(CoPPointName copPointName, double time, CoPTrajectoryPoint location)
-   {
-      setIncludingFrame(copPointsList.size(), time, location);
-      addWayPoint(copPointName);
    }
 
    public void setToNaN(int waypointIndex)
@@ -137,16 +164,17 @@ public class CoPPointsInFoot
       return copLocations.get(copPointIndex);
    }
 
-   public FixedFramePoint3DBasics getWaypointInWorldFrameReadOnly(int copPointIndex)
+   public FramePoint3DReadOnly getWaypointInWorld(int copPointIndex)
    {
-      return copLocationsInWorldFrameReadOnly.get(copPointIndex);
+      copLocations.get(copPointIndex).checkReferenceFrameMatch(worldFrame);
+      return copLocations.get(copPointIndex).getPosition();
    }
 
    public void changeFrame(ReferenceFrame desiredFrame)
    {
       swingFootCentroid.changeFrame(desiredFrame);
       supportFootCentroid.changeFrame(desiredFrame);
-      for (int i = 0; i < copPointsList.size(); i++)
+      for (int i = 0; i < copLocations.size(); i++)
          copLocations.get(i).changeFrame(desiredFrame);
    }
 
@@ -154,13 +182,8 @@ public class CoPPointsInFoot
    {
       swingFootCentroid.registerReferenceFrame(newReferenceFrame);
       supportFootCentroid.registerReferenceFrame(newReferenceFrame);
-      for (int i = 0; i < copPointsList.size(); i++)
+      for (int i = 0; i < copLocations.size(); i++)
          copLocations.get(i).registerReferenceFrame(newReferenceFrame);
-   }
-
-   public void switchCurrentReferenceFrame(int waypointIndex, ReferenceFrame desiredFrame)
-   {
-      copLocations.get(waypointIndex).switchCurrentReferenceFrame(desiredFrame);
    }
 
    public void setSwingFootLocation(FramePoint3DReadOnly footLocation)
@@ -182,7 +205,7 @@ public class CoPPointsInFoot
    {
       footLocationToPack.setIncludingFrame(supportFootCentroid);
    }
-   
+
    public void setFeetLocation(FramePoint3DReadOnly swingFootLocation, FramePoint3DReadOnly supportFootLocation)
    {
       setSwingFootLocation(swingFootLocation);
@@ -196,38 +219,27 @@ public class CoPPointsInFoot
 
    public void getFinalCoPPosition(FixedFramePoint3DBasics tempFinalICPToPack)
    {
-      copLocations.get(copPointsList.size() - 1).getPosition(tempFinalICPToPack);
+      copLocations.getLast().getPosition(tempFinalICPToPack);
    }
 
    public boolean isEmpty()
    {
-      return copPointsList.isEmpty();
+      return copLocations.isEmpty();
    }
 
    public int getNumberOfCoPPoints()
    {
-      return copPointsList.size();
+      return copLocations.size();
    }
-   
+
    public String toString()
    {
       String string = name;
-      for(int i = 0; i < getNumberOfCoPPoints(); i++)
+      for (int i = 0; i < getNumberOfCoPPoints(); i++)
       {
          string += getCoPPointList().get(i).toString() + ": " + get(i).toString() + "\n";
       }
       return string;
    }
-   
-   public String toString2()
-   {
-      String string = name;
-      for(int i = 0; i < getNumberOfCoPPoints(); i++)
-      {
-         string += getCoPPointList().get(i).toString() + "\n";
-      }
-      return string;
-   }
 
-   
 }

@@ -27,7 +27,7 @@ public class LogProperties extends Packet<LogProperties> implements Settable<Log
       variables_ = new us.ihmc.robotDataLogger.Variables();
       model_ = new us.ihmc.robotDataLogger.Model();
       timestamp_ = new java.lang.StringBuilder(255);
-      cameras_ = new us.ihmc.idl.IDLSequence.Object<us.ihmc.robotDataLogger.Camera> (255, us.ihmc.robotDataLogger.Camera.class, new us.ihmc.robotDataLogger.CameraPubSubType());
+      cameras_ = new us.ihmc.idl.IDLSequence.Object<us.ihmc.robotDataLogger.Camera> (255, new us.ihmc.robotDataLogger.CameraPubSubType());
       video_ = new us.ihmc.robotDataLogger.Video();
 
    }

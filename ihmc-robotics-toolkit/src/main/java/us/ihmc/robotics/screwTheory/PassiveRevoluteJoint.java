@@ -2,9 +2,12 @@ package us.ihmc.robotics.screwTheory;
 
 import org.ejml.data.DenseMatrix64F;
 
+import us.ihmc.commons.MathTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
-import us.ihmc.commons.MathTools;
+import us.ihmc.mecano.multiBodySystem.RevoluteJoint;
+import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
+import us.ihmc.mecano.spatial.interfaces.WrenchReadOnly;
 
 public class PassiveRevoluteJoint extends RevoluteJoint
 {
@@ -20,7 +23,7 @@ public class PassiveRevoluteJoint extends RevoluteJoint
     *    2) getTau() should always return a zero because, since the joint is NOT actuated,
     *    there is no torque.
     */
-   public PassiveRevoluteJoint(String name, RigidBody predecessor, RigidBodyTransform transformToParent, Vector3DReadOnly jointAxis, boolean isPartOfClosedKinematicLoop)
+   public PassiveRevoluteJoint(String name, RigidBodyBasics predecessor, RigidBodyTransform transformToParent, Vector3DReadOnly jointAxis, boolean isPartOfClosedKinematicLoop)
    {
       super(name, predecessor, transformToParent, jointAxis);
       this.isPartOfClosedKinematicLoop = isPartOfClosedKinematicLoop;
@@ -30,27 +33,28 @@ public class PassiveRevoluteJoint extends RevoluteJoint
     * Torque on a passive joint is always zero
     */
    @Override
-   public void getTauMatrix(DenseMatrix64F matrix)
+   public int getJointTau(int rowStart, DenseMatrix64F matrix)
    {
       MathTools.checkIntervalContains(matrix.getNumRows(), 1, Integer.MAX_VALUE);
       MathTools.checkIntervalContains(matrix.getNumCols(), 1, Integer.MAX_VALUE);
       matrix.set(0, 0, 0);
+      return rowStart + 1;
    }
 
    @Override
-   public void setDesiredAccelerationToZero()
+   public void setJointAccelerationToZero()
    {
       throw new RuntimeException("Cannot set acceleration of a passive joint");
    }
 
    @Override
-   public void setTorqueFromWrench(Wrench jointWrench)
+   public void setJointWrench(WrenchReadOnly jointWrench)
    {
       throw new RuntimeException("Cannot set torque of a passive joint");
    }
 
    @Override
-   public void setDesiredAcceleration(DenseMatrix64F matrix, int rowStart)
+   public int setJointAcceleration(int rowStart, DenseMatrix64F matrix)
    {
       throw new RuntimeException("Cannot set acceleration of a passive joint");
    }
@@ -83,45 +87,21 @@ public class PassiveRevoluteJoint extends RevoluteJoint
    }
 
    @Override
-   public void setQddDesired(double qddDesired)
-   {
-      throw new RuntimeException("Cannot set acceleration of a passive joint");
-   }
-
-   @Override
    public void setTau(double tau)
    {
       throw new RuntimeException("Cannot set torque of a passive joint");
    }
 
    @Override
-   public void setConfiguration(DenseMatrix64F matrix, int rowStart)
+   public int setJointConfiguration(int rowStart, DenseMatrix64F matrix)
    {
       throw new RuntimeException("Cannot set position of a passive joint");
    }
 
    @Override
-   public void setVelocity(DenseMatrix64F matrix, int rowStart)
+   public int setJointVelocity(int rowStart, DenseMatrix64F matrix)
    {
       throw new RuntimeException("Cannot set velocity of a passive joint");
-   }
-
-   @Override
-   public void setJointPositionVelocityAndAcceleration(InverseDynamicsJoint originalJoint)
-   {
-      throw new RuntimeException("Cannot set position, velocity, or acceleration of a passive joint");
-   }
-
-   @Override
-   public void setQddDesired(InverseDynamicsJoint originalJoint)
-   {
-      throw new RuntimeException("Cannot set acceleration of a passive joint");
-   }
-
-   @Override
-   public boolean isPassiveJoint()
-   {
-      return true;
    }
 
    public boolean isPartOfClosedKinematicLoop()
