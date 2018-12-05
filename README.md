@@ -3,7 +3,7 @@
 **Compile:** ![Compile](https://bamboo.ihmc.us/plugins/servlet/wittified/build-status/LIBS-IHMCOPENROBOTICSSOFTWARE)
 **Test (3000+ tests):** ![Test](https://bamboo.ihmc.us/plugins/servlet/wittified/build-status/LIBS-IHMCOPENROBOTICSSOFTWAREFAST)
 
- [ ![Download](https://api.bintray.com/packages/ihmcrobotics/maven-release/ihmc-common-walking-control-modules/images/download.svg?version=0.11.0) ](https://bintray.com/ihmcrobotics/maven-release/ihmc-common-walking-control-modules/0.11.0/link) <-- Download from Bintray
+ [ ![Download](https://api.bintray.com/packages/ihmcrobotics/maven-release/atlas/images/download.svg?version=0.12.0) ](https://bintray.com/ihmcrobotics/maven-release/atlas/0.12.0/link) <-- Download from Bintray
 
 ### Tested Platforms
 
