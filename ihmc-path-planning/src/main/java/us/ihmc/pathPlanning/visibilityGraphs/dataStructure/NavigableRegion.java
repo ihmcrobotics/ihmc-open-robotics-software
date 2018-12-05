@@ -12,7 +12,7 @@ import us.ihmc.robotics.geometry.PlanarRegion;
 
 public class NavigableRegion implements VisibilityMapHolder
 {
-   private final PlanarRegion homeRegion;
+   private final PlanarRegion homePlanarRegion;
    private final RigidBodyTransform transformToWorld = new RigidBodyTransform();
 
    private Cluster homeRegionCluster = null;
@@ -21,10 +21,11 @@ public class NavigableRegion implements VisibilityMapHolder
    private VisibilityMap visibilityMapInLocal = null;
    private VisibilityMap visibilityMapInWorld = null;
 
-   public NavigableRegion(PlanarRegion homeRegion)
+
+   public NavigableRegion(PlanarRegion homePlanarRegion)
    {
-      this.homeRegion = homeRegion;
-      homeRegion.getTransformToWorld(transformToWorld);
+      this.homePlanarRegion = homePlanarRegion;
+      homePlanarRegion.getTransformToWorld(transformToWorld);
    }
 
    public void setHomeRegionCluster(Cluster homeCluster)
@@ -59,9 +60,9 @@ public class NavigableRegion implements VisibilityMapHolder
       visibilityMapInLocal.computeVertices();
    }
 
-   public PlanarRegion getHomeRegion()
+   public PlanarRegion getHomePlanarRegion()
    {
-      return homeRegion;
+      return homePlanarRegion;
    }
 
    public RigidBodyTransform getTransformToWorld()
@@ -97,7 +98,7 @@ public class NavigableRegion implements VisibilityMapHolder
    @Override
    public int getMapId()
    {
-      return homeRegion.getRegionId();
+      return homePlanarRegion.getRegionId();
    }
 
    @Override

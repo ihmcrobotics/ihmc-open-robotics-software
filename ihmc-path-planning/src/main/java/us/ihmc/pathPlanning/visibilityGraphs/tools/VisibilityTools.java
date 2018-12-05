@@ -34,8 +34,17 @@ public class VisibilityTools
     */
    private static final boolean ENABLE_EXPERIMENTAL_QUICK_CHECK = false;
 
+   
+   // TODO: +++JEP: (Remove) Some hackish booleans to reduce expansion to O(n) by not doing all n*n combinations.
+   private static final boolean JUST_DO_AROUND_RING_INSTEAD_OF_ALL_CONNECTIONS = false;
+   private static final int INNER_CONNECTIONS_EVERY_N_POINTS = 1;
+   private static final boolean RETURN_AFTER_FINDING_A_SINGLE_CONNECTION = false;
+   private static final boolean CONTINUE_AFTER_FINDING_A_SINGLE_CONNECTION = false;
+   
+
    public static boolean isPointVisible(Point2DReadOnly observer, Point2DReadOnly targetPoint, List<? extends Point2DReadOnly> listOfPointsInCluster)
    {
+      //TODO: +++JEP: Need to check the closing point if it is a polygon!! Also, add test cases for that. Also need to make sure one polygon per cluster...
       for (int i = 0; i < listOfPointsInCluster.size() - 1; i++)
       {
          Point2DReadOnly first = listOfPointsInCluster.get(i);
@@ -65,43 +74,52 @@ public class VisibilityTools
       return filteredConnections;
    }
 
-   public static Set<Connection> createStaticVisibilityMap(List<Cluster> clusters, NavigableRegion navigableRegion)
+   public static Set<Connection> createStaticVisibilityMap(NavigableRegion navigableRegion)
    {
       int regionId = navigableRegion.getMapId();
-      PlanarRegion homeRegion = navigableRegion.getHomeRegion();
-      Set<Connection> connections = new HashSet<>();
-      List<boolean[]> navigability = new ArrayList<>(clusters.size());
+      PlanarRegion homeRegion = navigableRegion.getHomePlanarRegion();
+      
+      Cluster homeRegionCluster = navigableRegion.getHomeRegionCluster();
+      List<Cluster> allClusters = navigableRegion.getAllClusters();
 
-      for (Cluster cluster : clusters)
+      Set<Connection> connections = new HashSet<>();
+      List<boolean[]> navigability = new ArrayList<>(allClusters.size());
+
+      for (Cluster cluster : allClusters)
       {
-         navigability.add(addClusterSelfVisibility(cluster, homeRegion, clusters, regionId, connections));
+         if (cluster == homeRegionCluster)
+         {
+            if (JUST_DO_AROUND_RING_INSTEAD_OF_ALL_CONNECTIONS)
+               navigability.add(addClusterSelfVisibilityAroundRing(cluster, homeRegion, allClusters, regionId, connections));  
+            else
+               navigability.add(addClusterSelfVisibility(cluster, homeRegion, allClusters, regionId, connections));
+         }
+         else
+         {
+            navigability.add(addClusterSelfVisibilityAroundRing(cluster, homeRegion, allClusters, regionId, connections));            
+         }
       }
 
-      for (int sourceIndex = 0; sourceIndex < clusters.size(); sourceIndex++)
+      for (int sourceIndex = 0; sourceIndex < allClusters.size(); sourceIndex++)
       {
-         Cluster source = clusters.get(sourceIndex);
+         Cluster source = allClusters.get(sourceIndex);
          boolean[] sourceNavigability = navigability.get(sourceIndex);
 
-         for (int targetIndex = sourceIndex + 1; targetIndex < clusters.size(); targetIndex++)
+         for (int targetIndex = sourceIndex + 1; targetIndex < allClusters.size(); targetIndex++)
          {
-            Cluster target = clusters.get(targetIndex);
+            Cluster target = allClusters.get(targetIndex);
             boolean[] targetNavigability = navigability.get(targetIndex);
 
-            addCrossClusterVisibility(source, sourceNavigability, target, targetNavigability, clusters, regionId, connections);
+            addCrossClusterVisibility(source, sourceNavigability, target, targetNavigability, allClusters, regionId, connections);
          }
       }
 
       return connections;
    }
 
-   private static boolean isInsideANonNavigableZone(Point2DReadOnly query, List<Cluster> clusters)
+   private static boolean isNotInsideANonNavigableZone(Point2DReadOnly query, List<Cluster> clusters)
    {
-      for (Cluster cluster : clusters)
-      {
-         if (cluster.isInsideNonNavigableZone(query))
-            return true;
-      }
-      return false;
+      return clusters.stream().noneMatch(cluster -> cluster.isInsideNonNavigableZone(query));
    }
 
    /**
@@ -124,29 +142,7 @@ public class VisibilityTools
    {
       List<? extends Point2DReadOnly> navigableExtrusionPoints = clusterToBuildMapOf.getNavigableExtrusionsInLocal();
 
-      // We first go through the extrusions and check if they are actually navigable, i.e. inside the home region and not inside any non-navigable zone.
-      boolean[] arePointsActuallyNavigable = new boolean[navigableExtrusionPoints.size()];
-      Arrays.fill(arePointsActuallyNavigable, true);
-
-      for (int i = 0; i < navigableExtrusionPoints.size(); i++)
-      {
-         // Check that the point is actually navigable
-         Point2DReadOnly query = navigableExtrusionPoints.get(i);
-
-         boolean isNavigable = PlanarRegionTools.isPointInLocalInsidePlanarRegion(homeRegion, query);
-
-         if (isNavigable)
-         {
-            //TODO: Consider which of these two is better to use.
-            //            if (isInsideANonNavigableZone(query, allClusters))
-            //            {
-            //               isNavigable = false;
-            //            }
-            isNavigable = allClusters.stream().noneMatch(cluster -> cluster.isInsideNonNavigableZone(query));
-         }
-
-         arePointsActuallyNavigable[i] = isNavigable;
-      }
+      boolean[] arePointsActuallyNavigable = checkIfPointsInsidePlanarRegionAndOutsideNonavigableZones(homeRegion, allClusters, navigableExtrusionPoints);
 
       Vector2D directionToCheck = new Vector2D();
       Vector2D nextEdge = new Vector2D();
@@ -161,7 +157,7 @@ public class VisibilityTools
          Point2DReadOnly source = navigableExtrusionPoints.get(sourceIndex);
 
          // Starting from after the next vertex of the source as we already added all the edges as connections
-         for (int targetIndex = sourceIndex + 1; targetIndex < navigableExtrusionPoints.size(); targetIndex++)
+         for (int targetIndex = sourceIndex + 1; targetIndex < navigableExtrusionPoints.size(); targetIndex=targetIndex + INNER_CONNECTIONS_EVERY_N_POINTS)
          {
             if (!arePointsActuallyNavigable[targetIndex])
                continue; // Both source and target have to be navigable for the connection to be valid
@@ -196,6 +192,61 @@ public class VisibilityTools
 
       return arePointsActuallyNavigable;
    }
+   
+   public static boolean[] addClusterSelfVisibilityAroundRing(Cluster clusterToBuildMapOf, PlanarRegion homeRegion, List<Cluster> allClusters, int mapId,
+                                                    Collection<Connection> connectionsToPack)
+   {
+      List<? extends Point2DReadOnly> navigableExtrusionPoints = clusterToBuildMapOf.getNavigableExtrusionsInLocal();
+      boolean[] arePointsActuallyNavigable = checkIfPointsInsidePlanarRegionAndOutsideNonavigableZones(homeRegion, allClusters, navigableExtrusionPoints);
+
+      // Going through all of the possible combinations of two points for finding connections
+      for (int sourceIndex = 0; sourceIndex < navigableExtrusionPoints.size(); sourceIndex++)
+      {
+         if (!arePointsActuallyNavigable[sourceIndex])
+            continue; // Both source and target have to be navigable for the connection to be valid
+
+         Point2DReadOnly source = navigableExtrusionPoints.get(sourceIndex);
+
+         // Starting from after the next vertex of the source as we already added all the edges as connections
+         int targetIndex = (sourceIndex + 1) % navigableExtrusionPoints.size();
+         {
+            if (!arePointsActuallyNavigable[targetIndex])
+               continue; // Both source and target have to be navigable for the connection to be valid
+
+            Point2DReadOnly target = navigableExtrusionPoints.get(targetIndex);
+
+            // Finally run the expensive test to verify if the target can be seen from the source.
+            if (isPointVisibleForStaticMaps(allClusters, source, target))
+               connectionsToPack.add(new Connection(source, mapId, target, mapId));
+         }
+      }
+
+      return arePointsActuallyNavigable;
+   }
+
+   private static boolean[] checkIfPointsInsidePlanarRegionAndOutsideNonavigableZones(PlanarRegion homeRegion, List<Cluster> allClusters,
+                                                            List<? extends Point2DReadOnly> navigableExtrusionPoints)
+   {
+      // We first go through the extrusions and check if they are actually navigable, i.e. inside the home region and not inside any non-navigable zone.
+      boolean[] arePointsActuallyNavigable = new boolean[navigableExtrusionPoints.size()];
+      Arrays.fill(arePointsActuallyNavigable, true);
+
+      for (int i = 0; i < navigableExtrusionPoints.size(); i++)
+      {
+         // Check that the point is actually navigable
+         Point2DReadOnly query = navigableExtrusionPoints.get(i);
+
+         boolean isNavigable = PlanarRegionTools.isPointInLocalInsidePlanarRegion(homeRegion, query);
+
+         if (isNavigable)
+         {
+            isNavigable = isNotInsideANonNavigableZone(query, allClusters);
+         }
+
+         arePointsActuallyNavigable[i] = isNavigable;
+      }
+      return arePointsActuallyNavigable;
+   }
 
    /**
     * Finds all the possible and valid connections going from the navigable extrusions of
@@ -228,6 +279,7 @@ public class VisibilityTools
       List<? extends Point2DReadOnly> sources = sourceCluster.getNavigableExtrusionsInLocal();
       List<? extends Point2DReadOnly> targets = targetCluster.getNavigableExtrusionsInLocal();
 
+      sourceLoop:
       for (int sourceIndex = 0; sourceIndex < sourceNavigability.length; sourceIndex++)
       {
          if (!sourceNavigability[sourceIndex])
@@ -266,6 +318,10 @@ public class VisibilityTools
             if (isPointVisibleForStaticMaps(allClusters, source, target))
             {
                connectionsToPack.add(new Connection(source, mapId, target, mapId));
+               if (RETURN_AFTER_FINDING_A_SINGLE_CONNECTION)
+                  return;
+               if (CONTINUE_AFTER_FINDING_A_SINGLE_CONNECTION)
+                  continue sourceLoop;
             }
          }
       }
@@ -359,8 +415,14 @@ public class VisibilityTools
       }
    }
 
+   //TODO: +++JEP: Get rid of these checks after no longer needed for optimizing. 
+   private static int numberIsPointVisibleChecks = 0, edgeChecks = 0, ruledOutByBoundingBox = 0, notVisible = 0, visiblePoints = 0;
+   
    public static boolean isPointVisibleForStaticMaps(List<Cluster> clusters, Point2DReadOnly observer, Point2DReadOnly targetPoint)
    {
+      numberIsPointVisibleChecks++;
+      if (numberIsPointVisibleChecks % 1000000 == 0) printStats();
+
       for (Cluster cluster : clusters)
       {
          if (cluster.getExtrusionSide() == ExtrusionSide.OUTSIDE)
@@ -373,17 +435,36 @@ public class VisibilityTools
             if (!boundingBox.isInsideInclusive(observer) && !boundingBox.isInsideInclusive(targetPoint))
             {
                if (!boundingBox.doesIntersectWithLineSegment2D(observer, targetPoint))
+               {
+                  ruledOutByBoundingBox++;
                   continue;
+               }
             }
          }
 
+         edgeChecks++;
+         
+         //TODO: +++JEP: Lots of time taken here. 2,379,800 calls for 4.7 sec.
          if (!VisibilityTools.isPointVisible(observer, targetPoint, cluster.getNonNavigableExtrusionsInLocal()))
          {
+            notVisible++;
             return false;
          }
       }
 
+      visiblePoints++;
+      
       return true;
+   }
+
+   private static void printStats()
+   {
+      System.out.println("numberIsPointVisibleChecks = " + numberIsPointVisibleChecks);
+      System.out.println("ruledOutByBoundingBox = " + ruledOutByBoundingBox);
+      System.out.println("edgeChecks = " + edgeChecks);
+      System.out.println("notVisible = " + notVisible);
+      System.out.println("visiblePoints = " + visiblePoints);
+      System.out.println("");
    }
 
    public static List<Connection> removeConnectionsFromExtrusionsOutsideRegions(Collection<Connection> connections, PlanarRegion homeRegion)
@@ -393,7 +474,7 @@ public class VisibilityTools
 
    public static List<Connection> removeConnectionsFromExtrusionsInsideNoGoZones(Collection<Connection> connectionsToClean, List<Cluster> clusters)
    {
-      //TODO: +++JEP: This seems buggy to me. It doesn't seem to do the 2D / 3D thing wrong. Should be easy to make a failing test case I think...
+      //TODO: +++JEP: This seems buggy to me. It doesn't seem to do the 2D / 3D thing correctly. Should be easy to make a failing test case I think... Or remove if we don't need it.
       List<Connection> validConnections = new ArrayList<>(connectionsToClean);
 
       for (Cluster cluster : clusters)

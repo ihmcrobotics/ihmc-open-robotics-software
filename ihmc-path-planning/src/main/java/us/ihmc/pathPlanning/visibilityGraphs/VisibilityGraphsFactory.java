@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import us.ihmc.euclid.geometry.BoundingBox3D;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
 import us.ihmc.euclid.tuple3D.Point3D;
@@ -42,7 +43,7 @@ public class VisibilityGraphsFactory
     * +++JEP: Pretty sure they are obsolete now. Turning them off.
     */
    private static final boolean ENABLE_GREEDY_FILTERS = false;
-   
+
    // Whether to create the inter regions using the cluster points or , if false, to create them
    // after the inner regions are created, using the inner region maps,
    // The former (true) I believe is preferable since I think we should be creating inter regions first, then inner regions.
@@ -118,7 +119,7 @@ public class VisibilityGraphsFactory
                                                                             ObstacleExtrusionDistanceCalculator obstacleCalculator)
    {
       NavigableRegion navigableRegion = new NavigableRegion(region);
-      PlanarRegion homeRegion = navigableRegion.getHomeRegion();
+      PlanarRegion homeRegion = navigableRegion.getHomePlanarRegion();
 
       List<PlanarRegion> obstacleRegions = otherRegions.stream().filter(candidate -> obstacleRegionFilter.isRegionValidObstacle(candidate, homeRegion))
                                                        .collect(Collectors.toList());
@@ -151,11 +152,11 @@ public class VisibilityGraphsFactory
 
    private static void createStaticVisibilityMapsForNavigableRegion(NavigableRegion navigableRegion)
    {
-      Collection<Connection> connectionsForMap = VisibilityTools.createStaticVisibilityMap(navigableRegion.getAllClusters(), navigableRegion);
+      Collection<Connection> connectionsForMap = VisibilityTools.createStaticVisibilityMap(navigableRegion);
 
       if (ENABLE_GREEDY_FILTERS)
       {
-         PlanarRegion homeRegion = navigableRegion.getHomeRegion();
+         PlanarRegion homeRegion = navigableRegion.getHomePlanarRegion();
          connectionsForMap = VisibilityTools.removeConnectionsFromExtrusionsOutsideRegions(connectionsForMap, homeRegion);
          connectionsForMap = VisibilityTools.removeConnectionsFromExtrusionsInsideNoGoZones(connectionsForMap, navigableRegion.getAllClusters());
       }
@@ -386,63 +387,104 @@ public class VisibilityGraphsFactory
       return map;
    }
 
-   public static ArrayList<Connection> createInterRegionVisibilityConnectionsUsingClusterPoints(NavigableRegion sourceRegion, NavigableRegion targetRegion,
+   //TODO: +++JEP: Get rid of these stats after optimized.
+   private static int numberPlanarRegionBoundingBoxesTooFar = 0, totalSourceTargetChecks = 0, numberPassValidFilter = 0, numberNotInsideSourceRegion = 0,
+         numberNotInsideTargetRegion = 0, numberSourcesInNoGoZones = 0, numberTargetsInNoGoZones = 0, numberValidConnections = 0;
+
+   public static ArrayList<Connection> createInterRegionVisibilityConnectionsUsingClusterPoints(NavigableRegion sourceNavigableRegion,
+                                                                                                NavigableRegion targetNavigableRegion,
                                                                                                 InterRegionConnectionFilter filter)
    {
       ArrayList<Connection> connections = new ArrayList<Connection>();
 
-      int sourceId = sourceRegion.getMapId();
-      int targetId = targetRegion.getMapId();
+      int sourceId = sourceNavigableRegion.getMapId();
+      int targetId = targetNavigableRegion.getMapId();
 
       if (sourceId == targetId)
          return connections;
 
-      List<Cluster> sourceClusters = sourceRegion.getAllClusters();
-      List<Cluster> sourceObstacleClusters = sourceRegion.getObstacleClusters();
+      // If the source and target regions are simply too far apart, then do not check their individual points.
+      PlanarRegion sourceHomePlanarRegion = sourceNavigableRegion.getHomePlanarRegion();
+      PlanarRegion targetHomePlanarRegion = targetNavigableRegion.getHomePlanarRegion();
+
+      BoundingBox3D sourceHomeRegionBoundingBox = sourceHomePlanarRegion.getBoundingBox3dInWorld();
+      BoundingBox3D targetHomeRegionBoundingBox = targetHomePlanarRegion.getBoundingBox3dInWorld();
+
+      if (!sourceHomeRegionBoundingBox.intersectsEpsilon(targetHomeRegionBoundingBox, filter.getMaximumInterRegionConnetionDistance()))
+      {
+         numberPlanarRegionBoundingBoxesTooFar++;
+         return connections;
+      }
+
+      List<Cluster> sourceClusters = sourceNavigableRegion.getAllClusters();
+      List<Cluster> sourceObstacleClusters = sourceNavigableRegion.getObstacleClusters();
       for (Cluster sourceCluster : sourceClusters)
       {
-         List<Point3DReadOnly> sourcePoints = sourceCluster.getNavigableExtrusionsInWorld();
+         List<Point3DReadOnly> sourcePointsInWorld = sourceCluster.getNavigablePointsInsideHomeRegionInWorld(sourceHomePlanarRegion);
 
-         List<Cluster> targetClusters = targetRegion.getAllClusters();
-         List<Cluster> targetObstacleClusters = targetRegion.getObstacleClusters();
+         List<Cluster> targetClusters = targetNavigableRegion.getAllClusters();
+         List<Cluster> targetObstacleClusters = targetNavigableRegion.getObstacleClusters();
          for (Cluster targetCluster : targetClusters)
          {
-            List<Point3DReadOnly> targetPoints = targetCluster.getNavigableExtrusionsInWorld();
+            List<Point3DReadOnly> targetPointsInWorld = targetCluster.getNavigablePointsInsideHomeRegionInWorld(targetHomePlanarRegion);
 
-            for (Point3DReadOnly sourcePoint3D : sourcePoints)
+            for (int sourceIndex = 0; sourceIndex < sourcePointsInWorld.size(); sourceIndex++)
             {
-               for (Point3DReadOnly targetPoint3D : targetPoints)
+               Point3DReadOnly sourcePoint3DInWorld = sourcePointsInWorld.get(sourceIndex);
+
+               for (Point3DReadOnly targetPoint3D : targetPointsInWorld)
                {
-                  ConnectionPoint3D source = new ConnectionPoint3D(sourcePoint3D, targetId);
+                  totalSourceTargetChecks++;
+                  if (totalSourceTargetChecks % 10000000 == 0)
+                  {
+                     printStats();
+                  }
+
+                  ConnectionPoint3D source = new ConnectionPoint3D(sourcePoint3DInWorld, sourceId);
                   ConnectionPoint3D target = new ConnectionPoint3D(targetPoint3D, targetId);
 
                   if (filter.isConnectionValid(source, target))
                   {
-                     //TODO: +++JEP: Taking up lots of time, but necessary
-                     Point2D sourcePoint2DInLocal = getPoint2DInLocal(sourceRegion, sourcePoint3D);
+                     numberPassValidFilter++;
 
-                     PlanarRegion sourceHomeRegion = sourceRegion.getHomeRegion();
-                     PlanarRegion targetHomeRegion = targetRegion.getHomeRegion();
+                     Point2D sourcePoint2DInLocal = getPoint2DInLocal(sourceNavigableRegion, sourcePoint3DInWorld);
 
-                     if (!PlanarRegionTools.isPointInLocalInsidePlanarRegion(sourceHomeRegion, sourcePoint2DInLocal))
-                        continue;
+                     //TODO: Get rid of these check since now down beforehand.
+                     //                     double epsilonForInsidePlanarRegion = 1e-4; //Add a little just to make sure we do not miss anything.
 
-                     //TODO: +++JEP: Taking up lots of time, but necessary
-                     Point2D targetPoint2DInLocal = getPoint2DInLocal(targetRegion, targetPoint3D);
-                     if (!PlanarRegionTools.isPointInLocalInsidePlanarRegion(targetHomeRegion, targetPoint2DInLocal))
-                        continue;
+                     //                     //TODO: +++JEP: Taking up lots of time, but necessary. 4.7sec. 1,998,512 calls
+                     //                     if (!PlanarRegionTools.isPointInLocalInsidePlanarRegion(sourceHomePlanarRegion, sourcePoint2DInLocal, epsilonForInsidePlanarRegion))
+                     //                     {
+                     //                        numberNotInsideSourceRegion++;
+                     //                        continue;
+                     //                     }
+
+                     Point2D targetPoint2DInLocal = getPoint2DInLocal(targetNavigableRegion, targetPoint3D);
+
+                     //                     //TODO: +++JEP: Taking up lots of time, but necessary. 1.1 sec. 912,250 calls
+                     //                     if (!PlanarRegionTools.isPointInLocalInsidePlanarRegion(targetHomePlanarRegion, targetPoint2DInLocal, epsilonForInsidePlanarRegion))
+                     //                     {
+                     //                        numberNotInsideTargetRegion++;
+                     //                        continue;
+                     //                     }
 
                      Connection connection = new Connection(source, target);
-                     //+++JEP
 
                      boolean sourceIsInsideNoGoZone = isInsideANonNavigableZone(sourcePoint2DInLocal, sourceObstacleClusters);
                      if (sourceIsInsideNoGoZone)
+                     {
+                        numberSourcesInNoGoZones++;
                         continue;
+                     }
 
                      boolean targetIsInsideNoGoZone = isInsideANonNavigableZone(targetPoint2DInLocal, targetObstacleClusters);
                      if (targetIsInsideNoGoZone)
+                     {
+                        numberTargetsInNoGoZones++;
                         continue;
+                     }
 
+                     numberValidConnections++;
                      connections.add(connection);
                   }
                }
@@ -450,7 +492,22 @@ public class VisibilityGraphsFactory
          }
       }
 
+      //      printStats();
       return connections;
+   }
+
+   private static void printStats()
+   {
+      System.out.println("numberPlanarRegionBoundingBoxesTooFar = " + numberPlanarRegionBoundingBoxesTooFar);
+      System.out.println("totalSourceTargetChecks = " + totalSourceTargetChecks);
+      System.out.println("numberPassValidFilter = " + numberPassValidFilter);
+      System.out.println("numberNotInsideSourceRegion = " + numberNotInsideSourceRegion);
+      System.out.println("numberNotInsideTargetRegion = " + numberNotInsideTargetRegion);
+      System.out.println("numberSourcesInNoGoZones = " + numberSourcesInNoGoZones);
+      System.out.println("numberTargetsInNoGoZones = " + numberTargetsInNoGoZones);
+      System.out.println("numberValidConnections = " + numberValidConnections);
+
+      System.out.println();
    }
 
    private static boolean isInsideANonNavigableZone(Point2D pointInLocal, List<Cluster> clusters)

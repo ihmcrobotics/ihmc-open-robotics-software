@@ -126,7 +126,8 @@ public interface VisibilityGraphsParameters
    {
       return new InterRegionConnectionFilter()
       {
-         private final double maxLengthSquared = MathTools.square(getMaxInterRegionConnectionLength());
+         private final double maxLength = getMaxInterRegionConnectionLength();
+         private final double maxLengthSquared = MathTools.square(maxLength);
          private final double maxDeltaHeight = getTooHighToStepDistance();
 
          @Override
@@ -138,6 +139,12 @@ public interface VisibilityGraphsParameters
                return false;
 
             return true;
+         }
+
+         @Override
+         public double getMaximumInterRegionConnetionDistance()
+         {
+            return maxLength;
          }
       };
    }

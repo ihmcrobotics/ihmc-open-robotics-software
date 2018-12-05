@@ -1,20 +1,23 @@
 package us.ihmc.pathPlanning.visibilityGraphs.tools;
 
-import java.awt.*;
-import java.lang.reflect.Array;
+import static us.ihmc.euclid.geometry.tools.EuclidGeometryTools.distanceBetweenTwoLineSegment3Ds;
+import static us.ihmc.euclid.geometry.tools.EuclidGeometryTools.distanceFromPoint3DToLineSegment3D;
+import static us.ihmc.euclid.geometry.tools.EuclidGeometryTools.isPoint2DOnSideOfLine2D;
+import static us.ihmc.euclid.geometry.tools.EuclidGeometryTools.signedDistanceFromPoint3DToPlane3D;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
 import us.ihmc.commons.MathTools;
+import us.ihmc.commons.lists.ListWrappingIndexTools;
 import us.ihmc.euclid.geometry.BoundingBox2D;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.geometry.Line3D;
 import us.ihmc.euclid.geometry.LineSegment3D;
 import us.ihmc.euclid.geometry.interfaces.ConvexPolygon2DReadOnly;
 import us.ihmc.euclid.geometry.tools.EuclidGeometryPolygonTools;
-import us.ihmc.euclid.geometry.tools.EuclidGeometryRandomTools;
 import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple2D.Point2D;
@@ -32,11 +35,6 @@ import us.ihmc.robotEnvironmentAwareness.geometry.ConcaveHullDecomposition;
 import us.ihmc.robotEnvironmentAwareness.geometry.ConcaveHullTools;
 import us.ihmc.robotics.geometry.PlanarRegion;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
-import us.ihmc.commons.lists.ListWrappingIndexTools;
-import us.ihmc.tools.ArrayTools;
-
-import static us.ihmc.euclid.geometry.tools.EuclidGeometryTools.*;
-import static us.ihmc.euclid.geometry.tools.EuclidGeometryTools.distanceSquaredFromPoint2DToLineSegment2D;
 
 public class PlanarRegionTools
 {
@@ -263,7 +261,7 @@ public class PlanarRegionTools
 
       for (NavigableRegion navigableRegion : navigableRegions)
       {
-         if (isPointInWorldInsidePlanarRegion(navigableRegion.getHomeRegion(), point, epsilon))
+         if (isPointInWorldInsidePlanarRegion(navigableRegion.getHomePlanarRegion(), point, epsilon))
          {
             containers.add(navigableRegion);
          }
@@ -278,15 +276,15 @@ public class PlanarRegionTools
       Vector3D regionNormal = new Vector3D();
 
       NavigableRegion closestContainer = containers.get(0);
-      closestContainer.getHomeRegion().getNormal(regionNormal);
-      closestContainer.getHomeRegion().getPointInRegion(pointOnRegion);
+      closestContainer.getHomePlanarRegion().getNormal(regionNormal);
+      closestContainer.getHomePlanarRegion().getPointInRegion(pointOnRegion);
       double minDistance = EuclidGeometryTools.distanceFromPoint3DToPlane3D(point, pointOnRegion, regionNormal);
 
       for (int i = 1; i < containers.size(); i++)
       {
          NavigableRegion candidate = containers.get(i);
-         candidate.getHomeRegion().getNormal(regionNormal);
-         candidate.getHomeRegion().getPointInRegion(pointOnRegion);
+         candidate.getHomePlanarRegion().getNormal(regionNormal);
+         candidate.getHomePlanarRegion().getPointInRegion(pointOnRegion);
          double distance = EuclidGeometryTools.distanceFromPoint3DToPlane3D(point, pointOnRegion, regionNormal);
          if (distance < minDistance)
          {
@@ -332,25 +330,30 @@ public class PlanarRegionTools
       ConvexPolygon2D convexHull = planarRegion.getConvexHull();
       BoundingBox2D boundingBox = convexHull.getBoundingBox();
 
-      if (planarRegion.getConcaveHullSize() < convexHull.getNumberOfVertices())
-         throw new IllegalArgumentException("The concave hull of this polygon is not valid.");
-
       if (!boundingBox.isInsideEpsilon(pointInLocalToCheck, epsilon))
          return false;
       if (!convexHull.isPointInside(pointInLocalToCheck, epsilon))
          return false;
+      List<ConvexPolygon2D> convexPolygons = planarRegion.getConvexPolygons();
+
+      // If inside the convex hull at this point, then if there is only one polygon, you are also inside that too...
+      //TODO: Unit tests for all of this.
+      if (convexPolygons.size() == 1)
+      {
+         return true;
+      }
+
       if (MathTools.epsilonEquals(0.0, epsilon, 1.0e-10))
       {
-
          //TODO: +++JEP: Discuss this one with Sylvain. Do we want to check inside the concave hull, or check each planar region individually?
-         List<ConvexPolygon2D> convexPolygons = planarRegion.getConvexPolygons();
+
          for (ConvexPolygon2D convexPolygon : convexPolygons)
          {
             //+++JEP: Not sure if this one is faster or not. Discuss with Sylvain best way to do point inside convex polygon check.
             // Seems like you should be able to do a binary search on the distance to vertices, since it should be monotonic, right?
-//            boolean isInsidePolygon = convexPolygon.isPointInside(pointInLocalToCheck);
+            //            boolean isInsidePolygon = convexPolygon.isPointInside(pointInLocalToCheck);
             boolean isInsidePolygon = isPointInsideConvexPolygon2D(convexPolygon, pointInLocalToCheck);
-            
+
             if (isInsidePolygon)
                return true;
          }
@@ -360,12 +363,32 @@ public class PlanarRegionTools
       }
       else
       {
-         double[] epsilons = new double[planarRegion.getConcaveHullSize()];
-         Arrays.fill(epsilons, epsilon);
-         List<Point2D> concaveHull = ClusterTools.extrudePolygon(true, Arrays.asList(planarRegion.getConcaveHull()), epsilons);
+         //TODO: +++JEP: Discuss this one with Sylvain. Do we want to check inside the concave hull, or check each planar region individually?
 
-         return isPointInsidePolygon(concaveHull, pointInLocalToCheck);
+         for (ConvexPolygon2D convexPolygon : convexPolygons)
+         {
+            //+++JEP: Not sure if this one is faster or not. Discuss with Sylvain best way to do point inside convex polygon check.
+            // Seems like you should be able to do a binary search on the distance to vertices, since it should be monotonic, right?
+            //            boolean isInsidePolygon = convexPolygon.isPointInside(pointInLocalToCheck);
+            boolean isInsidePolygon = isPointInsideConvexPolygon2D(convexPolygon, pointInLocalToCheck);
+
+            if (isInsidePolygon)
+               return true;
+
+            //TODO: +++JEP: Discuss using the concaveHull or not. It seems buggy when points cross over the other side..
+            // When ClusterTools.extrudePolygon() is buggy...
+            //
+            //            if (planarRegion.getConcaveHullSize() < convexHull.getNumberOfVertices())
+            //               throw new IllegalArgumentException("The concave hull of this polygon is not valid.");
+            //
+            //         double[] epsilons = new double[planarRegion.getConcaveHullSize()];
+            //         Arrays.fill(epsilons, epsilon);
+            //         List<Point2D> concaveHull = ClusterTools.extrudePolygon(true, Arrays.asList(planarRegion.getConcaveHull()), epsilons);
+            //
+            //         return isPointInsidePolygon(concaveHull, pointInLocalToCheck);
+         }
       }
+      return false;
    }
 
    /**
