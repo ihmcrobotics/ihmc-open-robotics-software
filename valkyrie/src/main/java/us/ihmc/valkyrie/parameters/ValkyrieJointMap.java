@@ -2,6 +2,7 @@ package us.ihmc.valkyrie.parameters;
 
 import static us.ihmc.valkyrie.parameters.ValkyrieOrderedJointMap.jointNames;
 
+import java.util.ArrayList;
 import java.util.EnumMap;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
@@ -360,20 +361,12 @@ public class ValkyrieJointMap implements DRCRobotJointMap
    @Override
    public String[] getPositionControlledJointsForSimulation()
    {
-      String[] ret = new String[]
-      {
-            getNeckJointName(NeckJointName.DISTAL_NECK_PITCH),
-            getNeckJointName(NeckJointName.PROXIMAL_NECK_PITCH),
-            getNeckJointName(NeckJointName.DISTAL_NECK_YAW),
-            getArmJointName(RobotSide.LEFT, ArmJointName.ELBOW_ROLL),
-            getArmJointName(RobotSide.LEFT, ArmJointName.WRIST_ROLL),
-            getArmJointName(RobotSide.LEFT, ArmJointName.FIRST_WRIST_PITCH),
-            getArmJointName(RobotSide.RIGHT, ArmJointName.ELBOW_ROLL),
-            getArmJointName(RobotSide.RIGHT, ArmJointName.WRIST_ROLL),
-            getArmJointName(RobotSide.RIGHT, ArmJointName.FIRST_WRIST_PITCH),
-      };
-
-      return ret;
+      List<String> allJoints = new ArrayList<>();
+      allJoints.addAll(getArmJointNamesAsStrings());
+      allJoints.addAll(getLegJointNamesAsStrings());
+      allJoints.addAll(getSpineJointNamesAsStrings());
+      allJoints.addAll(getNeckJointNamesAsStrings());
+      return allJoints.toArray(new String[allJoints.size()]);
    }
 
    @Override

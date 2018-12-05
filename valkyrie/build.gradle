@@ -1,19 +1,10 @@
-buildscript {
-   repositories {
-      maven { url "https://plugins.gradle.org/m2/" }
-      mavenLocal()
-   }
-   dependencies {
-      classpath "us.ihmc:ihmc-build:0.15.1"
-      classpath "us.ihmc:ihmc-ci-plugin:0.18.0"
-      classpath "org.hidetake:gradle-ssh-plugin:2.9.0"
-   }
+plugins {
+   id("us.ihmc.ihmc-build") version "0.15.4"
+   id("us.ihmc.ihmc-ci-plugin") version "0.18.0"
+   id("us.ihmc.log-tools") version "0.2.2"
+   id("org.hidetake.ssh") version "2.9.0"
+   id "application"
 }
-
-apply plugin: "org.hidetake.ssh"
-apply plugin: "application"
-apply plugin: "us.ihmc.ihmc-build"
-apply plugin: "us.ihmc.ihmc-ci-plugin"
 
 ihmc {
    loadProductProperties("../product.properties")
@@ -35,20 +26,20 @@ mainDependencies {
    compile group: "org.ejml", name: "simple", version: "0.30"
    compile group: "org.ejml", name: "dense64", version: "0.30"
    compile group: "com.esotericsoftware.minlog", name: "minlog", version: "1.2"
-   compile group: "org.apache.commons", name: "commons-lang3", version: "3.7"
+   compile group: "org.apache.commons", name: "commons-lang3", version: "3.8.1"
    compile group: "us.ihmc.thirdparty.jinput", name: "jinput", version: "180727"
    compile group: "org.ros.rosjava_bootstrap", name: "message_generation", version: "0.2.1"
    compile group: "org.ros.rosjava_messages", name: "std_msgs", version: "0.5.9"
 
-   compile group: "us.ihmc", name: "euclid-core", version: "0.6.1"
-   compile group: "us.ihmc", name: "ihmc-yovariables", version: "0.3.5"
+   compile group: "us.ihmc", name: "euclid-core", version: "0.7.0"
+   compile group: "us.ihmc", name: "ihmc-yovariables", version: "0.3.6"
    compile group: "us.ihmc", name: "IHMCRealtime", version: "1.1.8"
    compile group: "us.ihmc", name: "IHMCRosControl", version: "0.5.0", changing: true
-   compile group: "us.ihmc", name: "ihmc-commons", version: "0.23.0"
-   compile group: "us.ihmc", name: "ihmc-jmonkey-engine-toolkit", version: "0.12.2"
-   compile group: "us.ihmc", name: "simulation-construction-set", version: "0.12.6"
-   compile group: "us.ihmc", name: "ihmc-graphics-description", version: "0.12.5"
-   compile group: "us.ihmc", name: "ihmc-robot-description", version: "0.12.2"
+   compile group: "us.ihmc", name: "ihmc-commons", version: "0.24.0"
+   compile group: "us.ihmc", name: "ihmc-jmonkey-engine-toolkit", version: "0.12.3"
+   compile group: "us.ihmc", name: "simulation-construction-set", version: "0.12.7"
+   compile group: "us.ihmc", name: "ihmc-graphics-description", version: "0.12.7"
+   compile group: "us.ihmc", name: "ihmc-robot-description", version: "0.12.3"
    compile group: "us.ihmc", name: "ihmc-communication", version: "source"
    compile group: "us.ihmc", name: "ihmc-humanoid-robotics", version: "source"
    compile group: "us.ihmc", name: "ihmc-system-identification", version: "source"
@@ -66,13 +57,14 @@ mainDependencies {
    compile group: "us.ihmc", name: "ihmc-robot-models", version: "source"
    compile group: "us.ihmc", name: "ihmc-robot-data-visualizer", version: "source"
    compile group: "us.ihmc", name: "ihmc-simulation-toolkit", version: "source"
+   compile group: "us.ihmc", name: "ihmc-footstep-planning-visualizers", version: "source"
 }
 
 testDependencies {
    compile group: "junit", name: "junit", version: "4.12"
 
    compile group: "us.ihmc", name: "ihmc-ci-core-api", version: "0.18.0"
-   compile group: "us.ihmc", name: "ihmc-commons-testing", version: "0.23.0"
+   compile group: "us.ihmc", name: "ihmc-commons-testing", version: "0.24.0"
    compile group: "us.ihmc", name: "ihmc-robotics-toolkit-test", version: "source"
    compile group: "us.ihmc", name: "ihmc-avatar-interfaces-test", version: "source"
 }
@@ -124,7 +116,9 @@ if (ihmc.isBuildRoot())
       def directory = "valkyrie"
 
       doLast {
-         def dest = new File(System.properties["user.home"], directory)
+         def home = new File(System.properties["user.home"])
+         def dest = new File(home, directory)
+         def configurationDir = new File(home, ".ihmc/Configurations")
          def lib = new File(dest, "lib")
          lib.deleteDir();
          lib.mkdirs();
@@ -144,6 +138,13 @@ if (ihmc.isBuildRoot())
             from jar.archivePath
             into dest
             rename { fileName -> "ValkyrieController.jar" }
+         }
+
+         delete configurationDir
+         mkdir configurationDir
+         copy {
+             from file("saved-configurations/defaultREAModuleConfiguration.txt")
+             into configurationDir
          }
       }
    }
@@ -167,7 +168,6 @@ if (ihmc.isBuildRoot())
             session(remotes.valkyrieRealtimeComputer) {
                execute("rm -rf " + directory + "/lib")
                execute("mkdir -p " + directory + "/lib")
-               execute("mkdir -p " + directory + "/Configurations")
 
                configurations.runtime.each {
                   put from: it, into: directory + "/lib"
@@ -187,14 +187,15 @@ if (ihmc.isBuildRoot())
             session(remotes.valkyrieNonRealtimeComputer) {
                execute("rm -rf " + directory + "/lib")
                execute("mkdir -p " + directory + "/lib")
-               execute("mkdir -p " + directory + "/Configurations")
 
                configurations.runtime.each {
                   put from: it, into: directory + "/lib"
                }
 
                put from: jar.archivePath, into: directory + "/ValkyrieController.jar"
-               
+
+               execute("rm -rf .ihmc/Configurations")
+               execute("mkdir -p .ihmc/Configurations")
                put from: file("saved-configurations/defaultREAModuleConfiguration.txt"), into: ".ihmc/Configurations"
 
                def scriptDir = new File(projectDir, "launchScripts/")

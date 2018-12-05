@@ -1,9 +1,14 @@
 package us.ihmc.valkyrie.parameters;
 
-import us.ihmc.footstepPlanning.graphSearch.FootstepPlannerParameters;
+import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParameters;
 
 public class ValkyrieFootstepPlannerParameters implements FootstepPlannerParameters
 {
+   @Override
+   public boolean checkForBodyBoxCollisions()
+   {
+      return true;
+   }
 
    @Override
    public double getIdealFootstepWidth()
@@ -20,13 +25,13 @@ public class ValkyrieFootstepPlannerParameters implements FootstepPlannerParamet
    @Override
    public double getMaximumStepReach()
    {
-      return 0.55;
+      return 0.35;
    }
 
    @Override
    public double getMaximumStepYaw()
    {
-      return 1.0;
+      return 0.8;
    }
 
    @Override
@@ -50,15 +55,33 @@ public class ValkyrieFootstepPlannerParameters implements FootstepPlannerParamet
    @Override
    public double getMaximumStepWidth()
    {
-      return 0.35;
+      return 0.4;
    }
    
    @Override
    public boolean getReturnBestEffortPlan()
    {
-      return true;
+      return false;
    }
-   
+
+   @Override
+   public double getBodyBoxBaseX()
+   {
+      return 0.0;
+   }
+
+   @Override
+   public double getBodyBoxWidth()
+   {
+      return 1.2;
+   }
+
+   @Override
+   public double getBodyBoxDepth()
+   {
+      return 0.65;
+   }
+
    @Override
    public int getMinimumStepsForBestEffortPlan()
    {

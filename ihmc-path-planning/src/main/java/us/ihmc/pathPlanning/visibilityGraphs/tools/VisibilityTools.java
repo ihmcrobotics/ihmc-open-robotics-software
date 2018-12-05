@@ -112,7 +112,7 @@ public class VisibilityTools
    private static boolean[] addClusterSelfVisibility(Cluster clusterToBuildMapOf, PlanarRegion homeRegion, List<Cluster> allClusters, int mapId,
                                                      Collection<Connection> connectionsToPack)
    {
-      List<Point2D> navigableExtrusions = clusterToBuildMapOf.getNavigableExtrusionsInLocal2D();
+      List<? extends Point2DReadOnly> navigableExtrusions = clusterToBuildMapOf.getNavigableExtrusionsInLocal();
 
       // We first go through the extrusions and check if they are actually navigable, i.e. inside the home region and not inside any non-navigable zone.
       boolean[] areActuallyNavigable = new boolean[navigableExtrusions.size()];
@@ -120,7 +120,7 @@ public class VisibilityTools
 
       for (int i = 0; i < navigableExtrusions.size() - 1; i++) // <= the extrusions are actually closed by replicating the first extrusion at the end
       { // Check that the point is actually navigable
-         Point2D query = navigableExtrusions.get(i);
+         Point2DReadOnly query = navigableExtrusions.get(i);
 
          boolean isNavigable = PlanarRegionTools.isPointInLocalInsidePlanarRegion(homeRegion, query);
 
@@ -146,7 +146,7 @@ public class VisibilityTools
          if (!areActuallyNavigable[sourceIndex])
             continue; // Both source and target have to be navigable for the connection to be valid
 
-         Point2D source = navigableExtrusions.get(sourceIndex);
+         Point2DReadOnly source = navigableExtrusions.get(sourceIndex);
 
          // Starting from after the next vertex of the source as we already added all the edges as connections
          for (int targetIndex = sourceIndex + 2; targetIndex < navigableExtrusions.size() - 1; targetIndex++)
@@ -154,7 +154,7 @@ public class VisibilityTools
             if (!areActuallyNavigable[targetIndex])
                continue; // Both source and target have to be navigable for the connection to be valid
 
-            Point2D target = navigableExtrusions.get(targetIndex);
+            Point2DReadOnly target = navigableExtrusions.get(targetIndex);
 
             if (ENABLE_EXPERIMENTAL_QUICK_CHECK)
             {
@@ -213,22 +213,22 @@ public class VisibilityTools
       Vector2D nextEdge = new Vector2D();
       Vector2D prevEdge = new Vector2D();
 
-      List<Point2D> sources = sourceCluster.getNavigableExtrusionsInLocal2D();
-      List<Point2D> targets = targetCluster.getNavigableExtrusionsInLocal2D();
+      List<? extends Point2DReadOnly> sources = sourceCluster.getNavigableExtrusionsInLocal();
+      List<? extends Point2DReadOnly> targets = targetCluster.getNavigableExtrusionsInLocal();
 
       for (int sourceIndex = 0; sourceIndex < sourceNavigability.length - 1; sourceIndex++)
       {
          if (!sourceNavigability[sourceIndex])
             continue;
 
-         Point2D source = sources.get(sourceIndex);
+         Point2DReadOnly source = sources.get(sourceIndex);
 
          for (int targetIndex = 0; targetIndex < targetNavigability.length - 1; targetIndex++)
          {
             if (!targetNavigability[targetIndex])
                continue;
 
-            Point2D target = targets.get(targetIndex);
+            Point2DReadOnly target = targets.get(targetIndex);
 
             if (ENABLE_EXPERIMENTAL_QUICK_CHECK)
             {
@@ -260,7 +260,7 @@ public class VisibilityTools
    public static Set<Connection> createStaticVisibilityMap(Point3DReadOnly observer, int observerRegionId, List<Cluster> clusters, int clustersRegionId)
    {
       Set<Connection> connections = new HashSet<>();
-      List<Point2D> listOfTargetPoints = new ArrayList<>();
+      List<Point2DReadOnly> listOfTargetPoints = new ArrayList<>();
       Point2D observer2D = new Point2D(observer);
 
       // Add all navigable points (including dynamic objects) to a list
@@ -269,7 +269,7 @@ public class VisibilityTools
          if (cluster.isInsideNonNavigableZone(observer2D))
             return Collections.emptySet();
 
-         for (Point2D point : cluster.getNavigableExtrusionsInLocal2D())
+         for (Point2DReadOnly point : cluster.getNavigableExtrusionsInLocal())
          {
             listOfTargetPoints.add(point);
          }
@@ -277,7 +277,7 @@ public class VisibilityTools
 
       for (int j = 0; j < listOfTargetPoints.size(); j++)
       {
-         Point2D target = listOfTargetPoints.get(j);
+         Point2DReadOnly target = listOfTargetPoints.get(j);
 
          if (observer.distanceXYSquared(target) > MAGIC_NUMBER)
          {
@@ -361,7 +361,7 @@ public class VisibilityTools
             }
          }
 
-         if (!VisibilityTools.isPointVisible(observer, targetPoint, cluster.getNonNavigableExtrusionsInLocal2D()))
+         if (!VisibilityTools.isPointVisible(observer, targetPoint, cluster.getNonNavigableExtrusionsInLocal()))
          {
             return false;
          }

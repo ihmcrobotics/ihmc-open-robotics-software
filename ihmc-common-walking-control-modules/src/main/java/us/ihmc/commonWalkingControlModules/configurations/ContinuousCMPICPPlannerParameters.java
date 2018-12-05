@@ -33,10 +33,8 @@ public abstract class ContinuousCMPICPPlannerParameters extends AbstractICPPlann
     */
    protected final EnumMap<CoPPointName, Double> stepLengthToCoPOffsetFactor = new EnumMap<>(CoPPointName.class);
 
-   /** Indicate the first CoP for the swing phase */
-   protected CoPPointName entryCoPName = CoPPointName.HEEL_COP;
    /** Indicate the last CoP for the swing phase. Typically everything for this point should be determined from the final values otherwise computation is not possible */
-   protected CoPPointName exitCoPName = CoPPointName.TOE_COP;
+   protected CoPPointName exitCoPName = CoPPointName.EXIT_COP;
 
    protected ContinuousCMPICPPlannerParameters()
    {
@@ -47,7 +45,7 @@ public abstract class ContinuousCMPICPPlannerParameters extends AbstractICPPlann
    {
       super(modelScale);
 
-      stepLengthToCoPOffsetFactor.put(entryCoPName, 0.0);
+      stepLengthToCoPOffsetFactor.put(CoPPointName.ENTRY_COP, 0.0);
       stepLengthToCoPOffsetFactor.put(exitCoPName, 1.0 / 3.0);
    }
 
@@ -94,7 +92,7 @@ public abstract class ContinuousCMPICPPlannerParameters extends AbstractICPPlann
    /** {@inheritDoc} */
    public EnumMap<CoPPointName, Double> getStepLengthToCoPOffsetFactors()
    {
-      stepLengthToCoPOffsetFactor.put(entryCoPName, 0.0);
+      stepLengthToCoPOffsetFactor.put(CoPPointName.ENTRY_COP, 0.0);
       stepLengthToCoPOffsetFactor.put(exitCoPName, 1.0 / 3.0);
       return stepLengthToCoPOffsetFactor;
    }

@@ -12,15 +12,19 @@ import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.Continuous
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.tools.ReferenceFrameTools;
 import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.mecano.algorithms.CentroidalMomentumCalculator;
+import us.ihmc.mecano.algorithms.CentroidalMomentumRateCalculator;
+import us.ihmc.mecano.frames.CenterOfMassReferenceFrame;
+import us.ihmc.mecano.multiBodySystem.RevoluteJoint;
+import us.ihmc.mecano.multiBodySystem.RigidBody;
+import us.ihmc.mecano.multiBodySystem.interfaces.JointBasics;
+import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
+import us.ihmc.mecano.tools.JointStateType;
+import us.ihmc.mecano.tools.MultiBodySystemRandomTools;
+import us.ihmc.mecano.tools.MultiBodySystemRandomTools.RandomFloatingRevoluteJointChain;
+import us.ihmc.mecano.tools.MultiBodySystemTools;
 import us.ihmc.robotics.linearAlgebra.MatrixTools;
 import us.ihmc.robotics.random.RandomGeometry;
-import us.ihmc.robotics.referenceFrames.CenterOfMassReferenceFrame;
-import us.ihmc.robotics.screwTheory.CentroidalMomentumMatrix;
-import us.ihmc.robotics.screwTheory.CentroidalMomentumRateTermCalculator;
-import us.ihmc.robotics.screwTheory.InverseDynamicsJoint;
-import us.ihmc.robotics.screwTheory.RevoluteJoint;
-import us.ihmc.robotics.screwTheory.RigidBody;
-import us.ihmc.robotics.screwTheory.ScrewTestTools;
 import us.ihmc.robotics.screwTheory.ScrewTools;
 import us.ihmc.robotics.screwTheory.TotalMassCalculator;
 import us.ihmc.robotics.testing.JUnitTools;
@@ -35,7 +39,7 @@ public class CentroidalMomentumRateTermCalculatorSCSTest
 
    private static final int NUMBER_OF_ITERATIONS = 10;
 
-   private final double controlDT = 0.00000005;
+   private final double controlDT = 1.0e-8;
 
    private final DenseMatrix64F a = new DenseMatrix64F(0, 0);
    private final DenseMatrix64F aPrevVal = new DenseMatrix64F(0, 0);
@@ -58,13 +62,13 @@ public class CentroidalMomentumRateTermCalculatorSCSTest
       Random random = new Random(12651L);
 
       ArrayList<RevoluteJoint> joints = new ArrayList<>();
-      RigidBody elevator = new RigidBody("elevator", worldFrame);
+      RigidBodyBasics elevator = new RigidBody("elevator", worldFrame);
       int numberOfJoints = 10;
       Vector3D[] jointAxes = new Vector3D[numberOfJoints];
       for (int i = 0; i < numberOfJoints; i++)
          jointAxes[i] = RandomGeometry.nextVector3D(random, 1.0);
 
-      ScrewTestTools.createRandomChainRobot("blop", joints, elevator, jointAxes, random);
+      joints.addAll(MultiBodySystemRandomTools.nextRevoluteJointChain(random, "blop", elevator, jointAxes));
       SCSRobotFromInverseDynamicsRobotModel robot = new SCSRobotFromInverseDynamicsRobotModel("robot", elevator.getChildrenJoints().get(0));
 
       assertAAndADotV(random, joints, elevator, robot,numberOfJoints);
@@ -77,12 +81,12 @@ public class CentroidalMomentumRateTermCalculatorSCSTest
       Random random = new Random(12651L);
 
       ArrayList<RevoluteJoint> joints = new ArrayList<>();
-      RigidBody elevator = new RigidBody("elevator", worldFrame);
-      RevoluteJoint rootJoint = ScrewTestTools.addRandomRevoluteJoint("rootJoint", random, elevator); // Just to make sure there is only one root joint for the SCS robot
-      RigidBody rootBody = ScrewTestTools.addRandomRigidBody("rootBody", random, rootJoint);
+      RigidBodyBasics elevator = new RigidBody("elevator", worldFrame);
+      RevoluteJoint rootJoint = MultiBodySystemRandomTools.nextRevoluteJoint(random, "rootJoint", elevator); // Just to make sure there is only one root joint for the SCS robot
+      RigidBodyBasics rootBody = MultiBodySystemRandomTools.nextRigidBody(random, "rootBody", rootJoint);
 
       int numberOfJoints = 10; 
-      ScrewTestTools.createRandomTreeRobot(joints, rootBody, numberOfJoints - 1, random);
+      joints.addAll(MultiBodySystemRandomTools.nextRevoluteJointTree(random, rootBody, numberOfJoints - 1));
       joints.add(0, rootJoint);
       SCSRobotFromInverseDynamicsRobotModel robot = new SCSRobotFromInverseDynamicsRobotModel("robot", rootJoint);
 
@@ -101,8 +105,8 @@ public class CentroidalMomentumRateTermCalculatorSCSTest
       for (int i = 0; i < numberOfJoints; i++)
          jointAxes[i] = RandomGeometry.nextVector3D(random, 1.0);
 
-      ScrewTestTools.RandomFloatingChain idRobot = new ScrewTestTools.RandomFloatingChain(random, jointAxes);
-      RigidBody elevator = idRobot.getElevator();
+      RandomFloatingRevoluteJointChain idRobot = new RandomFloatingRevoluteJointChain(random, jointAxes);
+      RigidBodyBasics elevator = idRobot.getElevator();
       joints.addAll(idRobot.getRevoluteJoints());
 
       SCSRobotFromInverseDynamicsRobotModel robot = new SCSRobotFromInverseDynamicsRobotModel("robot", idRobot.getRootJoint());
@@ -110,16 +114,16 @@ public class CentroidalMomentumRateTermCalculatorSCSTest
       assertAAndADotV(random, joints, elevator, robot, numberOfJoints + 1);
    }
 
-   private void assertAAndADotV(Random random, ArrayList<RevoluteJoint> joints, RigidBody elevator, SCSRobotFromInverseDynamicsRobotModel robot,int numJoints)
+   private void assertAAndADotV(Random random, ArrayList<RevoluteJoint> joints, RigidBodyBasics elevator, SCSRobotFromInverseDynamicsRobotModel robot,int numJoints)
          throws UnreasonableAccelerationException
    {
-      int numberOfDoFs = ScrewTools.computeDegreesOfFreedom(ScrewTools.computeSubtreeJoints(elevator));
+      int numberOfDoFs = MultiBodySystemTools.computeDegreesOfFreedom(MultiBodySystemTools.collectSubtreeJoints(elevator));
       DenseMatrix64F v = new DenseMatrix64F(numberOfDoFs, 1);
 
-      InverseDynamicsJoint[] idJoints = new InverseDynamicsJoint[numJoints]; 
+      JointBasics[] idJoints = new JointBasics[numJoints]; 
       CenterOfMassReferenceFrame centerOfMassFrame = new CenterOfMassReferenceFrame("com", worldFrame, elevator);
 
-      CentroidalMomentumMatrix centroidalMomentumMatrixCalculator = new CentroidalMomentumMatrix(elevator, centerOfMassFrame);
+      CentroidalMomentumCalculator centroidalMomentumMatrixCalculator = new CentroidalMomentumCalculator(elevator, centerOfMassFrame);
 
       a.reshape(6, numberOfDoFs);
       aPrevVal.reshape(6, numberOfDoFs);
@@ -128,22 +132,22 @@ public class CentroidalMomentumRateTermCalculatorSCSTest
 
       double totalMass = TotalMassCalculator.computeSubTreeMass(elevator);
       
-      CentroidalMomentumRateTermCalculator centroidalMomentumRateTermCalculator = new CentroidalMomentumRateTermCalculator(elevator, centerOfMassFrame);
+      CentroidalMomentumRateCalculator centroidalMomentumRateTermCalculator = new CentroidalMomentumRateCalculator(elevator, centerOfMassFrame);
 
       for (int i = 0; i < NUMBER_OF_ITERATIONS; i++)
       {
-         ScrewTestTools.setRandomVelocities(joints, random);
-         ScrewTestTools.setRandomPositions(joints, random);
-         ScrewTestTools.setRandomTorques(joints, random);
+         MultiBodySystemRandomTools.nextState(random, JointStateType.VELOCITY, joints);
+         MultiBodySystemRandomTools.nextState(random, JointStateType.CONFIGURATION, -Math.PI / 2.0, Math.PI / 2.0, joints);
+         MultiBodySystemRandomTools.nextState(random, JointStateType.EFFORT, joints);
 
          robot.updateJointPositions_ID_to_SCS();
          robot.updateJointVelocities_ID_to_SCS();
          robot.updateJointTorques_ID_to_SCS();
-
+         elevator.updateFramesRecursively();
          centerOfMassFrame.update();
 
-         centroidalMomentumMatrixCalculator.compute();
-         aPrevVal.set(centroidalMomentumMatrixCalculator.getMatrix());
+         centroidalMomentumMatrixCalculator.reset();
+         aPrevVal.set(centroidalMomentumMatrixCalculator.getCentroidalMomentumMatrix());
 
          robot.doDynamicsAndIntegrate(controlDT);
          robot.updateVelocities();
@@ -153,15 +157,15 @@ public class CentroidalMomentumRateTermCalculatorSCSTest
          centerOfMassFrame.update();
          
          robot.packIdJoints(idJoints);
-         ScrewTools.getJointVelocitiesMatrix(idJoints, v);
+         MultiBodySystemTools.extractJointsState(idJoints, JointStateType.VELOCITY, v);
 
          centroidalMomentumRateTermCalculator.reset();
          aDotVAnalytical.set(centroidalMomentumRateTermCalculator.getBiasSpatialForceMatrix());
 
          aTermCalculator.set(centroidalMomentumRateTermCalculator.getCentroidalMomentumMatrix());
          // Compute aDotV numerically
-         centroidalMomentumMatrixCalculator.compute();
-         a.set(centroidalMomentumMatrixCalculator.getMatrix());
+         centroidalMomentumMatrixCalculator.reset();
+         a.set(centroidalMomentumMatrixCalculator.getCentroidalMomentumMatrix());
          MatrixTools.numericallyDifferentiate(aDot, aPrevVal, a, controlDT);
          CommonOps.mult(aDot, v, aDotVNumerical);
 

@@ -148,24 +148,6 @@ public class SpatialData
       return distance;
    }
 
-   public Pose3D getTestFrame(List<ReachingManifoldCommand> manifolds)
-   {
-      for (int j = 0; j < manifolds.size(); j++)
-      {
-         for (int i = 0; i < rigidBodySpatials.size(); i++)
-         {
-            if (rigidBodyNames.get(i).equals(manifolds.get(j).getRigidBody().getName()))
-            {
-               ReachingManifoldCommand manifold = manifolds.get(j);
-               Pose3D currentSpatial = rigidBodySpatials.get(i);
-
-               return manifold.computeClosestPoseOnManifold(currentSpatial);
-            }
-         }
-      }
-      return null;
-   }
-
    public List<String> getRigidBodyNames()
    {
       return rigidBodyNames;

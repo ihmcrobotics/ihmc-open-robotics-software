@@ -29,12 +29,12 @@ import us.ihmc.euclid.tuple4D.Quaternion32;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepStatus;
 import us.ihmc.humanoidRobotics.kryo.IHMCCommunicationKryoNetClassList;
+import us.ihmc.mecano.multiBodySystem.interfaces.FloatingJointBasics;
+import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.multicastLogDataProtocol.modelLoaders.LogModelProvider;
 import us.ihmc.robotDataLogger.YoVariableServer;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.robotSide.RobotSide;
-import us.ihmc.robotics.screwTheory.FloatingInverseDynamicsJoint;
-import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.util.PeriodicNonRealtimeThreadSchedulerFactory;
 import us.ihmc.util.PeriodicThreadSchedulerFactory;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
@@ -240,12 +240,12 @@ public class IHMCMOCAPLocalizationModule implements MocapRigidbodiesListener, Pa
    {
       latestRobotConfigurationData = packet;
 
-      FloatingInverseDynamicsJoint rootJoint = fullRobotModel.getRootJoint();
+      FloatingJointBasics rootJoint = fullRobotModel.getRootJoint();
 
       TFloatArrayList newJointAngles = packet.getJointAngles();
       TFloatArrayList newJointVelocities = packet.getJointAngles();
       TFloatArrayList newJointTorques = packet.getJointTorques();
-      OneDoFJoint[] oneDoFJoints = fullRobotModel.getOneDoFJoints();
+      OneDoFJointBasics[] oneDoFJoints = fullRobotModel.getOneDoFJoints();
 
       for (int i = 0; i < newJointAngles.size(); i++)
       {
@@ -257,8 +257,8 @@ public class IHMCMOCAPLocalizationModule implements MocapRigidbodiesListener, Pa
       pelvisTranslationFromRobotConfigurationData.set(packet.getRootTranslation());
       pelvisOrientationFromRobotConfigurationData.set(packet.getRootOrientation());
 
-      rootJoint.setPosition(pelvisTranslationFromRobotConfigurationData.getX(), pelvisTranslationFromRobotConfigurationData.getY(), pelvisTranslationFromRobotConfigurationData.getZ());
-      rootJoint.setRotation(pelvisOrientationFromRobotConfigurationData.getX(), pelvisOrientationFromRobotConfigurationData.getY(), pelvisOrientationFromRobotConfigurationData.getZ(), pelvisOrientationFromRobotConfigurationData.getS());
+      rootJoint.getJointPose().setPosition(pelvisTranslationFromRobotConfigurationData.getX(), pelvisTranslationFromRobotConfigurationData.getY(), pelvisTranslationFromRobotConfigurationData.getZ());
+      rootJoint.getJointPose().getOrientation().setQuaternion(pelvisOrientationFromRobotConfigurationData.getX(), pelvisOrientationFromRobotConfigurationData.getY(), pelvisOrientationFromRobotConfigurationData.getZ(), pelvisOrientationFromRobotConfigurationData.getS());
       
       computeDriftTransform();
 

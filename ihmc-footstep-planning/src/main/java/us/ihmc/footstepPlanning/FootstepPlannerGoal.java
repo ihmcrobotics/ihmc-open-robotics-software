@@ -3,7 +3,10 @@ package us.ihmc.footstepPlanning;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.tuple2D.Point2D;
+import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
+
+
 
 public class FootstepPlannerGoal
 {
@@ -15,6 +18,28 @@ public class FootstepPlannerGoal
    private double distanceFromXYGoal;
 
    private FootstepPlannerGoalType footstepPlannerGoalType;
+
+   public void set(FootstepPlannerGoal other)
+   {
+      if (other.goalPoseBetweenFeet != null)
+         goalPoseBetweenFeet = new FramePose3D(other.goalPoseBetweenFeet);
+      if (other.goalPositionBetweenFeet != null)
+         goalPositionBetweenFeet = new FramePoint3D(other.goalPositionBetweenFeet);
+      if (other.singleFootstepGoal != null)
+         singleFootstepGoal = new SimpleFootstep(singleFootstepGoal);
+      if (other.doubleFootstepGoal != null)
+      {
+         doubleFootstepGoal = new SideDependentList<>();
+         for (RobotSide robotSide : RobotSide.values)
+            doubleFootstepGoal.put(robotSide, other.doubleFootstepGoal.get(robotSide));
+      }
+      if (other.xyGoal != null)
+         xyGoal = new Point2D(other.xyGoal);
+      if (Double.isFinite(other.distanceFromXYGoal))
+         distanceFromXYGoal = other.distanceFromXYGoal;
+      if (other.footstepPlannerGoalType != null)
+         footstepPlannerGoalType = other.footstepPlannerGoalType;
+   }
 
    public FramePose3D getGoalPoseBetweenFeet()
    {

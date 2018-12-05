@@ -7,14 +7,19 @@ import us.ihmc.commonWalkingControlModules.controllerCore.command.ControllerCore
 import us.ihmc.commonWalkingControlModules.controllerCore.command.ControllerCoreCommandType;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.SpatialAccelerationCommand;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.feedbackController.taskspace.SpatialFeedbackController;
-import us.ihmc.euclid.referenceFrame.*;
+import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.FramePose3D;
+import us.ihmc.euclid.referenceFrame.FrameQuaternion;
+import us.ihmc.euclid.referenceFrame.FrameVector3D;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.exceptions.ReferenceFrameMismatchException;
 import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
+import us.ihmc.mecano.spatial.Wrench;
+import us.ihmc.mecano.spatial.interfaces.WrenchReadOnly;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
-import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.robotics.screwTheory.SelectionMatrix3D;
 import us.ihmc.robotics.screwTheory.SelectionMatrix6D;
-import us.ihmc.robotics.screwTheory.Wrench;
-import us.ihmc.euclid.referenceFrame.exceptions.ReferenceFrameMismatchException;
 
 /**
  * {@link VirtualForceCommand} is a command meant to be submitted to the
@@ -57,9 +62,9 @@ public class VirtualForceCommand implements VirtualEffortCommand<VirtualForceCom
     * The base is the rigid-body located right before the first joint to be used for controlling the
     * end-effector.
     */
-   private RigidBody base;
+   private RigidBodyBasics base;
    /** The end-effector is the rigid-body to be controlled. */
-   private RigidBody endEffector;
+   private RigidBodyBasics endEffector;
 
    private String baseName;
    private String endEffectorName;
@@ -118,7 +123,7 @@ public class VirtualForceCommand implements VirtualEffortCommand<VirtualForceCom
     *           end-effector.
     * @param endEffector the rigid-body to be controlled.
     */
-   public void set(RigidBody base, RigidBody endEffector)
+   public void set(RigidBodyBasics base, RigidBodyBasics endEffector)
    {
       this.base = base;
       this.endEffector = endEffector;
@@ -175,14 +180,14 @@ public class VirtualForceCommand implements VirtualEffortCommand<VirtualForceCom
     *            {@code baseFrame = base.getBodyFixedFrame()},
     *            {@code expressedInFrame = controlFrame}.
     */
-   public void setLinearForce(ReferenceFrame controlFrame, Wrench desiredWrench)
+   public void setLinearForce(ReferenceFrame controlFrame, WrenchReadOnly desiredWrench)
    {
       desiredWrench.getBodyFrame().checkReferenceFrameMatch(endEffector.getBodyFixedFrame());
-      desiredWrench.getExpressedInFrame().checkReferenceFrameMatch(controlFrame);
+      desiredWrench.getReferenceFrame().checkReferenceFrameMatch(controlFrame);
 
       controlFramePose.setToZero(controlFrame);
       controlFramePose.changeFrame(endEffector.getBodyFixedFrame());
-      desiredWrench.getLinearPart(desiredLinearForce);
+      desiredLinearForce.set(desiredWrench.getLinearPart());
    }
 
    /**
@@ -316,7 +321,7 @@ public class VirtualForceCommand implements VirtualEffortCommand<VirtualForceCom
    {
       getControlFrame(controlFrameToPack);
       desiredWrenchToPack.setToZero(endEffector.getBodyFixedFrame(), controlFrameToPack);
-      desiredWrenchToPack.setLinearPart(desiredLinearForce);
+      desiredWrenchToPack.getLinearPart().set(desiredLinearForce);
    }
 
    /** {@inheritDoc} */
@@ -393,7 +398,7 @@ public class VirtualForceCommand implements VirtualEffortCommand<VirtualForceCom
 
    /** {@inheritDoc} */
    @Override
-   public RigidBody getBase()
+   public RigidBodyBasics getBase()
    {
       return base;
    }
@@ -407,7 +412,7 @@ public class VirtualForceCommand implements VirtualEffortCommand<VirtualForceCom
 
    /** {@inheritDoc} */
    @Override
-   public RigidBody getEndEffector()
+   public RigidBodyBasics getEndEffector()
    {
       return endEffector;
    }

@@ -28,6 +28,7 @@ import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
+import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.robotics.dataStructures.HeightMapWithPoints;
 import us.ihmc.robotics.geometry.HullFace;
 import us.ihmc.robotics.geometry.InsufficientDataException;
@@ -36,7 +37,6 @@ import us.ihmc.robotics.geometry.PlaneFitter;
 import us.ihmc.robotics.geometry.QuickHull3dWrapper;
 import us.ihmc.robotics.geometry.RotationTools;
 import us.ihmc.robotics.robotSide.RobotSide;
-import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.robotics.trajectories.TrajectoryType;
 
 /**
@@ -151,14 +151,14 @@ public class ConvexHullFootstepSnapper implements QuadTreeFootstepSnapper
    }
 
    @Override
-   public Footstep generateFootstepWithoutHeightMap(FramePose2D footPose2d, RigidBody foot, ReferenceFrame soleFrame, RobotSide robotSide, double height,
+   public Footstep generateFootstepWithoutHeightMap(FramePose2D footPose2d, RigidBodyBasics foot, ReferenceFrame soleFrame, RobotSide robotSide, double height,
          Vector3D planeNormal)
    {
       return simpleSnapper.generateFootstepWithoutHeightMap(footPose2d, foot, soleFrame, robotSide, height, planeNormal);
    }
 
    @Override
-   public Footstep generateSnappedFootstep(double soleX, double soleY, double yaw, RigidBody foot, ReferenceFrame soleFrame, RobotSide robotSide,
+   public Footstep generateSnappedFootstep(double soleX, double soleY, double yaw, RigidBodyBasics foot, ReferenceFrame soleFrame, RobotSide robotSide,
          HeightMapWithPoints heightMap) throws InsufficientDataException
    {
       FramePose2D footPose2d = new FramePose2D(ReferenceFrame.getWorldFrame(), new Point2D(soleX, soleY), yaw);
@@ -166,7 +166,7 @@ public class ConvexHullFootstepSnapper implements QuadTreeFootstepSnapper
       return generateFootstepUsingHeightMap(footPose2d, foot, soleFrame, robotSide, heightMap);
    }
 
-   public Footstep generateFootstepUsingHeightMap(FramePose2D footPose2d, RigidBody foot, ReferenceFrame soleFrame, RobotSide robotSide,
+   public Footstep generateFootstepUsingHeightMap(FramePose2D footPose2d, RigidBodyBasics foot, ReferenceFrame soleFrame, RobotSide robotSide,
          List<Point3D> pointList, double defaultHeight)
    {
       Footstep toReturn = generateFootstepWithoutHeightMap(footPose2d, foot, soleFrame, robotSide, 0.0, new Vector3D(0.0, 0.0, 1.0));
@@ -176,7 +176,7 @@ public class ConvexHullFootstepSnapper implements QuadTreeFootstepSnapper
    }
 
    @Override
-   public Footstep generateFootstepUsingHeightMap(FramePose2D footPose2d, RigidBody foot, ReferenceFrame soleFrame, RobotSide robotSide,
+   public Footstep generateFootstepUsingHeightMap(FramePose2D footPose2d, RigidBodyBasics foot, ReferenceFrame soleFrame, RobotSide robotSide,
          HeightMapWithPoints heightMap) throws InsufficientDataException
    {
       Footstep toReturn = generateFootstepWithoutHeightMap(footPose2d, foot, soleFrame, robotSide, 0.0, new Vector3D(0.0, 0.0, 1.0));

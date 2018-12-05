@@ -14,13 +14,13 @@ import java.util.concurrent.atomic.AtomicReference;
 
 import controller_msgs.msg.dds.LidarScanMessage;
 import controller_msgs.msg.dds.RequestLidarScanMessage;
-import us.ihmc.commons.PrintTools;
+import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.communication.net.NetClassList;
 import us.ihmc.communication.net.PacketConsumer;
 import us.ihmc.communication.packetCommunicator.PacketCommunicator;
 import us.ihmc.communication.util.NetworkPorts;
 import us.ihmc.humanoidRobotics.kryo.IHMCCommunicationKryoNetClassList;
-import us.ihmc.commons.thread.ThreadTools;
+import us.ihmc.log.LogTools;
 
 public class LidarScanLogWriter
 {
@@ -50,7 +50,7 @@ public class LidarScanLogWriter
    {
       if (packetCommunicator != null)
       {
-         PrintTools.error(this, "The logger is already connected to the network processor.");
+         LogTools.error("The logger is already connected to the network processor.");
       }
       else
       {
@@ -67,7 +67,7 @@ public class LidarScanLogWriter
    {
       if (packetCommunicator == null)
       {
-         PrintTools.error(this, "The logger is already disconnected from the network processor.");
+         LogTools.error("The logger is already disconnected from the network processor.");
       }
       else
       {
@@ -106,7 +106,7 @@ public class LidarScanLogWriter
    {
       if (loggingEnabled.get())
       {
-         PrintTools.error(this, "Already writing data.");
+         LogTools.error("Already writing data.");
          return;
       }
 
@@ -115,7 +115,7 @@ public class LidarScanLogWriter
          FileOutputStream fileOutputStream = new FileOutputStream(logFile);
          logDataOutputStream = new DataOutputStream(fileOutputStream);
          loggingEnabled.set(true);
-         PrintTools.info(this, "Recording lidar log: " + logFile.getPath());
+         LogTools.info("Recording lidar log: " + logFile.getPath());
       }
       catch (FileNotFoundException e)
       {
@@ -157,7 +157,7 @@ public class LidarScanLogWriter
          {
             logDataOutputStream.close();
             logDataOutputStream = null;
-            PrintTools.info(this, "Finish recording.");
+            LogTools.info("Finish recording.");
          }
       }
       catch (IOException e)

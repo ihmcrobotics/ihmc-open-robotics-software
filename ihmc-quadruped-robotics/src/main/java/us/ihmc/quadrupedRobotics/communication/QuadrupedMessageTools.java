@@ -5,6 +5,7 @@ import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.quadrupedRobotics.planning.QuadrupedTimedOrientedStep;
@@ -18,7 +19,7 @@ import java.util.List;
 public class QuadrupedMessageTools
 {
 
-   public static QuadrupedTimedStepMessage createQuadrupedTimedStepMessage(RobotQuadrant robotQuadrant, Point3D goalPosition, double groundClearance,
+   public static QuadrupedTimedStepMessage createQuadrupedTimedStepMessage(RobotQuadrant robotQuadrant, Point3DReadOnly goalPosition, double groundClearance,
                                                                            TimeInterval timeInterval)
    {
       QuadrupedTimedStepMessage message = new QuadrupedTimedStepMessage();
@@ -31,7 +32,7 @@ public class QuadrupedMessageTools
       return message;
    }
 
-   public static QuadrupedTimedStepMessage createQuadrupedTimedStepMessage(RobotQuadrant robotQuadrant, Point3D goalPosition, double groundClearance,
+   public static QuadrupedTimedStepMessage createQuadrupedTimedStepMessage(RobotQuadrant robotQuadrant, Point3DReadOnly goalPosition, double groundClearance,
                                                                            double startTime, double endTime)
    {
       QuadrupedTimedStepMessage message = new QuadrupedTimedStepMessage();
@@ -133,21 +134,6 @@ public class QuadrupedMessageTools
       message.getEuclideanTrajectory().set(HumanoidMessageTools.createEuclideanTrajectoryMessage(trajectoryTime, new Point3D(0.0, 0.0, desiredHeight),
                                                                                           ReferenceFrame.getWorldFrame()));
       message.getEuclideanTrajectory().getFrameInformation().setDataReferenceFrameId(MessageTools.toFrameId(ReferenceFrame.getWorldFrame()));
-      message.getEuclideanTrajectory().getSelectionMatrix().setXSelected(false);
-      message.getEuclideanTrajectory().getSelectionMatrix().setYSelected(false);
-      message.getEuclideanTrajectory().getSelectionMatrix().setZSelected(true);
-      return message;
-   }
-
-   /**
-    * Use this constructor to build a message with more than one trajectory point. This constructor
-    * only allocates memory for the trajectory points, you need to call {@link #setTrajectoryPoint}
-    * for each trajectory point afterwards. Set the id of the message to
-    * {@link Packet#VALID_MESSAGE_DEFAULT_ID}.
-    */
-   public static QuadrupedBodyHeightMessage createPelvisHeightTrajectoryMessage()
-   {
-      QuadrupedBodyHeightMessage message = new QuadrupedBodyHeightMessage();
       message.getEuclideanTrajectory().getSelectionMatrix().setXSelected(false);
       message.getEuclideanTrajectory().getSelectionMatrix().setYSelected(false);
       message.getEuclideanTrajectory().getSelectionMatrix().setZSelected(true);

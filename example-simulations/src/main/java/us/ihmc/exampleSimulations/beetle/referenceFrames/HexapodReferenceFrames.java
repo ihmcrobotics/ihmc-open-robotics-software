@@ -5,15 +5,15 @@ import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.mecano.frames.CenterOfMassReferenceFrame;
+import us.ihmc.mecano.multiBodySystem.interfaces.JointBasics;
+import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.robotModels.FullRobotModel;
-import us.ihmc.robotics.referenceFrames.CenterOfMassReferenceFrame;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 import us.ihmc.robotics.referenceFrames.TranslationReferenceFrame;
 import us.ihmc.robotics.referenceFrames.ZUpFrame;
 import us.ihmc.robotics.robotSide.RobotSextant;
 import us.ihmc.robotics.robotSide.SegmentDependentList;
-import us.ihmc.robotics.screwTheory.InverseDynamicsJoint;
-import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.sensorProcessing.frames.ReferenceFrames;
 
 public class HexapodReferenceFrames implements ReferenceFrames
@@ -40,8 +40,8 @@ public class HexapodReferenceFrames implements ReferenceFrames
 
       for (RobotSextant robotSextant : RobotSextant.values)
       {
-         RigidBody endEffector = fullRobotModel.getEndEffector(robotSextant);
-         InverseDynamicsJoint parentJoint = endEffector.getParentJoint();
+         RigidBodyBasics endEffector = fullRobotModel.getEndEffector(robotSextant);
+         JointBasics parentJoint = endEffector.getParentJoint();
          ReferenceFrame frameAfterJoint = parentJoint.getFrameAfterJoint();
          TranslationReferenceFrame footFrame = new TranslationReferenceFrame(robotSextant.name() + "footFrame", frameAfterJoint);
          Vector3D offsetFromJointBeforeFootToSole = offsetsFromJointBeforeFootToSole.get(robotSextant);

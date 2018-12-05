@@ -28,9 +28,9 @@ import us.ihmc.humanoidRobotics.communication.packets.manipulation.wholeBodyTraj
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.wholeBodyTrajectory.WholeBodyTrajectoryToolboxMessageTools;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.wholeBodyTrajectory.WholeBodyTrajectoryToolboxMessageTools.FunctionTrajectory;
 import us.ihmc.manipulation.planning.exploringSpatial.TrajectoryLibraryForDRC;
+import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.robotSide.RobotSide;
-import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.robotics.screwTheory.SelectionMatrix6D;
 import us.ihmc.simulationconstructionset.UnreasonableAccelerationException;
 import us.ihmc.valkyrie.ValkyrieRobotModel;
@@ -118,7 +118,7 @@ public class ValkyrieWholeBodyTrajectoryToolboxControllerTest extends AvatarWhol
       double timeResolution = trajectoryTime / 100.0;
 
       RobotSide robotSide = RobotSide.RIGHT;
-      RigidBody hand = fullRobotModel.getHand(robotSide);
+      RigidBodyBasics hand = fullRobotModel.getHand(robotSide);
 
       FunctionTrajectory handFunction = time -> TrajectoryLibraryForDRC.computeOpeningDoorTrajectory(time, trajectoryTime, openingRadius, openingAngle,
                                                                                                      openingDirectionCW, knobPose, twistTime, twistRadius,
@@ -170,7 +170,7 @@ public class ValkyrieWholeBodyTrajectoryToolboxControllerTest extends AvatarWhol
       double timeResolution = trajectoryTime / 100.0;
 
       RobotSide robotSide = RobotSide.RIGHT;
-      RigidBody hand = fullRobotModel.getHand(robotSide);
+      RigidBodyBasics hand = fullRobotModel.getHand(robotSide);
 
       Vector3D translationToGraspingFrame = new Vector3D(-0.0, 0.05, -0.1);
 
@@ -194,7 +194,7 @@ public class ValkyrieWholeBodyTrajectoryToolboxControllerTest extends AvatarWhol
       rigidBodyConfigurations.add(HumanoidMessageTools.createRigidBodyExplorationConfigurationMessage(hand, spaces));
 
       // keep sight on trajectory.
-      RigidBody head = fullRobotModel.getHead();
+      RigidBodyBasics head = fullRobotModel.getHead();
       SelectionMatrix6D selectionMatrixHead = new SelectionMatrix6D();
       selectionMatrixHead.clearSelection();
       selectionMatrixHead.selectLinearY(true);
@@ -238,7 +238,7 @@ public class ValkyrieWholeBodyTrajectoryToolboxControllerTest extends AvatarWhol
       double timeResolution = trajectoryTime / 100.0;
 
       RobotSide robotSide = RobotSide.RIGHT;
-      RigidBody hand = fullRobotModel.getHand(robotSide);
+      RigidBodyBasics hand = fullRobotModel.getHand(robotSide);
 
       FunctionTrajectory handFunction = time -> TrajectoryLibraryForDRC.computeClosingValveTrajectory(time, trajectoryTime, closingRadius, closingDirectionCW,
                                                                                                       closingAngle, valveCenterPosition, valveNormalVector);
@@ -277,7 +277,7 @@ public class ValkyrieWholeBodyTrajectoryToolboxControllerTest extends AvatarWhol
       configuration.getInitialConfiguration().set(HumanoidMessageTools.createKinematicsToolboxOutputStatus(fullRobotModel));
       configuration.setMaximumExpansionSize(2300);
 
-      RigidBody hand = fullRobotModel.getHand(RobotSide.RIGHT);
+      RigidBodyBasics hand = fullRobotModel.getHand(RobotSide.RIGHT);
       List<ReachingManifoldMessage> reachingManifolds = new ArrayList<>();
 
       ReachingManifoldMessage reachingManifold = HumanoidMessageTools.createReachingManifoldMessage(hand);

@@ -10,14 +10,14 @@ import us.ihmc.commonWalkingControlModules.controllerCore.WholeBodyFeedbackContr
 import us.ihmc.commonWalkingControlModules.controllerCore.WholeBodyInverseDynamicsSolver;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.ControllerCoreCommandType;
 import us.ihmc.commons.MathTools;
+import us.ihmc.commons.lists.RecyclingArrayList;
+import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.robotics.controllers.pidGains.PDGainsReadOnly;
 import us.ihmc.robotics.controllers.pidGains.implementations.PDGains;
-import us.ihmc.commons.lists.RecyclingArrayList;
-import us.ihmc.robotics.screwTheory.OneDoFJoint;
 
 /**
  * A {@code JointspaceFeedbackControlCommand} can be used to request the
- * {@link WholeBodyFeedbackController} to run PD controllers on a list of {@link OneDoFJoint}s to
+ * {@link WholeBodyFeedbackController} to run PD controllers on a list of {@link OneDoFJointBasics}s to
  * reach given desired positions and desired velocities.
  * <p>
  * The PD controllers used also handle a feed-forward acceleration for improved performance.
@@ -41,7 +41,7 @@ public class JointspaceFeedbackControlCommand implements FeedbackControlCommand<
    /** Initial capacity of the internal memory. */
    private final int initialCapacity = 15;
    /** Internal memory to save the joints to be controlled */
-   private final List<OneDoFJoint> joints = new ArrayList<>(initialCapacity);
+   private final List<OneDoFJointBasics> joints = new ArrayList<>(initialCapacity);
    /**
     * Internal memory to save the names of the joints to be controlled. This is used when passing
     * the command between two modules using different instances of the same physical robot.
@@ -149,7 +149,7 @@ public class JointspaceFeedbackControlCommand implements FeedbackControlCommand<
     * @param feedForwardAcceleration the feed-forward acceleration for the joint, used to improve
     *           tracking performance.
     */
-   public void addJoint(OneDoFJoint joint, double desiredPosition, double desiredVelocity, double feedForwardAcceleration)
+   public void addJoint(OneDoFJointBasics joint, double desiredPosition, double desiredVelocity, double feedForwardAcceleration)
    {
       joints.add(joint);
       jointNames.add(joint.getName());
@@ -169,7 +169,7 @@ public class JointspaceFeedbackControlCommand implements FeedbackControlCommand<
     * @param feedForwardAcceleration the feed-forward acceleration for the joint, used to improve
     *           tracking performance.
     */
-   public void addJoint(OneDoFJoint joint, double desiredPosition, double desiredVelocity, double feedForwardAcceleration, PDGainsReadOnly gains, double weight)
+   public void addJoint(OneDoFJointBasics joint, double desiredPosition, double desiredVelocity, double feedForwardAcceleration, PDGainsReadOnly gains, double weight)
    {
       joints.add(joint);
       jointNames.add(joint.getName());
@@ -228,7 +228,7 @@ public class JointspaceFeedbackControlCommand implements FeedbackControlCommand<
     *
     * @param nameToJointMap the map from joint name to joint reference of the entire robot.
     */
-   public void retrieveJointsFromName(Map<String, OneDoFJoint> nameToJointMap)
+   public void retrieveJointsFromName(Map<String, OneDoFJointBasics> nameToJointMap)
    {
       for (int i = 0; i < getNumberOfJoints(); i++)
       {
@@ -274,7 +274,7 @@ public class JointspaceFeedbackControlCommand implements FeedbackControlCommand<
     * @param jointIndex the index of the joint to return.
     * @return a joint to be controlled.
     */
-   public OneDoFJoint getJoint(int jointIndex)
+   public OneDoFJointBasics getJoint(int jointIndex)
    {
       return joints.get(jointIndex);
    }

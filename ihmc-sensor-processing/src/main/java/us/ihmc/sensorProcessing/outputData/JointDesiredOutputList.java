@@ -1,125 +1,69 @@
 package us.ihmc.sensorProcessing.outputData;
 
-import java.util.HashMap;
-
-import us.ihmc.robotics.screwTheory.OneDoFJoint;
-import us.ihmc.tools.lists.PairList;
+import gnu.trove.map.hash.TIntObjectHashMap;
+import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 
 public class JointDesiredOutputList implements JointDesiredOutputListBasics
 {
-   private final PairList<OneDoFJoint, JointDesiredOutput> jointsAndData = new PairList<>();
-   private final HashMap<OneDoFJoint, JointDesiredOutput> jointMap = new HashMap<>();
+   private final OneDoFJointBasics[] joints;
+   private final JointDesiredOutput[] jointsData;
+   private final TIntObjectHashMap<JointDesiredOutput> jointMap;
 
-   public JointDesiredOutputList(OneDoFJoint[] joints)
+   public JointDesiredOutputList(OneDoFJointBasics[] joints)
    {
-      for (OneDoFJoint joint : joints)
+      this.joints = joints;
+      this.jointsData = new JointDesiredOutput[joints.length];
+
+      float disableAutoCompaction = 0;
+      jointMap = new TIntObjectHashMap<>(joints.length);
+      jointMap.setAutoCompactionFactor(disableAutoCompaction);
+
+      for (int i = 0; i < joints.length; i++)
       {
          JointDesiredOutput data = new JointDesiredOutput();
-         jointsAndData.add(joint, data);
-         jointMap.put(joint, data);
+         jointsData[i] = data;
+         jointMap.put(joints[i].hashCode(), data);
       }
    }
 
    @Override
-   public boolean hasDataForJoint(OneDoFJoint joint)
+   public boolean hasDataForJoint(OneDoFJointBasics joint)
    {
-      return jointMap.containsKey(joint);
+      return jointMap.containsKey(joint.hashCode());
    }
 
    @Override
-   public OneDoFJoint getOneDoFJoint(int index)
+   public OneDoFJointBasics getOneDoFJoint(int index)
    {
-      return jointsAndData.first(index);
-   }
-
-   @Override
-   public JointDesiredOutput getJointDesiredOutput(OneDoFJoint joint)
-   {
-      return jointMap.get(joint);
+      return joints[index];
    }
 
    @Override
    public int getNumberOfJointsWithDesiredOutput()
    {
-      return jointsAndData.size();
+      return joints.length;
    }
 
    @Override
    public JointDesiredOutput getJointDesiredOutput(int index)
    {
-      return jointsAndData.second(index);
+      return jointsData[index];
+   }
+
+   @Override
+   public JointDesiredOutput getJointDesiredOutput(OneDoFJointBasics joint)
+   {
+      return jointMap.get(joint.hashCode());
+   }
+
+   @Override
+   public JointDesiredOutput getJointDesiredOutputFromHash(int jointHashCode)
+   {
+      return jointMap.get(jointHashCode);
    }
 
    public String getJointName(int index)
    {
-      return jointsAndData.first(index).getName();
-   }
-
-   @Override
-   public void clear()
-   {
-      for (int jointIdx = 0; jointIdx < jointsAndData.size(); jointIdx++)
-      {
-         jointsAndData.get(jointIdx).getValue().clear();
-      }
-   }
-
-//   public void updateFromModel()
-//   {
-//
-//      for (int i = 0; i < jointsAndData.size(); i++)
-//      {
-//
-//         OneDoFJoint joint = jointsAndData.first(i);
-//         LowLevelJointData data = jointsAndData.second(i);
-//
-//         data.setDesiredsFromOneDoFJoint(joint);
-//      }
-//   }
-
-   @Override
-   public void overwriteWith(JointDesiredOutputListReadOnly other)
-   {
-      for (int i = 0; i < jointsAndData.size(); i++)
-      {
-
-         OneDoFJoint joint = jointsAndData.first(i);
-         JointDesiredOutput data = jointsAndData.second(i);
-
-         JointDesiredOutputReadOnly otherData = other.getJointDesiredOutput(joint);
-         if (otherData != null)
-         {
-            data.set(otherData);
-         }
-      }
-   }
-
-   /**
-    * Complete the information held in this using other.
-    * Does not overwrite the data already set in this.
-    */
-   @Override
-   public void completeWith(JointDesiredOutputListReadOnly other)
-   {
-      for (int i = 0; i < jointsAndData.size(); i++)
-      {
-
-         OneDoFJoint joint = jointsAndData.first(i);
-         JointDesiredOutput data = jointsAndData.second(i);
-
-         JointDesiredOutputReadOnly otherData = other.getJointDesiredOutput(joint);
-         if (otherData != null)
-         {
-            data.completeWith(otherData);
-         }
-      }
-   }
-
-   public void requestIntegratorReset()
-   {
-      for (int jointIdx = 0; jointIdx < jointsAndData.size(); jointIdx++)
-      {
-         jointsAndData.get(jointIdx).getValue().setResetIntegrators(true);
-      }
+      return joints[index].getName();
    }
 }

@@ -8,7 +8,7 @@ import java.util.concurrent.atomic.AtomicReference;
 
 import us.ihmc.commons.PrintTools;
 import us.ihmc.euclid.tuple3D.Point3D;
-import us.ihmc.javaFXToolkit.messager.Messager;
+import us.ihmc.messager.Messager;
 import us.ihmc.pathPlanning.visibilityGraphs.tools.VisibilityGraphsIOTools;
 import us.ihmc.pathPlanning.visibilityGraphs.ui.messager.UIVisibilityGraphsTopics;
 import us.ihmc.robotEnvironmentAwareness.tools.ExecutorServiceTools;

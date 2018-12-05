@@ -4,7 +4,8 @@ import us.ihmc.euclid.referenceFrame.FramePoint2D;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.Vector3D;
-import us.ihmc.robotics.screwTheory.SpatialForceVector;
+import us.ihmc.mecano.spatial.SpatialForce;
+import us.ihmc.mecano.spatial.interfaces.SpatialForceBasics;
 
 /**
  * This class resolves where the Center of Pressure is for a given wrench and plane.
@@ -22,19 +23,19 @@ import us.ihmc.robotics.screwTheory.SpatialForceVector;
  */
 public class CenterOfPressureResolver
 {
-   private final SpatialForceVector wrenchResolvedOnPlane = new SpatialForceVector();
+   private final SpatialForce wrenchResolvedOnPlane = new SpatialForce();
    private final Vector3D torqueAtZeroInPlaneFrame = new Vector3D();
    private final Vector3D forceInPlaneFrame = new Vector3D();
 
-   public double resolveCenterOfPressureAndNormalTorque(FramePoint2D centerOfPressureToPack, SpatialForceVector spatialForceVector,
+   public double resolveCenterOfPressureAndNormalTorque(FramePoint2D centerOfPressureToPack, SpatialForceBasics spatialForceVector,
          ReferenceFrame centerOfPressurePlaneFrame)
    {
       // First resolve the wrench at the plane origin:
-      wrenchResolvedOnPlane.set(spatialForceVector);
+      wrenchResolvedOnPlane.setIncludingFrame(spatialForceVector);
       wrenchResolvedOnPlane.changeFrame(centerOfPressurePlaneFrame);
 
-      wrenchResolvedOnPlane.getAngularPart(torqueAtZeroInPlaneFrame);
-      wrenchResolvedOnPlane.getLinearPart(forceInPlaneFrame);
+      torqueAtZeroInPlaneFrame.set(wrenchResolvedOnPlane.getAngularPart());
+      forceInPlaneFrame.set(wrenchResolvedOnPlane.getLinearPart());
 
       double fz = forceInPlaneFrame.getZ();
 
@@ -59,15 +60,15 @@ public class CenterOfPressureResolver
       return normalTorqueAtCenterOfPressure;
    }
 
-   public double resolveCenterOfPressureAndNormalTorque(FramePoint3D centerOfPressureToPack, SpatialForceVector spatialForceVector,
+   public double resolveCenterOfPressureAndNormalTorque(FramePoint3D centerOfPressureToPack, SpatialForceBasics spatialForceVector,
          ReferenceFrame centerOfPressurePlaneFrame)
    {
       // First resolve the wrench at the plane origin:
-      wrenchResolvedOnPlane.set(spatialForceVector);
+      wrenchResolvedOnPlane.setIncludingFrame(spatialForceVector);
       wrenchResolvedOnPlane.changeFrame(centerOfPressurePlaneFrame);
 
-      wrenchResolvedOnPlane.getAngularPart(torqueAtZeroInPlaneFrame);
-      wrenchResolvedOnPlane.getLinearPart(forceInPlaneFrame);
+      torqueAtZeroInPlaneFrame.set(wrenchResolvedOnPlane.getAngularPart());
+      forceInPlaneFrame.set(wrenchResolvedOnPlane.getLinearPart());
 
       double fz = forceInPlaneFrame.getZ();
 

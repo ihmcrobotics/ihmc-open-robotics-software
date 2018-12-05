@@ -12,4 +12,7 @@ int8 robot_side
 # The position/orientation trajectory information.
 controller_msgs/SE3TrajectoryMessage se3_trajectory
 
+# The trajectory information for the force/moment to be achieved by the end-effector.
+controller_msgs/WrenchTrajectoryMessage wrench_trajectory
+
 

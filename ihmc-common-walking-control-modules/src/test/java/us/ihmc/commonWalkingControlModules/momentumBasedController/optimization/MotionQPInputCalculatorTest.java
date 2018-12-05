@@ -15,15 +15,17 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.tools.ReferenceFrameTools;
 import us.ihmc.euclid.tools.EuclidCoreRandomTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.mecano.algorithms.CentroidalMomentumRateCalculator;
+import us.ihmc.mecano.algorithms.SpatialAccelerationCalculator;
+import us.ihmc.mecano.frames.CenterOfMassReferenceFrame;
+import us.ihmc.mecano.multiBodySystem.RevoluteJoint;
+import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
+import us.ihmc.mecano.spatial.SpatialAcceleration;
+import us.ihmc.mecano.tools.JointStateType;
+import us.ihmc.mecano.tools.MecanoTestTools;
+import us.ihmc.mecano.tools.MultiBodySystemRandomTools;
+import us.ihmc.mecano.tools.MultiBodySystemTools;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.robotics.referenceFrames.CenterOfMassReferenceFrame;
-import us.ihmc.robotics.screwTheory.RevoluteJoint;
-import us.ihmc.robotics.screwTheory.RigidBody;
-import us.ihmc.robotics.screwTheory.ScrewTestTools;
-import us.ihmc.robotics.screwTheory.ScrewTools;
-import us.ihmc.robotics.screwTheory.SpatialAccelerationCalculator;
-import us.ihmc.robotics.screwTheory.SpatialAccelerationCalculatorTest;
-import us.ihmc.robotics.screwTheory.SpatialAccelerationVector;
 
 public class MotionQPInputCalculatorTest
 {
@@ -44,18 +46,19 @@ public class MotionQPInputCalculatorTest
 
       int numberOfJoints = 20;
 
-      List<RevoluteJoint> joints = ScrewTestTools.createRandomChainRobot(numberOfJoints, random);
-      RigidBody rootBody = joints.get(0).getPredecessor();
+      List<RevoluteJoint> joints = MultiBodySystemRandomTools.nextRevoluteJointChain(random, numberOfJoints);
+      RigidBodyBasics rootBody = joints.get(0).getPredecessor();
       ReferenceFrame rootFrame = rootBody.getBodyFixedFrame();
-      RigidBody endEffector = joints.get(numberOfJoints - 1).getSuccessor();
+      RigidBodyBasics endEffector = joints.get(numberOfJoints - 1).getSuccessor();
       ReferenceFrame endEffectorFrame = endEffector.getBodyFixedFrame();
-      int numberOfDoFs = ScrewTools.computeDegreesOfFreedom(joints);
+      int numberOfDoFs = MultiBodySystemTools.computeDegreesOfFreedom(joints);
 
       CenterOfMassReferenceFrame centerOfMassFrame = new CenterOfMassReferenceFrame("comFrame", worldFrame, rootBody);
-      SpatialAccelerationCalculator spatialAccelerationCalculator = new SpatialAccelerationCalculator(rootBody, 0.0, true);
+      SpatialAccelerationCalculator spatialAccelerationCalculator = new SpatialAccelerationCalculator(rootBody, ReferenceFrame.getWorldFrame());
+      spatialAccelerationCalculator.setGravitionalAcceleration(-0.0);
       JointIndexHandler jointIndexHandler = new JointIndexHandler(joints);
       YoVariableRegistry registry = new YoVariableRegistry("dummyRegistry");
-      CentroidalMomentumHandler centroidalMomentumHandler = new CentroidalMomentumHandler(rootBody, centerOfMassFrame);
+      CentroidalMomentumRateCalculator centroidalMomentumHandler = new CentroidalMomentumRateCalculator(rootBody, centerOfMassFrame);
       MotionQPInputCalculator motionQPInputCalculator = new MotionQPInputCalculator(centerOfMassFrame, centroidalMomentumHandler, jointIndexHandler, null, registry);
 
       QPInput motionQPInput = new QPInput(numberOfDoFs);
@@ -68,15 +71,15 @@ public class MotionQPInputCalculatorTest
 
       for (int i = 0; i < ITERATIONS; i++)
       {
-         ScrewTestTools.setRandomPositions(joints, random);
-         ScrewTestTools.setRandomVelocities(joints, random);
+         MultiBodySystemRandomTools.nextState(random, JointStateType.CONFIGURATION, -Math.PI / 2.0, Math.PI / 2.0, joints);
+         MultiBodySystemRandomTools.nextState(random, JointStateType.VELOCITY, joints);
          joints.get(0).updateFramesRecursively();
 
          centerOfMassFrame.update();
 
-         SpatialAccelerationVector desiredSpatialAcceleration = new SpatialAccelerationVector(endEffectorFrame, rootFrame, endEffectorFrame);
-         desiredSpatialAcceleration.setLinearPart(EuclidCoreRandomTools.nextVector3D(random, -10.0, 10.0));
-         desiredSpatialAcceleration.setAngularPart(EuclidCoreRandomTools.nextVector3D(random, -10.0, 10.0));
+         SpatialAcceleration desiredSpatialAcceleration = new SpatialAcceleration(endEffectorFrame, rootFrame, endEffectorFrame);
+         desiredSpatialAcceleration.getLinearPart().set(EuclidCoreRandomTools.nextVector3D(random, -10.0, 10.0));
+         desiredSpatialAcceleration.getAngularPart().set(EuclidCoreRandomTools.nextVector3D(random, -10.0, 10.0));
          spatialAccelerationCommand.setSpatialAcceleration(endEffectorFrame, desiredSpatialAcceleration);
 
          motionQPInputCalculator.initialize();
@@ -85,18 +88,18 @@ public class MotionQPInputCalculatorTest
          pseudoInverseSolver.setA(motionQPInput.taskJacobian);
          pseudoInverseSolver.solve(motionQPInput.taskObjective, desiredJointAccelerations);
 
-         ScrewTools.setDesiredAccelerations(joints, desiredJointAccelerations);
+         MultiBodySystemTools.insertJointsState(joints, JointStateType.ACCELERATION, desiredJointAccelerations);
 
-         spatialAccelerationCalculator.compute();
-         SpatialAccelerationVector achievedSpatialAcceleration = new SpatialAccelerationVector(endEffectorFrame, rootFrame, endEffectorFrame);
-         spatialAccelerationCalculator.getRelativeAcceleration(rootBody, endEffector, achievedSpatialAcceleration);
-         SpatialAccelerationCalculatorTest.assertSpatialAccelerationVectorEquals(achievedSpatialAcceleration, desiredSpatialAcceleration, 1.0e-10);
+         spatialAccelerationCalculator.reset();
+         SpatialAcceleration achievedSpatialAcceleration = new SpatialAcceleration(endEffectorFrame, rootFrame, endEffectorFrame);
+         achievedSpatialAcceleration.setIncludingFrame(spatialAccelerationCalculator.getRelativeAcceleration(rootBody, endEffector));
+         MecanoTestTools.assertSpatialAccelerationEquals(achievedSpatialAcceleration, desiredSpatialAcceleration, 1.0e-10);
       }
 
       for (int i = 0; i < ITERATIONS; i++)
       { // Test with the controlFrame not located at the endEffectorFrame
-         ScrewTestTools.setRandomPositions(joints, random);
-         ScrewTestTools.setRandomVelocities(joints, random);
+         MultiBodySystemRandomTools.nextState(random, JointStateType.CONFIGURATION, -Math.PI / 2.0, Math.PI / 2.0, joints);
+         MultiBodySystemRandomTools.nextState(random, JointStateType.VELOCITY, joints);
          joints.get(0).updateFramesRecursively();
 
          centerOfMassFrame.update();
@@ -105,9 +108,9 @@ public class MotionQPInputCalculatorTest
          controlFrameTransform.setTranslation(EuclidCoreRandomTools.nextPoint3D(random, 10.0));
          ReferenceFrame controlFrame = ReferenceFrame.constructFrameWithUnchangingTransformToParent("controlFrame" + i, endEffectorFrame, controlFrameTransform);
 
-         SpatialAccelerationVector desiredSpatialAcceleration = new SpatialAccelerationVector(endEffectorFrame, rootFrame, controlFrame);
-         desiredSpatialAcceleration.setLinearPart(EuclidCoreRandomTools.nextVector3D(random, -10.0, 10.0));
-         desiredSpatialAcceleration.setAngularPart(EuclidCoreRandomTools.nextVector3D(random, -10.0, 10.0));
+         SpatialAcceleration desiredSpatialAcceleration = new SpatialAcceleration(endEffectorFrame, rootFrame, controlFrame);
+         desiredSpatialAcceleration.getLinearPart().set(EuclidCoreRandomTools.nextVector3D(random, -10.0, 10.0));
+         desiredSpatialAcceleration.getAngularPart().set(EuclidCoreRandomTools.nextVector3D(random, -10.0, 10.0));
          spatialAccelerationCommand.setSpatialAcceleration(controlFrame, desiredSpatialAcceleration);
 
          motionQPInputCalculator.initialize();
@@ -116,13 +119,13 @@ public class MotionQPInputCalculatorTest
          pseudoInverseSolver.setA(motionQPInput.taskJacobian);
          pseudoInverseSolver.solve(motionQPInput.taskObjective, desiredJointAccelerations);
 
-         ScrewTools.setDesiredAccelerations(joints, desiredJointAccelerations);
+         MultiBodySystemTools.insertJointsState(joints, JointStateType.ACCELERATION, desiredJointAccelerations);
 
-         spatialAccelerationCalculator.compute();
-         SpatialAccelerationVector achievedSpatialAcceleration = new SpatialAccelerationVector(endEffectorFrame, rootFrame, endEffectorFrame);
-         spatialAccelerationCalculator.getRelativeAcceleration(rootBody, endEffector, achievedSpatialAcceleration);
-         achievedSpatialAcceleration.changeFrameNoRelativeMotion(controlFrame);
-         SpatialAccelerationCalculatorTest.assertSpatialAccelerationVectorEquals(achievedSpatialAcceleration, desiredSpatialAcceleration, 1.0e-10);
+         spatialAccelerationCalculator.reset();
+         SpatialAcceleration achievedSpatialAcceleration = new SpatialAcceleration(endEffectorFrame, rootFrame, endEffectorFrame);
+         achievedSpatialAcceleration.setIncludingFrame(spatialAccelerationCalculator.getRelativeAcceleration(rootBody, endEffector));
+         achievedSpatialAcceleration.changeFrame(controlFrame);
+         MecanoTestTools.assertSpatialAccelerationEquals(achievedSpatialAcceleration, desiredSpatialAcceleration, 1.0e-10);
       }
    }
 }

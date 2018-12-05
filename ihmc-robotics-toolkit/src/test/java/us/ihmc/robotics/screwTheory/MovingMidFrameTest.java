@@ -9,8 +9,17 @@ import java.util.Set;
 
 import org.junit.After;
 import org.junit.Test;
+
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.euclid.referenceFrame.tools.ReferenceFrameTools;
+import us.ihmc.mecano.frames.MovingReferenceFrame;
+import us.ihmc.mecano.multiBodySystem.OneDoFJoint;
+import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
+import us.ihmc.mecano.spatial.Twist;
+import us.ihmc.mecano.tools.JointStateType;
+import us.ihmc.mecano.tools.MecanoTestTools;
+import us.ihmc.mecano.tools.MultiBodySystemRandomTools;
+import us.ihmc.mecano.tools.MultiBodySystemStateIntegrator;
 
 public class MovingMidFrameTest
 {
@@ -27,8 +36,9 @@ public class MovingMidFrameTest
       Random random = new Random(3452345L);
       int numberOfJoints = 20;
       double updateDT = 1.0e-8;
+      MultiBodySystemStateIntegrator integrator = new MultiBodySystemStateIntegrator(updateDT);
 
-      List<OneDoFJoint> joints = ScrewTestTools.createRandomChainRobotWithOneDoFJoints(numberOfJoints, random);
+      List<OneDoFJoint> joints = MultiBodySystemRandomTools.nextOneDoFJointChain(random, numberOfJoints);
 
       Map<MovingMidFrame, NumericalMovingReferenceFrame> jointFramesToFDFrames = new HashMap<>();
       for (int i = 0; i < 5; i++)
@@ -49,8 +59,8 @@ public class MovingMidFrameTest
       Twist actualTwist = new Twist();
       Twist expectedTwist = new Twist();
 
-      ScrewTestTools.setRandomPositions(joints, random);
-      ScrewTestTools.setRandomVelocities(joints, random);
+      MultiBodySystemRandomTools.nextState(random, JointStateType.CONFIGURATION, -Math.PI / 2.0, Math.PI / 2.0, joints);
+      MultiBodySystemRandomTools.nextState(random, JointStateType.VELOCITY, joints);
       joints.get(0).getPredecessor().updateFramesRecursively();
 
       jointFramesToFDFrames.keySet().forEach(MovingReferenceFrame::update);
@@ -58,7 +68,7 @@ public class MovingMidFrameTest
 
       for (int i = 0; i < 100; i++)
       {
-         ScrewTestTools.integrateVelocities(joints, updateDT);
+         integrator.integrateFromVelocity(joints);
          joints.get(0).getPredecessor().updateFramesRecursively();
          jointFramesToFDFrames.keySet().forEach(MovingReferenceFrame::update);
          jointFramesToFDFrames.values().forEach(MovingReferenceFrame::update);
@@ -68,10 +78,10 @@ public class MovingMidFrameTest
          {
             entry.getKey().getTwistOfFrame(expectedTwist);
             entry.getValue().getTwistOfFrame(actualTwist);
-            expectedTwist.changeBodyFrameNoRelativeTwist(entry.getValue());
+            expectedTwist.setBodyFrame(entry.getValue());
             expectedTwist.changeFrame(entry.getValue());
 
-            TwistCalculatorTest.assertTwistEquals(expectedTwist, actualTwist, 1.0e-5);
+            MecanoTestTools.assertTwistEquals(expectedTwist, actualTwist, 1.0e-5);
          }
       }
    }

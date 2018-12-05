@@ -8,10 +8,10 @@ import java.util.Random;
 
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Test;
 
 import controller_msgs.msg.dds.NeckDesiredAccelerationsMessage;
 import controller_msgs.msg.dds.NeckTrajectoryMessage;
-import org.junit.Test;
 import us.ihmc.avatar.MultiRobotTestInterface;
 import us.ihmc.avatar.testTools.DRCSimulationTestHelper;
 import us.ihmc.commonWalkingControlModules.controlModules.rigidBody.RigidBodyControlMode;
@@ -21,9 +21,10 @@ import us.ihmc.commons.RandomNumbers;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
+import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
+import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
+import us.ihmc.mecano.tools.MultiBodySystemTools;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
-import us.ihmc.robotics.screwTheory.OneDoFJoint;
-import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.robotics.screwTheory.ScrewTools;
 import us.ihmc.simulationConstructionSetTools.bambooTools.BambooTools;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
@@ -54,17 +55,17 @@ public abstract class EndToEndNeckDesiredAccelerationsMessageTest implements Mul
 
       FullHumanoidRobotModel fullRobotModel = drcSimulationTestHelper.getControllerFullRobotModel();
 
-      RigidBody chest = fullRobotModel.getChest();
-      RigidBody head = fullRobotModel.getHead();
+      RigidBodyBasics chest = fullRobotModel.getChest();
+      RigidBodyBasics head = fullRobotModel.getHead();
       String headName = head.getName();
-      OneDoFJoint[] neckJoints = ScrewTools.createOneDoFJointPath(chest, head);
+      OneDoFJointBasics[] neckJoints = MultiBodySystemTools.createOneDoFJointPath(chest, head);
 
       // move joints to mid range
       double[] desiredJointPositions = new double[neckJoints.length];
       double[] desiredJointVelcoties = new double[neckJoints.length];
       for (int i = 0; i < neckJoints.length; i++)
       {
-         OneDoFJoint joint = neckJoints[i];
+         OneDoFJointBasics joint = neckJoints[i];
          desiredJointPositions[i] = (joint.getJointLimitLower() + joint.getJointLimitUpper()) / 2.0;
          desiredJointVelcoties[i] = 0.0;
       }
@@ -103,7 +104,7 @@ public abstract class EndToEndNeckDesiredAccelerationsMessageTest implements Mul
       return ((YoEnum<RigidBodyControlMode>) scs.getVariable(headOrientatManagerName, headControlStateName)).getEnumValue();
    }
 
-   public static double[] findQPOutputJointAccelerations(OneDoFJoint[] neckJoints, SimulationConstructionSet scs)
+   public static double[] findQPOutputJointAccelerations(OneDoFJointBasics[] neckJoints, SimulationConstructionSet scs)
    {
       double[] qdd_ds = new double[neckJoints.length];
       for (int i = 0; i < neckJoints.length; i++)
@@ -113,7 +114,7 @@ public abstract class EndToEndNeckDesiredAccelerationsMessageTest implements Mul
       return qdd_ds;
    }
 
-   public static double[] findControllerDesiredJointAccelerations(OneDoFJoint[] neckJoints, String bodyName, SimulationConstructionSet scs)
+   public static double[] findControllerDesiredJointAccelerations(OneDoFJointBasics[] neckJoints, String bodyName, SimulationConstructionSet scs)
    {
       double[] qdd_ds = new double[neckJoints.length];
       String nameSpace = bodyName + "UserControlModule";

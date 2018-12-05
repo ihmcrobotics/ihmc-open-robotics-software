@@ -9,7 +9,7 @@ import controller_msgs.msg.dds.AtlasAuxiliaryRobotData;
 import us.ihmc.commons.Conversions;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.euclid.tuple4D.interfaces.QuaternionReadOnly;
-import us.ihmc.robotics.screwTheory.OneDoFJoint;
+import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.robotics.sensors.ForceSensorDefinition;
 import us.ihmc.robotics.sensors.IMUDefinition;
 import us.ihmc.sensorProcessing.sensorProcessors.SensorOutputMapReadOnly;
@@ -29,9 +29,9 @@ public class SimulatedSensorHolderAndReader implements SensorReader
 
    protected final YoDouble yoTime;
 
-   protected final List<Pair<OneDoFJoint, DoubleProvider>> jointPositionSensors = new ArrayList<>();
-   protected final List<Pair<OneDoFJoint, DoubleProvider>> jointVelocitySensors = new ArrayList<>();
-   protected final List<Pair<OneDoFJoint, DoubleProvider>> jointTorqueSensors = new ArrayList<>();
+   protected final List<Pair<OneDoFJointBasics, DoubleProvider>> jointPositionSensors = new ArrayList<>();
+   protected final List<Pair<OneDoFJointBasics, DoubleProvider>> jointVelocitySensors = new ArrayList<>();
+   protected final List<Pair<OneDoFJointBasics, DoubleProvider>> jointTorqueSensors = new ArrayList<>();
    protected final List<Pair<IMUDefinition, QuaternionProvider>> orientationSensors = new ArrayList<>();
    protected final List<Pair<IMUDefinition, Vector3DProvider>> angularVelocitySensors = new ArrayList<>();
    protected final List<Pair<IMUDefinition, Vector3DProvider>> linearAccelerationSensors = new ArrayList<>();
@@ -49,17 +49,17 @@ public class SimulatedSensorHolderAndReader implements SensorReader
       parentRegistry.addChild(registry);
    }
 
-   public void addJointPositionSensorPort(OneDoFJoint oneDoFJoint, DoubleProvider jointPositionSensor)
+   public void addJointPositionSensorPort(OneDoFJointBasics oneDoFJoint, DoubleProvider jointPositionSensor)
    {
       jointPositionSensors.add(Pair.of(oneDoFJoint, jointPositionSensor));
    }
 
-   public void addJointTorqueSensorPort(OneDoFJoint oneDoFJoint, DoubleProvider jointTorqueSensor)
+   public void addJointTorqueSensorPort(OneDoFJointBasics oneDoFJoint, DoubleProvider jointTorqueSensor)
    {
       jointTorqueSensors.add(Pair.of(oneDoFJoint, jointTorqueSensor));
    }
 
-   public void addJointVelocitySensorPort(OneDoFJoint oneDoFJoint, DoubleProvider jointVelocitySensor)
+   public void addJointVelocitySensorPort(OneDoFJointBasics oneDoFJoint, DoubleProvider jointVelocitySensor)
    {
       jointVelocitySensors.add(Pair.of(oneDoFJoint, jointVelocitySensor));
    }
@@ -99,14 +99,14 @@ public class SimulatedSensorHolderAndReader implements SensorReader
    {
       for (int i = 0; i < jointPositionSensors.size(); i++)
       {
-         OneDoFJoint oneDoFJoint = jointPositionSensors.get(i).getLeft();
+         OneDoFJointBasics oneDoFJoint = jointPositionSensors.get(i).getLeft();
          double newValue = jointPositionSensors.get(i).getRight().getValue();
          sensorProcessing.setJointPositionSensorValue(oneDoFJoint, newValue);
       }
 
       for (int i = 0; i < jointTorqueSensors.size(); i++)
       {
-         OneDoFJoint oneDoFJoint = jointTorqueSensors.get(i).getLeft();
+         OneDoFJointBasics oneDoFJoint = jointTorqueSensors.get(i).getLeft();
          double newValue = jointTorqueSensors.get(i).getRight().getValue();
          sensorProcessing.setJointTauSensorValue(oneDoFJoint, newValue);
       }

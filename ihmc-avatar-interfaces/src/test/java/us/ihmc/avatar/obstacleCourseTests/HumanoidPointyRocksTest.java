@@ -73,7 +73,7 @@ public abstract class HumanoidPointyRocksTest implements MultiRobotTestInterface
    private final static double defaultTransferTime = 2.5;
    private final static double defaultChickenPercentage = 0.5;
 
-   private final static String chickenSupportName = "icpPlannerCoPTrajectoryGeneratorPercentageChickenSupport";
+   private final static String chickenSupportName = "icpPlannerPercentageChickenSupport";
 
    private final YoVariableRegistry registry = new YoVariableRegistry("PointyRocksTest");
    private final static ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
@@ -372,7 +372,7 @@ public abstract class HumanoidPointyRocksTest implements MultiRobotTestInterface
       FlatGroundEnvironment flatGroundEnvironment = new FlatGroundEnvironment();
       drcSimulationTestHelper = new DRCSimulationTestHelper(simulationTestingParameters, getRobotModel(), flatGroundEnvironment);
       drcSimulationTestHelper.setStartingLocation(selectedLocation);
-      drcSimulationTestHelper.setCheckForDesiredICPContinuity(false, 10.0);
+      drcSimulationTestHelper.setCheckForDesiredICPContinuity(true, 0.02);
       drcSimulationTestHelper.createSimulation("HumanoidPointyRocksTest");
 
       enablePartialFootholdDetectionAndResponse(drcSimulationTestHelper);
@@ -420,7 +420,7 @@ public abstract class HumanoidPointyRocksTest implements MultiRobotTestInterface
 
       assertTrue(success);
 
-      Vector3D plusMinusVector = new Vector3D(0.01, 0.01, 0.01);
+      Vector3D plusMinusVector = new Vector3D(0.02, 0.02, 0.01);
       BoundingBox3D boundingBox = BoundingBox3D.createUsingCenterAndPlusMinusVector(rootPositionAtStart, plusMinusVector);
       drcSimulationTestHelper.assertRobotsRootJointIsInBoundingBox(boundingBox);
 
@@ -749,7 +749,6 @@ public abstract class HumanoidPointyRocksTest implements MultiRobotTestInterface
    @Test(timeout = 570000)
    public void testWalkingForwardWithHalfFootContactChangesContinuousSteps() throws SimulationExceededMaximumTimeException
    {
-//      simulationTestingParameters.setKeepSCSUp(true);
       BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
 
       double swingTime = 0.5;
@@ -759,7 +758,7 @@ public abstract class HumanoidPointyRocksTest implements MultiRobotTestInterface
       FlatGroundEnvironment flatGroundEnvironment = new FlatGroundEnvironment();
       drcSimulationTestHelper = new DRCSimulationTestHelper(simulationTestingParameters, getRobotModel(), flatGroundEnvironment);
       drcSimulationTestHelper.setStartingLocation(selectedLocation);
-      drcSimulationTestHelper.setCheckForDesiredICPContinuity(false, 10.0);
+      drcSimulationTestHelper.setCheckForDesiredICPContinuity(true, 10.0);
       drcSimulationTestHelper.createSimulation("HumanoidPointyRocksTest");
       enablePartialFootholdDetectionAndResponse(drcSimulationTestHelper, 0.15);
 

@@ -1,28 +1,28 @@
 package us.ihmc.stateEstimation.humanoid.kinematicsBasedStateEstimation;
 
+import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.Set;
 
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.ContactableBodiesFactory;
-import us.ihmc.commonWalkingControlModules.sensors.footSwitch.KinematicsBasedFootSwitch;
-import us.ihmc.commonWalkingControlModules.sensors.footSwitch.WrenchAndContactSensorFusedFootSwitch;
-import us.ihmc.commonWalkingControlModules.sensors.footSwitch.WrenchBasedFootSwitch;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactableFoot;
-import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.humanoidRobotics.communication.subscribers.PelvisPoseCorrectionCommunicatorInterface;
 import us.ihmc.humanoidRobotics.communication.subscribers.StateEstimatorModeSubscriber;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.humanoidRobotics.model.CenterOfPressureDataHolder;
+import us.ihmc.mecano.multiBodySystem.interfaces.FloatingJointBasics;
+import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
+import us.ihmc.robotics.contactable.ContactablePlaneBody;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
-import us.ihmc.robotics.screwTheory.FloatingInverseDynamicsJoint;
-import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.robotics.screwTheory.TotalMassCalculator;
 import us.ihmc.robotics.sensors.CenterOfMassDataHolder;
 import us.ihmc.robotics.sensors.ContactSensor;
 import us.ihmc.robotics.sensors.ContactSensorHolder;
+import us.ihmc.robotics.sensors.FootSwitchFactory;
 import us.ihmc.robotics.sensors.FootSwitchInterface;
 import us.ihmc.robotics.sensors.ForceSensorDataHolder;
 import us.ihmc.robotics.sensors.ForceSensorDataReadOnly;
@@ -35,8 +35,6 @@ import us.ihmc.stateEstimation.humanoid.StateEstimatorController;
 import us.ihmc.tools.factories.FactoryTools;
 import us.ihmc.tools.factories.OptionalFactoryField;
 import us.ihmc.tools.factories.RequiredFactoryField;
-import us.ihmc.yoVariables.parameters.DoubleParameter;
-import us.ihmc.yoVariables.providers.DoubleProvider;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 
 /**
@@ -160,59 +158,30 @@ public class KinematicsBasedStateEstimatorFactory
       double gravityMagnitude = Math.abs(gravity);
       double totalRobotWeight = TotalMassCalculator.computeSubTreeMass(fullRobotModel.getElevator()) * gravityMagnitude;
 
-      Map<RigidBody, FootSwitchInterface> footSwitchMap = new LinkedHashMap<RigidBody, FootSwitchInterface>();
-      Map<RigidBody, ContactablePlaneBody> bipedFeetMap = new LinkedHashMap<RigidBody, ContactablePlaneBody>();
+      Map<RigidBodyBasics, FootSwitchInterface> footSwitchMap = new LinkedHashMap<RigidBodyBasics, FootSwitchInterface>();
+      Map<RigidBodyBasics, ContactablePlaneBody> bipedFeetMap = new LinkedHashMap<RigidBodyBasics, ContactablePlaneBody>();
 
       DRCRobotSensorInformation sensorInformation = sensorInformationField.get();
       ForceSensorDataHolder estimatorForceSensorDataHolderToUpdate = estimatorForceSensorDataHolderToUpdateField.get();
       StateEstimatorParameters stateEstimatorParameters = stateEstimatorParametersField.get();
       ContactSensorHolder contactSensorHolder = contactSensorHolderField.get();
-
-      DoubleProvider contactThresholdForce = new DoubleParameter("ContactThresholdForce", stateEstimatorRegistry, stateEstimatorParameters.getContactThresholdForce());
-      DoubleProvider copThresholdFraction = new DoubleParameter("CoPThresholdFraction", stateEstimatorRegistry, stateEstimatorParameters.getFootSwitchCoPThresholdFraction());
-      DoubleProvider contactThresholdHeight = new DoubleParameter("ContactThresholdHeight", stateEstimatorRegistry, stateEstimatorParameters.getContactThresholdHeight());
+      FootSwitchFactory footSwitchFactory = stateEstimatorParameters.getFootSwitchFactory();
 
       for (RobotSide robotSide : RobotSide.values)
       {
          String footForceSensorName = sensorInformation.getFeetForceSensorNames().get(robotSide);
          String footContactSensorName = sensorInformation.getFeetContactSensorNames().get(robotSide);
          ForceSensorDataReadOnly footForceSensorForEstimator = estimatorForceSensorDataHolderToUpdate.getByName(footForceSensorName);
+         ContactSensor footContactSensor = contactSensorHolder == null ? null : contactSensorHolder.getByName(footContactSensorName);
          String namePrefix = bipedFeet.get(robotSide).getName() + "StateEstimator";
 
-         RigidBody foot = bipedFeet.get(robotSide).getRigidBody();
+         RigidBodyBasics foot = bipedFeet.get(robotSide).getRigidBody();
          bipedFeetMap.put(foot, bipedFeet.get(robotSide));
 
-         switch (stateEstimatorParameters.getFootSwitchType())
-         {
-         case KinematicBased:
-
-            KinematicsBasedFootSwitch footSwitch = new KinematicsBasedFootSwitch(namePrefix, bipedFeet, contactThresholdHeight, totalRobotWeight, robotSide,
-                                                                                 stateEstimatorRegistry);
-            footSwitchMap.put(foot, footSwitch);
-            break;
-         case WrenchBased:
-            WrenchBasedFootSwitch wrenchBasedFootSwitchForEstimator = new WrenchBasedFootSwitch(namePrefix, footForceSensorForEstimator, totalRobotWeight,
-                                                                                                bipedFeet.get(robotSide), contactThresholdForce, null,
-                                                                                                copThresholdFraction, null, stateEstimatorRegistry);
-            footSwitchMap.put(foot, wrenchBasedFootSwitchForEstimator);
-            break;
-
-         case WrenchAndContactSensorFused:
-            ContactSensor footContactSensor = contactSensorHolder.getByName(footContactSensorName);
-            WrenchAndContactSensorFusedFootSwitch wrenchAndContactSensorBasedFootswitch = new WrenchAndContactSensorFusedFootSwitch(namePrefix,
-                                                                                                                                    footForceSensorForEstimator,
-                                                                                                                                    footContactSensor,
-                                                                                                                                    totalRobotWeight,
-                                                                                                                                    bipedFeet.get(robotSide),
-                                                                                                                                    contactThresholdForce, null,
-                                                                                                                                    copThresholdFraction, null,
-                                                                                                                                    stateEstimatorRegistry);
-            footSwitchMap.put(foot, wrenchAndContactSensorBasedFootswitch);
-            break;
-         default:
-            throw new Error("unknown foot switch type");
-         }
-
+         Set<ContactableFoot> otherFoot = Collections.singleton(bipedFeet.get(robotSide.getOppositeSide()));
+         FootSwitchInterface footSwitch = footSwitchFactory.newFootSwitch(namePrefix, bipedFeet.get(robotSide), otherFoot, footForceSensorForEstimator,
+                                                                          footContactSensor, totalRobotWeight, null, stateEstimatorRegistry);
+         footSwitchMap.put(foot, footSwitch);
       }
 
       String[] imuSensorsToUseInStateEstimator = sensorInformation.getIMUSensorsToUseInStateEstimator();
@@ -240,9 +209,9 @@ public class KinematicsBasedStateEstimatorFactory
 
    private FullInverseDynamicsStructure createFullInverseDynamicsStructure(FullHumanoidRobotModel fullRobotModel)
    {
-      RigidBody elevator = fullRobotModel.getElevator();
-      FloatingInverseDynamicsJoint rootInverseDynamicsJoint = fullRobotModel.getRootJoint();
-      RigidBody estimationLink = fullRobotModel.getPelvis();
+      RigidBodyBasics elevator = fullRobotModel.getElevator();
+      FloatingJointBasics rootInverseDynamicsJoint = fullRobotModel.getRootJoint();
+      RigidBodyBasics estimationLink = fullRobotModel.getPelvis();
 
       return new FullInverseDynamicsStructure(elevator, estimationLink, rootInverseDynamicsJoint);
    }

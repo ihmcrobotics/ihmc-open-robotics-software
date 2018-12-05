@@ -6,22 +6,19 @@ import java.util.Map;
 
 import controller_msgs.msg.dds.ReachingManifoldMessage;
 import gnu.trove.list.array.TDoubleArrayList;
-import us.ihmc.commons.MathTools;
 import us.ihmc.communication.controllerAPI.command.Command;
-import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
-import us.ihmc.euclid.utils.NameBasedHashCodeTools;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.wholeBodyTrajectory.ConfigurationSpaceName;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.wholeBodyTrajectory.WholeBodyTrajectoryToolboxMessageTools;
-import us.ihmc.robotics.screwTheory.RigidBody;
+import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.sensorProcessing.frames.ReferenceFrameHashCodeResolver;
 
 public class ReachingManifoldCommand
       implements Command<ReachingManifoldCommand, ReachingManifoldMessage>, WholeBodyTrajectoryToolboxAPI<ReachingManifoldMessage>
 {
-   private long rigidBodyNameBasedashCode;
-   private RigidBody rigidBody;
+   private int rigidBodyHashCode;
+   private RigidBodyBasics rigidBody;
 
    private Point3D manifoldOriginPosition;
    private Quaternion manifoldOriginOrientation;
@@ -35,12 +32,12 @@ public class ReachingManifoldCommand
 
    }
 
-   public ReachingManifoldCommand(RigidBody rigidBody, Point3D manifoldOriginPosition, Quaternion manifoldOriginOrientation,
+   public ReachingManifoldCommand(RigidBodyBasics rigidBody, Point3D manifoldOriginPosition, Quaternion manifoldOriginOrientation,
                                   ConfigurationSpaceName... configurationSpaces)
    {
       clear();
       this.rigidBody = rigidBody;
-      this.rigidBodyNameBasedashCode = rigidBody.getNameBasedHashCode();
+      this.rigidBodyHashCode = rigidBody.hashCode();
       this.manifoldOriginPosition.set(manifoldOriginPosition);
       this.manifoldOriginOrientation.set(manifoldOriginOrientation);
       for (int i = 0; i < configurationSpaces.length; i++)
@@ -54,7 +51,7 @@ public class ReachingManifoldCommand
    {
       clear();
 
-      rigidBodyNameBasedashCode = other.rigidBodyNameBasedashCode;
+      rigidBodyHashCode = other.rigidBodyHashCode;
       rigidBody = other.rigidBody;
 
       this.manifoldOriginPosition.set(other.manifoldOriginPosition);
@@ -75,15 +72,15 @@ public class ReachingManifoldCommand
    }
 
    @Override
-   public void set(ReachingManifoldMessage message, Map<Long, RigidBody> rigidBodyNamedBasedHashMap, ReferenceFrameHashCodeResolver referenceFrameResolver)
+   public void set(ReachingManifoldMessage message, Map<Integer, RigidBodyBasics> rigidBodyHashMap, ReferenceFrameHashCodeResolver referenceFrameResolver)
    {
       clear();
 
-      rigidBodyNameBasedashCode = message.getEndEffectorNameBasedHashCode();
-      if (rigidBodyNamedBasedHashMap == null)
+      rigidBodyHashCode = message.getEndEffectorHashCode();
+      if (rigidBodyHashMap == null)
          rigidBody = null;
       else
-         rigidBody = rigidBodyNamedBasedHashMap.get(rigidBodyNameBasedashCode);
+         rigidBody = rigidBodyHashMap.get(rigidBodyHashCode);
 
       this.manifoldOriginPosition.set(message.getManifoldOriginPosition());
       this.manifoldOriginOrientation.set(message.getManifoldOriginOrientation());
@@ -99,7 +96,7 @@ public class ReachingManifoldCommand
    @Override
    public void clear()
    {
-      rigidBodyNameBasedashCode = NameBasedHashCodeTools.NULL_HASHCODE;
+      rigidBodyHashCode = 0;
       rigidBody = null;
       manifoldOriginPosition = new Point3D();
       manifoldOriginOrientation = new Quaternion();
@@ -117,81 +114,10 @@ public class ReachingManifoldCommand
    @Override
    public boolean isCommandValid()
    {
-      return false;
+      return !manifoldOriginPosition.containsNaN() && !manifoldOriginOrientation.containsNaN();
    }
 
-   public Pose3D computeClosestPoseOnManifold(Pose3D pose)
-   {
-      double positionWeight = 1.0;
-      double orientationWeight = 0.0;
-      double closestDistance = Double.MAX_VALUE;
-      double distanceOld = closestDistance;
-
-      double alpha = -7.0;
-      double perturb = 0.01;
-
-      int maximumNumberOfIteration = 100;
-
-      TDoubleArrayList closestConfigurationSpace = new TDoubleArrayList();
-
-      // initial : medium values
-      for (int i = 0; i < getDimensionOfManifold(); i++)
-      {
-         closestConfigurationSpace.add((getUpperLimit(i) + getLowerLimit(i)) / 2);
-      }
-
-      // start iteration
-      for (int i = 0; i < maximumNumberOfIteration; i++)
-      {
-         // get pose
-         Pose3D closestPoseControl = computePoseOnManifold(closestConfigurationSpace);
-
-         // closest distance 
-         closestDistance = WholeBodyTrajectoryToolboxMessageTools.computePoseDistance(pose, closestPoseControl, positionWeight, orientationWeight);
-
-         // gradient decent
-         TDoubleArrayList gradientDecent = new TDoubleArrayList();
-         for (int j = 0; j < getDimensionOfManifold(); j++)
-         {
-            TDoubleArrayList perturbedConfigurationSpace = new TDoubleArrayList(closestConfigurationSpace);
-            perturbedConfigurationSpace.set(j, perturbedConfigurationSpace.get(j) + perturb);
-
-            perturbedConfigurationSpace.set(j, MathTools.clamp(perturbedConfigurationSpace.get(j), getLowerLimit(j), getUpperLimit(j)));
-
-            Pose3D perturbedPoseControl = computePoseOnManifold(perturbedConfigurationSpace);
-            double perturbedDistance = WholeBodyTrajectoryToolboxMessageTools.computePoseDistance(pose, perturbedPoseControl, positionWeight,
-                                                                                                  orientationWeight);
-            gradientDecent.add((perturbedDistance - closestDistance) / perturb);
-         }
-
-         // step alpha
-         TDoubleArrayList currentConfigurationSpace = new TDoubleArrayList();
-         for (int j = 0; j < getDimensionOfManifold(); j++)
-         {
-            currentConfigurationSpace.add(closestConfigurationSpace.get(j) + alpha * gradientDecent.get(j));
-
-            currentConfigurationSpace.set(j, MathTools.clamp(currentConfigurationSpace.get(j), getLowerLimit(j), getUpperLimit(j)));
-         }
-
-         Pose3D currentPoseControl = computePoseOnManifold(currentConfigurationSpace);
-
-         double currentDistance = WholeBodyTrajectoryToolboxMessageTools.computePoseDistance(pose, currentPoseControl, positionWeight, orientationWeight);
-
-         if (currentDistance < closestDistance)
-         {
-            closestDistance = currentDistance;
-            closestConfigurationSpace = new TDoubleArrayList(currentConfigurationSpace);
-         }
-         else
-         {
-            return computePoseOnManifold(closestConfigurationSpace);
-         }
-      }
-
-      return computePoseOnManifold(closestConfigurationSpace);
-   }
-
-   public RigidBody getRigidBody()
+   public RigidBodyBasics getRigidBody()
    {
       return rigidBody;
    }
@@ -216,15 +142,23 @@ public class ReachingManifoldCommand
       return manifoldLowerLimits.get(i);
    }
 
-   public Pose3D computePoseOnManifold(TDoubleArrayList configurationSpace)
+   public TDoubleArrayList getManifoldLowerLimits()
    {
-      Pose3D pose = new Pose3D(manifoldOriginPosition, manifoldOriginOrientation);
+      return manifoldLowerLimits;
+   }
 
-      for (int i = 0; i < manifoldConfigurationSpaces.size(); i++)
-      {
-         pose.appendTransform(manifoldConfigurationSpaces.get(i).getLocalRigidBodyTransform(configurationSpace.get(i)));
-      }
+   public TDoubleArrayList getManifoldUpperLimits()
+   {
+      return manifoldUpperLimits;
+   }
 
-      return pose;
+   public Point3D getManifoldOriginPosition()
+   {
+      return manifoldOriginPosition;
+   }
+
+   public Quaternion getManifoldOriginOrientation()
+   {
+      return manifoldOriginOrientation;
    }
 }

@@ -27,11 +27,11 @@ import us.ihmc.euclid.referenceFrame.tools.ReferenceFrameTools;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.footstepPlanning.polygonWiggling.PolygonWiggler;
 import us.ihmc.humanoidRobotics.footstep.FootSpoof;
+import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.robotics.referenceFrames.MidFrameZUpFrame;
 import us.ihmc.robotics.referenceFrames.ZUpFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
-import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 
@@ -63,8 +63,6 @@ public class ICPOptimizationCoPConstraintHandlerTest
       YoBoolean useControlPolygons = new YoBoolean("useControlPolygons", registry);
       ICPOptimizationCoPConstraintHandler constraintHandler = new ICPOptimizationCoPConstraintHandler(bipedSupportPolygons, null, useControlPolygons, false, registry);
       ICPOptimizationQPSolver solver = new ICPOptimizationQPSolver(5, false);
-      solver.setMinimumFeedbackWeight(0.0001);
-      solver.setMinimumFootstepWeight(0.0001);
 
       solver.resetCoPLocationConstraint();
       solver.addSupportPolygon(constraintHandler.updateCoPConstraintForDoubleSupport());
@@ -122,8 +120,6 @@ public class ICPOptimizationCoPConstraintHandlerTest
       YoBoolean useControlPolygons = new YoBoolean("useControlPolygons", registry);
       ICPOptimizationCoPConstraintHandler constraintHandler = new ICPOptimizationCoPConstraintHandler(bipedSupportPolygons, null, useControlPolygons, false, registry);
       ICPOptimizationQPSolver solver = new ICPOptimizationQPSolver(5, false);
-      solver.setMinimumFeedbackWeight(0.0001);
-      solver.setMinimumFootstepWeight(0.0001);
 
       // test left support
       solver.resetCoPLocationConstraint();
@@ -226,8 +222,6 @@ public class ICPOptimizationCoPConstraintHandlerTest
       YoBoolean useControlPolygons = new YoBoolean("useControlPolygons", registry);
       ICPOptimizationCoPConstraintHandler constraintHandler = new ICPOptimizationCoPConstraintHandler(bipedSupportPolygons, null, useControlPolygons, false, registry);
       ICPOptimizationQPSolver solver = new ICPOptimizationQPSolver(5, false);
-      solver.setMinimumFeedbackWeight(0.0001);
-      solver.setMinimumFootstepWeight(0.0001);
 
       solver.resetCoPLocationConstraint();
       solver.addSupportPolygon(constraintHandler.updateCoPConstraintForDoubleSupport());
@@ -279,8 +273,6 @@ public class ICPOptimizationCoPConstraintHandlerTest
       YoBoolean useControlPolygons = new YoBoolean("useControlPolygons", registry);
       ICPOptimizationCoPConstraintHandler constraintHandler = new ICPOptimizationCoPConstraintHandler(bipedSupportPolygons, null, useControlPolygons, false, registry);
       ICPOptimizationQPSolver solver = new ICPOptimizationQPSolver(5, false);
-      solver.setMinimumFeedbackWeight(0.0001);
-      solver.setMinimumFootstepWeight(0.0001);
 
       // test left support
       solver.resetCoPLocationConstraint();
@@ -402,7 +394,7 @@ public class ICPOptimizationCoPConstraintHandlerTest
          ankleZUpFrames.put(robotSide, new ZUpFrame(worldFrame, ankleFrame, robotSide.getCamelCaseNameForStartOfExpression() + "ZUp"));
 
          String sidePrefix = robotSide.getCamelCaseNameForStartOfExpression();
-         RigidBody foot = contactableFoot.getRigidBody();
+         RigidBodyBasics foot = contactableFoot.getRigidBody();
          ReferenceFrame soleFrame = contactableFoot.getSoleFrame();
          List<FramePoint2D> contactFramePoints = contactableFoot.getContactPoints2d();
          double coefficientOfFriction = contactableFoot.getCoefficientOfFriction();

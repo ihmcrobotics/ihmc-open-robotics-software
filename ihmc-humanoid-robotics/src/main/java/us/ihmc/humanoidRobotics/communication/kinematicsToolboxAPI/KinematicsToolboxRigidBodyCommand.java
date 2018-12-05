@@ -8,8 +8,7 @@ import controller_msgs.msg.dds.WeightMatrix3DMessage;
 import us.ihmc.communication.controllerAPI.command.Command;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.euclid.utils.NameBasedHashCodeTools;
-import us.ihmc.robotics.screwTheory.RigidBody;
+import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.robotics.screwTheory.SelectionMatrix6D;
 import us.ihmc.robotics.weightMatrices.WeightMatrix6D;
 import us.ihmc.sensorProcessing.frames.ReferenceFrameHashCodeResolver;
@@ -17,9 +16,9 @@ import us.ihmc.sensorProcessing.frames.ReferenceFrameHashCodeResolver;
 public class KinematicsToolboxRigidBodyCommand implements Command<KinematicsToolboxRigidBodyCommand, KinematicsToolboxRigidBodyMessage>
 {
    /** This is the unique hash code of the end-effector to be solved for. */
-   private long endEffectorNameBasedHashCode;
+   private int endEffectorHashCode;
    /** This is the end-effector to be solved for. */
-   private RigidBody endEffector;
+   private RigidBodyBasics endEffector;
 
    private final FramePose3D desiredPose = new FramePose3D();
    private final FramePose3D controlFramePose = new FramePose3D();
@@ -29,7 +28,7 @@ public class KinematicsToolboxRigidBodyCommand implements Command<KinematicsTool
    @Override
    public void clear()
    {
-      endEffectorNameBasedHashCode = NameBasedHashCodeTools.NULL_HASHCODE;
+      endEffectorHashCode = 0;
       endEffector = null;
       desiredPose.setToNaN(ReferenceFrame.getWorldFrame());
       controlFramePose.setToNaN(ReferenceFrame.getWorldFrame());
@@ -40,7 +39,7 @@ public class KinematicsToolboxRigidBodyCommand implements Command<KinematicsTool
    @Override
    public void set(KinematicsToolboxRigidBodyCommand other)
    {
-      endEffectorNameBasedHashCode = other.endEffectorNameBasedHashCode;
+      endEffectorHashCode = other.endEffectorHashCode;
       endEffector = other.endEffector;
       desiredPose.setIncludingFrame(other.desiredPose);
       controlFramePose.setIncludingFrame(other.controlFramePose);
@@ -54,14 +53,14 @@ public class KinematicsToolboxRigidBodyCommand implements Command<KinematicsTool
       set(message, null, null);
    }
 
-   public void set(KinematicsToolboxRigidBodyMessage message, Map<Long, RigidBody> rigidBodyNamedBasedHashMap,
+   public void set(KinematicsToolboxRigidBodyMessage message, Map<Integer, RigidBodyBasics> rigidBodyHashMap,
                    ReferenceFrameHashCodeResolver referenceFrameResolver)
    {
-      endEffectorNameBasedHashCode = message.getEndEffectorNameBasedHashCode();
-      if (rigidBodyNamedBasedHashMap == null)
+      endEffectorHashCode = message.getEndEffectorHashCode();
+      if (rigidBodyHashMap == null)
          endEffector = null;
       else
-         endEffector = rigidBodyNamedBasedHashMap.get(endEffectorNameBasedHashCode);
+         endEffector = rigidBodyHashMap.get(endEffectorHashCode);
       desiredPose.setIncludingFrame(ReferenceFrame.getWorldFrame(), message.getDesiredPositionInWorld(), message.getDesiredOrientationInWorld());
       ReferenceFrame referenceFrame = endEffector == null ? null : endEffector.getBodyFixedFrame();
       controlFramePose.setIncludingFrame(referenceFrame, message.getControlFramePositionInEndEffector(), message.getControlFrameOrientationInEndEffector());
@@ -79,16 +78,16 @@ public class KinematicsToolboxRigidBodyCommand implements Command<KinematicsTool
 
       if (referenceFrameResolver != null)
       {
-         ReferenceFrame angularSelectionFrame = referenceFrameResolver.getReferenceFrameFromNameBaseHashCode(angularSelection.getSelectionFrameId());
-         ReferenceFrame linearSelectionFrame = referenceFrameResolver.getReferenceFrameFromNameBaseHashCode(linearSelection.getSelectionFrameId());
+         ReferenceFrame angularSelectionFrame = referenceFrameResolver.getReferenceFrameFromHashCode(angularSelection.getSelectionFrameId());
+         ReferenceFrame linearSelectionFrame = referenceFrameResolver.getReferenceFrameFromHashCode(linearSelection.getSelectionFrameId());
          selectionMatrix.setSelectionFrames(angularSelectionFrame, linearSelectionFrame);
-         ReferenceFrame angularWeightFrame = referenceFrameResolver.getReferenceFrameFromNameBaseHashCode(angularWeight.getWeightFrameId());
-         ReferenceFrame linearWeightFrame = referenceFrameResolver.getReferenceFrameFromNameBaseHashCode(linearWeight.getWeightFrameId());
+         ReferenceFrame angularWeightFrame = referenceFrameResolver.getReferenceFrameFromHashCode(angularWeight.getWeightFrameId());
+         ReferenceFrame linearWeightFrame = referenceFrameResolver.getReferenceFrameFromHashCode(linearWeight.getWeightFrameId());
          weightMatrix.setWeightFrames(angularWeightFrame, linearWeightFrame);
       }
    }
 
-   public RigidBody getEndEffector()
+   public RigidBodyBasics getEndEffector()
    {
       return endEffector;
    }

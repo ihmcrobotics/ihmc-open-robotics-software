@@ -11,6 +11,7 @@ import org.ejml.alg.dense.misc.TransposeAlgs;
 import org.ejml.data.DenseMatrix64F;
 import org.ejml.data.RowD1Matrix64F;
 import org.ejml.ops.CommonOps;
+import org.ejml.ops.MatrixDimensionException;
 import org.ejml.ops.MatrixIO;
 
 import georegression.struct.point.Vector3D_F64;
@@ -1475,6 +1476,275 @@ public class MatrixTools
                + expectedColumns + ")";
 
          throw new RuntimeException(message);
+      }
+   }
+
+   /**
+    * <p>Performs the following operation:<br>
+    * <br>
+    * c = c + a * b
+    * </br>
+    * </p>
+    * where we are only modifying a block of the c matrix, starting a rowStart, colStart
+    * @param a The left matrix in the multiplication operation. Not modified.
+    * @param b The right matrix in the multiplication operation. Not modified.
+    * @param c Where the results of the operation are stored. Modified.
+    */
+   public static void multAddBlock( RowD1Matrix64F a , RowD1Matrix64F b , RowD1Matrix64F c, int rowStart, int colStart )
+   {
+      if( a == c || b == c )
+         throw new IllegalArgumentException("Neither 'a' or 'b' can be the same matrix as 'c'");
+      else if( a.numCols != b.numRows ) {
+         throw new MatrixDimensionException("The 'a' and 'b' matrices do not have compatible dimensions");
+      }
+
+      int aIndexStart = 0;
+
+      for( int i = 0; i < a.numRows; i++ ) {
+         for( int j = 0; j < b.numCols; j++ ) {
+            double total = 0;
+
+            int indexA = aIndexStart;
+            int indexB = j;
+            int end = indexA + b.numRows;
+            while( indexA < end ) {
+               total += a.data[indexA++] * b.data[indexB];
+               indexB += b.numCols;
+            }
+
+            int cIndex = (i+rowStart)*c.numCols + j + colStart;
+            c.data[ cIndex] +=  total;
+         }
+         aIndexStart += a.numCols;
+      }
+   }
+
+   /**
+    * <p>Performs the following operation:<br>
+    * <br>
+    * c = c + scalar * a * b
+    * </br>
+    * </p>
+    * where we are only modifying a block of the c matrix, starting a rowStart, colStart
+    * @param a The left matrix in the multiplication operation. Not modified.
+    * @param b The right matrix in the multiplication operation. Not modified.
+    * @param c Where the results of the operation are stored. Modified.
+    */
+   public static void multAddBlock( double scalar, RowD1Matrix64F a , RowD1Matrix64F b , RowD1Matrix64F c, int rowStart, int colStart )
+   {
+      if( a == c || b == c )
+         throw new IllegalArgumentException("Neither 'a' or 'b' can be the same matrix as 'c'");
+      else if( a.numCols != b.numRows ) {
+         throw new MatrixDimensionException("The 'a' and 'b' matrices do not have compatible dimensions");
+      }
+
+      int aIndexStart = 0;
+
+      for( int i = 0; i < a.numRows; i++ ) {
+         for( int j = 0; j < b.numCols; j++ ) {
+            double total = 0;
+
+            int indexA = aIndexStart;
+            int indexB = j;
+            int end = indexA + b.numRows;
+            while( indexA < end ) {
+               total += a.data[indexA++] * b.data[indexB];
+               indexB += b.numCols;
+            }
+
+            int cIndex = (i+rowStart)*c.numCols + j + colStart;
+            c.data[ cIndex] += scalar * total;
+         }
+         aIndexStart += a.numCols;
+      }
+   }
+
+   /**
+    * <p>Computes the matrix multiplication inner product:<br>
+    * <br>
+    * c = c + a * b<sup>T</sup> * b <br>
+    * <br>
+    * c<sub>ij</sub> = c<sub>ij</sub> + a * &sum;<sub>k=1:n</sub> { b<sub>ki</sub> * b<sub>kj</sub>}
+    * </p>
+    * <p>
+    * Is faster than using a generic matrix multiplication by taking advantage of symmetry.
+    * </p>
+    * @param a The scalar multiplier of the matrix.
+    * @param b The matrix being multiplied. Not modified.
+    * @param c Where the results of the operation are stored. Modified.
+    */
+   public static void multAddInner(double a, RowD1Matrix64F b, RowD1Matrix64F c)
+   {
+      if (b == c)
+         throw new IllegalArgumentException("'b' cannot be the same matrix as 'c'");
+      else if (b.numCols != c.numRows || b.numCols != c.numCols)
+         throw new MatrixDimensionException("The results matrix does not have the desired dimensions");
+
+      for (int i = 0; i < b.numCols; i++)
+      {
+         int j = i;
+         int indexC1 = i * c.numCols + j;
+         int indexA = i;
+         double sum = 0;
+         int end = indexA + b.numRows * b.numCols;
+         for (; indexA < end; indexA += b.numCols)
+         {
+            sum += b.data[indexA] * b.data[indexA];
+         }
+         c.data[indexC1] += a * sum;
+         j++;
+
+         for (; j < b.numCols; j++)
+         {
+            indexC1 = i * c.numCols + j;
+            int indexC2 = j * c.numCols + i;
+            indexA = i;
+            int indexB = j;
+            sum = 0;
+            end = indexA + b.numRows * b.numCols;
+            for (; indexA < end; indexA += b.numCols, indexB += b.numCols)
+            {
+               sum += b.data[indexA] * b.data[indexB];
+            }
+            sum *= a;
+            c.data[indexC1] += sum;
+            c.data[indexC2] += sum;
+         }
+      }
+   }
+
+   /**
+    * <p>Computes the matrix multiplication inner product:<br>
+    * <br>
+    * c = c + a * b<sup>T</sup> * b <br>
+    * <br>
+    * c<sub>(cRowStart + i) (cColStart + j)</sub> = c<sub>(cRowStart + i) (cColStart + j)</sub> + a * &sum;<sub>k=1:n</sub> { b<sub>ki</sub> * b<sub>kj</sub> }
+    * </p>
+    * <p> The block is added to matrix 'c' starting at cStartRow, cStartCol </p>
+    * <p>
+    * Is faster than using a generic matrix multiplication by taking advantage of symmetry.
+    * </p>
+    * @param a The scalar multiplier for the inner operation.
+    * @param b The matrix being multiplied. Not modified.
+    * @param c Where the results of the operation are stored. Modified.
+    * @param cRowStart The row index to start writing to in the block 'c'.
+    * @param cColStart The col index to start writing to in the block 'c'.
+    */
+   public static void multAddBlockInner(double a, RowD1Matrix64F b,  RowD1Matrix64F c, int cRowStart, int cColStart)
+   {
+      if (b == c)
+         throw new IllegalArgumentException("'b' cannot be the same matrix as 'c'");
+      else if (b.numCols + cRowStart > c.numRows || b.numCols + cColStart > c.numCols)
+         throw new MatrixDimensionException("The results matrix does not have the desired dimensions");
+
+      for (int i = 0; i < b.numCols; i++)
+      {
+         int j = i;
+         int indexA = i;
+         double sum = 0;
+         int end = indexA + b.numRows * b.numCols;
+         for (; indexA < end; indexA += b.numCols)
+         {
+            sum += b.data[indexA] * b.data[indexA];
+         }
+         int indexC1 = (i + cRowStart) * c.numCols + j + cColStart;
+         c.data[indexC1] += a * sum;
+         j++;
+
+         for (; j < b.numCols; j++)
+         {
+            indexA = i;
+            int indexB = j;
+            sum = 0;
+            end = indexA + b.numRows * b.numCols;
+            for (; indexA < end; indexA += b.numCols, indexB += b.numCols)
+            {
+               sum += b.data[indexA] * b.data[indexB];
+            }
+            indexC1 = (i + cRowStart) * c.numCols + j + cColStart;
+            int indexC2 = (j + cRowStart) * c.numCols + i + cColStart;
+            sum *= a;
+            c.data[indexC1] += sum;
+            c.data[indexC2] += sum;
+         }
+      }
+   }
+
+   /**
+    * <p>Performs the following operation:<br>
+    * <br>
+    * c = c + a<sup>T</sup> * b
+    * </br>
+    * </p>
+    * where we are only modifying a block of the c matrix, starting a rowStart, colStart
+    * @param a The left matrix in the multiplication operation. Not modified.
+    * @param b The right matrix in the multiplication operation. Not modified.
+    * @param c Where the results of the operation are stored. Modified.
+    */
+   public static void multAddBlockTransA( RowD1Matrix64F a , RowD1Matrix64F b , RowD1Matrix64F c, int rowStart, int colStart)
+   {
+      if( a == c || b == c )
+         throw new IllegalArgumentException("Neither 'a' or 'b' can be the same matrix as 'c'");
+      else if( a.numRows != b.numRows ) {
+         throw new MatrixDimensionException("The 'a' and 'b' matrices do not have compatible dimensions");
+      }
+
+      for( int i = 0; i < a.numCols; i++ ) {
+         for( int j = 0; j < b.numCols; j++ ) {
+            int indexA = i;
+            int indexB = j;
+            int end = indexB + b.numRows*b.numCols;
+
+            double total = 0;
+
+            // loop for k
+            for(; indexB < end; indexB += b.numCols ) {
+               total += a.data[indexA] * b.data[indexB];
+               indexA += a.numCols;
+            }
+
+            int cIndex = (i+rowStart)*c.numCols + j + colStart;
+            c.data[cIndex] += total;
+         }
+      }
+   }
+
+   /**
+    * <p>Performs the following operation:<br>
+    * <br>
+    * c = c + scalar * a<sup>T</sup> * b
+    * </br>
+    * </p>
+    * where we are only modifying a block of the c matrix, starting a rowStart, colStart
+    * @param a The left matrix in the multiplication operation. Not modified.
+    * @param b The right matrix in the multiplication operation. Not modified.
+    * @param c Where the results of the operation are stored. Modified.
+    */
+   public static void multAddBlockTransA(double scalar,  RowD1Matrix64F a , RowD1Matrix64F b , RowD1Matrix64F c, int rowStart, int colStart)
+   {
+      if( a == c || b == c )
+         throw new IllegalArgumentException("Neither 'a' or 'b' can be the same matrix as 'c'");
+      else if( a.numRows != b.numRows ) {
+         throw new MatrixDimensionException("The 'a' and 'b' matrices do not have compatible dimensions");
+      }
+
+      for( int i = 0; i < a.numCols; i++ ) {
+         for( int j = 0; j < b.numCols; j++ ) {
+            int indexA = i;
+            int indexB = j;
+            int end = indexB + b.numRows*b.numCols;
+
+            double total = 0;
+
+            // loop for k
+            for(; indexB < end; indexB += b.numCols ) {
+               total += a.data[indexA] * b.data[indexB];
+               indexA += a.numCols;
+            }
+
+            int cIndex = (i+rowStart)*c.numCols + j + colStart;
+            c.data[cIndex] += scalar * total;
+         }
       }
    }
 }

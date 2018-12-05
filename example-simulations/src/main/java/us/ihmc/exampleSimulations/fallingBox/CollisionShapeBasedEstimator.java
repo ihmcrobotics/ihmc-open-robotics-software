@@ -6,8 +6,8 @@ import org.ejml.data.DenseMatrix64F;
 
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
-import us.ihmc.robotics.math.frames.YoWrench;
-import us.ihmc.robotics.screwTheory.Wrench;
+import us.ihmc.mecano.spatial.Wrench;
+import us.ihmc.mecano.yoVariables.spatial.YoFixedFrameWrench;
 import us.ihmc.simulationconstructionset.ExternalForcePoint;
 import us.ihmc.simulationconstructionset.Joint;
 import us.ihmc.simulationconstructionset.Robot;
@@ -23,7 +23,7 @@ public class CollisionShapeBasedEstimator implements RobotController
 
    private final CollisionShapeBasedWrenchCalculator wrenchCalculator;
 
-   private final YoWrench wrench;
+   private final YoFixedFrameWrench wrench;
 
    public CollisionShapeBasedEstimator(Robot robot)
    {
@@ -35,7 +35,7 @@ public class CollisionShapeBasedEstimator implements RobotController
       wrenchCalculator = new CollisionShapeBasedWrenchCalculator(robot.getName() + "_ft", contactingExternalForcePoints, joint, new RigidBodyTransform(),
                                                                  registry);
 
-      wrench = new YoWrench(robot.getName() + "_wrench", worldFrame, worldFrame, registry);
+      wrench = new YoFixedFrameWrench(robot.getName() + "_wrench", worldFrame, worldFrame, registry);
    }
 
    @Override

@@ -19,16 +19,16 @@ import us.ihmc.commons.PrintTools;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.transform.RigidBodyTransform;
-import us.ihmc.javaFXToolkit.messager.Messager;
-import us.ihmc.javaFXToolkit.messager.MessagerAPIFactory.Topic;
 import us.ihmc.javaFXToolkit.shapes.JavaFXMeshBuilder;
+import us.ihmc.messager.Messager;
+import us.ihmc.messager.MessagerAPIFactory.Topic;
 import us.ihmc.pathPlanning.visibilityGraphs.ui.VisualizationParameters;
 import us.ihmc.robotics.geometry.PlanarRegion;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 
 public class PlanarRegionViewer
 {
-   private static final boolean VERBOSE = true;
+   private static final boolean VERBOSE = false;
    private ExecutorService executorService = Executors.newSingleThreadExecutor(ThreadTools.getNamedThreadFactory(getClass().getSimpleName()));
 
    private final Group root = new Group();
@@ -40,6 +40,8 @@ public class PlanarRegionViewer
 
    private final AnimationTimer renderMeshAnimation;
    private final AtomicReference<Boolean> show;
+
+   private static final PlanarRegionColorPicker colorPicker = new PlanarRegionColorPicker();
 
    public PlanarRegionViewer(Messager messager, Topic<PlanarRegionsList> planarRegionDataTopic, Topic<Boolean> showPlanarRegionsTopic)
    {
@@ -59,7 +61,7 @@ public class PlanarRegionViewer
             if (localReference != null)
             {
                if (VERBOSE)
-                  PrintTools.info(this, "Rendering new planar regions.");
+                  PrintTools.info("Rendering new planar regions.");
                graphicsRendered = localReference;
                root.getChildren().clear();
             }
@@ -117,7 +119,7 @@ public class PlanarRegionViewer
          }
 
          MeshView regionMeshView = new MeshView(meshBuilder.generateMesh());
-         regionMeshView.setMaterial(new PhongMaterial(getRegionColor(regionId, opacity.get())));
+         regionMeshView.setMaterial(new PhongMaterial(getRegionColor(regionId)));
          regionMeshViews.add(regionMeshView);
       }
 
@@ -132,12 +134,34 @@ public class PlanarRegionViewer
 
    public static Color getRegionColor(int regionId, double opacity)
    {
-      java.awt.Color awtColor = new java.awt.Color(regionId);
+      java.awt.Color awtColor = colorPicker.getColor(regionId);
       return Color.rgb(awtColor.getRed(), awtColor.getGreen(), awtColor.getBlue(), opacity);
    }
 
    public Node getRoot()
    {
       return root;
+   }
+
+   /**
+    * Keeps a list N of good colors to render planar regions. Region i is given color i mod N
+    */
+   private static class PlanarRegionColorPicker
+   {
+      private final ArrayList<java.awt.Color> colors = new ArrayList<>();
+
+      PlanarRegionColorPicker()
+      {
+         colors.add(new java.awt.Color(104, 130, 219));
+         colors.add(new java.awt.Color(113, 168, 133));
+         colors.add(new java.awt.Color(196, 182, 56));
+         colors.add(new java.awt.Color(190, 89, 110));
+         colors.add(new java.awt.Color(150, 150, 155));
+      }
+
+      java.awt.Color getColor(int regionId)
+      {
+         return colors.get(Math.abs(regionId % colors.size()));
+      }
    }
 }
