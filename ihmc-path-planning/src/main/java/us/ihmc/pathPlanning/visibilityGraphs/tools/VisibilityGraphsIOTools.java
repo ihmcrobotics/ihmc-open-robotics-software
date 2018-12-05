@@ -319,7 +319,6 @@ public class VisibilityGraphsIOTools
          goal = parseField(bufferedReader, GOAL_FIELD_OPEN, GOAL_FIELD_END, VisibilityGraphsIOTools::parsePoint3D);
       }
 
-
       private static String getDatasetName(String datasetResourceName)
       {
          String[] resourcePath = datasetResourceName.split("/");

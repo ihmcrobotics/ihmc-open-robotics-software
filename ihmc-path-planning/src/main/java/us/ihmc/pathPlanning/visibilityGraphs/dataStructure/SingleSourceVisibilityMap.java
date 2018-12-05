@@ -1,8 +1,6 @@
 package us.ihmc.pathPlanning.visibilityGraphs.dataStructure;
 
 import java.util.Collection;
-import java.util.Collections;
-import java.util.Set;
 
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple2D.Point2D;
@@ -57,7 +55,6 @@ public class SingleSourceVisibilityMap implements VisibilityMapHolder
       visibilityMapInLocal.addConnection(connectionInLocal);
       visibilityMapInLocal.computeVertices();
    }
-
 
    public Point3DReadOnly getSourceInWorld()
    {

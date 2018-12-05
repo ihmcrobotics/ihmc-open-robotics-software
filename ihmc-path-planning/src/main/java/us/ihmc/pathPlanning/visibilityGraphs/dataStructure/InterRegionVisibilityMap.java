@@ -41,7 +41,7 @@ public class InterRegionVisibilityMap implements VisibilityMapHolder
       //TODO: +++JEP: Decide on a good connection weight to minimize. But for now
       //TODO: Just use horizontalDistance since the tests work well with that...
       return horizontalDistance;
-//      return INTER_REGION_WEIGHT_SCALE * (horizontalDistance + verticalDistance);
+      //      return INTER_REGION_WEIGHT_SCALE * (horizontalDistance + verticalDistance);
    }
 
    @Override

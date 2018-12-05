@@ -91,7 +91,7 @@ public class NavigableRegionsManager
       long startBodyPathComputation = System.currentTimeMillis();
 
       //FIXME: +++JEP 181203. We have a bug where the the path can cross over a hole when there is an object on top of the hole. Need to fix that.
-      
+
       //TODO: Do this stuff lazily, rather than all up front for efficiency.
       navigableRegions = VisibilityGraphsFactory.createNavigableRegionButNotVisibilityMaps(regions, parameters);
 

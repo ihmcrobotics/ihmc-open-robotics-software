@@ -77,7 +77,8 @@ public class ClusterTools
          if (shouldExtrudeCorner)
          {
             int numberOfExtrusionsAtEndpoints = 3;
-            extrusions.addAll(extrudeMultiplePointsAtOutsideCorner(pointToExtrude, edgePrev, edgeNext, extrudeToTheLeft, numberOfExtrusionsAtEndpoints, extrusionDistance));
+            extrusions.addAll(extrudeMultiplePointsAtOutsideCorner(pointToExtrude, edgePrev, edgeNext, extrudeToTheLeft, numberOfExtrusionsAtEndpoints,
+                                                                   extrusionDistance));
          }
          else
          {
@@ -106,7 +107,7 @@ public class ClusterTools
       List<Point2D> extrusions = new ArrayList<>();
 
       if (pointsToExtrude.size() >= 2)
-      { 
+      {
          // Start
          Point2DReadOnly pointToExtrude = pointsToExtrude.get(0);
          double extrusionDistance = extrusionDistances[0];
@@ -117,7 +118,7 @@ public class ClusterTools
       }
 
       for (int i = 1; i < pointsToExtrude.size() - 1; i++)
-      { 
+      {
          // Go from start to end
          Point2DReadOnly pointToExtrude = pointsToExtrude.get(i);
          double extrusionDistance = extrusionDistances[i];
@@ -138,7 +139,7 @@ public class ClusterTools
       }
 
       if (pointsToExtrude.size() >= 2)
-      { 
+      {
          // End
          int lastIndex = pointsToExtrude.size() - 1;
          Point2DReadOnly pointToExtrude = pointsToExtrude.get(lastIndex);
@@ -150,7 +151,7 @@ public class ClusterTools
       }
 
       for (int i = pointsToExtrude.size() - 2; i >= 1; i--)
-      { 
+      {
          // Go from end back to start
          Point2DReadOnly pointToExtrude = pointsToExtrude.get(i);
          double extrusionDistance = extrusionDistances[i];
@@ -178,32 +179,33 @@ public class ClusterTools
     * then the two new lines will be moved by the extrusionDistance. 
     * If it is to the outside, then you should use extrudeMultiplePointsAtOutsideCorner() instead.
     */
-   public static void extrudeSinglePointAtInsideCorner(List<Point2D> extrusions, Point2DReadOnly pointToExtrude, double extrusionDistance,
-                                                       Line2D edgePrev, Line2D edgeNext, boolean extrudeToTheLeft)
+   public static void extrudeSinglePointAtInsideCorner(List<Point2D> extrusions, Point2DReadOnly pointToExtrude, double extrusionDistance, Line2D edgePrev,
+                                                       Line2D edgeNext, boolean extrudeToTheLeft)
    {
       Vector2DBasics previousEdgeDirection = edgePrev.getDirection();
       Vector2DBasics nextEdgeDirection = edgeNext.getDirection();
-      
+
       Vector2D extrusionDirection = new Vector2D();
       extrusionDirection.interpolate(previousEdgeDirection, nextEdgeDirection, 0.5);
       extrusionDirection.normalize();
-      
+
       double cosTheta = -previousEdgeDirection.dot(nextEdgeDirection);
-      double oneMinusCosThetaOverTwo = (1.0 - cosTheta)/2.0;
-      
+      double oneMinusCosThetaOverTwo = (1.0 - cosTheta) / 2.0;
+
       // Just in case. This should never happen, but with roundoff errors, sometimes it does.
       if (oneMinusCosThetaOverTwo < Double.MIN_VALUE)
       {
          oneMinusCosThetaOverTwo = Double.MIN_VALUE;
       }
-      
-      double sinThetaOverTwo = Math.sqrt(oneMinusCosThetaOverTwo);      
+
+      double sinThetaOverTwo = Math.sqrt(oneMinusCosThetaOverTwo);
       double extrusionMultiplier = 1.0 / sinThetaOverTwo;
-      
+
       //TODO: Hackish here. Maybe pass in magic number as a parameter.
       // But without this, could blow up to near infinity.
-      if (extrusionMultiplier > 3.0) extrusionMultiplier = 3.0;
-      
+      if (extrusionMultiplier > 3.0)
+         extrusionMultiplier = 3.0;
+
       extrusionDistance = extrusionDistance * extrusionMultiplier;
 
       extrusionDirection = EuclidGeometryTools.perpendicularVector2D(extrusionDirection);
@@ -237,8 +239,8 @@ public class ClusterTools
       return extrusions;
    }
 
-   public static List<Point2D> extrudeMultiplePointsAtOutsideCorner(Point2DReadOnly cornerPointToExtrude, Line2D previousEdge, Line2D nextEdge, boolean extrudeToTheLeft,
-                                             int numberOfExtrusions, double extrusionDistance)
+   public static List<Point2D> extrudeMultiplePointsAtOutsideCorner(Point2DReadOnly cornerPointToExtrude, Line2D previousEdge, Line2D nextEdge,
+                                                                    boolean extrudeToTheLeft, int numberOfExtrusions, double extrusionDistance)
    {
       List<Point2D> extrusions = new ArrayList<>();
 
@@ -368,7 +370,7 @@ public class ClusterTools
       ObstacleExtrusionDistanceCalculator navigableCalculator = (p, h) -> extrusionDistance;
 
       boolean extrudeToTheLeft = homeRegionCluster.getExtrusionSide() != ExtrusionSide.INSIDE;
-      
+
       //TODO: JEP+++: Why do we add a NonNavigableExtrusion to a home region cluster?
       // I guess it's for inner region cionnections that cross over empty space.
       // Need to make sure they don't. But then also need to make sure these 
@@ -413,13 +415,13 @@ public class ClusterTools
 
          //TODO: Check this. When should it be a multi-line and when should it be a polygon?
          if (Math.abs(otherNormal.dot(referenceNormal)) < zThresholdBeforeOrthogonal)
-         { 
+         {
             // Project region as a line
             cluster.setType(Type.MULTI_LINE);
             cluster.addRawPointsInLocal3D(filterVerticalPolygonForMultiLineExtrusion(rawPointsInLocal, POPPING_MULTILINE_POINTS_THRESHOLD));
          }
          else
-         { 
+         {
             // Project region as a polygon
             cluster.setType(Type.POLYGON);
             cluster.addRawPointsInLocal3D(rawPointsInLocal);
@@ -452,7 +454,7 @@ public class ClusterTools
          {
             cluster.addNonNavigableExtrusionsInLocal(extrudePolygon(extrudeToTheLeft, cluster, nonNavigableCalculator));
          }
-         catch(Exception e)
+         catch (Exception e)
          {
             e.printStackTrace();
             return;

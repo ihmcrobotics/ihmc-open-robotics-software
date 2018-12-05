@@ -21,7 +21,6 @@ public class NavigableRegion implements VisibilityMapHolder
    private VisibilityMap visibilityMapInLocal = null;
    private VisibilityMap visibilityMapInWorld = null;
 
-
    public NavigableRegion(PlanarRegion homePlanarRegion)
    {
       this.homePlanarRegion = homePlanarRegion;
