@@ -12,16 +12,22 @@ import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.pathPlanning.visibilityGraphs.tools.PlanarRegionTools;
+import us.ihmc.robotics.geometry.PlanarRegion;
 
 /**
  * A Cluster typically represents an obstacle over a planar region.
  * It consists of the 3D points of the obstacle, the 2D points of the navigable spots on the planar region 
  * and the 2D points of the nonNavigable spots on the planar region resulting from the obstacle.
  * It contains the RigidBodyTransform for moving the points from local to world coordinates.
+ * 
+ * There is one cluster per planar region per obstacle.
  */
 public class Cluster
 {
    private final RigidBodyTransform transformToWorld = new RigidBodyTransform();
+
+   //TODO: +++ This seems to assume that a bunch of points are one closed region if POLYGON. But what if the planar region it is created from
+   // has several independent areas? Perhaps we need a flag or guarantee or something that we have only 1 closed polygon per planar region used?
 
    private final List<Point3DReadOnly> rawPointsLocal = new ArrayList<>();
    private final List<Point2DReadOnly> navigableExtrusionsInLocal = new ArrayList<>();
@@ -29,6 +35,34 @@ public class Cluster
 
    private boolean nonNavigableExtrusionsBoundingBoxIsDirty = true;
    private final BoundingBox2D nonNavigableExtrusionsBoundingBox = new BoundingBox2D();
+
+   private List<Point3DReadOnly> navigablePointsInsideHomeRegionInWorld = null;
+
+   private static final double epsilonForMakingSurePointInsideHomeRegion = 1e-5; //Add a little to make sure we do not miss anything.
+
+   public List<Point3DReadOnly> getNavigablePointsInsideHomeRegionInWorld(PlanarRegion homeRegion)
+   {
+      //TODO: +++JEP: Finish.
+      //      return navigableExtrusionsInLocal.stream().map(this::toWorld3D).collect(Collectors.toList());
+
+      if (navigablePointsInsideHomeRegionInWorld == null)
+      {
+         navigablePointsInsideHomeRegionInWorld = new ArrayList<>();
+
+         for (Point2DReadOnly point : navigableExtrusionsInLocal)
+         {
+            //TODO: PlanarRegionTools.isPointInLocalInsidePlanarRegion() was buggy. Make sure to unit test it well, especially if use concave hull...
+
+            if (PlanarRegionTools.isPointInLocalInsidePlanarRegion(homeRegion, point, epsilonForMakingSurePointInsideHomeRegion))
+            {
+               Point3D point3D = toWorld3D(point);
+               navigablePointsInsideHomeRegionInWorld.add(point3D);
+            }
+         }
+      }
+
+      return navigablePointsInsideHomeRegionInWorld;
+   }
 
    public enum ExtrusionSide
    {
@@ -79,7 +113,7 @@ public class Cluster
    }
 
    public void updateBoundingBox()
-   { 
+   {
       //TODO: First reset the bounding box to zero or null or something?
       nonNavigableExtrusionsInLocal.forEach(nonNavigableExtrusionsBoundingBox::updateToIncludePoint);
       nonNavigableExtrusionsBoundingBoxIsDirty = false;
@@ -87,11 +121,11 @@ public class Cluster
 
    public boolean isInsideNonNavigableZone(Point2DReadOnly query)
    {
-      if (nonNavigableExtrusionsInLocal.isEmpty()) 
-         return false; 
+      if (nonNavigableExtrusionsInLocal.isEmpty())
+         return false;
 
       BoundingBox2D boundingBox = getNonNavigableExtrusionsBoundingBox();
-      
+
       if (extrusionSide == ExtrusionSide.INSIDE)
       {
          if (!boundingBox.isInsideInclusive(query))
@@ -128,6 +162,7 @@ public class Cluster
 
    public void setTransformToWorld(RigidBodyTransform transform)
    {
+      //TODO: +++JEP: Should never have to set the transform if we get it from the planar region. Right?
       transformToWorld.set(transform);
    }
 
@@ -235,18 +270,20 @@ public class Cluster
    {
       return navigableExtrusionsInLocal;
    }
-   
+
    public void setNavigableExtrusionsInLocal(List<Point2DReadOnly> points)
    {
       navigableExtrusionsInLocal.clear();
       navigableExtrusionsInLocal.addAll(points);
+
+      //TODO: Need to set to null in more places when this happens. Or reduce the number of calls available. Maybe make immuatable?
+      navigablePointsInsideHomeRegionInWorld = null;
    }
 
    public List<Point3DReadOnly> getNavigableExtrusionsInWorld()
    {
       return navigableExtrusionsInLocal.stream().map(this::toWorld3D).collect(Collectors.toList());
    }
-
 
    public void addNonNavigableExtrusionInLocal(Point2DReadOnly nonNavigableExtrusionInLocal)
    {
@@ -268,7 +305,7 @@ public class Cluster
 
    public BoundingBox2D getNonNavigableExtrusionsBoundingBox()
    {
-      if (nonNavigableExtrusionsBoundingBoxIsDirty) 
+      if (nonNavigableExtrusionsBoundingBoxIsDirty)
          updateBoundingBox();
 
       return nonNavigableExtrusionsBoundingBox;

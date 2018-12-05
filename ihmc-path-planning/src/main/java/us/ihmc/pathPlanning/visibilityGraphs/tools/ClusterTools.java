@@ -411,6 +411,7 @@ public class ClusterTools
             rawPointsInLocal.add(concaveHullVertexHome);
          }
 
+         //TODO: Check this. When should it be a multi-line and when should it be a polygon?
          if (Math.abs(otherNormal.dot(referenceNormal)) < zThresholdBeforeOrthogonal)
          { 
             // Project region as a line

@@ -44,7 +44,7 @@ public class NavigableRegionTest
          for (int i = 0; i < numberOfObstacleClusters; i++)
             navigableRegion.addObstacleCluster(obstacleClusters.get(i));
 
-         PlanarRegionTestTools.assertPlanarRegionsEqual(planarRegion, navigableRegion.getHomeRegion(), epsilon);
+         PlanarRegionTestTools.assertPlanarRegionsEqual(planarRegion, navigableRegion.getHomePlanarRegion(), epsilon);
          VisibilityGraphTestTools.assertVisibilityMapsEqual(navigableRegion.getVisibilityMapInLocal(), navigableRegion.getVisibilityMapInLocal(), epsilon);
          VisibilityGraphTestTools.assertVisibilityMapsEqual(navigableRegion.getVisibilityMapInWorld(), navigableRegion.getVisibilityMapInWorld(), epsilon);
          VisibilityGraphTestTools.assertClustersEqual(homeRegionCluster, navigableRegion.getHomeRegionCluster(), epsilon);
@@ -57,7 +57,7 @@ public class NavigableRegionTest
          for (int i = 0; i < numberOfObstacleClusters; i++)
             navigableRegion.addObstacleCluster(obstacleClusters.get(i));
 
-         PlanarRegionTestTools.assertPlanarRegionsEqual(planarRegion, navigableRegion.getHomeRegion(), epsilon);
+         PlanarRegionTestTools.assertPlanarRegionsEqual(planarRegion, navigableRegion.getHomePlanarRegion(), epsilon);
          VisibilityGraphTestTools.assertVisibilityMapsEqual(navigableRegion.getVisibilityMapInLocal(), navigableRegion.getVisibilityMapInLocal(), epsilon);
          VisibilityGraphTestTools.assertVisibilityMapsEqual(navigableRegion.getVisibilityMapInWorld(), navigableRegion.getVisibilityMapInWorld(), epsilon);
          VisibilityGraphTestTools.assertClustersEqual(homeRegionCluster, navigableRegion.getHomeRegionCluster(), epsilon);

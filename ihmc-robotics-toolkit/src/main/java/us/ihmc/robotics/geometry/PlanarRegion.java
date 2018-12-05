@@ -231,7 +231,8 @@ public class PlanarRegion
     * @param intersectionsInPlaneFrameToPack ArrayList of ConvexPolygon2d to pack with the
     *           intersections.
     */
-   public void getPolygonIntersectionsWhenProjectedVertically(ConvexPolygon2DBasics convexPolygon2DBasics, ArrayList<ConvexPolygon2D> intersectionsInPlaneFrameToPack)
+   public void getPolygonIntersectionsWhenProjectedVertically(ConvexPolygon2DBasics convexPolygon2DBasics,
+                                                              ArrayList<ConvexPolygon2D> intersectionsInPlaneFrameToPack)
    {
       // Instead of projecting all the polygons of this region onto the world XY-plane,
       // the given convex polygon is projected along the z-world axis to be snapped onto plane.
@@ -468,6 +469,7 @@ public class PlanarRegion
 
    private final Point3D localPoint = new Point3D();
    private final Point2D localPoint2D = new Point2D();
+
    /**
     * Computes the distance of the point to the region projected onto the world xy-plane.
     *
@@ -505,7 +507,6 @@ public class PlanarRegion
       else
          return isPointInside(localPoint.getX(), localPoint.getY());
    }
-
 
    /**
     * Checks to see if a given point is on the plane or above it by the specified distance.
@@ -579,6 +580,19 @@ public class PlanarRegion
     * Given a 2D point expressed in the plane local frame, computes whether the point is in this
     * region.
     *
+    * @param point2dInLocal query expressed in local coordinates.
+    * @param epsilon the tolerance to use during the test.
+    * @return true if the point is inside this region, false otherwise.
+    */
+   public boolean isPointInside(Point2DReadOnly point2dInLocal, double epsilon)
+   {
+      return isPointInside(point2dInLocal.getX(), point2dInLocal.getY(), epsilon);
+   }
+
+   /**
+    * Given a 2D point expressed in the plane local frame, computes whether the point is in this
+    * region.
+    *
     * @param xCoordinateInLocal x Coordinate of the 2D point in planar region local frame
     * @param yCoordinateInLocal y Coordinate of the 2D point in planar region local frame
     * @return true if the point is inside this region, false otherwise.
@@ -593,6 +607,24 @@ public class PlanarRegion
       return false;
    }
 
+   /**
+    * Given a 2D point expressed in the plane local frame, computes whether the point is in this
+    * region.
+    *
+    * @param xCoordinateInLocal x Coordinate of the 2D point in planar region local frame
+    * @param yCoordinateInLocal y Coordinate of the 2D point in planar region local frame
+    * @param epsilon the tolerance to use during the test.
+    * @return true if the point is inside this region, false otherwise.
+    */
+   public boolean isPointInside(double xCoordinateInLocal, double yCoordinateInLocal, double epsilon)
+   {
+      for (int i = 0; i < convexPolygons.size(); i++)
+      {
+         if (convexPolygons.get(i).isPointInside(xCoordinateInLocal, yCoordinateInLocal, epsilon))
+            return true;
+      }
+      return false;
+   }
 
    /**
     * Given a 2D point expressed in the plane local frame, computes whether the point is in this
@@ -612,6 +644,7 @@ public class PlanarRegion
       }
       return shortestDistanceToPoint;
    }
+
    /**
     * Computes the z-coordinate in world of the plane for a given xy-coordinates in world.
     *
@@ -1010,8 +1043,10 @@ public class PlanarRegion
                intersectionWithOther.flipDirection();
             }
 
-            double startPercent = EuclidGeometryTools.percentageAlongLineSegment3D(start, intersectionWithOther.getFirstEndpoint(), intersectionWithOther.getSecondEndpoint());
-            double endPercent = EuclidGeometryTools.percentageAlongLineSegment3D(end, intersectionWithOther.getFirstEndpoint(), intersectionWithOther.getSecondEndpoint());
+            double startPercent = EuclidGeometryTools.percentageAlongLineSegment3D(start, intersectionWithOther.getFirstEndpoint(),
+                                                                                   intersectionWithOther.getSecondEndpoint());
+            double endPercent = EuclidGeometryTools.percentageAlongLineSegment3D(end, intersectionWithOther.getFirstEndpoint(),
+                                                                                 intersectionWithOther.getSecondEndpoint());
 
             if (startPercent < 0.0 && endPercent < 0.0)
             {
@@ -1119,5 +1154,28 @@ public class PlanarRegion
    public void transformFromLocalToWorld(Transformable objectToTransform)
    {
       objectToTransform.applyTransform(fromLocalToWorldTransform);
+   }
+
+   @Override
+   public String toString()
+   {
+      StringBuffer buffer = new StringBuffer();
+
+      buffer.append("boundingBox: " + boundingBox3dInWorld.toString() + "\n");
+      buffer.append("number of polygons: " + convexPolygons.size() + "\n");
+
+      buffer.append("transformToWorld:\n" + fromLocalToWorldTransform + "\n");
+
+      int maxNumberOfPolygonsToPrint = 5;
+      for (int i = 0; i < maxNumberOfPolygonsToPrint; i++)
+      {
+         buffer.append(convexPolygons.get(i) + "\n");
+      }
+      if (convexPolygons.size() > maxNumberOfPolygonsToPrint)
+      {
+         buffer.append("...\n");
+      }
+
+      return buffer.toString();
    }
 }

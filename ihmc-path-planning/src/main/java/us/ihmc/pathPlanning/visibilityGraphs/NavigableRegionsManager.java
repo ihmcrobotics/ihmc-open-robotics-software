@@ -90,6 +90,8 @@ public class NavigableRegionsManager
 
       long startBodyPathComputation = System.currentTimeMillis();
 
+      //FIXME: +++JEP 181203. We have a bug where the the path can cross over a hole when there is an object on top of the hole. Need to fix that.
+      
       //TODO: Do this stuff lazily, rather than all up front for efficiency.
       navigableRegions = VisibilityGraphsFactory.createNavigableRegionButNotVisibilityMaps(regions, parameters);
 
@@ -182,7 +184,7 @@ public class NavigableRegionsManager
          List<Cluster> intersectingClusters = OcclusionTools.getListOfIntersectingObstacles(regionContainingPoint.getObstacleClusters(), start, goal);
          Cluster closestCluster = ClusterTools.getTheClosestCluster(start, intersectingClusters);
          Point3D closestExtrusion = ClusterTools.getTheClosestVisibleExtrusionPoint(1.0, start, goal, closestCluster.getNavigableExtrusionsInWorld(),
-                                                                                    regionContainingPoint.getHomeRegion());
+                                                                                    regionContainingPoint.getHomePlanarRegion());
 
          path = calculateBodyPath(start, closestExtrusion);
          path.add(goal);

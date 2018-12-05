@@ -290,7 +290,7 @@ public class VisibilityGraphTestTools
    {
       assertEquals(expected.getMapId(), actual.getMapId());
       assertClustersEqual(expected.getHomeRegionCluster(), actual.getHomeRegionCluster(), epsilon);
-      PlanarRegionTestTools.assertPlanarRegionsEqual(expected.getHomeRegion(), actual.getHomeRegion(), epsilon);
+      PlanarRegionTestTools.assertPlanarRegionsEqual(expected.getHomePlanarRegion(), actual.getHomePlanarRegion(), epsilon);
       assertEquals(expected.getObstacleClusters().size(), actual.getObstacleClusters().size());
       assertEquals(expected.getAllClusters().size(), actual.getAllClusters().size());
 
