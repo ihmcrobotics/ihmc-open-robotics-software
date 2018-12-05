@@ -164,18 +164,19 @@ public class QuadrupedXBoxAdapter implements JoystickEventListener
       double bodyRoll = 0.0;
       double bodyPitch = channels.get(XBoxOneMapping.RIGHT_STICK_Y) * maxBodyPitch.getValue();
       double bodyYaw = channels.get(XBoxOneMapping.RIGHT_STICK_X) * maxBodyYaw.getValue();
-      stepTeleopManager.setDesiredBodyOrientation(bodyYaw, bodyPitch, bodyRoll, bodyOrientationShiftTime.getValue());
 
       if (channels.get(XBoxOneMapping.DPAD) == 0.25)
       {
          double bodyHeightVelocity = maxBodyHeightVelocity.getValue();
          stepTeleopManager.setDesiredBodyHeight(bodyHeight.update(bodyHeightVelocity));
+
       }
       else if (channels.get(XBoxOneMapping.DPAD) == 0.75)
       {
          double bodyHeightVelocity = - maxBodyHeightVelocity.getValue();
          stepTeleopManager.setDesiredBodyHeight(bodyHeight.update(bodyHeightVelocity));
       }
+      stepTeleopManager.setDesiredBodyPose(0.0, 0.0, bodyYaw, bodyPitch, bodyRoll, bodyOrientationShiftTime.getValue());
 
       double xVelocity = channels.get(XBoxOneMapping.LEFT_STICK_Y) * maxVelocityX.getDoubleValue();
       double yVelocity = channels.get(XBoxOneMapping.LEFT_STICK_X) * maxVelocityY.getDoubleValue();

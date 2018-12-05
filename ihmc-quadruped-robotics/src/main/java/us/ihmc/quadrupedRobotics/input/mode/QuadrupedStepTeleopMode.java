@@ -59,7 +59,6 @@ public class QuadrupedStepTeleopMode
          double bodyRoll = 0.0;
          double bodyPitch = channels.get(XBoxOneMapping.RIGHT_STICK_Y) * pitchScaleParameter.getValue();
          double bodyYaw = channels.get(XBoxOneMapping.RIGHT_STICK_X) * yawScaleParameter.getValue();
-         stepTeleopManager.setDesiredBodyOrientation(bodyYaw, bodyPitch, bodyRoll, xGaitBodyOrientationShiftTime.getValue());
 
          double bodyHeightVelocity = 0.0;
          if (channels.get(XBoxOneMapping.DPAD) == 0.25)
@@ -71,6 +70,9 @@ public class QuadrupedStepTeleopMode
             bodyHeightVelocity -= bodyHeightMaxVelocity.getValue();
          }
          stepTeleopManager.setDesiredBodyHeight(bodyHeight.update(bodyHeightVelocity));
+
+         stepTeleopManager.setDesiredBodyPose(0.0, 0.0,  bodyYaw, bodyPitch, bodyRoll, xGaitBodyOrientationShiftTime.getValue());
+
 
          YoQuadrupedXGaitSettings xGaitSettings = stepTeleopManager.getXGaitSettings();
          double xVelocityMax = 0.5 * xStrideMax.getValue() / (xGaitSettings.getStepDuration() + xGaitSettings.getEndDoubleSupportDuration());

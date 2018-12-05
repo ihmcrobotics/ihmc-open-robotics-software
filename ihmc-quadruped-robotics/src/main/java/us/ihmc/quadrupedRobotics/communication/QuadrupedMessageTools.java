@@ -139,19 +139,4 @@ public class QuadrupedMessageTools
       message.getEuclideanTrajectory().getSelectionMatrix().setZSelected(true);
       return message;
    }
-
-   /**
-    * Use this constructor to build a message with more than one trajectory point. This constructor
-    * only allocates memory for the trajectory points, you need to call {@link #setTrajectoryPoint}
-    * for each trajectory point afterwards. Set the id of the message to
-    * {@link Packet#VALID_MESSAGE_DEFAULT_ID}.
-    */
-   public static QuadrupedBodyHeightMessage createPelvisHeightTrajectoryMessage()
-   {
-      QuadrupedBodyHeightMessage message = new QuadrupedBodyHeightMessage();
-      message.getEuclideanTrajectory().getSelectionMatrix().setXSelected(false);
-      message.getEuclideanTrajectory().getSelectionMatrix().setYSelected(false);
-      message.getEuclideanTrajectory().getSelectionMatrix().setZSelected(true);
-      return message;
-   }
 }

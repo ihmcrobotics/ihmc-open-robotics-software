@@ -68,6 +68,8 @@ import us.ihmc.simulationconstructionset.util.LinearGroundContactModel;
 import us.ihmc.simulationconstructionset.util.RobotController;
 import us.ihmc.simulationconstructionset.util.ground.*;
 import us.ihmc.stateEstimation.humanoid.StateEstimatorController;
+import us.ihmc.systemIdentification.frictionId.simulators.CoulombViscousStribeckFrictionParameters;
+import us.ihmc.systemIdentification.frictionId.simulators.SimulatedFrictionController;
 import us.ihmc.tools.factories.FactoryTools;
 import us.ihmc.tools.factories.OptionalFactoryField;
 import us.ihmc.tools.factories.RequiredFactoryField;
@@ -113,6 +115,7 @@ public class QuadrupedSimulationFactory
    private final RequiredFactoryField<QuadrupedPrivilegedConfigurationParameters> privilegedConfigurationParameters = new RequiredFactoryField<>("privilegedConfigurationParameters");
 
    private final OptionalFactoryField<SimulatedElasticityParameters> simulatedElasticityParameters = new OptionalFactoryField<>("simulatedElasticityParameters");
+   private final OptionalFactoryField<CoulombViscousStribeckFrictionParameters> simulatedFrictionParameters = new OptionalFactoryField<>("jointFrictionParameters");
    private final OptionalFactoryField<QuadrupedGroundContactModelType> groundContactModelType = new OptionalFactoryField<>("groundContactModelType");
    private final OptionalFactoryField<GroundProfile3D> providedGroundProfile3D = new OptionalFactoryField<>("providedGroundProfile3D");
    private final OptionalFactoryField<TerrainObject3D> providedTerrainObject3D = new OptionalFactoryField<>("providedTerrainObject3D");
@@ -512,6 +515,7 @@ public class QuadrupedSimulationFactory
       createSimulationController();
       setupSDFRobot();
       setupJointElasticity();
+      setupJointFriction();
       setupCameras();
 
       if (useNetworking.get())
@@ -587,6 +591,16 @@ public class QuadrupedSimulationFactory
       }
    }
 
+   private void setupJointFriction()
+   {
+      if (simulatedFrictionParameters.hasValue())
+      {
+         FloatingRootJointRobot floatingRootJointRobot = sdfRobot.get();
+         SimulatedFrictionController springJointOutputWriter = new SimulatedFrictionController(floatingRootJointRobot, simulatedFrictionParameters.get());
+         floatingRootJointRobot.setController(springJointOutputWriter, 1);
+      }
+   }
+
    public void setSimulationDT(double simulationDT)
    {
       this.simulationDT.set(simulationDT);
@@ -655,6 +669,11 @@ public class QuadrupedSimulationFactory
    public void setSimulatedElasticityParameters(SimulatedElasticityParameters simulatedElasticityParameters)
    {
       this.simulatedElasticityParameters.set(simulatedElasticityParameters);
+   }
+
+   public void setSimulatedFrictionParameters(CoulombViscousStribeckFrictionParameters simulatedFrictionParameters)
+   {
+      this.simulatedFrictionParameters.set(simulatedFrictionParameters);
    }
 
    public void setGroundContactParameters(GroundContactParameters groundContactParameters)
