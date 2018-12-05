@@ -6,11 +6,12 @@ package us.ihmc.stateEstimation.humanoid.kinematicsBasedStateEstimation;
 
 import org.ejml.data.DenseMatrix64F;
 import org.ejml.ops.CommonOps;
+
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
+import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
+import us.ihmc.mecano.tools.MultiBodySystemTools;
 import us.ihmc.robotics.functionApproximation.DampedLeastSquaresSolver;
 import us.ihmc.robotics.screwTheory.GeometricJacobian;
-import us.ihmc.robotics.screwTheory.OneDoFJoint;
-import us.ihmc.robotics.screwTheory.ScrewTools;
 import us.ihmc.sensorProcessing.stateEstimation.IMUSensorReadOnly;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
@@ -24,7 +25,7 @@ public class IMUBasedJointVelocityEstimator
    private final IMUSensorReadOnly parentIMU;
    private final IMUSensorReadOnly childIMU;
    private final YoDouble[] jointVelocitiesFromIMU;
-   private final OneDoFJoint[] joints;
+   private final OneDoFJointBasics[] joints;
    private final FrameVector3D childAngularVelocity = new FrameVector3D();
    private final FrameVector3D parentAngularVelocity = new FrameVector3D();
 
@@ -40,7 +41,7 @@ public class IMUBasedJointVelocityEstimator
       this.childIMU = childIMU;
       this.jacobian = jacobian;
 
-      joints = ScrewTools.filterJoints(jacobian.getJointsInOrder(), OneDoFJoint.class);
+      joints = MultiBodySystemTools.filterJoints(jacobian.getJointsInOrder(), OneDoFJointBasics.class);
       if (joints.length > 3)
       {
          throw new IllegalArgumentException("Cannot solve for more than 3 DoF betwen IMUs. " + joints.length + " DoF were given");
@@ -53,7 +54,7 @@ public class IMUBasedJointVelocityEstimator
       jointVelocitiesFromIMU = new YoDouble[joints.length];
       for (int i = 0; i < joints.length; i++)
       {
-         OneDoFJoint joint = joints[i];
+         OneDoFJointBasics joint = joints[i];
          jointVelocitiesFromIMU[i] = new YoDouble("qd_" + joint.getName() + "_IMUBased", registry);
       }
 
@@ -91,13 +92,13 @@ public class IMUBasedJointVelocityEstimator
 
       for (int i = 0; i < joints.length; i++)
       {
-         OneDoFJoint joint = joints[i];
+         OneDoFJointBasics joint = joints[i];
          double qd_IMU = qd_estimated.get(i, 0);
          jointVelocitiesFromIMU[i].set(qd_IMU);
       }
    }
 
-   public double getEstimatedJointVelocity(OneDoFJoint joint)
+   public double getEstimatedJointVelocity(OneDoFJointBasics joint)
    {
       for (int i = 0; i < joints.length; i++)
       {

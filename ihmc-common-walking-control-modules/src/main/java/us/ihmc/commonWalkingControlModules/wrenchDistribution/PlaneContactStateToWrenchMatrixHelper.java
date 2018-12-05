@@ -18,12 +18,13 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint2DReadOnly;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple2D.interfaces.Vector2DReadOnly;
-import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
+import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
+import us.ihmc.mecano.spatial.SpatialForce;
+import us.ihmc.mecano.spatial.Wrench;
+import us.ihmc.mecano.spatial.interfaces.WrenchReadOnly;
+import us.ihmc.robotics.contactable.ContactablePlaneBody;
 import us.ihmc.robotics.linearAlgebra.MatrixTools;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
-import us.ihmc.robotics.screwTheory.RigidBody;
-import us.ihmc.robotics.screwTheory.SpatialForceVector;
-import us.ihmc.robotics.screwTheory.Wrench;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
@@ -43,6 +44,8 @@ public class PlaneContactStateToWrenchMatrixHelper
     */
    private static final double minFootholdSizeForCoPObjectives = 1.0e-3;
 
+   public static final boolean useOldCoPObjectiveFormulation = true;
+
    private final int maxNumberOfContactPoints;
    private final int numberOfBasisVectorsPerContactPoint;
    private final double basisVectorAngleIncrement;
@@ -56,7 +59,9 @@ public class PlaneContactStateToWrenchMatrixHelper
    private final DenseMatrix64F fzRow = new DenseMatrix64F(0, 0);
    private final DenseMatrix64F singleCopRow = new DenseMatrix64F(0, 0);
    private final DenseMatrix64F copRegularizationJacobian;
+   private final DenseMatrix64F copRegularizationObjective;
    private final DenseMatrix64F copRateRegularizationJacobian;
+   private final DenseMatrix64F copRateRegularizationObjective;
 
    private final DenseMatrix64F rhoMaxMatrix;
    private final DenseMatrix64F rhoWeightMatrix;
@@ -111,9 +116,13 @@ public class PlaneContactStateToWrenchMatrixHelper
       basisVectorAngleIncrement = 2.0 * Math.PI / numberOfBasisVectorsPerContactPoint;
 
       rhoMatrix = new DenseMatrix64F(rhoSize, 1);
-      wrenchJacobianInCoMFrame = new DenseMatrix64F(SpatialForceVector.SIZE, rhoSize);
+      wrenchJacobianInCoMFrame = new DenseMatrix64F(SpatialForce.SIZE, rhoSize);
       copRegularizationJacobian = new DenseMatrix64F(2, rhoSize);
+      copRegularizationObjective = new DenseMatrix64F(2, 1);
+      copRegularizationObjective.zero();
       copRateRegularizationJacobian = new DenseMatrix64F(2, rhoSize);
+      copRateRegularizationObjective = new DenseMatrix64F(2, 1);
+      copRateRegularizationObjective.zero();
       wrenchJacobianInPlaneFrame = new DenseMatrix64F(Wrench.SIZE, rhoSize);
 
       rhoMaxMatrix = new DenseMatrix64F(rhoSize, 1);
@@ -129,7 +138,7 @@ public class PlaneContactStateToWrenchMatrixHelper
       String namePrefix = bodyName + "WrenchMatrixHelper";
       YoVariableRegistry registry = new YoVariableRegistry(namePrefix);
 
-      RigidBody rigidBody = contactablePlaneBody.getRigidBody();
+      RigidBodyBasics rigidBody = contactablePlaneBody.getRigidBody();
       planeFrame = new PoseReferenceFrame(namePrefix + "ContactFrame", rigidBody.getBodyFixedFrame());
       planeFrame.setPoseAndUpdate(contactablePlaneBody.getSoleFrame().getTransformToDesiredFrame(rigidBody.getBodyFixedFrame()));
       yoPlaneContactState = new YoPlaneContactState(namePrefix, rigidBody, planeFrame, contactPoints2d, 0.0, registry);
@@ -209,7 +218,8 @@ public class PlaneContactStateToWrenchMatrixHelper
       }
    }
 
-   public void computeMatrices(double defaultRhoWeight, double rhoRateWeight, Vector2DReadOnly copRegularizationWeight, Vector2DReadOnly copRateRegularizationWeight)
+   public void computeMatrices(double defaultRhoWeight, double rhoRateWeight, Vector2DReadOnly copRegularizationWeight,
+                               Vector2DReadOnly copRateRegularizationWeight)
    {
       int numberOfContactPointsInContact = yoPlaneContactState.getNumberOfContactPointsInContact();
       if (numberOfContactPointsInContact > maxNumberOfContactPoints)
@@ -267,7 +277,7 @@ public class PlaneContactStateToWrenchMatrixHelper
                computeBasisVector(basisVectorIndex, angleOffset, normalContactVectorRotationMatrix, basisVector);
 
                double rhoWeight = rhoWeights[contactPointIndex].getDoubleValue();
-               if(Double.isNaN(rhoWeight))
+               if (Double.isNaN(rhoWeight))
                {
                   rhoWeight = defaultRhoWeight;
                }
@@ -301,6 +311,23 @@ public class PlaneContactStateToWrenchMatrixHelper
       computeCopObjectiveJacobian(copRegularizationJacobian, desiredCoP);
       computeCopObjectiveJacobian(copRateRegularizationJacobian, previousCoP);
 
+      if (useOldCoPObjectiveFormulation)
+      {
+         if (desiredCoP.containsNaN())
+            copRegularizationObjective.zero();
+         else
+            desiredCoP.get(copRegularizationObjective);
+         if (previousCoP.containsNaN())
+            copRateRegularizationObjective.zero();
+         else
+            previousCoP.get(copRateRegularizationObjective);
+      }
+      else
+      {
+         copRegularizationObjective.zero();
+         copRateRegularizationObjective.zero();
+      }
+
       if (yoPlaneContactState.inContact() && !resetRequested.getBooleanValue() && canHandleCoPCommand())
       {
          copRegularizationWeightMatrix.set(0, 0, copRegularizationWeight.getX());
@@ -322,6 +349,9 @@ public class PlaneContactStateToWrenchMatrixHelper
          clear(rhoIndex);
    }
 
+   private final FrameVector3D forceFromRho = new FrameVector3D();
+
+   // FIXME Check code duplication in WrenchMatrixCalculator.getCenterOfPressureInput(...)
    public void computeCopObjectiveJacobian(DenseMatrix64F jacobianToPack, FramePoint2DReadOnly desiredCoP)
    {
       if (desiredCoP.containsNaN())
@@ -331,22 +361,54 @@ public class PlaneContactStateToWrenchMatrixHelper
          return;
       }
 
-      desiredCoP.checkReferenceFrameMatch(planeFrame);
+      if (useOldCoPObjectiveFormulation)
+      {
+         if (wrenchFromRho.getLinearPart().lengthSquared() < 1.0e-1)
+         {
+            jacobianToPack.reshape(2, rhoSize);
+            jacobianToPack.zero();
+            return;
+         }
 
-      int fzIndex = 5;
-      CommonOps.extractRow(wrenchJacobianInPlaneFrame, fzIndex, fzRow);
+         forceFromRho.setIncludingFrame(wrenchFromRho.getLinearPart());
+         forceFromRho.changeFrame(planeFrame);
 
-      // [x_cop * J_fz + J_ty] * rho == 0
-      int tauYIndex = 1;
-      CommonOps.extractRow(wrenchJacobianInPlaneFrame, tauYIndex, singleCopRow);
-      CommonOps.add(desiredCoP.getX(), fzRow, 1.0, singleCopRow, singleCopRow);
-      CommonOps.insert(singleCopRow, jacobianToPack, 0, 0);
+         if (forceFromRho.getZ() < 1.0e-1)
+         {
+            jacobianToPack.reshape(2, rhoSize);
+            jacobianToPack.zero();
+            return;
+         }
 
-      // [y_cop * J_fz - J_tx] * rho == 0
-      int tauXIndex = 0;
-      CommonOps.extractRow(wrenchJacobianInPlaneFrame, tauXIndex, singleCopRow);
-      CommonOps.add(desiredCoP.getY(), fzRow, -1.0, singleCopRow, singleCopRow);
-      CommonOps.insert(singleCopRow, jacobianToPack, 1, 0);
+         double fzInverse = 1.0 / forceFromRho.getZ();
+
+         // [ -J_ty / F_z_previous ] * rho == x_cop
+         int tauYIndex = 1;
+         MatrixTools.setMatrixBlock(jacobianToPack, 0, 0, wrenchJacobianInPlaneFrame, tauYIndex, 0, 1, rhoSize, -fzInverse);
+
+         // [  J_tx / F_z_previous] * rho == y_cop
+         int tauXIndex = 0;
+         MatrixTools.setMatrixBlock(jacobianToPack, 1, 0, wrenchJacobianInPlaneFrame, tauXIndex, 0, 1, rhoSize, fzInverse);
+      }
+      else
+      {
+         desiredCoP.checkReferenceFrameMatch(planeFrame);
+
+         int fzIndex = 5;
+         CommonOps.extractRow(wrenchJacobianInPlaneFrame, fzIndex, fzRow);
+
+         // [x_cop * J_fz + J_ty] * rho == 0
+         int tauYIndex = 1;
+         CommonOps.extractRow(wrenchJacobianInPlaneFrame, tauYIndex, singleCopRow);
+         CommonOps.add(desiredCoP.getX(), fzRow, 1.0, singleCopRow, singleCopRow);
+         CommonOps.insert(singleCopRow, jacobianToPack, 0, 0);
+
+         // [y_cop * J_fz - J_tx] * rho == 0
+         int tauXIndex = 0;
+         CommonOps.extractRow(wrenchJacobianInPlaneFrame, tauXIndex, singleCopRow);
+         CommonOps.add(desiredCoP.getY(), fzRow, -1.0, singleCopRow, singleCopRow);
+         CommonOps.insert(singleCopRow, jacobianToPack, 1, 0);
+      }
    }
 
    private void clear(int rhoIndex)
@@ -363,7 +425,7 @@ public class PlaneContactStateToWrenchMatrixHelper
    }
 
    private final Wrench wrenchFromRho = new Wrench();
-   private final DenseMatrix64F totalWrenchMatrix = new DenseMatrix64F(SpatialForceVector.SIZE, 1);
+   private final DenseMatrix64F totalWrenchMatrix = new DenseMatrix64F(SpatialForce.SIZE, 1);
 
    public void computeWrenchFromRho(int startIndex, DenseMatrix64F allRobotRho)
    {
@@ -373,7 +435,7 @@ public class PlaneContactStateToWrenchMatrixHelper
       if (yoPlaneContactState.inContact())
       {
          CommonOps.mult(wrenchJacobianInPlaneFrame, rhoMatrix, totalWrenchMatrix);
-         wrenchFromRho.set(bodyFixedFrame, planeFrame, totalWrenchMatrix);
+         wrenchFromRho.setIncludingFrame(bodyFixedFrame, planeFrame, totalWrenchMatrix);
 
          previousCoP.setX(-wrenchFromRho.getAngularPartY() / wrenchFromRho.getLinearPartZ());
          previousCoP.setY(wrenchFromRho.getAngularPartX() / wrenchFromRho.getLinearPartZ());
@@ -385,12 +447,12 @@ public class PlaneContactStateToWrenchMatrixHelper
       }
    }
 
-   public Wrench getWrench()
+   public WrenchReadOnly getWrench()
    {
       return wrenchFromRho;
    }
 
-   private final SpatialForceVector unitSpatialForceVector = new SpatialForceVector();
+   private final SpatialForce unitSpatialForceVector = new SpatialForce();
 
    public void computeWrenchJacobianInFrame(ReferenceFrame frame, DenseMatrix64F matrixToPack)
    {
@@ -403,8 +465,8 @@ public class PlaneContactStateToWrenchMatrixHelper
             FrameVector3D basisVector = basisVectors[rhoIndex];
             basisVectorOrigin.changeFrame(frame);
             basisVector.changeFrame(frame);
-            unitSpatialForceVector.setIncludingFrame(basisVector, basisVectorOrigin);
-            unitSpatialForceVector.getMatrixColumn(matrixToPack, rhoIndex);
+            unitSpatialForceVector.setIncludingFrame(null, basisVector, basisVectorOrigin);
+            unitSpatialForceVector.get(0, rhoIndex, matrixToPack);
          }
          else
          {
@@ -422,7 +484,8 @@ public class PlaneContactStateToWrenchMatrixHelper
       normalContactVectorRotationMatrixToPack.set(normalContactVectorRotation);
    }
 
-   private void computeBasisVector(int basisVectorIndex, double rotationOffset, RotationMatrix normalContactVectorRotationMatrix, FrameVector3D basisVectorToPack)
+   private void computeBasisVector(int basisVectorIndex, double rotationOffset, RotationMatrix normalContactVectorRotationMatrix,
+                                   FrameVector3D basisVectorToPack)
    {
       double angle = rotationOffset + basisVectorIndex * basisVectorAngleIncrement;
       double mu = yoPlaneContactState.getCoefficientOfFriction();
@@ -435,7 +498,7 @@ public class PlaneContactStateToWrenchMatrixHelper
       basisVectorToPack.normalize();
    }
 
-   public RigidBody getRigidBody()
+   public RigidBodyBasics getRigidBody()
    {
       return yoPlaneContactState.getRigidBody();
    }
@@ -485,9 +548,19 @@ public class PlaneContactStateToWrenchMatrixHelper
       return copRegularizationJacobian;
    }
 
+   public DenseMatrix64F getCoPRegularizationObjective()
+   {
+      return copRegularizationObjective;
+   }
+
    public DenseMatrix64F getCoPRateRegularizationJacobian()
    {
       return copRateRegularizationJacobian;
+   }
+
+   public DenseMatrix64F getCoPRateRegularizationObjective()
+   {
+      return copRateRegularizationObjective;
    }
 
    public DenseMatrix64F getCoPRegularizationWeight()
@@ -529,5 +602,4 @@ public class PlaneContactStateToWrenchMatrixHelper
    {
       return yoPlaneContactState.getFootholdArea() > minFootholdSizeForCoPObjectives;
    }
-
 }

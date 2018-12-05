@@ -245,7 +245,7 @@ public class PlanarRegionSegmentationCalculator
       Set<NormalOcTreeNode> newSetToExplore = new HashSet<>();
 
       NeighborActionRule<NormalOcTreeNode> extendSearchRule = neighborNode -> recordCandidatesForRegion(neighborNode, ocTreeNodePlanarRegion, newSetToExplore, boundingBox, parameters);
-      ocTreeNodePlanarRegion.nodeParallelStream()
+      ocTreeNodePlanarRegion.nodeStream() // TODO This should be in parallel, but the previous lambda makes threads share data which is no good.
                   .filter(node -> isNodeInBoundingBox(node, boundingBox))
                   .forEach(regionNode -> OcTreeNearestNeighborTools.findRadiusNeighbors(root, regionNode, searchRadius, extendSearchRule));
       nodesToExplore.addAll(newSetToExplore);

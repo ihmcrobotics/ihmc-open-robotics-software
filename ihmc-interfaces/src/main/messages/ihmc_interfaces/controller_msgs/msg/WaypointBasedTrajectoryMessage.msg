@@ -4,7 +4,7 @@
 # Unique ID used to identify this message, should preferably be consecutively increasing.
 uint32 sequence_id
 
-int64 end_effector_name_based_hash_code
+int32 end_effector_hash_code
 float64[] waypoint_times
 geometry_msgs/Pose[] waypoints
 SelectionMatrix3DMessage angular_selection_matrix

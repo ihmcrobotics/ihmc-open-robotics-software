@@ -52,6 +52,12 @@ public class AtlasICPOptimizationPushRecoveryATest extends AvatarICPOptimization
                      {
                         return true;
                      }
+
+                     @Override
+                     public boolean useSmartICPIntegrator()
+                     {
+                        return true;
+                     }
                   };
                }
 

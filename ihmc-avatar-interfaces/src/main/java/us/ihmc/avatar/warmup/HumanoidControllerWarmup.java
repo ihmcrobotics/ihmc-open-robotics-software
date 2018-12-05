@@ -35,18 +35,18 @@ import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactableFoot;
-import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.converter.FrameMessageCommandConverter;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
+import us.ihmc.mecano.multiBodySystem.interfaces.FloatingJointBasics;
+import us.ihmc.mecano.multiBodySystem.interfaces.JointBasics;
+import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
+import us.ihmc.mecano.spatial.Twist;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
+import us.ihmc.robotics.contactable.ContactablePlaneBody;
 import us.ihmc.robotics.geometry.RotationTools;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
-import us.ihmc.robotics.screwTheory.FloatingInverseDynamicsJoint;
-import us.ihmc.robotics.screwTheory.InverseDynamicsJoint;
-import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.robotics.screwTheory.TotalMassCalculator;
-import us.ihmc.robotics.screwTheory.Twist;
 import us.ihmc.robotics.sensors.FootSwitchInterface;
 import us.ihmc.sensorProcessing.frames.ReferenceFrameHashCodeResolver;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutputList;
@@ -81,9 +81,10 @@ public abstract class HumanoidControllerWarmup
 
    private FullHumanoidRobotModel fullRobotModel;
    private HumanoidReferenceFrames referenceFrames;
-   private OneDoFJoint[] oneDoFJoints;
+   private OneDoFJointBasics[] oneDoFJoints;
 
    private HighLevelControlManagerFactory managerFactory;
+   private HighLevelHumanoidControllerToolbox controllerToolbox;
    private WalkingHighLevelHumanoidController walkingController;
    private WholeBodyControllerCore controllerCore;
    private JointDesiredOutputList controllerOutput;
@@ -96,6 +97,7 @@ public abstract class HumanoidControllerWarmup
       controlDT = robotModel.getControllerDT();
 
       setupController();
+      controllerToolbox.initialize();
       walkingController.initialize();
       controllerCore.initialize();
    }
@@ -139,6 +141,7 @@ public abstract class HumanoidControllerWarmup
    private void doSingleTimeUpdate()
    {
       // (1) do control and compute desired accelerations
+      controllerToolbox.update();
       walkingController.doAction();
       ControllerCoreCommand coreCommand = walkingController.getControllerCoreCommand();
       controllerCore.submitControllerCoreCommand(coreCommand);
@@ -173,7 +176,7 @@ public abstract class HumanoidControllerWarmup
    {
       for (int i = 0; i < oneDoFJoints.length; i++)
       {
-         OneDoFJoint joint = oneDoFJoints[i];
+         OneDoFJointBasics joint = oneDoFJoints[i];
          JointDesiredOutputReadOnly jointDesireds = controllerOutput.getJointDesiredOutput(joint);
 
          if (jointDesireds == null)
@@ -200,9 +203,9 @@ public abstract class HumanoidControllerWarmup
       desiredAngularAcceleration.set(desiredAcceleration.get(0), desiredAcceleration.get(1), desiredAcceleration.get(2));
       desiredLinearAcceleration.set(desiredAcceleration.get(3), desiredAcceleration.get(4), desiredAcceleration.get(5));
 
-      FloatingInverseDynamicsJoint rootJoint = fullRobotModel.getRootJoint();
-      rootJoint.getTranslation(position);
-      rootJoint.getLinearVelocity(linearVelocity);
+      FloatingJointBasics rootJoint = fullRobotModel.getRootJoint();
+      position.set(rootJoint.getJointPose().getPosition());
+      linearVelocity.set(rootJoint.getJointTwist().getLinearPart());
 
       newPosition.set(desiredLinearAcceleration);
       newPosition.scale(0.5 * controlDT);
@@ -219,8 +222,8 @@ public abstract class HumanoidControllerWarmup
       newAngularVelocity.scale(controlDT);
       newAngularVelocity.add(angularVelocity);
 
-      rootJoint.setRotation(newOrientation);
-      rootJoint.setPosition(newPosition);
+      rootJoint.setJointOrientation(newOrientation);
+      rootJoint.setJointPosition(newPosition);
       rootJoint.updateFramesRecursively();
       frameLinearVelocity.setIncludingFrame(ReferenceFrame.getWorldFrame(), newLinearVelocity);
       frameAngularVelocity.setIncludingFrame(ReferenceFrame.getWorldFrame(), newAngularVelocity);
@@ -228,17 +231,17 @@ public abstract class HumanoidControllerWarmup
       frameAngularVelocity.scale(velocityDecay);
       frameLinearVelocity.changeFrame(rootJoint.getFrameAfterJoint());
       frameAngularVelocity.changeFrame(rootJoint.getFrameAfterJoint());
-      rootJointTwist.set(rootJoint.getFrameAfterJoint(), rootJoint.getFrameBeforeJoint(), rootJoint.getFrameAfterJoint(), frameLinearVelocity,
-                         frameAngularVelocity);
+      rootJointTwist.setIncludingFrame(rootJoint.getFrameAfterJoint(), rootJoint.getFrameBeforeJoint(), rootJoint.getFrameAfterJoint(), frameAngularVelocity,
+                         frameLinearVelocity);
       rootJoint.setJointTwist(rootJointTwist);
    }
 
    private void createControllerCore(YoVariableRegistry walkingControllerRegistry)
    {
-      InverseDynamicsJoint[] jointsToIgnore = DRCControllerThread.createListOfJointsToIgnore(fullRobotModel, robotModel, robotModel.getSensorInformation());
-      InverseDynamicsJoint[] jointsToOptimizeFor = HighLevelHumanoidControllerToolbox.computeJointsToOptimizeFor(fullRobotModel, jointsToIgnore);
+      JointBasics[] jointsToIgnore = DRCControllerThread.createListOfJointsToIgnore(fullRobotModel, robotModel, robotModel.getSensorInformation());
+      JointBasics[] jointsToOptimizeFor = HighLevelHumanoidControllerToolbox.computeJointsToOptimizeFor(fullRobotModel, jointsToIgnore);
 
-      FloatingInverseDynamicsJoint rootJoint = fullRobotModel.getRootJoint();
+      FloatingJointBasics rootJoint = fullRobotModel.getRootJoint();
       ReferenceFrame centerOfMassFrame = referenceFrames.getCenterOfMassFrame();
 
       WalkingControllerParameters walkingControllerParameters = robotModel.getWalkingControllerParameters();
@@ -292,7 +295,7 @@ public abstract class HumanoidControllerWarmup
       double totalRobotWeight = TotalMassCalculator.computeSubTreeMass(fullRobotModel.getElevator()) * gravityZ;
       SideDependentList<FootSwitchInterface> footSwitches = createFootSwitches(feet, totalRobotWeight, referenceFrames.getSoleZUpFrames());
 
-      HighLevelHumanoidControllerToolbox controllerToolbox = new HighLevelHumanoidControllerToolbox(fullRobotModel, referenceFrames, footSwitches, null, null,
+      controllerToolbox = new HighLevelHumanoidControllerToolbox(fullRobotModel, referenceFrames, footSwitches, null, null,
                                                                                                     yoTime, gravityZ, omega0, feet, controlDT, null,
                                                                                                     contactableBodies, yoGraphicsListRegistry);
 
@@ -355,7 +358,7 @@ public abstract class HumanoidControllerWarmup
          footStates.put(robotSide, footState);
       }
 
-      ParameterLoaderHelper.loadParameters(this, robotModel.getWholeBodyControllerParametersFile(), drcControllerThread, false);
+      ParameterLoaderHelper.loadParameters(this, robotModel.getWholeBodyControllerParametersFile(), drcControllerThread);
 
       YoVariable<?> defaultHeight = registry.getVariable(PelvisHeightControlState.class.getSimpleName(),
                                                          PelvisHeightControlState.class.getSimpleName() + "DefaultHeight");

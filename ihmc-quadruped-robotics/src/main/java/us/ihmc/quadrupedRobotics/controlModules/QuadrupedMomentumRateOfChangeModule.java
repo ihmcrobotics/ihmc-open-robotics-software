@@ -1,8 +1,8 @@
 package us.ihmc.quadrupedRobotics.controlModules;
 
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.MomentumRateCommand;
+import us.ihmc.commons.MathTools;
 import us.ihmc.euclid.referenceFrame.*;
-import us.ihmc.euclid.referenceFrame.interfaces.FixedFramePoint2DBasics;
 import us.ihmc.euclid.referenceFrame.interfaces.FixedFramePoint3DBasics;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
@@ -27,7 +27,7 @@ public class QuadrupedMomentumRateOfChangeModule
 
    private final DoubleParameter comPositionGravityCompensationParameter = new DoubleParameter("comPositionGravityCompensation", registry, 1);
 
-   private final FramePoint3D cmpPositionSetpoint = new FramePoint3D();
+   private final FramePoint3D eCMPPositionSetpoint = new FramePoint3D();
 
    private final ReferenceFrame centerOfMassFrame;
 
@@ -91,20 +91,25 @@ public class QuadrupedMomentumRateOfChangeModule
       this.dcmVelocitySetpoint.setIncludingFrame(dcmVelocitySetpoint);
    }
 
-   public void compute(FixedFramePoint3DBasics vrpPositionSetpointToPack, FixedFramePoint3DBasics cmpPositionSetpointToPack)
+   private final FramePoint3D centerOfMassPosition = new FramePoint3D();
+
+   public void compute(FixedFramePoint3DBasics vrpPositionSetpointToPack, FixedFramePoint3DBasics eCMPPositionSetpointToPack)
    {
       dcmPositionController.compute(vrpPositionSetpointToPack, dcmPositionEstimate, dcmPositionSetpoint, dcmVelocitySetpoint);
 
-      double vrpHeightOffsetFromHeightManagement = desiredCoMHeightAcceleration * linearInvertedPendulumModel.getComHeight() / gravity;
-      vrpPositionSetpointToPack.subZ(comPositionGravityCompensationParameter.getValue() * vrpHeightOffsetFromHeightManagement);
-      cmpPositionSetpoint.set(vrpPositionSetpointToPack);
-      cmpPositionSetpoint.subZ(linearInvertedPendulumModel.getComHeight());
+      double vrpHeightOffsetFromHeightManagement = desiredCoMHeightAcceleration * linearInvertedPendulumModel.getLipmHeight() / gravity;
+      vrpPositionSetpointToPack.subZ(vrpHeightOffsetFromHeightManagement);
 
-      linearInvertedPendulumModel.computeComForce(linearMomentumRateOfChange, cmpPositionSetpoint);
+      double modifiedHeight = comPositionGravityCompensationParameter.getValue() * linearInvertedPendulumModel.getLipmHeight();
+      eCMPPositionSetpoint.setIncludingFrame(vrpPositionSetpointToPack);
+      eCMPPositionSetpoint.subZ(modifiedHeight);
+      eCMPPositionSetpointToPack.setMatchingFrame(eCMPPositionSetpoint);
 
-      cmpPositionSetpoint.changeFrame(cmpPositionSetpointToPack.getReferenceFrame());
-      cmpPositionSetpointToPack.set(cmpPositionSetpoint);
-
+      centerOfMassPosition.setToZero(centerOfMassFrame);
+      eCMPPositionSetpoint.changeFrame(centerOfMassFrame);
+      linearMomentumRateOfChange.setIncludingFrame(centerOfMassPosition);
+      linearMomentumRateOfChange.sub(eCMPPositionSetpoint);
+      linearMomentumRateOfChange.scale(mass * MathTools.square(linearInvertedPendulumModel.getNaturalFrequency()));
       linearMomentumRateOfChange.changeFrame(worldFrame);
       linearMomentumRateOfChange.subZ(mass * gravity);
 
@@ -120,25 +125,26 @@ public class QuadrupedMomentumRateOfChangeModule
       return momentumRateCommand;
    }
 
-   private final FramePoint2D centerOfMass2d = new FramePoint2D();
-   private final FrameVector2D achievedCoMAcceleration2d = new FrameVector2D();
+   private final FramePoint3D centerOfMass = new FramePoint3D();
+   private final FrameVector3D achievedCoMAcceleration = new FrameVector3D();
 
-   public void computeAchievedCMP(FrameVector3DReadOnly achievedLinearMomentumRate, FixedFramePoint2DBasics achievedCMPToPack)
+   public void computeAchievedECMP(FrameVector3DReadOnly achievedLinearMomentumRate, FixedFramePoint3DBasics achievedECMPToPack)
    {
       if (achievedLinearMomentumRate.containsNaN())
          return;
 
-      centerOfMass2d.setToZero(centerOfMassFrame);
-      centerOfMass2d.changeFrame(worldFrame);
+      centerOfMass.setToZero(centerOfMassFrame);
+      centerOfMass.changeFrame(worldFrame);
 
-      achievedCoMAcceleration2d.setIncludingFrame(achievedLinearMomentumRate);
-      achievedCoMAcceleration2d.scale(1.0 / mass);
-      achievedCoMAcceleration2d.changeFrame(worldFrame);
+      achievedCoMAcceleration.setIncludingFrame(achievedLinearMomentumRate);
+      achievedCoMAcceleration.scale(1.0 / mass);
+      achievedCoMAcceleration.changeFrame(worldFrame);
 
       double omega0 = linearInvertedPendulumModel.getNaturalFrequency();
 
-      achievedCMPToPack.set(achievedCoMAcceleration2d);
-      achievedCMPToPack.scale(-1.0 / (omega0 * omega0));
-      achievedCMPToPack.add(centerOfMass2d);
+      achievedECMPToPack.set(achievedCoMAcceleration);
+      achievedECMPToPack.addZ(gravity); // needs to be an addZ, because gravity in this case is positive.
+      achievedECMPToPack.scale(-1.0 / (omega0 * omega0));
+      achievedECMPToPack.add(centerOfMass);
    }
 }

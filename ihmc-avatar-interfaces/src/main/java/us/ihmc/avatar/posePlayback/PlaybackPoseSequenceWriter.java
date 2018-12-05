@@ -17,7 +17,7 @@ import javax.swing.JFrame;
 import javax.swing.JRadioButton;
 import javax.swing.JTextField;
 
-import us.ihmc.robotics.screwTheory.OneDoFJoint;
+import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 
 public class PlaybackPoseSequenceWriter
 {
@@ -95,12 +95,12 @@ public class PlaybackPoseSequenceWriter
       ArrayList<PlaybackPose> poseSequence = posePlaybackRobotPoseSequence.getPoseSequence();
 
       PlaybackPose firstPose = poseSequence.get(0);
-      ArrayList<OneDoFJoint> oneDoFJoints = new ArrayList<>();
+      ArrayList<OneDoFJointBasics> oneDoFJoints = new ArrayList<>();
       firstPose.getOneDoFJoints(oneDoFJoints);
 
       printWriter.print("delayBeforePose poseDuration");
 
-      for (OneDoFJoint oneDoFJoint : oneDoFJoints)
+      for (OneDoFJointBasics oneDoFJoint : oneDoFJoints)
       {
          printWriter.print(" " + oneDoFJoint.getName());
       }

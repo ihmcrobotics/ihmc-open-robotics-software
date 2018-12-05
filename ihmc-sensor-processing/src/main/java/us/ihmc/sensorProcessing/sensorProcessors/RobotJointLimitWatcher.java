@@ -1,10 +1,10 @@
 package us.ihmc.sensorProcessing.sensorProcessors;
 
+import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
+import us.ihmc.robotics.math.YoVariableLimitChecker;
+import us.ihmc.simulationconstructionset.util.RobotController;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.robotics.math.YoVariableLimitChecker;
-import us.ihmc.robotics.screwTheory.OneDoFJoint;
-import us.ihmc.simulationconstructionset.util.RobotController;
 
 public class RobotJointLimitWatcher implements RobotController
 {
@@ -13,12 +13,12 @@ public class RobotJointLimitWatcher implements RobotController
    protected final YoDouble[] variablesToTrack;
    protected final YoVariableLimitChecker[] limitCheckers;
    
-   protected final OneDoFJoint[] oneDoFJoints;
+   protected final OneDoFJointBasics[] oneDoFJoints;
    private SensorRawOutputMapReadOnly sensorRawOutputMapReadOnly;
    
    protected YoVariableRegistry doNotRegister = new YoVariableRegistry("DoNotRegister");
 
-   public RobotJointLimitWatcher(OneDoFJoint[] oneDoFJoints, SensorRawOutputMapReadOnly sensorRawOutputMapReadOnly)
+   public RobotJointLimitWatcher(OneDoFJointBasics[] oneDoFJoints, SensorRawOutputMapReadOnly sensorRawOutputMapReadOnly)
    {
       this.oneDoFJoints = oneDoFJoints;
       this.sensorRawOutputMapReadOnly = sensorRawOutputMapReadOnly;
@@ -30,7 +30,7 @@ public class RobotJointLimitWatcher implements RobotController
 
       for (int i = 0; i < numberOfJoints; i++)
       {
-         OneDoFJoint oneDoFJoint = oneDoFJoints[i];
+         OneDoFJointBasics oneDoFJoint = oneDoFJoints[i];
          variablesToTrack[i] = new YoDouble(oneDoFJoint.getName(), doNotRegister);
 
          double thresholdPercentage = 0.02;
@@ -43,7 +43,7 @@ public class RobotJointLimitWatcher implements RobotController
       }
    }
    
-   public RobotJointLimitWatcher(OneDoFJoint[] oneDoFJoints)
+   public RobotJointLimitWatcher(OneDoFJointBasics[] oneDoFJoints)
    {
       this(oneDoFJoints, null);
    }

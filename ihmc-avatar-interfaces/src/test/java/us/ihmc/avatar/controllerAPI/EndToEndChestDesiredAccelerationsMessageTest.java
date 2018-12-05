@@ -1,6 +1,8 @@
 package us.ihmc.avatar.controllerAPI;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertArrayEquals;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 import java.util.Random;
 
@@ -16,18 +18,19 @@ import us.ihmc.commonWalkingControlModules.controlModules.rigidBody.RigidBodyCon
 import us.ihmc.commonWalkingControlModules.controllerCore.WholeBodyInverseDynamicsSolver;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.manipulation.individual.states.HandUserControlModeState;
 import us.ihmc.commons.RandomNumbers;
+import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
+import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
+import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
+import us.ihmc.mecano.tools.MultiBodySystemTools;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
-import us.ihmc.yoVariables.variable.YoEnum;
-import us.ihmc.robotics.screwTheory.OneDoFJoint;
-import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.robotics.screwTheory.ScrewTools;
-import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationConstructionSetTools.bambooTools.BambooTools;
+import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.util.simulationTesting.SimulationTestingParameters;
 import us.ihmc.tools.MemoryTools;
-import us.ihmc.commons.thread.ThreadTools;
+import us.ihmc.yoVariables.variable.YoEnum;
 
 public abstract class EndToEndChestDesiredAccelerationsMessageTest implements MultiRobotTestInterface
 {
@@ -55,9 +58,9 @@ public abstract class EndToEndChestDesiredAccelerationsMessageTest implements Mu
 
       FullHumanoidRobotModel fullRobotModel = drcSimulationTestHelper.getControllerFullRobotModel();
 
-      RigidBody pelvis = fullRobotModel.getPelvis();
-      RigidBody chest = fullRobotModel.getChest();
-      OneDoFJoint[] spineJoints = ScrewTools.createOneDoFJointPath(pelvis, chest);
+      RigidBodyBasics pelvis = fullRobotModel.getPelvis();
+      RigidBodyBasics chest = fullRobotModel.getChest();
+      OneDoFJointBasics[] spineJoints = MultiBodySystemTools.createOneDoFJointPath(pelvis, chest);
       double[] chestDesiredJointAccelerations = RandomNumbers.nextDoubleArray(random, spineJoints.length, 0.1);
       SpineDesiredAccelerationsMessage desiredAccelerationsMessage = HumanoidMessageTools.createSpineDesiredAccelerationsMessage(chestDesiredJointAccelerations);
 
@@ -92,7 +95,7 @@ public abstract class EndToEndChestDesiredAccelerationsMessageTest implements Mu
       return ((YoEnum<RigidBodyControlMode>) scs.getVariable(namespace, state)).getEnumValue();
    }
 
-   public double[] findQPOutputJointAccelerations(OneDoFJoint[] joints, SimulationConstructionSet scs)
+   public double[] findQPOutputJointAccelerations(OneDoFJointBasics[] joints, SimulationConstructionSet scs)
    {
       double[] qdd_ds = new double[joints.length];
       for (int i = 0; i < joints.length; i++)
@@ -102,7 +105,7 @@ public abstract class EndToEndChestDesiredAccelerationsMessageTest implements Mu
       return qdd_ds;
    }
 
-   public double[] findControllerDesiredJointAccelerations(OneDoFJoint[] joints, SimulationConstructionSet scs)
+   public double[] findControllerDesiredJointAccelerations(OneDoFJointBasics[] joints, SimulationConstructionSet scs)
    {
       double[] qdd_ds = new double[joints.length];
       String prefix = "utorsoUserMode";

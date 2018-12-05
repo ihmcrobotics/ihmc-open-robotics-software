@@ -17,14 +17,15 @@ import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.graphicsDescription.Graphics3DObject;
 import us.ihmc.graphicsDescription.appearance.AppearanceDefinition;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
+import us.ihmc.mecano.multiBodySystem.RevoluteJoint;
+import us.ihmc.mecano.multiBodySystem.RigidBody;
+import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
+import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
+import us.ihmc.mecano.tools.MultiBodySystemTools;
 import us.ihmc.robotics.geometry.RotationalInertiaCalculator;
 import us.ihmc.robotics.math.filters.FilteredVelocityYoFrameVector;
-import us.ihmc.robotics.screwTheory.OneDoFJoint;
-import us.ihmc.robotics.screwTheory.RevoluteJoint;
-import us.ihmc.robotics.screwTheory.RigidBody;
-import us.ihmc.robotics.screwTheory.ScrewTools;
-import us.ihmc.sensorProcessing.outputData.JointDesiredOutputReadOnly;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutputListReadOnly;
+import us.ihmc.sensorProcessing.outputData.JointDesiredOutputReadOnly;
 import us.ihmc.simulationconstructionset.KinematicPoint;
 import us.ihmc.simulationconstructionset.Link;
 import us.ihmc.simulationconstructionset.OneDegreeOfFreedomJoint;
@@ -42,7 +43,7 @@ public class FixedBaseRobotArm extends Robot
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
    private static final double gravity = 9.81;
 
-   private final RigidBody elevator;
+   private final RigidBodyBasics elevator;
    private final Vector3D shoulderYawOffset = new Vector3D(0.0, 0.0, 0.3);
    private final Vector3D shoulderRollOffset = new Vector3D(0.0, 0.0, 0.0);
    private final Vector3D shoulderPitchOffset = new Vector3D(0.0, 0.0, 0.0);
@@ -72,19 +73,19 @@ public class FixedBaseRobotArm extends Robot
    private final Vector3D handCoM = new Vector3D(0.0, 0.0, 0.05);
 
    private final RevoluteJoint shoulderYaw;
-   private final RigidBody shoulderYawLink;
+   private final RigidBodyBasics shoulderYawLink;
    private final RevoluteJoint shoulderRoll;
-   private final RigidBody shoulderRollLink;
+   private final RigidBodyBasics shoulderRollLink;
    private final RevoluteJoint shoulderPitch;
-   private final RigidBody upperArm;
+   private final RigidBodyBasics upperArm;
    private final RevoluteJoint elbowPitch;
-   private final RigidBody lowerArm;
+   private final RigidBodyBasics lowerArm;
    private final RevoluteJoint wristPitch;
-   private final RigidBody wristPitchLink;
+   private final RigidBodyBasics wristPitchLink;
    private final RevoluteJoint wristRoll;
-   private final RigidBody wristRollLink;
+   private final RigidBodyBasics wristRollLink;
    private final RevoluteJoint wristYaw;
-   private final RigidBody hand;
+   private final RigidBodyBasics hand;
 
    private final RigidBodyTransform controlFrameTransform = new RigidBodyTransform(new AxisAngle(), new Vector3D(0.0, 0.0, 0.4));
    private final ReferenceFrame handControlFrame;
@@ -93,7 +94,7 @@ public class FixedBaseRobotArm extends Robot
    private final FilteredVelocityYoFrameVector controlFrameLinearAcceleration;
    private final FilteredVelocityYoFrameVector controlFrameAngularAcceleration;
 
-   private final Map<OneDoFJoint, OneDegreeOfFreedomJoint> idToSCSJointMap = new HashMap<>();
+   private final Map<OneDoFJointBasics, OneDegreeOfFreedomJoint> idToSCSJointMap = new HashMap<>();
 
    public FixedBaseRobotArm(double dt)
    {
@@ -102,25 +103,25 @@ public class FixedBaseRobotArm extends Robot
 
       elevator = new RigidBody("elevator", worldFrame);
 
-      shoulderYaw = ScrewTools.addRevoluteJoint("shoulderYaw", elevator, shoulderYawOffset, Z_AXIS);
-      shoulderYawLink = ScrewTools.addRigidBody("shoulderYawLink", shoulderYaw, createNullMOI(), SMALL_MASS, new RigidBodyTransform());
-      shoulderRoll = ScrewTools.addRevoluteJoint("shoulderRoll", shoulderYawLink, shoulderRollOffset, X_AXIS);
-      shoulderRollLink = ScrewTools.addRigidBody("shoulderRollLink", shoulderRoll, createNullMOI(), SMALL_MASS, new RigidBodyTransform());
-      shoulderPitch = ScrewTools.addRevoluteJoint("shoulderPitch", shoulderRollLink, shoulderPitchOffset, Y_AXIS);
+      shoulderYaw = new RevoluteJoint("shoulderYaw", elevator, shoulderYawOffset, Z_AXIS);
+      shoulderYawLink = new RigidBody("shoulderYawLink", shoulderYaw, createNullMOI(), SMALL_MASS, new RigidBodyTransform());
+      shoulderRoll = new RevoluteJoint("shoulderRoll", shoulderYawLink, shoulderRollOffset, X_AXIS);
+      shoulderRollLink = new RigidBody("shoulderRollLink", shoulderRoll, createNullMOI(), SMALL_MASS, new RigidBodyTransform());
+      shoulderPitch = new RevoluteJoint("shoulderPitch", shoulderRollLink, shoulderPitchOffset, Y_AXIS);
 
-      upperArm = ScrewTools.addRigidBody("upperArm", shoulderPitch, upperArmInertia, upperArmMass, upperArmCoM);
+      upperArm = new RigidBody("upperArm", shoulderPitch, upperArmInertia, upperArmMass, upperArmCoM);
 
-      elbowPitch = ScrewTools.addRevoluteJoint("elbowPitch", upperArm, elbowPitchOffset, Y_AXIS);
+      elbowPitch = new RevoluteJoint("elbowPitch", upperArm, elbowPitchOffset, Y_AXIS);
 
-      lowerArm = ScrewTools.addRigidBody("lowerArm", elbowPitch, lowerArmInertia, lowerArmMass, lowerArmCoM);
+      lowerArm = new RigidBody("lowerArm", elbowPitch, lowerArmInertia, lowerArmMass, lowerArmCoM);
 
-      wristPitch = ScrewTools.addRevoluteJoint("wristPitch", lowerArm, wristPitchOffset, Y_AXIS);
-      wristPitchLink = ScrewTools.addRigidBody("wristPitchLink", wristPitch, createNullMOI(), SMALL_MASS, new RigidBodyTransform());
-      wristRoll = ScrewTools.addRevoluteJoint("wristRoll", wristPitchLink, wristRollOffset, X_AXIS);
-      wristRollLink = ScrewTools.addRigidBody("wristRollLink", wristRoll, createNullMOI(), SMALL_MASS, new RigidBodyTransform());
-      wristYaw = ScrewTools.addRevoluteJoint("wristYaw", wristRollLink, wristYawOffset, Z_AXIS);
+      wristPitch = new RevoluteJoint("wristPitch", lowerArm, wristPitchOffset, Y_AXIS);
+      wristPitchLink = new RigidBody("wristPitchLink", wristPitch, createNullMOI(), SMALL_MASS, new RigidBodyTransform());
+      wristRoll = new RevoluteJoint("wristRoll", wristPitchLink, wristRollOffset, X_AXIS);
+      wristRollLink = new RigidBody("wristRollLink", wristRoll, createNullMOI(), SMALL_MASS, new RigidBodyTransform());
+      wristYaw = new RevoluteJoint("wristYaw", wristRollLink, wristYawOffset, Z_AXIS);
 
-      hand = ScrewTools.addRigidBody("hand", wristYaw, handInertia, handMass, handCoM);
+      hand = new RigidBody("hand", wristYaw, handInertia, handMass, handCoM);
 
       handControlFrame = ReferenceFrame.constructFrameWithUnchangingTransformToParent("handControlFrame", hand.getBodyFixedFrame(), controlFrameTransform);
 
@@ -142,7 +143,7 @@ public class FixedBaseRobotArm extends Robot
 
    private void setJointLimits()
    {
-      RevoluteJoint[] allJoints = ScrewTools.filterJoints(ScrewTools.computeSubtreeJoints(elevator), RevoluteJoint.class);
+      RevoluteJoint[] allJoints = MultiBodySystemTools.filterJoints(MultiBodySystemTools.collectSubtreeJoints(elevator), RevoluteJoint.class);
       for (RevoluteJoint revoluteJoint : allJoints)
       {
          revoluteJoint.setJointLimitUpper(Math.PI);
@@ -262,9 +263,9 @@ public class FixedBaseRobotArm extends Robot
 
    public void updateSCSRobotJointTaus(JointDesiredOutputListReadOnly lowLevelOneDoFJointDesiredDataHolder)
    {
-      for (Entry<OneDoFJoint, OneDegreeOfFreedomJoint> pair : idToSCSJointMap.entrySet())
+      for (Entry<OneDoFJointBasics, OneDegreeOfFreedomJoint> pair : idToSCSJointMap.entrySet())
       {
-         OneDoFJoint oneDoFJoint = pair.getKey();
+         OneDoFJointBasics oneDoFJoint = pair.getKey();
          JointDesiredOutputReadOnly data = lowLevelOneDoFJointDesiredDataHolder.getJointDesiredOutput(oneDoFJoint); 
          if (data.hasDesiredTorque())
          {
@@ -276,9 +277,9 @@ public class FixedBaseRobotArm extends Robot
 
    public void updateSCSRobotJointConfiguration(JointDesiredOutputListReadOnly lowLevelOneDoFJointDesiredDataHolder)
    {
-      for (Entry<OneDoFJoint, OneDegreeOfFreedomJoint> pair : idToSCSJointMap.entrySet())
+      for (Entry<OneDoFJointBasics, OneDegreeOfFreedomJoint> pair : idToSCSJointMap.entrySet())
       {
-         OneDoFJoint oneDoFJoint = pair.getKey();
+         OneDoFJointBasics oneDoFJoint = pair.getKey();
          JointDesiredOutputReadOnly data = lowLevelOneDoFJointDesiredDataHolder.getJointDesiredOutput(oneDoFJoint); 
 
          if (data.hasDesiredPosition())
@@ -297,7 +298,7 @@ public class FixedBaseRobotArm extends Robot
 
    public void updateIDRobot()
    {
-      for (Entry<OneDoFJoint, OneDegreeOfFreedomJoint> pair : idToSCSJointMap.entrySet())
+      for (Entry<OneDoFJointBasics, OneDegreeOfFreedomJoint> pair : idToSCSJointMap.entrySet())
       {
          pair.getKey().setQ(pair.getValue().getQ());
          pair.getKey().setQd(pair.getValue().getQD());
@@ -309,7 +310,7 @@ public class FixedBaseRobotArm extends Robot
    {
       Random random = new Random();
 
-      for (Entry<OneDoFJoint, OneDegreeOfFreedomJoint> pair : idToSCSJointMap.entrySet())
+      for (Entry<OneDoFJointBasics, OneDegreeOfFreedomJoint> pair : idToSCSJointMap.entrySet())
       {
          OneDegreeOfFreedomJoint joint = pair.getValue();
 
@@ -324,12 +325,12 @@ public class FixedBaseRobotArm extends Robot
       }
    }
 
-   public RigidBody getElevator()
+   public RigidBodyBasics getElevator()
    {
       return elevator;
    }
 
-   public RigidBody getHand()
+   public RigidBodyBasics getHand()
    {
       return hand;
    }

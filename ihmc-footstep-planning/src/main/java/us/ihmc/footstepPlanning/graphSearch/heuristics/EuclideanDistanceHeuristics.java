@@ -1,14 +1,13 @@
 package us.ihmc.footstepPlanning.graphSearch.heuristics;
 
-import us.ihmc.footstepPlanning.graphSearch.heuristics.CostToGoHeuristics;
 import us.ihmc.footstepPlanning.graphSearch.graph.FootstepNode;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.providers.DoubleProvider;
 
 public class EuclideanDistanceHeuristics extends CostToGoHeuristics
 {
-   public EuclideanDistanceHeuristics(YoVariableRegistry registry)
+   public EuclideanDistanceHeuristics(DoubleProvider weight)
    {
-      super(registry);
+      super(weight);
    }
 
    @Override

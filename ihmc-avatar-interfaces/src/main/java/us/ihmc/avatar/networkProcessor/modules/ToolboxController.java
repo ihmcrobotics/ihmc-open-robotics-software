@@ -1,5 +1,11 @@
 package us.ihmc.avatar.networkProcessor.modules;
 
+import java.io.IOException;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ScheduledFuture;
+
+import javax.management.RuntimeErrorException;
+
 import us.ihmc.communication.controllerAPI.StatusMessageOutputManager;
 import us.ihmc.euclid.interfaces.Settable;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
@@ -7,11 +13,13 @@ import us.ihmc.yoVariables.variable.YoBoolean;
 
 public abstract class ToolboxController
 {
-   private static final boolean DEBUG = false;
+   protected static final boolean DEBUG = false;
 
    protected final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
-   private final StatusMessageOutputManager statusOutputManager;
+   protected final StatusMessageOutputManager statusOutputManager;
    private final YoBoolean initialize = new YoBoolean("initialize" + registry.getName(), registry);
+   
+   private ScheduledFuture<?> futureToListenTo;
 
    public ToolboxController(StatusMessageOutputManager statusOutputManager, YoVariableRegistry parentRegistry)
    {
@@ -32,10 +40,11 @@ public abstract class ToolboxController
    /**
     * Initializes once and run the {@link #updateInternal()} of this toolbox controller only if the
     * initialization succeeded.
+    * @throws Exception 
     * 
     * @see #hasBeenInitialized() The initialization state of this toolbox controller.
     */
-   public void update()
+   public void update() 
    {
       if (initialize.getBooleanValue())
       {
@@ -55,6 +64,32 @@ public abstract class ToolboxController
             e.printStackTrace();
          }
       }
+      
+      if (futureToListenTo != null)
+      {
+         if (futureToListenTo.isDone())
+         {
+            try
+            {
+               futureToListenTo.get();
+            }
+            catch (ExecutionException e)
+            {
+               e.getCause().printStackTrace();
+            }
+            catch (InterruptedException exception)
+            {
+               exception.getCause().printStackTrace();
+            }
+            
+            throw new RuntimeException("Toolbox controller thread crashed.");
+         }
+      }
+   }
+   
+   public void setFutureToListenTo(ScheduledFuture<?> future)
+   {
+      futureToListenTo = future;
    }
 
    /**
@@ -79,7 +114,7 @@ public abstract class ToolboxController
     * 
     * @param statusMessage the message to publish.
     */
-   protected <S extends Settable<S>> void reportMessage(S statusMessage)
+   public <S extends Settable<S>> void reportMessage(S statusMessage)
    {
       statusOutputManager.reportStatusMessage(statusMessage);
    }
@@ -90,7 +125,7 @@ public abstract class ToolboxController
     * 
     * @return {@code true} if the initialization succeeded, {@code false} otherwise.
     */
-   abstract protected boolean initialize();
+   abstract public boolean initialize();
 
    /**
     * Internal update method that should perform the computation for this toolbox controller. It is
@@ -98,7 +133,7 @@ public abstract class ToolboxController
     * 
     * @throws Exception
     */
-   abstract protected void updateInternal() throws Exception;
+   abstract public void updateInternal() throws Exception;
 
-   abstract protected boolean isDone();
+   abstract public boolean isDone();
 }

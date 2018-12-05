@@ -6,8 +6,8 @@ import org.ejml.data.DenseMatrix64F;
 
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
-import us.ihmc.robotics.math.frames.YoWrench;
-import us.ihmc.robotics.screwTheory.Wrench;
+import us.ihmc.mecano.spatial.Wrench;
+import us.ihmc.mecano.yoVariables.spatial.YoFixedFrameWrench;
 import us.ihmc.simulationconstructionset.GroundContactPoint;
 import us.ihmc.simulationconstructionset.Joint;
 import us.ihmc.simulationconstructionset.Robot;
@@ -23,7 +23,7 @@ public class GroundContactPointBasedEstimator implements RobotController
 
    private final GroundContactPointBasedWrenchCalculator wrenchCalculator;
 
-   private final YoWrench wrench;
+   private final YoFixedFrameWrench wrench;
 
    public GroundContactPointBasedEstimator(Robot robot)
    {
@@ -33,7 +33,7 @@ public class GroundContactPointBasedEstimator implements RobotController
       ArrayList<GroundContactPoint> groundContactPoints = robot.getAllGroundContactPoints();
       wrenchCalculator = new GroundContactPointBasedWrenchCalculator(robot.getName() + "_ft", groundContactPoints, joint, new RigidBodyTransform(), registry);
 
-      wrench = new YoWrench(robot.getName() + "_wrench", worldFrame, worldFrame, registry);
+      wrench = new YoFixedFrameWrench(robot.getName() + "_wrench", worldFrame, worldFrame, registry);
    }
 
    @Override

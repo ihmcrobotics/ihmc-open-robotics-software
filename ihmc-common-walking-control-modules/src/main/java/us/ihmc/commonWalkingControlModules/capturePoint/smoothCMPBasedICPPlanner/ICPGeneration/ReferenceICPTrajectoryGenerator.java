@@ -53,6 +53,7 @@ public class ReferenceICPTrajectoryGenerator implements PositionTrajectoryGenera
 
    private final YoBoolean copWaypointsWereAdjusted;
    private final YoBoolean isInitialTransfer;
+   private final YoBoolean isStanding;
 
    private final YoBoolean continuouslyAdjustForICPContinuity;
    private final YoBoolean areICPDynamicsSatisfied;
@@ -97,12 +98,13 @@ public class ReferenceICPTrajectoryGenerator implements PositionTrajectoryGenera
    private final List<YoDouble> icpSegmentStartTimes = new ArrayList<>();
    private final List<YoDouble> icpSegmentEndTimes = new ArrayList<>();
 
-   public ReferenceICPTrajectoryGenerator(String namePrefix, YoDouble omega0, YoInteger numberOfFootstepsToConsider, YoBoolean isInitialTransfer, boolean debug,
-                                          YoVariableRegistry registry, YoGraphicsListRegistry yoGraphicsListRegistry)
+   public ReferenceICPTrajectoryGenerator(String namePrefix, YoDouble omega0, YoInteger numberOfFootstepsToConsider, YoBoolean isInitialTransfer,
+                                          YoBoolean isStanding, boolean debug, YoVariableRegistry registry, YoGraphicsListRegistry yoGraphicsListRegistry)
    {
       this.omega0 = omega0;
       this.numberOfFootstepsToConsider = numberOfFootstepsToConsider;
       this.isInitialTransfer = isInitialTransfer;
+      this.isStanding = isStanding;
       this.debug = debug;
       this.visualize = VISUALIZE && yoGraphicsListRegistry != null;
 
@@ -229,30 +231,9 @@ public class ReferenceICPTrajectoryGenerator implements PositionTrajectoryGenera
       for (int order = 0; order < firstTrajectory.getNumberOfCoefficients() / 2; order++)
       {
          FrameTuple3DBasics icpQuantityInitialCondition = calculatedInitialICPConditions.add();
-         if (currentTrajectoryIndex < 0)
-         { // called when standing
-            firstTrajectory.getDerivative(order, localTime, icpQuantityInitialCondition);
-         }
-         else
-         { // called when moving
-            switch (order)
-            {
-//            case 0:
-//               icpQuantityInitialCondition.set(icpPositionDesiredCurrent);
-//               break;
-//            case 1:
-//               icpQuantityInitialCondition.set(icpVelocityDesiredCurrent);
-//               break;
-//            case 2:
-//               icpQuantityInitialCondition.set(icpAccelerationDesiredCurrent);
-//               break;
-            default:
-               icpToolbox
-                     .calculateICPQuantityFromCorrespondingCMPPolynomial3D(omega0.getDoubleValue(), localTime, order, trajectories.get(currentTrajectoryIndex),
-                                                                           exitCornerPoints.get(currentTrajectoryIndex), icpQuantityInitialCondition);
-               break;
-            }
-         }
+         icpToolbox
+               .calculateICPQuantityFromCorrespondingCMPPolynomial3D(omega0.getDoubleValue(), localTime, order, trajectories.get(currentTrajectoryIndex),
+                                                                     exitCornerPoints.get(currentTrajectoryIndex), icpQuantityInitialCondition);
       }
    }
 
@@ -382,9 +363,9 @@ public class ReferenceICPTrajectoryGenerator implements PositionTrajectoryGenera
 
       icpToolbox.computeDesiredCornerPoints(icpDesiredInitialPositionsFromCoPs, icpDesiredFinalPositionsFromCoPs, copTrajectories, omega0.getDoubleValue());
 
-      if (isInitialTransfer.getBooleanValue())
+      if (isInitialTransfer.getBooleanValue() && isStanding.getBooleanValue())
       {
-         getICPInitialConditionsForAdjustmentFromCoPs(localTimeInCurrentPhase.getDoubleValue(), -1);
+         getICPInitialConditionsForAdjustmentFromCoPs(localTimeInCurrentPhase.getDoubleValue(), 0);
          setInitialConditionsForAdjustment();
       }
    }
@@ -464,6 +445,7 @@ public class ReferenceICPTrajectoryGenerator implements PositionTrajectoryGenera
    public void setInitialConditionsForAdjustment()
    {
       setInitialICPConditions.clear();
+
       for (int i = 0; i < calculatedInitialICPConditions.size(); i++)
          setInitialICPConditions.add().setIncludingFrame(calculatedInitialICPConditions.get(i));
 

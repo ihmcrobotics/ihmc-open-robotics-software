@@ -32,11 +32,11 @@ import us.ihmc.manipulation.planning.exploringSpatial.SpatialData;
 import us.ihmc.manipulation.planning.exploringSpatial.SpatialNode;
 import us.ihmc.manipulation.planning.rrt.configurationAndTimeSpace.SpatialNodeTree;
 import us.ihmc.manipulation.planning.rrt.configurationAndTimeSpace.TreeStateVisualizer;
+import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotModels.FullRobotModelUtils;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
-import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
@@ -199,7 +199,7 @@ public class WholeBodyTrajectoryToolboxController extends ToolboxController
    }
 
    @Override
-   protected void updateInternal() throws InterruptedException, ExecutionException
+   public void updateInternal() throws InterruptedException, ExecutionException
    {
       currentNumberOfIterations.increment();
 
@@ -608,7 +608,7 @@ public class WholeBodyTrajectoryToolboxController extends ToolboxController
    }
 
    @Override
-   protected boolean initialize()
+   public boolean initialize()
    {
       isDone.set(false);
 
@@ -799,7 +799,7 @@ public class WholeBodyTrajectoryToolboxController extends ToolboxController
    }
 
    @Override
-   protected boolean isDone()
+   public boolean isDone()
    {
       return isDone.getBooleanValue();
    }
@@ -936,10 +936,10 @@ public class WholeBodyTrajectoryToolboxController extends ToolboxController
    private double computeArmJointsLimitScore(FullHumanoidRobotModel fullRobotModel)
    {
       double score = 0.0;
-      RigidBody chest = fullRobotModel.getChest();
+      RigidBodyBasics chest = fullRobotModel.getChest();
       for (RobotSide robotSide : RobotSide.values)
       {
-         RigidBody hand = fullRobotModel.getHand(robotSide);
+         RigidBodyBasics hand = fullRobotModel.getHand(robotSide);
          score += WholeBodyTrajectoryToolboxHelper.kinematicsChainLimitScore(chest, hand);
       }
       return score;

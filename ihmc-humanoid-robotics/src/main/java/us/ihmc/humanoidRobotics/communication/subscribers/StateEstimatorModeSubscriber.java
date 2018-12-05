@@ -6,13 +6,9 @@ import controller_msgs.msg.dds.StateEstimatorModePacket;
 import us.ihmc.communication.net.PacketConsumer;
 import us.ihmc.humanoidRobotics.communication.packets.sensing.StateEstimatorMode;
 
-public class StateEstimatorModeSubscriber implements PacketConsumer<StateEstimatorModePacket>
+public class StateEstimatorModeSubscriber
 {
    private final AtomicReference<StateEstimatorMode> referenceToRequestedMode = new AtomicReference<StateEstimatorMode>(null);
-
-   public StateEstimatorModeSubscriber()
-   {
-   }
 
    public boolean checkForNewOperatingModeRequest()
    {
@@ -24,7 +20,6 @@ public class StateEstimatorModeSubscriber implements PacketConsumer<StateEstimat
       return referenceToRequestedMode.getAndSet(null);
    }
 
-   @Override
    public void receivedPacket(StateEstimatorModePacket packet)
    {
       if (packet == null)
@@ -33,8 +28,12 @@ public class StateEstimatorModeSubscriber implements PacketConsumer<StateEstimat
       StateEstimatorMode requestedOperatingMode = StateEstimatorMode.fromByte(packet.getRequestedStateEstimatorMode());
       if (requestedOperatingMode != null)
       {
-         referenceToRequestedMode.set(requestedOperatingMode);
+         requestMode(requestedOperatingMode);
       }
    }
 
+   public void requestMode(StateEstimatorMode requestedOperatingMode)
+   {
+      referenceToRequestedMode.set(requestedOperatingMode);
+   }
 }

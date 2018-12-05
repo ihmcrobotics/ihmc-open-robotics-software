@@ -7,13 +7,14 @@ import static org.junit.Assert.fail;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 
-import controller_msgs.msg.dds.RobotConfigurationData;
 import org.junit.Test;
+
+import controller_msgs.msg.dds.RobotConfigurationData;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations;
+import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotModels.FullRobotModelUtils;
-import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.robotics.sensors.ForceSensorDefinition;
 import us.ihmc.robotics.sensors.IMUDefinition;
 import us.ihmc.sensorProcessing.communication.packets.dataobjects.RobotConfigurationDataFactory;
@@ -28,8 +29,8 @@ public abstract class RobotConfigurationDataBufferTest
       FullHumanoidRobotModel setterFullRobotModel = getFullRobotModel();
       FullHumanoidRobotModel getterFullRobotModel = getFullRobotModel();
 
-      OneDoFJoint[] setterJoints = FullRobotModelUtils.getAllJointsExcludingHands(setterFullRobotModel);
-      OneDoFJoint[] getterJoints = FullRobotModelUtils.getAllJointsExcludingHands(getterFullRobotModel);
+      OneDoFJointBasics[] setterJoints = FullRobotModelUtils.getAllJointsExcludingHands(setterFullRobotModel);
+      OneDoFJointBasics[] getterJoints = FullRobotModelUtils.getAllJointsExcludingHands(getterFullRobotModel);
       ForceSensorDefinition[] forceSensorDefinitions = setterFullRobotModel.getForceSensorDefinitions();
       IMUDefinition[] imuDefinitions = setterFullRobotModel.getIMUDefinitions();
 

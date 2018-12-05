@@ -1,8 +1,8 @@
 package us.ihmc.robotics.sensors;
 
+import us.ihmc.robotics.math.trajectories.Finishable;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
-import us.ihmc.robotics.math.trajectories.Finishable;
 
 public class CartesianTrajectoryBasedFootSwitch implements TrajectoryBasedFootSwitch
 {

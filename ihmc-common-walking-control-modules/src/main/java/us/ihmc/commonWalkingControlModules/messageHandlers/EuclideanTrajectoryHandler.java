@@ -30,6 +30,7 @@ public class EuclideanTrajectoryHandler
    private final SimpleEuclideanTrajectoryPoint lastPoint = new SimpleEuclideanTrajectoryPoint();
    private final SimpleEuclideanTrajectoryPoint firstPoint = new SimpleEuclideanTrajectoryPoint();
    private final SimpleEuclideanTrajectoryPoint secondPoint = new SimpleEuclideanTrajectoryPoint();
+   private final SimpleEuclideanTrajectoryPoint tempPoint = new SimpleEuclideanTrajectoryPoint();
 
    private final RecyclingLinkedList<SimpleEuclideanTrajectoryPoint> trajectoryPoints = new RecyclingLinkedList<>(defaultMaxNumberOfPoints,
                                                                                                                   SimpleEuclideanTrajectoryPoint.class,
@@ -180,6 +181,7 @@ public class EuclideanTrajectoryHandler
          trajectoryPoints.peekFirst(firstPoint);
          if (firstPoint.getTime() < currentTime)
          {
+            tempPoint.set(firstPoint);
             trajectoryPoints.removeFirst();
             removedPoints = true;
          }
@@ -193,7 +195,7 @@ public class EuclideanTrajectoryHandler
       // need to add the last removed point back so we can interpolate the current time.
       if (removedPoints && !trajectoryPoints.isEmpty())
       {
-         trajectoryPoints.addFirst(firstPoint);
+         trajectoryPoints.addFirst(tempPoint);
       }
 
       numberOfPoints.set(trajectoryPoints.size());

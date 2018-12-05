@@ -30,6 +30,7 @@ public class FootstepPlanningRequestPacket extends Packet<FootstepPlanningReques
    public us.ihmc.euclid.tuple4D.Quaternion goal_orientation_in_world_;
    public byte requested_footstep_planner_type_ = (byte) 255;
    public double timeout_;
+   public double horizon_length_;
    public controller_msgs.msg.dds.PlanarRegionsListMessage planar_regions_list_message_;
    public int planner_request_id_ = -1;
 
@@ -61,6 +62,8 @@ public class FootstepPlanningRequestPacket extends Packet<FootstepPlanningReques
       requested_footstep_planner_type_ = other.requested_footstep_planner_type_;
 
       timeout_ = other.timeout_;
+
+      horizon_length_ = other.horizon_length_;
 
       controller_msgs.msg.dds.PlanarRegionsListMessagePubSubType.staticCopy(other.planar_regions_list_message_, planar_regions_list_message_);
       planner_request_id_ = other.planner_request_id_;
@@ -133,6 +136,15 @@ public class FootstepPlanningRequestPacket extends Packet<FootstepPlanningReques
       return timeout_;
    }
 
+   public void setHorizonLength(double horizon_length)
+   {
+      horizon_length_ = horizon_length;
+   }
+   public double getHorizonLength()
+   {
+      return horizon_length_;
+   }
+
 
    public controller_msgs.msg.dds.PlanarRegionsListMessage getPlanarRegionsListMessage()
    {
@@ -178,6 +190,8 @@ public class FootstepPlanningRequestPacket extends Packet<FootstepPlanningReques
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.timeout_, other.timeout_, epsilon)) return false;
 
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.horizon_length_, other.horizon_length_, epsilon)) return false;
+
       if (!this.planar_regions_list_message_.epsilonEquals(other.planar_regions_list_message_, epsilon)) return false;
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.planner_request_id_, other.planner_request_id_, epsilon)) return false;
 
@@ -205,6 +219,8 @@ public class FootstepPlanningRequestPacket extends Packet<FootstepPlanningReques
       if(this.requested_footstep_planner_type_ != otherMyClass.requested_footstep_planner_type_) return false;
 
       if(this.timeout_ != otherMyClass.timeout_) return false;
+
+      if(this.horizon_length_ != otherMyClass.horizon_length_) return false;
 
       if (!this.planar_regions_list_message_.equals(otherMyClass.planar_regions_list_message_)) return false;
       if(this.planner_request_id_ != otherMyClass.planner_request_id_) return false;
@@ -235,6 +251,8 @@ public class FootstepPlanningRequestPacket extends Packet<FootstepPlanningReques
       builder.append(this.requested_footstep_planner_type_);      builder.append(", ");
       builder.append("timeout=");
       builder.append(this.timeout_);      builder.append(", ");
+      builder.append("horizon_length=");
+      builder.append(this.horizon_length_);      builder.append(", ");
       builder.append("planar_regions_list_message=");
       builder.append(this.planar_regions_list_message_);      builder.append(", ");
       builder.append("planner_request_id=");

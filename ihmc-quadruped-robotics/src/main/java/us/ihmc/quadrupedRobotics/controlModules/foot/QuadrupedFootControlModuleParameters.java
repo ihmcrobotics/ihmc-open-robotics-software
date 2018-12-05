@@ -1,10 +1,13 @@
 package us.ihmc.quadrupedRobotics.controlModules.foot;
 
 import us.ihmc.euclid.Axis;
+import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.robotics.controllers.pidGains.GainCoupling;
 import us.ihmc.robotics.controllers.pidGains.PID3DGainsReadOnly;
 import us.ihmc.robotics.controllers.pidGains.implementations.DefaultPID3DGains;
 import us.ihmc.robotics.controllers.pidGains.implementations.ParameterizedPID3DGains;
+import us.ihmc.robotics.dataStructures.parameters.ParameterVector3D;
 import us.ihmc.yoVariables.parameters.DoubleParameter;
 import us.ihmc.yoVariables.parameters.IntegerParameter;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
@@ -18,6 +21,7 @@ public class QuadrupedFootControlModuleParameters
 
    // final parameters
    private final ParameterizedPID3DGains solePositionGains;
+   private final Vector3DReadOnly solePositionWeights = new ParameterVector3D("solePositionWeights", new Vector3D(30.0, 30.0, 30.0), finalRegistry);
    private final DoubleParameter touchdownPressureLimitParameter = new DoubleParameter("touchdownPressureLimit", finalRegistry, 50);
    private final IntegerParameter touchdownTriggerWindowParameter = new IntegerParameter("touchdownTriggerWindow", finalRegistry, defaultTouchdownTriggerWindow);
    private final DoubleParameter minimumStepAdjustmentTimeParameter = new DoubleParameter("minimumStepAdjustmentTime", finalRegistry, 0.1);
@@ -41,6 +45,11 @@ public class QuadrupedFootControlModuleParameters
    public PID3DGainsReadOnly getSolePositionGains()
    {
       return solePositionGains;
+   }
+
+   public Vector3DReadOnly getSolePositionWeights()
+   {
+      return solePositionWeights;
    }
 
    public double getTouchdownPressureLimitParameter()

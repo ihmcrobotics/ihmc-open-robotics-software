@@ -3,7 +3,7 @@ package us.ihmc.commonWalkingControlModules.controllerCore.command;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.lowLevel.RootJointDesiredConfigurationDataReadOnly;
 import us.ihmc.euclid.referenceFrame.FramePoint2D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
-import us.ihmc.robotics.screwTheory.RigidBody;
+import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutputListReadOnly;
 
 /**
@@ -24,7 +24,7 @@ public interface ControllerCoreOutputReadOnly
    /**
     * Typically used to obtain the desired center of pressures for the feet.
     */
-   public abstract void getDesiredCenterOfPressure(FramePoint2D copToPack, RigidBody rigidBody);
+   public abstract void getDesiredCenterOfPressure(FramePoint2D copToPack, RigidBodyBasics rigidBody);
 
    /**
     * Retrieves the linear momentum rate obtained after the optimization problem has been solved.

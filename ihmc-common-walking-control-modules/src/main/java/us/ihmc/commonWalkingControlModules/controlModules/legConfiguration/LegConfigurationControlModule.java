@@ -4,14 +4,14 @@ import us.ihmc.commonWalkingControlModules.configurations.LegConfigurationParame
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.InverseDynamicsCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.PrivilegedJointSpaceCommand;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHumanoidControllerToolbox;
+import us.ihmc.commons.InterpolationTools;
 import us.ihmc.commons.MathTools;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
-import us.ihmc.commons.InterpolationTools;
 import us.ihmc.robotics.partNames.LegJointName;
 import us.ihmc.robotics.robotSide.RobotSide;
-import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.robotics.stateMachine.core.State;
 import us.ihmc.robotics.stateMachine.core.StateMachine;
 import us.ihmc.robotics.stateMachine.factories.StateMachineFactory;
@@ -91,7 +91,7 @@ public class LegConfigurationControlModule
    private final YoDouble currentVirtualActuatorLength;
    private final YoDouble currentVirtualActuatorVelocity;
 
-   private final OneDoFJoint kneePitchJoint;
+   private final OneDoFJointBasics kneePitchJoint;
 
    private final YoDouble dampingActionScaleFactor;
 
@@ -129,8 +129,8 @@ public class LegConfigurationControlModule
       kneeRangeOfMotion = kneeLimitUpper - kneeLimitLower;
       kneeMidRangeOfMotion = 0.5 * (kneeLimitUpper + kneeLimitLower);
 
-      OneDoFJoint hipPitchJoint = controllerToolbox.getFullRobotModel().getLegJoint(robotSide, LegJointName.HIP_PITCH);
-      OneDoFJoint anklePitchJoint = controllerToolbox.getFullRobotModel().getLegJoint(robotSide, LegJointName.ANKLE_PITCH);
+      OneDoFJointBasics hipPitchJoint = controllerToolbox.getFullRobotModel().getLegJoint(robotSide, LegJointName.HIP_PITCH);
+      OneDoFJointBasics anklePitchJoint = controllerToolbox.getFullRobotModel().getLegJoint(robotSide, LegJointName.ANKLE_PITCH);
       privilegedAccelerationCommand.addJoint(hipPitchJoint, Double.NaN);
       privilegedAccelerationCommand.addJoint(kneePitchJoint, Double.NaN);
       privilegedAccelerationCommand.addJoint(anklePitchJoint, Double.NaN);

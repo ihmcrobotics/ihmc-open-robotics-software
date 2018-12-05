@@ -2,67 +2,67 @@ package us.ihmc.robotics.math.filters;
 
 import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
-import us.ihmc.robotics.math.frames.YoSpatialVector;
+import us.ihmc.mecano.yoVariables.spatial.YoFixedFrameSpatialVector;
 import us.ihmc.yoVariables.providers.DoubleProvider;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 
-public class RateLimitedYoSpatialVector extends YoSpatialVector
+public class RateLimitedYoSpatialVector extends YoFixedFrameSpatialVector
 {
-   private final RateLimitedYoFrameVector rateLimitedLinearPart;
    private final RateLimitedYoFrameVector rateLimitedAngularPart;
+   private final RateLimitedYoFrameVector rateLimitedLinearPart;
 
-   public RateLimitedYoSpatialVector(String namePrefix, String nameSuffix, YoVariableRegistry registry, DoubleProvider maximumLinearRate,
-                                     DoubleProvider maximumAngularRate, double dt, FrameVector3DReadOnly rawLinearPart, FrameVector3DReadOnly rawAngularPart)
+   public RateLimitedYoSpatialVector(String namePrefix, String nameSuffix, YoVariableRegistry registry, DoubleProvider maximumAngularRate,
+                                     DoubleProvider maximumLinearRate, double dt, FrameVector3DReadOnly rawAngularPart, FrameVector3DReadOnly rawLinearPart)
    {
-      super(new RateLimitedYoFrameVector(namePrefix, nameSuffix, registry, maximumLinearRate, dt, rawLinearPart),
-            new RateLimitedYoFrameVector(namePrefix, nameSuffix, registry, maximumAngularRate, dt, rawAngularPart));
-      this.rateLimitedLinearPart = (RateLimitedYoFrameVector) linearPart;
-      this.rateLimitedAngularPart = (RateLimitedYoFrameVector) angularPart;
+      super(new RateLimitedYoFrameVector(namePrefix, nameSuffix, registry, maximumAngularRate, dt, rawAngularPart),
+            new RateLimitedYoFrameVector(namePrefix, nameSuffix, registry, maximumLinearRate, dt, rawLinearPart));
+      this.rateLimitedAngularPart = (RateLimitedYoFrameVector) getAngularPart();
+      this.rateLimitedLinearPart = (RateLimitedYoFrameVector) getLinearPart();
    }
 
-   public RateLimitedYoSpatialVector(String namePrefix, String nameSuffix, YoVariableRegistry registry, DoubleProvider maximumLinearRate,
-                                     DoubleProvider maximumAngularRate, double dt, YoSpatialVector rawSpatialVector)
+   public RateLimitedYoSpatialVector(String namePrefix, String nameSuffix, YoVariableRegistry registry, DoubleProvider maximumAngularRate,
+                                     DoubleProvider maximumLinearRate, double dt, YoFixedFrameSpatialVector rawSpatialVector)
    {
-      super(new RateLimitedYoFrameVector(namePrefix, nameSuffix, registry, maximumLinearRate, dt, rawSpatialVector.getYoLinearPart()),
-            new RateLimitedYoFrameVector(namePrefix, nameSuffix, registry, maximumAngularRate, dt, rawSpatialVector.getYoAngularPart()));
-      this.rateLimitedLinearPart = (RateLimitedYoFrameVector) linearPart;
-      this.rateLimitedAngularPart = (RateLimitedYoFrameVector) angularPart;
+      super(new RateLimitedYoFrameVector(namePrefix, nameSuffix, registry, maximumAngularRate, dt, rawSpatialVector.getAngularPart()),
+            new RateLimitedYoFrameVector(namePrefix, nameSuffix, registry, maximumLinearRate, dt, rawSpatialVector.getLinearPart()));
+      this.rateLimitedAngularPart = (RateLimitedYoFrameVector) getAngularPart();
+      this.rateLimitedLinearPart = (RateLimitedYoFrameVector) getLinearPart();
    }
 
-   public RateLimitedYoSpatialVector(RateLimitedYoFrameVector yoLinearPart, RateLimitedYoFrameVector yoAngularPart)
+   public RateLimitedYoSpatialVector(RateLimitedYoFrameVector yoAngularPart, RateLimitedYoFrameVector yoLinearPart)
    {
-      super(yoLinearPart, yoAngularPart);
-      this.rateLimitedLinearPart = yoLinearPart;
+      super(yoAngularPart, yoLinearPart);
       this.rateLimitedAngularPart = yoAngularPart;
+      this.rateLimitedLinearPart = yoLinearPart;
    }
 
    public void reset()
    {
-      rateLimitedLinearPart.reset();
       rateLimitedAngularPart.reset();
+      rateLimitedLinearPart.reset();
    }
 
    public void update()
    {
-      rateLimitedLinearPart.update();
       rateLimitedAngularPart.update();
+      rateLimitedLinearPart.update();
    }
 
-   public void update(FrameVector3DReadOnly rawLinearPart, FrameVector3DReadOnly rawAngularPart)
+   public void update(FrameVector3DReadOnly rawAngularPart, FrameVector3DReadOnly rawLinearPart)
    {
-      rateLimitedLinearPart.update(rawLinearPart);
       rateLimitedAngularPart.update(rawAngularPart);
-   }
-
-   public void update(Vector3DReadOnly rawLinearPart, Vector3DReadOnly rawAngularPart)
-   {
       rateLimitedLinearPart.update(rawLinearPart);
-      rateLimitedAngularPart.update(rawAngularPart);
    }
 
-   public void update(double rawLinearX, double rawLinearY, double rawLinearZ, double rawAngularX, double rawAngularY, double rawAngularZ)
+   public void update(Vector3DReadOnly rawAngularPart, Vector3DReadOnly rawLinearPart)
    {
-      rateLimitedLinearPart.update(rawLinearX, rawLinearY, rawLinearZ);
+      rateLimitedAngularPart.update(rawAngularPart);
+      rateLimitedLinearPart.update(rawLinearPart);
+   }
+
+   public void update(double rawAngularX, double rawAngularY, double rawAngularZ, double rawLinearX, double rawLinearY, double rawLinearZ)
+   {
       rateLimitedAngularPart.update(rawAngularX, rawAngularY, rawAngularZ);
+      rateLimitedLinearPart.update(rawLinearX, rawLinearY, rawLinearZ);
    }
 }

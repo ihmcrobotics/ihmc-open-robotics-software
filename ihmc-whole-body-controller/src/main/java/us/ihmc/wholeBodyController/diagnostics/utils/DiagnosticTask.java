@@ -2,10 +2,10 @@ package us.ihmc.wholeBodyController.diagnostics.utils;
 
 import java.util.ArrayDeque;
 
+import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
+import us.ihmc.wholeBodyController.diagnostics.DiagnosticDataReporter;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.robotics.screwTheory.OneDoFJoint;
-import us.ihmc.wholeBodyController.diagnostics.DiagnosticDataReporter;
 
 public abstract class DiagnosticTask
 {
@@ -30,17 +30,17 @@ public abstract class DiagnosticTask
       return timeInCurrentTask.getDoubleValue();
    }
 
-   public double getDesiredJointPositionOffset(OneDoFJoint joint)
+   public double getDesiredJointPositionOffset(OneDoFJointBasics joint)
    {
       return 0.0;
    }
 
-   public double getDesiredJointVelocityOffset(OneDoFJoint joint)
+   public double getDesiredJointVelocityOffset(OneDoFJointBasics joint)
    {
       return 0.0;
    }
 
-   public double getDesiredJointTauOffset(OneDoFJoint joint)
+   public double getDesiredJointTauOffset(OneDoFJointBasics joint)
    {
       return 0.0;
    }

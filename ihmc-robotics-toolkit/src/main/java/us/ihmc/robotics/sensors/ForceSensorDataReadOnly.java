@@ -4,14 +4,14 @@ import org.ejml.data.DenseMatrix64F;
 
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DBasics;
-import us.ihmc.robotics.screwTheory.RigidBody;
-import us.ihmc.robotics.screwTheory.Wrench;
+import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
+import us.ihmc.mecano.spatial.Wrench;
 
 public interface ForceSensorDataReadOnly
 {
    public ReferenceFrame getMeasurementFrame();
 
-   public RigidBody getMeasurementLink();
+   public RigidBodyBasics getMeasurementLink();
 
    public void getWrench(DenseMatrix64F wrenchToPack);
 

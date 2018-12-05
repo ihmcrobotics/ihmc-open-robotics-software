@@ -1,13 +1,13 @@
 package us.ihmc.quadrupedRobotics.output;
 
-import us.ihmc.quadrupedRobotics.model.QuadrupedRuntimeEnvironment;
-import us.ihmc.robotModels.FullRobotModel;
-import us.ihmc.robotics.screwTheory.OneDoFJoint;
-import us.ihmc.sensorProcessing.outputData.JointDesiredOutputList;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
-
 import java.util.ArrayList;
 import java.util.List;
+
+import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
+import us.ihmc.quadrupedRobotics.model.QuadrupedRuntimeEnvironment;
+import us.ihmc.robotModels.FullRobotModel;
+import us.ihmc.sensorProcessing.outputData.JointDesiredOutputList;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
 
 public class JointIntegratorComponent implements OutputProcessorComponent
 {
@@ -27,8 +27,8 @@ public class JointIntegratorComponent implements OutputProcessorComponent
 
    public void setFullRobotModel(FullRobotModel fullRobotModel)
    {
-      OneDoFJoint[] controllerJoints = fullRobotModel.getOneDoFJoints();
-      for (OneDoFJoint controllerJoint : controllerJoints)
+      OneDoFJointBasics[] controllerJoints = fullRobotModel.getOneDoFJoints();
+      for (OneDoFJointBasics controllerJoint : controllerJoints)
       {
          quadrupedJoints.add(new QuadrupedJointIntegrator(controllerJoint, jointDesiredOutputList.getJointDesiredOutput(controllerJoint), controlDT, registry));
       }

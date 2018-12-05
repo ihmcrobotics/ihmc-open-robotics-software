@@ -8,14 +8,8 @@ import us.ihmc.avatar.logProcessor.LogDataProcessorFunction;
 import us.ihmc.avatar.logProcessor.LogDataProcessorHelper;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
+import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
-import us.ihmc.yoVariables.dataBuffer.YoVariableHolder;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.yoVariables.variable.YoFramePoint3D;
-import us.ihmc.yoVariables.variable.YoFrameQuaternion;
-import us.ihmc.yoVariables.variable.YoFrameVector3D;
-import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.robotics.sensors.IMUDefinition;
 import us.ihmc.sensorProcessing.diagnostic.DelayEstimatorBetweenTwoSignals;
 import us.ihmc.sensorProcessing.diagnostic.DiagnosticParameters;
@@ -25,6 +19,12 @@ import us.ihmc.sensorProcessing.diagnostic.OneDoFJointFourierAnalysis;
 import us.ihmc.sensorProcessing.diagnostic.OrientationAngularVelocityConsistencyChecker;
 import us.ihmc.sensorProcessing.diagnostic.PositionVelocity1DConsistencyChecker;
 import us.ihmc.sensorProcessing.diagnostic.PositionVelocity3DConsistencyChecker;
+import us.ihmc.yoVariables.dataBuffer.YoVariableHolder;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoDouble;
+import us.ihmc.yoVariables.variable.YoFramePoint3D;
+import us.ihmc.yoVariables.variable.YoFrameQuaternion;
+import us.ihmc.yoVariables.variable.YoFrameVector3D;
 
 public class DiagnosticAnalysisProcessor implements LogDataProcessorFunction
 {
@@ -50,10 +50,10 @@ public class DiagnosticAnalysisProcessor implements LogDataProcessorFunction
 
    public void addJointFourierAnalyses(String qd_prefix, String qd_suffix, String tau_prefix, String tau_suffix, String tau_d_prefix, String tau_d_suffix)
    {
-      OneDoFJoint[] oneDoFJoints = fullRobotModel.getOneDoFJoints();
+      OneDoFJointBasics[] oneDoFJoints = fullRobotModel.getOneDoFJoints();
       double fftObservationWindow = diagnosticParameters.getFFTObservationWindow();
 
-      for (OneDoFJoint joint : oneDoFJoints)
+      for (OneDoFJointBasics joint : oneDoFJoints)
       {
          String jointName = joint.getName();
          YoDouble qd = (YoDouble) logYoVariableHolder.getVariable(qd_prefix + jointName + qd_suffix);
@@ -85,9 +85,9 @@ public class DiagnosticAnalysisProcessor implements LogDataProcessorFunction
 
    public void addJointConsistencyCheckers()
    {
-      OneDoFJoint[] oneDoFJoints = fullRobotModel.getOneDoFJoints();
+      OneDoFJointBasics[] oneDoFJoints = fullRobotModel.getOneDoFJoints();
 
-      for (OneDoFJoint joint : oneDoFJoints)
+      for (OneDoFJointBasics joint : oneDoFJoints)
       {
          String jointName = joint.getName();
          YoDouble rawJointPosition = (YoDouble) logYoVariableHolder.getVariable("raw_q_" + jointName);
@@ -155,9 +155,9 @@ public class DiagnosticAnalysisProcessor implements LogDataProcessorFunction
 
    public void addForceTrackingDelayEstimators(String tau_prefix, String tau_suffix, String tau_d_prefix, String tau_d_suffix)
    {
-      OneDoFJoint[] oneDoFJoints = fullRobotModel.getOneDoFJoints();
+      OneDoFJointBasics[] oneDoFJoints = fullRobotModel.getOneDoFJoints();
 
-      for (OneDoFJoint joint : oneDoFJoints)
+      for (OneDoFJointBasics joint : oneDoFJoints)
       {
          String jointName = joint.getName();
 

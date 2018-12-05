@@ -3,16 +3,23 @@ package us.ihmc.quadrupedRobotics.controller.toolbox;
 import org.ejml.alg.dense.misc.UnrolledInverseFromMinor;
 import org.ejml.data.DenseMatrix64F;
 import org.ejml.ops.CommonOps;
-import us.ihmc.robotModels.FullQuadrupedRobotModel;
+
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.mecano.frames.MovingReferenceFrame;
+import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
+import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
+import us.ihmc.mecano.tools.MultiBodySystemTools;
 import us.ihmc.quadrupedRobotics.estimator.referenceFrames.QuadrupedReferenceFrames;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.yoVariables.variable.YoFrameVector3D;
+import us.ihmc.robotModels.FullQuadrupedRobotModel;
 import us.ihmc.robotics.robotSide.QuadrantDependentList;
 import us.ihmc.robotics.robotSide.RobotQuadrant;
-import us.ihmc.robotics.screwTheory.*;
+import us.ihmc.robotics.screwTheory.GeometricJacobian;
+import us.ihmc.robotics.screwTheory.PointJacobian;
+import us.ihmc.robotics.screwTheory.ScrewTools;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoFrameVector3D;
 
 public class QuadrupedSoleForceEstimator
 {
@@ -29,7 +36,7 @@ public class QuadrupedSoleForceEstimator
    private final QuadrantDependentList<YoFrameVector3D> yoSoleVirtualForce;
    private final QuadrantDependentList<YoFrameVector3D> yoSoleContactForce;
 
-   private final QuadrantDependentList<OneDoFJoint[]> legJoints;
+   private final QuadrantDependentList<OneDoFJointBasics[]> legJoints;
    private final QuadrantDependentList<GeometricJacobian> footJacobian;
    private final QuadrantDependentList<PointJacobian> soleJacobian;
 
@@ -82,9 +89,9 @@ public class QuadrupedSoleForceEstimator
 
       for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
       {
-         RigidBody body = fullRobotModel.getRootJoint().getSuccessor();
-         RigidBody foot = fullRobotModel.getFoot(robotQuadrant);
-         legJoints.set(robotQuadrant, ScrewTools.filterJoints(ScrewTools.createJointPath(body, foot), OneDoFJoint.class));
+         RigidBodyBasics body = fullRobotModel.getRootJoint().getSuccessor();
+         RigidBodyBasics foot = fullRobotModel.getFoot(robotQuadrant);
+         legJoints.set(robotQuadrant, MultiBodySystemTools.filterJoints(MultiBodySystemTools.createJointPath(body, foot), OneDoFJointBasics.class));
          footJacobian.set(robotQuadrant, new GeometricJacobian(legJoints.get(robotQuadrant), body.getBodyFixedFrame()));
          soleJacobian.set(robotQuadrant, new PointJacobian());
          int jacobianRows = 3;
@@ -121,7 +128,7 @@ public class QuadrupedSoleForceEstimator
 
          for (int i = 0; i < legJoints.get(robotQuadrant).length; ++i)
          {
-            jointTorqueVector.get(robotQuadrant).set(i, 0, legJoints.get(robotQuadrant)[i].getTauMeasured());
+            jointTorqueVector.get(robotQuadrant).set(i, 0, legJoints.get(robotQuadrant)[i].getTau());
          }
       }
 

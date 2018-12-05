@@ -44,9 +44,9 @@ public class StereoVisionPointCloudMessagePubSubType implements us.ihmc.pubsub.T
 
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
-      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);current_alignment += (100 * 4) + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);current_alignment += (600000 * 4) + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 
-      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);current_alignment += (100 * 4) + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);current_alignment += (200000 * 4) + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 
 
       return current_alignment - initial_alignment;
@@ -85,11 +85,11 @@ public class StereoVisionPointCloudMessagePubSubType implements us.ihmc.pubsub.T
 
       cdr.write_type_11(data.getRobotTimestamp());
 
-      if(data.getPointCloud().size() <= 100)
+      if(data.getPointCloud().size() <= 600000)
       cdr.write_type_e(data.getPointCloud());else
           throw new RuntimeException("point_cloud field exceeds the maximum length");
 
-      if(data.getColors().size() <= 100)
+      if(data.getColors().size() <= 200000)
       cdr.write_type_e(data.getColors());else
           throw new RuntimeException("colors field exceeds the maximum length");
 

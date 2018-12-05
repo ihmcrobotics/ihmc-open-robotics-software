@@ -7,18 +7,18 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
+import us.ihmc.mecano.multiBodySystem.interfaces.FloatingJointBasics;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoFramePoint3D;
 import us.ihmc.yoVariables.variable.YoFrameQuaternion;
-import us.ihmc.robotics.screwTheory.FloatingInverseDynamicsJoint;
 import us.ihmc.sensorProcessing.stateEstimation.evaluation.FullInverseDynamicsStructure;
 
 public class PelvisPoseNoiseGenerator
 {
    private final YoVariableRegistry registry;
    
-   private final FloatingInverseDynamicsJoint rootJoint;
+   private final FloatingJointBasics rootJoint;
    private final ReferenceFrame rootJointFrame;
    
    private final Random random = new Random();
@@ -134,7 +134,7 @@ public class PelvisPoseNoiseGenerator
       
       updateAfterYoVariables();
       
-      rootJoint.setPositionAndRotation(pelvisPose);
+      rootJoint.setJointConfiguration(pelvisPose);
       rootJointFrame.update();
    }
 

@@ -16,7 +16,7 @@ import org.junit.Test;
 import us.ihmc.avatar.DRCObstacleCourseStartingLocation;
 import us.ihmc.avatar.MultiRobotTestInterface;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
-import us.ihmc.avatar.environments.DarpaRoboticsChallengeTrialsWalkingEnvironment;
+import us.ihmc.avatar.environments.DRCTrialsWalkingEnvironment;
 import us.ihmc.avatar.testTools.DRCSimulationTestHelper;
 import us.ihmc.avatar.testTools.ScriptedFootstepGenerator;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
@@ -42,14 +42,14 @@ public abstract class DRCObstacleCourseTrialsTerrainTest implements MultiRobotTe
    private static final SimulationTestingParameters simulationTestingParameters = SimulationTestingParameters.createFromSystemProperties();
 
    private DRCSimulationTestHelper drcSimulationTestHelper;
-   private DarpaRoboticsChallengeTrialsWalkingEnvironment environment;
+   private DRCTrialsWalkingEnvironment environment;
 
    protected abstract DRCRobotModel getRobotModelWithAdditionalFootContactPoints();
 
    @Before
    public void showMemoryUsageBeforeTest()
    {
-      environment = new DarpaRoboticsChallengeTrialsWalkingEnvironment();
+      environment = new DRCTrialsWalkingEnvironment();
       MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " before test.");
    }
 

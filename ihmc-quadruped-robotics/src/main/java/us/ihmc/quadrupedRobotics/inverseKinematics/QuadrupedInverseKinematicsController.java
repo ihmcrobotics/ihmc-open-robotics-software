@@ -1,5 +1,7 @@
 package us.ihmc.quadrupedRobotics.inverseKinematics;
 
+import static us.ihmc.humanoidRobotics.footstep.FootstepUtils.worldFrame;
+
 import us.ihmc.commonWalkingControlModules.configurations.JointPrivilegedConfigurationParameters;
 import us.ihmc.commonWalkingControlModules.controllerCore.WholeBodyControlCoreToolbox;
 import us.ihmc.commonWalkingControlModules.controllerCore.WholeBodyControllerCore;
@@ -13,8 +15,9 @@ import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
-import us.ihmc.quadrupedRobotics.estimator.referenceFrames.QuadrupedReferenceFrames;
-import us.ihmc.quadrupedRobotics.model.QuadrupedInitialPositionParameters;
+import us.ihmc.mecano.frames.CenterOfMassReferenceFrame;
+import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
+import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.robotModels.FullLeggedRobotModel;
 import us.ihmc.robotModels.FullQuadrupedRobotModel;
 import us.ihmc.robotics.controllers.pidGains.GainCoupling;
@@ -22,19 +25,14 @@ import us.ihmc.robotics.controllers.pidGains.YoPID3DGains;
 import us.ihmc.robotics.controllers.pidGains.implementations.DefaultYoPID3DGains;
 import us.ihmc.robotics.controllers.pidGains.implementations.PID3DConfiguration;
 import us.ihmc.robotics.math.filters.RateLimitedYoFramePoint;
-import us.ihmc.robotics.referenceFrames.CenterOfMassReferenceFrame;
 import us.ihmc.robotics.robotSide.QuadrantDependentList;
 import us.ihmc.robotics.robotSide.RobotQuadrant;
-import us.ihmc.robotics.screwTheory.OneDoFJoint;
-import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutputList;
 import us.ihmc.simulationconstructionset.util.RobotController;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoFramePoint3D;
-
-import static us.ihmc.humanoidRobotics.footstep.FootstepUtils.worldFrame;
 
 public class QuadrupedInverseKinematicsController implements RobotController
 {
@@ -74,9 +72,9 @@ public class QuadrupedInverseKinematicsController implements RobotController
 
       for (RobotQuadrant robotQuadrant : quadrants)
       {
-         RigidBody foot = fullRobotModel.getFoot(robotQuadrant);
+         RigidBodyBasics foot = fullRobotModel.getFoot(robotQuadrant);
          ReferenceFrame soleFrame = fullRobotModel.getSoleFrame(robotQuadrant);
-         RigidBody body = fullRobotModel.getBody();
+         RigidBodyBasics body = fullRobotModel.getBody();
 
          FramePoint3D currentPosition = new FramePoint3D(soleFrame);
          currentPosition.changeFrame(foot.getBodyFixedFrame());
@@ -86,7 +84,7 @@ public class QuadrupedInverseKinematicsController implements RobotController
          feedbackControlCommand.setBodyFixedPointToControl(currentPosition);
          feedbackControlCommands.put(robotQuadrant, feedbackControlCommand);
 
-         RigidBody rigidBody = foot;
+         RigidBodyBasics rigidBody = foot;
          while (rigidBody.getParentJoint().getPredecessor() != body)
             rigidBody = rigidBody.getParentJoint().getPredecessor();
          ReferenceFrame shoulderBaseFrame = rigidBody.getParentJoint().getFrameBeforeJoint();
@@ -114,7 +112,7 @@ public class QuadrupedInverseKinematicsController implements RobotController
       controllerCore = new WholeBodyControllerCore(controlCoreToolbox, getFeedbackCommandTemplate(), lowLevelJointOutputList, registry);
       controllerCoreCommand = new ControllerCoreCommand(WholeBodyControllerCoreMode.INVERSE_KINEMATICS);
 
-      for (OneDoFJoint joint : fullRobotModel.getOneDoFJoints())
+      for (OneDoFJointBasics joint : fullRobotModel.getOneDoFJoints())
       {
          double midrange = 0.5 * joint.getJointLimitUpper() + joint.getJointLimitLower();
          privilegedConfigurationCommand.addJoint(joint, midrange);

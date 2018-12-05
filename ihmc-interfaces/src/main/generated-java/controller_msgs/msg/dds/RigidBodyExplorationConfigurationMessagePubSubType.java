@@ -42,7 +42,7 @@ public class RigidBodyExplorationConfigurationMessagePubSubType implements us.ih
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 
-      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);current_alignment += (100 * 1) + us.ihmc.idl.CDR.alignment(current_alignment, 1);
 
@@ -66,7 +66,7 @@ public class RigidBodyExplorationConfigurationMessagePubSubType implements us.ih
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 
 
-      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
@@ -89,7 +89,7 @@ public class RigidBodyExplorationConfigurationMessagePubSubType implements us.ih
    {
       cdr.write_type_4(data.getSequenceId());
 
-      cdr.write_type_11(data.getRigidBodyNameBasedHashCode());
+      cdr.write_type_2(data.getRigidBodyHashCode());
 
       if(data.getConfigurationSpaceNamesToExplore().size() <= 100)
       cdr.write_type_e(data.getConfigurationSpaceNamesToExplore());else
@@ -109,7 +109,7 @@ public class RigidBodyExplorationConfigurationMessagePubSubType implements us.ih
    {
       data.setSequenceId(cdr.read_type_4());
       	
-      data.setRigidBodyNameBasedHashCode(cdr.read_type_11());
+      data.setRigidBodyHashCode(cdr.read_type_2());
       	
       cdr.read_type_e(data.getConfigurationSpaceNamesToExplore());	
       cdr.read_type_e(data.getExplorationRangeUpperLimits());	
@@ -121,7 +121,7 @@ public class RigidBodyExplorationConfigurationMessagePubSubType implements us.ih
    public final void serialize(controller_msgs.msg.dds.RigidBodyExplorationConfigurationMessage data, us.ihmc.idl.InterchangeSerializer ser)
    {
       ser.write_type_4("sequence_id", data.getSequenceId());
-      ser.write_type_11("rigid_body_name_based_hash_code", data.getRigidBodyNameBasedHashCode());
+      ser.write_type_2("rigid_body_hash_code", data.getRigidBodyHashCode());
       ser.write_type_e("configuration_space_names_to_explore", data.getConfigurationSpaceNamesToExplore());
       ser.write_type_e("exploration_range_upper_limits", data.getExplorationRangeUpperLimits());
       ser.write_type_e("exploration_range_lower_limits", data.getExplorationRangeLowerLimits());
@@ -131,7 +131,7 @@ public class RigidBodyExplorationConfigurationMessagePubSubType implements us.ih
    public final void deserialize(us.ihmc.idl.InterchangeSerializer ser, controller_msgs.msg.dds.RigidBodyExplorationConfigurationMessage data)
    {
       data.setSequenceId(ser.read_type_4("sequence_id"));
-      data.setRigidBodyNameBasedHashCode(ser.read_type_11("rigid_body_name_based_hash_code"));
+      data.setRigidBodyHashCode(ser.read_type_2("rigid_body_hash_code"));
       ser.read_type_e("configuration_space_names_to_explore", data.getConfigurationSpaceNamesToExplore());
       ser.read_type_e("exploration_range_upper_limits", data.getExplorationRangeUpperLimits());
       ser.read_type_e("exploration_range_lower_limits", data.getExplorationRangeLowerLimits());

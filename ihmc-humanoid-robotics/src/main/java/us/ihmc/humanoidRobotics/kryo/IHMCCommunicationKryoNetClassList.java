@@ -42,6 +42,7 @@ import geometry_msgs.msg.dds.TwistWithCovariancePubSubType;
 import geometry_msgs.msg.dds.TwistWithCovarianceStampedPubSubType;
 import geometry_msgs.msg.dds.Vector3PubSubType;
 import geometry_msgs.msg.dds.Vector3StampedPubSubType;
+import geometry_msgs.msg.dds.Wrench;
 import geometry_msgs.msg.dds.WrenchPubSubType;
 import geometry_msgs.msg.dds.WrenchStampedPubSubType;
 import gnu.trove.list.array.TByteArrayList;
@@ -145,6 +146,7 @@ import trajectory_msgs.msg.dds.JointTrajectoryPointPubSubType;
 import trajectory_msgs.msg.dds.JointTrajectoryPubSubType;
 import trajectory_msgs.msg.dds.MultiDOFJointTrajectoryPointPubSubType;
 import trajectory_msgs.msg.dds.MultiDOFJointTrajectoryPubSubType;
+import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.communication.net.NetClassList;
 import us.ihmc.communication.packets.ControllerCrashLocation;
 import us.ihmc.communication.packets.ExecutionMode;
@@ -185,7 +187,6 @@ import us.ihmc.humanoidRobotics.communication.packets.walking.HumanoidBodyPart;
 import us.ihmc.humanoidRobotics.communication.packets.walking.LoadBearingRequest;
 import us.ihmc.humanoidRobotics.communication.packets.walking.WalkingStatus;
 import us.ihmc.idl.IDLSequence;
-import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.pubsub.TopicDataType;
 import us.ihmc.pubsub.types.ByteBufferPubSubType;
 import us.ihmc.robotics.kinematics.TimeStampedTransform3D;
@@ -226,7 +227,13 @@ public class IHMCCommunicationKryoNetClassList extends NetClassList
       registerPacketField(us.ihmc.idl.CDR.class);
       
 
+      registerPacketField(WrenchTrajectoryMessage.class);
+      registerPacketField(WrenchTrajectoryMessagePubSubType.class);
+      registerPacketField(WrenchTrajectoryPointMessage.class);
+      registerPacketField(WrenchTrajectoryPointMessage[].class);
+      registerPacketField(WrenchTrajectoryPointMessagePubSubType.class);
       registerPacketField(KinematicsToolboxConfigurationMessagePubSubType.class);
+      registerPacketField(Wrench.class);
       registerPacketField(WholeBodyTrajectoryToolboxMessagePubSubType.class);
       registerPacketField(PlanOffsetStatusPubSubType.class);
       registerPacketField(HeaderPubSubType.class);

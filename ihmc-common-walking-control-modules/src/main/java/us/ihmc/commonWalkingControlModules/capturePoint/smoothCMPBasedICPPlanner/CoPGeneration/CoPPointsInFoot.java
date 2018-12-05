@@ -136,7 +136,7 @@ public class CoPPointsInFoot
       addWayPointName(copPointName);
    }
 
-   void addWayPointName(CoPPointName copPointName)
+   private void addWayPointName(CoPPointName copPointName)
    {
       this.copPointsList.add(copPointName);
    }
@@ -224,12 +224,12 @@ public class CoPPointsInFoot
 
    public boolean isEmpty()
    {
-      return copPointsList.isEmpty();
+      return copLocations.isEmpty();
    }
 
    public int getNumberOfCoPPoints()
    {
-      return copPointsList.size();
+      return copLocations.size();
    }
 
    public String toString()
