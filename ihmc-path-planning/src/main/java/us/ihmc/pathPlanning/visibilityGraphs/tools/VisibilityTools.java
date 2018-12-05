@@ -21,7 +21,7 @@ import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.pathPlanning.visibilityGraphs.clusterManagement.Cluster;
 import us.ihmc.pathPlanning.visibilityGraphs.clusterManagement.Cluster.ExtrusionSide;
 import us.ihmc.pathPlanning.visibilityGraphs.dataStructure.Connection;
-import us.ihmc.pathPlanning.visibilityGraphs.dataStructure.NavigableRegion;
+import us.ihmc.pathPlanning.visibilityGraphs.dataStructure.VisibilityMapWithNavigableRegion;
 import us.ihmc.robotics.geometry.PlanarRegion;
 
 public class VisibilityTools
@@ -72,7 +72,7 @@ public class VisibilityTools
       return filteredConnections;
    }
 
-   public static Set<Connection> createStaticVisibilityMap(NavigableRegion navigableRegion)
+   public static Set<Connection> createStaticVisibilityMap(VisibilityMapWithNavigableRegion navigableRegion)
    {
       int regionId = navigableRegion.getMapId();
       PlanarRegion homeRegion = navigableRegion.getHomePlanarRegion();

@@ -79,7 +79,7 @@ import us.ihmc.pathPlanning.statistics.PlannerStatistics;
 import us.ihmc.pathPlanning.statistics.VisibilityGraphStatistics;
 import us.ihmc.pathPlanning.visibilityGraphs.DefaultVisibilityGraphParameters;
 import us.ihmc.pathPlanning.visibilityGraphs.dataStructure.InterRegionVisibilityMap;
-import us.ihmc.pathPlanning.visibilityGraphs.dataStructure.NavigableRegion;
+import us.ihmc.pathPlanning.visibilityGraphs.dataStructure.VisibilityMapWithNavigableRegion;
 import us.ihmc.pathPlanning.visibilityGraphs.dataStructure.VisibilityMap;
 import us.ihmc.pathPlanning.visibilityGraphs.interfaces.VisibilityGraphsParameters;
 import us.ihmc.pathPlanning.visibilityGraphs.interfaces.VisibilityMapHolder;
@@ -318,7 +318,7 @@ public class FootstepPathCalculatorModule
       InterRegionVisibilityMap interRegionVisibilityMap = new InterRegionVisibilityMap();
       interRegionVisibilityMap.addConnections(statistics.getInterRegionsVisibilityMap().getConnections());
 
-      List<NavigableRegion> navigableRegionList = new ArrayList<>();
+      List<VisibilityMapWithNavigableRegion> navigableRegionList = new ArrayList<>();
       for (int i = 0; i < statistics.getNumberOfNavigableRegions(); i++)
          navigableRegionList.add(statistics.getNavigableRegion(i));
 

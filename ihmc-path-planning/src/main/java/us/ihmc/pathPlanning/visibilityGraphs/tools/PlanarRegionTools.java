@@ -29,7 +29,7 @@ import us.ihmc.euclid.tuple3D.interfaces.Point3DBasics;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DBasics;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
-import us.ihmc.pathPlanning.visibilityGraphs.dataStructure.NavigableRegion;
+import us.ihmc.pathPlanning.visibilityGraphs.dataStructure.VisibilityMapWithNavigableRegion;
 import us.ihmc.pathPlanning.visibilityGraphs.interfaces.PlanarRegionFilter;
 import us.ihmc.robotEnvironmentAwareness.geometry.ConcaveHullDecomposition;
 import us.ihmc.robotEnvironmentAwareness.geometry.ConcaveHullTools;
@@ -250,16 +250,16 @@ public class PlanarRegionTools
       return closestPoint.epsilonEquals(point, epsilon);
    }
 
-   public static NavigableRegion getNavigableRegionContainingThisPoint(Point3DReadOnly point, List<NavigableRegion> navigableRegions)
+   public static VisibilityMapWithNavigableRegion getNavigableRegionContainingThisPoint(Point3DReadOnly point, List<VisibilityMapWithNavigableRegion> navigableRegions)
    {
       return getNavigableRegionContainingThisPoint(point, navigableRegions, 0.0);
    }
 
-   public static NavigableRegion getNavigableRegionContainingThisPoint(Point3DReadOnly point, List<NavigableRegion> navigableRegions, double epsilon)
+   public static VisibilityMapWithNavigableRegion getNavigableRegionContainingThisPoint(Point3DReadOnly point, List<VisibilityMapWithNavigableRegion> navigableRegions, double epsilon)
    {
-      List<NavigableRegion> containers = new ArrayList<>();
+      List<VisibilityMapWithNavigableRegion> containers = new ArrayList<>();
 
-      for (NavigableRegion navigableRegion : navigableRegions)
+      for (VisibilityMapWithNavigableRegion navigableRegion : navigableRegions)
       {
          if (isPointInWorldInsidePlanarRegion(navigableRegion.getHomePlanarRegion(), point, epsilon))
          {
@@ -275,14 +275,14 @@ public class PlanarRegionTools
       Point3D pointOnRegion = new Point3D();
       Vector3D regionNormal = new Vector3D();
 
-      NavigableRegion closestContainer = containers.get(0);
+      VisibilityMapWithNavigableRegion closestContainer = containers.get(0);
       closestContainer.getHomePlanarRegion().getNormal(regionNormal);
       closestContainer.getHomePlanarRegion().getPointInRegion(pointOnRegion);
       double minDistance = EuclidGeometryTools.distanceFromPoint3DToPlane3D(point, pointOnRegion, regionNormal);
 
       for (int i = 1; i < containers.size(); i++)
       {
-         NavigableRegion candidate = containers.get(i);
+         VisibilityMapWithNavigableRegion candidate = containers.get(i);
          candidate.getHomePlanarRegion().getNormal(regionNormal);
          candidate.getHomePlanarRegion().getPointInRegion(pointOnRegion);
          double distance = EuclidGeometryTools.distanceFromPoint3DToPlane3D(point, pointOnRegion, regionNormal);

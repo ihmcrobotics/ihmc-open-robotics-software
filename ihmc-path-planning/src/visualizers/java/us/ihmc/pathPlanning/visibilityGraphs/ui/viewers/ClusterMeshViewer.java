@@ -20,7 +20,7 @@ import us.ihmc.javaFXToolkit.shapes.JavaFXMeshBuilder;
 import us.ihmc.messager.Messager;
 import us.ihmc.messager.MessagerAPIFactory.Topic;
 import us.ihmc.pathPlanning.visibilityGraphs.clusterManagement.Cluster;
-import us.ihmc.pathPlanning.visibilityGraphs.dataStructure.NavigableRegion;
+import us.ihmc.pathPlanning.visibilityGraphs.dataStructure.VisibilityMapWithNavigableRegion;
 import us.ihmc.pathPlanning.visibilityGraphs.ui.VisualizationParameters;
 
 public class ClusterMeshViewer extends AnimationTimer
@@ -41,7 +41,7 @@ public class ClusterMeshViewer extends AnimationTimer
    private AtomicReference<Boolean> showNavigableExtrusions;
    private AtomicReference<Boolean> showNonNavigableExtrusions;
 
-   private AtomicReference<List<NavigableRegion>> newRequestReference;
+   private AtomicReference<List<VisibilityMapWithNavigableRegion>> newRequestReference;
 
    private final Messager messager;
 
@@ -66,7 +66,7 @@ public class ClusterMeshViewer extends AnimationTimer
    }
 
    public void setTopics(Topic<Boolean> resetRequestedTopic, Topic<Boolean> showClusterRawPointsTopic, Topic<Boolean> showClusterNavigableExtrusionsTopic,
-                         Topic<Boolean> showClusterNonNavigableExtrusionsTopic, Topic<List<NavigableRegion>> navigableRegionDataTopic)
+                         Topic<Boolean> showClusterNonNavigableExtrusionsTopic, Topic<List<VisibilityMapWithNavigableRegion>> navigableRegionDataTopic)
    {
       resetRequested = messager.createInput(resetRequestedTopic, false);
       showRawPoints = messager.createInput(showClusterRawPointsTopic, false);
@@ -121,19 +121,19 @@ public class ClusterMeshViewer extends AnimationTimer
 
       if (showRawPoints.get() || showNavigableExtrusions.get() || showNonNavigableExtrusions.get())
       {
-         List<NavigableRegion> newRequest = newRequestReference.getAndSet(null);
+         List<VisibilityMapWithNavigableRegion> newRequest = newRequestReference.getAndSet(null);
 
          if (newRequest != null)
             processNavigableRegionsOnThread(newRequest);
       }
    }
 
-   private void processNavigableRegionsOnThread(List<NavigableRegion> navigableRegionLocalPlanners)
+   private void processNavigableRegionsOnThread(List<VisibilityMapWithNavigableRegion> navigableRegionLocalPlanners)
    {
       executorService.execute(() -> processNavigableRegions(navigableRegionLocalPlanners));
    }
 
-   private void processNavigableRegions(List<NavigableRegion> navigableRegionLocalPlanners)
+   private void processNavigableRegions(List<VisibilityMapWithNavigableRegion> navigableRegionLocalPlanners)
    {
       Map<Integer, JavaFXMeshBuilder> rawPointsMeshBuilders = new HashMap<>();
       Map<Integer, JavaFXMeshBuilder> navigableExtrusionsMeshBuilders = new HashMap<>();
@@ -141,7 +141,7 @@ public class ClusterMeshViewer extends AnimationTimer
       Map<Integer, Material> navigableMaterials = new HashMap<>();
       Map<Integer, Material> nonNavigableMaterials = new HashMap<>();
 
-      for (NavigableRegion navigableRegionLocalPlanner : navigableRegionLocalPlanners)
+      for (VisibilityMapWithNavigableRegion navigableRegionLocalPlanner : navigableRegionLocalPlanners)
       {
          int regionId = navigableRegionLocalPlanner.getMapId();
          JavaFXMeshBuilder rawPointsMeshBuilder = getOrCreate(rawPointsMeshBuilders, regionId);

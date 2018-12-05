@@ -57,13 +57,13 @@ public class VisibilityGraphRandomTools
       return cluster;
    }
 
-   public static NavigableRegion getRandomNavigableRegion(Random random)
+   public static VisibilityMapWithNavigableRegion getRandomNavigableRegion(Random random)
    {
       int numberOfObstacleClusters = RandomNumbers.nextInt(random, 1, 50);
       PlanarRegion homeRegion = nextPlanarRegion(random);
       Cluster homeCluster = getRandomCluster(random);
 
-      NavigableRegion navigableRegion = new NavigableRegion(homeRegion);
+      VisibilityMapWithNavigableRegion navigableRegion = new VisibilityMapWithNavigableRegion(homeRegion);
       navigableRegion.setHomeRegionCluster(homeCluster);
       for (int i = 0; i < numberOfObstacleClusters; i++)
          navigableRegion.addObstacleCluster(getRandomCluster(random));
