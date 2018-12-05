@@ -250,4 +250,9 @@ public class QuadrupedControllerToolbox
    {
       return soleForceEstimator.getSoleContactForce(robotQuadrant);
    }
+
+   public QuadrupedSupportPolygons getSupportPolygons()
+   {
+      return supportPolygon;
+   }
 }

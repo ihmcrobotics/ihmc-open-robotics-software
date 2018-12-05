@@ -67,6 +67,7 @@ public class QuadrupedStandController implements EventState
 
       // initialize feedback controllers
       balanceManager.initializeForStanding();
+      balanceManager.enableBodyXYControl();
       bodyOrientationManager.initialize();
 
       feetManager.requestFullContact();
@@ -75,5 +76,6 @@ public class QuadrupedStandController implements EventState
    @Override
    public void onExit()
    {
+      balanceManager.disableBodyXYControl();
    }
 }
