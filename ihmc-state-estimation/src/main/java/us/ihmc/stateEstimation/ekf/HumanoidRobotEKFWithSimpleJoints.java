@@ -10,14 +10,15 @@ import java.util.Map;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
+import us.ihmc.mecano.frames.MovingReferenceFrame;
+import us.ihmc.mecano.multiBodySystem.OneDoFJoint;
+import us.ihmc.mecano.multiBodySystem.interfaces.FloatingJointBasics;
+import us.ihmc.mecano.multiBodySystem.interfaces.JointBasics;
+import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
+import us.ihmc.mecano.tools.MultiBodySystemTools;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
-import us.ihmc.robotics.screwTheory.FloatingInverseDynamicsJoint;
-import us.ihmc.robotics.screwTheory.InverseDynamicsJoint;
-import us.ihmc.robotics.screwTheory.MovingReferenceFrame;
-import us.ihmc.robotics.screwTheory.OneDoFJoint;
-import us.ihmc.robotics.screwTheory.ScrewTools;
 import us.ihmc.sensorProcessing.sensorProcessors.SensorOutputMapReadOnly;
 import us.ihmc.sensorProcessing.sensorProcessors.SensorRawOutputMapReadOnly;
 import us.ihmc.stateEstimation.humanoid.StateEstimatorController;
@@ -36,15 +37,15 @@ public class HumanoidRobotEKFWithSimpleJoints implements StateEstimatorControlle
    {
       this.processedSensorOutput = processedSensorOutput;
 
-      InverseDynamicsJoint[] chestSubtreeJoints = ScrewTools.computeSubtreeJoints(estimatorFullRobotModel.getChest());
-      simpleJoints = Arrays.asList(ScrewTools.filterJoints(chestSubtreeJoints, OneDoFJoint.class));
+      JointBasics[] chestSubtreeJoints = MultiBodySystemTools.collectSubtreeJoints(estimatorFullRobotModel.getChest());
+      simpleJoints = Arrays.asList(MultiBodySystemTools.filterJoints(chestSubtreeJoints, OneDoFJoint.class));
       if (simpleJoints.size() != chestSubtreeJoints.length)
       {
          throw new RuntimeException("Can only handle OneDoFJoints in a robot.");
       }
 
-      List<OneDoFJoint> jointsForEKF = new ArrayList<>();
-      for (OneDoFJoint oneDoFJoint : estimatorFullRobotModel.getOneDoFJoints())
+      List<OneDoFJointBasics> jointsForEKF = new ArrayList<>();
+      for (OneDoFJointBasics oneDoFJoint : estimatorFullRobotModel.getOneDoFJoints())
       {
          if (!simpleJoints.contains(oneDoFJoint))
          {
@@ -59,7 +60,7 @@ public class HumanoidRobotEKFWithSimpleJoints implements StateEstimatorControlle
          forceSensorMap.put(footForceSensorNames.get(robotSide), soleFrames.get(robotSide));
       }
 
-      FloatingInverseDynamicsJoint rootJoint = estimatorFullRobotModel.getRootJoint();
+      FloatingJointBasics rootJoint = estimatorFullRobotModel.getRootJoint();
       leggedRobotEKF = new LeggedRobotEKF(rootJoint, jointsForEKF, imuNames, forceSensorMap, sensorOutput, dt, gravity, graphicsListRegistry);
    }
 
