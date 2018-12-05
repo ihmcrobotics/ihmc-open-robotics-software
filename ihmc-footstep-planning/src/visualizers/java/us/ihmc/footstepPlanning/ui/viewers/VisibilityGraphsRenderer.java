@@ -3,7 +3,7 @@ package us.ihmc.footstepPlanning.ui.viewers;
 import static us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI.GlobalResetTopic;
 import static us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI.GoalVisibilityMap;
 import static us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI.InterRegionVisibilityMap;
-import static us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI.NavigableRegionData;
+import static us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI.VisibilityMapWithNavigableRegionData;
 import static us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI.ShowClusterNavigableExtrusions;
 import static us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI.ShowClusterNonNavigableExtrusions;
 import static us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI.ShowClusterRawPoints;
@@ -52,7 +52,7 @@ public class VisibilityGraphsRenderer
       goalPositionReference = messager.createInput(FootstepPlannerMessagerAPI.GoalPositionTopic);
 
       clusterMeshViewer = new ClusterMeshViewer(messager, executorService);
-      clusterMeshViewer.setTopics(GlobalResetTopic, ShowClusterRawPoints, ShowClusterNavigableExtrusions, ShowClusterNonNavigableExtrusions, NavigableRegionData);
+      clusterMeshViewer.setTopics(GlobalResetTopic, ShowClusterRawPoints, ShowClusterNavigableExtrusions, ShowClusterNonNavigableExtrusions, VisibilityMapWithNavigableRegionData);
 
       startMapViewer = new VisibilityMapHolderViewer(messager, executorService);
       startMapViewer.setCustomColor(Color.YELLOW);
@@ -63,7 +63,7 @@ public class VisibilityGraphsRenderer
       goalMapViewer.setTopics(ShowGoalVisibilityMap, GoalVisibilityMap);
 
       navigableRegionViewer = new NavigableRegionViewer(messager, executorService);
-      navigableRegionViewer.setTopics(GlobalResetTopic, ShowNavigableRegionVisibilityMaps, NavigableRegionData);
+      navigableRegionViewer.setTopics(GlobalResetTopic, ShowNavigableRegionVisibilityMaps, VisibilityMapWithNavigableRegionData);
 
       interRegionConnectionsViewer = new VisibilityMapHolderViewer(messager, executorService);
       interRegionConnectionsViewer.setCustomColor(Color.CRIMSON);

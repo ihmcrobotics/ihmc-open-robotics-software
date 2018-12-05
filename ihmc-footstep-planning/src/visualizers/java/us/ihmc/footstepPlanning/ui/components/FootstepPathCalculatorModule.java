@@ -10,7 +10,7 @@ import static us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI.
 import static us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI.InterRegionVisibilityMap;
 import static us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI.LowLevelGoalOrientationTopic;
 import static us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI.LowLevelGoalPositionTopic;
-import static us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI.NavigableRegionData;
+import static us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI.VisibilityMapWithNavigableRegionData;
 import static us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI.PlanarRegionDataTopic;
 import static us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI.PlannerHorizonLengthTopic;
 import static us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI.PlannerParametersTopic;
@@ -324,7 +324,7 @@ public class FootstepPathCalculatorModule
 
       messager.submitMessage(StartVisibilityMap, startMap);
       messager.submitMessage(GoalVisibilityMap, goalMap);
-      messager.submitMessage(NavigableRegionData, navigableRegionList);
+      messager.submitMessage(VisibilityMapWithNavigableRegionData, navigableRegionList);
       messager.submitMessage(InterRegionVisibilityMap, interRegionVisibilityMap);
    }
 
