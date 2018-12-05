@@ -23,8 +23,8 @@ import us.ihmc.robotics.geometry.PlanarRegion;
 
 public class NavigableRegionsManager
 {
-   final static boolean debug = false;
-   final static boolean useCustomDijkstraSearch = true;
+   private final static boolean debug = false;
+   private final static boolean useCustomDijkstraSearch = true;
 
    private NavigableRegions navigableRegions;
 
@@ -54,8 +54,23 @@ public class NavigableRegionsManager
    public NavigableRegionsManager(VisibilityGraphsParameters parameters, List<PlanarRegion> regions)
    {
       this.navigableRegions = new NavigableRegions(parameters, regions);
-
       this.parameters = parameters == null ? new DefaultVisibilityGraphParameters() : parameters;
+   }
+
+   public static ArrayList<VisibilityMapWithNavigableRegion> createListOfVisibilityMapsWithNavigableRegions(NavigableRegions navigableRegions)
+   {
+      ArrayList<VisibilityMapWithNavigableRegion> list = new ArrayList<>();
+
+      List<VisibilityMapWithNavigableRegion> naviableRegionsList = navigableRegions.getNaviableRegionsList();
+
+      for (VisibilityMapWithNavigableRegion navigableRegion : naviableRegionsList)
+      {
+         //         VisibilityMapWithNavigableRegion visibilityMapWithNavigableRegion = new VisibilityMapWithNavigableRegion(navigableRegion);
+         VisibilityMapWithNavigableRegion visibilityMapWithNavigableRegion = navigableRegion;
+         list.add(visibilityMapWithNavigableRegion);
+      }
+
+      return list;
    }
 
    public List<VisibilityMapWithNavigableRegion> getNavigableRegionsList()
@@ -98,19 +113,22 @@ public class NavigableRegionsManager
       // Otherwise, the ordering does not matter.
       //      VisibilityGraphsFactory.createStaticVisibilityMapsForNavigableRegions(navigableRegions);
 
-      List<VisibilityMapWithNavigableRegion> navigableRegionsList = navigableRegions.getNaviableRegionsList();
-      interRegionVisibilityMap = VisibilityGraphsFactory.createInterRegionVisibilityMap(navigableRegionsList, parameters.getInterRegionConnectionFilter());
-      VisibilityGraphsFactory.createStaticVisibilityMapsForNavigableRegions(navigableRegionsList);
+      ArrayList<VisibilityMapWithNavigableRegion> visibilityMapsWithNavigableRegions = createListOfVisibilityMapsWithNavigableRegions(navigableRegions);
+
+      interRegionVisibilityMap = VisibilityGraphsFactory.createInterRegionVisibilityMap(visibilityMapsWithNavigableRegions,
+                                                                                        parameters.getInterRegionConnectionFilter());
+      VisibilityGraphsFactory.createStaticVisibilityMapsForNavigableRegions(visibilityMapsWithNavigableRegions);
 
       double searchHostEpsilon = parameters.getSearchHostRegionEpsilon();
-      startMap = VisibilityGraphsFactory.createSingleSourceVisibilityMap(start, navigableRegionsList, searchHostEpsilon,
+      startMap = VisibilityGraphsFactory.createSingleSourceVisibilityMap(start, visibilityMapsWithNavigableRegions, searchHostEpsilon,
                                                                          interRegionVisibilityMap.getVisibilityMapInLocal());
-      goalMap = VisibilityGraphsFactory.createSingleSourceVisibilityMap(goal, navigableRegionsList, searchHostEpsilon,
+      goalMap = VisibilityGraphsFactory.createSingleSourceVisibilityMap(goal, visibilityMapsWithNavigableRegions, searchHostEpsilon,
                                                                         interRegionVisibilityMap.getVisibilityMapInLocal());
 
       if (goalMap == null)
       {
-         goalMap = VisibilityGraphsFactory.connectToClosestPoints(new ConnectionPoint3D(goal, START_GOAL_ID), 1, navigableRegionsList, START_GOAL_ID);
+         goalMap = VisibilityGraphsFactory.connectToClosestPoints(new ConnectionPoint3D(goal, START_GOAL_ID), 1, visibilityMapsWithNavigableRegions,
+                                                                  START_GOAL_ID);
       }
 
       if (startMap != null)
@@ -128,14 +146,15 @@ public class NavigableRegionsManager
          startMap = VisibilityGraphsFactory.connectToFallbackMap(start, START_GOAL_ID, 1.0e-3, interRegionVisibilityMap.getVisibilityMapInLocal());
 
          if (startMap == null)
-            startMap = VisibilityGraphsFactory.connectToClosestPoints(new ConnectionPoint3D(start, START_GOAL_ID), 1, navigableRegionsList, START_GOAL_ID);
+            startMap = VisibilityGraphsFactory.connectToClosestPoints(new ConnectionPoint3D(start, START_GOAL_ID), 1, visibilityMapsWithNavigableRegions,
+                                                                      START_GOAL_ID);
       }
 
       if (startMap == null)
          return null;
 
       List<VisibilityMapHolder> visibilityMapHolders = new ArrayList<>();
-      visibilityMapHolders.addAll(navigableRegionsList);
+      visibilityMapHolders.addAll(visibilityMapsWithNavigableRegions);
       visibilityMapHolders.add(startMap);
       visibilityMapHolders.add(goalMap);
       visibilityMapHolders.add(interRegionVisibilityMap);
@@ -166,9 +185,9 @@ public class NavigableRegionsManager
 
       if (path == null)
       {
-         List<VisibilityMapWithNavigableRegion> navigableRegionsList = navigableRegions.getNavigableRegions();
+         ArrayList<VisibilityMapWithNavigableRegion> visibilityMapsWithNavigableRegions = createListOfVisibilityMapsWithNavigableRegions(navigableRegions);
 
-         if (!OcclusionTools.isTheGoalIntersectingAnyObstacles(navigableRegionsList.get(0), start, goal))
+         if (!OcclusionTools.isTheGoalIntersectingAnyObstacles(visibilityMapsWithNavigableRegions.get(0), start, goal))
          {
             if (debug)
             {
@@ -182,7 +201,8 @@ public class NavigableRegionsManager
             return path;
          }
 
-         VisibilityMapWithNavigableRegion regionContainingPoint = PlanarRegionTools.getNavigableRegionContainingThisPoint(start, navigableRegionsList);
+         VisibilityMapWithNavigableRegion regionContainingPoint = PlanarRegionTools.getNavigableRegionContainingThisPoint(start,
+                                                                                                                          visibilityMapsWithNavigableRegions);
          List<Cluster> intersectingClusters = OcclusionTools.getListOfIntersectingObstacles(regionContainingPoint.getObstacleClusters(), start, goal);
          Cluster closestCluster = ClusterTools.getTheClosestCluster(start, intersectingClusters);
          Point3D closestExtrusion = ClusterTools.getTheClosestVisibleExtrusionPoint(1.0, start, goal, closestCluster.getNavigableExtrusionsInWorld(),
