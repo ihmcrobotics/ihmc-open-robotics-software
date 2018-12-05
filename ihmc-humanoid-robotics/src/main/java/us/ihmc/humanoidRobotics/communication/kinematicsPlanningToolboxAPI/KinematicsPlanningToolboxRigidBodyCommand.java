@@ -35,6 +35,7 @@ public class KinematicsPlanningToolboxRigidBodyCommand implements Command<Kinema
    @Override
    public void set(KinematicsPlanningToolboxRigidBodyCommand other)
    {
+      clear();
       endEffectorHashCode = other.endEffectorHashCode;
       endEffector = other.endEffector;
 
@@ -58,6 +59,7 @@ public class KinematicsPlanningToolboxRigidBodyCommand implements Command<Kinema
    public void set(KinematicsPlanningToolboxRigidBodyMessage message, Map<Integer, RigidBodyBasics> rigidBodyHashMap,
                    ReferenceFrameHashCodeResolver referenceFrameResolver)
    {
+      clear();
       endEffectorHashCode = message.getEndEffectorHashCode();
       if (rigidBodyHashMap == null)
          endEffector = null;
