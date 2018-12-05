@@ -5,7 +5,6 @@ import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 
 public class REAGeometryTools
 {
-
    public static double distanceSquaredBetweenTwoBoundingBox3Ds(Point3DReadOnly min1, Point3DReadOnly max1, Point3DReadOnly min2, Point3DReadOnly max2)
    {
       double dx = EuclidCoreTools.max(min1.getX() - max2.getX(), 0.0, min2.getX() - max1.getX());

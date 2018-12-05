@@ -68,7 +68,7 @@ public class DelaunayTriangulationVisualizer extends Application
       {
          Node regionGraphics = createRegionGraphics(rawData);
          regionGraphics.setManaged(false);
-         PolygonizerVisualizer.translateNode(regionGraphics, average);
+         REAGraphics3DTools.translateNode(regionGraphics, average);
          nodeToRegionId.put(regionGraphics, rawData.getRegionId());
          view3dFactory.addNodeToView(regionGraphics);
       }
