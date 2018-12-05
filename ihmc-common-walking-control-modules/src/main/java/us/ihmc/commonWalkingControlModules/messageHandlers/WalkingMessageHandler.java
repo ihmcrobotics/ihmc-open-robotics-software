@@ -116,15 +116,6 @@ public class WalkingMessageHandler
 
    public WalkingMessageHandler(double defaultTransferTime, double defaultSwingTime, double defaultTouchdownTime, double defaultInitialTransferTime,
                                 double defaultFinalTransferTime, SideDependentList<? extends ContactablePlaneBody> contactableFeet,
-                                StatusMessageOutputManager statusOutputManager, YoGraphicsListRegistry yoGraphicsListRegistry,
-                                YoVariableRegistry parentRegistry)
-   {
-      this(defaultTransferTime, defaultSwingTime, defaultTouchdownTime, defaultInitialTransferTime, defaultFinalTransferTime, contactableFeet,
-           statusOutputManager, null, yoGraphicsListRegistry, parentRegistry);
-   }
-
-   public WalkingMessageHandler(double defaultTransferTime, double defaultSwingTime, double defaultTouchdownTime, double defaultInitialTransferTime,
-                                double defaultFinalTransferTime, SideDependentList<? extends ContactablePlaneBody> contactableFeet,
                                 StatusMessageOutputManager statusOutputManager, YoDouble yoTime, YoGraphicsListRegistry yoGraphicsListRegistry,
                                 YoVariableRegistry parentRegistry)
    {
