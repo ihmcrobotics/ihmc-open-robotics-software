@@ -54,7 +54,6 @@ public class JGraphTools
          connections.add(new Connection(source, target));
       }
 
-
       ConnectionPoint3D previousTarget = start;
 
       for (Connection connection : connections)
@@ -92,7 +91,8 @@ public class JGraphTools
       addConnectionToGraph(connection, connection.length(), graphToUpdate);
    }
 
-   public static void addConnectionToGraph(Connection connection, double connectionWeight, SimpleWeightedGraph<ConnectionPoint3D, DefaultWeightedEdge> graphToUpdate)
+   public static void addConnectionToGraph(Connection connection, double connectionWeight,
+                                           SimpleWeightedGraph<ConnectionPoint3D, DefaultWeightedEdge> graphToUpdate)
    {
       ConnectionPoint3D source = connection.getSourcePoint();
       ConnectionPoint3D target = connection.getTargetPoint();

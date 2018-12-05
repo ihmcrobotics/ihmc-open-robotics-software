@@ -157,9 +157,9 @@ public class PointCloudTools
    public static List<Point2DReadOnly> addPointsAlongPolygon(List<Point2DReadOnly> polygonPoints, double brakeDownThreshold)
    {
       List<Point2DReadOnly> pointsToReturn = new ArrayList<>();
-      
+
       int size = polygonPoints.size();
-      
+
       for (int i = 0; i < size; i++)
       {
          Point2DReadOnly point1 = polygonPoints.get(i);
@@ -168,19 +168,19 @@ public class PointCloudTools
          pointsToReturn.add(point1);
          doBrakeDown2D(pointsToReturn, point1, point2, brakeDownThreshold);
       }
-      
+
       return pointsToReturn;
    }
-   
+
    private static void doBrakeDown2D(List<Point2DReadOnly> pointList, Point2DReadOnly point1, Point2DReadOnly point2, double brakeDownThreshold)
    {
       double distance = point2.distance(point1);
-      
+
       double nOfPointsToAddToSegment = Math.floor(distance / brakeDownThreshold);
       brakeDownThreshold = distance / (((double) nOfPointsToAddToSegment) + 1.0);
-      
+
       Vector2D direction = new Vector2D(point2.getX() - point1.getX(), point2.getY() - point1.getY());
-      direction.scale(1.0/distance);
+      direction.scale(1.0 / distance);
 
       for (int i = 0; i < nOfPointsToAddToSegment; i++)
       {
@@ -420,7 +420,6 @@ public class PointCloudTools
             ConvexPolygon2D convexPolygon = new ConvexPolygon2D(Vertex2DSupplier.asVertex2DSupplier(cluster1.getRawPointsInLocal2D()));
 
             PlanarRegion planarRegion = new PlanarRegion(cluster1.getTransformToWorld(), convexPolygon);
-            
 
             regions.add(planarRegion);
          }

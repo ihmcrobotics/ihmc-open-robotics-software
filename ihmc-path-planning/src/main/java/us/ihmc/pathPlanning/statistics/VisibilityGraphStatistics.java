@@ -1,10 +1,10 @@
 package us.ihmc.pathPlanning.statistics;
 
-import us.ihmc.pathPlanning.visibilityGraphs.dataStructure.NavigableRegion;
-import us.ihmc.pathPlanning.visibilityGraphs.dataStructure.VisibilityMap;
-
 import java.util.ArrayList;
 import java.util.List;
+
+import us.ihmc.pathPlanning.visibilityGraphs.dataStructure.NavigableRegion;
+import us.ihmc.pathPlanning.visibilityGraphs.dataStructure.VisibilityMap;
 
 public class VisibilityGraphStatistics implements PlannerStatistics<VisibilityGraphStatistics>
 {

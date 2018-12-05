@@ -96,8 +96,10 @@ public class Connection implements Transformable, EpsilonComparable<Connection>
 
    public ConnectionPoint3D getOppositePoint(ConnectionPoint3D point)
    {
-      if(point.equals(source)) return target;
-      else if (point.equals(target)) return source;
+      if (point.equals(source))
+         return target;
+      else if (point.equals(target))
+         return source;
       return null;
    }
 

@@ -1,13 +1,19 @@
 package us.ihmc.pathPlanning.visibilityGraphs.dijkstra;
 
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.PriorityQueue;
+
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.pathPlanning.visibilityGraphs.dataStructure.Connection;
 import us.ihmc.pathPlanning.visibilityGraphs.dataStructure.ConnectionPoint3D;
-import us.ihmc.pathPlanning.visibilityGraphs.interfaces.VisibilityGraphPathPlanner;
 import us.ihmc.pathPlanning.visibilityGraphs.dataStructure.VisibilityMap;
+import us.ihmc.pathPlanning.visibilityGraphs.interfaces.VisibilityGraphPathPlanner;
 import us.ihmc.pathPlanning.visibilityGraphs.interfaces.VisibilityMapHolder;
-
-import java.util.*;
 
 public class DijkstraVisibilityGraphPlanner implements VisibilityGraphPathPlanner
 {
@@ -59,17 +65,17 @@ public class DijkstraVisibilityGraphPlanner implements VisibilityGraphPathPlanne
 
       double bestCostToGoal = Double.POSITIVE_INFINITY;
 
-      stackLoop:
-      while(!stack.isEmpty())
+      stackLoop: while (!stack.isEmpty())
       {
          ConnectionPoint3D sourcePoint = stack.poll();
          double sourceNodeCost = nodeCosts.get(sourcePoint);
 
-         if (sourceNodeCost > bestCostToGoal) break stackLoop;
-         
+         if (sourceNodeCost > bestCostToGoal)
+            break stackLoop;
+
          HashSet<ConnectionData> connections = visibilityMap.computeIfAbsent(sourcePoint, (p) -> new HashSet<>());
          double distanceToGoalSquared = sourcePoint.distanceSquared(goalPoint);
-         if(distanceToGoalSquared < closestDistanceToGoalSquared)
+         if (distanceToGoalSquared < closestDistanceToGoalSquared)
          {
             closestPointToGoal = sourcePoint;
             closestDistanceToGoalSquared = distanceToGoalSquared;
@@ -82,13 +88,13 @@ public class DijkstraVisibilityGraphPlanner implements VisibilityGraphPathPlanne
 
             double targetNodeCost = sourceNodeCost + connectionData.edgeWeight;
 
-            if(!nodeCosts.containsKey(targetPoint) || nodeCosts.get(targetPoint) > targetNodeCost)
+            if (!nodeCosts.containsKey(targetPoint) || nodeCosts.get(targetPoint) > targetNodeCost)
             {
                nodeCosts.put(targetPoint, targetNodeCost);
                incomingBestEdge.put(targetPoint, connectionData);
 
-               if(targetPoint.equals(goalPoint))
-               {                  
+               if (targetPoint.equals(goalPoint))
+               {
                   bestCostToGoal = targetNodeCost;
                }
                else
@@ -99,7 +105,7 @@ public class DijkstraVisibilityGraphPlanner implements VisibilityGraphPathPlanne
          }
       }
 
-      if(nodeCosts.containsKey(goalPoint))
+      if (nodeCosts.containsKey(goalPoint))
       {
          return getPathToPoint(goalPoint);
       }
@@ -117,7 +123,7 @@ public class DijkstraVisibilityGraphPlanner implements VisibilityGraphPathPlanne
       ConnectionData incomingEdge = incomingBestEdge.get(point);
       ConnectionPoint3D previousTargetPoint = new ConnectionPoint3D(point);
 
-      while(incomingEdge != null)
+      while (incomingEdge != null)
       {
          Connection connection = incomingEdge.connection;
          ConnectionPoint3D targetPoint = connection.getOppositePoint(previousTargetPoint);
