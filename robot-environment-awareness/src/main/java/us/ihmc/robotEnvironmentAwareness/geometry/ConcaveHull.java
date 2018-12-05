@@ -31,6 +31,11 @@ public class ConcaveHull implements Iterable<Point2D>
       other.forEach(hullVertices::add);
    }
 
+   public boolean isEmpty()
+   {
+      return hullVertices.isEmpty();
+   }
+
    public void ensureCounterClockwiseOrdering()
    {
       ConcaveHullTools.ensureCounterClockwiseOrdering(hullVertices);
