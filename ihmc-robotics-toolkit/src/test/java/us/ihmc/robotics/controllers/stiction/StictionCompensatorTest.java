@@ -6,15 +6,18 @@ import us.ihmc.commons.RandomNumbers;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationPlan;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.continuousIntegration.IntegrationCategory;
+import us.ihmc.robotics.controllers.stiction.StictionCompensator.StictionActionMode;
 import us.ihmc.yoVariables.parameters.DefaultParameterReader;
 import us.ihmc.yoVariables.parameters.XmlParameterReader;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
+import us.ihmc.yoVariables.variable.YoEnum;
 
 import java.util.Random;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotEquals;
+import static us.ihmc.robotics.controllers.stiction.StictionCompensator.StictionActionMode.Moving;
 
 @ContinuousIntegrationPlan(categories = {IntegrationCategory.FAST})
 public class StictionCompensatorTest
@@ -87,9 +90,16 @@ public class StictionCompensatorTest
 
       YoDouble stictionCompensationRate = (YoDouble) registry.getVariable("_StictionCompensationRate");
       YoDouble desiredTorqueStictionLimitFactor = (YoDouble) registry.getVariable("_DesiredTorqueStictionLimitFactor");
+      YoDouble minTimeInMode = (YoDouble) registry.getVariable("_MinTimeInMode");
+      YoEnum<StictionActionMode> actionMode = (YoEnum<StictionActionMode>) registry.getVariable("_StictionActionMode");
+
 
       DefaultParameterReader reader = new DefaultParameterReader();
       reader.readParametersInRegistry(registry);
+
+      // have to call up front to introduce the rate limiting
+      stictionCompensator.computeStictionCompensation();
+
 
       Random random = new Random(1738L);
       double expectedStictionCompensation = 0.0;
@@ -105,7 +115,10 @@ public class StictionCompensatorTest
          stictionCompensationRate.set(maxRate);
 
          stictionCompensator.setDesiredTorque(expectedDesiredTorque);
+         stictionCompensator.setDesiredAcceleration(5.0 * Math.signum(expectedDesiredTorque));
+         stictionCompensator.setVelocities(5.0 * Math.signum(expectedDesiredTorque), 5.0 * Math.signum(expectedDesiredTorque));
 
+         actionMode.set(Moving);
          double stictionCompensation = stictionCompensator.computeStictionCompensation();
 
          assertEquals(stictionCompensation, yoStictionCompensation.getDoubleValue(), epsilon);
@@ -124,5 +137,129 @@ public class StictionCompensatorTest
 
          assertEquals("Iter " + iter, expectedStictionCompensation, stictionCompensation, epsilon);
       }
+   }
+
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
+   @Test(timeout = 30000)
+   public void testActionForwardMode()
+   {
+      YoVariableRegistry registry = new YoVariableRegistry("test");
+      YoDouble constantStictionProvider = new YoDouble("constantStictionProvider", registry);
+      StictionModel stictionModel = new ConstantStictionModel(constantStictionProvider);
+
+      StictionCompensator stictionCompensator = new StictionCompensator("", stictionModel, controlDT, registry);
+
+      YoDouble minTimeInMode = (YoDouble) registry.getVariable("_MinTimeInMode");
+
+      YoEnum<StictionActionMode> actionMode = (YoEnum<StictionActionMode>) registry.getVariable("_StictionActionMode");
+
+      DefaultParameterReader reader = new DefaultParameterReader();
+      reader.readParametersInRegistry(registry);
+
+      StictionActionMode currentExpectedMode = actionMode.getEnumValue();
+
+      stictionCompensator.setVelocities(1.0, 1.0);
+      stictionCompensator.setDesiredAcceleration(5.0);
+      stictionCompensator.setDesiredTorque(5.0);
+
+      // mode shouldn't change
+      for (int i = 0; i < minTimeInMode.getDoubleValue() / controlDT ; i++)
+      {
+         stictionCompensator.computeStictionCompensation();
+         assertEquals(currentExpectedMode, actionMode.getEnumValue());
+      }
+
+      stictionCompensator.computeStictionCompensation();
+
+      currentExpectedMode = StictionActionMode.Accelerating;
+      assertEquals(currentExpectedMode, actionMode.getEnumValue());
+
+      stictionCompensator.setDesiredAcceleration(0.0);
+      // mode shouldn't change
+      for (int i = 0; i < minTimeInMode.getDoubleValue() / controlDT ; i++)
+      {
+         stictionCompensator.computeStictionCompensation();
+         assertEquals(currentExpectedMode, actionMode.getEnumValue());
+      }
+
+      stictionCompensator.computeStictionCompensation();
+
+      currentExpectedMode = Moving;
+      assertEquals(currentExpectedMode, actionMode.getEnumValue());
+
+      stictionCompensator.setDesiredAcceleration(-5.0);
+      // mode shouldn't change
+      for (int i = 0; i < minTimeInMode.getDoubleValue() / controlDT ; i++)
+      {
+         stictionCompensator.computeStictionCompensation();
+         assertEquals(currentExpectedMode, actionMode.getEnumValue());
+      }
+
+      stictionCompensator.computeStictionCompensation();
+
+      currentExpectedMode = StictionActionMode.Braking;
+      assertEquals(currentExpectedMode, actionMode.getEnumValue());
+   }
+
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
+   @Test(timeout = 30000)
+   public void testActionBackwardMode()
+   {
+      YoVariableRegistry registry = new YoVariableRegistry("test");
+      YoDouble constantStictionProvider = new YoDouble("constantStictionProvider", registry);
+      StictionModel stictionModel = new ConstantStictionModel(constantStictionProvider);
+
+      StictionCompensator stictionCompensator = new StictionCompensator("", stictionModel, controlDT, registry);
+
+      YoDouble minTimeInMode = (YoDouble) registry.getVariable("_MinTimeInMode");
+
+      YoEnum<StictionActionMode> actionMode = (YoEnum<StictionActionMode>) registry.getVariable("_StictionActionMode");
+
+      DefaultParameterReader reader = new DefaultParameterReader();
+      reader.readParametersInRegistry(registry);
+
+      StictionActionMode currentExpectedMode = actionMode.getEnumValue();
+
+      stictionCompensator.setVelocities(-1.0, -1.0);
+      stictionCompensator.setDesiredAcceleration(-5.0);
+      stictionCompensator.setDesiredTorque(-5.0);
+
+      // mode shouldn't change
+      for (int i = 0; i < minTimeInMode.getDoubleValue() / controlDT ; i++)
+      {
+         stictionCompensator.computeStictionCompensation();
+         assertEquals(currentExpectedMode, actionMode.getEnumValue());
+      }
+
+      stictionCompensator.computeStictionCompensation();
+
+      currentExpectedMode = StictionActionMode.Accelerating;
+      assertEquals(currentExpectedMode, actionMode.getEnumValue());
+
+      stictionCompensator.setDesiredAcceleration(0.0);
+      // mode shouldn't change
+      for (int i = 0; i < minTimeInMode.getDoubleValue() / controlDT ; i++)
+      {
+         stictionCompensator.computeStictionCompensation();
+         assertEquals(currentExpectedMode, actionMode.getEnumValue());
+      }
+
+      stictionCompensator.computeStictionCompensation();
+
+      currentExpectedMode = Moving;
+      assertEquals(currentExpectedMode, actionMode.getEnumValue());
+
+      stictionCompensator.setDesiredAcceleration(5.0);
+      // mode shouldn't change
+      for (int i = 0; i < minTimeInMode.getDoubleValue() / controlDT ; i++)
+      {
+         stictionCompensator.computeStictionCompensation();
+         assertEquals(currentExpectedMode, actionMode.getEnumValue());
+      }
+
+      stictionCompensator.computeStictionCompensation();
+
+      currentExpectedMode = StictionActionMode.Braking;
+      assertEquals(currentExpectedMode, actionMode.getEnumValue());
    }
 }
