@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicReference;
 
+import gnu.trove.map.TObjectDoubleMap;
 import us.ihmc.commonWalkingControlModules.visualizer.EstimatedFromTorquesWrenchVisualizer;
 import us.ihmc.commons.Conversions;
 import us.ihmc.commons.PrintTools;
@@ -292,9 +293,9 @@ public class DRCKinematicsBasedStateEstimator implements StateEstimatorControlle
    }
 
    @Override
-   public void initializeEstimator(RigidBodyTransform initialRootJointTranform)
+   public void initializeEstimator(RigidBodyTransform rootJointTransform, TObjectDoubleMap<String> jointPositions)
    {
-      pelvisLinearStateUpdater.initializeRootJointPosition(initialRootJointTranform.getTranslationVector());
+      pelvisLinearStateUpdater.initializeRootJointPosition(rootJointTransform.getTranslationVector());
       // Do nothing for the orientation since the IMU is trusted
    }
 
@@ -326,6 +327,7 @@ public class DRCKinematicsBasedStateEstimator implements StateEstimatorControlle
       this.stateEstimatorModeSubscriber = stateEstimatorModeSubscriber;
    }
 
+   @Override
    public void requestStateEstimatorMode(StateEstimatorMode stateEstimatorMode)
    {
       atomicOperationMode.set(stateEstimatorMode);

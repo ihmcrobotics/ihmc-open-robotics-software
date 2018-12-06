@@ -6,6 +6,7 @@ import java.util.List;
 import controller_msgs.msg.dds.ControllerCrashNotificationPacket;
 import controller_msgs.msg.dds.RequestWristForceSensorCalibrationPacket;
 import controller_msgs.msg.dds.StateEstimatorModePacket;
+import gnu.trove.map.TObjectDoubleMap;
 import us.ihmc.commonWalkingControlModules.controlModules.ForceSensorToJointTorqueProjector;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.ContactableBodiesFactory;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.ControllerAPIDefinition;
@@ -18,6 +19,7 @@ import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
+import us.ihmc.humanoidRobotics.communication.packets.sensing.StateEstimatorMode;
 import us.ihmc.humanoidRobotics.communication.subscribers.PelvisPoseCorrectionCommunicatorInterface;
 import us.ihmc.humanoidRobotics.communication.subscribers.RequestWristForceSensorCalibrationSubscriber;
 import us.ihmc.humanoidRobotics.communication.subscribers.StateEstimatorModeSubscriber;
@@ -416,10 +418,10 @@ public class DRCEstimatorThread implements MultiThreadedRobotControlElement
       throw new RuntimeException("Estimator thread should not wake up based on clock");
    }
 
-   public void initializeEstimator(RigidBodyTransform rootJointTransform)
+   public void initializeEstimator(RigidBodyTransform rootJointTransform, TObjectDoubleMap<String> jointPositions)
    {
       if (stateEstimator != null)
-         stateEstimator.initializeEstimator(rootJointTransform);
+         stateEstimator.initializeEstimator(rootJointTransform, jointPositions);
    }
 
    // Used by the Atlas stand prep state.
