@@ -25,7 +25,6 @@ import us.ihmc.robotics.geometry.PlanarRegion;
 public class NavigableRegionsManager
 {
    private final static boolean debug = false;
-   private final static boolean useCustomDijkstraSearch = true;
 
    private final NavigableRegions navigableRegions;
    private final ArrayList<VisibilityMapWithNavigableRegion> visibilityMapsWithNavigableRegions = new ArrayList<>();
@@ -59,7 +58,7 @@ public class NavigableRegionsManager
       this.parameters = parameters == null ? new DefaultVisibilityGraphParameters() : parameters;
    }
 
-   public static ArrayList<VisibilityMapWithNavigableRegion> createListOfVisibilityMapsWithNavigableRegions(NavigableRegions navigableRegions)
+   private static ArrayList<VisibilityMapWithNavigableRegion> createListOfVisibilityMapsWithNavigableRegions(NavigableRegions navigableRegions)
    {
       ArrayList<VisibilityMapWithNavigableRegion> list = new ArrayList<>();
 
@@ -105,20 +104,18 @@ public class NavigableRegionsManager
 
       long startBodyPathComputation = System.currentTimeMillis();
 
+      navigableRegions.createNavigableRegions();
+
       //FIXME: +++JEP 181203. We have a bug where the the path can cross over a hole when there is an object on top of the hole. Need to fix that.
 
       //TODO: Do this stuff lazily, rather than all up front for efficiency.
-      navigableRegions.createNavigableRegions();
-
+      
       //Note: This has to be done before inter regions if the inter regions are computed using inner regions.
       // Otherwise, the ordering does not matter.
       //      VisibilityGraphsFactory.createStaticVisibilityMapsForNavigableRegions(navigableRegions);
 
-      
-      List<VisibilityMapWithNavigableRegion> listOfVisibiltyMaps = createListOfVisibilityMapsWithNavigableRegions(navigableRegions);
-
       visibilityMapsWithNavigableRegions.clear();
-      visibilityMapsWithNavigableRegions.addAll(listOfVisibiltyMaps);
+      visibilityMapsWithNavigableRegions.addAll(createListOfVisibilityMapsWithNavigableRegions(navigableRegions));
       
       interRegionVisibilityMap = VisibilityGraphsFactory.createInterRegionVisibilityMap(visibilityMapsWithNavigableRegions,
                                                                                         parameters.getInterRegionConnectionFilter());
