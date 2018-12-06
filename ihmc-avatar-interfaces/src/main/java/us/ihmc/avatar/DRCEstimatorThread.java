@@ -3,9 +3,12 @@ package us.ihmc.avatar;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 
 import controller_msgs.msg.dds.ControllerCrashNotificationPacket;
+import controller_msgs.msg.dds.HighLevelStateChangeStatusMessage;
 import controller_msgs.msg.dds.RequestWristForceSensorCalibrationPacket;
+import gnu.trove.map.TObjectDoubleMap;
 import us.ihmc.commonWalkingControlModules.controlModules.ForceSensorToJointTorqueProjector;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.ControllerAPIDefinition;
 import us.ihmc.commons.Conversions;
@@ -17,6 +20,8 @@ import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
+import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelControllerName;
+import us.ihmc.humanoidRobotics.communication.packets.sensing.StateEstimatorMode;
 import us.ihmc.humanoidRobotics.communication.subscribers.PelvisPoseCorrectionCommunicatorInterface;
 import us.ihmc.humanoidRobotics.communication.subscribers.RequestWristForceSensorCalibrationSubscriber;
 import us.ihmc.mecano.multiBodySystem.interfaces.FloatingJointBasics;
@@ -239,6 +244,17 @@ public class DRCEstimatorThread implements MultiThreadedRobotControlElement
       }
    }
 
+   public void setupHighLevelControllerCallback(String robotName, RealtimeRos2Node realtimeRos2Node,
+                                                Map<HighLevelControllerName, StateEstimatorMode> stateModeMap)
+   {
+      MessageTopicNameGenerator publisherTopicNameGenerator = ControllerAPIDefinition.getPublisherTopicNameGenerator(robotName);
+      ROS2Tools.createCallbackSubscription(realtimeRos2Node, HighLevelStateChangeStatusMessage.class, publisherTopicNameGenerator, subscriber -> {
+         HighLevelStateChangeStatusMessage message = subscriber.takeNextData();
+         StateEstimatorMode requestedMode = stateModeMap.get(HighLevelControllerName.fromByte(message.getEndHighLevelControllerName()));
+         stateEstimator.requestStateEstimatorMode(requestedMode);
+      });
+   }
+
    @Override
    public void initialize()
    {
@@ -381,17 +397,10 @@ public class DRCEstimatorThread implements MultiThreadedRobotControlElement
       throw new RuntimeException("Estimator thread should not wake up based on clock");
    }
 
-   public void initializeEstimator(RigidBodyTransform rootJointTransform)
+   public void initializeEstimator(RigidBodyTransform rootJointTransform, TObjectDoubleMap<String> jointPositions)
    {
       if (stateEstimator != null)
-         stateEstimator.initializeEstimator(rootJointTransform);
-   }
-
-   // Used by the Atlas stand prep state.
-   @Deprecated
-   public StateEstimatorController getStateEstimator()
-   {
-      return stateEstimator;
+         stateEstimator.initializeEstimator(rootJointTransform, jointPositions);
    }
 
    public List<? extends IMUSensorReadOnly> getSimulatedIMUOutput()
