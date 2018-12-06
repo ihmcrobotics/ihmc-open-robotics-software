@@ -62,7 +62,7 @@ public class PlanarRegionSegmentationRawDataImporter
          line = line.replaceAll("origin: ", "");
          line = line.replaceAll("normal: ", "");
          String[] values = line.split(cvsSplitBy);
-         
+
          int regionId = Integer.parseInt(values[0]);
          float xOrigin = Float.parseFloat(values[1]);
          float yOrigin = Float.parseFloat(values[2]);
@@ -97,7 +97,7 @@ public class PlanarRegionSegmentationRawDataImporter
          String cvsSplitBy = ",";
 
          List<Point3D> loadedPoints = new ArrayList<>();
-         
+
          while ((line = bufferedReader.readLine()) != null)
          {
             String[] coordsAsString = line.split(cvsSplitBy);
