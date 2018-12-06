@@ -15,7 +15,6 @@ import us.ihmc.communication.controllerAPI.CommandInputManager;
 import us.ihmc.communication.controllerAPI.StatusMessageOutputManager;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelControllerName;
-import us.ihmc.humanoidRobotics.communication.packets.sensing.StateEstimatorMode;
 import us.ihmc.mecano.multiBodySystem.OneDoFJoint;
 import us.ihmc.mecano.multiBodySystem.interfaces.FloatingJointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.JointBasics;
@@ -194,12 +193,6 @@ public class WalkingControllerState extends HighLevelControllerState
    public boolean isJointLoadBearing(String jointName)
    {
       return walkingController.isJointLoadBearing(jointName);
-   }
-
-   @Override
-   public StateEstimatorMode getStateEstimatorMode()
-   {
-      return StateEstimatorMode.NORMAL;
    }
 
    /**
