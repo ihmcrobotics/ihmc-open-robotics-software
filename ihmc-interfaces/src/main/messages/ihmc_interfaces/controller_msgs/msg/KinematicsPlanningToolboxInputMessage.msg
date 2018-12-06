@@ -1,0 +1,7 @@
+# This message is 
+# Unique ID used to identify this message, should preferably be consecutively increasing.
+uint32 sequence_id
+
+controller_msgs/KinematicsPlanningToolboxRigidBodyMessage[] rigid_body_messages
+KinematicsPlanningToolboxCenterOfMassMessage center_of_mass_message
+KinematicsToolboxConfigurationMessage kinematics_configuration_message
