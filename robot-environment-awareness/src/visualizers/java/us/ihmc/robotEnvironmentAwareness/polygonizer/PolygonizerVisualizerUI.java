@@ -1,7 +1,5 @@
 package us.ihmc.robotEnvironmentAwareness.polygonizer;
 
-import java.io.IOException;
-
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Scene;
@@ -23,8 +21,10 @@ public class PolygonizerVisualizerUI
 
    @FXML
    private PolygonizerMenuBarController polygonizerMenuBarController;
+   @FXML
+   private PolygonizerDisplayOptionTabController polygonizerDisplayOptionTabController;
 
-   public PolygonizerVisualizerUI(JavaFXMessager messager, Stage primaryStage) throws IOException
+   public PolygonizerVisualizerUI(JavaFXMessager messager, Stage primaryStage) throws Exception
    {
       this.messager = messager;
       this.primaryStage = primaryStage;
@@ -33,13 +33,15 @@ public class PolygonizerVisualizerUI
       loader.setController(this);
       loader.setLocation(getClass().getResource(getClass().getSimpleName() + ".fxml"));
       mainPane = loader.load();
-
-      polygonizer = new Polygonizer(messager);
-      multipleConcaveHullViewer = new MultipleConcaveHullViewer();
-      messager.registerTopicListener(Polygonizer.PolygonizerOutput,
-                                     message -> multipleConcaveHullViewer.submit(MultipleConcaveHullViewer.toConcaveHullViewerInputs(message)));
+      messager.startMessager();
 
       polygonizerMenuBarController.initialize(messager, primaryStage);
+      polygonizerDisplayOptionTabController.initialize(messager);
+
+      polygonizer = new Polygonizer(messager);
+      multipleConcaveHullViewer = new MultipleConcaveHullViewer(messager);
+      messager.registerTopicListener(Polygonizer.PolygonizerOutput,
+                                     message -> multipleConcaveHullViewer.submit(MultipleConcaveHullViewer.toConcaveHullViewerInputs(message)));
 
       View3DFactory view3dFactory = View3DFactory.createSubscene();
       view3dFactory.addCameraController(true);
@@ -58,7 +60,6 @@ public class PolygonizerVisualizerUI
 
    public void show() throws Exception
    {
-      messager.startMessager();
       primaryStage.show();
       multipleConcaveHullViewer.start();
    }
@@ -86,7 +87,7 @@ public class PolygonizerVisualizerUI
       {
          MessagerAPIFactory apiFactory = new MessagerAPIFactory();
          apiFactory.createRootCategory(PolygonizerVisualizerUI.class.getSimpleName());
-         apiFactory.includeMessagerAPIs(Polygonizer.API);
+         apiFactory.includeMessagerAPIs(Polygonizer.API, MultipleConcaveHullViewer.API);
          messagerAPI = apiFactory.getAPIAndCloseFactory();
       }
       return messagerAPI;
