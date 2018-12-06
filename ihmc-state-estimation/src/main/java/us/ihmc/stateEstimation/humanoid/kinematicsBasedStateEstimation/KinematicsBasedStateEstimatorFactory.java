@@ -9,7 +9,6 @@ import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.Co
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactableFoot;
 import us.ihmc.humanoidRobotics.communication.subscribers.PelvisPoseCorrectionCommunicatorInterface;
-import us.ihmc.humanoidRobotics.communication.subscribers.StateEstimatorModeSubscriber;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.humanoidRobotics.model.CenterOfPressureDataHolder;
 import us.ihmc.mecano.multiBodySystem.interfaces.FloatingJointBasics;
@@ -59,7 +58,6 @@ public class KinematicsBasedStateEstimatorFactory
    private RequiredFactoryField<CenterOfPressureDataHolder> centerOfPressureDataHolderFromControllerField = new RequiredFactoryField<>("centerOfPressureDataHolderFromControllerField");
    private RequiredFactoryField<RobotMotionStatusHolder> robotMotionStatusFromControllerField = new RequiredFactoryField<>("robotMotionStatusFromControllerField");
 
-   private OptionalFactoryField<StateEstimatorModeSubscriber> operatingModeSubscriberField = new OptionalFactoryField<>("operatingModeSubscriberField");
    private OptionalFactoryField<PelvisPoseCorrectionCommunicatorInterface> externalPelvisPoseSubscriberField = new OptionalFactoryField<>("externalPelvisPoseSubscriberField");
 
    public KinematicsBasedStateEstimatorFactory setEstimatorFullRobotModel(FullHumanoidRobotModel estimatorFullRobotModel)
@@ -128,12 +126,6 @@ public class KinematicsBasedStateEstimatorFactory
       return this;
    }
 
-   public KinematicsBasedStateEstimatorFactory setOperatingModeSubscriber(StateEstimatorModeSubscriber operatingModeSubscriber)
-   {
-      this.operatingModeSubscriberField.set(operatingModeSubscriber);
-      return this;
-   }
-
    public KinematicsBasedStateEstimatorFactory setExternalPelvisCorrectorSubscriber(PelvisPoseCorrectionCommunicatorInterface externalPelvisPoseSubscriber)
    {
       this.externalPelvisPoseSubscriberField.set(externalPelvisPoseSubscriber);
@@ -195,10 +187,6 @@ public class KinematicsBasedStateEstimatorFactory
                                                                                         robotMotionStatusFromControllerField.get(), bipedFeetMap,
                                                                                         stateEstimatorYoGraphicsListRegistry);
 
-      if (operatingModeSubscriberField.hasValue())
-      {
-         estimator.setOperatingModeSubscriber(operatingModeSubscriberField.get());
-      }
       if (externalPelvisPoseSubscriberField.hasValue())
       {
          estimator.setExternalPelvisCorrectorSubscriber(externalPelvisPoseSubscriberField.get());
