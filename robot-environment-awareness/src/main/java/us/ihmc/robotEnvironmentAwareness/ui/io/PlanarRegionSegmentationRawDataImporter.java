@@ -14,6 +14,7 @@ import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Point3D32;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.Vector3D32;
+import us.ihmc.robotEnvironmentAwareness.geometry.PointMean;
 import us.ihmc.robotEnvironmentAwareness.planarRegion.PlanarRegionSegmentationRawData;
 
 public class PlanarRegionSegmentationRawDataImporter
@@ -118,6 +119,19 @@ public class PlanarRegionSegmentationRawDataImporter
       {
          return null;
       }
+   }
+
+   /**
+    * Computes the the average point of all the loaded data and subtract it to the data to it is
+    * centered around (0, 0, 0) in world.
+    */
+   public void recenterData()
+   {
+      PointMean pointMean = new PointMean();
+
+      planarRegionSegmentationRawData.stream().flatMap(PlanarRegionSegmentationRawData::stream).forEach(pointMean::update);
+      pointMean.negate();
+      planarRegionSegmentationRawData.forEach(data -> data.translate(pointMean));
    }
 
    public List<PlanarRegionSegmentationRawData> getPlanarRegionSegmentationRawData()

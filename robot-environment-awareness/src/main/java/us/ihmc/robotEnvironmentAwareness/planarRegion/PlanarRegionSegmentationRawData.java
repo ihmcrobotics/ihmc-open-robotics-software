@@ -16,6 +16,7 @@ import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
+import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.jOctoMap.node.NormalOcTreeNode;
@@ -27,8 +28,8 @@ public class PlanarRegionSegmentationRawData
    private final int regionId;
    private final Vector3D normal;
    private final Point3D origin;
-   private final List<Point3D> pointCloud;
    private final Quaternion orientation;
+   private final List<Point3D> pointCloud;
    private final List<LineSegment3D> intersections = new ArrayList<>();
    private final BoundingBox3D boundingBoxWorld = new BoundingBox3D();
 
@@ -66,6 +67,30 @@ public class PlanarRegionSegmentationRawData
       getPointCloudInWorld().forEach(boundingBoxWorld::updateToIncludePoint);
    }
 
+   public void addIntersections(List<? extends LineSegment3DReadOnly> intersectionsToAdd)
+   {
+      intersectionsToAdd.forEach(this::addIntersection);
+   }
+
+   public void addIntersection(LineSegment3DReadOnly intersectionToAdd)
+   {
+      intersections.add(new LineSegment3D(intersectionToAdd));
+      boundingBoxWorld.updateToIncludePoint(intersectionToAdd.getFirstEndpoint());
+      boundingBoxWorld.updateToIncludePoint(intersectionToAdd.getSecondEndpoint());
+   }
+
+   public void translate(Tuple3DReadOnly translation)
+   {
+      origin.add(translation);
+      pointCloud.stream().forEach(point -> point.add(translation));
+      intersections.stream().forEach(segment -> segment.translate(translation));
+      Point3D newMin = new Point3D(boundingBoxWorld.getMinPoint());
+      Point3D newMax = new Point3D(boundingBoxWorld.getMaxPoint());
+      newMin.add(translation);
+      newMax.add(translation);
+      boundingBoxWorld.set(newMin, newMax);
+   }
+
    public int getRegionId()
    {
       return regionId;
@@ -74,26 +99,6 @@ public class PlanarRegionSegmentationRawData
    public int size()
    {
       return pointCloud.size();
-   }
-
-   public List<Point2D> getPointCloudInPlane()
-   {
-      return pointCloud.stream().map(this::toPointInPlane).collect(Collectors.toList());
-   }
-
-   private Point2D toPointInPlane(Point3D point3d)
-   {
-      return PolygonizerTools.toPointInPlane(point3d, origin, orientation);
-   }
-
-   public List<Point3D> getPointCloudInWorld()
-   {
-      return pointCloud;
-   }
-
-   public void getPoint(int index, Point3D pointToPack)
-   {
-      pointToPack.set(pointCloud.get(index));
    }
 
    public Point3D getOrigin()
@@ -111,6 +116,36 @@ public class PlanarRegionSegmentationRawData
       return orientation;
    }
 
+   public RigidBodyTransform getTransformFromLocalToWorld()
+   {
+      return new RigidBodyTransform(orientation, origin);
+   }
+
+   public BoundingBox3D getBoundingBoxInWorld()
+   {
+      return boundingBoxWorld;
+   }
+
+   public List<Point3D> getPointCloudInWorld()
+   {
+      return pointCloud;
+   }
+
+   public List<Point2D> getPointCloudInPlane()
+   {
+      return pointCloud.stream().map(this::toPointInPlane).collect(Collectors.toList());
+   }
+
+   private Point2D toPointInPlane(Point3D point3d)
+   {
+      return PolygonizerTools.toPointInPlane(point3d, origin, orientation);
+   }
+
+   public void getPoint(int index, Point3D pointToPack)
+   {
+      pointToPack.set(pointCloud.get(index));
+   }
+
    public Stream<Point3D> stream()
    {
       return pointCloud.stream();
@@ -121,26 +156,9 @@ public class PlanarRegionSegmentationRawData
       return pointCloud.parallelStream();
    }
 
-   public RigidBodyTransform getTransformFromLocalToWorld()
-   {
-      return new RigidBodyTransform(orientation, origin);
-   }
-
    public boolean hasIntersections()
    {
       return intersections != null;
-   }
-
-   public void addIntersections(List<? extends LineSegment3DReadOnly> intersectionsToAdd)
-   {
-      intersectionsToAdd.forEach(this::addIntersection);
-   }
-
-   public void addIntersection(LineSegment3DReadOnly intersectionToAdd)
-   {
-      intersections.add(new LineSegment3D(intersectionToAdd));
-      boundingBoxWorld.updateToIncludePoint(intersectionToAdd.getFirstEndpoint());
-      boundingBoxWorld.updateToIncludePoint(intersectionToAdd.getSecondEndpoint());
    }
 
    public List<LineSegment3D> getIntersectionsInWorld()
@@ -156,11 +174,6 @@ public class PlanarRegionSegmentationRawData
    private LineSegment2D toLineSegmentInPlane(LineSegment3D lineSegmentInWorld)
    {
       return PolygonizerTools.toLineSegmentInPlane(lineSegmentInWorld, origin, orientation);
-   }
-
-   public BoundingBox3D getBoundingBoxInWorld()
-   {
-      return boundingBoxWorld;
    }
 
    public PlanarRegionSegmentationMessage toMessage()
