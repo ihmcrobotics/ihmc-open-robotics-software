@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import gnu.trove.map.TObjectDoubleMap;
 import us.ihmc.commons.Conversions;
 import us.ihmc.ekf.filter.FilterTools;
 import us.ihmc.ekf.filter.RobotState;
@@ -26,6 +27,7 @@ import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicCoordinateSystem;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
+import us.ihmc.humanoidRobotics.communication.packets.sensing.StateEstimatorMode;
 import us.ihmc.log.LogTools;
 import us.ihmc.mecano.multiBodySystem.interfaces.FloatingJointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
@@ -81,8 +83,6 @@ public class LeggedRobotEKF implements StateEstimatorController
                                                                                                             registry);
    private final YoGraphicCoordinateSystem pelvisVisualization = new YoGraphicCoordinateSystem("PelvisFrame", pelvisPoseForVisualization, 0.3,
                                                                                                YoAppearance.Green());
-
-   private boolean isInitialized = false;
 
    public LeggedRobotEKF(FloatingJointBasics rootJoint, List<OneDoFJointBasics> oneDoFJoints, Collection<String> imuNames,
                          Map<String, ReferenceFrame> forceSensorMap, SensorRawOutputMapReadOnly sensorOutput, double dt, double gravity,
@@ -185,11 +185,6 @@ public class LeggedRobotEKF implements StateEstimatorController
    @Override
    public void doControl()
    {
-      if (!isInitialized)
-      {
-         initializeJointAngles();
-      }
-
       long startTime = System.nanoTime();
 
       stateEstimator.predict();
@@ -202,19 +197,6 @@ public class LeggedRobotEKF implements StateEstimatorController
       estimationTime.set(Conversions.nanosecondsToMilliseconds((double) (System.nanoTime() - startTime)));
 
       updateYoVariables();
-   }
-
-   private void initializeJointAngles()
-   {
-      // TODO: remove this
-      // on the first tick this sets all joint positions to the measured value this should really be done through a proper initialization or by increasing the initial joint position uncertainty.
-      for (int jointIdx = 0; jointIdx < oneDoFJoints.size(); jointIdx++)
-      {
-         double jointPositionMeasurement = sensorOutput.getJointPositionRawOutput(oneDoFJoints.get(jointIdx));
-         JointState jointState = jointStates.get(jointIdx);
-         jointState.initialize(jointPositionMeasurement, 0.0);
-      }
-      isInitialized = true;
    }
 
    private void updateYoVariables()
@@ -274,10 +256,24 @@ public class LeggedRobotEKF implements StateEstimatorController
    }
 
    @Override
-   public void initializeEstimator(RigidBodyTransform rootJointTransform)
+   public void initializeEstimator(RigidBodyTransform rootJointTransform, TObjectDoubleMap<String> jointPositions)
    {
       rootTwist.setToZero(rootJoint.getFrameAfterJoint(), rootJoint.getFrameBeforeJoint(), rootJoint.getFrameAfterJoint());
       rootState.initialize(rootJointTransform, rootTwist);
+
+      for (int jointIdx = 0; jointIdx < oneDoFJoints.size(); jointIdx++)
+      {
+         double initialJointPosition = jointPositions.get(oneDoFJoints.get(jointIdx).getName());
+         JointState jointState = jointStates.get(jointIdx);
+         jointState.initialize(initialJointPosition, 0.0);
+      }
+   }
+
+   @Override
+   public void requestStateEstimatorMode(StateEstimatorMode operatingMode)
+   {
+      // TODO Auto-generated method stub
+
    }
 
    @Override
