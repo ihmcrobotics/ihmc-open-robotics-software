@@ -27,7 +27,7 @@ public class StictionCompensator
    private double desiredAcceleration;
    private double desiredTorque;
 
-   private enum StictionActionMode
+   enum StictionActionMode
    {
       Moving(0), Accelerating(1), Braking(2), Stopped(3);
 
@@ -164,7 +164,7 @@ public class StictionCompensator
 
    private void updateWindowSize()
    {
-      windowSize.set((int) (minTimeInMode.getValue() / controlDt));
+      windowSize.set((int) (0.25 * minTimeInMode.getValue() / controlDt));
    }
 
    private StictionActionMode estimateCurrentActionMode()
@@ -183,7 +183,7 @@ public class StictionCompensator
          double velocitySign = Math.signum(desiredVelocity);
          double accelerationSign = Math.signum(desiredAcceleration);
 
-         if (velocitySign * accelerationSign > 1)
+         if (velocitySign * accelerationSign > 0)
             return StictionActionMode.Accelerating.index();
          else
             return StictionActionMode.Braking.index();
