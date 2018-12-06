@@ -5,12 +5,11 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import controller_msgs.msg.dds.KinematicsPlanningToolboxRigidBodyMessage;
 import us.ihmc.communication.controllerAPI.CommandConversionInterface;
 import us.ihmc.communication.controllerAPI.command.Command;
 import us.ihmc.euclid.interfaces.Settable;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.humanoidRobotics.communication.kinematicsPlanningToolboxAPI.KinematicsPlanningToolboxRigidBodyCommand;
+import us.ihmc.humanoidRobotics.communication.kinematicsPlanningToolboxAPI.KinematicsPlanningToolboxAPI;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.mecano.multiBodySystem.interfaces.JointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
@@ -55,14 +54,15 @@ public class KinematicsPlanningToolboxCommandConverter implements CommandConvers
    @Override
    public <C extends Command<?, M>, M extends Settable<M>> boolean isConvertible(C command, M message)
    {
-      return message instanceof KinematicsPlanningToolboxRigidBodyMessage;
+      if (command instanceof KinematicsPlanningToolboxAPI<?>)
+         return true;
+      return false;
    }
 
    @Override
    public <C extends Command<?, M>, M extends Settable<M>> void process(C command, M message)
    {
-      KinematicsPlanningToolboxRigidBodyMessage rigiBodyMessage = (KinematicsPlanningToolboxRigidBodyMessage) message;
-      KinematicsPlanningToolboxRigidBodyCommand rigiBodyCommand = (KinematicsPlanningToolboxRigidBodyCommand) command;
-      rigiBodyCommand.set(rigiBodyMessage, rigidBodyHashMap, referenceFrameHashCodeResolver);
+      KinematicsPlanningToolboxAPI<M> kinematicsPlanningCommand = (KinematicsPlanningToolboxAPI<M>) command;
+      kinematicsPlanningCommand.set(message, rigidBodyHashMap, referenceFrameHashCodeResolver);
    }
 }
