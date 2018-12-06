@@ -78,9 +78,9 @@ public abstract class QuadrupedXGaitWalkOverRoughTerrainTest implements Quadrupe
    public void testWalkingOverConsecutiveRamps() throws IOException
    {
       ZigZagSlopeEnvironment environment = new ZigZagSlopeEnvironment(0.15, 0.5, 20, -0.1);
-      double walkTime = 5.0;
       double walkingSpeed = 0.25;
       double minimumXPositionAfterWalking = 3.0;
+      double walkTime = 3.0 * minimumXPositionAfterWalking / walkingSpeed;
 
       runWalkingOverTerrain(environment, walkTime, walkingSpeed, minimumXPositionAfterWalking, getXGaitSettings());
    }
@@ -142,7 +142,7 @@ public abstract class QuadrupedXGaitWalkOverRoughTerrainTest implements Quadrupe
       QuadrupedTestBehaviors.readyXGait(conductor, variables, stepTeleopManager);
       stepTeleopManager.getXGaitSettings().set(xGaitSettings);
 
-      stepTeleopManager.setDesiredBodyHeight(0.5);
+//      stepTeleopManager.setDesiredBodyHeight(0.5);
       stepTeleopManager.requestXGait();
       stepTeleopManager.setDesiredVelocity(walkingSpeed, 0.0, 0.0);
       conductor.addSustainGoal(QuadrupedTestGoals.notFallen(variables));
