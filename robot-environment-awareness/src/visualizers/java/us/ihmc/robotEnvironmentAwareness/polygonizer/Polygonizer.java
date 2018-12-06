@@ -79,7 +79,7 @@ public class Polygonizer
 
    public static Input toInput(PlanarRegionSegmentationRawData data)
    {
-      return new Input(data.getRegionId(), data.getTransformFromLocalToWorld(), data.getPointCloudInPlane(), data.getIntersections());
+      return new Input(data.getRegionId(), data.getTransformFromLocalToWorld(), data.getPointCloudInPlane(), data.getIntersectionsInPlane());
    }
 
    public static List<Input> toInputList(Collection<PlanarRegionSegmentationRawData> data)

@@ -60,7 +60,7 @@ public abstract class PlanarRegionPolygonizer
       {
          // First compute the set of concave hulls for this region
          List<Point2D> pointCloudInPlane = rawData.getPointCloudInPlane();
-         List<LineSegment2D> intersections = rawData.getIntersections();
+         List<LineSegment2D> intersections = rawData.getIntersectionsInPlane();
          ConcaveHullCollection concaveHullCollection = SimpleConcaveHullFactory.createConcaveHullCollection(pointCloudInPlane, intersections,
                                                                                                             concaveHullFactoryParameters);
 
