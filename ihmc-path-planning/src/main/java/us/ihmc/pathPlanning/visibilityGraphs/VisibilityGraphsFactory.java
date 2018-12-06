@@ -144,17 +144,19 @@ public class VisibilityGraphsFactory
     *           added to the map.
     * @return the new map or {@code null} if a host region could not be found.
     */
-   public static SingleSourceVisibilityMap createSingleSourceVisibilityMap(Point3DReadOnly source, List<VisibilityMapWithNavigableRegion> navigableRegions,
+   public static SingleSourceVisibilityMap createSingleSourceVisibilityMap(Point3DReadOnly source, NavigableRegions navigableRegions,
                                                                            double searchHostEpsilon, VisibilityMap potentialFallbackMap)
    {
-      VisibilityMapWithNavigableRegion hostRegion = PlanarRegionTools.getNavigableRegionContainingThisPoint(source, navigableRegions, searchHostEpsilon);
+      NavigableRegion hostNavigableRegion = PlanarRegionTools.getNavigableRegionContainingThisPoint(source, navigableRegions, searchHostEpsilon);
 
-      if (hostRegion == null)
+      if (hostNavigableRegion == null)
          return null;
 
       Point3D sourceInLocal = new Point3D(source);
-      hostRegion.transformFromWorldToLocal(sourceInLocal);
-      int mapId = hostRegion.getMapId();
+      hostNavigableRegion.transformFromWorldToLocal(sourceInLocal);
+      int mapId = hostNavigableRegion.getMapId();
+      
+      VisibilityMapWithNavigableRegion hostRegion = new VisibilityMapWithNavigableRegion(hostNavigableRegion);
 
       Set<Connection> connections = VisibilityTools.createStaticVisibilityMap(sourceInLocal, mapId, hostRegion.getAllClusters(), mapId);
 
