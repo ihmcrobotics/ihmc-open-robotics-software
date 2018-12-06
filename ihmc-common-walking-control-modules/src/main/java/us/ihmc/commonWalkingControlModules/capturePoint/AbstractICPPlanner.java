@@ -37,6 +37,7 @@ public abstract class AbstractICPPlanner implements ICPPlannerInterface
    protected final YoInteger numberFootstepsToConsider = new YoInteger(namePrefix + "NumberFootstepsToConsider", registry);
    protected final YoBoolean isStanding = new YoBoolean(namePrefix + "IsStanding", registry);
    protected final YoBoolean isInitialTransfer = new YoBoolean(namePrefix + "IsInitialTransfer", registry);
+   protected final YoBoolean isFinalTransfer = new YoBoolean(namePrefix + "IsFinalTransfer", registry);
    protected final YoBoolean isDoubleSupport = new YoBoolean(namePrefix + "IsDoubleSupport", registry);
 
    protected final ExecutionTimer timer = new ExecutionTimer(namePrefix + "Timer", registry);
@@ -142,7 +143,7 @@ public abstract class AbstractICPPlanner implements ICPPlannerInterface
 
    /**
     * Creates an ICP planner. Refer to the class documentation: {@link ContinuousCMPBasedICPPlanner}.
-    * 
+    *
     * @param bipedSupportPolygons it is used to get reference frames relevant for walking such as
     *           the sole frames. It is also used in
     *           {@link ReferenceCentroidalMomentumPivotLocationsCalculator} to adapt the ICP plan to
@@ -202,6 +203,7 @@ public abstract class AbstractICPPlanner implements ICPPlannerInterface
       transferDurationAlphas.add(transferDurationAlpha);
    }
 
+   @Override
    public void initializeParameters(ICPPlannerParameters parameters)
    {
       defaultTransferDurationAlpha.set(parameters.getTransferSplitFraction());
@@ -455,7 +457,7 @@ public abstract class AbstractICPPlanner implements ICPPlannerInterface
    {
       desiredCentroidalMomentumPivotPositionToPack.setIncludingFrame(desiredCMPPosition);
    }
-   
+
    public void getDesiredCentroidalMomentumPivotPosition(YoFramePoint3D desiredCentroidalMomentumPivotPositionToPack)
    {
       desiredCentroidalMomentumPivotPositionToPack.set(desiredCMPPosition);
