@@ -6,6 +6,8 @@ import java.util.List;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 
 import controller_msgs.msg.dds.StampedPosePacket;
+import gnu.trove.map.TObjectDoubleMap;
+import gnu.trove.map.hash.TObjectDoubleHashMap;
 import us.ihmc.avatar.DRCEstimatorThread;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.SimulatedDRCRobotTimeProvider;
@@ -300,7 +302,14 @@ public class AvatarSimulationFactory
          humanoidFloatingRootJointRobot.computeCenterOfMass(initialCoMPosition);
 
          RigidBodyTransform rootJointTransform = humanoidFloatingRootJointRobot.getRootJoint().getJointTransform3D();
-         stateEstimationThread.initializeEstimator(rootJointTransform);
+
+         TObjectDoubleMap<String> jointPositions = new TObjectDoubleHashMap<>();
+         for (OneDegreeOfFreedomJoint joint : humanoidFloatingRootJointRobot.getOneDegreeOfFreedomJoints())
+         {
+            jointPositions.put(joint.getName(), joint.getQ());
+         }
+
+         stateEstimationThread.initializeEstimator(rootJointTransform, jointPositions);
       }
    }
 
