@@ -2,10 +2,11 @@ package us.ihmc.avatar;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 import controller_msgs.msg.dds.ControllerCrashNotificationPacket;
+import controller_msgs.msg.dds.HighLevelStateChangeStatusMessage;
 import controller_msgs.msg.dds.RequestWristForceSensorCalibrationPacket;
-import controller_msgs.msg.dds.StateEstimatorModePacket;
 import gnu.trove.map.TObjectDoubleMap;
 import us.ihmc.commonWalkingControlModules.controlModules.ForceSensorToJointTorqueProjector;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.ContactableBodiesFactory;
@@ -19,6 +20,7 @@ import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
+import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelControllerName;
 import us.ihmc.humanoidRobotics.communication.packets.sensing.StateEstimatorMode;
 import us.ihmc.humanoidRobotics.communication.subscribers.PelvisPoseCorrectionCommunicatorInterface;
 import us.ihmc.humanoidRobotics.communication.subscribers.RequestWristForceSensorCalibrationSubscriber;
@@ -200,17 +202,6 @@ public class DRCEstimatorThread implements MultiThreadedRobotControlElement
 
          stateEstimator = estimatorFactory.createStateEstimator(estimatorRegistry, yoGraphicsListRegistry);
          estimatorController.addRobotController(stateEstimator);
-
-         if (realtimeRos2Node != null)
-         {
-            MessageTopicNameGenerator publisherTopicNameGenerator = ControllerAPIDefinition.getPublisherTopicNameGenerator(robotName);
-            ROS2Tools.createCallbackSubscription(realtimeRos2Node, StateEstimatorModePacket.class, publisherTopicNameGenerator, subscriber -> {
-               StateEstimatorModePacket message = subscriber.takeNextData();
-               StateEstimatorMode requestedMode = StateEstimatorMode.fromByte(message.getRequestedStateEstimatorMode());
-               stateEstimator.requestStateEstimatorMode(requestedMode);
-            });
-
-         }
       }
       else
       {
@@ -278,6 +269,17 @@ public class DRCEstimatorThread implements MultiThreadedRobotControlElement
       {
          robotVisualizer.setMainRegistry(estimatorRegistry, estimatorFullRobotModel.getElevator(), yoGraphicsListRegistry);
       }
+   }
+
+   public void setupHighLevelControllerCallback(String robotName, RealtimeRos2Node realtimeRos2Node,
+                                                Map<HighLevelControllerName, StateEstimatorMode> stateModeMap)
+   {
+      MessageTopicNameGenerator publisherTopicNameGenerator = ControllerAPIDefinition.getPublisherTopicNameGenerator(robotName);
+      ROS2Tools.createCallbackSubscription(realtimeRos2Node, HighLevelStateChangeStatusMessage.class, publisherTopicNameGenerator, subscriber -> {
+         HighLevelStateChangeStatusMessage message = subscriber.takeNextData();
+         StateEstimatorMode requestedMode = stateModeMap.get(HighLevelControllerName.fromByte(message.getEndHighLevelControllerName()));
+         stateEstimator.requestStateEstimatorMode(requestedMode);
+      });
    }
 
    @Override
