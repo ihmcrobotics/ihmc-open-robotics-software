@@ -15,7 +15,6 @@ import us.ihmc.graphicsDescription.yoGraphics.YoGraphicReferenceFrame;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.communication.packets.sensing.StateEstimatorMode;
 import us.ihmc.humanoidRobotics.communication.subscribers.PelvisPoseCorrectionCommunicatorInterface;
-import us.ihmc.humanoidRobotics.communication.subscribers.StateEstimatorModeSubscriber;
 import us.ihmc.humanoidRobotics.model.CenterOfPressureDataHolder;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.robotics.contactable.ContactablePlaneBody;
@@ -70,8 +69,6 @@ public class DRCKinematicsBasedStateEstimator implements StateEstimatorControlle
    private final SensorOutputMapReadOnly sensorOutputMapReadOnly;
 
    private final JointTorqueFromForceSensorVisualizer jointTorqueFromForceSensorVisualizer;
-
-   private StateEstimatorModeSubscriber stateEstimatorModeSubscriber = null;
 
    private final YoBoolean reinitializeStateEstimator = new YoBoolean("reinitializeStateEstimator", registry);
 
@@ -233,13 +230,10 @@ public class DRCKinematicsBasedStateEstimator implements StateEstimatorControlle
       if (fusedIMUSensor != null)
          fusedIMUSensor.update();
 
-      if (stateEstimatorModeSubscriber != null && stateEstimatorModeSubscriber.checkForNewOperatingModeRequest())
-      {
-         operatingMode.set(stateEstimatorModeSubscriber.getRequestedOperatingMode());
-      }
-
       if (atomicOperationMode.get() != null)
+      {
          operatingMode.set(atomicOperationMode.getAndSet(null));
+      }
 
       jointStateUpdater.updateJointState();
 
@@ -320,11 +314,6 @@ public class DRCKinematicsBasedStateEstimator implements StateEstimatorControlle
    public void setExternalPelvisCorrectorSubscriber(PelvisPoseCorrectionCommunicatorInterface externalPelvisPoseSubscriber)
    {
       pelvisPoseHistoryCorrection.setExternalPelvisCorrectorSubscriber(externalPelvisPoseSubscriber);
-   }
-
-   public void setOperatingModeSubscriber(StateEstimatorModeSubscriber stateEstimatorModeSubscriber)
-   {
-      this.stateEstimatorModeSubscriber = stateEstimatorModeSubscriber;
    }
 
    @Override
