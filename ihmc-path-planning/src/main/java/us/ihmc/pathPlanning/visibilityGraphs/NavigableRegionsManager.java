@@ -12,8 +12,8 @@ import us.ihmc.pathPlanning.visibilityGraphs.clusterManagement.Cluster;
 import us.ihmc.pathPlanning.visibilityGraphs.dataStructure.Connection;
 import us.ihmc.pathPlanning.visibilityGraphs.dataStructure.ConnectionPoint3D;
 import us.ihmc.pathPlanning.visibilityGraphs.dataStructure.InterRegionVisibilityMap;
-import us.ihmc.pathPlanning.visibilityGraphs.dataStructure.VisibilityMapWithNavigableRegion;
 import us.ihmc.pathPlanning.visibilityGraphs.dataStructure.SingleSourceVisibilityMap;
+import us.ihmc.pathPlanning.visibilityGraphs.dataStructure.VisibilityMapWithNavigableRegion;
 import us.ihmc.pathPlanning.visibilityGraphs.interfaces.VisibilityGraphsParameters;
 import us.ihmc.pathPlanning.visibilityGraphs.interfaces.VisibilityMapHolder;
 import us.ihmc.pathPlanning.visibilityGraphs.tools.ClusterTools;
@@ -27,6 +27,7 @@ public class NavigableRegionsManager
    private final static boolean useCustomDijkstraSearch = true;
 
    private NavigableRegions navigableRegions;
+   private ArrayList<VisibilityMapWithNavigableRegion> visibilityMapsWithNavigableRegions = new ArrayList<>();
 
    final static int START_GOAL_ID = 0;
 
@@ -53,10 +54,27 @@ public class NavigableRegionsManager
 
    public NavigableRegionsManager(VisibilityGraphsParameters parameters, List<PlanarRegion> regions)
    {
-      this.navigableRegions = new NavigableRegions(parameters, regions);
+      this.navigableRegions = new NavigableRegions(parameters, regions);      
       this.parameters = parameters == null ? new DefaultVisibilityGraphParameters() : parameters;
    }
 
+   public static ArrayList<VisibilityMapWithNavigableRegion> foo(NavigableRegions navigableRegions)
+   {
+      ArrayList<VisibilityMapWithNavigableRegion> list = new ArrayList<>();
+
+      List<VisibilityMapWithNavigableRegion> naviableRegionsList = navigableRegions.getNaviableRegionsList();
+
+      for (VisibilityMapWithNavigableRegion navigableRegion : naviableRegionsList)
+      {
+//         VisibilityMapWithNavigableRegion visibilityMapWithNavigableRegion = new VisibilityMapWithNavigableRegion(navigableRegion.getNavigableRegion());
+         VisibilityMapWithNavigableRegion visibilityMapWithNavigableRegion = navigableRegion;
+         list.add(visibilityMapWithNavigableRegion);
+      }
+
+      return list;
+   }
+
+   
    public static ArrayList<VisibilityMapWithNavigableRegion> createListOfVisibilityMapsWithNavigableRegions(NavigableRegions navigableRegions)
    {
       ArrayList<VisibilityMapWithNavigableRegion> list = new ArrayList<>();
@@ -65,7 +83,7 @@ public class NavigableRegionsManager
 
       for (VisibilityMapWithNavigableRegion navigableRegion : naviableRegionsList)
       {
-         //         VisibilityMapWithNavigableRegion visibilityMapWithNavigableRegion = new VisibilityMapWithNavigableRegion(navigableRegion);
+//         VisibilityMapWithNavigableRegion visibilityMapWithNavigableRegion = new VisibilityMapWithNavigableRegion(navigableRegion);
          VisibilityMapWithNavigableRegion visibilityMapWithNavigableRegion = navigableRegion;
          list.add(visibilityMapWithNavigableRegion);
       }
@@ -113,7 +131,8 @@ public class NavigableRegionsManager
       // Otherwise, the ordering does not matter.
       //      VisibilityGraphsFactory.createStaticVisibilityMapsForNavigableRegions(navigableRegions);
 
-      ArrayList<VisibilityMapWithNavigableRegion> visibilityMapsWithNavigableRegions = createListOfVisibilityMapsWithNavigableRegions(navigableRegions);
+      
+      visibilityMapsWithNavigableRegions = createListOfVisibilityMapsWithNavigableRegions(navigableRegions);
 
       interRegionVisibilityMap = VisibilityGraphsFactory.createInterRegionVisibilityMap(visibilityMapsWithNavigableRegions,
                                                                                         parameters.getInterRegionConnectionFilter());

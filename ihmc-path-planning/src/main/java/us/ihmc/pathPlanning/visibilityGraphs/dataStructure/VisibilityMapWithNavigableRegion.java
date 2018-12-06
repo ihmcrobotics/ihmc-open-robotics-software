@@ -16,9 +16,26 @@ public class VisibilityMapWithNavigableRegion implements VisibilityMapHolder
 
    private final NavigableRegion navigableRegion;
 
+   public VisibilityMapWithNavigableRegion(VisibilityMapWithNavigableRegion visibilityMapWithNavigableRegion)
+   {
+      this.navigableRegion = visibilityMapWithNavigableRegion.navigableRegion;
+      this.visibilityMapInLocal = visibilityMapWithNavigableRegion.visibilityMapInLocal;
+      this.visibilityMapInWorld = visibilityMapWithNavigableRegion.visibilityMapInWorld;
+   }
+
    public VisibilityMapWithNavigableRegion(PlanarRegion homePlanarRegion)
    {
       this.navigableRegion = new NavigableRegion(homePlanarRegion);
+   }
+
+   public VisibilityMapWithNavigableRegion(NavigableRegion navigableRegion)
+   {
+      this.navigableRegion = navigableRegion;
+   }
+
+   public NavigableRegion getNavigableRegion()
+   {
+      return navigableRegion;
    }
 
    public void setHomeRegionCluster(Cluster homeCluster)
