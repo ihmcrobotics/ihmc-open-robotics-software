@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.EnumMap;
 
 import controller_msgs.msg.dds.HighLevelStateChangeStatusMessage;
-import controller_msgs.msg.dds.StateEstimatorModePacket;
 import us.ihmc.commonWalkingControlModules.configurations.HighLevelControllerParameters;
 import us.ihmc.commonWalkingControlModules.configurations.ICPTrajectoryPlannerParameters;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
@@ -64,7 +63,6 @@ public class HumanoidHighLevelControllerManager implements RobotController
    private final EnumMap<HighLevelControllerName, HighLevelControllerState> highLevelControllerStates = new EnumMap<>(HighLevelControllerName.class);
 
    private final HighLevelStateChangeStatusMessage highLevelStateChangeStatusMessage = new HighLevelStateChangeStatusMessage();
-   private final StateEstimatorModePacket stateEstimatorModePacket = new StateEstimatorModePacket();
 
    private final ExecutionTimer highLevelControllerTimer = new ExecutionTimer("activeHighLevelControllerTimer", 1.0, registry);
 
