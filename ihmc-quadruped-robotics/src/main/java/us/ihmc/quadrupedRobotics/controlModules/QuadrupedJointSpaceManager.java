@@ -1,5 +1,6 @@
 package us.ihmc.quadrupedRobotics.controlModules;
 
+import javafx.util.Pair;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.FeedbackControlCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.InverseDynamicsCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.InverseDynamicsCommandList;
@@ -13,13 +14,16 @@ import us.ihmc.quadrupedRobotics.parameters.QuadrupedPrivilegedConfigurationPara
 import us.ihmc.robotics.partNames.LegJointName;
 import us.ihmc.robotics.robotSide.QuadrantDependentList;
 import us.ihmc.robotics.robotSide.RobotQuadrant;
+import us.ihmc.tools.lists.PairList;
 import us.ihmc.yoVariables.parameters.DoubleParameter;
 import us.ihmc.yoVariables.providers.DoubleProvider;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class QuadrupedJointSpaceManager
 {
@@ -46,6 +50,7 @@ public class QuadrupedJointSpaceManager
 
    private final List<DoubleProvider> privilegedConfigurations = new ArrayList<>();
    private final List<OneDoFJointBasics> kneeJoints = new ArrayList<>();
+   private final PairList<OneDoFJointBasics, Double> jointConfigurations = new PairList<>();
 
    public QuadrupedJointSpaceManager(QuadrupedControllerToolbox controllerToolbox, YoVariableRegistry parentRegistry)
    {
@@ -54,10 +59,15 @@ public class QuadrupedJointSpaceManager
 
       for (RobotQuadrant quadrant : RobotQuadrant.values)
       {
-         OneDoFJointBasics joint = controllerToolbox.getFullRobotModel().getLegJoint(quadrant, LegJointName.KNEE_PITCH);
-         kneeJoints.add(joint);
-         privilegedConfigurations.add(new DoubleParameter(joint.getName() + "_PrivilegedConfiguration", registry, privilegedConfigurationParameters.getPrivilegedConfiguration(quadrant)));
+         OneDoFJointBasics kneePitch = controllerToolbox.getFullRobotModel().getLegJoint(quadrant, LegJointName.KNEE_PITCH);
+         OneDoFJointBasics hipRoll = controllerToolbox.getFullRobotModel().getLegJoint(quadrant, LegJointName.HIP_ROLL);
+         OneDoFJointBasics hipPitch = controllerToolbox.getFullRobotModel().getLegJoint(quadrant, LegJointName.HIP_PITCH);
+         kneeJoints.add(kneePitch);
+         privilegedConfigurations.add(new DoubleParameter(kneePitch.getName() + "_PrivilegedConfiguration", registry, privilegedConfigurationParameters.getPrivilegedConfiguration(LegJointName.KNEE_PITCH, quadrant)));
+         jointConfigurations.add(hipRoll, privilegedConfigurationParameters.getPrivilegedConfiguration(LegJointName.HIP_ROLL, quadrant));
+         jointConfigurations.add(hipPitch, privilegedConfigurationParameters.getPrivilegedConfiguration(LegJointName.HIP_PITCH, quadrant));
       }
+
 
 
       privilegedConfigurationWeight = new DoubleParameter("kneePrivWeight", registry, privilegedConfigurationParameters.getKneeWeight());
@@ -88,6 +98,12 @@ public class QuadrupedJointSpaceManager
          privilegedConfigurationCommand.setVelocityGains(privilegedConfigurationVelocityGain.getValue());
          privilegedConfigurationCommand.setWeight(i, privilegedConfigurationWeight.getValue());
       }
+
+      for (int i = 0; i < jointConfigurations.size(); i++)
+      {
+         privilegedConfigurationCommand.addJoint(jointConfigurations.get(i).getLeft(), jointConfigurations.get(i).getRight());
+      }
+
    }
 
    public FeedbackControlCommand<?> createFeedbackControlTemplate()

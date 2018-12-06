@@ -7,6 +7,7 @@ import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.Continuous
 import us.ihmc.quadrupedRobotics.*;
 import us.ihmc.quadrupedRobotics.controller.QuadrupedControlMode;
 import us.ihmc.quadrupedRobotics.input.managers.QuadrupedTeleopManager;
+import us.ihmc.quadrupedRobotics.model.QuadrupedInitialOffsetAndYaw;
 import us.ihmc.quadrupedRobotics.planning.QuadrupedXGaitSettings;
 import us.ihmc.quadrupedRobotics.planning.QuadrupedXGaitSettingsReadOnly;
 import us.ihmc.quadrupedRobotics.planning.chooser.footstepChooser.DefaultPointFootSnapperParameters;
@@ -16,6 +17,7 @@ import us.ihmc.simulationConstructionSetTools.util.environments.planarRegionEnvi
 import us.ihmc.simulationConstructionSetTools.util.simulationrunner.GoalOrientedTestConductor;
 import us.ihmc.simulationconstructionset.SimulationConstructionSetParameters;
 import us.ihmc.tools.MemoryTools;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
 
 import java.io.IOException;
 
@@ -105,18 +107,26 @@ public abstract class QuadrupedXGaitWalkOverRoughTerrainTest implements Quadrupe
       StaircaseEnvironment staircaseEnvironment = new StaircaseEnvironment(numberOfSteps, stepHeight, stepLength);
       double walkTime = 20.0;
       double walkingSpeed = 0.3;
-      double minimumXPositionAfterWalking  = numberOfSteps * stepLength + 0.5;
+      double minimumXPositionAfterWalking = numberOfSteps * stepLength + 0.5;
 
       runWalkingOverTerrain(staircaseEnvironment, walkTime, walkingSpeed, minimumXPositionAfterWalking, getXGaitSettings());
    }
 
-   private void runWalkingOverTerrain(PlanarRegionEnvironmentInterface environment, double walkTime, double walkingSpeed,
-                                      double minimumXPositionAfterWalking, QuadrupedXGaitSettingsReadOnly xGaitSettings) throws IOException
+   protected void runWalkingOverTerrain(PlanarRegionEnvironmentInterface environment, double walkTime, double walkingSpeed, double minimumXPositionAfterWalking,
+                                      QuadrupedXGaitSettingsReadOnly xGaitSettings) throws IOException
+   {
+      runWalkingOverTerrain(environment, walkTime, walkingSpeed, minimumXPositionAfterWalking, xGaitSettings, null);
+   }
+
+   protected void runWalkingOverTerrain(PlanarRegionEnvironmentInterface environment, double walkTime, double walkingSpeed, double minimumXPositionAfterWalking,
+                                      QuadrupedXGaitSettingsReadOnly xGaitSettings, QuadrupedInitialOffsetAndYaw offsetAndYaw) throws IOException
    {
       SimulationConstructionSetParameters simulationConstructionSetParameters = SimulationConstructionSetParameters.createFromSystemProperties();
       simulationConstructionSetParameters.setUseAutoGroundGraphics(false);
 
       quadrupedTestFactory = createQuadrupedTestFactory();
+      if (offsetAndYaw != null)
+         quadrupedTestFactory.setInitialOffset(offsetAndYaw);
       quadrupedTestFactory.setScsParameters(simulationConstructionSetParameters);
       quadrupedTestFactory.setTerrainObject3D(environment.getTerrainObject3D());
       quadrupedTestFactory.setControlMode(QuadrupedControlMode.FORCE);
@@ -132,19 +142,18 @@ public abstract class QuadrupedXGaitWalkOverRoughTerrainTest implements Quadrupe
       QuadrupedTestBehaviors.readyXGait(conductor, variables, stepTeleopManager);
       stepTeleopManager.getXGaitSettings().set(xGaitSettings);
 
+      stepTeleopManager.setDesiredBodyHeight(0.5);
       stepTeleopManager.requestXGait();
       stepTeleopManager.setDesiredVelocity(walkingSpeed, 0.0, 0.0);
       conductor.addSustainGoal(QuadrupedTestGoals.notFallen(variables));
-      conductor.addTerminalGoal(YoVariableTestGoal.timeInFuture(variables.getYoTime(), walkTime));
-
       conductor.addTerminalGoal(YoVariableTestGoal.doubleGreaterThan(variables.getRobotBodyX(), minimumXPositionAfterWalking));
+      conductor.addTimeLimit(variables.getYoTime(), variables.getYoTime().getDoubleValue() + walkTime);
       conductor.simulate();
 
       stepTeleopManager.setDesiredVelocity(0.0, 0.0, 0.0);
       conductor.addSustainGoal(QuadrupedTestGoals.notFallen(variables));
       conductor.addTerminalGoal(YoVariableTestGoal.timeInFuture(variables.getYoTime(), 1.0));
       conductor.simulate();
-
 
       stepTeleopManager.requestStanding();
       conductor.addTerminalGoal(QuadrupedTestGoals.timeInFuture(variables, 2.0));
