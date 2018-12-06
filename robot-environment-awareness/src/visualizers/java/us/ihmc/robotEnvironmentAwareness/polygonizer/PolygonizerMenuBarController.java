@@ -37,6 +37,7 @@ public class PolygonizerMenuBarController
          try
          {
             dataImporter.loadPlanarRegionSegmentationData();
+            dataImporter.recenterData();
             messager.submitMessage(Polygonizer.PolygonizerInput, Polygonizer.toInputList(dataImporter.getPlanarRegionSegmentationRawData()));
          }
          catch (IOException e)
