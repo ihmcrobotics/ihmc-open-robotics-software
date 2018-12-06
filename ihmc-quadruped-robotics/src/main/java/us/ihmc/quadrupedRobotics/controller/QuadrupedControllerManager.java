@@ -1,11 +1,18 @@
 package us.ihmc.quadrupedRobotics.controller;
 
+import java.util.concurrent.atomic.AtomicReference;
+
 import controller_msgs.msg.dds.HighLevelStateChangeStatusMessage;
 import controller_msgs.msg.dds.WalkingControllerFailureStatusMessage;
 import us.ihmc.commonWalkingControlModules.configurations.HighLevelControllerParameters;
 import us.ihmc.commonWalkingControlModules.controllerAPI.input.ControllerNetworkSubscriber;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.lowLevel.YoLowLevelOneDoFJointDesiredDataHolder;
-import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.*;
+import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.DoNothingControllerState;
+import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.FreezeControllerState;
+import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.HighLevelControllerState;
+import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.SmoothTransitionControllerState;
+import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.StandPrepControllerState;
+import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.StandReadyControllerState;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.controllerAPI.CommandInputManager;
 import us.ihmc.communication.controllerAPI.StatusMessageOutputManager;
@@ -13,7 +20,6 @@ import us.ihmc.humanoidRobotics.communication.controllerAPI.command.HighLevelCon
 import us.ihmc.humanoidRobotics.communication.controllerAPI.converter.ClearDelayQueueConverter;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelControllerName;
 import us.ihmc.humanoidRobotics.communication.packets.sensing.StateEstimatorMode;
-import us.ihmc.humanoidRobotics.communication.subscribers.StateEstimatorModeSubscriber;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.quadrupedRobotics.communication.QuadrupedControllerAPIDefinition;
 import us.ihmc.quadrupedRobotics.controlModules.QuadrupedControlManagerFactory;
@@ -39,14 +45,13 @@ import us.ihmc.sensorProcessing.outputData.JointDesiredOutputList;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutputListReadOnly;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutputReadOnly;
 import us.ihmc.simulationconstructionset.util.RobotController;
+import us.ihmc.stateEstimation.humanoid.StateEstimatorController;
 import us.ihmc.tools.thread.CloseableAndDisposable;
 import us.ihmc.tools.thread.CloseableAndDisposableRegistry;
 import us.ihmc.yoVariables.parameters.BooleanParameter;
 import us.ihmc.yoVariables.providers.BooleanProvider;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoEnum;
-
-import java.util.concurrent.atomic.AtomicReference;
 
 /**
  * A {@link RobotController} for switching between other robot controllers according to an internal
@@ -82,7 +87,7 @@ public class QuadrupedControllerManager implements RobotController, CloseableAnd
 
    private final BooleanProvider trustFootSwitches;
 
-   private StateEstimatorModeSubscriber stateEstimatorModeSubscriber;
+   private StateEstimatorController stateEstimator;
 
    public QuadrupedControllerManager(QuadrupedRuntimeEnvironment runtimeEnvironment, QuadrupedPhysicalProperties physicalProperties,
                                      HighLevelControllerName initialControllerState, HighLevelControllerState calibrationState)
@@ -181,8 +186,8 @@ public class QuadrupedControllerManager implements RobotController, CloseableAnd
          runtimeEnvironment.getFootSwitches().get(RobotQuadrant.FRONT_RIGHT).setFootContactState(false);
          runtimeEnvironment.getFootSwitches().get(RobotQuadrant.HIND_LEFT).setFootContactState(false);
          runtimeEnvironment.getFootSwitches().get(RobotQuadrant.HIND_RIGHT).setFootContactState(true);
-         if (stateEstimatorModeSubscriber != null)
-            stateEstimatorModeSubscriber.requestMode(StateEstimatorMode.FROZEN);
+         if (stateEstimator != null)
+            stateEstimator.requestStateEstimatorMode(StateEstimatorMode.FROZEN);
          break;
       case STAND_READY:
          for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
@@ -190,8 +195,8 @@ public class QuadrupedControllerManager implements RobotController, CloseableAnd
             runtimeEnvironment.getFootSwitches().get(robotQuadrant).trustFootSwitch(false);
             runtimeEnvironment.getFootSwitches().get(robotQuadrant).setFootContactState(true);
          }
-         if (stateEstimatorModeSubscriber != null)
-            stateEstimatorModeSubscriber.requestMode(StateEstimatorMode.NORMAL);
+         if (stateEstimator != null)
+            stateEstimator.requestStateEstimatorMode(StateEstimatorMode.NORMAL);
          break;
       case STAND_TRANSITION_STATE:
       case WALKING:
@@ -403,8 +408,8 @@ public class QuadrupedControllerManager implements RobotController, CloseableAnd
       closeableAndDisposableRegistry.closeAndDispose();
    }
 
-   public void setStateEstimatorModeSubscriber(StateEstimatorModeSubscriber stateEstimatorModeSubscriber)
+   public void setStateEstimator(StateEstimatorController stateEstimator)
    {
-      this.stateEstimatorModeSubscriber = stateEstimatorModeSubscriber;
+      this.stateEstimator = stateEstimator;
    }
 }
