@@ -35,11 +35,6 @@ public class NavigableRegions
       this.regions = regions;
    }
 
-   public List<VisibilityMapWithNavigableRegion> getNavigableRegions()
-   {
-      return navigableRegions;
-   }
-
    public Point3DReadOnly[][] getNavigableExtrusions()
    {
       Point3DReadOnly[][] allNavigableExtrusions = new Point3D[navigableRegions.size()][];
