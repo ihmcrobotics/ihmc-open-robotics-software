@@ -22,7 +22,6 @@ import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.communication.packets.sensing.StateEstimatorMode;
 import us.ihmc.humanoidRobotics.communication.subscribers.PelvisPoseCorrectionCommunicatorInterface;
 import us.ihmc.humanoidRobotics.communication.subscribers.RequestWristForceSensorCalibrationSubscriber;
-import us.ihmc.humanoidRobotics.communication.subscribers.StateEstimatorModeSubscriber;
 import us.ihmc.humanoidRobotics.model.CenterOfPressureDataHolder;
 import us.ihmc.mecano.multiBodySystem.interfaces.FloatingJointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
@@ -192,21 +191,26 @@ public class DRCEstimatorThread implements MultiThreadedRobotControlElement
 
          if (realtimeRos2Node != null)
          {
-            StateEstimatorModeSubscriber stateEstimatorModeSubscriber = new StateEstimatorModeSubscriber();
             RequestWristForceSensorCalibrationSubscriber requestWristForceSensorCalibrationSubscriber = new RequestWristForceSensorCalibrationSubscriber();
-
             MessageTopicNameGenerator subscriberTopicNameGenerator = ControllerAPIDefinition.getSubscriberTopicNameGenerator(robotName);
-            ROS2Tools.createCallbackSubscription(realtimeRos2Node, StateEstimatorModePacket.class, subscriberTopicNameGenerator,
-                                                 subscriber -> stateEstimatorModeSubscriber.receivedPacket(subscriber.takeNextData()));
             ROS2Tools.createCallbackSubscription(realtimeRos2Node, RequestWristForceSensorCalibrationPacket.class, subscriberTopicNameGenerator,
                                                  subscriber -> requestWristForceSensorCalibrationSubscriber.receivedPacket(subscriber.takeNextData()));
-
-            estimatorFactory.setOperatingModeSubscriber(stateEstimatorModeSubscriber);
             forceSensorStateUpdater.setRequestWristForceSensorCalibrationSubscriber(requestWristForceSensorCalibrationSubscriber);
          }
 
          stateEstimator = estimatorFactory.createStateEstimator(estimatorRegistry, yoGraphicsListRegistry);
          estimatorController.addRobotController(stateEstimator);
+
+         if (realtimeRos2Node != null)
+         {
+            MessageTopicNameGenerator publisherTopicNameGenerator = ControllerAPIDefinition.getPublisherTopicNameGenerator(robotName);
+            ROS2Tools.createCallbackSubscription(realtimeRos2Node, StateEstimatorModePacket.class, publisherTopicNameGenerator, subscriber -> {
+               StateEstimatorModePacket message = subscriber.takeNextData();
+               StateEstimatorMode requestedMode = StateEstimatorMode.fromByte(message.getRequestedStateEstimatorMode());
+               stateEstimator.requestStateEstimatorMode(requestedMode);
+            });
+
+         }
       }
       else
       {
@@ -422,13 +426,6 @@ public class DRCEstimatorThread implements MultiThreadedRobotControlElement
    {
       if (stateEstimator != null)
          stateEstimator.initializeEstimator(rootJointTransform, jointPositions);
-   }
-
-   // Used by the Atlas stand prep state.
-   @Deprecated
-   public StateEstimatorController getStateEstimator()
-   {
-      return stateEstimator;
    }
 
    public List<? extends IMUSensorReadOnly> getSimulatedIMUOutput()
