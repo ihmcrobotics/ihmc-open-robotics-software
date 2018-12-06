@@ -6,6 +6,8 @@ import us.ihmc.commons.RandomNumbers;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationPlan;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.continuousIntegration.IntegrationCategory;
+import us.ihmc.yoVariables.parameters.DefaultParameterReader;
+import us.ihmc.yoVariables.parameters.XmlParameterReader;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 
@@ -85,6 +87,9 @@ public class StictionCompensatorTest
 
       YoDouble stictionCompensationRate = (YoDouble) registry.getVariable("_StictionCompensationRate");
       YoDouble desiredTorqueStictionLimitFactor = (YoDouble) registry.getVariable("_DesiredTorqueStictionLimitFactor");
+
+      DefaultParameterReader reader = new DefaultParameterReader();
+      reader.readParametersInRegistry(registry);
 
       Random random = new Random(1738L);
       double expectedStictionCompensation = 0.0;
