@@ -3,6 +3,7 @@ package us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelSt
 import us.ihmc.commonWalkingControlModules.configurations.HighLevelControllerParameters;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.JointAccelerationIntegrationCommand;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelControllerName;
+import us.ihmc.humanoidRobotics.communication.packets.sensing.StateEstimatorMode;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.robotics.stateMachine.core.State;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutputList;
@@ -77,6 +78,22 @@ public abstract class HighLevelControllerState implements State, JointLoadStatus
    public boolean isJointLoadBearing(String jointName)
    {
       return false;
+   }
+
+   /**
+    * Allows the state estimator mode to change based on the controller state. E.g. diagnostic states that have the robot
+    * hanging should return the {@link StateEstimatorMode#FROZEN} mode to prevent the state estimator from trying to
+    * estimate the position of a floating robot. Modes such as walking can overwrite this method and set the state estimation
+    * mode to {@link StateEstimatorMode#NORMAL}.
+    * <p>
+    * On each high level controller state change a message requesting the state estimator mode returned for the upcoming state
+    * will be published.
+    * </p>
+    * @return the desired state estimator mode of the controller state.
+    */
+   public StateEstimatorMode getStateEstimatorMode()
+   {
+      return StateEstimatorMode.FROZEN;
    }
 
    public HighLevelControllerName getHighLevelControllerName()
