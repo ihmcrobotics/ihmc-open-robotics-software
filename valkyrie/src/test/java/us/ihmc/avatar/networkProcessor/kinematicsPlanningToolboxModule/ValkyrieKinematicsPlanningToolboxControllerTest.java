@@ -33,6 +33,13 @@ public class ValkyrieKinematicsPlanningToolboxControllerTest extends AvatarKinem
    
    @ContinuousIntegrationTest(estimatedDuration = 20.0)
    @Test(timeout = 30000)
+   public void testDualHandTrajectory() throws Exception, UnreasonableAccelerationException
+   {
+      super.testDualHandTrajectory();
+   }
+   
+   @ContinuousIntegrationTest(estimatedDuration = 20.0)
+   @Test(timeout = 30000)
    public void testLinearInterpolatedTrajectory() throws Exception, UnreasonableAccelerationException
    {
       super.testLinearInterpolatedTrajectory();
