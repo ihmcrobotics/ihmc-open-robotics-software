@@ -4,9 +4,6 @@ import controller_msgs.msg.dds.RobotConfigurationData;
 import net.java.games.input.Event;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.ROS2Tools.MessageTopicNameGenerator;
-import us.ihmc.communication.net.NetClassList;
-import us.ihmc.communication.packetCommunicator.PacketCommunicator;
-import us.ihmc.communication.util.NetworkPorts;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
 import us.ihmc.quadrupedRobotics.communication.QuadrupedControllerAPIDefinition;
@@ -29,7 +26,6 @@ import us.ihmc.util.PeriodicNonRealtimeThreadSchedulerFactory;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 
-import java.io.IOException;
 import java.util.Collections;
 import java.util.EnumMap;
 import java.util.Map;
@@ -79,7 +75,7 @@ public class QuadrupedXBoxAdapter implements JoystickEventListener
       ROS2Tools.createCallbackSubscription(ros2Node, RobotConfigurationData.class, controllerPubGenerator, s -> robotDataReceiver.receivedPacket(s.takeNextData()));
 
       QuadrupedReferenceFrames referenceFrames = new QuadrupedReferenceFrames(fullRobotModel, physicalProperties);
-      this.stepTeleopManager = new QuadrupedTeleopManager(robotName, ros2Node, defaultXGaitSettings, physicalProperties.getNominalCoMHeight(), referenceFrames,
+      this.stepTeleopManager = new QuadrupedTeleopManager(robotName, ros2Node, defaultXGaitSettings, physicalProperties.getNominalBodyHeight(), referenceFrames,
                                                           DT, graphicsListRegistry, registry);
 
       maxBodyYaw.set(0.15);
@@ -89,7 +85,7 @@ public class QuadrupedXBoxAdapter implements JoystickEventListener
       maxVelocityY.set(0.25);
       maxVelocityYaw.set(0.4);
       bodyOrientationShiftTime.set(0.1);
-      this.bodyHeight = new InputValueIntegrator(DT, physicalProperties.getNominalCoMHeight());
+      this.bodyHeight = new InputValueIntegrator(DT, physicalProperties.getNominalBodyHeight());
 
       // Initialize all channels to zero.
       for (XBoxOneMapping channel : XBoxOneMapping.values)

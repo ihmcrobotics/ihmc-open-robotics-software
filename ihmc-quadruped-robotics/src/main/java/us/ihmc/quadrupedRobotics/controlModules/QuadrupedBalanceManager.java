@@ -103,7 +103,7 @@ public class QuadrupedBalanceManager
       supportFrame = referenceFrames.getCenterOfFeetZUpFrameAveragingLowestZHeightsAcrossEnds();
       robotTimestamp = runtimeEnvironment.getRobotTimestamp();
 
-      double nominalHeight = physicalProperties.getNominalCoMHeight();
+      double nominalHeight = physicalProperties.getNominalBodyHeight();
       ReferenceFrame supportFrame = referenceFrames.getCenterOfFeetZUpFrameAveragingLowestZHeightsAcrossEnds();
       dcmPlanner = new DCMPlanner(runtimeEnvironment.getGravity(), nominalHeight, robotTimestamp, supportFrame, referenceFrames.getSoleFrames(), registry,
                                   yoGraphicsListRegistry, debug);
