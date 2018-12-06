@@ -65,7 +65,7 @@ public class NavigableRegions
 
    public void createNavigableRegions()
    {
-      navigableRegions = VisibilityGraphsFactory.createNavigableRegionButNotVisibilityMaps(regions, parameters);
+      navigableRegions = NavigableRegionsFactory.createNavigableRegionButNotVisibilityMaps(regions, parameters);
    }
 
    public List<NavigableRegion> getNaviableRegionsList()

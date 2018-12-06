@@ -6,11 +6,9 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 import us.ihmc.euclid.geometry.BoundingBox3D;
 import us.ihmc.euclid.tuple2D.Point2D;
-import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.pathPlanning.visibilityGraphs.clusterManagement.Cluster;
@@ -23,20 +21,16 @@ import us.ihmc.pathPlanning.visibilityGraphs.dataStructure.VisibilityMap;
 import us.ihmc.pathPlanning.visibilityGraphs.dataStructure.VisibilityMapWithNavigableRegion;
 import us.ihmc.pathPlanning.visibilityGraphs.interfaces.InterRegionConnectionFilter;
 import us.ihmc.pathPlanning.visibilityGraphs.interfaces.NavigableExtrusionDistanceCalculator;
-import us.ihmc.pathPlanning.visibilityGraphs.interfaces.NavigableRegionFilter;
 import us.ihmc.pathPlanning.visibilityGraphs.interfaces.ObstacleExtrusionDistanceCalculator;
 import us.ihmc.pathPlanning.visibilityGraphs.interfaces.ObstacleRegionFilter;
 import us.ihmc.pathPlanning.visibilityGraphs.interfaces.PlanarRegionFilter;
 import us.ihmc.pathPlanning.visibilityGraphs.interfaces.VisibilityGraphsParameters;
-import us.ihmc.pathPlanning.visibilityGraphs.tools.ClusterTools;
 import us.ihmc.pathPlanning.visibilityGraphs.tools.PlanarRegionTools;
-import us.ihmc.pathPlanning.visibilityGraphs.tools.PointCloudTools;
 import us.ihmc.pathPlanning.visibilityGraphs.tools.VisibilityTools;
 import us.ihmc.robotics.geometry.PlanarRegion;
 
 public class VisibilityGraphsFactory
 {
-   private static final double DEPTH_THRESHOLD_FOR_CONVEX_DECOMPOSITION = 0.05;
    /**
     * I believe these filters are now not useful anymore, but I haven't had the time to make sure
     * they're obsolete. When disabled, everything still looks good.
@@ -69,7 +63,7 @@ public class VisibilityGraphsFactory
       if (allRegions.isEmpty())
          return null;
 
-      List<NavigableRegion> navigableRegions = createNavigableRegionButNotVisibilityMaps(allRegions, parameters);
+      List<NavigableRegion> navigableRegions = NavigableRegionsFactory.createNavigableRegionButNotVisibilityMaps(allRegions, parameters);
 
       List<VisibilityMapWithNavigableRegion> visibilityMapsWithNavigableRegions = new ArrayList<>(allRegions.size());
 
@@ -82,45 +76,7 @@ public class VisibilityGraphsFactory
       return visibilityMapsWithNavigableRegions;
    }
 
-   public static List<NavigableRegion> createNavigableRegionButNotVisibilityMaps(List<PlanarRegion> allRegions, VisibilityGraphsParameters parameters)
-   {
-      if (allRegions.isEmpty())
-         return null;
-
-      List<NavigableRegion> navigableRegions = new ArrayList<>(allRegions.size());
-
-      NavigableRegionFilter navigableRegionFilter = parameters.getNavigableRegionFilter();
-
-      for (int candidateIndex = 0; candidateIndex < allRegions.size(); candidateIndex++)
-      {
-         PlanarRegion candidate = allRegions.get(candidateIndex);
-
-         List<PlanarRegion> otherRegions = new ArrayList<>(allRegions);
-         Collections.swap(otherRegions, candidateIndex, otherRegions.size() - 1);
-         otherRegions.remove(otherRegions.size() - 1);
-
-         if (!navigableRegionFilter.isPlanarRegionNavigable(candidate, otherRegions))
-            continue;
-
-         NavigableRegion navigableRegion = createNavigableRegionButNotVisibilityMaps(candidate, otherRegions, parameters);
-         navigableRegions.add(navigableRegion);
-      }
-
-      return navigableRegions;
-   }
-
-   public static NavigableRegion createNavigableRegionButNotVisibilityMaps(PlanarRegion region, List<PlanarRegion> otherRegions,
-                                                                           VisibilityGraphsParameters parameters)
-   {
-      PlanarRegionFilter planarRegionFilter = parameters.getPlanarRegionFilter();
-      double orthogonalAngle = parameters.getRegionOrthogonalAngle();
-      double clusterResolution = parameters.getClusterResolution();
-      NavigableExtrusionDistanceCalculator navigableCalculator = parameters.getNavigableExtrusionDistanceCalculator();
-      ObstacleExtrusionDistanceCalculator obstacleCalculator = parameters.getObstacleExtrusionDistanceCalculator();
-      ObstacleRegionFilter obstacleRegionFilter = parameters.getObstacleRegionFilter();
-      return createNavigableRegionButNotVisibilityMaps(region, otherRegions, orthogonalAngle, clusterResolution, obstacleRegionFilter, planarRegionFilter,
-                                                       navigableCalculator, obstacleCalculator);
-   }
+   
 
    public static VisibilityMapWithNavigableRegion createVisibilityMapsWithNavigableRegions(PlanarRegion region, List<PlanarRegion> otherRegions,
                                                                                            double orthogonalAngle, double clusterResolution,
@@ -128,7 +84,7 @@ public class VisibilityGraphsFactory
                                                                                            NavigableExtrusionDistanceCalculator navigableCalculator,
                                                                                            ObstacleExtrusionDistanceCalculator obstacleCalculator)
    {
-      NavigableRegion navigableRegion = createNavigableRegionButNotVisibilityMaps(region, otherRegions, orthogonalAngle, clusterResolution,
+      NavigableRegion navigableRegion = NavigableRegionsFactory.createNavigableRegionButNotVisibilityMaps(region, otherRegions, orthogonalAngle, clusterResolution,
                                                                                   obstacleRegionFilter, filter, navigableCalculator, obstacleCalculator);
 
       VisibilityMapWithNavigableRegion visibilityMapWithNavigableRegion = new VisibilityMapWithNavigableRegion(navigableRegion);
@@ -137,31 +93,7 @@ public class VisibilityGraphsFactory
       return visibilityMapWithNavigableRegion;
    }
 
-   private static NavigableRegion createNavigableRegionButNotVisibilityMaps(PlanarRegion region, List<PlanarRegion> otherRegions, double orthogonalAngle,
-                                                                            double clusterResolution, ObstacleRegionFilter obstacleRegionFilter,
-                                                                            PlanarRegionFilter filter, NavigableExtrusionDistanceCalculator navigableCalculator,
-                                                                            ObstacleExtrusionDistanceCalculator obstacleCalculator)
-   {
-      NavigableRegion navigableRegion = new NavigableRegion(region);
-      PlanarRegion homeRegion = navigableRegion.getHomePlanarRegion();
-
-      List<PlanarRegion> obstacleRegions = otherRegions.stream().filter(candidate -> obstacleRegionFilter.isRegionValidObstacle(candidate, homeRegion))
-                                                       .collect(Collectors.toList());
-
-      obstacleRegions = PlanarRegionTools.filterRegionsByTruncatingVerticesBeneathHomeRegion(obstacleRegions, homeRegion,
-                                                                                             DEPTH_THRESHOLD_FOR_CONVEX_DECOMPOSITION, filter);
-
-      navigableRegion.setHomeRegionCluster(ClusterTools.createHomeRegionCluster(homeRegion, navigableCalculator));
-      navigableRegion.addObstacleClusters(ClusterTools.createObstacleClusters(homeRegion, obstacleRegions, orthogonalAngle, obstacleCalculator));
-
-      for (Cluster cluster : navigableRegion.getAllClusters())
-      {
-         List<Point2DReadOnly> expandListOf2DPoints = PointCloudTools.addPointsAlongPolygon(cluster.getNavigableExtrusionsInLocal(), clusterResolution);
-         cluster.setNavigableExtrusionsInLocal(expandListOf2DPoints);
-      }
-      return navigableRegion;
-   }
-
+   
    public static void createStaticVisibilityMapsForNavigableRegions(List<VisibilityMapWithNavigableRegion> navigableRegions)
    {
       if (navigableRegions == null)
