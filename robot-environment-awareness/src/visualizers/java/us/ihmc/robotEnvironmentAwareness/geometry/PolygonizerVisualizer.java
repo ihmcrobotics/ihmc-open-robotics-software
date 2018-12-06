@@ -6,7 +6,6 @@ import java.text.DecimalFormat;
 import java.text.NumberFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -16,7 +15,6 @@ import java.util.PriorityQueue;
 import java.util.Random;
 import java.util.Set;
 import java.util.function.Supplier;
-import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.tuple.Pair;
 
@@ -25,6 +23,7 @@ import com.vividsolutions.jts.triangulate.quadedge.QuadEdgeTriangle;
 import com.vividsolutions.jts.triangulate.quadedge.Vertex;
 
 import javafx.application.Application;
+import javafx.application.Platform;
 import javafx.beans.Observable;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.DoubleProperty;
@@ -51,7 +50,6 @@ import javafx.scene.paint.PhongMaterial;
 import javafx.scene.shape.MeshView;
 import javafx.stage.Stage;
 import us.ihmc.commons.lists.ListWrappingIndexTools;
-import us.ihmc.euclid.Axis;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.geometry.LineSegment2D;
 import us.ihmc.euclid.geometry.LineSegment3D;
@@ -109,9 +107,9 @@ public class PolygonizerVisualizer extends Application
 
    public PolygonizerVisualizer() throws IOException
    {
-      parameters.setEdgeLengthThreshold(0.2);
-      //            parameters.setAllowSplittingConcaveHull(false);
-      //            parameters.setRemoveAllTrianglesWithTwoBorderEdges(false);
+      parameters.setEdgeLengthThreshold(0.05);
+      //      parameters.setAllowSplittingConcaveHull(false);
+      //      parameters.setRemoveAllTrianglesWithTwoBorderEdges(false);
       //      parameters.setMaxNumberOfIterations(0);
    }
 
@@ -125,31 +123,10 @@ public class PolygonizerVisualizer extends Application
          dataImporter = new PlanarRegionSegmentationRawDataImporter(defaultFile);
       else
          dataImporter = PlanarRegionSegmentationRawDataImporter.createImporterWithFileChooser(primaryStage);
-
-      List<PlanarRegionSegmentationRawData> regionsRawData;
-
       if (dataImporter == null)
-      {
-         regionsRawData = exampleOverlappingLineConstraints();
-      }
-      else
-      {
-         dataImporter.loadPlanarRegionSegmentationData();
-         regionsRawData = dataImporter.getPlanarRegionSegmentationRawData();
-      }
-
-      //      { // Custom region for new File("../../Data/Segmentation/20161210_184102_PlanarRegionSegmentation_Sim_CB")
-      //         PlanarRegion planarRegion = new PlanarRegion(new RigidBodyTransform(new Quaternion(), new Vector3D(4.0, 5.0, 0.0)),
-      //                                                      new ConvexPolygon2D(Vertex2DSupplier.asVertex2DSupplier(new Point2D(0.0, 0.0), new Point2D(1.0, 0.0),
-      //                                                                                                              new Point2D(1.0, 1.0), new Point2D(0.0, 1.0))));
-      //         PlanarRegionSegmentationParameters blahParams = new PlanarRegionSegmentationParameters();
-      //         blahParams.setMaxDistanceFromPlane(0.20);
-      //         blahParams.setMaxAngleFromPlane(Math.toRadians(30.0));
-      //         blahParams.setSearchRadius(0.27);
-      //         List<PlanarRegionSegmentationRawData> blah = CustomPlanarRegionHandler.mergeCustomRegionToEstimatedRegions(planarRegion, regionsRawData, blahParams);
-      //         System.out.println(blah);
-      //      }
-
+         Platform.exit();
+      dataImporter.loadPlanarRegionSegmentationData();
+      List<PlanarRegionSegmentationRawData> regionsRawData = dataImporter.getPlanarRegionSegmentationRawData();
       regionsRawData.forEach(rawData -> idToRawData.put(rawData.getRegionId(), rawData));
 
       View3DFactory view3dFactory = View3DFactory.createSubscene();
@@ -248,39 +225,6 @@ public class PolygonizerVisualizer extends Application
 
       primaryStage.setScene(new Scene(mainPane, 800, 400, true));
       primaryStage.show();
-   }
-
-   public static List<PlanarRegionSegmentationRawData> exampleOverlappingLineConstraints()
-   {
-      List<Point3D> pointcloud = new ArrayList<>();
-
-      double xOffset = 0.4;
-      double yOffset = 0.0;
-
-      double size = 0.1;
-      double density = 0.0075;
-
-      for (int i = 0; i < size / density; i++)
-      {
-         for (int j = 0; j < size / density; j++)
-         {
-            double x = i * density + xOffset;
-            double y = j * density + yOffset;
-            pointcloud.add(new Point3D(x, y, 0.0));
-         }
-      }
-
-      PlanarRegionSegmentationRawData data = new PlanarRegionSegmentationRawData(1, Axis.Z, new Point3D(), pointcloud);
-
-      List<LineSegment2D> polygon1 = Arrays.asList(new LineSegment2D(0.25, -0.025, 0.25, -0.20), new LineSegment2D(0.35, -0.025, 0.35, -0.20),
-                                                   new LineSegment2D(0.25, -0.025, 0.35, -0.025), new LineSegment2D(0.25, -0.20, 0.35, -0.20));
-
-      List<LineSegment2D> polygon2 = polygon1.stream().map(LineSegment2D::new).peek(segment -> segment.translate(0.11, 0.005)).collect(Collectors.toList());
-
-      data.addIntersections(polygon1);
-      data.addIntersections(polygon2);
-
-      return Collections.singletonList(data);
    }
 
    private Pane setupStatisticViz(FocusBasedCameraMouseEventHandler cameraController)
@@ -398,7 +342,7 @@ public class PolygonizerVisualizer extends Application
       ObservableList<Node> children = regionGroup.getChildren();
 
       List<Point2D> pointsInPlane = rawData.getPointCloudInPlane();
-      List<LineSegment2D> intersections = rawData.getIntersections();
+      List<LineSegment2D> intersections = rawData.getIntersectionsInPlane();
       ConcaveHullFactoryResult concaveHullFactoryResult = SimpleConcaveHullFactory.createConcaveHull(pointsInPlane, intersections, parameters);
 
       if (VISUALIZE_CONCAVE_HULL)
@@ -597,8 +541,7 @@ public class PolygonizerVisualizer extends Application
 
    private Node createIntersectionsGraphics(PlanarRegionSegmentationRawData rawData)
    {
-      List<LineSegment3D> intersections = PolygonizerTools.toLineSegmentsInWorld(rawData.getIntersections(), rawData.getOrigin(), rawData.getNormal());
-      MeshView meshView = REAGraphics3DTools.multiLine(intersections, Color.RED, 0.00125);
+      MeshView meshView = REAGraphics3DTools.multiLine(rawData.getIntersectionsInWorld(), Color.RED, 0.00125);
       meshView.visibleProperty().bind(showIntersections);
       return meshView;
    }

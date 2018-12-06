@@ -10,7 +10,7 @@ import java.util.stream.Stream;
 
 import us.ihmc.euclid.geometry.BoundingBox3D;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
-import us.ihmc.euclid.geometry.LineSegment2D;
+import us.ihmc.euclid.geometry.LineSegment3D;
 import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple2D.Point2D;
@@ -84,18 +84,16 @@ public class CustomPlanarRegionHandler
          if (!isCustomRegionMergeableToEstimatedRegion(customRegion, estimatedRegion, parameters))
             continue;
 
-         RigidBodyTransform fromCustomToEstimatedTransform = new RigidBodyTransform();
-         customRegion.getTransformToWorld(fromCustomToEstimatedTransform);
-         fromCustomToEstimatedTransform.multiplyInvertOther(estimatedRegion.getTransformFromLocalToWorld());
+         RigidBodyTransform transformToWorld = new RigidBodyTransform();
+         customRegion.getTransformToWorld(transformToWorld);
 
-         List<Point2D> vertices = Stream.of(customRegion.getConcaveHull()).map(Point3D::new).peek(fromCustomToEstimatedTransform::transform).map(Point2D::new)
-                                        .collect(Collectors.toList());
+         List<Point3D> vertices = Stream.of(customRegion.getConcaveHull()).map(Point3D::new).peek(transformToWorld::transform).collect(Collectors.toList());
 
-         Point2D previousVertex = vertices.get(vertices.size() - 1);
+         Point3D previousVertex = vertices.get(vertices.size() - 1);
 
-         for (Point2D vertex : vertices)
+         for (Point3D vertex : vertices)
          {
-            estimatedRegion.addIntersection(new LineSegment2D(previousVertex, vertex));
+            estimatedRegion.addIntersection(new LineSegment3D(previousVertex, vertex));
             previousVertex = vertex;
          }
 
