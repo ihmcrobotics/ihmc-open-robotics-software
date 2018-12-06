@@ -25,11 +25,9 @@ import us.ihmc.robotics.math.trajectories.waypoints.FrameEuclideanTrajectoryPoin
 import us.ihmc.robotics.math.trajectories.waypoints.FrameSE3TrajectoryPoint;
 import us.ihmc.robotics.math.trajectories.waypoints.MultipleWaypointsPositionTrajectoryGenerator;
 import us.ihmc.robotics.screwTheory.SelectionMatrix3D;
-import us.ihmc.yoVariables.parameters.DoubleParameter;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.yoVariables.variable.YoFramePoint3D;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -108,7 +106,7 @@ public class QuadrupedCenterOfMassHeightManager
       controlBodyHeight.set(true);
       heightCommandHasBeenReceived.set(false);
 
-      nominalPosition = new ParameterVector3D("nominalCoMPosition", new Vector3D(0.0, 0.0, physicalProperties.getNominalCoMHeight()), registry);
+      nominalPosition = new ParameterVector3D("nominalCoMPosition", new Vector3D(0.0, 0.0, physicalProperties.getNominalBodyHeight()), registry);
       nominalVelocity = new FrameVector3D(supportFrame);
 
       centerOfMassHeightTrajectory = new MultipleWaypointsPositionTrajectoryGenerator("centerOfMassHeight", supportFrame, registry);
