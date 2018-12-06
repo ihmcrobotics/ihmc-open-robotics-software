@@ -19,7 +19,6 @@ import us.ihmc.communication.controllerAPI.StatusMessageOutputManager;
 import us.ihmc.euclid.referenceFrame.FramePoint2D;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.HighLevelControllerStateCommand;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelControllerName;
-import us.ihmc.humanoidRobotics.communication.packets.sensing.StateEstimatorMode;
 import us.ihmc.humanoidRobotics.model.CenterOfPressureDataHolder;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.mecano.tools.MultiBodySystemTools;
@@ -216,10 +215,6 @@ public class HumanoidHighLevelControllerManager implements RobotController
             highLevelStateChangeStatusMessage.setInitialHighLevelControllerName(fromByte);
             highLevelStateChangeStatusMessage.setEndHighLevelControllerName(toByte);
             statusMessageOutputManager.reportStatusMessage(highLevelStateChangeStatusMessage);
-
-            StateEstimatorMode desiredStateEstimatorMode = stateMachine.getState(to).getStateEstimatorMode();
-            stateEstimatorModePacket.setRequestedStateEstimatorMode(desiredStateEstimatorMode.toByte());
-            statusMessageOutputManager.reportStatusMessage(stateEstimatorModePacket);
          }
       });
 
