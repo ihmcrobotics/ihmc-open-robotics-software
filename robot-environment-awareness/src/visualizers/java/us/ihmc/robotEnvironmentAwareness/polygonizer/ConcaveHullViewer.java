@@ -1,4 +1,4 @@
-package us.ihmc.robotEnvironmentAwareness;
+package us.ihmc.robotEnvironmentAwareness.polygonizer;
 
 import static us.ihmc.robotEnvironmentAwareness.geometry.ConcaveHullFactoryGraphicsTools.*;
 import static us.ihmc.robotEnvironmentAwareness.geometry.REAGraphics3DTools.*;
@@ -10,17 +10,21 @@ import java.util.concurrent.atomic.AtomicReference;
 
 import javafx.animation.AnimationTimer;
 import javafx.beans.property.BooleanProperty;
+import javafx.beans.property.DoubleProperty;
+import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleBooleanProperty;
+import javafx.beans.property.SimpleDoubleProperty;
+import javafx.beans.property.SimpleObjectProperty;
 import javafx.scene.Group;
 import javafx.scene.Node;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.MeshView;
 import us.ihmc.euclid.transform.RigidBodyTransform;
-import us.ihmc.javaFXToolkit.messager.JavaFXMessager;
 import us.ihmc.robotEnvironmentAwareness.geometry.SimpleConcaveHullFactory.ConcaveHullFactoryResult;
 
-public class ConcaveHullFactoryResultViewer extends AnimationTimer
+public class ConcaveHullViewer extends AnimationTimer
 {
+   private final BooleanProperty hideAll = new SimpleBooleanProperty(this, "hideAll", false);
    private final ViewerGraphicObject graphicDelaunayTriangulation = new ViewerGraphicObject("viewDelaunayTriangulation", true);
    private final ViewerGraphicObject graphicBorderVertices = new ViewerGraphicObject("viewBorderVertices", false);
    private final ViewerGraphicObject graphicBorderEdges = new ViewerGraphicObject("viewBorderEdges", false);
@@ -36,15 +40,15 @@ public class ConcaveHullFactoryResultViewer extends AnimationTimer
 
    private final Group rootNode = new Group();
 
-   private double borderVerticesSize = 0.003;
-   private double borderEdgesSize = 0.0015;
-   private Color constraintEdgeColor = Color.BLACK;
-   private double constraintEdgeSize = 0.002;
+   private final DoubleProperty borderVerticesSize = new SimpleDoubleProperty(this, "borderVerticesSize", 0.003);
+   private final DoubleProperty borderEdgesSize = new SimpleDoubleProperty(this, "borderEdgesSize", 0.0015);
+   private final ObjectProperty<Color> constraintEdgeColor = new SimpleObjectProperty<Color>(this, "constraintEdgeColor", Color.BLACK);
+   private final DoubleProperty constraintEdgeSize = new SimpleDoubleProperty(this, "constraintEdgeSize", 0.002);
 
-   private final AtomicReference<ViewerInput> latestInputReference = new AtomicReference<>(null);
+   private final AtomicReference<ConcaveHullViewerInput> latestInputReference = new AtomicReference<>(null);
    private final Random random = new Random(34534);
 
-   public ConcaveHullFactoryResultViewer(JavaFXMessager messager)
+   public ConcaveHullViewer()
    {
       graphics.forEach(graphic -> rootNode.getChildren().add(graphic.meshViewRendered));
       graphicBorderVertices.setMouseTransparent(true);
@@ -60,37 +64,50 @@ public class ConcaveHullFactoryResultViewer extends AnimationTimer
       graphics.forEach(graphic -> graphic.render());
    }
 
-   public void submit(Color defaultColor, RigidBodyTransform transformToWorld, ConcaveHullFactoryResult input)
+   public void submit(ConcaveHullViewerInput input)
    {
-      latestInputReference.set(new ViewerInput(defaultColor, transformToWorld, input));
+      latestInputReference.set(input);
+      refreshMeshes();
+   }
+
+   public void submit(Color defaultColor, RigidBodyTransform transformToWorld, ConcaveHullFactoryResult concaveHullFactoryResult)
+   {
+      latestInputReference.set(new ConcaveHullViewerInput(defaultColor, transformToWorld, concaveHullFactoryResult));
       refreshMeshes();
    }
 
    private void refreshMeshes()
    {
-      ViewerInput latestInput = latestInputReference.get();
+      ConcaveHullViewerInput latestInput = latestInputReference.get();
       if (latestInput == null)
          return;
 
       Color defaultColor = latestInput.defaultColor;
       RigidBodyTransform transformToWorld = latestInput.transformToWorld;
-      ConcaveHullFactoryResult concaveHullFactoryResult = latestInput.input;
+      ConcaveHullFactoryResult concaveHullFactoryResult = latestInput.concaveHullFactoryResult;
 
       graphicDelaunayTriangulation.submitForRendering(delaunayTrianglesToRainbowTriangles(transformToWorld, concaveHullFactoryResult, random));
-      graphicBorderVertices.submitForRendering(borderVerticesToMultiSpheres(transformToWorld, concaveHullFactoryResult, defaultColor, borderVerticesSize));
-      graphicBorderEdges.submitForRendering(borderEdgesToMultiLine(transformToWorld, concaveHullFactoryResult, defaultColor, borderEdgesSize));
+      graphicBorderVertices.submitForRendering(borderVerticesToMultiSpheres(transformToWorld, concaveHullFactoryResult, defaultColor,
+                                                                            borderVerticesSize.get()));
+      graphicBorderEdges.submitForRendering(borderEdgesToMultiLine(transformToWorld, concaveHullFactoryResult, defaultColor, borderEdgesSize.get()));
       graphicBorderTriangles.submitForRendering(borderTrianglesToRainbowMultiTriangles(transformToWorld, concaveHullFactoryResult, random));
-      graphicConstraintEdges.submitForRendering(constraintEdgesToMultiLine(transformToWorld, concaveHullFactoryResult, constraintEdgeColor,
-                                                                           constraintEdgeSize));
+      graphicConstraintEdges.submitForRendering(constraintEdgesToMultiLine(transformToWorld, concaveHullFactoryResult, constraintEdgeColor.get(),
+                                                                           constraintEdgeSize.get()));
       graphicOrderedBorderEdges.submitForRendering(orderedBorderEdgesToRainbowMultiLine(transformToWorld, concaveHullFactoryResult));
       // TODO Implement priority queue viz
-      graphicConcaveHull.submitForRendering(multiLine(transformToWorld, concaveHullFactoryResult.getConcaveHullCollection(), defaultColor, borderEdgesSize));
+      graphicConcaveHull.submitForRendering(multiLine(transformToWorld, concaveHullFactoryResult.getConcaveHullCollection(), defaultColor,
+                                                      borderEdgesSize.get()));
       // TODO Implement concave pockets viz
    }
 
    public Node getRootNode()
    {
       return rootNode;
+   }
+
+   public BooleanProperty hideAllProperty()
+   {
+      return hideAll;
    }
 
    public BooleanProperty viewDelaunayTriangulationProperty()
@@ -138,7 +155,7 @@ public class ConcaveHullFactoryResultViewer extends AnimationTimer
       return graphicConcavePockets.viewGraphic;
    }
 
-   private static class ViewerGraphicObject
+   private class ViewerGraphicObject
    {
       private final BooleanProperty viewGraphic;
       private final MeshView meshViewRendered = new MeshView();
@@ -151,7 +168,7 @@ public class ConcaveHullFactoryResultViewer extends AnimationTimer
 
       void render()
       {
-         if (!viewGraphic.get())
+         if (!viewGraphic.get() || hideAll.get())
          {
             meshViewRendered.setMesh(null);
             meshViewRendered.setMaterial(null);
@@ -177,17 +194,17 @@ public class ConcaveHullFactoryResultViewer extends AnimationTimer
       }
    }
 
-   private static class ViewerInput
+   public static class ConcaveHullViewerInput
    {
       private Color defaultColor;
       private RigidBodyTransform transformToWorld;
-      private ConcaveHullFactoryResult input;
+      private ConcaveHullFactoryResult concaveHullFactoryResult;
 
-      public ViewerInput(Color defaultColor, RigidBodyTransform transformToWorld, ConcaveHullFactoryResult input)
+      public ConcaveHullViewerInput(Color defaultColor, RigidBodyTransform transformToWorld, ConcaveHullFactoryResult input)
       {
          this.defaultColor = defaultColor;
          this.transformToWorld = transformToWorld;
-         this.input = input;
+         this.concaveHullFactoryResult = input;
       }
    }
 }
