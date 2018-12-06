@@ -11,6 +11,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 import controller_msgs.msg.dds.KinematicsPlanningToolboxCenterOfMassMessage;
+import controller_msgs.msg.dds.KinematicsPlanningToolboxInputMessage;
 import controller_msgs.msg.dds.KinematicsPlanningToolboxRigidBodyMessage;
 import controller_msgs.msg.dds.RobotConfigurationData;
 import gnu.trove.list.array.TDoubleArrayList;
@@ -175,6 +176,68 @@ public abstract class AvatarKinematicsPlanningToolboxControllerTest implements M
       }
 
       ReferenceFrameTools.clearWorldFrameTree();
+   }
+
+   @ContinuousIntegrationTest(estimatedDuration = 20.0)
+   @Test(timeout = 30000)
+   public void testDualHandTrajectory() throws Exception, UnreasonableAccelerationException
+   {
+      FullHumanoidRobotModel initialFullRobotModel = createFullRobotModelAtInitialConfiguration();
+      snapGhostToFullRobotModel(initialFullRobotModel);
+
+      RobotSide robotSide = RobotSide.LEFT;
+      RigidBodyBasics endEffector = initialFullRobotModel.getHand(robotSide);
+      double trajectoryTime = 5.0;
+      int numberOfKeyFrames = 10;
+      FramePose3D initialPose = new FramePose3D(endEffector.getBodyFixedFrame());
+      FramePose3D desiredPose = new FramePose3D(endEffector.getBodyFixedFrame(), new Point3D(0.1, 0.1, 0.6), new AxisAngle(1.0, 0.0, 0.0, 0.5 * Math.PI));
+      initialPose.changeFrame(worldFrame);
+      desiredPose.changeFrame(worldFrame);
+
+      TDoubleArrayList keyFrameTimes = new TDoubleArrayList();
+      List<Pose3DReadOnly> keyFramePoses = new ArrayList<Pose3DReadOnly>();
+      List<Point3DReadOnly> desiredCOMPoints = new ArrayList<Point3DReadOnly>();
+
+      for (int i = 0; i < numberOfKeyFrames; i++)
+      {
+         double alpha = (i + 1) / (double) (numberOfKeyFrames);
+         keyFrameTimes.add(alpha * trajectoryTime);
+         Pose3D pose = new Pose3D(initialPose);
+         pose.interpolate(desiredPose, alpha);
+         keyFramePoses.add(pose);
+         desiredCOMPoints.add(new Point3D());
+         if (visualize)
+            scs.addStaticLinkGraphics(createEndEffectorKeyFrameVisualization(pose));
+      }
+
+      KinematicsPlanningToolboxRigidBodyMessage endEffectorMessage = HumanoidMessageTools.createKinematicsPlanningToolboxRigidBodyMessage(endEffector,
+                                                                                                                                          keyFrameTimes,
+                                                                                                                                          keyFramePoses);
+
+      endEffectorMessage.getAngularWeightMatrix().set(MessageTools.createWeightMatrix3DMessage(20.0));
+      endEffectorMessage.getLinearWeightMatrix().set(MessageTools.createWeightMatrix3DMessage(20.0));
+
+      KinematicsPlanningToolboxRigidBodyMessage holdAnotherHandMessage = KinematicsPlanningToolboxMessageFactory.holdRigidBodyCurrentPose(initialFullRobotModel.getHand(robotSide.getOppositeSide()),
+                                                                                                                                          keyFrameTimes);
+      KinematicsPlanningToolboxInputMessage inputMessage = new KinematicsPlanningToolboxInputMessage();
+      inputMessage.getRigidBodyMessages().add().set(endEffectorMessage);
+      inputMessage.getRigidBodyMessages().add().set(holdAnotherHandMessage);
+      System.out.println("submit");
+      commandInputManager.submitMessage(inputMessage);
+      System.out.println("submitted");
+
+      if (inputMessage.getKinematicsConfigurationMessage() == null)
+         System.out.println("null");
+      if (inputMessage.getCenterOfMassMessage() == null)
+         System.out.println("null");
+
+      RobotConfigurationData robotConfigurationData = AvatarHumanoidKinematicsToolboxControllerTest.extractRobotConfigurationData(initialFullRobotModel);
+      toolboxController.updateRobotConfigurationData(robotConfigurationData);
+      toolboxController.updateCapturabilityBasedStatus(AvatarHumanoidKinematicsToolboxControllerTest.createCapturabilityBasedStatus(true, true));
+
+      int numberOfIterations = 350;
+
+      runKinematicsPlanningToolboxController(numberOfIterations);
    }
 
    @ContinuousIntegrationTest(estimatedDuration = 20.0)
