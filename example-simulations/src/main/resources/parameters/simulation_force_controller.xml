@@ -96,8 +96,8 @@
                     <registry name="QuadrupedMomentumRateOfChangeModule">
                         <registry name="DivergentComponentOfMotionController">
                             <parameter name="vrpPositionRateLimit" type="DoubleParameter" min="0.0" max="1.0" value="1.7E308"/>
-                            <parameter name="kpX_DcmPosition" type="DoubleParameter" min="0.0" max="1.0" value="1.0"/>
-                            <parameter name="kpY_DcmPosition" type="DoubleParameter" min="0.0" max="1.0" value="1.0"/>
+                            <parameter name="kpX_DcmPosition" type="DoubleParameter" min="0.0" max="1.0" value="2.0"/>
+                            <parameter name="kpY_DcmPosition" type="DoubleParameter" min="0.0" max="1.0" value="2.0"/>
                             <parameter name="kpZ_DcmPosition" type="DoubleParameter" min="0.0" max="1.0" value="0.0"/>
                             <parameter name="zetaX_DcmPosition" type="DoubleParameter" min="0.0" max="1.0" value="0.0"/>
                             <parameter name="zetaY_DcmPosition" type="DoubleParameter" min="0.0" max="1.0" value="0.0"/>
