@@ -7,9 +7,11 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import gnu.trove.map.TObjectDoubleMap;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
+import us.ihmc.humanoidRobotics.communication.packets.sensing.StateEstimatorMode;
 import us.ihmc.mecano.frames.MovingReferenceFrame;
 import us.ihmc.mecano.multiBodySystem.OneDoFJoint;
 import us.ihmc.mecano.multiBodySystem.interfaces.FloatingJointBasics;
@@ -102,8 +104,14 @@ public class HumanoidRobotEKFWithSimpleJoints implements StateEstimatorControlle
    }
 
    @Override
-   public void initializeEstimator(RigidBodyTransform rootJointTransform)
+   public void initializeEstimator(RigidBodyTransform rootJointTransform, TObjectDoubleMap<String> jointPositions)
    {
-      leggedRobotEKF.initializeEstimator(rootJointTransform);
+      leggedRobotEKF.initializeEstimator(rootJointTransform, jointPositions);
+   }
+
+   @Override
+   public void requestStateEstimatorMode(StateEstimatorMode operatingMode)
+   {
+      leggedRobotEKF.requestStateEstimatorMode(operatingMode);
    }
 }
