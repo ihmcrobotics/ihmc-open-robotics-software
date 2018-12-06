@@ -32,6 +32,7 @@ import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
 import us.ihmc.euclid.tools.EuclidCoreTools;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.communication.kinematicsPlanningToolboxAPI.KinematicsPlanningToolboxCenterOfMassCommand;
+import us.ihmc.humanoidRobotics.communication.kinematicsPlanningToolboxAPI.KinematicsPlanningToolboxInputCommand;
 import us.ihmc.humanoidRobotics.communication.kinematicsPlanningToolboxAPI.KinematicsPlanningToolboxRigidBodyCommand;
 import us.ihmc.humanoidRobotics.communication.kinematicsToolboxAPI.KinematicsToolboxConfigurationCommand;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
@@ -130,25 +131,49 @@ public class KinematicsPlanningToolboxController extends ToolboxController
       centerOfMassCommand.set(null);
       configurationCommand.set(null);
 
-      if (commandInputManager.isNewCommandAvailable(KinematicsPlanningToolboxRigidBodyCommand.class))
+      if (commandInputManager.isNewCommandAvailable(KinematicsPlanningToolboxInputCommand.class))
       {
-         List<KinematicsPlanningToolboxRigidBodyCommand> commands = commandInputManager.pollNewCommands(KinematicsPlanningToolboxRigidBodyCommand.class);
-         for (int i = 0; i < commands.size(); i++)
-            rigidBodyCommands.add(commands.get(i));
+         KinematicsPlanningToolboxInputCommand command = commandInputManager.pollNewestCommand(KinematicsPlanningToolboxInputCommand.class);
+         List<KinematicsPlanningToolboxRigidBodyCommand> rigidBodyCommands = command.getRigidBodyCommands();
+         if (rigidBodyCommands.size() == 0)
+         {
+            return false;
+         }
+         else
+         {
+            for (int i = 0; i < rigidBodyCommands.size(); i++)
+               this.rigidBodyCommands.add(rigidBodyCommands.get(i));
+         }
+
+         KinematicsPlanningToolboxCenterOfMassCommand centerOfMassCommand = command.getCenterOfMassCommand();
+         this.centerOfMassCommand.set(centerOfMassCommand);
+
+         KinematicsToolboxConfigurationCommand configurationCommand = command.getKinematicsConfigurationCommand();
+         this.configurationCommand.set(configurationCommand);
+
       }
       else
-         return false;
-
-      if (commandInputManager.isNewCommandAvailable(KinematicsPlanningToolboxCenterOfMassCommand.class))
       {
-         KinematicsPlanningToolboxCenterOfMassCommand comCommand = commandInputManager.pollNewestCommand(KinematicsPlanningToolboxCenterOfMassCommand.class);
-         centerOfMassCommand.set(comCommand);
-      }
+         if (commandInputManager.isNewCommandAvailable(KinematicsPlanningToolboxRigidBodyCommand.class))
+         {
+            List<KinematicsPlanningToolboxRigidBodyCommand> commands = commandInputManager.pollNewCommands(KinematicsPlanningToolboxRigidBodyCommand.class);
+            for (int i = 0; i < commands.size(); i++)
+               rigidBodyCommands.add(commands.get(i));
+         }
+         else
+            return false;
 
-      if (commandInputManager.isNewCommandAvailable(KinematicsToolboxConfigurationCommand.class))
-      {
-         KinematicsToolboxConfigurationCommand command = commandInputManager.pollNewestCommand(KinematicsToolboxConfigurationCommand.class);
-         configurationCommand.set(command);
+         if (commandInputManager.isNewCommandAvailable(KinematicsPlanningToolboxCenterOfMassCommand.class))
+         {
+            KinematicsPlanningToolboxCenterOfMassCommand comCommand = commandInputManager.pollNewestCommand(KinematicsPlanningToolboxCenterOfMassCommand.class);
+            centerOfMassCommand.set(comCommand);
+         }
+
+         if (commandInputManager.isNewCommandAvailable(KinematicsToolboxConfigurationCommand.class))
+         {
+            KinematicsToolboxConfigurationCommand command = commandInputManager.pollNewestCommand(KinematicsToolboxConfigurationCommand.class);
+            configurationCommand.set(command);
+         }
       }
 
       if (!updateInitialRobotConfigurationToIKController())
@@ -227,11 +252,12 @@ public class KinematicsPlanningToolboxController extends ToolboxController
          }
          else if (!checkKeyFrameTimes(command))
          {
-            throw new RuntimeException(command.getClass().getSimpleName() + " must have same key frame times with the first KinematicsPlanningToolboxRigidBodyMessage.");
+            throw new RuntimeException(command.getClass().getSimpleName()
+                  + " must have same key frame times with the first KinematicsPlanningToolboxRigidBodyMessage.");
          }
       }
 
-      if (centerOfMassCommand.get() != null)
+      if (centerOfMassCommand.get() != null && centerOfMassCommand.get().getNumberOfWayPoints() != 0)
 
       {
          if (!checkKeyFrameTimes(centerOfMassCommand.get()))
