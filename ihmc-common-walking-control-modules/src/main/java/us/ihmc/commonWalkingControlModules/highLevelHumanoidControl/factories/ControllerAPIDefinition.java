@@ -60,7 +60,6 @@ import controller_msgs.msg.dds.PrepareForLocomotionMessage;
 import controller_msgs.msg.dds.RequestPlanarRegionsListMessage;
 import controller_msgs.msg.dds.SpineDesiredAccelerationsMessage;
 import controller_msgs.msg.dds.SpineTrajectoryMessage;
-import controller_msgs.msg.dds.StateEstimatorModePacket;
 import controller_msgs.msg.dds.StopAllTrajectoryMessage;
 import controller_msgs.msg.dds.TextToSpeechPacket;
 import controller_msgs.msg.dds.WalkingControllerFailureStatusMessage;
@@ -154,7 +153,6 @@ public class ControllerAPIDefinition
       statusMessages.add(WalkingControllerFailureStatusMessage.class);
       statusMessages.add(ManipulationAbortedStatus.class);
       statusMessages.add(HighLevelStateChangeStatusMessage.class);
-      statusMessages.add(StateEstimatorModePacket.class);
       statusMessages.add(TextToSpeechPacket.class);
       statusMessages.add(RequestPlanarRegionsListMessage.class);
 
