@@ -15,6 +15,7 @@ import us.ihmc.communication.controllerAPI.CommandInputManager;
 import us.ihmc.communication.controllerAPI.StatusMessageOutputManager;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelControllerName;
+import us.ihmc.humanoidRobotics.communication.packets.sensing.StateEstimatorMode;
 import us.ihmc.mecano.multiBodySystem.OneDoFJoint;
 import us.ihmc.mecano.multiBodySystem.interfaces.FloatingJointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.JointBasics;
@@ -25,6 +26,7 @@ import us.ihmc.sensorProcessing.model.RobotMotionStatus;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutputList;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutputListReadOnly;
 import us.ihmc.yoVariables.variable.YoBoolean;
+import us.ihmc.yoVariables.variable.YoVariable;
 
 public class WalkingControllerState extends HighLevelControllerState
 {
@@ -192,6 +194,12 @@ public class WalkingControllerState extends HighLevelControllerState
    public boolean isJointLoadBearing(String jointName)
    {
       return walkingController.isJointLoadBearing(jointName);
+   }
+
+   @Override
+   public StateEstimatorMode getStateEstimatorMode()
+   {
+      return StateEstimatorMode.NORMAL;
    }
 
    /**
