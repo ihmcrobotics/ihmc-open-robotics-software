@@ -5,6 +5,7 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.stream.Collectors;
 
 import gnu.trove.map.TObjectDoubleMap;
@@ -40,6 +41,7 @@ import us.ihmc.sensorProcessing.sensorProcessors.SensorRawOutputMapReadOnly;
 import us.ihmc.sensorProcessing.stateEstimation.IMUSensorReadOnly;
 import us.ihmc.stateEstimation.humanoid.StateEstimatorController;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoFramePoint3D;
 import us.ihmc.yoVariables.variable.YoFramePose3D;
@@ -83,6 +85,9 @@ public class LeggedRobotEKF implements StateEstimatorController
                                                                                                             registry);
    private final YoGraphicCoordinateSystem pelvisVisualization = new YoGraphicCoordinateSystem("PelvisFrame", pelvisPoseForVisualization, 0.3,
                                                                                                YoAppearance.Green());
+
+   private final AtomicBoolean fixRobotRequest = new AtomicBoolean(false);
+   private final YoBoolean fixRobot = new YoBoolean("FixRobot", registry);
 
    public LeggedRobotEKF(FloatingJointBasics rootJoint, List<OneDoFJointBasics> oneDoFJoints, Collection<String> imuNames,
                          Map<String, ReferenceFrame> forceSensorMap, SensorRawOutputMapReadOnly sensorOutput, double dt, double gravity,
@@ -187,6 +192,8 @@ public class LeggedRobotEKF implements StateEstimatorController
    {
       long startTime = System.nanoTime();
 
+      fixRobot.set(fixRobotRequest.get());
+
       stateEstimator.predict();
       updateRobot();
 
@@ -232,7 +239,10 @@ public class LeggedRobotEKF implements StateEstimatorController
          forceSensorOutputs.get(footIdx).getWrench(footWrench);
          footForce.setIncludingFrame(footWrench.getLinearPart());
          footForce.changeFrame(ReferenceFrame.getWorldFrame());
-         footVelocitySensors.get(footIdx).setLoad(footForce.getZ() / weight);
+
+         // When fixing the robot this will cause the state estimator to assume the feet are not moving:
+         double loadPercentage = fixRobot.getValue() ? 1.0 : footForce.getZ() / weight;
+         footVelocitySensors.get(footIdx).setLoad(loadPercentage);
       }
    }
 
@@ -272,8 +282,7 @@ public class LeggedRobotEKF implements StateEstimatorController
    @Override
    public void requestStateEstimatorMode(StateEstimatorMode operatingMode)
    {
-      // TODO Auto-generated method stub
-
+      fixRobotRequest.set(operatingMode == StateEstimatorMode.FROZEN);
    }
 
    @Override
