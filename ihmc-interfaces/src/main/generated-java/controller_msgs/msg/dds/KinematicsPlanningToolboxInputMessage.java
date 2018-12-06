@@ -9,12 +9,24 @@ import us.ihmc.pubsub.TopicDataType;
 public class KinematicsPlanningToolboxInputMessage extends Packet<KinematicsPlanningToolboxInputMessage> implements Settable<KinematicsPlanningToolboxInputMessage>, EpsilonComparable<KinematicsPlanningToolboxInputMessage>
 {
    /**
-            * This message is
+            * This message is part of the IHMC whole-body inverse kinematics module: KinematicsPlanningToolbox.
             * Unique ID used to identify this message, should preferably be consecutively increasing.
             */
    public long sequence_id_;
+   /**
+            * This is a list of rigid body messages which is used in KinematicsPlanningToolbox.
+            * It should composed of at least one message. Each message represent the input for solving the trajectory for one rigid-body.
+            */
    public us.ihmc.idl.IDLSequence.Object<controller_msgs.msg.dds.KinematicsPlanningToolboxRigidBodyMessage>  rigid_body_messages_;
+   /**
+            * This is desired key frames for center of mass position and will be used in KinematicsPlanningToolbox.
+            * In case this message is empty, the kinematics solver will keep center of mass position in its current location.
+            */
    public controller_msgs.msg.dds.KinematicsPlanningToolboxCenterOfMassMessage center_of_mass_message_;
+   /**
+            * This is kinematics configuration message and will configure whole body inverse kinematics solver.
+            * This is optional.
+            */
    public controller_msgs.msg.dds.KinematicsToolboxConfigurationMessage kinematics_configuration_message_;
 
    public KinematicsPlanningToolboxInputMessage()
@@ -41,7 +53,7 @@ public class KinematicsPlanningToolboxInputMessage extends Packet<KinematicsPlan
    }
 
    /**
-            * This message is
+            * This message is part of the IHMC whole-body inverse kinematics module: KinematicsPlanningToolbox.
             * Unique ID used to identify this message, should preferably be consecutively increasing.
             */
    public void setSequenceId(long sequence_id)
@@ -49,7 +61,7 @@ public class KinematicsPlanningToolboxInputMessage extends Packet<KinematicsPlan
       sequence_id_ = sequence_id;
    }
    /**
-            * This message is
+            * This message is part of the IHMC whole-body inverse kinematics module: KinematicsPlanningToolbox.
             * Unique ID used to identify this message, should preferably be consecutively increasing.
             */
    public long getSequenceId()
@@ -58,18 +70,30 @@ public class KinematicsPlanningToolboxInputMessage extends Packet<KinematicsPlan
    }
 
 
+   /**
+            * This is a list of rigid body messages which is used in KinematicsPlanningToolbox.
+            * It should composed of at least one message. Each message represent the input for solving the trajectory for one rigid-body.
+            */
    public us.ihmc.idl.IDLSequence.Object<controller_msgs.msg.dds.KinematicsPlanningToolboxRigidBodyMessage>  getRigidBodyMessages()
    {
       return rigid_body_messages_;
    }
 
 
+   /**
+            * This is desired key frames for center of mass position and will be used in KinematicsPlanningToolbox.
+            * In case this message is empty, the kinematics solver will keep center of mass position in its current location.
+            */
    public controller_msgs.msg.dds.KinematicsPlanningToolboxCenterOfMassMessage getCenterOfMassMessage()
    {
       return center_of_mass_message_;
    }
 
 
+   /**
+            * This is kinematics configuration message and will configure whole body inverse kinematics solver.
+            * This is optional.
+            */
    public controller_msgs.msg.dds.KinematicsToolboxConfigurationMessage getKinematicsConfigurationMessage()
    {
       return kinematics_configuration_message_;
