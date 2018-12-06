@@ -17,9 +17,10 @@ import us.ihmc.pathPlanning.visibilityGraphs.clusterManagement.Cluster;
 import us.ihmc.pathPlanning.visibilityGraphs.dataStructure.Connection;
 import us.ihmc.pathPlanning.visibilityGraphs.dataStructure.ConnectionPoint3D;
 import us.ihmc.pathPlanning.visibilityGraphs.dataStructure.InterRegionVisibilityMap;
-import us.ihmc.pathPlanning.visibilityGraphs.dataStructure.VisibilityMapWithNavigableRegion;
+import us.ihmc.pathPlanning.visibilityGraphs.dataStructure.NavigableRegion;
 import us.ihmc.pathPlanning.visibilityGraphs.dataStructure.SingleSourceVisibilityMap;
 import us.ihmc.pathPlanning.visibilityGraphs.dataStructure.VisibilityMap;
+import us.ihmc.pathPlanning.visibilityGraphs.dataStructure.VisibilityMapWithNavigableRegion;
 import us.ihmc.pathPlanning.visibilityGraphs.interfaces.InterRegionConnectionFilter;
 import us.ihmc.pathPlanning.visibilityGraphs.interfaces.NavigableExtrusionDistanceCalculator;
 import us.ihmc.pathPlanning.visibilityGraphs.interfaces.NavigableRegionFilter;
@@ -50,23 +51,43 @@ public class VisibilityGraphsFactory
    // Also, could then do the two in parallel instead of sequentially.
    private static final boolean CREATE_INTER_REGIONS_USING_CLUSTER_POINTS = true;
 
-   public static List<VisibilityMapWithNavigableRegion> createNavigableRegions(List<PlanarRegion> allRegions, VisibilityGraphsParameters parameters)
+   public static List<VisibilityMapWithNavigableRegion> createVisibilityMapsWithNavigableRegions(List<PlanarRegion> allRegions,
+                                                                                                 VisibilityGraphsParameters parameters)
    {
       if (allRegions.isEmpty())
          return null;
 
-      List<VisibilityMapWithNavigableRegion> navigableRegions = createNavigableRegionButNotVisibilityMaps(allRegions, parameters);
+      List<VisibilityMapWithNavigableRegion> navigableRegions = createNavigableRegionAndListOfVisibilityMaps(allRegions, parameters);
       createStaticVisibilityMapsForNavigableRegions(navigableRegions);
 
       return navigableRegions;
    }
 
-   public static List<VisibilityMapWithNavigableRegion> createNavigableRegionButNotVisibilityMaps(List<PlanarRegion> allRegions, VisibilityGraphsParameters parameters)
+   public static List<VisibilityMapWithNavigableRegion> createNavigableRegionAndListOfVisibilityMaps(List<PlanarRegion> allRegions,
+                                                                                                     VisibilityGraphsParameters parameters)
    {
       if (allRegions.isEmpty())
          return null;
 
-      List<VisibilityMapWithNavigableRegion> navigableRegions = new ArrayList<>(allRegions.size());
+      List<NavigableRegion> navigableRegions = createNavigableRegionButNotVisibilityMaps(allRegions, parameters);
+
+      List<VisibilityMapWithNavigableRegion> visibilityMapsWithNavigableRegions = new ArrayList<>(allRegions.size());
+
+      for (int i = 0; i < navigableRegions.size(); i++)
+      {
+         NavigableRegion navigableRegion = navigableRegions.get(i);
+         visibilityMapsWithNavigableRegions.add(new VisibilityMapWithNavigableRegion(navigableRegion));
+      }
+
+      return visibilityMapsWithNavigableRegions;
+   }
+
+   public static List<NavigableRegion> createNavigableRegionButNotVisibilityMaps(List<PlanarRegion> allRegions, VisibilityGraphsParameters parameters)
+   {
+      if (allRegions.isEmpty())
+         return null;
+
+      List<NavigableRegion> navigableRegions = new ArrayList<>(allRegions.size());
 
       NavigableRegionFilter navigableRegionFilter = parameters.getNavigableRegionFilter();
 
@@ -81,14 +102,14 @@ public class VisibilityGraphsFactory
          if (!navigableRegionFilter.isPlanarRegionNavigable(candidate, otherRegions))
             continue;
 
-         VisibilityMapWithNavigableRegion navigableRegion = createNavigableRegionButNotVisibilityMaps(candidate, otherRegions, parameters);
+         NavigableRegion navigableRegion = createNavigableRegionButNotVisibilityMaps(candidate, otherRegions, parameters);
          navigableRegions.add(navigableRegion);
       }
 
       return navigableRegions;
    }
 
-   public static VisibilityMapWithNavigableRegion createNavigableRegionButNotVisibilityMaps(PlanarRegion region, List<PlanarRegion> otherRegions,
+   public static NavigableRegion createNavigableRegionButNotVisibilityMaps(PlanarRegion region, List<PlanarRegion> otherRegions,
                                                                            VisibilityGraphsParameters parameters)
    {
       PlanarRegionFilter planarRegionFilter = parameters.getPlanarRegionFilter();
@@ -101,24 +122,27 @@ public class VisibilityGraphsFactory
                                                        navigableCalculator, obstacleCalculator);
    }
 
-   public static VisibilityMapWithNavigableRegion createNavigableRegion(PlanarRegion region, List<PlanarRegion> otherRegions, double orthogonalAngle, double clusterResolution,
-                                                       ObstacleRegionFilter obstacleRegionFilter, PlanarRegionFilter filter,
-                                                       NavigableExtrusionDistanceCalculator navigableCalculator,
-                                                       ObstacleExtrusionDistanceCalculator obstacleCalculator)
+   public static VisibilityMapWithNavigableRegion createVisibilityMapsWithNavigableRegions(PlanarRegion region, List<PlanarRegion> otherRegions,
+                                                                                           double orthogonalAngle, double clusterResolution,
+                                                                                           ObstacleRegionFilter obstacleRegionFilter, PlanarRegionFilter filter,
+                                                                                           NavigableExtrusionDistanceCalculator navigableCalculator,
+                                                                                           ObstacleExtrusionDistanceCalculator obstacleCalculator)
    {
-      VisibilityMapWithNavigableRegion navigableRegion = createNavigableRegionButNotVisibilityMaps(region, otherRegions, orthogonalAngle, clusterResolution,
+      NavigableRegion navigableRegion = createNavigableRegionButNotVisibilityMaps(region, otherRegions, orthogonalAngle, clusterResolution,
                                                                                   obstacleRegionFilter, filter, navigableCalculator, obstacleCalculator);
-      createStaticVisibilityMapsForNavigableRegion(navigableRegion);
 
-      return navigableRegion;
+      VisibilityMapWithNavigableRegion visibilityMapWithNavigableRegion = new VisibilityMapWithNavigableRegion(navigableRegion);
+      createStaticVisibilityMapsForNavigableRegion(visibilityMapWithNavigableRegion);
+
+      return visibilityMapWithNavigableRegion;
    }
 
-   private static VisibilityMapWithNavigableRegion createNavigableRegionButNotVisibilityMaps(PlanarRegion region, List<PlanarRegion> otherRegions, double orthogonalAngle,
+   private static NavigableRegion createNavigableRegionButNotVisibilityMaps(PlanarRegion region, List<PlanarRegion> otherRegions, double orthogonalAngle,
                                                                             double clusterResolution, ObstacleRegionFilter obstacleRegionFilter,
                                                                             PlanarRegionFilter filter, NavigableExtrusionDistanceCalculator navigableCalculator,
                                                                             ObstacleExtrusionDistanceCalculator obstacleCalculator)
    {
-      VisibilityMapWithNavigableRegion navigableRegion = new VisibilityMapWithNavigableRegion(region);
+      NavigableRegion navigableRegion = new NavigableRegion(region);
       PlanarRegion homeRegion = navigableRegion.getHomePlanarRegion();
 
       List<PlanarRegion> obstacleRegions = otherRegions.stream().filter(candidate -> obstacleRegionFilter.isRegionValidObstacle(candidate, homeRegion))
@@ -354,7 +378,8 @@ public class VisibilityGraphsFactory
       return new SingleSourceVisibilityMap(source, mapId, connections);
    }
 
-   public static InterRegionVisibilityMap createInterRegionVisibilityMap(List<VisibilityMapWithNavigableRegion> navigableRegions, InterRegionConnectionFilter filter)
+   public static InterRegionVisibilityMap createInterRegionVisibilityMap(List<VisibilityMapWithNavigableRegion> navigableRegions,
+                                                                         InterRegionConnectionFilter filter)
    {
       if (CREATE_INTER_REGIONS_USING_CLUSTER_POINTS)
       {
