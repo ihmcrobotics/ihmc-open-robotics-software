@@ -90,7 +90,7 @@ public abstract class QuadrupedBodyPathPlanTest implements QuadrupedMultiRobotTe
       point4.setTime(12.0);
       point4.position_.set(0.0, 0.0, 0.0);
 
-      QuadrupedTestBehaviors.executeBodyPathPlan(conductor, variables, stepTeleopManager, 0.1, 0.2, point1, point2, point3, point4);
+      QuadrupedTestBehaviors.executeBodyPathPlan(conductor, variables, stepTeleopManager, 0.15, 0.2, point1, point2, point3, point4);
    }
 
    /**
