@@ -327,6 +327,8 @@ public class QuadrupedWalkingControllerState extends HighLevelControllerState im
 
       feetManager.registerStepTransitionCallback(this);
 
+      balanceManager.initialize();
+
       stateMachine.resetToInitialState();
 
       initialize();
