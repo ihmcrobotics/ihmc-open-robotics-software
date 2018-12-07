@@ -19,6 +19,7 @@ import us.ihmc.quadrupedBasics.gait.QuadrupedTimedStep;
 import us.ihmc.quadrupedRobotics.planning.ContactState;
 import us.ihmc.quadrupedRobotics.planning.QuadrupedTimedContactSequence;
 import us.ihmc.robotics.math.trajectories.FrameTrajectory3D;
+import us.ihmc.robotics.math.trajectories.YoFrameTrajectory3D;
 import us.ihmc.robotics.robotSide.QuadrantDependentList;
 import us.ihmc.yoVariables.parameters.DoubleParameter;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
@@ -40,7 +41,7 @@ public class DCMPlanner
 
    private final QuadrupedPiecewiseConstantCopTrajectory piecewiseConstantCopTrajectory;
    private final PiecewiseReverseDcmTrajectory dcmTrajectory;
-   private final FrameTrajectory3D dcmTransitionTrajectory;
+   private final YoFrameTrajectory3D dcmTransitionTrajectory;
 
    private final DoubleParameter initialTransitionDurationParameter = new DoubleParameter("initialTransitionDuration", registry, 0.5);
 
@@ -87,7 +88,7 @@ public class DCMPlanner
       this.supportFrame = supportFrame;
       this.soleFrames = soleFrames;
       this.debug = debug;
-      this.dcmTransitionTrajectory = new FrameTrajectory3D(6, supportFrame);
+      this.dcmTransitionTrajectory = new YoFrameTrajectory3D("dcmTransitionTrajectory", 4, supportFrame, registry);
       dcmTrajectory = new PiecewiseReverseDcmTrajectory(STEP_SEQUENCE_CAPACITY, gravity, nominalHeight, registry);
       piecewiseConstantCopTrajectory = new QuadrupedPiecewiseConstantCopTrajectory(2 * STEP_SEQUENCE_CAPACITY, registry);
 
