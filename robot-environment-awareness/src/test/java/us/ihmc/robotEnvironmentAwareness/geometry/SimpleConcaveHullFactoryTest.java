@@ -102,7 +102,7 @@ public class SimpleConcaveHullFactoryTest
       }
    }
 
-   @Test
+   @Test(timeout = 30000)
    public void testSimplePointcloudFormingASquare()
    {
       List<Point2D> expectedHull = new ArrayList<>();
@@ -160,7 +160,7 @@ public class SimpleConcaveHullFactoryTest
       }
    }
 
-   @Test
+   @Test(timeout = 30000)
    public void testRandomCircleBasedConvexPointCloud()
    {
       Random random = new Random(5435);
@@ -197,7 +197,7 @@ public class SimpleConcaveHullFactoryTest
       }
    }
 
-   @Test
+   @Test(timeout = 30000)
    public void testPointCloudWithSurroundingLineConstraints()
    {
       List<Point3D> pointcloud = new ArrayList<>();
@@ -230,7 +230,7 @@ public class SimpleConcaveHullFactoryTest
       assertEquals(1, concaveHullCollection.getNumberOfConcaveHulls());
    }
 
-   @Test
+   @Test(timeout = 30000)
    public void testSomeLineConstraints()
    {
       List<Point3D> pointcloud = new ArrayList<>();
@@ -270,7 +270,7 @@ public class SimpleConcaveHullFactoryTest
       assertEquals(1, concaveHullCollection.getNumberOfConcaveHulls());
    }
 
-   @Test
+   @Test(timeout = 30000)
    public void testOverlappingLineConstraints()
    {
       Random random = new Random(34543);
