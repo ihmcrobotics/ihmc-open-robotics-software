@@ -19,7 +19,6 @@ import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.commons.lang3.tuple.Pair;
 
 import com.vividsolutions.jts.geom.Coordinate;
-import com.vividsolutions.jts.geom.GeometryFactory;
 import com.vividsolutions.jts.geom.LineString;
 import com.vividsolutions.jts.geom.MultiLineString;
 import com.vividsolutions.jts.geom.MultiPoint;
@@ -86,7 +85,7 @@ public abstract class SimpleConcaveHullFactory
 
       double triangulationTolerance = parameters.getTriangulationTolerance();
       MultiPoint sites = filterAndCreateMultiPoint(pointCloud2d, lineConstraints, triangulationTolerance);
-      MultiLineString constraintSegments = createMultiLineString(lineConstraints);
+      MultiLineString constraintSegments = JTSTools.createMultiLineString(lineConstraints);
       ConcaveHullFactoryResult result = new ConcaveHullFactoryResult();
       ConcaveHullVariables initialVariables = initializeTriangulation(sites, constraintSegments, triangulationTolerance, result);
       List<ConcaveHullVariables> variablesList = computeConcaveHullBorderEdgesRecursive(parameters, initialVariables);
@@ -115,7 +114,7 @@ public abstract class SimpleConcaveHullFactory
          if (!isTooCloseToConstraintSegments(point, lineConstraints, tolerance))
             filteredPointCloud2d.add(point);
       }
-      return createMultiPoint(filteredPointCloud2d);
+      return JTSTools.point2DsToMultiPoint(filteredPointCloud2d);
    }
 
    public static boolean isTooCloseToConstraintSegments(Point2DReadOnly point, List<? extends LineSegment2DReadOnly> lineConstraints, double tolerance)
@@ -133,86 +132,6 @@ public abstract class SimpleConcaveHullFactory
          e.printStackTrace();
       }
       return false;
-   }
-
-   public static MultiPoint createMultiPoint(List<? extends Point2DReadOnly> pointCloud2d)
-   {
-      Coordinate[] coordinates = new Coordinate[pointCloud2d.size()];
-
-      for (int i = 0; i < pointCloud2d.size(); i++)
-      {
-         Point2DReadOnly point2d = pointCloud2d.get(i);
-         coordinates[i] = new Coordinate(point2d.getX(), point2d.getY());
-      }
-
-      return new GeometryFactory().createMultiPoint(coordinates);
-   }
-
-   public static MultiLineString createMultiLineString(List<? extends LineSegment2DReadOnly> lineSegments)
-   {
-      if (lineSegments == null)
-         return null;
-
-      List<LineString> lineStrings = lineSegments.stream().map(SimpleConcaveHullFactory::createLineString).collect(Collectors.toList());
-
-      GeometryFactory geometryFactory = new GeometryFactory();
-
-      // Try to merge lineStrings
-      for (int i = 0; i < lineStrings.size(); i++)
-      {
-         LineString firstLineString = lineStrings.get(i);
-         List<Coordinate> firstCoordinates = new ArrayList<>(Arrays.asList(firstLineString.getCoordinates()));
-
-         for (int j = lineStrings.size() - 1; j >= i + 1; j--)
-         {
-            LineString secondLineString = lineStrings.get(j);
-            List<Coordinate> secondCoordinates = new ArrayList<>(Arrays.asList(secondLineString.getCoordinates()));
-
-            boolean concatenate = false;
-
-            double tolerance = 1.0e-3;
-            if (firstLineString.getEndPoint().equalsExact(secondLineString.getStartPoint(), tolerance))
-            {
-               concatenate = true;
-            }
-            else if (firstLineString.getEndPoint().equalsExact(secondLineString.getEndPoint(), tolerance))
-            {
-               concatenate = true;
-               Collections.reverse(secondCoordinates);
-            }
-            else if (firstLineString.getStartPoint().equalsExact(secondLineString.getEndPoint(), tolerance))
-            {
-               concatenate = true;
-               Collections.reverse(firstCoordinates);
-               Collections.reverse(secondCoordinates);
-            }
-            else if (firstLineString.getStartPoint().equalsExact(secondLineString.getStartPoint(), tolerance))
-            {
-               concatenate = true;
-               Collections.reverse(firstCoordinates);
-            }
-
-            if (concatenate)
-            {
-               lineStrings.remove(j);
-               secondCoordinates.remove(0);
-               firstCoordinates.addAll(secondCoordinates);
-               firstLineString = geometryFactory.createLineString(firstCoordinates.toArray(new Coordinate[firstCoordinates.size()]));
-               lineStrings.set(i, firstLineString);
-            }
-         }
-      }
-
-      return geometryFactory.createMultiLineString(lineStrings.toArray(new LineString[lineStrings.size()]));
-   }
-
-   public static LineString createLineString(LineSegment2DReadOnly lineSegment)
-   {
-      Coordinate lineSegmentStart = new Coordinate(lineSegment.getFirstEndpointX(), lineSegment.getFirstEndpointY());
-      Coordinate lineSegmentEnd = new Coordinate(lineSegment.getSecondEndpointX(), lineSegment.getSecondEndpointY());
-
-      Coordinate[] endPoints = {lineSegmentStart, lineSegmentEnd};
-      return new GeometryFactory().createLineString(endPoints);
    }
 
    private static ConcaveHull computeConcaveHull(List<QuadEdge> orderedBorderEdges)
