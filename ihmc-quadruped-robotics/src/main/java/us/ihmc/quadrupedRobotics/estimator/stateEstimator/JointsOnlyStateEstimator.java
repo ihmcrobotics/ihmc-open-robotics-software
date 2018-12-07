@@ -1,15 +1,18 @@
 package us.ihmc.quadrupedRobotics.estimator.stateEstimator;
 
+import gnu.trove.map.TObjectDoubleMap;
 import us.ihmc.commons.Conversions;
+import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.humanoidRobotics.communication.packets.sensing.StateEstimatorMode;
 import us.ihmc.robotModels.FullRobotModel;
 import us.ihmc.robotics.robotSide.RobotQuadrant;
 import us.ihmc.sensorProcessing.sensorProcessors.SensorOutputMapReadOnly;
 import us.ihmc.sensorProcessing.stateEstimation.evaluation.FullInverseDynamicsStructure;
-import us.ihmc.simulationconstructionset.util.RobotController;
+import us.ihmc.stateEstimation.humanoid.StateEstimatorController;
 import us.ihmc.stateEstimation.humanoid.kinematicsBasedStateEstimation.JointStateUpdater;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 
-public class JointsOnlyStateEstimator implements RobotController
+public class JointsOnlyStateEstimator implements StateEstimatorController
 {
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
    private final FullRobotModel fullRobotModel;
@@ -76,6 +79,16 @@ public class JointsOnlyStateEstimator implements RobotController
    public String getDescription()
    {
       return null;
+   }
+
+   @Override
+   public void requestStateEstimatorMode(StateEstimatorMode operatingMode)
+   {
+   }
+
+   @Override
+   public void initializeEstimator(RigidBodyTransform rootJointTransform, TObjectDoubleMap<String> jointPositions)
+   {
    }
 
 }

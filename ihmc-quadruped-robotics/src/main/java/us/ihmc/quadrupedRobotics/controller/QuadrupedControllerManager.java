@@ -46,6 +46,7 @@ import us.ihmc.sensorProcessing.outputData.JointDesiredOutputListReadOnly;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutputReadOnly;
 import us.ihmc.simulationconstructionset.util.RobotController;
 import us.ihmc.stateEstimation.humanoid.StateEstimatorController;
+import us.ihmc.stateEstimation.humanoid.StateEstimatorModeSubscriber;
 import us.ihmc.tools.thread.CloseableAndDisposable;
 import us.ihmc.tools.thread.CloseableAndDisposableRegistry;
 import us.ihmc.yoVariables.parameters.BooleanParameter;
@@ -87,7 +88,7 @@ public class QuadrupedControllerManager implements RobotController, CloseableAnd
 
    private final BooleanProvider trustFootSwitches;
 
-   private StateEstimatorController stateEstimator;
+   private StateEstimatorModeSubscriber stateEstimatorModeSubscriber;
 
    public QuadrupedControllerManager(QuadrupedRuntimeEnvironment runtimeEnvironment, QuadrupedPhysicalProperties physicalProperties,
                                      HighLevelControllerName initialControllerState, HighLevelControllerState calibrationState)
@@ -186,8 +187,8 @@ public class QuadrupedControllerManager implements RobotController, CloseableAnd
          runtimeEnvironment.getFootSwitches().get(RobotQuadrant.FRONT_RIGHT).setFootContactState(false);
          runtimeEnvironment.getFootSwitches().get(RobotQuadrant.HIND_LEFT).setFootContactState(false);
          runtimeEnvironment.getFootSwitches().get(RobotQuadrant.HIND_RIGHT).setFootContactState(true);
-         if (stateEstimator != null)
-            stateEstimator.requestStateEstimatorMode(StateEstimatorMode.FROZEN);
+         if (stateEstimatorModeSubscriber != null)
+            stateEstimatorModeSubscriber.requestStateEstimatorMode(StateEstimatorMode.FROZEN);
          break;
       case STAND_READY:
          for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
@@ -195,8 +196,8 @@ public class QuadrupedControllerManager implements RobotController, CloseableAnd
             runtimeEnvironment.getFootSwitches().get(robotQuadrant).trustFootSwitch(false);
             runtimeEnvironment.getFootSwitches().get(robotQuadrant).setFootContactState(true);
          }
-         if (stateEstimator != null)
-            stateEstimator.requestStateEstimatorMode(StateEstimatorMode.NORMAL);
+         if (stateEstimatorModeSubscriber != null)
+            stateEstimatorModeSubscriber.requestStateEstimatorMode(StateEstimatorMode.NORMAL);
          break;
       case STAND_TRANSITION_STATE:
       case WALKING:
@@ -408,8 +409,8 @@ public class QuadrupedControllerManager implements RobotController, CloseableAnd
       closeableAndDisposableRegistry.closeAndDispose();
    }
 
-   public void setStateEstimator(StateEstimatorController stateEstimator)
+   public void setStateEstimatorModeSubscriber(StateEstimatorModeSubscriber stateEstimatorModeSubscriber)
    {
-      this.stateEstimator = stateEstimator;
+      this.stateEstimatorModeSubscriber = stateEstimatorModeSubscriber;
    }
 }
