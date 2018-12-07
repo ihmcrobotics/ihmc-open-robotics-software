@@ -36,45 +36,51 @@ public class DeadbandTools
       }
    }
 
-   public static void applyDeadband(Vector3DBasics vectorToPack, double deadband)
+   public static boolean applyDeadband(Vector3DBasics vectorToPack, double deadband)
    {
       double length = vectorToPack.length();
       if (length < deadband)
       {
          vectorToPack.setToZero();
+         return false;
       }
       else
       {
          double newLength = length - deadband;
          vectorToPack.scale(newLength / length);
+         return true;
       }
    }
 
-   public static void applyDeadband(Point2DBasics pointToPack, Point2DReadOnly centerPoint, double deadband)
+   public static boolean applyDeadband(Point2DBasics pointToPack, Point2DReadOnly centerPoint, double deadband)
    {
       double distance = pointToPack.distance(centerPoint);
       if (distance < deadband)
       {
          pointToPack.set(centerPoint);
+         return false;
       }
       else
       {
          double newDistance = distance - deadband;
          pointToPack.interpolate(centerPoint, 1.0 - newDistance / distance);
+         return true;
       }
    }
 
-   public static void applyDeadband(Point3DBasics pointToPack, Point3DReadOnly centerPoint, double deadband)
+   public static boolean applyDeadband(Point3DBasics pointToPack, Point3DReadOnly centerPoint, double deadband)
    {
       double distance = pointToPack.distance(centerPoint);
       if (distance < deadband)
       {
          pointToPack.set(centerPoint);
+         return false;
       }
       else
       {
          double newDistance = distance - deadband;
          pointToPack.interpolate(centerPoint, 1.0 - newDistance / distance);
+         return true;
       }
    }
 }
