@@ -2,25 +2,29 @@ package us.ihmc.robotEnvironmentAwareness.polygonizer;
 
 import java.io.IOException;
 import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 
 import javafx.fxml.FXML;
 import javafx.stage.Window;
-import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.javaFXToolkit.messager.JavaFXMessager;
 import us.ihmc.robotEnvironmentAwareness.ui.io.PlanarRegionSegmentationRawDataImporter;
 
 public class PolygonizerMenuBarController
 {
-   private final ExecutorService executorService = Executors.newSingleThreadExecutor(ThreadTools.getNamedThreadFactory(getClass().getSimpleName()));
-
    private JavaFXMessager messager;
+   private ExecutorService executorService;
    private Window ownerWindow;
 
-   public void initialize(JavaFXMessager messager, Window ownerWindow)
+   public void initialize(JavaFXMessager messager, ExecutorService executorService, Window ownerWindow)
    {
       this.messager = messager;
+      this.executorService = executorService;
       this.ownerWindow = ownerWindow;
+   }
+
+   @FXML
+   public void reload()
+   {
+      messager.submitMessage(PolygonizerManager.PlanarRegionSemgentationReload, true);
    }
 
    @FXML
@@ -38,17 +42,12 @@ public class PolygonizerMenuBarController
          {
             dataImporter.loadPlanarRegionSegmentationData();
             dataImporter.recenterData();
-            messager.submitMessage(Polygonizer.PolygonizerInput, Polygonizer.toInputList(dataImporter.getPlanarRegionSegmentationRawData()));
+            messager.submitMessage(PolygonizerManager.PlanarRegionSemgentationData, dataImporter.getPlanarRegionSegmentationRawData());
          }
          catch (IOException e)
          {
             e.printStackTrace();
          }
       }
-   }
-
-   public void shutdown()
-   {
-      executorService.shutdownNow();
    }
 }

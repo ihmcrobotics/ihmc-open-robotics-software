@@ -1,10 +1,18 @@
 package us.ihmc.robotEnvironmentAwareness.polygonizer;
 
+import static us.ihmc.robotEnvironmentAwareness.polygonizer.MultiplePointCloudViewer.*;
+import static us.ihmc.robotEnvironmentAwareness.polygonizer.Polygonizer.*;
+import static us.ihmc.robotEnvironmentAwareness.polygonizer.PolygonizerManager.*;
+
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Scene;
 import javafx.scene.layout.BorderPane;
 import javafx.stage.Stage;
+import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.javaFXToolkit.messager.JavaFXMessager;
 import us.ihmc.javaFXToolkit.scenes.View3DFactory;
 import us.ihmc.messager.MessagerAPIFactory;
@@ -16,13 +24,17 @@ public class PolygonizerVisualizerUI
    private final Stage primaryStage;
    private final BorderPane mainPane;
 
-   private final Polygonizer polygonizer;
    private final MultipleConcaveHullViewer multipleConcaveHullViewer;
+   private final MultiplePointCloudViewer multiplePointCloudViewer;
+
+   private final ExecutorService executorService = Executors.newSingleThreadExecutor(ThreadTools.getNamedThreadFactory(getClass().getSimpleName()));
 
    @FXML
    private PolygonizerMenuBarController polygonizerMenuBarController;
    @FXML
    private PolygonizerDisplayOptionTabController polygonizerDisplayOptionTabController;
+   @FXML
+   private PolygonizerParametersTabController polygonizerParametersTabController;
 
    public PolygonizerVisualizerUI(JavaFXMessager messager, Stage primaryStage) throws Exception
    {
@@ -35,13 +47,17 @@ public class PolygonizerVisualizerUI
       mainPane = loader.load();
       messager.startMessager();
 
-      polygonizerMenuBarController.initialize(messager, primaryStage);
+      polygonizerMenuBarController.initialize(messager, executorService, primaryStage);
       polygonizerDisplayOptionTabController.initialize(messager);
+      polygonizerParametersTabController.initialize(messager);
 
-      polygonizer = new Polygonizer(messager);
+      new PolygonizerManager(messager, executorService);
       multipleConcaveHullViewer = new MultipleConcaveHullViewer(messager);
-      messager.registerTopicListener(Polygonizer.PolygonizerOutput,
-                                     message -> multipleConcaveHullViewer.submit(MultipleConcaveHullViewer.toConcaveHullViewerInputs(message)));
+      multiplePointCloudViewer = new MultiplePointCloudViewer(messager, executorService);
+
+      messager.registerTopicListener(PolygonizerOutput,
+                                     message -> executorService.execute(() -> multipleConcaveHullViewer.submit(MultipleConcaveHullViewer.toConcaveHullViewerInputList(message))));
+      messager.registerTopicListener(PlanarRegionSemgentationData, data -> messager.submitMessage(PointCloudInput, MultiplePointCloudViewer.toInputList(data)));
 
       View3DFactory view3dFactory = View3DFactory.createSubscene();
       view3dFactory.addCameraController(true);
@@ -49,6 +65,7 @@ public class PolygonizerVisualizerUI
       mainPane.setCenter(view3dFactory.getSubSceneWrappedInsidePane());
 
       view3dFactory.addNodeToView(multipleConcaveHullViewer.getRootNode());
+      view3dFactory.addNodeToView(multiplePointCloudViewer.getRootNode());
 
       primaryStage.setTitle(getClass().getSimpleName());
       primaryStage.setMaximized(true);
@@ -62,6 +79,7 @@ public class PolygonizerVisualizerUI
    {
       primaryStage.show();
       multipleConcaveHullViewer.start();
+      multiplePointCloudViewer.start();
    }
 
    public void stop()
@@ -69,8 +87,8 @@ public class PolygonizerVisualizerUI
       try
       {
          multipleConcaveHullViewer.stop();
-         polygonizer.shutdown();
-         polygonizerMenuBarController.shutdown();
+         multiplePointCloudViewer.stop();
+         executorService.shutdown();
          messager.closeMessager();
       }
       catch (Exception e)
@@ -87,7 +105,7 @@ public class PolygonizerVisualizerUI
       {
          MessagerAPIFactory apiFactory = new MessagerAPIFactory();
          apiFactory.createRootCategory(PolygonizerVisualizerUI.class.getSimpleName());
-         apiFactory.includeMessagerAPIs(Polygonizer.API, MultipleConcaveHullViewer.API);
+         apiFactory.includeMessagerAPIs(PolygonizerManager.API, MultipleConcaveHullViewer.API, MultiplePointCloudViewer.API);
          messagerAPI = apiFactory.getAPIAndCloseFactory();
       }
       return messagerAPI;

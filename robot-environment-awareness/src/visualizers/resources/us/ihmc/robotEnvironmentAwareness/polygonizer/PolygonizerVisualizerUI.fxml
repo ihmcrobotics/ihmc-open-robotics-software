@@ -27,6 +27,17 @@
 						</AnchorPane>
 					</content>
 				</Tab>
+				<Tab text="Parameters">
+					<content>
+						<AnchorPane minHeight="0.0" minWidth="0.0"
+							prefHeight="180.0" prefWidth="200.0">
+							<children>
+								<fx:include fx:id="polygonizerParametersTab"
+									source="PolygonizerParametersTab.fxml" />
+							</children>
+						</AnchorPane>
+					</content>
+				</Tab>
 			</tabs>
 		</TabPane>
 	</bottom>

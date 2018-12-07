@@ -76,7 +76,7 @@ public class PlanarRegionIntersectionCalculator
       return allIntersections;
    }
 
-   public static void extendLinesToIntersection(List<LineSegment3D> allIntersections)
+   private static void extendLinesToIntersection(List<LineSegment3D> allIntersections)
    {
       Point3D closestPointOnCurrentLine = new Point3D();
       Point3D closestPointOnOtherLine = new Point3D();
