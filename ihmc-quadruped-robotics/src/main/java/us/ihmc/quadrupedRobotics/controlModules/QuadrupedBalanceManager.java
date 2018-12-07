@@ -244,8 +244,7 @@ public class QuadrupedBalanceManager
       }
    }
 
-
-   public void initializeForStanding()
+   public void initialize()
    {
       centerOfMassHeightManager.initialize();
 
@@ -262,6 +261,21 @@ public class QuadrupedBalanceManager
 
       momentumRateOfChangeModule.initialize();
 
+      dcmPlanner.initializeForStanding();
+   }
+
+   public void initializeForStanding()
+   {
+      centerOfMassHeightManager.initialize();
+
+      // update model
+      centerOfMassHeightManager.update();
+      if (updateLipmHeightFromDesireds.getValue())
+         linearInvertedPendulumModel.setLipmHeight(centerOfMassHeightManager.getDesiredHeight(supportFrame));
+
+      momentumRateOfChangeModule.initialize();
+
+      // FIXME this should do something with the desired values
       dcmPlanner.initializeForStanding();
    }
 
