@@ -46,7 +46,7 @@ public class QuadrupedStepMessageHandler
       this.robotTimestamp = robotTimestamp;
       this.receivedStepSequence = new YoPreallocatedList<>(YoQuadrupedTimedStep.class, "receivedStepSequence", STEP_QUEUE_SIZE, registry);
 
-      initialTransferDurationForShifting.set(0.5);
+      initialTransferDurationForShifting.set(1.00);
 
       for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
          upcomingFootTrajectoryCommandList.put(robotQuadrant, new RecyclingArrayDeque<>(SoleTrajectoryCommand.class, SoleTrajectoryCommand::set));
