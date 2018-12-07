@@ -4,11 +4,9 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
 
-import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.euclid.geometry.LineSegment2D;
 import us.ihmc.euclid.geometry.interfaces.LineSegment2DReadOnly;
 import us.ihmc.euclid.transform.RigidBodyTransform;
@@ -45,13 +43,14 @@ public class Polygonizer
 
    public static final MessagerAPI API = apiFactory.getAPIAndCloseFactory();
 
-   private final ExecutorService executorService = Executors.newSingleThreadExecutor(ThreadTools.getNamedThreadFactory(getClass().getSimpleName()));
    private final AtomicReference<ConcaveHullFactoryParameters> parameters;
    private final Messager messager;
+   private final ExecutorService executorService;
 
-   public Polygonizer(Messager messager)
+   public Polygonizer(Messager messager, ExecutorService executorService)
    {
       this.messager = messager;
+      this.executorService = executorService;
       parameters = messager.createInput(PolygonizerParameters, new ConcaveHullFactoryParameters());
       messager.registerTopicListener(PolygonizerInput, this::processAndPublishLater);
    }
@@ -64,11 +63,6 @@ public class Polygonizer
    private List<Output> process(Collection<Input> inputs)
    {
       return inputs.stream().map(this::process).collect(Collectors.toList());
-   }
-
-   public void shutdown()
-   {
-      executorService.shutdownNow();
    }
 
    private Output process(Input input)

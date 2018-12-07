@@ -39,6 +39,15 @@ public class REAGraphics3DTools
       nodeToTransform.getTransforms().add(JavaFXTools.convertRigidBodyTransformToAffine(transform));
    }
 
+   public static MeshView pointcloud(List<? extends Tuple3DReadOnly> pointcloud, Color color, double size)
+   {
+      JavaFXMeshBuilder meshBuilder = new JavaFXMeshBuilder();
+      pointcloud.forEach(point -> meshBuilder.addTetrahedron(size, point));
+      MeshView meshView = new MeshView(meshBuilder.generateMesh());
+      meshView.setMaterial(new PhongMaterial(color));
+      return meshView;
+   }
+
    public static MeshView multiLine(RigidBodyTransform transformToWorld, ConcaveHullCollection concaveHullCollection, Color color, double lineWidth)
    {
       JavaFXMeshBuilder meshBuilder = new JavaFXMeshBuilder();

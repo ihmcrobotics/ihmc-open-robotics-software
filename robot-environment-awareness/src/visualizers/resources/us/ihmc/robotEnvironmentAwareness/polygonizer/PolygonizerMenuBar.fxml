@@ -8,6 +8,7 @@
   <menus>
     <Menu mnemonicParsing="false" text="File">
       <items>
+            <MenuItem mnemonicParsing="false" onAction="#reload" text="Reload" />
         <MenuItem mnemonicParsing="false" onAction="#load" text="Load..." />
       </items>
     </Menu>

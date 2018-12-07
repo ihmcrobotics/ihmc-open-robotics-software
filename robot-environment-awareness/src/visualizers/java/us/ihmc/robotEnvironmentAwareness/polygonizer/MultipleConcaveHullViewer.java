@@ -127,7 +127,7 @@ public class MultipleConcaveHullViewer extends AnimationTimer
       return rootNode;
    }
 
-   public static List<ConcaveHullViewerInput> toConcaveHullViewerInputs(Collection<Polygonizer.Output> polygonizerOutputs)
+   public static List<ConcaveHullViewerInput> toConcaveHullViewerInputList(Collection<Polygonizer.Output> polygonizerOutputs)
    {
       return polygonizerOutputs.stream().map(MultipleConcaveHullViewer::toConcaveHullViewerInput).collect(Collectors.toList());
    }

@@ -79,6 +79,13 @@ public class PlanarRegionSegmentationRawData
       boundingBoxWorld.updateToIncludePoint(intersectionToAdd.getSecondEndpoint());
    }
 
+   public void clearIntersections()
+   {
+      intersections.clear();
+      boundingBoxWorld.setToNaN();
+      pointCloud.forEach(boundingBoxWorld::updateToIncludePoint);
+   }
+
    public void translate(Tuple3DReadOnly translation)
    {
       origin.add(translation);
