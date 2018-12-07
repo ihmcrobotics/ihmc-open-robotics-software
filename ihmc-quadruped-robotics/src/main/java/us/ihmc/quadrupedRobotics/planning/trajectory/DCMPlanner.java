@@ -239,6 +239,7 @@ public class DCMPlanner
       {
          // update desired dcm position
          desiredDCMPosition.setToZero(supportFrame);
+         desiredDCMPosition.setZ(comHeight.getDoubleValue());
          desiredDCMVelocity.setToZero(supportFrame);
       }
       else
