@@ -42,6 +42,11 @@ public class PolygonizerManager
    private final AtomicReference<IntersectionEstimationParameters> intersectionParameters;
    private final Messager messager;
 
+   public PolygonizerManager(Messager messager)
+   {
+      this(messager, null);
+   }
+
    public PolygonizerManager(Messager messager, ExecutorService executorService)
    {
       this.messager = messager;

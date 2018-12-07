@@ -11,7 +11,7 @@
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.RowConstraints?>
 
-<AnchorPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="111.0" prefWidth="1149.0" xmlns="http://javafx.com/javafx/8.0.171" xmlns:fx="http://javafx.com/fxml/1" fx:controller="us.ihmc.robotEnvironmentAwareness.polygonizer.PolygonizerParametersTabController">
+<AnchorPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="111.0" prefWidth="1357.0" xmlns="http://javafx.com/javafx/8.0.171" xmlns:fx="http://javafx.com/fxml/1" fx:controller="us.ihmc.robotEnvironmentAwareness.polygonizer.PolygonizerParametersTabController">
    <children>
       <GridPane hgap="5.0" layoutX="10.0" layoutY="10.0" style="-fx-border-color: lightblue; -fx-padding: 3; -fx-border-radius: 5; -fx-border-width: 2;" vgap="5.0" AnchorPane.leftAnchor="100.0" AnchorPane.topAnchor="5.0">
          <columnConstraints>
@@ -19,6 +19,8 @@
             <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" />
             <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" />
             <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" />
+            <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
+            <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
          </columnConstraints>
          <rowConstraints>
             <RowConstraints minHeight="10.0" vgrow="SOMETIMES" />
@@ -62,9 +64,15 @@
                   <Tooltip prefWidth="200.0" text="Threshold used for decomposing the concave hull into convex polygons. Describes the maximum depth of a concavity before the concave hull gets split in 2." wrapText="true" />
                </tooltip>
             </Label>
+            <Label maxWidth="1.7976931348623157E308" text="Max Iterations:" GridPane.columnIndex="4">
+               <tooltip>
+                  <Tooltip prefWidth="200.0" text="Filter parameter to remove peaks from the concave hull" wrapText="true" />
+               </tooltip>
+            </Label>
+            <Spinner fx:id="maxIterationsSpinner" editable="true" prefWidth="100.0" GridPane.columnIndex="5" />
          </children>
       </GridPane>
-      <GridPane hgap="5.0" layoutX="500.0" layoutY="20.0" style="-fx-padding: 3; -fx-border-width: 2; -fx-border-color: lightblue; -fx-border-radius: 5;" vgap="5.0" AnchorPane.leftAnchor="600.0" AnchorPane.topAnchor="5.0">
+      <GridPane hgap="5.0" layoutX="812.0" layoutY="3.0" style="-fx-padding: 3; -fx-border-width: 2; -fx-border-color: lightblue; -fx-border-radius: 5;" vgap="5.0" AnchorPane.leftAnchor="812.0" AnchorPane.topAnchor="3.0">
          <columnConstraints>
             <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" />
             <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" />

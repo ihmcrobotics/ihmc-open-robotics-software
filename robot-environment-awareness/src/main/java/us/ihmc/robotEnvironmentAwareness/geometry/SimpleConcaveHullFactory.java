@@ -54,7 +54,7 @@ import us.ihmc.log.LogTools;
  */
 public abstract class SimpleConcaveHullFactory
 {
-   private static final boolean VERBOSE = true;
+   private static final boolean VERBOSE = false;
    private static final boolean REPORT_TIME = false;
 
    public static ConcaveHullCollection createConcaveHullCollection(List<? extends Point2DReadOnly> pointCloud2d, ConcaveHullFactoryParameters parameters)

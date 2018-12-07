@@ -106,6 +106,11 @@ public class ConcaveHullFactoryGraphicsTools
    public static MeshView constraintEdgesToMultiLine(RigidBodyTransform transformToWorld, ConcaveHullFactoryResult concaveHullFactoryResult, Color color, double lineWidth)
    {
       List<LineSegment3D> constraintEdges = JTSTools.extractConstraintEdges(concaveHullFactoryResult, transformToWorld);
+      for (int i = 0; i < constraintEdges.size(); i++)
+      {
+         constraintEdges.get(i).getFirstEndpoint().addZ(0.001 * i);
+         constraintEdges.get(i).getSecondEndpoint().addZ(0.001 * i);
+      }
       return REAGraphics3DTools.multiLine(constraintEdges, color, lineWidth);
    }
 }
