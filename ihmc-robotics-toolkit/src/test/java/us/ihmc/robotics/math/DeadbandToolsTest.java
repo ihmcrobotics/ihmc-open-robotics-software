@@ -1,0 +1,105 @@
+package us.ihmc.robotics.math;
+
+import org.junit.Test;
+import us.ihmc.commons.RandomNumbers;
+import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
+import us.ihmc.euclid.tools.EuclidCoreRandomTools;
+import us.ihmc.euclid.tools.EuclidCoreTestTools;
+import us.ihmc.euclid.tuple2D.Vector2D;
+import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
+import us.ihmc.euclid.tuple2D.interfaces.Vector2DReadOnly;
+import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
+
+import java.util.Random;
+
+import static junit.framework.TestCase.assertEquals;
+
+public class DeadbandToolsTest
+{
+   private static final double epsilon = 1e-9;
+   private static final int iters = 100;
+
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
+   @Test(timeout = 30000)
+   public void testScalar()
+   {
+      Random random = new Random(1738L);
+
+      for (int iter = 0; iter < iters; iter++)
+      {
+         double value = RandomNumbers.nextDouble(random, 0.0, 100.0);
+         double noPassDeadband = RandomNumbers.nextDouble(random, Math.abs(value) + 10.0 * epsilon, 100);
+         double somePassDeadband = RandomNumbers.nextDouble(random, Math.abs(value) - 10.0 * epsilon);
+
+         double offset = RandomNumbers.nextDouble(random, 100.0);
+
+         assertEquals("iter = " + iter, 0.0, DeadbandTools.applyDeadband(noPassDeadband, value), epsilon);
+         assertEquals("iter = " + iter, 0.0, DeadbandTools.applyDeadband(noPassDeadband, -value), epsilon);
+
+         assertEquals("iter = " + iter, offset, DeadbandTools.applyDeadband(noPassDeadband, offset, offset + value));
+         assertEquals("iter = " + iter, offset, DeadbandTools.applyDeadband(noPassDeadband, offset, offset - value));
+
+         assertEquals("Deadband = " + somePassDeadband + ", value = " + value, value - somePassDeadband, DeadbandTools.applyDeadband(somePassDeadband, value), epsilon);
+         assertEquals("Deadband = " + somePassDeadband + ", value = " + (-value), -value + somePassDeadband, DeadbandTools.applyDeadband(somePassDeadband, -value), epsilon);
+
+         assertEquals("Center = " + offset + ", deadband = " + somePassDeadband + ", value = " + (offset + value), offset + value - somePassDeadband, DeadbandTools.applyDeadband(somePassDeadband, offset, offset + value), epsilon);
+         assertEquals("Center = " + offset + ", deadband = " + somePassDeadband + ", value = " + (offset - value), offset - value + somePassDeadband, DeadbandTools.applyDeadband(somePassDeadband, offset, offset - value), epsilon);
+      }
+   }
+
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
+   @Test(timeout = 30000)
+   public void testVector()
+   {
+      Random random = new Random(1738L);
+
+      for (int iter = 0; iter < iters; iter++)
+      {
+         Vector2DReadOnly value2D = EuclidCoreRandomTools.nextVector2D(random, new Vector2D(10.0, 10.0));
+         Vector3DReadOnly value3D = EuclidCoreRandomTools.nextVector3D(random, new Vector3D(10.0, 10.0, 10.0));
+         double noPassDeadband2D = RandomNumbers.nextDouble(random, value2D.length() + 10.0 * epsilon, 100);
+         double noPassDeadband3D = RandomNumbers.nextDouble(random, value3D.length() + 10.0 * epsilon, 100);
+         double somePassDeadband2D = RandomNumbers.nextDouble(random, value2D.length() - 10.0 * epsilon);
+         double somePassDeadband3D = RandomNumbers.nextDouble(random, value3D.length() - 10.0 * epsilon);
+
+         Vector2D output2D = new Vector2D();
+         Vector3D output3D = new Vector3D();
+
+         output2D.set(value2D);
+         output3D.set(value3D);
+         DeadbandTools.applyDeadband(output2D, noPassDeadband2D);
+         DeadbandTools.applyDeadband(output3D, noPassDeadband3D);
+         EuclidCoreTestTools.assertVector2DGeometricallyEquals(new Vector2D(), output2D, epsilon);
+         EuclidCoreTestTools.assertVector3DGeometricallyEquals(new Vector3D(), output3D, epsilon);
+
+         output2D.set(value2D);
+         output3D.set(value3D);
+         output2D.negate();
+         output3D.negate();
+         DeadbandTools.applyDeadband(output2D, noPassDeadband2D);
+         DeadbandTools.applyDeadband(output3D, noPassDeadband3D);
+         EuclidCoreTestTools.assertVector2DGeometricallyEquals(new Vector2D(), output2D, epsilon);
+         EuclidCoreTestTools.assertVector3DGeometricallyEquals(new Vector3D(), output3D, epsilon);
+
+
+         output2D.set(value2D);
+         DeadbandTools.applyDeadband(output2D, somePassDeadband2D);
+         Vector2D output2DExpected = new Vector2D(value2D);
+         output2DExpected.normalize();
+         output2DExpected.scale(-somePassDeadband2D);
+         output2DExpected.add(value2D);
+         EuclidCoreTestTools.assertVector2DGeometricallyEquals(output2DExpected, output2D, epsilon);
+
+
+         output3D.set(value3D);
+         DeadbandTools.applyDeadband(output3D, somePassDeadband3D);
+         Vector3D output3DExpected = new Vector3D(value3D);
+         output3DExpected.normalize();
+         output3DExpected.scale(-somePassDeadband3D);
+         output3DExpected.add(value3D);
+         EuclidCoreTestTools.assertVector3DGeometricallyEquals(output3DExpected, output3D, epsilon);
+
+      }
+   }
+}
