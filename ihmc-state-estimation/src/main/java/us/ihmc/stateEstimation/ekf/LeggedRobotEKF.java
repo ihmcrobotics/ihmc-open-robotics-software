@@ -35,11 +35,14 @@ import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.mecano.spatial.Twist;
 import us.ihmc.mecano.spatial.Wrench;
+import us.ihmc.robotics.math.filters.AlphaFilteredYoVariable;
 import us.ihmc.robotics.screwTheory.ScrewTools;
 import us.ihmc.robotics.sensors.ForceSensorDataReadOnly;
 import us.ihmc.sensorProcessing.sensorProcessors.SensorRawOutputMapReadOnly;
 import us.ihmc.sensorProcessing.stateEstimation.IMUSensorReadOnly;
 import us.ihmc.stateEstimation.humanoid.StateEstimatorController;
+import us.ihmc.yoVariables.parameters.DoubleParameter;
+import us.ihmc.yoVariables.providers.DoubleProvider;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
@@ -70,6 +73,7 @@ public class LeggedRobotEKF implements StateEstimatorController
    private final FrameVector3D footForce = new FrameVector3D();
    private final double weight;
    private final List<FootVelocitySensor> footVelocitySensors = new ArrayList<>();
+   private final List<AlphaFilteredYoVariable> zForces = new ArrayList<>();
    private final List<ForceSensorDataReadOnly> forceSensorOutputs = new ArrayList<>();
    private final List<ReferenceFrame> copFrames = new ArrayList<>();
 
@@ -88,7 +92,7 @@ public class LeggedRobotEKF implements StateEstimatorController
 
    private final AtomicBoolean fixRobotRequest = new AtomicBoolean(false);
    private final YoBoolean fixRobot = new YoBoolean("FixRobot", registry);
-
+   
    public LeggedRobotEKF(FloatingJointBasics rootJoint, List<OneDoFJointBasics> oneDoFJoints, Collection<String> imuNames,
                          Map<String, ReferenceFrame> forceSensorMap, SensorRawOutputMapReadOnly sensorOutput, double dt, double gravity,
                          YoGraphicsListRegistry graphicsListRegistry)
@@ -106,7 +110,7 @@ public class LeggedRobotEKF implements StateEstimatorController
          LogTools.info("Creating joint state for " + oneDoFJoint.getName());
          JointState jointState = new JointState(oneDoFJoint.getName(), dt, registry);
          jointStates.add(jointState);
-         JointPositionSensor jointPositionSensor = new JointPositionSensor(oneDoFJoint.getName(), dt, registry);
+         JointPositionSensor jointPositionSensor = new JointPositionSensorWithBacklash(oneDoFJoint.getName(), dt, registry);
          jointPositionSensors.add(jointPositionSensor);
          sensors.add(jointPositionSensor);
          jointAngles.add(new YoDouble(oneDoFJoint.getName() + "JointAngle", registry));
@@ -127,6 +131,8 @@ public class LeggedRobotEKF implements StateEstimatorController
          sensors.add(linearAccelerationSensor);
       }
 
+      DoubleProvider zForceFilter = new DoubleParameter("ZForceFilter", registry, 100.0);
+      DoubleProvider zForceAlpha = () -> AlphaFilteredYoVariable.computeAlphaGivenBreakFrequencyProperly(zForceFilter .getValue(), dt);
       weight = -Arrays.asList(ScrewTools.computeSubtreeSuccessors(rootJoint.getPredecessor())).stream().collect(Collectors.summingDouble(body -> body.getInertia().getMass())) * gravity;
       for (String forceSensorName : forceSensorMap.keySet())
       {
@@ -176,6 +182,9 @@ public class LeggedRobotEKF implements StateEstimatorController
          forceSensorOutputs.add(forceSensorOutput);
          copFrames.add(copFrame);
          sensors.add(footVelocitySensor);
+         
+         AlphaFilteredYoVariable filteredZForce = new AlphaFilteredYoVariable(foot.getName() + "ZForce", registry, zForceAlpha);
+         zForces.add(filteredZForce);
       }
 
       RobotState robotState = new RobotState(rootState, jointStates);
@@ -239,9 +248,10 @@ public class LeggedRobotEKF implements StateEstimatorController
          forceSensorOutputs.get(footIdx).getWrench(footWrench);
          footForce.setIncludingFrame(footWrench.getLinearPart());
          footForce.changeFrame(ReferenceFrame.getWorldFrame());
+         zForces.get(footIdx).update(footForce.getZ() / weight);
 
          // When fixing the robot this will cause the state estimator to assume the feet are not moving:
-         double loadPercentage = fixRobot.getValue() ? 1.0 : footForce.getZ() / weight;
+         double loadPercentage = fixRobot.getValue() ? 1.0 : zForces.get(footIdx).getValue();
          footVelocitySensors.get(footIdx).setLoad(loadPercentage);
       }
    }
