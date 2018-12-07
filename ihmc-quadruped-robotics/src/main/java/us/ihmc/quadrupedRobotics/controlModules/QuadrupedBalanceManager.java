@@ -272,7 +272,7 @@ public class QuadrupedBalanceManager
       if (updateLipmHeightFromDesireds.getValue())
          linearInvertedPendulumModel.setLipmHeight(centerOfMassHeightManager.getDesiredHeight(supportFrame));
 
-      dcmPlanner.initializeForStepping(controllerToolbox.getContactStates(), dcmPositionEstimate);
+      dcmPlanner.initializeForStepping(controllerToolbox.getContactStates(), yoDesiredDCMPosition);
    }
 
    public void completedStep(RobotQuadrant robotQuadrant)
