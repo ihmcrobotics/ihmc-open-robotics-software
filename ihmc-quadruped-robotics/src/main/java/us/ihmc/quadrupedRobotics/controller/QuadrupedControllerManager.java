@@ -336,7 +336,7 @@ public class QuadrupedControllerManager implements RobotController, CloseableAnd
       factory.addDoneTransition(HighLevelControllerName.STAND_PREP_STATE, HighLevelControllerName.STAND_READY);
       factory.addDoneTransition(HighLevelControllerName.STAND_TRANSITION_STATE, HighLevelControllerName.WALKING);
       factory.addDoneTransition(sitDownStateName, HighLevelControllerName.FREEZE_STATE);
-      factory.addDoneTransition(HighLevelControllerName.EXIT_WALKING, HighLevelControllerName.FREEZE_STATE);
+      factory.addDoneTransition(HighLevelControllerName.EXIT_WALKING, sitDownStateName);
 
       // Set up walking controller failure transition
       HighLevelControllerName fallbackControllerState = highLevelControllerParameters.getFallbackControllerState();
