@@ -5,10 +5,13 @@ import us.ihmc.commons.RandomNumbers;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.euclid.tools.EuclidCoreRandomTools;
 import us.ihmc.euclid.tools.EuclidCoreTestTools;
+import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple2D.Vector2D;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
 import us.ihmc.euclid.tuple2D.interfaces.Vector2DReadOnly;
+import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 
 import java.util.Random;
@@ -99,6 +102,72 @@ public class DeadbandToolsTest
          output3DExpected.scale(-somePassDeadband3D);
          output3DExpected.add(value3D);
          EuclidCoreTestTools.assertVector3DGeometricallyEquals(output3DExpected, output3D, epsilon);
+
+      }
+   }
+
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
+   @Test(timeout = 30000)
+   public void testPoint()
+   {
+      Random random = new Random(1738L);
+
+      Point2D zero2D = new Point2D();
+      Point3D zero3D = new Point3D();
+      for (int iter = 0; iter < iters; iter++)
+      {
+
+         Point2DReadOnly value2D = EuclidCoreRandomTools.nextPoint2D(random, 10.0);
+         Point2DReadOnly center2D = EuclidCoreRandomTools.nextPoint2D(random, 10.0);
+         Point3DReadOnly value3D = EuclidCoreRandomTools.nextPoint3D(random, 10.0);
+         Point3DReadOnly center3D = EuclidCoreRandomTools.nextPoint3D(random, 10.0);
+         double noPassDeadband2D = RandomNumbers.nextDouble(random, value2D.distance(zero2D) + 10.0 * epsilon, 100);
+         double noPassDeadband3D = RandomNumbers.nextDouble(random, value3D.distance(zero3D) + 10.0 * epsilon, 100);
+         double somePassDeadband2D = RandomNumbers.nextDouble(random, value2D.distance(zero2D) - 10.0 * epsilon);
+         double somePassDeadband3D = RandomNumbers.nextDouble(random, value3D.distance(zero3D) - 10.0 * epsilon);
+
+         Point2D output2D = new Point2D();
+         Point3D output3D = new Point3D();
+
+         output2D.set(value2D);
+         output3D.set(value3D);
+         DeadbandTools.applyDeadband(output2D, center2D, noPassDeadband2D);
+         DeadbandTools.applyDeadband(output3D, center3D, noPassDeadband3D);
+         EuclidCoreTestTools.assertPoint2DGeometricallyEquals(center2D, output2D, epsilon);
+         EuclidCoreTestTools.assertPoint3DGeometricallyEquals(center3D, output3D, epsilon);
+
+         output2D.set(value2D);
+         output3D.set(value3D);
+         output2D.negate();
+         output3D.negate();
+         DeadbandTools.applyDeadband(output2D, center2D, noPassDeadband2D);
+         DeadbandTools.applyDeadband(output3D, center3D, noPassDeadband3D);
+         EuclidCoreTestTools.assertPoint2DGeometricallyEquals(center2D, output2D, epsilon);
+         EuclidCoreTestTools.assertPoint3DGeometricallyEquals(center3D, output3D, epsilon);
+
+
+         output2D.set(value2D);
+         DeadbandTools.applyDeadband(output2D, center2D, somePassDeadband2D);
+         Vector2D deadband2DVector = new Vector2D(value2D);
+         deadband2DVector.sub(center2D);
+         deadband2DVector.normalize();
+         deadband2DVector.scale(-somePassDeadband2D);
+         Point2D output2DExpected = new Point2D(center2D);
+         output2DExpected.add(value2D);
+         EuclidCoreTestTools.assertPoint2DGeometricallyEquals(output2DExpected, output2D, epsilon);
+
+
+
+         output3D.set(value3D);
+         DeadbandTools.applyDeadband(output3D, center3D, somePassDeadband3D);
+         Vector3D deadband3DVector = new Vector3D(value3D);
+         deadband3DVector.sub(center3D);
+         deadband3DVector.normalize();
+         deadband3DVector.scale(-somePassDeadband3D);
+         Point3D output3DExpected = new Point3D(center3D);
+         output3DExpected.add(value3D);
+
+         EuclidCoreTestTools.assertPoint3DGeometricallyEquals(output3DExpected, output3D, epsilon);
 
       }
    }
