@@ -54,7 +54,6 @@ public class DCMPlanner
    private final YoInteger numberOfStepsInPlanner = new YoInteger("numberOfStepsInPlanner", registry);
    private final YoFramePoint3D perfectCMPPosition = new YoFramePoint3D("perfectCMPPosition", worldFrame, registry);
 
-
    private final YoBoolean isStanding = new YoBoolean("isStanding", registry);
 
    private final ReferenceFrame supportFrame;
@@ -143,7 +142,8 @@ public class DCMPlanner
       dcmTrajectory.resetVariables();
    }
 
-   public void initializeForStepping(QuadrantDependentList<YoEnum<ContactState>> currentContactStates, FramePoint3DReadOnly dcmPosition, FrameVector3DReadOnly dcmVelocity)
+   public void initializeForStepping(QuadrantDependentList<YoEnum<ContactState>> currentContactStates, FramePoint3DReadOnly dcmPosition,
+                                     FrameVector3DReadOnly dcmVelocity)
    {
       isStanding.set(false);
 
@@ -197,8 +197,10 @@ public class DCMPlanner
       finalTransitionDCMPosition.changeFrame(dcmTransitionTrajectory.getReferenceFrame());
       finalTransitionDCMVelocity.changeFrame(dcmTransitionTrajectory.getReferenceFrame());
 
-      dcmTransitionTrajectory.setQuinticWithZeroTerminalVelocityAndAcceleration(transitionStartTime, transitionEndTime, initialTransitionDCMPosition,
-                                                                                finalTransitionDCMPosition);
+      dcmTransitionTrajectory
+            .setCubic(transitionStartTime, transitionEndTime, initialTransitionDCMPosition, initialTransitionDCMVelocity, finalTransitionDCMPosition,
+                      finalTransitionDCMVelocity);
+
       dcmPositionAtEndOfTransition.setMatchingFrame(finalTransitionDCMPosition);
       dcmVelocityAtEndOfTransition.setMatchingFrame(finalTransitionDCMVelocity);
 
@@ -221,7 +223,7 @@ public class DCMPlanner
       if (!Double.isFinite(transitionEndTime))
          throw new IllegalArgumentException("Transition end time is not valid.");
       if (transitionStartTime > transitionEndTime)
-         throw new IllegalArgumentException("Transition start time " + transitionStartTime + " is after the transition end time " + transitionEndTime +".");
+         throw new IllegalArgumentException("Transition start time " + transitionStartTime + " is after the transition end time " + transitionEndTime + ".");
       if (!dcmTransitionTrajectory.isValidTrajectory())
          throw new IllegalArgumentException("Transition trajectory is invalid.");
    }
@@ -251,7 +253,6 @@ public class DCMPlanner
             dcmTransitionTrajectory.compute(currentTime);
             dcmTransitionTrajectory.getFramePosition(desiredDCMPosition);
             dcmTransitionTrajectory.getFrameVelocity(desiredDCMVelocity);
-
          }
          else
          {
