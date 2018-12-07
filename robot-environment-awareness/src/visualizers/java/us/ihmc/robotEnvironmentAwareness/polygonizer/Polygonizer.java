@@ -47,6 +47,11 @@ public class Polygonizer
    private final Messager messager;
    private final ExecutorService executorService;
 
+   public Polygonizer(Messager messager)
+   {
+      this(messager, null);
+   }
+
    public Polygonizer(Messager messager, ExecutorService executorService)
    {
       this.messager = messager;
@@ -57,7 +62,10 @@ public class Polygonizer
 
    private void processAndPublishLater(Collection<Input> inputs)
    {
-      executorService.execute(() -> messager.submitMessage(PolygonizerOutput, process(inputs)));
+      if (executorService != null)
+         executorService.execute(() -> messager.submitMessage(PolygonizerOutput, process(inputs)));
+      else
+         messager.submitMessage(PolygonizerOutput, process(inputs));
    }
 
    private List<Output> process(Collection<Input> inputs)

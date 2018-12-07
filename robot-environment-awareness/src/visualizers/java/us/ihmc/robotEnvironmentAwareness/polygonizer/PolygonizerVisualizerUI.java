@@ -10,6 +10,8 @@ import java.util.concurrent.Executors;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Scene;
+import javafx.scene.input.KeyCode;
+import javafx.scene.input.KeyEvent;
 import javafx.scene.layout.BorderPane;
 import javafx.stage.Stage;
 import us.ihmc.commons.thread.ThreadTools;
@@ -70,6 +72,11 @@ public class PolygonizerVisualizerUI
       primaryStage.setTitle(getClass().getSimpleName());
       primaryStage.setMaximized(true);
       Scene mainScene = new Scene(mainPane, 600, 400);
+
+      primaryStage.addEventHandler(KeyEvent.KEY_PRESSED, event -> {
+         if (event.getCode() == KeyCode.F5)
+            messager.submitMessage(PolygonizerManager.PlanarRegionSemgentationReload, true);
+      });
 
       primaryStage.setScene(mainScene);
       primaryStage.setOnCloseRequest(event -> stop());

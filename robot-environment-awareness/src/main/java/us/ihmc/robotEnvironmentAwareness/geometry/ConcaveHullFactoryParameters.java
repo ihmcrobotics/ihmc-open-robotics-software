@@ -37,7 +37,7 @@ public class ConcaveHullFactoryParameters
       removeAllTrianglesWithTwoBorderEdges = true;
       allowSplittingConcaveHull = true;
       maxNumberOfIterations = 5000;
-      triangulationTolerance = 0.01;
+      triangulationTolerance = 0.0;
    }
 
    public double getEdgeLengthThreshold()

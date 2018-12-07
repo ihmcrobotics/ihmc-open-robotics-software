@@ -4,8 +4,8 @@ import static us.ihmc.robotEnvironmentAwareness.ui.controller.PolygonizerAnchorP
 
 import javafx.fxml.FXML;
 import javafx.scene.control.Spinner;
-import javafx.scene.control.ToggleButton;
 import javafx.scene.control.SpinnerValueFactory.IntegerSpinnerValueFactory;
+import javafx.scene.control.ToggleButton;
 import us.ihmc.javaFXToolkit.StringConverterTools;
 import us.ihmc.javaFXToolkit.messager.JavaFXMessager;
 import us.ihmc.robotEnvironmentAwareness.ui.properties.ConcaveHullFactoryParametersProperty;
@@ -17,6 +17,8 @@ public class PolygonizerParametersTabController
    // Polygonizer parameters
    @FXML
    private Spinner<Double> concaveHullThresholdSpinner;
+   @FXML
+   private Spinner<Integer> maxIterationsSpinner;
    @FXML
    private Spinner<Integer> minRegionSizePolygonizerSpinner;
    @FXML
@@ -54,6 +56,7 @@ public class PolygonizerParametersTabController
       setupControls();
 
       concaveHullFactoryParametersProperty.bindBidirectionalEdgeLengthThreshold(concaveHullThresholdSpinner.getValueFactory().valueProperty());
+      concaveHullFactoryParametersProperty.bindBidirectionalMaxNumberOfIterations(maxIterationsSpinner.getValueFactory().valueProperty());
       messager.bindBidirectional(Polygonizer.PolygonizerParameters, concaveHullFactoryParametersProperty, false);
 
       polygonizerParametersProperty.bindBidirectionalMinNumberOfNodes(minRegionSizePolygonizerSpinner.getValueFactory().valueProperty());
@@ -61,20 +64,22 @@ public class PolygonizerParametersTabController
       polygonizerParametersProperty.bindBidirectionalShallowAngleThreshold(shallowAngleThresholdSpinner.getValueFactory().valueProperty());
       polygonizerParametersProperty.bindBidirectionalLengthThreshold(minEdgeLengthSpinner.getValueFactory().valueProperty());
       polygonizerParametersProperty.bindBidirectionalDepthThreshold(depthThresholdSpinner.getValueFactory().valueProperty());
-//      messager.bindBidirectional(REAModuleAPI.PlanarRegionsPolygonizerParameters, polygonizerParametersProperty, false); // TODO
+      //      messager.bindBidirectional(REAModuleAPI.PlanarRegionsPolygonizerParameters, polygonizerParametersProperty, false); // TODO
 
       intersectionEstimationParametersProperty.bindBidirectionalMaxDistanceToRegion(maxDistanceToRegionSpinner.getValueFactory().valueProperty());
       intersectionEstimationParametersProperty.bindBidirectionalMinRegionSize(minRegionSizeIntersectionSpinner.getValueFactory().valueProperty());
       intersectionEstimationParametersProperty.bindBidirectionalMinIntersectionLength(minIntersectionLengthSpinner.getValueFactory().valueProperty());
       intersectionEstimationParametersProperty.bindBidirectionalMinRegionAngleDifference(minRegionAngleDifferenceSpinner.getValueFactory().valueProperty());
       intersectionEstimationParametersProperty.bindBidirectionalAddIntersectionsToRegions(addIntersectionsToRegionsButton.selectedProperty());
-//      messager.bindBidirectional(REAModuleAPI.PlanarRegionsIntersectionParameters, intersectionEstimationParametersProperty, false); // TODO
+      //      messager.bindBidirectional(REAModuleAPI.PlanarRegionsIntersectionParameters, intersectionEstimationParametersProperty, false); // TODO
 
    }
 
    private void setupControls()
    {
-      concaveHullThresholdSpinner.setValueFactory(createLengthValueFactory(0.001, 0.50, 0.2, 0.05));
+      concaveHullThresholdSpinner.setValueFactory(createLengthValueFactory(0.001, 0.50, 0.2, 0.005));
+      maxIterationsSpinner.setValueFactory(new IntegerSpinnerValueFactory(1, 5000, 5000, 1));
+
       minRegionSizePolygonizerSpinner.setValueFactory(new IntegerSpinnerValueFactory(0, 1000, 10, 10));
       peakAngleThresholdSpinner.setValueFactory(createAngleValueFactory(Math.PI / 2.0, Math.PI, Math.toRadians(160), Math.toRadians(5.0)));
       shallowAngleThresholdSpinner.setValueFactory(createAngleValueFactory(0.0, Math.PI / 2.0, Math.toRadians(10), Math.toRadians(2.5)));
@@ -86,7 +91,7 @@ public class PolygonizerParametersTabController
       minIntersectionLengthSpinner.setValueFactory(createLengthValueFactory(0.0, 0.50, 0.06, 0.01));
       minRegionAngleDifferenceSpinner.setValueFactory(createAngleValueFactory(0.0, Math.PI / 2.0, Math.toRadians(15.0), Math.toRadians(5.0)));
 
-      concaveHullThresholdSpinner.getValueFactory().setConverter(StringConverterTools.metersToRoundedCentimeters());
+      concaveHullThresholdSpinner.getValueFactory().setConverter(StringConverterTools.metersToRoundedMillimeters());
       peakAngleThresholdSpinner.getValueFactory().setConverter(StringConverterTools.radiansToRoundedDegrees());
       shallowAngleThresholdSpinner.getValueFactory().setConverter(StringConverterTools.radiansToRoundedDegrees());
       minEdgeLengthSpinner.getValueFactory().setConverter(StringConverterTools.metersToRoundedCentimeters());
