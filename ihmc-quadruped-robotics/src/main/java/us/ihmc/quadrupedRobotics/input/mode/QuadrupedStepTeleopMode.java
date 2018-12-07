@@ -39,8 +39,8 @@ public class QuadrupedStepTeleopMode
    public QuadrupedStepTeleopMode(String robotName, Ros2Node ros2Node, QuadrupedPhysicalProperties physicalProperties, QuadrupedXGaitSettingsReadOnly xGaitSettings,
                                   QuadrupedReferenceFrames referenceFrames, double updateDT, YoGraphicsListRegistry graphicsListRegistry, YoVariableRegistry parentRegistry)
    {
-      this.stepTeleopManager = new QuadrupedTeleopManager(robotName, ros2Node, xGaitSettings, physicalProperties.getNominalCoMHeight(), referenceFrames, graphicsListRegistry, registry);
-      this.bodyHeight = new InputValueIntegrator(updateDT, physicalProperties.getNominalCoMHeight());
+      this.stepTeleopManager = new QuadrupedTeleopManager(robotName, ros2Node, xGaitSettings, physicalProperties.getNominalBodyHeight(), referenceFrames, graphicsListRegistry, registry);
+      this.bodyHeight = new InputValueIntegrator(updateDT, physicalProperties.getNominalBodyHeight());
 
       xGaitStepDuration[0] = new DoubleParameter("xGaitStepDurationMode0", registry, 0.5);
       xGaitStepDuration[1] = new DoubleParameter("xGaitStepDurationMode1", registry, 0.33);
