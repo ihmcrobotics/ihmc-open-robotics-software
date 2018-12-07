@@ -335,7 +335,7 @@ public class QuadrupedSimulationFactory
 
       if(useStateEstimator.get())
       {
-         controllerManager.setStateEstimator(stateEstimator);
+         controllerManager.setStateEstimatorModeSubscriber(stateEstimator);
       }
    }
 
