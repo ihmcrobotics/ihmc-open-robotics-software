@@ -30,7 +30,7 @@ public class JTSToolsTest
 {
    private static final int ITERATIONS = 1000;
 
-   @Test
+   @Test(timeout = 30000)
    public void testPointConversions()
    {
       Random random = new Random(4234234);
@@ -65,7 +65,7 @@ public class JTSToolsTest
       }
    }
 
-   @Test
+   @Test(timeout = 30000)
    public void testLineStringConversion() throws Exception
    {
       Random random = new Random(2423423);
@@ -80,7 +80,7 @@ public class JTSToolsTest
       }
    }
 
-   @Test
+   @Test(timeout = 30000)
    public void testMultiString() throws Exception
    {
       Random random = new Random(43543);
