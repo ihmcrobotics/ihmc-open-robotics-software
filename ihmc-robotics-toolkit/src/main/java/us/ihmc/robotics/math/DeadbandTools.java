@@ -1,9 +1,11 @@
 package us.ihmc.robotics.math;
 
-import us.ihmc.euclid.referenceFrame.interfaces.FramePoint2DBasics;
-import us.ihmc.euclid.referenceFrame.interfaces.FramePoint2DReadOnly;
-import us.ihmc.euclid.referenceFrame.interfaces.FrameVector2DBasics;
-import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DBasics;
+import us.ihmc.euclid.tuple2D.interfaces.Point2DBasics;
+import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
+import us.ihmc.euclid.tuple2D.interfaces.Vector2DBasics;
+import us.ihmc.euclid.tuple3D.interfaces.Point3DBasics;
+import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
+import us.ihmc.euclid.tuple3D.interfaces.Vector3DBasics;
 
 public class DeadbandTools
 {
@@ -20,7 +22,7 @@ public class DeadbandTools
          return Math.min(deadbandCenter, value + deadbandSize);
    }
 
-   public static void applyDeadband(FrameVector2DBasics vectorToPack, double deadband)
+   public static void applyDeadband(Vector2DBasics vectorToPack, double deadband)
    {
       double length = vectorToPack.length();
       if (length < deadband)
@@ -34,7 +36,7 @@ public class DeadbandTools
       }
    }
 
-   public static void applyDeadband(FrameVector3DBasics vectorToPack, double deadband)
+   public static void applyDeadband(Vector3DBasics vectorToPack, double deadband)
    {
       double length = vectorToPack.length();
       if (length < deadband)
@@ -48,7 +50,21 @@ public class DeadbandTools
       }
    }
 
-   public static void applyDeadband(FramePoint2DBasics pointToPack, FramePoint2DReadOnly centerPoint, double deadband)
+   public static void applyDeadband(Point2DBasics pointToPack, Point2DReadOnly centerPoint, double deadband)
+   {
+      double distance = pointToPack.distance(centerPoint);
+      if (distance < deadband)
+      {
+         pointToPack.set(centerPoint);
+      }
+      else
+      {
+         double newDistance = distance - deadband;
+         pointToPack.interpolate(centerPoint, 1.0 - newDistance / distance);
+      }
+   }
+
+   public static void applyDeadband(Point3DBasics pointToPack, Point3DReadOnly centerPoint, double deadband)
    {
       double distance = pointToPack.distance(centerPoint);
       if (distance < deadband)
