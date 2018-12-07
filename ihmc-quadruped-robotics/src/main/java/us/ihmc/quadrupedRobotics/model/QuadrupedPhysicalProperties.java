@@ -13,6 +13,6 @@ public interface QuadrupedPhysicalProperties
    Vector3D getOffsetFromJointBeforeFootToSole(RobotQuadrant robotQuadrant);
    ArrayList<Point2D> getFootGroundContactPoints(RobotQuadrant robotQuadrant);
    QuadrantDependentList<ArrayList<Point2D>> getFeetGroundContactPoints();
-   double getNominalCoMHeight();
+   double getNominalBodyHeight();
    boolean trustFootSwitches();
 }

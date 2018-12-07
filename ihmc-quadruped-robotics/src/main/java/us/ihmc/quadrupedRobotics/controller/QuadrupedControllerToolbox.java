@@ -2,7 +2,6 @@ package us.ihmc.quadrupedRobotics.controller;
 
 import static us.ihmc.humanoidRobotics.footstep.FootstepUtils.worldFrame;
 
-import java.awt.Color;
 import java.util.List;
 
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.QuadrupedSupportPolygons;
@@ -12,7 +11,6 @@ import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
-import us.ihmc.graphicsDescription.yoGraphics.plotting.YoArtifactPolygon;
 import us.ihmc.mecano.algorithms.CenterOfMassJacobian;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.quadrupedRobotics.controlModules.foot.QuadrupedFootControlModuleParameters;
@@ -23,7 +21,6 @@ import us.ihmc.quadrupedRobotics.controller.toolbox.QuadrupedSoleForceEstimator;
 import us.ihmc.quadrupedRobotics.estimator.GroundPlaneEstimator;
 import us.ihmc.quadrupedRobotics.estimator.YoGroundPlaneEstimator;
 import us.ihmc.quadrupedRobotics.estimator.referenceFrames.QuadrupedReferenceFrames;
-import us.ihmc.quadrupedRobotics.geometry.supportPolygon.QuadrupedSupportPolygon;
 import us.ihmc.quadrupedRobotics.model.QuadrupedPhysicalProperties;
 import us.ihmc.quadrupedRobotics.model.QuadrupedRuntimeEnvironment;
 import us.ihmc.quadrupedRobotics.planning.ContactState;
@@ -34,7 +31,6 @@ import us.ihmc.robotics.robotSide.RobotQuadrant;
 import us.ihmc.robotics.sensors.CenterOfMassDataHolderReadOnly;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoEnum;
-import us.ihmc.yoVariables.variable.YoFrameConvexPolygon2D;
 import us.ihmc.yoVariables.variable.YoFramePoint3D;
 import us.ihmc.yoVariables.variable.YoFrameVector3D;
 
@@ -91,7 +87,7 @@ public class QuadrupedControllerToolbox
 
       soleForceEstimator = new QuadrupedSoleForceEstimator(fullRobotModel, referenceFrames, registry);
 
-      linearInvertedPendulumModel = new LinearInvertedPendulumModel(referenceFrames.getCenterOfMassFrame(), mass, gravity, physicalProperties.getNominalCoMHeight(), registry);
+      linearInvertedPendulumModel = new LinearInvertedPendulumModel(referenceFrames.getCenterOfMassFrame(), mass, gravity, physicalProperties.getNominalBodyHeight(), registry);
 //      upcomingGroundPlaneEstimator = new YoGroundPlaneEstimator("upcoming", registry, runtimeEnvironment.getGraphicsListRegistry(), YoAppearance.PlaneMaterial());
       upcomingGroundPlaneEstimator = new GroundPlaneEstimator();
       groundPlaneEstimator = new YoGroundPlaneEstimator(registry, runtimeEnvironment.getGraphicsListRegistry());
