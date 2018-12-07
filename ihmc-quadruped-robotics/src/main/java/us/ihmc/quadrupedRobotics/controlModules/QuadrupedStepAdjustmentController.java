@@ -42,6 +42,7 @@ public class QuadrupedStepAdjustmentController
    private final YoBoolean stepHasBeenAdjusted = new YoBoolean("stepHasBeenAdjusted", registry);
 
    private final DoubleParameter dcmStepAdjustmentGain = new DoubleParameter("dcmStepAdjustmentGain", registry, 1.0);
+   private final DoubleParameter minimumFootstepMultiplier = new DoubleParameter("minimumFootstepMultiplier", registry, 0.0);
    private final DoubleParameter dcmErrorThresholdForStepAdjustment = new DoubleParameter("dcmErrorThresholdForStepAdjustment", registry, 0.0);
    private final DoubleParameter dcmErrorDeadbandForStepAdjustment = new DoubleParameter("dcmErrorDeadbandForStepAdjustment", registry, 0.0);
    private final BooleanParameter useStepAdjustment = new BooleanParameter("useStepAdjustment", registry, true);
@@ -69,9 +70,10 @@ public class QuadrupedStepAdjustmentController
          String prefix = robotQuadrant.getShortName();
 
          YoFrameVector3D instantaneousStepAdjustment = new YoFrameVector3D(prefix + "InstantaneousStepAdjustment", worldFrame, registry);
-         RateLimitedYoFrameVector limitedInstantaneousStepAdjustment = new RateLimitedYoFrameVector(prefix + "LimitedInstantaneousStepAdjustment", "", registry, maxStepAdjustmentRate,
-                                                                                controllerToolbox.getRuntimeEnvironment().getControlDT(),
-                                                                                instantaneousStepAdjustment);
+         RateLimitedYoFrameVector limitedInstantaneousStepAdjustment = new RateLimitedYoFrameVector(prefix + "LimitedInstantaneousStepAdjustment", "", registry,
+                                                                                                    maxStepAdjustmentRate,
+                                                                                                    controllerToolbox.getRuntimeEnvironment().getControlDT(),
+                                                                                                    instantaneousStepAdjustment);
 
          YoDouble dcmStepAdjustmentMultiplier = new YoDouble(prefix + "DcmStepAdjustmentMultiplier", registry);
          instantaneousStepAdjustment.setToNaN();
@@ -120,7 +122,6 @@ public class QuadrupedStepAdjustmentController
          QuadrupedStep adjustedStep = adjustedActiveSteps.add();
          adjustedStep.set(activeStep);
 
-
          RobotQuadrant robotQuadrant = activeStep.getRobotQuadrant();
 
          FixedFrameVector3DBasics instantaneousStepAdjustment = instantaneousStepAdjustments.get(robotQuadrant);
@@ -141,7 +142,9 @@ public class QuadrupedStepAdjustmentController
             if (DeadbandTools.applyDeadband(dcmErrorWithDeadband, dcmErrorDeadbandForStepAdjustment.getValue()))
             {
                double timeRemainingInStep = Math.max(activeStep.getTimeInterval().getEndTime() - controllerTime.getDoubleValue(), 0.0);
-               dcmStepAdjustmentMultiplier.set(dcmStepAdjustmentGain.getValue() * Math.exp(timeRemainingInStep * lipModel.getNaturalFrequency()));
+               double recursionMultiplier = Math.exp(timeRemainingInStep * lipModel.getNaturalFrequency());
+               double adjustmentMultiplier = minimumFootstepMultiplier.getValue() + recursionMultiplier / minimumFootstepMultiplier.getValue();
+               dcmStepAdjustmentMultiplier.set(dcmStepAdjustmentGain.getValue() * adjustmentMultiplier);
 
                instantaneousStepAdjustment.set(dcmError);
                instantaneousStepAdjustment.scale(-dcmStepAdjustmentMultiplier.getDoubleValue());
@@ -164,7 +167,7 @@ public class QuadrupedStepAdjustmentController
          tempPoint.changeFrame(worldFrame);
          tempPoint.add(limitedInstantaneousStepAdjustment);
          crossoverProjection.project(tempPoint, robotQuadrant);
-//         groundPlaneEstimator.projectZ(tempPoint);
+         //         groundPlaneEstimator.projectZ(tempPoint);
          adjustedStep.setGoalPosition(tempPoint);
       }
 
