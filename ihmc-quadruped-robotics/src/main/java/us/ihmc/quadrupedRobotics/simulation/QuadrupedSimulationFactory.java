@@ -147,13 +147,11 @@ public class QuadrupedSimulationFactory
    private StateEstimatorController stateEstimator;
    private CenterOfMassDataHolder centerOfMassDataHolder = null;
    private RealtimeRos2Node realtimeRos2Node;
-   private RobotController headController;
    private QuadrupedControllerManager controllerManager;
    private DRCPoseCommunicator poseCommunicator;
    private GroundProfile3D groundProfile3D;
    private LinearGroundContactModel groundContactModel;
    private QuadrupedSimulationController simulationController;
-   private QuadrupedLegInverseKinematicsCalculator legInverseKinematicsCalculator;
    private List<CameraConfiguration> cameraConfigurations = new ArrayList<>();
    private YoVariableServer yoVariableServer;
 
@@ -303,16 +301,6 @@ public class QuadrupedSimulationFactory
       }
    }
 
-   private void createInverseKinematicsCalculator()
-   {
-      if (controlMode.get() == QuadrupedControlMode.POSITION)
-      {
-         legInverseKinematicsCalculator = new QuadrupedInverseKinematicsCalculators(modelFactory.get(), jointDesiredOutputList.get(), physicalProperties.get(),
-                                                                                    fullRobotModel.get(), referenceFrames.get(),
-                                                                                    sdfRobot.get().getRobotsYoVariableRegistry(), yoGraphicsListRegistry);
-      }
-   }
-
    public void createControllerManager()
    {
       QuadrupedRuntimeEnvironment runtimeEnvironment = new QuadrupedRuntimeEnvironment(controlDT.get(), sdfRobot.get().getYoTime(), fullRobotModel.get(),
@@ -411,7 +399,7 @@ public class QuadrupedSimulationFactory
    private void createSimulationController()
    {
       simulationController = new QuadrupedSimulationController(sdfRobot.get(), sensorReader, outputWriter.get(), controllerManager, stateEstimator,
-                                                               poseCommunicator, headController, yoVariableServer);
+                                                               poseCommunicator, yoVariableServer);
       simulationController.getYoVariableRegistry().addChild(factoryRegistry);
    }
 
@@ -510,7 +498,6 @@ public class QuadrupedSimulationFactory
       createFootSwitches();
       createStateEstimator();
       createRealtimeRos2Node();
-      createInverseKinematicsCalculator();
       createControllerManager();
       createControllerNetworkSubscriber();
       createPoseCommunicator();
