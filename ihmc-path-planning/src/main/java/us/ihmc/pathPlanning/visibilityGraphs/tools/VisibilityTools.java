@@ -222,7 +222,7 @@ public class VisibilityTools
       return arePointsActuallyNavigable;
    }
 
-   private static boolean[] checkIfPointsInsidePlanarRegionAndOutsideNonavigableZones(PlanarRegion homeRegion, List<Cluster> allClusters,
+   public static boolean[] checkIfPointsInsidePlanarRegionAndOutsideNonavigableZones(PlanarRegion homeRegion, List<Cluster> allClusters,
                                                                                       List<? extends Point2DReadOnly> navigableExtrusionPoints)
    {
       // We first go through the extrusions and check if they are actually navigable, i.e. inside the home region and not inside any non-navigable zone.

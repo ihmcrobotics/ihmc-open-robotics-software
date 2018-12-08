@@ -9,6 +9,7 @@ import java.util.Set;
 
 import us.ihmc.euclid.geometry.BoundingBox3D;
 import us.ihmc.euclid.tuple2D.Point2D;
+import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.pathPlanning.visibilityGraphs.clusterManagement.Cluster;
@@ -469,7 +470,7 @@ public class VisibilityGraphsFactory
       System.out.println();
    }
 
-   private static boolean isInsideANonNavigableZone(Point2D pointInLocal, List<Cluster> clusters)
+   public static boolean isInsideANonNavigableZone(Point2DReadOnly pointInLocal, List<Cluster> clusters)
    {
       for (Cluster cluster : clusters)
       {
@@ -479,7 +480,16 @@ public class VisibilityGraphsFactory
       return false;
    }
 
-   private static Point2D getPoint2DInLocal(VisibilityMapWithNavigableRegion region, Point3DReadOnly point3DInWorld)
+   public static Point2D getPoint2DInLocal(VisibilityMapWithNavigableRegion region, Point3DReadOnly point3DInWorld)
+   {
+      Point3D pointInLocal = new Point3D();
+      pointInLocal.set(point3DInWorld);
+      region.transformFromWorldToLocal(pointInLocal);
+      Point2D pointInLocal2D = new Point2D(pointInLocal.getX(), pointInLocal.getY());
+      return pointInLocal2D;
+   }
+   
+   public static Point2D getPoint2DInLocal(NavigableRegion region, Point3DReadOnly point3DInWorld)
    {
       Point3D pointInLocal = new Point3D();
       pointInLocal.set(point3DInWorld);

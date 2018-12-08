@@ -106,6 +106,8 @@ public class ConnectionPoint3D implements Point3DReadOnly
       if (other == null)
          return false;
 
+      //TODO: JEP: I'm really not liking this equals since the round is troublesome.
+      //TODO: Better to speed things up, is to store them in a KD tree.
       if (this.hashCode != other.hashCode)
          return false;
 
