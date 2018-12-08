@@ -6,7 +6,6 @@ import us.ihmc.euclid.interfaces.Transformable;
 import us.ihmc.euclid.tools.EuclidCoreIOTools;
 import us.ihmc.euclid.transform.interfaces.Transform;
 import us.ihmc.euclid.tuple2D.Point2D;
-import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 
@@ -15,29 +14,11 @@ import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
       private VisibilityGraphNode sourceNode;
       private VisibilityGraphNode targetNode;
 
-//      public VisibilityGraphEdge(VisibilityGraphEdge other)
-//      {
-//         this.sourceNode = new VisibilityGraphNode(other.sourceNode);
-//         this.targetNode = new VisibilityGraphNode(other.targetNode);
-//      }
-
-//      public VisibilityGraphEdge(Point3DReadOnly sourcePointInWorld, Point2DReadOnly sourceInLocal, Point3DReadOnly targetPointInWorld, Point2DReadOnly targetInLocal, int regionId)
-//      {
-//         this.sourceNode = new VisibilityGraphNode(sourcePointInWorld, sourceInLocal, regionId);
-//         this.targetNode = new VisibilityGraphNode(targetPointInWorld, targetInLocal, regionId);
-//      }
-
       public VisibilityGraphEdge(VisibilityGraphNode source, VisibilityGraphNode target)
       {
          this.sourceNode = source;
          this.targetNode = target;
       }
-//
-//      public VisibilityGraphEdge(Point3DReadOnly source, int sourceRegionId, Point3DReadOnly target, int targetRegionId)
-//      {
-//         this.sourceNode = new VisibilityGraphNode(source, sourceRegionId);
-//         this.targetNode = new VisibilityGraphNode(target, targetRegionId);
-//      }
       
       public VisibilityGraphNode getSourceNode()
       {
@@ -48,11 +29,6 @@ import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
       {
          return targetNode;
       }
-
-//      public VisibilityGraphEdge getCopy()
-//      {
-//         return new VisibilityGraphEdge(this);
-//      }
 
       public ConnectionPoint3D getSourcePoint()
       {
