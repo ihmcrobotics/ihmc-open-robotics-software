@@ -89,33 +89,6 @@ public class QuadrupedFallDetector
       parentRegistry.addChild(registry);
    }
 
-   public QuadrupedFallDetector(ReferenceFrame bodyFrame, QuadrantDependentList<MovingReferenceFrame> soleFrames,
-                                DivergentComponentOfMotionEstimator dcmPositionEstimator, YoVariableRegistry parentRegistry)
-   {
-      this.bodyFrame = bodyFrame;
-      this.soleFrames = soleFrames;
-      this.fallDetectionType.set(FallDetectionType.DCM_OUTSIDE_SUPPORT_POLYGON_LIMIT);
-      this.dcmPositionEstimator = dcmPositionEstimator;
-
-      maxPitchInRad = new DoubleParameter("maxPitchInRad", registry, 0.5);
-      maxRollInRad = new DoubleParameter("maxRollInRad", registry, 0.5);
-      maxHeightError = new DoubleParameter("maxHeightError", registry, 0.1);
-      dcmOutsideSupportThreshold = new DoubleParameter("dcmDistanceOutsideSupportPolygonSupportThreshold", registry, 0.15);
-
-      isFallDetected = new GlitchFilteredYoBoolean("isFallDetected", registry, DEFAULT_FALL_GLITCH_WINDOW);
-      isFallDetected.set(false);
-
-      for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
-      {
-         YoBoolean isUsingNextFootstep = new YoBoolean(robotQuadrant.getShortName() + "_IsFallDetectionUsingNextFootstep", registry);
-         isUsingNextFootstep.set(false);
-         isUsingNextFootsteps.put(robotQuadrant, isUsingNextFootstep);
-         nextFootstepPositions.put(robotQuadrant, new FramePoint3D());
-      }
-
-      parentRegistry.addChild(registry);
-   }
-
    public void setNextFootstep(RobotQuadrant robotQuadrant, QuadrupedStep timedFootstep)
    {
       boolean notNull = timedFootstep != null;
@@ -152,6 +125,7 @@ public class QuadrupedFallDetector
          break;
       case HEIGHT_LIMIT:
          isFallDetectedUnfiltered = detectHeightLimitFailure();
+         break;
       case ALL:
          isFallDetectedUnfiltered = detectDcmDistanceOutsideSupportPolygonLimitFailure() || detectPitchLimitFailure() || detectRollLimitFailure() || detectHeightLimitFailure();
          break;
