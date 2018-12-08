@@ -1,4 +1,4 @@
-package us.ihmc.quadrupedRobotics.mechanics.inverseKinematics;
+package us.ihmc.quadrupedRobotics.inverseKinematics;
 
 import us.ihmc.euclid.tuple3D.Vector3D;
 
