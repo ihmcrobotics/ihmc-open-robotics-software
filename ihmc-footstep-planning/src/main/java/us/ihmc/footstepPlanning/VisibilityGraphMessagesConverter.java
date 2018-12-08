@@ -204,10 +204,7 @@ public class VisibilityGraphMessagesConverter
 
    public static Cluster convertToCluster(VisibilityClusterMessage message)
    {
-      Cluster cluster = new Cluster();
-
-      cluster.setType(Cluster.Type.fromByte(message.getType()));
-      cluster.setExtrusionSide(Cluster.ExtrusionSide.fromByte(message.getExtrusionSide()));
+      Cluster cluster = new Cluster(Cluster.ExtrusionSide.fromByte(message.getExtrusionSide()), Cluster.ClusterType.fromByte(message.getType()));
 
       Pose3D poseInWorld = message.getPoseInWorld();
       RigidBodyTransform transform = new RigidBodyTransform();

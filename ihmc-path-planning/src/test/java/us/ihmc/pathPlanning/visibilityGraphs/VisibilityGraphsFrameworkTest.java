@@ -616,10 +616,17 @@ public class VisibilityGraphsFrameworkTest extends Application
 
       Point3DReadOnly pathEnd = path.get(path.size() - 1);
       Point3DReadOnly pathStart = path.get(0);
+      
+      Point2DReadOnly pathEnd2D = new Point2D(pathEnd);
+      Point2DReadOnly pathStart2D = new Point2D(pathStart);
+      
+      Point2DReadOnly goal2D = new Point2D(goal);
+      Point2DReadOnly start2D = new Point2D(start);
+      
       errorMessages += assertTrue(datasetName, "Body path does not end at desired goal position: desired = " + goal + ", actual = " + pathEnd,
-                                  pathEnd.geometricallyEquals(goal, START_GOAL_EPSILON));
+                                  pathEnd2D.geometricallyEquals(goal2D, START_GOAL_EPSILON));
       errorMessages += assertTrue(datasetName, "Body path does not start from desired start position: desired = " + start + ", actual = " + pathStart,
-                                  pathStart.geometricallyEquals(start, START_GOAL_EPSILON));
+                                  pathStart2D.geometricallyEquals(start2D, START_GOAL_EPSILON));
 
       return errorMessages;
    }

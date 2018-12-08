@@ -14,6 +14,7 @@ import us.ihmc.pathPlanning.visibilityGraphs.dataStructure.Connection;
 import us.ihmc.pathPlanning.visibilityGraphs.dataStructure.ConnectionPoint3D;
 import us.ihmc.pathPlanning.visibilityGraphs.dataStructure.InterRegionVisibilityMap;
 import us.ihmc.pathPlanning.visibilityGraphs.dataStructure.NavigableRegion;
+import us.ihmc.pathPlanning.visibilityGraphs.dataStructure.SingleSourceVisibilityMap;
 import us.ihmc.pathPlanning.visibilityGraphs.dataStructure.VisibilityGraphEdge;
 import us.ihmc.pathPlanning.visibilityGraphs.dataStructure.VisibilityGraphNavigableRegion;
 import us.ihmc.pathPlanning.visibilityGraphs.dataStructure.VisibilityGraphNode;
@@ -166,13 +167,13 @@ public class VisibilityGraph
       Point3D projectedSourceInWorld = new Point3D(sourceInLocal);
       navigableRegion.transformFromLocalToWorld(projectedSourceInWorld);
 
-      ArrayList<VisibilityGraphNode> homeRegionNodes = visibilityGraphNavigableRegion.getHomeRegionNodes();
+      List<VisibilityGraphNode> allNavigableNodes = visibilityGraphNavigableRegion.getAllNavigableNodes();
 
       List<Cluster> allClusters = navigableRegion.getAllClusters();
 
       VisibilityGraphNode sourceNode = new VisibilityGraphNode(projectedSourceInWorld, sourceInLocal, visibilityGraphNavigableRegion.getMapId());
 
-      for (VisibilityGraphNode targetNode : homeRegionNodes)
+      for (VisibilityGraphNode targetNode : allNavigableNodes)
       {
          Point2DReadOnly targetInLocal = targetNode.getPoint2DInLocal();
          if (sourceInLocal.distanceSquared(targetInLocal) > minimumDistanceForStartOrGoalEdgeSquared)
@@ -192,9 +193,14 @@ public class VisibilityGraph
       {
          if (sourceNode.getRegionId() == nodeToAttachToIfInSameRegion.getRegionId())
          {
-            VisibilityGraphEdge edgeFromSourceToAdditionalTarget = new VisibilityGraphEdge(sourceNode, nodeToAttachToIfInSameRegion);
-            sourceNode.addEdge(edgeFromSourceToAdditionalTarget);
-            nodeToAttachToIfInSameRegion.addEdge(edgeFromSourceToAdditionalTarget);
+            boolean targetIsVisible = VisibilityTools.isPointVisibleForStaticMaps(allClusters, sourceInLocal, nodeToAttachToIfInSameRegion.getPoint2DInLocal());
+
+            if (targetIsVisible)
+            {
+               VisibilityGraphEdge edgeFromSourceToAdditionalTarget = new VisibilityGraphEdge(sourceNode, nodeToAttachToIfInSameRegion);
+               sourceNode.addEdge(edgeFromSourceToAdditionalTarget);
+               nodeToAttachToIfInSameRegion.addEdge(edgeFromSourceToAdditionalTarget);
+            }
          }
       }
 
@@ -231,21 +237,23 @@ public class VisibilityGraph
       List<Cluster> sourceObstacleClusters = sourceNavigableRegion.getNavigableRegion().getObstacleClusters();
       List<Cluster> targetObstacleClusters = targetNavigableRegion.getNavigableRegion().getObstacleClusters();
 
-      ArrayList<VisibilityGraphNode> sourceHomeRegionNodes = sourceNavigableRegion.getHomeRegionNodes();
-      ArrayList<VisibilityGraphNode> targetHomeRegionNodes = targetNavigableRegion.getHomeRegionNodes();
+      //      List<VisibilityGraphNode> sourceHomeRegionNodes = sourceNavigableRegion.getHomeRegionNodes();
+      //      List<VisibilityGraphNode> targetHomeRegionNodes = targetNavigableRegion.getHomeRegionNodes();
 
       //TODO: +++JEP: Also connect to the obstacle navigable regions when appropriate!!!
-      ArrayList<ArrayList<VisibilityGraphNode>> sourceObstacleNodesLists = sourceNavigableRegion.getObstacleNavigableNodes();
+      //      List<List<VisibilityGraphNode>> sourceObstacleNodesLists = sourceNavigableRegion.getObstacleNavigableNodes();
+      //      List<List<VisibilityGraphNode>> targetObstacleNodesLists = targetNavigableRegion.getObstacleNavigableNodes();
 
-      ArrayList<ArrayList<VisibilityGraphNode>> targetObstacleNodesLists = targetNavigableRegion.getObstacleNavigableNodes();
+      List<VisibilityGraphNode> sourceRegionNodes = sourceNavigableRegion.getAllNavigableNodes();
+      List<VisibilityGraphNode> targetRegionNodes = targetNavigableRegion.getAllNavigableNodes();
 
-      createInterRegionVisibilityConnections(sourceHomeRegionNodes, targetHomeRegionNodes, sourceObstacleClusters, targetObstacleClusters, filter, edgesToPack);
+      createInterRegionVisibilityConnections(sourceRegionNodes, targetRegionNodes, sourceObstacleClusters, targetObstacleClusters, filter, edgesToPack);
 
       //      printStats();
 
    }
 
-   public static void createInterRegionVisibilityConnections(ArrayList<VisibilityGraphNode> sourceNodeList, ArrayList<VisibilityGraphNode> targetNodeList,
+   public static void createInterRegionVisibilityConnections(List<VisibilityGraphNode> sourceNodeList, List<VisibilityGraphNode> targetNodeList,
                                                              List<Cluster> sourceObstacleClusters, List<Cluster> targetObstacleClusters,
                                                              InterRegionConnectionFilter filter, ArrayList<VisibilityGraphEdge> edgesToPack)
    {
@@ -324,20 +332,13 @@ public class VisibilityGraph
       {
 
          NavigableRegion navigableRegion = visibilityGraphNavigableRegion.getNavigableRegion();
-         ArrayList<VisibilityGraphNode> homeRegionNodes = visibilityGraphNavigableRegion.getHomeRegionNodes();
-         ArrayList<ArrayList<VisibilityGraphNode>> obstacleNavigableNodes = visibilityGraphNavigableRegion.getObstacleNavigableNodes();
-         ArrayList<VisibilityGraphEdge> allEdges = visibilityGraphNavigableRegion.getAllEdges();
+         List<VisibilityGraphNode> homeRegionNodes = visibilityGraphNavigableRegion.getHomeRegionNodes();
+         List<List<VisibilityGraphNode>> obstacleNavigableNodes = visibilityGraphNavigableRegion.getObstacleNavigableNodes();
+         List<VisibilityGraphEdge> allEdges = visibilityGraphNavigableRegion.getAllEdges();
 
          VisibilityMapWithNavigableRegion visibilityMapWithNavigableRegion = new VisibilityMapWithNavigableRegion(navigableRegion);
 
-         Collection<Connection> connections = new ArrayList<Connection>();
-
-         for (VisibilityGraphEdge edge : allEdges)
-         {
-            ConnectionPoint3D sourcePoint = edge.getSourcePoint();
-            ConnectionPoint3D targetPoint = edge.getTargetPoint();
-            connections.add(new Connection(sourcePoint, targetPoint));
-         }
+         Collection<Connection> connections = createConnectionsFromEdges(allEdges);
 
          VisibilityMap visibilityMapInWorld = new VisibilityMap(connections);
          visibilityMapWithNavigableRegion.setVisibilityMapInWorld(visibilityMapInWorld);
@@ -354,8 +355,35 @@ public class VisibilityGraph
          interRegionVisibilityMap.addConnection(connection);
       }
 
+      if (startNode != null)
+      {
+         Collection<Connection> startConnections = createConnectionsFromEdges(startNode.getEdges());
+         SingleSourceVisibilityMap startMap = new SingleSourceVisibilityMap(startNode.getPointInWorld(), startNode.getRegionId(), startConnections);
+         solution.setStartMap(startMap);
+      }
+
+      if (goalNode != null)
+      {
+         Collection<Connection> goalConnections = createConnectionsFromEdges(goalNode.getEdges());
+         SingleSourceVisibilityMap goalMap = new SingleSourceVisibilityMap(goalNode.getPointInWorld(), goalNode.getRegionId(), goalConnections);
+         solution.setGoalMap(goalMap);
+      }
+
       solution.setInterRegionVisibilityMap(interRegionVisibilityMap);
       return solution;
+   }
+
+   private Collection<Connection> createConnectionsFromEdges(List<VisibilityGraphEdge> edges)
+   {
+      Collection<Connection> connections = new ArrayList<Connection>();
+
+      for (VisibilityGraphEdge edge : edges)
+      {
+         ConnectionPoint3D sourcePoint = edge.getSourcePoint();
+         ConnectionPoint3D targetPoint = edge.getTargetPoint();
+         connections.add(new Connection(sourcePoint, targetPoint));
+      }
+      return connections;
    }
 
 }

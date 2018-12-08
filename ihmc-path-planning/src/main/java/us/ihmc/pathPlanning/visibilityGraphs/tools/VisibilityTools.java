@@ -40,13 +40,24 @@ public class VisibilityTools
    private static final boolean RETURN_AFTER_FINDING_A_SINGLE_CONNECTION = false;
    private static final boolean CONTINUE_AFTER_FINDING_A_SINGLE_CONNECTION = false;
 
-   public static boolean isPointVisible(Point2DReadOnly observer, Point2DReadOnly targetPoint, List<? extends Point2DReadOnly> listOfPointsInCluster)
+   public static boolean isPointVisible(Point2DReadOnly observer, Point2DReadOnly targetPoint, List<? extends Point2DReadOnly> listOfPointsInCluster, boolean closed)
    {
       //TODO: +++JEP: Need to check the closing point if it is a polygon!! Also, add test cases for that. Also need to make sure one polygon per cluster...
-      for (int i = 0; i < listOfPointsInCluster.size() - 1; i++)
+      //TODO: CLean this up a bit to look better.
+      int size = listOfPointsInCluster.size();
+      int endIndex = size - 1;
+      if (closed)
+         endIndex++;
+      
+      for (int i = 0; i < endIndex; i++)
       {
          Point2DReadOnly first = listOfPointsInCluster.get(i);
-         Point2DReadOnly second = listOfPointsInCluster.get(i + 1);
+         
+         int nextIndex = i+1;
+         if (nextIndex == size) 
+            nextIndex = 0;
+         
+         Point2DReadOnly second = listOfPointsInCluster.get(nextIndex);
 
          if (EuclidGeometryTools.doLineSegment2DsIntersect(first, second, observer, targetPoint))
          {
@@ -443,7 +454,8 @@ public class VisibilityTools
          edgeChecks++;
 
          //TODO: +++JEP: Lots of time taken here. 2,379,800 calls for 4.7 sec.
-         if (!VisibilityTools.isPointVisible(observer, targetPoint, cluster.getNonNavigableExtrusionsInLocal()))
+         boolean closed = cluster.isClosed();
+         if (!VisibilityTools.isPointVisible(observer, targetPoint, cluster.getNonNavigableExtrusionsInLocal(), closed))
          {
             notVisible++;
             return false;

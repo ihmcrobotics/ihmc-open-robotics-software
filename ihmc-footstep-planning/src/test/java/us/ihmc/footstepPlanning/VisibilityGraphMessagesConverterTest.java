@@ -41,7 +41,7 @@ public class VisibilityGraphMessagesConverterTest
       Random random = new Random(1738L);
       for (int iter = 0; iter < iters; iter++)
       {
-         byte typeByte = (byte) RandomNumbers.nextInt(random, 0, Cluster.Type.values.length - 1);
+         byte typeByte = (byte) RandomNumbers.nextInt(random, 0, Cluster.ClusterType.values.length - 1);
          byte extrusionSideByte = (byte) RandomNumbers.nextInt(random, 0, Cluster.ExtrusionSide.values.length - 1);
 
          int numberOfRawPoints = RandomNumbers.nextInt(random, 1, 1000);
@@ -60,10 +60,8 @@ public class VisibilityGraphMessagesConverterTest
          for (int i = 0; i < numberOfNonNavigableExtrusions; i++)
             nonNavigableExtrusionsInLocalExpected.add(EuclidCoreRandomTools.nextPoint2D(random, 100.0));
 
-         Cluster clusterToConvert = new Cluster();
+         Cluster clusterToConvert = new Cluster(Cluster.ExtrusionSide.fromByte(extrusionSideByte), Cluster.ClusterType.fromByte(typeByte));
          clusterToConvert.setTransformToWorld(transformToWorld);
-         clusterToConvert.setType(Cluster.Type.fromByte(typeByte));
-         clusterToConvert.setExtrusionSide(Cluster.ExtrusionSide.fromByte(extrusionSideByte));
 
          for (int i = 0; i < numberOfRawPoints; i++)
             clusterToConvert.addRawPointInLocal(rawPointsInLocalExpected.get(i));

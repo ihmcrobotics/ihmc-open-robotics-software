@@ -152,11 +152,16 @@ public class ClusterMeshViewer extends AnimationTimer
          for (Cluster cluster : clusters)
          {
             for (Point3DReadOnly rawPoint : cluster.getRawPointsInWorld())
+            {
                rawPointsMeshBuilder.addTetrahedron(VisualizationParameters.CLUSTER_RAWPOINT_SIZE, rawPoint);
+            }
+            
+            boolean close = cluster.isClosed();
+            
             navigableExtrusionsMeshBuilder
-                  .addMultiLine(cluster.getNavigableExtrusionsInWorld(), VisualizationParameters.NAVIGABLECLUSTER_LINE_THICKNESS, false);
+                  .addMultiLine(cluster.getNavigableExtrusionsInWorld(), VisualizationParameters.NAVIGABLECLUSTER_LINE_THICKNESS, close);
             nonNavigableExtrusionsMeshBuilder
-                  .addMultiLine(cluster.getNonNavigableExtrusionsInWorld(), VisualizationParameters.NON_NAVIGABLECLUSTER_LINE_THICKNESS, false);
+                  .addMultiLine(cluster.getNonNavigableExtrusionsInWorld(), VisualizationParameters.NON_NAVIGABLECLUSTER_LINE_THICKNESS, close);
          }
 
          navigableMaterials.put(regionId, new PhongMaterial(getNavigableLineColor(regionId)));

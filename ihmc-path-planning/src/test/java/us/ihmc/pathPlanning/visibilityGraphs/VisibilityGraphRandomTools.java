@@ -23,7 +23,7 @@ public class VisibilityGraphRandomTools
 {
    public static Cluster getRandomCluster(Random random)
    {
-      byte typeByte = (byte) RandomNumbers.nextInt(random, 0, Cluster.Type.values.length - 1);
+      byte typeByte = (byte) RandomNumbers.nextInt(random, 0, Cluster.ClusterType.values.length - 1);
       byte extrusionSideByte = (byte) RandomNumbers.nextInt(random, 0, Cluster.ExtrusionSide.values.length - 1);
 
       int numberOfRawPoints = RandomNumbers.nextInt(random, 1, 100);
@@ -42,10 +42,8 @@ public class VisibilityGraphRandomTools
       for (int i = 0; i < numberOfNonNavigableExtrusions; i++)
          nonNavigableExtrusionsInLocalExpected.add(EuclidCoreRandomTools.nextPoint2D(random, 100.0));
 
-      Cluster cluster = new Cluster();
+      Cluster cluster = new Cluster(Cluster.ExtrusionSide.fromByte(extrusionSideByte), Cluster.ClusterType.fromByte(typeByte));
       cluster.setTransformToWorld(transformToWorld);
-      cluster.setType(Cluster.Type.fromByte(typeByte));
-      cluster.setExtrusionSide(Cluster.ExtrusionSide.fromByte(extrusionSideByte));
 
       for (int i = 0; i < numberOfRawPoints; i++)
          cluster.addRawPointInLocal(rawPointsInLocalExpected.get(i));
