@@ -2,7 +2,7 @@ package us.ihmc.quadrupedRobotics.providers;
 
 import us.ihmc.communication.net.PacketConsumer;
 import us.ihmc.communication.streamingData.GlobalDataProducer;
-import us.ihmc.quadrupedRobotics.communication.packets.QuadrupedXGaitSettingsPacket;
+import us.ihmc.quadrupedRobotics.packets.QuadrupedXGaitSettingsPacket;
 import us.ihmc.quadrupedRobotics.planning.QuadrupedXGaitSettingsReadOnly;
 import us.ihmc.commons.MathTools;
 import us.ihmc.yoVariables.parameters.DoubleParameter;

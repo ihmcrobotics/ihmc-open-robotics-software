@@ -35,6 +35,7 @@ mainDependencies {
    compile group: "us.ihmc", name: "ihmc-convex-optimization-adapter", version: "source"
    compile group: "us.ihmc", name: "ihmc-humanoid-robotics", version: "source"
    compile group: "us.ihmc", name: "ihmc-quadruped-basics", version: "source"
+   compile group: "us.ihmc", name: "ihmc-quadruped-communication", version: "source"
    compile group: "us.ihmc", name: "ihmc-java-toolkit", version: "source"
    compile group: "us.ihmc", name: "ihmc-robotics-toolkit", version: "source"
    compile group: "us.ihmc", name: "ihmc-communication", version: "source"

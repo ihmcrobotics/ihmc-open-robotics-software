@@ -22,8 +22,8 @@ import us.ihmc.mecano.algorithms.CenterOfMassJacobian;
 import us.ihmc.mecano.multiBodySystem.interfaces.FloatingJointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.mecano.spatial.Twist;
-import us.ihmc.quadrupedRobotics.estimator.referenceFrames.QuadrupedReferenceFrames;
-import us.ihmc.quadrupedRobotics.geometry.supportPolygon.QuadrupedSupportPolygon;
+import us.ihmc.quadrupedBasics.referenceFrames.QuadrupedReferenceFrames;
+import us.ihmc.quadrupedBasics.supportPolygon.QuadrupedSupportPolygon;
 import us.ihmc.quadrupedRobotics.inverseKinematics.QuadrupedInverseKinematicsCalculators;
 import us.ihmc.quadrupedRobotics.inverseKinematics.QuadrupedLegInverseKinematicsCalculator;
 import us.ihmc.quadrupedRobotics.model.QuadrupedPhysicalProperties;
@@ -350,7 +350,7 @@ public class QuadrupedPositionBasedCrawlController implements State
                                                 QuadrupedPositionBasedCrawlControllerParameters crawlControllerParameters)
    {
       this.jointDesiredOutputList = environment.getJointDesiredOutputList();
-      this.referenceFrames = new QuadrupedReferenceFrames(environment.getFullRobotModel(), physicalProperties);
+      this.referenceFrames = new QuadrupedReferenceFrames(environment.getFullRobotModel());
       this.inverseKinematicsCalculators = new QuadrupedInverseKinematicsCalculators(modelFactory, jointDesiredOutputList, physicalProperties,
                                                                                     environment.getFullRobotModel(), referenceFrames, registry,
                                                                                     environment.getGraphicsListRegistry());
@@ -393,7 +393,7 @@ public class QuadrupedPositionBasedCrawlController implements State
 
       feedForwardFullRobotModel = modelFactory.createFullRobotModel();
       this.feedForwardCenterOfMassJacobian = new CenterOfMassJacobian(feedForwardFullRobotModel.getElevator(), feedForwardFullRobotModel.getElevatorFrame());
-      feedForwardReferenceFrames = new QuadrupedReferenceFrames(feedForwardFullRobotModel, physicalProperties);
+      feedForwardReferenceFrames = new QuadrupedReferenceFrames(feedForwardFullRobotModel);
       feedForwardCenterOfMassFrame = new TranslationReferenceFrame("offsetFeedForwardCenterOfMassFrame", feedForwardReferenceFrames.getCenterOfMassFrame());
       feedForwardReferenceFrames.updateFrames();
       feedForwardBodyFrame = feedForwardReferenceFrames.getBodyFrame();

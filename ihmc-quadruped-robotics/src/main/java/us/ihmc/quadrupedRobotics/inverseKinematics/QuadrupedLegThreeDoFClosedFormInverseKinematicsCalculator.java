@@ -4,7 +4,7 @@ import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Vector3D;
-import us.ihmc.quadrupedRobotics.estimator.referenceFrames.QuadrupedReferenceFrames;
+import us.ihmc.quadrupedBasics.referenceFrames.QuadrupedReferenceFrames;
 import us.ihmc.quadrupedRobotics.model.QuadrupedPhysicalProperties;
 import us.ihmc.robotModels.FullQuadrupedRobotModel;
 import us.ihmc.robotModels.FullQuadrupedRobotModelFactory;
@@ -77,7 +77,7 @@ public class QuadrupedLegThreeDoFClosedFormInverseKinematicsCalculator
    {
       //make these here to ensure we get a zero pose
       FullQuadrupedRobotModel fullRobotModel = modelFactory.createFullRobotModel();
-      QuadrupedReferenceFrames referenceFrames = new QuadrupedReferenceFrames(fullRobotModel, physicalProperties);
+      QuadrupedReferenceFrames referenceFrames = new QuadrupedReferenceFrames(fullRobotModel);
 
       ReferenceFrame legAttachmentFrame = referenceFrames.getLegAttachmentFrame(robotQuadrant);
       ReferenceFrame frameBeforeHipPitch = referenceFrames.getHipPitchFrame(robotQuadrant).getParent();
@@ -92,7 +92,7 @@ public class QuadrupedLegThreeDoFClosedFormInverseKinematicsCalculator
    {
       //make these here to ensure we get a zero pose
       FullQuadrupedRobotModel fullRobotModel = modelFactory.createFullRobotModel();
-      QuadrupedReferenceFrames referenceFrames = new QuadrupedReferenceFrames(fullRobotModel, physicalProperties);
+      QuadrupedReferenceFrames referenceFrames = new QuadrupedReferenceFrames(fullRobotModel);
 
       ReferenceFrame frameAfterHipRoll = referenceFrames.getFrameBeforeLegJoint(robotQuadrant, LegJointName.HIP_ROLL);
       ReferenceFrame frameBeforeHipPitch = referenceFrames.getHipPitchFrame(robotQuadrant).getParent();

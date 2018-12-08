@@ -1,7 +1,7 @@
 package us.ihmc.quadrupedRobotics.planning.chooser.swingLegChooser;
 
 import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
-import us.ihmc.quadrupedRobotics.geometry.supportPolygon.QuadrupedSupportPolygon;
+import us.ihmc.quadrupedBasics.supportPolygon.QuadrupedSupportPolygon;
 import us.ihmc.robotics.robotSide.RobotQuadrant;
 
 public class DefaultGaitSwingLegChooser implements NextSwingLegChooser
