@@ -24,9 +24,11 @@ import us.ihmc.robotics.geometry.PlanarRegion;
  */
 public class Cluster
 {
+   //TODO: +++JEP: Remove so many methods and clean up the API so easier to maintain.
+
    private final RigidBodyTransform transformToWorld = new RigidBodyTransform();
 
-   //TODO: +++ This seems to assume that a bunch of points are one closed region if POLYGON. But what if the planar region it is created from
+   //TODO: +++JEP This seems to assume that a bunch of points are one closed region if POLYGON. But what if the planar region it is created from
    // has several independent areas? Perhaps we need a flag or guarantee or something that we have only 1 closed polygon per planar region used?
 
    private final List<Point3DReadOnly> rawPointsLocal = new ArrayList<>();
@@ -86,10 +88,14 @@ public class Cluster
 
    private final ExtrusionSide extrusionSide;
 
+   /**
+    * Type of Cluster
+    *  MULTI_LINE means open at the end, not closed. This type is often used when projecting a PlanarRegion onto another parallel PlanarRegion.
+    *  POLYGON is a closed, perhaps concave, polygon.
+    *
+    */
    public enum ClusterType
    {
-      // Multi-Line means open at the end, not closed. 
-      // Polygon is a closed, perhaps concave, polygon.
       MULTI_LINE, POLYGON;
 
       public static ClusterType[] values = values();
@@ -148,11 +154,6 @@ public class Cluster
          return PlanarRegionTools.isPointInsidePolygon(nonNavigableExtrusionsInLocal, query);
       }
    }
-
-//   public void setExtrusionSide(ExtrusionSide extrusionSide)
-//   {
-//      this.extrusionSide = extrusionSide;
-//   }
 
    public ExtrusionSide getExtrusionSide()
    {
