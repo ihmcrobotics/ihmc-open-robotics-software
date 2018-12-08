@@ -1,4 +1,4 @@
-package us.ihmc.quadrupedPlanning.chooser.footstepChooser;
+package us.ihmc.quadrupedPlanning.footstepChooser;
 
 import controller_msgs.msg.dds.QuadrupedGroundPlaneMessage;
 import us.ihmc.communication.ROS2Tools;

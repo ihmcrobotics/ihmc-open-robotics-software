@@ -5,7 +5,7 @@ import us.ihmc.quadrupedBasics.gait.QuadrupedTimedStep;
 import us.ihmc.quadrupedPlanning.QuadrupedXGaitPlanner;
 import us.ihmc.quadrupedPlanning.YoQuadrupedXGaitSettings;
 import us.ihmc.quadrupedPlanning.bodyPath.QuadrupedPlanarBodyPathProvider;
-import us.ihmc.quadrupedPlanning.chooser.footstepChooser.PointFootSnapper;
+import us.ihmc.quadrupedPlanning.footstepChooser.PointFootSnapper;
 import us.ihmc.robotics.robotSide.RobotQuadrant;
 import us.ihmc.yoVariables.providers.DoubleProvider;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
