@@ -1,4 +1,4 @@
-package us.ihmc.quadrupedRobotics.mechanics.inverseKinematics;
+package us.ihmc.quadrupedRobotics.inverseKinematics;
 
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;

@@ -1,4 +1,4 @@
-package us.ihmc.quadrupedRobotics.mechanics.inverseKinematics;
+package us.ihmc.quadrupedRobotics.inverseKinematics;
 
 import org.apache.commons.lang3.mutable.MutableDouble;
 
