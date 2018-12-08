@@ -1,4 +1,4 @@
-package us.ihmc.quadrupedRobotics.planning;
+package us.ihmc.quadrupedRobotics.util;
 
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DBasics;
