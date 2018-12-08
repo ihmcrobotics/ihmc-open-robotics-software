@@ -125,7 +125,7 @@ public class QuadrupedFootSwitchFactory
 
    public void setUseKneeTorqueTouchdown(boolean useKneeTorqueTouchdown)
    {
-      this.useKneeTorqueTouchdown.set(true);
+      this.useKneeTorqueTouchdown.set(useKneeTorqueTouchdown);
    }
 
    public void setFullRobotModel(FullQuadrupedRobotModel fullRobotModel)
