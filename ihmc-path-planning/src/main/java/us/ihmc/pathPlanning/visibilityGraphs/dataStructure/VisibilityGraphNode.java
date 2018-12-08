@@ -14,35 +14,30 @@ public class VisibilityGraphNode implements Transformable, EpsilonComparable<Vis
 {
    private final ConnectionPoint3D pointInWorld;
    private final Point2D point2DInLocal;
-   
+
    private final ArrayList<VisibilityGraphEdge> edges = new ArrayList<>();
-   
-//   public VisibilityGraphNode(Point3DReadOnly point, int sourceRegionId)
-//   {
-//      this.point = new ConnectionPoint3D(point, sourceRegionId);
-//   }
-//
-//   public VisibilityGraphNode(VisibilityGraphNode node)
-//   {
-//      this.point = new ConnectionPoint3D(node.point);
-//   }
-//
+
+   public int getRegionId()
+   {
+      return pointInWorld.getRegionId();
+   }
+
    public VisibilityGraphNode(Point3DReadOnly pointInWorld, Point2DReadOnly pointInLocal, int regionId)
    {
       this.pointInWorld = new ConnectionPoint3D(pointInWorld, regionId);
       this.point2DInLocal = new Point2D(pointInLocal);
    }
-   
+
    public Point2DReadOnly getPoint2DInLocal()
    {
       return point2DInLocal;
    }
-   
+
    public void addEdge(VisibilityGraphEdge edge)
    {
       edges.add(edge);
    }
-   
+
    public List<VisibilityGraphEdge> getEdges()
    {
       return edges;
@@ -72,7 +67,7 @@ public class VisibilityGraphNode implements Transformable, EpsilonComparable<Vis
    @Override
    public void applyTransform(Transform transform)
    {
-      pointInWorld.applyTransform(transform); 
+      pointInWorld.applyTransform(transform);
    }
 
    @Override
@@ -80,7 +75,7 @@ public class VisibilityGraphNode implements Transformable, EpsilonComparable<Vis
    {
       pointInWorld.applyInverseTransform(transform);
    }
-   
+
    @Override
    public String toString()
    {
