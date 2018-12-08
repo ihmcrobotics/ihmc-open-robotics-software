@@ -6,6 +6,7 @@ import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.mecano.frames.MovingReferenceFrame;
 import us.ihmc.quadrupedBasics.supportPolygon.QuadrupedSupportPolygon;
+import us.ihmc.quadrupedRobotics.parameters.QuadrupedFallDetectionParameters;
 import us.ihmc.robotics.math.filters.GlitchFilteredYoBoolean;
 import us.ihmc.robotics.robotSide.QuadrantDependentList;
 import us.ihmc.robotics.robotSide.RobotQuadrant;
@@ -29,9 +30,9 @@ public class QuadrupedFallDetector
 
    // Parameters
    private static final int DEFAULT_FALL_GLITCH_WINDOW = 1;
-   private final DoubleParameter maxPitchInRad = new DoubleParameter("maxPitchInRad", registry, 0.5);
-   private final DoubleParameter maxRollInRad = new DoubleParameter("maxRollInRad", registry, 0.5);
-   private final DoubleParameter dcmOutsideSupportThreshold = new DoubleParameter("dcmDistanceOutsideSupportPolygonSupportThreshold", registry, 0.15);
+   private final DoubleParameter maxPitchInRad;
+   private final DoubleParameter maxRollInRad;
+   private final DoubleParameter dcmOutsideSupportThreshold;
    private final IntegerParameter fallDetectorGlitchFilterWindow = new IntegerParameter("fallDetectorGlitchFilterWindow", registry, DEFAULT_FALL_GLITCH_WINDOW);
 
    //Estimation Variables
@@ -47,8 +48,32 @@ public class QuadrupedFallDetector
 
    // Yo Variables
    private final YoDouble yoDcmDistanceOutsideSupportPolygon = new YoDouble("dcmDistanceOutsideSupportPolygon", registry);
-   private final YoEnum<FallDetectionType> fallDetectionType = YoEnum.create("fallDetectionType", FallDetectionType.class, registry);
+   private final YoEnum<FallDetectionType> fallDetectionType = YoEnum.create("getFallDetectionType", FallDetectionType.class, registry);
    private final GlitchFilteredYoBoolean isFallDetected;
+
+   public QuadrupedFallDetector(ReferenceFrame bodyFrame, QuadrantDependentList<MovingReferenceFrame> soleFrames,
+                                DivergentComponentOfMotionEstimator dcmPositionEstimator, QuadrupedFallDetectionParameters fallDetectionParameters,
+                                YoVariableRegistry parentRegistry)
+   {
+      this.bodyFrame = bodyFrame;
+      this.soleFrames = soleFrames;
+      this.fallDetectionType.set(fallDetectionParameters.getFallDetectionType());
+      this.dcmPositionEstimator = dcmPositionEstimator;
+
+      supportPolygon = new QuadrupedSupportPolygon();
+
+      maxPitchInRad = new DoubleParameter("maxPitchInRad", registry, fallDetectionParameters.getMaxPitch());
+      maxRollInRad = new DoubleParameter("maxRollInRad", registry, fallDetectionParameters.getMaxRoll());
+      dcmOutsideSupportThreshold = new DoubleParameter("dcmDistanceOutsideSupportPolygonSupportThreshold", registry, fallDetectionParameters.getIcpDistanceOutsideSupportPolygon());
+
+      isFallDetected = new GlitchFilteredYoBoolean("isFallDetected", registry, DEFAULT_FALL_GLITCH_WINDOW);
+      isFallDetected.set(false);
+
+      dcmPositionEstimate = new FramePoint3D();
+      dcmPositionEstimate2D = new FramePoint2D();
+
+      parentRegistry.addChild(registry);
+   }
 
    public QuadrupedFallDetector(ReferenceFrame bodyFrame, QuadrantDependentList<MovingReferenceFrame> soleFrames,
                                 DivergentComponentOfMotionEstimator dcmPositionEstimator, YoVariableRegistry parentRegistry)
@@ -59,6 +84,10 @@ public class QuadrupedFallDetector
       this.dcmPositionEstimator = dcmPositionEstimator;
 
       supportPolygon = new QuadrupedSupportPolygon();
+
+      maxPitchInRad = new DoubleParameter("maxPitchInRad", registry, 0.5);
+      maxRollInRad = new DoubleParameter("maxRollInRad", registry, 0.5);
+      dcmOutsideSupportThreshold = new DoubleParameter("dcmDistanceOutsideSupportPolygonSupportThreshold", registry, 0.15);
 
       isFallDetected = new GlitchFilteredYoBoolean("isFallDetected", registry, DEFAULT_FALL_GLITCH_WINDOW);
       isFallDetected.set(false);
