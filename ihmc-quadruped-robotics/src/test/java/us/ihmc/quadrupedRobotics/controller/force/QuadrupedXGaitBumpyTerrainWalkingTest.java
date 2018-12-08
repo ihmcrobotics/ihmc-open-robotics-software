@@ -7,7 +7,7 @@ import org.junit.Before;
 
 import org.junit.Test;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
-import us.ihmc.quadrupedPlanning.chooser.footstepChooser.HeightMapFootSnapper;
+import us.ihmc.quadrupedPlanning.footstepChooser.HeightMapFootSnapper;
 import us.ihmc.quadrupedPlanning.input.managers.QuadrupedTeleopManager;
 import us.ihmc.quadrupedRobotics.QuadrupedForceTestYoVariables;
 import us.ihmc.quadrupedRobotics.QuadrupedMultiRobotTestInterface;

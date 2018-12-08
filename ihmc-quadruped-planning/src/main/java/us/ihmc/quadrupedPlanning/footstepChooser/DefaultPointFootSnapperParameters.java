@@ -1,4 +1,4 @@
-package us.ihmc.quadrupedPlanning.chooser.footstepChooser;
+package us.ihmc.quadrupedPlanning.footstepChooser;
 
 public class DefaultPointFootSnapperParameters implements PointFootSnapperParameters
 {

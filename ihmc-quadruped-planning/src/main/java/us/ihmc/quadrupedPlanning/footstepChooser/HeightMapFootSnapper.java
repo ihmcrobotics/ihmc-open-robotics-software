@@ -1,4 +1,4 @@
-package us.ihmc.quadrupedPlanning.chooser.footstepChooser;
+package us.ihmc.quadrupedPlanning.footstepChooser;
 
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;

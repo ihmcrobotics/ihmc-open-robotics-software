@@ -1,4 +1,4 @@
-package us.ihmc.quadrupedPlanning.chooser.footstepChooser;
+package us.ihmc.quadrupedPlanning.footstepChooser;
 
 import us.ihmc.commons.MathTools;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;

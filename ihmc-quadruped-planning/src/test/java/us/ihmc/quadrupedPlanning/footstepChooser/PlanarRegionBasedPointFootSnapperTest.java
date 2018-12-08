@@ -1,4 +1,4 @@
-package us.ihmc.quadrupedPlanning.chooser.footstepChooser;
+package us.ihmc.quadrupedPlanning.footstepChooser;
 
 import org.junit.Test;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationPlan;
