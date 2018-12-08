@@ -1,18 +1,19 @@
 package us.ihmc.quadrupedRobotics.messageHandling;
 
 import us.ihmc.commons.MathTools;
+import us.ihmc.commons.lists.RecyclingArrayDeque;
+import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.QuadrupedTimedStepCommand;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.QuadrupedTimedStepListCommand;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.SoleTrajectoryCommand;
-import us.ihmc.robotics.time.TimeIntervalTools;
+import us.ihmc.quadrupedBasics.gait.QuadrupedTimedStep;
 import us.ihmc.quadrupedRobotics.util.YoQuadrupedTimedStep;
-import us.ihmc.commons.lists.RecyclingArrayDeque;
-import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.robotics.lists.YoPreallocatedList;
 import us.ihmc.robotics.robotSide.QuadrantDependentList;
 import us.ihmc.robotics.robotSide.RobotQuadrant;
+import us.ihmc.robotics.time.TimeIntervalTools;
 import us.ihmc.yoVariables.parameters.DoubleParameter;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
@@ -210,6 +211,22 @@ public class QuadrupedStepMessageHandler
             activeSteps.add(receivedStepSequence.get(i));
          }
       }
+   }
+
+   public QuadrupedTimedStep getNextStep()
+   {
+      for (int i = 0; i < receivedStepSequence.size(); i++)
+      {
+         double currentTime = robotTimestamp.getDoubleValue();
+         double endTime = receivedStepSequence.get(i).getTimeInterval().getEndTime();
+
+         if (currentTime < endTime)
+         {
+            return receivedStepSequence.get(i);
+         }
+      }
+
+      return null;
    }
 
    public void reset()
