@@ -26,7 +26,7 @@ import us.ihmc.robotics.geometry.PlanarRegion;
 
 public class NavigableRegionsManager
 {
-   private final static boolean debug = false;
+   private final static boolean debug = false; 
    private final VisibilityGraphsParameters parameters;
 
    private final VisibilityMapSolution visibilityMapSolution = new VisibilityMapSolution();
@@ -79,19 +79,25 @@ public class NavigableRegionsManager
 
    public List<Point3DReadOnly> calculateBodyPath(final Point3DReadOnly start, final Point3DReadOnly goal)
    {
-      boolean useNewVisibilityGraph = true;
+      boolean calculateVisibilityMapAllAt = true;
 
-      if (useNewVisibilityGraph)
+      if (calculateVisibilityMapAllAt)
       {
-         return calculateBodyPathUsingNewVisibilityGraph(start, goal);
+         return calculateVisibilityMapAllAtOnceThenFindPath(start, goal);
       }
       else
       {
-         return calculateBodyPathUsingOldVisibilityGraphs(start, goal);
+         return calculateVisibilityMapLazilyWhileFindingPath(start, goal);
       }
    }
 
-   public List<Point3DReadOnly> calculateBodyPathUsingNewVisibilityGraph(final Point3DReadOnly startInWorld, final Point3DReadOnly goalInWorld)
+   private List<Point3DReadOnly> calculateVisibilityMapLazilyWhileFindingPath(Point3DReadOnly start, Point3DReadOnly goal)
+   {
+      // TODO Auto-generated method stub
+      return null;
+   }
+
+   public List<Point3DReadOnly> calculateVisibilityMapAllAtOnceThenFindPath(final Point3DReadOnly startInWorld, final Point3DReadOnly goalInWorld)
    {
       boolean areStartAndGoalValid = checkIfStartAndGoalAreValid(startInWorld, goalInWorld);
       if (!areStartAndGoalValid)
@@ -143,82 +149,6 @@ public class NavigableRegionsManager
 
       ConnectionPoint3D startConnection = new ConnectionPoint3D(projectedStartInWorld, START_GOAL_ID);
       ConnectionPoint3D goalConnection = new ConnectionPoint3D(projectedGoalInWorld, START_GOAL_ID);
-
-      List<Point3DReadOnly> path = parameters.getPathPlanner().calculatePath(startConnection, goalConnection, visibilityMapHolders);
-      printResults(startBodyPathComputation, path);
-      return path;
-   }
-
-   //TODO: +++JEP: Remove this once the new one is working and clean up.
-   public List<Point3DReadOnly> calculateBodyPathUsingOldVisibilityGraphs(final Point3DReadOnly start, final Point3DReadOnly goal)
-   {
-      boolean areStartAndGoalValid = checkIfStartAndGoalAreValid(start, goal);
-      if (!areStartAndGoalValid)
-         return null;
-
-      NavigableRegions navigableRegions = visibilityMapSolution.getNavigableRegions();
-      navigableRegions.filterPlanarRegionsWithBoundingCapsule(start, goal, parameters.getExplorationDistanceFromStartGoal());
-      long startBodyPathComputation = System.currentTimeMillis();
-
-      navigableRegions.createNavigableRegions();
-
-      SingleSourceVisibilityMap startMap = null, goalMap = null;
-
-      ArrayList<VisibilityMapWithNavigableRegion> visibilityMapsWithNavigableRegions = createListOfVisibilityMapsWithNavigableRegions(navigableRegions);
-      InterRegionVisibilityMap interRegionVisibilityMap = VisibilityGraphsFactory.createInterRegionVisibilityMap(visibilityMapsWithNavigableRegions,
-                                                                                                                 parameters.getInterRegionConnectionFilter());
-      VisibilityGraphsFactory.createStaticVisibilityMapsForNavigableRegions(visibilityMapsWithNavigableRegions);
-      int START_GOAL_ID = 0;
-
-      double searchHostEpsilon = parameters.getSearchHostRegionEpsilon();
-
-      visibilityMapSolution.setVisibilityMapsWithNavigableRegions(visibilityMapsWithNavigableRegions);
-      visibilityMapSolution.setInterRegionVisibilityMap(interRegionVisibilityMap);
-
-      startMap = VisibilityGraphsFactory.createSingleSourceVisibilityMap(start, navigableRegions, searchHostEpsilon,
-                                                                         interRegionVisibilityMap.getVisibilityMapInLocal());
-      goalMap = VisibilityGraphsFactory.createSingleSourceVisibilityMap(goal, navigableRegions, searchHostEpsilon,
-                                                                        interRegionVisibilityMap.getVisibilityMapInLocal());
-
-      if (goalMap == null)
-      {
-         goalMap = VisibilityGraphsFactory.connectToClosestPoints(new ConnectionPoint3D(goal, START_GOAL_ID), 1, visibilityMapsWithNavigableRegions,
-                                                                  START_GOAL_ID);
-      }
-
-      if (startMap != null)
-      {
-         if (startMap.getHostRegion() == goalMap.getHostRegion())
-         {
-            if (isPointVisibleForStaticMaps(startMap.getHostRegion().getAllClusters(), startMap.getSourceInLocal2D(), goalMap.getSourceInLocal2D()))
-            {
-               startMap.addConnectionInWorld(new Connection(start, startMap.getMapId(), goal, goalMap.getMapId()));
-            }
-         }
-      }
-      else
-      {
-         startMap = VisibilityGraphsFactory.connectToFallbackMap(start, START_GOAL_ID, 1.0e-3, interRegionVisibilityMap.getVisibilityMapInLocal());
-
-         if (startMap == null)
-            startMap = VisibilityGraphsFactory.connectToClosestPoints(new ConnectionPoint3D(start, START_GOAL_ID), 1, visibilityMapsWithNavigableRegions,
-                                                                      START_GOAL_ID);
-      }
-
-      visibilityMapSolution.setStartMap(startMap);
-      visibilityMapSolution.setGoalMap(goalMap);
-
-      if (startMap == null)
-         return null;
-
-      List<VisibilityMapHolder> visibilityMapHolders = new ArrayList<>();
-      visibilityMapHolders.addAll(visibilityMapsWithNavigableRegions);
-      visibilityMapHolders.add(startMap);
-      visibilityMapHolders.add(goalMap);
-      visibilityMapHolders.add(interRegionVisibilityMap);
-
-      ConnectionPoint3D startConnection = new ConnectionPoint3D(start, START_GOAL_ID);
-      ConnectionPoint3D goalConnection = new ConnectionPoint3D(goal, START_GOAL_ID);
 
       List<Point3DReadOnly> path = parameters.getPathPlanner().calculatePath(startConnection, goalConnection, visibilityMapHolders);
       printResults(startBodyPathComputation, path);
@@ -309,13 +239,11 @@ public class NavigableRegionsManager
    public VisibilityMapHolder getGoalMap()
    {
       return visibilityMapSolution.getGoalMap();
-
    }
 
    public InterRegionVisibilityMap getInterRegionConnections()
    {
       return visibilityMapSolution.getInterRegionVisibilityMap();
-
    }
 
 }
