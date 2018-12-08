@@ -1,9 +1,10 @@
-package us.ihmc.quadrupedRobotics.util;
+package us.ihmc.quadrupedBasics.utils;
+
+import us.ihmc.quadrupedBasics.gait.TimeIntervalProvider;
+import us.ihmc.tools.lists.ListSorter;
 
 import java.util.Comparator;
 import java.util.List;
-
-import us.ihmc.tools.lists.ListSorter;
 
 @SuppressWarnings("unchecked")
 public class TimeIntervalTools

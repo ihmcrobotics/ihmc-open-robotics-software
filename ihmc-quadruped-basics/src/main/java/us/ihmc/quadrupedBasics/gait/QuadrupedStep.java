@@ -1,4 +1,4 @@
-package us.ihmc.quadrupedRobotics.planning;
+package us.ihmc.quadrupedBasics.gait;
 
 import us.ihmc.commons.MathTools;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
@@ -50,7 +50,7 @@ public class QuadrupedStep
    /**
     * Unsafe for external use.
     */
-   protected Point3DBasics getGoalPosition()
+   public Point3DBasics getGoalPosition()
    {
       return goalPosition;
    }

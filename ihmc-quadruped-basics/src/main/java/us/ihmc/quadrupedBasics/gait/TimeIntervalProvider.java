@@ -1,4 +1,4 @@
-package us.ihmc.quadrupedRobotics.util;
+package us.ihmc.quadrupedBasics.gait;
 
 public interface TimeIntervalProvider
 {

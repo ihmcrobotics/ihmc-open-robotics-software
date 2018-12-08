@@ -1,8 +1,7 @@
-package us.ihmc.quadrupedRobotics.util;
+package us.ihmc.quadrupedBasics.gait;
 
 import us.ihmc.commons.MathTools;
 import us.ihmc.euclid.tools.EuclidCoreIOTools;
-import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.TimeIntervalCommand;
 
 public class TimeInterval
