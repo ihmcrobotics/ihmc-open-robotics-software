@@ -12,13 +12,12 @@ import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelControllerName;
 import us.ihmc.jMonkeyEngineToolkit.GroundProfile3D;
 import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
+import us.ihmc.quadrupedPlanning.input.QuadrupedTestTeleopScript;
+import us.ihmc.quadrupedPlanning.input.managers.QuadrupedTeleopManager;
 import us.ihmc.quadrupedRobotics.QuadrupedTestFactory;
 import us.ihmc.quadrupedRobotics.controller.QuadrupedControlMode;
-import us.ihmc.quadrupedRobotics.parameters.QuadrupedPositionBasedCrawlControllerParameters;
 import us.ihmc.quadrupedBasics.referenceFrames.QuadrupedReferenceFrames;
 import us.ihmc.quadrupedRobotics.estimator.stateEstimator.QuadrupedSensorInformation;
-import us.ihmc.quadrupedRobotics.input.QuadrupedTestTeleopScript;
-import us.ihmc.quadrupedRobotics.input.managers.QuadrupedTeleopManager;
 import us.ihmc.quadrupedRobotics.model.QuadrupedInitialOffsetAndYaw;
 import us.ihmc.quadrupedRobotics.model.QuadrupedInitialPositionParameters;
 import us.ihmc.quadrupedRobotics.model.QuadrupedModelFactory;
@@ -85,7 +84,7 @@ public class GenericQuadrupedTestFactory implements QuadrupedTestFactory
    }
 
    @Override
-   public GoalOrientedTestConductor createTestConductor() throws IOException
+   public GoalOrientedTestConductor createTestConductor()
    {
       useStateEstimator.setDefaultValue(USE_STATE_ESTIMATOR);
       initialPosition.setDefaultValue(new GenericQuadrupedDefaultInitialPosition());
@@ -101,7 +100,6 @@ public class GenericQuadrupedTestFactory implements QuadrupedTestFactory
       GroundContactParameters groundContactParameters = new GenericQuadrupedGroundContactParameters();
       QuadrupedSensorInformation sensorInformation = new GenericQuadrupedSensorInformation();
       StateEstimatorParameters stateEstimatorParameters = new GenericQuadrupedStateEstimatorParameters(false, CONTROL_DT);
-      QuadrupedPositionBasedCrawlControllerParameters positionBasedCrawlControllerParameters = new GenericQuadrupedPositionBasedCrawlControllerParameters();
       GenericQuadrupedXGaitSettings xGaitSettings = new GenericQuadrupedXGaitSettings();
       GenericQuadrupedHighLevelControllerParameters highLevelControllerParameters = new GenericQuadrupedHighLevelControllerParameters(
             modelFactory.getJointMap());
@@ -190,7 +188,6 @@ public class GenericQuadrupedTestFactory implements QuadrupedTestFactory
          stepTeleopManager = null;
       }
 
-      simulationFactory.setPositionBasedCrawlControllerParameters(positionBasedCrawlControllerParameters);
       simulationFactory.setUsePushRobotController(usePushRobotController.get());
       GoalOrientedTestConductor goalOrientedTestConductor = new GoalOrientedTestConductor(simulationFactory.createSimulation(), simulationTestingParameters);
 

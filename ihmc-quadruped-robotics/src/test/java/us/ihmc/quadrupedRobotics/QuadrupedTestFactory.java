@@ -1,8 +1,8 @@
 package us.ihmc.quadrupedRobotics;
 
 import us.ihmc.jMonkeyEngineToolkit.GroundProfile3D;
+import us.ihmc.quadrupedPlanning.input.managers.QuadrupedTeleopManager;
 import us.ihmc.quadrupedRobotics.controller.QuadrupedControlMode;
-import us.ihmc.quadrupedRobotics.input.managers.QuadrupedTeleopManager;
 import us.ihmc.quadrupedRobotics.model.QuadrupedInitialOffsetAndYaw;
 import us.ihmc.quadrupedRobotics.model.QuadrupedInitialPositionParameters;
 import us.ihmc.quadrupedRobotics.simulation.QuadrupedGroundContactModelType;
