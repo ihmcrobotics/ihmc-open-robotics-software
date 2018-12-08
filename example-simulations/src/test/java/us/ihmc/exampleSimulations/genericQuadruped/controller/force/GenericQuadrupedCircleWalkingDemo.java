@@ -1,10 +1,10 @@
 package us.ihmc.exampleSimulations.genericQuadruped.controller.force;
 
 import us.ihmc.exampleSimulations.genericQuadruped.GenericQuadrupedTestFactory;
+import us.ihmc.quadrupedPlanning.input.managers.QuadrupedTeleopManager;
 import us.ihmc.quadrupedRobotics.QuadrupedForceTestYoVariables;
 import us.ihmc.quadrupedRobotics.QuadrupedTestBehaviors;
 import us.ihmc.quadrupedRobotics.controller.QuadrupedControlMode;
-import us.ihmc.quadrupedRobotics.input.managers.QuadrupedTeleopManager;
 import us.ihmc.quadrupedRobotics.simulation.QuadrupedGroundContactModelType;
 import us.ihmc.robotics.testing.YoVariableTestGoal;
 import us.ihmc.simulationConstructionSetTools.util.simulationrunner.GoalOrientedTestConductor;
@@ -20,8 +20,6 @@ public class GenericQuadrupedCircleWalkingDemo
 {
    public static void main(String[] args)
    {
-      try
-      {
          GenericQuadrupedTestFactory quadrupedTestFactory = new GenericQuadrupedTestFactory();
          quadrupedTestFactory.setControlMode(QuadrupedControlMode.FORCE);
          quadrupedTestFactory.setGroundContactModelType(QuadrupedGroundContactModelType.FLAT);
@@ -52,10 +50,5 @@ public class GenericQuadrupedCircleWalkingDemo
          });
 
          conductor.simulate();
-      }
-      catch (IOException e)
-      {
-         throw new RuntimeException("Error loading simulation: " + e.getMessage());
-      }
    }
 }
