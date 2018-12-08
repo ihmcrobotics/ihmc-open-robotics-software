@@ -40,7 +40,8 @@ public class VisibilityTools
    private static final boolean RETURN_AFTER_FINDING_A_SINGLE_CONNECTION = false;
    private static final boolean CONTINUE_AFTER_FINDING_A_SINGLE_CONNECTION = false;
 
-   public static boolean isPointVisible(Point2DReadOnly observer, Point2DReadOnly targetPoint, List<? extends Point2DReadOnly> listOfPointsInCluster, boolean closed)
+   public static boolean isPointVisible(Point2DReadOnly observer, Point2DReadOnly targetPoint, List<? extends Point2DReadOnly> listOfPointsInCluster,
+                                        boolean closed)
    {
       //TODO: +++JEP: Need to check the closing point if it is a polygon!! Also, add test cases for that. Also need to make sure one polygon per cluster...
       //TODO: CLean this up a bit to look better.
@@ -48,15 +49,15 @@ public class VisibilityTools
       int endIndex = size - 1;
       if (closed)
          endIndex++;
-      
+
       for (int i = 0; i < endIndex; i++)
       {
          Point2DReadOnly first = listOfPointsInCluster.get(i);
-         
-         int nextIndex = i+1;
-         if (nextIndex == size) 
+
+         int nextIndex = i + 1;
+         if (nextIndex == size)
             nextIndex = 0;
-         
+
          Point2DReadOnly second = listOfPointsInCluster.get(nextIndex);
 
          if (EuclidGeometryTools.doLineSegment2DsIntersect(first, second, observer, targetPoint))
@@ -151,7 +152,7 @@ public class VisibilityTools
    {
       List<? extends Point2DReadOnly> navigableExtrusionPoints = clusterToBuildMapOf.getNavigableExtrusionsInLocal();
 
-      boolean[] arePointsActuallyNavigable = checkIfPointsInsidePlanarRegionAndOutsideNonavigableZones(homeRegion, allClusters, navigableExtrusionPoints);
+      boolean[] arePointsActuallyNavigable = checkIfPointsInsidePlanarRegionAndOutsideNonNavigableZones(homeRegion, allClusters, navigableExtrusionPoints);
 
       Vector2D directionToCheck = new Vector2D();
       Vector2D nextEdge = new Vector2D();
@@ -206,7 +207,7 @@ public class VisibilityTools
                                                               Collection<Connection> connectionsToPack)
    {
       List<? extends Point2DReadOnly> navigableExtrusionPoints = clusterToBuildMapOf.getNavigableExtrusionsInLocal();
-      boolean[] arePointsActuallyNavigable = checkIfPointsInsidePlanarRegionAndOutsideNonavigableZones(homeRegion, allClusters, navigableExtrusionPoints);
+      boolean[] arePointsActuallyNavigable = checkIfPointsInsidePlanarRegionAndOutsideNonNavigableZones(homeRegion, allClusters, navigableExtrusionPoints);
 
       // Going through all of the possible combinations of two points for finding connections
       for (int sourceIndex = 0; sourceIndex < navigableExtrusionPoints.size(); sourceIndex++)
@@ -233,8 +234,8 @@ public class VisibilityTools
       return arePointsActuallyNavigable;
    }
 
-   public static boolean[] checkIfPointsInsidePlanarRegionAndOutsideNonavigableZones(PlanarRegion homeRegion, List<Cluster> allClusters,
-                                                                                      List<? extends Point2DReadOnly> navigableExtrusionPoints)
+   public static boolean[] checkIfPointsInsidePlanarRegionAndOutsideNonNavigableZones(PlanarRegion homeRegion, List<Cluster> allClusters,
+                                                                                     List<? extends Point2DReadOnly> navigableExtrusionPoints)
    {
       // We first go through the extrusions and check if they are actually navigable, i.e. inside the home region and not inside any non-navigable zone.
       boolean[] arePointsActuallyNavigable = new boolean[navigableExtrusionPoints.size()];
@@ -429,8 +430,8 @@ public class VisibilityTools
    public static boolean isPointVisibleForStaticMaps(List<Cluster> clusters, Point2DReadOnly observer, Point2DReadOnly targetPoint)
    {
       numberIsPointVisibleChecks++;
-//      if (numberIsPointVisibleChecks % 1000000 == 0)
-//         printStats();
+      //      if (numberIsPointVisibleChecks % 1000000 == 0)
+      //         printStats();
 
       for (Cluster cluster : clusters)
       {

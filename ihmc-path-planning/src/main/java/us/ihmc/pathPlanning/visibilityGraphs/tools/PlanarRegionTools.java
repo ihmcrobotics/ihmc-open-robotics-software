@@ -372,7 +372,7 @@ public class PlanarRegionTools
             //+++JEP: Not sure if this one is faster or not. Discuss with Sylvain best way to do point inside convex polygon check.
             // Seems like you should be able to do a binary search on the distance to vertices, since it should be monotonic, right?
             //            boolean isInsidePolygon = convexPolygon.isPointInside(pointInLocalToCheck);
-            boolean isInsidePolygon = isPointInsideConvexPolygon2D(convexPolygon, pointInLocalToCheck);
+            boolean isInsidePolygon = convexPolygon.isPointInside(pointInLocalToCheck, epsilon);
 
             if (isInsidePolygon)
                return true;
@@ -395,8 +395,10 @@ public class PlanarRegionTools
 
    /**
     * Return true if the given point is contained inside the boundary.
-    * See: http://www.ecse.rpi.edu/Homepages/wrf/Research/Short_Notes/pnpoly.html
     * https://stackoverflow.com/questions/8721406/how-to-determine-if-a-point-is-inside-a-2d-convex-polygon
+    * 
+    * Also check https://en.wikipedia.org/wiki/Point_in_polygon.
+    * 
     * @param test The point to check
     * @return true if the point is inside the boundary, false otherwise
     *

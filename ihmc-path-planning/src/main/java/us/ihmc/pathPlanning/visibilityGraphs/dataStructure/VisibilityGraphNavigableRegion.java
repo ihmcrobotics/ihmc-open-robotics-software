@@ -118,7 +118,7 @@ public class VisibilityGraphNavigableRegion
                                                          List<VisibilityGraphNode> nodesToPack, ArrayList<VisibilityGraphEdge> edgesToPack)
    {
       List<? extends Point2DReadOnly> navigableExtrusionPoints = clusterToBuildMapOf.getNavigableExtrusionsInLocal();
-      boolean[] arePointsActuallyNavigable = VisibilityTools.checkIfPointsInsidePlanarRegionAndOutsideNonavigableZones(homeRegion, allClusters,
+      boolean[] arePointsActuallyNavigable = VisibilityTools.checkIfPointsInsidePlanarRegionAndOutsideNonNavigableZones(homeRegion, allClusters,
                                                                                                                        navigableExtrusionPoints);
 
       ArrayList<VisibilityGraphNode> newNodes = new ArrayList<>();
