@@ -15,6 +15,8 @@ import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.geometry.interfaces.Vertex2DSupplier;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple2D.Point2D;
+import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
+import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.pathPlanning.visibilityGraphs.dataStructure.Connection;
 import us.ihmc.pathPlanning.visibilityGraphs.dataStructure.ConnectionPoint3D;
 import us.ihmc.pathPlanning.visibilityGraphs.dataStructure.InterRegionVisibilityMap;
@@ -161,6 +163,34 @@ public class VisibilityGraphTest
 
       InterRegionVisibilityMap interRegionVisibilityMap = visibilityMapSolution.getInterRegionVisibilityMap();
       assertTrue(interRegionVisibilityMap.getVisibilityMapInWorld().isEmpty());
+
+      double searchHostEpsilon = 0.01;
+      visibilityGraph.setStart(new Point3D(0.4, 0.35, 0.005), searchHostEpsilon);
+
+      VisibilityGraphNode startNode = visibilityGraph.getStartNode();
+      List<VisibilityGraphEdge> startEdges = visibilityGraph.getStartEdges();
+
+      Point2DReadOnly startInLocal = startNode.getPoint2DInLocal();
+      ConnectionPoint3D startInWorld = startNode.getPointInWorld();
+
+      assertTrue(startInLocal.epsilonEquals(new Point2D(10.4, 0.35), EPSILON));
+      assertTrue(startInWorld.epsilonEquals(new Point3D(0.4, 0.35, 0.0), EPSILON));
+
+      assertEquals(8, startEdges.size());
+
+      visibilityGraph.setGoal(new Point3D(0.6, 0.55, 0.003), searchHostEpsilon);
+
+      VisibilityGraphNode goalNode = visibilityGraph.getGoalNode();
+      List<VisibilityGraphEdge> goalEdges = visibilityGraph.getStartEdges();
+
+      Point2DReadOnly goalInLocal = goalNode.getPoint2DInLocal();
+      ConnectionPoint3D goalInWorld = goalNode.getPointInWorld();
+
+      assertTrue(goalInLocal.epsilonEquals(new Point2D(10.6, 0.55), EPSILON));
+      assertTrue(goalInWorld.epsilonEquals(new Point3D(0.6, 0.55, 0.0), EPSILON));
+
+      assertEquals(9, goalEdges.size());
+      assertEquals(9, startEdges.size());
    }
 
    @Test(timeout = 30000)
