@@ -7,6 +7,7 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.mecano.frames.MovingReferenceFrame;
 import us.ihmc.quadrupedBasics.supportPolygon.QuadrupedSupportPolygon;
 import us.ihmc.quadrupedRobotics.parameters.QuadrupedFallDetectionParameters;
+import us.ihmc.quadrupedRobotics.planning.QuadrupedStep;
 import us.ihmc.robotics.math.filters.GlitchFilteredYoBoolean;
 import us.ihmc.robotics.robotSide.QuadrantDependentList;
 import us.ihmc.robotics.robotSide.RobotQuadrant;
@@ -14,6 +15,7 @@ import us.ihmc.yoVariables.parameters.DoubleParameter;
 import us.ihmc.yoVariables.parameters.IntegerParameter;
 import us.ihmc.yoVariables.providers.BooleanProvider;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoEnum;
 
@@ -41,10 +43,14 @@ public class QuadrupedFallDetector
    private final ReferenceFrame bodyFrame;
    private final QuadrantDependentList<MovingReferenceFrame> soleFrames;
 
-   private final FramePoint3D dcmPositionEstimate;
-   private final FramePoint2D dcmPositionEstimate2D;
+   private final FramePoint3D dcmPositionEstimate = new FramePoint3D();
+   private final FramePoint2D dcmPositionEstimate2D = new FramePoint2D();
    private final DivergentComponentOfMotionEstimator dcmPositionEstimator;
-   private final QuadrupedSupportPolygon supportPolygon;
+   private final QuadrupedSupportPolygon supportPolygon = new QuadrupedSupportPolygon();
+   private final QuadrupedSupportPolygon upcomingSupportPolygon = new QuadrupedSupportPolygon();
+
+   private final QuadrantDependentList<YoBoolean> isUsingNextFootsteps = new QuadrantDependentList<>();
+   private final QuadrantDependentList<FramePoint3D> nextFootstepPositions = new QuadrantDependentList<>();
 
    // Yo Variables
    private final YoDouble yoDcmDistanceOutsideSupportPolygon = new YoDouble("dcmDistanceOutsideSupportPolygon", registry);
@@ -60,8 +66,6 @@ public class QuadrupedFallDetector
       this.fallDetectionType.set(fallDetectionParameters.getFallDetectionType());
       this.dcmPositionEstimator = dcmPositionEstimator;
 
-      supportPolygon = new QuadrupedSupportPolygon();
-
       maxPitchInRad = new DoubleParameter("maxPitchInRad", registry, fallDetectionParameters.getMaxPitch());
       maxRollInRad = new DoubleParameter("maxRollInRad", registry, fallDetectionParameters.getMaxRoll());
       dcmOutsideSupportThreshold = new DoubleParameter("dcmDistanceOutsideSupportPolygonSupportThreshold", registry, fallDetectionParameters.getIcpDistanceOutsideSupportPolygon());
@@ -69,8 +73,13 @@ public class QuadrupedFallDetector
       isFallDetected = new GlitchFilteredYoBoolean("isFallDetected", registry, DEFAULT_FALL_GLITCH_WINDOW);
       isFallDetected.set(false);
 
-      dcmPositionEstimate = new FramePoint3D();
-      dcmPositionEstimate2D = new FramePoint2D();
+      for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
+      {
+         YoBoolean isUsingNextFootstep = new YoBoolean(robotQuadrant.getShortName() + "_IsFallDetectionUsingNextFootstep", registry);
+         isUsingNextFootstep.set(false);
+         isUsingNextFootsteps.put(robotQuadrant, isUsingNextFootstep);
+         nextFootstepPositions.put(robotQuadrant, new FramePoint3D());
+      }
 
       parentRegistry.addChild(registry);
    }
@@ -83,8 +92,6 @@ public class QuadrupedFallDetector
       this.fallDetectionType.set(FallDetectionType.DCM_OUTSIDE_SUPPORT_POLYGON_LIMIT);
       this.dcmPositionEstimator = dcmPositionEstimator;
 
-      supportPolygon = new QuadrupedSupportPolygon();
-
       maxPitchInRad = new DoubleParameter("maxPitchInRad", registry, 0.5);
       maxRollInRad = new DoubleParameter("maxRollInRad", registry, 0.5);
       dcmOutsideSupportThreshold = new DoubleParameter("dcmDistanceOutsideSupportPolygonSupportThreshold", registry, 0.15);
@@ -92,10 +99,24 @@ public class QuadrupedFallDetector
       isFallDetected = new GlitchFilteredYoBoolean("isFallDetected", registry, DEFAULT_FALL_GLITCH_WINDOW);
       isFallDetected.set(false);
 
-      dcmPositionEstimate = new FramePoint3D();
-      dcmPositionEstimate2D = new FramePoint2D();
+      for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
+      {
+         YoBoolean isUsingNextFootstep = new YoBoolean(robotQuadrant.getShortName() + "_IsFallDetectionUsingNextFootstep", registry);
+         isUsingNextFootstep.set(false);
+         isUsingNextFootsteps.put(robotQuadrant, isUsingNextFootstep);
+         nextFootstepPositions.put(robotQuadrant, new FramePoint3D());
+      }
 
       parentRegistry.addChild(registry);
+   }
+
+   public void setNextFootstep(RobotQuadrant robotQuadrant, QuadrupedStep timedFootstep)
+   {
+      boolean notNull = timedFootstep != null;
+      isUsingNextFootsteps.get(robotQuadrant).set(notNull);
+
+      if (notNull)
+         timedFootstep.getGoalPosition(nextFootstepPositions.get(robotQuadrant));
    }
 
    public boolean detect()
@@ -141,7 +162,15 @@ public class QuadrupedFallDetector
       dcmPositionEstimate2D.set(dcmPositionEstimate);
 
       for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
+      {
          supportPolygon.setFootstep(robotQuadrant, soleFrames.get(robotQuadrant));
+
+         // update the upcoming position
+         if (isUsingNextFootsteps.get(robotQuadrant).getBooleanValue())
+            upcomingSupportPolygon.setFootstep(robotQuadrant, nextFootstepPositions.get(robotQuadrant));
+         else
+            upcomingSupportPolygon.setFootstep(robotQuadrant, soleFrames.get(robotQuadrant));
+      }
    }
 
    private boolean detectPitchLimitFailure()
