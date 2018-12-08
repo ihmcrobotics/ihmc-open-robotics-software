@@ -1,8 +1,8 @@
 package us.ihmc.quadrupedRobotics.planning.stepStream;
 
 import us.ihmc.commons.lists.PreallocatedList;
+import us.ihmc.quadrupedBasics.gait.QuadrupedTimedStep;
 import us.ihmc.quadrupedRobotics.planning.QuadrupedTimedOrientedStep;
-import us.ihmc.quadrupedRobotics.planning.QuadrupedTimedStep;
 import us.ihmc.robotics.robotSide.EndDependentList;
 import us.ihmc.robotics.robotSide.RobotEnd;
 

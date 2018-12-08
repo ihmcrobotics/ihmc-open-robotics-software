@@ -3,7 +3,8 @@ package us.ihmc.quadrupedRobotics.planning;
 import us.ihmc.commons.MathTools;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DBasics;
-import us.ihmc.quadrupedRobotics.util.TimeInterval;
+import us.ihmc.quadrupedBasics.gait.QuadrupedTimedStep;
+import us.ihmc.quadrupedBasics.gait.TimeInterval;
 import us.ihmc.robotics.robotSide.RobotQuadrant;
 
 public class QuadrupedTimedOrientedStep extends QuadrupedTimedStep

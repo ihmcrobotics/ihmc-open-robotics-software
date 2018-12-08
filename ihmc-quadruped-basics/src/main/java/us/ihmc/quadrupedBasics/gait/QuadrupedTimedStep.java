@@ -1,11 +1,9 @@
-package us.ihmc.quadrupedRobotics.planning;
+package us.ihmc.quadrupedBasics.gait;
 
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DBasics;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.QuadrupedTimedStepCommand;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.TimeIntervalCommand;
-import us.ihmc.quadrupedRobotics.util.TimeInterval;
-import us.ihmc.quadrupedRobotics.util.TimeIntervalProvider;
 import us.ihmc.robotics.robotSide.RobotQuadrant;
 
 public class QuadrupedTimedStep extends QuadrupedStep implements TimeIntervalProvider
