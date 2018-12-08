@@ -13,6 +13,7 @@ import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelSta
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.SmoothTransitionControllerState;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.StandPrepControllerState;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.StandReadyControllerState;
+import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.stateTransitions.QuadrupedFeetLoadedToWalkingStandTransition;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.controllerAPI.CommandInputManager;
 import us.ihmc.communication.controllerAPI.StatusMessageOutputManager;
@@ -37,6 +38,7 @@ import us.ihmc.robotics.robotController.OutputProcessor;
 import us.ihmc.robotics.robotSide.RobotQuadrant;
 import us.ihmc.robotics.stateMachine.core.State;
 import us.ihmc.robotics.stateMachine.core.StateMachine;
+import us.ihmc.robotics.stateMachine.core.StateTransition;
 import us.ihmc.robotics.stateMachine.core.StateTransitionCondition;
 import us.ihmc.robotics.stateMachine.factories.StateMachineFactory;
 import us.ihmc.ros2.RealtimeRos2Node;
@@ -344,6 +346,17 @@ public class QuadrupedControllerManager implements RobotController, CloseableAnd
       factory.addTransition(HighLevelControllerName.WALKING, fallbackControllerState, t -> isFallDetected.getValue());
       factory.addTransition(fallbackControllerState, HighLevelControllerName.STAND_PREP_STATE,
                             createRequestedTransition(HighLevelControllerName.STAND_PREP_STATE));
+
+      // Set up foot loaded transition
+      StateTransitionCondition footLoadedTransition = new QuadrupedFeetLoadedToWalkingStandTransition(HighLevelControllerName.WALKING, requestedControllerState,
+                                                                                                      runtimeEnvironment.getFootSwitches(),
+                                                                                                      runtimeEnvironment.getControlDT(),
+                                                                                                      runtimeEnvironment.getFullRobotModel().getTotalMass(),
+                                                                                                      runtimeEnvironment.getGravity(),
+                                                                                                      runtimeEnvironment.getHighLevelControllerParameters(),
+                                                                                                      registry);
+      factory.addTransition(HighLevelControllerName.STAND_READY, new StateTransition<>(HighLevelControllerName.WALKING, footLoadedTransition));
+
 
       factory.addStateChangedListener((from, to) -> {
          byte fromByte = from == null ? -1 : from.toByte();
