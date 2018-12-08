@@ -15,6 +15,7 @@ public interface VisibilityGraphsParameters
 
    double getNormalZThresholdForAccessibleRegions();
 
+   //TODO: This parameter doesn't seem to do anything. It seems this one is used: getNavigableExtrusionDistanceCalculator 
    double getExtrusionDistance();
 
    double getExtrusionDistanceIfNotTooHighToStep();

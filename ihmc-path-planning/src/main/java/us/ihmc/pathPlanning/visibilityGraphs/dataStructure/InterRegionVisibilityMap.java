@@ -50,6 +50,7 @@ public class InterRegionVisibilityMap implements VisibilityMapHolder
       return 0;
    }
 
+   //TODO: One of these must be wrong if there is no transformation between the two...
    @Override
    public VisibilityMap getVisibilityMapInLocal()
    {

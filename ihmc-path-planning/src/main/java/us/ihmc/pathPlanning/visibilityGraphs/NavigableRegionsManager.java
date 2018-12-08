@@ -29,7 +29,7 @@ public class NavigableRegionsManager
    private final VisibilityGraphsParameters parameters;
 
    private final VisibilityMapSolution visibilityMapSolution = new VisibilityMapSolution();
-   
+
    public NavigableRegionsManager()
    {
       this(null, null);
@@ -47,7 +47,7 @@ public class NavigableRegionsManager
 
    public NavigableRegionsManager(VisibilityGraphsParameters parameters, List<PlanarRegion> regions)
    {
-      visibilityMapSolution.setNavigableRegions(new NavigableRegions(parameters, regions));      
+      visibilityMapSolution.setNavigableRegions(new NavigableRegions(parameters, regions));
       this.parameters = parameters == null ? new DefaultVisibilityGraphParameters() : parameters;
    }
 
@@ -94,39 +94,37 @@ public class NavigableRegionsManager
          PrintTools.info("Starting to calculate body path");
 
       NavigableRegions navigableRegions = visibilityMapSolution.getNavigableRegions();
-      
       navigableRegions.filterPlanarRegionsWithBoundingCapsule(start, goal, parameters.getExplorationDistanceFromStartGoal());
-
       long startBodyPathComputation = System.currentTimeMillis();
 
       navigableRegions.createNavigableRegions();
-      
-      
-      
+
+      boolean useNewVisibilityGraph = false;
+      if (useNewVisibilityGraph)
+      {
+         VisibilityGraph visibilityGraph = new VisibilityGraph(navigableRegions, parameters.getInterRegionConnectionFilter());
+         VisibilityMapSolution visibilityMapSolutionFromNewVisibilityGraph = visibilityGraph.createVisibilityMapSolution();
+         visibilityMapSolution.setVisibilityMapsWithNavigableRegions(visibilityMapSolutionFromNewVisibilityGraph.getVisibilityMapsWithNavigableRegions());
+         visibilityMapSolution.setInterRegionVisibilityMap(visibilityMapSolutionFromNewVisibilityGraph.getInterRegionVisibilityMap());
+      }
+
       ArrayList<VisibilityMapWithNavigableRegion> visibilityMapsWithNavigableRegions = createListOfVisibilityMapsWithNavigableRegions(navigableRegions);
-
-      visibilityMapSolution.setVisibilityMapsWithNavigableRegions(visibilityMapsWithNavigableRegions);
-
       InterRegionVisibilityMap interRegionVisibilityMap = VisibilityGraphsFactory.createInterRegionVisibilityMap(visibilityMapsWithNavigableRegions,
                                                                                                                  parameters.getInterRegionConnectionFilter());
-      visibilityMapSolution.setInterRegionVisibilityMap(interRegionVisibilityMap);
-
       VisibilityGraphsFactory.createStaticVisibilityMapsForNavigableRegions(visibilityMapsWithNavigableRegions);
-      
-      
-      
-      
 
-    
+      if (!useNewVisibilityGraph)
+      {
+         visibilityMapSolution.setVisibilityMapsWithNavigableRegions(visibilityMapsWithNavigableRegions);
+         visibilityMapSolution.setInterRegionVisibilityMap(interRegionVisibilityMap);
+      }
+
       double searchHostEpsilon = parameters.getSearchHostRegionEpsilon();
       SingleSourceVisibilityMap startMap = VisibilityGraphsFactory.createSingleSourceVisibilityMap(start, navigableRegions, searchHostEpsilon,
-                                                                         interRegionVisibilityMap.getVisibilityMapInLocal());
+                                                                                                   interRegionVisibilityMap.getVisibilityMapInLocal());
       SingleSourceVisibilityMap goalMap = VisibilityGraphsFactory.createSingleSourceVisibilityMap(goal, navigableRegions, searchHostEpsilon,
-                                                                        interRegionVisibilityMap.getVisibilityMapInLocal());
+                                                                                                  interRegionVisibilityMap.getVisibilityMapInLocal());
 
-      
-
-      
       int START_GOAL_ID = 0;
 
       if (goalMap == null)
@@ -156,10 +154,9 @@ public class NavigableRegionsManager
 
       visibilityMapSolution.setStartMap(startMap);
       visibilityMapSolution.setGoalMap(goalMap);
-      
+
       if (startMap == null)
          return null;
-
 
       List<VisibilityMapHolder> visibilityMapHolders = new ArrayList<>();
       visibilityMapHolders.addAll(visibilityMapsWithNavigableRegions);
