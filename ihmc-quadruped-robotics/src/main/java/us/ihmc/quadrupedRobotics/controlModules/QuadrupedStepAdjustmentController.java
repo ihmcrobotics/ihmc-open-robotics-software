@@ -143,7 +143,7 @@ public class QuadrupedStepAdjustmentController
             {
                double timeRemainingInStep = Math.max(activeStep.getTimeInterval().getEndTime() - controllerTime.getDoubleValue(), 0.0);
                double recursionMultiplier = Math.exp(timeRemainingInStep * lipModel.getNaturalFrequency());
-               double adjustmentMultiplier = minimumFootstepMultiplier.getValue() + recursionMultiplier / minimumFootstepMultiplier.getValue();
+               double adjustmentMultiplier = minimumFootstepMultiplier.getValue() + (1.0 - minimumFootstepMultiplier.getValue()) * recursionMultiplier;
                dcmStepAdjustmentMultiplier.set(dcmStepAdjustmentGain.getValue() * adjustmentMultiplier);
 
                instantaneousStepAdjustment.set(dcmError);
