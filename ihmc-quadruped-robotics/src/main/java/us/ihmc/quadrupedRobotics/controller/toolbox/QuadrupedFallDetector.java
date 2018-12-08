@@ -27,7 +27,7 @@ public class QuadrupedFallDetector
 
    public enum FallDetectionType
    {
-      NONE, ROLL_LIMIT, PITCH_LIMIT, PITCH_AND_ROLL_LIMIT, DCM_OUTSIDE_SUPPORT_POLYGON_LIMIT, ALL
+      NONE, ROLL_LIMIT, PITCH_LIMIT, PITCH_AND_ROLL_LIMIT, HEIGHT_LIMIT, DCM_OUTSIDE_SUPPORT_POLYGON_LIMIT, ALL
    }
 
    // Parameters
@@ -35,9 +35,9 @@ public class QuadrupedFallDetector
    private final DoubleParameter maxPitchInRad;
    private final DoubleParameter maxRollInRad;
    private final DoubleParameter dcmOutsideSupportThreshold;
+   private final DoubleParameter maxHeightError;
    private final IntegerParameter fallDetectorGlitchFilterWindow = new IntegerParameter("fallDetectorGlitchFilterWindow", registry, DEFAULT_FALL_GLITCH_WINDOW);
 
-   //Estimation Variables
    private final FrameQuaternion bodyOrientation = new FrameQuaternion();
 
    private final ReferenceFrame bodyFrame;
@@ -52,7 +52,10 @@ public class QuadrupedFallDetector
    private final QuadrantDependentList<YoBoolean> isUsingNextFootsteps = new QuadrantDependentList<>();
    private final QuadrantDependentList<FramePoint3D> nextFootstepPositions = new QuadrantDependentList<>();
 
-   // Yo Variables
+   private final YoDouble desiredHeightForFallDetection = new YoDouble("desiredHeightForFallDetection", registry);
+   private final YoDouble currentHeightForFallDetection = new YoDouble("currentHeightForFallDetection", registry);
+   private final YoDouble heightErrorForFallDetection = new YoDouble("heightErrorForFallDetection", registry);
+
    private final YoDouble yoDcmDistanceOutsideSupportPolygon = new YoDouble("dcmDistanceOutsideSupportPolygon", registry);
    private final YoDouble yoDcmDistanceOutsideUpcomingPolygon = new YoDouble("dcmDistanceOutsideUpcomingPolygon", registry);
    private final YoEnum<FallDetectionType> fallDetectionType = YoEnum.create("getFallDetectionType", FallDetectionType.class, registry);
@@ -69,6 +72,7 @@ public class QuadrupedFallDetector
 
       maxPitchInRad = new DoubleParameter("maxPitchInRad", registry, fallDetectionParameters.getMaxPitch());
       maxRollInRad = new DoubleParameter("maxRollInRad", registry, fallDetectionParameters.getMaxRoll());
+      maxHeightError = new DoubleParameter("maxHeightError", registry, fallDetectionParameters.getMaxHeightError());
       dcmOutsideSupportThreshold = new DoubleParameter("dcmDistanceOutsideSupportPolygonSupportThreshold", registry, fallDetectionParameters.getIcpDistanceOutsideSupportPolygon());
 
       isFallDetected = new GlitchFilteredYoBoolean("isFallDetected", registry, DEFAULT_FALL_GLITCH_WINDOW);
@@ -95,6 +99,7 @@ public class QuadrupedFallDetector
 
       maxPitchInRad = new DoubleParameter("maxPitchInRad", registry, 0.5);
       maxRollInRad = new DoubleParameter("maxRollInRad", registry, 0.5);
+      maxHeightError = new DoubleParameter("maxHeightError", registry, 0.1);
       dcmOutsideSupportThreshold = new DoubleParameter("dcmDistanceOutsideSupportPolygonSupportThreshold", registry, 0.15);
 
       isFallDetected = new GlitchFilteredYoBoolean("isFallDetected", registry, DEFAULT_FALL_GLITCH_WINDOW);
@@ -120,6 +125,12 @@ public class QuadrupedFallDetector
          timedFootstep.getGoalPosition(nextFootstepPositions.get(robotQuadrant));
    }
 
+   public void setHeightForFallDetection(double desiredHeight, double currentHeight)
+   {
+      desiredHeightForFallDetection.set(desiredHeight);
+      currentHeightForFallDetection.set(currentHeight);
+   }
+
    public boolean detect()
    {
       updateEstimates();
@@ -139,8 +150,10 @@ public class QuadrupedFallDetector
       case PITCH_AND_ROLL_LIMIT:
          isFallDetectedUnfiltered = detectPitchLimitFailure() || detectRollLimitFailure();
          break;
+      case HEIGHT_LIMIT:
+         isFallDetectedUnfiltered = detectHeightLimitFailure();
       case ALL:
-         isFallDetectedUnfiltered = detectDcmDistanceOutsideSupportPolygonLimitFailure() || detectPitchLimitFailure() || detectRollLimitFailure();
+         isFallDetectedUnfiltered = detectDcmDistanceOutsideSupportPolygonLimitFailure() || detectPitchLimitFailure() || detectRollLimitFailure() || detectHeightLimitFailure();
          break;
       default:
          isFallDetectedUnfiltered = false;
@@ -178,6 +191,13 @@ public class QuadrupedFallDetector
    {
       return Math.abs(bodyOrientation.getPitch()) > maxPitchInRad.getValue();
    }
+
+   private boolean detectHeightLimitFailure()
+   {
+      heightErrorForFallDetection.set(desiredHeightForFallDetection.getDoubleValue() - currentHeightForFallDetection.getDoubleValue());
+      return Math.abs(heightErrorForFallDetection.getDoubleValue()) > maxHeightError.getValue();
+   }
+
 
    private boolean detectRollLimitFailure()
    {
