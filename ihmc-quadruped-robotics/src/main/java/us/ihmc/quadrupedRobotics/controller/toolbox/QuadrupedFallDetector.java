@@ -5,7 +5,7 @@ import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.mecano.frames.MovingReferenceFrame;
-import us.ihmc.quadrupedRobotics.geometry.supportPolygon.QuadrupedSupportPolygon;
+import us.ihmc.quadrupedBasics.supportPolygon.QuadrupedSupportPolygon;
 import us.ihmc.robotics.math.filters.GlitchFilteredYoBoolean;
 import us.ihmc.robotics.robotSide.QuadrantDependentList;
 import us.ihmc.robotics.robotSide.RobotQuadrant;

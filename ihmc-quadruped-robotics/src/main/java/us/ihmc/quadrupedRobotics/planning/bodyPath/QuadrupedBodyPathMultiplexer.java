@@ -3,7 +3,7 @@ package us.ihmc.quadrupedRobotics.planning.bodyPath;
 import controller_msgs.msg.dds.QuadrupedBodyPathPlanMessage;
 import us.ihmc.euclid.referenceFrame.FramePose2D;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
-import us.ihmc.quadrupedRobotics.estimator.referenceFrames.QuadrupedReferenceFrames;
+import us.ihmc.quadrupedBasics.referenceFrames.QuadrupedReferenceFrames;
 import us.ihmc.quadrupedRobotics.planning.QuadrupedXGaitSettingsReadOnly;
 import us.ihmc.ros2.Ros2Node;
 import us.ihmc.yoVariables.providers.DoubleProvider;

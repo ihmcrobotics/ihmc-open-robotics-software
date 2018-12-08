@@ -19,7 +19,7 @@ import us.ihmc.quadrupedRobotics.controller.toolbox.LinearInvertedPendulumModel;
 import us.ihmc.quadrupedRobotics.controller.toolbox.QuadrupedFallDetector;
 import us.ihmc.quadrupedRobotics.estimator.GroundPlaneEstimator;
 import us.ihmc.quadrupedRobotics.estimator.YoGroundPlaneEstimator;
-import us.ihmc.quadrupedRobotics.estimator.referenceFrames.QuadrupedReferenceFrames;
+import us.ihmc.quadrupedBasics.referenceFrames.QuadrupedReferenceFrames;
 import us.ihmc.quadrupedRobotics.model.QuadrupedPhysicalProperties;
 import us.ihmc.quadrupedRobotics.model.QuadrupedRuntimeEnvironment;
 import us.ihmc.quadrupedRobotics.planning.ContactState;
@@ -81,7 +81,7 @@ public class QuadrupedControllerToolbox
 
 
       // create controllers and estimators
-      referenceFrames = new QuadrupedReferenceFrames(runtimeEnvironment.getFullRobotModel(), physicalProperties);
+      referenceFrames = new QuadrupedReferenceFrames(runtimeEnvironment.getFullRobotModel());
 
       linearInvertedPendulumModel = new LinearInvertedPendulumModel(referenceFrames.getCenterOfMassFrame(), mass, gravity, physicalProperties.getNominalBodyHeight(), registry);
 //      upcomingGroundPlaneEstimator = new YoGroundPlaneEstimator("upcoming", registry, runtimeEnvironment.getGraphicsListRegistry(), YoAppearance.PlaneMaterial());

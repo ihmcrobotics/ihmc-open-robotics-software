@@ -3,7 +3,7 @@ package us.ihmc.quadrupedRobotics.planning.chooser.footstepChooser;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
-import us.ihmc.quadrupedRobotics.geometry.supportPolygon.QuadrupedSupportPolygon;
+import us.ihmc.quadrupedBasics.supportPolygon.QuadrupedSupportPolygon;
 import us.ihmc.robotics.robotSide.RobotQuadrant;
 
 public interface SwingTargetGenerator
