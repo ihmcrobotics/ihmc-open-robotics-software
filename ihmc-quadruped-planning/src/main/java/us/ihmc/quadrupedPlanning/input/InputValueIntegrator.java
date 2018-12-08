@@ -1,4 +1,4 @@
-package us.ihmc.quadrupedPlanning.input.value;
+package us.ihmc.quadrupedPlanning.input;
 
 public class InputValueIntegrator
 {
