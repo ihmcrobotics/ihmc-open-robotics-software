@@ -54,6 +54,7 @@ public class QuadrupedFallDetector
 
    // Yo Variables
    private final YoDouble yoDcmDistanceOutsideSupportPolygon = new YoDouble("dcmDistanceOutsideSupportPolygon", registry);
+   private final YoDouble yoDcmDistanceOutsideUpcomingPolygon = new YoDouble("dcmDistanceOutsideUpcomingPolygon", registry);
    private final YoEnum<FallDetectionType> fallDetectionType = YoEnum.create("getFallDetectionType", FallDetectionType.class, registry);
    private final GlitchFilteredYoBoolean isFallDetected;
 
@@ -185,10 +186,12 @@ public class QuadrupedFallDetector
 
    private boolean detectDcmDistanceOutsideSupportPolygonLimitFailure()
    {
-      double distance = supportPolygon.distance(dcmPositionEstimate2D);
+      double supportDistance = supportPolygon.distance(dcmPositionEstimate2D);
+      double upcomingSupportDistance = upcomingSupportPolygon.distance(dcmPositionEstimate2D);
 
-      yoDcmDistanceOutsideSupportPolygon.set(distance);
-      return distance > dcmOutsideSupportThreshold.getValue();
+      yoDcmDistanceOutsideSupportPolygon.set(supportDistance);
+      yoDcmDistanceOutsideUpcomingPolygon.set(upcomingSupportDistance);
+      return supportDistance > dcmOutsideSupportThreshold.getValue() && upcomingSupportDistance > yoDcmDistanceOutsideUpcomingPolygon.getDoubleValue();
    }
 
    public BooleanProvider getIsFallDetected()
