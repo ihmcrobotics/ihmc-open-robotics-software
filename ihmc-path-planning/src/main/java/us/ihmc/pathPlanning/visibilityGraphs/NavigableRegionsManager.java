@@ -5,9 +5,9 @@ import static us.ihmc.pathPlanning.visibilityGraphs.tools.VisibilityTools.isPoin
 import java.util.ArrayList;
 import java.util.List;
 
-import us.ihmc.commons.PrintTools;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
+import us.ihmc.log.LogTools;
 import us.ihmc.pathPlanning.visibilityGraphs.clusterManagement.Cluster;
 import us.ihmc.pathPlanning.visibilityGraphs.dataStructure.Connection;
 import us.ihmc.pathPlanning.visibilityGraphs.dataStructure.ConnectionPoint3D;
@@ -78,20 +78,23 @@ public class NavigableRegionsManager
 
    public List<Point3DReadOnly> calculateBodyPath(final Point3DReadOnly start, final Point3DReadOnly goal)
    {
-      if (start == null)
-      {
-         PrintTools.error("Start is null!");
-         return null;
-      }
+      boolean useNewVisibilityGraph = true;
 
-      if (goal == null)
+      if (useNewVisibilityGraph)
       {
-         PrintTools.error("Goal is null!");
-         return null;
+         return calculateBodyPathUsingNewVisibilityGraph(start, goal);
       }
+      else
+      {
+         return calculateBodyPathUsingOldVisibilityGraphs(start, goal);
+      }
+   }
 
-      if (debug)
-         PrintTools.info("Starting to calculate body path");
+   public List<Point3DReadOnly> calculateBodyPathUsingNewVisibilityGraph(final Point3DReadOnly start, final Point3DReadOnly goal)
+   {
+      boolean areStartAndGoalValid = checkIfStartAndGoalAreValid(start, goal);
+      if (!areStartAndGoalValid)
+         return null;
 
       NavigableRegions navigableRegions = visibilityMapSolution.getNavigableRegions();
       navigableRegions.filterPlanarRegionsWithBoundingCapsule(start, goal, parameters.getExplorationDistanceFromStartGoal());
@@ -99,33 +102,102 @@ public class NavigableRegionsManager
 
       navigableRegions.createNavigableRegions();
 
-      boolean useNewVisibilityGraph = false;
-      if (useNewVisibilityGraph)
+      SingleSourceVisibilityMap startMap = null, goalMap = null;
+
+      VisibilityGraph visibilityGraph = new VisibilityGraph(navigableRegions, parameters.getInterRegionConnectionFilter());
+      VisibilityMapSolution visibilityMapSolutionFromNewVisibilityGraph = visibilityGraph.createVisibilityMapSolution();
+      
+      visibilityMapSolution.setVisibilityMapsWithNavigableRegions(visibilityMapSolutionFromNewVisibilityGraph.getVisibilityMapsWithNavigableRegions());
+      visibilityMapSolution.setInterRegionVisibilityMap(visibilityMapSolutionFromNewVisibilityGraph.getInterRegionVisibilityMap());
+
+      //TODO: Remove these once we can...
+      ArrayList<VisibilityMapWithNavigableRegion> visibilityMapsWithNavigableRegions = createListOfVisibilityMapsWithNavigableRegions(navigableRegions);
+      InterRegionVisibilityMap interRegionVisibilityMap = VisibilityGraphsFactory.createInterRegionVisibilityMap(visibilityMapsWithNavigableRegions,
+                                                                                                                 parameters.getInterRegionConnectionFilter());
+      VisibilityGraphsFactory.createStaticVisibilityMapsForNavigableRegions(visibilityMapsWithNavigableRegions);
+      int START_GOAL_ID = 0;
+
+      double searchHostEpsilon = parameters.getSearchHostRegionEpsilon();
+
+      startMap = VisibilityGraphsFactory.createSingleSourceVisibilityMap(start, navigableRegions, searchHostEpsilon,
+                                                                         interRegionVisibilityMap.getVisibilityMapInLocal());
+      goalMap = VisibilityGraphsFactory.createSingleSourceVisibilityMap(goal, navigableRegions, searchHostEpsilon,
+                                                                        interRegionVisibilityMap.getVisibilityMapInLocal());
+      if (goalMap == null)
       {
-         VisibilityGraph visibilityGraph = new VisibilityGraph(navigableRegions, parameters.getInterRegionConnectionFilter());
-         VisibilityMapSolution visibilityMapSolutionFromNewVisibilityGraph = visibilityGraph.createVisibilityMapSolution();
-         visibilityMapSolution.setVisibilityMapsWithNavigableRegions(visibilityMapSolutionFromNewVisibilityGraph.getVisibilityMapsWithNavigableRegions());
-         visibilityMapSolution.setInterRegionVisibilityMap(visibilityMapSolutionFromNewVisibilityGraph.getInterRegionVisibilityMap());
+         goalMap = VisibilityGraphsFactory.connectToClosestPoints(new ConnectionPoint3D(goal, START_GOAL_ID), 1, visibilityMapsWithNavigableRegions,
+                                                                  START_GOAL_ID);
       }
+
+      if (startMap != null)
+      {
+         if (startMap.getHostRegion() == goalMap.getHostRegion())
+         {
+            if (isPointVisibleForStaticMaps(startMap.getHostRegion().getAllClusters(), startMap.getSourceInLocal2D(), goalMap.getSourceInLocal2D()))
+            {
+               startMap.addConnectionInWorld(new Connection(start, startMap.getMapId(), goal, goalMap.getMapId()));
+            }
+         }
+      }
+      else
+      {
+         startMap = VisibilityGraphsFactory.connectToFallbackMap(start, START_GOAL_ID, 1.0e-3, interRegionVisibilityMap.getVisibilityMapInLocal());
+
+         if (startMap == null)
+            startMap = VisibilityGraphsFactory.connectToClosestPoints(new ConnectionPoint3D(start, START_GOAL_ID), 1, visibilityMapsWithNavigableRegions,
+                                                                      START_GOAL_ID);
+      }
+
+      visibilityMapSolution.setStartMap(startMap);
+      visibilityMapSolution.setGoalMap(goalMap);
+
+      if (startMap == null)
+         return null;
+
+      List<VisibilityMapHolder> visibilityMapHolders = new ArrayList<>();
+      visibilityMapHolders.addAll(visibilityMapsWithNavigableRegions);
+      visibilityMapHolders.add(startMap);
+      visibilityMapHolders.add(goalMap);
+      visibilityMapHolders.add(interRegionVisibilityMap);
+
+      ConnectionPoint3D startConnection = new ConnectionPoint3D(start, START_GOAL_ID);
+      ConnectionPoint3D goalConnection = new ConnectionPoint3D(goal, START_GOAL_ID);
+
+      List<Point3DReadOnly> path = parameters.getPathPlanner().calculatePath(startConnection, goalConnection, visibilityMapHolders);
+      printResults(startBodyPathComputation, path);
+      return path;
+   }
+
+   //TODO: +++JEP: Remove this once the new one is working and clean up.
+   public List<Point3DReadOnly> calculateBodyPathUsingOldVisibilityGraphs(final Point3DReadOnly start, final Point3DReadOnly goal)
+   {
+      boolean areStartAndGoalValid = checkIfStartAndGoalAreValid(start, goal);
+      if (!areStartAndGoalValid)
+         return null;
+
+      NavigableRegions navigableRegions = visibilityMapSolution.getNavigableRegions();
+      navigableRegions.filterPlanarRegionsWithBoundingCapsule(start, goal, parameters.getExplorationDistanceFromStartGoal());
+      long startBodyPathComputation = System.currentTimeMillis();
+
+      navigableRegions.createNavigableRegions();
+
+      SingleSourceVisibilityMap startMap = null, goalMap = null;
 
       ArrayList<VisibilityMapWithNavigableRegion> visibilityMapsWithNavigableRegions = createListOfVisibilityMapsWithNavigableRegions(navigableRegions);
       InterRegionVisibilityMap interRegionVisibilityMap = VisibilityGraphsFactory.createInterRegionVisibilityMap(visibilityMapsWithNavigableRegions,
                                                                                                                  parameters.getInterRegionConnectionFilter());
       VisibilityGraphsFactory.createStaticVisibilityMapsForNavigableRegions(visibilityMapsWithNavigableRegions);
-
-      if (!useNewVisibilityGraph)
-      {
-         visibilityMapSolution.setVisibilityMapsWithNavigableRegions(visibilityMapsWithNavigableRegions);
-         visibilityMapSolution.setInterRegionVisibilityMap(interRegionVisibilityMap);
-      }
+      int START_GOAL_ID = 0;
 
       double searchHostEpsilon = parameters.getSearchHostRegionEpsilon();
-      SingleSourceVisibilityMap startMap = VisibilityGraphsFactory.createSingleSourceVisibilityMap(start, navigableRegions, searchHostEpsilon,
-                                                                                                   interRegionVisibilityMap.getVisibilityMapInLocal());
-      SingleSourceVisibilityMap goalMap = VisibilityGraphsFactory.createSingleSourceVisibilityMap(goal, navigableRegions, searchHostEpsilon,
-                                                                                                  interRegionVisibilityMap.getVisibilityMapInLocal());
 
-      int START_GOAL_ID = 0;
+      visibilityMapSolution.setVisibilityMapsWithNavigableRegions(visibilityMapsWithNavigableRegions);
+      visibilityMapSolution.setInterRegionVisibilityMap(interRegionVisibilityMap);
+
+      startMap = VisibilityGraphsFactory.createSingleSourceVisibilityMap(start, navigableRegions, searchHostEpsilon,
+                                                                         interRegionVisibilityMap.getVisibilityMapInLocal());
+      goalMap = VisibilityGraphsFactory.createSingleSourceVisibilityMap(goal, navigableRegions, searchHostEpsilon,
+                                                                        interRegionVisibilityMap.getVisibilityMapInLocal());
 
       if (goalMap == null)
       {
@@ -168,20 +240,44 @@ public class NavigableRegionsManager
       ConnectionPoint3D goalConnection = new ConnectionPoint3D(goal, START_GOAL_ID);
 
       List<Point3DReadOnly> path = parameters.getPathPlanner().calculatePath(startConnection, goalConnection, visibilityMapHolders);
+      printResults(startBodyPathComputation, path);
+      return path;
+   }
 
+   private boolean checkIfStartAndGoalAreValid(Point3DReadOnly start, Point3DReadOnly goal)
+   {
+      boolean areStartAndGoalValid = true;
+      if (start == null)
+      {
+         LogTools.error("Start is null!");
+         areStartAndGoalValid = false;
+      }
+
+      if (goal == null)
+      {
+         LogTools.error("Goal is null!");
+         areStartAndGoalValid = false;
+      }
+
+      if (debug)
+         LogTools.info("Starting to calculate body path");
+
+      return areStartAndGoalValid;
+   }
+
+   private void printResults(long startBodyPathComputation, List<Point3DReadOnly> path)
+   {
       if (debug)
       {
          if (path != null)
          {
-            PrintTools.info("Total time to find solution was: " + (System.currentTimeMillis() - startBodyPathComputation) + "ms");
+            LogTools.info("Total time to find solution was: " + (System.currentTimeMillis() - startBodyPathComputation) + "ms");
          }
          else
          {
-            PrintTools.info("NO BODY PATH SOLUTION WAS FOUND!" + (System.currentTimeMillis() - startBodyPathComputation) + "ms");
+            LogTools.info("NO BODY PATH SOLUTION WAS FOUND!" + (System.currentTimeMillis() - startBodyPathComputation) + "ms");
          }
       }
-
-      return path;
    }
 
    public List<Point3DReadOnly> calculateBodyPathWithOcclusions(Point3DReadOnly start, Point3DReadOnly goal)
@@ -197,7 +293,7 @@ public class NavigableRegionsManager
          {
             if (debug)
             {
-               PrintTools.info("StraightLine available");
+               LogTools.info("StraightLine available");
             }
 
             path = new ArrayList<>();
