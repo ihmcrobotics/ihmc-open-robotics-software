@@ -1,6 +1,5 @@
 package us.ihmc.quadrupedPlanning.input;
 
-import us.ihmc.quadrupedPlanning.input.managers.QuadrupedTeleopManager;
 import us.ihmc.simulationconstructionset.scripts.Script;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoInteger;

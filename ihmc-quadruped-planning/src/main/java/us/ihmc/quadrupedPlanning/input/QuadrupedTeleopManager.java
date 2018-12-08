@@ -1,4 +1,4 @@
-package us.ihmc.quadrupedPlanning.input.managers;
+package us.ihmc.quadrupedPlanning.input;
 
 import com.google.common.util.concurrent.AtomicDouble;
 import controller_msgs.msg.dds.*;

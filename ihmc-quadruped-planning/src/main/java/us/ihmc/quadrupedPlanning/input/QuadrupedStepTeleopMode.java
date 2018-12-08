@@ -1,12 +1,10 @@
-package us.ihmc.quadrupedPlanning.input.mode;
+package us.ihmc.quadrupedPlanning.input;
 
 import net.java.games.input.Event;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.quadrupedBasics.referenceFrames.QuadrupedReferenceFrames;
 import us.ihmc.quadrupedPlanning.QuadrupedXGaitSettingsReadOnly;
 import us.ihmc.quadrupedPlanning.YoQuadrupedXGaitSettings;
-import us.ihmc.quadrupedPlanning.input.managers.QuadrupedTeleopManager;
-import us.ihmc.quadrupedPlanning.input.value.InputValueIntegrator;
 import us.ihmc.ros2.Ros2Node;
 import us.ihmc.tools.inputDevices.joystick.mapping.XBoxOneMapping;
 import us.ihmc.yoVariables.parameters.DoubleParameter;
