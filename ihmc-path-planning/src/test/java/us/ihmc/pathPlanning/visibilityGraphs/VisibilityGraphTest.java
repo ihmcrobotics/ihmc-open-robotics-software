@@ -87,9 +87,9 @@ public class VisibilityGraphTest
       assertEquals(1, visibilityGraphNavigableRegions.size());
       VisibilityGraphNavigableRegion visibilityGraphNavigableRegion = visibilityGraphNavigableRegions.get(0);
 
-      ArrayList<VisibilityGraphEdge> navigableRegionEdges = visibilityGraphNavigableRegion.getAllEdges();
+      List<VisibilityGraphEdge> navigableRegionEdges = visibilityGraphNavigableRegion.getAllEdges();
       assertEquals(28, navigableRegionEdges.size());
-      ArrayList<VisibilityGraphNode> homeRegionNodes = visibilityGraphNavigableRegion.getHomeRegionNodes();
+      List<VisibilityGraphNode> homeRegionNodes = visibilityGraphNavigableRegion.getHomeRegionNodes();
       assertEquals(8, homeRegionNodes.size());
 
       ArrayList<VisibilityGraphEdge> crossRegionEdges = visibilityGraph.getCrossRegionEdges();
@@ -168,6 +168,7 @@ public class VisibilityGraphTest
       visibilityGraph.setStart(new Point3D(0.4, 0.35, 0.005), searchHostEpsilon);
 
       VisibilityGraphNode startNode = visibilityGraph.getStartNode();
+      assertEquals(97, startNode.getRegionId());
       List<VisibilityGraphEdge> startEdges = visibilityGraph.getStartEdges();
 
       Point2DReadOnly startInLocal = startNode.getPoint2DInLocal();
@@ -181,7 +182,8 @@ public class VisibilityGraphTest
       visibilityGraph.setGoal(new Point3D(0.6, 0.55, 0.003), searchHostEpsilon);
 
       VisibilityGraphNode goalNode = visibilityGraph.getGoalNode();
-      List<VisibilityGraphEdge> goalEdges = visibilityGraph.getStartEdges();
+      assertEquals(97, goalNode.getRegionId());
+      List<VisibilityGraphEdge> goalEdges = visibilityGraph.getGoalEdges();
 
       Point2DReadOnly goalInLocal = goalNode.getPoint2DInLocal();
       ConnectionPoint3D goalInWorld = goalNode.getPointInWorld();
@@ -258,19 +260,16 @@ public class VisibilityGraphTest
       VisibilityGraphNavigableRegion visibilityGraphNavigableRegion0 = visibilityGraphNavigableRegions.get(0);
       VisibilityGraphNavigableRegion visibilityGraphNavigableRegion1 = visibilityGraphNavigableRegions.get(1);
 
-      ArrayList<VisibilityGraphEdge> internalEdges0 = visibilityGraphNavigableRegion0.getAllEdges();
-      ArrayList<VisibilityGraphEdge> internalEdges1 = visibilityGraphNavigableRegion1.getAllEdges();
+      List<VisibilityGraphEdge> internalEdges0 = visibilityGraphNavigableRegion0.getAllEdges();
+      List<VisibilityGraphEdge> internalEdges1 = visibilityGraphNavigableRegion1.getAllEdges();
 
       assertEquals(28, internalEdges0.size());
       assertEquals(28, internalEdges1.size());
 
-      ArrayList<VisibilityGraphNode> nodes0 = visibilityGraphNavigableRegion0.getHomeRegionNodes();
-      ArrayList<VisibilityGraphNode> nodes1 = visibilityGraphNavigableRegion1.getHomeRegionNodes();
+      List<VisibilityGraphNode> nodes0 = visibilityGraphNavigableRegion0.getHomeRegionNodes();
+      List<VisibilityGraphNode> nodes1 = visibilityGraphNavigableRegion1.getHomeRegionNodes();
       assertEquals(8, nodes0.size());
       assertEquals(8, nodes1.size());
-
-      ArrayList<VisibilityGraphEdge> crossRegionEdges = visibilityGraph.getCrossRegionEdges();
-      assertEquals(7, crossRegionEdges.size());
 
       ConnectionPoint3D connectionA = new ConnectionPoint3D(0.0, 0.0, 0.0, 0);
       ConnectionPoint3D connectionAB = new ConnectionPoint3D(0.0, 0.5, 0.0, 0);
@@ -289,6 +288,27 @@ public class VisibilityGraphTest
       ConnectionPoint3D connectionGH = new ConnectionPoint3D(2.1, 0.5, 0.0, 0);
       ConnectionPoint3D connectionH = new ConnectionPoint3D(2.1, 0.0, 0.0, 0);
       ConnectionPoint3D connectionHE = new ConnectionPoint3D(1.6, 0.0, 0.0, 0);
+
+      assertTrue(nodesContainPoint(nodes0, connectionA));
+      assertTrue(nodesContainPoint(nodes0, connectionAB));
+      assertTrue(nodesContainPoint(nodes0, connectionB));
+      assertTrue(nodesContainPoint(nodes0, connectionBC));
+      assertTrue(nodesContainPoint(nodes0, connectionC));
+      assertTrue(nodesContainPoint(nodes0, connectionCD));
+      assertTrue(nodesContainPoint(nodes0, connectionD));
+      assertTrue(nodesContainPoint(nodes0, connectionDA));
+      
+      assertTrue(nodesContainPoint(nodes1, connectionE));
+      assertTrue(nodesContainPoint(nodes1, connectionEF));
+      assertTrue(nodesContainPoint(nodes1, connectionF));
+      assertTrue(nodesContainPoint(nodes1, connectionFG));
+      assertTrue(nodesContainPoint(nodes1, connectionG));
+      assertTrue(nodesContainPoint(nodes1, connectionGH));
+      assertTrue(nodesContainPoint(nodes1, connectionH));
+      assertTrue(nodesContainPoint(nodes1, connectionHE));
+
+      ArrayList<VisibilityGraphEdge> crossRegionEdges = visibilityGraph.getCrossRegionEdges();
+      assertEquals(7, crossRegionEdges.size());
 
       assertTrue(edgeListContains(crossRegionEdges, connectionC, connectionF));
       assertTrue(edgeListContains(crossRegionEdges, connectionC, connectionEF));
@@ -331,6 +351,36 @@ public class VisibilityGraphTest
       assertTrue(connectionsContain(connections, connectionCD, connectionE));
       assertTrue(connectionsContain(connections, connectionD, connectionEF));
       assertTrue(connectionsContain(connections, connectionD, connectionE));
+
+      double searchHostEpsilon = 0.01;
+      visibilityGraph.setStart(new Point3D(0.4, 0.35, 0.005), searchHostEpsilon);
+
+      VisibilityGraphNode startNode = visibilityGraph.getStartNode();
+      assertEquals(77, startNode.getRegionId());
+      List<VisibilityGraphEdge> startEdges = visibilityGraph.getStartEdges();
+
+      Point2DReadOnly startInLocal = startNode.getPoint2DInLocal();
+      ConnectionPoint3D startInWorld = startNode.getPointInWorld();
+
+      assertTrue(startInLocal.epsilonEquals(new Point2D(0.4, 0.35), EPSILON));
+      assertTrue(startInWorld.epsilonEquals(new Point3D(0.4, 0.35, 0.0), EPSILON));
+
+      assertEquals(8, startEdges.size());
+
+      visibilityGraph.setGoal(new Point3D(1.5, 0.55, 0.003), searchHostEpsilon);
+
+      VisibilityGraphNode goalNode = visibilityGraph.getGoalNode();
+      assertEquals(63, goalNode.getRegionId());
+      List<VisibilityGraphEdge> goalEdges = visibilityGraph.getGoalEdges();
+
+      Point2DReadOnly goalInLocal = goalNode.getPoint2DInLocal();
+      ConnectionPoint3D goalInWorld = goalNode.getPointInWorld();
+
+      assertTrue(goalInLocal.epsilonEquals(new Point2D(7.0 - 1.1 + 1.5, 3.0 + 0.55), EPSILON));
+      assertTrue(goalInWorld.epsilonEquals(new Point3D(1.5, 0.55, 0.0), EPSILON));
+
+      assertEquals(8, goalEdges.size());
+      assertEquals(8, startEdges.size());
    }
 
    @Test(timeout = 30000)
@@ -401,11 +451,11 @@ public class VisibilityGraphTest
       VisibilityGraphNavigableRegion visibilityGraphNavigableRegion0 = visibilityGraphNavigableRegions.get(0);
       VisibilityGraphNavigableRegion visibilityGraphNavigableRegion1 = visibilityGraphNavigableRegions.get(1);
 
-      ArrayList<VisibilityGraphEdge> internalEdges0 = visibilityGraphNavigableRegion0.getAllEdges();
-      ArrayList<VisibilityGraphEdge> internalEdges1 = visibilityGraphNavigableRegion1.getAllEdges();
+      List<VisibilityGraphEdge> internalEdges0 = visibilityGraphNavigableRegion0.getAllEdges();
+      List<VisibilityGraphEdge> internalEdges1 = visibilityGraphNavigableRegion1.getAllEdges();
 
-      ArrayList<VisibilityGraphNode> nodes0 = visibilityGraphNavigableRegion0.getHomeRegionNodes();
-      ArrayList<VisibilityGraphNode> nodes1 = visibilityGraphNavigableRegion1.getHomeRegionNodes();
+      List<VisibilityGraphNode> nodes0 = visibilityGraphNavigableRegion0.getHomeRegionNodes();
+      List<VisibilityGraphNode> nodes1 = visibilityGraphNavigableRegion1.getHomeRegionNodes();
       assertEquals(8, nodes0.size());
       assertEquals(8, nodes1.size());
 
@@ -431,13 +481,13 @@ public class VisibilityGraphTest
 
       assertTrue(arePointsAllContainedIn(nodes1, connectionE, connectionEF, connectionF, connectionFG, connectionG, connectionGH, connectionH, connectionHE));
 
-      ArrayList<ArrayList<VisibilityGraphNode>> listOfObstacleNavigableNodes0 = visibilityGraphNavigableRegion0.getObstacleNavigableNodes();
-      ArrayList<ArrayList<VisibilityGraphNode>> listOfObstacleNavigableNodes1 = visibilityGraphNavigableRegion1.getObstacleNavigableNodes();
+      List<List<VisibilityGraphNode>> listOfObstacleNavigableNodes0 = visibilityGraphNavigableRegion0.getObstacleNavigableNodes();
+      List<List<VisibilityGraphNode>> listOfObstacleNavigableNodes1 = visibilityGraphNavigableRegion1.getObstacleNavigableNodes();
 
       assertEquals(1, listOfObstacleNavigableNodes0.size());
       assertEquals(0, listOfObstacleNavigableNodes1.size());
 
-      ArrayList<VisibilityGraphNode> obstacleNavigableNodes0_0 = listOfObstacleNavigableNodes0.get(0);
+      List<VisibilityGraphNode> obstacleNavigableNodes0_0 = listOfObstacleNavigableNodes0.get(0);
       assertEquals(16, obstacleNavigableNodes0_0.size());
 
       double sqrt2By2 = Math.sqrt(2.0) / 2.0;
@@ -536,7 +586,7 @@ public class VisibilityGraphTest
       assertEquals(28, internalEdges1.size());
 
       ArrayList<VisibilityGraphEdge> crossRegionEdges = visibilityGraph.getCrossRegionEdges();
-      assertEquals(24, crossRegionEdges.size());
+      assertEquals(80, crossRegionEdges.size());
 
       assertTrue(edgeListContains(crossRegionEdges, connectionA, connectionE));
       assertTrue(edgeListContains(crossRegionEdges, connectionA, connectionEF));
@@ -573,7 +623,7 @@ public class VisibilityGraphTest
       Set<Connection> interRegionConnections = interRegionVisibilityMapInWorld.getConnections();
       Set<ConnectionPoint3D> interRegionVertices = interRegionVisibilityMapInWorld.getVertices();
 
-      assertEquals(24, interRegionConnections.size());
+      assertEquals(80, interRegionConnections.size());
       //TODO: Does it even make sense to hold the vertices here?
       assertEquals(0, interRegionVertices.size());
 
@@ -591,6 +641,45 @@ public class VisibilityGraphTest
       //      assertTrue(connectionsContain(interRegionConnections, connectionCD, connectionE));
       //      assertTrue(connectionsContain(interRegionConnections, connectionD, connectionEF));
       //      assertTrue(connectionsContain(interRegionConnections, connectionD, connectionE));
+      
+      
+      double searchHostEpsilon = 0.01;
+      visibilityGraph.setStart(new Point3D(0.1, 0.5, 0.005), searchHostEpsilon);
+
+      VisibilityGraphNode startNode = visibilityGraph.getStartNode();
+      assertEquals(77, startNode.getRegionId());
+      List<VisibilityGraphEdge> startEdges = visibilityGraph.getStartEdges();
+
+      Point2DReadOnly startInLocal = startNode.getPoint2DInLocal();
+      ConnectionPoint3D startInWorld = startNode.getPointInWorld();
+
+      assertTrue(startInLocal.epsilonEquals(new Point2D(0.1, 0.5), EPSILON));
+      assertTrue(startInWorld.epsilonEquals(new Point3D(0.1, 0.5, 0.0), EPSILON));
+
+      assertEquals(6, startEdges.size());
+
+      assertTrue(edgeListContains(startEdges, startInWorld , connectionA));
+      assertTrue(edgeListContains(startEdges, startInWorld , connectionAB));
+      assertTrue(edgeListContains(startEdges, startInWorld , connectionB));
+      
+      assertTrue(edgeListContains(startEdges, startInWorld , connectionE2));
+      assertTrue(edgeListContains(startEdges, startInWorld , connectionEF0));
+      assertTrue(edgeListContains(startEdges, startInWorld , connectionF0));
+
+      visibilityGraph.setGoal(new Point3D(0.5, 0.5, 0.053), searchHostEpsilon);
+
+      VisibilityGraphNode goalNode = visibilityGraph.getGoalNode();
+      assertEquals(63, goalNode.getRegionId());
+      List<VisibilityGraphEdge> goalEdges = visibilityGraph.getGoalEdges();
+
+      Point2DReadOnly goalInLocal = goalNode.getPoint2DInLocal();
+      ConnectionPoint3D goalInWorld = goalNode.getPointInWorld();
+
+      assertTrue(goalInLocal.epsilonEquals(new Point2D(0.5, 0.5), EPSILON));
+      assertTrue(goalInWorld.epsilonEquals(new Point3D(0.5, 0.5, height), EPSILON));
+
+      assertEquals(8, goalEdges.size());
+      assertEquals(6, startEdges.size());
    }
 
    private void printNodes(ArrayList<VisibilityGraphNode> nodes)
@@ -602,7 +691,7 @@ public class VisibilityGraphTest
       System.out.println();
    }
 
-   private boolean arePointsAllContainedIn(ArrayList<VisibilityGraphNode> nodes, ConnectionPoint3D... points)
+   private boolean arePointsAllContainedIn(List<VisibilityGraphNode> nodes, ConnectionPoint3D... points)
    {
       for (ConnectionPoint3D point : points)
       {
@@ -612,7 +701,7 @@ public class VisibilityGraphTest
       return true;
    }
 
-   private boolean nodesContainPoint(ArrayList<VisibilityGraphNode> nodes, ConnectionPoint3D point)
+   private boolean nodesContainPoint(List<VisibilityGraphNode> nodes, ConnectionPoint3D point)
    {
       for (VisibilityGraphNode node : nodes)
       {
@@ -642,7 +731,7 @@ public class VisibilityGraphTest
       return false;
    }
 
-   private void printEdges(ArrayList<VisibilityGraphEdge> edges)
+   private void printEdges(List<VisibilityGraphEdge> edges)
    {
       for (VisibilityGraphEdge edge : edges)
       {
@@ -652,7 +741,7 @@ public class VisibilityGraphTest
 
    }
 
-   private boolean edgeListContains(ArrayList<VisibilityGraphEdge> edges, ConnectionPoint3D pointOne, ConnectionPoint3D pointTwo)
+   private boolean edgeListContains(List<VisibilityGraphEdge> edges, ConnectionPoint3D pointOne, ConnectionPoint3D pointTwo)
    {
       for (VisibilityGraphEdge edge : edges)
       {

@@ -17,6 +17,8 @@ import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.pathPlanning.visibilityGraphs.clusterManagement.Cluster;
+import us.ihmc.pathPlanning.visibilityGraphs.clusterManagement.Cluster.ExtrusionSide;
+import us.ihmc.pathPlanning.visibilityGraphs.clusterManagement.Cluster.ClusterType;
 import us.ihmc.pathPlanning.visibilityGraphs.dataStructure.Connection;
 import us.ihmc.pathPlanning.visibilityGraphs.dataStructure.ConnectionPoint3D;
 import us.ihmc.robotics.geometry.PlanarRegion;
@@ -312,8 +314,6 @@ public class VisibilityToolsTest
       VisibilityTools.addCrossClusterVisibility(clusterOne, sourceNavigability, clusterTwo, targetNavigability, allClusters, mapId, connections);
 
       int index = 0;
-
-      printConnections(connections);
       assertConnectionEquals(pointA, pointE, connections.get(index++));
       assertConnectionEquals(pointB, pointE, connections.get(index++));
       assertConnectionEquals(pointB, pointH, connections.get(index++));
@@ -378,18 +378,45 @@ public class VisibilityToolsTest
       assertTrue(VisibilityTools.isPointVisibleForStaticMaps(clusters, pointC, pointH));
    }
 
-   
+   @Test(timeout = 30000)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
+   public void testIsPointVisibleForStaticMapsClosedPolygonVsOpenMultiLine()
+   {
+      Cluster keepOutClusterPolygon = new Cluster();
+      keepOutClusterPolygon.addNonNavigableExtrusionInLocal(new Point2D(0.0, 0.0));
+      keepOutClusterPolygon.addNonNavigableExtrusionInLocal(new Point2D(0.0, 1.0));
+      keepOutClusterPolygon.addNonNavigableExtrusionInLocal(new Point2D(1.0, 1.0));
+      keepOutClusterPolygon.addNonNavigableExtrusionInLocal(new Point2D(1.0, 0.0));
+
+      Cluster keepOutClusterMultiline = new Cluster(ExtrusionSide.INSIDE, ClusterType.MULTI_LINE);
+      keepOutClusterMultiline.addNonNavigableExtrusionInLocal(new Point2D(0.0, 0.0));
+      keepOutClusterMultiline.addNonNavigableExtrusionInLocal(new Point2D(0.0, 1.0));
+      keepOutClusterMultiline.addNonNavigableExtrusionInLocal(new Point2D(1.0, 1.0));
+      keepOutClusterMultiline.addNonNavigableExtrusionInLocal(new Point2D(1.0, 0.0));
+
+      Point2D pointOutside = new Point2D(0.5, -1.0);
+      Point2D pointInside = new Point2D(0.5, 0.5);
+
+      ArrayList<Cluster> polygonClusters = new ArrayList<>();
+      polygonClusters.add(keepOutClusterPolygon);
+      assertFalse(VisibilityTools.isPointVisibleForStaticMaps(polygonClusters, pointOutside, pointInside));
+
+      ArrayList<Cluster> multilineClusters = new ArrayList<>();
+      multilineClusters.add(keepOutClusterMultiline);
+      assertTrue(VisibilityTools.isPointVisibleForStaticMaps(multilineClusters, pointOutside, pointInside));
+   }
+
    @Test(timeout = 30000)
    @ContinuousIntegrationTest(estimatedDuration = 0.0)
    public void testRemoveConnectionsFromExtrusionsInsideNoGoZones()
    {
       Collection<Connection> connectionsToClean = new ArrayList<>();
-      
+
       ConnectionPoint3D pointA = new ConnectionPoint3D(0.0, 0.0, 0.0, 33);
       ConnectionPoint3D pointB = new ConnectionPoint3D(1.0, 0.0, 0.0, 33);
       ConnectionPoint3D pointC = new ConnectionPoint3D(1.0, 1.0, 0.0, 33);
       ConnectionPoint3D pointD = new ConnectionPoint3D(0.0, 1.0, 0.0, 33);
-      
+
       Connection connectionAB = new Connection(pointA, pointB);
       Connection connectionAC = new Connection(pointA, pointC);
       Connection connectionBD = new Connection(pointB, pointD);
@@ -397,39 +424,39 @@ public class VisibilityToolsTest
       Connection connectionCB = new Connection(pointC, pointB);
       Connection connectionDC = new Connection(pointD, pointC);
       Connection connectionDA = new Connection(pointD, pointA);
-      
+
       connectionsToClean.add(connectionAB);
       connectionsToClean.add(connectionAC);
       connectionsToClean.add(connectionBD);
-      connectionsToClean.add(connectionCA);      
-      connectionsToClean.add(connectionCB);      
-      connectionsToClean.add(connectionDC);      
-      connectionsToClean.add(connectionDA);      
-      
+      connectionsToClean.add(connectionCA);
+      connectionsToClean.add(connectionCB);
+      connectionsToClean.add(connectionDC);
+      connectionsToClean.add(connectionDA);
+
       List<Cluster> clusters = new ArrayList<>();
-      
+
       Cluster clusterOne = new Cluster();
       clusterOne.addNonNavigableExtrusionInLocal(new Point2D(-0.1, 0.5));
       clusterOne.addNonNavigableExtrusionInLocal(new Point2D(1.1, 0.5));
       clusters.add(clusterOne);
-      
+
       Cluster clusterTwo = new Cluster();
       clusterTwo.addNonNavigableExtrusionInLocal(new Point2D(0.9, 0.9));
       clusterTwo.addNonNavigableExtrusionInLocal(new Point2D(1.1, 0.9));
       clusterTwo.addNonNavigableExtrusionInLocal(new Point2D(1.1, 1.1));
       clusterTwo.addNonNavigableExtrusionInLocal(new Point2D(0.9, 1.1));
       clusters.add(clusterTwo);
-      
+
       List<Connection> filteredConnections = VisibilityTools.removeConnectionsFromExtrusionsInsideNoGoZones(connectionsToClean, clusters);
-      
+
       assertEquals(3, filteredConnections.size());
-      
+
       int index = 0;
       assertEquals(connectionAB, filteredConnections.get(index++));
       assertEquals(connectionBD, filteredConnections.get(index++));
       assertEquals(connectionDA, filteredConnections.get(index++));
    }
-   
+
    private PlanarRegion createAHomeRegionSquare(double xyMax)
    {
       RigidBodyTransform transformToWorld = new RigidBodyTransform();

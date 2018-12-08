@@ -64,6 +64,7 @@ public class Cluster
       return navigablePointsInsideHomeRegionInWorld;
    }
 
+   //TODO: Clean up and extract and give better name. If multi-line, does extrusion side even matter??
    public enum ExtrusionSide
    {
       INSIDE, OUTSIDE;
@@ -83,22 +84,22 @@ public class Cluster
       }
    };
 
-   private ExtrusionSide extrusionSide = ExtrusionSide.OUTSIDE;
+   private final ExtrusionSide extrusionSide;
 
-   public enum Type
+   public enum ClusterType
    {
       // Multi-Line means open at the end, not closed. 
       // Polygon is a closed, perhaps concave, polygon.
-      LINE, MULTI_LINE, POLYGON;
+      MULTI_LINE, POLYGON;
 
-      public static Type[] values = values();
+      public static ClusterType[] values = values();
 
       public byte toByte()
       {
          return (byte) ordinal();
       }
 
-      public static Type fromByte(byte enumAsByte)
+      public static ClusterType fromByte(byte enumAsByte)
       {
          if (enumAsByte == -1)
             return null;
@@ -106,10 +107,18 @@ public class Cluster
       }
    };
 
-   private Type type = Type.POLYGON;
+   //TODO: +++JEP: Try to make this final.
+   private ClusterType type;
 
    public Cluster()
    {
+      this(ExtrusionSide.OUTSIDE, ClusterType.POLYGON);
+   }
+   
+   public Cluster(ExtrusionSide extrusionSide, ClusterType type)
+   {
+      this.extrusionSide = extrusionSide;
+      this.type = type;
    }
 
    public void updateBoundingBox()
@@ -140,22 +149,27 @@ public class Cluster
       }
    }
 
-   public void setExtrusionSide(ExtrusionSide extrusionSide)
-   {
-      this.extrusionSide = extrusionSide;
-   }
+//   public void setExtrusionSide(ExtrusionSide extrusionSide)
+//   {
+//      this.extrusionSide = extrusionSide;
+//   }
 
    public ExtrusionSide getExtrusionSide()
    {
       return extrusionSide;
    }
 
-   public void setType(Type type)
+   public void setType(ClusterType type)
    {
       this.type = type;
    }
 
-   public Type getType()
+   public boolean isClosed()
+   {
+      return (type == ClusterType.POLYGON);
+   }
+
+   public ClusterType getType()
    {
       return type;
    }
@@ -359,4 +373,5 @@ public class Cluster
    {
       return new Point2D(toLocal3D(pointInWorld));
    }
+
 }

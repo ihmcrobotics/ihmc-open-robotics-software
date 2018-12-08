@@ -21,7 +21,7 @@ import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.pathPlanning.visibilityGraphs.clusterManagement.Cluster;
 import us.ihmc.pathPlanning.visibilityGraphs.clusterManagement.Cluster.ExtrusionSide;
-import us.ihmc.pathPlanning.visibilityGraphs.clusterManagement.Cluster.Type;
+import us.ihmc.pathPlanning.visibilityGraphs.clusterManagement.Cluster.ClusterType;
 import us.ihmc.pathPlanning.visibilityGraphs.interfaces.NavigableExtrusionDistanceCalculator;
 import us.ihmc.pathPlanning.visibilityGraphs.interfaces.ObstacleExtrusionDistanceCalculator;
 import us.ihmc.robotics.geometry.PlanarRegion;
@@ -358,11 +358,9 @@ public class ClusterTools
       RigidBodyTransform transformToWorld = new RigidBodyTransform();
       homeRegion.getTransformToWorld(transformToWorld);
 
-      Cluster homeRegionCluster = new Cluster();
-      homeRegionCluster.setType(Type.POLYGON);
+      Cluster homeRegionCluster = new Cluster(ExtrusionSide.INSIDE, ClusterType.POLYGON);
       homeRegionCluster.setTransformToWorld(transformToWorld);
       homeRegionCluster.addRawPointsInLocal2D(homeRegion.getConcaveHull());
-      homeRegionCluster.setExtrusionSide(ExtrusionSide.INSIDE);
 
       double extrusionDistance = calculator.computeExtrusionDistance(homeRegion);
 
@@ -397,8 +395,7 @@ public class ClusterTools
       {
          Vector3D otherNormal = obstacleRegion.getNormal();
 
-         Cluster cluster = new Cluster();
-         cluster.setExtrusionSide(ExtrusionSide.OUTSIDE);
+         Cluster cluster = new Cluster(ExtrusionSide.OUTSIDE, ClusterType.POLYGON);
          cluster.setTransformToWorld(transformFromHomeToWorld);
 
          List<Point3D> rawPointsInLocal = new ArrayList<>();
@@ -417,13 +414,13 @@ public class ClusterTools
          if (Math.abs(otherNormal.dot(referenceNormal)) < zThresholdBeforeOrthogonal)
          {
             // Project region as a line
-            cluster.setType(Type.MULTI_LINE);
+            cluster.setType(ClusterType.MULTI_LINE);
             cluster.addRawPointsInLocal3D(filterVerticalPolygonForMultiLineExtrusion(rawPointsInLocal, POPPING_MULTILINE_POINTS_THRESHOLD));
          }
          else
          {
             // Project region as a polygon
-            cluster.setType(Type.POLYGON);
+            cluster.setType(ClusterType.POLYGON);
             cluster.addRawPointsInLocal3D(rawPointsInLocal);
          }
 
@@ -442,10 +439,10 @@ public class ClusterTools
 
       switch (cluster.getType())
       {
-      case LINE:
       case MULTI_LINE:
          cluster.addNonNavigableExtrusionsInLocal(extrudeMultiLine(cluster, nonNavigableCalculator, numberOfExtrusionsAtEndpoints));
          cluster.addNavigableExtrusionsInLocal(extrudeMultiLine(cluster, navigableCalculator, numberOfExtrusionsAtEndpoints));
+         cluster.setType(ClusterType.POLYGON);
          break;
       case POLYGON:
          boolean extrudeToTheLeft = cluster.getExtrusionSide() != ExtrusionSide.INSIDE;
