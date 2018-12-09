@@ -3,7 +3,7 @@ package us.ihmc.robotics.time;
 import us.ihmc.commons.MathTools;
 import us.ihmc.euclid.tools.EuclidCoreIOTools;
 
-public class TimeInterval
+public class TimeInterval implements TimeIntervalBasics
 {
    private double startTime;
    private double endTime;
@@ -59,24 +59,20 @@ public class TimeInterval
       this.startTime = startTime;
       this.endTime = endTime;
    }
+
    public double getDuration()
    {
       return getEndTime() - getStartTime();
    }
 
-   public TimeInterval shiftInterval(double shiftTime)
+   public TimeIntervalBasics shiftInterval(double shiftTime)
    {
       this.startTime = getStartTime() + shiftTime;
       this.endTime = getEndTime() + shiftTime;
       return this;
    }
 
-   public void get(TimeInterval timeIntervalToPack)
-   {
-      timeIntervalToPack.set(this);
-   }
-
-   public void set(TimeInterval timeInterval)
+   public void set(TimeIntervalReadOnly timeInterval)
    {
       this.startTime = timeInterval.getStartTime();
       this.endTime = timeInterval.getEndTime();
@@ -97,12 +93,6 @@ public class TimeInterval
    @Override
    public String toString()
    {
-      return EuclidCoreIOTools.getStringOf("(", " )", ", ", startTime, endTime);
-   }
-
-   private void checkInterval()
-   {
-      if (endTime < startTime)
-         throw new IllegalArgumentException("The end time is not valid! End time " + endTime + " must be greater than start time " + startTime);
+      return EuclidCoreIOTools.getStringOf("(", " )", ", ", getStartTime(), getEndTime());
    }
 }
