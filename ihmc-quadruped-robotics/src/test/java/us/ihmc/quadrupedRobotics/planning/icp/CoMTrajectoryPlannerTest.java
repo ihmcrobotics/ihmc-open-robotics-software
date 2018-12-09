@@ -2,6 +2,7 @@ package us.ihmc.quadrupedRobotics.planning.icp;
 
 import org.junit.Test;
 import us.ihmc.commons.RandomNumbers;
+import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
@@ -20,7 +21,9 @@ import java.util.Random;
 public class CoMTrajectoryPlannerTest
 {
    private static final double epsilon = 1e-6;
-   @Test
+
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
+   @Test(timeout = 30000)
    public void testOneSimpleMovingSegmentInContact()
    {
       YoVariableRegistry registry = new YoVariableRegistry("test");
@@ -84,7 +87,8 @@ public class CoMTrajectoryPlannerTest
       }
    }
 
-   @Test
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
+   @Test(timeout = 30000)
    public void testOneMovingSegmentInContact()
    {
       YoVariableRegistry registry = new YoVariableRegistry("test");
@@ -144,7 +148,8 @@ public class CoMTrajectoryPlannerTest
       }
    }
 
-   @Test
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
+   @Test(timeout = 30000)
    public void testTwoMovingSegmentsInContact()
    {
       YoVariableRegistry registry = new YoVariableRegistry("test");
@@ -221,7 +226,8 @@ public class CoMTrajectoryPlannerTest
 
 
 
-   @Test
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
+   @Test(timeout = 30000)
    public void testManyMovingSegmentsInContact3D()
    {
       YoVariableRegistry registry = new YoVariableRegistry("test");
@@ -306,7 +312,8 @@ public class CoMTrajectoryPlannerTest
 
 
 
-   @Test
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
+   @Test(timeout = 30000)
    public void testTwoMovingSegmentsOneFlight()
    {
       YoVariableRegistry registry = new YoVariableRegistry("test");
