@@ -2,12 +2,10 @@ package us.ihmc.quadrupedRobotics.planning.icp;
 
 import org.junit.Test;
 import us.ihmc.commons.RandomNumbers;
-import us.ihmc.euclid.referenceFrame.FramePoint2D;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
 import us.ihmc.euclid.referenceFrame.tools.EuclidFrameRandomTools;
-import us.ihmc.euclid.tools.EuclidCoreRandomTools;
 import us.ihmc.euclid.tools.EuclidCoreTestTools;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.quadrupedBasics.gait.TimeInterval;
@@ -123,10 +121,7 @@ public class CoMTrajectoryPlannerTest
       planner.compute(1.0);
       EuclidCoreTestTools.assertPoint3DGeometricallyEquals(finalICP, planner.getDesiredDCMPosition(), epsilon);
 
-      FramePoint3D initialDCM = new FramePoint3D();
-      double interpolation = Math.exp(-omega.getDoubleValue());
-      initialDCM.interpolate(firstContact.getCopPosition(), secondContact.getCopPosition(), interpolation);
-      initialDCM.addZ(nominalHeight);
+      FramePoint3DReadOnly initialDCM = recursivelyComputeInitialDCM(contactSequence, nominalHeight, omega.getDoubleValue());
 
       planner.compute(0.0);
       EuclidCoreTestTools.assertPoint3DGeometricallyEquals(initialDCM, planner.getDesiredDCMPosition(), epsilon);
@@ -165,11 +160,11 @@ public class CoMTrajectoryPlannerTest
       QuadrupedContactPhase secondContact = new QuadrupedContactPhase();
       QuadrupedContactPhase thirdContact= new QuadrupedContactPhase();
 
-      firstContact.setTimeInterval(new TimeInterval(0.0, 1.0));
+      firstContact.setTimeInterval(new TimeInterval(0.0, 0.75));
       firstContact.setCopPosition(new FramePoint3D());
-      secondContact.setTimeInterval(new TimeInterval(1.0, 2.0));
+      secondContact.setTimeInterval(new TimeInterval(0.75, 1.9));
       secondContact.setCopPosition(new FramePoint3D(ReferenceFrame.getWorldFrame(), 1.0, 0.5, 0.0));
-      thirdContact.setTimeInterval(new TimeInterval(2.0, 3.0));
+      thirdContact.setTimeInterval(new TimeInterval(1.9, 3.0));
       thirdContact.setCopPosition(new FramePoint3D(ReferenceFrame.getWorldFrame(), 2.0, 0.0, 0.0));
 
       contactSequence.add(firstContact);
@@ -184,14 +179,7 @@ public class CoMTrajectoryPlannerTest
 
       EuclidCoreTestTools.assertPoint3DGeometricallyEquals(comPosition, planner.getDesiredCoMPosition(), epsilon);
 
-
-      FramePoint3D secondDCM = new FramePoint3D();
-      FramePoint3D initialDCM = new FramePoint3D();
-      double interpolation = Math.exp(-omega.getDoubleValue());
-      secondDCM.interpolate(secondContact.getCopPosition(), thirdContact.getCopPosition(), interpolation);
-      initialDCM.interpolate(firstContact.getCopPosition(), secondDCM, interpolation);
-      secondDCM.addZ(nominalHeight);
-      initialDCM.addZ(nominalHeight);
+      FramePoint3DReadOnly initialDCM = recursivelyComputeInitialDCM(contactSequence, nominalHeight, omega.getDoubleValue());
 
       EuclidCoreTestTools.assertPoint3DGeometricallyEquals(initialDCM, planner.getDesiredDCMPosition(), epsilon);
 
@@ -210,6 +198,24 @@ public class CoMTrajectoryPlannerTest
 
          EuclidCoreTestTools.assertPoint3DGeometricallyEquals(expectedDCM, planner.getDesiredDCMPosition(), epsilon);
       }
+   }
+
+   private FramePoint3DReadOnly recursivelyComputeInitialDCM(List<QuadrupedContactPhase> contactPhases, double nominalHeight, double omega)
+   {
+      int numberOfPhases = contactPhases.size();
+      FramePoint3D lastDCM = new FramePoint3D(contactPhases.get(numberOfPhases -1).getCopPosition());
+      lastDCM.addZ(nominalHeight);
+      FramePoint3D initialDCM = new FramePoint3D(lastDCM);
+      for (int i = numberOfPhases - 2; i >= 0; i--)
+      {
+         FramePoint3D vrp = new FramePoint3D(contactPhases.get(i).getCopPosition());
+         vrp.addZ(nominalHeight);
+
+         double exponential = Math.exp(-omega * contactPhases.get(i).getTimeInterval().getDuration());
+         initialDCM.interpolate(vrp, 1.0 - exponential);
+      }
+
+      return initialDCM;
    }
 
 
@@ -266,8 +272,6 @@ public class CoMTrajectoryPlannerTest
             currentStartTime += segmentDuration;
          }
 
-
-
          FramePoint3D initialCoMPosition = new FramePoint3D(startCoPPosition);
          initialCoMPosition.addZ(nominalHeight);
 
@@ -275,37 +279,27 @@ public class CoMTrajectoryPlannerTest
          planner.solveForTrajectory();
          planner.compute(0.0);
 
-         EuclidCoreTestTools.assertPoint3DGeometricallyEquals("iter = " + iter, initialCoMPosition, planner.getDesiredCoMPosition(), epsilon);
+         EuclidCoreTestTools.assertPoint3DGeometricallyEquals("iter = " + iter + ", Initial CoM is wrong.", initialCoMPosition, planner.getDesiredCoMPosition(), epsilon);
 
          FramePoint3DReadOnly desiredInitialDCM = planner.getDesiredDCMPosition();
 
-         FramePoint3D finalDCM = new FramePoint3D(contactSequence.get(numberOfContacts - 1).getCopPosition());
-         finalDCM.addZ(nominalHeight);
-         FramePoint3D currentDCM = new FramePoint3D(finalDCM);
-         for (int index = numberOfContacts - 1; index > 0; index--)
-         {
-            FramePoint3D vrp = new FramePoint3D(contactSequence.get(index - 1).getCopPosition());
-            vrp.addZ(nominalHeight);
-            double interpolation = Math.exp(-omega.getDoubleValue() * contactSequence.get(index).getTimeInterval().getDuration());
-
-            currentDCM.interpolate(vrp, 1.0 - interpolation);
-         }
-
-         EuclidCoreTestTools.assertPoint3DGeometricallyEquals("iter = " + iter, currentDCM, desiredInitialDCM, epsilon);
+         FramePoint3DReadOnly initialDCM = recursivelyComputeInitialDCM(contactSequence, nominalHeight, omega.getDoubleValue());
+         EuclidCoreTestTools.assertPoint3DGeometricallyEquals("iter = " + iter + ", Initial DCM is wrong.", initialDCM, desiredInitialDCM, epsilon);
 
          FramePoint3D initialVRP = new FramePoint3D(contactSequence.get(0).getCopPosition());
          initialVRP.addZ(nominalHeight);
 
          for (int i = 0; i < 100; i++)
          {
-            double time = RandomNumbers.nextDouble(random, 0.0, contactSequence.get(0).getTimeInterval().getDuration());
+            double time = RandomNumbers.nextDouble(random, contactSequence.get(0).getTimeInterval().getStartTime(),
+                                                   contactSequence.get(0).getTimeInterval().getEndTime());
             FramePoint3D expectedDCM = new FramePoint3D();
             double exponential = Math.exp(omega.getDoubleValue() * time);
-            expectedDCM.interpolate(initialVRP, currentDCM, exponential);
+            expectedDCM.interpolate(initialVRP, initialDCM, exponential);
 
             planner.compute(time);
 
-            EuclidCoreTestTools.assertPoint3DGeometricallyEquals(expectedDCM, planner.getDesiredDCMPosition(), epsilon);
+            EuclidCoreTestTools.assertPoint3DGeometricallyEquals("inner iter = " + i + ", iter = " + iter, expectedDCM, planner.getDesiredDCMPosition(), epsilon);
          }
       }
    }
