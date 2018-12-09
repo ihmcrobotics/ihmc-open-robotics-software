@@ -31,7 +31,7 @@ public class DCMBasedCoMPlanner
       contactSequence = new QuadrupedContactSequence(soleFrames, 4, 10);
       omega.set(Math.sqrt(gravity / nominalHeight));
 
-      comTrajectoryPlanner = new CoMTrajectoryPlanner(contactSequence, omega, registry);
+      comTrajectoryPlanner = new CoMTrajectoryPlanner(contactSequence, omega, gravity, nominalHeight, registry);
 
       parentRegistry.addChild(registry);
    }
@@ -52,8 +52,8 @@ public class DCMBasedCoMPlanner
       comTrajectoryPlanner.solveForTrajectory();
       comTrajectoryPlanner.compute(timeInPhase);
 
-      desiredDCMPositionToPack.set(comTrajectoryPlanner.getDesiredICPPosition());
-      desiredDCMVelocityToPack.set(comTrajectoryPlanner.getDesiredICPVelocity());
+      desiredDCMPositionToPack.set(comTrajectoryPlanner.getDesiredDCMPosition());
+      desiredDCMVelocityToPack.set(comTrajectoryPlanner.getDesiredDCMVelocity());
    }
 
    public void clearStepSequence()
