@@ -63,18 +63,21 @@ public class CoMTrajectoryPlannerTest
       planner.compute(0.0);
       EuclidCoreTestTools.assertPoint3DGeometricallyEquals(initialDCM, planner.getDesiredDCMPosition(), epsilon);
 
+      FramePoint3D initialVRP = new FramePoint3D();
+      initialVRP.set(firstContact.getCopPosition());
+      initialVRP.addZ(nominalHeight);
+
       Random random = new Random(1738L);
       for (int i = 0; i < 100; i++)
       {
          double time = RandomNumbers.nextDouble(random, 0.0, 1.0);
          FramePoint3D expectedDCM = new FramePoint3D();
          double exponential = Math.exp(omega.getDoubleValue() * time);
-         expectedDCM.interpolate(firstContact.getCopPosition(), initialDCM, exponential);
-         expectedDCM.addZ(nominalHeight);
+         expectedDCM.interpolate(initialVRP, initialDCM, exponential);
 
          planner.compute(time);
 
-         EuclidCoreTestTools.assertPoint3DGeometricallyEquals(expectedDCM, planner.getDesiredDCMPosition(), epsilon);
+         EuclidCoreTestTools.assertPoint3DGeometricallyEquals("time : " + time, expectedDCM, planner.getDesiredDCMPosition(), epsilon);
       }
    }
 
@@ -123,14 +126,16 @@ public class CoMTrajectoryPlannerTest
 
       EuclidCoreTestTools.assertPoint3DGeometricallyEquals(initialDCM, planner.getDesiredDCMPosition(), epsilon);
 
+      FramePoint3D initialVRP = new FramePoint3D(firstContact.getCopPosition());
+      initialVRP.addZ(nominalHeight);
+
       Random random = new Random(1738L);
       for (int i = 0; i < 100; i++)
       {
          double time = RandomNumbers.nextDouble(random, 0.0, 1.0);
          FramePoint3D expectedDCM = new FramePoint3D();
          double exponential = Math.exp(omega.getDoubleValue() * time);
-         expectedDCM.interpolate(firstContact.getCopPosition(), initialDCM, exponential);
-         expectedDCM.addZ(nominalHeight);
+         expectedDCM.interpolate(initialVRP, initialDCM, exponential);
 
          planner.compute(time);
 
