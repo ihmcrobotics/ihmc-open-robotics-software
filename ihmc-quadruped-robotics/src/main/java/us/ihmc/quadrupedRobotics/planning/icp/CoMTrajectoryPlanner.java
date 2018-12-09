@@ -79,6 +79,14 @@ public class CoMTrajectoryPlanner
       yCoefficientVector.reshape(size, 1);
       zCoefficientVector.reshape(size, 1);
 
+      coefficientMultipliers.zero();
+      xCoefficientConstants.zero();
+      yCoefficientConstants.zero();
+      zCoefficientConstants.zero();
+      xCoefficientVector.zero();
+      yCoefficientVector.zero();
+      zCoefficientVector.zero();
+
       int numberOfPhases = contactSequence.size();
       int numberOfTransitions = numberOfPhases - 1;
 
