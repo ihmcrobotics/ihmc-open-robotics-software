@@ -21,7 +21,7 @@ import us.ihmc.humanoidRobotics.communication.controllerAPI.converter.ClearDelay
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelControllerName;
 import us.ihmc.humanoidRobotics.communication.packets.sensing.StateEstimatorMode;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
-import us.ihmc.quadrupedRobotics.communication.QuadrupedControllerAPIDefinition;
+import us.ihmc.quadrupedCommunication.QuadrupedControllerAPIDefinition;
 import us.ihmc.quadrupedRobotics.controlModules.QuadrupedControlManagerFactory;
 import us.ihmc.quadrupedRobotics.controller.states.QuadrupedExitWalkingControllerState;
 import us.ihmc.quadrupedRobotics.controller.states.QuadrupedSitDownControllerState;
