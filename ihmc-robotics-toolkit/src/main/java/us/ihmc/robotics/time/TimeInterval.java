@@ -10,20 +10,20 @@ public class TimeInterval
 
    public TimeInterval()
    {
-      this.startTime = 0;
-      this.endTime = 0;
+      this(0.0, 0.0);
    }
 
    public TimeInterval(TimeInterval timeInterval)
    {
-      this.startTime = timeInterval.startTime;
-      this.endTime = timeInterval.endTime;
+      this(timeInterval.getStartTime(), timeInterval.getEndTime());
    }
 
    public TimeInterval(double startTime, double endTime)
    {
       this.startTime = startTime;
       this.endTime = endTime;
+
+      checkInterval();
    }
 
    public double getStartTime()
@@ -31,6 +31,10 @@ public class TimeInterval
       return startTime;
    }
 
+   /**
+    * Use the interval setter when using this method! Otherwise, an incorrect interval may be set.
+    */
+   @Deprecated
    public void setStartTime(double startTime)
    {
       this.startTime = startTime;
@@ -41,6 +45,10 @@ public class TimeInterval
       return endTime;
    }
 
+   /**
+    * Use the interval setter when using this method! Otherwise, an incorrect interval may be set.
+    */
+   @Deprecated
    public void setEndTime(double endTime)
    {
       this.endTime = endTime;
@@ -48,8 +56,8 @@ public class TimeInterval
 
    public void setInterval(double startTime, double endTime)
    {
-      setStartTime(startTime);
-      setEndTime(endTime);
+      this.startTime = startTime;
+      this.endTime = endTime;
    }
    public double getDuration()
    {
@@ -58,21 +66,22 @@ public class TimeInterval
 
    public TimeInterval shiftInterval(double shiftTime)
    {
-      setStartTime(getStartTime() + shiftTime);
-      setEndTime(getEndTime() + shiftTime);
+      this.startTime = getStartTime() + shiftTime;
+      this.endTime = getEndTime() + shiftTime;
       return this;
    }
 
-   public void get(TimeInterval timeInterval)
+   public void get(TimeInterval timeIntervalToPack)
    {
-      timeInterval.setStartTime(getStartTime());
-      timeInterval.setEndTime(getEndTime());
+      timeIntervalToPack.set(this);
    }
 
    public void set(TimeInterval timeInterval)
    {
-      setStartTime(timeInterval.getStartTime());
-      setEndTime(timeInterval.getEndTime());
+      this.startTime = timeInterval.getStartTime();
+      this.endTime = timeInterval.getEndTime();
+
+      checkInterval();
    }
 
    public boolean epsilonEquals(TimeInterval other, double epsilon)
@@ -89,5 +98,11 @@ public class TimeInterval
    public String toString()
    {
       return EuclidCoreIOTools.getStringOf("(", " )", ", ", startTime, endTime);
+   }
+
+   private void checkInterval()
+   {
+      if (endTime < startTime)
+         throw new IllegalArgumentException("The end time is not valid! End time " + endTime + " must be greater than start time " + startTime);
    }
 }
