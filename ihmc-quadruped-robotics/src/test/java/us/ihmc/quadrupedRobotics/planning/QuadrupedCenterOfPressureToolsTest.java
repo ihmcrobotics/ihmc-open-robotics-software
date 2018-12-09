@@ -72,5 +72,382 @@ public class QuadrupedCenterOfPressureToolsTest
 
       assertEquals(0.0, normalizedContactPressures.get(RobotQuadrant.FRONT_RIGHT).getValue(), epsilon);
       assertEquals(0.0, normalizedContactPressures2.get(RobotQuadrant.FRONT_RIGHT).getValue(), epsilon);
+
+
+      // back two and front left in contact
+      feetInContact.clear();
+      feetInContact.add(RobotQuadrant.FRONT_RIGHT);
+      feetInContact.add(RobotQuadrant.HIND_LEFT);
+      feetInContact.add(RobotQuadrant.HIND_RIGHT);
+
+      contactStates.clear();
+      contactStates.put(RobotQuadrant.FRONT_LEFT, ContactState.NO_CONTACT);
+      contactStates.put(RobotQuadrant.FRONT_RIGHT, ContactState.IN_CONTACT);
+      contactStates.put(RobotQuadrant.HIND_LEFT, ContactState.IN_CONTACT);
+      contactStates.put(RobotQuadrant.HIND_RIGHT, ContactState.IN_CONTACT);
+
+      QuadrupedCenterOfPressureTools.computeNominalNormalizedContactPressure(normalizedContactPressures, contactStates);
+      QuadrupedCenterOfPressureTools.computeNominalNormalizedContactPressure(normalizedContactPressures2, feetInContact);
+
+      assertEquals(0.25, normalizedContactPressures.get(RobotQuadrant.HIND_LEFT).getValue(), epsilon);
+      assertEquals(0.25, normalizedContactPressures2.get(RobotQuadrant.HIND_LEFT).getValue(), epsilon);
+
+      assertEquals(0.25, normalizedContactPressures.get(RobotQuadrant.HIND_RIGHT).getValue(), epsilon);
+      assertEquals(0.25, normalizedContactPressures2.get(RobotQuadrant.HIND_RIGHT).getValue(), epsilon);
+
+      assertEquals(0.0, normalizedContactPressures.get(RobotQuadrant.FRONT_LEFT).getValue(), epsilon);
+      assertEquals(0.0, normalizedContactPressures2.get(RobotQuadrant.FRONT_LEFT).getValue(), epsilon);
+
+      assertEquals(0.5, normalizedContactPressures.get(RobotQuadrant.FRONT_RIGHT).getValue(), epsilon);
+      assertEquals(0.5, normalizedContactPressures2.get(RobotQuadrant.FRONT_RIGHT).getValue(), epsilon);
+
+
+
+      // front two and back right in contact
+      feetInContact.clear();
+      feetInContact.add(RobotQuadrant.FRONT_LEFT);
+      feetInContact.add(RobotQuadrant.FRONT_RIGHT);
+      feetInContact.add(RobotQuadrant.HIND_RIGHT);
+
+      contactStates.clear();
+      contactStates.put(RobotQuadrant.FRONT_LEFT, ContactState.IN_CONTACT);
+      contactStates.put(RobotQuadrant.FRONT_RIGHT, ContactState.IN_CONTACT);
+      contactStates.put(RobotQuadrant.HIND_LEFT, ContactState.NO_CONTACT);
+      contactStates.put(RobotQuadrant.HIND_RIGHT, ContactState.IN_CONTACT);
+
+      QuadrupedCenterOfPressureTools.computeNominalNormalizedContactPressure(normalizedContactPressures, contactStates);
+      QuadrupedCenterOfPressureTools.computeNominalNormalizedContactPressure(normalizedContactPressures2, feetInContact);
+
+      assertEquals(0.0, normalizedContactPressures.get(RobotQuadrant.HIND_LEFT).getValue(), epsilon);
+      assertEquals(0.0, normalizedContactPressures2.get(RobotQuadrant.HIND_LEFT).getValue(), epsilon);
+
+      assertEquals(0.5, normalizedContactPressures.get(RobotQuadrant.HIND_RIGHT).getValue(), epsilon);
+      assertEquals(0.5, normalizedContactPressures2.get(RobotQuadrant.HIND_RIGHT).getValue(), epsilon);
+
+      assertEquals(0.25, normalizedContactPressures.get(RobotQuadrant.FRONT_LEFT).getValue(), epsilon);
+      assertEquals(0.25, normalizedContactPressures2.get(RobotQuadrant.FRONT_LEFT).getValue(), epsilon);
+
+      assertEquals(0.25, normalizedContactPressures.get(RobotQuadrant.FRONT_RIGHT).getValue(), epsilon);
+      assertEquals(0.25, normalizedContactPressures2.get(RobotQuadrant.FRONT_RIGHT).getValue(), epsilon);
+
+
+      // front two and back left in contact
+      feetInContact.clear();
+      feetInContact.add(RobotQuadrant.FRONT_LEFT);
+      feetInContact.add(RobotQuadrant.FRONT_RIGHT);
+      feetInContact.add(RobotQuadrant.HIND_LEFT);
+
+      contactStates.clear();
+      contactStates.put(RobotQuadrant.FRONT_LEFT, ContactState.IN_CONTACT);
+      contactStates.put(RobotQuadrant.FRONT_RIGHT, ContactState.IN_CONTACT);
+      contactStates.put(RobotQuadrant.HIND_LEFT, ContactState.IN_CONTACT);
+      contactStates.put(RobotQuadrant.HIND_RIGHT, ContactState.NO_CONTACT);
+
+      QuadrupedCenterOfPressureTools.computeNominalNormalizedContactPressure(normalizedContactPressures, contactStates);
+      QuadrupedCenterOfPressureTools.computeNominalNormalizedContactPressure(normalizedContactPressures2, feetInContact);
+
+      assertEquals(0.5, normalizedContactPressures.get(RobotQuadrant.HIND_LEFT).getValue(), epsilon);
+      assertEquals(0.5, normalizedContactPressures2.get(RobotQuadrant.HIND_LEFT).getValue(), epsilon);
+
+      assertEquals(0.0, normalizedContactPressures.get(RobotQuadrant.HIND_RIGHT).getValue(), epsilon);
+      assertEquals(0.0, normalizedContactPressures2.get(RobotQuadrant.HIND_RIGHT).getValue(), epsilon);
+
+      assertEquals(0.25, normalizedContactPressures.get(RobotQuadrant.FRONT_LEFT).getValue(), epsilon);
+      assertEquals(0.25, normalizedContactPressures2.get(RobotQuadrant.FRONT_LEFT).getValue(), epsilon);
+
+      assertEquals(0.25, normalizedContactPressures.get(RobotQuadrant.FRONT_RIGHT).getValue(), epsilon);
+      assertEquals(0.25, normalizedContactPressures2.get(RobotQuadrant.FRONT_RIGHT).getValue(), epsilon);
+
+
+
+
+      // front two in contact
+      feetInContact.clear();
+      feetInContact.add(RobotQuadrant.FRONT_LEFT);
+      feetInContact.add(RobotQuadrant.FRONT_RIGHT);
+
+      contactStates.clear();
+      contactStates.put(RobotQuadrant.FRONT_LEFT, ContactState.IN_CONTACT);
+      contactStates.put(RobotQuadrant.FRONT_RIGHT, ContactState.IN_CONTACT);
+      contactStates.put(RobotQuadrant.HIND_LEFT, ContactState.NO_CONTACT);
+      contactStates.put(RobotQuadrant.HIND_RIGHT, ContactState.NO_CONTACT);
+
+      QuadrupedCenterOfPressureTools.computeNominalNormalizedContactPressure(normalizedContactPressures, contactStates);
+      QuadrupedCenterOfPressureTools.computeNominalNormalizedContactPressure(normalizedContactPressures2, feetInContact);
+
+      assertEquals(0.0, normalizedContactPressures.get(RobotQuadrant.HIND_LEFT).getValue(), epsilon);
+      assertEquals(0.0, normalizedContactPressures2.get(RobotQuadrant.HIND_LEFT).getValue(), epsilon);
+
+      assertEquals(0.0, normalizedContactPressures.get(RobotQuadrant.HIND_RIGHT).getValue(), epsilon);
+      assertEquals(0.0, normalizedContactPressures2.get(RobotQuadrant.HIND_RIGHT).getValue(), epsilon);
+
+      assertEquals(0.5, normalizedContactPressures.get(RobotQuadrant.FRONT_LEFT).getValue(), epsilon);
+      assertEquals(0.5, normalizedContactPressures2.get(RobotQuadrant.FRONT_LEFT).getValue(), epsilon);
+
+      assertEquals(0.5, normalizedContactPressures.get(RobotQuadrant.FRONT_RIGHT).getValue(), epsilon);
+      assertEquals(0.5, normalizedContactPressures2.get(RobotQuadrant.FRONT_RIGHT).getValue(), epsilon);
+
+      // back two in contact
+      feetInContact.clear();
+      feetInContact.add(RobotQuadrant.HIND_LEFT);
+      feetInContact.add(RobotQuadrant.HIND_RIGHT);
+
+      contactStates.clear();
+      contactStates.put(RobotQuadrant.FRONT_LEFT, ContactState.NO_CONTACT);
+      contactStates.put(RobotQuadrant.FRONT_RIGHT, ContactState.NO_CONTACT);
+      contactStates.put(RobotQuadrant.HIND_LEFT, ContactState.IN_CONTACT);
+      contactStates.put(RobotQuadrant.HIND_RIGHT, ContactState.IN_CONTACT);
+
+      QuadrupedCenterOfPressureTools.computeNominalNormalizedContactPressure(normalizedContactPressures, contactStates);
+      QuadrupedCenterOfPressureTools.computeNominalNormalizedContactPressure(normalizedContactPressures2, feetInContact);
+
+      assertEquals(0.5, normalizedContactPressures.get(RobotQuadrant.HIND_LEFT).getValue(), epsilon);
+      assertEquals(0.5, normalizedContactPressures2.get(RobotQuadrant.HIND_LEFT).getValue(), epsilon);
+
+      assertEquals(0.5, normalizedContactPressures.get(RobotQuadrant.HIND_RIGHT).getValue(), epsilon);
+      assertEquals(0.5, normalizedContactPressures2.get(RobotQuadrant.HIND_RIGHT).getValue(), epsilon);
+
+      assertEquals(0.0, normalizedContactPressures.get(RobotQuadrant.FRONT_LEFT).getValue(), epsilon);
+      assertEquals(0.0, normalizedContactPressures2.get(RobotQuadrant.FRONT_LEFT).getValue(), epsilon);
+
+      assertEquals(0.0, normalizedContactPressures.get(RobotQuadrant.FRONT_RIGHT).getValue(), epsilon);
+      assertEquals(0.0, normalizedContactPressures2.get(RobotQuadrant.FRONT_RIGHT).getValue(), epsilon);
+
+
+      // left two in contact
+      feetInContact.clear();
+      feetInContact.add(RobotQuadrant.HIND_LEFT);
+      feetInContact.add(RobotQuadrant.FRONT_LEFT);
+
+      contactStates.clear();
+      contactStates.put(RobotQuadrant.FRONT_LEFT, ContactState.IN_CONTACT);
+      contactStates.put(RobotQuadrant.FRONT_RIGHT, ContactState.NO_CONTACT);
+      contactStates.put(RobotQuadrant.HIND_LEFT, ContactState.IN_CONTACT);
+      contactStates.put(RobotQuadrant.HIND_RIGHT, ContactState.NO_CONTACT);
+
+      QuadrupedCenterOfPressureTools.computeNominalNormalizedContactPressure(normalizedContactPressures, contactStates);
+      QuadrupedCenterOfPressureTools.computeNominalNormalizedContactPressure(normalizedContactPressures2, feetInContact);
+
+      assertEquals(0.5, normalizedContactPressures.get(RobotQuadrant.HIND_LEFT).getValue(), epsilon);
+      assertEquals(0.5, normalizedContactPressures2.get(RobotQuadrant.HIND_LEFT).getValue(), epsilon);
+
+      assertEquals(0.0, normalizedContactPressures.get(RobotQuadrant.HIND_RIGHT).getValue(), epsilon);
+      assertEquals(0.0, normalizedContactPressures2.get(RobotQuadrant.HIND_RIGHT).getValue(), epsilon);
+
+      assertEquals(0.5, normalizedContactPressures.get(RobotQuadrant.FRONT_LEFT).getValue(), epsilon);
+      assertEquals(0.5, normalizedContactPressures2.get(RobotQuadrant.FRONT_LEFT).getValue(), epsilon);
+
+      assertEquals(0.0, normalizedContactPressures.get(RobotQuadrant.FRONT_RIGHT).getValue(), epsilon);
+      assertEquals(0.0, normalizedContactPressures2.get(RobotQuadrant.FRONT_RIGHT).getValue(), epsilon);
+
+      // right two in contact
+      feetInContact.clear();
+      feetInContact.add(RobotQuadrant.HIND_RIGHT);
+      feetInContact.add(RobotQuadrant.FRONT_RIGHT);
+
+      contactStates.clear();
+      contactStates.put(RobotQuadrant.FRONT_LEFT, ContactState.NO_CONTACT);
+      contactStates.put(RobotQuadrant.FRONT_RIGHT, ContactState.IN_CONTACT);
+      contactStates.put(RobotQuadrant.HIND_LEFT, ContactState.NO_CONTACT);
+      contactStates.put(RobotQuadrant.HIND_RIGHT, ContactState.IN_CONTACT);
+
+      QuadrupedCenterOfPressureTools.computeNominalNormalizedContactPressure(normalizedContactPressures, contactStates);
+      QuadrupedCenterOfPressureTools.computeNominalNormalizedContactPressure(normalizedContactPressures2, feetInContact);
+
+      assertEquals(0.0, normalizedContactPressures.get(RobotQuadrant.HIND_LEFT).getValue(), epsilon);
+      assertEquals(0.0, normalizedContactPressures2.get(RobotQuadrant.HIND_LEFT).getValue(), epsilon);
+
+      assertEquals(0.5, normalizedContactPressures.get(RobotQuadrant.HIND_RIGHT).getValue(), epsilon);
+      assertEquals(0.5, normalizedContactPressures2.get(RobotQuadrant.HIND_RIGHT).getValue(), epsilon);
+
+      assertEquals(0.0, normalizedContactPressures.get(RobotQuadrant.FRONT_LEFT).getValue(), epsilon);
+      assertEquals(0.0, normalizedContactPressures2.get(RobotQuadrant.FRONT_LEFT).getValue(), epsilon);
+
+      assertEquals(0.5, normalizedContactPressures.get(RobotQuadrant.FRONT_RIGHT).getValue(), epsilon);
+      assertEquals(0.5, normalizedContactPressures2.get(RobotQuadrant.FRONT_RIGHT).getValue(), epsilon);
+
+
+      // front left hind right in contact
+      feetInContact.clear();
+      feetInContact.add(RobotQuadrant.HIND_RIGHT);
+      feetInContact.add(RobotQuadrant.FRONT_LEFT);
+
+      contactStates.clear();
+      contactStates.put(RobotQuadrant.FRONT_LEFT, ContactState.IN_CONTACT);
+      contactStates.put(RobotQuadrant.FRONT_RIGHT, ContactState.NO_CONTACT);
+      contactStates.put(RobotQuadrant.HIND_LEFT, ContactState.NO_CONTACT);
+      contactStates.put(RobotQuadrant.HIND_RIGHT, ContactState.IN_CONTACT);
+
+      QuadrupedCenterOfPressureTools.computeNominalNormalizedContactPressure(normalizedContactPressures, contactStates);
+      QuadrupedCenterOfPressureTools.computeNominalNormalizedContactPressure(normalizedContactPressures2, feetInContact);
+
+      assertEquals(0.0, normalizedContactPressures.get(RobotQuadrant.HIND_LEFT).getValue(), epsilon);
+      assertEquals(0.0, normalizedContactPressures2.get(RobotQuadrant.HIND_LEFT).getValue(), epsilon);
+
+      assertEquals(0.5, normalizedContactPressures.get(RobotQuadrant.HIND_RIGHT).getValue(), epsilon);
+      assertEquals(0.5, normalizedContactPressures2.get(RobotQuadrant.HIND_RIGHT).getValue(), epsilon);
+
+      assertEquals(0.5, normalizedContactPressures.get(RobotQuadrant.FRONT_LEFT).getValue(), epsilon);
+      assertEquals(0.5, normalizedContactPressures2.get(RobotQuadrant.FRONT_LEFT).getValue(), epsilon);
+
+      assertEquals(0.0, normalizedContactPressures.get(RobotQuadrant.FRONT_RIGHT).getValue(), epsilon);
+      assertEquals(0.0, normalizedContactPressures2.get(RobotQuadrant.FRONT_RIGHT).getValue(), epsilon);
+
+
+
+      // front right hind left in contact
+      feetInContact.clear();
+      feetInContact.add(RobotQuadrant.HIND_LEFT);
+      feetInContact.add(RobotQuadrant.FRONT_RIGHT);
+
+      contactStates.clear();
+      contactStates.put(RobotQuadrant.FRONT_LEFT, ContactState.NO_CONTACT);
+      contactStates.put(RobotQuadrant.FRONT_RIGHT, ContactState.IN_CONTACT);
+      contactStates.put(RobotQuadrant.HIND_LEFT, ContactState.IN_CONTACT);
+      contactStates.put(RobotQuadrant.HIND_RIGHT, ContactState.NO_CONTACT);
+
+      QuadrupedCenterOfPressureTools.computeNominalNormalizedContactPressure(normalizedContactPressures, contactStates);
+      QuadrupedCenterOfPressureTools.computeNominalNormalizedContactPressure(normalizedContactPressures2, feetInContact);
+
+      assertEquals(0.5, normalizedContactPressures.get(RobotQuadrant.HIND_LEFT).getValue(), epsilon);
+      assertEquals(0.5, normalizedContactPressures2.get(RobotQuadrant.HIND_LEFT).getValue(), epsilon);
+
+      assertEquals(0.0, normalizedContactPressures.get(RobotQuadrant.HIND_RIGHT).getValue(), epsilon);
+      assertEquals(0.0, normalizedContactPressures2.get(RobotQuadrant.HIND_RIGHT).getValue(), epsilon);
+
+      assertEquals(0.0, normalizedContactPressures.get(RobotQuadrant.FRONT_LEFT).getValue(), epsilon);
+      assertEquals(0.0, normalizedContactPressures2.get(RobotQuadrant.FRONT_LEFT).getValue(), epsilon);
+
+      assertEquals(0.5, normalizedContactPressures.get(RobotQuadrant.FRONT_RIGHT).getValue(), epsilon);
+      assertEquals(0.5, normalizedContactPressures2.get(RobotQuadrant.FRONT_RIGHT).getValue(), epsilon);
+
+
+
+      // hind left in contact
+      feetInContact.clear();
+      feetInContact.add(RobotQuadrant.HIND_LEFT);
+
+      contactStates.clear();
+      contactStates.put(RobotQuadrant.FRONT_LEFT, ContactState.NO_CONTACT);
+      contactStates.put(RobotQuadrant.FRONT_RIGHT, ContactState.NO_CONTACT);
+      contactStates.put(RobotQuadrant.HIND_LEFT, ContactState.IN_CONTACT);
+      contactStates.put(RobotQuadrant.HIND_RIGHT, ContactState.NO_CONTACT);
+
+      QuadrupedCenterOfPressureTools.computeNominalNormalizedContactPressure(normalizedContactPressures, contactStates);
+      QuadrupedCenterOfPressureTools.computeNominalNormalizedContactPressure(normalizedContactPressures2, feetInContact);
+
+      assertEquals(1.0, normalizedContactPressures.get(RobotQuadrant.HIND_LEFT).getValue(), epsilon);
+      assertEquals(1.0, normalizedContactPressures2.get(RobotQuadrant.HIND_LEFT).getValue(), epsilon);
+
+      assertEquals(0.0, normalizedContactPressures.get(RobotQuadrant.HIND_RIGHT).getValue(), epsilon);
+      assertEquals(0.0, normalizedContactPressures2.get(RobotQuadrant.HIND_RIGHT).getValue(), epsilon);
+
+      assertEquals(0.0, normalizedContactPressures.get(RobotQuadrant.FRONT_LEFT).getValue(), epsilon);
+      assertEquals(0.0, normalizedContactPressures2.get(RobotQuadrant.FRONT_LEFT).getValue(), epsilon);
+
+      assertEquals(0.0, normalizedContactPressures.get(RobotQuadrant.FRONT_RIGHT).getValue(), epsilon);
+      assertEquals(0.0, normalizedContactPressures2.get(RobotQuadrant.FRONT_RIGHT).getValue(), epsilon);
+
+
+      // hind right in contact
+      feetInContact.clear();
+      feetInContact.add(RobotQuadrant.HIND_RIGHT);
+
+      contactStates.clear();
+      contactStates.put(RobotQuadrant.FRONT_LEFT, ContactState.NO_CONTACT);
+      contactStates.put(RobotQuadrant.FRONT_RIGHT, ContactState.NO_CONTACT);
+      contactStates.put(RobotQuadrant.HIND_LEFT, ContactState.NO_CONTACT);
+      contactStates.put(RobotQuadrant.HIND_RIGHT, ContactState.IN_CONTACT);
+
+      QuadrupedCenterOfPressureTools.computeNominalNormalizedContactPressure(normalizedContactPressures, contactStates);
+      QuadrupedCenterOfPressureTools.computeNominalNormalizedContactPressure(normalizedContactPressures2, feetInContact);
+
+      assertEquals(0.0, normalizedContactPressures.get(RobotQuadrant.HIND_LEFT).getValue(), epsilon);
+      assertEquals(0.0, normalizedContactPressures2.get(RobotQuadrant.HIND_LEFT).getValue(), epsilon);
+
+      assertEquals(1.0, normalizedContactPressures.get(RobotQuadrant.HIND_RIGHT).getValue(), epsilon);
+      assertEquals(1.0, normalizedContactPressures2.get(RobotQuadrant.HIND_RIGHT).getValue(), epsilon);
+
+      assertEquals(0.0, normalizedContactPressures.get(RobotQuadrant.FRONT_LEFT).getValue(), epsilon);
+      assertEquals(0.0, normalizedContactPressures2.get(RobotQuadrant.FRONT_LEFT).getValue(), epsilon);
+
+      assertEquals(0.0, normalizedContactPressures.get(RobotQuadrant.FRONT_RIGHT).getValue(), epsilon);
+      assertEquals(0.0, normalizedContactPressures2.get(RobotQuadrant.FRONT_RIGHT).getValue(), epsilon);
+
+
+      // front left in contact
+      feetInContact.clear();
+      feetInContact.add(RobotQuadrant.FRONT_LEFT);
+
+      contactStates.clear();
+      contactStates.put(RobotQuadrant.FRONT_LEFT, ContactState.IN_CONTACT);
+      contactStates.put(RobotQuadrant.FRONT_RIGHT, ContactState.NO_CONTACT);
+      contactStates.put(RobotQuadrant.HIND_LEFT, ContactState.NO_CONTACT);
+      contactStates.put(RobotQuadrant.HIND_RIGHT, ContactState.NO_CONTACT);
+
+      QuadrupedCenterOfPressureTools.computeNominalNormalizedContactPressure(normalizedContactPressures, contactStates);
+      QuadrupedCenterOfPressureTools.computeNominalNormalizedContactPressure(normalizedContactPressures2, feetInContact);
+
+      assertEquals(0.0, normalizedContactPressures.get(RobotQuadrant.HIND_LEFT).getValue(), epsilon);
+      assertEquals(0.0, normalizedContactPressures2.get(RobotQuadrant.HIND_LEFT).getValue(), epsilon);
+
+      assertEquals(0.0, normalizedContactPressures.get(RobotQuadrant.HIND_RIGHT).getValue(), epsilon);
+      assertEquals(0.0, normalizedContactPressures2.get(RobotQuadrant.HIND_RIGHT).getValue(), epsilon);
+
+      assertEquals(1.0, normalizedContactPressures.get(RobotQuadrant.FRONT_LEFT).getValue(), epsilon);
+      assertEquals(1.0, normalizedContactPressures2.get(RobotQuadrant.FRONT_LEFT).getValue(), epsilon);
+
+      assertEquals(0.0, normalizedContactPressures.get(RobotQuadrant.FRONT_RIGHT).getValue(), epsilon);
+      assertEquals(0.0, normalizedContactPressures2.get(RobotQuadrant.FRONT_RIGHT).getValue(), epsilon);
+
+      // front right in contact
+      feetInContact.clear();
+      feetInContact.add(RobotQuadrant.FRONT_RIGHT);
+
+      contactStates.clear();
+      contactStates.put(RobotQuadrant.FRONT_LEFT, ContactState.NO_CONTACT);
+      contactStates.put(RobotQuadrant.FRONT_RIGHT, ContactState.IN_CONTACT);
+      contactStates.put(RobotQuadrant.HIND_LEFT, ContactState.NO_CONTACT);
+      contactStates.put(RobotQuadrant.HIND_RIGHT, ContactState.NO_CONTACT);
+
+      QuadrupedCenterOfPressureTools.computeNominalNormalizedContactPressure(normalizedContactPressures, contactStates);
+      QuadrupedCenterOfPressureTools.computeNominalNormalizedContactPressure(normalizedContactPressures2, feetInContact);
+
+      assertEquals(0.0, normalizedContactPressures.get(RobotQuadrant.HIND_LEFT).getValue(), epsilon);
+      assertEquals(0.0, normalizedContactPressures2.get(RobotQuadrant.HIND_LEFT).getValue(), epsilon);
+
+      assertEquals(0.0, normalizedContactPressures.get(RobotQuadrant.HIND_RIGHT).getValue(), epsilon);
+      assertEquals(0.0, normalizedContactPressures2.get(RobotQuadrant.HIND_RIGHT).getValue(), epsilon);
+
+      assertEquals(0.0, normalizedContactPressures.get(RobotQuadrant.FRONT_LEFT).getValue(), epsilon);
+      assertEquals(0.0, normalizedContactPressures2.get(RobotQuadrant.FRONT_LEFT).getValue(), epsilon);
+
+      assertEquals(1.0, normalizedContactPressures.get(RobotQuadrant.FRONT_RIGHT).getValue(), epsilon);
+      assertEquals(1.0, normalizedContactPressures2.get(RobotQuadrant.FRONT_RIGHT).getValue(), epsilon);
+
+
+      // no contact
+      feetInContact.clear();
+
+      contactStates.clear();
+      contactStates.put(RobotQuadrant.FRONT_LEFT, ContactState.NO_CONTACT);
+      contactStates.put(RobotQuadrant.FRONT_RIGHT, ContactState.NO_CONTACT);
+      contactStates.put(RobotQuadrant.HIND_LEFT, ContactState.NO_CONTACT);
+      contactStates.put(RobotQuadrant.HIND_RIGHT, ContactState.NO_CONTACT);
+
+      QuadrupedCenterOfPressureTools.computeNominalNormalizedContactPressure(normalizedContactPressures, contactStates);
+      QuadrupedCenterOfPressureTools.computeNominalNormalizedContactPressure(normalizedContactPressures2, feetInContact);
+
+      assertEquals(0.0, normalizedContactPressures.get(RobotQuadrant.HIND_LEFT).getValue(), epsilon);
+      assertEquals(0.0, normalizedContactPressures2.get(RobotQuadrant.HIND_LEFT).getValue(), epsilon);
+
+      assertEquals(0.0, normalizedContactPressures.get(RobotQuadrant.HIND_RIGHT).getValue(), epsilon);
+      assertEquals(0.0, normalizedContactPressures2.get(RobotQuadrant.HIND_RIGHT).getValue(), epsilon);
+
+      assertEquals(0.0, normalizedContactPressures.get(RobotQuadrant.FRONT_LEFT).getValue(), epsilon);
+      assertEquals(0.0, normalizedContactPressures2.get(RobotQuadrant.FRONT_LEFT).getValue(), epsilon);
+
+      assertEquals(0.0, normalizedContactPressures.get(RobotQuadrant.FRONT_RIGHT).getValue(), epsilon);
+      assertEquals(0.0, normalizedContactPressures2.get(RobotQuadrant.FRONT_RIGHT).getValue(), epsilon);
    }
 }
