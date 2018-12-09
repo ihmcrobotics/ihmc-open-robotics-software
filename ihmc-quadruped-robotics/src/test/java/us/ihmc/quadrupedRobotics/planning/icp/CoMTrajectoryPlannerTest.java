@@ -43,6 +43,7 @@ public class CoMTrajectoryPlannerTest
       FramePoint3D comPosition = new FramePoint3D();
       comPosition.setZ(nominalHeight);
       planner.setCurrentCoMPosition(comPosition);
+
       planner.solveForTrajectory();
       planner.compute(0.0);
 
