@@ -118,6 +118,10 @@ public class CoMTrajectoryPlanner
       secondCoefficient.setZ(zCoefficientVector.get(getSecondCoefficient(0)));
    }
 
+   /**
+    * Computes the desired values.
+    * @param timeInPhase time in the current phase. Note that this assumes that the phase starts at 0.0.
+    */
    public void compute(double timeInPhase)
    {
       QuadrupedContactPhase currentContactPhase = contactSequence.get(0);
