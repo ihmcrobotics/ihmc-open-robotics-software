@@ -16,13 +16,13 @@ public class QuadrupedTimedStep extends QuadrupedStep implements TimeIntervalPro
    {
    }
 
-   public QuadrupedTimedStep(RobotQuadrant robotQuadrant, FramePoint3D goalPosition, double groundClearance, TimeInterval timeInterval)
+   public QuadrupedTimedStep(RobotQuadrant robotQuadrant, FramePoint3D goalPosition, double groundClearance, TimeIntervalBasics timeInterval)
    {
       super(robotQuadrant, goalPosition, groundClearance);
       setTimeInterval(timeInterval);
    }
 
-   public QuadrupedTimedStep(RobotQuadrant robotQuadrant, Point3DBasics goalPosition, double groundClearance, TimeInterval timeInterval)
+   public QuadrupedTimedStep(RobotQuadrant robotQuadrant, Point3DBasics goalPosition, double groundClearance, TimeIntervalBasics timeInterval)
    {
       this();
       setRobotQuadrant(robotQuadrant);
@@ -37,12 +37,12 @@ public class QuadrupedTimedStep extends QuadrupedStep implements TimeIntervalPro
    }
 
    @Override
-   public TimeInterval getTimeInterval()
+   public TimeIntervalBasics getTimeInterval()
    {
       return timeInterval;
    }
 
-   public void setTimeInterval(TimeInterval timeInterval)
+   public void setTimeInterval(TimeIntervalBasics timeInterval)
    {
       getTimeInterval().set(timeInterval);
    }

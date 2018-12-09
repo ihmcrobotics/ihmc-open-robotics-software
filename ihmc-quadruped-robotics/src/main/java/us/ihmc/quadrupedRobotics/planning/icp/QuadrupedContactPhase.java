@@ -51,7 +51,7 @@ public class QuadrupedContactPhase implements TimeIntervalProvider
       return solePosition;
    }
 
-   public FramePoint3D getCopPosition()
+   public FramePoint3DReadOnly getCopPosition()
    {
       return copPosition;
    }

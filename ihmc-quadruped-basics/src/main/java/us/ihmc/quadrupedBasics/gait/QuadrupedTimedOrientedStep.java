@@ -14,13 +14,13 @@ public class QuadrupedTimedOrientedStep extends QuadrupedTimedStep
    {
    }
 
-   public QuadrupedTimedOrientedStep(RobotQuadrant robotQuadrant, FramePoint3D goalPosition, double groundClearance, TimeInterval timeInterval, double stepYaw)
+   public QuadrupedTimedOrientedStep(RobotQuadrant robotQuadrant, FramePoint3D goalPosition, double groundClearance, TimeIntervalBasics timeInterval, double stepYaw)
    {
       super(robotQuadrant, goalPosition, groundClearance, timeInterval);
       setStepYaw(stepYaw);
    }
 
-   public QuadrupedTimedOrientedStep(RobotQuadrant robotQuadrant, Point3DBasics goalPosition, double groundClearance, TimeInterval timeInterval, double stepYaw)
+   public QuadrupedTimedOrientedStep(RobotQuadrant robotQuadrant, Point3DBasics goalPosition, double groundClearance, TimeIntervalBasics timeInterval, double stepYaw)
    {
       this();
       setRobotQuadrant(robotQuadrant);
