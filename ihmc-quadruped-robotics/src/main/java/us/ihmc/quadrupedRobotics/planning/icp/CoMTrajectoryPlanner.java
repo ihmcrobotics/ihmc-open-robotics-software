@@ -145,24 +145,44 @@ public class CoMTrajectoryPlanner
       return desiredCoMPosition;
    }
 
-   private void setPositionEqualityInContact(int sequenceId, double timeInPhase, FramePoint2DReadOnly point)
+   /**
+    * <p> Sets the continuity constraint on the initial position. This DOES result in a initial discontinuity on the desired DCM location. </p>
+    * <p> This constraint should be used for the initial position of the center of mass to properly initialize the trajectory. </p><
+    * <p> Recall that the equation for the center of mass is defined by </p>
+    * <p>
+    *    x<sub>i</sub>(t) = c<sub>0,i</sub> e<sup>&omega; t</sup> + c<sub>1,i</sub> e<sup>-&omega; t</sup> + c<sub>2,i</sub> t + c<sub>3,i</sub>
+    * </p>
+    * <p>
+    *    This results in the following constraint:
+    * </p>
+    * <p>
+    *    c<sub>0,i</sub> e<sup>&omega; t</sup> + c<sub>1,i</sub> e<sup>-&omega; t</sup> = x<sub>0</sub>
+    * </p>
+    * <p>
+    *    c<sub>2,i</sub> = c<sub>3,i</sub> = 0
+    * </p>
+    * @param sequenceId i in the above equations
+    * @param timeInPhaseForConstraint t in the above equations
+    * @param centerOfMassLocationForConstraint x<sub>0</sub> in the above equations
+    */
+   private void setPositionEqualityInContact(int sequenceId, double timeInPhaseForConstraint, FramePoint2DReadOnly centerOfMassLocationForConstraint)
    {
-      point.checkReferenceFrameMatch(ReferenceFrame.getWorldFrame());
+      centerOfMassLocationForConstraint.checkReferenceFrameMatch(ReferenceFrame.getWorldFrame());
       double omega = this.omega.getDoubleValue();
 
       double c0, c1, bX, bY;
-      if (timeInPhase > 0)
+      if (timeInPhaseForConstraint > 0)
       {
-         c0 = Math.exp(omega * timeInPhase);
-         c1 = Math.exp(-omega * timeInPhase);
+         c0 = Math.exp(omega * timeInPhaseForConstraint);
+         c1 = Math.exp(-omega * timeInPhaseForConstraint);
       }
       else
       {
          c0 = 1.0;
          c1 = 1.0;
       }
-      bX = point.getX() - contactSequence.get(sequenceId).getCopPosition().getX();
-      bY = point.getY() - contactSequence.get(sequenceId).getCopPosition().getY();
+      bX = centerOfMassLocationForConstraint.getX() - contactSequence.get(sequenceId).getCopPosition().getX();
+      bY = centerOfMassLocationForConstraint.getY() - contactSequence.get(sequenceId).getCopPosition().getY();
 
       coefficientMultipliers.set(numberOfConstraints, getFirstCoefficient(sequenceId), c0);
       coefficientMultipliers.set(numberOfConstraints, getSecondCoefficient(sequenceId), c1);
@@ -172,16 +192,37 @@ public class CoMTrajectoryPlanner
       numberOfConstraints++;
    }
 
-   private void setCapturePointTerminalConstraint(int sequenceId, FramePoint3DReadOnly point)
+   /**
+    * <p> Sets the terminal constraint on the center of mass trajectory. This constraint states that the final position should be equal to
+    * {@param terminalPosition} and the desired velocity should be equal to 0. </p>
+    * <p> Recall that the equation for the center of mass position is defined by </p>
+    * <p>
+    *    x<sub>i</sub>(t) = c<sub>0,i</sub> e<sup>&omega; t</sup> + c<sub>1,i</sub> e<sup>-&omega; t</sup> + c<sub>2,i</sub> t + c<sub>3,i</sub>
+    * </p>
+    * <p> and the center of mass velocity is defined by </p>
+    * <p>
+    *    v<sub>i</sub>(t) = &omega; c<sub>0,i</sub> e<sup>&omega; t</sup> - &omega; c<sub>1,i</sub> e<sup>-&omega; t</sup> + c<sub>2,i</sub>
+    * </p>
+    * <p> The number of variables can be reduced because of this knowledge, making the constraint:</p>
+    * <p>
+    *    c<sub>0,i</sub> 2.0 e<sup>&omega; T<sub>i</sub></sup> + r<sub>cop,i</sub> = x<sub>f</sub>
+    * </p>
+    * <p>
+    *    c<sub>2,i</sub> = c<sub>3,i</sub> = 0
+    * </p>
+    * @param sequenceId i in the above equations
+    * @param terminalPosition desired final location. x<sub>f</sub> in the above equations.
+    */
+   private void setCapturePointTerminalConstraint(int sequenceId, FramePoint3DReadOnly terminalPosition)
    {
-      point.checkReferenceFrameMatch(ReferenceFrame.getWorldFrame());
+      terminalPosition.checkReferenceFrameMatch(ReferenceFrame.getWorldFrame());
       double omega = this.omega.getDoubleValue();
 
       double duration = contactSequence.get(sequenceId).getTimeInterval().getDuration();
 
       double c0 = 2.0 * Math.exp(omega * duration);
-      double bX = point.getX() - contactSequence.get(sequenceId).getCopPosition().getX();
-      double bY = point.getY() - contactSequence.get(sequenceId).getCopPosition().getY();
+      double bX = terminalPosition.getX() - contactSequence.get(sequenceId).getCopPosition().getX();
+      double bY = terminalPosition.getY() - contactSequence.get(sequenceId).getCopPosition().getY();
 
       coefficientMultipliers.set(numberOfConstraints, getFirstCoefficient(sequenceId), c0);
       xCoefficientConstants.add(numberOfConstraints, 0, bX);
@@ -190,13 +231,47 @@ public class CoMTrajectoryPlanner
       numberOfConstraints++;
    }
 
+   /**
+    * Sets up the continuity constraint on the CoM position at a state change.
+    * <p>
+    *    The CoM position equation is as follows:
+    * </p>
+    * <p>
+    *    x<sub>i</sub>(t) = c<sub>0,i</sub> e<sup>&omega; t</sup> + c<sub>1,i</sub> e<sup>-&omega; t</sup> + c<sub>2,i</sub> t + c<sub>3,i</sub>
+    * </p>
+    * <p> If both the previous state and the next state are in contact, the constraint used is </p>
+    * <p>
+    *    c<sub>0,i-1</sub> e<sup>&omega; T<sub>i-1</sub></sup> + c<sub>1,i-1</sub> e<sup>-&omega; T<sub>i-1</sub></sup> + r<sub>cop,i-1</sub>
+    *    = c<sub>0,i</sub> e<sup>&omega; 0</sup> + c<sub>1,i</sub> e<sup>-&omega; 0</sup> + r<sub>cop,i</sub>
+    * </p>
+    * <p>
+    *    c<sub>2,i-1</sub> = c<sub>3,i-1</sub> = c<sub>2,i</sub> = c<sub>3,i</sub> = 0
+    * </p>
+    * <p> If the previous state is in contact and the next state is in flight, the constraint used is </p>
+    * <p>
+    *    c<sub>0,i-1</sub> e<sup>&omega; T<sub>i-1</sub></sup> + c<sub>1,i-1</sub> e<sup>-&omega; T<sub>i-1</sub></sup> + r<sub>cop,i-1</sub>
+    *    = c<sub>2,i</sub> 0 + c<sub>3,i</sub>
+    * </p>
+    * <p>
+    *    c<sub>2,i-1</sub> = c<sub>3,i-1</sub> = c<sub>0,i</sub> = c<sub>1,i</sub> = 0
+    * </p>
+    * <p> If the previous state is in flight and the next state is in contact, the constraint used is </p>
+    * <p>
+    *    c<sub>2,i-1</sub> 0 + c<sub>3,i-1</sub>
+    *       = c<sub>0,i</sub> e<sup>&omega; 0</sup> + c<sub>1,i</sub> e<sup>-&omega; 0</sup> + r<sub>cop,i</sub>
+    * </p>
+    * <p>
+    *    c<sub>0,i-1</sub> = c<sub>1,i-1</sub> = c<sub>2,i</sub> = c<sub>3,i</sub> = 0
+    * </p>
+    * @param previousSequence i-1 in the above equations.
+    * @param nextSequence i in the above equations.
+    */
    private void setPositionContinuity(int previousSequence, int nextSequence)
    {
       QuadrupedContactPhase previousContact = contactSequence.get(previousSequence);
       QuadrupedContactPhase nextContact = contactSequence.get(nextSequence);
 
       double previousDuration = previousContact.getTimeInterval().getDuration();
-
       double previousBX, previousBY;
       if (previousContact.getContactState() == ContactState.IN_CONTACT)
       {
@@ -237,6 +312,32 @@ public class CoMTrajectoryPlanner
       numberOfConstraints++;
    }
 
+   /**
+    * Sets up the continuity constraint on the CoM velocity at a state change.
+    * <p>
+    *    The CoM velocity equation is as follows:
+    * </p>
+    * <p>
+    *    v<sub>i</sub>(t) = &omega; c<sub>0,i</sub> e<sup>&omega; t</sup> - &omega; c<sub>1,i</sub> e<sup>-&omega; t</sup> + c<sub>2,i</sub>
+    * </p>
+    * <p> If both the previous state and the next state are in contact, the constraint used is </p>
+    * <p>
+    *    &omega; c<sub>0,i-1</sub> e<sup>&omega; T<sub>i-1</sub></sup> - &omega; c<sub>1,i-1</sub> e<sup>-&omega; T<sub>i-1</sub></sup>
+    *    = &omega; c<sub>0,i</sub> e<sup>&omega; 0</sup> - &omega; c<sub>1,i</sub> e<sup>-&omega; 0</sup>
+    * </p>
+    * <p> If the previous state is in contact and the next state is in flight, the constraint used is </p>
+    * <p>
+    *    &omega; c<sub>0,i-1</sub> e<sup>&omega; T<sub>i-1</sub></sup> - &omega; c<sub>1,i-1</sub> e<sup>-&omega; T<sub>i-1</sub></sup>
+    *    = c<sub>2,i</sub>
+    * </p>
+    * <p> If the previous state is in flight and the next state is in contact, the constraint used is </p>
+    * <p>
+    *    c<sub>2,i-1</sub>
+    *       = &omega; c<sub>0,i</sub> e<sup>&omega; 0</sup> - &omega; c<sub>1,i</sub> e<sup>-&omega; 0</sup>
+    * </p>
+    * @param previousSequence i-1 in the above equations.
+    * @param nextSequence i in the above equations.
+    */
    private void setVelocityContinuity(int previousSequence, int nextSequence)
    {
       QuadrupedContactPhase previousContact = contactSequence.get(previousSequence);
