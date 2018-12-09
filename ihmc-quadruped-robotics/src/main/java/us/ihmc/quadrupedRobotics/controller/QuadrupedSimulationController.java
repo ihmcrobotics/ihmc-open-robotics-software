@@ -21,7 +21,6 @@ public class QuadrupedSimulationController implements RobotController
    private final SensorReader sensorReader;
    private final OutputWriter outputWriter;
    private final RobotController gaitControlManager;
-   private RobotController headController; //not implemented yet
    private StateEstimatorController stateEstimator; //not implemented yet
    private final DRCPoseCommunicator poseCommunicator;
    private boolean firstTick = true;
@@ -29,13 +28,13 @@ public class QuadrupedSimulationController implements RobotController
    private final RobotVisualizer robotVisualizer;
 
    public QuadrupedSimulationController(FloatingRootJointRobot simulationRobot, SensorReader sensorReader, OutputWriter outputWriter, RobotController gaitControlManager, StateEstimatorController stateEstimator,
-                                        DRCPoseCommunicator poseCommunicator, RobotController headController)
+                                        DRCPoseCommunicator poseCommunicator)
    {
-      this(simulationRobot, sensorReader, outputWriter, gaitControlManager, stateEstimator, poseCommunicator, headController, null);
+      this(simulationRobot, sensorReader, outputWriter, gaitControlManager, stateEstimator, poseCommunicator, null);
    }
 
    public QuadrupedSimulationController(FloatingRootJointRobot simulationRobot, SensorReader sensorReader, OutputWriter outputWriter, RobotController gaitControlManager, StateEstimatorController stateEstimator,
-                                        DRCPoseCommunicator poseCommunicator, RobotController headController, RobotVisualizer robotVisualizer)
+                                        DRCPoseCommunicator poseCommunicator, RobotVisualizer robotVisualizer)
    {
       this.sdfRobot = simulationRobot;
       this.poseCommunicator = poseCommunicator;
@@ -43,11 +42,8 @@ public class QuadrupedSimulationController implements RobotController
       this.outputWriter = outputWriter;
       this.gaitControlManager = gaitControlManager;
       this.stateEstimator = stateEstimator;
-      this.headController = headController;
       this.robotVisualizer = robotVisualizer;
       registry.addChild(gaitControlManager.getYoVariableRegistry());
-      if (headController != null)
-         registry.addChild(headController.getYoVariableRegistry());
 
       if (robotVisualizer != null)
       {
@@ -97,9 +93,6 @@ public class QuadrupedSimulationController implements RobotController
       {
          poseCommunicator.write();
       }
-
-      if(headController != null)
-         headController.doControl();
 
       outputWriter.write();
 

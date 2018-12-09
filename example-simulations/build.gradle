@@ -51,4 +51,6 @@ testDependencies {
    compile group: "us.ihmc", name: "ihmc-ci-core-api", version: "0.17.14"
    compile group: "us.ihmc", name: "ihmc-robotics-toolkit-test", version: "source"
    compile group: "us.ihmc", name: "ihmc-quadruped-robotics-test", version: "source"
+   compile group: "us.ihmc", name: "ihmc-quadruped-planning-test", version: "source"
+
 }
