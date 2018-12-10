@@ -395,7 +395,7 @@ public class VisibilityGraphsFactory
                for (Point3DReadOnly targetPoint3D : targetPointsInWorld)
                {
                   totalSourceTargetChecks++;
-                  if (totalSourceTargetChecks % 10000000 == 0)
+                  if ((totalSourceTargetChecks % 100000002) == 0)
                   {
                      printStats();
                   }
@@ -407,7 +407,7 @@ public class VisibilityGraphsFactory
                   {
                      numberPassValidFilter++;
 
-                     Point2D sourcePoint2DInLocal = getPoint2DInLocal(sourceNavigableRegion, sourcePoint3DInWorld);
+//                     Point2D sourcePoint2DInLocal = getPoint2DInLocal(sourceNavigableRegion, sourcePoint3DInWorld);
 
                      //TODO: Get rid of these check since now down beforehand.
                      //                     double epsilonForInsidePlanarRegion = 1e-4; //Add a little just to make sure we do not miss anything.
@@ -419,7 +419,7 @@ public class VisibilityGraphsFactory
                      //                        continue;
                      //                     }
 
-                     Point2D targetPoint2DInLocal = getPoint2DInLocal(targetNavigableRegion, targetPoint3D);
+//                     Point2D targetPoint2DInLocal = getPoint2DInLocal(targetNavigableRegion, targetPoint3D);
 
                      //                     //TODO: +++JEP: Taking up lots of time, but necessary. 1.1 sec. 912,250 calls
                      //                     if (!PlanarRegionTools.isPointInLocalInsidePlanarRegion(targetHomePlanarRegion, targetPoint2DInLocal, epsilonForInsidePlanarRegion))
@@ -427,22 +427,22 @@ public class VisibilityGraphsFactory
                      //                        numberNotInsideTargetRegion++;
                      //                        continue;
                      //                     }
-
+//
                      Connection connection = new Connection(source, target);
-
-                     boolean sourceIsInsideNoGoZone = isInsideANonNavigableZone(sourcePoint2DInLocal, sourceObstacleClusters);
-                     if (sourceIsInsideNoGoZone)
-                     {
-                        numberSourcesInNoGoZones++;
-                        continue;
-                     }
-
-                     boolean targetIsInsideNoGoZone = isInsideANonNavigableZone(targetPoint2DInLocal, targetObstacleClusters);
-                     if (targetIsInsideNoGoZone)
-                     {
-                        numberTargetsInNoGoZones++;
-                        continue;
-                     }
+//
+//                     boolean sourceIsInsideNoGoZone = isInsideANonNavigableZone(sourcePoint2DInLocal, sourceObstacleClusters);
+//                     if (sourceIsInsideNoGoZone)
+//                     {
+//                        numberSourcesInNoGoZones++;
+//                        continue;
+//                     }
+//
+//                     boolean targetIsInsideNoGoZone = isInsideANonNavigableZone(targetPoint2DInLocal, targetObstacleClusters);
+//                     if (targetIsInsideNoGoZone)
+//                     {
+//                        numberTargetsInNoGoZones++;
+//                        continue;
+//                     }
 
                      numberValidConnections++;
                      connections.add(connection);
