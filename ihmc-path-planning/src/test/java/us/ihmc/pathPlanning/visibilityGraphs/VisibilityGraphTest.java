@@ -82,6 +82,7 @@ public class VisibilityGraphTest
          }
       };
       VisibilityGraph visibilityGraph = new VisibilityGraph(navigableRegions, filter);
+      visibilityGraph.fullyExpandVisibilityGraph();
 
       ArrayList<VisibilityGraphNavigableRegion> visibilityGraphNavigableRegions = visibilityGraph.getVisibilityGraphNavigableRegions();
       assertEquals(1, visibilityGraphNavigableRegions.size());
@@ -254,6 +255,7 @@ public class VisibilityGraphTest
          }
       };
       VisibilityGraph visibilityGraph = new VisibilityGraph(navigableRegions, filter);
+      visibilityGraph.fullyExpandVisibilityGraph();
 
       ArrayList<VisibilityGraphNavigableRegion> visibilityGraphNavigableRegions = visibilityGraph.getVisibilityGraphNavigableRegions();
       assertEquals(2, visibilityGraphNavigableRegions.size());
@@ -297,7 +299,7 @@ public class VisibilityGraphTest
       assertTrue(nodesContainPoint(nodes0, connectionCD));
       assertTrue(nodesContainPoint(nodes0, connectionD));
       assertTrue(nodesContainPoint(nodes0, connectionDA));
-      
+
       assertTrue(nodesContainPoint(nodes1, connectionE));
       assertTrue(nodesContainPoint(nodes1, connectionEF));
       assertTrue(nodesContainPoint(nodes1, connectionF));
@@ -444,6 +446,7 @@ public class VisibilityGraphTest
          }
       };
       VisibilityGraph visibilityGraph = new VisibilityGraph(navigableRegions, filter);
+      visibilityGraph.fullyExpandVisibilityGraph();
 
       ArrayList<VisibilityGraphNavigableRegion> visibilityGraphNavigableRegions = visibilityGraph.getVisibilityGraphNavigableRegions();
 
@@ -641,8 +644,7 @@ public class VisibilityGraphTest
       //      assertTrue(connectionsContain(interRegionConnections, connectionCD, connectionE));
       //      assertTrue(connectionsContain(interRegionConnections, connectionD, connectionEF));
       //      assertTrue(connectionsContain(interRegionConnections, connectionD, connectionE));
-      
-      
+
       double searchHostEpsilon = 0.01;
       visibilityGraph.setStart(new Point3D(0.1, 0.5, 0.005), searchHostEpsilon);
 
@@ -658,13 +660,13 @@ public class VisibilityGraphTest
 
       assertEquals(6, startEdges.size());
 
-      assertTrue(edgeListContains(startEdges, startInWorld , connectionA));
-      assertTrue(edgeListContains(startEdges, startInWorld , connectionAB));
-      assertTrue(edgeListContains(startEdges, startInWorld , connectionB));
-      
-      assertTrue(edgeListContains(startEdges, startInWorld , connectionE2));
-      assertTrue(edgeListContains(startEdges, startInWorld , connectionEF0));
-      assertTrue(edgeListContains(startEdges, startInWorld , connectionF0));
+      assertTrue(edgeListContains(startEdges, startInWorld, connectionA));
+      assertTrue(edgeListContains(startEdges, startInWorld, connectionAB));
+      assertTrue(edgeListContains(startEdges, startInWorld, connectionB));
+
+      assertTrue(edgeListContains(startEdges, startInWorld, connectionE2));
+      assertTrue(edgeListContains(startEdges, startInWorld, connectionEF0));
+      assertTrue(edgeListContains(startEdges, startInWorld, connectionF0));
 
       visibilityGraph.setGoal(new Point3D(0.5, 0.5, 0.053), searchHostEpsilon);
 
