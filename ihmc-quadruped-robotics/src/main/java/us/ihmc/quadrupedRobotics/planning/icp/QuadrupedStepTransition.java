@@ -19,6 +19,14 @@ class QuadrupedStepTransition
       robotQuadrant = RobotQuadrant.FRONT_LEFT;
    }
 
+   public void reset()
+   {
+      time = Double.MAX_VALUE;
+      solePosition.setToNaN();
+      type = null;
+      robotQuadrant = null;
+   }
+
    public void setTransitionTime(double time)
    {
       this.time = time;

@@ -13,9 +13,11 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 
-public class NewQuadrupedContactSequence extends RecyclingArrayList<NewQuadrupedContactPhase>
+public class NewQuadrupedContactSequence
 {
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
+
+   private static final double finalTransferDuration = 1.0;
 
    private Comparator<QuadrupedStepTransition> compareByTime = Comparator.comparingDouble(QuadrupedStepTransition::getTransitionTime);
 
@@ -24,16 +26,18 @@ public class NewQuadrupedContactSequence extends RecyclingArrayList<NewQuadruped
    private final RecyclingArrayList<QuadrupedStepTransition> stepTransitions = new RecyclingArrayList<>(QuadrupedStepTransition::new);
    private final List<RobotQuadrant> feetInContact = new ArrayList<>();
    private final QuadrantDependentList<FramePoint3D> solePositions = new QuadrantDependentList<>();
+   private final QuadrantDependentList<ReferenceFrame> soleFrames;
+
 
 
    private final int maxCapacity;
 
-   private final QuadrantDependentList<ReferenceFrame> soleFrames;
+   private final RecyclingArrayList<NewQuadrupedContactPhase> contactSequence;
 
    public NewQuadrupedContactSequence(QuadrantDependentList<ReferenceFrame> soleFrames, int pastContactPhaseCapacity, int futureContactPhaseCapacity)
    {
-      super(pastContactPhaseCapacity + futureContactPhaseCapacity + 1, NewQuadrupedContactPhase.class);
-      clear();
+      contactSequence = new RecyclingArrayList<>(pastContactPhaseCapacity + futureContactPhaseCapacity + 1, NewQuadrupedContactPhase::new);
+      contactSequence.clear();
 
       this.soleFrames = soleFrames;
 
@@ -54,7 +58,8 @@ public class NewQuadrupedContactSequence extends RecyclingArrayList<NewQuadruped
 
    public void initialize()
    {
-      clear();
+      contactSequence.clear();
+      stepTransitions.clear();
    }
 
    /**
@@ -63,7 +68,7 @@ public class NewQuadrupedContactSequence extends RecyclingArrayList<NewQuadruped
     * @param currentFeetInContact list of current feet in contact (input)
     * @param currentTime current time (input)
     */
-   public void update(List<? extends QuadrupedTimedStep> stepSequence, List<RobotQuadrant> currentFeetInContact, double currentTime)
+   public RecyclingArrayList<NewQuadrupedContactPhase> update(List<? extends QuadrupedTimedStep> stepSequence, List<RobotQuadrant> currentFeetInContact, double currentTime)
    {
       // initialize contact state and sole positions
       for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
@@ -75,15 +80,7 @@ public class NewQuadrupedContactSequence extends RecyclingArrayList<NewQuadruped
       for (int footIndex = 0; footIndex < currentFeetInContact.size(); footIndex++)
          feetInContact.add(currentFeetInContact.get(footIndex));
 
-      // initialize step transitions
-      for (int i = 0; i < stepTransitions.size(); i++)
-      {
-         stepTransitions.get(i).setTransitionTime(Double.MAX_VALUE);
-      }
-
-      // FIXME we might have some bugs in here
       int numberOfStepTransitions = 0;
-      stepTransitions.clear();
       for (int i = 0; i < stepSequence.size(); i++)
       {
          QuadrupedTimedStep step = stepSequence.get(i);
@@ -117,20 +114,20 @@ public class NewQuadrupedContactSequence extends RecyclingArrayList<NewQuadruped
       ListSorter.sort(stepTransitions, compareByTime);
 
       // retain desired number of past contact phases
-      TimeIntervalTools.removeStartTimesGreaterThanOrEqualTo(currentTime, this);
-      while (size() > pastContactPhaseCapacity + 1)
+      TimeIntervalTools.removeStartTimesGreaterThanOrEqualTo(currentTime, contactSequence);
+      while (contactSequence.size() > pastContactPhaseCapacity + 1)
       {
-         remove(0);
+         contactSequence.remove(0);
       }
 
       NewQuadrupedContactPhase contactPhase;
-      if (isEmpty())
+      if (contactSequence.isEmpty())
       {
          contactPhase = createNewContactPhase(currentTime, feetInContact, solePositions);
       }
       else
       {
-         NewQuadrupedContactPhase lastContactPhase = get(size() - 1);
+         NewQuadrupedContactPhase lastContactPhase = contactSequence.getLast();
          if (isEqualContactState(lastContactPhase.getFeetInContact(), currentFeetInContact))
          {
             // extend current contact phase
@@ -141,7 +138,7 @@ public class NewQuadrupedContactSequence extends RecyclingArrayList<NewQuadruped
          {
             // end previous contact phase
             lastContactPhase.getTimeInterval().setEndTime(currentTime);
-            remove(0);
+            contactSequence.remove(0);
 
             contactPhase = createNewContactPhase(currentTime, feetInContact, solePositions);
          }
@@ -173,11 +170,13 @@ public class NewQuadrupedContactSequence extends RecyclingArrayList<NewQuadruped
             contactPhase = createNewContactPhase(stepTransitions.get(i).getTransitionTime(), feetInContact, solePositions);
             if (contactPhase == null) // made the full sequence
             {
-               return;
+               return contactSequence;
             }
          }
       }
-      contactPhase.getTimeInterval().setEndTime(contactPhase.getTimeInterval().getStartTime() + 1.0);
+      contactPhase.getTimeInterval().setEndTime(contactPhase.getTimeInterval().getStartTime() + finalTransferDuration);
+
+      return contactSequence;
    }
 
    private boolean isEqualContactState(List<RobotQuadrant> contactStateA, List<RobotQuadrant> contactStateB)
@@ -195,9 +194,9 @@ public class NewQuadrupedContactSequence extends RecyclingArrayList<NewQuadruped
 
    private NewQuadrupedContactPhase createNewContactPhase(double startTime, List<RobotQuadrant> feetInContact, QuadrantDependentList<FramePoint3D> solePositions)
    {
-      if (maxCapacity - size() > 0)
+      if (maxCapacity - contactSequence.size() > 0)
       {
-         NewQuadrupedContactPhase contactPhase = add();
+         NewQuadrupedContactPhase contactPhase = contactSequence.add();
          contactPhase.getTimeInterval().setStartTime(startTime);
          contactPhase.setFeetInContact(feetInContact);
          contactPhase.setSolePosition(solePositions);
