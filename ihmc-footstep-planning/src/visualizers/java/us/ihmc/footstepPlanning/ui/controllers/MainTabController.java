@@ -109,6 +109,11 @@ public class MainTabController
       messager.submitMessage(AbortPlanningTopic, true);
    }
 
+   @FXML
+   public void sendPlan()
+   {
+
+   }
 
    private JavaFXMessager messager;
 
