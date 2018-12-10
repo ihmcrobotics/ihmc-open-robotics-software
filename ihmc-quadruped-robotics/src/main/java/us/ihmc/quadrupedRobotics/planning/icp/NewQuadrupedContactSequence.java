@@ -1,5 +1,6 @@
 package us.ihmc.quadrupedRobotics.planning.icp;
 
+import us.ihmc.commons.MathTools;
 import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
@@ -17,18 +18,16 @@ public class NewQuadrupedContactSequence
 {
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
 
-   private static final double finalTransferDuration = 1.0;
+   public static final double finalTransferDuration = 1.0;
 
-   private Comparator<QuadrupedStepTransition> compareByTime = Comparator.comparingDouble(QuadrupedStepTransition::getTransitionTime);
+   private Comparator<NewQuadrupedStepTransition> compareByTime = Comparator.comparingDouble(NewQuadrupedStepTransition::getTransitionTime);
 
    // internal states
    private final int pastContactPhaseCapacity;
-   private final RecyclingArrayList<QuadrupedStepTransition> stepTransitions = new RecyclingArrayList<>(QuadrupedStepTransition::new);
+   private final RecyclingArrayList<NewQuadrupedStepTransition> stepTransitions = new RecyclingArrayList<>(NewQuadrupedStepTransition::new);
    private final List<RobotQuadrant> feetInContact = new ArrayList<>();
    private final QuadrantDependentList<FramePoint3D> solePositions = new QuadrantDependentList<>();
    private final QuadrantDependentList<ReferenceFrame> soleFrames;
-
-
 
    private final int maxCapacity;
 
@@ -68,43 +67,15 @@ public class NewQuadrupedContactSequence
     * @param currentFeetInContact list of current feet in contact (input)
     * @param currentTime current time (input)
     */
-   public RecyclingArrayList<NewQuadrupedContactPhase> update(List<? extends QuadrupedTimedStep> stepSequence, List<RobotQuadrant> currentFeetInContact, double currentTime)
+   public RecyclingArrayList<NewQuadrupedContactPhase> update(List<? extends QuadrupedTimedStep> stepSequence, List<RobotQuadrant> currentFeetInContact,
+                                                              double currentTime)
    {
       initializeCalculationConditions(currentFeetInContact);
       computeStepTransitionsFromStepSequence(currentTime, stepSequence);
 
-      NewQuadrupedContactPhase contactPhase = trimPastContactSequences(currentTime, currentFeetInContact);
+      trimPastContactSequences(currentTime, currentFeetInContact);
 
-      // compute transition time and center of pressure for each time interval
-      for (int transitionNumber = 0; transitionNumber < stepTransitions.size(); transitionNumber++)
-      {
-         QuadrupedStepTransition stepTransition = stepTransitions.get(transitionNumber);
-         switch (stepTransitions.get(transitionNumber).getTransitionType())
-         {
-         case LIFT_OFF:
-            feetInContact.remove(stepTransition.getRobotQuadrant());
-            break;
-         case TOUCH_DOWN:
-            feetInContact.add(stepTransition.getRobotQuadrant());
-            solePositions.get(stepTransition.getRobotQuadrant()).changeFrame(worldFrame);
-            solePositions.get(stepTransition.getRobotQuadrant()).set(stepTransition.getSolePosition());
-            break;
-         }
-
-         if ((stepTransitions.get(transitionNumber).getTransitionTime() != stepTransitions.get(transitionNumber + 1).getTransitionTime()))
-         {
-            contactPhase.getTimeInterval().setEndTime(stepTransitions.get(transitionNumber).getTransitionTime());
-
-            contactPhase = createNewContactPhase(stepTransitions.get(transitionNumber).getTransitionTime(), feetInContact, solePositions);
-            if (contactPhase == null) // made the full sequence
-            {
-               return contactSequence;
-            }
-         }
-      }
-      contactPhase.getTimeInterval().setEndTime(contactPhase.getTimeInterval().getStartTime() + finalTransferDuration);
-
-      return contactSequence;
+      return computeContactPhasesFromStepTransitions();
    }
 
    private void initializeCalculationConditions(List<RobotQuadrant> currentFeetInContact)
@@ -128,30 +99,43 @@ public class NewQuadrupedContactSequence
 
          if (step.getTimeInterval().getStartTime() >= currentTime)
          {
-            QuadrupedStepTransition stepTransition = stepTransitions.add();
+            NewQuadrupedStepTransition stepTransition = stepTransitions.add();
 
             stepTransition.setTransitionTime(step.getTimeInterval().getStartTime());
-            stepTransition.setTransitionType(QuadrupedStepTransitionType.LIFT_OFF);
-            stepTransition.setRobotQuadrant(step.getRobotQuadrant());
-            stepTransition.setSolePosition(stepTransition.getSolePosition());
+            stepTransition.addTransition(QuadrupedStepTransitionType.LIFT_OFF, step.getRobotQuadrant(), step.getGoalPosition());
          }
 
          if (step.getTimeInterval().getEndTime() >= currentTime)
          {
-            QuadrupedStepTransition stepTransition = stepTransitions.add();
+            NewQuadrupedStepTransition stepTransition = stepTransitions.add();
 
             stepTransition.setTransitionTime(step.getTimeInterval().getEndTime());
-            stepTransition.setTransitionType(QuadrupedStepTransitionType.TOUCH_DOWN);
-            stepTransition.setRobotQuadrant(step.getRobotQuadrant());
-            stepTransition.setSolePosition(step.getGoalPosition());
+            stepTransition.addTransition(QuadrupedStepTransitionType.TOUCH_DOWN, step.getRobotQuadrant(), step.getGoalPosition());
          }
       }
 
       // sort step transitions in ascending order as a function of time
       ListSorter.sort(stepTransitions, compareByTime);
+
+      // collapse the transitions that occur at the same time
+      int transitionNumber = 0;
+      while (transitionNumber < stepTransitions.size() - 1)
+      {
+         NewQuadrupedStepTransition currentTransition = stepTransitions.get(transitionNumber);
+         NewQuadrupedStepTransition nextTransition = stepTransitions.get(transitionNumber + 1);
+         if (MathTools.epsilonEquals(currentTransition.getTransitionTime(), nextTransition.getTransitionTime(), NewQuadrupedStepTransition.sameTimeEpsilon))
+         {
+            currentTransition.addTransition(nextTransition);
+            stepTransitions.remove(transitionNumber + 1);
+         }
+         else
+         {
+            transitionNumber++;
+         }
+      }
    }
 
-   private NewQuadrupedContactPhase trimPastContactSequences(double currentTime, List<RobotQuadrant> currentFeetInContact)
+   private void trimPastContactSequences(double currentTime, List<RobotQuadrant> currentFeetInContact)
    {
       // retain desired number of past contact phases
       TimeIntervalTools.removeStartTimesGreaterThanOrEqualTo(currentTime, contactSequence);
@@ -193,9 +177,53 @@ public class NewQuadrupedContactSequence
             contactPhase.update();
          }
       }
-
-      return contactPhase;
    }
+
+   private RecyclingArrayList<NewQuadrupedContactPhase> computeContactPhasesFromStepTransitions()
+   {
+      int numberOfTransitions = stepTransitions.size();
+      // compute transition time and center of pressure for each time interval
+      for (int transitionNumber = 0; transitionNumber < numberOfTransitions; transitionNumber++)
+      {
+         NewQuadrupedStepTransition stepTransition = stepTransitions.get(transitionNumber);
+
+         for (int transitioningFootNumber = 0; transitioningFootNumber < stepTransition.getNumberOfFeetInTransition(); transitioningFootNumber++)
+         {
+            RobotQuadrant transitionQuadrant = stepTransition.getTransitionQuadrant(transitioningFootNumber);
+            switch (stepTransition.getTransitionType(transitioningFootNumber))
+            {
+            case LIFT_OFF:
+               feetInContact.remove(transitionQuadrant);
+               break;
+            case TOUCH_DOWN:
+               feetInContact.add(transitionQuadrant);
+               solePositions.get(transitionQuadrant).setIncludingFrame(worldFrame, stepTransition.getTransitionPosition(transitionQuadrant));
+               break;
+            }
+         }
+
+         NewQuadrupedContactPhase contactPhase = contactSequence.add();
+
+         boolean isLastContact = (transitionNumber == numberOfTransitions - 1) || (contactSequence.size() == maxCapacity);
+
+         contactPhase.setFeetInContact(feetInContact);
+         contactPhase.setSolePosition(solePositions);
+         contactPhase.update();
+
+         if (isLastContact)
+         {
+            contactPhase.getTimeInterval().setInterval(stepTransition.getTransitionTime(), stepTransition.getTransitionTime() + finalTransferDuration);
+            return contactSequence;
+         }
+         else
+         {
+            contactPhase.getTimeInterval().setInterval(stepTransition.getTransitionTime(), stepTransitions.get(transitionNumber + 1).getTransitionTime());
+         }
+      }
+
+      return contactSequence;
+   }
+
 
    private boolean isEqualContactState(List<RobotQuadrant> contactStateA, List<RobotQuadrant> contactStateB)
    {
@@ -209,24 +237,4 @@ public class NewQuadrupedContactSequence
       }
       return true;
    }
-
-   private NewQuadrupedContactPhase createNewContactPhase(double startTime, List<RobotQuadrant> feetInContact, QuadrantDependentList<FramePoint3D> solePositions)
-   {
-      if (maxCapacity - contactSequence.size() > 0)
-      {
-         NewQuadrupedContactPhase contactPhase = contactSequence.add();
-         contactPhase.getTimeInterval().setStartTime(startTime);
-         contactPhase.setFeetInContact(feetInContact);
-         contactPhase.setSolePosition(solePositions);
-
-         contactPhase.update();
-
-         return contactPhase;
-      }
-      else
-      {
-         return null;
-      }
-   }
-
 }
