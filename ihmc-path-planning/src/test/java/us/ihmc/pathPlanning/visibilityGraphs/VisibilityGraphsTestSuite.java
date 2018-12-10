@@ -16,7 +16,7 @@ import us.ihmc.pathPlanning.visibilityGraphs.tools.VisibilityGraphsGeometryTools
 import us.ihmc.pathPlanning.visibilityGraphs.tools.VisibilityToolsTest;
 
 @RunWith(Suite.class)
-@Suite.SuiteClasses({VisibilityGraphTest.class, VisibilityToolsTest.class, VisibilityGraphsFactoryTest.class, ConnectionPoint3DTest.class, NavigableRegionTest.class, ClusterTest.class,
+@Suite.SuiteClasses({VisibilityGraphTest.class, VisibilityToolsTest.class, ConnectionPoint3DTest.class, NavigableRegionTest.class, ClusterTest.class,
       ClusterToolsTest.class, JGraphToolsTest.class, PlanarRegionToolsTest.class, PointCloudToolsTest.class, VisibilityGraphsGeometryToolsTest.class,
       VisibilityToolsTest.class, DijkstraVisibilityGraphPlannerTest.class
 //      WaypointDefinedBodyPathPlan.class,
