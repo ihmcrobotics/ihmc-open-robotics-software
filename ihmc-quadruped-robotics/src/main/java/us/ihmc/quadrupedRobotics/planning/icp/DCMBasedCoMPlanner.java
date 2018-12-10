@@ -47,7 +47,7 @@ public class DCMBasedCoMPlanner
    {
       contactSequenceUpdater.update(stepSequence, currentFeetInContact, currentTime);
 
-      double timeInPhase = currentTime - contactSequenceUpdater.getContactSequence().getFirst().getTimeInterval().getStartTime();
+      double timeInPhase = currentTime - contactSequenceUpdater.getContactSequence().get(0).getTimeInterval().getStartTime();
       timeInContactPhase.set(timeInPhase);
 
       comTrajectoryPlanner.solveForTrajectory();
