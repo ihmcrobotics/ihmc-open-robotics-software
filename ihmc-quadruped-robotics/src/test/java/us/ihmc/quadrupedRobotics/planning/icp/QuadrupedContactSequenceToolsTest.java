@@ -67,10 +67,8 @@ public class QuadrupedContactSequenceToolsTest
             startTime = nextStartTime;
          }
 
-         while (contactSequenceExpected.size() > phasesToKeep)
+         while (contactSequenceExpected.size() > phasesToKeep + 1)
             contactSequenceExpected.remove(0);
-
-         // TODO finish the current phase
 
          QuadrupedContactPhase lastContactPhase = contactSequenceExpected.getLast();
          if (QuadrupedContactSequenceTools.isEqualContactState(lastContactPhase.getFeetInContact(), feetInContact))
@@ -105,12 +103,6 @@ public class QuadrupedContactSequenceToolsTest
    @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testComputeStepTransitionsFromStepSequence()
-   {
-      fail();
-   }
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(timeout = 30000)
-   public void testIsContactSequenceEqual()
    {
       fail();
    }
