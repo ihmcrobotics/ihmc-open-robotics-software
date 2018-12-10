@@ -81,6 +81,7 @@ public class QuadrupedContactSequenceUpdater
    private void computeContactPhasesFromStepTransitions()
    {
       int numberOfTransitions = stepTransitions.size();
+      QuadrupedContactPhase contactPhase = contactSequence.getLast();
       // compute transition time and center of pressure for each time interval
       for (int transitionNumber = 0; transitionNumber < numberOfTransitions; transitionNumber++)
       {
@@ -101,7 +102,8 @@ public class QuadrupedContactSequenceUpdater
             }
          }
 
-         QuadrupedContactPhase contactPhase = contactSequence.add();
+         contactPhase.getTimeInterval().setEndTime(stepTransition.getTransitionTime());
+         contactPhase = contactSequence.add();
 
          boolean isLastContact = (transitionNumber == numberOfTransitions - 1) || (contactSequence.size() == maxCapacity);
 
@@ -116,7 +118,7 @@ public class QuadrupedContactSequenceUpdater
          }
          else
          {
-            contactPhase.getTimeInterval().setInterval(stepTransition.getTransitionTime(), stepTransitions.get(transitionNumber + 1).getTransitionTime());
+            contactPhase.getTimeInterval().setStartTime(stepTransition.getTransitionTime());
          }
       }
    }
