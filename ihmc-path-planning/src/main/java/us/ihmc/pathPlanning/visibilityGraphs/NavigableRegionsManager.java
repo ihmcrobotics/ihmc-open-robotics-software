@@ -13,7 +13,6 @@ import us.ihmc.pathPlanning.visibilityGraphs.clusterManagement.Cluster;
 import us.ihmc.pathPlanning.visibilityGraphs.dataStructure.ConnectionPoint3D;
 import us.ihmc.pathPlanning.visibilityGraphs.dataStructure.InterRegionVisibilityMap;
 import us.ihmc.pathPlanning.visibilityGraphs.dataStructure.NavigableRegion;
-import us.ihmc.pathPlanning.visibilityGraphs.dataStructure.SingleSourceVisibilityMap;
 import us.ihmc.pathPlanning.visibilityGraphs.dataStructure.VisibilityGraphEdge;
 import us.ihmc.pathPlanning.visibilityGraphs.dataStructure.VisibilityGraphNode;
 import us.ihmc.pathPlanning.visibilityGraphs.dataStructure.VisibilityMapSolution;
@@ -80,19 +79,12 @@ public class NavigableRegionsManager
 
    public List<Point3DReadOnly> calculateBodyPath(final Point3DReadOnly start, final Point3DReadOnly goal)
    {
-      boolean calculateVisibilityMapAllAtOnce = false;
-
-      if (calculateVisibilityMapAllAtOnce)
-      {
-         return calculateVisibilityMapAllAtOnceThenFindPath(start, goal);
-      }
-      else
-      {
-         return calculateVisibilityMapLazilyWhileFindingPath(start, goal);
-      }
+      boolean fullyExpandVisibilityGraph = false;
+      return calculateVisibilityMapWhileFindingPath(start, goal, fullyExpandVisibilityGraph);
    }
 
-   private List<Point3DReadOnly> calculateVisibilityMapLazilyWhileFindingPath(Point3DReadOnly startInWorld, Point3DReadOnly goalInWorld)
+   private List<Point3DReadOnly> calculateVisibilityMapWhileFindingPath(Point3DReadOnly startInWorld, Point3DReadOnly goalInWorld,
+                                                                              boolean fullyExpandVisibilityGraph)
    {
       boolean areStartAndGoalValid = checkIfStartAndGoalAreValid(startInWorld, goalInWorld);
       if (!areStartAndGoalValid)
@@ -106,7 +98,8 @@ public class NavigableRegionsManager
 
       VisibilityGraph visibilityGraph = new VisibilityGraph(navigableRegions, parameters.getInterRegionConnectionFilter());
 
-      //      visibilityGraph.fullyExpandVisibilityGraph();
+      if (fullyExpandVisibilityGraph)
+         visibilityGraph.fullyExpandVisibilityGraph();
 
       double searchHostEpsilon = parameters.getSearchHostRegionEpsilon();
 
@@ -143,7 +136,9 @@ public class NavigableRegionsManager
       startNode.setEdgesHaveBeenDetermined(true);
       startNode.setCostFromStart(0.0, null);
       startNode.setEstimatedCostToGoal(startInWorld.distance(goalInWorld));
-      expandNode(visibilityGraph, startNode, goalInWorld, queue);
+
+      queue.add(startNode);
+      //      expandNode(visibilityGraph, startNode, goalInWorld, queue);
 
       while (!queue.isEmpty())
       {
@@ -166,14 +161,14 @@ public class NavigableRegionsManager
 
       List<Point3DReadOnly> path = new ArrayList<>();
       VisibilityGraphNode nodeWalkingBack = goalNode;
-      
-      while(nodeWalkingBack != null)
+
+      while (nodeWalkingBack != null)
       {
          path.add(nodeWalkingBack.getPointInWorld());
          nodeWalkingBack = nodeWalkingBack.getBestParentNode();
       }
       Collections.reverse(path);
-      
+
       printResults(startBodyPathComputation, path);
       return path;
    }
@@ -186,12 +181,9 @@ public class NavigableRegionsManager
          throw new RuntimeException("Node has already been expanded!!");
       }
 
-      boolean edgesHaveBeenDetermined = nodeToExpand.getEdgesHaveBeenDetermined();
-
-      if (!edgesHaveBeenDetermined)
+      if (!nodeToExpand.getEdgesHaveBeenDetermined())
       {
          visibilityGraph.computeInnerAndInterEdges(nodeToExpand);
-         nodeToExpand.setEdgesHaveBeenDetermined(true);
       }
 
       List<VisibilityGraphEdge> edges = nodeToExpand.getEdges();
@@ -231,76 +223,9 @@ public class NavigableRegionsManager
             queue.remove(nextNode);
             queue.add(nextNode);
          }
-
       }
 
       nodeToExpand.setHasBeenExpanded(true);
-   }
-
-   public List<Point3DReadOnly> calculateVisibilityMapAllAtOnceThenFindPath(final Point3DReadOnly startInWorld, final Point3DReadOnly goalInWorld)
-   {
-      boolean areStartAndGoalValid = checkIfStartAndGoalAreValid(startInWorld, goalInWorld);
-      if (!areStartAndGoalValid)
-         return null;
-
-      NavigableRegions navigableRegions = visibilityMapSolution.getNavigableRegions();
-      navigableRegions.filterPlanarRegionsWithBoundingCapsule(startInWorld, goalInWorld, parameters.getExplorationDistanceFromStartGoal());
-      long startBodyPathComputation = System.currentTimeMillis();
-
-      navigableRegions.createNavigableRegions();
-
-      VisibilityGraph visibilityGraph = new VisibilityGraph(navigableRegions, parameters.getInterRegionConnectionFilter());
-      visibilityGraph.fullyExpandVisibilityGraph();
-
-      double searchHostEpsilon = parameters.getSearchHostRegionEpsilon();
-
-      visibilityGraph.setStart(startInWorld, searchHostEpsilon);
-      visibilityGraph.setGoal(goalInWorld, searchHostEpsilon);
-
-      VisibilityGraphNode startNode = visibilityGraph.getStartNode();
-      VisibilityGraphNode goalNode = visibilityGraph.getGoalNode();
-
-      if (startNode == null)
-         return null;
-
-      VisibilityMapSolution visibilityMapSolutionFromNewVisibilityGraph = visibilityGraph.createVisibilityMapSolution();
-
-      visibilityMapSolution.setVisibilityMapsWithNavigableRegions(visibilityMapSolutionFromNewVisibilityGraph.getVisibilityMapsWithNavigableRegions());
-      visibilityMapSolution.setInterRegionVisibilityMap(visibilityMapSolutionFromNewVisibilityGraph.getInterRegionVisibilityMap());
-
-      visibilityMapSolution.setStartMap(visibilityMapSolutionFromNewVisibilityGraph.getStartMap());
-      visibilityMapSolution.setGoalMap(visibilityMapSolutionFromNewVisibilityGraph.getGoalMap());
-
-      ConnectionPoint3D projectedStartInWorld = startNode.getPointInWorld();
-      ConnectionPoint3D projectedGoalInWorld = goalNode.getPointInWorld();
-
-      int START_GOAL_ID = 0;
-
-      ConnectionPoint3D startConnection = new ConnectionPoint3D(projectedStartInWorld, START_GOAL_ID);
-      ConnectionPoint3D goalConnection = new ConnectionPoint3D(projectedGoalInWorld, START_GOAL_ID);
-
-      List<VisibilityMapHolder> visibilityMapHolders = createVisibilityMapHoldersFromVisibilityMapSolution(visibilityMapSolution);
-
-      List<Point3DReadOnly> path = parameters.getPathPlanner().calculatePath(startConnection, goalConnection, visibilityMapHolders);
-      printResults(startBodyPathComputation, path);
-      return path;
-   }
-
-   private static List<VisibilityMapHolder> createVisibilityMapHoldersFromVisibilityMapSolution(VisibilityMapSolution visibilityMapSolution)
-   {
-      SingleSourceVisibilityMap startMap = visibilityMapSolution.getStartMap();
-      SingleSourceVisibilityMap goalMap = visibilityMapSolution.getGoalMap();
-
-      if (startMap == null)
-         return null;
-
-      List<VisibilityMapHolder> visibilityMapHolders = new ArrayList<>();
-      visibilityMapHolders.addAll(visibilityMapSolution.getVisibilityMapsWithNavigableRegions());
-      visibilityMapHolders.add(startMap);
-      visibilityMapHolders.add(goalMap);
-      visibilityMapHolders.add(visibilityMapSolution.getInterRegionVisibilityMap());
-
-      return visibilityMapHolders;
    }
 
    private boolean checkIfStartAndGoalAreValid(Point3DReadOnly start, Point3DReadOnly goal)

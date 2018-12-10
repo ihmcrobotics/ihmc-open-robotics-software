@@ -71,6 +71,15 @@ public class VisibilityGraph
             createInterRegionVisibilityConnections(sourceNavigableRegion, targetNavigableRegion);
          }
       }
+      
+      for (VisibilityGraphNavigableRegion visibilityGraphNavigableRegion : visibilityGraphNavigableRegions)
+      {
+         List<VisibilityGraphNode> allNavigableNodes = visibilityGraphNavigableRegion.getAllNavigableNodes();
+         for (VisibilityGraphNode node : allNavigableNodes)
+         {
+            node.setEdgesHaveBeenDetermined(true);
+         }
+      }
    }
 
    public void computeInnerAndInterEdges(VisibilityGraphNode sourceNode)
@@ -85,7 +94,7 @@ public class VisibilityGraph
       {
          if (targetVisibilityGraphNavigableRegion == sourceVisibilityGraphNavigableRegion)
             continue;
-         
+
          //TOOD: +++JEP: Inefficient but for now...
 
          NavigableRegion targetNavigableRegion = targetVisibilityGraphNavigableRegion.getNavigableRegion();
@@ -96,6 +105,8 @@ public class VisibilityGraph
                                                 crossRegionEdges);
 
       }
+
+      sourceNode.setEdgesHaveBeenDetermined(true);
    }
 
    public void createInterRegionVisibilityConnections(VisibilityGraphNavigableRegion sourceNavigableRegion,
@@ -248,10 +259,6 @@ public class VisibilityGraph
       return sourceNode;
    }
 
-   //TODO: +++JEP: Get rid of these stats after optimized.
-   private static int numberPlanarRegionBoundingBoxesTooFar = 0, totalSourceTargetChecks = 0, numberPassValidFilter = 0, numberNotInsideSourceRegion = 0,
-         numberNotInsideTargetRegion = 0, numberSourcesInNoGoZones = 0, numberTargetsInNoGoZones = 0, numberValidConnections = 0;
-
    public static void createInterRegionVisibilityConnections(VisibilityGraphNavigableRegion sourceNavigableRegion,
                                                              VisibilityGraphNavigableRegion targetNavigableRegion, InterRegionConnectionFilter filter,
                                                              ArrayList<VisibilityGraphEdge> edgesToPack)
@@ -271,7 +278,6 @@ public class VisibilityGraph
       // If the source and target regions are simply too far apart, then do not check their individual points.
       if (!sourceHomeRegionBoundingBox.intersectsEpsilon(targetHomeRegionBoundingBox, filter.getMaximumInterRegionConnetionDistance()))
       {
-         numberPlanarRegionBoundingBoxesTooFar++;
          return;
       }
 
@@ -300,36 +306,8 @@ public class VisibilityGraph
    {
       for (VisibilityGraphNode targetNode : targetNodeList)
       {
-         totalSourceTargetChecks++;
-         if (totalSourceTargetChecks % 10000000 == 0)
-         {
-            printStats();
-         }
-
          if (filter.isConnectionValid(sourceNode.getPointInWorld(), targetNode.getPointInWorld()))
          {
-            numberPassValidFilter++;
-
-            Point2DReadOnly sourcePoint2DInLocal = sourceNode.getPoint2DInLocal();
-            Point2DReadOnly targetPoint2DInLocal = targetNode.getPoint2DInLocal();
-
-            //TOOD: +++JEP: These should be eliminated at the beginning, not during expansion!!!
-            boolean sourceIsInsideNoGoZone = VisibilityGraphsFactory.isInsideANonNavigableZone(sourcePoint2DInLocal, sourceObstacleClusters);
-            if (sourceIsInsideNoGoZone)
-            {
-               numberSourcesInNoGoZones++;
-               continue;
-            }
-
-            boolean targetIsInsideNoGoZone = VisibilityGraphsFactory.isInsideANonNavigableZone(targetPoint2DInLocal, targetObstacleClusters);
-            if (targetIsInsideNoGoZone)
-            {
-               numberTargetsInNoGoZones++;
-               continue;
-            }
-
-            numberValidConnections++;
-
             VisibilityGraphEdge edge = new VisibilityGraphEdge(sourceNode, targetNode);
             sourceNode.addEdge(edge);
             targetNode.addEdge(edge);
@@ -337,20 +315,6 @@ public class VisibilityGraph
             edgesToPack.add(edge);
          }
       }
-   }
-
-   private static void printStats()
-   {
-      System.out.println("numberPlanarRegionBoundingBoxesTooFar = " + numberPlanarRegionBoundingBoxesTooFar);
-      System.out.println("totalSourceTargetChecks = " + totalSourceTargetChecks);
-      System.out.println("numberPassValidFilter = " + numberPassValidFilter);
-      System.out.println("numberNotInsideSourceRegion = " + numberNotInsideSourceRegion);
-      System.out.println("numberNotInsideTargetRegion = " + numberNotInsideTargetRegion);
-      System.out.println("numberSourcesInNoGoZones = " + numberSourcesInNoGoZones);
-      System.out.println("numberTargetsInNoGoZones = " + numberTargetsInNoGoZones);
-      System.out.println("numberValidConnections = " + numberValidConnections);
-
-      System.out.println();
    }
 
    public VisibilityMapSolution createVisibilityMapSolution()
