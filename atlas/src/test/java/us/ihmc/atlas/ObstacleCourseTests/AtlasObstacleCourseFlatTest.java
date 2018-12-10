@@ -140,4 +140,12 @@ public class AtlasObstacleCourseFlatTest extends DRCObstacleCourseFlatTest
    {
       super.testWalkingUpToRampWithShortSteps();
    }
+
+   @Override
+   @ContinuousIntegrationTest(estimatedDuration = 83.3)
+   @Test(timeout = 420000)
+   public void testRepeatedWalking() throws SimulationExceededMaximumTimeException
+   {
+      super.testRepeatedWalking();
+   }
 }
