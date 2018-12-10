@@ -11,8 +11,6 @@ import us.ihmc.footstepPlanning.ui.RemoteUIMessageConverter;
 import us.ihmc.javaFXToolkit.messager.SharedMemoryJavaFXMessager;
 import us.ihmc.pubsub.DomainFactory;
 import us.ihmc.valkyrie.ValkyrieRobotModel;
-import us.ihmc.valkyrie.parameters.ValkyrieFootstepPlannerParameters;
-import us.ihmc.valkyrie.parameters.ValkyrieFootstepPlanningParameters;
 
 /**
  * This class provides a visualizer for the remote footstep planner found in the footstep planner toolbox.
