@@ -1,11 +1,13 @@
 package us.ihmc.quadrupedRobotics.planning.icp;
 
+import org.apache.commons.lang3.mutable.MutableDouble;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
 import us.ihmc.quadrupedBasics.gait.TimeInterval;
 import us.ihmc.quadrupedBasics.gait.TimeIntervalProvider;
 import us.ihmc.quadrupedRobotics.planning.ContactState;
+import us.ihmc.quadrupedRobotics.planning.QuadrupedCenterOfPressureTools;
 import us.ihmc.robotics.robotSide.QuadrantDependentList;
 import us.ihmc.robotics.robotSide.RobotQuadrant;
 
@@ -20,7 +22,7 @@ public class NewQuadrupedContactPhase
    private ContactState contactState = ContactState.IN_CONTACT;
 
    private final QuadrantDependentList<FramePoint3D> solePosition = new QuadrantDependentList<>();
-   private final QuadrantDependentList<Double> normalizedContactPressures = new QuadrantDependentList<>();
+   private final QuadrantDependentList<MutableDouble> normalizedContactPressures = new QuadrantDependentList<>();
 
    public NewQuadrupedContactPhase()
    {
@@ -28,7 +30,7 @@ public class NewQuadrupedContactPhase
       {
          feetInContact.add(robotQuadrant);
          solePosition.put(robotQuadrant, new FramePoint3D());
-         normalizedContactPressures.put(robotQuadrant, new Double(0.0));
+         normalizedContactPressures.put(robotQuadrant, new MutableDouble(0.0));
       }
    }
 
@@ -68,6 +70,9 @@ public class NewQuadrupedContactPhase
          contactState = ContactState.NO_CONTACT;
       else
          contactState = ContactState.IN_CONTACT;
+
+      QuadrupedCenterOfPressureTools.computeNominalNormalizedContactPressure(normalizedContactPressures, feetInContact);
+      QuadrupedCenterOfPressureTools.computeCenterOfPressure(copPosition, solePosition, normalizedContactPressures);
    }
 
    public TimeInterval getTimeInterval()
