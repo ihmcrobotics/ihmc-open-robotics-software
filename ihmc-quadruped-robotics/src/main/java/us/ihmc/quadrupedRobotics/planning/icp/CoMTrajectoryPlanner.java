@@ -37,7 +37,7 @@ public class CoMTrajectoryPlanner
    private final double gravityZ;
    private double nominalCoMHeight;
 
-   private final List<QuadrupedContactPhase> contactSequence;
+   private final List<NewQuadrupedContactPhase> contactSequence;
 
    private final YoFramePoint3D desiredCoMPosition = new YoFramePoint3D("desiredCoMPosition", worldFrame, registry);
    private final YoFrameVector3D desiredCoMVelocity = new YoFrameVector3D("desiredComVelocity", worldFrame, registry);
@@ -50,7 +50,7 @@ public class CoMTrajectoryPlanner
    private int numberOfConstraints = 0;
 
 
-   public CoMTrajectoryPlanner(List<QuadrupedContactPhase> contactSequence, YoDouble omega, double gravityZ, double nominalCoMHeight, YoVariableRegistry parentRegistry)
+   public CoMTrajectoryPlanner(List<NewQuadrupedContactPhase> contactSequence, YoDouble omega, double gravityZ, double nominalCoMHeight, YoVariableRegistry parentRegistry)
    {
       this.contactSequence = contactSequence;
       this.omega = omega;
@@ -105,7 +105,7 @@ public class CoMTrajectoryPlanner
       }
 
       // set terminal constraint
-      QuadrupedContactPhase lastContactPhase = contactSequence.get(numberOfPhases - 1);
+      NewQuadrupedContactPhase lastContactPhase = contactSequence.get(numberOfPhases - 1);
       finalDCMPosition.set(lastContactPhase.getCopPosition());
       finalDCMPosition.addZ(nominalCoMHeight);
       setDCMTerminalConstraint(numberOfPhases - 1, finalDCMPosition);
@@ -132,7 +132,7 @@ public class CoMTrajectoryPlanner
     */
    public void compute(double timeInPhase)
    {
-      QuadrupedContactPhase currentContactPhase = contactSequence.get(0);
+      NewQuadrupedContactPhase currentContactPhase = contactSequence.get(0);
 
       ContactState contactState = currentContactPhase.getContactState();
       double firstCoefficientPositionMultiplier = getFirstCoefficientPositionMultiplier(contactState, timeInPhase);
@@ -318,8 +318,8 @@ public class CoMTrajectoryPlanner
     */
    private void setPositionContinuity(int previousSequence, int nextSequence)
    {
-      QuadrupedContactPhase previousContact = contactSequence.get(previousSequence);
-      QuadrupedContactPhase nextContact = contactSequence.get(nextSequence);
+      NewQuadrupedContactPhase previousContact = contactSequence.get(previousSequence);
+      NewQuadrupedContactPhase nextContact = contactSequence.get(nextSequence);
 
       double previousDuration = previousContact.getTimeInterval().getDuration();
       double previousBX, previousBY, previousBZ;
@@ -397,8 +397,8 @@ public class CoMTrajectoryPlanner
     */
    private void setVelocityContinuity(int previousSequence, int nextSequence)
    {
-      QuadrupedContactPhase previousContact = contactSequence.get(previousSequence);
-      QuadrupedContactPhase nextContact = contactSequence.get(nextSequence);
+      NewQuadrupedContactPhase previousContact = contactSequence.get(previousSequence);
+      NewQuadrupedContactPhase nextContact = contactSequence.get(nextSequence);
 
       double previousDuration = previousContact.getTimeInterval().getDuration();
 

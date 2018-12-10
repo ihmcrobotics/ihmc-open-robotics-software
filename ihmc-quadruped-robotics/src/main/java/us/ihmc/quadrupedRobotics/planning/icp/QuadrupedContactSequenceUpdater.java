@@ -14,7 +14,7 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 
-public class NewQuadrupedContactSequence
+public class QuadrupedContactSequenceUpdater
 {
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
 
@@ -33,7 +33,7 @@ public class NewQuadrupedContactSequence
 
    private final RecyclingArrayList<NewQuadrupedContactPhase> contactSequence;
 
-   public NewQuadrupedContactSequence(QuadrantDependentList<ReferenceFrame> soleFrames, int pastContactPhaseCapacity, int futureContactPhaseCapacity)
+   public QuadrupedContactSequenceUpdater(QuadrantDependentList<ReferenceFrame> soleFrames, int pastContactPhaseCapacity, int futureContactPhaseCapacity)
    {
       contactSequence = new RecyclingArrayList<>(pastContactPhaseCapacity + futureContactPhaseCapacity + 1, NewQuadrupedContactPhase::new);
       contactSequence.clear();
@@ -58,16 +58,14 @@ public class NewQuadrupedContactSequence
    public void initialize()
    {
       contactSequence.clear();
-      stepTransitions.clear();
    }
 
-   /**
-    * compute piecewise center of pressure plan given an array of upcoming steps
-    * @param stepSequence list of upcoming steps (input)
-    * @param currentFeetInContact list of current feet in contact (input)
-    * @param currentTime current time (input)
-    */
-   public RecyclingArrayList<NewQuadrupedContactPhase> update(List<? extends QuadrupedTimedStep> stepSequence, List<RobotQuadrant> currentFeetInContact,
+   public RecyclingArrayList<NewQuadrupedContactPhase> getContactSequence()
+   {
+      return contactSequence;
+   }
+
+   public void update(List<? extends QuadrupedTimedStep> stepSequence, List<RobotQuadrant> currentFeetInContact,
                                                               double currentTime)
    {
       initializeCalculationConditions(currentFeetInContact);
@@ -75,7 +73,7 @@ public class NewQuadrupedContactSequence
 
       trimPastContactSequences(currentTime, currentFeetInContact);
 
-      return computeContactPhasesFromStepTransitions();
+      computeContactPhasesFromStepTransitions();
    }
 
    private void initializeCalculationConditions(List<RobotQuadrant> currentFeetInContact)
@@ -93,6 +91,7 @@ public class NewQuadrupedContactSequence
 
    private void computeStepTransitionsFromStepSequence(double currentTime, List<? extends QuadrupedTimedStep> stepSequence)
    {
+      stepTransitions.clear();
       for (int i = 0; i < stepSequence.size(); i++)
       {
          QuadrupedTimedStep step = stepSequence.get(i);
@@ -179,7 +178,7 @@ public class NewQuadrupedContactSequence
       }
    }
 
-   private RecyclingArrayList<NewQuadrupedContactPhase> computeContactPhasesFromStepTransitions()
+   private void computeContactPhasesFromStepTransitions()
    {
       int numberOfTransitions = stepTransitions.size();
       // compute transition time and center of pressure for each time interval
@@ -213,7 +212,7 @@ public class NewQuadrupedContactSequence
          if (isLastContact)
          {
             contactPhase.getTimeInterval().setInterval(stepTransition.getTransitionTime(), stepTransition.getTransitionTime() + finalTransferDuration);
-            return contactSequence;
+            return;
          }
          else
          {
@@ -221,7 +220,7 @@ public class NewQuadrupedContactSequence
          }
       }
 
-      return contactSequence;
+      return;
    }
 
 

@@ -4,8 +4,8 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FixedFramePoint3DBasics;
 import us.ihmc.euclid.referenceFrame.interfaces.FixedFrameVector3DBasics;
 import us.ihmc.quadrupedBasics.gait.QuadrupedTimedStep;
-import us.ihmc.quadrupedRobotics.planning.ContactState;
 import us.ihmc.robotics.robotSide.QuadrantDependentList;
+import us.ihmc.robotics.robotSide.RobotQuadrant;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 
@@ -18,39 +18,40 @@ public class DCMBasedCoMPlanner
 
    private final List<QuadrupedTimedStep> stepSequence = new ArrayList<>();
 
-   private final double gravity;
-   private final YoDouble omega = new YoDouble("omega", registry);
    private final YoDouble timeInContactPhase = new YoDouble("timeInContactPhase", registry);
 
-   private final QuadrupedContactSequence contactSequence;
+   private final QuadrupedContactSequenceUpdater contactSequenceUpdater;
    private final CoMTrajectoryPlanner comTrajectoryPlanner;
 
-   public DCMBasedCoMPlanner(QuadrantDependentList<ReferenceFrame> soleFrames, double gravity, double nominalHeight, YoVariableRegistry parentRegistry)
+   public DCMBasedCoMPlanner(QuadrantDependentList<ReferenceFrame> soleFrames, YoDouble omega, double gravity, double nominalHeight, YoVariableRegistry parentRegistry)
    {
-      this.gravity = gravity;
-      contactSequence = new QuadrupedContactSequence(soleFrames, 4, 10);
-      omega.set(Math.sqrt(gravity / nominalHeight));
+      contactSequenceUpdater = new QuadrupedContactSequenceUpdater(soleFrames, 4, 10);
 
-      comTrajectoryPlanner = new CoMTrajectoryPlanner(contactSequence, omega, gravity, nominalHeight, registry);
+      comTrajectoryPlanner = new CoMTrajectoryPlanner(contactSequenceUpdater.getContactSequence(), omega, gravity, nominalHeight, registry);
 
       parentRegistry.addChild(registry);
    }
 
    public void initialize()
    {
-      contactSequence.initialize();
+      contactSequenceUpdater.initialize();
    }
 
-   public void computeSetpoints(double currentTime, QuadrantDependentList<ContactState> currentContactStates, FixedFramePoint3DBasics desiredDCMPositionToPack,
+   void setNominalCoMHeight(double comHeight)
+   {
+      comTrajectoryPlanner.setNominalCoMHeight(comHeight);
+   }
+
+   public void computeSetpoints(double currentTime, List<RobotQuadrant> currentFeetInContact, FixedFramePoint3DBasics desiredDCMPositionToPack,
                                 FixedFrameVector3DBasics desiredDCMVelocityToPack)
    {
-      contactSequence.update(stepSequence, currentContactStates, currentTime);
+      contactSequenceUpdater.update(stepSequence, currentFeetInContact, currentTime);
 
-      double timeInPhase = currentTime - contactSequence.getFirst().getTimeInterval().getStartTime();
+      double timeInPhase = currentTime - contactSequenceUpdater.getContactSequence().getFirst().getTimeInterval().getStartTime();
       timeInContactPhase.set(timeInPhase);
 
       comTrajectoryPlanner.solveForTrajectory();
-      comTrajectoryPlanner.compute(timeInPhase);
+      comTrajectoryPlanner.compute(timeInContactPhase.getDoubleValue());
 
       desiredDCMPositionToPack.set(comTrajectoryPlanner.getDesiredDCMPosition());
       desiredDCMVelocityToPack.set(comTrajectoryPlanner.getDesiredDCMVelocity());
@@ -66,34 +67,13 @@ public class DCMBasedCoMPlanner
       stepSequence.add(step);
    }
 
-   void setCoMHeight(double comHeight)
-   {
-      omega.set(Math.sqrt(gravity / comHeight));
-   }
-
    public void initializeForStanding()
    {
-      contactSequence.initialize();
+      contactSequenceUpdater.initialize();
    }
 
    public void initializeForStepping()
    {
-      contactSequence.initialize();
+      contactSequenceUpdater.initialize();
    }
-
-   void getFinalDesiredDCM(FixedFramePoint3DBasics finalDesiredDCMToPack)
-   {
-
-   }
-
-   double getFinalTime()
-   {
-      return Double.POSITIVE_INFINITY;
-   }
-
-   private void computeTrajectories(double currentTime, QuadrantDependentList<ContactState> currentContactStates)
-   {
-      contactSequence.update(stepSequence, currentContactStates, currentTime);
-   }
-
 }
