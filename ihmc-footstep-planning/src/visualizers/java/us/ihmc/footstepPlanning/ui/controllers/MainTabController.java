@@ -8,27 +8,30 @@ import static us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI.
 import static us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI.StartOrientationTopic;
 import static us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI.StartPositionTopic;
 
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 
+import javafx.animation.AnimationTimer;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
-import javafx.scene.control.CheckBox;
-import javafx.scene.control.ComboBox;
-import javafx.scene.control.Spinner;
-import javafx.scene.control.SpinnerValueFactory;
+import javafx.scene.control.*;
 import javafx.scene.control.SpinnerValueFactory.DoubleSpinnerValueFactory;
-import javafx.scene.control.TextField;
-import javafx.scene.control.ToggleButton;
 import us.ihmc.commons.PrintTools;
+import us.ihmc.euclid.referenceFrame.FramePose3D;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.footstepPlanning.FootstepPlannerType;
 import us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI;
+import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.javaFXToolkit.messager.JavaFXMessager;
 import us.ihmc.javaFXToolkit.messager.MessageBidirectionalBinding.PropertyToMessageTypeConverter;
+import us.ihmc.mecano.frames.MovingReferenceFrame;
 import us.ihmc.messager.TopicListener;
 import us.ihmc.pathPlanning.visibilityGraphs.ui.properties.Point3DProperty;
 import us.ihmc.pathPlanning.visibilityGraphs.ui.properties.YawProperty;
+import us.ihmc.robotModels.FullHumanoidRobotModel;
+import us.ihmc.robotModels.FullRobotModel;
 
 public class MainTabController
 {
@@ -86,7 +89,6 @@ public class MainTabController
    @FXML
    private Spinner<Double> goalYaw;
 
-
    @FXML
    public void computePath()
    {
@@ -111,6 +113,9 @@ public class MainTabController
    private JavaFXMessager messager;
 
    private AtomicReference<Integer> currentPlannerRequestId;
+   private final AtomicBoolean requestSetStartPoseFromRobot = new AtomicBoolean(false);
+   private AnimationTimer robotPoseHandler;
+   private HumanoidReferenceFrames humanoidReferenceFrames;
 
    private final Point3DProperty startPositionProperty = new Point3DProperty(this, "startPositionProperty", new Point3D());
    private final Point3DProperty goalPositionProperty = new Point3DProperty(this, "goalPositionProperty", new Point3D());
@@ -208,12 +213,41 @@ public class MainTabController
       goalRotationProperty.bindBidirectionalYaw(goalYaw.getValueFactory().valueProperty());
       messager.bindBidirectional(GoalOrientationTopic, goalRotationProperty, false);
 
+      robotPoseHandler = new AnimationTimer()
+      {
+         @Override
+         public void handle(long now)
+         {
+            if(requestSetStartPoseFromRobot.getAndSet(false))
+            {
+               humanoidReferenceFrames.updateFrames();
+               MovingReferenceFrame midFeetZUpFrame = humanoidReferenceFrames.getMidFeetZUpFrame();
+               FramePose3D startPose = new FramePose3D();
+               startPose.setToZero(midFeetZUpFrame);
+               startPose.changeFrame(ReferenceFrame.getWorldFrame());
 
+               double x = startPose.getX();
+               double y = startPose.getY();
+               double yaw = startPose.getYaw();
 
-
-
+               startPositionProperty.set(new Point3D(x, y, yaw));
+            }
+         }
+      };
+      robotPoseHandler.start();
 
       messager.registerTopicListener(GlobalResetTopic, reset -> clearStartGoalTextFields());
+   }
+
+   @FXML
+   private void setStartPoseFromRobot()
+   {
+      requestSetStartPoseFromRobot.set(true);
+   }
+
+   public void setFullRobotModel(FullHumanoidRobotModel fullHumanoidRobotModel)
+   {
+      this.humanoidReferenceFrames = new HumanoidReferenceFrames(fullHumanoidRobotModel);
    }
 
    private void clearStartGoalTextFields()
