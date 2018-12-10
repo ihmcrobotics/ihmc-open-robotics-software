@@ -36,7 +36,7 @@ public class Cluster
    private final List<Point2DReadOnly> nonNavigableExtrusionsInLocal = new ArrayList<>();
 
    private boolean nonNavigableExtrusionsBoundingBoxIsDirty = true;
-   private final BoundingBox2D nonNavigableExtrusionsBoundingBox = new BoundingBox2D();
+   private final BoundingBox2D nonNavigableExtrusionsBoundingBox = new BoundingBox2D(Double.NaN, Double.NaN, Double.NaN, Double.NaN);
 
    private List<Point3DReadOnly> navigablePointsInsideHomeRegionInWorld = null;
 
@@ -129,7 +129,7 @@ public class Cluster
 
    public void updateBoundingBox()
    {
-      //TODO: First reset the bounding box to zero or null or something?
+      nonNavigableExtrusionsBoundingBox.setToNaN();
       nonNavigableExtrusionsInLocal.forEach(nonNavigableExtrusionsBoundingBox::updateToIncludePoint);
       nonNavigableExtrusionsBoundingBoxIsDirty = false;
    }
@@ -368,11 +368,6 @@ public class Cluster
       Point3D pointInLocal = new Point3D();
       transformToWorld.inverseTransform(pointInWorld, pointInLocal);
       return pointInLocal;
-   }
-
-   private Point2D toLocal2D(Point3DReadOnly pointInWorld)
-   {
-      return new Point2D(toLocal3D(pointInWorld));
    }
 
 }
