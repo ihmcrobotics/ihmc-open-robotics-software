@@ -1,13 +1,20 @@
 package us.ihmc.quadrupedRobotics.planning;
 
+import org.apache.commons.lang3.mutable.Mutable;
 import org.apache.commons.lang3.mutable.MutableDouble;
 import org.junit.Test;
+import us.ihmc.commons.RandomNumbers;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
+import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.tools.EuclidFrameRandomTools;
+import us.ihmc.euclid.referenceFrame.tools.EuclidFrameTestTools;
 import us.ihmc.robotics.robotSide.QuadrantDependentList;
 import us.ihmc.robotics.robotSide.RobotQuadrant;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Random;
 
 import static org.junit.Assert.assertEquals;
 
@@ -449,5 +456,43 @@ public class QuadrupedCenterOfPressureToolsTest
 
       assertEquals(0.0, normalizedContactPressures.get(RobotQuadrant.FRONT_RIGHT).getValue(), epsilon);
       assertEquals(0.0, normalizedContactPressures2.get(RobotQuadrant.FRONT_RIGHT).getValue(), epsilon);
+   }
+
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
+   @Test(timeout = 30000)
+   public void testComputeCenterOfPressure()
+   {
+      Random random = new Random(1738L);
+
+      QuadrantDependentList<FramePoint3D> solePositions = new QuadrantDependentList<>();
+      QuadrantDependentList<MutableDouble> normalizedPressures = new QuadrantDependentList<>();
+
+
+      for (int iter = 0; iter < 100; iter++)
+      {
+         double pressure = 0.0;
+         for (RobotQuadrant quadrant : RobotQuadrant.values)
+         {
+            solePositions.put(quadrant, EuclidFrameRandomTools.nextFramePoint3D(random, ReferenceFrame.getWorldFrame(), 0.5));
+            normalizedPressures.put(quadrant, new MutableDouble(RandomNumbers.nextDouble(random, 0.0, 1.0)));
+            pressure += normalizedPressures.get(quadrant).getValue();
+         }
+
+
+         FramePoint3D copPosition = new FramePoint3D();
+         QuadrupedCenterOfPressureTools.computeCenterOfPressure(copPosition, solePositions, normalizedPressures);
+
+         FramePoint3D expectedCoPPosition = new FramePoint3D();
+         for (RobotQuadrant quadrant : RobotQuadrant.values)
+         {
+            FramePoint3D point = new FramePoint3D(solePositions.get(quadrant));
+            point.scale(normalizedPressures.get(quadrant).getValue());
+            expectedCoPPosition.add(point);
+         }
+
+         expectedCoPPosition.scale(1.0 / pressure);
+
+         EuclidFrameTestTools.assertFramePoint3DGeometricallyEquals(expectedCoPPosition, copPosition, epsilon);
+      }
    }
 }
