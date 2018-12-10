@@ -62,16 +62,6 @@ public class QuadrupedContactSequenceUpdater
 
    public void update(List<? extends QuadrupedTimedStep> stepSequence, List<RobotQuadrant> currentFeetInContact, double currentTime)
    {
-      initializeCalculationConditions(currentFeetInContact);
-
-      QuadrupedContactSequenceTools.computeStepTransitionsFromStepSequence(stepTransitions, currentTime, stepSequence);
-      QuadrupedContactSequenceTools.trimPastContactSequences(contactSequence, currentTime, currentFeetInContact, solePositions, pastContactPhaseCapacity);
-
-      computeContactPhasesFromStepTransitions();
-   }
-
-   private void initializeCalculationConditions(List<RobotQuadrant> currentFeetInContact)
-   {
       // initialize contact state and sole positions
       for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
       {
@@ -81,6 +71,11 @@ public class QuadrupedContactSequenceUpdater
       feetInContact.clear();
       for (int footIndex = 0; footIndex < currentFeetInContact.size(); footIndex++)
          feetInContact.add(currentFeetInContact.get(footIndex));
+
+      QuadrupedContactSequenceTools.computeStepTransitionsFromStepSequence(stepTransitions, currentTime, stepSequence);
+      QuadrupedContactSequenceTools.trimPastContactSequences(contactSequence, currentTime, currentFeetInContact, solePositions, pastContactPhaseCapacity);
+
+      computeContactPhasesFromStepTransitions();
    }
 
    private void computeContactPhasesFromStepTransitions()
