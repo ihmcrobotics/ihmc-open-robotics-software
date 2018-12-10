@@ -173,7 +173,7 @@ public class QuadrupedStepMessageHandler
       for (int i = 0; i < numberOfStepsToAdjust; i++)
       {
          double multiplier = (numberOfStepsToRecover.getIntegerValue() - i) / (double) numberOfStepsToRecover.getIntegerValue();
-         receivedStepSequence.get(i).getGoalPosition(tempStep);
+         receivedStepSequence.get(i).getGoalPositionProvider(tempStep);
          tempStep.scaleAdd(multiplier, stepAdjustment, tempStep);
          receivedStepSequence.get(i).setGoalPosition(tempStep);
       }

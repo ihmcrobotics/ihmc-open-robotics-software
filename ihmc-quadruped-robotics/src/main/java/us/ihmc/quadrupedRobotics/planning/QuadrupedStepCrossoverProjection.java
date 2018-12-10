@@ -29,7 +29,7 @@ public class QuadrupedStepCrossoverProjection
 
    public void project(QuadrupedTimedStep step)
    {
-      step.getGoalPosition(goalPosition);
+      step.getGoalPositionProvider(goalPosition);
       project(goalPosition, step.getRobotQuadrant());
       step.setGoalPosition(goalPosition);
    }

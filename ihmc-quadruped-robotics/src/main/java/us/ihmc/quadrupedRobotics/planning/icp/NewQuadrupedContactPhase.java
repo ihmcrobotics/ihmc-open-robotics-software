@@ -14,7 +14,7 @@ import us.ihmc.robotics.robotSide.RobotQuadrant;
 import java.util.ArrayList;
 import java.util.List;
 
-public class NewQuadrupedContactPhase
+public class NewQuadrupedContactPhase implements TimeIntervalProvider
 {
    private final TimeInterval timeInterval = new TimeInterval();
    private final List<RobotQuadrant> feetInContact = new ArrayList<>();

@@ -116,7 +116,7 @@ public class QuadrupedTimedContactSequence extends PreallocatedList<QuadrupedTim
             stepTransition[numberOfStepTransitions].time = step.getTimeInterval().getStartTime();
             stepTransition[numberOfStepTransitions].type = QuadrupedStepTransitionType.LIFT_OFF;
             stepTransition[numberOfStepTransitions].robotQuadrant = step.getRobotQuadrant();
-            step.getGoalPosition(stepTransition[numberOfStepTransitions].solePosition);
+            step.getGoalPositionProvider(stepTransition[numberOfStepTransitions].solePosition);
             transitionStep[numberOfStepTransitions] = step;
             numberOfStepTransitions++;
          }
@@ -126,7 +126,7 @@ public class QuadrupedTimedContactSequence extends PreallocatedList<QuadrupedTim
             stepTransition[numberOfStepTransitions].time = step.getTimeInterval().getEndTime();
             stepTransition[numberOfStepTransitions].type = QuadrupedStepTransitionType.TOUCH_DOWN;
             stepTransition[numberOfStepTransitions].robotQuadrant = step.getRobotQuadrant();
-            step.getGoalPosition(stepTransition[numberOfStepTransitions].solePosition);
+            step.getGoalPositionProvider(stepTransition[numberOfStepTransitions].solePosition);
             transitionStep[numberOfStepTransitions] = step;
             numberOfStepTransitions++;
          }

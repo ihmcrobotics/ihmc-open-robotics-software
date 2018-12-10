@@ -98,7 +98,7 @@ public class QuadrupedFeetManager
 
    public void adjustStep(QuadrupedStep step)
    {
-      step.getGoalPosition(tempPoint);
+      step.getGoalPositionProvider(tempPoint);
       tempPoint.changeFrame(ReferenceFrame.getWorldFrame());
       footControlModules.get(step.getRobotQuadrant()).adjustStep(tempPoint);
    }

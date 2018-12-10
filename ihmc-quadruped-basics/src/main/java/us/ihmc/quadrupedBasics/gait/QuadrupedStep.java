@@ -39,7 +39,7 @@ public class QuadrupedStep
 
    public QuadrupedStep(QuadrupedStep other)
    {
-      this(other.getRobotQuadrant(), other.getGoalPosition(), other.getGroundClearance());
+      this(other.getRobotQuadrant(), other.getGoalPositionProvider(), other.getGroundClearance());
    }
 
    public RobotQuadrant getRobotQuadrant()
@@ -50,7 +50,12 @@ public class QuadrupedStep
    /**
     * Unsafe for external use.
     */
-   public Point3DBasics getGoalPosition()
+   public Point3DBasics getGoalPositionProvider()
+   {
+      return goalPosition;
+   }
+
+   public Point3DReadOnly getGoalPosition()
    {
       return goalPosition;
    }
@@ -61,27 +66,27 @@ public class QuadrupedStep
    }
 
 
-   public void getGoalPosition(Point3D goalPosition)
+   public void getGoalPositionProvider(Point3D goalPosition)
    {
-      goalPosition.set(getGoalPosition());
+      goalPosition.set(getGoalPositionProvider());
    }
 
-   public void getGoalPosition(FixedFramePoint3DBasics goalPosition)
+   public void getGoalPositionProvider(FixedFramePoint3DBasics goalPosition)
    {
-      tempGoalPosition.setIncludingFrame(worldFrame, getGoalPosition());
+      tempGoalPosition.setIncludingFrame(worldFrame, getGoalPositionProvider());
       goalPosition.setMatchingFrame(tempGoalPosition);
    }
 
    public void setGoalPosition(Point3DReadOnly goalPosition)
    {
-      getGoalPosition().set(goalPosition);
+      getGoalPositionProvider().set(goalPosition);
    }
 
    public void setGoalPosition(FramePoint3D goalPosition)
    {
       ReferenceFrame originalFrame = goalPosition.getReferenceFrame();
       goalPosition.changeFrame(worldFrame);
-      getGoalPosition().set(goalPosition);
+      getGoalPositionProvider().set(goalPosition);
       goalPosition.changeFrame(originalFrame);
    }
 
@@ -98,7 +103,7 @@ public class QuadrupedStep
    public void set(QuadrupedStep other)
    {
       setRobotQuadrant(other.getRobotQuadrant());
-      setGoalPosition(other.getGoalPosition());
+      setGoalPosition(other.getGoalPositionProvider());
       setGroundClearance(other.getGroundClearance());
    }
 
@@ -112,14 +117,14 @@ public class QuadrupedStep
    public void get(QuadrupedTimedStep other)
    {
       other.setRobotQuadrant(getRobotQuadrant());
-      other.setGoalPosition(getGoalPosition());
+      other.setGoalPosition(getGoalPositionProvider());
       other.setGroundClearance(getGroundClearance());
    }
 
    public boolean epsilonEquals(QuadrupedTimedStep other, double epsilon)
    {
       return getRobotQuadrant() == other.getRobotQuadrant() &&
-             getGoalPosition().epsilonEquals(other.getGoalPosition(), epsilon) &&
+             getGoalPositionProvider().epsilonEquals(other.getGoalPositionProvider(), epsilon) &&
              MathTools.epsilonEquals(getGroundClearance(), other.getGroundClearance(), epsilon);
 
    }
@@ -128,7 +133,7 @@ public class QuadrupedStep
    {
       String string = super.toString();
       string += "\nrobotQuadrant: " + getRobotQuadrant();
-      string += "\ngoalPosition:" + getGoalPosition();
+      string += "\ngoalPosition:" + getGoalPositionProvider();
       string += "\ngroundClearance: " + getGroundClearance();
       return string;
    }

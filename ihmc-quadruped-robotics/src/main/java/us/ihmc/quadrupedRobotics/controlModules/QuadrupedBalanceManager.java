@@ -181,7 +181,7 @@ public class QuadrupedBalanceManager
          if (count == maxNumberOfFootstepGraphicsPerQuadrant)
             continue;
 
-         step.getGoalPosition(stepSequenceVisualizationPosition);
+         step.getGoalPositionProvider(stepSequenceVisualizationPosition);
          stepSequenceVisualization.get(quadrant).setBall(stepSequenceVisualizationPosition, count);
          stepVisualizationCounter.get(quadrant).setValue(count + 1);
       }
@@ -194,7 +194,7 @@ public class QuadrupedBalanceManager
       {
          QuadrupedTimedStep step = steps.get(i);
          RobotQuadrant quadrant = step.getRobotQuadrant();
-         step.getGoalPosition(stepSequenceVisualizationPosition);
+         step.getGoalPositionProvider(stepSequenceVisualizationPosition);
          stepSequenceVisualization.get(quadrant).setBall(stepSequenceVisualizationPosition, 0);
       }
    }

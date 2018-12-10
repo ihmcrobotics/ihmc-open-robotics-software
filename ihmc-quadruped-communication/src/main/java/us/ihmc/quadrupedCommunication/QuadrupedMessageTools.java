@@ -48,7 +48,7 @@ public class QuadrupedMessageTools
    {
       QuadrupedTimedStepMessage message = new QuadrupedTimedStepMessage();
       message.getQuadrupedStepMessage().setRobotQuadrant(step.getRobotQuadrant().toByte());
-      step.getGoalPosition(message.getQuadrupedStepMessage().getGoalPosition());
+      step.getGoalPositionProvider(message.getQuadrupedStepMessage().getGoalPosition());
       message.getQuadrupedStepMessage().setGroundClearance(step.getGroundClearance());
       message.getTimeInterval().setStartTime(step.getTimeInterval().getStartTime());
       message.getTimeInterval().setEndTime(step.getTimeInterval().getEndTime());
