@@ -20,7 +20,7 @@ public class QuadrupedContactPhase implements ContactStateProvider
    private final FramePoint3D copPosition = new FramePoint3D();
    private ContactState contactState = ContactState.IN_CONTACT;
 
-   private final QuadrantDependentList<FramePoint3D> solePosition = new QuadrantDependentList<>();
+   private final QuadrantDependentList<FramePoint3D> solePositions = new QuadrantDependentList<>();
    private final QuadrantDependentList<MutableDouble> normalizedContactPressures = new QuadrantDependentList<>();
 
    public QuadrupedContactPhase()
@@ -28,7 +28,7 @@ public class QuadrupedContactPhase implements ContactStateProvider
       for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
       {
          feetInContact.add(robotQuadrant);
-         solePosition.put(robotQuadrant, new FramePoint3D());
+         solePositions.put(robotQuadrant, new FramePoint3D());
          normalizedContactPressures.put(robotQuadrant, new MutableDouble(0.0));
       }
    }
@@ -49,16 +49,16 @@ public class QuadrupedContactPhase implements ContactStateProvider
    {
       for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
       {
-         this.solePosition.get(robotQuadrant).setIncludingFrame(solePosition.get(robotQuadrant));
-         this.solePosition.get(robotQuadrant).changeFrame(ReferenceFrame.getWorldFrame());
+         this.solePositions.get(robotQuadrant).setIncludingFrame(solePosition.get(robotQuadrant));
+         this.solePositions.get(robotQuadrant).changeFrame(ReferenceFrame.getWorldFrame());
       }
    }
 
    public void set(QuadrupedContactPhase other)
    {
       setTimeInterval(other.getTimeInterval());
-      setFeetInContact(other.getFeetInContact());
-      setSolePosition(other.getSolePosition());
+      setFeetInContact(other.feetInContact);
+      setSolePosition(other.solePositions);
 
       update();
    }
@@ -71,7 +71,7 @@ public class QuadrupedContactPhase implements ContactStateProvider
          contactState = ContactState.IN_CONTACT;
 
       QuadrupedCenterOfPressureTools.computeNominalNormalizedContactPressure(normalizedContactPressures, feetInContact);
-      QuadrupedCenterOfPressureTools.computeCenterOfPressure(copPosition, solePosition, normalizedContactPressures);
+      QuadrupedCenterOfPressureTools.computeCenterOfPressure(copPosition, solePositions, normalizedContactPressures);
    }
 
    @Override
@@ -97,8 +97,8 @@ public class QuadrupedContactPhase implements ContactStateProvider
       return feetInContact;
    }
 
-   public QuadrantDependentList<FramePoint3D> getSolePosition()
+   public FramePoint3DReadOnly getSolePosition(RobotQuadrant robotQuadrant)
    {
-      return solePosition;
+      return solePositions.get(robotQuadrant);
    }
 }
