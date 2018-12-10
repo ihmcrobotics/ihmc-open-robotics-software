@@ -12,8 +12,17 @@ import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 
 public class VisibilityGraphNode implements Transformable, EpsilonComparable<VisibilityGraphNode>
 {
+   private final VisibilityGraphNavigableRegion visibilityGraphNavigableRegion;
    private final ConnectionPoint3D pointInWorld;
    private final Point2D point2DInLocal;
+
+   private boolean edgesHaveBeenDetermined = false;
+
+   private double costFromStart = Double.NaN;
+   private double estimatedCostToGoal = Double.NaN;
+
+   private boolean hasBeenExpanded = false;
+   private VisibilityGraphNode bestParentNode = null;
 
    private final ArrayList<VisibilityGraphEdge> edges = new ArrayList<>();
 
@@ -22,10 +31,16 @@ public class VisibilityGraphNode implements Transformable, EpsilonComparable<Vis
       return pointInWorld.getRegionId();
    }
 
-   public VisibilityGraphNode(Point3DReadOnly pointInWorld, Point2DReadOnly pointInLocal, int regionId)
+   public VisibilityGraphNode(Point3DReadOnly pointInWorld, Point2DReadOnly pointInLocal, VisibilityGraphNavigableRegion visibilityGraphNavigableRegion)
    {
-      this.pointInWorld = new ConnectionPoint3D(pointInWorld, regionId);
+      this.visibilityGraphNavigableRegion = visibilityGraphNavigableRegion;
+      this.pointInWorld = new ConnectionPoint3D(pointInWorld, visibilityGraphNavigableRegion.getMapId());
       this.point2DInLocal = new Point2D(pointInLocal);
+   }
+
+   public VisibilityGraphNavigableRegion getVisibilityGraphNavigableRegion()
+   {
+      return visibilityGraphNavigableRegion;
    }
 
    public Point2DReadOnly getPoint2DInLocal()
@@ -80,6 +95,52 @@ public class VisibilityGraphNode implements Transformable, EpsilonComparable<Vis
    public String toString()
    {
       return pointInWorld.toString();
+   }
+
+   public double getCostFromStart()
+   {
+      return costFromStart;
+   }
+
+   public void setCostFromStart(double costFromStart, VisibilityGraphNode bestParentNode)
+   {
+      this.costFromStart = costFromStart;
+      this.bestParentNode = bestParentNode;
+   }
+
+   public VisibilityGraphNode getBestParentNode()
+   {
+      return bestParentNode;
+   }
+
+   public double getEstimatedCostToGoal()
+   {
+      return estimatedCostToGoal;
+   }
+
+   public void setEstimatedCostToGoal(double estimatedCostToGoal)
+   {
+      this.estimatedCostToGoal = estimatedCostToGoal;
+   }
+
+   public boolean getHasBeenExpanded()
+   {
+      return hasBeenExpanded;
+   }
+
+   public void setHasBeenExpanded(boolean hasBeenExpanded)
+   {
+      this.hasBeenExpanded = hasBeenExpanded;
+   }
+
+   public boolean getEdgesHaveBeenDetermined()
+   {
+      return edgesHaveBeenDetermined;
+   }
+
+   public void setEdgesHaveBeenDetermined(boolean edgesHaveBeenDetermined)
+   {
+      this.edgesHaveBeenDetermined = edgesHaveBeenDetermined;
    }
 
 }

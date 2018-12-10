@@ -35,12 +35,13 @@ public class VisibilityGraph
    private final ArrayList<VisibilityGraphEdge> crossRegionEdges = new ArrayList<VisibilityGraphEdge>();
 
    private VisibilityGraphNode startNode, goalNode;
-   //   private final ArrayList<VisibilityGraphEdge> startEdges = new ArrayList<>();
-   //   private final ArrayList<VisibilityGraphEdge> goalEdges = new ArrayList<>();
 
-   public VisibilityGraph(NavigableRegions navigableRegions, InterRegionConnectionFilter filter)
+   private final InterRegionConnectionFilter interRegionConnectionFilter;
+
+   public VisibilityGraph(NavigableRegions navigableRegions, InterRegionConnectionFilter interRegionConnectionFilter)
    {
       this.navigableRegions = navigableRegions;
+      this.interRegionConnectionFilter = interRegionConnectionFilter;
 
       List<NavigableRegion> naviableRegionsList = navigableRegions.getNaviableRegionsList();
 
@@ -48,9 +49,16 @@ public class VisibilityGraph
       {
          VisibilityGraphNavigableRegion visibilityGraphNavigableRegion = new VisibilityGraphNavigableRegion(navigableRegion);
          visibilityGraphNavigableRegion.createGraphAroundClusterRings();
-         visibilityGraphNavigableRegion.createGraphBetweenInnerClusterRings();
 
          visibilityGraphNavigableRegions.add(visibilityGraphNavigableRegion);
+      }
+   }
+
+   public void fullyExpandVisibilityGraph()
+   {
+      for (VisibilityGraphNavigableRegion visibilityGraphNavigableRegion : visibilityGraphNavigableRegions)
+      {
+         visibilityGraphNavigableRegion.createGraphBetweenInnerClusterRings();
       }
 
       for (int sourceIndex = 0; sourceIndex < visibilityGraphNavigableRegions.size(); sourceIndex++)
@@ -60,9 +68,40 @@ public class VisibilityGraph
          for (int targetIndex = sourceIndex + 1; targetIndex < visibilityGraphNavigableRegions.size(); targetIndex++)
          {
             VisibilityGraphNavigableRegion targetNavigableRegion = visibilityGraphNavigableRegions.get(targetIndex);
-            createInterRegionVisibilityConnections(sourceNavigableRegion, targetNavigableRegion, filter, crossRegionEdges);
+            createInterRegionVisibilityConnections(sourceNavigableRegion, targetNavigableRegion);
          }
       }
+   }
+
+   public void computeInnerAndInterEdges(VisibilityGraphNode sourceNode)
+   {
+      VisibilityGraphNavigableRegion sourceVisibilityGraphNavigableRegion = sourceNode.getVisibilityGraphNavigableRegion();
+      sourceVisibilityGraphNavigableRegion.addInnerRegionEdgesFromSourceNode(sourceNode);
+
+      NavigableRegion sourceNavigableRegion = sourceVisibilityGraphNavigableRegion.getNavigableRegion();
+      List<Cluster> sourceObstacleClusters = sourceNavigableRegion.getObstacleClusters();
+
+      for (VisibilityGraphNavigableRegion targetVisibilityGraphNavigableRegion : visibilityGraphNavigableRegions)
+      {
+         if (targetVisibilityGraphNavigableRegion == sourceVisibilityGraphNavigableRegion)
+            continue;
+         
+         //TOOD: +++JEP: Inefficient but for now...
+
+         NavigableRegion targetNavigableRegion = targetVisibilityGraphNavigableRegion.getNavigableRegion();
+         List<Cluster> targetObstacleClusters = targetNavigableRegion.getObstacleClusters();
+
+         List<VisibilityGraphNode> allNavigableNodes = targetVisibilityGraphNavigableRegion.getAllNavigableNodes();
+         createInterRegionVisibilityConnections(sourceNode, allNavigableNodes, sourceObstacleClusters, targetObstacleClusters, interRegionConnectionFilter,
+                                                crossRegionEdges);
+
+      }
+   }
+
+   public void createInterRegionVisibilityConnections(VisibilityGraphNavigableRegion sourceNavigableRegion,
+                                                      VisibilityGraphNavigableRegion targetNavigableRegion)
+   {
+      createInterRegionVisibilityConnections(sourceNavigableRegion, targetNavigableRegion, interRegionConnectionFilter, crossRegionEdges);
    }
 
    public VisibilityGraphNode getStartNode()
@@ -99,6 +138,7 @@ public class VisibilityGraph
          return false;
 
       startNode = createStaticVisibilityMap(sourceLocationInWorld, visibilityGraphNavigableRegion, goalNode);
+      startNode.setEdgesHaveBeenDetermined(true);
       success = !startNode.getEdges().isEmpty();
 
       return success;
@@ -117,6 +157,7 @@ public class VisibilityGraph
          return false;
 
       goalNode = createStaticVisibilityMap(sourceLocationInWorld, visibilityGraphNavigableRegion, startNode);
+      goalNode.setEdgesHaveBeenDetermined(true);
       success = !goalNode.getEdges().isEmpty();
 
       return success;
@@ -171,7 +212,7 @@ public class VisibilityGraph
 
       List<Cluster> allClusters = navigableRegion.getAllClusters();
 
-      VisibilityGraphNode sourceNode = new VisibilityGraphNode(projectedSourceInWorld, sourceInLocal, visibilityGraphNavigableRegion.getMapId());
+      VisibilityGraphNode sourceNode = new VisibilityGraphNode(projectedSourceInWorld, sourceInLocal, visibilityGraphNavigableRegion);
 
       for (VisibilityGraphNode targetNode : allNavigableNodes)
       {
@@ -237,20 +278,10 @@ public class VisibilityGraph
       List<Cluster> sourceObstacleClusters = sourceNavigableRegion.getNavigableRegion().getObstacleClusters();
       List<Cluster> targetObstacleClusters = targetNavigableRegion.getNavigableRegion().getObstacleClusters();
 
-      //      List<VisibilityGraphNode> sourceHomeRegionNodes = sourceNavigableRegion.getHomeRegionNodes();
-      //      List<VisibilityGraphNode> targetHomeRegionNodes = targetNavigableRegion.getHomeRegionNodes();
-
-      //TODO: +++JEP: Also connect to the obstacle navigable regions when appropriate!!!
-      //      List<List<VisibilityGraphNode>> sourceObstacleNodesLists = sourceNavigableRegion.getObstacleNavigableNodes();
-      //      List<List<VisibilityGraphNode>> targetObstacleNodesLists = targetNavigableRegion.getObstacleNavigableNodes();
-
       List<VisibilityGraphNode> sourceRegionNodes = sourceNavigableRegion.getAllNavigableNodes();
       List<VisibilityGraphNode> targetRegionNodes = targetNavigableRegion.getAllNavigableNodes();
 
       createInterRegionVisibilityConnections(sourceRegionNodes, targetRegionNodes, sourceObstacleClusters, targetObstacleClusters, filter, edgesToPack);
-
-      //      printStats();
-
    }
 
    public static void createInterRegionVisibilityConnections(List<VisibilityGraphNode> sourceNodeList, List<VisibilityGraphNode> targetNodeList,
@@ -259,49 +290,51 @@ public class VisibilityGraph
    {
       for (VisibilityGraphNode sourceNode : sourceNodeList)
       {
-         for (VisibilityGraphNode targetNode : targetNodeList)
+         createInterRegionVisibilityConnections(sourceNode, targetNodeList, sourceObstacleClusters, targetObstacleClusters, filter, edgesToPack);
+      }
+   }
+
+   public static void createInterRegionVisibilityConnections(VisibilityGraphNode sourceNode, List<VisibilityGraphNode> targetNodeList,
+                                                             List<Cluster> sourceObstacleClusters, List<Cluster> targetObstacleClusters,
+                                                             InterRegionConnectionFilter filter, ArrayList<VisibilityGraphEdge> edgesToPack)
+   {
+      for (VisibilityGraphNode targetNode : targetNodeList)
+      {
+         totalSourceTargetChecks++;
+         if (totalSourceTargetChecks % 10000000 == 0)
          {
-            totalSourceTargetChecks++;
-            if (totalSourceTargetChecks % 10000000 == 0)
+            printStats();
+         }
+
+         if (filter.isConnectionValid(sourceNode.getPointInWorld(), targetNode.getPointInWorld()))
+         {
+            numberPassValidFilter++;
+
+            Point2DReadOnly sourcePoint2DInLocal = sourceNode.getPoint2DInLocal();
+            Point2DReadOnly targetPoint2DInLocal = targetNode.getPoint2DInLocal();
+
+            //TOOD: +++JEP: These should be eliminated at the beginning, not during expansion!!!
+            boolean sourceIsInsideNoGoZone = VisibilityGraphsFactory.isInsideANonNavigableZone(sourcePoint2DInLocal, sourceObstacleClusters);
+            if (sourceIsInsideNoGoZone)
             {
-               printStats();
+               numberSourcesInNoGoZones++;
+               continue;
             }
 
-            //                  ConnectionPoint3D source = new ConnectionPoint3D(sourcePoint3DInWorld, sourceId);
-            //                  ConnectionPoint3D target = new ConnectionPoint3D(targetPoint3D, targetId);
-
-            if (filter.isConnectionValid(sourceNode.getPointInWorld(), targetNode.getPointInWorld()))
+            boolean targetIsInsideNoGoZone = VisibilityGraphsFactory.isInsideANonNavigableZone(targetPoint2DInLocal, targetObstacleClusters);
+            if (targetIsInsideNoGoZone)
             {
-               numberPassValidFilter++;
-
-               //                     Point2D sourcePoint2DInLocal = VisibilityGraphsFactory.getPoint2DInLocal(sourceNavigableRegion, sourcePoint3DInWorld);
-               Point2DReadOnly sourcePoint2DInLocal = sourceNode.getPoint2DInLocal();
-
-               //                     Point2D targetPoint2DInLocal = VisibilityGraphsFactory.getPoint2DInLocal(targetNavigableRegion, targetPoint3D);
-               Point2DReadOnly targetPoint2DInLocal = targetNode.getPoint2DInLocal();
-
-               boolean sourceIsInsideNoGoZone = VisibilityGraphsFactory.isInsideANonNavigableZone(sourcePoint2DInLocal, sourceObstacleClusters);
-               if (sourceIsInsideNoGoZone)
-               {
-                  numberSourcesInNoGoZones++;
-                  continue;
-               }
-
-               boolean targetIsInsideNoGoZone = VisibilityGraphsFactory.isInsideANonNavigableZone(targetPoint2DInLocal, targetObstacleClusters);
-               if (targetIsInsideNoGoZone)
-               {
-                  numberTargetsInNoGoZones++;
-                  continue;
-               }
-
-               numberValidConnections++;
-
-               VisibilityGraphEdge edge = new VisibilityGraphEdge(sourceNode, targetNode);
-               sourceNode.addEdge(edge);
-               targetNode.addEdge(edge);
-
-               edgesToPack.add(edge);
+               numberTargetsInNoGoZones++;
+               continue;
             }
+
+            numberValidConnections++;
+
+            VisibilityGraphEdge edge = new VisibilityGraphEdge(sourceNode, targetNode);
+            sourceNode.addEdge(edge);
+            targetNode.addEdge(edge);
+
+            edgesToPack.add(edge);
          }
       }
    }
@@ -332,8 +365,6 @@ public class VisibilityGraph
       {
 
          NavigableRegion navigableRegion = visibilityGraphNavigableRegion.getNavigableRegion();
-         List<VisibilityGraphNode> homeRegionNodes = visibilityGraphNavigableRegion.getHomeRegionNodes();
-         List<List<VisibilityGraphNode>> obstacleNavigableNodes = visibilityGraphNavigableRegion.getObstacleNavigableNodes();
          List<VisibilityGraphEdge> allEdges = visibilityGraphNavigableRegion.getAllEdges();
 
          VisibilityMapWithNavigableRegion visibilityMapWithNavigableRegion = new VisibilityMapWithNavigableRegion(navigableRegion);
