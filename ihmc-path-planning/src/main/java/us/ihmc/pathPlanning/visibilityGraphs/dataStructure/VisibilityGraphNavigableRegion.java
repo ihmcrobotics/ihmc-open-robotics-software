@@ -30,6 +30,11 @@ public class VisibilityGraphNavigableRegion
       return navigableRegion;
    }
 
+   public int getMapId()
+   {
+      return navigableRegion.getMapId();
+   }
+
    public List<VisibilityGraphNode> getHomeRegionNodes()
    {
       return homeRegionNodes;
@@ -67,7 +72,7 @@ public class VisibilityGraphNavigableRegion
       innerRegionEdges.add(edge);
    }
 
-   public void createGraphAroundClusterRings()
+   public void createGraphAroundClusterRings(boolean createEdgesAroundClusterRing)
    {
       PlanarRegion homePlanarRegion = navigableRegion.getHomePlanarRegion();
       Cluster homeRegionCluster = navigableRegion.getHomeRegionCluster();
@@ -75,7 +80,8 @@ public class VisibilityGraphNavigableRegion
       List<Cluster> obstacleClusters = navigableRegion.getObstacleClusters();
       int mapId = navigableRegion.getMapId();
 
-      addClusterSelfVisibilityAroundRing(this, homeRegionCluster, homePlanarRegion, allClusters, mapId, homeRegionNodes, innerRegionEdges);
+      createNavigableRegionNodes(this, homeRegionCluster, homePlanarRegion, allClusters, mapId, homeRegionNodes, innerRegionEdges,
+                                 createEdgesAroundClusterRing);
 
       obstacleNavigableNodes.clear();
       for (int i = 0; i < obstacleClusters.size(); i++)
@@ -87,7 +93,7 @@ public class VisibilityGraphNavigableRegion
       {
          Cluster obstacleCluster = obstacleClusters.get(i);
          List<VisibilityGraphNode> obstacleNodes = obstacleNavigableNodes.get(i);
-         addClusterSelfVisibilityAroundRing(this, obstacleCluster, homePlanarRegion, allClusters, mapId, obstacleNodes, innerRegionEdges);
+         createNavigableRegionNodes(this, obstacleCluster, homePlanarRegion, allClusters, mapId, obstacleNodes, innerRegionEdges, createEdgesAroundClusterRing);
       }
    }
 
@@ -118,12 +124,11 @@ public class VisibilityGraphNavigableRegion
             addCrossClusterVisibility(sourceNodes, targetNodes, allClusters, regionId, innerRegionEdges);
          }
       }
-
    }
 
-   public static void addClusterSelfVisibilityAroundRing(VisibilityGraphNavigableRegion visibilityGraphNavigableRegion, Cluster clusterToBuildMapOf,
-                                                         PlanarRegion homeRegion, List<Cluster> allClusters, int mapId, List<VisibilityGraphNode> nodesToPack,
-                                                         ArrayList<VisibilityGraphEdge> edgesToPack)
+   public static void createNavigableRegionNodes(VisibilityGraphNavigableRegion visibilityGraphNavigableRegion, Cluster clusterToBuildMapOf,
+                                                 PlanarRegion homeRegion, List<Cluster> allClusters, int mapId, List<VisibilityGraphNode> nodesToPack,
+                                                 ArrayList<VisibilityGraphEdge> edgesToPack, boolean createEdgesAroundClusterRing)
    {
       List<? extends Point2DReadOnly> navigableExtrusionPoints = clusterToBuildMapOf.getNavigableExtrusionsInLocal();
       boolean[] arePointsActuallyNavigable = VisibilityTools.checkIfPointsInsidePlanarRegionAndOutsideNonNavigableZones(homeRegion, allClusters,
@@ -147,7 +152,16 @@ public class VisibilityGraphNavigableRegion
          }
       }
 
-      // Going through all of the possible combinations of two points for finding connections
+      if (createEdgesAroundClusterRing)
+      {
+         createEdgesAroundClusterRing(newNodes, allClusters, edgesToPack);
+      }
+   }
+
+   private static void createEdgesAroundClusterRing(ArrayList<VisibilityGraphNode> newNodes, List<Cluster> allClusters,
+                                                    ArrayList<VisibilityGraphEdge> edgesToPack)
+   {
+      // Go around the ring looking for connections.
       for (int sourceIndex = 0; sourceIndex < newNodes.size(); sourceIndex++)
       {
          VisibilityGraphNode sourceNode = newNodes.get(sourceIndex);
@@ -228,26 +242,37 @@ public class VisibilityGraphNavigableRegion
 
    public void addInnerRegionEdgesFromSourceNode(VisibilityGraphNode sourceNode)
    {
-      List<Cluster> allClusters = navigableRegion.getAllClusters();
-      Point2DReadOnly sourceNodeInLocal = sourceNode.getPoint2DInLocal();
-
       List<VisibilityGraphNode> allNavigableNodes = getAllNavigableNodes();
 
-      // Look for visibility inside the navigable region for inner edges.
       for (VisibilityGraphNode targetNode : allNavigableNodes)
       {
-         Point2DReadOnly targetNodeInLocal = targetNode.getPoint2DInLocal();
-         boolean targetIsVisible = VisibilityTools.isPointVisibleForStaticMaps(allClusters, sourceNodeInLocal, targetNodeInLocal);
-
-         if (targetIsVisible)
-         {
-            addInnerRegionEdge(sourceNode, targetNode);
-         }
+         addInnerEdgeFromSourceToTargetNodeIfVisible(sourceNode, targetNode);
       }
    }
 
-   public int getMapId()
+   public void addInnerEdgeFromSourceToTargetNodeIfVisible(VisibilityGraphNode sourceNode, VisibilityGraphNode targetNode)
    {
-      return navigableRegion.getMapId();
+      checkNavigableRegionConsistency(sourceNode, targetNode);
+
+      List<Cluster> allClusters = navigableRegion.getAllClusters();
+
+      Point2DReadOnly sourceNodeInLocal = sourceNode.getPoint2DInLocal();
+      Point2DReadOnly targetNodeInLocal = targetNode.getPoint2DInLocal();
+
+      boolean targetIsVisible = VisibilityTools.isPointVisibleForStaticMaps(allClusters, sourceNodeInLocal, targetNodeInLocal);
+
+      if (targetIsVisible)
+      {
+         addInnerRegionEdge(sourceNode, targetNode);
+      }
    }
+
+   private void checkNavigableRegionConsistency(VisibilityGraphNode sourceNode, VisibilityGraphNode targetNode)
+   {
+      if ((sourceNode.getVisibilityGraphNavigableRegion() != this) || (targetNode.getVisibilityGraphNavigableRegion() != this))
+      {
+         throw new RuntimeException("(sourceNode.getVisibilityGraphNavigableRegion() != this) || (targetNode.getVisibilityGraphNavigableRegion() != this)");
+      }
+   }
+
 }

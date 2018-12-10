@@ -84,7 +84,7 @@ public class NavigableRegionsManager
    }
 
    private List<Point3DReadOnly> calculateVisibilityMapWhileFindingPath(Point3DReadOnly startInWorld, Point3DReadOnly goalInWorld,
-                                                                              boolean fullyExpandVisibilityGraph)
+                                                                        boolean fullyExpandVisibilityGraph)
    {
       boolean areStartAndGoalValid = checkIfStartAndGoalAreValid(startInWorld, goalInWorld);
       if (!areStartAndGoalValid)
@@ -103,11 +103,8 @@ public class NavigableRegionsManager
 
       double searchHostEpsilon = parameters.getSearchHostRegionEpsilon();
 
-      visibilityGraph.setStart(startInWorld, searchHostEpsilon);
-      visibilityGraph.setGoal(goalInWorld, searchHostEpsilon);
-
-      VisibilityGraphNode startNode = visibilityGraph.getStartNode();
-      VisibilityGraphNode goalNode = visibilityGraph.getGoalNode();
+      VisibilityGraphNode startNode = visibilityGraph.setStart(startInWorld, searchHostEpsilon);
+      VisibilityGraphNode goalNode = visibilityGraph.setGoal(goalInWorld, searchHostEpsilon);
 
       if (startNode == null)
          return null;
@@ -135,10 +132,8 @@ public class NavigableRegionsManager
 
       startNode.setEdgesHaveBeenDetermined(true);
       startNode.setCostFromStart(0.0, null);
-      startNode.setEstimatedCostToGoal(startInWorld.distance(goalInWorld));
-
+      startNode.setEstimatedCostToGoal(startInWorld.distanceXY(goalInWorld));
       queue.add(startNode);
-      //      expandNode(visibilityGraph, startNode, goalInWorld, queue);
 
       while (!queue.isEmpty())
       {
@@ -208,7 +203,7 @@ public class NavigableRegionsManager
          ConnectionPoint3D nextNodeInWorld = nextNode.getPointInWorld();
 
          //TODO: Something besides distance later...
-         double distance = nodeToExpandInWorld.distance(nextNodeInWorld);
+         double distance = nodeToExpandInWorld.distanceXY(nextNodeInWorld);
          double newCostFromStart = nodeToExpand.getCostFromStart() + distance;
 
          double currentCostFromStart = nextNode.getCostFromStart();
@@ -218,7 +213,7 @@ public class NavigableRegionsManager
             nextNode.setCostFromStart(newCostFromStart, nodeToExpand);
 
             //TODO: Heuristic for AStar.
-            nextNode.setEstimatedCostToGoal(nextNodeInWorld.distance(goalInWorld));
+            nextNode.setEstimatedCostToGoal(nextNodeInWorld.distanceXY(goalInWorld));
 
             queue.remove(nextNode);
             queue.add(nextNode);
