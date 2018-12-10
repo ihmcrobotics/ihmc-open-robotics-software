@@ -18,11 +18,10 @@ public class QuadrupedContactSequenceUpdater
 {
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
 
-   public static final double finalTransferDuration = 1.0;
+   static final double finalTransferDuration = 1.0;
 
    private Comparator<QuadrupedStepTransition> compareByTime = Comparator.comparingDouble(QuadrupedStepTransition::getTransitionTime);
 
-   // internal states
    private final int pastContactPhaseCapacity;
    private final RecyclingArrayList<QuadrupedStepTransition> stepTransitions = new RecyclingArrayList<>(QuadrupedStepTransition::new);
    private final List<RobotQuadrant> feetInContact = new ArrayList<>();
@@ -60,7 +59,7 @@ public class QuadrupedContactSequenceUpdater
       contactSequence.clear();
    }
 
-   public List<? extends ContactStateProvider> getContactSequence()
+   public List<QuadrupedContactPhase> getContactSequence()
    {
       return contactSequence;
    }
@@ -219,8 +218,6 @@ public class QuadrupedContactSequenceUpdater
             contactPhase.getTimeInterval().setInterval(stepTransition.getTransitionTime(), stepTransitions.get(transitionNumber + 1).getTransitionTime());
          }
       }
-
-      return;
    }
 
 
