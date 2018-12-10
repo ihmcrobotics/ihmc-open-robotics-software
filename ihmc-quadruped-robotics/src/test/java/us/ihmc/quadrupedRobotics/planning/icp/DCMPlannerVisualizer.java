@@ -39,26 +39,32 @@ public class DCMPlannerVisualizer
    private final DCMBasedCoMPlanner planner;
 
    private List<QuadrupedTimedStep> steps;
-   private final QuadrantDependentList<ContactState> contactStates = new QuadrantDependentList<>();
+   private final List<RobotQuadrant> feetInContact = new ArrayList<>();
 
    private final YoFramePoint3D desiredICPPosition;
    private final YoFrameVector3D desiredICPVelocity;
+   private final YoDouble omega;
 
    public DCMPlannerVisualizer()
    {
       YoVariableRegistry registry = new YoVariableRegistry("test");
       QuadrantDependentList<ReferenceFrame> soleFrames = createSoleFrames();
-      planner = new DCMBasedCoMPlanner(soleFrames, gravity, nominalHeight, registry);
-      steps = createSteps(soleFrames);
 
       desiredICPPosition = new YoFramePoint3D("desiredICPPosition", worldFrame, registry);
       desiredICPVelocity = new YoFrameVector3D("desiredICPVelocity", worldFrame, registry);
+      omega = new YoDouble("omega", registry);
+      omega.set(Math.sqrt(gravity / nominalHeight));
+
+      planner = new DCMBasedCoMPlanner(soleFrames, omega, gravity, nominalHeight, registry);
+      steps = createSteps(soleFrames);
+
 
       SimulationConstructionSetParameters scsParameters = new SimulationConstructionSetParameters(true, BUFFER_SIZE);
       Robot robot = new Robot("Dummy");
 
       for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
-         contactStates.put(robotQuadrant, ContactState.IN_CONTACT);
+         feetInContact.add(robotQuadrant);
+
 
       yoTime = new YoDouble("timeToCheck", registry);
       scs = new SimulationConstructionSet(robot, scsParameters);
@@ -178,7 +184,7 @@ public class DCMPlannerVisualizer
          planner.initialize();
          double currentTime = yoTime.getDoubleValue();
          updateContactState(currentTime);
-         planner.computeSetpoints(currentTime, contactStates, desiredICPPosition, desiredICPVelocity);
+         planner.computeSetpoints(currentTime, feetInContact, desiredICPPosition, desiredICPVelocity);
 
          scs.tickAndUpdate();
       }
@@ -186,17 +192,14 @@ public class DCMPlannerVisualizer
 
    private void updateContactState(double currentTime)
    {
+      feetInContact.clear();
+      for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
+         feetInContact.add(robotQuadrant);
       for (int i = 0; i < steps.size(); i++)
       {
          QuadrupedTimedStep step = steps.get(i);
          if (step.getTimeInterval().intervalContains(currentTime))
-         {
-            contactStates.put(step.getRobotQuadrant(), ContactState.NO_CONTACT);
-         }
-         else
-         {
-            contactStates.put(step.getRobotQuadrant(), ContactState.IN_CONTACT);
-         }
+            feetInContact.remove(step.getRobotQuadrant());
       }
    }
 

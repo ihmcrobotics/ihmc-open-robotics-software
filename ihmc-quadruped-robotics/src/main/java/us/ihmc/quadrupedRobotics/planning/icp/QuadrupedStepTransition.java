@@ -1,69 +1,92 @@
 package us.ihmc.quadrupedRobotics.planning.icp;
 
+import us.ihmc.commons.MathTools;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
+import us.ihmc.robotics.robotSide.QuadrantDependentList;
 import us.ihmc.robotics.robotSide.RobotQuadrant;
+
+import java.util.ArrayList;
+import java.util.List;
 
 class QuadrupedStepTransition
 {
-   private QuadrupedStepTransitionType type;
-   private RobotQuadrant robotQuadrant;
-   private final Point3D solePosition;
-   private double time;
+   public static final double sameTimeEpsilon = 1e-3;
+
+   private final List<RobotQuadrant> transitionQuadrants = new ArrayList<>();
+   private final List<QuadrupedStepTransitionType> transitionTypes = new ArrayList<>();
+   private final QuadrantDependentList<Point3D> transitionPositions = new QuadrantDependentList<>();
+   private double transitionTime = Double.MAX_VALUE;
 
    public QuadrupedStepTransition()
    {
-      time = Double.MAX_VALUE;
-      type = QuadrupedStepTransitionType.LIFT_OFF;
-      solePosition = new Point3D();
-      robotQuadrant = RobotQuadrant.FRONT_LEFT;
+      for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
+      {
+         Point3D transitionPosition = new Point3D();
+         transitionPosition.setToNaN();
+         transitionPositions.put(robotQuadrant, transitionPosition);
+      }
    }
 
    public void reset()
    {
-      time = Double.MAX_VALUE;
-      solePosition.setToNaN();
-      type = null;
-      robotQuadrant = null;
+      transitionTime = Double.MAX_VALUE;
+      transitionQuadrants.clear();
+      transitionTypes.clear();
+      for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
+      {
+         transitionPositions.get(robotQuadrant).setToNaN();
+      }
    }
 
    public void setTransitionTime(double time)
    {
-      this.time = time;
+      this.transitionTime = time;
    }
 
-   public void setTransitionType(QuadrupedStepTransitionType type)
+   public void addTransition(QuadrupedStepTransitionType transitionType, RobotQuadrant transitionQuadrant, Point3DReadOnly transitionPosition)
    {
-      this.type = type;
+      transitionTypes.add(transitionType);
+      transitionQuadrants.add(transitionQuadrant);
+      transitionPositions.get(transitionQuadrant).set(transitionPosition);
    }
 
-   public void setSolePosition(Point3DReadOnly solePosition)
+   public void addTransition(QuadrupedStepTransition other)
    {
-      this.solePosition.set(solePosition);
-   }
+      if (!MathTools.epsilonEquals(transitionTime, other.transitionTime, sameTimeEpsilon))
+         throw new IllegalArgumentException("These transitions occur at different times!");
 
-   public void setRobotQuadrant(RobotQuadrant robotQuadrant)
-   {
-      this.robotQuadrant = robotQuadrant;
+      for (int i = 0; i < other.transitionQuadrants.size(); i++)
+      {
+         RobotQuadrant addingQuadrant = other.transitionQuadrants.get(i);
+         transitionQuadrants.add(addingQuadrant);
+         transitionTypes.add(other.transitionTypes.get(i));
+         transitionPositions.get(addingQuadrant).set(other.transitionPositions.get(addingQuadrant));
+      }
    }
 
    public double getTransitionTime()
    {
-      return time;
+      return transitionTime;
    }
 
-   public Point3DReadOnly getSolePosition()
+   public int getNumberOfFeetInTransition()
    {
-      return solePosition;
+      return transitionQuadrants.size();
    }
 
-   public RobotQuadrant getRobotQuadrant()
+   public QuadrupedStepTransitionType getTransitionType(int transitionNumber)
    {
-      return robotQuadrant;
+      return transitionTypes.get(transitionNumber);
    }
 
-   public QuadrupedStepTransitionType getTransitionType()
+   public RobotQuadrant getTransitionQuadrant(int transitionNumber)
    {
-      return type;
+      return transitionQuadrants.get(transitionNumber);
+   }
+
+   public Point3DReadOnly getTransitionPosition(RobotQuadrant transitionQuadrant)
+   {
+      return transitionPositions.get(transitionQuadrant);
    }
 }

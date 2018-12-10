@@ -1,64 +1,36 @@
 package us.ihmc.quadrupedRobotics.planning.icp;
 
+import org.apache.commons.lang3.mutable.MutableDouble;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
 import us.ihmc.quadrupedBasics.gait.TimeInterval;
-import us.ihmc.quadrupedBasics.gait.TimeIntervalProvider;
 import us.ihmc.quadrupedRobotics.planning.ContactState;
+import us.ihmc.quadrupedRobotics.planning.QuadrupedCenterOfPressureTools;
 import us.ihmc.robotics.robotSide.QuadrantDependentList;
 import us.ihmc.robotics.robotSide.RobotQuadrant;
 
-public class QuadrupedContactPhase implements TimeIntervalProvider
+import java.util.ArrayList;
+import java.util.List;
+
+public class QuadrupedContactPhase implements ContactStateProvider
 {
    private final TimeInterval timeInterval = new TimeInterval();
-   private final QuadrantDependentList<ContactState> contactStates = new QuadrantDependentList<>();
-   private final QuadrantDependentList<FramePoint3D> solePosition = new QuadrantDependentList<>();
+   private final List<RobotQuadrant> feetInContact = new ArrayList<>();
    private final FramePoint3D copPosition = new FramePoint3D();
    private ContactState contactState = ContactState.IN_CONTACT;
+
+   private final QuadrantDependentList<FramePoint3D> solePosition = new QuadrantDependentList<>();
+   private final QuadrantDependentList<MutableDouble> normalizedContactPressures = new QuadrantDependentList<>();
 
    public QuadrupedContactPhase()
    {
       for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
       {
-         contactStates.set(robotQuadrant, ContactState.IN_CONTACT);
-         solePosition.set(robotQuadrant, new FramePoint3D());
+         feetInContact.add(robotQuadrant);
+         solePosition.put(robotQuadrant, new FramePoint3D());
+         normalizedContactPressures.put(robotQuadrant, new MutableDouble(0.0));
       }
-   }
-
-   public void set(QuadrupedContactPhase other)
-   {
-      setTimeInterval(other.getTimeInterval());
-      setContactStates(other.getContactStates());
-      setSolePosition(other.getSolePosition());
-      setCopPosition(other.getCopPosition());
-      setContactState(other.getContactState());
-   }
-
-   @Override
-   public TimeInterval getTimeInterval()
-   {
-      return timeInterval;
-   }
-
-   public QuadrantDependentList<ContactState> getContactStates()
-   {
-      return contactStates;
-   }
-
-   public QuadrantDependentList<FramePoint3D> getSolePosition()
-   {
-      return solePosition;
-   }
-
-   public FramePoint3DReadOnly getCopPosition()
-   {
-      return copPosition;
-   }
-
-   public ContactState getContactState()
-   {
-      return contactState;
    }
 
    public void setTimeInterval(TimeInterval timeInterval)
@@ -66,12 +38,11 @@ public class QuadrupedContactPhase implements TimeIntervalProvider
       this.timeInterval.set(timeInterval);
    }
 
-   public void setContactStates(QuadrantDependentList<ContactState> contactStates)
+   public void setFeetInContact(List<RobotQuadrant> feetInContact)
    {
-      for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
-      {
-         this.contactStates.set(robotQuadrant, contactStates.get(robotQuadrant));
-      }
+      this.feetInContact.clear();
+      for (int i = 0; i < feetInContact.size(); i++)
+         this.feetInContact.add(feetInContact.get(i));
    }
 
    public void setSolePosition(QuadrantDependentList<FramePoint3D> solePosition)
@@ -83,13 +54,51 @@ public class QuadrupedContactPhase implements TimeIntervalProvider
       }
    }
 
-   public void setCopPosition(FramePoint3DReadOnly copPosition)
+   public void set(QuadrupedContactPhase other)
    {
-      this.copPosition.setIncludingFrame(copPosition);
+      setTimeInterval(other.getTimeInterval());
+      setFeetInContact(other.getFeetInContact());
+      setSolePosition(other.getSolePosition());
+
+      update();
    }
 
-   public void setContactState(ContactState contactState)
+   public void update()
    {
-      this.contactState = contactState;
+      if (feetInContact.isEmpty())
+         contactState = ContactState.NO_CONTACT;
+      else
+         contactState = ContactState.IN_CONTACT;
+
+      QuadrupedCenterOfPressureTools.computeNominalNormalizedContactPressure(normalizedContactPressures, feetInContact);
+      QuadrupedCenterOfPressureTools.computeCenterOfPressure(copPosition, solePosition, normalizedContactPressures);
+   }
+
+   @Override
+   public TimeInterval getTimeInterval()
+   {
+      return timeInterval;
+   }
+
+   @Override
+   public FramePoint3DReadOnly getCopPosition()
+   {
+      return copPosition;
+   }
+
+   @Override
+   public ContactState getContactState()
+   {
+      return contactState;
+   }
+
+   public List<RobotQuadrant> getFeetInContact()
+   {
+      return feetInContact;
+   }
+
+   public QuadrantDependentList<FramePoint3D> getSolePosition()
+   {
+      return solePosition;
    }
 }

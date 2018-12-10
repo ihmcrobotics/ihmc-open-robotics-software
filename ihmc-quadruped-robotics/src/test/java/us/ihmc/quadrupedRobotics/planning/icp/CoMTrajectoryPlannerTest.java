@@ -32,11 +32,11 @@ public class CoMTrajectoryPlannerTest
       double gravityZ = 9.81;
       double nominalHeight = 0.7;
 
-      List<QuadrupedContactPhase> contactSequence = new ArrayList<>();
+      List<ContactStateProvider> contactSequence = new ArrayList<>();
       CoMTrajectoryPlanner planner = new CoMTrajectoryPlanner(contactSequence, omega, gravityZ, nominalHeight, registry);
 
-      QuadrupedContactPhase firstContact = new QuadrupedContactPhase();
-      QuadrupedContactPhase secondContact = new QuadrupedContactPhase();
+      SettableContactStateProvider firstContact = new SettableContactStateProvider();
+      SettableContactStateProvider secondContact = new SettableContactStateProvider();
 
       firstContact.setTimeInterval(new TimeInterval(0.0, 1.0));
       firstContact.setCopPosition(new FramePoint3D());
@@ -97,11 +97,11 @@ public class CoMTrajectoryPlannerTest
       double gravityZ = 9.81;
       double nominalHeight = 0.7;
 
-      List<QuadrupedContactPhase> contactSequence = new ArrayList<>();
+      List<ContactStateProvider> contactSequence = new ArrayList<>();
       CoMTrajectoryPlanner planner = new CoMTrajectoryPlanner(contactSequence, omega, gravityZ, nominalHeight, registry);
 
-      QuadrupedContactPhase firstContact = new QuadrupedContactPhase();
-      QuadrupedContactPhase secondContact = new QuadrupedContactPhase();
+      SettableContactStateProvider firstContact = new SettableContactStateProvider();
+      SettableContactStateProvider secondContact = new SettableContactStateProvider();
 
       firstContact.setTimeInterval(new TimeInterval(0.0, 1.0));
       firstContact.setCopPosition(new FramePoint3D(ReferenceFrame.getWorldFrame(), -0.1, 0.15, 0.0));
@@ -158,12 +158,12 @@ public class CoMTrajectoryPlannerTest
       double gravityZ = 9.81;
       double nominalHeight = 0.7;
 
-      List<QuadrupedContactPhase> contactSequence = new ArrayList<>();
+      List<ContactStateProvider> contactSequence = new ArrayList<>();
       CoMTrajectoryPlanner planner = new CoMTrajectoryPlanner(contactSequence, omega, gravityZ, nominalHeight, registry);
 
-      QuadrupedContactPhase firstContact = new QuadrupedContactPhase();
-      QuadrupedContactPhase secondContact = new QuadrupedContactPhase();
-      QuadrupedContactPhase thirdContact= new QuadrupedContactPhase();
+      SettableContactStateProvider firstContact = new SettableContactStateProvider();
+      SettableContactStateProvider secondContact = new SettableContactStateProvider();
+      SettableContactStateProvider thirdContact= new SettableContactStateProvider();
 
       firstContact.setTimeInterval(new TimeInterval(0.0, 0.75));
       firstContact.setCopPosition(new FramePoint3D());
@@ -205,7 +205,7 @@ public class CoMTrajectoryPlannerTest
       }
    }
 
-   private FramePoint3DReadOnly recursivelyComputeInitialDCM(List<QuadrupedContactPhase> contactPhases, double nominalHeight, double omega)
+   private FramePoint3DReadOnly recursivelyComputeInitialDCM(List<ContactStateProvider> contactPhases, double nominalHeight, double omega)
    {
       int numberOfPhases = contactPhases.size();
       FramePoint3D lastDCM = new FramePoint3D(contactPhases.get(numberOfPhases -1).getCopPosition());
@@ -236,7 +236,7 @@ public class CoMTrajectoryPlannerTest
       double gravityZ = 9.81;
       double nominalHeight = 0.7;
 
-      List<QuadrupedContactPhase> contactSequence = new ArrayList<>();
+      List<ContactStateProvider> contactSequence = new ArrayList<>();
       CoMTrajectoryPlanner planner = new CoMTrajectoryPlanner(contactSequence, omega, gravityZ, nominalHeight, registry);
 
       Random random = new Random(1738L);
@@ -254,7 +254,7 @@ public class CoMTrajectoryPlannerTest
          double segmentDuration = RandomNumbers.nextDouble(random, 0.0, 5.0);
 
          // handle initial phase
-         QuadrupedContactPhase contactPhase = new QuadrupedContactPhase();
+         SettableContactStateProvider contactPhase = new SettableContactStateProvider();
          contactPhase.setTimeInterval(new TimeInterval(currentStartTime, segmentDuration + currentStartTime));
          contactPhase.setCopPosition(startCoPPosition);
 
@@ -269,7 +269,7 @@ public class CoMTrajectoryPlannerTest
             segmentDuration = RandomNumbers.nextDouble(random, 0.0, 5.0);
             currentCoPPosition.add(EuclidFrameRandomTools.nextFrameVector3D(random, ReferenceFrame.getWorldFrame(), new Vector3D(1.0, 1.0, 0.0)));
 
-            contactPhase = new QuadrupedContactPhase();
+            contactPhase = new SettableContactStateProvider();
             contactPhase.setTimeInterval(new TimeInterval(currentStartTime, segmentDuration + currentStartTime));
             contactPhase.setCopPosition(currentCoPPosition);
 
@@ -322,12 +322,12 @@ public class CoMTrajectoryPlannerTest
       double gravityZ = 9.81;
       double nominalHeight = 0.7;
 
-      List<QuadrupedContactPhase> contactSequence = new ArrayList<>();
+      List<ContactStateProvider> contactSequence = new ArrayList<>();
       CoMTrajectoryPlanner planner = new CoMTrajectoryPlanner(contactSequence, omega, gravityZ, nominalHeight, registry);
 
-      QuadrupedContactPhase firstContact = new QuadrupedContactPhase();
-      QuadrupedContactPhase secondContact = new QuadrupedContactPhase();
-      QuadrupedContactPhase thirdContact = new QuadrupedContactPhase();
+      SettableContactStateProvider firstContact = new SettableContactStateProvider();
+      SettableContactStateProvider secondContact = new SettableContactStateProvider();
+      SettableContactStateProvider thirdContact = new SettableContactStateProvider();
 
       firstContact.setTimeInterval(new TimeInterval(0.0, 1.0));
       firstContact.setCopPosition(new FramePoint3D());

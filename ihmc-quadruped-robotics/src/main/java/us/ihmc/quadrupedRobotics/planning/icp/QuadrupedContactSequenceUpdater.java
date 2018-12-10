@@ -20,22 +20,22 @@ public class QuadrupedContactSequenceUpdater
 
    public static final double finalTransferDuration = 1.0;
 
-   private Comparator<NewQuadrupedStepTransition> compareByTime = Comparator.comparingDouble(NewQuadrupedStepTransition::getTransitionTime);
+   private Comparator<QuadrupedStepTransition> compareByTime = Comparator.comparingDouble(QuadrupedStepTransition::getTransitionTime);
 
    // internal states
    private final int pastContactPhaseCapacity;
-   private final RecyclingArrayList<NewQuadrupedStepTransition> stepTransitions = new RecyclingArrayList<>(NewQuadrupedStepTransition::new);
+   private final RecyclingArrayList<QuadrupedStepTransition> stepTransitions = new RecyclingArrayList<>(QuadrupedStepTransition::new);
    private final List<RobotQuadrant> feetInContact = new ArrayList<>();
    private final QuadrantDependentList<FramePoint3D> solePositions = new QuadrantDependentList<>();
    private final QuadrantDependentList<ReferenceFrame> soleFrames;
 
    private final int maxCapacity;
 
-   private final RecyclingArrayList<NewQuadrupedContactPhase> contactSequence;
+   private final RecyclingArrayList<QuadrupedContactPhase> contactSequence;
 
    public QuadrupedContactSequenceUpdater(QuadrantDependentList<ReferenceFrame> soleFrames, int pastContactPhaseCapacity, int futureContactPhaseCapacity)
    {
-      contactSequence = new RecyclingArrayList<>(pastContactPhaseCapacity + futureContactPhaseCapacity + 1, NewQuadrupedContactPhase::new);
+      contactSequence = new RecyclingArrayList<>(pastContactPhaseCapacity + futureContactPhaseCapacity + 1, QuadrupedContactPhase::new);
       contactSequence.clear();
 
       this.soleFrames = soleFrames;
@@ -60,7 +60,7 @@ public class QuadrupedContactSequenceUpdater
       contactSequence.clear();
    }
 
-   public RecyclingArrayList<NewQuadrupedContactPhase> getContactSequence()
+   public List<? extends ContactStateProvider> getContactSequence()
    {
       return contactSequence;
    }
@@ -98,7 +98,7 @@ public class QuadrupedContactSequenceUpdater
 
          if (step.getTimeInterval().getStartTime() >= currentTime)
          {
-            NewQuadrupedStepTransition stepTransition = stepTransitions.add();
+            QuadrupedStepTransition stepTransition = stepTransitions.add();
 
             stepTransition.setTransitionTime(step.getTimeInterval().getStartTime());
             stepTransition.addTransition(QuadrupedStepTransitionType.LIFT_OFF, step.getRobotQuadrant(), step.getGoalPosition());
@@ -106,7 +106,7 @@ public class QuadrupedContactSequenceUpdater
 
          if (step.getTimeInterval().getEndTime() >= currentTime)
          {
-            NewQuadrupedStepTransition stepTransition = stepTransitions.add();
+            QuadrupedStepTransition stepTransition = stepTransitions.add();
 
             stepTransition.setTransitionTime(step.getTimeInterval().getEndTime());
             stepTransition.addTransition(QuadrupedStepTransitionType.TOUCH_DOWN, step.getRobotQuadrant(), step.getGoalPosition());
@@ -120,9 +120,9 @@ public class QuadrupedContactSequenceUpdater
       int transitionNumber = 0;
       while (transitionNumber < stepTransitions.size() - 1)
       {
-         NewQuadrupedStepTransition currentTransition = stepTransitions.get(transitionNumber);
-         NewQuadrupedStepTransition nextTransition = stepTransitions.get(transitionNumber + 1);
-         if (MathTools.epsilonEquals(currentTransition.getTransitionTime(), nextTransition.getTransitionTime(), NewQuadrupedStepTransition.sameTimeEpsilon))
+         QuadrupedStepTransition currentTransition = stepTransitions.get(transitionNumber);
+         QuadrupedStepTransition nextTransition = stepTransitions.get(transitionNumber + 1);
+         if (MathTools.epsilonEquals(currentTransition.getTransitionTime(), nextTransition.getTransitionTime(), QuadrupedStepTransition.sameTimeEpsilon))
          {
             currentTransition.addTransition(nextTransition);
             stepTransitions.remove(transitionNumber + 1);
@@ -143,7 +143,7 @@ public class QuadrupedContactSequenceUpdater
          contactSequence.remove(0);
       }
 
-      NewQuadrupedContactPhase contactPhase;
+      QuadrupedContactPhase contactPhase;
       if (contactSequence.isEmpty())
       {
          contactPhase = contactSequence.add();
@@ -155,7 +155,7 @@ public class QuadrupedContactSequenceUpdater
       }
       else
       {
-         NewQuadrupedContactPhase lastContactPhase = contactSequence.getLast();
+         QuadrupedContactPhase lastContactPhase = contactSequence.getLast();
          if (isEqualContactState(lastContactPhase.getFeetInContact(), currentFeetInContact))
          {
             // extend current contact phase
@@ -184,7 +184,7 @@ public class QuadrupedContactSequenceUpdater
       // compute transition time and center of pressure for each time interval
       for (int transitionNumber = 0; transitionNumber < numberOfTransitions; transitionNumber++)
       {
-         NewQuadrupedStepTransition stepTransition = stepTransitions.get(transitionNumber);
+         QuadrupedStepTransition stepTransition = stepTransitions.get(transitionNumber);
 
          for (int transitioningFootNumber = 0; transitioningFootNumber < stepTransition.getNumberOfFeetInTransition(); transitioningFootNumber++)
          {
@@ -201,7 +201,7 @@ public class QuadrupedContactSequenceUpdater
             }
          }
 
-         NewQuadrupedContactPhase contactPhase = contactSequence.add();
+         QuadrupedContactPhase contactPhase = contactSequence.add();
 
          boolean isLastContact = (transitionNumber == numberOfTransitions - 1) || (contactSequence.size() == maxCapacity);
 
