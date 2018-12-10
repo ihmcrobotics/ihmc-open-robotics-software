@@ -89,6 +89,7 @@ public class VisibilityGraphTest
       VisibilityGraphNavigableRegion visibilityGraphNavigableRegion = visibilityGraphNavigableRegions.get(0);
 
       List<VisibilityGraphEdge> navigableRegionEdges = visibilityGraphNavigableRegion.getAllEdges();
+
       assertEquals(28, navigableRegionEdges.size());
       List<VisibilityGraphNode> homeRegionNodes = visibilityGraphNavigableRegion.getHomeRegionNodes();
       assertEquals(8, homeRegionNodes.size());
@@ -585,7 +586,7 @@ public class VisibilityGraphTest
       assertTrue(edgeListContains(internalEdges0, connectionH1, connectionH2));
       assertTrue(edgeListContains(internalEdges0, connectionH2, connectionHE0));
 
-      assertEquals(11 + 6 + 9 + 6 + 9 + 6 + 8 + 5 + 16, internalEdges0.size());
+      assertEquals(11 + 6 + 9 + 6 + 9 + 6 + 8 + 5 + 20, internalEdges0.size());
       assertEquals(28, internalEdges1.size());
 
       ArrayList<VisibilityGraphEdge> crossRegionEdges = visibilityGraph.getCrossRegionEdges();
@@ -611,7 +612,7 @@ public class VisibilityGraphTest
       Set<Connection> connections0 = innerMap0.getConnections();
 
       assertEquals(24, vertices0.size());
-      assertEquals(11 + 6 + 9 + 6 + 9 + 6 + 8 + 5 + 16, connections0.size());
+      assertEquals(11 + 6 + 9 + 6 + 9 + 6 + 8 + 5 + 20, connections0.size());
 
       VisibilityMap innerMap1 = innerMapAdnRegion1.getVisibilityMapInWorld();
       Set<ConnectionPoint3D> vertices1 = innerMap1.getVertices();

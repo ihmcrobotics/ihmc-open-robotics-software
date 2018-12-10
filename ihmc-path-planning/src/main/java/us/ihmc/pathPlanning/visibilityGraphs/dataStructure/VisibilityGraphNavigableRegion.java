@@ -11,8 +11,6 @@ import us.ihmc.robotics.geometry.PlanarRegion;
 
 public class VisibilityGraphNavigableRegion
 {
-   private static final int INNER_CONNECTIONS_EVERY_N_POINTS = 1;
-
    private final NavigableRegion navigableRegion;
 
    private final ArrayList<VisibilityGraphNode> homeRegionNodes = new ArrayList<VisibilityGraphNode>();
@@ -100,11 +98,9 @@ public class VisibilityGraphNavigableRegion
    public void createGraphBetweenInnerClusterRings()
    {
       int regionId = navigableRegion.getMapId();
-      PlanarRegion homeRegion = navigableRegion.getHomePlanarRegion();
-
       List<Cluster> allClusters = navigableRegion.getAllClusters();
 
-      addClusterSelfVisibility(homeRegion, allClusters, regionId, homeRegionNodes, innerRegionEdges);
+      addClusterSelfVisibility(allClusters, regionId, homeRegionNodes, innerRegionEdges);
 
       for (int targetIndex = 0; targetIndex < obstacleNavigableNodes.size(); targetIndex++)
       {
@@ -113,6 +109,12 @@ public class VisibilityGraphNavigableRegion
          addCrossClusterVisibility(homeRegionNodes, targetNodes, allClusters, regionId, innerRegionEdges);
       }
 
+      for (int sourceIndex = 0; sourceIndex < obstacleNavigableNodes.size(); sourceIndex++)
+      {
+         List<VisibilityGraphNode> obstacleNodes = obstacleNavigableNodes.get(sourceIndex);
+         addClusterSelfVisibility(allClusters, regionId, obstacleNodes, innerRegionEdges);
+      }
+      
       for (int sourceIndex = 0; sourceIndex < obstacleNavigableNodes.size(); sourceIndex++)
       {
          List<VisibilityGraphNode> sourceNodes = obstacleNavigableNodes.get(sourceIndex);
@@ -187,21 +189,17 @@ public class VisibilityGraphNavigableRegion
       }
    }
 
-   public static void addClusterSelfVisibility(PlanarRegion homeRegion, List<Cluster> allClusters, int mapId, ArrayList<VisibilityGraphNode> homeRegionNodes,
-                                               ArrayList<VisibilityGraphEdge> edgesToPack)
+   public static void addClusterSelfVisibility(List<Cluster> allClusters, int mapId, List<VisibilityGraphNode> nodes,
+                                               List<VisibilityGraphEdge> edgesToPack)
    {
       // Going through all of the possible combinations of two points for finding connections
-      for (int sourceIndex = 0; sourceIndex < homeRegionNodes.size(); sourceIndex++)
+      for (int sourceIndex = 0; sourceIndex < nodes.size(); sourceIndex++)
       {
-         VisibilityGraphNode sourceNode = homeRegionNodes.get(sourceIndex);
+         VisibilityGraphNode sourceNode = nodes.get(sourceIndex);
 
-         // Starting from after the next vertex of the source as we already added all the edges around the ring as connections.
-         // And then end before the last one
-         for (int targetIndex = sourceIndex + 2; targetIndex < homeRegionNodes.size(); targetIndex = targetIndex + INNER_CONNECTIONS_EVERY_N_POINTS)
+         for (int targetIndex = sourceIndex + 1; targetIndex < nodes.size(); targetIndex++)
          {
-            if ((sourceIndex == 0) && (targetIndex == homeRegionNodes.size() - 1))
-               continue;
-            VisibilityGraphNode targetNode = homeRegionNodes.get(targetIndex);
+            VisibilityGraphNode targetNode = nodes.get(targetIndex);
 
             // Finally run the expensive test to verify if the target can be seen from the source.
             if (VisibilityTools.isPointVisibleForStaticMaps(allClusters, sourceNode.getPoint2DInLocal(), targetNode.getPoint2DInLocal()))

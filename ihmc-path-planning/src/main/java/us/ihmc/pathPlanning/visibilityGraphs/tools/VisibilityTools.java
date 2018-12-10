@@ -424,15 +424,8 @@ public class VisibilityTools
       }
    }
 
-   //TODO: +++JEP: Get rid of these checks after no longer needed for optimizing. 
-   private static int numberIsPointVisibleChecks = 0, edgeChecks = 0, ruledOutByBoundingBox = 0, notVisible = 0, visiblePoints = 0;
-
    public static boolean isPointVisibleForStaticMaps(List<Cluster> clusters, Point2DReadOnly observer, Point2DReadOnly targetPoint)
    {
-      numberIsPointVisibleChecks++;
-      //      if (numberIsPointVisibleChecks % 1000000 == 0)
-      //         printStats();
-
       for (Cluster cluster : clusters)
       {
          if (cluster.getExtrusionSide() == ExtrusionSide.OUTSIDE)
@@ -446,36 +439,20 @@ public class VisibilityTools
             {
                if (!boundingBox.doesIntersectWithLineSegment2D(observer, targetPoint))
                {
-                  ruledOutByBoundingBox++;
                   continue;
                }
             }
          }
 
-         edgeChecks++;
-
          //TODO: +++JEP: Lots of time taken here. 2,379,800 calls for 4.7 sec.
          boolean closed = cluster.isClosed();
          if (!VisibilityTools.isPointVisible(observer, targetPoint, cluster.getNonNavigableExtrusionsInLocal(), closed))
          {
-            notVisible++;
             return false;
          }
       }
 
-      visiblePoints++;
-
       return true;
-   }
-
-   private static void printStats()
-   {
-      System.out.println("numberIsPointVisibleChecks = " + numberIsPointVisibleChecks);
-      System.out.println("ruledOutByBoundingBox = " + ruledOutByBoundingBox);
-      System.out.println("edgeChecks = " + edgeChecks);
-      System.out.println("notVisible = " + notVisible);
-      System.out.println("visiblePoints = " + visiblePoints);
-      System.out.println("");
    }
 
    public static List<Connection> removeConnectionsFromExtrusionsOutsideRegions(Collection<Connection> connections, PlanarRegion homeRegion)
