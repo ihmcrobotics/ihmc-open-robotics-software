@@ -62,7 +62,7 @@ public class DefaultVisibilityGraphParameters implements VisibilityGraphsParamet
          @Override
          public double computeExtrusionDistance(PlanarRegion navigableRegionToBeExtruded)
          {
-            return 0.02;
+            return 0.04;
          }
       };
    }
