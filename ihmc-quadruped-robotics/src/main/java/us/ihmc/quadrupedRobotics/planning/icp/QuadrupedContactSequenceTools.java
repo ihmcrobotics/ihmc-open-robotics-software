@@ -15,7 +15,7 @@ import java.util.List;
 public class QuadrupedContactSequenceTools
 {
    public static void computeStepTransitionsFromStepSequence(RecyclingArrayList<QuadrupedStepTransition> stepTransitionsToPack, double currentTime,
-                                                       List<? extends QuadrupedTimedStep> stepSequence)
+                                                             List<? extends QuadrupedTimedStep> stepSequence)
    {
       stepTransitionsToPack.clear();
       for (int i = 0; i < stepSequence.size(); i++)
@@ -60,8 +60,9 @@ public class QuadrupedContactSequenceTools
       }
    }
 
-   public static void trimPastContactSequences(RecyclingArrayList<QuadrupedContactPhase> contactSequenceToPack, double currentTime, List<RobotQuadrant> currentFeetInContact,
-                                         QuadrantDependentList<? extends FramePoint3DReadOnly> currentSolePositions, int contactPhasesToRetain)
+   public static void trimPastContactSequences(RecyclingArrayList<QuadrupedContactPhase> contactSequenceToPack, double currentTime,
+                                               List<RobotQuadrant> currentFeetInContact,
+                                               QuadrantDependentList<? extends FramePoint3DReadOnly> currentSolePositions, int contactPhasesToRetain)
    {
       // retain desired number of past contact phases
       TimeIntervalTools.removeStartTimesGreaterThanOrEqualTo(currentTime, contactSequenceToPack);
