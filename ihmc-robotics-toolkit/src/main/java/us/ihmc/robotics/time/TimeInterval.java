@@ -1,6 +1,5 @@
 package us.ihmc.robotics.time;
 
-import us.ihmc.commons.MathTools;
 import us.ihmc.euclid.tools.EuclidCoreIOTools;
 
 public class TimeInterval implements TimeIntervalBasics
@@ -10,7 +9,7 @@ public class TimeInterval implements TimeIntervalBasics
 
    public TimeInterval()
    {
-      this(0.0, 0.0);
+      this(Double.NaN, Double.NaN);
    }
 
    public TimeInterval(TimeInterval timeInterval)
