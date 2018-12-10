@@ -6,7 +6,6 @@ import java.util.List;
 
 import us.ihmc.euclid.geometry.BoundingBox3D;
 import us.ihmc.euclid.tuple2D.Point2D;
-import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.pathPlanning.visibilityGraphs.clusterManagement.Cluster;
@@ -23,13 +22,10 @@ import us.ihmc.pathPlanning.visibilityGraphs.dataStructure.VisibilityMapSolution
 import us.ihmc.pathPlanning.visibilityGraphs.dataStructure.VisibilityMapWithNavigableRegion;
 import us.ihmc.pathPlanning.visibilityGraphs.interfaces.InterRegionConnectionFilter;
 import us.ihmc.pathPlanning.visibilityGraphs.tools.PlanarRegionTools;
-import us.ihmc.pathPlanning.visibilityGraphs.tools.VisibilityTools;
 import us.ihmc.robotics.geometry.PlanarRegion;
 
 public class VisibilityGraph
 {
-   private static final double minimumDistanceForStartOrGoalEdgeSquared = 0.01 * 0.01;
-
    private ArrayList<VisibilityGraphNavigableRegion> visibilityGraphNavigableRegions = new ArrayList<>();
    private final NavigableRegions navigableRegions;
    private final ArrayList<VisibilityGraphEdge> crossRegionEdges = new ArrayList<VisibilityGraphEdge>();
@@ -48,7 +44,12 @@ public class VisibilityGraph
       for (NavigableRegion navigableRegion : naviableRegionsList)
       {
          VisibilityGraphNavigableRegion visibilityGraphNavigableRegion = new VisibilityGraphNavigableRegion(navigableRegion);
-         visibilityGraphNavigableRegion.createGraphAroundClusterRings();
+ 
+         //TODO: +++JEP: Just get rid of createEdgesAroundClusterRing? Or store Nodes with clusters somehow?
+         // Set createEdgesAroundClusterRing to true if at the beginning you want to create loops around the clusters.
+         boolean createEdgesAroundClusterRing = false;
+
+         visibilityGraphNavigableRegion.createGraphAroundClusterRings(createEdgesAroundClusterRing);
 
          visibilityGraphNavigableRegions.add(visibilityGraphNavigableRegion);
       }
@@ -71,7 +72,7 @@ public class VisibilityGraph
             createInterRegionVisibilityConnections(sourceNavigableRegion, targetNavigableRegion);
          }
       }
-      
+
       for (VisibilityGraphNavigableRegion visibilityGraphNavigableRegion : visibilityGraphNavigableRegions)
       {
          List<VisibilityGraphNode> allNavigableNodes = visibilityGraphNavigableRegion.getAllNavigableNodes();
@@ -95,7 +96,7 @@ public class VisibilityGraph
          if (targetVisibilityGraphNavigableRegion == sourceVisibilityGraphNavigableRegion)
             continue;
 
-         //TOOD: +++JEP: Inefficient but for now...
+         //TOOD: +++JEP: Efficiently add Bounding Box check before going through all combinations. Perhaps have a cached bounding box reachable map?
 
          NavigableRegion targetNavigableRegion = targetVisibilityGraphNavigableRegion.getNavigableRegion();
          List<Cluster> targetObstacleClusters = targetNavigableRegion.getObstacleClusters();
@@ -103,10 +104,38 @@ public class VisibilityGraph
          List<VisibilityGraphNode> allNavigableNodes = targetVisibilityGraphNavigableRegion.getAllNavigableNodes();
          createInterRegionVisibilityConnections(sourceNode, allNavigableNodes, sourceObstacleClusters, targetObstacleClusters, interRegionConnectionFilter,
                                                 crossRegionEdges);
-
       }
 
       sourceNode.setEdgesHaveBeenDetermined(true);
+   }
+
+   public static void connectNodeToInnerRegionNodes(VisibilityGraphNode sourceNode, VisibilityGraphNavigableRegion visibilityGraphNavigableRegion,
+                                                    VisibilityGraphNode nodeToAttachToIfInSameRegion)
+   {
+      visibilityGraphNavigableRegion.addInnerRegionEdgesFromSourceNode(sourceNode);
+
+      if (nodeToAttachToIfInSameRegion != null)
+      {
+         if (sourceNode.getRegionId() == nodeToAttachToIfInSameRegion.getRegionId())
+         {
+            visibilityGraphNavigableRegion.addInnerEdgeFromSourceToTargetNodeIfVisible(sourceNode, nodeToAttachToIfInSameRegion);
+         }
+      }
+
+      sourceNode.setEdgesHaveBeenDetermined(true);
+   }
+
+   public static VisibilityGraphNode createNode(Point3DReadOnly sourceInWorld, VisibilityGraphNavigableRegion visibilityGraphNavigableRegion)
+   {
+      NavigableRegion navigableRegion = visibilityGraphNavigableRegion.getNavigableRegion();
+      Point3D sourceInLocal3D = new Point3D(sourceInWorld);
+      navigableRegion.transformFromWorldToLocal(sourceInLocal3D);
+      Point2D sourceInLocal = new Point2D(sourceInLocal3D);
+
+      Point3D projectedSourceInWorld = new Point3D(sourceInLocal);
+      navigableRegion.transformFromLocalToWorld(projectedSourceInWorld);
+
+      return new VisibilityGraphNode(projectedSourceInWorld, sourceInLocal, visibilityGraphNavigableRegion);
    }
 
    public void createInterRegionVisibilityConnections(VisibilityGraphNavigableRegion sourceNavigableRegion,
@@ -139,42 +168,32 @@ public class VisibilityGraph
       return goalNode.getEdges();
    }
 
-   public boolean setStart(Point3DReadOnly sourceLocationInWorld, double searchHostEpsilon)
+   public VisibilityGraphNode setStart(Point3DReadOnly sourceLocationInWorld, double searchHostEpsilon)
    {
-      boolean success = true;
+      //TODO: Need a fallback map if start is not connectable...
 
       VisibilityGraphNavigableRegion visibilityGraphNavigableRegion = getVisibilityGraphNavigableRegionContainingThisPoint(sourceLocationInWorld,
                                                                                                                            searchHostEpsilon);
       if (visibilityGraphNavigableRegion == null)
-         return false;
+         return null;
 
-      startNode = createStaticVisibilityMap(sourceLocationInWorld, visibilityGraphNavigableRegion, goalNode);
-      startNode.setEdgesHaveBeenDetermined(true);
-      success = !startNode.getEdges().isEmpty();
+      startNode = createNode(sourceLocationInWorld, visibilityGraphNavigableRegion);
+      connectNodeToInnerRegionNodes(startNode, visibilityGraphNavigableRegion, goalNode);
 
-      return success;
-
-      //TODO: Need a fallback map...
-      //    return connectSourceToHostOrFallbackMap(source, potentialFallbackMap, hostRegion);
+      return startNode;
    }
 
-   public boolean setGoal(Point3DReadOnly sourceLocationInWorld, double searchHostEpsilon)
+   public VisibilityGraphNode setGoal(Point3DReadOnly sourceLocationInWorld, double searchHostEpsilon)
    {
-      boolean success = true;
-
       VisibilityGraphNavigableRegion visibilityGraphNavigableRegion = getVisibilityGraphNavigableRegionContainingThisPoint(sourceLocationInWorld,
                                                                                                                            searchHostEpsilon);
       if (visibilityGraphNavigableRegion == null)
-         return false;
+         return null;
 
-      goalNode = createStaticVisibilityMap(sourceLocationInWorld, visibilityGraphNavigableRegion, startNode);
-      goalNode.setEdgesHaveBeenDetermined(true);
-      success = !goalNode.getEdges().isEmpty();
+      goalNode = createNode(sourceLocationInWorld, visibilityGraphNavigableRegion);
+      connectNodeToInnerRegionNodes(goalNode, visibilityGraphNavigableRegion, startNode);
 
-      return success;
-
-      //TODO: Need a fallback map...
-      //    return connectSourceToHostOrFallbackMap(source, potentialFallbackMap, hostRegion);
+      return goalNode;
    }
 
    private VisibilityGraphNavigableRegion getVisibilityGraphNavigableRegionContainingThisPoint(Point3DReadOnly sourceLocationInWorld, double searchHostEpsilon)
@@ -206,57 +225,6 @@ public class VisibilityGraph
    public ArrayList<VisibilityGraphEdge> getCrossRegionEdges()
    {
       return crossRegionEdges;
-   }
-
-   public static VisibilityGraphNode createStaticVisibilityMap(Point3DReadOnly sourceInWorld, VisibilityGraphNavigableRegion visibilityGraphNavigableRegion,
-                                                               VisibilityGraphNode nodeToAttachToIfInSameRegion)
-   {
-      NavigableRegion navigableRegion = visibilityGraphNavigableRegion.getNavigableRegion();
-      Point3D sourceInLocal3D = new Point3D(sourceInWorld);
-      navigableRegion.transformFromWorldToLocal(sourceInLocal3D);
-      Point2D sourceInLocal = new Point2D(sourceInLocal3D);
-
-      Point3D projectedSourceInWorld = new Point3D(sourceInLocal);
-      navigableRegion.transformFromLocalToWorld(projectedSourceInWorld);
-
-      List<VisibilityGraphNode> allNavigableNodes = visibilityGraphNavigableRegion.getAllNavigableNodes();
-
-      List<Cluster> allClusters = navigableRegion.getAllClusters();
-
-      VisibilityGraphNode sourceNode = new VisibilityGraphNode(projectedSourceInWorld, sourceInLocal, visibilityGraphNavigableRegion);
-
-      for (VisibilityGraphNode targetNode : allNavigableNodes)
-      {
-         Point2DReadOnly targetInLocal = targetNode.getPoint2DInLocal();
-         if (sourceInLocal.distanceSquared(targetInLocal) > minimumDistanceForStartOrGoalEdgeSquared)
-         {
-            boolean targetIsVisible = VisibilityTools.isPointVisibleForStaticMaps(allClusters, sourceInLocal, targetInLocal);
-
-            if (targetIsVisible)
-            {
-               VisibilityGraphEdge newEdge = new VisibilityGraphEdge(sourceNode, targetNode);
-               sourceNode.addEdge(newEdge);
-               targetNode.addEdge(newEdge);
-            }
-         }
-      }
-
-      if (nodeToAttachToIfInSameRegion != null)
-      {
-         if (sourceNode.getRegionId() == nodeToAttachToIfInSameRegion.getRegionId())
-         {
-            boolean targetIsVisible = VisibilityTools.isPointVisibleForStaticMaps(allClusters, sourceInLocal, nodeToAttachToIfInSameRegion.getPoint2DInLocal());
-
-            if (targetIsVisible)
-            {
-               VisibilityGraphEdge edgeFromSourceToAdditionalTarget = new VisibilityGraphEdge(sourceNode, nodeToAttachToIfInSameRegion);
-               sourceNode.addEdge(edgeFromSourceToAdditionalTarget);
-               nodeToAttachToIfInSameRegion.addEdge(edgeFromSourceToAdditionalTarget);
-            }
-         }
-      }
-
-      return sourceNode;
    }
 
    public static void createInterRegionVisibilityConnections(VisibilityGraphNavigableRegion sourceNavigableRegion,
