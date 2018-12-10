@@ -16,15 +16,14 @@ import javafx.application.Application;
 import javafx.stage.Stage;
 import javafx.util.Pair;
 import us.ihmc.commons.MathTools;
-import us.ihmc.commons.PrintTools;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.continuousIntegration.ContinuousIntegrationTools;
 import us.ihmc.continuousIntegration.IntegrationCategory;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
+import us.ihmc.euclid.geometry.Ellipsoid3D;
 import us.ihmc.euclid.geometry.LineSegment3D;
 import us.ihmc.euclid.geometry.Plane3D;
-import us.ihmc.euclid.shape.Ellipsoid3D;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DBasics;
@@ -35,6 +34,7 @@ import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DBasics;
 import us.ihmc.javaFXToolkit.messager.JavaFXMessager;
 import us.ihmc.javaFXToolkit.messager.SharedMemoryJavaFXMessager;
+import us.ihmc.log.LogTools;
 import us.ihmc.pathPlanning.visibilityGraphs.interfaces.VisibilityGraphsParameters;
 import us.ihmc.pathPlanning.visibilityGraphs.tools.PlanarRegionTools;
 import us.ihmc.pathPlanning.visibilityGraphs.tools.VisibilityGraphsIOTools;
@@ -164,7 +164,7 @@ public class VisibilityGraphsFrameworkTest extends Application
 
       if (DEBUG)
       {
-         PrintTools.info("Unit test files found: " + allDatasets.size());
+         LogTools.info("Unit test files found: " + allDatasets.size());
       }
 
       AtomicReference<Boolean> previousDatasetRequested = null;
@@ -207,7 +207,7 @@ public class VisibilityGraphsFrameworkTest extends Application
 
          if (DEBUG)
          {
-            PrintTools.info("Processing file: " + dataset.getDatasetName());
+            LogTools.info("Processing file: " + dataset.getDatasetName());
          }
 
          String errorMessagesForCurrentFile = datasetTestRunner.testDataset(dataset);
@@ -250,7 +250,7 @@ public class VisibilityGraphsFrameworkTest extends Application
                VisibilityGraphsUnitTestDataset requestedDataset = allDatasets.stream().filter(d -> d.getDatasetName().equals(path)).findFirst().orElse(null);
                if (requestedDataset == null)
                {
-                  PrintTools.error("Could not find the requested dataset with name: " + path);
+                  LogTools.error("Could not find the requested dataset with name: " + path);
                }
                else
                {
@@ -285,10 +285,8 @@ public class VisibilityGraphsFrameworkTest extends Application
 
       if (DEBUG)
       {
-         PrintTools.info("Unit test files found: " + allDatasets.size());
+         LogTools.info("Unit test files found: " + allDatasets.size());
       }
-
-
 
       if (VISUALIZE)
       {
@@ -316,7 +314,7 @@ public class VisibilityGraphsFrameworkTest extends Application
 
       if (DEBUG)
       {
-         PrintTools.info("Processing file: " + dataset.getDatasetName());
+         LogTools.info("Processing file: " + dataset.getDatasetName());
       }
 
       String errorMessages = datasetTestRunner.testDataset(dataset);
@@ -763,7 +761,7 @@ public class VisibilityGraphsFrameworkTest extends Application
       if (VISUALIZE || DEBUG)
       {
          if (!condition)
-            PrintTools.error(datasetName + ": " + message);
+            LogTools.error(datasetName + ": " + message);
       }
       return !condition ? "\n" + message : "";
    }
