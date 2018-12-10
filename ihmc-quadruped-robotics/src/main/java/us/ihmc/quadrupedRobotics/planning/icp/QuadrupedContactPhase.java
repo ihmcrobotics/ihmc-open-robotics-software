@@ -45,7 +45,7 @@ public class QuadrupedContactPhase implements ContactStateProvider
          this.feetInContact.add(feetInContact.get(i));
    }
 
-   public void setSolePosition(QuadrantDependentList<FramePoint3D> solePosition)
+   public void setSolePositions(QuadrantDependentList<? extends FramePoint3DReadOnly> solePosition)
    {
       for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
       {
@@ -58,7 +58,7 @@ public class QuadrupedContactPhase implements ContactStateProvider
    {
       setTimeInterval(other.getTimeInterval());
       setFeetInContact(other.feetInContact);
-      setSolePosition(other.solePositions);
+      setSolePositions(other.solePositions);
 
       update();
    }
