@@ -4,6 +4,7 @@ import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
+import us.ihmc.mecano.frames.MovingReferenceFrame;
 import us.ihmc.quadrupedBasics.gait.QuadrupedTimedStep;
 import us.ihmc.quadrupedBasics.utils.TimeIntervalTools;
 import us.ihmc.robotics.robotSide.QuadrantDependentList;
@@ -22,13 +23,13 @@ public class QuadrupedContactSequenceUpdater
    private final RecyclingArrayList<QuadrupedStepTransition> stepTransitions = new RecyclingArrayList<>(QuadrupedStepTransition::new);
    private final List<RobotQuadrant> feetInContact = new ArrayList<>();
    private final QuadrantDependentList<FramePoint3D> solePositions = new QuadrantDependentList<>();
-   private final QuadrantDependentList<ReferenceFrame> soleFrames;
+   private final QuadrantDependentList<MovingReferenceFrame> soleFrames;
 
    private final int maxCapacity;
 
    private final RecyclingArrayList<QuadrupedContactPhase> contactSequence;
 
-   public QuadrupedContactSequenceUpdater(QuadrantDependentList<ReferenceFrame> soleFrames, int pastContactPhaseCapacity, int futureContactPhaseCapacity)
+   public QuadrupedContactSequenceUpdater(QuadrantDependentList<MovingReferenceFrame> soleFrames, int pastContactPhaseCapacity, int futureContactPhaseCapacity)
    {
       contactSequence = new RecyclingArrayList<>(pastContactPhaseCapacity + futureContactPhaseCapacity + 1, QuadrupedContactPhase::new);
       contactSequence.clear();

@@ -9,6 +9,7 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
 import us.ihmc.quadrupedRobotics.planning.ContactState;
+import us.ihmc.yoVariables.providers.DoubleProvider;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.*;
 
@@ -34,7 +35,7 @@ public class CoMTrajectoryPlanner
 
    private final LinearSolver<DenseMatrix64F> solver = LinearSolverFactory.linear(0);
 
-   private final YoDouble omega;
+   private final DoubleProvider omega;
    private final double gravityZ;
    private double nominalCoMHeight;
 
@@ -55,7 +56,7 @@ public class CoMTrajectoryPlanner
    private int numberOfConstraints = 0;
 
 
-   public CoMTrajectoryPlanner(List<? extends ContactStateProvider> contactSequence, YoDouble omega, double gravityZ, double nominalCoMHeight, YoVariableRegistry parentRegistry)
+   public CoMTrajectoryPlanner(List<? extends ContactStateProvider> contactSequence, DoubleProvider omega, double gravityZ, double nominalCoMHeight, YoVariableRegistry parentRegistry)
    {
       this.contactSequence = contactSequence;
       this.omega = omega;
@@ -166,14 +167,14 @@ public class CoMTrajectoryPlanner
       desiredCoMVelocity.scaleAdd(secondCoefficientVelocityMultiplier, secondCoefficient, desiredCoMVelocity);
       desiredCoMVelocity.addZ(gravityVelocityEffect);
 
-      desiredDCMPosition.scaleAdd(1.0 / omega.getDoubleValue(), desiredCoMVelocity, desiredCoMPosition);
+      desiredDCMPosition.scaleAdd(1.0 / omega.getValue(), desiredCoMVelocity, desiredCoMPosition);
 
       desiredDCMVelocity.set(firstCoefficient);
       desiredDCMVelocity.scale(2.0 * firstCoefficientVelocityMultiplier);
 
-      desiredVRPPosition.scaleAdd(-omega.getDoubleValue(), desiredDCMVelocity, desiredDCMPosition);
+      desiredVRPPosition.scaleAdd(-omega.getValue(), desiredDCMVelocity, desiredDCMPosition);
       desiredECMPPosition.set(desiredVRPPosition);
-      desiredECMPPosition.subZ(gravityZ / MathTools.square(omega.getDoubleValue()));
+      desiredECMPPosition.subZ(gravityZ / MathTools.square(omega.getValue()));
    }
 
    public void setCurrentCoMPosition(FramePoint3DReadOnly currentCoMPosition)
@@ -229,7 +230,7 @@ public class CoMTrajectoryPlanner
    private void setCoMPositionEqualityInContact(int sequenceId, double timeInPhaseForConstraint, FramePoint3DReadOnly centerOfMassLocationForConstraint)
    {
       centerOfMassLocationForConstraint.checkReferenceFrameMatch(ReferenceFrame.getWorldFrame());
-      double omega = this.omega.getDoubleValue();
+      double omega = this.omega.getValue();
 
       double c0, c1, bX, bY, bZ;
       if (timeInPhaseForConstraint > 0)
@@ -283,7 +284,7 @@ public class CoMTrajectoryPlanner
    private void setDCMTerminalConstraint(int sequenceId, FramePoint3DReadOnly terminalDCMPosition)
    {
       terminalDCMPosition.checkReferenceFrameMatch(ReferenceFrame.getWorldFrame());
-      double omega = this.omega.getDoubleValue();
+      double omega = this.omega.getValue();
 
       double duration = contactSequence.get(sequenceId).getTimeInterval().getDuration();
 
@@ -444,7 +445,7 @@ public class CoMTrajectoryPlanner
    {
       if (contactState == ContactState.IN_CONTACT)
       {
-         return Math.exp(omega.getDoubleValue() * timeInPhase);
+         return Math.exp(omega.getValue() * timeInPhase);
       }
       else
       {
@@ -456,7 +457,7 @@ public class CoMTrajectoryPlanner
    {
       if (contactState == ContactState.IN_CONTACT)
       {
-         return Math.exp(-omega.getDoubleValue() * timeInPhase);
+         return Math.exp(-omega.getValue() * timeInPhase);
       }
       else
       {
@@ -468,7 +469,7 @@ public class CoMTrajectoryPlanner
    {
       if (contactState == ContactState.IN_CONTACT)
       {
-         return omega.getDoubleValue() * Math.exp(omega.getDoubleValue() * timeInPhase);
+         return omega.getValue() * Math.exp(omega.getValue() * timeInPhase);
       }
       else
       {
@@ -480,7 +481,7 @@ public class CoMTrajectoryPlanner
    {
       if (contactState == ContactState.IN_CONTACT)
       {
-         return -omega.getDoubleValue() * Math.exp(-omega.getDoubleValue() * timeInPhase);
+         return -omega.getValue() * Math.exp(-omega.getValue() * timeInPhase);
       }
       else
       {

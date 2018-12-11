@@ -7,6 +7,7 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tools.EuclidCoreTestTools;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.mecano.frames.MovingReferenceFrame;
 import us.ihmc.quadrupedBasics.gait.QuadrupedTimedStep;
 import us.ihmc.quadrupedBasics.gait.TimeInterval;
 import us.ihmc.quadrupedRobotics.planning.ContactState;
@@ -32,7 +33,7 @@ public class QuadrupedContactSequenceUpdaterTest
       double nominalLength = 1.0;
       double nominalWidth = 0.5;
 
-      QuadrantDependentList<ReferenceFrame> soleFrames = createSimpleSoleFrames(nominalLength, nominalWidth);
+      QuadrantDependentList<MovingReferenceFrame> soleFrames = createSimpleSoleFrames(nominalLength, nominalWidth);
       QuadrupedContactSequenceUpdater contactSequenceUpdater = new QuadrupedContactSequenceUpdater(soleFrames, 4, 20);
 
       List<RobotQuadrant> currentFeetInContact = new ArrayList<>();
@@ -105,12 +106,12 @@ public class QuadrupedContactSequenceUpdaterTest
       assertEquals(1.0 + QuadrupedContactSequenceUpdater.finalTransferDuration, contactSequence.get(2).getTimeInterval().getEndTime(), epsilon);
    }
 
-   private static QuadrantDependentList<ReferenceFrame> createSimpleSoleFrames(double nominalLength, double nominalWidth)
+   private static QuadrantDependentList<MovingReferenceFrame> createSimpleSoleFrames(double nominalLength, double nominalWidth)
    {
-      QuadrantDependentList<ReferenceFrame> soleFrames = new QuadrantDependentList<>();
+      QuadrantDependentList<MovingReferenceFrame> soleFrames = new QuadrantDependentList<>();
       for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
       {
-         TranslationReferenceFrame referenceFrame = new TranslationReferenceFrame("footFrame", ReferenceFrame.getWorldFrame());
+         TranslationMovingReferenceFrame referenceFrame = new TranslationMovingReferenceFrame("footFrame", ReferenceFrame.getWorldFrame());
          double xTranslation = robotQuadrant.getEnd().negateIfHindEnd(nominalLength / 2.0);
          double yTranslation = robotQuadrant.getSide().negateIfRightSide(nominalWidth / 2.0);
          Vector3D translation = new Vector3D(xTranslation, yTranslation, 0.0);
