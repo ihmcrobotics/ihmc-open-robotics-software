@@ -39,7 +39,7 @@ public class FootstepPlannerUI
 
    private final PlanarRegionViewer planarRegionViewer;
    private final StartGoalPositionEditor startGoalEditor;
-   private final FootPositionEditor footPositionEditor;
+   private final NodeCheckerEditor nodeCheckerEditor;
    private final StartGoalPositionViewer startGoalPositionViewer;
    private final StartGoalOrientationViewer startGoalOrientationViewer;
    private final FootstepPathMeshViewer pathViewer;
@@ -129,7 +129,7 @@ public class FootstepPlannerUI
       this.startGoalOrientationViewer = new StartGoalOrientationViewer(messager);
       this.startGoalEditor = new StartGoalPositionEditor(messager, subScene, StartPositionEditModeEnabledTopic, GoalPositionEditModeEnabledTopic,
                                                          StartPositionTopic, GoalPositionTopic);
-      this.footPositionEditor = new FootPositionEditor(messager, subScene);
+      this.nodeCheckerEditor = new NodeCheckerEditor(messager, subScene);
       this.orientationEditor = new StartGoalOrientationEditor(messager, view3dFactory.getSubScene());
       this.pathViewer = new FootstepPathMeshViewer(messager);
       this.nodeCheckerRenderer = new NodeCheckerRenderer(messager);
@@ -167,7 +167,7 @@ public class FootstepPlannerUI
       orientationEditor.start();
       pathViewer.start();
       nodeCheckerRenderer.start();
-      footPositionEditor.start();
+      nodeCheckerEditor.start();
       bodyPathMeshViewer.start();
       visibilityGraphsRenderer.start();
       graphRenderer.start();

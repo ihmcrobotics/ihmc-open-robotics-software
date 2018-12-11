@@ -128,6 +128,7 @@ public class FootstepPlannerMessagerAPI
    public static final Topic<Boolean> EnableNodeChecking = Root.child(NodeChecking).topic(Enable);
    public static final Topic<Point3D> NodeCheckingPosition = Root.child(NodeChecking).topic(Position);
    public static final Topic<Quaternion> NodeCheckingOrientation = Root.child(NodeChecking).topic(Orientation);
+   public static final Topic<Boolean> EnableNodeCheckingPositionEditing = Root.child(NodeChecking).child(PositionTheme).topic(Enable);
 
    public static final Topic<Boolean> exportUnitTestDataFile = Root.child(UnitTest).topic(Export);
    public static final Topic<String> exportUnitTestPath = Root.child(UnitTest).topic(Path);
