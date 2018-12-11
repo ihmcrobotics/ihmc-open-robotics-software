@@ -3,6 +3,7 @@ package us.ihmc.quadrupedRobotics.planning.icp;
 import org.ejml.data.DenseMatrix64F;
 import org.ejml.factory.LinearSolverFactory;
 import org.ejml.interfaces.linsol.LinearSolver;
+import us.ihmc.commons.MathTools;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
@@ -41,8 +42,12 @@ public class CoMTrajectoryPlanner
 
    private final YoFramePoint3D desiredCoMPosition = new YoFramePoint3D("desiredCoMPosition", worldFrame, registry);
    private final YoFrameVector3D desiredCoMVelocity = new YoFrameVector3D("desiredComVelocity", worldFrame, registry);
+
    private final YoFramePoint3D desiredDCMPosition = new YoFramePoint3D("desiredDCMPosition", worldFrame, registry);
    private final YoFrameVector3D desiredDCMVelocity = new YoFrameVector3D("desiredDCMVelocity", worldFrame, registry);
+
+   private final YoFramePoint3D desiredVRPPosition = new YoFramePoint3D("desiredVRPPosition", worldFrame, registry);
+   private final YoFramePoint3D desiredECMPPosition = new YoFramePoint3D("desiredECMPPosition", worldFrame, registry);
 
    private final YoFramePoint3D firstCoefficient = new YoFramePoint3D("comFirstCoefficient", worldFrame, registry);
    private final YoFramePoint3D secondCoefficient = new YoFramePoint3D("comSecondCoefficient", worldFrame, registry);
@@ -165,6 +170,10 @@ public class CoMTrajectoryPlanner
 
       desiredDCMVelocity.set(firstCoefficient);
       desiredDCMVelocity.scale(2.0 * firstCoefficientVelocityMultiplier);
+
+      desiredVRPPosition.scaleAdd(-omega.getDoubleValue(), desiredDCMVelocity, desiredDCMPosition);
+      desiredECMPPosition.set(desiredVRPPosition);
+      desiredECMPPosition.subZ(gravityZ / MathTools.square(omega.getDoubleValue()));
    }
 
    public void setCurrentCoMPosition(FramePoint3DReadOnly currentCoMPosition)
@@ -185,6 +194,16 @@ public class CoMTrajectoryPlanner
    public FramePoint3DReadOnly getDesiredCoMPosition()
    {
       return desiredCoMPosition;
+   }
+
+   public FramePoint3DReadOnly getDesiredVRPPosition()
+   {
+      return desiredVRPPosition;
+   }
+
+   public FramePoint3DReadOnly getDesiredECMPPosition()
+   {
+      return desiredECMPPosition;
    }
 
    /**
