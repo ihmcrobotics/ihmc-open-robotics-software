@@ -81,7 +81,7 @@ public class ValkyrieFootstepPlannerParameters implements FootstepPlannerParamet
    @Override
    public double getBodyBoxDepth()
    {
-      return 0.45;
+      return 0.4;
    }
 
    @Override
@@ -135,13 +135,13 @@ public class ValkyrieFootstepPlannerParameters implements FootstepPlannerParamet
    @Override
    public double getStepTranslationBoundingBoxScaleFactor()
    {
-      return 0.6;
+      return 0.65;
    }
 
    @Override
    public double getMaximumXYWiggleDistance()
    {
-      return 0.05;
+      return 0.04;
    }
 
    @Override
