@@ -5,11 +5,13 @@ import us.ihmc.euclid.referenceFrame.interfaces.FixedFramePoint3DBasics;
 import us.ihmc.euclid.referenceFrame.interfaces.FixedFrameVector3DBasics;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DBasics;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
+import us.ihmc.mecano.frames.MovingReferenceFrame;
 import us.ihmc.quadrupedBasics.gait.QuadrupedTimedStep;
 import us.ihmc.quadrupedRobotics.planning.ContactState;
 import us.ihmc.quadrupedRobotics.planning.trajectory.DCMPlannerInterface;
 import us.ihmc.robotics.robotSide.QuadrantDependentList;
 import us.ihmc.robotics.robotSide.RobotQuadrant;
+import us.ihmc.yoVariables.providers.DoubleProvider;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoEnum;
@@ -23,7 +25,7 @@ public class DCMBasedCoMPlanner implements DCMPlannerInterface
 
    private final List<QuadrupedTimedStep> stepSequence = new ArrayList<>();
 
-   private final YoDouble timestamp;
+   private final DoubleProvider timestamp;
    private final YoDouble timeInContactPhase = new YoDouble("timeInContactPhase", registry);
 
    private final QuadrupedContactSequenceUpdater contactSequenceUpdater;
@@ -31,7 +33,7 @@ public class DCMBasedCoMPlanner implements DCMPlannerInterface
 
    private final List<RobotQuadrant> currentFeetInContact = new ArrayList<>();
 
-   public DCMBasedCoMPlanner(QuadrantDependentList<ReferenceFrame> soleFrames, YoDouble timestamp, YoDouble omega, double gravity, double nominalHeight,
+   public DCMBasedCoMPlanner(QuadrantDependentList<MovingReferenceFrame> soleFrames, DoubleProvider timestamp, DoubleProvider omega, double gravity, double nominalHeight,
                              YoVariableRegistry parentRegistry)
    {
       this.timestamp = timestamp;
@@ -88,7 +90,7 @@ public class DCMBasedCoMPlanner implements DCMPlannerInterface
    {
       updateFeetInContactFromContactStates(currentContactStates);
 
-      computeSetpoints(timestamp.getDoubleValue(), currentFeetInContact, desiredDCMPositionToPack, desiredDCMVelocityToPack);
+      computeSetpoints(timestamp.getValue(), currentFeetInContact, desiredDCMPositionToPack, desiredDCMVelocityToPack);
    }
 
    @Override

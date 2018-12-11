@@ -5,6 +5,7 @@ import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.graphicsDescription.Graphics3DObject;
+import us.ihmc.mecano.frames.MovingReferenceFrame;
 import us.ihmc.quadrupedBasics.gait.QuadrupedTimedStep;
 import us.ihmc.quadrupedRobotics.planning.ContactState;
 import us.ihmc.robotics.referenceFrames.TranslationReferenceFrame;
@@ -48,7 +49,7 @@ public class DCMPlannerVisualizer
    public DCMPlannerVisualizer()
    {
       YoVariableRegistry registry = new YoVariableRegistry("test");
-      QuadrantDependentList<ReferenceFrame> soleFrames = createSoleFrames();
+      QuadrantDependentList<MovingReferenceFrame> soleFrames = createSoleFrames();
 
       desiredICPPosition = new YoFramePoint3D("desiredICPPosition", worldFrame, registry);
       desiredICPVelocity = new YoFrameVector3D("desiredICPVelocity", worldFrame, registry);
@@ -88,12 +89,12 @@ public class DCMPlannerVisualizer
       ThreadTools.sleepForever();
    }
 
-   private QuadrantDependentList<ReferenceFrame> createSoleFrames()
+   private QuadrantDependentList<MovingReferenceFrame> createSoleFrames()
    {
-      QuadrantDependentList<ReferenceFrame> soleFrames = new QuadrantDependentList<>();
+      QuadrantDependentList<MovingReferenceFrame> soleFrames = new QuadrantDependentList<>();
       for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
       {
-         TranslationReferenceFrame soleFrame = new TranslationReferenceFrame(robotQuadrant + "SoleFrame", worldFrame);
+         TranslationMovingReferenceFrame soleFrame = new TranslationMovingReferenceFrame(robotQuadrant + "SoleFrame", worldFrame);
          Vector3D translation = new Vector3D();
          translation.setX(robotQuadrant.getEnd().negateIfHindEnd(stanceLength / 2.0));
          translation.setY(robotQuadrant.getSide().negateIfRightSide(stanceWidth / 2.0));
@@ -116,7 +117,7 @@ public class DCMPlannerVisualizer
    private final FramePoint3D hindLeftStep = new FramePoint3D();
    private final FramePoint3D hindRightStep = new FramePoint3D();
 
-   private List<QuadrupedTimedStep> createSteps(QuadrantDependentList<ReferenceFrame> soleFrames)
+   private List<QuadrupedTimedStep> createSteps(QuadrantDependentList<MovingReferenceFrame> soleFrames)
    {
       int stepInterval = 0;
       List<QuadrupedTimedStep> steps = new ArrayList<>();
