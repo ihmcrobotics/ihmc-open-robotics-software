@@ -55,7 +55,6 @@ public class CoMTrajectoryPlanner
 
    private int numberOfConstraints = 0;
 
-
    public CoMTrajectoryPlanner(List<? extends ContactStateProvider> contactSequence, DoubleProvider omega, double gravityZ, double nominalCoMHeight, YoVariableRegistry parentRegistry)
    {
       this.contactSequence = contactSequence;
@@ -123,13 +122,13 @@ public class CoMTrajectoryPlanner
       solver.solve(yCoefficientConstants, yCoefficientVector);
       solver.solve(zCoefficientConstants, zCoefficientVector);
 
-      firstCoefficient.setX(xCoefficientVector.get(getFirstCoefficient(0)));
-      firstCoefficient.setY(yCoefficientVector.get(getFirstCoefficient(0)));
-      firstCoefficient.setZ(zCoefficientVector.get(getFirstCoefficient(0)));
+      firstCoefficient.setX(xCoefficientVector.get(CoMTrajectoryPlannerTools.getFirstCoefficientIndex(0)));
+      firstCoefficient.setY(yCoefficientVector.get(CoMTrajectoryPlannerTools.getFirstCoefficientIndex(0)));
+      firstCoefficient.setZ(zCoefficientVector.get(CoMTrajectoryPlannerTools.getFirstCoefficientIndex(0)));
 
-      secondCoefficient.setX(xCoefficientVector.get(getSecondCoefficient(0)));
-      secondCoefficient.setY(yCoefficientVector.get(getSecondCoefficient(0)));
-      secondCoefficient.setZ(zCoefficientVector.get(getSecondCoefficient(0)));
+      secondCoefficient.setX(xCoefficientVector.get(CoMTrajectoryPlannerTools.getSecondCoefficientIndex(0)));
+      secondCoefficient.setY(yCoefficientVector.get(CoMTrajectoryPlannerTools.getSecondCoefficientIndex(0)));
+      secondCoefficient.setZ(zCoefficientVector.get(CoMTrajectoryPlannerTools.getSecondCoefficientIndex(0)));
    }
 
    /**
@@ -141,13 +140,14 @@ public class CoMTrajectoryPlanner
       ContactStateProvider currentContactPhase = contactSequence.get(0);
 
       ContactState contactState = currentContactPhase.getContactState();
-      double firstCoefficientPositionMultiplier = getFirstCoefficientPositionMultiplier(contactState, timeInPhase);
-      double secondCoefficientPositionMultiplier = getSecondCoefficientPositionMultiplier(contactState, timeInPhase);
+      double firstCoefficientPositionMultiplier = CoMTrajectoryPlannerTools.getFirstCoefficientPositionMultiplier(contactState, timeInPhase, omega.getValue());
+      double secondCoefficientPositionMultiplier = CoMTrajectoryPlannerTools.getSecondCoefficientPositionMultiplier(contactState, timeInPhase, omega.getValue());
 
-      double firstCoefficientVelocityMultiplier = getFirstCoefficientVelocityMultiplier(contactState, timeInPhase);
-      double secondCoefficientVelocityMultiplier = getSecondCoefficientVelocityMultiplier(contactState, timeInPhase);
-      double gravityPositionEffect = getGravityPositionEffect(contactState, timeInPhase);
-      double gravityVelocityEffect = getGravityVelocityEffect(contactState, timeInPhase);
+      double firstCoefficientVelocityMultiplier = CoMTrajectoryPlannerTools.getFirstCoefficientVelocityMultiplier(contactState, timeInPhase, omega.getValue());
+      double secondCoefficientVelocityMultiplier = CoMTrajectoryPlannerTools.getSecondCoefficientVelocityMultiplier(contactState, timeInPhase, omega.getValue());
+
+      double gravityPositionEffect = CoMTrajectoryPlannerTools.getGravityPositionEffect(contactState, timeInPhase, gravityZ);
+      double gravityVelocityEffect = CoMTrajectoryPlannerTools.getGravityVelocityEffect(contactState, timeInPhase, gravityZ);
 
       if (contactState == ContactState.IN_CONTACT)
       {
@@ -247,8 +247,8 @@ public class CoMTrajectoryPlanner
       bY = centerOfMassLocationForConstraint.getY() - contactSequence.get(sequenceId).getCopPosition().getY();
       bZ = centerOfMassLocationForConstraint.getZ() - contactSequence.get(sequenceId).getCopPosition().getZ() - nominalCoMHeight;
 
-      coefficientMultipliers.set(numberOfConstraints, getFirstCoefficient(sequenceId), c0);
-      coefficientMultipliers.set(numberOfConstraints, getSecondCoefficient(sequenceId), c1);
+      coefficientMultipliers.set(numberOfConstraints, CoMTrajectoryPlannerTools.getFirstCoefficientIndex(sequenceId), c0);
+      coefficientMultipliers.set(numberOfConstraints, CoMTrajectoryPlannerTools.getSecondCoefficientIndex(sequenceId), c1);
       xCoefficientConstants.add(numberOfConstraints, 0, bX);
       yCoefficientConstants.add(numberOfConstraints, 0, bY);
       zCoefficientConstants.add(numberOfConstraints, 0, bZ);
@@ -293,7 +293,7 @@ public class CoMTrajectoryPlanner
       double bY = terminalDCMPosition.getY() - contactSequence.get(sequenceId).getCopPosition().getY();
       double bZ = terminalDCMPosition.getZ() - (contactSequence.get(sequenceId).getCopPosition().getZ() + nominalCoMHeight);
 
-      coefficientMultipliers.set(numberOfConstraints, getFirstCoefficient(sequenceId), c0);
+      coefficientMultipliers.set(numberOfConstraints, CoMTrajectoryPlannerTools.getFirstCoefficientIndex(sequenceId), c0);
       xCoefficientConstants.add(numberOfConstraints, 0, bX);
       yCoefficientConstants.add(numberOfConstraints, 0, bY);
       zCoefficientConstants.add(numberOfConstraints, 0, bZ);
@@ -356,9 +356,9 @@ public class CoMTrajectoryPlanner
          previousBZ = 0.0;
       }
 
-      double previousC0 = getFirstCoefficientPositionMultiplier(previousContact.getContactState(), previousDuration);
-      double previousC1 = getSecondCoefficientPositionMultiplier(previousContact.getContactState(), previousDuration);
-      double previousGravityEffect = -getGravityPositionEffect(previousContact.getContactState(), previousDuration);
+      double previousC0 = CoMTrajectoryPlannerTools.getFirstCoefficientPositionMultiplier(previousContact.getContactState(), previousDuration, omega.getValue());
+      double previousC1 = CoMTrajectoryPlannerTools.getSecondCoefficientPositionMultiplier(previousContact.getContactState(), previousDuration, omega.getValue());
+      double previousGravityEffect = -CoMTrajectoryPlannerTools.getGravityPositionEffect(previousContact.getContactState(), previousDuration, gravityZ);
 
       double nextBX, nextBY, nextBZ;
       if (nextContact.getContactState() == ContactState.IN_CONTACT)
@@ -374,14 +374,14 @@ public class CoMTrajectoryPlanner
          nextBZ = 0.0;
       }
 
-      double nextC0 = -getFirstCoefficientPositionMultiplier(nextContact.getContactState(), 0.0);
-      double nextC1 = -getSecondCoefficientPositionMultiplier(nextContact.getContactState(), 0.0);
-      double nextGravityEffort = getGravityPositionEffect(nextContact.getContactState(), 0.0);
+      double nextC0 = -CoMTrajectoryPlannerTools.getFirstCoefficientPositionMultiplier(nextContact.getContactState(), 0.0, omega.getValue());
+      double nextC1 = -CoMTrajectoryPlannerTools.getSecondCoefficientPositionMultiplier(nextContact.getContactState(), 0.0, omega.getValue());
+      double nextGravityEffort = CoMTrajectoryPlannerTools.getGravityPositionEffect(nextContact.getContactState(), 0.0, gravityZ);
 
-      coefficientMultipliers.set(numberOfConstraints, getFirstCoefficient(previousSequence), previousC0);
-      coefficientMultipliers.set(numberOfConstraints, getSecondCoefficient(previousSequence), previousC1);
-      coefficientMultipliers.set(numberOfConstraints, getFirstCoefficient(nextSequence), nextC0);
-      coefficientMultipliers.set(numberOfConstraints, getSecondCoefficient(nextSequence), nextC1);
+      coefficientMultipliers.set(numberOfConstraints, CoMTrajectoryPlannerTools.getFirstCoefficientIndex(previousSequence), previousC0);
+      coefficientMultipliers.set(numberOfConstraints, CoMTrajectoryPlannerTools.getSecondCoefficientIndex(previousSequence), previousC1);
+      coefficientMultipliers.set(numberOfConstraints, CoMTrajectoryPlannerTools.getFirstCoefficientIndex(nextSequence), nextC0);
+      coefficientMultipliers.set(numberOfConstraints, CoMTrajectoryPlannerTools.getSecondCoefficientIndex(nextSequence), nextC1);
       xCoefficientConstants.add(numberOfConstraints, 0, previousBX + nextBX);
       yCoefficientConstants.add(numberOfConstraints, 0, previousBY + nextBY);
       zCoefficientConstants.add(numberOfConstraints, 0, previousBZ + nextBZ + previousGravityEffect + nextGravityEffort);
@@ -422,18 +422,18 @@ public class CoMTrajectoryPlanner
 
       double previousDuration = previousContact.getTimeInterval().getDuration();
 
-      double previousC0 = getFirstCoefficientVelocityMultiplier(previousContact.getContactState(), previousDuration);
-      double previousC1 = getSecondCoefficientVelocityMultiplier(previousContact.getContactState(), previousDuration);
-      double previousGravityEffect = -getGravityVelocityEffect(previousContact.getContactState(), previousDuration);
+      double previousC0 = CoMTrajectoryPlannerTools.getFirstCoefficientVelocityMultiplier(previousContact.getContactState(), previousDuration, omega.getValue());
+      double previousC1 = CoMTrajectoryPlannerTools.getSecondCoefficientVelocityMultiplier(previousContact.getContactState(), previousDuration, omega.getValue());
+      double previousGravityEffect = -CoMTrajectoryPlannerTools.getGravityVelocityEffect(previousContact.getContactState(), previousDuration, gravityZ);
 
-      double nextC0 = -getFirstCoefficientVelocityMultiplier(nextContact.getContactState(), 0.0);
-      double nextC1 = -getSecondCoefficientVelocityMultiplier(nextContact.getContactState(), 0.0);
-      double nextGravityEffect = getGravityVelocityEffect(nextContact.getContactState(), 0.0);
+      double nextC0 = -CoMTrajectoryPlannerTools.getFirstCoefficientVelocityMultiplier(nextContact.getContactState(), 0.0, omega.getValue());
+      double nextC1 = -CoMTrajectoryPlannerTools.getSecondCoefficientVelocityMultiplier(nextContact.getContactState(), 0.0, omega.getValue());
+      double nextGravityEffect = CoMTrajectoryPlannerTools.getGravityVelocityEffect(nextContact.getContactState(), 0.0, gravityZ);
 
-      coefficientMultipliers.set(numberOfConstraints, getFirstCoefficient(previousSequence), previousC0);
-      coefficientMultipliers.set(numberOfConstraints, getSecondCoefficient(previousSequence), previousC1);
-      coefficientMultipliers.set(numberOfConstraints, getFirstCoefficient(nextSequence), nextC0);
-      coefficientMultipliers.set(numberOfConstraints, getSecondCoefficient(nextSequence), nextC1);
+      coefficientMultipliers.set(numberOfConstraints, CoMTrajectoryPlannerTools.getFirstCoefficientIndex(previousSequence), previousC0);
+      coefficientMultipliers.set(numberOfConstraints, CoMTrajectoryPlannerTools.getSecondCoefficientIndex(previousSequence), previousC1);
+      coefficientMultipliers.set(numberOfConstraints, CoMTrajectoryPlannerTools.getFirstCoefficientIndex(nextSequence), nextC0);
+      coefficientMultipliers.set(numberOfConstraints, CoMTrajectoryPlannerTools.getSecondCoefficientIndex(nextSequence), nextC1);
       xCoefficientConstants.add(numberOfConstraints, 0, 0.0);
       yCoefficientConstants.add(numberOfConstraints, 0, 0.0);
       zCoefficientConstants.add(numberOfConstraints, 0, previousGravityEffect + nextGravityEffect);
@@ -441,85 +441,33 @@ public class CoMTrajectoryPlanner
       numberOfConstraints++;
    }
 
-   private double getFirstCoefficientPositionMultiplier(ContactState contactState, double timeInPhase)
+   ContactState getContactState(int stepIndex)
    {
-      if (contactState == ContactState.IN_CONTACT)
-      {
-         return Math.exp(omega.getValue() * timeInPhase);
-      }
-      else
-      {
-         return timeInPhase;
-      }
+      return contactSequence.get(stepIndex).getContactState();
    }
 
-   private double getSecondCoefficientPositionMultiplier(ContactState contactState, double timeInPhase)
+   FramePoint3DReadOnly getCopPosition(int stepIndex)
    {
-      if (contactState == ContactState.IN_CONTACT)
-      {
-         return Math.exp(-omega.getValue() * timeInPhase);
-      }
-      else
-      {
-         return 1.0;
-      }
+      return contactSequence.get(stepIndex).getCopPosition();
    }
 
-   private double getFirstCoefficientVelocityMultiplier(ContactState contactState, double timeInPhase)
+   double getNominalCoMHeight()
    {
-      if (contactState == ContactState.IN_CONTACT)
-      {
-         return omega.getValue() * Math.exp(omega.getValue() * timeInPhase);
-      }
-      else
-      {
-         return 1.0;
-      }
+      return nominalCoMHeight;
    }
 
-   private double getSecondCoefficientVelocityMultiplier(ContactState contactState, double timeInPhase)
+   DenseMatrix64F getXCoefficientVector()
    {
-      if (contactState == ContactState.IN_CONTACT)
-      {
-         return -omega.getValue() * Math.exp(-omega.getValue() * timeInPhase);
-      }
-      else
-      {
-         return 0.0;
-      }
+      return xCoefficientVector;
    }
 
-   private double getGravityPositionEffect(ContactState contactState, double timeInPhase)
+   DenseMatrix64F getYCoefficientVector()
    {
-      if (contactState == ContactState.IN_CONTACT)
-      {
-         return 0.0;
-      }
-      else
-      {
-         return -gravityZ * timeInPhase * timeInPhase;
-      }
+      return yCoefficientVector;
    }
 
-   private double getGravityVelocityEffect(ContactState contactState, double timeInPhase)
+   DenseMatrix64F getZCoefficientVector()
    {
-      if (contactState == ContactState.IN_CONTACT)
-      {
-         return 0.0;
-      }
-      else
-      {
-         return -2.0 * gravityZ * timeInPhase;
-      }
-   }
-
-   private int getFirstCoefficient(int sequenceId)
-   {
-      return 2 * sequenceId;
-   }
-
-   private int getSecondCoefficient(int sequenceId)
-   {
-      return 2 * sequenceId + 1;
+      return zCoefficientVector;
    }
 }
