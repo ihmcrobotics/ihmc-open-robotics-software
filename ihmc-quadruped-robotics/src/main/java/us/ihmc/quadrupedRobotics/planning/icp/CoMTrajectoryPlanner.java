@@ -209,6 +209,7 @@ public class CoMTrajectoryPlanner
    private final FramePoint3D secondCoefficient = new FramePoint3D();
 
    private final FrameVector3D comVelocity = new FrameVector3D();
+   private final FrameVector3D comAcceleration = new FrameVector3D();
    private final FrameVector3D dcmVelocity = new FrameVector3D();
 
    private void updateCornerPoints(int size)
@@ -219,14 +220,6 @@ public class CoMTrajectoryPlanner
       for (; i < Math.min(size, maxCapacity + 1); i++)
       {
          ContactState contactState = contactSequence.get(i).getContactState();
-         double firstCoefficientPositionMultiplier = CoMTrajectoryPlannerTools.getFirstCoefficientPositionMultiplier(contactState, 0.0, omega);
-         double secondCoefficientPositionMultiplier = CoMTrajectoryPlannerTools.getSecondCoefficientPositionMultiplier(contactState, 0.0, omega);
-
-         double firstCoefficientVelocityMultiplier = CoMTrajectoryPlannerTools.getFirstCoefficientVelocityMultiplier(contactState, 0.0, omega);
-         double secondCoefficientVelocityMultiplier = CoMTrajectoryPlannerTools.getSecondCoefficientVelocityMultiplier(contactState, 0.0, omega);
-
-         double gravityPositionEffect = CoMTrajectoryPlannerTools.getGravityPositionEffect(contactState, 0.0, gravityZ);
-         double gravityVelocityEffect = CoMTrajectoryPlannerTools.getGravityVelocityEffect(contactState, 0.0, gravityZ);
 
          int firstCoefficientIndex = CoMTrajectoryPlannerTools.getFirstCoefficientIndex(i);
          int secondCoefficientIndex = CoMTrajectoryPlannerTools.getSecondCoefficientIndex(i);
@@ -238,31 +231,16 @@ public class CoMTrajectoryPlanner
          secondCoefficient.setY(yCoefficientVector.get(secondCoefficientIndex));
          secondCoefficient.setZ(zCoefficientVector.get(secondCoefficientIndex));
 
-         FixedFramePoint3DBasics desiredCoMPosition = comCornerPoints.get(i);
 
-         if (contactState == ContactState.IN_CONTACT)
-         {
-            desiredCoMPosition.set(contactSequence.get(i).getCopPosition());
-            desiredCoMPosition.addZ(nominalCoMHeight);
-         }
-         else
-         {
-            desiredCoMPosition.setToZero();
-         }
-         desiredCoMPosition.scaleAdd(firstCoefficientPositionMultiplier, firstCoefficient, desiredCoMPosition);
-         desiredCoMPosition.scaleAdd(secondCoefficientPositionMultiplier, secondCoefficient, desiredCoMPosition);
-         desiredCoMPosition.addZ(gravityPositionEffect);
+         CoMTrajectoryPlannerTools.constructDesiredCoMPosition(comCornerPoints.get(i), firstCoefficient, secondCoefficient, contactSequence.get(i).getCopPosition(),
+                                                               contactState, 0.0, omega, gravityZ, nominalCoMHeight);
+         CoMTrajectoryPlannerTools.constructDesiredCoMVelocity(comVelocity, firstCoefficient, secondCoefficient, contactState, 0.0, omega,
+                                                               gravityZ);
+         CoMTrajectoryPlannerTools.constructDesiredCoMAcceleration(comAcceleration, firstCoefficient, secondCoefficient, contactState, 0.0, omega,
+                                                                   gravityZ);
 
-         comVelocity.setToZero();
-         comVelocity.scaleAdd(firstCoefficientVelocityMultiplier, firstCoefficient, comVelocity);
-         comVelocity.scaleAdd(secondCoefficientVelocityMultiplier, secondCoefficient, comVelocity);
-         comVelocity.addZ(gravityVelocityEffect);
-
-         CapturePointTools.computeDesiredCapturePointPosition(desiredCoMPosition, comVelocity, omega, dcmCornerPoints.get(i));
-
-         dcmVelocity.set(firstCoefficient);
-         dcmVelocity.scale(2.0 * omega * firstCoefficientVelocityMultiplier);
-
+         CapturePointTools.computeDesiredCapturePointPosition(comCornerPoints.get(i), comVelocity, omega, dcmCornerPoints.get(i));
+         CapturePointTools.computeDesiredCapturePointVelocity(comVelocity, comAcceleration, omega, dcmVelocity);
          CapturePointTools.computeDesiredCentroidalMomentumPivot(dcmCornerPoints.get(i), dcmVelocity, omega, vrpCornerPoints.get(i));
       }
 
@@ -285,41 +263,14 @@ public class CoMTrajectoryPlanner
       double omega = this.omega.getValue();
 
       ContactState contactState = currentContactPhase.getContactState();
-      double firstCoefficientPositionMultiplier = CoMTrajectoryPlannerTools.getFirstCoefficientPositionMultiplier(contactState, timeInPhase, omega);
-      double secondCoefficientPositionMultiplier = CoMTrajectoryPlannerTools.getSecondCoefficientPositionMultiplier(contactState, timeInPhase, omega);
 
-      double firstCoefficientVelocityMultiplier = CoMTrajectoryPlannerTools.getFirstCoefficientVelocityMultiplier(contactState, timeInPhase, omega);
-      double secondCoefficientVelocityMultiplier = CoMTrajectoryPlannerTools.getSecondCoefficientVelocityMultiplier(contactState, timeInPhase, omega);
+      CoMTrajectoryPlannerTools.constructDesiredCoMPosition(desiredCoMPosition, yoFirstCoefficient, yoSecondCoefficient, currentContactPhase.getCopPosition(),
+                                                            contactState, timeInPhase, omega, gravityZ, nominalCoMHeight);
+      CoMTrajectoryPlannerTools.constructDesiredCoMVelocity(desiredCoMVelocity, yoFirstCoefficient, yoSecondCoefficient, contactState, timeInPhase, omega,
+                                                            gravityZ);
+      CoMTrajectoryPlannerTools.constructDesiredCoMAcceleration(desiredCoMAcceleration, yoFirstCoefficient, yoSecondCoefficient, contactState, timeInPhase, omega,
+                                                            gravityZ);
 
-      double firstCoefficientAccelerationMultiplier = CoMTrajectoryPlannerTools.getFirstCoefficientAccelerationMultiplier(contactState, timeInPhase, omega);
-      double secondCoefficientAccelerationMultiplier = CoMTrajectoryPlannerTools.getSecondCoefficientAccelerationMultiplier(contactState, timeInPhase, omega);
-
-      double gravityPositionEffect = CoMTrajectoryPlannerTools.getGravityPositionEffect(contactState, timeInPhase, gravityZ);
-      double gravityVelocityEffect = CoMTrajectoryPlannerTools.getGravityVelocityEffect(contactState, timeInPhase, gravityZ);
-      double gravityAccelerationEffect = CoMTrajectoryPlannerTools.getGravityAccelerationEffect(contactState, gravityZ);
-
-      if (contactState == ContactState.IN_CONTACT)
-      {
-         desiredCoMPosition.set(currentContactPhase.getCopPosition());
-         desiredCoMPosition.addZ(nominalCoMHeight);
-      }
-      else
-      {
-         desiredCoMPosition.setToZero();
-      }
-      desiredCoMPosition.scaleAdd(firstCoefficientPositionMultiplier, yoFirstCoefficient, desiredCoMPosition);
-      desiredCoMPosition.scaleAdd(secondCoefficientPositionMultiplier, yoSecondCoefficient, desiredCoMPosition);
-      desiredCoMPosition.addZ(gravityPositionEffect);
-
-      desiredCoMVelocity.setToZero();
-      desiredCoMVelocity.scaleAdd(firstCoefficientVelocityMultiplier, yoFirstCoefficient, desiredCoMVelocity);
-      desiredCoMVelocity.scaleAdd(secondCoefficientVelocityMultiplier, yoSecondCoefficient, desiredCoMVelocity);
-      desiredCoMVelocity.addZ(gravityVelocityEffect);
-
-      desiredCoMAcceleration.setToZero();
-      desiredCoMAcceleration.scaleAdd(firstCoefficientAccelerationMultiplier, yoFirstCoefficient, desiredCoMAcceleration);
-      desiredCoMAcceleration.scaleAdd(secondCoefficientAccelerationMultiplier, yoSecondCoefficient, desiredCoMAcceleration);
-      desiredCoMAcceleration.addZ(gravityAccelerationEffect);
 
       CapturePointTools.computeDesiredCapturePointPosition(desiredCoMPosition, desiredCoMVelocity, omega, desiredDCMPosition);
       CapturePointTools.computeDesiredCapturePointVelocity(desiredCoMVelocity, desiredCoMAcceleration, omega, desiredDCMVelocity);
