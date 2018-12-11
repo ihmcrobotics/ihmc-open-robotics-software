@@ -53,7 +53,7 @@
                             <Label text="Min step width" GridPane.columnIndex="1" GridPane.halignment="RIGHT" GridPane.rowIndex="3" />
             
                             <Label text="Min step length" GridPane.columnIndex="1" GridPane.halignment="RIGHT" GridPane.rowIndex="1" />
-                            <Label text="Min step z" GridPane.columnIndex="5" GridPane.halignment="RIGHT" />
+                            <Label text="Max step z" GridPane.columnIndex="5" GridPane.halignment="RIGHT" />
                             <Label text="Max surface incline" GridPane.columnIndex="5" GridPane.halignment="RIGHT" GridPane.rowIndex="3" />
             
                             <Label text="Max step yaw" GridPane.columnIndex="3" GridPane.halignment="RIGHT" />

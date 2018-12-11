@@ -18,24 +18,26 @@ import java.nio.file.Paths;
 
 public class ValkyrieCTTSOSimulation
 {
-   private static final Environment environment = Environment.CINDERS;
+   private static final Environment environment = Environment.JERSEY_BARRIERS;
 
    private enum Environment
    {
-      JERSEY_BARRIERS("20181210_JerseyBarrierData", 0.71, 0.23, -0.14),
-      CINDERS("20181211_CinderBlocksData", 0.4, 0.0, -0.4);
+      JERSEY_BARRIERS("20181210_JerseyBarrierData", 0.54, 0.32, -0.24, true),
+      CINDERS("20181211_CinderBlocksData", 0.38, 0.0, -0.4, true);
 
       final String fileName;
       final double startX;
       final double startY;
       final double startYaw;
+      final boolean generateGroundPlane;
 
-      Environment(String fileName, double startX, double startY, double startYaw)
+      Environment(String fileName, double startX, double startY, double startYaw, boolean generateGroundPlane)
       {
          this.fileName = fileName;
          this.startX = startX;
          this.startY = startY;
          this.startYaw = startYaw;
+         this.generateGroundPlane = generateGroundPlane;
       }
    }
 
@@ -44,7 +46,7 @@ public class ValkyrieCTTSOSimulation
       DRCRobotModel robotModel = new ValkyrieRobotModel(RobotTarget.SCS, false);
       Path path = Paths.get(Thread.currentThread().getContextClassLoader().getResource("environmentData/" + environment.fileName).getPath());
       PlanarRegionsList planarRegionsList = PlanarRegionDataImporter.importPlanarRegionData(path.toFile());
-      PlanarRegionsListDefinedEnvironment simEnvironment = new PlanarRegionsListDefinedEnvironment(planarRegionsList, 0.001, false);
+      PlanarRegionsListDefinedEnvironment simEnvironment = new PlanarRegionsListDefinedEnvironment(planarRegionsList, 0.001, environment.generateGroundPlane);
 
       DRCSimulationStarter simulationStarter = new DRCSimulationStarter(robotModel, simEnvironment);
       simulationStarter.setRunMultiThreaded(true);
@@ -78,6 +80,6 @@ public class ValkyrieCTTSOSimulation
 
       // spoof and publish planar regions
       ConstantPlanarRegionsPublisher constantPlanarRegionsPublisher = new ConstantPlanarRegionsPublisher(planarRegionsList);
-      constantPlanarRegionsPublisher.start(100);
+      constantPlanarRegionsPublisher.start(2000);
    }
 }
