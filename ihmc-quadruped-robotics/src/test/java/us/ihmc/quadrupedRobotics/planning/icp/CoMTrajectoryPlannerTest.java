@@ -22,7 +22,7 @@ import java.util.Random;
 
 public class CoMTrajectoryPlannerTest
 {
-   private static final double epsilon = 1e-6;
+   private static final double epsilon = 1e-3;
 
    @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
@@ -447,6 +447,60 @@ public class CoMTrajectoryPlannerTest
          FramePoint3D expectedDCM = new FramePoint3D();
          double exponential = Math.exp(omega.getDoubleValue() * time);
          expectedDCM.interpolate(firstVRP, initialDCM, exponential);
+
+         planner.compute(time);
+
+         EuclidCoreTestTools.assertPoint3DGeometricallyEquals("i = " + i, expectedDCM, planner.getDesiredDCMPosition(), epsilon);
+      }
+   }
+
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
+   @Test(timeout = 30000)
+   public void testStartingInFlight()
+   {
+      YoVariableRegistry registry = new YoVariableRegistry("test");
+      YoDouble omega = new YoDouble("omega", registry);
+      omega.set(3.0);
+      double gravityZ = 9.81;
+      double nominalHeight = 0.7;
+
+      List<ContactStateProvider> contactSequence = new ArrayList<>();
+      CoMTrajectoryPlanner planner = new CoMTrajectoryPlanner(contactSequence, omega, gravityZ, nominalHeight, registry);
+
+      SettableContactStateProvider secondContact = new SettableContactStateProvider();
+      SettableContactStateProvider thirdContact = new SettableContactStateProvider();
+
+      secondContact.setTimeInterval(new TimeInterval(0.0, 0.25));
+      secondContact.setContactState(ContactState.NO_CONTACT);
+      thirdContact.setTimeInterval(new TimeInterval(0.25, 1.25));
+      thirdContact.setCopPosition(new FramePoint3D(ReferenceFrame.getWorldFrame(), 2.0, 0.0, 0.0));
+
+      contactSequence.add(secondContact);
+      contactSequence.add(thirdContact);
+
+      FramePoint3D comPosition = new FramePoint3D(ReferenceFrame.getWorldFrame(), 0.05, 0.0, nominalHeight);
+      planner.setCurrentCoMPosition(comPosition);
+      planner.solveForTrajectory();
+      planner.compute(0.0);
+
+      EuclidCoreTestTools.assertPoint3DGeometricallyEquals("Desired CoM is invalid.", comPosition, planner.getDesiredCoMPosition(), epsilon);
+
+
+      FramePoint3D secondVRP = new FramePoint3D(secondContact.getCopPosition());
+      FramePoint3D thirdVRP = new FramePoint3D(thirdContact.getCopPosition());
+      secondVRP.addZ(nominalHeight);
+      thirdVRP.addZ(nominalHeight);
+
+
+      FramePoint3D initialDCM = new FramePoint3D(planner.getDesiredDCMPosition());
+
+      Random random = new Random(1738L);
+      for (int i = 0; i < 100; i++)
+      {
+         double time = RandomNumbers.nextDouble(random, 0.0, contactSequence.get(0).getTimeInterval().getDuration());
+         FramePoint3D expectedDCM = new FramePoint3D();
+         double exponential = Math.exp(omega.getDoubleValue() * time);
+//         expectedDCM.interpolate(firstVRP, initialDCM, exponential);
 
          planner.compute(time);
 

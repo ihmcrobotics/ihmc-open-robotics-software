@@ -3,6 +3,7 @@ package us.ihmc.quadrupedRobotics.planning.icp;
 import org.ejml.data.DenseMatrix64F;
 import org.ejml.factory.LinearSolverFactory;
 import org.ejml.interfaces.linsol.LinearSolver;
+import org.ejml.ops.CommonOps;
 import us.ihmc.commons.MathTools;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
@@ -36,6 +37,7 @@ public class CoMTrajectoryPlanner
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
 
    private final DenseMatrix64F coefficientMultipliers = new DenseMatrix64F(0, 0);
+   private final DenseMatrix64F coefficientMultipliersInv = new DenseMatrix64F(0, 0);
    private final DenseMatrix64F xCoefficientConstants = new DenseMatrix64F(0, 1);
    private final DenseMatrix64F yCoefficientConstants = new DenseMatrix64F(0, 1);
    private final DenseMatrix64F zCoefficientConstants = new DenseMatrix64F(0, 1);
@@ -141,6 +143,7 @@ public class CoMTrajectoryPlanner
    {
       int size = 2 * contactSequence.size();
       coefficientMultipliers.reshape(size, size);
+      coefficientMultipliersInv.reshape(size, size);
       xCoefficientConstants.reshape(size, 1);
       yCoefficientConstants.reshape(size, 1);
       zCoefficientConstants.reshape(size, 1);
@@ -148,7 +151,7 @@ public class CoMTrajectoryPlanner
       yCoefficientVector.reshape(size, 1);
       zCoefficientVector.reshape(size, 1);
 
-      coefficientMultipliers.zero();
+      coefficientMultipliersInv.zero();
       xCoefficientConstants.zero();
       yCoefficientConstants.zero();
       zCoefficientConstants.zero();
@@ -162,7 +165,7 @@ public class CoMTrajectoryPlanner
       numberOfConstraints = 0;
 
       // set initial constraint
-      setCoMPositionEqualityInContact(0, 0.0, currentCoMPosition);
+      setCoMPositionConstraint(0, 0.0, currentCoMPosition);
 
       // add transition continuity constraints
       for (int transition = 0; transition < numberOfTransitions; transition++)
@@ -182,9 +185,10 @@ public class CoMTrajectoryPlanner
       // TODO this can probably be made more efficient by inverting the multipliers matrix
       // solve for coefficients
       solver.setA(coefficientMultipliers);
-      solver.solve(xCoefficientConstants, xCoefficientVector);
-      solver.solve(yCoefficientConstants, yCoefficientVector);
-      solver.solve(zCoefficientConstants, zCoefficientVector);
+      solver.invert(coefficientMultipliersInv);
+      CommonOps.mult(coefficientMultipliersInv, xCoefficientConstants, xCoefficientVector);
+      CommonOps.mult(coefficientMultipliersInv, yCoefficientConstants, yCoefficientVector);
+      CommonOps.mult(coefficientMultipliersInv, zCoefficientConstants, zCoefficientVector);
 
       yoFirstCoefficient.setX(xCoefficientVector.get(CoMTrajectoryPlannerTools.getFirstCoefficientIndex(0)));
       yoFirstCoefficient.setY(yCoefficientVector.get(CoMTrajectoryPlannerTools.getFirstCoefficientIndex(0)));
@@ -205,7 +209,8 @@ public class CoMTrajectoryPlanner
 
    private void updateCornerPoints(int size)
    {
-      for (int i = 0; i < Math.min(size, maxCapacity + 1); i++)
+      int i = 0;
+      for (; i < Math.min(size, maxCapacity + 1); i++)
       {
          ContactState contactState = contactSequence.get(i).getContactState();
          double firstCoefficientPositionMultiplier = CoMTrajectoryPlannerTools.getFirstCoefficientPositionMultiplier(contactState, 0.0, omega.getValue());
@@ -252,6 +257,13 @@ public class CoMTrajectoryPlanner
          dcmVelocity.scale(2.0 * firstCoefficientVelocityMultiplier);
 
          vrpCornerPoints.get(i).scaleAdd(-omega.getValue(), dcmVelocity, desiredDCMPosition);
+      }
+
+      for (; i < maxCapacity + 1; i++)
+      {
+         comCornerPoints.get(i).setToNaN();
+         dcmCornerPoints.get(i).setToNaN();
+         vrpCornerPoints.get(i).setToNaN();
       }
    }
 
@@ -323,6 +335,11 @@ public class CoMTrajectoryPlanner
       return desiredCoMPosition;
    }
 
+   public FrameVector3DReadOnly getDesiredCoMVelocity()
+   {
+      return desiredCoMVelocity;
+   }
+
    public FramePoint3DReadOnly getDesiredVRPPosition()
    {
       return desiredVRPPosition;
@@ -353,12 +370,12 @@ public class CoMTrajectoryPlanner
     * @param timeInPhaseForConstraint t in the above equations
     * @param centerOfMassLocationForConstraint x<sub>0</sub> in the above equations
     */
-   private void setCoMPositionEqualityInContact(int sequenceId, double timeInPhaseForConstraint, FramePoint3DReadOnly centerOfMassLocationForConstraint)
+   private void setCoMPositionConstraint(int sequenceId, double timeInPhaseForConstraint, FramePoint3DReadOnly centerOfMassLocationForConstraint)
    {
       centerOfMassLocationForConstraint.checkReferenceFrameMatch(ReferenceFrame.getWorldFrame());
       double omega = this.omega.getValue();
 
-      double c0, c1, bX, bY, bZ;
+      double c0, c1;
       if (timeInPhaseForConstraint > 0)
       {
          c0 = Math.exp(omega * timeInPhaseForConstraint);
@@ -369,9 +386,17 @@ public class CoMTrajectoryPlanner
          c0 = 1.0;
          c1 = 1.0;
       }
-      bX = centerOfMassLocationForConstraint.getX() - contactSequence.get(sequenceId).getCopPosition().getX();
-      bY = centerOfMassLocationForConstraint.getY() - contactSequence.get(sequenceId).getCopPosition().getY();
-      bZ = centerOfMassLocationForConstraint.getZ() - contactSequence.get(sequenceId).getCopPosition().getZ() - nominalCoMHeight;
+
+      double bX = centerOfMassLocationForConstraint.getX();
+      double bY = centerOfMassLocationForConstraint.getY();
+      double bZ = centerOfMassLocationForConstraint.getZ();
+
+      if (contactSequence.get(sequenceId).getContactState() == ContactState.IN_CONTACT)
+      {
+         bX -= contactSequence.get(sequenceId).getCopPosition().getX();
+         bY -= contactSequence.get(sequenceId).getCopPosition().getY();
+         bZ -= (contactSequence.get(sequenceId).getCopPosition().getZ() + nominalCoMHeight);
+      }
 
       coefficientMultipliers.set(numberOfConstraints, CoMTrajectoryPlannerTools.getFirstCoefficientIndex(sequenceId), c0);
       coefficientMultipliers.set(numberOfConstraints, CoMTrajectoryPlannerTools.getSecondCoefficientIndex(sequenceId), c1);

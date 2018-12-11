@@ -56,6 +56,7 @@ public class CoMTrajectoryPlannerVisualizer
    private List<ContactStateProvider> contactStates;
 
    private final YoFramePoint3D desiredCoMPosition;
+   private final YoFrameVector3D desiredCoMVelocity;
    private final YoFramePoint3D desiredICPPosition;
    private final YoFrameVector3D desiredICPVelocity;
 
@@ -68,6 +69,7 @@ public class CoMTrajectoryPlannerVisualizer
       YoGraphicsListRegistry graphicsListRegistry = new YoGraphicsListRegistry();
 
       desiredCoMPosition = new YoFramePoint3D("desiredCoMPosition", worldFrame, registry);
+      desiredCoMVelocity = new YoFrameVector3D("desiredCoMVelocity", worldFrame, registry);
       desiredICPPosition = new YoFramePoint3D("desiredICPPosition", worldFrame, registry);
       desiredICPVelocity = new YoFrameVector3D("desiredICPVelocity", worldFrame, registry);
       YoDouble omega = new YoDouble("omega", registry);
@@ -176,6 +178,7 @@ public class CoMTrajectoryPlannerVisualizer
          planner.compute(timeInPhase.getDoubleValue());
 
          desiredCoMPosition.set(planner.getDesiredCoMPosition());
+         desiredCoMVelocity.set(planner.getDesiredCoMVelocity());
          desiredICPPosition.set(planner.getDesiredDCMPosition());
          desiredICPVelocity.set(planner.getDesiredDCMVelocity());
 
