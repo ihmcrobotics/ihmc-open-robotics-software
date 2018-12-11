@@ -125,27 +125,9 @@ public class BodyCollisionNodeChecker extends FootstepNodeChecker
       if (planarRegionList.size() == 0)
          return true;
 
-//      PrintTools.info("Body dimensions = (" + parameters.getBodyBoxDepth() + ", " + parameters.getBodyBoxWidth() + ", " + parameters.getBodyBoxHeight() + ")");
-      
-      bodyCollisionBox.setSize(parameters.getBodyBoxDepth(), parameters.getBodyBoxWidth(), parameters.getBodyBoxHeight());
-      if (!MathTools.epsilonEquals(1.0, scaleFactor, 1e-5))
-         bodyCollisionBox.scale(scaleFactor);
+      updateBodyCollisionBox(node, previousNode, scaleFactor);
 
-      if(addStepTranslationToBoundingBox)
-      {
-         tempPoint.setIncludingFrame(worldFrame, node.getX(), node.getY(), 0.0);
-         tempPoint.sub(previousNode.getX(), previousNode.getY(), 0.0);
-         tempPoint.changeFrame(midStanceFrame);
-         double stepTranslationScaleFactor = 0.4;
-         double stepTranslationMidFootFrameX = stepTranslationScaleFactor * Math.abs(tempPoint.getX());
-         double stepTranslationMidFootFrameY = stepTranslationScaleFactor * Math.abs(tempPoint.getY());
-         bodyBoxDimensions.set(parameters.getBodyBoxDepth() + stepTranslationMidFootFrameX, parameters.getBodyBoxWidth() + stepTranslationMidFootFrameY, parameters.getBodyBoxHeight());
-      }
-      else
-      {
-         bodyBoxDimensions.set(parameters.getBodyBoxDepth(), parameters.getBodyBoxWidth(), parameters.getBodyBoxHeight());
-      }
-
+      bodyBoxDimensions.set(parameters.getBodyBoxBaseX(), parameters.getBodyBoxBaseY(), parameters.getBodyBoxBaseZ() + 0.5 * parameters.getBodyBoxHeight());
       bodyCollisionFrame.updateTranslation(bodyBoxDimensions);
       bodyCollisionPolytope.getVertices().clear();
       for (Point3D vertex : bodyCollisionBox.getVertices())
@@ -165,6 +147,22 @@ public class BodyCollisionNodeChecker extends FootstepNodeChecker
       }
 
       return true;
+   }
+
+   private void updateBodyCollisionBox(FootstepNode node, FootstepNode previousNode, double scaleFactor)
+   {
+      tempPoint.setIncludingFrame(worldFrame, node.getX(), node.getY(), 0.0);
+      tempPoint.sub(previousNode.getX(), previousNode.getY(), 0.0);
+      tempPoint.changeFrame(midStanceFrame);
+
+      double stepTranslationScaleFactor = 0.4;
+      double stepTranslationMidFootFrameX = stepTranslationScaleFactor * Math.abs(tempPoint.getX());
+      double stepTranslationMidFootFrameY = stepTranslationScaleFactor * Math.abs(tempPoint.getY());
+      bodyCollisionBox.setSize(parameters.getBodyBoxDepth() + stepTranslationMidFootFrameX, parameters.getBodyBoxWidth() + stepTranslationMidFootFrameY,
+                               parameters.getBodyBoxHeight());
+
+      if (!MathTools.epsilonEquals(1.0, scaleFactor, 1e-5))
+         bodyCollisionBox.scale(scaleFactor);
    }
 
    private final FramePose3D midPose = new FramePose3D();

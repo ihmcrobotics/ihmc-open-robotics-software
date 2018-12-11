@@ -74,13 +74,13 @@ public class ValkyrieFootstepPlannerParameters implements FootstepPlannerParamet
    @Override
    public double getBodyBoxWidth()
    {
-      return 0.8;
+      return 0.85;
    }
 
    @Override
    public double getBodyBoxDepth()
    {
-      return 0.3;
+      return 0.4;
    }
 
    @Override
