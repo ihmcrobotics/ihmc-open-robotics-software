@@ -14,6 +14,6 @@ public class ValkyrieFootstepPlannerCostParameters implements FootstepPlannerCos
    @Override
    public double getYawWeight()
    {
-      return 0.03;
+      return 0.1;
    }
 }
