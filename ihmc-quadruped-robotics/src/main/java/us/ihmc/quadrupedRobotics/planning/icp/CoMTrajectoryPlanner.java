@@ -8,6 +8,7 @@ import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FixedFramePoint3DBasics;
+import us.ihmc.euclid.referenceFrame.interfaces.FixedFrameVector3DBasics;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
@@ -53,14 +54,14 @@ public class CoMTrajectoryPlanner
 
    private final List<? extends ContactStateProvider> contactSequence;
 
-   private final YoFramePoint3D desiredCoMPosition = new YoFramePoint3D("desiredCoMPosition", worldFrame, registry);
-   private final YoFrameVector3D desiredCoMVelocity = new YoFrameVector3D("desiredComVelocity", worldFrame, registry);
+   private final FixedFramePoint3DBasics desiredCoMPosition = new FramePoint3D(worldFrame);
+   private final FixedFrameVector3DBasics desiredCoMVelocity = new FrameVector3D(worldFrame);
 
-   private final YoFramePoint3D desiredDCMPosition = new YoFramePoint3D("desiredDCMPosition", worldFrame, registry);
-   private final YoFrameVector3D desiredDCMVelocity = new YoFrameVector3D("desiredDCMVelocity", worldFrame, registry);
+   private final FixedFramePoint3DBasics desiredDCMPosition = new FramePoint3D(worldFrame);
+   private final FixedFrameVector3DBasics desiredDCMVelocity = new FrameVector3D(worldFrame);
 
-   private final YoFramePoint3D desiredVRPPosition = new YoFramePoint3D("desiredVRPPosition", worldFrame, registry);
-   private final YoFramePoint3D desiredECMPPosition = new YoFramePoint3D("desiredECMPPosition", worldFrame, registry);
+   private final FixedFramePoint3DBasics desiredVRPPosition = new FramePoint3D(worldFrame);
+   private final FixedFramePoint3DBasics desiredECMPPosition = new FramePoint3D(worldFrame);
 
    private final YoFramePoint3D yoFirstCoefficient = new YoFramePoint3D("comFirstCoefficient", worldFrame, registry);
    private final YoFramePoint3D yoSecondCoefficient = new YoFramePoint3D("comSecondCoefficient", worldFrame, registry);
