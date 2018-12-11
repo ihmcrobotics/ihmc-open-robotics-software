@@ -24,6 +24,62 @@ public class CoMTrajectoryPlannerTest
 
    @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
+   public void testNoSteps()
+   {
+      YoVariableRegistry registry = new YoVariableRegistry("test");
+      YoDouble omega = new YoDouble("omega", registry);
+      omega.set(3.0);
+      double gravityZ = 9.81;
+      double nominalHeight = 0.7;
+
+      List<ContactStateProvider> contactSequence = new ArrayList<>();
+      CoMTrajectoryPlanner planner = new CoMTrajectoryPlanner(contactSequence, omega, gravityZ, nominalHeight, registry);
+
+      SettableContactStateProvider firstContact = new SettableContactStateProvider();
+
+      firstContact.setTimeInterval(new TimeInterval(0.0, Double.POSITIVE_INFINITY));
+      firstContact.setCopPosition(new FramePoint3D());
+
+      contactSequence.add(firstContact);
+
+      FramePoint3D comPosition = new FramePoint3D();
+      comPosition.setZ(nominalHeight);
+      planner.setCurrentCoMPosition(comPosition);
+
+      planner.solveForTrajectory();
+      planner.compute(0.0);
+
+      FramePoint3D desiredDCM = new FramePoint3D(firstContact.getCopPosition());
+      desiredDCM.addZ(nominalHeight);
+
+      EuclidCoreTestTools.assertPoint3DGeometricallyEquals(comPosition, planner.getDesiredCoMPosition(), epsilon);
+
+      planner.compute(1.0);
+      EuclidCoreTestTools.assertPoint3DGeometricallyEquals(desiredDCM, planner.getDesiredDCMPosition(), epsilon);
+
+      planner.compute(0.0);
+      EuclidCoreTestTools.assertPoint3DGeometricallyEquals(desiredDCM, planner.getDesiredDCMPosition(), epsilon);
+
+      planner.compute(10.0);
+      EuclidCoreTestTools.assertPoint3DGeometricallyEquals(desiredDCM, planner.getDesiredDCMPosition(), epsilon);
+      planner.compute(100.0);
+      EuclidCoreTestTools.assertPoint3DGeometricallyEquals(desiredDCM, planner.getDesiredDCMPosition(), epsilon);
+      planner.compute(1000.0);
+      EuclidCoreTestTools.assertPoint3DGeometricallyEquals(desiredDCM, planner.getDesiredDCMPosition(), epsilon);
+
+
+      Random random = new Random(1738L);
+      for (int i = 0; i < 100; i++)
+      {
+         double time = RandomNumbers.nextDouble(random, 0.0, 1000.0);
+         planner.compute(time);
+
+         EuclidCoreTestTools.assertPoint3DGeometricallyEquals("iter : " + i + ", time : " + time, desiredDCM, planner.getDesiredDCMPosition(), epsilon);
+      }
+   }
+
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
+   @Test(timeout = 30000)
    public void testOneSimpleMovingSegmentInContact()
    {
       YoVariableRegistry registry = new YoVariableRegistry("test");
@@ -53,13 +109,13 @@ public class CoMTrajectoryPlannerTest
       planner.solveForTrajectory();
       planner.compute(0.0);
 
-      FramePoint3D finalICP = new FramePoint3D(secondContact.getCopPosition());
-      finalICP.addZ(nominalHeight);
+      FramePoint3D finalDCM = new FramePoint3D(secondContact.getCopPosition());
+      finalDCM.addZ(nominalHeight);
 
       EuclidCoreTestTools.assertPoint3DGeometricallyEquals(comPosition, planner.getDesiredCoMPosition(), epsilon);
 
       planner.compute(1.0);
-      EuclidCoreTestTools.assertPoint3DGeometricallyEquals(finalICP, planner.getDesiredDCMPosition(), epsilon);
+      EuclidCoreTestTools.assertPoint3DGeometricallyEquals(finalDCM, planner.getDesiredDCMPosition(), epsilon);
 
       FramePoint3D initialDCM = new FramePoint3D();
       double interpolation = Math.exp(-omega.getDoubleValue());

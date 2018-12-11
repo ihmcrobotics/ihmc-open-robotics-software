@@ -17,8 +17,6 @@ public class QuadrupedContactSequenceUpdater
 {
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
 
-   static final double finalTransferDuration = 1.0;
-
    private final int pastContactPhaseCapacity;
    private final RecyclingArrayList<QuadrupedStepTransition> stepTransitions = new RecyclingArrayList<>(QuadrupedStepTransition::new);
    private final List<RobotQuadrant> feetInContact = new ArrayList<>();
@@ -79,15 +77,11 @@ public class QuadrupedContactSequenceUpdater
       computeContactPhasesFromStepTransitions();
    }
 
-   public double getMaxCapacity()
-   {
-      return maxCapacity;
-   }
-
    private void computeContactPhasesFromStepTransitions()
    {
       int numberOfTransitions = stepTransitions.size();
       QuadrupedContactPhase contactPhase = contactSequence.getLast();
+
       // compute transition time and center of pressure for each time interval
       for (int transitionNumber = 0; transitionNumber < numberOfTransitions; transitionNumber++)
       {
@@ -111,22 +105,19 @@ public class QuadrupedContactSequenceUpdater
          contactPhase.getTimeInterval().setEndTime(stepTransition.getTransitionTime());
          contactPhase = contactSequence.add();
 
-         boolean isLastContact = (transitionNumber == numberOfTransitions - 1) || (contactSequence.size() == maxCapacity);
 
          contactPhase.setFeetInContact(feetInContact);
          contactPhase.setSolePositions(solePositions);
          contactPhase.update();
 
+         contactPhase.getTimeInterval().setStartTime(stepTransition.getTransitionTime());
+
+         boolean isLastContact = (transitionNumber == numberOfTransitions - 1) || (contactSequence.size() == maxCapacity);
          if (isLastContact)
-         {
-            contactPhase.getTimeInterval().setInterval(stepTransition.getTransitionTime(), stepTransition.getTransitionTime() + finalTransferDuration);
-            return;
-         }
-         else
-         {
-            contactPhase.getTimeInterval().setStartTime(stepTransition.getTransitionTime());
-         }
+            break;
       }
+
+      contactPhase.getTimeInterval().setEndTime(Double.POSITIVE_INFINITY);
    }
 
 }
