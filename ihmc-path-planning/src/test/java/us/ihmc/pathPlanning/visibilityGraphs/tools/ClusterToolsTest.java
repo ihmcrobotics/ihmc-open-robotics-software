@@ -367,6 +367,8 @@ public class ClusterToolsTest
    public void testSquareOnTopOfSquare() throws Exception
    {
       double tiltedPointHeight = 0.1;
+      double arbitraryTranslationX = 3.0;
+      double arbitraryTranslationY = -4.0; 
       
       Point3D pointAInWorld = new Point3D(0.0, 0.0, 0.0);
       Point3D pointBInWorld = new Point3D(0.0, 1.0, 0.0);
@@ -375,9 +377,13 @@ public class ClusterToolsTest
 
       Vector3D zAxisForTransform = new Vector3D(-tiltedPointHeight, 0.0, 1.0);
       zAxisForTransform.normalize();
-      Point3DReadOnly pointForTransform = new Point3D();
 
-      RigidBodyTransform transformToWorld0 = createTransformFromPointAndZAxis(pointForTransform, zAxisForTransform);
+      RigidBodyTransform transformToWorldOops = new RigidBodyTransform();
+      transformToWorldOops.setTranslation(arbitraryTranslationX, arbitraryTranslationY, 0.0);
+      
+      RigidBodyTransform transformToWorld0 = createTransformFromPointAndZAxis(new Point3D(), zAxisForTransform);
+      transformToWorld0.multiply(transformToWorldOops);
+      
       RigidBodyTransform transformToLocal0 = new RigidBodyTransform(transformToWorld0);
       transformToLocal0.invert();
 
@@ -386,10 +392,10 @@ public class ClusterToolsTest
       Point3D pointCInLocal3D = createAndTransformPoint(pointCInWorld, transformToLocal0);
       Point3D pointDInLocal3D = createAndTransformPoint(pointDInWorld, transformToLocal0);
 
-      //      System.out.println(pointAInLocal);
-      //      System.out.println(pointBInLocal);
-      //      System.out.println(pointCInLocal);
-      //      System.out.println(pointDInLocal);
+//            System.out.println(pointAInLocal3D);
+//            System.out.println(pointBInLocal3D);
+//            System.out.println(pointCInLocal3D);
+//            System.out.println(pointDInLocal3D);
 
       assertEquals(0.0, pointAInLocal3D.getZ(), EPSILON);
       assertEquals(0.0, pointBInLocal3D.getZ(), EPSILON);
@@ -436,33 +442,46 @@ public class ClusterToolsTest
       
       assertEquals(1, obstacleClusters.size());
       Cluster obstacleCluster = obstacleClusters.get(0);
-      List<Point3DReadOnly> navigableExtrusionsInWorld = obstacleCluster.getNonNavigableExtrusionsInWorld();
+      List<Point3DReadOnly> navigableExtrusionsInWorld = obstacleCluster.getNavigableExtrusionsInWorld();
       
       assertEquals(12, navigableExtrusionsInWorld.size());
       
       printPoints3D(navigableExtrusionsInWorld);
       double sqrt2By2 = Math.sqrt(2.0)/2.0;
       
-      Point2D pointE0InLocal = new Point2D(0.3, 0.2);
-      Point2D pointE1InLocal = new Point2D(0.3 - sqrt2By2 * 0.1, 0.3 - sqrt2By2 * 0.1);
-      Point2D pointE2InLocal = new Point2D(0.2, 0.3);
+      Point2D pointE0InWorld = new Point2D(0.3, 0.2);
+      Point2D pointE1InWorld = new Point2D(0.3 - sqrt2By2 * 0.1, 0.3 - sqrt2By2 * 0.1);
+      Point2D pointE2InWorld = new Point2D(0.2, 0.3);
+                       
+      Point2D pointF0InWorld = new Point2D(0.2, 0.7);
+      Point2D pointF1InWorld = new Point2D(0.3 - sqrt2By2 * 0.1, 0.7 + sqrt2By2 * 0.1);
+      Point2D pointF2InWorld = new Point2D(0.3, 0.8);
+                       
+      Point2D pointG0InWorld = new Point2D(0.7, 0.8);
+      Point2D pointG1InWorld = new Point2D(0.7 + sqrt2By2 * 0.1, 0.7 + sqrt2By2 * 0.1);
+      Point2D pointG2InWorld = new Point2D(0.8, 0.7);
+                       
+      Point2D pointH0InWorld = new Point2D(0.8, 0.3);
+      Point2D pointH1InWorld = new Point2D(0.7 + sqrt2By2 * 0.1, 0.3 - sqrt2By2 * 0.1);
+      Point2D pointH2InWorld = new Point2D(0.7, 0.2);
       
-      Point2D pointF0InLocal = new Point2D(0.2, 0.7);
-      Point2D pointF1InLocal = new Point2D(0.3 - sqrt2By2 * 0.1, 0.7 + sqrt2By2 * 0.1);
-      Point2D pointF2InLocal = new Point2D(0.3, 0.8);
+      assertTrue(listContainsAllXYMatch(navigableExtrusionsInWorld, pointE0InWorld, pointE1InWorld, pointE2InWorld));
+      assertTrue(listContainsAllXYMatch(navigableExtrusionsInWorld, pointF0InWorld, pointF1InWorld, pointF2InWorld));
+      assertTrue(listContainsAllXYMatch(navigableExtrusionsInWorld, pointG0InWorld, pointG1InWorld, pointG2InWorld));
+      assertTrue(listContainsAllXYMatch(navigableExtrusionsInWorld, pointH0InWorld, pointH1InWorld, pointH2InWorld));
       
-      Point2D pointG0InLocal = new Point2D(0.7, 0.8);
-      Point2D pointG1InLocal = new Point2D(0.7 + sqrt2By2 * 0.1, 0.7 + sqrt2By2 * 0.1);
-      Point2D pointG2InLocal = new Point2D(0.8, 0.7);
+      // Make sure navigableExtrusionsInWorld lie on the PlanarRegion.
+      RigidBodyTransform transformToPlanarRegion = new RigidBodyTransform();
+      homeRegion.getTransformToWorld(transformToPlanarRegion);
+      transformToPlanarRegion.invert();
       
-      Point2D pointH0InLocal = new Point2D(0.8, 0.3);
-      Point2D pointH1InLocal = new Point2D(0.7 + sqrt2By2 * 0.1, 0.3 - sqrt2By2 * 0.1);
-      Point2D pointH2InLocal = new Point2D(0.7, 0.2);
-      
-//      assertTrue(listContainsAll(navigableExtrusionsInLocal, pointE0InLocal, pointE1InLocal, pointE2InLocal));
-//      assertTrue(listContainsAll(navigableExtrusionsInLocal, pointF0InLocal, pointF1InLocal, pointF2InLocal));
-//      assertTrue(listContainsAll(navigableExtrusionsInLocal, pointG0InLocal, pointG1InLocal, pointG2InLocal));
-//      assertTrue(listContainsAll(navigableExtrusionsInLocal, pointH0InLocal, pointH1InLocal, pointH2InLocal));
+      for (Point3DReadOnly point3D : navigableExtrusionsInWorld)
+      {
+        Point3D pointToTest = new Point3D(point3D);
+        transformToPlanarRegion.transform(pointToTest);
+        
+        assertEquals(0.0, pointToTest.getZ(), EPSILON);
+      }
    }
 
    private boolean listContainsAll(List<Point2DReadOnly> points, Point2DReadOnly... pointsToCheck)
@@ -475,7 +494,28 @@ public class ClusterToolsTest
       
       return true;
    }
+   
+   private boolean listContainsAllXYMatch(List<Point3DReadOnly> points, Point2DReadOnly... pointsToCheck)
+   {
+      for (Point2DReadOnly pointToCheck : pointsToCheck)
+      {
+         if (!listContainsXYMatch(points, pointToCheck))
+            return false;
+      }
+      
+      return true;
+   }
 
+   private boolean listContainsXYMatch(List<Point3DReadOnly> points, Point2DReadOnly pointToCheck)
+   {
+      for (Point3DReadOnly point : points)
+      {
+         if (pointToCheck.epsilonEquals(new Point2D(point), EPSILON))
+            return true;
+      }
+      return false;
+   }
+   
    private boolean listContains(List<Point2DReadOnly> points, Point2DReadOnly pointToCheck)
    {
       for (Point2DReadOnly point : points)
