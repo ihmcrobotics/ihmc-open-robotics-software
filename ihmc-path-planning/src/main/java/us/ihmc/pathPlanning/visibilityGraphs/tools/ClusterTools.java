@@ -7,6 +7,7 @@ import java.util.stream.Collectors;
 
 import us.ihmc.commons.MathTools;
 import us.ihmc.commons.lists.ListWrappingIndexTools;
+import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.geometry.Line2D;
 import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
 import us.ihmc.euclid.tools.EuclidCoreTools;
@@ -20,8 +21,8 @@ import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.pathPlanning.visibilityGraphs.clusterManagement.Cluster;
-import us.ihmc.pathPlanning.visibilityGraphs.clusterManagement.Cluster.ExtrusionSide;
 import us.ihmc.pathPlanning.visibilityGraphs.clusterManagement.Cluster.ClusterType;
+import us.ihmc.pathPlanning.visibilityGraphs.clusterManagement.Cluster.ExtrusionSide;
 import us.ihmc.pathPlanning.visibilityGraphs.interfaces.NavigableExtrusionDistanceCalculator;
 import us.ihmc.pathPlanning.visibilityGraphs.interfaces.ObstacleExtrusionDistanceCalculator;
 import us.ihmc.robotics.geometry.PlanarRegion;
@@ -388,47 +389,76 @@ public class ClusterTools
 
       RigidBodyTransform transformFromHomeToWorld = new RigidBodyTransform();
       homeRegion.getTransformToWorld(transformFromHomeToWorld);
+
       Vector3D referenceNormal = homeRegion.getNormal();
       double zThresholdBeforeOrthogonal = Math.cos(orthogonalAngle);
 
       for (PlanarRegion obstacleRegion : obstacleRegions)
       {
-         Vector3D otherNormal = obstacleRegion.getNormal();
+         Cluster obstacleCluster = createObstacleCluster(extrusionDistanceCalculator, transformFromHomeToWorld, referenceNormal, zThresholdBeforeOrthogonal,
+                                                         obstacleRegion);
 
-         Cluster cluster = new Cluster(ExtrusionSide.OUTSIDE, ClusterType.POLYGON);
-         cluster.setTransformToWorld(transformFromHomeToWorld);
+         obstacleClusters.add(obstacleCluster);
 
-         List<Point3D> rawPointsInLocal = new ArrayList<>();
-         RigidBodyTransform transformFromOtherToHome = new RigidBodyTransform();
-         obstacleRegion.getTransformToWorld(transformFromOtherToHome);
-         transformFromOtherToHome.preMultiplyInvertOther(transformFromHomeToWorld);
-
-         for (int i = 0; i < obstacleRegion.getConvexHull().getNumberOfVertices(); i++)
-         {
-            Point3D concaveHullVertexHome = new Point3D(obstacleRegion.getConvexHull().getVertex(i));
-            concaveHullVertexHome.applyTransform(transformFromOtherToHome);
-            rawPointsInLocal.add(concaveHullVertexHome);
-         }
-
-         //TODO: Check this. When should it be a multi-line and when should it be a polygon?
-         if (Math.abs(otherNormal.dot(referenceNormal)) < zThresholdBeforeOrthogonal)
-         {
-            // Project region as a line
-            cluster.setType(ClusterType.MULTI_LINE);
-            cluster.addRawPointsInLocal3D(filterVerticalPolygonForMultiLineExtrusion(rawPointsInLocal, POPPING_MULTILINE_POINTS_THRESHOLD));
-         }
-         else
-         {
-            // Project region as a polygon
-            cluster.setType(ClusterType.POLYGON);
-            cluster.addRawPointsInLocal3D(rawPointsInLocal);
-         }
-
-         extrudeObstacleCluster(cluster, extrusionDistanceCalculator);
-         obstacleClusters.add(cluster);
       }
 
       return obstacleClusters;
+   }
+
+   private static Cluster createObstacleCluster(ObstacleExtrusionDistanceCalculator extrusionDistanceCalculator, RigidBodyTransform transformFromHomeRegionToWorld,
+                                                Vector3D referenceNormal, double zThresholdBeforeOrthogonal, PlanarRegion obstacleRegion)
+   {
+      RigidBodyTransform transformFromWorldToHome = new RigidBodyTransform(transformFromHomeRegionToWorld);
+      transformFromWorldToHome.invert();
+      
+      RigidBodyTransform transformFromObstacleToWorld = new RigidBodyTransform();
+      obstacleRegion.getTransformToWorld(transformFromObstacleToWorld);
+      
+//      System.out.println(transformFromObstacleToWorld);
+      
+      RigidBodyTransform transformFromObstacleToHome = new RigidBodyTransform(transformFromObstacleToWorld);
+      transformFromObstacleToHome.multiply(transformFromWorldToHome);
+
+      
+//      RigidBodyTransform transformFromOtherToHome = new RigidBodyTransform();
+//      obstacleRegion.getTransformToWorld(transformFromOtherToHome);
+//      transformFromOtherToHome.preMultiplyInvertOther(transformFromHomeToWorld);
+      
+      ConvexPolygon2D obstacleConvexHull = obstacleRegion.getConvexHull();
+      
+      List<Point3D> rawPointsInLocal = new ArrayList<>();
+      for (int i = 0; i < obstacleConvexHull.getNumberOfVertices(); i++)
+      {
+         Point3D concaveHullVertexHome = new Point3D(obstacleConvexHull.getVertex(i));
+         concaveHullVertexHome.applyTransform(transformFromObstacleToHome);
+         rawPointsInLocal.add(concaveHullVertexHome);
+         
+//         System.out.println(concaveHullVertexHome);
+      }
+
+      
+      
+      Vector3D otherNormal = obstacleRegion.getNormal();
+      Cluster cluster = new Cluster(ExtrusionSide.OUTSIDE, ClusterType.POLYGON);
+      cluster.setTransformToWorld(transformFromHomeRegionToWorld);
+      
+      //TODO: Check this. When should it be a multi-line and when should it be a polygon?
+      if (Math.abs(otherNormal.dot(referenceNormal)) < zThresholdBeforeOrthogonal)
+      {
+         // Project region as a line
+         cluster.setType(ClusterType.MULTI_LINE);
+         cluster.addRawPointsInLocal3D(filterVerticalPolygonForMultiLineExtrusion(rawPointsInLocal, POPPING_MULTILINE_POINTS_THRESHOLD));
+      }
+      else
+      {
+         // Project region as a polygon
+         cluster.setType(ClusterType.POLYGON);
+         cluster.addRawPointsInLocal3D(rawPointsInLocal);
+      }
+
+      extrudeObstacleCluster(cluster, extrusionDistanceCalculator);
+
+      return cluster;
    }
 
    public static void extrudeObstacleCluster(Cluster cluster, ObstacleExtrusionDistanceCalculator calculator)
