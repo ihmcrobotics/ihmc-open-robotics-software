@@ -1,5 +1,6 @@
 package us.ihmc.quadrupedRobotics.planning.icp;
 
+import org.apache.logging.log4j.util.PropertySource;
 import org.junit.Test;
 import us.ihmc.commons.RandomNumbers;
 import us.ihmc.commons.lists.RecyclingArrayList;
@@ -7,6 +8,7 @@ import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.Continuous
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tools.EuclidCoreRandomTools;
+import us.ihmc.quadrupedBasics.gait.QuadrupedTimedStep;
 import us.ihmc.quadrupedBasics.gait.TimeInterval;
 import us.ihmc.robotics.robotSide.QuadrantDependentList;
 import us.ihmc.robotics.robotSide.RobotQuadrant;
@@ -28,7 +30,7 @@ public class QuadrupedContactSequenceToolsTest
    {
       Random random = new Random(1738L);
 
-      for (int iter = 0; iter < 1; iter++)
+      for (int iter = 0; iter < 10; iter++)
       {
          double currentTime = RandomNumbers.nextDouble(random, 5.0, 10.0);
          double nominalLength = RandomNumbers.nextDouble(random, 0.5, 2.0);
@@ -91,7 +93,6 @@ public class QuadrupedContactSequenceToolsTest
             contactPhase.update();
          }
 
-
          assertEquals(contactSequenceExpected.size(), contactSequence.size());
          for (int i = 0; i < contactSequenceExpected.size(); i++)
          {
@@ -104,9 +105,51 @@ public class QuadrupedContactSequenceToolsTest
    @Test(timeout = 30000)
    public void testComputeStepTransitionsFromStepSequence()
    {
-      fail();
-   }
+      Random random = new Random(1738L);
 
+      for (int iter = 0; iter < 1; iter++)
+      {
+         double currentTime = RandomNumbers.nextDouble(random, 5.0, 10.0);
+         double nominalLength = RandomNumbers.nextDouble(random, 0.5, 2.0);
+         double nominalWidth = RandomNumbers.nextDouble(random, 0.15, 1.0);
+
+         RecyclingArrayList<QuadrupedStepTransition> stepTransitions = new RecyclingArrayList<>(QuadrupedStepTransition::new);
+
+         RecyclingArrayList<QuadrupedTimedStep> timedSteps = getRandomSteps(random, currentTime, nominalWidth, nominalLength);
+
+         QuadrupedContactSequenceTools.computeStepTransitionsFromStepSequence(stepTransitions, currentTime, timedSteps);
+
+
+         RecyclingArrayList<QuadrupedStepTransition> stepTransitionsExpected = new RecyclingArrayList<>(QuadrupedStepTransition::new);
+
+         timedSteps.sort(Comparator.comparingDouble(timedStep -> timedStep.getTimeInterval().getStartTime()));
+
+         for (int i = 0; i < timedSteps.size(); i++)
+         {
+            QuadrupedTimedStep step = timedSteps.get(i);
+
+            if (step.getTimeInterval().getStartTime() >= currentTime)
+            {
+               QuadrupedStepTransition stepTransition = stepTransitionsExpected.add();
+
+               stepTransition.setTransitionTime(step.getTimeInterval().getStartTime());
+               stepTransition.addTransition(QuadrupedStepTransitionType.LIFT_OFF, step.getRobotQuadrant(), step.getGoalPosition());
+            }
+
+            if (step.getTimeInterval().getEndTime() >= currentTime)
+            {
+               QuadrupedStepTransition stepTransition = stepTransitionsExpected.add();
+
+               stepTransition.setTransitionTime(step.getTimeInterval().getEndTime());
+               stepTransition.addTransition(QuadrupedStepTransitionType.TOUCH_DOWN, step.getRobotQuadrant(), step.getGoalPosition());
+            }
+         }
+
+         stepTransitionsExpected.sort(Comparator.comparingDouble(QuadrupedStepTransition::getTransitionTime));
+
+         DCMPlanningTestTools.assertQuadrupedStepTransitionsListEqual(stepTransitionsExpected, stepTransitions, epsilon);
+      }
+   }
 
    private RecyclingArrayList<QuadrupedContactPhase> getRandomContactSequence(Random random, double currentTime, double nominalWidth, double nominalLength)
    {
@@ -143,6 +186,36 @@ public class QuadrupedContactSequenceToolsTest
       phase.setSolePositions(solePositions);
    }
 
+   private RecyclingArrayList<QuadrupedTimedStep> getRandomSteps(Random random, double currentTime, double nominalWidth, double nominalLength)
+   {
+      int sequenceSize = RandomNumbers.nextInt(random, 2, 50);
+      RecyclingArrayList<QuadrupedTimedStep> timedSteps = new RecyclingArrayList<>(QuadrupedTimedStep::new);
+
+      double startTime = RandomNumbers.nextDouble(random, currentTime, 10.0);
+
+      for (int i = 0; i < sequenceSize; i++)
+      {
+         double duration = RandomNumbers.nextDouble(random, 0.01, 1.5);
+         QuadrupedTimedStep step = timedSteps.add();
+         packRandomStep(step, random, startTime, duration, nominalWidth, nominalLength);
+
+         startTime = step.getTimeInterval().getStartTime() + RandomNumbers.nextDouble(random, 2.0);
+      }
+
+      return timedSteps;
+   }
+
+   private void packRandomStep(QuadrupedTimedStep stepToPack, Random random, double startTime, double duration, double nominalWidth, double nominalLength)
+   {
+      RobotQuadrant quadrant = RobotQuadrant.values[RandomNumbers.nextInt(random, 0, 3)];
+      FramePoint3D stepLocation = new FramePoint3D(ReferenceFrame.getWorldFrame(), quadrant.getEnd().negateIfHindEnd(nominalLength / 2.0),
+                                                   quadrant.getSide().negateIfRightSide(nominalWidth / 2.0), 0.0);
+
+      stepToPack.getTimeInterval().setInterval(startTime, startTime + duration);
+      stepToPack.setGoalPosition(stepLocation);
+      stepToPack.setRobotQuadrant(quadrant);
+   }
+
    private List<RobotQuadrant> getRandomFeetInContact(Random random)
    {
       int numberOfFeetInContact = RandomNumbers.nextInt(random, 0, 4);
@@ -169,6 +242,5 @@ public class QuadrupedContactSequenceToolsTest
 
       return solePositions;
    }
-
 
 }

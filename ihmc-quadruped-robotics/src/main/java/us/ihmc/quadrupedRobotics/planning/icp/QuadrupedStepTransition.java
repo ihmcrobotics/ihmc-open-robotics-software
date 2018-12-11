@@ -89,4 +89,9 @@ class QuadrupedStepTransition
    {
       return transitionPositions.get(transitionQuadrant);
    }
+
+   List<RobotQuadrant> getTransitionQuadrants()
+   {
+      return transitionQuadrants;
+   }
 }
