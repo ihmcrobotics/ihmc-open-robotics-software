@@ -480,16 +480,6 @@ public class CoMTrajectoryPlannerTest
          checkPlannerDynamics(planner, omega.getDoubleValue());
 
          EuclidFrameTestTools.assertFramePoint3DGeometricallyEquals("i = " + i, expectedDCM, planner.getDesiredDCMPosition(), epsilon);
-
-         FramePoint3D constructedDCM = new FramePoint3D();
-         constructedDCM.scaleAdd(omega.getDoubleValue(), planner.getDesiredCoMVelocity(), planner.getDesiredCoMPosition());
-         EuclidFrameTestTools.assertFramePoint3DGeometricallyEquals(constructedDCM, planner.getDesiredDCMPosition(), epsilon);
-
-         FrameVector3D constructedDCMVelocity = new FrameVector3D();
-         constructedDCMVelocity.set(planner.getDesiredDCMPosition());
-         constructedDCMVelocity.sub(planner.getDesiredVRPPosition());
-         constructedDCMVelocity.scale(omega.getDoubleValue());
-         EuclidFrameTestTools.assertFrameVector3DGeometricallyEquals(constructedDCMVelocity, planner.getDesiredDCMVelocity(), epsilon);
       }
    }
 
@@ -548,15 +538,15 @@ public class CoMTrajectoryPlannerTest
    private static void checkPlannerDynamics(CoMTrajectoryPlanner planner, double omega)
    {
       FramePoint3D constructedDCMPosition = new FramePoint3D();
-      constructedDCMPosition.scaleAdd(omega, planner.getDesiredCoMPosition(), planner.getDesiredCoMPosition());
+      constructedDCMPosition.scaleAdd(1.0 / omega, planner.getDesiredCoMVelocity(), planner.getDesiredCoMPosition());
 
       FrameVector3D constructedDCMVelocity = new FrameVector3D();
       constructedDCMVelocity.set(constructedDCMPosition);
       constructedDCMVelocity.sub(planner.getDesiredVRPPosition());
       constructedDCMVelocity.scale(omega);
 
-      EuclidFrameTestTools.assertFramePoint3DGeometricallyEquals(constructedDCMPosition, planner.getDesiredDCMPosition(), epsilon);
-      EuclidFrameTestTools.assertFrameVector3DGeometricallyEquals(constructedDCMVelocity, planner.getDesiredDCMVelocity(), epsilon);
+      EuclidFrameTestTools.assertFramePoint3DGeometricallyEquals("dcm dynamics are wrong.", constructedDCMPosition, planner.getDesiredDCMPosition(), epsilon);
+      EuclidFrameTestTools.assertFrameVector3DGeometricallyEquals("vrp dynamics are wrong.", constructedDCMVelocity, planner.getDesiredDCMVelocity(), epsilon);
 
    }
 }

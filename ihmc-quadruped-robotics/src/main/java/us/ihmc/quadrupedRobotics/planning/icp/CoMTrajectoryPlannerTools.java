@@ -1,5 +1,6 @@
 package us.ihmc.quadrupedRobotics.planning.icp;
 
+import us.ihmc.commons.MathTools;
 import us.ihmc.quadrupedRobotics.planning.ContactState;
 
 public class CoMTrajectoryPlannerTools
@@ -52,6 +53,30 @@ public class CoMTrajectoryPlannerTools
       }
    }
 
+   static double getFirstCoefficientAccelerationMultiplier(ContactState contactState, double timeInPhase, double omega)
+   {
+      if (contactState == ContactState.IN_CONTACT)
+      {
+         return Math.min(Double.MAX_VALUE, MathTools.square(omega) * Math.exp(omega * timeInPhase));
+      }
+      else
+      {
+         return 1.0;
+      }
+   }
+
+   static double getSecondCoefficientAccelerationMultiplier(ContactState contactState, double timeInPhase, double omega)
+   {
+      if (contactState == ContactState.IN_CONTACT)
+      {
+         return MathTools.square(omega) * getSecondCoefficientPositionMultiplier(contactState, timeInPhase, omega);
+      }
+      else
+      {
+         return 0.0;
+      }
+   }
+
    static double getGravityPositionEffect(ContactState contactState, double timeInPhase, double gravityZ)
    {
       if (contactState == ContactState.IN_CONTACT)
@@ -60,7 +85,7 @@ public class CoMTrajectoryPlannerTools
       }
       else
       {
-         return -gravityZ * timeInPhase * timeInPhase;
+         return -0.5 * gravityZ * MathTools.square(timeInPhase);
       }
    }
 
@@ -72,7 +97,19 @@ public class CoMTrajectoryPlannerTools
       }
       else
       {
-         return -2.0 * gravityZ * timeInPhase;
+         return -gravityZ * timeInPhase;
+      }
+   }
+
+   static double getGravityAccelerationEffect(ContactState contactState, double gravityZ)
+   {
+      if (contactState == ContactState.IN_CONTACT)
+      {
+         return 0.0;
+      }
+      else
+      {
+         return -gravityZ;
       }
    }
 
