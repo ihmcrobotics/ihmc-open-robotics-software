@@ -40,7 +40,7 @@ public class QuadrupedContactSequenceTools
       }
 
       // sort step transitions in ascending order as a function of time
-      ListSorter.sort(stepTransitionsToPack, Comparator.comparingDouble(QuadrupedStepTransition::getTransitionTime));
+      stepTransitionsToPack.sort(Comparator.comparingDouble(QuadrupedStepTransition::getTransitionTime));
 
       // collapse the transitions that occur at the same time
       collapseTransitionEvents(stepTransitionsToPack);
