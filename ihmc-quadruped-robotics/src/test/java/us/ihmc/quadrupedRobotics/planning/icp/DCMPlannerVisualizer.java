@@ -55,7 +55,10 @@ public class DCMPlannerVisualizer
       omega = new YoDouble("omega", registry);
       omega.set(Math.sqrt(gravity / nominalHeight));
 
-      planner = new DCMBasedCoMPlanner(soleFrames, omega, gravity, nominalHeight, registry);
+      yoTime = new YoDouble("timeToCheck", registry);
+
+
+      planner = new DCMBasedCoMPlanner(soleFrames, yoTime, omega, gravity, nominalHeight, registry);
       steps = createSteps(soleFrames);
 
 
@@ -66,7 +69,6 @@ public class DCMPlannerVisualizer
          feetInContact.add(robotQuadrant);
 
 
-      yoTime = new YoDouble("timeToCheck", registry);
       scs = new SimulationConstructionSet(robot, scsParameters);
       scs.addYoVariableRegistry(registry);
       //      scs.addYoGraphicsListRegistry(yoGraphicsListRegistry);

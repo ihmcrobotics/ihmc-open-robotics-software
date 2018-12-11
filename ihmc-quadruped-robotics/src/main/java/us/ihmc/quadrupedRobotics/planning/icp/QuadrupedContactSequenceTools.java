@@ -43,6 +43,12 @@ public class QuadrupedContactSequenceTools
       ListSorter.sort(stepTransitionsToPack, Comparator.comparingDouble(QuadrupedStepTransition::getTransitionTime));
 
       // collapse the transitions that occur at the same time
+      collapseTransitionEvents(stepTransitionsToPack);
+   }
+
+   public static void collapseTransitionEvents(List<QuadrupedStepTransition> stepTransitionsToPack)
+   {
+      // collapse the transitions that occur at the same time
       int transitionNumber = 0;
       while (transitionNumber < stepTransitionsToPack.size() - 1)
       {
@@ -59,6 +65,7 @@ public class QuadrupedContactSequenceTools
          }
       }
    }
+
 
    public static void trimPastContactSequences(RecyclingArrayList<QuadrupedContactPhase> contactSequenceToPack, double currentTime,
                                                List<RobotQuadrant> currentFeetInContact,

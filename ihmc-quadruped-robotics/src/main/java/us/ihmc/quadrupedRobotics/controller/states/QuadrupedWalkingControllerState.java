@@ -520,7 +520,7 @@ public class QuadrupedWalkingControllerState extends HighLevelControllerState im
    {
       for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
       {
-         boolean legLoaded = feetManager.getContactState(robotQuadrant).isLoadingBearing();
+         boolean legLoaded = feetManager.getContactState(robotQuadrant).isLoadBearing();
          if (legLoaded && legJointNames.get(robotQuadrant).contains(jointName))
             return true;
       }
