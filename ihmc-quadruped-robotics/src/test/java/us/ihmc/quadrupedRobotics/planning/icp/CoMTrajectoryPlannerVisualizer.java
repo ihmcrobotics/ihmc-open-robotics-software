@@ -151,8 +151,8 @@ public class CoMTrajectoryPlannerVisualizer
 
       SettableContactStateProvider finalStateProvider = new SettableContactStateProvider();
       finalStateProvider.setCopPosition(new FramePoint3D(worldFrame, contactPosition, 0.0, 0.0));
-      finalStateProvider.getTimeInterval().setInterval(currentTime, Double.POSITIVE_INFINITY);
-      finalStateProvider.setContactState(ContactState.NO_CONTACT);
+      finalStateProvider.getTimeInterval().setInterval(currentTime, currentTime + 5.0);
+      finalStateProvider.setContactState(ContactState.IN_CONTACT);
 
       simDuration = currentTime + 5;
 
