@@ -582,6 +582,32 @@ public class CapturePointToolsTest
    }
 
    @Test
+   public void testComputeDesiredCapturePointVelocity2()
+   {
+      YoFrameVector3D centerOfMassVelocity = new YoFrameVector3D("", ReferenceFrame.getWorldFrame(), registry);
+      YoFrameVector3D centerOfMassAcceleration = new YoFrameVector3D("2", ReferenceFrame.getWorldFrame(), registry);
+      YoFrameVector3D capturePointVelocity = new YoFrameVector3D("3", ReferenceFrame.getWorldFrame(), registry);
+      YoFrameVector3D computedCapturePointVelocity= new YoFrameVector3D("7", ReferenceFrame.getWorldFrame(), registry);
+
+
+      for (int i = 0; i < nTests; i++)
+      {
+         centerOfMassAcceleration.set(EuclidFrameRandomTools.nextFramePoint3D(random, ReferenceFrame.getWorldFrame(), 10.0));
+         centerOfMassAcceleration.set(EuclidFrameRandomTools.nextFramePoint3D(random, ReferenceFrame.getWorldFrame(), 10.0));
+
+         double omega0 = 0.5;
+
+         CapturePointTools.computeDesiredCapturePointVelocity(centerOfMassVelocity, centerOfMassAcceleration, omega0, capturePointVelocity);
+
+         computedCapturePointVelocity.set(centerOfMassAcceleration);
+         computedCapturePointVelocity.scale(1.0 / omega0);
+         computedCapturePointVelocity.add(centerOfMassVelocity);
+
+         EuclidCoreTestTools.assertTuple3DEquals("", computedCapturePointVelocity, capturePointVelocity, 1e-10);
+      }
+   }
+
+   @Test
    public void testComputeConstantCenterOfPressureFromInitialAndFinalCapturePointLocations()
    {
       YoFramePoint3D constantCenterOfPressure = new YoFramePoint3D("COP", ReferenceFrame.getWorldFrame(), registry);
