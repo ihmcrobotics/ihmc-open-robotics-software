@@ -40,16 +40,18 @@ public class DCMPlannerVisualizer
    private final DCMBasedCoMPlanner planner;
 
    private List<QuadrupedTimedStep> steps;
+   private final QuadrantDependentList<MovingReferenceFrame> soleFrames;
    private final List<RobotQuadrant> feetInContact = new ArrayList<>();
 
    private final YoFramePoint3D desiredICPPosition;
    private final YoFrameVector3D desiredICPVelocity;
    private final YoDouble omega;
+   private final double simDt = 1e-5;
 
    public DCMPlannerVisualizer()
    {
       YoVariableRegistry registry = new YoVariableRegistry("test");
-      QuadrantDependentList<MovingReferenceFrame> soleFrames = createSoleFrames();
+      soleFrames = createSoleFrames();
 
       desiredICPPosition = new YoFramePoint3D("desiredICPPosition", worldFrame, registry);
       desiredICPVelocity = new YoFrameVector3D("desiredICPVelocity", worldFrame, registry);
@@ -180,6 +182,7 @@ public class DCMPlannerVisualizer
    {
       while (true)
       {
+         yoTime.add(simDt);
          planner.clearStepSequence();
          for (int i = 0; i < steps.size(); i++)
             planner.addStepToSequence(steps.get(i));
@@ -202,7 +205,12 @@ public class DCMPlannerVisualizer
       {
          QuadrupedTimedStep step = steps.get(i);
          if (step.getTimeInterval().intervalContains(currentTime))
+         {
+            TranslationMovingReferenceFrame newSoleFrame = new TranslationMovingReferenceFrame("NewSoleFrame", worldFrame);
+            newSoleFrame.updateTranslation(step.getGoalPosition());
+            soleFrames.put(step.getRobotQuadrant(), newSoleFrame);
             feetInContact.remove(step.getRobotQuadrant());
+         }
       }
    }
 
