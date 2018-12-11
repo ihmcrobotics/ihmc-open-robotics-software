@@ -570,34 +570,4 @@ public class CoMTrajectoryPlanner
 
       numberOfConstraints++;
    }
-
-   ContactState getContactState(int stepIndex)
-   {
-      return contactSequence.get(stepIndex).getContactState();
-   }
-
-   FramePoint3DReadOnly getCopPosition(int stepIndex)
-   {
-      return contactSequence.get(stepIndex).getCopPosition();
-   }
-
-   double getNominalCoMHeight()
-   {
-      return nominalCoMHeight;
-   }
-
-   DenseMatrix64F getXCoefficientVector()
-   {
-      return xCoefficientVector;
-   }
-
-   DenseMatrix64F getYCoefficientVector()
-   {
-      return yCoefficientVector;
-   }
-
-   DenseMatrix64F getZCoefficientVector()
-   {
-      return zCoefficientVector;
-   }
 }
