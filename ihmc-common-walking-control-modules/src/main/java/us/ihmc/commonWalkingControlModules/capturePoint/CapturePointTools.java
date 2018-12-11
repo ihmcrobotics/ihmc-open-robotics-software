@@ -681,6 +681,25 @@ public class CapturePointTools
       desiredICPToPack.scaleAdd(1.0 / omega0, desiredCenterOfMassVelocity, desiredCenterOfMassPosition);
    }
 
+   /**
+    * Computes the desired Instantaneous Capture Point position by
+    * <p>
+    *    x&#775;<sup>ICP</sup> = x&#775;<sup>CoM</sup> + 1&frasl;&omega;  x&#776;<sup>CoM</sup>
+    * </p>
+    *
+    * @param desiredCenterOfMassAcceleration
+    * @param desiredCenterOfMassAcceleration
+    * @param omega0 the natural frequency &omega; =
+    *           &radic;<span style="text-decoration:overline;">&nbsp; g / z0&nbsp;</span> of the
+    *           biped.
+    * @param desiredICPVelocityToPack
+    */
+   public static void computeDesiredCapturePointVelocity(FrameVector3DReadOnly desiredCenterOfMassVelocity, FrameVector3DReadOnly desiredCenterOfMassAcceleration,
+                                                         double omega0, FixedFrameVector3DBasics desiredICPVelocityToPack)
+   {
+      desiredICPVelocityToPack.scaleAdd(1.0 / omega0, desiredCenterOfMassAcceleration, desiredCenterOfMassVelocity);
+   }
+
 
    /**
     * Compute the desired capture point position at a given time.
