@@ -23,8 +23,11 @@ import us.ihmc.javaFXToolkit.shapes.TextureColorPalette2D;
 import us.ihmc.messager.Messager;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.robotSide.RobotSide;
+import us.ihmc.robotics.robotSide.SegmentDependentList;
 import us.ihmc.robotics.robotSide.SideDependentList;
+import us.ihmc.wholeBodyController.RobotContactPointParameters;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.concurrent.atomic.AtomicReference;
 
@@ -38,10 +41,9 @@ public class NodeCheckerRenderer extends AnimationTimer
    private final AtomicReference<Quaternion> footOrientationReference;
    private final AtomicReference<RobotSide> initialSupportSideReference;
 
-   private static final ConvexPolygon2D defaultFootPolygon = PlannerTools.createDefaultFootPolygon();
-   private final SideDependentList<ConvexPolygon2D> footPolygons = new SideDependentList<>(defaultFootPolygon, defaultFootPolygon);
+   private final SideDependentList<ConvexPolygon2D> footPolygons;
    private final SettableFootstepPlannerParameters parameters = new SettableFootstepPlannerParameters(new DefaultFootstepPlanningParameters());
-   private final SimplePlanarRegionFootstepNodeSnapper snapper = new SimplePlanarRegionFootstepNodeSnapper(footPolygons, parameters);
+   private final SimplePlanarRegionFootstepNodeSnapper snapper;
 
    private final FootstepNodeChecker nodeChecker;
 
@@ -50,7 +52,7 @@ public class NodeCheckerRenderer extends AnimationTimer
 
    private static final Color ghostFootstepColor = Color.color(0.2, 0.2, 0.2, 0.2);
 
-   public NodeCheckerRenderer(Messager messager)
+   public NodeCheckerRenderer(Messager messager, RobotContactPointParameters<RobotSide> robotContactPointParameters)
    {
       nodeCheckerEnabled = messager.createInput(EnableNodeChecking, false);
       planarRegionsReference = messager.createInput(PlanarRegionDataTopic);
@@ -61,6 +63,27 @@ public class NodeCheckerRenderer extends AnimationTimer
       TextureColorPalette2D colorPalette = new TextureColorPalette2D();
       colorPalette.setHueBrightnessBased(0.9);
       meshBuilder = new JavaFXMultiColorMeshBuilder(colorPalette);
+
+      if(robotContactPointParameters == null)
+      {
+         footPolygons = PlannerTools.createDefaultFootPolygons();
+      }
+      else
+      {
+         SegmentDependentList<RobotSide, ArrayList<Point2D>> controllerFootGroundContactPoints = robotContactPointParameters
+               .getControllerFootGroundContactPoints();
+
+         footPolygons = new SideDependentList<>();
+         for(RobotSide robotSide : RobotSide.values)
+         {
+            ConvexPolygon2D footPolygon = new ConvexPolygon2D();
+            controllerFootGroundContactPoints.get(robotSide).forEach(footPolygon::addVertex);
+            footPolygon.update();
+            footPolygons.put(robotSide, footPolygon);
+         }
+      }
+
+      snapper = new SimplePlanarRegionFootstepNodeSnapper(footPolygons, parameters);
 
       SnapBasedNodeChecker snapBasedNodeChecker = new SnapBasedNodeChecker(parameters, footPolygons, snapper);
       BodyCollisionNodeChecker bodyCollisionNodeChecker = new BodyCollisionNodeChecker(parameters, snapper);

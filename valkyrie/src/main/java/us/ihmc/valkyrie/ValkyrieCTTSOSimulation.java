@@ -58,6 +58,7 @@ public class ValkyrieCTTSOSimulation
       // talk to controller and footstep planner
       networkProcessorParameters.enableControllerCommunicator(true);
       networkProcessorParameters.enableFootstepPlanningToolbox(true);
+      networkProcessorParameters.enablePerceptionModule(true);
 
       // disable everything else
       networkProcessorParameters.enableUiModule(false);
@@ -65,7 +66,6 @@ public class ValkyrieCTTSOSimulation
       networkProcessorParameters.enableBehaviorVisualizer(false);
       networkProcessorParameters.enableSensorModule(true);
       networkProcessorParameters.enableZeroPoseRobotConfigurationPublisherModule(false);
-      networkProcessorParameters.enablePerceptionModule(true);
       networkProcessorParameters.setEnableJoystickBasedStepping(false);
       networkProcessorParameters.enableRosModule(false);
       networkProcessorParameters.enableLocalControllerCommunicator(false);
