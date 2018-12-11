@@ -1,6 +1,7 @@
 package us.ihmc.quadrupedRobotics.planning.icp;
 
 import org.junit.Test;
+import us.ihmc.commons.MathTools;
 import us.ihmc.commons.RandomNumbers;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.quadrupedRobotics.planning.ContactState;
@@ -124,6 +125,61 @@ public class CoMTrajectoryPlannerToolsTest
 
    @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
+   public void testGetFirstCoefficientAccelerationMultiplier()
+   {
+      Random random = new Random(1738L);
+      for (int iter = 0; iter < iters; iter++)
+      {
+         double timeInPhase = RandomNumbers.nextDouble(random, 0.0, 10000);
+         double omega = RandomNumbers.nextDouble(random, 1.0, 10.0);
+         double multiplier = CoMTrajectoryPlannerTools.getFirstCoefficientAccelerationMultiplier(ContactState.IN_CONTACT, timeInPhase, omega);
+
+         double expectedMultiplier = omega * omega * Math.exp(omega * timeInPhase);
+         if (!Double.isFinite(expectedMultiplier))
+            expectedMultiplier = Double.MAX_VALUE;
+
+         assertTrue("time = " + timeInPhase, Double.isFinite(multiplier));
+         assertEquals(expectedMultiplier, multiplier, epsilon);
+         assertEquals(Math.min(omega * omega * CoMTrajectoryPlannerTools.getFirstCoefficientPositionMultiplier(ContactState.IN_CONTACT, timeInPhase, omega), Double.MAX_VALUE), multiplier, epsilon);
+
+         multiplier = CoMTrajectoryPlannerTools.getFirstCoefficientAccelerationMultiplier(ContactState.NO_CONTACT, timeInPhase, omega);
+         expectedMultiplier = 1.0;
+
+         assertTrue(Double.isFinite(multiplier));
+         assertEquals(expectedMultiplier, multiplier);
+      }
+   }
+
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
+   @Test(timeout = 30000)
+   public void testGetSecondCoefficientAccelerationMultiplier()
+   {
+      Random random = new Random(1738L);
+      for (int iter = 0; iter < iters; iter++)
+      {
+         double timeInPhase = RandomNumbers.nextDouble(random, 0.0, 10000);
+         double omega = RandomNumbers.nextDouble(random, 1.0, 10.0);
+         double multiplier = CoMTrajectoryPlannerTools.getSecondCoefficientAccelerationMultiplier(ContactState.IN_CONTACT, timeInPhase, omega);
+
+         double expectedMultiplier = omega * omega * Math.exp(-omega * timeInPhase);
+         if (!Double.isFinite(expectedMultiplier))
+            expectedMultiplier = Double.MIN_VALUE;
+
+         assertTrue(Double.isFinite(multiplier));
+         assertEquals(expectedMultiplier, multiplier, epsilon);
+         assertEquals(Math.min(omega * omega * CoMTrajectoryPlannerTools.getSecondCoefficientPositionMultiplier(ContactState.IN_CONTACT, timeInPhase, omega), Double.MAX_VALUE), multiplier, epsilon);
+
+
+         multiplier = CoMTrajectoryPlannerTools.getSecondCoefficientAccelerationMultiplier(ContactState.NO_CONTACT, timeInPhase, omega);
+         expectedMultiplier = 0.0;
+
+         assertTrue(Double.isFinite(multiplier));
+         assertEquals(expectedMultiplier, multiplier);
+      }
+   }
+
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
+   @Test(timeout = 30000)
    public void testGetGravityPositionEffect()
    {
       Random random = new Random(1738L);
@@ -135,13 +191,13 @@ public class CoMTrajectoryPlannerToolsTest
          assertEquals(0.0, multiplier, epsilon);
 
          multiplier = CoMTrajectoryPlannerTools.getGravityPositionEffect(ContactState.NO_CONTACT, timeInPhase, gravity);
-         double expectedMultiplier =  -gravity * timeInPhase * timeInPhase;
+         double expectedMultiplier =  -0.5 * gravity * timeInPhase * timeInPhase;
 
          if (!Double.isFinite(expectedMultiplier))
             expectedMultiplier = Double.MIN_VALUE;
 
          assertTrue(Double.isFinite(multiplier));
-         assertEquals(expectedMultiplier, multiplier, epsilon);
+         assertEquals(expectedMultiplier, multiplier, 100 * epsilon);
       }
    }
 
@@ -158,7 +214,29 @@ public class CoMTrajectoryPlannerToolsTest
          assertEquals(0.0, multiplier, epsilon);
 
          multiplier = CoMTrajectoryPlannerTools.getGravityVelocityEffect(ContactState.NO_CONTACT, timeInPhase, gravity);
-         double expectedMultiplier =  -2.0 * gravity * timeInPhase;
+         double expectedMultiplier =  -gravity * timeInPhase;
+
+         if (!Double.isFinite(expectedMultiplier))
+            expectedMultiplier = Double.MIN_VALUE;
+
+         assertTrue(Double.isFinite(multiplier));
+         assertEquals(expectedMultiplier, multiplier, epsilon);
+      }
+   }
+
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
+   @Test(timeout = 30000)
+   public void testGetGravityAccelerationEffect()
+   {
+      Random random = new Random(1738L);
+      for (int iter = 0; iter < iters; iter++)
+      {
+         double gravity = RandomNumbers.nextDouble(random, 8.0, 10.0);
+         double multiplier = CoMTrajectoryPlannerTools.getGravityAccelerationEffect(ContactState.IN_CONTACT, gravity);
+         assertEquals(0.0, multiplier, epsilon);
+
+         multiplier = CoMTrajectoryPlannerTools.getGravityAccelerationEffect(ContactState.NO_CONTACT, gravity);
+         double expectedMultiplier =  -gravity ;
 
          if (!Double.isFinite(expectedMultiplier))
             expectedMultiplier = Double.MIN_VALUE;
