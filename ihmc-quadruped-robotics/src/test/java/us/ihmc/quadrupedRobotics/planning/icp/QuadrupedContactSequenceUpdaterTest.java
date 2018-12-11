@@ -11,7 +11,6 @@ import us.ihmc.mecano.frames.MovingReferenceFrame;
 import us.ihmc.quadrupedBasics.gait.QuadrupedTimedStep;
 import us.ihmc.quadrupedBasics.gait.TimeInterval;
 import us.ihmc.quadrupedRobotics.planning.ContactState;
-import us.ihmc.robotics.referenceFrames.TranslationReferenceFrame;
 import us.ihmc.robotics.robotSide.QuadrantDependentList;
 import us.ihmc.robotics.robotSide.RobotQuadrant;
 
@@ -24,6 +23,47 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 public class QuadrupedContactSequenceUpdaterTest
 {
    private static final double epsilon = 1e-8;
+
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
+   @Test(timeout = 30000)
+   public void testNoSteps()
+   {
+      double nominalLength = 1.0;
+      double nominalWidth = 0.5;
+
+      QuadrantDependentList<MovingReferenceFrame> soleFrames = createSimpleSoleFrames(nominalLength, nominalWidth);
+      QuadrupedContactSequenceUpdater contactSequenceUpdater = new QuadrupedContactSequenceUpdater(soleFrames, 4, 20);
+
+      List<RobotQuadrant> currentFeetInContact = new ArrayList<>();
+      for (RobotQuadrant quadrant : RobotQuadrant.values)
+         currentFeetInContact.add(quadrant);
+
+      List<QuadrupedTimedStep> stepList = new ArrayList<>();
+
+      contactSequenceUpdater.update(stepList, currentFeetInContact, 0.0);
+
+      List<QuadrupedContactPhase> contactSequence = contactSequenceUpdater.getContactSequence();
+
+      assertEquals(1, contactSequence.size());
+
+      // test first contact state
+      assertEquals(ContactState.IN_CONTACT, contactSequence.get(0).getContactState());
+      EuclidCoreTestTools.assertPoint3DGeometricallyEquals(new Point3D(nominalLength / 2.0, nominalWidth / 2.0, 0.0),
+                                                           contactSequence.get(0).getSolePosition(RobotQuadrant.FRONT_LEFT), epsilon);
+      EuclidCoreTestTools.assertPoint3DGeometricallyEquals(new Point3D(nominalLength / 2.0, -nominalWidth / 2.0, 0.0),
+                                                           contactSequence.get(0).getSolePosition(RobotQuadrant.FRONT_RIGHT), epsilon);
+      EuclidCoreTestTools.assertPoint3DGeometricallyEquals(new Point3D(-nominalLength / 2.0, nominalWidth / 2.0, 0.0),
+                                                           contactSequence.get(0).getSolePosition(RobotQuadrant.HIND_LEFT), epsilon);
+      EuclidCoreTestTools.assertPoint3DGeometricallyEquals(new Point3D(-nominalLength / 2.0, -nominalWidth / 2.0, 0.0),
+                                                           contactSequence.get(0).getSolePosition(RobotQuadrant.HIND_RIGHT), epsilon);
+      assertEquals(4, contactSequence.get(0).getFeetInContact().size());
+      assertTrue(contactSequence.get(0).getFeetInContact().contains(RobotQuadrant.FRONT_LEFT));
+      assertTrue(contactSequence.get(0).getFeetInContact().contains(RobotQuadrant.FRONT_RIGHT));
+      assertTrue(contactSequence.get(0).getFeetInContact().contains(RobotQuadrant.HIND_LEFT));
+      assertTrue(contactSequence.get(0).getFeetInContact().contains(RobotQuadrant.HIND_RIGHT));
+      assertEquals(0.0, contactSequence.get(0).getTimeInterval().getStartTime(), epsilon);
+      assertEquals(Double.POSITIVE_INFINITY, contactSequence.get(0).getTimeInterval().getEndTime(), epsilon);
+   }
 
    @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
@@ -103,7 +143,7 @@ public class QuadrupedContactSequenceUpdaterTest
       EuclidCoreTestTools.assertPoint3DGeometricallyEquals(new Point3D(-nominalLength / 2.0, -nominalWidth / 2.0, 0.0),
                                                            contactSequence.get(2).getSolePosition(RobotQuadrant.HIND_RIGHT), epsilon);
       assertEquals(1.0, contactSequence.get(2).getTimeInterval().getStartTime(), epsilon);
-      assertEquals(1.0 + QuadrupedContactSequenceUpdater.finalTransferDuration, contactSequence.get(2).getTimeInterval().getEndTime(), epsilon);
+      assertEquals(Double.POSITIVE_INFINITY, contactSequence.get(2).getTimeInterval().getEndTime(), epsilon);
    }
 
    private static QuadrantDependentList<MovingReferenceFrame> createSimpleSoleFrames(double nominalLength, double nominalWidth)
