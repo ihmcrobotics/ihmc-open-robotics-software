@@ -8,7 +8,7 @@ public class CoMTrajectoryPlannerTools
    {
       if (contactState == ContactState.IN_CONTACT)
       {
-         return Math.exp(omega * timeInPhase);
+         return Math.min(Double.MAX_VALUE, Math.exp(omega * timeInPhase));
       }
       else
       {
@@ -32,7 +32,7 @@ public class CoMTrajectoryPlannerTools
    {
       if (contactState == ContactState.IN_CONTACT)
       {
-         return omega * Math.exp(omega * timeInPhase);
+         return Math.min(Double.MAX_VALUE, omega * Math.exp(omega * timeInPhase));
       }
       else
       {
@@ -44,7 +44,7 @@ public class CoMTrajectoryPlannerTools
    {
       if (contactState == ContactState.IN_CONTACT)
       {
-         return -omega * Math.exp(-omega * timeInPhase);
+         return -omega * getSecondCoefficientPositionMultiplier(contactState, timeInPhase, omega);
       }
       else
       {
