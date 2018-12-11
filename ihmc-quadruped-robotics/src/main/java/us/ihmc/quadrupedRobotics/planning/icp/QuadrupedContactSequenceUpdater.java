@@ -79,6 +79,11 @@ public class QuadrupedContactSequenceUpdater
       computeContactPhasesFromStepTransitions();
    }
 
+   public double getMaxCapacity()
+   {
+      return maxCapacity;
+   }
+
    private void computeContactPhasesFromStepTransitions()
    {
       int numberOfTransitions = stepTransitions.size();
