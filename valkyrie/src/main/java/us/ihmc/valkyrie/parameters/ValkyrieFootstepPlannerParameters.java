@@ -1,5 +1,6 @@
 package us.ihmc.valkyrie.parameters;
 
+import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerCostParameters;
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParameters;
 
 public class ValkyrieFootstepPlannerParameters implements FootstepPlannerParameters
@@ -31,7 +32,7 @@ public class ValkyrieFootstepPlannerParameters implements FootstepPlannerParamet
    @Override
    public double getMaximumStepYaw()
    {
-      return 0.8;
+      return 0.6;
    }
 
    @Override
@@ -49,7 +50,7 @@ public class ValkyrieFootstepPlannerParameters implements FootstepPlannerParamet
    @Override
    public double getMaximumStepZ()
    {
-      return 0.1;
+      return 0.15;
    }
 
    @Override
@@ -73,13 +74,13 @@ public class ValkyrieFootstepPlannerParameters implements FootstepPlannerParamet
    @Override
    public double getBodyBoxWidth()
    {
-      return 1.2;
+      return 0.8;
    }
 
    @Override
    public double getBodyBoxDepth()
    {
-      return 0.65;
+      return 0.35;
    }
 
    @Override
@@ -97,6 +98,12 @@ public class ValkyrieFootstepPlannerParameters implements FootstepPlannerParamet
    @Override
    public double getMinYClearanceFromStance()
    {
-      return 0.15;
+      return 0.2;
+   }
+
+   @Override
+   public FootstepPlannerCostParameters getCostParameters()
+   {
+      return new ValkyrieFootstepPlannerCostParameters();
    }
 }

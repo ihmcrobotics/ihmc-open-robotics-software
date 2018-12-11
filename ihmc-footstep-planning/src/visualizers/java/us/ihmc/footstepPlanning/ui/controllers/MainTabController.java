@@ -21,6 +21,7 @@ import us.ihmc.commons.PrintTools;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.footstepPlanning.FootstepPlannerType;
 import us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
@@ -235,7 +236,8 @@ public class MainTabController
                double y = startPose.getY();
                double yaw = startPose.getYaw();
 
-               startPositionProperty.set(new Point3D(x, y, yaw));
+               startPositionProperty.set(new Point3D(x, y, startPositionProperty.get().getZ()));
+               startRotationProperty.set(new Quaternion(yaw, 0.0, 0.0));
             }
          }
       };

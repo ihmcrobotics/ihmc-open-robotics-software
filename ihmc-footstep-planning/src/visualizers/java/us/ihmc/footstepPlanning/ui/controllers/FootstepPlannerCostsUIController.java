@@ -64,7 +64,7 @@ public class FootstepPlannerCostsUIController
       costPerStep.setValueFactory(createLowWeightValueFactory());
       heuristicsWeight.setValueFactory(createHighWeightValueFactory());
 
-      yawWeight.setValueFactory(createLowWeightValueFactory());
+      yawWeight.setValueFactory(new DoubleSpinnerValueFactory(0.0, 0.7, 0.0, 0.01));
       pitchWeight.setValueFactory(createLowWeightValueFactory());
       rollWeight.setValueFactory(createLowWeightValueFactory());
 
