@@ -31,7 +31,7 @@ public class Cluster
    //TODO: +++JEP This seems to assume that a bunch of points are one closed region if POLYGON. But what if the planar region it is created from
    // has several independent areas? Perhaps we need a flag or guarantee or something that we have only 1 closed polygon per planar region used?
 
-   private final List<Point3DReadOnly> rawPointsLocal = new ArrayList<>();
+   private final List<Point3DReadOnly> rawPointsInLocal3D = new ArrayList<>();
    private final List<Point2DReadOnly> navigableExtrusionsInLocal = new ArrayList<>();
    private final List<Point2DReadOnly> nonNavigableExtrusionsInLocal = new ArrayList<>();
 
@@ -188,22 +188,22 @@ public class Cluster
 
    public int getNumberOfRawPoints()
    {
-      return rawPointsLocal.size();
+      return rawPointsInLocal3D.size();
    }
 
    public void addRawPointInLocal(Point2DReadOnly pointInLocal)
    {
-      rawPointsLocal.add(new Point3D(pointInLocal));
+      rawPointsInLocal3D.add(new Point3D(pointInLocal));
    }
 
    public void addRawPointInLocal(Point3DReadOnly pointInLocal)
    {
-      rawPointsLocal.add(new Point3D(pointInLocal));
+      rawPointsInLocal3D.add(new Point3D(pointInLocal));
    }
 
    public void addRawPointInWorld(Point3DReadOnly pointInWorld)
    {
-      rawPointsLocal.add(toLocal3D(pointInWorld));
+      rawPointsInLocal3D.add(toLocal3D(pointInWorld));
    }
 
    public void addRawPointsInLocal2D(List<? extends Point2DReadOnly> pointsInLocal)
@@ -228,27 +228,27 @@ public class Cluster
 
    public Point3DReadOnly getRawPointInLocal(int i)
    {
-      return rawPointsLocal.get(i);
+      return rawPointsInLocal3D.get(i);
    }
 
    public Point3DReadOnly getRawPointInWorld(int i)
    {
-      return toWorld3D(rawPointsLocal.get(i));
+      return toWorld3D(rawPointsInLocal3D.get(i));
    }
 
    public List<Point3DReadOnly> getRawPointsInLocal3D()
    {
-      return rawPointsLocal;
+      return rawPointsInLocal3D;
    }
 
    public List<Point3DReadOnly> getRawPointsInWorld()
    {
-      return rawPointsLocal.stream().map(this::toWorld3D).collect(Collectors.toList());
+      return rawPointsInLocal3D.stream().map(this::toWorld3D).collect(Collectors.toList());
    }
 
    public List<Point2DReadOnly> getRawPointsInLocal2D()
    {
-      return rawPointsLocal.stream().map(Point2D::new).collect(Collectors.toList());
+      return rawPointsInLocal3D.stream().map(Point2D::new).collect(Collectors.toList());
    }
 
    public void addNavigableExtrusionInLocal(Point2DReadOnly navigableExtrusionInLocal)
@@ -293,6 +293,12 @@ public class Cluster
 
       //TODO: Need to set to null in more places when this happens. Or reduce the number of calls available. Maybe make immuatable?
       navigablePointsInsideHomeRegionInWorld = null;
+   }
+   
+   public void setNonNavigableExtrusionsInLocal(List<Point2DReadOnly> points)
+   {
+      nonNavigableExtrusionsInLocal.clear();
+      nonNavigableExtrusionsInLocal.addAll(points);
    }
 
    public List<Point3DReadOnly> getNavigableExtrusionsInWorld()
