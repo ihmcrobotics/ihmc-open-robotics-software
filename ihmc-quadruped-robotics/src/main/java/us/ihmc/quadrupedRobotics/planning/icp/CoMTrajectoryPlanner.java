@@ -296,7 +296,7 @@ public class CoMTrajectoryPlanner
       desiredDCMPosition.scaleAdd(1.0 / omega.getValue(), desiredCoMVelocity, desiredCoMPosition);
 
       desiredDCMVelocity.set(yoFirstCoefficient);
-      desiredDCMVelocity.scale(2.0 * firstCoefficientVelocityMultiplier);
+      desiredDCMVelocity.scale(Math.min(2.0 * firstCoefficientVelocityMultiplier, Double.MAX_VALUE));
 
       desiredVRPPosition.scaleAdd(-omega.getValue(), desiredDCMVelocity, desiredDCMPosition);
       desiredECMPPosition.set(desiredVRPPosition);
