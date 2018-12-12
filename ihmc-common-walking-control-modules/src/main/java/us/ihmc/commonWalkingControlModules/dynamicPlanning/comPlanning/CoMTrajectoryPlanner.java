@@ -4,7 +4,6 @@ import org.ejml.data.DenseMatrix64F;
 import org.ejml.factory.LinearSolverFactory;
 import org.ejml.interfaces.linsol.LinearSolver;
 import org.ejml.ops.CommonOps;
-import us.ihmc.commons.MathTools;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
@@ -185,7 +184,7 @@ public class CoMTrajectoryPlanner implements CoMTrajectoryPlannerInterface
 
       // set terminal constraint
       ContactStateProvider lastContactPhase = contactSequence.get(numberOfPhases - 1);
-      finalDCMPosition.set(lastContactPhase.getCopPosition());
+      finalDCMPosition.set(lastContactPhase.getCopStartPosition());
       finalDCMPosition.addZ(nominalCoMHeight);
       setDCMTerminalConstraint(numberOfPhases - 1, finalDCMPosition);
 
@@ -262,7 +261,7 @@ public class CoMTrajectoryPlanner implements CoMTrajectoryPlannerInterface
 
       ContactState contactState = contactStateProvider.getContactState();
 
-      constructDesiredCoMPosition(comPositionToPack, firstCoefficient, secondCoefficient, contactStateProvider.getCopPosition(), contactState, timeInPhase,
+      constructDesiredCoMPosition(comPositionToPack, firstCoefficient, secondCoefficient, contactStateProvider.getCopStartPosition(), contactState, timeInPhase,
                                   omega, gravityZ, nominalCoMHeight);
       constructDesiredCoMVelocity(comVelocityToPack, firstCoefficient, secondCoefficient, contactState, timeInPhase, omega, gravityZ);
       constructDesiredCoMAcceleration(comAccelerationToPack, firstCoefficient, secondCoefficient, contactState, timeInPhase, omega, gravityZ);
@@ -357,7 +356,7 @@ public class CoMTrajectoryPlanner implements CoMTrajectoryPlannerInterface
 
       if (contactState == ContactState.IN_CONTACT)
       {
-         FramePoint3DReadOnly copPosition = contactStateProvider.getCopPosition();
+         FramePoint3DReadOnly copPosition = contactStateProvider.getCopStartPosition();
          copPosition.checkReferenceFrameMatch(worldFrame);
          bX -= copPosition.getX();
          bY -= copPosition.getY();
@@ -406,7 +405,7 @@ public class CoMTrajectoryPlanner implements CoMTrajectoryPlannerInterface
 
       ContactStateProvider contactStateProvider = contactSequence.get(sequenceId);
       double duration = contactStateProvider.getTimeInterval().getDuration();
-      FramePoint3DReadOnly copPosition = contactStateProvider.getCopPosition();
+      FramePoint3DReadOnly copPosition = contactStateProvider.getCopStartPosition();
       copPosition.checkReferenceFrameMatch(worldFrame);
 
       double c0 = 2.0 * Math.exp(omega * duration);
@@ -467,7 +466,7 @@ public class CoMTrajectoryPlanner implements CoMTrajectoryPlannerInterface
       double previousBX, previousBY, previousBZ;
       if (previousContact.getContactState() == ContactState.IN_CONTACT)
       {
-         FramePoint3DReadOnly previousCopPosition = previousContact.getCopPosition();
+         FramePoint3DReadOnly previousCopPosition = previousContact.getCopStartPosition();
          previousCopPosition.checkReferenceFrameMatch(worldFrame);
          previousBX = previousCopPosition.getX();
          previousBY = previousCopPosition.getY();
@@ -488,7 +487,7 @@ public class CoMTrajectoryPlanner implements CoMTrajectoryPlannerInterface
       double nextBX, nextBY, nextBZ;
       if (nextContact.getContactState() == ContactState.IN_CONTACT)
       {
-         FramePoint3DReadOnly nextCopPosition = nextContact.getCopPosition();
+         FramePoint3DReadOnly nextCopPosition = nextContact.getCopStartPosition();
          nextCopPosition.checkReferenceFrameMatch(worldFrame);
          nextBX = nextCopPosition.getX();
          nextBY = nextCopPosition.getY();
