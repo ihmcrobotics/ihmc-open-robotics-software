@@ -2,6 +2,8 @@ package us.ihmc.quadrupedRobotics.planning.icp;
 
 import us.ihmc.commonWalkingControlModules.dynamicPlanning.comPlanning.CoMTrajectoryPlanner;
 import us.ihmc.commonWalkingControlModules.dynamicPlanning.comPlanning.CoMTrajectoryPlannerInterface;
+import us.ihmc.euclid.referenceFrame.interfaces.FixedFramePoint3DBasics;
+import us.ihmc.euclid.referenceFrame.interfaces.FixedFrameVector3DBasics;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
@@ -70,9 +72,9 @@ public class QuadrupedCoMTrajectoryPlanner implements CoMTrajectoryPlannerInterf
       stepSequence.add(step);
    }
 
-   public void setCurrentCoMPosition(FramePoint3DReadOnly currentCoMPosition)
+   public void setInitialCenterOfMassState(FramePoint3DReadOnly centerOfMassPosition, FrameVector3DReadOnly centerOfMassVelocity)
    {
-      comTrajectoryPlanner.setCurrentCoMPosition(currentCoMPosition);
+      comTrajectoryPlanner.setInitialCenterOfMassState(centerOfMassPosition, centerOfMassVelocity);
    }
 
 
@@ -124,6 +126,21 @@ public class QuadrupedCoMTrajectoryPlanner implements CoMTrajectoryPlannerInterf
    }
 
    @Override
+   public void compute(int segmentId, double timeInPhase)
+   {
+      throw new RuntimeException("This method is not valid for this implementation of the planner.");
+   }
+
+   /** {@inheritDoc} */
+   @Override
+   public void compute(int segmentId, double timeInPhase, FixedFramePoint3DBasics comPositionToPack, FixedFrameVector3DBasics comVelocityToPack,
+                       FixedFrameVector3DBasics comAccelerationToPack, FixedFramePoint3DBasics dcmPositionToPack, FixedFrameVector3DBasics dcmVelocityToPack,
+                       FixedFramePoint3DBasics vrpPositionToPack)
+   {
+      throw new RuntimeException("This method is not valid for this implementation of the planner.");
+   }
+
+   @Override
    public FramePoint3DReadOnly getDesiredDCMPosition()
    {
       return comTrajectoryPlanner.getDesiredDCMPosition();
@@ -157,12 +174,6 @@ public class QuadrupedCoMTrajectoryPlanner implements CoMTrajectoryPlannerInterf
    public FramePoint3DReadOnly getDesiredVRPPosition()
    {
       return comTrajectoryPlanner.getDesiredVRPPosition();
-   }
-
-   @Override
-   public FramePoint3DReadOnly getDesiredECMPPosition()
-   {
-      return comTrajectoryPlanner.getDesiredECMPPosition();
    }
 
 }

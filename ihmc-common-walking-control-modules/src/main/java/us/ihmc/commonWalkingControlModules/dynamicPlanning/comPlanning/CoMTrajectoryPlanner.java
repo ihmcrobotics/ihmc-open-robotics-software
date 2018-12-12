@@ -66,7 +66,6 @@ public class CoMTrajectoryPlanner implements CoMTrajectoryPlannerInterface
    private final FixedFrameVector3DBasics desiredDCMVelocity = new FrameVector3D(worldFrame);
 
    private final FixedFramePoint3DBasics desiredVRPPosition = new FramePoint3D(worldFrame);
-   private final FixedFramePoint3DBasics desiredECMPPosition = new FramePoint3D(worldFrame);
 
    private final YoFramePoint3D yoFirstCoefficient = new YoFramePoint3D("comFirstCoefficient", worldFrame, registry);
    private final YoFramePoint3D yoSecondCoefficient = new YoFramePoint3D("comSecondCoefficient", worldFrame, registry);
@@ -213,75 +212,71 @@ public class CoMTrajectoryPlanner implements CoMTrajectoryPlannerInterface
    private final FramePoint3D firstCoefficient = new FramePoint3D();
    private final FramePoint3D secondCoefficient = new FramePoint3D();
 
-   private final FrameVector3D comVelocity = new FrameVector3D();
-   private final FrameVector3D comAcceleration = new FrameVector3D();
-   private final FrameVector3D dcmVelocity = new FrameVector3D();
+   private final FrameVector3D comVelocityToThrowAway = new FrameVector3D();
+   private final FrameVector3D comAccelerationToThrowAway = new FrameVector3D();
+   private final FrameVector3D dcmVelocityToThrowAway = new FrameVector3D();
 
    private void updateCornerPoints(int size)
    {
-      double omega = this.omega.getValue();
-
-      int i = 0;
-      for (; i < Math.min(size, maxCapacity + 1); i++)
+      int segmentId = 0;
+      for (; segmentId < Math.min(size, maxCapacity + 1); segmentId++)
       {
-         ContactState contactState = contactSequence.get(i).getContactState();
-
-         int firstCoefficientIndex = getFirstCoefficientIndex(i);
-         int secondCoefficientIndex = getSecondCoefficientIndex(i);
-         firstCoefficient.setX(xCoefficientVector.get(firstCoefficientIndex));
-         firstCoefficient.setY(yCoefficientVector.get(firstCoefficientIndex));
-         firstCoefficient.setZ(zCoefficientVector.get(firstCoefficientIndex));
-
-         secondCoefficient.setX(xCoefficientVector.get(secondCoefficientIndex));
-         secondCoefficient.setY(yCoefficientVector.get(secondCoefficientIndex));
-         secondCoefficient.setZ(zCoefficientVector.get(secondCoefficientIndex));
-
-         constructDesiredCoMPosition(comCornerPoints.get(i), firstCoefficient, secondCoefficient, contactSequence.get(i).getCopPosition(), contactState, 0.0,
-                                     omega, gravityZ, nominalCoMHeight);
-         constructDesiredCoMVelocity(comVelocity, firstCoefficient, secondCoefficient, contactState, 0.0, omega, gravityZ);
-         constructDesiredCoMAcceleration(comAcceleration, firstCoefficient, secondCoefficient, contactState, 0.0, omega, gravityZ);
-
-         computeDesiredCapturePointPosition(comCornerPoints.get(i), comVelocity, omega, dcmCornerPoints.get(i));
-         computeDesiredCapturePointVelocity(comVelocity, comAcceleration, omega, dcmVelocity);
-         computeDesiredCentroidalMomentumPivot(dcmCornerPoints.get(i), dcmVelocity, omega, vrpCornerPoints.get(i));
+         compute(segmentId, 0.0, comCornerPoints.get(segmentId), comVelocityToThrowAway, comAccelerationToThrowAway, dcmCornerPoints.get(segmentId), dcmVelocityToThrowAway,
+                 vrpCornerPoints.get(segmentId));
       }
 
-      for (; i < maxCapacity + 1; i++)
+      for (; segmentId < maxCapacity + 1; segmentId++)
       {
-         comCornerPoints.get(i).setToNaN();
-         dcmCornerPoints.get(i).setToNaN();
-         vrpCornerPoints.get(i).setToNaN();
+         comCornerPoints.get(segmentId).setToNaN();
+         dcmCornerPoints.get(segmentId).setToNaN();
+         vrpCornerPoints.get(segmentId).setToNaN();
       }
    }
 
    /** {@inheritDoc} */
    @Override
-   public void compute(double timeInPhase)
+   public void compute(int segmentId, double timeInPhase)
    {
-      ContactStateProvider currentContactPhase = contactSequence.get(0);
+      compute(segmentId, timeInPhase, desiredCoMPosition, desiredCoMVelocity, desiredCoMAcceleration, desiredDCMPosition, desiredDCMVelocity, desiredVRPPosition);
+   }
+
+   /** {@inheritDoc} */
+   @Override
+   public void compute(int segmentId, double timeInPhase, FixedFramePoint3DBasics comPositionToPack, FixedFrameVector3DBasics comVelocityToPack,
+                       FixedFrameVector3DBasics comAccelerationToPack, FixedFramePoint3DBasics dcmPositionToPack, FixedFrameVector3DBasics dcmVelocityToPack,
+                       FixedFramePoint3DBasics vrpPositionToPack)
+   {
+      ContactStateProvider contactStateProvider = contactSequence.get(segmentId);
+
+      int firstCoefficientIndex = getFirstCoefficientIndex(segmentId);
+      int secondCoefficientIndex = getSecondCoefficientIndex(segmentId);
+      firstCoefficient.setX(xCoefficientVector.get(firstCoefficientIndex));
+      firstCoefficient.setY(yCoefficientVector.get(firstCoefficientIndex));
+      firstCoefficient.setZ(zCoefficientVector.get(firstCoefficientIndex));
+
+      secondCoefficient.setX(xCoefficientVector.get(secondCoefficientIndex));
+      secondCoefficient.setY(yCoefficientVector.get(secondCoefficientIndex));
+      secondCoefficient.setZ(zCoefficientVector.get(secondCoefficientIndex));
 
       double omega = this.omega.getValue();
 
-      ContactState contactState = currentContactPhase.getContactState();
+      ContactState contactState = contactStateProvider.getContactState();
 
-      constructDesiredCoMPosition(desiredCoMPosition, yoFirstCoefficient, yoSecondCoefficient, currentContactPhase.getCopPosition(), contactState, timeInPhase,
+      constructDesiredCoMPosition(comPositionToPack, firstCoefficient, secondCoefficient, contactStateProvider.getCopPosition(), contactState, timeInPhase,
                                   omega, gravityZ, nominalCoMHeight);
-      constructDesiredCoMVelocity(desiredCoMVelocity, yoFirstCoefficient, yoSecondCoefficient, contactState, timeInPhase, omega, gravityZ);
-      constructDesiredCoMAcceleration(desiredCoMAcceleration, yoFirstCoefficient, yoSecondCoefficient, contactState, timeInPhase, omega, gravityZ);
+      constructDesiredCoMVelocity(comVelocityToPack, firstCoefficient, secondCoefficient, contactState, timeInPhase, omega, gravityZ);
+      constructDesiredCoMAcceleration(comAccelerationToPack, firstCoefficient, secondCoefficient, contactState, timeInPhase, omega, gravityZ);
 
-      computeDesiredCapturePointPosition(desiredCoMPosition, desiredCoMVelocity, omega, desiredDCMPosition);
-      computeDesiredCapturePointVelocity(desiredCoMVelocity, desiredCoMAcceleration, omega, desiredDCMVelocity);
-      computeDesiredCentroidalMomentumPivot(desiredDCMPosition, desiredDCMVelocity, omega, desiredVRPPosition);
-
-      desiredECMPPosition.set(desiredVRPPosition);
-      desiredECMPPosition.subZ(gravityZ / MathTools.square(omega));
+      computeDesiredCapturePointPosition(comPositionToPack, comVelocityToPack, omega, dcmPositionToPack);
+      computeDesiredCapturePointVelocity(comVelocityToPack, comAccelerationToPack, omega, dcmVelocityToPack);
+      computeDesiredCentroidalMomentumPivot(dcmPositionToPack, desiredDCMVelocity, omega, vrpPositionToPack);
    }
 
    /** {@inheritDoc} */
    @Override
-   public void setCurrentCoMPosition(FramePoint3DReadOnly currentCoMPosition)
+   public void setInitialCenterOfMassState(FramePoint3DReadOnly centerOfMassPosition, FrameVector3DReadOnly centerOfMassVelocity)
    {
-      this.currentCoMPosition.setIncludingFrame(currentCoMPosition);
+      this.currentCoMPosition.setIncludingFrame(centerOfMassPosition);
    }
 
    /** {@inheritDoc} */
@@ -324,13 +319,6 @@ public class CoMTrajectoryPlanner implements CoMTrajectoryPlannerInterface
    public FramePoint3DReadOnly getDesiredVRPPosition()
    {
       return desiredVRPPosition;
-   }
-
-   /** {@inheritDoc} */
-   @Override
-   public FramePoint3DReadOnly getDesiredECMPPosition()
-   {
-      return desiredECMPPosition;
    }
 
    /**
