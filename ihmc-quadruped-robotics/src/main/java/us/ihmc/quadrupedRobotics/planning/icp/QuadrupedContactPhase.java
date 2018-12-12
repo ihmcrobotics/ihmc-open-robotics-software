@@ -90,7 +90,7 @@ public class QuadrupedContactPhase implements ContactStateProvider
    }
 
    @Override
-   public FramePoint3DReadOnly getCopPosition()
+   public FramePoint3DReadOnly getCopStartPosition()
    {
       return copPosition;
    }

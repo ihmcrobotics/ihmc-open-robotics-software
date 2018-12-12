@@ -5,6 +5,7 @@ import us.ihmc.robotics.time.TimeIntervalProvider;
 
 public interface ContactStateProvider extends TimeIntervalProvider
 {
-   FramePoint3DReadOnly getCopPosition();
+   FramePoint3DReadOnly getCopStartPosition();
+   FramePoint3DReadOnly getCopEndPosition();
    ContactState getContactState();
 }
