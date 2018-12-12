@@ -48,7 +48,6 @@ public class FootstepNodeSnapAndWiggler extends FootstepNodeSnapper
       }
 
       FootstepNodeTools.getFootPolygon(footstepNode, footPolygonsInSoleFrame.get(footstepNode.getRobotSide()), footPolygon);
-      List<PlanarRegion> planarRegionsList = getOrCreateSteppableRegions(footstepNode.getRoundedX(), footstepNode.getRoundedY());
       RigidBodyTransform snapTransform = PlanarRegionsListPolygonSnapper.snapPolygonToPlanarRegionsList(footPolygon, planarRegionsList, planarRegionToPack);
 
       if (snapTransform == null)
