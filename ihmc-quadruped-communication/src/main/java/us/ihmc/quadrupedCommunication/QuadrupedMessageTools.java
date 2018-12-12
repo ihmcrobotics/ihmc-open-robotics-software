@@ -10,7 +10,7 @@ import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.quadrupedBasics.gait.QuadrupedTimedOrientedStep;
 import us.ihmc.quadrupedBasics.gait.QuadrupedTimedStep;
-import us.ihmc.quadrupedBasics.gait.TimeInterval;
+import us.ihmc.robotics.time.TimeInterval;
 import us.ihmc.robotics.robotSide.RobotQuadrant;
 
 import java.util.List;

@@ -1,8 +1,8 @@
-package us.ihmc.quadrupedBasics.utils;
+package us.ihmc.robotics.time;
 
 import org.junit.Test;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
-import us.ihmc.quadrupedBasics.gait.TimeInterval;
+import us.ihmc.robotics.time.TimeInterval;
 
 import static junit.framework.TestCase.assertEquals;
 import static org.junit.Assert.assertTrue;

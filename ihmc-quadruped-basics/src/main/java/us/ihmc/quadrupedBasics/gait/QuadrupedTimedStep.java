@@ -5,6 +5,8 @@ import us.ihmc.euclid.tuple3D.interfaces.Point3DBasics;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.QuadrupedTimedStepCommand;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.TimeIntervalCommand;
 import us.ihmc.robotics.robotSide.RobotQuadrant;
+import us.ihmc.robotics.time.TimeInterval;
+import us.ihmc.robotics.time.TimeIntervalProvider;
 
 public class QuadrupedTimedStep extends QuadrupedStep implements TimeIntervalProvider
 {
@@ -47,7 +49,7 @@ public class QuadrupedTimedStep extends QuadrupedStep implements TimeIntervalPro
 
    public void setTimeInterval(TimeIntervalCommand command)
    {
-      getTimeInterval().set(command);
+      command.getTimeInterval(getTimeInterval());
    }
 
    public void set(QuadrupedTimedStep other)

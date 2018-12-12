@@ -2,6 +2,7 @@ package us.ihmc.humanoidRobotics.communication.controllerAPI.command;
 
 import controller_msgs.msg.dds.TimeIntervalMessage;
 import us.ihmc.communication.controllerAPI.command.Command;
+import us.ihmc.robotics.time.TimeInterval;
 
 public class TimeIntervalCommand implements Command<TimeIntervalCommand, TimeIntervalMessage>
 {
@@ -32,6 +33,11 @@ public class TimeIntervalCommand implements Command<TimeIntervalCommand, TimeInt
    {
       startTime = other.startTime;
       endTime = other.endTime;
+   }
+
+   public void getTimeInterval(TimeInterval timeIntervalToPack)
+   {
+      timeIntervalToPack.setInterval(startTime, endTime);
    }
 
    public double getStartTime()
