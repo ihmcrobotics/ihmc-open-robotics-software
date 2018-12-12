@@ -1,7 +1,7 @@
 package us.ihmc.quadrupedRobotics.planning.icp;
 
-import org.apache.logging.log4j.util.PropertySource;
 import org.junit.Test;
+import us.ihmc.commonWalkingControlModules.dynamicPlanning.comPlanning.DCMPlanningTestTools;
 import us.ihmc.commons.RandomNumbers;
 import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
@@ -12,7 +12,6 @@ import us.ihmc.quadrupedBasics.gait.QuadrupedTimedStep;
 import us.ihmc.quadrupedBasics.gait.TimeInterval;
 import us.ihmc.robotics.robotSide.QuadrantDependentList;
 import us.ihmc.robotics.robotSide.RobotQuadrant;
-import us.ihmc.tools.lists.ListSorter;
 
 import java.util.*;
 
