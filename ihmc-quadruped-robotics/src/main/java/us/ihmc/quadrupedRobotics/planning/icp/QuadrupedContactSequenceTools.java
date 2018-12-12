@@ -124,4 +124,21 @@ public class QuadrupedContactSequenceTools
       }
       return true;
    }
+
+   public static void shiftContactSequencesToRelativeTime(List<QuadrupedContactPhase> contactSequenceToPack, double currentAbsoluteTime)
+   {
+      double shiftTime = -currentAbsoluteTime;
+      for (int sequence = 0; sequence < contactSequenceToPack.size(); sequence++)
+         contactSequenceToPack.get(sequence).getTimeInterval().shiftInterval(shiftTime);
+   }
+
+   public static void shiftStepTransitionsToRelativeTime(List<QuadrupedStepTransition> stepTransitionsToPack, double currentAbsoluteTime)
+   {
+      double shiftTime = -currentAbsoluteTime;
+      for (int transitionIndex = 0; transitionIndex < stepTransitionsToPack.size(); transitionIndex++)
+      {
+         QuadrupedStepTransition transition = stepTransitionsToPack.get(transitionIndex);
+         transition.setTransitionTime(transition.getTransitionTime() + shiftTime);
+      }
+   }
 }

@@ -1,10 +1,10 @@
 package us.ihmc.quadrupedRobotics.planning.icp;
 
-import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FixedFramePoint3DBasics;
 import us.ihmc.euclid.referenceFrame.interfaces.FixedFrameVector3DBasics;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DBasics;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
+import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.mecano.frames.MovingReferenceFrame;
 import us.ihmc.quadrupedBasics.gait.QuadrupedTimedStep;
 import us.ihmc.quadrupedRobotics.planning.ContactState;
@@ -33,13 +33,20 @@ public class DCMBasedCoMPlanner implements DCMPlannerInterface
 
    private final List<RobotQuadrant> currentFeetInContact = new ArrayList<>();
 
-   public DCMBasedCoMPlanner(QuadrantDependentList<MovingReferenceFrame> soleFrames, DoubleProvider timestamp, DoubleProvider omega, double gravity, double nominalHeight,
-                             YoVariableRegistry parentRegistry)
+   public DCMBasedCoMPlanner(QuadrantDependentList<MovingReferenceFrame> soleFrames, DoubleProvider timestamp, DoubleProvider omega, double gravity,
+                             double nominalHeight, YoVariableRegistry parentRegistry)
+   {
+      this(soleFrames, timestamp, omega, gravity, nominalHeight, parentRegistry, null);
+   }
+
+   public DCMBasedCoMPlanner(QuadrantDependentList<MovingReferenceFrame> soleFrames, DoubleProvider timestamp, DoubleProvider omega, double gravity,
+                             double nominalHeight, YoVariableRegistry parentRegistry, YoGraphicsListRegistry graphicsListRegistry)
    {
       this.timestamp = timestamp;
       contactSequenceUpdater = new QuadrupedContactSequenceUpdater(soleFrames, 4, 10);
 
-      comTrajectoryPlanner = new CoMTrajectoryPlanner(contactSequenceUpdater.getContactSequence(), omega, gravity, nominalHeight, registry);
+      comTrajectoryPlanner = new CoMTrajectoryPlanner(contactSequenceUpdater.getContactSequenceInAbsoluteTime(), omega, gravity, nominalHeight, registry,
+                                                      graphicsListRegistry);
 
       parentRegistry.addChild(registry);
    }
@@ -55,8 +62,6 @@ public class DCMBasedCoMPlanner implements DCMPlannerInterface
       comTrajectoryPlanner.setNominalCoMHeight(comHeight);
    }
 
-
-
    public void clearStepSequence()
    {
       stepSequence.clear();
@@ -65,6 +70,11 @@ public class DCMBasedCoMPlanner implements DCMPlannerInterface
    public void addStepToSequence(QuadrupedTimedStep step)
    {
       stepSequence.add(step);
+   }
+
+   public void setCurrentCoMPosition(FramePoint3DReadOnly currentCoMPosition)
+   {
+      comTrajectoryPlanner.setCurrentCoMPosition(currentCoMPosition);
    }
 
    @Override
@@ -106,11 +116,11 @@ public class DCMBasedCoMPlanner implements DCMPlannerInterface
    }
 
    void computeSetpoints(double currentTime, List<RobotQuadrant> currentFeetInContact, FixedFramePoint3DBasics desiredDCMPositionToPack,
-                                FixedFrameVector3DBasics desiredDCMVelocityToPack)
+                         FixedFrameVector3DBasics desiredDCMVelocityToPack)
    {
       contactSequenceUpdater.update(stepSequence, currentFeetInContact, currentTime);
 
-      double timeInPhase = currentTime - contactSequenceUpdater.getContactSequence().get(0).getTimeInterval().getStartTime();
+      double timeInPhase = currentTime - contactSequenceUpdater.getContactSequenceInAbsoluteTime().get(0).getTimeInterval().getStartTime();
       timeInContactPhase.set(timeInPhase);
 
       comTrajectoryPlanner.solveForTrajectory();

@@ -507,7 +507,7 @@ public class CoMTrajectoryPlannerTest
       contactSequence.add(secondContact);
       contactSequence.add(thirdContact);
 
-      FramePoint3D comPosition = new FramePoint3D(ReferenceFrame.getWorldFrame(), 0.05, 0.0, nominalHeight);
+      FramePoint3D comPosition = new FramePoint3D(ReferenceFrame.getWorldFrame(), 0.05, 0.05, nominalHeight + 0.05);
       planner.setCurrentCoMPosition(comPosition);
       planner.solveForTrajectory();
       planner.compute(0.0);
@@ -526,11 +526,7 @@ public class CoMTrajectoryPlannerTest
       for (int i = 0; i < 100; i++)
       {
          double time = RandomNumbers.nextDouble(random, 0.0, contactSequence.get(0).getTimeInterval().getDuration());
-         FramePoint3D expectedDCM = new FramePoint3D();
-
          planner.compute(time);
-
-         EuclidCoreTestTools.assertPoint3DGeometricallyEquals("i = " + i, expectedDCM, planner.getDesiredDCMPosition(), epsilon);
          checkPlannerDynamics(planner, omega.getDoubleValue());
       }
    }
