@@ -73,7 +73,6 @@ public class QuadrupedContactSequenceUpdater
          feetInContact.add(currentFeetInContact.get(footIndex));
 
       QuadrupedContactSequenceTools.computeStepTransitionsFromStepSequence(stepTransitionsInAbsoluteTime, currentTime, stepSequence);
-      TimeIntervalTools.removeEndTimesLessThan(currentTime, contactSequenceInAbsoluteTime);
       QuadrupedContactSequenceTools.trimPastContactSequences(contactSequenceInAbsoluteTime, currentTime, currentFeetInContact, solePositions);
 
       computeContactPhasesFromStepTransitions();

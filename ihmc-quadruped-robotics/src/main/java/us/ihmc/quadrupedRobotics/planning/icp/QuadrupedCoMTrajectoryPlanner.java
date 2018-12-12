@@ -1,14 +1,11 @@
 package us.ihmc.quadrupedRobotics.planning.icp;
 
-import us.ihmc.euclid.referenceFrame.interfaces.FixedFramePoint3DBasics;
-import us.ihmc.euclid.referenceFrame.interfaces.FixedFrameVector3DBasics;
-import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DBasics;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
+import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.mecano.frames.MovingReferenceFrame;
 import us.ihmc.quadrupedBasics.gait.QuadrupedTimedStep;
 import us.ihmc.quadrupedRobotics.planning.ContactState;
-import us.ihmc.quadrupedRobotics.planning.trajectory.DCMPlannerInterface;
 import us.ihmc.robotics.robotSide.QuadrantDependentList;
 import us.ihmc.robotics.robotSide.RobotQuadrant;
 import us.ihmc.yoVariables.providers.DoubleProvider;
@@ -19,7 +16,7 @@ import us.ihmc.yoVariables.variable.YoEnum;
 import java.util.ArrayList;
 import java.util.List;
 
-public class DCMBasedCoMPlanner
+public class QuadrupedCoMTrajectoryPlanner implements CoMTrajectoryPlannerInterface
 {
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
 
@@ -33,14 +30,14 @@ public class DCMBasedCoMPlanner
 
    private final List<RobotQuadrant> currentFeetInContact = new ArrayList<>();
 
-   public DCMBasedCoMPlanner(QuadrantDependentList<MovingReferenceFrame> soleFrames, DoubleProvider timestamp, DoubleProvider omega, double gravity,
-                             double nominalHeight, YoVariableRegistry parentRegistry)
+   public QuadrupedCoMTrajectoryPlanner(QuadrantDependentList<MovingReferenceFrame> soleFrames, DoubleProvider timestamp, DoubleProvider omega, double gravity,
+                                        double nominalHeight, YoVariableRegistry parentRegistry)
    {
       this(soleFrames, timestamp, omega, gravity, nominalHeight, parentRegistry, null);
    }
 
-   public DCMBasedCoMPlanner(QuadrantDependentList<MovingReferenceFrame> soleFrames, DoubleProvider timestamp, DoubleProvider omega, double gravity,
-                             double nominalHeight, YoVariableRegistry parentRegistry, YoGraphicsListRegistry graphicsListRegistry)
+   public QuadrupedCoMTrajectoryPlanner(QuadrantDependentList<MovingReferenceFrame> soleFrames, DoubleProvider timestamp, DoubleProvider omega, double gravity,
+                                        double nominalHeight, YoVariableRegistry parentRegistry, YoGraphicsListRegistry graphicsListRegistry)
    {
       this.timestamp = timestamp;
       contactSequenceUpdater = new QuadrupedContactSequenceUpdater(soleFrames, 4, 10);
@@ -76,45 +73,22 @@ public class DCMBasedCoMPlanner
       comTrajectoryPlanner.setCurrentCoMPosition(currentCoMPosition);
    }
 
+
    public void initializeForStanding()
    {
       currentFeetInContact.clear();
       for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
          currentFeetInContact.add(robotQuadrant);
-
       contactSequenceUpdater.initialize();
    }
 
-   @Override
-   public void initializeForStepping(QuadrantDependentList<YoEnum<ContactState>> currentContactStates, FramePoint3DReadOnly dcmPosition)
+   public void initializeForStepping(QuadrantDependentList<YoEnum<ContactState>> currentContactStates)
    {
       updateFeetInContactFromContactStates(currentContactStates);
       contactSequenceUpdater.initialize();
    }
 
-   @Override
-   public void computeDcmSetpoints(QuadrantDependentList<YoEnum<ContactState>> currentContactStates, FixedFramePoint3DBasics desiredDCMPositionToPack,
-                                   FixedFrameVector3DBasics desiredDCMVelocityToPack)
-   {
-      updateFeetInContactFromContactStates(currentContactStates);
-
-      computeSetpoints(timestamp.getValue(), currentFeetInContact, desiredDCMPositionToPack, desiredDCMVelocityToPack);
-   }
-
-   @Override
-   public void getFinalDCMPosition(FixedFramePoint3DBasics finalDesiredDCMToPack)
-   {
-
-   }
-
-   @Override
-   public void getDesiredECMPPosition(FramePoint3DBasics eCMPPositionToPack)
-   {
-      eCMPPositionToPack.set(comTrajectoryPlanner.getDesiredECMPPosition());
-   }
-
-   void computeSetpoints(double currentTime, List<RobotQuadrant> currentFeetInContact, FixedFramePoint3DBasics desiredDCMPositionToPack,
-                         FixedFrameVector3DBasics desiredDCMVelocityToPack)
+   void computeSetpoints(double currentTime, List<RobotQuadrant> currentFeetInContact)
    {
       contactSequenceUpdater.update(stepSequence, currentFeetInContact, currentTime);
 
@@ -123,9 +97,6 @@ public class DCMBasedCoMPlanner
 
       comTrajectoryPlanner.solveForTrajectory();
       comTrajectoryPlanner.compute(timeInContactPhase.getDoubleValue());
-
-      desiredDCMPositionToPack.set(comTrajectoryPlanner.getDesiredDCMPosition());
-      desiredDCMVelocityToPack.set(comTrajectoryPlanner.getDesiredDCMVelocity());
    }
 
    private void updateFeetInContactFromContactStates(QuadrantDependentList<YoEnum<ContactState>> currentContactStates)
@@ -137,4 +108,59 @@ public class DCMBasedCoMPlanner
             currentFeetInContact.add(robotQuadrant);
       }
    }
+
+   @Override
+   public void solveForTrajectory()
+   {
+      comTrajectoryPlanner.solveForTrajectory();
+   }
+
+   @Override
+   public void compute(double timeInPhase)
+   {
+      comTrajectoryPlanner.compute(timeInPhase);
+   }
+
+   @Override
+   public FramePoint3DReadOnly getDesiredDCMPosition()
+   {
+      return comTrajectoryPlanner.getDesiredDCMPosition();
+   }
+
+   @Override
+   public FrameVector3DReadOnly getDesiredDCMVelocity()
+   {
+      return comTrajectoryPlanner.getDesiredDCMVelocity();
+   }
+
+   @Override
+   public FramePoint3DReadOnly getDesiredCoMPosition()
+   {
+      return comTrajectoryPlanner.getDesiredCoMPosition();
+   }
+
+   @Override
+   public FrameVector3DReadOnly getDesiredCoMVelocity()
+   {
+      return comTrajectoryPlanner.getDesiredCoMVelocity();
+   }
+
+   @Override
+   public FrameVector3DReadOnly getDesiredCoMAcceleration()
+   {
+      return comTrajectoryPlanner.getDesiredCoMAcceleration();
+   }
+
+   @Override
+   public FramePoint3DReadOnly getDesiredVRPPosition()
+   {
+      return comTrajectoryPlanner.getDesiredVRPPosition();
+   }
+
+   @Override
+   public FramePoint3DReadOnly getDesiredECMPPosition()
+   {
+      return comTrajectoryPlanner.getDesiredECMPPosition();
+   }
+
 }

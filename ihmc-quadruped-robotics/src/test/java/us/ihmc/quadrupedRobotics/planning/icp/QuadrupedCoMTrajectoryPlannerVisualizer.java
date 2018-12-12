@@ -6,6 +6,7 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.graphicsDescription.Graphics3DObject;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
+import us.ihmc.graphicsDescription.yoGraphics.BagOfBalls;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.mecano.frames.MovingReferenceFrame;
@@ -24,7 +25,7 @@ import us.ihmc.yoVariables.variable.YoFrameVector3D;
 import java.util.ArrayList;
 import java.util.List;
 
-public class DCMPlannerVisualizer
+public class QuadrupedCoMTrajectoryPlannerVisualizer
 {
    private static final double stanceLength = 1.0;
    private static final double stanceWidth = 0.5;
@@ -47,7 +48,7 @@ public class DCMPlannerVisualizer
    private final SimulationConstructionSet scs;
    private final YoDouble yoTime;
 
-   private final DCMBasedCoMPlanner planner;
+   private final QuadrupedCoMTrajectoryPlanner planner;
 
    private List<QuadrupedTimedStep> steps;
    private final QuadrantDependentList<TranslationMovingReferenceFrame> soleFramesForModifying = createSoleFrames();
@@ -60,9 +61,13 @@ public class DCMPlannerVisualizer
    private final YoFrameVector3D desiredDCMVelocity;
    private final YoFramePoint3D desiredVRPPosition;
 
+   private final BagOfBalls dcmTrajectory;
+   private final BagOfBalls comTrajectory;
+   private final BagOfBalls vrpTrajectory;
+
    private final double simDuration;
 
-   public DCMPlannerVisualizer()
+   public QuadrupedCoMTrajectoryPlannerVisualizer()
    {
       YoVariableRegistry registry = new YoVariableRegistry("test");
       YoGraphicsListRegistry yoGraphicsListRegistry = new YoGraphicsListRegistry();
@@ -80,6 +85,10 @@ public class DCMPlannerVisualizer
       YoDouble omega = new YoDouble("omega", registry);
       omega.set(Math.sqrt(gravity / nominalHeight));
 
+      dcmTrajectory = new BagOfBalls(50, 0.02, "dcmTrajectory", YoAppearance.Yellow(), registry, yoGraphicsListRegistry);
+      comTrajectory = new BagOfBalls(50, 0.02, "comTrajectory", YoAppearance.Black(), registry, yoGraphicsListRegistry);
+      vrpTrajectory = new BagOfBalls(50, 0.02, "vrpTrajectory", YoAppearance.Green(), registry, yoGraphicsListRegistry);
+
       yoTime = new YoDouble("time", registry);
 
       YoGraphicPosition dcmViz = new YoGraphicPosition("desiredDCM", desiredDCMPosition, 0.02, YoAppearance.Yellow(),
@@ -92,7 +101,7 @@ public class DCMPlannerVisualizer
       yoGraphicsListRegistry.registerArtifact("dcmPlanner", comViz.createArtifact());
       yoGraphicsListRegistry.registerArtifact("dcmPlanner", vrpViz.createArtifact());
 
-      planner = new DCMBasedCoMPlanner(soleFrames, yoTime, omega, gravity, nominalHeight, registry, yoGraphicsListRegistry);
+      planner = new QuadrupedCoMTrajectoryPlanner(soleFrames, yoTime, omega, gravity, nominalHeight, registry, yoGraphicsListRegistry);
       steps = createSteps(soleFrames);
 
       simDuration = steps.get(steps.size() - 1).getTimeInterval().getEndTime() + 5.0;
@@ -210,17 +219,22 @@ public class DCMPlannerVisualizer
       planner.initialize();
       planner.setCurrentCoMPosition(desiredCoMPosition);
 
-      planner.clearStepSequence();
-      for (int i = 0; i < steps.size(); i++)
-         planner.addStepToSequence(steps.get(i));
-      planner.computeSetpoints(yoTime.getDoubleValue(), feetInContact, desiredDCMPosition, desiredDCMVelocity);
-
       while (simDuration > yoTime.getDoubleValue())
       {
          planner.clearStepSequence();
          steps.forEach(planner::addStepToSequence);
+         planner.computeSetpoints(yoTime.getDoubleValue(), feetInContact);
 
-         planner.computeSetpoints(yoTime.getDoubleValue(), feetInContact, desiredDCMPosition, desiredDCMVelocity);
+         desiredCoMPosition.set(planner.getDesiredCoMPosition());
+         desiredCoMVelocity.set(planner.getDesiredCoMVelocity());
+         desiredCoMAcceleration.set(planner.getDesiredCoMAcceleration());
+         desiredDCMPosition.set(planner.getDesiredDCMPosition());
+         desiredDCMVelocity.set(planner.getDesiredDCMVelocity());
+         desiredVRPPosition.set(planner.getDesiredVRPPosition());
+
+         dcmTrajectory.setBallLoop(desiredDCMPosition);
+         comTrajectory.setBallLoop(desiredCoMPosition);
+         vrpTrajectory.setBallLoop(desiredVRPPosition);
 
          yoTime.add(simDt);
          updateFeetStates(yoTime.getDoubleValue());
@@ -248,6 +262,6 @@ public class DCMPlannerVisualizer
 
    public static void main(String[] args)
    {
-      DCMPlannerVisualizer visualizer = new DCMPlannerVisualizer();
+      QuadrupedCoMTrajectoryPlannerVisualizer visualizer = new QuadrupedCoMTrajectoryPlannerVisualizer();
    }
 }
