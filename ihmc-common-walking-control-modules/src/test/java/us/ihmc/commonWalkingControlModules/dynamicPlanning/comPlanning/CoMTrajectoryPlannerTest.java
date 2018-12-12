@@ -44,8 +44,9 @@ public class CoMTrajectoryPlannerTest
       contactSequence.add(firstContact);
 
       FramePoint3D comPosition = new FramePoint3D();
+      FrameVector3D comVelocity = new FrameVector3D();
       comPosition.setZ(nominalHeight);
-      planner.setCurrentCoMPosition(comPosition);
+      planner.setInitialCenterOfMassState(comPosition, comVelocity);
 
       planner.solveForTrajectory();
       planner.compute(0.0);
@@ -140,8 +141,9 @@ public class CoMTrajectoryPlannerTest
       contactSequence.add(secondContact);
 
       FramePoint3D comPosition = new FramePoint3D();
+      FrameVector3D comVelocity = new FrameVector3D();
       comPosition.setZ(nominalHeight);
-      planner.setCurrentCoMPosition(comPosition);
+      planner.setInitialCenterOfMassState(comPosition, comVelocity);
 
       planner.solveForTrajectory();
       planner.compute(0.0);
@@ -211,7 +213,8 @@ public class CoMTrajectoryPlannerTest
       contactSequence.add(secondContact);
 
       FramePoint3D comPosition = new FramePoint3D(ReferenceFrame.getWorldFrame(), -0.1, 0.15, nominalHeight);
-      planner.setCurrentCoMPosition(comPosition);
+      FrameVector3D comVelocity = new FrameVector3D();
+      planner.setInitialCenterOfMassState(comPosition, comVelocity);
 
       planner.solveForTrajectory();
       planner.compute(0.0);
@@ -280,8 +283,10 @@ public class CoMTrajectoryPlannerTest
       contactSequence.add(thirdContact);
 
       FramePoint3D comPosition = new FramePoint3D();
+      FrameVector3D comVelocity = new FrameVector3D();
       comPosition.setZ(nominalHeight);
-      planner.setCurrentCoMPosition(comPosition);
+      planner.setInitialCenterOfMassState(comPosition, comVelocity);
+
       planner.solveForTrajectory();
       planner.compute(0.0);
       checkPlannerDynamics(planner, omega.getDoubleValue());
@@ -383,15 +388,16 @@ public class CoMTrajectoryPlannerTest
             currentStartTime += segmentDuration;
          }
 
-         FramePoint3D initialCoMPosition = new FramePoint3D(startCoPPosition);
-         initialCoMPosition.addZ(nominalHeight);
+         FramePoint3D comPosition = new FramePoint3D();
+         FrameVector3D comVelocity = new FrameVector3D();
+         comPosition.setZ(nominalHeight);
+         planner.setInitialCenterOfMassState(comPosition, comVelocity);
 
-         planner.setCurrentCoMPosition(initialCoMPosition);
          planner.solveForTrajectory();
          planner.compute(0.0);
          checkPlannerDynamics(planner, omega.getDoubleValue());
 
-         EuclidCoreTestTools.assertPoint3DGeometricallyEquals("iter = " + iter + ", Initial CoM is wrong.", initialCoMPosition, planner.getDesiredCoMPosition(), epsilon);
+         EuclidCoreTestTools.assertPoint3DGeometricallyEquals("iter = " + iter + ", Initial CoM is wrong.", comPosition, planner.getDesiredCoMPosition(), epsilon);
 
          FramePoint3DReadOnly desiredInitialDCM = planner.getDesiredDCMPosition();
 
@@ -448,8 +454,10 @@ public class CoMTrajectoryPlannerTest
       contactSequence.add(thirdContact);
 
       FramePoint3D comPosition = new FramePoint3D();
-      comPosition.addZ(nominalHeight);
-      planner.setCurrentCoMPosition(comPosition);
+      FrameVector3D comVelocity = new FrameVector3D();
+      comPosition.setZ(nominalHeight);
+      planner.setInitialCenterOfMassState(comPosition, comVelocity);
+
       planner.solveForTrajectory();
       planner.compute(0.0);
       checkPlannerDynamics(planner, omega.getDoubleValue());
@@ -507,7 +515,9 @@ public class CoMTrajectoryPlannerTest
       contactSequence.add(thirdContact);
 
       FramePoint3D comPosition = new FramePoint3D(ReferenceFrame.getWorldFrame(), 0.05, 0.05, nominalHeight + 0.05);
-      planner.setCurrentCoMPosition(comPosition);
+      FrameVector3D comVelocity = new FrameVector3D();
+      planner.setInitialCenterOfMassState(comPosition, comVelocity);
+
       planner.solveForTrajectory();
       planner.compute(0.0);
       checkPlannerDynamics(planner, omega.getDoubleValue());

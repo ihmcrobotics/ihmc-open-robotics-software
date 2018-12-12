@@ -174,7 +174,8 @@ public class CoMTrajectoryPlannerVisualizer
    {
       desiredCoMPosition.setToZero();
       desiredCoMPosition.setZ(nominalHeight);
-      planner.setCurrentCoMPosition(desiredCoMPosition);
+      desiredCoMVelocity.setToZero();
+      planner.setInitialCenterOfMassState(desiredCoMPosition, desiredCoMVelocity);
       planner.solveForTrajectory();
 
       while (simDuration > yoTime.getDoubleValue())
@@ -217,8 +218,7 @@ public class CoMTrajectoryPlannerVisualizer
          for (ContactStateProvider contactState : contactStates)
             contactState.getTimeInterval().shiftInterval(timeShift);
 
-         planner.setCurrentCoMPosition(desiredCoMPosition);
-//         planner.solveForTrajectory();
+         planner.setInitialCenterOfMassState(desiredCoMPosition, desiredCoMVelocity);
          timeInPhase.set(0.0);
       }
    }

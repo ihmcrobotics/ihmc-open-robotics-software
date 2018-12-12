@@ -216,8 +216,9 @@ public class QuadrupedCoMTrajectoryPlannerVisualizer
    private void simulate()
    {
       desiredCoMPosition.setZ(nominalHeight);
+      desiredCoMVelocity.setToZero();
       planner.initialize();
-      planner.setCurrentCoMPosition(desiredCoMPosition);
+      planner.setInitialCenterOfMassState(desiredCoMPosition, desiredCoMVelocity);
 
       while (simDuration > yoTime.getDoubleValue())
       {
