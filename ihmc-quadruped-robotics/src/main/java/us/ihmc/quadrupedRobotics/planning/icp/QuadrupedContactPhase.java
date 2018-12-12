@@ -33,6 +33,15 @@ public class QuadrupedContactPhase implements ContactStateProvider
       }
    }
 
+   public void reset()
+   {
+      feetInContact.clear();
+      for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
+         solePositions.get(robotQuadrant).setToNaN();
+      copPosition.setToNaN();
+      timeInterval.reset();
+   }
+
    public void setTimeInterval(TimeInterval timeInterval)
    {
       this.timeInterval.set(timeInterval);
@@ -40,6 +49,9 @@ public class QuadrupedContactPhase implements ContactStateProvider
 
    public void setFeetInContact(List<RobotQuadrant> feetInContact)
    {
+      if (feetInContact.size() > 4)
+         throw new IllegalArgumentException("There can't be more than 4 feet in contact for a quadruped.");
+
       this.feetInContact.clear();
       for (int i = 0; i < feetInContact.size(); i++)
          this.feetInContact.add(feetInContact.get(i));
@@ -48,10 +60,7 @@ public class QuadrupedContactPhase implements ContactStateProvider
    public void setSolePositions(QuadrantDependentList<? extends FramePoint3DReadOnly> solePosition)
    {
       for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
-      {
-         this.solePositions.get(robotQuadrant).setIncludingFrame(solePosition.get(robotQuadrant));
-         this.solePositions.get(robotQuadrant).changeFrame(ReferenceFrame.getWorldFrame());
-      }
+         this.solePositions.get(robotQuadrant).setMatchingFrame(solePosition.get(robotQuadrant));
    }
 
    public void set(QuadrupedContactPhase other)
