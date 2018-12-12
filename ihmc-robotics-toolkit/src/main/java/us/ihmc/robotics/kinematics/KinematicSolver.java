@@ -9,15 +9,15 @@ import org.ejml.interfaces.linsol.LinearSolver;
 import org.ejml.ops.CommonOps;
 import org.ejml.ops.NormOps;
 
+import us.ihmc.commons.MathTools;
 import us.ihmc.euclid.axisAngle.AxisAngle;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
-import us.ihmc.commons.MathTools;
+import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
+import us.ihmc.mecano.spatial.SpatialVector;
+import us.ihmc.mecano.tools.MultiBodySystemTools;
 import us.ihmc.robotics.screwTheory.GeometricJacobian;
-import us.ihmc.robotics.screwTheory.OneDoFJoint;
-import us.ihmc.robotics.screwTheory.ScrewTools;
-import us.ihmc.robotics.screwTheory.SpatialMotionVector;
 
 public class KinematicSolver implements InverseKinematicsCalculator
 {
@@ -45,7 +45,7 @@ public class KinematicSolver implements InverseKinematicsCalculator
    private final DenseMatrix64F inverseTerm;
 
    private final GeometricJacobian jacobian;
-   private final OneDoFJoint[] oneDoFJoints;
+   private final OneDoFJointBasics[] oneDoFJoints;
 
    private final double dampingConstant;
 
@@ -69,15 +69,15 @@ public class KinematicSolver implements InverseKinematicsCalculator
       this.jacobian = jacobian;
       this.tolerance = tolerance;
       this.maxIterations = maxIterations;
-      this.oneDoFJoints = ScrewTools.filterJoints(jacobian.getJointsInOrder(), OneDoFJoint.class);
-      nDoF = ScrewTools.computeDegreesOfFreedom(oneDoFJoints);
+      this.oneDoFJoints = MultiBodySystemTools.filterJoints(jacobian.getJointsInOrder(), OneDoFJointBasics.class);
+      nDoF = MultiBodySystemTools.computeDegreesOfFreedom(oneDoFJoints);
 
       jacobianMethod = new DenseMatrix64F(nDoF, nDoF);
       jacobianTranspose = new DenseMatrix64F(nDoF, nDoF);
       jacobianJacobianTranspose = new DenseMatrix64F(nDoF, nDoF);
       jJTe = new DenseMatrix64F(nDoF, 1);
       correction = new DenseMatrix64F(nDoF, 1);
-      spatialError = new DenseMatrix64F(SpatialMotionVector.SIZE, 1);
+      spatialError = new DenseMatrix64F(SpatialVector.SIZE, 1);
       dampingSquaredDiagonal = new DenseMatrix64F(nDoF, nDoF);
       inverseTerm = new DenseMatrix64F(nDoF, nDoF);
 

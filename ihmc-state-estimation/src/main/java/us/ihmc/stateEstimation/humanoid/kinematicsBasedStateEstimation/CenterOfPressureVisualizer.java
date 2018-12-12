@@ -16,11 +16,11 @@ import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition.GraphicType;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.graphicsDescription.yoGraphics.plotting.YoArtifactPosition;
+import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
+import us.ihmc.mecano.spatial.Wrench;
+import us.ihmc.robotics.sensors.FootSwitchInterface;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoFramePoint3D;
-import us.ihmc.robotics.screwTheory.RigidBody;
-import us.ihmc.robotics.screwTheory.Wrench;
-import us.ihmc.robotics.sensors.FootSwitchInterface;
 
 
 public class CenterOfPressureVisualizer
@@ -29,22 +29,22 @@ public class CenterOfPressureVisualizer
 
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
 
-   private final Map<RigidBody, YoFramePoint3D> footRawCoPPositionsInWorld = new HashMap<>();
+   private final Map<RigidBodyBasics, YoFramePoint3D> footRawCoPPositionsInWorld = new HashMap<>();
    private final YoFramePoint3D overallRawCoPPositionInWorld;
    private final FramePoint2D tempRawCoP2d = new FramePoint2D();
    private final FramePoint3D tempRawCoP = new FramePoint3D();
    private final Wrench tempWrench = new Wrench();
-   private final Map<RigidBody, FootSwitchInterface> footSwitches;
-   private final Collection<RigidBody> footRigidBodies;
-   private final List<RigidBody> footList = new ArrayList<>();
+   private final Map<RigidBodyBasics, FootSwitchInterface> footSwitches;
+   private final Collection<RigidBodyBasics> footRigidBodies;
+   private final List<RigidBodyBasics> footList = new ArrayList<>();
 
-   public CenterOfPressureVisualizer(Map<RigidBody, FootSwitchInterface> footSwitches,
+   public CenterOfPressureVisualizer(Map<RigidBodyBasics, FootSwitchInterface> footSwitches,
          YoGraphicsListRegistry yoGraphicsListRegistry, YoVariableRegistry parentRegistry)
    {
       this.footSwitches = footSwitches;
       footRigidBodies = footSwitches.keySet();
 
-      for (RigidBody rigidBody : footRigidBodies)
+      for (RigidBodyBasics rigidBody : footRigidBodies)
       {
          String rigidBodyName = rigidBody.getName();
          rigidBodyName = WordUtils.capitalize(rigidBodyName);
@@ -77,7 +77,7 @@ public class CenterOfPressureVisualizer
 
          for (int i = 0; i < footList.size(); i++)
          {
-            RigidBody rigidBody = footList.get(i);
+            RigidBodyBasics rigidBody = footList.get(i);
 
             footSwitches.get(rigidBody).computeAndPackCoP(tempRawCoP2d);
             tempRawCoP.setIncludingFrame(tempRawCoP2d.getReferenceFrame(), tempRawCoP2d.getX(), tempRawCoP2d.getY(), 0.0);
@@ -97,7 +97,7 @@ public class CenterOfPressureVisualizer
 
    public void hide()
    {
-      for (RigidBody rigidBody : footRigidBodies)
+      for (RigidBodyBasics rigidBody : footRigidBodies)
       {
          footRawCoPPositionsInWorld.get(rigidBody).setToNaN();
       }

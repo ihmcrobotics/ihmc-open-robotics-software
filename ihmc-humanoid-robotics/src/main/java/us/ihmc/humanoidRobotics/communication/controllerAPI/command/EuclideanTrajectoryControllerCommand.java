@@ -91,16 +91,16 @@ public final class EuclideanTrajectoryControllerCommand extends QueueableCommand
       FrameInformation frameInformation = message.getFrameInformation();
       long trajectoryFrameId = frameInformation.getTrajectoryReferenceFrameId();
       long dataFrameId = HumanoidMessageTools.getDataFrameIDConsideringDefault(frameInformation);
-      this.trajectoryFrame = resolver.getReferenceFrameFromNameBaseHashCode(trajectoryFrameId);
-      ReferenceFrame dataFrame = resolver.getReferenceFrameFromNameBaseHashCode(dataFrameId);
+      this.trajectoryFrame = resolver.getReferenceFrameFromHashCode(trajectoryFrameId);
+      ReferenceFrame dataFrame = resolver.getReferenceFrameFromHashCode(dataFrameId);
 
       clear(dataFrame);
       setFromMessage(message);
 
-      ReferenceFrame linearSelectionFrame = resolver.getReferenceFrameFromNameBaseHashCode(message.getSelectionMatrix().getSelectionFrameId());
+      ReferenceFrame linearSelectionFrame = resolver.getReferenceFrameFromHashCode(message.getSelectionMatrix().getSelectionFrameId());
       selectionMatrix.setSelectionFrame(linearSelectionFrame);
 
-      ReferenceFrame linearWeightFrame = resolver.getReferenceFrameFromNameBaseHashCode(message.getWeightMatrix().getWeightFrameId());
+      ReferenceFrame linearWeightFrame = resolver.getReferenceFrameFromHashCode(message.getWeightMatrix().getWeightFrameId());
       weightMatrix.setWeightFrame(linearWeightFrame);
    }
 
@@ -170,6 +170,16 @@ public final class EuclideanTrajectoryControllerCommand extends QueueableCommand
    public void setSelectionMatrix(SelectionMatrix3D selectionMatrix)
    {
       this.selectionMatrix.set(selectionMatrix);
+   }
+
+   public void setUseCustomControlFrame(boolean useCustomControlFrame)
+   {
+      this.useCustomControlFrame = useCustomControlFrame;
+   }
+
+   public void setControlFramePose(RigidBodyTransform controlFramePose)
+   {
+      this.controlFramePoseInBodyFrame.set(controlFramePose);
    }
 
    public FrameEuclideanTrajectoryPointList getTrajectoryPointList()
@@ -279,6 +289,11 @@ public final class EuclideanTrajectoryControllerCommand extends QueueableCommand
    public void setTrajectoryFrame(ReferenceFrame trajectoryFrame)
    {
       this.trajectoryFrame = trajectoryFrame;
+   }
+
+   public RigidBodyTransform getControlFramePose()
+   {
+      return controlFramePoseInBodyFrame;
    }
 
    public void getControlFramePose(RigidBodyTransform transformToPack)

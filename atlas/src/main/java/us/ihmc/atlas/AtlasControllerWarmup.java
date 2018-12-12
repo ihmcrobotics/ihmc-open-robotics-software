@@ -11,11 +11,14 @@ import us.ihmc.simulationconstructionset.FloatingRootJointRobot;
 
 public class AtlasControllerWarmup extends HumanoidControllerWarmup
 {
-   private static final AtlasRobotModel robotModel = new AtlasRobotModel(AtlasRobotVersion.ATLAS_UNPLUGGED_V5_NO_FOREARMS, RobotTarget.SCS, true);
-
    public AtlasControllerWarmup()
    {
-      super(robotModel);
+      this(AtlasRobotVersion.ATLAS_UNPLUGGED_V5_NO_FOREARMS);
+   }
+
+   public AtlasControllerWarmup(AtlasRobotVersion version)
+   {
+      super(new AtlasRobotModel(version, RobotTarget.SCS, true));
    }
 
    @Override
@@ -50,7 +53,7 @@ public class AtlasControllerWarmup extends HumanoidControllerWarmup
    public static void main(String[] args)
    {
       AtlasControllerWarmup atlasControllerWarmup = new AtlasControllerWarmup();
-      FloatingRootJointRobot robot = robotModel.createHumanoidFloatingRootJointRobot(false);
+      FloatingRootJointRobot robot = atlasControllerWarmup.getRobotModel().createHumanoidFloatingRootJointRobot(false);
       HumanoidControllerWarmupVisualizer.runAndVisualizeWarmup(atlasControllerWarmup, robot);
    }
 }

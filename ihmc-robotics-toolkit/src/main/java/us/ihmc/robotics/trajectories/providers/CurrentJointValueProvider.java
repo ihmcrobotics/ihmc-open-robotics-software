@@ -1,13 +1,13 @@
 package us.ihmc.robotics.trajectories.providers;
 
-import us.ihmc.robotics.screwTheory.OneDoFJoint;
+import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.yoVariables.providers.DoubleProvider;
 
 public class CurrentJointValueProvider implements DoubleProvider
 {
-   OneDoFJoint joint;
+   OneDoFJointBasics joint;
    
-   public CurrentJointValueProvider(OneDoFJoint joint)
+   public CurrentJointValueProvider(OneDoFJointBasics joint)
    {
       this.joint = joint;
    }

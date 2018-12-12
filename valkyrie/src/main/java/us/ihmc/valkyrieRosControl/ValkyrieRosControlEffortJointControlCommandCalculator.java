@@ -1,7 +1,7 @@
 package us.ihmc.valkyrieRosControl;
 
+import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.robotics.controllers.PIDController;
-import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutputReadOnly;
 import us.ihmc.valkyrieRosControl.dataHolders.YoEffortJointHandleHolder;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
@@ -48,7 +48,7 @@ public class ValkyrieRosControlEffortJointControlCommandCalculator
       pidController.setProportionalGain(desiredOutput.hasStiffness() ? desiredOutput.getStiffness() : 0.0);
       pidController.setDerivativeGain(desiredOutput.hasDamping() ? desiredOutput.getDamping() : 0.0);
 
-      OneDoFJoint oneDoFJoint = yoEffortJointHandleHolder.getOneDoFJoint();
+      OneDoFJointBasics oneDoFJoint = yoEffortJointHandleHolder.getOneDoFJoint();
       
       double q, qd;
 

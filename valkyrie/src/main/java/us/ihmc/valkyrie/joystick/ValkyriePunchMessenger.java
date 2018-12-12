@@ -73,6 +73,6 @@ public class ValkyriePunchMessenger implements HumanoidRobotPunchMessenger, Huma
    {
       HighLevelStateMessage message = new HighLevelStateMessage();
       message.setHighLevelControllerName(HighLevelControllerName.STAND_TRANSITION_STATE.toByte());
-      highLevelStatePublisher.publish(message);      
+      highLevelStatePublisher.publish(message);
    }
 }

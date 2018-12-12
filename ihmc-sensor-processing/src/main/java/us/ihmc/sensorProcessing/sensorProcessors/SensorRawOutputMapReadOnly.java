@@ -3,7 +3,7 @@ package us.ihmc.sensorProcessing.sensorProcessors;
 import java.util.List;
 
 import controller_msgs.msg.dds.AtlasAuxiliaryRobotData;
-import us.ihmc.robotics.screwTheory.OneDoFJoint;
+import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.robotics.sensors.ForceSensorDataHolderReadOnly;
 import us.ihmc.sensorProcessing.stateEstimation.IMUSensorReadOnly;
 
@@ -15,13 +15,13 @@ public interface SensorRawOutputMapReadOnly extends SensorTimestampHolder
 
    public long getSensorHeadPPSTimestamp();
    
-   public double getJointPositionRawOutput(OneDoFJoint oneDoFJoint);
+   public double getJointPositionRawOutput(OneDoFJointBasics oneDoFJoint);
 
-   public double getJointVelocityRawOutput(OneDoFJoint oneDoFJoint);
+   public double getJointVelocityRawOutput(OneDoFJointBasics oneDoFJoint);
    
-   public double getJointAccelerationRawOutput(OneDoFJoint oneDoFJoint);
+   public double getJointAccelerationRawOutput(OneDoFJointBasics oneDoFJoint);
 
-   public double getJointTauRawOutput(OneDoFJoint oneDoFJoint);
+   public double getJointTauRawOutput(OneDoFJointBasics oneDoFJoint);
    
    public List<? extends IMUSensorReadOnly> getIMURawOutputs();
 

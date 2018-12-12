@@ -18,7 +18,7 @@ import us.ihmc.graphicsDescription.appearance.YoAppearanceRGBColor;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicVector;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
-import us.ihmc.robotics.screwTheory.Wrench;
+import us.ihmc.mecano.spatial.Wrench;
 import us.ihmc.robotics.weightMatrices.WeightMatrix6D;
 import us.ihmc.tools.exceptions.NoConvergenceException;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
@@ -191,7 +191,7 @@ public class FlatGroundContactForceOptimizer
          }
          indexOffset += contactPointsInPlane;
 
-         Wrench wrench = new Wrench(planeFrame, ReferenceFrame.getWorldFrame(), resultForce, resultTorque);
+         Wrench wrench = new Wrench(planeFrame, ReferenceFrame.getWorldFrame(), resultTorque, resultForce);
          wrenches.add(wrench);
       }
 

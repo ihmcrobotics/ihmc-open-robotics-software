@@ -1,7 +1,10 @@
 package us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.virtualModelControl;
 
+import java.util.List;
+
 import org.ejml.data.DenseMatrix64F;
 import org.ejml.ops.CommonOps;
+
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.JointspaceAccelerationCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.virtualModelControl.JointTorqueCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.virtualModelControl.VirtualEffortCommand;
@@ -9,10 +12,16 @@ import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.QPInput;
 import us.ihmc.commonWalkingControlModules.virtualModelControl.VirtualModelControlSolution;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.mecano.algorithms.GeometricJacobianCalculator;
+import us.ihmc.mecano.multiBodySystem.interfaces.JointBasics;
+import us.ihmc.mecano.multiBodySystem.interfaces.JointReadOnly;
+import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
+import us.ihmc.mecano.spatial.Wrench;
+import us.ihmc.mecano.spatial.interfaces.WrenchReadOnly;
+import us.ihmc.mecano.tools.MultiBodySystemTools;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
-import us.ihmc.robotics.screwTheory.*;
-
-import java.util.List;
+import us.ihmc.robotics.screwTheory.ScrewTools;
+import us.ihmc.robotics.screwTheory.SelectionMatrix6D;
 
 public class VirtualModelMomentumController
 {
@@ -73,15 +82,16 @@ public class VirtualModelMomentumController
       jacobianCalculator.clear();
       jacobianCalculator.setKinematicChain(commandToAdd.getBase(), commandToAdd.getEndEffector());
       jacobianCalculator.setJacobianFrame(controlFrame);
-      jacobianCalculator.computeJacobianMatrix();
+      jacobianCalculator.reset();
 
       // Compute the M-by-N task Jacobian: J = S * J
       // Step 1, let's get the 'small' Jacobian matrix, j.
       // It is called small as its number of columns is equal to the number of DoFs to its kinematic chain, which is way smaller than the number of robot DoFs.
-      jacobianCalculator.getJacobianMatrix(tempSelectionMatrix, tempTaskJacobian);
+      tempTaskJacobian.reshape(taskSize, jacobianCalculator.getNumberOfDegreesOfFreedom());
+      CommonOps.mult(tempSelectionMatrix, jacobianCalculator.getJacobianMatrix(), tempTaskJacobian);
 
       // Step 2: The small Jacobian matrix into the full Jacobian matrix. Proper indexing has to be ensured, so it is handled by the jointIndexHandler.
-      List<InverseDynamicsJoint> jointsUsedInTask = jacobianCalculator.getJointsFromBaseToEndEffector();
+      List<JointReadOnly> jointsUsedInTask = jacobianCalculator.getJointsFromBaseToEndEffector();
       jointIndexHandler.compactBlockToFullBlockIgnoreUnindexedJoints(jointsUsedInTask, tempTaskJacobian, tempFullJacobian);
 
       /*
@@ -108,14 +118,14 @@ public class VirtualModelMomentumController
     */
    public boolean addJointTorqueCommand(JointTorqueCommand commandToAdd)
    {
-      int taskSize = ScrewTools.computeDegreesOfFreedom(commandToAdd.getJoints());
+      int taskSize = MultiBodySystemTools.computeDegreesOfFreedom(commandToAdd.getJoints());
 
       if (taskSize == 0)
          return false;
 
       for (int jointNumber = 0; jointNumber < commandToAdd.getNumberOfJoints(); jointNumber++)
       {
-         InverseDynamicsJoint joint = commandToAdd.getJoint(jointNumber);
+         JointBasics joint = commandToAdd.getJoint(jointNumber);
          int[] jointIndices = jointIndexHandler.getJointIndices(joint);
          if (jointIndices == null)
             return false;
@@ -143,13 +153,13 @@ public class VirtualModelMomentumController
     *
     * @return true if the wrench was successfully added.
     */
-   public boolean addExternalWrench(RigidBody base, RigidBody endEffector, Wrench wrench, SelectionMatrix6D selectionMatrix)
+   public boolean addExternalWrench(RigidBodyBasics base, RigidBodyBasics endEffector, WrenchReadOnly wrench, SelectionMatrix6D selectionMatrix)
    {
       if (wrench.getLinearPart().length() < 1e-5 && wrench.getAngularPart().length() < 1e-5)
          return false;
 
       // Gets the M-by-6 selection matrix S.
-      selectionMatrix.getCompactSelectionMatrixInFrame(wrench.getExpressedInFrame(), tempSelectionMatrix);
+      selectionMatrix.getCompactSelectionMatrixInFrame(wrench.getReferenceFrame(), tempSelectionMatrix);
 
       int taskSize = tempSelectionMatrix.getNumRows();
 
@@ -158,16 +168,17 @@ public class VirtualModelMomentumController
 
       jacobianCalculator.clear();
       jacobianCalculator.setKinematicChain(base, endEffector);
-      jacobianCalculator.setJacobianFrame(wrench.getExpressedInFrame());
-      jacobianCalculator.computeJacobianMatrix();
+      jacobianCalculator.setJacobianFrame(wrench.getReferenceFrame());
+      jacobianCalculator.reset();
 
       // Compute the M-by-N task Jacobian: J = S * J
       // Step 1, let's get the 'small' Jacobian matrix, j.
       // It is called small as its number of columns is equal to the number of DoFs to its kinematic chain, which is way smaller than the number of robot DoFs.
-      jacobianCalculator.getJacobianMatrix(tempSelectionMatrix, tempTaskJacobian);
+      tempTaskJacobian.reshape(taskSize, jacobianCalculator.getNumberOfDegreesOfFreedom());
+      CommonOps.mult(tempSelectionMatrix, jacobianCalculator.getJacobianMatrix(), tempTaskJacobian);
 
       // Step 2: The small Jacobian matrix into the full Jacobian matrix. Proper indexing has to be ensured, so it is handled by the jointIndexHandler.
-      List<InverseDynamicsJoint> jointsUsedInTask = jacobianCalculator.getJointsFromBaseToEndEffector();
+      List<JointReadOnly> jointsUsedInTask = jacobianCalculator.getJointsFromBaseToEndEffector();
       jointIndexHandler.compactBlockToFullBlockIgnoreUnindexedJoints(jointsUsedInTask, tempTaskJacobian, tempFullJacobian);
 
       /*
@@ -178,7 +189,7 @@ public class VirtualModelMomentumController
        * @formatter:on
        */
       tempTaskObjective.reshape(taskSize, 1);
-      wrench.getMatrix(tempFullObjective);
+      wrench.get(tempFullObjective);
       CommonOps.mult(tempSelectionMatrix, tempFullObjective, tempTaskObjective);
 
       // Add these forces to the effort matrix t = J' w
@@ -200,7 +211,7 @@ public class VirtualModelMomentumController
     *
     * @return true if the wrench was successfully added.
     */
-   public boolean addExternalWrench(RigidBody base, RigidBody endEffector, Wrench wrench)
+   public boolean addExternalWrench(RigidBodyBasics base, RigidBodyBasics endEffector, Wrench wrench)
    {
       return addExternalWrench(base, endEffector, wrench, defaultSelectionMatrix);
    }

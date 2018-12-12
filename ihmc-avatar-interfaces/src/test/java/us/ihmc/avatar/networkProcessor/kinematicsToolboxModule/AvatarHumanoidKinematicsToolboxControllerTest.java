@@ -34,13 +34,14 @@ import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.graphicsDescription.appearance.YoAppearanceRGBColor;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
+import us.ihmc.mecano.algorithms.CenterOfMassCalculator;
+import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
+import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
+import us.ihmc.mecano.tools.MultiBodySystemTools;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotModels.FullRobotModelUtils;
 import us.ihmc.robotics.robotDescription.RobotDescription;
 import us.ihmc.robotics.robotSide.RobotSide;
-import us.ihmc.robotics.screwTheory.CenterOfMassCalculator;
-import us.ihmc.robotics.screwTheory.OneDoFJoint;
-import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.robotics.screwTheory.ScrewTools;
 import us.ihmc.robotics.screwTheory.SelectionMatrix3D;
 import us.ihmc.robotics.sensors.ForceSensorDefinition;
@@ -225,7 +226,7 @@ public abstract class AvatarHumanoidKinematicsToolboxControllerTest implements M
          for (RobotSide robotSide : RobotSide.values)
          {
             randomizeArmJointPositions(random, robotSide, randomizedFullRobotModel, 0.6);
-            RigidBody hand = randomizedFullRobotModel.getHand(robotSide);
+            RigidBodyBasics hand = randomizedFullRobotModel.getHand(robotSide);
             FramePoint3D desiredPosition = new FramePoint3D(hand.getBodyFixedFrame());
             desiredPosition.changeFrame(worldFrame);
             KinematicsToolboxRigidBodyMessage message = MessageTools.createKinematicsToolboxRigidBodyMessage(hand, desiredPosition);
@@ -338,7 +339,7 @@ public abstract class AvatarHumanoidKinematicsToolboxControllerTest implements M
 
       int numberOfTests = 30;
 
-      RigidBody[] bodiesToControl = {
+      RigidBodyBasics[] bodiesToControl = {
             randomizedFullRobotModel.getChest(),
             randomizedFullRobotModel.getHand(RobotSide.LEFT),
             randomizedFullRobotModel.getHand(RobotSide.RIGHT),
@@ -354,10 +355,10 @@ public abstract class AvatarHumanoidKinematicsToolboxControllerTest implements M
          RigidBodyTransform initialSupportFootTransform = initialFullRobotModel.getFoot(supportFootSide).getBodyFixedFrame().getTransformToWorldFrame();
          transformFromRootJointToWorldFrame.preMultiply(initialSupportFootTransform);
          
-         randomizedFullRobotModel.getRootJoint().setPositionAndRotation(transformFromRootJointToWorldFrame);
+         randomizedFullRobotModel.getRootJoint().setJointConfiguration(transformFromRootJointToWorldFrame);
          randomizedFullRobotModel.updateFrames();
 
-         for (RigidBody rigidBody : bodiesToControl)
+         for (RigidBodyBasics rigidBody : bodiesToControl)
          {
             FramePoint3D desiredPosition = new FramePoint3D(rigidBody.getBodyFixedFrame());
             desiredPosition.changeFrame(worldFrame);
@@ -437,28 +438,28 @@ public abstract class AvatarHumanoidKinematicsToolboxControllerTest implements M
 
    private void randomizeArmJointPositions(Random random, RobotSide robotSide, FullHumanoidRobotModel robotModelToModify, double percentOfMotionRangeAllowed)
    {
-      RigidBody chest = robotModelToModify.getChest();
-      RigidBody hand = robotModelToModify.getHand(robotSide);
+      RigidBodyBasics chest = robotModelToModify.getChest();
+      RigidBodyBasics hand = robotModelToModify.getHand(robotSide);
       randomizeKinematicsChainPositions(random, chest, hand, percentOfMotionRangeAllowed);
    }
 
-   private void randomizeKinematicsChainPositions(Random random, RigidBody base, RigidBody body)
+   private void randomizeKinematicsChainPositions(Random random, RigidBodyBasics base, RigidBodyBasics body)
    {
       randomizeKinematicsChainPositions(random, base, body, 1.0);
    }
 
-   private void randomizeKinematicsChainPositions(Random random, RigidBody base, RigidBody body, double percentOfMotionRangeAllowed)
+   private void randomizeKinematicsChainPositions(Random random, RigidBodyBasics base, RigidBodyBasics body, double percentOfMotionRangeAllowed)
    {
       percentOfMotionRangeAllowed = MathTools.clamp(percentOfMotionRangeAllowed, 0.0, 1.0);
 
-      OneDoFJoint[] joints = ScrewTools.createOneDoFJointPath(base, body);
+      OneDoFJointBasics[] joints = MultiBodySystemTools.createOneDoFJointPath(base, body);
 
       randomizeJointPositions(random, joints, percentOfMotionRangeAllowed);
    }
 
-   private void randomizeJointPositions(Random random, OneDoFJoint[] joints, double percentOfMotionRangeAllowed)
+   private void randomizeJointPositions(Random random, OneDoFJointBasics[] joints, double percentOfMotionRangeAllowed)
    {
-      for (OneDoFJoint joint : joints)
+      for (OneDoFJointBasics joint : joints)
       {
          double jointLimitLower = joint.getJointLimitLower();
          double jointLimitUpper = joint.getJointLimitUpper();
@@ -472,8 +473,8 @@ public abstract class AvatarHumanoidKinematicsToolboxControllerTest implements M
    private FramePoint3D computeCenterOfMass3D(FullHumanoidRobotModel fullHumanoidRobotModel)
    {
       CenterOfMassCalculator calculator = new CenterOfMassCalculator(fullHumanoidRobotModel.getElevator(), worldFrame);
-      calculator.compute();
-      return calculator.getCenterOfMass();
+      calculator.reset();
+      return new FramePoint3D(calculator.getCenterOfMass());
    }
 
    private RobotController createToolboxUpdater()
@@ -523,11 +524,11 @@ public abstract class AvatarHumanoidKinematicsToolboxControllerTest implements M
 
    public static RobotConfigurationData extractRobotConfigurationData(FullHumanoidRobotModel fullRobotModel)
    {
-      OneDoFJoint[] joints = FullRobotModelUtils.getAllJointsExcludingHands(fullRobotModel);
+      OneDoFJointBasics[] joints = FullRobotModelUtils.getAllJointsExcludingHands(fullRobotModel);
       RobotConfigurationData robotConfigurationData = RobotConfigurationDataFactory.create(joints, new ForceSensorDefinition[0], new IMUDefinition[0]);
       RobotConfigurationDataFactory.packJointState(robotConfigurationData, Arrays.stream(joints).collect(Collectors.toList()));
-      robotConfigurationData.getRootTranslation().set(fullRobotModel.getRootJoint().getTranslationForReading());
-      robotConfigurationData.getRootOrientation().set(fullRobotModel.getRootJoint().getRotationForReading());
+      robotConfigurationData.getRootTranslation().set(fullRobotModel.getRootJoint().getJointPose().getPosition());
+      robotConfigurationData.getRootOrientation().set(fullRobotModel.getRootJoint().getJointPose().getOrientation());
       return robotConfigurationData;
    }
 

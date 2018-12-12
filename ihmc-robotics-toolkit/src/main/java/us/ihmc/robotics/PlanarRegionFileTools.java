@@ -464,7 +464,7 @@ public class PlanarRegionFileTools
    {
       try
       {
-         return IOUtils.readLines(loadingClass.getClassLoader().getResourceAsStream(relativePath), StandardCharsets.UTF_8);
+         return IOUtils.readLines(loadingClass.getClassLoader().getResourceAsStream(relativePath), StandardCharsets.UTF_8.name());
       }
       catch (IOException e)
       {

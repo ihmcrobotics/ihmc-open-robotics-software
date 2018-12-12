@@ -5,6 +5,7 @@
 1. Run `us.ihmc.idl.IHMCInterfacesGenerateMessages`, 
    located in `ihmc-interfaces\src\generator\java`
    with `ihmc-open-robotics-software/ihmc-interfaces` set as the working directory.
+2. Update the standalone `ihmc_msgs` and `ihmc_interfaces` repositories on GitHub.
 
 #### Step Develop branch
 

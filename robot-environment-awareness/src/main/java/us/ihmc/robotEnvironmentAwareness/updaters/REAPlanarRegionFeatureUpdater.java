@@ -6,7 +6,7 @@ import java.util.concurrent.atomic.AtomicReference;
 
 import us.ihmc.euclid.geometry.LineSegment3D;
 import us.ihmc.jOctoMap.ocTree.NormalOcTree;
-import us.ihmc.javaFXToolkit.messager.Messager;
+import us.ihmc.messager.Messager;
 import us.ihmc.robotEnvironmentAwareness.communication.REAModuleAPI;
 import us.ihmc.robotEnvironmentAwareness.geometry.ConcaveHullFactoryParameters;
 import us.ihmc.robotEnvironmentAwareness.io.FilePropertyHelper;
@@ -30,7 +30,7 @@ public class REAPlanarRegionFeatureUpdater implements RegionFeaturesProvider
 
    private final PlanarRegionSegmentationDataExporter dataExporter = EXPORT_SEGMENTATION_ON_EXCEPTION ? new PlanarRegionSegmentationDataExporter(new File("DataThrowingException/Segmentation")) : null;
 
-   private final TimeReporter timeReporter = new TimeReporter(this);
+   private final TimeReporter timeReporter = new TimeReporter();
    private final NormalOcTree octree;
 
    private final PlanarRegionSegmentationCalculator segmentationCalculator = new PlanarRegionSegmentationCalculator();

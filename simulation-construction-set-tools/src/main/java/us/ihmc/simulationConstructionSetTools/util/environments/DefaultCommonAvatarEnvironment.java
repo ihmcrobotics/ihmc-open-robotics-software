@@ -1595,12 +1595,22 @@ public class DefaultCommonAvatarEnvironment implements CommonAvatarEnvironmentIn
    private static void setUpCinderBlockSquare(CombinedTerrainObject3D combinedTerrainObject, double xCenter, double yCenter, int numberFlatSupports,
          double yawDegrees)
    {
+      if (numberFlatSupports < 0)
+         return;
+
       double xOffset = 0, yOffset = cinderBlockWidth / 2.0;
       double[] xyRotated1 = rotateAroundOrigin(new double[] {xOffset, yOffset}, yawDegrees);
       double[] xyRotated2 = rotateAroundOrigin(new double[] {xOffset, -yOffset}, yawDegrees);
 
-      setUpCinderBlock(combinedTerrainObject, xCenter + xyRotated1[0], yCenter + xyRotated1[1], numberFlatSupports, yawDegrees);
-      setUpCinderBlock(combinedTerrainObject, xCenter + xyRotated2[0], yCenter + xyRotated2[1], numberFlatSupports, yawDegrees);
+
+      RigidBodyTransform location = new RigidBodyTransform();
+      location.setRotationYawAndZeroTranslation(Math.toRadians(yawDegrees));
+      location.setTranslation(new Vector3D(xCenter, yCenter, cinderBlockHeight / 2 + numberFlatSupports * cinderBlockHeight));
+
+      RotatableCinderBlockTerrainObject newBox = new RotatableCinderBlockTerrainObject(
+            new Box3D(location, cinderBlockLength + overlapToPreventGaps, 2.0 * cinderBlockWidth + overlapToPreventGaps, cinderBlockHeight + overlapToPreventGaps),
+            cinderBlockAppearance);
+      combinedTerrainObject.addTerrainObject(newBox);
 
       if (numberFlatSupports > 0)
          setUpCinderBlockSquare(combinedTerrainObject, xCenter, yCenter, numberFlatSupports - 1, yawDegrees + 90);
@@ -1649,22 +1659,20 @@ public class DefaultCommonAvatarEnvironment implements CommonAvatarEnvironmentIn
 
       setUpCinderBlockSquare(combinedTerrainObject, xCenter, yCenter, numberFlatSupports - 1, yawDegrees);
 
-      double rampRise = cinderBlockLength * Math.sin(cinderBlockTiltRadians);
+      double xOffset = 0, yOffset = -cinderBlockWidth;
+      double[] xyRotated = rotateAroundOrigin(new double[] {xOffset, yOffset}, yawDegrees);
+      RigidBodyTransform location = new RigidBodyTransform();
+      location.setRotationYawAndZeroTranslation(Math.toRadians(yawDegrees));
 
-      RigidBodyTransform blockSupportLocation = new RigidBodyTransform();
-      blockSupportLocation.setRotationYawAndZeroTranslation(Math.toRadians(yawDegrees));
-      double[] xySupportRotatedOffset = rotateAroundOrigin(new double[] {(cinderBlockLength - rampRise) / 2, 0}, yawDegrees);
-      blockSupportLocation.setTranslation(
-            new Vector3D(xCenter + xySupportRotatedOffset[0], yCenter + xySupportRotatedOffset[1], rampRise / 2 + numberFlatSupports * cinderBlockHeight));
-      RotatableBoxTerrainObject newBox = new RotatableBoxTerrainObject(new Box3D(blockSupportLocation, rampRise, cinderBlockLength, rampRise),
-            cinderBlockAppearance);
+      RigidBodyTransform tilt = new RigidBodyTransform();
+      tilt.setRotationPitchAndZeroTranslation(-cinderBlockTiltRadians);
+      location.multiply(tilt);
+
+      double zCenter = (cinderBlockHeight * Math.cos(cinderBlockTiltRadians) + cinderBlockLength * Math.sin(cinderBlockTiltRadians)) / 2;
+      location.setTranslation(xCenter, yCenter, zCenter + numberFlatSupports * cinderBlockHeight);
+      RotatableCinderBlockTerrainObject newBox = new RotatableCinderBlockTerrainObject(
+            new Box3D(location, cinderBlockLength, 2.0 * cinderBlockWidth, cinderBlockHeight), cinderBlockAppearance);
       combinedTerrainObject.addTerrainObject(newBox);
-
-      double xOffset = 0, yOffset = cinderBlockWidth / 2;
-      double[] xyRotated1 = rotateAroundOrigin(new double[] {xOffset, yOffset}, yawDegrees);
-      double[] xyRotated2 = rotateAroundOrigin(new double[] {xOffset, -yOffset}, yawDegrees);
-      setUpSlopedCinderBlock(combinedTerrainObject, xCenter + xyRotated1[0], yCenter + xyRotated1[1], numberFlatSupports, yawDegrees);
-      setUpSlopedCinderBlock(combinedTerrainObject, xCenter + xyRotated2[0], yCenter + xyRotated2[1], numberFlatSupports, yawDegrees);
    }
 
    public static CombinedTerrainObject3D setUpGround(String name)

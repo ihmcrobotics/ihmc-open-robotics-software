@@ -10,14 +10,14 @@ import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition.GraphicType;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
+import us.ihmc.mecano.algorithms.CenterOfMassJacobian;
 import us.ihmc.robotModels.FullRobotModel;
+import us.ihmc.robotics.math.trajectories.StraightLineCartesianTrajectoryGenerator;
+import us.ihmc.robotics.screwTheory.SelectionMatrix6D;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoFramePoint3D;
 import us.ihmc.yoVariables.variable.YoFrameVector3D;
-import us.ihmc.robotics.math.trajectories.StraightLineCartesianTrajectoryGenerator;
-import us.ihmc.robotics.screwTheory.CenterOfMassJacobian;
-import us.ihmc.robotics.screwTheory.SelectionMatrix6D;
 
 public class HexapodMomentumController
 {
@@ -52,7 +52,7 @@ public class HexapodMomentumController
    {
       this.referenceFrames = referenceFrames;
       this.dt = dt;
-      comJacobian = new CenterOfMassJacobian(fullRobotModel.getElevator());
+      comJacobian = new CenterOfMassJacobian(fullRobotModel.getElevator(), fullRobotModel.getElevator().getBodyFixedFrame());
       yoTime = new YoDouble(prefix + "yoTime", registry);
       yoLinearMomentumRateOfChange = new YoFrameVector3D(prefix + "desiredLinearMomentumRateOfChange", ReferenceFrame.getWorldFrame(), registry);  
       yoAngularMomentumRateOfChange = new YoFrameVector3D(prefix + "desiredAngularMomentumRateOfChange", ReferenceFrame.getWorldFrame(), registry);
@@ -84,8 +84,8 @@ public class HexapodMomentumController
       currentCenterOfMassPosition.changeFrame(ReferenceFrame.getWorldFrame());
       yoCurrentCenterOfMassPosition.set(currentCenterOfMassPosition);
       
-      comJacobian.compute();
-      comJacobian.getCenterOfMassVelocity(currentCenterOfMassVelocity);
+      comJacobian.reset();
+      currentCenterOfMassVelocity.setIncludingFrame(comJacobian.getCenterOfMassVelocity());
       currentCenterOfMassVelocity.changeFrame(ReferenceFrame.getWorldFrame());
       
       desiredComPosition.setToZero(referenceFrames.getCenterOfFeetFrame());

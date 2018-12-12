@@ -6,10 +6,10 @@ import org.junit.Before;
 import org.junit.Test;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.quadrupedPlanning.input.QuadrupedTeleopManager;
 import us.ihmc.quadrupedRobotics.*;
 import us.ihmc.quadrupedRobotics.controller.QuadrupedControlMode;
 import us.ihmc.quadrupedRobotics.environments.SimpleMazeEnvironment;
-import us.ihmc.quadrupedRobotics.input.managers.QuadrupedTeleopManager;
 import us.ihmc.quadrupedRobotics.simulation.QuadrupedGroundContactModelType;
 import us.ihmc.simulationConstructionSetTools.util.simulationrunner.GoalOrientedTestConductor;
 import us.ihmc.simulationconstructionset.util.ground.TerrainObject3D;
@@ -90,7 +90,7 @@ public abstract class QuadrupedBodyPathPlanTest implements QuadrupedMultiRobotTe
       point4.setTime(12.0);
       point4.position_.set(0.0, 0.0, 0.0);
 
-      QuadrupedTestBehaviors.executeBodyPathPlan(conductor, variables, stepTeleopManager, 0.1, 0.2, point1, point2, point3, point4);
+      QuadrupedTestBehaviors.executeBodyPathPlan(conductor, variables, stepTeleopManager, 0.15, 0.2, point1, point2, point3, point4);
    }
 
    /**

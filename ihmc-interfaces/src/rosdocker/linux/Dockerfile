@@ -19,13 +19,13 @@ WORKDIR /root/ihmc_ros1_bridge
 COPY src/main/messages/ihmc_interfaces/controller_msgs src/controller_msgs
 
 RUN /bin/bash -c "source /opt/ros/$ROS2_DISTRO/setup.bash \
-    && ament build --symlink-install --only controller_msgs"
+    && ament build --only controller_msgs"
 
 # Add ihmc demos (build separately to save time)
 COPY src/ihmc_demo_py src/ihmc_demo_py
 
 RUN /bin/bash -c "source /opt/ros/$ROS2_DISTRO/setup.bash \
-    && ament build --symlink-install --only ihmc_demo_py"
+    && ament build --only ihmc_demo_py"
 
 RUN mkdir -p /root/ihmc_catkin_ws/src
 
@@ -46,13 +46,14 @@ WORKDIR /root/ihmc_ros1_bridge
 COPY src/rosdocker/linux/ihmc_ros1_bridge.repos .
 RUN vcs import src < ihmc_ros1_bridge.repos
 
-ENV MAKEFLAGS=-j1
+#Uncomment this if bridge fails to compile due to out-of-memory issues
+#ENV MAKEFLAGS=-j1
 
 RUN /bin/bash -c "source /opt/ros/$ROS2_DISTRO/setup.bash \
                && source /root/ihmc_ros1_bridge/install/local_setup.bash \
                && source /opt/ros/kinetic/setup.bash \
                && source /root/ihmc_catkin_ws/install/setup.bash \
-               && ament build --symlink-install --only ros1_bridge --force-cmake-configure"
+               && ament build --only ros1_bridge --force-cmake-configure"
 
 #COPY ./runtime_entrypoint.sh /
 

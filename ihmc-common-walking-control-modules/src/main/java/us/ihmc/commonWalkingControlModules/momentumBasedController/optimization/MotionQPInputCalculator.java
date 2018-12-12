@@ -18,18 +18,22 @@ import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinemat
 import us.ihmc.commonWalkingControlModules.inverseKinematics.JointPrivilegedConfigurationHandler;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.mecano.algorithms.CentroidalMomentumRateCalculator;
+import us.ihmc.mecano.algorithms.GeometricJacobianCalculator;
+import us.ihmc.mecano.multiBodySystem.interfaces.JointBasics;
+import us.ihmc.mecano.multiBodySystem.interfaces.JointReadOnly;
+import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
+import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
+import us.ihmc.mecano.spatial.Momentum;
+import us.ihmc.mecano.spatial.SpatialAcceleration;
+import us.ihmc.mecano.spatial.SpatialForce;
+import us.ihmc.mecano.spatial.SpatialVector;
+import us.ihmc.mecano.spatial.interfaces.MomentumReadOnly;
+import us.ihmc.mecano.spatial.interfaces.SpatialForceReadOnly;
+import us.ihmc.mecano.tools.MultiBodySystemTools;
 import us.ihmc.robotics.linearAlgebra.DampedLeastSquaresNullspaceCalculator;
 import us.ihmc.robotics.linearAlgebra.MatrixTools;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
-import us.ihmc.robotics.screwTheory.GeometricJacobianCalculator;
-import us.ihmc.robotics.screwTheory.InverseDynamicsJoint;
-import us.ihmc.robotics.screwTheory.Momentum;
-import us.ihmc.robotics.screwTheory.OneDoFJoint;
-import us.ihmc.robotics.screwTheory.RigidBody;
-import us.ihmc.robotics.screwTheory.ScrewTools;
-import us.ihmc.robotics.screwTheory.SpatialAccelerationVector;
-import us.ihmc.robotics.screwTheory.SpatialForceVector;
-import us.ihmc.robotics.screwTheory.SpatialMotionVector;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 
@@ -44,22 +48,20 @@ public class MotionQPInputCalculator
    private final PoseReferenceFrame controlFrame = new PoseReferenceFrame("controlFrame", worldFrame);
    private final GeometricJacobianCalculator jacobianCalculator = new GeometricJacobianCalculator();
 
-   private final OneDoFJoint[] oneDoFJoints;
+   private final OneDoFJointBasics[] oneDoFJoints;
 
-   private final DenseMatrix64F convectiveTermMatrix = new DenseMatrix64F(SpatialMotionVector.SIZE, 1);
-
-   private final CentroidalMomentumHandler centroidalMomentumHandler;
+   private final CentroidalMomentumRateCalculator centroidalMomentumRateCalculator;
 
    private final JointPrivilegedConfigurationHandler privilegedConfigurationHandler;
 
-   private final DenseMatrix64F tempPrimaryTaskJacobian = new DenseMatrix64F(SpatialMotionVector.SIZE, 12);
+   private final DenseMatrix64F tempPrimaryTaskJacobian = new DenseMatrix64F(SpatialVector.SIZE, 12);
 
-   private final DenseMatrix64F tempTaskJacobian = new DenseMatrix64F(SpatialMotionVector.SIZE, 12);
-   private final DenseMatrix64F tempTaskObjective = new DenseMatrix64F(SpatialMotionVector.SIZE, 1);
-   private final DenseMatrix64F tempTaskWeight = new DenseMatrix64F(SpatialAccelerationVector.SIZE, SpatialAccelerationVector.SIZE);
-   private final DenseMatrix64F tempTaskWeightSubspace = new DenseMatrix64F(SpatialAccelerationVector.SIZE, SpatialAccelerationVector.SIZE);
+   private final DenseMatrix64F tempTaskJacobian = new DenseMatrix64F(SpatialVector.SIZE, 12);
+   private final DenseMatrix64F tempTaskObjective = new DenseMatrix64F(SpatialVector.SIZE, 1);
+   private final DenseMatrix64F tempTaskWeight = new DenseMatrix64F(SpatialAcceleration.SIZE, SpatialAcceleration.SIZE);
+   private final DenseMatrix64F tempTaskWeightSubspace = new DenseMatrix64F(SpatialAcceleration.SIZE, SpatialAcceleration.SIZE);
 
-   private final DenseMatrix64F tempSelectionMatrix = new DenseMatrix64F(SpatialAccelerationVector.SIZE, SpatialAccelerationVector.SIZE);
+   private final DenseMatrix64F tempSelectionMatrix = new DenseMatrix64F(SpatialAcceleration.SIZE, SpatialAcceleration.SIZE);
 
    private final FrameVector3D angularMomentum = new FrameVector3D();
    private final FrameVector3D linearMomentum = new FrameVector3D();
@@ -72,12 +74,12 @@ public class MotionQPInputCalculator
 
    private final int numberOfDoFs;
 
-   public MotionQPInputCalculator(ReferenceFrame centerOfMassFrame, CentroidalMomentumHandler centroidalMomentumHandler, JointIndexHandler jointIndexHandler,
+   public MotionQPInputCalculator(ReferenceFrame centerOfMassFrame, CentroidalMomentumRateCalculator centroidalMomentumRateCalculator, JointIndexHandler jointIndexHandler,
                                   JointPrivilegedConfigurationParameters jointPrivilegedConfigurationParameters, YoVariableRegistry parentRegistry)
    {
       this.centerOfMassFrame = centerOfMassFrame;
       this.jointIndexHandler = jointIndexHandler;
-      this.centroidalMomentumHandler = centroidalMomentumHandler;
+      this.centroidalMomentumRateCalculator = centroidalMomentumRateCalculator;
       oneDoFJoints = jointIndexHandler.getIndexedOneDoFJoints();
       numberOfDoFs = jointIndexHandler.getNumberOfDoFs();
 
@@ -103,7 +105,7 @@ public class MotionQPInputCalculator
 
    public void initialize()
    {
-      centroidalMomentumHandler.reset();
+      centroidalMomentumRateCalculator.reset();
       allTaskJacobian.reshape(0, numberOfDoFs);
    }
 
@@ -149,7 +151,7 @@ public class MotionQPInputCalculator
 
       if (robotTaskSize > 0)
       {
-         OneDoFJoint[] joints = privilegedConfigurationHandler.getJoints();
+         OneDoFJointBasics[] joints = privilegedConfigurationHandler.getJoints();
          tempTaskJacobian.reshape(robotTaskSize, numberOfDoFs);
          boolean success = jointIndexHandler.compactBlockToFullBlock(joints, selectionMatrix, tempTaskJacobian);
 
@@ -188,7 +190,7 @@ public class MotionQPInputCalculator
       motionQPInputToPack.setTaskObjective(privilegedConfigurationHandler.getPrivilegedJointVelocities());
       motionQPInputToPack.setTaskWeightMatrix(privilegedConfigurationHandler.getWeights());
 
-      OneDoFJoint[] joints = privilegedConfigurationHandler.getJoints();
+      OneDoFJointBasics[] joints = privilegedConfigurationHandler.getJoints();
       boolean success = jointIndexHandler.compactBlockToFullBlock(joints, selectionMatrix, motionQPInputToPack.taskJacobian);
 
       if (!success)
@@ -229,21 +231,20 @@ public class MotionQPInputCalculator
       {
          // Compute the M-by-M weight matrix W computed as follows: W = S * W * S^T
          motionQPInputToPack.setUseWeightScalar(false);
-         tempTaskWeight.reshape(SpatialAccelerationVector.SIZE, SpatialAccelerationVector.SIZE);
-         tempTaskWeightSubspace.reshape(taskSize, SpatialAccelerationVector.SIZE);
+         tempTaskWeight.reshape(SpatialAcceleration.SIZE, SpatialAcceleration.SIZE);
+         tempTaskWeightSubspace.reshape(taskSize, SpatialAcceleration.SIZE);
          commandToConvert.getWeightMatrix(controlFrame, tempTaskWeight);
          CommonOps.mult(tempSelectionMatrix, tempTaskWeight, tempTaskWeightSubspace);
          CommonOps.multTransB(tempTaskWeightSubspace, tempSelectionMatrix, motionQPInputToPack.taskWeightMatrix);
       }
 
-      RigidBody base = commandToConvert.getBase();
-      RigidBody endEffector = commandToConvert.getEndEffector();
+      RigidBodyBasics base = commandToConvert.getBase();
+      RigidBodyBasics endEffector = commandToConvert.getEndEffector();
 
       jacobianCalculator.clear();
       jacobianCalculator.setKinematicChain(base, endEffector);
       jacobianCalculator.setJacobianFrame(controlFrame);
-      jacobianCalculator.computeJacobianMatrix();
-      jacobianCalculator.computeConvectiveTerm();
+      jacobianCalculator.reset();
 
       /*
        * @formatter:off
@@ -253,19 +254,19 @@ public class MotionQPInputCalculator
        * convective term vector resulting from the Coriolis and Centrifugal effects.
        * @formatter:on
        */
-      jacobianCalculator.getConvectiveTerm(convectiveTermMatrix);
       commandToConvert.getDesiredSpatialAcceleration(tempTaskObjective);
-      CommonOps.subtractEquals(tempTaskObjective, convectiveTermMatrix);
+      CommonOps.subtractEquals(tempTaskObjective, jacobianCalculator.getConvectiveTermMatrix());
       CommonOps.mult(tempSelectionMatrix, tempTaskObjective, motionQPInputToPack.taskObjective);
 
       // Compute the M-by-N task Jacobian: J = S * J
       // Step 1, let's get the 'small' Jacobian matrix j.
       // It is called small as its number of columns is equal to the number of DoFs to its kinematic chain which is way smaller than the number of robot DoFs.
-      jacobianCalculator.getJacobianMatrix(tempSelectionMatrix, tempTaskJacobian);
+      tempTaskJacobian.reshape(taskSize, jacobianCalculator.getNumberOfDegreesOfFreedom());
+      CommonOps.mult(tempSelectionMatrix, jacobianCalculator.getJacobianMatrix(), tempTaskJacobian);
 
       // Dealing with the primary base:
-      RigidBody primaryBase = commandToConvert.getPrimaryBase();
-      List<InverseDynamicsJoint> jointsUsedInTask = jacobianCalculator.getJointsFromBaseToEndEffector();
+      RigidBodyBasics primaryBase = commandToConvert.getPrimaryBase();
+      List<JointReadOnly> jointsUsedInTask = jacobianCalculator.getJointsFromBaseToEndEffector();
 
       // Step 2: The small Jacobian matrix into the full Jacobian matrix. Proper indexing has to be ensured, so it is handled by the jointIndexHandler.
       jointIndexHandler.compactBlockToFullBlockIgnoreUnindexedJoints(jointsUsedInTask, tempTaskJacobian, motionQPInputToPack.taskJacobian);
@@ -285,7 +286,7 @@ public class MotionQPInputCalculator
          boolean isJointUpstreamOfPrimaryBase = false;
          for (int i = jointsUsedInTask.size() - 1; i >= 0; i--)
          {
-            InverseDynamicsJoint joint = jointsUsedInTask.get(i);
+            JointReadOnly joint = jointsUsedInTask.get(i);
 
             if (joint.getSuccessor() == primaryBase)
                isJointUpstreamOfPrimaryBase = true;
@@ -348,20 +349,20 @@ public class MotionQPInputCalculator
       {
          // Compute the M-by-M weight matrix W computed as follows: W = S * W * S^T
          motionQPInputToPack.setUseWeightScalar(false);
-         tempTaskWeight.reshape(SpatialAccelerationVector.SIZE, SpatialAccelerationVector.SIZE);
-         tempTaskWeightSubspace.reshape(taskSize, SpatialAccelerationVector.SIZE);
+         tempTaskWeight.reshape(SpatialAcceleration.SIZE, SpatialAcceleration.SIZE);
+         tempTaskWeightSubspace.reshape(taskSize, SpatialAcceleration.SIZE);
          commandToConvert.getWeightMatrix(controlFrame, tempTaskWeight);
          CommonOps.mult(tempSelectionMatrix, tempTaskWeight, tempTaskWeightSubspace);
          CommonOps.multTransB(tempTaskWeightSubspace, tempSelectionMatrix, motionQPInputToPack.taskWeightMatrix);
       }
 
-      RigidBody base = commandToConvert.getBase();
-      RigidBody endEffector = commandToConvert.getEndEffector();
+      RigidBodyBasics base = commandToConvert.getBase();
+      RigidBodyBasics endEffector = commandToConvert.getEndEffector();
 
       jacobianCalculator.clear();
       jacobianCalculator.setKinematicChain(base, endEffector);
       jacobianCalculator.setJacobianFrame(controlFrame);
-      jacobianCalculator.computeJacobianMatrix();
+      jacobianCalculator.reset();
 
       /*
        * @formatter:off
@@ -376,11 +377,12 @@ public class MotionQPInputCalculator
       // Compute the M-by-N task Jacobian: J = S * J
       // Step 1, let's get the 'small' Jacobian matrix j.
       // It is called small as its number of columns is equal to the number of DoFs to its kinematic chain which is way smaller than the number of robot DoFs.
-      jacobianCalculator.getJacobianMatrix(tempSelectionMatrix, tempTaskJacobian);
+      tempTaskJacobian.reshape(taskSize, jacobianCalculator.getNumberOfDegreesOfFreedom());
+      CommonOps.mult(tempSelectionMatrix, jacobianCalculator.getJacobianMatrix(), tempTaskJacobian);
 
       // Dealing with the primary base:
-      RigidBody primaryBase = commandToConvert.getPrimaryBase();
-      List<InverseDynamicsJoint> jointsUsedInTask = jacobianCalculator.getJointsFromBaseToEndEffector();
+      RigidBodyBasics primaryBase = commandToConvert.getPrimaryBase();
+      List<JointReadOnly> jointsUsedInTask = jacobianCalculator.getJointsFromBaseToEndEffector();
 
       // Step 2: The small Jacobian matrix into the full Jacobian matrix. Proper indexing has to be ensured, so it is handled by the jointIndexHandler.
       jointIndexHandler.compactBlockToFullBlockIgnoreUnindexedJoints(jointsUsedInTask, tempTaskJacobian, motionQPInputToPack.taskJacobian);
@@ -400,7 +402,7 @@ public class MotionQPInputCalculator
          boolean isJointUpstreamOfPrimaryBase = false;
          for (int i = jointsUsedInTask.size() - 1; i >= 0; i--)
          {
-            InverseDynamicsJoint joint = jointsUsedInTask.get(i);
+            JointReadOnly joint = jointsUsedInTask.get(i);
 
             if (joint.getSuccessor() == primaryBase)
                isJointUpstreamOfPrimaryBase = true;
@@ -450,8 +452,8 @@ public class MotionQPInputCalculator
       motionQPInputToPack.setConstraintType(ConstraintType.OBJECTIVE);
 
       // Compute the weight: W = S * W * S^T
-      tempTaskWeight.reshape(SpatialAccelerationVector.SIZE, SpatialAccelerationVector.SIZE);
-      tempTaskWeightSubspace.reshape(taskSize, SpatialAccelerationVector.SIZE);
+      tempTaskWeight.reshape(SpatialAcceleration.SIZE, SpatialAcceleration.SIZE);
+      tempTaskWeightSubspace.reshape(taskSize, SpatialAcceleration.SIZE);
       commandToConvert.getWeightMatrix(tempTaskWeight);
       CommonOps.mult(tempSelectionMatrix, tempTaskWeight, tempTaskWeightSubspace);
       CommonOps.multTransB(tempTaskWeightSubspace, tempSelectionMatrix, motionQPInputToPack.taskWeightMatrix);
@@ -465,7 +467,7 @@ public class MotionQPInputCalculator
       linearMomentum.changeFrame(centerOfMassFrame);
       angularMomentum.get(0, tempTaskObjective);
       linearMomentum.get(3, tempTaskObjective);
-      DenseMatrix64F convectiveTerm = centroidalMomentumHandler.getCentroidalMomentumConvectiveTerm();
+      DenseMatrix64F convectiveTerm = centroidalMomentumRateCalculator.getBiasSpatialForceMatrix();
 
       // Compute the task objective: p = S * ( hDot - ADot qDot )
       CommonOps.subtractEquals(tempTaskObjective, convectiveTerm);
@@ -494,8 +496,8 @@ public class MotionQPInputCalculator
       motionQPInputToPack.setConstraintType(ConstraintType.OBJECTIVE);
 
       // Compute the weight: W = S * W * S^T
-      tempTaskWeight.reshape(SpatialAccelerationVector.SIZE, SpatialAccelerationVector.SIZE);
-      tempTaskWeightSubspace.reshape(taskSize, SpatialAccelerationVector.SIZE);
+      tempTaskWeight.reshape(SpatialAcceleration.SIZE, SpatialAcceleration.SIZE);
+      tempTaskWeightSubspace.reshape(taskSize, SpatialAcceleration.SIZE);
       commandToConvert.getWeightMatrix(tempTaskWeight);
       CommonOps.mult(tempSelectionMatrix, tempTaskWeight, tempTaskWeightSubspace);
       CommonOps.multTransB(tempTaskWeightSubspace, tempSelectionMatrix, motionQPInputToPack.taskWeightMatrix);
@@ -525,7 +527,7 @@ public class MotionQPInputCalculator
     */
    public boolean convertJointspaceAccelerationCommand(JointspaceAccelerationCommand commandToConvert, QPInput motionQPInputToPack)
    {
-      int taskSize = ScrewTools.computeDegreesOfFreedom(commandToConvert.getJoints());
+      int taskSize = MultiBodySystemTools.computeDegreesOfFreedom(commandToConvert.getJoints());
 
       if (taskSize == 0)
          return false;
@@ -539,7 +541,7 @@ public class MotionQPInputCalculator
       int row = 0;
       for (int jointIndex = 0; jointIndex < commandToConvert.getNumberOfJoints(); jointIndex++)
       {
-         InverseDynamicsJoint joint = commandToConvert.getJoint(jointIndex);
+         JointBasics joint = commandToConvert.getJoint(jointIndex);
          double weight = commandToConvert.getWeight(jointIndex);
          int[] columns = jointIndexHandler.getJointIndices(joint);
          if (columns == null)
@@ -565,7 +567,7 @@ public class MotionQPInputCalculator
     */
    public boolean convertJointspaceVelocityCommand(JointspaceVelocityCommand commandToConvert, QPInput motionQPInputToPack)
    {
-      int taskSize = ScrewTools.computeDegreesOfFreedom(commandToConvert.getJoints());
+      int taskSize = MultiBodySystemTools.computeDegreesOfFreedom(commandToConvert.getJoints());
 
       if (taskSize == 0)
          return false;
@@ -579,7 +581,7 @@ public class MotionQPInputCalculator
       int row = 0;
       for (int jointIndex = 0; jointIndex < commandToConvert.getNumberOfJoints(); jointIndex++)
       {
-         InverseDynamicsJoint joint = commandToConvert.getJoint(jointIndex);
+         JointBasics joint = commandToConvert.getJoint(jointIndex);
          double weight = commandToConvert.getWeight(jointIndex);
          int[] columns = jointIndexHandler.getJointIndices(joint);
          if (columns == null)
@@ -607,23 +609,27 @@ public class MotionQPInputCalculator
 
    public DenseMatrix64F getCentroidalMomentumMatrix()
    {
-      return centroidalMomentumHandler.getCentroidalMomentumMatrixPart();
+      return centroidalMomentumRateCalculator.getCentroidalMomentumMatrix();
    }
 
    public DenseMatrix64F getCentroidalMomentumConvectiveTerm()
    {
-      return centroidalMomentumHandler.getCentroidalMomentumConvectiveTerm();
+      return centroidalMomentumRateCalculator.getBiasSpatialForceMatrix();
    }
 
-   public SpatialForceVector computeCentroidalMomentumRateFromSolution(DenseMatrix64F jointAccelerations)
+   private final SpatialForce momentumRate = new SpatialForce();
+
+   public SpatialForceReadOnly computeCentroidalMomentumRateFromSolution(DenseMatrix64F jointAccelerations)
    {
-      centroidalMomentumHandler.computeCentroidalMomentumRate(jointAccelerations);
-      return centroidalMomentumHandler.getCentroidalMomentumRate();
+      centroidalMomentumRateCalculator.getMomentumRate(jointAccelerations, momentumRate);
+      return momentumRate;
    }
 
-   public Momentum computeCentroidalMomentumFromSolution(DenseMatrix64F jointVelocities)
+   private final Momentum momentum = new Momentum();
+
+   public MomentumReadOnly computeCentroidalMomentumFromSolution(DenseMatrix64F jointVelocities)
    {
-      centroidalMomentumHandler.computeCentroidalMomentum(jointVelocities);
-      return centroidalMomentumHandler.getCentroidalMomentum();
+      centroidalMomentumRateCalculator.getMomentum(jointVelocities, momentum);
+      return momentum;
    }
 }

@@ -9,10 +9,11 @@ import us.ihmc.graphicsDescription.Graphics3DObject;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicCoordinateSystem;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
+import us.ihmc.mecano.multiBodySystem.RigidBody;
+import us.ihmc.mecano.multiBodySystem.SixDoFJoint;
+import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.robotics.robotDescription.InertiaTools;
-import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.robotics.screwTheory.ScrewTools;
-import us.ihmc.robotics.screwTheory.SixDoFJoint;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.yoVariables.variable.YoFramePoseUsingYawPitchRoll;
 
@@ -20,7 +21,7 @@ public class CommonInertiaEllipsoidsExampleSimulation
 {
    public static void main(String[] args)
    {
-      RigidBody elevator = new RigidBody("elevator", ReferenceFrame.getWorldFrame());
+      RigidBodyBasics elevator = new RigidBody("elevator", ReferenceFrame.getWorldFrame());
       SixDoFJoint rootJoint = new SixDoFJoint("sixdof", elevator);
       RigidBodyTransform inertiaPose = new RigidBodyTransform();
       Matrix3D momentOfInertia = new Matrix3D();
@@ -49,7 +50,7 @@ public class CommonInertiaEllipsoidsExampleSimulation
       System.out.println(transform);
       momentOfInertia = InertiaTools.rotate(transform, momentOfInertia);
       System.out.println(momentOfInertia);
-      RigidBody aBody = ScrewTools.addRigidBody("test", rootJoint, momentOfInertia, mass, inertiaPose);
+      RigidBodyBasics aBody = new RigidBody("test", rootJoint, momentOfInertia, mass, inertiaPose);
       rootJoint.updateFramesRecursively();
 
       YoGraphicsListRegistry yoGraphicsListRegistry = new YoGraphicsListRegistry();

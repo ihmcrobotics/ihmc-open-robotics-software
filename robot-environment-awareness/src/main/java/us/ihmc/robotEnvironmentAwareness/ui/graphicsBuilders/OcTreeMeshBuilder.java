@@ -1,6 +1,6 @@
 package us.ihmc.robotEnvironmentAwareness.ui.graphicsBuilders;
 
-import static us.ihmc.jOctoMap.iterators.OcTreeIteratorFactory.createLeafIterable;
+import static us.ihmc.jOctoMap.iterators.OcTreeIteratorFactory.*;
 
 import java.util.ArrayDeque;
 import java.util.ArrayList;
@@ -22,7 +22,8 @@ import javafx.scene.Node;
 import javafx.scene.paint.Color;
 import javafx.scene.paint.Material;
 import javafx.scene.shape.Mesh;
-import us.ihmc.commons.PrintTools;
+import us.ihmc.commons.lists.RecyclingArrayList;
+import us.ihmc.commons.lists.SupplierBuilder;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Point3D32;
 import us.ihmc.euclid.tuple3D.Vector3D;
@@ -32,6 +33,7 @@ import us.ihmc.graphicsDescription.TexCoord2f;
 import us.ihmc.jOctoMap.key.OcTreeKey;
 import us.ihmc.javaFXToolkit.shapes.JavaFXMultiColorMeshBuilder;
 import us.ihmc.javaFXToolkit.shapes.TextureColorPalette1D;
+import us.ihmc.log.LogTools;
 import us.ihmc.robotEnvironmentAwareness.communication.REAModuleAPI;
 import us.ihmc.robotEnvironmentAwareness.communication.REAUIMessager;
 import us.ihmc.robotEnvironmentAwareness.communication.packets.NormalOcTreeMessage;
@@ -39,8 +41,6 @@ import us.ihmc.robotEnvironmentAwareness.communication.packets.PlanarRegionSegme
 import us.ihmc.robotEnvironmentAwareness.geometry.IntersectionPlaneBoxCalculator;
 import us.ihmc.robotEnvironmentAwareness.ui.UIOcTree;
 import us.ihmc.robotEnvironmentAwareness.ui.UIOcTreeNode;
-import us.ihmc.commons.lists.RecyclingArrayList;
-import us.ihmc.commons.lists.SupplierBuilder;
 
 /**
  * Created by adrien on 11/21/16.
@@ -162,7 +162,7 @@ public class OcTreeMeshBuilder implements Runnable
    {
       if (newSubOcTreeMeshViews.get() != null)
       {
-         PrintTools.warn("Rendering job is not done, waiting before creating new meshes.");
+         LogTools.warn("Rendering job is not done, waiting before creating new meshes.");
          return;
       }
 

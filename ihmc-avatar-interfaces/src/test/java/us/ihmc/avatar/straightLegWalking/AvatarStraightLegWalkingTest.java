@@ -163,7 +163,7 @@ public abstract class AvatarStraightLegWalkingTest implements MultiRobotTestInte
       double initialFinalTransfer = walkingControllerParameters.getDefaultInitialTransferTime();
 
       int numberOfSteps = footsteps.getFootstepDataList().size();
-      drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(numberOfSteps * stepTime + 2.0 * initialFinalTransfer + 1.0);
+      drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(numberOfSteps * stepTime + 2.0 * initialFinalTransfer + 3.0);
 
       assertReachedGoal(footsteps);
       assertTrue(success);
@@ -781,7 +781,7 @@ public abstract class AvatarStraightLegWalkingTest implements MultiRobotTestInte
       Point3D midpoint = new Point3D(midStance);
       midpoint.addZ(1.0);
 
-      Point3D bounds = new Point3D(0.2, 0.2, 0.3);
+      Point3D bounds = new Point3D(0.25, 0.25, 0.3);
 
       BoundingBox3D boundingBox3D = BoundingBox3D.createUsingCenterAndPlusMinusVector(midpoint, bounds);
       drcSimulationTestHelper.assertRobotsRootJointIsInBoundingBox(boundingBox3D);

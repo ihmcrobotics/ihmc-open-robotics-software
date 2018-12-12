@@ -6,8 +6,9 @@ import java.util.List;
 
 import org.ejml.data.DenseMatrix64F;
 
+import us.ihmc.mecano.spatial.Wrench;
+import us.ihmc.mecano.spatial.interfaces.WrenchReadOnly;
 import us.ihmc.robotics.screwTheory.GenericCRC32;
-import us.ihmc.robotics.screwTheory.Wrench;
 
 public class ForceSensorDataHolder implements ForceSensorDataHolderReadOnly
 {
@@ -85,7 +86,7 @@ public class ForceSensorDataHolder implements ForceSensorDataHolderReadOnly
       forceSensors.get(key).setWrench(data);
    }
 
-   public void setForceSensorValue(ForceSensorDefinition key, Wrench wrench)
+   public void setForceSensorValue(ForceSensorDefinition key, WrenchReadOnly wrench)
    {
       forceSensors.get(key).setWrench(wrench);
    }

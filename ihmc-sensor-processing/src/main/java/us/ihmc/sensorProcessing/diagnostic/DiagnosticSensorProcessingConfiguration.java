@@ -3,9 +3,8 @@ package us.ihmc.sensorProcessing.diagnostic;
 import java.util.List;
 import java.util.Map;
 
-import us.ihmc.robotics.screwTheory.OneDoFJoint;
+import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.robotics.sensors.ForceSensorDefinition;
-import us.ihmc.sensorProcessing.outputData.JointDesiredOutputList;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutputListReadOnly;
 import us.ihmc.sensorProcessing.sensorProcessors.SensorProcessing;
 import us.ihmc.sensorProcessing.simulatedSensors.SensorNoiseParameters;
@@ -15,15 +14,15 @@ public class DiagnosticSensorProcessingConfiguration implements SensorProcessing
 {
    private final SensorProcessingConfiguration sensorProcessingConfiguration;
 
-   private Map<OneDoFJoint, OneDoFJointSensorValidityChecker> jointSensorValidityCheckers;
+   private Map<OneDoFJointBasics, OneDoFJointSensorValidityChecker> jointSensorValidityCheckers;
    private Map<String, IMUSensorValidityChecker> imuSensorValidityCheckers;
    private Map<ForceSensorDefinition, WrenchSensorValidityChecker> wrenchSensorValidityCheckers;
 
-   private Map<OneDoFJoint, PositionVelocity1DConsistencyChecker> jointPositionVelocityConsistencyCheckers;
+   private Map<OneDoFJointBasics, PositionVelocity1DConsistencyChecker> jointPositionVelocityConsistencyCheckers;
    private Map<String, OrientationAngularVelocityConsistencyChecker> imuOrientationAngularVelocityConsistencyCheckers;
 
-   private Map<OneDoFJoint, OneDoFJointForceTrackingDelayEstimator> jointForceTrackingDelayEstimators;
-   private Map<OneDoFJoint, OneDoFJointFourierAnalysis> jointFourierAnalysisMap;
+   private Map<OneDoFJointBasics, OneDoFJointForceTrackingDelayEstimator> jointForceTrackingDelayEstimators;
+   private Map<OneDoFJointBasics, OneDoFJointFourierAnalysis> jointFourierAnalysisMap;
    
    private final JointDesiredOutputListReadOnly lowLevelOneDoFJointDesiredDataHolder;
 
@@ -89,7 +88,7 @@ public class DiagnosticSensorProcessingConfiguration implements SensorProcessing
       }
    }
 
-   public Map<OneDoFJoint, OneDoFJointSensorValidityChecker> getJointSensorValidityCheckers()
+   public Map<OneDoFJointBasics, OneDoFJointSensorValidityChecker> getJointSensorValidityCheckers()
    {
       return jointSensorValidityCheckers;
    }
@@ -104,7 +103,7 @@ public class DiagnosticSensorProcessingConfiguration implements SensorProcessing
       return wrenchSensorValidityCheckers;
    }
 
-   public Map<OneDoFJoint, PositionVelocity1DConsistencyChecker> getJointPositionVelocityConsistencyCheckers()
+   public Map<OneDoFJointBasics, PositionVelocity1DConsistencyChecker> getJointPositionVelocityConsistencyCheckers()
    {
       return jointPositionVelocityConsistencyCheckers;
    }
@@ -114,12 +113,12 @@ public class DiagnosticSensorProcessingConfiguration implements SensorProcessing
       return imuOrientationAngularVelocityConsistencyCheckers;
    }
 
-   public Map<OneDoFJoint, OneDoFJointForceTrackingDelayEstimator> getJointForceTrackingDelayEstimators()
+   public Map<OneDoFJointBasics, OneDoFJointForceTrackingDelayEstimator> getJointForceTrackingDelayEstimators()
    {
       return jointForceTrackingDelayEstimators;
    }
 
-   public Map<OneDoFJoint, OneDoFJointFourierAnalysis> getJointFourierAnalysisMap()
+   public Map<OneDoFJointBasics, OneDoFJointFourierAnalysis> getJointFourierAnalysisMap()
    {
       return jointFourierAnalysisMap;
    }

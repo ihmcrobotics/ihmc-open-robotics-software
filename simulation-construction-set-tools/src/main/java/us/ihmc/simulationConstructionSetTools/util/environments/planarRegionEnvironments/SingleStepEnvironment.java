@@ -1,6 +1,7 @@
 package us.ihmc.simulationConstructionSetTools.util.environments.planarRegionEnvironments;
 
 import us.ihmc.euclid.Axis;
+import us.ihmc.graphicsDescription.appearance.YoAppearance;
 
 public class SingleStepEnvironment extends PlanarRegionEnvironmentInterface
 {
@@ -28,5 +29,7 @@ public class SingleStepEnvironment extends PlanarRegionEnvironmentInterface
       generator.identity();
       generator.translate(2.0 + stepLength, 0.0, 0.0);
       generator.addRectangle(2.0, 2.0);
+
+      addPlanarRegionsToTerrain(YoAppearance.Grey());
    }
 }

@@ -14,11 +14,11 @@ import us.ihmc.euclid.matrix.RotationMatrix;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
+import us.ihmc.mecano.spatial.Twist;
 import us.ihmc.robotics.math.filters.AlphaBasedOnBreakFrequencyProvider;
 import us.ihmc.robotics.math.filters.AlphaFilteredYoFrameQuaternion;
 import us.ihmc.robotics.math.filters.AlphaFilteredYoFrameVector;
-import us.ihmc.robotics.screwTheory.RigidBody;
-import us.ihmc.robotics.screwTheory.Twist;
 import us.ihmc.sensorProcessing.stateEstimation.IMUSensorReadOnly;
 import us.ihmc.sensorProcessing.stateEstimation.StateEstimatorParameters;
 import us.ihmc.yoVariables.parameters.BooleanParameter;
@@ -61,20 +61,20 @@ public class IMUBiasStateEstimator implements IMUBiasProvider
 
    private final List<? extends IMUSensorReadOnly> imuProcessedOutputs;
    private final Map<IMUSensorReadOnly, Integer> imuToIndexMap = new HashMap<>();
-   private final List<RigidBody> feet;
+   private final List<RigidBodyBasics> feet;
    private final BooleanParameter alwaysTrustFeet = new BooleanParameter("imuBiasEstimatorAlwaysTrustFeet", registry, false);
 
    private final Vector3D gravityVectorInWorld = new Vector3D();
    private final Vector3D zUpVector = new Vector3D();
 
 
-   public IMUBiasStateEstimator(List<? extends IMUSensorReadOnly> imuProcessedOutputs, Collection<RigidBody> feet, double gravitationalAcceleration,
+   public IMUBiasStateEstimator(List<? extends IMUSensorReadOnly> imuProcessedOutputs, Collection<RigidBodyBasics> feet, double gravitationalAcceleration,
                                 BooleanProvider cancelGravityFromAccelerationMeasurement, double updateDT, YoVariableRegistry parentRegistry)
    {
       this(imuProcessedOutputs, feet, gravitationalAcceleration, cancelGravityFromAccelerationMeasurement, updateDT, null, parentRegistry);
    }
    
-   public IMUBiasStateEstimator(List<? extends IMUSensorReadOnly> imuProcessedOutputs, Collection<RigidBody> feet, double gravitationalAcceleration,
+   public IMUBiasStateEstimator(List<? extends IMUSensorReadOnly> imuProcessedOutputs, Collection<RigidBodyBasics> feet, double gravitationalAcceleration,
                                 BooleanProvider cancelGravityFromAccelerationMeasurement, double updateDT, StateEstimatorParameters stateEstimatorParameters,
                                 YoVariableRegistry parentRegistry)
    {
@@ -175,7 +175,7 @@ public class IMUBiasStateEstimator implements IMUBiasProvider
    private final RotationMatrix orientationMeasurement = new RotationMatrix();
    private final RotationMatrix orientationMeasurementTransposed = new RotationMatrix();
 
-   public void compute(List<RigidBody> trustedFeet)
+   public void compute(List<RigidBodyBasics> trustedFeet)
    {
       if (alwaysTrustFeet.getValue())
          trustedFeet = feet;
@@ -184,7 +184,7 @@ public class IMUBiasStateEstimator implements IMUBiasProvider
       estimateBiases();
    }
 
-   private void checkIfBiasEstimationPossible(List<RigidBody> trustedFeet)
+   private void checkIfBiasEstimationPossible(List<RigidBodyBasics> trustedFeet)
    {
       if (trustedFeet.size() < feet.size())
       {
@@ -199,18 +199,18 @@ public class IMUBiasStateEstimator implements IMUBiasProvider
       for (int imuIndex = 0; imuIndex < imuProcessedOutputs.size(); imuIndex++)
       {
          IMUSensorReadOnly imuSensor = imuProcessedOutputs.get(imuIndex);
-         RigidBody measurementLink = imuSensor.getMeasurementLink();
+         RigidBodyBasics measurementLink = imuSensor.getMeasurementLink();
 
          double feetToIMUAngularVelocityMagnitude = 0.0;
          double feetToIMULinearVelocityMagnitude = 0.0;
 
          for (int footIndex = 0; footIndex < trustedFeet.size(); footIndex++)
          {
-            RigidBody trustedFoot = trustedFeet.get(footIndex);
+            RigidBodyBasics trustedFoot = trustedFeet.get(footIndex);
 
             measurementLink.getBodyFixedFrame().getTwistRelativeToOther(trustedFoot.getBodyFixedFrame(), twist);
-            feetToIMUAngularVelocityMagnitude += twist.getAngularPartMagnitude();
-            feetToIMULinearVelocityMagnitude += twist.getLinearPartMagnitude();
+            feetToIMUAngularVelocityMagnitude += twist.getAngularPart().length();
+            feetToIMULinearVelocityMagnitude += twist.getLinearPart().length();
          }
 
          feetToIMUAngularVelocityMagnitudes.get(imuIndex).set(feetToIMUAngularVelocityMagnitude);

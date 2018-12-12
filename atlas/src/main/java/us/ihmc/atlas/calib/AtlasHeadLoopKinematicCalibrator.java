@@ -52,9 +52,9 @@ import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.graphicsDescription.appearance.YoAppearanceRGBColor;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicCoordinateSystem;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition;
+import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.robotics.partNames.LimbName;
 import us.ihmc.robotics.robotSide.RobotSide;
-import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.yoVariables.dataBuffer.IndexChangedListener;
 import us.ihmc.yoVariables.variable.YoFramePoint3D;
 import us.ihmc.yoVariables.variable.YoFramePoseUsingYawPitchRoll;
@@ -318,9 +318,9 @@ public class AtlasHeadLoopKinematicCalibrator extends AtlasKinematicCalibrator
 
    }
 
-   private ArrayList<OneDoFJoint> getArmJoints()
+   private ArrayList<OneDoFJointBasics> getArmJoints()
    {
-      ArrayList<OneDoFJoint> armJoints = new ArrayList<OneDoFJoint>();
+      ArrayList<OneDoFJointBasics> armJoints = new ArrayList<OneDoFJointBasics>();
       for (int i = 0; i < joints.length; i++)
       {
          if (joints[i].getName().matches(".*arm.*"))

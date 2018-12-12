@@ -15,6 +15,7 @@ import us.ihmc.commonWalkingControlModules.trajectories.SoftTouchdownPoseTraject
 import us.ihmc.commonWalkingControlModules.trajectories.TwoWaypointSwingGenerator;
 import us.ihmc.commons.MathTools;
 import us.ihmc.commons.PrintTools;
+import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.euclid.referenceFrame.FramePoint2D;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
@@ -28,8 +29,11 @@ import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactableFoot;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
+import us.ihmc.mecano.frames.MovingReferenceFrame;
+import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
+import us.ihmc.mecano.spatial.SpatialAcceleration;
+import us.ihmc.mecano.spatial.Twist;
 import us.ihmc.robotics.controllers.pidGains.PIDSE3GainsReadOnly;
-import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.robotics.math.filters.RateLimitedYoFramePose;
 import us.ihmc.robotics.math.trajectories.MultipleWaypointsBlendedPoseTrajectoryGenerator;
 import us.ihmc.robotics.math.trajectories.PoseTrajectoryGenerator;
@@ -38,10 +42,6 @@ import us.ihmc.robotics.math.trajectories.waypoints.FrameSE3TrajectoryPoint;
 import us.ihmc.robotics.math.trajectories.waypoints.MultipleWaypointsPoseTrajectoryGenerator;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
-import us.ihmc.robotics.screwTheory.MovingReferenceFrame;
-import us.ihmc.robotics.screwTheory.RigidBody;
-import us.ihmc.robotics.screwTheory.SpatialAccelerationVector;
-import us.ihmc.robotics.screwTheory.Twist;
 import us.ihmc.robotics.trajectories.TrajectoryType;
 import us.ihmc.robotics.trajectories.providers.CurrentRigidBodyStateProvider;
 import us.ihmc.yoVariables.parameters.BooleanParameter;
@@ -138,7 +138,7 @@ public class SwingState extends AbstractFootControlState
    private final PoseReferenceFrame desiredControlFrame = new PoseReferenceFrame("desiredControlFrame", desiredSoleFrame);
    private final FramePose3D desiredPose = new FramePose3D();
    private final Twist desiredTwist = new Twist();
-   private final SpatialAccelerationVector desiredSpatialAcceleration = new SpatialAccelerationVector();
+   private final SpatialAcceleration desiredSpatialAcceleration = new SpatialAcceleration();
 
    private final RigidBodyTransform transformFromToeToAnkle = new RigidBodyTransform();
 
@@ -189,7 +189,7 @@ public class SwingState extends AbstractFootControlState
 
       this.legSingularityAndKneeCollapseAvoidanceControlModule = footControlHelper.getLegSingularityAndKneeCollapseAvoidanceControlModule();
 
-      RigidBody foot = contactableFoot.getRigidBody();
+      RigidBodyBasics foot = contactableFoot.getRigidBody();
       String namePrefix = robotSide.getCamelCaseNameForStartOfExpression() + "FootSwing";
       yoDesiredLinearVelocity = new YoFrameVector3D(namePrefix + "DesiredLinearVelocity", worldFrame, registry);
       yoDesiredLinearVelocity.setToNaN();
@@ -759,20 +759,20 @@ public class SwingState extends AbstractFootControlState
       // change twist
       desiredLinearVelocity.changeFrame(desiredSoleFrame);
       desiredAngularVelocity.changeFrame(desiredSoleFrame);
-      desiredTwist.set(desiredSoleFrame, worldFrame, desiredSoleFrame, desiredLinearVelocity, desiredAngularVelocity);
+      desiredTwist.setIncludingFrame(desiredSoleFrame, worldFrame, desiredSoleFrame, desiredAngularVelocity, desiredLinearVelocity);
       desiredTwist.changeFrame(desiredControlFrame);
-      desiredTwist.getLinearPart(desiredLinearVelocity);
-      desiredTwist.getAngularPart(desiredAngularVelocity);
+      desiredLinearVelocity.setIncludingFrame(desiredTwist.getLinearPart());
+      desiredAngularVelocity.setIncludingFrame(desiredTwist.getAngularPart());
       desiredLinearVelocity.changeFrame(worldFrame);
       desiredAngularVelocity.changeFrame(worldFrame);
 
       // change spatial acceleration
       desiredLinearAcceleration.changeFrame(desiredSoleFrame);
       desiredAngularAcceleration.changeFrame(desiredSoleFrame);
-      desiredSpatialAcceleration.set(desiredSoleFrame, worldFrame, desiredSoleFrame, desiredLinearAcceleration, desiredAngularAcceleration);
-      desiredSpatialAcceleration.changeFrameNoRelativeMotion(desiredControlFrame);
-      desiredSpatialAcceleration.getLinearPart(desiredLinearAcceleration);
-      desiredSpatialAcceleration.getAngularPart(desiredAngularAcceleration);
+      desiredSpatialAcceleration.setIncludingFrame(desiredSoleFrame, worldFrame, desiredSoleFrame, desiredAngularAcceleration, desiredLinearAcceleration);
+      desiredSpatialAcceleration.changeFrame(desiredControlFrame);
+      desiredLinearAcceleration.setIncludingFrame(desiredSpatialAcceleration.getLinearPart());
+      desiredAngularAcceleration.setIncludingFrame(desiredSpatialAcceleration.getAngularPart());
       desiredLinearAcceleration.changeFrame(worldFrame);
       desiredAngularAcceleration.changeFrame(worldFrame);
    }

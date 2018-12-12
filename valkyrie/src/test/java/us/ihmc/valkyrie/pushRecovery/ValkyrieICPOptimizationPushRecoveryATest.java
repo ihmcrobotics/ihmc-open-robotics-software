@@ -35,7 +35,7 @@ public class ValkyrieICPOptimizationPushRecoveryATest extends AvatarICPOptimizat
                @Override
                public ICPOptimizationParameters getICPOptimizationParameters()
                {
-                  return new ValkyrieICPOptimizationParameters(false)
+                  return new ValkyrieICPOptimizationParameters(RobotTarget.SCS)
                   {
                      @Override
                      public boolean useAngularMomentum()
@@ -92,7 +92,7 @@ public class ValkyrieICPOptimizationPushRecoveryATest extends AvatarICPOptimizat
 
    @Override
    @ContinuousIntegrationTest(estimatedDuration = 60.0)
-   @Test(timeout = 150000)
+   @Test(timeout = 200000)
    public void testPushICPOptimizationForwardPushInSlowSwing() throws Exception
    {
       percentWeight = 0.2;

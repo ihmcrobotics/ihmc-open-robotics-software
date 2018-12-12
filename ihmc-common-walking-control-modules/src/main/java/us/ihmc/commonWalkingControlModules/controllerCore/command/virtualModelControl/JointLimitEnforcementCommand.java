@@ -1,16 +1,16 @@
 package us.ihmc.commonWalkingControlModules.controllerCore.command.virtualModelControl;
 
-import us.ihmc.commonWalkingControlModules.controllerCore.command.ControllerCoreCommandType;
-import us.ihmc.robotics.kinematics.JointLimitData;
-import us.ihmc.commons.lists.RecyclingArrayList;
-import us.ihmc.robotics.screwTheory.OneDoFJoint;
-
 import java.util.ArrayList;
 import java.util.List;
 
+import us.ihmc.commonWalkingControlModules.controllerCore.command.ControllerCoreCommandType;
+import us.ihmc.commons.lists.RecyclingArrayList;
+import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
+import us.ihmc.robotics.kinematics.JointLimitData;
+
 public class JointLimitEnforcementCommand implements VirtualModelControlCommand<JointLimitEnforcementCommand>
 {
-   private final List<OneDoFJoint> joints;
+   private final List<OneDoFJointBasics> joints;
    private final RecyclingArrayList<JointLimitData> jointLimitData;
 
    public JointLimitEnforcementCommand()
@@ -45,13 +45,13 @@ public class JointLimitEnforcementCommand implements VirtualModelControlCommand<
       }
    }
 
-   public void addJoint(OneDoFJoint joint, JointLimitData jointLimitData)
+   public void addJoint(OneDoFJointBasics joint, JointLimitData jointLimitData)
    {
       joints.add(joint);
       this.jointLimitData.add().set(jointLimitData);
    }
 
-   public void addJoint(OneDoFJoint joint, double stiffness, double damping)
+   public void addJoint(OneDoFJointBasics joint, double stiffness, double damping)
    {
       joints.add(joint);
       JointLimitData jointLimitData = this.jointLimitData.add();
@@ -65,7 +65,7 @@ public class JointLimitEnforcementCommand implements VirtualModelControlCommand<
       return joints.size();
    }
 
-   public OneDoFJoint getJoint(int jointIndex)
+   public OneDoFJointBasics getJoint(int jointIndex)
    {
       return joints.get(jointIndex);
    }

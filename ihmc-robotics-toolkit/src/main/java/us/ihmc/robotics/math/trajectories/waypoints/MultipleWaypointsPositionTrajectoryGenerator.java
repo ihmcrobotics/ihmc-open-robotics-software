@@ -1,6 +1,6 @@
 package us.ihmc.robotics.math.trajectories.waypoints;
 
-import static us.ihmc.robotics.math.trajectories.waypoints.MultipleWaypointsTrajectoryGenerator.*;
+import static us.ihmc.robotics.math.trajectories.waypoints.MultipleWaypointsTrajectoryGenerator.defaultMaximumNumberOfWaypoints;
 
 import java.util.ArrayList;
 
@@ -257,8 +257,9 @@ public class MultipleWaypointsPositionTrajectoryGenerator extends PositionTrajec
 
    private void initializeSubTrajectory(int waypointIndex)
    {
+      int secondWaypointIndex = Math.min(waypointIndex + 1, numberOfWaypoints.getValue() - 1);
       YoFrameEuclideanTrajectoryPoint start = waypoints.get(waypointIndex);
-      YoFrameEuclideanTrajectoryPoint end = waypoints.get(waypointIndex + 1);
+      YoFrameEuclideanTrajectoryPoint end = waypoints.get(secondWaypointIndex);
       subTrajectory.setCubic(0.0, end.getTime() - start.getTime(), start.getPosition(), start.getLinearVelocity(), end.getPosition(), end.getLinearVelocity());
    }
 
@@ -291,8 +292,9 @@ public class MultipleWaypointsPositionTrajectoryGenerator extends PositionTrajec
          initializeSubTrajectory(currentWaypointIndex.getIntegerValue());
       }
 
+      int secondWaypointIndex = Math.min(currentWaypointIndex.getValue() + 1, numberOfWaypoints.getValue() - 1);
       YoFrameEuclideanTrajectoryPoint start = waypoints.get(currentWaypointIndex.getValue());
-      YoFrameEuclideanTrajectoryPoint end = waypoints.get(currentWaypointIndex.getValue() + 1);
+      YoFrameEuclideanTrajectoryPoint end = waypoints.get(secondWaypointIndex);
 
       if (time < start.getTime())
       {

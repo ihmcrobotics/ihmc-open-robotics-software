@@ -4,10 +4,11 @@ import us.ihmc.commonWalkingControlModules.controlModules.CenterOfPressureResolv
 import us.ihmc.euclid.referenceFrame.FramePoint2D;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.mecano.spatial.SpatialForce;
+import us.ihmc.mecano.spatial.interfaces.SpatialForceReadOnly;
 import us.ihmc.robotics.referenceFrames.OriginAndPointFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
-import us.ihmc.robotics.screwTheory.SpatialForceVector;
 
 public class Omega0Calculator implements Omega0CalculatorInterface
 {
@@ -19,7 +20,7 @@ public class Omega0Calculator implements Omega0CalculatorInterface
    private final SideDependentList<FramePoint3D> cops = new SideDependentList<>(); // Max of 2 CoPs assumed here
    private final FramePoint2D pseudoCoP2d = new FramePoint2D();
    private final FramePoint3D pseudoCoP = new FramePoint3D();
-   private final SpatialForceVector totalGroundReactionWrench = new SpatialForceVector();
+   private final SpatialForce totalGroundReactionWrench = new SpatialForce();
 
    private double omega0;
 
@@ -36,9 +37,9 @@ public class Omega0Calculator implements Omega0CalculatorInterface
 
    private final FramePoint3D tempCoP3d = new FramePoint3D();
 
-   public double computeOmega0(SideDependentList<FramePoint2D> cop2ds, SpatialForceVector newTotalGroundReactionWrench)
+   public double computeOmega0(SideDependentList<FramePoint2D> cop2ds, SpatialForceReadOnly newTotalGroundReactionWrench)
    {
-      totalGroundReactionWrench.set(newTotalGroundReactionWrench);
+      totalGroundReactionWrench.setIncludingFrame(newTotalGroundReactionWrench);
       totalGroundReactionWrench.changeFrame(centerOfMassFrame);
       double fz = totalGroundReactionWrench.getLinearPartZ();
 

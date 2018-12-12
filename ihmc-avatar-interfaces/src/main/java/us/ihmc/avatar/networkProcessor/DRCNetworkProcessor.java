@@ -4,7 +4,8 @@ import java.io.IOException;
 
 import controller_msgs.msg.dds.PlanarRegionsListMessage;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
-import us.ihmc.avatar.networkProcessor.footstepPlanningToolboxModule.FootstepPlanningToolboxModule;
+import us.ihmc.avatar.footstepPlanning.MultiStageFootstepPlanningModule;
+import us.ihmc.avatar.networkProcessor.kinematicsPlanningToolboxModule.KinematicsPlanningToolboxModule;
 import us.ihmc.avatar.networkProcessor.kinematicsToolboxModule.KinematicsToolboxModule;
 import us.ihmc.avatar.networkProcessor.modules.RosModule;
 import us.ihmc.avatar.networkProcessor.modules.ZeroPoseMockRobotConfigurationDataPublisherModule;
@@ -23,7 +24,6 @@ import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
 import us.ihmc.robotBehaviors.watson.TextToSpeechNetworkModule;
 import us.ihmc.robotEnvironmentAwareness.communication.REACommunicationProperties;
 import us.ihmc.robotEnvironmentAwareness.updaters.LIDARBasedREAModule;
-import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.ros2.Ros2Node;
 import us.ihmc.sensorProcessing.parameters.DRCRobotSensorInformation;
 
@@ -40,6 +40,7 @@ public class DRCNetworkProcessor
       tryToStartModule(() -> setupZeroPoseRobotConfigurationPublisherModule(robotModel, params));
       tryToStartModule(() -> setupWholebodyTrajectoryToolboxModule(robotModel, params));
       tryToStartModule(() -> setupKinematicsToolboxModule(robotModel, params));
+      tryToStartModule(() -> setupKinematicsPlanningToolboxModule(robotModel, params));
       tryToStartModule(() -> setupFootstepPlanningToolboxModule(robotModel, params));
       tryToStartModule(() -> addTextToSpeechEngine(params));
       tryToStartModule(() -> setupHeightQuadTreeToolboxModule(robotModel, params));
@@ -73,13 +74,19 @@ public class DRCNetworkProcessor
       new KinematicsToolboxModule(robotModel, params.isKinematicsToolboxVisualizerEnabled());
    }
 
+   private void setupKinematicsPlanningToolboxModule(DRCRobotModel robotModel, DRCNetworkModuleParameters params) throws IOException
+   {
+      if (!params.isKinematicsPlanningToolboxEnabled())
+         return;
+      new KinematicsPlanningToolboxModule(robotModel, false);
+   }
+
    private void setupFootstepPlanningToolboxModule(DRCRobotModel robotModel, DRCNetworkModuleParameters params) throws IOException
    {
       if (!params.isFootstepPlanningToolboxEnabled())
          return;
 
-      FullHumanoidRobotModel fullRobotModel = robotModel.createFullRobotModel();
-      new FootstepPlanningToolboxModule(robotModel, fullRobotModel, null, params.isFootstepPlanningToolboxVisualizerEnabled());
+      new MultiStageFootstepPlanningModule(robotModel, null, params.isFootstepPlanningToolboxVisualizerEnabled());
    }
 
    private void setupMocapModule(DRCRobotModel robotModel, DRCNetworkModuleParameters params) throws IOException
@@ -163,7 +170,6 @@ public class DRCNetworkProcessor
       if (params.isHeightQuadTreeToolboxEnabled())
          new HeightQuadTreeToolboxModule(robotModel.getSimpleRobotName(), robotModel.createFullRobotModel(), robotModel.getLogModelProvider());
    }
-   
 
    private void setupRobotEnvironmentAwerenessModule(DRCNetworkModuleParameters params) throws IOException
    {
@@ -175,7 +181,8 @@ public class DRCNetworkProcessor
          catch (Exception e)
          {
             throw new RuntimeException(e);
-         };
+         }
+      ;
    }
 
    protected void connect(PacketCommunicator communicator)

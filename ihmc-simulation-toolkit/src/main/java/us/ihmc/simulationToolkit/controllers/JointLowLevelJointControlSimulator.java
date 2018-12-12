@@ -1,14 +1,13 @@
 package us.ihmc.simulationToolkit.controllers;
 
+import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.robotics.controllers.PIDController;
-import us.ihmc.sensorProcessing.outputData.JointDesiredControlMode;
-import us.ihmc.sensorProcessing.outputData.JointDesiredOutput;
-import us.ihmc.sensorProcessing.outputData.JointDesiredOutputReadOnly;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.robotics.screwTheory.TotalMassCalculator;
+import us.ihmc.sensorProcessing.outputData.JointDesiredControlMode;
+import us.ihmc.sensorProcessing.outputData.JointDesiredOutputReadOnly;
 import us.ihmc.simulationconstructionset.OneDegreeOfFreedomJoint;
 import us.ihmc.simulationconstructionset.util.RobotController;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
 
 public class JointLowLevelJointControlSimulator implements RobotController
 {
@@ -19,10 +18,10 @@ public class JointLowLevelJointControlSimulator implements RobotController
 
    private final double controlDT;
    private final OneDegreeOfFreedomJoint simulatedJoint;
-   private final OneDoFJoint controllerJoint;
+   private final OneDoFJointBasics controllerJoint;
    private final JointDesiredOutputReadOnly jointDesiredOutput;
 
-   public JointLowLevelJointControlSimulator(OneDegreeOfFreedomJoint simulatedJoint, OneDoFJoint highLevelControllerOutputJoint,
+   public JointLowLevelJointControlSimulator(OneDegreeOfFreedomJoint simulatedJoint, OneDoFJointBasics highLevelControllerOutputJoint,
                                              JointDesiredOutputReadOnly jointDesiredOutput, boolean isUpperBodyJoint,
                                              boolean isBackJoint, boolean isExoJoint, double totalMass, double controlDT)
    {
@@ -108,18 +107,21 @@ public class JointLowLevelJointControlSimulator implements RobotController
       if (jointDesiredOutput != null && jointDesiredOutput.getControlMode() == JointDesiredControlMode.POSITION)
       {
          double currentPosition = simulatedJoint.getQYoVariable().getDoubleValue();
-         double desiredPosition = jointDesiredOutput.getDesiredPosition();
+         double desiredPosition = jointDesiredOutput.hasDesiredPosition() ? jointDesiredOutput.getDesiredPosition() : currentPosition;
          double currentRate = simulatedJoint.getQDYoVariable().getDoubleValue();
-         double desiredRate = jointDesiredOutput.getDesiredVelocity();
-         double desiredTau = jointPositionController.compute(currentPosition, desiredPosition, currentRate, desiredRate, controlDT);
-         simulatedJoint.setTau(desiredTau);
-      }
-      else if (jointDesiredOutput == null && controllerJoint.isUnderPositionControl())
-      {
-         double currentPosition = simulatedJoint.getQYoVariable().getDoubleValue();
-         double desiredPosition = controllerJoint.getqDesired();
-         double currentRate = simulatedJoint.getQDYoVariable().getDoubleValue();
-         double desiredRate = controllerJoint.getQdDesired();
+
+         double desiredRate = jointDesiredOutput.hasDesiredVelocity() ? jointDesiredOutput.getDesiredVelocity() : 0.0;
+         if (jointDesiredOutput.hasStiffness())
+            jointPositionController.setProportionalGain(jointDesiredOutput.getStiffness());
+         if (jointDesiredOutput.hasDamping())
+            jointPositionController.setDerivativeGain(jointDesiredOutput.getDamping());
+
+         if (jointDesiredOutput.hasStiffness() || jointDesiredOutput.hasDamping())
+         {
+            jointPositionController.setIntegralGain(0.0);
+            jointPositionController.setMaximumOutputLimit(Double.POSITIVE_INFINITY);
+         }
+
          double desiredTau = jointPositionController.compute(currentPosition, desiredPosition, currentRate, desiredRate, controlDT);
          simulatedJoint.setTau(desiredTau);
       }

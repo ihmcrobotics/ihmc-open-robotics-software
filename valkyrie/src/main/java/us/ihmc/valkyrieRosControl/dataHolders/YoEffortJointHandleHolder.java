@@ -1,7 +1,7 @@
 package us.ihmc.valkyrieRosControl.dataHolders;
 
 import us.ihmc.commonWalkingControlModules.controllerCore.command.lowLevel.YoJointDesiredOutput;
-import us.ihmc.robotics.screwTheory.OneDoFJoint;
+import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.rosControl.EffortJointHandle;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutput;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutputBasics;
@@ -12,7 +12,7 @@ public class YoEffortJointHandleHolder
 {
    private final String name;
    private final EffortJointHandle handle;
-   private final OneDoFJoint joint;
+   private final OneDoFJointBasics joint;
    private final JointDesiredOutputBasics desiredJointData;
    private final YoJointDesiredOutput yoDesiredJointData;
 
@@ -21,7 +21,7 @@ public class YoEffortJointHandleHolder
    private final YoDouble q;
    private final YoDouble qd;
 
-   public YoEffortJointHandleHolder(EffortJointHandle handle, OneDoFJoint joint, JointDesiredOutputBasics desiredJointData, YoVariableRegistry parentRegistry)
+   public YoEffortJointHandleHolder(EffortJointHandle handle, OneDoFJointBasics joint, JointDesiredOutputBasics desiredJointData, YoVariableRegistry parentRegistry)
    {
       this.name = handle.getName();
       YoVariableRegistry registry = new YoVariableRegistry(name);
@@ -54,7 +54,7 @@ public class YoEffortJointHandleHolder
       handle.setDesiredEffort(effort);
    }
 
-   public OneDoFJoint getOneDoFJoint()
+   public OneDoFJointBasics getOneDoFJoint()
    {
       return joint;
    }

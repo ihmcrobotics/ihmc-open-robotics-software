@@ -17,6 +17,11 @@ public class SimpleFootstep
       foothold.clear();
    }
 
+   public SimpleFootstep(SimpleFootstep other)
+   {
+      set(other);
+   }
+
    public void set(SimpleFootstep other)
    {
       this.robotSide = other.robotSide;
@@ -76,5 +81,14 @@ public class SimpleFootstep
       if (!this.foothold.epsilonEquals(otherFootstep.foothold, epsilon))
          return false;
       return true;
+   }
+
+   public String toString()
+   {
+      String message = "Robot side = " + robotSide;
+      message += "\nSole frame pose = " + soleFramePose;
+      message += "\nFoothold = " + foothold;
+
+      return message;
    }
 }

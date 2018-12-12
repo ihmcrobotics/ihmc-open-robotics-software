@@ -1,6 +1,7 @@
 package us.ihmc.simulationConstructionSetTools.util.environments.planarRegionEnvironments;
 
 import us.ihmc.euclid.tools.EuclidCoreRandomTools;
+import us.ihmc.graphicsDescription.appearance.YoAppearance;
 
 import java.util.Random;
 
@@ -27,5 +28,7 @@ public class VaryingHeightTiledGroundEnvironment extends PlanarRegionEnvironment
             generator.identity();
          }
       }
+
+      addPlanarRegionsToTerrain(YoAppearance.Grey());
    }
 }

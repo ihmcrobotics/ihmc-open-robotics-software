@@ -30,8 +30,8 @@ import us.ihmc.graphicsDescription.HeightMap;
 import us.ihmc.graphicsDescription.appearance.AppearanceDefinition;
 import us.ihmc.graphicsDescription.appearance.YoAppearanceRGBColor;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
-import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactableBody;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepStatus;
+import us.ihmc.robotics.contactable.ContactableBody;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.yoVariables.parameters.DoubleParameter;
@@ -279,7 +279,7 @@ public class ContinuousStepGenerator implements Updatable
          nextFootstepPose2D.appendTranslation(0.0, -halfInPlaceWidth);
          nextFootstepPose2D.appendTranslation(xDisplacement, yDisplacement);
 
-         nextFootstepPose3D.set(footstepAdjustment.adjustFootstep(nextFootstepPose2D));
+         nextFootstepPose3D.set(footstepAdjustment.adjustFootstep(nextFootstepPose2D, swingSide));
 
          int vizualizerIndex = i / 2;
          List<FootstepVisualizer> footstepVisualizers = footstepSideDependentVisualizers.get(swingSide);
@@ -564,7 +564,7 @@ public class ContinuousStepGenerator implements Updatable
          private final FramePose3D adjustedPose = new FramePose3D();
 
          @Override
-         public FramePose3DReadOnly adjustFootstep(FramePose2DReadOnly footstepPose)
+         public FramePose3DReadOnly adjustFootstep(FramePose2DReadOnly footstepPose, RobotSide footSide)
          {
             adjustedPose.getPosition().set(footstepPose.getPosition());
             adjustedPose.setZ(currentSupportFootPose.getZ());
@@ -597,7 +597,7 @@ public class ContinuousStepGenerator implements Updatable
          private final FramePose3D adjustedPose = new FramePose3D();
 
          @Override
-         public FramePose3DReadOnly adjustFootstep(FramePose2DReadOnly footstepPose)
+         public FramePose3DReadOnly adjustFootstep(FramePose2DReadOnly footstepPose, RobotSide footSide)
          {
             adjustedPose.getPosition().set(footstepPose.getPosition());
             adjustedPose.setZ(heightMap.heightAt(footstepPose.getX(), footstepPose.getY(), 0.0));

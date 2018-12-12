@@ -2,10 +2,9 @@ package us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelSt
 
 import us.ihmc.commons.MathTools;
 import us.ihmc.euclid.tools.EuclidCoreTools;
+import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.robotics.math.filters.DeltaLimitedYoVariable;
-import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.sensorProcessing.outputData.JointDesiredControlMode;
-import us.ihmc.sensorProcessing.outputData.JointDesiredOutput;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutputBasics;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutputReadOnly;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
@@ -20,9 +19,9 @@ public class JointControlBlender
    private final DeltaLimitedYoVariable positionStepSizeLimiter;
    private final DeltaLimitedYoVariable velocityStepSizeLimiter;
 
-   private final OneDoFJoint oneDoFJoint;
+   private final OneDoFJointBasics oneDoFJoint;
 
-   public JointControlBlender(String nameSuffix, OneDoFJoint oneDoFJoint, YoVariableRegistry parentRegistry)
+   public JointControlBlender(String nameSuffix, OneDoFJointBasics oneDoFJoint, YoVariableRegistry parentRegistry)
    {
       this.oneDoFJoint = oneDoFJoint;
       String namePrefix = oneDoFJoint.getName();
