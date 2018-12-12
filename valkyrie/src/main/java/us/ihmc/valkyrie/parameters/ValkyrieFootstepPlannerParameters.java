@@ -106,4 +106,17 @@ public class ValkyrieFootstepPlannerParameters implements FootstepPlannerParamet
    {
       return new ValkyrieFootstepPlannerCostParameters();
    }
+   
+   @Override
+   public double getCliffHeightToAvoid()
+   {
+      return 0.08;
+   }
+
+   @Override
+   public double getMinimumDistanceFromCliffBottoms()
+   {
+      return 0.04;
+   }
+
 }

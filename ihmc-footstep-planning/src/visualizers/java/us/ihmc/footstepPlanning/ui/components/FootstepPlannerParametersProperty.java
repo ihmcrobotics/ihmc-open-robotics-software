@@ -49,6 +49,9 @@ public class FootstepPlannerParametersProperty extends ParametersProperty<Settab
    private DoubleField bodyBoxBaseY = new DoubleField(SettableFootstepPlannerParameters::getBodyBoxBaseY, SettableFootstepPlannerParameters::setBodyBoxBaseY);
    private DoubleField bodyBoxBaseZ = new DoubleField(SettableFootstepPlannerParameters::getBodyBoxBaseZ, SettableFootstepPlannerParameters::setBodyBoxBaseZ);
 
+   private DoubleField cliffHeight = new DoubleField(SettableFootstepPlannerParameters::getCliffHeightToAvoid, SettableFootstepPlannerParameters::setCliffHeightToAvoid);
+   private DoubleField cliffClearance = new DoubleField(SettableFootstepPlannerParameters::getMinimumDistanceFromCliffBottoms, SettableFootstepPlannerParameters::setMinimumDistanceFromCliffBottoms);
+
    public FootstepPlannerParametersProperty(Object bean, String name)
    {
       this(bean, name, new DefaultFootstepPlanningParameters());
@@ -221,6 +224,16 @@ public class FootstepPlannerParametersProperty extends ParametersProperty<Settab
       bindFieldBidirectionalToNumberProperty(property, costPerStep);
    }
 
+   public void bidirectionalBindCliffHeight(Property<? extends Number> property)
+   {
+      bindFieldBidirectionalToNumberProperty(property, cliffHeight);
+   }
+   
+   public void bidirectionalBindCliffClearance(Property<? extends Number> property)
+   {
+      bindFieldBidirectionalToNumberProperty(property, cliffClearance);
+   }
+   
    public void bidirectionalBindHeuristicsWeight(AtomicReference<FootstepPlannerType> plannerTypeReference, Property<? extends Number> property)
    {
       if (plannerTypeReference.get() == null)
