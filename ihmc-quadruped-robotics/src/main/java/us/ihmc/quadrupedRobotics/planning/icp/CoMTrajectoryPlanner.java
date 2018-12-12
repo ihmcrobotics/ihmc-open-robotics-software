@@ -30,7 +30,7 @@ import static us.ihmc.quadrupedRobotics.planning.icp.CoMTrajectoryPlannerTools.*
 
 // This guy assumes that the final phase is always the "stopping" phase, where the CoM is supposed to come to rest.
 // This means that the final CoP is the terminal ICP location
-public class CoMTrajectoryPlanner
+public class CoMTrajectoryPlanner implements CoMTrajectoryPlannerInterface
 {
    private static final int maxCapacity = 10;
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
@@ -135,14 +135,15 @@ public class CoMTrajectoryPlanner
       parentRegistry.addChild(registry);
    }
 
-   /**
-    * Sets the nominal CoM height to be used by the planner.
-    */
+   /** {@inheritDoc} */
+   @Override
    public void setNominalCoMHeight(double nominalCoMHeight)
    {
       this.nominalCoMHeight = nominalCoMHeight;
    }
 
+   /** {@inheritDoc} */
+   @Override
    public void solveForTrajectory()
    {
       if (!ContactStateProviderTools.checkContactSequenceIsValid(contactSequence))
@@ -254,10 +255,8 @@ public class CoMTrajectoryPlanner
       }
    }
 
-   /**
-    * Computes the desired values.
-    * @param timeInPhase time in the current phase. Note that this assumes that the phase starts at 0.0.
-    */
+   /** {@inheritDoc} */
+   @Override
    public void compute(double timeInPhase)
    {
       ContactStateProvider currentContactPhase = contactSequence.get(0);
@@ -279,41 +278,57 @@ public class CoMTrajectoryPlanner
       desiredECMPPosition.subZ(gravityZ / MathTools.square(omega));
    }
 
+   /** {@inheritDoc} */
+   @Override
    public void setCurrentCoMPosition(FramePoint3DReadOnly currentCoMPosition)
    {
       this.currentCoMPosition.setIncludingFrame(currentCoMPosition);
    }
 
+   /** {@inheritDoc} */
+   @Override
    public FramePoint3DReadOnly getDesiredDCMPosition()
    {
       return desiredDCMPosition;
    }
 
+   /** {@inheritDoc} */
+   @Override
    public FrameVector3DReadOnly getDesiredDCMVelocity()
    {
       return desiredDCMVelocity;
    }
 
+   /** {@inheritDoc} */
+   @Override
    public FramePoint3DReadOnly getDesiredCoMPosition()
    {
       return desiredCoMPosition;
    }
 
+   /** {@inheritDoc} */
+   @Override
    public FrameVector3DReadOnly getDesiredCoMVelocity()
    {
       return desiredCoMVelocity;
    }
 
+   /** {@inheritDoc} */
+   @Override
    public FrameVector3DReadOnly getDesiredCoMAcceleration()
    {
       return desiredCoMAcceleration;
    }
 
+   /** {@inheritDoc} */
+   @Override
    public FramePoint3DReadOnly getDesiredVRPPosition()
    {
       return desiredVRPPosition;
    }
 
+   /** {@inheritDoc} */
+   @Override
    public FramePoint3DReadOnly getDesiredECMPPosition()
    {
       return desiredECMPPosition;

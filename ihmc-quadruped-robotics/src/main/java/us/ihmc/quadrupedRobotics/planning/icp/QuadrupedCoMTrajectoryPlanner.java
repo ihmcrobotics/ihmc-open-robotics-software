@@ -19,7 +19,7 @@ import us.ihmc.yoVariables.variable.YoEnum;
 import java.util.ArrayList;
 import java.util.List;
 
-public class DCMBasedCoMPlanner implements DCMPlannerInterface
+public class DCMBasedCoMPlanner
 {
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
 
@@ -45,7 +45,7 @@ public class DCMBasedCoMPlanner implements DCMPlannerInterface
       this.timestamp = timestamp;
       contactSequenceUpdater = new QuadrupedContactSequenceUpdater(soleFrames, 4, 10);
 
-      comTrajectoryPlanner = new CoMTrajectoryPlanner(contactSequenceUpdater.getContactSequenceInAbsoluteTime(), omega, gravity, nominalHeight, registry,
+      comTrajectoryPlanner = new CoMTrajectoryPlanner(contactSequenceUpdater.getContactSequence(), omega, gravity, nominalHeight, registry,
                                                       graphicsListRegistry);
 
       parentRegistry.addChild(registry);
@@ -56,7 +56,6 @@ public class DCMBasedCoMPlanner implements DCMPlannerInterface
       contactSequenceUpdater.initialize();
    }
 
-   @Override
    public void setNominalCoMHeight(double comHeight)
    {
       comTrajectoryPlanner.setNominalCoMHeight(comHeight);
@@ -77,7 +76,6 @@ public class DCMBasedCoMPlanner implements DCMPlannerInterface
       comTrajectoryPlanner.setCurrentCoMPosition(currentCoMPosition);
    }
 
-   @Override
    public void initializeForStanding()
    {
       currentFeetInContact.clear();
@@ -120,7 +118,7 @@ public class DCMBasedCoMPlanner implements DCMPlannerInterface
    {
       contactSequenceUpdater.update(stepSequence, currentFeetInContact, currentTime);
 
-      double timeInPhase = currentTime - contactSequenceUpdater.getContactSequenceInAbsoluteTime().get(0).getTimeInterval().getStartTime();
+      double timeInPhase = currentTime - contactSequenceUpdater.getContactSequence().get(0).getTimeInterval().getStartTime();
       timeInContactPhase.set(timeInPhase);
 
       comTrajectoryPlanner.solveForTrajectory();
