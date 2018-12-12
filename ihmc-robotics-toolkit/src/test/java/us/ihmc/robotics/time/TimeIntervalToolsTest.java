@@ -1,8 +1,10 @@
-package us.ihmc.quadrupedBasics.utils;
+package us.ihmc.robotics.time;
 
+import org.junit.Assert;
 import org.junit.Test;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
-import us.ihmc.quadrupedBasics.gait.TimeInterval;
+import us.ihmc.robotics.time.TimeInterval;
+import us.ihmc.robotics.time.TimeIntervalTools;
 
 import java.util.ArrayList;
 
@@ -28,26 +30,26 @@ public class TimeIntervalToolsTest
       TimeIntervalTools.sortByReverseStartTime(arrayValues);
       for (int i = 0; i < size; i++)
       {
-         assertEquals(arrayValues.get(i).getValue(), size - 1 - i, epsilon);
+         Assert.assertEquals(arrayValues.get(i).getValue(), size - 1 - i, epsilon);
       }
 
       TimeIntervalTools.sortByStartTime(arrayValues);
       for (int i = 0; i < size; i++)
       {
-         assertEquals(arrayValues.get(i).getValue(), i, epsilon);
+         Assert.assertEquals(arrayValues.get(i).getValue(), i, epsilon);
       }
 
       TimeIntervalTools.sortByReverseEndTime(arrayValues);
       for (int i = 0; i < size; i++)
       {
-         assertEquals(arrayValues.get(i).getValue(), size - 1 - i, epsilon);
+         Assert.assertEquals(arrayValues.get(i).getValue(), size - 1 - i, epsilon);
       }
 
 
       TimeIntervalTools.sortByEndTime(arrayValues);
       for (int i = 0; i < arrayValues.size(); i++)
       {
-         assertEquals(arrayValues.get(i).getValue(), i, epsilon);
+         Assert.assertEquals(arrayValues.get(i).getValue(), i, epsilon);
       }
    }
 
@@ -71,7 +73,7 @@ public class TimeIntervalToolsTest
       assertEquals(arrayValues.size(), size);
       for (int i = 0; i < size; i++)
       {
-         assertEquals(arrayValues.get(i).getValue(), i, epsilon);
+         Assert.assertEquals(arrayValues.get(i).getValue(), i, epsilon);
       }
 
       TimeIntervalTools.removeStartTimesGreaterThan(6.5, arrayValues);
@@ -79,7 +81,7 @@ public class TimeIntervalToolsTest
       assertEquals(arrayValues.size(), size);
       for (int i = 0; i < size; i++)
       {
-         assertEquals(arrayValues.get(i).getValue(), i, epsilon);
+         Assert.assertEquals(arrayValues.get(i).getValue(), i, epsilon);
       }
 
       TimeIntervalTools.removeStartTimesLessThan(1.5, arrayValues);
@@ -87,11 +89,11 @@ public class TimeIntervalToolsTest
       assertEquals(arrayValues.size(), size);
       for (int i = 0; i < size; i++)
       {
-         assertEquals(arrayValues.get(i).getValue(), i + 2, epsilon);
+         Assert.assertEquals(arrayValues.get(i).getValue(), i + 2, epsilon);
       }
 
       TimeIntervalTools.removeEndTimesLessThan(6.5, arrayValues);
       assertEquals(arrayValues.size(), 1);
-      assertEquals(arrayValues.get(0).getValue(), 6, epsilon);
+      Assert.assertEquals(arrayValues.get(0).getValue(), 6, epsilon);
    }
 }

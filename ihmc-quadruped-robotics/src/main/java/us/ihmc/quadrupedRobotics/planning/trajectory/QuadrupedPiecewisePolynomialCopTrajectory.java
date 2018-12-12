@@ -4,7 +4,7 @@ import org.apache.commons.lang3.mutable.MutableDouble;
 
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.quadrupedBasics.gait.TimeInterval;
+import us.ihmc.robotics.time.TimeInterval;
 import us.ihmc.quadrupedRobotics.planning.ContactState;
 import us.ihmc.quadrupedRobotics.planning.QuadrupedCenterOfPressureTools;
 import us.ihmc.quadrupedRobotics.planning.QuadrupedTimedContactPhase;
