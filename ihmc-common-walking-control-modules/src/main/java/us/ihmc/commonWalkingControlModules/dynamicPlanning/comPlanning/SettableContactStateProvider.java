@@ -36,6 +36,11 @@ public class SettableContactStateProvider implements ContactStateProvider
       return copPosition;
    }
 
+   public FramePoint3DReadOnly getCopEndPosition()
+   {
+      return copPosition;
+   }
+
    public ContactState getContactState()
    {
       return contactState;
