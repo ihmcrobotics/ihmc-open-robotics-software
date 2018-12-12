@@ -8,12 +8,24 @@ public class ValkyrieFootstepPlannerCostParameters implements FootstepPlannerCos
    @Override
    public DoubleProvider getAStarHeuristicsWeight()
    {
-      return () -> 4.0;
+      return () -> 3.0;
    }
 
    @Override
    public double getYawWeight()
    {
       return 0.1;
+   }
+
+   @Override
+   public boolean useQuadraticDistanceCost()
+   {
+      return true;
+   }
+
+   @Override
+   public double getForwardWeight()
+   {
+      return 2.5;
    }
 }
