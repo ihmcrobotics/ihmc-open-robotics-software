@@ -1,8 +1,7 @@
-package us.ihmc.quadrupedBasics.gait;
+package us.ihmc.robotics.time;
 
 import us.ihmc.commons.MathTools;
 import us.ihmc.euclid.tools.EuclidCoreIOTools;
-import us.ihmc.humanoidRobotics.communication.controllerAPI.command.TimeIntervalCommand;
 
 public class TimeInterval
 {
@@ -74,12 +73,6 @@ public class TimeInterval
    {
       setStartTime(timeInterval.getStartTime());
       setEndTime(timeInterval.getEndTime());
-   }
-
-   public void set(TimeIntervalCommand command)
-   {
-      setStartTime(command.getStartTime());
-      setEndTime(command.getEndTime());
    }
 
    public boolean epsilonEquals(TimeInterval other, double epsilon)
