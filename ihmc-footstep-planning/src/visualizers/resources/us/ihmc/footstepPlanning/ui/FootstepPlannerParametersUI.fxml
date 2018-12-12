@@ -59,7 +59,7 @@
                             <Label text="Min step length" GridPane.columnIndex="1" GridPane.halignment="RIGHT" GridPane.rowIndex="1" />
                             <Label text="Max step z" GridPane.columnIndex="5" GridPane.halignment="RIGHT" />
                             <Label text="Max surface incline" GridPane.columnIndex="5" GridPane.halignment="RIGHT" GridPane.rowIndex="3" />
-            
+
                             <Label text="Max step yaw" GridPane.columnIndex="3" GridPane.halignment="RIGHT" />
                             <Label text="Min step yaw" GridPane.columnIndex="3" GridPane.halignment="RIGHT" GridPane.rowIndex="1" />
                             <Label text="Min foothold percent" GridPane.columnIndex="5" GridPane.halignment="RIGHT" GridPane.rowIndex="2" />
@@ -75,7 +75,7 @@
                             <Spinner fx:id="minStepLength" editable="true" GridPane.columnIndex="2" GridPane.rowIndex="1" />
                             <Spinner fx:id="maxStepZ" editable="true" GridPane.columnIndex="6" />
                             <Spinner fx:id="minSurfaceIncline" editable="true" GridPane.columnIndex="6" GridPane.rowIndex="3" />
-            
+
                             <Spinner fx:id="maxStepYaw" editable="true" GridPane.columnIndex="4" />
                             <Spinner fx:id="minStepYaw" editable="true" GridPane.columnIndex="4" GridPane.rowIndex="1" />
                             <Spinner fx:id="minFootholdPercent" editable="true" GridPane.columnIndex="6" GridPane.rowIndex="2" />
