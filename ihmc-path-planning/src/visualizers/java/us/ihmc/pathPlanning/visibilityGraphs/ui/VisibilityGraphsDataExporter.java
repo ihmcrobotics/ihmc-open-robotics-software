@@ -6,8 +6,8 @@ import java.nio.file.Paths;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.atomic.AtomicReference;
 
-import us.ihmc.commons.PrintTools;
 import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.log.LogTools;
 import us.ihmc.messager.Messager;
 import us.ihmc.pathPlanning.visibilityGraphs.tools.VisibilityGraphsIOTools;
 import us.ihmc.pathPlanning.visibilityGraphs.ui.messager.UIVisibilityGraphsTopics;
@@ -50,25 +50,25 @@ public class VisibilityGraphsDataExporter
    {
       if (dataDirectoryPath.get() == null)
       {
-         PrintTools.error("The path to the data directory is null.");
+         LogTools.error("The path to the data directory is null.");
          return;
       }
 
       if (planarRegionData == null)
       {
-         PrintTools.error("No planar regions, not exporting the data.");
+         LogTools.error("No planar regions, not exporting the data.");
          return;
       }
 
       if (start == null)
       {
-         PrintTools.error("No start position, not exporting the data.");
+         LogTools.error("No start position, not exporting the data.");
          return;
       }
 
       if (goal == null)
       {
-         PrintTools.error("No goal position, not exporting the data.");
+         LogTools.error("No goal position, not exporting the data.");
          return;
       }
 
