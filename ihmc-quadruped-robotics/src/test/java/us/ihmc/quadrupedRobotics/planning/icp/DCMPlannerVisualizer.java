@@ -5,10 +5,11 @@ import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.graphicsDescription.Graphics3DObject;
+import us.ihmc.graphicsDescription.appearance.YoAppearance;
+import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition;
+import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.mecano.frames.MovingReferenceFrame;
 import us.ihmc.quadrupedBasics.gait.QuadrupedTimedStep;
-import us.ihmc.quadrupedRobotics.planning.ContactState;
-import us.ihmc.robotics.referenceFrames.TranslationReferenceFrame;
 import us.ihmc.robotics.robotSide.QuadrantDependentList;
 import us.ihmc.robotics.robotSide.RobotQuadrant;
 import us.ihmc.simulationconstructionset.Robot;
@@ -30,7 +31,16 @@ public class DCMPlannerVisualizer
    private static final double gravity = 9.81;
    private static final double nominalHeight = 0.75;
 
-   private static final int BUFFER_SIZE = 16000;
+
+   private static final double initialTransferTime = 1.0;
+   private static final double stepDuration = 0.4;
+   private static final double stanceDuration = 0.2;
+   private static final double stepLength = 0.5;
+   private static final int numberOfSteps = 5;
+
+   private static final double simDt = 1e-3;
+
+   private static final int BUFFER_SIZE = 160000;
 
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
 
@@ -40,29 +50,52 @@ public class DCMPlannerVisualizer
    private final DCMBasedCoMPlanner planner;
 
    private List<QuadrupedTimedStep> steps;
-   private final QuadrantDependentList<MovingReferenceFrame> soleFrames;
+   private final QuadrantDependentList<TranslationMovingReferenceFrame> soleFramesForModifying = createSoleFrames();
    private final List<RobotQuadrant> feetInContact = new ArrayList<>();
 
-   private final YoFramePoint3D desiredICPPosition;
-   private final YoFrameVector3D desiredICPVelocity;
-   private final YoDouble omega;
-   private final double simDt = 1e-5;
+   private final YoFramePoint3D desiredCoMPosition;
+   private final YoFrameVector3D desiredCoMVelocity;
+   private final YoFrameVector3D desiredCoMAcceleration;
+   private final YoFramePoint3D desiredDCMPosition;
+   private final YoFrameVector3D desiredDCMVelocity;
+   private final YoFramePoint3D desiredVRPPosition;
+
+   private final double simDuration;
 
    public DCMPlannerVisualizer()
    {
       YoVariableRegistry registry = new YoVariableRegistry("test");
-      soleFrames = createSoleFrames();
+      YoGraphicsListRegistry yoGraphicsListRegistry = new YoGraphicsListRegistry();
 
-      desiredICPPosition = new YoFramePoint3D("desiredICPPosition", worldFrame, registry);
-      desiredICPVelocity = new YoFrameVector3D("desiredICPVelocity", worldFrame, registry);
-      omega = new YoDouble("omega", registry);
+      QuadrantDependentList<MovingReferenceFrame> soleFrames = new QuadrantDependentList<>();
+      soleFrames.putAll(soleFramesForModifying);
+
+      desiredCoMPosition = new YoFramePoint3D("desiredCoMPosition", worldFrame, registry);
+      desiredCoMVelocity = new YoFrameVector3D("desiredCoMVelocity", worldFrame, registry);
+      desiredCoMAcceleration = new YoFrameVector3D("desiredCoMAcceleration", worldFrame, registry);
+      desiredDCMPosition = new YoFramePoint3D("desiredDCMPosition", worldFrame, registry);
+      desiredDCMVelocity = new YoFrameVector3D("desiredDCMVelocity", worldFrame, registry);
+      desiredVRPPosition = new YoFramePoint3D("desiredVRPPosition", worldFrame, registry);
+
+      YoDouble omega = new YoDouble("omega", registry);
       omega.set(Math.sqrt(gravity / nominalHeight));
 
-      yoTime = new YoDouble("timeToCheck", registry);
+      yoTime = new YoDouble("time", registry);
 
+      YoGraphicPosition dcmViz = new YoGraphicPosition("desiredDCM", desiredDCMPosition, 0.02, YoAppearance.Yellow(),
+                                                       YoGraphicPosition.GraphicType.BALL_WITH_CROSS);
+      YoGraphicPosition comViz = new YoGraphicPosition("desiredCoM", desiredCoMPosition, 0.02, YoAppearance.Black(), YoGraphicPosition.GraphicType.SOLID_BALL);
+      YoGraphicPosition vrpViz = new YoGraphicPosition("desiredVRP", desiredVRPPosition, 0.02, YoAppearance.Purple(),
+                                                       YoGraphicPosition.GraphicType.BALL_WITH_ROTATED_CROSS);
 
-      planner = new DCMBasedCoMPlanner(soleFrames, yoTime, omega, gravity, nominalHeight, registry);
+      yoGraphicsListRegistry.registerArtifact("dcmPlanner", dcmViz.createArtifact());
+      yoGraphicsListRegistry.registerArtifact("dcmPlanner", comViz.createArtifact());
+      yoGraphicsListRegistry.registerArtifact("dcmPlanner", vrpViz.createArtifact());
+
+      planner = new DCMBasedCoMPlanner(soleFrames, yoTime, omega, gravity, nominalHeight, registry, yoGraphicsListRegistry);
       steps = createSteps(soleFrames);
+
+      simDuration = steps.get(steps.size() - 1).getTimeInterval().getEndTime() + 5.0;
 
 
       SimulationConstructionSetParameters scsParameters = new SimulationConstructionSetParameters(true, BUFFER_SIZE);
@@ -71,11 +104,11 @@ public class DCMPlannerVisualizer
       for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
          feetInContact.add(robotQuadrant);
 
-
       scs = new SimulationConstructionSet(robot, scsParameters);
+      scs.setDT(simDt, 1);
       scs.addYoVariableRegistry(registry);
-      //      scs.addYoGraphicsListRegistry(yoGraphicsListRegistry);
-      scs.setPlaybackRealTimeRate(0.025);
+      scs.addYoGraphicsListRegistry(yoGraphicsListRegistry);
+      scs.setPlaybackRealTimeRate(0.25);
       Graphics3DObject linkGraphics = new Graphics3DObject();
       linkGraphics.addCoordinateSystem(0.3);
       scs.addStaticLinkGraphics(linkGraphics);
@@ -83,7 +116,7 @@ public class DCMPlannerVisualizer
       scs.setCameraPosition(-0.5, 0.0, 1.0);
 
       SimulationOverheadPlotterFactory simulationOverheadPlotterFactory = scs.createSimulationOverheadPlotterFactory();
-      //      simulationOverheadPlotterFactory.addYoGraphicsListRegistries(yoGraphicsListRegistry);
+      simulationOverheadPlotterFactory.addYoGraphicsListRegistries(yoGraphicsListRegistry);
       simulationOverheadPlotterFactory.createOverheadPlotter();
 
       scs.startOnAThread();
@@ -91,9 +124,9 @@ public class DCMPlannerVisualizer
       ThreadTools.sleepForever();
    }
 
-   private QuadrantDependentList<MovingReferenceFrame> createSoleFrames()
+   private static QuadrantDependentList<TranslationMovingReferenceFrame> createSoleFrames()
    {
-      QuadrantDependentList<MovingReferenceFrame> soleFrames = new QuadrantDependentList<>();
+      QuadrantDependentList<TranslationMovingReferenceFrame> soleFrames = new QuadrantDependentList<>();
       for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
       {
          TranslationMovingReferenceFrame soleFrame = new TranslationMovingReferenceFrame(robotQuadrant + "SoleFrame", worldFrame);
@@ -108,21 +141,16 @@ public class DCMPlannerVisualizer
       return soleFrames;
    }
 
-   private final double stepStartTime = 1.0;
-   private final double stepDuration = 0.4;
-   private final double stanceDuration = 0.2;
-   private final double stepLength = 0.5;
-   private final int numberOfSteps = 5;
-
-   private final FramePoint3D frontLeftStep = new FramePoint3D();
-   private final FramePoint3D frontRightStep = new FramePoint3D();
-   private final FramePoint3D hindLeftStep = new FramePoint3D();
-   private final FramePoint3D hindRightStep = new FramePoint3D();
 
    private List<QuadrupedTimedStep> createSteps(QuadrantDependentList<MovingReferenceFrame> soleFrames)
    {
       int stepInterval = 0;
       List<QuadrupedTimedStep> steps = new ArrayList<>();
+
+      FramePoint3D frontLeftStep = new FramePoint3D();
+      FramePoint3D frontRightStep = new FramePoint3D();
+      FramePoint3D hindLeftStep = new FramePoint3D();
+      FramePoint3D hindRightStep = new FramePoint3D();
 
       frontLeftStep.setToZero(soleFrames.get(RobotQuadrant.FRONT_LEFT));
       frontRightStep.setToZero(soleFrames.get(RobotQuadrant.FRONT_RIGHT));
@@ -134,7 +162,7 @@ public class DCMPlannerVisualizer
       hindLeftStep.changeFrame(worldFrame);
       hindRightStep.changeFrame(worldFrame);
 
-      double currentTime = stepStartTime;
+      double currentTime = initialTransferTime;
       for (int i = 0; i < numberOfSteps; i++)
       {
          frontLeftStep.addX(stepLength);
@@ -145,10 +173,8 @@ public class DCMPlannerVisualizer
          QuadrupedTimedStep step1 = new QuadrupedTimedStep();
          QuadrupedTimedStep step2 = new QuadrupedTimedStep();
 
-         step1.getTimeInterval().setStartTime(currentTime);
-         step1.getTimeInterval().setEndTime(currentTime + stepDuration);
-         step2.getTimeInterval().setStartTime(currentTime);
-         step2.getTimeInterval().setEndTime(currentTime + stepDuration);
+         step1.getTimeInterval().setInterval(currentTime, currentTime + stepDuration);
+         step2.getTimeInterval().setInterval(currentTime + 0.5 * stepDuration, currentTime + 1.5 * stepDuration);
 
          if (stepInterval == 0)
          {
@@ -180,35 +206,41 @@ public class DCMPlannerVisualizer
 
    private void simulate()
    {
-      while (true)
-      {
-         yoTime.add(simDt);
-         planner.clearStepSequence();
-         for (int i = 0; i < steps.size(); i++)
-            planner.addStepToSequence(steps.get(i));
+      desiredCoMPosition.setZ(nominalHeight);
+      planner.initialize();
+      planner.setCurrentCoMPosition(desiredCoMPosition);
 
-         planner.initialize();
-         double currentTime = yoTime.getDoubleValue();
-         updateContactState(currentTime);
-         planner.computeSetpoints(currentTime, feetInContact, desiredICPPosition, desiredICPVelocity);
+      planner.clearStepSequence();
+      for (int i = 0; i < steps.size(); i++)
+         planner.addStepToSequence(steps.get(i));
+      planner.computeSetpoints(yoTime.getDoubleValue(), feetInContact, desiredDCMPosition, desiredDCMVelocity);
+
+      while (simDuration > yoTime.getDoubleValue())
+      {
+         planner.clearStepSequence();
+         steps.forEach(planner::addStepToSequence);
+
+         planner.computeSetpoints(yoTime.getDoubleValue(), feetInContact, desiredDCMPosition, desiredDCMVelocity);
+
+         yoTime.add(simDt);
+         updateFeetStates(yoTime.getDoubleValue());
 
          scs.tickAndUpdate();
       }
    }
 
-   private void updateContactState(double currentTime)
+   private void updateFeetStates(double currentTime)
    {
       feetInContact.clear();
       for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
          feetInContact.add(robotQuadrant);
+
       for (int i = 0; i < steps.size(); i++)
       {
          QuadrupedTimedStep step = steps.get(i);
          if (step.getTimeInterval().intervalContains(currentTime))
          {
-            TranslationMovingReferenceFrame newSoleFrame = new TranslationMovingReferenceFrame("NewSoleFrame", worldFrame);
-            newSoleFrame.updateTranslation(step.getGoalPosition());
-            soleFrames.put(step.getRobotQuadrant(), newSoleFrame);
+            soleFramesForModifying.get(step.getRobotQuadrant()).updateTranslation(step.getGoalPosition());
             feetInContact.remove(step.getRobotQuadrant());
          }
       }

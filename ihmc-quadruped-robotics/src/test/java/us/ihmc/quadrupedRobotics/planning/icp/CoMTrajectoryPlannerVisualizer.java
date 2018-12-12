@@ -102,7 +102,7 @@ public class CoMTrajectoryPlannerVisualizer
       scs.setDT(simDt, 1);
       scs.addYoVariableRegistry(registry);
       scs.addYoGraphicsListRegistry(graphicsListRegistry);
-      scs.setPlaybackRealTimeRate(0.025);
+      scs.setPlaybackRealTimeRate(0.25);
       Graphics3DObject linkGraphics = new Graphics3DObject();
       linkGraphics.addCoordinateSystem(0.3);
       scs.addStaticLinkGraphics(linkGraphics);
@@ -179,11 +179,12 @@ public class CoMTrajectoryPlannerVisualizer
       planner.setCurrentCoMPosition(desiredCoMPosition);
       planner.solveForTrajectory();
 
-      while (true)
+      while (simDuration > yoTime.getDoubleValue())
       {
          if (!MathTools.epsilonEquals(contactStates.get(0).getTimeInterval().getStartTime(), 0.0, 1e-5))
             throw new RuntimeException("This is a problem");
 
+         planner.solveForTrajectory();
          planner.compute(timeInPhase.getDoubleValue());
 
          desiredCoMPosition.set(planner.getDesiredCoMPosition());
@@ -203,9 +204,6 @@ public class CoMTrajectoryPlannerVisualizer
          updateContactState();
 
          scs.tickAndUpdate();
-
-         if (yoTime.getDoubleValue() > simDuration)
-            break;
       }
    }
 
@@ -222,7 +220,7 @@ public class CoMTrajectoryPlannerVisualizer
             contactState.getTimeInterval().shiftInterval(timeShift);
 
          planner.setCurrentCoMPosition(desiredCoMPosition);
-         planner.solveForTrajectory();
+//         planner.solveForTrajectory();
          timeInPhase.set(0.0);
       }
    }
