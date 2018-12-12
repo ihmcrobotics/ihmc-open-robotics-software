@@ -4,6 +4,7 @@ import javafx.animation.AnimationTimer;
 import javafx.scene.Node;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.MeshView;
+import us.ihmc.euclid.exceptions.NotARotationMatrixException;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple2D.Point2D;
@@ -128,7 +129,16 @@ public class NodeCheckerRenderer extends AnimationTimer
 
       RigidBodyTransform snappedTransformToWorld = new RigidBodyTransform();
       ConvexPolygon2D foothold = snapData.getCroppedFoothold();
-      FootstepNodeTools.getSnappedNodeTransform(node, snapData.getSnapTransform(), snappedTransformToWorld);
+
+      try
+      {
+         FootstepNodeTools.getSnappedNodeTransform(node, snapData.getSnapTransform(), snappedTransformToWorld);
+      }
+      catch(NotARotationMatrixException e)
+      {
+         return;
+      }
+
       snappedTransformToWorld.appendTranslation(0.0, 0.0, 0.01);
       planarTransformToWorld.setTranslationZ(snappedTransformToWorld.getTranslationZ() + 0.1);
 
