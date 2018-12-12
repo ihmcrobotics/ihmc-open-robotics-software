@@ -62,7 +62,12 @@ public class FootstepPlannerParametersUIController
    private Spinner<Double> cliffHeightSpinner;
    @FXML
    private Spinner<Double> cliffClearance;
-
+   @FXML
+   private Spinner<Double> maxXYWiggleSpinner;
+   @FXML
+   private Spinner<Double> maxYawWiggleSpinner;
+   @FXML
+   private Spinner<Double> wiggleInsideDeltaSpinner;
 
    private static final double footWidth = 0.15;
    private static final double footLength = 0.25;
@@ -98,7 +103,9 @@ public class FootstepPlannerParametersUIController
 
       minXClearance.setValueFactory(new DoubleSpinnerValueFactory(0.0, 0.3, 0.0, 0.01));
       minYClearance.setValueFactory(new DoubleSpinnerValueFactory(0.0, 0.3, 0.0, 0.01));
-
+      maxXYWiggleSpinner.setValueFactory(new DoubleSpinnerValueFactory(0.0, 0.3, 0.0, 0.005));
+      maxYawWiggleSpinner.setValueFactory(new DoubleSpinnerValueFactory(0.0, 0.5, 0.0, 0.005));
+      wiggleInsideDeltaSpinner.setValueFactory(new DoubleSpinnerValueFactory(0.0, 0.3, 0.0, 0.005));
 
       maxStepLength.getValueFactory().valueProperty().addListener((ChangeListener) -> updateStepShape());
       minStepLength.getValueFactory().valueProperty().addListener((ChangeListener) -> updateStepShape());
@@ -137,7 +144,11 @@ public class FootstepPlannerParametersUIController
       
       parametersProperty.bidirectionalBindCliffHeight(cliffHeightSpinner.getValueFactory().valueProperty());
       parametersProperty.bidirectionalBindCliffClearance(cliffClearance.getValueFactory().valueProperty());
-      
+
+      parametersProperty.bidirectionalBindMaxWiggleXY(maxXYWiggleSpinner.getValueFactory().valueProperty());
+      parametersProperty.bidirectionalBindMaxWiggleYaw(maxYawWiggleSpinner.getValueFactory().valueProperty());
+      parametersProperty.bidirectionalBindWiggleInsideDelta(wiggleInsideDeltaSpinner.getValueFactory().valueProperty());
+
       messager.bindBidirectional(FootstepPlannerMessagerAPI.PlannerParametersTopic, parametersProperty, createConverter(), true);
 
       // these dimensions work best for valkyrie
