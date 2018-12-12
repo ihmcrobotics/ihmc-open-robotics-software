@@ -304,6 +304,11 @@ public class CoMTrajectoryPlanner
       return desiredCoMVelocity;
    }
 
+   public FrameVector3DReadOnly getDesiredCoMAcceleration()
+   {
+      return desiredCoMAcceleration;
+   }
+
    public FramePoint3DReadOnly getDesiredVRPPosition()
    {
       return desiredVRPPosition;
@@ -337,30 +342,26 @@ public class CoMTrajectoryPlanner
    private void setCoMPositionConstraint(int sequenceId, double timeInPhaseForConstraint, FramePoint3DReadOnly centerOfMassLocationForConstraint)
    {
       centerOfMassLocationForConstraint.checkReferenceFrameMatch(ReferenceFrame.getWorldFrame());
+      ContactStateProvider contactStateProvider = contactSequence.get(sequenceId);
       double omega = this.omega.getValue();
+      ContactState contactState = contactStateProvider.getContactState();
 
-      double c0, c1;
-      if (timeInPhaseForConstraint > 0)
-      {
-         c0 = Math.exp(omega * timeInPhaseForConstraint);
-         c1 = Math.exp(-omega * timeInPhaseForConstraint);
-      }
-      else
-      {
-         c0 = 1.0;
-         c1 = 1.0;
-      }
+      double c0 = getFirstCoefficientPositionMultiplier(contactState, timeInPhaseForConstraint, omega);
+      double c1 = getSecondCoefficientPositionMultiplier(contactState, timeInPhaseForConstraint, omega);
 
       double bX = centerOfMassLocationForConstraint.getX();
       double bY = centerOfMassLocationForConstraint.getY();
       double bZ = centerOfMassLocationForConstraint.getZ();
 
-      if (contactSequence.get(sequenceId).getContactState() == ContactState.IN_CONTACT)
+      if (contactState == ContactState.IN_CONTACT)
       {
-         bX -= contactSequence.get(sequenceId).getCopPosition().getX();
-         bY -= contactSequence.get(sequenceId).getCopPosition().getY();
-         bZ -= (contactSequence.get(sequenceId).getCopPosition().getZ() + nominalCoMHeight);
+         FramePoint3DReadOnly copPosition = contactStateProvider.getCopPosition();
+         copPosition.checkReferenceFrameMatch(worldFrame);
+         bX -= copPosition.getX();
+         bY -= copPosition.getY();
+         bZ -= (copPosition.getZ() + nominalCoMHeight);
       }
+      bZ -= getGravityPositionEffect(contactState, gravityZ, timeInPhaseForConstraint);
 
       coefficientMultipliers.set(numberOfConstraints, getFirstCoefficientIndex(sequenceId), c0);
       coefficientMultipliers.set(numberOfConstraints, getSecondCoefficientIndex(sequenceId), c1);
@@ -398,15 +399,18 @@ public class CoMTrajectoryPlanner
     */
    private void setDCMTerminalConstraint(int sequenceId, FramePoint3DReadOnly terminalDCMPosition)
    {
-      terminalDCMPosition.checkReferenceFrameMatch(ReferenceFrame.getWorldFrame());
+      terminalDCMPosition.checkReferenceFrameMatch(worldFrame);
       double omega = this.omega.getValue();
 
-      double duration = contactSequence.get(sequenceId).getTimeInterval().getDuration();
+      ContactStateProvider contactStateProvider = contactSequence.get(sequenceId);
+      double duration = contactStateProvider.getTimeInterval().getDuration();
+      FramePoint3DReadOnly copPosition = contactStateProvider.getCopPosition();
+      copPosition.checkReferenceFrameMatch(worldFrame);
 
       double c0 = 2.0 * Math.exp(omega * duration);
-      double bX = terminalDCMPosition.getX() - contactSequence.get(sequenceId).getCopPosition().getX();
-      double bY = terminalDCMPosition.getY() - contactSequence.get(sequenceId).getCopPosition().getY();
-      double bZ = terminalDCMPosition.getZ() - (contactSequence.get(sequenceId).getCopPosition().getZ() + nominalCoMHeight);
+      double bX = terminalDCMPosition.getX() - copPosition.getX();
+      double bY = terminalDCMPosition.getY() - copPosition.getY();
+      double bZ = terminalDCMPosition.getZ() - (copPosition.getZ() + nominalCoMHeight);
 
       coefficientMultipliers.set(numberOfConstraints, getFirstCoefficientIndex(sequenceId), c0);
       xCoefficientConstants.add(numberOfConstraints, 0, bX);
@@ -462,6 +466,7 @@ public class CoMTrajectoryPlanner
       if (previousContact.getContactState() == ContactState.IN_CONTACT)
       {
          FramePoint3DReadOnly previousCopPosition = previousContact.getCopPosition();
+         previousCopPosition.checkReferenceFrameMatch(worldFrame);
          previousBX = previousCopPosition.getX();
          previousBY = previousCopPosition.getY();
          previousBZ = previousCopPosition.getZ() + nominalCoMHeight;
@@ -482,6 +487,7 @@ public class CoMTrajectoryPlanner
       if (nextContact.getContactState() == ContactState.IN_CONTACT)
       {
          FramePoint3DReadOnly nextCopPosition = nextContact.getCopPosition();
+         nextCopPosition.checkReferenceFrameMatch(worldFrame);
          nextBX = nextCopPosition.getX();
          nextBY = nextCopPosition.getY();
          nextBZ = nextCopPosition.getZ() + nominalCoMHeight;
