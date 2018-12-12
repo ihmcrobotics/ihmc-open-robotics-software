@@ -11,6 +11,7 @@ import static us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI.
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 
+import controller_msgs.msg.dds.FootstepDataListMessage;
 import javafx.animation.AnimationTimer;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
@@ -18,12 +19,15 @@ import javafx.fxml.FXML;
 import javafx.scene.control.*;
 import javafx.scene.control.SpinnerValueFactory.DoubleSpinnerValueFactory;
 import us.ihmc.commons.PrintTools;
+import us.ihmc.communication.packets.ExecutionMode;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
+import us.ihmc.footstepPlanning.FootstepPlan;
 import us.ihmc.footstepPlanning.FootstepPlannerType;
 import us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI;
+import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessageConverter;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.javaFXToolkit.messager.JavaFXMessager;
 import us.ihmc.javaFXToolkit.messager.MessageBidirectionalBinding.PropertyToMessageTypeConverter;
@@ -113,7 +117,14 @@ public class MainTabController
    @FXML
    public void sendPlan()
    {
-
+      FootstepPlan footstepPlan = footstepPlanReference.get();
+      if(footstepPlan == null)
+         return;
+      double swingTime = 1.2;
+      double transferTime = 0.8;
+      FootstepDataListMessage footstepDataListMessage = FootstepDataMessageConverter
+            .createFootstepDataListFromPlan(footstepPlan, swingTime, transferTime, ExecutionMode.OVERRIDE);
+      messager.submitMessage(FootstepPlannerMessagerAPI.FootstepDataListTopic, footstepDataListMessage);
    }
 
    private JavaFXMessager messager;
@@ -122,6 +133,7 @@ public class MainTabController
    private final AtomicBoolean requestSetStartPoseFromRobot = new AtomicBoolean(false);
    private AnimationTimer robotPoseHandler;
    private HumanoidReferenceFrames humanoidReferenceFrames;
+   private AtomicReference<FootstepPlan> footstepPlanReference;
 
    private final Point3DProperty startPositionProperty = new Point3DProperty(this, "startPositionProperty", new Point3D());
    private final Point3DProperty goalPositionProperty = new Point3DProperty(this, "goalPositionProperty", new Point3D());
@@ -134,7 +146,7 @@ public class MainTabController
       this.messager = messager;
 
       currentPlannerRequestId = messager.createInput(FootstepPlannerMessagerAPI.PlannerRequestIdTopic, -1);
-
+      footstepPlanReference = messager.createInput(FootstepPlannerMessagerAPI.FootstepPlanTopic, null);
    }
 
    private void setupControls()
