@@ -1,13 +1,13 @@
-package us.ihmc.commonWalkingControlModules.dynamicPlanning.comPlanning;
+package us.ihmc.quadrupedRobotics.planning.icp;
 
 import junit.framework.TestCase;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tools.EuclidCoreTestTools;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.mecano.frames.MovingReferenceFrame;
-import us.ihmc.quadrupedBasics.gait.TimeInterval;
 import us.ihmc.robotics.robotSide.QuadrantDependentList;
 import us.ihmc.robotics.robotSide.RobotQuadrant;
+import us.ihmc.robotics.time.TimeInterval;
 
 import java.util.List;
 
@@ -20,31 +20,31 @@ public class DCMPlanningTestTools
    {
       assertTimeIntervalsEqual(expected.getTimeInterval(), actual.getTimeInterval(), epsilon);
 
-      Assertions.assertEquals(expected.getFeetInContact().size(), actual.getFeetInContact().size(), epsilon);
+      assertEquals(expected.getFeetInContact().size(), actual.getFeetInContact().size(), epsilon);
       for (RobotQuadrant robotQuadrant : expected.getFeetInContact())
       {
-         TestCase.assertTrue(actual.getFeetInContact().contains(robotQuadrant));
+         assertTrue(actual.getFeetInContact().contains(robotQuadrant));
          EuclidCoreTestTools.assertPoint3DGeometricallyEquals(expected.getSolePosition(robotQuadrant), actual.getSolePosition(robotQuadrant), epsilon);
       }
    }
 
    public static void assertQuadrupedStepTransitionsEqual(QuadrupedStepTransition expected, QuadrupedStepTransition actual, double epsilon)
    {
-      Assertions.assertEquals(expected.getTransitionTime(), actual.getTransitionTime(), epsilon);
-      Assertions.assertEquals(expected.getNumberOfFeetInTransition(), actual.getNumberOfFeetInTransition());
+      assertEquals(expected.getTransitionTime(), actual.getTransitionTime(), epsilon);
+      assertEquals(expected.getNumberOfFeetInTransition(), actual.getNumberOfFeetInTransition());
 
       for (int i = 0; i < expected.getNumberOfFeetInTransition(); i++)
       {
          RobotQuadrant quadrant = expected.getTransitionQuadrant(i);
-         TestCase.assertTrue(actual.getTransitionQuadrants().contains(quadrant));
+         assertTrue(actual.getTransitionQuadrants().contains(quadrant));
          EuclidCoreTestTools.assertPoint3DGeometricallyEquals(expected.getTransitionPosition(quadrant), actual.getTransitionPosition(quadrant), epsilon);
-         Assertions.assertEquals(expected.getTransitionType(i), actual.getTransitionType(i));
+         assertEquals(expected.getTransitionType(i), actual.getTransitionType(i));
       }
    }
 
    public static void assertQuadrupedStepTransitionsListEqual(List<QuadrupedStepTransition> expected, List<QuadrupedStepTransition> actual, double epsilon)
    {
-      Assertions.assertEquals(expected.size(), actual.size());
+      assertEquals(expected.size(), actual.size());
 
       for (int i = 0; i < expected.size(); i++)
          assertQuadrupedStepTransitionsEqual(expected.get(i), actual.get(i), epsilon);
@@ -53,8 +53,8 @@ public class DCMPlanningTestTools
 
    public static void assertTimeIntervalsEqual(TimeInterval expected, TimeInterval actual, double epsilon)
    {
-      Assertions.assertEquals(expected.getStartTime(), actual.getStartTime(), epsilon);
-      Assertions.assertEquals(expected.getEndTime(), actual.getEndTime(), epsilon);
+      assertEquals(expected.getStartTime(), actual.getStartTime(), epsilon);
+      assertEquals(expected.getEndTime(), actual.getEndTime(), epsilon);
    }
 
    static QuadrantDependentList<MovingReferenceFrame> createSimpleSoleFrames(double nominalLength, double nominalWidth)

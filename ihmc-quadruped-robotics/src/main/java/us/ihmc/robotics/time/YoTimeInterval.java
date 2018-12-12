@@ -1,9 +1,6 @@
 package us.ihmc.robotics.time;
 
 import us.ihmc.euclid.tools.EuclidCoreIOTools;
-import us.ihmc.humanoidRobotics.communication.controllerAPI.command.TimeIntervalCommand;
-import us.ihmc.quadrupedBasics.gait.TimeIntervalBasics;
-import us.ihmc.quadrupedBasics.gait.TimeIntervalReadOnly;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 
@@ -64,13 +61,6 @@ public class YoTimeInterval implements TimeIntervalBasics
    {
       this.startTime.set(timeInterval.getStartTime());
       this.endTime.set(timeInterval.getEndTime());
-   }
-
-   @Override
-   public void set(TimeIntervalCommand command)
-   {
-      this.startTime.set(command.getStartTime());
-      this.endTime.set(command.getEndTime());
    }
 
    @Override

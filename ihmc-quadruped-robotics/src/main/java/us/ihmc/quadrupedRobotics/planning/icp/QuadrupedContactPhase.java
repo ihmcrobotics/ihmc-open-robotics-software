@@ -1,14 +1,14 @@
 package us.ihmc.quadrupedRobotics.planning.icp;
 
 import org.apache.commons.lang3.mutable.MutableDouble;
+import us.ihmc.commonWalkingControlModules.dynamicPlanning.comPlanning.ContactState;
 import us.ihmc.commonWalkingControlModules.dynamicPlanning.comPlanning.ContactStateProvider;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
-import us.ihmc.quadrupedBasics.gait.TimeInterval;
-import us.ihmc.quadrupedRobotics.planning.ContactState;
 import us.ihmc.quadrupedRobotics.planning.QuadrupedCenterOfPressureTools;
 import us.ihmc.robotics.robotSide.QuadrantDependentList;
 import us.ihmc.robotics.robotSide.RobotQuadrant;
+import us.ihmc.robotics.time.TimeInterval;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -75,7 +75,7 @@ public class QuadrupedContactPhase implements ContactStateProvider
    public void update()
    {
       if (feetInContact.isEmpty())
-         contactState = ContactState.NO_CONTACT;
+         contactState = ContactState.FLIGHT;
       else
          contactState = ContactState.IN_CONTACT;
 

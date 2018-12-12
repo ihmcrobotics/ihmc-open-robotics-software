@@ -1,9 +1,6 @@
 package us.ihmc.commonWalkingControlModules.dynamicPlanning.comPlanning;
 
 import org.junit.Test;
-import us.ihmc.commonWalkingControlModules.dynamicPlanning.comPlanning.CoMTrajectoryPlanner;
-import us.ihmc.commonWalkingControlModules.dynamicPlanning.comPlanning.ContactStateProvider;
-import us.ihmc.commonWalkingControlModules.dynamicPlanning.comPlanning.SettableContactStateProvider;
 import us.ihmc.commons.RandomNumbers;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
@@ -14,8 +11,7 @@ import us.ihmc.euclid.referenceFrame.tools.EuclidFrameRandomTools;
 import us.ihmc.euclid.referenceFrame.tools.EuclidFrameTestTools;
 import us.ihmc.euclid.tools.EuclidCoreTestTools;
 import us.ihmc.euclid.tuple3D.Vector3D;
-import us.ihmc.quadrupedBasics.gait.TimeInterval;
-import us.ihmc.quadrupedRobotics.planning.ContactState;
+import us.ihmc.robotics.time.TimeInterval;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 
@@ -443,7 +439,7 @@ public class CoMTrajectoryPlannerTest
       firstContact.setTimeInterval(new TimeInterval(0.0, 1.0));
       firstContact.setCopPosition(new FramePoint3D());
       secondContact.setTimeInterval(new TimeInterval(1.0, 1.25));
-      secondContact.setContactState(ContactState.NO_CONTACT);
+      secondContact.setContactState(ContactState.FLIGHT);
       thirdContact.setTimeInterval(new TimeInterval(1.25, 2.25));
       thirdContact.setCopPosition(new FramePoint3D(ReferenceFrame.getWorldFrame(), 2.0, 0.0, 0.0));
 
@@ -503,7 +499,7 @@ public class CoMTrajectoryPlannerTest
       SettableContactStateProvider thirdContact = new SettableContactStateProvider();
 
       secondContact.setTimeInterval(new TimeInterval(0.0, 0.25));
-      secondContact.setContactState(ContactState.NO_CONTACT);
+      secondContact.setContactState(ContactState.FLIGHT);
       thirdContact.setTimeInterval(new TimeInterval(0.25, 1.25));
       thirdContact.setCopPosition(new FramePoint3D(ReferenceFrame.getWorldFrame(), 2.0, 0.0, 0.0));
 
