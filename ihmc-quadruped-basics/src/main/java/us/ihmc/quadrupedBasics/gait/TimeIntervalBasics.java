@@ -16,6 +16,11 @@ public interface TimeIntervalBasics extends TimeIntervalReadOnly
    @Deprecated
    void setEndTime(double endTime);
 
+   default void reset()
+   {
+      setInterval(Double.NaN, Double.NaN);
+   }
+
    void setInterval(double startTime, double endTime);
 
    TimeIntervalBasics shiftInterval(double shiftTime);
