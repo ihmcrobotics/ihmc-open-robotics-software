@@ -33,7 +33,6 @@ mainDependencies {
    compile group: "us.ihmc", name: "ihmc-communication", version: "source"
    compile group: "us.ihmc", name: "ihmc-robot-models", version: "source"
    compile group: "us.ihmc", name: "ihmc-sensor-processing", version: "source"
-   compile group: "us.ihmc", name: "ihmc-footstep-planning", version: "source"
    compile group: "us.ihmc", name: "ihmc-interfaces", version: "source"
 }
 

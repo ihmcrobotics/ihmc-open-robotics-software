@@ -1,23 +1,23 @@
 package us.ihmc.footstepPlanning.graphSearch.footstepSnapping;
 
-import java.util.ArrayList;
-import java.util.List;
-
+import us.ihmc.commonWalkingControlModules.polygonWiggling.PolygonWiggler;
+import us.ihmc.commonWalkingControlModules.polygonWiggling.WiggleParameters;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
 import us.ihmc.euclid.tuple3D.Point3D;
-import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParameters;
 import us.ihmc.footstepPlanning.graphSearch.graph.FootstepNode;
 import us.ihmc.footstepPlanning.graphSearch.graph.FootstepNodeTools;
-import us.ihmc.footstepPlanning.graphSearch.listeners.BipedalFootstepPlannerListener;
 import us.ihmc.footstepPlanning.graphSearch.graph.visualization.BipedalFootstepPlannerNodeRejectionReason;
+import us.ihmc.footstepPlanning.graphSearch.listeners.BipedalFootstepPlannerListener;
+import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParameters;
 import us.ihmc.footstepPlanning.polygonSnapping.PlanarRegionsListPolygonSnapper;
-import us.ihmc.footstepPlanning.polygonWiggling.PolygonWiggler;
-import us.ihmc.footstepPlanning.polygonWiggling.WiggleParameters;
 import us.ihmc.pathPlanning.visibilityGraphs.tools.PlanarRegionTools;
 import us.ihmc.robotics.geometry.PlanarRegion;
 import us.ihmc.robotics.robotSide.SideDependentList;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public class FootstepNodeSnapAndWiggler extends FootstepNodeSnapper
 {

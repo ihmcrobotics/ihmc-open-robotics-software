@@ -1,4 +1,4 @@
-package us.ihmc.footstepPlanning.polygonWiggling;
+package us.ihmc.commonWalkingControlModules.polygonWiggling;
 
 import org.ejml.data.DenseMatrix64F;
 import org.ejml.ops.CommonOps;
