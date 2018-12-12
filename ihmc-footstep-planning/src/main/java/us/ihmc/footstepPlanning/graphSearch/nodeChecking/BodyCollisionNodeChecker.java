@@ -5,6 +5,7 @@ import us.ihmc.commons.PrintTools;
 import us.ihmc.euclid.geometry.Box3D;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
+import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
@@ -45,6 +46,7 @@ public class BodyCollisionNodeChecker extends FootstepNodeChecker
    private final Vector3D bodyBoxDimensions = new Vector3D();
 
    private final FramePoint3D tempPoint = new FramePoint3D();
+   private final FrameVector3D tempVector = new FrameVector3D();
    private final RigidBodyTransform tempTransform = new RigidBodyTransform();
 
    public BodyCollisionNodeChecker(FootstepPlannerParameters parameters, FootstepNodeSnapper snapper)
@@ -151,15 +153,13 @@ public class BodyCollisionNodeChecker extends FootstepNodeChecker
 
    private void updateBodyCollisionBox(FootstepNode node, FootstepNode previousNode, double scaleFactor)
    {
-      tempPoint.setIncludingFrame(worldFrame, node.getX(), node.getY(), 0.0);
-      tempPoint.sub(previousNode.getX(), previousNode.getY(), 0.0);
-      tempPoint.changeFrame(midStanceFrame);
+      tempVector.setIncludingFrame(worldFrame, node.getX(), node.getY(), 0.0);
+      tempVector.sub(previousNode.getX(), previousNode.getY(), 0.0);
+      tempVector.changeFrame(midStanceFrame);
 
-      double stepTranslationScaleFactor = 0.4;
-      double stepTranslationMidFootFrameX = stepTranslationScaleFactor * Math.abs(tempPoint.getX());
-      double stepTranslationMidFootFrameY = stepTranslationScaleFactor * Math.abs(tempPoint.getY());
-      bodyCollisionBox.setSize(parameters.getBodyBoxDepth() + stepTranslationMidFootFrameX, parameters.getBodyBoxWidth() + stepTranslationMidFootFrameY,
-                               parameters.getBodyBoxHeight());
+      double stepTranslationScaleFactor = 0.6;
+      double stepTranslationMidFootFrameX = stepTranslationScaleFactor * Math.abs(tempVector.getX());
+      bodyCollisionBox.setSize(parameters.getBodyBoxDepth() + stepTranslationMidFootFrameX, parameters.getBodyBoxWidth(), parameters.getBodyBoxHeight());
 
       if (!MathTools.epsilonEquals(1.0, scaleFactor, 1e-5))
          bodyCollisionBox.scale(scaleFactor);

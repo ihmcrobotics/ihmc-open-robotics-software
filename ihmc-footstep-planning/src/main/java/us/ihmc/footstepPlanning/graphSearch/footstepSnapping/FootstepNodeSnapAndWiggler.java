@@ -92,7 +92,8 @@ public class FootstepNodeSnapAndWiggler extends FootstepNodeSnapper
             .getConvexHullOfPolygonIntersections(planarRegionToPack, footPolygon, snapAndWiggleTransform);
       FootstepNodeSnappingTools.changeFromPlanarRegionToSoleFrame(planarRegionToPack, footstepNode, snapAndWiggleTransform, wiggledFootholdPolygonInLocalFrame);
 
-      return new FootstepNodeSnapData(snapAndWiggleTransform, wiggledFootholdPolygonInLocalFrame);
+      footPolygon.set(footPolygonsInSoleFrame.get(footstepNode.getRobotSide())); // TODO ignoring partial footholds. don't merge this
+      return new FootstepNodeSnapData(snapAndWiggleTransform, footPolygon);
    }
 
    private RigidBodyTransform getWiggleTransformInPlanarRegionFrame(ConvexPolygon2D footholdPolygon)
