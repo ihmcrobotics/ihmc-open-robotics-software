@@ -41,7 +41,7 @@ public class QuadrupedContactSequenceUpdaterTest
 
       contactSequenceUpdater.update(stepList, currentFeetInContact, 0.0);
 
-      List<QuadrupedContactPhase> contactSequence = contactSequenceUpdater.getContactSequenceInAbsoluteTime();
+      List<QuadrupedContactPhase> contactSequence = contactSequenceUpdater.getContactSequence();
 
       assertEquals(1, contactSequence.size());
 
@@ -89,7 +89,7 @@ public class QuadrupedContactSequenceUpdaterTest
 
       contactSequenceUpdater.update(stepList, currentFeetInContact, 0.0);
 
-      List<QuadrupedContactPhase> contactSequence = contactSequenceUpdater.getContactSequenceInAbsoluteTime();
+      List<QuadrupedContactPhase> contactSequence = contactSequenceUpdater.getContactSequence();
 
       assertEquals(3, contactSequence.size());
 
@@ -249,7 +249,7 @@ public class QuadrupedContactSequenceUpdaterTest
 
       contactSequenceUpdater.update(stepList, currentFeetInContact, currentTime);
 
-      List<QuadrupedContactPhase> contactSequence = contactSequenceUpdater.getContactSequenceInAbsoluteTime();
+      List<QuadrupedContactPhase> contactSequence = contactSequenceUpdater.getContactSequence();
 
       assertEquals(9, contactSequence.size());
 

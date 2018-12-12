@@ -49,7 +49,7 @@ public class QuadrupedContactSequenceToolsTest
          List<RobotQuadrant> feetInContact = getRandomFeetInContact(random);
          QuadrantDependentList<FramePoint3D> solePositions = getRandomSolePositions(random, nominalWidth, nominalLength);
 
-         QuadrupedContactSequenceTools.trimPastContactSequences(contactSequence, currentTime, feetInContact, solePositions, phasesToKeep);
+         QuadrupedContactSequenceTools.trimPastContactSequences(contactSequence, currentTime, feetInContact, solePositions);
 
          int sequenceIndex = 0;
          while (sequenceIndex < contactSequenceExpected.size())
