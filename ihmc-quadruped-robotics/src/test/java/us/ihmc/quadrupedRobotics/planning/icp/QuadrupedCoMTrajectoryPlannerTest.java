@@ -1,16 +1,12 @@
 package us.ihmc.quadrupedRobotics.planning.icp;
 
 import org.junit.Test;
-import us.ihmc.commons.RandomNumbers;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
-import us.ihmc.euclid.referenceFrame.tools.EuclidFrameRandomTools;
+import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
 import us.ihmc.euclid.referenceFrame.tools.EuclidFrameTestTools;
-import us.ihmc.euclid.tools.EuclidCoreTestTools;
-import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.mecano.frames.MovingReferenceFrame;
 import us.ihmc.quadrupedBasics.gait.QuadrupedTimedStep;
 import us.ihmc.quadrupedBasics.gait.TimeInterval;
@@ -23,9 +19,8 @@ import us.ihmc.yoVariables.variable.YoEnum;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Random;
 
-public class DCMBasedCoMPlannerTest
+public class QuadrupedCoMTrajectoryPlannerTest
 {
    private static final double epsilon = 1e-6;
 
@@ -45,7 +40,7 @@ public class DCMBasedCoMPlannerTest
 
       List<ContactStateProvider> contactSequence = new ArrayList<>();
       QuadrantDependentList<MovingReferenceFrame> soleFrames = DCMPlanningTestTools.createSimpleSoleFrames(nominalLength, nominalWidth);
-      DCMBasedCoMPlanner planner = new DCMBasedCoMPlanner(soleFrames, time, omega, gravityZ, nominalHeight, registry);
+      QuadrupedCoMTrajectoryPlanner planner = new QuadrupedCoMTrajectoryPlanner(soleFrames, time, omega, gravityZ, nominalHeight, registry);
 
       SettableContactStateProvider firstContact = new SettableContactStateProvider();
 
@@ -58,8 +53,6 @@ public class DCMBasedCoMPlannerTest
       for (RobotQuadrant quadrant : RobotQuadrant.values)
          feetInContact.add(quadrant);
 
-      FramePoint3D desiredDCM = new FramePoint3D();
-      FrameVector3D desiredDCMVelocity = new FrameVector3D();
       planner.initializeForStanding();
 
       FramePoint3D expectedDesiredDCM = new FramePoint3D();
@@ -74,10 +67,10 @@ public class DCMBasedCoMPlannerTest
 
       for (double timeInState = 0.0; timeInState < 5000; timeInState += 0.5)
       {
-         planner.computeSetpoints(timeInState, feetInContact, desiredDCM, desiredDCMVelocity);
+         planner.computeSetpoints(timeInState, feetInContact);
 
-         EuclidFrameTestTools.assertFramePoint3DGeometricallyEquals("Position failed at t = " + timeInState, expectedDesiredDCM, desiredDCM, epsilon);
-         EuclidFrameTestTools.assertFrameVector3DGeometricallyEquals("Velocity failed at t = " + timeInState, new FrameVector3D(), desiredDCMVelocity, epsilon);
+         EuclidFrameTestTools.assertFramePoint3DGeometricallyEquals("Position failed at t = " + timeInState, expectedDesiredDCM, planner.getDesiredDCMPosition(), epsilon);
+         EuclidFrameTestTools.assertFrameVector3DGeometricallyEquals("Velocity failed at t = " + timeInState, new FrameVector3D(), planner.getDesiredDCMVelocity(), epsilon);
       }
    }
 
@@ -100,7 +93,7 @@ public class DCMBasedCoMPlannerTest
       QuadrantDependentList<YoEnum<ContactState>> contactStates = new QuadrantDependentList<>();
       for (RobotQuadrant quadrant : RobotQuadrant.values)
          contactStates.put(quadrant, new YoEnum<>(quadrant.getShortName() + "ContactState", registry, ContactState.class));
-      DCMBasedCoMPlanner planner = new DCMBasedCoMPlanner(soleFrames, time, omega, gravityZ, nominalHeight, registry);
+      QuadrupedCoMTrajectoryPlanner planner = new QuadrupedCoMTrajectoryPlanner(soleFrames, time, omega, gravityZ, nominalHeight, registry);
 
       SettableContactStateProvider firstContact = new SettableContactStateProvider();
 
@@ -113,8 +106,6 @@ public class DCMBasedCoMPlannerTest
       for (RobotQuadrant quadrant : RobotQuadrant.values)
          feetInContact.add(quadrant);
 
-      FramePoint3D desiredDCM = new FramePoint3D();
-      FrameVector3D desiredDCMVelocity = new FrameVector3D();
       planner.initializeForStanding();
 
       FramePoint3D expectedDesiredDCM = new FramePoint3D();
@@ -129,10 +120,10 @@ public class DCMBasedCoMPlannerTest
 
       for (double timeInState = 0.0; timeInState < 0.5; timeInState += 0.5)
       {
-         planner.computeSetpoints(timeInState, feetInContact, desiredDCM, desiredDCMVelocity);
+         planner.computeSetpoints(timeInState, feetInContact);
 
-         EuclidFrameTestTools.assertFramePoint3DGeometricallyEquals("Position failed at t = " + timeInState, expectedDesiredDCM, desiredDCM, epsilon);
-         EuclidFrameTestTools.assertFrameVector3DGeometricallyEquals("Velocity failed at t = " + timeInState, new FrameVector3D(), desiredDCMVelocity, epsilon);
+         EuclidFrameTestTools.assertFramePoint3DGeometricallyEquals("Position failed at t = " + timeInState, expectedDesiredDCM, planner.getDesiredDCMPosition(), epsilon);
+         EuclidFrameTestTools.assertFrameVector3DGeometricallyEquals("Velocity failed at t = " + timeInState, new FrameVector3D(), planner.getDesiredDCMVelocity(), epsilon);
       }
 
       time.set(0.3);
@@ -148,30 +139,28 @@ public class DCMBasedCoMPlannerTest
       contactStates.get(RobotQuadrant.HIND_LEFT).set(ContactState.IN_CONTACT);
 
       planner.addStepToSequence(step);
-      planner.initializeForStepping(contactStates, null);
+      planner.initializeForStepping(contactStates);
 
       for (; time.getDoubleValue() < 0.5; time.add(0.05))
       {
-         planner.computeSetpoints(time.getDoubleValue(), feetInContact, desiredDCM, desiredDCMVelocity);
+         planner.computeSetpoints(time.getDoubleValue(), feetInContact);
       }
 
       feetInContact.remove(RobotQuadrant.FRONT_LEFT);
 
       for (; time.getDoubleValue() < 1.5; time.add(0.05))
-         ;
       {
-         planner.computeSetpoints(time.getDoubleValue(), feetInContact, desiredDCM, desiredDCMVelocity);
+         planner.computeSetpoints(time.getDoubleValue(), feetInContact);
       }
 
-      MovingReferenceFrame newSoleFrame = new TranslationMovingReferenceFrame("newSOleFrame", ReferenceFrame.getWorldFrame());
+      MovingReferenceFrame newSoleFrame = new TranslationMovingReferenceFrame("newSoleFrame", ReferenceFrame.getWorldFrame());
       ((TranslationMovingReferenceFrame) newSoleFrame).updateTranslation(step.getGoalPositionProvider());
       soleFrames.put(RobotQuadrant.FRONT_LEFT, newSoleFrame);
 
       feetInContact.add(RobotQuadrant.FRONT_LEFT);
       for (; time.getDoubleValue() < 1.0; time.add(0.05))
-         ;
       {
-         planner.computeSetpoints(time.getDoubleValue(), feetInContact, desiredDCM, desiredDCMVelocity);
+         planner.computeSetpoints(time.getDoubleValue(), feetInContact);
       }
 
       FramePoint3D finalDCM = new FramePoint3D();
@@ -193,12 +182,18 @@ public class DCMBasedCoMPlannerTest
       finalDCM.add(step.getGoalPosition());
       finalDCM.scale(0.25);
       finalDCM.addZ(nominalHeight);
+      FrameVector3DReadOnly zero = new FrameVector3D();
 
       for (; time.getDoubleValue() < 100.0; time.add(0.5))
       {
-         planner.computeSetpoints(time.getDoubleValue(), feetInContact, desiredDCM, desiredDCMVelocity);
+         planner.computeSetpoints(time.getDoubleValue(), feetInContact);
 
-         EuclidFrameTestTools.assertFramePoint3DGeometricallyEquals(finalDCM, desiredDCM, epsilon);
+         EuclidFrameTestTools.assertFramePoint3DGeometricallyEquals(finalDCM, planner.getDesiredDCMPosition(), epsilon);
+         EuclidFrameTestTools.assertFrameVector3DGeometricallyEquals(zero, planner.getDesiredDCMVelocity(), epsilon);
+         EuclidFrameTestTools.assertFramePoint3DGeometricallyEquals(finalDCM, planner.getDesiredCoMPosition(), epsilon);
+         EuclidFrameTestTools.assertFrameVector3DGeometricallyEquals(zero, planner.getDesiredCoMVelocity(), epsilon);
+         EuclidFrameTestTools.assertFrameVector3DGeometricallyEquals(zero, planner.getDesiredCoMAcceleration(), epsilon);
+         EuclidFrameTestTools.assertFramePoint3DGeometricallyEquals(finalDCM, planner.getDesiredVRPPosition(), epsilon);
       }
    }
 

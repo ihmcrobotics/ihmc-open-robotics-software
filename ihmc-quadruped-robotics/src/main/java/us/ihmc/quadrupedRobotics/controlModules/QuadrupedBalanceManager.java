@@ -24,7 +24,6 @@ import us.ihmc.quadrupedRobotics.controller.toolbox.LinearInvertedPendulumModel;
 import us.ihmc.quadrupedBasics.referenceFrames.QuadrupedReferenceFrames;
 import us.ihmc.quadrupedRobotics.model.QuadrupedPhysicalProperties;
 import us.ihmc.quadrupedRobotics.model.QuadrupedRuntimeEnvironment;
-import us.ihmc.quadrupedRobotics.planning.icp.DCMBasedCoMPlanner;
 import us.ihmc.quadrupedRobotics.planning.trajectory.DCMPlannerInterface;
 import us.ihmc.quadrupedRobotics.util.YoQuadrupedTimedStep;
 import us.ihmc.quadrupedRobotics.planning.trajectory.DCMPlanner;
@@ -112,9 +111,6 @@ public class QuadrupedBalanceManager
       ReferenceFrame supportFrame = referenceFrames.getCenterOfFeetZUpFrameAveragingLowestZHeightsAcrossEnds();
       dcmPlanner = new DCMPlanner(runtimeEnvironment.getGravity(), nominalHeight, robotTimestamp, supportFrame, referenceFrames.getSoleFrames(), registry,
                                   yoGraphicsListRegistry, debug);
-//      dcmPlanner = new DCMBasedCoMPlanner(referenceFrames.getSoleFrames(), runtimeEnvironment.getRobotTimestamp(), controllerToolbox.getLinearInvertedPendulumModel().getYoNaturalFrequency(),
-//                                          runtimeEnvironment.getGravity(), nominalHeight, registry);
-
       linearInvertedPendulumModel = controllerToolbox.getLinearInvertedPendulumModel();
 
       bodyICPBasedTranslationManager = new QuadrupedBodyICPBasedTranslationManager(controllerToolbox, 0.05, registry);
