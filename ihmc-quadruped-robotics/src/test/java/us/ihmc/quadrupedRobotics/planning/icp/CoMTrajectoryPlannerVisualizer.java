@@ -1,19 +1,16 @@
 package us.ihmc.quadrupedRobotics.planning.icp;
 
+import us.ihmc.commons.MathTools;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.graphicsDescription.Graphics3DObject;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.graphicsDescription.yoGraphics.BagOfBalls;
+import us.ihmc.graphicsDescription.yoGraphics.YoGraphic;
+import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
-import us.ihmc.mecano.frames.MovingReferenceFrame;
-import us.ihmc.quadrupedBasics.gait.QuadrupedTimedStep;
-import us.ihmc.quadrupedBasics.utils.TimeIntervalTools;
 import us.ihmc.quadrupedRobotics.planning.ContactState;
-import us.ihmc.robotics.robotSide.QuadrantDependentList;
-import us.ihmc.robotics.robotSide.RobotQuadrant;
 import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.SimulationConstructionSetParameters;
@@ -57,11 +54,13 @@ public class CoMTrajectoryPlannerVisualizer
 
    private final YoFramePoint3D desiredCoMPosition;
    private final YoFrameVector3D desiredCoMVelocity;
-   private final YoFramePoint3D desiredICPPosition;
-   private final YoFrameVector3D desiredICPVelocity;
+   private final YoFramePoint3D desiredDCMPosition;
+   private final YoFrameVector3D desiredDCMVelocity;
+   private final YoFramePoint3D desiredVRPPosition;
 
    private final BagOfBalls dcmTrajectory;
    private final BagOfBalls comTrajectory;
+   private final BagOfBalls vrpTrajectory;
 
    public CoMTrajectoryPlannerVisualizer()
    {
@@ -70,19 +69,29 @@ public class CoMTrajectoryPlannerVisualizer
 
       desiredCoMPosition = new YoFramePoint3D("desiredCoMPosition", worldFrame, registry);
       desiredCoMVelocity = new YoFrameVector3D("desiredCoMVelocity", worldFrame, registry);
-      desiredICPPosition = new YoFramePoint3D("desiredICPPosition", worldFrame, registry);
-      desiredICPVelocity = new YoFrameVector3D("desiredICPVelocity", worldFrame, registry);
+      desiredDCMPosition = new YoFramePoint3D("desiredDCMPosition", worldFrame, registry);
+      desiredDCMVelocity = new YoFrameVector3D("desiredDCMVelocity", worldFrame, registry);
+      desiredVRPPosition = new YoFramePoint3D("desiredVRPPosition", worldFrame, registry);
       YoDouble omega = new YoDouble("omega", registry);
       omega.set(Math.sqrt(gravity / nominalHeight));
 
       dcmTrajectory = new BagOfBalls(50, 0.02, "dcmTrajectory", YoAppearance.Yellow(), registry, graphicsListRegistry);
       comTrajectory = new BagOfBalls(50, 0.02, "comTrajectory", YoAppearance.Black(), registry, graphicsListRegistry);
+      vrpTrajectory = new BagOfBalls(50, 0.02, "vrpTrajectory", YoAppearance.Green(), registry, graphicsListRegistry);
 
       yoTime = new YoDouble("timeToCheck", registry);
       timeInPhase = new YoDouble("timeInPhase", registry);
 
       contactStates = createContacts();
       planner = new CoMTrajectoryPlanner(contactStates, omega, gravity, nominalHeight, registry, graphicsListRegistry);
+
+      YoGraphicPosition dcmViz = new YoGraphicPosition("desiredDCM", desiredDCMPosition, 0.02, YoAppearance.Yellow(), YoGraphicPosition.GraphicType.BALL_WITH_CROSS);
+      YoGraphicPosition comViz = new YoGraphicPosition("desiredCoM", desiredCoMPosition, 0.02, YoAppearance.Black(), YoGraphicPosition.GraphicType.SOLID_BALL);
+      YoGraphicPosition vrpViz = new YoGraphicPosition("desiredVRP", desiredVRPPosition, 0.02, YoAppearance.Purple(), YoGraphicPosition.GraphicType.BALL_WITH_ROTATED_CROSS);
+
+      graphicsListRegistry.registerArtifact("dcmPlanner", dcmViz.createArtifact());
+      graphicsListRegistry.registerArtifact("dcmPlanner", comViz.createArtifact());
+      graphicsListRegistry.registerArtifact("dcmPlanner", vrpViz.createArtifact());
 
       SimulationConstructionSetParameters scsParameters = new SimulationConstructionSetParameters(true, BUFFER_SIZE);
       Robot robot = new Robot("Dummy");
@@ -170,20 +179,25 @@ public class CoMTrajectoryPlannerVisualizer
 
       while (true)
       {
-         yoTime.add(simDt);
-         timeInPhase.add(simDt);
-
-         updateContactState();
+         if (!MathTools.epsilonEquals(contactStates.get(0).getTimeInterval().getStartTime(), 0.0, 1e-5))
+            throw new RuntimeException("This is a problem");
 
          planner.compute(timeInPhase.getDoubleValue());
 
          desiredCoMPosition.set(planner.getDesiredCoMPosition());
          desiredCoMVelocity.set(planner.getDesiredCoMVelocity());
-         desiredICPPosition.set(planner.getDesiredDCMPosition());
-         desiredICPVelocity.set(planner.getDesiredDCMVelocity());
+         desiredDCMPosition.set(planner.getDesiredDCMPosition());
+         desiredDCMVelocity.set(planner.getDesiredDCMVelocity());
+         desiredVRPPosition.set(planner.getDesiredVRPPosition());
 
-         dcmTrajectory.setBallLoop(desiredICPPosition);
+         dcmTrajectory.setBallLoop(desiredDCMPosition);
          comTrajectory.setBallLoop(desiredCoMPosition);
+         vrpTrajectory.setBallLoop(desiredVRPPosition);
+
+         yoTime.add(simDt);
+         timeInPhase.add(simDt);
+
+         updateContactState();
 
          scs.tickAndUpdate();
 
@@ -194,11 +208,16 @@ public class CoMTrajectoryPlannerVisualizer
 
    private void updateContactState()
    {
-      int previousNumberOfStates = contactStates.size();
-      TimeIntervalTools.removeEndTimesLessThan(yoTime.getDoubleValue(), contactStates);
-
-      if (contactStates.size() < previousNumberOfStates)
+      if (timeInPhase.getDoubleValue() > contactStates.get(0).getTimeInterval().getEndTime() && contactStates.size() > 1)
       {
+         contactStates.remove(0);
+
+         // has to be done to reinitialize from zero
+         double timeShift = -contactStates.get(0).getTimeInterval().getStartTime();
+
+         for (ContactStateProvider contactState : contactStates)
+            contactState.getTimeInterval().shiftInterval(timeShift);
+
          planner.setCurrentCoMPosition(desiredCoMPosition);
          planner.solveForTrajectory();
          timeInPhase.set(0.0);

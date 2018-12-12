@@ -145,6 +145,9 @@ public class CoMTrajectoryPlanner
 
    public void solveForTrajectory()
    {
+      if (!ContactStateProviderTools.checkContactSequenceIsValid(contactSequence))
+         throw new IllegalArgumentException("The contact sequence is not valid.");
+
       int size = 2 * contactSequence.size();
       coefficientMultipliers.reshape(size, size);
       coefficientMultipliersInv.reshape(size, size);
