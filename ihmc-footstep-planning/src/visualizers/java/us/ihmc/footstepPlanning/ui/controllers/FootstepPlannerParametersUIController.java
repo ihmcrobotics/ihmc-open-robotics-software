@@ -58,6 +58,10 @@ public class FootstepPlannerParametersUIController
    private Spinner<Double> minXClearance;
    @FXML
    private Spinner<Double> minYClearance;
+   @FXML
+   private Spinner<Double> cliffHeightSpinner;
+   @FXML
+   private Spinner<Double> cliffClearance;
 
 
    private static final double footWidth = 0.15;
@@ -104,6 +108,9 @@ public class FootstepPlannerParametersUIController
       minStepYaw.getValueFactory().valueProperty().addListener((ChangeListener) -> updateStepShape());
       minXClearance.getValueFactory().valueProperty().addListener((ChangeListener) -> updateStepShape());
       minYClearance.getValueFactory().valueProperty().addListener((ChangeListener) -> updateStepShape());
+      
+      cliffHeightSpinner.setValueFactory(new DoubleSpinnerValueFactory(0.0, 0.5, 0.0, 0.01));
+      cliffClearance.setValueFactory(new DoubleSpinnerValueFactory(0.0, 0.5, 0.0, 0.01));
    }
 
    public void bindControls()
@@ -127,7 +134,10 @@ public class FootstepPlannerParametersUIController
 
       parametersProperty.bidirectionalBindMinXClearanceFromStance(minXClearance.getValueFactory().valueProperty());
       parametersProperty.bidirectionalBindMinYClearanceFromStance(minYClearance.getValueFactory().valueProperty());
-
+      
+      parametersProperty.bidirectionalBindCliffHeight(cliffHeightSpinner.getValueFactory().valueProperty());
+      parametersProperty.bidirectionalBindCliffClearance(cliffClearance.getValueFactory().valueProperty());
+      
       messager.bindBidirectional(FootstepPlannerMessagerAPI.PlannerParametersTopic, parametersProperty, createConverter(), true);
 
       // these dimensions work best for valkyrie
