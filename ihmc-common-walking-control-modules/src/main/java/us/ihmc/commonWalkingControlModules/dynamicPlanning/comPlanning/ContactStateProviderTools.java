@@ -6,6 +6,8 @@ import java.util.List;
 
 public class ContactStateProviderTools
 {
+   static double epsilonForContinuity = 1e-4;
+
    static boolean checkContactSequenceIsValid(List<? extends ContactStateProvider> contactStateSequence)
    {
       if (!checkContactSequenceDoesNotEndInFlight(contactStateSequence))
@@ -18,7 +20,8 @@ public class ContactStateProviderTools
    {
       for (int index = 0; index < contactStateSequence.size() - 1; index++)
       {
-         if (!MathTools.epsilonEquals(contactStateSequence.get(index).getTimeInterval().getEndTime(), contactStateSequence.get(index + 1).getTimeInterval().getStartTime(), 1e-4))
+         if (!MathTools.epsilonEquals(contactStateSequence.get(index).getTimeInterval().getEndTime(), contactStateSequence.get(index + 1).getTimeInterval().getStartTime(),
+                                      epsilonForContinuity))
             return false;
       }
 
