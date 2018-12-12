@@ -1,4 +1,4 @@
-package us.ihmc.quadrupedRobotics.planning.icp;
+package us.ihmc.commonWalkingControlModules.dynamicPlanning.comPlanning;
 
 import org.ejml.data.DenseMatrix64F;
 import org.ejml.factory.LinearSolverFactory;
@@ -26,7 +26,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static us.ihmc.commonWalkingControlModules.capturePoint.CapturePointTools.*;
-import static us.ihmc.quadrupedRobotics.planning.icp.CoMTrajectoryPlannerTools.*;
+import static us.ihmc.commonWalkingControlModules.dynamicPlanning.comPlanning.CoMTrajectoryPlannerTools.*;
 
 // This guy assumes that the final phase is always the "stopping" phase, where the CoM is supposed to come to rest.
 // This means that the final CoP is the terminal ICP location

@@ -1,6 +1,7 @@
 package us.ihmc.quadrupedRobotics.planning.icp;
 
 import org.junit.Test;
+import us.ihmc.commonWalkingControlModules.dynamicPlanning.comPlanning.DCMPlanningTestTools;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;

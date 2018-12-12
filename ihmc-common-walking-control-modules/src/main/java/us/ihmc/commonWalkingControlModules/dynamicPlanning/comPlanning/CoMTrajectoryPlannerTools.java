@@ -1,4 +1,4 @@
-package us.ihmc.quadrupedRobotics.planning.icp;
+package us.ihmc.commonWalkingControlModules.dynamicPlanning.comPlanning;
 
 import us.ihmc.commons.MathTools;
 import us.ihmc.euclid.referenceFrame.interfaces.FixedFramePoint3DBasics;

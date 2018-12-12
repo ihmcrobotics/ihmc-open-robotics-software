@@ -1,7 +1,6 @@
-package us.ihmc.quadrupedRobotics.planning.icp;
+package us.ihmc.commonWalkingControlModules.dynamicPlanning.comPlanning;
 
 import us.ihmc.commons.MathTools;
-import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
 import us.ihmc.quadrupedBasics.gait.TimeIntervalProvider;
 import us.ihmc.quadrupedRobotics.planning.ContactState;
 

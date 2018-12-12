@@ -1,8 +1,8 @@
 package us.ihmc.quadrupedRobotics.planning.icp;
 
 import org.apache.commons.lang3.mutable.MutableDouble;
+import us.ihmc.commonWalkingControlModules.dynamicPlanning.comPlanning.ContactStateProvider;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
-import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
 import us.ihmc.quadrupedBasics.gait.TimeInterval;
 import us.ihmc.quadrupedRobotics.planning.ContactState;
