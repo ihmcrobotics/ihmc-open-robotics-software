@@ -51,6 +51,9 @@ public class FootstepPlannerParametersProperty extends ParametersProperty<Settab
 
    private DoubleField cliffHeight = new DoubleField(SettableFootstepPlannerParameters::getCliffHeightToAvoid, SettableFootstepPlannerParameters::setCliffHeightToAvoid);
    private DoubleField cliffClearance = new DoubleField(SettableFootstepPlannerParameters::getMinimumDistanceFromCliffBottoms, SettableFootstepPlannerParameters::setMinimumDistanceFromCliffBottoms);
+   private DoubleField maxWiggleXY = new DoubleField(SettableFootstepPlannerParameters::getMaximumXYWiggleDistance, SettableFootstepPlannerParameters::setMaximumXYWiggleDistance);
+   private DoubleField maxWiggleYaw = new DoubleField(SettableFootstepPlannerParameters::getMaximumYawWiggle, SettableFootstepPlannerParameters::setMaximumYawWiggle);
+   private DoubleField wiggleInsideDelta = new DoubleField(SettableFootstepPlannerParameters::getWiggleInsideDelta, SettableFootstepPlannerParameters::setWiggleInsideDelta);
 
    public FootstepPlannerParametersProperty(Object bean, String name)
    {
@@ -154,6 +157,21 @@ public class FootstepPlannerParametersProperty extends ParametersProperty<Settab
       bindFieldBidirectionalToBooleanProperty(property, performHeuristicSearchPolicies);
    }
 
+   public void bidirectionalBindMaxWiggleXY(Property<Double> property)
+   {
+      bindFieldBidirectionalToNumberProperty(property, maxWiggleXY);
+   }
+
+   public void bidirectionalBindMaxWiggleYaw(Property<Double> property)
+   {
+      bindFieldBidirectionalToNumberProperty(property, maxWiggleYaw);
+   }
+
+   public void bidirectionalBindWiggleInsideDelta(Property<Double> property)
+   {
+      bindFieldBidirectionalToNumberProperty(property, wiggleInsideDelta);
+   }
+
    public void bidirectionalBindBodyBoxWidth(Property<? extends Number> property)
    {
       bindFieldBidirectionalToNumberProperty(property, bodyBoxWidth);
@@ -233,7 +251,7 @@ public class FootstepPlannerParametersProperty extends ParametersProperty<Settab
    {
       bindFieldBidirectionalToNumberProperty(property, cliffClearance);
    }
-   
+
    public void bidirectionalBindHeuristicsWeight(AtomicReference<FootstepPlannerType> plannerTypeReference, Property<? extends Number> property)
    {
       if (plannerTypeReference.get() == null)

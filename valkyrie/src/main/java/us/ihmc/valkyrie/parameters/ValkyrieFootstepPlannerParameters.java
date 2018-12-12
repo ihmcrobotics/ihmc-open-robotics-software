@@ -1,5 +1,6 @@
 package us.ihmc.valkyrie.parameters;
 
+import us.ihmc.footstepPlanning.graphSearch.graph.FootstepNode;
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerCostParameters;
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParameters;
 
@@ -110,7 +111,7 @@ public class ValkyrieFootstepPlannerParameters implements FootstepPlannerParamet
    @Override
    public double getCliffHeightToAvoid()
    {
-      return 0.08;
+      return 0.07;
    }
 
    @Override
@@ -119,4 +120,33 @@ public class ValkyrieFootstepPlannerParameters implements FootstepPlannerParamet
       return 0.04;
    }
 
+   @Override
+   public double getWiggleInsideDelta()
+   {
+      return 0.01;
+   }
+
+   @Override
+   public boolean getWiggleIntoConvexHullOfPlanarRegions()
+   {
+      return true;
+   }
+
+   @Override
+   public double getMaximumXYWiggleDistance()
+   {
+      return 0.05;
+   }
+
+   @Override
+   public boolean getRejectIfCannotFullyWiggleInside()
+   {
+      return false;
+   }
+
+   @Override
+   public double getMaximumYawWiggle()
+   {
+      return 0.3;
+   }
 }

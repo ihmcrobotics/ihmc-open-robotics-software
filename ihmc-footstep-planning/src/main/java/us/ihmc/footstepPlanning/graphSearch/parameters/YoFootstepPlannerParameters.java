@@ -518,7 +518,7 @@ public class YoFootstepPlannerParameters implements FootstepPlannerParameters
 
    public void setMinimumDistanceFromCliffBottoms(double minimumDistanceFromCliffBottoms)
    {
-      this.minXClearanceFromStance.set(minimumDistanceFromCliffBottoms);
+      this.minimumDistanceFromCliffBottoms.set(minimumDistanceFromCliffBottoms);
    }
 
    public void setReturnBestEffortPlan(boolean returnBestEffortPlan)
