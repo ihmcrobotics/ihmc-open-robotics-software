@@ -13,6 +13,13 @@ import java.util.List;
 
 public class QuadrupedContactSequenceTools
 {
+   private static boolean debug = false;
+
+   public static void setDebug(boolean debug)
+   {
+      QuadrupedContactSequenceTools.debug = debug;
+   }
+
    public static void computeStepTransitionsFromStepSequence(RecyclingArrayList<QuadrupedStepTransition> stepTransitionsToPack, double currentTime,
                                                              List<? extends QuadrupedTimedStep> stepSequence)
    {
@@ -24,6 +31,7 @@ public class QuadrupedContactSequenceTools
          if (step.getTimeInterval().getStartTime() >= currentTime)
          {
             QuadrupedStepTransition stepTransition = stepTransitionsToPack.add();
+            stepTransition.reset();
 
             stepTransition.setTransitionTime(step.getTimeInterval().getStartTime());
             stepTransition.addTransition(QuadrupedStepTransitionType.LIFT_OFF, step.getRobotQuadrant(), step.getGoalPosition());
@@ -32,6 +40,7 @@ public class QuadrupedContactSequenceTools
          if (step.getTimeInterval().getEndTime() >= currentTime)
          {
             QuadrupedStepTransition stepTransition = stepTransitionsToPack.add();
+            stepTransition.reset();
 
             stepTransition.setTransitionTime(step.getTimeInterval().getEndTime());
             stepTransition.addTransition(QuadrupedStepTransitionType.TOUCH_DOWN, step.getRobotQuadrant(), step.getGoalPosition());
@@ -43,6 +52,13 @@ public class QuadrupedContactSequenceTools
 
       // collapse the transitions that occur at the same time
       collapseTransitionEvents(stepTransitionsToPack);
+
+      int currentNumberOfTransitions = stepTransitionsToPack.size();
+      // remove any transitions that already happened
+      stepTransitionsToPack.removeIf(transition -> transition.getTransitionTime() < currentTime);
+
+      if (debug && stepTransitionsToPack.size() < currentNumberOfTransitions)
+         throw new RuntimeException("Somehow a past transition was generated from what is supposed to be a pruned step sequence.");
    }
 
    public static void collapseTransitionEvents(List<QuadrupedStepTransition> stepTransitionsToPack)
@@ -65,51 +81,55 @@ public class QuadrupedContactSequenceTools
       }
    }
 
-
    public static void trimPastContactSequences(RecyclingArrayList<QuadrupedContactPhase> contactSequenceToPack, double currentTime,
                                                List<RobotQuadrant> currentFeetInContact,
-                                               QuadrantDependentList<? extends FramePoint3DReadOnly> currentSolePositions, int contactPhasesToRetain)
+                                               QuadrantDependentList<? extends FramePoint3DReadOnly> currentSolePositions)
    {
-      // retain desired number of past contact phases
+      // remove all future steps, as they don't affect the past sequence and could have been changed.
       TimeIntervalTools.removeStartTimesGreaterThanOrEqualTo(currentTime, contactSequenceToPack);
-      while (contactSequenceToPack.size() > contactPhasesToRetain + 1)
-      {
-         contactSequenceToPack.remove(0);
-      }
 
-      QuadrupedContactPhase contactPhase;
+      // remove all steps that are already complete, as they don't matter any more.
+      TimeIntervalTools.removeEndTimesLessThan(currentTime, contactSequenceToPack);
+
       if (contactSequenceToPack.isEmpty())
-      {
-         contactPhase = contactSequenceToPack.add();
-         contactPhase.getTimeInterval().setStartTime(currentTime);
-         contactPhase.setFeetInContact(currentFeetInContact);
-         contactPhase.setSolePositions(currentSolePositions);
-
-         contactPhase.update();
+      { // if there aren't any past sequences, add the current one in.
+         addCurrentStateAsAContactPhase(contactSequenceToPack, currentFeetInContact, currentSolePositions, currentTime);
       }
       else
-      {
-         QuadrupedContactPhase lastContactPhase = contactSequenceToPack.getLast();
-         if (isEqualContactState(lastContactPhase.getFeetInContact(), currentFeetInContact))
-         {
-            // extend current contact phase
-            contactPhase = lastContactPhase;
-            contactPhase.setSolePositions(currentSolePositions);
-         }
-         else
-         {
-            // end previous contact phase
-            lastContactPhase.getTimeInterval().setEndTime(currentTime);
-            contactSequenceToPack.remove(0);
+      { // there are some contact phases that are currently in progress
+         if (debug && contactSequenceToPack.size() > 1)
+            throw new RuntimeException("You shouldn't have more than one sequence remaining in the plan after trimming.");
 
-            contactPhase = contactSequenceToPack.add();
-            contactPhase.getTimeInterval().setStartTime(currentTime);
-            contactPhase.setFeetInContact(currentFeetInContact);
-            contactPhase.setSolePositions(currentSolePositions);
+         for (int i = 0; i < contactSequenceToPack.size(); i++)
+         {
+            QuadrupedContactPhase contactPhase = contactSequenceToPack.get(i);
 
-            contactPhase.update();
+            if (isEqualContactState(contactPhase.getFeetInContact(), currentFeetInContact))
+            { // the last phase hasn't been completed, so update the sole positions
+               contactPhase.setSolePositions(currentSolePositions);
+               contactPhase.update();
+            }
+            else
+            { // end the previous contact phase and add a new one for the current state
+               contactSequenceToPack.remove(i);
+               addCurrentStateAsAContactPhase(contactSequenceToPack, currentFeetInContact, currentSolePositions, currentTime);
+
+               if (debug)
+                  throw new RuntimeException("This phase should have been removed already.");
+            }
          }
       }
+   }
+
+   public static void addCurrentStateAsAContactPhase(RecyclingArrayList<QuadrupedContactPhase> contactSequenceToPack, List<RobotQuadrant> currentFeetInContact,
+                                                     QuadrantDependentList<? extends FramePoint3DReadOnly> solePositions, double currentTime)
+   {
+      QuadrupedContactPhase contactPhase = contactSequenceToPack.add();
+      contactPhase.reset();
+      contactPhase.setFeetInContact(currentFeetInContact);
+      contactPhase.setSolePositions(solePositions);
+      contactPhase.getTimeInterval().setStartTime(currentTime);
+      contactPhase.update();
    }
 
    public static boolean isEqualContactState(List<RobotQuadrant> contactStateA, List<RobotQuadrant> contactStateB)
@@ -130,15 +150,5 @@ public class QuadrupedContactSequenceTools
       double shiftTime = -currentAbsoluteTime;
       for (int sequence = 0; sequence < contactSequenceToPack.size(); sequence++)
          contactSequenceToPack.get(sequence).getTimeInterval().shiftInterval(shiftTime);
-   }
-
-   public static void shiftStepTransitionsToRelativeTime(List<QuadrupedStepTransition> stepTransitionsToPack, double currentAbsoluteTime)
-   {
-      double shiftTime = -currentAbsoluteTime;
-      for (int transitionIndex = 0; transitionIndex < stepTransitionsToPack.size(); transitionIndex++)
-      {
-         QuadrupedStepTransition transition = stepTransitionsToPack.get(transitionIndex);
-         transition.setTransitionTime(transition.getTransitionTime() + shiftTime);
-      }
    }
 }
