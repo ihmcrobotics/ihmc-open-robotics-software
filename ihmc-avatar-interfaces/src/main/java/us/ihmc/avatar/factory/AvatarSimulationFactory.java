@@ -6,6 +6,8 @@ import java.util.List;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 
 import controller_msgs.msg.dds.StampedPosePacket;
+import gnu.trove.map.TObjectDoubleMap;
+import gnu.trove.map.hash.TObjectDoubleHashMap;
 import us.ihmc.avatar.DRCEstimatorThread;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.SimulatedDRCRobotTimeProvider;
@@ -22,13 +24,12 @@ import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.communication.subscribers.PelvisPoseCorrectionCommunicator;
 import us.ihmc.humanoidRobotics.communication.subscribers.PelvisPoseCorrectionCommunicatorInterface;
+import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.robotDataLogger.YoVariableServer;
 import us.ihmc.robotModels.FullRobotModel;
 import us.ihmc.robotics.controllers.pidGains.implementations.YoPDGains;
 import us.ihmc.robotics.partNames.JointRole;
-import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.ros2.RealtimeRos2Node;
-import us.ihmc.sensorProcessing.outputData.JointDesiredOutput;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutputBasics;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutputList;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutputWriter;
@@ -301,7 +302,14 @@ public class AvatarSimulationFactory
          humanoidFloatingRootJointRobot.computeCenterOfMass(initialCoMPosition);
 
          RigidBodyTransform rootJointTransform = humanoidFloatingRootJointRobot.getRootJoint().getJointTransform3D();
-         stateEstimationThread.initializeEstimator(rootJointTransform);
+
+         TObjectDoubleMap<String> jointPositions = new TObjectDoubleHashMap<>();
+         for (OneDegreeOfFreedomJoint joint : humanoidFloatingRootJointRobot.getOneDegreeOfFreedomJoints())
+         {
+            jointPositions.put(joint.getName(), joint.getQ());
+         }
+
+         stateEstimationThread.initializeEstimator(rootJointTransform, jointPositions);
       }
    }
 
@@ -332,7 +340,7 @@ public class AvatarSimulationFactory
          {
             OneDegreeOfFreedomJoint simulatedJoint = humanoidFloatingRootJointRobot.getOneDegreeOfFreedomJoint(positionControlledJointName);
             FullRobotModel controllerFullRobotModel = threadDataSynchronizer.getControllerFullRobotModel();
-            OneDoFJoint controllerJoint = controllerFullRobotModel.getOneDoFJointByName(positionControlledJointName);
+            OneDoFJointBasics controllerJoint = controllerFullRobotModel.getOneDoFJointByName(positionControlledJointName);
 
             if (simulatedJoint == null || controllerJoint == null)
                continue;

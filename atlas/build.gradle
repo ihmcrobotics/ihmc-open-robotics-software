@@ -1,19 +1,10 @@
-buildscript {
-   repositories {
-      maven { url "https://plugins.gradle.org/m2/" }
-      mavenLocal()
-   }
-   dependencies {
-      classpath "us.ihmc:ihmc-build:0.15.1"
-      classpath "us.ihmc:ihmc-ci-plugin:0.18.0"
-      classpath "org.hidetake:gradle-ssh-plugin:2.9.0"
-   }
+plugins {
+   id("us.ihmc.ihmc-build") version "0.15.4"
+   id("us.ihmc.ihmc-ci-plugin") version "0.18.0"
+   id("us.ihmc.log-tools") version "0.2.2"
+   id("org.hidetake.ssh") version "2.9.0"
+   id "application"
 }
-
-apply plugin: "application"
-apply plugin: "org.hidetake.ssh"
-apply plugin: "us.ihmc.ihmc-build"
-apply plugin: "us.ihmc.ihmc-ci-plugin"
 
 applicationName = "IHMCAtlasAPI"
 mainClassName = "us.ihmc.atlas.AtlasROSAPINetworkProcessor"
@@ -28,7 +19,7 @@ ihmc {
 
 testSuites {
    def prefix = "LIBS-IHMCOPENROBOTICSSOFTWARE"
-   bambooPlanKeys = [prefix + "FAST", prefix + "INDEVELOPMENT", prefix + "UI", prefix + "VIDEO"]
+   bambooPlanKeys = [prefix + "FAST", prefix + "SLOW", prefix + "INDEVELOPMENT", prefix + "UI", prefix + "VIDEO"]
    maximumSuiteDuration = 15.0
 }
 
@@ -56,14 +47,14 @@ mainDependencies {
    compile "org.ros.rosjava_messages:geometry_msgs:1.11.9"
    compile "org.boofcv:recognition:0.24.1"
 
-   compile group: "us.ihmc", name: "euclid-core", version: "0.6.1"
-   compile group: "us.ihmc", name: "ihmc-yovariables", version: "0.3.5"
+   compile group: "us.ihmc", name: "euclid-core", version: "0.7.0"
+   compile group: "us.ihmc", name: "ihmc-yovariables", version: "0.3.6"
    compile group: "us.ihmc", name: "ihmc-commons", version: "0.24.0"
-   compile group: "us.ihmc", name: "ihmc-jmonkey-engine-toolkit", version: "0.12.2"
-   compile group: "us.ihmc", name: "simulation-construction-set", version: "0.12.6"
-   compile group: "us.ihmc", name: "ihmc-graphics-description", version: "0.12.6"
-   compile group: "us.ihmc", name: "ihmc-robot-description", version: "0.12.2"
-   compile group: "us.ihmc", name: "ihmc-javafx-toolkit", version: "0.12.4"
+   compile group: "us.ihmc", name: "ihmc-jmonkey-engine-toolkit", version: "0.12.3"
+   compile group: "us.ihmc", name: "simulation-construction-set", version: "0.12.7"
+   compile group: "us.ihmc", name: "ihmc-graphics-description", version: "0.12.7"
+   compile group: "us.ihmc", name: "ihmc-robot-description", version: "0.12.3"
+   compile group: "us.ihmc", name: "ihmc-javafx-toolkit", version: "0.12.5"
    compile group: "us.ihmc", name: "ihmc-humanoid-behaviors", version: "source"
    compile group: "us.ihmc", name: "ihmc-mocap", version: "source"
    compile group: "us.ihmc", name: "ihmc-common-walking-control-modules", version: "source"
@@ -89,6 +80,7 @@ mainDependencies {
 
 testDependencies {
    compile group: "junit", name: "junit", version: "4.12"
+   compile group: "org.junit.vintage", name: "junit-vintage-engine", version: "5.3.1"
    compile group: "com.thoughtworks.xstream", name: "xstream", version: "1.4.7"
 
    compile group: "us.ihmc", name: "ihmc-ci-core-api", version: "0.18.0"

@@ -2,11 +2,13 @@ package us.ihmc.footstepPlanning.graphSearch.aStar;
 
 import java.util.ArrayDeque;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Queue;
 
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.footstepPlanning.graphSearch.graph.FootstepNode;
-import us.ihmc.footstepPlanning.graphSearch.graph.visualization.GraphVisualization;
+import us.ihmc.footstepPlanning.graphSearch.graph.visualization.BipedalFootstepPlannerNodeRejectionReason;
+import us.ihmc.footstepPlanning.graphSearch.listeners.BipedalFootstepPlannerListener;
 import us.ihmc.graphicsDescription.Graphics3DObject;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition;
@@ -22,7 +24,7 @@ import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.commons.thread.ThreadTools;
 
-public class FootstepNodeVisualization implements GraphVisualization
+public class FootstepNodeVisualization implements BipedalFootstepPlannerListener
 {
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
 
@@ -86,23 +88,17 @@ public class FootstepNodeVisualization implements GraphVisualization
    }
 
    @Override
-   public void addNode(FootstepNode node, boolean active)
+   public void addNode(FootstepNode node, FootstepNode previousNode)
    {
       FootstepNode localNode = creat2dNode(node);
 
       if (nodeExists(localNode))
       {
-         if (isNodeActive(localNode) == active)
-            return;
-
-         if (active)
-            setNodeActive(localNode);
-         else
-            setNodeInactive(localNode);
+         setNodeActive(localNode);
          return;
       }
 
-      addNodeUnsafe(localNode, active);
+      addNodeUnsafe(localNode, true);
    }
 
    private void addNodeUnsafe(FootstepNode node, boolean active)
@@ -123,8 +119,7 @@ public class FootstepNodeVisualization implements GraphVisualization
       nodeCount.increment();
    }
 
-   @Override
-   public void setNodeActive(FootstepNode node)
+   private void setNodeActive(FootstepNode node)
    {
       FootstepNode localNode = creat2dNode(node);
 
@@ -147,7 +142,7 @@ public class FootstepNodeVisualization implements GraphVisualization
    }
 
    @Override
-   public void setNodeInactive(FootstepNode node)
+   public void rejectNode(FootstepNode node, FootstepNode previousNode, BipedalFootstepPlannerNodeRejectionReason reason)
    {
       FootstepNode localNode = creat2dNode(node);
 
@@ -170,7 +165,16 @@ public class FootstepNodeVisualization implements GraphVisualization
    }
 
    @Override
-   public boolean nodeExists(FootstepNode node)
+   public void plannerFinished(List<FootstepNode> plan)
+   {
+   }
+
+   @Override
+   public void reportLowestCostNodeList(List<FootstepNode> plan)
+   {
+   }
+
+   private boolean nodeExists(FootstepNode node)
    {
       FootstepNode localNode = creat2dNode(node);
 
@@ -233,37 +237,39 @@ public class FootstepNodeVisualization implements GraphVisualization
 
       for (int i = 0; i < 10; i++)
       {
-         viz.addNode(new FootstepNode(0.05 * i, 0.0), true);
+         viz.addNode(new FootstepNode(0.05 * i, 0.0), null);
          viz.tickAndUpdate();
       }
 
       for (int i = 0; i < 10; i++)
       {
-         viz.addNode(new FootstepNode(0.05 * i, 0.1), false);
+         viz.addNode(new FootstepNode(0.05 * i, 0.1), null);
          viz.tickAndUpdate();
       }
 
       for (int i = 0; i < 10; i++)
       {
-         viz.setNodeInactive(new FootstepNode(0.05 * i, 0.0));
+         FootstepNode node = new FootstepNode(0.05 * i, 0.0);
+         viz.rejectNode(node, null, null);
          viz.tickAndUpdate();
       }
 
       for (int i = 0; i < 10; i++)
       {
-         viz.setNodeActive(new FootstepNode(0.05 * i, 0.1));
+         FootstepNode node = new FootstepNode(0.05 * i, 0.1);
+         viz.rejectNode(node, null, null);
          viz.tickAndUpdate();
       }
 
       for (int i = 0; i < 10; i++)
       {
-         viz.addNode(new FootstepNode(0.05 * i, 0.0), true);
+         viz.addNode(new FootstepNode(0.05 * i, 0.0), null);
          viz.tickAndUpdate();
       }
 
       for (int i = 0; i < 10; i++)
       {
-         viz.addNode(new FootstepNode(0.05 * i, 0.1), false);
+         viz.addNode(new FootstepNode(0.05 * i, 0.1), null);
          viz.tickAndUpdate();
       }
 

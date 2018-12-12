@@ -24,6 +24,7 @@ import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
+import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.kinematics.DdoglegInverseKinematicsCalculator;
 import us.ihmc.robotics.kinematics.InverseKinematicsCalculator;
@@ -34,7 +35,6 @@ import us.ihmc.robotics.kinematics.RandomRestartInverseKinematicsCalculator;
 import us.ihmc.robotics.partNames.ArmJointName;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.screwTheory.GeometricJacobian;
-import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.simulationconstructionset.FloatingRootJointRobot;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
@@ -57,7 +57,7 @@ public abstract class NumericalInverseKinematicsCalculatorWithRobotTest implemen
    private static final ArrayList<Double> wristPitchLimits = new ArrayList<Double>();
    private static final boolean DEBUG = true;
 
-   private final EnumMap<JointNames, OneDoFJoint> oneDoFJoints = new EnumMap<JointNames, OneDoFJoint>(JointNames.class);
+   private final EnumMap<JointNames, OneDoFJointBasics> oneDoFJoints = new EnumMap<JointNames, OneDoFJointBasics>(JointNames.class);
    private final EnumMap<JointNames, ArrayList<Double>> jointLimits = new EnumMap<JointNames, ArrayList<Double>>(JointNames.class);
    private final EnumMap<JointNames, Double> jointAngles = new EnumMap<JointNames, Double>(JointNames.class);
    private final EnumMap<JointNames, Double> jointAnglesInitial = new EnumMap<JointNames, Double>(JointNames.class);

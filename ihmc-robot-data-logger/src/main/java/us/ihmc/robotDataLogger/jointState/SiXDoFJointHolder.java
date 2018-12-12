@@ -2,8 +2,8 @@ package us.ihmc.robotDataLogger.jointState;
 
 import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
 import us.ihmc.euclid.tuple4D.interfaces.QuaternionReadOnly;
+import us.ihmc.mecano.multiBodySystem.SixDoFJoint;
 import us.ihmc.robotDataLogger.JointType;
-import us.ihmc.robotics.screwTheory.SixDoFJoint;
 
 public class SiXDoFJointHolder implements JointHolder
 {
@@ -27,10 +27,10 @@ public class SiXDoFJointHolder implements JointHolder
 
    public void get(double[] buffer, int offset)
    {
-      QuaternionReadOnly rotation = inverseDynamicsJoint.getRotationForReading();
-      Tuple3DReadOnly translation = inverseDynamicsJoint.getTranslationForReading();
-      Tuple3DReadOnly angularVelocity = inverseDynamicsJoint.getAngularVelocityForReading();
-      Tuple3DReadOnly linearVelocity = inverseDynamicsJoint.getLinearVelocityForReading();
+      QuaternionReadOnly rotation = inverseDynamicsJoint.getJointPose().getOrientation();
+      Tuple3DReadOnly translation = inverseDynamicsJoint.getJointPose().getPosition();
+      Tuple3DReadOnly angularVelocity = inverseDynamicsJoint.getJointTwist().getAngularPart();
+      Tuple3DReadOnly linearVelocity = inverseDynamicsJoint.getJointTwist().getLinearPart();
 
       buffer[offset++] = rotation.getS();
       buffer[offset++] = rotation.getX();

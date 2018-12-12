@@ -1,5 +1,6 @@
 package us.ihmc.quadrupedRobotics.controller.toolbox;
 
+import us.ihmc.commons.MathTools;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
@@ -8,20 +9,25 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 
 public class LinearInvertedPendulumModel
 {
-   private double mass;
-   private double gravity;
-   private double comHeight;
+   private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
+
+   private final YoDouble totalMass = new YoDouble("totalMass", registry);
+   private final YoDouble lipmHeight = new YoDouble("lipmHeight", registry);
+   private final double gravity;
    private final ReferenceFrame comZUpFrame;
 
-   YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
-   YoDouble yoLipNaturalFrequency = new YoDouble("lipNaturalFrequency", registry);
+   private final YoDouble omega0 = new YoDouble("omega0", registry);
 
-   public LinearInvertedPendulumModel(ReferenceFrame comZUpFrame, double mass, double gravity, double comHeight, YoVariableRegistry parentRegistry)
+   public LinearInvertedPendulumModel(ReferenceFrame comZUpFrame, double totalMass, double gravity, double comHeight, YoVariableRegistry parentRegistry)
    {
-      this.mass = mass;
+      lipmHeight.addVariableChangedListener(v -> omega0.set(computeNaturalFrequency()));
+
+      this.totalMass.set(totalMass);
       this.gravity = gravity;
-      this.comHeight = comHeight;
+      this.lipmHeight.set(comHeight);
       this.comZUpFrame = comZUpFrame;
+
+
       parentRegistry.addChild(registry);
    }
 
@@ -30,7 +36,17 @@ public class LinearInvertedPendulumModel
     */
    public double getNaturalFrequency()
    {
-      return Math.sqrt(gravity / comHeight);
+      return omega0.getDoubleValue();
+   }
+
+   private double computeNaturalFrequency()
+   {
+      return Math.sqrt(gravity / lipmHeight.getDoubleValue());
+   }
+
+   private double computeLipmHeight()
+   {
+      return gravity / MathTools.square(getNaturalFrequency());
    }
 
    /**
@@ -42,29 +58,20 @@ public class LinearInvertedPendulumModel
    }
 
    /**
-    * @param mass total mass of the robot
+    * @param mass total totalMass of the robot
     */
    public void setMass(double mass)
    {
-      this.mass = mass;
-      this.yoLipNaturalFrequency.set(getNaturalFrequency());
+      this.totalMass.set(mass);
+      this.omega0.set(computeNaturalFrequency());
    }
 
    /**
-    * @return total mass of the robot
+    * @return total totalMass of the robot
     */
    public double getMass()
    {
-      return mass;
-   }
-
-   /**
-    * @param gravity force of gravity in the vertical axis
-    */
-   public void setGravity(double gravity)
-   {
-      this.gravity = gravity;
-      this.yoLipNaturalFrequency.set(getNaturalFrequency());
+      return totalMass.getDoubleValue();
    }
 
    /**
@@ -76,45 +83,45 @@ public class LinearInvertedPendulumModel
    }
 
    /**
-    * @param comHeight nominal center of mass height relative to the eCMP
+    * @param lipmHeight nominal center of totalMass height relative to the eCMP
     */
-   public void setComHeight(double comHeight)
+   public void setLipmHeight(double lipmHeight)
    {
-      this.comHeight = Math.max(comHeight, 0.001);
-      this.yoLipNaturalFrequency.set(getNaturalFrequency());
+      this.lipmHeight.set(Math.max(lipmHeight, 0.001));
+      this.omega0.set(computeNaturalFrequency());
    }
 
    /**
-    * @return nominal center of mass height relative to the eCMP
+    * @return nominal center of totalMass height relative to the eCMP
     */
-   public double getComHeight()
+   public double getLipmHeight()
    {
-      return comHeight;
+      return lipmHeight.getDoubleValue();
    }
 
    /**
     * Compute the total contact force acting on the CoM given the desired eCMP.
-    * @param comForceToPack computed contact force acting on the center of mass
-    * @param cmpPosition known position of the enhanced centroidal moment pivot
+    * @param comForceToPack computed contact force acting on the center of totalMass
+    * @param eCMPPosition known position of the enhanced centroidal moment pivot
     */
-   public void computeComForce(FrameVector3D comForceToPack, FramePoint3D cmpPosition)
+   public void computeComForce(FrameVector3D comForceToPack, FramePoint3D eCMPPosition)
    {
-      ReferenceFrame cmpPositionFrame = cmpPosition.getReferenceFrame();
+      ReferenceFrame cmpPositionFrame = eCMPPosition.getReferenceFrame();
       ReferenceFrame comForceFrame = comForceToPack.getReferenceFrame();
-      cmpPosition.changeFrame(comZUpFrame);
+      eCMPPosition.changeFrame(comZUpFrame);
       comForceToPack.setToNaN(comZUpFrame);
 
       double omega = getNaturalFrequency();
-      comForceToPack.set(cmpPosition);
-      comForceToPack.scale(-mass * Math.pow(omega, 2));
+      comForceToPack.set(eCMPPosition);
+      comForceToPack.scale(-totalMass.getDoubleValue() * Math.pow(omega, 2));
       comForceToPack.changeFrame(comForceFrame);
-      cmpPosition.changeFrame(cmpPositionFrame);
+      eCMPPosition.changeFrame(cmpPositionFrame);
    }
 
    /**
     * Compute the eCMP position given the total contact force acting on the CoM.
     * @param cmpPositionToPack computed position of the enhanced centroidal moment pivot
-    * @param comForce known contact force acting on the center of mass
+    * @param comForce known contact force acting on the center of totalMass
     */
    public void computeCmpPosition(FramePoint3D cmpPositionToPack, FrameVector3D comForce)
    {
@@ -125,7 +132,7 @@ public class LinearInvertedPendulumModel
 
       double omega = getNaturalFrequency();
       cmpPositionToPack.set(comForce);
-      cmpPositionToPack.scale(-1.0 / (mass * Math.pow(omega, 2)));
+      cmpPositionToPack.scale(-1.0 / (totalMass.getDoubleValue() * Math.pow(omega, 2)));
       cmpPositionToPack.changeFrame(cmpPositionFrame);
       comForce.changeFrame(comForceFrame);
    }

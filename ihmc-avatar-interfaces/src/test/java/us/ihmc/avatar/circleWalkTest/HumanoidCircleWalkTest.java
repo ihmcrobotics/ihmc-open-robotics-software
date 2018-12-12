@@ -25,10 +25,10 @@ import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
+import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.partNames.ArmJointName;
 import us.ihmc.robotics.robotSide.RobotSide;
-import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.simulationConstructionSetTools.bambooTools.BambooTools;
 import us.ihmc.simulationConstructionSetTools.robotController.SimpleRobotController;
 import us.ihmc.simulationConstructionSetTools.util.HumanoidFloatingRootJointRobot;
@@ -84,7 +84,7 @@ public abstract class HumanoidCircleWalkTest implements MultiRobotTestInterface
 
    protected double getRandomValidJointAngle(RobotSide side, ArmJointName armJointName, FullHumanoidRobotModel fullRobotModel)
    {
-      OneDoFJoint armJoint = fullRobotModel.getArmJoint(side, armJointName);
+      OneDoFJointBasics armJoint = fullRobotModel.getArmJoint(side, armJointName);
       if (armJoint != null)
       {
          double jointAngle = armJoint.getJointLimitLower() + (armJoint.getJointLimitUpper() - armJoint.getJointLimitLower()) * random.nextDouble();
@@ -398,7 +398,7 @@ public abstract class HumanoidCircleWalkTest implements MultiRobotTestInterface
          }
       }
 
-      public YoDouble getJointDesiredPosition(RobotSide side, OneDoFJoint joint)
+      public YoDouble getJointDesiredPosition(RobotSide side, OneDoFJointBasics joint)
       {
          String variable = "q_d_" + joint.getName();
          return (YoDouble) humanoidRobotModel.getVariable(variable);

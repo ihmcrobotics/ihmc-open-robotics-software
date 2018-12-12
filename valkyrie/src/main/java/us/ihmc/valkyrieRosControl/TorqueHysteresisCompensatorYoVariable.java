@@ -1,7 +1,7 @@
 package us.ihmc.valkyrieRosControl;
 
 import us.ihmc.commons.MathTools;
-import us.ihmc.robotics.screwTheory.OneDoFJoint;
+import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutputReadOnly;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
@@ -15,7 +15,7 @@ public class TorqueHysteresisCompensatorYoVariable extends YoDouble
       ZERO, RAMP_UP, RAMP_DOWN, MAX_HYSTERESIS
    };
 
-   private final OneDoFJoint joint;
+   private final OneDoFJointBasics joint;
    private final JointDesiredOutputReadOnly output;
    private final YoDouble torqueHysteresisAmplitude;
    private final YoDouble jointAccelerationMin;
@@ -36,14 +36,14 @@ public class TorqueHysteresisCompensatorYoVariable extends YoDouble
 
    private final YoBoolean enabled;
 
-   public TorqueHysteresisCompensatorYoVariable(String prefix, OneDoFJoint joint, JointDesiredOutputReadOnly output, YoDouble torqueHysteresisAmplitude,
+   public TorqueHysteresisCompensatorYoVariable(String prefix, OneDoFJointBasics joint, JointDesiredOutputReadOnly output, YoDouble torqueHysteresisAmplitude,
                                                 YoDouble jointAccelerationMin, YoDouble jointVelocityMax, YoDouble rampTime, YoDouble yoTime,
                                                 YoVariableRegistry registry)
    {
       this(prefix, joint, output, torqueHysteresisAmplitude, jointAccelerationMin, jointVelocityMax, rampTime, rampTime, yoTime, registry);
    }
 
-   public TorqueHysteresisCompensatorYoVariable(String prefix, OneDoFJoint joint, JointDesiredOutputReadOnly output, YoDouble torqueHysteresisAmplitude,
+   public TorqueHysteresisCompensatorYoVariable(String prefix, OneDoFJointBasics joint, JointDesiredOutputReadOnly output, YoDouble torqueHysteresisAmplitude,
                                                 YoDouble jointAccelerationMin, YoDouble jointVelocityMax, YoDouble rampUpTime, YoDouble rampDownTime,
                                                 YoDouble yoTime, YoVariableRegistry registry)
    {

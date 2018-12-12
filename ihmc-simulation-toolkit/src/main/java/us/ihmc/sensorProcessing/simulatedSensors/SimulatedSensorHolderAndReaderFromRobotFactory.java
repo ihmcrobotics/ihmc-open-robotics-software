@@ -9,8 +9,8 @@ import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.euclid.tuple4D.interfaces.QuaternionReadOnly;
-import us.ihmc.robotics.screwTheory.FloatingInverseDynamicsJoint;
-import us.ihmc.robotics.screwTheory.OneDoFJoint;
+import us.ihmc.mecano.multiBodySystem.interfaces.FloatingJointBasics;
+import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.robotics.sensors.ContactSensorHolder;
 import us.ihmc.robotics.sensors.ForceSensorDefinition;
 import us.ihmc.robotics.sensors.IMUDefinition;
@@ -47,7 +47,7 @@ public class SimulatedSensorHolderAndReaderFromRobotFactory implements SensorRea
    }
 
    @Override
-   public void build(FloatingInverseDynamicsJoint rootJoint, IMUDefinition[] imuDefinition, ForceSensorDefinition[] forceSensorDefinitions,
+   public void build(FloatingJointBasics rootJoint, IMUDefinition[] imuDefinition, ForceSensorDefinition[] forceSensorDefinitions,
                      ContactSensorHolder contactSensorHolder, RawJointSensorDataHolderMap rawJointSensorDataHolderMap,
                      JointDesiredOutputList estimatorDesiredJointDataHolder, YoVariableRegistry parentRegistry)
    {
@@ -101,7 +101,7 @@ public class SimulatedSensorHolderAndReaderFromRobotFactory implements SensorRea
 
       for (OneDegreeOfFreedomJoint oneDegreeOfFreedomJoint : oneDegreeOfFreedomJoints)
       {
-         OneDoFJoint oneDoFJoint = scsToInverseDynamicsJointMap.getInverseDynamicsOneDoFJoint(oneDegreeOfFreedomJoint);
+         OneDoFJointBasics oneDoFJoint = scsToInverseDynamicsJointMap.getInverseDynamicsOneDoFJoint(oneDegreeOfFreedomJoint);
 
          simulatedSensorHolderAndReader.addJointPositionSensorPort(oneDoFJoint, oneDegreeOfFreedomJoint.getQYoVariable());
          simulatedSensorHolderAndReader.addJointVelocitySensorPort(oneDoFJoint, oneDegreeOfFreedomJoint.getQDYoVariable());

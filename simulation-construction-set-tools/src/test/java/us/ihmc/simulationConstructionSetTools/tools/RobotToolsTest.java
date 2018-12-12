@@ -1,6 +1,6 @@
 package us.ihmc.simulationConstructionSetTools.tools;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertNotNull;
 
 import java.util.Random;
 
@@ -8,23 +8,22 @@ import org.junit.Test;
 
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.euclid.tuple3D.Vector3D;
-import us.ihmc.robotics.screwTheory.ScrewTestTools;
-import us.ihmc.robotics.screwTheory.ScrewTestTools.RandomFloatingChain;
-import us.ihmc.simulationConstructionSetTools.tools.RobotTools;
+import us.ihmc.mecano.tools.JointStateType;
+import us.ihmc.mecano.tools.MultiBodySystemRandomTools.RandomFloatingRevoluteJointChain;
 import us.ihmc.simulationConstructionSetTools.tools.RobotTools.SCSRobotFromInverseDynamicsRobotModel;
 import us.ihmc.simulationconstructionset.Joint;
 import us.ihmc.simulationconstructionset.Robot;
 
 public class RobotToolsTest
 {
-   private RandomFloatingChain getRandomFloatingChain()
+   private RandomFloatingRevoluteJointChain getRandomFloatingChain()
    {
       Random random = new Random();
 
       Vector3D[] jointAxes = {new Vector3D(1.0, 0.0, 0.0)};
-      ScrewTestTools.RandomFloatingChain randomFloatingChain = new ScrewTestTools.RandomFloatingChain(random, jointAxes);
+      RandomFloatingRevoluteJointChain randomFloatingChain = new RandomFloatingRevoluteJointChain(random, jointAxes);
 
-      randomFloatingChain.setRandomPositionsAndVelocities(random);
+      randomFloatingChain.nextState(random, JointStateType.CONFIGURATION, JointStateType.VELOCITY);
 
       return randomFloatingChain;
    }

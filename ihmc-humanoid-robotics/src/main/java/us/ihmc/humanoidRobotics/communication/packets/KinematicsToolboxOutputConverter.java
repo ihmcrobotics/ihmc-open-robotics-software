@@ -1,5 +1,7 @@
 package us.ihmc.humanoidRobotics.communication.packets;
 
+import java.util.Arrays;
+
 import controller_msgs.msg.dds.ArmTrajectoryMessage;
 import controller_msgs.msg.dds.ChestTrajectoryMessage;
 import controller_msgs.msg.dds.FootTrajectoryMessage;
@@ -15,16 +17,16 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
-import us.ihmc.euclid.utils.NameBasedHashCodeTools;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
+import us.ihmc.mecano.multiBodySystem.interfaces.FloatingJointBasics;
+import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
+import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
+import us.ihmc.mecano.tools.MultiBodySystemTools;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotModels.FullHumanoidRobotModelFactory;
 import us.ihmc.robotModels.FullRobotModelUtils;
 import us.ihmc.robotics.partNames.LimbName;
 import us.ihmc.robotics.robotSide.RobotSide;
-import us.ihmc.robotics.screwTheory.FloatingInverseDynamicsJoint;
-import us.ihmc.robotics.screwTheory.OneDoFJoint;
-import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.robotics.screwTheory.ScrewTools;
 
 public class KinematicsToolboxOutputConverter
@@ -33,8 +35,8 @@ public class KinematicsToolboxOutputConverter
 
    private final FullHumanoidRobotModel fullRobotModelToUseForConversion;
    private final HumanoidReferenceFrames referenceFrames;
-   private final FloatingInverseDynamicsJoint rootJoint;
-   private final OneDoFJoint[] oneDoFJoints;
+   private final FloatingJointBasics rootJoint;
+   private final OneDoFJointBasics[] oneDoFJoints;
    private final int jointsHashCode;
 
    public KinematicsToolboxOutputConverter(FullHumanoidRobotModelFactory fullRobotModelFactory)
@@ -42,7 +44,7 @@ public class KinematicsToolboxOutputConverter
       this.fullRobotModelToUseForConversion = fullRobotModelFactory.createFullRobotModel();
       rootJoint = fullRobotModelToUseForConversion.getRootJoint();
       oneDoFJoints = FullRobotModelUtils.getAllJointsExcludingHands(fullRobotModelToUseForConversion);
-      jointsHashCode = (int) NameBasedHashCodeTools.computeArrayHashCode(oneDoFJoints);
+      jointsHashCode = Arrays.hashCode(oneDoFJoints);
       referenceFrames = new HumanoidReferenceFrames(fullRobotModelToUseForConversion);
    }
 
@@ -54,13 +56,13 @@ public class KinematicsToolboxOutputConverter
       for (int i = 0; i < oneDoFJoints.length; i++)
       {
          float q = solution.getDesiredJointAngles().get(i);
-         OneDoFJoint joint = oneDoFJoints[i];
+         OneDoFJointBasics joint = oneDoFJoints[i];
          joint.setQ(q);
       }
       Vector3D translation = solution.getDesiredRootTranslation();
-      rootJoint.setPosition(translation.getX(), translation.getY(), translation.getZ());
+      rootJoint.getJointPose().setPosition(translation.getX(), translation.getY(), translation.getZ());
       Quaternion orientation = solution.getDesiredRootOrientation();
-      rootJoint.setRotation(orientation.getX(), orientation.getY(), orientation.getZ(), orientation.getS());
+      rootJoint.getJointPose().getOrientation().setQuaternion(orientation.getX(), orientation.getY(), orientation.getZ(), orientation.getS());
       fullRobotModelToUseForConversion.updateFrames();
    }
 
@@ -86,14 +88,14 @@ public class KinematicsToolboxOutputConverter
 
    public void computeArmTrajectoryMessage(RobotSide robotSide)
    {
-      RigidBody hand = fullRobotModelToUseForConversion.getHand(robotSide);
-      RigidBody chest = fullRobotModelToUseForConversion.getChest();
-      OneDoFJoint[] armJoints = ScrewTools.createOneDoFJointPath(chest, hand);
+      RigidBodyBasics hand = fullRobotModelToUseForConversion.getHand(robotSide);
+      RigidBodyBasics chest = fullRobotModelToUseForConversion.getChest();
+      OneDoFJointBasics[] armJoints = MultiBodySystemTools.createOneDoFJointPath(chest, hand);
       int numberOfArmJoints = armJoints.length;
       double[] desiredJointPositions = new double[numberOfArmJoints];
       for (int i = 0; i < numberOfArmJoints; i++)
       {
-         OneDoFJoint armJoint = armJoints[i];
+         OneDoFJointBasics armJoint = armJoints[i];
          desiredJointPositions[i] = MathTools.clamp(armJoint.getQ(), armJoint.getJointLimitLower(), armJoint.getJointLimitUpper());
       }
       ArmTrajectoryMessage armTrajectoryMessage = robotSide == RobotSide.LEFT ? output.getLeftArmTrajectoryMessage() : output.getRightArmTrajectoryMessage();

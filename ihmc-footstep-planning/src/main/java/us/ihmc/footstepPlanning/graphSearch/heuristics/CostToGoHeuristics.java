@@ -1,32 +1,27 @@
 package us.ihmc.footstepPlanning.graphSearch.heuristics;
 
 import us.ihmc.footstepPlanning.graphSearch.graph.FootstepNode;
+import us.ihmc.yoVariables.providers.DoubleProvider;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 
 public abstract class CostToGoHeuristics
 {
-   private final YoDouble weight;
+   private final DoubleProvider weight;
 
-   public CostToGoHeuristics(YoVariableRegistry registry)
+   public CostToGoHeuristics(DoubleProvider weight)
    {
-      weight = new YoDouble("HeuristicWeight", registry);
-      weight.set(1.0);
-   }
-
-   public void setWeight(double weight)
-   {
-      this.weight.set(Math.max(0.0, weight));
+      this.weight = weight;
    }
 
    public double getWeight()
    {
-      return weight.getDoubleValue();
+      return weight.getValue();
    }
 
    public double compute(FootstepNode node, FootstepNode goalNode)
    {
-      return weight.getDoubleValue() * computeHeuristics(node, goalNode);
+      return weight.getValue() * computeHeuristics(node, goalNode);
    }
 
    protected abstract double computeHeuristics(FootstepNode node, FootstepNode goalNode);

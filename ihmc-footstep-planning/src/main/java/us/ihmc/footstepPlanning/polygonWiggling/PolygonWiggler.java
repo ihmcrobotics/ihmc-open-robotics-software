@@ -97,13 +97,14 @@ public class PolygonWiggler
     */
    public static RigidBodyTransform findWiggleTransform(ConvexPolygon2D polygonToWiggle, ConvexPolygon2D planeToWiggleInto, WiggleParameters parameters)
    {
-      int constraintsPerPoint = planeToWiggleInto.getNumberOfVertices();
       int numberOfPoints = polygonToWiggle.getNumberOfVertices();
       Point2DReadOnly pointToRotateAbout = polygonToWiggle.getCentroid();
 
       DenseMatrix64F A = new DenseMatrix64F(0);
       DenseMatrix64F b = new DenseMatrix64F(0);
       convertToInequalityConstraints(planeToWiggleInto, A, b, parameters.deltaInside);
+
+      int constraintsPerPoint = A.getNumRows();
 
       int boundConstraints = 6;
       DenseMatrix64F A_full = new DenseMatrix64F(constraintsPerPoint * numberOfPoints + boundConstraints, 3);

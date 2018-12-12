@@ -1,12 +1,12 @@
 package us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories;
 
+import java.util.EnumMap;
+
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.HighLevelControllerFactoryHelper;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.HighLevelControllerState;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.SmoothTransitionControllerState;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelControllerName;
-import us.ihmc.robotics.screwTheory.OneDoFJoint;
-
-import java.util.EnumMap;
+import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 
 public class ExitWalkingTransitionControllerStateFactory implements HighLevelControllerStateFactory
 {
@@ -29,7 +29,7 @@ public class ExitWalkingTransitionControllerStateFactory implements HighLevelCon
 
          HighLevelControllerState initialControllerState = initialControllerStateFactory.getOrCreateControllerState(controllerFactoryHelper);
          HighLevelControllerState finalControllerState = finalControllerStateFactory.getOrCreateControllerState(controllerFactoryHelper);
-         OneDoFJoint[] controlledJoints = controllerFactoryHelper.getHighLevelHumanoidControllerToolbox().getControlledOneDoFJoints();
+         OneDoFJointBasics[] controlledJoints = controllerFactoryHelper.getHighLevelHumanoidControllerToolbox().getControlledOneDoFJoints();
 
          transitionControllerState = new SmoothTransitionControllerState("exitWalking", HighLevelControllerName.EXIT_WALKING, initialControllerState,
                                                                          finalControllerState, controlledJoints, controllerFactoryHelper.getHighLevelControllerParameters());

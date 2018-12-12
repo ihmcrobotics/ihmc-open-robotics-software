@@ -21,5 +21,6 @@ geometry_msgs/Point goal_position_in_world
 geometry_msgs/Quaternion goal_orientation_in_world
 byte requested_footstep_planner_type 255
 float64 timeout
+float64 horizon_length
 PlanarRegionsListMessage planar_regions_list_message
 int32 planner_request_id -1

@@ -6,6 +6,9 @@ import us.ihmc.euclid.tools.EuclidCoreTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple2D.Vector2D;
 import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.mecano.frames.MovingReferenceFrame;
+import us.ihmc.mecano.spatial.Twist;
+import us.ihmc.mecano.spatial.interfaces.TwistReadOnly;
 
 public class MovingMidFrameZUpFrame extends MovingReferenceFrame
 {
@@ -63,18 +66,18 @@ public class MovingMidFrameZUpFrame extends MovingReferenceFrame
    @Override
    protected void updateTwistRelativeToParent(Twist twistRelativeToParentToPack)
    {
-      Twist twistOfFrameOne = frameOne.getTwistOfFrame();
-      Twist twistOfFrameTwo = frameTwo.getTwistOfFrame();
+      TwistReadOnly twistOfFrameOne = frameOne.getTwistOfFrame();
+      TwistReadOnly twistOfFrameTwo = frameTwo.getTwistOfFrame();
 
-      twistOfFrameOne.getLinearPart(linearVelocityOne);
-      twistOfFrameTwo.getLinearPart(linearVelocityTwo);
+      linearVelocityOne.setIncludingFrame(twistOfFrameOne.getLinearPart());
+      linearVelocityTwo.setIncludingFrame(twistOfFrameTwo.getLinearPart());
 
       linearVelocityOne.changeFrame(this);
       linearVelocityTwo.changeFrame(this);
       linearVelocity.setToZero(this);
       linearVelocity.interpolate(linearVelocityOne, linearVelocityTwo, 0.5);
       twistRelativeToParentToPack.setToZero(this, getParent(), this);
-      twistRelativeToParentToPack.setLinearPart(linearVelocity);
+      twistRelativeToParentToPack.getLinearPart().set(linearVelocity);
 
       linearVelocityOne.sub(linearVelocity);
       linearVelocityTwo.sub(linearVelocity);
@@ -89,12 +92,11 @@ public class MovingMidFrameZUpFrame extends MovingReferenceFrame
       double distanceFromTwo = EuclidCoreTools.norm(originTwo.getX(), originTwo.getY());
 
       double omegaZFromOne = linearVelocityOne.getX() / distanceFromOne;
-      omegaZFromOne = Math.copySign(omegaZFromOne, originOne.getY());
+      omegaZFromOne = omegaZFromOne * Math.signum(originOne.getY());
 
       double omegaZFromTwo = linearVelocityTwo.getX() / distanceFromTwo;
-      omegaZFromTwo = -Math.copySign(omegaZFromTwo, originTwo.getY());
+      omegaZFromTwo = omegaZFromTwo * Math.signum(originTwo.getY());
 
-      twistRelativeToParentToPack.setAngularPartZ(0.5 * (omegaZFromOne + omegaZFromTwo));
-      twistRelativeToParentToPack.setAngularPartZ(omegaZFromTwo);
+      twistRelativeToParentToPack.setAngularPartZ(-0.5 * (omegaZFromOne + omegaZFromTwo));
    }
 }

@@ -2,6 +2,7 @@ package us.ihmc.valkyrie.joystick;
 
 import java.io.IOException;
 
+import controller_msgs.msg.dds.PlanarRegionsListMessage;
 import controller_msgs.msg.dds.RobotConfigurationData;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
@@ -21,6 +22,8 @@ import us.ihmc.javaFXToolkit.messager.JavaFXMessager;
 import us.ihmc.javaFXToolkit.messager.SharedMemoryJavaFXMessager;
 import us.ihmc.javaFXToolkit.scenes.View3DFactory;
 import us.ihmc.javaFXVisualizers.JavaFXRobotVisualizer;
+import us.ihmc.robotEnvironmentAwareness.communication.REACommunicationProperties;
+import us.ihmc.robotEnvironmentAwareness.ui.JavaFXPlanarRegionsViewer;
 import us.ihmc.robotModels.FullHumanoidRobotModelFactory;
 import us.ihmc.ros2.Ros2Node;
 
@@ -31,6 +34,7 @@ public class JoystickBasedGraspingMainUI
 
    private final GraspingJavaFXController graspingJavaFXController;
    private final JavaFXRobotVisualizer javaFXRobotVisualizer;
+   private final JavaFXPlanarRegionsViewer planarRegionsViewer;
 
    private final JavaFXMessager messager = new SharedMemoryJavaFXMessager(GraspingJavaFXTopics.API);
    private final XBoxOneJavaFXController xBoxOneJavaFXController;
@@ -68,6 +72,11 @@ public class JoystickBasedGraspingMainUI
                                            s -> javaFXRobotVisualizer.submitNewConfiguration(s.takeNextData()));
       view3dFactory.addNodeToView(javaFXRobotVisualizer.getRootNode());
 
+      planarRegionsViewer = new JavaFXPlanarRegionsViewer();
+      ROS2Tools.createCallbackSubscription(ros2Node, PlanarRegionsListMessage.class, REACommunicationProperties.publisherTopicNameGenerator,
+                                           s -> planarRegionsViewer.submitPlanarRegions(s.takeNextData()));
+      view3dFactory.addNodeToView(planarRegionsViewer.getRootNode());
+      
       graspingJavaFXController = new GraspingJavaFXController(robotName, messager, ros2Node, fullRobotModelFactory, javaFXRobotVisualizer,
                                                               handFingerTrajectoryMessagePublisher);
       view3dFactory.addNodeToView(graspingJavaFXController.getRootNode());
@@ -76,6 +85,8 @@ public class JoystickBasedGraspingMainUI
 
       Translate rootJointOffset = new Translate();
       cameraController.prependTransform(rootJointOffset);
+      Translate manipulationFocusPoint = new Translate(0.0, 0.0, 1.0);
+      cameraController.prependTransform(manipulationFocusPoint);
 
       messager.startMessager();
 
@@ -92,6 +103,7 @@ public class JoystickBasedGraspingMainUI
    {
       primaryStage.show();
       javaFXRobotVisualizer.start();
+      planarRegionsViewer.start();
       graspingJavaFXController.start();
    }
 
@@ -107,6 +119,7 @@ public class JoystickBasedGraspingMainUI
       }
       xBoxOneJavaFXController.stop();
       javaFXRobotVisualizer.stop();
+      planarRegionsViewer.stop();
       graspingJavaFXController.stop();
 
       ThreadTools.sleep(100); // Give some time to send the message.:

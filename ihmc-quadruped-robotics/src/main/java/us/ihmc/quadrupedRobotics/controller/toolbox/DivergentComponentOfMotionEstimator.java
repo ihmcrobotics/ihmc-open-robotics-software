@@ -4,12 +4,14 @@ import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition;
+import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition.GraphicType;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsList;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.graphicsDescription.yoGraphics.plotting.ArtifactList;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoFramePoint3D;
 
+import static us.ihmc.graphicsDescription.appearance.YoAppearance.Black;
 import static us.ihmc.graphicsDescription.appearance.YoAppearance.Blue;
 
 public class DivergentComponentOfMotionEstimator
@@ -48,10 +50,17 @@ public class DivergentComponentOfMotionEstimator
       YoGraphicsList yoGraphicsList = new YoGraphicsList(getClass().getSimpleName());
       ArtifactList artifactList = new ArtifactList(getClass().getSimpleName());
 
-      YoGraphicPosition yoIcpPositionEstimateViz = new YoGraphicPosition("Capture Point" + suffix , yoIcpPositionEstimate, 0.01, Blue(), YoGraphicPosition.GraphicType.BALL_WITH_ROTATED_CROSS);
+      YoGraphicPosition yoIcpPositionEstimateViz = new YoGraphicPosition("Capture Point" + suffix , yoIcpPositionEstimate, 0.01, Blue(), GraphicType.BALL_WITH_ROTATED_CROSS);
+      YoGraphicPosition dcmPositionEstimateViz = new YoGraphicPosition("Divergent Component of Motion" + suffix , yoDcmPositionEstimate, 0.01, Blue(), GraphicType.BALL_WITH_ROTATED_CROSS);
+      YoGraphicPosition comEstimateViz = new YoGraphicPosition("Center of Mass" + suffix , centerOfMass, 0.006, Black(), GraphicType.BALL_WITH_CROSS);
 
       yoGraphicsList.add(yoIcpPositionEstimateViz);
+      yoGraphicsList.add(dcmPositionEstimateViz);
+      yoGraphicsList.add(comEstimateViz);
+
       artifactList.add(yoIcpPositionEstimateViz.createArtifact());
+      artifactList.add(comEstimateViz.createArtifact());
+
       graphicsListRegistry.registerYoGraphicsList(yoGraphicsList);
       graphicsListRegistry.registerArtifactList(artifactList);
    }
@@ -77,7 +86,7 @@ public class DivergentComponentOfMotionEstimator
       dcmPositionEstimateToPack.scale(1.0 / lipModel.getNaturalFrequency());
       yoDcmPositionEstimate.setMatchingFrame(dcmPositionEstimateToPack);
       yoIcpPositionEstimate.set(yoDcmPositionEstimate);
-      yoIcpPositionEstimate.add(0, 0, -lipModel.getComHeight());
+      yoIcpPositionEstimate.subZ(lipModel.getLipmHeight());
       centerOfMass.setFromReferenceFrame(comZUpFrame);
 
       dcmPositionEstimateToPack.changeFrame(dcmPositionEstimateFrame);

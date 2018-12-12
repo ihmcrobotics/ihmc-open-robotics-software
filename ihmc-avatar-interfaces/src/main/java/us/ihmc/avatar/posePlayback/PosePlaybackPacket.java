@@ -2,12 +2,12 @@ package us.ihmc.avatar.posePlayback;
 
 import java.util.Map;
 
-import us.ihmc.robotics.screwTheory.OneDoFJoint;
+import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 
 public interface PosePlaybackPacket
 {
-   public abstract Map<OneDoFJoint, Double> getJointKps();
-   public abstract Map<OneDoFJoint, Double> getJointKds();
+   public abstract Map<OneDoFJointBasics, Double> getJointKps();
+   public abstract Map<OneDoFJointBasics, Double> getJointKds();
    
    public abstract PlaybackPoseSequence getPlaybackPoseSequence();
    

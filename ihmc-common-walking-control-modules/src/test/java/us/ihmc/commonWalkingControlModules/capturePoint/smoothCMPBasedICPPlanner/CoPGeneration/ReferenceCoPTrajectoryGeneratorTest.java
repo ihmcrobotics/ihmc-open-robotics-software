@@ -1,9 +1,15 @@
 package us.ihmc.commonWalkingControlModules.capturePoint.smoothCMPBasedICPPlanner.CoPGeneration;
 
+import static org.junit.Assert.assertTrue;
+
+import java.util.ArrayList;
+import java.util.List;
+
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
+
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.BipedSupportPolygons;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.ListOfPointsContactableFoot;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.YoPlaneContactState;
@@ -13,29 +19,29 @@ import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.Continuous
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.continuousIntegration.IntegrationCategory;
 import us.ihmc.euclid.geometry.LineSegment2D;
-import us.ihmc.euclid.referenceFrame.*;
+import us.ihmc.euclid.referenceFrame.FramePoint2D;
+import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.FrameQuaternion;
+import us.ihmc.euclid.referenceFrame.FrameVector3D;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint2DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
-import us.ihmc.euclid.tools.EuclidCoreTestTools;
 import us.ihmc.euclid.referenceFrame.tools.ReferenceFrameTools;
+import us.ihmc.euclid.tools.EuclidCoreTestTools;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple2D.Vector2D;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactableFoot;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.humanoidRobotics.footstep.FootstepTiming;
+import us.ihmc.mecano.multiBodySystem.RigidBody;
+import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.robotics.referenceFrames.MidFootZUpGroundFrame;
 import us.ihmc.robotics.referenceFrames.ZUpFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
-import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoInteger;
-
-import java.util.ArrayList;
-import java.util.List;
-
-import static org.junit.Assert.assertTrue;
 
 @ContinuousIntegrationPlan(categories = {IntegrationCategory.FAST})
 public class ReferenceCoPTrajectoryGeneratorTest
@@ -60,7 +66,7 @@ public class ReferenceCoPTrajectoryGeneratorTest
    private final SideDependentList<ReferenceFrame> soleZUpFrames = new SideDependentList<>();
    private final SideDependentList<ReferenceFrame> ankleZUpFrames = new SideDependentList<>();
    private final SideDependentList<ContactableFoot> contactableFeet = new SideDependentList<>();
-   private final SideDependentList<RigidBody> feetBodies = new SideDependentList<>();
+   private final SideDependentList<RigidBodyBasics> feetBodies = new SideDependentList<>();
    private final YoVariableRegistry parentRegistry = new YoVariableRegistry("TestRegistry");
    private final SideDependentList<YoPlaneContactState> contactStates = new SideDependentList<>();
    private final SmoothCMPPlannerParameters plannerParameters = new TestSmoothCMPPlannerParameters();;
@@ -98,7 +104,7 @@ public class ReferenceCoPTrajectoryGeneratorTest
          ContactableFoot contactableFoot = new ListOfPointsContactableFoot(null, soleFrame, contactPoints, point1,
                                                                            new LineSegment2D(point1, point2));
          contactableFeet.put(side, contactableFoot);
-         RigidBody feetBody = new RigidBody(side.toString() + "Feet", ReferenceFrame.getWorldFrame());
+         RigidBodyBasics feetBody = new RigidBody(side.toString() + "Feet", ReferenceFrame.getWorldFrame());
          feetBodies.put(side, feetBody);
          List<FramePoint2D> contactFramePoints = new ArrayList<>();
          contactFramePoints.add(new FramePoint2D(soleFrame, point1));

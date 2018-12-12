@@ -5,17 +5,18 @@ import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.Vector3D;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.yoVariables.variable.YoDouble;
+import us.ihmc.mecano.algorithms.SpatialAccelerationCalculator;
+import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
+import us.ihmc.mecano.spatial.SpatialAcceleration;
+import us.ihmc.mecano.spatial.Twist;
+import us.ihmc.mecano.spatial.interfaces.SpatialAccelerationReadOnly;
 import us.ihmc.robotics.math.corruptors.NoisyYoDouble;
 import us.ihmc.robotics.math.corruptors.NoisyYoRotationMatrix;
 import us.ihmc.robotics.robotController.RawSensorReader;
-import us.ihmc.robotics.screwTheory.RigidBody;
-import us.ihmc.robotics.screwTheory.SpatialAccelerationCalculator;
-import us.ihmc.robotics.screwTheory.SpatialAccelerationVector;
-import us.ihmc.robotics.screwTheory.Twist;
 import us.ihmc.robotics.screwTheory.TwistCalculator;
 import us.ihmc.robotics.sensors.RawIMUSensorsInterface;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoDouble;
 
 public abstract class SimulatedIMURawSensorReader implements RawSensorReader
 {
@@ -24,7 +25,7 @@ public abstract class SimulatedIMURawSensorReader implements RawSensorReader
 
    private final RawIMUSensorsInterface rawSensors;
    protected final int imuIndex;
-   protected final RigidBody rigidBody;
+   protected final RigidBodyBasics rigidBody;
    protected final ReferenceFrame imuFrame;
 
    private final FramePoint3D imuFramePoint;
@@ -41,7 +42,7 @@ public abstract class SimulatedIMURawSensorReader implements RawSensorReader
    private final Twist twist = new Twist();
    private final Twist twistInIMUFrame = new Twist();
    private final Twist twistInWorldFrame = new Twist();
-   private final SpatialAccelerationVector spatialAcceleration;
+   private final SpatialAcceleration spatialAcceleration;
 
    protected final YoDouble perfM00;
    protected final YoDouble perfM01;
@@ -85,14 +86,15 @@ public abstract class SimulatedIMURawSensorReader implements RawSensorReader
    protected final NoisyYoDouble[] gyroList;
    protected final NoisyYoDouble[] compassList;
 
-   public SimulatedIMURawSensorReader(RawIMUSensorsInterface rawSensors, int imuIndex, RigidBody rigidBody, ReferenceFrame imuFrame, RigidBody rootBody, SpatialAccelerationVector rootAcceleration)
+   public SimulatedIMURawSensorReader(RawIMUSensorsInterface rawSensors, int imuIndex, RigidBodyBasics rigidBody, ReferenceFrame imuFrame, RigidBodyBasics rootBody, SpatialAccelerationReadOnly rootAcceleration)
    {
       this.rawSensors = rawSensors;
       this.imuIndex = imuIndex;
       this.rigidBody = rigidBody;
       this.imuFrame = imuFrame;
       this.twistCalculator = new TwistCalculator(ReferenceFrame.getWorldFrame(), rootBody);
-      this.spatialAccelerationCalculator = new SpatialAccelerationCalculator(rootBody, rootAcceleration, true, false);
+      this.spatialAccelerationCalculator = new SpatialAccelerationCalculator(rootBody, ReferenceFrame.getWorldFrame());
+      spatialAccelerationCalculator.setRootAcceleration(rootAcceleration);
 
       name = getClass().getSimpleName() + imuIndex;
       registry = new YoVariableRegistry(name);
@@ -100,7 +102,7 @@ public abstract class SimulatedIMURawSensorReader implements RawSensorReader
       imuFramePoint = new FramePoint3D(imuFrame);
       bodyFrame = rigidBody.getBodyFixedFrame();
 
-      spatialAcceleration = new SpatialAccelerationVector(bodyFrame, worldFrame, bodyFrame);
+      spatialAcceleration = new SpatialAcceleration(bodyFrame, worldFrame, bodyFrame);
 
       perfM00 = new YoDouble("perf_imu_m00", registry);
       perfM01 = new YoDouble("perf_imu_m01", registry);
@@ -156,9 +158,9 @@ public abstract class SimulatedIMURawSensorReader implements RawSensorReader
    public void read()
    {
       twistCalculator.compute();
-      spatialAccelerationCalculator.compute();
+      spatialAccelerationCalculator.reset();
       twistCalculator.getTwistOfBody(rigidBody, twist);    // Twist of bodyCoM and not IMU!
-      spatialAccelerationCalculator.getAccelerationOfBody(rigidBody, spatialAcceleration);
+      spatialAcceleration.setIncludingFrame(spatialAccelerationCalculator.getAccelerationOfBody(rigidBody));
       spatialAcceleration.changeFrame(worldFrame, twist, twist);
 
       updatePerfectOrientation();
@@ -199,9 +201,9 @@ public abstract class SimulatedIMURawSensorReader implements RawSensorReader
 
    protected void updatePerfectAngularVelocity()
    {
-      twistInIMUFrame.set(twist);
+      twistInIMUFrame.setIncludingFrame(twist);
       twistInIMUFrame.changeFrame(imuFrame);
-      twistInIMUFrame.getAngularPart(angularVelocity);
+      angularVelocity.set(twistInIMUFrame.getAngularPart());
 
       perfGyroX.set(angularVelocity.getX());
       perfGyroY.set(angularVelocity.getY());
@@ -210,14 +212,14 @@ public abstract class SimulatedIMURawSensorReader implements RawSensorReader
 
    protected void updatePerfectAcceleration()
    {
-      twistInWorldFrame.set(twist);
+      twistInWorldFrame.setIncludingFrame(twist);
       twistInWorldFrame.changeFrame(worldFrame);
 
       FramePoint3D imuFramePointInWorldFrame = new FramePoint3D(imuFramePoint);
       imuFramePointInWorldFrame.changeFrame(worldFrame);
 
       acceleration.setToZero(worldFrame);
-      spatialAcceleration.getAccelerationOfPointFixedInBodyFrame(twistInWorldFrame, imuFramePointInWorldFrame, acceleration);
+      spatialAcceleration.getLinearAccelerationAt(twistInWorldFrame, imuFramePointInWorldFrame, acceleration);
       acceleration.changeFrame(imuFrame);
 
       perfAccelX.set(acceleration.getX());

@@ -12,7 +12,7 @@ byte CONFIGURATION_SPACE_NAME_SO3 = 6
 # Unique ID used to identify this message, should preferably be consecutively increasing.
 uint32 sequence_id
 
-int64 rigid_body_name_based_hash_code
+int32 rigid_body_hash_code
 byte[] configuration_space_names_to_explore
 
 float64[] exploration_range_upper_limits

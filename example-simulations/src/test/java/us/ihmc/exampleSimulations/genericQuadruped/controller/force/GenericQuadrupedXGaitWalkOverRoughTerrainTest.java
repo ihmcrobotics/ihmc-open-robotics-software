@@ -7,16 +7,15 @@ import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.Continuous
 import us.ihmc.continuousIntegration.IntegrationCategory;
 import us.ihmc.exampleSimulations.genericQuadruped.GenericQuadrupedTestFactory;
 import us.ihmc.exampleSimulations.genericQuadruped.parameters.GenericQuadrupedXGaitSettings;
+import us.ihmc.quadrupedPlanning.QuadrupedXGaitSettingsReadOnly;
 import us.ihmc.quadrupedRobotics.QuadrupedTestFactory;
 import us.ihmc.quadrupedRobotics.controller.force.QuadrupedXGaitWalkOverRoughTerrainTest;
-import us.ihmc.quadrupedRobotics.planning.QuadrupedXGaitSettingsReadOnly;
 
 import java.io.IOException;
 
 public class GenericQuadrupedXGaitWalkOverRoughTerrainTest extends QuadrupedXGaitWalkOverRoughTerrainTest
 {
    private QuadrupedXGaitSettingsReadOnly xGaitSettings;
-
 
    @ContinuousIntegrationTest(estimatedDuration = 80.0)
    @Test(timeout = 2000000)
@@ -39,7 +38,7 @@ public class GenericQuadrupedXGaitWalkOverRoughTerrainTest extends QuadrupedXGai
    public void testWalkingOverSingleStepUp() throws IOException, AssertionFailedError
    {
       xGaitSettings = new GenericQuadrupedXGaitSettings();
-      super.testWalkingOverSingleStepUp();
+      super.testWalkingOverSingleStepUp(Double.NaN);
    }
 
    @ContinuousIntegrationTest(estimatedDuration = 80.0)

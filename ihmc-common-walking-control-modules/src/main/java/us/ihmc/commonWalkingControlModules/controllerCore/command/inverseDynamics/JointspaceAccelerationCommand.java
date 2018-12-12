@@ -1,6 +1,6 @@
 package us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics;
 
-import static us.ihmc.robotics.weightMatrices.SolverWeightLevels.*;
+import static us.ihmc.robotics.weightMatrices.SolverWeightLevels.HARD_CONSTRAINT;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -14,10 +14,10 @@ import us.ihmc.commonWalkingControlModules.controllerCore.command.ControllerCore
 import us.ihmc.commonWalkingControlModules.controllerCore.command.ControllerCoreCommandType;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.feedbackController.jointspace.OneDoFJointFeedbackController;
 import us.ihmc.commons.MathTools;
-import us.ihmc.robotics.lists.DenseMatrixArrayList;
 import us.ihmc.commons.lists.RecyclingArrayList;
-import us.ihmc.robotics.screwTheory.InverseDynamicsJoint;
-import us.ihmc.robotics.screwTheory.OneDoFJoint;
+import us.ihmc.mecano.multiBodySystem.interfaces.JointBasics;
+import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
+import us.ihmc.robotics.lists.DenseMatrixArrayList;
 import us.ihmc.robotics.weightMatrices.SolverWeightLevels;
 
 /**
@@ -48,7 +48,7 @@ public class JointspaceAccelerationCommand implements InverseDynamicsCommand<Joi
     */
    private final List<String> jointNames = new ArrayList<>(initialCapacity);
    /** The list of joints for which desired accelerations are assigned. */
-   private final List<InverseDynamicsJoint> joints = new ArrayList<>(initialCapacity);
+   private final List<JointBasics> joints = new ArrayList<>(initialCapacity);
    /**
     * The list of the desired accelerations for each joint. The list follows the same ordering as
     * the {@link #joints} list. Each {@link DenseMatrix64F} in this list, is a N-by-1 vector where N
@@ -106,13 +106,13 @@ public class JointspaceAccelerationCommand implements InverseDynamicsCommand<Joi
     * The joint is added at the last position, i.e. at the index
     * {@code i == this.getNumberOfJoints()}. Note that it is registered as a hard constraint. It is
     * highly recommended to set the weight afterwards or simply use
-    * {@link #addJoint(OneDoFJoint, double, double)} instead.
+    * {@link #addJoint(OneDoFJointBasics, double, double)} instead.
     * </p>
     * 
     * @param joint the joint to be controlled.
     * @param desiredAcceleration the joint acceleration to be achieved in the next control tick.
     */
-   public void addJoint(OneDoFJoint joint, double desiredAcceleration)
+   public void addJoint(OneDoFJointBasics joint, double desiredAcceleration)
    {
       addJoint(joint, desiredAcceleration, HARD_CONSTRAINT);
    }
@@ -128,7 +128,7 @@ public class JointspaceAccelerationCommand implements InverseDynamicsCommand<Joi
     * @param desiredAcceleration the joint acceleration to be achieved in the next control tick.
     * @param weight positive value that denotes the priority of the joint task.
     */
-   public void addJoint(OneDoFJoint joint, double desiredAcceleration, double weight)
+   public void addJoint(OneDoFJointBasics joint, double desiredAcceleration, double weight)
    {
       joints.add(joint);
       jointNames.add(joint.getName());
@@ -152,7 +152,7 @@ public class JointspaceAccelerationCommand implements InverseDynamicsCommand<Joi
     *           {@code joint.getDegreesOfFreedom()}. Not modified.
     * @throws RuntimeException if the {@code desiredAcceleration} is not a N-by-1 vector.
     */
-   public void addJoint(InverseDynamicsJoint joint, DenseMatrix64F desiredAcceleration)
+   public void addJoint(JointBasics joint, DenseMatrix64F desiredAcceleration)
    {
       addJoint(joint, desiredAcceleration, HARD_CONSTRAINT);
    }
@@ -171,7 +171,7 @@ public class JointspaceAccelerationCommand implements InverseDynamicsCommand<Joi
     * @param weight positive value that denotes the priority of the joint task.
     * @throws RuntimeException if the {@code desiredAcceleration} is not a N-by-1 vector.
     */
-   public void addJoint(InverseDynamicsJoint joint, DenseMatrix64F desiredAcceleration, double weight)
+   public void addJoint(JointBasics joint, DenseMatrix64F desiredAcceleration, double weight)
    {
       checkConsistency(joint, desiredAcceleration);
       joints.add(joint);
@@ -226,12 +226,12 @@ public class JointspaceAccelerationCommand implements InverseDynamicsCommand<Joi
     *           refer to. Not modified.
     * @throws RuntimeException if the given map does not have all this command's joints.
     */
-   public void retrieveJointsFromName(Map<String, ? extends InverseDynamicsJoint> nameToJointMap)
+   public void retrieveJointsFromName(Map<String, ? extends JointBasics> nameToJointMap)
    {
       for (int i = 0; i < getNumberOfJoints(); i++)
       {
          String jointName = jointNames.get(i);
-         InverseDynamicsJoint newJointReference = nameToJointMap.get(jointName);
+         JointBasics newJointReference = nameToJointMap.get(jointName);
          if (newJointReference == null)
             throw new RuntimeException("The given map is missing the joint: " + jointName);
          joints.set(i, newJointReference);
@@ -274,7 +274,7 @@ public class JointspaceAccelerationCommand implements InverseDynamicsCommand<Joi
          weights.get(jointIdx).setValue(weight);
    }
 
-   private void checkConsistency(InverseDynamicsJoint joint, DenseMatrix64F desiredAcceleration)
+   private void checkConsistency(JointBasics joint, DenseMatrix64F desiredAcceleration)
    {
       MathTools.checkEquals(joint.getDegreesOfFreedom(), desiredAcceleration.getNumRows());
    }
@@ -336,7 +336,7 @@ public class JointspaceAccelerationCommand implements InverseDynamicsCommand<Joi
     * 
     * @return the list of joints to be controlled.
     */
-   public List<InverseDynamicsJoint> getJoints()
+   public List<JointBasics> getJoints()
    {
       return joints;
    }
@@ -347,7 +347,7 @@ public class JointspaceAccelerationCommand implements InverseDynamicsCommand<Joi
     * @param jointIndex the index of the joint &in; [0, {@code getNumberOfJoints()}[.
     * @return one of the joints to be controlled.
     */
-   public InverseDynamicsJoint getJoint(int jointIndex)
+   public JointBasics getJoint(int jointIndex)
    {
       return joints.get(jointIndex);
    }

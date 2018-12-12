@@ -1,18 +1,22 @@
 package us.ihmc.robotics.screwTheory;
 
+import us.ihmc.mecano.multiBodySystem.interfaces.JointBasics;
+import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 
 public class InverseDynamicsJointStateCopier extends AbstractInverseDynamicsCopier
 {
 
-   public InverseDynamicsJointStateCopier(RigidBody originalBody, RigidBody targetBody)
+   public InverseDynamicsJointStateCopier(RigidBodyBasics originalBody, RigidBodyBasics targetBody)
    {
       super(originalBody, targetBody);
    }
 
    @Override
-   protected void copyJoint(InverseDynamicsJoint originalJoint, InverseDynamicsJoint targetJoint)
+   protected void copyJoint(JointBasics originalJoint, JointBasics targetJoint)
    {
-      targetJoint.setJointPositionVelocityAndAcceleration(originalJoint);
+      targetJoint.setJointConfiguration(originalJoint);
+      targetJoint.setJointTwist(originalJoint);
+      targetJoint.setJointAcceleration(originalJoint);
    }  
 
 }

@@ -1,13 +1,12 @@
 package us.ihmc.exampleSimulations.genericQuadruped.parameters;
 
 import us.ihmc.robotics.robotSide.SideDependentList;
+import us.ihmc.robotics.sensors.FootSwitchFactory;
 import us.ihmc.sensorProcessing.sensorProcessors.SensorProcessing;
 import us.ihmc.sensorProcessing.sensorProcessors.SensorProcessing.SensorType;
 import us.ihmc.sensorProcessing.simulatedSensors.SensorNoiseParameters;
-import us.ihmc.sensorProcessing.stateEstimation.FootSwitchType;
 import us.ihmc.sensorProcessing.stateEstimation.StateEstimatorParameters;
 import us.ihmc.yoVariables.providers.DoubleProvider;
-import us.ihmc.yoVariables.variable.YoDouble;
 
 public class GenericQuadrupedStateEstimatorParameters extends StateEstimatorParameters
 {
@@ -151,28 +150,11 @@ public class GenericQuadrupedStateEstimatorParameters extends StateEstimatorPara
       return 0.15;
    }
 
+   // TODO Need to figure out how to get the quadruped to use this factory.
    @Override
-   public double getContactThresholdForce()
+   public FootSwitchFactory getFootSwitchFactory()
    {
-      return 120.0;
-   }
-
-   @Override
-   public double getFootSwitchCoPThresholdFraction()
-   {
-      return Double.NaN;
-   }
-
-   @Override
-   public double getContactThresholdHeight()
-   {
-      return 0.01;
-   }
-
-   @Override
-   public FootSwitchType getFootSwitchType()
-   {
-      return FootSwitchType.TouchdownBased;
+      return null;
    }
 
    @Override
@@ -210,4 +192,11 @@ public class GenericQuadrupedStateEstimatorParameters extends StateEstimatorPara
    {
       return true;
    }
+
+   @Override
+   public boolean requestFrozenModeAtStart()
+   {
+      return true;
+   }
+
 }

@@ -27,8 +27,9 @@ public class ValkyrieNetworkProcessor
       networkModuleParams.enableBehaviorVisualizer(true);
       networkModuleParams.enableRobotEnvironmentAwerenessModule(false);
       networkModuleParams.enableKinematicsToolbox(true);
+      networkModuleParams.enableKinematicsPlanningToolbox(true);
       networkModuleParams.enableFootstepPlanningToolbox(true);
-      networkModuleParams.enableFootstepPlanningToolboxVisualizer(true);
+      networkModuleParams.enableFootstepPlanningToolboxVisualizer(false);
       networkModuleParams.setEnableJoystickBasedStepping(true);
 
 //      uncomment these for the sensors

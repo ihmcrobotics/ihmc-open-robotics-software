@@ -1,6 +1,6 @@
 package us.ihmc.robotics.kinematics;
 
-import us.ihmc.robotics.screwTheory.OneDoFJoint;
+import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 
 public class JointLimitData
 {
@@ -21,7 +21,7 @@ public class JointLimitData
       clear();
    }
 
-   public JointLimitData(OneDoFJoint joint)
+   public JointLimitData(OneDoFJointBasics joint)
    {
       clear();
       setJointLimits(joint);
@@ -57,7 +57,7 @@ public class JointLimitData
       positionLimitDamping = other.positionLimitDamping;
    }
 
-   public void setJointLimits(OneDoFJoint joint)
+   public void setJointLimits(OneDoFJointBasics joint)
    {
       positionSoftUpperLimit = joint.getJointLimitUpper();
       positionSoftLowerLimit = joint.getJointLimitLower();
@@ -65,8 +65,8 @@ public class JointLimitData
       velocityLimitUpper = joint.getVelocityLimitUpper();
       velocityLimitLower = joint.getVelocityLimitLower();
 
-      torqueLimitUpper = joint.getMaxEffortLimit();
-      torqueLimitLower = joint.getMinEffortLimit();
+      torqueLimitUpper = joint.getEffortLimitUpper();
+      torqueLimitLower = joint.getEffortLimitLower();
    }
 
    public void completeWith(JointLimitData other)

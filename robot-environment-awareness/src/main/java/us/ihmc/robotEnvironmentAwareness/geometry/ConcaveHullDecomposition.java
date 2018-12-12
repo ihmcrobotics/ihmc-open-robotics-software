@@ -1,19 +1,17 @@
 package us.ihmc.robotEnvironmentAwareness.geometry;
 
-import static us.ihmc.robotEnvironmentAwareness.geometry.ConcaveHullTools.findClosestIntersectionWithRay;
-import static us.ihmc.commons.lists.ListWrappingIndexTools.next;
-import static us.ihmc.commons.lists.ListWrappingIndexTools.removeAllExclusive;
-import static us.ihmc.commons.lists.ListWrappingIndexTools.subListInclusive;
+import static us.ihmc.commons.lists.ListWrappingIndexTools.*;
+import static us.ihmc.robotEnvironmentAwareness.geometry.ConcaveHullTools.*;
 
 import java.util.ArrayList;
 import java.util.List;
 
-import us.ihmc.commons.PrintTools;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.geometry.interfaces.Vertex2DSupplier;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple2D.Vector2D;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
+import us.ihmc.log.LogTools;
 
 public class ConcaveHullDecomposition
 {
@@ -77,7 +75,7 @@ public class ConcaveHullDecomposition
       {
          if (concaveHullVertices.isEmpty())
          {
-            PrintTools.warn("The concave hull is empty");
+            LogTools.warn("The concave hull is empty");
             return;
          }
 
@@ -92,7 +90,7 @@ public class ConcaveHullDecomposition
 
          if (pocket == null)
          {
-            PrintTools.error("Did not find any pocket.");
+            LogTools.error("Did not find any pocket.");
             if (EXPORT_BAD_POLYGONS_TO_FILE)
                ConcaveHullTools.exportVertexListToFile(concaveHullVertices, BAD_POLYGONS_FILE_NAME + (badPolygonsFileIndex++));
             return;
@@ -128,7 +126,7 @@ public class ConcaveHullDecomposition
       
       if (otherVertexIndexForCutting == -1)
       {
-         PrintTools.error("Something went wrong finding the other vertex for cutting. Pocket vertex: " + deepestVertex + ", bridge: start: "
+         LogTools.error("Something went wrong finding the other vertex for cutting. Pocket vertex: " + deepestVertex + ", bridge: start: "
                + startBridgeVertex + ", end: " + endBridgeVertex);
          if (EXPORT_BAD_POLYGONS_TO_FILE)
             ConcaveHullTools.exportVertexListToFile(concaveHullVertices, BAD_POLYGONS_FILE_NAME + (badPolygonsFileIndex++));
@@ -153,7 +151,7 @@ public class ConcaveHullDecomposition
       {
          if (EXPORT_BAD_POLYGONS_TO_FILE)
             ConcaveHullTools.exportVertexListToFile(concaveHullVertices, BAD_POLYGONS_FILE_NAME + (badPolygonsFileIndex++));
-         PrintTools.error("Something went wrong splitting the polygon");
+         LogTools.error("Something went wrong splitting the polygon");
          return;
       }
 

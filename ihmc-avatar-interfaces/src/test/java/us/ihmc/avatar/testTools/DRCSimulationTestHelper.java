@@ -1,8 +1,6 @@
 package us.ihmc.avatar.testTools;
 
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
+import static org.junit.Assert.*;
 
 import java.io.InputStream;
 import java.util.ArrayList;
@@ -56,7 +54,6 @@ import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
-import us.ihmc.robotics.screwTheory.InverseDynamicsCalculatorListener;
 import us.ihmc.ros2.Ros2Node;
 import us.ihmc.sensorProcessing.frames.CommonHumanoidReferenceFrames;
 import us.ihmc.simulationConstructionSetTools.bambooTools.BambooTools;
@@ -104,8 +101,6 @@ public class DRCSimulationTestHelper
    private boolean addFootstepMessageGenerator = false;
    private boolean useHeadingAndVelocityScript = false;
    private boolean cheatWithGroundHeightAtFootstep = false;
-   private HighLevelControllerStateFactory controllerStateFactory = null;
-   private ControllerStateTransitionFactory<HighLevelControllerName> controllerStateTransitionFactory = null;
    private DRCRobotInitialSetup<HumanoidFloatingRootJointRobot> initialSetup = null;
    private HeadingAndVelocityEvaluationScriptParameters walkingScriptParameters = null;
    private PelvisPoseCorrectionCommunicatorInterface externalPelvisCorrectorSubscriber = null;
@@ -182,10 +177,6 @@ public class DRCSimulationTestHelper
    {
       simulationStarter.setRunMultiThreaded(simulationTestingParameters.getRunMultiThreaded());
       simulationStarter.setUsePerfectSensors(simulationTestingParameters.getUsePefectSensors());
-      if (controllerStateFactory != null)
-         simulationStarter.registerHighLevelControllerState(controllerStateFactory);
-      if (controllerStateTransitionFactory != null)
-         simulationStarter.registerControllerStateTransition(controllerStateTransitionFactory);
       if (initialSetup != null)
          simulationStarter.setRobotInitialSetup(initialSetup);
       simulationStarter.setStartingLocationOffset(startingLocation);
@@ -265,12 +256,6 @@ public class DRCSimulationTestHelper
    public AvatarSimulation getAvatarSimulation()
    {
       return avatarSimulation;
-   }
-
-   public void setInverseDynamicsCalculatorListener(InverseDynamicsCalculatorListener inverseDynamicsCalculatorListener)
-   {
-      HighLevelHumanoidControllerFactory controllerFactory = avatarSimulation.getHighLevelHumanoidControllerFactory();
-      controllerFactory.setInverseDynamicsCalculatorListener(inverseDynamicsCalculatorListener);
    }
 
    public FullHumanoidRobotModel getControllerFullRobotModel()
@@ -625,9 +610,14 @@ public class DRCSimulationTestHelper
       this.cheatWithGroundHeightAtFootstep = cheatWithGroundHeightAtFootstep;
    }
 
-   public void setHighLevelControllerStateFactory(HighLevelControllerStateFactory controllerStateFactory)
+   public void registerHighLevelControllerState(HighLevelControllerStateFactory controllerFactory)
    {
-      this.controllerStateFactory = controllerStateFactory;
+      simulationStarter.registerHighLevelControllerState(controllerFactory);
+   }
+
+   public void registerControllerStateTransition(ControllerStateTransitionFactory<HighLevelControllerName> controllerStateTransitionFactory)
+   {
+      simulationStarter.registerControllerStateTransition(controllerStateTransitionFactory);
    }
 
    public void setInitialSetup(DRCRobotInitialSetup<HumanoidFloatingRootJointRobot> initialSetup)

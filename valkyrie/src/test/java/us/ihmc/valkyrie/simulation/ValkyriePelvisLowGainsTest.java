@@ -8,11 +8,8 @@ import us.ihmc.avatar.obstacleCourseTests.DRCPelvisLowGainsTest;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationPlan;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.continuousIntegration.IntegrationCategory;
-import us.ihmc.robotModels.FullRobotModel;
-import us.ihmc.robotics.screwTheory.InverseDynamicsCalculatorListener;
 import us.ihmc.simulationConstructionSetTools.bambooTools.BambooTools;
 import us.ihmc.simulationConstructionSetTools.util.HumanoidFloatingRootJointRobot;
-import us.ihmc.simulationconstructionset.FloatingRootJointRobot;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
 import us.ihmc.valkyrie.ValkyrieRobotModel;
@@ -58,11 +55,5 @@ public class ValkyriePelvisLowGainsTest extends DRCPelvisLowGainsTest
    {
       return (YoDouble) scs.getVariable("HighLevelHumanoidControllerFactory.PelvisOrientationManager.RootJointAngularAccelerationControlModule.v1PelvisAxisAngleOrientationController",
                                                 "v1PelvisOrientationErrorMagnitude");
-   }
-
-   @Override
-   public InverseDynamicsCalculatorListener getInverseDynamicsCalculatorListener(FullRobotModel controllersFullRobotModel, FloatingRootJointRobot robot)
-   {
-      return null;
    }
 }
