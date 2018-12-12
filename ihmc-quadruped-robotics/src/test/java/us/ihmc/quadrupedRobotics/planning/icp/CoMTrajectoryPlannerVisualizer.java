@@ -34,7 +34,7 @@ public class CoMTrajectoryPlannerVisualizer
    private static final double stepLength = 0.5;
    private static final int numberOfSteps = 5;
 
-   private static final boolean includeFlight = false;
+   private static final boolean includeFlight = true;
 
    private static final double simDt = 1e-3;
 
@@ -54,6 +54,7 @@ public class CoMTrajectoryPlannerVisualizer
 
    private final YoFramePoint3D desiredCoMPosition;
    private final YoFrameVector3D desiredCoMVelocity;
+   private final YoFrameVector3D desiredCoMAcceleration;
    private final YoFramePoint3D desiredDCMPosition;
    private final YoFrameVector3D desiredDCMVelocity;
    private final YoFramePoint3D desiredVRPPosition;
@@ -69,6 +70,7 @@ public class CoMTrajectoryPlannerVisualizer
 
       desiredCoMPosition = new YoFramePoint3D("desiredCoMPosition", worldFrame, registry);
       desiredCoMVelocity = new YoFrameVector3D("desiredCoMVelocity", worldFrame, registry);
+      desiredCoMAcceleration = new YoFrameVector3D("desiredCoMAcceleration", worldFrame, registry);
       desiredDCMPosition = new YoFramePoint3D("desiredDCMPosition", worldFrame, registry);
       desiredDCMVelocity = new YoFrameVector3D("desiredDCMVelocity", worldFrame, registry);
       desiredVRPPosition = new YoFramePoint3D("desiredVRPPosition", worldFrame, registry);
@@ -186,6 +188,7 @@ public class CoMTrajectoryPlannerVisualizer
 
          desiredCoMPosition.set(planner.getDesiredCoMPosition());
          desiredCoMVelocity.set(planner.getDesiredCoMVelocity());
+         desiredCoMAcceleration.set(planner.getDesiredCoMAcceleration());
          desiredDCMPosition.set(planner.getDesiredDCMPosition());
          desiredDCMVelocity.set(planner.getDesiredDCMVelocity());
          desiredVRPPosition.set(planner.getDesiredVRPPosition());
