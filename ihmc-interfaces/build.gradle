@@ -14,7 +14,7 @@ buildscript {
 }
 
 plugins {
-   id("us.ihmc.ihmc-build") version "0.15.4"
+   id("us.ihmc.ihmc-build") version "0.15.5"
    id("us.ihmc.ihmc-ci-plugin") version "0.18.0"
    id("us.ihmc.log-tools") version "0.2.2"
 }
