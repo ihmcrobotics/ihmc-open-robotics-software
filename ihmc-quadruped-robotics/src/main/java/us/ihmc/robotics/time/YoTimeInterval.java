@@ -1,7 +1,7 @@
-package us.ihmc.quadrupedRobotics.util;
+package us.ihmc.robotics.time;
 
 import us.ihmc.euclid.tools.EuclidCoreIOTools;
-import us.ihmc.quadrupedBasics.gait.TimeInterval;
+import us.ihmc.robotics.time.TimeInterval;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 
