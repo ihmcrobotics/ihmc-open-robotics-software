@@ -48,6 +48,7 @@ public class FootstepPlannerParametersProperty extends ParametersProperty<Settab
    private DoubleField bodyBoxBaseX = new DoubleField(SettableFootstepPlannerParameters::getBodyBoxBaseX, SettableFootstepPlannerParameters::setBodyBoxBaseX);
    private DoubleField bodyBoxBaseY = new DoubleField(SettableFootstepPlannerParameters::getBodyBoxBaseY, SettableFootstepPlannerParameters::setBodyBoxBaseY);
    private DoubleField bodyBoxBaseZ = new DoubleField(SettableFootstepPlannerParameters::getBodyBoxBaseZ, SettableFootstepPlannerParameters::setBodyBoxBaseZ);
+   private DoubleField stepTranslationBoundingBoxScaleFactor = new DoubleField(SettableFootstepPlannerParameters::getStepTranslationBoundingBoxScaleFactor, SettableFootstepPlannerParameters::setStepTranslationBoundingBoxScaleFactor);
 
    private DoubleField cliffHeight = new DoubleField(SettableFootstepPlannerParameters::getCliffHeightToAvoid, SettableFootstepPlannerParameters::setCliffHeightToAvoid);
    private DoubleField cliffClearance = new DoubleField(SettableFootstepPlannerParameters::getMinimumDistanceFromCliffBottoms, SettableFootstepPlannerParameters::setMinimumDistanceFromCliffBottoms);
@@ -250,6 +251,11 @@ public class FootstepPlannerParametersProperty extends ParametersProperty<Settab
    public void bidirectionalBindCliffClearance(Property<? extends Number> property)
    {
       bindFieldBidirectionalToNumberProperty(property, cliffClearance);
+   }
+
+   public void bidirectionalBindStepTranslationBoundingBoxScaleFactor(Property<? extends Number> property)
+   {
+      bindFieldBidirectionalToNumberProperty(property, stepTranslationBoundingBoxScaleFactor);
    }
 
    public void bidirectionalBindHeuristicsWeight(AtomicReference<FootstepPlannerType> plannerTypeReference, Property<? extends Number> property)

@@ -45,6 +45,7 @@ public class SettableFootstepPlannerParameters implements FootstepPlannerParamet
    private double bodyBoxBaseX;
    private double bodyBoxBaseY;
    private double bodyBoxBaseZ;
+   private double stepTranslationBoundingBoxScaleFactor;
 
    private final SettableFootstepPlannerCostParameters costParameters;
 
@@ -98,6 +99,7 @@ public class SettableFootstepPlannerParameters implements FootstepPlannerParamet
       this.bodyBoxBaseX = footstepPlannerParameters.getBodyBoxBaseX();
       this.bodyBoxBaseY = footstepPlannerParameters.getBodyBoxBaseY();
       this.bodyBoxBaseZ = footstepPlannerParameters.getBodyBoxBaseZ();
+      this.stepTranslationBoundingBoxScaleFactor = footstepPlannerParameters.getStepTranslationBoundingBoxScaleFactor();
 
       this.costParameters.set(footstepPlannerParameters.getCostParameters());
    }
@@ -352,6 +354,11 @@ public class SettableFootstepPlannerParameters implements FootstepPlannerParamet
       this.bodyBoxBaseZ = bodyBoxBaseZ;
    }
 
+   public void setStepTranslationBoundingBoxScaleFactor(double stepTranslationBoundingBoxScaleFactor)
+   {
+      this.stepTranslationBoundingBoxScaleFactor = stepTranslationBoundingBoxScaleFactor;
+   }
+
    @Override
    public double getIdealFootstepWidth()
    {
@@ -566,6 +573,12 @@ public class SettableFootstepPlannerParameters implements FootstepPlannerParamet
    public double getBodyBoxBaseZ()
    {
       return bodyBoxBaseZ;
+   }
+
+   @Override
+   public double getStepTranslationBoundingBoxScaleFactor()
+   {
+      return stepTranslationBoundingBoxScaleFactor;
    }
 
    public boolean useQuadraticDistanceCost()

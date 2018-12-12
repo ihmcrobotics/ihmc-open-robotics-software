@@ -371,6 +371,7 @@ public class RemoteUIMessageConverter
       packet.setBodyBoxBaseZ(parameters.getBodyBoxBaseZ());
       packet.setMinXClearanceFromStance(parameters.getMinXClearanceFromStance());
       packet.setMinYClearanceFromStance(parameters.getMinYClearanceFromStance());
+      packet.setStepTranslationBoundingBoxScaleFactor(parameters.getStepTranslationBoundingBoxScaleFactor());
 
       FootstepPlannerCostParameters costParameters = parameters.getCostParameters();
 

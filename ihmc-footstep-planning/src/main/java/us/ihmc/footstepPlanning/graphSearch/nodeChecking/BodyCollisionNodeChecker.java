@@ -157,8 +157,7 @@ public class BodyCollisionNodeChecker extends FootstepNodeChecker
       tempVector.sub(previousNode.getX(), previousNode.getY(), 0.0);
       tempVector.changeFrame(midStanceFrame);
 
-      double stepTranslationScaleFactor = 0.6;
-      double stepTranslationMidFootFrameX = stepTranslationScaleFactor * Math.abs(tempVector.getX());
+      double stepTranslationMidFootFrameX = parameters.getStepTranslationBoundingBoxScaleFactor() * Math.abs(tempVector.getX());
       bodyCollisionBox.setSize(parameters.getBodyBoxDepth() + stepTranslationMidFootFrameX, parameters.getBodyBoxWidth(), parameters.getBodyBoxHeight());
 
       if (!MathTools.epsilonEquals(1.0, scaleFactor, 1e-5))
