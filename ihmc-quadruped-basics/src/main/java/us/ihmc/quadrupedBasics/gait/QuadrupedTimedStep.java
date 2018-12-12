@@ -6,6 +6,7 @@ import us.ihmc.humanoidRobotics.communication.controllerAPI.command.QuadrupedTim
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.TimeIntervalCommand;
 import us.ihmc.robotics.robotSide.RobotQuadrant;
 import us.ihmc.robotics.time.TimeInterval;
+import us.ihmc.robotics.time.TimeIntervalBasics;
 import us.ihmc.robotics.time.TimeIntervalProvider;
 
 public class QuadrupedTimedStep extends QuadrupedStep implements TimeIntervalProvider

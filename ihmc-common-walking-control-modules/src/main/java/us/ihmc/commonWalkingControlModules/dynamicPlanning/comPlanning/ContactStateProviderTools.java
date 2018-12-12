@@ -1,8 +1,6 @@
 package us.ihmc.commonWalkingControlModules.dynamicPlanning.comPlanning;
 
 import us.ihmc.commons.MathTools;
-import us.ihmc.quadrupedBasics.gait.TimeIntervalProvider;
-import us.ihmc.quadrupedRobotics.planning.ContactState;
 
 import java.util.List;
 

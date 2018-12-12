@@ -1,6 +1,4 @@
-package us.ihmc.quadrupedBasics.gait;
-
-import us.ihmc.humanoidRobotics.communication.controllerAPI.command.TimeIntervalCommand;
+package us.ihmc.robotics.time;
 
 public interface TimeIntervalBasics extends TimeIntervalReadOnly
 {
@@ -26,6 +24,4 @@ public interface TimeIntervalBasics extends TimeIntervalReadOnly
    TimeIntervalBasics shiftInterval(double shiftTime);
 
    void set(TimeIntervalReadOnly timeInterval);
-
-   void set(TimeIntervalCommand command);
 }

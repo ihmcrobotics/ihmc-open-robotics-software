@@ -1,8 +1,6 @@
-package us.ihmc.quadrupedBasics.gait;
+package us.ihmc.robotics.time;
 
 import us.ihmc.commons.MathTools;
-import us.ihmc.euclid.tools.EuclidCoreIOTools;
-import us.ihmc.humanoidRobotics.communication.controllerAPI.command.TimeIntervalCommand;
 
 public interface TimeIntervalReadOnly
 {

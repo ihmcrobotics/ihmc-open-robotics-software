@@ -9,7 +9,6 @@ import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.graphicsDescription.yoGraphics.BagOfBalls;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
-import us.ihmc.quadrupedRobotics.planning.ContactState;
 import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.SimulationConstructionSetParameters;
@@ -150,7 +149,7 @@ public class CoMTrajectoryPlannerVisualizer
             SettableContactStateProvider flightStateProvider = new SettableContactStateProvider();
 
             flightStateProvider.getTimeInterval().setInterval(currentTime, currentTime + flightDuration);
-            flightStateProvider.setContactState(ContactState.NO_CONTACT);
+            flightStateProvider.setContactState(ContactState.FLIGHT);
 
             contacts.add(flightStateProvider);
 

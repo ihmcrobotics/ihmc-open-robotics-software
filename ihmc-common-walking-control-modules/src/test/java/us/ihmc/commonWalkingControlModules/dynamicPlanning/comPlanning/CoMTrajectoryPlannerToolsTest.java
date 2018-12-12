@@ -1,10 +1,8 @@
 package us.ihmc.commonWalkingControlModules.dynamicPlanning.comPlanning;
 
 import org.junit.Test;
-import us.ihmc.commonWalkingControlModules.dynamicPlanning.comPlanning.CoMTrajectoryPlannerTools;
 import us.ihmc.commons.RandomNumbers;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
-import us.ihmc.quadrupedRobotics.planning.ContactState;
 
 import java.util.Random;
 
@@ -32,13 +30,13 @@ public class CoMTrajectoryPlannerToolsTest
             expectedMultiplier = Double.MAX_VALUE;
 
          assertTrue(Double.isFinite(multiplier));
-         Assertions.assertEquals(expectedMultiplier, multiplier, epsilon);
+         assertEquals(expectedMultiplier, multiplier, epsilon);
 
-         multiplier = CoMTrajectoryPlannerTools.getFirstCoefficientPositionMultiplier(ContactState.NO_CONTACT, timeInPhase, omega);
+         multiplier = CoMTrajectoryPlannerTools.getFirstCoefficientPositionMultiplier(ContactState.FLIGHT, timeInPhase, omega);
          expectedMultiplier = timeInPhase;
 
          assertTrue(Double.isFinite(multiplier));
-         Assertions.assertEquals(expectedMultiplier, multiplier);
+         assertEquals(expectedMultiplier, multiplier);
       }
    }
 
@@ -58,13 +56,13 @@ public class CoMTrajectoryPlannerToolsTest
             expectedMultiplier = Double.MAX_VALUE;
 
          assertTrue(Double.isFinite(multiplier));
-         Assertions.assertEquals(expectedMultiplier, multiplier, epsilon);
+         assertEquals(expectedMultiplier, multiplier, epsilon);
 
-         multiplier = CoMTrajectoryPlannerTools.getSecondCoefficientPositionMultiplier(ContactState.NO_CONTACT, timeInPhase, omega);
+         multiplier = CoMTrajectoryPlannerTools.getSecondCoefficientPositionMultiplier(ContactState.FLIGHT, timeInPhase, omega);
          expectedMultiplier = 1.0;
 
          assertTrue(Double.isFinite(multiplier));
-         Assertions.assertEquals(expectedMultiplier, multiplier);
+         assertEquals(expectedMultiplier, multiplier);
       }
    }
 
@@ -84,14 +82,14 @@ public class CoMTrajectoryPlannerToolsTest
             expectedMultiplier = Double.MAX_VALUE;
 
          assertTrue("time = " + timeInPhase, Double.isFinite(multiplier));
-         Assertions.assertEquals(expectedMultiplier, multiplier, epsilon);
-         Assertions.assertEquals(Math.min(omega * CoMTrajectoryPlannerTools.getFirstCoefficientPositionMultiplier(ContactState.IN_CONTACT, timeInPhase, omega), Double.MAX_VALUE), multiplier, epsilon);
+         assertEquals(expectedMultiplier, multiplier, epsilon);
+         assertEquals(Math.min(omega * CoMTrajectoryPlannerTools.getFirstCoefficientPositionMultiplier(ContactState.IN_CONTACT, timeInPhase, omega), Double.MAX_VALUE), multiplier, epsilon);
 
-         multiplier = CoMTrajectoryPlannerTools.getFirstCoefficientVelocityMultiplier(ContactState.NO_CONTACT, timeInPhase, omega);
+         multiplier = CoMTrajectoryPlannerTools.getFirstCoefficientVelocityMultiplier(ContactState.FLIGHT, timeInPhase, omega);
          expectedMultiplier = 1.0;
 
          assertTrue(Double.isFinite(multiplier));
-         Assertions.assertEquals(expectedMultiplier, multiplier);
+         assertEquals(expectedMultiplier, multiplier);
       }
    }
 
@@ -111,15 +109,15 @@ public class CoMTrajectoryPlannerToolsTest
             expectedMultiplier = Double.MIN_VALUE;
 
          assertTrue(Double.isFinite(multiplier));
-         Assertions.assertEquals(expectedMultiplier, multiplier, epsilon);
-         Assertions.assertEquals(Math.min(-omega * CoMTrajectoryPlannerTools.getSecondCoefficientPositionMultiplier(ContactState.IN_CONTACT, timeInPhase, omega), Double.MAX_VALUE), multiplier, epsilon);
+         assertEquals(expectedMultiplier, multiplier, epsilon);
+         assertEquals(Math.min(-omega * CoMTrajectoryPlannerTools.getSecondCoefficientPositionMultiplier(ContactState.IN_CONTACT, timeInPhase, omega), Double.MAX_VALUE), multiplier, epsilon);
 
 
-         multiplier = CoMTrajectoryPlannerTools.getSecondCoefficientVelocityMultiplier(ContactState.NO_CONTACT, timeInPhase, omega);
+         multiplier = CoMTrajectoryPlannerTools.getSecondCoefficientVelocityMultiplier(ContactState.FLIGHT, timeInPhase, omega);
          expectedMultiplier = 0.0;
 
          assertTrue(Double.isFinite(multiplier));
-         Assertions.assertEquals(expectedMultiplier, multiplier);
+         assertEquals(expectedMultiplier, multiplier);
       }
    }
 
@@ -139,14 +137,14 @@ public class CoMTrajectoryPlannerToolsTest
             expectedMultiplier = Double.MAX_VALUE;
 
          assertTrue("time = " + timeInPhase, Double.isFinite(multiplier));
-         Assertions.assertEquals(expectedMultiplier, multiplier, epsilon);
-         Assertions.assertEquals(Math.min(omega * omega * CoMTrajectoryPlannerTools.getFirstCoefficientPositionMultiplier(ContactState.IN_CONTACT, timeInPhase, omega), Double.MAX_VALUE), multiplier, epsilon);
+         assertEquals(expectedMultiplier, multiplier, epsilon);
+         assertEquals(Math.min(omega * omega * CoMTrajectoryPlannerTools.getFirstCoefficientPositionMultiplier(ContactState.IN_CONTACT, timeInPhase, omega), Double.MAX_VALUE), multiplier, epsilon);
 
-         multiplier = CoMTrajectoryPlannerTools.getFirstCoefficientAccelerationMultiplier(ContactState.NO_CONTACT, timeInPhase, omega);
+         multiplier = CoMTrajectoryPlannerTools.getFirstCoefficientAccelerationMultiplier(ContactState.FLIGHT, timeInPhase, omega);
          expectedMultiplier = 1.0;
 
          assertTrue(Double.isFinite(multiplier));
-         Assertions.assertEquals(expectedMultiplier, multiplier);
+         assertEquals(expectedMultiplier, multiplier);
       }
    }
 
@@ -166,15 +164,15 @@ public class CoMTrajectoryPlannerToolsTest
             expectedMultiplier = Double.MIN_VALUE;
 
          assertTrue(Double.isFinite(multiplier));
-         Assertions.assertEquals(expectedMultiplier, multiplier, epsilon);
-         Assertions.assertEquals(Math.min(omega * omega * CoMTrajectoryPlannerTools.getSecondCoefficientPositionMultiplier(ContactState.IN_CONTACT, timeInPhase, omega), Double.MAX_VALUE), multiplier, epsilon);
+         assertEquals(expectedMultiplier, multiplier, epsilon);
+         assertEquals(Math.min(omega * omega * CoMTrajectoryPlannerTools.getSecondCoefficientPositionMultiplier(ContactState.IN_CONTACT, timeInPhase, omega), Double.MAX_VALUE), multiplier, epsilon);
 
 
-         multiplier = CoMTrajectoryPlannerTools.getSecondCoefficientAccelerationMultiplier(ContactState.NO_CONTACT, timeInPhase, omega);
+         multiplier = CoMTrajectoryPlannerTools.getSecondCoefficientAccelerationMultiplier(ContactState.FLIGHT, timeInPhase, omega);
          expectedMultiplier = 0.0;
 
          assertTrue(Double.isFinite(multiplier));
-         Assertions.assertEquals(expectedMultiplier, multiplier);
+         assertEquals(expectedMultiplier, multiplier);
       }
    }
 
@@ -188,16 +186,16 @@ public class CoMTrajectoryPlannerToolsTest
          double timeInPhase = RandomNumbers.nextDouble(random, 0.0, 10000);
          double gravity = RandomNumbers.nextDouble(random, 8.0, 10.0);
          double multiplier = CoMTrajectoryPlannerTools.getGravityPositionEffect(ContactState.IN_CONTACT, timeInPhase, gravity);
-         Assertions.assertEquals(0.0, multiplier, epsilon);
+         assertEquals(0.0, multiplier, epsilon);
 
-         multiplier = CoMTrajectoryPlannerTools.getGravityPositionEffect(ContactState.NO_CONTACT, timeInPhase, gravity);
+         multiplier = CoMTrajectoryPlannerTools.getGravityPositionEffect(ContactState.FLIGHT, timeInPhase, gravity);
          double expectedMultiplier =  -0.5 * gravity * timeInPhase * timeInPhase;
 
          if (!Double.isFinite(expectedMultiplier))
             expectedMultiplier = Double.MIN_VALUE;
 
          assertTrue(Double.isFinite(multiplier));
-         Assertions.assertEquals(expectedMultiplier, multiplier, 100 * epsilon);
+         assertEquals(expectedMultiplier, multiplier, 100 * epsilon);
       }
    }
 
@@ -211,16 +209,16 @@ public class CoMTrajectoryPlannerToolsTest
          double timeInPhase = RandomNumbers.nextDouble(random, 0.0, 10000);
          double gravity = RandomNumbers.nextDouble(random, 8.0, 10.0);
          double multiplier = CoMTrajectoryPlannerTools.getGravityVelocityEffect(ContactState.IN_CONTACT, timeInPhase, gravity);
-         Assertions.assertEquals(0.0, multiplier, epsilon);
+         assertEquals(0.0, multiplier, epsilon);
 
-         multiplier = CoMTrajectoryPlannerTools.getGravityVelocityEffect(ContactState.NO_CONTACT, timeInPhase, gravity);
+         multiplier = CoMTrajectoryPlannerTools.getGravityVelocityEffect(ContactState.FLIGHT, timeInPhase, gravity);
          double expectedMultiplier =  -gravity * timeInPhase;
 
          if (!Double.isFinite(expectedMultiplier))
             expectedMultiplier = Double.MIN_VALUE;
 
          assertTrue(Double.isFinite(multiplier));
-         Assertions.assertEquals(expectedMultiplier, multiplier, epsilon);
+         assertEquals(expectedMultiplier, multiplier, epsilon);
       }
    }
 
@@ -233,16 +231,16 @@ public class CoMTrajectoryPlannerToolsTest
       {
          double gravity = RandomNumbers.nextDouble(random, 8.0, 10.0);
          double multiplier = CoMTrajectoryPlannerTools.getGravityAccelerationEffect(ContactState.IN_CONTACT, gravity);
-         Assertions.assertEquals(0.0, multiplier, epsilon);
+         assertEquals(0.0, multiplier, epsilon);
 
-         multiplier = CoMTrajectoryPlannerTools.getGravityAccelerationEffect(ContactState.NO_CONTACT, gravity);
+         multiplier = CoMTrajectoryPlannerTools.getGravityAccelerationEffect(ContactState.FLIGHT, gravity);
          double expectedMultiplier =  -gravity ;
 
          if (!Double.isFinite(expectedMultiplier))
             expectedMultiplier = Double.MIN_VALUE;
 
          assertTrue(Double.isFinite(multiplier));
-         Assertions.assertEquals(expectedMultiplier, multiplier, epsilon);
+         assertEquals(expectedMultiplier, multiplier, epsilon);
       }
    }
 
@@ -258,8 +256,7 @@ public class CoMTrajectoryPlannerToolsTest
          int index = CoMTrajectoryPlannerTools.getFirstCoefficientIndex(sequence);
          int expectedIndex = 2 * sequence;
 
-         Assertions.assertEquals(expectedIndex, index);
-
+         assertEquals(expectedIndex, index);
       }
    }
 
@@ -274,8 +271,7 @@ public class CoMTrajectoryPlannerToolsTest
          int index = CoMTrajectoryPlannerTools.getSecondCoefficientIndex(sequence);
          int expectedIndex = 2 * sequence + 1;
 
-         Assertions.assertEquals(expectedIndex, index);
-
+         assertEquals(expectedIndex, index);
       }
    }
 }

@@ -1,5 +1,6 @@
 package us.ihmc.robotics.time;
 
+import us.ihmc.commons.MathTools;
 import us.ihmc.euclid.tools.EuclidCoreIOTools;
 
 public class TimeInterval implements TimeIntervalBasics

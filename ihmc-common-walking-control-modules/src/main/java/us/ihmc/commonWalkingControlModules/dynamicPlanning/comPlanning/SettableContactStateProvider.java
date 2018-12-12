@@ -2,10 +2,8 @@ package us.ihmc.commonWalkingControlModules.dynamicPlanning.comPlanning;
 
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
-import us.ihmc.quadrupedBasics.gait.TimeInterval;
-import us.ihmc.quadrupedBasics.gait.TimeIntervalProvider;
-import us.ihmc.quadrupedBasics.gait.TimeIntervalReadOnly;
-import us.ihmc.quadrupedRobotics.planning.ContactState;
+import us.ihmc.robotics.time.TimeInterval;
+import us.ihmc.robotics.time.TimeIntervalReadOnly;
 
 public class SettableContactStateProvider implements ContactStateProvider
 {
