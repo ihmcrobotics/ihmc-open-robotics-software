@@ -158,6 +158,7 @@ public class CoMTrajectoryPlanner
       yCoefficientVector.reshape(size, 1);
       zCoefficientVector.reshape(size, 1);
 
+      coefficientMultipliers.zero();
       coefficientMultipliersInv.zero();
       xCoefficientConstants.zero();
       yCoefficientConstants.zero();
