@@ -99,7 +99,7 @@ public class BipedContactSequenceUpdater
          {
             RobotSide side = endFeetInContact.get(i);
             startFeetInContact.add(side);
-            startSolePoses.get(side).setIncludingFrame(endSolePoses.get(i));
+            startSolePoses.get(side).setIncludingFrame(endSolePoses.get(side));
          }
 
          for (int transitioningFootNumber = 0; transitioningFootNumber < stepTransition.getNumberOfFeetInTransition(); transitioningFootNumber++)
