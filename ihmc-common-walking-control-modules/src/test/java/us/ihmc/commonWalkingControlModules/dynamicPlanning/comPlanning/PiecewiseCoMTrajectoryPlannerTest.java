@@ -19,7 +19,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
-public class CoMTrajectoryPlannerTest
+public class PiecewiseCoMTrajectoryPlannerTest
 {
    private static final double epsilon = 1e-3;
 

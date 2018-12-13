@@ -9,7 +9,7 @@ import java.util.Random;
 import static junit.framework.TestCase.assertTrue;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-public class CoMTrajectoryPlannerToolsTest
+public class PiecewiseCoMTrajectoryPlannerToolsTest
 {
    private static final double epsilon = 1e-8;
    private static final int iters = 1000;
