@@ -6,6 +6,7 @@ import static org.junit.Assert.assertTrue;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import org.junit.Test;
 
@@ -25,8 +26,11 @@ import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
+import us.ihmc.pathPlanning.visibilityGraphs.DefaultVisibilityGraphParameters;
 import us.ihmc.pathPlanning.visibilityGraphs.clusterManagement.Cluster;
 import us.ihmc.pathPlanning.visibilityGraphs.interfaces.ObstacleExtrusionDistanceCalculator;
+import us.ihmc.pathPlanning.visibilityGraphs.interfaces.ObstacleRegionFilter;
+import us.ihmc.pathPlanning.visibilityGraphs.interfaces.PlanarRegionFilter;
 import us.ihmc.robotics.geometry.PlanarRegion;
 
 public class ClusterToolsTest
@@ -368,8 +372,8 @@ public class ClusterToolsTest
    {
       double tiltedPointHeight = 0.1;
       double arbitraryTranslationX = 3.0;
-      double arbitraryTranslationY = -4.0; 
-      
+      double arbitraryTranslationY = -4.0;
+
       Point3D pointAInWorld = new Point3D(0.0, 0.0, 0.0);
       Point3D pointBInWorld = new Point3D(0.0, 1.0, 0.0);
       Point3D pointCInWorld = new Point3D(1.0, 1.0, tiltedPointHeight);
@@ -380,10 +384,10 @@ public class ClusterToolsTest
 
       RigidBodyTransform transformToWorldOops = new RigidBodyTransform();
       transformToWorldOops.setTranslation(arbitraryTranslationX, arbitraryTranslationY, 0.0);
-      
+
       RigidBodyTransform transformToWorld0 = createTransformFromPointAndZAxis(new Point3D(), zAxisForTransform);
       transformToWorld0.multiply(transformToWorldOops);
-      
+
       RigidBodyTransform transformToLocal0 = new RigidBodyTransform(transformToWorld0);
       transformToLocal0.invert();
 
@@ -391,11 +395,6 @@ public class ClusterToolsTest
       Point3D pointBInLocal3D = createAndTransformPoint(pointBInWorld, transformToLocal0);
       Point3D pointCInLocal3D = createAndTransformPoint(pointCInWorld, transformToLocal0);
       Point3D pointDInLocal3D = createAndTransformPoint(pointDInWorld, transformToLocal0);
-
-//            System.out.println(pointAInLocal3D);
-//            System.out.println(pointBInLocal3D);
-//            System.out.println(pointCInLocal3D);
-//            System.out.println(pointDInLocal3D);
 
       assertEquals(0.0, pointAInLocal3D.getZ(), EPSILON);
       assertEquals(0.0, pointBInLocal3D.getZ(), EPSILON);
@@ -439,49 +438,158 @@ public class ClusterToolsTest
       };
 
       List<Cluster> obstacleClusters = ClusterTools.createObstacleClusters(homeRegion, obstacleRegions, orthogonalAngle, extrusionDistanceCalculator);
-      
+
       assertEquals(1, obstacleClusters.size());
       Cluster obstacleCluster = obstacleClusters.get(0);
       List<Point3DReadOnly> navigableExtrusionsInWorld = obstacleCluster.getNavigableExtrusionsInWorld();
-      
+
       assertEquals(12, navigableExtrusionsInWorld.size());
-      
-      printPoints3D(navigableExtrusionsInWorld);
-      double sqrt2By2 = Math.sqrt(2.0)/2.0;
-      
+
+      //      printPoints3D(navigableExtrusionsInWorld);
+      double sqrt2By2 = Math.sqrt(2.0) / 2.0;
+
       Point2D pointE0InWorld = new Point2D(0.3, 0.2);
       Point2D pointE1InWorld = new Point2D(0.3 - sqrt2By2 * 0.1, 0.3 - sqrt2By2 * 0.1);
       Point2D pointE2InWorld = new Point2D(0.2, 0.3);
-                       
+
       Point2D pointF0InWorld = new Point2D(0.2, 0.7);
       Point2D pointF1InWorld = new Point2D(0.3 - sqrt2By2 * 0.1, 0.7 + sqrt2By2 * 0.1);
       Point2D pointF2InWorld = new Point2D(0.3, 0.8);
-                       
+
       Point2D pointG0InWorld = new Point2D(0.7, 0.8);
       Point2D pointG1InWorld = new Point2D(0.7 + sqrt2By2 * 0.1, 0.7 + sqrt2By2 * 0.1);
       Point2D pointG2InWorld = new Point2D(0.8, 0.7);
-                       
+
       Point2D pointH0InWorld = new Point2D(0.8, 0.3);
       Point2D pointH1InWorld = new Point2D(0.7 + sqrt2By2 * 0.1, 0.3 - sqrt2By2 * 0.1);
       Point2D pointH2InWorld = new Point2D(0.7, 0.2);
-      
+
       assertTrue(listContainsAllXYMatch(navigableExtrusionsInWorld, pointE0InWorld, pointE1InWorld, pointE2InWorld));
       assertTrue(listContainsAllXYMatch(navigableExtrusionsInWorld, pointF0InWorld, pointF1InWorld, pointF2InWorld));
       assertTrue(listContainsAllXYMatch(navigableExtrusionsInWorld, pointG0InWorld, pointG1InWorld, pointG2InWorld));
       assertTrue(listContainsAllXYMatch(navigableExtrusionsInWorld, pointH0InWorld, pointH1InWorld, pointH2InWorld));
-      
+
       // Make sure navigableExtrusionsInWorld lie on the PlanarRegion.
       RigidBodyTransform transformToPlanarRegion = new RigidBodyTransform();
       homeRegion.getTransformToWorld(transformToPlanarRegion);
       transformToPlanarRegion.invert();
-      
+
       for (Point3DReadOnly point3D : navigableExtrusionsInWorld)
       {
-        Point3D pointToTest = new Point3D(point3D);
-        transformToPlanarRegion.transform(pointToTest);
-        
-        assertEquals(0.0, pointToTest.getZ(), EPSILON);
+         Point3D pointToTest = new Point3D(point3D);
+         transformToPlanarRegion.transform(pointToTest);
+
+         assertEquals(0.0, pointToTest.getZ(), EPSILON);
       }
+   }
+
+   @Test(timeout = 30000)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
+   public void testTwoSquaresOneObstacle() throws Exception
+   {
+      //TODO: +++JEP: Get this one passing and cleaned up.
+      double[][] region0_1Points = new double[][] {{-3.0, 3.0}, {3.0, 3.0}, {3.0, -3.0}, {-3.0, -3.0}};
+      Vector3D normal0_1 = new Vector3D(0.0, 0.0, 1.0);
+      normal0_1.normalize();
+      RigidBodyTransform transform0_1 = createTransformFromPointAndZAxis(new Point3D(), normal0_1);
+      PlanarRegion region0_1 = createPlanarRegion(transform0_1, region0_1Points);
+
+      double distanceBetweenBottomSquares = 0.25;
+
+      double[][] region1_1Points = new double[][] {{3.0 + distanceBetweenBottomSquares, 3.0}, {7.0, 3.0}, {7.0, -3.0},
+            {3.0 + distanceBetweenBottomSquares, -3.0}};
+      Vector3D normal1_1 = new Vector3D(0.0, 0.0, 1.0);
+      normal1_1.normalize();
+      RigidBodyTransform transform1_1 = createTransformFromPointAndZAxis(new Point3D(), normal1_1);
+      PlanarRegion region1_1 = createPlanarRegion(transform1_1, region1_1Points);
+
+      double[][] region2_1Points = new double[][] {{-0.5, 2.0}, {0.5, 2.0}, {0.5, -2.0}, {-0.5, -2.0}};
+      Vector3D normal2_1 = new Vector3D(0.0, 0.0, 1.0);
+      normal2_1.normalize();
+      RigidBodyTransform transform2_1 = createTransformFromPointAndZAxis(new Point3D(3.0 + distanceBetweenBottomSquares / 2.0, 0.0, 1.0), normal2_1);
+      PlanarRegion region2_1 = createPlanarRegion(transform2_1, region2_1Points);
+
+      List<PlanarRegion> obstacleRegions = new ArrayList<>();
+      obstacleRegions.add(region0_1);
+      obstacleRegions.add(region1_1);
+      PlanarRegion homeRegion = region2_1;
+
+      List<Cluster> obstacleClusters = createObstacleClusters(obstacleRegions, homeRegion);
+      assertEquals(0, obstacleClusters.size());
+
+      obstacleRegions.clear();
+      obstacleRegions.add(region1_1);
+      homeRegion = region0_1;
+
+      obstacleClusters = createObstacleClusters(obstacleRegions, homeRegion);
+      assertEquals(0, obstacleClusters.size());
+
+      obstacleRegions.clear();
+      obstacleRegions.add(region1_1);
+      obstacleRegions.add(region2_1);
+      homeRegion = region0_1;
+
+      obstacleClusters = createObstacleClusters(obstacleRegions, homeRegion);
+      assertEquals(1, obstacleClusters.size());
+      Cluster cluster = obstacleClusters.get(0);
+      List<Point2DReadOnly> nonNavigableExtrusionsInLocal = cluster.getNonNavigableExtrusionsInLocal();
+      assertEquals(12, nonNavigableExtrusionsInLocal.size());
+
+      obstacleRegions.clear();
+      obstacleRegions.add(region0_1);
+      obstacleRegions.add(region2_1);
+      homeRegion = region1_1;
+
+      obstacleClusters = createObstacleClusters(obstacleRegions, homeRegion);
+      assertEquals(1, obstacleClusters.size());
+      cluster = obstacleClusters.get(0);
+      nonNavigableExtrusionsInLocal = cluster.getNonNavigableExtrusionsInLocal();
+      assertEquals(12, nonNavigableExtrusionsInLocal.size());
+   }
+
+   private List<Cluster> createObstacleClusters(List<PlanarRegion> obstacleRegions, PlanarRegion homeRegion)
+   {
+      double orthogonalAngle = 0.8;
+
+      ObstacleExtrusionDistanceCalculator extrusionDistanceCalculator = new ObstacleExtrusionDistanceCalculator()
+      {
+         @Override
+         public double computeExtrusionDistance(Point2DReadOnly pointToExtrude, double obstacleHeight)
+         {
+            return 0.04;
+         }
+      };
+
+      DefaultVisibilityGraphParameters parameters = new DefaultVisibilityGraphParameters();
+      ObstacleRegionFilter obstacleRegionFilter = parameters.getObstacleRegionFilter();
+
+      List<PlanarRegion> filteredObstacleRegions = obstacleRegions.stream()
+                                                                  .filter(candidate -> obstacleRegionFilter.isRegionValidObstacle(candidate, homeRegion))
+                                                                  .collect(Collectors.toList());
+
+      PlanarRegionFilter planarRegionFilter = parameters.getPlanarRegionFilter();
+      double DEPTH_THRESHOLD_FOR_CONVEX_DECOMPOSITION = 0.05;
+
+      filteredObstacleRegions = PlanarRegionTools.filterRegionsByTruncatingVerticesBeneathHomeRegion(filteredObstacleRegions, homeRegion,
+                                                                                                     DEPTH_THRESHOLD_FOR_CONVEX_DECOMPOSITION,
+                                                                                                     planarRegionFilter);
+
+      List<Cluster> obstacleClusters = ClusterTools.createObstacleClusters(homeRegion, filteredObstacleRegions, orthogonalAngle, extrusionDistanceCalculator);
+      return obstacleClusters;
+   }
+
+   private PlanarRegion createPlanarRegion(RigidBodyTransform transform, double[][] points)
+   {
+      ConvexPolygon2D convexPolygon = new ConvexPolygon2D();
+      for (double[] position : points)
+      {
+         convexPolygon.addVertex(position[0], position[1]);
+      }
+      convexPolygon.update();
+
+      PlanarRegion planarRegion = new PlanarRegion(transform, convexPolygon);
+
+      return planarRegion;
    }
 
    private boolean listContainsAll(List<Point2DReadOnly> points, Point2DReadOnly... pointsToCheck)
@@ -491,10 +599,10 @@ public class ClusterToolsTest
          if (!listContains(points, pointToCheck))
             return false;
       }
-      
+
       return true;
    }
-   
+
    private boolean listContainsAllXYMatch(List<Point3DReadOnly> points, Point2DReadOnly... pointsToCheck)
    {
       for (Point2DReadOnly pointToCheck : pointsToCheck)
@@ -502,7 +610,7 @@ public class ClusterToolsTest
          if (!listContainsXYMatch(points, pointToCheck))
             return false;
       }
-      
+
       return true;
    }
 
@@ -515,7 +623,7 @@ public class ClusterToolsTest
       }
       return false;
    }
-   
+
    private boolean listContains(List<Point2DReadOnly> points, Point2DReadOnly pointToCheck)
    {
       for (Point2DReadOnly point : points)
@@ -555,7 +663,7 @@ public class ClusterToolsTest
       //      System.out.println("}");
 
    }
-   
+
    private void printPoints3D(Collection<Point3DReadOnly> points)
    {
       //      System.out.print("{");
@@ -570,11 +678,9 @@ public class ClusterToolsTest
 
    }
 
-
    public static void main(String[] args)
    {
       MutationTestFacilitator.facilitateMutationTestForClass(ClusterTools.class, ClusterToolsTest.class);
-
    }
 
 }
