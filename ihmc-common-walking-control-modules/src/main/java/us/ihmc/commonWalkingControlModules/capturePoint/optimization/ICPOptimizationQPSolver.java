@@ -820,7 +820,7 @@ public class ICPOptimizationQPSolver
             addPlanarRegionConstraint();
       }
 
-      if (previousTickFailed)
+      if (!previousTickFailed)
       { // this can occasionally over-constrain the problem, so remove it if the previous tick failed.
          addMaximumFeedbackRateConstraint();
          addMaximumFeedbackMagnitudeConstraint();
