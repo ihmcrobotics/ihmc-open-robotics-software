@@ -477,7 +477,7 @@ public class LinearCoMTrajectoryPlanner implements CoMTrajectoryPlannerInterface
       ContactMotion contactMotion = contactStateProvider.getContactMotion();
       double duration = contactStateProvider.getTimeInterval().getDuration();
 
-      double c0 = 2.0 * Math.exp(omega.getValue() * duration);
+      double c0 = Math.min(sufficientlyLarge, 2.0 * Math.exp(omega.getValue() * duration));
       double c2, c3;
       if (contactMotion.getNumberOfCoefficients() > 3)
       {
