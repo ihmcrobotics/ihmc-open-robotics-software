@@ -458,7 +458,7 @@ public class LinearCoMTrajectoryPlanner implements CoMTrajectoryPlannerInterface
       double duration = contactSequence.get(sequenceId).getTimeInterval().getDuration();
 
       double c0 = 2.0 * Math.exp(omega.getValue() * duration);
-      double c2 = duration;
+      double c2 = Math.min(LinearCoMTrajectoryPlannerTools.sufficientlyLarge, duration);
       double c3 = 1;
 
       int startIndex = indexHandler.getContactSequenceStartIndex(sequenceId);

@@ -7,6 +7,8 @@ import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
 
 public class LinearCoMTrajectoryPlannerTools
 {
+   static final double sufficientlyLarge = 1.0e10;
+
    static void constructDesiredCoMPosition(FixedFramePoint3DBasics desiredCoMPositionToPack, FramePoint3DReadOnly firstCoefficient,
                                            FramePoint3DReadOnly secondCoefficient, FramePoint3DReadOnly thirdCoefficient,
                                            FramePoint3DReadOnly fourthCoefficient, ContactState contactState, double timeInPhase, double omega, double gravityZ)
@@ -78,7 +80,7 @@ public class LinearCoMTrajectoryPlannerTools
    {
       if (contactState.isLoadBearing())
       {
-         return Math.min(Double.MAX_VALUE, Math.exp(omega * timeInPhase));
+         return Math.min(sufficientlyLarge, Math.exp(omega * timeInPhase));
       }
       else
       {
@@ -150,7 +152,7 @@ public class LinearCoMTrajectoryPlannerTools
    {
       if (contactState.isLoadBearing())
       {
-         return timeInPhase;
+         return Math.min(sufficientlyLarge, timeInPhase);
       }
       else
       {
@@ -174,7 +176,7 @@ public class LinearCoMTrajectoryPlannerTools
    {
       if (contactState.isLoadBearing())
       {
-         return Math.min(Double.MAX_VALUE, omega * Math.exp(omega * timeInPhase));
+         return Math.min(sufficientlyLarge, omega * Math.exp(omega * timeInPhase));
       }
       else
       {
@@ -220,9 +222,9 @@ public class LinearCoMTrajectoryPlannerTools
 
    static double getFirstCoefficientCoMAccelerationMultiplier(ContactState contactState, double timeInPhase, double omega)
    {
-      if (contactState == ContactState.IN_CONTACT)
+      if (contactState.isLoadBearing())
       {
-         return Math.min(Double.MAX_VALUE, MathTools.square(omega) * Math.exp(omega * timeInPhase));
+         return Math.min(sufficientlyLarge, MathTools.square(omega) * Math.exp(omega * timeInPhase));
       }
       else
       {
@@ -232,7 +234,7 @@ public class LinearCoMTrajectoryPlannerTools
 
    static double getSecondCoefficientCoMAccelerationMultiplier(ContactState contactState, double timeInPhase, double omega)
    {
-      if (contactState == ContactState.IN_CONTACT)
+      if (contactState.isLoadBearing())
       {
          return MathTools.square(omega) * getSecondCoefficientCoMPositionMultiplier(contactState, timeInPhase, omega);
       }
