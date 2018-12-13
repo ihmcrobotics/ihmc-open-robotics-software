@@ -575,6 +575,61 @@ public class PlanarRegionToolsTest
       assertTrue(regionsWithinDistance.contains(planarRegion));
    }
 
+   @Test(timeout = 30000)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
+   public void testIsRegionAOverlapingWithRegionB()
+   {
+      //TODO: +++JEP: Get this to pass by fixing isRegionAOverlapingWithRegionB()
+      ConvexPolygon2D polygonA = new ConvexPolygon2D();
+      polygonA.addVertex(1.0, 1.0);
+      polygonA.addVertex(1.0, -1.0);
+      polygonA.addVertex(-1.0, -1.0);
+      polygonA.addVertex(-1.0, 1.0);
+      polygonA.update();
+      
+      ConvexPolygon2D polygonB = new ConvexPolygon2D();
+      polygonB.addVertex(3.1, 1.0);
+      polygonB.addVertex(3.1, -1.0);
+      polygonB.addVertex(1.1, -1.0);
+      polygonB.addVertex(1.1, 1.0);
+      polygonB.update();
+      
+      PlanarRegion regionA = new PlanarRegion(new RigidBodyTransform(), polygonA);
+      PlanarRegion regionB = new PlanarRegion(new RigidBodyTransform(), polygonB);
+
+      double epsilonForCheck = 0.0;
+      assertFalse(PlanarRegionTools.isRegionAOverlapingWithRegionB(regionA, regionB, epsilonForCheck));
+      assertFalse(PlanarRegionTools.isRegionAOverlapingWithRegionB(regionB, regionA, epsilonForCheck));
+      epsilonForCheck = 0.099;
+      assertFalse(PlanarRegionTools.isRegionAOverlapingWithRegionB(regionA, regionB, epsilonForCheck));
+      assertFalse(PlanarRegionTools.isRegionAOverlapingWithRegionB(regionB, regionA, epsilonForCheck));
+      epsilonForCheck = 0.101;
+      assertTrue(PlanarRegionTools.isRegionAOverlapingWithRegionB(regionA, regionB, epsilonForCheck));
+      assertTrue(PlanarRegionTools.isRegionAOverlapingWithRegionB(regionB, regionA, epsilonForCheck));
+      epsilonForCheck = 100.0;
+      assertTrue(PlanarRegionTools.isRegionAOverlapingWithRegionB(regionA, regionB, epsilonForCheck));
+      assertTrue(PlanarRegionTools.isRegionAOverlapingWithRegionB(regionB, regionA, epsilonForCheck));
+      
+      
+      RigidBodyTransform transformC = new RigidBodyTransform();
+      transformC.setRotationEuler(0.0, Math.PI/2.0, 0.0);
+      PlanarRegion regionC = new PlanarRegion(transformC, polygonA);
+      epsilonForCheck = 0.0;
+      assertFalse(PlanarRegionTools.isRegionAOverlapingWithRegionB(regionB, regionC, epsilonForCheck));
+      assertFalse(PlanarRegionTools.isRegionAOverlapingWithRegionB(regionC, regionB, epsilonForCheck));
+      epsilonForCheck = 1.098;
+      assertFalse(PlanarRegionTools.isRegionAOverlapingWithRegionB(regionB, regionC, epsilonForCheck));
+      assertFalse(PlanarRegionTools.isRegionAOverlapingWithRegionB(regionC, regionB, epsilonForCheck));
+      epsilonForCheck = 1.102;
+      assertTrue(PlanarRegionTools.isRegionAOverlapingWithRegionB(regionB, regionC, epsilonForCheck));
+      assertTrue(PlanarRegionTools.isRegionAOverlapingWithRegionB(regionC, regionB, epsilonForCheck));
+      epsilonForCheck = 100.0;
+      assertTrue(PlanarRegionTools.isRegionAOverlapingWithRegionB(regionB, regionC, epsilonForCheck));
+      assertTrue(PlanarRegionTools.isRegionAOverlapingWithRegionB(regionC, regionB, epsilonForCheck));
+
+   }
+   
+   
    private static double findFurthestPointFromOrigin(ConvexPolygon2D polygon)
    {
       Point2D origin = new Point2D();
