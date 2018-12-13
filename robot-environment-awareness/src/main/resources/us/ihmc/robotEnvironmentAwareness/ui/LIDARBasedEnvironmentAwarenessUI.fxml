@@ -5,7 +5,7 @@
 <?import javafx.scene.layout.AnchorPane?>
 <?import javafx.scene.layout.BorderPane?>
 
-<BorderPane prefHeight="560.0" prefWidth="893.0" xmlns="http://javafx.com/javafx/8.0.60" xmlns:fx="http://javafx.com/fxml/1">
+<BorderPane prefHeight="560.0" prefWidth="893.0" xmlns="http://javafx.com/javafx/8.0.171" xmlns:fx="http://javafx.com/fxml/1">
 	<center>
 		<AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="568.0" prefWidth="945.0" BorderPane.alignment="CENTER" />
 	</center>
@@ -56,6 +56,15 @@
                      </children>
                   </AnchorPane>
                </content>
+            </Tab>
+            <Tab text="CustomRegionMerge">
+              <content>
+                <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
+                     <children>
+                        <fx:include fx:id="customRegionMergeAnchorPane" source="CustomRegionMergeAnchorPane.fxml" />
+                     </children>
+                  </AnchorPane>
+              </content>
             </Tab>
             <Tab text="Polygonizer">
                <content>

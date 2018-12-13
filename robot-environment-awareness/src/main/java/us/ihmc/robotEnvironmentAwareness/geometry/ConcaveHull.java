@@ -7,26 +7,33 @@ import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import us.ihmc.euclid.orientation.interfaces.Orientation3DReadOnly;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple2D.Point2D;
+import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
 import us.ihmc.euclid.tuple3D.Point3D;
-import us.ihmc.euclid.tuple3D.Vector3D;
-import us.ihmc.euclid.tuple4D.Quaternion;
+import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
+import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.robotEnvironmentAwareness.planarRegion.PolygonizerTools;
 
 public class ConcaveHull implements Iterable<Point2D>
 {
    private final List<Point2D> hullVertices;
 
-   public ConcaveHull(List<Point2D> hullVertices)
+   public ConcaveHull(List<? extends Point2DReadOnly> hullVertices)
    {
-      this.hullVertices = hullVertices;
+      this.hullVertices = hullVertices.stream().map(Point2D::new).collect(Collectors.toList());
    }
 
    public ConcaveHull(ConcaveHull other)
    {
       this.hullVertices = new ArrayList<>();
       other.forEach(hullVertices::add);
+   }
+
+   public boolean isEmpty()
+   {
+      return hullVertices.isEmpty();
    }
 
    public void ensureCounterClockwiseOrdering()
@@ -118,12 +125,12 @@ public class ConcaveHull implements Iterable<Point2D>
       return hullVertices.get(vertexIndex);
    }
 
-   public List<Point3D> toVerticesInWorld(Point3D hullOrigin, Quaternion hullOrientation)
+   public List<Point3D> toVerticesInWorld(Point3DReadOnly hullOrigin, Orientation3DReadOnly hullOrientation)
    {
       return PolygonizerTools.toPointsInWorld(hullVertices, hullOrigin, hullOrientation);
    }
 
-   public List<Point3D> toVerticesInWorld(Point3D hullOrigin, Vector3D hullNormal)
+   public List<Point3D> toVerticesInWorld(Point3DReadOnly hullOrigin, Vector3DReadOnly hullNormal)
    {
       return PolygonizerTools.toPointsInWorld(hullVertices, hullOrigin, hullNormal);
    }

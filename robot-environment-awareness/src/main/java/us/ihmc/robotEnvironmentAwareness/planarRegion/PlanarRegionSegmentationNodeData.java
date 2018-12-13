@@ -9,10 +9,16 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Stream;
 
+import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
+import us.ihmc.euclid.tools.EuclidCoreTools;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.euclid.tuple3D.interfaces.Point3DBasics;
+import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
+import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.jOctoMap.node.NormalOcTreeNode;
 import us.ihmc.robotEnvironmentAwareness.geometry.PointMean;
+import us.ihmc.robotEnvironmentAwareness.geometry.REAGeometryTools;
 import us.ihmc.robotEnvironmentAwareness.geometry.VectorMean;
 import us.ihmc.robotics.geometry.PlanarRegion;
 import us.ihmc.robotics.linearAlgebra.PrincipalComponentAnalysis3D;
@@ -79,9 +85,7 @@ public class PlanarRegionSegmentationNodeData implements Iterable<NormalOcTreeNo
       {
          nodes.removeAll(nodesToRemove);
          recomputeNormalAndOrigin();
-         nodesToRemove.stream()
-                      .filter(nodeSet::remove)
-                      .forEach(this::updateBoundingBoxAfterRemovingNode);
+         nodesToRemove.stream().filter(nodeSet::remove).forEach(this::updateBoundingBoxAfterRemovingNode);
       }
    }
 
@@ -124,11 +128,11 @@ public class PlanarRegionSegmentationNodeData implements Iterable<NormalOcTreeNo
          return false;
 
       double nodeY = node.getY();
-      if (nodeY < min.getY() || nodeY > max.getY()) 
+      if (nodeY < min.getY() || nodeY > max.getY())
          return false;
 
       double nodeZ = node.getZ();
-      if (nodeZ < min.getZ() || nodeZ > max.getZ()) 
+      if (nodeZ < min.getZ() || nodeZ > max.getZ())
          return false;
 
       return true;
@@ -148,9 +152,9 @@ public class PlanarRegionSegmentationNodeData implements Iterable<NormalOcTreeNo
       double nodeY = node.getY();
       double nodeZ = node.getZ();
 
-      double dx = max(min.getX() - nodeX, 0.0, nodeX - max.getX());
-      double dy = max(min.getY() - nodeY, 0.0, nodeY - max.getY());
-      double dz = max(min.getZ() - nodeZ, 0.0, nodeZ - max.getZ());
+      double dx = EuclidCoreTools.max(min.getX() - nodeX, 0.0, nodeX - max.getX());
+      double dy = EuclidCoreTools.max(min.getY() - nodeY, 0.0, nodeY - max.getY());
+      double dz = EuclidCoreTools.max(min.getZ() - nodeZ, 0.0, nodeZ - max.getZ());
       return dx * dx + dy * dy + dz * dz;
    }
 
@@ -161,18 +165,12 @@ public class PlanarRegionSegmentationNodeData implements Iterable<NormalOcTreeNo
 
    public double distanceSquaredFromOtherRegionBoundingBox(PlanarRegionSegmentationNodeData other)
    {
-      double dx = max(min.getX() - other.max.getX(), 0.0, other.min.getX() - max.getX());
-      double dy = max(min.getY() - other.max.getY(), 0.0, other.min.getY() - max.getY());
-      double dz = max(min.getZ() - other.max.getZ(), 0.0, other.min.getZ() - max.getZ());
-      return dx * dx + dy * dy + dz * dz;
+      return distanceSquaredFromOtherBoundingBox(other.min, other.max);
    }
 
-   private static double max(double a, double b, double c)
+   public double distanceSquaredFromOtherBoundingBox(Point3DReadOnly otherMin, Point3DReadOnly otherMax)
    {
-      if (a > b)
-         return a > c ? a : c;
-      else
-         return b > c ? b : c;
+      return REAGeometryTools.distanceSquaredBetweenTwoBoundingBox3Ds(min, max, otherMin, otherMax);
    }
 
    private void updateBoundingBoxWithNewNode(NormalOcTreeNode newNode)
@@ -186,13 +184,13 @@ public class PlanarRegionSegmentationNodeData implements Iterable<NormalOcTreeNo
       double nodeY = newNode.getY();
       if (nodeY < min.getY())
          min.setY(nodeY);
-      else if (nodeY > max.getY()) 
+      else if (nodeY > max.getY())
          max.setY(nodeY);
 
       double nodeZ = newNode.getZ();
       if (nodeZ < min.getZ())
          min.setZ(nodeZ);
-      else if (nodeZ > max.getZ()) 
+      else if (nodeZ > max.getZ())
          max.setZ(nodeZ);
    }
 
@@ -218,7 +216,7 @@ public class PlanarRegionSegmentationNodeData implements Iterable<NormalOcTreeNo
          min.setY(findMin((node1, node2) -> node1.getY() < node2.getY() ? -1 : 1).getY());
       else if (Math.abs(nodeY - max.getY()) < epsilon)
          max.setY(findMax((node1, node2) -> node1.getY() < node2.getY() ? -1 : 1).getY());
-      
+
       if (Math.abs(nodeZ - min.getZ()) < epsilon)
          min.setZ(findMin((node1, node2) -> node1.getZ() < node2.getZ() ? -1 : 1).getZ());
       else if (Math.abs(nodeZ - max.getZ()) < epsilon)
@@ -240,7 +238,7 @@ public class PlanarRegionSegmentationNodeData implements Iterable<NormalOcTreeNo
       return id;
    }
 
-   public void getPoint(int index, Point3D pointToPack)
+   public void getPoint(int index, Point3DBasics pointToPack)
    {
       nodes.get(index).getHitLocation(pointToPack);
    }
@@ -250,23 +248,19 @@ public class PlanarRegionSegmentationNodeData implements Iterable<NormalOcTreeNo
       return nodes.get(index);
    }
 
-   public double orthogonalDistance(Point3D point)
+   public double orthogonalDistance(Point3DReadOnly point)
    {
-      temporaryVector.set(point);
-      temporaryVector.sub(this.point);
-      return temporaryVector.dot(normal);
+      return EuclidGeometryTools.distanceFromPoint3DToPlane3D(point, this.point, normal);
    }
 
-   public double absoluteOrthogonalDistance(Point3D point)
+   public double absoluteOrthogonalDistance(Point3DReadOnly point)
    {
       return Math.abs(orthogonalDistance(point));
    }
 
    public double orhtogonalDistance(NormalOcTreeNode node)
    {
-      temporaryVector.set(node.getHitLocationX(), node.getHitLocationY(), node.getHitLocationZ());
-      temporaryVector.sub(point);
-      return temporaryVector.dot(normal);
+      return EuclidGeometryTools.distanceFromPoint3DToPlane3D(node.getHitLocationX(), node.getHitLocationY(), node.getHitLocationZ(), point, normal);
    }
 
    public double absoluteOrthogonalDistance(NormalOcTreeNode node)
@@ -274,22 +268,22 @@ public class PlanarRegionSegmentationNodeData implements Iterable<NormalOcTreeNo
       return Math.abs(orhtogonalDistance(node));
    }
 
-   public double angle(Vector3D normal)
+   public double angle(Vector3DReadOnly normal)
    {
       return this.normal.angle(normal);
    }
 
-   public double absoluteAngle(Vector3D normal)
+   public double absoluteAngle(Vector3DReadOnly normal)
    {
       return Math.abs(angle(normal));
    }
 
-   public double dot(Vector3D normal)
+   public double dot(Vector3DReadOnly normal)
    {
       return this.normal.dot(normal);
    }
 
-   public double absoluteDot(Vector3D normal)
+   public double absoluteDot(Vector3DReadOnly normal)
    {
       return Math.abs(dot(normal));
    }
