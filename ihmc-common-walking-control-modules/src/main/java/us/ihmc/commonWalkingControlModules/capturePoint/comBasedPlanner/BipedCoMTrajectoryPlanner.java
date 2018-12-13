@@ -40,7 +40,7 @@ public class BipedCoMTrajectoryPlanner
       stepSequence.clear();
    }
 
-   public void addStepToStequence(BipedTimedStep step)
+   public void addStepToSequence(BipedTimedStep step)
    {
       stepSequence.add(step);
    }
