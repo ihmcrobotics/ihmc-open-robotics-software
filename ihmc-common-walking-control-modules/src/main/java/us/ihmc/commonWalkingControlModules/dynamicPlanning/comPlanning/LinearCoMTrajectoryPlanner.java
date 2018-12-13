@@ -295,6 +295,7 @@ public class LinearCoMTrajectoryPlanner implements CoMTrajectoryPlannerInterface
       secondCoefficient.setZ(zCoefficientVector.get(secondCoefficientIndex));
 
       ContactState contactState = contactStateProvider.getContactState();
+      ContactMotion contactMotion = contactStateProvider.getContactMotion();
       if (contactState.isLoadBearing())
       {
          int thirdCoefficientIndex = startIndex + 2;
@@ -302,10 +303,17 @@ public class LinearCoMTrajectoryPlanner implements CoMTrajectoryPlannerInterface
          thirdCoefficient.setY(yCoefficientVector.get(thirdCoefficientIndex));
          thirdCoefficient.setZ(zCoefficientVector.get(thirdCoefficientIndex));
 
-         int fourthCoefficientIndex = startIndex + 3;
-         fourthCoefficient.setX(xCoefficientVector.get(fourthCoefficientIndex));
-         fourthCoefficient.setY(yCoefficientVector.get(fourthCoefficientIndex));
-         fourthCoefficient.setZ(zCoefficientVector.get(fourthCoefficientIndex));
+         if (contactMotion.getNumberOfCoefficients() > 3)
+         {
+            int fourthCoefficientIndex = startIndex + 3;
+            fourthCoefficient.setX(xCoefficientVector.get(fourthCoefficientIndex));
+            fourthCoefficient.setY(yCoefficientVector.get(fourthCoefficientIndex));
+            fourthCoefficient.setZ(zCoefficientVector.get(fourthCoefficientIndex));
+         }
+         else
+         {
+            fourthCoefficient.setToNaN();
+         }
       }
       else
       {
@@ -314,12 +322,12 @@ public class LinearCoMTrajectoryPlanner implements CoMTrajectoryPlannerInterface
       }
       double omega = this.omega.getValue();
 
-      constructDesiredCoMPosition(comPositionToPack, firstCoefficient, secondCoefficient, thirdCoefficient, fourthCoefficient, contactState, timeInPhase, omega,
-                                  gravityZ);
-      constructDesiredCoMVelocity(comVelocityToPack, firstCoefficient, secondCoefficient, thirdCoefficient, fourthCoefficient, contactState, timeInPhase, omega,
-                                  gravityZ);
+      constructDesiredCoMPosition(comPositionToPack, firstCoefficient, secondCoefficient, thirdCoefficient, fourthCoefficient, contactState, contactMotion,
+                                  timeInPhase, omega, gravityZ);
+      constructDesiredCoMVelocity(comVelocityToPack, firstCoefficient, secondCoefficient, thirdCoefficient, fourthCoefficient, contactState, contactMotion,
+                                  timeInPhase, omega, gravityZ);
       constructDesiredCoMAcceleration(comAccelerationToPack, firstCoefficient, secondCoefficient, thirdCoefficient, fourthCoefficient, contactState,
-                                      timeInPhase, omega, gravityZ);
+                                      contactMotion, timeInPhase, omega, gravityZ);
 
       computeDesiredCapturePointPosition(comPositionToPack, comVelocityToPack, omega, dcmPositionToPack);
       computeDesiredCapturePointVelocity(comVelocityToPack, comAccelerationToPack, omega, dcmVelocityToPack);
@@ -402,11 +410,14 @@ public class LinearCoMTrajectoryPlanner implements CoMTrajectoryPlannerInterface
 
       if (contactState.isLoadBearing())
       {
+         ContactMotion contactMotion = contactStateProvider.getContactMotion();
          // set constraint on CoM initial position
          coefficientMultipliers.set(numberOfConstraints, 0, getFirstCoefficientCoMPositionMultiplier(contactState, 0.0, omega));
          coefficientMultipliers.set(numberOfConstraints, 1, getSecondCoefficientCoMPositionMultiplier(contactState, 0.0, omega));
-         coefficientMultipliers.set(numberOfConstraints, 2, getThirdCoefficientCoMPositionMultiplier(contactState, 0.0));
-         coefficientMultipliers.set(numberOfConstraints, 3, getFourthCoefficientCoMPositionMultiplier(contactState));
+         coefficientMultipliers.set(numberOfConstraints, 2, getThirdCoefficientCoMPositionMultiplier(contactState, contactMotion, 0.0));
+         if (contactMotion.getNumberOfCoefficients() > 3)
+            coefficientMultipliers.set(numberOfConstraints, 3, getFourthCoefficientCoMPositionMultiplier(contactState, contactMotion));
+
          xCoefficientConstants.add(numberOfConstraints, 0, centerOfMassLocationForConstraint.getX());
          yCoefficientConstants.add(numberOfConstraints, 0, centerOfMassLocationForConstraint.getY());
          zCoefficientConstants.add(numberOfConstraints, 0, centerOfMassLocationForConstraint.getZ());
@@ -527,9 +538,14 @@ public class LinearCoMTrajectoryPlanner implements CoMTrajectoryPlannerInterface
 
       if (previousContactState.isLoadBearing())
       {
-         coefficientMultipliers
-               .set(numberOfConstraints, previousStartIndex + 2, getThirdCoefficientCoMPositionMultiplier(previousContactState, previousDuration));
-         coefficientMultipliers.set(numberOfConstraints, previousStartIndex + 3, getFourthCoefficientCoMPositionMultiplier(previousContactState));
+         ContactMotion previousContactMotion = previousContact.getContactMotion();
+         coefficientMultipliers.set(numberOfConstraints, previousStartIndex + 2,
+                                    getThirdCoefficientCoMPositionMultiplier(previousContactState, previousContactMotion, previousDuration));
+         if (previousContactMotion.getNumberOfCoefficients() > 3)
+         {
+            coefficientMultipliers
+                  .set(numberOfConstraints, previousStartIndex + 3, getFourthCoefficientCoMPositionMultiplier(previousContactState, previousContactMotion));
+         }
       }
       zCoefficientConstants.add(numberOfConstraints, 0, -getGravityPositionEffect(previousContactState, previousDuration, gravityZ));
 
@@ -541,8 +557,14 @@ public class LinearCoMTrajectoryPlanner implements CoMTrajectoryPlannerInterface
 
       if (nextContactState.isLoadBearing())
       {
-         coefficientMultipliers.set(numberOfConstraints, nextStartIndex + 2, -getThirdCoefficientCoMPositionMultiplier(nextContactState, 0.0));
-         coefficientMultipliers.set(numberOfConstraints, nextStartIndex + 3, -getFourthCoefficientCoMPositionMultiplier(nextContactState));
+         ContactMotion nextContactMotion = nextContact.getContactMotion();
+         coefficientMultipliers
+               .set(numberOfConstraints, nextStartIndex + 2, -getThirdCoefficientCoMPositionMultiplier(nextContactState, nextContactMotion, 0.0));
+         if (nextContactMotion.getNumberOfCoefficients() > 3)
+         {
+            coefficientMultipliers
+                  .set(numberOfConstraints, nextStartIndex + 3, -getFourthCoefficientCoMPositionMultiplier(nextContactState, nextContactMotion));
+         }
       }
       zCoefficientConstants.add(numberOfConstraints, 0, getGravityPositionEffect(nextContactState, 0.0, gravityZ));
 
@@ -591,8 +613,14 @@ public class LinearCoMTrajectoryPlanner implements CoMTrajectoryPlannerInterface
             .set(numberOfConstraints, previousStartIndex + 1, getSecondCoefficientCoMVelocityMultiplier(previousContactState, previousDuration, omega));
       if (previousContactState.isLoadBearing())
       {
-         coefficientMultipliers.set(numberOfConstraints, previousStartIndex + 2, getThirdCoefficientCoMVelocityMultiplier(previousContactState));
-         coefficientMultipliers.set(numberOfConstraints, previousStartIndex + 3, getFourthCoefficientCoMVelocityMultiplier(previousContactState));
+         ContactMotion previousContactMotion = previousContact.getContactMotion();
+         coefficientMultipliers
+               .set(numberOfConstraints, previousStartIndex + 2, getThirdCoefficientCoMVelocityMultiplier(previousContactState, previousContactMotion));
+         if (previousContactMotion.getNumberOfCoefficients() > 3)
+         {
+            coefficientMultipliers
+                  .set(numberOfConstraints, previousStartIndex + 3, getFourthCoefficientCoMVelocityMultiplier(previousContactState, previousContactMotion));
+         }
       }
       zCoefficientConstants.add(numberOfConstraints, 0, -getGravityVelocityEffect(previousContactState, previousDuration, gravityZ));
 
@@ -602,8 +630,13 @@ public class LinearCoMTrajectoryPlanner implements CoMTrajectoryPlannerInterface
       coefficientMultipliers.set(numberOfConstraints, nextStartIndex + 1, -getSecondCoefficientCoMVelocityMultiplier(nextContactState, 0.0, omega));
       if (nextContactState.isLoadBearing())
       {
-         coefficientMultipliers.set(numberOfConstraints, nextStartIndex + 2, -getThirdCoefficientCoMVelocityMultiplier(nextContactState));
-         coefficientMultipliers.set(numberOfConstraints, nextStartIndex + 3, -getFourthCoefficientCoMVelocityMultiplier(nextContactState));
+         ContactMotion nextContactMotion = nextContact.getContactMotion();
+         coefficientMultipliers.set(numberOfConstraints, nextStartIndex + 2, -getThirdCoefficientCoMVelocityMultiplier(nextContactState, nextContactMotion));
+         if (nextContactMotion.getNumberOfCoefficients() > 3)
+         {
+            coefficientMultipliers
+                  .set(numberOfConstraints, nextStartIndex + 3, -getFourthCoefficientCoMVelocityMultiplier(nextContactState, nextContactMotion));
+         }
       }
       zCoefficientConstants.add(numberOfConstraints, 0, getGravityVelocityEffect(nextContactState, 0.0, gravityZ));
 
@@ -617,14 +650,16 @@ public class LinearCoMTrajectoryPlanner implements CoMTrajectoryPlannerInterface
       ContactState contactState = contactStateProvider.getContactState();
       if (contactState.isLoadBearing())
       {
+         ContactMotion contactMotion = contactStateProvider.getContactMotion();
          int startIndex = indexHandler.getContactSequenceStartIndex(sequenceId);
          FramePoint3DReadOnly copPosition = contactStateProvider.getCopStartPosition();
          copPosition.checkReferenceFrameMatch(worldFrame);
 
          coefficientMultipliers.set(numberOfConstraints, startIndex + 0, getFirstCoefficientVRPPositionMultiplier(contactState));
          coefficientMultipliers.set(numberOfConstraints, startIndex + 1, getSecondCoefficientVRPPositionMultiplier(contactState));
-         coefficientMultipliers.set(numberOfConstraints, startIndex + 2, getThirdCoefficientVRPPositionMultiplier(contactState, 0.0));
-         coefficientMultipliers.set(numberOfConstraints, startIndex + 3, getFourthCoefficientVRPPositionMultiplier(contactState));
+         coefficientMultipliers.set(numberOfConstraints, startIndex + 2, getThirdCoefficientVRPPositionMultiplier(contactState, contactMotion, 0.0));
+         if (contactMotion.getNumberOfCoefficients() > 3)
+            coefficientMultipliers.set(numberOfConstraints, startIndex + 3, getFourthCoefficientVRPPositionMultiplier(contactState, contactMotion));
          xCoefficientConstants.set(numberOfConstraints, 0, copPosition.getX());
          yCoefficientConstants.set(numberOfConstraints, 0, copPosition.getY());
          zCoefficientConstants.set(numberOfConstraints, 0, copPosition.getZ() + nominalCoMHeight);
@@ -638,17 +673,20 @@ public class LinearCoMTrajectoryPlanner implements CoMTrajectoryPlannerInterface
       ContactStateProvider contactStateProvider = contactSequence.get(sequenceId);
 
       ContactState contactState = contactStateProvider.getContactState();
-      if (contactState.isLoadBearing())
+      if (contactState.isLoadBearing() && contactStateProvider.getContactMotion().getNumberOfCoefficients() > 3)
       {
+         ContactMotion contactMotion = contactStateProvider.getContactMotion();
          int startIndex = indexHandler.getContactSequenceStartIndex(sequenceId);
          FramePoint3DReadOnly copPosition = contactStateProvider.getCopEndPosition();
          copPosition.checkReferenceFrameMatch(worldFrame);
 
          coefficientMultipliers.set(numberOfConstraints, startIndex + 0, getFirstCoefficientVRPPositionMultiplier(contactState));
          coefficientMultipliers.set(numberOfConstraints, startIndex + 1, getSecondCoefficientVRPPositionMultiplier(contactState));
-         coefficientMultipliers.set(numberOfConstraints, startIndex + 2,
-                                    getThirdCoefficientVRPPositionMultiplier(contactState, contactStateProvider.getTimeInterval().getDuration()));
-         coefficientMultipliers.set(numberOfConstraints, startIndex + 3, getFourthCoefficientVRPPositionMultiplier(contactState));
+         coefficientMultipliers.set(numberOfConstraints, startIndex + 2, getThirdCoefficientVRPPositionMultiplier(contactState, contactMotion,
+                                                                                                                  contactStateProvider.getTimeInterval()
+                                                                                                                                      .getDuration()));
+         if (contactMotion.getNumberOfCoefficients() > 3)
+            coefficientMultipliers.set(numberOfConstraints, startIndex + 3, getFourthCoefficientVRPPositionMultiplier(contactState, contactMotion));
          xCoefficientConstants.set(numberOfConstraints, 0, copPosition.getX());
          yCoefficientConstants.set(numberOfConstraints, 0, copPosition.getY());
          zCoefficientConstants.set(numberOfConstraints, 0, copPosition.getZ() + nominalCoMHeight);
