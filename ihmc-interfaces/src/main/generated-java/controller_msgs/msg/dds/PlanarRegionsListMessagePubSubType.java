@@ -49,6 +49,9 @@ public class PlanarRegionsListMessagePubSubType implements us.ihmc.pubsub.TopicD
           current_alignment += geometry_msgs.msg.dds.PointPubSubType.getMaxCdrSerializedSize(current_alignment);}
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);for(int i0 = 0; i0 < 300; ++i0)
       {
+          current_alignment += geometry_msgs.msg.dds.QuaternionPubSubType.getMaxCdrSerializedSize(current_alignment);}
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);for(int i0 = 0; i0 < 300; ++i0)
+      {
           current_alignment += geometry_msgs.msg.dds.Vector3PubSubType.getMaxCdrSerializedSize(current_alignment);}
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);current_alignment += (300 * 4) + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 
@@ -83,6 +86,11 @@ public class PlanarRegionsListMessagePubSubType implements us.ihmc.pubsub.TopicD
       for(int i0 = 0; i0 < data.getRegionOrigin().size(); ++i0)
       {
           current_alignment += geometry_msgs.msg.dds.PointPubSubType.getCdrSerializedSize(data.getRegionOrigin().get(i0), current_alignment);}
+
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+      for(int i0 = 0; i0 < data.getRegionOrientation().size(); ++i0)
+      {
+          current_alignment += geometry_msgs.msg.dds.QuaternionPubSubType.getCdrSerializedSize(data.getRegionOrientation().get(i0), current_alignment);}
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
       for(int i0 = 0; i0 < data.getRegionNormal().size(); ++i0)
@@ -122,6 +130,10 @@ public class PlanarRegionsListMessagePubSubType implements us.ihmc.pubsub.TopicD
       cdr.write_type_e(data.getRegionOrigin());else
           throw new RuntimeException("region_origin field exceeds the maximum length");
 
+      if(data.getRegionOrientation().size() <= 300)
+      cdr.write_type_e(data.getRegionOrientation());else
+          throw new RuntimeException("region_orientation field exceeds the maximum length");
+
       if(data.getRegionNormal().size() <= 300)
       cdr.write_type_e(data.getRegionNormal());else
           throw new RuntimeException("region_normal field exceeds the maximum length");
@@ -150,6 +162,7 @@ public class PlanarRegionsListMessagePubSubType implements us.ihmc.pubsub.TopicD
       	
       cdr.read_type_e(data.getRegionId());	
       cdr.read_type_e(data.getRegionOrigin());	
+      cdr.read_type_e(data.getRegionOrientation());	
       cdr.read_type_e(data.getRegionNormal());	
       cdr.read_type_e(data.getConcaveHullsSize());	
       cdr.read_type_e(data.getNumberOfConvexPolygons());	
@@ -164,6 +177,7 @@ public class PlanarRegionsListMessagePubSubType implements us.ihmc.pubsub.TopicD
       ser.write_type_4("sequence_id", data.getSequenceId());
       ser.write_type_e("region_id", data.getRegionId());
       ser.write_type_e("region_origin", data.getRegionOrigin());
+      ser.write_type_e("region_orientation", data.getRegionOrientation());
       ser.write_type_e("region_normal", data.getRegionNormal());
       ser.write_type_e("concave_hulls_size", data.getConcaveHullsSize());
       ser.write_type_e("number_of_convex_polygons", data.getNumberOfConvexPolygons());
@@ -177,6 +191,7 @@ public class PlanarRegionsListMessagePubSubType implements us.ihmc.pubsub.TopicD
       data.setSequenceId(ser.read_type_4("sequence_id"));
       ser.read_type_e("region_id", data.getRegionId());
       ser.read_type_e("region_origin", data.getRegionOrigin());
+      ser.read_type_e("region_orientation", data.getRegionOrientation());
       ser.read_type_e("region_normal", data.getRegionNormal());
       ser.read_type_e("concave_hulls_size", data.getConcaveHullsSize());
       ser.read_type_e("number_of_convex_polygons", data.getNumberOfConvexPolygons());
