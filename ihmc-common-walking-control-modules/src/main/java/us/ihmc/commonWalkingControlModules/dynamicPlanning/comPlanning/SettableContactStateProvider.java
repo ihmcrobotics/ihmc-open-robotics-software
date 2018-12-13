@@ -8,17 +8,17 @@ import us.ihmc.robotics.time.TimeIntervalReadOnly;
 public class SettableContactStateProvider implements ContactStateProvider
 {
    private ContactState contactState = ContactState.IN_CONTACT;
-   private final FramePoint3D copPosition = new FramePoint3D();
+   private final FramePoint3D startCopPosition = new FramePoint3D();
    private final TimeInterval timeInterval = new TimeInterval();
 
    public SettableContactStateProvider()
    {
-      copPosition.setToNaN();
+      startCopPosition.setToNaN();
    }
 
-   public void setCopPosition(FramePoint3DReadOnly copPosition)
+   public void setStartCopPosition(FramePoint3DReadOnly startCopPosition)
    {
-      this.copPosition.set(copPosition);
+      this.startCopPosition.set(startCopPosition);
    }
 
    public void setTimeInterval(TimeIntervalReadOnly timeInterval)
@@ -33,12 +33,12 @@ public class SettableContactStateProvider implements ContactStateProvider
 
    public FramePoint3DReadOnly getCopStartPosition()
    {
-      return copPosition;
+      return startCopPosition;
    }
 
    public FramePoint3DReadOnly getCopEndPosition()
    {
-      return copPosition;
+      return startCopPosition;
    }
 
    public ContactState getContactState()

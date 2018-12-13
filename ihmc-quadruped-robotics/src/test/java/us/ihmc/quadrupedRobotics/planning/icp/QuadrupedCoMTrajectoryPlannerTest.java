@@ -47,7 +47,7 @@ public class QuadrupedCoMTrajectoryPlannerTest
       SettableContactStateProvider firstContact = new SettableContactStateProvider();
 
       firstContact.setTimeInterval(new TimeInterval(0.0, Double.POSITIVE_INFINITY));
-      firstContact.setCopPosition(new FramePoint3D());
+      firstContact.setStartCopPosition(new FramePoint3D());
 
       contactSequence.add(firstContact);
 
@@ -100,7 +100,7 @@ public class QuadrupedCoMTrajectoryPlannerTest
       SettableContactStateProvider firstContact = new SettableContactStateProvider();
 
       firstContact.setTimeInterval(new TimeInterval(0.0, Double.POSITIVE_INFINITY));
-      firstContact.setCopPosition(new FramePoint3D());
+      firstContact.setStartCopPosition(new FramePoint3D());
 
       contactSequence.add(firstContact);
 
