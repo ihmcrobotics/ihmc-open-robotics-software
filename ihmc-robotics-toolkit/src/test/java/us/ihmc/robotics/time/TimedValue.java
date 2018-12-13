@@ -1,7 +1,4 @@
-package us.ihmc.quadrupedBasics.utils;
-
-import us.ihmc.quadrupedBasics.gait.TimeInterval;
-import us.ihmc.quadrupedBasics.gait.TimeIntervalProvider;
+package us.ihmc.robotics.time;
 
 public class TimedValue implements TimeIntervalProvider
 {

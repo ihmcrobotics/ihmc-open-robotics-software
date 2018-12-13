@@ -39,11 +39,9 @@ public abstract class PlanarRegionPolygonizer
                                                          ConcaveHullFactoryParameters concaveHullFactoryParameters, PolygonizerParameters polygonizerParameters,
                                                          PlanarRegionSegmentationDataExporter dataExporter)
    {
-      List<List<PlanarRegion>> regions = rawData.parallelStream()
-                                                .filter(data -> data.size() >= polygonizerParameters.getMinNumberOfNodes())
+      List<List<PlanarRegion>> regions = rawData.parallelStream().filter(data -> data.size() >= polygonizerParameters.getMinNumberOfNodes())
                                                 .map(data -> createPlanarRegion(data, concaveHullFactoryParameters, polygonizerParameters, dataExporter))
-                                                .filter(region -> region != null)
-                                                .collect(Collectors.toList());
+                                                .filter(region -> region != null).collect(Collectors.toList());
 
       List<PlanarRegion> flattenedRegions = new ArrayList<>();
       for (List<PlanarRegion> regionsSublist : regions)
@@ -60,7 +58,7 @@ public abstract class PlanarRegionPolygonizer
       {
          // First compute the set of concave hulls for this region
          List<Point2D> pointCloudInPlane = rawData.getPointCloudInPlane();
-         List<LineSegment2D> intersections = rawData.getIntersections();
+         List<LineSegment2D> intersections = rawData.getIntersectionsInPlane();
          ConcaveHullCollection concaveHullCollection = SimpleConcaveHullFactory.createConcaveHullCollection(pointCloudInPlane, intersections,
                                                                                                             concaveHullFactoryParameters);
 
