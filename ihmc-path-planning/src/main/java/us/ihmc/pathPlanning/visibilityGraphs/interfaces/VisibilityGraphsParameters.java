@@ -174,10 +174,13 @@ public interface VisibilityGraphsParameters
             //TOOD: ++++++JEP: Lots of bugs here. Need to clean up ConvexPolygon stuff to find distances and if overlapping more nicely...
             //TODO: Get rid of these magic numbers and make them parameters somewhere. Make sure the overlapping region check is larger than getMaxInterRegionConnectionLength() 
             //TODO: BodyPathPlannerEnvironment crash when the number is set to 1.0. But should work fine all the same...
+            //TOOD: This check should just be an approximation and should be ok for false positives. In fact, just returning true should be ok. Check that.
+            //TODO: But somehow that's not right, since if we chang 0.25 to 1.0 below, we get a Runtime Exception: Tried to create a line from two coincidal points!?
             if (!PlanarRegionTools.isRegionAOverlapingWithRegionB(query, navigableRegion, 0.25)) //1.0))
                return false;
 
-            if (PlanarRegionTools.computeMinHeightOfRegionAAboveRegionB(query, navigableRegion) > 3.0)
+            double minimumHeight = PlanarRegionTools.computeMinHeightOfRegionAAboveRegionB(query, navigableRegion);
+            if (minimumHeight > 2.0)
                return false;
 
             return true;

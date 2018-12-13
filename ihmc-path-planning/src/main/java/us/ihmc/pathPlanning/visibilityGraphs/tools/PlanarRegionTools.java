@@ -548,70 +548,19 @@ public class PlanarRegionTools
       return containers;
    }
 
-   public static boolean isRegionAOverlapingWithRegionB(PlanarRegion regionA, PlanarRegion regionB, double epsilon)
-   {
-      //TODO: Switch to new and delete old once it's all working and tested.
-      boolean useOldRegionOverlapping = true;
-
-      if (useOldRegionOverlapping)
-      {
-         return isRegionAOverlapingWithRegionBOld(regionA, regionB, epsilon);
-      }
-      else
-      {
-         return isRegionAOverlapingWithRegionBNew(regionA, regionB, epsilon);
-      }
-   }
-
    /**
-    * Check if the projection of at least one vertex of {@code regionA} is inside {@code regionB}.
-    * <p>
-    * The sign of {@code epsilon} is equivalent to performing the test against {@code regionB}
-    * shrunk by {@code Math.abs(epsilon)} if {@code epsilon < 0.0}, or against the {@code regionB}
-    * enlarged by {@code epsilon} if {@code epsilon > 0.0}.
-    * </p>
-    *
-    * @param regionA the query. Not modified.
-    * @param regionB the reference. Not modified.
-    * @param epsilon the tolerance to use during the test.
-    * @return {@code true} if region A is at least partially above or below region B, {@code false}
-    *         otherwise.
+    * Check if the vertical projections of the convex hulls of two planar regions overlap within epsilon.
     */
-   public static boolean isRegionAOverlapingWithRegionBOld(PlanarRegion regionA, PlanarRegion regionB, double epsilon)
+   public static boolean isRegionAOverlapingWithRegionB(PlanarRegion regionOne, PlanarRegion regionTwo, double epsilon)
    {
-      RigidBodyTransform transformFromBToWorld = new RigidBodyTransform();
-      regionB.getTransformToWorld(transformFromBToWorld);
-      RigidBodyTransform transformFromAToB = new RigidBodyTransform();
-      regionA.getTransformToWorld(transformFromAToB);
-      transformFromAToB.preMultiplyInvertOther(transformFromBToWorld);
-
-      ConvexPolygon2D convexHullB = regionB.getConvexHull();
-
-      for (int i = 0; i < regionA.getConvexHull().getNumberOfVertices(); i++)
-      {
-         Point3D vertexA3D = new Point3D(regionA.getConvexHull().getVertex(i));
-         transformFromAToB.transform(vertexA3D);
-         Point2D vertexA2D = new Point2D(vertexA3D);
-         if (convexHullB.getBoundingBox().isInsideEpsilon(vertexA2D, epsilon) && convexHullB.isPointInside(vertexA2D, epsilon))
-            return true;
-      }
-
-      return false;
-   }
-
-   //TODO: ++++++JEP: New implementation that should work better. However, broken until convexPolygonTools.computeIntersectionOfPolygons() is fixed.
-   public static boolean isRegionAOverlapingWithRegionBNew(PlanarRegion regionOne, PlanarRegion regionTwo, double epsilon)
-   {
-      BoundingBox3D boundingBoxOneInWorld = regionOne.getBoundingBox3dInWorld();
-      BoundingBox3D boundingBoxTwoInWorld = regionTwo.getBoundingBox3dInWorld();
-
-      if (!boundingBoxOneInWorld.intersectsEpsilon(boundingBoxTwoInWorld, epsilon))
-         return false;
-
       ConvexPolygon2D convexHullOne = getVerticallyProjectedConvexHull(regionOne);
       ConvexPolygon2D convexHullTwo = getVerticallyProjectedConvexHull(regionTwo);
 
-      return doPolygonsIntersect(convexHullOne, convexHullTwo, epsilon);
+      boolean boundingBoxesOfProjectionsIntersect = convexHullOne.getBoundingBox().intersectsEpsilon(convexHullTwo.getBoundingBox(), epsilon);
+      return boundingBoxesOfProjectionsIntersect;
+      
+      //++++++JEP: Fix this and use this if you want it to be more accurate. However, if this is just for approximate tests and can have false positives, then bounding boxes are fine.
+//      return doPolygonsIntersect(convexHullOne, convexHullTwo, epsilon);
    }
 
    private static ConvexPolygon2D getVerticallyProjectedConvexHull(PlanarRegion planarRegion)
