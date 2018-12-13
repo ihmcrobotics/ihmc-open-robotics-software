@@ -92,9 +92,9 @@ public class SimpleBipedContactPhase implements ContactStateProvider
       reset();
       setFeetInContact(other.feetInContact);
       for (int i = 0; i < other.startFeet.size(); i++)
-         addStartFoot(other.startFeet.get(i), other.startFootPoses.get(startFeet.get(i)));
+         addStartFoot(other.startFeet.get(i), other.startFootPoses.get(other.startFeet.get(i)));
       for (int i = 0; i < other.endFeet.size(); i++)
-         addEndFoot(other.endFeet.get(i), other.endFootPoses.get(endFeet.get(i)));
+         addEndFoot(other.endFeet.get(i), other.endFootPoses.get(other.endFeet.get(i)));
 
       update();
    }
@@ -156,7 +156,7 @@ public class SimpleBipedContactPhase implements ContactStateProvider
          startCopPosition.scale(1.0 / startFeet.size());
 
          endCopPosition.setToZero();
-         for (int i = 0; i < startFeet.size(); i++)
+         for (int i = 0; i < endFeet.size(); i++)
          {
             tempPoint.setIncludingFrame(endFootPoses.get(endFeet.get(i)).getPosition());
             tempPoint.changeFrame(ReferenceFrame.getWorldFrame());
