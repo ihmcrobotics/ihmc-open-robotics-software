@@ -1,7 +1,9 @@
 package us.ihmc.pathPlanning.visibilityGraphs.tools;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
 import static us.ihmc.euclid.tools.EuclidCoreRandomTools.nextDouble;
 
 import java.util.ArrayList;
@@ -10,7 +12,6 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Random;
 
-import org.junit.Assert;
 import org.junit.Test;
 
 import us.ihmc.commons.MutationTestFacilitator;
@@ -18,7 +19,6 @@ import us.ihmc.commons.RandomNumbers;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.euclid.axisAngle.AxisAngle;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
-import us.ihmc.euclid.geometry.LineSegment2D;
 import us.ihmc.euclid.geometry.LineSegment3D;
 import us.ihmc.euclid.geometry.interfaces.ConvexPolygon2DBasics;
 import us.ihmc.euclid.geometry.interfaces.ConvexPolygon2DReadOnly;
@@ -46,17 +46,56 @@ public class PlanarRegionToolsTest
 
    @Test(timeout = 30000)
    @ContinuousIntegrationTest(estimatedDuration = 0.0)
+   public void testComputeMinHeightOfRegionAAboveRegionB()
+   {
+      double[][] verticesA = new double[][] {{0.0, 0.0}, {0.0, 1.0}, {1.0, 1.0}, {1.0, 0.0}};
+      ConvexPolygon2D convexPolygonA = new ConvexPolygon2D(Vertex2DSupplier.asVertex2DSupplier(verticesA));
+      RigidBodyTransform transformA = new RigidBodyTransform();
+      double heightAbove = 3.0;
+      transformA.setTranslation(0.0, 0.0, heightAbove);
+      PlanarRegion regionA = new PlanarRegion(transformA, convexPolygonA);
+
+      double[][] verticesB = new double[][] {{0.0, 0.0}, {0.0, 1.0}, {1.0, 1.0}, {1.0, 0.0}};
+      ConvexPolygon2D convexPolygonB = new ConvexPolygon2D(Vertex2DSupplier.asVertex2DSupplier(verticesB));
+      RigidBodyTransform transformB = new RigidBodyTransform();
+      PlanarRegion regionB = new PlanarRegion(transformB, convexPolygonB);
+
+      double minHeightOfRegionAAboveRegionB = PlanarRegionTools.computeMinHeightOfRegionAAboveRegionB(regionA, regionB);
+      assertEquals(heightAbove, minHeightOfRegionAAboveRegionB, EPSILON);
+      
+      // Now rotate the bottom one, lifting the plane and decreasing the height above.
+      transformB = new RigidBodyTransform();
+      double rotationAngleB = -0.4789;
+      transformB.setRotationEuler(0.0, rotationAngleB, 0.0);
+      regionB = new PlanarRegion(transformB, convexPolygonB);
+
+      minHeightOfRegionAAboveRegionB = PlanarRegionTools.computeMinHeightOfRegionAAboveRegionB(regionA, regionB);
+      assertEquals(heightAbove + Math.tan(rotationAngleB) * 1.0, minHeightOfRegionAAboveRegionB, EPSILON);
+      
+      // Now rotate the top one, lowering the points and decreasing the height above also.
+      transformA = new RigidBodyTransform();
+      double rotationAngleA = 0.123;
+      transformA.setTranslation(0.0, 0.0, heightAbove);
+      transformA.setRotationEuler(0.0, rotationAngleA, 0.0);
+      regionA = new PlanarRegion(transformA, convexPolygonA);
+
+      minHeightOfRegionAAboveRegionB = PlanarRegionTools.computeMinHeightOfRegionAAboveRegionB(regionA, regionB);
+      assertEquals(heightAbove + Math.cos(rotationAngleA) * Math.tan(rotationAngleB) * 1.0 - Math.sin(rotationAngleA) * 1.0, minHeightOfRegionAAboveRegionB, EPSILON);
+   }
+
+   @Test(timeout = 30000)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    public void testProjectPointToPlanes()
    {
       ConvexPolygon2D convexPolygon = createUnitSquarePolygon();
       RigidBodyTransform squarePose = new RigidBodyTransform();
       PlanarRegion square = new PlanarRegion(squarePose, convexPolygon);
-      
+
       Point3D pointToProject = new Point3D(0.0, 0.0, 5.0);
       PlanarRegionsList regions = new PlanarRegionsList();
       regions.addPlanarRegion(square);
       Point3D projectedPoint = PlanarRegionTools.projectPointToPlanes(pointToProject, regions);
-      
+
       EuclidCoreTestTools.assertPoint3DGeometricallyEquals(new Point3D(0.0, 0.0, 0.0), projectedPoint, 1e-10);
    }
 
@@ -68,7 +107,7 @@ public class PlanarRegionToolsTest
       convexPolygon.addVertex(new Point2D(0.5, 0.5));
       convexPolygon.addVertex(new Point2D(-0.5, 0.5));
       convexPolygon.update();
-      
+
       return convexPolygon;
    }
 
@@ -586,14 +625,14 @@ public class PlanarRegionToolsTest
       polygonA.addVertex(-1.0, -1.0);
       polygonA.addVertex(-1.0, 1.0);
       polygonA.update();
-      
+
       ConvexPolygon2D polygonB = new ConvexPolygon2D();
       polygonB.addVertex(3.1, 1.0);
       polygonB.addVertex(3.1, -1.0);
       polygonB.addVertex(1.1, -1.0);
       polygonB.addVertex(1.1, 1.0);
       polygonB.update();
-      
+
       PlanarRegion regionA = new PlanarRegion(new RigidBodyTransform(), polygonA);
       PlanarRegion regionB = new PlanarRegion(new RigidBodyTransform(), polygonB);
 
@@ -609,10 +648,9 @@ public class PlanarRegionToolsTest
       epsilonForCheck = 100.0;
       assertTrue(PlanarRegionTools.isRegionAOverlapingWithRegionB(regionA, regionB, epsilonForCheck));
       assertTrue(PlanarRegionTools.isRegionAOverlapingWithRegionB(regionB, regionA, epsilonForCheck));
-      
-      
+
       RigidBodyTransform transformC = new RigidBodyTransform();
-      transformC.setRotationEuler(0.0, Math.PI/2.0, 0.0);
+      transformC.setRotationEuler(0.0, Math.PI / 2.0, 0.0);
       PlanarRegion regionC = new PlanarRegion(transformC, polygonA);
       epsilonForCheck = 0.0;
       assertFalse(PlanarRegionTools.isRegionAOverlapingWithRegionB(regionB, regionC, epsilonForCheck));
@@ -628,8 +666,7 @@ public class PlanarRegionToolsTest
       assertTrue(PlanarRegionTools.isRegionAOverlapingWithRegionB(regionC, regionB, epsilonForCheck));
 
    }
-   
-   
+
    private static double findFurthestPointFromOrigin(ConvexPolygon2D polygon)
    {
       Point2D origin = new Point2D();
