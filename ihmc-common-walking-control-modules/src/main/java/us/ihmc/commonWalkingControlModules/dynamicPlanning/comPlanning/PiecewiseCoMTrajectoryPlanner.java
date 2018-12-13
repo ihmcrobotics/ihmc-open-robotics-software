@@ -24,11 +24,11 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static us.ihmc.commonWalkingControlModules.capturePoint.CapturePointTools.*;
-import static us.ihmc.commonWalkingControlModules.dynamicPlanning.comPlanning.CoMTrajectoryPlannerTools.*;
+import static us.ihmc.commonWalkingControlModules.dynamicPlanning.comPlanning.PiecewiseCoMTrajectoryPlannerTools.*;
 
 // This guy assumes that the final phase is always the "stopping" phase, where the CoM is supposed to come to rest.
 // This means that the final CoP is the terminal ICP location
-public class CoMTrajectoryPlanner implements CoMTrajectoryPlannerInterface
+public class PiecewiseCoMTrajectoryPlanner implements CoMTrajectoryPlannerInterface
 {
    private static final int maxCapacity = 10;
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
@@ -75,14 +75,14 @@ public class CoMTrajectoryPlanner implements CoMTrajectoryPlannerInterface
 
    private int numberOfConstraints = 0;
 
-   public CoMTrajectoryPlanner(List<? extends ContactStateProvider> contactSequence, DoubleProvider omega, double gravityZ, double nominalCoMHeight,
-                               YoVariableRegistry parentRegistry)
+   public PiecewiseCoMTrajectoryPlanner(List<? extends ContactStateProvider> contactSequence, DoubleProvider omega, double gravityZ, double nominalCoMHeight,
+                                        YoVariableRegistry parentRegistry)
    {
       this(contactSequence, omega, gravityZ, nominalCoMHeight, parentRegistry, null);
    }
 
-   public CoMTrajectoryPlanner(List<? extends ContactStateProvider> contactSequence, DoubleProvider omega, double gravityZ, double nominalCoMHeight,
-                               YoVariableRegistry parentRegistry, YoGraphicsListRegistry yoGraphicsListRegistry)
+   public PiecewiseCoMTrajectoryPlanner(List<? extends ContactStateProvider> contactSequence, DoubleProvider omega, double gravityZ, double nominalCoMHeight,
+                                        YoVariableRegistry parentRegistry, YoGraphicsListRegistry yoGraphicsListRegistry)
    {
       this.contactSequence = contactSequence;
       this.omega = omega;

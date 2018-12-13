@@ -57,37 +57,41 @@ public class SegmentedCoMTrajectory
       double firstSegmentDuration = this.midpointTimeInPhase - this.startTimeInPhase;
       double secondSegmentDuration = this.midpointTimeInPhase - this.startTimeInPhase;
 
-      double initialPositionConstant0 = CoMTrajectoryPlannerTools.getFirstCoefficientPositionMultiplier(firstContactState, 0.0, omega);
-      double initialPositionConstant1 = CoMTrajectoryPlannerTools.getSecondCoefficientPositionMultiplier(firstContactState, 0.0, omega);
+      double initialPositionConstant0 = PiecewiseCoMTrajectoryPlannerTools.getFirstCoefficientPositionMultiplier(firstContactState, 0.0, omega);
+      double initialPositionConstant1 = PiecewiseCoMTrajectoryPlannerTools.getSecondCoefficientPositionMultiplier(firstContactState, 0.0, omega);
       double initialPositionConstant2 = getThirdCoefficientPositionMultiplier(firstContactState, 0.0, gravityZ);
 
-      double midpointFirstPositionConstant0 = CoMTrajectoryPlannerTools.getFirstCoefficientPositionMultiplier(firstContactState, firstSegmentDuration, omega);
-      double midpointFirstPositionConstant1 = CoMTrajectoryPlannerTools.getSecondCoefficientPositionMultiplier(firstContactState, firstSegmentDuration, omega);
+      double midpointFirstPositionConstant0 = PiecewiseCoMTrajectoryPlannerTools
+            .getFirstCoefficientPositionMultiplier(firstContactState, firstSegmentDuration, omega);
+      double midpointFirstPositionConstant1 = PiecewiseCoMTrajectoryPlannerTools
+            .getSecondCoefficientPositionMultiplier(firstContactState, firstSegmentDuration, omega);
       double midpointFirstPositionConstant2 = getThirdCoefficientPositionMultiplier(firstContactState, firstSegmentDuration, gravityZ);
 
-      double midpointSecondPositionConstant0 = CoMTrajectoryPlannerTools.getFirstCoefficientPositionMultiplier(secondContactState, 0.0, omega);
-      double midpointSecondPositionConstant1 = CoMTrajectoryPlannerTools.getSecondCoefficientPositionMultiplier(secondContactState, 0.0, omega);
+      double midpointSecondPositionConstant0 = PiecewiseCoMTrajectoryPlannerTools.getFirstCoefficientPositionMultiplier(secondContactState, 0.0, omega);
+      double midpointSecondPositionConstant1 = PiecewiseCoMTrajectoryPlannerTools.getSecondCoefficientPositionMultiplier(secondContactState, 0.0, omega);
       double midpointSecondPositionConstant2 = getThirdCoefficientPositionMultiplier(secondContactState, 0.0, gravityZ);
 
-      double finalPositionConstant0 = CoMTrajectoryPlannerTools.getFirstCoefficientPositionMultiplier(secondContactState, secondSegmentDuration, omega);
-      double finalPositionConstant1 = CoMTrajectoryPlannerTools.getSecondCoefficientPositionMultiplier(secondContactState, secondSegmentDuration, omega);
+      double finalPositionConstant0 = PiecewiseCoMTrajectoryPlannerTools.getFirstCoefficientPositionMultiplier(secondContactState, secondSegmentDuration, omega);
+      double finalPositionConstant1 = PiecewiseCoMTrajectoryPlannerTools.getSecondCoefficientPositionMultiplier(secondContactState, secondSegmentDuration, omega);
       double finalPositionConstant2 = getThirdCoefficientPositionMultiplier(secondContactState, secondSegmentDuration, gravityZ);
 
-      double initialVelocityConstant0 = CoMTrajectoryPlannerTools.getFirstCoefficientVelocityMultiplier(firstContactState, 0.0, omega);
-      double initialVelocityConstant1 = CoMTrajectoryPlannerTools.getSecondCoefficientVelocityMultiplier(firstContactState, 0.0, omega);
-      double initialVelocityConstant2 = CoMTrajectoryPlannerTools.getGravityVelocityEffect(firstContactState, 0.0, gravityZ);
+      double initialVelocityConstant0 = PiecewiseCoMTrajectoryPlannerTools.getFirstCoefficientVelocityMultiplier(firstContactState, 0.0, omega);
+      double initialVelocityConstant1 = PiecewiseCoMTrajectoryPlannerTools.getSecondCoefficientVelocityMultiplier(firstContactState, 0.0, omega);
+      double initialVelocityConstant2 = PiecewiseCoMTrajectoryPlannerTools.getGravityVelocityEffect(firstContactState, 0.0, gravityZ);
 
-      double midpointFirstVelocityConstant0 = CoMTrajectoryPlannerTools.getFirstCoefficientVelocityMultiplier(firstContactState, firstSegmentDuration, omega);
-      double midpointFirstVelocityConstant1 = CoMTrajectoryPlannerTools.getSecondCoefficientVelocityMultiplier(firstContactState, firstSegmentDuration, omega);
-      double midpointFirstVelocityConstant2 = CoMTrajectoryPlannerTools.getGravityVelocityEffect(firstContactState, firstSegmentDuration, gravityZ);
+      double midpointFirstVelocityConstant0 = PiecewiseCoMTrajectoryPlannerTools
+            .getFirstCoefficientVelocityMultiplier(firstContactState, firstSegmentDuration, omega);
+      double midpointFirstVelocityConstant1 = PiecewiseCoMTrajectoryPlannerTools
+            .getSecondCoefficientVelocityMultiplier(firstContactState, firstSegmentDuration, omega);
+      double midpointFirstVelocityConstant2 = PiecewiseCoMTrajectoryPlannerTools.getGravityVelocityEffect(firstContactState, firstSegmentDuration, gravityZ);
 
-      double midpointSecondVelocityConstant0 = CoMTrajectoryPlannerTools.getFirstCoefficientVelocityMultiplier(secondContactState, 0.0, omega);
-      double midpointSecondVelocityConstant1 = CoMTrajectoryPlannerTools.getSecondCoefficientVelocityMultiplier(secondContactState, 0.0, omega);
-      double midpointSecondVelocityConstant2 = CoMTrajectoryPlannerTools.getGravityVelocityEffect(secondContactState, 0.0, gravityZ);
+      double midpointSecondVelocityConstant0 = PiecewiseCoMTrajectoryPlannerTools.getFirstCoefficientVelocityMultiplier(secondContactState, 0.0, omega);
+      double midpointSecondVelocityConstant1 = PiecewiseCoMTrajectoryPlannerTools.getSecondCoefficientVelocityMultiplier(secondContactState, 0.0, omega);
+      double midpointSecondVelocityConstant2 = PiecewiseCoMTrajectoryPlannerTools.getGravityVelocityEffect(secondContactState, 0.0, gravityZ);
 
-      double finalVelocityConstant0 = CoMTrajectoryPlannerTools.getFirstCoefficientVelocityMultiplier(secondContactState, secondSegmentDuration, omega);
-      double finalVelocityConstant1 = CoMTrajectoryPlannerTools.getSecondCoefficientVelocityMultiplier(secondContactState, secondSegmentDuration, omega);
-      double finalVelocityConstant2 = CoMTrajectoryPlannerTools.getGravityVelocityEffect(secondContactState, secondSegmentDuration, gravityZ);
+      double finalVelocityConstant0 = PiecewiseCoMTrajectoryPlannerTools.getFirstCoefficientVelocityMultiplier(secondContactState, secondSegmentDuration, omega);
+      double finalVelocityConstant1 = PiecewiseCoMTrajectoryPlannerTools.getSecondCoefficientVelocityMultiplier(secondContactState, secondSegmentDuration, omega);
+      double finalVelocityConstant2 = PiecewiseCoMTrajectoryPlannerTools.getGravityVelocityEffect(secondContactState, secondSegmentDuration, gravityZ);
 
       coefficientMultipliers.zero();
       coefficientMultipliersInv.zero();
@@ -214,17 +218,17 @@ public class SegmentedCoMTrajectory
          thirdCoefficient.setZ(zCoefficientConstants.get(2));
       }
 
-      double firstPositionMultiplier = CoMTrajectoryPlannerTools.getFirstCoefficientPositionMultiplier(contactState, timeInSegment, omega);
-      double secondPositionMultiplier = CoMTrajectoryPlannerTools.getSecondCoefficientPositionMultiplier(contactState, timeInSegment, omega);
+      double firstPositionMultiplier = PiecewiseCoMTrajectoryPlannerTools.getFirstCoefficientPositionMultiplier(contactState, timeInSegment, omega);
+      double secondPositionMultiplier = PiecewiseCoMTrajectoryPlannerTools.getSecondCoefficientPositionMultiplier(contactState, timeInSegment, omega);
       double thirdPositionMultiplier = getThirdCoefficientPositionMultiplier(contactState, timeInSegment, gravityZ);
 
-      double firstVelocityMultiplier = CoMTrajectoryPlannerTools.getFirstCoefficientVelocityMultiplier(contactState, timeInSegment, omega);
-      double secondVelocityMultiplier = CoMTrajectoryPlannerTools.getSecondCoefficientVelocityMultiplier(contactState, timeInSegment, omega);
-      double thirdVelocityMultiplier = CoMTrajectoryPlannerTools.getGravityVelocityEffect(contactState, timeInSegment, gravityZ);
+      double firstVelocityMultiplier = PiecewiseCoMTrajectoryPlannerTools.getFirstCoefficientVelocityMultiplier(contactState, timeInSegment, omega);
+      double secondVelocityMultiplier = PiecewiseCoMTrajectoryPlannerTools.getSecondCoefficientVelocityMultiplier(contactState, timeInSegment, omega);
+      double thirdVelocityMultiplier = PiecewiseCoMTrajectoryPlannerTools.getGravityVelocityEffect(contactState, timeInSegment, gravityZ);
 
-      double firstAccelerationMultiplier = CoMTrajectoryPlannerTools.getFirstCoefficientAccelerationMultiplier(contactState, timeInSegment, omega);
-      double secondAccelerationMultiplier = CoMTrajectoryPlannerTools.getSecondCoefficientAccelerationMultiplier(contactState, timeInSegment, omega);
-      double thirdAccelerationMultiplier = CoMTrajectoryPlannerTools.getGravityAccelerationEffect(contactState, gravityZ);
+      double firstAccelerationMultiplier = PiecewiseCoMTrajectoryPlannerTools.getFirstCoefficientAccelerationMultiplier(contactState, timeInSegment, omega);
+      double secondAccelerationMultiplier = PiecewiseCoMTrajectoryPlannerTools.getSecondCoefficientAccelerationMultiplier(contactState, timeInSegment, omega);
+      double thirdAccelerationMultiplier = PiecewiseCoMTrajectoryPlannerTools.getGravityAccelerationEffect(contactState, gravityZ);
 
       desiredComPosition.setToZero();
       desiredComPosition.scaleAdd(firstPositionMultiplier, firstCoefficient, desiredComPosition);
@@ -259,7 +263,7 @@ public class SegmentedCoMTrajectory
 
    private static double getThirdCoefficientPositionMultiplier(ContactState contactState, double time, double gravityZ)
    {
-      return contactState == ContactState.IN_CONTACT ? 1.0 : CoMTrajectoryPlannerTools.getGravityPositionEffect(contactState, time, gravityZ);
+      return contactState == ContactState.IN_CONTACT ? 1.0 : PiecewiseCoMTrajectoryPlannerTools.getGravityPositionEffect(contactState, time, gravityZ);
    }
 
 }

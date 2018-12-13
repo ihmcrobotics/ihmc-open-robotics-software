@@ -34,7 +34,7 @@ public class CoMTrajectoryPlannerTest
       double nominalHeight = 0.7;
 
       List<ContactStateProvider> contactSequence = new ArrayList<>();
-      CoMTrajectoryPlanner planner = new CoMTrajectoryPlanner(contactSequence, omega, gravityZ, nominalHeight, registry);
+      PiecewiseCoMTrajectoryPlanner planner = new PiecewiseCoMTrajectoryPlanner(contactSequence, omega, gravityZ, nominalHeight, registry);
 
       SettableContactStateProvider firstContact = new SettableContactStateProvider();
 
@@ -127,7 +127,7 @@ public class CoMTrajectoryPlannerTest
       double nominalHeight = 0.7;
 
       List<ContactStateProvider> contactSequence = new ArrayList<>();
-      CoMTrajectoryPlanner planner = new CoMTrajectoryPlanner(contactSequence, omega, gravityZ, nominalHeight, registry);
+      PiecewiseCoMTrajectoryPlanner planner = new PiecewiseCoMTrajectoryPlanner(contactSequence, omega, gravityZ, nominalHeight, registry);
 
       SettableContactStateProvider firstContact = new SettableContactStateProvider();
       SettableContactStateProvider secondContact = new SettableContactStateProvider();
@@ -199,7 +199,7 @@ public class CoMTrajectoryPlannerTest
       double nominalHeight = 0.7;
 
       List<ContactStateProvider> contactSequence = new ArrayList<>();
-      CoMTrajectoryPlanner planner = new CoMTrajectoryPlanner(contactSequence, omega, gravityZ, nominalHeight, registry);
+      PiecewiseCoMTrajectoryPlanner planner = new PiecewiseCoMTrajectoryPlanner(contactSequence, omega, gravityZ, nominalHeight, registry);
 
       SettableContactStateProvider firstContact = new SettableContactStateProvider();
       SettableContactStateProvider secondContact = new SettableContactStateProvider();
@@ -265,7 +265,7 @@ public class CoMTrajectoryPlannerTest
       double nominalHeight = 0.7;
 
       List<ContactStateProvider> contactSequence = new ArrayList<>();
-      CoMTrajectoryPlanner planner = new CoMTrajectoryPlanner(contactSequence, omega, gravityZ, nominalHeight, registry);
+      PiecewiseCoMTrajectoryPlanner planner = new PiecewiseCoMTrajectoryPlanner(contactSequence, omega, gravityZ, nominalHeight, registry);
 
       SettableContactStateProvider firstContact = new SettableContactStateProvider();
       SettableContactStateProvider secondContact = new SettableContactStateProvider();
@@ -347,7 +347,7 @@ public class CoMTrajectoryPlannerTest
       double nominalHeight = 0.7;
 
       List<ContactStateProvider> contactSequence = new ArrayList<>();
-      CoMTrajectoryPlanner planner = new CoMTrajectoryPlanner(contactSequence, omega, gravityZ, nominalHeight, registry);
+      PiecewiseCoMTrajectoryPlanner planner = new PiecewiseCoMTrajectoryPlanner(contactSequence, omega, gravityZ, nominalHeight, registry);
 
       Random random = new Random(1738L);
 
@@ -436,7 +436,7 @@ public class CoMTrajectoryPlannerTest
       double nominalHeight = 0.7;
 
       List<ContactStateProvider> contactSequence = new ArrayList<>();
-      CoMTrajectoryPlanner planner = new CoMTrajectoryPlanner(contactSequence, omega, gravityZ, nominalHeight, registry);
+      PiecewiseCoMTrajectoryPlanner planner = new PiecewiseCoMTrajectoryPlanner(contactSequence, omega, gravityZ, nominalHeight, registry);
 
       SettableContactStateProvider firstContact = new SettableContactStateProvider();
       SettableContactStateProvider secondContact = new SettableContactStateProvider();
@@ -501,7 +501,7 @@ public class CoMTrajectoryPlannerTest
       double nominalHeight = 0.7;
 
       List<ContactStateProvider> contactSequence = new ArrayList<>();
-      CoMTrajectoryPlanner planner = new CoMTrajectoryPlanner(contactSequence, omega, gravityZ, nominalHeight, registry);
+      PiecewiseCoMTrajectoryPlanner planner = new PiecewiseCoMTrajectoryPlanner(contactSequence, omega, gravityZ, nominalHeight, registry);
 
       SettableContactStateProvider secondContact = new SettableContactStateProvider();
       SettableContactStateProvider thirdContact = new SettableContactStateProvider();
@@ -540,7 +540,7 @@ public class CoMTrajectoryPlannerTest
       }
    }
 
-   private static void checkPlannerDynamics(CoMTrajectoryPlanner planner, double omega)
+   private static void checkPlannerDynamics(PiecewiseCoMTrajectoryPlanner planner, double omega)
    {
       FramePoint3D constructedDCMPosition = new FramePoint3D();
       constructedDCMPosition.scaleAdd(1.0 / omega, planner.getDesiredCoMVelocity(), planner.getDesiredCoMPosition());
