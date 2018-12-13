@@ -6,6 +6,7 @@ import javafx.scene.Scene;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.Pane;
 import javafx.stage.Stage;
+import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI;
 import us.ihmc.footstepPlanning.graphSearch.parameters.DefaultFootstepPlanningParameters;
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParameters;
@@ -77,18 +78,18 @@ public class FootstepPlannerUI
 
    public FootstepPlannerUI(Stage primaryStage, FootstepPlannerParameters plannerParameters, VisibilityGraphsParameters visibilityGraphsParameters) throws Exception
    {
-      this(primaryStage, new SharedMemoryJavaFXMessager(FootstepPlannerMessagerAPI.API), plannerParameters, visibilityGraphsParameters, null, null);
+      this(primaryStage, new SharedMemoryJavaFXMessager(FootstepPlannerMessagerAPI.API), plannerParameters, visibilityGraphsParameters, null, null, null);
       messager.startMessager();
    }
 
    public FootstepPlannerUI(Stage primaryStage, JavaFXMessager messager) throws Exception
    {
-      this(primaryStage, messager, new DefaultFootstepPlanningParameters(), new DefaultVisibilityGraphParameters(), null, null);
+      this(primaryStage, messager, new DefaultFootstepPlanningParameters(), new DefaultVisibilityGraphParameters(), null, null, null);
    }
 
    public FootstepPlannerUI(Stage primaryStage, JavaFXMessager messager, FootstepPlannerParameters plannerParameters,
                             VisibilityGraphsParameters visibilityGraphsParameters, FullHumanoidRobotModelFactory fullHumanoidRobotModelFactory,
-                            RobotContactPointParameters<RobotSide> contactPointParameters) throws Exception
+                            RobotContactPointParameters<RobotSide> contactPointParameters, WalkingControllerParameters walkingControllerParameters) throws Exception
    {
       this.primaryStage = primaryStage;
       this.messager = messager;
@@ -165,6 +166,11 @@ public class FootstepPlannerUI
          robotVisualizer.start();
       }
 
+      if(walkingControllerParameters != null)
+      {
+         mainTabController.setDefaultTiming(walkingControllerParameters.getDefaultSwingTime(), walkingControllerParameters.getDefaultTransferTime());
+      }
+
       planarRegionViewer.start();
       startGoalPositionViewer.start();
       startGoalOrientationViewer.start();
@@ -220,8 +226,8 @@ public class FootstepPlannerUI
    }
 
    public static FootstepPlannerUI createMessagerUI(Stage primaryStage, JavaFXMessager messager, FootstepPlannerParameters plannerParameters,
-                                                    VisibilityGraphsParameters visibilityGraphsParameters, FullHumanoidRobotModelFactory fullHumanoidRobotModelFactory, RobotContactPointParameters<RobotSide> contactPointParameters) throws Exception
+                                                    VisibilityGraphsParameters visibilityGraphsParameters, FullHumanoidRobotModelFactory fullHumanoidRobotModelFactory, RobotContactPointParameters<RobotSide> contactPointParameters, WalkingControllerParameters walkingControllerParameters) throws Exception
    {
-      return new FootstepPlannerUI(primaryStage, messager, plannerParameters, visibilityGraphsParameters, fullHumanoidRobotModelFactory, contactPointParameters);
+      return new FootstepPlannerUI(primaryStage, messager, plannerParameters, visibilityGraphsParameters, fullHumanoidRobotModelFactory, contactPointParameters, walkingControllerParameters);
    }
 }

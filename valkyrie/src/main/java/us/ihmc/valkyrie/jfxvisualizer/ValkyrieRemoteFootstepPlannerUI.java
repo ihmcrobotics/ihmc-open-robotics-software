@@ -34,7 +34,7 @@ public class ValkyrieRemoteFootstepPlannerUI extends Application
 
       messager.startMessager();
 
-      ui = FootstepPlannerUI.createMessagerUI(primaryStage, messager, drcRobotModel.getFootstepPlannerParameters(), drcRobotModel.getVisibilityGraphsParameters(), drcRobotModel, drcRobotModel.getContactPointParameters());
+      ui = FootstepPlannerUI.createMessagerUI(primaryStage, messager, drcRobotModel.getFootstepPlannerParameters(), drcRobotModel.getVisibilityGraphsParameters(), drcRobotModel, drcRobotModel.getContactPointParameters(), drcRobotModel.getWalkingControllerParameters());
       ui.show();
    }
 
