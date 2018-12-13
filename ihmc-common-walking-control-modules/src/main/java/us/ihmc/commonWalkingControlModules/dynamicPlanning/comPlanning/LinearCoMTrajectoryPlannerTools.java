@@ -55,7 +55,7 @@ public class LinearCoMTrajectoryPlannerTools
 
          if (contactMotion == ContactMotion.LINEAR)
          {
-            double fourthCoefficientPositionMultiplier = getFourthCoefficientCoMPositionMultiplier(contactState, contactMotion);
+            double fourthCoefficientPositionMultiplier = getFourthCoefficientCoMVelocityMultiplier(contactState, contactMotion);
             desiredCoMVelocityToPack.scaleAdd(fourthCoefficientPositionMultiplier, fourthCoefficient, desiredCoMVelocityToPack);
          }
       }
