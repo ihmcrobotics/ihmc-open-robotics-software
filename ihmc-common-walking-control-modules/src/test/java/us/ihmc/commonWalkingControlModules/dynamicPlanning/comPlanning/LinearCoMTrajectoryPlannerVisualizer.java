@@ -125,7 +125,7 @@ public class LinearCoMTrajectoryPlannerVisualizer
       SettableContactStateProvider initialContactStateProvider = new SettableContactStateProvider();
       initialContactStateProvider.getTimeInterval().setInterval(0.0, initialTransferDuration);
       initialContactStateProvider.setStartCopPosition(new FramePoint3D(worldFrame, contactPosition, 0.0, 0.0));
-//      initialContactStateProvider.setEndCopPosition(new FramePoint3D(worldFrame, contactPosition, 0.0, 0.0));
+      initialContactStateProvider.setEndCopPosition(new FramePoint3D(worldFrame, contactPosition, 0.0, 0.0));
       initialContactStateProvider.setContactState(ContactState.IN_CONTACT);
 
       contacts.add(initialContactStateProvider);
@@ -137,10 +137,10 @@ public class LinearCoMTrajectoryPlannerVisualizer
          SettableContactStateProvider contactStateProvider = new SettableContactStateProvider();
 
          contactStateProvider.setStartCopPosition(new FramePoint3D(worldFrame, contactPosition, 0.0, 0.0));
-//         if (includeFlight)
-//            contactStateProvider.setEndCopPosition(contactStateProvider.getCopStartPosition());
-//         else
-//            contactStateProvider.setEndCopPosition(new FramePoint3D(worldFrame, contactPosition + stepDuration, 0.0, 0.0));
+         if (includeFlight)
+            contactStateProvider.setEndCopPosition(contactStateProvider.getCopStartPosition());
+         else
+            contactStateProvider.setEndCopPosition(new FramePoint3D(worldFrame, contactPosition + stepLength, 0.0, 0.0));
          contactStateProvider.getTimeInterval().setInterval(currentTime, currentTime + stepDuration);
          contactStateProvider.setContactState(ContactState.IN_CONTACT);
 
@@ -164,6 +164,7 @@ public class LinearCoMTrajectoryPlannerVisualizer
 
       SettableContactStateProvider finalStateProvider = new SettableContactStateProvider();
       finalStateProvider.setStartCopPosition(new FramePoint3D(worldFrame, contactPosition, 0.0, 0.0));
+      finalStateProvider.setEndCopPosition(new FramePoint3D(worldFrame, contactPosition, 0.0, 0.0));
       finalStateProvider.getTimeInterval().setInterval(currentTime, currentTime + 5.0);
       finalStateProvider.setContactState(ContactState.IN_CONTACT);
 

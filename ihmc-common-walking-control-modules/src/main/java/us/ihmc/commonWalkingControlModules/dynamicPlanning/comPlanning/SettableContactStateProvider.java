@@ -9,16 +9,23 @@ public class SettableContactStateProvider implements ContactStateProvider
 {
    private ContactState contactState = ContactState.IN_CONTACT;
    private final FramePoint3D startCopPosition = new FramePoint3D();
+   private final FramePoint3D endCopPosition = new FramePoint3D();
    private final TimeInterval timeInterval = new TimeInterval();
 
    public SettableContactStateProvider()
    {
       startCopPosition.setToNaN();
+      endCopPosition.setToNaN();
    }
 
    public void setStartCopPosition(FramePoint3DReadOnly startCopPosition)
    {
       this.startCopPosition.set(startCopPosition);
+   }
+
+   public void setEndCopPosition(FramePoint3DReadOnly endCopPosition)
+   {
+      this.endCopPosition.set(endCopPosition);
    }
 
    public void setTimeInterval(TimeIntervalReadOnly timeInterval)
@@ -38,7 +45,7 @@ public class SettableContactStateProvider implements ContactStateProvider
 
    public FramePoint3DReadOnly getCopEndPosition()
    {
-      return startCopPosition;
+      return endCopPosition;
    }
 
    public ContactState getContactState()
