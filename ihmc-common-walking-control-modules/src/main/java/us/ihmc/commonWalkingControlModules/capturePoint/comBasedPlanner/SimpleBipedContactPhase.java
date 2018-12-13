@@ -5,11 +5,14 @@ import us.ihmc.commonWalkingControlModules.dynamicPlanning.comPlanning.ContactSt
 import us.ihmc.commonWalkingControlModules.dynamicPlanning.comPlanning.ContactStateProvider;
 import us.ihmc.euclid.referenceFrame.FrameConvexPolygon2D;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameConvexPolygon2DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint2DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
+import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DReadOnly;
 import us.ihmc.robotics.robotSide.RobotSide;
+import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.time.TimeInterval;
 import us.ihmc.robotics.time.TimeIntervalBasics;
 
@@ -23,14 +26,23 @@ public class SimpleBipedContactPhase implements ContactStateProvider
    private ContactState contactState = ContactState.IN_CONTACT;
    private final ContactMotion contactMotion = ContactMotion.LINEAR;
 
-   private final FrameConvexPolygon2D startFootPolygon = new FrameConvexPolygon2D();
-   private final FrameConvexPolygon2D nextFootPolygon = new FrameConvexPolygon2D();
+   private final List<RobotSide> startFeet = new ArrayList<>();
+   private final List<RobotSide> endFeet = new ArrayList<>();
+   private final SideDependentList<FramePose3D> startFootPoses = new SideDependentList<>();
+   private final SideDependentList<FramePose3D> nextFootPoses = new SideDependentList<>();
+
+
 
    private final FramePoint3D startCopPosition = new FramePoint3D();
    private final FramePoint3D endCopPosition = new FramePoint3D();
 
    public SimpleBipedContactPhase()
    {
+      for (RobotSide robotSide : RobotSide.values)
+      {
+         startFootPoses.put(robotSide, new FramePose3D());
+         nextFootPoses.put(robotSide, new FramePose3D());
+      }
    }
 
    @Override
@@ -63,13 +75,21 @@ public class SimpleBipedContactPhase implements ContactStateProvider
       return contactMotion;
    }
 
+   public List<RobotSide> getFeetInContact()
+   {
+      return feetInContact;
+   }
+
    public void reset()
    {
       feetInContact.clear();
-      startFootPolygon.clearAndUpdate();
-      nextFootPolygon.clearAndUpdate();
       startCopPosition.setToNaN();
       endCopPosition.setToNaN();
+      for (RobotSide robotSide : RobotSide.values)
+      {
+         startFootPoses.get(robotSide).setToNaN();
+         nextFootPoses.get(robotSide).setToNaN();
+      }
    }
 
    public void setFeetInContact(List<RobotSide> feetInContact)
@@ -84,15 +104,20 @@ public class SimpleBipedContactPhase implements ContactStateProvider
       }
    }
 
-   public void setStartFootPolygon(FrameConvexPolygon2DReadOnly polygon)
+   public void addStartFoot(RobotSide robotSide, FramePose3DReadOnly pose)
    {
-      startFootPolygon.set(polygon);
+      startFeet.add(robotSide);
+      startFootPoses.get(robotSide).setIncludingFrame(pose);
    }
 
-   public void setNextFootPolygon(FrameConvexPolygon2DReadOnly polygon)
+   public void addNextFoot(RobotSide robotSide, FramePose3DReadOnly pose)
    {
-      nextFootPolygon.set(polygon);
+      endFeet.add(robotSide);
+      nextFootPoses.get(robotSide).setIncludingFrame(pose);
    }
+
+
+   private final FramePoint3D tempPoint = new FramePoint3D();
 
    public void update()
    {
@@ -100,23 +125,28 @@ public class SimpleBipedContactPhase implements ContactStateProvider
       {
          contactState = ContactState.FLIGHT;
       }
-      else if (feetInContact.size() == 1)
-      {
-         contactState = ContactState.IN_CONTACT;
-         FramePoint2DReadOnly startCentroid = startFootPolygon.getCentroid();
-         startCopPosition.setIncludingFrame(startCentroid.getReferenceFrame(), startCentroid, 0.0);
-         startCopPosition.changeFrame(ReferenceFrame.getWorldFrame());
-         endCopPosition.setIncludingFrame(startCopPosition);
-      }
       else
       {
          contactState = ContactState.IN_CONTACT;
-         FramePoint2DReadOnly startCentroid = startFootPolygon.getCentroid();
-         FramePoint2DReadOnly endCentroid = startFootPolygon.getCentroid();
-         startCopPosition.setIncludingFrame(startCentroid.getReferenceFrame(), startCentroid, 0.0);
-         startCopPosition.changeFrame(ReferenceFrame.getWorldFrame());
-         endCopPosition.setIncludingFrame(endCentroid.getReferenceFrame(), endCentroid, 0.0);
-         endCopPosition.changeFrame(ReferenceFrame.getWorldFrame());
+
+         startCopPosition.setToZero();
+         for (int i = 0; i < startFeet.size(); i++)
+         {
+            tempPoint.setIncludingFrame(startFootPoses.get(startFeet.get(i)).getPosition());
+            tempPoint.changeFrame(ReferenceFrame.getWorldFrame());
+            startCopPosition.add(tempPoint);
+         }
+         startCopPosition.scale(1.0 / startFeet.size());
+
+         endCopPosition.setToZero();
+         for (int i = 0; i < startFeet.size(); i++)
+         {
+            tempPoint.setIncludingFrame(nextFootPoses.get(endFeet.get(i)).getPosition());
+            tempPoint.changeFrame(ReferenceFrame.getWorldFrame());
+            endCopPosition.add(tempPoint);
+         }
+         endCopPosition.scale(1.0 / endFeet.size());
       }
+
    }
 }
