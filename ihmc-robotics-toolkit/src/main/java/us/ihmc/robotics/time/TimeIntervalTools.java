@@ -1,7 +1,4 @@
-package us.ihmc.quadrupedBasics.utils;
-
-import us.ihmc.quadrupedBasics.gait.TimeIntervalProvider;
-import us.ihmc.tools.lists.ListSorter;
+package us.ihmc.robotics.time;
 
 import java.util.Comparator;
 import java.util.List;
@@ -11,22 +8,50 @@ public class TimeIntervalTools
 {
    static public void sortByStartTime(List<? extends TimeIntervalProvider> timeIntervalProviders)
    {
-      ListSorter.sort((List<TimeIntervalProvider>)timeIntervalProviders, startTimeComparator);
+      sort((List<TimeIntervalProvider>) timeIntervalProviders, startTimeComparator);
    }
 
    static public void sortByReverseStartTime(List<? extends TimeIntervalProvider> timeIntervalProviders)
    {
-      ListSorter.sort((List<TimeIntervalProvider>)timeIntervalProviders, startTimeComparator.reversed());
+      sort((List<TimeIntervalProvider>) timeIntervalProviders, startTimeComparator.reversed());
    }
 
    static public void sortByEndTime(List<? extends TimeIntervalProvider> timeIntervalProviders)
    {
-      ListSorter.sort((List<TimeIntervalProvider>)timeIntervalProviders, endTimeComparator);
+      sort((List<TimeIntervalProvider>) timeIntervalProviders, endTimeComparator);
    }
 
    static public void sortByReverseEndTime(List<? extends TimeIntervalProvider> timeIntervalProviders)
    {
-      ListSorter.sort((List<TimeIntervalProvider>)timeIntervalProviders, endTimeComparator.reversed());
+      sort((List<TimeIntervalProvider>) timeIntervalProviders, endTimeComparator.reversed());
+   }
+
+   private static <T> void sort(List<T> ts, Comparator<T> comparator)
+   {
+      boolean ordered = false;
+
+      while (!ordered)
+      {
+         ordered = true;
+         for (int i = 0; i < ts.size() - 1; i++)
+         {
+            T a = ts.get(i);
+            T b = ts.get(i + 1);
+
+            if (comparator.compare(a, b) > 0)
+            {
+               ordered = false;
+               swap(ts, i, i + 1);
+            }
+         }
+      }
+   }
+
+   private static <T> void swap(List<T> ts, int a, int b)
+   {
+      T tmp = ts.get(a);
+      ts.set(a, ts.get(b));
+      ts.set(b, tmp);
    }
 
    static public void removeStartTimesLessThan(double time, List<? extends TimeIntervalProvider> timeIntervalProviders)

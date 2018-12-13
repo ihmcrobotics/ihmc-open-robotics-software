@@ -1,5 +1,5 @@
 plugins {
-   id("us.ihmc.ihmc-build") version "0.15.4"
+   id("us.ihmc.ihmc-build") version "0.15.5"
    id("us.ihmc.ihmc-ci-plugin") version "0.18.0"
    id("us.ihmc.log-tools") version "0.2.2"
 }
@@ -19,7 +19,7 @@ testSuites {
 }
 
 mainDependencies {
-   compile group: "com.vividsolutions", name: "jts", version: "1.13"
+   compile group: "com.vividsolutions", name: "jts", version: "1.13" // TODO Update to https://github.com/locationtech/jts
    compile group: "org.apache.commons", name: "commons-lang3", version: "3.8.1"
    
    compile group: "us.ihmc", name: "euclid", version: "0.10.0"
@@ -41,6 +41,8 @@ applicationDependencies {
 }
 
 testDependencies {
+   compile ihmc.sourceSetProject("visualizers")
+
    compile group: "junit", name: "junit", version: "4.12"
    compile group: "org.junit.vintage", name: "junit-vintage-engine", version: "5.3.1"
 

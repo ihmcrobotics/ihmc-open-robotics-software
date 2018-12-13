@@ -12,7 +12,6 @@ import org.apache.commons.lang3.tuple.Pair;
 
 import us.ihmc.euclid.geometry.Line3D;
 import us.ihmc.euclid.geometry.LineSegment1D;
-import us.ihmc.euclid.geometry.LineSegment2D;
 import us.ihmc.euclid.geometry.LineSegment3D;
 import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
 import us.ihmc.euclid.tuple3D.Point3D;
@@ -69,17 +68,15 @@ public class PlanarRegionIntersectionCalculator
             PlanarRegionSegmentationRawData region1 = entry.getValue().getLeft();
             PlanarRegionSegmentationRawData region2 = entry.getValue().getRight();
 
-            List<LineSegment2D> intersectionsForRegion1 = PolygonizerTools.toLineSegmentsInPlane(intersections, region1.getOrigin(), region1.getNormal());
-            region1.addIntersections(intersectionsForRegion1);
-            List<LineSegment2D> intersectionsForRegion2 = PolygonizerTools.toLineSegmentsInPlane(intersections, region2.getOrigin(), region2.getNormal());
-            region2.addIntersections(intersectionsForRegion2);
+            region1.addIntersections(intersections);
+            region2.addIntersections(intersections);
          }
       }
 
       return allIntersections;
    }
 
-   public static void extendLinesToIntersection(List<LineSegment3D> allIntersections)
+   private static void extendLinesToIntersection(List<LineSegment3D> allIntersections)
    {
       Point3D closestPointOnCurrentLine = new Point3D();
       Point3D closestPointOnOtherLine = new Point3D();
@@ -215,7 +212,7 @@ public class PlanarRegionIntersectionCalculator
          }
          else
          { // The current point is too far from the previous, end of the current segment
-              // If there is not secondEndpoint, that means the firstEndpoint is isolated => not an intersection.
+           // If there is not secondEndpoint, that means the firstEndpoint is isolated => not an intersection.
             if (!Double.isNaN(secondEndpoint) || Math.abs(secondEndpoint - firstEndpoint) >= minIntersectionLength)
                intersectionSegments.add(new LineSegment1D(firstEndpoint, secondEndpoint));
 
