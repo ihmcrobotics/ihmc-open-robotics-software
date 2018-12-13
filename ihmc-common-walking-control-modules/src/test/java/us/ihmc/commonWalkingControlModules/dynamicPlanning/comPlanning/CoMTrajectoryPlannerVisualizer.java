@@ -46,7 +46,7 @@ public class CoMTrajectoryPlannerVisualizer
    private final YoDouble yoTime;
    private final YoDouble timeInPhase;
 
-   private final CoMTrajectoryPlanner planner;
+   private final PiecewiseCoMTrajectoryPlanner planner;
 
    private List<ContactStateProvider> contactStates;
 
@@ -83,7 +83,7 @@ public class CoMTrajectoryPlannerVisualizer
       timeInPhase = new YoDouble("timeInPhase", registry);
 
       contactStates = createContacts();
-      planner = new CoMTrajectoryPlanner(contactStates, omega, gravity, nominalHeight, registry, graphicsListRegistry);
+      planner = new PiecewiseCoMTrajectoryPlanner(contactStates, omega, gravity, nominalHeight, registry, graphicsListRegistry);
 
       YoGraphicPosition dcmViz = new YoGraphicPosition("desiredDCM", desiredDCMPosition, 0.02, YoAppearance.Yellow(), YoGraphicPosition.GraphicType.BALL_WITH_CROSS);
       YoGraphicPosition comViz = new YoGraphicPosition("desiredCoM", desiredCoMPosition, 0.02, YoAppearance.Black(), YoGraphicPosition.GraphicType.SOLID_BALL);

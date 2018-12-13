@@ -1,6 +1,6 @@
 package us.ihmc.quadrupedRobotics.planning.icp;
 
-import us.ihmc.commonWalkingControlModules.dynamicPlanning.comPlanning.CoMTrajectoryPlanner;
+import us.ihmc.commonWalkingControlModules.dynamicPlanning.comPlanning.PiecewiseCoMTrajectoryPlanner;
 import us.ihmc.commonWalkingControlModules.dynamicPlanning.comPlanning.CoMTrajectoryPlannerInterface;
 import us.ihmc.euclid.referenceFrame.interfaces.FixedFramePoint3DBasics;
 import us.ihmc.euclid.referenceFrame.interfaces.FixedFrameVector3DBasics;
@@ -30,7 +30,7 @@ public class QuadrupedCoMTrajectoryPlanner implements CoMTrajectoryPlannerInterf
    private final YoDouble timeInContactPhase = new YoDouble("timeInContactPhase", registry);
 
    private final QuadrupedContactSequenceUpdater contactSequenceUpdater;
-   private final CoMTrajectoryPlanner comTrajectoryPlanner;
+   private final PiecewiseCoMTrajectoryPlanner comTrajectoryPlanner;
 
    private final List<RobotQuadrant> currentFeetInContact = new ArrayList<>();
 
@@ -46,8 +46,8 @@ public class QuadrupedCoMTrajectoryPlanner implements CoMTrajectoryPlannerInterf
       this.timestamp = timestamp;
       contactSequenceUpdater = new QuadrupedContactSequenceUpdater(soleFrames, 4, 10);
 
-      comTrajectoryPlanner = new CoMTrajectoryPlanner(contactSequenceUpdater.getContactSequence(), omega, gravity, nominalHeight, registry,
-                                                      graphicsListRegistry);
+      comTrajectoryPlanner = new PiecewiseCoMTrajectoryPlanner(contactSequenceUpdater.getContactSequence(), omega, gravity, nominalHeight, registry,
+                                                               graphicsListRegistry);
 
       parentRegistry.addChild(registry);
    }
