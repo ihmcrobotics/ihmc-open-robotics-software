@@ -5,7 +5,6 @@ import java.util.List;
 import us.ihmc.commons.MathTools;
 import us.ihmc.pathPlanning.visibilityGraphs.dataStructure.ConnectionPoint3D;
 import us.ihmc.pathPlanning.visibilityGraphs.dijkstra.DijkstraVisibilityGraphPlanner;
-import us.ihmc.pathPlanning.visibilityGraphs.tools.JGraphTools;
 import us.ihmc.pathPlanning.visibilityGraphs.tools.PlanarRegionTools;
 import us.ihmc.robotics.geometry.PlanarRegion;
 
@@ -94,13 +93,12 @@ public interface VisibilityGraphsParameters
     */
    default ObstacleExtrusionDistanceCalculator getObstacleExtrusionDistanceCalculator()
    {
-      return (pointToExtrude, obstacleHeight) ->
-      {
-         if(obstacleHeight < 0.0)
+      return (pointToExtrude, obstacleHeight) -> {
+         if (obstacleHeight < 0.0)
          {
             return 0.0;
          }
-         else if(obstacleHeight < getTooHighToStepDistance())
+         else if (obstacleHeight < getTooHighToStepDistance())
          {
             return getExtrusionDistanceIfNotTooHighToStep();
          }
@@ -173,7 +171,10 @@ public interface VisibilityGraphsParameters
          @Override
          public boolean isRegionValidObstacle(PlanarRegion query, PlanarRegion navigableRegion)
          {
-            if (!PlanarRegionTools.isRegionAOverlapingWithRegionB(query, navigableRegion, 0.1))
+            //TOOD: ++++++JEP: Lots of bugs here. Need to clean up ConvexPolygon stuff to find distances and if overlapping more nicely...
+            //TODO: Get rid of these magic numbers and make them parameters somewhere. Make sure the overlapping region check is larger than getMaxInterRegionConnectionLength() 
+            //TODO: BodyPathPlannerEnvironment crash when the number is set to 1.0. But should work fine all the same...
+            if (!PlanarRegionTools.isRegionAOverlapingWithRegionB(query, navigableRegion, 0.25)) //1.0))
                return false;
 
             if (PlanarRegionTools.computeMinHeightOfRegionAAboveRegionB(query, navigableRegion) > 3.0)
@@ -187,6 +188,6 @@ public interface VisibilityGraphsParameters
    default VisibilityGraphPathPlanner getPathPlanner()
    {
       return new DijkstraVisibilityGraphPlanner();
-//      return JGraphTools.getJGraphPlanner();
+      //      return JGraphTools.getJGraphPlanner();
    }
 }
