@@ -76,11 +76,17 @@ public class LinearCoMTrajectoryPlannerToolsTest
       for (int iter = 0; iter < iters; iter++)
       {
          double timeInPhase = RandomNumbers.nextDouble(random, 0.0, 10000);
-         double multiplier = LinearCoMTrajectoryPlannerTools.getThirdCoefficientCoMPositionMultiplier(ContactState.IN_CONTACT, timeInPhase);
+         double multiplier = LinearCoMTrajectoryPlannerTools.getThirdCoefficientCoMPositionMultiplier(ContactState.IN_CONTACT, ContactMotion.LINEAR, timeInPhase);
 
          double expectedMultiplier = timeInPhase;
          if (!Double.isFinite(expectedMultiplier))
             expectedMultiplier = sufficientlyLarge;
+
+         assertTrue(Double.isFinite(multiplier));
+         assertEquals(expectedMultiplier, multiplier, epsilon);
+
+         multiplier = LinearCoMTrajectoryPlannerTools.getThirdCoefficientCoMPositionMultiplier(ContactState.IN_CONTACT, ContactMotion.CONSTANT, timeInPhase);
+         expectedMultiplier = 1.0;
 
          assertTrue(Double.isFinite(multiplier));
          assertEquals(expectedMultiplier, multiplier, epsilon);
@@ -91,7 +97,7 @@ public class LinearCoMTrajectoryPlannerToolsTest
    @Test(timeout = 30000)
    public void testGetFourthCoefficientCoMPositionMultiplier()
    {
-      double multiplier = LinearCoMTrajectoryPlannerTools.getFourthCoefficientCoMPositionMultiplier(ContactState.IN_CONTACT);
+      double multiplier = LinearCoMTrajectoryPlannerTools.getFourthCoefficientCoMPositionMultiplier(ContactState.IN_CONTACT, ContactMotion.LINEAR);
 
       double expectedMultiplier = 1.0;
       assertTrue(Double.isFinite(multiplier));
@@ -158,17 +164,22 @@ public class LinearCoMTrajectoryPlannerToolsTest
    @Test(timeout = 30000)
    public void testGetThirdCoefficientCoMVelocityMultiplier()
    {
-      double multiplier = LinearCoMTrajectoryPlannerTools.getThirdCoefficientCoMVelocityMultiplier(ContactState.IN_CONTACT);
+      double multiplier = LinearCoMTrajectoryPlannerTools.getThirdCoefficientCoMVelocityMultiplier(ContactState.IN_CONTACT, ContactMotion.LINEAR);
 
       assertTrue(Double.isFinite(multiplier));
       assertEquals(1.0, multiplier, epsilon);
+
+      multiplier = LinearCoMTrajectoryPlannerTools.getThirdCoefficientCoMVelocityMultiplier(ContactState.IN_CONTACT, ContactMotion.CONSTANT);
+
+      assertTrue(Double.isFinite(multiplier));
+      assertEquals(0.0, multiplier, epsilon);
    }
 
    @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testGetFourthCoefficientCoMVelocityMultiplier()
    {
-      double multiplier = LinearCoMTrajectoryPlannerTools.getFourthCoefficientCoMVelocityMultiplier(ContactState.IN_CONTACT);
+      double multiplier = LinearCoMTrajectoryPlannerTools.getFourthCoefficientCoMVelocityMultiplier(ContactState.IN_CONTACT, ContactMotion.LINEAR);
 
       assertTrue(Double.isFinite(multiplier));
       assertEquals(0.0, multiplier, epsilon);
@@ -236,7 +247,12 @@ public class LinearCoMTrajectoryPlannerToolsTest
    @Test(timeout = 30000)
    public void testGetThirdCoefficientCoMAccelerationMultiplier()
    {
-      double multiplier = LinearCoMTrajectoryPlannerTools.getFourthCoefficientCoMAccelerationMultiplier(ContactState.IN_CONTACT);
+      double multiplier = LinearCoMTrajectoryPlannerTools.getThirdCoefficientCoMAccelerationMultiplier(ContactState.IN_CONTACT);
+
+      assertTrue(Double.isFinite(multiplier));
+      assertEquals(0.0, multiplier, epsilon);
+
+      multiplier = LinearCoMTrajectoryPlannerTools.getThirdCoefficientCoMAccelerationMultiplier(ContactState.IN_CONTACT);
 
       assertTrue(Double.isFinite(multiplier));
       assertEquals(0.0, multiplier, epsilon);
@@ -246,7 +262,7 @@ public class LinearCoMTrajectoryPlannerToolsTest
    @Test(timeout = 30000)
    public void testGetFourthCoefficientCoMAccelerationMultiplier()
    {
-      double multiplier = LinearCoMTrajectoryPlannerTools.getFourthCoefficientCoMAccelerationMultiplier(ContactState.IN_CONTACT);
+      double multiplier = LinearCoMTrajectoryPlannerTools.getFourthCoefficientCoMAccelerationMultiplier(ContactState.IN_CONTACT, ContactMotion.LINEAR);
 
       assertTrue(Double.isFinite(multiplier));
       assertEquals(0.0, multiplier, epsilon);
@@ -267,7 +283,6 @@ public class LinearCoMTrajectoryPlannerToolsTest
          if (!Double.isFinite(expectedMultiplier) || expectedMultiplier > sufficientlyLarge)
             expectedMultiplier = sufficientlyLarge;
 
-         fail();
          assertTrue(Double.isFinite(multiplier));
          assertEquals(expectedMultiplier, multiplier, epsilon);
 
@@ -294,7 +309,6 @@ public class LinearCoMTrajectoryPlannerToolsTest
          if (!Double.isFinite(expectedMultiplier))
             expectedMultiplier = sufficientlyLarge;
 
-         fail();
          assertTrue(Double.isFinite(multiplier));
          assertEquals(expectedMultiplier, multiplier, epsilon);
 
@@ -314,13 +328,19 @@ public class LinearCoMTrajectoryPlannerToolsTest
       for (int iter = 0; iter < iters; iter++)
       {
          double timeInPhase = RandomNumbers.nextDouble(random, 0.0, 10000);
-         double multiplier = LinearCoMTrajectoryPlannerTools.getThirdCoefficientCoMPositionMultiplier(ContactState.IN_CONTACT, timeInPhase);
+         double multiplier = LinearCoMTrajectoryPlannerTools.getThirdCoefficientCoMPositionMultiplier(ContactState.IN_CONTACT, ContactMotion.LINEAR, timeInPhase);
 
          double expectedMultiplier = timeInPhase;
          if (!Double.isFinite(expectedMultiplier))
             expectedMultiplier = sufficientlyLarge;
 
-         fail();
+         assertTrue(Double.isFinite(multiplier));
+         assertEquals(expectedMultiplier, multiplier, epsilon);
+
+         multiplier = LinearCoMTrajectoryPlannerTools.getThirdCoefficientCoMPositionMultiplier(ContactState.IN_CONTACT, ContactMotion.CONSTANT, timeInPhase);
+
+         expectedMultiplier = 1.0;
+
          assertTrue(Double.isFinite(multiplier));
          assertEquals(expectedMultiplier, multiplier, epsilon);
       }
@@ -330,9 +350,8 @@ public class LinearCoMTrajectoryPlannerToolsTest
    @Test(timeout = 30000)
    public void testGetFourthCoefficientVRPPositionMultiplier()
    {
-      double multiplier = LinearCoMTrajectoryPlannerTools.getFourthCoefficientCoMPositionMultiplier(ContactState.IN_CONTACT);
+      double multiplier = LinearCoMTrajectoryPlannerTools.getFourthCoefficientCoMPositionMultiplier(ContactState.IN_CONTACT, ContactMotion.LINEAR);
 
-      fail();
       double expectedMultiplier = 1.0;
       assertTrue(Double.isFinite(multiplier));
       assertEquals(expectedMultiplier, multiplier, epsilon);

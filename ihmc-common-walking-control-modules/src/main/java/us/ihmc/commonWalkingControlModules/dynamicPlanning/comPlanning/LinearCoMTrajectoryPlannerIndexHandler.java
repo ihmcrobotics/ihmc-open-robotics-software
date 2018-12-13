@@ -6,7 +6,6 @@ import java.util.List;
 
 public class LinearCoMTrajectoryPlannerIndexHandler
 {
-   private static final int contactSequenceSize = 4;
    private static final int flightSequenceSize = 2;
 
    private final List< ? extends ContactStateProvider> contactSequence;
@@ -24,12 +23,21 @@ public class LinearCoMTrajectoryPlannerIndexHandler
       startIndices.clear();
       size = 0;
       startIndices.add(0);
-      size += contactSequence.get(0).getContactState().isLoadBearing() ? contactSequenceSize : flightSequenceSize;
+      size += getSize(0);
       for (int sequenceId = 1; sequenceId < contactSequence.size(); sequenceId++)
       {
          startIndices.add(size);
-         size += contactSequence.get(sequenceId).getContactState().isLoadBearing() ? contactSequenceSize : flightSequenceSize;
+         size += getSize(sequenceId);
       }
+   }
+
+   private int getSize(int sequenceId)
+   {
+      ContactStateProvider stateProvider = contactSequence.get(sequenceId);
+      if (!stateProvider.getContactState().isLoadBearing())
+         return flightSequenceSize;
+      else
+         return stateProvider.getContactMotion().getNumberOfCoefficients();
    }
 
    public int getTotalSize()
