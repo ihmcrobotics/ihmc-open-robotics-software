@@ -41,5 +41,5 @@ visualizersDependencies {
    compile group: "us.ihmc", name: "ihmc-interfaces", version: "source"
    compile group: "us.ihmc", name: "ihmc-java-toolkit", version: "source"
    compile group: "us.ihmc", name: "simulation-construction-set-tools", version: "source"
-   compile group: "us.ihmc", name: "simulation-construction-set", version: "0.12.7"
+   compile group: "us.ihmc", name: "simulation-construction-set", version: "0.12.9"
 }
