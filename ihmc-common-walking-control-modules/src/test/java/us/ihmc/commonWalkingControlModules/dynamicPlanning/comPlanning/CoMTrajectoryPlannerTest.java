@@ -39,7 +39,7 @@ public class CoMTrajectoryPlannerTest
       SettableContactStateProvider firstContact = new SettableContactStateProvider();
 
       firstContact.setTimeInterval(new TimeInterval(0.0, Double.POSITIVE_INFINITY));
-      firstContact.setCopPosition(new FramePoint3D());
+      firstContact.setStartCopPosition(new FramePoint3D());
 
       contactSequence.add(firstContact);
 
@@ -133,9 +133,9 @@ public class CoMTrajectoryPlannerTest
       SettableContactStateProvider secondContact = new SettableContactStateProvider();
 
       firstContact.setTimeInterval(new TimeInterval(0.0, 1.0));
-      firstContact.setCopPosition(new FramePoint3D());
+      firstContact.setStartCopPosition(new FramePoint3D());
       secondContact.setTimeInterval(new TimeInterval(1.0, 2.0));
-      secondContact.setCopPosition(new FramePoint3D(ReferenceFrame.getWorldFrame(), 1.0, 0.25, 0.0));
+      secondContact.setStartCopPosition(new FramePoint3D(ReferenceFrame.getWorldFrame(), 1.0, 0.25, 0.0));
 
       contactSequence.add(firstContact);
       contactSequence.add(secondContact);
@@ -205,9 +205,9 @@ public class CoMTrajectoryPlannerTest
       SettableContactStateProvider secondContact = new SettableContactStateProvider();
 
       firstContact.setTimeInterval(new TimeInterval(0.0, 1.0));
-      firstContact.setCopPosition(new FramePoint3D(ReferenceFrame.getWorldFrame(), -0.1, 0.15, 0.0));
+      firstContact.setStartCopPosition(new FramePoint3D(ReferenceFrame.getWorldFrame(), -0.1, 0.15, 0.0));
       secondContact.setTimeInterval(new TimeInterval(1.0, 2.0));
-      secondContact.setCopPosition(new FramePoint3D(ReferenceFrame.getWorldFrame(), 1.0, 0.25, 0.0));
+      secondContact.setStartCopPosition(new FramePoint3D(ReferenceFrame.getWorldFrame(), 1.0, 0.25, 0.0));
 
       contactSequence.add(firstContact);
       contactSequence.add(secondContact);
@@ -272,11 +272,11 @@ public class CoMTrajectoryPlannerTest
       SettableContactStateProvider thirdContact= new SettableContactStateProvider();
 
       firstContact.setTimeInterval(new TimeInterval(0.0, 0.75));
-      firstContact.setCopPosition(new FramePoint3D());
+      firstContact.setStartCopPosition(new FramePoint3D());
       secondContact.setTimeInterval(new TimeInterval(0.75, 1.9));
-      secondContact.setCopPosition(new FramePoint3D(ReferenceFrame.getWorldFrame(), 1.0, 0.5, 0.0));
+      secondContact.setStartCopPosition(new FramePoint3D(ReferenceFrame.getWorldFrame(), 1.0, 0.5, 0.0));
       thirdContact.setTimeInterval(new TimeInterval(1.9, 3.0));
-      thirdContact.setCopPosition(new FramePoint3D(ReferenceFrame.getWorldFrame(), 2.0, 0.0, 0.0));
+      thirdContact.setStartCopPosition(new FramePoint3D(ReferenceFrame.getWorldFrame(), 2.0, 0.0, 0.0));
 
       contactSequence.add(firstContact);
       contactSequence.add(secondContact);
@@ -366,7 +366,7 @@ public class CoMTrajectoryPlannerTest
          // handle initial phase
          SettableContactStateProvider contactPhase = new SettableContactStateProvider();
          contactPhase.setTimeInterval(new TimeInterval(currentStartTime, segmentDuration + currentStartTime));
-         contactPhase.setCopPosition(startCoPPosition);
+         contactPhase.setStartCopPosition(startCoPPosition);
 
          contactSequence.add(contactPhase);
 
@@ -381,7 +381,7 @@ public class CoMTrajectoryPlannerTest
 
             contactPhase = new SettableContactStateProvider();
             contactPhase.setTimeInterval(new TimeInterval(currentStartTime, segmentDuration + currentStartTime));
-            contactPhase.setCopPosition(currentCoPPosition);
+            contactPhase.setStartCopPosition(currentCoPPosition);
 
             contactSequence.add(contactPhase);
 
@@ -443,11 +443,11 @@ public class CoMTrajectoryPlannerTest
       SettableContactStateProvider thirdContact = new SettableContactStateProvider();
 
       firstContact.setTimeInterval(new TimeInterval(0.0, 1.0));
-      firstContact.setCopPosition(new FramePoint3D());
+      firstContact.setStartCopPosition(new FramePoint3D());
       secondContact.setTimeInterval(new TimeInterval(1.0, 1.25));
       secondContact.setContactState(ContactState.FLIGHT);
       thirdContact.setTimeInterval(new TimeInterval(1.25, 2.25));
-      thirdContact.setCopPosition(new FramePoint3D(ReferenceFrame.getWorldFrame(), 2.0, 0.0, 0.0));
+      thirdContact.setStartCopPosition(new FramePoint3D(ReferenceFrame.getWorldFrame(), 2.0, 0.0, 0.0));
 
       contactSequence.add(firstContact);
       contactSequence.add(secondContact);
@@ -509,7 +509,7 @@ public class CoMTrajectoryPlannerTest
       secondContact.setTimeInterval(new TimeInterval(0.0, 0.25));
       secondContact.setContactState(ContactState.FLIGHT);
       thirdContact.setTimeInterval(new TimeInterval(0.25, 1.25));
-      thirdContact.setCopPosition(new FramePoint3D(ReferenceFrame.getWorldFrame(), 2.0, 0.0, 0.0));
+      thirdContact.setStartCopPosition(new FramePoint3D(ReferenceFrame.getWorldFrame(), 2.0, 0.0, 0.0));
 
       contactSequence.add(secondContact);
       contactSequence.add(thirdContact);

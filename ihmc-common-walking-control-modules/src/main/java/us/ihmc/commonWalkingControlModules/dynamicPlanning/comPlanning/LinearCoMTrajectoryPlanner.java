@@ -391,8 +391,6 @@ public class LinearCoMTrajectoryPlanner implements CoMTrajectoryPlannerInterface
     * <p>
     *    c<sub>2,i</sub> = c<sub>3,i</sub> = 0
     * </p>
-    * @param sequenceId i in the above equations
-    * @param timeInPhaseForConstraint t in the above equations
     * @param centerOfMassLocationForConstraint x<sub>0</sub> in the above equations
     */
    private void setCoMPositionConstraint(FramePoint3DReadOnly centerOfMassLocationForConstraint)

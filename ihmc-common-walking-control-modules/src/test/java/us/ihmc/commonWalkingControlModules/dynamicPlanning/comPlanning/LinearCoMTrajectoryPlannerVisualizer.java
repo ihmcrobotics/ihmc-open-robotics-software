@@ -21,7 +21,7 @@ import us.ihmc.yoVariables.variable.YoFrameVector3D;
 import java.util.ArrayList;
 import java.util.List;
 
-public class CoMTrajectoryPlannerVisualizer
+public class LinearCoMTrajectoryPlannerVisualizer
 {
    private static final double gravity = 9.81;
    private static final double nominalHeight = 0.75;
@@ -32,7 +32,7 @@ public class CoMTrajectoryPlannerVisualizer
    private static final double stepLength = 0.5;
    private static final int numberOfSteps = 5;
 
-   private static final boolean includeFlight = true;
+   private static final boolean includeFlight = false;
 
    private static final double simDt = 1e-3;
 
@@ -46,7 +46,7 @@ public class CoMTrajectoryPlannerVisualizer
    private final YoDouble yoTime;
    private final YoDouble timeInPhase;
 
-   private final PiecewiseCoMTrajectoryPlanner planner;
+   private final LinearCoMTrajectoryPlanner planner;
 
    private List<ContactStateProvider> contactStates;
 
@@ -61,7 +61,7 @@ public class CoMTrajectoryPlannerVisualizer
    private final BagOfBalls comTrajectory;
    private final BagOfBalls vrpTrajectory;
 
-   public CoMTrajectoryPlannerVisualizer()
+   public LinearCoMTrajectoryPlannerVisualizer()
    {
       YoVariableRegistry registry = new YoVariableRegistry("test");
       YoGraphicsListRegistry graphicsListRegistry = new YoGraphicsListRegistry();
@@ -83,7 +83,7 @@ public class CoMTrajectoryPlannerVisualizer
       timeInPhase = new YoDouble("timeInPhase", registry);
 
       contactStates = createContacts();
-      planner = new PiecewiseCoMTrajectoryPlanner(contactStates, omega, gravity, nominalHeight, registry, graphicsListRegistry);
+      planner = new LinearCoMTrajectoryPlanner(contactStates, omega, gravity, nominalHeight, registry, graphicsListRegistry);
 
       YoGraphicPosition dcmViz = new YoGraphicPosition("desiredDCM", desiredDCMPosition, 0.02, YoAppearance.Yellow(), YoGraphicPosition.GraphicType.BALL_WITH_CROSS);
       YoGraphicPosition comViz = new YoGraphicPosition("desiredCoM", desiredCoMPosition, 0.02, YoAppearance.Black(), YoGraphicPosition.GraphicType.SOLID_BALL);
@@ -124,7 +124,8 @@ public class CoMTrajectoryPlannerVisualizer
 
       SettableContactStateProvider initialContactStateProvider = new SettableContactStateProvider();
       initialContactStateProvider.getTimeInterval().setInterval(0.0, initialTransferDuration);
-      initialContactStateProvider.setCopPosition(new FramePoint3D(worldFrame, contactPosition, 0.0, 0.0));
+      initialContactStateProvider.setStartCopPosition(new FramePoint3D(worldFrame, contactPosition, 0.0, 0.0));
+//      initialContactStateProvider.setEndCopPosition(new FramePoint3D(worldFrame, contactPosition, 0.0, 0.0));
       initialContactStateProvider.setContactState(ContactState.IN_CONTACT);
 
       contacts.add(initialContactStateProvider);
@@ -133,10 +134,13 @@ public class CoMTrajectoryPlannerVisualizer
 
       for (int i = 0; i < numberOfSteps; i++)
       {
-
          SettableContactStateProvider contactStateProvider = new SettableContactStateProvider();
 
-         contactStateProvider.setCopPosition(new FramePoint3D(worldFrame, contactPosition, 0.0, 0.0));
+         contactStateProvider.setStartCopPosition(new FramePoint3D(worldFrame, contactPosition, 0.0, 0.0));
+//         if (includeFlight)
+//            contactStateProvider.setEndCopPosition(contactStateProvider.getCopStartPosition());
+//         else
+//            contactStateProvider.setEndCopPosition(new FramePoint3D(worldFrame, contactPosition + stepDuration, 0.0, 0.0));
          contactStateProvider.getTimeInterval().setInterval(currentTime, currentTime + stepDuration);
          contactStateProvider.setContactState(ContactState.IN_CONTACT);
 
@@ -159,7 +163,7 @@ public class CoMTrajectoryPlannerVisualizer
       }
 
       SettableContactStateProvider finalStateProvider = new SettableContactStateProvider();
-      finalStateProvider.setCopPosition(new FramePoint3D(worldFrame, contactPosition, 0.0, 0.0));
+      finalStateProvider.setStartCopPosition(new FramePoint3D(worldFrame, contactPosition, 0.0, 0.0));
       finalStateProvider.getTimeInterval().setInterval(currentTime, currentTime + 5.0);
       finalStateProvider.setContactState(ContactState.IN_CONTACT);
 
@@ -225,6 +229,6 @@ public class CoMTrajectoryPlannerVisualizer
 
    public static void main(String[] args)
    {
-      CoMTrajectoryPlannerVisualizer visualizer = new CoMTrajectoryPlannerVisualizer();
+      LinearCoMTrajectoryPlannerVisualizer visualizer = new LinearCoMTrajectoryPlannerVisualizer();
    }
 }
