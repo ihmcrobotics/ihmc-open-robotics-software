@@ -7,8 +7,74 @@ import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
 
 public class LinearCoMTrajectoryPlannerTools
 {
+   static void constructDesiredCoMPosition(FixedFramePoint3DBasics desiredCoMPositionToPack, FramePoint3DReadOnly firstCoefficient,
+                                           FramePoint3DReadOnly secondCoefficient, FramePoint3DReadOnly thirdCoefficient,
+                                           FramePoint3DReadOnly fourthCoefficient, ContactState contactState, double timeInPhase, double omega, double gravityZ)
+   {
+      double firstCoefficientPositionMultiplier = getFirstCoefficientCoMPositionMultiplier(contactState, timeInPhase, omega);
+      double secondCoefficientPositionMultiplier = getSecondCoefficientCoMPositionMultiplier(contactState, timeInPhase, omega);
+      double gravityPositionEffect = getGravityPositionEffect(contactState, timeInPhase, gravityZ);
 
-   static double getFirstCoefficientPositionMultiplier(ContactState contactState, double timeInPhase, double omega)
+      desiredCoMPositionToPack.setToZero();
+      desiredCoMPositionToPack.scaleAdd(firstCoefficientPositionMultiplier, firstCoefficient, desiredCoMPositionToPack);
+      desiredCoMPositionToPack.scaleAdd(secondCoefficientPositionMultiplier, secondCoefficient, desiredCoMPositionToPack);
+      desiredCoMPositionToPack.addZ(gravityPositionEffect);
+      if (contactState.isLoadBearing())
+      {
+         double thirdCoefficientPositionMultiplier = getThirdCoefficientCoMPositionMultiplier(contactState, timeInPhase);
+         double fourthCoefficientPositionMultiplier = getFourthCoefficientCoMPositionMultiplier(contactState);
+
+         desiredCoMPositionToPack.scaleAdd(thirdCoefficientPositionMultiplier, thirdCoefficient, desiredCoMPositionToPack);
+         desiredCoMPositionToPack.scaleAdd(fourthCoefficientPositionMultiplier, fourthCoefficient, desiredCoMPositionToPack);
+      }
+   }
+
+   static void constructDesiredCoMVelocity(FixedFrameVector3DBasics desiredCoMVelocityToPack, FramePoint3DReadOnly firstCoefficient,
+                                           FramePoint3DReadOnly secondCoefficient, FramePoint3DReadOnly thirdCoefficient,
+                                           FramePoint3DReadOnly fourthCoefficient, ContactState contactState, double timeInPhase, double omega, double gravityZ)
+   {
+      double firstCoefficientVelocityMultiplier = getFirstCoefficientCoMVelocityMultiplier(contactState, timeInPhase, omega);
+      double secondCoefficientVelocityMultiplier = getSecondCoefficientCoMVelocityMultiplier(contactState, timeInPhase, omega);
+      double gravityVelocityEffect = getGravityVelocityEffect(contactState, timeInPhase, gravityZ);
+
+      desiredCoMVelocityToPack.setToZero();
+      desiredCoMVelocityToPack.scaleAdd(firstCoefficientVelocityMultiplier, firstCoefficient, desiredCoMVelocityToPack);
+      desiredCoMVelocityToPack.scaleAdd(secondCoefficientVelocityMultiplier, secondCoefficient, desiredCoMVelocityToPack);
+      desiredCoMVelocityToPack.addZ(gravityVelocityEffect);
+      if (contactState.isLoadBearing())
+      {
+         double thirdCoefficientVelocityMultiplier = getThirdCoefficientCoMVelocityMultiplier(contactState);
+         double fourthCoefficientVelocityMultiplier = getFourthCoefficientCoMVelocityMultiplier(contactState);
+
+         desiredCoMVelocityToPack.scaleAdd(thirdCoefficientVelocityMultiplier, thirdCoefficient, desiredCoMVelocityToPack);
+         desiredCoMVelocityToPack.scaleAdd(fourthCoefficientVelocityMultiplier, fourthCoefficient, desiredCoMVelocityToPack);
+      }
+   }
+
+   static void constructDesiredCoMAcceleration(FixedFrameVector3DBasics desiredCoMAccelerationToPack, FramePoint3DReadOnly firstCoefficient,
+                                               FramePoint3DReadOnly secondCoefficient, FramePoint3DReadOnly thirdCoefficient,
+                                               FramePoint3DReadOnly fourthCoefficient, ContactState contactState, double timeInPhase, double omega,
+                                               double gravityZ)
+   {
+      double firstCoefficientAccelerationMultiplier = getFirstCoefficientCoMAccelerationMultiplier(contactState, timeInPhase, omega);
+      double secondCoefficientAccelerationMultiplier = getSecondCoefficientCoMAccelerationMultiplier(contactState, timeInPhase, omega);
+      double gravityAccelerationEffect = getGravityAccelerationEffect(contactState, gravityZ);
+
+      desiredCoMAccelerationToPack.setToZero();
+      desiredCoMAccelerationToPack.scaleAdd(firstCoefficientAccelerationMultiplier, firstCoefficient, desiredCoMAccelerationToPack);
+      desiredCoMAccelerationToPack.scaleAdd(secondCoefficientAccelerationMultiplier, secondCoefficient, desiredCoMAccelerationToPack);
+      desiredCoMAccelerationToPack.addZ(gravityAccelerationEffect);
+      if (contactState.isLoadBearing())
+      {
+         double thirdCoefficientVelocityMultiplier = getThirdCoefficientCoMAccelerationMultiplier(contactState);
+         double fourthCoefficientVelocityMultiplier = getFourthCoefficientCoMAccelerationMultiplier(contactState);
+
+         desiredCoMAccelerationToPack.scaleAdd(thirdCoefficientVelocityMultiplier, thirdCoefficient, desiredCoMAccelerationToPack);
+         desiredCoMAccelerationToPack.scaleAdd(fourthCoefficientVelocityMultiplier, fourthCoefficient, desiredCoMAccelerationToPack);
+      }
+   }
+
+   static double getFirstCoefficientCoMPositionMultiplier(ContactState contactState, double timeInPhase, double omega)
    {
       if (contactState.isLoadBearing())
       {
@@ -20,7 +86,7 @@ public class LinearCoMTrajectoryPlannerTools
       }
    }
 
-   static double getSecondCoefficientPositionMultiplier(ContactState contactState, double timeInPhase, double omega)
+   static double getSecondCoefficientCoMPositionMultiplier(ContactState contactState, double timeInPhase, double omega)
    {
       if (contactState.isLoadBearing())
       {
@@ -32,7 +98,7 @@ public class LinearCoMTrajectoryPlannerTools
       }
    }
 
-   static double getThirdCoefficientPositionMultiplier(ContactState contactState, double timeInPhase)
+   static double getThirdCoefficientCoMPositionMultiplier(ContactState contactState, double timeInPhase)
    {
       if (contactState.isLoadBearing())
       {
@@ -44,7 +110,7 @@ public class LinearCoMTrajectoryPlannerTools
       }
    }
 
-   static double getFourthCoefficientPositionMultiplier(ContactState contactState)
+   static double getFourthCoefficientCoMPositionMultiplier(ContactState contactState)
    {
       if (contactState.isLoadBearing())
       {
@@ -56,7 +122,55 @@ public class LinearCoMTrajectoryPlannerTools
       }
    }
 
-   static double getFirstCoefficientVelocityMultiplier(ContactState contactState, double timeInPhase, double omega)
+   static double getFirstCoefficientVRPPositionMultiplier(ContactState contactState)
+   {
+      if (contactState.isLoadBearing())
+      {
+         return 0.0;
+      }
+      else
+      {
+         throw new IllegalArgumentException("Flight doesn't use the VRP.");
+      }
+   }
+
+   static double getSecondCoefficientVRPPositionMultiplier(ContactState contactState)
+   {
+      if (contactState.isLoadBearing())
+      {
+         return 0.0;
+      }
+      else
+      {
+         throw new IllegalArgumentException("Flight doesn't use the VRP.");
+      }
+   }
+
+   static double getThirdCoefficientVRPPositionMultiplier(ContactState contactState, double timeInPhase)
+   {
+      if (contactState.isLoadBearing())
+      {
+         return timeInPhase;
+      }
+      else
+      {
+         throw new IllegalArgumentException("Flight doesn't use the VRP.");
+      }
+   }
+
+   static double getFourthCoefficientVRPPositionMultiplier(ContactState contactState)
+   {
+      if (contactState.isLoadBearing())
+      {
+         return 1.0;
+      }
+      else
+      {
+         throw new IllegalArgumentException("Flight doesn't use the VRP.");
+      }
+   }
+
+   static double getFirstCoefficientCoMVelocityMultiplier(ContactState contactState, double timeInPhase, double omega)
    {
       if (contactState.isLoadBearing())
       {
@@ -68,11 +182,11 @@ public class LinearCoMTrajectoryPlannerTools
       }
    }
 
-   static double getSecondCoefficientVelocityMultiplier(ContactState contactState, double timeInPhase, double omega)
+   static double getSecondCoefficientCoMVelocityMultiplier(ContactState contactState, double timeInPhase, double omega)
    {
       if (contactState.isLoadBearing())
       {
-         return -omega * getSecondCoefficientPositionMultiplier(contactState, timeInPhase, omega);
+         return -omega * getSecondCoefficientCoMPositionMultiplier(contactState, timeInPhase, omega);
       }
       else
       {
@@ -80,7 +194,7 @@ public class LinearCoMTrajectoryPlannerTools
       }
    }
 
-   static double getThirdCoefficientVelocityMultiplier(ContactState contactState)
+   static double getThirdCoefficientCoMVelocityMultiplier(ContactState contactState)
    {
       if (contactState.isLoadBearing())
       {
@@ -92,7 +206,7 @@ public class LinearCoMTrajectoryPlannerTools
       }
    }
 
-   static double getFourthCoefficientVelocityMultiplier(ContactState contactState)
+   static double getFourthCoefficientCoMVelocityMultiplier(ContactState contactState)
    {
       if (contactState.isLoadBearing())
       {
@@ -104,7 +218,7 @@ public class LinearCoMTrajectoryPlannerTools
       }
    }
 
-   static double getFirstCoefficientAccelerationMultiplier(ContactState contactState, double timeInPhase, double omega)
+   static double getFirstCoefficientCoMAccelerationMultiplier(ContactState contactState, double timeInPhase, double omega)
    {
       if (contactState == ContactState.IN_CONTACT)
       {
@@ -116,11 +230,11 @@ public class LinearCoMTrajectoryPlannerTools
       }
    }
 
-   static double getSecondCoefficientAccelerationMultiplier(ContactState contactState, double timeInPhase, double omega)
+   static double getSecondCoefficientCoMAccelerationMultiplier(ContactState contactState, double timeInPhase, double omega)
    {
       if (contactState == ContactState.IN_CONTACT)
       {
-         return MathTools.square(omega) * getSecondCoefficientPositionMultiplier(contactState, timeInPhase, omega);
+         return MathTools.square(omega) * getSecondCoefficientCoMPositionMultiplier(contactState, timeInPhase, omega);
       }
       else
       {
@@ -128,7 +242,7 @@ public class LinearCoMTrajectoryPlannerTools
       }
    }
 
-   static double getThirdCoefficientAccelerationMultiplier(ContactState contactState)
+   static double getThirdCoefficientCoMAccelerationMultiplier(ContactState contactState)
    {
       if (contactState.isLoadBearing())
       {
@@ -140,7 +254,7 @@ public class LinearCoMTrajectoryPlannerTools
       }
    }
 
-   static double getFourthCoefficientAccelerationMultiplier(ContactState contactState)
+   static double getFourthCoefficientCoMAccelerationMultiplier(ContactState contactState)
    {
       if (contactState.isLoadBearing())
       {
