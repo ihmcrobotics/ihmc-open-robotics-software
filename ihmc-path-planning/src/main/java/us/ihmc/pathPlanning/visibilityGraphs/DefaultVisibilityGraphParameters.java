@@ -6,6 +6,8 @@ import us.ihmc.robotics.geometry.PlanarRegion;
 
 public class DefaultVisibilityGraphParameters implements VisibilityGraphsParameters
 {
+   //TODO: JavaDoc all the methods to make them more clear.
+
    @Override
    public double getMaxInterRegionConnectionLength()
    {
@@ -33,7 +35,7 @@ public class DefaultVisibilityGraphParameters implements VisibilityGraphsParamet
    @Override
    public double getTooHighToStepDistance()
    {
-      return 0.4;
+      return 0.28;
    }
 
    @Override
@@ -62,7 +64,7 @@ public class DefaultVisibilityGraphParameters implements VisibilityGraphsParamet
          @Override
          public double computeExtrusionDistance(PlanarRegion navigableRegionToBeExtruded)
          {
-            return 0.04;
+            return 0.02;
          }
       };
    }
