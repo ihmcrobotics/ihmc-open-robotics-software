@@ -229,9 +229,16 @@ public class LinearCoMTrajectoryPlanner implements CoMTrajectoryPlannerInterface
          yoThirdCoefficient.setY(yCoefficientVector.get(thirdCoefficientIndex));
          yoThirdCoefficient.setZ(zCoefficientVector.get(thirdCoefficientIndex));
 
-         yoFourthCoefficient.setX(xCoefficientVector.get(fourthCoefficientIndex));
-         yoFourthCoefficient.setY(yCoefficientVector.get(fourthCoefficientIndex));
-         yoFourthCoefficient.setZ(zCoefficientVector.get(fourthCoefficientIndex));
+         if (contactSequence.get(0).getContactMotion().getNumberOfCoefficients() > 3)
+         {
+            yoFourthCoefficient.setX(xCoefficientVector.get(fourthCoefficientIndex));
+            yoFourthCoefficient.setY(yCoefficientVector.get(fourthCoefficientIndex));
+            yoFourthCoefficient.setZ(zCoefficientVector.get(fourthCoefficientIndex));
+         }
+         else
+         {
+            yoFourthCoefficient.setToNaN();
+         }
       }
       else
       {
@@ -466,18 +473,30 @@ public class LinearCoMTrajectoryPlanner implements CoMTrajectoryPlannerInterface
    {
       terminalDCMPosition.checkReferenceFrameMatch(worldFrame);
 
-      double duration = contactSequence.get(sequenceId).getTimeInterval().getDuration();
+      ContactStateProvider contactStateProvider = contactSequence.get(sequenceId);
+      ContactMotion contactMotion = contactStateProvider.getContactMotion();
+      double duration = contactStateProvider.getTimeInterval().getDuration();
 
       double c0 = 2.0 * Math.exp(omega.getValue() * duration);
-      double c2 = Math.min(LinearCoMTrajectoryPlannerTools.sufficientlyLarge, duration);
-      double c3 = 1;
+      double c2, c3;
+      if (contactMotion.getNumberOfCoefficients() > 3)
+      {
+         c2 = Math.min(LinearCoMTrajectoryPlannerTools.sufficientlyLarge, duration);
+         c3 = 1;
+      }
+      else
+      {
+         c2 = 1;
+         c3 = Double.NaN;
+      }
 
       int startIndex = indexHandler.getContactSequenceStartIndex(sequenceId);
 
       // add constraints on terminal DCM position
       coefficientMultipliers.set(numberOfConstraints, startIndex + 0, c0);
       coefficientMultipliers.set(numberOfConstraints, startIndex + 2, c2);
-      coefficientMultipliers.set(numberOfConstraints, startIndex + 3, c3);
+      if (contactStateProvider.getContactMotion().getNumberOfCoefficients() > 3)
+         coefficientMultipliers.set(numberOfConstraints, startIndex + 3, c3);
       xCoefficientConstants.add(numberOfConstraints, 0, terminalDCMPosition.getX());
       yCoefficientConstants.add(numberOfConstraints, 0, terminalDCMPosition.getY());
       zCoefficientConstants.add(numberOfConstraints, 0, terminalDCMPosition.getZ());
