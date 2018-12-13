@@ -8,6 +8,7 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.mecano.frames.MovingReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
+import us.ihmc.robotics.time.TimeIntervalTools;
 
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -65,45 +66,26 @@ public class BipedContactSequenceUpdater
       feetInContact.clear();
       for (int footIndex = 0; footIndex < currentFeetInContact.size(); footIndex++)
          feetInContact.add(currentFeetInContact.get(footIndex));
-   }
 
-   public void computeStepTransitionsFromStepSequence(RecyclingArrayList<BipedStepTransition> stepTransitionsToPack, double currentTime,
-                                          List<? extends BipedTimedStep> stepSequence)
-   {
-      stepTransitionsToPack.clear();
-      for (int i = 0; i < stepSequence.size(); i++)
+      BipedContactSequenceTools.computeStepTransitionsFromStepSequence(stepTransitionsInAbsoluteTime, currentTime, stepSequence);
+      BipedContactSequenceTools.trimPastContactSequences(contactSequenceInAbsoluteTime, currentTime, currentFeetInContact, solePoses);
+
+      computeContactPhasesFromStepTransitions();
+
+      contactSequenceInRelativeTime.clear();
+      for (int i = 0; i < contactSequenceInAbsoluteTime.size(); i++)
       {
-         BipedTimedStep step = stepSequence.get(i);
-
-         if (step.getTimeInterval().getStartTime() >= currentTime)
-         {
-            BipedStepTransition stepTransition = stepTransitionsToPack.add();
-            stepTransition.reset();
-
-            stepTransition.setTransitionTime(step.getTimeInterval().getStartTime());
-
-            stepTransition.addTransition(BipedStepTransitionType.LIFT_OFF, step.getRobotSide(), step.getGoalPose());
-         }
-
-         if (step.getTimeInterval().getEndTime() >= currentTime)
-         {
-            BipedStepTransition stepTransition = stepTransitionsToPack.add();
-            stepTransition.reset();
-
-            stepTransition.setTransitionTime(step.getTimeInterval().getEndTime());
-            stepTransition.addTransition(BipedStepTransitionType.TOUCH_DOWN, step.getRobotSide(), step.getGoalPose());
-         }
+         SimpleBipedContactPhase contactPhase = contactSequenceInRelativeTime.add();
+         contactPhase.reset();
+         contactPhase.set(contactSequenceInAbsoluteTime.get(i));
       }
 
-      // sort step transitions in ascending order as a function of time
-      stepTransitionsToPack.sort(Comparator.comparingDouble(BipedStepTransition::getTransitionTime));
+      BipedContactSequenceTools.shiftContactSequencesToRelativeTime(contactSequenceInRelativeTime, currentTime);
 
-      // collapse the transitions that occur at the same time
-      BipedContactSequenceTools.collapseTransitionEvents(stepTransitionsToPack);
-
-      // remove any transitions that already happened
-      stepTransitionsToPack.removeIf(transition -> transition.getTransitionTime() < currentTime);
+      TimeIntervalTools.removeEndTimesLessThan(0.0, contactSequenceInRelativeTime);
    }
+
+
 
    // fixme this function is not correct
 
