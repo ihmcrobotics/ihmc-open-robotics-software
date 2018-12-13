@@ -385,6 +385,133 @@ public class VisibilityGraphTest
       assertEquals(8, goalEdges.size());
       assertEquals(8, startEdges.size());
    }
+   
+   @Test(timeout = 30000)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
+   public void testVisibilityGraphTwoSquaresWithImpassableBarrier()
+   {
+      //TODO: +++JEP: Get this to pass and clean it up and make it better.
+      VisibilityGraphsParameters parameters = createVisibilityGraphParametersForTest();
+      List<PlanarRegion> planarRegions = new ArrayList<>();
+
+      Point2D pointA = new Point2D(-0.01, -0.01);
+      Point2D pointB = new Point2D(-0.01, 1.01);
+      Point2D pointC = new Point2D(1.01, 1.01);
+      Point2D pointD = new Point2D(1.01, -0.01);
+
+      Point2D pointE = new Point2D(-0.01, - 0.01);
+      Point2D pointF = new Point2D(-0.01, 1.01);
+      Point2D pointG = new Point2D(1.01, 1.01);
+      Point2D pointH = new Point2D(1.01, -0.01);
+
+      ConvexPolygon2D polygon0_0 = new ConvexPolygon2D(Vertex2DSupplier.asVertex2DSupplier(pointA, pointB, pointC, pointD));
+      ConvexPolygon2D polygon1_0 = new ConvexPolygon2D(Vertex2DSupplier.asVertex2DSupplier(pointE, pointF, pointG, pointH));
+
+      RigidBodyTransform transform0 = new RigidBodyTransform();
+      RigidBodyTransform transform1 = new RigidBodyTransform();
+      transform1.setTranslation(1.25, 0.0, 0.0);
+
+      PlanarRegion planarRegion0 = new PlanarRegion(transform0, polygon0_0);
+      planarRegion0.setRegionId(77);
+      PlanarRegion planarRegion1 = new PlanarRegion(transform1, polygon1_0);
+      planarRegion1.setRegionId(63);
+
+      planarRegions.add(planarRegion0);
+      planarRegions.add(planarRegion1);
+
+      Point2D barrierPointI = new Point2D(0.0, 0.0);
+      Point2D barrierPointJ = new Point2D(0.0, 1.0);
+      Point2D barrierPointK = new Point2D(1.0, 1.0);
+      Point2D barrierPointL = new Point2D(1.0, 0.0);
+      
+      ConvexPolygon2D barrierPolygon = new ConvexPolygon2D(Vertex2DSupplier.asVertex2DSupplier(barrierPointI, barrierPointJ, barrierPointK, barrierPointL));
+      RigidBodyTransform barrierTransform = new RigidBodyTransform();
+      barrierTransform.setRotationEuler(0.0, -Math.PI/2.0, 0.0);
+      barrierTransform.setTranslation(1.125, 0.0, 0.0);
+
+      PlanarRegion barrierPlanarRegion = new PlanarRegion(barrierTransform, barrierPolygon);
+      barrierPlanarRegion.setRegionId(99);
+
+      planarRegions.add(barrierPlanarRegion);
+
+      
+      NavigableRegions navigableRegions = new NavigableRegions(parameters, planarRegions);
+      navigableRegions.createNavigableRegions();
+
+      InterRegionConnectionFilter filter = new InterRegionConnectionFilter()
+      {
+         @Override
+         public boolean isConnectionValid(ConnectionPoint3D source, ConnectionPoint3D target)
+         {
+            double distance = source.distance(target);
+            return distance < 0.58;
+         }
+
+         @Override
+         public double getMaximumInterRegionConnetionDistance()
+         {
+            return 0.58;
+         }
+      };
+      VisibilityGraph visibilityGraph = new VisibilityGraph(navigableRegions, filter);
+      visibilityGraph.fullyExpandVisibilityGraph();
+
+      ArrayList<VisibilityGraphNavigableRegion> visibilityGraphNavigableRegions = visibilityGraph.getVisibilityGraphNavigableRegions();
+      assertEquals(2, visibilityGraphNavigableRegions.size());
+      VisibilityGraphNavigableRegion visibilityGraphNavigableRegion0 = visibilityGraphNavigableRegions.get(0);
+      VisibilityGraphNavigableRegion visibilityGraphNavigableRegion1 = visibilityGraphNavigableRegions.get(1);
+
+      List<VisibilityGraphEdge> internalEdges0 = visibilityGraphNavigableRegion0.getAllEdges();
+      List<VisibilityGraphEdge> internalEdges1 = visibilityGraphNavigableRegion1.getAllEdges();
+
+      assertEquals(28, internalEdges0.size());
+      assertEquals(28, internalEdges1.size());
+
+      List<VisibilityGraphNode> nodes0 = visibilityGraphNavigableRegion0.getHomeRegionNodes();
+      List<VisibilityGraphNode> nodes1 = visibilityGraphNavigableRegion1.getHomeRegionNodes();
+      assertEquals(8, nodes0.size());
+      assertEquals(8, nodes1.size());
+
+      ConnectionPoint3D connectionA = new ConnectionPoint3D(0.0, 0.0, 0.0, 0);
+      ConnectionPoint3D connectionAB = new ConnectionPoint3D(0.0, 0.5, 0.0, 0);
+      ConnectionPoint3D connectionB = new ConnectionPoint3D(0.0, 1.0, 0.0, 0);
+      ConnectionPoint3D connectionBC = new ConnectionPoint3D(0.5, 1.0, 0.0, 0);
+      ConnectionPoint3D connectionC = new ConnectionPoint3D(1.0, 1.0, 0.0, 0);
+      ConnectionPoint3D connectionCD = new ConnectionPoint3D(1.0, 0.5, 0.0, 0);
+      ConnectionPoint3D connectionD = new ConnectionPoint3D(1.0, 0.0, 0.0, 0);
+      ConnectionPoint3D connectionDA = new ConnectionPoint3D(0.5, 0.0, 0.0, 0);
+
+      ConnectionPoint3D connectionE = new ConnectionPoint3D(1.25, 0.0, 0.0, 0);
+      ConnectionPoint3D connectionEF = new ConnectionPoint3D(1.25, 0.5, 0.0, 0);
+      ConnectionPoint3D connectionF = new ConnectionPoint3D(1.25, 1.0, 0.0, 0);
+      ConnectionPoint3D connectionFG = new ConnectionPoint3D(1.75, 1.0, 0.0, 0);
+      ConnectionPoint3D connectionG = new ConnectionPoint3D(2.25, 1.0, 0.0, 0);
+      ConnectionPoint3D connectionGH = new ConnectionPoint3D(2.25, 0.5, 0.0, 0);
+      ConnectionPoint3D connectionH = new ConnectionPoint3D(2.25, 0.0, 0.0, 0);
+      ConnectionPoint3D connectionHE = new ConnectionPoint3D(1.75, 0.0, 0.0, 0);
+
+      assertTrue(nodesContainPoint(nodes0, connectionA));
+      assertTrue(nodesContainPoint(nodes0, connectionAB));
+      assertTrue(nodesContainPoint(nodes0, connectionB));
+      assertTrue(nodesContainPoint(nodes0, connectionBC));
+      assertTrue(nodesContainPoint(nodes0, connectionC));
+      assertTrue(nodesContainPoint(nodes0, connectionCD));
+      assertTrue(nodesContainPoint(nodes0, connectionD));
+      assertTrue(nodesContainPoint(nodes0, connectionDA));
+
+      assertTrue(nodesContainPoint(nodes1, connectionE));
+      assertTrue(nodesContainPoint(nodes1, connectionEF));
+      assertTrue(nodesContainPoint(nodes1, connectionF));
+      assertTrue(nodesContainPoint(nodes1, connectionFG));
+      assertTrue(nodesContainPoint(nodes1, connectionG));
+      assertTrue(nodesContainPoint(nodes1, connectionGH));
+      assertTrue(nodesContainPoint(nodes1, connectionH));
+      assertTrue(nodesContainPoint(nodes1, connectionHE));
+
+      // Should be no cross region edges since the barrier should be blocking them...
+      ArrayList<VisibilityGraphEdge> crossRegionEdges = visibilityGraph.getCrossRegionEdges();
+      assertEquals(0, crossRegionEdges.size());
+   }
 
    @Test(timeout = 30000)
    @ContinuousIntegrationTest(estimatedDuration = 0.0)
@@ -685,7 +812,7 @@ public class VisibilityGraphTest
       assertEquals(6, startEdges.size());
    }
 
-   private void printNodes(ArrayList<VisibilityGraphNode> nodes)
+   private void printNodes(List<VisibilityGraphNode> nodes)
    {
       for (VisibilityGraphNode node : nodes)
       {
