@@ -704,33 +704,53 @@ public class PlanarRegionTools
    }
 
    /**
-    * From the local coordinates of the {@code regionB}, this method computes and return the minimum
-    * z-coordinate among the vertices of {@code regionA}'s concave hull.
-    *
-    * @param regionA the query. Not modified.
-    * @param regionB the reference. Not modified.
-    * @return the height of the lowest vertex of {@code regionA} above {@code regionB}. The returned
-    *         value is negative if the lowest vertex is below {@code regionB}.
+    * Finds the minimum height of all the vertices in the convex hull of a PlanarRegion when projected vertically onto a second PlanarRegion.
+    * 
+    * @param regionA PlanarRegion to test height of points of its convex hull above the plane. Not modified.
+    * @param regionB PlanarRegion that defines the plane that the points will be projected down onto. Not modified.
+    * @return Minimum vertical projection of {@code regionA} vertices onto the plane of regionB. The returned value is negative if the lowest vertex is below {@code region B}.
     */
    public static double computeMinHeightOfRegionAAboveRegionB(PlanarRegion regionA, PlanarRegion regionB)
    {
-      //TODO: ++++++JEP: Project straight down instead of perpendicularly to the surface...
-      RigidBodyTransform transformFromBToWorld = new RigidBodyTransform();
-      regionB.getTransformToWorld(transformFromBToWorld);
-      RigidBodyTransform transformFromAToB = new RigidBodyTransform();
-      regionA.getTransformToWorld(transformFromAToB);
-      transformFromAToB.preMultiplyInvertOther(transformFromBToWorld);
+      RigidBodyTransform transformFromAToWorld = new RigidBodyTransform();
+      regionA.getTransformToWorld(transformFromAToWorld);
 
       double minZ = Double.POSITIVE_INFINITY;
+      ConvexPolygon2D convexHullInLocalA = regionA.getConvexHull();
 
-      for (int i = 0; i < regionA.getConvexHull().getNumberOfVertices(); i++)
+      for (int i = 0; i < convexHullInLocalA.getNumberOfVertices(); i++)
       {
-         Point3D vertexA3D = new Point3D(regionA.getConcaveHull()[i]);
-         transformFromAToB.transform(vertexA3D);
-         minZ = Math.min(minZ, vertexA3D.getZ());
+         Point3D vertexOfAInWorld = new Point3D(convexHullInLocalA.getVertex(i));
+         transformFromAToWorld.transform(vertexOfAInWorld);
+         Point3D vertexOfAProjectedToBInWorld = projectInZToPlanarRegion(vertexOfAInWorld, regionB);
+         double deltaZ = vertexOfAInWorld.getZ() - vertexOfAProjectedToBInWorld.getZ();
+         minZ = Math.min(minZ, deltaZ);
       }
 
       return minZ;
+   }
+
+   /**
+    * Projects a point in world frame vertically down or up onto a PlanarRegion and returns the intersection in world frame.
+    * 
+    * @param pointInWorldToProjectInZ
+    * @param planarRegion
+    * @return the vertically projected point
+    */
+   public static Point3D projectInZToPlanarRegion(Point3D pointInWorldToProjectInZ, PlanarRegion planarRegion)
+   {
+      Vector3D surfaceNormalInWorld = planarRegion.getNormal();
+
+      RigidBodyTransform transformToWorld = new RigidBodyTransform();
+      planarRegion.getTransformToWorld(transformToWorld);
+
+      Point3D planarRegionReferencePointInWorld = new Point3D(0.0, 0.0, 0.0);
+      transformToWorld.transform(planarRegionReferencePointInWorld);
+
+      Vector3DReadOnly verticalLine = new Vector3D(0.0, 0.0, 1.0);
+
+      return EuclidGeometryTools.intersectionBetweenLine3DAndPlane3D(planarRegionReferencePointInWorld, surfaceNormalInWorld, pointInWorldToProjectInZ,
+                                                                     verticalLine);
    }
 
    public static List<PlanarRegion> ensureClockwiseOrder(List<PlanarRegion> planarRegions)

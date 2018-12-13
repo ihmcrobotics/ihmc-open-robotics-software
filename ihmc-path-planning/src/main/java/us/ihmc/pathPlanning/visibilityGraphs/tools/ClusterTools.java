@@ -480,7 +480,7 @@ public class ClusterTools
          Point2D obstacleConcaveHullVertexProjectedToGround2D = new Point2D(obstacleConcaveHullVertexInWorld);
          obstacleConcaveHullProjectedToGround.add(obstacleConcaveHullVertexProjectedToGround2D);
 
-         Point3D obstacleConcaveHullVertexProjectedDownToHomeRegion = projectInZToPlanarRegion(obstacleConcaveHullVertexInWorld, homeRegion);
+         Point3D obstacleConcaveHullVertexProjectedDownToHomeRegion = PlanarRegionTools.projectInZToPlanarRegion(obstacleConcaveHullVertexInWorld, homeRegion);
          obstacleConcaveHullProjectedToHomeRegion.add(obstacleConcaveHullVertexProjectedDownToHomeRegion);
       }
 
@@ -543,7 +543,7 @@ public class ClusterTools
       return temporaryClusterPoints;
    }
 
-   private static List<Point2DReadOnly> projectPointsVerticallyToPlanarRegionLocal(PlanarRegion planarRegion, List<Point2DReadOnly> pointsToProjectInWorld,
+   private static List<Point2DReadOnly> projectPointsVerticallyToPlanarRegionLocal(PlanarRegion planarRegionToProjectOnto, List<Point2DReadOnly> pointsToProjectInWorld,
                                                                                    RigidBodyTransform transformFromWorldToPlanarRegion)
    {
       List<Point2DReadOnly> navigableExtrusionsInHomeRegionLocal = new ArrayList<>();
@@ -552,7 +552,7 @@ public class ClusterTools
          Point2DReadOnly navigableExtrusionInFlatWorld = pointsToProjectInWorld.get(i);
          Point3D navigableExtrusionInFlatWorld3D = new Point3D(navigableExtrusionInFlatWorld);
 
-         Point3D extrudedPointOnHomeRegion = projectInZToPlanarRegion(navigableExtrusionInFlatWorld3D, planarRegion);
+         Point3D extrudedPointOnHomeRegion = PlanarRegionTools.projectInZToPlanarRegion(navigableExtrusionInFlatWorld3D, planarRegionToProjectOnto);
 
          transformFromWorldToPlanarRegion.transform(extrudedPointOnHomeRegion);
 
@@ -566,22 +566,6 @@ public class ClusterTools
       }
 
       return navigableExtrusionsInHomeRegionLocal;
-   }
-
-   private static Point3D projectInZToPlanarRegion(Point3D pointInWorldToProjectInZ, PlanarRegion planarRegion)
-   {
-      Vector3D surfaceNormalInWorld = planarRegion.getNormal();
-
-      RigidBodyTransform transformToWorld = new RigidBodyTransform();
-      planarRegion.getTransformToWorld(transformToWorld);
-
-      Point3D planarRegionReferencePointInWorld = new Point3D(0.0, 0.0, 0.0);
-      transformToWorld.transform(planarRegionReferencePointInWorld);
-
-      Vector3DReadOnly verticalLine = new Vector3D(0.0, 0.0, 1.0);
-
-      return EuclidGeometryTools.intersectionBetweenLine3DAndPlane3D(planarRegionReferencePointInWorld, surfaceNormalInWorld, pointInWorldToProjectInZ,
-                                                                     verticalLine);
    }
 
    public static void extrudeObstacleCluster(Cluster cluster, ObstacleExtrusionDistanceCalculator calculator)
