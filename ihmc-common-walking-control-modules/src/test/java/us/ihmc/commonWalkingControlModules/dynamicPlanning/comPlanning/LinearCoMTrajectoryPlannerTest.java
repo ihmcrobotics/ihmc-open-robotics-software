@@ -10,6 +10,7 @@ import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
 import us.ihmc.euclid.referenceFrame.tools.EuclidFrameRandomTools;
 import us.ihmc.euclid.referenceFrame.tools.EuclidFrameTestTools;
 import us.ihmc.euclid.tools.EuclidCoreTestTools;
+import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.robotics.time.TimeInterval;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
@@ -21,7 +22,7 @@ import java.util.Random;
 
 public class LinearCoMTrajectoryPlannerTest
 {
-   private static final double epsilon = 1e-3;
+   private static final double epsilon = 1e-4;
 
    @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
@@ -448,26 +449,25 @@ public class LinearCoMTrajectoryPlannerTest
          FramePoint3DReadOnly desiredInitialDCM = planner.getDesiredDCMPosition();
 
          FramePoint3DReadOnly initialDCM = recursivelyComputeInitialDCMLinear(contactSequence, nominalHeight, omega.getDoubleValue());
-         EuclidCoreTestTools.assertPoint3DGeometricallyEquals("iter = " + iter + ", Initial DCM is wrong.", initialDCM, desiredInitialDCM, epsilon);
+         EuclidCoreTestTools.assertPoint3DGeometricallyEquals("iter = " + iter + ", Initial DCM is wrong.", initialDCM, desiredInitialDCM, initialDCM.distance(new Point3D()) * epsilon);
 
          FramePoint3D initialVRP = new FramePoint3D(contactSequence.get(0).getCopStartPosition());
          FramePoint3D finalVRP = new FramePoint3D(contactSequence.get(0).getCopEndPosition());
          initialVRP.addZ(nominalHeight);
          finalVRP.addZ(nominalHeight);
 
-         double startTime = contactSequence.get(0).getTimeInterval().getStartTime();
-         double endTime = contactSequence.get(0).getTimeInterval().getEndTime();
+         double duration = contactSequence.get(0).getTimeInterval().getDuration();
          for (int i = 0; i < 100; i++)
          {
-            double time = RandomNumbers.nextDouble(random, startTime, endTime);
+            double time = RandomNumbers.nextDouble(random, 0.0, duration);
 
             FramePoint3D expectedDCM = new FramePoint3D();
-            DCMTrajectoryTools.computeDCMUsingLinearVRP(omega.getDoubleValue(), time, endTime - startTime, initialDCM, initialVRP, finalVRP, expectedDCM);
+            DCMTrajectoryTools.computeDCMUsingLinearVRP(omega.getDoubleValue(), time, duration, initialDCM, initialVRP, finalVRP, expectedDCM);
 
             planner.compute(time);
             checkPlannerDynamics(planner, omega.getDoubleValue());
 
-            EuclidCoreTestTools.assertPoint3DGeometricallyEquals("time : " + time, expectedDCM, planner.getDesiredDCMPosition(), epsilon);
+            EuclidCoreTestTools.assertPoint3DGeometricallyEquals("time : " + time, expectedDCM, planner.getDesiredDCMPosition(), 100.0 * epsilon);
          }
       }
    }
