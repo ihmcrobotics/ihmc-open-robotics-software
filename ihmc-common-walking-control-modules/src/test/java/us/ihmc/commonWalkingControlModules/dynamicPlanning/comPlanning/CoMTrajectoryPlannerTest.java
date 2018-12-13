@@ -20,7 +20,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
-public class LinearCoMTrajectoryPlannerTest
+public class CoMTrajectoryPlannerTest
 {
    private static final double epsilon = 1e-4;
 
@@ -35,7 +35,7 @@ public class LinearCoMTrajectoryPlannerTest
       double nominalHeight = 0.7;
 
       List<ContactStateProvider> contactSequence = new ArrayList<>();
-      LinearCoMTrajectoryPlanner planner = new LinearCoMTrajectoryPlanner(contactSequence, omega, gravityZ, nominalHeight, registry);
+      CoMTrajectoryPlanner planner = new CoMTrajectoryPlanner(contactSequence, omega, gravityZ, nominalHeight, registry);
 
       SettableContactStateProvider firstContact = new SettableContactStateProvider();
 
@@ -130,7 +130,7 @@ public class LinearCoMTrajectoryPlannerTest
       double nominalHeight = 0.7;
 
       List<ContactStateProvider> contactSequence = new ArrayList<>();
-      LinearCoMTrajectoryPlanner planner = new LinearCoMTrajectoryPlanner(contactSequence, omega, gravityZ, nominalHeight, registry);
+      CoMTrajectoryPlanner planner = new CoMTrajectoryPlanner(contactSequence, omega, gravityZ, nominalHeight, registry);
 
       SettableContactStateProvider firstContact = new SettableContactStateProvider();
 
@@ -224,7 +224,7 @@ public class LinearCoMTrajectoryPlannerTest
       double nominalHeight = 0.7;
 
       List<ContactStateProvider> contactSequence = new ArrayList<>();
-      LinearCoMTrajectoryPlanner planner = new LinearCoMTrajectoryPlanner(contactSequence, omega, gravityZ, nominalHeight, registry);
+      CoMTrajectoryPlanner planner = new CoMTrajectoryPlanner(contactSequence, omega, gravityZ, nominalHeight, registry);
 
       SettableContactStateProvider firstContact = new SettableContactStateProvider();
       SettableContactStateProvider secondContact = new SettableContactStateProvider();
@@ -300,7 +300,7 @@ public class LinearCoMTrajectoryPlannerTest
       double nominalHeight = 0.7;
 
       List<ContactStateProvider> contactSequence = new ArrayList<>();
-      LinearCoMTrajectoryPlanner planner = new LinearCoMTrajectoryPlanner(contactSequence, omega, gravityZ, nominalHeight, registry);
+      CoMTrajectoryPlanner planner = new CoMTrajectoryPlanner(contactSequence, omega, gravityZ, nominalHeight, registry);
 
       SettableContactStateProvider firstContact = new SettableContactStateProvider();
       SettableContactStateProvider secondContact = new SettableContactStateProvider();
@@ -381,7 +381,7 @@ public class LinearCoMTrajectoryPlannerTest
       double nominalHeight = 0.7;
 
       List<ContactStateProvider> contactSequence = new ArrayList<>();
-      LinearCoMTrajectoryPlanner planner = new LinearCoMTrajectoryPlanner(contactSequence, omega, gravityZ, nominalHeight, registry);
+      CoMTrajectoryPlanner planner = new CoMTrajectoryPlanner(contactSequence, omega, gravityZ, nominalHeight, registry);
 
       SettableContactStateProvider firstContact = new SettableContactStateProvider();
       SettableContactStateProvider secondContact = new SettableContactStateProvider();
@@ -451,7 +451,7 @@ public class LinearCoMTrajectoryPlannerTest
       double nominalHeight = 0.7;
 
       List<ContactStateProvider> contactSequence = new ArrayList<>();
-      LinearCoMTrajectoryPlanner planner = new LinearCoMTrajectoryPlanner(contactSequence, omega, gravityZ, nominalHeight, registry);
+      CoMTrajectoryPlanner planner = new CoMTrajectoryPlanner(contactSequence, omega, gravityZ, nominalHeight, registry);
 
       SettableContactStateProvider firstContact = new SettableContactStateProvider();
       SettableContactStateProvider secondContact = new SettableContactStateProvider();
@@ -526,7 +526,7 @@ public class LinearCoMTrajectoryPlannerTest
       double nominalHeight = 0.7;
 
       List<ContactStateProvider> contactSequence = new ArrayList<>();
-      LinearCoMTrajectoryPlanner planner = new LinearCoMTrajectoryPlanner(contactSequence, omega, gravityZ, nominalHeight, registry);
+      CoMTrajectoryPlanner planner = new CoMTrajectoryPlanner(contactSequence, omega, gravityZ, nominalHeight, registry);
 
       SettableContactStateProvider firstContact = new SettableContactStateProvider();
       SettableContactStateProvider secondContact = new SettableContactStateProvider();
@@ -593,7 +593,7 @@ public class LinearCoMTrajectoryPlannerTest
       double nominalHeight = 0.7;
 
       List<ContactStateProvider> contactSequence = new ArrayList<>();
-      LinearCoMTrajectoryPlanner planner = new LinearCoMTrajectoryPlanner(contactSequence, omega, gravityZ, nominalHeight, registry);
+      CoMTrajectoryPlanner planner = new CoMTrajectoryPlanner(contactSequence, omega, gravityZ, nominalHeight, registry);
 
       SettableContactStateProvider firstContact = new SettableContactStateProvider();
       SettableContactStateProvider secondContact = new SettableContactStateProvider();
@@ -702,7 +702,7 @@ public class LinearCoMTrajectoryPlannerTest
       double nominalHeight = 0.7;
 
       List<ContactStateProvider> contactSequence = new ArrayList<>();
-      LinearCoMTrajectoryPlanner planner = new LinearCoMTrajectoryPlanner(contactSequence, omega, gravityZ, nominalHeight, registry);
+      CoMTrajectoryPlanner planner = new CoMTrajectoryPlanner(contactSequence, omega, gravityZ, nominalHeight, registry);
 
       Random random = new Random(1738L);
 
@@ -793,7 +793,7 @@ public class LinearCoMTrajectoryPlannerTest
       double nominalHeight = 0.7;
 
       List<ContactStateProvider> contactSequence = new ArrayList<>();
-      LinearCoMTrajectoryPlanner planner = new LinearCoMTrajectoryPlanner(contactSequence, omega, gravityZ, nominalHeight, registry);
+      CoMTrajectoryPlanner planner = new CoMTrajectoryPlanner(contactSequence, omega, gravityZ, nominalHeight, registry);
 
       Random random = new Random(1738L);
 
@@ -892,7 +892,7 @@ public class LinearCoMTrajectoryPlannerTest
       double nominalHeight = 0.7;
 
       List<ContactStateProvider> contactSequence = new ArrayList<>();
-      LinearCoMTrajectoryPlanner planner = new LinearCoMTrajectoryPlanner(contactSequence, omega, gravityZ, nominalHeight, registry);
+      CoMTrajectoryPlanner planner = new CoMTrajectoryPlanner(contactSequence, omega, gravityZ, nominalHeight, registry);
 
       SettableContactStateProvider firstContact = new SettableContactStateProvider();
       SettableContactStateProvider secondContact = new SettableContactStateProvider();
@@ -962,7 +962,7 @@ public class LinearCoMTrajectoryPlannerTest
       double nominalHeight = 0.7;
 
       List<ContactStateProvider> contactSequence = new ArrayList<>();
-      LinearCoMTrajectoryPlanner planner = new LinearCoMTrajectoryPlanner(contactSequence, omega, gravityZ, nominalHeight, registry);
+      CoMTrajectoryPlanner planner = new CoMTrajectoryPlanner(contactSequence, omega, gravityZ, nominalHeight, registry);
 
       SettableContactStateProvider firstContact = new SettableContactStateProvider();
       SettableContactStateProvider secondContact = new SettableContactStateProvider();
@@ -1030,7 +1030,7 @@ public class LinearCoMTrajectoryPlannerTest
       double nominalHeight = 0.7;
 
       List<ContactStateProvider> contactSequence = new ArrayList<>();
-      LinearCoMTrajectoryPlanner planner = new LinearCoMTrajectoryPlanner(contactSequence, omega, gravityZ, nominalHeight, registry);
+      CoMTrajectoryPlanner planner = new CoMTrajectoryPlanner(contactSequence, omega, gravityZ, nominalHeight, registry);
 
       SettableContactStateProvider firstContact = new SettableContactStateProvider();
       SettableContactStateProvider secondContact = new SettableContactStateProvider();
@@ -1083,7 +1083,7 @@ public class LinearCoMTrajectoryPlannerTest
       double nominalHeight = 0.7;
 
       List<ContactStateProvider> contactSequence = new ArrayList<>();
-      LinearCoMTrajectoryPlanner planner = new LinearCoMTrajectoryPlanner(contactSequence, omega, gravityZ, nominalHeight, registry);
+      CoMTrajectoryPlanner planner = new CoMTrajectoryPlanner(contactSequence, omega, gravityZ, nominalHeight, registry);
 
       SettableContactStateProvider firstContact = new SettableContactStateProvider();
       SettableContactStateProvider secondContact = new SettableContactStateProvider();
@@ -1122,7 +1122,7 @@ public class LinearCoMTrajectoryPlannerTest
       }
    }
 
-   private static void checkPlannerDynamics(LinearCoMTrajectoryPlanner planner, double omega)
+   private static void checkPlannerDynamics(CoMTrajectoryPlanner planner, double omega)
    {
       FramePoint3D constructedDCMPosition = new FramePoint3D();
       constructedDCMPosition.scaleAdd(1.0 / omega, planner.getDesiredCoMVelocity(), planner.getDesiredCoMPosition());

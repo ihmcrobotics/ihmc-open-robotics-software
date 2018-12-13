@@ -4,7 +4,7 @@ import gnu.trove.list.array.TIntArrayList;
 
 import java.util.List;
 
-public class LinearCoMTrajectoryPlannerIndexHandler
+public class CoMTrajectoryPlannerIndexHandler
 {
    private static final int flightSequenceSize = 2;
 
@@ -13,7 +13,7 @@ public class LinearCoMTrajectoryPlannerIndexHandler
    private int size;
    private final TIntArrayList startIndices = new TIntArrayList();
 
-   public LinearCoMTrajectoryPlannerIndexHandler(List<? extends ContactStateProvider> contactSequence)
+   public CoMTrajectoryPlannerIndexHandler(List<? extends ContactStateProvider> contactSequence)
    {
       this.contactSequence = contactSequence;
    }

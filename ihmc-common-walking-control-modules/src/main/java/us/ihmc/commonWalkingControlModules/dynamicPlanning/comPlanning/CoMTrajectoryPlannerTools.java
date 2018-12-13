@@ -5,7 +5,7 @@ import us.ihmc.euclid.referenceFrame.interfaces.FixedFramePoint3DBasics;
 import us.ihmc.euclid.referenceFrame.interfaces.FixedFrameVector3DBasics;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
 
-public class LinearCoMTrajectoryPlannerTools
+public class CoMTrajectoryPlannerTools
 {
    static final double sufficientlyLarge = 1.0e10;
 
