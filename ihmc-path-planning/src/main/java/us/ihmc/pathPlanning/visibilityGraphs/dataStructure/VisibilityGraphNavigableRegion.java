@@ -70,7 +70,7 @@ public class VisibilityGraphNavigableRegion
       innerRegionEdges.add(edge);
    }
 
-   public void createGraphAroundClusterRings(boolean createEdgesAroundClusterRing)
+   public void createNavigableRegionNodes(boolean createEdgesAroundClusterRing)
    {
       PlanarRegion homePlanarRegion = navigableRegion.getHomePlanarRegion();
       Cluster homeRegionCluster = navigableRegion.getHomeRegionCluster();
