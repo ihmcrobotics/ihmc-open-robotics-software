@@ -1,5 +1,6 @@
 package us.ihmc.robotics.linearAlgebra.commonOps;
 
+import org.ejml.data.DenseMatrix64F;
 import org.ejml.data.RowD1Matrix64F;
 
 import us.ihmc.tools.nativelibraries.NativeLibraryLoader;
@@ -107,5 +108,25 @@ public class NativeCommonOps
       }
       x.reshape(a.getNumCols(), 1);
       nativeCommonOpsWrapper.solveDamped(x.data, a.data, b.data, a.getNumRows(), a.getNumCols(), alpha);
+   }
+
+   /**
+    * Projects the matrix {@code a} onto the null-space of {@code b} and stores the result in {@code c} such that</br>
+    * b * c == 0</br>
+    * This method uses a damped least square approach causing the null-space to grow gradually.
+    * @param a matrix to project
+    * @param b matrix to compute the null-space of
+    * @param c where the result is stored (modified)
+    * @param alpha damping value
+    * @throws IllegalArgumentException if the matrix dimensions are incompatible.
+    */
+   public static void projectOnNullspace(DenseMatrix64F a, DenseMatrix64F b, DenseMatrix64F c, double alpha)
+   {
+      if (a.getNumCols() != b.getNumCols())
+      {
+         throw new IllegalArgumentException("Incompatible Matrix Dimensions.");
+      }
+      c.reshape(a.getNumRows(), a.getNumCols());
+      nativeCommonOpsWrapper.projectOnNullspace(c.data, a.data, b.data, a.getNumRows(), a.getNumCols(), b.getNumRows(), alpha);
    }
 }
