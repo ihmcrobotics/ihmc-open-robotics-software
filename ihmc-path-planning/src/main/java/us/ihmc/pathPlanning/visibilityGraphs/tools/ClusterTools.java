@@ -19,7 +19,6 @@ import us.ihmc.euclid.tuple2D.interfaces.Vector2DBasics;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
-import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.pathPlanning.visibilityGraphs.clusterManagement.Cluster;
 import us.ihmc.pathPlanning.visibilityGraphs.clusterManagement.Cluster.ClusterType;
 import us.ihmc.pathPlanning.visibilityGraphs.clusterManagement.Cluster.ExtrusionSide;
@@ -404,62 +403,10 @@ public class ClusterTools
       return obstacleClusters;
    }
 
-   //TODO: +++ Make unnecessary and Delete me!
-   private static Cluster createObstacleClusterOld(ObstacleExtrusionDistanceCalculator extrusionDistanceCalculator,
-                                                   RigidBodyTransform transformFromHomeRegionToWorld, Vector3D referenceNormal,
-                                                   double zThresholdBeforeOrthogonal, PlanarRegion obstacleRegion)
-   {
-      Vector3D otherNormal = obstacleRegion.getNormal();
-
-      Cluster cluster = new Cluster(ExtrusionSide.OUTSIDE, ClusterType.POLYGON);
-      cluster.setTransformToWorld(transformFromHomeRegionToWorld);
-
-      List<Point3D> rawPointsInLocal = new ArrayList<>();
-      RigidBodyTransform transformFromOtherToHome = new RigidBodyTransform();
-      obstacleRegion.getTransformToWorld(transformFromOtherToHome);
-      transformFromOtherToHome.preMultiplyInvertOther(transformFromHomeRegionToWorld);
-
-      for (int i = 0; i < obstacleRegion.getConvexHull().getNumberOfVertices(); i++)
-      {
-         Point3D concaveHullVertexHome = new Point3D(obstacleRegion.getConvexHull().getVertex(i));
-         concaveHullVertexHome.applyTransform(transformFromOtherToHome);
-         rawPointsInLocal.add(concaveHullVertexHome);
-      }
-
-      //TODO: Check this. When should it be a multi-line and when should it be a polygon?
-      if (Math.abs(otherNormal.dot(referenceNormal)) < zThresholdBeforeOrthogonal)
-      {
-         // Project region as a line
-         cluster.setType(ClusterType.MULTI_LINE);
-         cluster.addRawPointsInLocal3D(filterVerticalPolygonForMultiLineExtrusion(rawPointsInLocal, POPPING_MULTILINE_POINTS_THRESHOLD));
-      }
-      else
-      {
-         // Project region as a polygon
-         cluster.setType(ClusterType.POLYGON);
-         cluster.addRawPointsInLocal3D(rawPointsInLocal);
-      }
-
-      extrudeObstacleCluster(cluster, extrusionDistanceCalculator);
-
-      return cluster;
-   }
-
-   //TODO: +++JEP Finish this for vertical regions, so we don't have to use createObstacleClusterOld.
    private static Cluster createObstacleCluster(PlanarRegion homeRegion, ObstacleExtrusionDistanceCalculator extrusionDistanceCalculator,
                                                 RigidBodyTransform transformFromHomeRegionToWorld, Vector3D referenceNormal, double zThresholdBeforeOrthogonal,
                                                 PlanarRegion obstacleRegion)
    {
-      Vector3D otherNormal = obstacleRegion.getNormal();
-
-      //TODO: Check this. When should it be a multi-line and when should it be a polygon?
-      //TODO: +++JEP: Clean up to not have to call the old method...
-      if (Math.abs(otherNormal.dot(referenceNormal)) < zThresholdBeforeOrthogonal)
-      {
-         return createObstacleClusterOld(extrusionDistanceCalculator, transformFromHomeRegionToWorld, referenceNormal, zThresholdBeforeOrthogonal,
-                                         obstacleRegion);
-      }
-
       Point2D[] concaveHull = obstacleRegion.getConcaveHull();
 
       RigidBodyTransform transformFromObstacleToWorld = new RigidBodyTransform();
@@ -487,13 +434,16 @@ public class ClusterTools
       // TODO: This is good but hackish. Need to clean up to not require this temporary Cluster...
       ArrayList<Point3D> temporaryClusterPoints = createTemporaryClusterPointsSettingZToHeightDifference(obstacleConcaveHullInWorld,
                                                                                                          obstacleConcaveHullProjectedToHomeRegion);
-      Cluster tempFlatClusterToExtrude = createTemporaryClusterWithZEqualZeroAndExtrudeIt(extrusionDistanceCalculator, temporaryClusterPoints);
+
+      Vector3D obstacleNormal = obstacleRegion.getNormal();
+      boolean verticalObstacle = Math.abs(obstacleNormal.getZ()) < zThresholdBeforeOrthogonal;
+      Cluster tempFlatClusterToExtrude = createTemporaryClusterWithZEqualZeroAndExtrudeIt(extrusionDistanceCalculator, temporaryClusterPoints,
+                                                                                          verticalObstacle);
 
       List<Point2DReadOnly> navigableExtrusionsInFlatWorld = tempFlatClusterToExtrude.getNavigableExtrusionsInLocal();
       List<Point2DReadOnly> nonNavigableExtrusionsInFlatWorld = tempFlatClusterToExtrude.getNonNavigableExtrusionsInLocal();
 
       // Project the points back up to the home region...
-
       RigidBodyTransform transformFromWorldToHome = new RigidBodyTransform(transformFromHomeRegionToWorld);
       transformFromWorldToHome.invert();
       List<Point2DReadOnly> navigableExtrusionsInHomeRegionLocal = projectPointsVerticallyToPlanarRegionLocal(homeRegion, navigableExtrusionsInFlatWorld,
@@ -511,13 +461,25 @@ public class ClusterTools
    }
 
    private static Cluster createTemporaryClusterWithZEqualZeroAndExtrudeIt(ObstacleExtrusionDistanceCalculator extrusionDistanceCalculator,
-                                                                           ArrayList<Point3D> temporaryClusterPoints)
+                                                                           ArrayList<Point3D> temporaryClusterPoints, boolean verticalObstacle)
    {
-      Cluster tempFlatClusterToExtrude = new Cluster(ExtrusionSide.OUTSIDE, ClusterType.POLYGON);
-      tempFlatClusterToExtrude.addRawPointsInWorld(temporaryClusterPoints);
-     
-      extrudeObstacleCluster(tempFlatClusterToExtrude, extrusionDistanceCalculator);
+      Cluster tempFlatClusterToExtrude;
 
+      if (verticalObstacle)
+      {
+         // Project region as a line
+         //TODO: Seems something fishy here if you look at the Cinder Block field and see that the vertical obstacle near the ramp removes navigable points from the flat, but not from the ramp?
+         tempFlatClusterToExtrude = new Cluster(ExtrusionSide.OUTSIDE, ClusterType.MULTI_LINE);
+         List<Point3D> filteredPointsForMultiLine = filterVerticalPolygonForMultiLineExtrusion(temporaryClusterPoints, POPPING_MULTILINE_POINTS_THRESHOLD);
+         tempFlatClusterToExtrude.addRawPointsInLocal3D(filteredPointsForMultiLine);
+      }
+      else
+      {
+         tempFlatClusterToExtrude = new Cluster(ExtrusionSide.OUTSIDE, ClusterType.POLYGON);
+         tempFlatClusterToExtrude.addRawPointsInLocal3D(temporaryClusterPoints);
+      }
+
+      extrudeObstacleCluster(tempFlatClusterToExtrude, extrusionDistanceCalculator);
       return tempFlatClusterToExtrude;
    }
 
@@ -543,7 +505,8 @@ public class ClusterTools
       return temporaryClusterPoints;
    }
 
-   private static List<Point2DReadOnly> projectPointsVerticallyToPlanarRegionLocal(PlanarRegion planarRegionToProjectOnto, List<Point2DReadOnly> pointsToProjectInWorld,
+   private static List<Point2DReadOnly> projectPointsVerticallyToPlanarRegionLocal(PlanarRegion planarRegionToProjectOnto,
+                                                                                   List<Point2DReadOnly> pointsToProjectInWorld,
                                                                                    RigidBodyTransform transformFromWorldToPlanarRegion)
    {
       List<Point2DReadOnly> navigableExtrusionsInHomeRegionLocal = new ArrayList<>();

@@ -514,14 +514,14 @@ public class ClusterToolsTest
       obstacleRegions.add(region1_1);
       PlanarRegion homeRegion = region2_1;
 
-      List<Cluster> obstacleClusters = createObstacleClusters(obstacleRegions, homeRegion);
+      List<Cluster> obstacleClusters = createObstacleClustersForTests(obstacleRegions, homeRegion);
       assertEquals(0, obstacleClusters.size());
 
       obstacleRegions.clear();
       obstacleRegions.add(region1_1);
       homeRegion = region0_1;
 
-      obstacleClusters = createObstacleClusters(obstacleRegions, homeRegion);
+      obstacleClusters = createObstacleClustersForTests(obstacleRegions, homeRegion);
       assertEquals(0, obstacleClusters.size());
 
       obstacleRegions.clear();
@@ -529,7 +529,7 @@ public class ClusterToolsTest
       obstacleRegions.add(region2_1);
       homeRegion = region0_1;
 
-      obstacleClusters = createObstacleClusters(obstacleRegions, homeRegion);
+      obstacleClusters = createObstacleClustersForTests(obstacleRegions, homeRegion);
       assertEquals(1, obstacleClusters.size());
       Cluster cluster = obstacleClusters.get(0);
       List<Point2DReadOnly> nonNavigableExtrusionsInLocal = cluster.getNonNavigableExtrusionsInLocal();
@@ -540,14 +540,94 @@ public class ClusterToolsTest
       obstacleRegions.add(region2_1);
       homeRegion = region1_1;
 
-      obstacleClusters = createObstacleClusters(obstacleRegions, homeRegion);
+      obstacleClusters = createObstacleClustersForTests(obstacleRegions, homeRegion);
       assertEquals(1, obstacleClusters.size());
       cluster = obstacleClusters.get(0);
       nonNavigableExtrusionsInLocal = cluster.getNonNavigableExtrusionsInLocal();
       assertEquals(12, nonNavigableExtrusionsInLocal.size());
    }
 
-   private List<Cluster> createObstacleClusters(List<PlanarRegion> obstacleRegions, PlanarRegion homeRegion)
+   @Test(timeout = 30000)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
+   public void testCreateObstaclesVerticalSegmentOverRotatedBase()
+   {
+      Point2D pointA = new Point2D(0.0, -0.5);
+      Point2D pointB = new Point2D(0.0, 0.5);
+      Point2D pointC = new Point2D(0.5, 0.5);
+      Point2D pointD = new Point2D(0.5, -0.5);
+
+      Point2D pointE = new Point2D(-10.0, -10.0);
+      Point2D pointF = new Point2D(-10.0, 10.0);
+      Point2D pointG = new Point2D(10.0, 10.0);
+      Point2D pointH = new Point2D(10.0, -10.0);
+
+      ConvexPolygon2D polygon0_0 = new ConvexPolygon2D(Vertex2DSupplier.asVertex2DSupplier(pointA, pointB, pointC, pointD));
+      ConvexPolygon2D polygon1_0 = new ConvexPolygon2D(Vertex2DSupplier.asVertex2DSupplier(pointE, pointF, pointG, pointH));
+
+      RigidBodyTransform transform0 = new RigidBodyTransform();
+      transform0.setRotationEuler(0.0, Math.PI / 2.0, 0.0);
+      transform0.setTranslation(0.0, 0.0, 1.0);
+      PlanarRegion planarRegion0 = new PlanarRegion(transform0, polygon0_0);
+
+      ObstacleExtrusionDistanceCalculator extrusionDistanceCalculator = new ObstacleExtrusionDistanceCalculator()
+      {
+         @Override
+         public double computeExtrusionDistance(Point2DReadOnly pointToExtrude, double obstacleHeight)
+         {
+            return 0.01;
+         }
+      };
+      double orthogonalAngle = 0.5;
+      
+      double baseRotationAngle = 0.0;
+      RigidBodyTransform transform1 = new RigidBodyTransform();
+      transform1.setRotationEuler(0.0, baseRotationAngle, 0.0);
+      PlanarRegion planarRegion1 = new PlanarRegion(transform1, polygon1_0);
+
+      List<PlanarRegion> obstacleRegions = new ArrayList<>();
+      obstacleRegions.add(planarRegion0);
+      List<Cluster> obstacleClustersOn1 = ClusterTools.createObstacleClusters(planarRegion1, obstacleRegions, orthogonalAngle, extrusionDistanceCalculator);
+
+      assertEquals(1, obstacleClustersOn1.size());
+      Cluster obstacleCluster = obstacleClustersOn1.get(0);
+
+      List<Point3DReadOnly> obstacleExtrusionsInWorld = obstacleCluster.getNavigableExtrusionsInWorld();
+      assertEquals(10, obstacleExtrusionsInWorld.size());
+
+      assertTrue(listContains(obstacleExtrusionsInWorld, new Point3D(0.0, -0.51, 0.0)));
+      assertTrue(listContains(obstacleExtrusionsInWorld, new Point3D(0.0, 0.51, 0.0)));
+      assertTrue(listContainsXYMatch(obstacleExtrusionsInWorld, new Point2D(0.01, 0.5)));
+      assertTrue(listContainsXYMatch(obstacleExtrusionsInWorld, new Point2D(0.01, -0.5)));
+      assertTrue(listContainsXYMatch(obstacleExtrusionsInWorld, new Point2D(-0.01, 0.5)));
+      assertTrue(listContainsXYMatch(obstacleExtrusionsInWorld, new Point2D(-0.01, -0.5)));
+      
+      baseRotationAngle = 0.2;
+      transform1 = new RigidBodyTransform();
+      transform1.setRotationEuler(0.0, baseRotationAngle, 0.0);
+      planarRegion1 = new PlanarRegion(transform1, polygon1_0);
+
+      obstacleRegions = new ArrayList<>();
+      obstacleRegions.add(planarRegion0);
+      obstacleClustersOn1 = ClusterTools.createObstacleClusters(planarRegion1, obstacleRegions, orthogonalAngle, extrusionDistanceCalculator);
+
+      assertEquals(1, obstacleClustersOn1.size());
+      obstacleCluster = obstacleClustersOn1.get(0);
+
+      obstacleExtrusionsInWorld = obstacleCluster.getNavigableExtrusionsInWorld();
+      assertEquals(10, obstacleExtrusionsInWorld.size());
+
+//      printPoints3D(obstacleExtrusionsInWorld);
+
+      assertTrue(listContains(obstacleExtrusionsInWorld, new Point3D(0.0, -0.51, 0.0)));
+      assertTrue(listContains(obstacleExtrusionsInWorld, new Point3D(0.0, 0.51, 0.0)));
+      assertTrue(listContainsXYMatch(obstacleExtrusionsInWorld, new Point2D(0.01, 0.5)));
+      assertTrue(listContainsXYMatch(obstacleExtrusionsInWorld, new Point2D(0.01, -0.5)));
+      assertTrue(listContainsXYMatch(obstacleExtrusionsInWorld, new Point2D(-0.01, 0.5)));
+      assertTrue(listContainsXYMatch(obstacleExtrusionsInWorld, new Point2D(-0.01, -0.5)));
+
+   }
+
+   private List<Cluster> createObstacleClustersForTests(List<PlanarRegion> obstacleRegions, PlanarRegion homeRegion)
    {
       double orthogonalAngle = 0.8;
 
@@ -627,6 +707,16 @@ public class ClusterToolsTest
    private boolean listContains(List<Point2DReadOnly> points, Point2DReadOnly pointToCheck)
    {
       for (Point2DReadOnly point : points)
+      {
+         if (point.epsilonEquals(pointToCheck, EPSILON))
+            return true;
+      }
+      return false;
+   }
+
+   private boolean listContains(List<Point3DReadOnly> points, Point3D pointToCheck)
+   {
+      for (Point3DReadOnly point : points)
       {
          if (point.epsilonEquals(pointToCheck, EPSILON))
             return true;
