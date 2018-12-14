@@ -91,6 +91,7 @@ public class SimpleBipedContactPhase implements ContactStateProvider
    {
       reset();
       setFeetInContact(other.feetInContact);
+      getTimeInterval().set(other.timeInterval);
       for (int i = 0; i < other.startFeet.size(); i++)
          addStartFoot(other.startFeet.get(i), other.startFootPoses.get(other.startFeet.get(i)));
       for (int i = 0; i < other.endFeet.size(); i++)
