@@ -25,6 +25,14 @@ JNIEXPORT void JNICALL Java_us_ihmc_robotics_linearAlgebra_commonOps_NativeCommo
 
 /*
  * Class:     us_ihmc_robotics_linearAlgebra_commonOps_NativeCommonOpsWrapper
+ * Method:    invert
+ * Signature: ([D[DI)V
+ */
+JNIEXPORT void JNICALL Java_us_ihmc_robotics_linearAlgebra_commonOps_NativeCommonOpsWrapper_invert
+  (JNIEnv *, jobject, jdoubleArray, jdoubleArray, jint);
+
+/*
+ * Class:     us_ihmc_robotics_linearAlgebra_commonOps_NativeCommonOpsWrapper
  * Method:    solve
  * Signature: ([D[D[DI)V
  */

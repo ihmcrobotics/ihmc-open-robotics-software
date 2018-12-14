@@ -6,6 +6,8 @@ public class NativeCommonOpsWrapper
 
    public native void computeAtBA(double[] result, double[] aData, double[] bData, int aRows, int aCols);
 
+   public native void invert(double[] result, double[] aData, int aRows);
+
    public native void solve(double[] result, double[] aData, double[] bData, int aRows);
 
    public native void solveRobust(double[] result, double[] aData, double[] bData, int aRows, int aCols);

@@ -52,6 +52,23 @@ public class NativeCommonOps
    }
 
    /**
+    * Inverts a matrix.</br>
+    * This method requires that the matrix is square and invertible and uses a LU decomposition.
+    * @param a matrix to invert
+    * @param inv where the result is stored (modified)
+    * @throws IllegalArgumentException if the matrix dimensions are incompatible.
+    */
+   public static void invert(RowD1Matrix64F a, RowD1Matrix64F inv)
+   {
+      if (a.getNumRows() != a.getNumCols())
+      {
+         throw new IllegalArgumentException("Incompatible Matrix Dimensions.");
+      }
+      inv.reshape(a.getNumRows(), a.getNumCols());
+      nativeCommonOpsWrapper.invert(inv.data, a.data, a.getNumRows());
+   }
+
+   /**
     * Computes the solution to the linear equation</br>
     * a * x == b</br>
     * This method requires that the matrix a is square and invertible and uses a LU decomposition.
