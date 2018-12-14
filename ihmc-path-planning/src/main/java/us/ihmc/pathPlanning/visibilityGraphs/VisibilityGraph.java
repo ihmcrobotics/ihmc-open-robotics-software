@@ -5,7 +5,9 @@ import java.util.Collection;
 import java.util.List;
 
 import us.ihmc.euclid.geometry.BoundingBox3D;
+import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple2D.Point2D;
+import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.pathPlanning.visibilityGraphs.clusterManagement.Cluster;
@@ -22,10 +24,14 @@ import us.ihmc.pathPlanning.visibilityGraphs.dataStructure.VisibilityMapSolution
 import us.ihmc.pathPlanning.visibilityGraphs.dataStructure.VisibilityMapWithNavigableRegion;
 import us.ihmc.pathPlanning.visibilityGraphs.interfaces.InterRegionConnectionFilter;
 import us.ihmc.pathPlanning.visibilityGraphs.tools.PlanarRegionTools;
+import us.ihmc.pathPlanning.visibilityGraphs.tools.VisibilityTools;
 import us.ihmc.robotics.geometry.PlanarRegion;
 
 public class VisibilityGraph
 {
+   // Flag for whether to just connect the shortest interconnecting edge, or all of them.
+   //TODO: Try this on for size for a while and if shortest edge seems like always the best way to go, remove the flag.
+   private static final boolean ONLY_USE_SHORTEST_INTER_CONNECTING_EDGE = true;
    private ArrayList<VisibilityGraphNavigableRegion> visibilityGraphNavigableRegions = new ArrayList<>();
    private final NavigableRegions navigableRegions;
    private final ArrayList<VisibilityGraphEdge> crossRegionEdges = new ArrayList<VisibilityGraphEdge>();
@@ -44,12 +50,12 @@ public class VisibilityGraph
       for (NavigableRegion navigableRegion : naviableRegionsList)
       {
          VisibilityGraphNavigableRegion visibilityGraphNavigableRegion = new VisibilityGraphNavigableRegion(navigableRegion);
- 
+
          //TODO: +++JEP: Just get rid of createEdgesAroundClusterRing? Or store Nodes with clusters somehow?
          // Set createEdgesAroundClusterRing to true if at the beginning you want to create loops around the clusters.
          boolean createEdgesAroundClusterRing = false;
 
-         visibilityGraphNavigableRegion.createGraphAroundClusterRings(createEdgesAroundClusterRing);
+         visibilityGraphNavigableRegion.createNavigableRegionNodes(createEdgesAroundClusterRing);
 
          visibilityGraphNavigableRegions.add(visibilityGraphNavigableRegion);
       }
@@ -272,17 +278,100 @@ public class VisibilityGraph
                                                              List<Cluster> sourceObstacleClusters, List<Cluster> targetObstacleClusters,
                                                              InterRegionConnectionFilter filter, ArrayList<VisibilityGraphEdge> edgesToPack)
    {
+      PlanarRegion sourceHomeRegion = sourceNode.getVisibilityGraphNavigableRegion().getNavigableRegion().getHomePlanarRegion();
+      ConnectionPoint3D sourceInWorld = sourceNode.getPointInWorld();
+      Point2DReadOnly sourceInSourceLocal = sourceNode.getPoint2DInLocal();
+
+      RigidBodyTransform transformFromWorldToSource = new RigidBodyTransform();
+      sourceHomeRegion.getTransformToWorld(transformFromWorldToSource);
+      transformFromWorldToSource.invert();
+
+      RigidBodyTransform transformFromWorldToTarget = new RigidBodyTransform();
+
+      List<VisibilityGraphEdge> potentialEdges = new ArrayList<>();
+
       for (VisibilityGraphNode targetNode : targetNodeList)
       {
-         if (filter.isConnectionValid(sourceNode.getPointInWorld(), targetNode.getPointInWorld()))
+         ConnectionPoint3D targetInWorld = targetNode.getPointInWorld();
+         if (filter.isConnectionValid(sourceInWorld, targetInWorld))
          {
-            VisibilityGraphEdge edge = new VisibilityGraphEdge(sourceNode, targetNode);
-            sourceNode.addEdge(edge);
-            targetNode.addEdge(edge);
+            //TODO: +++++++JEP: xyDistance check is a hack to allow connections through keep out regions enough to make them, but not enough to go through walls...
 
-            edgesToPack.add(edge);
+            double xyDistance = sourceInWorld.distanceXY(targetInWorld);
+            if (xyDistance < 0.30)
+            {
+               VisibilityGraphEdge edge = new VisibilityGraphEdge(sourceNode, targetNode);
+               potentialEdges.add(edge);
+            }
+
+            else // Check if the edge is visible if it is a long one.
+            {
+               PlanarRegion targetHomeRegion = targetNode.getVisibilityGraphNavigableRegion().getNavigableRegion().getHomePlanarRegion();
+               targetHomeRegion.getTransformToWorld(transformFromWorldToTarget);
+               transformFromWorldToTarget.invert();
+
+               Point2DReadOnly targetInTargetLocal = targetNode.getPoint2DInLocal();
+
+               Point3D targetProjectedVerticallyOntoSource = PlanarRegionTools.projectInZToPlanarRegion(targetInWorld, sourceHomeRegion);
+               Point3D sourceProjectedVerticallyOntoTarget = PlanarRegionTools.projectInZToPlanarRegion(sourceInWorld, targetHomeRegion);
+
+               transformFromWorldToSource.transform(targetProjectedVerticallyOntoSource);
+               transformFromWorldToTarget.transform(sourceProjectedVerticallyOntoTarget);
+
+               Point2D targetInSourceLocal = new Point2D(targetProjectedVerticallyOntoSource);
+               Point2D sourceInTargetLocal = new Point2D(sourceProjectedVerticallyOntoTarget);
+
+               //TODO: +++JEP: 
+               boolean targetIsVisibleThroughSourceObstacles = VisibilityTools.isPointVisibleForStaticMaps(sourceObstacleClusters, sourceInSourceLocal,
+                                                                                                           targetInSourceLocal);
+               boolean sourceIsVisibleThroughTargetObstacles = VisibilityTools.isPointVisibleForStaticMaps(targetObstacleClusters, targetInTargetLocal,
+                                                                                                           sourceInTargetLocal);
+
+               if ((!targetIsVisibleThroughSourceObstacles || !sourceIsVisibleThroughTargetObstacles))
+                  continue;
+
+               VisibilityGraphEdge edge = new VisibilityGraphEdge(sourceNode, targetNode);
+               potentialEdges.add(edge);
+            }
          }
       }
+
+      if (ONLY_USE_SHORTEST_INTER_CONNECTING_EDGE)
+      {
+         VisibilityGraphEdge shortestEdgeXY = findShortestEdgeXY(sourceNode, potentialEdges);
+
+         if (shortestEdgeXY != null)
+         {
+            sourceNode.addEdge(shortestEdgeXY);
+            shortestEdgeXY.getTargetNode().addEdge(shortestEdgeXY);
+
+            edgesToPack.add(shortestEdgeXY);
+         }
+      }
+      else
+      {
+         edgesToPack.addAll(potentialEdges);
+      }
+
+   }
+
+   private static VisibilityGraphEdge findShortestEdgeXY(VisibilityGraphNode sourceNode, List<VisibilityGraphEdge> potentialEdges)
+   {
+      VisibilityGraphEdge shortestEdgeXY = null;
+      double shortestLengthXY = Double.POSITIVE_INFINITY;
+
+      for (VisibilityGraphEdge potentialEdge : potentialEdges)
+      {
+         VisibilityGraphNode targetNode = potentialEdge.getTargetNode();
+         double distance = sourceNode.distanceXY(targetNode);
+
+         if (distance < shortestLengthXY)
+         {
+            shortestEdgeXY = potentialEdge;
+            shortestLengthXY = distance;
+         }
+      }
+      return shortestEdgeXY;
    }
 
    public VisibilityMapSolution createVisibilityMapSolution()

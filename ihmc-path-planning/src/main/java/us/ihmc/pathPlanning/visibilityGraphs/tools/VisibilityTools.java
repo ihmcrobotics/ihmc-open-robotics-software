@@ -43,7 +43,6 @@ public class VisibilityTools
    public static boolean isPointVisible(Point2DReadOnly observer, Point2DReadOnly targetPoint, List<? extends Point2DReadOnly> listOfPointsInCluster,
                                         boolean closed)
    {
-      //TODO: +++JEP: Need to check the closing point if it is a polygon!! Also, add test cases for that. Also need to make sure one polygon per cluster...
       //TODO: CLean this up a bit to look better.
       int size = listOfPointsInCluster.size();
       int endIndex = size - 1;
