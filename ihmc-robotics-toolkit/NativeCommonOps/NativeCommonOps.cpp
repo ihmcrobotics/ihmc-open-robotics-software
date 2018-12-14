@@ -107,3 +107,24 @@ JNIEXPORT void JNICALL Java_us_ihmc_robotics_linearAlgebra_commonOps_NativeCommo
 	env->ReleaseDoubleArrayElements(bData, bDataArray, 0);
 	delete resultDataArray;
 }
+
+JNIEXPORT void JNICALL Java_us_ihmc_robotics_linearAlgebra_commonOps_NativeCommonOpsWrapper_projectOnNullspace(JNIEnv *env, jobject thisObj,
+		jdoubleArray result, jdoubleArray aData, jdoubleArray bData, jint aRows, jint aCols, jint bRows, jdouble alpha)
+{
+	jdouble *aDataArray = env->GetDoubleArrayElements(aData, NULL);
+	jdouble *bDataArray = env->GetDoubleArrayElements(bData, NULL);
+	MatrixXd A = Eigen::Map<Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic, Eigen::RowMajor>>(aDataArray, aRows, aCols);
+	MatrixXd B = Eigen::Map<Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic, Eigen::RowMajor>>(bDataArray, bRows, aCols);
+
+	MatrixXd BtB = B.transpose() * B;
+	MatrixXd outer = BtB + MatrixXd::Identity(aCols, aCols) * alpha * alpha;
+	MatrixXd x = A * (MatrixXd::Identity(aCols, aCols) - outer.llt().solve(BtB));
+
+	jdouble *resultDataArray = new jdouble[aRows * aCols];
+	Eigen::Map<Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic, Eigen::RowMajor>>(resultDataArray, aRows, aCols) = x;
+	env->SetDoubleArrayRegion(result, 0, aRows * aCols, resultDataArray);
+
+	env->ReleaseDoubleArrayElements(aData, aDataArray, 0);
+	env->ReleaseDoubleArrayElements(bData, bDataArray, 0);
+	delete resultDataArray;
+}
