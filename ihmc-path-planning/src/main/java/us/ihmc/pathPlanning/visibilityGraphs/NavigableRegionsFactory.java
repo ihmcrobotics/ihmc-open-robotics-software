@@ -23,7 +23,7 @@ public class NavigableRegionsFactory
 {
    private static final double DEPTH_THRESHOLD_FOR_CONVEX_DECOMPOSITION = 0.05;
 
-   public static List<NavigableRegion> createNavigableRegionButNotVisibilityMaps(List<PlanarRegion> allRegions, VisibilityGraphsParameters parameters)
+   public static List<NavigableRegion> createNavigableRegions(List<PlanarRegion> allRegions, VisibilityGraphsParameters parameters)
    {
       if (allRegions.isEmpty())
          return null;
@@ -43,15 +43,14 @@ public class NavigableRegionsFactory
          if (!navigableRegionFilter.isPlanarRegionNavigable(candidate, otherRegions))
             continue;
 
-         NavigableRegion navigableRegion = createNavigableRegionButNotVisibilityMaps(candidate, otherRegions, parameters);
+         NavigableRegion navigableRegion = createNavigableRegions(candidate, otherRegions, parameters);
          navigableRegions.add(navigableRegion);
       }
 
       return navigableRegions;
    }
 
-   public static NavigableRegion createNavigableRegionButNotVisibilityMaps(PlanarRegion region, List<PlanarRegion> otherRegions,
-                                                                           VisibilityGraphsParameters parameters)
+   public static NavigableRegion createNavigableRegions(PlanarRegion region, List<PlanarRegion> otherRegions, VisibilityGraphsParameters parameters)
    {
       PlanarRegionFilter planarRegionFilter = parameters.getPlanarRegionFilter();
       double orthogonalAngle = parameters.getRegionOrthogonalAngle();
@@ -59,14 +58,14 @@ public class NavigableRegionsFactory
       NavigableExtrusionDistanceCalculator navigableCalculator = parameters.getNavigableExtrusionDistanceCalculator();
       ObstacleExtrusionDistanceCalculator obstacleCalculator = parameters.getObstacleExtrusionDistanceCalculator();
       ObstacleRegionFilter obstacleRegionFilter = parameters.getObstacleRegionFilter();
-      return createNavigableRegionButNotVisibilityMaps(region, otherRegions, orthogonalAngle, clusterResolution, obstacleRegionFilter, planarRegionFilter,
-                                                       navigableCalculator, obstacleCalculator);
+      return createNavigableRegions(region, otherRegions, orthogonalAngle, clusterResolution, obstacleRegionFilter, planarRegionFilter, navigableCalculator,
+                                    obstacleCalculator);
    }
 
-   public static NavigableRegion createNavigableRegionButNotVisibilityMaps(PlanarRegion region, List<PlanarRegion> otherRegions, double orthogonalAngle,
-                                                                            double clusterResolution, ObstacleRegionFilter obstacleRegionFilter,
-                                                                            PlanarRegionFilter filter, NavigableExtrusionDistanceCalculator navigableCalculator,
-                                                                            ObstacleExtrusionDistanceCalculator obstacleCalculator)
+   public static NavigableRegion createNavigableRegions(PlanarRegion region, List<PlanarRegion> otherRegions, double orthogonalAngle, double clusterResolution,
+                                                        ObstacleRegionFilter obstacleRegionFilter, PlanarRegionFilter filter,
+                                                        NavigableExtrusionDistanceCalculator navigableCalculator,
+                                                        ObstacleExtrusionDistanceCalculator obstacleCalculator)
    {
       NavigableRegion navigableRegion = new NavigableRegion(region);
       PlanarRegion homeRegion = navigableRegion.getHomePlanarRegion();
