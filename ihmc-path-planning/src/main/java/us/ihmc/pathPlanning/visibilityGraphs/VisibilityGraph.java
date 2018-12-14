@@ -296,7 +296,6 @@ public class VisibilityGraph
          if (filter.isConnectionValid(sourceInWorld, targetInWorld))
          {
             //TODO: +++++++JEP: xyDistance check is a hack to allow connections through keep out regions enough to make them, but not enough to go through walls...
-
             double xyDistance = sourceInWorld.distanceXY(targetInWorld);
             if (xyDistance < 0.30)
             {
@@ -321,17 +320,17 @@ public class VisibilityGraph
                Point2D targetInSourceLocal = new Point2D(targetProjectedVerticallyOntoSource);
                Point2D sourceInTargetLocal = new Point2D(sourceProjectedVerticallyOntoTarget);
 
-               //TODO: +++JEP: 
+               //TODO: +++JEP: Inter-region connections and obstacles still needs some thought and some good unit tests.
                boolean targetIsVisibleThroughSourceObstacles = VisibilityTools.isPointVisibleForStaticMaps(sourceObstacleClusters, sourceInSourceLocal,
                                                                                                            targetInSourceLocal);
                boolean sourceIsVisibleThroughTargetObstacles = VisibilityTools.isPointVisibleForStaticMaps(targetObstacleClusters, targetInTargetLocal,
                                                                                                            sourceInTargetLocal);
 
-               if ((!targetIsVisibleThroughSourceObstacles || !sourceIsVisibleThroughTargetObstacles))
-                  continue;
-
-               VisibilityGraphEdge edge = new VisibilityGraphEdge(sourceNode, targetNode);
-               potentialEdges.add(edge);
+               if ((targetIsVisibleThroughSourceObstacles && sourceIsVisibleThroughTargetObstacles))
+               {
+                  VisibilityGraphEdge edge = new VisibilityGraphEdge(sourceNode, targetNode);
+                  potentialEdges.add(edge);
+               }
             }
          }
       }
