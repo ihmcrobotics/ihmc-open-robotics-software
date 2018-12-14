@@ -62,7 +62,7 @@ public class PlanarRegionToolsTest
 
       double minHeightOfRegionAAboveRegionB = PlanarRegionTools.computeMinHeightOfRegionAAboveRegionB(regionA, regionB);
       assertEquals(heightAbove, minHeightOfRegionAAboveRegionB, EPSILON);
-      
+
       // Now rotate the bottom one, lifting the plane and decreasing the height above.
       transformB = new RigidBodyTransform();
       double rotationAngleB = -0.4789;
@@ -71,7 +71,7 @@ public class PlanarRegionToolsTest
 
       minHeightOfRegionAAboveRegionB = PlanarRegionTools.computeMinHeightOfRegionAAboveRegionB(regionA, regionB);
       assertEquals(heightAbove + Math.tan(rotationAngleB) * 1.0, minHeightOfRegionAAboveRegionB, EPSILON);
-      
+
       // Now rotate the top one, lowering the points and decreasing the height above also.
       transformA = new RigidBodyTransform();
       double rotationAngleA = 0.123;
@@ -80,7 +80,8 @@ public class PlanarRegionToolsTest
       regionA = new PlanarRegion(transformA, convexPolygonA);
 
       minHeightOfRegionAAboveRegionB = PlanarRegionTools.computeMinHeightOfRegionAAboveRegionB(regionA, regionB);
-      assertEquals(heightAbove + Math.cos(rotationAngleA) * Math.tan(rotationAngleB) * 1.0 - Math.sin(rotationAngleA) * 1.0, minHeightOfRegionAAboveRegionB, EPSILON);
+      assertEquals(heightAbove + Math.cos(rotationAngleA) * Math.tan(rotationAngleB) * 1.0 - Math.sin(rotationAngleA) * 1.0, minHeightOfRegionAAboveRegionB,
+                   EPSILON);
    }
 
    @Test(timeout = 30000)
@@ -664,7 +665,71 @@ public class PlanarRegionToolsTest
       epsilonForCheck = 100.0;
       assertTrue(PlanarRegionTools.isRegionAOverlapingWithRegionB(regionB, regionC, epsilonForCheck));
       assertTrue(PlanarRegionTools.isRegionAOverlapingWithRegionB(regionC, regionB, epsilonForCheck));
+   }
 
+   @Test(timeout = 30000)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
+   public void testIsPlanarRegionAAbovePlanarRegionB()
+   {
+      ConvexPolygon2D polygonA = new ConvexPolygon2D();
+      polygonA.addVertex(1.0, 1.0);
+      polygonA.addVertex(1.0, -1.0);
+      polygonA.addVertex(-1.0, -1.0);
+      polygonA.addVertex(-1.0, 1.0);
+      polygonA.update();
+
+      ConvexPolygon2D polygonB = new ConvexPolygon2D();
+      polygonB.addVertex(3.0, 1.0);
+      polygonB.addVertex(3.0, -1.0);
+      polygonB.addVertex(1.0, -1.0);
+      polygonB.addVertex(1.0, 1.0);
+      polygonB.update();
+
+      PlanarRegion regionA = new PlanarRegion(new RigidBodyTransform(), polygonA);
+      PlanarRegion regionB = new PlanarRegion(new RigidBodyTransform(), polygonB);
+
+      double epsilon = 0.01;
+
+      assertFalse(PlanarRegionTools.isPlanarRegionAAbovePlanarRegionB(regionA, regionB, epsilon));
+      assertFalse(PlanarRegionTools.isPlanarRegionAAbovePlanarRegionB(regionB, regionA, epsilon));
+
+      RigidBodyTransform transformOne = new RigidBodyTransform();
+      transformOne.setTranslation(0.0, 0.0, 0.99 * epsilon);
+      regionA = new PlanarRegion(transformOne, polygonA);
+      regionB = new PlanarRegion(new RigidBodyTransform(), polygonB);
+      assertFalse(PlanarRegionTools.isPlanarRegionAAbovePlanarRegionB(regionA, regionB, epsilon));
+      assertFalse(PlanarRegionTools.isPlanarRegionAAbovePlanarRegionB(regionB, regionA, epsilon));
+
+      transformOne = new RigidBodyTransform();
+      transformOne.setTranslation(0.0, 0.0, 1.01 * epsilon);
+      regionA = new PlanarRegion(transformOne, polygonA);
+      regionB = new PlanarRegion(new RigidBodyTransform(), polygonB);
+      assertTrue(PlanarRegionTools.isPlanarRegionAAbovePlanarRegionB(regionA, regionB, epsilon));
+      assertFalse(PlanarRegionTools.isPlanarRegionAAbovePlanarRegionB(regionB, regionA, epsilon));
+
+      transformOne = new RigidBodyTransform();
+      transformOne.setTranslation(0.0, 0.0, 0.0);
+      transformOne.setRotationEuler(0.0, Math.PI / 4.0, 0.0);
+      RigidBodyTransform transformTwo = new RigidBodyTransform();
+      transformTwo.setTranslation(-10.0, 0.0, 0.0);
+      regionA = new PlanarRegion(transformOne, polygonA);
+      regionB = new PlanarRegion(transformTwo, polygonB);
+      assertTrue(PlanarRegionTools.isPlanarRegionAAbovePlanarRegionB(regionA, regionB, epsilon));
+      assertFalse(PlanarRegionTools.isPlanarRegionAAbovePlanarRegionB(regionB, regionA, epsilon));
+
+      transformTwo = new RigidBodyTransform();
+      transformTwo.setTranslation(10.0, 0.0, 0.0);
+      regionA = new PlanarRegion(transformOne, polygonA);
+      regionB = new PlanarRegion(transformTwo, polygonB);
+      assertTrue(PlanarRegionTools.isPlanarRegionAAbovePlanarRegionB(regionA, regionB, epsilon));
+      assertTrue(PlanarRegionTools.isPlanarRegionAAbovePlanarRegionB(regionB, regionA, epsilon));
+      
+      transformTwo = new RigidBodyTransform();
+      transformTwo.setTranslation(0.0, 0.0, 0.0);
+      regionA = new PlanarRegion(transformOne, polygonA);
+      regionB = new PlanarRegion(transformTwo, polygonB);
+      assertTrue(PlanarRegionTools.isPlanarRegionAAbovePlanarRegionB(regionA, regionB, epsilon));
+      assertTrue(PlanarRegionTools.isPlanarRegionAAbovePlanarRegionB(regionB, regionA, epsilon));
    }
 
    private static double findFurthestPointFromOrigin(ConvexPolygon2D polygon)
