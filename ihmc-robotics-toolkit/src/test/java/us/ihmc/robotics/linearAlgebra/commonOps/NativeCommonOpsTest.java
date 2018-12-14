@@ -127,6 +127,55 @@ public class NativeCommonOpsTest
 
    @ContinuousIntegrationTest(estimatedDuration = 1.0)
    @Test(timeout = 10000)
+   public void testInvert()
+   {
+      Random random = new Random(40L);
+
+      System.out.println("Testing inverting with random matrices...");
+
+      long nativeTime = 0;
+      long ejmlTime = 0;
+      double matrixSizes = 0;
+      LinearSolver<DenseMatrix64F> solver = LinearSolverFactory.lu(maxSize);
+
+      for (int i = 0; i < warmumIterations; i++)
+      {
+         DenseMatrix64F A = RandomMatrices.createRandom(maxSize, maxSize, -100.0, 100.0, random);
+         DenseMatrix64F B = new DenseMatrix64F(maxSize, maxSize);
+         solver.setA(A);
+         solver.invert(B);
+         NativeCommonOps.invert(A, B);
+      }
+
+      for (int i = 0; i < iterations; i++)
+      {
+         int aRows = random.nextInt(maxSize) + 1;
+         matrixSizes += aRows;
+
+         DenseMatrix64F A = RandomMatrices.createRandom(aRows, aRows, -100.0, 100.0, random);
+         DenseMatrix64F nativeResult = new DenseMatrix64F(aRows, aRows);
+         DenseMatrix64F ejmlResult = new DenseMatrix64F(aRows, aRows);
+
+         nativeTime -= System.nanoTime();
+         NativeCommonOps.invert(A, nativeResult);
+         nativeTime += System.nanoTime();
+
+         ejmlTime -= System.nanoTime();
+         solver.setA(A);
+         solver.invert(ejmlResult);
+         ejmlTime += System.nanoTime();
+
+         JUnitTools.assertMatrixEquals(ejmlResult, nativeResult, epsilon);
+      }
+
+      System.out.println("Native took " + Precision.round(Conversions.nanosecondsToMilliseconds((double) (nativeTime / iterations)), 3) + " ms on average");
+      System.out.println("EJML took " + Precision.round(Conversions.nanosecondsToMilliseconds((double) (ejmlTime / iterations)), 3) + " ms on average");
+      System.out.println("Average matrix size was " + Precision.round(matrixSizes / iterations, 1));
+      System.out.println("Native takes " + Precision.round((100.0 * nativeTime / ejmlTime), 0) + "% of EJML time.\n");
+   }
+
+   @ContinuousIntegrationTest(estimatedDuration = 1.0)
+   @Test(timeout = 10000)
    public void testSolve()
    {
       Random random = new Random(40L);

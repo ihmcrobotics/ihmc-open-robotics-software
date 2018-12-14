@@ -50,6 +50,22 @@ JNIEXPORT void JNICALL Java_us_ihmc_robotics_linearAlgebra_commonOps_NativeCommo
 	delete resultDataArray;
 }
 
+JNIEXPORT void JNICALL Java_us_ihmc_robotics_linearAlgebra_commonOps_NativeCommonOpsWrapper_invert(JNIEnv *env, jobject thisObj,
+		jdoubleArray result, jdoubleArray aData, jint aRows)
+{
+	jdouble *aDataArray = env->GetDoubleArrayElements(aData, NULL);
+	MatrixXd A = Eigen::Map<Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic, Eigen::RowMajor>>(aDataArray, aRows, aRows);
+
+	MatrixXd x = A.lu().inverse();
+
+	jdouble *resultDataArray = new jdouble[aRows * aRows];
+	Eigen::Map<Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic, Eigen::RowMajor>>(resultDataArray, aRows, aRows) = x;
+	env->SetDoubleArrayRegion(result, 0, aRows * aRows, resultDataArray);
+
+	env->ReleaseDoubleArrayElements(aData, aDataArray, 0);
+	delete resultDataArray;
+}
+
 JNIEXPORT void JNICALL Java_us_ihmc_robotics_linearAlgebra_commonOps_NativeCommonOpsWrapper_solve(JNIEnv *env, jobject thisObj,
 		jdoubleArray result, jdoubleArray aData, jdoubleArray bData, jint aRows)
 {
