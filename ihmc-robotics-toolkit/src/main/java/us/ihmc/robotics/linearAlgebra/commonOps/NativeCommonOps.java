@@ -30,7 +30,7 @@ public class NativeCommonOps
          throw new IllegalArgumentException("Incompatible Matrix Dimensions.");
       }
       c.reshape(a.getNumRows(), b.getNumCols());
-      nativeCommonOpsWrapper.computeAB(c.data, a.data, b.data, a.getNumRows(), a.getNumCols(), b.getNumCols());
+      nativeCommonOpsWrapper.mult(c.data, a.data, b.data, a.getNumRows(), a.getNumCols(), b.getNumCols());
    }
 
    /**
@@ -48,7 +48,7 @@ public class NativeCommonOps
          throw new IllegalArgumentException("Incompatible Matrix Dimensions.");
       }
       c.reshape(a.getNumCols(), a.getNumCols());
-      nativeCommonOpsWrapper.computeAtBA(c.data, a.data, b.data, a.getNumRows(), a.getNumCols());
+      nativeCommonOpsWrapper.multQuad(c.data, a.data, b.data, a.getNumRows(), a.getNumCols());
    }
 
    /**

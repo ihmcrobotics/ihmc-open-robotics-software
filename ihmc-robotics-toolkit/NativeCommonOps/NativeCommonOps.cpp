@@ -12,7 +12,7 @@
 
 using Eigen::MatrixXd;
 
-JNIEXPORT void JNICALL Java_us_ihmc_robotics_linearAlgebra_commonOps_NativeCommonOpsWrapper_computeAB(JNIEnv *env, jobject thisObj,
+JNIEXPORT void JNICALL Java_us_ihmc_robotics_linearAlgebra_commonOps_NativeCommonOpsWrapper_mult(JNIEnv *env, jobject thisObj,
 		jdoubleArray result, jdoubleArray aData, jdoubleArray bData, jint aRows, jint aCols, jint bCols)
 {
 	jdouble *aDataArray = env->GetDoubleArrayElements(aData, NULL);
@@ -31,7 +31,7 @@ JNIEXPORT void JNICALL Java_us_ihmc_robotics_linearAlgebra_commonOps_NativeCommo
 	delete resultDataArray;
 }
 
-JNIEXPORT void JNICALL Java_us_ihmc_robotics_linearAlgebra_commonOps_NativeCommonOpsWrapper_computeAtBA(JNIEnv *env, jobject thisObj,
+JNIEXPORT void JNICALL Java_us_ihmc_robotics_linearAlgebra_commonOps_NativeCommonOpsWrapper_multQuad(JNIEnv *env, jobject thisObj,
 		jdoubleArray result, jdoubleArray aData, jdoubleArray bData, jint aRows, jint aCols)
 {
 	jdouble *aDataArray = env->GetDoubleArrayElements(aData, NULL);

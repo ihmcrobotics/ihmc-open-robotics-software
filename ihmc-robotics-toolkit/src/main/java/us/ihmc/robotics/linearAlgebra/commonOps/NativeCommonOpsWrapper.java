@@ -2,9 +2,9 @@ package us.ihmc.robotics.linearAlgebra.commonOps;
 
 public class NativeCommonOpsWrapper
 {
-   public native void computeAB(double[] result, double[] aData, double[] bData, int aRows, int aCols, int bCols);
+   public native void mult(double[] result, double[] aData, double[] bData, int aRows, int aCols, int bCols);
 
-   public native void computeAtBA(double[] result, double[] aData, double[] bData, int aRows, int aCols);
+   public native void multQuad(double[] result, double[] aData, double[] bData, int aRows, int aCols);
 
    public native void invert(double[] result, double[] aData, int aRows);
 
