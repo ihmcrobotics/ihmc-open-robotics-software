@@ -39,7 +39,6 @@ mainDependencies {
    compile group: "org.boofcv", name: "calibration", version: "0.24.1"
    compile group: "org.boofcv", name: "visualize", version: "0.24.1"
    compile group: "org.ros.rosjava_bootstrap", name: "message_generation", version: "0.2.1"
-   compile group: "kryonet", name: "kryonet-all", version: "2.21"
    compile group: "com.github.wendykierp", name: "JTransforms", version: "3.1"
    compile group: "org.ros.rosjava_messages", name: "sensor_msgs", version: "1.11.7"
    compile group: "org.ros.rosjava_messages", name: "multisense_ros", version: "3.4.2"
