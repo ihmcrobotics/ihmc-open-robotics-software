@@ -10,6 +10,7 @@ import org.ejml.interfaces.linsol.LinearSolver;
 import org.ejml.ops.CommonOps;
 import us.ihmc.commons.MathTools;
 import us.ihmc.robotics.linearAlgebra.MatrixTools;
+import us.ihmc.robotics.linearAlgebra.commonOps.NativeCommonOps;
 import us.ihmc.tools.exceptions.NoConvergenceException;
 
 /**
@@ -195,7 +196,7 @@ public class JavaQuadProgSolver extends AbstractSimpleActiveSetQPSolver
    @Override
    public double getObjectiveCost(DenseMatrix64F x)
    {
-      multQuad(x, quadraticCostQMatrix, computedObjectiveFunctionValue);
+      NativeCommonOps.multQuad(x, quadraticCostQMatrix, computedObjectiveFunctionValue);
       CommonOps.scale(0.5, computedObjectiveFunctionValue);
       CommonOps.multAddTransA(quadraticCostQVector, x, computedObjectiveFunctionValue);
       return computedObjectiveFunctionValue.get(0, 0) + quadraticCostScalar;
