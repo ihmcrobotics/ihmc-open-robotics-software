@@ -686,7 +686,7 @@ public class PlanarRegionTools
     * @param planarRegion
     * @return the vertically projected point
     */
-   public static Point3D projectInZToPlanarRegion(Point3D pointInWorldToProjectInZ, PlanarRegion planarRegion)
+   public static Point3D projectInZToPlanarRegion(Point3DReadOnly pointInWorldToProjectInZ, PlanarRegion planarRegion)
    {
       Vector3D surfaceNormalInWorld = planarRegion.getNormal();
 

@@ -487,7 +487,6 @@ public class ClusterToolsTest
    @ContinuousIntegrationTest(estimatedDuration = 0.0)
    public void testTwoSquaresOneObstacle() throws Exception
    {
-      //TODO: +++JEP: Get this one passing and cleaned up.
       double[][] region0_1Points = new double[][] {{-3.0, 3.0}, {3.0, 3.0}, {3.0, -3.0}, {-3.0, -3.0}};
       Vector3D normal0_1 = new Vector3D(0.0, 0.0, 1.0);
       normal0_1.normalize();

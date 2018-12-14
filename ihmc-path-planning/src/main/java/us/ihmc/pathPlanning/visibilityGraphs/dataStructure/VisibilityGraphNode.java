@@ -68,6 +68,11 @@ public class VisibilityGraphNode implements Transformable, EpsilonComparable<Vis
       return pointInWorld.distance(target.pointInWorld);
    }
 
+   public double distanceXY(VisibilityGraphNode target)
+   {
+      return pointInWorld.distanceXY(target.pointInWorld);
+   }
+
    public double distanceSquared(VisibilityGraphNode target)
    {
       return pointInWorld.distanceSquared(target.pointInWorld);
