@@ -168,6 +168,9 @@ public interface VisibilityGraphsParameters
    {
       return new ObstacleRegionFilter()
       {
+         double canDuckUnderHeight = 2.0;
+         double canEasilyStepOverHeight = 0.03;
+
          @Override
          public boolean isRegionValidObstacle(PlanarRegion query, PlanarRegion navigableRegion)
          {
@@ -180,7 +183,10 @@ public interface VisibilityGraphsParameters
                return false;
 
             double minimumHeight = PlanarRegionTools.computeMinHeightOfRegionAAboveRegionB(query, navigableRegion);
-            if (minimumHeight > 2.0)
+            if (minimumHeight > canDuckUnderHeight )
+               return false;
+            
+            if (!PlanarRegionTools.isPlanarRegionAAbovePlanarRegionB(query, navigableRegion, canEasilyStepOverHeight))
                return false;
 
             return true;
