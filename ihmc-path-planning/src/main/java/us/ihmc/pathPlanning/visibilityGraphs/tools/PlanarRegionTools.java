@@ -558,9 +558,9 @@ public class PlanarRegionTools
 
       boolean boundingBoxesOfProjectionsIntersect = convexHullOne.getBoundingBox().intersectsEpsilon(convexHullTwo.getBoundingBox(), epsilon);
       return boundingBoxesOfProjectionsIntersect;
-      
+
       //++++++JEP: Fix this and use this if you want it to be more accurate. However, if this is just for approximate tests and can have false positives, then bounding boxes are fine.
-//      return doPolygonsIntersect(convexHullOne, convexHullTwo, epsilon);
+      //      return doPolygonsIntersect(convexHullOne, convexHullTwo, epsilon);
    }
 
    private static ConvexPolygon2D getVerticallyProjectedConvexHull(PlanarRegion planarRegion)
@@ -992,5 +992,82 @@ public class PlanarRegionTools
          return truncatedRegion;
       else
          return null;
+   }
+
+   /**
+    * Checks to see if regionA is above regionB in terms of not ever having to "step up" from regionA to regionB.
+    * If regionA is above regionB, then regionB should not be able to be an obstacle of regionA.
+    * 
+    * @param regionA PlanarRegion to check to see if it is above the other region.
+    * @param regionB PlanarRegion to check to see if it is below the other region.
+    * @param epsilon Margin of error. If epsilon is positive, then will still return true even if there are points in regionB higher than regionA by at most epsilon.
+    * @return true if regionA is above regionB, else false.
+    */
+   public static boolean isPlanarRegionAAbovePlanarRegionB(PlanarRegion regionA, PlanarRegion regionB, double epsilon)
+   {
+      ConvexPolygon2D convexHullA = regionA.getConvexHull();
+      ConvexPolygon2D convexHullB = regionB.getConvexHull();
+
+      RigidBodyTransform transformToWorldA = new RigidBodyTransform();
+      regionA.getTransformToWorld(transformToWorldA);
+
+      RigidBodyTransform transformToWorldB = new RigidBodyTransform();
+      regionB.getTransformToWorld(transformToWorldB);
+      RigidBodyTransform transformFromWorldToLocalB = new RigidBodyTransform();
+      transformFromWorldToLocalB.set(transformToWorldB);
+      transformFromWorldToLocalB.invert();
+
+      List<? extends Point2DReadOnly> verticesA = convexHullA.getPolygonVerticesView();
+      List<? extends Point2DReadOnly> verticesB = convexHullB.getPolygonVerticesView();
+
+      double[] regionBMinAndMaxZ = getMinAndMaxZInWorld(verticesB, transformToWorldB);
+
+      double minBzInWorld = regionBMinAndMaxZ[0];
+      double maxBzInWorld = regionBMinAndMaxZ[1];
+
+      Point3D pointAInWorld = new Point3D();
+      Point3D pointAInLocalB = new Point3D();
+
+      for (Point2DReadOnly vertexAInLocal : verticesA)
+      {
+         pointAInWorld.set(vertexAInLocal);
+         pointAInWorld.setZ(0.0);
+         transformToWorldA.transform(pointAInWorld);
+
+         pointAInLocalB.set(pointAInWorld);
+         transformFromWorldToLocalB.transform(pointAInLocalB);
+
+         if (pointAInWorld.getZ() > maxBzInWorld + epsilon)
+            return true;
+
+         if ((pointAInWorld.getZ() > minBzInWorld + epsilon) && (pointAInLocalB.getZ() > epsilon))
+            return true;
+      }
+
+      return false;
+   }
+
+   private static double[] getMinAndMaxZInWorld(List<? extends Point2DReadOnly> pointsInLocal, RigidBodyTransform transformToWorld)
+   {
+      double minZ = Double.POSITIVE_INFINITY;
+      double maxZ = Double.NEGATIVE_INFINITY;
+
+      Point3D pointInWorld = new Point3D();
+
+      for (Point2DReadOnly pointInLocal : pointsInLocal)
+      {
+         pointInWorld.set(pointInLocal);
+         pointInWorld.setZ(0.0);
+         transformToWorld.transform(pointInWorld);
+
+         double pointZInWorld = pointInWorld.getZ();
+         if (pointZInWorld < minZ)
+            minZ = pointZInWorld;
+
+         if (pointZInWorld > maxZ)
+            maxZ = pointZInWorld;
+      }
+
+      return new double[] {minZ, maxZ};
    }
 }
