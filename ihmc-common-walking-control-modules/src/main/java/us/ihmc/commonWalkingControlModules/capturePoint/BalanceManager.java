@@ -422,8 +422,6 @@ public class BalanceManager
       controllerToolbox.getCapturePointVelocity(capturePointVelocity2d);
       controllerToolbox.getCoP(copEstimate);
 
-      computeICPPlan(supportLeg);
-
       if (icpPlanner instanceof ICPPlannerWithAngularMomentumOffsetInterface)
          icpPlanner.modifyDesiredICPForAngularMomentum(copEstimate, supportLeg);
 
@@ -519,14 +517,11 @@ public class BalanceManager
       }
    }
 
-   public void computeICPPlan(RobotSide supportLeg)
+   public void computeICPPlan()
    {
       controllerToolbox.getCapturePoint(capturePoint2d);
       controllerToolbox.getCoP(copEstimate);
       icpPlanner.compute(capturePoint2d, yoTime.getDoubleValue());
-
-      if (icpPlanner instanceof ICPPlannerWithAngularMomentumOffsetInterface)
-         icpPlanner.modifyDesiredICPForAngularMomentum(copEstimate, supportLeg);
    }
 
 
@@ -827,6 +822,7 @@ public class BalanceManager
    {
       centerOfMassPosition.setToZero(centerOfMassFrame);
       yoCenterOfMass.setMatchingFrame(centerOfMassPosition);
+      computeICPPlan();
       icpPlanner.getFinalDesiredCapturePointPosition(yoFinalDesiredICP);
    }
 
