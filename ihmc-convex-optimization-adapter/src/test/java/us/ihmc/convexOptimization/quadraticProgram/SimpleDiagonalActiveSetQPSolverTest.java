@@ -14,10 +14,11 @@ public class SimpleDiagonalActiveSetQPSolverTest extends AbstractSimpleActiveSet
       return new SimpleDiagonalActiveSetQPSolver();
    }
 
+   @Override
    @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testSimpleCasesWithBoundsConstraints()
    {
-      testSimpleCasesWithBoundsConstraints(1, 3, 2, 3, false);
+      testSimpleCasesWithBoundsConstraints(1, 3, 3, 2, false);
    }
 }
