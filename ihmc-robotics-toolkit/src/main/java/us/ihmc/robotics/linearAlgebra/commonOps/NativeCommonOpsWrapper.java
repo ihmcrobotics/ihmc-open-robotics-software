@@ -10,6 +10,8 @@ public class NativeCommonOpsWrapper
 
    public native void solve(double[] result, double[] aData, double[] bData, int aRows);
 
+   public native boolean solveCheck(double[] result, double[] aData, double[] bData, int aRows);
+
    public native void solveRobust(double[] result, double[] aData, double[] bData, int aRows, int aCols);
 
    public native void solveDamped(double[] result, double[] aData, double[] bData, int aRows, int aCols, double alpha);

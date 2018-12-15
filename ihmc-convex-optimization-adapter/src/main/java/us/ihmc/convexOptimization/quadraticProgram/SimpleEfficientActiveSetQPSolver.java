@@ -892,7 +892,7 @@ public class SimpleEfficientActiveSetQPSolver extends AbstractSimpleActiveSetQPS
 
       CommonOps.scale(-1.0, bigVectorForLagrangeMultiplierSolution);
 
-      NativeCommonOps.solve(bigMatrixForLagrangeMultiplierSolution, bigVectorForLagrangeMultiplierSolution, augmentedLagrangeMultipliers);
+      NativeCommonOps.solveCheck(bigMatrixForLagrangeMultiplierSolution, bigVectorForLagrangeMultiplierSolution, augmentedLagrangeMultipliers);
 
       AAndC.reshape(numberOfAugmentedEqualityConstraints, numberOfVariables);
       CommonOps.insert(linearEqualityConstraintsAMatrix, AAndC, 0, 0);
