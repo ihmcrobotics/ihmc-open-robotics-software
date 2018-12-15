@@ -41,6 +41,14 @@ JNIEXPORT void JNICALL Java_us_ihmc_robotics_linearAlgebra_commonOps_NativeCommo
 
 /*
  * Class:     us_ihmc_robotics_linearAlgebra_commonOps_NativeCommonOpsWrapper
+ * Method:    solveCheck
+ * Signature: ([D[D[DI)Z
+ */
+JNIEXPORT jboolean JNICALL Java_us_ihmc_robotics_linearAlgebra_commonOps_NativeCommonOpsWrapper_solveCheck
+  (JNIEnv *, jobject, jdoubleArray, jdoubleArray, jdoubleArray, jint);
+
+/*
+ * Class:     us_ihmc_robotics_linearAlgebra_commonOps_NativeCommonOpsWrapper
  * Method:    solveRobust
  * Signature: ([D[D[DII)V
  */

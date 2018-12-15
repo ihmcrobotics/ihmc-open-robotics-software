@@ -2,6 +2,7 @@ package us.ihmc.robotics.linearAlgebra.commonOps;
 
 import org.ejml.data.DenseMatrix64F;
 import org.ejml.data.RowD1Matrix64F;
+import org.ejml.ops.CommonOps;
 
 import us.ihmc.tools.nativelibraries.NativeLibraryLoader;
 
@@ -85,6 +86,31 @@ public class NativeCommonOps
       }
       x.reshape(a.getNumCols(), 1);
       nativeCommonOpsWrapper.solve(x.data, a.data, b.data, a.getNumRows());
+   }
+
+   /**
+    * Computes the solution to the linear equation</br>
+    * a * x == b</br>
+    * This method requires that {@code a} is square. It will check the invertability of {@code a} and will return false if it is not invertible.
+    * @param a matrix in equation
+    * @param b matrix in equation
+    * @param x where the result is stored (modified)
+    * @return whether a solution was found
+    * @throws IllegalArgumentException if the matrix dimensions are incompatible.
+    */
+   public static boolean solveCheck(RowD1Matrix64F a, RowD1Matrix64F b, RowD1Matrix64F x)
+   {
+      if (a.getNumRows() != b.getNumRows() || b.getNumCols() != 1 || a.getNumCols() != a.getNumRows())
+      {
+         throw new IllegalArgumentException("Incompatible Matrix Dimensions.");
+      }
+      x.reshape(a.getNumCols(), 1);
+      if (nativeCommonOpsWrapper.solveCheck(x.data, a.data, b.data, a.getNumRows()))
+      {
+         return true;
+      }
+      CommonOps.fill(x, Double.NaN);
+      return false;
    }
 
    /**
