@@ -79,7 +79,6 @@ public class JavaQuadProgSolver extends AbstractSimpleActiveSetQPSolver
    private final DenseMatrix64F Q_augmented_inv = new DenseMatrix64F(0, 0);
 
    private final CholeskyDecomposition<DenseMatrix64F> decomposer = DecompositionFactory.chol(defaultSize, false);
-   private final LinearSolver<DenseMatrix64F> solver = LinearSolverFactory.linear(defaultSize);
 
    private final DenseMatrix64F decomposedQuadraticCostQMatrix = new DenseMatrix64F(0, 0);
 
@@ -414,9 +413,8 @@ public class JavaQuadProgSolver extends AbstractSimpleActiveSetQPSolver
 
       R_norm = 1.0; // this variable will hold the norm of the matrix R
 
-      // compute the inverse of the factorized matrix G^-1, this is the initial value for H //// TODO: 5/14/17 combine this with the decomposition 
-      solver.setA(decomposedQuadraticCostQMatrix);
-      solver.invert(J);
+      // compute the inverse of the factorized matrix G^-1, this is the initial value for H //// TODO: 5/14/17 combine this with the decomposition
+      NativeCommonOps.invert(decomposedQuadraticCostQMatrix, J);
       c2 = CommonOps.trace(J);
 
       int numberOfIterations = 0;
@@ -438,8 +436,7 @@ public class JavaQuadProgSolver extends AbstractSimpleActiveSetQPSolver
 
             MatrixTools.setMatrixBlock(Q_augmented, problemSize, 0, tempMatrix, 0, 0, numberOfEqualityConstraints, problemSize, 1.0);
 
-            solver.setA(Q_augmented);
-            solver.invert(Q_augmented_inv);
+            NativeCommonOps.invert(Q_augmented, Q_augmented_inv);
 
             MatrixTools.setMatrixBlock(q_augmented, 0, 0, quadraticCostQVector, 0, 0, problemSize, 1, -1.0);
             MatrixTools.setMatrixBlock(q_augmented, problemSize, 0, linearEqualityConstraintsBVector, 0, 0, numberOfEqualityConstraints, 1, -1.0);
