@@ -29,7 +29,7 @@ public class BipedCoMTrajectoryPlanner
    public BipedCoMTrajectoryPlanner(SideDependentList<MovingReferenceFrame> soleFrames, DoubleProvider omega, double gravityZ, double nominalCoMHeight, YoVariableRegistry parentRegistry,
                                     YoGraphicsListRegistry yoGraphicsListRegistry)
    {
-      sequenceUpdater = new BipedContactSequenceUpdater(soleFrames);
+      sequenceUpdater = new BipedContactSequenceUpdater(soleFrames, registry, yoGraphicsListRegistry);
       comTrajectoryPlanner = new CoMTrajectoryPlanner(sequenceUpdater.getContactSequence(), omega, gravityZ, nominalCoMHeight, registry, yoGraphicsListRegistry);
 
       parentRegistry.addChild(registry);

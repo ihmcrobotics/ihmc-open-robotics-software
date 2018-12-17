@@ -1,21 +1,25 @@
 package us.ihmc.commonWalkingControlModules.capturePoint.comBasedPlanner;
 
 import us.ihmc.commons.lists.RecyclingArrayList;
-import us.ihmc.euclid.geometry.ConvexPolygon2D;
-import us.ihmc.euclid.referenceFrame.FrameConvexPolygon2D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.graphicsDescription.appearance.YoAppearance;
+import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition;
+import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.mecano.frames.MovingReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
+import us.ihmc.robotics.time.TimeInterval;
 import us.ihmc.robotics.time.TimeIntervalTools;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoFramePoint2D;
 
 import java.util.ArrayList;
 import java.util.List;
 
 public class BipedContactSequenceUpdater
 {
-   private static final int maxCapacity = 5;
+   private static final int maxCapacity = 7;
    private final RecyclingArrayList<BipedStepTransition> stepTransitionsInAbsoluteTime = new RecyclingArrayList<>(BipedStepTransition::new);
 
    private final RecyclingArrayList<SimpleBipedContactPhase> contactSequenceInRelativeTime = new RecyclingArrayList<>(maxCapacity,
@@ -23,13 +27,14 @@ public class BipedContactSequenceUpdater
    private final RecyclingArrayList<SimpleBipedContactPhase> contactSequenceInAbsoluteTime = new RecyclingArrayList<>(maxCapacity,
                                                                                                                       SimpleBipedContactPhase::new);
 
-   private final List<RobotSide> startFeetInContact = new ArrayList<>();
-   private final List<RobotSide> endFeetInContact = new ArrayList<>();
-   private final SideDependentList<FramePose3D> startSolePoses = new SideDependentList<>();
-   private final SideDependentList<FramePose3D> endSolePoses = new SideDependentList<>();
+   private final List<YoFramePoint2D> startCoPs = new ArrayList<>();
+   private final List<YoFramePoint2D> endCoPs = new ArrayList<>();
+
+   private final List<RobotSide> feetInContact = new ArrayList<>();
+   private final SideDependentList<FramePose3D> solePoses = new SideDependentList<>();
    private final SideDependentList<MovingReferenceFrame> soleFrames;
 
-   public BipedContactSequenceUpdater(SideDependentList<MovingReferenceFrame> soleFrames)
+   public BipedContactSequenceUpdater(SideDependentList<MovingReferenceFrame> soleFrames, YoVariableRegistry registry, YoGraphicsListRegistry graphicsListRegistry)
    {
       this.soleFrames = soleFrames;
       contactSequenceInAbsoluteTime.clear();
@@ -37,14 +42,27 @@ public class BipedContactSequenceUpdater
 
       for (RobotSide robotSide : RobotSide.values)
       {
-         startFeetInContact.add(robotSide);
-         startSolePoses.set(robotSide, new FramePose3D());
-         endSolePoses.set(robotSide, new FramePose3D());
+         feetInContact.add(robotSide);
+         solePoses.set(robotSide, new FramePose3D());
+      }
+
+      for (int i = 0; i < maxCapacity; i++)
+      {
+         startCoPs.add(new YoFramePoint2D("startCoP" + i, ReferenceFrame.getWorldFrame(), registry));
+         endCoPs.add(new YoFramePoint2D("endCoP" + i, ReferenceFrame.getWorldFrame(), registry));
+
+         YoGraphicPosition startCoP = new YoGraphicPosition("start cop " + i, startCoPs.get(i), 0.01, YoAppearance.Green(), YoGraphicPosition.GraphicType.SOLID_BALL);
+         YoGraphicPosition endCoP = new YoGraphicPosition("end cop " + i, startCoPs.get(i), 0.01, YoAppearance.Green(), YoGraphicPosition.GraphicType.SOLID_BALL);
+
+         graphicsListRegistry.registerArtifact("Contact Sequence", startCoP.createArtifact());
+         graphicsListRegistry.registerArtifact("Contact Sequence", endCoP.createArtifact());
       }
    }
 
    public void initialize()
    {
+      for (int i = 0; i < contactSequenceInAbsoluteTime.size(); i++)
+         contactSequenceInAbsoluteTime.get(i).reset();
       contactSequenceInAbsoluteTime.clear();
    }
 
@@ -55,18 +73,21 @@ public class BipedContactSequenceUpdater
 
    public void update(List<? extends BipedTimedStep> stepSequence, List<RobotSide> currentFeetInContact, double currentTime)
    {
+      initialize();
+
       // initialize contact state and sole positions
       for (RobotSide robotSide : RobotSide.values)
       {
-         startSolePoses.get(robotSide).setToZero(soleFrames.get(robotSide));
-         endSolePoses.get(robotSide).setToZero(soleFrames.get(robotSide));
+         solePoses.get(robotSide).setToZero(soleFrames.get(robotSide));
       }
-      startFeetInContact.clear();
+      feetInContact.clear();
       for (int footIndex = 0; footIndex < currentFeetInContact.size(); footIndex++)
-         startFeetInContact.add(currentFeetInContact.get(footIndex));
+      {
+         feetInContact.add(currentFeetInContact.get(footIndex));
+      }
 
       BipedContactSequenceTools.computeStepTransitionsFromStepSequence(stepTransitionsInAbsoluteTime, currentTime, stepSequence);
-      BipedContactSequenceTools.trimPastContactSequences(contactSequenceInAbsoluteTime, currentTime, currentFeetInContact, startSolePoses);
+      BipedContactSequenceTools.trimPastContactSequences(contactSequenceInAbsoluteTime, currentTime, currentFeetInContact, solePoses);
 
       computeContactPhasesFromStepTransitions();
 
@@ -81,26 +102,43 @@ public class BipedContactSequenceUpdater
       BipedContactSequenceTools.shiftContactSequencesToRelativeTime(contactSequenceInRelativeTime, currentTime);
 
       TimeIntervalTools.removeEndTimesLessThan(0.0, contactSequenceInRelativeTime);
+
+      int i = 0;
+      for (; i < contactSequenceInRelativeTime.size(); i++)
+      {
+         startCoPs.get(i).set(contactSequenceInRelativeTime.get(i).getCopStartPosition());
+         endCoPs.get(i).set(contactSequenceInRelativeTime.get(i).getCopEndPosition());
+      }
+      for (; i < maxCapacity; i++)
+      {
+         startCoPs.get(i).setToNaN();
+         endCoPs.get(i).setToNaN();
+      }
    }
 
-   // fixme this function is probably not correct
 
    private void computeContactPhasesFromStepTransitions()
    {
       int numberOfTransitions = stepTransitionsInAbsoluteTime.size();
-      SimpleBipedContactPhase contactPhase = contactSequenceInAbsoluteTime.getLast();
+      SimpleBipedContactPhase previousContactPhase = contactSequenceInAbsoluteTime.getLast();
+//      previousContactPhase.reset();
+
+//      for (int i = 0; i < feetInContact.size(); i++)
+//      {
+//         previousContactPhase.addStartFoot(feetInContact.get(i), solePoses.get(feetInContact.get(i)));
+//      }
 
       // compute transition time and center of pressure for each time interval
       for (int transitionNumber = 0; transitionNumber < numberOfTransitions; transitionNumber++)
       {
+
          BipedStepTransition stepTransition = stepTransitionsInAbsoluteTime.get(transitionNumber);
-         startFeetInContact.clear();
-         for (int i = 0; i < endFeetInContact.size(); i++)
-         {
-            RobotSide side = endFeetInContact.get(i);
-            startFeetInContact.add(side);
-            startSolePoses.get(side).setIncludingFrame(endSolePoses.get(side));
-         }
+
+         // end the previous phase and add a new one
+         previousContactPhase.getTimeInterval().setEndTime(stepTransition.getTransitionTime());
+
+         SimpleBipedContactPhase contactPhase = contactSequenceInAbsoluteTime.add();
+         contactPhase.reset();
 
          for (int transitioningFootNumber = 0; transitioningFootNumber < stepTransition.getNumberOfFeetInTransition(); transitioningFootNumber++)
          {
@@ -108,35 +146,61 @@ public class BipedContactSequenceUpdater
             switch (stepTransition.getTransitionType(transitioningFootNumber))
             {
             case LIFT_OFF:
-               endFeetInContact.remove(transitionSide);
+               feetInContact.remove(transitionSide);
                break;
             case TOUCH_DOWN:
-               endFeetInContact.add(transitionSide);
-               endSolePoses.get(transitionSide).setIncludingFrame(stepTransition.transitionPose(transitionSide));
+               feetInContact.add(transitionSide);
+               solePoses.get(transitionSide).setMatchingFrame(stepTransition.transitionPose(transitionSide));
                break;
             }
          }
 
-         // end the previous phase and add a new one
-         contactPhase.getTimeInterval().setEndTime(stepTransition.getTransitionTime());
-         contactPhase = contactSequenceInAbsoluteTime.add();
+         if (stepTransition.getNumberOfFeetInTransition() > 1)
+         { // just started or landed from a jump
+            throw new RuntimeException("Not handled.");
+         }
+         else
+         {
+            RobotSide transitionSide = stepTransition.getTransitionSide(0);
+            BipedStepTransitionType transitionType = stepTransition.getTransitionType(0);
 
-         contactPhase.reset();
-         contactPhase.setFeetInContact(endFeetInContact);
-         for (int i = 0; i < startFeetInContact.size(); i++)
-            contactPhase.addStartFoot(startFeetInContact.get(i), startSolePoses.get(startFeetInContact.get(i)));
-         for (int i = 0; i < endFeetInContact.size(); i++)
-            contactPhase.addStartFoot(endFeetInContact.get(i), startSolePoses.get(endFeetInContact.get(i)));
+            RobotSide startSide, previousEndSide;
+
+            if (transitionType == BipedStepTransitionType.LIFT_OFF)
+            { // this is the end of transfer, with a foot lifting off the ground, meaning this phase is the start of swing
+               startSide = transitionSide.getOppositeSide();
+               previousEndSide = transitionSide.getOppositeSide();
+            }
+            else
+            {
+               startSide = transitionSide.getOppositeSide();
+               previousEndSide = transitionSide.getOppositeSide();
+            }
+
+            if (feetInContact.size() > 0)
+            {
+               contactPhase.addStartFoot(startSide, solePoses.get(startSide));
+            }
+
+            previousContactPhase.addEndFoot(previousEndSide, solePoses.get(previousEndSide));
+            previousContactPhase.update();
+         }
+
+         contactPhase.setFeetInContact(feetInContact);
+
          contactPhase.getTimeInterval().setStartTime(stepTransition.getTransitionTime());
-         contactPhase.update();
+//         contactPhase.update();
 
+         previousContactPhase = contactPhase;
          boolean isLastContact = (transitionNumber == numberOfTransitions - 1) || (contactSequenceInAbsoluteTime.size() == maxCapacity);
          if (isLastContact)
             break;
       }
 
-      contactPhase.getTimeInterval().setEndTime(Double.POSITIVE_INFINITY);
-
+      previousContactPhase.getTimeInterval().setEndTime(Double.POSITIVE_INFINITY);
+      for (int i = 0; i < feetInContact.size(); i++)
+         previousContactPhase.addEndFoot(feetInContact.get(i), solePoses.get(feetInContact.get(i)));
+      previousContactPhase.update();
    }
 
 }

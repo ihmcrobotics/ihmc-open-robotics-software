@@ -46,7 +46,6 @@ public class CoMTrajectoryPlanner implements CoMTrajectoryPlannerInterface
    private final DenseMatrix64F yCoefficientVector = new DenseMatrix64F(0, 1);
    private final DenseMatrix64F zCoefficientVector = new DenseMatrix64F(0, 1);
 
-   private final FramePoint3D currentCoMPosition = new FramePoint3D();
    private final FramePoint3D finalDCMPosition = new FramePoint3D();
 
    private final LinearSolver<DenseMatrix64F> solver = LinearSolverFactory.linear(0);
@@ -68,6 +67,7 @@ public class CoMTrajectoryPlanner implements CoMTrajectoryPlannerInterface
 
    private final FixedFramePoint3DBasics desiredVRPPosition = new FramePoint3D(worldFrame);
 
+   private final YoFramePoint3D currentCoMPosition = new YoFramePoint3D("currentCoMPosition", worldFrame, registry);
    private final YoFramePoint3D yoFirstCoefficient = new YoFramePoint3D("comFirstCoefficient", worldFrame, registry);
    private final YoFramePoint3D yoSecondCoefficient = new YoFramePoint3D("comSecondCoefficient", worldFrame, registry);
    private final YoFramePoint3D yoThirdCoefficient = new YoFramePoint3D("comThirdCoefficient", worldFrame, registry);
@@ -345,7 +345,7 @@ public class CoMTrajectoryPlanner implements CoMTrajectoryPlannerInterface
    @Override
    public void setInitialCenterOfMassState(FramePoint3DReadOnly centerOfMassPosition, FrameVector3DReadOnly centerOfMassVelocity)
    {
-      this.currentCoMPosition.setIncludingFrame(centerOfMassPosition);
+      this.currentCoMPosition.setMatchingFrame(centerOfMassPosition);
    }
 
    /** {@inheritDoc} */
