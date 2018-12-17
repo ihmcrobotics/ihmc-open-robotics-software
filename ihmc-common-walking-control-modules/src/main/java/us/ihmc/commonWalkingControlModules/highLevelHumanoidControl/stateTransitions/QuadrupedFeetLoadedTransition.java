@@ -56,12 +56,12 @@ public class QuadrupedFeetLoadedTransition implements StateTransitionCondition
    private boolean areFeetLoaded()
    {
       double averageWeight = 0.0;
-      for (RobotSide robotSide : RobotSide.values)
+      for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
       {
-         YoDouble prepFootFz = prepFootFzs.get(robotSide);
-         SimpleMovingAverageFilteredYoVariable prepFootFzAverage = prepFootFzAverages.get(robotSide);
+         YoDouble prepFootFz = prepFootFzs.get(robotQuadrant);
+         SimpleMovingAverageFilteredYoVariable prepFootFzAverage = prepFootFzAverages.get(robotQuadrant);
 
-         footSwitches.get(robotSide).computeAndPackFootWrench(temporaryFootWrench);
+         footSwitches.get(robotQuadrant).computeAndPackFootWrench(temporaryFootWrench);
          prepFootFz.set(temporaryFootWrench.getLinearPartZ());
          prepFootFzAverage.update();
 
