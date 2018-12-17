@@ -529,8 +529,11 @@ public class WalkingHighLevelHumanoidController implements JointLoadStatusProvid
 
       updateFailureDetection();
 
+      // Do transitions will request ICP planner updates.
       stateMachine.doTransitions();
+      // This updates the ICP plan continuously.
       balanceManager.update();
+      // Do action is relying on the ICP plan being valid.
       stateMachine.doAction();
 
       currentState = stateMachine.getCurrentState();
