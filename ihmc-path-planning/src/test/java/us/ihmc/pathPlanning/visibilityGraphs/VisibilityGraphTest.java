@@ -875,8 +875,8 @@ public class VisibilityGraphTest
    {
       for (VisibilityGraphEdge edge : edges)
       {
-         ConnectionPoint3D sourcePoint = edge.getSourcePoint();
-         ConnectionPoint3D targetPoint = edge.getTargetPoint();
+         ConnectionPoint3D sourcePoint = edge.getSourcePointInWorld();
+         ConnectionPoint3D targetPoint = edge.getTargetPointInWorld();
 
          if (sourcePoint.equals(pointOne) && targetPoint.equals(pointTwo))
             return true;
