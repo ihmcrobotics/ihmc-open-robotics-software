@@ -4,13 +4,11 @@ import java.util.ArrayList;
 import java.util.List;
 
 import us.ihmc.euclid.interfaces.EpsilonComparable;
-import us.ihmc.euclid.interfaces.Transformable;
-import us.ihmc.euclid.transform.interfaces.Transform;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 
-public class VisibilityGraphNode implements Transformable, EpsilonComparable<VisibilityGraphNode>
+public class VisibilityGraphNode implements EpsilonComparable<VisibilityGraphNode>
 {
    private final VisibilityGraphNavigableRegion visibilityGraphNavigableRegion;
    private final ConnectionPoint3D pointInWorld;
@@ -82,18 +80,6 @@ public class VisibilityGraphNode implements Transformable, EpsilonComparable<Vis
    public boolean epsilonEquals(VisibilityGraphNode other, double epsilon)
    {
       return pointInWorld.epsilonEquals(other.pointInWorld, epsilon);
-   }
-
-   @Override
-   public void applyTransform(Transform transform)
-   {
-      pointInWorld.applyTransform(transform);
-   }
-
-   @Override
-   public void applyInverseTransform(Transform transform)
-   {
-      pointInWorld.applyInverseTransform(transform);
    }
 
    @Override
