@@ -95,8 +95,8 @@ public class BipedContactSequenceTools
 
             if (isEqualContactState(contactPhase.getFeetInContact(), currentFeetInContact))
             { // the last phase hasn't been completed, so update the sole positions
+               contactPhase.resetEnd();
                contactPhase.setStartFootPoses(currentSolePoses);
-               contactPhase.update();
             }
             else
             { // end the previous contact phase and add a new one for the current state

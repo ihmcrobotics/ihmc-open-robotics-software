@@ -71,10 +71,13 @@ public class BipedContactSequenceUpdater
       return contactSequenceInRelativeTime;
    }
 
+   public List<SimpleBipedContactPhase> getAbsoluteContactSequence()
+   {
+      return contactSequenceInAbsoluteTime;
+   }
+
    public void update(List<? extends BipedTimedStep> stepSequence, List<RobotSide> currentFeetInContact, double currentTime)
    {
-      initialize();
-
       // initialize contact state and sole positions
       for (RobotSide robotSide : RobotSide.values)
       {
@@ -121,12 +124,6 @@ public class BipedContactSequenceUpdater
    {
       int numberOfTransitions = stepTransitionsInAbsoluteTime.size();
       SimpleBipedContactPhase previousContactPhase = contactSequenceInAbsoluteTime.getLast();
-//      previousContactPhase.reset();
-
-//      for (int i = 0; i < feetInContact.size(); i++)
-//      {
-//         previousContactPhase.addStartFoot(feetInContact.get(i), solePoses.get(feetInContact.get(i)));
-//      }
 
       // compute transition time and center of pressure for each time interval
       for (int transitionNumber = 0; transitionNumber < numberOfTransitions; transitionNumber++)
