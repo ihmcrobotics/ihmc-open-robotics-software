@@ -562,7 +562,7 @@ public class PlanarRegionTools
       //      return doPolygonsIntersect(convexHullOne, convexHullTwo, epsilon);
    }
 
-   private static ConvexPolygon2D getVerticallyProjectedConvexHull(PlanarRegion planarRegion)
+   public static ConvexPolygon2D getVerticallyProjectedConvexHull(PlanarRegion planarRegion)
    {
       RigidBodyTransform transformToWorld = new RigidBodyTransform();
       planarRegion.getTransformToWorld(transformToWorld);
