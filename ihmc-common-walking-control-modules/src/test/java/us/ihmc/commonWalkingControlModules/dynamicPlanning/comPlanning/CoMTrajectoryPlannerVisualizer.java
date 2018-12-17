@@ -32,7 +32,7 @@ public class CoMTrajectoryPlannerVisualizer
    private static final double stepLength = 0.5;
    private static final int numberOfSteps = 5;
 
-   private static final boolean includeFlight = false;
+   private static final boolean includeFlight = true;
 
    private static final double simDt = 1e-3;
 

@@ -46,7 +46,7 @@ public class BipedContactSequenceUpdater
          solePoses.set(robotSide, new FramePose3D());
       }
 
-      for (int i = 0; i < maxCapacity; i++)
+      for (int i = 0; i < maxCapacity + 1; i++)
       {
          startCoPs.add(new YoFramePoint2D("startCoP" + i, ReferenceFrame.getWorldFrame(), registry));
          endCoPs.add(new YoFramePoint2D("endCoP" + i, ReferenceFrame.getWorldFrame(), registry));
@@ -152,7 +152,7 @@ public class BipedContactSequenceUpdater
             }
          }
 
-         if (stepTransition.getNumberOfFeetInTransition() > 1)
+         if (stepTransition.getNumberOfFeetInTransition() > 1 && stepTransition.getTransitionType(0) == stepTransition.getTransitionType(1))
          { // just started or landed from a jump
             throw new RuntimeException("Not handled.");
          }
@@ -189,7 +189,7 @@ public class BipedContactSequenceUpdater
 //         contactPhase.update();
 
          previousContactPhase = contactPhase;
-         boolean isLastContact = (transitionNumber == numberOfTransitions - 1) || (contactSequenceInAbsoluteTime.size() == maxCapacity);
+         boolean isLastContact = (transitionNumber == numberOfTransitions - 1) || (contactSequenceInAbsoluteTime.size() >= maxCapacity && feetInContact.size() > 0);
          if (isLastContact)
             break;
       }

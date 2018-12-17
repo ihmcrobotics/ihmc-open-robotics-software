@@ -1,5 +1,6 @@
 package us.ihmc.commonWalkingControlModules.capturePoint.comBasedPlanner;
 
+import us.ihmc.commons.InterpolationTools;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
@@ -32,9 +33,17 @@ public class BipedCoMTrajectoryPlannerVisualizer
 
    private static final double initialTransferTime = 1.0;
    private static final double swingDuration = 0.4;
-   private static final double stanceDuration = 0.2;
-   private static final double stepLength = 0.5;
-   private static final int numberOfSteps = 5;
+   private static final double stanceDuration = 0.1;
+   private static final double flightDuration = 0.1;
+
+   private static final double startLength = 0.3;
+   private static final double stepLength = 0.8;
+   private static final double runLength = 1.7;
+   private static final int numberOfWalkingSteps = 0;
+   private static final int numberOfRunningSteps = 5;
+
+   private static final boolean includeFlight = true;
+
 
    private static final double simDt = 1e-3;
 
@@ -156,9 +165,10 @@ public class BipedCoMTrajectoryPlannerVisualizer
 
       double stepStartTime = initialTransferTime;
       RobotSide currentSide = RobotSide.LEFT;
-      for (int i = 0; i < numberOfSteps; i++)
+      for (int i = 0; i < numberOfWalkingSteps; i++)
       {
-         stepPose.getPosition().addX(stepLength);
+         double length = InterpolationTools.linearInterpolate(i / (numberOfWalkingSteps - 1), startLength, stepLength);
+         stepPose.getPosition().addX(length);
          stepPose.getPosition().setY(currentSide.negateIfRightSide(stanceWidth / 2.0));
 
          BipedTimedStep step = new BipedTimedStep();
@@ -170,6 +180,26 @@ public class BipedCoMTrajectoryPlannerVisualizer
 
          currentSide = currentSide.getOppositeSide();
          stepStartTime += swingDuration + stanceDuration;
+      }
+
+      if (includeFlight)
+      {
+         for (int i = 0; i < numberOfRunningSteps; i++)
+         {
+            double length = InterpolationTools.linearInterpolate(i / (numberOfWalkingSteps - 1), stepLength, runLength);
+            stepPose.getPosition().addX(length);
+            stepPose.getPosition().setY(currentSide.negateIfRightSide(stanceWidth / 2.0));
+
+            BipedTimedStep step = new BipedTimedStep();
+
+            step.getTimeInterval().setInterval(stepStartTime, stepStartTime + swingDuration);
+            step.setRobotSide(currentSide);
+            step.setGoalPose(stepPose);
+            steps.add(step);
+
+            currentSide = currentSide.getOppositeSide();
+            stepStartTime += swingDuration - flightDuration;
+         }
       }
 
 
