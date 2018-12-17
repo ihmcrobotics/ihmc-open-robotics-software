@@ -125,8 +125,8 @@ public class LeggedRobotEKF implements StateEstimatorController
          String name = FilterTools.stringToPrefix(imuOutput.getSensorName());
          RigidBodyBasics imuBody = imuOutput.getMeasurementLink();
          ReferenceFrame imuFrame = imuOutput.getMeasurementFrame();
-         AngularVelocitySensor angularVelocitySensor = new AngularVelocitySensor(name + "AngularVelocity", dt, imuBody, imuFrame, true, registry);
-         LinearAccelerationSensor linearAccelerationSensor = new LinearAccelerationSensor(name + "LinearAcceleration", dt, imuBody, imuFrame, true, registry);
+         AngularVelocitySensor angularVelocitySensor = new AngularVelocitySensor(name + "AngularVelocity", dt, imuBody, imuFrame, false, registry);
+         LinearAccelerationSensor linearAccelerationSensor = new LinearAccelerationSensor(name + "LinearAcceleration", dt, imuBody, imuFrame, false, registry);
          angularVelocitySensors.add(angularVelocitySensor);
          linearAccelerationSensors.add(linearAccelerationSensor);
          sensors.add(angularVelocitySensor);
