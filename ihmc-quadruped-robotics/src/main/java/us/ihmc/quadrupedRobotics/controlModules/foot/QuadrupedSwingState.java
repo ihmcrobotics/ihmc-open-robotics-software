@@ -83,6 +83,7 @@ public class QuadrupedSwingState extends QuadrupedFootState
    private final YoBoolean hasMinimumTimePassed;
 
    private final DoubleParameter minHeightDifferenceForObstacleClearance;
+   private final DoubleParameter minPhaseThroughSwingForContact;
 
    private final DoubleParameter percentPastSwingForDone;
    private final YoBoolean isSwingPastDone;
@@ -119,6 +120,7 @@ public class QuadrupedSwingState extends QuadrupedFootState
       String namePrefix = robotQuadrant.getPascalCaseName();
 
       minHeightDifferenceForObstacleClearance = new DoubleParameter(namePrefix + "MinHeightDifferenceForObstacleClearance", registry, 0.04);
+      minPhaseThroughSwingForContact = new DoubleParameter(namePrefix + "minPhaseThroughSwingForContact", registry, 0.8);
 
       timeInState = new YoDouble(namePrefix + "TimeInState", registry);
       timeInStateWithSwingSpeedUp = new YoDouble(namePrefix + "TimeInStateWithSwingSpeedUp", registry);
