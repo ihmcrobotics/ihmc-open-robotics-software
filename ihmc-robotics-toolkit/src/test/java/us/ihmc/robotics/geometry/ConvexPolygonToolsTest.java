@@ -1125,7 +1125,7 @@ public class ConvexPolygonToolsTest
       tools.computeMinimumDistancePoints(polygonOne, polygonTwo, pointOneToPack, pointTwoToPack);
    }
 
-   @Ignore
+
    @ContinuousIntegrationTest(estimatedDuration = 3.8)
    @Test(timeout = 30000)
    public void testPolygonIntersections()
