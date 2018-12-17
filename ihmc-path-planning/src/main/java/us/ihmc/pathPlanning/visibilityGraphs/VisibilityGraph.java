@@ -402,7 +402,7 @@ public class VisibilityGraph
 
       for (VisibilityGraphEdge crossRegionEdge : crossRegionEdges)
       {
-         Connection connection = new Connection(crossRegionEdge.getSourcePoint(), crossRegionEdge.getTargetPoint());
+         Connection connection = new Connection(crossRegionEdge.getSourcePointInWorld(), crossRegionEdge.getTargetPointInWorld());
          interRegionVisibilityMap.addConnection(connection);
       }
 
@@ -430,8 +430,8 @@ public class VisibilityGraph
 
       for (VisibilityGraphEdge edge : edges)
       {
-         ConnectionPoint3D sourcePoint = edge.getSourcePoint();
-         ConnectionPoint3D targetPoint = edge.getTargetPoint();
+         ConnectionPoint3D sourcePoint = edge.getSourcePointInWorld();
+         ConnectionPoint3D targetPoint = edge.getTargetPointInWorld();
          connections.add(new Connection(sourcePoint, targetPoint));
       }
       return connections;
