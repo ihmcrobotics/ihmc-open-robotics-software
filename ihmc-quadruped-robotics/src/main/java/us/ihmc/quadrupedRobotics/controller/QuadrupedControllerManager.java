@@ -296,8 +296,6 @@ public class QuadrupedControllerManager implements RobotController, CloseableAnd
                             createRequestedTransition(HighLevelControllerName.STAND_PREP_STATE));
       factory.addTransition(HighLevelControllerName.STAND_READY, sitDownStateName, createRequestedTransition(sitDownStateName));
       factory.addTransition(HighLevelControllerName.FREEZE_STATE, sitDownStateName, createRequestedTransition(sitDownStateName));
-      factory.addTransition(HighLevelControllerName.FREEZE_STATE, HighLevelControllerName.STAND_TRANSITION_STATE,
-                            createRequestedTransition(HighLevelControllerName.WALKING));
       factory.addTransition(HighLevelControllerName.FREEZE_STATE, HighLevelControllerName.STAND_PREP_STATE,
                             createRequestedTransition(HighLevelControllerName.STAND_PREP_STATE));
       factory.addTransition(HighLevelControllerName.STAND_PREP_STATE, HighLevelControllerName.FREEZE_STATE,
