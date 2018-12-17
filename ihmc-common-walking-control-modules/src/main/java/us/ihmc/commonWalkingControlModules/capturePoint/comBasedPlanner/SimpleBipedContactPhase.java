@@ -31,6 +31,8 @@ public class SimpleBipedContactPhase implements ContactStateProvider
    private final FramePoint3D startCopPosition = new FramePoint3D();
    private final FramePoint3D endCopPosition = new FramePoint3D();
 
+   private boolean isUpToDate = false;
+
    public SimpleBipedContactPhase()
    {
       for (RobotSide robotSide : RobotSide.values)
@@ -49,12 +51,18 @@ public class SimpleBipedContactPhase implements ContactStateProvider
    @Override
    public FramePoint3DReadOnly getCopStartPosition()
    {
+      if (!isUpToDate)
+         throw new RuntimeException("The CoP positions are not up to date.");
+
       return startCopPosition;
    }
 
    @Override
    public FramePoint3DReadOnly getCopEndPosition()
    {
+      if (!isUpToDate)
+         throw new RuntimeException("The CoP positions are not up to date.");
+
       return endCopPosition;
    }
 
@@ -78,6 +86,8 @@ public class SimpleBipedContactPhase implements ContactStateProvider
    public void reset()
    {
       feetInContact.clear();
+      startFeet.clear();
+      endFeet.clear();
       startCopPosition.setToNaN();
       endCopPosition.setToNaN();
       for (RobotSide robotSide : RobotSide.values)
@@ -85,6 +95,8 @@ public class SimpleBipedContactPhase implements ContactStateProvider
          startFootPoses.get(robotSide).setToNaN();
          endFootPoses.get(robotSide).setToNaN();
       }
+
+      isUpToDate = false;
    }
 
    public void set(SimpleBipedContactPhase other)
@@ -97,9 +109,10 @@ public class SimpleBipedContactPhase implements ContactStateProvider
       for (int i = 0; i < other.endFeet.size(); i++)
          addEndFoot(other.endFeet.get(i), other.endFootPoses.get(other.endFeet.get(i)));
 
+      isUpToDate = false;
+
       update();
    }
-
 
    public void setFeetInContact(List<RobotSide> feetInContact)
    {
@@ -111,29 +124,39 @@ public class SimpleBipedContactPhase implements ContactStateProvider
       {
          this.feetInContact.add(feetInContact.get(i));
       }
+
+      isUpToDate = false;
    }
 
    public void addStartFoot(RobotSide robotSide, FramePose3DReadOnly pose)
    {
+      if (startFeet.contains(robotSide))
+         throw new RuntimeException("Already contains this.");
       startFeet.add(robotSide);
-      startFootPoses.get(robotSide).setIncludingFrame(pose);
+      startFootPoses.get(robotSide).setMatchingFrame(pose);
+
+      isUpToDate = false;
    }
 
    public void addEndFoot(RobotSide robotSide, FramePose3DReadOnly pose)
    {
+      if (endFeet.contains(robotSide))
+         throw new RuntimeException("Already contains this.");
       endFeet.add(robotSide);
-      endFootPoses.get(robotSide).setIncludingFrame(pose);
-   }
+      endFootPoses.get(robotSide).setMatchingFrame(pose);
 
+      isUpToDate = false;
+   }
 
    public void setStartFootPoses(SideDependentList<? extends FramePose3DReadOnly> poses)
    {
       for (RobotSide robotSide : RobotSide.values)
       {
-         startFootPoses.get(robotSide).setIncludingFrame(poses.get(robotSide));
+         startFootPoses.get(robotSide).setMatchingFrame(poses.get(robotSide));
       }
-   }
 
+      isUpToDate = false;
+   }
 
    private final FramePoint3D tempPoint = new FramePoint3D();
 
@@ -166,5 +189,6 @@ public class SimpleBipedContactPhase implements ContactStateProvider
          endCopPosition.scale(1.0 / endFeet.size());
       }
 
+      isUpToDate = true;
    }
 }

@@ -1,5 +1,6 @@
 package us.ihmc.commonWalkingControlModules.capturePoint.comBasedPlanner;
 
+import us.ihmc.commonWalkingControlModules.dynamicPlanning.comPlanning.ContactStateProvider;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
@@ -13,6 +14,7 @@ import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.mecano.frames.MovingReferenceFrame;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.robotSide.RobotSide;
+import us.ihmc.robotics.time.TimeIntervalTools;
 import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.SimulationConstructionSetParameters;
@@ -160,6 +162,7 @@ public class BipedCoMTrajectoryPlannerVisualizer
       for (int i = 0; i < numberOfSteps; i++)
       {
          stepPose.getPosition().addX(stepLength);
+         stepPose.getPosition().setY(currentSide.negateIfRightSide(stanceWidth / 2.0));
 
          BipedTimedStep step = new BipedTimedStep();
 
@@ -213,9 +216,16 @@ public class BipedCoMTrajectoryPlannerVisualizer
       for (RobotSide robotSide : RobotSide.values)
          feetInContact.add(robotSide);
 
+
+      if (currentTime > steps.get(0).getTimeInterval().getEndTime() && steps.size() > 1)
+      {
+         steps.remove(0);
+         planner.setInitialCenterOfMassState(desiredCoMPosition, desiredCoMVelocity);
+      }
       for (int i = 0; i < steps.size(); i++)
       {
          BipedTimedStep step = steps.get(i);
+
          if (step.getTimeInterval().intervalContains(currentTime))
          {
             soleFramesForModifying.get(step.getRobotSide()).updateTranslation(step.getGoalPose().getPosition());
