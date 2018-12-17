@@ -2,14 +2,12 @@ package us.ihmc.pathPlanning.visibilityGraphs.dataStructure;
 
 import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
 import us.ihmc.euclid.interfaces.EpsilonComparable;
-import us.ihmc.euclid.interfaces.Transformable;
 import us.ihmc.euclid.tools.EuclidCoreIOTools;
-import us.ihmc.euclid.transform.interfaces.Transform;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 
-   public class VisibilityGraphEdge implements Transformable, EpsilonComparable<VisibilityGraphEdge>
+   public class VisibilityGraphEdge implements EpsilonComparable<VisibilityGraphEdge>
    {
       private VisibilityGraphNode sourceNode;
       private VisibilityGraphNode targetNode;
@@ -97,20 +95,6 @@ import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
       public double lengthSquared()
       {
          return sourceNode.distanceSquared(targetNode);
-      }
-
-      @Override
-      public void applyTransform(Transform transform)
-      {
-         sourceNode.applyTransform(transform);
-         targetNode.applyTransform(transform);
-      }
-
-      @Override
-      public void applyInverseTransform(Transform transform)
-      {
-         sourceNode.applyInverseTransform(transform);
-         targetNode.applyInverseTransform(transform);
       }
 
       @Override
