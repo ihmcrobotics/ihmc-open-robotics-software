@@ -14,10 +14,10 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import us.ihmc.commons.PrintTools;
 import us.ihmc.euclid.tools.EuclidCoreIOTools;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
+import us.ihmc.log.LogTools;
 import us.ihmc.robotics.PlanarRegionFileTools;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 
@@ -68,13 +68,13 @@ public class VisibilityGraphsIOTools
    {
       if (containingFolder == null || !containingFolder.exists())
       {
-         PrintTools.error("The given folder does not exist or is null.");
+         LogTools.error("The given folder does not exist or is null.");
          return false;
       }
 
       if (start == null || goal == null)
       {
-         PrintTools.error("Must export start AND goal.");
+         LogTools.error("Must export start AND goal.");
          return false;
       }
 
@@ -188,8 +188,8 @@ public class VisibilityGraphsIOTools
 
       for (int i = 0; i < childDirectories.size(); i++)
       {
-         PrintTools.info("trying to load:");
-         PrintTools.info(TEST_DATA_URL + "/" + childDirectories.get(i));
+         LogTools.info("trying to load:");
+         LogTools.info(TEST_DATA_URL + "/" + childDirectories.get(i));
 
          datasets.add(loadDataset(loadingClass, TEST_DATA_URL + "/" + childDirectories.get(i)));
       }
