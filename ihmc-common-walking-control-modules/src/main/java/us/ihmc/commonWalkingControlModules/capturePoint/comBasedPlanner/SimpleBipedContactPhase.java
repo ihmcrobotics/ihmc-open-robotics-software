@@ -99,6 +99,20 @@ public class SimpleBipedContactPhase implements ContactStateProvider
       isUpToDate = false;
    }
 
+   public void resetEnd()
+   {
+      endFeet.clear();
+      endCopPosition.setToNaN();
+      for (RobotSide robotSide : RobotSide.values)
+      {
+         endFootPoses.get(robotSide).setToNaN();
+      }
+
+      isUpToDate = false;
+   }
+
+
+
    public void set(SimpleBipedContactPhase other)
    {
       reset();

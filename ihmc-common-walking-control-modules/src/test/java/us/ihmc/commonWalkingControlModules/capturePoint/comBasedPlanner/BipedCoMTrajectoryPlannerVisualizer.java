@@ -1,8 +1,6 @@
 package us.ihmc.commonWalkingControlModules.capturePoint.comBasedPlanner;
 
-import us.ihmc.commonWalkingControlModules.dynamicPlanning.comPlanning.ContactStateProvider;
 import us.ihmc.commons.thread.ThreadTools;
-import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.Vector3D;
@@ -12,9 +10,8 @@ import us.ihmc.graphicsDescription.yoGraphics.BagOfBalls;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.mecano.frames.MovingReferenceFrame;
-import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.robotSide.RobotSide;
-import us.ihmc.robotics.time.TimeIntervalTools;
+import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.SimulationConstructionSetParameters;
@@ -29,7 +26,6 @@ import java.util.List;
 
 public class BipedCoMTrajectoryPlannerVisualizer
 {
-   private static final double stanceLength = 1.0;
    private static final double stanceWidth = 0.5;
    private static final double gravity = 9.81;
    private static final double nominalHeight = 1.25;
@@ -52,6 +48,7 @@ public class BipedCoMTrajectoryPlannerVisualizer
    private final BipedCoMTrajectoryPlanner planner;
 
    private List<BipedTimedStep> steps;
+   private final List<BipedTimedStep> stepsInProgress = new ArrayList<>();
    private final SideDependentList<TranslationMovingReferenceFrame> soleFramesForModifying = createSoleFrames();
    private final List<RobotSide> feetInContact = new ArrayList<>();
 
@@ -216,12 +213,29 @@ public class BipedCoMTrajectoryPlannerVisualizer
       for (RobotSide robotSide : RobotSide.values)
          feetInContact.add(robotSide);
 
-
-      if (currentTime > steps.get(0).getTimeInterval().getEndTime() && steps.size() > 1)
+      int stepNumber = 0;
+      while (stepNumber < steps.size())
       {
-         steps.remove(0);
-         planner.setInitialCenterOfMassState(desiredCoMPosition, desiredCoMVelocity);
+         BipedTimedStep step = steps.get(stepNumber);
+         if (currentTime > step.getTimeInterval().getEndTime() && steps.size() > 1)
+         {
+            steps.remove(stepNumber);
+            stepsInProgress.remove(step);
+            planner.setInitialCenterOfMassState(desiredCoMPosition, desiredCoMVelocity);
+         }
+         else
+         {
+            stepNumber++;
+         }
+
+         if (currentTime > step.getTimeInterval().getStartTime() && !stepsInProgress.contains(step))
+         {
+            stepsInProgress.add(step);
+            planner.setInitialCenterOfMassState(desiredCoMPosition, desiredCoMVelocity);
+         }
+
       }
+
       for (int i = 0; i < steps.size(); i++)
       {
          BipedTimedStep step = steps.get(i);

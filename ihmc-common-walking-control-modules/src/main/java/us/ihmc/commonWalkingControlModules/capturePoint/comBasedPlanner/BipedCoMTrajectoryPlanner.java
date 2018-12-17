@@ -60,7 +60,7 @@ public class BipedCoMTrajectoryPlanner
    {
       sequenceUpdater.update(stepSequence, currentFeetInContact, currentTime);
 
-      double timeInPhase = currentTime - sequenceUpdater.getContactSequence().get(0).getTimeInterval().getStartTime();
+      double timeInPhase = currentTime - sequenceUpdater.getAbsoluteContactSequence().get(0).getTimeInterval().getStartTime();
       timeInContactPhase.set(timeInPhase);
 
       comTrajectoryPlanner.solveForTrajectory();
