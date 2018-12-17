@@ -13,7 +13,6 @@ import java.util.stream.Collectors;
 import us.ihmc.commons.MathTools;
 import us.ihmc.commons.lists.ListWrappingIndexTools;
 import us.ihmc.euclid.geometry.BoundingBox2D;
-import us.ihmc.euclid.geometry.BoundingBox3D;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.geometry.Line3D;
 import us.ihmc.euclid.geometry.LineSegment3D;
@@ -861,13 +860,7 @@ public class PlanarRegionTools
       return query.getConvexHull().signedDistance(originInLocal) <= circleRadius;
    }
 
-   private static Point3D applyTransform(RigidBodyTransform transform, Point2D point2D)
-   {
-      Point3D point3D = new Point3D(point2D);
-      transform.transform(point3D);
-      return point3D;
-   }
-
+   //TODO: Test this method extensively.
    public static List<PlanarRegion> filterRegionsByTruncatingVerticesBeneathHomeRegion(List<PlanarRegion> regionsToCheck, PlanarRegion homeRegion,
                                                                                        double depthThresholdForConvexDecomposition, PlanarRegionFilter filter)
    {
