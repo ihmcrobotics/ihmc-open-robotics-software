@@ -41,6 +41,11 @@ public class VisibilityGraphNode implements EpsilonComparable<VisibilityGraphNod
       return visibilityGraphNavigableRegion;
    }
 
+   public ConnectionPoint3D getPointInWorld()
+   {
+      return pointInWorld;
+   }
+
    public Point2DReadOnly getPoint2DInLocal()
    {
       return point2DInLocal;
@@ -56,11 +61,6 @@ public class VisibilityGraphNode implements EpsilonComparable<VisibilityGraphNod
       return edges;
    }
 
-   public ConnectionPoint3D getPointInWorld()
-   {
-      return pointInWorld;
-   }
-
    public double distance(VisibilityGraphNode target)
    {
       return pointInWorld.distance(target.pointInWorld);
@@ -69,23 +69,6 @@ public class VisibilityGraphNode implements EpsilonComparable<VisibilityGraphNod
    public double distanceXY(VisibilityGraphNode target)
    {
       return pointInWorld.distanceXY(target.pointInWorld);
-   }
-
-   public double distanceSquared(VisibilityGraphNode target)
-   {
-      return pointInWorld.distanceSquared(target.pointInWorld);
-   }
-
-   @Override
-   public boolean epsilonEquals(VisibilityGraphNode other, double epsilon)
-   {
-      return pointInWorld.epsilonEquals(other.pointInWorld, epsilon);
-   }
-
-   @Override
-   public String toString()
-   {
-      return pointInWorld.toString();
    }
 
    public double getCostFromStart()
@@ -132,6 +115,18 @@ public class VisibilityGraphNode implements EpsilonComparable<VisibilityGraphNod
    public void setEdgesHaveBeenDetermined(boolean edgesHaveBeenDetermined)
    {
       this.edgesHaveBeenDetermined = edgesHaveBeenDetermined;
+   }
+
+   @Override
+   public boolean epsilonEquals(VisibilityGraphNode other, double epsilon)
+   {
+      return pointInWorld.epsilonEquals(other.pointInWorld, epsilon);
+   }
+
+   @Override
+   public String toString()
+   {
+      return pointInWorld.toString();
    }
 
 }

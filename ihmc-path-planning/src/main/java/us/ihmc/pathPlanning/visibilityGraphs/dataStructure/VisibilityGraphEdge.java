@@ -51,11 +51,6 @@ public class VisibilityGraphEdge implements EpsilonComparable<VisibilityGraphEdg
       return sourceNode.distance(targetNode);
    }
 
-   public double lengthSquared()
-   {
-      return sourceNode.distanceSquared(targetNode);
-   }
-
    @Override
    public boolean epsilonEquals(VisibilityGraphEdge other, double epsilon)
    {
