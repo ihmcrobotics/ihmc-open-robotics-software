@@ -25,20 +25,21 @@ import us.ihmc.tools.exceptions.NoConvergenceException;
  * "A numerically stable dual method for solving strictly convex quadratic
  * programs" by D. Goldfarb and A. Idnani.
  *
- * @author Robert Griffin
- *
- *
- * The problem stored in the solver is of the form:
- * min 0.5 * x G x + g0 x
- * s.t.
- *     CE^T x + ce0 = 0
- *     CI^T x + ci0 >= 0
- *
- * To interface with the solver, however, use the standard form:
- * min 0.5 * x G x + g0 x
- * s.t.
- *     CE^T x = ce0
+ * <p>
+ * The problem stored in the solver is of the form:</br>
+ * min 0.5 * x G x + g0 x</br>
+ * s.t.</br>
+ *     CE^T x + ce0 = 0</br>
+ *     CI^T x + ci0 >= 0</br>
+ *</br>
+ * To interface with the solver, however, use the standard form:</br>
+ * min 0.5 * x G x + g0 x</br>
+ * s.t.</br>
+ *     CE^T x = ce0</br>
  *     CI^T x <= ci0
+ * </p>
+ *
+ * @author Robert Griffin
  */
 public class JavaQuadProgSolver extends AbstractSimpleActiveSetQPSolver
 {
