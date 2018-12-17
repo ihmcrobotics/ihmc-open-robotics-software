@@ -36,6 +36,14 @@ public class SimpleEfficientActiveSetQPSolverWithInactiveVariablesTest extends A
    }
 
    @Override
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
+   @Test(timeout = 30000)
+   public void testSimpleCasesWithBoundsConstraintsAndInactiveVariables()
+   {
+      testSimpleCasesWithBoundsConstraintsAndInactiveVariables(1, 2, 2, 2, false);
+   }
+
+   @Override
    public double[] getLowerBounds()
    {
       // Need to modify the bounds for some tests to get a valid problem for this type of solver.
