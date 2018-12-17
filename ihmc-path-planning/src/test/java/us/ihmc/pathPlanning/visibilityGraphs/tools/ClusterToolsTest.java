@@ -45,7 +45,12 @@ public class ClusterToolsTest
       Point2D endpoint2 = new Point2D(1.0, 0.0);
       double extrusionDistance = 0.5;
 
-      List<Point2D> extrusions = ClusterTools.extrudeLine(endpoint1, endpoint2, extrusionDistance, 3);
+      List<Point2DReadOnly> points = new ArrayList<Point2DReadOnly>();
+      points.add(endpoint1);
+      points.add(endpoint2);
+      
+      double[] extrusionDistances = new double[] {extrusionDistance, extrusionDistance};
+      List<Point2D> extrusions = ClusterTools.extrudeMultiLine(points, extrusionDistances, 3);
 
       assertEquals(6, extrusions.size());
       int index = 0;

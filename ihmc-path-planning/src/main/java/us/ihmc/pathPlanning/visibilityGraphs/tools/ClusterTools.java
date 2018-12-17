@@ -220,26 +220,6 @@ public class ClusterTools
       extrusions.add(extrusion);
    }
 
-   public static List<Point2D> extrudeLine(Point2DReadOnly endpoint1, Point2DReadOnly endpoint2, double extrusionDistance, int numberOfExtrusionsAtEndpoints)
-   {
-      return extrudeLine(endpoint1, extrusionDistance, endpoint2, extrusionDistance, numberOfExtrusionsAtEndpoints);
-   }
-
-   public static List<Point2D> extrudeLine(Point2DReadOnly endpoint1, double extrusionDistance1, Point2DReadOnly endpoint2, double extrusionDistance2,
-                                           int numberOfExtrusionsAtEndpoints)
-   {
-      List<Point2D> extrusions = new ArrayList<>();
-      Line2D edge1 = new Line2D(endpoint1, endpoint2);
-      Line2D edge2 = new Line2D(endpoint2, endpoint1);
-
-      List<Point2D> extrusions1 = extrudeMultiplePointsAtOutsideCorner(endpoint1, edge2, edge1, true, numberOfExtrusionsAtEndpoints, extrusionDistance1);
-      List<Point2D> extrusions2 = extrudeMultiplePointsAtOutsideCorner(endpoint2, edge1, edge2, true, numberOfExtrusionsAtEndpoints, extrusionDistance2);
-      extrusions.addAll(extrusions1);
-      extrusions.addAll(extrusions2);
-
-      return extrusions;
-   }
-
    public static List<Point2D> extrudeMultiplePointsAtOutsideCorner(Point2DReadOnly cornerPointToExtrude, Line2D previousEdge, Line2D nextEdge,
                                                                     boolean extrudeToTheLeft, int numberOfExtrusions, double extrusionDistance)
    {
