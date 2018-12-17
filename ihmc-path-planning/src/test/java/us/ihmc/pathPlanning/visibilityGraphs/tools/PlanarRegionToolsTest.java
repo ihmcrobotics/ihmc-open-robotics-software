@@ -70,7 +70,7 @@ public class PlanarRegionToolsTest
       regionB = new PlanarRegion(transformB, convexPolygonB);
 
       minHeightOfRegionAAboveRegionB = PlanarRegionTools.computeMinHeightOfRegionAAboveRegionB(regionA, regionB);
-      assertEquals(heightAbove + Math.tan(rotationAngleB) * 1.0, minHeightOfRegionAAboveRegionB, EPSILON);
+      assertEquals(heightAbove + Math.sin(rotationAngleB) * 1.0, minHeightOfRegionAAboveRegionB, EPSILON);
 
       // Now rotate the top one, lowering the points and decreasing the height above also.
       transformA = new RigidBodyTransform();
@@ -80,8 +80,21 @@ public class PlanarRegionToolsTest
       regionA = new PlanarRegion(transformA, convexPolygonA);
 
       minHeightOfRegionAAboveRegionB = PlanarRegionTools.computeMinHeightOfRegionAAboveRegionB(regionA, regionB);
-      assertEquals(heightAbove + Math.cos(rotationAngleA) * Math.tan(rotationAngleB) * 1.0 - Math.sin(rotationAngleA) * 1.0, minHeightOfRegionAAboveRegionB,
-                   EPSILON);
+      double expectedMinHeight = heightAbove - Math.cos(rotationAngleB) * Math.tan(rotationAngleA) * 1.0 + Math.sin(rotationAngleB) * 1.0;
+      assertEquals(expectedMinHeight, minHeightOfRegionAAboveRegionB, EPSILON);
+
+      // Have one on top be vertical:
+
+      transformA = new RigidBodyTransform();
+      rotationAngleA = -Math.PI / 2.0;
+      transformA.setTranslation(0.0, 0.0, heightAbove);
+      transformA.setRotationEuler(0.0, rotationAngleA, 0.0);
+      regionA = new PlanarRegion(transformA, convexPolygonA);
+
+      minHeightOfRegionAAboveRegionB = PlanarRegionTools.computeMinHeightOfRegionAAboveRegionB(regionA, regionB);
+      expectedMinHeight = heightAbove;
+      assertEquals(expectedMinHeight, minHeightOfRegionAAboveRegionB, EPSILON);
+
    }
 
    @Test(timeout = 30000)
@@ -723,7 +736,7 @@ public class PlanarRegionToolsTest
       regionB = new PlanarRegion(transformTwo, polygonB);
       assertTrue(PlanarRegionTools.isPlanarRegionAAbovePlanarRegionB(regionA, regionB, epsilon));
       assertTrue(PlanarRegionTools.isPlanarRegionAAbovePlanarRegionB(regionB, regionA, epsilon));
-      
+
       transformTwo = new RigidBodyTransform();
       transformTwo.setTranslation(0.0, 0.0, 0.0);
       regionA = new PlanarRegion(transformOne, polygonA);

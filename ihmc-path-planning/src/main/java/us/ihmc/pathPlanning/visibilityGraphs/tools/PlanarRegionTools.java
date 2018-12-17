@@ -652,7 +652,10 @@ public class PlanarRegionTools
    }
 
    /**
-    * Finds the minimum height of all the vertices in the convex hull of a PlanarRegion when projected vertically onto a second PlanarRegion.
+    * Finds the minimum height between the convex hulls of two PlanarRegions when projected vertically. 
+    * It does this by projecting all the vertices of one of the convex hulls to the other PlanarRegion's plane vertically in world. It then finds the minimum distance of those projections.
+    * Next it does the same thing for the other convex hull projected vertically onto the other region's plane. Finally, it takes the max of the two.
+    * If one of the Planar Regions are vertical, such that the points of the other cannot be projected vertical on it, then that projection is ignored.
     * 
     * @param regionA PlanarRegion to test height of points of its convex hull above the plane. Not modified.
     * @param regionB PlanarRegion that defines the plane that the points will be projected down onto. Not modified.
@@ -663,7 +666,7 @@ public class PlanarRegionTools
       RigidBodyTransform transformFromAToWorld = new RigidBodyTransform();
       regionA.getTransformToWorld(transformFromAToWorld);
 
-      double minZ = Double.POSITIVE_INFINITY;
+      double minZOfAProjectedToB = Double.POSITIVE_INFINITY;
       ConvexPolygon2D convexHullInLocalA = regionA.getConvexHull();
 
       for (int i = 0; i < convexHullInLocalA.getNumberOfVertices(); i++)
@@ -671,11 +674,38 @@ public class PlanarRegionTools
          Point3D vertexOfAInWorld = new Point3D(convexHullInLocalA.getVertex(i));
          transformFromAToWorld.transform(vertexOfAInWorld);
          Point3D vertexOfAProjectedToBInWorld = projectInZToPlanarRegion(vertexOfAInWorld, regionB);
-         double deltaZ = vertexOfAInWorld.getZ() - vertexOfAProjectedToBInWorld.getZ();
-         minZ = Math.min(minZ, deltaZ);
+         if (vertexOfAProjectedToBInWorld != null)
+         {
+            double deltaZ = vertexOfAInWorld.getZ() - vertexOfAProjectedToBInWorld.getZ();
+            minZOfAProjectedToB = Math.min(minZOfAProjectedToB, deltaZ);
+         }
       }
 
-      return minZ;
+      RigidBodyTransform transformFromBToWorld = new RigidBodyTransform();
+      regionB.getTransformToWorld(transformFromBToWorld);
+
+      double minZOfBProjectedToA = Double.POSITIVE_INFINITY;
+      ConvexPolygon2D convexHullInLocalB = regionB.getConvexHull();
+
+      for (int i = 0; i < convexHullInLocalB.getNumberOfVertices(); i++)
+      {
+         Point3D vertexOfBInWorld = new Point3D(convexHullInLocalB.getVertex(i));
+         transformFromBToWorld.transform(vertexOfBInWorld);
+         Point3D vertexOfBProjectedToAInWorld = projectInZToPlanarRegion(vertexOfBInWorld, regionA);
+         if (vertexOfBProjectedToAInWorld != null)
+         {
+            double deltaZ = vertexOfBProjectedToAInWorld.getZ() - vertexOfBInWorld.getZ();
+            minZOfBProjectedToA = Math.min(minZOfBProjectedToA, deltaZ);
+         }
+      }
+
+      if (Double.isInfinite(minZOfAProjectedToB))
+         return minZOfBProjectedToA;
+      
+      if (Double.isInfinite(minZOfBProjectedToA))
+         return minZOfAProjectedToB;
+
+      return Math.max(minZOfAProjectedToB, minZOfBProjectedToA);
    }
 
    /**
