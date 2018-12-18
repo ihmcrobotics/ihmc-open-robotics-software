@@ -1,6 +1,7 @@
 package us.ihmc.robotEnvironmentAwareness.geometry;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -41,6 +42,8 @@ import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DBasics;
 import us.ihmc.javaFXToolkit.messager.JavaFXMessager;
 import us.ihmc.javaFXToolkit.messager.SharedMemoryJavaFXMessager;
+import us.ihmc.messager.Messager;
+import us.ihmc.messager.SharedMemoryMessager;
 import us.ihmc.robotEnvironmentAwareness.planarRegion.PlanarRegionSegmentationRawData;
 import us.ihmc.robotEnvironmentAwareness.polygonizer.Polygonizer;
 import us.ihmc.robotEnvironmentAwareness.polygonizer.Polygonizer.Output;
@@ -51,19 +54,23 @@ public class SimpleConcaveHullFactoryTest
 {
    private static boolean VISUALIZE = false;
 
-   private JavaFXMessager messager;
+   private Messager messager;
    private MutableBoolean uiIsGoingDown = new MutableBoolean(false);
 
    @Before
    public void setup() throws Exception
    {
-      messager = new SharedMemoryJavaFXMessager(PolygonizerVisualizerUI.getMessagerAPI());
       uiIsGoingDown.setFalse();
 
       if (VISUALIZE)
-         createVisualizer(messager);
+      {
+         SharedMemoryJavaFXMessager jfxMessager = new SharedMemoryJavaFXMessager(PolygonizerVisualizerUI.getMessagerAPI());
+         messager = jfxMessager;
+         createVisualizer(jfxMessager);
+      }
       else
       {
+         messager = new SharedMemoryMessager(PolygonizerVisualizerUI.getMessagerAPI());
          messager.startMessager();
          new PolygonizerManager(messager);
       }
