@@ -1,6 +1,6 @@
 package us.ihmc.exampleSimulations.fallingBox;
 
-import us.ihmc.euclid.geometry.Box3D;
+import us.ihmc.euclid.shape.Box3D;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
