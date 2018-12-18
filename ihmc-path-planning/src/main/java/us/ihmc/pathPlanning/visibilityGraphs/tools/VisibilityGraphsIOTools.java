@@ -139,6 +139,25 @@ public class VisibilityGraphsIOTools
       return ret;
    }
 
+   protected static int parsePathSize(BufferedReader file)
+   {
+      Integer pathSize = parseField(file, PATH_SIZE_FIELD_OPEN, PATH_SIZE_FIELD_END, Integer::valueOf);
+      if (pathSize == null)
+         return -1;
+      else
+         return pathSize.intValue();
+   }
+
+   protected static Point3D parseStartField(BufferedReader bufferedReader)
+   {
+      return parseField(bufferedReader, START_FIELD_OPEN, START_FIELD_CLOSE, VisibilityGraphsIOTools::parsePoint3D);
+   }
+
+   protected static Point3D parseGoalField(BufferedReader bufferedReader)
+   {
+      return parseField(bufferedReader, GOAL_FIELD_OPEN, GOAL_FIELD_END, VisibilityGraphsIOTools::parsePoint3D);
+   }
+
    protected static void writeField(File file, String fieldOpen, String fieldClose, Writer writer)
    {
       BufferedWriter bw = null;
@@ -253,6 +272,29 @@ public class VisibilityGraphsIOTools
       return PlanarRegionFileTools.isPlanarRegionFile(planarRegionFolders[0]);
    }
 
+   protected static String getDatasetNameFromResourceName(String datasetResourceName)
+   {
+      String[] resourcePath = datasetResourceName.split("/");
+      return resourcePath[resourcePath.length - 1];
+   }
+
+   protected static String getPlanarRegionsDirectoryName(String datasetName)
+   {
+      String date = datasetName.substring(0, 15);
+      return date + "_PlanarRegion";
+   }
+
+   protected static BufferedReader createBufferedReaderFromResource(Class<?> clazz, String expectedParametersResourceName)
+   {
+      InputStream parametersFile = clazz.getResourceAsStream(expectedParametersResourceName);
+      if (parametersFile == null)
+         throw new RuntimeException("Could not find the parmeter file: " + expectedParametersResourceName);
+
+      InputStreamReader inputStreamReader = new InputStreamReader(parametersFile);
+      BufferedReader bufferedReader = new BufferedReader(inputStreamReader);
+      return bufferedReader;
+   }
+
    public static VisibilityGraphsUnitTestDataset loadDataset(Class<?> clazz, String datasetResourceName)
    {
       return new VisibilityGraphsUnitTestDataset(clazz, datasetResourceName);
@@ -266,22 +308,28 @@ public class VisibilityGraphsIOTools
       private int expectedPathSize;
       private Point3D start;
       private Point3D goal;
-      private final PlanarRegionsList planarRegionsList;
+      private PlanarRegionsList planarRegionsList;
 
-      protected VisibilityGraphsUnitTestDataset(Class<?> clazz, String datasetResourceName)
+      public VisibilityGraphsUnitTestDataset(String datasetName, String datasetResourceName)
       {
-         this.datasetName = getDatasetName(datasetResourceName);
+         this.datasetName = datasetName;
+         this.datasetResourceName = datasetResourceName;
+      }
+
+      public VisibilityGraphsUnitTestDataset(Class<?> clazz, String datasetResourceName)
+      {
+         this.datasetName = getDatasetNameFromResourceName(datasetResourceName);
          this.datasetResourceName = datasetResourceName;
 
+         loadFromResource(clazz, datasetResourceName);
+      }
+
+      private void loadFromResource(Class<?> clazz, String datasetResourceName)
+      {
          String expectedParametersResourceName = "/" + datasetResourceName + "/" + INPUTS_PARAMETERS_FILENAME;
-         String expectedPlanarRegionsResourceName = "/" + datasetResourceName + "/" + getPlanarRegionsDirectoryName();
+         String expectedPlanarRegionsResourceName = "/" + datasetResourceName + "/" + getPlanarRegionsDirectoryName(datasetName);
 
-         InputStream parametersFile = clazz.getResourceAsStream(expectedParametersResourceName);
-         if (parametersFile == null)
-            throw new RuntimeException("Could not find the parmeter file: " + expectedParametersResourceName);
-
-         InputStreamReader inputStreamReader = new InputStreamReader(parametersFile);
-         BufferedReader bufferedReader = new BufferedReader(inputStreamReader);
+         BufferedReader bufferedReader = createBufferedReaderFromResource(clazz, expectedParametersResourceName);
          try
          {
             bufferedReader.mark(10000);
@@ -302,47 +350,61 @@ public class VisibilityGraphsIOTools
             e.printStackTrace();
          }
 
-         planarRegionsList = PlanarRegionFileTools.importPlanarRegionData(clazz, expectedPlanarRegionsResourceName);
+         PlanarRegionsList planarRegionsList = PlanarRegionFileTools.importPlanarRegionData(clazz, expectedPlanarRegionsResourceName);
+         setPlanarRegionsList(planarRegionsList);
 
          if (start == null)
-            throw new RuntimeException("Could not load the start position. Data file: " + parametersFile);
+            throw new RuntimeException("Could not load the start position. Data file: " + expectedParametersResourceName);
          if (goal == null)
-            throw new RuntimeException("Could not load the goal position. Data file: " + parametersFile);
+            throw new RuntimeException("Could not load the goal position. Data file: " + expectedParametersResourceName);
          if (planarRegionsList == null)
             throw new RuntimeException("Could not load the planar regions. Data folder: " + expectedPlanarRegionsResourceName);
       }
 
       protected void loadFields(BufferedReader bufferedReader)
       {
-         expectedPathSize = parsePathSize(bufferedReader);
-         start = parseField(bufferedReader, START_FIELD_OPEN, START_FIELD_CLOSE, VisibilityGraphsIOTools::parsePoint3D);
-         goal = parseField(bufferedReader, GOAL_FIELD_OPEN, GOAL_FIELD_END, VisibilityGraphsIOTools::parsePoint3D);
+         int expectedPathSize = parsePathSize(bufferedReader);
+         Point3D start = parseStartField(bufferedReader);
+         Point3D goal = parseGoalField(bufferedReader);
+
+         setExpectedPathSize(expectedPathSize);
+         setStart(start);
+         setGoal(goal);
       }
 
-      private static String getDatasetName(String datasetResourceName)
+      public void setExpectedPathSize(int expectedPathSize)
       {
-         String[] resourcePath = datasetResourceName.split("/");
-         return resourcePath[resourcePath.length - 1];
+         this.expectedPathSize = expectedPathSize;
       }
 
-      private String getPlanarRegionsDirectoryName()
+      public void setStart(Point3D start)
       {
-         String date = datasetName.substring(0, 15);
-         return date + "_PlanarRegion";
+         this.start = start;
       }
 
-      private static int parsePathSize(BufferedReader file)
+      private void setGoal(Point3D goal)
       {
-         Integer pathSize = parseField(file, PATH_SIZE_FIELD_OPEN, PATH_SIZE_FIELD_END, Integer::valueOf);
-         if (pathSize == null)
-            return -1;
-         else
-            return pathSize.intValue();
+         this.goal = goal;
+      }
+
+      public void setPlanarRegionsList(PlanarRegionsList planarRegionsList)
+      {
+         this.planarRegionsList = planarRegionsList;
       }
 
       public String getDatasetName()
       {
          return datasetResourceName;
+      }
+
+      public boolean hasExpectedPathSize()
+      {
+         return expectedPathSize > 0;
+      }
+
+      public int getExpectedPathSize()
+      {
+         return expectedPathSize;
       }
 
       public Point3D getStart()
@@ -360,14 +422,5 @@ public class VisibilityGraphsIOTools
          return planarRegionsList;
       }
 
-      public boolean hasExpectedPathSize()
-      {
-         return expectedPathSize > 0;
-      }
-
-      public int getExpectedPathSize()
-      {
-         return expectedPathSize;
-      }
    }
 }
