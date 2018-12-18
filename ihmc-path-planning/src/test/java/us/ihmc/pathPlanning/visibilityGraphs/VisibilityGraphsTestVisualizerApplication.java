@@ -1,17 +1,31 @@
 package us.ihmc.pathPlanning.visibilityGraphs;
 
+import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import javafx.application.Application;
 import javafx.stage.Stage;
 import us.ihmc.commons.thread.ThreadTools;
+import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.javaFXToolkit.messager.JavaFXMessager;
 import us.ihmc.javaFXToolkit.messager.SharedMemoryJavaFXMessager;
 import us.ihmc.log.LogTools;
+import us.ihmc.pathPlanning.visibilityGraphs.dataStructure.VisibilityMapSolution;
+import us.ihmc.pathPlanning.visibilityGraphs.dataStructure.VisibilityMapWithNavigableRegion;
 import us.ihmc.pathPlanning.visibilityGraphs.ui.messager.UIVisibilityGraphsTopics;
 import us.ihmc.pathPlanning.visibilityGraphs.visualizer.VisibilityGraphsTestVisualizer;
+import us.ihmc.robotics.geometry.PlanarRegionsList;
 
 public class VisibilityGraphsTestVisualizerApplication extends Application
 {
+// Default UI parameters which should be changeable on the fly
+   private static final boolean showBodyPath = true;
+   private static final boolean showClusterRawPoints = false;
+   private static final boolean showClusterNavigableExtrusions = false;
+   private static final boolean showClusterNonNavigableExtrusions = false;
+   private static final boolean showRegionInnerConnections = false;
+   private static final boolean showRegionInterConnections = false;
+   
    //TODO: +++JEP: Why or why do these have to be static? What if we want to launch several applications?
    private static VisibilityGraphsTestVisualizer ui;
    private static SharedMemoryJavaFXMessager messager;
@@ -27,10 +41,22 @@ public class VisibilityGraphsTestVisualizerApplication extends Application
       messager = new SharedMemoryJavaFXMessager(UIVisibilityGraphsTopics.API);
       messager.startMessager();
 
+      setDefaultUISettings(messager);
+      
       ui = new VisibilityGraphsTestVisualizer(primaryStage, messager);
       ui.show();
 
       uiHasBeenConstructed.set(true);
+   }
+   
+   private void setDefaultUISettings(JavaFXMessager messager)
+   {
+      messager.submitMessage(UIVisibilityGraphsTopics.ShowBodyPath, showBodyPath);
+      messager.submitMessage(UIVisibilityGraphsTopics.ShowClusterRawPoints, showClusterRawPoints);
+      messager.submitMessage(UIVisibilityGraphsTopics.ShowClusterNavigableExtrusions, showClusterNavigableExtrusions);
+      messager.submitMessage(UIVisibilityGraphsTopics.ShowClusterNonNavigableExtrusions, showClusterNonNavigableExtrusions);
+      messager.submitMessage(UIVisibilityGraphsTopics.ShowNavigableRegionVisibilityMaps, showRegionInnerConnections);
+      messager.submitMessage(UIVisibilityGraphsTopics.ShowInterRegionVisibilityMap, showRegionInterConnections);
    }
 
    @Override
@@ -62,4 +88,45 @@ public class VisibilityGraphsTestVisualizerApplication extends Application
 
       LogTools.info("UI is constructed.");
    }
+
+   public static void main(String[] args)
+   {
+      VisibilityGraphsTestVisualizerApplication application = new VisibilityGraphsTestVisualizerApplication();
+      application.startMeUp();
+      ThreadTools.sleepForever();
+   }
+
+   public void submitVisibilityGraphSolutionToVisualizer(VisibilityMapSolution visibilityMapSolution)
+   {
+      messager.submitMessage(UIVisibilityGraphsTopics.StartVisibilityMap, visibilityMapSolution.getStartMap());
+      messager.submitMessage(UIVisibilityGraphsTopics.GoalVisibilityMap, visibilityMapSolution.getGoalMap());
+      messager.submitMessage(UIVisibilityGraphsTopics.InterRegionVisibilityMap, visibilityMapSolution.getInterRegionVisibilityMap());
+   }
+
+   public void submitNavigableRegionsToVisualizer(List<VisibilityMapWithNavigableRegion> navigableRegions)
+   {
+      messager.submitMessage(UIVisibilityGraphsTopics.NavigableRegionData, navigableRegions);
+      messager.submitMessage(UIVisibilityGraphsTopics.NavigableRegionVisibilityMap, navigableRegions);
+   }
+
+   public void submitStartToVisualizer(Point3D start)
+   {
+      messager.submitMessage(UIVisibilityGraphsTopics.StartPosition, start);
+   }
+
+   public void submitGoalToVisualizer(Point3D goal)
+   {
+      messager.submitMessage(UIVisibilityGraphsTopics.GoalPosition, goal);      
+   }
+
+   public void submitPlanarRegionsListToVisualizer(PlanarRegionsList planarRegionsList)
+   {
+      messager.submitMessage(UIVisibilityGraphsTopics.PlanarRegionData, planarRegionsList);
+   }
+
+   public void submitShadowPlanarRegionsListToVisualizer(PlanarRegionsList planarRegionsList)
+   {
+      messager.submitMessage(UIVisibilityGraphsTopics.ShadowPlanarRegionData, planarRegionsList);      
+   }
+
 }

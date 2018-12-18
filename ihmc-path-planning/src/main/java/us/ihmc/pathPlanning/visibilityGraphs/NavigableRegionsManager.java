@@ -299,6 +299,11 @@ public class NavigableRegionsManager
       }
    }
 
+   public VisibilityMapSolution getVisibilityMapSolution()
+   {
+      return visibilityMapSolution;
+   }
+
    public VisibilityMapHolder getStartMap()
    {
       return visibilityMapSolution.getStartMap();
