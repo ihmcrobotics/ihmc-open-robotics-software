@@ -25,9 +25,6 @@ public class NavigableRegionsFactory
 
    public static List<NavigableRegion> createNavigableRegions(List<PlanarRegion> allRegions, VisibilityGraphsParameters parameters)
    {
-      if (allRegions.isEmpty())
-         return null;
-
       List<NavigableRegion> navigableRegions = new ArrayList<>(allRegions.size());
 
       NavigableRegionFilter navigableRegionFilter = parameters.getNavigableRegionFilter();

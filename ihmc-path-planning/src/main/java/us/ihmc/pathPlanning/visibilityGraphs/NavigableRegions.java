@@ -8,6 +8,7 @@ import us.ihmc.pathPlanning.visibilityGraphs.dataStructure.NavigableRegion;
 import us.ihmc.pathPlanning.visibilityGraphs.interfaces.VisibilityGraphsParameters;
 import us.ihmc.pathPlanning.visibilityGraphs.tools.PlanarRegionTools;
 import us.ihmc.robotics.geometry.PlanarRegion;
+import us.ihmc.robotics.geometry.PlanarRegionsList;
 
 public class NavigableRegions
 {
@@ -15,6 +16,11 @@ public class NavigableRegions
    private List<NavigableRegion> navigableRegions;
 
    private final VisibilityGraphsParameters parameters;
+
+   public NavigableRegions(VisibilityGraphsParameters parameters, PlanarRegionsList regions)
+   {
+      this(parameters, regions.getPlanarRegionsAsList());
+   }
 
    public NavigableRegions(VisibilityGraphsParameters parameters, List<PlanarRegion> regions)
    {

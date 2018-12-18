@@ -18,14 +18,14 @@ import us.ihmc.robotics.geometry.PlanarRegionsList;
 
 public class VisibilityGraphsTestVisualizerApplication extends Application
 {
-// Default UI parameters which should be changeable on the fly
+   // Default UI parameters which should be changeable on the fly
    private static final boolean showBodyPath = true;
    private static final boolean showClusterRawPoints = false;
    private static final boolean showClusterNavigableExtrusions = false;
    private static final boolean showClusterNonNavigableExtrusions = false;
    private static final boolean showRegionInnerConnections = false;
    private static final boolean showRegionInterConnections = false;
-   
+
    //TODO: +++JEP: Why or why do these have to be static? What if we want to launch several applications?
    private static VisibilityGraphsTestVisualizer ui;
    private static SharedMemoryJavaFXMessager messager;
@@ -42,13 +42,13 @@ public class VisibilityGraphsTestVisualizerApplication extends Application
       messager.startMessager();
 
       setDefaultUISettings(messager);
-      
+
       ui = new VisibilityGraphsTestVisualizer(primaryStage, messager);
       ui.show();
 
       uiHasBeenConstructed.set(true);
    }
-   
+
    private void setDefaultUISettings(JavaFXMessager messager)
    {
       messager.submitMessage(UIVisibilityGraphsTopics.ShowBodyPath, showBodyPath);
@@ -101,6 +101,8 @@ public class VisibilityGraphsTestVisualizerApplication extends Application
       messager.submitMessage(UIVisibilityGraphsTopics.StartVisibilityMap, visibilityMapSolution.getStartMap());
       messager.submitMessage(UIVisibilityGraphsTopics.GoalVisibilityMap, visibilityMapSolution.getGoalMap());
       messager.submitMessage(UIVisibilityGraphsTopics.InterRegionVisibilityMap, visibilityMapSolution.getInterRegionVisibilityMap());
+
+      submitNavigableRegionsToVisualizer(visibilityMapSolution.getVisibilityMapsWithNavigableRegions());
    }
 
    public void submitNavigableRegionsToVisualizer(List<VisibilityMapWithNavigableRegion> navigableRegions)
@@ -116,7 +118,7 @@ public class VisibilityGraphsTestVisualizerApplication extends Application
 
    public void submitGoalToVisualizer(Point3D goal)
    {
-      messager.submitMessage(UIVisibilityGraphsTopics.GoalPosition, goal);      
+      messager.submitMessage(UIVisibilityGraphsTopics.GoalPosition, goal);
    }
 
    public void submitPlanarRegionsListToVisualizer(PlanarRegionsList planarRegionsList)
@@ -126,7 +128,7 @@ public class VisibilityGraphsTestVisualizerApplication extends Application
 
    public void submitShadowPlanarRegionsListToVisualizer(PlanarRegionsList planarRegionsList)
    {
-      messager.submitMessage(UIVisibilityGraphsTopics.ShadowPlanarRegionData, planarRegionsList);      
+      messager.submitMessage(UIVisibilityGraphsTopics.ShadowPlanarRegionData, planarRegionsList);
    }
 
 }

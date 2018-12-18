@@ -148,20 +148,20 @@ public class ClusterMeshViewer extends AnimationTimer
          JavaFXMeshBuilder navigableExtrusionsMeshBuilder = getOrCreate(navigableExtrusionsMeshBuilders, regionId);
          JavaFXMeshBuilder nonNavigableExtrusionsMeshBuilder = getOrCreate(nonNavigableExtrusionsMeshBuilders, regionId);
 
-         List<Cluster> clusters = navigableRegionLocalPlanner.getAllClusters();
-         for (Cluster cluster : clusters)
+         buildNavigableExtrusion(navigableExtrusionsMeshBuilder, navigableRegionLocalPlanner.getHomeRegionCluster());
+
+         List<Cluster> allClusters = navigableRegionLocalPlanner.getAllClusters();
+         for (Cluster cluster : allClusters)
          {
-            for (Point3DReadOnly rawPoint : cluster.getRawPointsInWorld())
-            {
-               rawPointsMeshBuilder.addTetrahedron(VisualizationParameters.CLUSTER_RAWPOINT_SIZE, rawPoint);
-            }
-            
-            boolean close = cluster.isClosed();
-            
-            navigableExtrusionsMeshBuilder
-                  .addMultiLine(cluster.getNavigableExtrusionsInWorld(), VisualizationParameters.NAVIGABLECLUSTER_LINE_THICKNESS, close);
-            nonNavigableExtrusionsMeshBuilder
-                  .addMultiLine(cluster.getNonNavigableExtrusionsInWorld(), VisualizationParameters.NON_NAVIGABLECLUSTER_LINE_THICKNESS, close);
+            buildRawClusterPoints(rawPointsMeshBuilder, cluster);
+         }
+         
+         //TODO: +++JEP: Show Nonnavigable regions for all clusters or just obstacle clusters?
+         //TODO: +++JEP: Or make a third boolean checkbox to show obstacle non-navigable vs. homeRegion non-navigable.
+         List<Cluster> obstacleClusters = navigableRegionLocalPlanner.getObstacleClusters();
+         for (Cluster cluster : obstacleClusters)
+         {
+            buildNonNavigableExtrusion(nonNavigableExtrusionsMeshBuilder, cluster);
          }
 
          navigableMaterials.put(regionId, new PhongMaterial(getNavigableLineColor(regionId)));
@@ -190,6 +190,30 @@ public class ClusterMeshViewer extends AnimationTimer
       rawPointsToRenderReference.set(rawPointsMapToRender);
       navigableExtrusionsToRenderReference.set(navigableExtrusionsMapToRender);
       nonNavigableExtrusionsToRenderReference.set(nonNavigableExtrusionsMapToRender);
+   }
+
+   private void buildRawClusterPoints(JavaFXMeshBuilder rawPointsMeshBuilder, Cluster cluster)
+   {
+      for (Point3DReadOnly rawPoint : cluster.getRawPointsInWorld())
+      {
+         rawPointsMeshBuilder.addTetrahedron(VisualizationParameters.CLUSTER_RAWPOINT_SIZE, rawPoint);
+      }
+   }
+ 
+   private void buildNavigableExtrusion(JavaFXMeshBuilder navigableExtrusionsMeshBuilder, Cluster cluster)
+   {
+      boolean close = cluster.isClosed();
+      
+      navigableExtrusionsMeshBuilder
+            .addMultiLine(cluster.getNavigableExtrusionsInWorld(), VisualizationParameters.NAVIGABLECLUSTER_LINE_THICKNESS, close);
+   }
+   
+   private void buildNonNavigableExtrusion(JavaFXMeshBuilder nonNavigableExtrusionsMeshBuilder, Cluster cluster)
+   {
+      boolean close = cluster.isClosed();
+
+      nonNavigableExtrusionsMeshBuilder
+            .addMultiLine(cluster.getNonNavigableExtrusionsInWorld(), VisualizationParameters.NON_NAVIGABLECLUSTER_LINE_THICKNESS, close);
    }
 
    private JavaFXMeshBuilder getOrCreate(Map<Integer, JavaFXMeshBuilder> meshBuilders, int regionId)

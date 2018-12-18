@@ -80,16 +80,17 @@ public class NavigableRegionsManager
    public List<Point3DReadOnly> calculateBodyPath(final Point3DReadOnly start, final Point3DReadOnly goal)
    {
       boolean fullyExpandVisibilityGraph = false;
+      return calculateBodyPath(start, goal, fullyExpandVisibilityGraph);
+   }
+
+   public List<Point3DReadOnly> calculateBodyPath(final Point3DReadOnly start, final Point3DReadOnly goal, boolean fullyExpandVisibilityGraph)
+   {
       return calculateVisibilityMapWhileFindingPath(start, goal, fullyExpandVisibilityGraph);
    }
 
    private List<Point3DReadOnly> calculateVisibilityMapWhileFindingPath(Point3DReadOnly startInWorld, Point3DReadOnly goalInWorld,
                                                                         boolean fullyExpandVisibilityGraph)
    {
-      boolean areStartAndGoalValid = checkIfStartAndGoalAreValid(startInWorld, goalInWorld);
-      if (!areStartAndGoalValid)
-         return null;
-
       NavigableRegions navigableRegions = visibilityMapSolution.getNavigableRegions();
       navigableRegions.filterPlanarRegionsWithBoundingCapsule(startInWorld, goalInWorld, parameters.getExplorationDistanceFromStartGoal());
       long startBodyPathComputation = System.currentTimeMillis();
@@ -101,50 +102,52 @@ public class NavigableRegionsManager
       if (fullyExpandVisibilityGraph)
          visibilityGraph.fullyExpandVisibilityGraph();
 
-      double searchHostEpsilon = parameters.getSearchHostRegionEpsilon();
+      boolean areStartAndGoalValid = checkIfStartAndGoalAreValid(startInWorld, goalInWorld);
+      if (!areStartAndGoalValid)
+         return null;
 
+      double searchHostEpsilon = parameters.getSearchHostRegionEpsilon();
       VisibilityGraphNode startNode = visibilityGraph.setStart(startInWorld, searchHostEpsilon);
       VisibilityGraphNode goalNode = visibilityGraph.setGoal(goalInWorld, searchHostEpsilon);
 
-      if (startNode == null)
-         return null;
-
-      //TODO: Pull this out to somewhere else since it is A-Star solver.
-
-      Comparator<VisibilityGraphNode> comparator = new Comparator<VisibilityGraphNode>()
+      if ((startNode != null) && (areStartAndGoalValid))
       {
-         @Override
-         public int compare(VisibilityGraphNode nodeOne, VisibilityGraphNode nodeTwo)
+
+         //TODO: Pull this out to somewhere else since it is A-Star solver.
+
+         Comparator<VisibilityGraphNode> comparator = new Comparator<VisibilityGraphNode>()
          {
-            //TODO: Check the statement below. It might be false, since just doing compare not equals?
-            //Note: Can only return 0 if the two nodes are ==. 
-            // This is because queue.remove(node) will remove the first one with .equals()
-            if (nodeOne == nodeTwo)
-               return 0;
+            @Override
+            public int compare(VisibilityGraphNode nodeOne, VisibilityGraphNode nodeTwo)
+            {
+               //TODO: Check the statement below. It might be false, since just doing compare not equals?
+               //Note: Can only return 0 if the two nodes are ==. 
+               // This is because queue.remove(node) will remove the first one with .equals()
+               if (nodeOne == nodeTwo)
+                  return 0;
 
-            if (nodeOne.getCostFromStart() + nodeOne.getEstimatedCostToGoal() < nodeTwo.getCostFromStart() + nodeTwo.getEstimatedCostToGoal())
-               return -1;
-            return 1;
+               if (nodeOne.getCostFromStart() + nodeOne.getEstimatedCostToGoal() < nodeTwo.getCostFromStart() + nodeTwo.getEstimatedCostToGoal())
+                  return -1;
+               return 1;
+            }
+         };
+
+         PriorityQueue<VisibilityGraphNode> queue = new PriorityQueue<>(comparator);
+
+         startNode.setEdgesHaveBeenDetermined(true);
+         startNode.setCostFromStart(0.0, null);
+         startNode.setEstimatedCostToGoal(startInWorld.distanceXY(goalInWorld));
+         queue.add(startNode);
+
+         while (!queue.isEmpty())
+         {
+            VisibilityGraphNode nodeToExpand = queue.poll();
+
+            if (nodeToExpand == goalNode)
+               break;
+            expandNode(visibilityGraph, nodeToExpand, goalInWorld, queue);
          }
-      };
-
-      PriorityQueue<VisibilityGraphNode> queue = new PriorityQueue<>(comparator);
-
-      startNode.setEdgesHaveBeenDetermined(true);
-      startNode.setCostFromStart(0.0, null);
-      startNode.setEstimatedCostToGoal(startInWorld.distanceXY(goalInWorld));
-      queue.add(startNode);
-
-      while (!queue.isEmpty())
-      {
-         VisibilityGraphNode nodeToExpand = queue.poll();
-
-         if (nodeToExpand == goalNode)
-            break;
-         expandNode(visibilityGraph, nodeToExpand, goalInWorld, queue);
       }
-
-      //
 
       VisibilityMapSolution visibilityMapSolutionFromNewVisibilityGraph = visibilityGraph.createVisibilityMapSolution();
 

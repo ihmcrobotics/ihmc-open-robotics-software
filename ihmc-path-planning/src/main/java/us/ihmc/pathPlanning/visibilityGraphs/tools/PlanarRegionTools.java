@@ -263,7 +263,11 @@ public class PlanarRegionTools
    {
       List<NavigableRegion> containers = new ArrayList<>();
 
-      for (NavigableRegion navigableRegion : navigableRegions.getNaviableRegionsList())
+      List<NavigableRegion> naviableRegionsList = navigableRegions.getNaviableRegionsList();
+      if (naviableRegionsList == null)
+         return null;
+
+      for (NavigableRegion navigableRegion : naviableRegionsList)
       {
          if (isPointInWorldInsidePlanarRegion(navigableRegion.getHomePlanarRegion(), point, epsilon))
          {
