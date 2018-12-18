@@ -55,7 +55,7 @@ public class VisibilityGraphsFrameworkTest
    // For enabling helpful prints.
    private static boolean DEBUG = false;
 
-   private static VisibilityGraphsTestVisualizerApplication application = null;
+   private static VisibilityGraphsTestVisualizerApplication visualizerApplication = null;
    // Because we use JavaFX, there will be two instance of VisibilityGraphsFrameworkTest, one for running the test and one starting the ui. The messager has to be static so both the ui and test use the same instance.
    private static JavaFXMessager messager = null;
 
@@ -82,10 +82,10 @@ public class VisibilityGraphsFrameworkTest
 
       if (VISUALIZE)
       {
-         application = new VisibilityGraphsTestVisualizerApplication();
-         application.startMeUp();
+         visualizerApplication = new VisibilityGraphsTestVisualizerApplication();
+         visualizerApplication.startMeUp();
 
-         messager = application.getMessager();
+         messager = visualizerApplication.getMessager();
       }
    }
 
@@ -94,8 +94,8 @@ public class VisibilityGraphsFrameworkTest
    {
       if (VISUALIZE)
       {
-         application.stop();
-         application = null;
+         visualizerApplication.stop();
+         visualizerApplication = null;
          messager = null;
       }
    }
@@ -310,9 +310,9 @@ public class VisibilityGraphsFrameworkTest
 
       if (VISUALIZE)
       {         
-         application.submitPlanarRegionsListToVisualizer(planarRegionsList);
-         application.submitStartToVisualizer(start);
-         application.submitGoalToVisualizer(goal);
+         visualizerApplication.submitPlanarRegionsListToVisualizer(planarRegionsList);
+         visualizerApplication.submitStartToVisualizer(start);
+         visualizerApplication.submitGoalToVisualizer(goal);
       }
 
       String errorMessages = calculateAndTestVizGraphsBodyPath(datasetName, start, goal, planarRegionsList);
@@ -335,12 +335,12 @@ public class VisibilityGraphsFrameworkTest
       {
          stopWalkerRequest = messager.createInput(UIVisibilityGraphsTopics.StopWalker, false);
          if (simulateOcclusions)
-            application.submitShadowPlanarRegionsListToVisualizer(planarRegionsList);
+            visualizerApplication.submitShadowPlanarRegionsListToVisualizer(planarRegionsList);
          else
-            application.submitPlanarRegionsListToVisualizer(planarRegionsList);
+            visualizerApplication.submitPlanarRegionsListToVisualizer(planarRegionsList);
          
-         application.submitStartToVisualizer(start);
-         application.submitGoalToVisualizer(goal);
+         visualizerApplication.submitStartToVisualizer(start);
+         visualizerApplication.submitGoalToVisualizer(goal);
       }
 
       String errorMessages = "";
@@ -368,7 +368,7 @@ public class VisibilityGraphsFrameworkTest
          if (VISUALIZE)
          {
             if (simulateOcclusions)
-               application.submitPlanarRegionsListToVisualizer(knownRegions);
+               visualizerApplication.submitPlanarRegionsListToVisualizer(knownRegions);
          }
 
          long startTime = System.currentTimeMillis();
@@ -462,8 +462,8 @@ public class VisibilityGraphsFrameworkTest
             messager.submitMessage(UIVisibilityGraphsTopics.BodyPathData, path);
          }
          
-         application.submitVisibilityGraphSolutionToVisualizer(manager.getVisibilityMapSolution());
-         application.submitNavigableRegionsToVisualizer(manager.getNavigableRegionsList());
+         visualizerApplication.submitVisibilityGraphSolutionToVisualizer(manager.getVisibilityMapSolution());
+         visualizerApplication.submitNavigableRegionsToVisualizer(manager.getNavigableRegionsList());
       }
 
       String errorMessages = basicBodyPathSanityChecks(datasetName, start, goal, path);
