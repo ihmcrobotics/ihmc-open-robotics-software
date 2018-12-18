@@ -251,7 +251,7 @@ public class QuadrupedSimulationFactory
       footSwitchFactory.setFullRobotModel(fullRobotModel.get());
       footSwitchFactory.setGravity(gravity.get());
       footSwitchFactory.setSimulatedRobot(sdfRobot.get());
-      footSwitchFactory.setYoVariableRegistry(sdfRobot.get().getRobotsYoVariableRegistry());
+      footSwitchFactory.setYoVariableRegistry(factoryRegistry);
       footSwitchFactory.setFootSwitchType(footSwitchType.get());
       footSwitchFactory.setKneeTouchdownThresholds(kneeTorqueTouchdownDetectionThreshold.get());
 
