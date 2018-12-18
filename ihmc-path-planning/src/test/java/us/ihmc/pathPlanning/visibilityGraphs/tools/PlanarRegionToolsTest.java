@@ -160,6 +160,33 @@ public class PlanarRegionToolsTest
       for (int i = 0; i < expectedVerticesInWorld.length; i++)
          EuclidCoreTestTools.assertPoint3DGeometricallyEquals(expectedVerticesInWorld[i], actualVerticesInWorld[i], EPSILON);
    }
+   
+   @Test(timeout = 30000)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
+   public void testTruncatePlanarRegionIfIntersectingWithPlaneTwo() throws Exception
+   {
+      Point3D groundOrigin = new Point3D(4.25, 8.5, 0.0);
+      Vector3D groundNormal = new Vector3D(0.0, 0.0, 1.0);
+
+      Point3D squareOrigin = new Point3D(8.5, 8.5, 0.0);
+      Vector3D squareNormal = new Vector3D(-0.1, 0.1, 0.9899);
+      squareNormal.normalize();
+      AxisAngle squareOrientation = EuclidGeometryTools.axisAngleFromZUpToVector3D(squareNormal);
+      RigidBodyTransform squarePose = new RigidBodyTransform(squareOrientation, squareOrigin);
+
+      double squareSide = 4.0;
+
+      Point2D[] concaveHullVertices = {new Point2D(-squareSide/2.0, squareSide/2.0), new Point2D(squareSide/2.0, squareSide/2.0), new Point2D(squareSide/2.0, -squareSide/2.0), new Point2D(-squareSide/2.0, -squareSide/2.0)};
+      List<ConvexPolygon2D> convexPolygons = new ArrayList<>();
+      convexPolygons.add(new ConvexPolygon2D(Vertex2DSupplier.asVertex2DSupplier(concaveHullVertices)));
+      PlanarRegion rotatedSquare = new PlanarRegion(squarePose, concaveHullVertices, convexPolygons);
+
+      PlanarRegion truncatedSquare = PlanarRegionTools.truncatePlanarRegionIfIntersectingWithPlane(groundOrigin, groundNormal, rotatedSquare, 0.05, null);
+            
+//      TODO: Finish this test up with some asserts and more cases.
+//      System.out.println(truncatedSquare);
+
+   }
 
    public static Point3D toWorld(Point2D point2D, Transform transformToWorld)
    {
