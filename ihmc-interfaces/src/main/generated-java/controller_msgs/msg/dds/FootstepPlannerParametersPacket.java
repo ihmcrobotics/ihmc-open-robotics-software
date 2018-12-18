@@ -284,6 +284,12 @@ public class FootstepPlannerParametersPacket extends Packet<FootstepPlannerParam
             */
    public double min_y_clearance_from_stance_ = -1.0;
    /**
+            * The bounding box for body collision checking places the box at the mid-foot frame between consecutive steps.
+            * If t if the xy-translation between these two steps in mid-foot frame, the box's depth and with are expanded
+            * by (alpha * t.x) and (alpha * t.y) respectively.
+            */
+   public double step_translation_bounding_box_scale_factor_ = -1.0;
+   /**
             * When using a cost based planning approach this value defines the weighting parameters to be used
             */
    public controller_msgs.msg.dds.FootstepPlannerCostParametersPacket cost_parameters_;
@@ -374,6 +380,8 @@ public class FootstepPlannerParametersPacket extends Packet<FootstepPlannerParam
       min_x_clearance_from_stance_ = other.min_x_clearance_from_stance_;
 
       min_y_clearance_from_stance_ = other.min_y_clearance_from_stance_;
+
+      step_translation_bounding_box_scale_factor_ = other.step_translation_bounding_box_scale_factor_;
 
       controller_msgs.msg.dds.FootstepPlannerCostParametersPacketPubSubType.staticCopy(other.cost_parameters_, cost_parameters_);
    }
@@ -1161,6 +1169,25 @@ public class FootstepPlannerParametersPacket extends Packet<FootstepPlannerParam
       return min_y_clearance_from_stance_;
    }
 
+   /**
+            * The bounding box for body collision checking places the box at the mid-foot frame between consecutive steps.
+            * If t if the xy-translation between these two steps in mid-foot frame, the box's depth and with are expanded
+            * by (alpha * t.x) and (alpha * t.y) respectively.
+            */
+   public void setStepTranslationBoundingBoxScaleFactor(double step_translation_bounding_box_scale_factor)
+   {
+      step_translation_bounding_box_scale_factor_ = step_translation_bounding_box_scale_factor;
+   }
+   /**
+            * The bounding box for body collision checking places the box at the mid-foot frame between consecutive steps.
+            * If t if the xy-translation between these two steps in mid-foot frame, the box's depth and with are expanded
+            * by (alpha * t.x) and (alpha * t.y) respectively.
+            */
+   public double getStepTranslationBoundingBoxScaleFactor()
+   {
+      return step_translation_bounding_box_scale_factor_;
+   }
+
 
    /**
             * When using a cost based planning approach this value defines the weighting parameters to be used
@@ -1262,6 +1289,8 @@ public class FootstepPlannerParametersPacket extends Packet<FootstepPlannerParam
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.min_y_clearance_from_stance_, other.min_y_clearance_from_stance_, epsilon)) return false;
 
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.step_translation_bounding_box_scale_factor_, other.step_translation_bounding_box_scale_factor_, epsilon)) return false;
+
       if (!this.cost_parameters_.epsilonEquals(other.cost_parameters_, epsilon)) return false;
 
       return true;
@@ -1350,6 +1379,8 @@ public class FootstepPlannerParametersPacket extends Packet<FootstepPlannerParam
 
       if(this.min_y_clearance_from_stance_ != otherMyClass.min_y_clearance_from_stance_) return false;
 
+      if(this.step_translation_bounding_box_scale_factor_ != otherMyClass.step_translation_bounding_box_scale_factor_) return false;
+
       if (!this.cost_parameters_.equals(otherMyClass.cost_parameters_)) return false;
 
       return true;
@@ -1435,6 +1466,8 @@ public class FootstepPlannerParametersPacket extends Packet<FootstepPlannerParam
       builder.append(this.min_x_clearance_from_stance_);      builder.append(", ");
       builder.append("min_y_clearance_from_stance=");
       builder.append(this.min_y_clearance_from_stance_);      builder.append(", ");
+      builder.append("step_translation_bounding_box_scale_factor=");
+      builder.append(this.step_translation_bounding_box_scale_factor_);      builder.append(", ");
       builder.append("cost_parameters=");
       builder.append(this.cost_parameters_);
       builder.append("}");

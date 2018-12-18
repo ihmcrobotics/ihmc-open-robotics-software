@@ -19,10 +19,10 @@
                               GridPane.columnIndex="1" GridPane.rowIndex="3" prefWidth="250.0"/>
 
                 <Label text="Cost per step" GridPane.halignment="RIGHT" GridPane.columnIndex="2" GridPane.rowIndex="2"/>
-                <Label text="Heuristics weight" GridPane.halignment="RIGHT" GridPane.columnIndex="2" GridPane.rowIndex="3"/>
+                <Label text="A* Heuristics weight" GridPane.halignment="RIGHT" GridPane.columnIndex="2" GridPane.rowIndex="3"/>
 
                 <Spinner fx:id="costPerStep" editable="true" GridPane.columnIndex="3" GridPane.rowIndex="2"/>
-                <Spinner fx:id="heuristicsWeight"  editable="true" GridPane.columnIndex="3" GridPane.rowIndex="3"/>
+                <Spinner fx:id="aStarHeuristicsWeight"  editable="true" GridPane.columnIndex="3" GridPane.rowIndex="3"/>
 
                 <Label text="Yaw weight" GridPane.halignment="RIGHT" GridPane.columnIndex="4" GridPane.rowIndex="1"/>
                 <Label text="Pitch weight" GridPane.halignment="RIGHT" GridPane.columnIndex="4" GridPane.rowIndex="2"/>

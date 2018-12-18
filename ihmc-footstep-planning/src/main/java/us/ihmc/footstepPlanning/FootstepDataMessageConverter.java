@@ -1,4 +1,4 @@
-package us.ihmc.humanoidRobotics.communication.packets.walking;
+package us.ihmc.footstepPlanning;
 
 import java.util.ArrayList;
 
@@ -10,8 +10,6 @@ import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
-import us.ihmc.footstepPlanning.FootstepPlan;
-import us.ihmc.footstepPlanning.SimpleFootstep;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.robotics.geometry.ConvexPolygonTools;
 
