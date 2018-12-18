@@ -83,7 +83,7 @@ public class VisibilityGraphsFrameworkTest
       if (VISUALIZE)
       {
          visualizerApplication = new VisibilityGraphsTestVisualizerApplication();
-         visualizerApplication.startMeUp();
+         visualizerApplication.startOnAThread();
 
          messager = visualizerApplication.getMessager();
       }

@@ -75,7 +75,7 @@ public class VisibilityGraphsTestVisualizerApplication extends Application
       return messager;
    }
 
-   public void startMeUp()
+   public void startOnAThread()
    {
       Thread thread = new Thread(() -> launch());
       thread.start();
@@ -92,7 +92,7 @@ public class VisibilityGraphsTestVisualizerApplication extends Application
    public static void main(String[] args)
    {
       VisibilityGraphsTestVisualizerApplication application = new VisibilityGraphsTestVisualizerApplication();
-      application.startMeUp();
+      application.startOnAThread();
       ThreadTools.sleepForever();
    }
 
