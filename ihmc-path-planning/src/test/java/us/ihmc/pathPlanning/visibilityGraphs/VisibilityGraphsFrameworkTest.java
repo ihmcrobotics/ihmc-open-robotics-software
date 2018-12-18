@@ -59,13 +59,6 @@ public class VisibilityGraphsFrameworkTest
    // Because we use JavaFX, there will be two instance of VisibilityGraphsFrameworkTest, one for running the test and one starting the ui. The messager has to be static so both the ui and test use the same instance.
    private static JavaFXMessager messager = null;
 
-   // Default UI parameters which should be changeable on the fly
-   private static final boolean showBodyPath = true;
-   private static final boolean showClusterRawPoints = false;
-   private static final boolean showClusterNavigableExtrusions = false;
-   private static final boolean showClusterNonNavigableExtrusions = false;
-   private static final boolean showRegionInnerConnections = false;
-   private static final boolean showRegionInterConnections = false;
 
    // The following are used for collision checks.
    private static final double walkerOffsetHeight = 0.75;
@@ -93,13 +86,6 @@ public class VisibilityGraphsFrameworkTest
          application.startMeUp();
 
          messager = application.getMessager();
-
-         messager.submitMessage(UIVisibilityGraphsTopics.ShowBodyPath, showBodyPath);
-         messager.submitMessage(UIVisibilityGraphsTopics.ShowClusterRawPoints, showClusterRawPoints);
-         messager.submitMessage(UIVisibilityGraphsTopics.ShowClusterNavigableExtrusions, showClusterNavigableExtrusions);
-         messager.submitMessage(UIVisibilityGraphsTopics.ShowClusterNonNavigableExtrusions, showClusterNonNavigableExtrusions);
-         messager.submitMessage(UIVisibilityGraphsTopics.ShowNavigableRegionVisibilityMaps, showRegionInnerConnections);
-         messager.submitMessage(UIVisibilityGraphsTopics.ShowInterRegionVisibilityMap, showRegionInterConnections);
       }
    }
 
@@ -323,10 +309,10 @@ public class VisibilityGraphsFrameworkTest
       Point3D goal = dataset.getGoal();
 
       if (VISUALIZE)
-      {
-         messager.submitMessage(UIVisibilityGraphsTopics.PlanarRegionData, planarRegionsList);
-         messager.submitMessage(UIVisibilityGraphsTopics.StartPosition, start);
-         messager.submitMessage(UIVisibilityGraphsTopics.GoalPosition, goal);
+      {         
+         application.submitPlanarRegionsListToVisualizer(planarRegionsList);
+         application.submitStartToVisualizer(start);
+         application.submitGoalToVisualizer(goal);
       }
 
       String errorMessages = calculateAndTestVizGraphsBodyPath(datasetName, start, goal, planarRegionsList);
@@ -349,11 +335,12 @@ public class VisibilityGraphsFrameworkTest
       {
          stopWalkerRequest = messager.createInput(UIVisibilityGraphsTopics.StopWalker, false);
          if (simulateOcclusions)
-            messager.submitMessage(UIVisibilityGraphsTopics.ShadowPlanarRegionData, planarRegionsList);
+            application.submitShadowPlanarRegionsListToVisualizer(planarRegionsList);
          else
-            messager.submitMessage(UIVisibilityGraphsTopics.PlanarRegionData, planarRegionsList);
-         messager.submitMessage(UIVisibilityGraphsTopics.StartPosition, start);
-         messager.submitMessage(UIVisibilityGraphsTopics.GoalPosition, goal);
+            application.submitPlanarRegionsListToVisualizer(planarRegionsList);
+         
+         application.submitStartToVisualizer(start);
+         application.submitGoalToVisualizer(goal);
       }
 
       String errorMessages = "";
@@ -381,7 +368,7 @@ public class VisibilityGraphsFrameworkTest
          if (VISUALIZE)
          {
             if (simulateOcclusions)
-               messager.submitMessage(UIVisibilityGraphsTopics.PlanarRegionData, knownRegions);
+               application.submitPlanarRegionsListToVisualizer(knownRegions);
          }
 
          long startTime = System.currentTimeMillis();
@@ -474,11 +461,9 @@ public class VisibilityGraphsFrameworkTest
          {
             messager.submitMessage(UIVisibilityGraphsTopics.BodyPathData, path);
          }
-         messager.submitMessage(UIVisibilityGraphsTopics.NavigableRegionData, manager.getNavigableRegionsList());
-         messager.submitMessage(UIVisibilityGraphsTopics.StartVisibilityMap, manager.getStartMap());
-         messager.submitMessage(UIVisibilityGraphsTopics.GoalVisibilityMap, manager.getGoalMap());
-         messager.submitMessage(UIVisibilityGraphsTopics.NavigableRegionVisibilityMap, manager.getNavigableRegionsList());
-         messager.submitMessage(UIVisibilityGraphsTopics.InterRegionVisibilityMap, manager.getInterRegionConnections());
+         
+         application.submitVisibilityGraphSolutionToVisualizer(manager.getVisibilityMapSolution());
+         application.submitNavigableRegionsToVisualizer(manager.getNavigableRegionsList());
       }
 
       String errorMessages = basicBodyPathSanityChecks(datasetName, start, goal, path);
