@@ -29,6 +29,7 @@ import us.ihmc.euclid.tuple3D.interfaces.Point3DBasics;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DBasics;
 import us.ihmc.euclid.tuple4D.Quaternion;
+import us.ihmc.log.LogTools;
 import us.ihmc.robotics.random.RandomGeometry;
 
 public class PlanarRegion
@@ -98,6 +99,9 @@ public class PlanarRegion
       fromLocalToWorldTransform.set(transformToWorld);
       fromWorldToLocalTransform.setAndInvert(fromLocalToWorldTransform);
       this.concaveHullsVertices = concaveHullVertices;
+      //TODO: Remove repeat vertices if you have them, or fix upstream so they don't create them.
+      checkConcaveHullRepeatVertices(false);
+
       convexPolygons = planarRegionConvexPolygons;
       updateBoundingBox();
       updateConvexHull();
@@ -119,6 +123,8 @@ public class PlanarRegion
       {
          concaveHullsVertices[i] = new Point2D(convexPolygon.getVertex(i));
       }
+      checkConcaveHullRepeatVertices(false);
+
       convexPolygons = new ArrayList<>();
       convexPolygons.add(convexPolygon);
       updateBoundingBox();
@@ -708,6 +714,26 @@ public class PlanarRegion
    public Point2D[] getConcaveHull()
    {
       return concaveHullsVertices;
+   }
+   
+   private void checkConcaveHullRepeatVertices(boolean throwException)
+   {
+      for (int i=0; i<concaveHullsVertices.length; i++)
+      {
+         int nextIndex = (i + 1) % concaveHullsVertices.length;
+         
+         Point2D vertex = concaveHullsVertices[i];
+         Point2D nextVertex = concaveHullsVertices[nextIndex];
+         
+         if (vertex.distance(nextVertex) < 1e-7)
+         {
+            LogTools.error("Setting concave hull with repeat vertices" + vertex);
+            if (throwException)
+            {
+               throw new RuntimeException("Setting concave hull with repeat vertices" + vertex);
+            }
+         }
+      }
    }
 
    public Point2D getConcaveHullVertex(int i)
