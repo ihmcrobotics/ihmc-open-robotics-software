@@ -153,7 +153,8 @@ public class PlanarRegionMessageConverter
       for (int regionIndex = 0; regionIndex < message.getConcaveHullsSize().size(); regionIndex++)
       {
          RigidBodyTransform transformToWorld = new RigidBodyTransform();
-         if (Math.abs(AngleTools.trimAngleMinusPiToPi(message.getRegionOrientation().get(regionIndex).getAngle())) < 1.0e-3)
+         if (message.getRegionOrientation().isEmpty()
+               || Math.abs(AngleTools.trimAngleMinusPiToPi(message.getRegionOrientation().get(regionIndex).getAngle())) < 1.0e-3)
          {
             AxisAngle regionOrientation = EuclidGeometryTools.axisAngleFromZUpToVector3D(normals.get(regionIndex));
             transformToWorld.set(regionOrientation, origins.get(regionIndex));
@@ -200,6 +201,7 @@ public class PlanarRegionMessageConverter
       {
          message.getRegionId().add(planarRegionMessage.getRegionId());
          message.getRegionOrigin().add().set(planarRegionMessage.getRegionOrigin());
+         message.getRegionOrientation().add().set(planarRegionMessage.getRegionOrientation());
          message.getRegionNormal().add().set(planarRegionMessage.getRegionNormal());
          message.getConcaveHullsSize().add(planarRegionMessage.getConcaveHullSize());
          message.getNumberOfConvexPolygons().add(planarRegionMessage.getNumberOfConvexPolygons());

@@ -3,6 +3,7 @@ package us.ihmc.quadrupedRobotics.model;
 import us.ihmc.commonWalkingControlModules.configurations.HighLevelControllerParameters;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.ControllerCoreOptimizationSettings;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
+import us.ihmc.quadrupedRobotics.parameters.QuadrupedFallDetectionParameters;
 import us.ihmc.quadrupedRobotics.parameters.QuadrupedPrivilegedConfigurationParameters;
 import us.ihmc.quadrupedRobotics.parameters.QuadrupedSitDownParameters;
 import us.ihmc.robotModels.FullQuadrupedRobotModel;
@@ -30,6 +31,7 @@ public class QuadrupedRuntimeEnvironment
    private final HighLevelControllerParameters highLevelControllerParameters;
    private final QuadrupedSitDownParameters sitDownParameters;
    private final QuadrupedPrivilegedConfigurationParameters privilegedConfigurationParameters;
+   private final QuadrupedFallDetectionParameters fallDetectionParameters;
 
    private final double gravityZ;
 
@@ -45,7 +47,7 @@ public class QuadrupedRuntimeEnvironment
                                       QuadrantDependentList<ContactablePlaneBody> contactableFeet, List<ContactablePlaneBody> contactablePlaneBodies,
                                       CenterOfMassDataHolderReadOnly centerOfMassDataHolder, QuadrantDependentList<FootSwitchInterface> footSwitches,
                                       double gravity, HighLevelControllerParameters highLevelControllerParameters, QuadrupedSitDownParameters sitDownParameters,
-                                      QuadrupedPrivilegedConfigurationParameters privilegedConfigurationParameters)
+                                      QuadrupedPrivilegedConfigurationParameters privilegedConfigurationParameters, QuadrupedFallDetectionParameters fallDetectionParameters)
    {
       this.controlDT = controlDT;
       this.robotTimestamp = robotTimestamp;
@@ -63,6 +65,7 @@ public class QuadrupedRuntimeEnvironment
       this.highLevelControllerParameters = highLevelControllerParameters;
       this.sitDownParameters = sitDownParameters;
       this.privilegedConfigurationParameters = privilegedConfigurationParameters;
+      this.fallDetectionParameters = fallDetectionParameters;
    }
 
    public double getControlDT()
@@ -143,5 +146,10 @@ public class QuadrupedRuntimeEnvironment
    public QuadrupedPrivilegedConfigurationParameters getPrivilegedConfigurationParameters()
    {
       return privilegedConfigurationParameters;
+   }
+
+   public QuadrupedFallDetectionParameters getFallDetectionParameters()
+   {
+      return fallDetectionParameters;
    }
 }
