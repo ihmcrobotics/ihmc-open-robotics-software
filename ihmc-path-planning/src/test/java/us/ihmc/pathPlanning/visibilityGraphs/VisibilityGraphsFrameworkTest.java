@@ -12,8 +12,6 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
-import javafx.application.Application;
-import javafx.stage.Stage;
 import javafx.util.Pair;
 import us.ihmc.commons.MathTools;
 import us.ihmc.commons.thread.ThreadTools;
@@ -33,7 +31,6 @@ import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DBasics;
 import us.ihmc.javaFXToolkit.messager.JavaFXMessager;
-import us.ihmc.javaFXToolkit.messager.SharedMemoryJavaFXMessager;
 import us.ihmc.log.LogTools;
 import us.ihmc.pathPlanning.visibilityGraphs.interfaces.VisibilityGraphsParameters;
 import us.ihmc.pathPlanning.visibilityGraphs.tools.PlanarRegionTools;
@@ -41,13 +38,12 @@ import us.ihmc.pathPlanning.visibilityGraphs.tools.VisibilityGraphsIOTools;
 import us.ihmc.pathPlanning.visibilityGraphs.tools.VisibilityGraphsIOTools.VisibilityGraphsUnitTestDataset;
 import us.ihmc.pathPlanning.visibilityGraphs.ui.VisibilityGraphsDataExporter;
 import us.ihmc.pathPlanning.visibilityGraphs.ui.messager.UIVisibilityGraphsTopics;
-import us.ihmc.pathPlanning.visibilityGraphs.visualizer.VisibilityGraphsTestVisualizer;
 import us.ihmc.robotEnvironmentAwareness.geometry.ConcaveHullDecomposition;
 import us.ihmc.robotics.geometry.PlanarRegion;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.geometry.SpiralBasedAlgorithm;
 
-public class VisibilityGraphsFrameworkTest extends Application
+public class VisibilityGraphsFrameworkTest
 {
    // Set that to MAX_VALUE when visualizing. Before pushing, it has to be reset to a reasonable value.
    private static final long TIMEOUT = 100000; // Long.MAX_VALUE; // 
@@ -59,10 +55,9 @@ public class VisibilityGraphsFrameworkTest extends Application
    // For enabling helpful prints.
    private static boolean DEBUG = false;
 
+   private static VisibilityGraphsTestVisualizerApplication application = null;
    // Because we use JavaFX, there will be two instance of VisibilityGraphsFrameworkTest, one for running the test and one starting the ui. The messager has to be static so both the ui and test use the same instance.
    private static JavaFXMessager messager = null;
-   // Because JavaFX will create a fresh new instance of VisibilityGraphsFrameworkTest, the ui has to be static so there is only one instance and we can refer to it in the test part.
-   private static VisibilityGraphsTestVisualizer ui;
 
    // Default UI parameters which should be changeable on the fly
    private static final boolean showBodyPath = true;
@@ -94,14 +89,10 @@ public class VisibilityGraphsFrameworkTest extends Application
 
       if (VISUALIZE)
       {
-         messager = new SharedMemoryJavaFXMessager(UIVisibilityGraphsTopics.API);
-         messager.startMessager();
+         application = new VisibilityGraphsTestVisualizerApplication();
+         application.startMeUp();
 
-         // Did not find a better solution for starting JavaFX and still be able to move on.
-         new Thread(() -> launch()).start();
-
-         while (ui == null)
-            ThreadTools.sleep(200);
+         messager = application.getMessager();
 
          messager.submitMessage(UIVisibilityGraphsTopics.ShowBodyPath, showBodyPath);
          messager.submitMessage(UIVisibilityGraphsTopics.ShowClusterRawPoints, showClusterRawPoints);
@@ -117,8 +108,8 @@ public class VisibilityGraphsFrameworkTest extends Application
    {
       if (VISUALIZE)
       {
-         stop();
-         ui = null;
+         application.stop();
+         application = null;
          messager = null;
       }
    }
@@ -221,8 +212,8 @@ public class VisibilityGraphsFrameworkTest extends Application
             messager.submitMessage(UIVisibilityGraphsTopics.ReloadDatasetRequest, false);
             messager.submitMessage(UIVisibilityGraphsTopics.PreviousDatasetRequest, false);
 
-            while (!nextDatasetRequested.get() && !reloadDatasetRequested.get() && !previousDatasetRequested.get() && dataset.getDatasetName().equals(
-                  requestedDatasetPathReference.get()))
+            while (!nextDatasetRequested.get() && !reloadDatasetRequested.get() && !previousDatasetRequested.get()
+                  && dataset.getDatasetName().equals(requestedDatasetPathReference.get()))
             {
                if (!messager.isMessagerOpen())
                   return; // The ui has been closed
@@ -295,7 +286,6 @@ public class VisibilityGraphsFrameworkTest extends Application
 
       }
 
-
       if (allDatasets.isEmpty())
          Assert.fail("Did not find any datasets to test.");
 
@@ -318,7 +308,6 @@ public class VisibilityGraphsFrameworkTest extends Application
       }
 
       String errorMessages = datasetTestRunner.testDataset(dataset);
-
 
       Assert.assertTrue("Errors: " + errorMessages, errorMessages.isEmpty());
       ThreadTools.sleepForever(); // Apparently need to give some time for the prints to appear in the right order.
@@ -614,13 +603,13 @@ public class VisibilityGraphsFrameworkTest extends Application
 
       Point3DReadOnly pathEnd = path.get(path.size() - 1);
       Point3DReadOnly pathStart = path.get(0);
-      
+
       Point2DReadOnly pathEnd2D = new Point2D(pathEnd);
       Point2DReadOnly pathStart2D = new Point2D(pathStart);
-      
+
       Point2DReadOnly goal2D = new Point2D(goal);
       Point2DReadOnly start2D = new Point2D(start);
-      
+
       errorMessages += assertTrue(datasetName, "Body path does not end at desired goal position: desired = " + goal + ", actual = " + pathEnd,
                                   pathEnd2D.geometricallyEquals(goal2D, START_GOAL_EPSILON));
       errorMessages += assertTrue(datasetName, "Body path does not start from desired start position: desired = " + start + ", actual = " + pathStart,
@@ -766,30 +755,10 @@ public class VisibilityGraphsFrameworkTest extends Application
       return !condition ? "\n" + message : "";
    }
 
-   @Override
-   public void start(Stage primaryStage) throws Exception
+   private static interface DatasetTestRunner
    {
-      if (VISUALIZE)
-      {
-         ui = new VisibilityGraphsTestVisualizer(primaryStage, messager);
-         ui.show();
-      }
+      String testDataset(VisibilityGraphsUnitTestDataset dataset);
    }
-
-   @Override
-   public void stop() throws Exception
-   {
-      if (VISUALIZE)
-      {
-         ui.stop();
-      }
-   }
-
-private static interface DatasetTestRunner
-{
-   String testDataset(VisibilityGraphsUnitTestDataset dataset);
-
-}
 
    public static void main(String[] args) throws Exception
    {
