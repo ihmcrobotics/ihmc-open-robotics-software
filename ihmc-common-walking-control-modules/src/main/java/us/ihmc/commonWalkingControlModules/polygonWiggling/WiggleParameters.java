@@ -1,4 +1,4 @@
-package us.ihmc.footstepPlanning.polygonWiggling;
+package us.ihmc.commonWalkingControlModules.polygonWiggling;
 
 public class WiggleParameters
 {
