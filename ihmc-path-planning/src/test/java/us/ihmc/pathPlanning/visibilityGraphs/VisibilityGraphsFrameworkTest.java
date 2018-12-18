@@ -463,7 +463,6 @@ public class VisibilityGraphsFrameworkTest
          }
          
          visualizerApplication.submitVisibilityGraphSolutionToVisualizer(manager.getVisibilityMapSolution());
-         visualizerApplication.submitNavigableRegionsToVisualizer(manager.getNavigableRegionsList());
       }
 
       String errorMessages = basicBodyPathSanityChecks(datasetName, start, goal, path);
