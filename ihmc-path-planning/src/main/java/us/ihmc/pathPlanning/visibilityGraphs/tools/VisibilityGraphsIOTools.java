@@ -47,19 +47,32 @@ public class VisibilityGraphsIOTools
    {
       File datasetFolder = new File(containingFolder + File.separator + datasetName);
       if (datasetFolder.exists())
+      {
+         LogTools.error("DatasetFolder already exists: " + datasetFolder);
          return false;
+      }
+
       boolean success = datasetFolder.mkdir();
       if (!success)
+      {
+         LogTools.error("Could not make directory: " + datasetFolder);
          return false;
+      }
 
       Path planarRegionsFolder = Paths.get(datasetFolder.getPath() + File.separator + PlanarRegionFileTools.createDefaultTimeStampedFolderName());
       success = PlanarRegionFileTools.exportPlanarRegionData(planarRegionsFolder, planarRegionsList);
       if (!success)
+      {
+         LogTools.error("Could not export planar region data to " + planarRegionsFolder);
          return false;
+      }
 
       success = exportParameters(datasetFolder, start, goal);
       if (!success)
+      {
+         LogTools.error("Could not export parameters " + datasetFolder);
          return false;
+      }
 
       return true;
    }
