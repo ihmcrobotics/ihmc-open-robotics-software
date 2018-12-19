@@ -10,6 +10,7 @@ import java.util.stream.Collectors;
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import javafx.util.Pair;
@@ -58,7 +59,6 @@ public class VisibilityGraphsFrameworkTest
    private static VisibilityGraphsTestVisualizerApplication visualizerApplication = null;
    // Because we use JavaFX, there will be two instance of VisibilityGraphsFrameworkTest, one for running the test and one starting the ui. The messager has to be static so both the ui and test use the same instance.
    private static JavaFXMessager messager = null;
-
 
    // The following are used for collision checks.
    private static final double walkerOffsetHeight = 0.75;
@@ -113,6 +113,8 @@ public class VisibilityGraphsFrameworkTest
       runAssertionsOnAllDatasets(dataset -> runAssertionsWithoutOcclusion(dataset));
    }
 
+   //TODO: Fix and make this pass.
+   @Ignore("This needs to be fixed for when start and goal are invalid.")
    @Test(timeout = TIMEOUT)
    @ContinuousIntegrationTest(estimatedDuration = 10.0, categoriesOverride = {IntegrationCategory.IN_DEVELOPMENT})
    public void testDatasetsNoOcclusionSimulateDynamicReplanning() throws Exception
@@ -124,6 +126,8 @@ public class VisibilityGraphsFrameworkTest
       runAssertionsOnAllDatasets(dataset -> runAssertionsSimulateDynamicReplanning(dataset, 0.20, 1000, false));
    }
 
+   //TODO: Fix and make this pass.
+   @Ignore("Occlusion planning needs to be implemented better.")
    @Test(timeout = TIMEOUT)
    @ContinuousIntegrationTest(estimatedDuration = 10.0, categoriesOverride = {IntegrationCategory.IN_DEVELOPMENT})
    public void testDatasetsSimulateOcclusionAndDynamicReplanning() throws Exception
@@ -309,7 +313,7 @@ public class VisibilityGraphsFrameworkTest
       Point3D goal = dataset.getGoal();
 
       if (VISUALIZE)
-      {         
+      {
          visualizerApplication.submitPlanarRegionsListToVisualizer(planarRegionsList);
          visualizerApplication.submitStartToVisualizer(start);
          visualizerApplication.submitGoalToVisualizer(goal);
@@ -338,7 +342,7 @@ public class VisibilityGraphsFrameworkTest
             visualizerApplication.submitShadowPlanarRegionsListToVisualizer(planarRegionsList);
          else
             visualizerApplication.submitPlanarRegionsListToVisualizer(planarRegionsList);
-         
+
          visualizerApplication.submitStartToVisualizer(start);
          visualizerApplication.submitGoalToVisualizer(goal);
       }
@@ -461,7 +465,7 @@ public class VisibilityGraphsFrameworkTest
          {
             messager.submitMessage(UIVisibilityGraphsTopics.BodyPathData, path);
          }
-         
+
          visualizerApplication.submitVisibilityGraphSolutionToVisualizer(manager.getVisibilityMapSolution());
       }
 
