@@ -10,6 +10,7 @@ import us.ihmc.graphicsDescription.structure.Graphics3DNode;
 import us.ihmc.javaFXToolkit.messager.JavaFXMessager;
 import us.ihmc.javaFXToolkit.node.JavaFXGraphics3DNode;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
+import us.ihmc.messager.Messager;
 import us.ihmc.quadrupedBasics.referenceFrames.QuadrupedReferenceFrames;
 import us.ihmc.robotModels.FullQuadrupedRobotModel;
 import us.ihmc.robotModels.FullQuadrupedRobotModelFactory;
@@ -32,25 +33,23 @@ public class JavaFXQuadrupedVisualizer
 
    private final OneDoFJointBasics[] allJoints;
    private final int jointNameHash;
-   private final AtomicReference<RigidBodyTransform> newRootJointPoseReference = new AtomicReference<>(null);
-   private final AtomicReference<float[]> newJointConfigurationReference = new AtomicReference<>(null);
+
+   private final AtomicReference<RobotConfigurationData> robotConfigurationDataReference;
 
    private boolean isRobotLoaded = false;
    private final Group rootNode = new Group();
 
    private final AnimationTimer animationTimer;
 
-   private final JavaFXMessager messager;
-
-   public JavaFXQuadrupedVisualizer(JavaFXMessager messager, FullQuadrupedRobotModelFactory fullRobotModelFactory)
+   public JavaFXQuadrupedVisualizer(Messager messager, FullQuadrupedRobotModelFactory fullRobotModelFactory)
    {
-      this.messager = messager;
       fullRobotModel = fullRobotModelFactory.createFullRobotModel();
       allJoints = fullRobotModel.getOneDoFJoints();
       referenceFrames = new QuadrupedReferenceFrames(fullRobotModel);
 
-      jointNameHash = calculateJointNameHash(allJoints, fullRobotModel.getForceSensorDefinitions(),
-                                             fullRobotModel.getIMUDefinitions());
+      robotConfigurationDataReference = messager.createInput(QuadrupedUIMessagerAPI.RobotConfigurationDataTopic);
+
+      jointNameHash = calculateJointNameHash(allJoints, fullRobotModel.getForceSensorDefinitions(), fullRobotModel.getIMUDefinitions());
 
       new Thread(() -> loadRobotModelAndGraphics(fullRobotModelFactory), "RobotVisualizerLoading").start();
 
@@ -64,16 +63,21 @@ public class JavaFXQuadrupedVisualizer
             else if (rootNode.getChildren().isEmpty())
                rootNode.getChildren().add(robotRootNode);
 
-            RigidBodyTransform newRootJointPose = newRootJointPoseReference.getAndSet(null);
-            if (newRootJointPose != null)
-               fullRobotModel.getRootJoint().setJointConfiguration(newRootJointPose);
+            RobotConfigurationData robotConfigurationData = robotConfigurationDataReference.getAndSet(null);
+            if (robotConfigurationData == null)
+               return;
 
-            float[] newJointConfiguration = newJointConfigurationReference.getAndSet(null);
-            if (newJointConfiguration != null)
-            {
-               for (int i = 0; i < allJoints.length; i++)
-                  allJoints[i].setQ(newJointConfiguration[i]);
-            }
+            if (robotConfigurationData.getJointNameHash() != jointNameHash)
+               throw new RuntimeException("Joint names do not match for RobotConfigurationData");
+
+            RigidBodyTransform newRootJointPose = new RigidBodyTransform(robotConfigurationData.getRootOrientation(),
+                                                                         robotConfigurationData.getRootTranslation());
+            fullRobotModel.getRootJoint().setJointConfiguration(newRootJointPose);
+
+            float[] newJointConfiguration = robotConfigurationData.getJointAngles().toArray();
+            for (int i = 0; i < allJoints.length; i++)
+               allJoints[i].setQ(newJointConfiguration[i]);
+
             fullRobotModel.getElevator().updateFramesRecursively();
             graphicsRobot.update();
             robotRootNode.update();
@@ -85,7 +89,7 @@ public class JavaFXQuadrupedVisualizer
       };
    }
 
-   public static int calculateJointNameHash(OneDoFJointBasics[] joints, ForceSensorDefinition[] forceSensorDefinitions, IMUDefinition[] imuDefinitions)
+   private static int calculateJointNameHash(OneDoFJointBasics[] joints, ForceSensorDefinition[] forceSensorDefinitions, IMUDefinition[] imuDefinitions)
    {
       CRC32 crc = new CRC32();
       for (OneDoFJointBasics joint : joints)
@@ -135,14 +139,6 @@ public class JavaFXQuadrupedVisualizer
       graphics3dNode.getChildrenNodes().forEach(child -> addNodesRecursively(child, node));
    }
 
-   public void submitNewConfiguration(RobotConfigurationData robotConfigurationData)
-   {
-      if (robotConfigurationData.getJointNameHash() != jointNameHash)
-         throw new RuntimeException("Joint names do not match for RobotConfigurationData");
-
-      newRootJointPoseReference.set(new RigidBodyTransform(robotConfigurationData.getRootOrientation(), robotConfigurationData.getRootTranslation()));
-      newJointConfigurationReference.set(robotConfigurationData.getJointAngles().toArray());
-   }
 
    public FullQuadrupedRobotModel getFullRobotModel()
    {
