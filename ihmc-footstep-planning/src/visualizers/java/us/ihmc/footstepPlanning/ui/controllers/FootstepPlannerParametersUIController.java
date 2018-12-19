@@ -58,7 +58,16 @@ public class FootstepPlannerParametersUIController
    private Spinner<Double> minXClearance;
    @FXML
    private Spinner<Double> minYClearance;
-
+   @FXML
+   private Spinner<Double> cliffHeightSpinner;
+   @FXML
+   private Spinner<Double> cliffClearance;
+   @FXML
+   private Spinner<Double> maxXYWiggleSpinner;
+   @FXML
+   private Spinner<Double> maxYawWiggleSpinner;
+   @FXML
+   private Spinner<Double> wiggleInsideDeltaSpinner;
 
    private static final double footWidth = 0.15;
    private static final double footLength = 0.25;
@@ -87,14 +96,15 @@ public class FootstepPlannerParametersUIController
       maxStepZ.setValueFactory(new DoubleSpinnerValueFactory(0.0, 0.5, 0.0, 0.02));
       minSurfaceIncline.setValueFactory(new DoubleSpinnerValueFactory(0.0, 1.5, 0.0, 0.1));
 
-
       maxStepYaw.setValueFactory(new DoubleSpinnerValueFactory(0.0, 1.5, 0.0, 0.1));
       minStepYaw.setValueFactory(new DoubleSpinnerValueFactory(-1.5, 0.0, 0.0, 0.1));
       minFootholdPercent.setValueFactory(new DoubleSpinnerValueFactory(0.0, 1.0, 0.0, 0.05));
 
       minXClearance.setValueFactory(new DoubleSpinnerValueFactory(0.0, 0.3, 0.0, 0.01));
       minYClearance.setValueFactory(new DoubleSpinnerValueFactory(0.0, 0.3, 0.0, 0.01));
-
+      maxXYWiggleSpinner.setValueFactory(new DoubleSpinnerValueFactory(0.0, 0.3, 0.0, 0.005));
+      maxYawWiggleSpinner.setValueFactory(new DoubleSpinnerValueFactory(0.0, 0.5, 0.0, 0.005));
+      wiggleInsideDeltaSpinner.setValueFactory(new DoubleSpinnerValueFactory(0.0, 0.3, 0.0, 0.005));
 
       maxStepLength.getValueFactory().valueProperty().addListener((ChangeListener) -> updateStepShape());
       minStepLength.getValueFactory().valueProperty().addListener((ChangeListener) -> updateStepShape());
@@ -104,6 +114,9 @@ public class FootstepPlannerParametersUIController
       minStepYaw.getValueFactory().valueProperty().addListener((ChangeListener) -> updateStepShape());
       minXClearance.getValueFactory().valueProperty().addListener((ChangeListener) -> updateStepShape());
       minYClearance.getValueFactory().valueProperty().addListener((ChangeListener) -> updateStepShape());
+      
+      cliffHeightSpinner.setValueFactory(new DoubleSpinnerValueFactory(0.0, 0.5, 0.0, 0.01));
+      cliffClearance.setValueFactory(new DoubleSpinnerValueFactory(0.0, 0.5, 0.0, 0.01));
    }
 
    public void bindControls()
@@ -127,6 +140,13 @@ public class FootstepPlannerParametersUIController
 
       parametersProperty.bidirectionalBindMinXClearanceFromStance(minXClearance.getValueFactory().valueProperty());
       parametersProperty.bidirectionalBindMinYClearanceFromStance(minYClearance.getValueFactory().valueProperty());
+      
+      parametersProperty.bidirectionalBindCliffHeight(cliffHeightSpinner.getValueFactory().valueProperty());
+      parametersProperty.bidirectionalBindCliffClearance(cliffClearance.getValueFactory().valueProperty());
+
+      parametersProperty.bidirectionalBindMaxWiggleXY(maxXYWiggleSpinner.getValueFactory().valueProperty());
+      parametersProperty.bidirectionalBindMaxWiggleYaw(maxYawWiggleSpinner.getValueFactory().valueProperty());
+      parametersProperty.bidirectionalBindWiggleInsideDelta(wiggleInsideDeltaSpinner.getValueFactory().valueProperty());
 
       messager.bindBidirectional(FootstepPlannerMessagerAPI.PlannerParametersTopic, parametersProperty, createConverter(), true);
 

@@ -18,6 +18,7 @@ import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.footstepPlanning.FootstepPlanningResult;
+import us.ihmc.footstepPlanning.tools.FootstepPlannerMessageTools;
 import us.ihmc.humanoidBehaviors.behaviors.AbstractBehavior;
 import us.ihmc.humanoidBehaviors.behaviors.primitives.FootstepListBehavior;
 import us.ihmc.humanoidBehaviors.communication.ConcurrentListeningQueue;
@@ -211,7 +212,7 @@ public class WalkToGoalBehavior extends AbstractBehavior
          tempFinalPose.setY(walkToGoalBehaviorPacket.getYGoal());
          tempFinalPose.setOrientationYawPitchRoll(walkToGoalBehaviorPacket.getThetaGoal(), 0.0, 0.0);
          FramePose3D finalPose = new FramePose3D(ReferenceFrame.getWorldFrame(), tempFinalPose);
-         FootstepPlanningRequestPacket tempPlanningRequestPacket = HumanoidMessageTools.createFootstepPlanningRequestPacket(initialPose, goalSide, finalPose);
+         FootstepPlanningRequestPacket tempPlanningRequestPacket = FootstepPlannerMessageTools.createFootstepPlanningRequestPacket(initialPose, goalSide, finalPose);
          tempPlanningRequestPacket.setTimeout(3.0);
          tempPlanningRequestPacket.setDestination(PacketDestination.FOOTSTEP_PLANNING_TOOLBOX_MODULE.ordinal());
 

@@ -822,8 +822,8 @@ public class ICPOptimizationQPSolver
 
       if (!previousTickFailed)
       { // this can occasionally over-constrain the problem, so remove it if the previous tick failed.
-         addMaximumFeedbackRateConstraint();
          addMaximumFeedbackMagnitudeConstraint();
+         addMaximumFeedbackRateConstraint();
       }
 
       boolean foundSolution = solve(solution);

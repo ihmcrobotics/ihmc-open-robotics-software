@@ -154,9 +154,9 @@ public class PlanarRegionViewer
       {
          colors.add(new java.awt.Color(104, 130, 219));
          colors.add(new java.awt.Color(113, 168, 133));
-         colors.add(new java.awt.Color(196, 182, 56));
+         colors.add(new java.awt.Color(196, 182, 90));
          colors.add(new java.awt.Color(190, 89, 110));
-         colors.add(new java.awt.Color(150, 150, 155));
+         colors.add(new java.awt.Color(155, 80, 190));
       }
 
       java.awt.Color getColor(int regionId)

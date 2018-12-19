@@ -6,6 +6,7 @@ import java.util.List;
 import us.ihmc.commons.MathTools;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
+import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.shape.Box3D;
 import us.ihmc.euclid.transform.RigidBodyTransform;
@@ -43,6 +44,7 @@ public class BodyCollisionNodeChecker extends FootstepNodeChecker
    private final Vector3D bodyBoxDimensions = new Vector3D();
 
    private final FramePoint3D tempPoint = new FramePoint3D();
+   private final FrameVector3D tempVector = new FrameVector3D();
    private final RigidBodyTransform tempTransform = new RigidBodyTransform();
 
    public BodyCollisionNodeChecker(FootstepPlannerParameters parameters, FootstepNodeSnapper snapper)
@@ -123,11 +125,8 @@ public class BodyCollisionNodeChecker extends FootstepNodeChecker
       if (planarRegionList.size() == 0)
          return true;
 
-//      PrintTools.info("Body dimensions = (" + parameters.getBodyBoxDepth() + ", " + parameters.getBodyBoxWidth() + ", " + parameters.getBodyBoxHeight() + ")");
-      
-      bodyCollisionBox.setSize(parameters.getBodyBoxDepth(), parameters.getBodyBoxWidth(), parameters.getBodyBoxHeight());
-      if (!MathTools.epsilonEquals(1.0, scaleFactor, 1e-5))
-         bodyCollisionBox.scale(scaleFactor);
+      updateBodyCollisionBox(node, previousNode, scaleFactor);
+
       bodyBoxDimensions.set(parameters.getBodyBoxBaseX(), parameters.getBodyBoxBaseY(), parameters.getBodyBoxBaseZ() + 0.5 * parameters.getBodyBoxHeight());
       bodyCollisionFrame.updateTranslation(bodyBoxDimensions);
       bodyCollisionPolytope.getVertices().clear();
@@ -148,6 +147,19 @@ public class BodyCollisionNodeChecker extends FootstepNodeChecker
       }
 
       return true;
+   }
+
+   private void updateBodyCollisionBox(FootstepNode node, FootstepNode previousNode, double scaleFactor)
+   {
+      tempVector.setIncludingFrame(worldFrame, node.getX(), node.getY(), 0.0);
+      tempVector.sub(previousNode.getX(), previousNode.getY(), 0.0);
+      tempVector.changeFrame(midStanceFrame);
+
+      double stepTranslationMidFootFrameX = parameters.getStepTranslationBoundingBoxScaleFactor() * Math.abs(tempVector.getX());
+      bodyCollisionBox.setSize(parameters.getBodyBoxDepth() + stepTranslationMidFootFrameX, parameters.getBodyBoxWidth(), parameters.getBodyBoxHeight());
+
+      if (!MathTools.epsilonEquals(1.0, scaleFactor, 1e-5))
+         bodyCollisionBox.scale(scaleFactor);
    }
 
    private final FramePose3D midPose = new FramePose3D();
