@@ -39,7 +39,7 @@ public abstract class FootstepPlannerDataSetTest
    protected static final double bambooTimeScaling = 4.0;
 
    // Whether to start the UI or not.
-   protected static boolean VISUALIZE = true;
+   protected static boolean VISUALIZE = false;
    // For enabling helpful prints.
    protected static boolean DEBUG = true;
    protected static boolean VERBOSE = true;
