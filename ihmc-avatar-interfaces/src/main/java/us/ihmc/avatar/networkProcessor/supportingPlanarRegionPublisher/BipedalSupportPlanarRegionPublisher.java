@@ -22,6 +22,7 @@ import us.ihmc.communication.packets.PlanarRegionMessageConverter;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.geometry.interfaces.Vertex2DSupplier;
 import us.ihmc.euclid.referenceFrame.FramePoint2D;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
@@ -38,6 +39,13 @@ import us.ihmc.ros2.RealtimeRos2Node;
 
 public class BipedalSupportPlanarRegionPublisher
 {
+   /**
+    * If true, the support polygon's convex hull is published as a single planar region if the robot is in double support and the feet planes are close.
+    * Otherwise, the polygons are published separately
+    */
+   private static final boolean useConvexHullIfPossible = true;
+   private static final double supportRegionScaleFactor = 2.0;
+
    private final RealtimeRos2Node ros2Node = ROS2Tools.createRealtimeRos2Node(PubSubImplementation.FAST_RTPS, "supporting_planar_region_publisher");
    private final IHMCRealtimeROS2Publisher<PlanarRegionsListMessage> regionPublisher;
 
@@ -61,8 +69,6 @@ public class BipedalSupportPlanarRegionPublisher
       contactableBodiesFactory.setReferenceFrames(referenceFrames);
       contactableBodiesFactory.setFootContactPoints(robotModel.getContactPointParameters().getControllerFootGroundContactPoints());
       contactableFeet = new SideDependentList<>(contactableBodiesFactory.createFootContactablePlaneBodies());
-
-      double supportRegionScaleFactor = 2.0;
 
       for (RobotSide robotSide : RobotSide.values)
       {
@@ -101,24 +107,57 @@ public class BipedalSupportPlanarRegionPublisher
 
       SideDependentList<Boolean> isInSupport = new SideDependentList<Boolean>(!capturabilityBasedStatus.getLeftFootSupportPolygon2d().isEmpty(),
                                                                               !capturabilityBasedStatus.getRightFootSupportPolygon2d().isEmpty());
-
       List<PlanarRegion> supportRegions = new ArrayList<>();
 
-      for (RobotSide robotSide : RobotSide.values)
+      if (useConvexHullIfPossible && feetAreInSamePlane(isInSupport))
       {
-         if (!isInSupport.get(robotSide))
-            continue;
+         ContactablePlaneBody leftContactableFoot = contactableFeet.get(RobotSide.LEFT);
+         ContactablePlaneBody rightContactableFoot = contactableFeet.get(RobotSide.RIGHT);
 
-         ContactablePlaneBody contactableFoot = contactableFeet.get(robotSide);
-         List<FramePoint2D> contactPoints = contactableFoot.getContactPoints2d();
-         RigidBodyTransform transformToWorld = contactableFoot.getSoleFrame().getTransformToWorldFrame();
+         ReferenceFrame leftSoleFrame = leftContactableFoot.getSoleFrame();
+         RigidBodyTransform leftFootTransformToWorld = leftSoleFrame.getTransformToWorldFrame();
 
-         PlanarRegion supportRegion = new PlanarRegion(transformToWorld, new ConvexPolygon2D(Vertex2DSupplier.asVertex2DSupplier(contactPoints)));
-         supportRegion.setRegionId(robotSide.ordinal());
-         supportRegions.add(supportRegion);
+         List<FramePoint2D> leftFootContactPoints = leftContactableFoot.getContactPoints2d();
+         List<FramePoint2D> rightFootContactPoints = rightContactableFoot.getContactPoints2d();
+         List<FramePoint2D> allContactPoints = new ArrayList<>(leftFootContactPoints);
+         allContactPoints.addAll(rightFootContactPoints);
+         allContactPoints.forEach(point -> point.changeFrame(leftSoleFrame));
+
+         PlanarRegion convexHullRegion = new PlanarRegion(leftFootTransformToWorld, new ConvexPolygon2D(Vertex2DSupplier.asVertex2DSupplier(allContactPoints)));
+         convexHullRegion.setRegionId(0);
+         supportRegions.add(convexHullRegion);
+      }
+      else
+      {
+         for (RobotSide robotSide : RobotSide.values)
+         {
+            if (!isInSupport.get(robotSide))
+               continue;
+
+            ContactablePlaneBody contactableFoot = contactableFeet.get(robotSide);
+            List<FramePoint2D> contactPoints = contactableFoot.getContactPoints2d();
+            RigidBodyTransform transformToWorld = contactableFoot.getSoleFrame().getTransformToWorldFrame();
+
+            PlanarRegion supportRegion = new PlanarRegion(transformToWorld, new ConvexPolygon2D(Vertex2DSupplier.asVertex2DSupplier(contactPoints)));
+            supportRegion.setRegionId(robotSide.ordinal());
+            supportRegions.add(supportRegion);
+         }
       }
 
       regionPublisher.publish(PlanarRegionMessageConverter.convertToPlanarRegionsListMessage(new PlanarRegionsList(supportRegions)));
+   }
+
+   private boolean feetAreInSamePlane(SideDependentList<Boolean> isInSupport)
+   {
+      boolean inDoubleSupport = isInSupport.get(RobotSide.LEFT) && isInSupport.get(RobotSide.RIGHT);
+      ReferenceFrame leftSoleFrame = contactableFeet.get(RobotSide.LEFT).getSoleFrame();
+      ReferenceFrame rightSoleFrame = contactableFeet.get(RobotSide.RIGHT).getSoleFrame();
+      RigidBodyTransform relativeSoleTransform = leftSoleFrame.getTransformToDesiredFrame(rightSoleFrame);
+
+      double rotationEpsilon = Math.toRadians(3.0);
+      double translationEpsilon = 0.02;
+      return inDoubleSupport && relativeSoleTransform.getRotationMatrix().getPitch() < rotationEpsilon && relativeSoleTransform.getRotationMatrix().getRoll() < rotationEpsilon
+            && relativeSoleTransform.getTranslationZ() < translationEpsilon;
    }
 
    public void stop()
