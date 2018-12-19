@@ -942,12 +942,6 @@ public class VisibilityGraphTest
                }
             };
          }
-
-         //         @Override
-         //         public double getExtrusionDistance()
-         //         {
-         //            return 0.2;
-         //         }
       };
    }
 
