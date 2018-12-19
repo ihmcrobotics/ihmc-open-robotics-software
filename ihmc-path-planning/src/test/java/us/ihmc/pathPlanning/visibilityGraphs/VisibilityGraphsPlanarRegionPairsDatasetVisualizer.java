@@ -31,7 +31,7 @@ public class VisibilityGraphsPlanarRegionPairsDatasetVisualizer
 
    public static void openResourceAndVisualizePairs(String resourceName, String folderToSavePairsTo)
    {
-      Class loadingClass = VisibilityGraphsDataExporter.class;
+      Class<VisibilityGraphsDataExporter> loadingClass = VisibilityGraphsDataExporter.class;
       VisibilityGraphsUnitTestDataset dataSet = VisibilityGraphsIOTools.loadDataset(loadingClass, resourceName);
 
       String datasetName = dataSet.getDatasetName();
