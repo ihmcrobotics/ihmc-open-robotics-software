@@ -121,10 +121,14 @@ public class BipedalSupportPlanarRegionPublisher
          List<FramePoint2D> rightFootContactPoints = rightContactableFoot.getContactPoints2d();
          List<FramePoint2D> allContactPoints = new ArrayList<>(leftFootContactPoints);
          allContactPoints.addAll(rightFootContactPoints);
-         allContactPoints.forEach(point -> point.changeFrame(leftSoleFrame));
+         
+         for(int i = 0; i < allContactPoints.size(); i++)
+         {
+            allContactPoints.get(i).changeFrameAndProjectToXYPlane(leftSoleFrame);
+         }
 
          PlanarRegion convexHullRegion = new PlanarRegion(leftFootTransformToWorld, new ConvexPolygon2D(Vertex2DSupplier.asVertex2DSupplier(allContactPoints)));
-         convexHullRegion.setRegionId(0);
+         convexHullRegion.setRegionId(2);
          supportRegions.add(convexHullRegion);
       }
       else
@@ -156,8 +160,10 @@ public class BipedalSupportPlanarRegionPublisher
 
       double rotationEpsilon = Math.toRadians(3.0);
       double translationEpsilon = 0.02;
-      return inDoubleSupport && relativeSoleTransform.getRotationMatrix().getPitch() < rotationEpsilon && relativeSoleTransform.getRotationMatrix().getRoll() < rotationEpsilon
-            && relativeSoleTransform.getTranslationZ() < translationEpsilon;
+      return inDoubleSupport && 
+            Math.abs(relativeSoleTransform.getRotationMatrix().getPitch()) < rotationEpsilon && 
+            Math.abs(relativeSoleTransform.getRotationMatrix().getRoll()) < rotationEpsilon &&
+            Math.abs(relativeSoleTransform.getTranslationZ()) < translationEpsilon;
    }
 
    public void stop()
