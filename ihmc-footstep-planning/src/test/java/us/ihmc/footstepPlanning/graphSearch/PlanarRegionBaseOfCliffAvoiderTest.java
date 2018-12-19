@@ -1,10 +1,12 @@
 package us.ihmc.footstepPlanning.graphSearch;
 
+import org.junit.Before;
 import org.junit.Test;
 import us.ihmc.commons.MutationTestFacilitator;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
+import us.ihmc.continuousIntegration.ContinuousIntegrationTools;
 import us.ihmc.continuousIntegration.IntegrationCategory;
 import us.ihmc.euclid.Axis;
 import us.ihmc.euclid.axisAngle.AxisAngle;
@@ -33,12 +35,17 @@ import java.util.Random;
 import static junit.framework.TestCase.assertFalse;
 import static junit.framework.TestCase.assertTrue;
 
-@ContinuousIntegrationAnnotations.ContinuousIntegrationPlan(categories = IntegrationCategory.EXCLUDE)
+@ContinuousIntegrationAnnotations.ContinuousIntegrationPlan(categories = IntegrationCategory.FAST)
 public class PlanarRegionBaseOfCliffAvoiderTest
 {
-   private final boolean visualize = false;
-   private final boolean doAsserts = true;
+   private boolean visualize = true;
    private final Random random = new Random(4587L);
+
+   @Before
+   public void setup()
+   {
+      visualize = visualize && !ContinuousIntegrationTools.isRunningOnContinuousIntegrationServer();
+   }
 
    @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
@@ -81,6 +88,7 @@ public class PlanarRegionBaseOfCliffAvoiderTest
       SimplePlanarRegionFootstepNodeSnapper snapper = new SimplePlanarRegionFootstepNodeSnapper(footPolygons, parameters);
       PlanarRegionBaseOfCliffAvoider avoider = new PlanarRegionBaseOfCliffAvoider(parameters, snapper, footPolygons);
       avoider.setPlanarRegions(planarRegionsList);
+      snapper.setPlanarRegions(planarRegionsList);
 
       SimulationConstructionSet scs = null;
       if (visualize)
@@ -103,14 +111,17 @@ public class PlanarRegionBaseOfCliffAvoiderTest
       double x = closestNodeDistanceToCliff;
       double y = 0.0;
       FootstepNode node = new FootstepNode(x, y, 0.0, footstepSide);
+      snapper.snapFootstepNode(node);
       assertTrue(avoider.isNodeValid(node, null));
 
       x = closestNodeDistanceToCliff + FootstepNode.gridSizeXY;
       node = new FootstepNode(x, y, 0.0, footstepSide);
+      snapper.snapFootstepNode(node);
       assertFalse(avoider.isNodeValid(node, null));
 
       x = closestNodeDistanceToCliff - FootstepNode.gridSizeXY;
       node = new FootstepNode(x, y, 0.0, footstepSide);
+      snapper.snapFootstepNode(node);
       assertTrue(avoider.isNodeValid(node, null));
    }
 
@@ -158,6 +169,7 @@ public class PlanarRegionBaseOfCliffAvoiderTest
 
       PlanarRegionsList planarRegionsList = generator.getPlanarRegionsList();
       cliffAvoider.setPlanarRegions(planarRegionsList);
+      snapper.setPlanarRegions(planarRegionsList);
 
       Vector2D frontNearNodeOffset = new Vector2D(0.5 * boxWidth + minimumDistanceFromCliffBottom + 0.5 * footLength - FootstepNode.gridSizeXY, 0.0);
       Vector2D frontFarNodeOffset = new Vector2D(0.5 * boxWidth + minimumDistanceFromCliffBottom + 0.5 * footLength + FootstepNode.gridSizeXY, 0.0);
@@ -180,6 +192,11 @@ public class PlanarRegionBaseOfCliffAvoiderTest
       FootstepNode frontFarNode = new FootstepNode(frontFarNodeOffset.getX(), frontFarNodeOffset.getY(), rotation, RobotSide.generateRandomRobotSide(random));
       FootstepNode sideNearNode = new FootstepNode(sideNearNodeOffset.getX(), sideNearNodeOffset.getY(), rotation, RobotSide.generateRandomRobotSide(random));
       FootstepNode sideFarNode = new FootstepNode(sideFarNodeOffset.getX(), sideFarNodeOffset.getY(), rotation, RobotSide.generateRandomRobotSide(random));
+
+      snapper.snapFootstepNode(frontNearNode);
+      snapper.snapFootstepNode(sideNearNode);
+      snapper.snapFootstepNode(frontFarNode);
+      snapper.snapFootstepNode(sideFarNode);
 
       assertFalse(cliffAvoider.isNodeValid(frontNearNode, null));
       assertFalse(cliffAvoider.isNodeValid(sideNearNode, null));

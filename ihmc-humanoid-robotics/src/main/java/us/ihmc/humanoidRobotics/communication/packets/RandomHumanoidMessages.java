@@ -17,7 +17,6 @@ import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D32;
 import us.ihmc.euclid.tuple4D.Quaternion;
-import us.ihmc.footstepPlanning.FootstepPlanningResult;
 import us.ihmc.humanoidRobotics.communication.packets.atlas.AtlasLowLevelControlMode;
 import us.ihmc.humanoidRobotics.communication.packets.bdi.BDIRobotBehavior;
 import us.ihmc.humanoidRobotics.communication.packets.behaviors.BehaviorControlModeEnum;
@@ -946,24 +945,6 @@ public final class RandomHumanoidMessages
       next.getOrientation().set(EuclidCoreRandomTools.nextQuaternion(random));
       IntStream.range(0, random.nextInt(10)).mapToObj(i -> EuclidCoreRandomTools.nextPoint2D(random)).forEach(next.getPredictedContactPoints2d().add()::set);
       next.setExecutionDelayTime(RandomNumbers.nextDoubleWithEdgeCases(random, 0.1));
-      return next;
-   }
-
-   public static FootstepPlanningToolboxOutputStatus nextFootstepPlanningToolboxOutputStatus(Random random)
-   {
-      FootstepPlanningToolboxOutputStatus next = new FootstepPlanningToolboxOutputStatus();
-      next.getFootstepDataList().set(RandomHumanoidMessages.nextFootstepDataListMessage(random));
-      int result = random.nextInt(FootstepPlanningResult.values.length);
-      next.setFootstepPlanningResult(FootstepPlanningResult.values[result].toByte());
-      next.setPlanId(random.nextInt());
-
-      for (int i = 0; i < random.nextInt(10); i++)
-      {
-         next.getBodyPath().add().set(EuclidCoreRandomTools.nextPoint2D(random));
-      }
-
-      next.getLowLevelPlannerGoal().set(new Pose2D(random.nextDouble(), random.nextDouble(), random.nextDouble()));
-
       return next;
    }
 

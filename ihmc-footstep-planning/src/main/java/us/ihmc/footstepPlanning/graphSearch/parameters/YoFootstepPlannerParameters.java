@@ -48,6 +48,7 @@ public class YoFootstepPlannerParameters implements FootstepPlannerParameters
    private final YoInteger minimumStepForBestEffortPlan = new YoInteger("minimumStepForBestEffortPlan", registry);
    private final YoDouble minXClearanceFromStance = new YoDouble("minXClearanceFromStance", registry);
    private final YoDouble minYClearanceFromStance = new YoDouble("minYClearanceFromStance", registry);
+   private final YoDouble stepTranslationBoundingBoxScaleFactor = new YoDouble("stepTranslationBoundingBoxScaleFactor", registry);
 
    private final YoFootstepPlannerCostParameters costParameters;
 
@@ -97,6 +98,7 @@ public class YoFootstepPlannerParameters implements FootstepPlannerParameters
       minimumStepForBestEffortPlan.set(defaults.getMinimumStepsForBestEffortPlan());
       minXClearanceFromStance.set(defaults.getMinXClearanceFromStance());
       minYClearanceFromStance.set(defaults.getMinYClearanceFromStance());
+      stepTranslationBoundingBoxScaleFactor.set(defaults.getStepTranslationBoundingBoxScaleFactor());
 
       costParameters.set(defaults.getCostParameters());
    }
@@ -318,6 +320,12 @@ public class YoFootstepPlannerParameters implements FootstepPlannerParameters
    }
 
    @Override
+   public double getStepTranslationBoundingBoxScaleFactor()
+   {
+      return stepTranslationBoundingBoxScaleFactor.getDoubleValue();
+   }
+
+   @Override
    public FootstepPlannerCostParameters getCostParameters()
    {
       return costParameters;
@@ -392,6 +400,8 @@ public class YoFootstepPlannerParameters implements FootstepPlannerParameters
          setMinXClearanceFromStance(parametersPacket.getMinXClearanceFromStance());
       if (parametersPacket.getMinYClearanceFromStance() != -1.0)
          setMinYClearanceFromStance(parametersPacket.getMinYClearanceFromStance());
+      if (parametersPacket.getStepTranslationBoundingBoxScaleFactor() != -1.0)
+         setStepTranslationBoundingBoxScaleFactor(parametersPacket.getStepTranslationBoundingBoxScaleFactor());
 
       setCostParameters(parametersPacket.getCostParameters());
    }
@@ -518,7 +528,7 @@ public class YoFootstepPlannerParameters implements FootstepPlannerParameters
 
    public void setMinimumDistanceFromCliffBottoms(double minimumDistanceFromCliffBottoms)
    {
-      this.minXClearanceFromStance.set(minimumDistanceFromCliffBottoms);
+      this.minimumDistanceFromCliffBottoms.set(minimumDistanceFromCliffBottoms);
    }
 
    public void setReturnBestEffortPlan(boolean returnBestEffortPlan)
@@ -574,6 +584,11 @@ public class YoFootstepPlannerParameters implements FootstepPlannerParameters
    public void setMinYClearanceFromStance(double minYClearanceFromStance)
    {
       this.minYClearanceFromStance.set(minYClearanceFromStance);
+   }
+
+   public void setStepTranslationBoundingBoxScaleFactor(double stepTranslationBoundingBoxScaleFactor)
+   {
+      this.stepTranslationBoundingBoxScaleFactor.set(stepTranslationBoundingBoxScaleFactor);
    }
 
    public void setCostParameters(FootstepPlannerCostParameters parameters)
