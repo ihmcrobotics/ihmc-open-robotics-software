@@ -131,6 +131,7 @@ public class MultiStageFootstepPlanningManager implements PlannerCompletionCallb
    private final StatusMessageOutputManager statusOutputManager;
    private final ScheduledExecutorService executorService;
    private final YoBoolean initialize = new YoBoolean("initialize" + registry.getName(), registry);
+   private final YoBoolean waitingForPlanningRequest = new YoBoolean("waitingForPlanningRequest", registry);
 
    private final MultiStagePlannerListener plannerListener;
 
@@ -185,6 +186,7 @@ public class MultiStageFootstepPlanningManager implements PlannerCompletionCallb
 
       isDonePlanningPath.set(false);
       isDonePlanningSteps.set(false);
+      waitingForPlanningRequest.set(false);
 
       isDonePlanningPath.addVariableChangedListener(v -> {
          if (!isDonePlanningPath.getBooleanValue())
@@ -463,10 +465,14 @@ public class MultiStageFootstepPlanningManager implements PlannerCompletionCallb
 
    public void processRequest(FootstepPlanningRequestPacket request)
    {
+      if (!waitingForPlanningRequest.getBooleanValue())
+         return;
+
       isDone.set(false);
       isDonePlanningSteps.set(false);
       isDonePlanningPath.set(false);
       latestRequestReference.set(request);
+      waitingForPlanningRequest.set(false);
    }
 
    public void processFootstepPlannerParameters(FootstepPlannerParametersPacket parameters)
@@ -603,6 +609,9 @@ public class MultiStageFootstepPlanningManager implements PlannerCompletionCallb
          stepPlanningObjectivePool.add(mainObjective);
          assignGoalsToAvailableStepPlanners();
       }
+
+      completedPathResults.clear();
+      completedStepResults.clear();
 
       return true;
    }
@@ -1017,12 +1026,11 @@ public class MultiStageFootstepPlanningManager implements PlannerCompletionCallb
          PrintTools.debug(this, "Waking up");
 
       initialize.set(true);
+      waitingForPlanningRequest.set(true);
    }
 
    public void sleep()
    {
-//      processPlanningStatisticsRequest();
-
       if (debug)
          PrintTools.debug(this, "Going to sleep");
 
@@ -1031,6 +1039,7 @@ public class MultiStageFootstepPlanningManager implements PlannerCompletionCallb
 
       for (FootstepPlanningStage planningTask : stepPlanningTasks.iterator())
          stepPlanningTasks.remove(planningTask).cancel(true);
+      waitingForPlanningRequest.set(false);
    }
 
    public void destroy()
