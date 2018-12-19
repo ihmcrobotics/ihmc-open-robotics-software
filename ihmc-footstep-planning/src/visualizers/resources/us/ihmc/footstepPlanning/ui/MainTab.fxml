@@ -150,8 +150,6 @@
                   <Spinner fx:id="goalZPosition" layoutX="578.0" layoutY="8.0" GridPane.columnIndex="7" GridPane.rowIndex="1" />
                   <Spinner fx:id="goalYPosition" layoutX="578.0" layoutY="89.0" GridPane.columnIndex="5" GridPane.rowIndex="1" />
                   <Spinner fx:id="goalYaw" layoutX="243.0" layoutY="89.0" GridPane.columnIndex="9" GridPane.rowIndex="1" />
-
-                  <Button fx:id="setStartPoseFromRobot" onAction="#setStartPoseFromRobot" text="Set From Robot" GridPane.columnIndex="11" />
                </children>
             </GridPane>
          </children></AnchorPane>
