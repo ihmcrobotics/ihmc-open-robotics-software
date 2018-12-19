@@ -22,7 +22,7 @@ import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 public class VisibilityGraphOcclusionTest
 {
    private static final long timeout = 30000;
-   private boolean visualize = true;
+   private boolean visualize = false;
    private PlanarRegionsList occludedEnvironmentWithAGoalPlane;
    private PlanarRegionsList occludedEnvironmentWithoutAGoalPlane;
 
