@@ -53,6 +53,10 @@ public class VisibilityGraphsFrameworkTest
 
    // Whether to start the UI or not.
    private static boolean VISUALIZE = false;
+
+   // Whether to fully expand the visibility graph or have it do efficient lazy evaluation.
+   private static boolean fullyExpandVisibilityGraph = false;
+
    // For enabling helpful prints.
    private static boolean DEBUG = false;
 
@@ -451,7 +455,7 @@ public class VisibilityGraphsFrameworkTest
 
       try
       {
-         path = manager.calculateBodyPath(start, goal);
+         path = manager.calculateBodyPath(start, goal, fullyExpandVisibilityGraph);
       }
       catch (Exception e)
       {
