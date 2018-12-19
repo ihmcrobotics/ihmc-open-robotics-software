@@ -343,7 +343,7 @@ public class ClusterTools
       homeRegionCluster.setTransformToWorld(transformToWorld);
       homeRegionCluster.addRawPointsInLocal2D(homeRegion.getConcaveHull());
 
-      double extrusionDistance = calculator.computeExtrusionDistance(homeRegion);
+      double extrusionDistance = calculator.computeNavigableExtrusionDistance(homeRegion);
 
       ObstacleExtrusionDistanceCalculator nonNavigableCalculator = (p, h) -> extrusionDistance - NAV_TO_NON_NAV_DISTANCE;
       ObstacleExtrusionDistanceCalculator navigableCalculator = (p, h) -> extrusionDistance;
