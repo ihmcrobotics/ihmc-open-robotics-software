@@ -402,8 +402,8 @@ public class RemoteUIMessageConverter
 
       packet.setMaxInterRegionConnectionLength(parameters.getMaxInterRegionConnectionLength());
       packet.setNormalZThresholdForAccessibleRegions(parameters.getNormalZThresholdForAccessibleRegions());
-      packet.setExtrusionDistance(parameters.getExtrusionDistance());
-      packet.setExtrusionDistanceIfNotTooHighToStep(parameters.getExtrusionDistanceIfNotTooHighToStep());
+      packet.setExtrusionDistance(parameters.getObstacleExtrusionDistance());
+      packet.setExtrusionDistanceIfNotTooHighToStep(parameters.getObstacleExtrusionDistanceIfNotTooHighToStep());
       packet.setTooHighToStepDistance(parameters.getTooHighToStepDistance());
       packet.setClusterResolution(parameters.getClusterResolution());
       packet.setExplorationDistanceFromStartGoal(parameters.getExplorationDistanceFromStartGoal());

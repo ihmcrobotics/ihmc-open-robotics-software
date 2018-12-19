@@ -25,8 +25,8 @@ public class SettableVisibilityGraphsParameters implements VisibilityGraphsParam
    {
       setMaxInterRegionConnectionLength(visibilityGraphsParameters.getMaxInterRegionConnectionLength());
       setNormalZThresholdForAccessibleRegions(visibilityGraphsParameters.getNormalZThresholdForAccessibleRegions());
-      setExtrusionDistance(visibilityGraphsParameters.getExtrusionDistance());
-      setExtrusionDistanceIfNotTooHighToStep(visibilityGraphsParameters.getExtrusionDistanceIfNotTooHighToStep());
+      setExtrusionDistance(visibilityGraphsParameters.getObstacleExtrusionDistance());
+      setExtrusionDistanceIfNotTooHighToStep(visibilityGraphsParameters.getObstacleExtrusionDistanceIfNotTooHighToStep());
       setTooHighToStepDistance(visibilityGraphsParameters.getTooHighToStepDistance());
       setClusterResolution(visibilityGraphsParameters.getClusterResolution());
       setExplorationDistanceFromStartGoal(visibilityGraphsParameters.getExplorationDistanceFromStartGoal());
@@ -105,13 +105,13 @@ public class SettableVisibilityGraphsParameters implements VisibilityGraphsParam
    }
 
    @Override
-   public double getExtrusionDistance()
+   public double getObstacleExtrusionDistance()
    {
       return extrusionDistance;
    }
 
    @Override
-   public double getExtrusionDistanceIfNotTooHighToStep()
+   public double getObstacleExtrusionDistanceIfNotTooHighToStep()
    {
       return extrusionDistanceIfNotTooHighToStep;
    }

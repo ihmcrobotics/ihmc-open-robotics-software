@@ -14,30 +14,34 @@ import us.ihmc.robotics.geometry.PlanarRegion;
 
 public interface VisibilityGraphsParameters
 {
-   double getMaxInterRegionConnectionLength();
+   public abstract double getMaxInterRegionConnectionLength();
 
-   double getNormalZThresholdForAccessibleRegions();
+   public abstract double getNormalZThresholdForAccessibleRegions();
 
-   //TODO: This parameter doesn't seem to do anything. It seems this one is used: getNavigableExtrusionDistanceCalculator 
-   double getExtrusionDistance();
+   public default double getNavigableExtrusionDistance()
+   {
+      return 0.02;
+   }
 
-   double getExtrusionDistanceIfNotTooHighToStep();
+   public abstract double getObstacleExtrusionDistance();
 
-   double getTooHighToStepDistance();
+   public abstract double getObstacleExtrusionDistanceIfNotTooHighToStep();
 
-   double getClusterResolution();
+   public abstract double getTooHighToStepDistance();
 
-   default double getExplorationDistanceFromStartGoal()
+   public abstract double getClusterResolution();
+
+   public default double getExplorationDistanceFromStartGoal()
    {
       return Double.POSITIVE_INFINITY;
    }
 
-   default double getPlanarRegionMinArea()
+   public default double getPlanarRegionMinArea()
    {
       return 0.0;
    }
 
-   default int getPlanarRegionMinSize()
+   public default int getPlanarRegionMinSize()
    {
       return 0;
    }
@@ -54,7 +58,7 @@ public interface VisibilityGraphsParameters
     * @return the angle threshold to use to determine if a line or polygon projection method should
     *         be used.
     */
-   default double getRegionOrthogonalAngle()
+   public default double getRegionOrthogonalAngle()
    {
       return Math.toRadians(75.0);
    }
@@ -68,7 +72,7 @@ public interface VisibilityGraphsParameters
     * 
     * @return the value of the epsilon to use.
     */
-   default double getSearchHostRegionEpsilon()
+   public default double getSearchHostRegionEpsilon()
    {
       return 0.03;
    }
@@ -78,14 +82,14 @@ public interface VisibilityGraphsParameters
     * 
     * @return
     */
-   default NavigableExtrusionDistanceCalculator getNavigableExtrusionDistanceCalculator()
+   public default NavigableExtrusionDistanceCalculator getNavigableExtrusionDistanceCalculator()
    {
       return new NavigableExtrusionDistanceCalculator()
       {
          @Override
-         public double computeExtrusionDistance(PlanarRegion navigableRegionToBeExtruded)
+         public double computeNavigableExtrusionDistance(PlanarRegion navigableRegionToBeExtruded)
          {
-            return getExtrusionDistanceIfNotTooHighToStep();
+            return getNavigableExtrusionDistance();
          }
       };
    }
@@ -95,7 +99,7 @@ public interface VisibilityGraphsParameters
     * 
     * @return the calculator use for obstacle extrusion.
     */
-   default ObstacleExtrusionDistanceCalculator getObstacleExtrusionDistanceCalculator()
+   public default ObstacleExtrusionDistanceCalculator getObstacleExtrusionDistanceCalculator()
    {
       return (pointToExtrude, obstacleHeight) -> {
          if (obstacleHeight < 0.0)
@@ -104,16 +108,16 @@ public interface VisibilityGraphsParameters
          }
          else if (obstacleHeight < getTooHighToStepDistance())
          {
-            return getExtrusionDistanceIfNotTooHighToStep();
+            return getObstacleExtrusionDistanceIfNotTooHighToStep();
          }
          else
          {
-            return getExtrusionDistance();
+            return getObstacleExtrusionDistance();
          }
       };
    }
 
-   default NavigableRegionFilter getNavigableRegionFilter()
+   public default NavigableRegionFilter getNavigableRegionFilter()
    {
       return new NavigableRegionFilter()
       {
@@ -125,7 +129,7 @@ public interface VisibilityGraphsParameters
       };
    }
 
-   default InterRegionConnectionFilter getInterRegionConnectionFilter()
+   public default InterRegionConnectionFilter getInterRegionConnectionFilter()
    {
       return new InterRegionConnectionFilter()
       {
@@ -152,7 +156,7 @@ public interface VisibilityGraphsParameters
       };
    }
 
-   default PlanarRegionFilter getPlanarRegionFilter()
+   public default PlanarRegionFilter getPlanarRegionFilter()
    {
       return new PlanarRegionFilter()
       {
@@ -172,7 +176,7 @@ public interface VisibilityGraphsParameters
     * Returns the height at which the robot can duck under an obstacle. Any obstacles that are higher than that height above a navigable planar reigon will be ignored.
     * @return height at which the robot can duck under an obstacle.
     */
-   default double getCanDuckUnderHeight()
+   public default double getCanDuckUnderHeight()
    {
       return 2.0;
    }
@@ -181,12 +185,12 @@ public interface VisibilityGraphsParameters
     * Returns the height at which an obstacle can be easily stepped over. Any obstacles that are lower than that height above a navigable planar region will be ignored.
     * @return height at which the robot can easily step over an object.
     */
-   default double getCanEasilyStepOverHeight()
+   public default double getCanEasilyStepOverHeight()
    {
       return 0.03;
    }
 
-   default ObstacleRegionFilter getObstacleRegionFilter()
+   public default ObstacleRegionFilter getObstacleRegionFilter()
    {
       final ConvexPolygonTools convexPolygonTools = new ConvexPolygonTools();
 
@@ -271,7 +275,7 @@ public interface VisibilityGraphsParameters
       };
    }
 
-   default VisibilityGraphPathPlanner getPathPlanner()
+   public default VisibilityGraphPathPlanner getPathPlanner()
    {
       return new DijkstraVisibilityGraphPlanner();
       //      return JGraphTools.getJGraphPlanner();

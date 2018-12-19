@@ -936,7 +936,7 @@ public class VisibilityGraphTest
             return new NavigableExtrusionDistanceCalculator()
             {
                @Override
-               public double computeExtrusionDistance(PlanarRegion navigableRegionToBeExtruded)
+               public double computeNavigableExtrusionDistance(PlanarRegion navigableRegionToBeExtruded)
                {
                   return 0.01;
                }
