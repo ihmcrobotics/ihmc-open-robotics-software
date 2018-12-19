@@ -1,7 +1,10 @@
 package us.ihmc.pathPlanning.visibilityGraphs;
 
+import java.util.List;
+
 import org.junit.Before;
 import org.junit.Test;
+
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.continuousIntegration.ContinuousIntegrationTools;
@@ -15,8 +18,6 @@ import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.geometry.PlanarRegionsListGenerator;
 import us.ihmc.robotics.graphics.Graphics3DObjectTools;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
-
-import java.util.List;
 
 public class VisibilityGraphOcclusionTest
 {

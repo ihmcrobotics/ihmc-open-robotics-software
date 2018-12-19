@@ -6,7 +6,10 @@ import java.util.List;
 import java.util.Random;
 
 import org.junit.After;
-import org.junit.*;
+import org.junit.Assert;
+import org.junit.Before;
+import org.junit.Rule;
+import org.junit.Test;
 import org.junit.rules.TestName;
 
 import us.ihmc.commons.MathTools;
