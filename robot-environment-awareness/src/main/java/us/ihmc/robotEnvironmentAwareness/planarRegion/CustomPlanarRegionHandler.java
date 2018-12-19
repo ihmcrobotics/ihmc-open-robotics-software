@@ -52,7 +52,7 @@ public class CustomPlanarRegionHandler
     */
    public static List<PlanarRegion> mergeCustomRegionsToEstimatedRegions(Collection<PlanarRegion> customRegions,
                                                                          List<PlanarRegionSegmentationRawData> estimatedRegions,
-                                                                         PlanarRegionSegmentationParameters parameters)
+                                                                         CustomRegionMergeParameters parameters)
    {
       boolean atLeastOneRegionWasMerged = true;
 
@@ -75,7 +75,7 @@ public class CustomPlanarRegionHandler
 
    public static List<PlanarRegionSegmentationRawData> mergeCustomRegionToEstimatedRegions(PlanarRegion customRegion,
                                                                                            List<PlanarRegionSegmentationRawData> estimatedRegions,
-                                                                                           PlanarRegionSegmentationParameters parameters)
+                                                                                           CustomRegionMergeParameters parameters)
    {
       List<PlanarRegionSegmentationRawData> modifiedEstimatedRegions = new ArrayList<>();
 
@@ -104,7 +104,7 @@ public class CustomPlanarRegionHandler
    }
 
    private static boolean isCustomRegionMergeableToEstimatedRegion(PlanarRegion customRegion, PlanarRegionSegmentationRawData estimatedRegion,
-                                                                   PlanarRegionSegmentationParameters parameters)
+                                                                   CustomRegionMergeParameters parameters)
    {
       double maxDistanceFromPlane = parameters.getMaxDistanceFromPlane();
 

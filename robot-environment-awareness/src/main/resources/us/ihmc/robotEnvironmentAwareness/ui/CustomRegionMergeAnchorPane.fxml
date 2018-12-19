@@ -48,9 +48,9 @@
                      <tooltip>
                         <Tooltip text="Asserts that the planes of a custon region and an estimated region are parallel enough before attempting to merge them" />
                      </tooltip></Label>
-                  <Slider fx:id="maxDistanceInPlaneSlider" blockIncrement="0.01" majorTickUnit="0.05" max="0.2" maxWidth="1.7976931348623157E308" prefHeight="38.0" prefWidth="209.0" showTickLabels="true" showTickMarks="true" snapToTicks="true" value="0.05" GridPane.columnIndex="3" />
-                  <Slider fx:id="maxDistanceFromPlaneSlider" blockIncrement="0.01" majorTickUnit="0.05" max="0.2" maxWidth="1.7976931348623157E308" prefHeight="38.0" prefWidth="209.0" showTickLabels="true" showTickMarks="true" snapToTicks="true" value="0.05" GridPane.columnIndex="1" GridPane.rowIndex="1" />
-                  <Slider fx:id="maxAngleFromPlaneSlider" blockIncrement="0.01" majorTickUnit="0.0872665" max="0.5236" maxWidth="1.7976931348623157E308" minorTickCount="4" prefHeight="38.0" prefWidth="209.0" showTickLabels="true" showTickMarks="true" snapToTicks="true" value="0.174533" GridPane.columnIndex="1" />
+                  <Slider fx:id="maxDistanceInPlaneSlider" blockIncrement="0.01" majorTickUnit="0.05" max="0.3" maxWidth="1.7976931348623157E308" prefHeight="38.0" prefWidth="209.0" showTickLabels="true" showTickMarks="true" snapToTicks="true" value="0.05" GridPane.columnIndex="3" />
+                  <Slider fx:id="maxDistanceFromPlaneSlider" blockIncrement="0.01" majorTickUnit="0.05" max="0.2" maxWidth="1.7976931348623157E308" prefHeight="38.0" prefWidth="209.0" showTickLabels="true" showTickMarks="true" snapToTicks="true" value="0.07" GridPane.columnIndex="1" GridPane.rowIndex="1" />
+                  <Slider fx:id="maxAngleFromPlaneSlider" blockIncrement="0.01" majorTickUnit="0.0872665" max="0.5236" maxWidth="1.7976931348623157E308" minorTickCount="4" prefHeight="38.0" prefWidth="209.0" showTickLabels="true" showTickMarks="true" snapToTicks="true" value="0.2" GridPane.columnIndex="1" />
                </children>
             </GridPane>
          </children>
