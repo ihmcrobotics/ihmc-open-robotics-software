@@ -1,7 +1,7 @@
 package us.ihmc.quadrupedUI;
 
-import controller_msgs.msg.dds.RobotConfigurationData;
 import javafx.animation.AnimationTimer;
+import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Scene;
 import javafx.scene.layout.BorderPane;
@@ -9,14 +9,13 @@ import javafx.scene.layout.Pane;
 import javafx.scene.transform.Translate;
 import javafx.stage.Stage;
 import us.ihmc.communication.ROS2Tools;
-import us.ihmc.communication.ROS2Tools.MessageTopicNameGenerator;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.javaFXToolkit.cameraControllers.FocusBasedCameraMouseEventHandler;
 import us.ihmc.javaFXToolkit.messager.JavaFXMessager;
 import us.ihmc.javaFXToolkit.scenes.View3DFactory;
+import us.ihmc.messager.Messager;
 import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
-import us.ihmc.quadrupedCommunication.QuadrupedControllerAPIDefinition;
 import us.ihmc.quadrupedRobotics.model.QuadrupedModelFactory;
 import us.ihmc.ros2.RealtimeRos2Node;
 
@@ -24,12 +23,15 @@ public class QuadrupedUserInterface
 {
    private final RealtimeRos2Node ros2Node;
 
-   private final JavaFXMessager messager;
+   private final Messager messager;
    private final Stage primaryStage;
    private final BorderPane mainPane;
 
    private final JavaFXQuadrupedVisualizer robotVisualizer;
    private final AnimationTimer cameraTracking;
+
+   @FXML
+   private MainTabController mainTabController;
 
    public QuadrupedUserInterface(Stage primaryStage, JavaFXMessager messager, QuadrupedModelFactory modelFactory) throws Exception
    {
@@ -45,6 +47,10 @@ public class QuadrupedUserInterface
 
       mainPane = loader.load();
 
+      mainTabController.attachMessager(messager);
+
+      mainTabController.bindControls();
+
       View3DFactory view3dFactory = View3DFactory.createSubscene();
       view3dFactory.addCameraController(true);
       view3dFactory.addWorldCoordinateSystem(0.3);
@@ -52,8 +58,7 @@ public class QuadrupedUserInterface
 
       robotVisualizer = new JavaFXQuadrupedVisualizer(messager, modelFactory);
 
-      createSubscribers(robotName);
-
+      view3dFactory.addNodeToView(robotVisualizer.getRootNode());
 
       FocusBasedCameraMouseEventHandler cameraController = view3dFactory.addCameraController(true);
       Translate rootJointOffset = new Translate();
@@ -86,21 +91,6 @@ public class QuadrupedUserInterface
 
    }
 
-   private void createSubscribers(String robotName)
-   {
-      MessageTopicNameGenerator controllerPubGenerator = QuadrupedControllerAPIDefinition.getPublisherTopicNameGenerator(robotName);
-      ROS2Tools.createCallbackSubscription(ros2Node, RobotConfigurationData.class, controllerPubGenerator, s -> handleNewConfigurationData(s.takeNextData()));
-   }
-
-   private void handleNewConfigurationData(RobotConfigurationData robotConfigurationData)
-   {
-      robotVisualizer.submitNewConfiguration(robotConfigurationData);
-   }
-
-   public JavaFXMessager getMessager()
-   {
-      return messager;
-   }
 
    public void show()
    {
@@ -109,5 +99,18 @@ public class QuadrupedUserInterface
 
    public void stop()
    {
+      try
+      {
+         robotVisualizer.stop();
+      }
+      catch(Exception e)
+      {
+         e.printStackTrace();
+      }
+   }
+
+   public static QuadrupedUserInterface createUserInterface(Stage primaryStage, JavaFXMessager messager, QuadrupedModelFactory modelFactory) throws Exception
+   {
+      return new QuadrupedUserInterface(primaryStage, messager, modelFactory);
    }
 }
