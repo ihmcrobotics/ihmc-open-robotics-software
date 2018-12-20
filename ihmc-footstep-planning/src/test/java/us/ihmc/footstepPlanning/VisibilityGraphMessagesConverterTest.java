@@ -173,7 +173,7 @@ public class VisibilityGraphMessagesConverterTest
       for (int iter = 0; iter < iters; iter++)
       {
          VisibilityMapWithNavigableRegion navigableRegionToConvert = VisibilityGraphRandomTools.getRandomNavigableRegion(random);
-         VisibilityMapWithNavigableRegionMessage message = VisibilityGraphMessagesConverter.convertToNavigableRegionMessage(navigableRegionToConvert);
+         NavigableRegionMessage message = VisibilityGraphMessagesConverter.convertToNavigableRegionMessage(navigableRegionToConvert);
 
          VisibilityMapWithNavigableRegion convertedNavigableRegion = VisibilityGraphMessagesConverter.convertToVisibilityMapWithNavigableRegion(message);
 
