@@ -359,7 +359,6 @@ public class ClusterTools
 
       homeRegionCluster.addNonNavigableExtrusionsInLocal(extrudePolygon(extrudeToTheLeft, homeRegionCluster, nonNavigableCalculator));
       homeRegionCluster.addNavigableExtrusionsInLocal(extrudePolygon(extrudeToTheLeft, homeRegionCluster, navigableCalculator));
-      homeRegionCluster.updateBoundingBox();
       return homeRegionCluster;
    }
 
@@ -522,7 +521,6 @@ public class ClusterTools
       default:
          throw new RuntimeException("Unhandled cluster type: " + cluster.getType());
       }
-      cluster.updateBoundingBox();
    }
 
    /**
