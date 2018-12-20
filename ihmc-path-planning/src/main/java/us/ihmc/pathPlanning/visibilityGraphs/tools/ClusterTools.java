@@ -83,7 +83,7 @@ public class ClusterTools
          }
          else
          {
-            extrudeSinglePointAtInsideCorner(extrusions, pointToExtrude, extrusionDistance, edgePrev, edgeNext, extrudeToTheLeft);
+            extrusions.add(extrudeSinglePointAtInsideCorner(pointToExtrude, edgePrev, edgeNext, extrudeToTheLeft, extrusionDistance));
          }
       }
 
@@ -135,7 +135,7 @@ public class ClusterTools
          }
          else
          {
-            extrudeSinglePointAtInsideCorner(extrusions, pointToExtrude, extrusionDistance, edgePrev, edgeNext, true);
+            extrusions.add(extrudeSinglePointAtInsideCorner(pointToExtrude, edgePrev, edgeNext, true, extrusionDistance));
          }
       }
 
@@ -168,7 +168,7 @@ public class ClusterTools
          }
          else
          {
-            extrudeSinglePointAtInsideCorner(extrusions, pointToExtrude, extrusionDistance, edgePrev, edgeNext, true);
+            extrusions.add(extrudeSinglePointAtInsideCorner(pointToExtrude, edgePrev, edgeNext, true, extrusionDistance));
          }
       }
 
@@ -180,8 +180,8 @@ public class ClusterTools
     * then the two new lines will be moved by the extrusionDistance. 
     * If it is to the outside, then you should use extrudeMultiplePointsAtOutsideCorner() instead.
     */
-   public static void extrudeSinglePointAtInsideCorner(List<Point2D> extrusions, Point2DReadOnly pointToExtrude, double extrusionDistance, Line2D edgePrev,
-                                                       Line2D edgeNext, boolean extrudeToTheLeft)
+   public static Point2D extrudeSinglePointAtInsideCorner(Point2DReadOnly pointToExtrude, Line2D edgePrev, Line2D edgeNext,
+                                                       boolean extrudeToTheLeft, double extrusionDistance)
    {
       Vector2DBasics previousEdgeDirection = edgePrev.getDirection();
       Vector2DBasics nextEdgeDirection = edgeNext.getDirection();
@@ -217,7 +217,8 @@ public class ClusterTools
 
       Point2D extrusion = new Point2D();
       extrusion.scaleAdd(extrusionDistance, extrusionDirection, pointToExtrude);
-      extrusions.add(extrusion);
+
+      return extrusion;
    }
 
    public static List<Point2D> extrudeMultiplePointsAtOutsideCorner(Point2DReadOnly cornerPointToExtrude, Line2D previousEdge, Line2D nextEdge,
@@ -472,12 +473,6 @@ public class ClusterTools
          Point3D obstaclePointInWorld = obstacleConcaveHullInWorld.get(i);
          Point3D obstacleProjectedToHomeRegionInWorld = obstacleConcaveHullProjectedToHomeRegion.get(i);
 
-         //TODO: Delete this check after it all works.
-         if (Math.abs(obstaclePointInWorld.getX() - obstacleProjectedToHomeRegionInWorld.getX()) > 1e-7)
-            throw new RuntimeException();
-         if (Math.abs(obstaclePointInWorld.getY() - obstacleProjectedToHomeRegionInWorld.getY()) > 1e-7)
-            throw new RuntimeException();
-
          double obstacleHeight = obstaclePointInWorld.getZ() - obstacleProjectedToHomeRegionInWorld.getZ();
 
          temporaryClusterPoints.add(new Point3D(obstaclePointInWorld.getX(), obstaclePointInWorld.getY(), obstacleHeight));
@@ -498,13 +493,7 @@ public class ClusterTools
          Point3D extrudedPointOnHomeRegion = PlanarRegionTools.projectInZToPlanarRegion(navigableExtrusionInFlatWorld3D, planarRegionToProjectOnto);
 
          transformFromWorldToPlanarRegion.transform(extrudedPointOnHomeRegion);
-
-         //TODO: Verify z = 0 here...
-         if (Math.abs(extrudedPointOnHomeRegion.getZ()) > 1e-7)
-            throw new RuntimeException();
-
          Point2D navigableExtrusionInHomeRegionLocal = new Point2D(extrudedPointOnHomeRegion);
-
          navigableExtrusionsInHomeRegionLocal.add(navigableExtrusionInHomeRegionLocal);
       }
 

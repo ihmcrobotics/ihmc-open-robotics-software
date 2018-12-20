@@ -20,16 +20,13 @@ import us.ihmc.robotics.geometry.PlanarRegion;
  * and the 2D points of the nonNavigable spots on the planar region resulting from the obstacle.
  * It contains the RigidBodyTransform for moving the points from local to world coordinates.
  * 
- * There is one cluster per planar region per obstacle.
+ * There is one cluster per planar region per obstacle. Each PlanarRegion has a closed concave hull.
  */
 public class Cluster
 {
    //TODO: +++JEP: Remove so many methods and clean up the API so easier to maintain.
 
    private final RigidBodyTransform transformToWorld = new RigidBodyTransform();
-
-   //TODO: +++JEP This seems to assume that a bunch of points are one closed region if POLYGON. But what if the planar region it is created from
-   // has several independent areas? Perhaps we need a flag or guarantee or something that we have only 1 closed polygon per planar region used?
 
    private final List<Point3DReadOnly> rawPointsInLocal3D = new ArrayList<>();
    private final List<Point2DReadOnly> navigableExtrusionsInLocal = new ArrayList<>();

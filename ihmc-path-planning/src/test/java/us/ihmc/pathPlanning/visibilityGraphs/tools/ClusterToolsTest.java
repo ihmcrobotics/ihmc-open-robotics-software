@@ -364,7 +364,7 @@ public class ClusterToolsTest
       Line2D edgeNext = new Line2D(pointB, pointC);
 
       List<Point2D> extrudedPointList = new ArrayList<>();
-      ClusterTools.extrudeSinglePointAtInsideCorner(extrudedPointList, pointB, extrusionDistance, edgePrev, edgeNext, extrudeToTheLeft);
+      extrudedPointList.add(ClusterTools.extrudeSinglePointAtInsideCorner(pointB, edgePrev, edgeNext, extrudeToTheLeft, extrusionDistance));
 
       assertEquals(1, extrudedPointList.size());
       Point2D extrudedPoint = extrudedPointList.get(0);
