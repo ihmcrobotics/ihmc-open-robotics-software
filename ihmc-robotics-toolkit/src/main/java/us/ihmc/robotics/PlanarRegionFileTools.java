@@ -111,7 +111,7 @@ public class PlanarRegionFileTools
       {
          PlanarRegionsList loadedRegions = importPlanarRegionDataInternal(filename -> new File(dataFolder, filename));
          if (loadedRegions == null)
-            LogTools.error("Could not load the file: " + dataFolder.getName(), PlanarRegionFileTools.class);
+            LogTools.error("Could not load the file: " + dataFolder.getName());
          return loadedRegions;
       }
       catch (IOException e)
@@ -144,7 +144,7 @@ public class PlanarRegionFileTools
             return new BufferedReader(new InputStreamReader(inputStream));
          });
          if (loadedRegions == null)
-            LogTools.error("Could not load the file: " + dataFolder, PlanarRegionFileTools.class);
+            LogTools.error("Could not load the file: " + dataFolder);
          return loadedRegions;
       }
       catch (IOException e)
@@ -167,7 +167,7 @@ public class PlanarRegionFileTools
       {
          PlanarRegionsList loadedRegions = importPlanarRegionDataInternal(filename -> fileFromClassPath(loadingClass, Paths.get(dataFolderRelativePath.toString(), filename)));
          if (loadedRegions == null)
-            LogTools.error("Could not load the file: " + dataFolderRelativePath.toString(), PlanarRegionFileTools.class);
+            LogTools.error("Could not load the file: " + dataFolderRelativePath.toString());
          return loadedRegions;
       }
       catch (IOException e)
