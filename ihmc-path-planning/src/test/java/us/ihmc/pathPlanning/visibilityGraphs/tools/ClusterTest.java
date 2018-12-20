@@ -11,6 +11,8 @@ import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.Continuous
 import us.ihmc.euclid.geometry.BoundingBox2D;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.pathPlanning.visibilityGraphs.clusterManagement.Cluster;
+import us.ihmc.pathPlanning.visibilityGraphs.clusterManagement.Cluster.ClusterType;
+import us.ihmc.pathPlanning.visibilityGraphs.clusterManagement.Cluster.ExtrusionSide;
 
 public class ClusterTest
 {
@@ -25,7 +27,7 @@ public class ClusterTest
       Point2D pointC = new Point2D(1.0, 1.0);
       Point2D pointD = new Point2D(0.0, 1.0);
 
-      Cluster obstacleCluster = new Cluster();
+      Cluster obstacleCluster = new Cluster(ExtrusionSide.OUTSIDE, ClusterType.POLYGON);
 
       obstacleCluster.addNonNavigableExtrusionInLocal(new Point2D(0.1, -0.1));
       obstacleCluster.addNonNavigableExtrusionInLocal(new Point2D(1.1, -0.1));
@@ -42,7 +44,7 @@ public class ClusterTest
    @ContinuousIntegrationTest(estimatedDuration = 0.0)
    public void testBoundingBox()
    {
-      Cluster obstacleCluster = new Cluster();
+      Cluster obstacleCluster = new Cluster(ExtrusionSide.OUTSIDE, ClusterType.POLYGON);
 
       obstacleCluster.addNonNavigableExtrusionInLocal(new Point2D(0.1, -0.1));
       obstacleCluster.addNonNavigableExtrusionInLocal(new Point2D(1.1, -0.1));

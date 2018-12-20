@@ -40,9 +40,6 @@ public class Cluster
 
    public List<Point3DReadOnly> getNavigablePointsInsideHomeRegionInWorld(PlanarRegion homeRegion)
    {
-      //TODO: +++JEP: Finish.
-      //      return navigableExtrusionsInLocal.stream().map(this::toWorld3D).collect(Collectors.toList());
-
       if (navigablePointsInsideHomeRegionInWorld == null)
       {
          navigablePointsInsideHomeRegionInWorld = new ArrayList<>();
@@ -62,7 +59,6 @@ public class Cluster
       return navigablePointsInsideHomeRegionInWorld;
    }
 
-   //TODO: Clean up and extract and give better name. If multi-line, does extrusion side even matter??
    public enum ExtrusionSide
    {
       INSIDE, OUTSIDE;
@@ -84,15 +80,16 @@ public class Cluster
 
    private final ExtrusionSide extrusionSide;
 
-   /**
-    * Type of Cluster
-    *  MULTI_LINE means open at the end, not closed. This type is often used when projecting a PlanarRegion onto another parallel PlanarRegion.
-    *  POLYGON is a closed, perhaps concave, polygon.
-    *
-    */
    public enum ClusterType
    {
-      MULTI_LINE, POLYGON;
+      /**  
+       * MULTI_LINE means open at the end, not closed. This type is often used when projecting a PlanarRegion onto another parallel PlanarRegion.
+       */
+      MULTI_LINE,
+      /**  
+       * POLYGON is a closed, perhaps concave, polygon.
+       */
+      POLYGON;
 
       public static ClusterType[] values = values();
 
@@ -112,11 +109,6 @@ public class Cluster
    //TODO: +++JEP: Try to make this final.
    private ClusterType type;
 
-   public Cluster()
-   {
-      this(ExtrusionSide.OUTSIDE, ClusterType.POLYGON);
-   }
-   
    public Cluster(ExtrusionSide extrusionSide, ClusterType type)
    {
       this.extrusionSide = extrusionSide;
@@ -289,7 +281,7 @@ public class Cluster
       //TODO: Need to set to null in more places when this happens. Or reduce the number of calls available. Maybe make immuatable?
       navigablePointsInsideHomeRegionInWorld = null;
    }
-   
+
    public void setNonNavigableExtrusionsInLocal(List<Point2DReadOnly> points)
    {
       clearNonNavigableExtrusions();

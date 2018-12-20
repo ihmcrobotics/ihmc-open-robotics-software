@@ -22,6 +22,8 @@ import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.pathPlanning.visibilityGraphs.clusterManagement.Cluster;
+import us.ihmc.pathPlanning.visibilityGraphs.clusterManagement.Cluster.ClusterType;
+import us.ihmc.pathPlanning.visibilityGraphs.clusterManagement.Cluster.ExtrusionSide;
 import us.ihmc.robotics.geometry.PlanarRegion;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 
@@ -315,7 +317,7 @@ public class PointCloudTools
 
          int index = 0;
 
-         Cluster cluster = new Cluster();
+         Cluster cluster = new Cluster(ExtrusionSide.OUTSIDE, ClusterType.POLYGON);
          int nPacketsRead = 0;
 
          ArrayList<Point3D> pointsTemp = new ArrayList<>();
@@ -334,7 +336,7 @@ public class PointCloudTools
                   pointsTemp.clear();
                }
 
-               cluster = new Cluster();
+               cluster = new Cluster(ExtrusionSide.OUTSIDE, ClusterType.POLYGON);
                clusters.add(cluster);
                nPacketsRead++;
                //               System.out.println("New cluster created");
