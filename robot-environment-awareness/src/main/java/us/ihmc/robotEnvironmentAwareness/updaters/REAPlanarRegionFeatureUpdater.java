@@ -200,8 +200,20 @@ public class REAPlanarRegionFeatureUpdater implements RegionFeaturesProvider
 
    public void registerCustomPlanarRegion(PlanarRegion planarRegion)
    {
-      CustomPlanarRegionHandler.performConvexDecompositionIfNeeded(planarRegion);
-      customPlanarRegions.put(planarRegion.getRegionId(), planarRegion);
+      if(planarRegion.getRegionId() == PlanarRegion.NO_REGION_ID)
+      {
+         // ignore if region id isn't set
+         return;
+      }
+      else if(planarRegion.isEmpty())
+      {
+         customPlanarRegions.remove(planarRegion.getRegionId());
+      }
+      else
+      {
+         CustomPlanarRegionHandler.performConvexDecompositionIfNeeded(planarRegion);
+         customPlanarRegions.put(planarRegion.getRegionId(), planarRegion);
+      }
    }
 
    public void clearOcTree()
