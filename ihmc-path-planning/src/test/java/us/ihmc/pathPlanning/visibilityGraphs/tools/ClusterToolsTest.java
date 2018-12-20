@@ -48,7 +48,7 @@ public class ClusterToolsTest
       List<Point2DReadOnly> points = new ArrayList<Point2DReadOnly>();
       points.add(endpoint1);
       points.add(endpoint2);
-      
+
       double[] extrusionDistances = new double[] {extrusionDistance, extrusionDistance};
       List<Point2D> extrusions = ClusterTools.extrudeMultiLine(points, extrusionDistances, 3);
 
@@ -582,7 +582,7 @@ public class ClusterToolsTest
          }
       };
       double orthogonalAngle = 0.5;
-      
+
       double baseRotationAngle = 0.0;
       RigidBodyTransform transform1 = new RigidBodyTransform();
       transform1.setRotationEuler(0.0, baseRotationAngle, 0.0);
@@ -604,7 +604,7 @@ public class ClusterToolsTest
       assertTrue(listContainsXYMatch(obstacleExtrusionsInWorld, new Point2D(0.01, -0.5)));
       assertTrue(listContainsXYMatch(obstacleExtrusionsInWorld, new Point2D(-0.01, 0.5)));
       assertTrue(listContainsXYMatch(obstacleExtrusionsInWorld, new Point2D(-0.01, -0.5)));
-      
+
       baseRotationAngle = 0.2;
       transform1 = new RigidBodyTransform();
       transform1.setRotationEuler(0.0, baseRotationAngle, 0.0);
@@ -620,7 +620,7 @@ public class ClusterToolsTest
       obstacleExtrusionsInWorld = obstacleCluster.getNavigableExtrusionsInWorld();
       assertEquals(10, obstacleExtrusionsInWorld.size());
 
-//      printPoints3D(obstacleExtrusionsInWorld);
+      //      printPoints3D(obstacleExtrusionsInWorld);
 
       assertTrue(listContains(obstacleExtrusionsInWorld, new Point3D(0.0, -0.51, 0.0)));
       assertTrue(listContains(obstacleExtrusionsInWorld, new Point3D(0.0, 0.51, 0.0)));
@@ -629,6 +629,139 @@ public class ClusterToolsTest
       assertTrue(listContainsXYMatch(obstacleExtrusionsInWorld, new Point2D(-0.01, 0.5)));
       assertTrue(listContainsXYMatch(obstacleExtrusionsInWorld, new Point2D(-0.01, -0.5)));
 
+   }
+
+   @Test(timeout = 30000)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
+   public void testFilterPointsWithSameXYCoordinatesKeepingHighest()
+   {
+      List<Point3D> pointsToFilter = new ArrayList<>();
+      double thresholdSquared = 0.1 * 0.1;
+
+      Point3D pointA = new Point3D(0.0, 0.0, 0.7);
+      Point3D pointB = new Point3D(0.001, 0.0, 0.3);
+      Point3D pointC = new Point3D(0.002, 0.0, -0.9);
+      Point3D pointD = new Point3D(0.01, 0.0, 0.9);
+      Point3D pointE = new Point3D(0.3, 0.0, 0.55);
+      Point3D pointF = new Point3D(0.35, 0.0, 0.75);
+      Point3D pointG = new Point3D(0.451, 0.0, 0.43);
+      Point3D pointH = new Point3D(0.54, 0.0, 0.2);
+
+      pointsToFilter.add(pointA);
+      pointsToFilter.add(pointB);
+
+      List<Point3D> filteredPoints = ClusterTools.filterPointsWithSameXYCoordinatesKeepingHighest(pointsToFilter, thresholdSquared);
+      assertEquals(1, filteredPoints.size());
+      assertTrue(listContains(filteredPoints, pointA));
+
+      pointsToFilter.clear();
+      pointsToFilter.add(pointB);
+      pointsToFilter.add(pointA);
+
+      filteredPoints = ClusterTools.filterPointsWithSameXYCoordinatesKeepingHighest(pointsToFilter, thresholdSquared);
+      assertEquals(1, filteredPoints.size());
+      assertTrue(listContains(filteredPoints, pointA));
+
+      pointsToFilter.clear();
+      pointsToFilter.add(pointB);
+      pointsToFilter.add(pointC);
+      pointsToFilter.add(pointA);
+      filteredPoints = ClusterTools.filterPointsWithSameXYCoordinatesKeepingHighest(pointsToFilter, thresholdSquared);
+      assertEquals(1, filteredPoints.size());
+      assertTrue(listContains(filteredPoints, pointA));
+
+      pointsToFilter.clear();
+      pointsToFilter.add(pointA);
+      pointsToFilter.add(pointB);
+      pointsToFilter.add(pointC);
+      pointsToFilter.add(pointD);
+      pointsToFilter.add(pointE);
+      pointsToFilter.add(pointF);
+      pointsToFilter.add(pointG);
+      pointsToFilter.add(pointH);
+
+      filteredPoints = ClusterTools.filterPointsWithSameXYCoordinatesKeepingHighest(pointsToFilter, thresholdSquared);
+      assertEquals(3, filteredPoints.size());
+      assertTrue(listContains(filteredPoints, pointD));
+      assertTrue(listContains(filteredPoints, pointF));
+      assertTrue(listContains(filteredPoints, pointG));
+
+      pointsToFilter.clear();
+      for (int i = 0; i < 101; i++)
+      {
+         pointsToFilter.add(new Point3D(0.03 * i, 0.0, 0.03 * i));
+      }
+
+      filteredPoints = ClusterTools.filterPointsWithSameXYCoordinatesKeepingHighest(pointsToFilter, thresholdSquared);
+      assertEquals(25, filteredPoints.size());
+      assertTrue(listContains(filteredPoints, new Point3D(3.0, 0.0, 3.0)));
+      
+      pointsToFilter.clear();
+      for (int i = 0; i < 101; i++)
+      {
+         pointsToFilter.add(new Point3D(0.03 * i, 0.0, 3.0 - 0.03 * i));
+      }
+
+      filteredPoints = ClusterTools.filterPointsWithSameXYCoordinatesKeepingHighest(pointsToFilter, thresholdSquared);
+      assertEquals(26, filteredPoints.size());
+      assertTrue(listContains(filteredPoints, new Point3D(0.0, 0.0, 3.0)));
+   }
+
+   @Test(timeout = 30000)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
+   public void testVerticalObstacleOne()
+   {
+      double[][] region0_1Points = new double[][] {{-1.0, 1.0}, {1.0, 1.0}, {1.0, -1.0}, {-1.0, -1.0}};
+      Vector3D normal0_1 = new Vector3D(0.0, 0.0, 1.0);
+      normal0_1.normalize();
+      RigidBodyTransform transform0_1 = new RigidBodyTransform();
+      PlanarRegion flatGroundRegion = createPlanarRegion(transform0_1, region0_1Points);
+
+      double[][] region1_1Points = new double[][] {{0.0, 0.0}, {0.0, 0.2}, {0.1, 0.2}, {0.1, 0.0}};
+      double[][] region1_2Points = new double[][] {{0.1, 0.0}, {0.1, 0.4}, {0.2, 0.4}, {0.2, 0.0}};
+      double[][] concaveHull = new double[][] {{0.0, 0.0}, {0.0, 0.2}, {0.1, 0.2}, {0.1, 0.4}, {0.2, 0.4}, {0.2, 0.0}};
+      Vector3D normal1_1 = new Vector3D(0.0, -1.0, 0.0);
+      normal1_1.normalize();
+      RigidBodyTransform transform1_1 = createTransformFromPointAndZAxis(new Point3D(0.0, 0.0, 0.014), normal1_1);
+      PlanarRegion verticalObstacleRegion = createPlanarRegionFromSeveralPolygons(concaveHull, transform1_1, region1_1Points, region1_2Points);
+
+      List<PlanarRegion> obstacleRegions = new ArrayList<>();
+      obstacleRegions.add(verticalObstacleRegion);
+      PlanarRegion homeRegion = flatGroundRegion;
+
+      DefaultVisibilityGraphParameters parameters = new DefaultVisibilityGraphParameters();
+
+      double orthogonalAngle = parameters.getRegionOrthogonalAngle();
+      ObstacleExtrusionDistanceCalculator extrusionDistanceCalculator = new ObstacleExtrusionDistanceCalculator()
+      {
+         @Override
+         public double computeExtrusionDistance(Point2DReadOnly pointToExtrude, double obstacleHeight)
+         {
+            if (obstacleHeight < (0.014 + 0.2 - 0.001))
+               return 0.0;
+            if (obstacleHeight < (0.014 + 0.4 - 0.001))
+               return 0.2;
+            return 0.4;
+         }
+      };
+
+      List<Cluster> obstacleClusters = ClusterTools.createObstacleClusters(homeRegion, obstacleRegions, orthogonalAngle, extrusionDistanceCalculator);
+      assertEquals(1, obstacleClusters.size());
+
+      Cluster cluster = obstacleClusters.get(0);
+      List<Point2DReadOnly> navigableExtrusionsInLocal = cluster.getNavigableExtrusionsInLocal();
+      List<Point2DReadOnly> nonNavigableExtrusionsInLocal = cluster.getNonNavigableExtrusionsInLocal();
+      assertEquals(12, navigableExtrusionsInLocal.size());
+      assertEquals(12, nonNavigableExtrusionsInLocal.size());
+
+      assertTrue(listContains(navigableExtrusionsInLocal, new Point2D(0.0, -0.2)));
+      assertTrue(listContains(navigableExtrusionsInLocal, new Point2D(-0.2, 0.0)));
+      assertTrue(listContains(navigableExtrusionsInLocal, new Point2D(0.0, 0.2)));
+      assertTrue(listContains(navigableExtrusionsInLocal, new Point2D(0.1, 0.4)));
+      assertTrue(listContains(navigableExtrusionsInLocal, new Point2D(0.2, 0.4)));
+      assertTrue(listContains(navigableExtrusionsInLocal, new Point2D(0.6, 0.0)));
+      assertTrue(listContains(navigableExtrusionsInLocal, new Point2D(0.2, -0.4)));
+      assertTrue(listContains(navigableExtrusionsInLocal, new Point2D(0.1, -0.4)));
    }
 
    private List<Cluster> createObstacleClustersForTests(List<PlanarRegion> obstacleRegions, PlanarRegion homeRegion)
@@ -664,16 +797,51 @@ public class ClusterToolsTest
 
    private PlanarRegion createPlanarRegion(RigidBodyTransform transform, double[][] points)
    {
+      ConvexPolygon2D convexPolygon = createConvexPolygon(points);
+      PlanarRegion planarRegion = new PlanarRegion(transform, convexPolygon);
+      return planarRegion;
+   }
+
+   private PlanarRegion createPlanarRegionFromSeveralPolygons(double[][] concaveHull, RigidBodyTransform transform, double[][]... listOfPoints)
+   {
+      ArrayList<ConvexPolygon2D> polygons = new ArrayList<>();
+
+      for (double[][] points : listOfPoints)
+      {
+         polygons.add(createConvexPolygon(points));
+      }
+
+      Point2D[] concaveHullVertices = convertToListOfPoint2Ds(concaveHull);
+
+      PlanarRegion planarRegion = new PlanarRegion(transform, concaveHullVertices, polygons);
+
+      return planarRegion;
+   }
+
+   private Point2D[] convertToListOfPoint2Ds(double[][] points)
+   {
+      Point2D[] list = new Point2D[points.length];
+
+      for (int i = 0; i < points.length; i++)
+      {
+         double[] point = points[i];
+
+         Point2D point2D = new Point2D(point[0], point[1]);
+         list[i] = point2D;
+      }
+
+      return list;
+   }
+
+   private ConvexPolygon2D createConvexPolygon(double[][] points)
+   {
       ConvexPolygon2D convexPolygon = new ConvexPolygon2D();
       for (double[] position : points)
       {
          convexPolygon.addVertex(position[0], position[1]);
       }
       convexPolygon.update();
-
-      PlanarRegion planarRegion = new PlanarRegion(transform, convexPolygon);
-
-      return planarRegion;
+      return convexPolygon;
    }
 
    private boolean listContainsAll(List<Point2DReadOnly> points, Point2DReadOnly... pointsToCheck)
@@ -718,7 +886,7 @@ public class ClusterToolsTest
       return false;
    }
 
-   private boolean listContains(List<Point3DReadOnly> points, Point3D pointToCheck)
+   private boolean listContains(List<? extends Point3DReadOnly> points, Point3D pointToCheck)
    {
       for (Point3DReadOnly point : points)
       {
@@ -758,7 +926,7 @@ public class ClusterToolsTest
 
    }
 
-   private void printPoints3D(Collection<Point3DReadOnly> points)
+   private void printPoints3D(Collection<? extends Point3DReadOnly> points)
    {
       //      System.out.print("{");
 
