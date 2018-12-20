@@ -13,9 +13,6 @@ public class NavigableRegion
 {
    private final PlanarRegion homePlanarRegion;
 
-   //TODO: +++JEP: Is this transform redundant since we have the homePlanarRegion?
-   private final RigidBodyTransform transformToWorld = new RigidBodyTransform();
-
    private Cluster homeRegionCluster = null;
    private List<Cluster> obstacleClusters = new ArrayList<>();
    private List<Cluster> allClusters = new ArrayList<>();
@@ -23,7 +20,6 @@ public class NavigableRegion
    public NavigableRegion(PlanarRegion homePlanarRegion)
    {
       this.homePlanarRegion = homePlanarRegion;
-      homePlanarRegion.getTransformToWorld(transformToWorld);
    }
 
    public void setHomeRegionCluster(Cluster homeCluster)
@@ -50,7 +46,9 @@ public class NavigableRegion
 
    public RigidBodyTransform getTransformToWorld()
    {
-      return new RigidBodyTransform(transformToWorld);
+      RigidBodyTransform transform = new RigidBodyTransform();
+      homePlanarRegion.getTransformToWorld(transform);
+      return transform;
    }
 
    public Cluster getHomeRegionCluster()
@@ -74,13 +72,13 @@ public class NavigableRegion
    }
 
    public void transformFromLocalToWorld(Transformable objectToTransformToWorld)
-   {
-      objectToTransformToWorld.applyTransform(transformToWorld);
+   { 
+      homePlanarRegion.transformFromLocalToWorld(objectToTransformToWorld);
    }
 
    public void transformFromWorldToLocal(Transformable objectToTransformToWorld)
    {
-      objectToTransformToWorld.applyInverseTransform(transformToWorld);
+      homePlanarRegion.transformFromWorldToLocal(objectToTransformToWorld);
    }
 
    public int getMapId()
