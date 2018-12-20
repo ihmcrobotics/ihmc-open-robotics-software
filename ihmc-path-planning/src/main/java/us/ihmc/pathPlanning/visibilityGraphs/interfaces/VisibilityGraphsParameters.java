@@ -12,36 +12,36 @@ import us.ihmc.pathPlanning.visibilityGraphs.tools.PlanarRegionTools;
 import us.ihmc.robotics.geometry.ConvexPolygonTools;
 import us.ihmc.robotics.geometry.PlanarRegion;
 
-public interface VisibilityGraphsParameters
+interface VisibilityGraphsParameters
 {
-   public abstract double getMaxInterRegionConnectionLength();
+   double getMaxInterRegionConnectionLength();
 
-   public abstract double getNormalZThresholdForAccessibleRegions();
+   double getNormalZThresholdForAccessibleRegions();
 
-   public default double getNavigableExtrusionDistance()
+   default double getNavigableExtrusionDistance()
    {
       return 0.02;
    }
 
-   public abstract double getObstacleExtrusionDistance();
+   double getObstacleExtrusionDistance();
 
-   public abstract double getObstacleExtrusionDistanceIfNotTooHighToStep();
+   double getObstacleExtrusionDistanceIfNotTooHighToStep();
 
-   public abstract double getTooHighToStepDistance();
+   double getTooHighToStepDistance();
 
-   public abstract double getClusterResolution();
+   double getClusterResolution();
 
-   public default double getExplorationDistanceFromStartGoal()
+   default double getExplorationDistanceFromStartGoal()
    {
       return Double.POSITIVE_INFINITY;
    }
 
-   public default double getPlanarRegionMinArea()
+   default double getPlanarRegionMinArea()
    {
       return 0.0;
    }
 
-   public default int getPlanarRegionMinSize()
+   default int getPlanarRegionMinSize()
    {
       return 0;
    }
@@ -58,7 +58,7 @@ public interface VisibilityGraphsParameters
     * @return the angle threshold to use to determine if a line or polygon projection method should
     *         be used.
     */
-   public default double getRegionOrthogonalAngle()
+   default double getRegionOrthogonalAngle()
    {
       return Math.toRadians(75.0);
    }
@@ -72,7 +72,7 @@ public interface VisibilityGraphsParameters
     * 
     * @return the value of the epsilon to use.
     */
-   public default double getSearchHostRegionEpsilon()
+   default double getSearchHostRegionEpsilon()
    {
       return 0.03;
    }
@@ -82,7 +82,7 @@ public interface VisibilityGraphsParameters
     * 
     * @return
     */
-   public default NavigableExtrusionDistanceCalculator getNavigableExtrusionDistanceCalculator()
+   default NavigableExtrusionDistanceCalculator getNavigableExtrusionDistanceCalculator()
    {
       return new NavigableExtrusionDistanceCalculator()
       {
@@ -99,7 +99,7 @@ public interface VisibilityGraphsParameters
     * 
     * @return the calculator use for obstacle extrusion.
     */
-   public default ObstacleExtrusionDistanceCalculator getObstacleExtrusionDistanceCalculator()
+   default ObstacleExtrusionDistanceCalculator getObstacleExtrusionDistanceCalculator()
    {
       return (pointToExtrude, obstacleHeight) -> {
          if (obstacleHeight < 0.0)
@@ -117,7 +117,7 @@ public interface VisibilityGraphsParameters
       };
    }
 
-   public default NavigableRegionFilter getNavigableRegionFilter()
+   default NavigableRegionFilter getNavigableRegionFilter()
    {
       return new NavigableRegionFilter()
       {
@@ -129,7 +129,7 @@ public interface VisibilityGraphsParameters
       };
    }
 
-   public default InterRegionConnectionFilter getInterRegionConnectionFilter()
+   default InterRegionConnectionFilter getInterRegionConnectionFilter()
    {
       return new InterRegionConnectionFilter()
       {
@@ -156,7 +156,7 @@ public interface VisibilityGraphsParameters
       };
    }
 
-   public default PlanarRegionFilter getPlanarRegionFilter()
+   default PlanarRegionFilter getPlanarRegionFilter()
    {
       return new PlanarRegionFilter()
       {
@@ -176,7 +176,7 @@ public interface VisibilityGraphsParameters
     * Returns the height at which the robot can duck under an obstacle. Any obstacles that are higher than that height above a navigable planar reigon will be ignored.
     * @return height at which the robot can duck under an obstacle.
     */
-   public default double getCanDuckUnderHeight()
+   default double getCanDuckUnderHeight()
    {
       return 2.0;
    }
@@ -185,12 +185,12 @@ public interface VisibilityGraphsParameters
     * Returns the height at which an obstacle can be easily stepped over. Any obstacles that are lower than that height above a navigable planar region will be ignored.
     * @return height at which the robot can easily step over an object.
     */
-   public default double getCanEasilyStepOverHeight()
+   default double getCanEasilyStepOverHeight()
    {
       return 0.03;
    }
 
-   public default ObstacleRegionFilter getObstacleRegionFilter()
+   default ObstacleRegionFilter getObstacleRegionFilter()
    {
       final ConvexPolygonTools convexPolygonTools = new ConvexPolygonTools();
 
@@ -212,7 +212,7 @@ public interface VisibilityGraphsParameters
             }
          }
 
-         public boolean isRegionValidObstacleUsingMinimumHeightAbove(PlanarRegion potentialObstacleRegion, PlanarRegion navigableRegion)
+         boolean isRegionValidObstacleUsingMinimumHeightAbove(PlanarRegion potentialObstacleRegion, PlanarRegion navigableRegion)
          {
             //TODO: ++++++JEP: Fix this and use this if you want it to be more accurate. However, if this is just for approximate tests and can have false positives, then bounding boxes are fine.
             //      return doPolygonsIntersect(convexHullOne, convexHullTwo, epsilon);
@@ -276,7 +276,7 @@ public interface VisibilityGraphsParameters
       };
    }
 
-   public default VisibilityGraphPathPlanner getPathPlanner()
+   default VisibilityGraphPathPlanner getPathPlanner()
    {
       return new DijkstraVisibilityGraphPlanner();
       //      return JGraphTools.getJGraphPlanner();
