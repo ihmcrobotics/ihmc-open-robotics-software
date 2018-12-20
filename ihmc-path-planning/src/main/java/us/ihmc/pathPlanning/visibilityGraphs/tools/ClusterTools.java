@@ -29,6 +29,8 @@ import us.ihmc.robotics.linearAlgebra.PrincipalComponentAnalysis3D;
 
 public class ClusterTools
 {
+   //TODO: +++JerryPratt: The case of vertical PlanarRegions needs a lot of work. The outside sides will get extruded based on their height, even if close by 
+   // there are high vertices. Need some example cases for this and need to fix it up.
    private static final double HALF_PI = 0.5 * Math.PI;
    private static final double POPPING_POLYGON_POINTS_THRESHOLD = 0.0; //MathTools.square(0.025);
    private static final double POPPING_MULTILINE_POINTS_THRESHOLD = MathTools.square(0.20);
@@ -69,7 +71,7 @@ public class ClusterTools
 
          boolean shouldExtrudeCorner;
 
-         //TODO: Think about half_pi limits here. Do they make the most sense? Just a little over and you still might want to round the corner...
+         //TODO: +++JerryPratt: Think about half_pi limits here. Do they make the most sense? Just a little over and you still might want to round the corner...
          if (extrudeToTheLeft)
             shouldExtrudeCorner = edgePrev.getDirection().angle(edgeNext.getDirection()) <= -HALF_PI;
          else
