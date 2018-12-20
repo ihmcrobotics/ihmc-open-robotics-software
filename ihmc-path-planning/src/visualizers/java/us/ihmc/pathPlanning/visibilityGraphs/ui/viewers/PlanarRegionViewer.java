@@ -15,11 +15,11 @@ import javafx.scene.Node;
 import javafx.scene.paint.Color;
 import javafx.scene.paint.PhongMaterial;
 import javafx.scene.shape.MeshView;
-import us.ihmc.commons.PrintTools;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.javaFXToolkit.shapes.JavaFXMeshBuilder;
+import us.ihmc.log.LogTools;
 import us.ihmc.messager.Messager;
 import us.ihmc.messager.MessagerAPIFactory.Topic;
 import us.ihmc.pathPlanning.visibilityGraphs.ui.VisualizationParameters;
@@ -61,7 +61,7 @@ public class PlanarRegionViewer
             if (localReference != null)
             {
                if (VERBOSE)
-                  PrintTools.info("Rendering new planar regions.");
+                  LogTools.info("Rendering new planar regions.");
                graphicsRendered = localReference;
                root.getChildren().clear();
             }
@@ -96,7 +96,7 @@ public class PlanarRegionViewer
    private void buildMeshAndMaterial(PlanarRegionsList planarRegionsList)
    {
       if (VERBOSE)
-         PrintTools.info(this, "Creating mesh and material for new planar regions.");
+         LogTools.info("Creating mesh and material for new planar regions.", this);
 
       RigidBodyTransform transformToWorld = new RigidBodyTransform();
 
