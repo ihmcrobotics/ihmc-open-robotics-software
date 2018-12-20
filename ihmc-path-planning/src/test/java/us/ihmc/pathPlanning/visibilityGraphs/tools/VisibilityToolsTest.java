@@ -31,11 +31,11 @@ public class VisibilityToolsTest
    @ContinuousIntegrationTest(estimatedDuration = 0.0)
    public void testIsPointVisibleForStaticMaps()
    {
-      Cluster keepOutClusterOne = new Cluster();
+      Cluster keepOutClusterOne = new Cluster(ExtrusionSide.OUTSIDE, ClusterType.POLYGON);
       keepOutClusterOne.addNonNavigableExtrusionInLocal(new Point2D(-0.1, 0.5));
       keepOutClusterOne.addNonNavigableExtrusionInLocal(new Point2D(1.1, 0.5));
 
-      Cluster keepOutClusterTwo = new Cluster();
+      Cluster keepOutClusterTwo = new Cluster(ExtrusionSide.OUTSIDE, ClusterType.POLYGON);
       keepOutClusterTwo.addNonNavigableExtrusionInLocal(new Point2D(2.5, -0.1));
       keepOutClusterTwo.addNonNavigableExtrusionInLocal(new Point2D(2.5, 1.1));
 
@@ -85,7 +85,7 @@ public class VisibilityToolsTest
    @ContinuousIntegrationTest(estimatedDuration = 0.0)
    public void testIsPointVisibleForStaticMapsClosedPolygonVsOpenMultiLine()
    {
-      Cluster keepOutClusterPolygon = new Cluster();
+      Cluster keepOutClusterPolygon = new Cluster(ExtrusionSide.OUTSIDE, ClusterType.POLYGON);
       keepOutClusterPolygon.addNonNavigableExtrusionInLocal(new Point2D(0.0, 0.0));
       keepOutClusterPolygon.addNonNavigableExtrusionInLocal(new Point2D(0.0, 1.0));
       keepOutClusterPolygon.addNonNavigableExtrusionInLocal(new Point2D(1.0, 1.0));
