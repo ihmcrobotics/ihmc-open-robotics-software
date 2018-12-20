@@ -182,8 +182,8 @@ public class ClusterTools
     * then the two new lines will be moved by the extrusionDistance. 
     * If it is to the outside, then you should use extrudeMultiplePointsAtOutsideCorner() instead.
     */
-   public static Point2D extrudeSinglePointAtInsideCorner(Point2DReadOnly pointToExtrude, Line2D edgePrev, Line2D edgeNext,
-                                                       boolean extrudeToTheLeft, double extrusionDistance)
+   public static Point2D extrudeSinglePointAtInsideCorner(Point2DReadOnly pointToExtrude, Line2D edgePrev, Line2D edgeNext, boolean extrudeToTheLeft,
+                                                          double extrusionDistance)
    {
       Vector2DBasics previousEdgeDirection = edgePrev.getDirection();
       Vector2DBasics nextEdgeDirection = edgeNext.getDirection();
@@ -596,6 +596,7 @@ public class ClusterTools
       // FIXME Problem with the obstacle height.
       if (filteredPoints.get(0).distanceXYSquared(filteredPoints.get(filteredPoints.size() - 1)) <= poppingPointsDistanceSquaredThreshold)
       {
+         System.out.println("Here I am");
          double maxHeight = filteredPoints.stream().map(Point3D::getZ).max((d1, d2) -> Double.compare(d1, d2)).get();
          List<Point3D> endpoints = new ArrayList<>();
          endpoints.add(filteredPoints.get(0));
@@ -605,19 +606,70 @@ public class ClusterTools
       }
       else
       {
-         int index = 0;
-         // Look for points with same XY-coordinates and only keep the highest one.
-         while (index < filteredPoints.size() - 1)
-         {
-            Point3D pointCurr = filteredPoints.get(index);
-            Point3D pointNext = filteredPoints.get(index + 1);
-
-            if (pointCurr.distanceXYSquared(pointNext) < poppingPointsDistanceSquaredThreshold)
-               filteredPoints.remove(pointCurr.getZ() <= pointNext.getZ() ? index : index + 1);
-            else
-               index++;
-         }
+         filteredPoints = filterPointsWithSameXYCoordinatesKeepingHighest(filteredPoints, poppingPointsDistanceSquaredThreshold);
          return filteredPoints;
       }
+   }
+
+   /**
+    * Goes through a list of points and removes duplicates next to each other whose xy distance squared is less than poppingPointsDistanceSquaredThreshold.
+    * It assumes the list is ordered in such a way that the only possible duplicates are next to each other.
+    * In removing a duplicate, it keeps the one with the larger z value.
+    * At the end, all points are guaranteed to be greater than the threshold distance apart.
+    * 
+    * @param pointsToFilter List of points to be filtered.
+    * @param poppingPointsDistanceSquaredThreshold Threshold for the squared distance for considering points to be duplicates.
+    */
+   public static List<Point3D> filterPointsWithSameXYCoordinatesKeepingHighest(List<Point3D> pointsToFilter, double poppingPointsDistanceSquaredThreshold)
+   {
+      List<Point3D> filteredPointsToReturn = new ArrayList<>();
+      if (pointsToFilter.isEmpty())
+         return filteredPointsToReturn;
+
+      if (pointsToFilter.size() == 1)
+      {
+         filteredPointsToReturn.add(pointsToFilter.get(0));
+         return filteredPointsToReturn;
+      }
+      
+      boolean pointWasFiltered = false;
+
+      for (int i = 0; i < pointsToFilter.size(); i++)
+      {
+         if (i==pointsToFilter.size() - 1)
+         {
+            filteredPointsToReturn.add(pointsToFilter.get(i));
+            continue;
+         }
+         
+         Point3D currentPoint = pointsToFilter.get(i);
+         Point3D nextPoint = pointsToFilter.get(i + 1);
+
+         if (currentPoint.distanceXYSquared(nextPoint) < poppingPointsDistanceSquaredThreshold)
+         {
+            if (currentPoint.getZ() > nextPoint.getZ())
+            {
+               filteredPointsToReturn.add(currentPoint);
+            }
+            else
+            {
+               filteredPointsToReturn.add(nextPoint);
+            }
+            pointWasFiltered = true;
+            i++;
+         }
+         else
+         {
+            filteredPointsToReturn.add(currentPoint);
+         }
+      }
+
+      if (pointWasFiltered)
+      {
+         return filterPointsWithSameXYCoordinatesKeepingHighest(filteredPointsToReturn, poppingPointsDistanceSquaredThreshold);
+      }
+
+      return filteredPointsToReturn;
+
    }
 }
