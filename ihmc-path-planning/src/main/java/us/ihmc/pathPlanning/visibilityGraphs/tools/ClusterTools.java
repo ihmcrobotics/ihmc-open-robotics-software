@@ -33,7 +33,7 @@ public class ClusterTools
    // there are high vertices. Need some example cases for this and need to fix it up.
    private static final double HALF_PI = 0.5 * Math.PI;
    private static final double POPPING_POLYGON_POINTS_THRESHOLD = 0.0; //MathTools.square(0.025);
-   private static final double POPPING_MULTILINE_POINTS_THRESHOLD = MathTools.square(0.20);
+   private static final double POPPING_MULTILINE_POINTS_THRESHOLD = MathTools.square(0.10);
    private static final double NAV_TO_NON_NAV_DISTANCE = 0.001;
 
    public static List<Point2D> extrudePolygon(boolean extrudeToTheLeft, Cluster cluster, ObstacleExtrusionDistanceCalculator calculator)
@@ -596,7 +596,6 @@ public class ClusterTools
       // FIXME Problem with the obstacle height.
       if (filteredPoints.get(0).distanceXYSquared(filteredPoints.get(filteredPoints.size() - 1)) <= poppingPointsDistanceSquaredThreshold)
       {
-         System.out.println("Here I am");
          double maxHeight = filteredPoints.stream().map(Point3D::getZ).max((d1, d2) -> Double.compare(d1, d2)).get();
          List<Point3D> endpoints = new ArrayList<>();
          endpoints.add(filteredPoints.get(0));
