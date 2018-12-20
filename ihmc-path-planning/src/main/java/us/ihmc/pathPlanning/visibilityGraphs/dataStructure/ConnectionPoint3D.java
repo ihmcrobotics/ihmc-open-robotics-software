@@ -9,6 +9,7 @@ import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
 
 public class ConnectionPoint3D implements Point3DReadOnly
 {
+   //TODO: +++JerryPratt: Consider if we even need this class anymore, or if Point3D is all we need.
    public static final double PRECISION = 1.0e-4;
    public static final double INV_PRECISION = 1.0e+4;
 

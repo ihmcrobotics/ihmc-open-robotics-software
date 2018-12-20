@@ -12,6 +12,7 @@ import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 
 public class Connection implements Transformable, EpsilonComparable<Connection>
 {
+   //TODO: +++JerryPratt: Consider if we need this class anymore and extract out if not.
    private ConnectionPoint3D source;
    private ConnectionPoint3D target;
 
