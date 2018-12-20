@@ -1,10 +1,5 @@
 package us.ihmc.robotEnvironmentAwareness.updaters;
 
-import java.io.File;
-import java.util.Collections;
-import java.util.List;
-import java.util.concurrent.atomic.AtomicReference;
-
 import gnu.trove.map.hash.TIntObjectHashMap;
 import us.ihmc.euclid.geometry.LineSegment3D;
 import us.ihmc.jOctoMap.ocTree.NormalOcTree;
@@ -12,18 +7,15 @@ import us.ihmc.messager.Messager;
 import us.ihmc.robotEnvironmentAwareness.communication.REAModuleAPI;
 import us.ihmc.robotEnvironmentAwareness.geometry.ConcaveHullFactoryParameters;
 import us.ihmc.robotEnvironmentAwareness.io.FilePropertyHelper;
-import us.ihmc.robotEnvironmentAwareness.planarRegion.CustomPlanarRegionHandler;
-import us.ihmc.robotEnvironmentAwareness.planarRegion.IntersectionEstimationParameters;
-import us.ihmc.robotEnvironmentAwareness.planarRegion.PlanarRegionIntersectionCalculator;
-import us.ihmc.robotEnvironmentAwareness.planarRegion.PlanarRegionPolygonizer;
-import us.ihmc.robotEnvironmentAwareness.planarRegion.PlanarRegionSegmentationCalculator;
-import us.ihmc.robotEnvironmentAwareness.planarRegion.PlanarRegionSegmentationNodeData;
-import us.ihmc.robotEnvironmentAwareness.planarRegion.PlanarRegionSegmentationParameters;
-import us.ihmc.robotEnvironmentAwareness.planarRegion.PlanarRegionSegmentationRawData;
-import us.ihmc.robotEnvironmentAwareness.planarRegion.PolygonizerParameters;
+import us.ihmc.robotEnvironmentAwareness.planarRegion.*;
 import us.ihmc.robotEnvironmentAwareness.ui.io.PlanarRegionSegmentationDataExporter;
 import us.ihmc.robotics.geometry.PlanarRegion;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
+
+import java.io.File;
+import java.util.Collections;
+import java.util.List;
+import java.util.concurrent.atomic.AtomicReference;
 
 public class REAPlanarRegionFeatureUpdater implements RegionFeaturesProvider
 {
@@ -55,7 +47,7 @@ public class REAPlanarRegionFeatureUpdater implements RegionFeaturesProvider
    private final AtomicReference<Boolean> clearPolygonizer;
    private final AtomicReference<Boolean> enableIntersectionCalulator;
    private final AtomicReference<PlanarRegionSegmentationParameters> planarRegionSegmentationParameters;
-   private final AtomicReference<PlanarRegionSegmentationParameters> customRegionMergingParameters;
+   private final AtomicReference<CustomRegionMergeParameters> customRegionMergingParameters;
    private final AtomicReference<ConcaveHullFactoryParameters> concaveHullFactoryParameters;
    private final AtomicReference<PolygonizerParameters> polygonizerParameters;
    private final AtomicReference<IntersectionEstimationParameters> intersectionEstimationParameters;
@@ -75,7 +67,7 @@ public class REAPlanarRegionFeatureUpdater implements RegionFeaturesProvider
       clearPolygonizer = reaMessager.createInput(REAModuleAPI.PlanarRegionsPolygonizerClear, false);
       enableIntersectionCalulator = reaMessager.createInput(REAModuleAPI.PlanarRegionsIntersectionEnable, false);
       planarRegionSegmentationParameters = reaMessager.createInput(REAModuleAPI.PlanarRegionsSegmentationParameters, new PlanarRegionSegmentationParameters());
-      customRegionMergingParameters = reaMessager.createInput(REAModuleAPI.CustomRegionsMergingParameters, new PlanarRegionSegmentationParameters());
+      customRegionMergingParameters = reaMessager.createInput(REAModuleAPI.CustomRegionsMergingParameters, new CustomRegionMergeParameters());
       concaveHullFactoryParameters = reaMessager.createInput(REAModuleAPI.PlanarRegionsConcaveHullParameters, new ConcaveHullFactoryParameters());
       polygonizerParameters = reaMessager.createInput(REAModuleAPI.PlanarRegionsPolygonizerParameters, new PolygonizerParameters());
       intersectionEstimationParameters = reaMessager.createInput(REAModuleAPI.PlanarRegionsIntersectionParameters, new IntersectionEstimationParameters());
@@ -121,7 +113,7 @@ public class REAPlanarRegionFeatureUpdater implements RegionFeaturesProvider
 
       String customRegionMergingParametersFile = filePropertyHelper.loadProperty(REAModuleAPI.CustomRegionsMergingParameters.getName());
       if (customRegionMergingParametersFile != null)
-         customRegionMergingParameters.set(PlanarRegionSegmentationParameters.parse(customRegionMergingParametersFile));
+         customRegionMergingParameters.set(CustomRegionMergeParameters.parse(customRegionMergingParametersFile));
 
       String planarRegionConcaveHullFactoryParametersFile = filePropertyHelper.loadProperty(REAModuleAPI.PlanarRegionsConcaveHullParameters.getName());
       if (planarRegionConcaveHullFactoryParametersFile != null)
@@ -208,8 +200,20 @@ public class REAPlanarRegionFeatureUpdater implements RegionFeaturesProvider
 
    public void registerCustomPlanarRegion(PlanarRegion planarRegion)
    {
-      CustomPlanarRegionHandler.performConvexDecompositionIfNeeded(planarRegion);
-      customPlanarRegions.put(planarRegion.getRegionId(), planarRegion);
+      if(planarRegion.getRegionId() == PlanarRegion.NO_REGION_ID)
+      {
+         // ignore if region id isn't set
+         return;
+      }
+      else if(planarRegion.isEmpty())
+      {
+         customPlanarRegions.remove(planarRegion.getRegionId());
+      }
+      else
+      {
+         CustomPlanarRegionHandler.performConvexDecompositionIfNeeded(planarRegion);
+         customPlanarRegions.put(planarRegion.getRegionId(), planarRegion);
+      }
    }
 
    public void clearOcTree()
