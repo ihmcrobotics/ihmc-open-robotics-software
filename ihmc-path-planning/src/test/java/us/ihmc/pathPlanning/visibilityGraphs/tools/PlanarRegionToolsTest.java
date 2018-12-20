@@ -659,7 +659,7 @@ public class PlanarRegionToolsTest
    @ContinuousIntegrationTest(estimatedDuration = 0.0)
    public void testIsRegionAOverlapingWithRegionB()
    {
-      //TODO: +++JEP: Get this to pass by fixing isRegionAOverlapingWithRegionB()
+      //TODO: +++JerryPratt: Get this to pass by fixing isRegionAOverlapingWithRegionB()
       ConvexPolygon2D polygonA = new ConvexPolygon2D();
       polygonA.addVertex(1.0, 1.0);
       polygonA.addVertex(1.0, -1.0);

@@ -24,7 +24,7 @@ import us.ihmc.robotics.geometry.PlanarRegion;
  */
 public class Cluster
 {
-   //TODO: +++JEP: Remove so many methods and clean up the API so easier to maintain.
+   //TODO: +++JerryPratt: Remove so many methods and clean up the API so easier to maintain.
 
    private final RigidBodyTransform transformToWorld = new RigidBodyTransform();
 
@@ -106,7 +106,7 @@ public class Cluster
       }
    };
 
-   //TODO: +++JEP: Try to make this final.
+   //TODO: +++JerryPratt: Try to make this final.
    private ClusterType type;
 
    public Cluster(ExtrusionSide extrusionSide, ClusterType type)
@@ -164,7 +164,7 @@ public class Cluster
 
    public void setTransformToWorld(RigidBodyTransform transform)
    {
-      //TODO: +++JEP: Should never have to set the transform if we get it from the planar region. Right?
+      //TODO: +++JerryPratt: Should never have to set the transform if we get it from the planar region. Right?
       transformToWorld.set(transform);
    }
 

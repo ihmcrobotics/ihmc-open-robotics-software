@@ -51,7 +51,7 @@ public class VisibilityGraph
       {
          VisibilityGraphNavigableRegion visibilityGraphNavigableRegion = new VisibilityGraphNavigableRegion(navigableRegion);
 
-         //TODO: +++JEP: Just get rid of createEdgesAroundClusterRing? Or store Nodes with clusters somehow?
+         //TODO: +++JerryPratt: Just get rid of createEdgesAroundClusterRing? Or store Nodes with clusters somehow?
          // Set createEdgesAroundClusterRing to true if at the beginning you want to create loops around the clusters.
          boolean createEdgesAroundClusterRing = false;
 
@@ -102,7 +102,7 @@ public class VisibilityGraph
          if (targetVisibilityGraphNavigableRegion == sourceVisibilityGraphNavigableRegion)
             continue;
 
-         //TOOD: +++JEP: Efficiently add Bounding Box check before going through all combinations. Perhaps have a cached bounding box reachable map?
+         //TOOD: +++JerryPratt: Efficiently add Bounding Box check before going through all combinations. Perhaps have a cached bounding box reachable map?
 
          NavigableRegion targetNavigableRegion = targetVisibilityGraphNavigableRegion.getNavigableRegion();
          List<Cluster> targetObstacleClusters = targetNavigableRegion.getObstacleClusters();
@@ -295,7 +295,7 @@ public class VisibilityGraph
          ConnectionPoint3D targetInWorld = targetNode.getPointInWorld();
          if (filter.isConnectionValid(sourceInWorld, targetInWorld))
          {
-            //TODO: +++++++JEP: xyDistance check is a hack to allow connections through keep out regions enough to make them, but not enough to go through walls...
+            //TODO: +++++++JerryPratt: xyDistance check is a hack to allow connections through keep out regions enough to make them, but not enough to go through walls...
             double xyDistance = sourceInWorld.distanceXY(targetInWorld);
             if (xyDistance < 0.30)
             {
@@ -320,7 +320,7 @@ public class VisibilityGraph
                Point2D targetInSourceLocal = new Point2D(targetProjectedVerticallyOntoSource);
                Point2D sourceInTargetLocal = new Point2D(sourceProjectedVerticallyOntoTarget);
 
-               //TODO: +++JEP: Inter-region connections and obstacles still needs some thought and some good unit tests.
+               //TODO: +++JerryPratt: Inter-region connections and obstacles still needs some thought and some good unit tests.
                boolean targetIsVisibleThroughSourceObstacles = VisibilityTools.isPointVisibleForStaticMaps(sourceObstacleClusters, sourceInSourceLocal,
                                                                                                            targetInSourceLocal);
                boolean sourceIsVisibleThroughTargetObstacles = VisibilityTools.isPointVisibleForStaticMaps(targetObstacleClusters, targetInTargetLocal,

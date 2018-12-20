@@ -26,7 +26,7 @@ public class VisibilityGraphsTestVisualizerApplication extends Application
    private static final boolean showRegionInnerConnections = false;
    private static final boolean showRegionInterConnections = false;
 
-   //TODO: +++JEP: Why or why do these have to be static? What if we want to launch several applications?
+   //TODO: +++JerryPratt: Why or why do these have to be static? What if we want to launch several applications?
    private static VisibilityGraphsTestVisualizer ui;
    private static SharedMemoryJavaFXMessager messager;
    private static AtomicBoolean uiHasBeenConstructed = new AtomicBoolean(false);

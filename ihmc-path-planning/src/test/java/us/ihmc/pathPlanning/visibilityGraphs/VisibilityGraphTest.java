@@ -387,7 +387,7 @@ public class VisibilityGraphTest
       assertEquals(8, startEdges.size());
    }
 
-   //TODO: +++JEP: Get this test to pass and clean it up and make it better.
+   //TODO: +++JerryPratt: Get this test to pass and clean it up and make it better.
    @Ignore("Need to double check this test and fix it.")
    @Test(timeout = 30000)
    @ContinuousIntegrationTest(estimatedDuration = 0.0)

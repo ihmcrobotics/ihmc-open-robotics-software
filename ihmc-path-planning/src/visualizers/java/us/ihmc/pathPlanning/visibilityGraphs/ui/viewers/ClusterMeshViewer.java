@@ -156,8 +156,8 @@ public class ClusterMeshViewer extends AnimationTimer
             buildRawClusterPoints(rawPointsMeshBuilder, cluster);
          }
          
-         //TODO: +++JEP: Show Nonnavigable regions for all clusters or just obstacle clusters?
-         //TODO: +++JEP: Or make a third boolean checkbox to show obstacle non-navigable vs. homeRegion non-navigable.
+         //TODO: +++JerryPratt: Show Nonnavigable regions for all clusters or just obstacle clusters?
+         //TODO: +++JerryPratt: Or make a third boolean checkbox to show obstacle non-navigable vs. homeRegion non-navigable.
          List<Cluster> obstacleClusters = navigableRegionLocalPlanner.getObstacleClusters();
          for (Cluster cluster : obstacleClusters)
          {
