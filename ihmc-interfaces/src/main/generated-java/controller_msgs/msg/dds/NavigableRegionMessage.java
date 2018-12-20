@@ -9,14 +9,14 @@ import us.ihmc.pubsub.TopicDataType;
 /**
        * This message is part of the IHMC footstep planning module.
        */
-public class VisibilityMapWithNavigableRegionMessage extends Packet<VisibilityMapWithNavigableRegionMessage> implements Settable<VisibilityMapWithNavigableRegionMessage>, EpsilonComparable<VisibilityMapWithNavigableRegionMessage>
+public class NavigableRegionMessage extends Packet<NavigableRegionMessage> implements Settable<NavigableRegionMessage>, EpsilonComparable<NavigableRegionMessage>
 {
    public controller_msgs.msg.dds.PlanarRegionMessage home_region_;
    public controller_msgs.msg.dds.VisibilityClusterMessage home_region_cluster_;
    public controller_msgs.msg.dds.VisibilityMapMessage visibility_map_in_world_;
    public us.ihmc.idl.IDLSequence.Object<controller_msgs.msg.dds.VisibilityClusterMessage>  obstacle_clusters_;
 
-   public VisibilityMapWithNavigableRegionMessage()
+   public NavigableRegionMessage()
    {
       home_region_ = new controller_msgs.msg.dds.PlanarRegionMessage();
       home_region_cluster_ = new controller_msgs.msg.dds.VisibilityClusterMessage();
@@ -25,13 +25,13 @@ public class VisibilityMapWithNavigableRegionMessage extends Packet<VisibilityMa
 
    }
 
-   public VisibilityMapWithNavigableRegionMessage(VisibilityMapWithNavigableRegionMessage other)
+   public NavigableRegionMessage(NavigableRegionMessage other)
    {
       this();
       set(other);
    }
 
-   public void set(VisibilityMapWithNavigableRegionMessage other)
+   public void set(NavigableRegionMessage other)
    {
       controller_msgs.msg.dds.PlanarRegionMessagePubSubType.staticCopy(other.home_region_, home_region_);
       controller_msgs.msg.dds.VisibilityClusterMessagePubSubType.staticCopy(other.home_region_cluster_, home_region_cluster_);
@@ -76,7 +76,7 @@ public class VisibilityMapWithNavigableRegionMessage extends Packet<VisibilityMa
    }
 
    @Override
-   public boolean epsilonEquals(VisibilityMapWithNavigableRegionMessage other, double epsilon)
+   public boolean epsilonEquals(NavigableRegionMessage other, double epsilon)
    {
       if(other == null) return false;
       if(other == this) return true;
@@ -100,9 +100,9 @@ public class VisibilityMapWithNavigableRegionMessage extends Packet<VisibilityMa
    {
       if(other == null) return false;
       if(other == this) return true;
-      if(!(other instanceof VisibilityMapWithNavigableRegionMessage)) return false;
+      if(!(other instanceof NavigableRegionMessage)) return false;
 
-      VisibilityMapWithNavigableRegionMessage otherMyClass = (VisibilityMapWithNavigableRegionMessage) other;
+      NavigableRegionMessage otherMyClass = (NavigableRegionMessage) other;
 
       if (!this.home_region_.equals(otherMyClass.home_region_)) return false;
       if (!this.home_region_cluster_.equals(otherMyClass.home_region_cluster_)) return false;
