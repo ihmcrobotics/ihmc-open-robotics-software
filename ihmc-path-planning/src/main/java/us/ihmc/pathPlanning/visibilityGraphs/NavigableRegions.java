@@ -10,6 +10,8 @@ import us.ihmc.pathPlanning.visibilityGraphs.tools.PlanarRegionTools;
 import us.ihmc.robotics.geometry.PlanarRegion;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 
+//TODO: +++JEP: Either remove this class or add more helper methods here. Right now it does not do enough worth keeping it around.
+//TODO: +++JEP: Clean up package structure for all of these classes.
 public class NavigableRegions
 {
    private List<PlanarRegion> regions;
