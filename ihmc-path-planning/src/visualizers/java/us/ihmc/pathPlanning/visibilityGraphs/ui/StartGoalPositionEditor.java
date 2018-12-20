@@ -10,8 +10,8 @@ import javafx.scene.SubScene;
 import javafx.scene.input.MouseButton;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.input.PickResult;
-import us.ihmc.commons.PrintTools;
 import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.log.LogTools;
 import us.ihmc.messager.Messager;
 import us.ihmc.messager.MessagerAPIFactory.Topic;
 
@@ -114,7 +114,7 @@ public class StartGoalPositionEditor extends AnimationTimer
          if (positionValidated.getAndSet(false))
          {
             if (VERBOSE)
-               PrintTools.info(this, "Start position is validated: " + interception);
+               LogTools.info("Start position is validated: " + interception, this);
             messager.submitMessage(startEditModeEnabledTopic, false);
          }
          return;
@@ -131,7 +131,7 @@ public class StartGoalPositionEditor extends AnimationTimer
          if (positionValidated.getAndSet(false))
          {
             if (VERBOSE)
-               PrintTools.info(this, "Goal position is validated: " + interception);
+               LogTools.info("Goal position is validated: " + interception, this);
             messager.submitMessage(goalEditModeEnabledTopic, false);
          }
       }
@@ -142,14 +142,14 @@ public class StartGoalPositionEditor extends AnimationTimer
       if (!isRayCastInterceptorAttached)
       {
          if (VERBOSE)
-            PrintTools.info(this, "Attaching ray cast event handler.");
+            LogTools.info("Attaching ray cast event handler.", this);
          sceneNode.addEventHandler(MouseEvent.ANY, rayCastInterceptor);
          isRayCastInterceptorAttached = true;
       }
       if (!isLeftClickInterceptorAttached)
       {
          if (VERBOSE)
-            PrintTools.info(this, "Attaching left click event handler.");
+            LogTools.info("Attaching left click event handler.", this);
          sceneNode.addEventHandler(MouseEvent.ANY, leftClickInterceptor);
          isLeftClickInterceptorAttached = true;
       }

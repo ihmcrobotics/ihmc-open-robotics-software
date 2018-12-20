@@ -30,7 +30,7 @@ import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerCostParame
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParameters;
 import us.ihmc.idl.IDLSequence;
 import us.ihmc.messager.Messager;
-import us.ihmc.pathPlanning.visibilityGraphs.dataStructure.NavigableRegion;
+import us.ihmc.pathPlanning.visibilityGraphs.dataStructure.VisibilityMapWithNavigableRegion;
 import us.ihmc.pathPlanning.visibilityGraphs.interfaces.VisibilityGraphsParameters;
 import us.ihmc.pathPlanning.visibilityGraphs.interfaces.VisibilityMapHolder;
 import us.ihmc.pubsub.DomainFactory;
@@ -238,11 +238,11 @@ public class RemoteUIMessageConverter
       VisibilityMapHolder goalVisibilityMap = VisibilityGraphMessagesConverter.convertToSingleSourceVisibilityMap(packet.getGoalVisibilityMap());
       VisibilityMapHolder interRegionVisibilityMap = VisibilityGraphMessagesConverter.convertToInterRegionsVisibilityMap(packet.getInterRegionsMap());
 
-      List<NavigableRegion> navigableRegionList = VisibilityGraphMessagesConverter.convertToNavigableRegionsList(packet.getNavigableRegions());
+      List<VisibilityMapWithNavigableRegion> navigableRegionList = VisibilityGraphMessagesConverter.convertToNavigableRegionsList(packet.getNavigableRegions());
 
       messager.submitMessage(FootstepPlannerMessagerAPI.StartVisibilityMap, startVisibilityMap);
       messager.submitMessage(FootstepPlannerMessagerAPI.GoalVisibilityMap, goalVisibilityMap);
-      messager.submitMessage(FootstepPlannerMessagerAPI.NavigableRegionData, navigableRegionList);
+      messager.submitMessage(FootstepPlannerMessagerAPI.VisibilityMapWithNavigableRegionData, navigableRegionList);
       messager.submitMessage(FootstepPlannerMessagerAPI.InterRegionVisibilityMap, interRegionVisibilityMap);
    }
 
@@ -402,8 +402,8 @@ public class RemoteUIMessageConverter
 
       packet.setMaxInterRegionConnectionLength(parameters.getMaxInterRegionConnectionLength());
       packet.setNormalZThresholdForAccessibleRegions(parameters.getNormalZThresholdForAccessibleRegions());
-      packet.setExtrusionDistance(parameters.getExtrusionDistance());
-      packet.setExtrusionDistanceIfNotTooHighToStep(parameters.getExtrusionDistanceIfNotTooHighToStep());
+      packet.setExtrusionDistance(parameters.getObstacleExtrusionDistance());
+      packet.setExtrusionDistanceIfNotTooHighToStep(parameters.getObstacleExtrusionDistanceIfNotTooHighToStep());
       packet.setTooHighToStepDistance(parameters.getTooHighToStepDistance());
       packet.setClusterResolution(parameters.getClusterResolution());
       packet.setExplorationDistanceFromStartGoal(parameters.getExplorationDistanceFromStartGoal());

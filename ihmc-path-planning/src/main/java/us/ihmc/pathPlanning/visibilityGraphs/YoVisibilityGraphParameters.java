@@ -34,8 +34,8 @@ public class YoVisibilityGraphParameters implements VisibilityGraphsParameters
       setMaxInterRegionConnectionLength(parameters.getMaxInterRegionConnectionLength());
       setNormalZThresholdForAccessibleRegions(parameters.getNormalZThresholdForAccessibleRegions());
       setRegionOrthogonalAngle(parameters.getRegionOrthogonalAngle());
-      setExtrusionDistance(parameters.getExtrusionDistance());
-      setExtrusionDistanceIfNotTooHighToStep(parameters.getExtrusionDistanceIfNotTooHighToStep());
+      setExtrusionDistance(parameters.getObstacleExtrusionDistance());
+      setExtrusionDistanceIfNotTooHighToStep(parameters.getObstacleExtrusionDistanceIfNotTooHighToStep());
       setTooHighToStepDistance(parameters.getTooHighToStepDistance());
       setClusterResolution(parameters.getClusterResolution());
       setExplorationDistanceFromStartGoal(parameters.getExplorationDistanceFromStartGoal());
@@ -89,13 +89,13 @@ public class YoVisibilityGraphParameters implements VisibilityGraphsParameters
    }
 
    @Override
-   public double getExtrusionDistance()
+   public double getObstacleExtrusionDistance()
    {
       return extrusionDistance.getDoubleValue();
    }
 
    @Override
-   public double getExtrusionDistanceIfNotTooHighToStep()
+   public double getObstacleExtrusionDistanceIfNotTooHighToStep()
    {
       return extrusionDistanceIfNotTooHighToStep.getDoubleValue();
    }
