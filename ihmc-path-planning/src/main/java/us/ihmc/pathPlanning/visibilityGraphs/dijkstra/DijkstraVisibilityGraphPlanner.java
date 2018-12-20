@@ -65,13 +65,13 @@ public class DijkstraVisibilityGraphPlanner implements VisibilityGraphPathPlanne
 
       double bestCostToGoal = Double.POSITIVE_INFINITY;
 
-      stackLoop: while (!stack.isEmpty())
+      while (!stack.isEmpty())
       {
          ConnectionPoint3D sourcePoint = stack.poll();
          double sourceNodeCost = nodeCosts.get(sourcePoint);
 
          if (sourceNodeCost > bestCostToGoal)
-            break stackLoop;
+            break;
 
          HashSet<ConnectionData> connections = visibilityMap.computeIfAbsent(sourcePoint, (p) -> new HashSet<>());
          double distanceToGoalSquared = sourcePoint.distanceSquared(goalPoint);
