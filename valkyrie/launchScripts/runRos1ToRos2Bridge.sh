@@ -3,6 +3,10 @@
 source $HOME/.val_config
 source $HOME/.ihmc_bridge_config
 scriptname=$(basename $0)
+BRIDGE_NAME=valkyrie_static_bridge
+
+# No bridge options for static bridge
+BRIDGE_OPTS=
 
 # Kill off old processes
 
@@ -20,16 +24,16 @@ for p in $bridge_script_processes; do
 done
 
 # Nuke any existing bridges, giving processes time to die
-killall -q dynamic_bridge && echo Waiting for old bridge processes to die && sleep 3
-killall -q -9 dynamic_bridge && echo Waiting for old bridge processes to die harder && sleep 3
+killall -q $BRIDGE_NAME && echo Waiting for old bridge processes to die && sleep 3
+killall -q -9 $BRIDGE_NAME && echo Waiting for old bridge processes to die harder && sleep 3
 
 # Check whether there's something still not dead, in which case give up
-killall -q -0 dynamic_bridge && echo Unable to kill old bridge processes && exit 1
+killall -q -0 $BRIDGE_NAME && echo Unable to kill old bridge processes && exit 1
 
 echo "Starting bridge"
 
 while [[ 1 ]]; do 
-    /usr/bin/python3 /opt/ros/ardent/bin/ros2 run ros1_bridge dynamic_bridge --bridge-all-topics &
+    /usr/bin/python3 /opt/ros/ardent/bin/ros2 run ros1_bridge $BRIDGE_NAME $BRIDGE_OPTS &
     BRIDGE_PID=$!
     trap "kill $BRIDGE_PID && source $HOME/.val_config && rosnode kill ros_bridge; exit 0" INT TERM
     wait
