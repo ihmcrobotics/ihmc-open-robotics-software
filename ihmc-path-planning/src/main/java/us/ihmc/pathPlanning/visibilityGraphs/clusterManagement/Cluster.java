@@ -24,6 +24,7 @@ import us.ihmc.robotics.geometry.PlanarRegion;
  */
 public class Cluster
 {
+   //TODO: +++JerryPratt: Refactor packages. No need for clusterManagement package.
    //TODO: +++JerryPratt: Remove so many methods and clean up the API so easier to maintain.
 
    private final RigidBodyTransform transformToWorld = new RigidBodyTransform();
