@@ -58,6 +58,7 @@ public class BipedalSupportPlanarRegionPublisher
    private final FullHumanoidRobotModel fullRobotModel;
    private final HumanoidReferenceFrames referenceFrames;
    private final SideDependentList<ContactablePlaneBody> contactableFeet;
+   private final List<PlanarRegion> supportRegions = new ArrayList<>();
 
    public BipedalSupportPlanarRegionPublisher(DRCRobotModel robotModel)
    {
@@ -81,6 +82,11 @@ public class BipedalSupportPlanarRegionPublisher
                                            (NewMessageListener<RobotConfigurationData>) subscriber -> latestRobotConfigurationData.set(subscriber.takeNextData()));
       regionPublisher = ROS2Tools.createPublisher(ros2Node, PlanarRegionsListMessage.class,
                                                   REACommunicationProperties.subscriberCustomRegionsTopicNameGenerator);
+      
+      for (int i = 0; i < 3; i++)
+      {
+         supportRegions.add(new PlanarRegion());
+      }
    }
 
    public void start()
@@ -107,45 +113,44 @@ public class BipedalSupportPlanarRegionPublisher
 
       SideDependentList<Boolean> isInSupport = new SideDependentList<Boolean>(!capturabilityBasedStatus.getLeftFootSupportPolygon2d().isEmpty(),
                                                                               !capturabilityBasedStatus.getRightFootSupportPolygon2d().isEmpty());
-      List<PlanarRegion> supportRegions = new ArrayList<>();
-
       if (useConvexHullIfPossible && feetAreInSamePlane(isInSupport))
       {
          ContactablePlaneBody leftContactableFoot = contactableFeet.get(RobotSide.LEFT);
          ContactablePlaneBody rightContactableFoot = contactableFeet.get(RobotSide.RIGHT);
-
          ReferenceFrame leftSoleFrame = leftContactableFoot.getSoleFrame();
-         RigidBodyTransform leftFootTransformToWorld = leftSoleFrame.getTransformToWorldFrame();
 
-         List<FramePoint2D> leftFootContactPoints = leftContactableFoot.getContactPoints2d();
-         List<FramePoint2D> rightFootContactPoints = rightContactableFoot.getContactPoints2d();
-         List<FramePoint2D> allContactPoints = new ArrayList<>(leftFootContactPoints);
-         allContactPoints.addAll(rightFootContactPoints);
-         
-         for(int i = 0; i < allContactPoints.size(); i++)
-         {
-            allContactPoints.get(i).changeFrameAndProjectToXYPlane(leftSoleFrame);
-         }
+         List<FramePoint2D> allContactPoints = new ArrayList<>();
+         allContactPoints.addAll(leftContactableFoot.getContactPoints2d());
+         allContactPoints.addAll(rightContactableFoot.getContactPoints2d());
+         allContactPoints.forEach(p -> p.changeFrameAndProjectToXYPlane(leftSoleFrame));
 
-         PlanarRegion convexHullRegion = new PlanarRegion(leftFootTransformToWorld, new ConvexPolygon2D(Vertex2DSupplier.asVertex2DSupplier(allContactPoints)));
-         convexHullRegion.setRegionId(2);
-         supportRegions.add(convexHullRegion);
+         supportRegions.set(0, new PlanarRegion());
+         supportRegions.set(1, new PlanarRegion());
+         supportRegions.set(2, new PlanarRegion(leftSoleFrame.getTransformToWorldFrame(), new ConvexPolygon2D(Vertex2DSupplier.asVertex2DSupplier(allContactPoints))));
       }
       else
       {
          for (RobotSide robotSide : RobotSide.values)
          {
-            if (!isInSupport.get(robotSide))
-               continue;
-
-            ContactablePlaneBody contactableFoot = contactableFeet.get(robotSide);
-            List<FramePoint2D> contactPoints = contactableFoot.getContactPoints2d();
-            RigidBodyTransform transformToWorld = contactableFoot.getSoleFrame().getTransformToWorldFrame();
-
-            PlanarRegion supportRegion = new PlanarRegion(transformToWorld, new ConvexPolygon2D(Vertex2DSupplier.asVertex2DSupplier(contactPoints)));
-            supportRegion.setRegionId(robotSide.ordinal());
-            supportRegions.add(supportRegion);
+            if (isInSupport.get(robotSide))
+            {
+               ContactablePlaneBody contactableFoot = contactableFeet.get(robotSide);
+               List<FramePoint2D> contactPoints = contactableFoot.getContactPoints2d();
+               RigidBodyTransform transformToWorld = referenceFrames.getSoleFrames().get(robotSide).getTransformToWorldFrame();
+               supportRegions.set(robotSide.ordinal(), new PlanarRegion(transformToWorld, new ConvexPolygon2D(Vertex2DSupplier.asVertex2DSupplier(contactPoints))));
+            }
+            else
+            {
+               supportRegions.set(robotSide.ordinal(), new PlanarRegion());
+            }
          }
+
+         supportRegions.set(2, new PlanarRegion());
+      }
+
+      for (int i = 0; i < 3; i++)
+      {
+         supportRegions.get(i).setRegionId(i);
       }
 
       regionPublisher.publish(PlanarRegionMessageConverter.convertToPlanarRegionsListMessage(new PlanarRegionsList(supportRegions)));
