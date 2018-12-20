@@ -353,11 +353,11 @@ public class PlanarRegionTools
 
       if (MathTools.epsilonEquals(0.0, epsilon, 1.0e-10))
       {
-         //TODO: +++JEP: Discuss this one with Sylvain. Do we want to check inside the concave hull, or check each planar region individually?
+         //TODO: +++JerryPratt: Discuss this one with Sylvain. Do we want to check inside the concave hull, or check each planar region individually?
 
          for (ConvexPolygon2D convexPolygon : convexPolygons)
          {
-            //+++JEP: Not sure if this one is faster or not. Discuss with Sylvain best way to do point inside convex polygon check.
+            //+++JerryPratt: Not sure if this one is faster or not. Discuss with Sylvain best way to do point inside convex polygon check.
             // Seems like you should be able to do a binary search on the distance to vertices, since it should be monotonic, right?
             //            boolean isInsidePolygon = convexPolygon.isPointInside(pointInLocalToCheck);
             boolean isInsidePolygon = isPointInsideConvexPolygon2D(convexPolygon, pointInLocalToCheck);
@@ -371,11 +371,11 @@ public class PlanarRegionTools
       }
       else
       {
-         //TODO: +++JEP: Discuss this one with Sylvain. Do we want to check inside the concave hull, or check each planar region individually?
+         //TODO: +++JerryPratt: Discuss this one with Sylvain. Do we want to check inside the concave hull, or check each planar region individually?
 
          for (ConvexPolygon2D convexPolygon : convexPolygons)
          {
-            //+++JEP: Not sure if this one is faster or not. Discuss with Sylvain best way to do point inside convex polygon check.
+            //+++JerryPratt: Not sure if this one is faster or not. Discuss with Sylvain best way to do point inside convex polygon check.
             // Seems like you should be able to do a binary search on the distance to vertices, since it should be monotonic, right?
             //            boolean isInsidePolygon = convexPolygon.isPointInside(pointInLocalToCheck);
             boolean isInsidePolygon = convexPolygon.isPointInside(pointInLocalToCheck, epsilon);
@@ -383,7 +383,7 @@ public class PlanarRegionTools
             if (isInsidePolygon)
                return true;
 
-            //TODO: +++JEP: Discuss using the concaveHull or not. It seems buggy when points cross over the other side..
+            //TODO: +++JerryPratt: Discuss using the concaveHull or not. It seems buggy when points cross over the other side..
             // When ClusterTools.extrudePolygon() is buggy...
             //
             //            if (planarRegion.getConcaveHullSize() < convexHull.getNumberOfVertices())
@@ -562,7 +562,7 @@ public class PlanarRegionTools
       boolean boundingBoxesOfProjectionsIntersect = convexHullOne.getBoundingBox().intersectsEpsilon(convexHullTwo.getBoundingBox(), epsilon);
       return boundingBoxesOfProjectionsIntersect;
 
-      //++++++JEP: Fix this and use this if you want it to be more accurate. However, if this is just for approximate tests and can have false positives, then bounding boxes are fine.
+      //++++++JerryPratt: Fix this and use this if you want it to be more accurate. However, if this is just for approximate tests and can have false positives, then bounding boxes are fine.
       //      return doPolygonsIntersect(convexHullOne, convexHullTwo, epsilon);
    }
 

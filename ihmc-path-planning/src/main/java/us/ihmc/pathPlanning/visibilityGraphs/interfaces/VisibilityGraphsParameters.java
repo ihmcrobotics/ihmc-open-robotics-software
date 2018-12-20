@@ -214,10 +214,10 @@ public interface VisibilityGraphsParameters
 
          boolean isRegionValidObstacleUsingMinimumHeightAbove(PlanarRegion potentialObstacleRegion, PlanarRegion navigableRegion)
          {
-            //TODO: ++++++JEP: Fix this and use this if you want it to be more accurate. However, if this is just for approximate tests and can have false positives, then bounding boxes are fine.
+            //TODO: ++++++JerryPratt: Fix this and use this if you want it to be more accurate. However, if this is just for approximate tests and can have false positives, then bounding boxes are fine.
             //      return doPolygonsIntersect(convexHullOne, convexHullTwo, epsilon);
 
-            //TOOD: ++++++JEP: Lots of bugs here. Need to clean up ConvexPolygon stuff to find distances and if overlapping more nicely...
+            //TOOD: ++++++JerryPratt: Lots of bugs here. Need to clean up ConvexPolygon stuff to find distances and if overlapping more nicely...
             //TODO: Get rid of these magic numbers and make them parameters somewhere. Make sure the overlapping region check is larger than getMaxInterRegionConnectionLength() 
             //TODO: BodyPathPlannerEnvironment crash when the number is set to 1.0. But should work fine all the same...
             //TOOD: This check should just be an approximation and should be ok for false positives. In fact, just returning true should be ok. Check that.
