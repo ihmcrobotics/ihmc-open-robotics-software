@@ -199,6 +199,7 @@ public interface VisibilityGraphsParameters
          @Override
          public boolean isRegionValidObstacle(PlanarRegion potentialObstacleRegion, PlanarRegion navigableRegion)
          {
+            //TODO: Choose one and use it. Or if allow for either, make this boolean a parameter or static field.
             boolean usePolygonIntersection = false;
 
             if (usePolygonIntersection)
@@ -213,7 +214,7 @@ public interface VisibilityGraphsParameters
 
          public boolean isRegionValidObstacleUsingMinimumHeightAbove(PlanarRegion potentialObstacleRegion, PlanarRegion navigableRegion)
          {
-            //++++++JEP: Fix this and use this if you want it to be more accurate. However, if this is just for approximate tests and can have false positives, then bounding boxes are fine.
+            //TODO: ++++++JEP: Fix this and use this if you want it to be more accurate. However, if this is just for approximate tests and can have false positives, then bounding boxes are fine.
             //      return doPolygonsIntersect(convexHullOne, convexHullTwo, epsilon);
 
             //TOOD: ++++++JEP: Lots of bugs here. Need to clean up ConvexPolygon stuff to find distances and if overlapping more nicely...
