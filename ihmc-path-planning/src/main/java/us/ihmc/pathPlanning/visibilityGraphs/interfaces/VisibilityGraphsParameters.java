@@ -12,7 +12,7 @@ import us.ihmc.pathPlanning.visibilityGraphs.tools.PlanarRegionTools;
 import us.ihmc.robotics.geometry.ConvexPolygonTools;
 import us.ihmc.robotics.geometry.PlanarRegion;
 
-interface VisibilityGraphsParameters
+public interface VisibilityGraphsParameters
 {
    double getMaxInterRegionConnectionLength();
 
