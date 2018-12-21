@@ -450,7 +450,7 @@ public class ClusterTools
       if (verticalObstacle)
       {
          // Project region as a line
-         //TODO: Seems something fishy here if you look at the Cinder Block field and see that the vertical obstacle near the ramp removes navigable points from the flat, but not from the ramp?
+         //TODO: +++JerryPratt: Rethink vertical obstacles and redo how they are done. Lots of potential issues with things like single region doorways, regions that start and end at a low height, etc.
          tempFlatClusterToExtrude = new Cluster(ExtrusionSide.OUTSIDE, ClusterType.MULTI_LINE);
          List<Point3D> filteredPointsForMultiLine = filterVerticalPolygonForMultiLineExtrusion(temporaryClusterPoints, POPPING_MULTILINE_POINTS_THRESHOLD);
          tempFlatClusterToExtrude.addRawPointsInLocal3D(filteredPointsForMultiLine);
