@@ -1,8 +1,6 @@
 package us.ihmc.quadrupedUI;
 
 import net.java.games.input.Event;
-import us.ihmc.llama.model.LlamaPhysicalProperties;
-import us.ihmc.llama.model.LlamaVersion;
 import us.ihmc.quadrupedPlanning.input.InputValueIntegrator;
 import us.ihmc.tools.inputDevices.joystick.Joystick;
 import us.ihmc.tools.inputDevices.joystick.JoystickCustomizationFilter;
@@ -23,7 +21,6 @@ public class BodyControlXBoxAdapter implements JoystickEventListener
    private static final double maxBodyRoll = 0.15;
    private static final double maxBodyTranslation = 0.1;
 
-   private final Joystick joystick;
    private final Map<XBoxOneMapping, Double> channels = Collections.synchronizedMap(new EnumMap<>(XBoxOneMapping.class));
    private InputValueIntegrator bodyHeight;
    private double commandedBodyYaw = 0.0;
@@ -32,10 +29,10 @@ public class BodyControlXBoxAdapter implements JoystickEventListener
    private double commandedBodyTranslationX = 0.0;
    private double commandedBodyTranslationY = 0.0;
 
-   public BodyControlXBoxAdapter() throws JoystickNotFoundException
+   public BodyControlXBoxAdapter(double nominalBodyHeight) throws JoystickNotFoundException
    {
-      joystick = new Joystick(JoystickModel.XBOX_ONE, 0);
-      this.bodyHeight = new InputValueIntegrator(LlamaStepTabController.DT, new LlamaPhysicalProperties(LlamaVersion.Llama, true).getNominalBodyHeight());
+      Joystick joystick = new Joystick(JoystickModel.XBOX_ONE, 0);
+      this.bodyHeight = new InputValueIntegrator(BodyPoseController.DT, nominalBodyHeight);
 
       for (XBoxOneMapping channel : XBoxOneMapping.values)
          channels.put(channel, 0.0);
