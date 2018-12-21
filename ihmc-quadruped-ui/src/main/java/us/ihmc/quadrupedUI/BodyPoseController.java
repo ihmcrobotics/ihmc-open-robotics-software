@@ -36,7 +36,7 @@ public class BodyPoseController
 
    private final Messager messager;
 
-   public BodyPoseController(JavaFXMessager messager)
+   public BodyPoseController(JavaFXMessager messager, double nominalHeight)
    {
       this.messager = messager;
 
@@ -46,7 +46,7 @@ public class BodyPoseController
 
       try
       {
-         xBoxAdapter = new BodyControlXBoxAdapter();
+         xBoxAdapter = new BodyControlXBoxAdapter(nominalHeight);
       }
       catch (JoystickNotFoundException e)
       {
