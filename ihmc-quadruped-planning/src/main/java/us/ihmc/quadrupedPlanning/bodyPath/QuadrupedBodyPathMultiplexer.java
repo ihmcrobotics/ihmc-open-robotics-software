@@ -1,10 +1,14 @@
 package us.ihmc.quadrupedPlanning.bodyPath;
 
 import controller_msgs.msg.dds.QuadrupedBodyPathPlanMessage;
+import controller_msgs.msg.dds.QuadrupedFootstepStatusMessage;
+import us.ihmc.communication.ROS2Tools;
 import us.ihmc.euclid.referenceFrame.FramePose2D;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.quadrupedBasics.referenceFrames.QuadrupedReferenceFrames;
+import us.ihmc.quadrupedCommunication.QuadrupedControllerAPIDefinition;
 import us.ihmc.quadrupedPlanning.QuadrupedXGaitSettingsReadOnly;
+import us.ihmc.robotics.robotSide.RobotQuadrant;
 import us.ihmc.ros2.Ros2Node;
 import us.ihmc.yoVariables.providers.DoubleProvider;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
@@ -24,8 +28,28 @@ public class QuadrupedBodyPathMultiplexer implements QuadrupedPlanarBodyPathProv
                                        Ros2Node ros2Node, DoubleProvider firstStepDelay, YoGraphicsListRegistry graphicsListRegistry, YoVariableRegistry parentRegistry)
    {
       waypointBasedPath = new QuadrupedWaypointBasedBodyPathProvider(robotName, referenceFrames, ros2Node, timestamp, graphicsListRegistry, registry);
-      joystickBasedPath = new QuadrupedConstantVelocityBodyPathProvider(robotName, referenceFrames, xGaitSettings, firstStepDelay, timestamp, ros2Node, registry);
+      joystickBasedPath = new QuadrupedConstantVelocityBodyPathProvider(referenceFrames, xGaitSettings, firstStepDelay, timestamp, registry);
       joystickBasedPath.setShiftPlanBasedOnStepAdjustment(true);
+
+      ROS2Tools.MessageTopicNameGenerator controllerPubGenerator = QuadrupedControllerAPIDefinition.getPublisherTopicNameGenerator(robotName);
+
+      ROS2Tools.createCallbackSubscription(ros2Node, QuadrupedFootstepStatusMessage.class, controllerPubGenerator, s -> {
+         QuadrupedFootstepStatusMessage packet = s.takeNextData();
+         if (packet.getFootstepStatus() == QuadrupedFootstepStatusMessage.FOOTSTEP_STATUS_STARTED)
+         {
+            RobotQuadrant quadrant = RobotQuadrant.fromByte((byte) packet.getFootstepQuadrant());
+            joystickBasedPath.startedFootstep(quadrant, packet);
+         }
+      });
+
+      ROS2Tools.createCallbackSubscription(ros2Node, QuadrupedFootstepStatusMessage.class, controllerPubGenerator, s -> {
+         QuadrupedFootstepStatusMessage packet = s.takeNextData();
+         if (packet.getFootstepStatus() == QuadrupedFootstepStatusMessage.FOOTSTEP_STATUS_COMPLETED)
+         {
+            RobotQuadrant quadrant = RobotQuadrant.fromByte((byte) packet.getFootstepQuadrant());
+            joystickBasedPath.completedFootstep(quadrant, packet);
+         }
+      });
 
       parentRegistry.addChild(registry);
    }

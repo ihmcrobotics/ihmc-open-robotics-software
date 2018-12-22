@@ -52,8 +52,8 @@ public class QuadrupedConstantVelocityBodyPathProvider implements QuadrupedPlana
    private final FramePose2D tempPose = new FramePose2D();
    private final QuaternionBasedTransform tempTransform = new QuaternionBasedTransform();
 
-   public QuadrupedConstantVelocityBodyPathProvider(String robotName, QuadrupedReferenceFrames referenceFrames, QuadrupedXGaitSettingsReadOnly xGaitSettings,
-                                                    DoubleProvider firstStepDelay, YoDouble timestamp, Ros2Node ros2Node, YoVariableRegistry parentRegistry)
+   public QuadrupedConstantVelocityBodyPathProvider(QuadrupedReferenceFrames referenceFrames, QuadrupedXGaitSettingsReadOnly xGaitSettings,
+                                                    DoubleProvider firstStepDelay, YoDouble timestamp, YoVariableRegistry parentRegistry)
    {
       this.supportFrame = referenceFrames.getCenterOfFeetZUpFrameAveragingLowestZHeightsAcrossEnds();
       this.firstStepDelay = firstStepDelay;
@@ -64,32 +64,22 @@ public class QuadrupedConstantVelocityBodyPathProvider implements QuadrupedPlana
          footstepCompleteStatuses.set(quadrant, new AtomicReference<>());
       }
 
-      MessageTopicNameGenerator controllerPubGenerator = QuadrupedControllerAPIDefinition.getPublisherTopicNameGenerator(robotName);
-
-      ROS2Tools.createCallbackSubscription(ros2Node, QuadrupedFootstepStatusMessage.class, controllerPubGenerator, s -> {
-         QuadrupedFootstepStatusMessage packet = s.takeNextData();
-         if (packet.getFootstepStatus() == QuadrupedFootstepStatusMessage.FOOTSTEP_STATUS_STARTED)
-         {
-            RobotQuadrant quadrant = RobotQuadrant.fromByte((byte) packet.getFootstepQuadrant());
-            footstepStartStatuses.get(quadrant).set(packet);
-            recomputeInitialPose.set(true);
-         }
-      });
-
-      ROS2Tools.createCallbackSubscription(ros2Node, QuadrupedFootstepStatusMessage.class, controllerPubGenerator, s -> {
-         QuadrupedFootstepStatusMessage packet = s.takeNextData();
-         if (packet.getFootstepStatus() == QuadrupedFootstepStatusMessage.FOOTSTEP_STATUS_COMPLETED)
-         {
-            RobotQuadrant quadrant = RobotQuadrant.fromByte((byte) packet.getFootstepQuadrant());
-            footstepCompleteStatuses.get(quadrant).set(packet);
-            recomputeStepAdjustment.set(true);
-         }
-      });
-
       this.xGaitSettings = xGaitSettings;
       this.timestamp = timestamp;
 
       parentRegistry.addChild(registry);
+   }
+
+   public void completedFootstep(RobotQuadrant robotQuadrant, QuadrupedFootstepStatusMessage message)
+   {
+      footstepStartStatuses.get(robotQuadrant).set(message);
+      recomputeInitialPose.set(true);
+   }
+
+   public void startedFootstep(RobotQuadrant robotQuadrant, QuadrupedFootstepStatusMessage message)
+   {
+      footstepCompleteStatuses.get(robotQuadrant).set(message);
+      recomputeInitialPose.set(true);
    }
 
    @Override
@@ -130,7 +120,7 @@ public class QuadrupedConstantVelocityBodyPathProvider implements QuadrupedPlana
       }
 
       initialPose.set(startPoint.getX(), startPoint.getY(), startYaw.getDoubleValue());
-      if(shiftPlanBasedOnStepAdjustment.getBooleanValue())
+      if (shiftPlanBasedOnStepAdjustment.getBooleanValue())
       {
          initialPose.prependTranslation(achievedStepAdjustment.getX(), achievedStepAdjustment.getY());
       }
@@ -188,7 +178,7 @@ public class QuadrupedConstantVelocityBodyPathProvider implements QuadrupedPlana
       double newStartTime = latestStatusMessage.getDesiredStepInterval().getEndTime();
       startTime.set(newStartTime);
 
-      if(shiftPlanBasedOnStepAdjustment.getBooleanValue())
+      if (shiftPlanBasedOnStepAdjustment.getBooleanValue())
       {
          RobotQuadrant quadrant = RobotQuadrant.fromByte((byte) latestStatusMessage.getFootstepQuadrant());
          Point3DReadOnly latestMessageSoleDesiredPosition = latestStatusMessage.getDesiredTouchdownPositionInWorld();
