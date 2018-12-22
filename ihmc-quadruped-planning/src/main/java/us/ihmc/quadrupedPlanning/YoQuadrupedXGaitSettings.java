@@ -3,6 +3,7 @@ package us.ihmc.quadrupedPlanning;
 import us.ihmc.communication.net.PacketConsumer;
 import us.ihmc.communication.streamingData.GlobalDataProducer;
 import us.ihmc.commons.MathTools;
+import us.ihmc.yoVariables.listener.VariableChangedListener;
 import us.ihmc.yoVariables.parameters.DoubleParameter;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
@@ -59,6 +60,16 @@ public class YoQuadrupedXGaitSettings implements QuadrupedXGaitSettingsReadOnly
       }
 
       parentRegistry.addChild(registry);
+   }
+
+   public void addVariableChangedListener(VariableChangedListener listener)
+   {
+      yoEndDoubleSupportDuration.addVariableChangedListener(listener);
+      yoEndPhaseShift.addVariableChangedListener(listener);
+      yoStanceLength.addVariableChangedListener(listener);
+      yoStanceWidth.addVariableChangedListener(listener);
+      yoStepGroundClearance.addVariableChangedListener(listener);
+      yoStepDuration.addVariableChangedListener(listener);
    }
 
    @Override

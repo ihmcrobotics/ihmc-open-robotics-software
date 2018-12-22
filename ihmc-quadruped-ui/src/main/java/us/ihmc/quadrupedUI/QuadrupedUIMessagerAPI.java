@@ -1,16 +1,14 @@
 package us.ihmc.quadrupedUI;
 
-import controller_msgs.msg.dds.QuadrupedBodyOrientationMessage;
 import controller_msgs.msg.dds.QuadrupedBodyTrajectoryMessage;
 import controller_msgs.msg.dds.RobotConfigurationData;
-import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.HighLevelControllerState;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelControllerName;
 import us.ihmc.messager.MessagerAPIFactory;
 import us.ihmc.messager.MessagerAPIFactory.*;
 import us.ihmc.quadrupedBasics.referenceFrames.QuadrupedReferenceFrames;
+import us.ihmc.quadrupedPlanning.QuadrupedXGaitSettings;
+import us.ihmc.quadrupedPlanning.QuadrupedXGaitSettingsReadOnly;
 import us.ihmc.robotModels.FullQuadrupedRobotModel;
-
-import javax.naming.ldap.Control;
 
 public class QuadrupedUIMessagerAPI
 {
@@ -21,6 +19,8 @@ public class QuadrupedUIMessagerAPI
    private static final CategoryTheme Command = apiFactory.createCategoryTheme("Command");
    private static final CategoryTheme BodyControl = apiFactory.createCategoryTheme("BodyControl");
    private static final CategoryTheme FootstepControl = apiFactory.createCategoryTheme("FootstepControl");
+   private static final CategoryTheme Planning = apiFactory.createCategoryTheme("Planning");
+   private static final CategoryTheme XGait = apiFactory.createCategoryTheme("XGait");
 
 
    private static final TypedTopicTheme<RobotConfigurationData> RobotConfigurationData = apiFactory.createTypedTopicTheme("RobotConfigurationData");
@@ -30,6 +30,7 @@ public class QuadrupedUIMessagerAPI
    private static final TypedTopicTheme<Boolean> Enable = apiFactory.createTypedTopicTheme("Enable");
    private static final TypedTopicTheme<Double> BodyHeight = apiFactory.createTypedTopicTheme("BodyHeight");
    private static final TypedTopicTheme<QuadrupedBodyTrajectoryMessage> BodyTrajectoryMessage = apiFactory.createTypedTopicTheme("BodyTrajectoryMessage");
+   private static final TypedTopicTheme<QuadrupedXGaitSettingsReadOnly> XGaitSettings = apiFactory.createTypedTopicTheme("XGaitSettings");
 
    private static final Category Root = apiFactory.createRootCategory(apiFactory.createCategoryTheme("QuadrupedUI"));
 
@@ -42,6 +43,7 @@ public class QuadrupedUIMessagerAPI
    public static final Topic<QuadrupedBodyTrajectoryMessage> BodyTrajectoryMessageTopic = Root.child(Command).topic(BodyTrajectoryMessage);
    public static final Topic<Boolean> EnableBodyControlTopic = Root.child(Command).child(BodyControl).topic(Enable);
    public static final Topic<Boolean> EnableFootstepControlTopic = Root.child(Command).child(FootstepControl).topic(Enable);
+   public static final Topic<QuadrupedXGaitSettingsReadOnly> XGaitSettingsTopic = Root.child(Planning).child(XGait).topic(XGaitSettings);
 
    public static final MessagerAPI API = apiFactory.getAPIAndCloseFactory();
 
