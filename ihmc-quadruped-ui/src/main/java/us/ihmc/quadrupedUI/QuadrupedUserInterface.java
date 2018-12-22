@@ -17,12 +17,15 @@ import us.ihmc.javaFXToolkit.scenes.View3DFactory;
 import us.ihmc.log.LogTools;
 import us.ihmc.messager.Messager;
 import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
+import us.ihmc.quadrupedPlanning.QuadrupedXGaitSettings;
+import us.ihmc.quadrupedPlanning.YoQuadrupedXGaitSettings;
 import us.ihmc.quadrupedRobotics.model.QuadrupedModelFactory;
 import us.ihmc.quadrupedRobotics.model.QuadrupedPhysicalProperties;
 import us.ihmc.quadrupedUI.controllers.BodyPoseController;
 import us.ihmc.quadrupedUI.uiControllers.MainTabController;
 import us.ihmc.ros2.RealtimeRos2Node;
 import us.ihmc.tools.inputDevices.joystick.exceptions.JoystickNotFoundException;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
 
 public class QuadrupedUserInterface
 {
@@ -34,12 +37,14 @@ public class QuadrupedUserInterface
 
    private final JavaFXQuadrupedVisualizer robotVisualizer;
    private final AnimationTimer cameraTracking;
+//   private final YoVariableRegistry registry;
 
    @FXML
    private MainTabController mainTabController;
 
    public QuadrupedUserInterface(Stage primaryStage, JavaFXMessager messager, QuadrupedModelFactory modelFactory,
-                                 QuadrupedPhysicalProperties physicalProperties) throws Exception
+                                 QuadrupedPhysicalProperties physicalProperties, QuadrupedXGaitSettings xGaitSettings, YoVariableRegistry registry)
+         throws Exception
    {
       this.primaryStage = primaryStage;
       this.messager = messager;
@@ -96,6 +101,10 @@ public class QuadrupedUserInterface
 
       BodyPoseController bodyPoseController = new BodyPoseController(joystick, messager, physicalProperties.getNominalBodyHeight());
 
+      YoQuadrupedXGaitSettings yoXGaitSettings = new YoQuadrupedXGaitSettings(xGaitSettings, null, registry);
+      yoXGaitSettings.addVariableChangedListener(v -> messager.submitMessage(QuadrupedUIMessagerAPI.XGaitSettingsTopic, yoXGaitSettings));
+      messager.registerTopicListener(QuadrupedUIMessagerAPI.XGaitSettingsTopic, yoXGaitSettings::set);
+
       robotVisualizer.start();
       cameraTracking.start();
       ros2Node.spin();
@@ -128,8 +137,9 @@ public class QuadrupedUserInterface
    }
 
    public static QuadrupedUserInterface createUserInterface(Stage primaryStage, JavaFXMessager messager, QuadrupedModelFactory modelFactory,
-                                                            QuadrupedPhysicalProperties physicalProperties) throws Exception
+                                                            QuadrupedPhysicalProperties physicalProperties, QuadrupedXGaitSettings xGaitSettings,
+                                                            YoVariableRegistry registry) throws Exception
    {
-      return new QuadrupedUserInterface(primaryStage, messager, modelFactory, physicalProperties);
+      return new QuadrupedUserInterface(primaryStage, messager, modelFactory, physicalProperties, xGaitSettings, registry);
    }
 }
