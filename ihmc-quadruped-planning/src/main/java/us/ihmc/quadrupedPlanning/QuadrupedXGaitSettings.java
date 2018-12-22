@@ -13,7 +13,7 @@ public class QuadrupedXGaitSettings implements QuadrupedXGaitSettingsReadOnly
    {
    }
 
-   public QuadrupedXGaitSettings(QuadrupedXGaitSettings other)
+   public QuadrupedXGaitSettings(QuadrupedXGaitSettingsReadOnly other)
    {
       set(other);
    }

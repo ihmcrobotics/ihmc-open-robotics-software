@@ -76,9 +76,13 @@ public class QuadrupedWaypointBasedBodyPathProvider implements QuadrupedPlanarBo
          graphicsListRegistry.registerYoGraphicsList(graphicsList);
       }
 
-      MessageTopicNameGenerator publisherTopicNameGenerator = QuadrupedControllerAPIDefinition.getPublisherTopicNameGenerator(robotName);
-      ROS2Tools.createCallbackSubscription(ros2Node, QuadrupedBodyPathPlanMessage.class, publisherTopicNameGenerator, s -> bodyPathPlanMessage.set(s.takeNextData()));
+
       parentRegistry.addChild(registry);
+   }
+
+   public void setBodyPathPlan(QuadrupedBodyPathPlanMessage message)
+   {
+      bodyPathPlanMessage.set(message);
    }
 
    @Override
