@@ -1,19 +1,20 @@
-package us.ihmc.quadrupedUI;
+package us.ihmc.quadrupedUI.controllers;
 
-import controller_msgs.msg.dds.QuadrupedBodyHeightMessage;
 import controller_msgs.msg.dds.QuadrupedBodyTrajectoryMessage;
 import controller_msgs.msg.dds.SE3TrajectoryPointMessage;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.javaFXToolkit.messager.JavaFXMessager;
-import us.ihmc.log.LogTools;
 import us.ihmc.messager.Messager;
 import us.ihmc.quadrupedBasics.referenceFrames.QuadrupedReferenceFrames;
-import us.ihmc.quadrupedCommunication.QuadrupedMessageTools;
-import us.ihmc.tools.inputDevices.joystick.exceptions.JoystickNotFoundException;
+import us.ihmc.quadrupedUI.QuadrupedUIMessagerAPI;
+import us.ihmc.tools.inputDevices.joystick.Joystick;
 
-import java.util.concurrent.*;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ScheduledFuture;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 
@@ -27,7 +28,8 @@ public class BodyPoseController
    private static final double bodyOrientationMoveTime = 0.35;
 
    private final AtomicBoolean disableBodyControl = new AtomicBoolean(false);
-   private final ScheduledExecutorService executorService = Executors.newSingleThreadScheduledExecutor(ThreadTools.getNamedThreadFactory(getClass().getSimpleName()));
+   private final ScheduledExecutorService executorService = Executors
+         .newSingleThreadScheduledExecutor(ThreadTools.getNamedThreadFactory(getClass().getSimpleName()));
 
    private final AtomicReference<QuadrupedReferenceFrames> referenceFramesReference;
 
@@ -36,23 +38,14 @@ public class BodyPoseController
 
    private final Messager messager;
 
-   public BodyPoseController(JavaFXMessager messager, double nominalHeight)
+   public BodyPoseController(Joystick joystick, JavaFXMessager messager, double nominalHeight)
    {
       this.messager = messager;
 
       messager.registerTopicListener(QuadrupedUIMessagerAPI.EnableBodyControlTopic, this::conditionallyEnableBodyControl);
 
       referenceFramesReference = messager.createInput(QuadrupedUIMessagerAPI.ReferenceFramesTopic);
-
-      try
-      {
-         xBoxAdapter = new BodyControlXBoxAdapter(nominalHeight);
-      }
-      catch (JoystickNotFoundException e)
-      {
-         LogTools.error("Could not find joystick. Running without xbox controller");
-         xBoxAdapter = null;
-      }
+      xBoxAdapter = new BodyControlXBoxAdapter(joystick, nominalHeight);
    }
 
    private void conditionallyEnableBodyControl(boolean enable)
