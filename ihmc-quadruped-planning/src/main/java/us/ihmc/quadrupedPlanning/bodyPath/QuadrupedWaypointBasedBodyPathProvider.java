@@ -46,7 +46,7 @@ public class QuadrupedWaypointBasedBodyPathProvider implements QuadrupedPlanarBo
    private final ReferenceFrame supportFrame;
    private final FramePose3D supportPose = new FramePose3D();
 
-   public QuadrupedWaypointBasedBodyPathProvider(String robotName, QuadrupedReferenceFrames referenceFrames, Ros2Node ros2Node, YoDouble timestamp, YoGraphicsListRegistry graphicsListRegistry, YoVariableRegistry parentRegistry)
+   public QuadrupedWaypointBasedBodyPathProvider(QuadrupedReferenceFrames referenceFrames, YoDouble timestamp, YoGraphicsListRegistry graphicsListRegistry, YoVariableRegistry parentRegistry)
    {
       this.timestamp = timestamp;
       this.supportFrame = referenceFrames.getCenterOfFeetZUpFrameAveragingLowestZHeightsAcrossEnds();
