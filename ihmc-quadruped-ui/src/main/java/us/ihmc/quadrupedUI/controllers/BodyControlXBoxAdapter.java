@@ -1,12 +1,9 @@
-package us.ihmc.quadrupedUI;
+package us.ihmc.quadrupedUI.controllers;
 
 import net.java.games.input.Event;
 import us.ihmc.quadrupedPlanning.input.InputValueIntegrator;
 import us.ihmc.tools.inputDevices.joystick.Joystick;
-import us.ihmc.tools.inputDevices.joystick.JoystickCustomizationFilter;
 import us.ihmc.tools.inputDevices.joystick.JoystickEventListener;
-import us.ihmc.tools.inputDevices.joystick.JoystickModel;
-import us.ihmc.tools.inputDevices.joystick.exceptions.JoystickNotFoundException;
 import us.ihmc.tools.inputDevices.joystick.mapping.XBoxOneMapping;
 
 import java.util.Collections;
@@ -29,23 +26,14 @@ public class BodyControlXBoxAdapter implements JoystickEventListener
    private double commandedBodyTranslationX = 0.0;
    private double commandedBodyTranslationY = 0.0;
 
-   public BodyControlXBoxAdapter(double nominalBodyHeight) throws JoystickNotFoundException
+   public BodyControlXBoxAdapter(Joystick joystick, double nominalBodyHeight)
    {
-      Joystick joystick = new Joystick(JoystickModel.XBOX_ONE, 0);
       this.bodyHeight = new InputValueIntegrator(BodyPoseController.DT, nominalBodyHeight);
 
       for (XBoxOneMapping channel : XBoxOneMapping.values)
          channels.put(channel, 0.0);
 
       joystick.addJoystickEventListener(this);
-      joystick.setPollInterval(10);
-
-      joystick.setCustomizationFilter(new JoystickCustomizationFilter(XBoxOneMapping.LEFT_TRIGGER, false, 0.1, 1));
-      joystick.setCustomizationFilter(new JoystickCustomizationFilter(XBoxOneMapping.RIGHT_TRIGGER, false, 0.1, 1));
-      joystick.setCustomizationFilter(new JoystickCustomizationFilter(XBoxOneMapping.LEFT_STICK_X, false, 0.1, 1));
-      joystick.setCustomizationFilter(new JoystickCustomizationFilter(XBoxOneMapping.LEFT_STICK_Y, false, 0.1, 1));
-      joystick.setCustomizationFilter(new JoystickCustomizationFilter(XBoxOneMapping.RIGHT_STICK_X, false, 0.1, 1));
-      joystick.setCustomizationFilter(new JoystickCustomizationFilter(XBoxOneMapping.RIGHT_STICK_Y, false, 0.1, 1));
    }
 
    @Override

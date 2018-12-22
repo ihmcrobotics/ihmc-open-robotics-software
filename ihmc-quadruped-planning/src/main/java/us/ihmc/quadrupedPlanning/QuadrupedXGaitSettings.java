@@ -9,6 +9,15 @@ public class QuadrupedXGaitSettings implements QuadrupedXGaitSettingsReadOnly
    private double endDoubleSupportDuration;
    private double endPhaseShift;
 
+   public QuadrupedXGaitSettings()
+   {
+   }
+
+   public QuadrupedXGaitSettings(QuadrupedXGaitSettings other)
+   {
+      set(other);
+   }
+
    @Override
    public double getStanceLength()
    {
