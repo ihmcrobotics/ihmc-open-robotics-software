@@ -34,6 +34,9 @@ module controller_msgs
       const octet CALIBRATION =
       8;
 
+      const octet CUSTOM1 =
+      9;
+
 
       /**
        * This message is part of the IHMC whole-body controller API.

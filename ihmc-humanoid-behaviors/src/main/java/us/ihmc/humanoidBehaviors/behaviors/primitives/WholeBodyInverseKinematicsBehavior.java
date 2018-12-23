@@ -17,11 +17,11 @@ import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.humanoidBehaviors.behaviors.AbstractBehavior;
 import us.ihmc.humanoidBehaviors.communication.ConcurrentListeningQueue;
 import us.ihmc.humanoidRobotics.communication.packets.KinematicsToolboxOutputConverter;
+import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotModels.FullHumanoidRobotModelFactory;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
-import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.robotics.screwTheory.SelectionMatrix6D;
 import us.ihmc.ros2.Ros2Node;
 import us.ihmc.yoVariables.variable.YoBoolean;
@@ -259,7 +259,7 @@ public class WholeBodyInverseKinematicsBehavior extends AbstractBehavior
          {
             Point3D desiredHandPosition = new Point3D(yoDesiredHandPosition);
             Quaternion desiredHandOrientation = new Quaternion(yoDesiredHandOrientation);
-            RigidBody hand = fullRobotModel.getHand(robotSide);
+            RigidBodyBasics hand = fullRobotModel.getHand(robotSide);
             ReferenceFrame handControlFrame = fullRobotModel.getHandControlFrame(robotSide);
             KinematicsToolboxRigidBodyMessage handMessage = MessageTools.createKinematicsToolboxRigidBodyMessage(hand, handControlFrame, desiredHandPosition,
                                                                                                                  desiredHandOrientation);
@@ -276,13 +276,13 @@ public class WholeBodyInverseKinematicsBehavior extends AbstractBehavior
       else
       {
          Quaternion desiredChestOrientation = new Quaternion(yoDesiredChestOrientation);
-         RigidBody chest = fullRobotModel.getChest();
+         RigidBodyBasics chest = fullRobotModel.getChest();
          chestMessage = MessageTools.createKinematicsToolboxRigidBodyMessage(chest, desiredChestOrientation);
          chestMessage.getAngularWeightMatrix().set(MessageTools.createWeightMatrix3DMessage(0.02));
          chestMessage.getLinearWeightMatrix().set(MessageTools.createWeightMatrix3DMessage(0.02));
       }
 
-      RigidBody pelvis = fullRobotModel.getPelvis();
+      RigidBodyBasics pelvis = fullRobotModel.getPelvis();
 
       if (yoDesiredPelvisOrientation.containsNaN() && yoDesiredPelvisPosition.containsNaN())
          pelvisMessage = null;

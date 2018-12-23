@@ -9,10 +9,10 @@ import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.tools.ReferenceFrameTools;
 import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.mecano.spatial.SpatialAcceleration;
+import us.ihmc.mecano.spatial.Wrench;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.robotSide.RobotSide;
-import us.ihmc.robotics.screwTheory.SpatialAccelerationVector;
-import us.ihmc.robotics.screwTheory.Wrench;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 
 public abstract class ProvidedMassMatrixToolRigidBodyTest
@@ -39,7 +39,7 @@ public abstract class ProvidedMassMatrixToolRigidBodyTest
       ProvidedMassMatrixToolRigidBody providedMassMatrixToolRigidBody = new ProvidedMassMatrixToolRigidBody(robotSide, fullRobotModel, gravity, registry, null);
       providedMassMatrixToolRigidBody.setMass(mass);
 
-      SpatialAccelerationVector handSpatialAccelerationVector = new SpatialAccelerationVector(elevatorFrame, elevatorFrame, elevatorFrame);
+      SpatialAcceleration handSpatialAccelerationVector = new SpatialAcceleration(elevatorFrame, elevatorFrame, elevatorFrame);
       Wrench toolWrench = new Wrench();
 
       providedMassMatrixToolRigidBody.control(handSpatialAccelerationVector, toolWrench);

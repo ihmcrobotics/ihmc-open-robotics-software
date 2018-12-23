@@ -1,18 +1,18 @@
 package us.ihmc.sensorProcessing.outputData;
 
-import us.ihmc.robotics.screwTheory.OneDoFJoint;
-import us.ihmc.tools.lists.PairList;
-
 import java.util.HashMap;
+
+import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
+import us.ihmc.tools.lists.PairList;
 
 public class LowLevelStateList implements LowLevelStateListReadOnly
 {
-   private final PairList<OneDoFJoint, LowLevelState> jointsAndData = new PairList<>();
-   private final HashMap<OneDoFJoint, LowLevelState> jointMap = new HashMap<>();
+   private final PairList<OneDoFJointBasics, LowLevelState> jointsAndData = new PairList<>();
+   private final HashMap<OneDoFJointBasics, LowLevelState> jointMap = new HashMap<>();
 
-   public LowLevelStateList(OneDoFJoint[] joints)
+   public LowLevelStateList(OneDoFJointBasics[] joints)
    {
-      for (OneDoFJoint joint : joints)
+      for (OneDoFJointBasics joint : joints)
       {
          LowLevelState data = new LowLevelState();
          jointsAndData.add(joint, data);
@@ -21,19 +21,19 @@ public class LowLevelStateList implements LowLevelStateListReadOnly
    }
 
    @Override
-   public boolean hasDataForJoint(OneDoFJoint joint)
+   public boolean hasDataForJoint(OneDoFJointBasics joint)
    {
       return jointMap.containsKey(joint);
    }
 
    @Override
-   public OneDoFJoint getOneDoFJoint(int index)
+   public OneDoFJointBasics getOneDoFJoint(int index)
    {
       return jointsAndData.first(index);
    }
 
    @Override
-   public LowLevelState getLowLevelState(OneDoFJoint joint)
+   public LowLevelState getLowLevelState(OneDoFJointBasics joint)
    {
       return jointMap.get(joint);
    }
@@ -68,7 +68,7 @@ public class LowLevelStateList implements LowLevelStateListReadOnly
       for (int i = 0; i < jointsAndData.size(); i++)
       {
 
-         OneDoFJoint joint = jointsAndData.first(i);
+         OneDoFJointBasics joint = jointsAndData.first(i);
          LowLevelState data = jointsAndData.second(i);
 
          LowLevelStateReadOnly otherData = other.getLowLevelState(joint);

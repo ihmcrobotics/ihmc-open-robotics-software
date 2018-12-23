@@ -1,10 +1,10 @@
 package us.ihmc.valkyrieRosControl.sliderBoardControl;
 
+import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.robotics.controllers.PDController;
+import us.ihmc.robotics.math.filters.RevisedBacklashCompensatingVelocityYoVariable;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.robotics.math.filters.RevisedBacklashCompensatingVelocityYoVariable;
-import us.ihmc.robotics.screwTheory.OneDoFJoint;
 
 /**
  * @author Doug Stephen <a href="mailto:dstephen@ihmc.us">(dstephen@ihmc.us)</a>
@@ -12,7 +12,7 @@ import us.ihmc.robotics.screwTheory.OneDoFJoint;
 abstract class ValkyrieSliderBoardJointHolder
 {
    protected final ValkyrieRosControlSliderBoard valkyrieRosControlSliderBoard;
-   protected final OneDoFJoint joint;
+   protected final OneDoFJointBasics joint;
    protected final double dt;
    protected final YoVariableRegistry registry;
    protected final PDController pdController;
@@ -27,7 +27,7 @@ abstract class ValkyrieSliderBoardJointHolder
    protected final YoDouble jointCommand_function;
    protected final YoDouble tau_d;
 
-   public ValkyrieSliderBoardJointHolder(ValkyrieRosControlSliderBoard valkyrieRosControlSliderBoard, OneDoFJoint joint, YoVariableRegistry parentRegistry, double dt)
+   public ValkyrieSliderBoardJointHolder(ValkyrieRosControlSliderBoard valkyrieRosControlSliderBoard, OneDoFJointBasics joint, YoVariableRegistry parentRegistry, double dt)
    {
       this.valkyrieRosControlSliderBoard = valkyrieRosControlSliderBoard;
       this.joint = joint;

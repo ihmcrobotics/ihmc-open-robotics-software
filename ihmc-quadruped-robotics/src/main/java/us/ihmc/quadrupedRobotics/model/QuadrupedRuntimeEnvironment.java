@@ -1,13 +1,14 @@
 package us.ihmc.quadrupedRobotics.model;
 
+import us.ihmc.commonWalkingControlModules.configurations.HighLevelControllerParameters;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.ControllerCoreOptimizationSettings;
-import us.ihmc.communication.streamingData.GlobalDataProducer;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
-import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
-import us.ihmc.quadrupedRobotics.planning.QuadrupedXGaitSettingsReadOnly;
+import us.ihmc.quadrupedRobotics.parameters.QuadrupedFallDetectionParameters;
+import us.ihmc.quadrupedRobotics.parameters.QuadrupedPrivilegedConfigurationParameters;
+import us.ihmc.quadrupedRobotics.parameters.QuadrupedSitDownParameters;
 import us.ihmc.robotModels.FullQuadrupedRobotModel;
+import us.ihmc.robotics.contactable.ContactablePlaneBody;
 import us.ihmc.robotics.robotSide.QuadrantDependentList;
-import us.ihmc.robotics.sensors.CenterOfMassDataHolder;
 import us.ihmc.robotics.sensors.CenterOfMassDataHolderReadOnly;
 import us.ihmc.robotics.sensors.FootSwitchInterface;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutputList;
@@ -24,10 +25,13 @@ public class QuadrupedRuntimeEnvironment
    private final YoVariableRegistry parentRegistry;
    private final YoGraphicsListRegistry graphicsListRegistry;
    private final YoGraphicsListRegistry graphicsListRegistryForDetachedOverhead;
-   private final GlobalDataProducer globalDataProducer;
    private final JointDesiredOutputList jointDesiredOutputList;
    private final ControllerCoreOptimizationSettings controllerCoreOptimizationSettings;
    private final CenterOfMassDataHolderReadOnly centerOfMassDataHolder;
+   private final HighLevelControllerParameters highLevelControllerParameters;
+   private final QuadrupedSitDownParameters sitDownParameters;
+   private final QuadrupedPrivilegedConfigurationParameters privilegedConfigurationParameters;
+   private final QuadrupedFallDetectionParameters fallDetectionParameters;
 
    private final double gravityZ;
 
@@ -39,9 +43,11 @@ public class QuadrupedRuntimeEnvironment
    public QuadrupedRuntimeEnvironment(double controlDT, YoDouble robotTimestamp, FullQuadrupedRobotModel fullRobotModel,
                                       ControllerCoreOptimizationSettings controllerCoreOptimizationSettings, JointDesiredOutputList jointDesiredOutputList,
                                       YoVariableRegistry parentRegistry, YoGraphicsListRegistry graphicsListRegistry,
-                                      YoGraphicsListRegistry graphicsListRegistryForDetachedOverhead, GlobalDataProducer globalDataProducer,
+                                      YoGraphicsListRegistry graphicsListRegistryForDetachedOverhead,
                                       QuadrantDependentList<ContactablePlaneBody> contactableFeet, List<ContactablePlaneBody> contactablePlaneBodies,
-                                      CenterOfMassDataHolderReadOnly centerOfMassDataHolder, QuadrantDependentList<FootSwitchInterface> footSwitches, double gravity)
+                                      CenterOfMassDataHolderReadOnly centerOfMassDataHolder, QuadrantDependentList<FootSwitchInterface> footSwitches,
+                                      double gravity, HighLevelControllerParameters highLevelControllerParameters, QuadrupedSitDownParameters sitDownParameters,
+                                      QuadrupedPrivilegedConfigurationParameters privilegedConfigurationParameters, QuadrupedFallDetectionParameters fallDetectionParameters)
    {
       this.controlDT = controlDT;
       this.robotTimestamp = robotTimestamp;
@@ -50,13 +56,16 @@ public class QuadrupedRuntimeEnvironment
       this.parentRegistry = parentRegistry;
       this.graphicsListRegistry = graphicsListRegistry;
       this.graphicsListRegistryForDetachedOverhead = graphicsListRegistryForDetachedOverhead;
-      this.globalDataProducer = globalDataProducer;
       this.footSwitches = footSwitches;
       this.contactableFeet = contactableFeet;
       this.contactablePlaneBodies = contactablePlaneBodies;
       this.gravityZ = Math.abs(gravity);
       this.jointDesiredOutputList = jointDesiredOutputList;
       this.centerOfMassDataHolder = centerOfMassDataHolder;
+      this.highLevelControllerParameters = highLevelControllerParameters;
+      this.sitDownParameters = sitDownParameters;
+      this.privilegedConfigurationParameters = privilegedConfigurationParameters;
+      this.fallDetectionParameters = fallDetectionParameters;
    }
 
    public double getControlDT()
@@ -94,11 +103,6 @@ public class QuadrupedRuntimeEnvironment
       return graphicsListRegistryForDetachedOverhead;
    }
 
-   public GlobalDataProducer getGlobalDataProducer()
-   {
-      return globalDataProducer;
-   }
-
    public ControllerCoreOptimizationSettings getControllerCoreOptimizationSettings()
    {
       return controllerCoreOptimizationSettings;
@@ -127,5 +131,25 @@ public class QuadrupedRuntimeEnvironment
    public CenterOfMassDataHolderReadOnly getCenterOfMassDataHolder()
    {
       return centerOfMassDataHolder;
+   }
+
+   public HighLevelControllerParameters getHighLevelControllerParameters()
+   {
+      return highLevelControllerParameters;
+   }
+
+   public QuadrupedSitDownParameters getSitDownParameters()
+   {
+      return sitDownParameters;
+   }
+
+   public QuadrupedPrivilegedConfigurationParameters getPrivilegedConfigurationParameters()
+   {
+      return privilegedConfigurationParameters;
+   }
+
+   public QuadrupedFallDetectionParameters getFallDetectionParameters()
+   {
+      return fallDetectionParameters;
    }
 }

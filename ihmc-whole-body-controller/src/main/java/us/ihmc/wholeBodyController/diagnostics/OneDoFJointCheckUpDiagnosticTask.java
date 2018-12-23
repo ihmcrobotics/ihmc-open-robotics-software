@@ -7,17 +7,17 @@ import org.apache.commons.math3.stat.descriptive.moment.Mean;
 import org.apache.commons.math3.stat.descriptive.moment.StandardDeviation;
 
 import us.ihmc.commons.MathTools;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.yoVariables.variable.YoDouble;
+import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.robotics.math.functionGenerator.YoFunctionGenerator;
 import us.ihmc.robotics.math.functionGenerator.YoFunctionGeneratorMode;
-import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.sensorProcessing.diagnostic.DiagnosticParameters;
 import us.ihmc.sensorProcessing.diagnostic.OneDoFJointForceTrackingDelayEstimator;
 import us.ihmc.sensorProcessing.diagnostic.OneDoFJointFourierAnalysis;
 import us.ihmc.sensorProcessing.diagnostic.OneDoFJointSensorValidityChecker;
 import us.ihmc.sensorProcessing.diagnostic.PositionVelocity1DConsistencyChecker;
 import us.ihmc.wholeBodyController.diagnostics.utils.DiagnosticTask;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoDouble;
 
 public class OneDoFJointCheckUpDiagnosticTask extends DiagnosticTask
 {
@@ -25,7 +25,7 @@ public class OneDoFJointCheckUpDiagnosticTask extends DiagnosticTask
 
    private final YoVariableRegistry registry;
 
-   private final OneDoFJoint joint;
+   private final OneDoFJointBasics joint;
    private final YoDouble desiredJointPositionOffset;
    private final YoDouble desiredJointVelocityOffset;
    private final YoDouble desiredJointTauOffset;
@@ -85,7 +85,7 @@ public class OneDoFJointCheckUpDiagnosticTask extends DiagnosticTask
 
    private OneDoFJointCheckUpDiagnosticDataReporter dataReporter;
 
-   public OneDoFJointCheckUpDiagnosticTask(OneDoFJoint jointToCheck, DiagnosticControllerToolbox toolbox)
+   public OneDoFJointCheckUpDiagnosticTask(OneDoFJointBasics jointToCheck, DiagnosticControllerToolbox toolbox)
    {
       this.joint = jointToCheck;
       String jointName = joint.getName();
@@ -313,7 +313,7 @@ public class OneDoFJointCheckUpDiagnosticTask extends DiagnosticTask
    }
 
    @Override
-   public double getDesiredJointPositionOffset(OneDoFJoint joint)
+   public double getDesiredJointPositionOffset(OneDoFJointBasics joint)
    {
       if (joint == this.joint)
          return desiredJointPositionOffset.getDoubleValue();
@@ -322,7 +322,7 @@ public class OneDoFJointCheckUpDiagnosticTask extends DiagnosticTask
    }
 
    @Override
-   public double getDesiredJointVelocityOffset(OneDoFJoint joint)
+   public double getDesiredJointVelocityOffset(OneDoFJointBasics joint)
    {
       if (joint == this.joint)
          return desiredJointVelocityOffset.getDoubleValue();
@@ -331,7 +331,7 @@ public class OneDoFJointCheckUpDiagnosticTask extends DiagnosticTask
    }
 
    @Override
-   public double getDesiredJointTauOffset(OneDoFJoint joint)
+   public double getDesiredJointTauOffset(OneDoFJointBasics joint)
    {
       if (joint == this.joint)
          return desiredJointTauOffset.getDoubleValue();

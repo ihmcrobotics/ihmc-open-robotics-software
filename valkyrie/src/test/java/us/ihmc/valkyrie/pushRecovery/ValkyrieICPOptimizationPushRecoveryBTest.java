@@ -35,7 +35,7 @@ public class ValkyrieICPOptimizationPushRecoveryBTest extends AvatarICPOptimizat
                @Override
                public ICPOptimizationParameters getICPOptimizationParameters()
                {
-                  return new ValkyrieICPOptimizationParameters(false)
+                  return new ValkyrieICPOptimizationParameters(RobotTarget.SCS)
                   {
                      @Override
                      public boolean useAngularMomentum()

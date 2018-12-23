@@ -1,9 +1,9 @@
 package us.ihmc.valkyrieRosControl.dataHolders;
 
+import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
+import us.ihmc.rosControl.wholeRobot.JointStateHandle;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.robotics.screwTheory.OneDoFJoint;
-import us.ihmc.rosControl.wholeRobot.JointStateHandle;
 
 /**
  * Created by parallels on 7/6/16.
@@ -12,13 +12,13 @@ public class YoJointStateHandleHolder
 {
    private final String name;
    private final JointStateHandle handle;
-   private final OneDoFJoint joint;
+   private final OneDoFJointBasics joint;
 
    private final YoDouble tauMeasured;
    private final YoDouble q;
    private final YoDouble qd;
 
-   public YoJointStateHandleHolder(JointStateHandle handle, OneDoFJoint joint, YoVariableRegistry parentRegistry)
+   public YoJointStateHandleHolder(JointStateHandle handle, OneDoFJointBasics joint, YoVariableRegistry parentRegistry)
    {
       this.name = handle.getName();
       YoVariableRegistry registry = new YoVariableRegistry(name);
@@ -40,7 +40,7 @@ public class YoJointStateHandleHolder
       this.tauMeasured.set(handle.getEffort());
    }
 
-   public OneDoFJoint getOneDoFJoint()
+   public OneDoFJointBasics getOneDoFJoint()
    {
       return joint;
    }

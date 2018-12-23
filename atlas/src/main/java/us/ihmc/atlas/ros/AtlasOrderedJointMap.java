@@ -3,9 +3,9 @@ package us.ihmc.atlas.ros;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
+import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
-import us.ihmc.robotics.screwTheory.OneDoFJoint;
 
 public class AtlasOrderedJointMap
 {
@@ -164,9 +164,9 @@ public class AtlasOrderedJointMap
       forcedSideDependentJointNames.put(RobotSide.LEFT, jointNamesLeft);
    }
 
-   public static OneDoFJoint[] getJointMap(Map<String, OneDoFJoint> jointsByName)
+   public static OneDoFJointBasics[] getJointMap(Map<String, OneDoFJointBasics> jointsByName)
    {
-      OneDoFJoint[] joints = new OneDoFJoint[numberOfJoints];
+      OneDoFJointBasics[] joints = new OneDoFJointBasics[numberOfJoints];
       for (int i = 0; i < numberOfJoints; i++)
       {
          joints[i] = jointsByName.get(jointNames[i]);

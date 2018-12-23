@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.EnumMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.function.Function;
 
 public class QuadrantDependentList<V> extends SegmentDependentList<RobotQuadrant, V>
 {
@@ -78,5 +79,17 @@ public class QuadrantDependentList<V> extends SegmentDependentList<RobotQuadrant
    public static <V> QuadrantDependentList<ArrayList<V>> createListOfArrayLists()
    {
       return new QuadrantDependentList<ArrayList<V>>(new ArrayList<V>(), new ArrayList<V>(), new ArrayList<V>(), new ArrayList<V>());
+   }
+
+   public static <V> QuadrantDependentList<V> build(Function<RobotQuadrant, V> values)
+   {
+      QuadrantDependentList<V> quadrantDependentList = new QuadrantDependentList<>();
+
+      for(RobotQuadrant quadrant : RobotQuadrant.values)
+      {
+         quadrantDependentList.put(quadrant, values.apply(quadrant));
+      }
+
+      return quadrantDependentList;
    }
 }

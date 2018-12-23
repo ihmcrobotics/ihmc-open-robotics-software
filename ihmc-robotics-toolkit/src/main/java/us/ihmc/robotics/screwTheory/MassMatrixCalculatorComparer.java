@@ -3,8 +3,17 @@ package us.ihmc.robotics.screwTheory;
 import java.util.ArrayList;
 import java.util.Random;
 
+import org.ejml.data.DenseMatrix64F;
+
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.mecano.algorithms.CompositeRigidBodyMassMatrixCalculator;
+import us.ihmc.mecano.multiBodySystem.RevoluteJoint;
+import us.ihmc.mecano.multiBodySystem.RigidBody;
+import us.ihmc.mecano.multiBodySystem.interfaces.JointBasics;
+import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
+import us.ihmc.mecano.tools.JointStateType;
+import us.ihmc.mecano.tools.MultiBodySystemRandomTools;
 
 public class MassMatrixCalculatorComparer
 {
@@ -15,24 +24,49 @@ public class MassMatrixCalculatorComparer
    private final Random random = new Random(1776L);
    private final ArrayList<MassMatrixCalculator> massMatrixCalculators = new ArrayList<MassMatrixCalculator>();
    private final MassMatrixCalculator diffIdMassMatricCalculator;
-   private final MassMatrixCalculator compositeMassMatricCalculator;
+   private final CompositeRigidBodyMassMatrixCalculator compositeMassMatricCalculator;
    private final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
    private final ArrayList<RevoluteJoint> joints;
-   private final RigidBody elevator;
+   private final RigidBodyBasics elevator;
 
    public MassMatrixCalculatorComparer()
    {
       joints = new ArrayList<RevoluteJoint>();
       elevator = new RigidBody("elevator", worldFrame);
       Vector3D[] jointAxes = {X, Y, Z, Z, X, Z, Z, X, Y, Y};
-      ScrewTestTools.createRandomChainRobot("", joints, elevator, jointAxes, random);
+      joints.addAll(MultiBodySystemRandomTools.nextRevoluteJointChain(random, "", elevator, jointAxes));
 
 
       diffIdMassMatricCalculator = new DifferentialIDMassMatrixCalculator(worldFrame, elevator);
       compositeMassMatricCalculator = new CompositeRigidBodyMassMatrixCalculator(elevator);
 
       massMatrixCalculators.add(diffIdMassMatricCalculator);
-      massMatrixCalculators.add(compositeMassMatricCalculator);
+      massMatrixCalculators.add(new MassMatrixCalculator()
+      {
+         @Override
+         public void getMassMatrix(DenseMatrix64F massMatrixToPack)
+         {
+            massMatrixToPack.set(compositeMassMatricCalculator.getMassMatrix());
+         }
+         
+         @Override
+         public DenseMatrix64F getMassMatrix()
+         {
+            return compositeMassMatricCalculator.getMassMatrix();
+         }
+         
+         @Override
+         public JointBasics[] getJointsInOrder()
+         {
+            return compositeMassMatricCalculator.getInput().getJointsToConsider().toArray(new JointBasics[0]);
+         }
+         
+         @Override
+         public void compute()
+         {
+            compositeMassMatricCalculator.reset();            
+         }
+      });
    }
 
    public void altCompare()
@@ -43,7 +77,7 @@ public class MassMatrixCalculatorComparer
       int nIterations = 10000;
       for (int i = 0; i < nIterations; i++)
       {
-         ScrewTestTools.setRandomPositions(joints, random);
+         MultiBodySystemRandomTools.nextState(random, JointStateType.CONFIGURATION, -Math.PI / 2.0, Math.PI / 2.0, joints);
          elevator.updateFramesRecursively();
 
          long startTime = System.nanoTime();
@@ -53,7 +87,7 @@ public class MassMatrixCalculatorComparer
          diffIdTimeTaken += (endTime - startTime) / (1e9);
 
          startTime = System.nanoTime();
-         compositeMassMatricCalculator.compute();
+         compositeMassMatricCalculator.reset();
          endTime = System.nanoTime();
 
          compositeTimeTaken += (endTime - startTime) / (1e9);
@@ -74,7 +108,7 @@ public class MassMatrixCalculatorComparer
          int nIterations = 10000;
          for (int i = 0; i < nIterations; i++)
          {
-            ScrewTestTools.setRandomPositions(joints, random);
+            MultiBodySystemRandomTools.nextState(random, JointStateType.CONFIGURATION, -Math.PI / 2.0, Math.PI / 2.0, joints);
             elevator.updateFramesRecursively();
             massMatrixCalculator.compute();
          }

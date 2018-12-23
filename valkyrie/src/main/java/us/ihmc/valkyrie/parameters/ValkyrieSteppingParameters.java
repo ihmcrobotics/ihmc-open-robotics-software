@@ -27,7 +27,10 @@ public class ValkyrieSteppingParameters implements SteppingParameters
    @Override
    public double getInPlaceWidth()
    {
-      return 0.25;
+      if (target == RobotTarget.SCS)
+         return 0.25;
+
+      return 0.3;
    }
 
    @Override
@@ -97,7 +100,7 @@ public class ValkyrieSteppingParameters implements SteppingParameters
    public double getMinSwingHeightFromStanceFoot()
    {
       if (target == RobotTarget.REAL_ROBOT)
-         return 0.025;
+         return 0.05; //changed from 0.025 to 0.05 in 11/2018 to help with foot getting caught on pallet
       else
          return SteppingParameters.super.getMinSwingHeightFromStanceFoot();
    }

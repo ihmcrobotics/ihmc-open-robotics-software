@@ -1,18 +1,24 @@
 package us.ihmc.commonWalkingControlModules.momentumBasedController.optimization;
 
-import gnu.trove.list.array.TIntArrayList;
+import java.util.LinkedHashMap;
+
 import org.ejml.data.DenseMatrix64F;
 import org.ejml.ops.CommonOps;
-import us.ihmc.robotics.screwTheory.*;
 
-import java.util.LinkedHashMap;
+import gnu.trove.list.array.TIntArrayList;
+import us.ihmc.mecano.multiBodySystem.interfaces.JointBasics;
+import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
+import us.ihmc.mecano.spatial.SpatialForce;
+import us.ihmc.mecano.tools.MultiBodySystemTools;
+import us.ihmc.robotics.screwTheory.GravityCoriolisExternalWrenchMatrixCalculator;
+import us.ihmc.robotics.screwTheory.ScrewTools;
 
 public class DynamicsMatrixCalculatorHelper
 {
    private final GravityCoriolisExternalWrenchMatrixCalculator coriolisMatrixCalculator;
    private final JointIndexHandler jointIndexHandler;
 
-   private final LinkedHashMap<InverseDynamicsJoint, int[]> bodyOnlyIndices = new LinkedHashMap<>();
+   private final LinkedHashMap<JointBasics, int[]> bodyOnlyIndices = new LinkedHashMap<>();
 
    private final int degreesOfFreedom;
    private final int bodyDoFs;
@@ -25,12 +31,12 @@ public class DynamicsMatrixCalculatorHelper
       this.coriolisMatrixCalculator = coriolisMatrixCalculator;
       this.jointIndexHandler = jointIndexHandler;
 
-      degreesOfFreedom = ScrewTools.computeDegreesOfFreedom(jointIndexHandler.getIndexedJoints());
-      OneDoFJoint[] bodyJoints = jointIndexHandler.getIndexedOneDoFJoints();
-      bodyDoFs = ScrewTools.computeDegreesOfFreedom(bodyJoints);
+      degreesOfFreedom = MultiBodySystemTools.computeDegreesOfFreedom(jointIndexHandler.getIndexedJoints());
+      OneDoFJointBasics[] bodyJoints = jointIndexHandler.getIndexedOneDoFJoints();
+      bodyDoFs = MultiBodySystemTools.computeDegreesOfFreedom(bodyJoints);
       floatingBaseDoFs = degreesOfFreedom - bodyDoFs;
 
-      for (InverseDynamicsJoint joint : bodyJoints)
+      for (JointBasics joint : bodyJoints)
       {
          TIntArrayList listToPackIndices = new TIntArrayList();
          ScrewTools.computeIndexForJoint(bodyJoints, listToPackIndices, joint);
@@ -45,14 +51,14 @@ public class DynamicsMatrixCalculatorHelper
       this.rhoSize = rhoSize;
    }
 
-   private final DenseMatrix64F tmpCoriolisMatrix = new DenseMatrix64F(SpatialForceVector.SIZE);
+   private final DenseMatrix64F tmpCoriolisMatrix = new DenseMatrix64F(SpatialForce.SIZE);
    public void computeCoriolisMatrix(DenseMatrix64F coriolisMatrix)
    {
-      InverseDynamicsJoint[] jointsToOptimizeFor = jointIndexHandler.getIndexedJoints();
+      JointBasics[] jointsToOptimizeFor = jointIndexHandler.getIndexedJoints();
 
       for (int jointID = 0; jointID < jointsToOptimizeFor.length; jointID++)
       {
-         InverseDynamicsJoint joint = jointsToOptimizeFor[jointID];
+         JointBasics joint = jointsToOptimizeFor[jointID];
          int jointDoFs = joint.getDegreesOfFreedom();
          tmpCoriolisMatrix.reshape(jointDoFs, 1);
          coriolisMatrixCalculator.getJointCoriolisMatrix(joint, tmpCoriolisMatrix);

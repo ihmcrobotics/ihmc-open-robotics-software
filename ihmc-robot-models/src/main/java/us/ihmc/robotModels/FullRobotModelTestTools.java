@@ -12,6 +12,15 @@ import java.util.Random;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.mecano.frames.MovingReferenceFrame;
+import us.ihmc.mecano.multiBodySystem.RevoluteJoint;
+import us.ihmc.mecano.multiBodySystem.RigidBody;
+import us.ihmc.mecano.multiBodySystem.SixDoFJoint;
+import us.ihmc.mecano.multiBodySystem.interfaces.FloatingJointBasics;
+import us.ihmc.mecano.multiBodySystem.interfaces.JointBasics;
+import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
+import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
+import us.ihmc.mecano.tools.MultiBodySystemRandomTools;
 import us.ihmc.robotics.partNames.ArmJointName;
 import us.ihmc.robotics.partNames.LegJointName;
 import us.ihmc.robotics.partNames.LimbName;
@@ -20,14 +29,6 @@ import us.ihmc.robotics.partNames.RobotSpecificJointNames;
 import us.ihmc.robotics.partNames.SpineJointName;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
-import us.ihmc.robotics.screwTheory.FloatingInverseDynamicsJoint;
-import us.ihmc.robotics.screwTheory.InverseDynamicsJoint;
-import us.ihmc.robotics.screwTheory.MovingReferenceFrame;
-import us.ihmc.robotics.screwTheory.OneDoFJoint;
-import us.ihmc.robotics.screwTheory.RevoluteJoint;
-import us.ihmc.robotics.screwTheory.RigidBody;
-import us.ihmc.robotics.screwTheory.ScrewTestTools;
-import us.ihmc.robotics.screwTheory.SixDoFJoint;
 import us.ihmc.robotics.screwTheory.TotalMassCalculator;
 import us.ihmc.robotics.sensors.ContactSensorDefinition;
 import us.ihmc.robotics.sensors.ForceSensorDefinition;
@@ -43,31 +44,31 @@ public class FullRobotModelTestTools
       private static final Vector3D pitch = new Vector3D(0.0, 1.0, 0.0);
       private static final Vector3D yaw = new Vector3D(0.0, 0.0, 1.0);
 
-      private final RigidBody elevator;
-      private final RigidBody pelvis;
-      private final RigidBody chest;
-      private final RigidBody head;
+      private final RigidBodyBasics elevator;
+      private final RigidBodyBasics pelvis;
+      private final RigidBodyBasics chest;
+      private final RigidBodyBasics head;
 
       private final SixDoFJoint rootJoint;
 
-      private final LinkedHashMap<String, OneDoFJoint> oneDoFJoints = new LinkedHashMap<>();
+      private final LinkedHashMap<String, OneDoFJointBasics> oneDoFJoints = new LinkedHashMap<>();
 
-      private final HashMap<SpineJointName, OneDoFJoint> spineJoints = new HashMap<>();
-      private final HashMap<NeckJointName, OneDoFJoint> neckJoints = new HashMap<>();
+      private final HashMap<SpineJointName, OneDoFJointBasics> spineJoints = new HashMap<>();
+      private final HashMap<NeckJointName, OneDoFJointBasics> neckJoints = new HashMap<>();
 
-      private final SideDependentList<HashMap<ArmJointName, OneDoFJoint>> armJoints = new SideDependentList<>();
-      private final SideDependentList<HashMap<LegJointName, OneDoFJoint>> legJoints = new SideDependentList<>();
-      private final SideDependentList<ArrayList<OneDoFJoint>> armJointIDsList = new SideDependentList<>();
-      private final SideDependentList<ArrayList<OneDoFJoint>> legJointIDsList = new SideDependentList<>();
+      private final SideDependentList<HashMap<ArmJointName, OneDoFJointBasics>> armJoints = new SideDependentList<>();
+      private final SideDependentList<HashMap<LegJointName, OneDoFJointBasics>> legJoints = new SideDependentList<>();
+      private final SideDependentList<ArrayList<OneDoFJointBasics>> armJointIDsList = new SideDependentList<>();
+      private final SideDependentList<ArrayList<OneDoFJointBasics>> legJointIDsList = new SideDependentList<>();
 
       private final LegJointName[] legJointNames;
       private final ArmJointName[] armJointNames;
       private final SpineJointName[] spineJointNames;
       private final NeckJointName[] neckJointNames;
 
-      private final SideDependentList<HashMap<LimbName, RigidBody>> endEffectors = new SideDependentList<>();
-      private final SideDependentList<RigidBody> hands = new SideDependentList<>();
-      private final SideDependentList<RigidBody> feet = new SideDependentList<>();
+      private final SideDependentList<HashMap<LimbName, RigidBodyBasics>> endEffectors = new SideDependentList<>();
+      private final SideDependentList<RigidBodyBasics> hands = new SideDependentList<>();
+      private final SideDependentList<RigidBodyBasics> feet = new SideDependentList<>();
 
       private final SideDependentList<MovingReferenceFrame> soleFrames = new SideDependentList<>();
 
@@ -85,13 +86,13 @@ public class FullRobotModelTestTools
          elevator = new RigidBody("elevator", ReferenceFrame.getWorldFrame());
 
          rootJoint = new SixDoFJoint("rootJoint", elevator);
-         pelvis = ScrewTestTools.addRandomRigidBody("pelvis", random, rootJoint);
+         pelvis = MultiBodySystemRandomTools.nextRigidBody(random, "pelvis", rootJoint);
 
          addSpine(random);
-         chest = ScrewTestTools.addRandomRigidBody("chest", random, spineJoints.get(SpineJointName.SPINE_YAW));
+         chest = MultiBodySystemRandomTools.nextRigidBody(random, "chest", spineJoints.get(SpineJointName.SPINE_YAW));
 
          addNeck(random);
-         head = ScrewTestTools.addRandomRigidBody("head", random, neckJoints.get(NeckJointName.DISTAL_NECK_PITCH));
+         head = MultiBodySystemRandomTools.nextRigidBody(random, "head", neckJoints.get(NeckJointName.DISTAL_NECK_PITCH));
 
          for (RobotSide robotSide : RobotSide.values)
          {
@@ -153,13 +154,13 @@ public class FullRobotModelTestTools
 
       private void addSpine(Random random)
       {
-         RevoluteJoint spineRoll = ScrewTestTools.addRandomRevoluteJoint("spineRoll", roll, random, pelvis);
-         RigidBody trunnion1 = ScrewTestTools.addRandomRigidBody("spineTrunnion1", random, spineRoll);
+         RevoluteJoint spineRoll = MultiBodySystemRandomTools.nextRevoluteJoint(random, "spineRoll", roll, pelvis);
+         RigidBodyBasics trunnion1 = MultiBodySystemRandomTools.nextRigidBody(random, "spineTrunnion1", spineRoll);
 
-         RevoluteJoint spinePitch = ScrewTestTools.addRandomRevoluteJoint("spinePitch", pitch, random, trunnion1);
-         RigidBody trunnion2 = ScrewTestTools.addRandomRigidBody("spineTrunnion2", random, spinePitch);
+         RevoluteJoint spinePitch = MultiBodySystemRandomTools.nextRevoluteJoint(random, "spinePitch", pitch, trunnion1);
+         RigidBodyBasics trunnion2 = MultiBodySystemRandomTools.nextRigidBody(random, "spineTrunnion2", spinePitch);
 
-         RevoluteJoint spineYaw = ScrewTestTools.addRandomRevoluteJoint("spineYaw", yaw, random, trunnion2);
+         RevoluteJoint spineYaw = MultiBodySystemRandomTools.nextRevoluteJoint(random, "spineYaw", yaw, trunnion2);
 
          spineJoints.put(SpineJointName.SPINE_ROLL, spineRoll);
          spineJoints.put(SpineJointName.SPINE_PITCH, spinePitch);
@@ -172,13 +173,13 @@ public class FullRobotModelTestTools
 
       private void addNeck(Random random)
       {
-         RevoluteJoint lowerNeckPitch = ScrewTestTools.addRandomRevoluteJoint("lowerNeckPitch", pitch, random, chest);
-         RigidBody trunnion1 = ScrewTestTools.addRandomRigidBody("neckTrunnion1", random, lowerNeckPitch);
+         RevoluteJoint lowerNeckPitch = MultiBodySystemRandomTools.nextRevoluteJoint(random, "lowerNeckPitch", pitch, chest);
+         RigidBodyBasics trunnion1 = MultiBodySystemRandomTools.nextRigidBody(random, "neckTrunnion1", lowerNeckPitch);
 
-         RevoluteJoint neckYaw = ScrewTestTools.addRandomRevoluteJoint("neckYaw", yaw, random, trunnion1);
-         RigidBody trunnion2 = ScrewTestTools.addRandomRigidBody("neckTrunnion2", random, neckYaw);
+         RevoluteJoint neckYaw = MultiBodySystemRandomTools.nextRevoluteJoint(random, "neckYaw", yaw, trunnion1);
+         RigidBodyBasics trunnion2 = MultiBodySystemRandomTools.nextRigidBody(random, "neckTrunnion2", neckYaw);
 
-         RevoluteJoint upperNeckPitch = ScrewTestTools.addRandomRevoluteJoint("upperNeckPitch", pitch, random, trunnion2);
+         RevoluteJoint upperNeckPitch = MultiBodySystemRandomTools.nextRevoluteJoint(random, "upperNeckPitch", pitch, trunnion2);
 
          neckJoints.put(NeckJointName.PROXIMAL_NECK_PITCH, lowerNeckPitch);
          neckJoints.put(NeckJointName.DISTAL_NECK_YAW, neckYaw);
@@ -193,26 +194,26 @@ public class FullRobotModelTestTools
       {
          String prefix = robotSide.getShortLowerCaseName();
 
-         RevoluteJoint shoulderYaw = ScrewTestTools.addRandomRevoluteJoint(prefix + "_shoulderYaw", yaw, random, chest);
-         RigidBody shoulderTrunnion = ScrewTestTools.addRandomRigidBody(prefix + "_shoulderTrunnion", random, shoulderYaw);
+         RevoluteJoint shoulderYaw = MultiBodySystemRandomTools.nextRevoluteJoint(random, prefix + "_shoulderYaw", yaw, chest);
+         RigidBodyBasics shoulderTrunnion = MultiBodySystemRandomTools.nextRigidBody(random, prefix + "_shoulderTrunnion", shoulderYaw);
 
-         RevoluteJoint shoulderRoll = ScrewTestTools.addRandomRevoluteJoint(prefix + "_shoulderRoll", roll, random, shoulderTrunnion);
-         RigidBody shoulder = ScrewTestTools.addRandomRigidBody(prefix + "_shoulder", random, shoulderRoll);
+         RevoluteJoint shoulderRoll = MultiBodySystemRandomTools.nextRevoluteJoint(random, prefix + "_shoulderRoll", roll, shoulderTrunnion);
+         RigidBodyBasics shoulder = MultiBodySystemRandomTools.nextRigidBody(random, prefix + "_shoulder", shoulderRoll);
 
-         RevoluteJoint shoulderPitch = ScrewTestTools.addRandomRevoluteJoint(prefix + "_shoulderPitch", pitch, random, shoulder);
-         RigidBody upperArm = ScrewTestTools.addRandomRigidBody(prefix + "_upperArm", random, shoulderPitch);
+         RevoluteJoint shoulderPitch = MultiBodySystemRandomTools.nextRevoluteJoint(random, prefix + "_shoulderPitch", pitch, shoulder);
+         RigidBodyBasics upperArm = MultiBodySystemRandomTools.nextRigidBody(random, prefix + "_upperArm", shoulderPitch);
 
-         RevoluteJoint elbowPitch = ScrewTestTools.addRandomRevoluteJoint(prefix + "_elbowPitch", pitch, random, upperArm);
-         RigidBody lowerArm = ScrewTestTools.addRandomRigidBody(prefix + "_lowerArm", random, elbowPitch);
+         RevoluteJoint elbowPitch = MultiBodySystemRandomTools.nextRevoluteJoint(random, prefix + "_elbowPitch", pitch, upperArm);
+         RigidBodyBasics lowerArm = MultiBodySystemRandomTools.nextRigidBody(random, prefix + "_lowerArm", elbowPitch);
 
-         RevoluteJoint elbowYaw = ScrewTestTools.addRandomRevoluteJoint(prefix + "_elbowYaw", yaw, random, lowerArm);
-         RigidBody forearm = ScrewTestTools.addRandomRigidBody(prefix + "_forearm", random, elbowYaw);
+         RevoluteJoint elbowYaw = MultiBodySystemRandomTools.nextRevoluteJoint(random, prefix + "_elbowYaw", yaw, lowerArm);
+         RigidBodyBasics forearm = MultiBodySystemRandomTools.nextRigidBody(random, prefix + "_forearm", elbowYaw);
 
-         RevoluteJoint firstWristPitch = ScrewTestTools.addRandomRevoluteJoint(prefix + "_firstWristPitch", pitch, random, forearm);
-         RigidBody wristTrunnion1 = ScrewTestTools.addRandomRigidBody(prefix + "_wristTrunnion1", random, firstWristPitch);
+         RevoluteJoint firstWristPitch = MultiBodySystemRandomTools.nextRevoluteJoint(random, prefix + "_firstWristPitch", pitch, forearm);
+         RigidBodyBasics wristTrunnion1 = MultiBodySystemRandomTools.nextRigidBody(random, prefix + "_wristTrunnion1", firstWristPitch);
 
-         RevoluteJoint wristRoll = ScrewTestTools.addRandomRevoluteJoint(prefix + "_wristRoll", roll, random, wristTrunnion1);
-         RigidBody hand = ScrewTestTools.addRandomRigidBody(prefix + "_hand", random, wristRoll);
+         RevoluteJoint wristRoll = MultiBodySystemRandomTools.nextRevoluteJoint(random, prefix + "_wristRoll", roll, wristTrunnion1);
+         RigidBodyBasics hand = MultiBodySystemRandomTools.nextRigidBody(random, prefix + "_hand", wristRoll);
 
          armJoints.get(robotSide).put(ArmJointName.SHOULDER_YAW, shoulderYaw);
          armJoints.get(robotSide).put(ArmJointName.SHOULDER_ROLL, shoulderRoll);
@@ -246,23 +247,23 @@ public class FullRobotModelTestTools
       {
          String prefix = robotSide.getShortLowerCaseName();
 
-         RevoluteJoint hipYaw = ScrewTestTools.addRandomRevoluteJoint(prefix + "_hipYaw", yaw, random, pelvis);
-         RigidBody hipTrunnion = ScrewTestTools.addRandomRigidBody(prefix + "_hipTrunnion", random, hipYaw);
+         RevoluteJoint hipYaw = MultiBodySystemRandomTools.nextRevoluteJoint(random, prefix + "_hipYaw", yaw, pelvis);
+         RigidBodyBasics hipTrunnion = MultiBodySystemRandomTools.nextRigidBody(random, prefix + "_hipTrunnion", hipYaw);
 
-         RevoluteJoint hipRoll = ScrewTestTools.addRandomRevoluteJoint(prefix + "_hipRoll", roll, random, hipTrunnion);
-         RigidBody hip = ScrewTestTools.addRandomRigidBody(prefix + "_hip", random, hipRoll);
+         RevoluteJoint hipRoll = MultiBodySystemRandomTools.nextRevoluteJoint(random, prefix + "_hipRoll", roll, hipTrunnion);
+         RigidBodyBasics hip = MultiBodySystemRandomTools.nextRigidBody(random, prefix + "_hip", hipRoll);
 
-         RevoluteJoint hipPitch = ScrewTestTools.addRandomRevoluteJoint(prefix + "_hipPitch", pitch, random, hip);
-         RigidBody upperLeg = ScrewTestTools.addRandomRigidBody(prefix + "_upperLeg", random, hipPitch);
+         RevoluteJoint hipPitch = MultiBodySystemRandomTools.nextRevoluteJoint(random, prefix + "_hipPitch", pitch, hip);
+         RigidBodyBasics upperLeg = MultiBodySystemRandomTools.nextRigidBody(random, prefix + "_upperLeg", hipPitch);
 
-         RevoluteJoint kneePitch = ScrewTestTools.addRandomRevoluteJoint(prefix + "_kneePitch", pitch, random, upperLeg);
-         RigidBody lowerLeg = ScrewTestTools.addRandomRigidBody(prefix + "_lowerLeg", random, kneePitch);
+         RevoluteJoint kneePitch = MultiBodySystemRandomTools.nextRevoluteJoint(random, prefix + "_kneePitch", pitch, upperLeg);
+         RigidBodyBasics lowerLeg = MultiBodySystemRandomTools.nextRigidBody(random, prefix + "_lowerLeg", kneePitch);
 
-         RevoluteJoint ankleRoll = ScrewTestTools.addRandomRevoluteJoint(prefix + "_ankleRoll", roll, random, lowerLeg);
-         RigidBody ankleTrunnion = ScrewTestTools.addRandomRigidBody(prefix + "_ankleTrunnion", random, ankleRoll);
+         RevoluteJoint ankleRoll = MultiBodySystemRandomTools.nextRevoluteJoint(random, prefix + "_ankleRoll", roll, lowerLeg);
+         RigidBodyBasics ankleTrunnion = MultiBodySystemRandomTools.nextRigidBody(random, prefix + "_ankleTrunnion", ankleRoll);
 
-         RevoluteJoint anklePitch = ScrewTestTools.addRandomRevoluteJoint(prefix + "_anklePitch", pitch, random, ankleTrunnion);
-         RigidBody foot = ScrewTestTools.addRandomRigidBody(prefix + "_foot", random, anklePitch);
+         RevoluteJoint anklePitch = MultiBodySystemRandomTools.nextRevoluteJoint(random, prefix + "_anklePitch", pitch, ankleTrunnion);
+         RigidBodyBasics foot = MultiBodySystemRandomTools.nextRigidBody(random, prefix + "_foot", anklePitch);
 
          legJoints.get(robotSide).put(LegJointName.HIP_YAW, hipYaw);
          legJoints.get(robotSide).put(LegJointName.HIP_ROLL, hipRoll);
@@ -304,32 +305,32 @@ public class FullRobotModelTestTools
          return elevator.getBodyFixedFrame();
       }
 
-      @Override public FloatingInverseDynamicsJoint getRootJoint()
+      @Override public FloatingJointBasics getRootJoint()
       {
          return rootJoint;
       }
 
-      @Override public RigidBody getElevator()
+      @Override public RigidBodyBasics getElevator()
       {
          return elevator;
       }
 
-      @Override public OneDoFJoint getSpineJoint(SpineJointName spineJointName)
+      @Override public OneDoFJointBasics getSpineJoint(SpineJointName spineJointName)
       {
          return spineJoints.get(spineJointName);
       }
 
-      @Override public RigidBody getEndEffector(Enum<?> segmentEnum)
+      @Override public RigidBodyBasics getEndEffector(Enum<?> segmentEnum)
       {
          return null;
       }
 
-      @Override public OneDoFJoint getNeckJoint(NeckJointName neckJointName)
+      @Override public OneDoFJointBasics getNeckJoint(NeckJointName neckJointName)
       {
          return neckJoints.get(neckJointName);
       }
 
-      @Override public InverseDynamicsJoint getLidarJoint(String lidarName)
+      @Override public JointBasics getLidarJoint(String lidarName)
       {
          return null;
       }
@@ -349,22 +350,22 @@ public class FullRobotModelTestTools
          return null;
       }
 
-      @Override public RigidBody getPelvis()
+      @Override public RigidBodyBasics getPelvis()
       {
          return pelvis;
       }
 
-      @Override public RigidBody getRootBody()
+      @Override public RigidBodyBasics getRootBody()
       {
          return pelvis;
       }
 
-      @Override public RigidBody getChest()
+      @Override public RigidBodyBasics getChest()
       {
          return chest;
       }
 
-      @Override public RigidBody getHead()
+      @Override public RigidBodyBasics getHead()
       {
          return head;
       }
@@ -374,28 +375,28 @@ public class FullRobotModelTestTools
          return head.getParentJoint().getFrameAfterJoint();
       }
 
-      @Override public OneDoFJoint[] getOneDoFJoints()
+      @Override public OneDoFJointBasics[] getOneDoFJoints()
       {
-         OneDoFJoint[] oneDoFJointsAsArray = new OneDoFJoint[oneDoFJoints.size()];
+         OneDoFJointBasics[] oneDoFJointsAsArray = new OneDoFJointBasics[oneDoFJoints.size()];
          oneDoFJoints.values().toArray(oneDoFJointsAsArray);
          return oneDoFJointsAsArray;
       }
 
-      @Override public Map<String, OneDoFJoint> getOneDoFJointsAsMap()
+      @Override public Map<String, OneDoFJointBasics> getOneDoFJointsAsMap()
       {
          return oneDoFJoints;
       }
 
-      @Override public void getOneDoFJointsFromRootToHere(OneDoFJoint oneDoFJointAtEndOfChain, List<OneDoFJoint> oneDoFJointsToPack)
+      @Override public void getOneDoFJointsFromRootToHere(OneDoFJointBasics oneDoFJointAtEndOfChain, List<OneDoFJointBasics> oneDoFJointsToPack)
       {
          oneDoFJointsToPack.clear();
-         InverseDynamicsJoint parent = oneDoFJointAtEndOfChain;
+         JointBasics parent = oneDoFJointAtEndOfChain;
 
          while (parent != rootJoint)
          {
-            if (parent instanceof OneDoFJoint)
+            if (parent instanceof OneDoFJointBasics)
             {
-               oneDoFJointsToPack.add((OneDoFJoint) parent);
+               oneDoFJointsToPack.add((OneDoFJointBasics) parent);
             }
 
             parent = parent.getPredecessor().getParentJoint();
@@ -404,23 +405,23 @@ public class FullRobotModelTestTools
          Collections.reverse(oneDoFJointsToPack);
       }
 
-      @Override public OneDoFJoint[] getControllableOneDoFJoints()
+      @Override public OneDoFJointBasics[] getControllableOneDoFJoints()
       {
          return getOneDoFJoints();
       }
 
-      @Override public void getOneDoFJoints(List<OneDoFJoint> oneDoFJointsToPack)
+      @Override public void getOneDoFJoints(List<OneDoFJointBasics> oneDoFJointsToPack)
       {
-         Collection<OneDoFJoint> values = oneDoFJoints.values();
+         Collection<OneDoFJointBasics> values = oneDoFJoints.values();
          oneDoFJointsToPack.addAll(values);
       }
 
-      @Override public OneDoFJoint getOneDoFJointByName(String name)
+      @Override public OneDoFJointBasics getOneDoFJointByName(String name)
       {
          return oneDoFJoints.get(name);
       }
 
-      @Override public void getControllableOneDoFJoints(List<OneDoFJoint> oneDoFJointsToPack)
+      @Override public void getControllableOneDoFJoints(List<OneDoFJointBasics> oneDoFJointsToPack)
       {
          getOneDoFJoints(oneDoFJointsToPack);
       }
@@ -450,27 +451,27 @@ public class FullRobotModelTestTools
          return legJoints.get(robotSide).get(legJointName).getFrameAfterJoint();
       }
 
-      @Override public OneDoFJoint getLegJoint(RobotSide robotSide, LegJointName legJointName)
+      @Override public OneDoFJointBasics getLegJoint(RobotSide robotSide, LegJointName legJointName)
       {
          return legJoints.get(robotSide).get(legJointName);
       }
 
-      @Override public OneDoFJoint getArmJoint(RobotSide robotSide, ArmJointName armJointName)
+      @Override public OneDoFJointBasics getArmJoint(RobotSide robotSide, ArmJointName armJointName)
       {
          return armJoints.get(robotSide).get(armJointName);
       }
 
-      @Override public RigidBody getFoot(RobotSide robotSide)
+      @Override public RigidBodyBasics getFoot(RobotSide robotSide)
       {
          return feet.get(robotSide);
       }
 
-      @Override public RigidBody getHand(RobotSide robotSide)
+      @Override public RigidBodyBasics getHand(RobotSide robotSide)
       {
          return hands.get(robotSide);
       }
 
-      @Override public RigidBody getEndEffector(RobotSide robotSide, LimbName limbName)
+      @Override public RigidBodyBasics getEndEffector(RobotSide robotSide, LimbName limbName)
       {
          return endEffectors.get(robotSide).get(limbName);
       }
@@ -500,7 +501,7 @@ public class FullRobotModelTestTools
          int i = 0;
          if (limb == LimbName.ARM)
          {
-            for (OneDoFJoint joint : armJointIDsList.get(side))
+            for (OneDoFJointBasics joint : armJointIDsList.get(side))
             {
                joint.setQ(q[i]);
                i++;
@@ -508,7 +509,7 @@ public class FullRobotModelTestTools
          }
          else if (limb == LimbName.LEG)
          {
-            for (OneDoFJoint jnt : legJointIDsList.get(side))
+            for (OneDoFJointBasics jnt : legJointIDsList.get(side))
             {
                jnt.setQ(q[i]);
                i++;

@@ -19,6 +19,7 @@ import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParam
 import us.ihmc.commonWalkingControlModules.controlModules.rigidBody.RigidBodyControlMode;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.feedbackController.FeedbackControllerSettings;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.MomentumOptimizationSettings;
+import us.ihmc.commonWalkingControlModules.sensors.footSwitch.WrenchBasedFootSwitchFactory;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.robotics.controllers.pidGains.GainCoupling;
@@ -34,7 +35,7 @@ import us.ihmc.robotics.partNames.NeckJointName;
 import us.ihmc.robotics.partNames.SpineJointName;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
-import us.ihmc.sensorProcessing.stateEstimation.FootSwitchType;
+import us.ihmc.robotics.sensors.FootSwitchFactory;
 import us.ihmc.valkyrieRosControl.ValkyrieRosControlController;
 
 public class ValkyrieWalkingControllerParameters extends WalkingControllerParameters
@@ -64,12 +65,11 @@ public class ValkyrieWalkingControllerParameters extends WalkingControllerParame
       this.jointMap = jointMap;
       this.target = target;
 
-      boolean runningOnRealRobot = target == RobotTarget.REAL_ROBOT;
-      legConfigurationParameters = new ValkyrieLegConfigurationParameters(runningOnRealRobot);
-      toeOffParameters = new ValkyrieToeOffParameters(runningOnRealRobot);
+      legConfigurationParameters = new ValkyrieLegConfigurationParameters(target);
+      toeOffParameters = new ValkyrieToeOffParameters(target);
       swingTrajectoryParameters = new ValkyrieSwingTrajectoryParameters(target);
       steppingParameters = new ValkyrieSteppingParameters(target);
-      icpOptimizationParameters = new ValkyrieICPOptimizationParameters(runningOnRealRobot);
+      icpOptimizationParameters = new ValkyrieICPOptimizationParameters(target);
 
       // Generated using ValkyrieFullRobotModelVisualizer
       RigidBodyTransform leftHandLocation = new RigidBodyTransform(new double[] { 0.8772111323383822, -0.47056204413925823, 0.09524700476706424,
@@ -434,9 +434,9 @@ public class ValkyrieWalkingControllerParameters extends WalkingControllerParame
       jointHomeConfiguration.put(jointMap.getSpineJointName(SpineJointName.SPINE_ROLL), 0.0);
       jointHomeConfiguration.put(jointMap.getSpineJointName(SpineJointName.SPINE_YAW), 0.0);
 
-      jointHomeConfiguration.put(jointMap.getNeckJointName(NeckJointName.PROXIMAL_NECK_PITCH), 0.0);
+      jointHomeConfiguration.put(jointMap.getNeckJointName(NeckJointName.PROXIMAL_NECK_PITCH), 0.6);
       jointHomeConfiguration.put(jointMap.getNeckJointName(NeckJointName.DISTAL_NECK_YAW), 0.0);
-      jointHomeConfiguration.put(jointMap.getNeckJointName(NeckJointName.DISTAL_NECK_PITCH), 0.0);
+      jointHomeConfiguration.put(jointMap.getNeckJointName(NeckJointName.DISTAL_NECK_PITCH), -0.1);
 
       for (RobotSide robotSide : RobotSide.values)
       {
@@ -472,8 +472,8 @@ public class ValkyrieWalkingControllerParameters extends WalkingControllerParame
    {
       boolean runningOnRealRobot = target == RobotTarget.REAL_ROBOT;
 
-      double kpX = 100.0; // Was 150.0 before tuneup of sep 2018
-      double kpY = 100.0; // Was 100.0 before tuneup of sep 2018
+      double kpX = runningOnRealRobot? 100.0 : 150.0; // Was 150.0 before tuneup of sep 2018
+      double kpY = runningOnRealRobot? 100.0 : 150.0; // Was 100.0 before tuneup of sep 2018
       double kpZ = runningOnRealRobot ? 250.0 : 200.0;  // Was 200.0 before tuneup of sep 2018
       // zeta was [0.8, 0.5, 0.8] before tuneup of sep 2018
       double zetaXY = runningOnRealRobot ? 0.7 : 0.7;
@@ -572,28 +572,13 @@ public class ValkyrieWalkingControllerParameters extends WalkingControllerParame
    }
 
    @Override
-   public double getContactThresholdForce()
+   public FootSwitchFactory getFootSwitchFactory()
    {
-      switch(target)
-      {
-      case REAL_ROBOT:
-      case GAZEBO:
-         return 50.0;
-      default:
-         return 5.0;
-      }
-   }
-
-   @Override
-   public double getSecondContactThresholdForceIgnoringCoP()
-   {
-      return 75.0;
-   }
-
-   @Override
-   public double getCoPThresholdFraction()
-   {
-      return 0.01;
+      WrenchBasedFootSwitchFactory factory = new WrenchBasedFootSwitchFactory();
+      factory.setDefaultContactThresholdForce(target == RobotTarget.SCS ? 5.0 : 50.0);
+      factory.setDefaultCoPThresholdFraction(0.01);
+      factory.setDefaultSecondContactThresholdForceIgnoringCoP(75.0);
+      return factory;
    }
 
    @Override
@@ -651,19 +636,6 @@ public class ValkyrieWalkingControllerParameters extends WalkingControllerParame
    public ICPAngularMomentumModifierParameters getICPAngularMomentumModifierParameters()
    {
       return new ICPAngularMomentumModifierParameters();
-   }
-
-   @Override
-   public double getContactThresholdHeight()
-   {
-      return 0.05;
-   }
-
-   @Override
-   public FootSwitchType getFootSwitchType()
-   {
-      return FootSwitchType.WrenchBased;
-      //      return runningOnRealRobot ? FootSwitchType.WrenchAndContactSensorFused : FootSwitchType.WrenchBased;
    }
 
    @Override
@@ -740,15 +712,23 @@ public class ValkyrieWalkingControllerParameters extends WalkingControllerParame
    {
       return 0.18;
    }
-   
+
    /** {@inheritDoc} */
    @Override
    public boolean useOptimizationBasedICPController()
    {
-   // TODO Need to be re-enabled once tuned on unit A which appears to be more sensitive.
-      return false;
+      switch (target)
+      {
+      case SCS:
+      case REAL_ROBOT:
+         return true;
+      case GAZEBO:
+      default:
+         // TODO Need to be re-enabled once tuned on unit A which appears to be more sensitive.
+         return false;
+      }
    }
-   
+
    /** {@inheritDoc} */
    @Override
    public ICPOptimizationParameters getICPOptimizationParameters()

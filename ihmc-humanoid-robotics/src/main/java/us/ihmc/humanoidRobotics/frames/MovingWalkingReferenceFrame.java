@@ -5,9 +5,10 @@ import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.mecano.frames.MovingReferenceFrame;
+import us.ihmc.mecano.spatial.Twist;
+import us.ihmc.mecano.spatial.interfaces.TwistReadOnly;
 import us.ihmc.robotics.screwTheory.MovingMidFootZUpGroundFrame;
-import us.ihmc.robotics.screwTheory.MovingReferenceFrame;
-import us.ihmc.robotics.screwTheory.Twist;
 
 /**
  * {@code MovingWalkingReferenceFrame} was originally implemented in
@@ -64,13 +65,13 @@ public class MovingWalkingReferenceFrame extends MovingReferenceFrame
    {
       twistRelativeToParentToPack.setToZero(this, getParent(), this);
 
-      Twist twistOfMidFootFrame = midFootZUpGroundFrame.getTwistOfFrame();
-      twistOfMidFootFrame.getAngularPart(angularVelocity);
-      twistOfMidFootFrame.getLinearPart(linearVelocity);
+      TwistReadOnly twistOfMidFootFrame = midFootZUpGroundFrame.getTwistOfFrame();
+      angularVelocity.setIncludingFrame(twistOfMidFootFrame.getAngularPart());
+      linearVelocity.setIncludingFrame(twistOfMidFootFrame.getLinearPart());
 
       pelvisFrame.getTwistRelativeToOther(midFootZUpGroundFrame, twistOfPelvisRelativeToMidFootFrame);
 
-      twistOfPelvisRelativeToMidFootFrame.getLinearPart(linearPelvisVelocity);
+      linearPelvisVelocity.setIncludingFrame(twistOfPelvisRelativeToMidFootFrame.getLinearPart());
       linearPelvisVelocity.changeFrame(this);
 
       angularVelocity.changeFrame(this);
@@ -82,7 +83,7 @@ public class MovingWalkingReferenceFrame extends MovingReferenceFrame
 
       linearVelocity.add(linearVelocityOffset);
 
-      twistRelativeToParentToPack.setAngularPart(angularVelocity);
-      twistRelativeToParentToPack.setLinearPart(linearVelocity);
+      twistRelativeToParentToPack.getAngularPart().set(angularVelocity);
+      twistRelativeToParentToPack.getLinearPart().set(linearVelocity);
    }
 }

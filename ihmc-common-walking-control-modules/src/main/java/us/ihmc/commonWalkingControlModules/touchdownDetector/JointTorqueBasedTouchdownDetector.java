@@ -1,14 +1,14 @@
 package us.ihmc.commonWalkingControlModules.touchdownDetector;
 
 import us.ihmc.commons.MathTools;
+import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.robotics.screwTheory.OneDoFJoint;
 
 public class JointTorqueBasedTouchdownDetector implements TouchdownDetector
 {
-   private final OneDoFJoint joint;
+   private final OneDoFJointBasics joint;
    private final YoDouble jointTorque;
    private final YoDouble torqueThreshold;
    private final YoBoolean touchdownDetected;
@@ -16,7 +16,7 @@ public class JointTorqueBasedTouchdownDetector implements TouchdownDetector
    private final boolean dontDetectTouchdownIfAtJointLimit;
    private double signum;
 
-   public JointTorqueBasedTouchdownDetector(OneDoFJoint joint, YoVariableRegistry registry)
+   public JointTorqueBasedTouchdownDetector(OneDoFJointBasics joint, YoVariableRegistry registry)
    {
       this(joint, false, registry);
    }
@@ -27,7 +27,7 @@ public class JointTorqueBasedTouchdownDetector implements TouchdownDetector
     *                                          false-positive touchdown signals given by simulated torques at joint limits
     * @param registry
     */
-   public JointTorqueBasedTouchdownDetector(OneDoFJoint joint, boolean dontDetectTouchdownIfAtJointLimit, YoVariableRegistry registry)
+   public JointTorqueBasedTouchdownDetector(OneDoFJointBasics joint, boolean dontDetectTouchdownIfAtJointLimit, YoVariableRegistry registry)
    {
       this.joint = joint;
       this.dontDetectTouchdownIfAtJointLimit = dontDetectTouchdownIfAtJointLimit;
@@ -69,9 +69,9 @@ public class JointTorqueBasedTouchdownDetector implements TouchdownDetector
    public void update()
    {
       double threshold = torqueThreshold.getDoubleValue() * signum;
-      double torque = joint.getTauMeasured() * signum;
+      double torque = joint.getTau() * signum;
 
-      jointTorque.set(joint.getTauMeasured());
+      jointTorque.set(joint.getTau());
 
       if (dontDetectTouchdownIfAtJointLimit && isAtJointLimit())
       {

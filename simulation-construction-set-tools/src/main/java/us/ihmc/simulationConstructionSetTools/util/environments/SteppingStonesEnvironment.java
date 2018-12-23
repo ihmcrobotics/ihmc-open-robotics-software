@@ -1,11 +1,13 @@
 package us.ihmc.simulationConstructionSetTools.util.environments;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import us.ihmc.euclid.axisAngle.AxisAngle;
-import us.ihmc.euclid.geometry.Box3D;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.shape.Box3D;
 import us.ihmc.euclid.transform.RigidBodyTransform;
-import us.ihmc.euclid.tuple2D.Vector2D;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DBasics;
@@ -16,10 +18,6 @@ import us.ihmc.simulationconstructionset.ExternalForcePoint;
 import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.simulationconstructionset.util.ground.RotatableBoxTerrainObject;
 import us.ihmc.simulationconstructionset.util.ground.TerrainObject3D;
-import us.ihmc.tools.lists.PairList;
-
-import java.util.ArrayList;
-import java.util.List;
 
 public class SteppingStonesEnvironment implements CommonAvatarEnvironmentInterface
 {
@@ -99,7 +97,7 @@ public class SteppingStonesEnvironment implements CommonAvatarEnvironmentInterfa
 
    public Point3D getStartPosition()
    {
-      return new Point3D(0.5, 0.5, 0.4);
+      return new Point3D(0.5, 0.5, 0.25);
    }
 
    public double getStartYaw()

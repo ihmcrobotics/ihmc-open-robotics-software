@@ -301,9 +301,15 @@ public class QuadrupedControllerInputProviderTest
       }
 
       @Override
-      public double getNominalCoMHeight()
+      public double getNominalBodyHeight()
       {
          return 0.0;
+      }
+
+      @Override
+      public boolean trustFootSwitches()
+      {
+         return true;
       }
    }
 }

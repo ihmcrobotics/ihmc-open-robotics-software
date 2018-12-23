@@ -4,11 +4,11 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import us.ihmc.commons.PrintTools;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.geometry.LineSegment2D;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple2D.Point2D;
+import us.ihmc.log.LogTools;
 import us.ihmc.robotEnvironmentAwareness.geometry.ConcaveHull;
 import us.ihmc.robotEnvironmentAwareness.geometry.ConcaveHullCollection;
 import us.ihmc.robotEnvironmentAwareness.geometry.ConcaveHullDecomposition;
@@ -39,11 +39,9 @@ public abstract class PlanarRegionPolygonizer
                                                          ConcaveHullFactoryParameters concaveHullFactoryParameters, PolygonizerParameters polygonizerParameters,
                                                          PlanarRegionSegmentationDataExporter dataExporter)
    {
-      List<List<PlanarRegion>> regions = rawData.parallelStream()
-                                                .filter(data -> data.size() >= polygonizerParameters.getMinNumberOfNodes())
+      List<List<PlanarRegion>> regions = rawData.parallelStream().filter(data -> data.size() >= polygonizerParameters.getMinNumberOfNodes())
                                                 .map(data -> createPlanarRegion(data, concaveHullFactoryParameters, polygonizerParameters, dataExporter))
-                                                .filter(region -> region != null)
-                                                .collect(Collectors.toList());
+                                                .filter(region -> region != null).collect(Collectors.toList());
 
       List<PlanarRegion> flattenedRegions = new ArrayList<>();
       for (List<PlanarRegion> regionsSublist : regions)
@@ -60,7 +58,7 @@ public abstract class PlanarRegionPolygonizer
       {
          // First compute the set of concave hulls for this region
          List<Point2D> pointCloudInPlane = rawData.getPointCloudInPlane();
-         List<LineSegment2D> intersections = rawData.getIntersections();
+         List<LineSegment2D> intersections = rawData.getIntersectionsInPlane();
          ConcaveHullCollection concaveHullCollection = SimpleConcaveHullFactory.createConcaveHullCollection(pointCloudInPlane, intersections,
                                                                                                             concaveHullFactoryParameters);
 
@@ -104,7 +102,7 @@ public abstract class PlanarRegionPolygonizer
          }
          else
          {
-            PrintTools.error("Caught following exception: " + e.getMessage() + ", exporting segmentation data.");
+            LogTools.error("Caught following exception: " + e.getMessage() + ", exporting segmentation data.");
             dataExporter.exportSegmentationRawData(rawData);
          }
          return null;

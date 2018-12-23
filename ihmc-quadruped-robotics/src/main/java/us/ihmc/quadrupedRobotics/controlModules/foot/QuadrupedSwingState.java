@@ -14,8 +14,10 @@ import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
+import us.ihmc.mecano.frames.MovingReferenceFrame;
+import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.quadrupedRobotics.controller.QuadrupedControllerToolbox;
-import us.ihmc.quadrupedRobotics.planning.YoQuadrupedTimedStep;
+import us.ihmc.quadrupedRobotics.util.YoQuadrupedTimedStep;
 import us.ihmc.robotics.dataStructures.parameters.FrameParameterVector3D;
 import us.ihmc.robotics.math.filters.GlitchFilteredYoBoolean;
 import us.ihmc.robotics.math.trajectories.MultipleWaypointsBlendedPositionTrajectoryGenerator;
@@ -23,8 +25,6 @@ import us.ihmc.robotics.math.trajectories.PositionTrajectoryGenerator;
 import us.ihmc.robotics.math.trajectories.waypoints.FrameEuclideanTrajectoryPoint;
 import us.ihmc.robotics.math.trajectories.waypoints.MultipleWaypointsPositionTrajectoryGenerator;
 import us.ihmc.robotics.robotSide.RobotQuadrant;
-import us.ihmc.robotics.screwTheory.MovingReferenceFrame;
-import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.robotics.sensors.FootSwitchInterface;
 import us.ihmc.robotics.trajectories.TrajectoryType;
 import us.ihmc.robotics.trajectories.providers.CurrentRigidBodyStateProvider;
@@ -83,6 +83,7 @@ public class QuadrupedSwingState extends QuadrupedFootState
    private final YoBoolean hasMinimumTimePassed;
 
    private final DoubleParameter minHeightDifferenceForObstacleClearance;
+   private final DoubleParameter minPhaseThroughSwingForContact;
 
    private final DoubleParameter percentPastSwingForDone;
    private final YoBoolean isSwingPastDone;
@@ -119,6 +120,7 @@ public class QuadrupedSwingState extends QuadrupedFootState
       String namePrefix = robotQuadrant.getPascalCaseName();
 
       minHeightDifferenceForObstacleClearance = new DoubleParameter(namePrefix + "MinHeightDifferenceForObstacleClearance", registry, 0.04);
+      minPhaseThroughSwingForContact = new DoubleParameter(namePrefix + "minPhaseThroughSwingForContact", registry, 0.8);
 
       timeInState = new YoDouble(namePrefix + "TimeInState", registry);
       timeInStateWithSwingSpeedUp = new YoDouble(namePrefix + "TimeInStateWithSwingSpeedUp", registry);
@@ -138,7 +140,7 @@ public class QuadrupedSwingState extends QuadrupedFootState
       touchdownAcceleration = new FrameParameterVector3D(namePrefix + "TouchdownAcceleration", ReferenceFrame.getWorldFrame(), defaultTouchdownVelocity,
                                                          registry);
 
-      isSwingSpeedUpEnabled = new BooleanParameter(namePrefix + "IsSwingSpeedUpEnabled", registry, true);
+      isSwingSpeedUpEnabled = new BooleanParameter(namePrefix + "IsSwingSpeedUpEnabled", registry, false);
       minSwingTimeForDisturbanceRecovery = new DoubleParameter(namePrefix + "MinSwingTimeForDisturbanceRecovery", registry, 0.2);
       minRequiredSpeedUpFactor = new DoubleParameter(namePrefix + "MinRequiredSpeedUpFactor", registry, 1.05);
 
@@ -168,7 +170,7 @@ public class QuadrupedSwingState extends QuadrupedFootState
       this.touchdownTrigger = new GlitchFilteredYoBoolean(this.robotQuadrant.getCamelCaseName() + "TouchdownTriggered", registry,
                                                           QuadrupedFootControlModuleParameters.getDefaultTouchdownTriggerWindow());
 
-      RigidBody foot = controllerToolbox.getFullRobotModel().getFoot(robotQuadrant);
+      RigidBodyBasics foot = controllerToolbox.getFullRobotModel().getFoot(robotQuadrant);
       FramePoint3D currentPosition = new FramePoint3D(soleFrame);
       currentPosition.changeFrame(foot.getBodyFixedFrame());
 
@@ -295,14 +297,16 @@ public class QuadrupedSwingState extends QuadrupedFootState
       desiredSoleLinearAcceleration.setMatchingFrame(desiredAcceleration);
 
       feedbackControlCommand.set(desiredPosition, desiredVelocity);
+      feedbackControlCommand.setFeedForwardAction(desiredAcceleration);
       feedbackControlCommand.setGains(parameters.getSolePositionGains());
+      feedbackControlCommand.setWeightsForSolver(parameters.getSolePositionWeights());
 
       updateEndOfStateConditions(time);
    }
 
    private boolean hasMinimumTimePassed(double timeInState)
    {
-      return timeInState / swingDuration.getDoubleValue() > 0.5;
+      return timeInState / swingDuration.getDoubleValue() > 0.6;
    }
 
    private void updateEndOfStateConditions(double timeInState)

@@ -32,10 +32,10 @@ import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition.GraphicType;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsList;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.graphicsDescription.yoGraphics.plotting.ArtifactList;
-import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.humanoidRobotics.footstep.FootstepTiming;
 import us.ihmc.robotModels.FullRobotModel;
+import us.ihmc.robotics.contactable.ContactablePlaneBody;
 import us.ihmc.robotics.math.frames.YoFramePointInMultipleFrames;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
@@ -341,6 +341,7 @@ public class SmoothCMPBasedICPPlanner extends AbstractICPPlanner
 
       this.initialTime.set(initialTime);
       isInitialTransfer.set(true);
+      isFinalTransfer.set(false);
       isStanding.set(true);
       isDoubleSupport.set(true);
       transferDurations.get(0).set(finalTransferDuration.getDoubleValue());
@@ -358,11 +359,12 @@ public class SmoothCMPBasedICPPlanner extends AbstractICPPlanner
       isDoubleSupport.set(true);
       isInitialTransfer.set(isStanding.getBooleanValue());
 
-      if (isInitialTransfer.getBooleanValue())
+      if (isInitialTransfer.getBooleanValue() || isFinalTransfer.getValue())
          previousTransferToSide.set(null);
 
       isStanding.set(false);
       int numberOfFootstepRegistered = getNumberOfFootstepsRegistered();
+      isFinalTransfer.set(numberOfFootstepRegistered == 0);
       transferDurations.get(numberOfFootstepRegistered).set(finalTransferDuration.getDoubleValue());
       transferDurationAlphas.get(numberOfFootstepRegistered).set(finalTransferDurationAlpha.getDoubleValue());
       referenceICPGenerator.setInitialConditionsForAdjustment();
@@ -387,6 +389,7 @@ public class SmoothCMPBasedICPPlanner extends AbstractICPPlanner
       isDoubleSupport.set(false);
 
       isInitialTransfer.set(false);
+      isFinalTransfer.set(false);
       isHoldingPosition.set(false);
 
       int numberOfFootstepRegistered = getNumberOfFootstepsRegistered();
@@ -603,7 +606,7 @@ public class SmoothCMPBasedICPPlanner extends AbstractICPPlanner
       timer.stopMeasurement();
    }
 
-   private void updateListeners()
+   public void updateListeners()
    {
       referenceCoPGenerator.updateListeners();
    }
@@ -717,6 +720,22 @@ public class SmoothCMPBasedICPPlanner extends AbstractICPPlanner
       referenceCoPGenerator.setDefaultPhaseTimes(defaultSwingTime, defaultTransferTime);
    }
 
+   public void getDesiredCenterOfMassVelocity(YoFrameVector3D desiredCenterOfMassVelocityToPack)
+   {
+      desiredCenterOfMassVelocityToPack.set(desiredCoMVelocity);
+   }
+
+   public void getDesiredCenterOfMassAcceleration(YoFrameVector3D desiredCenterOfMassAccelerationToPack)
+   {
+      desiredCenterOfMassAccelerationToPack.set(desiredCoMVelocity);
+   }
+
+   public void getDesiredCenterOfPressurePosition(YoFramePoint3D desiredCenterOfPressurePositionToPack)
+   {
+      desiredCenterOfPressurePositionToPack.setMatchingFrame(desiredCoPPosition);
+   }
+
+
    /** {@inheritDoc} */
    @Override
    public void getDesiredCenterOfPressurePosition(FramePoint3D desiredCenterOfPressurePositionToPack)
@@ -750,9 +769,9 @@ public class SmoothCMPBasedICPPlanner extends AbstractICPPlanner
       this.adjustPlanForDSContinuity.set(ensureContinuity);
    }
 
-   // package-private getters for tests
+   // getters for tests and visualizers
 
-   ReferenceCoPTrajectoryGenerator getReferenceCoPGenerator()
+   public ReferenceCoPTrajectoryGenerator getReferenceCoPGenerator()
    {
       return referenceCoPGenerator;
    }
@@ -762,12 +781,12 @@ public class SmoothCMPBasedICPPlanner extends AbstractICPPlanner
       return referenceCMPGenerator;
    }
 
-   ReferenceICPTrajectoryGenerator getReferenceICPGenerator()
+   public ReferenceICPTrajectoryGenerator getReferenceICPGenerator()
    {
       return referenceICPGenerator;
    }
 
-   ReferenceCoMTrajectoryGenerator getReferenceCoMGenerator()
+   public ReferenceCoMTrajectoryGenerator getReferenceCoMGenerator()
    {
       return referenceCoMGenerator;
    }

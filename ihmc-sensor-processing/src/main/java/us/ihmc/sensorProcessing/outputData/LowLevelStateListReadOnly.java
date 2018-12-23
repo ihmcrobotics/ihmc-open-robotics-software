@@ -1,14 +1,14 @@
 package us.ihmc.sensorProcessing.outputData;
 
-import us.ihmc.robotics.screwTheory.OneDoFJoint;
+import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 
 public interface LowLevelStateListReadOnly
 {
-   boolean hasDataForJoint(OneDoFJoint joint);
+   boolean hasDataForJoint(OneDoFJointBasics joint);
 
-   OneDoFJoint getOneDoFJoint(int index);
+   OneDoFJointBasics getOneDoFJoint(int index);
 
-   LowLevelStateReadOnly getLowLevelState(OneDoFJoint joint);
+   LowLevelStateReadOnly getLowLevelState(OneDoFJointBasics joint);
 
    LowLevelStateReadOnly getLowLevelState(int index);
 

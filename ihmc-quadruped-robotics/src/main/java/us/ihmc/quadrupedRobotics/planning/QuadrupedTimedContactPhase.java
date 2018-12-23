@@ -2,8 +2,8 @@ package us.ihmc.quadrupedRobotics.planning;
 
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.quadrupedRobotics.util.TimeInterval;
-import us.ihmc.quadrupedRobotics.util.TimeIntervalProvider;
+import us.ihmc.robotics.time.TimeInterval;
+import us.ihmc.robotics.time.TimeIntervalProvider;
 import us.ihmc.robotics.robotSide.QuadrantDependentList;
 import us.ihmc.robotics.robotSide.RobotQuadrant;
 

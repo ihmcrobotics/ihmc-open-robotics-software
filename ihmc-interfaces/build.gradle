@@ -1,24 +1,25 @@
 buildscript {
    repositories {
+      maven { url "https://plugins.gradle.org/m2/" }
       mavenCentral()
       maven { url "http://dl.bintray.com/ihmcrobotics/maven-release" }
       maven { url "http://dl.bintray.com/ihmcrobotics/maven-vendor" }
-      maven { url "https://plugins.gradle.org/m2/" }
       mavenLocal()
       jcenter()
    }
    dependencies {
-      classpath "us.ihmc:ihmc-build:0.15.1"
-      classpath "us.ihmc:ihmc-ci-plugin:0.18.0"
-      classpath "us.ihmc:ros2-msg-to-pubsub-generator:0.10.0"
-//      classpath "us.ihmc:ihmc-pub-sub-generator:0.8.3"
-      classpath "com.bmuschko:gradle-docker-plugin:3.2.5"
+      classpath "us.ihmc:ros2-msg-to-pubsub-generator:0.13.1"
+//      classpath "com.bmuschko:gradle-docker-plugin:4.0.1"
    }
 }
 
-apply plugin: "us.ihmc.ihmc-build"
-apply plugin: "us.ihmc.ihmc-ci-plugin"
-apply plugin: "com.bmuschko.docker-remote-api"
+plugins {
+   id("us.ihmc.ihmc-build") version "0.15.5"
+   id("us.ihmc.ihmc-ci-plugin") version "0.18.0"
+   id("us.ihmc.log-tools") version "0.2.2"
+}
+
+//apply plugin: "com.bmuschko.docker-remote-api"
 
 ihmc {
    loadProductProperties("../product.properties")
@@ -37,27 +38,27 @@ testSuites {
 }
 
 mainDependencies {
-   compile group: "us.ihmc", name: "euclid-core", version: "0.6.1"
-   compile group: "us.ihmc", name: "euclid", version: "0.9.3"
-   compile group: "us.ihmc", name: "ihmc-pub-sub", version: "0.8.3"
-   compile group: "us.ihmc", name: "ros2-common-interfaces", version: "0.10.0"
+   compile group: "us.ihmc", name: "euclid", version: "0.11.0"
+   compile group: "us.ihmc", name: "euclid-geometry", version: "0.11.0"
+   compile group: "us.ihmc", name: "ihmc-pub-sub", version: "0.10.1"
+   compile group: "us.ihmc", name: "ros2-common-interfaces", version: "0.13.1"
    compile group: "us.ihmc", name: "ihmc-commons", version: "0.24.0"
 }
 
 testDependencies {
    compile group: "us.ihmc", name: "ihmc-ci-core-api", version: "0.18.0"
-   compile group: "us.ihmc", name: "ihmc-ros2-library", version: "0.10.0"
+   compile group: "us.ihmc", name: "ihmc-ros2-library", version: "0.13.1"
 }
 
 generatorDependencies {
    compile group: "us.ihmc", name: "ihmc-commons", version: "0.24.0"
-   compile group: "us.ihmc", name: "ros2-msg-to-pubsub-generator", version: "0.10.0"
+   compile group: "us.ihmc", name: "ros2-msg-to-pubsub-generator", version: "0.13.1"
 }
 
-task buildImage(type: com.bmuschko.gradle.docker.tasks.image.DockerBuildImage) {
-   inputDir = file("src/generator/docker")
-   tag = "ihmc/ros1-bridge-build"
-}
+//task buildImage(type: com.bmuschko.gradle.docker.tasks.image.DockerBuildImage) {
+//   inputDir = file("src/generator/docker")
+//   tag = "ihmc/ros1-bridge-build"
+//}
 
 def generator = new us.ihmc.ros2.rosidl.RosInterfaceGenerator();
 
@@ -80,7 +81,6 @@ task generateMessages {
       {
          throw new org.gradle.api.GradleException("Could not find ros2-common-interfaces in configurations.compile!")
       }
-
 
       generator.addPackageRootToIDLGenerator(file("build/tmp/generateMessages/ros2-common-interfaces/rcl_interfaces").toPath());
       generator.addPackageRootToIDLGenerator(file("build/tmp/generateMessages/ros2-common-interfaces/common_interfaces").toPath());

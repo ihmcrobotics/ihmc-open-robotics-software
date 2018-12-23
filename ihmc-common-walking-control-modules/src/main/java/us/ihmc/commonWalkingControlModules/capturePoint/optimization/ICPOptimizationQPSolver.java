@@ -31,6 +31,7 @@ public class ICPOptimizationQPSolver
    private static final double convergenceThreshold = 1.0e-20;
 
    private boolean resetActiveSet;
+   private boolean previousTickFailed = false;
 
    /** Index handler that manages the indices for the objectives and solutions in the quadratic program. */
    private final ICPQPIndexHandler indexHandler;
@@ -819,10 +820,14 @@ public class ICPOptimizationQPSolver
             addPlanarRegionConstraint();
       }
 
-      addMaximumFeedbackMagnitudeConstraint();
-      addMaximumFeedbackRateConstraint();
+      if (!previousTickFailed)
+      { // this can occasionally over-constrain the problem, so remove it if the previous tick failed.
+         addMaximumFeedbackMagnitudeConstraint();
+         addMaximumFeedbackRateConstraint();
+      }
 
       boolean foundSolution = solve(solution);
+      previousTickFailed = !foundSolution;
 
       if (foundSolution)
       {

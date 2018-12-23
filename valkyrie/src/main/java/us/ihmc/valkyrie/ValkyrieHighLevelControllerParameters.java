@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+import us.ihmc.avatar.drcRobot.RobotTarget;
 import us.ihmc.commonWalkingControlModules.configurations.GroupParameter;
 import us.ihmc.commonWalkingControlModules.configurations.HighLevelControllerParameters;
 import us.ihmc.commonWalkingControlModules.controllerCore.parameters.JointAccelerationIntegrationParameters;
@@ -24,14 +25,13 @@ import us.ihmc.wholeBodyController.DRCRobotJointMap;
 
 public class ValkyrieHighLevelControllerParameters implements HighLevelControllerParameters
 {
+   private final RobotTarget target;
    private final ValkyrieJointMap jointMap;
    private final ValkyrieStandPrepParameters standPrepParameters;
 
-   private final boolean runningOnRealRobot;
-
-   public ValkyrieHighLevelControllerParameters(boolean runningOnRealRobot, ValkyrieJointMap jointMap)
+   public ValkyrieHighLevelControllerParameters(RobotTarget target, ValkyrieJointMap jointMap)
    {
-      this.runningOnRealRobot = runningOnRealRobot;
+      this.target = target;
       this.jointMap = jointMap;
       standPrepParameters = new ValkyrieStandPrepParameters(jointMap);
    }
@@ -74,15 +74,27 @@ public class ValkyrieHighLevelControllerParameters implements HighLevelControlle
    {
       List<GroupParameter<JointDesiredBehaviorReadOnly>> behaviors = new ArrayList<>();
 
-      // Can go up to kp = 30.0, kd = 3.0
-      configureSymmetricBehavior(behaviors, jointMap, LegJointName.HIP_YAW, JointDesiredControlMode.EFFORT, 15.0, 1.5);
-      configureSymmetricBehavior(behaviors, jointMap, LegJointName.HIP_ROLL, JointDesiredControlMode.EFFORT, 15.0, 1.5);
-      configureSymmetricBehavior(behaviors, jointMap, LegJointName.HIP_PITCH, JointDesiredControlMode.EFFORT, 15.0, 1.5);
-      // Can go up to kp = 30.0, kd = 4.0
-      configureSymmetricBehavior(behaviors, jointMap, LegJointName.KNEE_PITCH, JointDesiredControlMode.EFFORT, 15.0, 2.0);
-      // Can go up to kp = 60.0, kd = 6.0
-      configureSymmetricBehavior(behaviors, jointMap, LegJointName.ANKLE_PITCH, JointDesiredControlMode.EFFORT, 0.0, 3.0);
-      configureSymmetricBehavior(behaviors, jointMap, LegJointName.ANKLE_ROLL, JointDesiredControlMode.EFFORT, 0.0, 3.0);
+      if (target == RobotTarget.REAL_ROBOT || target == RobotTarget.GAZEBO)
+      {
+         // Can go up to kp = 30.0, kd = 3.0
+         configureSymmetricBehavior(behaviors, jointMap, LegJointName.HIP_YAW, JointDesiredControlMode.EFFORT, 15.0, 1.5);
+         configureSymmetricBehavior(behaviors, jointMap, LegJointName.HIP_ROLL, JointDesiredControlMode.EFFORT, 15.0, 1.5);
+         configureSymmetricBehavior(behaviors, jointMap, LegJointName.HIP_PITCH, JointDesiredControlMode.EFFORT, 15.0, 1.5);
+         // Can go up to kp = 30.0, kd = 4.0
+         configureSymmetricBehavior(behaviors, jointMap, LegJointName.KNEE_PITCH, JointDesiredControlMode.EFFORT, 15.0, 2.0);
+         // Can go up to kp = 60.0, kd = 6.0
+         configureSymmetricBehavior(behaviors, jointMap, LegJointName.ANKLE_PITCH, JointDesiredControlMode.EFFORT, 0.0, 3.0);
+         configureSymmetricBehavior(behaviors, jointMap, LegJointName.ANKLE_ROLL, JointDesiredControlMode.EFFORT, 0.0, 3.0);
+      }
+      else
+      {
+         configureSymmetricBehavior(behaviors, jointMap, LegJointName.HIP_YAW, JointDesiredControlMode.EFFORT, 0.0, 0.0);
+         configureSymmetricBehavior(behaviors, jointMap, LegJointName.HIP_ROLL, JointDesiredControlMode.EFFORT, 0.0, 0.0);
+         configureSymmetricBehavior(behaviors, jointMap, LegJointName.HIP_PITCH, JointDesiredControlMode.EFFORT, 0.0, 0.0);
+         configureSymmetricBehavior(behaviors, jointMap, LegJointName.KNEE_PITCH, JointDesiredControlMode.EFFORT, 0.0, 0.0);
+         configureSymmetricBehavior(behaviors, jointMap, LegJointName.ANKLE_PITCH, JointDesiredControlMode.EFFORT, 0.0, 0.0);
+         configureSymmetricBehavior(behaviors, jointMap, LegJointName.ANKLE_ROLL, JointDesiredControlMode.EFFORT, 0.0, 0.0);
+      }
 
       return behaviors;
    }
@@ -90,7 +102,7 @@ public class ValkyrieHighLevelControllerParameters implements HighLevelControlle
    private List<GroupParameter<JointDesiredBehaviorReadOnly>> getDesiredJointBehaviorForWalking()
    {
       List<GroupParameter<JointDesiredBehaviorReadOnly>> behaviors = new ArrayList<>();
-      if (runningOnRealRobot)
+      if (target == RobotTarget.REAL_ROBOT || target == RobotTarget.GAZEBO)
       {
          // Can go up to kp = 30.0, kd = 3.0
          configureSymmetricBehavior(behaviors, jointMap, LegJointName.HIP_YAW, JointDesiredControlMode.EFFORT, 15.0, 1.5);
@@ -114,8 +126,8 @@ public class ValkyrieHighLevelControllerParameters implements HighLevelControlle
 
          // position controlled on the real robot:
          configureSymmetricBehavior(behaviors, jointMap, ArmJointName.ELBOW_ROLL, JointDesiredControlMode.POSITION, 7.0, 0.0);
-         configureSymmetricBehavior(behaviors, jointMap, ArmJointName.WRIST_ROLL, JointDesiredControlMode.POSITION, 20.0, 0.5);
-         configureSymmetricBehavior(behaviors, jointMap, ArmJointName.FIRST_WRIST_PITCH, JointDesiredControlMode.POSITION, 20.0, 0.5);
+         configureSymmetricBehavior(behaviors, jointMap, ArmJointName.WRIST_ROLL, JointDesiredControlMode.POSITION, 20.0, 0.3);
+         configureSymmetricBehavior(behaviors, jointMap, ArmJointName.FIRST_WRIST_PITCH, JointDesiredControlMode.POSITION, 20.0, 0.3);
 
          configureBehavior(behaviors, jointMap, NeckJointName.DISTAL_NECK_PITCH, JointDesiredControlMode.POSITION, 0.0, 0.0);
          configureBehavior(behaviors, jointMap, NeckJointName.PROXIMAL_NECK_PITCH, JointDesiredControlMode.POSITION, 0.0, 0.0);
@@ -154,32 +166,58 @@ public class ValkyrieHighLevelControllerParameters implements HighLevelControlle
    {
       List<GroupParameter<JointDesiredBehaviorReadOnly>> behaviors = new ArrayList<>();
 
-      configureSymmetricBehavior(behaviors, jointMap, ArmJointName.SHOULDER_PITCH, JointDesiredControlMode.EFFORT, 15.0, 1.5);
-      configureSymmetricBehavior(behaviors, jointMap, ArmJointName.SHOULDER_ROLL, JointDesiredControlMode.EFFORT, 15.0, 1.5);
-      configureSymmetricBehavior(behaviors, jointMap, ArmJointName.SHOULDER_YAW, JointDesiredControlMode.EFFORT, 12.0, 1.2);
-      configureSymmetricBehavior(behaviors, jointMap, ArmJointName.ELBOW_PITCH, JointDesiredControlMode.EFFORT, 12.0, 3.0);
+      if (target == RobotTarget.SCS)
+      {
+         configureSymmetricBehavior(behaviors, jointMap, ArmJointName.SHOULDER_PITCH, JointDesiredControlMode.POSITION, 500.0, 50.0);
+         configureSymmetricBehavior(behaviors, jointMap, ArmJointName.SHOULDER_ROLL, JointDesiredControlMode.POSITION, 500.0, 50.0);
+         configureSymmetricBehavior(behaviors, jointMap, ArmJointName.SHOULDER_YAW, JointDesiredControlMode.POSITION, 250.0, 25.0);
+         configureSymmetricBehavior(behaviors, jointMap, ArmJointName.ELBOW_PITCH, JointDesiredControlMode.POSITION, 250.0, 25.0);
 
-      configureSymmetricBehavior(behaviors, jointMap, LegJointName.HIP_YAW, JointDesiredControlMode.EFFORT, 30.0, 6.2);
-      configureSymmetricBehavior(behaviors, jointMap, LegJointName.HIP_ROLL, JointDesiredControlMode.EFFORT, 150.0, 7.5);
-      configureSymmetricBehavior(behaviors, jointMap, LegJointName.HIP_PITCH, JointDesiredControlMode.EFFORT, 160.0, 7.0);
-      configureSymmetricBehavior(behaviors, jointMap, LegJointName.KNEE_PITCH, JointDesiredControlMode.EFFORT, 75.0, 3.0);
-      configureSymmetricBehavior(behaviors, jointMap, LegJointName.ANKLE_PITCH, JointDesiredControlMode.EFFORT, 25.0, 2.0);
-      configureSymmetricBehavior(behaviors, jointMap, LegJointName.ANKLE_ROLL, JointDesiredControlMode.EFFORT, 17.0, 1.0);
+         configureSymmetricBehavior(behaviors, jointMap, LegJointName.HIP_YAW, JointDesiredControlMode.POSITION, 500.0, 50.0);
+         configureSymmetricBehavior(behaviors, jointMap, LegJointName.HIP_ROLL, JointDesiredControlMode.POSITION, 500.0, 50.0);
+         configureSymmetricBehavior(behaviors, jointMap, LegJointName.HIP_PITCH, JointDesiredControlMode.POSITION, 500.0, 50.0);
+         configureSymmetricBehavior(behaviors, jointMap, LegJointName.KNEE_PITCH, JointDesiredControlMode.POSITION, 100.0, 50.0);
+         configureSymmetricBehavior(behaviors, jointMap, LegJointName.ANKLE_PITCH, JointDesiredControlMode.POSITION, 40.0, 10.0);
+         configureSymmetricBehavior(behaviors, jointMap, LegJointName.ANKLE_ROLL, JointDesiredControlMode.POSITION, 40.0, 10.0);
 
-      configureBehavior(behaviors, jointMap, SpineJointName.SPINE_YAW, JointDesiredControlMode.EFFORT, 30.0, 3.0);
-      configureBehavior(behaviors, jointMap, SpineJointName.SPINE_PITCH, JointDesiredControlMode.EFFORT, 180.0, 12.0);
-      configureBehavior(behaviors, jointMap, SpineJointName.SPINE_ROLL, JointDesiredControlMode.EFFORT, 180.0, 12.0);
+         configureBehavior(behaviors, jointMap, SpineJointName.SPINE_YAW, JointDesiredControlMode.POSITION, 1500.0, 150.0);
+         configureBehavior(behaviors, jointMap, SpineJointName.SPINE_PITCH, JointDesiredControlMode.POSITION, 1500.0, 150.0);
+         configureBehavior(behaviors, jointMap, SpineJointName.SPINE_ROLL, JointDesiredControlMode.POSITION, 1500.0, 150.0);
 
-      // position controlled on the real robot:
-      JointDesiredControlMode controlMode = runningOnRealRobot ? JointDesiredControlMode.POSITION : JointDesiredControlMode.EFFORT;
+         configureSymmetricBehavior(behaviors, jointMap, ArmJointName.ELBOW_ROLL, JointDesiredControlMode.POSITION, 50.0, 10.0);
+         configureSymmetricBehavior(behaviors, jointMap, ArmJointName.WRIST_ROLL, JointDesiredControlMode.POSITION, 30.0, 5.0);
+         configureSymmetricBehavior(behaviors, jointMap, ArmJointName.FIRST_WRIST_PITCH, JointDesiredControlMode.POSITION, 30.0, 5.0);
 
-      configureSymmetricBehavior(behaviors, jointMap, ArmJointName.ELBOW_ROLL, controlMode, 15.0, 0.0);
-      configureSymmetricBehavior(behaviors, jointMap, ArmJointName.WRIST_ROLL, controlMode, 6.0, 0.3);
-      configureSymmetricBehavior(behaviors, jointMap, ArmJointName.FIRST_WRIST_PITCH, controlMode, 6.0, 0.3);
+         configureBehavior(behaviors, jointMap, NeckJointName.PROXIMAL_NECK_PITCH, JointDesiredControlMode.POSITION, 50.0, 10.0);
+         configureBehavior(behaviors, jointMap, NeckJointName.DISTAL_NECK_YAW, JointDesiredControlMode.POSITION, 50.0, 10.0);
+         configureBehavior(behaviors, jointMap, NeckJointName.DISTAL_NECK_PITCH, JointDesiredControlMode.POSITION, 50.0, 10.0);
+      }
+      else
+      {
+         configureSymmetricBehavior(behaviors, jointMap, ArmJointName.SHOULDER_PITCH, JointDesiredControlMode.EFFORT, 15.0, 1.5);
+         configureSymmetricBehavior(behaviors, jointMap, ArmJointName.SHOULDER_ROLL, JointDesiredControlMode.EFFORT, 15.0, 1.5);
+         configureSymmetricBehavior(behaviors, jointMap, ArmJointName.SHOULDER_YAW, JointDesiredControlMode.EFFORT, 12.0, 1.2);
+         configureSymmetricBehavior(behaviors, jointMap, ArmJointName.ELBOW_PITCH, JointDesiredControlMode.EFFORT, 12.0, 3.0);
 
-      configureBehavior(behaviors, jointMap, NeckJointName.PROXIMAL_NECK_PITCH, controlMode, 0.0, 0.0);
-      configureBehavior(behaviors, jointMap, NeckJointName.DISTAL_NECK_YAW, controlMode, 0.0, 0.0);
-      configureBehavior(behaviors, jointMap, NeckJointName.DISTAL_NECK_PITCH, controlMode, 0.0, 0.0);
+         configureSymmetricBehavior(behaviors, jointMap, LegJointName.HIP_YAW, JointDesiredControlMode.EFFORT, 30.0, 6.2);
+         configureSymmetricBehavior(behaviors, jointMap, LegJointName.HIP_ROLL, JointDesiredControlMode.EFFORT, 150.0, 7.5);
+         configureSymmetricBehavior(behaviors, jointMap, LegJointName.HIP_PITCH, JointDesiredControlMode.EFFORT, 160.0, 7.0);
+         configureSymmetricBehavior(behaviors, jointMap, LegJointName.KNEE_PITCH, JointDesiredControlMode.EFFORT, 75.0, 3.0);
+         configureSymmetricBehavior(behaviors, jointMap, LegJointName.ANKLE_PITCH, JointDesiredControlMode.EFFORT, 25.0, 2.0);
+         configureSymmetricBehavior(behaviors, jointMap, LegJointName.ANKLE_ROLL, JointDesiredControlMode.EFFORT, 17.0, 1.0);
+
+         configureBehavior(behaviors, jointMap, SpineJointName.SPINE_YAW, JointDesiredControlMode.EFFORT, 30.0, 3.0);
+         configureBehavior(behaviors, jointMap, SpineJointName.SPINE_PITCH, JointDesiredControlMode.EFFORT, 180.0, 12.0);
+         configureBehavior(behaviors, jointMap, SpineJointName.SPINE_ROLL, JointDesiredControlMode.EFFORT, 180.0, 12.0);
+
+         configureSymmetricBehavior(behaviors, jointMap, ArmJointName.ELBOW_ROLL, JointDesiredControlMode.POSITION, 15.0, 0.0);
+         configureSymmetricBehavior(behaviors, jointMap, ArmJointName.WRIST_ROLL, JointDesiredControlMode.POSITION, 6.0, 0.3);
+         configureSymmetricBehavior(behaviors, jointMap, ArmJointName.FIRST_WRIST_PITCH, JointDesiredControlMode.POSITION, 6.0, 0.3);
+
+         configureBehavior(behaviors, jointMap, NeckJointName.PROXIMAL_NECK_PITCH, JointDesiredControlMode.POSITION, 0.0, 0.0);
+         configureBehavior(behaviors, jointMap, NeckJointName.DISTAL_NECK_YAW, JointDesiredControlMode.POSITION, 0.0, 0.0);
+         configureBehavior(behaviors, jointMap, NeckJointName.DISTAL_NECK_PITCH, JointDesiredControlMode.POSITION, 0.0, 0.0);
+      }
 
       return behaviors;
    }
@@ -237,19 +275,21 @@ public class ValkyrieHighLevelControllerParameters implements HighLevelControlle
    @Override
    public HighLevelControllerName getDefaultInitialControllerState()
    {
-      return runningOnRealRobot ? HighLevelControllerName.STAND_PREP_STATE : HighLevelControllerName.WALKING;
+      boolean shouldUseStandPrep = (target == RobotTarget.REAL_ROBOT) || (target == RobotTarget.GAZEBO);
+      return shouldUseStandPrep ? HighLevelControllerName.STAND_PREP_STATE : HighLevelControllerName.WALKING;
    }
 
    @Override
    public HighLevelControllerName getFallbackControllerState()
    {
-      return runningOnRealRobot ? HighLevelControllerName.STAND_PREP_STATE : HighLevelControllerName.DO_NOTHING_BEHAVIOR;
+      boolean shouldUseStandPrep = (target == RobotTarget.REAL_ROBOT) || (target == RobotTarget.GAZEBO);
+      return shouldUseStandPrep ? HighLevelControllerName.STAND_PREP_STATE : HighLevelControllerName.DO_NOTHING_BEHAVIOR;
    }
 
    @Override
    public boolean automaticallyTransitionToWalkingWhenReady()
    {
-      return runningOnRealRobot;
+      return (target == RobotTarget.REAL_ROBOT) || (target == RobotTarget.GAZEBO);
    }
 
    @Override

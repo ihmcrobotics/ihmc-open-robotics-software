@@ -35,14 +35,15 @@ import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
+import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
+import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
+import us.ihmc.mecano.tools.MultiBodySystemTools;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.math.trajectories.waypoints.SimpleTrajectoryPoint1D;
 import us.ihmc.robotics.math.trajectories.waypoints.SimpleTrajectoryPoint1DList;
 import us.ihmc.robotics.math.trajectories.waypoints.TrajectoryPoint1DCalculator;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
-import us.ihmc.robotics.screwTheory.OneDoFJoint;
-import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.robotics.screwTheory.ScrewTools;
 import us.ihmc.simulationConstructionSetTools.bambooTools.BambooTools;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
@@ -142,16 +143,16 @@ public class AtlasUpperBodyTrajectoriesWhileWalkingTest
       int numberOfTrajectoryPoints = 5;
       double trajectoryTime = (numberOfTrajectoryPoints + 1) * timePerWaypoint;
 
-      SideDependentList<OneDoFJoint[]> armsJoints = new SideDependentList<>();
+      SideDependentList<OneDoFJointBasics[]> armsJoints = new SideDependentList<>();
       SideDependentList<List<ArmTrajectoryMessage>> armTrajectoryMessages = new SideDependentList<>();
 
       for (RobotSide robotSide : RobotSide.values)
       {
-         RigidBody chest = fullRobotModel.getChest();
-         RigidBody hand = fullRobotModel.getHand(robotSide);
-         OneDoFJoint[] armJoints = ScrewTools.createOneDoFJointPath(chest, hand);
+         RigidBodyBasics chest = fullRobotModel.getChest();
+         RigidBodyBasics hand = fullRobotModel.getHand(robotSide);
+         OneDoFJointBasics[] armJoints = MultiBodySystemTools.createOneDoFJointPath(chest, hand);
          armsJoints.put(robotSide, armJoints);
-         int numberOfJoints = ScrewTools.computeDegreesOfFreedom(armJoints);
+         int numberOfJoints = MultiBodySystemTools.computeDegreesOfFreedom(armJoints);
 
          List<ArmTrajectoryMessage> messageList = new ArrayList<>();
 
@@ -171,7 +172,7 @@ public class AtlasUpperBodyTrajectoriesWhileWalkingTest
 
             for (int jointIndex = 0; jointIndex < numberOfJoints; jointIndex++)
             {
-               OneDoFJoint joint = armJoints[jointIndex];
+               OneDoFJointBasics joint = armJoints[jointIndex];
                OneDoFJointTrajectoryMessage jointTrajectoryMessage = armTrajectoryMessage.getJointspaceTrajectory().getJointTrajectoryMessages().add();
 
                trajectoryPoint1DCalculator.clear();

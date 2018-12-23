@@ -6,16 +6,17 @@ import java.util.List;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicReferenceFrame;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsList;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.mecano.multiBodySystem.interfaces.JointBasics;
+import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
+import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.robotics.geometry.GeometryTools;
-import us.ihmc.robotics.screwTheory.InverseDynamicsJoint;
-import us.ihmc.robotics.screwTheory.OneDoFJoint;
-import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.simulationconstructionset.util.RobotController;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
 
 public class JointAxisVisualizer implements RobotController
 {
@@ -23,22 +24,22 @@ public class JointAxisVisualizer implements RobotController
    private final YoVariableRegistry registry = new YoVariableRegistry(name);
    private final List<YoGraphicReferenceFrame> yoGraphicReferenceFrames = new ArrayList<YoGraphicReferenceFrame>();
    
-   public JointAxisVisualizer(RigidBody rootBody, YoGraphicsListRegistry yoGraphicsListRegistry, double length)
+   public JointAxisVisualizer(RigidBodyBasics rootBody, YoGraphicsListRegistry yoGraphicsListRegistry, double length)
    {
       YoGraphicsList yoGraphicsList = new YoGraphicsList(name);
-      List<InverseDynamicsJoint> jointStack = new ArrayList<InverseDynamicsJoint>(rootBody.getChildrenJoints());
+      List<JointBasics> jointStack = new ArrayList<JointBasics>(rootBody.getChildrenJoints());
       while (!jointStack.isEmpty())
       {
-         InverseDynamicsJoint joint = jointStack.get(0);
-         if(joint instanceof OneDoFJoint)
+         JointBasics joint = jointStack.get(0);
+         if(joint instanceof OneDoFJointBasics)
          {
-            FrameVector3D jAxis=((OneDoFJoint)joint).getJointAxis();
+            FrameVector3DReadOnly jAxis=((OneDoFJointBasics)joint).getJointAxis();
             ReferenceFrame referenceFrame = GeometryTools.constructReferenceFrameFromPointAndZAxis(joint.getName()+"JointAxis", new FramePoint3D(jAxis.getReferenceFrame()), new FrameVector3D(jAxis.getReferenceFrame(),jAxis));
             YoGraphicReferenceFrame yoGraphicReferenceFrame = new YoGraphicReferenceFrame(referenceFrame , registry, false, length, YoAppearance.Gold());
             yoGraphicsList.add(yoGraphicReferenceFrame);
             yoGraphicReferenceFrames.add(yoGraphicReferenceFrame);
          }
-         List<InverseDynamicsJoint> childrenJoints = joint.getSuccessor().getChildrenJoints();
+         List<? extends JointBasics> childrenJoints = joint.getSuccessor().getChildrenJoints();
          jointStack.addAll(childrenJoints);
          jointStack.remove(joint);
       }

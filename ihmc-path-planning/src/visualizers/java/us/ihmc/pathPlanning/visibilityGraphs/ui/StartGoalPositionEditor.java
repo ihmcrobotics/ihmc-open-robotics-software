@@ -12,12 +12,12 @@ import javafx.scene.input.MouseEvent;
 import javafx.scene.input.PickResult;
 import us.ihmc.commons.PrintTools;
 import us.ihmc.euclid.tuple3D.Point3D;
-import us.ihmc.javaFXToolkit.messager.Messager;
-import us.ihmc.javaFXToolkit.messager.MessagerAPIFactory.Topic;
+import us.ihmc.messager.Messager;
+import us.ihmc.messager.MessagerAPIFactory.Topic;
 
 public class StartGoalPositionEditor extends AnimationTimer
 {
-   private static final boolean VERBOSE = true;
+   private static final boolean VERBOSE = false;
 
    private final EventHandler<MouseEvent> rayCastInterceptor;
    private boolean isRayCastInterceptorAttached = false;

@@ -3,17 +3,17 @@ package us.ihmc.wholeBodyController;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 
+import us.ihmc.mecano.multiBodySystem.interfaces.JointBasics;
+import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
+import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
+import us.ihmc.mecano.tools.MultiBodySystemTools;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.partNames.ArmJointName;
 import us.ihmc.robotics.partNames.LegJointName;
 import us.ihmc.robotics.partNames.SpineJointName;
 import us.ihmc.robotics.robotSide.RobotSide;
-import us.ihmc.robotics.screwTheory.InverseDynamicsJoint;
-import us.ihmc.robotics.screwTheory.OneDoFJoint;
-import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.robotics.screwTheory.ScrewTools;
 import us.ihmc.robotics.sensors.ForceSensorDataHolderReadOnly;
-import us.ihmc.sensorProcessing.outputData.JointDesiredOutput;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutputBasics;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutputList;
 import us.ihmc.sensorProcessing.sensors.RawJointSensorDataHolderMap;
@@ -60,7 +60,7 @@ public class DRCOutputProcessorWithAccelerationIntegration implements DRCOutputP
    private final YoDouble kPosArmJointTorque = new YoDouble("kPosArmJointTorque",
          "Gain for position control in order to achieve acceleration control using additional joint torque (Arms only)", registry);
 
-   private PairList<OneDoFJoint, JointDesiredOutputBasics> jointStateAndData;
+   private PairList<OneDoFJointBasics, JointDesiredOutputBasics> jointStateAndData;
    private LinkedHashMap<JointDesiredOutputBasics, YoDouble> alphaDesiredVelocityMap;
    private LinkedHashMap<JointDesiredOutputBasics, YoDouble> alphaDesiredPositionMap;
    private LinkedHashMap<JointDesiredOutputBasics, YoDouble> velocityTorqueMap;
@@ -177,11 +177,12 @@ public class DRCOutputProcessorWithAccelerationIntegration implements DRCOutputP
       for (int i = 0; i < jointStateAndData.size(); i++)
       {
          JointDesiredOutputBasics jointData = jointStateAndData.second(i);
-         OneDoFJoint jointState = jointStateAndData.first(i);
+         OneDoFJointBasics jointState = jointStateAndData.first(i);
          YoDouble qd_d_joint = desiredVelocities.get(jointData);
          YoDouble q_d_joint = desiredPositions.get(jointData);
 
-         boolean integrateDesiredAccelerations = jointState.getIntegrateDesiredAccelerations();
+         // FIXME See Jira ticket EOD-965
+         boolean integrateDesiredAccelerations = true; //jointState.getIntegrateDesiredAccelerations();
          // Don't call the listener there, we want to be able to set those both from the controller and SCS.
          doAccelerationIntegrationMap.get(jointData).set(integrateDesiredAccelerations, false);
 
@@ -215,12 +216,12 @@ public class DRCOutputProcessorWithAccelerationIntegration implements DRCOutputP
       }
    }
 
-   private void integrateAccelerationsToGetDesiredVelocities(OneDoFJoint jointState, JointDesiredOutputBasics lowLevelJointData, YoDouble qd_d_joint, YoDouble q_d_joint)
+   private void integrateAccelerationsToGetDesiredVelocities(OneDoFJointBasics jointState, JointDesiredOutputBasics lowLevelJointData, YoDouble qd_d_joint, YoDouble q_d_joint)
    {
       double currentPosition = jointState.getQ();
       double currentVelocity = jointState.getQd();
 
-      if (jointState.getResetDesiredAccelerationIntegrator())
+      if (lowLevelJointData.pollResetIntegratorsRequest())
       {
          //       qd_d_joint.set(currentVelocity);
          qd_d_joint.set(0.0);
@@ -280,15 +281,15 @@ public class DRCOutputProcessorWithAccelerationIntegration implements DRCOutputP
          }
       }
 
-      ArrayList<OneDoFJoint> armOneDoFJoints = new ArrayList<>();
+      ArrayList<OneDoFJointBasics> armOneDoFJoints = new ArrayList<>();
       for (RobotSide robotSide : RobotSide.values)
       {
-         RigidBody hand = controllerRobotModel.getHand(robotSide);
+         RigidBodyBasics hand = controllerRobotModel.getHand(robotSide);
          if (hand != null)
          {
-            InverseDynamicsJoint[] armJoints = ScrewTools.createJointPath(controllerRobotModel.getChest(), hand);
-            OneDoFJoint[] filterArmJoints = ScrewTools.filterJoints(armJoints, OneDoFJoint.class);
-            for (OneDoFJoint armJoint : filterArmJoints)
+            JointBasics[] armJoints = MultiBodySystemTools.createJointPath(controllerRobotModel.getChest(), hand);
+            OneDoFJointBasics[] filterArmJoints = MultiBodySystemTools.filterJoints(armJoints, OneDoFJointBasics.class);
+            for (OneDoFJointBasics armJoint : filterArmJoints)
                armOneDoFJoints.add(armJoint);
          }
       }
@@ -307,7 +308,7 @@ public class DRCOutputProcessorWithAccelerationIntegration implements DRCOutputP
 
       for (int i = 0; i < jointStateAndData.size(); i++)
       {
-         final OneDoFJoint jointState = jointStateAndData.first(i);
+         final OneDoFJointBasics jointState = jointStateAndData.first(i);
          final JointDesiredOutputBasics jointData = jointStateAndData.second(i);
          
          final YoBoolean doAccelerationIntegration = new YoBoolean("doAccelerationIntegration_" + jointState.getName(), registry);
@@ -344,7 +345,8 @@ public class DRCOutputProcessorWithAccelerationIntegration implements DRCOutputP
             @Override
             public void notifyOfVariableChange(YoVariable<?> v)
             {
-               jointState.setIntegrateDesiredAccelerations(doAccelerationIntegration.getBooleanValue());
+               // FIXME
+//               jointState.setIntegrateDesiredAccelerations(doAccelerationIntegration.getBooleanValue());
             }
          });
 
@@ -354,24 +356,25 @@ public class DRCOutputProcessorWithAccelerationIntegration implements DRCOutputP
          doAccelerationIntegrationMap.put(jointData, doAccelerationIntegration);
       }
 
-      if (runningOnRealRobot)
-      {
-         for (RobotSide robotSide : RobotSide.values)
-         {
-            for (LegJointName legJointName : legJointsForIntegratingAcceleration)
-               controllerRobotModel.getLegJoint(robotSide, legJointName).setIntegrateDesiredAccelerations(true);
-
-            for (ArmJointName armJointName : armJointsForIntegratingAcceleration)
-            {
-               OneDoFJoint armJoint = controllerRobotModel.getArmJoint(robotSide, armJointName);
-               if(armJoint!=null)
-                  armJoint.setIntegrateDesiredAccelerations(true);
-            }
-         }
-
-         for (SpineJointName spineJointName : spineJointsForIntegratingAcceleration)
-            controllerRobotModel.getSpineJoint(spineJointName).setIntegrateDesiredAccelerations(true);
-      }
+      // FIXME
+//      if (runningOnRealRobot)
+//      {
+//         for (RobotSide robotSide : RobotSide.values)
+//         {
+//            for (LegJointName legJointName : legJointsForIntegratingAcceleration)
+//               controllerRobotModel.getLegJoint(robotSide, legJointName).setIntegrateDesiredAccelerations(true);
+//
+//            for (ArmJointName armJointName : armJointsForIntegratingAcceleration)
+//            {
+//               OneDoFJoint armJoint = controllerRobotModel.getArmJoint(robotSide, armJointName);
+//               if(armJoint!=null)
+//                  armJoint.setIntegrateDesiredAccelerations(true);
+//            }
+//         }
+//
+//         for (SpineJointName spineJointName : spineJointsForIntegratingAcceleration)
+//            controllerRobotModel.getSpineJoint(spineJointName).setIntegrateDesiredAccelerations(true);
+//      }
    }
 
    @Override

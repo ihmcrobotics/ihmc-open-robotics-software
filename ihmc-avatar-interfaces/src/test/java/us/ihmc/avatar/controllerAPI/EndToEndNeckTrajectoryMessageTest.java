@@ -7,24 +7,25 @@ import java.util.Random;
 
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Test;
 
 import controller_msgs.msg.dds.NeckTrajectoryMessage;
-import org.junit.Test;
 import us.ihmc.avatar.MultiRobotTestInterface;
 import us.ihmc.avatar.testTools.DRCSimulationTestHelper;
 import us.ihmc.commons.RandomNumbers;
+import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
+import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
+import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
+import us.ihmc.mecano.tools.MultiBodySystemTools;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.math.trajectories.CubicPolynomialTrajectoryGenerator;
-import us.ihmc.robotics.screwTheory.OneDoFJoint;
-import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.robotics.screwTheory.ScrewTools;
 import us.ihmc.simulationConstructionSetTools.bambooTools.BambooTools;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.util.simulationTesting.SimulationTestingParameters;
 import us.ihmc.tools.MemoryTools;
-import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.yoVariables.variable.YoDouble;
 
 public abstract class EndToEndNeckTrajectoryMessageTest implements MultiRobotTestInterface
@@ -54,16 +55,16 @@ public abstract class EndToEndNeckTrajectoryMessageTest implements MultiRobotTes
       FullHumanoidRobotModel fullRobotModel = drcSimulationTestHelper.getControllerFullRobotModel();
 
       double trajectoryTime = 0.5;
-      RigidBody chest = fullRobotModel.getChest();
-      RigidBody head = fullRobotModel.getHead();
-      OneDoFJoint[] neckJoints = ScrewTools.createOneDoFJointPath(chest, head);
+      RigidBodyBasics chest = fullRobotModel.getChest();
+      RigidBodyBasics head = fullRobotModel.getHead();
+      OneDoFJointBasics[] neckJoints = MultiBodySystemTools.createOneDoFJointPath(chest, head);
       int numberOfJoints = neckJoints.length;
       double[] desiredJointPositions = new double[numberOfJoints];
       double[] desiredJointVelcoties = new double[numberOfJoints];
 
       for (int i = 0; i < numberOfJoints; i++)
       {
-         OneDoFJoint joint = neckJoints[i];
+         OneDoFJointBasics joint = neckJoints[i];
          desiredJointPositions[i] = RandomNumbers.nextDouble(random, joint.getJointLimitLower(), joint.getJointLimitUpper());
       }
 
@@ -73,7 +74,7 @@ public abstract class EndToEndNeckTrajectoryMessageTest implements MultiRobotTes
       {
          for (int i = 0; i < numberOfJoints; i++)
          {
-            OneDoFJoint neckJoint = neckJoints[i];
+            OneDoFJointBasics neckJoint = neckJoints[i];
             System.out.println(neckJoint.getName() + ": q = " + neckJoint.getQ());
          }
       }
@@ -88,7 +89,7 @@ public abstract class EndToEndNeckTrajectoryMessageTest implements MultiRobotTes
       assertSingleWaypointExecuted(neckJoints, desiredJointPositions, desiredJointVelcoties, epsilon, scs);
    }
 
-   public static void assertSingleWaypointExecuted(OneDoFJoint[] neckJoints, double[] desiredJointPositions, double[] desiredJointVelcoties, double epsilon,
+   public static void assertSingleWaypointExecuted(OneDoFJointBasics[] neckJoints, double[] desiredJointPositions, double[] desiredJointVelcoties, double epsilon,
          SimulationConstructionSet scs)
    {
       double[] controllerDesiredJointPositions = findControllerDesiredPositions(neckJoints, scs);
@@ -101,7 +102,7 @@ public abstract class EndToEndNeckTrajectoryMessageTest implements MultiRobotTes
       {
          for (int i = 0; i < neckJoints.length; i++)
          {
-            OneDoFJoint joint = neckJoints[i];
+            OneDoFJointBasics joint = neckJoints[i];
             double q_err = desiredJointPositions[i] - joint.getQ();
             System.out.println(joint.getName() + ": q_err = " + q_err + ", controller q_d = " + controllerDesiredJointPositions[i] + ", message q_d = "
                   + desiredJointPositions[i] + ", q = " + joint.getQ());
@@ -109,13 +110,13 @@ public abstract class EndToEndNeckTrajectoryMessageTest implements MultiRobotTes
 
          for (int i = 0; i < neckJoints.length; i++)
          {
-            OneDoFJoint joint = neckJoints[i];
+            OneDoFJointBasics joint = neckJoints[i];
             System.out.println(joint.getName() + ": controller qd_d = " + controllerDesiredJointVelocities[i]);
          }
       }
    }
 
-   public static double[] findControllerDesiredPositions(OneDoFJoint[] neckJoints, SimulationConstructionSet scs)
+   public static double[] findControllerDesiredPositions(OneDoFJointBasics[] neckJoints, SimulationConstructionSet scs)
    {
       double[] controllerDesiredJointPositions = new double[neckJoints.length];
       for (int i = 0; i < neckJoints.length; i++)
@@ -130,7 +131,7 @@ public abstract class EndToEndNeckTrajectoryMessageTest implements MultiRobotTes
       return controllerDesiredJointPositions;
    }
 
-   public static double[] findControllerDesiredVelocities(OneDoFJoint[] neckJoints, SimulationConstructionSet scs)
+   public static double[] findControllerDesiredVelocities(OneDoFJointBasics[] neckJoints, SimulationConstructionSet scs)
    {
       double[] controllerDesiredJointVelocities = new double[neckJoints.length];
       for (int i = 0; i < neckJoints.length; i++)

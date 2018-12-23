@@ -1,8 +1,8 @@
 package us.ihmc.sensorProcessing.frames;
 
+import us.ihmc.mecano.frames.MovingReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
-import us.ihmc.robotics.screwTheory.MovingReferenceFrame;
 
 public interface CommonHumanoidReferenceFrames extends CommonLeggedReferenceFrames<RobotSide>
 {

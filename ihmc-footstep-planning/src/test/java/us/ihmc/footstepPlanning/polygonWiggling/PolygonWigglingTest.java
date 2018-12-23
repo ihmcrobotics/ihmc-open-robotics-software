@@ -1,23 +1,13 @@
 package us.ihmc.footstepPlanning.polygonWiggling;
 
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
-
-import java.awt.BorderLayout;
-import java.awt.Color;
-import java.awt.Dimension;
-import java.util.ArrayList;
-import java.util.Random;
-
-import javax.swing.JFrame;
-
 import org.ejml.data.DenseMatrix64F;
 import org.ejml.ops.CommonOps;
 import org.junit.After;
 import org.junit.Test;
-
+import us.ihmc.commonWalkingControlModules.polygonWiggling.PolygonWiggler;
+import us.ihmc.commonWalkingControlModules.polygonWiggling.WiggleParameters;
 import us.ihmc.commons.MutationTestFacilitator;
+import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.continuousIntegration.IntegrationCategory;
@@ -27,15 +17,21 @@ import us.ihmc.euclid.referenceFrame.tools.ReferenceFrameTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
-import us.ihmc.footstepPlanning.testTools.PlanningTestTools;
+import us.ihmc.footstepPlanning.tools.PlannerTools;
 import us.ihmc.graphicsDescription.yoGraphics.plotting.ArtifactList;
 import us.ihmc.graphicsDescription.yoGraphics.plotting.YoArtifactPolygon;
 import us.ihmc.plotting.Plotter;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.yoVariables.variable.YoFrameConvexPolygon2D;
 import us.ihmc.robotics.geometry.ConvexPolygon2dCalculator;
 import us.ihmc.robotics.geometry.PlanarRegion;
-import us.ihmc.commons.thread.ThreadTools;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoFrameConvexPolygon2D;
+
+import javax.swing.*;
+import java.awt.*;
+import java.util.ArrayList;
+import java.util.Random;
+
+import static org.junit.Assert.*;
 
 @ContinuousIntegrationAnnotations.ContinuousIntegrationPlan(categories = IntegrationCategory.FAST)
 public class PolygonWigglingTest
@@ -65,7 +61,7 @@ public class PolygonWigglingTest
       plane.addVertex(0.5, 0.5);
       plane.update();
 
-      ConvexPolygon2D initialFoot = PlanningTestTools.createDefaultFootPolygon();
+      ConvexPolygon2D initialFoot = PlannerTools.createDefaultFootPolygon();
       RigidBodyTransform initialFootTransform = new RigidBodyTransform();
       initialFootTransform.setRotationYawAndZeroTranslation(Math.toRadians(-30.0));
       initialFootTransform.setTranslation(-0.1, -0.3, 0.0);
@@ -96,7 +92,7 @@ public class PolygonWigglingTest
       plane.addVertex(0.5, 0.5);
       plane.update();
 
-      ConvexPolygon2D initialFoot = PlanningTestTools.createDefaultFootPolygon();
+      ConvexPolygon2D initialFoot = PlannerTools.createDefaultFootPolygon();
       RigidBodyTransform initialFootTransform = new RigidBodyTransform();
       initialFootTransform.setRotationYawAndZeroTranslation(Math.toRadians(-30.0));
       initialFootTransform.setTranslation(-0.1, -0.3, 0.0);
@@ -148,7 +144,7 @@ public class PolygonWigglingTest
       plane.addVertex(0.5, 0.5);
       plane.update();
 
-      ConvexPolygon2D initialFoot = PlanningTestTools.createDefaultFootPolygon();
+      ConvexPolygon2D initialFoot = PlannerTools.createDefaultFootPolygon();
       RigidBodyTransform initialFootTransform = new RigidBodyTransform();
       initialFootTransform.setRotationYawAndZeroTranslation(Math.toRadians(-30.0));
       initialFootTransform.setTranslation(-0.1, -0.3, 0.0);
@@ -174,10 +170,10 @@ public class PolygonWigglingTest
    @Test(timeout = 30000)
    public void testProjectionThatRequiredRotation()
    {
-      ConvexPolygon2D plane = PlanningTestTools.createDefaultFootPolygon();
+      ConvexPolygon2D plane = PlannerTools.createDefaultFootPolygon();
       plane.scale(1.1);
 
-      ConvexPolygon2D initialFoot = PlanningTestTools.createDefaultFootPolygon();
+      ConvexPolygon2D initialFoot = PlannerTools.createDefaultFootPolygon();
       RigidBodyTransform initialFootTransform = new RigidBodyTransform();
       initialFootTransform.setRotationYawAndZeroTranslation(Math.toRadians(-13.0));
       initialFootTransform.setTranslation(-0.1, -0.3, 0.0);
@@ -200,7 +196,7 @@ public class PolygonWigglingTest
    @Test(timeout = 30000)
    public void testImpossibleCases()
    {
-      ConvexPolygon2D plane = PlanningTestTools.createDefaultFootPolygon();
+      ConvexPolygon2D plane = PlannerTools.createDefaultFootPolygon();
       plane.scale(0.9);
       addPolygonToArtifacts("Plane", plane, Color.BLACK);
 
@@ -208,7 +204,7 @@ public class PolygonWigglingTest
       double yawLimit = Math.toRadians(15.0);
       for (int i = 0; i < 1000; i ++)
       {
-         ConvexPolygon2D initialFoot = PlanningTestTools.createDefaultFootPolygon();
+         ConvexPolygon2D initialFoot = PlannerTools.createDefaultFootPolygon();
          RigidBodyTransform initialFootTransform = new RigidBodyTransform();
          double x = 5.0 * (random.nextDouble() - 0.5);
          double y = 5.0 * (random.nextDouble() - 0.5);
@@ -244,7 +240,7 @@ public class PolygonWigglingTest
       plane.addVertex(0.5, 0.5);
       plane.update();
 
-      ConvexPolygon2D initialFoot = PlanningTestTools.createDefaultFootPolygon();
+      ConvexPolygon2D initialFoot = PlannerTools.createDefaultFootPolygon();
       RigidBodyTransform initialFootTransform = new RigidBodyTransform();
       initialFootTransform.setTranslationAndIdentityRotation(-0.2, 0.25, 0.0);
       initialFoot.applyTransform(initialFootTransform, false);
@@ -273,7 +269,7 @@ public class PolygonWigglingTest
       plane.addVertex(0.5, 0.5);
       plane.update();
 
-      ConvexPolygon2D initialFoot = PlanningTestTools.createDefaultFootPolygon();
+      ConvexPolygon2D initialFoot = PlannerTools.createDefaultFootPolygon();
       RigidBodyTransform initialFootTransform = new RigidBodyTransform();
       initialFootTransform.setTranslationAndIdentityRotation(-0.2, 0.25, 0.0);
       initialFoot.applyTransform(initialFootTransform, false);
@@ -304,7 +300,7 @@ public class PolygonWigglingTest
       plane.addVertex(0.0, 2.0);
       plane.update();
 
-      ConvexPolygon2D initialFoot = PlanningTestTools.createDefaultFootPolygon();
+      ConvexPolygon2D initialFoot = PlannerTools.createDefaultFootPolygon();
       RigidBodyTransform initialFootTransform = new RigidBodyTransform();
       initialFootTransform.setTranslationAndIdentityRotation(0.5, 0.0, 0.0);
       initialFoot.applyTransform(initialFootTransform, false);
@@ -346,7 +342,7 @@ public class PolygonWigglingTest
       plane.addVertex(0.0, 2.0);
       plane.update();
 
-      ConvexPolygon2D initialFoot = PlanningTestTools.createDefaultFootPolygon();
+      ConvexPolygon2D initialFoot = PlannerTools.createDefaultFootPolygon();
       RigidBodyTransform initialFootTransform = new RigidBodyTransform();
       initialFootTransform.setTranslationAndIdentityRotation(1.0, 1.5, 0.0);
       initialFoot.applyTransform(initialFootTransform, false);
@@ -382,7 +378,7 @@ public class PolygonWigglingTest
       plane.addVertex(0.0, 2.0);
       plane.update();
 
-      ConvexPolygon2D initialFoot = PlanningTestTools.createDefaultFootPolygon();
+      ConvexPolygon2D initialFoot = PlannerTools.createDefaultFootPolygon();
       RigidBodyTransform initialFootTransform = new RigidBodyTransform();
       initialFootTransform.setTranslationAndIdentityRotation(0.5, 0.0, 0.0);
       initialFoot.applyTransform(initialFootTransform, false);
@@ -418,7 +414,7 @@ public class PolygonWigglingTest
       plane.addVertex(0.0, 2.0);
       plane.update();
 
-      ConvexPolygon2D initialFoot = PlanningTestTools.createDefaultFootPolygon();
+      ConvexPolygon2D initialFoot = PlannerTools.createDefaultFootPolygon();
       RigidBodyTransform initialFootTransform = new RigidBodyTransform();
       initialFootTransform.setTranslationAndIdentityRotation(1.0, 1.5, 0.0);
       initialFoot.applyTransform(initialFootTransform, false);
@@ -455,7 +451,7 @@ public class PolygonWigglingTest
       plane.addVertex(0.0, 2.0);
       plane.update();
 
-      ConvexPolygon2D initialFoot = PlanningTestTools.createDefaultFootPolygon();
+      ConvexPolygon2D initialFoot = PlannerTools.createDefaultFootPolygon();
       RigidBodyTransform initialFootTransform = new RigidBodyTransform();
       initialFootTransform.setTranslationAndIdentityRotation(0.5, 0.05, 0.0);
       initialFoot.applyTransform(initialFootTransform, false);
@@ -520,7 +516,7 @@ public class PolygonWigglingTest
 
       for (int i = 0; i < 1000; i++)
       {
-         ConvexPolygon2D initialFoot = PlanningTestTools.createDefaultFootPolygon();
+         ConvexPolygon2D initialFoot = PlannerTools.createDefaultFootPolygon();
          if (random.nextBoolean())
          {
             initialFoot.removeVertex(random.nextInt(4));
@@ -583,7 +579,7 @@ public class PolygonWigglingTest
       RigidBodyTransform transformToWorld = new RigidBodyTransform();
       PlanarRegion region = new PlanarRegion(transformToWorld, planes);
 
-      ConvexPolygon2D initialFoot = PlanningTestTools.createDefaultFootPolygon();
+      ConvexPolygon2D initialFoot = PlannerTools.createDefaultFootPolygon();
       RigidBodyTransform initialFootTransform = new RigidBodyTransform();
       initialFootTransform.setRotationYawAndZeroTranslation(Math.toRadians(-30.0));
       initialFootTransform.setTranslation(-0.05, 0.09, 0.0);
@@ -630,7 +626,7 @@ public class PolygonWigglingTest
       RigidBodyTransform transformToWorld = new RigidBodyTransform();
       PlanarRegion region = new PlanarRegion(transformToWorld, planes);
 
-      ConvexPolygon2D initialFoot = PlanningTestTools.createDefaultFootPolygon();
+      ConvexPolygon2D initialFoot = PlannerTools.createDefaultFootPolygon();
       RigidBodyTransform initialFootTransform = new RigidBodyTransform();
       initialFootTransform.setRotationYawAndZeroTranslation(Math.toRadians(-30.0));
       initialFootTransform.setTranslation(-0.05, 0.09, 0.0);
@@ -677,7 +673,7 @@ public class PolygonWigglingTest
       RigidBodyTransform transformToWorld = new RigidBodyTransform();
       PlanarRegion region = new PlanarRegion(transformToWorld, planes);
 
-      ConvexPolygon2D initialFoot = PlanningTestTools.createDefaultFootPolygon();
+      ConvexPolygon2D initialFoot = PlannerTools.createDefaultFootPolygon();
       RigidBodyTransform initialFootTransform = new RigidBodyTransform();
       initialFootTransform.setRotationYawAndZeroTranslation(Math.toRadians(-30.0));
       initialFootTransform.setTranslation(0.1, 0.1, 0.0);
@@ -718,7 +714,7 @@ public class PolygonWigglingTest
       RigidBodyTransform transformToWorld = new RigidBodyTransform();
       PlanarRegion region = new PlanarRegion(transformToWorld, planes);
 
-      ConvexPolygon2D initialFoot = PlanningTestTools.createDefaultFootPolygon();
+      ConvexPolygon2D initialFoot = PlannerTools.createDefaultFootPolygon();
       RigidBodyTransform initialFootTransform = new RigidBodyTransform();
       initialFootTransform.setRotationYawAndZeroTranslation(Math.toRadians(-30.0));
       initialFootTransform.setTranslation(-0.05, 0.09, 0.0);
@@ -761,7 +757,7 @@ public class PolygonWigglingTest
       RigidBodyTransform transformToWorld = new RigidBodyTransform();
       PlanarRegion region = new PlanarRegion(transformToWorld, planes);
 
-      ConvexPolygon2D initialFoot = PlanningTestTools.createDefaultFootPolygon();
+      ConvexPolygon2D initialFoot = PlannerTools.createDefaultFootPolygon();
       RigidBodyTransform initialFootTransform = new RigidBodyTransform();
       initialFootTransform.setRotationYawAndZeroTranslation(Math.toRadians(-30.0));
       initialFootTransform.setTranslation(-0.05, 0.05, 0.0);

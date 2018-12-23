@@ -15,17 +15,16 @@ import us.ihmc.communication.controllerAPI.CommandInputManager;
 import us.ihmc.communication.controllerAPI.StatusMessageOutputManager;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelControllerName;
+import us.ihmc.mecano.multiBodySystem.OneDoFJoint;
+import us.ihmc.mecano.multiBodySystem.interfaces.FloatingJointBasics;
+import us.ihmc.mecano.multiBodySystem.interfaces.JointBasics;
+import us.ihmc.mecano.tools.MultiBodySystemTools;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
-import us.ihmc.robotics.screwTheory.FloatingInverseDynamicsJoint;
-import us.ihmc.robotics.screwTheory.InverseDynamicsJoint;
-import us.ihmc.robotics.screwTheory.OneDoFJoint;
-import us.ihmc.robotics.screwTheory.ScrewTools;
 import us.ihmc.robotics.time.ExecutionTimer;
 import us.ihmc.sensorProcessing.model.RobotMotionStatus;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutputList;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutputListReadOnly;
 import us.ihmc.yoVariables.variable.YoBoolean;
-import us.ihmc.yoVariables.variable.YoVariable;
 
 public class WalkingControllerState extends HighLevelControllerState
 {
@@ -51,7 +50,7 @@ public class WalkingControllerState extends HighLevelControllerState
                                  HighLevelControlManagerFactory managerFactory, HighLevelHumanoidControllerToolbox controllerToolbox,
                                  HighLevelControllerParameters highLevelControllerParameters, WalkingControllerParameters walkingControllerParameters)
    {
-      super(controllerState, highLevelControllerParameters, controllerToolbox.getControlledOneDoFJoints());
+      super(controllerState, highLevelControllerParameters, MultiBodySystemTools.filterJoints(controllerToolbox.getControlledJoints(), OneDoFJoint.class));
       this.controllerToolbox = controllerToolbox;
 
       // create walking controller
@@ -60,9 +59,9 @@ public class WalkingControllerState extends HighLevelControllerState
 
       // create controller core
       FullHumanoidRobotModel fullRobotModel = controllerToolbox.getFullRobotModel();
-      InverseDynamicsJoint[] jointsToOptimizeFor = controllerToolbox.getControlledJoints();
+      JointBasics[] jointsToOptimizeFor = controllerToolbox.getControlledJoints();
 
-      FloatingInverseDynamicsJoint rootJoint = fullRobotModel.getRootJoint();
+      FloatingJointBasics rootJoint = fullRobotModel.getRootJoint();
       ReferenceFrame centerOfMassFrame = controllerToolbox.getCenterOfMassFrame();
       WholeBodyControlCoreToolbox toolbox = new WholeBodyControlCoreToolbox(controllerToolbox.getControlDT(), controllerToolbox.getGravityZ(), rootJoint,
                                                                             jointsToOptimizeFor, centerOfMassFrame,
@@ -138,11 +137,6 @@ public class WalkingControllerState extends HighLevelControllerState
       requestIntegratorReset = true;
    }
 
-   public void initializeDesiredHeightToCurrent()
-   {
-      walkingController.initializeDesiredHeightToCurrent();
-   }
-
    @Override
    public void doAction(double timeInState)
    {
@@ -176,22 +170,15 @@ public class WalkingControllerState extends HighLevelControllerState
       controllerCoreTimer.stopMeasurement();
    }
 
-   public void reinitializePelvisOrientation(boolean reinitialize)
-   {
-      walkingController.reinitializePelvisOrientation(reinitialize);
-   }
-
    @Override
    public void onEntry()
    {
       initialize();
-      walkingController.resetJointIntegrators();
    }
 
    @Override
    public void onExit()
    {
-      walkingController.resetJointIntegrators();
       controllerToolbox.reportChangeOfRobotMotionStatus(RobotMotionStatus.UNKNOWN);
    }
 

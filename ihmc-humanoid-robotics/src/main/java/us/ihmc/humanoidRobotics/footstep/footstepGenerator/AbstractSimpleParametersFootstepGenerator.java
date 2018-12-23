@@ -9,11 +9,11 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.humanoidRobotics.footstep.footstepGenerator.overheadPath.CompositeOverheadPath;
 import us.ihmc.humanoidRobotics.footstep.footstepGenerator.overheadPath.OverheadPath;
+import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.robotics.geometry.AngleTools;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
-import us.ihmc.robotics.screwTheory.RigidBody;
 
 public abstract class AbstractSimpleParametersFootstepGenerator extends AbstractFootstepGenerator
 {
@@ -26,14 +26,14 @@ public abstract class AbstractSimpleParametersFootstepGenerator extends Abstract
    protected boolean isRightwardPath;
    protected FootstepCounter footstepCounter;
 
-   public AbstractSimpleParametersFootstepGenerator(SideDependentList<RigidBody> feet, SideDependentList<ReferenceFrame> soleFrames, PathTypeStepParameters pathType)
+   public AbstractSimpleParametersFootstepGenerator(SideDependentList<RigidBodyBasics> feet, SideDependentList<ReferenceFrame> soleFrames, PathTypeStepParameters pathType)
    {
       super(feet, soleFrames);
       setPathParameters(pathType);
    }
 
    // set a start side preference for when it is not forced to a specific side.
-   public AbstractSimpleParametersFootstepGenerator(SideDependentList<RigidBody> feet, SideDependentList<ReferenceFrame> soleFrames, PathTypeStepParameters pathType, RobotSide stanceStart)
+   public AbstractSimpleParametersFootstepGenerator(SideDependentList<RigidBodyBasics> feet, SideDependentList<ReferenceFrame> soleFrames, PathTypeStepParameters pathType, RobotSide stanceStart)
    {
       super(feet, soleFrames, stanceStart);
       setPathParameters(pathType);

@@ -4,13 +4,11 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.ejml.data.DenseMatrix64F;
-import org.ejml.factory.LinearSolverFactory;
-import org.ejml.interfaces.linsol.LinearSolver;
 import org.ejml.ops.CommonOps;
 
 import gnu.trove.list.array.TDoubleArrayList;
-import us.ihmc.commons.PrintTools;
 import us.ihmc.commons.lists.RecyclingArrayList;
+import us.ihmc.robotics.linearAlgebra.commonOps.NativeCommonOps;
 import us.ihmc.robotics.time.ExecutionTimer;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
@@ -88,8 +86,6 @@ public class TrajectoryPointOptimizer
 
    private final ExecutionTimer computeTimer;
    private final ExecutionTimer timeUpdateTimer;
-
-   private final LinearSolver<DenseMatrix64F> solver = LinearSolverFactory.linear(0);
 
    private final DenseMatrix64F tempCoeffs = new DenseMatrix64F(1, 1);
    private final DenseMatrix64F tempLine = new DenseMatrix64F(1, 1);
@@ -369,21 +365,9 @@ public class TrajectoryPointOptimizer
       CommonOps.insert(f, d, 0, 0);
       CommonOps.insert(b, d, subProblemSize, 0);
 
-      solutionToPack.reshape(size, 1);
-      if (solver.setA(E))
-      {
-         solver.solve(d, solutionToPack);
-      }
-      else
-      {
-         PrintTools.error("Trajectory optimizer failed to solve.");
-      }
+      NativeCommonOps.solve(E, d, solutionToPack);
       solutionToPack.reshape(subProblemSize, 1);
-
-      d.reshape(subProblemSize, 1);
-      b.reshape(1, 1);
-      CommonOps.mult(H, solutionToPack, d);
-      CommonOps.multTransA(solutionToPack, d, b);
+      NativeCommonOps.multQuad(solutionToPack, H, b);
 
       return 0.5 * b.get(0, 0);
    }

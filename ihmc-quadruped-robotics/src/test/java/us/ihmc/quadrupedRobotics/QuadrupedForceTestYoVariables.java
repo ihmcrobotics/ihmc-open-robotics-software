@@ -1,10 +1,9 @@
 package us.ihmc.quadrupedRobotics;
 
 import us.ihmc.euclid.tuple4D.Quaternion;
-import us.ihmc.quadrupedRobotics.controller.QuadrupedControllerEnum;
-import us.ihmc.quadrupedRobotics.controller.QuadrupedControllerRequestedEvent;
-import us.ihmc.quadrupedRobotics.controller.QuadrupedSteppingRequestedEvent;
-import us.ihmc.quadrupedRobotics.controller.QuadrupedSteppingStateEnum;
+import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelControllerName;
+import us.ihmc.quadrupedBasics.QuadrupedSteppingRequestedEvent;
+import us.ihmc.quadrupedBasics.QuadrupedSteppingStateEnum;
 import us.ihmc.robotics.robotSide.RobotQuadrant;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.yoVariables.variable.YoDouble;
@@ -12,9 +11,9 @@ import us.ihmc.yoVariables.variable.YoEnum;
 
 public class QuadrupedForceTestYoVariables extends QuadrupedTestYoVariables
 {
-   private final YoEnum<QuadrupedControllerRequestedEvent> userTrigger;
+   private final YoEnum<HighLevelControllerName> userTrigger;
    private final YoEnum<QuadrupedSteppingRequestedEvent> stepTrigger;
-   private final YoEnum<QuadrupedControllerEnum> controllerState;
+   private final YoEnum<HighLevelControllerName> controllerState;
    private final YoEnum<QuadrupedSteppingStateEnum> steppingState;
 
    private final YoDouble stanceHeight;
@@ -42,6 +41,12 @@ public class QuadrupedForceTestYoVariables extends QuadrupedTestYoVariables
    private final YoDouble comPositionSetpointY;
    private final YoDouble desiredHeightInWorld;
 
+   private final YoDouble timeToPrepareForStanding;
+   private final YoDouble minimumTimeDoneWithStandPrep;
+
+   private final YoDouble toWalkingTransitionDuration;
+   private final YoDouble timeToMoveSittingDown;
+
    private final Quaternion bodyOrientation = new Quaternion();
 
    @SuppressWarnings("unchecked")
@@ -49,9 +54,9 @@ public class QuadrupedForceTestYoVariables extends QuadrupedTestYoVariables
    {
       super(scs);
       
-      userTrigger = (YoEnum<QuadrupedControllerRequestedEvent>) scs.getVariable("requestedControllerState");
+      userTrigger = (YoEnum<HighLevelControllerName>) scs.getVariable("requestedControllerState");
       stepTrigger = (YoEnum<QuadrupedSteppingRequestedEvent>) scs.getVariable("stepTrigger");
-      controllerState = (YoEnum<QuadrupedControllerEnum>) scs.getVariable("controllerCurrentState");
+      controllerState = (YoEnum<HighLevelControllerName>) scs.getVariable("controllerCurrentState");
       steppingState = (YoEnum<QuadrupedSteppingStateEnum>) scs.getVariable("steppingCurrentState");
 
       stanceHeight = (YoDouble) scs.getVariable("stanceHeight");
@@ -76,9 +81,14 @@ public class QuadrupedForceTestYoVariables extends QuadrupedTestYoVariables
       comPositionSetpointX = (YoDouble) scs.getVariable("comPositionSetpointX");
       comPositionSetpointY = (YoDouble) scs.getVariable("comPositionSetpointY");
       desiredHeightInWorld = (YoDouble) scs.getVariable("desiredHeightInWorld");
+
+      timeToPrepareForStanding = (YoDouble) scs.getVariable("timeToPrepareForStanding");
+      minimumTimeDoneWithStandPrep = (YoDouble) scs.getVariable("minimumTimeDoneWithStandPrep");
+      toWalkingTransitionDuration = (YoDouble) scs.getVariable("toWalkingTransitionDuration");
+      timeToMoveSittingDown = (YoDouble) scs.getVariable("timeToMoveSittingDown");
    }
 
-   public YoEnum<QuadrupedControllerRequestedEvent> getUserTrigger()
+   public YoEnum<HighLevelControllerName> getUserTrigger()
    {
       return userTrigger;
    }
@@ -88,7 +98,7 @@ public class QuadrupedForceTestYoVariables extends QuadrupedTestYoVariables
       return stepTrigger;
    }
 
-   public YoEnum<QuadrupedControllerEnum> getControllerState()
+   public YoEnum<HighLevelControllerName> getControllerState()
    {
       return controllerState;
    }
@@ -187,5 +197,30 @@ public class QuadrupedForceTestYoVariables extends QuadrupedTestYoVariables
    public YoDouble getHeightInWorldSetpoint()
    {
       return desiredHeightInWorld;
+   }
+
+   public YoDouble getTimeToPrepareForStanding()
+   {
+      return timeToPrepareForStanding;
+   }
+
+   public YoDouble getMinimumTimeDoneWithStandPrep()
+   {
+      return minimumTimeDoneWithStandPrep;
+   }
+
+   public double getTimeInStandPrep()
+   {
+      return timeToPrepareForStanding.getDoubleValue() + minimumTimeDoneWithStandPrep.getDoubleValue();
+   }
+
+   public double getToWalkingTransitionDuration()
+   {
+      return toWalkingTransitionDuration.getDoubleValue();
+   }
+
+   public double getTimeToMoveSittingDown()
+   {
+      return timeToMoveSittingDown.getDoubleValue();
    }
 }

@@ -15,21 +15,25 @@ public class HandTrajectoryCommand
 {
    private RobotSide robotSide;
    private final SE3TrajectoryControllerCommand se3Trajectory;
+   private final WrenchTrajectoryControllerCommand wrenchTrajectory;
 
    public HandTrajectoryCommand()
    {
       se3Trajectory = new SE3TrajectoryControllerCommand();
+      wrenchTrajectory = new WrenchTrajectoryControllerCommand();
    }
 
    public HandTrajectoryCommand(RobotSide robotSide, ReferenceFrame dataFrame, ReferenceFrame trajectoryFrame)
    {
       se3Trajectory = new SE3TrajectoryControllerCommand(dataFrame, trajectoryFrame);
+      wrenchTrajectory = new WrenchTrajectoryControllerCommand(dataFrame, trajectoryFrame);
       this.robotSide = robotSide;
    }
 
    public HandTrajectoryCommand(Random random)
    {
       se3Trajectory = new SE3TrajectoryControllerCommand(random);
+      wrenchTrajectory = new WrenchTrajectoryControllerCommand(random);
       robotSide = RobotSide.generateRandomRobotSide(random);
    }
 
@@ -37,12 +41,14 @@ public class HandTrajectoryCommand
    public void clear()
    {
       se3Trajectory.clear();
+      wrenchTrajectory.clear();
       robotSide = null;
    }
 
    public void clear(ReferenceFrame referenceFrame)
    {
       se3Trajectory.clear(referenceFrame);
+      wrenchTrajectory.clear(referenceFrame);
       robotSide = null;
    }
 
@@ -50,6 +56,7 @@ public class HandTrajectoryCommand
    public void set(HandTrajectoryCommand other)
    {
       se3Trajectory.set(other.se3Trajectory);
+      wrenchTrajectory.set(other.wrenchTrajectory);
       robotSide = other.robotSide;
    }
 
@@ -61,6 +68,7 @@ public class HandTrajectoryCommand
    public void setPropertiesOnly(HandTrajectoryCommand other)
    {
       se3Trajectory.setPropertiesOnly(other.se3Trajectory);
+      wrenchTrajectory.setPropertiesOnly(other.wrenchTrajectory);
       robotSide = other.robotSide;
    }
 
@@ -68,6 +76,7 @@ public class HandTrajectoryCommand
    public void setFromMessage(HandTrajectoryMessage message)
    {
       se3Trajectory.setFromMessage(message.getSe3Trajectory());
+      wrenchTrajectory.setFromMessage(message.getWrenchTrajectory());
       robotSide = RobotSide.fromByte(message.getRobotSide());
    }
 
@@ -75,6 +84,7 @@ public class HandTrajectoryCommand
    public void set(ReferenceFrameHashCodeResolver resolver, HandTrajectoryMessage message)
    {
       se3Trajectory.set(resolver, message.getSe3Trajectory());
+      wrenchTrajectory.set(resolver, message.getWrenchTrajectory());
       robotSide = RobotSide.fromByte(message.getRobotSide());
    }
 
@@ -93,6 +103,11 @@ public class HandTrajectoryCommand
       return se3Trajectory;
    }
 
+   public WrenchTrajectoryControllerCommand getWrenchTrajectory()
+   {
+      return wrenchTrajectory;
+   }
+
    @Override
    public Class<HandTrajectoryMessage> getMessageClass()
    {
@@ -108,7 +123,7 @@ public class HandTrajectoryCommand
    @Override
    public boolean epsilonEquals(HandTrajectoryCommand other, double epsilon)
    {
-      return robotSide == other.robotSide && se3Trajectory.epsilonEquals(other.se3Trajectory, epsilon);
+      return robotSide == other.robotSide && se3Trajectory.epsilonEquals(other.se3Trajectory, epsilon) && wrenchTrajectory.epsilonEquals(other.wrenchTrajectory, epsilon);
    }
    
    @Override
@@ -121,12 +136,14 @@ public class HandTrajectoryCommand
    public void setExecutionDelayTime(double delayTime)
    {
       se3Trajectory.setExecutionDelayTime(delayTime);
+      wrenchTrajectory.setExecutionDelayTime(delayTime);
    }
 
    @Override
    public void setExecutionTime(double adjustedExecutionTime)
    {
       se3Trajectory.setExecutionTime(adjustedExecutionTime);
+      wrenchTrajectory.setExecutionTime(adjustedExecutionTime);
    }
 
    @Override

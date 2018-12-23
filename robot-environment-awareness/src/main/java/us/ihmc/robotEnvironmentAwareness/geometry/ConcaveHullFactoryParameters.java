@@ -10,6 +10,7 @@ public class ConcaveHullFactoryParameters
    private boolean removeAllTrianglesWithTwoBorderEdges;
    private boolean allowSplittingConcaveHull;
    private int maxNumberOfIterations;
+   private double triangulationTolerance;
 
    public ConcaveHullFactoryParameters()
    {
@@ -27,6 +28,7 @@ public class ConcaveHullFactoryParameters
       removeAllTrianglesWithTwoBorderEdges = other.removeAllTrianglesWithTwoBorderEdges;
       allowSplittingConcaveHull = other.allowSplittingConcaveHull;
       maxNumberOfIterations = other.maxNumberOfIterations;
+      triangulationTolerance = other.triangulationTolerance;
    }
 
    public void setDefaultParameters()
@@ -35,6 +37,7 @@ public class ConcaveHullFactoryParameters
       removeAllTrianglesWithTwoBorderEdges = true;
       allowSplittingConcaveHull = true;
       maxNumberOfIterations = 5000;
+      triangulationTolerance = 0.0;
    }
 
    public double getEdgeLengthThreshold()
@@ -57,6 +60,11 @@ public class ConcaveHullFactoryParameters
       return maxNumberOfIterations;
    }
 
+   public double getTriangulationTolerance()
+   {
+      return triangulationTolerance;
+   }
+
    public void setEdgeLengthThreshold(double edgeLengthThreshold)
    {
       this.edgeLengthThreshold = edgeLengthThreshold;
@@ -77,13 +85,17 @@ public class ConcaveHullFactoryParameters
       this.maxNumberOfIterations = maxNumberOfIterations;
    }
 
+   public void setTriangulationTolerance(double triangulationTolerance)
+   {
+      this.triangulationTolerance = triangulationTolerance;
+   }
+
    @Override
    public String toString()
    {
-      return "edge length threshold: " + edgeLengthThreshold
-            + ", remove any triangle with two borderedges: " + removeAllTrianglesWithTwoBorderEdges
-            + ", allow splitting concave hull: " + allowSplittingConcaveHull
-            + ", maximum number of iterations: " + maxNumberOfIterations;
+      return "edge length threshold: " + edgeLengthThreshold + ", remove any triangle with two borderedges: " + removeAllTrianglesWithTwoBorderEdges
+            + ", allow splitting concave hull: " + allowSplittingConcaveHull + ", maximum number of iterations: " + maxNumberOfIterations
+            + ", triangulation tolerance: " + triangulationTolerance;
    }
 
    public static ConcaveHullFactoryParameters parse(String parametersAsString)
@@ -95,6 +107,7 @@ public class ConcaveHullFactoryParameters
       parameters.setRemoveAllTrianglesWithTwoBorderEdges(ScannerTools.readNextBoolean(scanner, parameters.doRemoveAllTrianglesWithTwoBorderEdges()));
       parameters.setAllowSplittingConcaveHull(ScannerTools.readNextBoolean(scanner, parameters.isSplittingConcaveHullAllowed()));
       parameters.setMaxNumberOfIterations(ScannerTools.readNextInt(scanner, parameters.getMaxNumberOfIterations()));
+      parameters.setTriangulationTolerance(ScannerTools.readNextDouble(scanner, parameters.getTriangulationTolerance()));
       scanner.close();
       return parameters;
    }

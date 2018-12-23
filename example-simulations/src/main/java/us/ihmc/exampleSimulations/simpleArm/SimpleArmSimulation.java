@@ -1,7 +1,7 @@
 package us.ihmc.exampleSimulations.simpleArm;
 
 import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.robotics.screwTheory.RigidBody;
+import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 
 public class SimpleArmSimulation
@@ -14,7 +14,7 @@ public class SimpleArmSimulation
       SimpleArmRobot simpleArmRobot = new SimpleArmRobot(0.0);
       SimpleRobotInputOutputMap robotInputOutputMap = new SimpleRobotInputOutputMap(simpleArmRobot);
       YoDouble time = simpleArmRobot.getYoTime();
-      RigidBody endEffectorBody = simpleArmRobot.getEndEffectorBody();
+      RigidBodyBasics endEffectorBody = simpleArmRobot.getEndEffectorBody();
       SimpleArmController controller = new SimpleArmController(robotInputOutputMap, endEffectorBody, time);
       simpleArmRobot.setController(controller);
 

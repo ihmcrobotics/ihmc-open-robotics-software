@@ -3,7 +3,7 @@ package us.ihmc.exampleSimulations.newtonsCradle;
 import java.util.ArrayList;
 
 import us.ihmc.commons.thread.ThreadTools;
-import us.ihmc.euclid.geometry.Box3D;
+import us.ihmc.euclid.shape.Box3D;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.exampleSimulations.collidingArms.SingleBallRobotDescription;

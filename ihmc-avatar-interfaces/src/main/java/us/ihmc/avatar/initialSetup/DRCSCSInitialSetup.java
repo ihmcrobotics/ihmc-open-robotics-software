@@ -65,7 +65,7 @@ public class DRCSCSInitialSetup
       robot.setGravity(gravity);
 
       LinearGroundContactModel groundContactModel = new LinearGroundContactModel(robot, robot.getRobotsYoVariableRegistry());
-      robotModel.getContactPointParameters().setupGroundContactModelParameters(groundContactModel);
+      robotModel.getContactPointParameters().setupGroundContactModelParameters(groundContactModel, simulateDT);
       if (enableGroundSlipping)
          groundContactModel.enableSlipping();
       if (Double.isFinite(groundAlphaStick) && Double.isFinite(groundAlphaSlip))
