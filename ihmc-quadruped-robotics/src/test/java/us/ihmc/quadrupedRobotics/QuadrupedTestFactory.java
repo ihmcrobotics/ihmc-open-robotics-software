@@ -23,9 +23,9 @@ public interface QuadrupedTestFactory
    public void setControlMode(QuadrupedControlMode controlMode);
 
    public void setGroundContactModelType(QuadrupedGroundContactModelType groundContactModelType);
-   
+
    public void setUseStateEstimator(boolean useStateEstimator);
-   
+
    public void setGroundProfile3D(GroundProfile3D groundProfile3D);
 
    public void setTerrainObject3D(TerrainObject3D terrainObject3D);

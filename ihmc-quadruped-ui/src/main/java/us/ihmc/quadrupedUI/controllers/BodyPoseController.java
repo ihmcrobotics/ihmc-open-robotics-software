@@ -28,8 +28,7 @@ public class BodyPoseController
    private static final double bodyOrientationMoveTime = 0.35;
 
    private final AtomicBoolean disableBodyControl = new AtomicBoolean(false);
-   private final ScheduledExecutorService executorService = Executors
-         .newSingleThreadScheduledExecutor(ThreadTools.getNamedThreadFactory(getClass().getSimpleName()));
+   private final ScheduledExecutorService executorService;
 
    private final AtomicReference<QuadrupedReferenceFrames> referenceFramesReference;
 
@@ -38,9 +37,10 @@ public class BodyPoseController
 
    private final Messager messager;
 
-   public BodyPoseController(Joystick joystick, JavaFXMessager messager, double nominalHeight)
+   public BodyPoseController(Joystick joystick, JavaFXMessager messager, ScheduledExecutorService executorService, double nominalHeight)
    {
       this.messager = messager;
+      this.executorService = executorService;
 
       messager.registerTopicListener(QuadrupedUIMessagerAPI.EnableBodyControlTopic, this::conditionallyEnableBodyControl);
 
