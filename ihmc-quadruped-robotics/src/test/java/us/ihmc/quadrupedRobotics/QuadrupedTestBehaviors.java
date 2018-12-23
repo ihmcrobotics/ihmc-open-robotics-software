@@ -80,7 +80,7 @@ public class QuadrupedTestBehaviors
 
    public static void startBalancing(GoalOrientedTestConductor conductor, QuadrupedForceTestYoVariables variables, QuadrupedTeleopManager teleopManager) throws AssertionFailedError
    {
-      teleopManager.requestSteppingState();
+      teleopManager.requestWalkingState();
       conductor.addTerminalGoal(QuadrupedTestGoals.notFallen(variables));
       conductor.addTerminalGoal(QuadrupedTestGoals.bodyHeight(variables, 0.1));
       conductor.addTerminalGoal(YoVariableTestGoal.enumEquals(variables.getControllerState(), HighLevelControllerName.WALKING));

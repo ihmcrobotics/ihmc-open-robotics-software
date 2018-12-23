@@ -68,12 +68,6 @@ public class QuadrupedStepTeleopManager
    private IHMCROS2Publisher<QuadrupedBodyHeightMessage> bodyHeightPublisher;
 
    public QuadrupedStepTeleopManager(String robotName, Ros2Node ros2Node, QuadrupedXGaitSettingsReadOnly defaultXGaitSettings, double initialBodyHeight,
-                                     QuadrupedReferenceFrames referenceFrames, YoGraphicsListRegistry graphicsListRegistry, YoVariableRegistry parentRegistry)
-   {
-      this(robotName, ros2Node, defaultXGaitSettings, initialBodyHeight, referenceFrames, 0.01, graphicsListRegistry, parentRegistry);
-   }
-
-   public QuadrupedStepTeleopManager(String robotName, Ros2Node ros2Node, QuadrupedXGaitSettingsReadOnly defaultXGaitSettings, double initialBodyHeight,
                                      QuadrupedReferenceFrames referenceFrames, double updateDT, YoGraphicsListRegistry graphicsListRegistry,
                                      YoVariableRegistry parentRegistry)
    {
@@ -99,7 +93,7 @@ public class QuadrupedStepTeleopManager
                                            s -> steppingStateChangeMessage.set(s.takeNextData()));
       ROS2Tools
             .createCallbackSubscription(ros2Node, RobotConfigurationData.class, controllerPubGenerator, s -> timestampNanos.set(s.takeNextData().timestamp_));
-      ROS2Tools.createCallbackSubscription(ros2Node, HighLevelStateMessage.class, controllerPubGenerator, s -> paused.set(true));
+      ROS2Tools.createCallbackSubscription(ros2Node, HighLevelStateMessage.class, controllerPubGenerator, s -> setPaused(true));
 
       ROS2Tools.createCallbackSubscription(ros2Node, QuadrupedBodyPathPlanMessage.class, controllerPubGenerator,
                                            s -> bodyPathMultiplexer.setBodyPathPlanMessage(s.takeNextData()));

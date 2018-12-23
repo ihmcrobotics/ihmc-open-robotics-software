@@ -59,7 +59,7 @@ public abstract class QuadrupedScriptedFlatGroundWalkingTest implements Quadrupe
       QuadrupedTestBehaviors.standUp(conductor, variables);
       QuadrupedTestBehaviors.startBalancing(conductor, variables, stepTeleopManager);
 
-      stepTeleopManager.requestSteppingState();
+      stepTeleopManager.requestWalkingState();
 
       conductor.addTerminalGoal(QuadrupedTestGoals.timeInFuture(variables, 1.0));
       conductor.simulate();

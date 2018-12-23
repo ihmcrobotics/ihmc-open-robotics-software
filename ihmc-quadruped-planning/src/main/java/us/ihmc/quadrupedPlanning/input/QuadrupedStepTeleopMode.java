@@ -90,7 +90,7 @@ public class QuadrupedStepTeleopMode
 
       if (XBoxOneMapping.getMapping(event) == XBoxOneMapping.A)
       {
-         stepTeleopManager.requestSteppingState();
+         stepTeleopManager.requestWalkingState();
          if (stepTeleopManager.isWalking())
             stepTeleopManager.requestStanding();
       }

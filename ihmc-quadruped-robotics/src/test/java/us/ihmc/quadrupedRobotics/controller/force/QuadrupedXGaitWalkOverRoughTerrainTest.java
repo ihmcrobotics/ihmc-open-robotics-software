@@ -2,6 +2,7 @@ package us.ihmc.quadrupedRobotics.controller.force;
 
 import org.junit.After;
 import org.junit.Before;
+import us.ihmc.quadrupedBasics.QuadrupedSteppingStateEnum;
 import us.ihmc.quadrupedPlanning.QuadrupedXGaitSettingsReadOnly;
 import us.ihmc.quadrupedPlanning.footstepChooser.DefaultPointFootSnapperParameters;
 import us.ihmc.quadrupedPlanning.footstepChooser.PlanarRegionBasedPointFootSnapper;
@@ -14,10 +15,12 @@ import us.ihmc.simulationConstructionSetTools.util.environments.planarRegionEnvi
 import us.ihmc.simulationConstructionSetTools.util.simulationrunner.GoalOrientedTestConductor;
 import us.ihmc.simulationconstructionset.SimulationConstructionSetParameters;
 import us.ihmc.tools.MemoryTools;
+import us.ihmc.yoVariables.variable.YoEnum;
 
 import java.io.IOException;
 
 import static junit.framework.TestCase.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public abstract class QuadrupedXGaitWalkOverRoughTerrainTest implements QuadrupedMultiRobotTestInterface
 {
@@ -112,6 +115,7 @@ public abstract class QuadrupedXGaitWalkOverRoughTerrainTest implements Quadrupe
       quadrupedTestFactory.setControlMode(QuadrupedControlMode.FORCE);
       quadrupedTestFactory.setUseNetworking(true);
 
+
       conductor = quadrupedTestFactory.createTestConductor();
       variables = new QuadrupedForceTestYoVariables(conductor.getScs());
       stepTeleopManager = quadrupedTestFactory.getStepTeleopManager();
@@ -120,6 +124,9 @@ public abstract class QuadrupedXGaitWalkOverRoughTerrainTest implements Quadrupe
       stepTeleopManager.setStepSnapper(snapper);
       if(!Double.isNaN(desiredBodyHeight))
          stepTeleopManager.setDesiredBodyHeight(desiredBodyHeight);
+
+      YoEnum<QuadrupedSteppingStateEnum> steppingCurrentState = (YoEnum<QuadrupedSteppingStateEnum>) conductor.getScs().getVariable("steppingCurrentState");
+
 
       QuadrupedTestBehaviors.readyXGait(conductor, variables, stepTeleopManager);
       stepTeleopManager.getXGaitSettings().set(xGaitSettings);
@@ -140,6 +147,6 @@ public abstract class QuadrupedXGaitWalkOverRoughTerrainTest implements Quadrupe
       conductor.addTerminalGoal(QuadrupedTestGoals.timeInFuture(variables, 2.0));
       conductor.simulate();
 
-      assertTrue(stepTeleopManager.isInStandState());
+      assertEquals(QuadrupedSteppingStateEnum.STAND, steppingCurrentState.getEnumValue());
    }
 }
