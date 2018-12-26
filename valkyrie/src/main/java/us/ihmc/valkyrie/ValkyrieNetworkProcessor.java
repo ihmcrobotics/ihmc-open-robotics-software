@@ -28,6 +28,7 @@ public class ValkyrieNetworkProcessor
       networkModuleParams.enableBehaviorVisualizer(true);
       String is_gazebo = System.getenv("IS_GAZEBO");
       if (is_gazebo != null && is_gazebo.equals("true")) {
+    	  System.out.println("IS_GAZEBO=true -- starting REA");
           startREA = true;
       }
       networkModuleParams.enableRobotEnvironmentAwerenessModule(startREA);
