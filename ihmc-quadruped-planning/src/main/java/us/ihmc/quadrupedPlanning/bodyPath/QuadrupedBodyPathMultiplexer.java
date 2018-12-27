@@ -73,11 +73,6 @@ public class QuadrupedBodyPathMultiplexer implements QuadrupedPlanarBodyPathProv
       }
    }
 
-   public void setBodyPathPlanMessage(QuadrupedBodyPathPlanMessage message)
-   {
-      waypointBasedPath.setBodyPathPlanMessage(message);
-   }
-
    public void startedFootstep(RobotQuadrant robotQuadrant, QuadrupedFootstepStatusMessage message)
    {
       joystickBasedPath.startedFootstep(robotQuadrant, message);

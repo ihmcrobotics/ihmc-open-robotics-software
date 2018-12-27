@@ -133,7 +133,7 @@ public class OldQuadrupedTeleopManager
       ROS2Tools.createCallbackSubscription(ros2Node, HighLevelStateMessage.class, controllerPubGenerator, s -> paused.set(true));
 
       ROS2Tools.createCallbackSubscription(ros2Node, QuadrupedBodyPathPlanMessage.class, controllerPubGenerator,
-                                           s -> bodyPathMultiplexer.setBodyPathPlanMessage(s.takeNextData()));
+                                           s -> bodyPathMultiplexer.handleBodyPathPlanMessage(s.takeNextData()));
 
       ROS2Tools.createCallbackSubscription(ros2Node, QuadrupedFootstepStatusMessage.class, controllerPubGenerator, s -> {
          QuadrupedFootstepStatusMessage packet = s.takeNextData();

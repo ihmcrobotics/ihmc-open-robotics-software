@@ -1,4 +1,4 @@
-package us.ihmc.quadrupedPlanning.networkProcessing;
+package us.ihmc.quadrupedPlanning.networkProcessing.stepTeleop;
 
 import controller_msgs.msg.dds.*;
 import us.ihmc.commons.Conversions;
@@ -6,8 +6,8 @@ import us.ihmc.communication.controllerAPI.CommandInputManager;
 import us.ihmc.communication.controllerAPI.StatusMessageOutputManager;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.quadrupedPlanning.QuadrupedXGaitSettingsReadOnly;
-import us.ihmc.quadrupedPlanning.input.QuadrupedRobotModelProviderNode;
-import us.ihmc.quadrupedPlanning.input.QuadrupedStepTeleopManager;
+import us.ihmc.quadrupedPlanning.networkProcessing.QuadrupedRobotModelProviderNode;
+import us.ihmc.quadrupedPlanning.networkProcessing.QuadrupedToolboxController;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -22,14 +22,13 @@ public class QuadrupedStepTeleopController extends QuadrupedToolboxController
 
    private final AtomicBoolean receivedInput = new AtomicBoolean();
 
-   public QuadrupedStepTeleopController(QuadrupedXGaitSettingsReadOnly defaultXGaitSettings, double initialBodyHeight, CommandInputManager commandInputManager,
+   public QuadrupedStepTeleopController(QuadrupedXGaitSettingsReadOnly defaultXGaitSettings, CommandInputManager commandInputManager,
                                         StatusMessageOutputManager statusOutputManager, QuadrupedRobotModelProviderNode robotModelProvider,
-                                        YoVariableRegistry parentRegistry,
-                                        YoGraphicsListRegistry graphicsListRegistry, long tickTimeMs)
+                                        YoVariableRegistry parentRegistry, YoGraphicsListRegistry graphicsListRegistry, long tickTimeMs)
    {
       super(statusOutputManager, parentRegistry);
 
-      teleopManager = new QuadrupedStepTeleopManager(defaultXGaitSettings, initialBodyHeight, robotModelProvider.getReferenceFrames(),
+      teleopManager = new QuadrupedStepTeleopManager(defaultXGaitSettings, robotModelProvider.getReferenceFrames(),
                                                      Conversions.millisecondsToSeconds(tickTimeMs), graphicsListRegistry, registry);
 
       commandInputManager.registerHasReceivedInputListener(command -> receivedInput.set(true));
@@ -83,9 +82,8 @@ public class QuadrupedStepTeleopController extends QuadrupedToolboxController
    public void updateInternal()
    {
       teleopManager.update();
-      statusOutputManager.reportStatusMessage(teleopManager.getStepListMessage());
-      statusOutputManager.reportStatusMessage(teleopManager.getBodyOrientationMessage());
-      statusOutputManager.reportStatusMessage(teleopManager.getBodyHeightMessage());
+      reportMessage(teleopManager.getStepListMessage());
+      reportMessage(teleopManager.getBodyOrientationMessage());
    }
 
    @Override
