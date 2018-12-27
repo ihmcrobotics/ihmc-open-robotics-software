@@ -1,13 +1,14 @@
 package us.ihmc.quadrupedRobotics.controller.force;
 
-import controller_msgs.msg.dds.*;
+import controller_msgs.msg.dds.QuadrupedTimedStepListMessage;
+import controller_msgs.msg.dds.QuadrupedTimedStepMessage;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.quadrupedCommunication.QuadrupedMessageTools;
-import us.ihmc.quadrupedPlanning.input.QuadrupedTeleopManager;
+import us.ihmc.quadrupedPlanning.input.OldQuadrupedTeleopManager;
 import us.ihmc.quadrupedRobotics.*;
 import us.ihmc.quadrupedRobotics.controller.QuadrupedControlMode;
 import us.ihmc.quadrupedRobotics.simulation.QuadrupedGroundContactModelType;
@@ -23,7 +24,7 @@ public abstract class QuadrupedScriptedFlatGroundWalkingTest implements Quadrupe
 {
    private GoalOrientedTestConductor conductor;
    private QuadrupedForceTestYoVariables variables;
-   private QuadrupedTeleopManager stepTeleopManager;
+   private OldQuadrupedTeleopManager stepTeleopManager;
    private QuadrupedTestFactory quadrupedTestFactory;
 
    @Before

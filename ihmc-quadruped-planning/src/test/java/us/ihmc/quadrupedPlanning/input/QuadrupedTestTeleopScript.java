@@ -9,19 +9,19 @@ import java.util.Random;
 public class QuadrupedTestTeleopScript implements Script
 {
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
-   private final QuadrupedTeleopManager teleopManager;
+   private final OldQuadrupedTeleopManager teleopManager;
    private final YoInteger counter = new YoInteger("counter", registry);
    private final int updateFrequency;
 
    private final Random random = new Random(125937L);
    private final int updateJitter;
 
-   public QuadrupedTestTeleopScript(QuadrupedTeleopManager teleopManager, int updateFrequency, YoVariableRegistry parentRegistry)
+   public QuadrupedTestTeleopScript(OldQuadrupedTeleopManager teleopManager, int updateFrequency, YoVariableRegistry parentRegistry)
    {
       this(teleopManager, updateFrequency, 0, parentRegistry);
    }
 
-   public QuadrupedTestTeleopScript(QuadrupedTeleopManager teleopManager, int updateFrequency, int updateJitter, YoVariableRegistry parentRegistry)
+   public QuadrupedTestTeleopScript(OldQuadrupedTeleopManager teleopManager, int updateFrequency, int updateJitter, YoVariableRegistry parentRegistry)
    {
       this.teleopManager = teleopManager;
       this.updateFrequency = updateFrequency;

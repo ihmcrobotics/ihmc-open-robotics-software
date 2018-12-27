@@ -36,6 +36,9 @@ public class ROS2Tools
    public static final String KINEMATICS_PLANNING_TOOLBOX = "/toolbox/ik_planning";
    public static final String WHOLE_BODY_TRAJECTORY_TOOLBOX = "/toolbox/ik_trajectory";
 
+   public static final String STEP_TELEOP_TOOLBOX = "/toolbox/step_teleop";
+   public static final String BODY_TELEOP_TOOLBOX = "/toolbox/body_teleop";
+
    public static final String BEHAVIOR_MODULE = "/behavior";
    public static final String REA_MODULE = "/rea";
 
@@ -75,7 +78,7 @@ public class ROS2Tools
    /**
     * Creates a ROS2 node that shares the same implementation as a real-time node <b>but that should
     * not be run in a real-time environment</b>.
-    * 
+    *
     * @param pubSubImplementation the implementation to use.
     * @param nodeName the name of the new ROS node.
     * @return the ROS node.
@@ -88,7 +91,7 @@ public class ROS2Tools
    /**
     * Creates a ROS2 node that shares the same implementation as a real-time node <b>but that should
     * not be run in a real-time environment</b>.
-    * 
+    *
     * @param pubSubImplementation the implementation to use.
     * @param nodeName the name of the new ROS node.
     * @param exceptionHandler how to handle exceptions thrown during the instantiation.
@@ -102,7 +105,7 @@ public class ROS2Tools
    /**
     * Creates a ROS2 node that is meant to run in real-time environment if the given
     * {@code periodicThreadSchedulerFactory} is a {@link PeriodicRealtimeThreadSchedulerFactory}.
-    * 
+    *
     * @param pubSubImplementation the implementation to use.
     * @param periodicThreadSchedulerFactory the factory used to create a periodic thread.
     * @param nodeName the name of the new ROS node.
@@ -117,7 +120,7 @@ public class ROS2Tools
    /**
     * Creates a ROS2 node that is meant to run in real-time environment if the given
     * {@code periodicThreadSchedulerFactory} is a {@link PeriodicRealtimeThreadSchedulerFactory}.
-    * 
+    *
     * @param pubSubImplementation the implementation to use.
     * @param periodicThreadSchedulerFactory the factory used to create a periodic thread.
     * @param nodeName the name of the new ROS node.
@@ -280,7 +283,7 @@ public class ROS2Tools
     * {@code "/ihmc/arm_trajectory"}.
     * </ul>
     * </p>
-    * 
+    *
     * @return the default generator.
     */
    public static MessageTopicNameGenerator getDefaultTopicNameGenerator()
@@ -304,7 +307,7 @@ public class ROS2Tools
     * {@code "/ihmc/valkyrie/arm_trajectory"}.
     * </ul>
     * </p>
-    * 
+    *
     * @return the default generator.
     */
    public static MessageTopicNameGenerator getDefaultTopicNameGenerator(String robotName)
@@ -328,7 +331,7 @@ public class ROS2Tools
     * {@code "/ihmc/valkyrie/arm_trajectory"}.
     * </ul>
     * </p>
-    * 
+    *
     * @return the generator.
     */
    public static MessageTopicNameGenerator getTopicNameGenerator(String robotName, String moduleName, ROS2TopicQualifier qualifier)
@@ -339,7 +342,7 @@ public class ROS2Tools
    /**
     * Generates a default topic name using the class name of the message, for instance:<br>
     * For {@code TextToSpeechPacket} this generates the topic name: {@code "/ihmc/text_to_speech"}.
-    * 
+    *
     * @param messageClass the class of the message to generate the topic name for.
     * @return the topic name.
     */
@@ -352,7 +355,7 @@ public class ROS2Tools
     * Generates a default topic name using the class name of the message, for instance:<br>
     * For {@code TextToSpeechPacket} when running Valkyrie this generates the topic name:
     * {@code "/ihmc/valkyrie/text_to_speech"}.
-    * 
+    *
     * @param messageClass the class of the message to generate the topic name for.
     * @return the topic name.
     */
@@ -366,8 +369,8 @@ public class ROS2Tools
     * {@link #generateDefaultTopicName(Class, String)}:<br>
     * For {@code TextToSpeechPacket} when running Valkyrie this generates the topic name:<br>
     * {@code "/ihmc/valkyrie/" + moduleName.toLowerCase() + qualifier + "/text_to_speech"}.
-    * 
-    * 
+    *
+    *
     * @param messageClass the class of the message to generate the topic name for.
     * @return the topic name.
     */
@@ -405,7 +408,7 @@ public class ROS2Tools
     * <li>{@code TextToSpeechPacket} becomes: {@code "/text_to_speech"}.
     * <li>{@code WholeBodyTrajectoryMessage} becomes: {@code "/whole_body_trajectory"}.
     * </ul>
-    * 
+    *
     * @param prefix the prefix of the returned {@code String}.
     * @param messageClass used for its simple name to generate a suffix.
     * @return the composed {@code String}.

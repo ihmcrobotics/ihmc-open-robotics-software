@@ -11,7 +11,7 @@ import us.ihmc.euclid.referenceFrame.tools.ReferenceFrameTools;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.quadrupedCommunication.QuadrupedMessageTools;
-import us.ihmc.quadrupedPlanning.input.QuadrupedTeleopManager;
+import us.ihmc.quadrupedPlanning.input.OldQuadrupedTeleopManager;
 import us.ihmc.quadrupedRobotics.*;
 import us.ihmc.quadrupedRobotics.controller.QuadrupedControlMode;
 import us.ihmc.quadrupedRobotics.model.QuadrupedInitialOffsetAndYaw;
@@ -29,7 +29,7 @@ public abstract class QuadrupedWalkOverSteppingStonesTest implements QuadrupedMu
 {
    private GoalOrientedTestConductor conductor;
    private QuadrupedForceTestYoVariables variables;
-   private QuadrupedTeleopManager stepTeleopManager;
+   private OldQuadrupedTeleopManager stepTeleopManager;
    private QuadrupedTestFactory quadrupedTestFactory;
 
    @Before

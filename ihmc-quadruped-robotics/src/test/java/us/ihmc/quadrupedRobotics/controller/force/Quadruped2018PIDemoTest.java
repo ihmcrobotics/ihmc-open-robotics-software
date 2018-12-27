@@ -1,17 +1,20 @@
 package us.ihmc.quadrupedRobotics.controller.force;
 
+import controller_msgs.msg.dds.QuadrupedGroundPlaneMessage;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import us.ihmc.commonWalkingControlModules.pushRecovery.PushRobotTestConductor;
 import us.ihmc.commons.PrintTools;
+import us.ihmc.communication.ROS2Tools;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations;
 import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.quadrupedCommunication.QuadrupedControllerAPIDefinition;
 import us.ihmc.quadrupedPlanning.YoQuadrupedXGaitSettings;
 import us.ihmc.quadrupedPlanning.footstepChooser.DefaultPointFootSnapperParameters;
 import us.ihmc.quadrupedPlanning.footstepChooser.PlanarGroundPointFootSnapper;
 import us.ihmc.quadrupedPlanning.footstepChooser.PlanarRegionBasedPointFootSnapper;
-import us.ihmc.quadrupedPlanning.input.QuadrupedTeleopManager;
+import us.ihmc.quadrupedPlanning.input.OldQuadrupedTeleopManager;
 import us.ihmc.quadrupedRobotics.*;
 import us.ihmc.quadrupedRobotics.controller.QuadrupedControlMode;
 import us.ihmc.quadrupedRobotics.model.QuadrupedInitialOffsetAndYaw;
@@ -35,7 +38,7 @@ public abstract class Quadruped2018PIDemoTest implements QuadrupedMultiRobotTest
    private QuadrupedForceTestYoVariables variables;
    private PushRobotTestConductor pusher;
    private QuadrupedTestFactory quadrupedTestFactory;
-   private QuadrupedTeleopManager stepTeleopManager;
+   private OldQuadrupedTeleopManager stepTeleopManager;
 
    @Before
    public void setup()
@@ -64,7 +67,7 @@ public abstract class Quadruped2018PIDemoTest implements QuadrupedMultiRobotTest
       }
    }
 
-   
+
    @After
    public void tearDown()
    {
@@ -75,7 +78,7 @@ public abstract class Quadruped2018PIDemoTest implements QuadrupedMultiRobotTest
       conductor = null;
       variables = null;
       pusher = null;
-      
+
       MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " after test.");
    }
 
@@ -480,7 +483,13 @@ public abstract class Quadruped2018PIDemoTest implements QuadrupedMultiRobotTest
       conductor = quadrupedTestFactory.createTestConductor();
       variables = new QuadrupedForceTestYoVariables(conductor.getScs());
       stepTeleopManager = quadrupedTestFactory.getStepTeleopManager();
-      stepTeleopManager.setStepSnapper(new PlanarGroundPointFootSnapper(quadrupedTestFactory.getRobotName(), stepTeleopManager.getReferenceFrames(), stepTeleopManager.getRos2Node()));
+      String robotName = quadrupedTestFactory.getRobotName();
+      PlanarGroundPointFootSnapper snapper = new PlanarGroundPointFootSnapper(stepTeleopManager.getReferenceFrames());
+      stepTeleopManager.setStepSnapper(snapper);
+
+      ROS2Tools.MessageTopicNameGenerator controllerPubGenerator = QuadrupedControllerAPIDefinition.getPublisherTopicNameGenerator(robotName);
+      ROS2Tools.createCallbackSubscription(stepTeleopManager.getRos2Node(), QuadrupedGroundPlaneMessage.class, controllerPubGenerator, s -> snapper.submitGroundPlane(s.takeNextData()));
+
 
       QuadrupedTestBehaviors.readyXGait(conductor, variables, stepTeleopManager);
 

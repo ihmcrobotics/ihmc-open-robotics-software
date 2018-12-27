@@ -1,32 +1,27 @@
 package us.ihmc.quadrupedRobotics.controller.force;
 
-import java.io.IOException;
-
 import org.junit.After;
 import org.junit.Before;
-
 import org.junit.Test;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.quadrupedPlanning.footstepChooser.HeightMapFootSnapper;
-import us.ihmc.quadrupedPlanning.input.QuadrupedTeleopManager;
-import us.ihmc.quadrupedRobotics.QuadrupedForceTestYoVariables;
-import us.ihmc.quadrupedRobotics.QuadrupedMultiRobotTestInterface;
-import us.ihmc.quadrupedRobotics.QuadrupedTestBehaviors;
-import us.ihmc.quadrupedRobotics.QuadrupedTestFactory;
-import us.ihmc.quadrupedRobotics.QuadrupedTestGoals;
+import us.ihmc.quadrupedPlanning.input.OldQuadrupedTeleopManager;
+import us.ihmc.quadrupedRobotics.*;
 import us.ihmc.quadrupedRobotics.controller.QuadrupedControlMode;
 import us.ihmc.robotics.testing.YoVariableTestGoal;
+import us.ihmc.simulationConstructionSetTools.util.simulationrunner.GoalOrientedTestConductor;
 import us.ihmc.simulationconstructionset.util.ControllerFailureException;
 import us.ihmc.simulationconstructionset.util.ground.BumpyGroundProfile;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
-import us.ihmc.simulationConstructionSetTools.util.simulationrunner.GoalOrientedTestConductor;
 import us.ihmc.tools.MemoryTools;
+
+import java.io.IOException;
 
 public abstract class QuadrupedXGaitBumpyTerrainWalkingTest implements QuadrupedMultiRobotTestInterface
 {
    protected GoalOrientedTestConductor conductor;
    protected QuadrupedForceTestYoVariables variables;
-   private QuadrupedTeleopManager stepTeleopManager;
+   private OldQuadrupedTeleopManager stepTeleopManager;
    private QuadrupedTestFactory quadrupedTestFactory;
 
    @Before
@@ -34,7 +29,7 @@ public abstract class QuadrupedXGaitBumpyTerrainWalkingTest implements Quadruped
    {
       MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " before test.");
    }
-   
+
    @After
    public void tearDown()
    {
@@ -129,7 +124,7 @@ public abstract class QuadrupedXGaitBumpyTerrainWalkingTest implements Quadruped
       conductor.addTimeLimit(variables.getYoTime(), 20.0);
       conductor.addTerminalGoal(YoVariableTestGoal.doubleGreaterThan(variables.getRobotBodyX(), 5.0));
       conductor.simulate();
-      
+
       stepTeleopManager.setDesiredVelocity(0.0, 0.0, 0.0);
       conductor.addTerminalGoal(YoVariableTestGoal.doubleGreaterThan(variables.getYoTime(), variables.getYoTime().getDoubleValue() + 2.0));
       conductor.simulate();

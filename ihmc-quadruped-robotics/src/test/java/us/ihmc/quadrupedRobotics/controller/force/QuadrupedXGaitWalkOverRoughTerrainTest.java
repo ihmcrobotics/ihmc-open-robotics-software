@@ -6,7 +6,7 @@ import us.ihmc.quadrupedBasics.QuadrupedSteppingStateEnum;
 import us.ihmc.quadrupedPlanning.QuadrupedXGaitSettingsReadOnly;
 import us.ihmc.quadrupedPlanning.footstepChooser.DefaultPointFootSnapperParameters;
 import us.ihmc.quadrupedPlanning.footstepChooser.PlanarRegionBasedPointFootSnapper;
-import us.ihmc.quadrupedPlanning.input.QuadrupedTeleopManager;
+import us.ihmc.quadrupedPlanning.input.OldQuadrupedTeleopManager;
 import us.ihmc.quadrupedRobotics.*;
 import us.ihmc.quadrupedRobotics.controller.QuadrupedControlMode;
 import us.ihmc.quadrupedRobotics.model.QuadrupedInitialOffsetAndYaw;
@@ -19,14 +19,13 @@ import us.ihmc.yoVariables.variable.YoEnum;
 
 import java.io.IOException;
 
-import static junit.framework.TestCase.assertTrue;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public abstract class QuadrupedXGaitWalkOverRoughTerrainTest implements QuadrupedMultiRobotTestInterface
 {
    protected GoalOrientedTestConductor conductor;
    protected QuadrupedForceTestYoVariables variables;
-   private QuadrupedTeleopManager stepTeleopManager;
+   private OldQuadrupedTeleopManager stepTeleopManager;
    private QuadrupedTestFactory quadrupedTestFactory;
 
    public abstract QuadrupedXGaitSettingsReadOnly getXGaitSettings();

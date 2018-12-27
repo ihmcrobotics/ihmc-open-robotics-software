@@ -1,7 +1,7 @@
 package us.ihmc.quadrupedRobotics;
 
 import us.ihmc.jMonkeyEngineToolkit.GroundProfile3D;
-import us.ihmc.quadrupedPlanning.input.QuadrupedTeleopManager;
+import us.ihmc.quadrupedPlanning.input.OldQuadrupedTeleopManager;
 import us.ihmc.quadrupedRobotics.controller.QuadrupedControlMode;
 import us.ihmc.quadrupedRobotics.model.QuadrupedInitialOffsetAndYaw;
 import us.ihmc.quadrupedRobotics.model.QuadrupedInitialPositionParameters;
@@ -18,7 +18,7 @@ public interface QuadrupedTestFactory
 {
    public GoalOrientedTestConductor createTestConductor() throws IOException;
 
-   public QuadrupedTeleopManager getStepTeleopManager();
+   public OldQuadrupedTeleopManager getStepTeleopManager();
 
    public void setControlMode(QuadrupedControlMode controlMode);
 
