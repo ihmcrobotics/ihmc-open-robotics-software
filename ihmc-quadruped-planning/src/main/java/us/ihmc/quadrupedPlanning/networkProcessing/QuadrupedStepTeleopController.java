@@ -2,68 +2,38 @@ package us.ihmc.quadrupedPlanning.networkProcessing;
 
 import controller_msgs.msg.dds.*;
 import us.ihmc.commons.Conversions;
-import us.ihmc.commons.PrintTools;
 import us.ihmc.communication.controllerAPI.CommandInputManager;
 import us.ihmc.communication.controllerAPI.StatusMessageOutputManager;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.quadrupedPlanning.QuadrupedXGaitSettingsReadOnly;
 import us.ihmc.quadrupedPlanning.input.QuadrupedRobotModelProviderNode;
 import us.ihmc.quadrupedPlanning.input.QuadrupedStepTeleopManager;
-import us.ihmc.robotModels.FullQuadrupedRobotModelFactory;
-import us.ihmc.ros2.RealtimeRos2Node;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.yoVariables.variable.YoBoolean;
-import us.ihmc.yoVariables.variable.YoDouble;
 
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.ScheduledFuture;
-import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicReference;
 
-public class QuadrupedStepTeleopController
+public class QuadrupedStepTeleopController extends QuadrupedToolboxController
 {
-   private static final boolean debug = false;
-
-   private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
-
-   private final StatusMessageOutputManager statusOutputManager;
    private final QuadrupedStepTeleopManager teleopManager;
 
-   private final YoDouble timeWithoutInputsBeforeGoingToSleep = new YoDouble("timeWithoutInputsBeforeGoingToSleep", registry);
+   private final AtomicReference<HighLevelStateChangeStatusMessage> controllerStateChangeMessage = new AtomicReference<>();
+   private final AtomicReference<QuadrupedSteppingStateChangeMessage> steppingStateChangeMessage = new AtomicReference<>();
 
-   private final YoDouble controllerTime = new YoDouble("TeleopControllerTime", registry);
-   protected final YoDouble timeOfLastInput = new YoDouble("timeOfLastInput", registry);
-
-   private Runnable managerRunnable = null;
-   private ScheduledFuture<?> managerTask = null;
-
-   protected final AtomicBoolean receivedInput = new AtomicBoolean();
-
-   private final long tickTimeMs;
-   private final ScheduledExecutorService executorService;
-   private final YoBoolean initialize = new YoBoolean("initialize" + registry.getName(), registry);
+   private final AtomicBoolean receivedInput = new AtomicBoolean();
 
    public QuadrupedStepTeleopController(QuadrupedXGaitSettingsReadOnly defaultXGaitSettings, double initialBodyHeight, CommandInputManager commandInputManager,
                                         StatusMessageOutputManager statusOutputManager, QuadrupedRobotModelProviderNode robotModelProvider,
-                                        ScheduledExecutorService executorService, YoVariableRegistry parentRegistry,
+                                        YoVariableRegistry parentRegistry,
                                         YoGraphicsListRegistry graphicsListRegistry, long tickTimeMs)
    {
-      this.tickTimeMs = tickTimeMs;
-      this.executorService = executorService;
-      this.statusOutputManager = statusOutputManager;
+      super(statusOutputManager, parentRegistry);
+
       teleopManager = new QuadrupedStepTeleopManager(defaultXGaitSettings, initialBodyHeight, robotModelProvider.getReferenceFrames(),
                                                      Conversions.millisecondsToSeconds(tickTimeMs), graphicsListRegistry, registry);
 
       commandInputManager.registerHasReceivedInputListener(command -> receivedInput.set(true));
 
-      timeWithoutInputsBeforeGoingToSleep.set(Double.POSITIVE_INFINITY);
-
-      parentRegistry.addChild(registry);
-   }
-
-   public void requestInitialize()
-   {
-      initialize.set(true);
    }
 
    public void setPaused(boolean pause)
@@ -83,12 +53,12 @@ public class QuadrupedStepTeleopController
 
    public void processHighLevelStateChangeMessage(HighLevelStateChangeStatusMessage message)
    {
-      teleopManager.processHighLevelStateChangeMessage(message);
+      controllerStateChangeMessage.set(message);
    }
 
    public void processSteppingStateChangeMessage(QuadrupedSteppingStateChangeMessage message)
    {
-      teleopManager.processSteppingStateChangeMessage(message);
+      steppingStateChangeMessage.set(message);
    }
 
    public void processGroundPlaneMessage(QuadrupedGroundPlaneMessage message)
@@ -101,98 +71,29 @@ public class QuadrupedStepTeleopController
       teleopManager.processTimestamp(timestampInNanos);
    }
 
-   public void reinitialize()
+   @Override
+   public boolean initialize()
    {
-      requestInitialize();
+      teleopManager.initialize();
+
+      return true;
    }
 
-   public void wakeUp()
+   @Override
+   public void updateInternal()
    {
-      if (managerTask != null)
-      {
-         if (debug)
-            PrintTools.error(this, "This planner is already running.");
-         return;
-      }
-
-      if (debug)
-         PrintTools.debug(this, "Waking up");
-
-      createPlannerRunnable();
-      teleopManager.wakeUp();
-      managerTask = executorService.scheduleAtFixedRate(managerRunnable, 0, tickTimeMs, TimeUnit.MILLISECONDS);
-
-      receivedInput.set(true);
+      teleopManager.update();
+      statusOutputManager.reportStatusMessage(teleopManager.getStepListMessage());
+      statusOutputManager.reportStatusMessage(teleopManager.getBodyOrientationMessage());
+      statusOutputManager.reportStatusMessage(teleopManager.getBodyHeightMessage());
    }
 
-   public void sleep()
+   @Override
+   public boolean isDone()
    {
-      if (debug)
-         PrintTools.debug(this, "Going to sleep");
+      if (controllerStateChangeMessage.get().getEndHighLevelControllerName() != HighLevelStateChangeStatusMessage.WALKING)
+         return true;
 
-      teleopManager.sleep();
-
-      managerRunnable = null;
-
-      if (managerTask == null)
-      {
-         if (debug)
-            PrintTools.error(this, "There is no task running.");
-         return;
-      }
-      else
-      {
-         managerTask.cancel(true);
-         managerTask = null;
-      }
-   }
-
-   public void destroy()
-   {
-      sleep();
-
-      if (debug)
-         PrintTools.debug(this, "Destroyed");
-   }
-
-   private void createPlannerRunnable()
-   {
-      if (managerRunnable != null)
-      {
-         if (debug)
-            PrintTools.error(this, "This planning runnable is not null.");
-         return;
-      }
-
-      managerRunnable = new Runnable()
-      {
-         @Override
-         public void run()
-         {
-            if (Thread.interrupted())
-               return;
-
-            try
-            {
-               teleopManager.update();
-               statusOutputManager.reportStatusMessage(teleopManager.getStepListMessage());
-               statusOutputManager.reportStatusMessage(teleopManager.getBodyOrientationMessage());
-               statusOutputManager.reportStatusMessage(teleopManager.getBodyHeightMessage());
-
-               controllerTime.add(Conversions.millisecondsToSeconds(tickTimeMs));
-
-               if (receivedInput.getAndSet(false))
-                  timeOfLastInput.set(controllerTime.getDoubleValue());
-               if (controllerTime.getDoubleValue() - timeOfLastInput.getDoubleValue() >= timeWithoutInputsBeforeGoingToSleep.getDoubleValue())
-                  sleep();
-            }
-            catch (Exception e)
-            {
-               e.printStackTrace();
-               sleep();
-               throw e;
-            }
-         }
-      };
+      return steppingStateChangeMessage.get().getEndQuadrupedSteppingStateEnum() != QuadrupedSteppingStateChangeMessage.STEP;
    }
 }
