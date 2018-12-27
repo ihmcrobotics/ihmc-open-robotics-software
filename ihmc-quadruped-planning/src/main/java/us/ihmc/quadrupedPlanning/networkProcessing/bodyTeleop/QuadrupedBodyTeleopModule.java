@@ -92,4 +92,9 @@ public class QuadrupedBodyTeleopModule extends QuadrupedToolboxModule
 
       super.sleep();
    }
+
+   public void setDesiredBodyPose(double x, double y, double yaw, double pitch, double roll, double time)
+   {
+      bodyTeleopController.setDesiredBodyPose(x, y, yaw, pitch, roll, time);
+   }
 }

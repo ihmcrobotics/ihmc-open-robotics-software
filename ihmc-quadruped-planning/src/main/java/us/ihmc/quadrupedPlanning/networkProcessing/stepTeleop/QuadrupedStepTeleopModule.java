@@ -103,4 +103,14 @@ public class QuadrupedStepTeleopModule extends QuadrupedToolboxModule
 
       super.sleep();
    }
+
+   public void setDesiredVelocity(double desiredVelocityX, double desiredVelocityY, double desiredVelocityZ)
+   {
+      stepTeleopController.setDesiredVelocity(desiredVelocityX, desiredVelocityY, desiredVelocityZ);
+   }
+
+   public void setEndPhaseShift(double endPhaseShift)
+   {
+      stepTeleopController.setEndPhaseShift(endPhaseShift);
+   }
 }

@@ -6,7 +6,6 @@ import us.ihmc.communication.controllerAPI.command.Command;
 import us.ihmc.euclid.interfaces.Settable;
 import us.ihmc.multicastLogDataProtocol.modelLoaders.LogModelProvider;
 import us.ihmc.pubsub.DomainFactory;
-import us.ihmc.quadrupedPlanning.QuadrupedXGaitSettings;
 import us.ihmc.quadrupedPlanning.networkProcessing.QuadrupedRobotModelProviderNode;
 import us.ihmc.quadrupedPlanning.networkProcessing.QuadrupedToolboxController;
 import us.ihmc.quadrupedPlanning.networkProcessing.QuadrupedToolboxModule;
@@ -23,7 +22,7 @@ public class QuadrupedBodyHeightTeleopModule extends QuadrupedToolboxModule
 {
    private static final int updatePeriodMilliseconds = 1;
 
-   private final QuadrupedBodyHeightTeleopController stepTeleopController;
+   private final QuadrupedBodyHeightTeleopController heightTeleopController;
 
    public QuadrupedBodyHeightTeleopModule(FullQuadrupedRobotModelFactory modelFactory, double nominalHeight, LogModelProvider modelProvider,
                                           DomainFactory.PubSubImplementation pubSubImplementation) throws IOException
@@ -33,22 +32,22 @@ public class QuadrupedBodyHeightTeleopModule extends QuadrupedToolboxModule
 
       QuadrupedRobotModelProviderNode robotModelProvider = new QuadrupedRobotModelProviderNode(robotName, realtimeRos2Node, modelFactory);
 
-      stepTeleopController = new QuadrupedBodyHeightTeleopController(nominalHeight, commandInputManager, statusOutputManager, robotModelProvider, registry);
+      heightTeleopController = new QuadrupedBodyHeightTeleopController(nominalHeight, commandInputManager, statusOutputManager, robotModelProvider, registry);
    }
 
    @Override
    public void registerExtraPuSubs(RealtimeRos2Node realtimeRos2Node)
    {
       ROS2Tools.createCallbackSubscription(realtimeRos2Node, HighLevelStateMessage.class, getPublisherTopicNameGenerator(),
-                                           s -> stepTeleopController.setPaused(true));
+                                           s -> heightTeleopController.setPaused(true));
       ROS2Tools.createCallbackSubscription(realtimeRos2Node, HighLevelStateChangeStatusMessage.class, getPublisherTopicNameGenerator(),
-                                           s -> stepTeleopController.processHighLevelStateChangeMessage(s.takeNextData()));
+                                           s -> heightTeleopController.processHighLevelStateChangeMessage(s.takeNextData()));
    }
 
    @Override
    public QuadrupedToolboxController getToolboxController()
    {
-      return stepTeleopController;
+      return heightTeleopController;
    }
 
    @Override
@@ -83,8 +82,13 @@ public class QuadrupedBodyHeightTeleopModule extends QuadrupedToolboxModule
    @Override
    public void sleep()
    {
-      stepTeleopController.setPaused(true);
+      heightTeleopController.setPaused(true);
 
       super.sleep();
+   }
+
+   public void setDesiredBodyHeight(double desiredBodyHeight)
+   {
+      heightTeleopController.setDesiredBodyHeight(desiredBodyHeight);
    }
 }
