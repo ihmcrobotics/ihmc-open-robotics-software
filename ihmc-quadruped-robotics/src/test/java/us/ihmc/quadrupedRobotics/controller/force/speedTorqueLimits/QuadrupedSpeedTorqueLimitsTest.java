@@ -7,7 +7,7 @@ import org.junit.Test;
 import us.ihmc.commons.PrintTools;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.quadrupedBasics.QuadrupedSteppingRequestedEvent;
-import us.ihmc.quadrupedPlanning.input.OldQuadrupedTeleopManager;
+import us.ihmc.quadrupedPlanning.input.QuadrupedTeleopManager;
 import us.ihmc.quadrupedRobotics.*;
 import us.ihmc.quadrupedRobotics.controller.QuadrupedControlMode;
 import us.ihmc.quadrupedRobotics.simulation.QuadrupedGroundContactModelType;
@@ -22,7 +22,7 @@ public abstract class QuadrupedSpeedTorqueLimitsTest implements QuadrupedMultiRo
 {
    private GoalOrientedTestConductor conductor;
    private QuadrupedForceTestYoVariables variables;
-   private OldQuadrupedTeleopManager stepTeleopManager;
+   private QuadrupedTeleopManager stepTeleopManager;
    private QuadrupedTestFactory quadrupedTestFactory;
 
    @Before

@@ -10,7 +10,7 @@ import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.Continuous
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.quadrupedCommunication.QuadrupedMessageTools;
-import us.ihmc.quadrupedPlanning.input.OldQuadrupedTeleopManager;
+import us.ihmc.quadrupedPlanning.input.QuadrupedTeleopManager;
 import us.ihmc.quadrupedRobotics.*;
 import us.ihmc.quadrupedRobotics.controller.QuadrupedControlMode;
 import us.ihmc.quadrupedRobotics.simulation.QuadrupedGroundContactModelType;
@@ -29,7 +29,7 @@ public abstract class QuadrupedXGaitPushRecoveryTest implements QuadrupedMultiRo
    private GoalOrientedTestConductor conductor;
    private QuadrupedForceTestYoVariables variables;
    private PushRobotTestConductor pusher;
-   private OldQuadrupedTeleopManager stepTeleopManager;
+   private QuadrupedTeleopManager stepTeleopManager;
    private QuadrupedTestFactory quadrupedTestFactory;
 
    @Before

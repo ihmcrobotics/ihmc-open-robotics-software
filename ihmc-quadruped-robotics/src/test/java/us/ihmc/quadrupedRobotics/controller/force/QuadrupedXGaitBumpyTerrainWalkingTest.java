@@ -5,7 +5,7 @@ import org.junit.Before;
 import org.junit.Test;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.quadrupedPlanning.footstepChooser.HeightMapFootSnapper;
-import us.ihmc.quadrupedPlanning.input.OldQuadrupedTeleopManager;
+import us.ihmc.quadrupedPlanning.input.QuadrupedTeleopManager;
 import us.ihmc.quadrupedRobotics.*;
 import us.ihmc.quadrupedRobotics.controller.QuadrupedControlMode;
 import us.ihmc.robotics.testing.YoVariableTestGoal;
@@ -21,7 +21,7 @@ public abstract class QuadrupedXGaitBumpyTerrainWalkingTest implements Quadruped
 {
    protected GoalOrientedTestConductor conductor;
    protected QuadrupedForceTestYoVariables variables;
-   private OldQuadrupedTeleopManager stepTeleopManager;
+   private QuadrupedTeleopManager stepTeleopManager;
    private QuadrupedTestFactory quadrupedTestFactory;
 
    @Before
