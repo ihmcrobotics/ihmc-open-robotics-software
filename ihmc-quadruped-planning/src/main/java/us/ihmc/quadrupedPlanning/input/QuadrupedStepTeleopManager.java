@@ -54,8 +54,6 @@ public class QuadrupedStepTeleopManager
    private final AtomicBoolean paused = new AtomicBoolean(false);
    private final AtomicDouble desiredBodyHeight = new AtomicDouble();
 
-   private final AtomicReference<HighLevelStateChangeStatusMessage> controllerStateChangeMessage = new AtomicReference<>();
-   private final AtomicReference<QuadrupedSteppingStateChangeMessage> steppingStateChangeMessage = new AtomicReference<>();
    private final AtomicLong timestampNanos = new AtomicLong();
 
    private final QuadrupedReferenceFrames referenceFrames;
@@ -109,16 +107,6 @@ public class QuadrupedStepTeleopManager
       }
    }
 
-   public void processHighLevelStateChangeMessage(HighLevelStateChangeStatusMessage message)
-   {
-      controllerStateChangeMessage.set(message);
-   }
-
-   public void processSteppingStateChangeMessage(QuadrupedSteppingStateChangeMessage message)
-   {
-      steppingStateChangeMessage.set(message);
-   }
-
    public void processGroundPlaneMessage(QuadrupedGroundPlaneMessage message)
    {
       snapper.submitGroundPlane(message);
@@ -129,7 +117,7 @@ public class QuadrupedStepTeleopManager
       this.timestampNanos.set(timestampInNanos);
    }
 
-   public void wakeUp()
+   public void initialize()
    {
       stepStream.onEntry();
 
@@ -261,8 +249,6 @@ public class QuadrupedStepTeleopManager
    public void setPaused(boolean pause)
    {
       paused.set(pause);
-
-      steppingStateChangeMessage.set(null);
    }
 
    public boolean isPaused()
