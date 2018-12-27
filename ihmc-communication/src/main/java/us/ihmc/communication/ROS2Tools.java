@@ -37,6 +37,7 @@ public class ROS2Tools
    public static final String WHOLE_BODY_TRAJECTORY_TOOLBOX = "/toolbox/ik_trajectory";
 
    public static final String STEP_TELEOP_TOOLBOX = "/toolbox/step_teleop";
+   public static final String HEIGHT_TELEOP_TOOLBOX = "/toolbox/height_teleop";
    public static final String BODY_TELEOP_TOOLBOX = "/toolbox/body_teleop";
 
    public static final String BEHAVIOR_MODULE = "/behavior";

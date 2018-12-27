@@ -1,23 +1,13 @@
-package us.ihmc.quadrupedPlanning.input;
+package us.ihmc.quadrupedPlanning.networkProcessing.stepTeleop;
 
-import com.google.common.util.concurrent.AtomicDouble;
 import controller_msgs.msg.dds.*;
 import us.ihmc.commons.Conversions;
 import us.ihmc.commons.lists.PreallocatedList;
-import us.ihmc.communication.IHMCROS2Publisher;
-import us.ihmc.communication.ROS2Tools;
-import us.ihmc.communication.ROS2Tools.MessageTopicNameGenerator;
-import us.ihmc.communication.packets.MessageTools;
-import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
-import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelControllerName;
-import us.ihmc.quadrupedBasics.QuadrupedSteppingRequestedEvent;
-import us.ihmc.quadrupedBasics.QuadrupedSteppingStateEnum;
 import us.ihmc.quadrupedBasics.gait.QuadrupedTimedOrientedStep;
 import us.ihmc.quadrupedBasics.gait.QuadrupedTimedStep;
 import us.ihmc.quadrupedBasics.referenceFrames.QuadrupedReferenceFrames;
-import us.ihmc.quadrupedCommunication.QuadrupedControllerAPIDefinition;
 import us.ihmc.quadrupedCommunication.QuadrupedMessageTools;
 import us.ihmc.quadrupedPlanning.QuadrupedXGaitSettingsReadOnly;
 import us.ihmc.quadrupedPlanning.YoQuadrupedXGaitSettings;
@@ -28,17 +18,14 @@ import us.ihmc.quadrupedPlanning.stepStream.QuadrupedXGaitStepStream;
 import us.ihmc.robotics.math.filters.RateLimitedYoFrameVector;
 import us.ihmc.robotics.robotSide.RobotQuadrant;
 import us.ihmc.robotics.time.TimeIntervalTools;
-import us.ihmc.ros2.RealtimeRos2Node;
-import us.ihmc.ros2.Ros2Node;
-import us.ihmc.yoVariables.listener.VariableChangedListener;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.yoVariables.variable.*;
+import us.ihmc.yoVariables.variable.YoDouble;
+import us.ihmc.yoVariables.variable.YoFrameVector3D;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicLong;
-import java.util.concurrent.atomic.AtomicReference;
 
 public class QuadrupedStepTeleopManager
 {
@@ -52,11 +39,8 @@ public class QuadrupedStepTeleopManager
 
    private final YoDouble firstStepDelay = new YoDouble("firstStepDelay", registry);
    private final AtomicBoolean paused = new AtomicBoolean(false);
-   private final AtomicDouble desiredBodyHeight = new AtomicDouble();
 
    private final AtomicLong timestampNanos = new AtomicLong();
-
-   private final QuadrupedReferenceFrames referenceFrames;
 
    private final QuadrupedXGaitStepStream stepStream;
    private final QuadrupedBodyPathMultiplexer bodyPathMultiplexer;
@@ -64,24 +48,19 @@ public class QuadrupedStepTeleopManager
 
    private QuadrupedTimedStepListMessage stepListMessage;
    private QuadrupedBodyOrientationMessage bodyOrientationMessage;
-   private QuadrupedBodyHeightMessage bodyHeightMessage;
 
-   public QuadrupedStepTeleopManager(QuadrupedXGaitSettingsReadOnly defaultXGaitSettings, double initialBodyHeight,
-                                     QuadrupedReferenceFrames referenceFrames, double updateDT, YoGraphicsListRegistry graphicsListRegistry,
-                                     YoVariableRegistry parentRegistry)
+   public QuadrupedStepTeleopManager(QuadrupedXGaitSettingsReadOnly defaultXGaitSettings, QuadrupedReferenceFrames referenceFrames, double updateDT,
+                                     YoGraphicsListRegistry graphicsListRegistry, YoVariableRegistry parentRegistry)
    {
-      this.referenceFrames = referenceFrames;
       this.xGaitSettings = new YoQuadrupedXGaitSettings(defaultXGaitSettings, null, registry);
 
       firstStepDelay.set(0.5);
-      this.bodyPathMultiplexer = new QuadrupedBodyPathMultiplexer(referenceFrames, timestamp, xGaitSettings, firstStepDelay,
-                                                                  graphicsListRegistry, registry);
+      this.bodyPathMultiplexer = new QuadrupedBodyPathMultiplexer(referenceFrames, timestamp, xGaitSettings, firstStepDelay, graphicsListRegistry, registry);
       this.stepStream = new QuadrupedXGaitStepStream(xGaitSettings, timestamp, bodyPathMultiplexer, firstStepDelay, registry);
 
       desiredVelocityRateLimit.set(10.0);
       limitedDesiredVelocity = new RateLimitedYoFrameVector("limitedTeleopDesiredVelocity", "", registry, desiredVelocityRateLimit, updateDT, desiredVelocity);
 
-      desiredBodyHeight.set(initialBodyHeight);
       snapper = new PlanarGroundPointFootSnapper(referenceFrames);
       stepStream.setStepSnapper(snapper);
 
@@ -90,7 +69,8 @@ public class QuadrupedStepTeleopManager
 
    public void processBodyPathPlanMessage(QuadrupedBodyPathPlanMessage message)
    {
-      bodyPathMultiplexer.setBodyPathPlanMessage(message);
+      bodyPathMultiplexer.initialize();
+      bodyPathMultiplexer.handleBodyPathPlanMessage(message);
    }
 
    public void processFootstepStatusMessage(QuadrupedFootstepStatusMessage message)
@@ -117,12 +97,22 @@ public class QuadrupedStepTeleopManager
       this.timestampNanos.set(timestampInNanos);
    }
 
+   public void setShiftPlanBasedOnStepAdjustment(boolean shiftPlanBasedOnStepAdjustment)
+   {
+      bodyPathMultiplexer.setShiftPlanBasedOnStepAdjustment(shiftPlanBasedOnStepAdjustment);
+   }
+
+
+   public void setPaused(boolean pause)
+   {
+      paused.set(pause);
+   }
+
    public void initialize()
    {
       stepStream.onEntry();
 
       populateStepMessage();
-      populateBodyHeightMessage();
       populateBodyOrientationMessage();
    }
 
@@ -132,18 +122,15 @@ public class QuadrupedStepTeleopManager
 
       timestamp.set(Conversions.nanosecondsToSeconds(timestampNanos.get()));
       bodyPathMultiplexer.setPlanarVelocityForJoystickPath(limitedDesiredVelocity.getX(), limitedDesiredVelocity.getY(), limitedDesiredVelocity.getZ());
-      referenceFrames.updateFrames();
 
       stepListMessage = null;
       bodyOrientationMessage = null;
-      bodyHeightMessage = null;
 
       if (paused.get())
          return;
 
       stepStream.process();
 
-      populateBodyHeightMessage();
       populateStepMessage();
       populateBodyOrientationMessage();
    }
@@ -161,7 +148,6 @@ public class QuadrupedStepTeleopManager
       this.desiredVelocity.set(desiredVelocityX, desiredVelocityY, desiredVelocityZ);
    }
 
-
    public QuadrupedTimedStepListMessage getStepListMessage()
    {
       return stepListMessage;
@@ -170,11 +156,6 @@ public class QuadrupedStepTeleopManager
    public QuadrupedBodyOrientationMessage getBodyOrientationMessage()
    {
       return bodyOrientationMessage;
-   }
-
-   public QuadrupedBodyHeightMessage getBodyHeightMessage()
-   {
-      return bodyHeightMessage;
    }
 
    private void populateStepMessage()
@@ -201,58 +182,5 @@ public class QuadrupedStepTeleopManager
       plannedStepsSortedByEndTime.addAll(plannedSteps);
       TimeIntervalTools.sortByEndTime(plannedStepsSortedByEndTime);
       return plannedStepsSortedByEndTime;
-   }
-
-   public void setDesiredBodyHeight(double desiredBodyHeight)
-   {
-      this.desiredBodyHeight.set(desiredBodyHeight);
-   }
-
-   private final FramePoint3D tempPoint = new FramePoint3D();
-
-   private void populateBodyHeightMessage()
-   {
-      double bodyHeight = desiredBodyHeight.getAndSet(Double.NaN);
-
-      if (!Double.isNaN(bodyHeight))
-      {
-         tempPoint.setIncludingFrame(referenceFrames.getCenterOfFeetZUpFrameAveragingLowestZHeightsAcrossEnds(), 0.0, 0.0, bodyHeight);
-         tempPoint.changeFrame(ReferenceFrame.getWorldFrame());
-
-         bodyHeightMessage = QuadrupedMessageTools.createQuadrupedBodyHeightMessage(0.0, tempPoint.getZ());
-         bodyHeightMessage.setControlBodyHeight(true);
-         bodyHeightMessage.setIsExpressedInAbsoluteTime(false);
-      }
-   }
-
-   public void setStepSnapper(PointFootSnapper stepSnapper)
-   {
-      stepStream.setStepSnapper(stepSnapper);
-   }
-
-   public YoQuadrupedXGaitSettings getXGaitSettings()
-   {
-      return xGaitSettings;
-   }
-
-   public void setShiftPlanBasedOnStepAdjustment(boolean shiftPlanBasedOnStepAdjustment)
-   {
-      bodyPathMultiplexer.setShiftPlanBasedOnStepAdjustment(shiftPlanBasedOnStepAdjustment);
-   }
-
-   public void handleBodyPathPlanMessage(QuadrupedBodyPathPlanMessage bodyPathPlanMessage)
-   {
-      bodyPathMultiplexer.initialize();
-      bodyPathMultiplexer.handleBodyPathPlanMessage(bodyPathPlanMessage);
-   }
-
-   public void setPaused(boolean pause)
-   {
-      paused.set(pause);
-   }
-
-   public boolean isPaused()
-   {
-      return paused.get();
    }
 }

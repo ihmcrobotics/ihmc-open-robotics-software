@@ -1,4 +1,4 @@
-package us.ihmc.quadrupedPlanning.networkProcessing;
+package us.ihmc.quadrupedPlanning.networkProcessing.stepTeleop;
 
 import controller_msgs.msg.dds.*;
 import us.ihmc.communication.ROS2Tools;
@@ -7,13 +7,17 @@ import us.ihmc.euclid.interfaces.Settable;
 import us.ihmc.multicastLogDataProtocol.modelLoaders.LogModelProvider;
 import us.ihmc.pubsub.DomainFactory;
 import us.ihmc.quadrupedPlanning.QuadrupedXGaitSettings;
-import us.ihmc.quadrupedPlanning.input.QuadrupedRobotModelProviderNode;
+import us.ihmc.quadrupedPlanning.networkProcessing.QuadrupedRobotModelProviderNode;
+import us.ihmc.quadrupedPlanning.networkProcessing.QuadrupedToolboxController;
+import us.ihmc.quadrupedPlanning.networkProcessing.QuadrupedToolboxModule;
 import us.ihmc.robotModels.FullQuadrupedRobotModelFactory;
 import us.ihmc.ros2.RealtimeRos2Node;
 
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+
+import static us.ihmc.communication.ROS2Tools.getTopicNameGenerator;
 
 public class QuadrupedStepTeleopModule extends QuadrupedToolboxModule
 {
@@ -83,13 +87,13 @@ public class QuadrupedStepTeleopModule extends QuadrupedToolboxModule
    @Override
    public ROS2Tools.MessageTopicNameGenerator getPublisherTopicNameGenerator()
    {
-      return QuadrupedStepTeleopCommunicationProperties.publisherTopicNameGenerator(robotName);
+      return  getTopicNameGenerator(robotName, ROS2Tools.STEP_TELEOP_TOOLBOX, ROS2Tools.ROS2TopicQualifier.OUTPUT);
    }
 
    @Override
    public ROS2Tools.MessageTopicNameGenerator getSubscriberTopicNameGenerator()
    {
-      return QuadrupedStepTeleopCommunicationProperties.subscriberTopicNameGenerator(robotName);
+      return getTopicNameGenerator(robotName, ROS2Tools.STEP_TELEOP_TOOLBOX, ROS2Tools.ROS2TopicQualifier.INPUT);
    }
 
    @Override

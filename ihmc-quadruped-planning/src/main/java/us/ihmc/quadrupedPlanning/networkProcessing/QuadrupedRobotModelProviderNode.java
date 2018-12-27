@@ -1,4 +1,4 @@
-package us.ihmc.quadrupedPlanning.input;
+package us.ihmc.quadrupedPlanning.networkProcessing;
 
 import controller_msgs.msg.dds.RobotConfigurationData;
 import us.ihmc.communication.ROS2Tools;
