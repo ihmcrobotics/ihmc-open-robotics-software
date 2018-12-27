@@ -25,7 +25,7 @@ public class QuadrupedStepTeleopModule extends QuadrupedToolboxModule
 
    private final QuadrupedStepTeleopController stepTeleopController;
 
-   public QuadrupedStepTeleopModule(FullQuadrupedRobotModelFactory modelFactory, QuadrupedXGaitSettings defaultXGaitSettings, double nominalHeight,
+   public QuadrupedStepTeleopModule(FullQuadrupedRobotModelFactory modelFactory, QuadrupedXGaitSettings defaultXGaitSettings,
                                     LogModelProvider modelProvider, boolean startYoVariableServer, DomainFactory.PubSubImplementation pubSubImplementation)
          throws IOException
    {
@@ -34,8 +34,8 @@ public class QuadrupedStepTeleopModule extends QuadrupedToolboxModule
 
       QuadrupedRobotModelProviderNode robotModelProvider = new QuadrupedRobotModelProviderNode(robotName, realtimeRos2Node, modelFactory);
 
-      stepTeleopController = new QuadrupedStepTeleopController(defaultXGaitSettings, nominalHeight, commandInputManager, statusOutputManager,
-                                                               robotModelProvider, registry, yoGraphicsListRegistry, updatePeriodMilliseconds);
+      stepTeleopController = new QuadrupedStepTeleopController(defaultXGaitSettings, commandInputManager, statusOutputManager, robotModelProvider, registry,
+                                                               yoGraphicsListRegistry, updatePeriodMilliseconds);
    }
 
    @Override
