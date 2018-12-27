@@ -47,7 +47,7 @@ public class QuadrupedXBoxAdapter implements JoystickEventListener
    private final RobotDataReceiver robotDataReceiver;
 
    private final YoGraphicsListRegistry graphicsListRegistry = new YoGraphicsListRegistry();
-   private final QuadrupedTeleopManager stepTeleopManager;
+   private final OldQuadrupedTeleopManager stepTeleopManager;
 
    private final YoDouble maxBodyYaw = new YoDouble("maxBodyYaw", registry);
    private final YoDouble maxBodyPitch = new YoDouble("maxBodyPitch", registry);
@@ -72,8 +72,8 @@ public class QuadrupedXBoxAdapter implements JoystickEventListener
       ROS2Tools.createCallbackSubscription(ros2Node, RobotConfigurationData.class, controllerPubGenerator, s -> robotDataReceiver.receivedPacket(s.takeNextData()));
 
       QuadrupedReferenceFrames referenceFrames = new QuadrupedReferenceFrames(fullRobotModel);
-      this.stepTeleopManager = new QuadrupedTeleopManager(robotName, ros2Node, defaultXGaitSettings, nominalBodyHeight, referenceFrames, DT,
-                                                          graphicsListRegistry, registry);
+      this.stepTeleopManager = new OldQuadrupedTeleopManager(robotName, ros2Node, defaultXGaitSettings, nominalBodyHeight, referenceFrames, DT,
+                                                             graphicsListRegistry, registry);
 
       maxBodyYaw.set(0.15);
       maxBodyPitch.set(0.15);
