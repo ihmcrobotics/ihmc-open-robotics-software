@@ -41,6 +41,11 @@ public class QuadrupedBodyHeightTeleopController extends QuadrupedToolboxControl
       controllerStateChangeMessage.set(message);
    }
 
+   public void setDesiredBodyHeight(double desiredBodyHeight)
+   {
+      teleopManager.setDesiredBodyHeight(desiredBodyHeight);
+   }
+
    @Override
    public boolean initialize()
    {

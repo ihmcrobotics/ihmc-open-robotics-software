@@ -70,6 +70,16 @@ public class QuadrupedStepTeleopController extends QuadrupedToolboxController
       teleopManager.processTimestamp(timestampInNanos);
    }
 
+   public void setDesiredVelocity(double desiredVelocityX, double desiredVelocityY, double desiredVelocityZ)
+   {
+      teleopManager.setDesiredVelocity(desiredVelocityX, desiredVelocityY, desiredVelocityZ);
+   }
+
+   public void setEndPhaseShift(double endPhaseShift)
+   {
+      teleopManager.setEndPhaseShift(endPhaseShift);
+   }
+
    @Override
    public boolean initialize()
    {
@@ -92,6 +102,6 @@ public class QuadrupedStepTeleopController extends QuadrupedToolboxController
       if (controllerStateChangeMessage.get().getEndHighLevelControllerName() != HighLevelStateChangeStatusMessage.WALKING)
          return true;
 
-      return steppingStateChangeMessage.get().getEndQuadrupedSteppingStateEnum() != QuadrupedSteppingStateChangeMessage.STEP;
+      return steppingStateChangeMessage.get().getEndQuadrupedSteppingStateEnum() != QuadrupedSteppingStateChangeMessage.STAND;
    }
 }

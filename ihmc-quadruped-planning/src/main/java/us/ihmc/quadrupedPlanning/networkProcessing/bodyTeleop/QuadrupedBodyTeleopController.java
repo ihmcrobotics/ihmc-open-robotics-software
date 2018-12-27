@@ -53,6 +53,11 @@ public class QuadrupedBodyTeleopController extends QuadrupedToolboxController
       teleopManager.processTimestamp(timestampInNanos);
    }
 
+   public void setDesiredBodyPose(double x, double y, double yaw, double pitch, double roll, double time)
+   {
+      teleopManager.setDesiredBodyPose(x, y, yaw, pitch, roll, time);
+   }
+
    @Override
    public boolean initialize()
    {

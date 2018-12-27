@@ -148,6 +148,11 @@ public class QuadrupedStepTeleopManager
       this.desiredVelocity.set(desiredVelocityX, desiredVelocityY, desiredVelocityZ);
    }
 
+   public void setEndPhaseShift(double endPhaseShift)
+   {
+      xGaitSettings.setEndPhaseShift(endPhaseShift);
+   }
+
    public QuadrupedTimedStepListMessage getStepListMessage()
    {
       return stepListMessage;
