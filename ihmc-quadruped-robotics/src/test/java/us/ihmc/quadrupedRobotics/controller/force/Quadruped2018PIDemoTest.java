@@ -14,7 +14,7 @@ import us.ihmc.quadrupedPlanning.YoQuadrupedXGaitSettings;
 import us.ihmc.quadrupedPlanning.footstepChooser.DefaultPointFootSnapperParameters;
 import us.ihmc.quadrupedPlanning.footstepChooser.PlanarGroundPointFootSnapper;
 import us.ihmc.quadrupedPlanning.footstepChooser.PlanarRegionBasedPointFootSnapper;
-import us.ihmc.quadrupedPlanning.input.OldQuadrupedTeleopManager;
+import us.ihmc.quadrupedPlanning.input.QuadrupedTeleopManager;
 import us.ihmc.quadrupedRobotics.*;
 import us.ihmc.quadrupedRobotics.controller.QuadrupedControlMode;
 import us.ihmc.quadrupedRobotics.model.QuadrupedInitialOffsetAndYaw;
@@ -38,7 +38,7 @@ public abstract class Quadruped2018PIDemoTest implements QuadrupedMultiRobotTest
    private QuadrupedForceTestYoVariables variables;
    private PushRobotTestConductor pusher;
    private QuadrupedTestFactory quadrupedTestFactory;
-   private OldQuadrupedTeleopManager stepTeleopManager;
+   private QuadrupedTeleopManager stepTeleopManager;
 
    @Before
    public void setup()

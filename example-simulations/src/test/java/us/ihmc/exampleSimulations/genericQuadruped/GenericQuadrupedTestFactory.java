@@ -12,7 +12,7 @@ import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelControllerName;
 import us.ihmc.jMonkeyEngineToolkit.GroundProfile3D;
 import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
-import us.ihmc.quadrupedPlanning.input.OldQuadrupedTeleopManager;
+import us.ihmc.quadrupedPlanning.input.QuadrupedTeleopManager;
 import us.ihmc.quadrupedPlanning.input.QuadrupedTestTeleopScript;
 import us.ihmc.quadrupedRobotics.QuadrupedTestFactory;
 import us.ihmc.quadrupedRobotics.controller.QuadrupedControlMode;
@@ -72,7 +72,7 @@ public class GenericQuadrupedTestFactory implements QuadrupedTestFactory
    private final OptionalFactoryField<SimulationConstructionSetParameters> scsParameters = new OptionalFactoryField<>("scsParameters");
 
    private FullQuadrupedRobotModel fullRobotModel;
-   private OldQuadrupedTeleopManager stepTeleopManager;
+   private QuadrupedTeleopManager stepTeleopManager;
    private YoGraphicsListRegistry graphicsListRegistry;
    private String robotName;
    private QuadrupedSimulationFactory simulationFactory;
@@ -180,7 +180,7 @@ public class GenericQuadrupedTestFactory implements QuadrupedTestFactory
          Ros2Node ros2Node = ROS2Tools.createRos2Node(PubSubImplementation.INTRAPROCESS, "quadruped_teleop_manager");
 
          graphicsListRegistry = new YoGraphicsListRegistry();
-         stepTeleopManager = new OldQuadrupedTeleopManager(robotName, ros2Node, xGaitSettings, physicalProperties.getNominalBodyHeight(), referenceFrames, graphicsListRegistry, teleopRegistry);
+         stepTeleopManager = new QuadrupedTeleopManager(robotName, ros2Node, xGaitSettings, physicalProperties.getNominalBodyHeight(), referenceFrames, graphicsListRegistry, teleopRegistry);
 
          new DefaultParameterReader().readParametersInRegistry(teleopRegistry);
       }
@@ -264,7 +264,7 @@ public class GenericQuadrupedTestFactory implements QuadrupedTestFactory
    }
 
    @Override
-   public OldQuadrupedTeleopManager getStepTeleopManager()
+   public QuadrupedTeleopManager getStepTeleopManager()
    {
       return stepTeleopManager;
    }

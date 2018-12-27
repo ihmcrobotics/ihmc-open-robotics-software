@@ -30,13 +30,13 @@ public class QuadrupedStepTeleopMode
 
    private final DoubleParameter xGaitBodyOrientationShiftTime = new DoubleParameter("xGaitBodyOrientationShiftTime", registry, 0.1);
 
-   private final OldQuadrupedTeleopManager stepTeleopManager;
+   private final QuadrupedTeleopManager stepTeleopManager;
    private InputValueIntegrator bodyHeight;
 
    public QuadrupedStepTeleopMode(String robotName, Ros2Node ros2Node, double nominalBodyHeight, QuadrupedXGaitSettingsReadOnly xGaitSettings,
                                   QuadrupedReferenceFrames referenceFrames, double updateDT, YoGraphicsListRegistry graphicsListRegistry, YoVariableRegistry parentRegistry)
    {
-      this.stepTeleopManager = new OldQuadrupedTeleopManager(robotName, ros2Node, xGaitSettings, nominalBodyHeight, referenceFrames, graphicsListRegistry, registry);
+      this.stepTeleopManager = new QuadrupedTeleopManager(robotName, ros2Node, xGaitSettings, nominalBodyHeight, referenceFrames, graphicsListRegistry, registry);
       this.bodyHeight = new InputValueIntegrator(updateDT, nominalBodyHeight);
 
       xGaitStepDuration[0] = new DoubleParameter("xGaitStepDurationMode0", registry, 0.5);
