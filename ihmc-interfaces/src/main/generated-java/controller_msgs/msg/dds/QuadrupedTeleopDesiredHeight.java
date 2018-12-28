@@ -57,15 +57,15 @@ public class QuadrupedTeleopDesiredHeight extends Packet<QuadrupedTeleopDesiredH
    }
 
 
-   public static Supplier<PilotAlarmPacketPubSubType> getPubSubType()
+   public static Supplier<QuadrupedTeleopDesiredHeightPubSubType> getPubSubType()
    {
-      return PilotAlarmPacketPubSubType::new;
+      return QuadrupedTeleopDesiredHeightPubSubType::new;
    }
 
    @Override
    public Supplier<TopicDataType> getPubSubTypePacket()
    {
-      return PilotAlarmPacketPubSubType::new;
+      return QuadrupedTeleopDesiredHeightPubSubType::new;
    }
 
    @Override
