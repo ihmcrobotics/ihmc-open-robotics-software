@@ -39,8 +39,8 @@ public class QuadrupedBodyTeleopModule extends QuadrupedToolboxModule
    @Override
    public void registerExtraSubscribers(RealtimeRos2Node realtimeRos2Node)
    {
+      // status messages from the controller
       ROS2Tools.MessageTopicNameGenerator controllerPubGenerator = QuadrupedControllerAPIDefinition.getPublisherTopicNameGenerator(robotName);
-
       ROS2Tools.createCallbackSubscription(realtimeRos2Node, RobotConfigurationData.class, controllerPubGenerator,
                                            s -> bodyTeleopController.processTimestamp(s.takeNextData().getTimestamp()));
       ROS2Tools.createCallbackSubscription(realtimeRos2Node, HighLevelStateMessage.class, controllerPubGenerator, s -> bodyTeleopController.setPaused(true));
@@ -48,6 +48,10 @@ public class QuadrupedBodyTeleopModule extends QuadrupedToolboxModule
                                            s -> bodyTeleopController.processHighLevelStateChangeMessage(s.takeNextData()));
       ROS2Tools.createCallbackSubscription(realtimeRos2Node, QuadrupedSteppingStateChangeMessage.class, controllerPubGenerator,
                                            s -> bodyTeleopController.processSteppingStateChangeMessage(s.takeNextData()));
+
+      // inputs to this module
+      ROS2Tools.createCallbackSubscription(realtimeRos2Node, QuadrupedTeleopDesiredPose.class, getSubscriberTopicNameGenerator(),
+                                           s -> bodyTeleopController.processTeleopDesiredPoseMessage(s.takeNextData()));
    }
 
    @Override
@@ -92,10 +96,5 @@ public class QuadrupedBodyTeleopModule extends QuadrupedToolboxModule
       bodyTeleopController.setPaused(true);
 
       super.sleep();
-   }
-
-   public void setDesiredBodyPose(double x, double y, double yaw, double pitch, double roll, double time)
-   {
-      bodyTeleopController.setDesiredBodyPose(x, y, yaw, pitch, roll, time);
    }
 }

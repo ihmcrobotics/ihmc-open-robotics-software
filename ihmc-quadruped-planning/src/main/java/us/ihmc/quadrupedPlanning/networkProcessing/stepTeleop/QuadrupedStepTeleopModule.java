@@ -42,8 +42,8 @@ public class QuadrupedStepTeleopModule extends QuadrupedToolboxModule
    @Override
    public void registerExtraSubscribers(RealtimeRos2Node realtimeRos2Node)
    {
+      // status messages from the controller
       ROS2Tools.MessageTopicNameGenerator controllerPubGenerator = QuadrupedControllerAPIDefinition.getPublisherTopicNameGenerator(robotName);
-
       ROS2Tools.createCallbackSubscription(realtimeRos2Node, RobotConfigurationData.class, controllerPubGenerator,
                                            s -> stepTeleopController.processTimestamp(s.takeNextData().getTimestamp()));
       ROS2Tools.createCallbackSubscription(realtimeRos2Node, HighLevelStateMessage.class, controllerPubGenerator, s -> stepTeleopController.setPaused(true));
@@ -56,10 +56,13 @@ public class QuadrupedStepTeleopModule extends QuadrupedToolboxModule
       ROS2Tools.createCallbackSubscription(realtimeRos2Node, QuadrupedGroundPlaneMessage.class, controllerPubGenerator,
                                            s -> stepTeleopController.processGroundPlaneMessage(s.takeNextData()));
 
-      ROS2Tools.createCallbackSubscription(realtimeRos2Node, QuadrupedBodyPathPlanMessage.class, getPublisherTopicNameGenerator(),
+      // inputs to this module
+      ROS2Tools.createCallbackSubscription(realtimeRos2Node, QuadrupedBodyPathPlanMessage.class, getSubscriberTopicNameGenerator(),
                                            s -> stepTeleopController.processBodyPathPlanMessage(s.takeNextData()));
-      ROS2Tools.createCallbackSubscription(realtimeRos2Node, QuadrupedXGaitSettingsPacket.class, getPublisherTopicNameGenerator(),
+      ROS2Tools.createCallbackSubscription(realtimeRos2Node, QuadrupedXGaitSettingsPacket.class, getSubscriberTopicNameGenerator(),
                                            s -> stepTeleopController.processXGaitSettingsPacket(s.takeNextData()));
+      ROS2Tools.createCallbackSubscription(realtimeRos2Node, QuadrupedTeleopDesiredVelocity.class, getSubscriberTopicNameGenerator(),
+                                           s -> stepTeleopController.processTeleopDesiredVelocity(s.takeNextData()));
    }
 
    @Override
