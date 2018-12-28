@@ -19,11 +19,17 @@ module __controller_msgs
          * Unique ID used to identify this message, should preferably be consecutively increasing.
          */
         unsigned long sequence_id;
+        @defaultValue(value=-1.0)
         double stance_length;
+        @defaultValue(value=-1.0)
         double stance_width;
+        @defaultValue(value=-1.0)
         double step_ground_clearance;
+        @defaultValue(value=-1.0)
         double step_duration;
+        @defaultValue(value=-1.0)
         double end_double_support_duration;
+        @defaultValue(value=-1.0)
         double end_phase_shift;
       };
     };

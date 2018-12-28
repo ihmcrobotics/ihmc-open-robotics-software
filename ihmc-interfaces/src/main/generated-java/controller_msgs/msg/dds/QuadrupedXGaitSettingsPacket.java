@@ -13,12 +13,12 @@ public class QuadrupedXGaitSettingsPacket extends Packet<QuadrupedXGaitSettingsP
     * Unique ID used to identify this message, should preferably be consecutively increasing.
     */
    public long sequence_id_;
-   double stance_length_;
-   double stance_width_;
-   double step_ground_clearance_;
-   double step_duration_;
-   double end_double_support_duration_;
-   double end_phase_shift_;
+   public double stance_length_ = -1.0;
+   public double stance_width_ = -1.0;
+   public double step_ground_clearance_ = -1.0;
+   public double step_duration_ = -1.0;
+   public double end_double_support_duration_ = -1.0;
+   public double end_phase_shift_ = -1.0;
 
    public QuadrupedXGaitSettingsPacket()
    {

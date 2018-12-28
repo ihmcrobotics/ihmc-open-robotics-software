@@ -4,9 +4,9 @@
 # Unique ID used to identify this message, should preferably be consecutively increasing.
 uint32 sequence_id
 
-float64 stance_length
-float64 stance_width
-float64 step_ground_clearance
-float64 step_duration
-float64 end_double_support_duration
-float64 end_phase_shift
+float64 stance_length -1.0
+float64 stance_width -1.0
+float64 step_ground_clearance -1.0
+float64 step_duration -1.0
+float64 end_double_support_duration -1.0
+float64 end_phase_shift -1.0
