@@ -4,14 +4,12 @@ import javafx.fxml.FXML;
 import javafx.scene.control.Button;
 import javafx.scene.control.CheckBox;
 import javafx.scene.control.TextField;
-import us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelControllerName;
 import us.ihmc.javaFXToolkit.messager.JavaFXMessager;
 import us.ihmc.messager.TopicListener;
 import us.ihmc.quadrupedRobotics.controller.QuadrupedControllerManager;
 import us.ihmc.quadrupedUI.QuadrupedUIMessagerAPI;
 
-import java.awt.*;
 import java.util.concurrent.atomic.AtomicReference;
 
 public class MainTabController
@@ -40,17 +38,17 @@ public class MainTabController
       this.messager = messager;
       currentControllerState = messager.createInput(QuadrupedUIMessagerAPI.CurrentControllerNameTopic, HighLevelControllerName.WALKING);
 
-      messager.registerTopicListener(QuadrupedUIMessagerAPI.EnableBodyControlTopic, this::validateBodyTopic);
-      messager.registerTopicListener(QuadrupedUIMessagerAPI.EnableFootstepControlTopic, this::validateWalkingTopic);
+      messager.registerTopicListener(QuadrupedUIMessagerAPI.EnableBodyTeleopTopic, this::validateBodyTopic);
+      messager.registerTopicListener(QuadrupedUIMessagerAPI.EnableStepTeleopTopic, this::validateWalkingTopic);
    }
 
    private void validateBodyTopic(boolean request)
    {
       if (request)
       {
-         messager.submitMessage(QuadrupedUIMessagerAPI.EnableFootstepControlTopic, false);
+         messager.submitMessage(QuadrupedUIMessagerAPI.EnableStepTeleopTopic, false);
          if (currentControllerState.get() != HighLevelControllerName.WALKING)
-            messager.submitMessage(QuadrupedUIMessagerAPI.EnableBodyControlTopic, false);
+            messager.submitMessage(QuadrupedUIMessagerAPI.EnableBodyTeleopTopic, false);
       }
    }
 
@@ -58,9 +56,9 @@ public class MainTabController
    {
       if (request)
       {
-         messager.submitMessage(QuadrupedUIMessagerAPI.EnableBodyControlTopic, false);
+         messager.submitMessage(QuadrupedUIMessagerAPI.EnableBodyTeleopTopic, false);
          if (currentControllerState.get() != HighLevelControllerName.WALKING)
-            messager.submitMessage(QuadrupedUIMessagerAPI.EnableFootstepControlTopic, false);
+            messager.submitMessage(QuadrupedUIMessagerAPI.EnableStepTeleopTopic, false);
       }
    }
 
@@ -80,8 +78,8 @@ public class MainTabController
    public void bindControls()
    {
       messager.registerJavaFXSyncedTopicListener(QuadrupedUIMessagerAPI.CurrentControllerNameTopic, new TextViewerListener<>(currentStateViewer));
-      messager.bindBidirectional(QuadrupedUIMessagerAPI.EnableBodyControlTopic, enableBodyPoseControl.selectedProperty(), true);
-      messager.bindBidirectional(QuadrupedUIMessagerAPI.EnableFootstepControlTopic, enableFootstepControl.selectedProperty(), true);
+      messager.bindBidirectional(QuadrupedUIMessagerAPI.EnableBodyTeleopTopic, enableBodyPoseControl.selectedProperty(), true);
+      messager.bindBidirectional(QuadrupedUIMessagerAPI.EnableStepTeleopTopic, enableFootstepControl.selectedProperty(), true);
    }
 
    private class TextViewerListener<T> implements TopicListener<T>

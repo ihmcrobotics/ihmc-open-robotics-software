@@ -36,7 +36,7 @@ public class QuadrupedXBoxController extends QuadrupedToolboxController implemen
    private final Map<XBoxOneMapping, Double> channels = Collections.synchronizedMap(new EnumMap<>(XBoxOneMapping.class));
 
    private final YoBoolean isPaused = new YoBoolean("xBoxIsPaused", registry);
-   
+
    private final YoDouble maxBodyYaw = new YoDouble("xBoxMaxBodyYaw", registry);
    private final YoDouble maxBodyRoll = new YoDouble("xBoxMaxBodyPitch", registry);
    private final YoDouble maxBodyPitch = new YoDouble("xBoxMaxBodyPitch", registry);
