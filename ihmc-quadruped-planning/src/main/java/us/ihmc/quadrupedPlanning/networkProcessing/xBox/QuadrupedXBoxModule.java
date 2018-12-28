@@ -25,15 +25,15 @@ import static us.ihmc.communication.ROS2Tools.getTopicNameGenerator;
 
 public class QuadrupedXBoxModule extends QuadrupedToolboxModule
 {
-   private static final int updatePeriodMilliseconds = 1;
+   private static final int updatePeriodMilliseconds = 10;
 
    private final QuadrupedXBoxController xBoxController;
 
    public QuadrupedXBoxModule(FullQuadrupedRobotModelFactory modelFactory, QuadrupedXGaitSettings defaultXGaitSettings, double nominalBodyHeight,
-                              LogModelProvider modelProvider, boolean startYoVariableServer, DomainFactory.PubSubImplementation pubSubImplementation)
+                              LogModelProvider modelProvider, DomainFactory.PubSubImplementation pubSubImplementation)
          throws IOException
    {
-      super(modelFactory.getRobotDescription().getName(), modelFactory.createFullRobotModel(), modelProvider, startYoVariableServer, updatePeriodMilliseconds,
+      super(modelFactory.getRobotDescription().getName(), modelFactory.createFullRobotModel(), modelProvider, false, updatePeriodMilliseconds,
             pubSubImplementation);
 
       xBoxController = new QuadrupedXBoxController(defaultXGaitSettings, nominalBodyHeight, commandInputManager, statusOutputManager, registry,
