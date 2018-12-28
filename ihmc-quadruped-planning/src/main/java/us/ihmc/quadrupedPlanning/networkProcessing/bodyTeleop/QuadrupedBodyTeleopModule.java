@@ -1,13 +1,15 @@
 package us.ihmc.quadrupedPlanning.networkProcessing.bodyTeleop;
 
-import controller_msgs.msg.dds.*;
+import controller_msgs.msg.dds.HighLevelStateChangeStatusMessage;
+import controller_msgs.msg.dds.HighLevelStateMessage;
+import controller_msgs.msg.dds.QuadrupedSteppingStateChangeMessage;
+import controller_msgs.msg.dds.RobotConfigurationData;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.controllerAPI.command.Command;
 import us.ihmc.euclid.interfaces.Settable;
 import us.ihmc.multicastLogDataProtocol.modelLoaders.LogModelProvider;
 import us.ihmc.pubsub.DomainFactory;
 import us.ihmc.quadrupedCommunication.QuadrupedControllerAPIDefinition;
-import us.ihmc.quadrupedPlanning.QuadrupedXGaitSettings;
 import us.ihmc.quadrupedPlanning.networkProcessing.QuadrupedRobotModelProviderNode;
 import us.ihmc.quadrupedPlanning.networkProcessing.QuadrupedToolboxController;
 import us.ihmc.quadrupedPlanning.networkProcessing.QuadrupedToolboxModule;
@@ -34,7 +36,7 @@ public class QuadrupedBodyTeleopModule extends QuadrupedToolboxModule
 
       QuadrupedRobotModelProviderNode robotModelProvider = new QuadrupedRobotModelProviderNode(robotName, realtimeRos2Node, modelFactory);
 
-      bodyTeleopController = new QuadrupedBodyTeleopController(commandInputManager, statusOutputManager, robotModelProvider, registry);
+      bodyTeleopController = new QuadrupedBodyTeleopController(statusOutputManager, robotModelProvider, registry);
    }
 
    @Override

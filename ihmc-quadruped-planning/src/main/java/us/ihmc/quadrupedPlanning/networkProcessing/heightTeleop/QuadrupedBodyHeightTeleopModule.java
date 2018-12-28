@@ -33,7 +33,7 @@ public class QuadrupedBodyHeightTeleopModule extends QuadrupedToolboxModule
 
       QuadrupedRobotModelProviderNode robotModelProvider = new QuadrupedRobotModelProviderNode(robotName, realtimeRos2Node, modelFactory);
 
-      heightTeleopController = new QuadrupedBodyHeightTeleopController(nominalHeight, commandInputManager, statusOutputManager, robotModelProvider, registry);
+      heightTeleopController = new QuadrupedBodyHeightTeleopController(nominalHeight, statusOutputManager, robotModelProvider, registry);
    }
 
    @Override

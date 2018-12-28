@@ -34,7 +34,7 @@ public class QuadrupedStepTeleopModule extends QuadrupedToolboxModule
 
       QuadrupedRobotModelProviderNode robotModelProvider = new QuadrupedRobotModelProviderNode(robotName, realtimeRos2Node, modelFactory);
 
-      stepTeleopController = new QuadrupedStepTeleopController(defaultXGaitSettings, commandInputManager, statusOutputManager, robotModelProvider, registry,
+      stepTeleopController = new QuadrupedStepTeleopController(defaultXGaitSettings, statusOutputManager, robotModelProvider, registry,
                                                                yoGraphicsListRegistry, updatePeriodMilliseconds);
    }
 

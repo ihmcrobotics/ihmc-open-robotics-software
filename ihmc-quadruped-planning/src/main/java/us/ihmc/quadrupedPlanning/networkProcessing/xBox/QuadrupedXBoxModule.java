@@ -1,6 +1,9 @@
 package us.ihmc.quadrupedPlanning.networkProcessing.xBox;
 
-import controller_msgs.msg.dds.*;
+import controller_msgs.msg.dds.HighLevelStateChangeStatusMessage;
+import controller_msgs.msg.dds.HighLevelStateMessage;
+import controller_msgs.msg.dds.QuadrupedSteppingStateChangeMessage;
+import controller_msgs.msg.dds.QuadrupedXGaitSettingsPacket;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.controllerAPI.command.Command;
 import us.ihmc.euclid.interfaces.Settable;
@@ -8,13 +11,8 @@ import us.ihmc.multicastLogDataProtocol.modelLoaders.LogModelProvider;
 import us.ihmc.pubsub.DomainFactory;
 import us.ihmc.quadrupedCommunication.QuadrupedControllerAPIDefinition;
 import us.ihmc.quadrupedPlanning.QuadrupedXGaitSettings;
-import us.ihmc.quadrupedPlanning.networkProcessing.QuadrupedRobotModelProviderNode;
 import us.ihmc.quadrupedPlanning.networkProcessing.QuadrupedToolboxController;
 import us.ihmc.quadrupedPlanning.networkProcessing.QuadrupedToolboxModule;
-import us.ihmc.quadrupedPlanning.networkProcessing.bodyTeleop.QuadrupedBodyTeleopModule;
-import us.ihmc.quadrupedPlanning.networkProcessing.heightTeleop.QuadrupedBodyHeightTeleopModule;
-import us.ihmc.quadrupedPlanning.networkProcessing.stepTeleop.QuadrupedStepTeleopController;
-import us.ihmc.quadrupedPlanning.networkProcessing.stepTeleop.QuadrupedStepTeleopModule;
 import us.ihmc.robotModels.FullQuadrupedRobotModelFactory;
 import us.ihmc.ros2.RealtimeRos2Node;
 
@@ -37,8 +35,7 @@ public class QuadrupedXBoxModule extends QuadrupedToolboxModule
       super(modelFactory.getRobotDescription().getName(), modelFactory.createFullRobotModel(), modelProvider, false, updatePeriodMilliseconds,
             pubSubImplementation);
 
-      xBoxController = new QuadrupedXBoxController(defaultXGaitSettings, nominalBodyHeight, commandInputManager, statusOutputManager, registry,
-                                                   updatePeriodMilliseconds);
+      xBoxController = new QuadrupedXBoxController(defaultXGaitSettings, nominalBodyHeight, statusOutputManager, registry, updatePeriodMilliseconds);
    }
 
    @Override
