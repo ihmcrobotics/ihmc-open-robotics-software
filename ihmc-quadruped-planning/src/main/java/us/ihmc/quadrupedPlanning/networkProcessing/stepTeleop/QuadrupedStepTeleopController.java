@@ -69,9 +69,9 @@ public class QuadrupedStepTeleopController extends QuadrupedToolboxController
       teleopManager.processTimestamp(timestampInNanos);
    }
 
-   public void setDesiredVelocity(double desiredVelocityX, double desiredVelocityY, double desiredVelocityZ)
+   public void processTeleopDesiredVelocity(QuadrupedTeleopDesiredVelocity message)
    {
-      teleopManager.setDesiredVelocity(desiredVelocityX, desiredVelocityY, desiredVelocityZ);
+      teleopManager.setDesiredVelocity(message.getDesiredXVelocity(), message.getDesiredYVelocity(), message.getDesiredYawVelocity());
    }
 
    public void setEndPhaseShift(double endPhaseShift)

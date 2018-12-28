@@ -40,8 +40,8 @@ public class QuadrupedXBoxModule extends QuadrupedToolboxModule
    @Override
    public void registerExtraSubscribers(RealtimeRos2Node realtimeRos2Node)
    {
+      // status messages from the controller
       ROS2Tools.MessageTopicNameGenerator controllerPubGenerator = QuadrupedControllerAPIDefinition.getPublisherTopicNameGenerator(robotName);
-
       ROS2Tools
             .createCallbackSubscription(realtimeRos2Node, HighLevelStateMessage.class, controllerPubGenerator, s -> xBoxController.setPaused(true));
       ROS2Tools.createCallbackSubscription(realtimeRos2Node, HighLevelStateChangeStatusMessage.class, controllerPubGenerator,
@@ -49,7 +49,7 @@ public class QuadrupedXBoxModule extends QuadrupedToolboxModule
       ROS2Tools.createCallbackSubscription(realtimeRos2Node, QuadrupedSteppingStateChangeMessage.class, controllerPubGenerator,
                                            s -> xBoxController.processSteppingStateChangeMessage(s.takeNextData()));
 
-      ROS2Tools.createCallbackSubscription(realtimeRos2Node, QuadrupedXGaitSettingsPacket.class, getPublisherTopicNameGenerator(),
+      ROS2Tools.createCallbackSubscription(realtimeRos2Node, QuadrupedXGaitSettingsPacket.class, getSubscriberTopicNameGenerator(),
                                            s -> xBoxController.processXGaitSettingsPacket(s.takeNextData()));
    }
 

@@ -2,6 +2,11 @@ package us.ihmc.quadrupedPlanning.networkProcessing.bodyTeleop;
 
 import controller_msgs.msg.dds.HighLevelStateChangeStatusMessage;
 import controller_msgs.msg.dds.QuadrupedSteppingStateChangeMessage;
+import controller_msgs.msg.dds.QuadrupedTeleopDesiredPose;
+import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
+import us.ihmc.euclid.tuple4D.Quaternion;
+import us.ihmc.euclid.tuple4D.interfaces.QuaternionReadOnly;
 import us.ihmc.quadrupedPlanning.networkProcessing.OutputManager;
 import us.ihmc.quadrupedPlanning.networkProcessing.QuadrupedRobotModelProviderNode;
 import us.ihmc.quadrupedPlanning.networkProcessing.QuadrupedToolboxController;
@@ -45,9 +50,11 @@ public class QuadrupedBodyTeleopController extends QuadrupedToolboxController
       teleopManager.processTimestamp(timestampInNanos);
    }
 
-   public void setDesiredBodyPose(double x, double y, double yaw, double pitch, double roll, double time)
+   public void processTeleopDesiredPoseMessage(QuadrupedTeleopDesiredPose message)
    {
-      teleopManager.setDesiredBodyPose(x, y, yaw, pitch, roll, time);
+      Point3DReadOnly position = message.getPose().getPosition();
+      QuaternionReadOnly orientation = message.getPose().getOrientation();
+      teleopManager.setDesiredBodyPose(position.getX(), position.getY(), orientation.getYaw(), orientation.getPitch(), orientation.getRoll(), message.getPoseShiftTime());
    }
 
    @Override
