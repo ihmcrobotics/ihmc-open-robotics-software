@@ -55,6 +55,8 @@ public class QuadrupedStepTeleopModule extends QuadrupedToolboxModule
                                            s -> stepTeleopController.processSteppingStateChangeMessage(s.takeNextData()));
       ROS2Tools.createCallbackSubscription(realtimeRos2Node, QuadrupedGroundPlaneMessage.class, getPublisherTopicNameGenerator(),
                                            s -> stepTeleopController.processGroundPlaneMessage(s.takeNextData()));
+      ROS2Tools.createCallbackSubscription(realtimeRos2Node, QuadrupedXGaitSettingsPacket.class, getPublisherTopicNameGenerator(),
+                                           s -> stepTeleopController.processXGaitSettingsPacket(s.takeNextData()));
    }
 
    @Override
@@ -79,6 +81,7 @@ public class QuadrupedStepTeleopModule extends QuadrupedToolboxModule
       statusMessages.add(QuadrupedFootstepStatusMessage.class);
       statusMessages.add(QuadrupedSteppingStateChangeMessage.class);
       statusMessages.add(QuadrupedGroundPlaneMessage.class);
+      statusMessages.add(QuadrupedXGaitSettingsPacket.class);
       statusMessages.add(RobotConfigurationData.class);
 
       return statusMessages;
@@ -102,11 +105,6 @@ public class QuadrupedStepTeleopModule extends QuadrupedToolboxModule
       stepTeleopController.setPaused(true);
 
       super.sleep();
-   }
-
-   public void setDesiredVelocity(double desiredVelocityX, double desiredVelocityY, double desiredVelocityZ)
-   {
-      stepTeleopController.setDesiredVelocity(desiredVelocityX, desiredVelocityY, desiredVelocityZ);
    }
 
    public void setEndPhaseShift(double endPhaseShift)

@@ -65,6 +65,11 @@ public class QuadrupedStepTeleopController extends QuadrupedToolboxController
       teleopManager.processGroundPlaneMessage(message);
    }
 
+   public void processXGaitSettingsPacket(QuadrupedXGaitSettingsPacket packet)
+   {
+      teleopManager.processXGaitSettingsPacket(packet);
+   }
+
    public void processTimestamp(long timestampInNanos)
    {
       teleopManager.processTimestamp(timestampInNanos);
