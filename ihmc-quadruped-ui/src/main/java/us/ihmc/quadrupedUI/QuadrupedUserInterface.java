@@ -8,7 +8,6 @@ import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.Pane;
 import javafx.scene.transform.Translate;
 import javafx.stage.Stage;
-import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.javaFXToolkit.cameraControllers.FocusBasedCameraMouseEventHandler;
@@ -20,11 +19,9 @@ import us.ihmc.quadrupedPlanning.YoQuadrupedXGaitSettings;
 import us.ihmc.quadrupedRobotics.model.QuadrupedModelFactory;
 import us.ihmc.quadrupedRobotics.model.QuadrupedPhysicalProperties;
 import us.ihmc.quadrupedUI.uiControllers.MainTabController;
+import us.ihmc.quadrupedUI.uiControllers.XGaitSettingsController;
 import us.ihmc.tools.inputDevices.joystick.exceptions.JoystickNotFoundException;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
-
-import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
 
 public class QuadrupedUserInterface
 {
@@ -32,11 +29,12 @@ public class QuadrupedUserInterface
 
    private final JavaFXQuadrupedVisualizer robotVisualizer;
    private final AnimationTimer cameraTracking;
-   private final ScheduledExecutorService executorService = Executors
-         .newSingleThreadScheduledExecutor(ThreadTools.getNamedThreadFactory(getClass().getSimpleName()));
 
    @FXML
    private MainTabController mainTabController;
+
+   @FXML
+   private XGaitSettingsController xGaitSettingsController;
 
    public QuadrupedUserInterface(Stage primaryStage, JavaFXMessager messager, QuadrupedModelFactory modelFactory,
                                  QuadrupedPhysicalProperties physicalProperties, QuadrupedXGaitSettingsReadOnly xGaitSettings, YoVariableRegistry registry)
@@ -51,8 +49,10 @@ public class QuadrupedUserInterface
       BorderPane mainPane = loader.load();
 
       mainTabController.attachMessager(messager);
+      xGaitSettingsController.attachMessager(messager, xGaitSettings);
 
       mainTabController.bindControls();
+      xGaitSettingsController.bindControls();
 
       View3DFactory view3dFactory = View3DFactory.createSubscene();
       view3dFactory.addCameraController(true);

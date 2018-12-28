@@ -10,7 +10,7 @@ import us.ihmc.quadrupedPlanning.QuadrupedXGaitSettingsReadOnly;
 import us.ihmc.quadrupedUI.QuadrupedUIMessagerAPI;
 import us.ihmc.quadrupedUI.QuadrupedXGaitSettingsProperty;
 
-public class XGaitSettingsUIController
+public class XGaitSettingsController
 {
    private JavaFXMessager messager;
    private QuadrupedXGaitSettingsProperty parametersProperty;
