@@ -52,7 +52,7 @@ public class QuadrupedStepTeleopManager
    public QuadrupedStepTeleopManager(QuadrupedXGaitSettingsReadOnly defaultXGaitSettings, QuadrupedReferenceFrames referenceFrames, double updateDT,
                                      YoGraphicsListRegistry graphicsListRegistry, YoVariableRegistry parentRegistry)
    {
-      this.xGaitSettings = new YoQuadrupedXGaitSettings(defaultXGaitSettings, null, registry);
+      this.xGaitSettings = new YoQuadrupedXGaitSettings(defaultXGaitSettings, registry);
 
       firstStepDelay.set(0.5);
       this.bodyPathMultiplexer = new QuadrupedBodyPathMultiplexer(referenceFrames, timestamp, xGaitSettings, firstStepDelay, graphicsListRegistry, registry);

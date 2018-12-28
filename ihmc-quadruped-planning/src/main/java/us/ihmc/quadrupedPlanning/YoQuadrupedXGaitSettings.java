@@ -34,8 +34,7 @@ public class YoQuadrupedXGaitSettings implements QuadrupedXGaitSettingsReadOnly
    private final YoDouble yoEndDoubleSupportDuration = new YoDouble("endDoubleSupportDurationInput", registry);
    private final YoDouble yoEndPhaseShift = new YoDouble("endPhaseShiftInput", registry);
 
-   public YoQuadrupedXGaitSettings(QuadrupedXGaitSettingsReadOnly defaultXGaitSettings, GlobalDataProducer globalDataProducer,
-                                   YoVariableRegistry parentRegistry)
+   public YoQuadrupedXGaitSettings(QuadrupedXGaitSettingsReadOnly defaultXGaitSettings, YoVariableRegistry parentRegistry)
    {
       yoStanceLength.set(defaultXGaitSettings.getStanceLength());
       yoStanceWidth.set(defaultXGaitSettings.getStanceWidth());

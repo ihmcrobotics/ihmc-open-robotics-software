@@ -8,6 +8,7 @@ import us.ihmc.communication.controllerAPI.CommandInputManager;
 import us.ihmc.communication.controllerAPI.StatusMessageOutputManager;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.quadrupedPlanning.QuadrupedXGaitSettingsReadOnly;
+import us.ihmc.quadrupedPlanning.YoQuadrupedXGaitSettings;
 import us.ihmc.quadrupedPlanning.input.InputValueIntegrator;
 import us.ihmc.quadrupedPlanning.networkProcessing.QuadrupedRobotModelProviderNode;
 import us.ihmc.quadrupedPlanning.networkProcessing.QuadrupedToolboxController;
@@ -52,6 +53,7 @@ public class QuadrupedXBoxController extends QuadrupedToolboxController implemen
    private final InputValueIntegrator bodyHeight;
    private double endPhaseShift;
 
+   private QuadrupedXGaitSettingsPacket xGaitSettingsPacket = null;
    private QuadrupedTeleopDesiredVelocity desiredVelocityMessage = null;
    private QuadrupedTeleopDesiredPose desiredPoseMessage = null;
    private QuadrupedTeleopDesiredHeight desiredHeightMessage = null;
@@ -100,6 +102,11 @@ public class QuadrupedXBoxController extends QuadrupedToolboxController implemen
       steppingStateChangeMessage.set(message);
    }
 
+   public void processXGaitSettingsPacket(QuadrupedXGaitSettingsPacket packet)
+   {
+      endPhaseShift = packet.getEndPhaseShift();
+   }
+
    public void setPaused(boolean paused)
    {
       isPaused.set(paused);
@@ -114,6 +121,7 @@ public class QuadrupedXBoxController extends QuadrupedToolboxController implemen
    @Override
    public void updateInternal()
    {
+      xGaitSettingsPacket = null;
       desiredVelocityMessage = null;
       desiredPoseMessage = null;
       desiredHeightMessage = null;
@@ -122,6 +130,7 @@ public class QuadrupedXBoxController extends QuadrupedToolboxController implemen
       processJoystickBodyCommands();
       processJoystickStepCommands();
 
+      reportMessage(xGaitSettingsPacket);
       reportMessage(desiredVelocityMessage);
       reportMessage(desiredPoseMessage);
       reportMessage(desiredHeightMessage);
@@ -204,20 +213,21 @@ public class QuadrupedXBoxController extends QuadrupedToolboxController implemen
       //      {
       //         stepTeleopManager.requestXGait();
       //      }
-      //      if (mapping == XBoxOneMapping.LEFT_BUMPER && channels.get(mapping) < 0.5 && stepTeleopModule != null) // the bumpers were firing twice for one click
-      //      {
-      //         endPhaseShift -= 90.0;
-      //         stepTeleopModule.setEndPhaseShift(endPhaseShift);
-      //      }
-      //      else if (mapping == XBoxOneMapping.RIGHT_BUMPER && channels.get(mapping) < 0.5 && stepTeleopModule != null)
-      //      {
-      //         endPhaseShift += 90.0;
-      //         stepTeleopModule.setEndPhaseShift(endPhaseShift);
-      //      }
+      if (mapping == XBoxOneMapping.LEFT_BUMPER && channels.get(mapping) < 0.5) // the bumpers were firing twice for one click
+      {
+         endPhaseShift -= 90.0;
+      }
+      else if (mapping == XBoxOneMapping.RIGHT_BUMPER && channels.get(mapping) < 0.5)
+      {
+         endPhaseShift += 90.0;
+      }
       //      else if(mapping == XBoxOneMapping.XBOX_BUTTON && channels.get(mapping) < 0.5)
       //      {
       //         stepTeleopManager.setPaused(!stepTeleopManager.isPaused());
       //      }
+
+      xGaitSettingsPacket = new QuadrupedXGaitSettingsPacket();
+      xGaitSettingsPacket.setEndPhaseShift(endPhaseShift);
    }
 
    @Override
