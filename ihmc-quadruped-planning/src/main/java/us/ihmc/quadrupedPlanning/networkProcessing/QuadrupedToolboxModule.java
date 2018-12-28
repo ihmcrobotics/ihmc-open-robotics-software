@@ -2,8 +2,6 @@ package us.ihmc.quadrupedPlanning.networkProcessing;
 
 import com.google.common.base.CaseFormat;
 import controller_msgs.msg.dds.ToolboxStateMessage;
-import us.ihmc.commonWalkingControlModules.controllerAPI.input.ControllerNetworkSubscriber;
-import us.ihmc.commonWalkingControlModules.controllerAPI.input.ControllerNetworkSubscriber.MessageFilter;
 import us.ihmc.commons.Conversions;
 import us.ihmc.commons.PrintTools;
 import us.ihmc.commons.thread.ThreadTools;
@@ -15,6 +13,7 @@ import us.ihmc.communication.controllerAPI.command.Command;
 import us.ihmc.communication.packets.ToolboxState;
 import us.ihmc.euclid.interfaces.Settable;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
+import us.ihmc.log.LogTools;
 import us.ihmc.multicastLogDataProtocol.modelLoaders.LogModelProvider;
 import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
 import us.ihmc.robotDataLogger.YoVariableServer;
@@ -26,10 +25,7 @@ import us.ihmc.util.PeriodicThreadSchedulerFactory;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 
-import java.io.IOException;
-import java.util.Collections;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicBoolean;
 
@@ -51,9 +47,9 @@ public abstract class QuadrupedToolboxModule
    protected final FullQuadrupedRobotModel fullRobotModel;
 
    protected final RealtimeRos2Node realtimeRos2Node;
-   protected final CommandInputManager commandInputManager;
-   protected final StatusMessageOutputManager statusOutputManager;
-   protected final ControllerNetworkSubscriber controllerNetworkSubscriber;
+   protected final CommandInputManager inputManager;
+   protected final OutputManager outputManager;
+   protected final NetworkSubscriber networkSubscriber;
 
    protected final ThreadFactory threadFactory = ThreadTools.getNamedThreadFactory(name);
    protected final ScheduledExecutorService executorService;
@@ -96,15 +92,14 @@ public abstract class QuadrupedToolboxModule
       this.startYoVariableServer = startYoVariableServer;
       this.fullRobotModel = fullRobotModelToLog;
       realtimeRos2Node = ROS2Tools.createRealtimeRos2Node(pubSubImplementation, "ihmc_" + CaseFormat.UPPER_CAMEL.to(CaseFormat.LOWER_UNDERSCORE, name));
-      commandInputManager = new CommandInputManager(name, createListOfSupportedCommands());
-      statusOutputManager = new StatusMessageOutputManager(createListOfSupportedStatus());
-      controllerNetworkSubscriber = new ControllerNetworkSubscriber(getSubscriberTopicNameGenerator(), commandInputManager, getPublisherTopicNameGenerator(),
-                                                                    statusOutputManager, realtimeRos2Node);
+      inputManager = new CommandInputManager(name, createListOfSupportedCommands());
+      outputManager = new OutputManager(createMapOfSupportedOutputMessages());
+      networkSubscriber = new NetworkSubscriber(getSubscriberTopicNameGenerator(), inputManager, outputManager, realtimeRos2Node);
 
       executorService = Executors.newScheduledThreadPool(1, threadFactory);
 
       timeWithoutInputsBeforeGoingToSleep.set(0.5);
-      commandInputManager.registerHasReceivedInputListener(new HasReceivedInputListener()
+      inputManager.registerHasReceivedInputListener(new HasReceivedInputListener()
       {
          private final Set<Class<? extends Command<?, ?>>> silentCommands = silentCommands();
 
@@ -116,10 +111,10 @@ public abstract class QuadrupedToolboxModule
          }
       });
 
-      controllerNetworkSubscriber.addMessageFilter(createMessageFilter());
+      networkSubscriber.addMessageFilter(createMessageFilter());
 
       ROS2Tools.createCallbackSubscription(realtimeRos2Node, ToolboxStateMessage.class, getSubscriberTopicNameGenerator(), s -> receivedPacket(s.takeNextData()));
-      registerExtraPuSubs(realtimeRos2Node);
+      registerExtraSubscribers(realtimeRos2Node);
       realtimeRos2Node.spin();
    }
 
@@ -172,9 +167,9 @@ public abstract class QuadrupedToolboxModule
       };
    }
 
-   public MessageFilter createMessageFilter()
+   public NetworkSubscriber.MessageFilter createMessageFilter()
    {
-      return new MessageFilter()
+      return new NetworkSubscriber.MessageFilter()
       {
          private final Set<Class<? extends Settable<?>>> exceptions = filterExceptions();
 
@@ -186,7 +181,7 @@ public abstract class QuadrupedToolboxModule
                if (toolboxTaskScheduled == null)
                {
                   if (DEBUG)
-                     PrintTools.info(QuadrupedToolboxModule.this, name + " is sleeping: " + message.getClass().getSimpleName() + " is ignored.");
+                     LogTools.info(name + " is sleeping: " + message.getClass().getSimpleName() + " is ignored.", QuadrupedToolboxModule.this);
                   return false;
                }
                else
@@ -194,26 +189,6 @@ public abstract class QuadrupedToolboxModule
                   return true;
                }
             }
-
-            // FIXME
-            //            if (message.getDestination() != thisDesitination)
-            //            {
-            //               if (DEBUG)
-            //                  PrintTools.error(QuadrupedToolboxModule.this, name + ": isMessageValid " + message.getDestination() + "!=" + thisDesitination);
-            //               return false;
-            //            }
-            //
-            //            if (toolboxTaskScheduled == null)
-            //            {
-            //               wakeUp(message.getSource());
-            //            }
-            //            else if (activeMessageSource.getOrdinal() != message.getSource())
-            //            {
-            //               if (DEBUG)
-            //                  PrintTools.error(QuadrupedToolboxModule.this, "Expecting messages from " + activeMessageSource.getEnumValue() + " received message from: "
-            //                        + PacketDestination.values[message.getSource()]);
-            //               return false;
-            //            }
 
             return true;
          }
@@ -354,7 +329,7 @@ public abstract class QuadrupedToolboxModule
       toolboxRunnable = null;
    }
 
-   abstract public void registerExtraPuSubs(RealtimeRos2Node realtimeRos2Node);
+   abstract public void registerExtraSubscribers(RealtimeRos2Node realtimeRos2Node);
 
    abstract public QuadrupedToolboxController getToolboxController();
 
@@ -366,7 +341,7 @@ public abstract class QuadrupedToolboxModule
    /**
     * @return used to create the {@link StatusMessageOutputManager} and to defines the output API.
     */
-   abstract public List<Class<? extends Settable<?>>> createListOfSupportedStatus();
+   abstract public Map<Class<? extends Settable<?>>, ROS2Tools.MessageTopicNameGenerator> createMapOfSupportedOutputMessages();
 
    /**
     * @return the collection of commands that cannot wake up this module.

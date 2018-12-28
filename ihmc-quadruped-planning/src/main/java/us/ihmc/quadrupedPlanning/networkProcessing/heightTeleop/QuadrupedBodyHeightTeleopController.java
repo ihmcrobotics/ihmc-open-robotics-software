@@ -1,7 +1,7 @@
 package us.ihmc.quadrupedPlanning.networkProcessing.heightTeleop;
 
 import controller_msgs.msg.dds.HighLevelStateChangeStatusMessage;
-import us.ihmc.communication.controllerAPI.StatusMessageOutputManager;
+import us.ihmc.quadrupedPlanning.networkProcessing.OutputManager;
 import us.ihmc.quadrupedPlanning.networkProcessing.QuadrupedRobotModelProviderNode;
 import us.ihmc.quadrupedPlanning.networkProcessing.QuadrupedToolboxController;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
@@ -14,7 +14,7 @@ public class QuadrupedBodyHeightTeleopController extends QuadrupedToolboxControl
 
    private final AtomicReference<HighLevelStateChangeStatusMessage> controllerStateChangeMessage = new AtomicReference<>();
 
-   public QuadrupedBodyHeightTeleopController(double initialBodyHeight, StatusMessageOutputManager statusOutputManager,
+   public QuadrupedBodyHeightTeleopController(double initialBodyHeight, OutputManager statusOutputManager,
                                               QuadrupedRobotModelProviderNode robotModelProvider, YoVariableRegistry parentRegistry)
    {
       super(statusOutputManager, parentRegistry);
@@ -49,7 +49,7 @@ public class QuadrupedBodyHeightTeleopController extends QuadrupedToolboxControl
    public void updateInternal()
    {
       teleopManager.update();
-      statusOutputManager.reportStatusMessage(teleopManager.getBodyHeightMessage());
+      reportMessage(teleopManager.getBodyHeightMessage());
    }
 
    @Override
