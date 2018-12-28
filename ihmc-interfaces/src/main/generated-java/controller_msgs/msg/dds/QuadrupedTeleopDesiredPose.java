@@ -55,15 +55,15 @@ public class QuadrupedTeleopDesiredPose extends Packet<QuadrupedTeleopDesiredPos
    }
 
 
-   public static Supplier<PilotAlarmPacketPubSubType> getPubSubType()
+   public static Supplier<QuadrupedTeleopDesiredPosePubSubType> getPubSubType()
    {
-      return PilotAlarmPacketPubSubType::new;
+      return QuadrupedTeleopDesiredPosePubSubType::new;
    }
 
    @Override
    public Supplier<TopicDataType> getPubSubTypePacket()
    {
-      return PilotAlarmPacketPubSubType::new;
+      return QuadrupedTeleopDesiredPosePubSubType::new;
    }
 
    @Override
