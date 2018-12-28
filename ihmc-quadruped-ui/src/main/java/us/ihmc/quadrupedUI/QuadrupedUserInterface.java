@@ -15,12 +15,10 @@ import us.ihmc.javaFXToolkit.cameraControllers.FocusBasedCameraMouseEventHandler
 import us.ihmc.javaFXToolkit.messager.JavaFXMessager;
 import us.ihmc.javaFXToolkit.scenes.View3DFactory;
 import us.ihmc.log.LogTools;
-import us.ihmc.messager.Messager;
 import us.ihmc.quadrupedPlanning.QuadrupedXGaitSettingsReadOnly;
 import us.ihmc.quadrupedPlanning.YoQuadrupedXGaitSettings;
 import us.ihmc.quadrupedRobotics.model.QuadrupedModelFactory;
 import us.ihmc.quadrupedRobotics.model.QuadrupedPhysicalProperties;
-import us.ihmc.quadrupedUI.controllers.BodyPoseController;
 import us.ihmc.quadrupedUI.uiControllers.MainTabController;
 import us.ihmc.tools.inputDevices.joystick.exceptions.JoystickNotFoundException;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
@@ -92,8 +90,6 @@ public class QuadrupedUserInterface
          LogTools.error("Could not find joystick. Running without xbox controller");
          joystick = null;
       }
-
-      BodyPoseController bodyPoseController = new BodyPoseController(joystick, messager, executorService, physicalProperties.getNominalBodyHeight());
 
       YoQuadrupedXGaitSettings yoXGaitSettings = new YoQuadrupedXGaitSettings(xGaitSettings, registry);
       yoXGaitSettings.addVariableChangedListener(v -> messager.submitMessage(QuadrupedUIMessagerAPI.XGaitSettingsTopic, yoXGaitSettings));

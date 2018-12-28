@@ -23,7 +23,6 @@ public class QuadrupedUIMessageConverter
 
    private IHMCRealtimeROS2Publisher<HighLevelStateMessage> desiredHighLevelStatePublisher;
    private IHMCRealtimeROS2Publisher<QuadrupedBodyHeightMessage> bodyHeightPublisher;
-   private IHMCRealtimeROS2Publisher<QuadrupedBodyTrajectoryMessage> bodyTrajectoryPublisher;
 
 
    public QuadrupedUIMessageConverter(RealtimeRos2Node ros2Node, Messager messager, String robotName)
@@ -56,11 +55,9 @@ public class QuadrupedUIMessageConverter
       MessageTopicNameGenerator controllerSubGenerator = QuadrupedControllerAPIDefinition.getSubscriberTopicNameGenerator(robotName);
       desiredHighLevelStatePublisher = ROS2Tools.createPublisher(ros2Node, HighLevelStateMessage.class, controllerSubGenerator);
       bodyHeightPublisher = ROS2Tools.createPublisher(ros2Node, QuadrupedBodyHeightMessage.class, controllerSubGenerator);
-      bodyTrajectoryPublisher = ROS2Tools.createPublisher(ros2Node, QuadrupedBodyTrajectoryMessage.class, controllerSubGenerator);
 
       messager.registerTopicListener(QuadrupedUIMessagerAPI.DesiredControllerNameTopic, this::publishDesiredHighLevelControllerState);
       messager.registerTopicListener(QuadrupedUIMessagerAPI.DesiredBodyHeightTopic, this::publishDesiredBodyHeight);
-      messager.registerTopicListener(QuadrupedUIMessagerAPI.BodyTrajectoryMessageTopic, this::publishBodyTrajectoryMessage);
    }
 
    private void processRobotConfigurationData(RobotConfigurationData robotConfigurationData)
@@ -85,11 +82,6 @@ public class QuadrupedUIMessageConverter
       bodyHeightMessage.setControlBodyHeight(true);
       bodyHeightMessage.setIsExpressedInAbsoluteTime(false);
       bodyHeightPublisher.publish(bodyHeightMessage);
-   }
-
-   public void publishBodyTrajectoryMessage(QuadrupedBodyTrajectoryMessage message)
-   {
-      bodyTrajectoryPublisher.publish(message);
    }
 
    public static QuadrupedUIMessageConverter createConverter(Messager messager, String robotName, DomainFactory.PubSubImplementation implementation)
