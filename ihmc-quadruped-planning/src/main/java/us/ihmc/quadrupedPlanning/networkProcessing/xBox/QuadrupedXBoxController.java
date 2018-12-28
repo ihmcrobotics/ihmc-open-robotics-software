@@ -3,19 +3,11 @@ package us.ihmc.quadrupedPlanning.networkProcessing.xBox;
 import controller_msgs.msg.dds.*;
 import net.java.games.input.Event;
 import us.ihmc.commons.Conversions;
-import us.ihmc.commons.PrintTools;
 import us.ihmc.communication.controllerAPI.CommandInputManager;
 import us.ihmc.communication.controllerAPI.StatusMessageOutputManager;
-import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.quadrupedPlanning.QuadrupedXGaitSettingsReadOnly;
-import us.ihmc.quadrupedPlanning.YoQuadrupedXGaitSettings;
 import us.ihmc.quadrupedPlanning.input.InputValueIntegrator;
-import us.ihmc.quadrupedPlanning.networkProcessing.QuadrupedRobotModelProviderNode;
 import us.ihmc.quadrupedPlanning.networkProcessing.QuadrupedToolboxController;
-import us.ihmc.quadrupedPlanning.networkProcessing.bodyTeleop.QuadrupedBodyTeleopModule;
-import us.ihmc.quadrupedPlanning.networkProcessing.heightTeleop.QuadrupedBodyHeightTeleopModule;
-import us.ihmc.quadrupedPlanning.networkProcessing.stepTeleop.QuadrupedStepTeleopManager;
-import us.ihmc.quadrupedPlanning.networkProcessing.stepTeleop.QuadrupedStepTeleopModule;
 import us.ihmc.tools.inputDevices.joystick.Joystick;
 import us.ihmc.tools.inputDevices.joystick.JoystickCustomizationFilter;
 import us.ihmc.tools.inputDevices.joystick.JoystickEventListener;
@@ -32,6 +24,8 @@ import java.util.Map;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 
+import static us.ihmc.quadrupedPlanning.networkProcessing.xBox.QuadrupedXBoxBindings.*;
+
 public class QuadrupedXBoxController extends QuadrupedToolboxController implements JoystickEventListener
 {
    private final AtomicReference<HighLevelStateChangeStatusMessage> controllerStateChangeMessage = new AtomicReference<>();
@@ -42,12 +36,19 @@ public class QuadrupedXBoxController extends QuadrupedToolboxController implemen
    private final Map<XBoxOneMapping, Double> channels = Collections.synchronizedMap(new EnumMap<>(XBoxOneMapping.class));
 
    private final YoBoolean isPaused = new YoBoolean("xBoxIsPaused", registry);
+   
    private final YoDouble maxBodyYaw = new YoDouble("xBoxMaxBodyYaw", registry);
+   private final YoDouble maxBodyRoll = new YoDouble("xBoxMaxBodyPitch", registry);
    private final YoDouble maxBodyPitch = new YoDouble("xBoxMaxBodyPitch", registry);
    private final YoDouble maxBodyHeightVelocity = new YoDouble("xBoxMaxBodyHeightVelocity", registry);
+
+   private final YoDouble maxTranslationX = new YoDouble("xBoxMaxTranslationX", registry);
+   private final YoDouble maxTranslationY = new YoDouble("xBoxMaxTranslationY", registry);
+
    private final YoDouble maxVelocityX = new YoDouble("xBoxMaxVelocityX", registry);
    private final YoDouble maxVelocityY = new YoDouble("xBoxMaxVelocityY", registry);
    private final YoDouble maxVelocityYaw = new YoDouble("xBoxMaxVelocityYaw", registry);
+
    private final YoDouble bodyOrientationShiftTime = new YoDouble("xBoxBodyOrientationShiftTime", registry);
 
    private final InputValueIntegrator bodyHeight;
@@ -74,11 +75,17 @@ public class QuadrupedXBoxController extends QuadrupedToolboxController implemen
       joystick.setPollInterval(10);
 
       maxBodyYaw.set(0.15);
+      maxBodyRoll.set(0.15);
       maxBodyPitch.set(0.15);
       maxBodyHeightVelocity.set(0.1);
+
+      maxTranslationX.set(0.25);
+      maxTranslationY.set(0.15);
+
       maxVelocityX.set(0.5);
       maxVelocityY.set(0.25);
       maxVelocityYaw.set(0.4);
+
       bodyOrientationShiftTime.set(0.1);
       this.bodyHeight = new InputValueIntegrator(Conversions.millisecondsToSeconds(updateTimeInMs), nominalBodyHeight);
       this.endPhaseShift = defaultXGaitSettings.getEndPhaseShift();
@@ -144,12 +151,18 @@ public class QuadrupedXBoxController extends QuadrupedToolboxController implemen
 
    private void configureJoystickFilters(Joystick device)
    {
-      device.setCustomizationFilter(new JoystickCustomizationFilter(XBoxOneMapping.LEFT_TRIGGER, false, 0.05, 1, 1.0));
-      device.setCustomizationFilter(new JoystickCustomizationFilter(XBoxOneMapping.RIGHT_TRIGGER, false, 0.05, 1, 1.0));
-      device.setCustomizationFilter(new JoystickCustomizationFilter(XBoxOneMapping.LEFT_STICK_X, true, 0.1, 1));
-      device.setCustomizationFilter(new JoystickCustomizationFilter(XBoxOneMapping.LEFT_STICK_Y, true, 0.1, 1));
-      device.setCustomizationFilter(new JoystickCustomizationFilter(XBoxOneMapping.RIGHT_STICK_X, true, 0.1, 1));
-      device.setCustomizationFilter(new JoystickCustomizationFilter(XBoxOneMapping.RIGHT_STICK_Y, true, 0.1, 1));
+      device.setCustomizationFilter(new JoystickCustomizationFilter(xVelocityMapping, xVelocityInvert, 0.1, 1));
+      device.setCustomizationFilter(new JoystickCustomizationFilter(yVelocityMapping, yVelocityInvert, 0.1, 1));
+      device.setCustomizationFilter(new JoystickCustomizationFilter(negativeYawRateMapping, negativeYawRateInvert, 0.05, 1, 1.0));
+      device.setCustomizationFilter(new JoystickCustomizationFilter(positiveYawRateMapping, positiveYawRateInvert, 0.05, 1, 1.0));
+
+      device.setCustomizationFilter(new JoystickCustomizationFilter(xTranslationMapping, xTranslationInvert, 0.1, 1));
+      device.setCustomizationFilter(new JoystickCustomizationFilter(yTranslationMapping, yTranslationInvert, 0.1, 1));
+      device.setCustomizationFilter(new JoystickCustomizationFilter(negativeYawMapping, negativeYawInvert, 0.05, 1, 1.0));
+      device.setCustomizationFilter(new JoystickCustomizationFilter(positiveYawMapping, positiveYawInvert, 0.05, 1, 1.0));
+
+      device.setCustomizationFilter(new JoystickCustomizationFilter(rollMapping, rollInvert, 0.1, 1));
+      device.setCustomizationFilter(new JoystickCustomizationFilter(pitchMapping, pitchInvert, 0.1, 1));
    }
 
    private void processJoystickHeightCommands()
@@ -170,21 +183,30 @@ public class QuadrupedXBoxController extends QuadrupedToolboxController implemen
 
    private void processJoystickBodyCommands()
    {
-      double bodyRoll = 0.0;
-      double bodyPitch = channels.get(XBoxOneMapping.RIGHT_STICK_Y) * maxBodyPitch.getValue();
-      double bodyYaw = channels.get(XBoxOneMapping.RIGHT_STICK_X) * maxBodyYaw.getValue();
+      double bodyRoll = channels.get(rollMapping) * maxBodyRoll.getValue();
+      double bodyPitch = channels.get(pitchMapping) * maxBodyPitch.getValue();
+
+      double bodyXTranslation = channels.get(xTranslationMapping) * maxTranslationX.getValue();
+      double bodyYTranslation = channels.get(yTranslationMapping) * maxTranslationY.getValue();
+
+      double bodyYawLeft = channels.get(negativeYawMapping);
+      double bodyYawRight = channels.get(positiveYawMapping);
+      double bodyYaw = (bodyYawLeft - bodyYawRight) * maxBodyYaw.getValue();
 
       desiredPoseMessage = new QuadrupedTeleopDesiredPose();
-      desiredPoseMessage.getPose().getPosition().set(0.0, 0.0, bodyHeight.value());
+      desiredPoseMessage.getPose().getPosition().set(bodyXTranslation, bodyYTranslation, bodyHeight.value());
       desiredPoseMessage.getPose().getOrientation().setYawPitchRoll(bodyYaw, bodyPitch, bodyRoll);
       desiredPoseMessage.setPoseShiftTime(bodyOrientationShiftTime.getValue());
    }
 
    private void processJoystickStepCommands()
    {
-      double xVelocity = channels.get(XBoxOneMapping.LEFT_STICK_Y) * maxVelocityX.getDoubleValue();
-      double yVelocity = channels.get(XBoxOneMapping.LEFT_STICK_X) * maxVelocityY.getDoubleValue();
-      double yawRate = channels.get(XBoxOneMapping.RIGHT_STICK_X) * maxVelocityYaw.getDoubleValue();
+      double xVelocity = channels.get(xVelocityMapping) * maxVelocityX.getValue();
+      double yVelocity = channels.get(yVelocityMapping) * maxVelocityY.getValue();
+
+      double bodyYawLeft = channels.get(negativeYawRateMapping);
+      double bodyYawRight = channels.get(positiveYawRateMapping);
+      double yawRate = (bodyYawLeft - bodyYawRight) * maxVelocityYaw.getValue();
 
       desiredVelocityMessage = new QuadrupedTeleopDesiredVelocity();
       desiredVelocityMessage.setDesiredXVelocity(xVelocity);
@@ -213,11 +235,11 @@ public class QuadrupedXBoxController extends QuadrupedToolboxController implemen
       //      {
       //         stepTeleopManager.requestXGait();
       //      }
-      if (mapping == XBoxOneMapping.LEFT_BUMPER && channels.get(mapping) < 0.5) // the bumpers were firing twice for one click
+      if (mapping == endPhaseShiftDown && channels.get(mapping) < 0.5) // the bumpers were firing twice for one click
       {
          endPhaseShift -= 90.0;
       }
-      else if (mapping == XBoxOneMapping.RIGHT_BUMPER && channels.get(mapping) < 0.5)
+      else if (mapping == endPhaseShiftUp && channels.get(mapping) < 0.5)
       {
          endPhaseShift += 90.0;
       }
