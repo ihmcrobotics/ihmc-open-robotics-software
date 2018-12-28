@@ -6,6 +6,7 @@ import us.ihmc.communication.controllerAPI.command.Command;
 import us.ihmc.euclid.interfaces.Settable;
 import us.ihmc.multicastLogDataProtocol.modelLoaders.LogModelProvider;
 import us.ihmc.pubsub.DomainFactory;
+import us.ihmc.quadrupedCommunication.QuadrupedControllerAPIDefinition;
 import us.ihmc.quadrupedPlanning.QuadrupedXGaitSettings;
 import us.ihmc.quadrupedPlanning.networkProcessing.QuadrupedRobotModelProviderNode;
 import us.ihmc.quadrupedPlanning.networkProcessing.QuadrupedToolboxController;
@@ -25,9 +26,8 @@ public class QuadrupedStepTeleopModule extends QuadrupedToolboxModule
 
    private final QuadrupedStepTeleopController stepTeleopController;
 
-   public QuadrupedStepTeleopModule(FullQuadrupedRobotModelFactory modelFactory, QuadrupedXGaitSettings defaultXGaitSettings,
-                                    LogModelProvider modelProvider, boolean startYoVariableServer, DomainFactory.PubSubImplementation pubSubImplementation)
-         throws IOException
+   public QuadrupedStepTeleopModule(FullQuadrupedRobotModelFactory modelFactory, QuadrupedXGaitSettings defaultXGaitSettings, LogModelProvider modelProvider,
+                                    boolean startYoVariableServer, DomainFactory.PubSubImplementation pubSubImplementation) throws IOException
    {
       super(modelFactory.getRobotDescription().getName(), modelFactory.createFullRobotModel(), modelProvider, startYoVariableServer, updatePeriodMilliseconds,
             pubSubImplementation);
@@ -41,20 +41,22 @@ public class QuadrupedStepTeleopModule extends QuadrupedToolboxModule
    @Override
    public void registerExtraPuSubs(RealtimeRos2Node realtimeRos2Node)
    {
-      ROS2Tools.createCallbackSubscription(realtimeRos2Node, RobotConfigurationData.class, getPublisherTopicNameGenerator(),
+      ROS2Tools.MessageTopicNameGenerator controllerPubGenerator = QuadrupedControllerAPIDefinition.getPublisherTopicNameGenerator(robotName);
+
+      ROS2Tools.createCallbackSubscription(realtimeRos2Node, RobotConfigurationData.class, controllerPubGenerator,
                                            s -> stepTeleopController.processTimestamp(s.takeNextData().getTimestamp()));
-      ROS2Tools.createCallbackSubscription(realtimeRos2Node, HighLevelStateMessage.class, getPublisherTopicNameGenerator(),
-                                           s -> stepTeleopController.setPaused(true));
-      ROS2Tools.createCallbackSubscription(realtimeRos2Node, HighLevelStateChangeStatusMessage.class, getPublisherTopicNameGenerator(),
+      ROS2Tools.createCallbackSubscription(realtimeRos2Node, HighLevelStateMessage.class, controllerPubGenerator, s -> stepTeleopController.setPaused(true));
+      ROS2Tools.createCallbackSubscription(realtimeRos2Node, HighLevelStateChangeStatusMessage.class, controllerPubGenerator,
                                            s -> stepTeleopController.processHighLevelStateChangeMessage(s.takeNextData()));
+      ROS2Tools.createCallbackSubscription(realtimeRos2Node, QuadrupedFootstepStatusMessage.class, controllerPubGenerator,
+                                           s -> stepTeleopController.processFootstepStatusMessage(s.takeNextData()));
+      ROS2Tools.createCallbackSubscription(realtimeRos2Node, QuadrupedSteppingStateChangeMessage.class, controllerPubGenerator,
+                                           s -> stepTeleopController.processSteppingStateChangeMessage(s.takeNextData()));
+      ROS2Tools.createCallbackSubscription(realtimeRos2Node, QuadrupedGroundPlaneMessage.class, controllerPubGenerator,
+                                           s -> stepTeleopController.processGroundPlaneMessage(s.takeNextData()));
+
       ROS2Tools.createCallbackSubscription(realtimeRos2Node, QuadrupedBodyPathPlanMessage.class, getPublisherTopicNameGenerator(),
                                            s -> stepTeleopController.processBodyPathPlanMessage(s.takeNextData()));
-      ROS2Tools.createCallbackSubscription(realtimeRos2Node, QuadrupedFootstepStatusMessage.class, getPublisherTopicNameGenerator(),
-                                           s -> stepTeleopController.processFootstepStatusMessage(s.takeNextData()));
-      ROS2Tools.createCallbackSubscription(realtimeRos2Node, QuadrupedSteppingStateChangeMessage.class, getPublisherTopicNameGenerator(),
-                                           s -> stepTeleopController.processSteppingStateChangeMessage(s.takeNextData()));
-      ROS2Tools.createCallbackSubscription(realtimeRos2Node, QuadrupedGroundPlaneMessage.class, getPublisherTopicNameGenerator(),
-                                           s -> stepTeleopController.processGroundPlaneMessage(s.takeNextData()));
       ROS2Tools.createCallbackSubscription(realtimeRos2Node, QuadrupedXGaitSettingsPacket.class, getPublisherTopicNameGenerator(),
                                            s -> stepTeleopController.processXGaitSettingsPacket(s.takeNextData()));
    }
@@ -90,7 +92,7 @@ public class QuadrupedStepTeleopModule extends QuadrupedToolboxModule
    @Override
    public ROS2Tools.MessageTopicNameGenerator getPublisherTopicNameGenerator()
    {
-      return  getTopicNameGenerator(robotName, ROS2Tools.STEP_TELEOP_TOOLBOX, ROS2Tools.ROS2TopicQualifier.OUTPUT);
+      return getTopicNameGenerator(robotName, ROS2Tools.STEP_TELEOP_TOOLBOX, ROS2Tools.ROS2TopicQualifier.OUTPUT);
    }
 
    @Override
