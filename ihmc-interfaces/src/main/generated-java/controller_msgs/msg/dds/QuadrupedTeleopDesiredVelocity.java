@@ -12,9 +12,9 @@ public class QuadrupedTeleopDesiredVelocity extends Packet<QuadrupedTeleopDesire
     * Unique ID used to identify this message, should preferably be consecutively increasing.
     */
    public long sequence_id_;
-   public double desired_x_velocity_;
-   public double desired_y_velocity_;
-   public double desired_yaw_velocity_;
+   public double desired_x_velocity_ = -1.0;
+   public double desired_y_velocity_ = -1.0;
+   public double desired_yaw_velocity_ = -1.0;
 
    public QuadrupedTeleopDesiredVelocity()
    {
