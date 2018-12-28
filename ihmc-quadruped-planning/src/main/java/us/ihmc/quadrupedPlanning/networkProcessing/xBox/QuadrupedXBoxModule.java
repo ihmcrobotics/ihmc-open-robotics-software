@@ -1,9 +1,6 @@
 package us.ihmc.quadrupedPlanning.networkProcessing.xBox;
 
-import controller_msgs.msg.dds.HighLevelStateChangeStatusMessage;
-import controller_msgs.msg.dds.HighLevelStateMessage;
-import controller_msgs.msg.dds.QuadrupedSteppingStateChangeMessage;
-import controller_msgs.msg.dds.QuadrupedXGaitSettingsPacket;
+import controller_msgs.msg.dds.*;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.controllerAPI.command.Command;
 import us.ihmc.euclid.interfaces.Settable;
@@ -18,7 +15,9 @@ import us.ihmc.ros2.RealtimeRos2Node;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import static us.ihmc.communication.ROS2Tools.getTopicNameGenerator;
 
@@ -35,11 +34,11 @@ public class QuadrupedXBoxModule extends QuadrupedToolboxModule
       super(modelFactory.getRobotDescription().getName(), modelFactory.createFullRobotModel(), modelProvider, false, updatePeriodMilliseconds,
             pubSubImplementation);
 
-      xBoxController = new QuadrupedXBoxController(defaultXGaitSettings, nominalBodyHeight, statusOutputManager, registry, updatePeriodMilliseconds);
+      xBoxController = new QuadrupedXBoxController(defaultXGaitSettings, nominalBodyHeight, outputManager, registry, updatePeriodMilliseconds);
    }
 
    @Override
-   public void registerExtraPuSubs(RealtimeRos2Node realtimeRos2Node)
+   public void registerExtraSubscribers(RealtimeRos2Node realtimeRos2Node)
    {
       ROS2Tools.MessageTopicNameGenerator controllerPubGenerator = QuadrupedControllerAPIDefinition.getPublisherTopicNameGenerator(robotName);
 
@@ -67,15 +66,15 @@ public class QuadrupedXBoxModule extends QuadrupedToolboxModule
    }
 
    @Override
-   public List<Class<? extends Settable<?>>> createListOfSupportedStatus()
+   public Map<Class<? extends Settable<?>>, ROS2Tools.MessageTopicNameGenerator> createMapOfSupportedOutputMessages()
    {
-      List<Class<? extends Settable<?>>> statusMessages = new ArrayList<>();
-      statusMessages.add(HighLevelStateMessage.class);
-      statusMessages.add(HighLevelStateChangeStatusMessage.class);
-      statusMessages.add(QuadrupedSteppingStateChangeMessage.class);
-      statusMessages.add(QuadrupedXGaitSettingsPacket.class);
+      Map<Class<? extends Settable<?>>, ROS2Tools.MessageTopicNameGenerator> messages = new HashMap<>();
 
-      return statusMessages;
+      messages.put(QuadrupedTeleopDesiredHeight.class, getTopicNameGenerator(robotName, ROS2Tools.HEIGHT_TELEOP_TOOLBOX, ROS2Tools.ROS2TopicQualifier.INPUT));
+      messages.put(QuadrupedTeleopDesiredPose.class, getTopicNameGenerator(robotName, ROS2Tools.BODY_TELEOP_TOOLBOX, ROS2Tools.ROS2TopicQualifier.INPUT));
+      messages.put(QuadrupedTeleopDesiredVelocity.class, getTopicNameGenerator(robotName, ROS2Tools.STEP_TELEOP_TOOLBOX, ROS2Tools.ROS2TopicQualifier.INPUT));
+
+      return messages;
    }
 
    @Override

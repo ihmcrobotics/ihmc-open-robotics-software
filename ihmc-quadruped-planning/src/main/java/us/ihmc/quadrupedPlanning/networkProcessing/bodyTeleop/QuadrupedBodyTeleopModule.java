@@ -1,9 +1,6 @@
 package us.ihmc.quadrupedPlanning.networkProcessing.bodyTeleop;
 
-import controller_msgs.msg.dds.HighLevelStateChangeStatusMessage;
-import controller_msgs.msg.dds.HighLevelStateMessage;
-import controller_msgs.msg.dds.QuadrupedSteppingStateChangeMessage;
-import controller_msgs.msg.dds.RobotConfigurationData;
+import controller_msgs.msg.dds.*;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.controllerAPI.command.Command;
 import us.ihmc.euclid.interfaces.Settable;
@@ -16,9 +13,9 @@ import us.ihmc.quadrupedPlanning.networkProcessing.QuadrupedToolboxModule;
 import us.ihmc.robotModels.FullQuadrupedRobotModelFactory;
 import us.ihmc.ros2.RealtimeRos2Node;
 
-import java.io.IOException;
-import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import static us.ihmc.communication.ROS2Tools.getTopicNameGenerator;
 
@@ -29,18 +26,18 @@ public class QuadrupedBodyTeleopModule extends QuadrupedToolboxModule
    private final QuadrupedBodyTeleopController bodyTeleopController;
 
    public QuadrupedBodyTeleopModule(FullQuadrupedRobotModelFactory modelFactory, LogModelProvider modelProvider,
-                                    DomainFactory.PubSubImplementation pubSubImplementation) throws IOException
+                                    DomainFactory.PubSubImplementation pubSubImplementation)
    {
       super(modelFactory.getRobotDescription().getName(), modelFactory.createFullRobotModel(), modelProvider, false, updatePeriodMilliseconds,
             pubSubImplementation);
 
       QuadrupedRobotModelProviderNode robotModelProvider = new QuadrupedRobotModelProviderNode(robotName, realtimeRos2Node, modelFactory);
 
-      bodyTeleopController = new QuadrupedBodyTeleopController(statusOutputManager, robotModelProvider, registry);
+      bodyTeleopController = new QuadrupedBodyTeleopController(outputManager, robotModelProvider, registry);
    }
 
    @Override
-   public void registerExtraPuSubs(RealtimeRos2Node realtimeRos2Node)
+   public void registerExtraSubscribers(RealtimeRos2Node realtimeRos2Node)
    {
       ROS2Tools.MessageTopicNameGenerator controllerPubGenerator = QuadrupedControllerAPIDefinition.getPublisherTopicNameGenerator(robotName);
 
@@ -66,15 +63,15 @@ public class QuadrupedBodyTeleopModule extends QuadrupedToolboxModule
    }
 
    @Override
-   public List<Class<? extends Settable<?>>> createListOfSupportedStatus()
+   public Map<Class<? extends Settable<?>>, ROS2Tools.MessageTopicNameGenerator> createMapOfSupportedOutputMessages()
    {
-      List<Class<? extends Settable<?>>> statusMessages = new ArrayList<>();
-      statusMessages.add(HighLevelStateMessage.class);
-      statusMessages.add(HighLevelStateChangeStatusMessage.class);
-      statusMessages.add(QuadrupedSteppingStateChangeMessage.class);
-      statusMessages.add(RobotConfigurationData.class);
+      Map<Class<? extends Settable<?>>, ROS2Tools.MessageTopicNameGenerator> messages = new HashMap<>();
 
-      return statusMessages;
+      ROS2Tools.MessageTopicNameGenerator controllerSubGenerator = QuadrupedControllerAPIDefinition.getSubscriberTopicNameGenerator(robotName);
+      messages.put(QuadrupedBodyOrientationMessage.class, controllerSubGenerator);
+      messages.put(QuadrupedBodyTrajectoryMessage.class, controllerSubGenerator);
+
+      return messages;
    }
 
    @Override

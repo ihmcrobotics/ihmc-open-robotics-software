@@ -1,6 +1,5 @@
 package us.ihmc.quadrupedPlanning.networkProcessing;
 
-import us.ihmc.communication.controllerAPI.StatusMessageOutputManager;
 import us.ihmc.euclid.interfaces.Settable;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
@@ -13,14 +12,14 @@ public abstract class QuadrupedToolboxController
    protected static final boolean DEBUG = false;
 
    protected final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
-   protected final StatusMessageOutputManager statusOutputManager;
+   protected final OutputManager outputManager;
    private final YoBoolean initialize = new YoBoolean("initialize" + registry.getName(), registry);
 
    private ScheduledFuture<?> futureToListenTo;
 
-   public QuadrupedToolboxController(StatusMessageOutputManager statusOutputManager, YoVariableRegistry parentRegistry)
+   public QuadrupedToolboxController(OutputManager outputManager, YoVariableRegistry parentRegistry)
    {
-      this.statusOutputManager = statusOutputManager;
+      this.outputManager = outputManager;
       parentRegistry.addChild(registry);
       requestInitialize();
    }
@@ -109,11 +108,11 @@ public abstract class QuadrupedToolboxController
     * Publishes the given status message. It used for sending the result computed by this toolbox
     * controller.
     *
-    * @param statusMessage the message to publish.
+    * @param outputMessage the message to publish.
     */
-   public <S extends Settable<S>> void reportMessage(S statusMessage)
+   public <S extends Settable<S>> void reportMessage(S outputMessage)
    {
-      statusOutputManager.reportStatusMessage(statusMessage);
+      outputManager.reportMessage(outputMessage);
    }
 
    /**

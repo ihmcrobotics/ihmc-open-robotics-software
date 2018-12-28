@@ -2,7 +2,7 @@ package us.ihmc.quadrupedPlanning.networkProcessing.bodyTeleop;
 
 import controller_msgs.msg.dds.HighLevelStateChangeStatusMessage;
 import controller_msgs.msg.dds.QuadrupedSteppingStateChangeMessage;
-import us.ihmc.communication.controllerAPI.StatusMessageOutputManager;
+import us.ihmc.quadrupedPlanning.networkProcessing.OutputManager;
 import us.ihmc.quadrupedPlanning.networkProcessing.QuadrupedRobotModelProviderNode;
 import us.ihmc.quadrupedPlanning.networkProcessing.QuadrupedToolboxController;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
@@ -16,7 +16,7 @@ public class QuadrupedBodyTeleopController extends QuadrupedToolboxController
    private final AtomicReference<HighLevelStateChangeStatusMessage> controllerStateChangeMessage = new AtomicReference<>();
    private final AtomicReference<QuadrupedSteppingStateChangeMessage> steppingStateChangeMessage = new AtomicReference<>();
 
-   public QuadrupedBodyTeleopController(StatusMessageOutputManager statusOutputManager, QuadrupedRobotModelProviderNode robotModelProvider,
+   public QuadrupedBodyTeleopController(OutputManager statusOutputManager, QuadrupedRobotModelProviderNode robotModelProvider,
                                         YoVariableRegistry parentRegistry)
    {
       super(statusOutputManager, parentRegistry);
