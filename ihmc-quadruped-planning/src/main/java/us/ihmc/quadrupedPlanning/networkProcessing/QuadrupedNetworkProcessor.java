@@ -18,10 +18,6 @@ public class QuadrupedNetworkProcessor
 {
    private final boolean DEBUG = false;
 
-   private QuadrupedStepTeleopModule stepTeleopModule = null;
-   private QuadrupedBodyHeightTeleopModule heightTeleopModule = null;
-   private QuadrupedBodyTeleopModule bodyTeleopModule = null;
-
    public QuadrupedNetworkProcessor(FullQuadrupedRobotModelFactory robotModel, QuadrupedNetworkModuleParameters params, double nominalHeight,
                                     QuadrupedXGaitSettings xGaitSettings)
    {
@@ -43,7 +39,7 @@ public class QuadrupedNetworkProcessor
    {
       if (!params.isStepTeleopModuleEnabled())
          return;
-      stepTeleopModule = new QuadrupedStepTeleopModule(modelFactory, xGaitSettings, null, params.visualizeStepTeleopModuleEnabled(), pubSubImplementation);
+      new QuadrupedStepTeleopModule(modelFactory, xGaitSettings, null, params.visualizeStepTeleopModuleEnabled(), pubSubImplementation);
    }
 
    private void setupBodyHeightTeleopModule(FullQuadrupedRobotModelFactory modelFactory, QuadrupedNetworkModuleParameters params, double nominalHeight,
@@ -51,7 +47,7 @@ public class QuadrupedNetworkProcessor
    {
       if (!params.isBodyHeightTeleopModuleEnabled())
          return;
-      heightTeleopModule = new QuadrupedBodyHeightTeleopModule(modelFactory, nominalHeight, null, pubSubImplementation);
+      new QuadrupedBodyHeightTeleopModule(modelFactory, nominalHeight, null, pubSubImplementation);
    }
 
    private void setupBodyTeleopModule(FullQuadrupedRobotModelFactory modelFactory, QuadrupedNetworkModuleParameters params,
@@ -59,7 +55,7 @@ public class QuadrupedNetworkProcessor
    {
       if (!params.isBodyTeleopModuleEnabled())
          return;
-      bodyTeleopModule = new QuadrupedBodyTeleopModule(modelFactory, null, pubSubImplementation);
+      new QuadrupedBodyTeleopModule(modelFactory, null, pubSubImplementation);
    }
 
    private void setupXBoxModule(FullQuadrupedRobotModelFactory modelFactory, QuadrupedNetworkModuleParameters params,
@@ -68,10 +64,7 @@ public class QuadrupedNetworkProcessor
    {
       if (!params.isXBoxModuleEnabled())
          return;
-      QuadrupedXBoxModule xBoxModule = new QuadrupedXBoxModule(modelFactory, defaultXGaitSettings, nominalBodyHeight, null, pubSubImplementation);
-      xBoxModule.setBodyTeleopModule(bodyTeleopModule);
-      xBoxModule.setStepTeleopModule(stepTeleopModule);
-      xBoxModule.setHeightTeleopModule(heightTeleopModule);
+      new QuadrupedXBoxModule(modelFactory, defaultXGaitSettings, nominalBodyHeight, null, pubSubImplementation);
    }
 
    private void setupRobotEnvironmentAwerenessModule(QuadrupedNetworkModuleParameters params, DomainFactory.PubSubImplementation pubSubImplementation)
