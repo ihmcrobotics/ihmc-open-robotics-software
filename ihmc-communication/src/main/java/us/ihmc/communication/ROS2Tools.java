@@ -36,9 +36,10 @@ public class ROS2Tools
    public static final String KINEMATICS_PLANNING_TOOLBOX = "/toolbox/ik_planning";
    public static final String WHOLE_BODY_TRAJECTORY_TOOLBOX = "/toolbox/ik_trajectory";
 
-   public static final String STEP_TELEOP_TOOLBOX = "/toolbox/step_teleop";
-   public static final String HEIGHT_TELEOP_TOOLBOX = "/toolbox/height_teleop";
-   public static final String BODY_TELEOP_TOOLBOX = "/toolbox/body_teleop";
+   public static final String STEP_TELEOP_TOOLBOX = "/toolbox/teleop/step_teleop";
+   public static final String HEIGHT_TELEOP_TOOLBOX = "/toolbox/teleop/height_teleop";
+   public static final String BODY_TELEOP_TOOLBOX = "/toolbox/teleop/body_teleop";
+   public static final String XBOX_TELEOP_TOOLBOX = "/toolbox/teleop/xbox_teleop";
 
    public static final String BEHAVIOR_MODULE = "/behavior";
    public static final String REA_MODULE = "/rea";
