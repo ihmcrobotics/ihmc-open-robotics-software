@@ -25,10 +25,10 @@ public class QuadrupedBodyTeleopModule extends QuadrupedToolboxModule
 
    private final QuadrupedBodyTeleopController bodyTeleopController;
 
-   public QuadrupedBodyTeleopModule(FullQuadrupedRobotModelFactory modelFactory, LogModelProvider modelProvider, boolean startYoVariableServer, DomainFactory.PubSubImplementation pubSubImplementation)
-         throws IOException
+   public QuadrupedBodyTeleopModule(FullQuadrupedRobotModelFactory modelFactory, LogModelProvider modelProvider,
+                                    DomainFactory.PubSubImplementation pubSubImplementation) throws IOException
    {
-      super(modelFactory.getRobotDescription().getName(), modelFactory.createFullRobotModel(), modelProvider, startYoVariableServer, updatePeriodMilliseconds,
+      super(modelFactory.getRobotDescription().getName(), modelFactory.createFullRobotModel(), modelProvider, false, updatePeriodMilliseconds,
             pubSubImplementation);
 
       QuadrupedRobotModelProviderNode robotModelProvider = new QuadrupedRobotModelProviderNode(robotName, realtimeRos2Node, modelFactory);

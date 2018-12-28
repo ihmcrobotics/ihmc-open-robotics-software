@@ -10,6 +10,8 @@ public class QuadrupedNetworkModuleParameters
    private boolean useBodyHeightTeleopModule;
    private boolean useStepTeleopModule;
    private boolean visualizeStepTeleopModule;
+   private boolean useBodyTeleopModule;
+   private boolean useXBoxModule;
    private boolean useRemoteObjectDetectionFeedback;
 
    private URI rosUri;
@@ -44,6 +46,7 @@ public class QuadrupedNetworkModuleParameters
       return useStepTeleopModule;
    }
 
+
    public void setVisualizeStepTeleopModule(boolean visualize)
    {
       this.visualizeStepTeleopModule = visualize;
@@ -52,6 +55,26 @@ public class QuadrupedNetworkModuleParameters
    public boolean visualizeStepTeleopModuleEnabled()
    {
       return visualizeStepTeleopModule;
+   }
+
+   public void enableBodyTeleopModule(boolean enable)
+   {
+      this.useBodyTeleopModule = enable;
+   }
+
+   public boolean isBodyTeleopModuleEnabled()
+   {
+      return useBodyTeleopModule;
+   }
+
+   public void enableXBoxModule(boolean enable)
+   {
+      this.useXBoxModule = enable;
+   }
+
+   public boolean isXBoxModuleEnabled()
+   {
+      return useXBoxModule;
    }
 
    public void enableNetworkProcessor(boolean useNetworkProcessor)
@@ -73,7 +96,6 @@ public class QuadrupedNetworkModuleParameters
    {
       this.useRemoteObjectDetectionFeedback = useRemoteObjectDetectionFeedback;
    }
-
 
    @Override
    public String toString()
