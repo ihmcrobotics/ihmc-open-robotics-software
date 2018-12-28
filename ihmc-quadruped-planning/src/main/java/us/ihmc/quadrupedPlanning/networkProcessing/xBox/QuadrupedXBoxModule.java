@@ -49,6 +49,8 @@ public class QuadrupedXBoxModule extends QuadrupedToolboxModule
                                            s -> xBoxController.processHighLevelStateChangeMessage(s.takeNextData()));
       ROS2Tools.createCallbackSubscription(realtimeRos2Node, QuadrupedSteppingStateChangeMessage.class, getPublisherTopicNameGenerator(),
                                            s -> xBoxController.processSteppingStateChangeMessage(s.takeNextData()));
+      ROS2Tools.createCallbackSubscription(realtimeRos2Node, QuadrupedXGaitSettingsPacket.class, getPublisherTopicNameGenerator(),
+                                           s -> xBoxController.processXGaitSettingsPacket(s.takeNextData()));
    }
 
    @Override
@@ -70,6 +72,7 @@ public class QuadrupedXBoxModule extends QuadrupedToolboxModule
       statusMessages.add(HighLevelStateMessage.class);
       statusMessages.add(HighLevelStateChangeStatusMessage.class);
       statusMessages.add(QuadrupedSteppingStateChangeMessage.class);
+      statusMessages.add(QuadrupedXGaitSettingsPacket.class);
 
       return statusMessages;
    }

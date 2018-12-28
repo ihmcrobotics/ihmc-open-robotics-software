@@ -95,7 +95,7 @@ public class QuadrupedUserInterface
 
       BodyPoseController bodyPoseController = new BodyPoseController(joystick, messager, executorService, physicalProperties.getNominalBodyHeight());
 
-      YoQuadrupedXGaitSettings yoXGaitSettings = new YoQuadrupedXGaitSettings(xGaitSettings, null, registry);
+      YoQuadrupedXGaitSettings yoXGaitSettings = new YoQuadrupedXGaitSettings(xGaitSettings, registry);
       yoXGaitSettings.addVariableChangedListener(v -> messager.submitMessage(QuadrupedUIMessagerAPI.XGaitSettingsTopic, yoXGaitSettings));
       messager.registerTopicListener(QuadrupedUIMessagerAPI.XGaitSettingsTopic, yoXGaitSettings::set);
 

@@ -93,7 +93,7 @@ public class QuadrupedTeleopManager
    {
       this.referenceFrames = referenceFrames;
       this.ros2Node = ros2Node;
-      this.xGaitSettings = new YoQuadrupedXGaitSettings(defaultXGaitSettings, null, registry);
+      this.xGaitSettings = new YoQuadrupedXGaitSettings(defaultXGaitSettings, registry);
 
       firstStepDelay.set(0.5);
       this.bodyPathMultiplexer = new QuadrupedBodyPathMultiplexer(referenceFrames, timestamp, xGaitSettings, firstStepDelay, graphicsListRegistry, registry);
