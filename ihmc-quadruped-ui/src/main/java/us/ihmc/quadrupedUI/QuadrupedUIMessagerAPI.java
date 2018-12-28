@@ -1,14 +1,11 @@
 package us.ihmc.quadrupedUI;
 
-import controller_msgs.msg.dds.FootstepStatusMessage;
-import controller_msgs.msg.dds.QuadrupedBodyTrajectoryMessage;
 import controller_msgs.msg.dds.QuadrupedFootstepStatusMessage;
 import controller_msgs.msg.dds.RobotConfigurationData;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelControllerName;
 import us.ihmc.messager.MessagerAPIFactory;
 import us.ihmc.messager.MessagerAPIFactory.*;
 import us.ihmc.quadrupedBasics.referenceFrames.QuadrupedReferenceFrames;
-import us.ihmc.quadrupedPlanning.QuadrupedXGaitSettings;
 import us.ihmc.quadrupedPlanning.QuadrupedXGaitSettingsReadOnly;
 import us.ihmc.robotModels.FullQuadrupedRobotModel;
 
@@ -22,6 +19,8 @@ public class QuadrupedUIMessagerAPI
    private static final CategoryTheme Command = apiFactory.createCategoryTheme("Command");
    private static final CategoryTheme BodyTeleop = apiFactory.createCategoryTheme("BodyTeleop");
    private static final CategoryTheme StepTeleop = apiFactory.createCategoryTheme("StepTeleop");
+   private static final CategoryTheme HeightTeleop = apiFactory.createCategoryTheme("HeightTeleop");
+   private static final CategoryTheme Joystick = apiFactory.createCategoryTheme("Joystick");
    private static final CategoryTheme Planning = apiFactory.createCategoryTheme("Planning");
    private static final CategoryTheme XGait = apiFactory.createCategoryTheme("XGait");
 
@@ -45,6 +44,8 @@ public class QuadrupedUIMessagerAPI
    public static final Topic<Double> DesiredBodyHeightTopic = Root.child(Command).topic(DesiredBodyHeight);
    public static final Topic<Boolean> EnableBodyTeleopTopic = Root.child(Command).child(BodyTeleop).topic(Enable);
    public static final Topic<Boolean> EnableStepTeleopTopic = Root.child(Command).child(StepTeleop).topic(Enable);
+   public static final Topic<Boolean> EnableHeightTeleopTopic = Root.child(Command).child(HeightTeleop).topic(Enable);
+   public static final Topic<Boolean> EnableJoystickTopic = Root.child(Command).child(Joystick).topic(Enable);
    public static final Topic<QuadrupedXGaitSettingsReadOnly> XGaitSettingsTopic = Root.child(Planning).child(XGait).topic(XGaitSettings);
    public static final Topic<QuadrupedFootstepStatusMessage> FootstepStatusMessageTopic = Root.child(Controller).child(Status).topic(FootstepStatusMessage);
 
