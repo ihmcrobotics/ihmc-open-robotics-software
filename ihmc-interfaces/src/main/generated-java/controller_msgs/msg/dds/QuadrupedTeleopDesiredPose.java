@@ -13,6 +13,7 @@ public class QuadrupedTeleopDesiredPose extends Packet<QuadrupedTeleopDesiredPos
     */
    public long sequence_id_;
    public us.ihmc.euclid.geometry.Pose3D pose_;
+   public double pose_shift_time_;
 
 
    public QuadrupedTeleopDesiredPose()
@@ -31,6 +32,8 @@ public class QuadrupedTeleopDesiredPose extends Packet<QuadrupedTeleopDesiredPos
       sequence_id_ = other.sequence_id_;
 
       geometry_msgs.msg.dds.PosePubSubType.staticCopy(other.pose_, pose_);
+
+      pose_shift_time_ = other.pose_shift_time_;
 
    }
 
@@ -52,6 +55,15 @@ public class QuadrupedTeleopDesiredPose extends Packet<QuadrupedTeleopDesiredPos
    public us.ihmc.euclid.geometry.Pose3D getPose()
    {
       return pose_;
+   }
+
+   public void setPoseShiftTime(double pose_shift_time)
+   {
+      pose_shift_time_ = pose_shift_time;
+   }
+   public double getPoseShiftTime()
+   {
+      return pose_shift_time_;
    }
 
 
@@ -76,6 +88,8 @@ public class QuadrupedTeleopDesiredPose extends Packet<QuadrupedTeleopDesiredPos
 
       if (!this.pose_.epsilonEquals(other.pose_, epsilon)) return false;
 
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.pose_shift_time_, other.pose_shift_time_, epsilon)) return false;
+
 
       return true;
    }
@@ -93,6 +107,8 @@ public class QuadrupedTeleopDesiredPose extends Packet<QuadrupedTeleopDesiredPos
 
       if (!this.pose_.equals(otherMyClass.pose_)) return false;
 
+      if(this.pose_shift_time_ != otherMyClass.pose_shift_time_) return false;
+
 
       return true;
    }
@@ -107,6 +123,9 @@ public class QuadrupedTeleopDesiredPose extends Packet<QuadrupedTeleopDesiredPos
       builder.append(this.sequence_id_);      builder.append(", ");
       builder.append("pose=");
       builder.append(this.pose_);      builder.append(", ");
+      builder.append("pose_shift_time=");
+      builder.append(this.pose_shift_time_);      builder.append(", ");
+
       builder.append("}");
       return builder.toString();
    }

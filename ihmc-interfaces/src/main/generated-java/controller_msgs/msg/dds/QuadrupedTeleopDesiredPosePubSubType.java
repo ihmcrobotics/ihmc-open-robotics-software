@@ -44,6 +44,8 @@ public class QuadrupedTeleopDesiredPosePubSubType implements us.ihmc.pubsub.Topi
 
       current_alignment += geometry_msgs.msg.dds.PointPubSubType.getMaxCdrSerializedSize(current_alignment);
 
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
+
 
       return current_alignment - initial_alignment;
    }
@@ -61,6 +63,8 @@ public class QuadrupedTeleopDesiredPosePubSubType implements us.ihmc.pubsub.Topi
 
       current_alignment += geometry_msgs.msg.dds.PosePubSubType.getCdrSerializedSize(data.getPose(), current_alignment);
 
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
+
 
 
       return current_alignment - initial_alignment;
@@ -72,6 +76,9 @@ public class QuadrupedTeleopDesiredPosePubSubType implements us.ihmc.pubsub.Topi
 
       geometry_msgs.msg.dds.PosePubSubType.write(data.getPose(), cdr);
 
+      cdr.write_type_6(data.getPoseShiftTime());
+
+
    }
 
    public static void read(controller_msgs.msg.dds.QuadrupedTeleopDesiredPose data, us.ihmc.idl.CDR cdr)
@@ -80,6 +87,9 @@ public class QuadrupedTeleopDesiredPosePubSubType implements us.ihmc.pubsub.Topi
 
       geometry_msgs.msg.dds.PosePubSubType.read(data.getPose(), cdr);
 
+      data.setPoseShiftTime(cdr.read_type_6());
+
+
    }
 
    @Override
@@ -87,6 +97,7 @@ public class QuadrupedTeleopDesiredPosePubSubType implements us.ihmc.pubsub.Topi
    {
       ser.write_type_4("sequence_id", data.getSequenceId());
       ser.write_type_a("pose", new geometry_msgs.msg.dds.PosePubSubType(), data.getPose());
+      ser.write_type_6("pose_shift_time", data.getPoseShiftTime());
    }
 
    @Override
@@ -94,6 +105,7 @@ public class QuadrupedTeleopDesiredPosePubSubType implements us.ihmc.pubsub.Topi
    {
       data.setSequenceId(ser.read_type_4("sequence_id"));
       ser.read_type_a("pose", new geometry_msgs.msg.dds.PosePubSubType(), data.getPose());
+      data.setPoseShiftTime(ser.read_type_6("pose_shift_time"));
    }
 
    public static void staticCopy(controller_msgs.msg.dds.QuadrupedTeleopDesiredPose src, controller_msgs.msg.dds.QuadrupedTeleopDesiredPose dest)
