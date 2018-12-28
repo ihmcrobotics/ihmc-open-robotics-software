@@ -91,20 +91,4 @@ public class QuadrupedXBoxModule extends QuadrupedToolboxModule
    {
       super.sleep();
    }
-
-   public void setStepTeleopModule(QuadrupedStepTeleopModule stepTeleopModule)
-   {
-      xBoxController.setStepTeleopModule(stepTeleopModule);
-   }
-
-   public void setBodyTeleopModule(QuadrupedBodyTeleopModule bodyTeleopModule)
-   {
-      xBoxController.setBodyTeleopModule(bodyTeleopModule);
-   }
-
-   public void setHeightTeleopModule(QuadrupedBodyHeightTeleopModule heightTeleopModule)
-   {
-      xBoxController.setHeightTeleopModule(heightTeleopModule);
-   }
-
 }

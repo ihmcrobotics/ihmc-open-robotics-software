@@ -40,10 +40,6 @@ public class QuadrupedXBoxController extends QuadrupedToolboxController implemen
 
    private final Map<XBoxOneMapping, Double> channels = Collections.synchronizedMap(new EnumMap<>(XBoxOneMapping.class));
 
-   private QuadrupedStepTeleopModule stepTeleopModule = null;
-   private QuadrupedBodyTeleopModule bodyTeleopModule = null;
-   private QuadrupedBodyHeightTeleopModule heightTeleopModule = null;
-
    private final YoBoolean isPaused = new YoBoolean("xBoxIsPaused", registry);
    private final YoDouble maxBodyYaw = new YoDouble("xBoxMaxBodyYaw", registry);
    private final YoDouble maxBodyPitch = new YoDouble("xBoxMaxBodyPitch", registry);
@@ -53,14 +49,17 @@ public class QuadrupedXBoxController extends QuadrupedToolboxController implemen
    private final YoDouble maxVelocityYaw = new YoDouble("xBoxMaxVelocityYaw", registry);
    private final YoDouble bodyOrientationShiftTime = new YoDouble("xBoxBodyOrientationShiftTime", registry);
 
-   private InputValueIntegrator bodyHeight;
+   private final InputValueIntegrator bodyHeight;
    private double endPhaseShift;
+
+   private QuadrupedTeleopDesiredVelocity desiredVelocityMessage = null;
+   private QuadrupedTeleopDesiredPose desiredPoseMessage = null;
+   private QuadrupedTeleopDesiredHeight desiredHeightMessage = null;
 
    public QuadrupedXBoxController(QuadrupedXGaitSettingsReadOnly defaultXGaitSettings, double nominalBodyHeight, CommandInputManager commandInputManager,
                                   StatusMessageOutputManager statusOutputManager, YoVariableRegistry parentRegistry, int updateTimeInMs) throws IOException
    {
       super(statusOutputManager, parentRegistry);
-
 
       boolean joystickIsConnected = Joystick.isAJoystickConnectedToSystem();
       if (!joystickIsConnected)
@@ -106,21 +105,6 @@ public class QuadrupedXBoxController extends QuadrupedToolboxController implemen
       isPaused.set(paused);
    }
 
-   public void setStepTeleopModule(QuadrupedStepTeleopModule stepTeleopModule)
-   {
-      this.stepTeleopModule = stepTeleopModule;
-   }
-
-   public void setBodyTeleopModule(QuadrupedBodyTeleopModule bodyTeleopModule)
-   {
-      this.bodyTeleopModule = bodyTeleopModule;
-   }
-
-   public void setHeightTeleopModule(QuadrupedBodyHeightTeleopModule heightTeleopModule)
-   {
-      this.heightTeleopModule = heightTeleopModule;
-   }
-
    @Override
    public boolean initialize()
    {
@@ -130,15 +114,17 @@ public class QuadrupedXBoxController extends QuadrupedToolboxController implemen
    @Override
    public void updateInternal()
    {
-      if (heightTeleopModule != null)
-         processJoystickHeightCommands();
-      if (bodyTeleopModule != null)
-         processJoystickBodyCommands();
-      if (stepTeleopModule != null)
-         processJoystickStepCommands();
+      desiredVelocityMessage = null;
+      desiredPoseMessage = null;
+      desiredHeightMessage = null;
 
-//      reportMessage(teleopManager.getStepListMessage());
-//      reportMessage(teleopManager.getBodyOrientationMessage());
+      processJoystickHeightCommands();
+      processJoystickBodyCommands();
+      processJoystickStepCommands();
+
+      reportMessage(desiredVelocityMessage);
+      reportMessage(desiredPoseMessage);
+      reportMessage(desiredHeightMessage);
    }
 
    @Override
@@ -169,7 +155,8 @@ public class QuadrupedXBoxController extends QuadrupedToolboxController implemen
          double bodyHeightVelocity = -maxBodyHeightVelocity.getValue();
          bodyHeight.update(bodyHeightVelocity);
       }
-      heightTeleopModule.setDesiredBodyHeight(bodyHeight.value());
+      desiredHeightMessage = new QuadrupedTeleopDesiredHeight();
+      desiredHeightMessage.setDesiredHeight(bodyHeight.value());
    }
 
    private void processJoystickBodyCommands()
@@ -177,7 +164,11 @@ public class QuadrupedXBoxController extends QuadrupedToolboxController implemen
       double bodyRoll = 0.0;
       double bodyPitch = channels.get(XBoxOneMapping.RIGHT_STICK_Y) * maxBodyPitch.getValue();
       double bodyYaw = channels.get(XBoxOneMapping.RIGHT_STICK_X) * maxBodyYaw.getValue();
-      bodyTeleopModule.setDesiredBodyPose(0.0, 0.0, bodyYaw, bodyPitch, bodyRoll, bodyOrientationShiftTime.getValue());
+
+      desiredPoseMessage = new QuadrupedTeleopDesiredPose();
+      desiredPoseMessage.getPose().getPosition().set(0.0, 0.0, bodyHeight.value());
+      desiredPoseMessage.getPose().getOrientation().setYawPitchRoll(bodyYaw, bodyPitch, bodyRoll);
+      desiredPoseMessage.setPoseShiftTime(bodyOrientationShiftTime.getValue());
    }
 
    private void processJoystickStepCommands()
@@ -185,7 +176,11 @@ public class QuadrupedXBoxController extends QuadrupedToolboxController implemen
       double xVelocity = channels.get(XBoxOneMapping.LEFT_STICK_Y) * maxVelocityX.getDoubleValue();
       double yVelocity = channels.get(XBoxOneMapping.LEFT_STICK_X) * maxVelocityY.getDoubleValue();
       double yawRate = channels.get(XBoxOneMapping.RIGHT_STICK_X) * maxVelocityYaw.getDoubleValue();
-      stepTeleopModule.setDesiredVelocity(xVelocity, yVelocity, yawRate);
+
+      desiredVelocityMessage = new QuadrupedTeleopDesiredVelocity();
+      desiredVelocityMessage.setDesiredXVelocity(xVelocity);
+      desiredVelocityMessage.setDesiredYVelocity(yVelocity);
+      desiredVelocityMessage.setDesiredYawVelocity(yawRate);
    }
 
    private void processStateChangeRequests(Event event)
@@ -209,16 +204,16 @@ public class QuadrupedXBoxController extends QuadrupedToolboxController implemen
       //      {
       //         stepTeleopManager.requestXGait();
       //      }
-      if (mapping == XBoxOneMapping.LEFT_BUMPER && channels.get(mapping) < 0.5 && stepTeleopModule != null) // the bumpers were firing twice for one click
-      {
-         endPhaseShift -= 90.0;
-         stepTeleopModule.setEndPhaseShift(endPhaseShift);
-      }
-      else if (mapping == XBoxOneMapping.RIGHT_BUMPER && channels.get(mapping) < 0.5 && stepTeleopModule != null)
-      {
-         endPhaseShift += 90.0;
-         stepTeleopModule.setEndPhaseShift(endPhaseShift);
-      }
+      //      if (mapping == XBoxOneMapping.LEFT_BUMPER && channels.get(mapping) < 0.5 && stepTeleopModule != null) // the bumpers were firing twice for one click
+      //      {
+      //         endPhaseShift -= 90.0;
+      //         stepTeleopModule.setEndPhaseShift(endPhaseShift);
+      //      }
+      //      else if (mapping == XBoxOneMapping.RIGHT_BUMPER && channels.get(mapping) < 0.5 && stepTeleopModule != null)
+      //      {
+      //         endPhaseShift += 90.0;
+      //         stepTeleopModule.setEndPhaseShift(endPhaseShift);
+      //      }
       //      else if(mapping == XBoxOneMapping.XBOX_BUTTON && channels.get(mapping) < 0.5)
       //      {
       //         stepTeleopManager.setPaused(!stepTeleopManager.isPaused());
