@@ -1,0 +1,33 @@
+#ifndef __controller_msgs__msg__QuadrupedXGaitSettingsPacket__idl__
+#define __controller_msgs__msg__QuadrupedXGaitSettingsPacket__idl__
+
+module __controller_msgs
+{
+  module msg
+  {
+    module dds
+    {
+
+      /**
+       * This message is part of the IHMC quadruped controller API.
+       * This message sends a desired stepping velocity to the step teleop module.
+       */
+      @TypeCode(type="controller_msgs::msg::dds_::QuadrupedXGaitSettingsPacket_")
+      struct QuadrupedXGaitSettingsPacket
+      {
+        /**
+         * Unique ID used to identify this message, should preferably be consecutively increasing.
+         */
+        unsigned long sequence_id;
+        double stance_length;
+        double stance_width;
+        double step_ground_clearance;
+        double step_duration;
+        double end_double_support_duration;
+        double end_phase_shift;
+      };
+    };
+  };
+};
+
+#endif
