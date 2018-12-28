@@ -92,6 +92,11 @@ public class QuadrupedStepTeleopManager
       snapper.submitGroundPlane(message);
    }
 
+   public void processXGaitSettingsPacket(QuadrupedXGaitSettingsPacket packet)
+   {
+      xGaitSettings.set(packet);
+   }
+
    public void processTimestamp(long timestampInNanos)
    {
       this.timestampNanos.set(timestampInNanos);
