@@ -3,7 +3,6 @@ package us.ihmc.quadrupedPlanning.networkProcessing.xBox;
 import controller_msgs.msg.dds.*;
 import net.java.games.input.Event;
 import us.ihmc.commons.Conversions;
-import us.ihmc.communication.controllerAPI.CommandInputManager;
 import us.ihmc.communication.controllerAPI.StatusMessageOutputManager;
 import us.ihmc.quadrupedPlanning.QuadrupedXGaitSettingsReadOnly;
 import us.ihmc.quadrupedPlanning.input.InputValueIntegrator;
@@ -21,7 +20,6 @@ import java.io.IOException;
 import java.util.Collections;
 import java.util.EnumMap;
 import java.util.Map;
-import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 
 import static us.ihmc.quadrupedPlanning.networkProcessing.xBox.QuadrupedXBoxBindings.*;
@@ -30,8 +28,6 @@ public class QuadrupedXBoxController extends QuadrupedToolboxController implemen
 {
    private final AtomicReference<HighLevelStateChangeStatusMessage> controllerStateChangeMessage = new AtomicReference<>();
    private final AtomicReference<QuadrupedSteppingStateChangeMessage> steppingStateChangeMessage = new AtomicReference<>();
-
-   private final AtomicBoolean receivedInput = new AtomicBoolean();
 
    private final Map<XBoxOneMapping, Double> channels = Collections.synchronizedMap(new EnumMap<>(XBoxOneMapping.class));
 
@@ -59,8 +55,8 @@ public class QuadrupedXBoxController extends QuadrupedToolboxController implemen
    private QuadrupedTeleopDesiredPose desiredPoseMessage = null;
    private QuadrupedTeleopDesiredHeight desiredHeightMessage = null;
 
-   public QuadrupedXBoxController(QuadrupedXGaitSettingsReadOnly defaultXGaitSettings, double nominalBodyHeight, CommandInputManager commandInputManager,
-                                  StatusMessageOutputManager statusOutputManager, YoVariableRegistry parentRegistry, int updateTimeInMs) throws IOException
+   public QuadrupedXBoxController(QuadrupedXGaitSettingsReadOnly defaultXGaitSettings, double nominalBodyHeight, StatusMessageOutputManager statusOutputManager,
+                                  YoVariableRegistry parentRegistry, int updateTimeInMs) throws IOException
    {
       super(statusOutputManager, parentRegistry);
 
@@ -95,8 +91,6 @@ public class QuadrupedXBoxController extends QuadrupedToolboxController implemen
       {
          channels.put(channel, 0.0);
       }
-
-      commandInputManager.registerHasReceivedInputListener(command -> receivedInput.set(true));
    }
 
    public void processHighLevelStateChangeMessage(HighLevelStateChangeStatusMessage message)

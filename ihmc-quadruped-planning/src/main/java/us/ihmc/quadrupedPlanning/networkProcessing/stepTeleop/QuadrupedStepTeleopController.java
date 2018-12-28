@@ -2,7 +2,6 @@ package us.ihmc.quadrupedPlanning.networkProcessing.stepTeleop;
 
 import controller_msgs.msg.dds.*;
 import us.ihmc.commons.Conversions;
-import us.ihmc.communication.controllerAPI.CommandInputManager;
 import us.ihmc.communication.controllerAPI.StatusMessageOutputManager;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.quadrupedPlanning.QuadrupedXGaitSettingsReadOnly;
@@ -10,7 +9,6 @@ import us.ihmc.quadrupedPlanning.networkProcessing.QuadrupedRobotModelProviderNo
 import us.ihmc.quadrupedPlanning.networkProcessing.QuadrupedToolboxController;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 
-import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 
 public class QuadrupedStepTeleopController extends QuadrupedToolboxController
@@ -20,19 +18,14 @@ public class QuadrupedStepTeleopController extends QuadrupedToolboxController
    private final AtomicReference<HighLevelStateChangeStatusMessage> controllerStateChangeMessage = new AtomicReference<>();
    private final AtomicReference<QuadrupedSteppingStateChangeMessage> steppingStateChangeMessage = new AtomicReference<>();
 
-   private final AtomicBoolean receivedInput = new AtomicBoolean();
-
-   public QuadrupedStepTeleopController(QuadrupedXGaitSettingsReadOnly defaultXGaitSettings, CommandInputManager commandInputManager,
-                                        StatusMessageOutputManager statusOutputManager, QuadrupedRobotModelProviderNode robotModelProvider,
-                                        YoVariableRegistry parentRegistry, YoGraphicsListRegistry graphicsListRegistry, long tickTimeMs)
+   public QuadrupedStepTeleopController(QuadrupedXGaitSettingsReadOnly defaultXGaitSettings, StatusMessageOutputManager statusOutputManager,
+                                        QuadrupedRobotModelProviderNode robotModelProvider, YoVariableRegistry parentRegistry,
+                                        YoGraphicsListRegistry graphicsListRegistry, long tickTimeMs)
    {
       super(statusOutputManager, parentRegistry);
 
       teleopManager = new QuadrupedStepTeleopManager(defaultXGaitSettings, robotModelProvider.getReferenceFrames(),
                                                      Conversions.millisecondsToSeconds(tickTimeMs), graphicsListRegistry, registry);
-
-      commandInputManager.registerHasReceivedInputListener(command -> receivedInput.set(true));
-
    }
 
    public void setPaused(boolean pause)

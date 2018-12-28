@@ -60,7 +60,7 @@ public abstract class QuadrupedToolboxModule
    protected ScheduledFuture<?> toolboxTaskScheduled = null;
    protected ScheduledFuture<?> yoVariableServerScheduled = null;
    protected Runnable toolboxRunnable = null;
-   protected final int updatePeriodMilliseconds = 1;
+   protected final int updatePeriodMilliseconds;
 
    protected final YoDouble timeWithoutInputsBeforeGoingToSleep = new YoDouble("timeWithoutInputsBeforeGoingToSleep", registry);
    protected final YoDouble timeOfLastInput = new YoDouble("timeOfLastInput", registry);
@@ -70,30 +70,27 @@ public abstract class QuadrupedToolboxModule
    private YoVariableServer yoVariableServer;
 
    public QuadrupedToolboxModule(String robotName, FullQuadrupedRobotModel fullRobotModelToLog, LogModelProvider modelProvider, boolean startYoVariableServer)
-         throws IOException
    {
       this(robotName, fullRobotModelToLog, modelProvider, startYoVariableServer, DEFAULT_UPDATE_PERIOD_MILLISECONDS);
    }
 
    public QuadrupedToolboxModule(String robotName, FullQuadrupedRobotModel fullRobotModelToLog, LogModelProvider modelProvider, boolean startYoVariableServer,
                                  int updatePeriodMilliseconds)
-         throws IOException
    {
       this(robotName, fullRobotModelToLog, modelProvider, startYoVariableServer, updatePeriodMilliseconds, PubSubImplementation.FAST_RTPS);
    }
 
    public QuadrupedToolboxModule(String robotName, FullQuadrupedRobotModel fullRobotModelToLog, LogModelProvider modelProvider, boolean startYoVariableServer,
                                  PubSubImplementation pubSubImplementation)
-         throws IOException
    {
       this(robotName, fullRobotModelToLog, modelProvider, startYoVariableServer, DEFAULT_UPDATE_PERIOD_MILLISECONDS, pubSubImplementation);
    }
 
    public QuadrupedToolboxModule(String robotName, FullQuadrupedRobotModel fullRobotModelToLog, LogModelProvider modelProvider, boolean startYoVariableServer,
                                  int updatePeriodMilliseconds, PubSubImplementation pubSubImplementation)
-         throws IOException
    {
       this.robotName = robotName;
+      this.updatePeriodMilliseconds = updatePeriodMilliseconds;
 
       this.modelProvider = modelProvider;
       this.startYoVariableServer = startYoVariableServer;
