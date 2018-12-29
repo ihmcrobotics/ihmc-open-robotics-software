@@ -26,6 +26,7 @@ import us.ihmc.yoVariables.registry.YoVariableRegistry;
 public class QuadrupedUserInterface
 {
    private final Stage primaryStage;
+   private final BorderPane mainPane;
 
    private final JavaFXQuadrupedVisualizer robotVisualizer;
    private final AnimationTimer cameraTracking;
@@ -46,7 +47,7 @@ public class QuadrupedUserInterface
       loader.setController(this);
       loader.setLocation(getClass().getResource(getClass().getSimpleName() + ".fxml"));
 
-      BorderPane mainPane = loader.load();
+      mainPane = loader.load();
 
       mainTabController.attachMessager(messager);
       xGaitSettingsController.attachMessager(messager, xGaitSettings);
@@ -80,20 +81,6 @@ public class QuadrupedUserInterface
          }
       };
 
-      QuadrupedJoystick joystick;
-      try
-      {
-         joystick = new QuadrupedJoystick();
-      }
-      catch (JoystickNotFoundException e)
-      {
-         LogTools.error("Could not find joystick. Running without xbox controller");
-         joystick = null;
-      }
-
-      YoQuadrupedXGaitSettings yoXGaitSettings = new YoQuadrupedXGaitSettings(xGaitSettings, registry);
-      yoXGaitSettings.addVariableChangedListener(v -> messager.submitMessage(QuadrupedUIMessagerAPI.XGaitSettingsTopic, yoXGaitSettings));
-      messager.registerTopicListener(QuadrupedUIMessagerAPI.XGaitSettingsTopic, yoXGaitSettings::set);
 
       robotVisualizer.start();
       cameraTracking.start();
@@ -105,7 +92,6 @@ public class QuadrupedUserInterface
 
       primaryStage.setScene(mainScene);
       primaryStage.setOnCloseRequest(event -> stop());
-
    }
 
    public void show()
