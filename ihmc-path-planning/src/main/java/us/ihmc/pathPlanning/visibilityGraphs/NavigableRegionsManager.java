@@ -17,6 +17,7 @@ import us.ihmc.pathPlanning.visibilityGraphs.dataStructure.VisibilityGraphEdge;
 import us.ihmc.pathPlanning.visibilityGraphs.dataStructure.VisibilityGraphNode;
 import us.ihmc.pathPlanning.visibilityGraphs.dataStructure.VisibilityMapSolution;
 import us.ihmc.pathPlanning.visibilityGraphs.dataStructure.VisibilityMapWithNavigableRegion;
+import us.ihmc.pathPlanning.visibilityGraphs.interfaces.VisibilityGraphsCostParameters;
 import us.ihmc.pathPlanning.visibilityGraphs.interfaces.VisibilityGraphsParameters;
 import us.ihmc.pathPlanning.visibilityGraphs.interfaces.VisibilityMapHolder;
 import us.ihmc.pathPlanning.visibilityGraphs.tools.ClusterTools;
@@ -28,6 +29,7 @@ public class NavigableRegionsManager
 {
    private final static boolean debug = false;
    private final VisibilityGraphsParameters parameters;
+   private final VisibilityGraphsCostParameters costParameters;
 
    private final VisibilityMapSolution visibilityMapSolution = new VisibilityMapSolution();
 
@@ -50,6 +52,7 @@ public class NavigableRegionsManager
    {
       visibilityMapSolution.setNavigableRegions(new NavigableRegions(parameters, regions));
       this.parameters = parameters == null ? new DefaultVisibilityGraphParameters() : parameters;
+      this.costParameters = new DefaultVisibilityGraphsCostParameters();
    }
 
    private static ArrayList<VisibilityMapWithNavigableRegion> createListOfVisibilityMapsWithNavigableRegions(NavigableRegions navigableRegions)
@@ -121,7 +124,7 @@ public class NavigableRegionsManager
             public int compare(VisibilityGraphNode nodeOne, VisibilityGraphNode nodeTwo)
             {
                //TODO: Check the statement below. It might be false, since just doing compare not equals?
-               //Note: Can only return 0 if the two nodes are ==. 
+               //Note: Can only return 0 if the two nodes are ==.
                // This is because queue.remove(node) will remove the first one with .equals()
                if (nodeOne == nodeTwo)
                   return 0;
