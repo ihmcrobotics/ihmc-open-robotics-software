@@ -14,6 +14,8 @@ import us.ihmc.robotics.geometry.PlanarRegion;
 
 public interface VisibilityGraphsParameters
 {
+   //TODO: JEP: JavaDoc all the methods to make them more clear.
+
    double getMaxInterRegionConnectionLength();
 
    double getNormalZThresholdForAccessibleRegions();
@@ -54,7 +56,7 @@ public interface VisibilityGraphsParameters
     * <p>
     * It should be close to 90 degrees.
     * </p>
-    * 
+    *
     * @return the angle threshold to use to determine if a line or polygon projection method should
     *         be used.
     */
@@ -69,7 +71,7 @@ public interface VisibilityGraphsParameters
     * A positive value corresponds to growing all the regions before testing if the start/goal is
     * inside.
     * </p>
-    * 
+    *
     * @return the value of the epsilon to use.
     */
    default double getSearchHostRegionEpsilon()
@@ -79,7 +81,7 @@ public interface VisibilityGraphsParameters
 
    /**
     * The constant extrusion distance to use when extruding the hull of a navigable region.
-    * 
+    *
     * @return
     */
    default NavigableExtrusionDistanceCalculator getNavigableExtrusionDistanceCalculator()
@@ -96,7 +98,7 @@ public interface VisibilityGraphsParameters
 
    /**
     * This calculator is used when extruding the projection of an obstacle onto a navigable region.
-    * 
+    *
     * @return the calculator use for obstacle extrusion.
     */
    default ObstacleExtrusionDistanceCalculator getObstacleExtrusionDistanceCalculator()
@@ -218,7 +220,7 @@ public interface VisibilityGraphsParameters
             //      return doPolygonsIntersect(convexHullOne, convexHullTwo, epsilon);
 
             //TOOD: ++++++JerryPratt: Lots of bugs here. Need to clean up ConvexPolygon stuff to find distances and if overlapping more nicely...
-            //TODO: Get rid of these magic numbers and make them parameters somewhere. Make sure the overlapping region check is larger than getMaxInterRegionConnectionLength() 
+            //TODO: Get rid of these magic numbers and make them parameters somewhere. Make sure the overlapping region check is larger than getMaxInterRegionConnectionLength()
             //TODO: BodyPathPlannerEnvironment crash when the number is set to 1.0. But should work fine all the same...
             //TOOD: This check should just be an approximation and should be ok for false positives. In fact, just returning true should be ok. Check that.
             //TODO: But somehow that's not right, since if we change 0.25 to 1.0 below, we get a Runtime Exception: Tried to create a line from two coincidal points!?
