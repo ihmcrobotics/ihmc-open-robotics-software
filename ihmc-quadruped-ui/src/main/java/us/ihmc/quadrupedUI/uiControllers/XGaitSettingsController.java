@@ -49,7 +49,7 @@ public class XGaitSettingsController
       stepGroundClearance.setValueFactory(new DoubleSpinnerValueFactory(0.0, 0.2, 0.0, 0.01));
 
       stepDuration.setValueFactory(new DoubleSpinnerValueFactory(0.0, 5.0, 0.0, 0.05));
-      endPhaseShift.setValueFactory(new DoubleSpinnerValueFactory(0.0, 1.5, 0.0, 0.05));
+      endDoubleSupportDuration.setValueFactory(new DoubleSpinnerValueFactory(0.0, 1.5, 0.0, 0.05));
       endPhaseShift.setValueFactory(new DoubleSpinnerValueFactory(0.0, 180, 0.0, 45));
    }
 

@@ -24,10 +24,17 @@ public class MainTabController
    private Button standUpButton;
 
    @FXML
-   private CheckBox enableBodyPoseControl;
+   private CheckBox enablePoseTeleopControl;
 
    @FXML
-   private CheckBox enableFootstepControl;
+   private CheckBox enableStepTeleopControl;
+
+   @FXML
+   private CheckBox enableHeightTeleopControl;
+
+   @FXML
+   private CheckBox enableJoystickControl;
+
 
    private AtomicReference<HighLevelControllerName> currentControllerState;
 
@@ -78,8 +85,10 @@ public class MainTabController
    public void bindControls()
    {
       messager.registerJavaFXSyncedTopicListener(QuadrupedUIMessagerAPI.CurrentControllerNameTopic, new TextViewerListener<>(currentStateViewer));
-      messager.bindBidirectional(QuadrupedUIMessagerAPI.EnableBodyTeleopTopic, enableBodyPoseControl.selectedProperty(), true);
-      messager.bindBidirectional(QuadrupedUIMessagerAPI.EnableStepTeleopTopic, enableFootstepControl.selectedProperty(), true);
+      messager.bindBidirectional(QuadrupedUIMessagerAPI.EnableBodyTeleopTopic, enablePoseTeleopControl.selectedProperty(), true);
+      messager.bindBidirectional(QuadrupedUIMessagerAPI.EnableStepTeleopTopic, enableStepTeleopControl.selectedProperty(), true);
+      messager.bindBidirectional(QuadrupedUIMessagerAPI.EnableHeightTeleopTopic, enableHeightTeleopControl.selectedProperty(), true);
+      messager.bindBidirectional(QuadrupedUIMessagerAPI.EnableJoystickTopic, enableJoystickControl.selectedProperty(), true);
    }
 
    private class TextViewerListener<T> implements TopicListener<T>
