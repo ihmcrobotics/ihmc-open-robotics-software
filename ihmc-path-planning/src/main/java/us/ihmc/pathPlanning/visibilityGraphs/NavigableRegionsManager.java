@@ -2,27 +2,28 @@ package us.ihmc.pathPlanning.visibilityGraphs;
 
 import java.util.*;
 
+import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.log.LogTools;
 import us.ihmc.pathPlanning.visibilityGraphs.clusterManagement.Cluster;
-import us.ihmc.pathPlanning.visibilityGraphs.dataStructure.InterRegionVisibilityMap;
-import us.ihmc.pathPlanning.visibilityGraphs.dataStructure.NavigableRegion;
-import us.ihmc.pathPlanning.visibilityGraphs.dataStructure.VisibilityGraphEdge;
-import us.ihmc.pathPlanning.visibilityGraphs.dataStructure.VisibilityGraphNode;
-import us.ihmc.pathPlanning.visibilityGraphs.dataStructure.VisibilityMapSolution;
-import us.ihmc.pathPlanning.visibilityGraphs.dataStructure.VisibilityMapWithNavigableRegion;
+import us.ihmc.pathPlanning.visibilityGraphs.dataStructure.*;
 import us.ihmc.pathPlanning.visibilityGraphs.interfaces.VisibilityGraphsCostParameters;
 import us.ihmc.pathPlanning.visibilityGraphs.interfaces.VisibilityGraphsParameters;
 import us.ihmc.pathPlanning.visibilityGraphs.interfaces.VisibilityMapHolder;
 import us.ihmc.pathPlanning.visibilityGraphs.tools.ClusterTools;
 import us.ihmc.pathPlanning.visibilityGraphs.tools.OcclusionTools;
 import us.ihmc.pathPlanning.visibilityGraphs.tools.PlanarRegionTools;
+import us.ihmc.pathPlanning.visibilityGraphs.tools.VisibilityTools;
 import us.ihmc.robotics.geometry.PlanarRegion;
 
 public class NavigableRegionsManager
 {
    private final static boolean debug = false;
+
+   private final static double bodyWidth = 1.1;
+   private final static double rotationWeight = 2.0;
+
    private final VisibilityGraphsParameters parameters;
    private final VisibilityGraphsCostParameters costParameters;
 
@@ -95,14 +96,10 @@ public class NavigableRegionsManager
    private List<Point3DReadOnly> calculateVisibilityMapWhileFindingPath(Point3DReadOnly startInWorld, Point3DReadOnly goalInWorld,
                                                                         boolean fullyExpandVisibilityGraph)
    {
-
-
       if (!initialize(startInWorld, goalInWorld, fullyExpandVisibilityGraph))
          return null;
 
       return planInternal();
-
-
    }
 
    private boolean initialize(Point3DReadOnly startInWorld, Point3DReadOnly goalInWorld, boolean fullyExpandVisibilityGraph)
@@ -163,8 +160,7 @@ public class NavigableRegionsManager
          {
             VisibilityGraphNode neighbor = getNeighborNode(nodeToExpand, neighboringEdge);
 
-            //TODO: Something besides distance cost later...
-            double connectionCost = computeConnectionCost(nodeToExpand, neighbor);
+            double connectionCost = computeEdgeCost(nodeToExpand, neighbor);
             double newCostFromStart = nodeToExpand.getCostFromStart() + connectionCost;
 
             double currentCostFromStart = neighbor.getCostFromStart();
@@ -222,10 +218,40 @@ public class NavigableRegionsManager
       return nodeToExpand.getEdges();
    }
 
-   private double computeConnectionCost(VisibilityGraphNode nodeToExpandInWorld, VisibilityGraphNode nextNodeInWorld)
+   private double computeEdgeCost(VisibilityGraphNode nodeToExpandInWorld, VisibilityGraphNode nextNodeInWorld)
    {
-      double distanceCost = costParameters.getDistanceWeight() * nodeToExpandInWorld.getPointInWorld().distanceXY(nextNodeInWorld.getPointInWorld());
-      return distanceCost;
+      Point3DReadOnly originPointInWorld = nodeToExpandInWorld.getPointInWorld();
+      Point3DReadOnly nextPointInWorld = nextNodeInWorld.getPointInWorld();
+
+      double horizontalDistance = originPointInWorld.distanceXY(nextPointInWorld);
+      if (horizontalDistance <= 0.0)
+         return 0.0;
+
+      double verticalDistance = Math.abs(nextPointInWorld.getZ() - originPointInWorld.getZ());
+
+      double distanceToCluster = Double.POSITIVE_INFINITY;
+      for (VisibilityGraphNavigableRegion navigableRegion : visibilityGraph.getVisibilityGraphNavigableRegions())
+      {
+         for (Cluster cluster : navigableRegion.getNavigableRegion().getObstacleClusters())
+         {
+            distanceToCluster = Math.min(distanceToCluster, VisibilityTools.distanceToCluster(new Point2D(originPointInWorld), new Point2D(nextPointInWorld),
+                                                                                              cluster.getNonNavigableExtrusionsInWorld2D(), cluster.isClosed()));
+         }
+      }
+
+      double angle = Math.atan(verticalDistance / horizontalDistance);
+
+      double distanceCost = costParameters.getDistanceWeight() * horizontalDistance;
+      double elevationCost = costParameters.getElevationWeight() * 2.0 * angle / Math.PI;
+
+      double distanceFromExtrusionForNoCost = bodyWidth / 2.0 - parameters.getObstacleExtrusionDistance();
+      double rotationCost = 0.0;
+      if (distanceToCluster < distanceFromExtrusionForNoCost)// && distanceToCluster > 0.0)
+      {
+         rotationCost = rotationWeight * (1.0 - distanceToCluster / distanceFromExtrusionForNoCost);
+      }
+
+      return distanceCost + elevationCost + rotationCost;
    }
 
    private boolean checkIfStartAndGoalAreValid(Point3DReadOnly start, Point3DReadOnly goal)

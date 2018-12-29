@@ -9,6 +9,11 @@ public interface VisibilityGraphsCostParameters
 
    default double getDistanceWeight()
    {
-      return 1.0;
+      return 1.5;
+   }
+
+   default double getElevationWeight()
+   {
+      return 0.0;
    }
 }

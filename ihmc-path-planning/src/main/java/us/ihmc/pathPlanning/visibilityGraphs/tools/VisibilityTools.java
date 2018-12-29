@@ -60,7 +60,7 @@ public class VisibilityTools
       if (numberOfVertices == 2)
          return distanceBetweenTwoLineSegment2Ds(firstPoint, secondPoint, listOfPointsInCluster.get(0), listOfPointsInCluster.get(1));
 
-      boolean pointIsVisibile = isPointVisible(firstPoint, secondPoint, listOfPointsInCluster, closed);
+      boolean pointIsVisible = isPointVisible(firstPoint, secondPoint, listOfPointsInCluster, closed);
 
       double minDistance = Double.POSITIVE_INFINITY;
 
@@ -74,7 +74,7 @@ public class VisibilityTools
 
       minDistance = Math.sqrt(minDistance);
 
-      if (!pointIsVisibile)
+      if (!pointIsVisible)
          minDistance = -minDistance;
       return minDistance;
    }
