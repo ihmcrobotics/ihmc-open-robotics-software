@@ -20,6 +20,12 @@
                 <Button fx:id="sitDownButton" GridPane.columnIndex="0" GridPane.rowIndex="1" text="Sit Down" onAction="#requestSitDown"/>
                 <Button fx:id="standUpButton" GridPane.columnIndex="1" GridPane.rowIndex="1" text="Stand Up" onAction="#requestStandUp"/>
 
+                <CheckBox fx:id="enablePoseTeleopControl" GridPane.columnIndex="0" GridPane.rowIndex="2" text="Enable Body Teleop" />
+                <CheckBox fx:id="enableStepTeleopControl" GridPane.columnIndex="1" GridPane.rowIndex="2" text="Enable Step Teleop" />
+
+                <CheckBox fx:id="enableHeightTeleopControl" GridPane.columnIndex="0" GridPane.rowIndex="3" text="Enable Height Teleop" />
+                <CheckBox fx:id="enableJoystickControl" GridPane.columnIndex="1" GridPane.rowIndex="3" text="Enable Joystick" />
+
             </children>
         </GridPane>
     </children>
