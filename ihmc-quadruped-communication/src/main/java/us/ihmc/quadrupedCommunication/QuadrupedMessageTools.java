@@ -138,4 +138,14 @@ public class QuadrupedMessageTools
       message.getEuclideanTrajectory().getSelectionMatrix().setZSelected(true);
       return message;
    }
+
+   public static QuadrupedTeleopDesiredVelocity createQuadrupedTeleopDesiredVelocity(double xVelocity, double yVelocity, double yawVelocity)
+   {
+      QuadrupedTeleopDesiredVelocity message = new QuadrupedTeleopDesiredVelocity();
+      message.setDesiredXVelocity(xVelocity);
+      message.setDesiredYVelocity(yVelocity);
+      message.setDesiredYawVelocity(yawVelocity);
+
+      return message;
+   }
 }

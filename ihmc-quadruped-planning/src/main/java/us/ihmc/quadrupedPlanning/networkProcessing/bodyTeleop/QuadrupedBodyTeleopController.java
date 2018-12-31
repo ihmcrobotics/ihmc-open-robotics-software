@@ -3,12 +3,10 @@ package us.ihmc.quadrupedPlanning.networkProcessing.bodyTeleop;
 import controller_msgs.msg.dds.HighLevelStateChangeStatusMessage;
 import controller_msgs.msg.dds.QuadrupedSteppingStateChangeMessage;
 import controller_msgs.msg.dds.QuadrupedTeleopDesiredPose;
-import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
-import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.euclid.tuple4D.interfaces.QuaternionReadOnly;
 import us.ihmc.quadrupedPlanning.networkProcessing.OutputManager;
-import us.ihmc.quadrupedPlanning.networkProcessing.QuadrupedRobotModelProviderNode;
+import us.ihmc.quadrupedPlanning.networkProcessing.QuadrupedRobotDataReceiver;
 import us.ihmc.quadrupedPlanning.networkProcessing.QuadrupedToolboxController;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 
@@ -21,12 +19,11 @@ public class QuadrupedBodyTeleopController extends QuadrupedToolboxController
    private final AtomicReference<HighLevelStateChangeStatusMessage> controllerStateChangeMessage = new AtomicReference<>();
    private final AtomicReference<QuadrupedSteppingStateChangeMessage> steppingStateChangeMessage = new AtomicReference<>();
 
-   public QuadrupedBodyTeleopController(OutputManager statusOutputManager, QuadrupedRobotModelProviderNode robotModelProvider,
-                                        YoVariableRegistry parentRegistry)
+   public QuadrupedBodyTeleopController(OutputManager statusOutputManager, QuadrupedRobotDataReceiver robotDataReceiver, YoVariableRegistry parentRegistry)
    {
-      super(statusOutputManager, parentRegistry);
+      super(robotDataReceiver, statusOutputManager, parentRegistry);
 
-      teleopManager = new QuadrupedBodyTeleopManager(robotModelProvider.getReferenceFrames(), registry);
+      teleopManager = new QuadrupedBodyTeleopManager(robotDataReceiver.getReferenceFrames(), registry);
 
    }
 
@@ -58,7 +55,7 @@ public class QuadrupedBodyTeleopController extends QuadrupedToolboxController
    }
 
    @Override
-   public boolean initialize()
+   public boolean initializeInternal()
    {
       return true;
    }

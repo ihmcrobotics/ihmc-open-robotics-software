@@ -1,19 +1,33 @@
 package us.ihmc.quadrupedRobotics.controller.force;
 
+import controller_msgs.msg.dds.QuadrupedTeleopDesiredVelocity;
+import controller_msgs.msg.dds.QuadrupedXGaitSettingsPacket;
+import controller_msgs.msg.dds.ToolboxStateMessage;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
+import us.ihmc.communication.IHMCROS2Publisher;
+import us.ihmc.communication.ROS2Tools;
+import us.ihmc.communication.packets.MessageTools;
+import us.ihmc.communication.packets.ToolboxState;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
+import us.ihmc.pubsub.DomainFactory;
 import us.ihmc.quadrupedBasics.QuadrupedSteppingStateEnum;
+import us.ihmc.quadrupedCommunication.QuadrupedMessageTools;
 import us.ihmc.quadrupedPlanning.input.QuadrupedTeleopManager;
+import us.ihmc.quadrupedPlanning.networkProcessing.QuadrupedNetworkProcessor;
 import us.ihmc.quadrupedRobotics.*;
 import us.ihmc.quadrupedRobotics.controller.QuadrupedControlMode;
 import us.ihmc.quadrupedRobotics.simulation.QuadrupedGroundContactModelType;
 import us.ihmc.robotics.testing.YoVariableTestGoal;
+import us.ihmc.ros2.Ros2Node;
+import us.ihmc.ros2.Ros2Publisher;
 import us.ihmc.simulationConstructionSetTools.util.simulationrunner.GoalOrientedTestConductor;
 import us.ihmc.tools.MemoryTools;
 
 import java.io.IOException;
+
+import static us.ihmc.communication.ROS2Tools.getTopicNameGenerator;
 
 public abstract class QuadrupedXGaitFlatGroundWalkingTest implements QuadrupedMultiRobotTestInterface
 {
@@ -181,9 +195,26 @@ public abstract class QuadrupedXGaitFlatGroundWalkingTest implements QuadrupedMu
 
       stepTeleopManager.getXGaitSettings().setEndPhaseShift(endPhaseShift);
 
+      Ros2Node ros2Node = ROS2Tools.createRos2Node(DomainFactory.PubSubImplementation.INTRAPROCESS, "quadruped_teleop_manager");
+
+      /*
+      String robotName = quadrupedTestFactory.getRobotName();
+      ROS2Tools.MessageTopicNameGenerator stepTeleopSubscriber = getTopicNameGenerator(robotName, ROS2Tools.STEP_TELEOP_TOOLBOX, ROS2Tools.ROS2TopicQualifier.INPUT);
+      IHMCROS2Publisher<QuadrupedXGaitSettingsPacket> xGaitSettingsPublisher = ROS2Tools.createPublisher(ros2Node, QuadrupedXGaitSettingsPacket.class, stepTeleopSubscriber);
+      IHMCROS2Publisher<QuadrupedTeleopDesiredVelocity> velocityPublisher = ROS2Tools.createPublisher(ros2Node, QuadrupedTeleopDesiredVelocity.class,
+                                                                                                      stepTeleopSubscriber);
+      IHMCROS2Publisher<ToolboxStateMessage> stepTeleopToolboxState = ROS2Tools.createPublisher(ros2Node, ToolboxStateMessage.class, stepTeleopSubscriber);
+
+
+      xGaitSettingsPublisher.publish(stepTeleopManager.getXGaitSettings().getAsPacket());
+      */
+
       double walkTime = 6.0;
       stepTeleopManager.requestXGait();
       stepTeleopManager.setDesiredVelocity(walkingSpeed, 0.0, 0.0);
+
+//      stepTeleopToolboxState.publish(MessageTools.createToolboxStateMessage(ToolboxState.WAKE_UP));
+//      velocityPublisher.publish(QuadrupedMessageTools.createQuadrupedTeleopDesiredVelocity(walkingSpeed, 0.0, 0.0));
       conductor.addSustainGoal(QuadrupedTestGoals.notFallen(variables));
       conductor.addTerminalGoal(YoVariableTestGoal.timeInFuture(variables.getYoTime(), walkTime));
 
@@ -199,6 +230,7 @@ public abstract class QuadrupedXGaitFlatGroundWalkingTest implements QuadrupedMu
 
       conductor.simulate();
 
+//      velocityPublisher.publish(QuadrupedMessageTools.createQuadrupedTeleopDesiredVelocity(0.0, 0.0, 0.0));
       stepTeleopManager.setDesiredVelocity(0.0, 0.0, 0.0);
       conductor.addTerminalGoal(YoVariableTestGoal.timeInFuture(variables.getYoTime(), 1.0));
 

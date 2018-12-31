@@ -5,6 +5,7 @@ import us.ihmc.communication.packetCommunicator.PacketCommunicator;
 import us.ihmc.communication.packets.PacketDestination;
 import us.ihmc.pubsub.DomainFactory;
 import us.ihmc.quadrupedPlanning.QuadrupedXGaitSettings;
+import us.ihmc.quadrupedPlanning.QuadrupedXGaitSettingsReadOnly;
 import us.ihmc.quadrupedPlanning.networkProcessing.bodyTeleop.QuadrupedBodyTeleopModule;
 import us.ihmc.quadrupedPlanning.networkProcessing.heightTeleop.QuadrupedBodyHeightTeleopModule;
 import us.ihmc.quadrupedPlanning.networkProcessing.stepTeleop.QuadrupedStepTeleopModule;
@@ -25,7 +26,7 @@ public class QuadrupedNetworkProcessor
    }
 
    public QuadrupedNetworkProcessor(FullQuadrupedRobotModelFactory robotModel, QuadrupedNetworkModuleParameters params, double nominalHeight,
-                                    QuadrupedXGaitSettings xGaitSettings, DomainFactory.PubSubImplementation pubSubImplementation)
+                                    QuadrupedXGaitSettingsReadOnly xGaitSettings, DomainFactory.PubSubImplementation pubSubImplementation)
    {
       tryToStartModule(() -> setupStepTeleopModule(robotModel, xGaitSettings, params, pubSubImplementation));
       tryToStartModule(() -> setupBodyHeightTeleopModule(robotModel, params, nominalHeight, pubSubImplementation));
@@ -34,7 +35,7 @@ public class QuadrupedNetworkProcessor
       tryToStartModule(() -> setupRobotEnvironmentAwerenessModule(params, pubSubImplementation));
    }
 
-   private void setupStepTeleopModule(FullQuadrupedRobotModelFactory modelFactory, QuadrupedXGaitSettings xGaitSettings,
+   private void setupStepTeleopModule(FullQuadrupedRobotModelFactory modelFactory, QuadrupedXGaitSettingsReadOnly xGaitSettings,
                                       QuadrupedNetworkModuleParameters params, DomainFactory.PubSubImplementation pubSubImplementation) throws IOException
    {
       if (!params.isStepTeleopModuleEnabled())
@@ -43,7 +44,7 @@ public class QuadrupedNetworkProcessor
    }
 
    private void setupBodyHeightTeleopModule(FullQuadrupedRobotModelFactory modelFactory, QuadrupedNetworkModuleParameters params, double nominalHeight,
-                                            DomainFactory.PubSubImplementation pubSubImplementation) throws IOException
+                                            DomainFactory.PubSubImplementation pubSubImplementation)
    {
       if (!params.isBodyHeightTeleopModuleEnabled())
          return;
@@ -51,7 +52,7 @@ public class QuadrupedNetworkProcessor
    }
 
    private void setupBodyTeleopModule(FullQuadrupedRobotModelFactory modelFactory, QuadrupedNetworkModuleParameters params,
-                                      DomainFactory.PubSubImplementation pubSubImplementation) throws IOException
+                                      DomainFactory.PubSubImplementation pubSubImplementation)
    {
       if (!params.isBodyTeleopModuleEnabled())
          return;
@@ -59,7 +60,7 @@ public class QuadrupedNetworkProcessor
    }
 
    private void setupXBoxModule(FullQuadrupedRobotModelFactory modelFactory, QuadrupedNetworkModuleParameters params,
-                                QuadrupedXGaitSettings defaultXGaitSettings, double nominalBodyHeight, DomainFactory.PubSubImplementation pubSubImplementation)
+                                QuadrupedXGaitSettingsReadOnly defaultXGaitSettings, double nominalBodyHeight, DomainFactory.PubSubImplementation pubSubImplementation)
          throws IOException
    {
       if (!params.isXBoxModuleEnabled())

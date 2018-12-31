@@ -8,10 +8,12 @@ import us.ihmc.multicastLogDataProtocol.modelLoaders.LogModelProvider;
 import us.ihmc.pubsub.DomainFactory;
 import us.ihmc.quadrupedCommunication.QuadrupedControllerAPIDefinition;
 import us.ihmc.quadrupedPlanning.QuadrupedXGaitSettings;
+import us.ihmc.quadrupedPlanning.QuadrupedXGaitSettingsReadOnly;
 import us.ihmc.quadrupedPlanning.networkProcessing.QuadrupedToolboxController;
 import us.ihmc.quadrupedPlanning.networkProcessing.QuadrupedToolboxModule;
 import us.ihmc.robotModels.FullQuadrupedRobotModelFactory;
 import us.ihmc.ros2.RealtimeRos2Node;
+import us.ihmc.yoVariables.parameters.DefaultParameterReader;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -27,14 +29,16 @@ public class QuadrupedXBoxModule extends QuadrupedToolboxModule
 
    private final QuadrupedXBoxController xBoxController;
 
-   public QuadrupedXBoxModule(FullQuadrupedRobotModelFactory modelFactory, QuadrupedXGaitSettings defaultXGaitSettings, double nominalBodyHeight,
+   public QuadrupedXBoxModule(FullQuadrupedRobotModelFactory modelFactory, QuadrupedXGaitSettingsReadOnly defaultXGaitSettings, double nominalBodyHeight,
                               LogModelProvider modelProvider, DomainFactory.PubSubImplementation pubSubImplementation)
          throws IOException
    {
       super(modelFactory.getRobotDescription().getName(), modelFactory.createFullRobotModel(), modelProvider, false, updatePeriodMilliseconds,
             pubSubImplementation);
 
-      xBoxController = new QuadrupedXBoxController(defaultXGaitSettings, nominalBodyHeight, outputManager, registry, updatePeriodMilliseconds);
+      xBoxController = new QuadrupedXBoxController(robotDataReceiver, defaultXGaitSettings, nominalBodyHeight, outputManager, registry, updatePeriodMilliseconds);
+
+      new DefaultParameterReader().readParametersInRegistry(registry);
    }
 
    @Override
@@ -62,7 +66,7 @@ public class QuadrupedXBoxModule extends QuadrupedToolboxModule
    @Override
    public List<Class<? extends Command<?, ?>>> createListOfSupportedCommands()
    {
-      return null;
+      return new ArrayList<>();
    }
 
    @Override

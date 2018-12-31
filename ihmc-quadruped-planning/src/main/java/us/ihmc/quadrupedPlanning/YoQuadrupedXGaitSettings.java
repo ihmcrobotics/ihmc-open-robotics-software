@@ -34,6 +34,8 @@ public class YoQuadrupedXGaitSettings implements QuadrupedXGaitSettingsReadOnly
    private final YoDouble yoEndDoubleSupportDuration = new YoDouble("endDoubleSupportDurationInput", registry);
    private final YoDouble yoEndPhaseShift = new YoDouble("endPhaseShiftInput", registry);
 
+   private final QuadrupedXGaitSettingsPacket packet = new QuadrupedXGaitSettingsPacket();
+
    public YoQuadrupedXGaitSettings(QuadrupedXGaitSettingsReadOnly defaultXGaitSettings, YoVariableRegistry parentRegistry)
    {
       yoStanceLength.set(defaultXGaitSettings.getStanceLength());
@@ -148,5 +150,17 @@ public class YoQuadrupedXGaitSettings implements QuadrupedXGaitSettingsReadOnly
          setEndDoubleSupportDuration(packet.getEndDoubleSupportDuration());
       if (packet.getEndPhaseShift() != -1.0)
          setEndPhaseShift(packet.getEndPhaseShift());
+   }
+
+   public QuadrupedXGaitSettingsPacket getAsPacket()
+   {
+      packet.setStanceLength(yoStanceLength.getDoubleValue());
+      packet.setStanceWidth(yoStanceWidth.getDoubleValue());
+      packet.setStepGroundClearance(yoStepGroundClearance.getDoubleValue());
+      packet.setStepDuration(yoStepDuration.getDoubleValue());
+      packet.setEndDoubleSupportDuration(yoEndDoubleSupportDuration.getDoubleValue());
+      packet.setEndPhaseShift(yoEndPhaseShift.getDoubleValue());
+
+      return packet;
    }
 }

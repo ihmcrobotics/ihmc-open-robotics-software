@@ -3,6 +3,7 @@ package us.ihmc.quadrupedPlanning.networkProcessing;
 import controller_msgs.msg.dds.InvalidPacketNotificationPacket;
 import controller_msgs.msg.dds.MessageCollection;
 import controller_msgs.msg.dds.MessageCollectionNotification;
+import javafx.beans.InvalidationListener;
 import us.ihmc.commonWalkingControlModules.controllerAPI.input.MessageCollector;
 import us.ihmc.commonWalkingControlModules.controllerAPI.input.MessageCollector.MessageIDExtractor;
 import us.ihmc.commons.PrintTools;
@@ -63,7 +64,7 @@ public class NetworkSubscriber
    private final MessageTopicNameGenerator subscriberTopicNameGenerator;
 
    public NetworkSubscriber(MessageTopicNameGenerator subscriberTopicNameGenerator, CommandInputManager controllerCommandInputManager,
-                            OutputManager messageOutputManager, RealtimeRos2Node realtimeRos2Node)
+                            MessageTopicNameGenerator publisherTopicNameGenerator, OutputManager messageOutputManager, RealtimeRos2Node realtimeRos2Node)
    {
       this.subscriberTopicNameGenerator = subscriberTopicNameGenerator;
       this.controllerCommandInputManager = controllerCommandInputManager;
@@ -78,7 +79,7 @@ public class NetworkSubscriber
       if (realtimeRos2Node == null)
          PrintTools.error(this, "No ROS2 node, " + getClass().getSimpleName() + " cannot be created.");
 
-      listOfSupportedOutputMessages.add(InvalidPacketNotificationPacket.class);
+      messageOutputManager.registerOutputMessage(InvalidPacketNotificationPacket.class, publisherTopicNameGenerator);
 
       createPublishersSubscribersForSupportedMessages();
       createGlobalStatusMessageListener();

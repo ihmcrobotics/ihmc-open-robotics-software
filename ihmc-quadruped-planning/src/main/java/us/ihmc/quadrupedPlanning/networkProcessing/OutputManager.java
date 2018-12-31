@@ -69,7 +69,7 @@ public class OutputManager
     * It is used to register in the API a output message.
     * @param outputMessageClass
     */
-   private <S extends Settable<S>> void registerOutputMessage(Class<S> outputMessageClass, MessageTopicNameGenerator topicNameGenerator)
+   public <S extends Settable<S>> void registerOutputMessage(Class<S> outputMessageClass, MessageTopicNameGenerator topicNameGenerator)
    {
       Builder<S> builder = CommandInputManager.createBuilderWithEmptyConstructor(outputMessageClass);
       outputClassToObjectMap.put(outputMessageClass, builder.newInstance());

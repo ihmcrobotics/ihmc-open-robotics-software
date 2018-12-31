@@ -7,12 +7,13 @@ import us.ihmc.euclid.interfaces.Settable;
 import us.ihmc.multicastLogDataProtocol.modelLoaders.LogModelProvider;
 import us.ihmc.pubsub.DomainFactory;
 import us.ihmc.quadrupedCommunication.QuadrupedControllerAPIDefinition;
-import us.ihmc.quadrupedPlanning.networkProcessing.QuadrupedRobotModelProviderNode;
 import us.ihmc.quadrupedPlanning.networkProcessing.QuadrupedToolboxController;
 import us.ihmc.quadrupedPlanning.networkProcessing.QuadrupedToolboxModule;
 import us.ihmc.robotModels.FullQuadrupedRobotModelFactory;
 import us.ihmc.ros2.RealtimeRos2Node;
+import us.ihmc.yoVariables.parameters.DefaultParameterReader;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -21,7 +22,7 @@ import static us.ihmc.communication.ROS2Tools.getTopicNameGenerator;
 
 public class QuadrupedBodyTeleopModule extends QuadrupedToolboxModule
 {
-   private static final int updatePeriodMilliseconds = 1;
+   private static final int updatePeriodMilliseconds = 10;
 
    private final QuadrupedBodyTeleopController bodyTeleopController;
 
@@ -31,9 +32,9 @@ public class QuadrupedBodyTeleopModule extends QuadrupedToolboxModule
       super(modelFactory.getRobotDescription().getName(), modelFactory.createFullRobotModel(), modelProvider, false, updatePeriodMilliseconds,
             pubSubImplementation);
 
-      QuadrupedRobotModelProviderNode robotModelProvider = new QuadrupedRobotModelProviderNode(robotName, realtimeRos2Node, modelFactory);
+      bodyTeleopController = new QuadrupedBodyTeleopController(outputManager, robotDataReceiver, registry);
 
-      bodyTeleopController = new QuadrupedBodyTeleopController(outputManager, robotModelProvider, registry);
+      new DefaultParameterReader().readParametersInRegistry(registry);
    }
 
    @Override
@@ -63,7 +64,7 @@ public class QuadrupedBodyTeleopModule extends QuadrupedToolboxModule
    @Override
    public List<Class<? extends Command<?, ?>>> createListOfSupportedCommands()
    {
-      return null;
+      return new ArrayList<>();
    }
 
    @Override

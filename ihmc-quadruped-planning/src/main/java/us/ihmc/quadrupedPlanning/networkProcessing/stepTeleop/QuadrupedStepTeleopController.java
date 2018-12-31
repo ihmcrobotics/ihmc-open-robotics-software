@@ -2,11 +2,10 @@ package us.ihmc.quadrupedPlanning.networkProcessing.stepTeleop;
 
 import controller_msgs.msg.dds.*;
 import us.ihmc.commons.Conversions;
-import us.ihmc.communication.controllerAPI.StatusMessageOutputManager;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.quadrupedPlanning.QuadrupedXGaitSettingsReadOnly;
 import us.ihmc.quadrupedPlanning.networkProcessing.OutputManager;
-import us.ihmc.quadrupedPlanning.networkProcessing.QuadrupedRobotModelProviderNode;
+import us.ihmc.quadrupedPlanning.networkProcessing.QuadrupedRobotDataReceiver;
 import us.ihmc.quadrupedPlanning.networkProcessing.QuadrupedToolboxController;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 
@@ -20,12 +19,12 @@ public class QuadrupedStepTeleopController extends QuadrupedToolboxController
    private final AtomicReference<QuadrupedSteppingStateChangeMessage> steppingStateChangeMessage = new AtomicReference<>();
 
    public QuadrupedStepTeleopController(QuadrupedXGaitSettingsReadOnly defaultXGaitSettings, OutputManager statusOutputManager,
-                                        QuadrupedRobotModelProviderNode robotModelProvider, YoVariableRegistry parentRegistry,
+                                        QuadrupedRobotDataReceiver robotDataReceiver, YoVariableRegistry parentRegistry,
                                         YoGraphicsListRegistry graphicsListRegistry, long tickTimeMs)
    {
-      super(statusOutputManager, parentRegistry);
+      super(robotDataReceiver, statusOutputManager, parentRegistry);
 
-      teleopManager = new QuadrupedStepTeleopManager(defaultXGaitSettings, robotModelProvider.getReferenceFrames(),
+      teleopManager = new QuadrupedStepTeleopManager(defaultXGaitSettings, robotDataReceiver.getReferenceFrames(),
                                                      Conversions.millisecondsToSeconds(tickTimeMs), graphicsListRegistry, registry);
    }
 
@@ -80,7 +79,7 @@ public class QuadrupedStepTeleopController extends QuadrupedToolboxController
    }
 
    @Override
-   public boolean initialize()
+   public boolean initializeInternal()
    {
       teleopManager.initialize();
 
