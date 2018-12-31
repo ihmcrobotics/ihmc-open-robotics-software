@@ -6,6 +6,7 @@ import java.util.List;
 import us.ihmc.euclid.geometry.BoundingBox2D;
 import us.ihmc.euclid.geometry.tools.EuclidGeometryPolygonTools;
 import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
+import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DBasics;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DBasics;
@@ -47,29 +48,42 @@ public class VisibilityTools
    }
 
    public static double distanceToCluster(Point2DReadOnly firstPoint, Point2DReadOnly secondPoint, List<? extends Point2DReadOnly> listOfPointsInCluster,
-                                          boolean closed)
+                                          Point2DBasics closestPointToPack, boolean closed)
    {
       int numberOfVertices = listOfPointsInCluster.size();
 
       if (numberOfVertices == 0)
+      {
+         closestPointToPack.setToNaN();
          return Double.NaN;
+      }
 
       if (numberOfVertices == 1)
-         return distanceFromPoint2DToLineSegment2D(listOfPointsInCluster.get(0), firstPoint, secondPoint);
+      {
+         orthogonalProjectionOnLineSegment2D(listOfPointsInCluster.get(0), firstPoint, secondPoint, closestPointToPack);
+         return listOfPointsInCluster.get(0).distance(closestPointToPack);
+      }
 
       if (numberOfVertices == 2)
-         return distanceBetweenTwoLineSegment2Ds(firstPoint, secondPoint, listOfPointsInCluster.get(0), listOfPointsInCluster.get(1));
+         return closestPoint2DsBetweenTwoLineSegment2Ds(firstPoint, secondPoint, listOfPointsInCluster.get(0), listOfPointsInCluster.get(1), closestPointToPack,
+                                                        null);
 
       boolean pointIsVisible = isPointVisible(firstPoint, secondPoint, listOfPointsInCluster, closed);
 
       double minDistance = Double.POSITIVE_INFINITY;
 
+      Point2DBasics closestPoint = new Point2D();
       for (int index = 0; index < numberOfVertices; index++)
       {
          Point2DReadOnly edgeStart = listOfPointsInCluster.get(index);
          Point2DReadOnly edgeEnd = listOfPointsInCluster.get(next(index, numberOfVertices));
 
-         minDistance = Math.min(minDistance, distanceBetweenTwoLineSegment2Ds(firstPoint, secondPoint, edgeStart, edgeEnd));
+         double distance = closestPoint2DsBetweenTwoLineSegment2Ds(firstPoint, secondPoint, edgeStart, edgeEnd, closestPoint, null);
+         if (distance < minDistance)
+         {
+            minDistance = distance;
+            closestPointToPack.set(closestPoint);
+         }
       }
 
       minDistance = Math.sqrt(minDistance);

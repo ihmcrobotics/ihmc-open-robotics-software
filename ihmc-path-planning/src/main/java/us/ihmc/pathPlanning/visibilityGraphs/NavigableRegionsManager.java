@@ -3,6 +3,7 @@ package us.ihmc.pathPlanning.visibilityGraphs;
 import java.util.*;
 
 import us.ihmc.euclid.tuple2D.Point2D;
+import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.log.LogTools;
@@ -222,6 +223,8 @@ public class NavigableRegionsManager
    {
       Point3DReadOnly originPointInWorld = nodeToExpandInWorld.getPointInWorld();
       Point3DReadOnly nextPointInWorld = nextNodeInWorld.getPointInWorld();
+      Point2DReadOnly originPointInWorld2D = new Point2D(originPointInWorld);
+      Point2DReadOnly nextPointInWorld2D = new Point2D(nextPointInWorld);;
 
       double horizontalDistance = originPointInWorld.distanceXY(nextPointInWorld);
       if (horizontalDistance <= 0.0)
@@ -230,12 +233,19 @@ public class NavigableRegionsManager
       double verticalDistance = Math.abs(nextPointInWorld.getZ() - originPointInWorld.getZ());
 
       double distanceToCluster = Double.POSITIVE_INFINITY;
+      Point2D closestPointToCluster = new Point2D();
       for (VisibilityGraphNavigableRegion navigableRegion : visibilityGraph.getVisibilityGraphNavigableRegions())
       {
          for (Cluster cluster : navigableRegion.getNavigableRegion().getObstacleClusters())
          {
-            distanceToCluster = Math.min(distanceToCluster, VisibilityTools.distanceToCluster(new Point2D(originPointInWorld), new Point2D(nextPointInWorld),
-                                                                                              cluster.getNonNavigableExtrusionsInWorld2D(), cluster.isClosed()));
+            Point2D tempPoint = new Point2D();
+            double distance = VisibilityTools.distanceToCluster(originPointInWorld2D, nextPointInWorld2D, cluster.getNonNavigableExtrusionsInWorld2D(),
+                                                                tempPoint, cluster.isClosed());
+            if (distance < distanceToCluster)
+            {
+               distanceToCluster = distance;
+               closestPointToCluster.set(tempPoint);
+            }
          }
       }
 
@@ -249,6 +259,10 @@ public class NavigableRegionsManager
       if (distanceToCluster < distanceFromExtrusionForNoCost)// && distanceToCluster > 0.0)
       {
          rotationCost = rotationWeight * (1.0 - distanceToCluster / distanceFromExtrusionForNoCost);
+         if (!closestPointToCluster.geometricallyEquals(originPointInWorld2D, 1e-4) && !closestPointToCluster.geometricallyEquals(nextPointInWorld2D, 1e-4))
+         {
+            Point2D pointInLocal = new Point2D();
+         }
       }
 
       return distanceCost + elevationCost + rotationCost;
