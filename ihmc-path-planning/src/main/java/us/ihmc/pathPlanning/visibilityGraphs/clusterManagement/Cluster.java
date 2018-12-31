@@ -16,10 +16,10 @@ import us.ihmc.robotics.geometry.PlanarRegion;
 
 /**
  * A Cluster typically represents an obstacle over a planar region.
- * It consists of the 3D points of the obstacle, the 2D points of the navigable spots on the planar region 
+ * It consists of the 3D points of the obstacle, the 2D points of the navigable spots on the planar region
  * and the 2D points of the nonNavigable spots on the planar region resulting from the obstacle.
  * It contains the RigidBodyTransform for moving the points from local to world coordinates.
- * 
+ *
  * There is one cluster per planar region per obstacle. Each PlanarRegion has a closed concave hull.
  */
 public class Cluster
@@ -83,11 +83,11 @@ public class Cluster
 
    public enum ClusterType
    {
-      /**  
+      /**
        * MULTI_LINE means open at the end, not closed. This type is often used when projecting a PlanarRegion onto another parallel PlanarRegion.
        */
       MULTI_LINE,
-      /**  
+      /**
        * POLYGON is a closed, perhaps concave, polygon.
        */
       POLYGON;
@@ -234,6 +234,11 @@ public class Cluster
       return rawPointsInLocal3D.stream().map(this::toWorld3D).collect(Collectors.toList());
    }
 
+   public List<Point2DReadOnly> getRawPointsInWorld2D()
+   {
+      return rawPointsInLocal3D.stream().map(this::toWorld2D).collect(Collectors.toList());
+   }
+
    public List<Point2DReadOnly> getRawPointsInLocal2D()
    {
       return rawPointsInLocal3D.stream().map(Point2D::new).collect(Collectors.toList());
@@ -340,9 +345,28 @@ public class Cluster
       return nonNavigableExtrusionsInLocal.stream().map(this::toWorld3D).collect(Collectors.toList());
    }
 
+   public List<Point2DReadOnly> getNonNavigableExtrusionsInWorld2D()
+   {
+      return nonNavigableExtrusionsInLocal.stream().map(this::toWorld2D).collect(Collectors.toList());
+   }
+
    private Point3D toWorld3D(Point2DReadOnly pointInLocal)
    {
       return toWorld3D(new Point3D(pointInLocal));
+   }
+
+   private Point2D toWorld2D(Point3DReadOnly pointInLocal)
+   {
+      Point2D pointInWorld = new Point2D(pointInLocal);
+      transformToWorld.transform(pointInWorld, false);
+      return pointInWorld;
+   }
+
+   private Point2D toWorld2D(Point2DReadOnly pointInLocal)
+   {
+      Point2D pointInWorld = new Point2D(pointInLocal);
+      transformToWorld.transform(pointInWorld, false);
+      return pointInWorld;
    }
 
    private Point3D toWorld3D(Point3DReadOnly pointInLocal)
