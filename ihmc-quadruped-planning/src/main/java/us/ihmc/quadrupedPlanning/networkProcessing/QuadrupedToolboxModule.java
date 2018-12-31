@@ -1,6 +1,7 @@
 package us.ihmc.quadrupedPlanning.networkProcessing;
 
 import com.google.common.base.CaseFormat;
+import controller_msgs.msg.dds.RobotConfigurationData;
 import controller_msgs.msg.dds.ToolboxStateMessage;
 import us.ihmc.commons.Conversions;
 import us.ihmc.commons.PrintTools;
@@ -16,6 +17,7 @@ import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.log.LogTools;
 import us.ihmc.multicastLogDataProtocol.modelLoaders.LogModelProvider;
 import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
+import us.ihmc.quadrupedCommunication.QuadrupedControllerAPIDefinition;
 import us.ihmc.robotDataLogger.YoVariableServer;
 import us.ihmc.robotDataLogger.logger.LogSettings;
 import us.ihmc.robotModels.FullQuadrupedRobotModel;
@@ -35,7 +37,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
  */
 public abstract class QuadrupedToolboxModule
 {
-   protected static final boolean DEBUG = false;
+   protected static final boolean DEBUG = true;
    protected static final double YO_VARIABLE_SERVER_DT = 0.01;
    protected static final int DEFAULT_UPDATE_PERIOD_MILLISECONDS = 1;
 
@@ -57,6 +59,8 @@ public abstract class QuadrupedToolboxModule
    protected ScheduledFuture<?> yoVariableServerScheduled = null;
    protected Runnable toolboxRunnable = null;
    protected final int updatePeriodMilliseconds;
+
+   protected final QuadrupedRobotDataReceiver robotDataReceiver;
 
    protected final YoDouble timeWithoutInputsBeforeGoingToSleep = new YoDouble("timeWithoutInputsBeforeGoingToSleep", registry);
    protected final YoDouble timeOfLastInput = new YoDouble("timeOfLastInput", registry);
@@ -94,7 +98,7 @@ public abstract class QuadrupedToolboxModule
       realtimeRos2Node = ROS2Tools.createRealtimeRos2Node(pubSubImplementation, "ihmc_" + CaseFormat.UPPER_CAMEL.to(CaseFormat.LOWER_UNDERSCORE, name));
       inputManager = new CommandInputManager(name, createListOfSupportedCommands());
       outputManager = new OutputManager(createMapOfSupportedOutputMessages());
-      networkSubscriber = new NetworkSubscriber(getSubscriberTopicNameGenerator(), inputManager, outputManager, realtimeRos2Node);
+      networkSubscriber = new NetworkSubscriber(getSubscriberTopicNameGenerator(), inputManager, getPublisherTopicNameGenerator(), outputManager, realtimeRos2Node);
 
       executorService = Executors.newScheduledThreadPool(1, threadFactory);
 
@@ -111,9 +115,16 @@ public abstract class QuadrupedToolboxModule
          }
       });
 
+      robotDataReceiver = new QuadrupedRobotDataReceiver(fullRobotModel, null);
+
+
       networkSubscriber.addMessageFilter(createMessageFilter());
 
       ROS2Tools.createCallbackSubscription(realtimeRos2Node, ToolboxStateMessage.class, getSubscriberTopicNameGenerator(), s -> receivedPacket(s.takeNextData()));
+      ROS2Tools.MessageTopicNameGenerator controllerPubGenerator = QuadrupedControllerAPIDefinition.getPublisherTopicNameGenerator(robotName);
+      ROS2Tools
+            .createCallbackSubscription(realtimeRos2Node, RobotConfigurationData.class, controllerPubGenerator, s -> robotDataReceiver.receivedPacket(s.takeNextData()));
+
       registerExtraSubscribers(realtimeRos2Node);
       realtimeRos2Node.spin();
    }
@@ -302,6 +313,9 @@ public abstract class QuadrupedToolboxModule
             if (Thread.interrupted())
                return;
 
+
+            robotDataReceiver.updateRobotModel();
+
             try
             {
                getToolboxController().update();
@@ -314,12 +328,18 @@ public abstract class QuadrupedToolboxModule
                else if (getToolboxController().isDone())
                   sleep();
             }
+            catch (InterruptedException e1)
+            {
+               e1.printStackTrace();
+               sleep();
+            }
             catch (Exception e)
             {
                e.printStackTrace();
                sleep();
                throw e;
             }
+
          }
       };
    }

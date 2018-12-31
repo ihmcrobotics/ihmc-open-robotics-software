@@ -2,7 +2,7 @@ package us.ihmc.quadrupedPlanning.networkProcessing.heightTeleop;
 
 import controller_msgs.msg.dds.HighLevelStateChangeStatusMessage;
 import us.ihmc.quadrupedPlanning.networkProcessing.OutputManager;
-import us.ihmc.quadrupedPlanning.networkProcessing.QuadrupedRobotModelProviderNode;
+import us.ihmc.quadrupedPlanning.networkProcessing.QuadrupedRobotDataReceiver;
 import us.ihmc.quadrupedPlanning.networkProcessing.QuadrupedToolboxController;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 
@@ -14,12 +14,12 @@ public class QuadrupedBodyHeightTeleopController extends QuadrupedToolboxControl
 
    private final AtomicReference<HighLevelStateChangeStatusMessage> controllerStateChangeMessage = new AtomicReference<>();
 
-   public QuadrupedBodyHeightTeleopController(double initialBodyHeight, OutputManager statusOutputManager,
-                                              QuadrupedRobotModelProviderNode robotModelProvider, YoVariableRegistry parentRegistry)
+   public QuadrupedBodyHeightTeleopController(double initialBodyHeight, OutputManager statusOutputManager, QuadrupedRobotDataReceiver robotDataReceiver,
+                                              YoVariableRegistry parentRegistry)
    {
-      super(statusOutputManager, parentRegistry);
+      super(robotDataReceiver, statusOutputManager, parentRegistry);
 
-      teleopManager = new QuadrupedBodyHeightTeleopManager(initialBodyHeight, robotModelProvider.getReferenceFrames());
+      teleopManager = new QuadrupedBodyHeightTeleopManager(initialBodyHeight, robotDataReceiver.getReferenceFrames());
    }
 
    public void setPaused(boolean pause)
@@ -38,7 +38,7 @@ public class QuadrupedBodyHeightTeleopController extends QuadrupedToolboxControl
    }
 
    @Override
-   public boolean initialize()
+   public boolean initializeInternal()
    {
       teleopManager.initialize();
 

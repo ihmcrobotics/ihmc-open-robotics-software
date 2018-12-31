@@ -8,13 +8,14 @@ import us.ihmc.euclid.interfaces.Settable;
 import us.ihmc.multicastLogDataProtocol.modelLoaders.LogModelProvider;
 import us.ihmc.pubsub.DomainFactory;
 import us.ihmc.quadrupedCommunication.QuadrupedControllerAPIDefinition;
-import us.ihmc.quadrupedPlanning.QuadrupedXGaitSettings;
-import us.ihmc.quadrupedPlanning.networkProcessing.QuadrupedRobotModelProviderNode;
+import us.ihmc.quadrupedPlanning.QuadrupedXGaitSettingsReadOnly;
 import us.ihmc.quadrupedPlanning.networkProcessing.QuadrupedToolboxController;
 import us.ihmc.quadrupedPlanning.networkProcessing.QuadrupedToolboxModule;
 import us.ihmc.robotModels.FullQuadrupedRobotModelFactory;
 import us.ihmc.ros2.RealtimeRos2Node;
+import us.ihmc.yoVariables.parameters.DefaultParameterReader;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -23,20 +24,20 @@ import static us.ihmc.communication.ROS2Tools.getTopicNameGenerator;
 
 public class QuadrupedStepTeleopModule extends QuadrupedToolboxModule
 {
-   private static final int updatePeriodMilliseconds = 1;
+   private static final int updatePeriodMilliseconds = 10;
 
    private final QuadrupedStepTeleopController stepTeleopController;
 
-   public QuadrupedStepTeleopModule(FullQuadrupedRobotModelFactory modelFactory, QuadrupedXGaitSettings defaultXGaitSettings, LogModelProvider modelProvider,
+   public QuadrupedStepTeleopModule(FullQuadrupedRobotModelFactory modelFactory, QuadrupedXGaitSettingsReadOnly defaultXGaitSettings, LogModelProvider modelProvider,
                                     boolean startYoVariableServer, DomainFactory.PubSubImplementation pubSubImplementation)
    {
       super(modelFactory.getRobotDescription().getName(), modelFactory.createFullRobotModel(), modelProvider, startYoVariableServer, updatePeriodMilliseconds,
             pubSubImplementation);
 
-      QuadrupedRobotModelProviderNode robotModelProvider = new QuadrupedRobotModelProviderNode(robotName, realtimeRos2Node, modelFactory);
 
-      stepTeleopController = new QuadrupedStepTeleopController(defaultXGaitSettings, outputManager, robotModelProvider, registry,
-                                                               yoGraphicsListRegistry, updatePeriodMilliseconds);
+      stepTeleopController = new QuadrupedStepTeleopController(defaultXGaitSettings, outputManager, robotDataReceiver, registry, yoGraphicsListRegistry,
+                                                               updatePeriodMilliseconds);
+      new DefaultParameterReader().readParametersInRegistry(registry);
    }
 
    @Override
@@ -74,7 +75,7 @@ public class QuadrupedStepTeleopModule extends QuadrupedToolboxModule
    @Override
    public List<Class<? extends Command<?, ?>>> createListOfSupportedCommands()
    {
-      return null;
+      return new ArrayList<>();
    }
 
    @Override

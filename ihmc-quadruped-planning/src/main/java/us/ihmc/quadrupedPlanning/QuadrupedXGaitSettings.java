@@ -1,5 +1,7 @@
 package us.ihmc.quadrupedPlanning;
 
+import controller_msgs.msg.dds.QuadrupedXGaitSettingsPacket;
+
 public class QuadrupedXGaitSettings implements QuadrupedXGaitSettingsReadOnly
 {
    private double stanceLength;
@@ -8,6 +10,8 @@ public class QuadrupedXGaitSettings implements QuadrupedXGaitSettingsReadOnly
    private double stepDuration;
    private double endDoubleSupportDuration;
    private double endPhaseShift;
+
+   private final QuadrupedXGaitSettingsPacket packet = new QuadrupedXGaitSettingsPacket();
 
    public QuadrupedXGaitSettings()
    {
@@ -92,5 +96,18 @@ public class QuadrupedXGaitSettings implements QuadrupedXGaitSettingsReadOnly
       stepDuration = other.getStepDuration();
       endDoubleSupportDuration = other.getEndDoubleSupportDuration();
       endPhaseShift = other.getEndPhaseShift();
+   }
+
+
+   public QuadrupedXGaitSettingsPacket getAsPacket()
+   {
+      packet.setStanceLength(stanceLength);
+      packet.setStanceWidth(stanceWidth);
+      packet.setStepGroundClearance(stepGroundClearance);
+      packet.setStepDuration(stepDuration);
+      packet.setEndDoubleSupportDuration(endDoubleSupportDuration);
+      packet.setEndPhaseShift(endPhaseShift);
+
+      return packet;
    }
 }

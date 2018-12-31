@@ -1,6 +1,7 @@
 package us.ihmc.quadrupedPlanning.networkProcessing;
 
 import us.ihmc.euclid.interfaces.Settable;
+import us.ihmc.sensorProcessing.communication.subscribers.RobotDataReceiver;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 
@@ -15,10 +16,13 @@ public abstract class QuadrupedToolboxController
    protected final OutputManager outputManager;
    private final YoBoolean initialize = new YoBoolean("initialize" + registry.getName(), registry);
 
+   protected final QuadrupedRobotDataReceiver robotDataReceiver;
+
    private ScheduledFuture<?> futureToListenTo;
 
-   public QuadrupedToolboxController(OutputManager outputManager, YoVariableRegistry parentRegistry)
+   public QuadrupedToolboxController(QuadrupedRobotDataReceiver robotDataReceiver, OutputManager outputManager, YoVariableRegistry parentRegistry)
    {
+      this.robotDataReceiver = robotDataReceiver;
       this.outputManager = outputManager;
       parentRegistry.addChild(registry);
       requestInitialize();
@@ -34,13 +38,30 @@ public abstract class QuadrupedToolboxController
    }
 
    /**
+    * Internal initialization method for preparing this toolbox controller before running
+    * {@link #updateInternal()}.
+    *
+    * @return {@code true} if the initialization succeeded, {@code false} otherwise.
+    */
+   public boolean initialize() throws InterruptedException
+   {
+      while (!robotDataReceiver.framesHaveBeenSetUp())
+      {
+         robotDataReceiver.updateRobotModel();
+         Thread.sleep(10);
+      }
+
+      return initializeInternal();
+   }
+
+   /**
     * Initializes once and run the {@link #updateInternal()} of this toolbox controller only if the
     * initialization succeeded.
     * @throws Exception
     *
     * @see #hasBeenInitialized() The initialization state of this toolbox controller.
     */
-   public void update()
+   public void update() throws InterruptedException
    {
       if (initialize.getBooleanValue())
       {
@@ -115,13 +136,15 @@ public abstract class QuadrupedToolboxController
       outputManager.reportMessage(outputMessage);
    }
 
+
+
    /**
     * Internal initialization method for preparing this toolbox controller before running
     * {@link #updateInternal()}.
     *
     * @return {@code true} if the initialization succeeded, {@code false} otherwise.
     */
-   abstract public boolean initialize();
+   abstract public boolean initializeInternal();
 
    /**
     * Internal update method that should perform the computation for this toolbox controller. It is

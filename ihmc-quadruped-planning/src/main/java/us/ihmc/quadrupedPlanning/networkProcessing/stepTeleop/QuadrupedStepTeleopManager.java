@@ -5,6 +5,7 @@ import us.ihmc.commons.Conversions;
 import us.ihmc.commons.lists.PreallocatedList;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
+import us.ihmc.log.LogTools;
 import us.ihmc.quadrupedBasics.gait.QuadrupedTimedOrientedStep;
 import us.ihmc.quadrupedBasics.gait.QuadrupedTimedStep;
 import us.ihmc.quadrupedBasics.referenceFrames.QuadrupedReferenceFrames;
@@ -115,10 +116,11 @@ public class QuadrupedStepTeleopManager
 
    public void initialize()
    {
+      timestamp.set(Conversions.nanosecondsToSeconds(timestampNanos.get()));
       stepStream.onEntry();
 
-      populateStepMessage();
-      populateBodyOrientationMessage();
+//      populateStepMessage();
+//      populateBodyOrientationMessage();
    }
 
    public void update()
@@ -173,7 +175,10 @@ public class QuadrupedStepTeleopManager
       List<? extends QuadrupedTimedStep> steps = stepStream.getSteps();
       List<QuadrupedTimedStepMessage> stepMessages = new ArrayList<>();
       for (int i = 0; i < steps.size(); i++)
+      {
+         LogTools.info("step " + i + " = " + steps.get(i).toString());
          stepMessages.add(QuadrupedMessageTools.createQuadrupedTimedStepMessage(steps.get(i)));
+      }
 
       stepListMessage = QuadrupedMessageTools.createQuadrupedTimedStepListMessage(stepMessages, true);
    }

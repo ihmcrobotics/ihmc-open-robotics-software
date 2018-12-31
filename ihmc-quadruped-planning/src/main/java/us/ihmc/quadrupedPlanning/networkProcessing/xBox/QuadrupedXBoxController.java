@@ -7,6 +7,7 @@ import us.ihmc.communication.controllerAPI.StatusMessageOutputManager;
 import us.ihmc.quadrupedPlanning.QuadrupedXGaitSettingsReadOnly;
 import us.ihmc.quadrupedPlanning.input.InputValueIntegrator;
 import us.ihmc.quadrupedPlanning.networkProcessing.OutputManager;
+import us.ihmc.quadrupedPlanning.networkProcessing.QuadrupedRobotDataReceiver;
 import us.ihmc.quadrupedPlanning.networkProcessing.QuadrupedToolboxController;
 import us.ihmc.tools.inputDevices.joystick.Joystick;
 import us.ihmc.tools.inputDevices.joystick.JoystickCustomizationFilter;
@@ -56,10 +57,10 @@ public class QuadrupedXBoxController extends QuadrupedToolboxController implemen
    private QuadrupedTeleopDesiredPose desiredPoseMessage = null;
    private QuadrupedTeleopDesiredHeight desiredHeightMessage = null;
 
-   public QuadrupedXBoxController(QuadrupedXGaitSettingsReadOnly defaultXGaitSettings, double nominalBodyHeight, OutputManager statusOutputManager,
+   public QuadrupedXBoxController(QuadrupedRobotDataReceiver robotDataReceiver, QuadrupedXGaitSettingsReadOnly defaultXGaitSettings, double nominalBodyHeight, OutputManager statusOutputManager,
                                   YoVariableRegistry parentRegistry, int updateTimeInMs) throws IOException
    {
-      super(statusOutputManager, parentRegistry);
+      super(robotDataReceiver, statusOutputManager, parentRegistry);
 
       boolean joystickIsConnected = Joystick.isAJoystickConnectedToSystem();
       if (!joystickIsConnected)
@@ -115,7 +116,7 @@ public class QuadrupedXBoxController extends QuadrupedToolboxController implemen
    }
 
    @Override
-   public boolean initialize()
+   public boolean initializeInternal()
    {
       return true;
    }
