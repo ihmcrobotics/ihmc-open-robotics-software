@@ -13,19 +13,18 @@ public class YoQuadrupedXGaitSettings implements QuadrupedXGaitSettingsReadOnly
 {
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
 
-   private final DoubleParameter stanceLengthLowerLimitParameter = new DoubleParameter("stanceLengthLowerLimit", registry, 0.4);
-   private final DoubleParameter stanceLengthUpperLimitParameter = new DoubleParameter("stanceLengthUpperLimit", registry, 1.4);
-   private final DoubleParameter stanceWidthLowerLimitParameter = new DoubleParameter("stanceWidthLowerLimit", registry, 0.1);
-   private final DoubleParameter stanceWidthUpperLimitParameter = new DoubleParameter("stanceWidthUpperLimit", registry, 0.6);
-   private final DoubleParameter stepGroundClearanceLowerLimitParameter = new DoubleParameter("stepGroundClearanceLowerLimit", registry, 0.0);
-   private final DoubleParameter stepGroundClearanceUpperLimitParameter = new DoubleParameter("stepGroundClearanceUpperLimit", registry, 0.25);
-   private final DoubleParameter stepDurationLowerLimitParameter = new DoubleParameter("stepDurationLowerLimit", registry, 0.15);
-   private final DoubleParameter stepDurationUpperLimitParameter = new DoubleParameter("stepDurationUpperLimit", registry, 0.6);
-   private final DoubleParameter endDoubleSupportDurationLowerLimitParameter = new DoubleParameter("endDoubleSupportDurationLowerLimit", registry, 0.0);
-   private final DoubleParameter endDoubleSupportDurationUpperLimitParameter = new DoubleParameter("endDoubleSupportDurationUpperLimit", registry,
-                                                                                                   Double.MAX_VALUE);
-   private final DoubleParameter endPhaseShiftLowerLimitParameter = new DoubleParameter("endPhaseShiftLowerLimit", registry, 0);
-   private final DoubleParameter endPhaseShiftUpperLimitParameter = new DoubleParameter("endPhaseShiftUpperLimit", registry, 359);
+   private final YoDouble stanceLengthLowerLimitParameter = new YoDouble("stanceLengthLowerLimit", registry);
+   private final YoDouble stanceLengthUpperLimitParameter = new YoDouble("stanceLengthUpperLimit", registry);
+   private final YoDouble stanceWidthLowerLimitParameter = new YoDouble("stanceWidthLowerLimit", registry);
+   private final YoDouble stanceWidthUpperLimitParameter = new YoDouble("stanceWidthUpperLimit", registry);
+   private final YoDouble stepGroundClearanceLowerLimitParameter = new YoDouble("stepGroundClearanceLowerLimit", registry);
+   private final YoDouble stepGroundClearanceUpperLimitParameter = new YoDouble("stepGroundClearanceUpperLimit", registry);
+   private final YoDouble stepDurationLowerLimitParameter = new YoDouble("stepDurationLowerLimit", registry);
+   private final YoDouble stepDurationUpperLimitParameter = new YoDouble("stepDurationUpperLimit", registry);
+   private final YoDouble endDoubleSupportDurationLowerLimitParameter = new YoDouble("endDoubleSupportDurationLowerLimit", registry);
+   private final YoDouble endDoubleSupportDurationUpperLimitParameter = new YoDouble("endDoubleSupportDurationUpperLimit", registry);
+   private final YoDouble endPhaseShiftLowerLimitParameter = new YoDouble("endPhaseShiftLowerLimit", registry);
+   private final YoDouble endPhaseShiftUpperLimitParameter = new YoDouble("endPhaseShiftUpperLimit", registry);
 
    private final YoDouble yoStanceLength = new YoDouble("stanceLengthInput", registry);
    private final YoDouble yoStanceWidth = new YoDouble("stanceWidthInput", registry);
@@ -44,6 +43,19 @@ public class YoQuadrupedXGaitSettings implements QuadrupedXGaitSettingsReadOnly
       yoStepDuration.set(defaultXGaitSettings.getStepDuration());
       yoEndDoubleSupportDuration.set(defaultXGaitSettings.getEndDoubleSupportDuration());
       yoEndPhaseShift.set(defaultXGaitSettings.getEndPhaseShift());
+
+      stanceLengthLowerLimitParameter.set(0.4);
+      stanceLengthUpperLimitParameter.set(1.4);
+      stanceWidthLowerLimitParameter.set(0.1);
+      stanceWidthUpperLimitParameter.set(0.6);
+      stepGroundClearanceLowerLimitParameter.set(0.0);
+      stepGroundClearanceUpperLimitParameter.set(0.25);
+      stepDurationLowerLimitParameter.set(0.15);
+      stepDurationUpperLimitParameter.set(0.6);
+      endDoubleSupportDurationLowerLimitParameter.set(0.0);
+      endDoubleSupportDurationUpperLimitParameter.set(Double.MAX_VALUE);
+      endPhaseShiftLowerLimitParameter.set(0);
+      endPhaseShiftUpperLimitParameter.set(359);
 
       parentRegistry.addChild(registry);
    }

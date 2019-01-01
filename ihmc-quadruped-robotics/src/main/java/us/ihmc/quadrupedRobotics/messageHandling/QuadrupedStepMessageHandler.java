@@ -13,6 +13,7 @@ import us.ihmc.quadrupedRobotics.util.YoQuadrupedTimedStep;
 import us.ihmc.robotics.lists.YoPreallocatedList;
 import us.ihmc.robotics.robotSide.QuadrantDependentList;
 import us.ihmc.robotics.robotSide.RobotQuadrant;
+import us.ihmc.robotics.time.TimeInterval;
 import us.ihmc.robotics.time.TimeIntervalTools;
 import us.ihmc.yoVariables.parameters.DoubleParameter;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
@@ -145,6 +146,7 @@ public class QuadrupedStepMessageHandler
 
    private void pruneHaltedSteps()
    {
+      TimeIntervalTools.removeStartTimesGreaterThan(haltTime.getDoubleValue(), receivedStepSequence);
       for (int i = receivedStepSequence.size() - 1; i >= 0; i--)
       {
          if (receivedStepSequence.get(i).getTimeInterval().getStartTime() > haltTime.getDoubleValue())

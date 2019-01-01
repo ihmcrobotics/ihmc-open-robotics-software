@@ -118,9 +118,6 @@ public class QuadrupedStepTeleopManager
    {
       timestamp.set(Conversions.nanosecondsToSeconds(timestampNanos.get()));
       stepStream.onEntry();
-
-//      populateStepMessage();
-//      populateBodyOrientationMessage();
    }
 
    public void update()
@@ -176,7 +173,6 @@ public class QuadrupedStepTeleopManager
       List<QuadrupedTimedStepMessage> stepMessages = new ArrayList<>();
       for (int i = 0; i < steps.size(); i++)
       {
-         LogTools.info("step " + i + " = " + steps.get(i).toString());
          stepMessages.add(QuadrupedMessageTools.createQuadrupedTimedStepMessage(steps.get(i)));
       }
 

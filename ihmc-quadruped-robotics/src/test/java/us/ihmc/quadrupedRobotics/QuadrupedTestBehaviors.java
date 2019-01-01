@@ -7,6 +7,7 @@ import junit.framework.AssertionFailedError;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelControllerName;
 import us.ihmc.idl.IDLSequence.Object;
 import us.ihmc.quadrupedBasics.QuadrupedSteppingStateEnum;
+import us.ihmc.quadrupedPlanning.input.NewQuadrupedTeleopManager;
 import us.ihmc.quadrupedPlanning.input.QuadrupedTeleopManager;
 import us.ihmc.quadrupedRobotics.controller.QuadrupedControllerManager;
 import us.ihmc.quadrupedRobotics.controller.QuadrupedPositionControllerRequestedEvent;
@@ -114,6 +115,54 @@ public class QuadrupedTestBehaviors
 
       stepTeleopManager.getXGaitSettings().setEndDoubleSupportDuration(initialDoubleSupportDuration);
       stepTeleopManager.getXGaitSettings().setEndPhaseShift(initialEndPhaseShift);
+   }
+
+
+
+
+   public static void readyXGait(GoalOrientedTestConductor conductor, QuadrupedForceTestYoVariables variables, NewQuadrupedTeleopManager stepTeleopManager) throws AssertionFailedError
+   {
+      standUp(conductor, variables);
+      startBalancing(conductor, variables, stepTeleopManager);
+      squareUp(conductor, variables, stepTeleopManager);
+   }
+
+   public static void startBalancing(GoalOrientedTestConductor conductor, QuadrupedForceTestYoVariables variables, NewQuadrupedTeleopManager teleopManager) throws AssertionFailedError
+   {
+      teleopManager.requestWalkingState();
+      conductor.addTerminalGoal(QuadrupedTestGoals.notFallen(variables));
+      conductor.addTerminalGoal(QuadrupedTestGoals.bodyHeight(variables, 0.1));
+      conductor.addTerminalGoal(YoVariableTestGoal.enumEquals(variables.getControllerState(), HighLevelControllerName.WALKING));
+      conductor.addTerminalGoal(YoVariableTestGoal.enumEquals(variables.getSteppingState(), QuadrupedSteppingStateEnum.STAND));
+      conductor.addTimeLimit(variables.getYoTime(), stateCompletionSafetyFactory * variables.getToWalkingTransitionDuration());
+      conductor.simulate();
+   }
+
+   public static void squareUp(GoalOrientedTestConductor conductor, QuadrupedForceTestYoVariables variables, NewQuadrupedTeleopManager stepTeleopManager)
+   {
+      conductor.addTerminalGoal(QuadrupedTestGoals.timeInFuture(variables, 0.2));
+      conductor.addSustainGoal(QuadrupedTestGoals.bodyHeight(variables, 0.25));
+      conductor.simulate();
+
+      double initialDoubleSupportDuration = stepTeleopManager.getXGaitSettings().getEndDoubleSupportDuration();
+      double initialEndPhaseShift = stepTeleopManager.getXGaitSettings().getEndPhaseShift();
+
+      stepTeleopManager.setEndDoubleSupportDuration(0.1);
+      stepTeleopManager.setEndPhaseShift(180.0);
+      stepTeleopManager.requestXGait();
+      stepTeleopManager.setDesiredVelocity(0.0, 0.0, 0.0);
+      conductor.addSustainGoal(QuadrupedTestGoals.notFallen(variables));
+      conductor.addSustainGoal(QuadrupedTestGoals.bodyHeight(variables, 0.25));
+      conductor.addTerminalGoal(QuadrupedTestGoals.timeInFuture(variables, 1.5));
+      conductor.simulate();
+
+      stepTeleopManager.requestStanding();
+      conductor.addSustainGoal(QuadrupedTestGoals.bodyHeight(variables, 0.25));
+      conductor.addTerminalGoal(QuadrupedTestGoals.timeInFuture(variables, 1.0));
+      conductor.simulate();
+
+      stepTeleopManager.setEndDoubleSupportDuration(initialDoubleSupportDuration);
+      stepTeleopManager.setEndPhaseShift(initialEndPhaseShift);
    }
 
    private static YoVariableTestGoal createBodyPathWaypointGoal(QuadrupedForceTestYoVariables variables, EuclideanTrajectoryPointMessage point, double positionDelta, double yawDelta)
