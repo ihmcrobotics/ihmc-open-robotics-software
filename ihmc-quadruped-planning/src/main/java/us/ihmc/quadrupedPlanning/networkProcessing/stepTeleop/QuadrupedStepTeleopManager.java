@@ -117,6 +117,7 @@ public class QuadrupedStepTeleopManager
    public void initialize()
    {
       timestamp.set(Conversions.nanosecondsToSeconds(timestampNanos.get()));
+      paused.set(false);
       stepStream.onEntry();
    }
 
