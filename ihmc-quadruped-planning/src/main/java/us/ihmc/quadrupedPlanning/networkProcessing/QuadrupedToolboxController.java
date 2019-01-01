@@ -1,7 +1,6 @@
 package us.ihmc.quadrupedPlanning.networkProcessing;
 
 import us.ihmc.euclid.interfaces.Settable;
-import us.ihmc.sensorProcessing.communication.subscribers.RobotDataReceiver;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 
@@ -133,7 +132,8 @@ public abstract class QuadrupedToolboxController
     */
    public <S extends Settable<S>> void reportMessage(S outputMessage)
    {
-      outputManager.reportMessage(outputMessage);
+      if (outputMessage != null)
+         outputManager.reportMessage(outputMessage);
    }
 
 
