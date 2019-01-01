@@ -18,6 +18,7 @@ import java.io.IOException;
 public class QuadrupedNetworkProcessor
 {
    private final boolean DEBUG = false;
+   private QuadrupedStepTeleopModule stepTeleopModule;
 
    public QuadrupedNetworkProcessor(FullQuadrupedRobotModelFactory robotModel, QuadrupedNetworkModuleParameters params, double nominalHeight,
                                     QuadrupedXGaitSettings xGaitSettings)
@@ -35,12 +36,18 @@ public class QuadrupedNetworkProcessor
       tryToStartModule(() -> setupRobotEnvironmentAwerenessModule(params, pubSubImplementation));
    }
 
+   public void setShiftPlanBasedOnStepAdjustment(boolean shift)
+   {
+      if (stepTeleopModule != null)
+         stepTeleopModule.setShiftPlanBasedOnStepAdjustment(shift);
+   }
+
    private void setupStepTeleopModule(FullQuadrupedRobotModelFactory modelFactory, QuadrupedXGaitSettingsReadOnly xGaitSettings,
                                       QuadrupedNetworkModuleParameters params, DomainFactory.PubSubImplementation pubSubImplementation) throws IOException
    {
       if (!params.isStepTeleopModuleEnabled())
          return;
-      new QuadrupedStepTeleopModule(modelFactory, xGaitSettings, null, params.visualizeStepTeleopModuleEnabled(), pubSubImplementation);
+      stepTeleopModule = new QuadrupedStepTeleopModule(modelFactory, xGaitSettings, null, params.visualizeStepTeleopModuleEnabled(), pubSubImplementation);
    }
 
    private void setupBodyHeightTeleopModule(FullQuadrupedRobotModelFactory modelFactory, QuadrupedNetworkModuleParameters params, double nominalHeight,
@@ -60,8 +67,8 @@ public class QuadrupedNetworkProcessor
    }
 
    private void setupXBoxModule(FullQuadrupedRobotModelFactory modelFactory, QuadrupedNetworkModuleParameters params,
-                                QuadrupedXGaitSettingsReadOnly defaultXGaitSettings, double nominalBodyHeight, DomainFactory.PubSubImplementation pubSubImplementation)
-         throws IOException
+                                QuadrupedXGaitSettingsReadOnly defaultXGaitSettings, double nominalBodyHeight,
+                                DomainFactory.PubSubImplementation pubSubImplementation) throws IOException
    {
       if (!params.isXBoxModuleEnabled())
          return;

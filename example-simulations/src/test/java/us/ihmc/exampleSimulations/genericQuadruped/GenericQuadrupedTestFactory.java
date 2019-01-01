@@ -12,8 +12,10 @@ import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelControllerName;
 import us.ihmc.jMonkeyEngineToolkit.GroundProfile3D;
 import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
+import us.ihmc.quadrupedPlanning.input.NewQuadrupedTeleopManager;
 import us.ihmc.quadrupedPlanning.input.QuadrupedTeleopManager;
 import us.ihmc.quadrupedPlanning.input.QuadrupedTestTeleopScript;
+import us.ihmc.quadrupedPlanning.networkProcessing.QuadrupedNetworkProcessor;
 import us.ihmc.quadrupedRobotics.QuadrupedTestFactory;
 import us.ihmc.quadrupedRobotics.controller.QuadrupedControlMode;
 import us.ihmc.quadrupedBasics.referenceFrames.QuadrupedReferenceFrames;
@@ -73,6 +75,7 @@ public class GenericQuadrupedTestFactory implements QuadrupedTestFactory
 
    private FullQuadrupedRobotModel fullRobotModel;
    private QuadrupedTeleopManager stepTeleopManager;
+   private NewQuadrupedTeleopManager newStepTeleopManager;
    private YoGraphicsListRegistry graphicsListRegistry;
    private String robotName;
    private QuadrupedSimulationFactory simulationFactory;
@@ -181,12 +184,16 @@ public class GenericQuadrupedTestFactory implements QuadrupedTestFactory
 
          graphicsListRegistry = new YoGraphicsListRegistry();
          stepTeleopManager = new QuadrupedTeleopManager(robotName, ros2Node, xGaitSettings, physicalProperties.getNominalBodyHeight(), referenceFrames, graphicsListRegistry, teleopRegistry);
+         QuadrupedNetworkProcessor networkProcessor = new GenericQuadrupedNetworkProcessor(modelFactory, physicalProperties.getNominalBodyHeight(),
+                                                                                           xGaitSettings, PubSubImplementation.INTRAPROCESS);
+         newStepTeleopManager = new NewQuadrupedTeleopManager(robotName, ros2Node, networkProcessor, xGaitSettings, teleopRegistry);
 
          new DefaultParameterReader().readParametersInRegistry(teleopRegistry);
       }
       else
       {
          stepTeleopManager = null;
+         newStepTeleopManager = null;
       }
 
       simulationFactory.setUsePushRobotController(usePushRobotController.get());

@@ -13,6 +13,7 @@ import us.ihmc.quadrupedCommunication.QuadrupedControllerAPIDefinition;
 import us.ihmc.quadrupedCommunication.QuadrupedMessageTools;
 import us.ihmc.quadrupedPlanning.QuadrupedXGaitSettingsReadOnly;
 import us.ihmc.quadrupedPlanning.YoQuadrupedXGaitSettings;
+import us.ihmc.quadrupedPlanning.networkProcessing.QuadrupedNetworkProcessor;
 import us.ihmc.ros2.Ros2Node;
 import us.ihmc.yoVariables.listener.VariableChangedListener;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
@@ -51,12 +52,14 @@ public class NewQuadrupedTeleopManager
 
    private final IHMCROS2Publisher<QuadrupedXGaitSettingsPacket> stepXGaitSettingsPublisher;
 
-   public NewQuadrupedTeleopManager(String robotName, Ros2Node ros2Node, QuadrupedXGaitSettingsReadOnly defaultXGaitSettings,
-                                    YoVariableRegistry parentRegistry)
+   private final QuadrupedNetworkProcessor networkProcessor;
+
+   public NewQuadrupedTeleopManager(String robotName, Ros2Node ros2Node, QuadrupedNetworkProcessor networkProcessor,
+                                    QuadrupedXGaitSettingsReadOnly defaultXGaitSettings, YoVariableRegistry parentRegistry)
    {
       this.ros2Node = ros2Node;
       this.xGaitSettings = new YoQuadrupedXGaitSettings(defaultXGaitSettings, registry);
-
+      this.networkProcessor = networkProcessor;
 
       MessageTopicNameGenerator controllerPubGenerator = QuadrupedControllerAPIDefinition.getPublisherTopicNameGenerator(robotName);
       ROS2Tools.createCallbackSubscription(ros2Node, HighLevelStateChangeStatusMessage.class, controllerPubGenerator,
@@ -159,6 +162,17 @@ public class NewQuadrupedTeleopManager
    {
       xGaitSettings.setEndPhaseShift(endPhaseShift);
       stepXGaitSettingsPublisher.publish(xGaitSettings.getAsPacket());
+   }
+
+   public void setStanceWidth(double stanceWidth)
+   {
+      xGaitSettings.setStanceWidth(stanceWidth);
+      stepXGaitSettingsPublisher.publish(xGaitSettings.getAsPacket());
+   }
+
+   public void setShiftPlanBasedOnStepAdjustment(boolean shift)
+   {
+      networkProcessor.setShiftPlanBasedOnStepAdjustment(shift);
    }
 
    public QuadrupedXGaitSettingsReadOnly getXGaitSettings()

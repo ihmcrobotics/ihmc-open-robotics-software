@@ -110,8 +110,10 @@ public class QuadrupedStepTeleopModule extends QuadrupedToolboxModule
       super.sleep();
    }
 
-   public void setEndPhaseShift(double endPhaseShift)
+   public void setShiftPlanBasedOnStepAdjustment(boolean shift)
    {
-      stepTeleopController.setEndPhaseShift(endPhaseShift);
+      stepTeleopController.setShiftPlanBasedOnStepAdjustment(shift);
    }
+
+
 }

@@ -73,9 +73,9 @@ public class QuadrupedStepTeleopController extends QuadrupedToolboxController
       teleopManager.setDesiredVelocity(message.getDesiredXVelocity(), message.getDesiredYVelocity(), message.getDesiredYawVelocity());
    }
 
-   public void setEndPhaseShift(double endPhaseShift)
+   public void setShiftPlanBasedOnStepAdjustment(boolean shift)
    {
-      teleopManager.setEndPhaseShift(endPhaseShift);
+      teleopManager.setShiftPlanBasedOnStepAdjustment(shift);
    }
 
    @Override
