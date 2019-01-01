@@ -14,6 +14,7 @@ import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.Continuous
 import us.ihmc.pubsub.DomainFactory;
 import us.ihmc.quadrupedBasics.QuadrupedSteppingStateEnum;
 import us.ihmc.quadrupedCommunication.QuadrupedMessageTools;
+import us.ihmc.quadrupedPlanning.input.NewQuadrupedTeleopManager;
 import us.ihmc.quadrupedPlanning.input.QuadrupedTeleopManager;
 import us.ihmc.quadrupedPlanning.networkProcessing.QuadrupedNetworkProcessor;
 import us.ihmc.quadrupedRobotics.*;
@@ -34,6 +35,7 @@ public abstract class QuadrupedXGaitFlatGroundWalkingTest implements QuadrupedMu
    private GoalOrientedTestConductor conductor;
    private QuadrupedForceTestYoVariables variables;
    private QuadrupedTeleopManager stepTeleopManager;
+   private NewQuadrupedTeleopManager newStepTeleopManager;
    private QuadrupedTestFactory quadrupedTestFactory;
 
    public abstract double getPacingWidth();
@@ -57,6 +59,8 @@ public abstract class QuadrupedXGaitFlatGroundWalkingTest implements QuadrupedMu
          conductor = quadrupedTestFactory.createTestConductor();
          variables = new QuadrupedForceTestYoVariables(conductor.getScs());
          stepTeleopManager = quadrupedTestFactory.getStepTeleopManager();
+         newStepTeleopManager = new NewQuadrupedTeleopManager(quadrupedTestFactory.getRobotName(), stepTeleopManager.getRos2Node(), stepTeleopManager.getXGaitSettings(),
+                                                              conductor.getScs().getRootRegistry());
       }
       catch (IOException e)
       {
@@ -191,9 +195,10 @@ public abstract class QuadrupedXGaitFlatGroundWalkingTest implements QuadrupedMu
 
    private void testFlatGroundWalking(double endPhaseShift, double walkingSpeed)
    {
-      QuadrupedTestBehaviors.readyXGait(conductor, variables, stepTeleopManager);
+      QuadrupedTestBehaviors.readyXGait(conductor, variables, newStepTeleopManager);
 
-      stepTeleopManager.getXGaitSettings().setEndPhaseShift(endPhaseShift);
+//      stepTeleopManager.getXGaitSettings().setEndPhaseShift(endPhaseShift);
+      newStepTeleopManager.setEndPhaseShift(endPhaseShift);
 
       Ros2Node ros2Node = ROS2Tools.createRos2Node(DomainFactory.PubSubImplementation.INTRAPROCESS, "quadruped_teleop_manager");
 
@@ -210,8 +215,10 @@ public abstract class QuadrupedXGaitFlatGroundWalkingTest implements QuadrupedMu
       */
 
       double walkTime = 6.0;
-      stepTeleopManager.requestXGait();
-      stepTeleopManager.setDesiredVelocity(walkingSpeed, 0.0, 0.0);
+//      stepTeleopManager.requestXGait();
+//      stepTeleopManager.setDesiredVelocity(walkingSpeed, 0.0, 0.0);
+      newStepTeleopManager.requestXGait();
+      newStepTeleopManager.setDesiredVelocity(walkingSpeed, 0.0, 0.0);
 
 //      stepTeleopToolboxState.publish(MessageTools.createToolboxStateMessage(ToolboxState.WAKE_UP));
 //      velocityPublisher.publish(QuadrupedMessageTools.createQuadrupedTeleopDesiredVelocity(walkingSpeed, 0.0, 0.0));
@@ -231,12 +238,14 @@ public abstract class QuadrupedXGaitFlatGroundWalkingTest implements QuadrupedMu
       conductor.simulate();
 
 //      velocityPublisher.publish(QuadrupedMessageTools.createQuadrupedTeleopDesiredVelocity(0.0, 0.0, 0.0));
-      stepTeleopManager.setDesiredVelocity(0.0, 0.0, 0.0);
+//      stepTeleopManager.setDesiredVelocity(0.0, 0.0, 0.0);
+      newStepTeleopManager.setDesiredVelocity(0.0, 0.0, 0.0);
       conductor.addTerminalGoal(YoVariableTestGoal.timeInFuture(variables.getYoTime(), 1.0));
 
       conductor.simulate();
 
-      stepTeleopManager.requestStanding();
+//      stepTeleopManager.requestStanding();
+      newStepTeleopManager.requestStanding();
       conductor.addTerminalGoal(YoVariableTestGoal.enumEquals(variables.getSteppingState(), QuadrupedSteppingStateEnum.STAND));
       conductor.addTerminalGoal(YoVariableTestGoal.timeInFuture(variables.getYoTime(), 0.5));
 

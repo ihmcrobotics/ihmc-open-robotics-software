@@ -148,4 +148,34 @@ public class QuadrupedMessageTools
 
       return message;
    }
+
+   public static QuadrupedTeleopDesiredHeight createQuadrupedTeleopDesiredHeight(double desiredHeight)
+   {
+      QuadrupedTeleopDesiredHeight message = new QuadrupedTeleopDesiredHeight();
+      message.setDesiredHeight(desiredHeight);
+
+      return message;
+   }
+
+   public static QuadrupedTeleopDesiredPose createQuadrupedTeleopDesiredPose(double yaw, double pitch, double roll, double time)
+   {
+      QuadrupedTeleopDesiredPose message = new QuadrupedTeleopDesiredPose();
+
+      message.getPose().getOrientation().setYawPitchRoll(yaw, pitch, roll);
+      message.setPoseShiftTime(time);
+
+      return message;
+   }
+
+   public static QuadrupedTeleopDesiredPose createQuadrupedTeleopDesiredPose(double x, double y, double yaw, double pitch, double roll, double time)
+   {
+      QuadrupedTeleopDesiredPose message = new QuadrupedTeleopDesiredPose();
+      message.getPose().getPosition().setX(x);
+      message.getPose().getPosition().setY(y);
+
+      message.getPose().getOrientation().setYawPitchRoll(yaw, pitch, roll);
+      message.setPoseShiftTime(time);
+
+      return message;
+   }
 }

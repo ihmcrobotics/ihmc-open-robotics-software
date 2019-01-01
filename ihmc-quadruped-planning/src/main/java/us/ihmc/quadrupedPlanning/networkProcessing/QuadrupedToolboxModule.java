@@ -98,11 +98,12 @@ public abstract class QuadrupedToolboxModule
       realtimeRos2Node = ROS2Tools.createRealtimeRos2Node(pubSubImplementation, "ihmc_" + CaseFormat.UPPER_CAMEL.to(CaseFormat.LOWER_UNDERSCORE, name));
       inputManager = new CommandInputManager(name, createListOfSupportedCommands());
       outputManager = new OutputManager(createMapOfSupportedOutputMessages());
-      networkSubscriber = new NetworkSubscriber(getSubscriberTopicNameGenerator(), inputManager, getPublisherTopicNameGenerator(), outputManager, realtimeRos2Node);
+      networkSubscriber = new NetworkSubscriber(getSubscriberTopicNameGenerator(), inputManager, getPublisherTopicNameGenerator(), outputManager,
+                                                realtimeRos2Node);
 
       executorService = Executors.newScheduledThreadPool(1, threadFactory);
 
-      timeWithoutInputsBeforeGoingToSleep.set(0.5);
+      timeWithoutInputsBeforeGoingToSleep.set(Double.MAX_VALUE);
       inputManager.registerHasReceivedInputListener(new HasReceivedInputListener()
       {
          private final Set<Class<? extends Command<?, ?>>> silentCommands = silentCommands();
@@ -117,13 +118,13 @@ public abstract class QuadrupedToolboxModule
 
       robotDataReceiver = new QuadrupedRobotDataReceiver(fullRobotModel, null);
 
-
       networkSubscriber.addMessageFilter(createMessageFilter());
 
-      ROS2Tools.createCallbackSubscription(realtimeRos2Node, ToolboxStateMessage.class, getSubscriberTopicNameGenerator(), s -> receivedPacket(s.takeNextData()));
-      ROS2Tools.MessageTopicNameGenerator controllerPubGenerator = QuadrupedControllerAPIDefinition.getPublisherTopicNameGenerator(robotName);
       ROS2Tools
-            .createCallbackSubscription(realtimeRos2Node, RobotConfigurationData.class, controllerPubGenerator, s -> robotDataReceiver.receivedPacket(s.takeNextData()));
+            .createCallbackSubscription(realtimeRos2Node, ToolboxStateMessage.class, getSubscriberTopicNameGenerator(), s -> receivedPacket(s.takeNextData()));
+      ROS2Tools.MessageTopicNameGenerator controllerPubGenerator = QuadrupedControllerAPIDefinition.getPublisherTopicNameGenerator(robotName);
+      ROS2Tools.createCallbackSubscription(realtimeRos2Node, RobotConfigurationData.class, controllerPubGenerator,
+                                           s -> robotDataReceiver.receivedPacket(s.takeNextData()));
 
       registerExtraSubscribers(realtimeRos2Node);
       realtimeRos2Node.spin();
@@ -144,8 +145,8 @@ public abstract class QuadrupedToolboxModule
       yoVariableServer.setMainRegistry(registry, fullRobotModel.getElevator(), yoGraphicsListRegistry);
       startYoVariableServerOnAThread(yoVariableServer);
 
-      yoVariableServerScheduled = executorService.scheduleAtFixedRate(createYoVariableServerRunnable(yoVariableServer), 0, updatePeriodMilliseconds,
-                                                                      TimeUnit.MILLISECONDS);
+      yoVariableServerScheduled = executorService
+            .scheduleAtFixedRate(createYoVariableServerRunnable(yoVariableServer), 0, updatePeriodMilliseconds, TimeUnit.MILLISECONDS);
    }
 
    private void startYoVariableServerOnAThread(final YoVariableServer yoVariableServer)
@@ -211,11 +212,6 @@ public abstract class QuadrupedToolboxModule
       if (DEBUG)
          PrintTools.info("Received a state message.");
 
-      if (toolboxTaskScheduled != null)
-      {
-         return;
-      }
-
       switch (ToolboxState.fromByte(message.getRequestedToolboxState()))
       {
       case WAKE_UP:
@@ -256,7 +252,6 @@ public abstract class QuadrupedToolboxModule
 
    public void sleep()
    {
-
       if (DEBUG)
          PrintTools.debug(this, "Going to sleep");
 
@@ -312,7 +307,6 @@ public abstract class QuadrupedToolboxModule
          {
             if (Thread.interrupted())
                return;
-
 
             robotDataReceiver.updateRobotModel();
 
