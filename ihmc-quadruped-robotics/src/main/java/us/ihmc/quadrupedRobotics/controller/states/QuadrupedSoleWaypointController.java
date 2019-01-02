@@ -1,5 +1,7 @@
 package us.ihmc.quadrupedRobotics.controller.states;
 
+import us.ihmc.quadrupedRobotics.controlModules.QuadrupedBalanceManager;
+import us.ihmc.quadrupedRobotics.controlModules.QuadrupedBodyOrientationManager;
 import us.ihmc.quadrupedRobotics.controlModules.QuadrupedControlManagerFactory;
 import us.ihmc.quadrupedRobotics.controlModules.foot.QuadrupedFeetManager;
 import us.ihmc.quadrupedRobotics.controller.ControllerEvent;
@@ -19,7 +21,9 @@ public class QuadrupedSoleWaypointController implements EventState, QuadrupedWay
 
    private final QuadrupedStepMessageHandler stepMessageHandler;
 
+   private final QuadrupedBodyOrientationManager bodyOrientationManager;
    private final QuadrupedFeetManager feetManager;
+   private final QuadrupedBalanceManager balanceManager;
 
    private final QuadrantDependentList<YoBoolean> isDoneMoving = new QuadrantDependentList<>();
 
@@ -29,6 +33,8 @@ public class QuadrupedSoleWaypointController implements EventState, QuadrupedWay
       this.stepMessageHandler = stepMessageHandler;
 
       feetManager = controlManagerFactory.getOrCreateFeetManager();
+      bodyOrientationManager = controlManagerFactory.getOrCreateBodyOrientationManager();
+      balanceManager = controlManagerFactory.getOrCreateBalanceManager();
 
       for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
       {
@@ -52,8 +58,7 @@ public class QuadrupedSoleWaypointController implements EventState, QuadrupedWay
       {
          if (stepMessageHandler.hasFootTrajectoryForSolePositionControl(robotQuadrant))
          {
-            feetManager
-                  .initializeWaypointTrajectory(stepMessageHandler.pollFootTrajectoryForSolePositionControl(robotQuadrant));
+            feetManager.initializeWaypointTrajectory(stepMessageHandler.pollFootTrajectoryForSolePositionControl(robotQuadrant));
             isDoneMoving.get(robotQuadrant).set(false);
          }
          else
@@ -77,14 +82,18 @@ public class QuadrupedSoleWaypointController implements EventState, QuadrupedWay
             isDoneMoving.get(robotQuadrant).set(false);
          }
       }
+
+      balanceManager.compute();
+      bodyOrientationManager.compute();
+      feetManager.compute();
    }
 
    @Override
    public ControllerEvent fireEvent(double timeInState)
    {
-      boolean allAreDone = false;
+      boolean allAreDone = true;
       for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
-         allAreDone |= isDoneMoving.get(robotQuadrant).getBooleanValue();
+         allAreDone &= isDoneMoving.get(robotQuadrant).getBooleanValue();
 
       return allAreDone ? ControllerEvent.DONE : null;
    }
