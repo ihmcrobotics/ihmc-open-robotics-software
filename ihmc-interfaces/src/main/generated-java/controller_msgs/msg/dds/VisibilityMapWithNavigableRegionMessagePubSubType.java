@@ -2,21 +2,21 @@ package controller_msgs.msg.dds;
 
 /**
 * 
-* Topic data type of the struct "NavigableRegionMessage" defined in "NavigableRegionMessage_.idl". Use this class to provide the TopicDataType to a Participant. 
+* Topic data type of the struct "VisibilityMapWithNavigableRegionMessage" defined in "VisibilityMapWithNavigableRegionMessage_.idl". Use this class to provide the TopicDataType to a Participant. 
 *
-* This file was automatically generated from NavigableRegionMessage_.idl by us.ihmc.idl.generator.IDLGenerator. 
-* Do not update this file directly, edit NavigableRegionMessage_.idl instead.
+* This file was automatically generated from VisibilityMapWithNavigableRegionMessage_.idl by us.ihmc.idl.generator.IDLGenerator. 
+* Do not update this file directly, edit VisibilityMapWithNavigableRegionMessage_.idl instead.
 *
 */
-public class NavigableRegionMessagePubSubType implements us.ihmc.pubsub.TopicDataType<controller_msgs.msg.dds.NavigableRegionMessage>
+public class VisibilityMapWithNavigableRegionMessagePubSubType implements us.ihmc.pubsub.TopicDataType<controller_msgs.msg.dds.VisibilityMapWithNavigableRegionMessage>
 {
-   public static final java.lang.String name = "controller_msgs::msg::dds_::NavigableRegionMessage_";
+   public static final java.lang.String name = "controller_msgs::msg::dds_::VisibilityMapWithNavigableRegionMessage_";
 
    private final us.ihmc.idl.CDR serializeCDR = new us.ihmc.idl.CDR();
    private final us.ihmc.idl.CDR deserializeCDR = new us.ihmc.idl.CDR();
 
    @Override
-   public void serialize(controller_msgs.msg.dds.NavigableRegionMessage data, us.ihmc.pubsub.common.SerializedPayload serializedPayload) throws java.io.IOException
+   public void serialize(controller_msgs.msg.dds.VisibilityMapWithNavigableRegionMessage data, us.ihmc.pubsub.common.SerializedPayload serializedPayload) throws java.io.IOException
    {
       serializeCDR.serialize(serializedPayload);
       write(data, serializeCDR);
@@ -24,7 +24,7 @@ public class NavigableRegionMessagePubSubType implements us.ihmc.pubsub.TopicDat
    }
 
    @Override
-   public void deserialize(us.ihmc.pubsub.common.SerializedPayload serializedPayload, controller_msgs.msg.dds.NavigableRegionMessage data) throws java.io.IOException
+   public void deserialize(us.ihmc.pubsub.common.SerializedPayload serializedPayload, controller_msgs.msg.dds.VisibilityMapWithNavigableRegionMessage data) throws java.io.IOException
    {
       deserializeCDR.deserialize(serializedPayload);
       read(data, deserializeCDR);
@@ -53,12 +53,12 @@ public class NavigableRegionMessagePubSubType implements us.ihmc.pubsub.TopicDat
       return current_alignment - initial_alignment;
    }
 
-   public final static int getCdrSerializedSize(controller_msgs.msg.dds.NavigableRegionMessage data)
+   public final static int getCdrSerializedSize(controller_msgs.msg.dds.VisibilityMapWithNavigableRegionMessage data)
    {
       return getCdrSerializedSize(data, 0);
    }
 
-   public final static int getCdrSerializedSize(controller_msgs.msg.dds.NavigableRegionMessage data, int current_alignment)
+   public final static int getCdrSerializedSize(controller_msgs.msg.dds.VisibilityMapWithNavigableRegionMessage data, int current_alignment)
    {
       int initial_alignment = current_alignment;
 
@@ -77,7 +77,7 @@ public class NavigableRegionMessagePubSubType implements us.ihmc.pubsub.TopicDat
       return current_alignment - initial_alignment;
    }
 
-   public static void write(controller_msgs.msg.dds.NavigableRegionMessage data, us.ihmc.idl.CDR cdr)
+   public static void write(controller_msgs.msg.dds.VisibilityMapWithNavigableRegionMessage data, us.ihmc.idl.CDR cdr)
    {
       controller_msgs.msg.dds.PlanarRegionMessagePubSubType.write(data.getHomeRegion(), cdr);
       controller_msgs.msg.dds.VisibilityClusterMessagePubSubType.write(data.getHomeRegionCluster(), cdr);
@@ -88,7 +88,7 @@ public class NavigableRegionMessagePubSubType implements us.ihmc.pubsub.TopicDat
 
    }
 
-   public static void read(controller_msgs.msg.dds.NavigableRegionMessage data, us.ihmc.idl.CDR cdr)
+   public static void read(controller_msgs.msg.dds.VisibilityMapWithNavigableRegionMessage data, us.ihmc.idl.CDR cdr)
    {
       controller_msgs.msg.dds.PlanarRegionMessagePubSubType.read(data.getHomeRegion(), cdr);	
       controller_msgs.msg.dds.VisibilityClusterMessagePubSubType.read(data.getHomeRegionCluster(), cdr);	
@@ -98,7 +98,7 @@ public class NavigableRegionMessagePubSubType implements us.ihmc.pubsub.TopicDat
    }
 
    @Override
-   public final void serialize(controller_msgs.msg.dds.NavigableRegionMessage data, us.ihmc.idl.InterchangeSerializer ser)
+   public final void serialize(controller_msgs.msg.dds.VisibilityMapWithNavigableRegionMessage data, us.ihmc.idl.InterchangeSerializer ser)
    {
       ser.write_type_a("home_region", new controller_msgs.msg.dds.PlanarRegionMessagePubSubType(), data.getHomeRegion());
 
@@ -110,7 +110,7 @@ public class NavigableRegionMessagePubSubType implements us.ihmc.pubsub.TopicDat
    }
 
    @Override
-   public final void deserialize(us.ihmc.idl.InterchangeSerializer ser, controller_msgs.msg.dds.NavigableRegionMessage data)
+   public final void deserialize(us.ihmc.idl.InterchangeSerializer ser, controller_msgs.msg.dds.VisibilityMapWithNavigableRegionMessage data)
    {
       ser.read_type_a("home_region", new controller_msgs.msg.dds.PlanarRegionMessagePubSubType(), data.getHomeRegion());
 
@@ -121,15 +121,15 @@ public class NavigableRegionMessagePubSubType implements us.ihmc.pubsub.TopicDat
       ser.read_type_e("obstacle_clusters", data.getObstacleClusters());
    }
 
-   public static void staticCopy(controller_msgs.msg.dds.NavigableRegionMessage src, controller_msgs.msg.dds.NavigableRegionMessage dest)
+   public static void staticCopy(controller_msgs.msg.dds.VisibilityMapWithNavigableRegionMessage src, controller_msgs.msg.dds.VisibilityMapWithNavigableRegionMessage dest)
    {
       dest.set(src);
    }
 
    @Override
-   public controller_msgs.msg.dds.NavigableRegionMessage createData()
+   public controller_msgs.msg.dds.VisibilityMapWithNavigableRegionMessage createData()
    {
-      return new controller_msgs.msg.dds.NavigableRegionMessage();
+      return new controller_msgs.msg.dds.VisibilityMapWithNavigableRegionMessage();
    }
    @Override
    public int getTypeSize()
@@ -143,24 +143,24 @@ public class NavigableRegionMessagePubSubType implements us.ihmc.pubsub.TopicDat
       return name;
    }
    
-   public void serialize(controller_msgs.msg.dds.NavigableRegionMessage data, us.ihmc.idl.CDR cdr)
+   public void serialize(controller_msgs.msg.dds.VisibilityMapWithNavigableRegionMessage data, us.ihmc.idl.CDR cdr)
    {
       write(data, cdr);
    }
 
-   public void deserialize(controller_msgs.msg.dds.NavigableRegionMessage data, us.ihmc.idl.CDR cdr)
+   public void deserialize(controller_msgs.msg.dds.VisibilityMapWithNavigableRegionMessage data, us.ihmc.idl.CDR cdr)
    {
       read(data, cdr);
    }
    
-   public void copy(controller_msgs.msg.dds.NavigableRegionMessage src, controller_msgs.msg.dds.NavigableRegionMessage dest)
+   public void copy(controller_msgs.msg.dds.VisibilityMapWithNavigableRegionMessage src, controller_msgs.msg.dds.VisibilityMapWithNavigableRegionMessage dest)
    {
       staticCopy(src, dest);
    }
 
    @Override
-   public NavigableRegionMessagePubSubType newInstance()
+   public VisibilityMapWithNavigableRegionMessagePubSubType newInstance()
    {
-      return new NavigableRegionMessagePubSubType();
+      return new VisibilityMapWithNavigableRegionMessagePubSubType();
    }
 }
