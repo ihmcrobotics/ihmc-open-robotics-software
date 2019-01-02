@@ -9,6 +9,7 @@ import us.ihmc.multicastLogDataProtocol.modelLoaders.LogModelProvider;
 import us.ihmc.pubsub.DomainFactory;
 import us.ihmc.quadrupedCommunication.QuadrupedControllerAPIDefinition;
 import us.ihmc.quadrupedPlanning.QuadrupedXGaitSettingsReadOnly;
+import us.ihmc.quadrupedPlanning.footstepChooser.PointFootSnapperParameters;
 import us.ihmc.quadrupedPlanning.networkProcessing.QuadrupedToolboxController;
 import us.ihmc.quadrupedPlanning.networkProcessing.QuadrupedToolboxModule;
 import us.ihmc.robotModels.FullQuadrupedRobotModelFactory;
@@ -28,15 +29,16 @@ public class QuadrupedStepTeleopModule extends QuadrupedToolboxModule
 
    private final QuadrupedStepTeleopController stepTeleopController;
 
-   public QuadrupedStepTeleopModule(FullQuadrupedRobotModelFactory modelFactory, QuadrupedXGaitSettingsReadOnly defaultXGaitSettings, LogModelProvider modelProvider,
-                                    boolean startYoVariableServer, DomainFactory.PubSubImplementation pubSubImplementation)
+   public QuadrupedStepTeleopModule(FullQuadrupedRobotModelFactory modelFactory, QuadrupedXGaitSettingsReadOnly defaultXGaitSettings,
+                                    PointFootSnapperParameters pointFootSnapperParameters, LogModelProvider modelProvider, boolean startYoVariableServer,
+                                    DomainFactory.PubSubImplementation pubSubImplementation)
    {
       super(modelFactory.getRobotDescription().getName(), modelFactory.createFullRobotModel(), modelProvider, startYoVariableServer, updatePeriodMilliseconds,
             pubSubImplementation);
 
 
-      stepTeleopController = new QuadrupedStepTeleopController(defaultXGaitSettings, outputManager, robotDataReceiver, registry, yoGraphicsListRegistry,
-                                                               updatePeriodMilliseconds);
+      stepTeleopController = new QuadrupedStepTeleopController(defaultXGaitSettings, pointFootSnapperParameters, outputManager, robotDataReceiver, registry,
+                                                               yoGraphicsListRegistry, updatePeriodMilliseconds);
       new DefaultParameterReader().readParametersInRegistry(registry);
    }
 
@@ -64,6 +66,8 @@ public class QuadrupedStepTeleopModule extends QuadrupedToolboxModule
                                            s -> stepTeleopController.processXGaitSettingsPacket(s.takeNextData()));
       ROS2Tools.createCallbackSubscription(realtimeRos2Node, QuadrupedTeleopDesiredVelocity.class, getSubscriberTopicNameGenerator(),
                                            s -> stepTeleopController.processTeleopDesiredVelocity(s.takeNextData()));
+      ROS2Tools.createCallbackSubscription(realtimeRos2Node, PlanarRegionsListMessage.class, getSubscriberTopicNameGenerator(),
+                                           s -> stepTeleopController.processPlanarRegionsListMessage(s.takeNextData()));
    }
 
    @Override

@@ -3,6 +3,7 @@ package us.ihmc.quadrupedRobotics.controller.force.speedTorqueLimits;
 import us.ihmc.commonWalkingControlModules.pushRecovery.PushRobotTestConductor;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.quadrupedPlanning.input.NewQuadrupedTeleopManager;
 import us.ihmc.quadrupedPlanning.input.QuadrupedTeleopManager;
 import us.ihmc.quadrupedRobotics.*;
 import us.ihmc.quadrupedRobotics.controller.QuadrupedControlMode;
@@ -16,7 +17,7 @@ public abstract class QuadrupedSpeedTorqueLimitGraphing implements QuadrupedMult
 {
    private GoalOrientedTestConductor conductor;
    private QuadrupedForceTestYoVariables variables;
-   private QuadrupedTeleopManager stepTeleopManager;
+   private NewQuadrupedTeleopManager stepTeleopManager;
    private PushRobotTestConductor pusher;
 
    public SimulationConstructionSet createSimulation() throws IOException
@@ -29,7 +30,7 @@ public abstract class QuadrupedSpeedTorqueLimitGraphing implements QuadrupedMult
       testFactory.setUseNetworking(true);
       conductor = testFactory.createTestConductor();
       variables = new QuadrupedForceTestYoVariables(conductor.getScs());
-      stepTeleopManager = testFactory.getStepTeleopManager();
+      stepTeleopManager = testFactory.getNewStepTeleopManager();
       pusher = new PushRobotTestConductor(conductor.getScs(), "body");
 
       return conductor.getScs();
@@ -53,10 +54,10 @@ public abstract class QuadrupedSpeedTorqueLimitGraphing implements QuadrupedMult
 //            pusher.applyForce(new Vector3d(0.0, 0.0, -1.0), force, dt);
             phase += dt * 20.0;
 
-            stepTeleopManager.getXGaitSettings().setEndPhaseShift(180.0);
-            stepTeleopManager.getXGaitSettings().setStepGroundClearance(0.25);
-            stepTeleopManager.getXGaitSettings().setStepDuration(0.55);
-            stepTeleopManager.getXGaitSettings().setEndDoubleSupportDuration(0.0);
+            stepTeleopManager.setEndPhaseShift(180.0);
+            stepTeleopManager.setStepGroundClearance(0.25);
+            stepTeleopManager.setStepDuration(0.55);
+            stepTeleopManager.setEndDoubleSupportDuration(0.0);
             double yaw = 0.05 * Math.cos(variables.getYoTime().getDoubleValue());
             double pitch = 0.1 * Math.sin(variables.getYoTime().getDoubleValue());
             double roll = 0.05 * Math.cos(variables.getYoTime().getDoubleValue());

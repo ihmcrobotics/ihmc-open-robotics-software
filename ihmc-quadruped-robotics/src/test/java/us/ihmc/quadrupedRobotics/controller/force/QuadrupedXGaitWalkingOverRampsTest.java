@@ -6,6 +6,7 @@ import org.junit.Before;
 import org.junit.Test;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.quadrupedPlanning.input.NewQuadrupedTeleopManager;
 import us.ihmc.quadrupedPlanning.input.QuadrupedTeleopManager;
 import us.ihmc.quadrupedRobotics.*;
 import us.ihmc.quadrupedRobotics.controller.QuadrupedControlMode;
@@ -22,7 +23,7 @@ public abstract class QuadrupedXGaitWalkingOverRampsTest implements QuadrupedMul
 {
    protected GoalOrientedTestConductor conductor;
    protected QuadrupedForceTestYoVariables variables;
-   private QuadrupedTeleopManager stepTeleopManager;
+   private NewQuadrupedTeleopManager stepTeleopManager;
    private QuadrupedTestFactory quadrupedTestFactory;
 
    @Before
@@ -68,15 +69,15 @@ public abstract class QuadrupedXGaitWalkingOverRampsTest implements QuadrupedMul
       quadrupedTestFactory.setUseNetworking(true);
       conductor = quadrupedTestFactory.createTestConductor();
       variables = new QuadrupedForceTestYoVariables(conductor.getScs());
-      stepTeleopManager = quadrupedTestFactory.getStepTeleopManager();
+      stepTeleopManager = quadrupedTestFactory.getNewStepTeleopManager();
 
-      stepTeleopManager.getXGaitSettings().setEndDoubleSupportDuration(0.05);
-      stepTeleopManager.getXGaitSettings().setStanceLength(1.00);
-      stepTeleopManager.getXGaitSettings().setStanceWidth(0.30);
-      stepTeleopManager.getXGaitSettings().setStepDuration(0.35);
-      stepTeleopManager.getXGaitSettings().setStepGroundClearance(0.1);
+      stepTeleopManager.setEndDoubleSupportDuration(0.05);
+      stepTeleopManager.setStanceLength(1.00);
+      stepTeleopManager.setStanceWidth(0.30);
+      stepTeleopManager.setStepDuration(0.35);
+      stepTeleopManager.setStepGroundClearance(0.1);
       stepTeleopManager.setDesiredBodyHeight(comHeightForRoughTerrain);
-      stepTeleopManager.setStepSnapper((x, y, minZ) -> new Point3D(x, y, groundProfile.heightAt(x, y, 0.0)));
+//      stepTeleopManager.setStepSnapper((x, y, minZ) -> new Point3D(x, y, groundProfile.heightAt(x, y, 0.0)));
 
       QuadrupedTestBehaviors.readyXGait(conductor, variables, stepTeleopManager);
 
@@ -126,7 +127,7 @@ public abstract class QuadrupedXGaitWalkingOverRampsTest implements QuadrupedMul
       quadrupedTestFactory.setUseNetworking(true);
       conductor = quadrupedTestFactory.createTestConductor();
       variables = new QuadrupedForceTestYoVariables(conductor.getScs());
-      stepTeleopManager = quadrupedTestFactory.getStepTeleopManager();
+      stepTeleopManager = quadrupedTestFactory.getNewStepTeleopManager();
 
       QuadrupedTestBehaviors.readyXGait(conductor, variables, stepTeleopManager);
 

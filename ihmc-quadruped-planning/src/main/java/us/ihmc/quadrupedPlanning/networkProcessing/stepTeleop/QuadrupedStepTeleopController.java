@@ -4,6 +4,7 @@ import controller_msgs.msg.dds.*;
 import us.ihmc.commons.Conversions;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.quadrupedPlanning.QuadrupedXGaitSettingsReadOnly;
+import us.ihmc.quadrupedPlanning.footstepChooser.PointFootSnapperParameters;
 import us.ihmc.quadrupedPlanning.networkProcessing.OutputManager;
 import us.ihmc.quadrupedPlanning.networkProcessing.QuadrupedRobotDataReceiver;
 import us.ihmc.quadrupedPlanning.networkProcessing.QuadrupedToolboxController;
@@ -18,13 +19,13 @@ public class QuadrupedStepTeleopController extends QuadrupedToolboxController
    private final AtomicReference<HighLevelStateChangeStatusMessage> controllerStateChangeMessage = new AtomicReference<>();
    private final AtomicReference<QuadrupedSteppingStateChangeMessage> steppingStateChangeMessage = new AtomicReference<>();
 
-   public QuadrupedStepTeleopController(QuadrupedXGaitSettingsReadOnly defaultXGaitSettings, OutputManager statusOutputManager,
-                                        QuadrupedRobotDataReceiver robotDataReceiver, YoVariableRegistry parentRegistry,
+   public QuadrupedStepTeleopController(QuadrupedXGaitSettingsReadOnly defaultXGaitSettings, PointFootSnapperParameters pointFootSnapperParameters,
+                                        OutputManager statusOutputManager, QuadrupedRobotDataReceiver robotDataReceiver, YoVariableRegistry parentRegistry,
                                         YoGraphicsListRegistry graphicsListRegistry, long tickTimeMs)
    {
       super(robotDataReceiver, statusOutputManager, parentRegistry);
 
-      teleopManager = new QuadrupedStepTeleopManager(defaultXGaitSettings, robotDataReceiver.getReferenceFrames(),
+      teleopManager = new QuadrupedStepTeleopManager(defaultXGaitSettings, pointFootSnapperParameters, robotDataReceiver.getReferenceFrames(),
                                                      Conversions.millisecondsToSeconds(tickTimeMs), graphicsListRegistry, registry);
    }
 
@@ -51,6 +52,11 @@ public class QuadrupedStepTeleopController extends QuadrupedToolboxController
    public void processSteppingStateChangeMessage(QuadrupedSteppingStateChangeMessage message)
    {
       steppingStateChangeMessage.set(message);
+   }
+
+   public void processPlanarRegionsListMessage(PlanarRegionsListMessage message)
+   {
+      teleopManager.processPlanarRegionsListMessage(message);
    }
 
    public void processGroundPlaneMessage(QuadrupedGroundPlaneMessage message)

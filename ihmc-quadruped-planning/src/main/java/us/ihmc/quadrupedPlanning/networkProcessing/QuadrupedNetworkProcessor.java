@@ -6,6 +6,7 @@ import us.ihmc.communication.packets.PacketDestination;
 import us.ihmc.pubsub.DomainFactory;
 import us.ihmc.quadrupedPlanning.QuadrupedXGaitSettings;
 import us.ihmc.quadrupedPlanning.QuadrupedXGaitSettingsReadOnly;
+import us.ihmc.quadrupedPlanning.footstepChooser.PointFootSnapperParameters;
 import us.ihmc.quadrupedPlanning.networkProcessing.bodyTeleop.QuadrupedBodyTeleopModule;
 import us.ihmc.quadrupedPlanning.networkProcessing.heightTeleop.QuadrupedBodyHeightTeleopModule;
 import us.ihmc.quadrupedPlanning.networkProcessing.stepTeleop.QuadrupedStepTeleopModule;
@@ -21,15 +22,16 @@ public class QuadrupedNetworkProcessor
    private QuadrupedStepTeleopModule stepTeleopModule;
 
    public QuadrupedNetworkProcessor(FullQuadrupedRobotModelFactory robotModel, QuadrupedNetworkModuleParameters params, double nominalHeight,
-                                    QuadrupedXGaitSettings xGaitSettings)
+                                    QuadrupedXGaitSettings xGaitSettings, PointFootSnapperParameters pointFootSnapperParameters)
    {
-      this(robotModel, params, nominalHeight, xGaitSettings, DomainFactory.PubSubImplementation.FAST_RTPS);
+      this(robotModel, params, nominalHeight, xGaitSettings, pointFootSnapperParameters, DomainFactory.PubSubImplementation.FAST_RTPS);
    }
 
    public QuadrupedNetworkProcessor(FullQuadrupedRobotModelFactory robotModel, QuadrupedNetworkModuleParameters params, double nominalHeight,
-                                    QuadrupedXGaitSettingsReadOnly xGaitSettings, DomainFactory.PubSubImplementation pubSubImplementation)
+                                    QuadrupedXGaitSettingsReadOnly xGaitSettings, PointFootSnapperParameters pointFootSnapperParameters,
+                                    DomainFactory.PubSubImplementation pubSubImplementation)
    {
-      tryToStartModule(() -> setupStepTeleopModule(robotModel, xGaitSettings, params, pubSubImplementation));
+      tryToStartModule(() -> setupStepTeleopModule(robotModel, xGaitSettings, pointFootSnapperParameters, params, pubSubImplementation));
       tryToStartModule(() -> setupBodyHeightTeleopModule(robotModel, params, nominalHeight, pubSubImplementation));
       tryToStartModule(() -> setupBodyTeleopModule(robotModel, params, pubSubImplementation));
       tryToStartModule(() -> setupXBoxModule(robotModel, params, xGaitSettings, nominalHeight, pubSubImplementation));
@@ -43,11 +45,13 @@ public class QuadrupedNetworkProcessor
    }
 
    private void setupStepTeleopModule(FullQuadrupedRobotModelFactory modelFactory, QuadrupedXGaitSettingsReadOnly xGaitSettings,
-                                      QuadrupedNetworkModuleParameters params, DomainFactory.PubSubImplementation pubSubImplementation) throws IOException
+                                      PointFootSnapperParameters pointFootSnapperParameters, QuadrupedNetworkModuleParameters params,
+                                      DomainFactory.PubSubImplementation pubSubImplementation)
    {
       if (!params.isStepTeleopModuleEnabled())
          return;
-      stepTeleopModule = new QuadrupedStepTeleopModule(modelFactory, xGaitSettings, null, params.visualizeStepTeleopModuleEnabled(), pubSubImplementation);
+      stepTeleopModule = new QuadrupedStepTeleopModule(modelFactory, xGaitSettings, pointFootSnapperParameters, null, params.visualizeStepTeleopModuleEnabled(),
+                                                       pubSubImplementation);
    }
 
    private void setupBodyHeightTeleopModule(FullQuadrupedRobotModelFactory modelFactory, QuadrupedNetworkModuleParameters params, double nominalHeight,

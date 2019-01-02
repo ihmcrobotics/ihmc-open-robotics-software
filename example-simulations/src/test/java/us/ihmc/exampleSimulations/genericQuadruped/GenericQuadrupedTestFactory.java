@@ -185,7 +185,8 @@ public class GenericQuadrupedTestFactory implements QuadrupedTestFactory
          graphicsListRegistry = new YoGraphicsListRegistry();
          stepTeleopManager = new QuadrupedTeleopManager(robotName, ros2Node, xGaitSettings, physicalProperties.getNominalBodyHeight(), referenceFrames, graphicsListRegistry, teleopRegistry);
          QuadrupedNetworkProcessor networkProcessor = new GenericQuadrupedNetworkProcessor(modelFactory, physicalProperties.getNominalBodyHeight(),
-                                                                                           xGaitSettings, PubSubImplementation.INTRAPROCESS);
+                                                                                           xGaitSettings, new GenericQuadrupedPointFootSnapperParameters(),
+                                                                                           PubSubImplementation.INTRAPROCESS);
          newStepTeleopManager = new NewQuadrupedTeleopManager(robotName, ros2Node, networkProcessor, xGaitSettings, teleopRegistry);
 
          new DefaultParameterReader().readParametersInRegistry(teleopRegistry);
@@ -274,6 +275,12 @@ public class GenericQuadrupedTestFactory implements QuadrupedTestFactory
    public QuadrupedTeleopManager getStepTeleopManager()
    {
       return stepTeleopManager;
+   }
+
+   @Override
+   public NewQuadrupedTeleopManager getNewStepTeleopManager()
+   {
+      return newStepTeleopManager;
    }
 
    @Override

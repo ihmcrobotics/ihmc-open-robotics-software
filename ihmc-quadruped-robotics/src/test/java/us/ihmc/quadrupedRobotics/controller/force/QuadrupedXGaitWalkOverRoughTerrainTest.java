@@ -6,6 +6,7 @@ import us.ihmc.quadrupedBasics.QuadrupedSteppingStateEnum;
 import us.ihmc.quadrupedPlanning.QuadrupedXGaitSettingsReadOnly;
 import us.ihmc.quadrupedPlanning.footstepChooser.DefaultPointFootSnapperParameters;
 import us.ihmc.quadrupedPlanning.footstepChooser.PlanarRegionBasedPointFootSnapper;
+import us.ihmc.quadrupedPlanning.input.NewQuadrupedTeleopManager;
 import us.ihmc.quadrupedPlanning.input.QuadrupedTeleopManager;
 import us.ihmc.quadrupedRobotics.*;
 import us.ihmc.quadrupedRobotics.controller.QuadrupedControlMode;
@@ -25,7 +26,7 @@ public abstract class QuadrupedXGaitWalkOverRoughTerrainTest implements Quadrupe
 {
    protected GoalOrientedTestConductor conductor;
    protected QuadrupedForceTestYoVariables variables;
-   private QuadrupedTeleopManager stepTeleopManager;
+   private NewQuadrupedTeleopManager stepTeleopManager;
    private QuadrupedTestFactory quadrupedTestFactory;
 
    public abstract QuadrupedXGaitSettingsReadOnly getXGaitSettings();
@@ -117,10 +118,8 @@ public abstract class QuadrupedXGaitWalkOverRoughTerrainTest implements Quadrupe
 
       conductor = quadrupedTestFactory.createTestConductor();
       variables = new QuadrupedForceTestYoVariables(conductor.getScs());
-      stepTeleopManager = quadrupedTestFactory.getStepTeleopManager();
-      PlanarRegionBasedPointFootSnapper snapper = new PlanarRegionBasedPointFootSnapper(new DefaultPointFootSnapperParameters());
-      snapper.setPlanarRegionsList(environment.getPlanarRegionsList());
-      stepTeleopManager.setStepSnapper(snapper);
+      stepTeleopManager = quadrupedTestFactory.getNewStepTeleopManager();
+      stepTeleopManager.submitPlanarRegionsList(environment.getPlanarRegionsList());
       if(!Double.isNaN(desiredBodyHeight))
          stepTeleopManager.setDesiredBodyHeight(desiredBodyHeight);
 
@@ -128,7 +127,7 @@ public abstract class QuadrupedXGaitWalkOverRoughTerrainTest implements Quadrupe
 
 
       QuadrupedTestBehaviors.readyXGait(conductor, variables, stepTeleopManager);
-      stepTeleopManager.getXGaitSettings().set(xGaitSettings);
+      stepTeleopManager.setXGaitSettings(xGaitSettings);
 
       stepTeleopManager.requestXGait();
       stepTeleopManager.setDesiredVelocity(walkingSpeed, 0.0, 0.0);

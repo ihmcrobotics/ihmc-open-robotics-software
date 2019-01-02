@@ -6,6 +6,7 @@ import org.junit.Before;
 import org.junit.Test;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.quadrupedPlanning.input.NewQuadrupedTeleopManager;
 import us.ihmc.quadrupedPlanning.input.QuadrupedTeleopManager;
 import us.ihmc.quadrupedRobotics.QuadrupedForceTestYoVariables;
 import us.ihmc.quadrupedRobotics.QuadrupedMultiRobotTestInterface;
@@ -24,7 +25,7 @@ public abstract class QuadrupedBodyPathPlanTest implements QuadrupedMultiRobotTe
 {
    private GoalOrientedTestConductor conductor;
    private QuadrupedForceTestYoVariables variables;
-   private QuadrupedTeleopManager stepTeleopManager;
+   private NewQuadrupedTeleopManager stepTeleopManager;
    private QuadrupedTestFactory quadrupedTestFactory;
 
    @Before
@@ -48,7 +49,7 @@ public abstract class QuadrupedBodyPathPlanTest implements QuadrupedMultiRobotTe
 
          conductor = quadrupedTestFactory.createTestConductor();
          variables = new QuadrupedForceTestYoVariables(conductor.getScs());
-         stepTeleopManager = quadrupedTestFactory.getStepTeleopManager();
+         stepTeleopManager = quadrupedTestFactory.getNewStepTeleopManager();
       }
       catch (IOException e)
       {
@@ -75,7 +76,7 @@ public abstract class QuadrupedBodyPathPlanTest implements QuadrupedMultiRobotTe
       setUpSimulation(null);
 
       QuadrupedTestBehaviors.readyXGait(conductor, variables, stepTeleopManager);
-      stepTeleopManager.getXGaitSettings().setEndPhaseShift(180);
+      stepTeleopManager.setEndPhaseShift(180);
 
       EuclideanTrajectoryPointMessage point1 = new EuclideanTrajectoryPointMessage();
       point1.setTime(3.0);
@@ -105,7 +106,7 @@ public abstract class QuadrupedBodyPathPlanTest implements QuadrupedMultiRobotTe
       setUpSimulation(new SimpleMazeEnvironment());
 
       QuadrupedTestBehaviors.readyXGait(conductor, variables, stepTeleopManager);
-      stepTeleopManager.getXGaitSettings().setEndPhaseShift(180);
+      stepTeleopManager.setEndPhaseShift(180);
 
       double time = 0.0;
       time += 3.0;
