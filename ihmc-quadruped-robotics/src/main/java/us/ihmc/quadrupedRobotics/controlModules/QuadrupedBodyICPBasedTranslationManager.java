@@ -36,6 +36,7 @@ import static us.ihmc.communication.packets.Packet.INVALID_MESSAGE_ID;
 public class QuadrupedBodyICPBasedTranslationManager
 {
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
+   private static final boolean useFeedForward = false;
 
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
 
@@ -111,7 +112,7 @@ public class QuadrupedBodyICPBasedTranslationManager
       bodyPositionGains.setKp(1.5);
       bodyPositionGains.setKi(2.0);
       bodyPositionGains.setMaximumIntegralError(0.05);
-      bodyPositionGains.setIntegralLeakRatio(AlphaFilteredYoVariable.computeAlphaGivenBreakFrequencyProperly(1.5, controlDT));
+      bodyPositionGains.setIntegralLeakRatio(AlphaFilteredYoVariable.computeAlphaGivenBreakFrequencyProperly(1.0, controlDT));
 
       manualMode.addParameterChangedListener(v -> initialize());
 
@@ -181,10 +182,17 @@ public class QuadrupedBodyICPBasedTranslationManager
       desiredICPOffsetFeedback.setX(xAction);
       desiredICPOffsetFeedback.setY(yAction);
 
-      tempPosition2d.setIncludingFrame(desiredICP);
-      tempPosition2d.changeFrame(desiredICPOffsetFeedForward.getReferenceFrame());
-      desiredICPOffsetFeedForward.setMatchingFrame(desiredBodyPosition);
-      desiredICPOffsetFeedForward.sub(tempPosition2d);
+      if (useFeedForward)
+      {
+         tempPosition2d.setIncludingFrame(desiredICP);
+         tempPosition2d.changeFrame(desiredICPOffsetFeedForward.getReferenceFrame());
+         desiredICPOffsetFeedForward.setMatchingFrame(desiredBodyPosition);
+         desiredICPOffsetFeedForward.sub(tempPosition2d);
+      }
+      else
+      {
+         desiredICPOffsetFeedForward.setToZero();
+      }
 
       desiredICPOffsetAction.set(desiredICPOffsetFeedForward);
       desiredICPOffsetAction.add(desiredICPOffsetFeedback);
