@@ -18,6 +18,7 @@ import us.ihmc.quadrupedRobotics.QuadrupedTestBehaviors;
 import us.ihmc.quadrupedRobotics.QuadrupedTestFactory;
 import us.ihmc.quadrupedRobotics.QuadrupedTestGoals;
 import us.ihmc.quadrupedRobotics.controller.QuadrupedControlMode;
+import us.ihmc.quadrupedRobotics.model.QuadrupedInitialOffsetAndYaw;
 import us.ihmc.quadrupedRobotics.simulation.QuadrupedGroundContactModelType;
 import us.ihmc.robotics.geometry.AngleTools;
 import us.ihmc.robotics.partNames.QuadrupedJointName;
@@ -220,13 +221,10 @@ public abstract class QuadrupedForceBasedStandControllerTest implements Quadrupe
 
    @ContinuousIntegrationTest(estimatedDuration = 30.0)
    @Test(timeout = 390000)
-   public void testStandingUpAndAdjustingCoM()
-         throws IOException
+   public void testStandingUpAndAdjustingBody() throws IOException
    {
       double heightShift = getHeightShift();
       double heightDelta = getHeightDelta();
-      double translationShift = getTranslationShift();
-      double translationDelta = getTranslationDelta();
       double orientationShift = getOrientationShift();
       double orientationDelta = getOrientationDelta();
       conductor = quadrupedTestFactory.createTestConductor();
@@ -241,21 +239,50 @@ public abstract class QuadrupedForceBasedStandControllerTest implements Quadrupe
       conductor.simulate();
 
       double initialBodyHeight = variables.getCurrentHeightInWorld().getDoubleValue();
-      runMovingCoM(initialBodyHeight + heightShift, orientationShift, orientationShift, orientationShift, translationShift, translationShift, heightDelta, orientationDelta, translationDelta);
-      runMovingCoM(initialBodyHeight + heightShift, orientationShift, orientationShift, orientationShift,-translationShift, translationShift, heightDelta, orientationDelta, translationDelta);
-      runMovingCoM(initialBodyHeight + heightShift, orientationShift, orientationShift, orientationShift,-translationShift,-translationShift, heightDelta, orientationDelta, translationDelta);
-      runMovingCoM(initialBodyHeight, orientationShift, -orientationShift, orientationShift, translationShift, -translationShift, heightDelta, orientationDelta, translationDelta);
-      runMovingCoM(initialBodyHeight - heightShift, -orientationShift, -orientationShift, -orientationShift, translationShift, -translationShift, heightDelta, orientationDelta, translationDelta);
-      runMovingCoM(initialBodyHeight + heightShift, -orientationShift, -orientationShift, -orientationShift, translationShift, translationShift, heightDelta, orientationDelta, translationDelta);
-      runMovingCoM(initialBodyHeight + heightShift, orientationShift, orientationShift, orientationShift, -translationShift, -translationShift, heightDelta, orientationDelta, translationDelta);
-      runMovingCoM(initialBodyHeight, 0.0, 0.0, 0.0, 0.0, 0.0, heightDelta, orientationDelta, translationDelta);
+      runMovingBody(initialBodyHeight + heightShift, orientationShift, orientationShift, orientationShift, heightDelta, orientationDelta);
+      runMovingBody(initialBodyHeight, orientationShift, -orientationShift, orientationShift, heightDelta, orientationDelta);
+      runMovingBody(initialBodyHeight - heightShift, -orientationShift, -orientationShift, -orientationShift, heightDelta, orientationDelta);
+      runMovingBody(initialBodyHeight + heightShift, orientationShift, orientationShift, orientationShift, heightDelta, orientationDelta);
+      runMovingBody(initialBodyHeight, 0.0, 0.0, 0.0, heightDelta, orientationDelta);
    }
 
-   private void runMovingCoM(double bodyHeight, double bodyOrientationYaw, double bodyOrientationPitch, double bodyOrientationRoll, double bodyX,
-                             double bodyY, double heightDelta, double orientationDelta, double translationDelta)
+
+   @ContinuousIntegrationTest(estimatedDuration = 30.0)
+   @Test(timeout = 390000)
+   public void testStandingUpAndShiftingCoM() throws IOException
+   {
+      double heightShift = getHeightShift();
+      double heightDelta = getHeightDelta();
+      double translationShift = getTranslationShift();
+      double translationDelta = getTranslationDelta();
+      quadrupedTestFactory.setInitialOffset(new QuadrupedInitialOffsetAndYaw(1.0));
+      conductor = quadrupedTestFactory.createTestConductor();
+      variables = new QuadrupedForceTestYoVariables(conductor.getScs());
+      stepTeleopManager = quadrupedTestFactory.getStepTeleopManager();
+
+      QuadrupedTestBehaviors.standUp(conductor, variables);
+      QuadrupedTestBehaviors.startBalancing(conductor, variables, stepTeleopManager);
+
+      conductor.addSustainGoal(QuadrupedTestGoals.notFallen(variables));
+      conductor.addTerminalGoal(YoVariableTestGoal.doubleGreaterThan(variables.getYoTime(), variables.getYoTime().getDoubleValue() + 1.0));
+      conductor.simulate();
+
+      double initialBodyHeight = variables.getCurrentHeightInWorld().getDoubleValue();
+      runMovingCoM(initialBodyHeight + heightShift, translationShift, translationShift, heightDelta, translationDelta);
+      runMovingCoM(initialBodyHeight + heightShift,-translationShift, translationShift, heightDelta, translationDelta);
+      runMovingCoM(initialBodyHeight + heightShift,-translationShift,-translationShift, heightDelta, translationDelta);
+      runMovingCoM(initialBodyHeight, translationShift, -translationShift, heightDelta, translationDelta);
+      runMovingCoM(initialBodyHeight - heightShift, translationShift,-translationShift, heightDelta, translationDelta);
+      runMovingCoM(initialBodyHeight + heightShift, translationShift, translationShift, heightDelta, translationDelta);
+      runMovingCoM(initialBodyHeight + heightShift,-translationShift,-translationShift, heightDelta, translationDelta);
+      runMovingCoM(initialBodyHeight, 0.0, 0.0, heightDelta, translationDelta);
+   }
+
+   private void runMovingBody(double bodyHeight, double bodyOrientationYaw, double bodyOrientationPitch, double bodyOrientationRoll,  double heightDelta,
+                              double orientationDelta)
    {
       stepTeleopManager.setDesiredBodyHeight(bodyHeight);
-      stepTeleopManager.setDesiredBodyPose(bodyX, bodyY, bodyOrientationYaw, bodyOrientationPitch, bodyOrientationRoll, 0.1);
+      stepTeleopManager.setDesiredBodyOrientation(bodyOrientationYaw, bodyOrientationPitch, bodyOrientationRoll, 0.1);
 
       conductor.addSustainGoal(QuadrupedTestGoals.notFallen(variables));
       conductor.addTerminalGoal(YoVariableTestGoal.doubleGreaterThan(variables.getYoTime(), variables.getYoTime().getDoubleValue() + 1.0));
@@ -273,5 +300,24 @@ public abstract class QuadrupedForceBasedStandControllerTest implements Quadrupe
       assertTrue("Roll did not meet goal : Math.abs(" + variables.getBodyEstimateRoll() + " - " + bodyOrientationRoll + " < "
                        + orientationDelta,
                  Math.abs(AngleTools.computeAngleDifferenceMinusPiToPi(variables.getBodyEstimateRoll(), bodyOrientationRoll)) < orientationDelta);
+   }
+
+   private void runMovingCoM(double bodyHeight, double bodyX, double bodyY, double heightDelta, double translationDelta)
+   {
+      stepTeleopManager.setDesiredBodyHeight(bodyHeight);
+      stepTeleopManager.setDesiredBodyTranslation(bodyX, bodyY, 0.1);
+
+      conductor.addSustainGoal(QuadrupedTestGoals.notFallen(variables));
+      conductor.addTerminalGoal(YoVariableTestGoal.doubleGreaterThan(variables.getYoTime(), variables.getYoTime().getDoubleValue() + 1.0));
+      conductor.simulate();
+
+      assertTrue("Height did not meet goal : Math.abs(" + variables.getCurrentHeightInWorld().getDoubleValue() + " - " + variables.getHeightInWorldSetpoint()
+                                                                                                                                  .getDoubleValue() + " < "
+                       + heightDelta,
+                 Math.abs(variables.getCurrentHeightInWorld().getDoubleValue() - variables.getHeightInWorldSetpoint().getDoubleValue()) < heightDelta);
+      assertTrue("X did not meet goal : Math.abs(" + variables.getRobotBodyX() + " - " + bodyX + " < " + translationDelta,
+                 Math.abs(AngleTools.computeAngleDifferenceMinusPiToPi(variables.getBodyEstimateYaw(), bodyX)) < translationDelta);
+      assertTrue("Y did not meet goal : Math.abs(" + variables.getRobotBodyY() + " - " + bodyY + " < " + translationDelta,
+                 Math.abs(AngleTools.computeAngleDifferenceMinusPiToPi(variables.getBodyEstimatePitch(), translationDelta)) < translationDelta);
    }
 }

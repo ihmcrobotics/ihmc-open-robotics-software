@@ -289,6 +289,14 @@ public class QuadrupedTeleopManager
       desiredOrientationTime.set(time);
    }
 
+   public void setDesiredBodyTranslation(double x, double y, double time)
+   {
+      desiredPositionX.set(x);
+      desiredPositionY.set(y);
+
+      desiredOrientationTime.set(time);
+   }
+
    public void setDesiredBodyPose(double x, double y, double yaw, double pitch, double roll, double time)
    {
       desiredPositionX.set(x);
