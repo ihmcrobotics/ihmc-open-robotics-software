@@ -306,7 +306,7 @@ public class QuadrupedSwingState extends QuadrupedFootState
 
    private boolean hasMinimumTimePassed(double timeInState)
    {
-      return timeInState / swingDuration.getDoubleValue() > 0.6;
+      return timeInState / swingDuration.getDoubleValue() > minPhaseThroughSwingForContact.getValue();
    }
 
    private void updateEndOfStateConditions(double timeInState)
