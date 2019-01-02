@@ -6,6 +6,7 @@ import us.ihmc.quadrupedRobotics.controller.QuadrupedControlMode;
 import us.ihmc.quadrupedRobotics.model.QuadrupedInitialOffsetAndYaw;
 import us.ihmc.quadrupedRobotics.model.QuadrupedInitialPositionParameters;
 import us.ihmc.quadrupedRobotics.simulation.QuadrupedGroundContactModelType;
+import us.ihmc.robotModels.FullQuadrupedRobotModel;
 import us.ihmc.robotModels.FullRobotModel;
 import us.ihmc.simulationConstructionSetTools.util.simulationrunner.GoalOrientedTestConductor;
 import us.ihmc.simulationconstructionset.SimulationConstructionSetParameters;
@@ -41,7 +42,7 @@ public interface QuadrupedTestFactory
 
    String getRobotName();
 
-   FullRobotModel getFullRobotModel();
+   FullQuadrupedRobotModel getFullRobotModel();
 
    void close();
 }
