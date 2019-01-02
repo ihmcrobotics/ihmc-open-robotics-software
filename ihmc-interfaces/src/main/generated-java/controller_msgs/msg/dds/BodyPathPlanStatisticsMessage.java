@@ -17,14 +17,14 @@ public class BodyPathPlanStatisticsMessage extends Packet<BodyPathPlanStatistics
             */
    public long sequence_id_;
    public int plan_id_ = -1;
-   public us.ihmc.idl.IDLSequence.Object<controller_msgs.msg.dds.NavigableRegionMessage>  navigable_regions_;
+   public us.ihmc.idl.IDLSequence.Object<controller_msgs.msg.dds.VisibilityMapWithNavigableRegionMessage>  navigable_regions_;
    public controller_msgs.msg.dds.VisibilityMapMessage inter_regions_map_;
    public controller_msgs.msg.dds.VisibilityMapMessage start_visibility_map_;
    public controller_msgs.msg.dds.VisibilityMapMessage goal_visibility_map_;
 
    public BodyPathPlanStatisticsMessage()
    {
-      navigable_regions_ = new us.ihmc.idl.IDLSequence.Object<controller_msgs.msg.dds.NavigableRegionMessage> (25, new controller_msgs.msg.dds.NavigableRegionMessagePubSubType());
+      navigable_regions_ = new us.ihmc.idl.IDLSequence.Object<controller_msgs.msg.dds.VisibilityMapWithNavigableRegionMessage> (25, new controller_msgs.msg.dds.VisibilityMapWithNavigableRegionMessagePubSubType());
       inter_regions_map_ = new controller_msgs.msg.dds.VisibilityMapMessage();
       start_visibility_map_ = new controller_msgs.msg.dds.VisibilityMapMessage();
       goal_visibility_map_ = new controller_msgs.msg.dds.VisibilityMapMessage();
@@ -74,7 +74,7 @@ public class BodyPathPlanStatisticsMessage extends Packet<BodyPathPlanStatistics
    }
 
 
-   public us.ihmc.idl.IDLSequence.Object<controller_msgs.msg.dds.NavigableRegionMessage>  getNavigableRegions()
+   public us.ihmc.idl.IDLSequence.Object<controller_msgs.msg.dds.VisibilityMapWithNavigableRegionMessage>  getNavigableRegions()
    {
       return navigable_regions_;
    }

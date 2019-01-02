@@ -9,14 +9,14 @@ import us.ihmc.pubsub.TopicDataType;
 /**
        * This message is part of the IHMC footstep planning module.
        */
-public class NavigableRegionMessage extends Packet<NavigableRegionMessage> implements Settable<NavigableRegionMessage>, EpsilonComparable<NavigableRegionMessage>
+public class VisibilityMapWithNavigableRegionMessage extends Packet<VisibilityMapWithNavigableRegionMessage> implements Settable<VisibilityMapWithNavigableRegionMessage>, EpsilonComparable<VisibilityMapWithNavigableRegionMessage>
 {
    public controller_msgs.msg.dds.PlanarRegionMessage home_region_;
    public controller_msgs.msg.dds.VisibilityClusterMessage home_region_cluster_;
    public controller_msgs.msg.dds.VisibilityMapMessage visibility_map_in_world_;
    public us.ihmc.idl.IDLSequence.Object<controller_msgs.msg.dds.VisibilityClusterMessage>  obstacle_clusters_;
 
-   public NavigableRegionMessage()
+   public VisibilityMapWithNavigableRegionMessage()
    {
       home_region_ = new controller_msgs.msg.dds.PlanarRegionMessage();
       home_region_cluster_ = new controller_msgs.msg.dds.VisibilityClusterMessage();
@@ -25,13 +25,13 @@ public class NavigableRegionMessage extends Packet<NavigableRegionMessage> imple
 
    }
 
-   public NavigableRegionMessage(NavigableRegionMessage other)
+   public VisibilityMapWithNavigableRegionMessage(VisibilityMapWithNavigableRegionMessage other)
    {
       this();
       set(other);
    }
 
-   public void set(NavigableRegionMessage other)
+   public void set(VisibilityMapWithNavigableRegionMessage other)
    {
       controller_msgs.msg.dds.PlanarRegionMessagePubSubType.staticCopy(other.home_region_, home_region_);
       controller_msgs.msg.dds.VisibilityClusterMessagePubSubType.staticCopy(other.home_region_cluster_, home_region_cluster_);
@@ -64,19 +64,19 @@ public class NavigableRegionMessage extends Packet<NavigableRegionMessage> imple
    }
 
 
-   public static Supplier<NavigableRegionMessagePubSubType> getPubSubType()
+   public static Supplier<VisibilityMapWithNavigableRegionMessagePubSubType> getPubSubType()
    {
-      return NavigableRegionMessagePubSubType::new;
+      return VisibilityMapWithNavigableRegionMessagePubSubType::new;
    }
 
    @Override
    public Supplier<TopicDataType> getPubSubTypePacket()
    {
-      return NavigableRegionMessagePubSubType::new;
+      return VisibilityMapWithNavigableRegionMessagePubSubType::new;
    }
 
    @Override
-   public boolean epsilonEquals(NavigableRegionMessage other, double epsilon)
+   public boolean epsilonEquals(VisibilityMapWithNavigableRegionMessage other, double epsilon)
    {
       if(other == null) return false;
       if(other == this) return true;
@@ -100,9 +100,9 @@ public class NavigableRegionMessage extends Packet<NavigableRegionMessage> imple
    {
       if(other == null) return false;
       if(other == this) return true;
-      if(!(other instanceof NavigableRegionMessage)) return false;
+      if(!(other instanceof VisibilityMapWithNavigableRegionMessage)) return false;
 
-      NavigableRegionMessage otherMyClass = (NavigableRegionMessage) other;
+      VisibilityMapWithNavigableRegionMessage otherMyClass = (VisibilityMapWithNavigableRegionMessage) other;
 
       if (!this.home_region_.equals(otherMyClass.home_region_)) return false;
       if (!this.home_region_cluster_.equals(otherMyClass.home_region_cluster_)) return false;
@@ -117,7 +117,7 @@ public class NavigableRegionMessage extends Packet<NavigableRegionMessage> imple
    {
       StringBuilder builder = new StringBuilder();
 
-      builder.append("NavigableRegionMessage {");
+      builder.append("VisibilityMapWithNavigableRegionMessage {");
       builder.append("home_region=");
       builder.append(this.home_region_);      builder.append(", ");
       builder.append("home_region_cluster=");
