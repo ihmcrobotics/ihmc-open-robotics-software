@@ -4,6 +4,8 @@ import java.io.IOException;
 
 import org.junit.Test;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
+import us.ihmc.euclid.referenceFrame.FramePoint2D;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.Vector3D;
 
 import org.junit.After;
@@ -11,6 +13,7 @@ import org.junit.Before;
 
 import junit.framework.AssertionFailedError;
 import us.ihmc.commonWalkingControlModules.pushRecovery.PushRobotTestConductor;
+import us.ihmc.quadrupedBasics.referenceFrames.QuadrupedReferenceFrames;
 import us.ihmc.quadrupedPlanning.input.QuadrupedTeleopManager;
 import us.ihmc.quadrupedRobotics.QuadrupedForceTestYoVariables;
 import us.ihmc.quadrupedRobotics.QuadrupedMultiRobotTestInterface;
@@ -27,6 +30,7 @@ import us.ihmc.simulationConstructionSetTools.util.simulationrunner.GoalOriented
 import us.ihmc.tools.MemoryTools;
 
 import static junit.framework.TestCase.assertTrue;
+import static org.junit.Assert.assertEquals;
 
 public abstract class QuadrupedForceBasedStandControllerTest implements QuadrupedMultiRobotTestInterface
 {
@@ -35,6 +39,9 @@ public abstract class QuadrupedForceBasedStandControllerTest implements Quadrupe
    private QuadrupedTeleopManager stepTeleopManager;
    private PushRobotTestConductor pusher;
    private QuadrupedTestFactory quadrupedTestFactory;
+
+   private static final double bodyShiftDuration = 0.1;
+   private static final double comShiftDuration = 1.0;
 
    @Before
    public void setup()
@@ -252,7 +259,7 @@ public abstract class QuadrupedForceBasedStandControllerTest implements Quadrupe
    public void testStandingUpAndShiftingCoM() throws IOException
    {
       double heightShift = getHeightShift();
-      double heightDelta = getHeightDelta();
+      double heightDelta = 5.0 * getHeightDelta();
       double translationShift = getTranslationShift();
       double translationDelta = getTranslationDelta();
       quadrupedTestFactory.setInitialOffset(new QuadrupedInitialOffsetAndYaw(1.0));
@@ -272,9 +279,6 @@ public abstract class QuadrupedForceBasedStandControllerTest implements Quadrupe
       runMovingCoM(initialBodyHeight + heightShift,-translationShift, translationShift, heightDelta, translationDelta);
       runMovingCoM(initialBodyHeight + heightShift,-translationShift,-translationShift, heightDelta, translationDelta);
       runMovingCoM(initialBodyHeight, translationShift, -translationShift, heightDelta, translationDelta);
-      runMovingCoM(initialBodyHeight - heightShift, translationShift,-translationShift, heightDelta, translationDelta);
-      runMovingCoM(initialBodyHeight + heightShift, translationShift, translationShift, heightDelta, translationDelta);
-      runMovingCoM(initialBodyHeight + heightShift,-translationShift,-translationShift, heightDelta, translationDelta);
       runMovingCoM(initialBodyHeight, 0.0, 0.0, heightDelta, translationDelta);
    }
 
@@ -282,10 +286,10 @@ public abstract class QuadrupedForceBasedStandControllerTest implements Quadrupe
                               double orientationDelta)
    {
       stepTeleopManager.setDesiredBodyHeight(bodyHeight);
-      stepTeleopManager.setDesiredBodyOrientation(bodyOrientationYaw, bodyOrientationPitch, bodyOrientationRoll, 0.1);
+      stepTeleopManager.setDesiredBodyOrientation(bodyOrientationYaw, bodyOrientationPitch, bodyOrientationRoll, bodyShiftDuration);
 
       conductor.addSustainGoal(QuadrupedTestGoals.notFallen(variables));
-      conductor.addTerminalGoal(YoVariableTestGoal.doubleGreaterThan(variables.getYoTime(), variables.getYoTime().getDoubleValue() + 1.0));
+      conductor.addTerminalGoal(YoVariableTestGoal.timeInFuture(variables.getYoTime(), 5.0 * bodyShiftDuration));
       conductor.simulate();
 
       assertTrue("Height did not meet goal : Math.abs(" + variables.getCurrentHeightInWorld().getDoubleValue() + " - " + variables.getHeightInWorldSetpoint()
@@ -305,19 +309,29 @@ public abstract class QuadrupedForceBasedStandControllerTest implements Quadrupe
    private void runMovingCoM(double bodyHeight, double bodyX, double bodyY, double heightDelta, double translationDelta)
    {
       stepTeleopManager.setDesiredBodyHeight(bodyHeight);
-      stepTeleopManager.setDesiredBodyTranslation(bodyX, bodyY, 0.1);
+      stepTeleopManager.setDesiredBodyTranslation(bodyX, bodyY, comShiftDuration);
+
+      QuadrupedReferenceFrames referenceFrames = new QuadrupedReferenceFrames(quadrupedTestFactory.getFullRobotModel());
+      referenceFrames.updateFrames();
+
+      FramePoint2D location = new FramePoint2D(referenceFrames.getCenterOfFeetZUpFrameAveragingLowestZHeightsAcrossEnds());
+      location.set(bodyX, bodyY);
+      location.changeFrame(ReferenceFrame.getWorldFrame());
 
       conductor.addSustainGoal(QuadrupedTestGoals.notFallen(variables));
-      conductor.addTerminalGoal(YoVariableTestGoal.doubleGreaterThan(variables.getYoTime(), variables.getYoTime().getDoubleValue() + 1.0));
+      conductor.addTerminalGoal(YoVariableTestGoal.timeInFuture(variables.getYoTime(), 2.0 * comShiftDuration));
       conductor.simulate();
 
-      assertTrue("Height did not meet goal : Math.abs(" + variables.getCurrentHeightInWorld().getDoubleValue() + " - " + variables.getHeightInWorldSetpoint()
-                                                                                                                                  .getDoubleValue() + " < "
-                       + heightDelta,
-                 Math.abs(variables.getCurrentHeightInWorld().getDoubleValue() - variables.getHeightInWorldSetpoint().getDoubleValue()) < heightDelta);
-      assertTrue("X did not meet goal : Math.abs(" + variables.getRobotBodyX() + " - " + bodyX + " < " + translationDelta,
-                 Math.abs(AngleTools.computeAngleDifferenceMinusPiToPi(variables.getBodyEstimateYaw(), bodyX)) < translationDelta);
-      assertTrue("Y did not meet goal : Math.abs(" + variables.getRobotBodyY() + " - " + bodyY + " < " + translationDelta,
-                 Math.abs(AngleTools.computeAngleDifferenceMinusPiToPi(variables.getBodyEstimatePitch(), translationDelta)) < translationDelta);
+      double currentHeightInWorld = variables.getCurrentHeightInWorld().getDoubleValue();
+      double currentBodyXInWorld = variables.getRobotBodyX().getDoubleValue();
+      double currentBodyYInWorld = variables.getRobotBodyY().getDoubleValue();
+
+      double heightInWorldSetpoint = variables.getHeightInWorldSetpoint().getDoubleValue();
+      double bodyInWorldXSetpoint = location.getX();
+      double bodyInWorldYSetpoint = location.getY();
+
+      assertEquals("Height did not meet goal.", heightInWorldSetpoint, currentHeightInWorld, heightDelta);
+      assertEquals("X did not meet goal.", bodyInWorldXSetpoint, currentBodyXInWorld, translationDelta);
+      assertEquals("Y did not meet goal.", bodyInWorldYSetpoint, currentBodyYInWorld, translationDelta);
    }
 }
