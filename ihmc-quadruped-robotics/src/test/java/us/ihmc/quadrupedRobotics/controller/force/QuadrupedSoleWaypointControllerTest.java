@@ -2,18 +2,15 @@ package us.ihmc.quadrupedRobotics.controller.force;
 
 import controller_msgs.msg.dds.EuclideanTrajectoryPointMessage;
 import controller_msgs.msg.dds.SoleTrajectoryMessage;
-import junit.framework.AssertionFailedError;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
-import us.ihmc.commonWalkingControlModules.pushRecovery.PushRobotTestConductor;
 import us.ihmc.communication.IHMCROS2Publisher;
 import us.ihmc.communication.ROS2Tools;
+import us.ihmc.communication.ROS2Tools.MessageTopicNameGenerator;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.euclid.tuple3D.Vector3D;
-import us.ihmc.humanoidRobotics.communication.controllerAPI.command.SoleTrajectoryCommand;
 import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
 import us.ihmc.quadrupedBasics.referenceFrames.QuadrupedReferenceFrames;
 import us.ihmc.quadrupedCommunication.QuadrupedControllerAPIDefinition;
@@ -21,19 +18,15 @@ import us.ihmc.quadrupedPlanning.input.QuadrupedTeleopManager;
 import us.ihmc.quadrupedRobotics.*;
 import us.ihmc.quadrupedRobotics.controller.QuadrupedControlMode;
 import us.ihmc.quadrupedRobotics.simulation.QuadrupedGroundContactModelType;
-import us.ihmc.robotics.geometry.AngleTools;
-import us.ihmc.robotics.partNames.QuadrupedJointName;
 import us.ihmc.robotics.robotSide.RobotQuadrant;
 import us.ihmc.robotics.testing.YoVariableTestGoal;
 import us.ihmc.ros2.Ros2Node;
-import us.ihmc.ros2.Ros2Publisher;
 import us.ihmc.simulationConstructionSetTools.util.simulationrunner.GoalOrientedTestConductor;
 import us.ihmc.tools.MemoryTools;
 
 import java.io.IOException;
 
 import static junit.framework.TestCase.assertEquals;
-import static junit.framework.TestCase.assertTrue;
 
 public abstract class QuadrupedSoleWaypointControllerTest implements QuadrupedMultiRobotTestInterface
 {
@@ -54,9 +47,7 @@ public abstract class QuadrupedSoleWaypointControllerTest implements QuadrupedMu
       quadrupedTestFactory.setUsePushRobotController(true);
       quadrupedTestFactory.setUseNetworking(true);
 
-      Ros2Node ros2Node = new Ros2Node(PubSubImplementation.INTRAPROCESS, "sole_waypoint_test");
-      soleTrajectoryPublisher = ROS2Tools.createPublisher(ros2Node, SoleTrajectoryMessage.class,
-                                                          QuadrupedControllerAPIDefinition.getSubscriberTopicNameGenerator(quadrupedTestFactory.getRobotName()));
+
    }
 
    @After
@@ -67,6 +58,7 @@ public abstract class QuadrupedSoleWaypointControllerTest implements QuadrupedMu
       conductor = null;
       variables = null;
       stepTeleopManager = null;
+      soleTrajectoryPublisher = null;
 
       MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " after test.");
    }
@@ -78,6 +70,9 @@ public abstract class QuadrupedSoleWaypointControllerTest implements QuadrupedMu
       conductor = quadrupedTestFactory.createTestConductor();
       variables = new QuadrupedForceTestYoVariables(conductor.getScs());
       stepTeleopManager = quadrupedTestFactory.getStepTeleopManager();
+
+      MessageTopicNameGenerator controllerSubGenerator = QuadrupedControllerAPIDefinition.getSubscriberTopicNameGenerator(quadrupedTestFactory.getRobotName());
+      soleTrajectoryPublisher = ROS2Tools.createPublisher(stepTeleopManager.getRos2Node(), SoleTrajectoryMessage.class, controllerSubGenerator);
 
       QuadrupedTestBehaviors.standUp(conductor, variables);
       QuadrupedTestBehaviors.startBalancing(conductor, variables, stepTeleopManager);
@@ -94,7 +89,7 @@ public abstract class QuadrupedSoleWaypointControllerTest implements QuadrupedMu
       FramePoint3D soleBasePosition = new FramePoint3D(referenceFrames.getSoleFrame(quadrantToTest));
       soleBasePosition.changeFrame(worldFrame);
 
-      runMovingFoot(quadrantToTest, soleBasePosition.getX(), soleBasePosition.getY(), soleBasePosition.getZ() + 0.05, 0.5, 0.02);
+      runMovingFoot(quadrantToTest, soleBasePosition.getX(), soleBasePosition.getY(), soleBasePosition.getZ() + 0.05, 5.0, 0.02);
 
       // todo touchdown
    }
