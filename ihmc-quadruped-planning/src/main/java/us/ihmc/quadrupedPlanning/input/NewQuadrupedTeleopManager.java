@@ -5,6 +5,7 @@ import us.ihmc.communication.IHMCROS2Publisher;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.ROS2Tools.MessageTopicNameGenerator;
 import us.ihmc.communication.packets.MessageTools;
+import us.ihmc.communication.packets.PlanarRegionMessageConverter;
 import us.ihmc.communication.packets.ToolboxState;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelControllerName;
@@ -14,6 +15,7 @@ import us.ihmc.quadrupedCommunication.QuadrupedMessageTools;
 import us.ihmc.quadrupedPlanning.QuadrupedXGaitSettingsReadOnly;
 import us.ihmc.quadrupedPlanning.YoQuadrupedXGaitSettings;
 import us.ihmc.quadrupedPlanning.networkProcessing.QuadrupedNetworkProcessor;
+import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.ros2.Ros2Node;
 import us.ihmc.yoVariables.listener.VariableChangedListener;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
@@ -51,6 +53,8 @@ public class NewQuadrupedTeleopManager
    private final IHMCROS2Publisher<ToolboxStateMessage> heightTeleopStatePublisher;
 
    private final IHMCROS2Publisher<QuadrupedXGaitSettingsPacket> stepXGaitSettingsPublisher;
+   private final IHMCROS2Publisher<PlanarRegionsListMessage> planarRegionsListPublisher;
+   private final IHMCROS2Publisher<QuadrupedBodyPathPlanMessage> bodyPathPublisher;
 
    private final QuadrupedNetworkProcessor networkProcessor;
 
@@ -82,11 +86,15 @@ public class NewQuadrupedTeleopManager
       desiredPosePublisher = ROS2Tools.createPublisher(ros2Node, QuadrupedTeleopDesiredPose.class, bodyTeleopSubGenerator);
       desiredHeightPublisher = ROS2Tools.createPublisher(ros2Node, QuadrupedTeleopDesiredHeight.class, heightTeleopSubGenerator);
 
+
       stepTeleopStatePublisher = ROS2Tools.createPublisher(ros2Node, ToolboxStateMessage.class, stepTeleopSubGenerator);
       heightTeleopStatePublisher = ROS2Tools.createPublisher(ros2Node, ToolboxStateMessage.class, heightTeleopSubGenerator);
       bodyTeleopStatePublisher = ROS2Tools.createPublisher(ros2Node, ToolboxStateMessage.class, bodyTeleopSubGenerator);
 
+      planarRegionsListPublisher = ROS2Tools.createPublisher(ros2Node, PlanarRegionsListMessage.class, stepTeleopSubGenerator);
       stepXGaitSettingsPublisher = ROS2Tools.createPublisher(ros2Node, QuadrupedXGaitSettingsPacket.class, stepTeleopSubGenerator);
+      bodyPathPublisher = ROS2Tools.createPublisher(ros2Node, QuadrupedBodyPathPlanMessage.class, stepTeleopSubGenerator);
+
 
       parentRegistry.addChild(registry);
 
@@ -152,6 +160,16 @@ public class NewQuadrupedTeleopManager
       desiredPosePublisher.publish(QuadrupedMessageTools.createQuadrupedTeleopDesiredPose(x, y, yaw, pitch, roll, time));
    }
 
+   public void submitPlanarRegionsList(PlanarRegionsList planarRegionsList)
+   {
+      planarRegionsListPublisher.publish(PlanarRegionMessageConverter.convertToPlanarRegionsListMessage(planarRegionsList));
+   }
+
+   public void submitBodyPathPlan(QuadrupedBodyPathPlanMessage message)
+   {
+      bodyPathPublisher.publish(message);
+   }
+
    public void setEndDoubleSupportDuration(double endDoubleSupportDuration)
    {
       xGaitSettings.setEndDoubleSupportDuration(endDoubleSupportDuration);
@@ -170,9 +188,33 @@ public class NewQuadrupedTeleopManager
       stepXGaitSettingsPublisher.publish(xGaitSettings.getAsPacket());
    }
 
+   public void setStanceLength(double stanceLength)
+   {
+      xGaitSettings.setStanceLength(stanceLength);
+      stepXGaitSettingsPublisher.publish(xGaitSettings.getAsPacket());
+   }
+
+   public void setStepGroundClearance(double groundClearance)
+   {
+      xGaitSettings.setStepGroundClearance(groundClearance);
+      stepXGaitSettingsPublisher.publish(xGaitSettings.getAsPacket());
+   }
+
+   public void setStepDuration(double stepDuration)
+   {
+      xGaitSettings.setStepDuration(stepDuration);
+      stepXGaitSettingsPublisher.publish(xGaitSettings.getAsPacket());
+   }
+
    public void setShiftPlanBasedOnStepAdjustment(boolean shift)
    {
       networkProcessor.setShiftPlanBasedOnStepAdjustment(shift);
+   }
+
+   public void setXGaitSettings(QuadrupedXGaitSettingsReadOnly xGaitSettings)
+   {
+      this.xGaitSettings.set(xGaitSettings);
+      stepXGaitSettingsPublisher.publish(this.xGaitSettings.getAsPacket());
    }
 
    public QuadrupedXGaitSettingsReadOnly getXGaitSettings()

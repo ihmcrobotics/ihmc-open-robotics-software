@@ -3,9 +3,9 @@ package us.ihmc.quadrupedPlanning.networkProcessing.stepTeleop;
 import controller_msgs.msg.dds.*;
 import us.ihmc.commons.Conversions;
 import us.ihmc.commons.lists.PreallocatedList;
+import us.ihmc.communication.packets.PlanarRegionMessageConverter;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
-import us.ihmc.log.LogTools;
 import us.ihmc.quadrupedBasics.gait.QuadrupedTimedOrientedStep;
 import us.ihmc.quadrupedBasics.gait.QuadrupedTimedStep;
 import us.ihmc.quadrupedBasics.referenceFrames.QuadrupedReferenceFrames;
@@ -14,7 +14,8 @@ import us.ihmc.quadrupedPlanning.QuadrupedXGaitSettingsReadOnly;
 import us.ihmc.quadrupedPlanning.YoQuadrupedXGaitSettings;
 import us.ihmc.quadrupedPlanning.bodyPath.QuadrupedBodyPathMultiplexer;
 import us.ihmc.quadrupedPlanning.footstepChooser.PlanarGroundPointFootSnapper;
-import us.ihmc.quadrupedPlanning.footstepChooser.PointFootSnapper;
+import us.ihmc.quadrupedPlanning.footstepChooser.PlanarRegionBasedPointFootSnapper;
+import us.ihmc.quadrupedPlanning.footstepChooser.PointFootSnapperParameters;
 import us.ihmc.quadrupedPlanning.stepStream.QuadrupedXGaitStepStream;
 import us.ihmc.robotics.math.filters.RateLimitedYoFrameVector;
 import us.ihmc.robotics.robotSide.RobotQuadrant;
@@ -45,12 +46,13 @@ public class QuadrupedStepTeleopManager
 
    private final QuadrupedXGaitStepStream stepStream;
    private final QuadrupedBodyPathMultiplexer bodyPathMultiplexer;
-   private final PlanarGroundPointFootSnapper snapper;
+   private final PlanarGroundPointFootSnapper groundPlaneSnapper;
+   private final PlanarRegionBasedPointFootSnapper planarRegionSnapper;
 
    private QuadrupedTimedStepListMessage stepListMessage;
    private QuadrupedBodyOrientationMessage bodyOrientationMessage;
 
-   public QuadrupedStepTeleopManager(QuadrupedXGaitSettingsReadOnly defaultXGaitSettings, QuadrupedReferenceFrames referenceFrames, double updateDT,
+   public QuadrupedStepTeleopManager(QuadrupedXGaitSettingsReadOnly defaultXGaitSettings, PointFootSnapperParameters pointFootSnapperParameters, QuadrupedReferenceFrames referenceFrames, double updateDT,
                                      YoGraphicsListRegistry graphicsListRegistry, YoVariableRegistry parentRegistry)
    {
       this.xGaitSettings = new YoQuadrupedXGaitSettings(defaultXGaitSettings, registry);
@@ -62,8 +64,10 @@ public class QuadrupedStepTeleopManager
       desiredVelocityRateLimit.set(10.0);
       limitedDesiredVelocity = new RateLimitedYoFrameVector("limitedTeleopDesiredVelocity", "", registry, desiredVelocityRateLimit, updateDT, desiredVelocity);
 
-      snapper = new PlanarGroundPointFootSnapper(referenceFrames);
-      stepStream.setStepSnapper(snapper);
+      groundPlaneSnapper = new PlanarGroundPointFootSnapper(referenceFrames);
+      planarRegionSnapper = new PlanarRegionBasedPointFootSnapper(pointFootSnapperParameters);
+      planarRegionSnapper.setFallbackSnapper(groundPlaneSnapper);
+      stepStream.setStepSnapper(planarRegionSnapper);
 
       parentRegistry.addChild(registry);
    }
@@ -88,9 +92,14 @@ public class QuadrupedStepTeleopManager
       }
    }
 
+   public void processPlanarRegionsListMessage(PlanarRegionsListMessage message)
+   {
+      planarRegionSnapper.setPlanarRegionsList(PlanarRegionMessageConverter.convertToPlanarRegionsList(message));
+   }
+
    public void processGroundPlaneMessage(QuadrupedGroundPlaneMessage message)
    {
-      snapper.submitGroundPlane(message);
+      groundPlaneSnapper.submitGroundPlane(message);
    }
 
    public void processXGaitSettingsPacket(QuadrupedXGaitSettingsPacket packet)
