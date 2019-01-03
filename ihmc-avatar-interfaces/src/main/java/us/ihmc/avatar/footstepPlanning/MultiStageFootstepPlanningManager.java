@@ -125,6 +125,7 @@ public class MultiStageFootstepPlanningManager implements PlannerCompletionCallb
    private final YoFootstepPlannerParameters footstepPlanningParameters;
    private final YoVisibilityGraphParameters visibilityGraphsParameters;
    private IHMCRealtimeROS2Publisher<TextToSpeechPacket> textToSpeechPublisher;
+   private IHMCRealtimeROS2Publisher<FootstepPlannerParametersPacket> parametersPublisher;
 
    private final RobotContactPointParameters<RobotSide> contactPointParameters;
 
@@ -522,7 +523,7 @@ public class MultiStageFootstepPlanningManager implements PlannerCompletionCallb
          FootstepPlannerMessageTools.copyParametersToPacket(parametersPacket, footstepPlanningParameters);
       }
 
-      statusOutputManager.reportStatusMessage(parametersPacket);
+      parametersPublisher.publish(parametersPacket);
    }
 
    private boolean initialize()
@@ -1027,6 +1028,11 @@ public class MultiStageFootstepPlanningManager implements PlannerCompletionCallb
    public void setTextToSpeechPublisher(IHMCRealtimeROS2Publisher<TextToSpeechPacket> textToSpeechPublisher)
    {
       this.textToSpeechPublisher = textToSpeechPublisher;
+   }
+
+   public void setParametersPublisher(IHMCRealtimeROS2Publisher<FootstepPlannerParametersPacket> parametersPublisher)
+   {
+      this.parametersPublisher = parametersPublisher;
    }
 
    public void wakeUp()
