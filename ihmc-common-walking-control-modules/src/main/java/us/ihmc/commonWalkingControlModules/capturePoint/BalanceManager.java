@@ -156,6 +156,8 @@ public class BalanceManager
 
    private final InverseDynamicsCommandList inverseDynamicsCommandList = new InverseDynamicsCommandList();
 
+   private final YoBoolean icpPlannerDone = new YoBoolean("ICPPlannerDone", registry);
+
    public BalanceManager(HighLevelHumanoidControllerToolbox controllerToolbox, WalkingControllerParameters walkingControllerParameters,
                          ICPWithTimeFreezingPlannerParameters icpPlannerParameters, ICPAngularMomentumModifierParameters angularMomentumModifierParameters,
                          YoVariableRegistry parentRegistry)
@@ -422,8 +424,6 @@ public class BalanceManager
       controllerToolbox.getCapturePointVelocity(capturePointVelocity2d);
       controllerToolbox.getCoP(copEstimate);
 
-      computeICPPlan(supportLeg);
-
       if (icpPlanner instanceof ICPPlannerWithAngularMomentumOffsetInterface)
          icpPlanner.modifyDesiredICPForAngularMomentum(copEstimate, supportLeg);
 
@@ -519,16 +519,13 @@ public class BalanceManager
       }
    }
 
-   public void computeICPPlan(RobotSide supportLeg)
+   public void computeICPPlan()
    {
       controllerToolbox.getCapturePoint(capturePoint2d);
       controllerToolbox.getCoP(copEstimate);
       icpPlanner.compute(capturePoint2d, yoTime.getDoubleValue());
-
-      if (icpPlanner instanceof ICPPlannerWithAngularMomentumOffsetInterface)
-         icpPlanner.modifyDesiredICPForAngularMomentum(copEstimate, supportLeg);
+      icpPlannerDone.set(icpPlanner.isDone());
    }
-
 
    public void packFootstepForRecoveringFromDisturbance(RobotSide swingSide, double swingTimeRemaining, Footstep footstepToPack)
    {
@@ -662,6 +659,8 @@ public class BalanceManager
          else
             dynamicReachabilityCalculator.checkReachabilityOfStep();
       }
+
+      icpPlannerDone.set(false);
    }
 
    public void initializeICPPlanForStanding()
@@ -673,6 +672,8 @@ public class BalanceManager
       }
       icpPlanner.initializeForStanding(yoTime.getDoubleValue());
       linearMomentumRateOfChangeControlModule.initializeForStanding();
+
+      icpPlannerDone.set(false);
    }
 
    public void initializeICPPlanForTransferToStanding(double finalTransferTime)
@@ -685,6 +686,8 @@ public class BalanceManager
       setFinalTransferTime(finalTransferTime);
       icpPlanner.initializeForTransfer(yoTime.getDoubleValue());
       linearMomentumRateOfChangeControlModule.initializeForStanding();
+
+      icpPlannerDone.set(false);
    }
 
    public void initializeICPPlanForTransfer(double swingTime, double transferTime, double finalTransferTime)
@@ -708,6 +711,8 @@ public class BalanceManager
          else
             dynamicReachabilityCalculator.checkReachabilityOfStep();
       }
+
+      icpPlannerDone.set(false);
    }
 
    public void computeNormalizedEllipticICPError(RobotSide transferToSide)
@@ -745,7 +750,7 @@ public class BalanceManager
 
    public boolean isICPPlanDone()
    {
-      return icpPlanner.isDone();
+      return icpPlannerDone.getValue();
    }
 
    public boolean isOnExitCMP()
@@ -827,6 +832,7 @@ public class BalanceManager
    {
       centerOfMassPosition.setToZero(centerOfMassFrame);
       yoCenterOfMass.setMatchingFrame(centerOfMassPosition);
+      computeICPPlan();
       icpPlanner.getFinalDesiredCapturePointPosition(yoFinalDesiredICP);
    }
 

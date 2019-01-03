@@ -290,8 +290,6 @@ public class WalkingSingleSupportState extends SingleSupportState
          pelvisOrientationManager.initializeSwing(supportSide, swingTime, nextTiming.getTransferTime(), nextTiming.getSwingTime());
       }
 
-      balanceManager.computeICPPlan(supportSide);
-
       nextFootstep.getPose(desiredFootPoseInWorld);
       desiredFootPoseInWorld.changeFrame(worldFrame);
 
