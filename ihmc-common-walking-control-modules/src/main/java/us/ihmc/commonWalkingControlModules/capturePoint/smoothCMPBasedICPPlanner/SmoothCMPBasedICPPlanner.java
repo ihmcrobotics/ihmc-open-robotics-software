@@ -349,6 +349,7 @@ public class SmoothCMPBasedICPPlanner extends AbstractICPPlanner
       referenceICPGenerator.setInitialConditionsForAdjustment();
       referenceCoMGenerator.initializeForSwingOrTransfer();
 
+      // If continuous update is enabled the plan will be updated in the compute method. If not, we update the plan here.
       if (!doContinuousReplanningForStanding.getValue())
       {
          updateTransferPlan(adjustPlanForStandingContinuity.getBooleanValue());
@@ -374,6 +375,7 @@ public class SmoothCMPBasedICPPlanner extends AbstractICPPlanner
       referenceICPGenerator.setInitialConditionsForAdjustment();
       referenceCoMGenerator.initializeForSwingOrTransfer();
 
+      // If continuous update is enabled the plan will be updated in the compute method. If not, we update the plan here.
       if (!doContinuousReplanningForTransfer.getValue())
       {
          updateTransferPlan(true);
@@ -407,6 +409,7 @@ public class SmoothCMPBasedICPPlanner extends AbstractICPPlanner
       referenceCoPGenerator.initializeForSwing();
       referenceCoMGenerator.initializeForSwingOrTransfer();
 
+      // If continuous update is enabled the plan will be updated in the compute method. If not, we update the plan here.
       if (!doContinuousReplanningForSwing.getValue())
       {
          updateSingleSupportPlan(true);
