@@ -20,12 +20,12 @@ import us.ihmc.robotics.testing.JUnitTools;
 public class NativeCommonOpsTest
 {
    private static final int maxSize = 80;
-   private static final int warmumIterations = 0;
+   private static final int warmumIterations = 2000;
    private static final int iterations = 5000;
-   private static final double epsilon = 1.0e-9;
+   private static final double epsilon = 1.0e-8;
 
    @ContinuousIntegrationTest(estimatedDuration = 1.0)
-   @Test(timeout = 10000)
+   @Test(timeout = 20000)
    public void testMult()
    {
       Random random = new Random(40L);
@@ -42,6 +42,7 @@ public class NativeCommonOpsTest
          DenseMatrix64F B = RandomMatrices.createRandom(maxSize, maxSize, random);
          DenseMatrix64F AB = new DenseMatrix64F(maxSize, maxSize);
          CommonOps.mult(A, B, AB);
+         NativeCommonOps.mult(A, B, AB);
       }
 
       for (int i = 0; i < iterations; i++)
@@ -74,7 +75,7 @@ public class NativeCommonOpsTest
    }
 
    @ContinuousIntegrationTest(estimatedDuration = 1.0)
-   @Test(timeout = 10000)
+   @Test(timeout = 20000)
    public void testMultQuad()
    {
       Random random = new Random(40L);
@@ -93,6 +94,7 @@ public class NativeCommonOpsTest
          DenseMatrix64F AtBA = new DenseMatrix64F(maxSize, maxSize);
          CommonOps.mult(B, A, tempBA);
          CommonOps.multTransA(A, tempBA, AtBA);
+         NativeCommonOps.multQuad(A, B, AtBA);
       }
 
       for (int i = 0; i < iterations; i++)
@@ -126,7 +128,7 @@ public class NativeCommonOpsTest
    }
 
    @ContinuousIntegrationTest(estimatedDuration = 1.0)
-   @Test(timeout = 10000)
+   @Test(timeout = 20000)
    public void testInvert()
    {
       Random random = new Random(40L);
@@ -175,7 +177,7 @@ public class NativeCommonOpsTest
    }
 
    @ContinuousIntegrationTest(estimatedDuration = 1.0)
-   @Test(timeout = 10000)
+   @Test(timeout = 20000)
    public void testSolve()
    {
       Random random = new Random(40L);
@@ -195,6 +197,7 @@ public class NativeCommonOpsTest
          CommonOps.mult(A, x, b);
          solver.setA(A);
          solver.solve(b, x);
+         NativeCommonOps.solve(A, b, x);
       }
 
       for (int i = 0; i < iterations; i++)
@@ -230,7 +233,7 @@ public class NativeCommonOpsTest
    }
 
    @ContinuousIntegrationTest(estimatedDuration = 1.0)
-   @Test(timeout = 10000)
+   @Test(timeout = 20000)
    public void testSolveLeastSquare()
    {
       Random random = new Random(40L);
@@ -257,6 +260,8 @@ public class NativeCommonOpsTest
          dampedSolver.solve(b, x);
          undampedSolver.setA(A);
          undampedSolver.solve(b, x);
+         NativeCommonOps.solveDamped(A, b, alpha, x);
+         NativeCommonOps.solveRobust(A, b, x);
       }
 
       for (int i = 0; i < iterations; i++)
@@ -308,7 +313,7 @@ public class NativeCommonOpsTest
    }
 
    @ContinuousIntegrationTest(estimatedDuration = 1.0)
-   @Test(timeout = 10000)
+   @Test(timeout = 20000)
    public void testNullspaceProjection()
    {
       Random random = new Random(40L);
