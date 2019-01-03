@@ -8,6 +8,7 @@ import org.ejml.ops.CommonOps;
 import gnu.trove.list.array.TIntArrayList;
 import us.ihmc.commons.PrintTools;
 import us.ihmc.robotics.linearAlgebra.MatrixTools;
+import us.ihmc.robotics.linearAlgebra.commonOps.NativeCommonOps;
 
 /**
  * Solves a Quadratic Program using a simple active set method.
@@ -88,8 +89,6 @@ public class SimpleEfficientActiveSetQPSolver extends AbstractSimpleActiveSetQPS
    private final TIntArrayList lowerBoundIndicesToRemoveFromActiveSet = new TIntArrayList();
 
    protected final DenseMatrix64F computedObjectiveFunctionValue = new DenseMatrix64F(1, 1);
-
-   private final LinearSolver<DenseMatrix64F> solver = LinearSolverFactory.linear(0);
 
    private final DenseMatrix64F lowerBoundViolations = new DenseMatrix64F(0, 0);
    private final DenseMatrix64F upperBoundViolations = new DenseMatrix64F(0, 0);
@@ -175,7 +174,7 @@ public class SimpleEfficientActiveSetQPSolver extends AbstractSimpleActiveSetQPS
    @Override
    public double getObjectiveCost(DenseMatrix64F x)
    {
-      multQuad(x, quadraticCostQMatrix, computedObjectiveFunctionValue);
+      NativeCommonOps.multQuad(x, quadraticCostQMatrix, computedObjectiveFunctionValue);
       CommonOps.scale(0.5, computedObjectiveFunctionValue);
       CommonOps.multAddTransA(quadraticCostQVector, x, computedObjectiveFunctionValue);
       return computedObjectiveFunctionValue.get(0, 0) + quadraticCostScalar;
@@ -428,10 +427,7 @@ public class SimpleEfficientActiveSetQPSolver extends AbstractSimpleActiveSetQPS
       int numberOfVariables = quadraticCostQMatrix.getNumRows();
       int numberOfEqualityConstraints = linearEqualityConstraintsAMatrix.getNumRows();
 
-      QInverse.reshape(numberOfVariables, numberOfVariables);
-
-      solver.setA(quadraticCostQMatrix);
-      solver.invert(QInverse);
+      NativeCommonOps.invert(quadraticCostQMatrix, QInverse);
 
       AQInverse.reshape(numberOfEqualityConstraints, numberOfVariables);
       QInverseATranspose.reshape(numberOfVariables, numberOfEqualityConstraints);
@@ -896,9 +892,7 @@ public class SimpleEfficientActiveSetQPSolver extends AbstractSimpleActiveSetQPS
 
       CommonOps.scale(-1.0, bigVectorForLagrangeMultiplierSolution);
 
-      augmentedLagrangeMultipliers.reshape(numberOfAugmentedEqualityConstraints, 1);
-      solver.setA(bigMatrixForLagrangeMultiplierSolution);
-      solver.solve(bigVectorForLagrangeMultiplierSolution, augmentedLagrangeMultipliers);
+      NativeCommonOps.solveCheck(bigMatrixForLagrangeMultiplierSolution, bigVectorForLagrangeMultiplierSolution, augmentedLagrangeMultipliers);
 
       AAndC.reshape(numberOfAugmentedEqualityConstraints, numberOfVariables);
       CommonOps.insert(linearEqualityConstraintsAMatrix, AAndC, 0, 0);

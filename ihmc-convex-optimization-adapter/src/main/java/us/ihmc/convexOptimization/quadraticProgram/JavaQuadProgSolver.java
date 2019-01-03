@@ -10,6 +10,7 @@ import org.ejml.interfaces.linsol.LinearSolver;
 import org.ejml.ops.CommonOps;
 import us.ihmc.commons.MathTools;
 import us.ihmc.robotics.linearAlgebra.MatrixTools;
+import us.ihmc.robotics.linearAlgebra.commonOps.NativeCommonOps;
 import us.ihmc.tools.exceptions.NoConvergenceException;
 
 /**
@@ -24,20 +25,21 @@ import us.ihmc.tools.exceptions.NoConvergenceException;
  * "A numerically stable dual method for solving strictly convex quadratic
  * programs" by D. Goldfarb and A. Idnani.
  *
- * @author Robert Griffin
- *
- *
- * The problem stored in the solver is of the form:
- * min 0.5 * x G x + g0 x
- * s.t.
- *     CE^T x + ce0 = 0
- *     CI^T x + ci0 >= 0
- *
- * To interface with the solver, however, use the standard form:
- * min 0.5 * x G x + g0 x
- * s.t.
- *     CE^T x = ce0
+ * <p>
+ * The problem stored in the solver is of the form:</br>
+ * min 0.5 * x G x + g0 x</br>
+ * s.t.</br>
+ *     CE^T x + ce0 = 0</br>
+ *     CI^T x + ci0 >= 0</br>
+ *</br>
+ * To interface with the solver, however, use the standard form:</br>
+ * min 0.5 * x G x + g0 x</br>
+ * s.t.</br>
+ *     CE^T x = ce0</br>
  *     CI^T x <= ci0
+ * </p>
+ *
+ * @author Robert Griffin
  */
 public class JavaQuadProgSolver extends AbstractSimpleActiveSetQPSolver
 {
@@ -77,7 +79,6 @@ public class JavaQuadProgSolver extends AbstractSimpleActiveSetQPSolver
    private final DenseMatrix64F Q_augmented_inv = new DenseMatrix64F(0, 0);
 
    private final CholeskyDecomposition<DenseMatrix64F> decomposer = DecompositionFactory.chol(defaultSize, false);
-   private final LinearSolver<DenseMatrix64F> solver = LinearSolverFactory.linear(defaultSize);
 
    private final DenseMatrix64F decomposedQuadraticCostQMatrix = new DenseMatrix64F(0, 0);
 
@@ -195,7 +196,7 @@ public class JavaQuadProgSolver extends AbstractSimpleActiveSetQPSolver
    @Override
    public double getObjectiveCost(DenseMatrix64F x)
    {
-      multQuad(x, quadraticCostQMatrix, computedObjectiveFunctionValue);
+      NativeCommonOps.multQuad(x, quadraticCostQMatrix, computedObjectiveFunctionValue);
       CommonOps.scale(0.5, computedObjectiveFunctionValue);
       CommonOps.multAddTransA(quadraticCostQVector, x, computedObjectiveFunctionValue);
       return computedObjectiveFunctionValue.get(0, 0) + quadraticCostScalar;
@@ -412,9 +413,8 @@ public class JavaQuadProgSolver extends AbstractSimpleActiveSetQPSolver
 
       R_norm = 1.0; // this variable will hold the norm of the matrix R
 
-      // compute the inverse of the factorized matrix G^-1, this is the initial value for H //// TODO: 5/14/17 combine this with the decomposition 
-      solver.setA(decomposedQuadraticCostQMatrix);
-      solver.invert(J);
+      // compute the inverse of the factorized matrix G^-1, this is the initial value for H //// TODO: 5/14/17 combine this with the decomposition
+      NativeCommonOps.invert(decomposedQuadraticCostQMatrix, J);
       c2 = CommonOps.trace(J);
 
       int numberOfIterations = 0;
@@ -436,8 +436,7 @@ public class JavaQuadProgSolver extends AbstractSimpleActiveSetQPSolver
 
             MatrixTools.setMatrixBlock(Q_augmented, problemSize, 0, tempMatrix, 0, 0, numberOfEqualityConstraints, problemSize, 1.0);
 
-            solver.setA(Q_augmented);
-            solver.invert(Q_augmented_inv);
+            NativeCommonOps.invert(Q_augmented, Q_augmented_inv);
 
             MatrixTools.setMatrixBlock(q_augmented, 0, 0, quadraticCostQVector, 0, 0, problemSize, 1, -1.0);
             MatrixTools.setMatrixBlock(q_augmented, problemSize, 0, linearEqualityConstraintsBVector, 0, 0, numberOfEqualityConstraints, 1, -1.0);
