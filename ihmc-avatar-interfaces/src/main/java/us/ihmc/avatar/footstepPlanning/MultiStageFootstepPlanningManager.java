@@ -23,6 +23,8 @@ import us.ihmc.footstepPlanning.*;
 import us.ihmc.footstepPlanning.graphSearch.graph.visualization.MultiStagePlannerListener;
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParameters;
 import us.ihmc.footstepPlanning.graphSearch.parameters.YoFootstepPlannerParameters;
+import us.ihmc.footstepPlanning.tools.FootstepPlannerIOTools;
+import us.ihmc.footstepPlanning.tools.FootstepPlannerMessageTools;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.pathPlanning.bodyPathPlanner.WaypointDefinedBodyPathPlanner;
 import us.ihmc.pathPlanning.statistics.ListOfStatistics;
@@ -505,6 +507,22 @@ public class MultiStageFootstepPlanningManager implements PlannerCompletionCallb
 
       ListOfStatistics statistics = convertToListOfStatistics(mapToPopulate);
       sendPlannerStatistics(statistics);
+   }
+
+   public void broadcastPlannerParameters()
+   {
+      FootstepPlannerParametersPacket parametersPacket = new FootstepPlannerParametersPacket();
+
+      if(latestFootstepPlannerParametersReference.get() != null)
+      {
+         parametersPacket.set(latestFootstepPlannerParametersReference.get());
+      }
+      else
+      {
+         FootstepPlannerMessageTools.copyParametersToPacket(parametersPacket, footstepPlanningParameters);
+      }
+
+      statusOutputManager.reportStatusMessage(parametersPacket);
    }
 
    private boolean initialize()

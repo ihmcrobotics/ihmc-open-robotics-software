@@ -100,6 +100,10 @@ public class MultiStageFootstepPlanningModule
       ROS2Tools.createCallbackSubscription(realtimeRos2Node, PlanningStatisticsRequestMessage.class,
                                            FootstepPlannerCommunicationProperties.subscriberTopicNameGenerator(robotName),
                                            s -> footstepPlanningController.processPlanningStatisticsRequest());
+      ROS2Tools.createCallbackSubscription(realtimeRos2Node, RequestFootstepPlannerParametersMessage.class,
+                                           FootstepPlannerCommunicationProperties.subscriberTopicNameGenerator(robotName),
+                                           s -> footstepPlanningController.broadcastPlannerParameters());
+
       IHMCRealtimeROS2Publisher<TextToSpeechPacket> textToSpeechPublisher = ROS2Tools
             .createPublisher(realtimeRos2Node, TextToSpeechPacket.class, ROS2Tools::generateDefaultTopicName);
 
