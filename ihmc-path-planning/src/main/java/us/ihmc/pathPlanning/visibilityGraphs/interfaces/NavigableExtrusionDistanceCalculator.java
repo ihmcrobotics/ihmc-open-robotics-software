@@ -10,5 +10,5 @@ public interface NavigableExtrusionDistanceCalculator
     * @param navigableRegionToBeExtruded the navigable region being extruded. Do not modify.
     * @return the extrusion distance to use.
     */
-   double computeExtrusionDistance(PlanarRegion navigableRegionToBeExtruded);
+   double computeNavigableExtrusionDistance(PlanarRegion navigableRegionToBeExtruded);
 }

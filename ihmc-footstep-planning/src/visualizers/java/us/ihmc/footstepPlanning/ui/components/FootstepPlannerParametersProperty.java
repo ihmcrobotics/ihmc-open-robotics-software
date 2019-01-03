@@ -48,6 +48,13 @@ public class FootstepPlannerParametersProperty extends ParametersProperty<Settab
    private DoubleField bodyBoxBaseX = new DoubleField(SettableFootstepPlannerParameters::getBodyBoxBaseX, SettableFootstepPlannerParameters::setBodyBoxBaseX);
    private DoubleField bodyBoxBaseY = new DoubleField(SettableFootstepPlannerParameters::getBodyBoxBaseY, SettableFootstepPlannerParameters::setBodyBoxBaseY);
    private DoubleField bodyBoxBaseZ = new DoubleField(SettableFootstepPlannerParameters::getBodyBoxBaseZ, SettableFootstepPlannerParameters::setBodyBoxBaseZ);
+   private DoubleField stepTranslationBoundingBoxScaleFactor = new DoubleField(SettableFootstepPlannerParameters::getStepTranslationBoundingBoxScaleFactor, SettableFootstepPlannerParameters::setStepTranslationBoundingBoxScaleFactor);
+
+   private DoubleField cliffHeight = new DoubleField(SettableFootstepPlannerParameters::getCliffHeightToAvoid, SettableFootstepPlannerParameters::setCliffHeightToAvoid);
+   private DoubleField cliffClearance = new DoubleField(SettableFootstepPlannerParameters::getMinimumDistanceFromCliffBottoms, SettableFootstepPlannerParameters::setMinimumDistanceFromCliffBottoms);
+   private DoubleField maxWiggleXY = new DoubleField(SettableFootstepPlannerParameters::getMaximumXYWiggleDistance, SettableFootstepPlannerParameters::setMaximumXYWiggleDistance);
+   private DoubleField maxWiggleYaw = new DoubleField(SettableFootstepPlannerParameters::getMaximumYawWiggle, SettableFootstepPlannerParameters::setMaximumYawWiggle);
+   private DoubleField wiggleInsideDelta = new DoubleField(SettableFootstepPlannerParameters::getWiggleInsideDelta, SettableFootstepPlannerParameters::setWiggleInsideDelta);
 
    public FootstepPlannerParametersProperty(Object bean, String name)
    {
@@ -151,6 +158,21 @@ public class FootstepPlannerParametersProperty extends ParametersProperty<Settab
       bindFieldBidirectionalToBooleanProperty(property, performHeuristicSearchPolicies);
    }
 
+   public void bidirectionalBindMaxWiggleXY(Property<Double> property)
+   {
+      bindFieldBidirectionalToNumberProperty(property, maxWiggleXY);
+   }
+
+   public void bidirectionalBindMaxWiggleYaw(Property<Double> property)
+   {
+      bindFieldBidirectionalToNumberProperty(property, maxWiggleYaw);
+   }
+
+   public void bidirectionalBindWiggleInsideDelta(Property<Double> property)
+   {
+      bindFieldBidirectionalToNumberProperty(property, wiggleInsideDelta);
+   }
+
    public void bidirectionalBindBodyBoxWidth(Property<? extends Number> property)
    {
       bindFieldBidirectionalToNumberProperty(property, bodyBoxWidth);
@@ -221,15 +243,24 @@ public class FootstepPlannerParametersProperty extends ParametersProperty<Settab
       bindFieldBidirectionalToNumberProperty(property, costPerStep);
    }
 
-   public void bidirectionalBindHeuristicsWeight(AtomicReference<FootstepPlannerType> plannerTypeReference, Property<? extends Number> property)
+   public void bidirectionalBindCliffHeight(Property<? extends Number> property)
    {
-      if (plannerTypeReference.get() == null)
-         return;
+      bindFieldBidirectionalToNumberProperty(property, cliffHeight);
+   }
+   
+   public void bidirectionalBindCliffClearance(Property<? extends Number> property)
+   {
+      bindFieldBidirectionalToNumberProperty(property, cliffClearance);
+   }
 
-      bindFieldBidirectionalToConditionalNumberProperty(() -> plannerTypeReference.get().equals(FootstepPlannerType.A_STAR), property, aStarHeuristicsWeight);
-      bindFieldBidirectionalToConditionalNumberProperty(() -> plannerTypeReference.get().equals(FootstepPlannerType.VIS_GRAPH_WITH_A_STAR), property, visGraphWithAStarHeuristicsWeight);
-      bindFieldBidirectionalToConditionalNumberProperty(() -> plannerTypeReference.get().equals(FootstepPlannerType.PLANAR_REGION_BIPEDAL), property, depthFirstHeuristicsWeight);
-      bindFieldBidirectionalToConditionalNumberProperty(() -> plannerTypeReference.get().equals(FootstepPlannerType.SIMPLE_BODY_PATH), property, bodyPathBasedHeuristicsWeight);
+   public void bidirectionalBindStepTranslationBoundingBoxScaleFactor(Property<? extends Number> property)
+   {
+      bindFieldBidirectionalToNumberProperty(property, stepTranslationBoundingBoxScaleFactor);
+   }
+
+   public void bidirectionalBindAStarHeuristicsWeight(Property<? extends Number> property)
+   {
+      bindFieldBidirectionalToNumberProperty(property, aStarHeuristicsWeight);
    }
 
    public void bidirectionalBindUseQuadraticHeightCost(Property<Boolean> property)

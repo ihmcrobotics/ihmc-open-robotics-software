@@ -1,11 +1,11 @@
 package us.ihmc.pathPlanning.visibilityGraphs;
 
-import us.ihmc.pathPlanning.visibilityGraphs.interfaces.NavigableExtrusionDistanceCalculator;
 import us.ihmc.pathPlanning.visibilityGraphs.interfaces.VisibilityGraphsParameters;
-import us.ihmc.robotics.geometry.PlanarRegion;
 
 public class DefaultVisibilityGraphParameters implements VisibilityGraphsParameters
 {
+   //TODO: JavaDoc all the methods to make them more clear.
+
    @Override
    public double getMaxInterRegionConnectionLength()
    {
@@ -15,17 +15,17 @@ public class DefaultVisibilityGraphParameters implements VisibilityGraphsParamet
    @Override
    public double getNormalZThresholdForAccessibleRegions()
    {
-      return 0.6;
+      return 0.75;
    }
 
    @Override
-   public double getExtrusionDistance()
+   public double getObstacleExtrusionDistance()
    {
       return 0.4;
    }
 
    @Override
-   public double getExtrusionDistanceIfNotTooHighToStep()
+   public double getObstacleExtrusionDistanceIfNotTooHighToStep()
    {
       return 0.05;
    }
@@ -33,7 +33,7 @@ public class DefaultVisibilityGraphParameters implements VisibilityGraphsParamet
    @Override
    public double getTooHighToStepDistance()
    {
-      return 0.4;
+      return 0.28;
    }
 
    @Override
@@ -54,16 +54,4 @@ public class DefaultVisibilityGraphParameters implements VisibilityGraphsParamet
       return 2;
    }
 
-   @Override
-   public NavigableExtrusionDistanceCalculator getNavigableExtrusionDistanceCalculator()
-   {
-      return new NavigableExtrusionDistanceCalculator()
-      {
-         @Override
-         public double computeExtrusionDistance(PlanarRegion navigableRegionToBeExtruded)
-         {
-            return 0.01;
-         }
-      };
-   }
 }
