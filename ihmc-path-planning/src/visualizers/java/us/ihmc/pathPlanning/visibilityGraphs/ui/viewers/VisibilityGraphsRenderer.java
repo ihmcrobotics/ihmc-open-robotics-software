@@ -23,10 +23,10 @@ import java.util.concurrent.atomic.AtomicReference;
 import javafx.scene.Group;
 import javafx.scene.Node;
 import javafx.scene.paint.Color;
-import us.ihmc.commons.PrintTools;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
+import us.ihmc.log.LogTools;
 import us.ihmc.messager.Messager;
 import us.ihmc.pathPlanning.visibilityGraphs.DefaultVisibilityGraphParameters;
 import us.ihmc.pathPlanning.visibilityGraphs.NavigableRegionsManager;
@@ -144,7 +144,7 @@ public class VisibilityGraphsRenderer
          return;
 
       if (VERBOSE)
-         PrintTools.info(this, "Computing body path.");
+         LogTools.info("Computing body path.", this);
 
       try
       {
@@ -166,9 +166,9 @@ public class VisibilityGraphsRenderer
          messager.submitMessage(BodyPathData, bodyPath);
          messager.submitMessage(StartVisibilityMap, navigableRegionsManager.getStartMap());
          messager.submitMessage(GoalVisibilityMap, navigableRegionsManager.getGoalMap());
-         messager.submitMessage(NavigableRegionVisibilityMap, navigableRegionsManager.getNavigableRegions());
+         messager.submitMessage(NavigableRegionVisibilityMap, navigableRegionsManager.getNavigableRegionsList());
          messager.submitMessage(InterRegionVisibilityMap, navigableRegionsManager.getInterRegionConnections());
-         messager.submitMessage(NavigableRegionData, navigableRegionsManager.getNavigableRegions());
+         messager.submitMessage(NavigableRegionData, navigableRegionsManager.getNavigableRegionsList());
       }
       catch (Exception e)
       {

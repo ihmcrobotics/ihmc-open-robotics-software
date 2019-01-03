@@ -46,7 +46,7 @@ public class BodyPathPlanStatisticsMessagePubSubType implements us.ihmc.pubsub.T
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);for(int i0 = 0; i0 < 25; ++i0)
       {
-          current_alignment += controller_msgs.msg.dds.NavigableRegionMessagePubSubType.getMaxCdrSerializedSize(current_alignment);}
+          current_alignment += controller_msgs.msg.dds.VisibilityMapWithNavigableRegionMessagePubSubType.getMaxCdrSerializedSize(current_alignment);}
       current_alignment += controller_msgs.msg.dds.VisibilityMapMessagePubSubType.getMaxCdrSerializedSize(current_alignment);
 
       current_alignment += controller_msgs.msg.dds.VisibilityMapMessagePubSubType.getMaxCdrSerializedSize(current_alignment);
@@ -75,7 +75,7 @@ public class BodyPathPlanStatisticsMessagePubSubType implements us.ihmc.pubsub.T
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
       for(int i0 = 0; i0 < data.getNavigableRegions().size(); ++i0)
       {
-          current_alignment += controller_msgs.msg.dds.NavigableRegionMessagePubSubType.getCdrSerializedSize(data.getNavigableRegions().get(i0), current_alignment);}
+          current_alignment += controller_msgs.msg.dds.VisibilityMapWithNavigableRegionMessagePubSubType.getCdrSerializedSize(data.getNavigableRegions().get(i0), current_alignment);}
 
       current_alignment += controller_msgs.msg.dds.VisibilityMapMessagePubSubType.getCdrSerializedSize(data.getInterRegionsMap(), current_alignment);
 

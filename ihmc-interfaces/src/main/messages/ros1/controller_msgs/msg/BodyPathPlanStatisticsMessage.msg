@@ -6,7 +6,7 @@ uint32 sequence_id
 # Field default value -1
 int32 plan_id
 
-controller_msgs/NavigableRegionMessage[] navigable_regions
+controller_msgs/VisibilityMapWithNavigableRegionMessage[] navigable_regions
 
 controller_msgs/VisibilityMapMessage inter_regions_map
 

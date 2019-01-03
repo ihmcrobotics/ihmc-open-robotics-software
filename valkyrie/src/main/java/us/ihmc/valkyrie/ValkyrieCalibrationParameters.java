@@ -40,6 +40,10 @@ public class ValkyrieCalibrationParameters implements WholeBodySetpointParameter
          setSetpoint(jointMap.getArmJointName(robotSide, ArmJointName.SHOULDER_ROLL), robotSide.negateIfLeftSide(1.1708));
          setSetpoint(jointMap.getArmJointName(robotSide, ArmJointName.SHOULDER_YAW), 0.05);
          setSetpoint(jointMap.getArmJointName(robotSide, ArmJointName.ELBOW_PITCH), robotSide.negateIfLeftSide(1.7));
+
+         setSetpoint(jointMap.getArmJointName(robotSide, ArmJointName.ELBOW_ROLL), 0.5);
+         setSetpoint(jointMap.getArmJointName(robotSide, ArmJointName.WRIST_ROLL), 0.0);
+         setSetpoint(jointMap.getArmJointName(robotSide, ArmJointName.FIRST_WRIST_PITCH), 0.0);
       }
    }
 

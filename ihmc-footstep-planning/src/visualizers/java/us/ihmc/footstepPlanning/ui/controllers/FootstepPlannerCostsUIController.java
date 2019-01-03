@@ -29,7 +29,7 @@ public class FootstepPlannerCostsUIController
    @FXML
    private Spinner<Double> costPerStep;
    @FXML
-   private Spinner<Double> heuristicsWeight;
+   private Spinner<Double> aStarHeuristicsWeight;
 
    @FXML
    private Spinner<Double> yawWeight;
@@ -47,8 +47,6 @@ public class FootstepPlannerCostsUIController
    @FXML
    private Spinner<Double> stepDownWeight;
 
-   private SpinnerValueFactory<Double> heuristicsWeightValueFactory;
-
    public void attachMessager(JavaFXMessager messager)
    {
       this.messager = messager;
@@ -62,9 +60,9 @@ public class FootstepPlannerCostsUIController
    public void setupControls()
    {
       costPerStep.setValueFactory(createLowWeightValueFactory());
-      heuristicsWeight.setValueFactory(createHighWeightValueFactory());
+      aStarHeuristicsWeight.setValueFactory(createHighWeightValueFactory());
 
-      yawWeight.setValueFactory(createLowWeightValueFactory());
+      yawWeight.setValueFactory(new DoubleSpinnerValueFactory(0.0, 0.7, 0.0, 0.01));
       pitchWeight.setValueFactory(createLowWeightValueFactory());
       rollWeight.setValueFactory(createLowWeightValueFactory());
 
@@ -78,19 +76,11 @@ public class FootstepPlannerCostsUIController
    {
       setupControls();
 
-      heuristicsWeightValueFactory = heuristicsWeight.getValueFactory();
-
-      AtomicReference<FootstepPlannerType> plannerType = messager.createInput(FootstepPlannerMessagerAPI.PlannerTypeTopic);
-      AtomicReference<FootstepPlannerParameters> plannerParameters = messager.createInput(FootstepPlannerMessagerAPI.PlannerParametersTopic);
-
-      messager.registerTopicListener(FootstepPlannerMessagerAPI.PlannerTypeTopic, createPlannerTypeChangeListener(plannerType, plannerParameters));
-
       property.bidirectionalBindUseQuadraticDistanceCost(useQuadraticDistanceCost.selectedProperty());
       property.bidirectionalBindUseQuadraticHeightCost(useQuadraticHeightCost.selectedProperty());
 
       property.bidirectionalBindCostPerStep(costPerStep.getValueFactory().valueProperty());
-      messager.registerJavaFXSyncedTopicListener(FootstepPlannerMessagerAPI.PlannerTypeTopic, createPlannerTypeChangeListener(plannerType, plannerParameters));
-      property.bidirectionalBindHeuristicsWeight(plannerType, heuristicsWeightValueFactory.valueProperty());
+      property.bidirectionalBindAStarHeuristicsWeight(aStarHeuristicsWeight.getValueFactory().valueProperty());
 
       property.bidirectionalBindYawWeight(yawWeight.getValueFactory().valueProperty());
       property.bidirectionalBindPitchWeight(pitchWeight.getValueFactory().valueProperty());
@@ -118,42 +108,6 @@ public class FootstepPlannerCostsUIController
          public SettableFootstepPlannerParameters interpret(FootstepPlannerParameters messageContent)
          {
             return new SettableFootstepPlannerParameters(messageContent);
-         }
-      };
-   }
-
-   private TopicListener<FootstepPlannerType> createPlannerTypeChangeListener(AtomicReference<FootstepPlannerType> plannerType, AtomicReference<FootstepPlannerParameters> plannerParameters)
-   {
-      return new TopicListener<FootstepPlannerType>()
-      {
-         @Override
-         public void receivedMessageForTopic(FootstepPlannerType messageContent)
-         {
-            FootstepPlannerType footstepPlannerType = plannerType.get();
-            if (footstepPlannerType == null)
-               return;
-
-            double weight = 0.0;
-            switch (footstepPlannerType)
-            {
-            case A_STAR:
-               weight = plannerParameters.get().getCostParameters().getAStarHeuristicsWeight().getValue();
-               break;
-            case VIS_GRAPH_WITH_A_STAR:
-               weight = plannerParameters.get().getCostParameters().getVisGraphWithAStarHeuristicsWeight().getValue();
-               break;
-            case PLANAR_REGION_BIPEDAL:
-               weight = plannerParameters.get().getCostParameters().getDepthFirstHeuristicsWeight().getValue();
-               break;
-            case SIMPLE_BODY_PATH:
-               weight = plannerParameters.get().getCostParameters().getBodyPathBasedHeuristicsWeight().getValue();
-               break;
-            default:
-               weight = 0.0;
-               break;
-            }
-
-            heuristicsWeightValueFactory.setValue(weight);
          }
       };
    }

@@ -66,13 +66,15 @@ public class PlanarRegionBaseOfCliffAvoider extends FootstepNodeChecker
       ConvexPolygon2D footPolygon = footPolygons.get(node.getRobotSide());
       for (int i = 0; i < footPolygon.getNumberOfVertices(); i++)
       {
-         Point2DReadOnly point1 = footPolygon.getVertex(i);
-         Point2DReadOnly point2 = footPolygon.getVertex((i + 1) % footPolygon.getNumberOfVertices());
+         Point2DReadOnly footPoint = footPolygon.getVertex(i);
+         Point2D extendedPoint1 = new Point2D(footPoint);
+         Point2D extendedPoint2 = new Point2D(footPoint);
 
-         Point2D averagePoint = EuclidGeometryTools.averagePoint2Ds(Arrays.asList(point1, point2));
-         Point2D extendedPoint = new Point2D(averagePoint);
-         extendedPoint.scale(1.0 + (minimumDistanceFromCliffBottoms / averagePoint.distanceFromOrigin()));
-         lineSegmentsInSoleFrame.add(new LineSegment2D(averagePoint.getX(), averagePoint.getY(), extendedPoint.getX(), extendedPoint.getY()));
+         extendedPoint1.addX(minimumDistanceFromCliffBottoms * Math.signum(footPoint.getX()));
+         extendedPoint2.addY(minimumDistanceFromCliffBottoms * Math.signum(footPoint.getY()));
+
+         lineSegmentsInSoleFrame.add(new LineSegment2D(footPoint.getX(), footPoint.getY(), extendedPoint1.getX(), extendedPoint1.getY()));
+         lineSegmentsInSoleFrame.add(new LineSegment2D(footPoint.getX(), footPoint.getY(), extendedPoint2.getX(), extendedPoint2.getY()));
       }
 
       Point3D highestPointInSoleFrame = new Point3D();
