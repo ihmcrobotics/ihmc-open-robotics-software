@@ -61,6 +61,10 @@ public class NativeCommonOps
     */
    public static void invert(RowD1Matrix64F a, RowD1Matrix64F inv)
    {
+      if (a == inv)
+      {
+         throw new IllegalArgumentException("Can not invert in place. The result matrix needs to be different from the matrix to invert.");
+      }
       if (a.getNumRows() != a.getNumCols())
       {
          throw new IllegalArgumentException("Incompatible Matrix Dimensions.");
@@ -165,6 +169,10 @@ public class NativeCommonOps
     */
    public static void projectOnNullspace(DenseMatrix64F a, DenseMatrix64F b, DenseMatrix64F c, double alpha)
    {
+      if (a == c)
+      {
+         throw new IllegalArgumentException("Can not project in place. The result matrix needs to be different from the matrix to project.");
+      }
       if (a.getNumCols() != b.getNumCols())
       {
          throw new IllegalArgumentException("Incompatible Matrix Dimensions.");
