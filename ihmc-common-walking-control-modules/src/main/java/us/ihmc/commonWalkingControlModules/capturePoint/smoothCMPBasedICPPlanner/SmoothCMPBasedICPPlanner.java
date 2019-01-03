@@ -348,7 +348,12 @@ public class SmoothCMPBasedICPPlanner extends AbstractICPPlanner
       transferDurationAlphas.get(0).set(finalTransferDurationAlpha.getDoubleValue());
       referenceICPGenerator.setInitialConditionsForAdjustment();
       referenceCoMGenerator.initializeForSwingOrTransfer();
-      updateTransferPlan(adjustPlanForStandingContinuity.getBooleanValue());
+
+      // If continuous update is enabled the plan will be updated in the compute method. If not, we update the plan here.
+      if (!doContinuousReplanningForStanding.getValue())
+      {
+         updateTransferPlan(adjustPlanForStandingContinuity.getBooleanValue());
+      }
    }
 
    /** {@inheritDoc} */
@@ -369,7 +374,12 @@ public class SmoothCMPBasedICPPlanner extends AbstractICPPlanner
       transferDurationAlphas.get(numberOfFootstepRegistered).set(finalTransferDurationAlpha.getDoubleValue());
       referenceICPGenerator.setInitialConditionsForAdjustment();
       referenceCoMGenerator.initializeForSwingOrTransfer();
-      updateTransferPlan(true);
+
+      // If continuous update is enabled the plan will be updated in the compute method. If not, we update the plan here.
+      if (!doContinuousReplanningForTransfer.getValue())
+      {
+         updateTransferPlan(true);
+      }
    }
 
    /** {@inheritDoc} */
@@ -399,7 +409,11 @@ public class SmoothCMPBasedICPPlanner extends AbstractICPPlanner
       referenceCoPGenerator.initializeForSwing();
       referenceCoMGenerator.initializeForSwingOrTransfer();
 
-      updateSingleSupportPlan(true);
+      // If continuous update is enabled the plan will be updated in the compute method. If not, we update the plan here.
+      if (!doContinuousReplanningForSwing.getValue())
+      {
+         updateSingleSupportPlan(true);
+      }
    }
 
    /** {@inheritDoc} */
