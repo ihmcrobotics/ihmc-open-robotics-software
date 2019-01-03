@@ -1,6 +1,8 @@
 package us.ihmc.robotics.linearAlgebra.commonOps;
 
+import org.ejml.data.DenseMatrix64F;
 import org.ejml.data.RowD1Matrix64F;
+import org.ejml.ops.CommonOps;
 
 import us.ihmc.tools.nativelibraries.NativeLibraryLoader;
 
@@ -29,7 +31,7 @@ public class NativeCommonOps
          throw new IllegalArgumentException("Incompatible Matrix Dimensions.");
       }
       c.reshape(a.getNumRows(), b.getNumCols());
-      nativeCommonOpsWrapper.computeAB(c.data, a.data, b.data, a.getNumRows(), a.getNumCols(), b.getNumCols());
+      nativeCommonOpsWrapper.mult(c.data, a.data, b.data, a.getNumRows(), a.getNumCols(), b.getNumCols());
    }
 
    /**
@@ -47,7 +49,28 @@ public class NativeCommonOps
          throw new IllegalArgumentException("Incompatible Matrix Dimensions.");
       }
       c.reshape(a.getNumCols(), a.getNumCols());
-      nativeCommonOpsWrapper.computeAtBA(c.data, a.data, b.data, a.getNumRows(), a.getNumCols());
+      nativeCommonOpsWrapper.multQuad(c.data, a.data, b.data, a.getNumRows(), a.getNumCols());
+   }
+
+   /**
+    * Inverts a matrix.</br>
+    * This method requires that the matrix is square and invertible and uses a LU decomposition.
+    * @param a matrix to invert
+    * @param inv where the result is stored (modified)
+    * @throws IllegalArgumentException if the matrix dimensions are incompatible.
+    */
+   public static void invert(RowD1Matrix64F a, RowD1Matrix64F inv)
+   {
+      if (a == inv)
+      {
+         throw new IllegalArgumentException("Can not invert in place. The result matrix needs to be different from the matrix to invert.");
+      }
+      if (a.getNumRows() != a.getNumCols())
+      {
+         throw new IllegalArgumentException("Incompatible Matrix Dimensions.");
+      }
+      inv.reshape(a.getNumRows(), a.getNumCols());
+      nativeCommonOpsWrapper.invert(inv.data, a.data, a.getNumRows());
    }
 
    /**
@@ -67,6 +90,31 @@ public class NativeCommonOps
       }
       x.reshape(a.getNumCols(), 1);
       nativeCommonOpsWrapper.solve(x.data, a.data, b.data, a.getNumRows());
+   }
+
+   /**
+    * Computes the solution to the linear equation</br>
+    * a * x == b</br>
+    * This method requires that {@code a} is square. It will check the invertability of {@code a} and will return false if it is not invertible.
+    * @param a matrix in equation
+    * @param b matrix in equation
+    * @param x where the result is stored (modified)
+    * @return whether a solution was found
+    * @throws IllegalArgumentException if the matrix dimensions are incompatible.
+    */
+   public static boolean solveCheck(RowD1Matrix64F a, RowD1Matrix64F b, RowD1Matrix64F x)
+   {
+      if (a.getNumRows() != b.getNumRows() || b.getNumCols() != 1 || a.getNumCols() != a.getNumRows())
+      {
+         throw new IllegalArgumentException("Incompatible Matrix Dimensions.");
+      }
+      x.reshape(a.getNumCols(), 1);
+      if (nativeCommonOpsWrapper.solveCheck(x.data, a.data, b.data, a.getNumRows()))
+      {
+         return true;
+      }
+      CommonOps.fill(x, Double.NaN);
+      return false;
    }
 
    /**
@@ -107,5 +155,29 @@ public class NativeCommonOps
       }
       x.reshape(a.getNumCols(), 1);
       nativeCommonOpsWrapper.solveDamped(x.data, a.data, b.data, a.getNumRows(), a.getNumCols(), alpha);
+   }
+
+   /**
+    * Projects the matrix {@code a} onto the null-space of {@code b} and stores the result in {@code c} such that</br>
+    * b * c == 0</br>
+    * This method uses a damped least square approach causing the null-space to grow gradually.
+    * @param a matrix to project
+    * @param b matrix to compute the null-space of
+    * @param c where the result is stored (modified)
+    * @param alpha damping value
+    * @throws IllegalArgumentException if the matrix dimensions are incompatible.
+    */
+   public static void projectOnNullspace(DenseMatrix64F a, DenseMatrix64F b, DenseMatrix64F c, double alpha)
+   {
+      if (a == c)
+      {
+         throw new IllegalArgumentException("Can not project in place. The result matrix needs to be different from the matrix to project.");
+      }
+      if (a.getNumCols() != b.getNumCols())
+      {
+         throw new IllegalArgumentException("Incompatible Matrix Dimensions.");
+      }
+      c.reshape(a.getNumRows(), a.getNumCols());
+      nativeCommonOpsWrapper.projectOnNullspace(c.data, a.data, b.data, a.getNumRows(), a.getNumCols(), b.getNumRows(), alpha);
    }
 }

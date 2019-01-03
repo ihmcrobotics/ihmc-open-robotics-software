@@ -9,19 +9,27 @@ extern "C" {
 #endif
 /*
  * Class:     us_ihmc_robotics_linearAlgebra_commonOps_NativeCommonOpsWrapper
- * Method:    computeAB
+ * Method:    mult
  * Signature: ([D[D[DIII)V
  */
-JNIEXPORT void JNICALL Java_us_ihmc_robotics_linearAlgebra_commonOps_NativeCommonOpsWrapper_computeAB
+JNIEXPORT void JNICALL Java_us_ihmc_robotics_linearAlgebra_commonOps_NativeCommonOpsWrapper_mult
   (JNIEnv *, jobject, jdoubleArray, jdoubleArray, jdoubleArray, jint, jint, jint);
 
 /*
  * Class:     us_ihmc_robotics_linearAlgebra_commonOps_NativeCommonOpsWrapper
- * Method:    computeAtBA
+ * Method:    multQuad
  * Signature: ([D[D[DII)V
  */
-JNIEXPORT void JNICALL Java_us_ihmc_robotics_linearAlgebra_commonOps_NativeCommonOpsWrapper_computeAtBA
+JNIEXPORT void JNICALL Java_us_ihmc_robotics_linearAlgebra_commonOps_NativeCommonOpsWrapper_multQuad
   (JNIEnv *, jobject, jdoubleArray, jdoubleArray, jdoubleArray, jint, jint);
+
+/*
+ * Class:     us_ihmc_robotics_linearAlgebra_commonOps_NativeCommonOpsWrapper
+ * Method:    invert
+ * Signature: ([D[DI)V
+ */
+JNIEXPORT void JNICALL Java_us_ihmc_robotics_linearAlgebra_commonOps_NativeCommonOpsWrapper_invert
+  (JNIEnv *, jobject, jdoubleArray, jdoubleArray, jint);
 
 /*
  * Class:     us_ihmc_robotics_linearAlgebra_commonOps_NativeCommonOpsWrapper
@@ -29,6 +37,14 @@ JNIEXPORT void JNICALL Java_us_ihmc_robotics_linearAlgebra_commonOps_NativeCommo
  * Signature: ([D[D[DI)V
  */
 JNIEXPORT void JNICALL Java_us_ihmc_robotics_linearAlgebra_commonOps_NativeCommonOpsWrapper_solve
+  (JNIEnv *, jobject, jdoubleArray, jdoubleArray, jdoubleArray, jint);
+
+/*
+ * Class:     us_ihmc_robotics_linearAlgebra_commonOps_NativeCommonOpsWrapper
+ * Method:    solveCheck
+ * Signature: ([D[D[DI)Z
+ */
+JNIEXPORT jboolean JNICALL Java_us_ihmc_robotics_linearAlgebra_commonOps_NativeCommonOpsWrapper_solveCheck
   (JNIEnv *, jobject, jdoubleArray, jdoubleArray, jdoubleArray, jint);
 
 /*
@@ -46,6 +62,14 @@ JNIEXPORT void JNICALL Java_us_ihmc_robotics_linearAlgebra_commonOps_NativeCommo
  */
 JNIEXPORT void JNICALL Java_us_ihmc_robotics_linearAlgebra_commonOps_NativeCommonOpsWrapper_solveDamped
   (JNIEnv *, jobject, jdoubleArray, jdoubleArray, jdoubleArray, jint, jint, jdouble);
+
+/*
+ * Class:     us_ihmc_robotics_linearAlgebra_commonOps_NativeCommonOpsWrapper
+ * Method:    projectOnNullspace
+ * Signature: ([D[D[DIIID)V
+ */
+JNIEXPORT void JNICALL Java_us_ihmc_robotics_linearAlgebra_commonOps_NativeCommonOpsWrapper_projectOnNullspace
+  (JNIEnv *, jobject, jdoubleArray, jdoubleArray, jdoubleArray, jint, jint, jint, jdouble);
 
 #ifdef __cplusplus
 }
