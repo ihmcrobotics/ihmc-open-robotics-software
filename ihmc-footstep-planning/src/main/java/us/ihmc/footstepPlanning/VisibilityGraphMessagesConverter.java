@@ -70,9 +70,9 @@ public class VisibilityGraphMessagesConverter
       return message;
    }
 
-   public static NavigableRegionMessage convertToNavigableRegionMessage(VisibilityMapWithNavigableRegion navigableRegion)
+   public static VisibilityMapWithNavigableRegionMessage convertToNavigableRegionMessage(VisibilityMapWithNavigableRegion navigableRegion)
    {
-      NavigableRegionMessage message = new NavigableRegionMessage();
+      VisibilityMapWithNavigableRegionMessage message = new VisibilityMapWithNavigableRegionMessage();
 
       message.getHomeRegion().set(PlanarRegionMessageConverter.convertToPlanarRegionMessage(navigableRegion.getHomePlanarRegion()));
       message.getHomeRegionCluster().set(convertToVisibilityClusterMessage(navigableRegion.getHomeRegionCluster()));
@@ -164,7 +164,7 @@ public class VisibilityGraphMessagesConverter
       return mapHolder;
    }
 
-   public static List<VisibilityMapWithNavigableRegion> convertToNavigableRegionsList(List<NavigableRegionMessage> message)
+   public static List<VisibilityMapWithNavigableRegion> convertToNavigableRegionsList(List<VisibilityMapWithNavigableRegionMessage> message)
    {
       List<VisibilityMapWithNavigableRegion> navigableRegionList = new ArrayList<>();
 
@@ -174,7 +174,7 @@ public class VisibilityGraphMessagesConverter
       return navigableRegionList;
    }
 
-   public static VisibilityMapWithNavigableRegion convertToVisibilityMapWithNavigableRegion(NavigableRegionMessage message)
+   public static VisibilityMapWithNavigableRegion convertToVisibilityMapWithNavigableRegion(VisibilityMapWithNavigableRegionMessage message)
    {
       VisibilityMapWithNavigableRegion visibilityMapWithNavigableRegion = new VisibilityMapWithNavigableRegion(PlanarRegionMessageConverter.convertToPlanarRegion(message.getHomeRegion()));
 
@@ -236,7 +236,7 @@ public class VisibilityGraphMessagesConverter
       statistics.setStartVisibilityMapInWorld(startMap.getMapId(), startMap.getVisibilityMapInWorld());
       statistics.setGoalVisibilityMapInWorld(goalMap.getMapId(), goalMap.getVisibilityMapInWorld());
       statistics.setInterRegionsVisibilityMapInWorld(interRegionsMap.getMapId(), interRegionsMap.getVisibilityMapInWorld());
-      List<NavigableRegionMessage> navigableRegions = message.getNavigableRegions();
+      List<VisibilityMapWithNavigableRegionMessage> navigableRegions = message.getNavigableRegions();
       for (int i = 0; i < navigableRegions.size(); i++)
          statistics.addNavigableRegion(convertToVisibilityMapWithNavigableRegion(navigableRegions.get(i)));
 
