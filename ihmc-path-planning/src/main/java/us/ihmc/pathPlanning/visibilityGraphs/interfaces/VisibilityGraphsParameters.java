@@ -3,10 +3,13 @@ package us.ihmc.pathPlanning.visibilityGraphs.interfaces;
 import java.util.List;
 
 import us.ihmc.commons.MathTools;
+import us.ihmc.euclid.geometry.ConvexPolygon2D;
+import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
+import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.pathPlanning.visibilityGraphs.dataStructure.ConnectionPoint3D;
 import us.ihmc.pathPlanning.visibilityGraphs.dijkstra.DijkstraVisibilityGraphPlanner;
-import us.ihmc.pathPlanning.visibilityGraphs.tools.JGraphTools;
 import us.ihmc.pathPlanning.visibilityGraphs.tools.PlanarRegionTools;
+import us.ihmc.robotics.geometry.ConvexPolygonTools;
 import us.ihmc.robotics.geometry.PlanarRegion;
 
 public interface VisibilityGraphsParameters
@@ -15,9 +18,14 @@ public interface VisibilityGraphsParameters
 
    double getNormalZThresholdForAccessibleRegions();
 
-   double getExtrusionDistance();
+   default double getNavigableExtrusionDistance()
+   {
+      return 0.02;
+   }
 
-   double getExtrusionDistanceIfNotTooHighToStep();
+   double getObstacleExtrusionDistance();
+
+   double getObstacleExtrusionDistanceIfNotTooHighToStep();
 
    double getTooHighToStepDistance();
 
@@ -79,9 +87,9 @@ public interface VisibilityGraphsParameters
       return new NavigableExtrusionDistanceCalculator()
       {
          @Override
-         public double computeExtrusionDistance(PlanarRegion navigableRegionToBeExtruded)
+         public double computeNavigableExtrusionDistance(PlanarRegion navigableRegionToBeExtruded)
          {
-            return getExtrusionDistanceIfNotTooHighToStep();
+            return getNavigableExtrusionDistance();
          }
       };
    }
@@ -93,19 +101,18 @@ public interface VisibilityGraphsParameters
     */
    default ObstacleExtrusionDistanceCalculator getObstacleExtrusionDistanceCalculator()
    {
-      return (pointToExtrude, obstacleHeight) ->
-      {
-         if(obstacleHeight < 0.0)
+      return (pointToExtrude, obstacleHeight) -> {
+         if (obstacleHeight < 0.0)
          {
             return 0.0;
          }
-         else if(obstacleHeight < getTooHighToStepDistance())
+         else if (obstacleHeight < getTooHighToStepDistance())
          {
-            return getExtrusionDistanceIfNotTooHighToStep();
+            return getObstacleExtrusionDistanceIfNotTooHighToStep();
          }
          else
          {
-            return getExtrusionDistance();
+            return getObstacleExtrusionDistance();
          }
       };
    }
@@ -126,7 +133,8 @@ public interface VisibilityGraphsParameters
    {
       return new InterRegionConnectionFilter()
       {
-         private final double maxLengthSquared = MathTools.square(getMaxInterRegionConnectionLength());
+         private final double maxLength = getMaxInterRegionConnectionLength();
+         private final double maxLengthSquared = MathTools.square(maxLength);
          private final double maxDeltaHeight = getTooHighToStepDistance();
 
          @Override
@@ -138,6 +146,12 @@ public interface VisibilityGraphsParameters
                return false;
 
             return true;
+         }
+
+         @Override
+         public double getMaximumInterRegionConnetionDistance()
+         {
+            return maxLength;
          }
       };
    }
@@ -158,17 +172,103 @@ public interface VisibilityGraphsParameters
       };
    }
 
+   /**
+    * Returns the height at which the robot can duck under an obstacle. Any obstacles that are higher than that height above a navigable planar reigon will be ignored.
+    * @return height at which the robot can duck under an obstacle.
+    */
+   default double getCanDuckUnderHeight()
+   {
+      return 2.0;
+   }
+
+   /**
+    * Returns the height at which an obstacle can be easily stepped over. Any obstacles that are lower than that height above a navigable planar region will be ignored.
+    * @return height at which the robot can easily step over an object.
+    */
+   default double getCanEasilyStepOverHeight()
+   {
+      return 0.03;
+   }
+
    default ObstacleRegionFilter getObstacleRegionFilter()
    {
+      final ConvexPolygonTools convexPolygonTools = new ConvexPolygonTools();
+
       return new ObstacleRegionFilter()
       {
          @Override
-         public boolean isRegionValidObstacle(PlanarRegion query, PlanarRegion navigableRegion)
+         public boolean isRegionValidObstacle(PlanarRegion potentialObstacleRegion, PlanarRegion navigableRegion)
          {
-            if (!PlanarRegionTools.isRegionAOverlapingWithRegionB(query, navigableRegion, 0.1))
+            //TODO: Choose one and use it. Or if allow for either, make this boolean a parameter or static field.
+            boolean usePolygonIntersection = false;
+
+            if (usePolygonIntersection)
+            {
+               return isRegionValidObstacleUsingPolygonIntersection(potentialObstacleRegion, navigableRegion);
+            }
+            else
+            {
+               return isRegionValidObstacleUsingMinimumHeightAbove(potentialObstacleRegion, navigableRegion);
+            }
+         }
+
+         boolean isRegionValidObstacleUsingMinimumHeightAbove(PlanarRegion potentialObstacleRegion, PlanarRegion navigableRegion)
+         {
+            //TODO: ++++++JerryPratt: Fix this and use this if you want it to be more accurate. However, if this is just for approximate tests and can have false positives, then bounding boxes are fine.
+            //      return doPolygonsIntersect(convexHullOne, convexHullTwo, epsilon);
+
+            //TOOD: ++++++JerryPratt: Lots of bugs here. Need to clean up ConvexPolygon stuff to find distances and if overlapping more nicely...
+            //TODO: Get rid of these magic numbers and make them parameters somewhere. Make sure the overlapping region check is larger than getMaxInterRegionConnectionLength() 
+            //TODO: BodyPathPlannerEnvironment crash when the number is set to 1.0. But should work fine all the same...
+            //TOOD: This check should just be an approximation and should be ok for false positives. In fact, just returning true should be ok. Check that.
+            //TODO: But somehow that's not right, since if we change 0.25 to 1.0 below, we get a Runtime Exception: Tried to create a line from two coincidal points!?
+            if (!PlanarRegionTools.isRegionAOverlapingWithRegionB(potentialObstacleRegion, navigableRegion, 0.25)) //1.0)) //0.25)) //1.0))
                return false;
 
-            if (PlanarRegionTools.computeMinHeightOfRegionAAboveRegionB(query, navigableRegion) > 3.0)
+            double minimumHeight = PlanarRegionTools.computeMinHeightOfRegionAAboveRegionB(potentialObstacleRegion, navigableRegion);
+            if (minimumHeight > getCanDuckUnderHeight())
+               return false;
+
+            if (!PlanarRegionTools.isPlanarRegionAAbovePlanarRegionB(potentialObstacleRegion, navigableRegion, getCanEasilyStepOverHeight()))
+               return false;
+
+            return true;
+         }
+
+         private boolean isRegionValidObstacleUsingPolygonIntersection(PlanarRegion potentialObstacleRegion, PlanarRegion navigableRegion)
+         {
+            ConvexPolygon2D potentialObstacleConvexHull = PlanarRegionTools.getVerticallyProjectedConvexHull(potentialObstacleRegion);
+            ConvexPolygon2D navigableRegionConvexHull = PlanarRegionTools.getVerticallyProjectedConvexHull(navigableRegion);
+
+            //TODO: Extrude the obstacle first...
+
+            ConvexPolygon2D intersectionPolygon = new ConvexPolygon2D();
+
+            //TODO: Write more test cases for ConvexPolygonTools.computeIntersectionOfPolygons
+            boolean polygonsIntersect = convexPolygonTools.computeIntersectionOfPolygons(potentialObstacleConvexHull, navigableRegionConvexHull,
+                                                                                         intersectionPolygon);
+            if (!polygonsIntersect)
+               return false;
+
+            List<? extends Point2DReadOnly> intersectionVerticesInWorld2D = intersectionPolygon.getPolygonVerticesView();
+
+            Double minimumHeight = Double.POSITIVE_INFINITY;
+            Double maximumHeight = Double.NEGATIVE_INFINITY;
+
+            for (int i = 0; i < intersectionVerticesInWorld2D.size(); i++)
+            {
+               Point3D pointToProject = new Point3D(intersectionVerticesInWorld2D.get(i));
+               Point3D pointProjectedToPotentialObstacle = PlanarRegionTools.projectInZToPlanarRegion(pointToProject, potentialObstacleRegion);
+               Point3D pointProjectedToNavigableRegion = PlanarRegionTools.projectInZToPlanarRegion(pointToProject, navigableRegion);
+
+               double height = pointProjectedToPotentialObstacle.getZ() - pointProjectedToNavigableRegion.getZ();
+               if (height < minimumHeight)
+                  minimumHeight = height;
+               if (height > maximumHeight)
+                  maximumHeight = height;
+            }
+
+            if (minimumHeight < getCanDuckUnderHeight())
                return false;
 
             return true;
@@ -179,6 +279,6 @@ public interface VisibilityGraphsParameters
    default VisibilityGraphPathPlanner getPathPlanner()
    {
       return new DijkstraVisibilityGraphPlanner();
-//      return JGraphTools.getJGraphPlanner();
+      //      return JGraphTools.getJGraphPlanner();
    }
 }

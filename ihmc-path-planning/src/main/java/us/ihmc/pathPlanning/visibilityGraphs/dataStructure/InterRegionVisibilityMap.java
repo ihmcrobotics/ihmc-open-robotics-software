@@ -38,7 +38,10 @@ public class InterRegionVisibilityMap implements VisibilityMapHolder
       double horizontalDistance = EuclidGeometryTools.distanceBetweenPoint2Ds(sourcePoint.getX(), sourcePoint.getY(), targetPoint.getX(), targetPoint.getY());
       double verticalDistance = Math.abs(sourcePoint.getZ() - targetPoint.getZ());
 
-      return INTER_REGION_WEIGHT_SCALE * (horizontalDistance + verticalDistance);
+      //TODO: +++JerryPratt: Decide on a good connection weight to minimize. But for now
+      //TODO: Just use horizontalDistance since the tests work well with that...
+      return horizontalDistance;
+      //      return INTER_REGION_WEIGHT_SCALE * (horizontalDistance + verticalDistance);
    }
 
    @Override
@@ -47,6 +50,7 @@ public class InterRegionVisibilityMap implements VisibilityMapHolder
       return 0;
    }
 
+   //TODO: One of these must be wrong if there is no transformation between the two...
    @Override
    public VisibilityMap getVisibilityMapInLocal()
    {

@@ -3,8 +3,8 @@ package us.ihmc.simulationConstructionSetTools.util.environments.environmentRobo
 import java.awt.Color;
 import java.util.ArrayList;
 
-import us.ihmc.euclid.geometry.Box3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.shape.Box3D;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;

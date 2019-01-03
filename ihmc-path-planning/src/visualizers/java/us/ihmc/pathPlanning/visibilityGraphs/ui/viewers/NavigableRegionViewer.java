@@ -20,7 +20,7 @@ import us.ihmc.javaFXToolkit.shapes.JavaFXMeshBuilder;
 import us.ihmc.messager.Messager;
 import us.ihmc.messager.MessagerAPIFactory.Topic;
 import us.ihmc.pathPlanning.visibilityGraphs.dataStructure.Connection;
-import us.ihmc.pathPlanning.visibilityGraphs.dataStructure.NavigableRegion;
+import us.ihmc.pathPlanning.visibilityGraphs.dataStructure.VisibilityMapWithNavigableRegion;
 import us.ihmc.pathPlanning.visibilityGraphs.dataStructure.VisibilityMap;
 import us.ihmc.pathPlanning.visibilityGraphs.interfaces.VisibilityMapHolder;
 import us.ihmc.pathPlanning.visibilityGraphs.ui.VisualizationParameters;
@@ -35,7 +35,7 @@ public class NavigableRegionViewer extends AnimationTimer
    private AtomicReference<Boolean> resetRequested;
    private AtomicReference<Boolean> show;
 
-   private AtomicReference<List<NavigableRegion>> newRequestReference;
+   private AtomicReference<List<VisibilityMapWithNavigableRegion>> newRequestReference;
 
    private final Messager messager;
 
@@ -58,7 +58,7 @@ public class NavigableRegionViewer extends AnimationTimer
       root.setMouseTransparent(true);
    }
 
-   public void setTopics(Topic<Boolean> globalResetTopic, Topic<Boolean> showNavigableRegionVisibilityMapsTopic, Topic<List<NavigableRegion>> navigableRegionVisibilityMapTopic)
+   public void setTopics(Topic<Boolean> globalResetTopic, Topic<Boolean> showNavigableRegionVisibilityMapsTopic, Topic<List<VisibilityMapWithNavigableRegion>> navigableRegionVisibilityMapTopic)
    {
       resetRequested = messager.createInput(globalResetTopic, false);
       show = messager.createInput(showNavigableRegionVisibilityMapsTopic, false);
@@ -87,19 +87,19 @@ public class NavigableRegionViewer extends AnimationTimer
 
       if (show.get())
       {
-         List<NavigableRegion> newRequest = newRequestReference.getAndSet(null);
+         List<VisibilityMapWithNavigableRegion> newRequest = newRequestReference.getAndSet(null);
 
          if (newRequest != null)
             processNavigableRegionsOnThread(newRequest);
       }
    }
 
-   private void processNavigableRegionsOnThread(List<NavigableRegion> newRequest)
+   private void processNavigableRegionsOnThread(List<VisibilityMapWithNavigableRegion> newRequest)
    {
       executorService.execute(() -> processNavigableRegions(newRequest));
    }
 
-   private void processNavigableRegions(List<NavigableRegion> newRequest)
+   private void processNavigableRegions(List<VisibilityMapWithNavigableRegion> newRequest)
    {
       Map<Integer, JavaFXMeshBuilder> meshBuilders = new HashMap<>();
       Map<Integer, Material> materials = new HashMap<>();

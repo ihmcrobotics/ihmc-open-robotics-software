@@ -9,9 +9,9 @@ public class VisibilityGraphsParametersProperty extends ParametersProperty<Setta
 {
    private final DoubleField maxInterRegionConnectionLength = new DoubleField(SettableVisibilityGraphsParameters::getMaxInterRegionConnectionLength, SettableVisibilityGraphsParameters::setMaxInterRegionConnectionLength);
    private final DoubleField normalZThresholdForAccessibleRegions = new DoubleField(SettableVisibilityGraphsParameters::getNormalZThresholdForAccessibleRegions, SettableVisibilityGraphsParameters::setNormalZThresholdForAccessibleRegions);
-   private final DoubleField extrusionDistance = new DoubleField(SettableVisibilityGraphsParameters::getExtrusionDistance, SettableVisibilityGraphsParameters::setExtrusionDistance);
+   private final DoubleField extrusionDistance = new DoubleField(SettableVisibilityGraphsParameters::getObstacleExtrusionDistance, SettableVisibilityGraphsParameters::setExtrusionDistance);
    private final IntegerField planarRegionMinSize = new IntegerField(SettableVisibilityGraphsParameters::getPlanarRegionMinSize, SettableVisibilityGraphsParameters::setPlanarRegionMinSize);
-   private final DoubleField extrusionDistanceIfNotTooHighToStep = new DoubleField(SettableVisibilityGraphsParameters::getExtrusionDistanceIfNotTooHighToStep, SettableVisibilityGraphsParameters::setExtrusionDistanceIfNotTooHighToStep);
+   private final DoubleField extrusionDistanceIfNotTooHighToStep = new DoubleField(SettableVisibilityGraphsParameters::getObstacleExtrusionDistanceIfNotTooHighToStep, SettableVisibilityGraphsParameters::setExtrusionDistanceIfNotTooHighToStep);
    private final DoubleField tooHighToStepDistance = new DoubleField(SettableVisibilityGraphsParameters::getTooHighToStepDistance, SettableVisibilityGraphsParameters::setTooHighToStepDistance);
    private final DoubleField clusterResolution = new DoubleField(SettableVisibilityGraphsParameters::getClusterResolution, SettableVisibilityGraphsParameters::setClusterResolution);
    private final DoubleField explorationDistanceFromStartGoal = new DoubleField(SettableVisibilityGraphsParameters::getExplorationDistanceFromStartGoal, SettableVisibilityGraphsParameters::setExplorationDistanceFromStartGoal);

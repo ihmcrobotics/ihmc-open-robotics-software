@@ -1,7 +1,7 @@
 package us.ihmc.robotics.geometry.shapes;
 
-import us.ihmc.euclid.geometry.Torus3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.shape.Torus3D;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 
 public class FrameTorus3d extends FrameShape3d<FrameTorus3d, Torus3D>

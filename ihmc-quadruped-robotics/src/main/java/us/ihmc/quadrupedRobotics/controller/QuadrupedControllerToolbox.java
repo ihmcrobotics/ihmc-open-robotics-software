@@ -6,6 +6,7 @@ import java.util.List;
 
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.QuadrupedSupportPolygons;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.YoPlaneContactState;
+import us.ihmc.commonWalkingControlModules.referenceFrames.CommonQuadrupedReferenceFramesVisualizer;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
@@ -36,6 +37,7 @@ import us.ihmc.yoVariables.variable.YoFrameVector3D;
 public class QuadrupedControllerToolbox
 {
    private final QuadrupedReferenceFrames referenceFrames;
+   private final CommonQuadrupedReferenceFramesVisualizer referenceFramesVisualizer;
    private final LinearInvertedPendulumModel linearInvertedPendulumModel;
    private final DivergentComponentOfMotionEstimator dcmPositionEstimator;
 
@@ -98,7 +100,8 @@ public class QuadrupedControllerToolbox
       comJacobian = new CenterOfMassJacobian(fullRobotModel.getElevator(), worldFrame);
       dcmPositionEstimator = new DivergentComponentOfMotionEstimator(referenceFrames.getCenterOfMassFrame(), linearInvertedPendulumModel, registry, yoGraphicsListRegistry);
 
-      fallDetector = new QuadrupedFallDetector(referenceFrames.getBodyFrame(), referenceFrames.getSoleFrames(), dcmPositionEstimator, registry);
+      fallDetector = new QuadrupedFallDetector(referenceFrames.getBodyFrame(), referenceFrames.getSoleFrames(), dcmPositionEstimator,
+                                               runtimeEnvironment.getFallDetectionParameters(), registry);
 
       contactablePlaneBodies = runtimeEnvironment.getContactablePlaneBodies();
       centerOfMassDataHolder = runtimeEnvironment.getCenterOfMassDataHolder();
@@ -120,6 +123,11 @@ public class QuadrupedControllerToolbox
          contactStates.put(robotQuadrant, contactState);
       }
 
+      if (yoGraphicsListRegistry != null)
+         referenceFramesVisualizer = new CommonQuadrupedReferenceFramesVisualizer(referenceFrames, yoGraphicsListRegistry, registry);
+      else
+         referenceFramesVisualizer = null;
+
 
       supportPolygon = new QuadrupedSupportPolygons(referenceFrames.getCenterOfFeetZUpFrameAveragingLowestZHeightsAcrossEnds(), footContactStates,
                                                     referenceFrames.getSoleZUpFrames(), registry, yoGraphicsListRegistry);
@@ -132,6 +140,9 @@ public class QuadrupedControllerToolbox
    {
       referenceFrames.updateFrames();
       supportPolygon.updateUsingContactStates(footContactStates);
+
+      if (referenceFramesVisualizer != null)
+         referenceFramesVisualizer.update();
 
       if(centerOfMassDataHolder == null)
       {

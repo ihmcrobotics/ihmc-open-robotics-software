@@ -30,13 +30,12 @@ import us.ihmc.quadrupedRobotics.estimator.sensorProcessing.simulatedSensors.SDF
 import us.ihmc.quadrupedRobotics.estimator.stateEstimator.QuadrupedSensorInformation;
 import us.ihmc.quadrupedRobotics.estimator.stateEstimator.QuadrupedSensorReaderWrapper;
 import us.ihmc.quadrupedRobotics.estimator.stateEstimator.QuadrupedStateEstimatorFactory;
-import us.ihmc.quadrupedRobotics.inverseKinematics.QuadrupedInverseKinematicsCalculators;
-import us.ihmc.quadrupedRobotics.inverseKinematics.QuadrupedLegInverseKinematicsCalculator;
 import us.ihmc.quadrupedRobotics.model.QuadrupedInitialOffsetAndYaw;
 import us.ihmc.quadrupedRobotics.model.QuadrupedInitialPositionParameters;
 import us.ihmc.quadrupedRobotics.model.QuadrupedModelFactory;
 import us.ihmc.quadrupedRobotics.model.QuadrupedPhysicalProperties;
 import us.ihmc.quadrupedRobotics.model.QuadrupedRuntimeEnvironment;
+import us.ihmc.quadrupedRobotics.parameters.QuadrupedFallDetectionParameters;
 import us.ihmc.quadrupedRobotics.parameters.QuadrupedPrivilegedConfigurationParameters;
 import us.ihmc.quadrupedRobotics.parameters.QuadrupedSitDownParameters;
 import us.ihmc.robotDataLogger.YoVariableServer;
@@ -120,6 +119,7 @@ public class QuadrupedSimulationFactory
    private final RequiredFactoryField<HighLevelControllerParameters> highLevelControllerParameters = new RequiredFactoryField<>("highLevelControllerParameters");
    private final RequiredFactoryField<QuadrupedSitDownParameters> sitDownParameters = new RequiredFactoryField<>("sitDownParameters");
    private final RequiredFactoryField<QuadrupedPrivilegedConfigurationParameters> privilegedConfigurationParameters = new RequiredFactoryField<>("privilegedConfigurationParameters");
+   private final RequiredFactoryField<QuadrupedFallDetectionParameters> fallDetectionParameters = new RequiredFactoryField<>("fallDetectionParameters");
 
    private final OptionalFactoryField<SimulatedElasticityParameters> simulatedElasticityParameters = new OptionalFactoryField<>("simulatedElasticityParameters");
    private final OptionalFactoryField<CoulombViscousStribeckFrictionParameters> simulatedFrictionParameters = new OptionalFactoryField<>("jointFrictionParameters");
@@ -251,7 +251,7 @@ public class QuadrupedSimulationFactory
       footSwitchFactory.setFullRobotModel(fullRobotModel.get());
       footSwitchFactory.setGravity(gravity.get());
       footSwitchFactory.setSimulatedRobot(sdfRobot.get());
-      footSwitchFactory.setYoVariableRegistry(sdfRobot.get().getRobotsYoVariableRegistry());
+      footSwitchFactory.setYoVariableRegistry(factoryRegistry);
       footSwitchFactory.setFootSwitchType(footSwitchType.get());
       footSwitchFactory.setKneeTouchdownThresholds(kneeTorqueTouchdownDetectionThreshold.get());
 
@@ -309,7 +309,8 @@ public class QuadrupedSimulationFactory
                                                                                        yoGraphicsListRegistryForDetachedOverhead, contactableFeet,
                                                                                        contactablePlaneBodies, centerOfMassDataHolder, footSwitches,
                                                                                        gravity.get(), highLevelControllerParameters.get(),
-                                                                                       sitDownParameters.get(), privilegedConfigurationParameters.get());
+                                                                                       sitDownParameters.get(), privilegedConfigurationParameters.get(),
+                                                                                       fallDetectionParameters.get());
 
       if(controlMode.get() == QuadrupedControlMode.POSITION)
       {
@@ -621,6 +622,11 @@ public class QuadrupedSimulationFactory
    public void setPrivilegedConfigurationParameters(QuadrupedPrivilegedConfigurationParameters privilegedConfigurationParameters)
    {
       this.privilegedConfigurationParameters.set(privilegedConfigurationParameters);
+   }
+
+   public void setFallDetectionParameters(QuadrupedFallDetectionParameters fallDetectionParameters)
+   {
+      this.fallDetectionParameters.set(fallDetectionParameters);
    }
 
    public void setGravity(double gravity)
