@@ -529,6 +529,9 @@ public class WalkingHighLevelHumanoidController implements JointLoadStatusProvid
 
       updateFailureDetection();
 
+      if (planarRegionsListHandler.hasNewPlanarRegions())
+         balanceManager.submitCurrentPlanarRegions(planarRegionsListHandler.pollHasNewPlanarRegionsList());
+
       // Do transitions will request ICP planner updates.
       stateMachine.doTransitions();
       // This updates the ICP plan continuously.
@@ -537,9 +540,6 @@ public class WalkingHighLevelHumanoidController implements JointLoadStatusProvid
       stateMachine.doAction();
 
       currentState = stateMachine.getCurrentState();
-
-      if (planarRegionsListHandler.hasNewPlanarRegions())
-         balanceManager.submitCurrentPlanarRegions(planarRegionsListHandler.pollHasNewPlanarRegionsList());
 
       updateManagers(currentState);
 
