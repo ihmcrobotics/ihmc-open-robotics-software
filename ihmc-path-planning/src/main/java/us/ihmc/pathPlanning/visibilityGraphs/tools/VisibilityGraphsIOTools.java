@@ -14,10 +14,10 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import us.ihmc.commons.PrintTools;
 import us.ihmc.euclid.tools.EuclidCoreIOTools;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
+import us.ihmc.log.LogTools;
 import us.ihmc.robotics.PlanarRegionFileTools;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 
@@ -47,19 +47,32 @@ public class VisibilityGraphsIOTools
    {
       File datasetFolder = new File(containingFolder + File.separator + datasetName);
       if (datasetFolder.exists())
+      {
+         LogTools.error("DatasetFolder already exists: " + datasetFolder);
          return false;
+      }
+
       boolean success = datasetFolder.mkdir();
       if (!success)
+      {
+         LogTools.error("Could not make directory: " + datasetFolder);
          return false;
+      }
 
       Path planarRegionsFolder = Paths.get(datasetFolder.getPath() + File.separator + PlanarRegionFileTools.createDefaultTimeStampedFolderName());
       success = PlanarRegionFileTools.exportPlanarRegionData(planarRegionsFolder, planarRegionsList);
       if (!success)
+      {
+         LogTools.error("Could not export planar region data to " + planarRegionsFolder);
          return false;
+      }
 
       success = exportParameters(datasetFolder, start, goal);
       if (!success)
+      {
+         LogTools.error("Could not export parameters " + datasetFolder);
          return false;
+      }
 
       return true;
    }
@@ -68,13 +81,13 @@ public class VisibilityGraphsIOTools
    {
       if (containingFolder == null || !containingFolder.exists())
       {
-         PrintTools.error("The given folder does not exist or is null.");
+         LogTools.error("The given folder does not exist or is null.");
          return false;
       }
 
       if (start == null || goal == null)
       {
-         PrintTools.error("Must export start AND goal.");
+         LogTools.error("Must export start AND goal.");
          return false;
       }
 
@@ -139,6 +152,25 @@ public class VisibilityGraphsIOTools
       return ret;
    }
 
+   protected static int parsePathSize(BufferedReader file)
+   {
+      Integer pathSize = parseField(file, PATH_SIZE_FIELD_OPEN, PATH_SIZE_FIELD_END, Integer::valueOf);
+      if (pathSize == null)
+         return -1;
+      else
+         return pathSize.intValue();
+   }
+
+   protected static Point3D parseStartField(BufferedReader bufferedReader)
+   {
+      return parseField(bufferedReader, START_FIELD_OPEN, START_FIELD_CLOSE, VisibilityGraphsIOTools::parsePoint3D);
+   }
+
+   protected static Point3D parseGoalField(BufferedReader bufferedReader)
+   {
+      return parseField(bufferedReader, GOAL_FIELD_OPEN, GOAL_FIELD_END, VisibilityGraphsIOTools::parsePoint3D);
+   }
+
    protected static void writeField(File file, String fieldOpen, String fieldClose, Writer writer)
    {
       BufferedWriter bw = null;
@@ -188,8 +220,8 @@ public class VisibilityGraphsIOTools
 
       for (int i = 0; i < childDirectories.size(); i++)
       {
-         PrintTools.info("trying to load:");
-         PrintTools.info(TEST_DATA_URL + "/" + childDirectories.get(i));
+         LogTools.info("trying to load:");
+         LogTools.info(TEST_DATA_URL + "/" + childDirectories.get(i));
 
          datasets.add(loadDataset(loadingClass, TEST_DATA_URL + "/" + childDirectories.get(i)));
       }
@@ -253,6 +285,29 @@ public class VisibilityGraphsIOTools
       return PlanarRegionFileTools.isPlanarRegionFile(planarRegionFolders[0]);
    }
 
+   protected static String getDatasetNameFromResourceName(String datasetResourceName)
+   {
+      String[] resourcePath = datasetResourceName.split("/");
+      return resourcePath[resourcePath.length - 1];
+   }
+
+   protected static String getPlanarRegionsDirectoryName(String datasetName)
+   {
+      String date = datasetName.substring(0, 15);
+      return date + "_PlanarRegion";
+   }
+
+   protected static BufferedReader createBufferedReaderFromResource(Class<?> clazz, String expectedParametersResourceName)
+   {
+      InputStream parametersFile = clazz.getResourceAsStream(expectedParametersResourceName);
+      if (parametersFile == null)
+         throw new RuntimeException("Could not find the parmeter file: " + expectedParametersResourceName);
+
+      InputStreamReader inputStreamReader = new InputStreamReader(parametersFile);
+      BufferedReader bufferedReader = new BufferedReader(inputStreamReader);
+      return bufferedReader;
+   }
+
    public static VisibilityGraphsUnitTestDataset loadDataset(Class<?> clazz, String datasetResourceName)
    {
       return new VisibilityGraphsUnitTestDataset(clazz, datasetResourceName);
@@ -266,22 +321,28 @@ public class VisibilityGraphsIOTools
       private int expectedPathSize;
       private Point3D start;
       private Point3D goal;
-      private final PlanarRegionsList planarRegionsList;
+      private PlanarRegionsList planarRegionsList;
 
-      protected VisibilityGraphsUnitTestDataset(Class<?> clazz, String datasetResourceName)
+      public VisibilityGraphsUnitTestDataset(String datasetName, String datasetResourceName)
       {
-         this.datasetName = getDatasetName(datasetResourceName);
+         this.datasetName = datasetName;
+         this.datasetResourceName = datasetResourceName;
+      }
+
+      public VisibilityGraphsUnitTestDataset(Class<?> clazz, String datasetResourceName)
+      {
+         this.datasetName = getDatasetNameFromResourceName(datasetResourceName);
          this.datasetResourceName = datasetResourceName;
 
+         loadFromResource(clazz, datasetResourceName);
+      }
+
+      private void loadFromResource(Class<?> clazz, String datasetResourceName)
+      {
          String expectedParametersResourceName = "/" + datasetResourceName + "/" + INPUTS_PARAMETERS_FILENAME;
-         String expectedPlanarRegionsResourceName = "/" + datasetResourceName + "/" + getPlanarRegionsDirectoryName();
+         String expectedPlanarRegionsResourceName = "/" + datasetResourceName + "/" + getPlanarRegionsDirectoryName(datasetName);
 
-         InputStream parametersFile = clazz.getResourceAsStream(expectedParametersResourceName);
-         if (parametersFile == null)
-            throw new RuntimeException("Could not find the parmeter file: " + expectedParametersResourceName);
-
-         InputStreamReader inputStreamReader = new InputStreamReader(parametersFile);
-         BufferedReader bufferedReader = new BufferedReader(inputStreamReader);
+         BufferedReader bufferedReader = createBufferedReaderFromResource(clazz, expectedParametersResourceName);
          try
          {
             bufferedReader.mark(10000);
@@ -302,48 +363,61 @@ public class VisibilityGraphsIOTools
             e.printStackTrace();
          }
 
-         planarRegionsList = PlanarRegionFileTools.importPlanarRegionData(clazz, expectedPlanarRegionsResourceName);
+         PlanarRegionsList planarRegionsList = PlanarRegionFileTools.importPlanarRegionData(clazz, expectedPlanarRegionsResourceName);
+         setPlanarRegionsList(planarRegionsList);
 
          if (start == null)
-            throw new RuntimeException("Could not load the start position. Data file: " + parametersFile);
+            throw new RuntimeException("Could not load the start position. Data file: " + expectedParametersResourceName);
          if (goal == null)
-            throw new RuntimeException("Could not load the goal position. Data file: " + parametersFile);
+            throw new RuntimeException("Could not load the goal position. Data file: " + expectedParametersResourceName);
          if (planarRegionsList == null)
             throw new RuntimeException("Could not load the planar regions. Data folder: " + expectedPlanarRegionsResourceName);
       }
 
       protected void loadFields(BufferedReader bufferedReader)
       {
-         expectedPathSize = parsePathSize(bufferedReader);
-         start = parseField(bufferedReader, START_FIELD_OPEN, START_FIELD_CLOSE, VisibilityGraphsIOTools::parsePoint3D);
-         goal = parseField(bufferedReader, GOAL_FIELD_OPEN, GOAL_FIELD_END, VisibilityGraphsIOTools::parsePoint3D);
+         int expectedPathSize = parsePathSize(bufferedReader);
+         Point3D start = parseStartField(bufferedReader);
+         Point3D goal = parseGoalField(bufferedReader);
+
+         setExpectedPathSize(expectedPathSize);
+         setStart(start);
+         setGoal(goal);
       }
 
-
-      private static String getDatasetName(String datasetResourceName)
+      public void setExpectedPathSize(int expectedPathSize)
       {
-         String[] resourcePath = datasetResourceName.split("/");
-         return resourcePath[resourcePath.length - 1];
+         this.expectedPathSize = expectedPathSize;
       }
 
-      private String getPlanarRegionsDirectoryName()
+      public void setStart(Point3D start)
       {
-         String date = datasetName.substring(0, 15);
-         return date + "_PlanarRegion";
+         this.start = start;
       }
 
-      private static int parsePathSize(BufferedReader file)
+      private void setGoal(Point3D goal)
       {
-         Integer pathSize = parseField(file, PATH_SIZE_FIELD_OPEN, PATH_SIZE_FIELD_END, Integer::valueOf);
-         if (pathSize == null)
-            return -1;
-         else
-            return pathSize.intValue();
+         this.goal = goal;
+      }
+
+      public void setPlanarRegionsList(PlanarRegionsList planarRegionsList)
+      {
+         this.planarRegionsList = planarRegionsList;
       }
 
       public String getDatasetName()
       {
          return datasetResourceName;
+      }
+
+      public boolean hasExpectedPathSize()
+      {
+         return expectedPathSize > 0;
+      }
+
+      public int getExpectedPathSize()
+      {
+         return expectedPathSize;
       }
 
       public Point3D getStart()
@@ -361,14 +435,5 @@ public class VisibilityGraphsIOTools
          return planarRegionsList;
       }
 
-      public boolean hasExpectedPathSize()
-      {
-         return expectedPathSize > 0;
-      }
-
-      public int getExpectedPathSize()
-      {
-         return expectedPathSize;
-      }
    }
 }

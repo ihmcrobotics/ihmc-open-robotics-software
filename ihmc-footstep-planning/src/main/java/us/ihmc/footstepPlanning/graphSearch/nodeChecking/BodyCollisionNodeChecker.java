@@ -1,11 +1,14 @@
 package us.ihmc.footstepPlanning.graphSearch.nodeChecking;
 
+import java.util.HashMap;
+import java.util.List;
+
 import us.ihmc.commons.MathTools;
-import us.ihmc.commons.PrintTools;
-import us.ihmc.euclid.geometry.Box3D;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
+import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.shape.Box3D;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
 import us.ihmc.euclid.tuple3D.Point3D;
@@ -13,7 +16,6 @@ import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.FootstepNodeSnapper;
 import us.ihmc.footstepPlanning.graphSearch.graph.FootstepNode;
-import us.ihmc.footstepPlanning.graphSearch.listeners.BipedalFootstepPlannerListener;
 import us.ihmc.footstepPlanning.graphSearch.graph.visualization.BipedalFootstepPlannerNodeRejectionReason;
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParameters;
 import us.ihmc.geometry.polytope.ConvexPolytope;
@@ -24,9 +26,6 @@ import us.ihmc.robotics.geometry.PlanarRegion;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 import us.ihmc.robotics.referenceFrames.TranslationReferenceFrame;
-
-import java.util.HashMap;
-import java.util.List;
 
 public class BodyCollisionNodeChecker extends FootstepNodeChecker
 {
@@ -45,6 +44,7 @@ public class BodyCollisionNodeChecker extends FootstepNodeChecker
    private final Vector3D bodyBoxDimensions = new Vector3D();
 
    private final FramePoint3D tempPoint = new FramePoint3D();
+   private final FrameVector3D tempVector = new FrameVector3D();
    private final RigidBodyTransform tempTransform = new RigidBodyTransform();
 
    public BodyCollisionNodeChecker(FootstepPlannerParameters parameters, FootstepNodeSnapper snapper)
@@ -125,11 +125,8 @@ public class BodyCollisionNodeChecker extends FootstepNodeChecker
       if (planarRegionList.size() == 0)
          return true;
 
-//      PrintTools.info("Body dimensions = (" + parameters.getBodyBoxDepth() + ", " + parameters.getBodyBoxWidth() + ", " + parameters.getBodyBoxHeight() + ")");
-      
-      bodyCollisionBox.setSize(parameters.getBodyBoxDepth(), parameters.getBodyBoxWidth(), parameters.getBodyBoxHeight());
-      if (!MathTools.epsilonEquals(1.0, scaleFactor, 1e-5))
-         bodyCollisionBox.scale(scaleFactor);
+      updateBodyCollisionBox(node, previousNode, scaleFactor);
+
       bodyBoxDimensions.set(parameters.getBodyBoxBaseX(), parameters.getBodyBoxBaseY(), parameters.getBodyBoxBaseZ() + 0.5 * parameters.getBodyBoxHeight());
       bodyCollisionFrame.updateTranslation(bodyBoxDimensions);
       bodyCollisionPolytope.getVertices().clear();
@@ -150,6 +147,19 @@ public class BodyCollisionNodeChecker extends FootstepNodeChecker
       }
 
       return true;
+   }
+
+   private void updateBodyCollisionBox(FootstepNode node, FootstepNode previousNode, double scaleFactor)
+   {
+      tempVector.setIncludingFrame(worldFrame, node.getX(), node.getY(), 0.0);
+      tempVector.sub(previousNode.getX(), previousNode.getY(), 0.0);
+      tempVector.changeFrame(midStanceFrame);
+
+      double stepTranslationMidFootFrameX = parameters.getStepTranslationBoundingBoxScaleFactor() * Math.abs(tempVector.getX());
+      bodyCollisionBox.setSize(parameters.getBodyBoxDepth() + stepTranslationMidFootFrameX, parameters.getBodyBoxWidth(), parameters.getBodyBoxHeight());
+
+      if (!MathTools.epsilonEquals(1.0, scaleFactor, 1e-5))
+         bodyCollisionBox.scale(scaleFactor);
    }
 
    private final FramePose3D midPose = new FramePose3D();

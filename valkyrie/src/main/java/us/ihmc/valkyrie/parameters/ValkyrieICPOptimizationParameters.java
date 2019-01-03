@@ -72,12 +72,15 @@ public class ValkyrieICPOptimizationParameters extends ICPOptimizationParameters
    public ICPControlGainsReadOnly getICPFeedbackGains()
    {
       ICPControlGains gains = new ICPControlGains();
-      gains.setKpOrthogonalToMotion(1.5);
+      gains.setKpOrthogonalToMotion(1.9);
       gains.setKpParallelToMotion(2.0);
 
       gains.setIntegralLeakRatio(0.97);
       gains.setMaxIntegralError(0.05);
       gains.setKi(1.0);
+
+      if (target == RobotTarget.REAL_ROBOT)
+         gains.setFeedbackPartMaxRate(1.5);
 
       return gains;
    }

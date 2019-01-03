@@ -2,6 +2,7 @@ package us.ihmc.footstepPlanning.ui.controllers;
 
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
+import javafx.scene.control.SpinnerValueFactory.DoubleSpinnerValueFactory;
 import us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI;
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParameters;
 import us.ihmc.footstepPlanning.ui.components.FootstepPlannerParametersProperty;
@@ -31,6 +32,8 @@ public class BodyCollisionCheckingUIController
    private Spinner<Double> bodyBoxBaseY;
    @FXML
    private Spinner<Double> bodyBoxBaseZ;
+   @FXML
+   private Spinner<Double> stepBBScale;
 
 
    public void attachMessager(JavaFXMessager messager)
@@ -47,6 +50,7 @@ public class BodyCollisionCheckingUIController
       bodyBoxBaseX.setValueFactory(new SpinnerValueFactory.DoubleSpinnerValueFactory(-0.5, 0.5, 0.0, 0.05));
       bodyBoxBaseY.setValueFactory(new SpinnerValueFactory.DoubleSpinnerValueFactory(-0.5, 0.5, 0.0, 0.05));
       bodyBoxBaseZ.setValueFactory(new SpinnerValueFactory.DoubleSpinnerValueFactory(0.0, 1.5, 0.0, 0.1));
+      stepBBScale.setValueFactory(new DoubleSpinnerValueFactory(0.0, 1.0, 0.0, 0.1));
    }
 
    public void bindControls()
@@ -61,6 +65,7 @@ public class BodyCollisionCheckingUIController
       parametersProperty.bidirectionalBindBodyBoxBaseX(bodyBoxBaseX.getValueFactory().valueProperty());
       parametersProperty.bidirectionalBindBodyBoxBaseY(bodyBoxBaseY.getValueFactory().valueProperty());
       parametersProperty.bidirectionalBindBodyBoxBaseZ(bodyBoxBaseZ.getValueFactory().valueProperty());
+      parametersProperty.bidirectionalBindStepTranslationBoundingBoxScaleFactor(stepBBScale.getValueFactory().valueProperty());
 
       messager.bindBidirectional(FootstepPlannerMessagerAPI.PlannerParametersTopic, parametersProperty, createConverter(), true);
    }

@@ -1,8 +1,8 @@
 #ifndef __controller_msgs__msg__BodyPathPlanStatisticsMessage__idl__
 #define __controller_msgs__msg__BodyPathPlanStatisticsMessage__idl__
 
-#include "controller_msgs/msg/./NavigableRegionMessage_.idl"
 #include "controller_msgs/msg/./VisibilityMapMessage_.idl"
+#include "controller_msgs/msg/./VisibilityMapWithNavigableRegionMessage_.idl"
 module controller_msgs
 {
   module msg
@@ -25,7 +25,7 @@ module controller_msgs
         unsigned long sequence_id;
         @defaultValue(value=-1)
         long plan_id;
-        sequence<controller_msgs::msg::dds::NavigableRegionMessage, 25> navigable_regions;
+        sequence<controller_msgs::msg::dds::VisibilityMapWithNavigableRegionMessage, 25> navigable_regions;
         controller_msgs::msg::dds::VisibilityMapMessage inter_regions_map;
         controller_msgs::msg::dds::VisibilityMapMessage start_visibility_map;
         controller_msgs::msg::dds::VisibilityMapMessage goal_visibility_map;

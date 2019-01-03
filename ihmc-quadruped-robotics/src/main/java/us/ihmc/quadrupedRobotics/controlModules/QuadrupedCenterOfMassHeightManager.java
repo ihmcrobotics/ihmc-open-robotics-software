@@ -267,7 +267,6 @@ public class QuadrupedCenterOfMassHeightManager
       desiredVelocity.changeFrame(worldFrame);
 
 
-
       // compute desired height in upcoming support frame
       tempDesiredPosition.changeFrame(upcomingGroundPlaneEstimator.getGroundPlaneFrame());
       tempDesiredPosition.setZ(desiredZHeight);
@@ -308,6 +307,8 @@ public class QuadrupedCenterOfMassHeightManager
       desiredVelocityInWorld.set(blendedHeightVelocity);
 
       computeCurrentState();
+
+      controllerToolbox.getFallDetector().setHeightForFallDetection(desiredHeightInWorld.getDoubleValue(), currentHeightInWorld.getDoubleValue());
    }
 
    public double getDesiredHeight(ReferenceFrame referenceFrame)
