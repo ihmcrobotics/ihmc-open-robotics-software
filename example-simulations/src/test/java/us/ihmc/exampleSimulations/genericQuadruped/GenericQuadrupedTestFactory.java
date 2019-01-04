@@ -73,6 +73,7 @@ public class GenericQuadrupedTestFactory implements QuadrupedTestFactory
    private final OptionalFactoryField<SimulationConstructionSetParameters> scsParameters = new OptionalFactoryField<>("scsParameters");
 
    private FullQuadrupedRobotModel fullRobotModel;
+   private QuadrupedNetworkProcessor networkProcessor;
    private RemoteQuadrupedTeleopManager stepTeleopManager;
    private YoGraphicsListRegistry graphicsListRegistry;
    private String robotName;
@@ -181,9 +182,8 @@ public class GenericQuadrupedTestFactory implements QuadrupedTestFactory
          Ros2Node ros2Node = ROS2Tools.createRos2Node(PubSubImplementation.INTRAPROCESS, "quadruped_teleop_manager");
 
          graphicsListRegistry = new YoGraphicsListRegistry();
-         QuadrupedNetworkProcessor networkProcessor = new GenericQuadrupedNetworkProcessor(modelFactory, physicalProperties.getNominalBodyHeight(),
-                                                                                           xGaitSettings, new GenericQuadrupedPointFootSnapperParameters(),
-                                                                                           PubSubImplementation.INTRAPROCESS);
+         networkProcessor = new GenericQuadrupedNetworkProcessor(modelFactory, physicalProperties.getNominalBodyHeight(), xGaitSettings,
+                                                                 new GenericQuadrupedPointFootSnapperParameters(), PubSubImplementation.INTRAPROCESS);
          stepTeleopManager = new RemoteQuadrupedTeleopManager(robotName, ros2Node, networkProcessor, xGaitSettings, teleopRegistry);
 
          new DefaultParameterReader().readParametersInRegistry(teleopRegistry);
@@ -288,6 +288,7 @@ public class GenericQuadrupedTestFactory implements QuadrupedTestFactory
    @Override
    public void close()
    {
+      networkProcessor.close();
       simulationFactory.close();
    }
 }

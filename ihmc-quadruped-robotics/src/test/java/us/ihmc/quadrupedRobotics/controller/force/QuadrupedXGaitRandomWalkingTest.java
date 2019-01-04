@@ -83,6 +83,8 @@ public abstract class QuadrupedXGaitRandomWalkingTest implements QuadrupedMultiR
       Random random = new Random(1447L);
       double runningDuration = variables.getYoTime().getDoubleValue();
 
+      stepTeleopManager.requestXGait();
+
       for (int i = 0; i < 10; i++)
       {
          runningDuration += randomSimulationDuration(random);
@@ -102,6 +104,7 @@ public abstract class QuadrupedXGaitRandomWalkingTest implements QuadrupedMultiR
       Random random = new Random(1547L);
       double runningDuration = variables.getYoTime().getDoubleValue();
 
+      stepTeleopManager.requestXGait();
       for (int i = 0; i < 10; i++)
       {
          runningDuration += randomSimulationDuration(random);
