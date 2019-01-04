@@ -1,10 +1,14 @@
 package us.ihmc.quadrupedPlanning.bodyPath;
 
 import controller_msgs.msg.dds.QuadrupedBodyPathPlanMessage;
+import controller_msgs.msg.dds.QuadrupedFootstepStatusMessage;
+import us.ihmc.communication.ROS2Tools;
 import us.ihmc.euclid.referenceFrame.FramePose2D;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.quadrupedBasics.referenceFrames.QuadrupedReferenceFrames;
+import us.ihmc.quadrupedCommunication.QuadrupedControllerAPIDefinition;
 import us.ihmc.quadrupedPlanning.QuadrupedXGaitSettingsReadOnly;
+import us.ihmc.robotics.robotSide.RobotQuadrant;
 import us.ihmc.ros2.Ros2Node;
 import us.ihmc.yoVariables.providers.DoubleProvider;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
@@ -20,11 +24,12 @@ public class QuadrupedBodyPathMultiplexer implements QuadrupedPlanarBodyPathProv
 
    private YoBoolean usingJoystickBasedPath = new YoBoolean("usingJoystickBasedPath", registry);
 
-   public QuadrupedBodyPathMultiplexer(String robotName, QuadrupedReferenceFrames referenceFrames, YoDouble timestamp, QuadrupedXGaitSettingsReadOnly xGaitSettings,
-                                       Ros2Node ros2Node, DoubleProvider firstStepDelay, YoGraphicsListRegistry graphicsListRegistry, YoVariableRegistry parentRegistry)
+   public QuadrupedBodyPathMultiplexer(QuadrupedReferenceFrames referenceFrames, YoDouble timestamp,
+                                       QuadrupedXGaitSettingsReadOnly xGaitSettings, DoubleProvider firstStepDelay,
+                                       YoGraphicsListRegistry graphicsListRegistry, YoVariableRegistry parentRegistry)
    {
-      waypointBasedPath = new QuadrupedWaypointBasedBodyPathProvider(robotName, referenceFrames, ros2Node, timestamp, graphicsListRegistry, registry);
-      joystickBasedPath = new QuadrupedConstantVelocityBodyPathProvider(robotName, referenceFrames, xGaitSettings, firstStepDelay, timestamp, ros2Node, registry);
+      waypointBasedPath = new QuadrupedWaypointBasedBodyPathProvider(referenceFrames, timestamp, graphicsListRegistry, registry);
+      joystickBasedPath = new QuadrupedConstantVelocityBodyPathProvider(referenceFrames, xGaitSettings, firstStepDelay, timestamp, registry);
       joystickBasedPath.setShiftPlanBasedOnStepAdjustment(true);
 
       parentRegistry.addChild(registry);
@@ -40,9 +45,9 @@ public class QuadrupedBodyPathMultiplexer implements QuadrupedPlanarBodyPathProv
    @Override
    public void getPlanarPose(double time, FramePose2D poseToPack)
    {
-      if(usingJoystickBasedPath.getBooleanValue())
+      if (usingJoystickBasedPath.getBooleanValue())
       {
-         if(waypointBasedPath.bodyPathIsAvailable())
+         if (waypointBasedPath.bodyPathIsAvailable())
          {
             waypointBasedPath.initialize();
             waypointBasedPath.getPlanarPose(time, poseToPack);
@@ -55,7 +60,7 @@ public class QuadrupedBodyPathMultiplexer implements QuadrupedPlanarBodyPathProv
       }
       else
       {
-         if(waypointBasedPath.isDone())
+         if (waypointBasedPath.isDone())
          {
             joystickBasedPath.initialize();
             joystickBasedPath.getPlanarPose(time, poseToPack);
@@ -67,6 +72,17 @@ public class QuadrupedBodyPathMultiplexer implements QuadrupedPlanarBodyPathProv
          }
       }
    }
+
+   public void startedFootstep(RobotQuadrant robotQuadrant, QuadrupedFootstepStatusMessage message)
+   {
+      joystickBasedPath.startedFootstep(robotQuadrant, message);
+   }
+
+   public void completedFootstep(RobotQuadrant robotQuadrant, QuadrupedFootstepStatusMessage message)
+   {
+      joystickBasedPath.completedFootstep(robotQuadrant, message);
+   }
+
 
    public void setPlanarVelocityForJoystickPath(double desiredVelocityX, double desiredVelocityY, double desiredVelocityYaw)
    {

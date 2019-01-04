@@ -26,7 +26,7 @@ import us.ihmc.euclid.referenceFrame.tools.ReferenceFrameTools;
 import us.ihmc.exampleSimulations.genericQuadruped.GenericQuadrupedTestFactory;
 import us.ihmc.graphicsDescription.MeshDataGenerator;
 import us.ihmc.jMonkeyEngineToolkit.jme.JMEGraphicsObject;
-import us.ihmc.quadrupedPlanning.input.QuadrupedTeleopManager;
+import us.ihmc.quadrupedPlanning.input.RemoteQuadrupedTeleopManager;
 import us.ihmc.quadrupedRobotics.QuadrupedForceTestYoVariables;
 import us.ihmc.quadrupedRobotics.QuadrupedTestBehaviors;
 import us.ihmc.quadrupedRobotics.QuadrupedTestFactory;
@@ -45,14 +45,14 @@ public class GenericQuadrupedAllocationTest
    private QuadrupedTestFactory quadrupedTestFactory;
    private GoalOrientedTestConductor conductor;
    private QuadrupedForceTestYoVariables variables;
-   private QuadrupedTeleopManager stepTeleopManager;
+   private RemoteQuadrupedTeleopManager stepTeleopManager;
    private AllocationProfiler allocationProfiler = new AllocationProfiler();
 
    @Before
    public void before() throws SimulationExceededMaximumTimeException
    {
       MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " before test.");
-      
+
       AllocationProfiler.checkInstrumentation();
 
       allocationProfiler.includeAllocationsInsideClass(QuadrupedControllerManager.class.getName());
@@ -76,7 +76,7 @@ public class GenericQuadrupedAllocationTest
       // Ignore the following methods as they are related to printouts.
       allocationProfiler.excludeAllocationsInsideMethod(Throwable.class.getName() + ".printStackTrace");
       allocationProfiler.excludeAllocationsInsideMethod(PrintTools.class.getName() + ".print");
-      
+
       setup();
    }
 
@@ -103,7 +103,7 @@ public class GenericQuadrupedAllocationTest
          quadrupedTestFactory.setUseNetworking(true);
          conductor = quadrupedTestFactory.createTestConductor();
          variables = new QuadrupedForceTestYoVariables(conductor.getScs());
-         stepTeleopManager = quadrupedTestFactory.getStepTeleopManager();
+         stepTeleopManager = quadrupedTestFactory.getRemoteStepTeleopManager();
       }
       catch (IOException e)
       {
@@ -131,7 +131,7 @@ public class GenericQuadrupedAllocationTest
    {
       QuadrupedTestBehaviors.readyXGait(conductor, variables, stepTeleopManager);
 
-      stepTeleopManager.getXGaitSettings().setEndPhaseShift(180);
+      stepTeleopManager.setEndPhaseShift(180);
 
       double walkTime = 5.0;
       double walkSpeed = 0.25;
