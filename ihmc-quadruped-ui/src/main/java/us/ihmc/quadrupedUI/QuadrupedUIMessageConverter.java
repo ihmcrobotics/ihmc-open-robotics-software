@@ -33,6 +33,7 @@ public class QuadrupedUIMessageConverter
    private IHMCRealtimeROS2Publisher<ToolboxStateMessage> enableJoystickPublisher;
    private IHMCRealtimeROS2Publisher<QuadrupedXGaitSettingsPacket> stepTeleopXGaitSettingsPublisher;
    private IHMCRealtimeROS2Publisher<QuadrupedXGaitSettingsPacket> xboxXGaitSettingsPublisher;
+   private IHMCRealtimeROS2Publisher<QuadrupedTimedStepListMessage> stepListMessagePublisher;
 
    public QuadrupedUIMessageConverter(RealtimeRos2Node ros2Node, Messager messager, String robotName)
    {
@@ -77,6 +78,7 @@ public class QuadrupedUIMessageConverter
                                                                                                                                        ROS2Tools.ROS2TopicQualifier.INPUT));
       xboxXGaitSettingsPublisher = ROS2Tools.createPublisher(ros2Node, QuadrupedXGaitSettingsPacket.class, getTopicNameGenerator(robotName, ROS2Tools.XBOX_TELEOP_TOOLBOX,
                                                                                                                                        ROS2Tools.ROS2TopicQualifier.INPUT));
+      stepListMessagePublisher = ROS2Tools.createPublisher(ros2Node, QuadrupedTimedStepListMessage.class, controllerSubGenerator);
 
       messager.registerTopicListener(QuadrupedUIMessagerAPI.DesiredControllerNameTopic, this::publishDesiredHighLevelControllerState);
       messager.registerTopicListener(QuadrupedUIMessagerAPI.DesiredBodyHeightTopic, this::publishDesiredBodyHeight);
@@ -86,6 +88,7 @@ public class QuadrupedUIMessageConverter
       messager.registerTopicListener(QuadrupedUIMessagerAPI.EnableHeightTeleopTopic, this::publishEnableHeightTeleop);
       messager.registerTopicListener(QuadrupedUIMessagerAPI.EnableJoystickTopic, this::publishEnableJoystick);
       messager.registerTopicListener(QuadrupedUIMessagerAPI.XGaitSettingsTopic, this::publishQuadrupedXGaitSettings);
+      messager.registerTopicListener(QuadrupedUIMessagerAPI.ManualStepsListMessageTopic, this::publishStepListMessage);
    }
 
    private void processRobotConfigurationData(RobotConfigurationData robotConfigurationData)
@@ -157,6 +160,11 @@ public class QuadrupedUIMessageConverter
 
       stepTeleopXGaitSettingsPublisher.publish(packet);
       xboxXGaitSettingsPublisher.publish(packet);
+   }
+
+   public void publishStepListMessage(QuadrupedTimedStepListMessage stepListMessage)
+   {
+      stepListMessagePublisher.publish(stepListMessage);
    }
 
    public static QuadrupedUIMessageConverter createConverter(Messager messager, String robotName, DomainFactory.PubSubImplementation implementation)
