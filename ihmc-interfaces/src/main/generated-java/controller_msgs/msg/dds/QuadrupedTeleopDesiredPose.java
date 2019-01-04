@@ -6,15 +6,18 @@ import us.ihmc.euclid.interfaces.EpsilonComparable;
 import java.util.function.Supplier;
 import us.ihmc.pubsub.TopicDataType;
 
+/**
+       * This message is part of the IHMC quadruped controller API.
+       * This message sends a desired body pose to the body teleop module.
+       */
 public class QuadrupedTeleopDesiredPose extends Packet<QuadrupedTeleopDesiredPose> implements Settable<QuadrupedTeleopDesiredPose>, EpsilonComparable<QuadrupedTeleopDesiredPose>
 {
    /**
-    * Unique ID used to identify this message, should preferably be consecutively increasing.
-    */
+            * Unique ID used to identify this message, should preferably be consecutively increasing.
+            */
    public long sequence_id_;
    public us.ihmc.euclid.geometry.Pose3D pose_;
    public double pose_shift_time_;
-
 
    public QuadrupedTeleopDesiredPose()
    {
@@ -32,25 +35,25 @@ public class QuadrupedTeleopDesiredPose extends Packet<QuadrupedTeleopDesiredPos
       sequence_id_ = other.sequence_id_;
 
       geometry_msgs.msg.dds.PosePubSubType.staticCopy(other.pose_, pose_);
-
       pose_shift_time_ = other.pose_shift_time_;
 
    }
 
    /**
-    * Unique ID used to identify this message, should preferably be consecutively increasing.
-    */
+            * Unique ID used to identify this message, should preferably be consecutively increasing.
+            */
    public void setSequenceId(long sequence_id)
    {
       sequence_id_ = sequence_id;
    }
    /**
-    * Unique ID used to identify this message, should preferably be consecutively increasing.
-    */
+            * Unique ID used to identify this message, should preferably be consecutively increasing.
+            */
    public long getSequenceId()
    {
       return sequence_id_;
    }
+
 
    public us.ihmc.euclid.geometry.Pose3D getPose()
    {
@@ -87,7 +90,6 @@ public class QuadrupedTeleopDesiredPose extends Packet<QuadrupedTeleopDesiredPos
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.sequence_id_, other.sequence_id_, epsilon)) return false;
 
       if (!this.pose_.epsilonEquals(other.pose_, epsilon)) return false;
-
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.pose_shift_time_, other.pose_shift_time_, epsilon)) return false;
 
 
@@ -106,7 +108,6 @@ public class QuadrupedTeleopDesiredPose extends Packet<QuadrupedTeleopDesiredPos
       if(this.sequence_id_ != otherMyClass.sequence_id_) return false;
 
       if (!this.pose_.equals(otherMyClass.pose_)) return false;
-
       if(this.pose_shift_time_ != otherMyClass.pose_shift_time_) return false;
 
 
@@ -124,8 +125,7 @@ public class QuadrupedTeleopDesiredPose extends Packet<QuadrupedTeleopDesiredPos
       builder.append("pose=");
       builder.append(this.pose_);      builder.append(", ");
       builder.append("pose_shift_time=");
-      builder.append(this.pose_shift_time_);      builder.append(", ");
-
+      builder.append(this.pose_shift_time_);
       builder.append("}");
       return builder.toString();
    }

@@ -1,13 +1,13 @@
 package controller_msgs.msg.dds;
 
 /**
- *
- * Topic data type of the struct "QuadrupedStepMessage" defined in "QuadrupedStepMessage_.idl". Use this class to provide the TopicDataType to a Participant.
- *
- * This file was automatically generated from QuadrupedStepMessage_.idl by us.ihmc.idl.generator.IDLGenerator.
- * Do not update this file directly, edit QuadrupedStepMessage_.idl instead.
- *
- */
+* 
+* Topic data type of the struct "QuadrupedTeleopDesiredPose" defined in "QuadrupedTeleopDesiredPose_.idl". Use this class to provide the TopicDataType to a Participant. 
+*
+* This file was automatically generated from QuadrupedTeleopDesiredPose_.idl by us.ihmc.idl.generator.IDLGenerator. 
+* Do not update this file directly, edit QuadrupedTeleopDesiredPose_.idl instead.
+*
+*/
 public class QuadrupedTeleopDesiredPosePubSubType implements us.ihmc.pubsub.TopicDataType<controller_msgs.msg.dds.QuadrupedTeleopDesiredPose>
 {
    public static final java.lang.String name = "controller_msgs::msg::dds_::QuadrupedTeleopDesiredPose_";
@@ -42,7 +42,7 @@ public class QuadrupedTeleopDesiredPosePubSubType implements us.ihmc.pubsub.Topi
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 
-      current_alignment += geometry_msgs.msg.dds.PointPubSubType.getMaxCdrSerializedSize(current_alignment);
+      current_alignment += geometry_msgs.msg.dds.PosePubSubType.getMaxCdrSerializedSize(current_alignment);
 
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
@@ -61,6 +61,7 @@ public class QuadrupedTeleopDesiredPosePubSubType implements us.ihmc.pubsub.Topi
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 
+
       current_alignment += geometry_msgs.msg.dds.PosePubSubType.getCdrSerializedSize(data.getPose(), current_alignment);
 
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
@@ -75,20 +76,17 @@ public class QuadrupedTeleopDesiredPosePubSubType implements us.ihmc.pubsub.Topi
       cdr.write_type_4(data.getSequenceId());
 
       geometry_msgs.msg.dds.PosePubSubType.write(data.getPose(), cdr);
-
       cdr.write_type_6(data.getPoseShiftTime());
-
 
    }
 
    public static void read(controller_msgs.msg.dds.QuadrupedTeleopDesiredPose data, us.ihmc.idl.CDR cdr)
    {
       data.setSequenceId(cdr.read_type_4());
-
-      geometry_msgs.msg.dds.PosePubSubType.read(data.getPose(), cdr);
-
+      	
+      geometry_msgs.msg.dds.PosePubSubType.read(data.getPose(), cdr);	
       data.setPoseShiftTime(cdr.read_type_6());
-
+      	
 
    }
 
@@ -97,6 +95,7 @@ public class QuadrupedTeleopDesiredPosePubSubType implements us.ihmc.pubsub.Topi
    {
       ser.write_type_4("sequence_id", data.getSequenceId());
       ser.write_type_a("pose", new geometry_msgs.msg.dds.PosePubSubType(), data.getPose());
+
       ser.write_type_6("pose_shift_time", data.getPoseShiftTime());
    }
 
@@ -105,6 +104,7 @@ public class QuadrupedTeleopDesiredPosePubSubType implements us.ihmc.pubsub.Topi
    {
       data.setSequenceId(ser.read_type_4("sequence_id"));
       ser.read_type_a("pose", new geometry_msgs.msg.dds.PosePubSubType(), data.getPose());
+
       data.setPoseShiftTime(ser.read_type_6("pose_shift_time"));
    }
 
@@ -129,7 +129,7 @@ public class QuadrupedTeleopDesiredPosePubSubType implements us.ihmc.pubsub.Topi
    {
       return name;
    }
-
+   
    public void serialize(controller_msgs.msg.dds.QuadrupedTeleopDesiredPose data, us.ihmc.idl.CDR cdr)
    {
       write(data, cdr);
@@ -139,7 +139,7 @@ public class QuadrupedTeleopDesiredPosePubSubType implements us.ihmc.pubsub.Topi
    {
       read(data, cdr);
    }
-
+   
    public void copy(controller_msgs.msg.dds.QuadrupedTeleopDesiredPose src, controller_msgs.msg.dds.QuadrupedTeleopDesiredPose dest)
    {
       staticCopy(src, dest);

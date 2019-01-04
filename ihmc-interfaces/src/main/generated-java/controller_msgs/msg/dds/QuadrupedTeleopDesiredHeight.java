@@ -6,11 +6,15 @@ import us.ihmc.euclid.interfaces.EpsilonComparable;
 import java.util.function.Supplier;
 import us.ihmc.pubsub.TopicDataType;
 
+/**
+       * This message is part of the IHMC quadruped controller API.
+       * This message sends a desired body height to the height teleop module.
+       */
 public class QuadrupedTeleopDesiredHeight extends Packet<QuadrupedTeleopDesiredHeight> implements Settable<QuadrupedTeleopDesiredHeight>, EpsilonComparable<QuadrupedTeleopDesiredHeight>
 {
    /**
-    * Unique ID used to identify this message, should preferably be consecutively increasing.
-    */
+            * Unique ID used to identify this message, should preferably be consecutively increasing.
+            */
    public long sequence_id_;
    public double desired_height_;
 
@@ -33,15 +37,15 @@ public class QuadrupedTeleopDesiredHeight extends Packet<QuadrupedTeleopDesiredH
    }
 
    /**
-    * Unique ID used to identify this message, should preferably be consecutively increasing.
-    */
+            * Unique ID used to identify this message, should preferably be consecutively increasing.
+            */
    public void setSequenceId(long sequence_id)
    {
       sequence_id_ = sequence_id;
    }
    /**
-    * Unique ID used to identify this message, should preferably be consecutively increasing.
-    */
+            * Unique ID used to identify this message, should preferably be consecutively increasing.
+            */
    public long getSequenceId()
    {
       return sequence_id_;
@@ -108,7 +112,7 @@ public class QuadrupedTeleopDesiredHeight extends Packet<QuadrupedTeleopDesiredH
       builder.append("sequence_id=");
       builder.append(this.sequence_id_);      builder.append(", ");
       builder.append("desired_height=");
-      builder.append(this.desired_height_);      builder.append(", ");
+      builder.append(this.desired_height_);
       builder.append("}");
       return builder.toString();
    }

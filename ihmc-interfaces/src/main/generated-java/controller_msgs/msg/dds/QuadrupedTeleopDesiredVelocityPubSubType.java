@@ -1,13 +1,13 @@
 package controller_msgs.msg.dds;
 
 /**
- *
- * Topic data type of the struct "ReachingManifoldMessage" defined in "ReachingManifoldMessage_.idl". Use this class to provide the TopicDataType to a Participant.
- *
- * This file was automatically generated from ReachingManifoldMessage_.idl by us.ihmc.idl.generator.IDLGenerator.
- * Do not update this file directly, edit ReachingManifoldMessage_.idl instead.
- *
- */
+* 
+* Topic data type of the struct "QuadrupedTeleopDesiredVelocity" defined in "QuadrupedTeleopDesiredVelocity_.idl". Use this class to provide the TopicDataType to a Participant. 
+*
+* This file was automatically generated from QuadrupedTeleopDesiredVelocity_.idl by us.ihmc.idl.generator.IDLGenerator. 
+* Do not update this file directly, edit QuadrupedTeleopDesiredVelocity_.idl instead.
+*
+*/
 public class QuadrupedTeleopDesiredVelocityPubSubType implements us.ihmc.pubsub.TopicDataType<controller_msgs.msg.dds.QuadrupedTeleopDesiredVelocity>
 {
    public static final java.lang.String name = "controller_msgs::msg::dds_::QuadrupedTeleopDesiredVelocity_";
@@ -92,10 +92,13 @@ public class QuadrupedTeleopDesiredVelocityPubSubType implements us.ihmc.pubsub.
    public static void read(controller_msgs.msg.dds.QuadrupedTeleopDesiredVelocity data, us.ihmc.idl.CDR cdr)
    {
       data.setSequenceId(cdr.read_type_4());
-
+      	
       data.setDesiredXVelocity(cdr.read_type_6());
+      	
       data.setDesiredYVelocity(cdr.read_type_6());
+      	
       data.setDesiredYawVelocity(cdr.read_type_6());
+      	
 
    }
 
@@ -138,7 +141,7 @@ public class QuadrupedTeleopDesiredVelocityPubSubType implements us.ihmc.pubsub.
    {
       return name;
    }
-
+   
    public void serialize(controller_msgs.msg.dds.QuadrupedTeleopDesiredVelocity data, us.ihmc.idl.CDR cdr)
    {
       write(data, cdr);
@@ -148,7 +151,7 @@ public class QuadrupedTeleopDesiredVelocityPubSubType implements us.ihmc.pubsub.
    {
       read(data, cdr);
    }
-
+   
    public void copy(controller_msgs.msg.dds.QuadrupedTeleopDesiredVelocity src, controller_msgs.msg.dds.QuadrupedTeleopDesiredVelocity dest)
    {
       staticCopy(src, dest);

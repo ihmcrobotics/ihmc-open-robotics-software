@@ -1,17 +1,20 @@
 package controller_msgs.msg.dds;
 
 import us.ihmc.communication.packets.Packet;
-import us.ihmc.euclid.interfaces.EpsilonComparable;
 import us.ihmc.euclid.interfaces.Settable;
+import us.ihmc.euclid.interfaces.EpsilonComparable;
+import java.util.function.Supplier;
 import us.ihmc.pubsub.TopicDataType;
 
-import java.util.function.Supplier;
-
+/**
+       * This message is part of the IHMC quadruped controller API.
+       * This message sends the x gait settings used for determining gait.
+       */
 public class QuadrupedXGaitSettingsPacket extends Packet<QuadrupedXGaitSettingsPacket> implements Settable<QuadrupedXGaitSettingsPacket>, EpsilonComparable<QuadrupedXGaitSettingsPacket>
 {
    /**
-    * Unique ID used to identify this message, should preferably be consecutively increasing.
-    */
+            * Unique ID used to identify this message, should preferably be consecutively increasing.
+            */
    public long sequence_id_;
    public double stance_length_ = -1.0;
    public double stance_width_ = -1.0;
@@ -49,15 +52,15 @@ public class QuadrupedXGaitSettingsPacket extends Packet<QuadrupedXGaitSettingsP
    }
 
    /**
-    * Unique ID used to identify this message, should preferably be consecutively increasing.
-    */
+            * Unique ID used to identify this message, should preferably be consecutively increasing.
+            */
    public void setSequenceId(long sequence_id)
    {
       sequence_id_ = sequence_id;
    }
    /**
-    * Unique ID used to identify this message, should preferably be consecutively increasing.
-    */
+            * Unique ID used to identify this message, should preferably be consecutively increasing.
+            */
    public long getSequenceId()
    {
       return sequence_id_;
@@ -181,7 +184,7 @@ public class QuadrupedXGaitSettingsPacket extends Packet<QuadrupedXGaitSettingsP
    }
 
    @Override
-   public String toString()
+   public java.lang.String toString()
    {
       StringBuilder builder = new StringBuilder();
 
@@ -199,7 +202,7 @@ public class QuadrupedXGaitSettingsPacket extends Packet<QuadrupedXGaitSettingsP
       builder.append("end_double_support_duration=");
       builder.append(this.end_double_support_duration_);      builder.append(", ");
       builder.append("end_phase_shift=");
-      builder.append(this.end_phase_shift_);      builder.append(", ");
+      builder.append(this.end_phase_shift_);
       builder.append("}");
       return builder.toString();
    }
