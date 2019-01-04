@@ -28,7 +28,7 @@ import java.util.concurrent.atomic.AtomicReference;
 
 import static us.ihmc.communication.ROS2Tools.getTopicNameGenerator;
 
-public class NewQuadrupedTeleopManager
+public class RemoteQuadrupedTeleopManager
 {
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
    private final YoQuadrupedXGaitSettings xGaitSettings;
@@ -58,8 +58,8 @@ public class NewQuadrupedTeleopManager
 
    private final QuadrupedNetworkProcessor networkProcessor;
 
-   public NewQuadrupedTeleopManager(String robotName, Ros2Node ros2Node, QuadrupedNetworkProcessor networkProcessor,
-                                    QuadrupedXGaitSettingsReadOnly defaultXGaitSettings, YoVariableRegistry parentRegistry)
+   public RemoteQuadrupedTeleopManager(String robotName, Ros2Node ros2Node, QuadrupedNetworkProcessor networkProcessor,
+                                       QuadrupedXGaitSettingsReadOnly defaultXGaitSettings, YoVariableRegistry parentRegistry)
    {
       this.ros2Node = ros2Node;
       this.xGaitSettings = new YoQuadrupedXGaitSettings(defaultXGaitSettings, registry);

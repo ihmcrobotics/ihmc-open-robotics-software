@@ -26,8 +26,7 @@ import us.ihmc.euclid.referenceFrame.tools.ReferenceFrameTools;
 import us.ihmc.exampleSimulations.genericQuadruped.GenericQuadrupedTestFactory;
 import us.ihmc.graphicsDescription.MeshDataGenerator;
 import us.ihmc.jMonkeyEngineToolkit.jme.JMEGraphicsObject;
-import us.ihmc.quadrupedPlanning.input.NewQuadrupedTeleopManager;
-import us.ihmc.quadrupedPlanning.input.QuadrupedTeleopManager;
+import us.ihmc.quadrupedPlanning.input.RemoteQuadrupedTeleopManager;
 import us.ihmc.quadrupedRobotics.QuadrupedForceTestYoVariables;
 import us.ihmc.quadrupedRobotics.QuadrupedTestBehaviors;
 import us.ihmc.quadrupedRobotics.QuadrupedTestFactory;
@@ -46,7 +45,7 @@ public class GenericQuadrupedAllocationTest
    private QuadrupedTestFactory quadrupedTestFactory;
    private GoalOrientedTestConductor conductor;
    private QuadrupedForceTestYoVariables variables;
-   private NewQuadrupedTeleopManager stepTeleopManager;
+   private RemoteQuadrupedTeleopManager stepTeleopManager;
    private AllocationProfiler allocationProfiler = new AllocationProfiler();
 
    @Before
@@ -104,7 +103,7 @@ public class GenericQuadrupedAllocationTest
          quadrupedTestFactory.setUseNetworking(true);
          conductor = quadrupedTestFactory.createTestConductor();
          variables = new QuadrupedForceTestYoVariables(conductor.getScs());
-         stepTeleopManager = quadrupedTestFactory.getNewStepTeleopManager();
+         stepTeleopManager = quadrupedTestFactory.getRemoteStepTeleopManager();
       }
       catch (IOException e)
       {

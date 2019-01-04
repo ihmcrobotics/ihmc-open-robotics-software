@@ -1,21 +1,13 @@
 package us.ihmc.quadrupedRobotics.controller.force;
 
-import controller_msgs.msg.dds.QuadrupedGroundPlaneMessage;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import us.ihmc.commonWalkingControlModules.pushRecovery.PushRobotTestConductor;
 import us.ihmc.commons.PrintTools;
-import us.ihmc.communication.ROS2Tools;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations;
 import us.ihmc.euclid.tuple3D.Vector3D;
-import us.ihmc.quadrupedCommunication.QuadrupedControllerAPIDefinition;
-import us.ihmc.quadrupedPlanning.YoQuadrupedXGaitSettings;
-import us.ihmc.quadrupedPlanning.footstepChooser.DefaultPointFootSnapperParameters;
-import us.ihmc.quadrupedPlanning.footstepChooser.PlanarGroundPointFootSnapper;
-import us.ihmc.quadrupedPlanning.footstepChooser.PlanarRegionBasedPointFootSnapper;
-import us.ihmc.quadrupedPlanning.input.NewQuadrupedTeleopManager;
-import us.ihmc.quadrupedPlanning.input.QuadrupedTeleopManager;
+import us.ihmc.quadrupedPlanning.input.RemoteQuadrupedTeleopManager;
 import us.ihmc.quadrupedRobotics.*;
 import us.ihmc.quadrupedRobotics.controller.QuadrupedControlMode;
 import us.ihmc.quadrupedRobotics.model.QuadrupedInitialOffsetAndYaw;
@@ -39,7 +31,7 @@ public abstract class Quadruped2018PIDemoTest implements QuadrupedMultiRobotTest
    private QuadrupedForceTestYoVariables variables;
    private PushRobotTestConductor pusher;
    private QuadrupedTestFactory quadrupedTestFactory;
-   private NewQuadrupedTeleopManager stepTeleopManager;
+   private RemoteQuadrupedTeleopManager stepTeleopManager;
 
    @Before
    public void setup()
@@ -60,7 +52,7 @@ public abstract class Quadruped2018PIDemoTest implements QuadrupedMultiRobotTest
          conductor = quadrupedTestFactory.createTestConductor();
          variables = new QuadrupedForceTestYoVariables(conductor.getScs());
          pusher = new PushRobotTestConductor(conductor.getScs(), "body");
-         stepTeleopManager = quadrupedTestFactory.getNewStepTeleopManager();
+         stepTeleopManager = quadrupedTestFactory.getRemoteStepTeleopManager();
       }
       catch (IOException e)
       {
@@ -329,7 +321,7 @@ public abstract class Quadruped2018PIDemoTest implements QuadrupedMultiRobotTest
 
       conductor = quadrupedTestFactory.createTestConductor();
       variables = new QuadrupedForceTestYoVariables(conductor.getScs());
-      stepTeleopManager = quadrupedTestFactory.getNewStepTeleopManager();
+      stepTeleopManager = quadrupedTestFactory.getRemoteStepTeleopManager();
 
       stepTeleopManager.setStanceLength(stanceLength);
       stepTeleopManager.setDesiredBodyHeight(bodyHeight);
@@ -388,7 +380,7 @@ public abstract class Quadruped2018PIDemoTest implements QuadrupedMultiRobotTest
 
       conductor = quadrupedTestFactory.createTestConductor();
       variables = new QuadrupedForceTestYoVariables(conductor.getScs());
-      stepTeleopManager = quadrupedTestFactory.getNewStepTeleopManager();
+      stepTeleopManager = quadrupedTestFactory.getRemoteStepTeleopManager();
 
       stepTeleopManager.setStanceLength(stanceLength);
       stepTeleopManager.setStepGroundClearance(stepGroundClearance);
@@ -437,7 +429,7 @@ public abstract class Quadruped2018PIDemoTest implements QuadrupedMultiRobotTest
 
       conductor = quadrupedTestFactory.createTestConductor();
       variables = new QuadrupedForceTestYoVariables(conductor.getScs());
-      stepTeleopManager = quadrupedTestFactory.getNewStepTeleopManager();
+      stepTeleopManager = quadrupedTestFactory.getRemoteStepTeleopManager();
 //      PlanarRegionBasedPointFootSnapper snapper = new PlanarRegionBasedPointFootSnapper(new DefaultPointFootSnapperParameters());
 //      snapper.setPlanarRegionsList(planarRegionsList);
 //      stepTeleopManager.setStepSnapper(snapper);
@@ -476,7 +468,7 @@ public abstract class Quadruped2018PIDemoTest implements QuadrupedMultiRobotTest
       quadrupedTestFactory.setUseNetworking(true);
       conductor = quadrupedTestFactory.createTestConductor();
       variables = new QuadrupedForceTestYoVariables(conductor.getScs());
-      stepTeleopManager = quadrupedTestFactory.getNewStepTeleopManager();
+      stepTeleopManager = quadrupedTestFactory.getRemoteStepTeleopManager();
 
       QuadrupedTestBehaviors.readyXGait(conductor, variables, stepTeleopManager);
 

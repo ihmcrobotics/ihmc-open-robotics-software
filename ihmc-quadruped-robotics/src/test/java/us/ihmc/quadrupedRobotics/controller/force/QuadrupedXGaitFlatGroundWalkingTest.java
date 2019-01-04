@@ -1,41 +1,26 @@
 package us.ihmc.quadrupedRobotics.controller.force;
 
-import controller_msgs.msg.dds.QuadrupedTeleopDesiredVelocity;
-import controller_msgs.msg.dds.QuadrupedXGaitSettingsPacket;
-import controller_msgs.msg.dds.ToolboxStateMessage;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
-import us.ihmc.communication.IHMCROS2Publisher;
-import us.ihmc.communication.ROS2Tools;
-import us.ihmc.communication.packets.MessageTools;
-import us.ihmc.communication.packets.ToolboxState;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
-import us.ihmc.pubsub.DomainFactory;
 import us.ihmc.quadrupedBasics.QuadrupedSteppingStateEnum;
-import us.ihmc.quadrupedCommunication.QuadrupedMessageTools;
-import us.ihmc.quadrupedPlanning.input.NewQuadrupedTeleopManager;
-import us.ihmc.quadrupedPlanning.input.QuadrupedTeleopManager;
-import us.ihmc.quadrupedPlanning.networkProcessing.QuadrupedNetworkProcessor;
+import us.ihmc.quadrupedPlanning.input.RemoteQuadrupedTeleopManager;
 import us.ihmc.quadrupedRobotics.*;
 import us.ihmc.quadrupedRobotics.controller.QuadrupedControlMode;
 import us.ihmc.quadrupedRobotics.simulation.QuadrupedGroundContactModelType;
 import us.ihmc.robotics.testing.YoVariableTestGoal;
-import us.ihmc.ros2.Ros2Node;
-import us.ihmc.ros2.Ros2Publisher;
 import us.ihmc.simulationConstructionSetTools.util.simulationrunner.GoalOrientedTestConductor;
 import us.ihmc.tools.MemoryTools;
 
 import java.io.IOException;
-
-import static us.ihmc.communication.ROS2Tools.getTopicNameGenerator;
 
 public abstract class QuadrupedXGaitFlatGroundWalkingTest implements QuadrupedMultiRobotTestInterface
 {
    private GoalOrientedTestConductor conductor;
    private QuadrupedForceTestYoVariables variables;
 //   private QuadrupedTeleopManager stepTeleopManager;
-   private NewQuadrupedTeleopManager newStepTeleopManager;
+   private RemoteQuadrupedTeleopManager newStepTeleopManager;
    private QuadrupedTestFactory quadrupedTestFactory;
 
    public abstract double getPacingWidth();
@@ -59,7 +44,7 @@ public abstract class QuadrupedXGaitFlatGroundWalkingTest implements QuadrupedMu
          conductor = quadrupedTestFactory.createTestConductor();
          variables = new QuadrupedForceTestYoVariables(conductor.getScs());
 //         stepTeleopManager = quadrupedTestFactory.getStepTeleopManager();
-         newStepTeleopManager = quadrupedTestFactory.getNewStepTeleopManager();
+         newStepTeleopManager = quadrupedTestFactory.getRemoteStepTeleopManager();
       }
       catch (IOException e)
       {

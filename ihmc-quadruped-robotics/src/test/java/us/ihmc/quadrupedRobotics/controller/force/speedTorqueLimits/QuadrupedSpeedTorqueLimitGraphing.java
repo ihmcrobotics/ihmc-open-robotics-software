@@ -3,8 +3,7 @@ package us.ihmc.quadrupedRobotics.controller.force.speedTorqueLimits;
 import us.ihmc.commonWalkingControlModules.pushRecovery.PushRobotTestConductor;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.euclid.tuple3D.Vector3D;
-import us.ihmc.quadrupedPlanning.input.NewQuadrupedTeleopManager;
-import us.ihmc.quadrupedPlanning.input.QuadrupedTeleopManager;
+import us.ihmc.quadrupedPlanning.input.RemoteQuadrupedTeleopManager;
 import us.ihmc.quadrupedRobotics.*;
 import us.ihmc.quadrupedRobotics.controller.QuadrupedControlMode;
 import us.ihmc.quadrupedRobotics.simulation.QuadrupedGroundContactModelType;
@@ -17,7 +16,7 @@ public abstract class QuadrupedSpeedTorqueLimitGraphing implements QuadrupedMult
 {
    private GoalOrientedTestConductor conductor;
    private QuadrupedForceTestYoVariables variables;
-   private NewQuadrupedTeleopManager stepTeleopManager;
+   private RemoteQuadrupedTeleopManager stepTeleopManager;
    private PushRobotTestConductor pusher;
 
    public SimulationConstructionSet createSimulation() throws IOException
@@ -30,7 +29,7 @@ public abstract class QuadrupedSpeedTorqueLimitGraphing implements QuadrupedMult
       testFactory.setUseNetworking(true);
       conductor = testFactory.createTestConductor();
       variables = new QuadrupedForceTestYoVariables(conductor.getScs());
-      stepTeleopManager = testFactory.getNewStepTeleopManager();
+      stepTeleopManager = testFactory.getRemoteStepTeleopManager();
       pusher = new PushRobotTestConductor(conductor.getScs(), "body");
 
       return conductor.getScs();

@@ -4,9 +4,7 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
-import us.ihmc.quadrupedPlanning.footstepChooser.HeightMapFootSnapper;
-import us.ihmc.quadrupedPlanning.input.NewQuadrupedTeleopManager;
-import us.ihmc.quadrupedPlanning.input.QuadrupedTeleopManager;
+import us.ihmc.quadrupedPlanning.input.RemoteQuadrupedTeleopManager;
 import us.ihmc.quadrupedRobotics.*;
 import us.ihmc.quadrupedRobotics.controller.QuadrupedControlMode;
 import us.ihmc.robotics.testing.YoVariableTestGoal;
@@ -22,7 +20,7 @@ public abstract class QuadrupedXGaitBumpyTerrainWalkingTest implements Quadruped
 {
    protected GoalOrientedTestConductor conductor;
    protected QuadrupedForceTestYoVariables variables;
-   private NewQuadrupedTeleopManager stepTeleopManager;
+   private RemoteQuadrupedTeleopManager stepTeleopManager;
    private QuadrupedTestFactory quadrupedTestFactory;
 
    @Before
@@ -77,7 +75,7 @@ public abstract class QuadrupedXGaitBumpyTerrainWalkingTest implements Quadruped
       quadrupedTestFactory.setUseNetworking(true);
       conductor = quadrupedTestFactory.createTestConductor();
       variables = new QuadrupedForceTestYoVariables(conductor.getScs());
-      stepTeleopManager = quadrupedTestFactory.getNewStepTeleopManager();
+      stepTeleopManager = quadrupedTestFactory.getRemoteStepTeleopManager();
    }
 
    @ContinuousIntegrationTest(estimatedDuration = 45.0)

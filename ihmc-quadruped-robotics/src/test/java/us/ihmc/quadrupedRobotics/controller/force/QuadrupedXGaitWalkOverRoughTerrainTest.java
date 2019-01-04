@@ -4,10 +4,7 @@ import org.junit.After;
 import org.junit.Before;
 import us.ihmc.quadrupedBasics.QuadrupedSteppingStateEnum;
 import us.ihmc.quadrupedPlanning.QuadrupedXGaitSettingsReadOnly;
-import us.ihmc.quadrupedPlanning.footstepChooser.DefaultPointFootSnapperParameters;
-import us.ihmc.quadrupedPlanning.footstepChooser.PlanarRegionBasedPointFootSnapper;
-import us.ihmc.quadrupedPlanning.input.NewQuadrupedTeleopManager;
-import us.ihmc.quadrupedPlanning.input.QuadrupedTeleopManager;
+import us.ihmc.quadrupedPlanning.input.RemoteQuadrupedTeleopManager;
 import us.ihmc.quadrupedRobotics.*;
 import us.ihmc.quadrupedRobotics.controller.QuadrupedControlMode;
 import us.ihmc.quadrupedRobotics.model.QuadrupedInitialOffsetAndYaw;
@@ -26,7 +23,7 @@ public abstract class QuadrupedXGaitWalkOverRoughTerrainTest implements Quadrupe
 {
    protected GoalOrientedTestConductor conductor;
    protected QuadrupedForceTestYoVariables variables;
-   private NewQuadrupedTeleopManager stepTeleopManager;
+   private RemoteQuadrupedTeleopManager stepTeleopManager;
    private QuadrupedTestFactory quadrupedTestFactory;
 
    public abstract QuadrupedXGaitSettingsReadOnly getXGaitSettings();
@@ -118,7 +115,7 @@ public abstract class QuadrupedXGaitWalkOverRoughTerrainTest implements Quadrupe
 
       conductor = quadrupedTestFactory.createTestConductor();
       variables = new QuadrupedForceTestYoVariables(conductor.getScs());
-      stepTeleopManager = quadrupedTestFactory.getNewStepTeleopManager();
+      stepTeleopManager = quadrupedTestFactory.getRemoteStepTeleopManager();
       stepTeleopManager.submitPlanarRegionsList(environment.getPlanarRegionsList());
       if(!Double.isNaN(desiredBodyHeight))
          stepTeleopManager.setDesiredBodyHeight(desiredBodyHeight);
