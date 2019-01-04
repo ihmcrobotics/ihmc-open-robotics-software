@@ -19,6 +19,7 @@ import us.ihmc.quadrupedPlanning.YoQuadrupedXGaitSettings;
 import us.ihmc.quadrupedRobotics.model.QuadrupedModelFactory;
 import us.ihmc.quadrupedRobotics.model.QuadrupedPhysicalProperties;
 import us.ihmc.quadrupedUI.uiControllers.MainTabController;
+import us.ihmc.quadrupedUI.uiControllers.ManualStepTabController;
 import us.ihmc.quadrupedUI.uiControllers.XGaitSettingsController;
 import us.ihmc.tools.inputDevices.joystick.exceptions.JoystickNotFoundException;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
@@ -37,6 +38,9 @@ public class QuadrupedUserInterface
    @FXML
    private XGaitSettingsController xGaitSettingsController;
 
+   @FXML
+   private ManualStepTabController manualStepTabController;
+
    public QuadrupedUserInterface(Stage primaryStage, JavaFXMessager messager, QuadrupedModelFactory modelFactory,
                                  QuadrupedPhysicalProperties physicalProperties, QuadrupedXGaitSettingsReadOnly xGaitSettings, YoVariableRegistry registry)
          throws Exception
@@ -51,9 +55,11 @@ public class QuadrupedUserInterface
 
       mainTabController.attachMessager(messager);
       xGaitSettingsController.attachMessager(messager, xGaitSettings);
+      manualStepTabController.attachMessager(messager, xGaitSettings);
 
       mainTabController.bindControls();
       xGaitSettingsController.bindControls();
+      manualStepTabController.bindControls();
 
       View3DFactory view3dFactory = View3DFactory.createSubscene();
       view3dFactory.addCameraController(true);
