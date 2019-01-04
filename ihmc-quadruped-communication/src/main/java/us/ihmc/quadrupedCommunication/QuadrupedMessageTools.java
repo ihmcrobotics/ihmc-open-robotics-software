@@ -161,7 +161,19 @@ public class QuadrupedMessageTools
    {
       QuadrupedTeleopDesiredPose message = new QuadrupedTeleopDesiredPose();
 
+      message.getPose().getPosition().setToNaN();
       message.getPose().getOrientation().setYawPitchRoll(yaw, pitch, roll);
+      message.setPoseShiftTime(time);
+
+      return message;
+   }
+
+   public static QuadrupedTeleopDesiredPose createQuadrupedTeleopDesiredPose(double x, double y, double time)
+   {
+      QuadrupedTeleopDesiredPose message = new QuadrupedTeleopDesiredPose();
+
+      message.getPose().getPosition().set(x, y, 0.0);
+      message.getPose().getOrientation().setToNaN();
       message.setPoseShiftTime(time);
 
       return message;

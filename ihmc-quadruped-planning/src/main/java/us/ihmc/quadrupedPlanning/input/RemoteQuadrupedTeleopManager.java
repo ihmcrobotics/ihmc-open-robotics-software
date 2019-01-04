@@ -155,6 +155,12 @@ public class RemoteQuadrupedTeleopManager
       desiredPosePublisher.publish(QuadrupedMessageTools.createQuadrupedTeleopDesiredPose(yaw, pitch, roll, time));
    }
 
+   public void setDesiredBodyTranslation(double x, double y, double time)
+   {
+      desiredPosePublisher.publish(QuadrupedMessageTools.createQuadrupedTeleopDesiredPose(x, y, time));
+   }
+
+
    public void setDesiredBodyPose(double x, double y, double yaw, double pitch, double roll, double time)
    {
       desiredPosePublisher.publish(QuadrupedMessageTools.createQuadrupedTeleopDesiredPose(x, y, yaw, pitch, roll, time));
