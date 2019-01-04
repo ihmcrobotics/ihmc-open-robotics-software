@@ -31,14 +31,6 @@ public class ManualStepTabController
    private static final double defaultStepDuration = 0.4;
    private static final double defaultDwellTime = 0.2;
 
-
-   private RealtimeRos2Node ros2Node;
-   private final ScheduledExecutorService executor = Executors.newSingleThreadScheduledExecutor();
-
-   private IHMCRealtimeROS2Publisher<QuadrupedTimedStepListMessage> timedStepListPublisher;
-
-   private final QuadrupedTimedStepListMessage stepListMessage = new QuadrupedTimedStepListMessage();
-
    private final AtomicBoolean useTrotOverCrawl = new AtomicBoolean(false);
 
    private JavaFXMessager messager;
@@ -100,19 +92,6 @@ public class ManualStepTabController
       firstFoot.getSelectionModel().select(RobotQuadrant.FRONT_RIGHT);
    }
 
-   public void stop()
-   {
-      executor.shutdown();
-   }
-
-   public void setRosNode(RealtimeRos2Node rosNode, String robotName)
-   {
-      this.ros2Node = rosNode;
-
-      MessageTopicNameGenerator controllerSubGenerator = QuadrupedControllerAPIDefinition.getSubscriberTopicNameGenerator(robotName);
-      timedStepListPublisher = ROS2Tools.createPublisher(ros2Node, QuadrupedTimedStepListMessage.class, controllerSubGenerator);
-   }
-
    public void sendSteps()
    {
       if (firstFoot.getSelectionModel().isEmpty())
@@ -147,6 +126,8 @@ public class ManualStepTabController
       QuadrupedXGaitSettingsReadOnly xGaitSettings = xGaitSettingsReference.get();
       QuadrupedReferenceFrames referenceFrames = referenceFramesReference.get();
 
+      QuadrupedTimedStepListMessage stepListMessage = new QuadrupedTimedStepListMessage();
+
       stepListMessage.setIsExpressedInAbsoluteTime(false);
       stepListMessage.getQuadrupedStepList().clear();
 
@@ -175,6 +156,7 @@ public class ManualStepTabController
       double timeDelay = 0.0;
       double lengthOffset = 0.0;
       double widthOffset = 0.0;
+
 
       for (int i = 0; i < numberOfSteps; i++)
       {
@@ -217,7 +199,7 @@ public class ManualStepTabController
          timeDelay += stepDuration + dwellTime;
       }
 
-      timedStepListPublisher.publish(stepListMessage);
+      messager.submitMessage(QuadrupedUIMessagerAPI.ManualStepsListMessageTopic, stepListMessage);
    }
 
    private void handleCrawlRequest()
@@ -230,11 +212,14 @@ public class ManualStepTabController
       double stepDuration = this.stepDuration.getValue();
       double dwellTime = this.dwellTime.getValue();
       int numberOfSteps = this.numberOfSteps.getValue();
-      stepListMessage.setIsExpressedInAbsoluteTime(false);
-      stepListMessage.getQuadrupedStepList().clear();
 
       QuadrupedXGaitSettingsReadOnly xGaitSettings = xGaitSettingsReference.get();
       QuadrupedReferenceFrames referenceFrames = referenceFramesReference.get();
+
+      QuadrupedTimedStepListMessage stepListMessage = new QuadrupedTimedStepListMessage();
+
+      stepListMessage.setIsExpressedInAbsoluteTime(false);
+      stepListMessage.getQuadrupedStepList().clear();
 
       double currentTime = 0.0;
 
@@ -320,8 +305,6 @@ public class ManualStepTabController
          currentTime += 0.5 * stepDuration + dwellTime;
       }
 
-      timedStepListPublisher.publish(stepListMessage);
+      messager.submitMessage(QuadrupedUIMessagerAPI.ManualStepsListMessageTopic, stepListMessage);
    }
-
-
 }

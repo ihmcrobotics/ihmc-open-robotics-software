@@ -1,6 +1,7 @@
 package us.ihmc.quadrupedUI;
 
 import controller_msgs.msg.dds.QuadrupedFootstepStatusMessage;
+import controller_msgs.msg.dds.QuadrupedTimedStepListMessage;
 import controller_msgs.msg.dds.RobotConfigurationData;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelControllerName;
 import us.ihmc.messager.MessagerAPIFactory;
@@ -33,6 +34,7 @@ public class QuadrupedUIMessagerAPI
    private static final TypedTopicTheme<Double> DesiredBodyHeight = apiFactory.createTypedTopicTheme("BodyHeight");
    private static final TypedTopicTheme<QuadrupedXGaitSettingsReadOnly> XGaitSettings = apiFactory.createTypedTopicTheme("XGaitSettings");
    private static final TypedTopicTheme<QuadrupedFootstepStatusMessage> FootstepStatusMessage = apiFactory.createTypedTopicTheme("FootstepStatusMessage");
+   private static final TypedTopicTheme<QuadrupedTimedStepListMessage> ManualStepsListMessage = apiFactory.createTypedTopicTheme("ManualStepsListMessage");
 
    private static final Category Root = apiFactory.createRootCategory(apiFactory.createCategoryTheme("QuadrupedUI"));
 
@@ -48,6 +50,7 @@ public class QuadrupedUIMessagerAPI
    public static final Topic<Boolean> EnableJoystickTopic = Root.child(Command).child(Joystick).topic(Enable);
    public static final Topic<QuadrupedXGaitSettingsReadOnly> XGaitSettingsTopic = Root.child(Planning).child(XGait).topic(XGaitSettings);
    public static final Topic<QuadrupedFootstepStatusMessage> FootstepStatusMessageTopic = Root.child(Controller).child(Status).topic(FootstepStatusMessage);
+   public static final Topic<QuadrupedTimedStepListMessage> ManualStepsListMessageTopic = Root.child(Command).child(StepTeleop).topic(ManualStepsListMessage);
 
    public static final MessagerAPI API = apiFactory.getAPIAndCloseFactory();
 
