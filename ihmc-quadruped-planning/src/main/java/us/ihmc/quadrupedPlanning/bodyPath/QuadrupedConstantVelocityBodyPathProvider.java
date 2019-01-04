@@ -72,13 +72,13 @@ public class QuadrupedConstantVelocityBodyPathProvider implements QuadrupedPlana
 
    public void completedFootstep(RobotQuadrant robotQuadrant, QuadrupedFootstepStatusMessage message)
    {
-      footstepStartStatuses.get(robotQuadrant).set(message);
+      footstepCompleteStatuses.get(robotQuadrant).set(message);
       recomputeInitialPose.set(true);
    }
 
    public void startedFootstep(RobotQuadrant robotQuadrant, QuadrupedFootstepStatusMessage message)
    {
-      footstepCompleteStatuses.get(robotQuadrant).set(message);
+      footstepStartStatuses.get(robotQuadrant).set(message);
       recomputeInitialPose.set(true);
    }
 
