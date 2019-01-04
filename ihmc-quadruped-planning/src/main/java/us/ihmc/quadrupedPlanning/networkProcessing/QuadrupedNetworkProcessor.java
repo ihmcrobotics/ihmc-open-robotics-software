@@ -15,11 +15,15 @@ import us.ihmc.robotEnvironmentAwareness.updaters.LIDARBasedREAModule;
 import us.ihmc.robotModels.FullQuadrupedRobotModelFactory;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 
 public class QuadrupedNetworkProcessor
 {
    private final boolean DEBUG = false;
    private QuadrupedStepTeleopModule stepTeleopModule;
+
+   private final List<QuadrupedToolboxModule> modules = new ArrayList<>();
 
    public QuadrupedNetworkProcessor(FullQuadrupedRobotModelFactory robotModel, QuadrupedNetworkModuleParameters params, double nominalHeight,
                                     QuadrupedXGaitSettings xGaitSettings, PointFootSnapperParameters pointFootSnapperParameters)
@@ -44,6 +48,14 @@ public class QuadrupedNetworkProcessor
          stepTeleopModule.setShiftPlanBasedOnStepAdjustment(shift);
    }
 
+   public void close()
+   {
+      for (int i = 0; i < modules.size(); i++)
+      {
+         modules.get(i).destroy();
+      }
+   }
+
    private void setupStepTeleopModule(FullQuadrupedRobotModelFactory modelFactory, QuadrupedXGaitSettingsReadOnly xGaitSettings,
                                       PointFootSnapperParameters pointFootSnapperParameters, QuadrupedNetworkModuleParameters params,
                                       DomainFactory.PubSubImplementation pubSubImplementation)
@@ -52,6 +64,7 @@ public class QuadrupedNetworkProcessor
          return;
       stepTeleopModule = new QuadrupedStepTeleopModule(modelFactory, xGaitSettings, pointFootSnapperParameters, null, params.visualizeStepTeleopModuleEnabled(),
                                                        pubSubImplementation);
+      modules.add(stepTeleopModule);
    }
 
    private void setupBodyHeightTeleopModule(FullQuadrupedRobotModelFactory modelFactory, QuadrupedNetworkModuleParameters params, double nominalHeight,
@@ -59,7 +72,7 @@ public class QuadrupedNetworkProcessor
    {
       if (!params.isBodyHeightTeleopModuleEnabled())
          return;
-      new QuadrupedBodyHeightTeleopModule(modelFactory, nominalHeight, null, pubSubImplementation);
+      modules.add(new QuadrupedBodyHeightTeleopModule(modelFactory, nominalHeight, null, pubSubImplementation));
    }
 
    private void setupBodyTeleopModule(FullQuadrupedRobotModelFactory modelFactory, QuadrupedNetworkModuleParameters params,
@@ -67,7 +80,7 @@ public class QuadrupedNetworkProcessor
    {
       if (!params.isBodyTeleopModuleEnabled())
          return;
-      new QuadrupedBodyTeleopModule(modelFactory, null, pubSubImplementation);
+      modules.add(new QuadrupedBodyTeleopModule(modelFactory, null, pubSubImplementation));
    }
 
    private void setupXBoxModule(FullQuadrupedRobotModelFactory modelFactory, QuadrupedNetworkModuleParameters params,
@@ -76,7 +89,7 @@ public class QuadrupedNetworkProcessor
    {
       if (!params.isXBoxModuleEnabled())
          return;
-      new QuadrupedXBoxModule(modelFactory, defaultXGaitSettings, nominalBodyHeight, null, pubSubImplementation);
+      modules.add(new QuadrupedXBoxModule(modelFactory, defaultXGaitSettings, nominalBodyHeight, null, pubSubImplementation));
    }
 
    private void setupRobotEnvironmentAwerenessModule(QuadrupedNetworkModuleParameters params, DomainFactory.PubSubImplementation pubSubImplementation)

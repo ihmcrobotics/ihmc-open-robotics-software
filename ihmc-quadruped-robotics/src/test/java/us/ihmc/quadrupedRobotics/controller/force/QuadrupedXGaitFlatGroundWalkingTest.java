@@ -20,7 +20,7 @@ public abstract class QuadrupedXGaitFlatGroundWalkingTest implements QuadrupedMu
    private GoalOrientedTestConductor conductor;
    private QuadrupedForceTestYoVariables variables;
 //   private QuadrupedTeleopManager stepTeleopManager;
-   private RemoteQuadrupedTeleopManager newStepTeleopManager;
+   private RemoteQuadrupedTeleopManager stepTeleopManager;
    private QuadrupedTestFactory quadrupedTestFactory;
 
    public abstract double getPacingWidth();
@@ -44,7 +44,7 @@ public abstract class QuadrupedXGaitFlatGroundWalkingTest implements QuadrupedMu
          conductor = quadrupedTestFactory.createTestConductor();
          variables = new QuadrupedForceTestYoVariables(conductor.getScs());
 //         stepTeleopManager = quadrupedTestFactory.getStepTeleopManager();
-         newStepTeleopManager = quadrupedTestFactory.getRemoteStepTeleopManager();
+         stepTeleopManager = quadrupedTestFactory.getRemoteStepTeleopManager();
       }
       catch (IOException e)
       {
@@ -179,19 +179,14 @@ public abstract class QuadrupedXGaitFlatGroundWalkingTest implements QuadrupedMu
 
    private void testFlatGroundWalking(double endPhaseShift, double walkingSpeed)
    {
-      QuadrupedTestBehaviors.readyXGait(conductor, variables, newStepTeleopManager);
+      QuadrupedTestBehaviors.readyXGait(conductor, variables, stepTeleopManager);
 
-//      stepTeleopManager.getXGaitSettings().setEndPhaseShift(endPhaseShift);
-      newStepTeleopManager.setEndPhaseShift(endPhaseShift);
+      stepTeleopManager.setEndPhaseShift(endPhaseShift);
 
       double walkTime = 6.0;
-//      stepTeleopManager.requestXGait();
-//      stepTeleopManager.setDesiredVelocity(walkingSpeed, 0.0, 0.0);
-      newStepTeleopManager.requestXGait();
-      newStepTeleopManager.setDesiredVelocity(walkingSpeed, 0.0, 0.0);
+      stepTeleopManager.requestXGait();
+      stepTeleopManager.setDesiredVelocity(walkingSpeed, 0.0, 0.0);
 
-//      stepTeleopToolboxState.publish(MessageTools.createToolboxStateMessage(ToolboxState.WAKE_UP));
-//      velocityPublisher.publish(QuadrupedMessageTools.createQuadrupedTeleopDesiredVelocity(walkingSpeed, 0.0, 0.0));
       conductor.addSustainGoal(QuadrupedTestGoals.notFallen(variables));
       conductor.addTerminalGoal(YoVariableTestGoal.timeInFuture(variables.getYoTime(), walkTime));
 
@@ -207,15 +202,12 @@ public abstract class QuadrupedXGaitFlatGroundWalkingTest implements QuadrupedMu
 
       conductor.simulate();
 
-//      velocityPublisher.publish(QuadrupedMessageTools.createQuadrupedTeleopDesiredVelocity(0.0, 0.0, 0.0));
-//      stepTeleopManager.setDesiredVelocity(0.0, 0.0, 0.0);
-      newStepTeleopManager.setDesiredVelocity(0.0, 0.0, 0.0);
+      stepTeleopManager.setDesiredVelocity(0.0, 0.0, 0.0);
       conductor.addTerminalGoal(YoVariableTestGoal.timeInFuture(variables.getYoTime(), 1.0));
 
       conductor.simulate();
 
-//      stepTeleopManager.requestStanding();
-      newStepTeleopManager.requestStanding();
+      stepTeleopManager.requestStanding();
       conductor.addTerminalGoal(YoVariableTestGoal.enumEquals(variables.getSteppingState(), QuadrupedSteppingStateEnum.STAND));
       conductor.addTerminalGoal(YoVariableTestGoal.timeInFuture(variables.getYoTime(), 0.5));
 
@@ -227,19 +219,14 @@ public abstract class QuadrupedXGaitFlatGroundWalkingTest implements QuadrupedMu
 
    private void testWalkingInASemiCircle(double endPhaseShift, double walkingSpeed, double angularVelocity)
    {
-//      stepTeleopManager.setShiftPlanBasedOnStepAdjustment(false);
-      newStepTeleopManager.setShiftPlanBasedOnStepAdjustment(false);
-//      QuadrupedTestBehaviors.readyXGait(conductor, variables, stepTeleopManager);
-      QuadrupedTestBehaviors.readyXGait(conductor, variables, newStepTeleopManager);
+      stepTeleopManager.setShiftPlanBasedOnStepAdjustment(false);
+      QuadrupedTestBehaviors.readyXGait(conductor, variables, stepTeleopManager);
       double radius = Math.abs(walkingSpeed / angularVelocity);
       double expectedSemiCircleWalkTime = Math.PI / Math.abs(angularVelocity);
 
-      newStepTeleopManager.requestXGait();
-      newStepTeleopManager.setEndPhaseShift(endPhaseShift);
-      newStepTeleopManager.setDesiredVelocity(walkingSpeed, 0.0, angularVelocity);
-//      stepTeleopManager.requestXGait();
-//      stepTeleopManager.getXGaitSettings().setEndPhaseShift(endPhaseShift);
-//      stepTeleopManager.setDesiredVelocity(walkingSpeed, 0.0, angularVelocity);
+      stepTeleopManager.requestXGait();
+      stepTeleopManager.setEndPhaseShift(endPhaseShift);
+      stepTeleopManager.setDesiredVelocity(walkingSpeed, 0.0, angularVelocity);
       conductor.addSustainGoal(QuadrupedTestGoals.notFallen(variables));
       conductor.addTimeLimit(variables.getYoTime(), expectedSemiCircleWalkTime * 1.5);
       conductor.addWaypointGoal(YoVariableTestGoal.doubleWithinEpsilon(variables.getRobotBodyYaw(), Math.signum(angularVelocity) * Math.PI / 2, 0.1));
@@ -319,20 +306,15 @@ public abstract class QuadrupedXGaitFlatGroundWalkingTest implements QuadrupedMu
 
    private void testFlatGroundPacing(double walkingSpeed)
    {
-//      stepTeleopManager.getXGaitSettings().setStanceWidth(getPacingWidth());
-      newStepTeleopManager.setStanceWidth(getPacingWidth());
+      stepTeleopManager.setStanceWidth(getPacingWidth());
 
-//      QuadrupedTestBehaviors.readyXGait(conductor, variables, stepTeleopManager);
-      QuadrupedTestBehaviors.readyXGait(conductor, variables, newStepTeleopManager);
+      QuadrupedTestBehaviors.readyXGait(conductor, variables, stepTeleopManager);
 
-//      stepTeleopManager.getXGaitSettings().setEndPhaseShift(0.0);
-      newStepTeleopManager.setEndPhaseShift(0.0);
+      stepTeleopManager.setEndPhaseShift(0.0);
 
       double walkTime = 5.0;
-      newStepTeleopManager.requestXGait();
-      newStepTeleopManager.setDesiredVelocity(walkingSpeed, 0.0, 0.0);
-//      stepTeleopManager.requestXGait();
-//      stepTeleopManager.setDesiredVelocity(walkingSpeed, 0.0, 0.0);
+      stepTeleopManager.requestXGait();
+      stepTeleopManager.setDesiredVelocity(walkingSpeed, 0.0, 0.0);
       conductor.addSustainGoal(QuadrupedTestGoals.notFallen(variables));
       conductor.addTerminalGoal(YoVariableTestGoal.timeInFuture(variables.getYoTime(), walkTime));
 
@@ -351,22 +333,16 @@ public abstract class QuadrupedXGaitFlatGroundWalkingTest implements QuadrupedMu
 
    private void testPacingInASemiCircle(double walkingSpeed, double angularVelocity)
    {
-//      stepTeleopManager.getXGaitSettings().setStanceWidth(getPacingWidth());
-      newStepTeleopManager.setStanceWidth(getPacingWidth());
+      stepTeleopManager.setStanceWidth(getPacingWidth());
 
-//      stepTeleopManager.setShiftPlanBasedOnStepAdjustment(false);
-      newStepTeleopManager.setShiftPlanBasedOnStepAdjustment(false);
-//      QuadrupedTestBehaviors.readyXGait(conductor, variables, stepTeleopManager);
-      QuadrupedTestBehaviors.readyXGait(conductor, variables, newStepTeleopManager);
+      stepTeleopManager.setShiftPlanBasedOnStepAdjustment(false);
+      QuadrupedTestBehaviors.readyXGait(conductor, variables, stepTeleopManager);
       double radius = Math.abs(walkingSpeed / angularVelocity);
       double expectedSemiCircleWalkTime = Math.PI / Math.abs(angularVelocity);
 
-      newStepTeleopManager.requestXGait();
-      newStepTeleopManager.setEndPhaseShift(0.0);
-      newStepTeleopManager.setDesiredVelocity(walkingSpeed, 0.0, angularVelocity);
-//      stepTeleopManager.requestXGait();
-//      stepTeleopManager.getXGaitSettings().setEndPhaseShift(0.0);
-//      stepTeleopManager.setDesiredVelocity(walkingSpeed, 0.0, angularVelocity);
+      stepTeleopManager.requestXGait();
+      stepTeleopManager.setEndPhaseShift(0.0);
+      stepTeleopManager.setDesiredVelocity(walkingSpeed, 0.0, angularVelocity);
       conductor.addSustainGoal(QuadrupedTestGoals.notFallen(variables));
       conductor.addTimeLimit(variables.getYoTime(), expectedSemiCircleWalkTime * 1.5);
       conductor.addWaypointGoal(YoVariableTestGoal.doubleWithinEpsilon(variables.getRobotBodyYaw(), Math.signum(angularVelocity) * Math.PI / 2, 0.1));
