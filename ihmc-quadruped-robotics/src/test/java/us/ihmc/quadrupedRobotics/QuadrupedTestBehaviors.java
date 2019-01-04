@@ -7,7 +7,7 @@ import junit.framework.AssertionFailedError;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelControllerName;
 import us.ihmc.idl.IDLSequence.Object;
 import us.ihmc.quadrupedBasics.QuadrupedSteppingStateEnum;
-import us.ihmc.quadrupedPlanning.input.NewQuadrupedTeleopManager;
+import us.ihmc.quadrupedPlanning.input.RemoteQuadrupedTeleopManager;
 import us.ihmc.quadrupedPlanning.input.QuadrupedTeleopManager;
 import us.ihmc.quadrupedRobotics.controller.QuadrupedControllerManager;
 import us.ihmc.quadrupedRobotics.controller.QuadrupedPositionControllerRequestedEvent;
@@ -120,14 +120,14 @@ public class QuadrupedTestBehaviors
 
 
 
-   public static void readyXGait(GoalOrientedTestConductor conductor, QuadrupedForceTestYoVariables variables, NewQuadrupedTeleopManager stepTeleopManager) throws AssertionFailedError
+   public static void readyXGait(GoalOrientedTestConductor conductor, QuadrupedForceTestYoVariables variables, RemoteQuadrupedTeleopManager stepTeleopManager) throws AssertionFailedError
    {
       standUp(conductor, variables);
       startBalancing(conductor, variables, stepTeleopManager);
       squareUp(conductor, variables, stepTeleopManager);
    }
 
-   public static void startBalancing(GoalOrientedTestConductor conductor, QuadrupedForceTestYoVariables variables, NewQuadrupedTeleopManager teleopManager) throws AssertionFailedError
+   public static void startBalancing(GoalOrientedTestConductor conductor, QuadrupedForceTestYoVariables variables, RemoteQuadrupedTeleopManager teleopManager) throws AssertionFailedError
    {
       teleopManager.requestWalkingState();
       conductor.addTerminalGoal(QuadrupedTestGoals.notFallen(variables));
@@ -138,7 +138,7 @@ public class QuadrupedTestBehaviors
       conductor.simulate();
    }
 
-   public static void squareUp(GoalOrientedTestConductor conductor, QuadrupedForceTestYoVariables variables, NewQuadrupedTeleopManager stepTeleopManager)
+   public static void squareUp(GoalOrientedTestConductor conductor, QuadrupedForceTestYoVariables variables, RemoteQuadrupedTeleopManager stepTeleopManager)
    {
       conductor.addTerminalGoal(QuadrupedTestGoals.timeInFuture(variables, 0.2));
       conductor.addSustainGoal(QuadrupedTestGoals.bodyHeight(variables, 0.25));
@@ -190,7 +190,7 @@ public class QuadrupedTestBehaviors
    }
 
    public static void executeBodyPathPlan(GoalOrientedTestConductor conductor, QuadrupedForceTestYoVariables variables,
-                                          NewQuadrupedTeleopManager stepTeleopManager, double positionDelta, double yawDelta,
+                                          RemoteQuadrupedTeleopManager stepTeleopManager, double positionDelta, double yawDelta,
                                           EuclideanTrajectoryPointMessage... points)
    {
       QuadrupedBodyPathPlanMessage bodyPathPlanMessage = new QuadrupedBodyPathPlanMessage();
