@@ -7,6 +7,7 @@ import us.ihmc.communication.packets.ExecutionMode;
 import us.ihmc.communication.packets.Packet;
 import us.ihmc.euclid.referenceFrame.*;
 import us.ihmc.euclid.referenceFrame.interfaces.FixedFramePoint3DBasics;
+import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
 import us.ihmc.euclid.tuple2D.Vector2D;
 import us.ihmc.euclid.tuple2D.interfaces.Vector2DReadOnly;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.QuadrupedBodyTrajectoryCommand;
@@ -16,17 +17,17 @@ import us.ihmc.log.LogTools;
 import us.ihmc.mecano.frames.MovingReferenceFrame;
 import us.ihmc.quadrupedRobotics.controller.QuadrupedControllerToolbox;
 import us.ihmc.quadrupedRobotics.model.QuadrupedRuntimeEnvironment;
+import us.ihmc.robotics.controllers.PIDController;
+import us.ihmc.robotics.controllers.pidGains.implementations.YoPIDGains;
 import us.ihmc.robotics.dataStructures.parameters.ParameterVector2D;
 import us.ihmc.robotics.geometry.ConvexPolygonScaler;
+import us.ihmc.robotics.math.filters.AlphaFilteredYoVariable;
 import us.ihmc.robotics.math.trajectories.waypoints.FrameSE3TrajectoryPoint;
 import us.ihmc.robotics.math.trajectories.waypoints.MultipleWaypointsPositionTrajectoryGenerator;
 import us.ihmc.robotics.robotSide.QuadrantDependentList;
 import us.ihmc.robotics.robotSide.RobotQuadrant;
-import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.screwTheory.SelectionMatrix3D;
-import us.ihmc.yoVariables.listener.ParameterChangedListener;
 import us.ihmc.yoVariables.parameters.BooleanParameter;
-import us.ihmc.yoVariables.parameters.YoParameter;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.*;
 
@@ -35,29 +36,27 @@ import static us.ihmc.communication.packets.Packet.INVALID_MESSAGE_ID;
 public class QuadrupedBodyICPBasedTranslationManager
 {
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
+   private static final boolean useFeedForward = false;
 
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
 
    private final YoDouble supportPolygonSafeMargin = new YoDouble("supportPolygonSafeMargin", registry);
    private final YoDouble frozenOffsetDecayAlpha = new YoDouble("frozenOffsetDecayAlpha", registry);
 
-   private final YoFramePoint2D desiredBodyPosition = new YoFramePoint2D("desiredBody", worldFrame, registry);
-   private final YoFramePoint2D currentBodyPosition = new YoFramePoint2D("currentBody", worldFrame, registry);
+   private final YoFramePoint2D desiredBodyPosition = new YoFramePoint2D("desiredBodyPosition", worldFrame, registry);
+   private final YoFramePoint2D currentBodyPosition = new YoFramePoint2D("currentBodyPosition", worldFrame, registry);
 
    private final YoDouble initialBodyPositionTime = new YoDouble("initialBodyPositionTime", registry);
 
    private final MultipleWaypointsPositionTrajectoryGenerator positionTrajectoryGenerator;
 
-   private final YoFrameVector2D bodyPositionError = new YoFrameVector2D("bodyPositionError", worldFrame, registry);
-   private final YoDouble proportionalGain = new YoDouble("bodyPositionProportionalGain", registry);
-   private final YoFrameVector2D proportionalTerm = new YoFrameVector2D("bodyPositionProportionalTerm", worldFrame, registry);
+   private final YoPIDGains bodyPositionGains = new YoPIDGains("_BodyPositionGains", registry);
+   private final PIDController xController = new PIDController(bodyPositionGains, "BodyXPosition", registry);
+   private final PIDController yController = new PIDController(bodyPositionGains, "BodyYPosition", registry);
 
-   private final YoFrameVector2D positionCumulatedError = new YoFrameVector2D("bodyPositionCumulatedError", worldFrame, registry);
-   private final YoDouble integralGain = new YoDouble("bodyPositionIntegralGain", registry);
-   private final YoFrameVector2D integralTerm = new YoFrameVector2D("bodyPositionIntegralTerm", worldFrame, registry);
-   private final YoDouble maximumIntegralError = new YoDouble("maximumBodyPositionIntegralError", registry);
-
-   private final YoFrameVector2D desiredICPOffset = new YoFrameVector2D("desiredICPOffset", worldFrame, registry);
+   private final YoFrameVector2D desiredICPOffsetFeedback = new YoFrameVector2D("desiredICPOffsetFeedback", worldFrame, registry);
+   private final YoFrameVector2D desiredICPOffsetFeedForward = new YoFrameVector2D("desiredICPOffsetFeedForward", worldFrame, registry);
+   private final YoFrameVector2D desiredICPOffsetAction = new YoFrameVector2D("desiredICPOffset", worldFrame, registry);
    private final Vector2DReadOnly userOffset = new ParameterVector2D("userDesiredICPOffset", new Vector2D(), registry);
 
    private final YoBoolean isEnabled = new YoBoolean("isBodyTranslationManagerEnabled", registry);
@@ -73,14 +72,12 @@ public class QuadrupedBodyICPBasedTranslationManager
 
    private final ReferenceFrame bodyZUpFrame;
    private final ReferenceFrame centerFeetZUpFrame;
-   private final QuadrantDependentList<MovingReferenceFrame> soleZUpFrames;
 
    private final QuadrupedSupportPolygons quadrupedSupportPolygons;
 
    private final FramePoint3D tempPosition = new FramePoint3D();
    private final FrameVector3D tempVelocity = new FrameVector3D();
    private final FramePoint2D tempPosition2d = new FramePoint2D();
-   private final FrameVector2D tempError2d = new FrameVector2D();
    private final FrameVector3D tempICPOffset = new FrameVector3D();
    private final FrameVector3D icpOffsetForFreezing = new FrameVector3D();
 
@@ -101,7 +98,7 @@ public class QuadrupedBodyICPBasedTranslationManager
       controlDT = runtimeEnvironment.getControlDT();
       bodyZUpFrame = controllerToolbox.getReferenceFrames().getBodyZUpFrame();
       centerFeetZUpFrame = controllerToolbox.getReferenceFrames().getCenterOfFeetZUpFrameAveragingLowestZHeightsAcrossEnds();
-      soleZUpFrames = controllerToolbox.getReferenceFrames().getSoleZUpFrames();
+      QuadrantDependentList<MovingReferenceFrame> soleZUpFrames = controllerToolbox.getReferenceFrames().getSoleZUpFrames();
 
       this.quadrupedSupportPolygons = controllerToolbox.getSupportPolygons();
 
@@ -112,18 +109,12 @@ public class QuadrupedBodyICPBasedTranslationManager
       for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
          positionTrajectoryGenerator.registerNewTrajectoryFrame(soleZUpFrames.get(robotQuadrant));
 
-      proportionalGain.set(0.5);
-      integralGain.set(1.5);
-      maximumIntegralError.set(0.08);
+      bodyPositionGains.setKp(1.5);
+      bodyPositionGains.setKi(2.0);
+      bodyPositionGains.setMaximumIntegralError(0.05);
+      bodyPositionGains.setIntegralLeakRatio(AlphaFilteredYoVariable.computeAlphaGivenBreakFrequencyProperly(1.0, controlDT));
 
-      manualMode.addParameterChangedListener(new ParameterChangedListener()
-      {
-         @Override
-         public void notifyOfParameterChange(YoParameter<?> v)
-         {
-            initialize();
-         }
-      });
+      manualMode.addParameterChangedListener(v -> initialize());
 
       String namePrefix = "BodyXYTranslation";
       lastCommandId = new YoLong(namePrefix + "LastCommandId", registry);
@@ -135,11 +126,10 @@ public class QuadrupedBodyICPBasedTranslationManager
       parentRegistry.addChild(registry);
    }
 
-   public void compute()
+   public void compute(FramePoint3DReadOnly desiredICP)
    {
       tempPosition2d.setToZero(bodyZUpFrame);
-      tempPosition2d.changeFrame(worldFrame);
-      currentBodyPosition.set(tempPosition2d);
+      currentBodyPosition.setMatchingFrame(tempPosition2d);
 
       if (isFrozen.getBooleanValue())
       {
@@ -149,7 +139,7 @@ public class QuadrupedBodyICPBasedTranslationManager
 
       if (!isEnabled.getBooleanValue())
       {
-         desiredICPOffset.setToZero();
+         desiredICPOffsetAction.setToZero();
          return;
       }
 
@@ -180,11 +170,32 @@ public class QuadrupedBodyICPBasedTranslationManager
 
       if (!isRunning.getBooleanValue())
       {
-         desiredICPOffset.setToZero();
+         desiredICPOffsetAction.setToZero();
          return;
       }
 
-      computeDesiredICPOffset();
+      desiredBodyPosition.checkReferenceFrameMatch(currentBodyPosition);
+      double xAction = xController.compute(currentBodyPosition.getX(), desiredBodyPosition.getX(), 0.0, 0.0, controlDT);
+      double yAction = yController.compute(currentBodyPosition.getY(), desiredBodyPosition.getY(), 0.0, 0.0, controlDT);
+
+      desiredBodyPosition.checkReferenceFrameMatch(desiredICPOffsetFeedback);
+      desiredICPOffsetFeedback.setX(xAction);
+      desiredICPOffsetFeedback.setY(yAction);
+
+      if (useFeedForward)
+      {
+         tempPosition2d.setIncludingFrame(desiredICP);
+         tempPosition2d.changeFrame(desiredICPOffsetFeedForward.getReferenceFrame());
+         desiredICPOffsetFeedForward.setMatchingFrame(desiredBodyPosition);
+         desiredICPOffsetFeedForward.sub(tempPosition2d);
+      }
+      else
+      {
+         desiredICPOffsetFeedForward.setToZero();
+      }
+
+      desiredICPOffsetAction.set(desiredICPOffsetFeedForward);
+      desiredICPOffsetAction.add(desiredICPOffsetFeedback);
    }
 
    public boolean isEnabled()
@@ -373,33 +384,6 @@ public class QuadrupedBodyICPBasedTranslationManager
       isTrajectoryStopped.set(command.isStopAllTrajectory());
    }
 
-   private void computeDesiredICPOffset()
-   {
-      bodyPositionError.set(desiredBodyPosition);
-      tempPosition2d.setToZero(bodyZUpFrame);
-      tempPosition2d.changeFrame(worldFrame);
-      bodyPositionError.sub(tempPosition2d);
-
-      tempError2d.setIncludingFrame(bodyPositionError);
-      tempError2d.scale(controlDT);
-      positionCumulatedError.add(tempError2d);
-
-      double cumulativeErrorMagnitude = positionCumulatedError.length();
-      if (cumulativeErrorMagnitude > maximumIntegralError.getDoubleValue())
-      {
-         positionCumulatedError.scale(maximumIntegralError.getDoubleValue() / cumulativeErrorMagnitude);
-      }
-
-      proportionalTerm.set(bodyPositionError);
-      proportionalTerm.scale(proportionalGain.getDoubleValue());
-
-      integralTerm.set(positionCumulatedError);
-      integralTerm.scale(integralGain.getDoubleValue());
-
-      desiredICPOffset.set(proportionalTerm);
-      desiredICPOffset.add(integralTerm);
-   }
-
    private final ConvexPolygonScaler convexPolygonShrinker = new ConvexPolygonScaler();
    private final FrameConvexPolygon2D safeSupportPolygonToConstrainICPOffset = new FrameConvexPolygon2D();
 
@@ -412,29 +396,28 @@ public class QuadrupedBodyICPBasedTranslationManager
 
       if (!isEnabled.getBooleanValue() || (!isRunning.getBooleanValue() && !manualMode.getValue()))
       {
-         desiredICPOffset.setToZero();
+         desiredICPOffsetAction.setToZero();
          icpOffsetForFreezing.setToZero();
          return;
       }
 
       if (manualMode.getValue())
       {
-         tempICPOffset.setIncludingFrame(centerFeetZUpFrame, userOffset.getX(), userOffset.getY(), 0.0);
+         tempICPOffset.setIncludingFrame(centerFeetZUpFrame, userOffset, 0.0);
       }
       else
       {
-         tempICPOffset.setIncludingFrame(desiredICPOffset.getReferenceFrame(), desiredICPOffset.getX(), desiredICPOffset.getY(), 0.0);
+         tempICPOffset.setIncludingFrame(desiredICPOffsetAction.getReferenceFrame(), desiredICPOffsetAction, 0.0);
          tempICPOffset.changeFrame(centerFeetZUpFrame);
       }
 
       if (isFrozen.getBooleanValue())
       {
-         icpOffsetForFreezing.changeFrame(desiredICPOffset.getReferenceFrame());
-         desiredICPOffset.set(icpOffsetForFreezing);
+         icpOffsetForFreezing.changeFrame(desiredICPOffsetAction.getReferenceFrame());
+         desiredICPOffsetAction.set(icpOffsetForFreezing);
          icpOffsetForFreezing.changeFrame(desiredICPToModify.getReferenceFrame());
          desiredICPToModify.add(icpOffsetForFreezing);
       }
-
       else
       {
          tempICPOffset.changeFrame(desiredICPToModify.getReferenceFrame());
@@ -451,7 +434,6 @@ public class QuadrupedBodyICPBasedTranslationManager
          originalDCMToModify.changeFrame(desiredICPToModify.getReferenceFrame());
          icpOffsetForFreezing.sub(originalDCMToModify);
       }
-
    }
 
    public void disable()
@@ -461,13 +443,12 @@ public class QuadrupedBodyICPBasedTranslationManager
       isFrozen.set(false);
       isTrajectoryStopped.set(false);
 
-      bodyPositionError.setToZero();
-      positionCumulatedError.setToZero();
+      xController.resetIntegrator();
+      yController.resetIntegrator();
 
-      proportionalTerm.setToZero();
-      integralTerm.setToZero();
-
-      desiredICPOffset.setToZero();
+      desiredICPOffsetAction.setToZero();
+      desiredICPOffsetFeedForward.setToZero();
+      desiredICPOffsetFeedback.setToZero();
    }
 
    public void enable()
