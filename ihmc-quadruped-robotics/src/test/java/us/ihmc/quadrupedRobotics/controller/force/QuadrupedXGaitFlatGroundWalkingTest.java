@@ -19,7 +19,6 @@ public abstract class QuadrupedXGaitFlatGroundWalkingTest implements QuadrupedMu
 {
    private GoalOrientedTestConductor conductor;
    private QuadrupedForceTestYoVariables variables;
-//   private QuadrupedTeleopManager stepTeleopManager;
    private RemoteQuadrupedTeleopManager stepTeleopManager;
    private QuadrupedTestFactory quadrupedTestFactory;
 
@@ -43,7 +42,6 @@ public abstract class QuadrupedXGaitFlatGroundWalkingTest implements QuadrupedMu
          quadrupedTestFactory.setUseNetworking(true);
          conductor = quadrupedTestFactory.createTestConductor();
          variables = new QuadrupedForceTestYoVariables(conductor.getScs());
-//         stepTeleopManager = quadrupedTestFactory.getStepTeleopManager();
          stepTeleopManager = quadrupedTestFactory.getRemoteStepTeleopManager();
       }
       catch (IOException e)

@@ -430,9 +430,6 @@ public abstract class Quadruped2018PIDemoTest implements QuadrupedMultiRobotTest
       conductor = quadrupedTestFactory.createTestConductor();
       variables = new QuadrupedForceTestYoVariables(conductor.getScs());
       stepTeleopManager = quadrupedTestFactory.getRemoteStepTeleopManager();
-//      PlanarRegionBasedPointFootSnapper snapper = new PlanarRegionBasedPointFootSnapper(new DefaultPointFootSnapperParameters());
-//      snapper.setPlanarRegionsList(planarRegionsList);
-//      stepTeleopManager.setStepSnapper(snapper);
       stepTeleopManager.submitPlanarRegionsList(planarRegionsList);
 
       QuadrupedTestBehaviors.readyXGait(conductor, variables, stepTeleopManager);
