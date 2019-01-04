@@ -1,7 +1,7 @@
 #ifndef __controller_msgs__msg__QuadrupedTeleopDesiredHeight__idl__
 #define __controller_msgs__msg__QuadrupedTeleopDesiredHeight__idl__
 
-module __controller_msgs
+module controller_msgs
 {
   module msg
   {

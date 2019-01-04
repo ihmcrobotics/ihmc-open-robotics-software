@@ -2,7 +2,7 @@
 #define __controller_msgs__msg__QuadrupedTeleopDesiredPose__idl__
 
 #include "geometry_msgs/msg/./Pose_.idl"
-module __controller_msgs
+module controller_msgs
 {
   module msg
   {

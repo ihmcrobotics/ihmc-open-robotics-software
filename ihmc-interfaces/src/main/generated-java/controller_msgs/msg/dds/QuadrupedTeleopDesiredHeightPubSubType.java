@@ -1,13 +1,13 @@
 package controller_msgs.msg.dds;
 
 /**
- *
- * Topic data type of the struct "PilotAlarmPacket" defined in "PilotAlarmPacket_.idl". Use this class to provide the TopicDataType to a Participant.
- *
- * This file was automatically generated from PilotAlarmPacket_.idl by us.ihmc.idl.generator.IDLGenerator.
- * Do not update this file directly, edit PilotAlarmPacket_.idl instead.
- *
- */
+* 
+* Topic data type of the struct "QuadrupedTeleopDesiredHeight" defined in "QuadrupedTeleopDesiredHeight_.idl". Use this class to provide the TopicDataType to a Participant. 
+*
+* This file was automatically generated from QuadrupedTeleopDesiredHeight_.idl by us.ihmc.idl.generator.IDLGenerator. 
+* Do not update this file directly, edit QuadrupedTeleopDesiredHeight_.idl instead.
+*
+*/
 public class QuadrupedTeleopDesiredHeightPubSubType implements us.ihmc.pubsub.TopicDataType<controller_msgs.msg.dds.QuadrupedTeleopDesiredHeight>
 {
    public static final java.lang.String name = "controller_msgs::msg::dds_::QuadrupedTeleopDesiredHeight_";
@@ -42,7 +42,8 @@ public class QuadrupedTeleopDesiredHeightPubSubType implements us.ihmc.pubsub.To
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 
-      current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
+
 
       return current_alignment - initial_alignment;
    }
@@ -58,7 +59,10 @@ public class QuadrupedTeleopDesiredHeightPubSubType implements us.ihmc.pubsub.To
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 
-      current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
+
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
+
+
 
       return current_alignment - initial_alignment;
    }
@@ -74,8 +78,9 @@ public class QuadrupedTeleopDesiredHeightPubSubType implements us.ihmc.pubsub.To
    public static void read(controller_msgs.msg.dds.QuadrupedTeleopDesiredHeight data, us.ihmc.idl.CDR cdr)
    {
       data.setSequenceId(cdr.read_type_4());
-
+      	
       data.setDesiredHeight(cdr.read_type_6());
+      	
 
    }
 
@@ -103,7 +108,6 @@ public class QuadrupedTeleopDesiredHeightPubSubType implements us.ihmc.pubsub.To
    {
       return new controller_msgs.msg.dds.QuadrupedTeleopDesiredHeight();
    }
-
    @Override
    public int getTypeSize()
    {
@@ -115,7 +119,7 @@ public class QuadrupedTeleopDesiredHeightPubSubType implements us.ihmc.pubsub.To
    {
       return name;
    }
-
+   
    public void serialize(controller_msgs.msg.dds.QuadrupedTeleopDesiredHeight data, us.ihmc.idl.CDR cdr)
    {
       write(data, cdr);
@@ -125,7 +129,7 @@ public class QuadrupedTeleopDesiredHeightPubSubType implements us.ihmc.pubsub.To
    {
       read(data, cdr);
    }
-
+   
    public void copy(controller_msgs.msg.dds.QuadrupedTeleopDesiredHeight src, controller_msgs.msg.dds.QuadrupedTeleopDesiredHeight dest)
    {
       staticCopy(src, dest);

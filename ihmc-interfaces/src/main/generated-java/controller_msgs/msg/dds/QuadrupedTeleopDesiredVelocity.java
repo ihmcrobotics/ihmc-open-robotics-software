@@ -6,15 +6,19 @@ import us.ihmc.euclid.interfaces.EpsilonComparable;
 import java.util.function.Supplier;
 import us.ihmc.pubsub.TopicDataType;
 
+/**
+       * This message is part of the IHMC quadruped controller API.
+       * This message sends a desired stepping velocity to the step teleop module.
+       */
 public class QuadrupedTeleopDesiredVelocity extends Packet<QuadrupedTeleopDesiredVelocity> implements Settable<QuadrupedTeleopDesiredVelocity>, EpsilonComparable<QuadrupedTeleopDesiredVelocity>
 {
    /**
-    * Unique ID used to identify this message, should preferably be consecutively increasing.
-    */
+            * Unique ID used to identify this message, should preferably be consecutively increasing.
+            */
    public long sequence_id_;
-   public double desired_x_velocity_ = -1.0;
-   public double desired_y_velocity_ = -1.0;
-   public double desired_yaw_velocity_ = -1.0;
+   public double desired_x_velocity_;
+   public double desired_y_velocity_;
+   public double desired_yaw_velocity_;
 
    public QuadrupedTeleopDesiredVelocity()
    {
@@ -39,15 +43,15 @@ public class QuadrupedTeleopDesiredVelocity extends Packet<QuadrupedTeleopDesire
    }
 
    /**
-    * Unique ID used to identify this message, should preferably be consecutively increasing.
-    */
+            * Unique ID used to identify this message, should preferably be consecutively increasing.
+            */
    public void setSequenceId(long sequence_id)
    {
       sequence_id_ = sequence_id;
    }
    /**
-    * Unique ID used to identify this message, should preferably be consecutively increasing.
-    */
+            * Unique ID used to identify this message, should preferably be consecutively increasing.
+            */
    public long getSequenceId()
    {
       return sequence_id_;
@@ -55,7 +59,7 @@ public class QuadrupedTeleopDesiredVelocity extends Packet<QuadrupedTeleopDesire
 
    public void setDesiredXVelocity(double desired_x_velocity)
    {
-      desired_x_velocity_= desired_x_velocity;
+      desired_x_velocity_ = desired_x_velocity;
    }
    public double getDesiredXVelocity()
    {
@@ -64,7 +68,7 @@ public class QuadrupedTeleopDesiredVelocity extends Packet<QuadrupedTeleopDesire
 
    public void setDesiredYVelocity(double desired_y_velocity)
    {
-      desired_y_velocity_= desired_y_velocity;
+      desired_y_velocity_ = desired_y_velocity;
    }
    public double getDesiredYVelocity()
    {
@@ -73,7 +77,7 @@ public class QuadrupedTeleopDesiredVelocity extends Packet<QuadrupedTeleopDesire
 
    public void setDesiredYawVelocity(double desired_yaw_velocity)
    {
-      desired_yaw_velocity_= desired_yaw_velocity;
+      desired_yaw_velocity_ = desired_yaw_velocity;
    }
    public double getDesiredYawVelocity()
    {
@@ -144,7 +148,7 @@ public class QuadrupedTeleopDesiredVelocity extends Packet<QuadrupedTeleopDesire
       builder.append("desired_y_velocity=");
       builder.append(this.desired_y_velocity_);      builder.append(", ");
       builder.append("desired_yaw_velocity=");
-      builder.append(this.desired_yaw_velocity_);      builder.append(", ");
+      builder.append(this.desired_yaw_velocity_);
       builder.append("}");
       return builder.toString();
    }

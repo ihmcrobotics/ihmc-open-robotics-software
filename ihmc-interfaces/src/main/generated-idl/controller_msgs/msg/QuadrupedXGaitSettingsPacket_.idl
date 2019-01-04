@@ -1,7 +1,7 @@
 #ifndef __controller_msgs__msg__QuadrupedXGaitSettingsPacket__idl__
 #define __controller_msgs__msg__QuadrupedXGaitSettingsPacket__idl__
 
-module __controller_msgs
+module controller_msgs
 {
   module msg
   {
@@ -10,7 +10,7 @@ module __controller_msgs
 
       /**
        * This message is part of the IHMC quadruped controller API.
-       * This message sends a desired stepping velocity to the step teleop module.
+       * This message sends the x gait settings used for determining gait.
        */
       @TypeCode(type="controller_msgs::msg::dds_::QuadrupedXGaitSettingsPacket_")
       struct QuadrupedXGaitSettingsPacket
