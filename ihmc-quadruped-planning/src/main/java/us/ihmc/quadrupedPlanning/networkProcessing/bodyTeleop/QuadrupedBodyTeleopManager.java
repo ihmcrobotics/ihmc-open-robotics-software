@@ -4,16 +4,20 @@ import com.google.common.util.concurrent.AtomicDouble;
 import controller_msgs.msg.dds.*;
 import us.ihmc.commons.Conversions;
 import us.ihmc.communication.packets.MessageTools;
+import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.quadrupedBasics.referenceFrames.QuadrupedReferenceFrames;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 
+import java.lang.ref.Reference;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicLong;
 
 public class QuadrupedBodyTeleopManager
 {
+   private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
+
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
    private final YoDouble timestamp = new YoDouble("timestamp", registry);
 
@@ -27,14 +31,16 @@ public class QuadrupedBodyTeleopManager
 
    private final AtomicLong timestampNanos = new AtomicLong();
 
-   private final QuadrupedReferenceFrames referenceFrames;
+   private final ReferenceFrame centerFeetZUpFrame;
 
    private QuadrupedBodyOrientationMessage bodyOrientationMessage = null;
    private QuadrupedBodyTrajectoryMessage bodyTrajectoryMessage = null;
 
+   private final FramePoint3D tempPoint = new FramePoint3D();
+
    public QuadrupedBodyTeleopManager(QuadrupedReferenceFrames referenceFrames, YoVariableRegistry parentRegistry)
    {
-      this.referenceFrames = referenceFrames;
+      centerFeetZUpFrame = referenceFrames.getCenterOfFeetZUpFrameAveragingLowestZHeightsAcrossEnds();
 
       parentRegistry.addChild(registry);
    }
@@ -48,6 +54,7 @@ public class QuadrupedBodyTeleopManager
    {
       paused.set(pause);
    }
+
 
    public void setDesiredBodyOrientation(double yaw, double pitch, double roll, double time)
    {
@@ -71,7 +78,6 @@ public class QuadrupedBodyTeleopManager
    public void update()
    {
       timestamp.set(Conversions.nanosecondsToSeconds(timestampNanos.get()));
-      referenceFrames.updateFrames();
 
       bodyOrientationMessage = null;
       bodyTrajectoryMessage = null;
@@ -115,6 +121,8 @@ public class QuadrupedBodyTeleopManager
       }
    }
 
+
+
    private void populateDesiredBodyTrajectory()
    {
       double desiredX = desiredPositionX.getAndSet(Double.NaN);
@@ -124,6 +132,8 @@ public class QuadrupedBodyTeleopManager
       double desiredPitch = desiredOrientationPitch.getAndSet(Double.NaN);
       double desiredRoll = desiredOrientationRoll.getAndSet(Double.NaN);
       double desiredTime = desiredOrientationTime.getAndSet(Double.NaN);
+
+      ReferenceFrame messageFrame = worldFrame;
 
       bodyTrajectoryMessage = new QuadrupedBodyTrajectoryMessage();
       SE3TrajectoryMessage se3Trajectory = bodyTrajectoryMessage.getSe3Trajectory();
@@ -146,8 +156,10 @@ public class QuadrupedBodyTeleopManager
       }
       if (!Double.isNaN(desiredX) && !Double.isNaN(desiredY))
       {
-         trajectoryPointMessage.getPosition().setX(desiredX);
-         trajectoryPointMessage.getPosition().setY(desiredY);
+         tempPoint.setIncludingFrame(centerFeetZUpFrame, desiredX, desiredY, 0.0);
+         tempPoint.changeFrame(messageFrame);
+         trajectoryPointMessage.getPosition().setX(tempPoint.getX());
+         trajectoryPointMessage.getPosition().setY(tempPoint.getY());
          se3Trajectory.getLinearSelectionMatrix().setXSelected(true);
          se3Trajectory.getLinearSelectionMatrix().setYSelected(true);
       }
