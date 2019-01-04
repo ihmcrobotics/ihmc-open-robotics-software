@@ -221,7 +221,7 @@ public abstract class FootstepPlannerDataSetTest
       }
       else
       {
-         Assert.assertEquals(message, numberOfFailingTests, 0);
+         Assert.assertEquals(message, 0, numberOfFailingTests);
       }
    }
 
