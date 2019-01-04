@@ -276,7 +276,7 @@ public class GenericQuadrupedTestFactory implements QuadrupedTestFactory
    }
 
    @Override
-   public FullRobotModel getFullRobotModel()
+   public FullQuadrupedRobotModel getFullRobotModel()
    {
       return fullRobotModel;
    }
