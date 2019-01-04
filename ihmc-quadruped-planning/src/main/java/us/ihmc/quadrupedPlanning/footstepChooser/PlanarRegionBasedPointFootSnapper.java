@@ -70,7 +70,7 @@ public class PlanarRegionBasedPointFootSnapper implements PointFootSnapper
    @Override
    public Point3DReadOnly snapStep(double xPosition, double yPosition, double minimumZPosition)
    {
-      if (planarRegionsList == null)
+      if (planarRegionsList.isEmpty())
       {
          if (fallbackSnapper != null)
             return fallbackSnapper.snapStep(xPosition, yPosition, minimumZPosition);
