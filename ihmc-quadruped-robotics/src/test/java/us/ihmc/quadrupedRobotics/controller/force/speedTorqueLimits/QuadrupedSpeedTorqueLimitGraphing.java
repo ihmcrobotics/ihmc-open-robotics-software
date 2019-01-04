@@ -1,27 +1,22 @@
 package us.ihmc.quadrupedRobotics.controller.force.speedTorqueLimits;
 
-import java.io.IOException;
-
-import us.ihmc.euclid.tuple3D.Vector3D;
-
 import us.ihmc.commonWalkingControlModules.pushRecovery.PushRobotTestConductor;
-import us.ihmc.quadrupedPlanning.input.QuadrupedTeleopManager;
-import us.ihmc.quadrupedRobotics.QuadrupedForceTestYoVariables;
-import us.ihmc.quadrupedRobotics.QuadrupedMultiRobotTestInterface;
-import us.ihmc.quadrupedRobotics.QuadrupedTestBehaviors;
-import us.ihmc.quadrupedRobotics.QuadrupedTestFactory;
-import us.ihmc.quadrupedRobotics.QuadrupedTestGoals;
+import us.ihmc.commons.thread.ThreadTools;
+import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.quadrupedPlanning.input.RemoteQuadrupedTeleopManager;
+import us.ihmc.quadrupedRobotics.*;
 import us.ihmc.quadrupedRobotics.controller.QuadrupedControlMode;
 import us.ihmc.quadrupedRobotics.simulation.QuadrupedGroundContactModelType;
-import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationConstructionSetTools.util.simulationrunner.GoalOrientedTestConductor;
-import us.ihmc.commons.thread.ThreadTools;
+import us.ihmc.simulationconstructionset.SimulationConstructionSet;
+
+import java.io.IOException;
 
 public abstract class QuadrupedSpeedTorqueLimitGraphing implements QuadrupedMultiRobotTestInterface
 {
    private GoalOrientedTestConductor conductor;
    private QuadrupedForceTestYoVariables variables;
-   private QuadrupedTeleopManager stepTeleopManager;
+   private RemoteQuadrupedTeleopManager stepTeleopManager;
    private PushRobotTestConductor pusher;
 
    public SimulationConstructionSet createSimulation() throws IOException
@@ -34,34 +29,34 @@ public abstract class QuadrupedSpeedTorqueLimitGraphing implements QuadrupedMult
       testFactory.setUseNetworking(true);
       conductor = testFactory.createTestConductor();
       variables = new QuadrupedForceTestYoVariables(conductor.getScs());
-      stepTeleopManager = testFactory.getStepTeleopManager();
+      stepTeleopManager = testFactory.getRemoteStepTeleopManager();
       pusher = new PushRobotTestConductor(conductor.getScs(), "body");
 
       return conductor.getScs();
    }
-   
+
    public void trotAroundSuperAggressively()
    {
       QuadrupedTestBehaviors.readyXGait(conductor, variables, stepTeleopManager);
-      
+
       conductor.addSustainGoal(QuadrupedTestGoals.notFallen(variables));
       conductor.addTerminalGoal(QuadrupedTestGoals.timeInFuture(variables, 1.0));
       conductor.simulate();
 
       double dt = 0.1;
       double phase = 90.0;
-      
+
       while (variables.getYoTime().getDoubleValue() < 20.0)
       {
          try
          {
 //            pusher.applyForce(new Vector3d(0.0, 0.0, -1.0), force, dt);
             phase += dt * 20.0;
-            
-            stepTeleopManager.getXGaitSettings().setEndPhaseShift(180.0);
-            stepTeleopManager.getXGaitSettings().setStepGroundClearance(0.25);
-            stepTeleopManager.getXGaitSettings().setStepDuration(0.55);
-            stepTeleopManager.getXGaitSettings().setEndDoubleSupportDuration(0.0);
+
+            stepTeleopManager.setEndPhaseShift(180.0);
+            stepTeleopManager.setStepGroundClearance(0.25);
+            stepTeleopManager.setStepDuration(0.55);
+            stepTeleopManager.setEndDoubleSupportDuration(0.0);
             double yaw = 0.05 * Math.cos(variables.getYoTime().getDoubleValue());
             double pitch = 0.1 * Math.sin(variables.getYoTime().getDoubleValue());
             double roll = 0.05 * Math.cos(variables.getYoTime().getDoubleValue());
@@ -71,7 +66,7 @@ public abstract class QuadrupedSpeedTorqueLimitGraphing implements QuadrupedMult
             double planarVelocityInputY = 0.2 * Math.cos(variables.getYoTime().getDoubleValue() + Math.PI);
             double planarVelocityInputZ = 0.2 * Math.cos(variables.getYoTime().getDoubleValue());
             stepTeleopManager.setDesiredVelocity(planarVelocityInputX, planarVelocityInputY, planarVelocityInputZ);
-            
+
             conductor.addSustainGoal(QuadrupedTestGoals.notFallen(variables));
             conductor.addTerminalGoal(QuadrupedTestGoals.timeInFuture(variables, dt));
             conductor.simulate();
@@ -81,28 +76,28 @@ public abstract class QuadrupedSpeedTorqueLimitGraphing implements QuadrupedMult
             break;
          }
       }
-      
+
       ThreadTools.sleepForever();
    }
-   
+
    public void pushDownOnBodyUntilLimits()
    {
       QuadrupedTestBehaviors.readyXGait(conductor, variables, stepTeleopManager);
-      
+
       double force = 0.0;
       double forceIncreasePerSec = 200.0;
       double dt = 0.1;
-      
+
       while (true)
       {
          try
          {
             pusher.applyForce(new Vector3D(0.0, 0.0, -1.0), force, dt);
-            
+
             conductor.addSustainGoal(QuadrupedTestGoals.notFallen(variables));
             conductor.addTerminalGoal(QuadrupedTestGoals.timeInFuture(variables, dt));
             conductor.simulate();
-            
+
             force += forceIncreasePerSec * dt;
          }
          catch (AssertionError assertionError)
