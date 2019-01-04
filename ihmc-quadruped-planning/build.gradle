@@ -33,7 +33,7 @@ mainDependencies {
     compile group: "us.ihmc", name: "robot-environment-awareness", version: "source"
     compile group: "us.ihmc", name: "simulation-construction-set-tools-test", version: "source"
     compile group: "us.ihmc", name: "ihmc-robot-data-logger", version: "source"
-
+    compile group: "us.ihmc", name: "ihmc-path-planning", version: "source"
 }
 
 testDependencies {
