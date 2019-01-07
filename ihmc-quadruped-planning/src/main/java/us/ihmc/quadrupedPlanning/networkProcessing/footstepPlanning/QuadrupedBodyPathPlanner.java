@@ -20,6 +20,7 @@ import us.ihmc.quadrupedPlanning.footstepChooser.PlanarRegionBasedPointFootSnapp
 import us.ihmc.quadrupedPlanning.footstepChooser.PointFootSnapperParameters;
 import us.ihmc.quadrupedPlanning.pathPlanning.SplinePathPlanner;
 import us.ihmc.quadrupedPlanning.stepStream.QuadrupedXGaitStepStream;
+import us.ihmc.quadrupedPlanning.velocityPlanning.DefaultConstantAccelerationBodyPathParameters;
 import us.ihmc.quadrupedPlanning.velocityPlanning.QuadrupedConstantAccelerationBodyPathPlanner;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.robotSide.RobotQuadrant;
@@ -56,7 +57,7 @@ public class QuadrupedBodyPathPlanner
       xGaitSettings = new YoQuadrupedXGaitSettings(defaultXGaitSettings, registry);
       firstStepDelay.set(0.5);
 
-      quadBodyPathPlanner = new QuadrupedConstantAccelerationBodyPathPlanner(registry);
+      quadBodyPathPlanner = new QuadrupedConstantAccelerationBodyPathPlanner(new DefaultConstantAccelerationBodyPathParameters(), registry);
       waypointBasedPath = new QuadrupedWaypointBasedBodyPathProvider(referenceFrames, timestamp, graphicsListRegistry, registry);
       stepStream = new QuadrupedXGaitStepStream(xGaitSettings, timestamp, waypointBasedPath, firstStepDelay, registry);
 
