@@ -28,8 +28,6 @@ public class QuadrupedConstantAccelerationBodyPathPlanner
 
    private static final Vector2DReadOnly forwardHeading = new Vector2D(1.0, 0.0);
 
-   private final YoDouble maxForwardVelocity = new YoDouble("maxForwardVelocity", registry);
-   private final YoDouble maxLateralVelocity = new YoDouble("maxLateralVelocity", registry);
    private final YoDouble maxYawRate = new YoDouble("maxYawRate", registry);
 
    private final YoDouble maxForwardAcceleration = new YoDouble("maxForwardAcceleration", registry);
@@ -49,10 +47,20 @@ public class QuadrupedConstantAccelerationBodyPathPlanner
 
    private final PoseReferenceFrame headingFrame = new PoseReferenceFrame("headingFrame", ReferenceFrame.getWorldFrame());
 
-   public QuadrupedConstantAccelerationBodyPathPlanner(YoVariableRegistry parentRegistry)
+   public QuadrupedConstantAccelerationBodyPathPlanner(ConstantAccelerationBodyPathParameters pathParameters, YoVariableRegistry parentRegistry)
    {
       robotSpeed.set(RobotSpeed.MEDIUM);
       discretelyTraverseWaypoints.set(true);
+
+      maxYawRate.set(pathParameters.getMaxYawRate());
+
+      maxForwardAcceleration.set(pathParameters.getMaxForwardAcceleration());
+      maxLateralAcceleration.set(pathParameters.getMaxLateralAcceleration());
+      maxYawAcceleration.set(pathParameters.getMaxYawAcceleration());
+
+      fastVelocity.set(pathParameters.getFastVelocity());
+      mediumVelocity.set(pathParameters.getMediumVelocity());
+      slowVelocity.set(pathParameters.getSlowVelocity());
 
       parentRegistry.addChild(registry);
    }
@@ -191,7 +199,7 @@ public class QuadrupedConstantAccelerationBodyPathPlanner
             // add accelerating waypoint
             bodyPathPlan.addWaypoint(new Pose2D(currentPosition, currentYaw), currentLinearVelocity, 0.0 , currentTime);
 
-            double timeAtMaxVelocity = (Math.abs(distanceToTravel) - Math.abs(2.0 * distanceWhileAccelerating)) / maxForwardVelocity.getDoubleValue();
+            double timeAtMaxVelocity = (Math.abs(distanceToTravel) - Math.abs(2.0 * distanceWhileAccelerating)) / desiredSpeed;
 
             // add constant velocity waypoint
             desiredHeading.set(currentLinearVelocity);
