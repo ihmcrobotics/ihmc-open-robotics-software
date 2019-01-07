@@ -1,9 +1,10 @@
-package us.ihmc.quadrupedPlanning.pathPlanning;
+package us.ihmc.quadrupedPlanning.velocityPlanning;
 
-import com.vividsolutions.jts.math.Vector2D;
 import gnu.trove.list.array.TDoubleArrayList;
 import us.ihmc.euclid.geometry.Pose2D;
 import us.ihmc.euclid.geometry.interfaces.Pose2DReadOnly;
+import us.ihmc.euclid.tuple2D.Vector2D;
+import us.ihmc.euclid.tuple2D.interfaces.Vector2DReadOnly;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -19,7 +20,7 @@ public class QuadrupedBodyPathPlan
    private final TDoubleArrayList bodyPathYawRateWaypoints = new TDoubleArrayList();
    private final TDoubleArrayList bodyPathTimes = new TDoubleArrayList();
 
-   public void addWaypoint(Pose2DReadOnly waypointPose, Vector2D linearVelocity, double yawRate, double time)
+   public void addWaypoint(Pose2DReadOnly waypointPose, Vector2DReadOnly linearVelocity, double yawRate, double time)
    {
       bodyPathPoseWaypoints.add(new Pose2D(waypointPose));
       bodyPathLinearVelocityWaypoints.add(new Vector2D(linearVelocity));
