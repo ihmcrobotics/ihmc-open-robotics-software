@@ -14,6 +14,8 @@ public class QuadrupedBodyPathPlan
    private final Pose2D startPose = new Pose2D();
    private final Pose2D goalPose = new Pose2D();
 
+   private boolean isExpressedInAbsoluteTime = true;
+
    private final List<Pose2D> bodyPathPoseWaypoints = new ArrayList<>();
    private final List<Vector2D> bodyPathLinearVelocityWaypoints = new ArrayList<>();
 
@@ -45,6 +47,41 @@ public class QuadrupedBodyPathPlan
    public void setGoalPose(Pose2DReadOnly goalPose)
    {
       this.goalPose.set(goalPose);
+   }
+
+   public void setExpressedInAbsoluteTime(boolean isExpressedInAbsoluteTime)
+   {
+      this.isExpressedInAbsoluteTime = isExpressedInAbsoluteTime;
+   }
+
+   public boolean isExpressedInAbsoluteTime()
+   {
+      return isExpressedInAbsoluteTime;
+   }
+
+   public int size()
+   {
+      return bodyPathPoseWaypoints.size();
+   }
+
+   public double getWaypointTime(int index)
+   {
+      return bodyPathTimes.get(index);
+   }
+
+   public Pose2DReadOnly getWaypointPose(int index)
+   {
+      return bodyPathPoseWaypoints.get(index);
+   }
+
+   public Vector2D getWaypointLinearVelocity(int index)
+   {
+      return bodyPathLinearVelocityWaypoints.get(index);
+   }
+
+   public double getWaypointYawRate(int index)
+   {
+      return bodyPathYawRateWaypoints.get(index);
    }
 
 }

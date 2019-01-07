@@ -4,18 +4,26 @@ import controller_msgs.msg.dds.EuclideanTrajectoryPointMessage;
 import controller_msgs.msg.dds.QuadrupedBodyPathPlanMessage;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.ROS2Tools.MessageTopicNameGenerator;
+import us.ihmc.euclid.geometry.Pose2D;
+import us.ihmc.euclid.geometry.interfaces.Pose2DReadOnly;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FramePose2D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.tuple2D.Vector2D;
+import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
+import us.ihmc.euclid.tuple2D.interfaces.Vector2DReadOnly;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
+import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicVector;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsList;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.quadrupedBasics.referenceFrames.QuadrupedReferenceFrames;
 import us.ihmc.quadrupedCommunication.QuadrupedControllerAPIDefinition;
+import us.ihmc.quadrupedPlanning.velocityPlanning.QuadrupedBodyPathPlan;
 import us.ihmc.robotics.math.trajectories.waypoints.MultipleWaypointsPositionTrajectoryGenerator;
 import us.ihmc.ros2.Ros2Node;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
@@ -33,7 +41,7 @@ public class QuadrupedWaypointBasedBodyPathProvider implements QuadrupedPlanarBo
 
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
 
-   private final AtomicReference<QuadrupedBodyPathPlanMessage> bodyPathPlanMessage = new AtomicReference<>();
+   private final AtomicReference<QuadrupedBodyPathPlan> bodyPathPlan = new AtomicReference<>();
    private final YoDouble timestamp;
    private final MultipleWaypointsPositionTrajectoryGenerator trajectory = new MultipleWaypointsPositionTrajectoryGenerator("bodyPath", worldFrame, registry);
    private final FramePoint3D trajectoryValue = new FramePoint3D(worldFrame);
@@ -80,9 +88,9 @@ public class QuadrupedWaypointBasedBodyPathProvider implements QuadrupedPlanarBo
       parentRegistry.addChild(registry);
    }
 
-   public void setBodyPathPlan(QuadrupedBodyPathPlanMessage message)
+   public void setBodyPathPlan(QuadrupedBodyPathPlan bodyPathPlan)
    {
-      bodyPathPlanMessage.set(message);
+      this.bodyPathPlan.set(bodyPathPlan);
    }
 
    @Override
@@ -91,29 +99,39 @@ public class QuadrupedWaypointBasedBodyPathProvider implements QuadrupedPlanarBo
       trajectory.clear();
       appendCurrentPoseAsWaypoint();
 
-      QuadrupedBodyPathPlanMessage bodyPathPlanMessage = this.bodyPathPlanMessage.getAndSet(null);
-      List<EuclideanTrajectoryPointMessage> originalBodyPathPoints = bodyPathPlanMessage.getBodyPathPoints();
+      QuadrupedBodyPathPlan bodyPathPlan = this.bodyPathPlan.getAndSet(null);
 
       double currentTime = timestamp.getDoubleValue();
-      boolean isExpressedInAbsoluteTime = bodyPathPlanMessage.getIsExpressedInAbsoluteTime();
-      for (int i = 0; i < originalBodyPathPoints.size(); i++)
-      {
-         EuclideanTrajectoryPointMessage waypoint = originalBodyPathPoints.get(i);
+      boolean isExpressedInAbsoluteTime = bodyPathPlan.isExpressedInAbsoluteTime();
 
+
+      for (int i = 0; i < bodyPathPlan.size(); i++)
+      {
+         double time = bodyPathPlan.getWaypointTime(i);
          if(!isExpressedInAbsoluteTime)
          {
-            waypoint.setTime(waypoint.getTime() + currentTime);
+            time += currentTime;
          }
 
-         if(waypoint.getTime() < currentTime)
+         if (time < currentTime)
          {
             continue;
          }
          else
          {
-            trajectory.appendWaypoint(waypoint.getTime(), waypoint.getPosition(), waypoint.getLinearVelocity());
+            Point2DReadOnly position = bodyPathPlan.getWaypointPose(i).getPosition();
+            double yaw = bodyPathPlan.getWaypointPose(i).getYaw();
+            Vector2DReadOnly velocity = bodyPathPlan.getWaypointLinearVelocity(i);
+            double yawRate = bodyPathPlan.getWaypointYawRate(i);
+
+            Point3DReadOnly trajectoryPositionKnot = new Point3D(position.getX(), position.getY(), yaw);
+            Vector3DReadOnly trajectoryVelocityKnot = new Vector3D(velocity.getX(), velocity.getY(), yawRate);
+
+            trajectory.appendWaypoint(time, trajectoryPositionKnot, trajectoryVelocityKnot);
          }
       }
+
+
 
       trajectory.initialize();
       setupGraphics();
@@ -163,7 +181,7 @@ public class QuadrupedWaypointBasedBodyPathProvider implements QuadrupedPlanarBo
 
    public boolean bodyPathIsAvailable()
    {
-      return bodyPathPlanMessage.get() != null;
+      return bodyPathPlan.get() != null;
    }
 
    public boolean isDone()
@@ -173,6 +191,28 @@ public class QuadrupedWaypointBasedBodyPathProvider implements QuadrupedPlanarBo
 
    public void setBodyPathPlanMessage(QuadrupedBodyPathPlanMessage bodyPathPlanMessage)
    {
-      this.bodyPathPlanMessage.set(bodyPathPlanMessage);
+
+      this.bodyPathPlan.set(convertToBodyPathPlan(bodyPathPlanMessage));
+   }
+
+   private static QuadrupedBodyPathPlan convertToBodyPathPlan(QuadrupedBodyPathPlanMessage message)
+   {
+      QuadrupedBodyPathPlan pathPlan = new QuadrupedBodyPathPlan();
+      List<EuclideanTrajectoryPointMessage> trajectoryPoints = message.getBodyPathPoints();
+      boolean isExpressedInAbsoluteTime = message.getIsExpressedInAbsoluteTime();
+
+      pathPlan.setExpressedInAbsoluteTime(isExpressedInAbsoluteTime);
+
+      for (int i = 0; i < trajectoryPoints.size(); i++)
+      {
+         EuclideanTrajectoryPointMessage point = trajectoryPoints.get(i);
+         Pose2DReadOnly pose = new Pose2D(point.getPosition().getX(), point.getPosition().getY(), point.getPosition().getZ());
+         Vector2DReadOnly linearVelocity = new Vector2D(point.getLinearVelocity().getX(), point.getLinearVelocity().getY());
+         double yawRate = point.getLinearVelocity().getZ();
+         double time = point.getTime();
+         pathPlan.addWaypoint(pose, linearVelocity, yawRate, time);
+      }
+
+      return pathPlan;
    }
 }
