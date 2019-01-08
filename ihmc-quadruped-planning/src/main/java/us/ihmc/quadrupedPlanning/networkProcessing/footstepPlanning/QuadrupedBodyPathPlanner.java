@@ -110,7 +110,6 @@ public class QuadrupedBodyPathPlanner
    {
       timestamp.set(Conversions.nanosecondsToSeconds(timestampNanos.get()));
 //      paused.set(false);
-      stepStream.onEntry();
    }
 
    public void compute()
@@ -124,6 +123,8 @@ public class QuadrupedBodyPathPlanner
       quadBodyPathPlanner.computePlan();
 
       waypointBasedPath.setBodyPathPlan(quadBodyPathPlanner.getPlan());
+
+      stepStream.onEntry();
    }
 
    public void update()

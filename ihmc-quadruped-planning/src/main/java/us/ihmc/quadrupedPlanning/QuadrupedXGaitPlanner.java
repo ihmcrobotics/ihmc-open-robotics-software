@@ -46,7 +46,7 @@ public class QuadrupedXGaitPlanner
 
    public void computeInitialPlan(QuadrupedPlanarFootstepPlan footstepPlan, RobotQuadrant initialStepQuadrant, double timeAtSoS)
    {
-      bodyPathProvider.initialize();
+//      bodyPathProvider.initialize();
 
       // initialize nominal support rectangle
       for (RobotQuadrant robotQuadrant : RobotQuadrant.values)

@@ -9,6 +9,7 @@ public class QuadrupedNetworkModuleParameters
    private boolean useRobotEnvironmentAwarenessModule;
    private boolean useBodyHeightTeleopModule;
    private boolean useStepTeleopModule;
+   private boolean useFootstepPlanningModule;
    private boolean visualizeStepTeleopModule;
    private boolean useBodyTeleopModule;
    private boolean useXBoxModule;
@@ -34,6 +35,16 @@ public class QuadrupedNetworkModuleParameters
    public boolean isBodyHeightTeleopModuleEnabled()
    {
       return useBodyHeightTeleopModule;
+   }
+
+   public void enableFootstepPlanningModule(boolean enable)
+   {
+      this.useFootstepPlanningModule = enable;
+   }
+
+   public boolean isFootstepPlanningModuleEnabled()
+   {
+      return useFootstepPlanningModule;
    }
 
    public void enableStepTeleopModule(boolean enable)

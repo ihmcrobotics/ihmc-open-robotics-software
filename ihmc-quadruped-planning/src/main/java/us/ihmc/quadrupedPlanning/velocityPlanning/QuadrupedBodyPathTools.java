@@ -6,11 +6,13 @@ public class QuadrupedBodyPathTools
 {
    private static double velocityEpsilonForSameValue = 1e-4;
 
-   public static double computeTimeToAchieveHeading(double currentYaw, double currentYawRate, double desiredYaw, double desiredYawRate, double maxRate, double maxAcceleration)
+   public static double computeTimeToAchieveHeading(double currentYaw, double currentYawRate, double desiredYaw, double desiredYawRate, double maxRate,
+                                                    double maxAcceleration)
    {
       double angleDelta = desiredYaw - currentYaw;
       double accelerationSign = Math.signum(angleDelta);
-      double timeToAccelerateWithNoMaxVelocity = computeTimeToAccelerateToAchieveValueWithNoMaxRate(currentYaw, currentYawRate, desiredYaw, desiredYawRate, maxAcceleration);
+      double timeToAccelerateWithNoMaxVelocity = computeTimeToAccelerateToAchieveValueWithNoMaxRate(currentYaw, currentYawRate, desiredYaw, desiredYawRate,
+                                                                                                    maxAcceleration);
       double maxVelocity = currentYawRate + accelerationSign * maxAcceleration * timeToAccelerateWithNoMaxVelocity;
 
       if (Math.abs(maxVelocity) > maxRate)
@@ -18,7 +20,8 @@ public class QuadrupedBodyPathTools
          double timeToAccelerate = (maxRate - Math.abs(currentYawRate)) / maxAcceleration;
          double distanceWhileAccelerating = currentYawRate * timeToAccelerate + 0.5 * accelerationSign * maxAcceleration * MathTools.square(timeToAccelerate);
          double timeToDecelerate = Math.abs(accelerationSign - desiredYawRate) / maxAcceleration;
-         double distanceWhileDecelerating = accelerationSign * maxRate * timeToDecelerate - 0.5 * accelerationSign * maxAcceleration * MathTools.square(timeToDecelerate);
+         double distanceWhileDecelerating =
+               accelerationSign * maxRate * timeToDecelerate - 0.5 * accelerationSign * maxAcceleration * MathTools.square(timeToDecelerate);
 
          double timeAtConstantVelocity = (Math.abs(angleDelta) - distanceWhileAccelerating - distanceWhileDecelerating) / maxRate;
 
@@ -30,21 +33,21 @@ public class QuadrupedBodyPathTools
 
          return timeToAccelerateWithNoMaxVelocity + timeToDecelerate;
       }
-
    }
 
-   public static double computeTimeToAccelerateToAchieveValueWithNoMaxRate(double currentValue, double currentRate, double desiredValue, double desiredRate, double maxAcceleration)
+   public static double computeTimeToAccelerateToAchieveValueWithNoMaxRate(double currentValue, double currentRate, double desiredValue, double desiredRate,
+                                                                           double maxAcceleration)
    {
-      double velocityDelta = 1.0 / (2.0 * maxAcceleration) * (MathTools.square(currentRate) - MathTools.square(desiredRate));
       double angleDelta = desiredValue - currentValue;
-      double a = Math.signum(angleDelta) * maxAcceleration;
+      double motionDirection = Math.signum(desiredValue - currentValue);
+      double acceleration = motionDirection * maxAcceleration;
+      double velocityDelta = 1.0 / (2.0 * acceleration) * (MathTools.square(currentRate) - MathTools.square(desiredRate));
+      double a = acceleration;
       double b = 2.0 * currentRate;
       double c = -angleDelta + velocityDelta;
 
-      return positiveQuadraticSolution(a, b, c);
+      return largestQuadraticSolution(a, b, c);
    }
-
-
 
    private static double canReachMaximumRate(double currentPosition, double desiredPosition, double maxRate, double maxAcceleration)
    {
@@ -52,7 +55,6 @@ public class QuadrupedBodyPathTools
 
       return 0.0;
    }
-
 
    private static double getDistanceCoveredOverDuration(double initialRate, double constantAcceleration, double duration)
    {
@@ -72,9 +74,18 @@ public class QuadrupedBodyPathTools
       return Math.abs(desiredRate - currentRate) / acceleration;
    }
 
-   private static double positiveQuadraticSolution(double a, double b, double c)
+   static double largestQuadraticSolution(double a, double b, double c)
    {
       double radical = Math.sqrt(MathTools.square(b) - 4.0 * a * c);
-      return (-b + radical) / (2.0 * a);
+
+      if (a > 0)
+      {
+         return (-b + radical) / (2.0 * a);
+      }
+      else
+      {
+         return (-b - radical) / (2.0 * a);
+      }
    }
+
 }

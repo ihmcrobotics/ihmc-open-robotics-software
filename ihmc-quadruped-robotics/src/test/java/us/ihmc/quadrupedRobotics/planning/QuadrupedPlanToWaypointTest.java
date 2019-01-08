@@ -85,13 +85,16 @@ public abstract class QuadrupedPlanToWaypointTest implements QuadrupedMultiRobot
       planningRequestPacket.getBodyOrientationInWorld().setYawPitchRoll(variables.getBodyEstimateYaw(), variables.getBodyEstimatePitch(),
                                                                         variables.getBodyEstimateRoll());
 
-      planningRequestPacket.getGoalPositionInWorld().set(1.5, 0.0, 0.0);
+      planningRequestPacket.getGoalPositionInWorld().set(1.5, 0.5, 0.0);
+//      planningRequestPacket.getGoalOrientationInWorld().setToYawQuaternion(-Math.PI * 0.25);
 
       stepTeleopManager.publishPlanningRequest(planningRequestPacket);
 
       conductor.addWaypointGoal(YoVariableTestGoal.doubleWithinEpsilon(variables.getRobotBodyX(), 1.5, 0.05));
-      conductor.addWaypointGoal(YoVariableTestGoal.doubleWithinEpsilon(variables.getRobotBodyY(), 0.0, 0.05));
-      conductor.addTimeLimit(variables.getYoTime(), 10.0);
+      conductor.addWaypointGoal(YoVariableTestGoal.doubleWithinEpsilon(variables.getRobotBodyY(), 0.5, 0.05));
+      conductor.addWaypointGoal(YoVariableTestGoal.doubleWithinEpsilon(variables.getRobotBodyYaw(), -Math.PI * 0.25, 0.25));
+      conductor.addTimeLimit(variables.getYoTime(), 20.0);
+      conductor.addDurationGoal(variables.getYoTime(), 20.0);
       conductor.simulate();
    }
 
