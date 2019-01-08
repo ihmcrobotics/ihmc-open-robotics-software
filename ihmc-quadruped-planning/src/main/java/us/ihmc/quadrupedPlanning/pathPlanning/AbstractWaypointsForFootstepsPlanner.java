@@ -53,4 +53,17 @@ public abstract class AbstractWaypointsForFootstepsPlanner implements WaypointsF
    {
       return waypoints;
    }
+
+   @Override
+   public FramePose3DReadOnly getInitialBodyPose()
+   {
+      return bodyStartPose;
+   }
+
+   @Override
+   public FramePose3DReadOnly getGoalBodyPose()
+   {
+      return bodyGoalPose;
+   }
+
 }

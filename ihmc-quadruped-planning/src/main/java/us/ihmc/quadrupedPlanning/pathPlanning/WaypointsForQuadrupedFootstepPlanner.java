@@ -18,4 +18,7 @@ public interface WaypointsForQuadrupedFootstepPlanner
    List<Point3D> getWaypoints();
 
    void planWaypoints();
+
+   FramePose3DReadOnly getInitialBodyPose();
+   FramePose3DReadOnly getGoalBodyPose();
 }

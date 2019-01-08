@@ -68,8 +68,10 @@ public class QuadrupedFootstepPlanningController extends QuadrupedToolboxControl
 
    public void processFootstepPlanningRequest(QuadrupedFootstepPlanningRequestPacket footstepPlanningRequestPacket)
    {
-      FramePose3D initialPose = new FramePose3D(ReferenceFrame.getWorldFrame(), footstepPlanningRequestPacket.getBodyPositionInWorld(), footstepPlanningRequestPacket.getBodyOrientationInWorld());
-      FramePose3D goalPose = new FramePose3D(ReferenceFrame.getWorldFrame(), footstepPlanningRequestPacket.getGoalPositionInWorld(), footstepPlanningRequestPacket.getGoalOrientationInWorld());
+      FramePose3D initialPose = new FramePose3D(ReferenceFrame.getWorldFrame(), footstepPlanningRequestPacket.getBodyPositionInWorld(),
+                                                footstepPlanningRequestPacket.getBodyOrientationInWorld());
+      FramePose3D goalPose = new FramePose3D(ReferenceFrame.getWorldFrame(), footstepPlanningRequestPacket.getGoalPositionInWorld(),
+                                             footstepPlanningRequestPacket.getGoalOrientationInWorld());
 
       QuadrupedFootstepPlannerGoal goal = new QuadrupedFootstepPlannerGoal();
       goal.setGoalPose(goalPose);

@@ -113,7 +113,7 @@ public class QuadrupedConstantAccelerationBodyPathPlanner
 
          desiredHeading.sub(nextWaypoint, currentPosition);
          desiredHeading.normalize();
-         double desiredYaw = desiredHeading.angle(forwardHeading);
+         double desiredYaw = forwardHeading.angle(desiredHeading);
 
          double timeToAccelerateTurnWithNoMaxRate = QuadrupedBodyPathTools.computeTimeToAccelerateToAchieveValueWithNoMaxRate(currentYaw, 0.0, desiredYaw, 0.0, maxYawAcceleration.getDoubleValue());
          boolean reachesMaxYawRate = maxYawAcceleration.getDoubleValue() * timeToAccelerateTurnWithNoMaxRate > maxYawRate.getValue();
@@ -243,6 +243,59 @@ public class QuadrupedConstantAccelerationBodyPathPlanner
             currentPosition.add(desiredHeading);
 
             currentTime += timeToAccelerateDistanceWithNoMaxRate;
+
+            bodyPathPlan.addWaypoint(new Pose2D(currentPosition, currentYaw), zeroVelocity, 0.0, currentTime);
+         }
+      }
+
+      double goalYaw = bodyPathWaypoints.getGoalPose().getYaw();
+      if (!MathTools.epsilonEquals(currentYaw, goalYaw, QuadrupedBodyPathTools.yawEpsilonForSameValue))
+      {
+         double timeToAccelerateTurnWithNoMaxRate = QuadrupedBodyPathTools.computeTimeToAccelerateToAchieveValueWithNoMaxRate(currentYaw, 0.0, goalYaw, 0.0, maxYawAcceleration.getDoubleValue());
+         boolean reachesMaxYawRate = maxYawAcceleration.getDoubleValue() * timeToAccelerateTurnWithNoMaxRate > maxYawRate.getValue();
+
+         // handle turning
+         if (reachesMaxYawRate)
+         {
+            double angleDelta = goalYaw - currentYaw;
+            double errorSign = Math.signum(angleDelta);
+            double timeToAccelerate = maxYawRate.getDoubleValue() / maxYawAcceleration.getValue();
+            double deltaWhileAccelerating = 0.5 * errorSign * maxYawAcceleration.getValue() * MathTools.square(timeToAccelerate);
+
+            currentYaw += deltaWhileAccelerating ;
+            currentTime += timeToAccelerate;
+
+            // add accelerating waypoint
+            bodyPathPlan.addWaypoint(new Pose2D(currentPosition, currentYaw), zeroVelocity, errorSign * maxYawRate.getDoubleValue(), currentTime);
+
+            double timeForMaxVelocity = (Math.abs(angleDelta) - Math.abs(2.0 * deltaWhileAccelerating)) / maxYawRate.getDoubleValue();
+
+            // add constant velocity waypoint
+            currentYaw += timeForMaxVelocity * maxYawRate.getDoubleValue() * errorSign;
+            currentTime += timeForMaxVelocity;
+
+            bodyPathPlan.addWaypoint(new Pose2D(currentPosition, currentYaw), zeroVelocity, errorSign * maxYawRate.getDoubleValue(), currentTime);
+
+            currentYaw += deltaWhileAccelerating;
+            currentTime += timeToAccelerate;
+
+            bodyPathPlan.addWaypoint(new Pose2D(currentPosition, currentYaw), zeroVelocity, 0.0, currentTime);
+         }
+         else
+         {
+            double angleDelta = goalYaw - currentYaw;
+            double errorSign = Math.signum(angleDelta);
+
+            double deltaWhileAccelerating = 0.5 * errorSign * maxYawAcceleration.getDoubleValue() * MathTools.square(timeToAccelerateTurnWithNoMaxRate);
+            double velocityAfterAccelerating = errorSign * maxYawAcceleration.getDoubleValue() * timeToAccelerateTurnWithNoMaxRate;
+
+            currentYaw += deltaWhileAccelerating ;
+            currentTime += timeToAccelerateTurnWithNoMaxRate;
+
+            bodyPathPlan.addWaypoint(new Pose2D(currentPosition, currentYaw), zeroVelocity, velocityAfterAccelerating, currentTime);
+
+            currentYaw += deltaWhileAccelerating;
+            currentTime += timeToAccelerateTurnWithNoMaxRate;
 
             bodyPathPlan.addWaypoint(new Pose2D(currentPosition, currentYaw), zeroVelocity, 0.0, currentTime);
          }
