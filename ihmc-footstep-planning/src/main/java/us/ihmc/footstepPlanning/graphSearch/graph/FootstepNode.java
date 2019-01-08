@@ -22,9 +22,7 @@ public class FootstepNode
    private final RobotSide robotSide;
 
    private Point2D midFootPoint;
-
    private final int hashCode;
-   private final int planarRegionsHashCode;
 
    public FootstepNode(double x, double y)
    {
@@ -39,7 +37,6 @@ public class FootstepNode
       this.robotSide = robotSide;
 
       hashCode = computeHashCode(this);
-      planarRegionsHashCode = computePlanarRegionsHashCode(this);
    }
 
    public double getX()
@@ -111,11 +108,6 @@ public class FootstepNode
    public int hashCode()
    {
       return hashCode;
-   }
-
-   public int getPlanarRegionsHashCode()
-   {
-      return planarRegionsHashCode;
    }
 
    private static int computeHashCode(FootstepNode node)
