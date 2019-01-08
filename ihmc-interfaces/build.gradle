@@ -8,7 +8,7 @@ buildscript {
       jcenter()
    }
    dependencies {
-      classpath "us.ihmc:ros2-msg-to-pubsub-generator:0.13.2"
+      classpath "us.ihmc:ros2-msg-to-pubsub-generator:0.13.3"
 //      classpath "com.bmuschko:gradle-docker-plugin:4.0.1"
    }
 }
@@ -41,18 +41,18 @@ mainDependencies {
    compile group: "us.ihmc", name: "euclid", version: "0.11.0"
    compile group: "us.ihmc", name: "euclid-geometry", version: "0.11.0"
    compile group: "us.ihmc", name: "ihmc-pub-sub", version: "0.10.1"
-   compile group: "us.ihmc", name: "ros2-common-interfaces", version: "0.13.2"
+   compile group: "us.ihmc", name: "ros2-common-interfaces", version: "0.13.3"
    compile group: "us.ihmc", name: "ihmc-commons", version: "0.24.0"
 }
 
 testDependencies {
    compile group: "us.ihmc", name: "ihmc-ci-core-api", version: "0.18.0"
-   compile group: "us.ihmc", name: "ihmc-ros2-library", version: "0.13.2"
+   compile group: "us.ihmc", name: "ihmc-ros2-library", version: "0.13.3"
 }
 
 generatorDependencies {
    compile group: "us.ihmc", name: "ihmc-commons", version: "0.24.0"
-   compile group: "us.ihmc", name: "ros2-msg-to-pubsub-generator", version: "0.13.2"
+   compile group: "us.ihmc", name: "ros2-msg-to-pubsub-generator", version: "0.13.3"
 }
 
 //task buildImage(type: com.bmuschko.gradle.docker.tasks.image.DockerBuildImage) {
