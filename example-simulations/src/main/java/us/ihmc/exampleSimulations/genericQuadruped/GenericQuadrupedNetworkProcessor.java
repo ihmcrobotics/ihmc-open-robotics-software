@@ -17,6 +17,7 @@ public class GenericQuadrupedNetworkProcessor extends QuadrupedNetworkProcessor
 
    static
    {
+      networkModuleParameters.enableFootstepPlanningModule(true);
       networkModuleParameters.enableStepTeleopModule(true);
       networkModuleParameters.enableBodyTeleopModule(true);
       networkModuleParameters.enableBodyHeightTeleopModule(true);

@@ -8,6 +8,7 @@ import us.ihmc.quadrupedPlanning.QuadrupedXGaitSettings;
 import us.ihmc.quadrupedPlanning.QuadrupedXGaitSettingsReadOnly;
 import us.ihmc.quadrupedPlanning.footstepChooser.PointFootSnapperParameters;
 import us.ihmc.quadrupedPlanning.networkProcessing.bodyTeleop.QuadrupedBodyTeleopModule;
+import us.ihmc.quadrupedPlanning.networkProcessing.footstepPlanning.QuadrupedFootstepPlanningModule;
 import us.ihmc.quadrupedPlanning.networkProcessing.heightTeleop.QuadrupedBodyHeightTeleopModule;
 import us.ihmc.quadrupedPlanning.networkProcessing.stepTeleop.QuadrupedStepTeleopModule;
 import us.ihmc.quadrupedPlanning.networkProcessing.xBox.QuadrupedXBoxModule;
@@ -35,6 +36,7 @@ public class QuadrupedNetworkProcessor
                                     QuadrupedXGaitSettingsReadOnly xGaitSettings, PointFootSnapperParameters pointFootSnapperParameters,
                                     DomainFactory.PubSubImplementation pubSubImplementation)
    {
+      tryToStartModule(() -> setupFootstepPlanningModule(robotModel, xGaitSettings, pointFootSnapperParameters, params, pubSubImplementation));
       tryToStartModule(() -> setupStepTeleopModule(robotModel, xGaitSettings, pointFootSnapperParameters, params, pubSubImplementation));
       tryToStartModule(() -> setupBodyHeightTeleopModule(robotModel, params, nominalHeight, pubSubImplementation));
       tryToStartModule(() -> setupBodyTeleopModule(robotModel, params, pubSubImplementation));
@@ -66,6 +68,17 @@ public class QuadrupedNetworkProcessor
                                                        pubSubImplementation);
       modules.add(stepTeleopModule);
    }
+
+   private void setupFootstepPlanningModule(FullQuadrupedRobotModelFactory modelFactory, QuadrupedXGaitSettingsReadOnly xGaitSettings,
+                                      PointFootSnapperParameters pointFootSnapperParameters, QuadrupedNetworkModuleParameters params,
+                                      DomainFactory.PubSubImplementation pubSubImplementation)
+   {
+      if (!params.isFootstepPlanningModuleEnabled())
+         return;
+      modules.add(new QuadrupedFootstepPlanningModule(modelFactory, xGaitSettings, pointFootSnapperParameters, null, params.visualizeStepTeleopModuleEnabled(),
+                                                             pubSubImplementation));
+   }
+
 
    private void setupBodyHeightTeleopModule(FullQuadrupedRobotModelFactory modelFactory, QuadrupedNetworkModuleParameters params, double nominalHeight,
                                             DomainFactory.PubSubImplementation pubSubImplementation)
