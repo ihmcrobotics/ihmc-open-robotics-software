@@ -4,6 +4,8 @@ import us.ihmc.commons.MathTools;
 
 public class QuadrupedBodyPathTools
 {
+   private static double positionEpsilonForSameValue = 1e-2;
+   static double yawEpsilonForSameValue = 1e-2;
    private static double velocityEpsilonForSameValue = 1e-4;
 
    public static double computeTimeToAchieveHeading(double currentYaw, double currentYawRate, double desiredYaw, double desiredYawRate, double maxRate,
