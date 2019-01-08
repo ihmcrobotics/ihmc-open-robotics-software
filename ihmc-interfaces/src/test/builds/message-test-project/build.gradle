@@ -9,56 +9,29 @@ buildscript {
    }
    dependencies {
       classpath "us.ihmc:ros2-msg-to-pubsub-generator:0.13.3"
-//      classpath "com.bmuschko:gradle-docker-plugin:4.0.1"
    }
 }
 
 plugins {
    id("us.ihmc.ihmc-build") version "0.15.5"
-   id("us.ihmc.ihmc-ci-plugin") version "0.18.0"
    id("us.ihmc.log-tools") version "0.2.2"
 }
 
-//apply plugin: "com.bmuschko.docker-remote-api"
-
 ihmc {
-   loadProductProperties("../product.properties")
+   group = "us.ihmc"
+   version = "0.0"
 
    configureDependencyResolution()
    resourceDirectory("main", "messages")
    resourceDirectory("main", "generated-idl")
    javaDirectory("main", "generated-java")
-   resourceDirectory("generator", "docker")
    configurePublications()
 }
 
-testSuites {
-   def prefix = "LIBS-IHMCOPENROBOTICSSOFTWARE"
-   bambooPlanKeys = [prefix + "FAST", prefix + "INDEVELOPMENT", prefix + "UI", prefix + "VIDEO"]
-}
-
 mainDependencies {
-   compile group: "us.ihmc", name: "euclid", version: "0.11.0"
-   compile group: "us.ihmc", name: "euclid-geometry", version: "0.11.0"
    compile group: "us.ihmc", name: "ihmc-pub-sub", version: "0.10.1"
    compile group: "us.ihmc", name: "ros2-common-interfaces", version: "0.13.3"
-   compile group: "us.ihmc", name: "ihmc-commons", version: "0.24.0"
 }
-
-testDependencies {
-   compile group: "us.ihmc", name: "ihmc-ci-core-api", version: "0.18.0"
-   compile group: "us.ihmc", name: "ihmc-ros2-library", version: "0.13.3"
-}
-
-generatorDependencies {
-   compile group: "us.ihmc", name: "ihmc-commons", version: "0.24.0"
-   compile group: "us.ihmc", name: "ros2-msg-to-pubsub-generator", version: "0.13.3"
-}
-
-//task buildImage(type: com.bmuschko.gradle.docker.tasks.image.DockerBuildImage) {
-//   inputDir = file("src/generator/docker")
-//   tag = "ihmc/ros1-bridge-build"
-//}
 
 def generator = new us.ihmc.ros2.rosidl.RosInterfaceGenerator();
 
@@ -92,21 +65,22 @@ task generateMessages {
       generator.generate(file("build/tmp/generateMessages/generated-idl").toPath(), file("build/tmp/generateMessages/generated-ros1").toPath(), file("build/tmp/generateMessages/generated-java").toPath());
 
       copy {
-         from "build/tmp/generateMessages/generated-idl/controller_msgs"
-         into "src/main/generated-idl/controller_msgs"
+         from "build/tmp/generateMessages/generated-idl/generator_test_msgs"
+         into "src/main/generated-idl/generator_test_msgs"
       }
 
       copy {
-         from "build/tmp/generateMessages/generated-java/controller_msgs"
-         into "src/main/generated-java/controller_msgs"
+         from "build/tmp/generateMessages/generated-java/generator_test_msgs"
+         into "src/main/generated-java/generator_test_msgs"
       }
 
       copy {
-         from "build/tmp/generateMessages/generated-ros1/controller_msgs"
-         into "src/main/messages/ros1/controller_msgs"
+         from "build/tmp/generateMessages/generated-ros1/generator_test_msgs"
+         into "src/main/messages/ros1/generator_test_msgs"
       }
 
       generator.convertDirectoryToUnixEOL(file("src/main/generated-idl").toPath())
       generator.convertDirectoryToUnixEOL(file("src/main/generated-java").toPath())
+      generator.convertDirectoryToUnixEOL(file("src/main/messages/ros1").toPath())
    }
 }
