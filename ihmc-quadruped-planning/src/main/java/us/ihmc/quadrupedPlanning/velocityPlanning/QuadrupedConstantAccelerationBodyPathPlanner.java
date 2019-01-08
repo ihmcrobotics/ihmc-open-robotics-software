@@ -84,6 +84,8 @@ public class QuadrupedConstantAccelerationBodyPathPlanner
       {
          computePlanDiscretelyTraversingWaypoints();
       }
+
+      bodyPathPlan.setExpressedInAbsoluteTime(false);
    }
 
    public QuadrupedBodyPathPlan getPlan()

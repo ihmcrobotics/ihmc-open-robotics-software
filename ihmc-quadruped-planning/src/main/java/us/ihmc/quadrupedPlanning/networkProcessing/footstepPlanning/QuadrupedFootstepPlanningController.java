@@ -77,6 +77,8 @@ public class QuadrupedFootstepPlanningController extends QuadrupedToolboxControl
       pathPlanner.setInitialBodyPose(initialPose);
       pathPlanner.setGoal(goal);
       pathPlanner.processPlanarRegionsListMessage(footstepPlanningRequestPacket.getPlanarRegionsListMessage());
+
+      pathPlanner.compute();
    }
 
    public void processTimestamp(long timestampInNanos)
