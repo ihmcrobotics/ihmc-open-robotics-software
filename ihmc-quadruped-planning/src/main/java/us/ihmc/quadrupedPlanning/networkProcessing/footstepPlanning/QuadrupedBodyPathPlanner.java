@@ -9,6 +9,7 @@ import us.ihmc.communication.packets.PlanarRegionMessageConverter;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DReadOnly;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.pathPlanning.bodyPathPlanner.WaypointDefinedBodyPathPlanner;
+import us.ihmc.pathPlanning.visibilityGraphs.tools.BodyPathPlan;
 import us.ihmc.quadrupedBasics.gait.QuadrupedTimedStep;
 import us.ihmc.quadrupedBasics.referenceFrames.QuadrupedReferenceFrames;
 import us.ihmc.quadrupedPlanning.QuadrupedFootstepPlannerGoal;
@@ -118,6 +119,10 @@ public class QuadrupedBodyPathPlanner
 
       bodyPathPlanner.setWaypoints(waypointPlanner.getWaypoints());
       bodyPathPlanner.compute();
+
+      BodyPathPlan bodyPathPlan = bodyPathPlanner.getPlan();
+      bodyPathPlan.setStartPose(waypointPlanner.getInitialBodyPose().getPosition().getX(), waypointPlanner.getInitialBodyPose().getPosition().getY(), waypointPlanner.getInitialBodyPose().getYaw());
+      bodyPathPlan.setGoalPose(waypointPlanner.getGoalBodyPose().getPosition().getX(), waypointPlanner.getGoalBodyPose().getPosition().getY(), waypointPlanner.getGoalBodyPose().getYaw());
 
       quadBodyPathPlanner.setBodyPathWaypoints(bodyPathPlanner.getPlan());
       quadBodyPathPlanner.computePlan();
