@@ -6,6 +6,7 @@ import controller_msgs.msg.dds.RobotConfigurationData;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelControllerName;
 import us.ihmc.messager.MessagerAPIFactory;
 import us.ihmc.messager.MessagerAPIFactory.*;
+import us.ihmc.quadrupedBasics.QuadrupedSteppingStateEnum;
 import us.ihmc.quadrupedBasics.referenceFrames.QuadrupedReferenceFrames;
 import us.ihmc.quadrupedPlanning.QuadrupedXGaitSettingsReadOnly;
 import us.ihmc.robotModels.FullQuadrupedRobotModel;
@@ -30,6 +31,7 @@ public class QuadrupedUIMessagerAPI
    private static final TypedTopicTheme<FullQuadrupedRobotModel> RobotModel = apiFactory.createTypedTopicTheme("RobotModel");
    private static final TypedTopicTheme<QuadrupedReferenceFrames> ReferenceFrames = apiFactory.createTypedTopicTheme("ReferenceFrames");
    private static final TypedTopicTheme<HighLevelControllerName> ControllerState = apiFactory.createTypedTopicTheme("ControllerState");
+   private static final TypedTopicTheme<QuadrupedSteppingStateEnum> SteppingState = apiFactory.createTypedTopicTheme("SteppingState");
    private static final TypedTopicTheme<Boolean> Enable = apiFactory.createTypedTopicTheme("Enable");
    private static final TypedTopicTheme<Double> DesiredBodyHeight = apiFactory.createTypedTopicTheme("BodyHeight");
    private static final TypedTopicTheme<QuadrupedXGaitSettingsReadOnly> XGaitSettings = apiFactory.createTypedTopicTheme("XGaitSettings");
@@ -43,6 +45,7 @@ public class QuadrupedUIMessagerAPI
    public static final Topic<QuadrupedReferenceFrames> ReferenceFramesTopic = Root.child(Robot).topic(ReferenceFrames);
    public static final Topic<HighLevelControllerName> CurrentControllerNameTopic = Root.child(Controller).child(Status).topic(ControllerState);
    public static final Topic<HighLevelControllerName> DesiredControllerNameTopic = Root.child(Command).topic(ControllerState);
+   public static final Topic<QuadrupedSteppingStateEnum> DesiredSteppingNameTopic = Root.child(Command).topic(SteppingState);
    public static final Topic<Double> DesiredBodyHeightTopic = Root.child(Command).topic(DesiredBodyHeight);
    public static final Topic<Boolean> EnableBodyTeleopTopic = Root.child(Command).child(BodyTeleop).topic(Enable);
    public static final Topic<Boolean> EnableStepTeleopTopic = Root.child(Command).child(StepTeleop).topic(Enable);
