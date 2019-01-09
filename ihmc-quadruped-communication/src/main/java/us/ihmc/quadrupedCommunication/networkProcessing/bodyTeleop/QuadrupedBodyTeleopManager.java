@@ -74,6 +74,11 @@ public class QuadrupedBodyTeleopManager
       desiredOrientationTime.set(time);
    }
 
+   public void initialize()
+   {
+      paused.set(false);
+   }
+
    public void update()
    {
       timestamp.set(Conversions.nanosecondsToSeconds(timestampNanos.get()));
