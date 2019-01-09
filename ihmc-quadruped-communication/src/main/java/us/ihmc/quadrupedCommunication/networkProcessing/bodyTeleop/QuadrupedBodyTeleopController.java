@@ -51,12 +51,15 @@ public class QuadrupedBodyTeleopController extends QuadrupedToolboxController
    {
       Point3DReadOnly position = message.getPose().getPosition();
       QuaternionReadOnly orientation = message.getPose().getOrientation();
-      teleopManager.setDesiredBodyPose(position.getX(), position.getY(), orientation.getYaw(), orientation.getPitch(), orientation.getRoll(), message.getPoseShiftTime());
+//      teleopManager.setDesiredBodyPose(position.getX(), position.getY(), orientation.getYaw(), orientation.getPitch(), orientation.getRoll(), message.getPoseShiftTime());
+      teleopManager.setDesiredBodyPose(0.0, 0.0, orientation.getYaw(), orientation.getPitch(), orientation.getRoll(), message.getPoseShiftTime());
    }
 
    @Override
    public boolean initializeInternal()
    {
+      teleopManager.initialize();
+
       return true;
    }
 
@@ -71,6 +74,12 @@ public class QuadrupedBodyTeleopController extends QuadrupedToolboxController
    @Override
    public boolean isDone()
    {
-      return false;
+      if (controllerStateChangeMessage.get() == null)
+         return false;
+
+      if (controllerStateChangeMessage.get().getEndHighLevelControllerName() != HighLevelStateChangeStatusMessage.WALKING)
+         return true;
+
+      return steppingStateChangeMessage.get().getEndQuadrupedSteppingStateEnum() != QuadrupedSteppingStateChangeMessage.STEP;
    }
 }
