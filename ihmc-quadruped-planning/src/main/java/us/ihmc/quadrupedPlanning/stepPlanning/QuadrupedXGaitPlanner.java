@@ -6,6 +6,7 @@ import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FramePose2D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DReadOnly;
 import us.ihmc.quadrupedBasics.gait.QuadrupedTimedOrientedStep;
 import us.ihmc.quadrupedBasics.gait.QuadrupedTimedStep;
 import us.ihmc.quadrupedPlanning.QuadrupedXGaitSettingsReadOnly;
@@ -51,7 +52,12 @@ public class QuadrupedXGaitPlanner
       this.snapper = snapper;
    }
 
-   public void computeInitialPlan(QuadrupedFootstepPlan footstepPlanToPack, RobotQuadrant initialStepQuadrant, double timeAtStartOfStep)
+   public void setGoalPose(FramePose3DReadOnly goalPose)
+   {
+      this.goalPose.set(goalPose);
+   }
+
+   public void computePlan(QuadrupedFootstepPlan footstepPlanToPack, RobotQuadrant initialStepQuadrant, double timeAtStartOfStep)
    {
       // initialize nominal support rectangle
       for (RobotQuadrant robotQuadrant : RobotQuadrant.values)

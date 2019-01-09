@@ -86,7 +86,7 @@ public abstract class QuadrupedPlanToWaypointTest implements QuadrupedMultiRobot
                                                                         variables.getBodyEstimateRoll());
 
       planningRequestPacket.getGoalPositionInWorld().set(1.5, 0.5, 0.0);
-//      planningRequestPacket.getGoalOrientationInWorld().setToYawQuaternion(-Math.PI * 0.25);
+      planningRequestPacket.getGoalOrientationInWorld().setToYawQuaternion(-Math.PI * 0.25);
 
       stepTeleopManager.publishPlanningRequest(planningRequestPacket);
 
