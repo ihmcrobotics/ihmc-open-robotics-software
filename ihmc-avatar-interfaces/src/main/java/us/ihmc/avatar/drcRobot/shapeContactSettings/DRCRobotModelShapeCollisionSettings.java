@@ -14,21 +14,21 @@ public interface DRCRobotModelShapeCollisionSettings
 
    default double getRestitutionCoefficient()
    {
-      return 0.0;
+      return 0.01;
    }
 
    default double getFrictionCoefficient()
    {
-      return 0.9;
+      return 1.0;
    }
 
    default double getHybridSpringCoefficient()
    {
-      return 100000.0;
+      return 10000;
    }
 
    default double getHybridDamperCoefficient()
    {
-      return 500.0;
+      return 1000;
    }
 }
