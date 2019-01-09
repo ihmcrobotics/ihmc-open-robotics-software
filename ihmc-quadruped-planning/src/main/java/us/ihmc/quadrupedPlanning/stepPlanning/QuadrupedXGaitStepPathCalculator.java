@@ -1,11 +1,11 @@
 package us.ihmc.quadrupedPlanning.stepPlanning;
 
+import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DReadOnly;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.quadrupedBasics.gait.QuadrupedTimedStep;
 import us.ihmc.quadrupedPlanning.YoQuadrupedXGaitSettings;
 import us.ihmc.quadrupedPlanning.bodyPath.QuadrupedPlanarBodyPathProvider;
 import us.ihmc.quadrupedPlanning.footstepChooser.PointFootSnapper;
-import us.ihmc.quadrupedPlanning.stepStream.QuadrupedPlanarFootstepPlan;
 import us.ihmc.robotics.robotSide.RobotQuadrant;
 import us.ihmc.yoVariables.providers.DoubleProvider;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
@@ -15,8 +15,6 @@ import java.util.List;
 
 public class QuadrupedXGaitStepPathCalculator
 {
-   private static int NUMBER_OF_PREVIEW_STEPS = 16;
-
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
    private final YoDouble minimumStepClearance = new YoDouble("minimumStepClearance", registry);
    private final YoDouble timestamp;
@@ -58,6 +56,11 @@ public class QuadrupedXGaitStepPathCalculator
       xGaitSettings.setStanceWidth(Math.max(xGaitSettings.getStanceWidth(), strideWidth / 2 + minimumStepClearance.getValue()));
    }
 
+   public void setGoalPose(FramePose3DReadOnly goalPose)
+   {
+      xGaitStepPlanner.setGoalPose(goalPose);
+   }
+
    public void onEntry()
    {
       // initialize step queue
@@ -65,12 +68,13 @@ public class QuadrupedXGaitStepPathCalculator
       double initialTime = timestamp.getDoubleValue() + firstStepDelay.getValue();
       RobotQuadrant initialQuadrant = (xGaitSettings.getEndPhaseShift() < 90) ? RobotQuadrant.HIND_LEFT : RobotQuadrant.FRONT_LEFT;
       bodyPathProvider.initialize();
-      xGaitStepPlanner.computeInitialPlan(footstepPlan, initialQuadrant, initialTime);
+      xGaitStepPlanner.computePlan(footstepPlan, initialQuadrant, initialTime);
       footstepPlan.initializeCurrentStepsFromPlannedSteps();
-      this.process();
+
+      updateOnline();
    }
 
-   public void process()
+   public void updateOnline()
    {
       double currentTime = timestamp.getDoubleValue();
 

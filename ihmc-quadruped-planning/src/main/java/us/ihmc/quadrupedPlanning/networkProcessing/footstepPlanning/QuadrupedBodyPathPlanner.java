@@ -1,7 +1,6 @@
 package us.ihmc.quadrupedPlanning.networkProcessing.footstepPlanning;
 
 import controller_msgs.msg.dds.PlanarRegionsListMessage;
-import controller_msgs.msg.dds.QuadrupedFootstepStatusMessage;
 import controller_msgs.msg.dds.QuadrupedGroundPlaneMessage;
 import controller_msgs.msg.dds.QuadrupedXGaitSettingsPacket;
 import us.ihmc.commons.Conversions;
@@ -20,11 +19,10 @@ import us.ihmc.quadrupedPlanning.footstepChooser.PlanarGroundPointFootSnapper;
 import us.ihmc.quadrupedPlanning.footstepChooser.PlanarRegionBasedPointFootSnapper;
 import us.ihmc.quadrupedPlanning.footstepChooser.PointFootSnapperParameters;
 import us.ihmc.quadrupedPlanning.pathPlanning.SplinePathPlanner;
-import us.ihmc.quadrupedPlanning.stepStream.QuadrupedXGaitStepStream;
+import us.ihmc.quadrupedPlanning.stepPlanning.QuadrupedXGaitStepPathCalculator;
 import us.ihmc.quadrupedPlanning.velocityPlanning.DefaultConstantAccelerationBodyPathParameters;
 import us.ihmc.quadrupedPlanning.velocityPlanning.QuadrupedConstantAccelerationBodyPathPlanner;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
-import us.ihmc.robotics.robotSide.RobotQuadrant;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 
@@ -39,7 +37,7 @@ public class QuadrupedBodyPathPlanner
    protected final WaypointDefinedBodyPathPlanner bodyPathPlanner = new WaypointDefinedBodyPathPlanner();
    private final QuadrupedConstantAccelerationBodyPathPlanner quadBodyPathPlanner;
    private final QuadrupedWaypointBasedBodyPathProvider waypointBasedPath;
-   private final QuadrupedXGaitStepStream stepStream;
+   private final QuadrupedXGaitStepPathCalculator stepPlanner;
    private final PlanarGroundPointFootSnapper groundPlaneSnapper;
    private final PlanarRegionBasedPointFootSnapper planarRegionSnapper;
 
@@ -60,12 +58,12 @@ public class QuadrupedBodyPathPlanner
 
       quadBodyPathPlanner = new QuadrupedConstantAccelerationBodyPathPlanner(new DefaultConstantAccelerationBodyPathParameters(), registry);
       waypointBasedPath = new QuadrupedWaypointBasedBodyPathProvider(referenceFrames, timestamp, graphicsListRegistry, registry);
-      stepStream = new QuadrupedXGaitStepStream(xGaitSettings, timestamp, waypointBasedPath, firstStepDelay, registry);
+      stepPlanner = new QuadrupedXGaitStepPathCalculator(xGaitSettings, timestamp, waypointBasedPath, firstStepDelay, registry);
 
       groundPlaneSnapper = new PlanarGroundPointFootSnapper(referenceFrames);
       planarRegionSnapper = new PlanarRegionBasedPointFootSnapper(pointFootSnapperParameters);
       planarRegionSnapper.setFallbackSnapper(groundPlaneSnapper);
-      stepStream.setStepSnapper(planarRegionSnapper);
+      stepPlanner.setStepSnapper(planarRegionSnapper);
 
       parentRegistry.addChild(registry);
    }
@@ -129,19 +127,20 @@ public class QuadrupedBodyPathPlanner
 
       waypointBasedPath.setBodyPathPlan(quadBodyPathPlanner.getPlan());
 
-      stepStream.onEntry();
+      stepPlanner.setGoalPose(waypointPlanner.getGoalBodyPose());
+      stepPlanner.onEntry();
    }
 
    public void update()
    {
       timestamp.set(Conversions.nanosecondsToSeconds(timestampNanos.get()));
 
-      stepStream.process();
+//      stepPlanner.updateOnline();
    }
 
    public List<? extends QuadrupedTimedStep> getSteps()
    {
-      return stepStream.getSteps();
+      return stepPlanner.getSteps();
    }
 
 }
