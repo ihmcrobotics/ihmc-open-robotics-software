@@ -47,14 +47,38 @@ public class QuadrupedXBoxModule extends QuadrupedToolboxModule
       // status messages from the controller
       ROS2Tools.MessageTopicNameGenerator controllerPubGenerator = QuadrupedControllerAPIDefinition.getPublisherTopicNameGenerator(robotName);
       ROS2Tools
-            .createCallbackSubscription(realtimeRos2Node, HighLevelStateMessage.class, controllerPubGenerator, s -> xBoxController.setPaused(true));
+            .createCallbackSubscription(realtimeRos2Node, HighLevelStateMessage.class, controllerPubGenerator, s -> setPaused(true));
       ROS2Tools.createCallbackSubscription(realtimeRos2Node, HighLevelStateChangeStatusMessage.class, controllerPubGenerator,
-                                           s -> xBoxController.processHighLevelStateChangeMessage(s.takeNextData()));
+                                           s -> processHighLevelStateChangeMessage(s.takeNextData()));
       ROS2Tools.createCallbackSubscription(realtimeRos2Node, QuadrupedSteppingStateChangeMessage.class, controllerPubGenerator,
-                                           s -> xBoxController.processSteppingStateChangeMessage(s.takeNextData()));
+                                           s -> processSteppingStateChangeMessage(s.takeNextData()));
 
       ROS2Tools.createCallbackSubscription(realtimeRos2Node, QuadrupedXGaitSettingsPacket.class, getSubscriberTopicNameGenerator(),
-                                           s -> xBoxController.processXGaitSettingsPacket(s.takeNextData()));
+                                           s -> processXGaitSettingsPacket(s.takeNextData()));
+   }
+
+   private void setPaused(boolean paused)
+   {
+      if (xBoxController != null)
+         xBoxController.setPaused(paused);
+   }
+
+   private void processHighLevelStateChangeMessage(HighLevelStateChangeStatusMessage message)
+   {
+      if (xBoxController != null)
+         xBoxController.processHighLevelStateChangeMessage(message);
+   }
+
+   private void processSteppingStateChangeMessage(QuadrupedSteppingStateChangeMessage message)
+   {
+      if (xBoxController != null)
+         xBoxController.processSteppingStateChangeMessage(message);
+   }
+
+   private void processXGaitSettingsPacket(QuadrupedXGaitSettingsPacket packet)
+   {
+      if (xBoxController != null)
+         xBoxController.processXGaitSettingsPacket(packet);
    }
 
    @Override
