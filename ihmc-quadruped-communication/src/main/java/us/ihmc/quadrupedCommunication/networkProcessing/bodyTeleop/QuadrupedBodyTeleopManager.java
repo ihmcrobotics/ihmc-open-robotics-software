@@ -158,6 +158,7 @@ public class QuadrupedBodyTeleopManager
          se3Trajectory.getAngularSelectionMatrix().setYSelected(true);
          se3Trajectory.getAngularSelectionMatrix().setZSelected(true);
       }
+      /*
       if (!Double.isNaN(desiredX) && !Double.isNaN(desiredY))
       {
          tempPoint.setIncludingFrame(centerFeetZUpFrame, desiredX, desiredY, 0.0);
@@ -167,6 +168,7 @@ public class QuadrupedBodyTeleopManager
          se3Trajectory.getLinearSelectionMatrix().setXSelected(true);
          se3Trajectory.getLinearSelectionMatrix().setYSelected(true);
       }
+      */
       trajectoryPointMessage.setTime(desiredTime);
    }
 
