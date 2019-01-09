@@ -4,9 +4,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
 
-import controller_msgs.msg.dds.KinematicsPlanningToolboxInputMessage;
-import controller_msgs.msg.dds.KinematicsPlanningToolboxOutputStatus;
-import controller_msgs.msg.dds.KinematicsPlanningToolboxRigidBodyMessage;
+import controller_msgs.msg.dds.KinematicsToolboxOutputStatus;
+import controller_msgs.msg.dds.KinematicsToolboxRigidBodyMessage;
 import controller_msgs.msg.dds.ToolboxStateMessage;
 import controller_msgs.msg.dds.WholeBodyTrajectoryMessage;
 import gnu.trove.list.array.TDoubleArrayList;
@@ -20,24 +19,22 @@ import javafx.scene.transform.Affine;
 import us.ihmc.avatar.handControl.HandFingerTrajectoryMessagePublisher;
 import us.ihmc.avatar.joystickBasedJavaFXController.ButtonState;
 import us.ihmc.avatar.joystickBasedJavaFXController.XBoxOneJavaFXController;
-import us.ihmc.avatar.networkProcessor.kinematicsPlanningToolboxModule.KinematicsPlanningToolboxModule;
+import us.ihmc.avatar.networkProcessor.kinematicsToolboxModule.KinematicsToolboxModule;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.ControllerAPIDefinition;
+import us.ihmc.commons.PrintTools;
 import us.ihmc.communication.IHMCROS2Publisher;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.ROS2Tools.MessageTopicNameGenerator;
 import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.communication.packets.PacketDestination;
 import us.ihmc.communication.packets.ToolboxState;
-import us.ihmc.euclid.geometry.Pose3D;
-import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
-import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.interfaces.Tuple3DBasics;
 import us.ihmc.euclid.tuple4D.Quaternion;
-import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.humanoidRobotics.communication.packets.KinematicsPlanningToolboxOutputConverter;
+import us.ihmc.humanoidRobotics.communication.packets.KinematicsToolboxMessageFactory;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.javaFXToolkit.JavaFXTools;
 import us.ihmc.javaFXToolkit.messager.JavaFXMessager;
@@ -45,7 +42,6 @@ import us.ihmc.javaFXToolkit.shapes.JavaFXCoordinateSystem;
 import us.ihmc.javaFXVisualizers.JavaFXRobotHandVisualizer;
 import us.ihmc.javaFXVisualizers.JavaFXRobotVisualizer;
 import us.ihmc.log.LogTools;
-import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotModels.FullHumanoidRobotModelFactory;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -80,7 +76,8 @@ public class JavaFXArmController
    private final HandFingerTrajectoryMessagePublisher handFingerTrajectoryMessagePublisher;
    private final IHMCROS2Publisher<WholeBodyTrajectoryMessage> wholeBodyTrajectoryPublisher;
    private final IHMCROS2Publisher<ToolboxStateMessage> toolboxStatePublisher;
-   private final IHMCROS2Publisher<KinematicsPlanningToolboxInputMessage> toolboxMessagePublisher;
+   //private final IHMCROS2Publisher<KinematicsPlanningToolboxInputMessage> toolboxMessagePublisher;
+   private final IHMCROS2Publisher<KinematicsToolboxRigidBodyMessage> toolboxMessagePublisher;
 
    private final AtomicReference<List<Node>> objectsToVisualizeReference = new AtomicReference<>(new ArrayList<>());
    private final RigidBodyTransform controlTransform = new RigidBodyTransform();
@@ -99,19 +96,20 @@ public class JavaFXArmController
    private final SideDependentList<List<RigidBodyTransform>> sideDependentKeyFramePoses = new SideDependentList<>();
    private final SideDependentList<JavaFXRobotHandVisualizer> sideDependentHandVizs = new SideDependentList<>();
 
-   private final AtomicReference<KinematicsPlanningToolboxOutputStatus> toolboxOutputPacket = new AtomicReference<>(null);
-   private final ValkyrieJavaFXMotionPreviewVisualizer motionPreviewVisualizer;
+   //private final AtomicReference<KinematicsPlanningToolboxOutputStatus> toolboxOutputPacket = new AtomicReference<>(null);
+   private final AtomicReference<KinematicsToolboxOutputStatus> toolboxOutputPacket = new AtomicReference<>(null);
+   private final ValkyrieJavaFXInverseKinematicsVisualizer motionPreviewVisualizer;
 
    FullHumanoidRobotModelFactory fullRobotModelFactory;
 
    public JavaFXArmController(String robotName, JavaFXMessager messager, Ros2Node ros2Node, FullHumanoidRobotModelFactory fullRobotModelFactory,
-                                   JavaFXRobotVisualizer javaFXRobotVisualizer, HandFingerTrajectoryMessagePublisher handFingerTrajectoryMessagePublisher)
+                              JavaFXRobotVisualizer javaFXRobotVisualizer, HandFingerTrajectoryMessagePublisher handFingerTrajectoryMessagePublisher)
    {
       this.fullRobotModelFactory = fullRobotModelFactory;
       fullRobotModel = javaFXRobotVisualizer.getFullRobotModel();
       outputConverter = new KinematicsPlanningToolboxOutputConverter(fullRobotModelFactory);
 
-      motionPreviewVisualizer = new ValkyrieJavaFXMotionPreviewVisualizer(fullRobotModelFactory);
+      motionPreviewVisualizer = new ValkyrieJavaFXInverseKinematicsVisualizer(fullRobotModelFactory);
       motionPreviewVisualizer.enable(false);
 
       HumanoidReferenceFrames referenceFrames = new HumanoidReferenceFrames(fullRobotModel);
@@ -152,18 +150,17 @@ public class JavaFXArmController
       messager.registerTopicListener(XBoxOneJavaFXController.ButtonXState, state -> submitReachingManifoldsToToolbox(state));
       messager.registerTopicListener(XBoxOneJavaFXController.ButtonYState, state -> confirmReachingMotion(state));
 
-      ROS2Tools.MessageTopicNameGenerator toolboxRequestTopicNameGenerator = KinematicsPlanningToolboxModule.getSubscriberTopicNameGenerator(robotName);
-      ROS2Tools.MessageTopicNameGenerator toolboxResponseTopicNameGenerator = KinematicsPlanningToolboxModule.getPublisherTopicNameGenerator(robotName);
+      ROS2Tools.MessageTopicNameGenerator toolboxRequestTopicNameGenerator = KinematicsToolboxModule.getSubscriberTopicNameGenerator(robotName);
+      ROS2Tools.MessageTopicNameGenerator toolboxResponseTopicNameGenerator = KinematicsToolboxModule.getPublisherTopicNameGenerator(robotName);
 
       MessageTopicNameGenerator subscriberTopicNameGenerator = ControllerAPIDefinition.getSubscriberTopicNameGenerator(robotName);
 
       wholeBodyTrajectoryPublisher = ROS2Tools.createPublisher(ros2Node, WholeBodyTrajectoryMessage.class, subscriberTopicNameGenerator);
       toolboxStatePublisher = ROS2Tools.createPublisher(ros2Node, ToolboxStateMessage.class, toolboxRequestTopicNameGenerator);
-      //toolboxMessagePublisher = ROS2Tools.createPublisher(ros2Node, KinematicsPlanningToolboxRigidBodyMessage.class, toolboxRequestTopicNameGenerator);
-      toolboxMessagePublisher = ROS2Tools.createPublisher(ros2Node, KinematicsPlanningToolboxInputMessage.class, toolboxRequestTopicNameGenerator);
+      toolboxMessagePublisher = ROS2Tools.createPublisher(ros2Node, KinematicsToolboxRigidBodyMessage.class, toolboxRequestTopicNameGenerator);
       this.handFingerTrajectoryMessagePublisher = handFingerTrajectoryMessagePublisher;
 
-      ROS2Tools.createCallbackSubscription(ros2Node, KinematicsPlanningToolboxOutputStatus.class, toolboxResponseTopicNameGenerator,
+      ROS2Tools.createCallbackSubscription(ros2Node, KinematicsToolboxOutputStatus.class, toolboxResponseTopicNameGenerator,
                                            s -> consumeToolboxOutputStatus(s.takeNextData()));
 
       animationTimer = new AnimationTimer()
@@ -188,16 +185,14 @@ public class JavaFXArmController
 
    }
 
-   private void consumeToolboxOutputStatus(KinematicsPlanningToolboxOutputStatus packet)
+   private void consumeToolboxOutputStatus(KinematicsToolboxOutputStatus packet)
    {
-      LogTools.info("packet arrived");
       toolboxOutputPacket.set(packet);
-
-      if (toolboxOutputPacket.get().getSolutionQuality() > 0.0)
+      
+      if(toolboxOutputPacket.get() != null)
       {
-         LogTools.info("motion previewed ");
          motionPreviewVisualizer.enable(true);
-         motionPreviewVisualizer.submitKinematicsPlanningToolboxOutputStatus(toolboxOutputPacket.get());
+         motionPreviewVisualizer.submitKinematicsToolboxOutputStatus(toolboxOutputPacket.get());
       }
    }
 
@@ -237,112 +232,45 @@ public class JavaFXArmController
       {
          motionPreviewVisualizer.enable(false);
          toolboxStatePublisher.publish(MessageTools.createToolboxStateMessage(ToolboxState.WAKE_UP));
-         SideDependentList<List<Pose3DReadOnly>> sideDependentKeyFramePosesForMessage = new SideDependentList<>(new ArrayList<Pose3DReadOnly>(),
-                                                                                                                new ArrayList<Pose3DReadOnly>());
-         SideDependentList<Integer> sideDependentNumberOfWayPointsForMessage = new SideDependentList<>(0, 0);
-         TDoubleArrayList keyFrameTimesForMessage = new TDoubleArrayList();
 
-         final int minimumNumberOfWayPointsThatGeneratorRequiring = 3;
+         RobotSide robotSide = RobotSide.RIGHT;
+         double appendingYawOrientationValue = robotSide.negateIfLeftSide(Math.PI / 2);
 
-         /*
-          * for the case that single side is selected. set number of way points
-          * between selected key frames for single side.
-          */
-         if (sideDependentKeyFramePoses.get(RobotSide.LEFT).size() == 0 || sideDependentKeyFramePoses.get(RobotSide.RIGHT).size() == 0)
+         if (sideDependentKeyFramePoses.get(robotSide).size() == 0)
          {
-            for (RobotSide robotSide : RobotSide.values)
-            {
-               int numberOfSelectedKeyFrames = sideDependentKeyFramePoses.get(robotSide).size();
-               if (numberOfSelectedKeyFrames == 0)
-                  sideDependentNumberOfWayPointsForMessage.put(robotSide, null);
-               else if (numberOfSelectedKeyFrames < minimumNumberOfWayPointsThatGeneratorRequiring)
-                  sideDependentNumberOfWayPointsForMessage.put(robotSide, minimumNumberOfWayPointsThatGeneratorRequiring - 1);
-            }
+            return;
          }
-         /*
-          * set number of way points between selected key frames for both sides.
-          */
          else
          {
-            for (RobotSide robotSide : RobotSide.values)
-            {
-               int numberOfSelectedKeyFrames = sideDependentKeyFramePoses.get(robotSide).size();
-               int lcm = getLeastCommonMultiple(numberOfSelectedKeyFrames, sideDependentKeyFramePoses.get(robotSide.getOppositeSide()).size());
-               if (lcm < minimumNumberOfWayPointsThatGeneratorRequiring)
-                  lcm = lcm * minimumNumberOfWayPointsThatGeneratorRequiring;
-               int numberOfWayPointsBetweenKeyFrames = (lcm / numberOfSelectedKeyFrames);
-               sideDependentNumberOfWayPointsForMessage.put(robotSide, numberOfWayPointsBetweenKeyFrames - 1);
-            }
-         }
+            Point3D desiredPosition = new Point3D(sideDependentKeyFramePoses.get(robotSide).get(0).getTranslationVector());
+            Quaternion desiredOrientation = new Quaternion(sideDependentKeyFramePoses.get(robotSide).get(0).getRotationMatrix());
+            desiredOrientation.appendYawRotation(appendingYawOrientationValue);
 
-         /*
-          * check and create key frame times
-          */
-         int numberOfKeyFramesForMessage = -1;
-         for (RobotSide robotSide : RobotSide.values)
-         {
-            if (sideDependentNumberOfWayPointsForMessage.get(robotSide) != null)
-               numberOfKeyFramesForMessage = sideDependentKeyFramePoses.get(robotSide).size() * (sideDependentNumberOfWayPointsForMessage.get(robotSide) + 1);
-         }
-         if (numberOfKeyFramesForMessage > 0)
-         {
-            for (int i = 0; i < numberOfKeyFramesForMessage; i++)
-               keyFrameTimesForMessage.add((i + 1) / (double) numberOfKeyFramesForMessage * timeDurationForMotion);
-         }
+            PrintTools.info("desiredPosition " + desiredPosition);
+            PrintTools.info("desiredOrientation " + desiredOrientation);
 
-         /*
-          * generate key frames for sending message.
-          */
-         KinematicsPlanningToolboxInputMessage message = new KinematicsPlanningToolboxInputMessage();
-         for (RobotSide robotSide : RobotSide.values)
-         {
-            List<RigidBodyTransform> selectedKeyFramePoses = sideDependentKeyFramePoses.get(robotSide);
-            if (selectedKeyFramePoses.size() != 0)
-            {
-               RigidBodyBasics endEffector = fullRobotModel.getHand(robotSide);
-               for (int i = 0; i < selectedKeyFramePoses.size(); i++)
-               {
-                  Pose3D posePrevious;
-                  if (i == 0)
-                     posePrevious = new Pose3D(fullRobotModel.getHandControlFrame(robotSide).getTransformToWorldFrame());
-                  else
-                     posePrevious = new Pose3D(selectedKeyFramePoses.get(i - 1));
-                  Pose3D pose = new Pose3D(selectedKeyFramePoses.get(i));
+            KinematicsToolboxRigidBodyMessage handMessage = MessageTools.createKinematicsToolboxRigidBodyMessage(fullRobotModel.getHand(robotSide), desiredPosition,
+                                                                                                             desiredOrientation);
 
-                  for (int j = 0; j < sideDependentNumberOfWayPointsForMessage.get(robotSide) + 1; j++)
-                  {
-                     double alpha = (j + 1) / (double) (sideDependentNumberOfWayPointsForMessage.get(robotSide) + 1);
-                     Pose3D poseToAppend = new Pose3D(posePrevious);
-                     poseToAppend.interpolate(pose, alpha);
-                     sideDependentKeyFramePosesForMessage.get(robotSide).add(poseToAppend);
-                  }
-               }
+            handMessage.getAngularWeightMatrix().set(MessageTools.createWeightMatrix3DMessage(defaultWeightForRigidBodyMessage));
+            handMessage.getLinearWeightMatrix().set(MessageTools.createWeightMatrix3DMessage(defaultWeightForRigidBodyMessage));
 
-               System.out.println(robotSide + " keyFramePosesForMessage " + sideDependentKeyFramePosesForMessage.get(robotSide).size());
+            handMessage.setDestination(PacketDestination.KINEMATICS_TOOLBOX_MODULE.ordinal());
+            
+            toolboxMessagePublisher.publish(handMessage);
+            
+            KinematicsToolboxRigidBodyMessage chestMessage = KinematicsToolboxMessageFactory.holdRigidBodyCurrentPose(fullRobotModel.getChest());
+            chestMessage.getAngularWeightMatrix().set(MessageTools.createWeightMatrix3DMessage((double) 20f));
+            chestMessage.getLinearWeightMatrix().set(MessageTools.createWeightMatrix3DMessage(20f));
+            chestMessage.setDestination(PacketDestination.KINEMATICS_TOOLBOX_MODULE.ordinal());
+            
+            KinematicsToolboxRigidBodyMessage pelvisMessage = KinematicsToolboxMessageFactory.holdRigidBodyCurrentPose(fullRobotModel.getPelvis());
+            pelvisMessage.getAngularWeightMatrix().set(MessageTools.createWeightMatrix3DMessage((double) 20f));
+            pelvisMessage.getLinearWeightMatrix().set(MessageTools.createWeightMatrix3DMessage(20f));
+            pelvisMessage.setDestination(PacketDestination.KINEMATICS_TOOLBOX_MODULE.ordinal());
 
-               KinematicsPlanningToolboxRigidBodyMessage endEffectorMessage = HumanoidMessageTools.createKinematicsPlanningToolboxRigidBodyMessage(endEffector,
-                                                                                                                                                   keyFrameTimesForMessage,
-                                                                                                                                                   sideDependentKeyFramePosesForMessage.get(robotSide));
-
-               endEffectorMessage.getAngularWeightMatrix().set(MessageTools.createWeightMatrix3DMessage(defaultWeightForRigidBodyMessage));
-               endEffectorMessage.getLinearWeightMatrix().set(MessageTools.createWeightMatrix3DMessage(defaultWeightForRigidBodyMessage));
-
-               RigidBodyTransform controlFrameToWrist = fullRobotModel.getHandControlFrame(robotSide).getTransformToWorldFrame();
-               FramePose3D controlFrameToHand = new FramePose3D(ReferenceFrame.getWorldFrame(), controlFrameToWrist);
-               controlFrameToHand.changeFrame(fullRobotModel.getHand(robotSide).getBodyFixedFrame());
-
-               endEffectorMessage.getControlFramePositionInEndEffector().set(controlFrameToHand.getPosition());
-               endEffectorMessage.getControlFrameOrientationInEndEffector().set(controlFrameToHand.getOrientation());
-
-               message.getRigidBodyMessages().add().set(endEffectorMessage);
-
-               System.out.println(robotSide + " message sent ");
-            }
-         }
-         if (message.getRigidBodyMessages().size() != 0)
-         {
-            System.out.println("getRigidBodyMessages " + message.getRigidBodyMessages().size());
-            toolboxMessagePublisher.publish(message);
+            toolboxMessagePublisher.publish(chestMessage);
+            toolboxMessagePublisher.publish(pelvisMessage);
          }
       }
    }
@@ -360,7 +288,7 @@ public class JavaFXArmController
 
             message.setDestination(PacketDestination.CONTROLLER.ordinal());
             outputConverter.setMessageToCreate(message);
-            outputConverter.computeWholeBodyTrajectoryMessage(toolboxOutputPacket.get());
+            //outputConverter.computeWholeBodyTrajectoryMessage(toolboxOutputPacket.get());
 
             wholeBodyTrajectoryPublisher.publish(message);
          }
