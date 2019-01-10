@@ -4,7 +4,7 @@ import org.junit.After;
 import org.junit.Before;
 import us.ihmc.quadrupedBasics.QuadrupedSteppingStateEnum;
 import us.ihmc.quadrupedPlanning.QuadrupedXGaitSettingsReadOnly;
-import us.ihmc.quadrupedPlanning.input.RemoteQuadrupedTeleopManager;
+import us.ihmc.quadrupedCommunication.teleop.RemoteQuadrupedTeleopManager;
 import us.ihmc.quadrupedRobotics.*;
 import us.ihmc.quadrupedRobotics.controller.QuadrupedControlMode;
 import us.ihmc.quadrupedRobotics.model.QuadrupedInitialOffsetAndYaw;
