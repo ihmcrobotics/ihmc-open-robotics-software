@@ -29,7 +29,6 @@ public class QuadrupedTurnWalkTurnPathPlanner
    private final YoDouble maxYawRate = new YoDouble("maxYawRate", registry);
 
    private final YoDouble maxForwardAcceleration = new YoDouble("maxForwardAcceleration", registry);
-   private final YoDouble maxLateralAcceleration = new YoDouble("maxLateralAcceleration", registry);
    private final YoDouble maxYawAcceleration = new YoDouble("maxYawAcceleration", registry);
 
    private final YoBoolean discretelyTraverseWaypoints = new YoBoolean("discretelyTraverseWaypoints", registry);
@@ -43,7 +42,6 @@ public class QuadrupedTurnWalkTurnPathPlanner
    private final QuadrupedBodyPathPlan bodyPathPlan = new QuadrupedBodyPathPlan();
    private BodyPathPlan bodyPathWaypoints;
 
-   private final PoseReferenceFrame headingFrame = new PoseReferenceFrame("headingFrame", ReferenceFrame.getWorldFrame());
 
    public QuadrupedTurnWalkTurnPathPlanner(TurnWalkTurnPathParameters pathParameters, YoVariableRegistry parentRegistry)
    {
@@ -53,7 +51,6 @@ public class QuadrupedTurnWalkTurnPathPlanner
       maxYawRate.set(pathParameters.getMaxYawRate());
 
       maxForwardAcceleration.set(pathParameters.getMaxForwardAcceleration());
-      maxLateralAcceleration.set(pathParameters.getMaxLateralAcceleration());
       maxYawAcceleration.set(pathParameters.getMaxYawAcceleration());
 
       fastVelocity.set(pathParameters.getFastVelocity());
@@ -300,7 +297,7 @@ public class QuadrupedTurnWalkTurnPathPlanner
    }
 
 
-   public static double computeTimeToAccelerateToAchieveValueWithNoMaxRate(double currentValue, double currentRate, double desiredValue, double desiredRate,
+   static double computeTimeToAccelerateToAchieveValueWithNoMaxRate(double currentValue, double currentRate, double desiredValue, double desiredRate,
                                                                            double maxAcceleration)
    {
       double angleDelta = desiredValue - currentValue;

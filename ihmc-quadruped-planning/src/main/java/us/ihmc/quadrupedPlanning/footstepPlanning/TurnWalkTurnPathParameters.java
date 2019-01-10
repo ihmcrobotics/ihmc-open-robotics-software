@@ -7,11 +7,6 @@ public interface TurnWalkTurnPathParameters
       return 5.0;
    }
 
-   default double getMaxLateralAcceleration()
-   {
-      return 2.5;
-   }
-
    default double getMaxYawAcceleration()
    {
       return 2.0 * Math.PI;

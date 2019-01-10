@@ -19,7 +19,7 @@ import us.ihmc.quadrupedPlanning.footstepChooser.PlanarGroundPointFootSnapper;
 import us.ihmc.quadrupedPlanning.footstepChooser.PlanarRegionBasedPointFootSnapper;
 import us.ihmc.quadrupedPlanning.footstepChooser.PointFootSnapperParameters;
 import us.ihmc.quadrupedPlanning.pathPlanning.SplinePathPlanner;
-import us.ihmc.quadrupedPlanning.footstepPlanning.QuadrupedXGaitStepPathCalculator;
+import us.ihmc.quadrupedPlanning.footstepPlanning.QuadrupedXGaitStepCalculator;
 import us.ihmc.quadrupedPlanning.footstepPlanning.DefaultTurnWalkTurnPathParameters;
 import us.ihmc.quadrupedPlanning.footstepPlanning.QuadrupedTurnWalkTurnPathPlanner;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
@@ -37,7 +37,7 @@ public class QuadrupedBodyPathPlanner
    protected final WaypointDefinedBodyPathPlanner bodyPathPlanner = new WaypointDefinedBodyPathPlanner();
    private final QuadrupedTurnWalkTurnPathPlanner quadBodyPathPlanner;
    private final QuadrupedWaypointBasedBodyPathProvider waypointBasedPath;
-   private final QuadrupedXGaitStepPathCalculator stepPlanner;
+   private final QuadrupedXGaitStepCalculator stepPlanner;
    private final PlanarGroundPointFootSnapper groundPlaneSnapper;
    private final PlanarRegionBasedPointFootSnapper planarRegionSnapper;
 
@@ -58,7 +58,7 @@ public class QuadrupedBodyPathPlanner
 
       quadBodyPathPlanner = new QuadrupedTurnWalkTurnPathPlanner(new DefaultTurnWalkTurnPathParameters(), registry);
       waypointBasedPath = new QuadrupedWaypointBasedBodyPathProvider(referenceFrames, timestamp, graphicsListRegistry, registry);
-      stepPlanner = new QuadrupedXGaitStepPathCalculator(xGaitSettings, timestamp, waypointBasedPath, firstStepDelay, registry);
+      stepPlanner = new QuadrupedXGaitStepCalculator(xGaitSettings, timestamp, waypointBasedPath, firstStepDelay, registry);
 
       groundPlaneSnapper = new PlanarGroundPointFootSnapper(referenceFrames);
       planarRegionSnapper = new PlanarRegionBasedPointFootSnapper(pointFootSnapperParameters);
