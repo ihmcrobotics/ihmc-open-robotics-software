@@ -6,6 +6,7 @@ import us.ihmc.communication.ROS2Tools.MessageTopicNameGenerator;
 import us.ihmc.communication.controllerAPI.command.Command;
 import us.ihmc.euclid.interfaces.Settable;
 import us.ihmc.multicastLogDataProtocol.modelLoaders.LogModelProvider;
+import us.ihmc.pathPlanning.visibilityGraphs.DefaultVisibilityGraphParameters;
 import us.ihmc.pubsub.DomainFactory;
 import us.ihmc.quadrupedCommunication.QuadrupedControllerAPIDefinition;
 import us.ihmc.quadrupedPlanning.QuadrupedXGaitSettingsReadOnly;
@@ -37,7 +38,8 @@ public class QuadrupedFootstepPlanningModule extends QuadrupedToolboxModule
             pubSubImplementation);
 
 
-      footstepPlanningController = new QuadrupedFootstepPlanningController(defaultXGaitSettings, pointFootSnapperParameters, outputManager, robotDataReceiver, registry,
+      footstepPlanningController = new QuadrupedFootstepPlanningController(defaultXGaitSettings, new DefaultVisibilityGraphParameters(),
+                                                                           pointFootSnapperParameters, outputManager, robotDataReceiver, registry,
                                                                            yoGraphicsListRegistry, updatePeriodMilliseconds);
       new DefaultParameterReader().readParametersInRegistry(registry);
    }

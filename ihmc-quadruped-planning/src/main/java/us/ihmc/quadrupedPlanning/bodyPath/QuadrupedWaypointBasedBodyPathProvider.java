@@ -20,7 +20,7 @@ import us.ihmc.graphicsDescription.yoGraphics.YoGraphicVector;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsList;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.quadrupedBasics.referenceFrames.QuadrupedReferenceFrames;
-import us.ihmc.quadrupedPlanning.footstepPlanning.QuadrupedBodyPathPlan;
+import us.ihmc.quadrupedPlanning.footstepPlanning.turnWalkTurn.TurnWalkTurnPathPlan;
 import us.ihmc.robotics.math.trajectories.waypoints.MultipleWaypointsPositionTrajectoryGenerator;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
@@ -37,7 +37,7 @@ public class QuadrupedWaypointBasedBodyPathProvider implements QuadrupedPlanarBo
 
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
 
-   private final AtomicReference<QuadrupedBodyPathPlan> bodyPathPlan = new AtomicReference<>();
+   private final AtomicReference<TurnWalkTurnPathPlan> bodyPathPlan = new AtomicReference<>();
    private final YoDouble timestamp;
    private final MultipleWaypointsPositionTrajectoryGenerator trajectory = new MultipleWaypointsPositionTrajectoryGenerator("bodyPath", worldFrame, registry);
    private final FramePoint3D trajectoryValue = new FramePoint3D(worldFrame);
@@ -84,7 +84,7 @@ public class QuadrupedWaypointBasedBodyPathProvider implements QuadrupedPlanarBo
       parentRegistry.addChild(registry);
    }
 
-   public void setBodyPathPlan(QuadrupedBodyPathPlan bodyPathPlan)
+   public void setBodyPathPlan(TurnWalkTurnPathPlan bodyPathPlan)
    {
       this.bodyPathPlan.set(bodyPathPlan);
    }
@@ -95,7 +95,7 @@ public class QuadrupedWaypointBasedBodyPathProvider implements QuadrupedPlanarBo
       trajectory.clear();
       appendCurrentPoseAsWaypoint();
 
-      QuadrupedBodyPathPlan bodyPathPlan = this.bodyPathPlan.getAndSet(null);
+      TurnWalkTurnPathPlan bodyPathPlan = this.bodyPathPlan.getAndSet(null);
 
       double currentTime = timestamp.getDoubleValue();
       boolean isExpressedInAbsoluteTime = bodyPathPlan.isExpressedInAbsoluteTime();
@@ -191,9 +191,9 @@ public class QuadrupedWaypointBasedBodyPathProvider implements QuadrupedPlanarBo
       this.bodyPathPlan.set(convertToBodyPathPlan(bodyPathPlanMessage));
    }
 
-   private static QuadrupedBodyPathPlan convertToBodyPathPlan(QuadrupedBodyPathPlanMessage message)
+   private static TurnWalkTurnPathPlan convertToBodyPathPlan(QuadrupedBodyPathPlanMessage message)
    {
-      QuadrupedBodyPathPlan pathPlan = new QuadrupedBodyPathPlan();
+      TurnWalkTurnPathPlan pathPlan = new TurnWalkTurnPathPlan();
       List<EuclideanTrajectoryPointMessage> trajectoryPoints = message.getBodyPathPoints();
       boolean isExpressedInAbsoluteTime = message.getIsExpressedInAbsoluteTime();
 

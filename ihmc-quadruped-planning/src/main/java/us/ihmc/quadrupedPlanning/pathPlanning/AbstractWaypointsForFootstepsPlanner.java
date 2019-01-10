@@ -6,19 +6,31 @@ import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DReadOnly;
 import us.ihmc.euclid.tuple2D.Vector2D;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.quadrupedPlanning.QuadrupedFootstepPlannerGoal;
+import us.ihmc.quadrupedPlanning.footstepPlanning.FootstepPlanningResult;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoEnum;
 
 import java.util.ArrayList;
 import java.util.List;
 
 public abstract class AbstractWaypointsForFootstepsPlanner implements WaypointsForQuadrupedFootstepPlanner
 {
+   protected final static boolean debug = false;
+
    protected final FramePose3D bodyStartPose = new FramePose3D();
    protected final FramePose3D bodyGoalPose = new FramePose3D();
 
    protected final List<Point3D> waypoints = new ArrayList<>();
 
+   protected final YoEnum<FootstepPlanningResult> yoResult;
+
    protected PlanarRegionsList planarRegionsList;
+
+   public AbstractWaypointsForFootstepsPlanner(String prefix, YoVariableRegistry registry)
+   {
+      yoResult = new YoEnum<>(prefix + "PathPlanningResult", registry, FootstepPlanningResult.class);
+   }
 
    @Override
    public void setInitialBodyPose(FramePose3DReadOnly initialPose)
