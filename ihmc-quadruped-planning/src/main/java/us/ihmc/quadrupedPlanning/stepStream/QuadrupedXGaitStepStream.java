@@ -2,9 +2,8 @@ package us.ihmc.quadrupedPlanning.stepStream;
 
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.quadrupedBasics.gait.QuadrupedTimedStep;
-import us.ihmc.quadrupedPlanning.QuadrupedXGaitPlanner;
 import us.ihmc.quadrupedPlanning.YoQuadrupedXGaitSettings;
-import us.ihmc.quadrupedPlanning.bodyPath.QuadrupedPlanarBodyPathProvider;
+import us.ihmc.quadrupedPlanning.stepStream.bodyPath.QuadrupedPlanarBodyPathProvider;
 import us.ihmc.quadrupedPlanning.footstepChooser.PointFootSnapper;
 import us.ihmc.robotics.robotSide.RobotQuadrant;
 import us.ihmc.yoVariables.providers.DoubleProvider;

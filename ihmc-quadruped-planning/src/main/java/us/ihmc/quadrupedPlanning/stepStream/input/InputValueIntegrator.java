@@ -1,4 +1,4 @@
-package us.ihmc.quadrupedPlanning.input;
+package us.ihmc.quadrupedPlanning.stepStream.input;
 
 public class InputValueIntegrator
 {

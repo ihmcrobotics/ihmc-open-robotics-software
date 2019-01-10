@@ -1,10 +1,9 @@
-package us.ihmc.quadrupedPlanning.input;
+package us.ihmc.quadrupedPlanning.stepStream.input;
 
 import net.java.games.input.Event;
 import us.ihmc.communication.net.NetClassList;
 import us.ihmc.communication.packetCommunicator.PacketCommunicator;
 import us.ihmc.communication.util.NetworkPorts;
-import us.ihmc.quadrupedPlanning.QuadrupedNeckJointPositionPacket;
 import us.ihmc.robotics.partNames.QuadrupedJointName;
 import us.ihmc.tools.inputDevices.joystick.Joystick;
 import us.ihmc.tools.inputDevices.joystick.JoystickCustomizationFilter;

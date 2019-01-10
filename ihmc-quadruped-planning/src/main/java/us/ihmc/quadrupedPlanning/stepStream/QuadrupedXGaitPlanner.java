@@ -1,4 +1,4 @@
-package us.ihmc.quadrupedPlanning;
+package us.ihmc.quadrupedPlanning.stepStream;
 
 import us.ihmc.commons.MathTools;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
@@ -8,7 +8,8 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.quadrupedBasics.gait.QuadrupedTimedOrientedStep;
 import us.ihmc.quadrupedBasics.gait.QuadrupedTimedStep;
 import us.ihmc.commons.lists.PreallocatedList;
-import us.ihmc.quadrupedPlanning.bodyPath.QuadrupedPlanarBodyPathProvider;
+import us.ihmc.quadrupedPlanning.QuadrupedXGaitSettingsReadOnly;
+import us.ihmc.quadrupedPlanning.stepStream.bodyPath.QuadrupedPlanarBodyPathProvider;
 import us.ihmc.quadrupedPlanning.footstepChooser.PointFootSnapper;
 import us.ihmc.quadrupedPlanning.stepStream.QuadrupedPlanarFootstepPlan;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;

@@ -1,4 +1,4 @@
-package us.ihmc.quadrupedPlanning.bodyPath;
+package us.ihmc.quadrupedPlanning.stepStream.bodyPath;
 
 import controller_msgs.msg.dds.QuadrupedBodyPathPlanMessage;
 import controller_msgs.msg.dds.QuadrupedFootstepStatusMessage;

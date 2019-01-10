@@ -1,4 +1,4 @@
-package us.ihmc.quadrupedPlanning.input;
+package us.ihmc.quadrupedPlanning.stepStream.input;
 
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelControllerName;
 import us.ihmc.simulationConstructionSetTools.util.inputdevices.MidiSliderBoard;

@@ -1,4 +1,4 @@
-package us.ihmc.quadrupedPlanning;
+package us.ihmc.quadrupedPlanning.stepStream.input;
 
 import us.ihmc.communication.packets.Packet;
 import us.ihmc.communication.packets.PacketDestination;
