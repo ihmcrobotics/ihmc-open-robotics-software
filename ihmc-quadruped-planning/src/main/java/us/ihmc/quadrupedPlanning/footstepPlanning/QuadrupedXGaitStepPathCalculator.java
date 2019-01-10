@@ -1,4 +1,4 @@
-package us.ihmc.quadrupedPlanning.stepPlanning;
+package us.ihmc.quadrupedPlanning.footstepPlanning;
 
 import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DReadOnly;
 import us.ihmc.euclid.tuple3D.Vector3D;

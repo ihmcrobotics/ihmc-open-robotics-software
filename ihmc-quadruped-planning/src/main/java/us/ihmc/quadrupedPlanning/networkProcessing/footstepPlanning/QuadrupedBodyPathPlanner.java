@@ -19,9 +19,9 @@ import us.ihmc.quadrupedPlanning.footstepChooser.PlanarGroundPointFootSnapper;
 import us.ihmc.quadrupedPlanning.footstepChooser.PlanarRegionBasedPointFootSnapper;
 import us.ihmc.quadrupedPlanning.footstepChooser.PointFootSnapperParameters;
 import us.ihmc.quadrupedPlanning.pathPlanning.SplinePathPlanner;
-import us.ihmc.quadrupedPlanning.stepPlanning.QuadrupedXGaitStepPathCalculator;
-import us.ihmc.quadrupedPlanning.footstepPlanning.DefaultConstantAccelerationBodyPathParameters;
-import us.ihmc.quadrupedPlanning.footstepPlanning.QuadrupedConstantAccelerationBodyPathPlanner;
+import us.ihmc.quadrupedPlanning.footstepPlanning.QuadrupedXGaitStepPathCalculator;
+import us.ihmc.quadrupedPlanning.footstepPlanning.DefaultTurnWalkTurnPathParameters;
+import us.ihmc.quadrupedPlanning.footstepPlanning.QuadrupedTurnWalkTurnPathPlanner;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
@@ -35,7 +35,7 @@ public class QuadrupedBodyPathPlanner
 
    private final SplinePathPlanner waypointPlanner = new SplinePathPlanner(registry);
    protected final WaypointDefinedBodyPathPlanner bodyPathPlanner = new WaypointDefinedBodyPathPlanner();
-   private final QuadrupedConstantAccelerationBodyPathPlanner quadBodyPathPlanner;
+   private final QuadrupedTurnWalkTurnPathPlanner quadBodyPathPlanner;
    private final QuadrupedWaypointBasedBodyPathProvider waypointBasedPath;
    private final QuadrupedXGaitStepPathCalculator stepPlanner;
    private final PlanarGroundPointFootSnapper groundPlaneSnapper;
@@ -56,7 +56,7 @@ public class QuadrupedBodyPathPlanner
       xGaitSettings = new YoQuadrupedXGaitSettings(defaultXGaitSettings, registry);
       firstStepDelay.set(0.5);
 
-      quadBodyPathPlanner = new QuadrupedConstantAccelerationBodyPathPlanner(new DefaultConstantAccelerationBodyPathParameters(), registry);
+      quadBodyPathPlanner = new QuadrupedTurnWalkTurnPathPlanner(new DefaultTurnWalkTurnPathParameters(), registry);
       waypointBasedPath = new QuadrupedWaypointBasedBodyPathProvider(referenceFrames, timestamp, graphicsListRegistry, registry);
       stepPlanner = new QuadrupedXGaitStepPathCalculator(xGaitSettings, timestamp, waypointBasedPath, firstStepDelay, registry);
 

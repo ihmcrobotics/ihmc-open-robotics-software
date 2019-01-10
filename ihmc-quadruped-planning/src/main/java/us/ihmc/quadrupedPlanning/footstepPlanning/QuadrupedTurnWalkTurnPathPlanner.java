@@ -3,13 +3,11 @@ package us.ihmc.quadrupedPlanning.footstepPlanning;
 import us.ihmc.commons.MathTools;
 import us.ihmc.euclid.geometry.Pose2D;
 import us.ihmc.euclid.geometry.interfaces.Pose2DReadOnly;
-import us.ihmc.euclid.referenceFrame.FrameVector2D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple2D.Vector2D;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
 import us.ihmc.euclid.tuple2D.interfaces.Vector2DReadOnly;
-import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.pathPlanning.visibilityGraphs.tools.BodyPathPlan;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
@@ -17,7 +15,7 @@ import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoEnum;
 
-public class QuadrupedConstantAccelerationBodyPathPlanner
+public class QuadrupedTurnWalkTurnPathPlanner
 {
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
 
@@ -47,7 +45,7 @@ public class QuadrupedConstantAccelerationBodyPathPlanner
 
    private final PoseReferenceFrame headingFrame = new PoseReferenceFrame("headingFrame", ReferenceFrame.getWorldFrame());
 
-   public QuadrupedConstantAccelerationBodyPathPlanner(ConstantAccelerationBodyPathParameters pathParameters, YoVariableRegistry parentRegistry)
+   public QuadrupedTurnWalkTurnPathPlanner(TurnWalkTurnPathParameters pathParameters, YoVariableRegistry parentRegistry)
    {
       robotSpeed.set(RobotSpeed.MEDIUM);
       discretelyTraverseWaypoints.set(true);
@@ -95,7 +93,6 @@ public class QuadrupedConstantAccelerationBodyPathPlanner
 
    private static final Vector2DReadOnly zeroVelocity = new Vector2D();
    private final Vector2D desiredHeading = new Vector2D();
-   private final Vector2D previousHeading = new Vector2D();
 
 
    private void computePlanDiscretelyTraversingWaypoints()
@@ -115,7 +112,7 @@ public class QuadrupedConstantAccelerationBodyPathPlanner
          desiredHeading.normalize();
          double desiredYaw = forwardHeading.angle(desiredHeading);
 
-         double timeToAccelerateTurnWithNoMaxRate = QuadrupedBodyPathTools.computeTimeToAccelerateToAchieveValueWithNoMaxRate(currentYaw, 0.0, desiredYaw, 0.0, maxYawAcceleration.getDoubleValue());
+         double timeToAccelerateTurnWithNoMaxRate = QuadrupedTurnWalkTurnPathPlanner.computeTimeToAccelerateToAchieveValueWithNoMaxRate(currentYaw, 0.0, desiredYaw, 0.0, maxYawAcceleration.getDoubleValue());
          boolean reachesMaxYawRate = maxYawAcceleration.getDoubleValue() * timeToAccelerateTurnWithNoMaxRate > maxYawRate.getValue();
 
          // handle turning
@@ -180,7 +177,7 @@ public class QuadrupedConstantAccelerationBodyPathPlanner
          }
 
          double distanceToTravel = currentPosition.distance(nextWaypoint);
-         double timeToAccelerateDistanceWithNoMaxRate = QuadrupedBodyPathTools.computeTimeToAccelerateToAchieveValueWithNoMaxRate(0.0, 0.0, distanceToTravel, 0.0, maxForwardAcceleration.getDoubleValue());
+         double timeToAccelerateDistanceWithNoMaxRate = QuadrupedTurnWalkTurnPathPlanner.computeTimeToAccelerateToAchieveValueWithNoMaxRate(0.0, 0.0, distanceToTravel, 0.0, maxForwardAcceleration.getDoubleValue());
          boolean reachesMaxForwardRate = maxForwardAcceleration.getDoubleValue() * timeToAccelerateDistanceWithNoMaxRate > desiredSpeed;
          if (reachesMaxForwardRate)
          {
@@ -249,9 +246,9 @@ public class QuadrupedConstantAccelerationBodyPathPlanner
       }
 
       double goalYaw = bodyPathWaypoints.getGoalPose().getYaw();
-      if (!MathTools.epsilonEquals(currentYaw, goalYaw, QuadrupedBodyPathTools.yawEpsilonForSameValue))
+      if (!MathTools.epsilonEquals(currentYaw, goalYaw, 2.0e-3))
       {
-         double timeToAccelerateTurnWithNoMaxRate = QuadrupedBodyPathTools.computeTimeToAccelerateToAchieveValueWithNoMaxRate(currentYaw, 0.0, goalYaw, 0.0, maxYawAcceleration.getDoubleValue());
+         double timeToAccelerateTurnWithNoMaxRate = QuadrupedTurnWalkTurnPathPlanner.computeTimeToAccelerateToAchieveValueWithNoMaxRate(currentYaw, 0.0, goalYaw, 0.0, maxYawAcceleration.getDoubleValue());
          boolean reachesMaxYawRate = maxYawAcceleration.getDoubleValue() * timeToAccelerateTurnWithNoMaxRate > maxYawRate.getValue();
 
          // handle turning
@@ -301,146 +298,34 @@ public class QuadrupedConstantAccelerationBodyPathPlanner
          }
       }
    }
-   /*
 
-   private void computePlanSmoothlyTraversingWaypoints()
+
+   public static double computeTimeToAccelerateToAchieveValueWithNoMaxRate(double currentValue, double currentRate, double desiredValue, double desiredRate,
+                                                                           double maxAcceleration)
    {
-      double currentTime = 0.0;
-      Pose2DReadOnly startPose = bodyPathWaypoints.getStartPose();
-      Point2D currentPosition = new Point2D(startPose.getPosition());
-      double currentYaw = startPose.getYaw();
-      Vector2D currentLinearVelocity = new Vector2D();
+      double angleDelta = desiredValue - currentValue;
+      double motionDirection = Math.signum(desiredValue - currentValue);
+      double acceleration = motionDirection * maxAcceleration;
+      double velocityDelta = 1.0 / (2.0 * acceleration) * (MathTools.square(currentRate) - MathTools.square(desiredRate));
+      double a = acceleration;
+      double b = 2.0 * currentRate;
+      double c = -angleDelta + velocityDelta;
 
-      previousHeading.set(Math.cos(currentYaw), Math.sin(currentYaw));
-
-      double desiredSpeed;
-      switch (robotSpeed.getEnumValue())
-      {
-      case FAST:
-         desiredSpeed = fastVelocity.getDoubleValue();
-         break;
-      case MEDIUM:
-         desiredSpeed = mediumVelocity.getDoubleValue();
-         break;
-      default:
-         desiredSpeed = slowVelocity.getDoubleValue();
-         break;
-      }
-
-
-      for (int currentWaypointIndex = 0; currentWaypointIndex < bodyPathWaypoints.getNumberOfWaypoints() - 1; currentWaypointIndex++)
-      {
-         int nextWaypointIndex = currentWaypointIndex + 1;
-         Point2DReadOnly nextWaypoint = new Point2D(bodyPathWaypoints.getWaypoint(nextWaypointIndex));
-
-         desiredHeading.sub(nextWaypoint, currentPosition);
-         desiredHeading.normalize();
-
-         double desiredYaw;
-         if (currentWaypointIndex == 0)
-         {
-            desiredYaw = desiredHeading.angle(forwardHeading);
-         }
-         else
-         {
-            double currentDesiredYaw = desiredHeading.angle(forwardHeading);
-//            Vector2D previousHeading =
-         }
-
-
-         double timeToAccelerateTurnWithNoMaxRate = QuadrupedBodyPathTools.computeTimeToAccelerateToAchieveValueWithNoMaxRate(currentYaw, 0.0, desiredYaw, 0.0, maxYawAcceleration.getDoubleValue());
-         boolean reachesMaxYawRate = maxYawAcceleration.getDoubleValue() * timeToAccelerateTurnWithNoMaxRate > maxYawRate.getValue();
-
-         if (reachesMaxYawRate)
-         {
-            double angleDelta = desiredYaw - currentYaw;
-            double errorSign = Math.signum(angleDelta);
-            double timeToAccelerate = maxYawRate.getDoubleValue() / maxYawAcceleration.getValue();
-            double deltaWhileAccelerating = 0.5 * errorSign * maxYawAcceleration.getValue() * MathTools.square(timeToAccelerate);
-
-            double yawAfterTurning = currentYaw + deltaWhileAccelerating;
-
-            Vector2D desiredVelocityAfterAcceleratingYaw = new Vector2D();
-            Vector2D distanceWhileAcceleratingYaw = new Vector2D();
-
-            computeDesiredVelocityWithAccelerationLimits(desiredVelocityAfterAcceleratingYaw, currentLinearVelocity, desiredHeading, yawAfterTurning, desiredSpeed,
-                                                         timeToAccelerate);
-
-            distanceWhileAcceleratingYaw.add(desiredVelocityAfterAcceleratingYaw, currentLinearVelocity);
-            distanceWhileAcceleratingYaw.scale(0.5 * timeToAccelerate);
-
-
-            currentYaw += deltaWhileAccelerating ;
-            currentTime += timeToAccelerate;
-
-            // add accelerating waypoint
-            bodyPathPlan.addWaypoint(new Pose2D(currentPosition, currentYaw), zeroVelocity, errorSign * maxYawRate.getDoubleValue(), currentTime);
-
-            double timeForMaxVelocity = (Math.abs(angleDelta) - Math.abs(2.0 * deltaWhileAccelerating)) / maxYawRate.getDoubleValue();
-
-            // add constant velocity waypoint
-            currentYaw += timeForMaxVelocity * maxYawRate.getDoubleValue() * errorSign;
-            currentTime += timeForMaxVelocity;
-
-            bodyPathPlan.addWaypoint(new Pose2D(currentPosition, currentYaw), zeroVelocity, errorSign * maxYawRate.getDoubleValue(), currentTime);
-
-            currentYaw += deltaWhileAccelerating;
-            currentTime += timeToAccelerate;
-
-            bodyPathPlan.addWaypoint(new Pose2D(currentPosition, currentYaw), zeroVelocity, 0.0, currentTime);
-         }
-         else
-         {
-            double angleDelta = desiredYaw - currentYaw;
-            double errorSign = Math.signum(angleDelta);
-
-            double deltaWhileAccelerating = 0.5 * errorSign * maxYawAcceleration.getDoubleValue() * MathTools.square(timeToAccelerateTurnWithNoMaxRate);
-            double velocityAfterAccelerating = errorSign * maxYawAcceleration.getDoubleValue() * timeToAccelerateTurnWithNoMaxRate;
-
-            currentYaw += deltaWhileAccelerating ;
-            currentTime += timeToAccelerateTurnWithNoMaxRate;
-
-            bodyPathPlan.addWaypoint(new Pose2D(currentPosition, currentYaw), zeroVelocity, velocityAfterAccelerating, currentTime);
-
-            currentYaw += deltaWhileAccelerating;
-            currentTime += timeToAccelerateTurnWithNoMaxRate;
-
-            bodyPathPlan.addWaypoint(new Pose2D(currentPosition, currentYaw), zeroVelocity, 0.0, currentTime);
-         }
-
-         previousHeading.set(desiredHeading);
-      }
+      return largestQuadraticSolution(a, b, c);
    }
-   */
 
-   private final FrameVector2D maxAccelerationInWorld = new FrameVector2D();
-   private final FrameVector2D maxVelocityChange = new FrameVector2D();
-   private final Quaternion orientation = new Quaternion();
 
-   private void computeDesiredVelocityWithAccelerationLimits(Vector2D desiredVelocityToPack, Vector2DReadOnly currentVelocity, Vector2DReadOnly desiredHeading,
-                                                             double currentYaw, double desiredSpeed, double timeToAcceleration)
+   static double largestQuadraticSolution(double a, double b, double c)
    {
-      desiredVelocityToPack.set(desiredHeading);
-      desiredVelocityToPack.scale(desiredSpeed / desiredHeading.length());
+      double radical = Math.sqrt(MathTools.square(b) - 4.0 * a * c);
 
-      orientation.setToYawQuaternion(currentYaw);
-      headingFrame.setOrientationAndUpdate(orientation);
-
-      maxAccelerationInWorld.setIncludingFrame(headingFrame, maxForwardAcceleration.getDoubleValue(), maxLateralAcceleration.getDoubleValue());
-      maxAccelerationInWorld.changeFrame(ReferenceFrame.getWorldFrame());
-
-      maxVelocityChange.setIncludingFrame(maxAccelerationInWorld);
-      maxVelocityChange.scale(timeToAcceleration);
-
-      if (Math.abs(desiredVelocityToPack.getX() - currentVelocity.getX()) > maxVelocityChange.getX())
+      if (a > 0)
       {
-         double alpha = Math.abs(maxVelocityChange.getX() / desiredVelocityToPack.getX());
-         desiredVelocityToPack.scale(alpha);
+         return (-b + radical) / (2.0 * a);
       }
-      if (Math.abs(desiredVelocityToPack.getY() - currentVelocity.getY()) > maxVelocityChange.getY())
+      else
       {
-         double alpha = Math.abs(maxVelocityChange.getY() / desiredVelocityToPack.getY());
-         desiredVelocityToPack.scale(alpha);
+         return (-b - radical) / (2.0 * a);
       }
    }
 }
