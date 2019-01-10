@@ -23,7 +23,7 @@ import us.ihmc.quadrupedCommunication.QuadrupedControllerAPIDefinition;
 import us.ihmc.quadrupedCommunication.QuadrupedMessageTools;
 import us.ihmc.quadrupedPlanning.QuadrupedXGaitSettingsReadOnly;
 import us.ihmc.quadrupedPlanning.YoQuadrupedXGaitSettings;
-import us.ihmc.quadrupedPlanning.bodyPath.QuadrupedBodyPathMultiplexer;
+import us.ihmc.quadrupedPlanning.stepStream.bodyPath.QuadrupedBodyPathMultiplexer;
 import us.ihmc.quadrupedPlanning.footstepChooser.PlanarGroundPointFootSnapper;
 import us.ihmc.quadrupedPlanning.footstepChooser.PointFootSnapper;
 import us.ihmc.quadrupedPlanning.stepStream.QuadrupedXGaitStepStream;

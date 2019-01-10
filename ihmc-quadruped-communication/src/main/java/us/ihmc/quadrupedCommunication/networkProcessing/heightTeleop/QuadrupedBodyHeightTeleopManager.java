@@ -6,12 +6,6 @@ import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.quadrupedBasics.referenceFrames.QuadrupedReferenceFrames;
 import us.ihmc.quadrupedCommunication.QuadrupedMessageTools;
-import us.ihmc.quadrupedPlanning.QuadrupedXGaitSettingsReadOnly;
-import us.ihmc.quadrupedPlanning.YoQuadrupedXGaitSettings;
-import us.ihmc.quadrupedPlanning.bodyPath.QuadrupedBodyPathMultiplexer;
-import us.ihmc.quadrupedPlanning.footstepChooser.PlanarGroundPointFootSnapper;
-import us.ihmc.quadrupedPlanning.footstepChooser.PointFootSnapper;
-import us.ihmc.quadrupedPlanning.stepStream.QuadrupedXGaitStepStream;
 
 import java.util.concurrent.atomic.AtomicBoolean;
 

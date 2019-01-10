@@ -1,4 +1,4 @@
-package us.ihmc.quadrupedPlanning.bodyPath;
+package us.ihmc.quadrupedPlanning.stepStream.bodyPath;
 
 import us.ihmc.euclid.referenceFrame.FramePose2D;
 

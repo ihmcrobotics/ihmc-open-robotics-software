@@ -4,7 +4,7 @@ import controller_msgs.msg.dds.*;
 import net.java.games.input.Event;
 import us.ihmc.commons.Conversions;
 import us.ihmc.quadrupedPlanning.QuadrupedXGaitSettingsReadOnly;
-import us.ihmc.quadrupedPlanning.input.InputValueIntegrator;
+import us.ihmc.quadrupedPlanning.stepStream.input.InputValueIntegrator;
 import us.ihmc.quadrupedCommunication.networkProcessing.OutputManager;
 import us.ihmc.quadrupedCommunication.networkProcessing.QuadrupedRobotDataReceiver;
 import us.ihmc.quadrupedCommunication.networkProcessing.QuadrupedToolboxController;

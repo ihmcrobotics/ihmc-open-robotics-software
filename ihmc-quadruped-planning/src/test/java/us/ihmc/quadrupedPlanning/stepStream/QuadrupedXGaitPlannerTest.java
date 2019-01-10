@@ -1,4 +1,4 @@
-package us.ihmc.quadrupedPlanning;
+package us.ihmc.quadrupedPlanning.stepStream;
 
 import org.junit.After;
 import org.junit.Test;
@@ -12,7 +12,9 @@ import us.ihmc.euclid.referenceFrame.tools.ReferenceFrameTools;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.quadrupedBasics.gait.QuadrupedTimedOrientedStep;
 import us.ihmc.quadrupedBasics.gait.QuadrupedTimedStep;
-import us.ihmc.quadrupedPlanning.bodyPath.QuadrupedPlanarBodyPathProvider;
+import us.ihmc.quadrupedPlanning.QuadrupedXGaitSettings;
+import us.ihmc.quadrupedPlanning.stepStream.QuadrupedXGaitPlanner;
+import us.ihmc.quadrupedPlanning.stepStream.bodyPath.QuadrupedPlanarBodyPathProvider;
 import us.ihmc.quadrupedPlanning.stepStream.QuadrupedPlanarFootstepPlan;
 import us.ihmc.robotics.robotSide.RobotEnd;
 import us.ihmc.robotics.robotSide.RobotQuadrant;
