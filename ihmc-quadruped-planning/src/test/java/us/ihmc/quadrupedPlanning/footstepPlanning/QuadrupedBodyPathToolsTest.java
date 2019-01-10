@@ -1,4 +1,4 @@
-package us.ihmc.quadrupedPlanning.velocityPlanning;
+package us.ihmc.quadrupedPlanning.footstepPlanning;
 
 import org.junit.Test;
 import us.ihmc.commons.MathTools;

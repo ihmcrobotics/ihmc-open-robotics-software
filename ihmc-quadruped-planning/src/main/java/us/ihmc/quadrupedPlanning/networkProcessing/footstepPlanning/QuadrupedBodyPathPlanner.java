@@ -20,8 +20,8 @@ import us.ihmc.quadrupedPlanning.footstepChooser.PlanarRegionBasedPointFootSnapp
 import us.ihmc.quadrupedPlanning.footstepChooser.PointFootSnapperParameters;
 import us.ihmc.quadrupedPlanning.pathPlanning.SplinePathPlanner;
 import us.ihmc.quadrupedPlanning.stepPlanning.QuadrupedXGaitStepPathCalculator;
-import us.ihmc.quadrupedPlanning.velocityPlanning.DefaultConstantAccelerationBodyPathParameters;
-import us.ihmc.quadrupedPlanning.velocityPlanning.QuadrupedConstantAccelerationBodyPathPlanner;
+import us.ihmc.quadrupedPlanning.footstepPlanning.DefaultConstantAccelerationBodyPathParameters;
+import us.ihmc.quadrupedPlanning.footstepPlanning.QuadrupedConstantAccelerationBodyPathPlanner;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
