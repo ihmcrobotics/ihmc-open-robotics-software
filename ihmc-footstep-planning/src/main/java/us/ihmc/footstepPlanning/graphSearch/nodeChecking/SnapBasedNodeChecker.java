@@ -3,15 +3,18 @@ package us.ihmc.footstepPlanning.graphSearch.nodeChecking;
 import us.ihmc.commons.PrintTools;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.geometry.LineSegment3D;
+import us.ihmc.euclid.tools.EuclidCoreTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.FootstepNodeSnapData;
 import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.FootstepNodeSnapper;
 import us.ihmc.footstepPlanning.graphSearch.graph.FootstepNode;
+import us.ihmc.footstepPlanning.graphSearch.graph.FootstepNodeTools;
 import us.ihmc.footstepPlanning.graphSearch.listeners.BipedalFootstepPlannerListener;
 import us.ihmc.footstepPlanning.graphSearch.graph.visualization.BipedalFootstepPlannerNodeRejectionReason;
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParameters;
+import us.ihmc.footstepPlanning.tools.FootstepPlannerIOTools;
 import us.ihmc.robotics.geometry.PlanarRegion;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.robotSide.SideDependentList;
@@ -107,6 +110,29 @@ public class SnapBasedNodeChecker extends FootstepNodeChecker
          }
          rejectNode(node, previousNode, BipedalFootstepPlannerNodeRejectionReason.OBSTACLE_BLOCKING_BODY);
          return false;
+      }
+
+      if(graph != null)
+      {
+         FootstepNode grandparentNode = graph.getParentNode(previousNode);
+         if(grandparentNode != null)
+         {
+            RigidBodyTransform grandparentSnapTransform = snapper.getSnapData(grandparentNode).getSnapTransform();
+            RigidBodyTransform grandparentNodeTransform = new RigidBodyTransform();
+            FootstepNodeTools.getSnappedNodeTransform(grandparentNode, grandparentSnapTransform, grandparentNodeTransform);
+
+            double heightChangeFromGrandparentNode = nodePosition.getZ() - grandparentNodeTransform.getTranslationZ();
+            double translationChangeFromGrandparentNode = EuclidCoreTools
+                  .norm(nodePosition.getX() - grandparentNodeTransform.getTranslationX(), nodePosition.getY() - grandparentNodeTransform.getTranslationY());
+
+            boolean largeStepUp = heightChangeFromGrandparentNode > parameters.getMaximumStepZWhenSteppingUp();
+
+            if (largeStepUp && translationChangeFromGrandparentNode > 1.7 * parameters.getMaximumStepReachWhenSteppingUp())
+            {
+               rejectNode(node, previousNode, BipedalFootstepPlannerNodeRejectionReason.STEP_TOO_FAR_AND_HIGH);
+               return false;
+            }
+         }
       }
 
       return true;
