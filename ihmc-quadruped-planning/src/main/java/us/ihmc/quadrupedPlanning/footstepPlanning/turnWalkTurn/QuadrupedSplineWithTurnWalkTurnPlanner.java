@@ -1,146 +1,130 @@
-package us.ihmc.quadrupedPlanning.networkProcessing.footstepPlanning;
+package us.ihmc.quadrupedPlanning.footstepPlanning.turnWalkTurn;
 
-import controller_msgs.msg.dds.PlanarRegionsListMessage;
 import controller_msgs.msg.dds.QuadrupedGroundPlaneMessage;
-import controller_msgs.msg.dds.QuadrupedXGaitSettingsPacket;
-import us.ihmc.commons.Conversions;
-import us.ihmc.communication.packets.PlanarRegionMessageConverter;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DReadOnly;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
+import us.ihmc.pathPlanning.bodyPathPlanner.BodyPathPlanner;
 import us.ihmc.pathPlanning.bodyPathPlanner.WaypointDefinedBodyPathPlanner;
 import us.ihmc.pathPlanning.visibilityGraphs.tools.BodyPathPlan;
 import us.ihmc.quadrupedBasics.gait.QuadrupedTimedStep;
 import us.ihmc.quadrupedBasics.referenceFrames.QuadrupedReferenceFrames;
 import us.ihmc.quadrupedPlanning.QuadrupedFootstepPlannerGoal;
-import us.ihmc.quadrupedPlanning.QuadrupedXGaitSettingsReadOnly;
 import us.ihmc.quadrupedPlanning.YoQuadrupedXGaitSettings;
 import us.ihmc.quadrupedPlanning.bodyPath.QuadrupedWaypointBasedBodyPathProvider;
 import us.ihmc.quadrupedPlanning.footstepChooser.PlanarGroundPointFootSnapper;
 import us.ihmc.quadrupedPlanning.footstepChooser.PlanarRegionBasedPointFootSnapper;
 import us.ihmc.quadrupedPlanning.footstepChooser.PointFootSnapperParameters;
+import us.ihmc.quadrupedPlanning.footstepPlanning.QuadrupedBodyPathAndFootstepPlanner;
 import us.ihmc.quadrupedPlanning.pathPlanning.SplinePathPlanner;
-import us.ihmc.quadrupedPlanning.footstepPlanning.QuadrupedXGaitStepCalculator;
-import us.ihmc.quadrupedPlanning.footstepPlanning.DefaultTurnWalkTurnPathParameters;
-import us.ihmc.quadrupedPlanning.footstepPlanning.QuadrupedTurnWalkTurnPathPlanner;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 
 import java.util.List;
-import java.util.concurrent.atomic.AtomicLong;
 
-public class QuadrupedBodyPathPlanner
+public class QuadrupedSplineWithTurnWalkTurnPlanner implements QuadrupedBodyPathAndFootstepPlanner
 {
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
 
+   private final BodyPathPlanner bodyPathPlanner = new WaypointDefinedBodyPathPlanner();
    private final SplinePathPlanner waypointPlanner = new SplinePathPlanner(registry);
-   protected final WaypointDefinedBodyPathPlanner bodyPathPlanner = new WaypointDefinedBodyPathPlanner();
+
    private final QuadrupedTurnWalkTurnPathPlanner quadBodyPathPlanner;
    private final QuadrupedWaypointBasedBodyPathProvider waypointBasedPath;
-   private final QuadrupedXGaitStepCalculator stepPlanner;
+   private final QuadrupedXGaitStepCalculator stepCalculator;
    private final PlanarGroundPointFootSnapper groundPlaneSnapper;
    private final PlanarRegionBasedPointFootSnapper planarRegionSnapper;
 
-   private final YoDouble timestamp = new YoDouble("timestamp", registry);
-   private final YoQuadrupedXGaitSettings xGaitSettings;
 
-   private final YoDouble firstStepDelay = new YoDouble("firstStepDelay", registry);
-
-   private final AtomicLong timestampNanos = new AtomicLong();
-
-
-   public QuadrupedBodyPathPlanner(QuadrupedXGaitSettingsReadOnly defaultXGaitSettings, PointFootSnapperParameters pointFootSnapperParameters,
-                                   QuadrupedReferenceFrames referenceFrames, YoGraphicsListRegistry graphicsListRegistry,
-                                   YoVariableRegistry parentRegistry)
+   public QuadrupedSplineWithTurnWalkTurnPlanner(YoQuadrupedXGaitSettings xGaitSettings, YoDouble timestamp, PointFootSnapperParameters pointFootSnapperParameters,
+                                                 QuadrupedReferenceFrames referenceFrames, YoGraphicsListRegistry graphicsListRegistry,
+                                                 YoVariableRegistry parentRegistry)
    {
-      xGaitSettings = new YoQuadrupedXGaitSettings(defaultXGaitSettings, registry);
+      YoDouble firstStepDelay = new YoDouble("firstStepDelay", registry);
       firstStepDelay.set(0.5);
 
-      quadBodyPathPlanner = new QuadrupedTurnWalkTurnPathPlanner(new DefaultTurnWalkTurnPathParameters(), registry);
+      quadBodyPathPlanner = new QuadrupedTurnWalkTurnPathPlanner(new DefaultTurnWalkTurnPathParameters(), bodyPathPlanner, registry);
       waypointBasedPath = new QuadrupedWaypointBasedBodyPathProvider(referenceFrames, timestamp, graphicsListRegistry, registry);
-      stepPlanner = new QuadrupedXGaitStepCalculator(xGaitSettings, timestamp, waypointBasedPath, firstStepDelay, registry);
+      stepCalculator = new QuadrupedXGaitStepCalculator(xGaitSettings, timestamp, waypointBasedPath, firstStepDelay, registry);
 
       groundPlaneSnapper = new PlanarGroundPointFootSnapper(referenceFrames);
       planarRegionSnapper = new PlanarRegionBasedPointFootSnapper(pointFootSnapperParameters);
       planarRegionSnapper.setFallbackSnapper(groundPlaneSnapper);
-      stepPlanner.setStepSnapper(planarRegionSnapper);
+      stepCalculator.setStepSnapper(planarRegionSnapper);
 
       parentRegistry.addChild(registry);
    }
 
-   public void processPlanarRegionsListMessage(PlanarRegionsListMessage message)
-   {
-      PlanarRegionsList planarRegionsList = PlanarRegionMessageConverter.convertToPlanarRegionsList(message);
-      setPlanarRegions(planarRegionsList);
-   }
-
-   public void processGroundPlaneMessage(QuadrupedGroundPlaneMessage message)
+   @Override
+   public void setGroundPlane(QuadrupedGroundPlaneMessage message)
    {
       groundPlaneSnapper.submitGroundPlane(message);
    }
 
-   public void processXGaitSettingsPacket(QuadrupedXGaitSettingsPacket packet)
-   {
-      xGaitSettings.set(packet);
-   }
-
-   public void processTimestamp(long timestampInNanos)
-   {
-      this.timestampNanos.set(timestampInNanos);
-   }
-
-   public void setInitialBodyPose(FramePose3DReadOnly bodyPose)
-   {
-      waypointPlanner.setInitialBodyPose(bodyPose);
-   }
-
-   public void setGoal(QuadrupedFootstepPlannerGoal goal)
-   {
-      waypointPlanner.setGoal(goal);
-   }
-
-   public void setPlanarRegions(PlanarRegionsList planarRegionsList)
+   @Override
+   public void setPlanarRegionsList(PlanarRegionsList planarRegionsList)
    {
       planarRegionSnapper.setPlanarRegionsList(planarRegionsList);
       waypointPlanner.setPlanarRegionsList(planarRegionsList);
    }
 
-   public void initialize()
+   @Override
+   public void setInitialBodyPose(FramePose3DReadOnly bodyPose)
    {
-      timestamp.set(Conversions.nanosecondsToSeconds(timestampNanos.get()));
-//      paused.set(false);
+      waypointPlanner.setInitialBodyPose(bodyPose);
    }
 
-   public void compute()
+   @Override
+   public void setGoal(QuadrupedFootstepPlannerGoal goal)
+   {
+      waypointPlanner.setGoal(goal);
+   }
+
+   @Override
+   public void initialize()
+   {
+   }
+
+
+   @Override
+   public void planPath()
    {
       waypointPlanner.planWaypoints();
 
       bodyPathPlanner.setWaypoints(waypointPlanner.getWaypoints());
       bodyPathPlanner.compute();
+   }
 
+   @Override
+   public void plan()
+   {
       BodyPathPlan bodyPathPlan = bodyPathPlanner.getPlan();
       bodyPathPlan.setStartPose(waypointPlanner.getInitialBodyPose().getPosition().getX(), waypointPlanner.getInitialBodyPose().getPosition().getY(), waypointPlanner.getInitialBodyPose().getYaw());
       bodyPathPlan.setGoalPose(waypointPlanner.getGoalBodyPose().getPosition().getX(), waypointPlanner.getGoalBodyPose().getPosition().getY(), waypointPlanner.getGoalBodyPose().getYaw());
 
-      quadBodyPathPlanner.setBodyPathWaypoints(bodyPathPlanner.getPlan());
       quadBodyPathPlanner.computePlan();
 
       waypointBasedPath.setBodyPathPlan(quadBodyPathPlanner.getPlan());
 
-      stepPlanner.setGoalPose(waypointPlanner.getGoalBodyPose());
-      stepPlanner.onEntry();
+      stepCalculator.setGoalPose(waypointPlanner.getGoalBodyPose());
+      stepCalculator.onEntry();
    }
 
+   @Override
    public void update()
    {
-      timestamp.set(Conversions.nanosecondsToSeconds(timestampNanos.get()));
-
 //      stepPlanner.updateOnline();
    }
 
-   public List<? extends QuadrupedTimedStep> getSteps()
+   @Override
+   public BodyPathPlan getPathPlan()
    {
-      return stepPlanner.getSteps();
+      return bodyPathPlanner.getPlan();
    }
 
+   @Override
+   public List<? extends QuadrupedTimedStep> getSteps()
+   {
+      return stepCalculator.getSteps();
+   }
 }

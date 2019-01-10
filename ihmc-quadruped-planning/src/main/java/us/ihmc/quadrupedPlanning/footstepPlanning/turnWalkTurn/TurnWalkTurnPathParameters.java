@@ -1,4 +1,4 @@
-package us.ihmc.quadrupedPlanning.footstepPlanning;
+package us.ihmc.quadrupedPlanning.footstepPlanning.turnWalkTurn;
 
 public interface TurnWalkTurnPathParameters
 {

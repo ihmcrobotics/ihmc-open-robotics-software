@@ -1,17 +1,16 @@
-package us.ihmc.quadrupedPlanning.footstepPlanning;
+package us.ihmc.quadrupedPlanning.footstepPlanning.turnWalkTurn;
 
 import us.ihmc.commons.MathTools;
 import us.ihmc.euclid.geometry.Pose2D;
 import us.ihmc.euclid.geometry.interfaces.Pose2DReadOnly;
-import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple2D.Vector2D;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
 import us.ihmc.euclid.tuple2D.interfaces.Vector2DReadOnly;
+import us.ihmc.pathPlanning.bodyPathPlanner.BodyPathPlanner;
 import us.ihmc.pathPlanning.visibilityGraphs.tools.BodyPathPlan;
-import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
+import us.ihmc.quadrupedPlanning.footstepPlanning.QuadrupedBodyPathPlan;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoEnum;
 
@@ -31,8 +30,6 @@ public class QuadrupedTurnWalkTurnPathPlanner
    private final YoDouble maxForwardAcceleration = new YoDouble("maxForwardAcceleration", registry);
    private final YoDouble maxYawAcceleration = new YoDouble("maxYawAcceleration", registry);
 
-   private final YoBoolean discretelyTraverseWaypoints = new YoBoolean("discretelyTraverseWaypoints", registry);
-
    private final YoDouble fastVelocity = new YoDouble("fastVelocity", registry);
    private final YoDouble mediumVelocity = new YoDouble("mediumVelocity", registry);
    private final YoDouble slowVelocity = new YoDouble("slowVelocity", registry);
@@ -40,13 +37,14 @@ public class QuadrupedTurnWalkTurnPathPlanner
    private final YoEnum<RobotSpeed> robotSpeed = YoEnum.create("robotSpeed", RobotSpeed.class, registry);
 
    private final QuadrupedBodyPathPlan bodyPathPlan = new QuadrupedBodyPathPlan();
-   private BodyPathPlan bodyPathWaypoints;
+   private final BodyPathPlanner bodyPathPlanner;
 
 
-   public QuadrupedTurnWalkTurnPathPlanner(TurnWalkTurnPathParameters pathParameters, YoVariableRegistry parentRegistry)
+   public QuadrupedTurnWalkTurnPathPlanner(TurnWalkTurnPathParameters pathParameters, BodyPathPlanner bodyPathPlanner, YoVariableRegistry parentRegistry)
    {
+      this.bodyPathPlanner = bodyPathPlanner;
+
       robotSpeed.set(RobotSpeed.MEDIUM);
-      discretelyTraverseWaypoints.set(true);
 
       maxYawRate.set(pathParameters.getMaxYawRate());
 
@@ -60,25 +58,18 @@ public class QuadrupedTurnWalkTurnPathPlanner
       parentRegistry.addChild(registry);
    }
 
-   public void setBodyPathWaypoints(BodyPathPlan bodyPathWaypoints)
-   {
-      this.bodyPathWaypoints = bodyPathWaypoints;
-   }
-
    public void computePlan()
    {
       bodyPathPlan.clear();
 
+      BodyPathPlan bodyPathWaypoints = bodyPathPlanner.getPlan();
       Pose2DReadOnly startPose = bodyPathWaypoints.getStartPose();
       Pose2DReadOnly goalPose = bodyPathWaypoints.getGoalPose();
 
       bodyPathPlan.setStartPose(startPose);
       bodyPathPlan.setGoalPose(goalPose);
 
-      if (discretelyTraverseWaypoints.getBooleanValue())
-      {
          computePlanDiscretelyTraversingWaypoints();
-      }
 
       bodyPathPlan.setExpressedInAbsoluteTime(false);
    }
@@ -95,6 +86,7 @@ public class QuadrupedTurnWalkTurnPathPlanner
    private void computePlanDiscretelyTraversingWaypoints()
    {
       double currentTime = 0.0;
+      BodyPathPlan bodyPathWaypoints = bodyPathPlanner.getPlan();
       Pose2DReadOnly startPose = bodyPathWaypoints.getStartPose();
       Point2D currentPosition = new Point2D(startPose.getPosition());
       double currentYaw = startPose.getYaw();

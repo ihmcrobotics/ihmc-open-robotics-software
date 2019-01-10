@@ -1,6 +1,8 @@
 package us.ihmc.quadrupedPlanning.networkProcessing.footstepPlanning;
 
 import controller_msgs.msg.dds.*;
+import us.ihmc.commons.Conversions;
+import us.ihmc.communication.packets.PlanarRegionMessageConverter;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
@@ -8,22 +10,31 @@ import us.ihmc.quadrupedBasics.gait.QuadrupedTimedStep;
 import us.ihmc.quadrupedCommunication.QuadrupedMessageTools;
 import us.ihmc.quadrupedPlanning.QuadrupedFootstepPlannerGoal;
 import us.ihmc.quadrupedPlanning.QuadrupedXGaitSettingsReadOnly;
+import us.ihmc.quadrupedPlanning.YoQuadrupedXGaitSettings;
 import us.ihmc.quadrupedPlanning.footstepChooser.PointFootSnapperParameters;
+import us.ihmc.quadrupedPlanning.footstepPlanning.QuadrupedBodyPathAndFootstepPlanner;
+import us.ihmc.quadrupedPlanning.footstepPlanning.turnWalkTurn.QuadrupedSplineWithTurnWalkTurnPlanner;
 import us.ihmc.quadrupedPlanning.networkProcessing.OutputManager;
 import us.ihmc.quadrupedPlanning.networkProcessing.QuadrupedRobotDataReceiver;
 import us.ihmc.quadrupedPlanning.networkProcessing.QuadrupedToolboxController;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoDouble;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.atomic.AtomicReference;
 
 public class QuadrupedFootstepPlanningController extends QuadrupedToolboxController
 {
-   private final QuadrupedBodyPathPlanner pathPlanner;
+   private final QuadrupedBodyPathAndFootstepPlanner planner;
 
    private final AtomicReference<HighLevelStateChangeStatusMessage> controllerStateChangeMessage = new AtomicReference<>();
    private final AtomicReference<QuadrupedSteppingStateChangeMessage> steppingStateChangeMessage = new AtomicReference<>();
+
+   private final YoQuadrupedXGaitSettings xGaitSettings;
+   private final AtomicLong robotTimestampNanos = new AtomicLong();
+   private final YoDouble robotTimestamp = new YoDouble("robotTimestamp", registry);
 
    public QuadrupedFootstepPlanningController(QuadrupedXGaitSettingsReadOnly defaultXGaitSettings, PointFootSnapperParameters pointFootSnapperParameters,
                                               OutputManager statusOutputManager, QuadrupedRobotDataReceiver robotDataReceiver, YoVariableRegistry parentRegistry,
@@ -31,15 +42,12 @@ public class QuadrupedFootstepPlanningController extends QuadrupedToolboxControl
    {
       super(robotDataReceiver, statusOutputManager, parentRegistry);
 
-      pathPlanner = new QuadrupedBodyPathPlanner(defaultXGaitSettings, pointFootSnapperParameters, robotDataReceiver.getReferenceFrames(),
-                                                 graphicsListRegistry, registry);
+      xGaitSettings = new YoQuadrupedXGaitSettings(defaultXGaitSettings, registry);
+
+
+      planner = new QuadrupedSplineWithTurnWalkTurnPlanner(xGaitSettings, robotTimestamp, pointFootSnapperParameters, robotDataReceiver.getReferenceFrames(),
+                                                           graphicsListRegistry, registry);
    }
-
-//   public void setPaused(boolean pause)
-//   {
-//      pathPlanner.setPaused(pause);
-//   }
-
 
    public void processHighLevelStateChangeMessage(HighLevelStateChangeStatusMessage message)
    {
@@ -53,17 +61,22 @@ public class QuadrupedFootstepPlanningController extends QuadrupedToolboxControl
 
    public void processPlanarRegionsListMessage(PlanarRegionsListMessage message)
    {
-      pathPlanner.processPlanarRegionsListMessage(message);
+      planner.setPlanarRegionsList(PlanarRegionMessageConverter.convertToPlanarRegionsList(message));
    }
 
    public void processGroundPlaneMessage(QuadrupedGroundPlaneMessage message)
    {
-      pathPlanner.processGroundPlaneMessage(message);
+      planner.setGroundPlane(message);
    }
 
    public void processXGaitSettingsPacket(QuadrupedXGaitSettingsPacket packet)
    {
-      pathPlanner.processXGaitSettingsPacket(packet);
+      xGaitSettings.set(packet);
+   }
+
+   public void processRobotTimestamp(long timestampInNanos)
+   {
+      this.robotTimestampNanos.set(timestampInNanos);
    }
 
    public void processFootstepPlanningRequest(QuadrupedFootstepPlanningRequestPacket footstepPlanningRequestPacket)
@@ -76,23 +89,22 @@ public class QuadrupedFootstepPlanningController extends QuadrupedToolboxControl
       QuadrupedFootstepPlannerGoal goal = new QuadrupedFootstepPlannerGoal();
       goal.setGoalPose(goalPose);
 
-      pathPlanner.setInitialBodyPose(initialPose);
-      pathPlanner.setGoal(goal);
-      pathPlanner.processPlanarRegionsListMessage(footstepPlanningRequestPacket.getPlanarRegionsListMessage());
+      processPlanarRegionsListMessage(footstepPlanningRequestPacket.getPlanarRegionsListMessage());
 
-      pathPlanner.compute();
-   }
+      planner.setInitialBodyPose(initialPose);
+      planner.setGoal(goal);
 
-   public void processTimestamp(long timestampInNanos)
-   {
-      pathPlanner.processTimestamp(timestampInNanos);
+      planner.planPath();
+      planner.plan();
    }
 
 
    @Override
    public boolean initializeInternal()
    {
-      pathPlanner.initialize();
+      robotTimestamp.set(Conversions.nanosecondsToSeconds(robotTimestampNanos.get()));
+
+      planner.initialize();
 
       return true;
    }
@@ -100,9 +112,11 @@ public class QuadrupedFootstepPlanningController extends QuadrupedToolboxControl
    @Override
    public void updateInternal()
    {
-      pathPlanner.update();
+      robotTimestamp.set(Conversions.nanosecondsToSeconds(robotTimestampNanos.get()));
 
-      reportMessage(convertToMessage(pathPlanner.getSteps()));
+      planner.update();
+
+      reportMessage(convertToMessage(planner.getSteps()));
    }
 
    @Override
