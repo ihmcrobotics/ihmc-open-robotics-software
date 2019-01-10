@@ -1,4 +1,4 @@
-package us.ihmc.quadrupedPlanning.velocityPlanning;
+package us.ihmc.quadrupedPlanning.footstepPlanning;
 
 import us.ihmc.commons.MathTools;
 import us.ihmc.euclid.geometry.Pose2D;
