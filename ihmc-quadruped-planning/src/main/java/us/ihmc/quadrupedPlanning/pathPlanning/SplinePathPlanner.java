@@ -1,6 +1,7 @@
 package us.ihmc.quadrupedPlanning.pathPlanning;
 
 import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.quadrupedPlanning.footstepPlanning.FootstepPlanningResult;
 import us.ihmc.robotics.math.trajectories.YoPolynomial;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 
@@ -12,14 +13,21 @@ public class SplinePathPlanner extends AbstractWaypointsForFootstepsPlanner
    private final YoPolynomial yPoly;
    private final YoPolynomial zPoly;
 
-   public SplinePathPlanner(YoVariableRegistry parentRegistry)
+   public SplinePathPlanner(YoVariableRegistry registry)
    {
-      xPoly = new YoPolynomial("xPoly", 4, parentRegistry);
-      yPoly = new YoPolynomial("yPoly", 4, parentRegistry);
-      zPoly = new YoPolynomial("zPoly", 4, parentRegistry);
+      this("", registry);
    }
 
-   public void planWaypoints()
+   public SplinePathPlanner(String prefix, YoVariableRegistry registry)
+   {
+      super(prefix, registry);
+
+      xPoly = new YoPolynomial("xPoly", 4, registry);
+      yPoly = new YoPolynomial("yPoly", 4, registry);
+      zPoly = new YoPolynomial("zPoly", 4, registry);
+   }
+
+   public FootstepPlanningResult planWaypoints()
    {
       waypoints.clear();
       double yaw = bodyStartPose.getYaw();
@@ -36,5 +44,7 @@ public class SplinePathPlanner extends AbstractWaypointsForFootstepsPlanner
          waypoints.add(point);
       }
 
+      yoResult.set(FootstepPlanningResult.OPTIMAL_SOLUTION);
+      return yoResult.getEnumValue();
    }
 }

@@ -8,11 +8,14 @@ import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DReadOnly;
 import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.quadrupedBasics.gait.QuadrupedTimedOrientedStep;
 import us.ihmc.quadrupedBasics.gait.QuadrupedTimedStep;
+import us.ihmc.quadrupedBasics.referenceFrames.QuadrupedReferenceFrames;
 import us.ihmc.quadrupedPlanning.QuadrupedXGaitSettingsReadOnly;
 import us.ihmc.quadrupedPlanning.YoQuadrupedXGaitSettings;
 import us.ihmc.quadrupedPlanning.bodyPath.QuadrupedPlanarBodyPathProvider;
+import us.ihmc.quadrupedPlanning.bodyPath.QuadrupedWaypointBasedBodyPathProvider;
 import us.ihmc.quadrupedPlanning.footstepChooser.PointFootSnapper;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 import us.ihmc.robotics.robotSide.*;
@@ -33,7 +36,7 @@ public class QuadrupedXGaitStepCalculator
    private final Vector3D desiredPlanarVelocity = new Vector3D();
    private final DoubleProvider firstStepDelay;
 
-   private final QuadrupedPlanarBodyPathProvider bodyPathProvider;
+   private final QuadrupedWaypointBasedBodyPathProvider waypointBasedPath;
 
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
    private static final double maximumStepDown = 0.2;
@@ -53,13 +56,13 @@ public class QuadrupedXGaitStepCalculator
 
    private final RecyclingArrayList<QuadrupedTimedOrientedStep> completeStepSequence = new RecyclingArrayList<>(QuadrupedTimedOrientedStep::new);
 
-
-   public QuadrupedXGaitStepCalculator(YoQuadrupedXGaitSettings xGaitSettings, YoDouble timestamp,
-                                       QuadrupedPlanarBodyPathProvider bodyPathProvider, DoubleProvider firstStepDelay, YoVariableRegistry parentRegistry)
+   public QuadrupedXGaitStepCalculator(YoQuadrupedXGaitSettings xGaitSettings, YoDouble timestamp, QuadrupedReferenceFrames referenceFrames,
+                                       DoubleProvider firstStepDelay, YoGraphicsListRegistry graphicsListRegistry, YoVariableRegistry parentRegistry)
    {
       this.xGaitSettings = xGaitSettings;
       this.timestamp = timestamp;
-      this.bodyPathProvider = bodyPathProvider;
+      waypointBasedPath = new QuadrupedWaypointBasedBodyPathProvider(referenceFrames, timestamp, graphicsListRegistry, registry);
+
       this.firstStepDelay = firstStepDelay;
       minimumStepClearance.set(0.075);
 
@@ -99,6 +102,10 @@ public class QuadrupedXGaitStepCalculator
       this.goalPose.set(goalPose);
    }
 
+   public void setBodyPathPlan(TurnWalkTurnPathPlan pathPlan)
+   {
+      waypointBasedPath.setBodyPathPlan(pathPlan);
+   }
 
    public void onEntry()
    {
@@ -106,7 +113,7 @@ public class QuadrupedXGaitStepCalculator
       updateXGaitSettings();
       double initialTime = timestamp.getDoubleValue() + firstStepDelay.getValue();
       RobotQuadrant initialQuadrant = (xGaitSettings.getEndPhaseShift() < 90) ? RobotQuadrant.HIND_LEFT : RobotQuadrant.FRONT_LEFT;
-      bodyPathProvider.initialize();
+      waypointBasedPath.initialize();
       computePlan(initialQuadrant, initialTime);
 
       initializeCurrentStepsFromPlannedSteps();
@@ -292,7 +299,7 @@ public class QuadrupedXGaitStepCalculator
 
    private void extrapolatePose(FramePose3D finalPose, double time)
    {
-      bodyPathProvider.getPlanarPose(time, bodyPathPose);
+      waypointBasedPath.getPlanarPose(time, bodyPathPose);
       finalPose.setX(bodyPathPose.getX());
       finalPose.setY(bodyPathPose.getY());
       finalPose.setOrientationYawPitchRoll(bodyPathPose.getYaw(), finalPose.getPitch(), finalPose.getRoll());

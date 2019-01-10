@@ -9,7 +9,6 @@ import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
 import us.ihmc.euclid.tuple2D.interfaces.Vector2DReadOnly;
 import us.ihmc.pathPlanning.bodyPathPlanner.BodyPathPlanner;
 import us.ihmc.pathPlanning.visibilityGraphs.tools.BodyPathPlan;
-import us.ihmc.quadrupedPlanning.footstepPlanning.QuadrupedBodyPathPlan;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoEnum;
@@ -36,7 +35,7 @@ public class QuadrupedTurnWalkTurnPathPlanner
 
    private final YoEnum<RobotSpeed> robotSpeed = YoEnum.create("robotSpeed", RobotSpeed.class, registry);
 
-   private final QuadrupedBodyPathPlan bodyPathPlan = new QuadrupedBodyPathPlan();
+   private final TurnWalkTurnPathPlan pathPlan = new TurnWalkTurnPathPlan();
    private final BodyPathPlanner bodyPathPlanner;
 
 
@@ -60,23 +59,23 @@ public class QuadrupedTurnWalkTurnPathPlanner
 
    public void computePlan()
    {
-      bodyPathPlan.clear();
+      pathPlan.clear();
 
       BodyPathPlan bodyPathWaypoints = bodyPathPlanner.getPlan();
       Pose2DReadOnly startPose = bodyPathWaypoints.getStartPose();
       Pose2DReadOnly goalPose = bodyPathWaypoints.getGoalPose();
 
-      bodyPathPlan.setStartPose(startPose);
-      bodyPathPlan.setGoalPose(goalPose);
+      pathPlan.setStartPose(startPose);
+      pathPlan.setGoalPose(goalPose);
 
          computePlanDiscretelyTraversingWaypoints();
 
-      bodyPathPlan.setExpressedInAbsoluteTime(false);
+      pathPlan.setExpressedInAbsoluteTime(false);
    }
 
-   public QuadrupedBodyPathPlan getPlan()
+   public TurnWalkTurnPathPlan getPlan()
    {
-      return bodyPathPlan;
+      return pathPlan;
    }
 
    private static final Vector2DReadOnly zeroVelocity = new Vector2D();
@@ -116,7 +115,7 @@ public class QuadrupedTurnWalkTurnPathPlanner
             currentTime += timeToAccelerate;
 
             // add accelerating waypoint
-            bodyPathPlan.addWaypoint(new Pose2D(currentPosition, currentYaw), zeroVelocity, errorSign * maxYawRate.getDoubleValue(), currentTime);
+            pathPlan.addWaypoint(new Pose2D(currentPosition, currentYaw), zeroVelocity, errorSign * maxYawRate.getDoubleValue(), currentTime);
 
             double timeForMaxVelocity = (Math.abs(angleDelta) - Math.abs(2.0 * deltaWhileAccelerating)) / maxYawRate.getDoubleValue();
 
@@ -124,12 +123,12 @@ public class QuadrupedTurnWalkTurnPathPlanner
             currentYaw += timeForMaxVelocity * maxYawRate.getDoubleValue() * errorSign;
             currentTime += timeForMaxVelocity;
 
-            bodyPathPlan.addWaypoint(new Pose2D(currentPosition, currentYaw), zeroVelocity, errorSign * maxYawRate.getDoubleValue(), currentTime);
+            pathPlan.addWaypoint(new Pose2D(currentPosition, currentYaw), zeroVelocity, errorSign * maxYawRate.getDoubleValue(), currentTime);
 
             currentYaw += deltaWhileAccelerating;
             currentTime += timeToAccelerate;
 
-            bodyPathPlan.addWaypoint(new Pose2D(currentPosition, currentYaw), zeroVelocity, 0.0, currentTime);
+            pathPlan.addWaypoint(new Pose2D(currentPosition, currentYaw), zeroVelocity, 0.0, currentTime);
          }
          else
          {
@@ -142,12 +141,12 @@ public class QuadrupedTurnWalkTurnPathPlanner
             currentYaw += deltaWhileAccelerating ;
             currentTime += timeToAccelerateTurnWithNoMaxRate;
 
-            bodyPathPlan.addWaypoint(new Pose2D(currentPosition, currentYaw), zeroVelocity, velocityAfterAccelerating, currentTime);
+            pathPlan.addWaypoint(new Pose2D(currentPosition, currentYaw), zeroVelocity, velocityAfterAccelerating, currentTime);
 
             currentYaw += deltaWhileAccelerating;
             currentTime += timeToAccelerateTurnWithNoMaxRate;
 
-            bodyPathPlan.addWaypoint(new Pose2D(currentPosition, currentYaw), zeroVelocity, 0.0, currentTime);
+            pathPlan.addWaypoint(new Pose2D(currentPosition, currentYaw), zeroVelocity, 0.0, currentTime);
          }
 
          // handle translation
@@ -185,7 +184,7 @@ public class QuadrupedTurnWalkTurnPathPlanner
             currentTime += timeToAccelerate;
 
             // add accelerating waypoint
-            bodyPathPlan.addWaypoint(new Pose2D(currentPosition, currentYaw), currentLinearVelocity, 0.0 , currentTime);
+            pathPlan.addWaypoint(new Pose2D(currentPosition, currentYaw), currentLinearVelocity, 0.0 , currentTime);
 
             double timeAtMaxVelocity = (Math.abs(distanceToTravel) - Math.abs(2.0 * distanceWhileAccelerating)) / desiredSpeed;
 
@@ -197,7 +196,7 @@ public class QuadrupedTurnWalkTurnPathPlanner
 
             currentTime += timeAtMaxVelocity;
 
-            bodyPathPlan.addWaypoint(new Pose2D(currentPosition, currentYaw), currentLinearVelocity, 0.0, currentTime);
+            pathPlan.addWaypoint(new Pose2D(currentPosition, currentYaw), currentLinearVelocity, 0.0, currentTime);
 
             desiredHeading.normalize();
             desiredHeading.scale(distanceWhileAccelerating);
@@ -206,7 +205,7 @@ public class QuadrupedTurnWalkTurnPathPlanner
 
             currentTime += timeToAccelerate;
 
-            bodyPathPlan.addWaypoint(new Pose2D(currentPosition, currentYaw), zeroVelocity, 0.0, currentTime);
+            pathPlan.addWaypoint(new Pose2D(currentPosition, currentYaw), zeroVelocity, 0.0, currentTime);
          }
          else
          {
@@ -224,13 +223,13 @@ public class QuadrupedTurnWalkTurnPathPlanner
 
             currentTime += timeToAccelerateDistanceWithNoMaxRate;
 
-            bodyPathPlan.addWaypoint(new Pose2D(currentPosition, currentYaw), currentLinearVelocity, 0.0, currentTime);
+            pathPlan.addWaypoint(new Pose2D(currentPosition, currentYaw), currentLinearVelocity, 0.0, currentTime);
 
             currentPosition.add(desiredHeading);
 
             currentTime += timeToAccelerateDistanceWithNoMaxRate;
 
-            bodyPathPlan.addWaypoint(new Pose2D(currentPosition, currentYaw), zeroVelocity, 0.0, currentTime);
+            pathPlan.addWaypoint(new Pose2D(currentPosition, currentYaw), zeroVelocity, 0.0, currentTime);
          }
       }
 
@@ -252,7 +251,7 @@ public class QuadrupedTurnWalkTurnPathPlanner
             currentTime += timeToAccelerate;
 
             // add accelerating waypoint
-            bodyPathPlan.addWaypoint(new Pose2D(currentPosition, currentYaw), zeroVelocity, errorSign * maxYawRate.getDoubleValue(), currentTime);
+            pathPlan.addWaypoint(new Pose2D(currentPosition, currentYaw), zeroVelocity, errorSign * maxYawRate.getDoubleValue(), currentTime);
 
             double timeForMaxVelocity = (Math.abs(angleDelta) - Math.abs(2.0 * deltaWhileAccelerating)) / maxYawRate.getDoubleValue();
 
@@ -260,12 +259,12 @@ public class QuadrupedTurnWalkTurnPathPlanner
             currentYaw += timeForMaxVelocity * maxYawRate.getDoubleValue() * errorSign;
             currentTime += timeForMaxVelocity;
 
-            bodyPathPlan.addWaypoint(new Pose2D(currentPosition, currentYaw), zeroVelocity, errorSign * maxYawRate.getDoubleValue(), currentTime);
+            pathPlan.addWaypoint(new Pose2D(currentPosition, currentYaw), zeroVelocity, errorSign * maxYawRate.getDoubleValue(), currentTime);
 
             currentYaw += deltaWhileAccelerating;
             currentTime += timeToAccelerate;
 
-            bodyPathPlan.addWaypoint(new Pose2D(currentPosition, currentYaw), zeroVelocity, 0.0, currentTime);
+            pathPlan.addWaypoint(new Pose2D(currentPosition, currentYaw), zeroVelocity, 0.0, currentTime);
          }
          else
          {
@@ -278,12 +277,12 @@ public class QuadrupedTurnWalkTurnPathPlanner
             currentYaw += deltaWhileAccelerating ;
             currentTime += timeToAccelerateTurnWithNoMaxRate;
 
-            bodyPathPlan.addWaypoint(new Pose2D(currentPosition, currentYaw), zeroVelocity, velocityAfterAccelerating, currentTime);
+            pathPlan.addWaypoint(new Pose2D(currentPosition, currentYaw), zeroVelocity, velocityAfterAccelerating, currentTime);
 
             currentYaw += deltaWhileAccelerating;
             currentTime += timeToAccelerateTurnWithNoMaxRate;
 
-            bodyPathPlan.addWaypoint(new Pose2D(currentPosition, currentYaw), zeroVelocity, 0.0, currentTime);
+            pathPlan.addWaypoint(new Pose2D(currentPosition, currentYaw), zeroVelocity, 0.0, currentTime);
          }
       }
    }

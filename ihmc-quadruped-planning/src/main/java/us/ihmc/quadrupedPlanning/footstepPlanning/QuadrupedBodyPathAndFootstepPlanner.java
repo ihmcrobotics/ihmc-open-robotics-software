@@ -5,7 +5,7 @@ import us.ihmc.quadrupedPlanning.footstepPlanning.QuadrupedFootstepPlanner;
 
 public interface QuadrupedBodyPathAndFootstepPlanner extends QuadrupedFootstepPlanner
 {
-   void planPath();
+   FootstepPlanningResult planPath();
 
    BodyPathPlan getPathPlan();
 }
