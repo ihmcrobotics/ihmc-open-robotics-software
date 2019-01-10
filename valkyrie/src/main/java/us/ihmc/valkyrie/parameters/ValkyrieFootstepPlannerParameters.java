@@ -155,4 +155,22 @@ public class ValkyrieFootstepPlannerParameters implements FootstepPlannerParamet
    {
       return 0.3;
    }
+
+   @Override
+   public double getMaximumStepReachWhenSteppingUp()
+   {
+      return 0.3;
+   }
+
+   @Override
+   public double getMaximumStepZWhenSteppingUp()
+   {
+      return 0.06;
+   }
+
+   @Override
+   public boolean performHeuristicSearchPolicies()
+   {
+      return false;
+   }
 }
