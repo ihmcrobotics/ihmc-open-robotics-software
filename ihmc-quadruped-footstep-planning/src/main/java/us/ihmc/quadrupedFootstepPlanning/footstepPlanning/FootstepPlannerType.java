@@ -1,4 +1,4 @@
-package us.ihmc.quadrupedPlanning.footstepPlanning;
+package us.ihmc.quadrupedFootstepPlanning.footstepPlanning;
 
 import us.ihmc.commons.RandomNumbers;
 

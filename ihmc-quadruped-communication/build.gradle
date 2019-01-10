@@ -26,6 +26,7 @@ mainDependencies {
    compile group: "us.ihmc", name: "ihmc-commons", version: "0.24.0"
    compile group: "us.ihmc", name: "ihmc-quadruped-basics", version: "source"
    compile group: "us.ihmc", name: "ihmc-quadruped-planning", version: "source"
+   compile group: "us.ihmc", name: "ihmc-quadruped-footstep-planning", version: "source"
    compile group: "us.ihmc", name: "ihmc-common-walking-control-modules", version: "source"
 }
 

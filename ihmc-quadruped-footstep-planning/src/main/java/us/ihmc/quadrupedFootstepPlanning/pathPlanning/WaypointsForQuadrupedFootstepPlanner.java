@@ -1,9 +1,9 @@
-package us.ihmc.quadrupedPlanning.pathPlanning;
+package us.ihmc.quadrupedFootstepPlanning.pathPlanning;
 
 import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DReadOnly;
 import us.ihmc.euclid.tuple3D.Point3D;
-import us.ihmc.quadrupedPlanning.footstepPlanning.QuadrupedFootstepPlannerGoal;
-import us.ihmc.quadrupedPlanning.footstepPlanning.FootstepPlanningResult;
+import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.FootstepPlanningResult;
+import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.QuadrupedFootstepPlannerGoal;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 
 import java.util.List;
