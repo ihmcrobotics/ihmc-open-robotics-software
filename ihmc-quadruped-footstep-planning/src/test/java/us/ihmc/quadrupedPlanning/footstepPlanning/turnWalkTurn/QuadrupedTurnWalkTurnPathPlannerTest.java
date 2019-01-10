@@ -1,9 +1,9 @@
-package us.ihmc.quadrupedPlanning.footstepPlanning.turnWalkTurn;
+package us.ihmc.quadrupedFootstepPlanning.footstepPlanning.turnWalkTurn;
 
 import org.junit.Test;
 import us.ihmc.commons.MathTools;
 import us.ihmc.commons.RandomNumbers;
-import us.ihmc.quadrupedPlanning.footstepPlanning.turnWalkTurn.QuadrupedTurnWalkTurnPathPlanner;
+import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.turnWalkTurn.QuadrupedTurnWalkTurnPathPlanner;
 
 import java.util.Random;
 

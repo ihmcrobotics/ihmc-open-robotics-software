@@ -1,4 +1,4 @@
-package us.ihmc.quadrupedPlanning.footstepPlanning.turnWalkTurn;
+package us.ihmc.quadrupedPlanning.stepStream.bodyPath;
 
 import gnu.trove.list.array.TDoubleArrayList;
 import us.ihmc.euclid.geometry.Pose2D;
@@ -9,7 +9,7 @@ import us.ihmc.euclid.tuple2D.interfaces.Vector2DReadOnly;
 import java.util.ArrayList;
 import java.util.List;
 
-public class TurnWalkTurnPathPlan
+public class QuadrupedBodyPathPlan
 {
    private final Pose2D startPose = new Pose2D();
    private final Pose2D goalPose = new Pose2D();

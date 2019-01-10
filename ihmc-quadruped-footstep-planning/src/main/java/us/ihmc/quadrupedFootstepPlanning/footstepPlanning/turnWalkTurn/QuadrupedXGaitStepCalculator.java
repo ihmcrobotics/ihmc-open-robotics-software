@@ -1,4 +1,4 @@
-package us.ihmc.quadrupedPlanning.footstepPlanning.turnWalkTurn;
+package us.ihmc.quadrupedFootstepPlanning.footstepPlanning.turnWalkTurn;
 
 import us.ihmc.commons.MathTools;
 import us.ihmc.commons.lists.RecyclingArrayList;
@@ -16,6 +16,7 @@ import us.ihmc.quadrupedPlanning.QuadrupedXGaitSettingsReadOnly;
 import us.ihmc.quadrupedPlanning.YoQuadrupedXGaitSettings;
 import us.ihmc.quadrupedPlanning.stepStream.bodyPath.QuadrupedWaypointBasedBodyPathProvider;
 import us.ihmc.quadrupedPlanning.footstepChooser.PointFootSnapper;
+import us.ihmc.quadrupedPlanning.stepStream.bodyPath.QuadrupedBodyPathPlan;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 import us.ihmc.robotics.robotSide.*;
 import us.ihmc.robotics.time.TimeInterval;
@@ -101,7 +102,7 @@ public class QuadrupedXGaitStepCalculator
       this.goalPose.set(goalPose);
    }
 
-   public void setBodyPathPlan(TurnWalkTurnPathPlan pathPlan)
+   public void setBodyPathPlan(QuadrupedBodyPathPlan pathPlan)
    {
       waypointBasedPath.setBodyPathPlan(pathPlan);
    }

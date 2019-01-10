@@ -1,7 +1,6 @@
-package us.ihmc.quadrupedPlanning.footstepPlanning;
+package us.ihmc.quadrupedFootstepPlanning.footstepPlanning;
 
 import us.ihmc.pathPlanning.visibilityGraphs.tools.BodyPathPlan;
-import us.ihmc.quadrupedPlanning.footstepPlanning.QuadrupedFootstepPlanner;
 
 public interface QuadrupedBodyPathAndFootstepPlanner extends QuadrupedFootstepPlanner
 {

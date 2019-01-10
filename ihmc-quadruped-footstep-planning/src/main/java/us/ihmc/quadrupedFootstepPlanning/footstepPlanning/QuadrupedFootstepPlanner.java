@@ -1,4 +1,4 @@
-package us.ihmc.quadrupedPlanning.footstepPlanning;
+package us.ihmc.quadrupedFootstepPlanning.footstepPlanning;
 
 import controller_msgs.msg.dds.QuadrupedGroundPlaneMessage;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DReadOnly;
