@@ -1,5 +1,0 @@
-package us.ihmc.quadrupedPlanning.footstepPlanning;
-
-public class DefaultConstantAccelerationBodyPathParameters implements ConstantAccelerationBodyPathParameters
-{
-}

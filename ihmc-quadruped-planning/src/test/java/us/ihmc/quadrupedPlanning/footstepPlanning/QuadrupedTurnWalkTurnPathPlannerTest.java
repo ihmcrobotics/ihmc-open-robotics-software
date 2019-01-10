@@ -8,7 +8,7 @@ import java.util.Random;
 
 import static org.junit.Assert.assertEquals;
 
-public class QuadrupedBodyPathToolsTest
+public class QuadrupedTurnWalkTurnPathPlannerTest
 {
    private static final double epsilon = 1e-10;
    private static final int iters = 1000;
@@ -18,13 +18,13 @@ public class QuadrupedBodyPathToolsTest
    {
       double delta = 0.25;
       double maxAcceleration = 1.0;
-      double time = QuadrupedBodyPathTools.computeTimeToAccelerateToAchieveValueWithNoMaxRate(0.0, 0.0, delta, 0.0, maxAcceleration);
+      double time = QuadrupedTurnWalkTurnPathPlanner.computeTimeToAccelerateToAchieveValueWithNoMaxRate(0.0, 0.0, delta, 0.0, maxAcceleration);
       double timeExpected = Math.sqrt(delta / maxAcceleration);
 
       assertEquals(timeExpected, time, epsilon);
 
       // flip the sign, and see what happens
-      time = QuadrupedBodyPathTools.computeTimeToAccelerateToAchieveValueWithNoMaxRate(0.0, 0.0, -delta, 0.0, maxAcceleration);
+      time = QuadrupedTurnWalkTurnPathPlanner.computeTimeToAccelerateToAchieveValueWithNoMaxRate(0.0, 0.0, -delta, 0.0, maxAcceleration);
 
       assertEquals(timeExpected, time, epsilon);
    }
@@ -46,7 +46,7 @@ public class QuadrupedBodyPathToolsTest
 
          double expectedValue = Math.max(positiveQuadraticSolution(a, b, c), negativeQuadraticSolution(a, b, c));
 
-         assertEquals(expectedValue, QuadrupedBodyPathTools.largestQuadraticSolution(a, b, c), epsilon);
+         assertEquals(expectedValue, QuadrupedTurnWalkTurnPathPlanner.largestQuadraticSolution(a, b, c), epsilon);
       }
    }
 

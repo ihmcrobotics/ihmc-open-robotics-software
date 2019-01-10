@@ -1,6 +1,6 @@
 package us.ihmc.quadrupedPlanning.footstepPlanning;
 
-public interface ConstantAccelerationBodyPathParameters
+public interface TurnWalkTurnPathParameters
 {
    default double getMaxForwardAcceleration()
    {

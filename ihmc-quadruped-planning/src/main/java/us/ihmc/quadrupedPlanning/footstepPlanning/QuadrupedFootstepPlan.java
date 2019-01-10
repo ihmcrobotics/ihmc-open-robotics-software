@@ -1,4 +1,4 @@
-package us.ihmc.quadrupedPlanning.stepPlanning;
+package us.ihmc.quadrupedPlanning.footstepPlanning;
 
 import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.quadrupedBasics.gait.QuadrupedTimedOrientedStep;
