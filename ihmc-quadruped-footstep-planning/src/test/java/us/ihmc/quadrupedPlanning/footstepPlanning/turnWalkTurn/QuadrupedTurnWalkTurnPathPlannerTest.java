@@ -14,7 +14,7 @@ public class QuadrupedTurnWalkTurnPathPlannerTest
    private static final double epsilon = 1e-10;
    private static final int iters = 1000;
 
-   @Test
+   @Test(timeout = 30000)
    public void testComputeTimeToAccelerateToAchieveValueWithNoMaxRate()
    {
       double delta = 0.25;
@@ -30,7 +30,7 @@ public class QuadrupedTurnWalkTurnPathPlannerTest
       assertEquals(timeExpected, time, epsilon);
    }
 
-   @Test
+   @Test(timeout = 30000)
    public void testLargestQuadraticSolution()
    {
       Random random = new Random(1738L);
