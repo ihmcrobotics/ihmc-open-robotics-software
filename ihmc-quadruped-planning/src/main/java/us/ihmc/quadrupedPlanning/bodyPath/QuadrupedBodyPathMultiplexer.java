@@ -2,14 +2,11 @@ package us.ihmc.quadrupedPlanning.bodyPath;
 
 import controller_msgs.msg.dds.QuadrupedBodyPathPlanMessage;
 import controller_msgs.msg.dds.QuadrupedFootstepStatusMessage;
-import us.ihmc.communication.ROS2Tools;
 import us.ihmc.euclid.referenceFrame.FramePose2D;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.quadrupedBasics.referenceFrames.QuadrupedReferenceFrames;
-import us.ihmc.quadrupedCommunication.QuadrupedControllerAPIDefinition;
 import us.ihmc.quadrupedPlanning.QuadrupedXGaitSettingsReadOnly;
 import us.ihmc.robotics.robotSide.RobotQuadrant;
-import us.ihmc.ros2.Ros2Node;
 import us.ihmc.yoVariables.providers.DoubleProvider;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;

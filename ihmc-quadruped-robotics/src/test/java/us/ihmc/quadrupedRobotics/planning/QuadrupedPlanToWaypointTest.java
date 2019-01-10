@@ -1,19 +1,16 @@
 package us.ihmc.quadrupedRobotics.planning;
 
-import controller_msgs.msg.dds.EuclideanTrajectoryPointMessage;
 import controller_msgs.msg.dds.QuadrupedFootstepPlanningRequestPacket;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
-import us.ihmc.euclid.tuple3D.Vector3D;
-import us.ihmc.quadrupedPlanning.input.RemoteQuadrupedTeleopManager;
+import us.ihmc.quadrupedCommunication.teleop.RemoteQuadrupedTeleopManager;
 import us.ihmc.quadrupedRobotics.QuadrupedForceTestYoVariables;
 import us.ihmc.quadrupedRobotics.QuadrupedMultiRobotTestInterface;
 import us.ihmc.quadrupedRobotics.QuadrupedTestBehaviors;
 import us.ihmc.quadrupedRobotics.QuadrupedTestFactory;
 import us.ihmc.quadrupedRobotics.controller.QuadrupedControlMode;
-import us.ihmc.quadrupedRobotics.environments.SimpleMazeEnvironment;
 import us.ihmc.quadrupedRobotics.simulation.QuadrupedGroundContactModelType;
 import us.ihmc.robotics.testing.YoVariableTestGoal;
 import us.ihmc.simulationConstructionSetTools.util.simulationrunner.GoalOrientedTestConductor;

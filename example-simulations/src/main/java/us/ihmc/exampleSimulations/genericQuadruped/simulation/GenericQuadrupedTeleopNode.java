@@ -1,7 +1,6 @@
 package us.ihmc.exampleSimulations.genericQuadruped.simulation;
 
 import java.io.IOException;
-import java.io.InputStream;
 
 import javax.swing.JFrame;
 
@@ -11,7 +10,7 @@ import us.ihmc.exampleSimulations.genericQuadruped.GenericQuadrupedSimulationFac
 import us.ihmc.exampleSimulations.genericQuadruped.model.GenericQuadrupedModelFactory;
 import us.ihmc.exampleSimulations.genericQuadruped.model.GenericQuadrupedPhysicalProperties;
 import us.ihmc.exampleSimulations.genericQuadruped.parameters.GenericQuadrupedXGaitSettings;
-import us.ihmc.quadrupedPlanning.input.QuadrupedXBoxAdapter;
+import us.ihmc.quadrupedCommunication.teleop.QuadrupedXBoxAdapter;
 import us.ihmc.robotModels.FullQuadrupedRobotModel;
 import us.ihmc.tools.inputDevices.joystick.Joystick;
 import us.ihmc.tools.inputDevices.joystick.JoystickModel;
