@@ -4,7 +4,6 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -287,7 +286,6 @@ public class ClusterToolsTest
       double extrusionDistance = 0.1;
 
       double sqrt2 = Math.sqrt(2.0);
-      double sqrt2By2 = Math.sqrt(2.0) / 2.0;
 
       Point2D expectedAnswer = new Point2D(0.0, 0.1 * sqrt2);
       boolean extrudeToTheLeft = true;
@@ -492,7 +490,7 @@ public class ClusterToolsTest
    @ContinuousIntegrationTest(estimatedDuration = 0.0)
    public void testTwoSquaresOneObstacle() throws Exception
    {
-      double[][] region0_1Points = new double[][] {{-3.0, 3.0}, {3.0, 3.0}, {3.0, -3.0}, {-3.0, -3.0}};
+      Point2D[] region0_1Points = new Point2D[] {new Point2D(-3.0, 3.0), new Point2D(3.0, 3.0), new Point2D(3.0, -3.0), new Point2D(-3.0, -3.0)};
       Vector3D normal0_1 = new Vector3D(0.0, 0.0, 1.0);
       normal0_1.normalize();
       RigidBodyTransform transform0_1 = createTransformFromPointAndZAxis(new Point3D(), normal0_1);
@@ -500,14 +498,14 @@ public class ClusterToolsTest
 
       double distanceBetweenBottomSquares = 0.25;
 
-      double[][] region1_1Points = new double[][] {{3.0 + distanceBetweenBottomSquares, 3.0}, {7.0, 3.0}, {7.0, -3.0},
-            {3.0 + distanceBetweenBottomSquares, -3.0}};
+      Point2D[] region1_1Points = new Point2D[] {new Point2D(3.0 + distanceBetweenBottomSquares, 3.0), new Point2D(7.0, 3.0), new Point2D(7.0, -3.0),
+            new Point2D(3.0 + distanceBetweenBottomSquares, -3.0)};
       Vector3D normal1_1 = new Vector3D(0.0, 0.0, 1.0);
       normal1_1.normalize();
       RigidBodyTransform transform1_1 = createTransformFromPointAndZAxis(new Point3D(), normal1_1);
       PlanarRegion region1_1 = createPlanarRegion(transform1_1, region1_1Points);
 
-      double[][] region2_1Points = new double[][] {{-0.5, 2.0}, {0.5, 2.0}, {0.5, -2.0}, {-0.5, -2.0}};
+      Point2D[] region2_1Points = new Point2D[] {new Point2D(-0.5, 2.0), new Point2D(0.5, 2.0), new Point2D(0.5, -2.0), new Point2D(-0.5, -2.0)};
       Vector3D normal2_1 = new Vector3D(0.0, 0.0, 1.0);
       normal2_1.normalize();
       RigidBodyTransform transform2_1 = createTransformFromPointAndZAxis(new Point3D(3.0 + distanceBetweenBottomSquares / 2.0, 0.0, 1.0), normal2_1);
@@ -695,7 +693,7 @@ public class ClusterToolsTest
       filteredPoints = ClusterTools.filterPointsWithSameXYCoordinatesKeepingHighest(pointsToFilter, thresholdSquared);
       assertEquals(25, filteredPoints.size());
       assertTrue(listContains(filteredPoints, new Point3D(3.0, 0.0, 3.0)));
-      
+
       pointsToFilter.clear();
       for (int i = 0; i < 101; i++)
       {
@@ -711,15 +709,16 @@ public class ClusterToolsTest
    @ContinuousIntegrationTest(estimatedDuration = 0.0)
    public void testVerticalObstacleOne()
    {
-      double[][] region0_1Points = new double[][] {{-1.0, 1.0}, {1.0, 1.0}, {1.0, -1.0}, {-1.0, -1.0}};
+      Point2D[] region0_1Points = new Point2D[] {new Point2D(-1.0, 1.0), new Point2D(1.0, 1.0), new Point2D(1.0, -1.0), new Point2D(-1.0, -1.0)};
       Vector3D normal0_1 = new Vector3D(0.0, 0.0, 1.0);
       normal0_1.normalize();
       RigidBodyTransform transform0_1 = new RigidBodyTransform();
       PlanarRegion flatGroundRegion = createPlanarRegion(transform0_1, region0_1Points);
 
-      double[][] region1_1Points = new double[][] {{0.0, 0.0}, {0.0, 0.2}, {0.1, 0.2}, {0.1, 0.0}};
-      double[][] region1_2Points = new double[][] {{0.1, 0.0}, {0.1, 0.4}, {0.2, 0.4}, {0.2, 0.0}};
-      double[][] concaveHull = new double[][] {{0.0, 0.0}, {0.0, 0.2}, {0.1, 0.2}, {0.1, 0.4}, {0.2, 0.4}, {0.2, 0.0}};
+      Point2D[] region1_1Points = new Point2D[] {new Point2D(0.0, 0.0), new Point2D(0.0, 0.2), new Point2D(0.1, 0.2), new Point2D(0.1, 0.0)};
+      Point2D[] region1_2Points = new Point2D[] {new Point2D(0.1, 0.0), new Point2D(0.1, 0.4), new Point2D(0.2, 0.4), new Point2D(0.2, 0.0)};
+      Point2D[] concaveHull = new Point2D[] {new Point2D(0.0, 0.0), new Point2D(0.0, 0.2), new Point2D(0.1, 0.2), new Point2D(0.1, 0.4), new Point2D(0.2, 0.4),
+            new Point2D(0.2, 0.0)};
       Vector3D normal1_1 = new Vector3D(0.0, -1.0, 0.0);
       normal1_1.normalize();
       RigidBodyTransform transform1_1 = createTransformFromPointAndZAxis(new Point3D(0.0, 0.0, 0.014), normal1_1);
@@ -795,64 +794,36 @@ public class ClusterToolsTest
       return obstacleClusters;
    }
 
-   private PlanarRegion createPlanarRegion(RigidBodyTransform transform, double[][] points)
+   private PlanarRegion createPlanarRegion(RigidBodyTransform transform, Point2D[] points)
    {
       ConvexPolygon2D convexPolygon = createConvexPolygon(points);
       PlanarRegion planarRegion = new PlanarRegion(transform, convexPolygon);
       return planarRegion;
    }
 
-   private PlanarRegion createPlanarRegionFromSeveralPolygons(double[][] concaveHull, RigidBodyTransform transform, double[][]... listOfPoints)
+   private PlanarRegion createPlanarRegionFromSeveralPolygons(Point2D[] concaveHullVertices, RigidBodyTransform transform, Point2D[]... listOfPoints)
    {
       ArrayList<ConvexPolygon2D> polygons = new ArrayList<>();
 
-      for (double[][] points : listOfPoints)
+      for (Point2D[] points : listOfPoints)
       {
          polygons.add(createConvexPolygon(points));
       }
-
-      Point2D[] concaveHullVertices = convertToListOfPoint2Ds(concaveHull);
 
       PlanarRegion planarRegion = new PlanarRegion(transform, concaveHullVertices, polygons);
 
       return planarRegion;
    }
 
-   private Point2D[] convertToListOfPoint2Ds(double[][] points)
-   {
-      Point2D[] list = new Point2D[points.length];
-
-      for (int i = 0; i < points.length; i++)
-      {
-         double[] point = points[i];
-
-         Point2D point2D = new Point2D(point[0], point[1]);
-         list[i] = point2D;
-      }
-
-      return list;
-   }
-
-   private ConvexPolygon2D createConvexPolygon(double[][] points)
+   private ConvexPolygon2D createConvexPolygon(Point2D[] points)
    {
       ConvexPolygon2D convexPolygon = new ConvexPolygon2D();
-      for (double[] position : points)
+      for (Point2D position : points)
       {
-         convexPolygon.addVertex(position[0], position[1]);
+         convexPolygon.addVertex(position);
       }
       convexPolygon.update();
       return convexPolygon;
-   }
-
-   private boolean listContainsAll(List<Point2DReadOnly> points, Point2DReadOnly... pointsToCheck)
-   {
-      for (Point2DReadOnly pointToCheck : pointsToCheck)
-      {
-         if (!listContains(points, pointToCheck))
-            return false;
-      }
-
-      return true;
    }
 
    private boolean listContainsAllXYMatch(List<Point3DReadOnly> points, Point2DReadOnly... pointsToCheck)
@@ -910,34 +881,6 @@ public class ClusterToolsTest
       ret.setRotation(EuclidGeometryTools.axisAngleFromZUpToVector3D(zAxis));
       ret.setTranslation(point);
       return ret;
-   }
-
-   private void printPoints2D(Collection<Point2DReadOnly> points)
-   {
-      //      System.out.print("{");
-
-      for (Point2DReadOnly point : points)
-      {
-         System.out.println(point);
-
-         //         System.out.print("{" + connection.getSourcePoint().getX() + ", " + connection.getSourcePoint().getY() + "}" + ",");
-      }
-      //      System.out.println("}");
-
-   }
-
-   private void printPoints3D(Collection<? extends Point3DReadOnly> points)
-   {
-      //      System.out.print("{");
-
-      for (Point3DReadOnly point : points)
-      {
-         System.out.println(point);
-
-         //         System.out.print("{" + connection.getSourcePoint().getX() + ", " + connection.getSourcePoint().getY() + "}" + ",");
-      }
-      //      System.out.println("}");
-
    }
 
    public static void main(String[] args)
