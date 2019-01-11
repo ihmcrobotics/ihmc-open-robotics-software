@@ -160,13 +160,17 @@ public class FootstepNode
 
    public static int computePlanarRegionsHashCode(FootstepNode node)
    {
+      Point2DReadOnly midstancePoint = node.getOrComputeMidStancePoint();
+      return computePlanarRegionsHashCode(round(midstancePoint.getX()), round(midstancePoint.getY()));
+   }
+
+   public static int computePlanarRegionsHashCode(double roundedX, double roundedY)
+   {
       final long prime = 31L;
       long bits = 1L;
-      for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
-      {
-         bits = prime * bits + Double.doubleToLongBits(node.getRoundedX(robotQuadrant));
-         bits = prime * bits + Double.doubleToLongBits(node.getRoundedY(robotQuadrant));
-      }
+      bits = prime * bits + Double.doubleToLongBits(roundedX);
+      bits = prime * bits + Double.doubleToLongBits(roundedY);
+
       return (int) (bits ^ bits >> 32);
    }
 
