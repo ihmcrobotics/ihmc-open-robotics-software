@@ -90,8 +90,7 @@ public abstract class QuadrupedPlanToWaypointTest implements QuadrupedMultiRobot
       conductor.addWaypointGoal(YoVariableTestGoal.doubleWithinEpsilon(variables.getRobotBodyX(), 1.5, 0.05));
       conductor.addWaypointGoal(YoVariableTestGoal.doubleWithinEpsilon(variables.getRobotBodyY(), 0.5, 0.05));
       conductor.addWaypointGoal(YoVariableTestGoal.doubleWithinEpsilon(variables.getRobotBodyYaw(), -Math.PI * 0.25, 0.25));
-      conductor.addTimeLimit(variables.getYoTime(), 20.0);
-      conductor.addDurationGoal(variables.getYoTime(), 20.0);
+      conductor.addDurationGoal(variables.getYoTime(), 10.0);
       conductor.simulate();
    }
 
