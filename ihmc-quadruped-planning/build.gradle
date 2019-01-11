@@ -29,11 +29,10 @@ mainDependencies {
     compile group: "us.ihmc", name: "ihmc-robotics-toolkit", version: "source"
     compile group: "us.ihmc", name: "ihmc-humanoid-robotics", version: "source"
     compile group: "us.ihmc", name: "ihmc-quadruped-basics", version: "source"
-    compile group: "us.ihmc", name: "ihmc-quadruped-communication", version: "source"
     compile group: "us.ihmc", name: "robot-environment-awareness", version: "source"
     compile group: "us.ihmc", name: "simulation-construction-set-tools-test", version: "source"
     compile group: "us.ihmc", name: "ihmc-robot-data-logger", version: "source"
-
+    compile group: "us.ihmc", name: "ihmc-path-planning", version: "source"
 }
 
 testDependencies {
