@@ -47,28 +47,28 @@ public class VisibilityTools
       return true;
    }
 
-   public static double distanceToCluster(Point2DReadOnly firstPoint, Point2DReadOnly secondPoint, List<? extends Point2DReadOnly> listOfPointsInCluster,
-                                          Point2DBasics closestPointToPack, boolean closed)
+   public static double distanceToCluster(Point2DReadOnly firstPointOfLine, Point2DReadOnly secondPointOfLine, List<? extends Point2DReadOnly> listOfPointsInCluster,
+                                          Point2DBasics closestPointOnLineToPack, boolean closed)
    {
       int numberOfVertices = listOfPointsInCluster.size();
 
       if (numberOfVertices == 0)
       {
-         closestPointToPack.setToNaN();
+         closestPointOnLineToPack.setToNaN();
          return Double.NaN;
       }
 
       if (numberOfVertices == 1)
       {
-         orthogonalProjectionOnLineSegment2D(listOfPointsInCluster.get(0), firstPoint, secondPoint, closestPointToPack);
-         return listOfPointsInCluster.get(0).distance(closestPointToPack);
+         orthogonalProjectionOnLineSegment2D(listOfPointsInCluster.get(0), firstPointOfLine, secondPointOfLine, closestPointOnLineToPack);
+         return listOfPointsInCluster.get(0).distance(closestPointOnLineToPack);
       }
 
       if (numberOfVertices == 2)
-         return closestPoint2DsBetweenTwoLineSegment2Ds(firstPoint, secondPoint, listOfPointsInCluster.get(0), listOfPointsInCluster.get(1), closestPointToPack,
+         return closestPoint2DsBetweenTwoLineSegment2Ds(firstPointOfLine, secondPointOfLine, listOfPointsInCluster.get(0), listOfPointsInCluster.get(1), closestPointOnLineToPack,
                                                         null);
 
-      boolean pointIsVisible = isPointVisible(firstPoint, secondPoint, listOfPointsInCluster, closed);
+      boolean pointIsVisible = isPointVisible(firstPointOfLine, secondPointOfLine, listOfPointsInCluster, closed);
 
       double minDistance = Double.POSITIVE_INFINITY;
 
@@ -78,17 +78,66 @@ public class VisibilityTools
          Point2DReadOnly edgeStart = listOfPointsInCluster.get(index);
          Point2DReadOnly edgeEnd = listOfPointsInCluster.get(next(index, numberOfVertices));
 
-         double distance = closestPoint2DsBetweenTwoLineSegment2Ds(firstPoint, secondPoint, edgeStart, edgeEnd, closestPoint, null);
+         double distance = closestPoint2DsBetweenTwoLineSegment2Ds(firstPointOfLine, secondPointOfLine, edgeStart, edgeEnd, closestPoint, null);
          if (distance < minDistance)
          {
             minDistance = distance;
-            closestPointToPack.set(closestPoint);
+            closestPointOnLineToPack.set(closestPoint);
          }
       }
 
       minDistance = Math.sqrt(minDistance);
 
       if (!pointIsVisible)
+         minDistance = -minDistance;
+      return minDistance;
+   }
+
+   public static double distanceToCluster(Point2DReadOnly point, List<? extends Point2DReadOnly> listOfPointsInCluster,
+                                          Point2DBasics closestPointInCluster)
+   {
+      int numberOfVertices = listOfPointsInCluster.size();
+
+      if (numberOfVertices == 0)
+      {
+         closestPointInCluster.setToNaN();
+         return Double.NaN;
+      }
+
+      if (numberOfVertices == 1)
+      {
+         closestPointInCluster.set(listOfPointsInCluster.get(0));
+         return distanceBetweenPoint2Ds(point.getX(), point.getY(), listOfPointsInCluster.get(0));
+      }
+
+      if (numberOfVertices == 2)
+      {
+         orthogonalProjectionOnLineSegment2D(point, listOfPointsInCluster.get(0), listOfPointsInCluster.get(1), closestPointInCluster);
+         return point.distance(closestPointInCluster);
+      }
+
+      Point2DBasics tempPoint = new Point2D();
+      boolean isQueryOutsidePolygon = false;
+      double minDistance = Double.POSITIVE_INFINITY;
+
+      for (int index = 0; index < numberOfVertices; index++)
+      {
+         Point2DReadOnly edgeStart = listOfPointsInCluster.get(index);
+         Point2DReadOnly edgeEnd = listOfPointsInCluster.get(next(index, numberOfVertices));
+
+         isQueryOutsidePolygon |= isPoint2DOnSideOfLine2D(point.getX(), point.getY(), edgeStart, edgeEnd, true);
+
+         orthogonalProjectionOnLineSegment2D(point, listOfPointsInCluster.get(0), listOfPointsInCluster.get(1), tempPoint);
+         double distance = point.distance(tempPoint);
+
+         if (distance < minDistance)
+         {
+            minDistance = distance;
+            closestPointInCluster.set(tempPoint);
+         }
+      }
+
+      if (!isQueryOutsidePolygon)
          minDistance = -minDistance;
       return minDistance;
    }
