@@ -12,6 +12,7 @@ import us.ihmc.pathPlanning.visibilityGraphs.dataStructure.*;
 import us.ihmc.pathPlanning.visibilityGraphs.interfaces.VisibilityGraphsCostParameters;
 import us.ihmc.pathPlanning.visibilityGraphs.interfaces.VisibilityGraphsParameters;
 import us.ihmc.pathPlanning.visibilityGraphs.interfaces.VisibilityMapHolder;
+import us.ihmc.pathPlanning.visibilityGraphs.postProcessing.ObstacleAvoidanceProcessor;
 import us.ihmc.pathPlanning.visibilityGraphs.tools.ClusterTools;
 import us.ihmc.pathPlanning.visibilityGraphs.tools.OcclusionTools;
 import us.ihmc.pathPlanning.visibilityGraphs.tools.PlanarRegionTools;
@@ -23,10 +24,12 @@ public class NavigableRegionsManager
    private final static boolean debug = false;
 
    private final static double bodyWidth = 1.1;
-   private final static double rotationWeight = 2.0;
+   private final static double rotationWeight = 0.0;
 
    private final VisibilityGraphsParameters parameters;
    private final VisibilityGraphsCostParameters costParameters;
+
+   private final ObstacleAvoidanceProcessor postProcessor;
 
    private final VisibilityMapSolution visibilityMapSolution = new VisibilityMapSolution();
 
@@ -56,6 +59,7 @@ public class NavigableRegionsManager
       visibilityMapSolution.setNavigableRegions(new NavigableRegions(parameters, regions));
       this.parameters = parameters == null ? new DefaultVisibilityGraphParameters() : parameters;
       this.costParameters = new DefaultVisibilityGraphsCostParameters();
+      postProcessor = new ObstacleAvoidanceProcessor(parameters);
    }
 
    private static ArrayList<VisibilityMapWithNavigableRegion> createListOfVisibilityMapsWithNavigableRegions(NavigableRegions navigableRegions)
@@ -199,6 +203,8 @@ public class NavigableRegionsManager
       }
       Collections.reverse(path);
 
+      path = postProcessor.pushNodesAwayFromObstacles(path, visibilityMapSolution);
+
       printResults(startBodyPathComputation, expandedNodesCount, iterations, path);
       return path;
    }
@@ -313,7 +319,7 @@ public class NavigableRegionsManager
       return nextNode;
    }
 
-   private void printResults(long startBodyPathComputation, long expandedNodesCount, long iterationCount, List<Point3DReadOnly> path)
+   private void printResults(long startBodyPathComputation, long expandedNodesCount, long iterationCount, List<? extends Point3DReadOnly> path)
    {
       if (debug)
       {
