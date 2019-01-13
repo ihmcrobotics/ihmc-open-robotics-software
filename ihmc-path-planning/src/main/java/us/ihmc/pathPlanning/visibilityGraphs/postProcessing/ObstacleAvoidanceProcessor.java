@@ -20,7 +20,7 @@ public class ObstacleAvoidanceProcessor
 
    public ObstacleAvoidanceProcessor(VisibilityGraphsParameters parameters)
    {
-      realDistanceFromObstacle = 10.0 * parameters.getObstacleExtrusionDistance();
+      realDistanceFromObstacle = 1.0;
    }
 
    public List<Point3DReadOnly> pushNodesAwayFromObstacles(List<Point3DReadOnly> oldNodePath, VisibilityMapSolution visibilityMapSolution)
@@ -45,9 +45,12 @@ public class ObstacleAvoidanceProcessor
                boolean isClosed = cluster.isClosed();
 
                Point2D tempPoint = new Point2D();
+               Vector2D clusterNormal = new Vector2D();
+
+               /*
                if (!isOriginPointStart)
                {
-                  double distanceToCluster = VisibilityTools.distanceToCluster(originPointInWorld2D, clusterPolygon, tempPoint);
+                  double distanceToCluster = VisibilityTools.distanceToCluster(originPointInWorld2D, clusterPolygon, tempPoint, clusterNormal);
                   if (distanceToCluster < realDistanceFromObstacle)
                   {
                      double distanceToMove = realDistanceFromObstacle - distanceToCluster;
@@ -62,10 +65,11 @@ public class ObstacleAvoidanceProcessor
                      newPath.get(nodeIndex).set(originPointInWorld2D, newHeight);
                   }
                }
+               */
 
                if (!isNextPointGoal)
                {
-                  double distanceToCluster = VisibilityTools.distanceToCluster(nextPointInWorld2D, clusterPolygon, tempPoint);
+                  double distanceToCluster = VisibilityTools.distanceToCluster(nextPointInWorld2D, clusterPolygon, tempPoint, clusterNormal);
                   if (distanceToCluster < realDistanceFromObstacle)
                   {
                      double distanceToMove = realDistanceFromObstacle - distanceToCluster;
