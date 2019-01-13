@@ -35,7 +35,6 @@ public class ObstacleAvoidanceProcessor
             Point2D originPointInWorld2D = new Point2D(newPath.get(nodeIndex));
             Point2D nextPointInWorld2D = new Point2D(newPath.get(nodeIndex + 1));
 
-            boolean isOriginPointStart = nodeIndex == 0;
             boolean isNextPointGoal = nodeIndex == oldNodePath.size() - 1;
 
             for (Cluster cluster : navigableRegion.getObstacleClusters())
@@ -46,27 +45,6 @@ public class ObstacleAvoidanceProcessor
 
                Point2D closestPointInCluster = new Point2D();
                Vector2D clusterNormal = new Vector2D();
-
-               /*
-               if (!isOriginPointStart)
-               {
-                  double distanceToCluster = VisibilityTools.distanceToCluster(originPointInWorld2D, clusterPolygon, tempPoint, clusterNormal);
-                  if (distanceToCluster < realDistanceFromObstacle)
-                  {
-                     double distanceToMove = realDistanceFromObstacle - distanceToCluster;
-                     Vector2D nodeOffset = new Vector2D();
-                     nodeOffset.sub(originPointInWorld2D, tempPoint);
-                     nodeOffset.normalize();
-                     nodeOffset.scale(distanceToMove);
-
-                     originPointInWorld2D.add(nodeOffset);
-                     double newHeight = navigableRegion.getPlaneZGivenXY(originPointInWorld2D.getX(), originPointInWorld2D.getY());
-
-                     newPath.get(nodeIndex).set(originPointInWorld2D, newHeight);
-                  }
-               }
-               */
-
 
                if (!isNextPointGoal)
                {
@@ -105,14 +83,6 @@ public class ObstacleAvoidanceProcessor
                   double newHeight = navigableRegion.getPlaneZGivenXY(nextPointInWorld2D.getX(), nextPointInWorld2D.getY());
                   newPath.add(nodeIndex + 1, new Point3D(newPathNode.getX(), newPathNode.getY(), newHeight));
                }
-               /*
-               double distance = VisibilityTools .distanceToCluster(originPointInWorld2D, nextPointInWorld2D, clusterPolygon, tempPoint, isClosed);
-               if (distance < distanceToCluster)
-               {
-                  distanceToCluster = distance;
-                  closestPointToCluster.set(tempPoint);
-               }
-               */
             }
 
             nodeIndex++;
