@@ -35,55 +35,25 @@ public class ObstacleAvoidanceProcessor
    {
       List<Point3D> newPath = oldNodePath.parallelStream().map(Point3D::new).collect(Collectors.toList());
 
-      for (NavigableRegion navigableRegion : visibilityMapSolution.getNavigableRegions().getNaviableRegionsList())
+      int nodeIndex = 0;
+      // don't do the goal node
+      while (nodeIndex < oldNodePath.size() - 2)
       {
-         int nodeIndex = 0;
-         while (nodeIndex < oldNodePath.size() - 1)
+         Point2D originPointInWorld2D = new Point2D(newPath.get(nodeIndex));
+         Point2D nextPointInWorld2D = new Point2D(newPath.get(nodeIndex + 1));
+
+         boolean isGoalNode = nodeIndex > oldNodePath.size() - 2;
+
+         if (!isGoalNode)
          {
-            Point2D originPointInWorld2D = new Point2D(newPath.get(nodeIndex));
-            Point2D nextPointInWorld2D = new Point2D(newPath.get(nodeIndex + 1));
+            adjustGoalNodePositionToAvoidObstacles(newPath, nodeIndex + 1, visibilityMapSolution);
+            // run it again, in case moving it moved it to be within the range of another one.
+            adjustGoalNodePositionToAvoidObstacles(newPath, nodeIndex + 1, visibilityMapSolution);
+         }
 
-            boolean isNextPointGoal = nodeIndex == oldNodePath.size() - 1;
-
-            Vector2D nodeShift = new Vector2D();
-            int numberOfShifts = 0;
-
-            for (Cluster cluster : navigableRegion.getObstacleClusters())
-            {
-               // handle and move origin and goal points
-               List<Point2DReadOnly> clusterPolygon = cluster.getNonNavigableExtrusionsInWorld2D();
-
-               Point2D closestPointInCluster = new Point2D();
-
-               if (!isNextPointGoal)
-               {
-                  double distanceToCluster = VisibilityTools.distanceToCluster(nextPointInWorld2D, clusterPolygon, closestPointInCluster, null);
-                  if (distanceToCluster < realDistanceFromObstacle)
-                  {
-                     double distanceToMove = realDistanceFromObstacle - distanceToCluster;
-                     Vector2D nodeOffset = new Vector2D();
-                     nodeOffset.sub(nextPointInWorld2D, closestPointInCluster);
-                     nodeOffset.normalize();
-                     nodeOffset.scale(distanceToMove);
-
-//                     nextPointInWorld2D.add(nodeOffset);
-                     nodeShift.add(nodeOffset);
-//                     double newHeight = navigableRegion.getPlaneZGivenXY(nextPointInWorld2D.getX(), nextPointInWorld2D.getY());
-
-//                     newPath.get(nodeIndex + 1).set(nextPointInWorld2D, newHeight);
-                     numberOfShifts += 1;
-                  }
-               }
-            }
-
-            if (nodeShift.length() > minDistanceToMove)
-            {
-               nodeShift.scale(1.0 / numberOfShifts);
-               nextPointInWorld2D.add(nodeShift);
-               double newHeight = navigableRegion.getPlaneZGivenXY(nextPointInWorld2D.getX(), nextPointInWorld2D.getY());
-               newPath.get(nodeIndex + 1).set(nextPointInWorld2D, newHeight);
-            }
-
+         // add points
+         for (NavigableRegion navigableRegion : visibilityMapSolution.getNavigableRegions().getNaviableRegionsList())
+         {
             boolean nodeWasAdded = false;
 
             List<Point2D> intermediateWaypointsToAdd = new ArrayList<>();
@@ -125,13 +95,52 @@ public class ObstacleAvoidanceProcessor
             comparator.setEndPoint(nextPointInWorld2D);
             intermediateWaypointsToAdd.sort(comparator);
 
-
             if (!nodeWasAdded)
                nodeIndex++;
          }
       }
 
       return newPath.parallelStream().map(Point3D::new).collect(Collectors.toList());
+   }
+
+   private void adjustGoalNodePositionToAvoidObstacles(List<Point3D> newPathToPack, int nodeIndex, VisibilityMapSolution visibilityMapSolution)
+   {
+      for (NavigableRegion navigableRegion : visibilityMapSolution.getNavigableRegions().getNaviableRegionsList())
+      {
+         Point2D nextPointInWorld2D = new Point2D(newPathToPack.get(nodeIndex));
+
+         Vector2D nodeShift = new Vector2D();
+         int numberOfShifts = 0;
+
+         for (Cluster cluster : navigableRegion.getObstacleClusters())
+         {
+            List<Point2DReadOnly> clusterPolygon = cluster.getNonNavigableExtrusionsInWorld2D();
+
+            Point2D closestPointInCluster = new Point2D();
+
+            double distanceToCluster = VisibilityTools.distanceToCluster(nextPointInWorld2D, clusterPolygon, closestPointInCluster, null);
+            if (distanceToCluster < 1.1 * realDistanceFromObstacle)
+            {
+               double distanceToMove = realDistanceFromObstacle - distanceToCluster;
+               Vector2D nodeOffset = new Vector2D();
+               nodeOffset.sub(nextPointInWorld2D, closestPointInCluster);
+               nodeOffset.normalize();
+               nodeOffset.scale(distanceToMove);
+
+               nodeShift.add(nodeOffset);
+
+               numberOfShifts += 1;
+            }
+         }
+
+         if (nodeShift.length() > minDistanceToMove)
+         {
+            nodeShift.scale(1.0 / numberOfShifts);
+            nextPointInWorld2D.add(nodeShift);
+            double newHeight = navigableRegion.getPlaneZGivenXY(nextPointInWorld2D.getX(), nextPointInWorld2D.getY());
+            newPathToPack.get(nodeIndex).set(nextPointInWorld2D, newHeight);
+         }
+      }
    }
 
    private class IntermediateComparator implements Comparator<Point2DReadOnly>
@@ -157,5 +166,4 @@ public class ObstacleAvoidanceProcessor
          return Double.compare(distanceA, distanceB);
       }
    }
-
 }
