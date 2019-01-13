@@ -67,7 +67,6 @@ public class ObstacleAvoidanceProcessor
                }
                */
 
-               Point2D closestPointOnConnection = new Point2D();
 
                if (!isNextPointGoal)
                {
@@ -87,11 +86,24 @@ public class ObstacleAvoidanceProcessor
                   }
                }
 
+
+               Point2D closestPointOnConnection = new Point2D();
+
                double connectionDistanceToObstacle = VisibilityTools.distanceToCluster(originPointInWorld2D, nextPointInWorld2D, clusterPolygon,
                                                                                        closestPointOnConnection, closestPointInCluster, clusterNormal, isClosed);
                if (connectionDistanceToObstacle < realDistanceFromObstacle)
                {
                   double distanceToMove = realDistanceFromObstacle - connectionDistanceToObstacle;
+                  Point2D newPathNode = new Point2D(closestPointOnConnection);
+
+                  Vector2D nodeOffset = new Vector2D();
+                  nodeOffset.sub(closestPointOnConnection, closestPointInCluster);
+                  nodeOffset.normalize();
+                  nodeOffset.scale(distanceToMove);
+
+                  newPathNode.add(nodeOffset);
+                  double newHeight = navigableRegion.getPlaneZGivenXY(nextPointInWorld2D.getX(), nextPointInWorld2D.getY());
+                  newPath.add(nodeIndex + 1, new Point3D(newPathNode.getX(), newPathNode.getY(), newHeight));
                }
                /*
                double distance = VisibilityTools .distanceToCluster(originPointInWorld2D, nextPointInWorld2D, clusterPolygon, tempPoint, isClosed);
