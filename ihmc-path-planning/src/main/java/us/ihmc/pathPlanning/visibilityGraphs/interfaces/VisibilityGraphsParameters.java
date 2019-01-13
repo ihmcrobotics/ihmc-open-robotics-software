@@ -27,6 +27,8 @@ public interface VisibilityGraphsParameters
 
    double getObstacleExtrusionDistance();
 
+   double getPreferredObstacleExtrusionDistance();
+
    double getObstacleExtrusionDistanceIfNotTooHighToStep();
 
    double getTooHighToStepDistance();
