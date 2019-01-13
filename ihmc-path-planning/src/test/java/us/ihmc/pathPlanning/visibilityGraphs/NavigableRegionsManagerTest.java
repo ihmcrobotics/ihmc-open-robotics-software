@@ -3,6 +3,7 @@ package us.ihmc.pathPlanning.visibilityGraphs;
 import org.junit.Test;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
+import us.ihmc.continuousIntegration.ContinuousIntegrationTools;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.geometry.interfaces.Vertex2DSupplier;
 import us.ihmc.euclid.tools.EuclidCoreTestTools;
@@ -50,7 +51,7 @@ public class NavigableRegionsManagerTest
 
       assertEquals(3, path.size());
       EuclidCoreTestTools.assertPoint3DGeometricallyEquals(start, path.get(0), epsilon);
-      EuclidCoreTestTools.assertPoint3DGeometricallyEquals(new Point3D(-10.0, -1.0, 0.0), path.get(1), epsilon);
+      EuclidCoreTestTools.assertPoint3DGeometricallyEquals(new Point3D(-10.0, -parameters.getPreferredObstacleExtrusionDistance(), 0.0), path.get(1), epsilon);
       EuclidCoreTestTools.assertPoint3DGeometricallyEquals(goal, path.get(2), epsilon);
 
       if (visualize)
@@ -78,7 +79,7 @@ public class NavigableRegionsManagerTest
 
       assertEquals(3, path.size());
       EuclidCoreTestTools.assertPoint3DGeometricallyEquals(start, path.get(0), epsilon);
-      EuclidCoreTestTools.assertPoint3DGeometricallyEquals(new Point3D(-10.0, -1.0, 0.0), path.get(1), epsilon);
+      EuclidCoreTestTools.assertPoint3DGeometricallyEquals(new Point3D(-10.0, -parameters.getPreferredObstacleExtrusionDistance(), 0.0), path.get(1), epsilon);
       EuclidCoreTestTools.assertPoint3DGeometricallyEquals(goal, path.get(2), epsilon);
 
       if (visualize)
@@ -96,8 +97,8 @@ public class NavigableRegionsManagerTest
       PlanarRegionsList planarRegionsList = new PlanarRegionsList(createFlatGroundWithWallEnvironment());
 
       // test on opposite sides of the wall, requiring going around it
-      Point3D start = new Point3D(-15.0, -0.05, 0.0);
-      Point3D goal = new Point3D(-5.0, -0.05, 0.0);
+      Point3D start = new Point3D(-15.0, -0.05 * parameters.getPreferredObstacleExtrusionDistance(), 0.0);
+      Point3D goal = new Point3D(-5.0, -0.05 * parameters.getPreferredObstacleExtrusionDistance(), 0.0);
 
       NavigableRegionsManager navigableRegionsManager = new NavigableRegionsManager(parameters, planarRegionsList.getPlanarRegionsAsList());
       navigableRegionsManager.setPlanarRegions(planarRegionsList.getPlanarRegionsAsList());
@@ -111,7 +112,7 @@ public class NavigableRegionsManagerTest
 
       assertEquals(3, path.size());
       EuclidCoreTestTools.assertPoint3DGeometricallyEquals(start, path.get(0), epsilon);
-      EuclidCoreTestTools.assertPoint3DGeometricallyEquals(new Point3D(-10.0, -1.0, 0.0), path.get(1), epsilon);
+      EuclidCoreTestTools.assertPoint3DGeometricallyEquals(new Point3D(-10.0, -parameters.getPreferredObstacleExtrusionDistance(), 0.0), path.get(1), epsilon);
       EuclidCoreTestTools.assertPoint3DGeometricallyEquals(goal, path.get(2), epsilon);
    }
 
@@ -124,8 +125,8 @@ public class NavigableRegionsManagerTest
       PlanarRegionsList planarRegionsList = new PlanarRegionsList(createFlatGroundWithWallEnvironment());
 
       // test on opposite sides of the wall, requiring going around it
-      Point3D start = new Point3D(-15.0, -0.1, 0.0);
-      Point3D goal = new Point3D(-5.0, -0.1, 0.0);
+      Point3D start = new Point3D(-15.0, -0.1 * parameters.getPreferredObstacleExtrusionDistance(), 0.0);
+      Point3D goal = new Point3D(-5.0, -0.1 * parameters.getPreferredObstacleExtrusionDistance(), 0.0);
 
       NavigableRegionsManager navigableRegionsManager = new NavigableRegionsManager(parameters, planarRegionsList.getPlanarRegionsAsList());
       navigableRegionsManager.setPlanarRegions(planarRegionsList.getPlanarRegionsAsList());
@@ -139,8 +140,63 @@ public class NavigableRegionsManagerTest
 
       assertEquals(3, path.size());
       EuclidCoreTestTools.assertPoint3DGeometricallyEquals(start, path.get(0), epsilon);
-      EuclidCoreTestTools.assertPoint3DGeometricallyEquals(new Point3D(-10.0, -1.0, 0.0), path.get(1), epsilon);
+      EuclidCoreTestTools.assertPoint3DGeometricallyEquals(new Point3D(-10.0, -parameters.getPreferredObstacleExtrusionDistance(), 0.0), path.get(1), epsilon);
       EuclidCoreTestTools.assertPoint3DGeometricallyEquals(goal, path.get(2), epsilon);
+   }
+
+   @Test(timeout = 30000)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
+   public void testFlatGroundWithWallAlmostStraightShot()
+   {
+      VisibilityGraphsParameters parameters = createVisibilityGraphParametersForTest();
+
+      PlanarRegionsList planarRegionsList = new PlanarRegionsList(createFlatGroundWithWallEnvironment());
+
+      // test on opposite sides of the wall, requiring going around it
+      Point3D start = new Point3D(-15.0, -0.95 * parameters.getPreferredObstacleExtrusionDistance(), 0.0);
+      Point3D goal = new Point3D(-5.0, -0.95 * parameters.getPreferredObstacleExtrusionDistance(), 0.0);
+
+      NavigableRegionsManager navigableRegionsManager = new NavigableRegionsManager(parameters, planarRegionsList.getPlanarRegionsAsList());
+      navigableRegionsManager.setPlanarRegions(planarRegionsList.getPlanarRegionsAsList());
+
+      List<Point3DReadOnly> path = navigableRegionsManager.calculateBodyPathWithOcclusions(start, goal);
+
+      if (visualize)
+      {
+         visualize(path, planarRegionsList, start, goal);
+      }
+
+      assertEquals(3, path.size());
+      EuclidCoreTestTools.assertPoint3DGeometricallyEquals(start, path.get(0), epsilon);
+      EuclidCoreTestTools.assertPoint3DGeometricallyEquals(new Point3D(-10.0, -parameters.getPreferredObstacleExtrusionDistance(), 0.0), path.get(1), epsilon);
+      EuclidCoreTestTools.assertPoint3DGeometricallyEquals(goal, path.get(2), epsilon);
+   }
+
+   @Test(timeout = 30000)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
+   public void testFlatGroundWithWallStraightShot()
+   {
+      VisibilityGraphsParameters parameters = createVisibilityGraphParametersForTest();
+
+      PlanarRegionsList planarRegionsList = new PlanarRegionsList(createFlatGroundWithWallEnvironment());
+
+      // test on opposite sides of the wall, requiring going around it
+      Point3D start = new Point3D(-15.0, -1.05 * parameters.getPreferredObstacleExtrusionDistance(), 0.0);
+      Point3D goal = new Point3D(-5.0, -1.05 * parameters.getPreferredObstacleExtrusionDistance(), 0.0);
+
+      NavigableRegionsManager navigableRegionsManager = new NavigableRegionsManager(parameters, planarRegionsList.getPlanarRegionsAsList());
+      navigableRegionsManager.setPlanarRegions(planarRegionsList.getPlanarRegionsAsList());
+
+      List<Point3DReadOnly> path = navigableRegionsManager.calculateBodyPathWithOcclusions(start, goal);
+
+      if (visualize)
+      {
+         visualize(path, planarRegionsList, start, goal);
+      }
+
+      assertEquals(2, path.size());
+      EuclidCoreTestTools.assertPoint3DGeometricallyEquals(start, path.get(0), epsilon);
+      EuclidCoreTestTools.assertPoint3DGeometricallyEquals(goal, path.get(1), epsilon);
    }
 
    private static List<PlanarRegion> createFlatGroundWithWallEnvironment()
@@ -178,6 +234,9 @@ public class NavigableRegionsManagerTest
 
    private static void visualize(List<Point3DReadOnly> path, PlanarRegionsList planarRegionsList, Point3D start, Point3D goal)
    {
+      if (!visualize || ContinuousIntegrationTools.isRunningOnContinuousIntegrationServer())
+         return;
+
       SimulationConstructionSet scs = new SimulationConstructionSet();
 
       Graphics3DObject graphics3DObject = new Graphics3DObject();
