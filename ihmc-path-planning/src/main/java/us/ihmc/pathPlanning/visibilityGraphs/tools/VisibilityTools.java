@@ -131,14 +131,16 @@ public class VisibilityTools
       if (numberOfVertices == 0)
       {
          closestPointInCluster.setToNaN();
-         normalToCluster.setToNaN();
+         if (normalToCluster != null)
+            normalToCluster.setToNaN();
          return Double.NaN;
       }
 
       if (numberOfVertices == 1)
       {
          closestPointInCluster.set(listOfPointsInCluster.get(0));
-         normalToCluster.setToZero();
+         if (normalToCluster != null)
+            normalToCluster.setToZero();
          return distanceBetweenPoint2Ds(point.getX(), point.getY(), listOfPointsInCluster.get(0));
       }
 
@@ -146,9 +148,12 @@ public class VisibilityTools
       {
          orthogonalProjectionOnLineSegment2D(point, listOfPointsInCluster.get(0), listOfPointsInCluster.get(1), closestPointInCluster);
 
-         normalToCluster.sub(listOfPointsInCluster.get(1), listOfPointsInCluster.get(0));
-         EuclidGeometryTools.perpendicularVector2D(normalToCluster, normalToCluster);
-         normalToCluster.normalize();
+         if (normalToCluster != null)
+         {
+            normalToCluster.sub(listOfPointsInCluster.get(1), listOfPointsInCluster.get(0));
+            EuclidGeometryTools.perpendicularVector2D(normalToCluster, normalToCluster);
+            normalToCluster.normalize();
+         }
 
          return point.distance(closestPointInCluster);
       }
@@ -172,9 +177,12 @@ public class VisibilityTools
             minDistance = distance;
             closestPointInCluster.set(tempPoint);
 
-            normalToCluster.sub(edgeEnd, edgeStart);
-            EuclidGeometryTools.perpendicularVector2D(normalToCluster, normalToCluster);
-            normalToCluster.normalize();
+            if (normalToCluster != null)
+            {
+               normalToCluster.sub(edgeEnd, edgeStart);
+               EuclidGeometryTools.perpendicularVector2D(normalToCluster, normalToCluster);
+               normalToCluster.normalize();
+            }
          }
       }
 
