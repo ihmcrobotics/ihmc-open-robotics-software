@@ -41,7 +41,6 @@ public class ObstacleAvoidanceProcessor
             {
                // handle and move origin and goal points
                List<Point2DReadOnly> clusterPolygon = cluster.getNonNavigableExtrusionsInWorld2D();
-               boolean isClosed = cluster.isClosed();
 
                Point2D closestPointInCluster = new Point2D();
                Vector2D clusterNormal = new Vector2D();
@@ -63,29 +62,44 @@ public class ObstacleAvoidanceProcessor
                      newPath.get(nodeIndex + 1).set(nextPointInWorld2D, newHeight);
                   }
                }
+            }
 
+            boolean nodeWasAdded = false;
 
+            /*
+            for (Cluster cluster : navigableRegion.getObstacleClusters())
+            {
+               List<Point2DReadOnly> clusterPolygon = cluster.getNonNavigableExtrusionsInWorld2D();
+               boolean isClosed = cluster.isClosed();
+
+               Point2D closestPointInCluster = new Point2D();
                Point2D closestPointOnConnection = new Point2D();
 
-               double connectionDistanceToObstacle = VisibilityTools.distanceToCluster(originPointInWorld2D, nextPointInWorld2D, clusterPolygon,
-                                                                                       closestPointOnConnection, closestPointInCluster, clusterNormal, isClosed);
+               Vector2D clusterNormal = new Vector2D();
+
+               double connectionDistanceToObstacle = VisibilityTools
+                     .distanceToCluster(originPointInWorld2D, nextPointInWorld2D, clusterPolygon, closestPointOnConnection, closestPointInCluster,
+                                        clusterNormal, isClosed);
                if (connectionDistanceToObstacle < realDistanceFromObstacle)
                {
                   double distanceToMove = realDistanceFromObstacle - connectionDistanceToObstacle;
-                  Point2D newPathNode = new Point2D(closestPointOnConnection);
 
                   Vector2D nodeOffset = new Vector2D();
                   nodeOffset.sub(closestPointOnConnection, closestPointInCluster);
                   nodeOffset.normalize();
                   nodeOffset.scale(distanceToMove);
 
-                  newPathNode.add(nodeOffset);
                   double newHeight = navigableRegion.getPlaneZGivenXY(nextPointInWorld2D.getX(), nextPointInWorld2D.getY());
-                  newPath.add(nodeIndex + 1, new Point3D(newPathNode.getX(), newPathNode.getY(), newHeight));
+                  Point3D newNode3D = new Point3D(closestPointOnConnection.getX() + nodeOffset.getX(), closestPointOnConnection.getY() + nodeOffset.getY(),
+                                                  newHeight);
+                  newPath.add(nodeIndex + 1, newNode3D);
+                  nodeWasAdded = true;
                }
             }
+            */
 
-            nodeIndex++;
+            if (!nodeWasAdded)
+               nodeIndex++;
          }
       }
 
