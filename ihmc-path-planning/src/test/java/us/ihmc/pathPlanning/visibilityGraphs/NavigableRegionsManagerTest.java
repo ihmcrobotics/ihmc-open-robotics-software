@@ -28,12 +28,12 @@ import static org.junit.Assert.assertEquals;
 
 public class NavigableRegionsManagerTest
 {
-   private static final boolean visualize = true;
-   private static final double epsilon = 1e-8;
+   private static final boolean visualize = false;
+   private static final double epsilon = 5e-3;
 
    @Test(timeout = 30000)
    @ContinuousIntegrationAnnotations.ContinuousIntegrationTest(estimatedDuration = 0.0)
-   public void testFlatGroundWithWall()
+   public void testFlatGroundWithWallInlineWithWall()
    {
       VisibilityGraphsParameters parameters = createVisibilityGraphParametersForTest();
 
@@ -57,30 +57,24 @@ public class NavigableRegionsManagerTest
       {
          visualize(path, planarRegionsList, start, goal);
       }
+   }
 
+   @Test(timeout = 30000)
+   @ContinuousIntegrationAnnotations.ContinuousIntegrationTest(estimatedDuration = 0.0)
+   public void testFlatGroundWithWallOnOppositeSidesOfWall()
+   {
+      VisibilityGraphsParameters parameters = createVisibilityGraphParametersForTest();
+
+      PlanarRegionsList planarRegionsList = new PlanarRegionsList(createFlatGroundWithWallEnvironment());
 
       // test on opposite sides of the wall, requiring going around it
-      start = new Point3D(-15.0, 1.0, 0.0);
-      goal = new Point3D(-5.0, 1.0, 0.0);
+      Point3D start = new Point3D(-15.0, 1.0, 0.0);
+      Point3D goal = new Point3D(-5.0, 1.0, 0.0);
 
-      path = navigableRegionsManager.calculateBodyPathWithOcclusions(start, goal);
+      NavigableRegionsManager navigableRegionsManager = new NavigableRegionsManager(parameters, planarRegionsList.getPlanarRegionsAsList());
+      navigableRegionsManager.setPlanarRegions(planarRegionsList.getPlanarRegionsAsList());
 
-      assertEquals(3, path.size());
-      EuclidCoreTestTools.assertPoint3DGeometricallyEquals(start, path.get(0), epsilon);
-      EuclidCoreTestTools.assertPoint3DGeometricallyEquals(new Point3D(-10.0, -1.0, 0.0), path.get(1), epsilon);
-      EuclidCoreTestTools.assertPoint3DGeometricallyEquals(goal, path.get(2), epsilon);
-
-      if (visualize)
-      {
-         visualize(path, planarRegionsList, start, goal);
-      }
-
-
-      // test slightly offset of the wall, giving a straight shot, but not one far enough from the wall.
-      start = new Point3D(-15.0, -0.1, 0.0);
-      goal = new Point3D(-5.0, -0.1, 0.0);
-
-      path = navigableRegionsManager.calculateBodyPathWithOcclusions(start, goal);
+      List<Point3DReadOnly> path = navigableRegionsManager.calculateBodyPathWithOcclusions(start, goal);
 
       assertEquals(3, path.size());
       EuclidCoreTestTools.assertPoint3DGeometricallyEquals(start, path.get(0), epsilon);
@@ -91,6 +85,62 @@ public class NavigableRegionsManagerTest
       {
          visualize(path, planarRegionsList, start, goal);
       }
+   }
+
+   @Test(timeout = 30000)
+   @ContinuousIntegrationAnnotations.ContinuousIntegrationTest(estimatedDuration = 0.0)
+   public void testFlatGroundWithWallStraightShotButVeryNearWall()
+   {
+      VisibilityGraphsParameters parameters = createVisibilityGraphParametersForTest();
+
+      PlanarRegionsList planarRegionsList = new PlanarRegionsList(createFlatGroundWithWallEnvironment());
+
+      // test on opposite sides of the wall, requiring going around it
+      Point3D start = new Point3D(-15.0, -0.05, 0.0);
+      Point3D goal = new Point3D(-5.0, -0.05, 0.0);
+
+      NavigableRegionsManager navigableRegionsManager = new NavigableRegionsManager(parameters, planarRegionsList.getPlanarRegionsAsList());
+      navigableRegionsManager.setPlanarRegions(planarRegionsList.getPlanarRegionsAsList());
+
+      List<Point3DReadOnly> path = navigableRegionsManager.calculateBodyPathWithOcclusions(start, goal);
+
+      if (visualize)
+      {
+         visualize(path, planarRegionsList, start, goal);
+      }
+
+      assertEquals(3, path.size());
+      EuclidCoreTestTools.assertPoint3DGeometricallyEquals(start, path.get(0), epsilon);
+      EuclidCoreTestTools.assertPoint3DGeometricallyEquals(new Point3D(-10.0, -1.0, 0.0), path.get(1), epsilon);
+      EuclidCoreTestTools.assertPoint3DGeometricallyEquals(goal, path.get(2), epsilon);
+   }
+
+   @Test(timeout = 30000)
+   @ContinuousIntegrationAnnotations.ContinuousIntegrationTest(estimatedDuration = 0.0)
+   public void testFlatGroundWithWallStraightShotButNearWall()
+   {
+      VisibilityGraphsParameters parameters = createVisibilityGraphParametersForTest();
+
+      PlanarRegionsList planarRegionsList = new PlanarRegionsList(createFlatGroundWithWallEnvironment());
+
+      // test on opposite sides of the wall, requiring going around it
+      Point3D start = new Point3D(-15.0, -0.1, 0.0);
+      Point3D goal = new Point3D(-5.0, -0.1, 0.0);
+
+      NavigableRegionsManager navigableRegionsManager = new NavigableRegionsManager(parameters, planarRegionsList.getPlanarRegionsAsList());
+      navigableRegionsManager.setPlanarRegions(planarRegionsList.getPlanarRegionsAsList());
+
+      List<Point3DReadOnly> path = navigableRegionsManager.calculateBodyPathWithOcclusions(start, goal);
+
+      if (visualize)
+      {
+         visualize(path, planarRegionsList, start, goal);
+      }
+
+      assertEquals(3, path.size());
+      EuclidCoreTestTools.assertPoint3DGeometricallyEquals(start, path.get(0), epsilon);
+      EuclidCoreTestTools.assertPoint3DGeometricallyEquals(new Point3D(-10.0, -1.0, 0.0), path.get(1), epsilon);
+      EuclidCoreTestTools.assertPoint3DGeometricallyEquals(goal, path.get(2), epsilon);
    }
 
    private static List<PlanarRegion> createFlatGroundWithWallEnvironment()
@@ -117,8 +167,8 @@ public class NavigableRegionsManagerTest
       RigidBodyTransform wallTransform = new RigidBodyTransform();
       wallTransform.setTranslation(-10.0, 0.0, 0.0);
       wallTransform.setRotationPitch(-Math.PI / 2.0);
-      PlanarRegion wallRegion = new PlanarRegion(wallTransform, new ConvexPolygon2D(
-            Vertex2DSupplier.asVertex2DSupplier(wallPointA, wallPointB, wallPointC, wallPointD)));
+      PlanarRegion wallRegion = new PlanarRegion(wallTransform,
+                                                 new ConvexPolygon2D(Vertex2DSupplier.asVertex2DSupplier(wallPointA, wallPointB, wallPointC, wallPointD)));
 
       planarRegions.add(groundPlaneRegion);
       planarRegions.add(wallRegion);
