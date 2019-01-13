@@ -21,6 +21,13 @@ public class DefaultVisibilityGraphParameters implements VisibilityGraphsParamet
 
    /** {@inheritDoc} */
    @Override
+   public double getPreferredObstacleExtrusionDistance()
+   {
+      return 1.0;
+   }
+
+   /** {@inheritDoc} */
+   @Override
    public double getObstacleExtrusionDistance()
    {
       return 0.1;
