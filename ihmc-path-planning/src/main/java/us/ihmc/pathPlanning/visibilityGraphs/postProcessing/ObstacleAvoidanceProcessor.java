@@ -20,7 +20,7 @@ public class ObstacleAvoidanceProcessor
 
    public ObstacleAvoidanceProcessor(VisibilityGraphsParameters parameters)
    {
-      realDistanceFromObstacle = 1.0;
+      realDistanceFromObstacle = parameters.getPreferredObstacleExtrusionDistance() - parameters.getObstacleExtrusionDistance();
    }
 
    public List<Point3DReadOnly> pushNodesAwayFromObstacles(List<Point3DReadOnly> oldNodePath, VisibilityMapSolution visibilityMapSolution)
