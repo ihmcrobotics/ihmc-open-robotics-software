@@ -4,11 +4,13 @@ import java.util.Arrays;
 import java.util.List;
 
 import us.ihmc.euclid.geometry.BoundingBox2D;
+import us.ihmc.euclid.geometry.LineSegment2D;
 import us.ihmc.euclid.geometry.tools.EuclidGeometryPolygonTools;
 import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DBasics;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
+import us.ihmc.euclid.tuple2D.interfaces.Vector2DBasics;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DBasics;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.pathPlanning.visibilityGraphs.clusterManagement.Cluster;
@@ -17,6 +19,7 @@ import us.ihmc.robotics.geometry.PlanarRegion;
 
 import static us.ihmc.euclid.geometry.tools.EuclidGeometryTools.*;
 import static us.ihmc.euclid.geometry.tools.EuclidGeometryTools.distanceSquaredFromPoint2DToLineSegment2D;
+import static us.ihmc.euclid.tools.EuclidCoreTools.norm;
 import static us.ihmc.euclid.tools.EuclidCoreTools.normSquared;
 
 public class VisibilityTools
@@ -48,25 +51,36 @@ public class VisibilityTools
    }
 
    public static double distanceToCluster(Point2DReadOnly firstPointOfLine, Point2DReadOnly secondPointOfLine, List<? extends Point2DReadOnly> listOfPointsInCluster,
-                                          Point2DBasics closestPointOnLineToPack, boolean closed)
+                                          Point2DBasics closestPointOnLineToPack, Vector2DBasics normalToCluster, boolean closed)
    {
       int numberOfVertices = listOfPointsInCluster.size();
 
       if (numberOfVertices == 0)
       {
-         closestPointOnLineToPack.setToNaN();
+         if (closestPointOnLineToPack != null)
+            closestPointOnLineToPack.setToNaN();
+         if (normalToCluster != null)
+            normalToCluster.setToNaN();
          return Double.NaN;
       }
 
       if (numberOfVertices == 1)
       {
          orthogonalProjectionOnLineSegment2D(listOfPointsInCluster.get(0), firstPointOfLine, secondPointOfLine, closestPointOnLineToPack);
+         if (normalToCluster != null)
+            normalToCluster.setToZero();
          return listOfPointsInCluster.get(0).distance(closestPointOnLineToPack);
       }
 
       if (numberOfVertices == 2)
-         return closestPoint2DsBetweenTwoLineSegment2Ds(firstPointOfLine, secondPointOfLine, listOfPointsInCluster.get(0), listOfPointsInCluster.get(1), closestPointOnLineToPack,
-                                                        null);
+      {
+         normalToCluster.sub(listOfPointsInCluster.get(1), listOfPointsInCluster.get(0));
+         EuclidGeometryTools.perpendicularVector2D(normalToCluster, normalToCluster);
+         normalToCluster.normalize();
+
+         return closestPoint2DsBetweenTwoLineSegment2Ds(firstPointOfLine, secondPointOfLine, listOfPointsInCluster.get(0), listOfPointsInCluster.get(1),
+                                                        closestPointOnLineToPack, null);
+      }
 
       boolean pointIsVisible = isPointVisible(firstPointOfLine, secondPointOfLine, listOfPointsInCluster, closed);
 
@@ -83,6 +97,10 @@ public class VisibilityTools
          {
             minDistance = distance;
             closestPointOnLineToPack.set(closestPoint);
+
+            normalToCluster.sub(edgeEnd, edgeStart);
+            EuclidGeometryTools.perpendicularVector2D(normalToCluster, normalToCluster);
+            normalToCluster.normalize();
          }
       }
 
@@ -94,25 +112,32 @@ public class VisibilityTools
    }
 
    public static double distanceToCluster(Point2DReadOnly point, List<? extends Point2DReadOnly> listOfPointsInCluster,
-                                          Point2DBasics closestPointInCluster)
+                                          Point2DBasics closestPointInCluster, Vector2DBasics normalToCluster)
    {
       int numberOfVertices = listOfPointsInCluster.size();
 
       if (numberOfVertices == 0)
       {
          closestPointInCluster.setToNaN();
+         normalToCluster.setToNaN();
          return Double.NaN;
       }
 
       if (numberOfVertices == 1)
       {
          closestPointInCluster.set(listOfPointsInCluster.get(0));
+         normalToCluster.setToZero();
          return distanceBetweenPoint2Ds(point.getX(), point.getY(), listOfPointsInCluster.get(0));
       }
 
       if (numberOfVertices == 2)
       {
          orthogonalProjectionOnLineSegment2D(point, listOfPointsInCluster.get(0), listOfPointsInCluster.get(1), closestPointInCluster);
+
+         normalToCluster.sub(listOfPointsInCluster.get(1), listOfPointsInCluster.get(0));
+         EuclidGeometryTools.perpendicularVector2D(normalToCluster, normalToCluster);
+         normalToCluster.normalize();
+
          return point.distance(closestPointInCluster);
       }
 
@@ -127,13 +152,17 @@ public class VisibilityTools
 
          isQueryOutsidePolygon |= isPoint2DOnSideOfLine2D(point.getX(), point.getY(), edgeStart, edgeEnd, true);
 
-         orthogonalProjectionOnLineSegment2D(point, listOfPointsInCluster.get(0), listOfPointsInCluster.get(1), tempPoint);
+         orthogonalProjectionOnLineSegment2D(point, edgeStart, edgeEnd, tempPoint);
          double distance = point.distance(tempPoint);
 
          if (distance < minDistance)
          {
             minDistance = distance;
             closestPointInCluster.set(tempPoint);
+
+            normalToCluster.sub(edgeEnd, edgeStart);
+            EuclidGeometryTools.perpendicularVector2D(normalToCluster, normalToCluster);
+            normalToCluster.normalize();
          }
       }
 

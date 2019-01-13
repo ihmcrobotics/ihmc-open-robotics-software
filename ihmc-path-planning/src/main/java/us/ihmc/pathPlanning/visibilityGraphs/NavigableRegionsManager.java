@@ -3,6 +3,7 @@ package us.ihmc.pathPlanning.visibilityGraphs;
 import java.util.*;
 
 import us.ihmc.euclid.tuple2D.Point2D;
+import us.ihmc.euclid.tuple2D.Vector2D;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
@@ -245,8 +246,9 @@ public class NavigableRegionsManager
          for (Cluster cluster : navigableRegion.getNavigableRegion().getObstacleClusters())
          {
             Point2D tempPoint = new Point2D();
+            Vector2D clusterNormal = new Vector2D();
             double distance = VisibilityTools.distanceToCluster(originPointInWorld2D, nextPointInWorld2D, cluster.getNonNavigableExtrusionsInWorld2D(),
-                                                                tempPoint, cluster.isClosed());
+                                                                tempPoint, clusterNormal, cluster.isClosed());
             if (distance < distanceToCluster)
             {
                distanceToCluster = distance;
