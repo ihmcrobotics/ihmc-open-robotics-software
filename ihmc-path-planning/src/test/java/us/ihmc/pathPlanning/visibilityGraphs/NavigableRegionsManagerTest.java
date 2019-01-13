@@ -2,7 +2,7 @@ package us.ihmc.pathPlanning.visibilityGraphs;
 
 import org.junit.Test;
 import us.ihmc.commons.thread.ThreadTools;
-import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations;
+import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.geometry.interfaces.Vertex2DSupplier;
 import us.ihmc.euclid.tools.EuclidCoreTestTools;
@@ -32,7 +32,7 @@ public class NavigableRegionsManagerTest
    private static final double epsilon = 5e-3;
 
    @Test(timeout = 30000)
-   @ContinuousIntegrationAnnotations.ContinuousIntegrationTest(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    public void testFlatGroundWithWallInlineWithWall()
    {
       VisibilityGraphsParameters parameters = createVisibilityGraphParametersForTest();
@@ -60,7 +60,7 @@ public class NavigableRegionsManagerTest
    }
 
    @Test(timeout = 30000)
-   @ContinuousIntegrationAnnotations.ContinuousIntegrationTest(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    public void testFlatGroundWithWallOnOppositeSidesOfWall()
    {
       VisibilityGraphsParameters parameters = createVisibilityGraphParametersForTest();
@@ -88,7 +88,7 @@ public class NavigableRegionsManagerTest
    }
 
    @Test(timeout = 30000)
-   @ContinuousIntegrationAnnotations.ContinuousIntegrationTest(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    public void testFlatGroundWithWallStraightShotButVeryNearWall()
    {
       VisibilityGraphsParameters parameters = createVisibilityGraphParametersForTest();
@@ -116,7 +116,7 @@ public class NavigableRegionsManagerTest
    }
 
    @Test(timeout = 30000)
-   @ContinuousIntegrationAnnotations.ContinuousIntegrationTest(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    public void testFlatGroundWithWallStraightShotButNearWall()
    {
       VisibilityGraphsParameters parameters = createVisibilityGraphParametersForTest();

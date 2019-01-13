@@ -245,14 +245,15 @@ public class NavigableRegionsManager
       {
          for (Cluster cluster : navigableRegion.getNavigableRegion().getObstacleClusters())
          {
-            Point2D tempPoint = new Point2D();
+            Point2D tempPointOnLine = new Point2D();
+            Point2D tempPointOnCluster = new Point2D();
             Vector2D clusterNormal = new Vector2D();
             double distance = VisibilityTools.distanceToCluster(originPointInWorld2D, nextPointInWorld2D, cluster.getNonNavigableExtrusionsInWorld2D(),
-                                                                tempPoint, clusterNormal, cluster.isClosed());
+                                                                tempPointOnLine, tempPointOnCluster, clusterNormal, cluster.isClosed());
             if (distance < distanceToCluster)
             {
                distanceToCluster = distance;
-               closestPointToCluster.set(tempPoint);
+               closestPointToCluster.set(tempPointOnCluster);
             }
          }
       }

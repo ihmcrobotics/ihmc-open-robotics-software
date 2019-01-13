@@ -44,7 +44,7 @@ public class ObstacleAvoidanceProcessor
                List<Point2DReadOnly> clusterPolygon = cluster.getNonNavigableExtrusionsInWorld2D();
                boolean isClosed = cluster.isClosed();
 
-               Point2D tempPoint = new Point2D();
+               Point2D closestPointInCluster = new Point2D();
                Vector2D clusterNormal = new Vector2D();
 
                /*
@@ -67,14 +67,16 @@ public class ObstacleAvoidanceProcessor
                }
                */
 
+               Point2D closestPointOnConnection = new Point2D();
+
                if (!isNextPointGoal)
                {
-                  double distanceToCluster = VisibilityTools.distanceToCluster(nextPointInWorld2D, clusterPolygon, tempPoint, clusterNormal);
+                  double distanceToCluster = VisibilityTools.distanceToCluster(nextPointInWorld2D, clusterPolygon, closestPointInCluster, clusterNormal);
                   if (distanceToCluster < realDistanceFromObstacle)
                   {
                      double distanceToMove = realDistanceFromObstacle - distanceToCluster;
                      Vector2D nodeOffset = new Vector2D();
-                     nodeOffset.sub(nextPointInWorld2D, tempPoint);
+                     nodeOffset.sub(nextPointInWorld2D, closestPointInCluster);
                      nodeOffset.normalize();
                      nodeOffset.scale(distanceToMove);
 
@@ -85,6 +87,12 @@ public class ObstacleAvoidanceProcessor
                   }
                }
 
+               double connectionDistanceToObstacle = VisibilityTools.distanceToCluster(originPointInWorld2D, nextPointInWorld2D, clusterPolygon,
+                                                                                       closestPointOnConnection, closestPointInCluster, clusterNormal, isClosed);
+               if (connectionDistanceToObstacle < realDistanceFromObstacle)
+               {
+                  double distanceToMove = realDistanceFromObstacle - connectionDistanceToObstacle;
+               }
                /*
                double distance = VisibilityTools .distanceToCluster(originPointInWorld2D, nextPointInWorld2D, clusterPolygon, tempPoint, isClosed);
                if (distance < distanceToCluster)

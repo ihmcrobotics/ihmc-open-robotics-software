@@ -50,8 +50,9 @@ public class VisibilityTools
       return true;
    }
 
-   public static double distanceToCluster(Point2DReadOnly firstPointOfLine, Point2DReadOnly secondPointOfLine, List<? extends Point2DReadOnly> listOfPointsInCluster,
-                                          Point2DBasics closestPointOnLineToPack, Vector2DBasics normalToCluster, boolean closed)
+   public static double distanceToCluster(Point2DReadOnly firstPointOfLine, Point2DReadOnly secondPointOfLine,
+                                          List<? extends Point2DReadOnly> listOfPointsInCluster, Point2DBasics closestPointOnLineToPack,
+                                          Point2DBasics closestPointOnClusterToPack, Vector2DBasics normalToClusterToPack, boolean closed)
    {
       int numberOfVertices = listOfPointsInCluster.size();
 
@@ -59,48 +60,59 @@ public class VisibilityTools
       {
          if (closestPointOnLineToPack != null)
             closestPointOnLineToPack.setToNaN();
-         if (normalToCluster != null)
-            normalToCluster.setToNaN();
+         if (closestPointOnClusterToPack != null)
+            closestPointOnClusterToPack.setToNaN();
+         if (normalToClusterToPack != null)
+            normalToClusterToPack.setToNaN();
          return Double.NaN;
       }
 
       if (numberOfVertices == 1)
       {
-         orthogonalProjectionOnLineSegment2D(listOfPointsInCluster.get(0), firstPointOfLine, secondPointOfLine, closestPointOnLineToPack);
-         if (normalToCluster != null)
-            normalToCluster.setToZero();
-         return listOfPointsInCluster.get(0).distance(closestPointOnLineToPack);
+         Point2DReadOnly clusterPoint = listOfPointsInCluster.get(0);
+         orthogonalProjectionOnLineSegment2D(clusterPoint, firstPointOfLine, secondPointOfLine, closestPointOnLineToPack);
+         if (normalToClusterToPack != null)
+            normalToClusterToPack.setToZero();
+         if (closestPointOnClusterToPack != null)
+            closestPointOnClusterToPack.set(clusterPoint);
+         return clusterPoint.distance(closestPointOnLineToPack);
       }
 
       if (numberOfVertices == 2)
       {
-         normalToCluster.sub(listOfPointsInCluster.get(1), listOfPointsInCluster.get(0));
-         EuclidGeometryTools.perpendicularVector2D(normalToCluster, normalToCluster);
-         normalToCluster.normalize();
+         normalToClusterToPack.sub(listOfPointsInCluster.get(1), listOfPointsInCluster.get(0));
+         EuclidGeometryTools.perpendicularVector2D(normalToClusterToPack, normalToClusterToPack);
+         normalToClusterToPack.normalize();
 
          return closestPoint2DsBetweenTwoLineSegment2Ds(firstPointOfLine, secondPointOfLine, listOfPointsInCluster.get(0), listOfPointsInCluster.get(1),
-                                                        closestPointOnLineToPack, null);
+                                                        closestPointOnLineToPack, closestPointOnClusterToPack);
       }
 
       boolean pointIsVisible = isPointVisible(firstPointOfLine, secondPointOfLine, listOfPointsInCluster, closed);
 
       double minDistance = Double.POSITIVE_INFINITY;
 
-      Point2DBasics closestPoint = new Point2D();
+      Point2DBasics closestPointOnLine = new Point2D();
+      Point2DBasics closestPointOnCluster = new Point2D();
+
       for (int index = 0; index < numberOfVertices; index++)
       {
          Point2DReadOnly edgeStart = listOfPointsInCluster.get(index);
          Point2DReadOnly edgeEnd = listOfPointsInCluster.get(next(index, numberOfVertices));
 
-         double distance = closestPoint2DsBetweenTwoLineSegment2Ds(firstPointOfLine, secondPointOfLine, edgeStart, edgeEnd, closestPoint, null);
+         double distance = closestPoint2DsBetweenTwoLineSegment2Ds(firstPointOfLine, secondPointOfLine, edgeStart, edgeEnd, closestPointOnLine,
+                                                                   closestPointOnCluster);
          if (distance < minDistance)
          {
             minDistance = distance;
-            closestPointOnLineToPack.set(closestPoint);
+            if (closestPointOnLineToPack != null)
+               closestPointOnLineToPack.set(closestPointOnLine);
+            if (closestPointOnClusterToPack != null)
+               closestPointOnClusterToPack.set(closestPointOnCluster);
 
-            normalToCluster.sub(edgeEnd, edgeStart);
-            EuclidGeometryTools.perpendicularVector2D(normalToCluster, normalToCluster);
-            normalToCluster.normalize();
+            normalToClusterToPack.sub(edgeEnd, edgeStart);
+            EuclidGeometryTools.perpendicularVector2D(normalToClusterToPack, normalToClusterToPack);
+            normalToClusterToPack.normalize();
          }
       }
 
