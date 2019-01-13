@@ -25,11 +25,12 @@ import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import java.util.ArrayList;
 import java.util.List;
 
+import static org.fest.assertions.Fail.fail;
 import static org.junit.Assert.assertEquals;
 
 public class NavigableRegionsManagerTest
 {
-   private static final boolean visualize = true;
+   private static final boolean visualize = false;
    private static final double epsilon = 5e-3;
 
    @Test(timeout = 30000)
@@ -461,8 +462,40 @@ public class NavigableRegionsManagerTest
 
    @Test(timeout = 30000)
    @ContinuousIntegrationTest(estimatedDuration = 0.0)
+   public void testFlatGroundBetweenAwkwardWallOpening()
+   {
+      VisibilityGraphsParameters parameters = createVisibilityGraphParametersForTest();
+
+      PlanarRegionsList planarRegionsList = new PlanarRegionsList(createFlatGroundWithWallAwkwardOpeningEnvironment());
+
+      // test aligned with the edge of the wall, requiring slight offset
+      Point3D start = new Point3D(-15.0, 1.5, 0.0);
+      Point3D goal = new Point3D(-5.0, 1.5, 0.0);
+
+      NavigableRegionsManager navigableRegionsManager = new NavigableRegionsManager(parameters, planarRegionsList.getPlanarRegionsAsList());
+      navigableRegionsManager.setPlanarRegions(planarRegionsList.getPlanarRegionsAsList());
+
+      List<Point3DReadOnly> path = navigableRegionsManager.calculateBodyPathWithOcclusions(start, goal);
+
+      if (visualize)
+      {
+         visualize(path, planarRegionsList, start, goal);
+      }
+
+      assertEquals(3, path.size());
+      EuclidCoreTestTools.assertPoint3DGeometricallyEquals(start, path.get(0), epsilon);
+      EuclidCoreTestTools.assertPoint3DGeometricallyEquals(new Point3D(-10.0, 0.0, 0.0), path.get(1), epsilon);
+      EuclidCoreTestTools.assertPoint3DGeometricallyEquals(goal, path.get(2), epsilon);
+   }
+
+   @Test(timeout = 30000)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    public void testFlatGroundBetweenBoxesOpening()
    {
+      /*
+      This test sets up an environment where the first, aggressive pass will hug the left of the opening. It is then further away from the other side than
+      the preferred distance, so it may not queue that up as a distance it should consider.
+       */
       VisibilityGraphsParameters parameters = createVisibilityGraphParametersForTest();
 
       PlanarRegionsList planarRegionsList = new PlanarRegionsList(createFlatGroundWithBoxesEnvironment());
@@ -517,6 +550,33 @@ public class NavigableRegionsManagerTest
       EuclidCoreTestTools.assertPoint3DGeometricallyEquals(goal, path.get(1), epsilon);
    }
 
+   @Test(timeout = 30000)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
+   public void testFlatGroundBetweenBoxInMiddle()
+   {
+      VisibilityGraphsParameters parameters = createVisibilityGraphParametersForTest();
+
+      PlanarRegionsList planarRegionsList = new PlanarRegionsList(createFlatGroundWithBoxInMiddleEnvironment());
+
+      // test aligned with the edge of the wall, requiring slight offset
+      Point3D start = new Point3D(-15.0, 0.0, 0.0);
+      Point3D goal = new Point3D(-5.0, 0.0, 0.0);
+
+      NavigableRegionsManager navigableRegionsManager = new NavigableRegionsManager(parameters, planarRegionsList.getPlanarRegionsAsList());
+      navigableRegionsManager.setPlanarRegions(planarRegionsList.getPlanarRegionsAsList());
+
+      List<Point3DReadOnly> path = navigableRegionsManager.calculateBodyPathWithOcclusions(start, goal);
+
+      if (visualize)
+      {
+         visualize(path, planarRegionsList, start, goal);
+      }
+
+      assertEquals(6, path.size());
+      EuclidCoreTestTools.assertPoint3DGeometricallyEquals(start, path.get(0), epsilon);
+      EuclidCoreTestTools.assertPoint3DGeometricallyEquals(goal, path.get(1), epsilon);
+      fail("Haven't properly implemented these tests yet.");
+   }
 
    private static List<PlanarRegion> createFlatGroundWithWallEnvironment()
    {
@@ -591,6 +651,46 @@ public class NavigableRegionsManagerTest
       return planarRegions;
    }
 
+   private static List<PlanarRegion> createFlatGroundWithWallAwkwardOpeningEnvironment()
+   {
+      List<PlanarRegion> planarRegions = new ArrayList<>();
+
+      // set up ground plane, 20 x 10
+      Point2D groundPlanePointA = new Point2D(10.0, -5.0);
+      Point2D groundPlanePointB = new Point2D(10.0, 5.0);
+      Point2D groundPlanePointC = new Point2D(-10.0, 5.0);
+      Point2D groundPlanePointD = new Point2D(-10.0, -5.0);
+
+      RigidBodyTransform groundTransform = new RigidBodyTransform();
+      groundTransform.setTranslation(-10.0, 0.0, 0.0);
+      PlanarRegion groundPlaneRegion = new PlanarRegion(groundTransform, new ConvexPolygon2D(
+            Vertex2DSupplier.asVertex2DSupplier(groundPlanePointA, groundPlanePointB, groundPlanePointC, groundPlanePointD)));
+
+      // set up wall, 5x2
+      Point2D wallPointA = new Point2D(2.0, 0.0);
+      Point2D wallPointB = new Point2D(0.0, 0.0);
+      Point2D wallPointC = new Point2D(2.0, 4.25);
+      Point2D wallPointD = new Point2D(0.0, 4.25);
+
+      RigidBodyTransform leftWallTransform = new RigidBodyTransform();
+      leftWallTransform.setTranslation(-10.0, 0.75, 0.0);
+      leftWallTransform.setRotationPitch(-Math.PI / 2.0);
+      PlanarRegion leftWallRegion = new PlanarRegion(leftWallTransform,
+                                                     new ConvexPolygon2D(Vertex2DSupplier.asVertex2DSupplier(wallPointA, wallPointB, wallPointC, wallPointD)));
+
+      RigidBodyTransform rightWallTransform = new RigidBodyTransform();
+      rightWallTransform.setTranslation(-10.0, -5.0, 0.0);
+      rightWallTransform.setRotationPitch(-Math.PI / 2.0);
+      PlanarRegion rightWallRegion = new PlanarRegion(rightWallTransform,
+                                                      new ConvexPolygon2D(Vertex2DSupplier.asVertex2DSupplier(wallPointA, wallPointB, wallPointC, wallPointD)));
+
+      planarRegions.add(groundPlaneRegion);
+      planarRegions.add(leftWallRegion);
+      planarRegions.add(rightWallRegion);
+
+      return planarRegions;
+   }
+
    private static List<PlanarRegion> createFlatGroundWithBoxEnvironment()
    {
       List<PlanarRegion> planarRegions = new ArrayList<>();
@@ -639,6 +739,65 @@ public class NavigableRegionsManagerTest
       planarRegions.add(frontWallRegion);
       planarRegions.add(backWallRegion);
       planarRegions.add(sideWallRegion);
+
+      return planarRegions;
+   }
+
+   private static List<PlanarRegion> createFlatGroundWithBoxInMiddleEnvironment()
+   {
+      List<PlanarRegion> planarRegions = new ArrayList<>();
+
+      // set up ground plane, 20 x 10
+      Point2D groundPlanePointA = new Point2D(10.0, -5.0);
+      Point2D groundPlanePointB = new Point2D(10.0, 5.0);
+      Point2D groundPlanePointC = new Point2D(-10.0, 5.0);
+      Point2D groundPlanePointD = new Point2D(-10.0, -5.0);
+
+      RigidBodyTransform groundTransform = new RigidBodyTransform();
+      groundTransform.setTranslation(-10.0, 0.0, 0.0);
+      PlanarRegion groundPlaneRegion = new PlanarRegion(groundTransform, new ConvexPolygon2D(
+            Vertex2DSupplier.asVertex2DSupplier(groundPlanePointA, groundPlanePointB, groundPlanePointC, groundPlanePointD)));
+
+      // set up wall, 5x2
+      Point2D frontWallPointA = new Point2D(2.0, 0.0);
+      Point2D frontWallPointB = new Point2D(0.0, 0.0);
+      Point2D frontWallPointC = new Point2D(2.0, 9.0);
+      Point2D frontWallPointD = new Point2D(0.0, 9.0);
+
+      RigidBodyTransform frontWallTransform = new RigidBodyTransform();
+      frontWallTransform.setTranslation(-11.5, -4.5, 0.0);
+      frontWallTransform.setRotationPitch(-Math.PI / 2.0);
+      PlanarRegion frontWallRegion = new PlanarRegion(frontWallTransform,
+                                                      new ConvexPolygon2D(Vertex2DSupplier.asVertex2DSupplier(frontWallPointA, frontWallPointB, frontWallPointC, frontWallPointD)));
+
+      RigidBodyTransform backWallTransform = new RigidBodyTransform();
+      backWallTransform.setTranslation(-8.5, -4.5, 0.0);
+      backWallTransform.setRotationPitch(-Math.PI / 2.0);
+      PlanarRegion backWallRegion = new PlanarRegion(backWallTransform,
+                                                     new ConvexPolygon2D(Vertex2DSupplier.asVertex2DSupplier(frontWallPointA, frontWallPointB, frontWallPointC, frontWallPointD)));
+
+      Point2D sideWallPointA = new Point2D(2.0, 0.0);
+      Point2D sideWallPointB = new Point2D(0.0, 0.0);
+      Point2D sideWallPointC = new Point2D(2.0, 3.0);
+      Point2D sideWallPointD = new Point2D(0.0, 3.0);
+
+      RigidBodyTransform leftSideWall = new RigidBodyTransform();
+      leftSideWall.setTranslation(-11.5, 4.5, 0.0);
+      leftSideWall.setRotationYawPitchRoll(-Math.PI / 2.0, -Math.PI / 2.0, 0.0);
+      PlanarRegion leftSideWallRegion = new PlanarRegion(leftSideWall,
+                                                     new ConvexPolygon2D(Vertex2DSupplier.asVertex2DSupplier(sideWallPointA, sideWallPointB, sideWallPointC, sideWallPointD)));
+
+      RigidBodyTransform rightSideWall = new RigidBodyTransform();
+      rightSideWall.setTranslation(-11.5, -4.5, 0.0);
+      rightSideWall.setRotationYawPitchRoll(-Math.PI / 2.0, -Math.PI / 2.0, 0.0);
+      PlanarRegion rightSideWallRegion = new PlanarRegion(rightSideWall,
+                                                         new ConvexPolygon2D(Vertex2DSupplier.asVertex2DSupplier(sideWallPointA, sideWallPointB, sideWallPointC, sideWallPointD)));
+
+      planarRegions.add(groundPlaneRegion);
+      planarRegions.add(frontWallRegion);
+      planarRegions.add(backWallRegion);
+      planarRegions.add(leftSideWallRegion);
+      planarRegions.add(rightSideWallRegion);
 
       return planarRegions;
    }
@@ -837,6 +996,19 @@ public class NavigableRegionsManagerTest
                   return true;
                }
             };
+
+         }
+
+         @Override
+         public double getObstacleExtrusionDistance()
+         {
+            return 0.1;
+         }
+
+         @Override
+         public double getPreferredObstacleExtrusionDistance()
+         {
+            return 1.0;
          }
 
          @Override
