@@ -9,6 +9,7 @@ import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.pathPlanning.visibilityGraphs.clusterManagement.Cluster;
 import us.ihmc.pathPlanning.visibilityGraphs.dataStructure.NavigableRegion;
+import us.ihmc.pathPlanning.visibilityGraphs.dataStructure.VisibilityGraphNode;
 import us.ihmc.pathPlanning.visibilityGraphs.dataStructure.VisibilityMapSolution;
 import us.ihmc.pathPlanning.visibilityGraphs.interfaces.VisibilityGraphsParameters;
 import us.ihmc.pathPlanning.visibilityGraphs.tools.VisibilityTools;
@@ -31,24 +32,25 @@ public class ObstacleAvoidanceProcessor
       realDistanceFromObstacle = parameters.getPreferredObstacleExtrusionDistance() - parameters.getObstacleExtrusionDistance();
    }
 
-   public List<Point3DReadOnly> pushNodesAwayFromObstacles(List<Point3DReadOnly> oldNodePath, VisibilityMapSolution visibilityMapSolution)
+   public List<Point3DReadOnly> computePathFromNodes(List<VisibilityGraphNode> nodePath, VisibilityMapSolution visibilityMapSolution)
    {
-      List<Point3D> newPath = oldNodePath.parallelStream().map(Point3D::new).collect(Collectors.toList());
+      List<Point3D> newPath = nodePath.parallelStream().map(node -> new Point3D(node.getPointInWorld())).collect(Collectors.toList());
 
       int nodeIndex = 0;
       // don't do the goal node
-      while (nodeIndex < oldNodePath.size() - 2)
+      while (nodeIndex < nodePath.size() - 2)
       {
+         int nextNodeIndex = nodeIndex + 1;
          Point2D originPointInWorld2D = new Point2D(newPath.get(nodeIndex));
-         Point2D nextPointInWorld2D = new Point2D(newPath.get(nodeIndex + 1));
+         Point2D nextPointInWorld2D = new Point2D(newPath.get(nextNodeIndex));
 
-         boolean isGoalNode = nodeIndex > oldNodePath.size() - 2;
+         boolean isGoalNode = nodeIndex > nodePath.size() - 2;
 
          if (!isGoalNode)
          {
-            adjustGoalNodePositionToAvoidObstacles(newPath, nodeIndex + 1, visibilityMapSolution);
+            adjustGoalNodePositionToAvoidObstacles(newPath.get(nextNodeIndex), nodePath.get(nextNodeIndex));
             // run it again, in case moving it moved it to be within the range of another one.
-            adjustGoalNodePositionToAvoidObstacles(newPath, nodeIndex + 1, visibilityMapSolution);
+            adjustGoalNodePositionToAvoidObstacles(newPath.get(nextNodeIndex), nodePath.get(nextNodeIndex));
          }
 
          // add points
@@ -103,43 +105,41 @@ public class ObstacleAvoidanceProcessor
       return newPath.parallelStream().map(Point3D::new).collect(Collectors.toList());
    }
 
-   private void adjustGoalNodePositionToAvoidObstacles(List<Point3D> newPathToPack, int nodeIndex, VisibilityMapSolution visibilityMapSolution)
+   private void adjustGoalNodePositionToAvoidObstacles(Point3D nodeLocationToPack, VisibilityGraphNode node)
    {
-      for (NavigableRegion navigableRegion : visibilityMapSolution.getNavigableRegions().getNaviableRegionsList())
+      Point2D nextPointInWorld2D = new Point2D(node.getPointInWorld());
+      Vector2D nodeShift = new Vector2D();
+      int numberOfShifts = 0;
+
+      NavigableRegion navigableRegion = node.getVisibilityGraphNavigableRegion().getNavigableRegion();
+
+      for (Cluster cluster : navigableRegion.getObstacleClusters())
       {
-         Point2D nextPointInWorld2D = new Point2D(newPathToPack.get(nodeIndex));
+         List<Point2DReadOnly> clusterPolygon = cluster.getNonNavigableExtrusionsInWorld2D();
 
-         Vector2D nodeShift = new Vector2D();
-         int numberOfShifts = 0;
+         Point2D closestPointInCluster = new Point2D();
 
-         for (Cluster cluster : navigableRegion.getObstacleClusters())
+         double distanceToCluster = VisibilityTools.distanceToCluster(nextPointInWorld2D, clusterPolygon, closestPointInCluster, null);
+         if (distanceToCluster < 1.1 * realDistanceFromObstacle)
          {
-            List<Point2DReadOnly> clusterPolygon = cluster.getNonNavigableExtrusionsInWorld2D();
+            double distanceToMove = realDistanceFromObstacle - distanceToCluster;
+            Vector2D nodeOffset = new Vector2D();
+            nodeOffset.sub(nextPointInWorld2D, closestPointInCluster);
+            nodeOffset.normalize();
+            nodeOffset.scale(distanceToMove);
 
-            Point2D closestPointInCluster = new Point2D();
+            nodeShift.add(nodeOffset);
 
-            double distanceToCluster = VisibilityTools.distanceToCluster(nextPointInWorld2D, clusterPolygon, closestPointInCluster, null);
-            if (distanceToCluster < 1.1 * realDistanceFromObstacle)
-            {
-               double distanceToMove = realDistanceFromObstacle - distanceToCluster;
-               Vector2D nodeOffset = new Vector2D();
-               nodeOffset.sub(nextPointInWorld2D, closestPointInCluster);
-               nodeOffset.normalize();
-               nodeOffset.scale(distanceToMove);
-
-               nodeShift.add(nodeOffset);
-
-               numberOfShifts += 1;
-            }
+            numberOfShifts += 1;
          }
+      }
 
-         if (nodeShift.length() > minDistanceToMove)
-         {
-            nodeShift.scale(1.0 / numberOfShifts);
-            nextPointInWorld2D.add(nodeShift);
-            double newHeight = navigableRegion.getPlaneZGivenXY(nextPointInWorld2D.getX(), nextPointInWorld2D.getY());
-            newPathToPack.get(nodeIndex).set(nextPointInWorld2D, newHeight);
-         }
+      if (nodeShift.length() > minDistanceToMove)
+      {
+         nodeShift.scale(1.0 / numberOfShifts);
+         nextPointInWorld2D.add(nodeShift);
+         double newHeight = navigableRegion.getPlaneZGivenXY(nextPointInWorld2D.getX(), nextPointInWorld2D.getY());
+         nodeLocationToPack.set(nextPointInWorld2D, newHeight);
       }
    }
 

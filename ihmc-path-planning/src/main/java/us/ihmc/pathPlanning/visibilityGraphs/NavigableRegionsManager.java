@@ -194,17 +194,17 @@ public class NavigableRegionsManager
       visibilityMapSolution.setStartMap(visibilityMapSolutionFromNewVisibilityGraph.getStartMap());
       visibilityMapSolution.setGoalMap(visibilityMapSolutionFromNewVisibilityGraph.getGoalMap());
 
-      List<Point3DReadOnly> path = new ArrayList<>();
+      List<VisibilityGraphNode> nodePath = new ArrayList<>();
       VisibilityGraphNode nodeWalkingBack = goalNode;
 
       while (nodeWalkingBack != null)
       {
-         path.add(nodeWalkingBack.getPointInWorld());
+         nodePath.add(nodeWalkingBack);
          nodeWalkingBack = nodeWalkingBack.getBestParentNode();
       }
-      Collections.reverse(path);
+      Collections.reverse(nodePath);
 
-      path = postProcessor.pushNodesAwayFromObstacles(path, visibilityMapSolution);
+      List<Point3DReadOnly> path = postProcessor.computePathFromNodes(nodePath, visibilityMapSolution);
 
       printResults(startBodyPathComputation, expandedNodesCount, iterations, path);
       return path;
