@@ -31,6 +31,7 @@ public class BodyCollisionNodeChecker extends FootstepNodeChecker
 {
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
    private static final double planarRegionsFilterRadius = 2.0;
+   private static final double collisionCacheResolution = FootstepNode.gridSizeXY;
 
    private final PoseReferenceFrame midStanceFrame = new PoseReferenceFrame("midStanceFrame", worldFrame);
    private final TranslationReferenceFrame bodyCollisionFrame = new TranslationReferenceFrame("bodyCollisionFrame", midStanceFrame);
@@ -38,11 +39,10 @@ public class BodyCollisionNodeChecker extends FootstepNodeChecker
    private final ConvexPolytope bodyCollisionPolytope = new ConvexPolytope();
    private final FootstepNodeSnapperReadOnly snapper;
 
-   private final TIntObjectMap<List<PlanarRegion>> nearbyPlanarRegions = new TIntObjectHashMap<>();
-
    private final GilbertJohnsonKeerthiCollisionDetector collisionDetector = new GilbertJohnsonKeerthiCollisionDetector();
 
    private final HashMap<PlanarRegion, ConvexPolytope> planarRegionPolytopes = new HashMap<>();
+   private final TIntObjectMap<List<PlanarRegion>> nearbyPlanarRegions = new TIntObjectHashMap<>();
 
    private final FootstepPlannerParameters parameters;
    private final Vector3D bodyBoxDimensions = new Vector3D();
@@ -134,14 +134,23 @@ public class BodyCollisionNodeChecker extends FootstepNodeChecker
       tempPoint2d1.set(node.getX(), node.getY());
       tempPoint2d2.set(previousNode.getX(), previousNode.getY());
       tempPoint2d1.interpolate(tempPoint2d1, tempPoint2d2, 0.5);
+      int hashcode = planarHashCode(tempPoint2d1.getX(), tempPoint2d2.getY());
 
-      List<PlanarRegion> nearbyRegions = PlanarRegionTools
-              .filterPlanarRegionsWithBoundingCircle(tempPoint2d1, planarRegionsFilterRadius, planarRegionsList.getPlanarRegionsAsList());
-      nearbyPlanarRegions.put(node.hashCode(), nearbyRegions);
-
-      for (int i = 0; i < planarRegionsList.getNumberOfPlanarRegions(); i++)
+      List<PlanarRegion> nearbyRegions;
+      if(nearbyPlanarRegions.containsKey(hashcode))
       {
-         ConvexPolytope planarRegionPolytope = planarRegionPolytopes.get(planarRegionsList.getPlanarRegion(i));
+         nearbyRegions = nearbyPlanarRegions.get(hashcode);
+      }
+      else
+      {
+         nearbyRegions = PlanarRegionTools
+               .filterPlanarRegionsWithBoundingCircle(tempPoint2d1, planarRegionsFilterRadius, planarRegionsList.getPlanarRegionsAsList());
+         nearbyPlanarRegions.put(hashcode, nearbyRegions);
+      }
+
+      for (int i = 0; i < nearbyRegions.size(); i++)
+      {
+         ConvexPolytope planarRegionPolytope = planarRegionPolytopes.get(nearbyRegions.get(i));
          if (collisionDetector.arePolytopesColliding(bodyCollisionPolytope, planarRegionPolytope, tempPoint1, tempPoint2))
          {
             return false;
@@ -149,6 +158,18 @@ public class BodyCollisionNodeChecker extends FootstepNodeChecker
       }
 
       return true;
+   }
+
+   private static int planarHashCode(double x, double y)
+   {
+      int xIndex = (int) Math.round(x / collisionCacheResolution);
+      int yIndex = (int) Math.round(y / collisionCacheResolution);
+
+      int prime = 31;
+      int result = 1;
+      result = prime * result + xIndex;
+      result = prime * result + yIndex;
+      return result;
    }
 
    private final FramePose3D midPose = new FramePose3D();

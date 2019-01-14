@@ -13,9 +13,6 @@ public class FootstepNode
    public static final double gridSizeXY = 0.05;
    public static final double gridSizeYaw = Math.PI / 18.0;
 
-   public static final double PRECISION     = 0.05;
-   public static final double INV_PRECISION = 1.0 / PRECISION;
-
    private final int xIndex;
    private final int yIndex;
    private final int yawIndex;
@@ -119,35 +116,6 @@ public class FootstepNode
       result = prime * result + node.yIndex;
       result = prime * result + node.yawIndex;
       return result;
-   }
-
-   public double getRoundedX()
-   {
-      return round(getX());
-   }
-
-   public double getRoundedY()
-   {
-      return round(getY());
-   }
-
-   private static int computePlanarRegionsHashCode(FootstepNode node)
-   {
-      return computePlanarRegionsHashCode(node.getRoundedX(), node.getRoundedY());
-   }
-
-   public static int computePlanarRegionsHashCode(double x, double y)
-   {
-      final long prime = 31L;
-      long bits = 1L;
-      bits = prime * bits + Double.doubleToLongBits(x);
-      bits = prime * bits + Double.doubleToLongBits(y);
-      return (int) (bits ^ bits >> 32);
-   }
-
-   public static double round(double value)
-   {
-      return Math.round(value * INV_PRECISION) * PRECISION;
    }
 
    @Override
