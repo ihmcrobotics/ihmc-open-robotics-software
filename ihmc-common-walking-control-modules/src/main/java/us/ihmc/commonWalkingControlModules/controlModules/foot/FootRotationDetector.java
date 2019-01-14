@@ -49,6 +49,7 @@ import us.ihmc.yoVariables.variable.YoFramePoint2D;
  */
 public class FootRotationDetector
 {
+   private static final double omegaThresholdForEstimation = 0.1;
    private static final double decayBreakFrequency = 1.0;
    private static final double filterBreakFrequency = 1.0;
    private static final double rotationThreshold = 0.4;
@@ -97,7 +98,7 @@ public class FootRotationDetector
       // 1. Using the twist of the foot
       TwistReadOnly soleFrameTwist = soleFrame.getTwistOfFrame();
       double omegaSquared = soleFrameTwist.getAngularPart().lengthSquared();
-      if (omegaSquared > 1.0e-5) // Need to divide by this so it can not be zero.
+      if (omegaSquared > omegaThresholdForEstimation)
       {
          tempPointOfRotation.setToZero(soleFrame);
          tempPointOfRotation.cross(soleFrameTwist.getAngularPart(), soleFrameTwist.getLinearPart());
