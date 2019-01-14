@@ -1,7 +1,5 @@
 package us.ihmc.avatar.roughTerrainWalking;
 
-import java.util.Random;
-
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
@@ -9,10 +7,13 @@ import org.junit.Before;
 import controller_msgs.msg.dds.FootstepDataListMessage;
 import controller_msgs.msg.dds.FootstepDataMessage;
 import us.ihmc.avatar.MultiRobotTestInterface;
+import us.ihmc.avatar.initialSetup.OffsetAndYawRobotInitialSetup;
 import us.ihmc.avatar.testTools.DRCSimulationTestHelper;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.simulationConstructionSetTools.bambooTools.BambooTools;
 import us.ihmc.simulationConstructionSetTools.util.environments.CommonAvatarEnvironmentInterface;
@@ -26,22 +27,24 @@ public abstract class AvatarFootWobbleTest implements MultiRobotTestInterface
    private SimulationTestingParameters simulationTestingParameters;
    private DRCSimulationTestHelper testHelper;
 
-   private static final double walkDistance = 1.0;
-   private static final double stepLenght = 0.1;
-   private static final double bumpWidth = 0.01;
-   private static final double bumpHeight = 0.01;
+   private static final double stepLenght = 0.15;
+   private static final int stepPairs = 1;
+   private static final double walkDistance = stepLenght * (1 + stepPairs * 2);
 
-   private static final Random random = new Random(20L);
+   private static final boolean allowStepAdjustment = false;
 
    public void testWobble() throws SimulationExceededMaximumTimeException
    {
       TestEnvironment environment = new TestEnvironment();
       testHelper = new DRCSimulationTestHelper(simulationTestingParameters, getRobotModel(), environment);
+      testHelper.setStartingLocation(environment.getStartingLocation());
       testHelper.createSimulation(getSimpleRobotName() + "FootWobbleTest");
       testHelper.setupCameraForUnitTest(new Point3D(walkDistance / 2.0, 0.0, 0.2), new Point3D(walkDistance / 2.0, -walkDistance * 3.0, 0.2));
       Assert.assertTrue(testHelper.simulateAndBlockAndCatchExceptions(0.25));
 
       FootstepDataListMessage steps = new FootstepDataListMessage();
+      steps.setAreFootstepsAdjustable(allowStepAdjustment);
+
       double duration = environment.packSteps(steps, getRobotModel().getWalkingControllerParameters());
 
       testHelper.publishToController(steps);
@@ -52,20 +55,22 @@ public abstract class AvatarFootWobbleTest implements MultiRobotTestInterface
    {
       private final CombinedTerrainObject3D terrain = new CombinedTerrainObject3D(getClass().getSimpleName());
       private static final double padding = 0.5;
+      private static final double rampHeight = 0.02;
 
       public TestEnvironment()
       {
-         // Ground plane that allows the robot to walk forward in x direction
-         terrain.addBox(-padding, -padding, walkDistance + padding, padding, -0.05, 0.0);
+         // Start and end platform
+         terrain.addBox(-padding, -padding, stepLenght, padding, 0.0, 2.0 * rampHeight);
+         terrain.addBox(walkDistance - stepLenght, -padding, walkDistance + padding, padding, 0.0, 2.0 * rampHeight);
 
-         // Add little bumps on the ground that the robot steps on.
+         // Add little ramps on the ground that the robot steps on.
          double x = stepLenght;
          while (x < walkDistance - stepLenght)
          {
-            double location = x + 2.0 * (random.nextDouble() - 0.5) * 2.0 * bumpWidth; // adjust location by up to twice the nominal width
-            double width = bumpWidth + 2.0 * random.nextDouble() * bumpWidth; // adjust width by growing it randomly up to three times the nominal value
-            terrain.addBox(location - width / 2.0, -padding, location + width / 2.0, padding, 0.0, bumpHeight);
-            x += stepLenght;
+            terrain.addRamp(x + stepLenght, -padding, x, padding, 2.0 * rampHeight, YoAppearance.LightGray());
+            terrain.addRamp(x, -padding, x + stepLenght, padding, 2.0 * rampHeight, YoAppearance.DarkGray());
+            terrain.addBox(x + stepLenght, -padding, x + 2.0 * stepLenght, padding, 2.0 * rampHeight);
+            x += 2.0 * stepLenght;
          }
       }
 
@@ -75,26 +80,38 @@ public abstract class AvatarFootWobbleTest implements MultiRobotTestInterface
          return terrain;
       }
 
+      public OffsetAndYawRobotInitialSetup getStartingLocation()
+      {
+         return new OffsetAndYawRobotInitialSetup(2.0 * rampHeight, new Vector3D(), 0.0);
+      }
+
       public double packSteps(FootstepDataListMessage steps, WalkingControllerParameters walkingControllerParameters)
       {
          double duration = walkingControllerParameters.getDefaultInitialTransferTime() - walkingControllerParameters.getDefaultTransferTime();
          double x = stepLenght;
          double y = walkingControllerParameters.getSteppingParameters().getInPlaceWidth() / 2.0;
-         RobotSide side = RobotSide.LEFT;
+         RobotSide side = RobotSide.RIGHT;
          while (x < walkDistance - stepLenght)
          {
-            FootstepDataMessage step = steps.getFootstepDataList().add();
-            step.setRobotSide(side.toByte());
-            step.getLocation().set(x, side.negateIfRightSide(y), 0.0);
+            FootstepDataMessage step1 = steps.getFootstepDataList().add();
+            step1.setRobotSide(side.toByte());
+            step1.getLocation().set(x, side.negateIfRightSide(y), 2.0 * rampHeight);
             side = side.getOppositeSide();
-            x += stepLenght;
             duration += walkingControllerParameters.getDefaultSwingTime() + walkingControllerParameters.getDefaultTransferTime();
+
+            FootstepDataMessage step2 = steps.getFootstepDataList().add();
+            step2.setRobotSide(side.toByte());
+            step2.getLocation().set(x + stepLenght, side.negateIfRightSide(y), 2.0 * rampHeight);
+            side = side.getOppositeSide();
+            duration += walkingControllerParameters.getDefaultSwingTime() + walkingControllerParameters.getDefaultTransferTime();
+
+            x += 2.0 * stepLenght;
          }
          for (int i = 0; i < 2; i++)
          {
             FootstepDataMessage step = steps.getFootstepDataList().add();
             step.setRobotSide(side.toByte());
-            step.getLocation().set(walkDistance, side.negateIfRightSide(y), 0.0);
+            step.getLocation().set(walkDistance, side.negateIfRightSide(y), 2.0 * rampHeight);
             side = side.getOppositeSide();
             duration += walkingControllerParameters.getDefaultSwingTime() + walkingControllerParameters.getDefaultTransferTime();
          }
