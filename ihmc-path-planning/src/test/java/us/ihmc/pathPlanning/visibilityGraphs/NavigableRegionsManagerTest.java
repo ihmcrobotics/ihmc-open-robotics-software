@@ -30,10 +30,11 @@ import static org.junit.Assert.assertEquals;
 
 public class NavigableRegionsManagerTest
 {
-   private static final boolean visualize = false;
+   private static final boolean visualize = true;
    private static final double epsilon = 5e-3;
+   private static final long timeout = 30000 * 100;
 
-   @Test(timeout = 30000)
+   @Test(timeout = timeout)
    @ContinuousIntegrationTest(estimatedDuration = 0.0)
    public void testFlatGroundWithWallInlineWithWall()
    {
@@ -61,7 +62,7 @@ public class NavigableRegionsManagerTest
       }
    }
 
-   @Test(timeout = 30000)
+   @Test(timeout = timeout)
    @ContinuousIntegrationTest(estimatedDuration = 0.0)
    public void testFlatGroundWithWallOnOppositeSidesOfWall()
    {
@@ -89,7 +90,7 @@ public class NavigableRegionsManagerTest
       EuclidCoreTestTools.assertPoint3DGeometricallyEquals(goal, path.get(2), epsilon);
    }
 
-   @Test(timeout = 30000)
+   @Test(timeout = timeout)
    @ContinuousIntegrationTest(estimatedDuration = 0.0)
    public void testFlatGroundWithWallStraightShotButVeryNearWall()
    {
@@ -117,7 +118,7 @@ public class NavigableRegionsManagerTest
       EuclidCoreTestTools.assertPoint3DGeometricallyEquals(goal, path.get(2), epsilon);
    }
 
-   @Test(timeout = 30000)
+   @Test(timeout = timeout)
    @ContinuousIntegrationTest(estimatedDuration = 0.0)
    public void testFlatGroundWithWallStraightShotButNearWall()
    {
@@ -145,7 +146,7 @@ public class NavigableRegionsManagerTest
       EuclidCoreTestTools.assertPoint3DGeometricallyEquals(goal, path.get(2), epsilon);
    }
 
-   @Test(timeout = 30000)
+   @Test(timeout = timeout)
    @ContinuousIntegrationTest(estimatedDuration = 0.0)
    public void testFlatGroundWithWallAlmostStraightShot()
    {
@@ -173,7 +174,7 @@ public class NavigableRegionsManagerTest
       EuclidCoreTestTools.assertPoint3DGeometricallyEquals(goal, path.get(2), epsilon);
    }
 
-   @Test(timeout = 30000)
+   @Test(timeout = timeout)
    @ContinuousIntegrationTest(estimatedDuration = 0.0)
    public void testFlatGroundWithWallStraightShot()
    {
@@ -200,7 +201,7 @@ public class NavigableRegionsManagerTest
       EuclidCoreTestTools.assertPoint3DGeometricallyEquals(goal, path.get(1), epsilon);
    }
 
-   @Test(timeout = 30000)
+   @Test(timeout = timeout)
    @ContinuousIntegrationTest(estimatedDuration = 0.0)
    public void testFlatGroundWithBoxInlineWithWall()
    {
@@ -230,7 +231,7 @@ public class NavigableRegionsManagerTest
       EuclidCoreTestTools.assertPoint3DGeometricallyEquals(goal, path.get(3), epsilon);
    }
 
-   @Test(timeout = 30000)
+   @Test(timeout = timeout)
    @ContinuousIntegrationTest(estimatedDuration = 0.0)
    public void testFlatGroundWithBoxOnOppositeSidesOfWall()
    {
@@ -259,7 +260,7 @@ public class NavigableRegionsManagerTest
       EuclidCoreTestTools.assertPoint3DGeometricallyEquals(goal, path.get(3), epsilon);
    }
 
-   @Test(timeout = 30000)
+   @Test(timeout = timeout)
    @ContinuousIntegrationTest(estimatedDuration = 0.0)
    public void testFlatGroundWithBoxStraightShotButVeryNearWall()
    {
@@ -288,7 +289,7 @@ public class NavigableRegionsManagerTest
       EuclidCoreTestTools.assertPoint3DGeometricallyEquals(goal, path.get(3), epsilon);
    }
 
-   @Test(timeout = 30000)
+   @Test(timeout = timeout)
    @ContinuousIntegrationTest(estimatedDuration = 0.0)
    public void testFlatGroundWithBoxStraightShotButNearWall()
    {
@@ -317,7 +318,7 @@ public class NavigableRegionsManagerTest
       EuclidCoreTestTools.assertPoint3DGeometricallyEquals(goal, path.get(3), epsilon);
    }
 
-   @Test(timeout = 30000)
+   @Test(timeout = timeout)
    @ContinuousIntegrationTest(estimatedDuration = 0.0)
    public void testFlatGroundWithBoxAlmostStraightShot()
    {
@@ -346,7 +347,7 @@ public class NavigableRegionsManagerTest
       EuclidCoreTestTools.assertPoint3DGeometricallyEquals(goal, path.get(3), epsilon);
    }
 
-   @Test(timeout = 30000)
+   @Test(timeout = timeout)
    @ContinuousIntegrationTest(estimatedDuration = 0.0)
    public void testFlatGroundWithBoxStraightShot()
    {
@@ -373,7 +374,7 @@ public class NavigableRegionsManagerTest
       EuclidCoreTestTools.assertPoint3DGeometricallyEquals(goal, path.get(1), epsilon);
    }
 
-   @Test(timeout = 30000)
+   @Test(timeout = timeout)
    @ContinuousIntegrationTest(estimatedDuration = 0.0)
    public void testFlatGroundWithTwoDifferentWalls()
    {
@@ -402,7 +403,7 @@ public class NavigableRegionsManagerTest
       EuclidCoreTestTools.assertPoint3DGeometricallyEquals(goal, path.get(2), epsilon);
    }
 
-   @Test(timeout = 30000)
+   @Test(timeout = timeout)
    @ContinuousIntegrationTest(estimatedDuration = 0.0)
    public void testFlatGroundBetweenWallOpening()
    {
@@ -433,7 +434,7 @@ public class NavigableRegionsManagerTest
    }
 
 
-   @Test(timeout = 30000)
+   @Test(timeout = timeout)
    @ContinuousIntegrationTest(estimatedDuration = 0.0)
    public void testFlatGroundBetweenWallOpeningStraightShot()
    {
@@ -460,7 +461,7 @@ public class NavigableRegionsManagerTest
       EuclidCoreTestTools.assertPoint3DGeometricallyEquals(goal, path.get(1), epsilon);
    }
 
-   @Test(timeout = 30000)
+   @Test(timeout = timeout)
    @ContinuousIntegrationTest(estimatedDuration = 0.0)
    public void testFlatGroundBetweenAwkwardWallOpening()
    {
@@ -488,7 +489,7 @@ public class NavigableRegionsManagerTest
       EuclidCoreTestTools.assertPoint3DGeometricallyEquals(goal, path.get(2), epsilon);
    }
 
-   @Test(timeout = 30000)
+   @Test(timeout = timeout)
    @ContinuousIntegrationTest(estimatedDuration = 0.0)
    public void testFlatGroundBetweenBoxesOpening()
    {
@@ -523,7 +524,7 @@ public class NavigableRegionsManagerTest
    }
 
 
-   @Test(timeout = 30000)
+   @Test(timeout = timeout)
    @ContinuousIntegrationTest(estimatedDuration = 0.0)
    public void testFlatGroundBetweenBoxesOpeningStraightShot()
    {
@@ -550,7 +551,7 @@ public class NavigableRegionsManagerTest
       EuclidCoreTestTools.assertPoint3DGeometricallyEquals(goal, path.get(1), epsilon);
    }
 
-   @Test(timeout = 30000)
+   @Test(timeout = timeout)
    @ContinuousIntegrationTest(estimatedDuration = 0.0)
    public void testFlatGroundBetweenBoxInMiddle()
    {
