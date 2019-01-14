@@ -7,8 +7,8 @@ import us.ihmc.exampleSimulations.genericQuadruped.parameters.GenericQuadrupedXG
 import us.ihmc.pubsub.DomainFactory;
 import us.ihmc.quadrupedPlanning.QuadrupedXGaitSettingsReadOnly;
 import us.ihmc.quadrupedPlanning.footstepChooser.PointFootSnapperParameters;
-import us.ihmc.quadrupedPlanning.networkProcessing.QuadrupedNetworkModuleParameters;
-import us.ihmc.quadrupedPlanning.networkProcessing.QuadrupedNetworkProcessor;
+import us.ihmc.quadrupedCommunication.networkProcessing.QuadrupedNetworkModuleParameters;
+import us.ihmc.quadrupedCommunication.networkProcessing.QuadrupedNetworkProcessor;
 import us.ihmc.robotModels.FullQuadrupedRobotModelFactory;
 
 public class GenericQuadrupedNetworkProcessor extends QuadrupedNetworkProcessor
@@ -17,6 +17,7 @@ public class GenericQuadrupedNetworkProcessor extends QuadrupedNetworkProcessor
 
    static
    {
+      networkModuleParameters.enableFootstepPlanningModule(true);
       networkModuleParameters.enableStepTeleopModule(true);
       networkModuleParameters.enableBodyTeleopModule(true);
       networkModuleParameters.enableBodyHeightTeleopModule(true);
