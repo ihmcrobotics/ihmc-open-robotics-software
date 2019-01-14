@@ -223,13 +223,15 @@ public class SupportState extends AbstractFootControlState
    @Override
    public void doSpecificAction(double timeInState)
    {
+      computeFootPolygon();
+      controllerToolbox.getDesiredCenterOfPressure(contactableFoot, desiredCoP);
+
       // handle partial foothold detection
       boolean recoverTimeHasPassed = timeInState > recoverTime.getDoubleValue();
       boolean contactStateHasChanged = false;
       if (partialFootholdControlModule != null && recoverTimeHasPassed)
       {
          footSwitch.computeAndPackCoP(cop);
-         controllerToolbox.getDesiredCenterOfPressure(contactableFoot, desiredCoP);
          partialFootholdControlModule.compute(desiredCoP, cop);
          YoPlaneContactState contactState = controllerToolbox.getFootContactState(robotSide);
          contactStateHasChanged = partialFootholdControlModule.applyShrunkPolygon(contactState);
@@ -251,7 +253,6 @@ public class SupportState extends AbstractFootControlState
       // toe contact point loading //// TODO: 6/5/17
       if (rampUpAllowableToeLoadAfterContact && timeInState < toeLoadingDuration.getDoubleValue())
       {
-         computeFootPolygon();
 
          double maxContactPointX = footPolygon.getMaxX();
          double minContactPointX = footPolygon.getMinX();
