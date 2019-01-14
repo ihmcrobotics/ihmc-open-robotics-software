@@ -2,6 +2,7 @@ package us.ihmc.commonWalkingControlModules.controlModules.foot;
 
 import java.awt.Color;
 
+import us.ihmc.commonWalkingControlModules.momentumBasedController.ParameterProvider;
 import us.ihmc.euclid.referenceFrame.FrameLine2D;
 import us.ihmc.euclid.referenceFrame.FrameLine3D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
@@ -49,11 +50,6 @@ import us.ihmc.yoVariables.variable.YoFramePoint2D;
  */
 public class FootRotationDetector
 {
-   private static final double omegaThresholdForEstimation = 0.1;
-   private static final double decayBreakFrequency = 1.0;
-   private static final double filterBreakFrequency = 1.0;
-   private static final double rotationThreshold = 0.4;
-
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
 
    private final YoFramePoint2D linePointA = new YoFramePoint2D("FootRotationPointA", ReferenceFrame.getWorldFrame(), registry);
@@ -69,26 +65,37 @@ public class FootRotationDetector
    private final YoDouble integratedRotationAngle;
    private final YoBoolean isRotating;
 
-   public FootRotationDetector(RobotSide side, MovingReferenceFrame soleFrame, double dt, YoVariableRegistry parentRegistry, YoGraphicsListRegistry graphicsRegistry)
+   private final DoubleProvider omegaThresholdForEstimation;
+   private final DoubleProvider decayBreakFrequency;
+   private final DoubleProvider filterBreakFrequency;
+   private final DoubleProvider rotationThreshold;
+
+   public FootRotationDetector(RobotSide side, MovingReferenceFrame soleFrame, double dt, YoVariableRegistry parentRegistry,
+                               YoGraphicsListRegistry graphicsRegistry)
    {
       this.soleFrame = soleFrame;
       this.dt = dt;
 
+      parentRegistry.addChild(registry);
+      omegaThresholdForEstimation = ParameterProvider.getParameter(FeetManager.class.getSimpleName(), "footRotation_omegaThresholdForEstimation", registry, 0.1);
+      decayBreakFrequency = ParameterProvider.getParameter(FeetManager.class.getSimpleName(), "footRotation_decayBreakFrequency", registry, 1.0);
+      filterBreakFrequency = ParameterProvider.getParameter(FeetManager.class.getSimpleName(), "footRotation_filterBreakFrequency", registry, 1.0);
+      rotationThreshold = ParameterProvider.getParameter(FeetManager.class.getSimpleName(), "footRotation_rotationThreshold", registry, 0.4);
+
       integratedRotationAngle = new YoDouble(side.getLowerCaseName() + "IntegratedRotationAngle", registry);
       isRotating = new YoBoolean(side.getLowerCaseName() + "IsRotating", registry);
 
-      DoubleProvider alpha = () -> AlphaFilteredYoVariable.computeAlphaGivenBreakFrequencyProperly(filterBreakFrequency, dt);
+      DoubleProvider alpha = () -> AlphaFilteredYoVariable.computeAlphaGivenBreakFrequencyProperly(filterBreakFrequency.getValue(), dt);
       filteredPointOfRotation = new AlphaFilteredYoFramePoint2d(side + "FilteredPointOfRotation", "", registry, alpha, soleFrame);
       filteredAxisOfRotation = new AlphaFilteredYoFrameVector2d(side + "FilteredAxisOfRotation", "", registry, alpha, soleFrame);
 
-      parentRegistry.addChild(registry);
+      reset();
+
       if (graphicsRegistry != null)
       {
          Artifact lineArtifact = new YoArtifactLineSegment2d(side.getLowerCaseName() + "VelocityBasedLineOfRotation", linePointA, linePointB, Color.ORANGE, 0.005, 0.01);
          graphicsRegistry.registerArtifact(getClass().getSimpleName(), lineArtifact);
       }
-
-      reset();
    }
 
    private final FrameVector3D tempPointOfRotation = new FrameVector3D();
@@ -98,7 +105,7 @@ public class FootRotationDetector
       // 1. Using the twist of the foot
       TwistReadOnly soleFrameTwist = soleFrame.getTwistOfFrame();
       double omegaSquared = soleFrameTwist.getAngularPart().lengthSquared();
-      if (omegaSquared > omegaThresholdForEstimation)
+      if (omegaSquared > omegaThresholdForEstimation.getValue())
       {
          tempPointOfRotation.setToZero(soleFrame);
          tempPointOfRotation.cross(soleFrameTwist.getAngularPart(), soleFrameTwist.getLinearPart());
@@ -126,9 +133,9 @@ public class FootRotationDetector
 
       if (!isRotating.getValue())
       {
-         isRotating.set(integratedRotationAngle.getValue() > rotationThreshold);
+         isRotating.set(integratedRotationAngle.getValue() > rotationThreshold.getValue());
       }
-      integratedRotationAngle.mul(AlphaFilteredYoVariable.computeAlphaGivenBreakFrequencyProperly(decayBreakFrequency, dt));
+      integratedRotationAngle.mul(AlphaFilteredYoVariable.computeAlphaGivenBreakFrequencyProperly(decayBreakFrequency.getValue(), dt));
 
       updateGraphics();
 
