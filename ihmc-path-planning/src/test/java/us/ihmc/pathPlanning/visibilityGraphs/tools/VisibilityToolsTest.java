@@ -14,8 +14,10 @@ import org.junit.Test;
 import us.ihmc.commons.MutationTestFacilitator;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
+import us.ihmc.euclid.tools.EuclidCoreTestTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple2D.Point2D;
+import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
 import us.ihmc.pathPlanning.visibilityGraphs.clusterManagement.Cluster;
 import us.ihmc.pathPlanning.visibilityGraphs.clusterManagement.Cluster.ClusterType;
 import us.ihmc.pathPlanning.visibilityGraphs.clusterManagement.Cluster.ExtrusionSide;
@@ -79,6 +81,82 @@ public class VisibilityToolsTest
       assertFalse(VisibilityTools.isPointVisibleForStaticMaps(clusters, pointC, pointF));
       assertFalse(VisibilityTools.isPointVisibleForStaticMaps(clusters, pointC, pointG));
       assertTrue(VisibilityTools.isPointVisibleForStaticMaps(clusters, pointC, pointH));
+   }
+
+   @Test(timeout = 30000)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
+   public void testDistanceFromConnectionToCluster()
+   {
+      Point2D leftWallPoint = new Point2D(0.5, 0.0);
+      Point2D rightWallPoint = new Point2D(-0.5, 0.0);
+
+
+      double fortyFive = Math.sin(Math.PI / 4.0);
+      List<Point2DReadOnly> pointsInCluster = new ArrayList<>();
+      pointsInCluster.add(new Point2D(0.1 + 0.5, 0.0));
+      pointsInCluster.add(new Point2D(0.1 * fortyFive + 0.5, 0.1 * fortyFive));
+      pointsInCluster.add(new Point2D(0.5, 0.1));
+      pointsInCluster.add(new Point2D(-0.5, 0.1));
+      pointsInCluster.add(new Point2D(-0.1 * fortyFive - 0.5, 0.1 * fortyFive));
+      pointsInCluster.add(new Point2D(-0.1 - 0.5, 0.0));
+      pointsInCluster.add(new Point2D(-0.1 * fortyFive - 0.5, -0.1 * fortyFive));
+      pointsInCluster.add(new Point2D(-0.5, -0.1));
+      pointsInCluster.add(new Point2D(0.5, -0.1));
+      pointsInCluster.add(new Point2D(0.1 * fortyFive + 0.5, -0.1 * fortyFive));
+
+
+      // line to the left of the cluster
+      Point2DReadOnly firstPointLeftVertical = new Point2D(0.7, -0.2);
+      Point2DReadOnly secondPointLeftVertical = new Point2D(0.7, 0.2);
+
+      Point2D closestPointOnLeftVerticalLine = new Point2D();
+      Point2D closestPointOnLeftVerticalCluster = new Point2D();
+
+      Point2DReadOnly closestPointOnLeftVerticalLineExpected = new Point2D(0.7, 0.0);
+      Point2DReadOnly closestPointOnLeftVerticalClusterExpected = new Point2D(0.6, 0.0);
+
+      double distance = VisibilityTools.distanceToCluster(firstPointLeftVertical, secondPointLeftVertical, pointsInCluster, closestPointOnLeftVerticalLine,
+                                                          closestPointOnLeftVerticalCluster, null, true);
+
+      EuclidCoreTestTools.assertPoint2DGeometricallyEquals(closestPointOnLeftVerticalClusterExpected, closestPointOnLeftVerticalCluster, EPSILON);
+      EuclidCoreTestTools.assertPoint2DGeometricallyEquals(closestPointOnLeftVerticalLineExpected, closestPointOnLeftVerticalLine, EPSILON);
+      assertEquals(0.1, distance, EPSILON);
+
+
+      // line to the right of the cluster
+      Point2DReadOnly firstPointRightVertical = new Point2D(-0.7, -0.2);
+      Point2DReadOnly secondPointRightVertical = new Point2D(-0.7, 0.2);
+
+      Point2D closestPointOnRightVerticalLine = new Point2D();
+      Point2D closestPointOnRightVerticalCluster = new Point2D();
+
+      Point2DReadOnly closestPointOnRightVerticalLineExpected = new Point2D(-0.7, 0.0);
+      Point2DReadOnly closestPointOnRightVerticalClusterExpected = new Point2D(-0.6, 0.0);
+
+      distance = VisibilityTools.distanceToCluster(firstPointRightVertical, secondPointRightVertical, pointsInCluster, closestPointOnRightVerticalLine,
+                                                          closestPointOnRightVerticalCluster, null, true);
+
+      assertEquals(0.1, distance, EPSILON);
+      EuclidCoreTestTools.assertPoint2DGeometricallyEquals(closestPointOnRightVerticalClusterExpected, closestPointOnRightVerticalCluster, EPSILON);
+      EuclidCoreTestTools.assertPoint2DGeometricallyEquals(closestPointOnRightVerticalLineExpected, closestPointOnRightVerticalLine, EPSILON);
+
+      // line above the cluster
+      Point2DReadOnly firstPointAboveHorizontal = new Point2D(0.7, 0.2);
+      Point2DReadOnly secondPointAboveHorizontal = new Point2D(-0.7, 0.2);
+
+      Point2D closestPointOnAboveHorizontalLine = new Point2D();
+      Point2D closestPointOnAboveHorizontalCluster = new Point2D();
+
+      Point2DReadOnly closestPointOnAboveHorizontalLineExpected = new Point2D(0.0, 0.2);
+      Point2DReadOnly closestPointOnAboveHorizontalClusterExpected = new Point2D(0.0, 0.1);
+
+      distance = VisibilityTools.distanceToCluster(firstPointAboveHorizontal, secondPointAboveHorizontal, pointsInCluster, closestPointOnAboveHorizontalLine,
+                                                   closestPointOnAboveHorizontalCluster, null, true);
+
+      assertEquals(0.1, distance, EPSILON);
+      EuclidCoreTestTools.assertPoint2DGeometricallyEquals(closestPointOnAboveHorizontalClusterExpected, closestPointOnAboveHorizontalCluster, EPSILON);
+      EuclidCoreTestTools.assertPoint2DGeometricallyEquals(closestPointOnAboveHorizontalLineExpected, closestPointOnAboveHorizontalLine, EPSILON);
+
    }
 
    @Test(timeout = 30000)
