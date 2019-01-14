@@ -80,9 +80,12 @@ public class VisibilityTools
 
       if (numberOfVertices == 2)
       {
-         normalToClusterToPack.sub(listOfPointsInCluster.get(1), listOfPointsInCluster.get(0));
-         EuclidGeometryTools.perpendicularVector2D(normalToClusterToPack, normalToClusterToPack);
-         normalToClusterToPack.normalize();
+         if (normalToClusterToPack != null)
+         {
+            normalToClusterToPack.sub(listOfPointsInCluster.get(1), listOfPointsInCluster.get(0));
+            EuclidGeometryTools.perpendicularVector2D(normalToClusterToPack, normalToClusterToPack);
+            normalToClusterToPack.normalize();
+         }
 
          return closestPoint2DsBetweenTwoLineSegment2Ds(firstPointOfLine, secondPointOfLine, listOfPointsInCluster.get(0), listOfPointsInCluster.get(1),
                                                         closestPointOnLineToPack, closestPointOnClusterToPack);
@@ -110,13 +113,14 @@ public class VisibilityTools
             if (closestPointOnClusterToPack != null)
                closestPointOnClusterToPack.set(closestPointOnCluster);
 
-            normalToClusterToPack.sub(edgeEnd, edgeStart);
-            EuclidGeometryTools.perpendicularVector2D(normalToClusterToPack, normalToClusterToPack);
-            normalToClusterToPack.normalize();
+            if (normalToClusterToPack != null)
+            {
+               normalToClusterToPack.sub(edgeEnd, edgeStart);
+               EuclidGeometryTools.perpendicularVector2D(normalToClusterToPack, normalToClusterToPack);
+               normalToClusterToPack.normalize();
+            }
          }
       }
-
-      minDistance = Math.sqrt(minDistance);
 
       if (!pointIsVisible)
          minDistance = -minDistance;
