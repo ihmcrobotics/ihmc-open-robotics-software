@@ -78,15 +78,15 @@ public class NavigableRegionsManagerTest
 
       List<Point3DReadOnly> path = navigableRegionsManager.calculateBodyPathWithOcclusions(start, goal);
 
-      assertEquals(3, path.size());
-      EuclidCoreTestTools.assertPoint3DGeometricallyEquals(start, path.get(0), epsilon);
-      EuclidCoreTestTools.assertPoint3DGeometricallyEquals(new Point3D(-10.0, -parameters.getPreferredObstacleExtrusionDistance(), 0.0), path.get(1), epsilon);
-      EuclidCoreTestTools.assertPoint3DGeometricallyEquals(goal, path.get(2), epsilon);
-
       if (visualize)
       {
          visualize(path, planarRegionsList, start, goal);
       }
+
+      assertEquals(3, path.size());
+      EuclidCoreTestTools.assertPoint3DGeometricallyEquals(start, path.get(0), epsilon);
+      EuclidCoreTestTools.assertPoint3DGeometricallyEquals(new Point3D(-10.0, -parameters.getPreferredObstacleExtrusionDistance(), 0.0), path.get(1), epsilon);
+      EuclidCoreTestTools.assertPoint3DGeometricallyEquals(goal, path.get(2), epsilon);
    }
 
    @Test(timeout = 30000)
