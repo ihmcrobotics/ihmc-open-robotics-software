@@ -27,33 +27,34 @@ import us.ihmc.yoVariables.variable.YoFramePoint2D;
 
 /**
  * This class computes whether a foot is rotating.</br>
- * If that is the case provides an estimate of the line of rotation. This class does not rely on a center of
- * pressure estimate and can be used with robots that do not have force-torque sensing in the feet.
+ * If that is the case provides an estimate of the line of rotation. This class does not rely on a center of pressure
+ * estimate and can be used with robots that do not have force-torque sensing in the feet.
  * <p>
- * Two strategies can be used to detect the rotation:<ul>
- * <li>Assuming flat ground and a ground height of 0.0 the foot can be intersected with this plane to accurately
- * find the line of rotation.<br>
- * <li>The twist of the foot can be used to detect an instantaneous line of rotation if the angular velocity of
- * the foot is sufficient.
- * </ul><p>
+ * Two strategies can be used to detect the rotation:
+ * <ul>
+ * <li>Assuming flat ground and a ground height of 0.0 the foot can be intersected with this plane to accurately find
+ * the line of rotation.<br>
+ * <li>The twist of the foot can be used to detect an instantaneous line of rotation if the angular velocity of the foot
+ * is sufficient.
+ * </ul>
+ * <p>
  * Both methods require some form of thresholding as to whether foot rotation is occurring. For the twist based
- * detection the angular foot velocity (only in sole plane) is integrated with a leak rate. This integrated
- * velocity is then thresholded to determine if foot the foot is unstable.
+ * detection the angular foot velocity (only in sole plane) is integrated with a leak rate. This integrated velocity is
+ * then thresholded to determine if foot the foot is unstable.
  * <p>
  * ------------</br>
- * Currently this class implements only the second one since the assumptions are less restrictive. Depending
- * on the performance the first method should be implemented as an alternative.</br>
+ * Currently this class implements only the second one since the assumptions are less restrictive. Depending on the
+ * performance the first method should be implemented as an alternative.</br>
  * ------------
  *
  * @author Georg Wiedebach
- *
  */
 public class FootRotationDetector
 {
-   private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
+   private final YoVariableRegistry registry;
 
-   private final YoFramePoint2D linePointA = new YoFramePoint2D("FootRotationPointA", ReferenceFrame.getWorldFrame(), registry);
-   private final YoFramePoint2D linePointB = new YoFramePoint2D("FootRotationPointB", ReferenceFrame.getWorldFrame(), registry);
+   private final YoFramePoint2D linePointA;
+   private final YoFramePoint2D linePointB;
 
    private final double dt;
    private final MovingReferenceFrame soleFrame;
@@ -76,11 +77,17 @@ public class FootRotationDetector
       this.soleFrame = soleFrame;
       this.dt = dt;
 
+      registry = new YoVariableRegistry(getClass().getSimpleName() + side.getPascalCaseName());
+      linePointA = new YoFramePoint2D("FootRotationPointA", ReferenceFrame.getWorldFrame(), registry);
+      linePointB = new YoFramePoint2D("FootRotationPointB", ReferenceFrame.getWorldFrame(), registry);
       parentRegistry.addChild(registry);
-      omegaThresholdForEstimation = ParameterProvider.getParameter(FeetManager.class.getSimpleName(), "footRotation_omegaThresholdForEstimation", registry, 0.1);
-      decayBreakFrequency = ParameterProvider.getParameter(FeetManager.class.getSimpleName(), "footRotation_decayBreakFrequency", registry, 1.0);
-      filterBreakFrequency = ParameterProvider.getParameter(FeetManager.class.getSimpleName(), "footRotation_filterBreakFrequency", registry, 1.0);
-      rotationThreshold = ParameterProvider.getParameter(FeetManager.class.getSimpleName(), "footRotation_rotationThreshold", registry, 0.4);
+
+      String feetManagerName = FeetManager.class.getSimpleName();
+      String paramRegistryName = getClass().getSimpleName() + "Parameters";
+      omegaThresholdForEstimation = ParameterProvider.getOrCreateParameter(feetManagerName, paramRegistryName, "omegaThresholdForEstimation", registry, 0.1);
+      decayBreakFrequency = ParameterProvider.getOrCreateParameter(feetManagerName, paramRegistryName, "decayBreakFrequency", registry, 1.0);
+      filterBreakFrequency = ParameterProvider.getOrCreateParameter(feetManagerName, paramRegistryName, "filterBreakFrequency", registry, 1.0);
+      rotationThreshold = ParameterProvider.getOrCreateParameter(feetManagerName, paramRegistryName, "rotationThreshold", registry, 0.4);
 
       integratedRotationAngle = new YoDouble(side.getLowerCaseName() + "IntegratedRotationAngle", registry);
       isRotating = new YoBoolean(side.getLowerCaseName() + "IsRotating", registry);
@@ -93,7 +100,7 @@ public class FootRotationDetector
 
       if (graphicsRegistry != null)
       {
-         Artifact lineArtifact = new YoArtifactLineSegment2d(side.getLowerCaseName() + "VelocityBasedLineOfRotation", linePointA, linePointB, Color.ORANGE, 0.005, 0.01);
+         Artifact lineArtifact = new YoArtifactLineSegment2d(side.getLowerCaseName() + "LineOfRotation", linePointA, linePointB, Color.ORANGE, 0.005, 0.01);
          graphicsRegistry.registerArtifact(getClass().getSimpleName(), lineArtifact);
       }
    }
