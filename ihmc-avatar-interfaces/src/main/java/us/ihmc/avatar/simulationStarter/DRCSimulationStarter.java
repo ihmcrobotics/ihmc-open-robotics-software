@@ -454,7 +454,6 @@ public class DRCSimulationStarter implements SimulationStarterInterface
 
       AvatarSimulationFactory avatarSimulationFactory = new AvatarSimulationFactory();
       avatarSimulationFactory.setRobotModel(robotModel);
-      avatarSimulationFactory.setShapeCollisionSettings(robotModel.getShapeCollisionSettings());
       avatarSimulationFactory.setHighLevelHumanoidControllerFactory(controllerFactory);
       avatarSimulationFactory.setCommonAvatarEnvironment(environment);
       avatarSimulationFactory.setRobotInitialSetup(robotInitialSetup);
@@ -462,6 +461,7 @@ public class DRCSimulationStarter implements SimulationStarterInterface
       avatarSimulationFactory.setGuiInitialSetup(guiInitialSetup);
       avatarSimulationFactory.setRealtimeRos2Node(realtimeRos2Node);
       avatarSimulationFactory.setCreateYoVariableServer(createYoVariableServer);
+      avatarSimulationFactory.setShapeCollisionSettings(robotModel.getShapeCollisionSettings());
       if (externalPelvisCorrectorSubscriber != null)
          avatarSimulationFactory.setExternalPelvisCorrectorSubscriber(externalPelvisCorrectorSubscriber);
       AvatarSimulation avatarSimulation = avatarSimulationFactory.createAvatarSimulation();
