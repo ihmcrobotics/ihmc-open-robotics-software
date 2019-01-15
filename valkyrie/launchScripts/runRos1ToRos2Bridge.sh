@@ -3,10 +3,10 @@
 source $HOME/.val_config
 source $HOME/.ihmc_bridge_config
 scriptname=$(basename $0)
-BRIDGE_NAME=valkyrie_static_bridge
+BRIDGE_NAME=valkyrie_static_bridge_yaml
 
 # No bridge options for static bridge
-BRIDGE_OPTS=
+BRIDGE_OPTS=$HOME/ihmc_bridge_ws/install/yaml_configs/valkyrie_bridged_topics.yaml
 
 # Kill off old processes
 
