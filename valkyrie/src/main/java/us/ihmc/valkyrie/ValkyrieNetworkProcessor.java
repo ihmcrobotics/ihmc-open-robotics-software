@@ -26,12 +26,7 @@ public class ValkyrieNetworkProcessor
       networkModuleParams.enableUiModule(true);
       networkModuleParams.enableBehaviorModule(true);
       networkModuleParams.enableBehaviorVisualizer(true);
-      String is_gazebo = System.getenv("IS_GAZEBO");
-      if (is_gazebo != null && is_gazebo.equals("true")) {
-    	  System.out.println("IS_GAZEBO=true -- starting REA");
-          startREA = true;
-      }
-      networkModuleParams.enableRobotEnvironmentAwerenessModule(startREA);
+      networkModuleParams.enableRobotEnvironmentAwerenessModule(true);
       networkModuleParams.enableKinematicsToolbox(true);
       networkModuleParams.enableKinematicsPlanningToolbox(true);
       networkModuleParams.enableFootstepPlanningToolbox(true);
