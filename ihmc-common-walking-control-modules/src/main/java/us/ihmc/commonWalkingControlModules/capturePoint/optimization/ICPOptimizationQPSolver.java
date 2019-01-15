@@ -13,6 +13,8 @@ import us.ihmc.euclid.referenceFrame.FrameVector2D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.*;
 import us.ihmc.robotics.linearAlgebra.MatrixTools;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoBoolean;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -166,9 +168,9 @@ public class ICPOptimizationQPSolver
    private final boolean autoSetPreviousSolution;
 
    /** boolean indicating whether or not the footstep rate term has been added and can be used. */
-   private boolean hasFootstepRateTerm = false;
+   private final YoBoolean hasFootstepRateTerm;
    /** boolean indicating whether or not the feedback rate term has been added and can be used. */
-   private boolean hasFeedbackRateTerm = false;
+   private final YoBoolean hasFeedbackRateTerm;
 
    private double maxFeedbackXMagnitude = Double.POSITIVE_INFINITY;
    private double maxFeedbackYMagnitude = Double.POSITIVE_INFINITY;
@@ -193,15 +195,20 @@ public class ICPOptimizationQPSolver
     */
    public ICPOptimizationQPSolver(int maximumNumberOfCMPVertices, boolean computeCostToGo)
    {
-      this(maximumNumberOfCMPVertices, computeCostToGo, true);
+      this(maximumNumberOfCMPVertices, computeCostToGo, true, null);
    }
 
-   public ICPOptimizationQPSolver(int maximumNumberOfCMPVertices, boolean computeCostToGo, boolean autoSetPreviousSolution)
+   public ICPOptimizationQPSolver(int maximumNumberOfCMPVertices, boolean computeCostToGo, boolean autoSetPreviousSolution, YoVariableRegistry registry)
    {
       this.computeCostToGo = computeCostToGo;
       this.autoSetPreviousSolution = autoSetPreviousSolution;
 
-      indexHandler = new ICPQPIndexHandler();
+      hasFootstepRateTerm = new YoBoolean("icpQPHasFootstepRateTerm", registry);
+      hasFeedbackRateTerm = new YoBoolean("icpQPHasFeedbackRateTerm", registry);
+      hasFootstepRateTerm.set(false);
+      hasFeedbackRateTerm.set(false);
+
+      indexHandler = new ICPQPIndexHandler(registry);
       inputCalculator = new ICPQPInputCalculator(indexHandler);
       constraintCalculator = new ICPQPConstraintCalculator(indexHandler);
 
@@ -514,7 +521,7 @@ public class ICPOptimizationQPSolver
       feedbackGain.zero();
       dynamicsWeight.zero();
 
-      hasFeedbackRateTerm = false;
+      hasFeedbackRateTerm.set(false);
    }
 
    /**
@@ -541,7 +548,7 @@ public class ICPOptimizationQPSolver
       footstepRecursionMultiplier = 0.0;
       footstepWeight.zero();
 
-      hasFootstepRateTerm = false;
+      hasFootstepRateTerm.set(false);
    }
 
    private final DenseMatrix64F tempFootstepWeight = new DenseMatrix64F(2, 2);
@@ -633,7 +640,7 @@ public class ICPOptimizationQPSolver
    {
       MatrixTools.setDiagonal(footstepRateWeight, rateWeight);
 
-      hasFootstepRateTerm = true;
+      hasFootstepRateTerm.set(true);
    }
 
    /**
@@ -742,7 +749,7 @@ public class ICPOptimizationQPSolver
       MatrixTools.setDiagonal(this.feedbackRateWeight, feedbackRateWeight);
       MatrixTools.setDiagonal(this.copCMPFeedbackRateWeight, copCMPFeedbackRateWeight);
 
-      hasFeedbackRateTerm = true;
+      hasFeedbackRateTerm.set(true);
    }
 
    private final FrameVector2D cmpOffsetToThrowAway = new FrameVector2D();
@@ -801,7 +808,7 @@ public class ICPOptimizationQPSolver
       if (indexHandler.hasCMPFeedbackTask())
          addCMPFeedbackTask();
 
-      if (hasFeedbackRateTerm)
+      if (hasFeedbackRateTerm.getBooleanValue())
          addFeedbackRateTask();
 
       addDynamicConstraintTask();
@@ -854,6 +861,11 @@ public class ICPOptimizationQPSolver
       return foundSolution;
    }
 
+   public boolean previousTickFailed()
+   {
+      return previousTickFailed;
+   }
+
    /**
     * Adds the minimization of step adjustment task to the quadratic program.<br>
     * Also adds the rate of the footstep adjustment, if enabled.
@@ -863,7 +875,7 @@ public class ICPOptimizationQPSolver
       int stepIndex = 0;
       inputCalculator.computeFootstepTask(stepIndex, footstepTaskInput, footstepWeight, referenceFootstepLocation);
 
-      if (hasFootstepRateTerm)
+      if (hasFootstepRateTerm.getBooleanValue())
          inputCalculator.computeFootstepRateTask(stepIndex, footstepTaskInput, footstepRateWeight, previousFootstepLocation);
 
       inputCalculator.submitFootstepTask(footstepTaskInput, solverInput_H, solverInput_h, solverInputResidualCost);
@@ -1074,7 +1086,7 @@ public class ICPOptimizationQPSolver
 
       solver.clear();
 
-      if (useWarmStart && pollResetActiveSet())
+      if (useWarmStart && pollResetActiveSet() || previousTickFailed)
          solver.resetActiveConstraints();
 
       solver.setQuadraticCostFunction(solverInput_H, solverInput_h, solverInputResidualCost.get(0, 0));
