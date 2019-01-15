@@ -299,6 +299,11 @@ public class Cluster
       return navigableExtrusionsInLocal.stream().map(this::toWorld3D).collect(Collectors.toList());
    }
 
+   public List<Point2DReadOnly> getNavigableExtrusionsInWorld2D()
+   {
+      return navigableExtrusionsInLocal.stream().map(this::toWorld2D).collect(Collectors.toList());
+   }
+
    public void addNonNavigableExtrusionInLocal(Point2DReadOnly nonNavigableExtrusionInLocal)
    {
       nonNavigableExtrusionsBoundingBox.updateToIncludePoint(nonNavigableExtrusionInLocal);
