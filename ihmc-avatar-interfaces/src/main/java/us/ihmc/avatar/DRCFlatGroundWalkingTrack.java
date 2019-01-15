@@ -115,7 +115,6 @@ public class DRCFlatGroundWalkingTrack
 
       AvatarSimulationFactory avatarSimulationFactory = new AvatarSimulationFactory();
       avatarSimulationFactory.setRobotModel(model);
-      avatarSimulationFactory.setShapeCollisionSettings(model.getShapeCollisionSettings());
       avatarSimulationFactory.setHighLevelHumanoidControllerFactory(controllerFactory);
       avatarSimulationFactory.setCommonAvatarEnvironment(null);
       avatarSimulationFactory.setRobotInitialSetup(robotInitialSetup);
