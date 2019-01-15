@@ -114,7 +114,7 @@ public class AvatarSimulationFactory
 
    private void initializeCollisionManager()
    {
-      if (shapeCollisionSettings.useShapeCollision())
+      if (shapeCollisionSettings != null && shapeCollisionSettings.useShapeCollision())
       {
          CollisionManager collisionManager;
          if (shapeCollisionSettings.useHybridImpulseHandler())
