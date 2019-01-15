@@ -72,7 +72,7 @@ public class QuadrupedFootSwitchFactory
    {
       for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
       {
-         SettableFootSwitch footSwitch = new SettableFootSwitch(footContactableBodies.get().get(robotQuadrant), robotQuadrant, totalRobotWeight, registry);
+         SettableFootSwitch footSwitch = new SettableFootSwitch(footContactableBodies.get().get(robotQuadrant), totalRobotWeight, 4, registry);
          footSwitches.set(robotQuadrant, footSwitch);
       }
    }
