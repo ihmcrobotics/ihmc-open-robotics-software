@@ -64,6 +64,7 @@ public class FootRotationDetector
 
    private final FrameLine2DBasics lineOfRotationInSole = new FrameLine2D();
    private final YoDouble integratedRotationAngle;
+   private final YoDouble absoluteFootOmega;
    private final YoBoolean isRotating;
 
    private final DoubleProvider omegaThresholdForEstimation;
@@ -84,12 +85,13 @@ public class FootRotationDetector
 
       String feetManagerName = FeetManager.class.getSimpleName();
       String paramRegistryName = getClass().getSimpleName() + "Parameters";
-      omegaThresholdForEstimation = ParameterProvider.getOrCreateParameter(feetManagerName, paramRegistryName, "omegaThresholdForEstimation", registry, 0.1);
+      omegaThresholdForEstimation = ParameterProvider.getOrCreateParameter(feetManagerName, paramRegistryName, "omegaThresholdForEstimation", registry, 3.0);
       decayBreakFrequency = ParameterProvider.getOrCreateParameter(feetManagerName, paramRegistryName, "decayBreakFrequency", registry, 1.0);
       filterBreakFrequency = ParameterProvider.getOrCreateParameter(feetManagerName, paramRegistryName, "filterBreakFrequency", registry, 1.0);
-      rotationThreshold = ParameterProvider.getOrCreateParameter(feetManagerName, paramRegistryName, "rotationThreshold", registry, 0.4);
+      rotationThreshold = ParameterProvider.getOrCreateParameter(feetManagerName, paramRegistryName, "rotationThreshold", registry, 0.2);
 
       integratedRotationAngle = new YoDouble(side.getLowerCaseName() + "IntegratedRotationAngle", registry);
+      absoluteFootOmega = new YoDouble(side.getLowerCaseName() + "AbsoluteFootOmega", registry);
       isRotating = new YoBoolean(side.getLowerCaseName() + "IsRotating", registry);
 
       DoubleProvider alpha = () -> AlphaFilteredYoVariable.computeAlphaGivenBreakFrequencyProperly(filterBreakFrequency.getValue(), dt);
@@ -112,7 +114,8 @@ public class FootRotationDetector
       // 1. Using the twist of the foot
       TwistReadOnly soleFrameTwist = soleFrame.getTwistOfFrame();
       double omegaSquared = soleFrameTwist.getAngularPart().lengthSquared();
-      if (omegaSquared > omegaThresholdForEstimation.getValue())
+      absoluteFootOmega.set(Math.sqrt(omegaSquared));
+      if (absoluteFootOmega.getValue() > omegaThresholdForEstimation.getValue())
       {
          tempPointOfRotation.setToZero(soleFrame);
          tempPointOfRotation.cross(soleFrameTwist.getAngularPart(), soleFrameTwist.getLinearPart());
@@ -136,6 +139,12 @@ public class FootRotationDetector
          filteredAxisOfRotation.update(lineOfRotationInSole.getDirection());
          lineOfRotationInSole.set(filteredPointOfRotation, filteredAxisOfRotation);
          lineOfRotationInSole.getDirection().normalize();
+      }
+      else if (!isRotating.getValue())
+      {
+         filteredPointOfRotation.reset();
+         filteredAxisOfRotation.reset();
+         lineOfRotationInSole.setToZero(soleFrame);
       }
 
       if (!isRotating.getValue())
@@ -185,7 +194,9 @@ public class FootRotationDetector
       linePointB.setToNaN();
       filteredPointOfRotation.reset();
       filteredAxisOfRotation.reset();
+      lineOfRotationInSole.setToZero(soleFrame);
       integratedRotationAngle.set(0.0);
+      absoluteFootOmega.set(0.0);
       isRotating.set(false);
    }
 }

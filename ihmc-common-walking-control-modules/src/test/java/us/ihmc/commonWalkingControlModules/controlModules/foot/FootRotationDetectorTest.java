@@ -41,7 +41,7 @@ public class FootRotationDetectorTest
       for (int i = 0; i < 100; i++)
       {
          // create random cop location (zero linear velocity) and a rotational velocity
-         double omegaNorm = random.nextDouble() + 1.0;
+         double omegaNorm = random.nextDouble() + 10.0;
          FramePoint3D point = new FramePoint3D(soleFrame, EuclidCoreRandomTools.nextPoint2D(random));
          FrameVector3D omega = new FrameVector3D(soleFrame, EuclidCoreRandomTools.nextVector2DWithFixedLength(random, omegaNorm));
 
@@ -62,7 +62,7 @@ public class FootRotationDetectorTest
       for (int i = 0; i < 100; i++)
       {
          // create random cop location (zero linear velocity) and a rotational velocity
-         double omegaNorm = random.nextDouble() + 1.0;
+         double omegaNorm = random.nextDouble() + 10.0;
          FramePoint3D point = new FramePoint3D(soleFrame, EuclidCoreRandomTools.nextPoint3D(random));
          FrameVector3D omega = new FrameVector3D(soleFrame, EuclidCoreRandomTools.nextVector3DWithFixedLength(random, omegaNorm));
 
