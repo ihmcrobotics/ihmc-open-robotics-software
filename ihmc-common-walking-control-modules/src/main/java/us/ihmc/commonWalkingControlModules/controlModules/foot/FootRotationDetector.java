@@ -183,6 +183,8 @@ public class FootRotationDetector
    {
       linePointA.setToNaN();
       linePointB.setToNaN();
+      filteredPointOfRotation.reset();
+      filteredAxisOfRotation.reset();
       integratedRotationAngle.set(0.0);
       isRotating.set(false);
    }
