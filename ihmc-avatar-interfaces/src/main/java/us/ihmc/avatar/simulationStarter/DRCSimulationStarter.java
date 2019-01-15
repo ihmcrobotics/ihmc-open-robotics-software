@@ -454,6 +454,7 @@ public class DRCSimulationStarter implements SimulationStarterInterface
 
       AvatarSimulationFactory avatarSimulationFactory = new AvatarSimulationFactory();
       avatarSimulationFactory.setRobotModel(robotModel);
+      avatarSimulationFactory.setShapeCollisionSettings(robotModel.getShapeCollisionSettings());
       avatarSimulationFactory.setHighLevelHumanoidControllerFactory(controllerFactory);
       avatarSimulationFactory.setCommonAvatarEnvironment(environment);
       avatarSimulationFactory.setRobotInitialSetup(robotInitialSetup);
