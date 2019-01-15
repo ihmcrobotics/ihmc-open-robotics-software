@@ -13,9 +13,7 @@ import us.ihmc.pathPlanning.visibilityGraphs.clusterManagement.Cluster;
 import us.ihmc.pathPlanning.visibilityGraphs.dataStructure.NavigableRegion;
 import us.ihmc.pathPlanning.visibilityGraphs.dataStructure.VisibilityGraphNode;
 import us.ihmc.pathPlanning.visibilityGraphs.dataStructure.VisibilityMapSolution;
-import us.ihmc.pathPlanning.visibilityGraphs.interfaces.NavigableRegionFilter;
 import us.ihmc.pathPlanning.visibilityGraphs.interfaces.VisibilityGraphsParameters;
-import us.ihmc.pathPlanning.visibilityGraphs.tools.ClusterTools;
 import us.ihmc.pathPlanning.visibilityGraphs.tools.PlanarRegionTools;
 import us.ihmc.pathPlanning.visibilityGraphs.tools.VisibilityTools;
 import us.ihmc.robotics.geometry.PlanarRegion;
@@ -33,11 +31,17 @@ public class ObstacleAvoidanceProcessor
    private static final double samePointEpsilon = 0.01;
 
    private final double desiredDistanceFromObstacleCluster;
+   private final double desiredDistanceFromCliff;
+   private final double minimumDistanceFromCliff;
+   private final double maxInterRegionConnectionLength;
    private final IntermediateComparator comparator = new IntermediateComparator();
 
    public ObstacleAvoidanceProcessor(VisibilityGraphsParameters parameters)
    {
       desiredDistanceFromObstacleCluster = parameters.getPreferredObstacleExtrusionDistance() - parameters.getObstacleExtrusionDistance();
+      maxInterRegionConnectionLength = parameters.getMaxInterRegionConnectionLength();
+      desiredDistanceFromCliff = 0.5;
+      minimumDistanceFromCliff = parameters.getObstacleExtrusionDistance();
    }
 
    public List<Point3DReadOnly> computePathFromNodes(List<VisibilityGraphNode> nodePath, VisibilityMapSolution visibilityMapSolution)
@@ -60,11 +64,14 @@ public class ObstacleAvoidanceProcessor
 
          boolean isGoalNode = pathNodeIndex > nodePath.size() - 2;
 
+         NavigableRegions allNavigableRegions = visibilityMapSolution.getNavigableRegions();
+
          if (!isGoalNode)
          {
-            adjustGoalNodePositionToAvoidObstacles(endPointInWorld, endVisGraphNode, visibilityMapSolution.getNavigableRegions());
+            adjustGoalNodePositionToAvoidObstaclesAndCliffs(endPointInWorld, endVisGraphNode, allNavigableRegions);
          }
 
+         /*
          List<Point3D> intermediateWaypointsToAdd = computeIntermediateWaypointsToAddToAvoidObstacles(new Point2D(startPointInWorld),
                                                                                                       new Point2D(endPointInWorld), startVisGraphNode,
                                                                                                       endVisGraphNode);
@@ -72,7 +79,7 @@ public class ObstacleAvoidanceProcessor
          // shift all the points around
          for (Point3D intermediateWaypointToAdd : intermediateWaypointsToAdd)
          {
-            adjustGoalNodePositionToAvoidObstacles(intermediateWaypointToAdd, endVisGraphNode, visibilityMapSolution.getNavigableRegions());
+            adjustGoalNodePositionToAvoidObstaclesAndCliffs(intermediateWaypointToAdd, startVisGraphNode, allNavigableRegions);
          }
 
          // prune duplicated points
@@ -88,6 +95,8 @@ public class ObstacleAvoidanceProcessor
                newPath.add(waypointIndex, intermediateWaypointToAdd);
             }
          }
+                  */
+
 
          waypointIndex++;
          pathNodeIndex++;
@@ -96,19 +105,66 @@ public class ObstacleAvoidanceProcessor
       return newPath.parallelStream().map(Point3D::new).collect(Collectors.toList());
    }
 
-   private void adjustGoalNodePositionToAvoidObstacles(Point3D nodeLocationToPack, VisibilityGraphNode node, NavigableRegions navigableRegions)
+   private void adjustGoalNodePositionToAvoidObstaclesAndCliffs(Point3D nodeLocationToPack, VisibilityGraphNode node, NavigableRegions allNavigableRegions)
    {
       Point2D nextPointInWorld2D = new Point2D(nodeLocationToPack);
 
       NavigableRegion navigableRegion = node.getVisibilityGraphNavigableRegion().getNavigableRegion();
 
-      Vector2DReadOnly nodeShiftToAvoidObstacles = getDirectionAndDistanceToShiftNodeToAvoidObstacles(nextPointInWorld2D, navigableRegion);
+      List<Point2DReadOnly> closestObstacleClusterPoints = getClosestPointsOnClusters(nextPointInWorld2D, navigableRegion.getObstacleClusters());
+      Vector2DReadOnly nodeShiftToAvoidObstacles = computeVectorToMaximizeAverageDistanceFromPoints(nextPointInWorld2D, closestObstacleClusterPoints,
+                                                                                                    desiredDistanceFromObstacleCluster, 0.0);
 
-      if (nodeShiftToAvoidObstacles.length() > minDistanceToMove)
+      Point2D shiftedPoint = new Point2D(nodeLocationToPack);
+      shiftedPoint.add(nodeShiftToAvoidObstacles);
+
+      boolean isShiftedPointNearACliff = isNearCliff(shiftedPoint, maxInterRegionConnectionLength, cliffHeightToAvoid, navigableRegion,
+                                                     allNavigableRegions.getNaviableRegionsList());
+
+      Vector2D nodeShift = new Vector2D();
+
+      if (isShiftedPointNearACliff)
       {
-         nextPointInWorld2D.add(nodeShiftToAvoidObstacles);
+         List<Point2DReadOnly> closestCliffObstacleClusterPoints = getClosestPointsOnClusters(nextPointInWorld2D, navigableRegion.getHomeRegionCluster());
+         nodeShift.set(computeVectorToMaximizeAverageDistanceFromPoints(nextPointInWorld2D, closestObstacleClusterPoints, closestCliffObstacleClusterPoints,
+                                                                                      desiredDistanceFromObstacleCluster, desiredDistanceFromCliff, 0.0, minimumDistanceFromCliff));
+      }
+      else
+      {
+         nodeShift.set(nodeShiftToAvoidObstacles);
+      }
 
-         Vector2DReadOnly extraShiftToAvoidCliffs = getDirectionAndDistanceToShiftToAvoidCliffs(nextPointInWorld2D, node, navigableRegions, 0.1);
+      /*
+      if (isShiftedPointNearACliff)
+      {
+         Vector2DReadOnly nodeShiftToAvoidCliffs = getDirectionAndDistanceToShiftToAvoidCliffs(shiftedPoint, node, navigableRegions, 0.1);
+         double totalPreferredCliffShift = nodeShiftToAvoidCliffs.length();
+         double minShift = totalPreferredCliffShift - desiredDistanceFromCliff + minimumDistanceFromCliff;
+
+         Vector2D averageShift = new Vector2D();
+         averageShift.add(nodeShiftToAvoidObstacles, nodeShiftToAvoidCliffs);
+         averageShift.scale(0.5);
+
+         if (averageShift.dot(nodeShiftToAvoidCliffs) < minShift)
+         { // do something else, because it's too close to a cliff now.
+
+         }
+         else
+         { // we're good, it's at least the minimum distance from a cliff
+            nodeShift.set(averageShift);
+         }
+      }
+      else
+      {
+         nodeShift.set(nodeShiftToAvoidObstacles);
+      }
+      */
+
+      if (nodeShift.length() > minDistanceToMove)
+      {
+         nextPointInWorld2D.add(nodeShift);
+
+         Vector2DReadOnly extraShiftToAvoidCliffs = getDirectionAndDistanceToShiftToAvoidCliffs(nextPointInWorld2D, node, allNavigableRegions, 0.1);
 
          if (extraShiftToAvoidCliffs.length() > minDistanceToMove)
             nextPointInWorld2D.add(extraShiftToAvoidCliffs);
@@ -231,90 +287,167 @@ public class ObstacleAvoidanceProcessor
       return intermediateWaypoints3DToAdd;
    }
 
-   private Vector2DReadOnly getDirectionAndDistanceToShiftNodeToAvoidObstacles(Point2DReadOnly pointInWorldToCheck, NavigableRegion navigableRegion)
+   private static List<Point2DReadOnly> getClosestPointsOnClusters(Point2DReadOnly pointInWorld, Cluster clusterInWorld)
    {
       List<Point2DReadOnly> closestClusterPoints = new ArrayList<>();
-      Point2D overallClosestClusterPoint = new Point2D();
-      double distanceToClosestPoint = Double.POSITIVE_INFINITY;
 
-      for (Cluster cluster : navigableRegion.getObstacleClusters())
+      List<Point2DReadOnly> clusterPolygon = clusterInWorld.getNonNavigableExtrusionsInWorld2D();
+
+      Point2D closestPointInCluster = new Point2D();
+      VisibilityTools.distanceToCluster(pointInWorld, clusterPolygon, closestPointInCluster, null);
+      closestClusterPoints.add(closestPointInCluster);
+
+      return closestClusterPoints;
+   }
+
+   private static List<Point2DReadOnly> getClosestPointsOnClusters(Point2DReadOnly pointInWorld, List<Cluster> clustersInWorld)
+   {
+      List<Point2DReadOnly> closestClusterPoints = new ArrayList<>();
+
+      for (Cluster cluster : clustersInWorld)
       {
          List<Point2DReadOnly> clusterPolygon = cluster.getNonNavigableExtrusionsInWorld2D();
 
          Point2D closestPointInCluster = new Point2D();
-         double distanceToCluster = VisibilityTools.distanceToCluster(pointInWorldToCheck, clusterPolygon, closestPointInCluster, null);
+         VisibilityTools.distanceToCluster(pointInWorld, clusterPolygon, closestPointInCluster, null);
          closestClusterPoints.add(closestPointInCluster);
-
-         if (distanceToCluster < distanceToClosestPoint)
-         {
-            distanceToClosestPoint = distanceToCluster;
-            overallClosestClusterPoint.set(closestPointInCluster);
-         }
       }
 
-      Vector2D nodeShift = new Vector2D();
-
-      if (overallClosestClusterPoint.distance(pointInWorldToCheck) < desiredDistanceFromObstacleCluster)
-      {
-         // first try shifting with all the nearby points
-         Vector2D preliminaryShift = new Vector2D();
-         int numberOfPointsWithinProximity = 0;
-         for (Point2DReadOnly closestPointOnCluster : closestClusterPoints)
-         {
-            double distanceToCluster = pointInWorldToCheck.distance(closestPointOnCluster);
-            if (distanceToCluster < desiredDistanceFromObstacleCluster)
-            {
-               Vector2D offset = new Vector2D();
-               offset.sub(pointInWorldToCheck, closestPointOnCluster);
-               offset.scale((desiredDistanceFromObstacleCluster - distanceToCluster) / offset.length());
-
-               preliminaryShift.add(offset);
-               numberOfPointsWithinProximity++;
-            }
-         }
-
-         preliminaryShift.scale(1.0 / numberOfPointsWithinProximity);
-
-         Point2D preliminarilyOffsetPoint = new Point2D(pointInWorldToCheck);
-         preliminarilyOffsetPoint.add(preliminaryShift);
-
-         // filter out the points that don't matter after shifting
-         int clusterPointIndex = 0;
-         while (clusterPointIndex < closestClusterPoints.size())
-         {
-            if (preliminarilyOffsetPoint.distance(closestClusterPoints.get(clusterPointIndex)) > 1.1 * desiredDistanceFromObstacleCluster)
-               closestClusterPoints.remove(clusterPointIndex);
-            else
-               clusterPointIndex++;
-         }
-
-         numberOfPointsWithinProximity = 0;
-         for (Point2DReadOnly closestPointOnCluster : closestClusterPoints)
-         {
-            double distanceToCluster = pointInWorldToCheck.distance(closestPointOnCluster);
-            Vector2D offset = new Vector2D();
-            offset.sub(pointInWorldToCheck, closestPointOnCluster);
-            offset.scale((desiredDistanceFromObstacleCluster - distanceToCluster) / offset.length());
-
-            nodeShift.add(offset);
-            numberOfPointsWithinProximity++;
-         }
-
-         nodeShift.scale(1.0 / numberOfPointsWithinProximity);
-      }
-
-      return nodeShift;
+      return closestClusterPoints;
    }
 
-   private static Vector2DReadOnly getDirectionAndDistanceToShiftToAvoidCliffs(Point2DReadOnly pointToCheck, VisibilityGraphNode originalNode,
-                                                                               NavigableRegions navigableRegions, double distanceInsideHomeRegionToAvoid, VisibilityGraphNode... segmentNodes)
+   private static Vector2DReadOnly computeVectorToMaximizeAverageDistanceFromPoints(Point2DReadOnly pointToShift,
+                                                                                    List<Point2DReadOnly> pointsToAvoidByDistanceA, double distanceA,
+                                                                                    double minimumDistanceA)
+   {
+      Vector2D averageShiftVector = new Vector2D();
+      int numberOfPointsWithinProximity = 0;
+
+      // sort these by distance
+      pointsToAvoidByDistanceA.sort(Comparator.comparingDouble(pointToShift::distance));
+
+      // if the closest point is too far away, then we won't be shifting at all.
+      if (pointToShift.distance(pointsToAvoidByDistanceA.get(0)) > distanceA)
+         return averageShiftVector;
+
+      Vector2D vectorToPoint = new Vector2D();
+
+      for (Point2DReadOnly pointToShiftFrom : pointsToAvoidByDistanceA)
+      {
+         vectorToPoint.sub(pointToShift, pointToShiftFrom);
+         double distanceToPoint = vectorToPoint.length();
+         double distanceAfterShifting = distanceToPoint + averageShiftVector.dot(vectorToPoint);
+         if (distanceAfterShifting < distanceA)
+         {
+            double extraDistanceToShift = distanceA - distanceToPoint;
+            vectorToPoint.scale(extraDistanceToShift / distanceToPoint);
+
+            // add this offset into shift vector
+            averageShiftVector.scale(numberOfPointsWithinProximity);
+            averageShiftVector.add(vectorToPoint);
+            numberOfPointsWithinProximity++;
+            averageShiftVector.scale(1.0 / numberOfPointsWithinProximity);
+         }
+      }
+
+      // enforce the minimum distance to a point
+      for (Point2DReadOnly pointToShiftFrom : pointsToAvoidByDistanceA)
+      {
+         vectorToPoint.sub(pointToShift, pointToShiftFrom);
+         vectorToPoint.add(averageShiftVector);
+         double distanceToPoint = vectorToPoint.length();
+         double distanceAfterShifting = distanceToPoint + averageShiftVector.dot(vectorToPoint);
+         if (distanceAfterShifting < minimumDistanceA)
+         {
+            double extraDistanceToShift = minimumDistanceA - distanceToPoint;
+            vectorToPoint.scale(extraDistanceToShift / distanceToPoint);
+
+            averageShiftVector.add(vectorToPoint);
+         }
+      }
+
+      return averageShiftVector;
+   }
+
+   private static Vector2DReadOnly computeVectorToMaximizeAverageDistanceFromPoints(Point2DReadOnly pointToShift,
+                                                                                    List<Point2DReadOnly> pointsToAvoidByDistanceA,
+                                                                                    List<Point2DReadOnly> pointsToAvoidByDistanceB, double distanceA,
+                                                                                    double distanceB, double minimumDistanceA, double minimumDistanceB)
+   {
+      Vector2D averageShiftVector = new Vector2D();
+      int numberOfPointsWithinProximity = 0;
+
+      // sort these by distance
+      List<Point2DReadOnly> pointsToAvoid = new ArrayList<>(pointsToAvoidByDistanceA);
+      pointsToAvoid.addAll(pointsToAvoidByDistanceB);
+      pointsToAvoid.sort((a, b) ->
+                         {
+                            double distanceForPointA = pointsToAvoidByDistanceA.contains(a) ? distanceA : distanceB;
+                            double distanceForPointB = pointsToAvoidByDistanceA.contains(b) ? distanceA : distanceB;
+
+                            double aShiftDistance = pointToShift.distance(a) - distanceForPointA;
+                            double bShiftDistance = pointToShift.distance(b) - distanceForPointB;
+
+                            return Double.compare(aShiftDistance, bShiftDistance);
+                         });
+
+      // if the closest point is too far away, then we won't be shifting at all.
+//      if (pointToShift.distance(pointsToAvoidByDistanceA.get(0)) > distanceA)
+//         return averageShiftVector;
+
+      Vector2D vectorToPoint = new Vector2D();
+
+      for (Point2DReadOnly pointToShiftFrom : pointsToAvoidByDistanceA)
+      {
+         vectorToPoint.sub(pointToShift, pointToShiftFrom);
+         double distanceToPoint = vectorToPoint.length();
+         double distanceAfterShifting = distanceToPoint + averageShiftVector.dot(vectorToPoint);
+
+         double distanceToAchieve = pointsToAvoidByDistanceA.contains(pointToShiftFrom) ? distanceA : distanceB;
+         if (distanceAfterShifting < distanceToAchieve)
+         {
+            double extraDistanceToShift = distanceToAchieve - distanceToPoint;
+            vectorToPoint.scale(extraDistanceToShift / distanceToPoint);
+
+            // add this offset into shift vector
+            averageShiftVector.scale(numberOfPointsWithinProximity);
+            averageShiftVector.add(vectorToPoint);
+            numberOfPointsWithinProximity++;
+            averageShiftVector.scale(1.0 / numberOfPointsWithinProximity);
+         }
+      }
+
+      // enforce the minimum distance to a point
+      for (Point2DReadOnly pointToShiftFrom : pointsToAvoidByDistanceA)
+      {
+         vectorToPoint.sub(pointToShift, pointToShiftFrom);
+         vectorToPoint.add(averageShiftVector);
+         double distanceToPoint = vectorToPoint.length();
+         double distanceAfterShifting = distanceToPoint + averageShiftVector.dot(vectorToPoint);
+
+         double distanceToAchieve = pointsToAvoidByDistanceA.contains(pointToShiftFrom) ? minimumDistanceA : minimumDistanceB;
+
+         if (distanceAfterShifting < distanceToAchieve)
+         {
+            double extraDistanceToShift = distanceToAchieve - distanceToPoint;
+            vectorToPoint.scale(extraDistanceToShift / distanceToPoint);
+
+            averageShiftVector.add(vectorToPoint);
+         }
+      }
+
+      return averageShiftVector;
+   }
+
+   private Vector2DReadOnly getDirectionAndDistanceToShiftToAvoidCliffs(Point2DReadOnly pointToCheck, VisibilityGraphNode originalNode,
+                                                                        NavigableRegions navigableRegions, double distanceInsideHomeRegionToAvoid)
    {
       double originalHeight = originalNode.getPointInWorld().getZ();
       double adjustedHeight = getMaxHeightOfPointInWorld(pointToCheck, navigableRegions);
 
       Vector2D nodeShiftToAvoidCliff = new Vector2D();
 
-      if (Math.abs(adjustedHeight - originalHeight) > cliffHeightToAvoid)
+      if (Math.abs(adjustedHeight - originalHeight) > desiredDistanceFromCliff)
       {
          Cluster cluster = originalNode.getVisibilityGraphNavigableRegion().getNavigableRegion().getHomeRegionCluster();
          List<Point2DReadOnly> clusterPolygon = cluster.getNonNavigableExtrusionsInWorld2D();
@@ -376,28 +509,37 @@ public class ObstacleAvoidanceProcessor
       }
    }
 
-   private boolean isNearCliff(Point2DReadOnly point, double maxConnectionDistance, double maxHeightDelta, NavigableRegion homeRegion, List<NavigableRegion> navigableRegions)
+   private boolean isNearCliff(Point2DReadOnly point, double maxConnectionDistance, double maxHeightDelta, NavigableRegion homeRegion,
+                               List<NavigableRegion> navigableRegions)
    {
-      List<NavigableRegion> nearbyRegions = filterNavigableRegionsWithBoundingCircle(point, maxConnectionDistance, navigableRegions);
-      List<NavigableRegion> closeEnoughRegions = filterNavigableRegionsConnectionWithDistanceAndHeightChange(homeRegion, nearbyRegions, maxConnectionDistance, maxHeightDelta);
-
-      if (closeEnoughRegions.size() > 1)
+      // if point is sufficiently inside, it is not near a cliff
+      Point2D closestPointToThrowAway = new Point2D();
+      double distanceToContainingCluster = VisibilityTools.distanceToCluster(point, homeRegion.getHomeRegionCluster().getNavigableExtrusionsInWorld2D(),
+                                                                             closestPointToThrowAway, null);
+      if (distanceToContainingCluster < -desiredDistanceFromCliff)
          return false;
 
-      return closeEnoughRegions.contains(homeRegion);
-   }
+      List<NavigableRegion> nearbyRegions = filterNavigableRegionsWithBoundingCircle(point, maxConnectionDistance + desiredDistanceFromCliff, navigableRegions);
+      List<NavigableRegion> closeEnoughRegions = filterNavigableRegionsConnectionWithDistanceAndHeightChange(homeRegion, nearbyRegions, maxConnectionDistance,
+                                                                                                             maxHeightDelta);
 
+      if (closeEnoughRegions.contains(homeRegion))
+         return closeEnoughRegions.size() < 2;
+      else
+         return closeEnoughRegions.size() < 1;
+   }
 
    private static List<NavigableRegion> filterNavigableRegionsConnectionWithDistanceAndHeightChange(NavigableRegion homeRegion,
                                                                                                     List<NavigableRegion> navigableRegions,
-                                                                                                     double maxConnectionDistance, double maxHeightDelta)
+                                                                                                    double maxConnectionDistance, double maxHeightDelta)
    {
-      return navigableRegions.stream().filter(otherRegion -> isOtherNavigableRegionWithinDistanceAndHeightDifference(homeRegion, otherRegion, maxConnectionDistance, maxHeightDelta)).collect(
-            Collectors.toList());
+      return navigableRegions.stream().filter(
+            otherRegion -> isOtherNavigableRegionWithinDistanceAndHeightDifference(homeRegion, otherRegion, maxConnectionDistance, maxHeightDelta))
+                             .collect(Collectors.toList());
    }
 
-   private static boolean isOtherNavigableRegionWithinDistanceAndHeightDifference(NavigableRegion regionA, NavigableRegion regionB, double maxConnectionDistance,
-                                                                                  double maxHeightDelta)
+   private static boolean isOtherNavigableRegionWithinDistanceAndHeightDifference(NavigableRegion regionA, NavigableRegion regionB,
+                                                                                  double maxConnectionDistance, double maxHeightDelta)
    {
       for (Point3DReadOnly pointA : regionA.getHomeRegionCluster().getNavigableExtrusionsInWorld())
       {
@@ -411,12 +553,15 @@ public class ObstacleAvoidanceProcessor
       return false;
    }
 
-   private static List<NavigableRegion> filterNavigableRegionsWithBoundingCircle(Point2DReadOnly circleOrigin, double circleRadius, List<NavigableRegion> navigableRegions)
+   private static List<NavigableRegion> filterNavigableRegionsWithBoundingCircle(Point2DReadOnly circleOrigin, double circleRadius,
+                                                                                 List<NavigableRegion> navigableRegions)
    {
       if (!Double.isFinite(circleRadius) || circleRadius < 0.0)
          return navigableRegions;
 
-      return navigableRegions.stream().filter(navigableRegion -> PlanarRegionTools.isPlanarRegionIntersectingWithCircle(circleOrigin, circleRadius, navigableRegion.getHomePlanarRegion())).collect(Collectors.toList());
+      return navigableRegions.stream().filter(
+            navigableRegion -> PlanarRegionTools.isPlanarRegionIntersectingWithCircle(circleOrigin, circleRadius, navigableRegion.getHomePlanarRegion()))
+                             .collect(Collectors.toList());
    }
 
    private class IntermediateComparator implements Comparator<Point2DReadOnly>
@@ -442,5 +587,4 @@ public class ObstacleAvoidanceProcessor
          return Double.compare(distanceA, distanceB);
       }
    }
-
 }
