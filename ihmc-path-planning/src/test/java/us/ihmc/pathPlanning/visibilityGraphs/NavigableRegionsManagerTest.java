@@ -5,18 +5,25 @@ import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.continuousIntegration.ContinuousIntegrationTools;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
+import us.ihmc.euclid.geometry.Pose2D;
 import us.ihmc.euclid.geometry.interfaces.Vertex2DSupplier;
 import us.ihmc.euclid.tools.EuclidCoreTestTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple2D.Point2D;
+import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.graphicsDescription.Graphics3DObject;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
+import us.ihmc.pathPlanning.bodyPathPlanner.WaypointDefinedBodyPathPlanner;
+import us.ihmc.pathPlanning.visibilityGraphs.clusterManagement.Cluster;
+import us.ihmc.pathPlanning.visibilityGraphs.dataStructure.VisibilityMapWithNavigableRegion;
 import us.ihmc.pathPlanning.visibilityGraphs.interfaces.NavigableExtrusionDistanceCalculator;
 import us.ihmc.pathPlanning.visibilityGraphs.interfaces.PlanarRegionFilter;
 import us.ihmc.pathPlanning.visibilityGraphs.interfaces.VisibilityGraphsParameters;
+import us.ihmc.pathPlanning.visibilityGraphs.postProcessing.ObstacleAvoidanceProcessor;
+import us.ihmc.pathPlanning.visibilityGraphs.tools.VisibilityTools;
 import us.ihmc.robotics.geometry.PlanarRegion;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.graphics.Graphics3DObjectTools;
@@ -25,14 +32,17 @@ import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import java.util.ArrayList;
 import java.util.List;
 
-import static org.fest.assertions.Fail.fail;
-import static org.junit.Assert.assertEquals;
+import static junit.framework.TestCase.assertTrue;
+import static org.junit.Assert.assertFalse;
 
 public class NavigableRegionsManagerTest
 {
-   private static final boolean visualize = true;
+   private static final boolean visualize = false;
    private static final double epsilon = 5e-3;
    private static final long timeout = 30000 * 100;
+
+   private static final double obstacleExtrusionDistance = 0.1;
+   private static final double preferredObstacleExtrusionDistance = 1.0;
 
    @Test(timeout = timeout)
    @ContinuousIntegrationTest(estimatedDuration = 0.0)
@@ -46,20 +56,18 @@ public class NavigableRegionsManagerTest
       Point3D start = new Point3D(-15.0, 0.0, 0.0);
       Point3D goal = new Point3D(-5.0, 0.0, 0.0);
 
-      NavigableRegionsManager navigableRegionsManager = new NavigableRegionsManager(parameters, planarRegionsList.getPlanarRegionsAsList());
+      ObstacleAvoidanceProcessor postProcessor = new ObstacleAvoidanceProcessor(parameters);
+      NavigableRegionsManager navigableRegionsManager = new NavigableRegionsManager(parameters, planarRegionsList.getPlanarRegionsAsList(), postProcessor);
       navigableRegionsManager.setPlanarRegions(planarRegionsList.getPlanarRegionsAsList());
 
       List<Point3DReadOnly> path = navigableRegionsManager.calculateBodyPathWithOcclusions(start, goal);
-
-      assertEquals(3, path.size());
-      EuclidCoreTestTools.assertPoint3DGeometricallyEquals(start, path.get(0), epsilon);
-      EuclidCoreTestTools.assertPoint3DGeometricallyEquals(new Point3D(-10.0, -parameters.getPreferredObstacleExtrusionDistance(), 0.0), path.get(1), epsilon);
-      EuclidCoreTestTools.assertPoint3DGeometricallyEquals(goal, path.get(2), epsilon);
 
       if (visualize)
       {
          visualize(path, planarRegionsList, start, goal);
       }
+
+      checkPath(path, start, goal, parameters, planarRegionsList, navigableRegionsManager.getNavigableRegionsList());
    }
 
    @Test(timeout = timeout)
@@ -74,7 +82,8 @@ public class NavigableRegionsManagerTest
       Point3D start = new Point3D(-15.0, 1.0, 0.0);
       Point3D goal = new Point3D(-5.0, 1.0, 0.0);
 
-      NavigableRegionsManager navigableRegionsManager = new NavigableRegionsManager(parameters, planarRegionsList.getPlanarRegionsAsList());
+      ObstacleAvoidanceProcessor postProcessor = new ObstacleAvoidanceProcessor(parameters);
+      NavigableRegionsManager navigableRegionsManager = new NavigableRegionsManager(parameters, planarRegionsList.getPlanarRegionsAsList(), postProcessor);
       navigableRegionsManager.setPlanarRegions(planarRegionsList.getPlanarRegionsAsList());
 
       List<Point3DReadOnly> path = navigableRegionsManager.calculateBodyPathWithOcclusions(start, goal);
@@ -84,10 +93,7 @@ public class NavigableRegionsManagerTest
          visualize(path, planarRegionsList, start, goal);
       }
 
-      assertEquals(3, path.size());
-      EuclidCoreTestTools.assertPoint3DGeometricallyEquals(start, path.get(0), epsilon);
-      EuclidCoreTestTools.assertPoint3DGeometricallyEquals(new Point3D(-10.0, -parameters.getPreferredObstacleExtrusionDistance(), 0.0), path.get(1), epsilon);
-      EuclidCoreTestTools.assertPoint3DGeometricallyEquals(goal, path.get(2), epsilon);
+      checkPath(path, start, goal, parameters, planarRegionsList, navigableRegionsManager.getNavigableRegionsList());
    }
 
    @Test(timeout = timeout)
@@ -102,7 +108,8 @@ public class NavigableRegionsManagerTest
       Point3D start = new Point3D(-15.0, -0.05 * parameters.getPreferredObstacleExtrusionDistance(), 0.0);
       Point3D goal = new Point3D(-5.0, -0.05 * parameters.getPreferredObstacleExtrusionDistance(), 0.0);
 
-      NavigableRegionsManager navigableRegionsManager = new NavigableRegionsManager(parameters, planarRegionsList.getPlanarRegionsAsList());
+      ObstacleAvoidanceProcessor postProcessor = new ObstacleAvoidanceProcessor(parameters);
+      NavigableRegionsManager navigableRegionsManager = new NavigableRegionsManager(parameters, planarRegionsList.getPlanarRegionsAsList(), postProcessor);
       navigableRegionsManager.setPlanarRegions(planarRegionsList.getPlanarRegionsAsList());
 
       List<Point3DReadOnly> path = navigableRegionsManager.calculateBodyPathWithOcclusions(start, goal);
@@ -112,10 +119,7 @@ public class NavigableRegionsManagerTest
          visualize(path, planarRegionsList, start, goal);
       }
 
-      assertEquals(3, path.size());
-      EuclidCoreTestTools.assertPoint3DGeometricallyEquals(start, path.get(0), epsilon);
-      EuclidCoreTestTools.assertPoint3DGeometricallyEquals(new Point3D(-10.0, -parameters.getPreferredObstacleExtrusionDistance(), 0.0), path.get(1), epsilon);
-      EuclidCoreTestTools.assertPoint3DGeometricallyEquals(goal, path.get(2), epsilon);
+      checkPath(path, start, goal, parameters, planarRegionsList, navigableRegionsManager.getNavigableRegionsList());
    }
 
    @Test(timeout = timeout)
@@ -130,7 +134,8 @@ public class NavigableRegionsManagerTest
       Point3D start = new Point3D(-15.0, -0.1 * parameters.getPreferredObstacleExtrusionDistance(), 0.0);
       Point3D goal = new Point3D(-5.0, -0.1 * parameters.getPreferredObstacleExtrusionDistance(), 0.0);
 
-      NavigableRegionsManager navigableRegionsManager = new NavigableRegionsManager(parameters, planarRegionsList.getPlanarRegionsAsList());
+      ObstacleAvoidanceProcessor postProcessor = new ObstacleAvoidanceProcessor(parameters);
+      NavigableRegionsManager navigableRegionsManager = new NavigableRegionsManager(parameters, planarRegionsList.getPlanarRegionsAsList(), postProcessor);
       navigableRegionsManager.setPlanarRegions(planarRegionsList.getPlanarRegionsAsList());
 
       List<Point3DReadOnly> path = navigableRegionsManager.calculateBodyPathWithOcclusions(start, goal);
@@ -140,10 +145,7 @@ public class NavigableRegionsManagerTest
          visualize(path, planarRegionsList, start, goal);
       }
 
-      assertEquals(3, path.size());
-      EuclidCoreTestTools.assertPoint3DGeometricallyEquals(start, path.get(0), epsilon);
-      EuclidCoreTestTools.assertPoint3DGeometricallyEquals(new Point3D(-10.0, -parameters.getPreferredObstacleExtrusionDistance(), 0.0), path.get(1), epsilon);
-      EuclidCoreTestTools.assertPoint3DGeometricallyEquals(goal, path.get(2), epsilon);
+      checkPath(path, start, goal, parameters, planarRegionsList, navigableRegionsManager.getNavigableRegionsList());
    }
 
    @Test(timeout = timeout)
@@ -158,7 +160,8 @@ public class NavigableRegionsManagerTest
       Point3D start = new Point3D(-15.0, -0.95 * parameters.getPreferredObstacleExtrusionDistance(), 0.0);
       Point3D goal = new Point3D(-5.0, -0.95 * parameters.getPreferredObstacleExtrusionDistance(), 0.0);
 
-      NavigableRegionsManager navigableRegionsManager = new NavigableRegionsManager(parameters, planarRegionsList.getPlanarRegionsAsList());
+      ObstacleAvoidanceProcessor postProcessor = new ObstacleAvoidanceProcessor(parameters);
+      NavigableRegionsManager navigableRegionsManager = new NavigableRegionsManager(parameters, planarRegionsList.getPlanarRegionsAsList(), postProcessor);
       navigableRegionsManager.setPlanarRegions(planarRegionsList.getPlanarRegionsAsList());
 
       List<Point3DReadOnly> path = navigableRegionsManager.calculateBodyPathWithOcclusions(start, goal);
@@ -168,10 +171,7 @@ public class NavigableRegionsManagerTest
          visualize(path, planarRegionsList, start, goal);
       }
 
-      assertEquals(3, path.size());
-      EuclidCoreTestTools.assertPoint3DGeometricallyEquals(start, path.get(0), epsilon);
-      EuclidCoreTestTools.assertPoint3DGeometricallyEquals(new Point3D(-10.0, -parameters.getPreferredObstacleExtrusionDistance(), 0.0), path.get(1), epsilon);
-      EuclidCoreTestTools.assertPoint3DGeometricallyEquals(goal, path.get(2), epsilon);
+      checkPath(path, start, goal, parameters, planarRegionsList, navigableRegionsManager.getNavigableRegionsList());
    }
 
    @Test(timeout = timeout)
@@ -186,7 +186,8 @@ public class NavigableRegionsManagerTest
       Point3D start = new Point3D(-15.0, -1.05 * parameters.getPreferredObstacleExtrusionDistance(), 0.0);
       Point3D goal = new Point3D(-5.0, -1.05 * parameters.getPreferredObstacleExtrusionDistance(), 0.0);
 
-      NavigableRegionsManager navigableRegionsManager = new NavigableRegionsManager(parameters, planarRegionsList.getPlanarRegionsAsList());
+      ObstacleAvoidanceProcessor postProcessor = new ObstacleAvoidanceProcessor(parameters);
+      NavigableRegionsManager navigableRegionsManager = new NavigableRegionsManager(parameters, planarRegionsList.getPlanarRegionsAsList(), postProcessor);
       navigableRegionsManager.setPlanarRegions(planarRegionsList.getPlanarRegionsAsList());
 
       List<Point3DReadOnly> path = navigableRegionsManager.calculateBodyPathWithOcclusions(start, goal);
@@ -196,9 +197,7 @@ public class NavigableRegionsManagerTest
          visualize(path, planarRegionsList, start, goal);
       }
 
-      assertEquals(2, path.size());
-      EuclidCoreTestTools.assertPoint3DGeometricallyEquals(start, path.get(0), epsilon);
-      EuclidCoreTestTools.assertPoint3DGeometricallyEquals(goal, path.get(1), epsilon);
+      checkPath(path, start, goal, parameters, planarRegionsList, navigableRegionsManager.getNavigableRegionsList());
    }
 
    @Test(timeout = timeout)
@@ -213,22 +212,18 @@ public class NavigableRegionsManagerTest
       Point3D start = new Point3D(-15.0, 0.0, 0.0);
       Point3D goal = new Point3D(-5.0, 0.0, 0.0);
 
-      NavigableRegionsManager navigableRegionsManager = new NavigableRegionsManager(parameters, planarRegionsList.getPlanarRegionsAsList());
+      ObstacleAvoidanceProcessor postProcessor = new ObstacleAvoidanceProcessor(parameters);
+      NavigableRegionsManager navigableRegionsManager = new NavigableRegionsManager(parameters, planarRegionsList.getPlanarRegionsAsList(), postProcessor);
       navigableRegionsManager.setPlanarRegions(planarRegionsList.getPlanarRegionsAsList());
 
       List<Point3DReadOnly> path = navigableRegionsManager.calculateBodyPathWithOcclusions(start, goal);
-
 
       if (visualize)
       {
          visualize(path, planarRegionsList, start, goal);
       }
 
-      assertEquals(4, path.size());
-      EuclidCoreTestTools.assertPoint3DGeometricallyEquals(start, path.get(0), epsilon);
-      EuclidCoreTestTools.assertPoint3DGeometricallyEquals(new Point3D(-11.5, -parameters.getPreferredObstacleExtrusionDistance(), 0.0), path.get(1), epsilon);
-      EuclidCoreTestTools.assertPoint3DGeometricallyEquals(new Point3D(-8.5, -parameters.getPreferredObstacleExtrusionDistance(), 0.0), path.get(2), epsilon);
-      EuclidCoreTestTools.assertPoint3DGeometricallyEquals(goal, path.get(3), epsilon);
+      checkPath(path, start, goal, parameters, planarRegionsList, navigableRegionsManager.getNavigableRegionsList());
    }
 
    @Test(timeout = timeout)
@@ -243,7 +238,8 @@ public class NavigableRegionsManagerTest
       Point3D start = new Point3D(-15.0, 1.0, 0.0);
       Point3D goal = new Point3D(-5.0, 1.0, 0.0);
 
-      NavigableRegionsManager navigableRegionsManager = new NavigableRegionsManager(parameters, planarRegionsList.getPlanarRegionsAsList());
+      ObstacleAvoidanceProcessor postProcessor = new ObstacleAvoidanceProcessor(parameters);
+      NavigableRegionsManager navigableRegionsManager = new NavigableRegionsManager(parameters, planarRegionsList.getPlanarRegionsAsList(), postProcessor);
       navigableRegionsManager.setPlanarRegions(planarRegionsList.getPlanarRegionsAsList());
 
       List<Point3DReadOnly> path = navigableRegionsManager.calculateBodyPathWithOcclusions(start, goal);
@@ -253,11 +249,7 @@ public class NavigableRegionsManagerTest
          visualize(path, planarRegionsList, start, goal);
       }
 
-      assertEquals(4, path.size());
-      EuclidCoreTestTools.assertPoint3DGeometricallyEquals(start, path.get(0), epsilon);
-      EuclidCoreTestTools.assertPoint3DGeometricallyEquals(new Point3D(-11.5, -parameters.getPreferredObstacleExtrusionDistance(), 0.0), path.get(1), epsilon);
-      EuclidCoreTestTools.assertPoint3DGeometricallyEquals(new Point3D(-8.5, -parameters.getPreferredObstacleExtrusionDistance(), 0.0), path.get(2), epsilon);
-      EuclidCoreTestTools.assertPoint3DGeometricallyEquals(goal, path.get(3), epsilon);
+      checkPath(path, start, goal, parameters, planarRegionsList, navigableRegionsManager.getNavigableRegionsList());
    }
 
    @Test(timeout = timeout)
@@ -272,7 +264,8 @@ public class NavigableRegionsManagerTest
       Point3D start = new Point3D(-15.0, -0.05 * parameters.getPreferredObstacleExtrusionDistance(), 0.0);
       Point3D goal = new Point3D(-5.0, -0.05 * parameters.getPreferredObstacleExtrusionDistance(), 0.0);
 
-      NavigableRegionsManager navigableRegionsManager = new NavigableRegionsManager(parameters, planarRegionsList.getPlanarRegionsAsList());
+      ObstacleAvoidanceProcessor postProcessor = new ObstacleAvoidanceProcessor(parameters);
+      NavigableRegionsManager navigableRegionsManager = new NavigableRegionsManager(parameters, planarRegionsList.getPlanarRegionsAsList(), postProcessor);
       navigableRegionsManager.setPlanarRegions(planarRegionsList.getPlanarRegionsAsList());
 
       List<Point3DReadOnly> path = navigableRegionsManager.calculateBodyPathWithOcclusions(start, goal);
@@ -282,11 +275,7 @@ public class NavigableRegionsManagerTest
          visualize(path, planarRegionsList, start, goal);
       }
 
-      assertEquals(4, path.size());
-      EuclidCoreTestTools.assertPoint3DGeometricallyEquals(start, path.get(0), epsilon);
-      EuclidCoreTestTools.assertPoint3DGeometricallyEquals(new Point3D(-11.5, -parameters.getPreferredObstacleExtrusionDistance(), 0.0), path.get(1), epsilon);
-      EuclidCoreTestTools.assertPoint3DGeometricallyEquals(new Point3D(-8.5, -parameters.getPreferredObstacleExtrusionDistance(), 0.0), path.get(2), epsilon);
-      EuclidCoreTestTools.assertPoint3DGeometricallyEquals(goal, path.get(3), epsilon);
+      checkPath(path, start, goal, parameters, planarRegionsList, navigableRegionsManager.getNavigableRegionsList());
    }
 
    @Test(timeout = timeout)
@@ -301,7 +290,8 @@ public class NavigableRegionsManagerTest
       Point3D start = new Point3D(-15.0, -0.1 * parameters.getPreferredObstacleExtrusionDistance(), 0.0);
       Point3D goal = new Point3D(-5.0, -0.1 * parameters.getPreferredObstacleExtrusionDistance(), 0.0);
 
-      NavigableRegionsManager navigableRegionsManager = new NavigableRegionsManager(parameters, planarRegionsList.getPlanarRegionsAsList());
+      ObstacleAvoidanceProcessor postProcessor = new ObstacleAvoidanceProcessor(parameters);
+      NavigableRegionsManager navigableRegionsManager = new NavigableRegionsManager(parameters, planarRegionsList.getPlanarRegionsAsList(), postProcessor);
       navigableRegionsManager.setPlanarRegions(planarRegionsList.getPlanarRegionsAsList());
 
       List<Point3DReadOnly> path = navigableRegionsManager.calculateBodyPathWithOcclusions(start, goal);
@@ -311,11 +301,7 @@ public class NavigableRegionsManagerTest
          visualize(path, planarRegionsList, start, goal);
       }
 
-      assertEquals(4, path.size());
-      EuclidCoreTestTools.assertPoint3DGeometricallyEquals(start, path.get(0), epsilon);
-      EuclidCoreTestTools.assertPoint3DGeometricallyEquals(new Point3D(-11.5, -parameters.getPreferredObstacleExtrusionDistance(), 0.0), path.get(1), epsilon);
-      EuclidCoreTestTools.assertPoint3DGeometricallyEquals(new Point3D(-8.5, -parameters.getPreferredObstacleExtrusionDistance(), 0.0), path.get(2), epsilon);
-      EuclidCoreTestTools.assertPoint3DGeometricallyEquals(goal, path.get(3), epsilon);
+      checkPath(path, start, goal, parameters, planarRegionsList, navigableRegionsManager.getNavigableRegionsList());
    }
 
    @Test(timeout = timeout)
@@ -330,7 +316,8 @@ public class NavigableRegionsManagerTest
       Point3D start = new Point3D(-15.0, -0.95 * parameters.getPreferredObstacleExtrusionDistance(), 0.0);
       Point3D goal = new Point3D(-5.0, -0.95 * parameters.getPreferredObstacleExtrusionDistance(), 0.0);
 
-      NavigableRegionsManager navigableRegionsManager = new NavigableRegionsManager(parameters, planarRegionsList.getPlanarRegionsAsList());
+      ObstacleAvoidanceProcessor postProcessor = new ObstacleAvoidanceProcessor(parameters);
+      NavigableRegionsManager navigableRegionsManager = new NavigableRegionsManager(parameters, planarRegionsList.getPlanarRegionsAsList(), postProcessor);
       navigableRegionsManager.setPlanarRegions(planarRegionsList.getPlanarRegionsAsList());
 
       List<Point3DReadOnly> path = navigableRegionsManager.calculateBodyPathWithOcclusions(start, goal);
@@ -340,11 +327,7 @@ public class NavigableRegionsManagerTest
          visualize(path, planarRegionsList, start, goal);
       }
 
-      assertEquals(4, path.size());
-      EuclidCoreTestTools.assertPoint3DGeometricallyEquals(start, path.get(0), epsilon);
-      EuclidCoreTestTools.assertPoint3DGeometricallyEquals(new Point3D(-11.5, -parameters.getPreferredObstacleExtrusionDistance(), 0.0), path.get(1), epsilon);
-      EuclidCoreTestTools.assertPoint3DGeometricallyEquals(new Point3D(-8.5, -parameters.getPreferredObstacleExtrusionDistance(), 0.0), path.get(2), epsilon);
-      EuclidCoreTestTools.assertPoint3DGeometricallyEquals(goal, path.get(3), epsilon);
+      checkPath(path, start, goal, parameters, planarRegionsList, navigableRegionsManager.getNavigableRegionsList());
    }
 
    @Test(timeout = timeout)
@@ -359,7 +342,8 @@ public class NavigableRegionsManagerTest
       Point3D start = new Point3D(-15.0, -1.05 * parameters.getPreferredObstacleExtrusionDistance(), 0.0);
       Point3D goal = new Point3D(-5.0, -1.05 * parameters.getPreferredObstacleExtrusionDistance(), 0.0);
 
-      NavigableRegionsManager navigableRegionsManager = new NavigableRegionsManager(parameters, planarRegionsList.getPlanarRegionsAsList());
+      ObstacleAvoidanceProcessor postProcessor = new ObstacleAvoidanceProcessor(parameters);
+      NavigableRegionsManager navigableRegionsManager = new NavigableRegionsManager(parameters, planarRegionsList.getPlanarRegionsAsList(), postProcessor);
       navigableRegionsManager.setPlanarRegions(planarRegionsList.getPlanarRegionsAsList());
 
       List<Point3DReadOnly> path = navigableRegionsManager.calculateBodyPathWithOcclusions(start, goal);
@@ -369,9 +353,7 @@ public class NavigableRegionsManagerTest
          visualize(path, planarRegionsList, start, goal);
       }
 
-      assertEquals(2, path.size());
-      EuclidCoreTestTools.assertPoint3DGeometricallyEquals(start, path.get(0), epsilon);
-      EuclidCoreTestTools.assertPoint3DGeometricallyEquals(goal, path.get(1), epsilon);
+      checkPath(path, start, goal, parameters, planarRegionsList, navigableRegionsManager.getNavigableRegionsList());
    }
 
    @Test(timeout = timeout)
@@ -386,7 +368,8 @@ public class NavigableRegionsManagerTest
       Point3D start = new Point3D(-15.0, -0.5 * parameters.getObstacleExtrusionDistance(), 0.0);
       Point3D goal = new Point3D(-5.0, -0.5 * parameters.getObstacleExtrusionDistance(), 0.0);
 
-      NavigableRegionsManager navigableRegionsManager = new NavigableRegionsManager(parameters, planarRegionsList.getPlanarRegionsAsList());
+      ObstacleAvoidanceProcessor postProcessor = new ObstacleAvoidanceProcessor(parameters);
+      NavigableRegionsManager navigableRegionsManager = new NavigableRegionsManager(parameters, planarRegionsList.getPlanarRegionsAsList(), postProcessor);
       navigableRegionsManager.setPlanarRegions(planarRegionsList.getPlanarRegionsAsList());
 
       List<Point3DReadOnly> path = navigableRegionsManager.calculateBodyPathWithOcclusions(start, goal);
@@ -396,11 +379,7 @@ public class NavigableRegionsManagerTest
          visualize(path, planarRegionsList, start, goal);
       }
 
-      assertEquals(4, path.size());
-      EuclidCoreTestTools.assertPoint3DGeometricallyEquals(start, path.get(0), epsilon);
-      EuclidCoreTestTools.assertPoint3DGeometricallyEquals(new Point3D(-11.5, 0.5 - parameters.getPreferredObstacleExtrusionDistance(), 0.0), path.get(1), epsilon);
-      EuclidCoreTestTools.assertPoint3DGeometricallyEquals(new Point3D(-8.5, -parameters.getPreferredObstacleExtrusionDistance(), 0.0), path.get(1), epsilon);
-      EuclidCoreTestTools.assertPoint3DGeometricallyEquals(goal, path.get(2), epsilon);
+      checkPath(path, start, goal, parameters, planarRegionsList, navigableRegionsManager.getNavigableRegionsList());
    }
 
    @Test(timeout = timeout)
@@ -415,7 +394,8 @@ public class NavigableRegionsManagerTest
       Point3D start = new Point3D(-15.0, 1.5, 0.0);
       Point3D goal = new Point3D(-5.0, 1.5, 0.0);
 
-      NavigableRegionsManager navigableRegionsManager = new NavigableRegionsManager(parameters, planarRegionsList.getPlanarRegionsAsList());
+      ObstacleAvoidanceProcessor postProcessor = new ObstacleAvoidanceProcessor(parameters);
+      NavigableRegionsManager navigableRegionsManager = new NavigableRegionsManager(parameters, planarRegionsList.getPlanarRegionsAsList(), postProcessor);
       navigableRegionsManager.setPlanarRegions(planarRegionsList.getPlanarRegionsAsList());
 
       List<Point3DReadOnly> path = navigableRegionsManager.calculateBodyPathWithOcclusions(start, goal);
@@ -425,14 +405,8 @@ public class NavigableRegionsManagerTest
          visualize(path, planarRegionsList, start, goal);
       }
 
-      assertEquals(3, path.size());
-      EuclidCoreTestTools.assertPoint3DGeometricallyEquals(start, path.get(0), epsilon);
-      EuclidCoreTestTools.assertPoint3DGeometricallyEquals(new Point3D(-10.0, 0.0, 0.0), path.get(1), epsilon);
-      EuclidCoreTestTools.assertPoint3DGeometricallyEquals(goal, path.get(2), epsilon);
-
-
+      checkPath(path, start, goal, parameters, planarRegionsList, navigableRegionsManager.getNavigableRegionsList());
    }
-
 
    @Test(timeout = timeout)
    @ContinuousIntegrationTest(estimatedDuration = 0.0)
@@ -446,7 +420,8 @@ public class NavigableRegionsManagerTest
       Point3D start = new Point3D(-15.0, 0.0, 0.0);
       Point3D goal = new Point3D(-5.0, 0.0, 0.0);
 
-      NavigableRegionsManager navigableRegionsManager = new NavigableRegionsManager(parameters, planarRegionsList.getPlanarRegionsAsList());
+      ObstacleAvoidanceProcessor postProcessor = new ObstacleAvoidanceProcessor(parameters);
+      NavigableRegionsManager navigableRegionsManager = new NavigableRegionsManager(parameters, planarRegionsList.getPlanarRegionsAsList(), postProcessor);
       navigableRegionsManager.setPlanarRegions(planarRegionsList.getPlanarRegionsAsList());
 
       List<Point3DReadOnly> path = navigableRegionsManager.calculateBodyPathWithOcclusions(start, goal);
@@ -456,9 +431,7 @@ public class NavigableRegionsManagerTest
          visualize(path, planarRegionsList, start, goal);
       }
 
-      assertEquals(2, path.size());
-      EuclidCoreTestTools.assertPoint3DGeometricallyEquals(start, path.get(0), epsilon);
-      EuclidCoreTestTools.assertPoint3DGeometricallyEquals(goal, path.get(1), epsilon);
+      checkPath(path, start, goal, parameters, planarRegionsList, navigableRegionsManager.getNavigableRegionsList());
    }
 
    @Test(timeout = timeout)
@@ -483,10 +456,7 @@ public class NavigableRegionsManagerTest
          visualize(path, planarRegionsList, start, goal);
       }
 
-      assertEquals(3, path.size());
-      EuclidCoreTestTools.assertPoint3DGeometricallyEquals(start, path.get(0), epsilon);
-      EuclidCoreTestTools.assertPoint3DGeometricallyEquals(new Point3D(-10.0, 0.0, 0.0), path.get(1), epsilon);
-      EuclidCoreTestTools.assertPoint3DGeometricallyEquals(goal, path.get(2), epsilon);
+      checkPath(path, start, goal, parameters, planarRegionsList, navigableRegionsManager.getNavigableRegionsList());
    }
 
    @Test(timeout = timeout)
@@ -505,7 +475,8 @@ public class NavigableRegionsManagerTest
       Point3D start = new Point3D(-15.0, 1.5, 0.0);
       Point3D goal = new Point3D(-5.0, 1.5, 0.0);
 
-      NavigableRegionsManager navigableRegionsManager = new NavigableRegionsManager(parameters, planarRegionsList.getPlanarRegionsAsList());
+      ObstacleAvoidanceProcessor postProcessor = new ObstacleAvoidanceProcessor(parameters);
+      NavigableRegionsManager navigableRegionsManager = new NavigableRegionsManager(parameters, planarRegionsList.getPlanarRegionsAsList(), postProcessor);
       navigableRegionsManager.setPlanarRegions(planarRegionsList.getPlanarRegionsAsList());
 
       List<Point3DReadOnly> path = navigableRegionsManager.calculateBodyPathWithOcclusions(start, goal);
@@ -515,14 +486,8 @@ public class NavigableRegionsManagerTest
          visualize(path, planarRegionsList, start, goal);
       }
 
-      assertEquals(3, path.size());
-      EuclidCoreTestTools.assertPoint3DGeometricallyEquals(start, path.get(0), epsilon);
-      EuclidCoreTestTools.assertPoint3DGeometricallyEquals(new Point3D(-10.0, 0.0, 0.0), path.get(1), epsilon);
-      EuclidCoreTestTools.assertPoint3DGeometricallyEquals(goal, path.get(2), epsilon);
-
-
+      checkPath(path, start, goal, parameters, planarRegionsList, navigableRegionsManager.getNavigableRegionsList());
    }
-
 
    @Test(timeout = timeout)
    @ContinuousIntegrationTest(estimatedDuration = 0.0)
@@ -536,7 +501,8 @@ public class NavigableRegionsManagerTest
       Point3D start = new Point3D(-15.0, 0.0, 0.0);
       Point3D goal = new Point3D(-5.0, 0.0, 0.0);
 
-      NavigableRegionsManager navigableRegionsManager = new NavigableRegionsManager(parameters, planarRegionsList.getPlanarRegionsAsList());
+      ObstacleAvoidanceProcessor postProcessor = new ObstacleAvoidanceProcessor(parameters);
+      NavigableRegionsManager navigableRegionsManager = new NavigableRegionsManager(parameters, planarRegionsList.getPlanarRegionsAsList(), postProcessor);
       navigableRegionsManager.setPlanarRegions(planarRegionsList.getPlanarRegionsAsList());
 
       List<Point3DReadOnly> path = navigableRegionsManager.calculateBodyPathWithOcclusions(start, goal);
@@ -546,9 +512,7 @@ public class NavigableRegionsManagerTest
          visualize(path, planarRegionsList, start, goal);
       }
 
-      assertEquals(2, path.size());
-      EuclidCoreTestTools.assertPoint3DGeometricallyEquals(start, path.get(0), epsilon);
-      EuclidCoreTestTools.assertPoint3DGeometricallyEquals(goal, path.get(1), epsilon);
+      checkPath(path, start, goal, parameters, planarRegionsList, navigableRegionsManager.getNavigableRegionsList());
    }
 
    @Test(timeout = timeout)
@@ -573,10 +537,70 @@ public class NavigableRegionsManagerTest
          visualize(path, planarRegionsList, start, goal);
       }
 
-      assertEquals(6, path.size());
+      checkPath(path, start, goal, parameters, planarRegionsList, navigableRegionsManager.getNavigableRegionsList());
+   }
+
+   private static void checkPath(List<Point3DReadOnly> path, Point3DReadOnly start, Point3DReadOnly goal, VisibilityGraphsParameters parameters,
+                                 PlanarRegionsList planarRegionsList, List<VisibilityMapWithNavigableRegion> navigableRegionsList)
+   {
+      NavigableRegionsManager navigableRegionsManager = new NavigableRegionsManager(parameters, planarRegionsList.getPlanarRegionsAsList(), null);
+
+      navigableRegionsManager.setPlanarRegions(planarRegionsList.getPlanarRegionsAsList());
+      List<Point3DReadOnly> originalPath = navigableRegionsManager.calculateBodyPathWithOcclusions(start, goal);
+
+      int numberOfPoints = path.size();
+      assertTrue(numberOfPoints >= originalPath.size());
       EuclidCoreTestTools.assertPoint3DGeometricallyEquals(start, path.get(0), epsilon);
-      EuclidCoreTestTools.assertPoint3DGeometricallyEquals(goal, path.get(1), epsilon);
-      fail("Haven't properly implemented these tests yet.");
+      EuclidCoreTestTools.assertPoint3DGeometricallyEquals(goal, path.get(numberOfPoints - 1), epsilon);
+
+      for (Point3DReadOnly point : path)
+      {
+         assertFalse(point.containsNaN());
+      }
+
+      WaypointDefinedBodyPathPlanner calculatedPath = new WaypointDefinedBodyPathPlanner();
+      calculatedPath.setWaypoints(path);
+
+      WaypointDefinedBodyPathPlanner expectedPathNoAvoidance = new WaypointDefinedBodyPathPlanner();
+      expectedPathNoAvoidance.setWaypoints(originalPath);
+
+      calculatedPath.compute();
+      expectedPathNoAvoidance.compute();
+
+      double distanceAlongExpectedPath = 0.0;
+
+      for (double alpha = 0.05; alpha < 1.0; alpha += 0.05)
+      {
+         Pose2D expectedPose = new Pose2D();
+         Pose2D actualPose = new Pose2D();
+
+         expectedPathNoAvoidance.getPointAlongPath(alpha, expectedPose);
+         calculatedPath.getPointAlongPath(alpha, actualPose);
+
+         // assert it doesn't deviate too much
+         EuclidCoreTestTools
+               .assertPoint2DGeometricallyEquals("alpha = " + alpha, expectedPose.getPosition(), actualPose.getPosition(), preferredObstacleExtrusionDistance);
+
+         // check that it's always moving along
+         Point2D pointAlongExpectedPath = new Point2D();
+         double newDistanceAlongExpectedPath = expectedPathNoAvoidance.getClosestPoint(pointAlongExpectedPath, actualPose);
+         assertTrue(newDistanceAlongExpectedPath >= distanceAlongExpectedPath);
+         distanceAlongExpectedPath = newDistanceAlongExpectedPath;
+
+         // check that it doesn't get too close to an obstacle
+         double distanceToObstacles = Double.MAX_VALUE;
+         for (VisibilityMapWithNavigableRegion navigableRegion : navigableRegionsList)
+         {
+            for (Cluster obstacleCluster : navigableRegion.getObstacleClusters())
+            {
+               List<Point2DReadOnly> clusterPolygon = obstacleCluster.getNonNavigableExtrusionsInWorld2D();
+               Point2D closestPointOnCluster = new Point2D();
+               distanceToObstacles = Math
+                     .min(distanceToObstacles, VisibilityTools.distanceToCluster(actualPose.getPosition(), clusterPolygon, closestPointOnCluster, null));
+            }
+         }
+         assertTrue(distanceToObstacles > 0.95 * preferredObstacleExtrusionDistance);
+      }
    }
 
    private static List<PlanarRegion> createFlatGroundWithWallEnvironment()
@@ -637,13 +661,13 @@ public class NavigableRegionsManagerTest
       leftWallTransform.setTranslation(-10.0, 0.5, 0.0);
       leftWallTransform.setRotationPitch(-Math.PI / 2.0);
       PlanarRegion leftWallRegion = new PlanarRegion(leftWallTransform,
-                                                 new ConvexPolygon2D(Vertex2DSupplier.asVertex2DSupplier(wallPointA, wallPointB, wallPointC, wallPointD)));
+                                                     new ConvexPolygon2D(Vertex2DSupplier.asVertex2DSupplier(wallPointA, wallPointB, wallPointC, wallPointD)));
 
       RigidBodyTransform rightWallTransform = new RigidBodyTransform();
       rightWallTransform.setTranslation(-10.0, -5.0, 0.0);
       rightWallTransform.setRotationPitch(-Math.PI / 2.0);
       PlanarRegion rightWallRegion = new PlanarRegion(rightWallTransform,
-                                                     new ConvexPolygon2D(Vertex2DSupplier.asVertex2DSupplier(wallPointA, wallPointB, wallPointC, wallPointD)));
+                                                      new ConvexPolygon2D(Vertex2DSupplier.asVertex2DSupplier(wallPointA, wallPointB, wallPointC, wallPointD)));
 
       planarRegions.add(groundPlaneRegion);
       planarRegions.add(leftWallRegion);
@@ -716,14 +740,14 @@ public class NavigableRegionsManagerTest
       RigidBodyTransform frontWallTransform = new RigidBodyTransform();
       frontWallTransform.setTranslation(-11.5, 0.0, 0.0);
       frontWallTransform.setRotationPitch(-Math.PI / 2.0);
-      PlanarRegion frontWallRegion = new PlanarRegion(frontWallTransform,
-                                                 new ConvexPolygon2D(Vertex2DSupplier.asVertex2DSupplier(frontWallPointA, frontWallPointB, frontWallPointC, frontWallPointD)));
+      PlanarRegion frontWallRegion = new PlanarRegion(frontWallTransform, new ConvexPolygon2D(
+            Vertex2DSupplier.asVertex2DSupplier(frontWallPointA, frontWallPointB, frontWallPointC, frontWallPointD)));
 
       RigidBodyTransform backWallTransform = new RigidBodyTransform();
       backWallTransform.setTranslation(-8.5, 0.0, 0.0);
       backWallTransform.setRotationPitch(-Math.PI / 2.0);
-      PlanarRegion backWallRegion = new PlanarRegion(backWallTransform,
-                                                      new ConvexPolygon2D(Vertex2DSupplier.asVertex2DSupplier(frontWallPointA, frontWallPointB, frontWallPointC, frontWallPointD)));
+      PlanarRegion backWallRegion = new PlanarRegion(backWallTransform, new ConvexPolygon2D(
+            Vertex2DSupplier.asVertex2DSupplier(frontWallPointA, frontWallPointB, frontWallPointC, frontWallPointD)));
 
       Point2D sideWallPointA = new Point2D(2.0, 0.0);
       Point2D sideWallPointB = new Point2D(0.0, 0.0);
@@ -733,8 +757,8 @@ public class NavigableRegionsManagerTest
       RigidBodyTransform sideWallTransform = new RigidBodyTransform();
       sideWallTransform.setTranslation(-11.5, 0.0, 0.0);
       sideWallTransform.setRotationYawPitchRoll(-Math.PI / 2.0, -Math.PI / 2.0, 0.0);
-      PlanarRegion sideWallRegion = new PlanarRegion(sideWallTransform,
-                                                     new ConvexPolygon2D(Vertex2DSupplier.asVertex2DSupplier(sideWallPointA, sideWallPointB, sideWallPointC, sideWallPointD)));
+      PlanarRegion sideWallRegion = new PlanarRegion(sideWallTransform, new ConvexPolygon2D(
+            Vertex2DSupplier.asVertex2DSupplier(sideWallPointA, sideWallPointB, sideWallPointC, sideWallPointD)));
 
       planarRegions.add(groundPlaneRegion);
       planarRegions.add(frontWallRegion);
@@ -768,14 +792,14 @@ public class NavigableRegionsManagerTest
       RigidBodyTransform frontWallTransform = new RigidBodyTransform();
       frontWallTransform.setTranslation(-11.5, -4.5, 0.0);
       frontWallTransform.setRotationPitch(-Math.PI / 2.0);
-      PlanarRegion frontWallRegion = new PlanarRegion(frontWallTransform,
-                                                      new ConvexPolygon2D(Vertex2DSupplier.asVertex2DSupplier(frontWallPointA, frontWallPointB, frontWallPointC, frontWallPointD)));
+      PlanarRegion frontWallRegion = new PlanarRegion(frontWallTransform, new ConvexPolygon2D(
+            Vertex2DSupplier.asVertex2DSupplier(frontWallPointA, frontWallPointB, frontWallPointC, frontWallPointD)));
 
       RigidBodyTransform backWallTransform = new RigidBodyTransform();
       backWallTransform.setTranslation(-8.5, -4.5, 0.0);
       backWallTransform.setRotationPitch(-Math.PI / 2.0);
-      PlanarRegion backWallRegion = new PlanarRegion(backWallTransform,
-                                                     new ConvexPolygon2D(Vertex2DSupplier.asVertex2DSupplier(frontWallPointA, frontWallPointB, frontWallPointC, frontWallPointD)));
+      PlanarRegion backWallRegion = new PlanarRegion(backWallTransform, new ConvexPolygon2D(
+            Vertex2DSupplier.asVertex2DSupplier(frontWallPointA, frontWallPointB, frontWallPointC, frontWallPointD)));
 
       Point2D sideWallPointA = new Point2D(2.0, 0.0);
       Point2D sideWallPointB = new Point2D(0.0, 0.0);
@@ -785,14 +809,14 @@ public class NavigableRegionsManagerTest
       RigidBodyTransform leftSideWall = new RigidBodyTransform();
       leftSideWall.setTranslation(-11.5, 4.5, 0.0);
       leftSideWall.setRotationYawPitchRoll(-Math.PI / 2.0, -Math.PI / 2.0, 0.0);
-      PlanarRegion leftSideWallRegion = new PlanarRegion(leftSideWall,
-                                                     new ConvexPolygon2D(Vertex2DSupplier.asVertex2DSupplier(sideWallPointA, sideWallPointB, sideWallPointC, sideWallPointD)));
+      PlanarRegion leftSideWallRegion = new PlanarRegion(leftSideWall, new ConvexPolygon2D(
+            Vertex2DSupplier.asVertex2DSupplier(sideWallPointA, sideWallPointB, sideWallPointC, sideWallPointD)));
 
       RigidBodyTransform rightSideWall = new RigidBodyTransform();
       rightSideWall.setTranslation(-11.5, -4.5, 0.0);
       rightSideWall.setRotationYawPitchRoll(-Math.PI / 2.0, -Math.PI / 2.0, 0.0);
-      PlanarRegion rightSideWallRegion = new PlanarRegion(rightSideWall,
-                                                         new ConvexPolygon2D(Vertex2DSupplier.asVertex2DSupplier(sideWallPointA, sideWallPointB, sideWallPointC, sideWallPointD)));
+      PlanarRegion rightSideWallRegion = new PlanarRegion(rightSideWall, new ConvexPolygon2D(
+            Vertex2DSupplier.asVertex2DSupplier(sideWallPointA, sideWallPointB, sideWallPointC, sideWallPointD)));
 
       planarRegions.add(groundPlaneRegion);
       planarRegions.add(frontWallRegion);
@@ -827,14 +851,14 @@ public class NavigableRegionsManagerTest
       RigidBodyTransform frontLeftWallTransform = new RigidBodyTransform();
       frontLeftWallTransform.setTranslation(-11.5, 0.5, 0.0);
       frontLeftWallTransform.setRotationPitch(-Math.PI / 2.0);
-      PlanarRegion frontLeftWallRegion = new PlanarRegion(frontLeftWallTransform,
-                                                      new ConvexPolygon2D(Vertex2DSupplier.asVertex2DSupplier(frontWallPointA, frontWallPointB, frontWallPointC, frontWallPointD)));
+      PlanarRegion frontLeftWallRegion = new PlanarRegion(frontLeftWallTransform, new ConvexPolygon2D(
+            Vertex2DSupplier.asVertex2DSupplier(frontWallPointA, frontWallPointB, frontWallPointC, frontWallPointD)));
 
       RigidBodyTransform frontRightWallTransform = new RigidBodyTransform();
       frontRightWallTransform.setTranslation(-11.5, -5.0, 0.0);
       frontRightWallTransform.setRotationPitch(-Math.PI / 2.0);
-      PlanarRegion frontRightWallRegion = new PlanarRegion(frontRightWallTransform,
-                                                          new ConvexPolygon2D(Vertex2DSupplier.asVertex2DSupplier(frontWallPointA, frontWallPointB, frontWallPointC, frontWallPointD)));
+      PlanarRegion frontRightWallRegion = new PlanarRegion(frontRightWallTransform, new ConvexPolygon2D(
+            Vertex2DSupplier.asVertex2DSupplier(frontWallPointA, frontWallPointB, frontWallPointC, frontWallPointD)));
 
       // set up wall, 5x2
       Point2D backWallPointA = new Point2D(2.0, 0.0);
@@ -842,18 +866,17 @@ public class NavigableRegionsManagerTest
       Point2D backWallPointC = new Point2D(2.0, 4.25);
       Point2D backWallPointD = new Point2D(0.0, 4.25);
 
-
       RigidBodyTransform backLeftWallTransform = new RigidBodyTransform();
       backLeftWallTransform.setTranslation(-8.5, 0.75, 0.0);
       backLeftWallTransform.setRotationPitch(-Math.PI / 2.0);
-      PlanarRegion backLeftWallRegion = new PlanarRegion(backLeftWallTransform,
-                                                     new ConvexPolygon2D(Vertex2DSupplier.asVertex2DSupplier(backWallPointA, backWallPointB, backWallPointC, backWallPointD)));
+      PlanarRegion backLeftWallRegion = new PlanarRegion(backLeftWallTransform, new ConvexPolygon2D(
+            Vertex2DSupplier.asVertex2DSupplier(backWallPointA, backWallPointB, backWallPointC, backWallPointD)));
 
       RigidBodyTransform backRightWallTransform = new RigidBodyTransform();
       backRightWallTransform.setTranslation(-8.5, -5.0, 0.0);
       backRightWallTransform.setRotationPitch(-Math.PI / 2.0);
-      PlanarRegion backRightWallRegion = new PlanarRegion(backRightWallTransform,
-                                                         new ConvexPolygon2D(Vertex2DSupplier.asVertex2DSupplier(backWallPointA, backWallPointB, backWallPointC, backWallPointD)));
+      PlanarRegion backRightWallRegion = new PlanarRegion(backRightWallTransform, new ConvexPolygon2D(
+            Vertex2DSupplier.asVertex2DSupplier(backWallPointA, backWallPointB, backWallPointC, backWallPointD)));
 
       Point2D sideWallPointA = new Point2D(2.0, 0.0);
       Point2D sideWallPointB = new Point2D(0.0, 0.0);
@@ -863,8 +886,8 @@ public class NavigableRegionsManagerTest
       RigidBodyTransform leftSideWallTransform = new RigidBodyTransform();
       leftSideWallTransform.setTranslation(-11.5, 0.625, 0.0);
       leftSideWallTransform.setRotationYawPitchRoll(-Math.PI / 2.0, -Math.PI / 2.0, 0.0);
-      PlanarRegion leftSideWallRegion = new PlanarRegion(leftSideWallTransform,
-                                                     new ConvexPolygon2D(Vertex2DSupplier.asVertex2DSupplier(sideWallPointA, sideWallPointB, sideWallPointC, sideWallPointD)));
+      PlanarRegion leftSideWallRegion = new PlanarRegion(leftSideWallTransform, new ConvexPolygon2D(
+            Vertex2DSupplier.asVertex2DSupplier(sideWallPointA, sideWallPointB, sideWallPointC, sideWallPointD)));
 
       planarRegions.add(groundPlaneRegion);
       planarRegions.add(frontLeftWallRegion);
@@ -911,9 +934,8 @@ public class NavigableRegionsManagerTest
       RigidBodyTransform otherWallTransform = new RigidBodyTransform();
       otherWallTransform.setTranslation(-11.5, 0.5, 0.0);
       otherWallTransform.setRotationPitch(-Math.PI / 2.0);
-      PlanarRegion otherWallRegion = new PlanarRegion(otherWallTransform,
-                                                 new ConvexPolygon2D(Vertex2DSupplier.asVertex2DSupplier(otherWallPointA, otherWallPointB, otherWallPointC,
-                                                                                                         otherWallPointD)));
+      PlanarRegion otherWallRegion = new PlanarRegion(otherWallTransform, new ConvexPolygon2D(
+            Vertex2DSupplier.asVertex2DSupplier(otherWallPointA, otherWallPointB, otherWallPointC, otherWallPointD)));
 
       planarRegions.add(groundPlaneRegion);
       planarRegions.add(wallRegion);
@@ -975,8 +997,8 @@ public class NavigableRegionsManagerTest
 
       scs.addStaticLinkGraphics(graphics3DObject);
 
-      scs.setCameraPosition(-7.0, -1.0, 25.0);
-      scs.setCameraFix(0.0, 0.0, 0.0);
+      scs.setCameraPosition(-15, -1.0, 25.0);
+      scs.setCameraFix(-10, 0.0, 0.0);
       scs.startOnAThread();
 
       ThreadTools.sleepForever();
@@ -1003,13 +1025,13 @@ public class NavigableRegionsManagerTest
          @Override
          public double getObstacleExtrusionDistance()
          {
-            return 0.1;
+            return obstacleExtrusionDistance;
          }
 
          @Override
          public double getPreferredObstacleExtrusionDistance()
          {
-            return 1.0;
+            return preferredObstacleExtrusionDistance;
          }
 
          @Override
