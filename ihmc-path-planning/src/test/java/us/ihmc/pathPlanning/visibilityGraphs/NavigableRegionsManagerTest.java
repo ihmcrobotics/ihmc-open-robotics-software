@@ -69,7 +69,6 @@ public class NavigableRegionsManagerTest
       }
 
       checkPath(path, start, goal, parameters, planarRegionsList, navigableRegionsManager.getNavigableRegionsList());
-      fail();
    }
 
    @Test(timeout = timeout)
@@ -96,7 +95,6 @@ public class NavigableRegionsManagerTest
       }
 
       checkPath(path, start, goal, parameters, planarRegionsList, navigableRegionsManager.getNavigableRegionsList());
-      fail();
    }
 
    @Test(timeout = timeout)
@@ -123,7 +121,6 @@ public class NavigableRegionsManagerTest
       }
 
       checkPath(path, start, goal, parameters, planarRegionsList, navigableRegionsManager.getNavigableRegionsList());
-      fail();
    }
 
    @Test(timeout = timeout)
@@ -150,7 +147,6 @@ public class NavigableRegionsManagerTest
       }
 
       checkPath(path, start, goal, parameters, planarRegionsList, navigableRegionsManager.getNavigableRegionsList());
-      fail();
    }
 
    @Test(timeout = timeout)
@@ -177,7 +173,6 @@ public class NavigableRegionsManagerTest
       }
 
       checkPath(path, start, goal, parameters, planarRegionsList, navigableRegionsManager.getNavigableRegionsList());
-      fail();
    }
 
    @Test(timeout = timeout)
@@ -204,7 +199,6 @@ public class NavigableRegionsManagerTest
       }
 
       checkPath(path, start, goal, parameters, planarRegionsList, navigableRegionsManager.getNavigableRegionsList());
-      fail();
    }
 
    @Test(timeout = timeout)
@@ -231,7 +225,6 @@ public class NavigableRegionsManagerTest
       }
 
       checkPath(path, start, goal, parameters, planarRegionsList, navigableRegionsManager.getNavigableRegionsList());
-      fail();
    }
 
    @Test(timeout = timeout)
@@ -258,7 +251,6 @@ public class NavigableRegionsManagerTest
       }
 
       checkPath(path, start, goal, parameters, planarRegionsList, navigableRegionsManager.getNavigableRegionsList());
-      fail();
    }
 
    @Test(timeout = timeout)
@@ -312,7 +304,6 @@ public class NavigableRegionsManagerTest
       }
 
       checkPath(path, start, goal, parameters, planarRegionsList, navigableRegionsManager.getNavigableRegionsList());
-      fail();
    }
 
    @Test(timeout = timeout)
@@ -339,7 +330,6 @@ public class NavigableRegionsManagerTest
       }
 
       checkPath(path, start, goal, parameters, planarRegionsList, navigableRegionsManager.getNavigableRegionsList());
-      fail();
    }
 
    @Test(timeout = timeout)
@@ -366,7 +356,6 @@ public class NavigableRegionsManagerTest
       }
 
       checkPath(path, start, goal, parameters, planarRegionsList, navigableRegionsManager.getNavigableRegionsList());
-      fail();
    }
 
    @Test(timeout = timeout)
@@ -387,13 +376,26 @@ public class NavigableRegionsManagerTest
 
       List<Point3DReadOnly> path = navigableRegionsManager.calculateBodyPathWithOcclusions(start, goal);
 
+      /*
+      if (visualize)
+      {
+         visualize(path, planarRegionsList, start, goal);
+      }
+      */
+
+      checkPath(path, start, goal, parameters, planarRegionsList, navigableRegionsManager.getNavigableRegionsList());
+
+      start = new Point3D(-15.0, 1.0 * parameters.getPreferredObstacleExtrusionDistance(), 0.0);
+
+
+      path = navigableRegionsManager.calculateBodyPathWithOcclusions(start, goal);
+
       if (visualize)
       {
          visualize(path, planarRegionsList, start, goal);
       }
 
       checkPath(path, start, goal, parameters, planarRegionsList, navigableRegionsManager.getNavigableRegionsList());
-      fail();
    }
 
    @Test(timeout = timeout)
@@ -447,7 +449,6 @@ public class NavigableRegionsManagerTest
       }
 
       checkPath(path, start, goal, parameters, planarRegionsList, navigableRegionsManager.getNavigableRegionsList());
-      fail();
    }
 
    @Test(timeout = timeout)
@@ -473,7 +474,6 @@ public class NavigableRegionsManagerTest
       }
 
       checkPath(path, start, goal, parameters, planarRegionsList, navigableRegionsManager.getNavigableRegionsList());
-      fail();
    }
 
    @Test(timeout = timeout)
@@ -531,7 +531,6 @@ public class NavigableRegionsManagerTest
       }
 
       checkPath(path, start, goal, parameters, planarRegionsList, navigableRegionsManager.getNavigableRegionsList());
-      fail();
    }
 
    @Test(timeout = timeout)

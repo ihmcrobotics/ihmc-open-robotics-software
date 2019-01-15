@@ -83,10 +83,12 @@ public class ObstacleAvoidanceProcessor
          // add the new points to the path
          for (Point3D intermediateWaypointToAdd : intermediateWaypointsToAdd)
          {
-            waypointIndex++;
             if (intermediateWaypointToAdd.distance(startPointInWorld) > samePointEpsilon
                   && intermediateWaypointToAdd.distance(endPointInWorld) > samePointEpsilon)
-            newPath.add(waypointIndex, intermediateWaypointToAdd);
+            {
+               waypointIndex++;
+               newPath.add(waypointIndex, intermediateWaypointToAdd);
+            }
          }
 
          waypointIndex++;
