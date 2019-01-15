@@ -42,25 +42,30 @@ public class NavigableRegionsManager
 
    public NavigableRegionsManager()
    {
-      this(null, null);
+      this(null, null, null);
    }
 
    public NavigableRegionsManager(VisibilityGraphsParameters parameters)
    {
-      this(parameters, null);
+      this(parameters, null, null);
    }
 
    public NavigableRegionsManager(List<PlanarRegion> regions)
    {
-      this(null, regions);
+      this(null, regions, null);
    }
 
    public NavigableRegionsManager(VisibilityGraphsParameters parameters, List<PlanarRegion> regions)
    {
+      this(parameters, regions, new ObstacleAvoidanceProcessor(parameters));
+   }
+
+   public NavigableRegionsManager(VisibilityGraphsParameters parameters, List<PlanarRegion> regions, ObstacleAvoidanceProcessor postProcessor)
+   {
       visibilityMapSolution.setNavigableRegions(new NavigableRegions(parameters, regions));
       this.parameters = parameters == null ? new DefaultVisibilityGraphParameters() : parameters;
       this.costParameters = new DefaultVisibilityGraphsCostParameters();
-      postProcessor = new ObstacleAvoidanceProcessor(parameters);
+      this.postProcessor = postProcessor;
    }
 
    private static ArrayList<VisibilityMapWithNavigableRegion> createListOfVisibilityMapsWithNavigableRegions(NavigableRegions navigableRegions)
@@ -204,7 +209,17 @@ public class NavigableRegionsManager
       }
       Collections.reverse(nodePath);
 
-      List<Point3DReadOnly> path = postProcessor.computePathFromNodes(nodePath, visibilityMapSolution);
+      List<Point3DReadOnly> path;
+      if (postProcessor != null)
+      {
+         path = postProcessor.computePathFromNodes(nodePath, visibilityMapSolution);
+      }
+      else
+      {
+         path = new ArrayList<>();
+         for (VisibilityGraphNode node : nodePath)
+            path.add(node.getPointInWorld());
+      }
 
       printResults(startBodyPathComputation, expandedNodesCount, iterations, path);
       return path;
