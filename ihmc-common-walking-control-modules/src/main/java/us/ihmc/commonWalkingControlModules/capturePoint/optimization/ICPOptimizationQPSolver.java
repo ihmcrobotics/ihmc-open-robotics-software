@@ -1086,7 +1086,7 @@ public class ICPOptimizationQPSolver
 
       solver.clear();
 
-      if (useWarmStart && pollResetActiveSet())
+      if (useWarmStart && pollResetActiveSet() || previousTickFailed)
          solver.resetActiveConstraints();
 
       solver.setQuadraticCostFunction(solverInput_H, solverInput_h, solverInputResidualCost.get(0, 0));
