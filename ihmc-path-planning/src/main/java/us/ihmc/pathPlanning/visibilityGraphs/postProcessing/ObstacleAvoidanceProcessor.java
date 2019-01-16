@@ -259,13 +259,13 @@ public class ObstacleAvoidanceProcessor
       return closestClusterPoints;
    }
 
-   private static Vector2DReadOnly computeVectorToMaximizeAverageDistanceFromPoints(Point2DReadOnly pointToShift,
-                                                                                    List<Point2DReadOnly> pointsToAvoidByDistanceA, double distanceA)
+   static Vector2DReadOnly computeVectorToMaximizeAverageDistanceFromPoints(Point2DReadOnly pointToShift,
+                                                                                    List<Point2DReadOnly> pointsToAvoidByDistance, double desiredDistance)
    {
-      return computeVectorToMaximizeAverageDistanceFromPoints(pointToShift, pointsToAvoidByDistanceA, new ArrayList<>(), distanceA, 0.0);
+      return computeVectorToMaximizeAverageDistanceFromPoints(pointToShift, pointsToAvoidByDistance, new ArrayList<>(), desiredDistance, 0.0);
    }
 
-   private static Vector2DReadOnly computeVectorToMaximizeAverageDistanceFromPoints(Point2DReadOnly pointToShift,
+   static Vector2DReadOnly computeVectorToMaximizeAverageDistanceFromPoints(Point2DReadOnly pointToShift,
                                                                                     List<Point2DReadOnly> pointsToAvoidByDistanceA,
                                                                                     List<Point2DReadOnly> pointsToAvoidByDistanceB, double distanceA,
                                                                                     double distanceB)
