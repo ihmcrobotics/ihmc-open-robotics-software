@@ -13,7 +13,6 @@ import us.ihmc.communication.controllerAPI.CommandInputManager;
 import us.ihmc.communication.controllerAPI.StatusMessageOutputManager;
 import us.ihmc.communication.packets.ToolboxState;
 import us.ihmc.footstepPlanning.communication.FootstepPlannerCommunicationProperties;
-import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParameters;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.multicastLogDataProtocol.modelLoaders.LogModelProvider;
 import us.ihmc.pathPlanning.visibilityGraphs.interfaces.VisibilityGraphsParameters;
@@ -71,6 +70,8 @@ public class MultiStageFootstepPlanningModule
       realtimeRos2Node = ROS2Tools.createRealtimeRos2Node(pubSubImplementation, "ihmc_" + CaseFormat.UPPER_CAMEL.to(CaseFormat.LOWER_UNDERSCORE, name));
       CommandInputManager commandInputManager = new CommandInputManager(name, FootstepPlannerCommunicationProperties.getSupportedCommands());
       StatusMessageOutputManager statusOutputManager = new StatusMessageOutputManager(FootstepPlannerCommunicationProperties.getSupportedStatusMessages());
+      new ControllerNetworkSubscriber(FootstepPlannerCommunicationProperties.subscriberTopicNameGenerator(robotName), commandInputManager,
+                                      FootstepPlannerCommunicationProperties.publisherTopicNameGenerator(robotName), statusOutputManager, realtimeRos2Node);
 
       ThreadFactory threadFactory = ThreadTools.getNamedThreadFactory(name);
       executorService = Executors.newScheduledThreadPool(1, threadFactory);
@@ -104,11 +105,8 @@ public class MultiStageFootstepPlanningModule
 
       IHMCRealtimeROS2Publisher<TextToSpeechPacket> textToSpeechPublisher = ROS2Tools
             .createPublisher(realtimeRos2Node, TextToSpeechPacket.class, ROS2Tools::generateDefaultTopicName);
-      IHMCRealtimeROS2Publisher<FootstepPlannerParametersPacket> parametersPublisher = ROS2Tools
-            .createPublisher(realtimeRos2Node, FootstepPlannerParametersPacket.class, ROS2Tools::generateDefaultTopicName);
 
       footstepPlanningController.setTextToSpeechPublisher(textToSpeechPublisher);
-      footstepPlanningController.setParametersPublisher(parametersPublisher);
 
       realtimeRos2Node.spin();
 

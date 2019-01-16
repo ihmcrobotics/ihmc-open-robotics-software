@@ -32,7 +32,7 @@ IHMC Robot Data Logger
 
 - clone ihmc-open-robotics-software
 - `cd ihmc-open-robotics-software/ihmc-robot-data-logger`
-- `../gradlew deployLogger -PdeployLoggerHost=[Hostname or IP of logger] -PdeployLoggerUser=[SSH username] -PdeployLoggerPassword=[SSH password]`
+- `gradle deployLogger -PdeployLoggerHost=[Hostname or IP of logger] -PdeployLoggerUser=[SSH username] -PdeployLoggerPassword=[SSH password]`
 
 ## Finishing the logger configuration
 

@@ -33,7 +33,7 @@ public class ClusterTools
    // there are high vertices. Need some example cases for this and need to fix it up.
    private static final double HALF_PI = 0.5 * Math.PI;
    private static final double POPPING_POLYGON_POINTS_THRESHOLD = 0.0; //MathTools.square(0.025);
-   private static final double POPPING_MULTILINE_POINTS_THRESHOLD = MathTools.square(0.20);
+   private static final double POPPING_MULTILINE_POINTS_THRESHOLD = MathTools.square(0.10);
    private static final double NAV_TO_NON_NAV_DISTANCE = 0.001;
 
    public static List<Point2D> extrudePolygon(boolean extrudeToTheLeft, Cluster cluster, ObstacleExtrusionDistanceCalculator calculator)
@@ -182,8 +182,8 @@ public class ClusterTools
     * then the two new lines will be moved by the extrusionDistance. 
     * If it is to the outside, then you should use extrudeMultiplePointsAtOutsideCorner() instead.
     */
-   public static Point2D extrudeSinglePointAtInsideCorner(Point2DReadOnly pointToExtrude, Line2D edgePrev, Line2D edgeNext,
-                                                       boolean extrudeToTheLeft, double extrusionDistance)
+   public static Point2D extrudeSinglePointAtInsideCorner(Point2DReadOnly pointToExtrude, Line2D edgePrev, Line2D edgeNext, boolean extrudeToTheLeft,
+                                                          double extrusionDistance)
    {
       Vector2DBasics previousEdgeDirection = edgePrev.getDirection();
       Vector2DBasics nextEdgeDirection = edgeNext.getDirection();
@@ -450,7 +450,7 @@ public class ClusterTools
       if (verticalObstacle)
       {
          // Project region as a line
-         //TODO: Seems something fishy here if you look at the Cinder Block field and see that the vertical obstacle near the ramp removes navigable points from the flat, but not from the ramp?
+         //TODO: +++JerryPratt: Rethink vertical obstacles and redo how they are done. Lots of potential issues with things like single region doorways, regions that start and end at a low height, etc.
          tempFlatClusterToExtrude = new Cluster(ExtrusionSide.OUTSIDE, ClusterType.MULTI_LINE);
          List<Point3D> filteredPointsForMultiLine = filterVerticalPolygonForMultiLineExtrusion(temporaryClusterPoints, POPPING_MULTILINE_POINTS_THRESHOLD);
          tempFlatClusterToExtrude.addRawPointsInLocal3D(filteredPointsForMultiLine);
@@ -605,19 +605,70 @@ public class ClusterTools
       }
       else
       {
-         int index = 0;
-         // Look for points with same XY-coordinates and only keep the highest one.
-         while (index < filteredPoints.size() - 1)
-         {
-            Point3D pointCurr = filteredPoints.get(index);
-            Point3D pointNext = filteredPoints.get(index + 1);
-
-            if (pointCurr.distanceXYSquared(pointNext) < poppingPointsDistanceSquaredThreshold)
-               filteredPoints.remove(pointCurr.getZ() <= pointNext.getZ() ? index : index + 1);
-            else
-               index++;
-         }
+         filteredPoints = filterPointsWithSameXYCoordinatesKeepingHighest(filteredPoints, poppingPointsDistanceSquaredThreshold);
          return filteredPoints;
       }
+   }
+
+   /**
+    * Goes through a list of points and removes duplicates next to each other whose xy distance squared is less than poppingPointsDistanceSquaredThreshold.
+    * It assumes the list is ordered in such a way that the only possible duplicates are next to each other.
+    * In removing a duplicate, it keeps the one with the larger z value.
+    * At the end, all points are guaranteed to be greater than the threshold distance apart.
+    * 
+    * @param pointsToFilter List of points to be filtered.
+    * @param poppingPointsDistanceSquaredThreshold Threshold for the squared distance for considering points to be duplicates.
+    */
+   public static List<Point3D> filterPointsWithSameXYCoordinatesKeepingHighest(List<Point3D> pointsToFilter, double poppingPointsDistanceSquaredThreshold)
+   {
+      List<Point3D> filteredPointsToReturn = new ArrayList<>();
+      if (pointsToFilter.isEmpty())
+         return filteredPointsToReturn;
+
+      if (pointsToFilter.size() == 1)
+      {
+         filteredPointsToReturn.add(pointsToFilter.get(0));
+         return filteredPointsToReturn;
+      }
+      
+      boolean pointWasFiltered = false;
+
+      for (int i = 0; i < pointsToFilter.size(); i++)
+      {
+         if (i==pointsToFilter.size() - 1)
+         {
+            filteredPointsToReturn.add(pointsToFilter.get(i));
+            continue;
+         }
+         
+         Point3D currentPoint = pointsToFilter.get(i);
+         Point3D nextPoint = pointsToFilter.get(i + 1);
+
+         if (currentPoint.distanceXYSquared(nextPoint) < poppingPointsDistanceSquaredThreshold)
+         {
+            if (currentPoint.getZ() > nextPoint.getZ())
+            {
+               filteredPointsToReturn.add(currentPoint);
+            }
+            else
+            {
+               filteredPointsToReturn.add(nextPoint);
+            }
+            pointWasFiltered = true;
+            i++;
+         }
+         else
+         {
+            filteredPointsToReturn.add(currentPoint);
+         }
+      }
+
+      if (pointWasFiltered)
+      {
+         return filterPointsWithSameXYCoordinatesKeepingHighest(filteredPointsToReturn, poppingPointsDistanceSquaredThreshold);
+      }
+
+      return filteredPointsToReturn;
+
    }
 }
