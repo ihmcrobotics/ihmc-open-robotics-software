@@ -12,7 +12,6 @@ import us.ihmc.euclid.tuple2D.interfaces.Vector2DReadOnly;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
-import us.ihmc.tools.ArrayTools;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -21,7 +20,7 @@ import java.util.Random;
 import static junit.framework.TestCase.assertTrue;
 import static org.junit.Assert.assertEquals;
 
-public class ObstacleAvoidanceProcessorTest
+public class ObstacleAndCliffAvoidanceProcessorTest
 {
    private static final long timeout = 30000;
    private static final double epsilon = 1e-10;
@@ -44,7 +43,7 @@ public class ObstacleAvoidanceProcessorTest
       pointsToAvoidByDistance.add(bottomLeft);
       pointsToAvoidByDistance.add(bottomRight);
 
-      Vector2DReadOnly calculatedVector = ObstacleAvoidanceProcessor
+      Vector2DReadOnly calculatedVector = ObstacleAndCliffAvoidanceProcessor
             .computeVectorToMaximizeAverageDistanceFromPoints(pointAtOrigin, pointsToAvoidByDistance, 1.0);
       Vector2DReadOnly expectedVector = new Vector2D();
 
@@ -56,7 +55,7 @@ public class ObstacleAvoidanceProcessorTest
       pointsToAvoidByDistance.add(new Point2D(0.5 * Math.sin(Math.PI / 3.0), -0.5 * Math.cos(Math.PI / 3.0)));
       pointsToAvoidByDistance.add(new Point2D(-0.5 * Math.sin(Math.PI / 3.0), -0.5 * Math.cos(Math.PI / 3.0)));
 
-      calculatedVector = ObstacleAvoidanceProcessor.computeVectorToMaximizeAverageDistanceFromPoints(pointAtOrigin, pointsToAvoidByDistance, 1.0);
+      calculatedVector = ObstacleAndCliffAvoidanceProcessor.computeVectorToMaximizeAverageDistanceFromPoints(pointAtOrigin, pointsToAvoidByDistance, 1.0);
       expectedVector = new Vector2D();
 
       EuclidCoreTestTools.assertVector2DGeometricallyEquals(expectedVector, calculatedVector, epsilon);
@@ -80,7 +79,7 @@ public class ObstacleAvoidanceProcessorTest
 
          List<Point2DReadOnly> pointsToAvoidByDistance = createPointsEvenlySpacedAboutPoint(expectedCenterPoint, numberOfPoints, expectedVector.length());
 
-         Vector2DReadOnly calculatedVector = ObstacleAvoidanceProcessor
+         Vector2DReadOnly calculatedVector = ObstacleAndCliffAvoidanceProcessor
                .computeVectorToMaximizeAverageDistanceFromPoints(actualPoint, pointsToAvoidByDistance, distanceFromPoint);
 
          EuclidCoreTestTools.assertVector2DGeometricallyEquals(expectedVector, calculatedVector, epsilon);
@@ -115,7 +114,7 @@ public class ObstacleAvoidanceProcessorTest
             pointsToAvoid.add(pointToAvoid);
          }
 
-         Vector2DReadOnly calculatedVector = ObstacleAvoidanceProcessor
+         Vector2DReadOnly calculatedVector = ObstacleAndCliffAvoidanceProcessor
                .computeVectorToMaximizeAverageDistanceFromPoints(pointToShift, pointsToAvoid, desiredDistanceAway);
 
          // it should just be the average of all these points
@@ -180,7 +179,7 @@ public class ObstacleAvoidanceProcessorTest
             listOfPoints.add(newPoint);
          }
 
-         ObstacleAvoidanceProcessor.removeDuplicated3DPointsFromList(listOfPoints, distanceToFilter);
+         ObstacleAndCliffAvoidanceProcessor.removeDuplicated3DPointsFromList(listOfPoints, distanceToFilter);
 
          for (int i = 0; i < listOfPoints.size(); i++)
          {
@@ -238,7 +237,7 @@ public class ObstacleAvoidanceProcessorTest
             listOfPoints.add(newPoint);
          }
 
-         ObstacleAvoidanceProcessor.removeDuplicated2DPointsFromList(listOfPoints, distanceToFilter);
+         ObstacleAndCliffAvoidanceProcessor.removeDuplicated2DPointsFromList(listOfPoints, distanceToFilter);
 
          for (int i = 0; i < listOfPoints.size(); i++)
          {
@@ -301,7 +300,7 @@ public class ObstacleAvoidanceProcessorTest
             listOfPoints.add(newPoint);
          }
 
-         ObstacleAvoidanceProcessor.removeDuplicateStartOrEndPointsFromList(listOfPoints, startPoint, endPoint, distanceToFilter);
+         ObstacleAndCliffAvoidanceProcessor.removeDuplicateStartOrEndPointsFromList(listOfPoints, startPoint, endPoint, distanceToFilter);
 
          for (int i = 0; i < listOfPoints.size(); i++)
          {
