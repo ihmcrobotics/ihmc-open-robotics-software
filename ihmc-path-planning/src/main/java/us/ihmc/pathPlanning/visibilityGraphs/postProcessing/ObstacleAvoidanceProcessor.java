@@ -333,51 +333,6 @@ public class ObstacleAvoidanceProcessor
       return averageShiftVector;
    }
 
-   private Vector2DReadOnly getDirectionAndDistanceToShiftToAvoidCliffs(Point2DReadOnly pointToCheck, VisibilityGraphNode originalNode,
-                                                                        NavigableRegions navigableRegions, double distanceInsideHomeRegionToAvoid)
-   {
-      double originalHeight = originalNode.getPointInWorld().getZ();
-      double adjustedHeight = getMaxHeightOfPointInWorld(pointToCheck, navigableRegions);
-
-      Vector2D nodeShiftToAvoidCliff = new Vector2D();
-
-      if (Math.abs(adjustedHeight - originalHeight) > desiredDistanceFromCliff)
-      {
-         Cluster cluster = originalNode.getVisibilityGraphNavigableRegion().getNavigableRegion().getHomeRegionCluster();
-         List<Point2DReadOnly> clusterPolygon = cluster.getNonNavigableExtrusionsInWorld2D();
-
-         Point2D closestPointInCluster = new Point2D();
-         double distanceToCluster = VisibilityTools.distanceToCluster(pointToCheck, clusterPolygon, closestPointInCluster, null);
-
-         double distanceToMove = distanceToCluster + distanceInsideHomeRegionToAvoid;
-         nodeShiftToAvoidCliff.sub(closestPointInCluster, pointToCheck);
-         nodeShiftToAvoidCliff.normalize();
-         nodeShiftToAvoidCliff.scale(distanceToMove);
-      }
-
-      return nodeShiftToAvoidCliff;
-   }
-
-   private static double getMaxHeightOfPointInWorld(Point2DReadOnly pointInWorldToCheck, NavigableRegions navigableRegions)
-   {
-      double maxHeight = Double.NEGATIVE_INFINITY;
-      for (NavigableRegion navigableRegion : navigableRegions.getNaviableRegionsList())
-      {
-         PlanarRegion planarRegion = navigableRegion.getHomePlanarRegion();
-
-         RigidBodyTransform transformToWorld = new RigidBodyTransform();
-         planarRegion.getTransformToWorld(transformToWorld);
-         Point2D pointInLocalToCheck = new Point2D(pointInWorldToCheck);
-         pointInLocalToCheck.applyInverseTransform(transformToWorld, false);
-         double height = planarRegion.getPlaneZGivenXY(pointInWorldToCheck.getX(), pointInWorldToCheck.getY());
-         if (PlanarRegionTools.isPointInLocalInsidePlanarRegion(navigableRegion.getHomePlanarRegion(), pointInLocalToCheck) && height > maxHeight)
-         {
-            maxHeight = height;
-         }
-      }
-
-      return maxHeight;
-   }
 
    private static void removeDuplicated2DPointsFromList(List<? extends Point2DReadOnly> listOfPoints, double samePointEpsilon)
    {
