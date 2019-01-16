@@ -309,12 +309,15 @@ public class PlanarRegionsListPointSnapperTest
 
             if (planarRegions != null)
             {
+               double highestZ = Double.NEGATIVE_INFINITY;
                for (PlanarRegion planarRegion : planarRegions)
                {
                   double planeZGivenXY = planarRegion.getPlaneZGivenXY(snappedVertex.getX(), snappedVertex.getY());
-                  assertEquals("planeZGivenXY = " + planeZGivenXY + ", snappedVertex.getZ() = " + snappedVertex.getZ(), planeZGivenXY, snappedVertex.getZ(),
-                               1e-4);
+                  if (planeZGivenXY > highestZ)
+                     highestZ = planeZGivenXY;
                }
+               assertEquals("planeZGivenXY = " + highestZ + ", snappedVertex.getZ() = " + snappedVertex.getZ(), highestZ, snappedVertex.getZ(),
+                            1e-4);
             }
          }
       }
