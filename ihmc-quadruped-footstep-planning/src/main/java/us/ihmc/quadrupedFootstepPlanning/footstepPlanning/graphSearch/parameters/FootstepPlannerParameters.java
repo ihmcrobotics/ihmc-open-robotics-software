@@ -16,6 +16,12 @@ public interface FootstepPlannerParameters
 
    double getMinimumStepWidth();
 
+   double getMaximumStepChangeZ();
+
+   double getMaximumStepCycleChangeZ();
+
+   double getBodyGroundClearance();
+
    /**
     * The planner will ignore candidate footsteps if they are on a planar region with an incline that is higher
     * then the value specified here.
