@@ -31,9 +31,10 @@ public class ParameterProvider
     * }
     * </pre>
     *
-    * The registry is traversed up starting from the provided downstream registry until the target registry is encountered.
-    * This registry will be searched for the child that is the parameter registry. If it does not exist it will be created.
-    * Then the parameter registry will be searched for the parameter. If it does not exist it will be created.
+    * The registry tree is traversed up starting from the provided downstream registry until the target registry is
+    * encountered. This registry will be searched for the child that is the parameter registry. If it does not exist it
+    * will be created. Then the parameter registry will be searched for the parameter. If it does not exist it will be
+    * created.
     *
     * @throws RuntimeException in case the target registry does not exist or the parameter exists but is not of the
     *    expected type
@@ -77,9 +78,10 @@ public class ParameterProvider
     * }
     * </pre>
     *
-    * The registry is traversed up starting from the provided downstream registry until the target registry is encountered.
-    * This registry will be searched for the child that is the parameter registry. If it does not exist it will be created.
-    * Then the parameter registry will be searched for the parameter. If it does not exist it will be created.
+    * The registry tree is traversed up starting from the provided downstream registry until the target registry is
+    * encountered. This registry will be searched for the child that is the parameter registry. If it does not exist it
+    * will be created. Then the parameter registry will be searched for the parameter. If it does not exist it will be
+    * created.
     *
     * @throws RuntimeException in case the target registry does not exist or the parameter exists but is not of the
     *    expected type
@@ -123,9 +125,10 @@ public class ParameterProvider
     * }
     * </pre>
     *
-    * The registry is traversed up starting from the provided downstream registry until the target registry is encountered.
-    * This registry will be searched for the child that is the parameter registry. If it does not exist it will be created.
-    * Then the parameter registry will be searched for the parameter. If it does not exist it will be created.
+    * The registry tree is traversed up starting from the provided downstream registry until the target registry is
+    * encountered. This registry will be searched for the child that is the parameter registry. If it does not exist it
+    * will be created. Then the parameter registry will be searched for the parameter. If it does not exist it will be
+    * created.
     *
     * @throws RuntimeException in case the target registry does not exist or the parameter exists but is not of the
     *    expected type
@@ -169,9 +172,10 @@ public class ParameterProvider
     * }
     * </pre>
     *
-    * The registry is traversed up starting from the provided downstream registry until the target registry is encountered.
-    * This registry will be searched for the child that is the parameter registry. If it does not exist it will be created.
-    * Then the parameter registry will be searched for the parameter. If it does not exist it will be created.
+    * The registry tree is traversed up starting from the provided downstream registry until the target registry is
+    * encountered. This registry will be searched for the child that is the parameter registry. If it does not exist it
+    * will be created. Then the parameter registry will be searched for the parameter. If it does not exist it will be
+    * created.
     *
     * @throws RuntimeException in case the target registry does not exist or the parameter exists but is not of the
     *    expected type
@@ -217,9 +221,10 @@ public class ParameterProvider
     * }
     * </pre>
     *
-    * The registry is traversed up starting from the provided downstream registry until the target registry is encountered.
-    * This registry will be searched for the child that is the parameter registry. If it does not exist it will be created.
-    * Then the parameter registry will be searched for the parameter. If it does not exist it will be created.
+    * The registry tree is traversed up starting from the provided downstream registry until the target registry is
+    * encountered. This registry will be searched for the child that is the parameter registry. If it does not exist it
+    * will be created. Then the parameter registry will be searched for the parameter. If it does not exist it will be
+    * created.
     *
     * @throws RuntimeException in case the target registry does not exist or the parameter exists but is not of the
     *    expected type
