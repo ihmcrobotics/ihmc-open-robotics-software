@@ -356,8 +356,8 @@ public class ObstacleAvoidanceProcessor
       }
    }
 
-   private static void removeDuplicateStartOrEndPointsFromList(List<? extends Point3DReadOnly> listOfPoints, Point3DReadOnly startPoint,
-                                                               Point3DReadOnly endPoint, double samePointEpsilon)
+   static void removeDuplicateStartOrEndPointsFromList(List<? extends Point3DReadOnly> listOfPoints, Point3DReadOnly startPoint, Point3DReadOnly endPoint,
+                                                       double samePointEpsilon)
    {
       int pointIndex = 0;
       while (pointIndex < listOfPoints.size())
