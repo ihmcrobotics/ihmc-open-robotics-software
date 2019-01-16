@@ -10,11 +10,20 @@ public interface CommonAvatarEnvironmentInterface
 {
    public abstract TerrainObject3D getTerrainObject3D();
 
-   public abstract List<? extends Robot> getEnvironmentRobots();
+   public default List<? extends Robot> getEnvironmentRobots()
+   {
+      return null;
+   }
 
-   public abstract void createAndSetContactControllerToARobot();
+   public default void createAndSetContactControllerToARobot()
+   {
+   }
 
-   public abstract void addContactPoints(List<? extends ExternalForcePoint> externalForcePoints);
+   public default void addContactPoints(List<? extends ExternalForcePoint> externalForcePoints)
+   {
+   }
 
-   public abstract void addSelectableListenerToSelectables(SelectableObjectListener selectedListener);
+   public default void addSelectableListenerToSelectables(SelectableObjectListener selectedListener)
+   {
+   }
 }
