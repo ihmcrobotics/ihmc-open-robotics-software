@@ -1,32 +1,21 @@
 package us.ihmc.quadrupedFootstepPlanning.footstepPlanning.graphSearch.footstepSnapping;
 
-import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.robotics.robotSide.QuadrantDependentList;
+import us.ihmc.robotics.robotSide.RobotQuadrant;
 
 public class FootstepNodeSnapData
 {
-   private final RigidBodyTransform snapTransform;
-   private final ConvexPolygon2D croppedFoothold;
+   private final QuadrantDependentList<RigidBodyTransform> snapTransforms;
 
-   public FootstepNodeSnapData(RigidBodyTransform snapTransform)
+   public FootstepNodeSnapData(QuadrantDependentList<RigidBodyTransform> snapTransforms)
    {
-      this(snapTransform, new ConvexPolygon2D());
+      this.snapTransforms = snapTransforms;
    }
 
-   public FootstepNodeSnapData(RigidBodyTransform snapTransform, ConvexPolygon2D croppedFoothold)
+   public RigidBodyTransform getSnapTransform(RobotQuadrant robotQuadrant)
    {
-      this.snapTransform = snapTransform;
-      this.croppedFoothold = croppedFoothold;
-   }
-
-   public ConvexPolygon2D getCroppedFoothold()
-   {
-      return croppedFoothold;
-   }
-
-   public RigidBodyTransform getSnapTransform()
-   {
-      return snapTransform;
+      return snapTransforms.get(robotQuadrant);
    }
 
    private static final FootstepNodeSnapData EMPTY_SNAP_DATA;
@@ -34,15 +23,19 @@ public class FootstepNodeSnapData
 
    static
    {
-      IDENTITY_SNAP_DATA = new FootstepNodeSnapData(new RigidBodyTransform(), new ConvexPolygon2D());
+      IDENTITY_SNAP_DATA = new FootstepNodeSnapData(new QuadrantDependentList<>(new RigidBodyTransform(), new RigidBodyTransform(), new RigidBodyTransform(),
+                                                                                new RigidBodyTransform()));
 
-      RigidBodyTransform snapTransform = new RigidBodyTransform();
-      ConvexPolygon2D croppedFoothold = new ConvexPolygon2D();
+      QuadrantDependentList<RigidBodyTransform> emptySnapTransforms = new QuadrantDependentList<>();
 
-      snapTransform.setToNaN();
-      croppedFoothold.setToNaN();
+      for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
+      {
+         RigidBodyTransform snapTransform = new RigidBodyTransform();
+         snapTransform.setToNaN();
+         emptySnapTransforms.put(robotQuadrant, snapTransform);
+      }
 
-      EMPTY_SNAP_DATA = new FootstepNodeSnapData(snapTransform, croppedFoothold);
+      EMPTY_SNAP_DATA = new FootstepNodeSnapData(emptySnapTransforms);
    }
 
    public static FootstepNodeSnapData emptyData()
