@@ -25,7 +25,7 @@ import java.util.stream.Collectors;
 
 public class ObstacleAvoidanceProcessor
 {
-   private static final boolean includeMidpoints = false;
+   private static final boolean includeMidpoints = true;
    private static final boolean adjustWaypoints = true;
    private static final boolean adjustMidpoints = false;
 
@@ -216,6 +216,7 @@ public class ObstacleAvoidanceProcessor
          if (thisWaypoint.distance(nextWaypoint) < clusterResolution)
          { // collapse with the next one
             thisWaypoint.interpolate(thisWaypoint, nextWaypoint, 0.5);
+            intermediateWaypointsToAdd.remove(intermediateWaypointIndex + 1);
          }
          else
          {
