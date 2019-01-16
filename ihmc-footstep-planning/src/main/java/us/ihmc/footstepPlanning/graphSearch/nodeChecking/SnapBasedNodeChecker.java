@@ -120,6 +120,7 @@ public class SnapBasedNodeChecker extends FootstepNodeChecker
             RigidBodyTransform grandparentSnapTransform = snapper.getSnapData(grandparentNode).getSnapTransform();
             RigidBodyTransform grandparentNodeTransform = new RigidBodyTransform();
             FootstepNodeTools.getSnappedNodeTransform(grandparentNode, grandparentSnapTransform, grandparentNodeTransform);
+            double grandparentTranslationScaleFactor = 1.6;
 
             double heightChangeFromGrandparentNode = nodePosition.getZ() - grandparentNodeTransform.getTranslationZ();
             double translationChangeFromGrandparentNode = EuclidCoreTools
@@ -127,7 +128,15 @@ public class SnapBasedNodeChecker extends FootstepNodeChecker
 
             boolean largeStepUp = heightChangeFromGrandparentNode > parameters.getMaximumStepZWhenSteppingUp();
 
-            if (largeStepUp && translationChangeFromGrandparentNode > 1.7 * parameters.getMaximumStepReachWhenSteppingUp())
+            if (largeStepUp && translationChangeFromGrandparentNode > grandparentTranslationScaleFactor * parameters.getMaximumStepReachWhenSteppingUp())
+            {
+               rejectNode(node, previousNode, BipedalFootstepPlannerNodeRejectionReason.STEP_TOO_FAR_AND_HIGH);
+               return false;
+            }
+
+            boolean largeStepDown = heightChangeFromGrandparentNode < parameters.getMaximumStepZWhenForwardAndDown();
+
+            if(largeStepDown && translationChangeFromGrandparentNode > grandparentTranslationScaleFactor * parameters.getMaximumStepXWhenForwardAndDown())
             {
                rejectNode(node, previousNode, BipedalFootstepPlannerNodeRejectionReason.STEP_TOO_FAR_AND_HIGH);
                return false;
