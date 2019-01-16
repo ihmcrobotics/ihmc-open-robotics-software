@@ -334,7 +334,7 @@ public class ObstacleAvoidanceProcessor
    }
 
 
-   private static void removeDuplicated2DPointsFromList(List<? extends Point2DReadOnly> listOfPoints, double samePointEpsilon)
+   static void removeDuplicated2DPointsFromList(List<? extends Point2DReadOnly> listOfPoints, double samePointEpsilon)
    {
       int pointIndex = 0;
       while (pointIndex < listOfPoints.size() - 1)
@@ -351,7 +351,7 @@ public class ObstacleAvoidanceProcessor
       }
    }
 
-   private static void removeDuplicated3DPointsFromList(List<? extends Point3DReadOnly> listOfPoints, double samePointEpsilon)
+   static void removeDuplicated3DPointsFromList(List<? extends Point3DReadOnly> listOfPoints, double samePointEpsilon)
    {
       int pointIndex = 0;
       while (pointIndex < listOfPoints.size() - 1)
