@@ -26,18 +26,18 @@ public class MultipleWaypointsOrientationTrajectoryGeneratorTest
    {
       ReferenceFrameTools.clearWorldFrameTree();
    }
-   
+
    @ContinuousIntegrationTest(estimatedDuration = 0.2)
    @Test(timeout = 30000)
    public void testCompareWithSimple()
    {
       YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
-      
+
       double trajectoryTime = 1.0;
       double dt = 0.0001;
 
       ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
-    
+
       SimpleOrientationTrajectoryGenerator simpleTraj = new SimpleOrientationTrajectoryGenerator("simpleTraj", true, worldFrame, registry);
       simpleTraj.setTrajectoryTime(trajectoryTime);
       simpleTraj.setInitialOrientation(new FrameQuaternion(worldFrame, 1.0, 0.2, -0.5));
@@ -45,14 +45,14 @@ public class MultipleWaypointsOrientationTrajectoryGeneratorTest
       simpleTraj.initialize();
 
       int numberOfWaypoints = 100;
-      MultipleWaypointsOrientationTrajectoryGenerator multipleWaypointTrajectory = new MultipleWaypointsOrientationTrajectoryGenerator("testedTraj", numberOfWaypoints+1, true, worldFrame, registry);
+      MultipleWaypointsOrientationTrajectoryGenerator multipleWaypointTrajectory = new MultipleWaypointsOrientationTrajectoryGenerator("testedTraj", numberOfWaypoints+1, worldFrame, registry);
       multipleWaypointTrajectory.clear();
-      
-      
-      
+
+
+
       FrameQuaternion waypointOrientation = new FrameQuaternion();
       FrameVector3D waypointAngularVelocity = new FrameVector3D();
-      
+
       for (int i = 0; i < numberOfWaypoints; i++)
       {
          double timeAtWaypoint = numberOfWaypoints == 1 ? trajectoryTime / 2.0 : i * trajectoryTime / (numberOfWaypoints - 1.0);
@@ -61,7 +61,7 @@ public class MultipleWaypointsOrientationTrajectoryGeneratorTest
          simpleTraj.getAngularVelocity(waypointAngularVelocity);
          multipleWaypointTrajectory.appendWaypoint(timeAtWaypoint, waypointOrientation, waypointAngularVelocity);
       }
-      
+
       multipleWaypointTrajectory.initialize();
 
 
@@ -72,18 +72,18 @@ public class MultipleWaypointsOrientationTrajectoryGeneratorTest
       FrameQuaternion orientationToPackSimple = new FrameQuaternion(worldFrame);
       FrameVector3D angularVelocityToPackSimple = new FrameVector3D(worldFrame);
       FrameVector3D angularAccelerationToPackSimple = new FrameVector3D(worldFrame);
-      
+
       for (double t = 0.0; t <= trajectoryTime; t += dt)
       {
          multipleWaypointTrajectory.compute(t);
          multipleWaypointTrajectory.getAngularData(orientationToPackMultiple, angularVelocityToPackMultiple, angularAccelerationToPackMultiple);
-         
+
          simpleTraj.compute(t);
          simpleTraj.getAngularData(orientationToPackSimple, angularVelocityToPackSimple, angularAccelerationToPackSimple);
-         
+
          boolean orientationsEqual = orientationToPackMultiple.epsilonEquals(orientationToPackSimple, EPSILON);
          assertTrue(orientationsEqual);
-         
+
          boolean angularVelocityEqual =  angularVelocityToPackMultiple.epsilonEquals(angularVelocityToPackSimple, EPSILON);
          assertTrue(angularVelocityEqual);
 

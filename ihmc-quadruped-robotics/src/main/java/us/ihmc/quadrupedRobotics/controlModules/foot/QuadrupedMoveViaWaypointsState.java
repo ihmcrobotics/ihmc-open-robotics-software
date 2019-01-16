@@ -52,7 +52,7 @@ public class QuadrupedMoveViaWaypointsState extends QuadrupedFootState
 
       // Create waypoint trajectory
       quadrupedWaypointsPositionTrajectoryGenerator = new MultipleWaypointsPositionTrajectoryGenerator(robotQuadrant.getCamelCaseName() + "SoleTrajectory",
-                                                                                                       true, worldFrame, registry);
+                                                                                                       worldFrame, registry);
 
       RigidBodyBasics foot = controllerToolbox.getFullRobotModel().getFoot(robotQuadrant);
       FramePoint3D currentPosition = new FramePoint3D(soleFrame);

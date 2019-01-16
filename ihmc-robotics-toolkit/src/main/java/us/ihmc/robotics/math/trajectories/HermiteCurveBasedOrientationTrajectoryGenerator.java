@@ -4,11 +4,14 @@ import static us.ihmc.commons.MathTools.square;
 
 import org.apache.commons.math3.util.Precision;
 
+import us.ihmc.commons.MathTools;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.interfaces.FrameQuaternionBasics;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameQuaternionReadOnly;
+import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DBasics;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
 import us.ihmc.euclid.tools.QuaternionTools;
 import us.ihmc.euclid.tuple3D.Vector3D;
@@ -18,16 +21,13 @@ import us.ihmc.euclid.tuple4D.Vector4D;
 import us.ihmc.euclid.tuple4D.interfaces.QuaternionBasics;
 import us.ihmc.euclid.tuple4D.interfaces.QuaternionReadOnly;
 import us.ihmc.euclid.tuple4D.interfaces.Vector4DReadOnly;
-import us.ihmc.commons.MathTools;
-import us.ihmc.robotics.math.frames.YoFrameQuaternionInMultipleFrames;
-import us.ihmc.robotics.math.frames.YoFrameVectorInMultipleFrames;
 import us.ihmc.robotics.math.trajectories.waypoints.FrameSO3TrajectoryPoint;
 import us.ihmc.robotics.math.trajectories.waypoints.YoFrameSO3TrajectoryPoint;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.yoVariables.variable.YoFrameQuaternion;
-import us.ihmc.yoVariables.variable.YoFrameVector3D;
 import us.ihmc.yoVariables.variable.YoInteger;
+import us.ihmc.yoVariables.variable.frameObjects.YoMutableFrameQuaternion;
+import us.ihmc.yoVariables.variable.frameObjects.YoMutableFrameVector3D;
 
 /**
  * This trajectory generator aims at interpolating between two orientations qa and qb for given
@@ -63,29 +63,21 @@ public class HermiteCurveBasedOrientationTrajectoryGenerator extends Orientation
    private final YoDouble[] cumulativeBeziersDot;
    private final YoDouble[] cumulativeBeziersDDot;
 
-   private final YoFrameVector3D[] controlRotations;
+   private final FrameVector3DBasics[] controlRotations;
 
-   private final YoFrameQuaternion initialOrientation;
-   private final YoFrameVector3D initialAngularVelocity;
-   private final YoFrameQuaternion finalOrientation;
-   private final YoFrameVector3D finalAngularVelocity;
+   private final FrameQuaternionBasics initialOrientation;
+   private final FrameVector3DBasics initialAngularVelocity;
+   private final FrameQuaternionBasics finalOrientation;
+   private final FrameVector3DBasics finalAngularVelocity;
 
-   private final YoFrameQuaternion currentOrientation;
-   private final YoFrameVector3D currentAngularVelocity;
-   private final YoFrameVector3D currentAngularAcceleration;
+   private final FrameQuaternionBasics currentOrientation;
+   private final FrameVector3DBasics currentAngularVelocity;
+   private final FrameVector3DBasics currentAngularAcceleration;
 
    private final ReferenceFrame trajectoryFrame;
 
    public HermiteCurveBasedOrientationTrajectoryGenerator(String name, ReferenceFrame referenceFrame, YoVariableRegistry parentRegistry)
    {
-      this(name, false, referenceFrame, parentRegistry);
-   }
-
-   public HermiteCurveBasedOrientationTrajectoryGenerator(String name, boolean allowMultipleFrames, ReferenceFrame referenceFrame,
-                                                          YoVariableRegistry parentRegistry)
-   {
-      super(allowMultipleFrames, referenceFrame);
-
       registry = new YoVariableRegistry(name);
       trajectoryTime = new YoDouble(name + "TrajectoryTime", registry);
       numberOfRevolutions = new YoInteger(name + "NumberOfRevolutions", registry);
@@ -95,7 +87,7 @@ public class HermiteCurveBasedOrientationTrajectoryGenerator extends Orientation
       cumulativeBeziers = new YoDouble[4];
       cumulativeBeziersDot = new YoDouble[4];
       cumulativeBeziersDDot = new YoDouble[4];
-      controlRotations = new YoFrameVector3D[4];
+      controlRotations = new FrameVector3DBasics[4];
 
       for (int i = 1; i <= 3; i++)
       {
@@ -113,50 +105,24 @@ public class HermiteCurveBasedOrientationTrajectoryGenerator extends Orientation
       String currentAngularAccelerationName = "CurrentAngularAcceleration";
       String controlRotationsName = "ControlRotations";
 
-      if (allowMultipleFrames)
+      initialOrientation = new YoMutableFrameQuaternion(name + initialOrientationName, "", registry, trajectoryFrame);
+      initialAngularVelocity = new YoMutableFrameVector3D(name + initialAngularVelocityName, "", registry, trajectoryFrame);
+      finalOrientation = new YoMutableFrameQuaternion(name + finalOrientationName, "", registry, trajectoryFrame);
+      finalAngularVelocity = new YoMutableFrameVector3D(name + finalAngularVelocityName, "", registry, trajectoryFrame);
+
+      currentOrientation = new YoMutableFrameQuaternion(name + currentOrientationName, "", registry, trajectoryFrame);
+      currentAngularVelocity = new YoMutableFrameVector3D(name + currentAngularVelocityName, "", registry, trajectoryFrame);
+      currentAngularAcceleration = new YoMutableFrameVector3D(name + currentAngularAccelerationName, "", registry,
+                                                                                                   trajectoryFrame);
+
+      registerFrameChangeables(initialOrientation, initialAngularVelocity);
+      registerFrameChangeables(finalOrientation, finalAngularVelocity);
+      registerFrameChangeables(currentOrientation, currentAngularVelocity, currentAngularAcceleration);
+
+      for (int i = 1; i <= 3; i++)
       {
-         YoFrameQuaternionInMultipleFrames initialOrientation = new YoFrameQuaternionInMultipleFrames(name + initialOrientationName, registry, trajectoryFrame);
-         YoFrameVectorInMultipleFrames initialAngularVelocity = new YoFrameVectorInMultipleFrames(name + initialAngularVelocityName, registry, trajectoryFrame);
-         YoFrameQuaternionInMultipleFrames finalOrientation = new YoFrameQuaternionInMultipleFrames(name + finalOrientationName, registry, trajectoryFrame);
-         YoFrameVectorInMultipleFrames finalAngularVelocity = new YoFrameVectorInMultipleFrames(name + finalAngularVelocityName, registry, trajectoryFrame);
-
-         YoFrameQuaternionInMultipleFrames currentOrientation = new YoFrameQuaternionInMultipleFrames(name + currentOrientationName, registry, trajectoryFrame);
-         YoFrameVectorInMultipleFrames currentAngularVelocity = new YoFrameVectorInMultipleFrames(name + currentAngularVelocityName, registry, trajectoryFrame);
-         YoFrameVectorInMultipleFrames currentAngularAcceleration = new YoFrameVectorInMultipleFrames(name + currentAngularAccelerationName, registry,
-                                                                                                      trajectoryFrame);
-
-         registerMultipleFramesHolders(initialOrientation, initialAngularVelocity);
-         registerMultipleFramesHolders(finalOrientation, finalAngularVelocity);
-         registerMultipleFramesHolders(currentOrientation, currentAngularVelocity, currentAngularAcceleration);
-
-         this.initialOrientation = initialOrientation;
-         this.initialAngularVelocity = initialAngularVelocity;
-         this.finalOrientation = finalOrientation;
-         this.finalAngularVelocity = finalAngularVelocity;
-         this.currentOrientation = currentOrientation;
-         this.currentAngularVelocity = currentAngularVelocity;
-         this.currentAngularAcceleration = currentAngularAcceleration;
-
-         for (int i = 1; i <= 3; i++)
-         {
-            YoFrameVectorInMultipleFrames controlRotation = new YoFrameVectorInMultipleFrames(name + controlRotationsName + i, registry, trajectoryFrame);
-            registerMultipleFramesHolders(controlRotation);
-            controlRotations[i] = controlRotation;
-         }
-      }
-      else
-      {
-         initialOrientation = new YoFrameQuaternion(name + initialOrientationName, trajectoryFrame, registry);
-         initialAngularVelocity = new YoFrameVector3D(name + initialAngularVelocityName, trajectoryFrame, registry);
-         finalOrientation = new YoFrameQuaternion(name + finalOrientationName, trajectoryFrame, registry);
-         finalAngularVelocity = new YoFrameVector3D(name + finalAngularVelocityName, trajectoryFrame, registry);
-
-         currentOrientation = new YoFrameQuaternion(name + currentOrientationName, trajectoryFrame, registry);
-         currentAngularVelocity = new YoFrameVector3D(name + currentAngularVelocityName, trajectoryFrame, registry);
-         currentAngularAcceleration = new YoFrameVector3D(name + currentAngularAccelerationName, trajectoryFrame, registry);
-
-         for (int i = 1; i <= 3; i++)
-            controlRotations[i] = new YoFrameVector3D(name + controlRotationsName + i, trajectoryFrame, registry);
+         controlRotations[i] = new YoMutableFrameVector3D(name + controlRotationsName + i, "", registry, trajectoryFrame);
+         registerFrameChangeables(controlRotations[i]);
       }
 
       parentRegistry.addChild(registry);
