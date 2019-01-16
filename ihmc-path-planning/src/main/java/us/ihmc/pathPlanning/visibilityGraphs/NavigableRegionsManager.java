@@ -24,9 +24,6 @@ public class NavigableRegionsManager
 {
    private final static boolean debug = false;
 
-   private final static double bodyWidth = 1.1;
-   private final static double rotationWeight = 0.0;
-
    private final VisibilityGraphsParameters parameters;
    private final VisibilityGraphsCostParameters costParameters;
 
@@ -245,8 +242,6 @@ public class NavigableRegionsManager
    {
       Point3DReadOnly originPointInWorld = nodeToExpandInWorld.getPointInWorld();
       Point3DReadOnly nextPointInWorld = nextNodeInWorld.getPointInWorld();
-      Point2DReadOnly originPointInWorld2D = new Point2D(originPointInWorld);
-      Point2DReadOnly nextPointInWorld2D = new Point2D(nextPointInWorld);;
 
       double horizontalDistance = originPointInWorld.distanceXY(nextPointInWorld);
       if (horizontalDistance <= 0.0)
@@ -254,42 +249,12 @@ public class NavigableRegionsManager
 
       double verticalDistance = Math.abs(nextPointInWorld.getZ() - originPointInWorld.getZ());
 
-      double distanceToCluster = Double.POSITIVE_INFINITY;
-      Point2D closestPointToCluster = new Point2D();
-      for (VisibilityGraphNavigableRegion navigableRegion : visibilityGraph.getVisibilityGraphNavigableRegions())
-      {
-         for (Cluster cluster : navigableRegion.getNavigableRegion().getObstacleClusters())
-         {
-            Point2D tempPointOnLine = new Point2D();
-            Point2D tempPointOnCluster = new Point2D();
-            Vector2D clusterNormal = new Vector2D();
-            double distance = VisibilityTools.distanceToCluster(originPointInWorld2D, nextPointInWorld2D, cluster.getNonNavigableExtrusionsInWorld2D(),
-                                                                tempPointOnLine, tempPointOnCluster, clusterNormal, cluster.isClosed());
-            if (distance < distanceToCluster)
-            {
-               distanceToCluster = distance;
-               closestPointToCluster.set(tempPointOnCluster);
-            }
-         }
-      }
-
       double angle = Math.atan(verticalDistance / horizontalDistance);
 
       double distanceCost = costParameters.getDistanceWeight() * horizontalDistance;
       double elevationCost = costParameters.getElevationWeight() * 2.0 * angle / Math.PI;
 
-      double distanceFromExtrusionForNoCost = bodyWidth / 2.0 - parameters.getObstacleExtrusionDistance();
-      double rotationCost = 0.0;
-      if (distanceToCluster < distanceFromExtrusionForNoCost)// && distanceToCluster > 0.0)
-      {
-         rotationCost = rotationWeight * (1.0 - distanceToCluster / distanceFromExtrusionForNoCost);
-         if (!closestPointToCluster.geometricallyEquals(originPointInWorld2D, 1e-4) && !closestPointToCluster.geometricallyEquals(nextPointInWorld2D, 1e-4))
-         {
-            Point2D pointInLocal = new Point2D();
-         }
-      }
-
-      return distanceCost + elevationCost + rotationCost;
+      return distanceCost + elevationCost;
    }
 
    private boolean checkIfStartAndGoalAreValid(Point3DReadOnly start, Point3DReadOnly goal)
