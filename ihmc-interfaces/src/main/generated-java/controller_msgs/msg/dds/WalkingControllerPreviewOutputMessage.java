@@ -9,7 +9,7 @@ import us.ihmc.pubsub.TopicDataType;
 /**
        * This message is part of the IHMC walking controller preview module: WalkingControllerPreviewToolbox.
        */
-public class WalkingControllerPreviewOutput extends Packet<WalkingControllerPreviewOutput> implements Settable<WalkingControllerPreviewOutput>, EpsilonComparable<WalkingControllerPreviewOutput>
+public class WalkingControllerPreviewOutputMessage extends Packet<WalkingControllerPreviewOutputMessage> implements Settable<WalkingControllerPreviewOutputMessage>, EpsilonComparable<WalkingControllerPreviewOutputMessage>
 {
    /**
             * Unique ID used to identify this message, should preferably be consecutively increasing.
@@ -24,19 +24,19 @@ public class WalkingControllerPreviewOutput extends Packet<WalkingControllerPrev
             */
    public us.ihmc.idl.IDLSequence.Object<controller_msgs.msg.dds.KinematicsToolboxOutputStatus>  robot_configurations_;
 
-   public WalkingControllerPreviewOutput()
+   public WalkingControllerPreviewOutputMessage()
    {
       robot_configurations_ = new us.ihmc.idl.IDLSequence.Object<controller_msgs.msg.dds.KinematicsToolboxOutputStatus> (1000, new controller_msgs.msg.dds.KinematicsToolboxOutputStatusPubSubType());
 
    }
 
-   public WalkingControllerPreviewOutput(WalkingControllerPreviewOutput other)
+   public WalkingControllerPreviewOutputMessage(WalkingControllerPreviewOutputMessage other)
    {
       this();
       set(other);
    }
 
-   public void set(WalkingControllerPreviewOutput other)
+   public void set(WalkingControllerPreviewOutputMessage other)
    {
       sequence_id_ = other.sequence_id_;
 
@@ -85,19 +85,19 @@ public class WalkingControllerPreviewOutput extends Packet<WalkingControllerPrev
    }
 
 
-   public static Supplier<WalkingControllerPreviewOutputPubSubType> getPubSubType()
+   public static Supplier<WalkingControllerPreviewOutputMessagePubSubType> getPubSubType()
    {
-      return WalkingControllerPreviewOutputPubSubType::new;
+      return WalkingControllerPreviewOutputMessagePubSubType::new;
    }
 
    @Override
    public Supplier<TopicDataType> getPubSubTypePacket()
    {
-      return WalkingControllerPreviewOutputPubSubType::new;
+      return WalkingControllerPreviewOutputMessagePubSubType::new;
    }
 
    @Override
-   public boolean epsilonEquals(WalkingControllerPreviewOutput other, double epsilon)
+   public boolean epsilonEquals(WalkingControllerPreviewOutputMessage other, double epsilon)
    {
       if(other == null) return false;
       if(other == this) return true;
@@ -122,9 +122,9 @@ public class WalkingControllerPreviewOutput extends Packet<WalkingControllerPrev
    {
       if(other == null) return false;
       if(other == this) return true;
-      if(!(other instanceof WalkingControllerPreviewOutput)) return false;
+      if(!(other instanceof WalkingControllerPreviewOutputMessage)) return false;
 
-      WalkingControllerPreviewOutput otherMyClass = (WalkingControllerPreviewOutput) other;
+      WalkingControllerPreviewOutputMessage otherMyClass = (WalkingControllerPreviewOutputMessage) other;
 
       if(this.sequence_id_ != otherMyClass.sequence_id_) return false;
 
@@ -140,7 +140,7 @@ public class WalkingControllerPreviewOutput extends Packet<WalkingControllerPrev
    {
       StringBuilder builder = new StringBuilder();
 
-      builder.append("WalkingControllerPreviewOutput {");
+      builder.append("WalkingControllerPreviewOutputMessage {");
       builder.append("sequence_id=");
       builder.append(this.sequence_id_);      builder.append(", ");
       builder.append("frame_dt=");
