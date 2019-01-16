@@ -6,7 +6,6 @@ import static us.ihmc.robotics.lists.FrameTuple2dArrayList.createFramePoint2dArr
 import java.awt.Color;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.LinkedHashMap;
 import java.util.List;
 
@@ -93,7 +92,6 @@ public class HighLevelHumanoidControllerToolbox
    private final SideDependentList<FrameConvexPolygon2D> defaultFootPolygons = new SideDependentList<>();
 
    private final ReferenceFrameHashCodeResolver referenceFrameHashCodeResolver;
-   private final Collection<ReferenceFrame> trajectoryFrames;
 
    protected final LinkedHashMap<ContactablePlaneBody, YoFramePoint2D> footDesiredCenterOfPressures = new LinkedHashMap<>();
    private final YoDouble desiredCoPAlpha;
@@ -166,7 +164,7 @@ public class HighLevelHumanoidControllerToolbox
 
    private final CenterOfMassDataHolderReadOnly centerOfMassDataHolder;
    private WalkingMessageHandler walkingMessageHandler;
-   
+
    private final YoBoolean controllerFailed = new YoBoolean("controllerFailed", registry);
 
    public HighLevelHumanoidControllerToolbox(FullHumanoidRobotModel fullRobotModel, CommonHumanoidReferenceFrames referenceFrames,
@@ -191,8 +189,6 @@ public class HighLevelHumanoidControllerToolbox
       this.wristForceSensors = wristForceSensors;
 
       referenceFrameHashCodeResolver = new ReferenceFrameHashCodeResolver(fullRobotModel, referenceFrames);
-      trajectoryFrames = new ArrayList<ReferenceFrame>();
-      trajectoryFrames.addAll(referenceFrameHashCodeResolver.getAllReferenceFrames());
 
       capturePointVelocityAlpha.set(0.5);
       yoCapturePointVelocity = FilteredVelocityYoFrameVector.createFilteredVelocityYoFrameVector("capturePointVelocity", "", capturePointVelocityAlpha, controlDT, registry, yoCapturePoint);
@@ -384,7 +380,7 @@ public class HighLevelHumanoidControllerToolbox
       filteredYoAngularMomentum = AlphaFilteredYoFrameVector.createAlphaFilteredYoFrameVector("filteredAngularMomentum", "", registry, alpha,
                                                                                               yoAngularMomentum);
       momentumGain.set(0.0);
-      
+
       attachControllerFailureListener(new ControllerFailureListener()
       {
          @Override
@@ -399,12 +395,12 @@ public class HighLevelHumanoidControllerToolbox
    {
       controllerFailed.set(true);
    }
-   
+
    public YoBoolean getControllerFailedBoolean()
    {
       return controllerFailed;
    }
-   
+
    public static JointBasics[] computeJointsToOptimizeFor(FullHumanoidRobotModel fullRobotModel, JointBasics... jointsToRemove)
    {
       List<JointBasics> joints = new ArrayList<JointBasics>();
@@ -1059,16 +1055,11 @@ public class HighLevelHumanoidControllerToolbox
       return referenceFrameHashCodeResolver;
    }
 
-   public Collection<ReferenceFrame> getTrajectoryFrames()
-   {
-      return trajectoryFrames;
-   }
-
    public void setWalkingMessageHandler(WalkingMessageHandler walkingMessageHandler)
    {
       this.walkingMessageHandler = walkingMessageHandler;
    }
-   
+
    public WalkingMessageHandler getWalkingMessageHandler()
    {
       return walkingMessageHandler;

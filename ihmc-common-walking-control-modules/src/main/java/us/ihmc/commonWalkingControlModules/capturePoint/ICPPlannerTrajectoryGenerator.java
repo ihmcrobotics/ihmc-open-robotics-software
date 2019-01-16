@@ -97,7 +97,8 @@ public class ICPPlannerTrajectoryGenerator implements PositionTrajectoryGenerato
       else
       {
          integrateCoMPositionUsingCubicICP(0.0, time, doubleSupportCapturePointTrajectory.getTrajectoryTime(), omega0.getDoubleValue(),
-               doubleSupportCapturePointTrajectory.getCurrentTrajectoryFrame(), xPolynomial, yPolynomial, initialCoMPositionInSpecificFrame, comPositionToPack);
+                                           doubleSupportCapturePointTrajectory.getReferenceFrame(), xPolynomial, yPolynomial, initialCoMPositionInSpecificFrame,
+                                           comPositionToPack);
       }
    }
 

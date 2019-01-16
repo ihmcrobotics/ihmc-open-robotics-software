@@ -11,7 +11,9 @@ import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DBasics;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
+import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DBasics;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
@@ -26,6 +28,8 @@ import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoFramePoint3D;
 import us.ihmc.yoVariables.variable.YoFrameVector3D;
 import us.ihmc.yoVariables.variable.YoInteger;
+import us.ihmc.yoVariables.variable.frameObjects.YoMutableFramePoint3D;
+import us.ihmc.yoVariables.variable.frameObjects.YoMutableFrameVector3D;
 
 public class MultipleWaypointsPositionTrajectoryGenerator extends PositionTrajectoryGeneratorInMultipleFrames
 {
@@ -41,9 +45,9 @@ public class MultipleWaypointsPositionTrajectoryGenerator extends PositionTrajec
    private final YoInteger currentWaypointIndex;
    private final ArrayList<YoFrameEuclideanTrajectoryPoint> waypoints;
 
-   private final YoFramePoint3D currentPosition;
-   private final YoFrameVector3D currentVelocity;
-   private final YoFrameVector3D currentAcceleration;
+   private final FramePoint3DBasics currentPosition;
+   private final FrameVector3DBasics currentVelocity;
+   private final FrameVector3DBasics currentAcceleration;
    private final YoPolynomial3D subTrajectory;
 
    public MultipleWaypointsPositionTrajectoryGenerator(String namePrefix, ReferenceFrame referenceFrame, YoVariableRegistry parentRegistry)
@@ -51,23 +55,9 @@ public class MultipleWaypointsPositionTrajectoryGenerator extends PositionTrajec
       this(namePrefix, defaultMaximumNumberOfWaypoints, referenceFrame, parentRegistry);
    }
 
-   public MultipleWaypointsPositionTrajectoryGenerator(String namePrefix, boolean allowMultipleFrames, ReferenceFrame referenceFrame,
-                                                       YoVariableRegistry parentRegistry)
-   {
-      this(namePrefix, defaultMaximumNumberOfWaypoints, allowMultipleFrames, referenceFrame, parentRegistry);
-   }
-
    public MultipleWaypointsPositionTrajectoryGenerator(String namePrefix, int maximumNumberOfWaypoints, ReferenceFrame referenceFrame,
                                                        YoVariableRegistry parentRegistry)
    {
-      this(namePrefix, maximumNumberOfWaypoints, false, referenceFrame, parentRegistry);
-   }
-
-   public MultipleWaypointsPositionTrajectoryGenerator(String namePrefix, int maximumNumberOfWaypoints, boolean allowMultipleFrames,
-                                                       ReferenceFrame referenceFrame, YoVariableRegistry parentRegistry)
-   {
-      super(allowMultipleFrames, referenceFrame);
-
       this.namePrefix = namePrefix;
       this.maximumNumberOfWaypoints = maximumNumberOfWaypoints;
 
@@ -85,32 +75,19 @@ public class MultipleWaypointsPositionTrajectoryGenerator extends PositionTrajec
       String currentVelocityName = namePrefix + "CurrentVelocity";
       String currentAccelerationName = namePrefix + "CurrentAcceleration";
 
-      if (allowMultipleFrames)
-      {
-         YoFramePointInMultipleFrames currentPosition = new YoFramePointInMultipleFrames(currentPositionName, registry, referenceFrame);
-         YoFrameVectorInMultipleFrames currentVelocity = new YoFrameVectorInMultipleFrames(currentVelocityName, registry, referenceFrame);
-         YoFrameVectorInMultipleFrames currentAcceleration = new YoFrameVectorInMultipleFrames(currentAccelerationName, registry, referenceFrame);
+      currentPosition = new YoMutableFramePoint3D(currentPositionName, "", registry, referenceFrame);
+      currentVelocity = new YoMutableFrameVector3D(currentVelocityName, "", registry, referenceFrame);
+      currentAcceleration = new YoMutableFrameVector3D(currentAccelerationName, "", registry, referenceFrame);
 
-         registerMultipleFramesHolders(currentPosition, currentVelocity, currentAcceleration);
-         this.currentPosition = currentPosition;
-         this.currentVelocity = currentVelocity;
-         this.currentAcceleration = currentAcceleration;
-      }
-      else
-      {
-         currentPosition = new YoFramePoint3D(currentPositionName, referenceFrame, registry);
-         currentVelocity = new YoFrameVector3D(currentVelocityName, referenceFrame, registry);
-         currentAcceleration = new YoFrameVector3D(currentAccelerationName, referenceFrame, registry);
-      }
+      registerFrameChangeables(currentPosition, currentVelocity, currentAcceleration);
 
       subTrajectory = new YoPolynomial3D(namePrefix, 4, registry);
 
       for (int i = 0; i < maximumNumberOfWaypoints; i++)
       {
          YoFrameEuclideanTrajectoryPoint waypoint = new YoFrameEuclideanTrajectoryPoint(namePrefix, "AtWaypoint" + i, registry, referenceFrame);
+         registerFrameChangeables(waypoint);
          waypoints.add(waypoint);
-         if (allowMultipleFrames)
-            registerMultipleFramesHolders(waypoint);
       }
 
       clear();
@@ -132,7 +109,7 @@ public class MultipleWaypointsPositionTrajectoryGenerator extends PositionTrajec
    public void clear(ReferenceFrame referenceFrame)
    {
       clear();
-      switchTrajectoryFrame(referenceFrame);
+      setReferenceFrame(referenceFrame);
    }
 
    public void appendWaypoint(double timeAtWaypoint, Point3DReadOnly position, Vector3DReadOnly linearVelocity)
@@ -167,14 +144,14 @@ public class MultipleWaypointsPositionTrajectoryGenerator extends PositionTrajec
 
    public void appendWaypoint(FrameEuclideanTrajectoryPoint frameEuclideanTrajectoryPoint)
    {
-      frameEuclideanTrajectoryPoint.checkReferenceFrameMatch(getCurrentTrajectoryFrame());
+      checkReferenceFrameMatch(frameEuclideanTrajectoryPoint);
       checkNumberOfWaypoints(numberOfWaypoints.getIntegerValue() + 1);
       appendWaypointUnsafe(frameEuclideanTrajectoryPoint);
    }
 
    public void appendWaypoint(FrameSE3TrajectoryPoint frameSE3TrajectoryPoint)
    {
-      frameSE3TrajectoryPoint.checkReferenceFrameMatch(getCurrentTrajectoryFrame());
+      checkReferenceFrameMatch(frameSE3TrajectoryPoint);
       checkNumberOfWaypoints(numberOfWaypoints.getIntegerValue() + 1);
       appendWaypointUnsafe(frameSE3TrajectoryPoint);
    }

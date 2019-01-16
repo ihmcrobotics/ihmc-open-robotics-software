@@ -1,11 +1,17 @@
 package us.ihmc.quadrupedRobotics.controlModules;
 
+import static us.ihmc.communication.packets.Packet.INVALID_MESSAGE_ID;
+
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.QuadrupedSupportPolygons;
 import us.ihmc.commonWalkingControlModules.controlModules.rigidBody.RigidBodyTaskspaceControlState;
 import us.ihmc.commons.lists.RecyclingArrayDeque;
 import us.ihmc.communication.packets.ExecutionMode;
 import us.ihmc.communication.packets.Packet;
-import us.ihmc.euclid.referenceFrame.*;
+import us.ihmc.euclid.referenceFrame.FrameConvexPolygon2D;
+import us.ihmc.euclid.referenceFrame.FramePoint2D;
+import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.FrameVector3D;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FixedFramePoint3DBasics;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
 import us.ihmc.euclid.tuple2D.Vector2D;
@@ -14,7 +20,6 @@ import us.ihmc.humanoidRobotics.communication.controllerAPI.command.QuadrupedBod
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.SE3TrajectoryControllerCommand;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.StopAllTrajectoryCommand;
 import us.ihmc.log.LogTools;
-import us.ihmc.mecano.frames.MovingReferenceFrame;
 import us.ihmc.quadrupedRobotics.controller.QuadrupedControllerToolbox;
 import us.ihmc.quadrupedRobotics.model.QuadrupedRuntimeEnvironment;
 import us.ihmc.robotics.controllers.PIDController;
@@ -24,14 +29,14 @@ import us.ihmc.robotics.geometry.ConvexPolygonScaler;
 import us.ihmc.robotics.math.filters.AlphaFilteredYoVariable;
 import us.ihmc.robotics.math.trajectories.waypoints.FrameSE3TrajectoryPoint;
 import us.ihmc.robotics.math.trajectories.waypoints.MultipleWaypointsPositionTrajectoryGenerator;
-import us.ihmc.robotics.robotSide.QuadrantDependentList;
-import us.ihmc.robotics.robotSide.RobotQuadrant;
 import us.ihmc.robotics.screwTheory.SelectionMatrix3D;
 import us.ihmc.yoVariables.parameters.BooleanParameter;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.yoVariables.variable.*;
-
-import static us.ihmc.communication.packets.Packet.INVALID_MESSAGE_ID;
+import us.ihmc.yoVariables.variable.YoBoolean;
+import us.ihmc.yoVariables.variable.YoDouble;
+import us.ihmc.yoVariables.variable.YoFramePoint2D;
+import us.ihmc.yoVariables.variable.YoFrameVector2D;
+import us.ihmc.yoVariables.variable.YoLong;
 
 public class QuadrupedBodyICPBasedTranslationManager
 {
@@ -98,16 +103,10 @@ public class QuadrupedBodyICPBasedTranslationManager
       controlDT = runtimeEnvironment.getControlDT();
       bodyZUpFrame = controllerToolbox.getReferenceFrames().getBodyZUpFrame();
       centerFeetZUpFrame = controllerToolbox.getReferenceFrames().getCenterOfFeetZUpFrameAveragingLowestZHeightsAcrossEnds();
-      QuadrantDependentList<MovingReferenceFrame> soleZUpFrames = controllerToolbox.getReferenceFrames().getSoleZUpFrames();
 
       this.quadrupedSupportPolygons = controllerToolbox.getSupportPolygons();
 
-      boolean allowMultipleFrames = true;
-      positionTrajectoryGenerator = new MultipleWaypointsPositionTrajectoryGenerator("bodyOffset", RigidBodyTaskspaceControlState.maxPointsInGenerator, allowMultipleFrames, centerFeetZUpFrame, registry);
-
-      positionTrajectoryGenerator.registerNewTrajectoryFrame(worldFrame);
-      for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
-         positionTrajectoryGenerator.registerNewTrajectoryFrame(soleZUpFrames.get(robotQuadrant));
+      positionTrajectoryGenerator = new MultipleWaypointsPositionTrajectoryGenerator("bodyOffset", RigidBodyTaskspaceControlState.maxPointsInGenerator, centerFeetZUpFrame, registry);
 
       bodyPositionGains.setKp(1.5);
       bodyPositionGains.setKi(2.0);
@@ -472,8 +471,7 @@ public class QuadrupedBodyICPBasedTranslationManager
       tempPosition.setToZero(bodyZUpFrame);
       tempPosition.changeFrame(worldFrame);
       tempVelocity.setToZero(worldFrame);
-      positionTrajectoryGenerator.clear();
-      positionTrajectoryGenerator.switchTrajectoryFrame(worldFrame);
+      positionTrajectoryGenerator.clear(worldFrame);
       positionTrajectoryGenerator.appendWaypoint(0.0, tempPosition, tempVelocity);
       positionTrajectoryGenerator.initialize();
       isTrajectoryStopped.set(false);

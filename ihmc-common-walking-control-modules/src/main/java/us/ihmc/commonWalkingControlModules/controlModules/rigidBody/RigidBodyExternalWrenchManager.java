@@ -51,9 +51,8 @@ public class RigidBodyExternalWrenchManager extends RigidBodyControlState
    private final FramePose3DReadOnly defaultControlFramePose;
    private final PoseReferenceFrame activeControlFrame;
 
-   public RigidBodyExternalWrenchManager(RigidBodyBasics bodyToControl, RigidBodyBasics baseBody, Collection<ReferenceFrame> trajectoryFrames,
-                                         ReferenceFrame controlFrame, YoDouble yoTime, YoGraphicsListRegistry graphicsListRegistry,
-                                         YoVariableRegistry parentRegistry)
+   public RigidBodyExternalWrenchManager(RigidBodyBasics bodyToControl, RigidBodyBasics baseBody, ReferenceFrame controlFrame, YoDouble yoTime,
+                                         YoGraphicsListRegistry graphicsListRegistry, YoVariableRegistry parentRegistry)
    {
       super(null, bodyToControl.getName() + "Wrench", yoTime, parentRegistry);
 
@@ -72,12 +71,6 @@ public class RigidBodyExternalWrenchManager extends RigidBodyControlState
 
       trajectoryGenerator = new LinearSpatialVectorTrajectoryGenerator(prefix, RigidBodyTaskspaceControlState.maxPointsInGenerator,
                                                                        ReferenceFrame.getWorldFrame(), registry);
-
-      if (trajectoryFrames != null)
-      {
-         trajectoryFrames.forEach(frame -> trajectoryGenerator.registerNewTrajectoryFrame(frame));
-      }
-      trajectoryGenerator.registerNewTrajectoryFrame(baseFrame);
       trajectoryGenerator.clear(baseFrame);
    }
 
