@@ -417,9 +417,11 @@ public class DRCSimulationStarter implements SimulationStarterInterface
       ArrayList<RigidBodyTransform> additionalContactTransforms = contactPointParameters.getAdditionalContactTransforms();
 
       contactableBodiesFactory.setFootContactPoints(contactPointParameters.getFootContactPoints());
-      contactableBodiesFactory.setToeContactParameters(contactPointParameters.getControllerToeContactPoints(), contactPointParameters.getControllerToeContactLines());
+      contactableBodiesFactory.setToeContactParameters(contactPointParameters.getControllerToeContactPoints(),
+                                                       contactPointParameters.getControllerToeContactLines());
       for (int i = 0; i < contactPointParameters.getAdditionalContactNames().size(); i++)
-         contactableBodiesFactory.addAdditionalContactPoint(additionalContactRigidBodyNames.get(i), additionaContactNames.get(i), additionalContactTransforms.get(i));
+         contactableBodiesFactory.addAdditionalContactPoint(additionalContactRigidBodyNames.get(i), additionaContactNames.get(i),
+                                                            additionalContactTransforms.get(i));
 
       DRCRobotSensorInformation sensorInformation = robotModel.getSensorInformation();
       SideDependentList<String> feetForceSensorNames = sensorInformation.getFeetForceSensorNames();
@@ -452,6 +454,7 @@ public class DRCSimulationStarter implements SimulationStarterInterface
 
       AvatarSimulationFactory avatarSimulationFactory = new AvatarSimulationFactory();
       avatarSimulationFactory.setRobotModel(robotModel);
+      avatarSimulationFactory.setShapeCollisionSettings(robotModel.getShapeCollisionSettings());
       avatarSimulationFactory.setHighLevelHumanoidControllerFactory(controllerFactory);
       avatarSimulationFactory.setCommonAvatarEnvironment(environment);
       avatarSimulationFactory.setRobotInitialSetup(robotInitialSetup);
@@ -459,7 +462,6 @@ public class DRCSimulationStarter implements SimulationStarterInterface
       avatarSimulationFactory.setGuiInitialSetup(guiInitialSetup);
       avatarSimulationFactory.setRealtimeRos2Node(realtimeRos2Node);
       avatarSimulationFactory.setCreateYoVariableServer(createYoVariableServer);
-      avatarSimulationFactory.setShapeCollision(robotModel.useShapeCollision());
       if (externalPelvisCorrectorSubscriber != null)
          avatarSimulationFactory.setExternalPelvisCorrectorSubscriber(externalPelvisCorrectorSubscriber);
       AvatarSimulation avatarSimulation = avatarSimulationFactory.createAvatarSimulation();
@@ -524,7 +526,8 @@ public class DRCSimulationStarter implements SimulationStarterInterface
 
             int framesPerSecond = 25;
             RawVideoDataServer drcRenderedSceneVideoHandler = new RawVideoDataServer(scsSensorOutputPacketCommunicator);
-            simulationConstructionSet.startStreamingVideoData(cameraConfiguration, width, height, new VideoDataServerImageCallback(drcRenderedSceneVideoHandler), timeStampProvider,
+            simulationConstructionSet.startStreamingVideoData(cameraConfiguration, width, height,
+                                                              new VideoDataServerImageCallback(drcRenderedSceneVideoHandler), timeStampProvider,
                                                               framesPerSecond);
          }
 

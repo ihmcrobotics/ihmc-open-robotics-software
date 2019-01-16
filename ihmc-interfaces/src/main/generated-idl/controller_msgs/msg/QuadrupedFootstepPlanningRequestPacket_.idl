@@ -1,0 +1,39 @@
+#ifndef __controller_msgs__msg__QuadrupedFootstepPlanningRequestPacket__idl__
+#define __controller_msgs__msg__QuadrupedFootstepPlanningRequestPacket__idl__
+
+#include "controller_msgs/msg/./PlanarRegionsListMessage_.idl"
+#include "geometry_msgs/msg/./Point_.idl"
+#include "geometry_msgs/msg/./Quaternion_.idl"
+module controller_msgs
+{
+  module msg
+  {
+    module dds
+    {
+      const long NO_PLAN_ID =
+      -1;
+
+
+      /**
+       * This message is part of the IHMC quadruped footstep planning module.
+       */
+      @TypeCode(type="controller_msgs::msg::dds_::QuadrupedFootstepPlanningRequestPacket_")
+      struct QuadrupedFootstepPlanningRequestPacket
+      {
+        /**
+         * Unique ID used to identify this message, should preferably be consecutively increasing.
+         */
+        unsigned long sequence_id;
+        geometry_msgs::msg::dds::Point body_position_in_world;
+        geometry_msgs::msg::dds::Quaternion body_orientation_in_world;
+        geometry_msgs::msg::dds::Point goal_position_in_world;
+        geometry_msgs::msg::dds::Quaternion goal_orientation_in_world;
+        controller_msgs::msg::dds::PlanarRegionsListMessage planar_regions_list_message;
+        @defaultValue(value=-1)
+        long planner_request_id;
+      };
+    };
+  };
+};
+
+#endif
