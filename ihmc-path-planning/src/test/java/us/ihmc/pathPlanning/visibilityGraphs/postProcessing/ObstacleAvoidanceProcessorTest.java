@@ -190,8 +190,8 @@ public class ObstacleAvoidanceProcessorTest
                Point3DReadOnly pointB = listOfPoints.get(j);
 
                double distance = pointA.distance(pointB);
-               assertTrue("Point " + i + " = " + pointA + " is too close to point " + j + " = " + pointB + ", with a distance of " + distance +", which should be at least " + distanceToFilter,
-                          distance > distanceToFilter);
+               assertTrue("Point " + i + " = " + pointA + " is too close to point " + j + " = " + pointB + ", with a distance of " + distance
+                                + ", which should be at least " + distanceToFilter, distance > distanceToFilter);
             }
          }
       }
@@ -248,9 +248,72 @@ public class ObstacleAvoidanceProcessorTest
                Point2DReadOnly pointB = listOfPoints.get(j);
 
                double distance = pointA.distance(pointB);
-               assertTrue("Point " + i + " = " + pointA + " is too close to point " + j + " = " + pointB + ", with a distance of " + distance +", which should be at least " + distanceToFilter,
-                          distance > distanceToFilter);
+               assertTrue("Point " + i + " = " + pointA + " is too close to point " + j + " = " + pointB + ", with a distance of " + distance
+                                + ", which should be at least " + distanceToFilter, distance > distanceToFilter);
             }
+         }
+      }
+   }
+
+   @Test(timeout = timeout)
+   public void testRemoveDuplicateStartOrEndPointsFromList()
+   {
+      Random random = new Random(1738L);
+      for (int iter = 0; iter < iters; iter++)
+      {
+         double distanceToFilter = RandomNumbers.nextDouble(random, 1e-4, 1.0);
+         int numberOfPointsRemove = RandomNumbers.nextInt(random, 0, 10);
+         int numberOfPointsToCreate = RandomNumbers.nextInt(random, numberOfPointsRemove, 50);
+
+         List<Point3D> listOfPoints = new ArrayList<>();
+         Point3D startPoint = EuclidCoreRandomTools.nextPoint3D(random, 10.0);
+         Point3D endPoint = EuclidCoreRandomTools.nextPoint3D(random, 10.0);
+         int numberOfRemovablePointsMade = 0;
+         for (int i = 0; i < numberOfPointsToCreate; i++)
+         {
+            int numberOfPointsRemainingToMake = numberOfPointsToCreate - listOfPoints.size();
+            int numberOfRemovablePointsRemainingToMake = numberOfPointsRemove - numberOfRemovablePointsMade;
+
+            double probabilityPointIsRemovable = (double) numberOfRemovablePointsRemainingToMake / numberOfPointsRemainingToMake;
+            boolean nextPointIsRemovable = RandomNumbers.nextBoolean(random, probabilityPointIsRemovable);
+
+            Vector3D displacementVector = EuclidCoreRandomTools.nextVector3D(random, -5.0, 5.0);
+            displacementVector.normalize();
+
+            if (nextPointIsRemovable)
+            {
+               displacementVector.scale(0.75 * distanceToFilter);
+               numberOfRemovablePointsMade++;
+            }
+            else
+            {
+               displacementVector.scale(1.5 * distanceToFilter);
+            }
+
+            boolean displacementFromStartPoint = RandomNumbers.nextBoolean(random, 0.5);
+            Point3D newPoint = new Point3D();
+            if (displacementFromStartPoint)
+               newPoint.set(startPoint);
+            else
+               newPoint.set(endPoint);
+            newPoint.add(displacementVector);
+
+            listOfPoints.add(newPoint);
+         }
+
+         ObstacleAvoidanceProcessor.removeDuplicateStartOrEndPointsFromList(listOfPoints, startPoint, endPoint, distanceToFilter);
+
+         for (int i = 0; i < listOfPoints.size(); i++)
+         {
+            Point3DReadOnly point = listOfPoints.get(i);
+
+            double distanceFromStart = point.distance(startPoint);
+            double distanceFromEnd = point.distance(endPoint);
+            assertTrue("Point " + i + " = " + point + " is too close to start " + startPoint + ", with a distance of " + distanceFromStart
+                             + ", which should be at least " + distanceToFilter, distanceFromStart > distanceToFilter);
+            assertTrue(
+                  "Point " + i + " = " + point + " is too close to end " + endPoint + ", with a distance of " + distanceFromEnd + ", which should be at least "
+                        + distanceToFilter, distanceFromEnd > distanceToFilter);
          }
       }
    }
