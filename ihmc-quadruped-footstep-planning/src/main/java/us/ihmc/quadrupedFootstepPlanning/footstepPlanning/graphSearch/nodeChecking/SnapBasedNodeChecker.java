@@ -6,14 +6,15 @@ import us.ihmc.euclid.geometry.LineSegment3D;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
-import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.FootstepNodeSnapData;
-import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.FootstepNodeSnapper;
-import us.ihmc.footstepPlanning.graphSearch.graph.FootstepNode;
-import us.ihmc.footstepPlanning.graphSearch.graph.visualization.BipedalFootstepPlannerNodeRejectionReason;
-import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParameters;
+import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.graphSearch.QuadrupedFootstepPlannerNodeRejectionReason;
+import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.graphSearch.footstepSnapping.FootstepNodeSnapData;
+import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.graphSearch.footstepSnapping.FootstepNodeSnapper;
+import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.graphSearch.graph.FootstepNode;
+import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.graphSearch.parameters.FootstepPlannerParameters;
 import us.ihmc.robotics.geometry.PlanarRegion;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
-import us.ihmc.robotics.robotSide.SideDependentList;
+import us.ihmc.robotics.robotSide.QuadrantDependentList;
+import us.ihmc.robotics.robotSide.RobotQuadrant;
 
 import java.util.List;
 
@@ -22,13 +23,11 @@ public class SnapBasedNodeChecker extends FootstepNodeChecker
    private static final boolean DEBUG = false;
 
    private final FootstepPlannerParameters parameters;
-   private final SideDependentList<ConvexPolygon2D> footPolygons;
    private final FootstepNodeSnapper snapper;
 
-   public SnapBasedNodeChecker(FootstepPlannerParameters parameters, SideDependentList<ConvexPolygon2D> footPolygons, FootstepNodeSnapper snapper)
+   public SnapBasedNodeChecker(FootstepPlannerParameters parameters, FootstepNodeSnapper snapper)
    {
       this.parameters = parameters;
-      this.footPolygons = footPolygons;
       this.snapper = snapper;
    }
 
@@ -39,7 +38,6 @@ public class SnapBasedNodeChecker extends FootstepNodeChecker
       snapper.setPlanarRegions(planarRegions);
    }
 
-   // TODO make this faster
    @Override
    public boolean isNodeValid(FootstepNode node, FootstepNode previousNode)
    {
@@ -49,29 +47,20 @@ public class SnapBasedNodeChecker extends FootstepNodeChecker
       }
 
       FootstepNodeSnapData snapData = snapper.snapFootstepNode(node);
-      RigidBodyTransform snapTransform = snapData.getSnapTransform();
-      if (snapTransform.containsNaN())
+      for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
       {
-         if (DEBUG)
+         RigidBodyTransform snapTransform = snapData.getSnapTransform(robotQuadrant);
+         if (snapTransform.containsNaN())
          {
-            PrintTools.debug("Was not able to snap node:\n" + node);
+            if (DEBUG)
+            {
+               PrintTools.debug("Was not able to snap node:\n" + node);
+            }
+            rejectNode(node, previousNode, QuadrupedFootstepPlannerNodeRejectionReason.COULD_NOT_SNAP);
+            return false;
          }
-         rejectNode(node, previousNode, BipedalFootstepPlannerNodeRejectionReason.COULD_NOT_SNAP);
-         return false;
       }
 
-      ConvexPolygon2D footholdAfterSnap = snapData.getCroppedFoothold();
-      double area = footholdAfterSnap.getArea();
-      double footArea = footPolygons.get(node.getRobotSide()).getArea();
-      if (!footholdAfterSnap.isEmpty() && area < parameters.getMinimumFootholdPercent() * footArea)
-      {
-         if (DEBUG)
-         {
-            PrintTools.debug("Node does not have enough foothold area. It only has " + Math.floor(100.0 * area / footArea) + "% foothold:\n" + node);
-         }
-         rejectNode(node, previousNode, BipedalFootstepPlannerNodeRejectionReason.NOT_ENOUGH_AREA);
-         return false;
-      }
 
       if (previousNode == null)
       {
@@ -79,34 +68,48 @@ public class SnapBasedNodeChecker extends FootstepNodeChecker
       }
 
       FootstepNodeSnapData previousNodeSnapData = snapper.snapFootstepNode(previousNode);
-      RigidBodyTransform previousSnapTransform = previousNodeSnapData.getSnapTransform();
-      Point3D nodePosition = new Point3D(node.getOrComputeMidFootPoint(parameters.getIdealFootstepWidth()));
-      snapTransform.transform(nodePosition);
-      Point3D previousNodePosition = new Point3D(previousNode.getOrComputeMidFootPoint(parameters.getIdealFootstepWidth()));
-      previousSnapTransform.transform(previousNodePosition);
 
-      double heightChange = Math.abs(nodePosition.getZ() - previousNodePosition.getZ());
-      if (heightChange > parameters.getMaximumStepZ())
+
+
+      for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
       {
-         if (DEBUG)
+         RigidBodyTransform previousFootSnapTransform = previousNodeSnapData.getSnapTransform(robotQuadrant);
+         RigidBodyTransform snapTransform = snapData.getSnapTransform(robotQuadrant);
+
+         Point3D stepPosition = new Point3D(node.getX(robotQuadrant), node.getY(robotQuadrant), 0.0);
+         Point3D previousStepPosition = new Point3D(previousNode.getX(robotQuadrant), previousNode.getY(robotQuadrant), 0.0);
+
+         snapTransform.transform(stepPosition);
+         previousFootSnapTransform.transform(previousStepPosition);
+
+         double heightChange = Math.abs(stepPosition.getZ() - previousStepPosition.getZ());
+         if (heightChange > parameters.getMaximumStepChangeZ())
          {
-            PrintTools.debug("Too much height difference (" + Math.round(100.0 * heightChange) + "cm) to previous node:\n" + node);
+            if (DEBUG)
+            {
+               PrintTools.debug("Too much height difference (" + Math.round(100.0 * heightChange) + "cm) to previous node:\n" + node);
+            }
+            rejectNode(node, previousNode, QuadrupedFootstepPlannerNodeRejectionReason.STEP_TOO_HIGH_OR_LOW);
+            return false;
          }
-         rejectNode(node, previousNode, BipedalFootstepPlannerNodeRejectionReason.STEP_TOO_HIGH_OR_LOW);
-         return false;
+
+
+         if (hasPlanarRegions() && isObstacleBetweenNodes(stepPosition, previousStepPosition,
+                                                          snapper.getOrCreateNearbyRegions(node.getRoundedX(robotQuadrant), node.getRoundedY(robotQuadrant)),
+                                                          parameters.getBodyGroundClearance()))
+         {
+            if (DEBUG)
+            {
+               PrintTools.debug("Found a obstacle between the nodes " + node + " and " + previousNode);
+            }
+            rejectNode(node, previousNode, QuadrupedFootstepPlannerNodeRejectionReason.OBSTACLE_BLOCKING_BODY);
+            return false;
+         }
       }
 
-      if (hasPlanarRegions() && isObstacleBetweenNodes(nodePosition, previousNodePosition,
-                                                       snapper.getOrCreateNearbyRegions(node.getRoundedX(), node.getRoundedY()),
-                                                       parameters.getBodyGroundClearance()))
-      {
-         if (DEBUG)
-         {
-            PrintTools.debug("Found a obstacle between the nodes " + node + " and " + previousNode);
-         }
-         rejectNode(node, previousNode, BipedalFootstepPlannerNodeRejectionReason.OBSTACLE_BLOCKING_BODY);
-         return false;
-      }
+
+
+
 
       return true;
    }
@@ -173,8 +176,8 @@ public class SnapBasedNodeChecker extends FootstepNodeChecker
    }
 
    @Override
-   public void addStartNode(FootstepNode startNode, RigidBodyTransform startNodeTransform)
+   public void addStartNode(FootstepNode startNode, QuadrantDependentList<RigidBodyTransform> startNodeTransforms)
    {
-      snapper.addSnapData(startNode, new FootstepNodeSnapData(startNodeTransform));
+      snapper.addSnapData(startNode, new FootstepNodeSnapData(startNodeTransforms));
    }
 }
