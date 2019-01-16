@@ -552,6 +552,77 @@ public class PlanarRegionTools
    }
 
    /**
+    * Find all the planar regions that contain the given point.
+    *
+    * @param point the query coordinates.
+    * @param maximumOrthogonalDistance tolerance expressed as maximum orthogonal distance from the
+    *           region.
+    * @return the list of planar regions containing the query. Returns null when no region contains
+    *         the query.
+    */
+   public static List<PlanarRegion> findPlanarRegionsContainingPoint(List<PlanarRegion> planarRegionsToCheck, Point3DReadOnly point, double maximumOrthogonalDistance)
+   {
+      List<PlanarRegion> containers = null;
+
+      for (int i = 0; i < planarRegionsToCheck.size(); i++)
+      {
+         PlanarRegion candidateRegion = planarRegionsToCheck.get(i);
+         if (candidateRegion.isPointInside(point, maximumOrthogonalDistance))
+         {
+            if (containers == null)
+               containers = new ArrayList<>();
+            containers.add(candidateRegion);
+         }
+      }
+
+      return containers;
+   }
+
+   /**
+    * Find all the planar regions that contain the given point. The algorithm is equivalent to
+    * projecting all the regions onto the XY-plane and then finding the regions containing the
+    * point.
+    *
+    * @param planarRegionsToCheck the list of the planar regions to look through
+    * @param point the query coordinates.
+    * @return the list of planar regions containing the query. Returns null when no region contains
+    *         the query.
+    */
+   public static List<PlanarRegion> findPlanarRegionsContainingPointByProjectionOntoXYPlane(List<PlanarRegion> planarRegionsToCheck, Point2DReadOnly point)
+   {
+      return findPlanarRegionsContainingPointByProjectionOntoXYPlane(planarRegionsToCheck, point.getX(), point.getY());
+   }
+
+   /**
+    * Find all the planar regions that contain the given point. The algorithm is equivalent to
+    * projecting all the regions onto the XY-plane and then finding the regions containing the
+    * point.
+    *
+    * @param planarRegionsToCheck the list of the planar regions to look through.
+    * @param x the query x-coordinate.
+    * @param y the query y-coordinate.
+    * @return the list of planar regions containing the query. Returns null when no region contains
+    *         the query.
+    */
+   public static List<PlanarRegion> findPlanarRegionsContainingPointByProjectionOntoXYPlane(List<PlanarRegion> planarRegionsToCheck, double x, double y)
+   {
+      List<PlanarRegion> containers = null;
+
+      for (int i = 0; i < planarRegionsToCheck.size(); i++)
+      {
+         PlanarRegion candidateRegion = planarRegionsToCheck.get(i);
+         if (candidateRegion.isPointInsideByProjectionOntoXYPlane(x, y))
+         {
+            if (containers == null)
+               containers = new ArrayList<>();
+            containers.add(candidateRegion);
+         }
+      }
+
+      return containers;
+   }
+
+   /**
     * Check if the vertical projections of the convex hulls of two planar regions overlap within epsilon.
     */
    public static boolean isRegionAOverlapingWithRegionB(PlanarRegion regionOne, PlanarRegion regionTwo, double epsilon)
