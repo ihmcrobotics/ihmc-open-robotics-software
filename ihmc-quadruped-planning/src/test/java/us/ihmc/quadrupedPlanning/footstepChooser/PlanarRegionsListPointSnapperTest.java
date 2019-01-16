@@ -24,18 +24,20 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
+import static org.fest.assertions.Fail.fail;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
 @ContinuousIntegrationAnnotations.ContinuousIntegrationPlan(categories = IntegrationCategory.FAST)
 public class PlanarRegionsListPointSnapperTest
 {
+   private static final double epsilon = 1e-7;
+
    @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testSimpleVerticalSnap()
    {
       Point2D pointToSnap = new Point2D();
-      RigidBodyTransform nonSnappedTransform = new RigidBodyTransform();
 
       PlanarRegionsListGenerator generator = new PlanarRegionsListGenerator();
 
@@ -48,7 +50,7 @@ public class PlanarRegionsListPointSnapperTest
 
       RigidBodyTransform expectedTransform = new RigidBodyTransform();
       expectedTransform.setTranslation(0.0, 0.0, 0.7);
-      assertTrue(expectedTransform.epsilonEquals(snapTransform, 1e-7));
+      EuclidCoreTestTools.assertRigidBodyTransformEquals(expectedTransform, snapTransform, epsilon);
    }
 
    @ContinuousIntegrationTest(estimatedDuration = 0.0)
@@ -56,7 +58,6 @@ public class PlanarRegionsListPointSnapperTest
    public void testSimpleVerticalAndRotatedSnap()
    {
       Point2D pointToSnap = new Point2D();
-      RigidBodyTransform nonSnappedTransform = new RigidBodyTransform();
 
       RigidBodyTransform planarRegionTransform = new RigidBodyTransform();
       planarRegionTransform.setRotationEulerAndZeroTranslation(0.1, 0.2, 0.3);
@@ -166,7 +167,7 @@ public class PlanarRegionsListPointSnapperTest
       RigidBodyTransform polygonSnappingTransform = PlanarRegionsListPointSnapper.snapPointToPlanarRegionsList(pointToSnap, planarRegionList, planarRegion);
 
       RigidBodyTransform identityTransform = new RigidBodyTransform();
-      assertTrue(polygonSnappingTransform.epsilonEquals(identityTransform, 1e-7));
+      EuclidCoreTestTools.assertRigidBodyTransformEquals(identityTransform, polygonSnappingTransform, epsilon);
 
       planarRegionTransformToWorld = new RigidBodyTransform();
       planarRegionTransformToWorld.setTranslation(1.2, 3.4, 7.6);
@@ -178,7 +179,7 @@ public class PlanarRegionsListPointSnapperTest
 
       RigidBodyTransform expectedTransform = new RigidBodyTransform();
       expectedTransform.setTranslation(0.0, 0.0, 7.6);
-      assertTrue(polygonSnappingTransform.epsilonEquals(expectedTransform, 1e-7));
+      EuclidCoreTestTools.assertRigidBodyTransformEquals(expectedTransform, polygonSnappingTransform, epsilon);
    }
 
    @ContinuousIntegrationTest(estimatedDuration = 0.0)
@@ -214,16 +215,16 @@ public class PlanarRegionsListPointSnapperTest
       Point3D highVertexOne = new Point3D(-1.0, -1.0, 0.0);
       polygonSnappingTransform.transform(highVertexOne);
 
-      assertEquals(-1.0, highVertexOne.getX(), 1e-7);
-      assertEquals(-1.0, highVertexOne.getY(), 1e-7);
-      assertEquals(planarRegionToSnapTo.getPlaneZGivenXY(-1.0, -1.0), highVertexOne.getZ(), 1e-7);
+      assertEquals(-1.0, highVertexOne.getX(), epsilon);
+      assertEquals(-1.0, highVertexOne.getY(), epsilon);
+      assertEquals(planarRegionToSnapTo.getPlaneZGivenXY(-1.0, -1.0), highVertexOne.getZ(), epsilon);
 
       Point3D highVertexTwo = new Point3D(-1.0, 1.0, 0.0);
       polygonSnappingTransform.transform(highVertexTwo);
 
-      assertEquals(-1.0, highVertexTwo.getX(), 1e-7);
-      assertEquals(1.0, highVertexTwo.getY(), 1e-7);
-      assertEquals(planarRegionToSnapTo.getPlaneZGivenXY(-1.0, 1.0), highVertexTwo.getZ(), 1e-7);
+      assertEquals(-1.0, highVertexTwo.getX(), epsilon);
+      assertEquals(1.0, highVertexTwo.getY(), epsilon);
+      assertEquals(planarRegionToSnapTo.getPlaneZGivenXY(-1.0, 1.0), highVertexTwo.getZ(), epsilon);
 
       assertSurfaceNormalsMatchAndSnapPreservesXFromAbove(polygonSnappingTransform, planarRegionTransformToWorld);
    }
@@ -261,9 +262,9 @@ public class PlanarRegionsListPointSnapperTest
       Point3D highVertexOne = new Point3D(-1.0, -1.0, 0.0);
       polygonSnappingTransform.transform(highVertexOne);
 
-      assertEquals(-1.0, highVertexOne.getX(), 1e-7);
-      assertEquals(-1.0, highVertexOne.getY(), 1e-7);
-      assertEquals(planarRegionToSnapTo.getPlaneZGivenXY(-1.0, -1.0), highVertexOne.getZ(), 1e-7);
+      assertEquals(-1.0, highVertexOne.getX(), epsilon);
+      assertEquals(-1.0, highVertexOne.getY(), epsilon);
+      assertEquals(planarRegionToSnapTo.getPlaneZGivenXY(-1.0, -1.0), highVertexOne.getZ(), epsilon);
 
       assertSurfaceNormalsMatchAndSnapPreservesXFromAbove(polygonSnappingTransform, planarRegionTransformToWorld);
    }
@@ -275,11 +276,11 @@ public class PlanarRegionsListPointSnapperTest
 
       Vector3D actualSurfaceNormal = new Vector3D(0.0, 0.0, 1.0);
       snapTransform.transform(actualSurfaceNormal);
-      EuclidCoreTestTools.assertTuple3DEquals(expectedSurfaceNormal, actualSurfaceNormal, 1e-7);
+      EuclidCoreTestTools.assertTuple3DEquals(expectedSurfaceNormal, actualSurfaceNormal, epsilon);
 
       Vector3D xAxis = new Vector3D(1.0, 0.0, 0.0);
       snapTransform.transform(xAxis);
-      assertEquals(0.0, xAxis.getY(), 1e-7);
+      assertEquals(0.0, xAxis.getY(), epsilon);
    }
 
    private static void doATest(PlanarRegionsList planarRegionsList, ArrayList<double[]> xyYawToTest)
@@ -316,9 +317,23 @@ public class PlanarRegionsListPointSnapperTest
                   if (planeZGivenXY > highestZ)
                      highestZ = planeZGivenXY;
                }
+               assertEquals(pointToSnap.getX(), snappedVertex.getX(), epsilon);
+               assertEquals(pointToSnap.getY(), snappedVertex.getY(), epsilon);
                assertEquals("planeZGivenXY = " + highestZ + ", snappedVertex.getZ() = " + snappedVertex.getZ(), highestZ, snappedVertex.getZ(),
-                            1e-4);
+                            epsilon);
             }
+            else
+            {
+               fail();
+            }
+         }
+         else
+         {
+            List<PlanarRegion> planarRegions = planarRegionsList
+                  .findPlanarRegionsContainingPointByProjectionOntoXYPlane(pointToSnap.getX(), pointToSnap.getY());
+
+            if (planarRegions != null)
+               assertTrue(planarRegions.isEmpty());
          }
       }
    }
