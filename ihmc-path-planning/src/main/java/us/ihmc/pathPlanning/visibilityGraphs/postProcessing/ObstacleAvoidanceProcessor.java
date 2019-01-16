@@ -85,9 +85,10 @@ public class ObstacleAvoidanceProcessor
             List<Point3D> intermediateWaypointsToAdd = computeIntermediateWaypointsToAddToAvoidObstacles(new Point2D(startPointInWorld), new Point2D(endPointInWorld), startVisGraphNode,
                                                                                                          endVisGraphNode);
             removeDuplicated3DPointsFromList(intermediateWaypointsToAdd, clusterResolution);
+            removeDuplicateStartOrEndPointsFromList(intermediateWaypointsToAdd, startPointInWorld, endPointInWorld, clusterResolution);
 
             // shift all the points around
-            if (adjustMidpoints)
+            if (adjustMidpoints)// && pathNodeIndex < 3 )
             {
                for (Point3D intermediateWaypointToAdd : intermediateWaypointsToAdd)
                {
@@ -97,16 +98,12 @@ public class ObstacleAvoidanceProcessor
 
             // prune duplicated points
             removeDuplicated3DPointsFromList(intermediateWaypointsToAdd, clusterResolution);
+            removeDuplicateStartOrEndPointsFromList(intermediateWaypointsToAdd, startPointInWorld, endPointInWorld, clusterResolution);
 
-            // add the new points to the path
             for (Point3D intermediateWaypointToAdd : intermediateWaypointsToAdd)
             {
-               if (intermediateWaypointToAdd.distance(startPointInWorld) > clusterResolution &&
-                     intermediateWaypointToAdd.distance(endPointInWorld) > clusterResolution)
-               {
-                  waypointIndex++;
-                  newPath.add(waypointIndex, intermediateWaypointToAdd);
-               }
+               waypointIndex++;
+               newPath.add(waypointIndex, intermediateWaypointToAdd);
             }
          }
 
@@ -415,6 +412,21 @@ public class ObstacleAvoidanceProcessor
          pointIndex++;
       }
    }
+
+   private static void removeDuplicateStartOrEndPointsFromList(List<? extends Point3DReadOnly> listOfPoints, Point3DReadOnly startPoint,
+                                                               Point3DReadOnly endPoint, double samePointEpsilon)
+   {
+      int pointIndex = 0;
+      while (pointIndex < listOfPoints.size())
+      {
+         Point3DReadOnly pointToCheck = listOfPoints.get(pointIndex);
+         if (pointToCheck.distance(startPoint) < samePointEpsilon || pointToCheck.distance(endPoint) < samePointEpsilon)
+            listOfPoints.remove(pointIndex);
+         else
+            pointIndex++;
+      }
+   }
+
 
 
    private boolean isNearCliff(Point2DReadOnly point, double maxConnectionDistance, double maxHeightDelta, NavigableRegion homeRegion,
