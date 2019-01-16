@@ -1,5 +1,5 @@
-#ifndef __controller_msgs__msg__WalkingControllerPreviewInput__idl__
-#define __controller_msgs__msg__WalkingControllerPreviewInput__idl__
+#ifndef __controller_msgs__msg__WalkingControllerPreviewInputMessage__idl__
+#define __controller_msgs__msg__WalkingControllerPreviewInputMessage__idl__
 
 #include "controller_msgs/msg/./FootstepDataListMessage_.idl"
 module controller_msgs
@@ -14,8 +14,8 @@ module controller_msgs
        * Configure only the fields to be previewed.
        * New fields will be added to this message as the module supports them.
        */
-      @TypeCode(type="controller_msgs::msg::dds_::WalkingControllerPreviewInput_")
-      struct WalkingControllerPreviewInput
+      @TypeCode(type="controller_msgs::msg::dds_::WalkingControllerPreviewInputMessage_")
+      struct WalkingControllerPreviewInputMessage
       {
         /**
          * Unique ID used to identify this message, should preferably be consecutively increasing.

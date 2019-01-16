@@ -1,5 +1,5 @@
-#ifndef __controller_msgs__msg__WalkingControllerPreviewOutput__idl__
-#define __controller_msgs__msg__WalkingControllerPreviewOutput__idl__
+#ifndef __controller_msgs__msg__WalkingControllerPreviewOutputMessage__idl__
+#define __controller_msgs__msg__WalkingControllerPreviewOutputMessage__idl__
 
 #include "controller_msgs/msg/./KinematicsToolboxOutputStatus_.idl"
 module controller_msgs
@@ -12,8 +12,8 @@ module controller_msgs
       /**
        * This message is part of the IHMC walking controller preview module: WalkingControllerPreviewToolbox.
        */
-      @TypeCode(type="controller_msgs::msg::dds_::WalkingControllerPreviewOutput_")
-      struct WalkingControllerPreviewOutput
+      @TypeCode(type="controller_msgs::msg::dds_::WalkingControllerPreviewOutputMessage_")
+      struct WalkingControllerPreviewOutputMessage
       {
         /**
          * Unique ID used to identify this message, should preferably be consecutively increasing.

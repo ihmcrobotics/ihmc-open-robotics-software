@@ -11,7 +11,7 @@ import us.ihmc.pubsub.TopicDataType;
        * Configure only the fields to be previewed.
        * New fields will be added to this message as the module supports them.
        */
-public class WalkingControllerPreviewInput extends Packet<WalkingControllerPreviewInput> implements Settable<WalkingControllerPreviewInput>, EpsilonComparable<WalkingControllerPreviewInput>
+public class WalkingControllerPreviewInputMessage extends Packet<WalkingControllerPreviewInputMessage> implements Settable<WalkingControllerPreviewInputMessage>, EpsilonComparable<WalkingControllerPreviewInputMessage>
 {
    /**
             * Unique ID used to identify this message, should preferably be consecutively increasing.
@@ -22,18 +22,18 @@ public class WalkingControllerPreviewInput extends Packet<WalkingControllerPrevi
             */
    public controller_msgs.msg.dds.FootstepDataListMessage footsteps_;
 
-   public WalkingControllerPreviewInput()
+   public WalkingControllerPreviewInputMessage()
    {
       footsteps_ = new controller_msgs.msg.dds.FootstepDataListMessage();
    }
 
-   public WalkingControllerPreviewInput(WalkingControllerPreviewInput other)
+   public WalkingControllerPreviewInputMessage(WalkingControllerPreviewInputMessage other)
    {
       this();
       set(other);
    }
 
-   public void set(WalkingControllerPreviewInput other)
+   public void set(WalkingControllerPreviewInputMessage other)
    {
       sequence_id_ = other.sequence_id_;
 
@@ -65,19 +65,19 @@ public class WalkingControllerPreviewInput extends Packet<WalkingControllerPrevi
    }
 
 
-   public static Supplier<WalkingControllerPreviewInputPubSubType> getPubSubType()
+   public static Supplier<WalkingControllerPreviewInputMessagePubSubType> getPubSubType()
    {
-      return WalkingControllerPreviewInputPubSubType::new;
+      return WalkingControllerPreviewInputMessagePubSubType::new;
    }
 
    @Override
    public Supplier<TopicDataType> getPubSubTypePacket()
    {
-      return WalkingControllerPreviewInputPubSubType::new;
+      return WalkingControllerPreviewInputMessagePubSubType::new;
    }
 
    @Override
-   public boolean epsilonEquals(WalkingControllerPreviewInput other, double epsilon)
+   public boolean epsilonEquals(WalkingControllerPreviewInputMessage other, double epsilon)
    {
       if(other == null) return false;
       if(other == this) return true;
@@ -94,9 +94,9 @@ public class WalkingControllerPreviewInput extends Packet<WalkingControllerPrevi
    {
       if(other == null) return false;
       if(other == this) return true;
-      if(!(other instanceof WalkingControllerPreviewInput)) return false;
+      if(!(other instanceof WalkingControllerPreviewInputMessage)) return false;
 
-      WalkingControllerPreviewInput otherMyClass = (WalkingControllerPreviewInput) other;
+      WalkingControllerPreviewInputMessage otherMyClass = (WalkingControllerPreviewInputMessage) other;
 
       if(this.sequence_id_ != otherMyClass.sequence_id_) return false;
 
@@ -110,7 +110,7 @@ public class WalkingControllerPreviewInput extends Packet<WalkingControllerPrevi
    {
       StringBuilder builder = new StringBuilder();
 
-      builder.append("WalkingControllerPreviewInput {");
+      builder.append("WalkingControllerPreviewInputMessage {");
       builder.append("sequence_id=");
       builder.append(this.sequence_id_);      builder.append(", ");
       builder.append("footsteps=");
