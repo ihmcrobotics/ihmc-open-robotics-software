@@ -27,7 +27,7 @@ public class ObstacleAvoidanceProcessor
 {
    private static final boolean includeMidpoints = true;
    private static final boolean adjustWaypoints = true;
-   private static final boolean adjustMidpoints = false;
+   private static final boolean adjustMidpoints = true; // FIXME this currently doesn't work
 
    private static final double minDistanceToMove = 0.01;
    private static final double cliffHeightToAvoid = 0.10;
@@ -47,7 +47,7 @@ public class ObstacleAvoidanceProcessor
       desiredDistanceFromCliff = parameters.getPreferredObstacleExtrusionDistance() - parameters.getNavigableExtrusionDistance();
 //      desiredDistanceFromCliff = 0.5;
       minimumDistanceFromCliff = parameters.getObstacleExtrusionDistance();
-      clusterResolution = parameters.getClusterResolution();
+      clusterResolution = 0.1;
    }
 
    public List<Point3DReadOnly> computePathFromNodes(List<VisibilityGraphNode> nodePath, VisibilityMapSolution visibilityMapSolution)
@@ -84,6 +84,8 @@ public class ObstacleAvoidanceProcessor
          {
             List<Point3D> intermediateWaypointsToAdd = computeIntermediateWaypointsToAddToAvoidObstacles(new Point2D(startPointInWorld), new Point2D(endPointInWorld), startVisGraphNode,
                                                                                                          endVisGraphNode);
+            removeDuplicated3DPointsFromList(intermediateWaypointsToAdd, clusterResolution);
+
             // shift all the points around
             if (adjustMidpoints)
             {
@@ -94,12 +96,13 @@ public class ObstacleAvoidanceProcessor
             }
 
             // prune duplicated points
-            removeDuplicated3DPointsFromList(intermediateWaypointsToAdd, samePointEpsilon);
+            removeDuplicated3DPointsFromList(intermediateWaypointsToAdd, clusterResolution);
 
             // add the new points to the path
             for (Point3D intermediateWaypointToAdd : intermediateWaypointsToAdd)
             {
-               if (intermediateWaypointToAdd.distance(startPointInWorld) > samePointEpsilon && intermediateWaypointToAdd.distance(endPointInWorld) > samePointEpsilon)
+               if (intermediateWaypointToAdd.distance(startPointInWorld) > clusterResolution &&
+                     intermediateWaypointToAdd.distance(endPointInWorld) > clusterResolution)
                {
                   waypointIndex++;
                   newPath.add(waypointIndex, intermediateWaypointToAdd);
