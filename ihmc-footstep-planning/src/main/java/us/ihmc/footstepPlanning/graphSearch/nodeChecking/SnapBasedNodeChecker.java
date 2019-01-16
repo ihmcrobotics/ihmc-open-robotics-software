@@ -134,7 +134,7 @@ public class SnapBasedNodeChecker extends FootstepNodeChecker
                return false;
             }
 
-            boolean largeStepDown = heightChangeFromGrandparentNode < parameters.getMaximumStepZWhenForwardAndDown();
+            boolean largeStepDown = heightChangeFromGrandparentNode < - parameters.getMaximumStepZWhenForwardAndDown();
 
             if(largeStepDown && translationChangeFromGrandparentNode > grandparentTranslationScaleFactor * parameters.getMaximumStepXWhenForwardAndDown())
             {
