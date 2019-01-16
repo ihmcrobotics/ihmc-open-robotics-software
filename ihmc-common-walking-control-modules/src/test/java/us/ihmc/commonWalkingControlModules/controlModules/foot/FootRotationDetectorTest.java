@@ -24,7 +24,7 @@ import us.ihmc.yoVariables.registry.YoVariableRegistry;
 public class FootRotationDetectorTest
 {
    @ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test
+   @Test(timeout = 3000)
    public void testRotationDetectionMath()
    {
       Random random = new Random(429L);
