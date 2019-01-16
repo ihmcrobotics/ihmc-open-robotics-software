@@ -57,7 +57,7 @@ public class NavigableRegionsManager
 
    public NavigableRegionsManager(VisibilityGraphsParameters parameters, List<PlanarRegion> regions)
    {
-      this(parameters, regions, new ObstacleAvoidanceProcessor(parameters));
+      this(parameters, regions, null);
    }
 
    public NavigableRegionsManager(VisibilityGraphsParameters parameters, List<PlanarRegion> regions, ObstacleAvoidanceProcessor postProcessor)
