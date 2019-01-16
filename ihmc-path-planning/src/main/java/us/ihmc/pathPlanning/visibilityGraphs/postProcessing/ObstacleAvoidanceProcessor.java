@@ -27,7 +27,7 @@ public class ObstacleAvoidanceProcessor
 {
    private static final boolean includeMidpoints = true;
    private static final boolean adjustWaypoints = true;
-   private static final boolean adjustMidpoints = true; // FIXME this currently doesn't work
+   private static final boolean adjustMidpoints = true;
 
    private static final double minDistanceToMove = 0.01;
    private static final double cliffHeightToAvoid = 0.10;
