@@ -22,7 +22,7 @@ import us.ihmc.pathPlanning.visibilityGraphs.dataStructure.VisibilityMapWithNavi
 import us.ihmc.pathPlanning.visibilityGraphs.interfaces.NavigableExtrusionDistanceCalculator;
 import us.ihmc.pathPlanning.visibilityGraphs.interfaces.PlanarRegionFilter;
 import us.ihmc.pathPlanning.visibilityGraphs.interfaces.VisibilityGraphsParameters;
-import us.ihmc.pathPlanning.visibilityGraphs.postProcessing.ObstacleAvoidanceProcessor;
+import us.ihmc.pathPlanning.visibilityGraphs.postProcessing.ObstacleAndCliffAvoidanceProcessor;
 import us.ihmc.pathPlanning.visibilityGraphs.tools.VisibilityTools;
 import us.ihmc.robotics.geometry.PlanarRegion;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
@@ -57,7 +57,7 @@ public class NavigableRegionsManagerTest
       Point3D start = new Point3D(-15.0, 0.0, 0.0);
       Point3D goal = new Point3D(-5.0, 0.0, 0.0);
 
-      ObstacleAvoidanceProcessor postProcessor = new ObstacleAvoidanceProcessor(parameters);
+      ObstacleAndCliffAvoidanceProcessor postProcessor = new ObstacleAndCliffAvoidanceProcessor(parameters);
       NavigableRegionsManager navigableRegionsManager = new NavigableRegionsManager(parameters, planarRegionsList.getPlanarRegionsAsList(), postProcessor);
       navigableRegionsManager.setPlanarRegions(planarRegionsList.getPlanarRegionsAsList());
 
@@ -83,7 +83,7 @@ public class NavigableRegionsManagerTest
       Point3D start = new Point3D(-15.0, 1.0, 0.0);
       Point3D goal = new Point3D(-5.0, 1.0, 0.0);
 
-      ObstacleAvoidanceProcessor postProcessor = new ObstacleAvoidanceProcessor(parameters);
+      ObstacleAndCliffAvoidanceProcessor postProcessor = new ObstacleAndCliffAvoidanceProcessor(parameters);
       NavigableRegionsManager navigableRegionsManager = new NavigableRegionsManager(parameters, planarRegionsList.getPlanarRegionsAsList(), postProcessor);
       navigableRegionsManager.setPlanarRegions(planarRegionsList.getPlanarRegionsAsList());
 
@@ -109,7 +109,7 @@ public class NavigableRegionsManagerTest
       Point3D start = new Point3D(-15.0, -0.05 * parameters.getPreferredObstacleExtrusionDistance(), 0.0);
       Point3D goal = new Point3D(-5.0, -0.05 * parameters.getPreferredObstacleExtrusionDistance(), 0.0);
 
-      ObstacleAvoidanceProcessor postProcessor = new ObstacleAvoidanceProcessor(parameters);
+      ObstacleAndCliffAvoidanceProcessor postProcessor = new ObstacleAndCliffAvoidanceProcessor(parameters);
       NavigableRegionsManager navigableRegionsManager = new NavigableRegionsManager(parameters, planarRegionsList.getPlanarRegionsAsList(), postProcessor);
       navigableRegionsManager.setPlanarRegions(planarRegionsList.getPlanarRegionsAsList());
 
@@ -136,7 +136,7 @@ public class NavigableRegionsManagerTest
       Point3D start = new Point3D(-15.0, -0.1 * parameters.getPreferredObstacleExtrusionDistance(), 0.0);
       Point3D goal = new Point3D(-5.0, -0.1 * parameters.getPreferredObstacleExtrusionDistance(), 0.0);
 
-      ObstacleAvoidanceProcessor postProcessor = new ObstacleAvoidanceProcessor(parameters);
+      ObstacleAndCliffAvoidanceProcessor postProcessor = new ObstacleAndCliffAvoidanceProcessor(parameters);
       NavigableRegionsManager navigableRegionsManager = new NavigableRegionsManager(parameters, planarRegionsList.getPlanarRegionsAsList(), postProcessor);
       navigableRegionsManager.setPlanarRegions(planarRegionsList.getPlanarRegionsAsList());
 
@@ -162,7 +162,7 @@ public class NavigableRegionsManagerTest
       Point3D start = new Point3D(-15.0, -0.95 * parameters.getPreferredObstacleExtrusionDistance(), 0.0);
       Point3D goal = new Point3D(-5.0, -0.95 * parameters.getPreferredObstacleExtrusionDistance(), 0.0);
 
-      ObstacleAvoidanceProcessor postProcessor = new ObstacleAvoidanceProcessor(parameters);
+      ObstacleAndCliffAvoidanceProcessor postProcessor = new ObstacleAndCliffAvoidanceProcessor(parameters);
       NavigableRegionsManager navigableRegionsManager = new NavigableRegionsManager(parameters, planarRegionsList.getPlanarRegionsAsList(), postProcessor);
       navigableRegionsManager.setPlanarRegions(planarRegionsList.getPlanarRegionsAsList());
 
@@ -188,7 +188,7 @@ public class NavigableRegionsManagerTest
       Point3D start = new Point3D(-15.0, -1.05 * parameters.getPreferredObstacleExtrusionDistance(), 0.0);
       Point3D goal = new Point3D(-5.0, -1.05 * parameters.getPreferredObstacleExtrusionDistance(), 0.0);
 
-      ObstacleAvoidanceProcessor postProcessor = new ObstacleAvoidanceProcessor(parameters);
+      ObstacleAndCliffAvoidanceProcessor postProcessor = new ObstacleAndCliffAvoidanceProcessor(parameters);
       NavigableRegionsManager navigableRegionsManager = new NavigableRegionsManager(parameters, planarRegionsList.getPlanarRegionsAsList(), postProcessor);
       navigableRegionsManager.setPlanarRegions(planarRegionsList.getPlanarRegionsAsList());
 
@@ -214,7 +214,7 @@ public class NavigableRegionsManagerTest
       Point3D start = new Point3D(-15.0, 0.0, 0.0);
       Point3D goal = new Point3D(-5.0, 0.0, 0.0);
 
-      ObstacleAvoidanceProcessor postProcessor = new ObstacleAvoidanceProcessor(parameters);
+      ObstacleAndCliffAvoidanceProcessor postProcessor = new ObstacleAndCliffAvoidanceProcessor(parameters);
       NavigableRegionsManager navigableRegionsManager = new NavigableRegionsManager(parameters, planarRegionsList.getPlanarRegionsAsList(), postProcessor);
       navigableRegionsManager.setPlanarRegions(planarRegionsList.getPlanarRegionsAsList());
 
@@ -240,7 +240,7 @@ public class NavigableRegionsManagerTest
       Point3D start = new Point3D(-15.0, 1.0, 0.0);
       Point3D goal = new Point3D(-5.0, 1.0, 0.0);
 
-      ObstacleAvoidanceProcessor postProcessor = new ObstacleAvoidanceProcessor(parameters);
+      ObstacleAndCliffAvoidanceProcessor postProcessor = new ObstacleAndCliffAvoidanceProcessor(parameters);
       NavigableRegionsManager navigableRegionsManager = new NavigableRegionsManager(parameters, planarRegionsList.getPlanarRegionsAsList(), postProcessor);
       navigableRegionsManager.setPlanarRegions(planarRegionsList.getPlanarRegionsAsList());
 
@@ -266,7 +266,7 @@ public class NavigableRegionsManagerTest
       Point3D start = new Point3D(-15.0, -0.05 * parameters.getPreferredObstacleExtrusionDistance(), 0.0);
       Point3D goal = new Point3D(-5.0, -0.05 * parameters.getPreferredObstacleExtrusionDistance(), 0.0);
 
-      ObstacleAvoidanceProcessor postProcessor = new ObstacleAvoidanceProcessor(parameters);
+      ObstacleAndCliffAvoidanceProcessor postProcessor = new ObstacleAndCliffAvoidanceProcessor(parameters);
       NavigableRegionsManager navigableRegionsManager = new NavigableRegionsManager(parameters, planarRegionsList.getPlanarRegionsAsList(), postProcessor);
       navigableRegionsManager.setPlanarRegions(planarRegionsList.getPlanarRegionsAsList());
 
@@ -292,7 +292,7 @@ public class NavigableRegionsManagerTest
       Point3D start = new Point3D(-15.0, -0.1 * parameters.getPreferredObstacleExtrusionDistance(), 0.0);
       Point3D goal = new Point3D(-5.0, -0.1 * parameters.getPreferredObstacleExtrusionDistance(), 0.0);
 
-      ObstacleAvoidanceProcessor postProcessor = new ObstacleAvoidanceProcessor(parameters);
+      ObstacleAndCliffAvoidanceProcessor postProcessor = new ObstacleAndCliffAvoidanceProcessor(parameters);
       NavigableRegionsManager navigableRegionsManager = new NavigableRegionsManager(parameters, planarRegionsList.getPlanarRegionsAsList(), postProcessor);
       navigableRegionsManager.setPlanarRegions(planarRegionsList.getPlanarRegionsAsList());
 
@@ -318,7 +318,7 @@ public class NavigableRegionsManagerTest
       Point3D start = new Point3D(-15.0, -0.95 * parameters.getPreferredObstacleExtrusionDistance(), 0.0);
       Point3D goal = new Point3D(-5.0, -0.95 * parameters.getPreferredObstacleExtrusionDistance(), 0.0);
 
-      ObstacleAvoidanceProcessor postProcessor = new ObstacleAvoidanceProcessor(parameters);
+      ObstacleAndCliffAvoidanceProcessor postProcessor = new ObstacleAndCliffAvoidanceProcessor(parameters);
       NavigableRegionsManager navigableRegionsManager = new NavigableRegionsManager(parameters, planarRegionsList.getPlanarRegionsAsList(), postProcessor);
       navigableRegionsManager.setPlanarRegions(planarRegionsList.getPlanarRegionsAsList());
 
@@ -344,7 +344,7 @@ public class NavigableRegionsManagerTest
       Point3D start = new Point3D(-15.0, -1.05 * parameters.getPreferredObstacleExtrusionDistance(), 0.0);
       Point3D goal = new Point3D(-5.0, -1.05 * parameters.getPreferredObstacleExtrusionDistance(), 0.0);
 
-      ObstacleAvoidanceProcessor postProcessor = new ObstacleAvoidanceProcessor(parameters);
+      ObstacleAndCliffAvoidanceProcessor postProcessor = new ObstacleAndCliffAvoidanceProcessor(parameters);
       NavigableRegionsManager navigableRegionsManager = new NavigableRegionsManager(parameters, planarRegionsList.getPlanarRegionsAsList(), postProcessor);
       navigableRegionsManager.setPlanarRegions(planarRegionsList.getPlanarRegionsAsList());
 
@@ -370,7 +370,7 @@ public class NavigableRegionsManagerTest
       Point3D start = new Point3D(-15.0, -0.5 * parameters.getObstacleExtrusionDistance(), 0.0);
       Point3D goal = new Point3D(-5.0, -0.5 * parameters.getObstacleExtrusionDistance(), 0.0);
 
-      ObstacleAvoidanceProcessor postProcessor = new ObstacleAvoidanceProcessor(parameters);
+      ObstacleAndCliffAvoidanceProcessor postProcessor = new ObstacleAndCliffAvoidanceProcessor(parameters);
       NavigableRegionsManager navigableRegionsManager = new NavigableRegionsManager(parameters, planarRegionsList.getPlanarRegionsAsList(), postProcessor);
       navigableRegionsManager.setPlanarRegions(planarRegionsList.getPlanarRegionsAsList());
 
@@ -409,7 +409,7 @@ public class NavigableRegionsManagerTest
       Point3D start = new Point3D(-15.0, 1.5, 0.0);
       Point3D goal = new Point3D(-5.0, 1.5, 0.0);
 
-      ObstacleAvoidanceProcessor postProcessor = new ObstacleAvoidanceProcessor(parameters);
+      ObstacleAndCliffAvoidanceProcessor postProcessor = new ObstacleAndCliffAvoidanceProcessor(parameters);
       NavigableRegionsManager navigableRegionsManager = new NavigableRegionsManager(parameters, planarRegionsList.getPlanarRegionsAsList(), postProcessor);
       navigableRegionsManager.setPlanarRegions(planarRegionsList.getPlanarRegionsAsList());
 
@@ -435,7 +435,7 @@ public class NavigableRegionsManagerTest
       Point3D start = new Point3D(-15.0, 0.0, 0.0);
       Point3D goal = new Point3D(-5.0, 0.0, 0.0);
 
-      ObstacleAvoidanceProcessor postProcessor = new ObstacleAvoidanceProcessor(parameters);
+      ObstacleAndCliffAvoidanceProcessor postProcessor = new ObstacleAndCliffAvoidanceProcessor(parameters);
       NavigableRegionsManager navigableRegionsManager = new NavigableRegionsManager(parameters, planarRegionsList.getPlanarRegionsAsList(), postProcessor);
       navigableRegionsManager.setPlanarRegions(planarRegionsList.getPlanarRegionsAsList());
 
@@ -491,7 +491,7 @@ public class NavigableRegionsManagerTest
       Point3D start = new Point3D(-15.0, 1.5, 0.0);
       Point3D goal = new Point3D(-5.0, 1.5, 0.0);
 
-      ObstacleAvoidanceProcessor postProcessor = new ObstacleAvoidanceProcessor(parameters);
+      ObstacleAndCliffAvoidanceProcessor postProcessor = new ObstacleAndCliffAvoidanceProcessor(parameters);
       NavigableRegionsManager navigableRegionsManager = new NavigableRegionsManager(parameters, planarRegionsList.getPlanarRegionsAsList(), postProcessor);
       navigableRegionsManager.setPlanarRegions(planarRegionsList.getPlanarRegionsAsList());
 
@@ -517,7 +517,7 @@ public class NavigableRegionsManagerTest
       Point3D start = new Point3D(-15.0, 0.0, 0.0);
       Point3D goal = new Point3D(-5.0, 0.0, 0.0);
 
-      ObstacleAvoidanceProcessor postProcessor = new ObstacleAvoidanceProcessor(parameters);
+      ObstacleAndCliffAvoidanceProcessor postProcessor = new ObstacleAndCliffAvoidanceProcessor(parameters);
       NavigableRegionsManager navigableRegionsManager = new NavigableRegionsManager(parameters, planarRegionsList.getPlanarRegionsAsList(), postProcessor);
       navigableRegionsManager.setPlanarRegions(planarRegionsList.getPlanarRegionsAsList());
 

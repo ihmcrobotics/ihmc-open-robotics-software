@@ -22,7 +22,7 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
 
-public class ObstacleAvoidanceProcessor
+public class ObstacleAndCliffAvoidanceProcessor
 {
    private static final boolean includeMidpoints = true;
    private static final boolean adjustWaypoints = true;
@@ -39,7 +39,7 @@ public class ObstacleAvoidanceProcessor
    private final double waypointResolution;
    private final IntermediateComparator comparator = new IntermediateComparator();
 
-   public ObstacleAvoidanceProcessor(VisibilityGraphsParameters parameters)
+   public ObstacleAndCliffAvoidanceProcessor(VisibilityGraphsParameters parameters)
    {
       desiredDistanceFromObstacleCluster = parameters.getPreferredObstacleExtrusionDistance() - parameters.getObstacleExtrusionDistance();
       maxInterRegionConnectionLength = parameters.getMaxInterRegionConnectionLength();
