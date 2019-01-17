@@ -1,164 +1,104 @@
 package us.ihmc.robotics.geometry.yoFrameObjects;
 
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.euclid.tuple3D.interfaces.Point3DBasics;
-import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
-import us.ihmc.euclid.tuple3D.interfaces.Vector3DBasics;
-import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
-import us.ihmc.euclid.tuple4D.interfaces.QuaternionBasics;
-import us.ihmc.euclid.tuple4D.interfaces.QuaternionReadOnly;
+import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
+import us.ihmc.euclid.referenceFrame.interfaces.FrameQuaternionReadOnly;
+import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
+import us.ihmc.euclid.transform.interfaces.Transform;
+import us.ihmc.robotics.geometry.interfaces.FrameSE3WaypointInterface;
+import us.ihmc.robotics.math.trajectories.waypoints.WaypointToStringTools;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.yoVariables.variable.YoFramePoint3D;
-import us.ihmc.yoVariables.variable.YoFrameQuaternion;
-import us.ihmc.yoVariables.variable.YoFrameVector3D;
-import us.ihmc.robotics.geometry.frameObjects.FrameSE3Waypoint;
-import us.ihmc.robotics.geometry.interfaces.SE3WaypointInterface;
-import us.ihmc.robotics.geometry.transformables.EuclideanWaypoint;
-import us.ihmc.robotics.geometry.transformables.SE3Waypoint;
-import us.ihmc.robotics.geometry.transformables.SO3Waypoint;
 
-public class YoFrameSE3Waypoint extends YoFrameWaypoint<YoFrameSE3Waypoint, FrameSE3Waypoint, SE3Waypoint>
-      implements SE3WaypointInterface<YoFrameSE3Waypoint>
+public class YoFrameSE3Waypoint implements FrameSE3WaypointInterface<YoFrameSE3Waypoint>
 {
-   private final YoFramePoint3D position;
-   private final YoFrameQuaternion orientation;
-   private final YoFrameVector3D linearVelocity;
-   private final YoFrameVector3D angularVelocity;
+   private final YoFrameEuclideanWaypoint euclideanWaypoint;
+   private final YoFrameSO3Waypoint so3Waypoint;
 
-   public YoFrameSE3Waypoint(String namePrefix, String nameSuffix, YoVariableRegistry registry, ReferenceFrame... referenceFrames)
+   public YoFrameSE3Waypoint(String namePrefix, String nameSuffix, YoVariableRegistry registry)
    {
-      super(new FrameSE3Waypoint(), namePrefix, nameSuffix, registry, referenceFrames);
-      position = YoFrameEuclideanWaypoint.createYoPosition(this, namePrefix, nameSuffix, registry);
-      orientation = YoFrameSO3Waypoint.createYoOrientation(this, namePrefix, nameSuffix, registry);
-      linearVelocity = YoFrameEuclideanWaypoint.createYoLinearVelocity(this, namePrefix, nameSuffix, registry);
-      angularVelocity = YoFrameSO3Waypoint.createYoAngularVelocity(this, namePrefix, nameSuffix, registry);
+      euclideanWaypoint = new YoFrameEuclideanWaypoint(namePrefix, nameSuffix, registry);
+      so3Waypoint = new YoFrameSO3Waypoint(namePrefix, nameSuffix, registry);
    }
 
    @Override
-   public void setPosition(Point3DReadOnly position)
+   public FramePoint3DReadOnly getPosition()
    {
-      this.position.set(position);
+      return euclideanWaypoint.getPosition();
    }
 
    @Override
-   public void setLinearVelocity(Vector3DReadOnly linearVelocity)
+   public FrameVector3DReadOnly getLinearVelocity()
    {
-      this.linearVelocity.set(linearVelocity);
+      return euclideanWaypoint.getLinearVelocity();
    }
 
    @Override
-   public void setOrientation(QuaternionReadOnly orientation)
+   public void setPosition(double x, double y, double z)
    {
-      this.orientation.set(orientation);
+      euclideanWaypoint.setPosition(x, y, z);
    }
 
    @Override
-   public void setAngularVelocity(Vector3DReadOnly angularVelocity)
+   public void setLinearVelocity(double x, double y, double z)
    {
-      this.angularVelocity.set(angularVelocity);
+      euclideanWaypoint.setLinearVelocity(x, y, z);
    }
 
    @Override
-   public void setPositionToZero()
+   public void applyTransform(Transform transform)
    {
-      position.setToZero();
+      euclideanWaypoint.applyTransform(transform);
+      so3Waypoint.applyTransform(transform);
    }
 
    @Override
-   public void setOrientationToZero()
+   public void applyInverseTransform(Transform transform)
    {
-      orientation.setToZero();
+      euclideanWaypoint.applyInverseTransform(transform);
+      so3Waypoint.applyInverseTransform(transform);
    }
 
    @Override
-   public void setLinearVelocityToZero()
+   public void setReferenceFrame(ReferenceFrame referenceFrame)
    {
-      linearVelocity.setToZero();
+      euclideanWaypoint.setReferenceFrame(referenceFrame);
+      so3Waypoint.setReferenceFrame(referenceFrame);
    }
 
    @Override
-   public void setAngularVelocityToZero()
+   public ReferenceFrame getReferenceFrame()
    {
-      angularVelocity.setToZero();
+      euclideanWaypoint.checkReferenceFrameMatch(so3Waypoint);
+      return euclideanWaypoint.getReferenceFrame();
    }
 
    @Override
-   public void setPositionToNaN()
+   public FrameQuaternionReadOnly getOrientation()
    {
-      position.setToNaN();
+      return so3Waypoint.getOrientation();
    }
 
    @Override
-   public void setOrientationToNaN()
+   public FrameVector3DReadOnly getAngularVelocity()
    {
-      orientation.setToNaN();
+      return so3Waypoint.getAngularVelocity();
    }
 
    @Override
-   public void setLinearVelocityToNaN()
+   public void setOrientation(double x, double y, double z, double s)
    {
-      linearVelocity.setToNaN();
+      so3Waypoint.setOrientation(x, y, z, s);
    }
 
    @Override
-   public void setAngularVelocityToNaN()
+   public void setAngularVelocity(double x, double y, double z)
    {
-      angularVelocity.setToNaN();
+      so3Waypoint.setAngularVelocity(x, y, z);
    }
 
    @Override
-   public double positionDistance(YoFrameSE3Waypoint other)
+   public String toString()
    {
-      putYoValuesIntoFrameWaypoint();
-      other.putYoValuesIntoFrameWaypoint();
-      return frameWaypoint.positionDistance(other.frameWaypoint);
-   }
-
-   @Override
-   public void getPosition(Point3DBasics positionToPack)
-   {
-      positionToPack.set(position);
-   }
-
-   @Override
-   public void getOrientation(QuaternionBasics orientationToPack)
-   {
-      orientationToPack.set(orientation);
-   }
-
-   @Override
-   public void getLinearVelocity(Vector3DBasics linearVelocityToPack)
-   {
-      linearVelocityToPack.set(linearVelocity);
-   }
-
-   @Override
-   public void getAngularVelocity(Vector3DBasics angularVelocityToPack)
-   {
-      angularVelocityToPack.set(angularVelocity);
-   }
-
-   @Override
-   protected void putYoValuesIntoFrameWaypoint()
-   {
-      SE3Waypoint simpleWaypoint = frameWaypoint.getGeometryObject();
-      EuclideanWaypoint euclideanWaypoint = simpleWaypoint.getEuclideanWaypoint();
-      SO3Waypoint so3Waypoint = simpleWaypoint.getSO3Waypoint();
-
-      euclideanWaypoint.set(position, linearVelocity);
-      so3Waypoint.set(orientation, angularVelocity);
-   }
-
-   @Override
-   protected void getYoValuesFromFrameWaypoint()
-   {
-      SE3Waypoint simpleWaypoint = frameWaypoint.getGeometryObject();
-      EuclideanWaypoint euclideanWaypoint = simpleWaypoint.getEuclideanWaypoint();
-      SO3Waypoint so3Waypoint = simpleWaypoint.getSO3Waypoint();
-
-      position.set(euclideanWaypoint.getPosition());
-      orientation.set(so3Waypoint.getOrientation());
-      linearVelocity.set(euclideanWaypoint.getLinearVelocity());
-      angularVelocity.set(so3Waypoint.getAngularVelocity());
+      return WaypointToStringTools.waypointToString(this);
    }
 }

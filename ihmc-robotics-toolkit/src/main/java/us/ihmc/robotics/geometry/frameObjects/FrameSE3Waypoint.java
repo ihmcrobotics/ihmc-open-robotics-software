@@ -1,288 +1,99 @@
 package us.ihmc.robotics.geometry.frameObjects;
 
-import us.ihmc.euclid.referenceFrame.FrameGeometryObject;
-import us.ihmc.euclid.referenceFrame.FramePoint3D;
-import us.ihmc.euclid.referenceFrame.FrameQuaternion;
-import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.euclid.tuple3D.interfaces.Point3DBasics;
-import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
-import us.ihmc.euclid.tuple3D.interfaces.Vector3DBasics;
-import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
-import us.ihmc.euclid.tuple4D.Quaternion;
-import us.ihmc.euclid.tuple4D.interfaces.QuaternionBasics;
-import us.ihmc.euclid.tuple4D.interfaces.QuaternionReadOnly;
-import us.ihmc.robotics.geometry.interfaces.EuclideanWaypointInterface;
-import us.ihmc.robotics.geometry.interfaces.SE3WaypointInterface;
-import us.ihmc.robotics.geometry.interfaces.SO3WaypointInterface;
-import us.ihmc.robotics.geometry.transformables.EuclideanWaypoint;
-import us.ihmc.robotics.geometry.transformables.SE3Waypoint;
-import us.ihmc.robotics.geometry.transformables.SO3Waypoint;
+import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
+import us.ihmc.euclid.referenceFrame.interfaces.FrameQuaternionReadOnly;
+import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
+import us.ihmc.euclid.transform.interfaces.Transform;
+import us.ihmc.robotics.geometry.interfaces.FrameSE3WaypointInterface;
 
-public class FrameSE3Waypoint extends FrameGeometryObject<FrameSE3Waypoint, SE3Waypoint> implements SE3WaypointInterface<FrameSE3Waypoint>
+public class FrameSE3Waypoint implements FrameSE3WaypointInterface<FrameSE3Waypoint>
 {
-   private final SE3Waypoint geometryObject;
-   
+   private final FrameEuclideanWaypoint euclideanWaypoint = new FrameEuclideanWaypoint();
+   private final FrameSO3Waypoint so3Waypoint = new FrameSO3Waypoint();
+
    public FrameSE3Waypoint()
    {
-      super(new SE3Waypoint());
-      geometryObject = getGeometryObject();
    }
 
    public FrameSE3Waypoint(ReferenceFrame referenceFrame)
    {
-      this();
-      this.referenceFrame = referenceFrame;
-   }
-
-   @Override
-   public void setPosition(Point3DReadOnly position)
-   {
-      geometryObject.setPosition(position);
-   }
-
-   public void setPosition(FramePoint3D position)
-   {
-      checkReferenceFrameMatch(position);
-      geometryObject.setPosition(position);
-   }
-
-   @Override
-   public void setOrientation(QuaternionReadOnly orientation)
-   {
-      geometryObject.setOrientation(orientation);
-   }
-
-   public void setOrientation(FrameQuaternion orientation)
-   {
-      geometryObject.setOrientation(orientation);
-   }
-
-   @Override
-   public void setLinearVelocity(Vector3DReadOnly linearVelocity)
-   {
-      geometryObject.setLinearVelocity(linearVelocity);
-   }
-
-   public void setLinearVelocity(FrameVector3D linearVelocity)
-   {
-      checkReferenceFrameMatch(linearVelocity);
-      geometryObject.setLinearVelocity(linearVelocity);
-   }
-
-   @Override
-   public void setAngularVelocity(Vector3DReadOnly angularVelocity)
-   {
-      geometryObject.setAngularVelocity(angularVelocity);
-   }
-
-   public void setAngularVelocity(FrameVector3D angularVelocity)
-   {
-      checkReferenceFrameMatch(angularVelocity);
-      geometryObject.setAngularVelocity(angularVelocity);
-   }
-
-   public void set(Point3DReadOnly position, QuaternionReadOnly orientation, Vector3DReadOnly linearVelocity, Vector3DReadOnly angularVelocity)
-   {
-      geometryObject.set(position, orientation, linearVelocity, angularVelocity);
-   }
-
-   public void setIncludingFrame(ReferenceFrame referenceFrame, Point3DReadOnly position, Quaternion orientation, Vector3DReadOnly linearVelocity, Vector3DReadOnly angularVelocity)
-   {
       setToZero(referenceFrame);
-      geometryObject.set(position, orientation, linearVelocity, angularVelocity);
-   }
-
-   public void set(FramePoint3D position, FrameQuaternion orientation, FrameVector3D linearVelocity, FrameVector3D angularVelocity)
-   {
-      checkReferenceFrameMatch(position);
-      checkReferenceFrameMatch(orientation);
-      checkReferenceFrameMatch(linearVelocity);
-      checkReferenceFrameMatch(angularVelocity);
-      geometryObject.set(position, orientation, linearVelocity, angularVelocity);
-   }
-
-   public void setIncludingFrame(FramePoint3D position, FrameQuaternion orientation, FrameVector3D linearVelocity, FrameVector3D angularVelocity)
-   {
-      position.checkReferenceFrameMatch(orientation);
-      position.checkReferenceFrameMatch(linearVelocity);
-      position.checkReferenceFrameMatch(angularVelocity);
-      setToZero(position.getReferenceFrame());
-      geometryObject.set(position, orientation, linearVelocity, angularVelocity);
-   }
-
-   public void set(SE3WaypointInterface<?> se3Waypoint)
-   {
-      geometryObject.set(se3Waypoint);
-   }
-
-   public void setIncludingFrame(ReferenceFrame referenceFrame, SE3WaypointInterface<?> se3Waypoint)
-   {
-      setToZero(referenceFrame);
-      geometryObject.set(se3Waypoint);
-   }
-
-   public void set(EuclideanWaypointInterface<?> euclideanWaypoint, SO3WaypointInterface<?> so3Waypoint)
-   {
-      geometryObject.set(euclideanWaypoint, so3Waypoint);
-   }
-
-   public void setIncludingFrame(ReferenceFrame referenceFrame, EuclideanWaypointInterface<?> euclideanWaypoint, SO3WaypointInterface<?> so3Waypoint)
-   {
-      setToZero(referenceFrame);
-      geometryObject.set(euclideanWaypoint, so3Waypoint);
-   }
-
-   public void set(FrameEuclideanWaypoint frameEuclideanWaypoint, FrameSO3Waypoint frameSO3Waypoint)
-   {
-      checkReferenceFrameMatch(frameEuclideanWaypoint);
-      checkReferenceFrameMatch(frameSO3Waypoint);
-      geometryObject.set(frameEuclideanWaypoint.getGeometryObject(), frameSO3Waypoint.getGeometryObject());
-   }
-
-   public void setIncludingFrame(FrameEuclideanWaypoint frameEuclideanWaypoint, FrameSO3Waypoint frameSO3Waypoint)
-   {
-      frameEuclideanWaypoint.checkReferenceFrameMatch(frameSO3Waypoint);
-      setToZero(frameEuclideanWaypoint.getReferenceFrame());
-      geometryObject.set(frameEuclideanWaypoint.getGeometryObject(), frameSO3Waypoint.getGeometryObject());
    }
 
    @Override
-   public void setPositionToZero()
+   public FramePoint3DReadOnly getPosition()
    {
-      geometryObject.setPositionToZero();
+      return euclideanWaypoint.getPosition();
    }
 
    @Override
-   public void setOrientationToZero()
+   public FrameVector3DReadOnly getLinearVelocity()
    {
-      geometryObject.setOrientationToZero();
+      return euclideanWaypoint.getLinearVelocity();
    }
 
    @Override
-   public void setLinearVelocityToZero()
+   public void setPosition(double x, double y, double z)
    {
-      geometryObject.setLinearVelocityToZero();
+      euclideanWaypoint.setPosition(x, y, z);
    }
 
    @Override
-   public void setAngularVelocityToZero()
+   public void setLinearVelocity(double x, double y, double z)
    {
-      geometryObject.setAngularVelocityToZero();
+      euclideanWaypoint.setLinearVelocity(x, y, z);
    }
 
    @Override
-   public void setPositionToNaN()
+   public void applyTransform(Transform transform)
    {
-      geometryObject.setPositionToNaN();
+      euclideanWaypoint.applyTransform(transform);
+      so3Waypoint.applyTransform(transform);
    }
 
    @Override
-   public void setOrientationToNaN()
+   public void applyInverseTransform(Transform transform)
    {
-      geometryObject.setOrientationToNaN();
+      euclideanWaypoint.applyInverseTransform(transform);
+      so3Waypoint.applyInverseTransform(transform);
    }
 
    @Override
-   public void setLinearVelocityToNaN()
+   public void setReferenceFrame(ReferenceFrame referenceFrame)
    {
-      geometryObject.setLinearVelocityToNaN();
+      euclideanWaypoint.setReferenceFrame(referenceFrame);
+      so3Waypoint.setReferenceFrame(referenceFrame);
    }
 
    @Override
-   public void setAngularVelocityToNaN()
+   public ReferenceFrame getReferenceFrame()
    {
-      geometryObject.setAngularVelocityToNaN();
+      euclideanWaypoint.checkReferenceFrameMatch(so3Waypoint);
+      return euclideanWaypoint.getReferenceFrame();
    }
 
    @Override
-   public double positionDistance(FrameSE3Waypoint other)
+   public FrameQuaternionReadOnly getOrientation()
    {
-      checkReferenceFrameMatch(other);
-      return geometryObject.positionDistance(other.geometryObject);
+      return so3Waypoint.getOrientation();
    }
 
    @Override
-   public void getPosition(Point3DBasics positionToPack)
+   public FrameVector3DReadOnly getAngularVelocity()
    {
-      geometryObject.getPosition(positionToPack);
-   }
-
-   public void getPosition(FramePoint3D positionToPack)
-   {
-      checkReferenceFrameMatch(positionToPack);
-      geometryObject.getPosition(positionToPack);
-   }
-
-   public void getPositionIncludingFrame(FramePoint3D positionToPack)
-   {
-      positionToPack.setToZero(getReferenceFrame());
-      geometryObject.getPosition(positionToPack);
+      return so3Waypoint.getAngularVelocity();
    }
 
    @Override
-   public void getOrientation(QuaternionBasics orientationToPack)
+   public void setOrientation(double x, double y, double z, double s)
    {
-      geometryObject.getOrientation(orientationToPack);
-   }
-
-   public void getOrientation(FrameQuaternion orientationToPack)
-   {
-      checkReferenceFrameMatch(orientationToPack);
-      geometryObject.getOrientation(orientationToPack);
-   }
-
-   public void getOrientationIncludingFrame(FrameQuaternion orientationToPack)
-   {
-      orientationToPack.setToZero(getReferenceFrame());
-      geometryObject.getOrientation(orientationToPack);
+      so3Waypoint.setOrientation(x, y, z, s);
    }
 
    @Override
-   public void getLinearVelocity(Vector3DBasics linearVelocityToPack)
+   public void setAngularVelocity(double x, double y, double z)
    {
-      geometryObject.getLinearVelocity(linearVelocityToPack);
-   }
-
-   public void getLinearVelocity(FrameVector3D linearVelocityToPack)
-   {
-      checkReferenceFrameMatch(linearVelocityToPack);
-      geometryObject.getLinearVelocity(linearVelocityToPack);
-   }
-
-   public void getLinearVelocityIncludingFrame(FrameVector3D linearVelocityToPack)
-   {
-      linearVelocityToPack.setToZero(getReferenceFrame());
-      geometryObject.getLinearVelocity(linearVelocityToPack);
-   }
-
-   @Override
-   public void getAngularVelocity(Vector3DBasics angularVelocityToPack)
-   {
-      geometryObject.getAngularVelocity(angularVelocityToPack);
-   }
-
-   public void getAngularVelocity(FrameVector3D angularVelocityToPack)
-   {
-      checkReferenceFrameMatch(angularVelocityToPack);
-      geometryObject.getAngularVelocity(angularVelocityToPack);
-   }
-
-   public void getAngularVelocityIncludingFrame(FrameVector3D angularVelocityToPack)
-   {
-      setToZero(getReferenceFrame());
-      geometryObject.getAngularVelocity(angularVelocityToPack);
-   }
-
-   public void get(SE3WaypointInterface<?> se3Waypoint)
-   {
-      EuclideanWaypoint euclideanWaypoint = geometryObject.getEuclideanWaypoint();
-      SO3Waypoint so3Waypoint = geometryObject.getSO3Waypoint();
-
-      se3Waypoint.setPosition(euclideanWaypoint.getPosition());
-      se3Waypoint.setLinearVelocity(euclideanWaypoint.getLinearVelocity());
-      
-      se3Waypoint.setOrientation(so3Waypoint.getOrientation());
-      se3Waypoint.setAngularVelocity(so3Waypoint.getAngularVelocity());
+      so3Waypoint.setAngularVelocity(x, y, z);
    }
 }

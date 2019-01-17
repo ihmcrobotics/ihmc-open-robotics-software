@@ -9,79 +9,64 @@ import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.euclid.tuple4D.interfaces.QuaternionReadOnly;
 import us.ihmc.euclid.tuple4D.interfaces.Tuple4DReadOnly;
-import us.ihmc.robotics.geometry.frameObjects.FrameEuclideanWaypoint;
-import us.ihmc.robotics.geometry.frameObjects.FrameSE3Waypoint;
-import us.ihmc.robotics.geometry.frameObjects.FrameSO3Waypoint;
-import us.ihmc.robotics.geometry.transformables.EuclideanWaypoint;
-import us.ihmc.robotics.geometry.transformables.SE3Waypoint;
-import us.ihmc.robotics.geometry.transformables.SO3Waypoint;
+import us.ihmc.robotics.geometry.interfaces.EuclideanWaypointInterface;
+import us.ihmc.robotics.geometry.interfaces.FrameEuclideanWaypointInterface;
+import us.ihmc.robotics.geometry.interfaces.FrameSE3WaypointInterface;
+import us.ihmc.robotics.geometry.interfaces.FrameSO3WaypointInterface;
+import us.ihmc.robotics.geometry.interfaces.SE3WaypointInterface;
+import us.ihmc.robotics.geometry.interfaces.SO3WaypointInterface;
 
 public abstract class WaypointToStringTools
 {
-   public static String waypointToString(FrameEuclideanWaypoint frameEuclideanWaypoint)
+   static final NumberFormat format = createNumberFormat();
+
+   public static String waypointToString(FrameEuclideanWaypointInterface<?> frameEuclideanWaypoint)
    {
-      EuclideanWaypoint simpleWaypoint = frameEuclideanWaypoint.getGeometryObject();
-      if (simpleWaypoint.getNumberFormat() == null)
-         simpleWaypoint.setNumberFormat(createNumberFormat());
-      Point3DReadOnly position = simpleWaypoint.getPosition();
-      Vector3DReadOnly linearVelocity = simpleWaypoint.getLinearVelocity();
+      Point3DReadOnly position = frameEuclideanWaypoint.getPosition();
+      Vector3DReadOnly linearVelocity = frameEuclideanWaypoint.getLinearVelocity();
       ReferenceFrame referenceFrame = frameEuclideanWaypoint.getReferenceFrame();
-      return waypointToString(position, linearVelocity, referenceFrame, simpleWaypoint.getNumberFormat());
+      return waypointToString(position, linearVelocity, referenceFrame, format);
    }
 
-   public static String waypointToString(FrameSO3Waypoint frameSO3Waypoint)
+   public static String waypointToString(FrameSO3WaypointInterface<?> frameSO3Waypoint)
    {
-      SO3Waypoint simpleWaypoint = frameSO3Waypoint.getGeometryObject();
-      if (simpleWaypoint.getNumberFormat() == null)
-         simpleWaypoint.setNumberFormat(createNumberFormat());
-      QuaternionReadOnly orientation = simpleWaypoint.getOrientation();
-      Vector3DReadOnly angularVelocity = simpleWaypoint.getAngularVelocity();
+      QuaternionReadOnly orientation = frameSO3Waypoint.getOrientation();
+      Vector3DReadOnly angularVelocity = frameSO3Waypoint.getAngularVelocity();
       ReferenceFrame referenceFrame = frameSO3Waypoint.getReferenceFrame();
-      return waypointToString(orientation, angularVelocity, referenceFrame, simpleWaypoint.getNumberFormat());
+      return waypointToString(orientation, angularVelocity, referenceFrame, format);
    }
 
-   public static String waypointToString(FrameSE3Waypoint frameSE3Waypoint)
+   public static String waypointToString(FrameSE3WaypointInterface<?> frameSE3Waypoint)
    {
-      SE3Waypoint simpleWaypoint = frameSE3Waypoint.getGeometryObject();
-      if (simpleWaypoint.getNumberFormat() == null)
-         simpleWaypoint.setNumberFormat(createNumberFormat());
-      EuclideanWaypoint euclideanWaypoint = simpleWaypoint.getEuclideanWaypoint();
-      Point3DReadOnly position = euclideanWaypoint.getPosition();
-      SO3Waypoint so3Waypoint = simpleWaypoint.getSO3Waypoint();
-      QuaternionReadOnly orientation = so3Waypoint.getOrientation();
-      Vector3DReadOnly linearVelocity = euclideanWaypoint.getLinearVelocity();
-      Vector3DReadOnly angularVelocity = so3Waypoint.getAngularVelocity();
+      Point3DReadOnly position = frameSE3Waypoint.getPosition();
+      QuaternionReadOnly orientation = frameSE3Waypoint.getOrientation();
+      Vector3DReadOnly linearVelocity = frameSE3Waypoint.getLinearVelocity();
+      Vector3DReadOnly angularVelocity = frameSE3Waypoint.getAngularVelocity();
       ReferenceFrame referenceFrame = frameSE3Waypoint.getReferenceFrame();
-      return waypointToString(position, orientation, linearVelocity, angularVelocity, referenceFrame, simpleWaypoint.getNumberFormat());
+      return waypointToString(position, orientation, linearVelocity, angularVelocity, referenceFrame, format);
    }
 
-   public static String waypointToString(EuclideanWaypoint simpleEuclideanWaypoint)
+   public static String waypointToString(EuclideanWaypointInterface<?> simpleEuclideanWaypoint)
    {
-      if (simpleEuclideanWaypoint.getNumberFormat() == null)
-         simpleEuclideanWaypoint.setNumberFormat(createNumberFormat());
       Point3DReadOnly position = simpleEuclideanWaypoint.getPosition();
       Vector3DReadOnly linearVelocity = simpleEuclideanWaypoint.getLinearVelocity();
-      return waypointToString(position, linearVelocity, simpleEuclideanWaypoint.getNumberFormat());
+      return waypointToString(position, linearVelocity, format);
    }
 
-   public static String waypointToString(SO3Waypoint simpleSO3Waypoint)
+   public static String waypointToString(SO3WaypointInterface<?> simpleSO3Waypoint)
    {
-      if (simpleSO3Waypoint.getNumberFormat() == null)
-         simpleSO3Waypoint.setNumberFormat(createNumberFormat());
       QuaternionReadOnly orientation = simpleSO3Waypoint.getOrientation();
       Vector3DReadOnly angularVelocity = simpleSO3Waypoint.getAngularVelocity();
-      return waypointToString(orientation, angularVelocity, simpleSO3Waypoint.getNumberFormat());
+      return waypointToString(orientation, angularVelocity, format);
    }
 
-   public static String waypointToString(SE3Waypoint simpleSE3Waypoint)
+   public static String waypointToString(SE3WaypointInterface<?> simpleSE3Waypoint)
    {
-      if (simpleSE3Waypoint.getNumberFormat() == null)
-         simpleSE3Waypoint.setNumberFormat(createNumberFormat());
-      Point3DReadOnly position = simpleSE3Waypoint.getEuclideanWaypoint().getPosition();
-      QuaternionReadOnly orientation = simpleSE3Waypoint.getSO3Waypoint().getOrientation();
-      Vector3DReadOnly linearVelocity = simpleSE3Waypoint.getEuclideanWaypoint().getLinearVelocity();
-      Vector3DReadOnly angularVelocity = simpleSE3Waypoint.getSO3Waypoint().getAngularVelocity();
-      return waypointToString(position, orientation, linearVelocity, angularVelocity, simpleSE3Waypoint.getNumberFormat());
+      Point3DReadOnly position = simpleSE3Waypoint.getPosition();
+      QuaternionReadOnly orientation = simpleSE3Waypoint.getOrientation();
+      Vector3DReadOnly linearVelocity = simpleSE3Waypoint.getLinearVelocity();
+      Vector3DReadOnly angularVelocity = simpleSE3Waypoint.getAngularVelocity();
+      return waypointToString(position, orientation, linearVelocity, angularVelocity, format);
    }
 
    private static DecimalFormat createNumberFormat()
