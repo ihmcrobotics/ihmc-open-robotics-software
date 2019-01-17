@@ -23,7 +23,8 @@ public class FootstepNodeTools
     *
     * @param snapTransform pre-snap to post-snap transform
     */
-   public static void getSnappedNodeTransform(RobotQuadrant robotQuadrant, FootstepNode node, RigidBodyTransform snapTransform, RigidBodyTransform transformToPack)
+   public static void getSnappedNodeTransform(RobotQuadrant robotQuadrant, FootstepNode node, RigidBodyTransform snapTransform,
+                                              RigidBodyTransform transformToPack)
    {
       getNodeTransform(robotQuadrant, node, transformToPack);
       snapTransform.transform(transformToPack);

@@ -34,17 +34,23 @@ public class FootstepNode
 
    public FootstepNode(Tuple2DReadOnly frontLeft, Tuple2DReadOnly frontRight, Tuple2DReadOnly hindLeft, Tuple2DReadOnly hindRight)
    {
-      int xFrontLeftIndex = (int) Math.round(frontLeft.getX() / gridSizeXY);
-      int yFrontLeftIndex = (int) Math.round(frontLeft.getY() / gridSizeXY);
+      this(frontLeft.getX(), frontLeft.getY(), frontRight.getX(), frontRight.getY(), hindLeft.getX(), hindLeft.getY(), hindRight.getX(), hindRight.getY());
+   }
 
-      int xFrontRightIndex = (int) Math.round(frontRight.getX() / gridSizeXY);
-      int yFrontRightIndex = (int) Math.round(frontRight.getY() / gridSizeXY);
+   public FootstepNode(double frontLeftX, double frontLeftY, double frontRightX, double frontRightY, double hindLeftX, double hindLeftY, double hindRightX,
+                       double hindRightY)
+   {
+      int xFrontLeftIndex = (int) Math.round(frontLeftX / gridSizeXY);
+      int yFrontLeftIndex = (int) Math.round(frontLeftY / gridSizeXY);
 
-      int xHindLeftIndex = (int) Math.round(hindLeft.getX() / gridSizeXY);
-      int yHindLeftIndex = (int) Math.round(hindLeft.getY() / gridSizeXY);
+      int xFrontRightIndex = (int) Math.round(frontRightX / gridSizeXY);
+      int yFrontRightIndex = (int) Math.round(frontRightY / gridSizeXY);
 
-      int xHindRightIndex = (int) Math.round(hindRight.getX() / gridSizeXY);
-      int yHindRightIndex = (int) Math.round(hindRight.getY() / gridSizeXY);
+      int xHindLeftIndex = (int) Math.round(hindLeftX / gridSizeXY);
+      int yHindLeftIndex = (int) Math.round(hindLeftY / gridSizeXY);
+
+      int xHindRightIndex = (int) Math.round(hindRightX / gridSizeXY);
+      int yHindRightIndex = (int) Math.round(hindRightY / gridSizeXY);
 
       xIndices.put(RobotQuadrant.FRONT_LEFT, xFrontLeftIndex);
       yIndices.put(RobotQuadrant.FRONT_LEFT, yFrontLeftIndex);
