@@ -41,7 +41,6 @@ import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 import us.ihmc.robotics.robotSide.QuadrantDependentList;
 import us.ihmc.robotics.robotSide.RobotQuadrant;
-import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
@@ -52,8 +51,7 @@ import java.util.List;
 
 public class QuadrupedAStarFootstepPlanner implements QuadrupedFootstepPlanner
 {
-   private static final boolean debug = false;
-   private static final RobotSide defaultStartNodeSide = RobotSide.LEFT;
+   private static final boolean debug = true;
 
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
 
@@ -253,6 +251,8 @@ public class QuadrupedAStarFootstepPlanner implements QuadrupedFootstepPlanner
 
       List<? extends QuadrupedTimedStep> steps = new ArrayList<>();
       List<FootstepNode> path = graph.getPathFromStart(endNode);
+
+      throw new RuntimeException("This hasn't been completed yet");
       // FIXME todo
       /*
       for (int i = 1; i < path.size(); i++)
@@ -277,7 +277,7 @@ public class QuadrupedAStarFootstepPlanner implements QuadrupedFootstepPlanner
       plan.setLowLevelPlanGoal(goalPoseInWorld);
       */
 
-      return steps;
+//      return steps;
    }
 
    @Override
