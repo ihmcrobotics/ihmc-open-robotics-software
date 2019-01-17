@@ -206,11 +206,22 @@ public class WalkingControllerPreviewToolboxController extends ToolboxController
    public boolean initialize()
    {
       isDone.set(false);
+      previewTime.set(0.0);
+      previewFrames.clear();
 
       RobotConfigurationData robotConfigurationData = latestRobotConfigurationDataReference.get();
-
       if (robotConfigurationData == null)
          return false;
+
+      // Initializes this desired robot to the most recent robot configuration data received from the walking controller.
+      KinematicsToolboxHelper.setRobotStateFromRobotConfigurationData(robotConfigurationData, rootJoint, controlledOneDoFJoints);
+
+      fullRobotModel.updateFrames();
+      referenceFrames.updateFrames();
+      walkingController.initialize();
+
+      taskExecutor.clear();
+      taskExecutor.submit(new WalkingPreviewResetTask(fullRobotModel, controllerToolbox.getFootContactStates(), walkingInputManager, controllerToolbox));
 
       return true;
    }
@@ -220,18 +231,7 @@ public class WalkingControllerPreviewToolboxController extends ToolboxController
    {
       if (toolboxInputManager.isNewCommandAvailable(WalkingControllerPreviewInputCommand.class))
       {
-         isDone.set(false);
-         previewTime.set(0.0);
-         previewFrames.clear();
-         // Initializes this desired robot to the most recent robot configuration data received from the walking controller.
-         KinematicsToolboxHelper.setRobotStateFromRobotConfigurationData(latestRobotConfigurationDataReference.get(), rootJoint, controlledOneDoFJoints);
-         fullRobotModel.updateFrames();
-         referenceFrames.updateFrames();
-         walkingController.initialize();
-
-         taskExecutor.clear();
-         taskExecutor.submit(new WalkingPreviewResetTask(fullRobotModel, controllerToolbox.getFootContactStates(), walkingInputManager, controllerToolbox)); // TODO Figure out what should be in the reset
-
+         initialize();
          WalkingControllerPreviewInputCommand command = toolboxInputManager.pollNewestCommand(WalkingControllerPreviewInputCommand.class);
          FootstepDataListCommand foostepCommand = command.getFoostepCommand();
          taskExecutor.submit(new FootstepListPreviewTask(foostepCommand, walkingInputManager, walkingOutputManager, controllerToolbox.getFootContactStates()));
@@ -254,7 +254,8 @@ public class WalkingControllerPreviewToolboxController extends ToolboxController
 
       KinematicsToolboxHelper.setRobotStateFromControllerCoreOutput(controllerCore.getControllerCoreOutput(), rootJoint, controlledOneDoFJoints);
 
-      previewFrames.add(MessageTools.createKinematicsToolboxOutputStatus(rootJoint, controlledOneDoFJoints));
+      if (!(taskExecutor.getCurrentTask() instanceof WalkingPreviewResetTask)) // Skip the frames that are to reset the controller.
+         previewFrames.add(MessageTools.createKinematicsToolboxOutputStatus(rootJoint, controlledOneDoFJoints));
 
       isDone.set(taskExecutor.isDone());
 
