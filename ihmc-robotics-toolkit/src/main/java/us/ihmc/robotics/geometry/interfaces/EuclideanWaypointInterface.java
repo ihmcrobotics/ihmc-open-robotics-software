@@ -16,6 +16,36 @@ public interface EuclideanWaypointInterface<T extends EuclideanWaypointInterface
 
    public abstract void setLinearVelocity(double x, double y, double z);
 
+   public default double getPositionX()
+   {
+      return getPosition().getX();
+   }
+
+   public default double getPositionY()
+   {
+      return getPosition().getY();
+   }
+
+   public default double getPositionZ()
+   {
+      return getPosition().getZ();
+   }
+
+   public default double getLinearVelocityX()
+   {
+      return getLinearVelocity().getX();
+   }
+
+   public default double getLinearVelocityY()
+   {
+      return getLinearVelocity().getY();
+   }
+
+   public default double getLinearVelocityZ()
+   {
+      return getLinearVelocity().getZ();
+   }
+
    public default void setPosition(Point3DReadOnly position)
    {
       setPosition(position.getX(), position.getY(), position.getZ());
@@ -59,6 +89,18 @@ public interface EuclideanWaypointInterface<T extends EuclideanWaypointInterface
    public default void getLinearVelocity(Vector3DBasics linearVelocityToPack)
    {
       linearVelocityToPack.set(getLinearVelocity());
+   }
+
+   public default void set(Point3DReadOnly position, Vector3DReadOnly linearVelocity)
+   {
+      setPosition(position);
+      setLinearVelocity(linearVelocity);
+   }
+
+   public default void get(Point3DBasics positionToPack, Vector3DBasics linearVelocityToPack)
+   {
+      getPosition(positionToPack);
+      getLinearVelocity(linearVelocityToPack);
    }
 
    @Override

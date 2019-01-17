@@ -16,6 +16,41 @@ public interface SO3WaypointInterface<T extends SO3WaypointInterface<T>> extends
 
    public abstract void setAngularVelocity(double x, double y, double z);
 
+   public default double getOrientationX()
+   {
+      return getOrientation().getX();
+   }
+
+   public default double getOrientationY()
+   {
+      return getOrientation().getY();
+   }
+
+   public default double getOrientationZ()
+   {
+      return getOrientation().getZ();
+   }
+
+   public default double getOrientationS()
+   {
+      return getOrientation().getS();
+   }
+
+   public default double getAngularVelocityX()
+   {
+      return getAngularVelocity().getX();
+   }
+
+   public default double getAngularVelocityY()
+   {
+      return getAngularVelocity().getY();
+   }
+
+   public default double getAngularVelocityZ()
+   {
+      return getAngularVelocity().getZ();
+   }
+
    public default void setOrientation(QuaternionReadOnly orientation)
    {
       setOrientation(orientation.getX(), orientation.getY(), orientation.getZ(), orientation.getS());
@@ -59,6 +94,18 @@ public interface SO3WaypointInterface<T extends SO3WaypointInterface<T>> extends
    public default void getAngularVelocity(Vector3DBasics angularVelocityToPack)
    {
       angularVelocityToPack.set(getAngularVelocity());
+   }
+
+   public default void set(QuaternionReadOnly orientation, Vector3DReadOnly angularVelocity)
+   {
+      setOrientation(orientation);
+      setAngularVelocity(angularVelocity);
+   }
+
+   public default void get(QuaternionBasics orientationToPack, Vector3DBasics angularVelocityToPack)
+   {
+      getOrientation(orientationToPack);
+      getAngularVelocity(angularVelocityToPack);
    }
 
    @Override
