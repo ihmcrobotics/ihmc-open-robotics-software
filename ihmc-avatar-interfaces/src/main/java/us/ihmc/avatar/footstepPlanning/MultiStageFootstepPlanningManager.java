@@ -1,5 +1,6 @@
 package us.ihmc.avatar.footstepPlanning;
 
+import com.badlogic.gdx.graphics.g3d.particles.ParticleSorter.Distance;
 import controller_msgs.msg.dds.*;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.opencv.core.Point3;
@@ -16,16 +17,19 @@ import us.ihmc.euclid.geometry.Pose2D;
 import us.ihmc.euclid.referenceFrame.FramePoint2D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple2D.Vector2D;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.footstepPlanning.*;
 import us.ihmc.footstepPlanning.graphSearch.graph.visualization.MultiStagePlannerListener;
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParameters;
+import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepProcessingParameters;
 import us.ihmc.footstepPlanning.graphSearch.parameters.YoFootstepPlannerParameters;
 import us.ihmc.footstepPlanning.tools.FootstepPlannerIOTools;
 import us.ihmc.footstepPlanning.tools.FootstepPlannerMessageTools;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
+import us.ihmc.idl.IDLSequence.Object;
 import us.ihmc.pathPlanning.bodyPathPlanner.WaypointDefinedBodyPathPlanner;
 import us.ihmc.pathPlanning.statistics.ListOfStatistics;
 import us.ihmc.pathPlanning.statistics.PlannerStatistics;
@@ -38,6 +42,7 @@ import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.graphics.YoGraphicPlanarRegionsList;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
+import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.tools.lists.PairList;
 import us.ihmc.wholeBodyController.RobotContactPointParameters;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
@@ -136,6 +141,7 @@ public class MultiStageFootstepPlanningManager implements PlannerCompletionCallb
    private final YoBoolean initialize = new YoBoolean("initialize" + registry.getName(), registry);
 
    private final MultiStagePlannerListener plannerListener;
+   private final DistanceBasedSwingTimeCalculator swingTimeCalculator;
 
    private final int maxNumberOfPathPlanners;
    private final int maxNumberOfStepPlanners;
@@ -199,6 +205,19 @@ public class MultiStageFootstepPlanningManager implements PlannerCompletionCallb
          if (isDonePlanningSteps.getBooleanValue())
             statusOutputManager.reportStatusMessage(FootstepPlanningMessageReporter.packStatus(FootstepPlannerStatus.IDLE));
       });
+
+      FootstepProcessingParameters footstepProcessingParameters = footstepPlannerParameters.getFootstepProcessingParameters();
+      if(footstepProcessingParameters == null)
+      {
+         swingTimeCalculator = null;
+      }
+      else
+      {
+         swingTimeCalculator = new DistanceBasedSwingTimeCalculator(footstepProcessingParameters.getMinimumSwingTime(),
+                                                                    footstepProcessingParameters.getMaximumStepTranslationForMinimumSwingTime(),
+                                                                    footstepProcessingParameters.getMaximumSwingTime(),
+                                                                    footstepProcessingParameters.getMinimumStepTranslationForMaximumSwingTime());
+      }
 
       parentRegistry.addChild(registry);
       initialize.set(true);
@@ -669,8 +688,8 @@ public class MultiStageFootstepPlanningManager implements PlannerCompletionCallb
             pathResult.set(pathStatus);
 
             sendMessageToUI("Result of path planning: " + planId.getIntegerValue() + ", " + pathStatus.toString());
-
             concatenatePathWaypoints();
+
             if (!computeBodyPath())
                reportPlannerFailed(pathResult.getEnumValue());
 
@@ -707,8 +726,13 @@ public class MultiStageFootstepPlanningManager implements PlannerCompletionCallb
 
             concatenateFootstepPlans();
             FootstepPlan footstepPlan = this.footstepPlan.getAndSet(null);
+
             FootstepPlanningToolboxOutputStatus footstepPlanMessage = packStepResult(footstepPlan, bodyPathPlan.getAndSet(null), stepStatus,
                                                                                      plannerTime.getDoubleValue());
+
+            if(swingTimeCalculator != null)
+               processSwingTimes(footstepPlanMessage.getFootstepDataList());
+
             statusOutputManager.reportStatusMessage(footstepPlanMessage);
 
             timeSpentInFootstepPlanner.set(plannerTime.getDoubleValue() - timeSpentBeforeFootstepPlanner.getDoubleValue());
@@ -731,6 +755,45 @@ public class MultiStageFootstepPlanningManager implements PlannerCompletionCallb
          plannerListener.plannerFinished(null);
 
       this.isDone.set(isDone);
+   }
+
+   private void processSwingTimes(FootstepDataListMessage footstepDataListMessage)
+   {
+      FramePose3D firstStepStancePose = new FramePose3D();
+      FramePose3D secondStepStancePose = new FramePose3D();
+
+      firstStepStancePose.set(mainObjective.getInitialStanceFootPose());
+
+      double idealStanceWidth = footstepPlanningParameters.getIdealFootstepWidth();
+      RobotSide initialStanceSide = mainObjective.getInitialStanceFootSide();
+      double yaw = firstStepStancePose.getYaw();
+      double vx = initialStanceSide.negateIfRightSide(Math.sin(yaw) * idealStanceWidth);
+      double vy = - initialStanceSide.negateIfRightSide(Math.cos(yaw) * idealStanceWidth);
+
+      secondStepStancePose.set(mainObjective.getInitialStanceFootPose());
+      secondStepStancePose.prependTranslation(vx, vy, 0.0);
+
+      Object<FootstepDataMessage> footstepDataList = footstepDataListMessage.getFootstepDataList();
+      for (int i = 0; i < footstepDataList.size(); i++)
+      {
+         FootstepDataMessage footstepDataMessage = footstepDataList.get(i);
+         Point3D startPoint = new Point3D();
+         Point3D endPoint = new Point3D();
+
+         startPoint.set(footstepDataMessage.getLocation());
+         if(i < 2)
+         {
+            endPoint.set(footstepDataMessage.getRobotSide() == initialStanceSide.toByte() ?
+                               firstStepStancePose.getPosition() :
+                               secondStepStancePose.getPosition());
+         }
+         else
+         {
+            endPoint.set(footstepDataList.get(i - 2).getLocation());
+         }
+
+         footstepDataMessage.setSwingDuration(swingTimeCalculator.calculateSwingTime(startPoint, endPoint));
+      }
    }
 
    private void checkPlannersForFailures()
