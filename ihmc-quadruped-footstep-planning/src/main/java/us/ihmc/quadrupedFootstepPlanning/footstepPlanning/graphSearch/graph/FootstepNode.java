@@ -21,6 +21,8 @@ public class FootstepNode
    private final QuadrantDependentList<Integer> xIndices = new QuadrantDependentList<>();
    private final QuadrantDependentList<Integer> yIndices = new QuadrantDependentList<>();
 
+   private double nominalYaw;
+
    private Point2D midStancePoint;
 
    private final int hashCode;
@@ -51,6 +53,8 @@ public class FootstepNode
 
       int xHindRightIndex = (int) Math.round(hindRightX / gridSizeXY);
       int yHindRightIndex = (int) Math.round(hindRightY / gridSizeXY);
+
+      nominalYaw = computeNominalYaw(frontLeftX, frontLeftY, frontRightX, frontRightY, hindLeftX, hindLeftY, hindRightX, hindRightY);
 
       xIndices.put(RobotQuadrant.FRONT_LEFT, xFrontLeftIndex);
       yIndices.put(RobotQuadrant.FRONT_LEFT, yFrontLeftIndex);
@@ -86,6 +90,11 @@ public class FootstepNode
    public int getYIndex(RobotQuadrant robotQuadrant)
    {
       return yIndices.get(robotQuadrant);
+   }
+
+   public double getNominalYaw()
+   {
+      return nominalYaw;
    }
 
    public double euclideanDistance(FootstepNode other)
@@ -215,5 +224,18 @@ public class FootstepNode
          string += "\n\t quadrant= " + robotQuadrant.getCamelCaseName() + ", x= " + getX(robotQuadrant) + ", y= " + getY(robotQuadrant);
       }
       return string;
+   }
+
+
+   public static double computeNominalYaw(double frontLeftX, double frontLeftY, double frontRightX, double frontRightY, double hindLeftX, double hindLeftY,
+                                       double hindRightX, double hindRightY)
+   {
+      double deltaX = frontLeftX - hindLeftX;
+      double deltaY = frontLeftY - hindLeftY;
+
+      deltaX += frontRightX - hindRightX;
+      deltaY += frontRightY - hindRightY;
+
+      return Math.atan2(deltaY, deltaX);
    }
 }

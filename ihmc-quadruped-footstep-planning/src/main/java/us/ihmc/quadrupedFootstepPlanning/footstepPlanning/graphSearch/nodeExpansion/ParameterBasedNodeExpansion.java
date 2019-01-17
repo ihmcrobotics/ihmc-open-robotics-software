@@ -90,7 +90,7 @@ public class ParameterBasedNodeExpansion implements FootstepNodeExpansion
       Vector2D hindLeft = new Vector2D(hindLeftX, hindLeftY);
       Vector2D hindRight = new Vector2D(hindRightX, hindRightY);
 
-      double nodeYaw = getNominalYaw(node);
+      double nodeYaw = node.getNominalYaw();
 
       AxisAngle rotation = new AxisAngle(nodeYaw, 0.0, 0.0);
       rotation.transform(frontLeft);
@@ -117,23 +117,5 @@ public class ParameterBasedNodeExpansion implements FootstepNodeExpansion
       }
 
       return array;
-   }
-
-   private static double getNominalYaw(FootstepNode node)
-   {
-      return getNominalYaw(node.getX(FRONT_LEFT), node.getY(FRONT_LEFT), node.getX(FRONT_RIGHT), node.getY(FRONT_RIGHT), node.getX(HIND_LEFT),
-                           node.getY(HIND_LEFT), node.getX(HIND_RIGHT), node.getY(HIND_RIGHT));
-   }
-
-   private static double getNominalYaw(double frontLeftX, double frontLeftY, double frontRightX, double frontRightY, double hindLeftX, double hindLeftY,
-                                double hindRightX, double hindRightY)
-   {
-      double deltaX = frontLeftX - hindLeftX;
-      double deltaY = frontLeftY - hindLeftY;
-
-      deltaX += frontRightX - hindRightX;
-      deltaY += frontRightY - hindRightY;
-
-      return Math.atan2(deltaY, deltaX);
    }
 }

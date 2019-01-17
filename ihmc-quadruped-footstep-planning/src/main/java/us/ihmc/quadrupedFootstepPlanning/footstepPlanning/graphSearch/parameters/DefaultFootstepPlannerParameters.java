@@ -57,4 +57,34 @@ public class DefaultFootstepPlannerParameters implements FootstepPlannerParamete
    {
       return 0.1;
    }
+
+   public double getForwardWeight()
+   {
+      return 1.0;
+   }
+
+   public double getLateralWeight()
+   {
+      return 1.0;
+   }
+
+   public double getYawWeight()
+   {
+      return 1.0;
+   }
+
+   public double getCostPerStep()
+   {
+      return 0.0;
+   }
+
+   public double getStepUpWeight()
+   {
+      return 0.0;
+   }
+
+   public double getStepDownWeight()
+   {
+      return 0.0;
+   }
 }
