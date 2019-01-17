@@ -23,7 +23,7 @@ import us.ihmc.utilities.ros.subscriber.AbstractRosTopicSubscriber;
 import us.ihmc.utilities.ros.subscriber.RosPointCloudSubscriber;
 import us.ihmc.utilities.ros.subscriber.RosPointCloudSubscriber.UnpackedPointCloud;
 
-public class MultisenseStereoVisionPointCloudWithSourceReceiver extends AbstractRosTopicSubscriber<PointCloud2>
+public class MultisenseStereoVisionPointCloudReceiver extends AbstractRosTopicSubscriber<PointCloud2>
 {
    private static final int MAX_NUMBER_OF_POINTS = 200000;
 
@@ -31,7 +31,7 @@ public class MultisenseStereoVisionPointCloudWithSourceReceiver extends Abstract
 
    private final IHMCROS2Publisher<StereoVisionPointCloudMessage> stereoVisionPublisher;
 
-   public MultisenseStereoVisionPointCloudWithSourceReceiver() throws URISyntaxException, IOException
+   public MultisenseStereoVisionPointCloudReceiver() throws URISyntaxException, IOException
    {
       super(PointCloud2._TYPE);
       URI masterURI = new URI("http://10.6.192.14:11311");
@@ -88,6 +88,6 @@ public class MultisenseStereoVisionPointCloudWithSourceReceiver extends Abstract
 
    public static void main(String[] args) throws URISyntaxException, IOException
    {
-      new MultisenseStereoVisionPointCloudWithSourceReceiver();
+      new MultisenseStereoVisionPointCloudReceiver();
    }
 }
