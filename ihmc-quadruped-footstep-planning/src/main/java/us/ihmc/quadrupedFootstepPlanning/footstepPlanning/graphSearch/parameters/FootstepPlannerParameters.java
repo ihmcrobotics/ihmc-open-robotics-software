@@ -22,6 +22,18 @@ public interface FootstepPlannerParameters
 
    double getBodyGroundClearance();
 
+   double getForwardWeight();
+
+   double getLateralWeight();
+
+   double getYawWeight();
+
+   double getCostPerStep();
+
+   double getStepUpWeight();
+
+   double getStepDownWeight();
+
    /**
     * The planner will ignore candidate footsteps if they are on a planar region with an incline that is higher
     * then the value specified here.
