@@ -1,124 +1,83 @@
 package us.ihmc.robotics.geometry.yoFrameObjects;
 
-import static us.ihmc.robotics.math.frames.YoFrameVariableNameTools.createName;
-
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.euclid.referenceFrame.interfaces.ReferenceFrameHolder;
-import us.ihmc.euclid.tuple3D.interfaces.Point3DBasics;
-import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
-import us.ihmc.euclid.tuple3D.interfaces.Vector3DBasics;
-import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
-import us.ihmc.robotics.geometry.frameObjects.FrameEuclideanWaypoint;
-import us.ihmc.robotics.geometry.interfaces.EuclideanWaypointInterface;
-import us.ihmc.robotics.geometry.transformables.EuclideanWaypoint;
+import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DBasics;
+import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
+import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DBasics;
+import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
+import us.ihmc.euclid.transform.interfaces.Transform;
+import us.ihmc.robotics.geometry.interfaces.FrameEuclideanWaypointInterface;
+import us.ihmc.robotics.math.trajectories.waypoints.WaypointToStringTools;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.yoVariables.variable.YoFramePoint3D;
-import us.ihmc.yoVariables.variable.YoFrameVector3D;
+import us.ihmc.yoVariables.variable.frameObjects.YoMutableFramePoint3D;
+import us.ihmc.yoVariables.variable.frameObjects.YoMutableFrameVector3D;
 
-public class YoFrameEuclideanWaypoint extends YoFrameWaypoint<YoFrameEuclideanWaypoint, FrameEuclideanWaypoint, EuclideanWaypoint>
-      implements EuclideanWaypointInterface<YoFrameEuclideanWaypoint>
+public class YoFrameEuclideanWaypoint implements FrameEuclideanWaypointInterface<YoFrameEuclideanWaypoint>
 {
-   private final YoFramePoint3D position;
-   private final YoFrameVector3D linearVelocity;
+   private final FramePoint3DBasics position;
+   private final FrameVector3DBasics linearVelocity;
 
-   public YoFrameEuclideanWaypoint(String namePrefix, String nameSuffix, YoVariableRegistry registry, ReferenceFrame... referenceFrames)
+   public YoFrameEuclideanWaypoint(String namePrefix, String nameSuffix, YoVariableRegistry registry)
    {
-      super(new FrameEuclideanWaypoint(), namePrefix, nameSuffix, registry, referenceFrames);
-
-      position = createYoPosition(this, namePrefix, nameSuffix, registry);
-      linearVelocity = createYoLinearVelocity(this, namePrefix, nameSuffix, registry);
-   }
-
-   public static YoFramePoint3D createYoPosition(final ReferenceFrameHolder referenceFrameHolder, String namePrefix, String nameSuffix, YoVariableRegistry registry)
-   {
-      return new YoFramePoint3D(createName(namePrefix, "position", ""), nameSuffix, null, registry)
-      {
-         @Override
-         public ReferenceFrame getReferenceFrame()
-         {
-            return referenceFrameHolder.getReferenceFrame();
-         }
-      };
-   }
-
-   public static YoFrameVector3D createYoLinearVelocity(final ReferenceFrameHolder referenceFrameHolder, String namePrefix, String nameSuffix, YoVariableRegistry registry)
-   {
-      return new YoFrameVector3D(createName(namePrefix, "linearVelocity", ""), nameSuffix, null, registry)
-      {
-         @Override
-         public ReferenceFrame getReferenceFrame()
-         {
-            return referenceFrameHolder.getReferenceFrame();
-         }
-      };
+      position = new YoMutableFramePoint3D(namePrefix + "Position", nameSuffix, registry);
+      linearVelocity = new YoMutableFrameVector3D(namePrefix + "LinearVelocity", nameSuffix, registry);
    }
 
    @Override
-   public void setPosition(Point3DReadOnly position)
+   public FramePoint3DReadOnly getPosition()
    {
-      this.position.set(position);
+      return position;
    }
 
    @Override
-   public void setLinearVelocity(Vector3DReadOnly linearVelocity)
+   public FrameVector3DReadOnly getLinearVelocity()
    {
-      this.linearVelocity.set(linearVelocity);
+      return linearVelocity;
    }
 
    @Override
-   public void setPositionToZero()
+   public void setPosition(double x, double y, double z)
    {
-      position.setToZero();
+      position.set(x, y, z);
    }
 
    @Override
-   public void setLinearVelocityToZero()
+   public void setLinearVelocity(double x, double y, double z)
    {
-      linearVelocity.setToZero();
+      linearVelocity.set(x, y, z);
    }
 
    @Override
-   public void setPositionToNaN()
+   public ReferenceFrame getReferenceFrame()
    {
-      position.setToNaN();
+      position.checkReferenceFrameMatch(linearVelocity);
+      return position.getReferenceFrame();
    }
 
    @Override
-   public void setLinearVelocityToNaN()
+   public void setReferenceFrame(ReferenceFrame referenceFrame)
    {
-      linearVelocity.setToNaN();
+      position.setReferenceFrame(referenceFrame);
+      linearVelocity.setReferenceFrame(referenceFrame);
    }
 
    @Override
-   public double positionDistance(YoFrameEuclideanWaypoint other)
+   public void applyTransform(Transform transform)
    {
-      return frameWaypoint.positionDistance(other.frameWaypoint);
+      position.applyTransform(transform);
+      linearVelocity.applyTransform(transform);
    }
 
    @Override
-   public void getPosition(Point3DBasics positionToPack)
+   public void applyInverseTransform(Transform transform)
    {
-      positionToPack.set(position);
+      position.applyInverseTransform(transform);
+      linearVelocity.applyInverseTransform(transform);
    }
 
    @Override
-   public void getLinearVelocity(Vector3DBasics linearVelocityToPack)
+   public String toString()
    {
-      linearVelocityToPack.set(linearVelocity);
-   }
-
-   @Override
-   protected void putYoValuesIntoFrameWaypoint()
-   {
-      EuclideanWaypoint simpleWaypoint = frameWaypoint.getGeometryObject();
-      simpleWaypoint.set(position, linearVelocity);
-   }
-
-   @Override
-   protected void getYoValuesFromFrameWaypoint()
-   {
-      EuclideanWaypoint simpleWaypoint = frameWaypoint.getGeometryObject();
-      position.set(simpleWaypoint.getPosition());
-      linearVelocity.set(simpleWaypoint.getLinearVelocity());
+      return WaypointToStringTools.waypointToString(this);
    }
 }
