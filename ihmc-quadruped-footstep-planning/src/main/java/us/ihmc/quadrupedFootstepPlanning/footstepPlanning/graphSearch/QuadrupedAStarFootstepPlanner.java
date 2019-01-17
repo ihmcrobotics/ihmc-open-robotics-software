@@ -1,61 +1,77 @@
 package us.ihmc.quadrupedFootstepPlanning.footstepPlanning.graphSearch;
 
+import controller_msgs.msg.dds.QuadrupedGroundPlaneMessage;
 import org.apache.commons.math3.util.Precision;
 import us.ihmc.commons.Conversions;
 import us.ihmc.commons.PrintTools;
 import us.ihmc.euclid.axisAngle.AxisAngle;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
-import us.ihmc.euclid.referenceFrame.FramePose3D;
-import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.*;
+import us.ihmc.euclid.referenceFrame.interfaces.FramePose2DReadOnly;
+import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DReadOnly;
 import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.pathPlanning.visibilityGraphs.tools.PlanarRegionTools;
-import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.FootstepPlanningResult;
-import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.QuadrupedFootstepPlanner;
-import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.QuadrupedFootstepPlannerGoal;
+import us.ihmc.quadrupedBasics.gait.QuadrupedTimedStep;
+import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.*;
 import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.graphSearch.footstepSnapping.FootstepNodeSnapData;
 import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.graphSearch.footstepSnapping.FootstepNodeSnapper;
 import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.graphSearch.footstepSnapping.FootstepNodeSnappingTools;
 import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.graphSearch.footstepSnapping.SimplePlanarRegionFootstepNodeSnapper;
+import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.graphSearch.graph.FootstepGraph;
 import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.graphSearch.graph.FootstepNode;
+import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.graphSearch.heuristics.CostToGoHeuristics;
+import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.graphSearch.heuristics.DistanceAndYawBasedHeuristics;
+import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.graphSearch.heuristics.NodeComparator;
 import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.graphSearch.listeners.QuadrupedFootstepPlannerListener;
+import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.graphSearch.listeners.StartAndGoalListener;
 import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.graphSearch.nodeChecking.FootstepNodeChecker;
+import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.graphSearch.nodeChecking.FootstepNodeCheckerOfCheckers;
 import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.graphSearch.nodeChecking.SnapBasedNodeChecker;
 import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.graphSearch.nodeExpansion.FootstepNodeExpansion;
 import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.graphSearch.parameters.FootstepPlannerParameters;
+import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.graphSearch.stepCost.FootstepCost;
+import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.graphSearch.stepCost.FootstepCostBuilder;
+import us.ihmc.quadrupedPlanning.QuadrupedXGaitSettings;
 import us.ihmc.robotics.geometry.PlanarRegion;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
+import us.ihmc.robotics.robotSide.QuadrantDependentList;
+import us.ihmc.robotics.robotSide.RobotQuadrant;
 import us.ihmc.robotics.robotSide.RobotSide;
-import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoLong;
 
 import java.util.*;
+import java.util.List;
 
 public class QuadrupedAStarFootstepPlanner implements QuadrupedFootstepPlanner
 {
    private static final boolean debug = false;
    private static final RobotSide defaultStartNodeSide = RobotSide.LEFT;
 
+   private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
+
    private final String name = getClass().getSimpleName();
    private final YoVariableRegistry registry = new YoVariableRegistry(name);
 
    private final FootstepPlannerParameters parameters;
+   private final QuadrupedXGaitSettings xGaitSettings;
 
-   private SideDependentList<FootstepNode> goalNodes;
    private HashSet<FootstepNode> expandedNodes;
    private PriorityQueue<FootstepNode> stack;
    private FootstepNode startNode;
+   private FootstepNode goalNode;
    private FootstepNode endNode;
 
    private PlanarRegionsList planarRegionsList;
 
-   private final FramePose3D goalPoseInWorld = new FramePose3D();
+   private final FramePose2D goalPoseInWorld = new FramePose2D();
 
    private final FootstepGraph graph;
    private final FootstepNodeChecker nodeChecker;
@@ -78,17 +94,12 @@ public class QuadrupedAStarFootstepPlanner implements QuadrupedFootstepPlanner
    private final YoBoolean validGoalNode = new YoBoolean("validGoalNode", registry);
    private final YoBoolean abortPlanning = new YoBoolean("abortPlanning", registry);
 
-   public QuadrupedAStarFootstepPlanner(FootstepPlannerParameters parameters, FootstepNodeChecker nodeChecker, CostToGoHeuristics heuristics,
-                                        FootstepNodeExpansion expansion, FootstepCost stepCostCalculator, FootstepNodeSnapper snapper, YoVariableRegistry parentRegistry)
-   {
-      this(parameters, nodeChecker, heuristics, expansion, stepCostCalculator, snapper, null, parentRegistry);
-   }
-
-   public QuadrupedAStarFootstepPlanner(FootstepPlannerParameters parameters, FootstepNodeChecker nodeChecker, CostToGoHeuristics heuristics,
-                                        FootstepNodeExpansion nodeExpansion, FootstepCost stepCostCalculator, FootstepNodeSnapper snapper,
-                                        BipedalFootstepPlannerListener listener, YoVariableRegistry parentRegistry)
+   public QuadrupedAStarFootstepPlanner(FootstepPlannerParameters parameters, QuadrupedXGaitSettings xGaitSettings, FootstepNodeChecker nodeChecker,
+                                        CostToGoHeuristics heuristics, FootstepNodeExpansion nodeExpansion, FootstepCost stepCostCalculator,
+                                        FootstepNodeSnapper snapper, QuadrupedFootstepPlannerListener listener, YoVariableRegistry parentRegistry)
    {
       this.parameters = parameters;
+      this.xGaitSettings = xGaitSettings;
       this.nodeChecker = nodeChecker;
       this.heuristics = heuristics;
       this.nodeExpansion = nodeExpansion;
@@ -114,21 +125,22 @@ public class QuadrupedAStarFootstepPlanner implements QuadrupedFootstepPlanner
    }
 
    @Override
-   public void setInitialStanceFoot(FramePose3D stanceFootPose, RobotSide side)
+   public void setStart(QuadrupedFootstepPlannerStart start)
    {
-      if (side == null)
+      checkGoalType(start);
+
+      startNode = getNodeFromTarget(start);
+      QuadrantDependentList<RigidBodyTransform> startNodeSnapTransforms = new QuadrantDependentList<>();
+      for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
       {
-         if (debug)
-            PrintTools.info("Start node needs a side, but trying to set it to null. Setting it to " + defaultStartNodeSide);
-
-         side = defaultStartNodeSide;
+         startNodeSnapTransforms.put(robotQuadrant, FootstepNodeSnappingTools
+               .computeSnapTransform(robotQuadrant, startNode, new Point3D(startNode.getX(robotQuadrant), startNode.getY(robotQuadrant), 0.0)));
       }
-      startNode = new FootstepNode(stanceFootPose.getX(), stanceFootPose.getY(), stanceFootPose.getYaw(), side);
-      RigidBodyTransform startNodeSnapTransform = FootstepNodeSnappingTools.computeSnapTransform(startNode, stanceFootPose);
-      snapper.addSnapData(startNode, new FootstepNodeSnapData(startNodeSnapTransform));
-      nodeChecker.addStartNode(startNode, startNodeSnapTransform);
+      snapper.addSnapData(startNode, new FootstepNodeSnapData(startNodeSnapTransforms));
+      nodeChecker.addStartNode(startNode, startNodeSnapTransforms);
 
-      startAndGoalListeners.parallelStream().forEach(listener -> listener.setInitialPose(stanceFootPose));
+      FramePose2DReadOnly startPose = new FramePose2D(worldFrame, startNode.getOrComputeMidStancePoint(), startNode.getNominalYaw());
+      startAndGoalListeners.parallelStream().forEach(listener -> listener.setInitialPose(startPose));
    }
 
    @Override
@@ -136,47 +148,61 @@ public class QuadrupedAStarFootstepPlanner implements QuadrupedFootstepPlanner
    {
       checkGoalType(goal);
 
-      goalNodes = new SideDependentList<>();
+      goalNode = getNodeFromTarget(goal);
 
-      SideDependentList<FramePose3D> goalPoses = new SideDependentList<>();
-
-      if (goal.getFootstepPlannerGoalType().equals(FootstepPlannerGoalType.POSE_BETWEEN_FEET))
-      {
-         FramePose3D goalPose = goal.getGoalPoseBetweenFeet();
-         ReferenceFrame goalFrame = new PoseReferenceFrame("GoalFrame", goalPose);
-         for (RobotSide side : RobotSide.values)
-         {
-            FramePose3D goalNodePose = new FramePose3D(goalFrame);
-            goalNodePose.setY(side.negateIfRightSide(parameters.getIdealFootstepWidth() / 2.0));
-            goalNodePose.changeFrame(goalPose.getReferenceFrame());
-            FootstepNode goalNode = new FootstepNode(goalNodePose.getX(), goalNodePose.getY(), goalNodePose.getYaw(), side);
-            goalNodes.put(side, goalNode);
-
-            goalNodePose.changeFrame(ReferenceFrame.getWorldFrame());
-            goalPoses.put(side, goalNodePose);
-         }
-      }
-      else if (goal.getFootstepPlannerGoalType().equals(FootstepPlannerGoalType.DOUBLE_FOOTSTEP))
-      {
-         SideDependentList<SimpleFootstep> goalSteps = goal.getDoubleFootstepGoal();
-         for (RobotSide side : RobotSide.values)
-         {
-            FramePose3D goalNodePose = new FramePose3D();
-            goalSteps.get(side).getSoleFramePose(goalNodePose);
-            FootstepNode goalNode = new FootstepNode(goalNodePose.getX(), goalNodePose.getY(), goalNodePose.getYaw(), side);
-            goalNodes.put(side, goalNode);
-
-            goalNodePose.changeFrame(ReferenceFrame.getWorldFrame());
-            goalPoses.put(side, goalNodePose);
-         }
-      }
-
-      goalPoseInWorld.interpolate(goalPoses.get(RobotSide.LEFT), goalPoses.get(RobotSide.RIGHT), 0.5);
+      goalPoseInWorld.set(goalNode.getOrComputeMidStancePoint(), goalNode.getNominalYaw());
       startAndGoalListeners.parallelStream().forEach(listener -> listener.setGoalPose(goalPoseInWorld));
    }
 
+   private FootstepNode getNodeFromTarget(QuadrupedFootstepPlannerTarget target)
+   {
+      FootstepNode nodeToReturn = null;
+
+      if (target.getTargetType().equals(FootstepPlannerTargetType.POSE_BETWEEN_FEET))
+      {
+         FramePose3DReadOnly goalPose = target.getTargetPose();
+         ReferenceFrame goalFrame = new PoseReferenceFrame("GoalFrame", goalPose);
+
+         FramePoint2D frontLeftStepPosition = new FramePoint2D(goalFrame, xGaitSettings.getStanceLength() / 2.0, xGaitSettings.getStanceWidth() / 2.0);
+         FramePoint2D frontRightStepPosition = new FramePoint2D(goalFrame, xGaitSettings.getStanceLength() / 2.0, -xGaitSettings.getStanceWidth() / 2.0);
+         FramePoint2D hindLeftStepPosition = new FramePoint2D(goalFrame, -xGaitSettings.getStanceLength() / 2.0, xGaitSettings.getStanceWidth() / 2.0);
+         FramePoint2D hindRightStepPosition = new FramePoint2D(goalFrame, -xGaitSettings.getStanceLength() / 2.0, -xGaitSettings.getStanceWidth() / 2.0);
+
+         frontLeftStepPosition.changeFrame(worldFrame);
+         frontRightStepPosition.changeFrame(worldFrame);
+         hindLeftStepPosition.changeFrame(worldFrame);
+         hindRightStepPosition.changeFrame(worldFrame);
+
+         nodeToReturn = new FootstepNode(frontLeftStepPosition, frontRightStepPosition, hindLeftStepPosition, hindRightStepPosition);
+      }
+      else if (target.getTargetType().equals(FootstepPlannerTargetType.FOOTSTEPS))
+      {
+         FramePoint3D frontLeftGoalPosition = new FramePoint3D(target.getFootGoalPosition(RobotQuadrant.FRONT_LEFT));
+         FramePoint3D frontRightGoalPosition = new FramePoint3D(target.getFootGoalPosition(RobotQuadrant.FRONT_RIGHT));
+         FramePoint3D hindLeftGoalPosition = new FramePoint3D(target.getFootGoalPosition(RobotQuadrant.HIND_LEFT));
+         FramePoint3D hindRightGoalPosition = new FramePoint3D(target.getFootGoalPosition(RobotQuadrant.HIND_RIGHT));
+
+         frontLeftGoalPosition.changeFrame(worldFrame);
+         frontRightGoalPosition.changeFrame(worldFrame);
+         hindLeftGoalPosition.changeFrame(worldFrame);
+         hindRightGoalPosition.changeFrame(worldFrame);
+
+         nodeToReturn = new FootstepNode(frontLeftGoalPosition.getX(), frontLeftGoalPosition.getY(), frontRightGoalPosition.getX(),
+                                         frontRightGoalPosition.getY(), hindLeftGoalPosition.getX(), hindLeftGoalPosition.getY(), hindRightGoalPosition.getX(),
+                                         hindRightGoalPosition.getY());
+      }
+
+      return nodeToReturn;
+   }
+
    @Override
-   public void setPlanarRegions(PlanarRegionsList planarRegionsList)
+   public void setGroundPlane(QuadrupedGroundPlaneMessage message)
+   {
+   }
+
+
+   @Override
+   public void setPlanarRegionsList(PlanarRegionsList planarRegionsList)
    {
       nodeChecker.setPlanarRegions(planarRegionsList);
       snapper.setPlanarRegions(planarRegionsList);
@@ -220,13 +246,15 @@ public class QuadrupedAStarFootstepPlanner implements QuadrupedFootstepPlanner
    }
 
    @Override
-   public FootstepPlan getPlan()
+   public List<? extends QuadrupedTimedStep> getSteps()
    {
       if (endNode == null || !graph.doesNodeExist(endNode))
          return null;
 
-      FootstepPlan plan = new FootstepPlan();
+      List<? extends QuadrupedTimedStep> steps = new ArrayList<>();
       List<FootstepNode> path = graph.getPathFromStart(endNode);
+      // FIXME todo
+      /*
       for (int i = 1; i < path.size(); i++)
       {
          RobotSide robotSide = path.get(i).getRobotSide();
@@ -247,8 +275,9 @@ public class QuadrupedAStarFootstepPlanner implements QuadrupedFootstepPlanner
       }
 
       plan.setLowLevelPlanGoal(goalPoseInWorld);
+      */
 
-      return plan;
+      return steps;
    }
 
    @Override
@@ -257,16 +286,12 @@ public class QuadrupedAStarFootstepPlanner implements QuadrupedFootstepPlanner
       return planningTime.getDoubleValue();
    }
 
-   @Override
-   public void setPlanningHorizonLength(double planningHorizon)
-   {
-   }
 
    private boolean initialize()
    {
       if (startNode == null)
          throw new NullPointerException("Need to set initial conditions before planning.");
-      if (goalNodes == null)
+      if (goalNode == null)
          throw new NullPointerException("Need to set goal before planning.");
 
       abortPlanning.set(false);
@@ -275,22 +300,15 @@ public class QuadrupedAStarFootstepPlanner implements QuadrupedFootstepPlanner
          checkStartHasPlanarRegion();
 
       graph.initialize(startNode);
-      NodeComparator nodeComparator = new NodeComparator(graph, goalNodes, heuristics);
+      NodeComparator nodeComparator = new NodeComparator(graph, goalNode, heuristics);
       stack = new PriorityQueue<>(nodeComparator);
 
-      validGoalNode.set(true);
-      for (RobotSide robotSide : RobotSide.values)
+      validGoalNode.set(nodeChecker.isNodeValid(goalNode, null));
+      if (!validGoalNode.getBooleanValue())// && !parameters.getReturnBestEffortPlan())
       {
-         boolean validGoalNode = nodeChecker.isNodeValid(goalNodes.get(robotSide), null);
-         if (!validGoalNode && !parameters.getReturnBestEffortPlan())
-         {
-            if (debug)
-               PrintTools.info("Goal node isn't valid. To plan without a valid goal node, best effort planning must be enabled");
-
-            return false;
-         }
-
-         this.validGoalNode.set(validGoalNode && this.validGoalNode.getBooleanValue());
+         if (debug)
+            PrintTools.info("Goal node isn't valid. To plan without a valid goal node, best effort planning must be enabled");
+         return false;
       }
 
       stack.add(startNode);
@@ -308,15 +326,18 @@ public class QuadrupedAStarFootstepPlanner implements QuadrupedFootstepPlanner
 
    private void checkStartHasPlanarRegion()
    {
-      Point3D startPoint = new Point3D(startNode.getX(), startNode.getY(), 0.0);
-      Point3DReadOnly startPos = PlanarRegionTools
-            .projectPointToPlanesVertically(startPoint, snapper.getOrCreateSteppableRegions(startNode.getRoundedX(), startNode.getRoundedY()));
-
-      if (startPos == null)
+      for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
       {
-         if (debug)
-            PrintTools.info("adding plane at start foot");
-         addPlanarRegionAtZeroHeight(startNode.getX(), startNode.getY());
+         Point3D startPoint = new Point3D(startNode.getX(robotQuadrant), startNode.getY(robotQuadrant), 0.0);
+         Point3DReadOnly startPos = PlanarRegionTools
+               .projectPointToPlanesVertically(startPoint, snapper.getOrCreateSteppableRegions(startNode.getRoundedX(robotQuadrant), startNode.getRoundedY(robotQuadrant)));
+
+         if (startPos == null)
+         {
+            if (debug)
+               PrintTools.info("adding plane at start foot");
+               addPlanarRegionAtZeroHeight(startNode.getX(robotQuadrant), startNode.getY(robotQuadrant));
+         }
       }
    }
 
@@ -377,7 +398,7 @@ public class QuadrupedAStarFootstepPlanner implements QuadrupedFootstepPlanner
          if (checkAndHandleNodeAtGoal(nodeToExpand))
             break;
 
-         checkAndHandleBestEffortNode(nodeToExpand);
+         //         checkAndHandleBestEffortNode(nodeToExpand);
 
          HashSet<FootstepNode> neighbors = nodeExpansion.expandNode(nodeToExpand);
          expandedNodesCount += neighbors.size();
@@ -396,7 +417,7 @@ public class QuadrupedAStarFootstepPlanner implements QuadrupedFootstepPlanner
             double cost = stepCostCalculator.compute(nodeToExpand, neighbor);
             graph.checkAndSetEdge(nodeToExpand, neighbor, cost);
 
-            if (!parameters.getReturnBestEffortPlan() || endNode == null || stack.comparator().compare(neighbor, endNode) < 0)
+            if (/*!parameters.getReturnBestEffortPlan() || */endNode == null || stack.comparator().compare(neighbor, endNode) < 0)
                stack.add(neighbor);
          }
 
@@ -427,10 +448,9 @@ public class QuadrupedAStarFootstepPlanner implements QuadrupedFootstepPlanner
       if (!validGoalNode.getBooleanValue())
          return false;
 
-      RobotSide nodeSide = nodeToExpand.getRobotSide();
-      if (goalNodes.get(nodeSide).equals(nodeToExpand))
+      if (goalNode.equals(nodeToExpand))
       {
-         endNode = goalNodes.get(nodeSide.getOppositeSide());
+         endNode = goalNode;
          graph.checkAndSetEdge(nodeToExpand, endNode, 0.0);
          return true;
       }
@@ -438,6 +458,7 @@ public class QuadrupedAStarFootstepPlanner implements QuadrupedFootstepPlanner
       return false;
    }
 
+   /*
    private void checkAndHandleBestEffortNode(FootstepNode nodeToExpand)
    {
       if (!parameters.getReturnBestEffortPlan())
@@ -446,14 +467,15 @@ public class QuadrupedAStarFootstepPlanner implements QuadrupedFootstepPlanner
       if (graph.getPathFromStart(nodeToExpand).size() - 1 < parameters.getMinimumStepsForBestEffortPlan())
          return;
 
-      if (endNode == null || heuristics.compute(nodeToExpand, goalNodes.get(nodeToExpand.getRobotSide())) < heuristics
-            .compute(endNode, goalNodes.get(endNode.getRobotSide())))
+      if (endNode == null || heuristics.compute(nodeToExpand, goalNode.get(nodeToExpand.getRobotSide())) < heuristics
+            .compute(endNode, goalNode.get(endNode.getRobotSide())))
       {
          if (listener != null)
             listener.reportLowestCostNodeList(graph.getPathFromStart(nodeToExpand));
          endNode = nodeToExpand;
       }
-   }
+   }\
+   */
 
    private FootstepPlanningResult checkResult()
    {
@@ -468,27 +490,28 @@ public class QuadrupedAStarFootstepPlanner implements QuadrupedFootstepPlanner
       return FootstepPlanningResult.SUB_OPTIMAL_SOLUTION;
    }
 
-   public static void checkGoalType(QuadrupedFootstepPlannerGoal goal)
+   public static void checkGoalType(QuadrupedFootstepPlannerTarget goal)
    {
-      FootstepPlannerGoalType supportedGoalType1 = FootstepPlannerGoalType.POSE_BETWEEN_FEET;
-      FootstepPlannerGoalType supportedGoalType2 = FootstepPlannerGoalType.DOUBLE_FOOTSTEP;
-      if (!goal.getFootstepPlannerGoalType().equals(supportedGoalType1) && !goal.getFootstepPlannerGoalType().equals(supportedGoalType2))
+      FootstepPlannerTargetType supportedGoalType1 = FootstepPlannerTargetType.POSE_BETWEEN_FEET;
+      FootstepPlannerTargetType supportedGoalType2 = FootstepPlannerTargetType.FOOTSTEPS;
+      if (!goal.getTargetType().equals(supportedGoalType1) && !goal.getTargetType().equals(supportedGoalType2))
          throw new IllegalArgumentException("Planner does not support goals other than " + supportedGoalType1 + " and " + supportedGoalType2);
    }
 
-   public static QuadrupedAStarFootstepPlanner createPlanner(FootstepPlannerParameters parameters, QuadrupedFootstepPlannerListener listener,
-                                                             FootstepNodeExpansion expansion, YoVariableRegistry registry)
+   public static QuadrupedAStarFootstepPlanner createPlanner(FootstepPlannerParameters parameters, QuadrupedXGaitSettings xGaitSettings,
+                                                             QuadrupedFootstepPlannerListener listener, FootstepNodeExpansion expansion,
+                                                             YoVariableRegistry registry)
    {
       SimplePlanarRegionFootstepNodeSnapper snapper = new SimplePlanarRegionFootstepNodeSnapper(parameters);
-//      FootstepNodeSnapAndWiggler postProcessingSnapper = new FootstepNodeSnapAndWiggler(footPolygons, parameters);
+      //      FootstepNodeSnapAndWiggler postProcessingSnapper = new FootstepNodeSnapAndWiggler(footPolygons, parameters);
       SimplePlanarRegionFootstepNodeSnapper postProcessingSnapper = new SimplePlanarRegionFootstepNodeSnapper(parameters);
 
       SnapBasedNodeChecker snapBasedNodeChecker = new SnapBasedNodeChecker(parameters, snapper);
-//      PlanarRegionBaseOfCliffAvoider cliffAvoider = new PlanarRegionBaseOfCliffAvoider(parameters, snapper, footPolygons);
+      //      PlanarRegionBaseOfCliffAvoider cliffAvoider = new PlanarRegionBaseOfCliffAvoider(parameters, snapper, footPolygons);
 
-      DistanceAndYawBasedHeuristics heuristics = new DistanceAndYawBasedHeuristics(parameters.getCostParameters().getAStarHeuristicsWeight(), parameters);
+      DistanceAndYawBasedHeuristics heuristics = new DistanceAndYawBasedHeuristics(parameters);
 
-      FootstepNodeChecker nodeChecker = new FootstepNodeCheckerOfCheckers(Arrays.asList(snapBasedNodeChecker, bodyCollisionNodeChecker, cliffAvoider));
+      FootstepNodeChecker nodeChecker = new FootstepNodeCheckerOfCheckers(Arrays.asList(snapBasedNodeChecker));//, cliffAvoider));
       nodeChecker.addPlannerListener(listener);
 
       FootstepCostBuilder costBuilder = new FootstepCostBuilder();
@@ -500,9 +523,8 @@ public class QuadrupedAStarFootstepPlanner implements QuadrupedFootstepPlanner
 
       FootstepCost footstepCost = costBuilder.buildCost();
 
-      QuadrupedAStarFootstepPlanner planner = new QuadrupedAStarFootstepPlanner(parameters, nodeChecker, heuristics, expansion, footstepCost, postProcessingSnapper, listener,
-                                                                                registry);
-
+      QuadrupedAStarFootstepPlanner planner = new QuadrupedAStarFootstepPlanner(parameters, xGaitSettings, nodeChecker, heuristics, expansion, footstepCost,
+                                                                                postProcessingSnapper, listener, registry);
 
       return planner;
    }

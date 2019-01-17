@@ -16,6 +16,7 @@ import us.ihmc.quadrupedCommunication.networkProcessing.QuadrupedToolboxControll
 import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.FootstepPlannerType;
 import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.QuadrupedBodyPathAndFootstepPlanner;
 import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.QuadrupedFootstepPlannerGoal;
+import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.QuadrupedFootstepPlannerStart;
 import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.turnWalkTurn.QuadrupedSplineWithTurnWalkTurnPlanner;
 import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.turnWalkTurn.QuadrupedVisGraphWithTurnWalkTurnPlanner;
 import us.ihmc.quadrupedPlanning.QuadrupedXGaitSettingsReadOnly;
@@ -142,13 +143,13 @@ public class QuadrupedFootstepPlanningController extends QuadrupedToolboxControl
       FramePose3D initialPose = new FramePose3D(ReferenceFrame.getWorldFrame(), request.getBodyPositionInWorld(), request.getBodyOrientationInWorld());
       FramePose3D goalPose = new FramePose3D(ReferenceFrame.getWorldFrame(), request.getGoalPositionInWorld(), request.getGoalOrientationInWorld());
 
+      QuadrupedFootstepPlannerStart start = new QuadrupedFootstepPlannerStart();
       QuadrupedFootstepPlannerGoal goal = new QuadrupedFootstepPlannerGoal();
+      start.setStartPose(initialPose);
       goal.setGoalPose(goalPose);
 
-      planner.setInitialBodyPose(initialPose);
+      planner.setStart(start);
       planner.setGoal(goal);
-
-      planner.initialize();
 
       return true;
    }

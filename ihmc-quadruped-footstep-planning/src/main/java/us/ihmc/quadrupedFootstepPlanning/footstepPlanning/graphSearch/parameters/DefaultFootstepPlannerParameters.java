@@ -87,4 +87,9 @@ public class DefaultFootstepPlannerParameters implements FootstepPlannerParamete
    {
       return 0.0;
    }
+
+   public double getHeuristicsWeight()
+   {
+      return 1.0;
+   }
 }
