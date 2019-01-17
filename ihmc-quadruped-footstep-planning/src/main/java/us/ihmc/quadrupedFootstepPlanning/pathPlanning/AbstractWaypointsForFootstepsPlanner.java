@@ -42,7 +42,7 @@ public abstract class AbstractWaypointsForFootstepsPlanner implements WaypointsF
 
    public void setGoal(QuadrupedFootstepPlannerGoal goal)
    {
-      FramePose3DReadOnly goalPose = goal.getGoalPose();
+      FramePose3DReadOnly goalPose = goal.getTargetPose();
       bodyGoalPose.setIncludingFrame(goalPose);
    }
 

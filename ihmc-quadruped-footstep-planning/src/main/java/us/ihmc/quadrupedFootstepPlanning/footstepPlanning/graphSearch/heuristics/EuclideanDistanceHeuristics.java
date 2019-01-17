@@ -1,13 +1,13 @@
 package us.ihmc.quadrupedFootstepPlanning.footstepPlanning.graphSearch.heuristics;
 
 import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.graphSearch.graph.FootstepNode;
-import us.ihmc.yoVariables.providers.DoubleProvider;
+import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.graphSearch.parameters.FootstepPlannerParameters;
 
 public class EuclideanDistanceHeuristics extends CostToGoHeuristics
 {
-   public EuclideanDistanceHeuristics(DoubleProvider weight)
+   public EuclideanDistanceHeuristics(FootstepPlannerParameters parameters)
    {
-      super(weight);
+      super(parameters);
    }
 
    @Override
