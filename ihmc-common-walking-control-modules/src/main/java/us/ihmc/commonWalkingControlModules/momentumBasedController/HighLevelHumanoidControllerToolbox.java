@@ -974,6 +974,11 @@ public class HighLevelHumanoidControllerToolbox
       robotMotionStatusChangedListeners.add(listener);
    }
 
+   public void detachRobotMotionStatusChangedListener(RobotMotionStatusChangedListener listener)
+   {
+      robotMotionStatusChangedListeners.remove(listener);
+   }
+
    public void reportChangeOfRobotMotionStatus(RobotMotionStatus newStatus)
    {
       for (int i = 0; i < robotMotionStatusChangedListeners.size(); i++)
