@@ -1,63 +1,66 @@
 package us.ihmc.robotics.geometry.interfaces;
 
-import us.ihmc.euclid.interfaces.GeometryObject;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.interfaces.FrameChangeable;
+import us.ihmc.euclid.referenceFrame.interfaces.FrameQuaternionReadOnly;
+import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
+import us.ihmc.euclid.referenceFrame.interfaces.ReferenceFrameHolder;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DBasics;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.euclid.tuple4D.interfaces.QuaternionBasics;
 import us.ihmc.euclid.tuple4D.interfaces.QuaternionReadOnly;
 
-public interface SO3WaypointInterface<T extends SO3WaypointInterface<T>> extends GeometryObject<T>
+public interface FrameSO3WaypointInterface<T extends FrameSO3WaypointInterface<T>> extends SO3WaypointInterface<T>, FrameChangeable
 {
-   public abstract QuaternionReadOnly getOrientation();
+   @Override
+   public abstract FrameQuaternionReadOnly getOrientation();
 
-   public abstract void setOrientation(double x, double y, double z, double s);
+   @Override
+   public abstract FrameVector3DReadOnly getAngularVelocity();
 
-   public abstract Vector3DReadOnly getAngularVelocity();
-
-   public abstract void setAngularVelocity(double x, double y, double z);
-
+   @Override
    public default void setOrientation(QuaternionReadOnly orientation)
    {
+      if (orientation instanceof ReferenceFrameHolder)
+      {
+         checkReferenceFrameMatch((ReferenceFrameHolder) orientation);
+      }
       setOrientation(orientation.getX(), orientation.getY(), orientation.getZ(), orientation.getS());
    }
 
-   public default void setOrientationToZero()
-   {
-      setOrientation(0.0, 0.0, 0.0, 1.0);
-   }
-
-   public default void setOrientationToNaN()
-   {
-      setOrientation(Double.NaN, Double.NaN, Double.NaN, Double.NaN);
-   }
-
+   @Override
    public default void setAngularVelocity(Vector3DReadOnly angularVelocity)
    {
+      if (angularVelocity instanceof ReferenceFrameHolder)
+      {
+         checkReferenceFrameMatch((ReferenceFrameHolder) angularVelocity);
+      }
       setAngularVelocity(angularVelocity.getX(), angularVelocity.getY(), angularVelocity.getZ());
    }
 
-   public default void setAngularVelocityToZero()
-   {
-      setAngularVelocity(0.0, 0.0, 0.0);
-   }
-
-   public default void setAngularVelocityToNaN()
-   {
-      setAngularVelocity(Double.NaN, Double.NaN, Double.NaN);
-   }
-
+   @Override
    public default double orientationDistance(T other)
    {
       return getOrientation().distance(other.getOrientation());
    }
 
+   @Override
    public default void getOrientation(QuaternionBasics orientationToPack)
    {
+      if (orientationToPack instanceof ReferenceFrameHolder)
+      {
+         checkReferenceFrameMatch((ReferenceFrameHolder) orientationToPack);
+      }
       orientationToPack.set(getOrientation());
    }
 
+   @Override
    public default void getAngularVelocity(Vector3DBasics angularVelocityToPack)
    {
+      if (angularVelocityToPack instanceof ReferenceFrameHolder)
+      {
+         checkReferenceFrameMatch((ReferenceFrameHolder) angularVelocityToPack);
+      }
       angularVelocityToPack.set(getAngularVelocity());
    }
 
@@ -84,23 +87,15 @@ public interface SO3WaypointInterface<T extends SO3WaypointInterface<T>> extends
       setAngularVelocity(other.getAngularVelocity());
    }
 
-   @Override
-   public default void setToNaN()
+   public default void setToNaN(ReferenceFrame referenceFrame)
    {
-      setOrientationToNaN();
-      setAngularVelocityToNaN();
+      setReferenceFrame(referenceFrame);
+      setToNaN();
    }
 
-   @Override
-   public default void setToZero()
+   public default void setToZero(ReferenceFrame referenceFrame)
    {
-      setOrientationToZero();
-      setAngularVelocityToZero();
-   }
-
-   @Override
-   default boolean containsNaN()
-   {
-      return getOrientation().containsNaN() || getAngularVelocity().containsNaN();
+      setReferenceFrame(referenceFrame);
+      setToZero();
    }
 }

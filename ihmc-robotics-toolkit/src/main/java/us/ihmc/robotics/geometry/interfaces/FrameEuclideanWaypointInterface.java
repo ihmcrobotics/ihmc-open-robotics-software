@@ -1,63 +1,66 @@
 package us.ihmc.robotics.geometry.interfaces;
 
-import us.ihmc.euclid.interfaces.GeometryObject;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.interfaces.FrameChangeable;
+import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
+import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
+import us.ihmc.euclid.referenceFrame.interfaces.ReferenceFrameHolder;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DBasics;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DBasics;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 
-public interface EuclideanWaypointInterface<T extends EuclideanWaypointInterface<T>> extends GeometryObject<T>
+public interface FrameEuclideanWaypointInterface<T extends FrameEuclideanWaypointInterface<T>> extends EuclideanWaypointInterface<T>, FrameChangeable
 {
-   public abstract Point3DReadOnly getPosition();
+   @Override
+   public abstract FramePoint3DReadOnly getPosition();
 
-   public abstract void setPosition(double x, double y, double z);
+   @Override
+   public abstract FrameVector3DReadOnly getLinearVelocity();
 
-   public abstract Vector3DReadOnly getLinearVelocity();
-
-   public abstract void setLinearVelocity(double x, double y, double z);
-
+   @Override
    public default void setPosition(Point3DReadOnly position)
    {
+      if (position instanceof ReferenceFrameHolder)
+      {
+         checkReferenceFrameMatch((ReferenceFrameHolder) position);
+      }
       setPosition(position.getX(), position.getY(), position.getZ());
    }
 
-   public default void setPositionToZero()
-   {
-      setPosition(0.0, 0.0, 0.0);
-   }
-
-   public default void setPositionToNaN()
-   {
-      setPosition(Double.NaN, Double.NaN, Double.NaN);
-   }
-
+   @Override
    public default void setLinearVelocity(Vector3DReadOnly linearVelocity)
    {
+      if (linearVelocity instanceof ReferenceFrameHolder)
+      {
+         checkReferenceFrameMatch((ReferenceFrameHolder) linearVelocity);
+      }
       setLinearVelocity(linearVelocity.getX(), linearVelocity.getY(), linearVelocity.getZ());
    }
 
-   public default void setLinearVelocityToZero()
-   {
-      setLinearVelocity(0.0, 0.0, 0.0);
-   }
-
-   public default void setLinearVelocityToNaN()
-   {
-      setLinearVelocity(Double.NaN, Double.NaN, Double.NaN);
-   }
-
+   @Override
    public default double positionDistance(T other)
    {
       return getPosition().distance(other.getPosition());
    }
 
+   @Override
    public default void getPosition(Point3DBasics positionToPack)
    {
+      if (positionToPack instanceof ReferenceFrameHolder)
+      {
+         checkReferenceFrameMatch((ReferenceFrameHolder) positionToPack);
+      }
       positionToPack.set(getPosition());
    }
 
+   @Override
    public default void getLinearVelocity(Vector3DBasics linearVelocityToPack)
    {
+      if (linearVelocityToPack instanceof ReferenceFrameHolder)
+      {
+         checkReferenceFrameMatch((ReferenceFrameHolder) linearVelocityToPack);
+      }
       linearVelocityToPack.set(getLinearVelocity());
    }
 
@@ -84,23 +87,15 @@ public interface EuclideanWaypointInterface<T extends EuclideanWaypointInterface
       setLinearVelocity(other.getLinearVelocity());
    }
 
-   @Override
-   public default void setToNaN()
+   public default void setToNaN(ReferenceFrame referenceFrame)
    {
-      setPositionToNaN();
-      setLinearVelocityToNaN();
+      setReferenceFrame(referenceFrame);
+      setToNaN();
    }
 
-   @Override
-   public default void setToZero()
+   public default void setToZero(ReferenceFrame referenceFrame)
    {
-      setPositionToZero();
-      setLinearVelocityToZero();
-   }
-
-   @Override
-   default boolean containsNaN()
-   {
-      return getPosition().containsNaN() || getLinearVelocity().containsNaN();
+      setReferenceFrame(referenceFrame);
+      setToZero();
    }
 }
