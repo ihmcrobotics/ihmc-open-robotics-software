@@ -34,6 +34,8 @@ public interface FootstepPlannerParameters
 
    double getStepDownWeight();
 
+   double getHeuristicsWeight();
+
    /**
     * The planner will ignore candidate footsteps if they are on a planar region with an incline that is higher
     * then the value specified here.
