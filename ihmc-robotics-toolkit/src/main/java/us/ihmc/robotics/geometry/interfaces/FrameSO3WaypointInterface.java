@@ -2,12 +2,11 @@ package us.ihmc.robotics.geometry.interfaces;
 
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameChangeable;
+import us.ihmc.euclid.referenceFrame.interfaces.FrameQuaternionBasics;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameQuaternionReadOnly;
+import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DBasics;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
-import us.ihmc.euclid.referenceFrame.interfaces.ReferenceFrameHolder;
-import us.ihmc.euclid.tuple3D.interfaces.Vector3DBasics;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
-import us.ihmc.euclid.tuple4D.interfaces.QuaternionBasics;
 import us.ihmc.euclid.tuple4D.interfaces.QuaternionReadOnly;
 
 public interface FrameSO3WaypointInterface<T extends FrameSO3WaypointInterface<T>> extends SO3WaypointInterface<T>, FrameChangeable
@@ -18,23 +17,15 @@ public interface FrameSO3WaypointInterface<T extends FrameSO3WaypointInterface<T
    @Override
    public abstract FrameVector3DReadOnly getAngularVelocity();
 
-   @Override
-   public default void setOrientation(QuaternionReadOnly orientation)
+   public default void setOrientation(FrameQuaternionReadOnly orientation)
    {
-      if (orientation instanceof ReferenceFrameHolder)
-      {
-         checkReferenceFrameMatch((ReferenceFrameHolder) orientation);
-      }
+      checkReferenceFrameMatch(orientation);
       setOrientation(orientation.getX(), orientation.getY(), orientation.getZ(), orientation.getS());
    }
 
-   @Override
-   public default void setAngularVelocity(Vector3DReadOnly angularVelocity)
+   public default void setAngularVelocity(FrameVector3DReadOnly angularVelocity)
    {
-      if (angularVelocity instanceof ReferenceFrameHolder)
-      {
-         checkReferenceFrameMatch((ReferenceFrameHolder) angularVelocity);
-      }
+      checkReferenceFrameMatch(angularVelocity);
       setAngularVelocity(angularVelocity.getX(), angularVelocity.getY(), angularVelocity.getZ());
    }
 
@@ -44,24 +35,56 @@ public interface FrameSO3WaypointInterface<T extends FrameSO3WaypointInterface<T
       return getOrientation().distance(other.getOrientation());
    }
 
-   @Override
-   public default void getOrientation(QuaternionBasics orientationToPack)
+   public default void getOrientation(FrameQuaternionBasics orientationToPack)
    {
-      if (orientationToPack instanceof ReferenceFrameHolder)
-      {
-         checkReferenceFrameMatch((ReferenceFrameHolder) orientationToPack);
-      }
+      checkReferenceFrameMatch(orientationToPack);
       orientationToPack.set(getOrientation());
    }
 
-   @Override
-   public default void getAngularVelocity(Vector3DBasics angularVelocityToPack)
+   public default void getAngularVelocity(FrameVector3DBasics angularVelocityToPack)
    {
-      if (angularVelocityToPack instanceof ReferenceFrameHolder)
-      {
-         checkReferenceFrameMatch((ReferenceFrameHolder) angularVelocityToPack);
-      }
+      checkReferenceFrameMatch(angularVelocityToPack);
       angularVelocityToPack.set(getAngularVelocity());
+   }
+
+   public default void getOrientationIncludingFrame(FrameQuaternionBasics orientationToPack)
+   {
+      orientationToPack.setIncludingFrame(getOrientation());
+   }
+
+   public default void getAngularVelocityIncludingFrame(FrameVector3DBasics angularVelocityToPack)
+   {
+      angularVelocityToPack.setIncludingFrame(getAngularVelocity());
+   }
+
+   public default void set(FrameQuaternionReadOnly orientation, FrameVector3DReadOnly angularVelocity)
+   {
+      setOrientation(orientation);
+      setAngularVelocity(angularVelocity);
+   }
+
+   public default void setIncludingFrame(FrameQuaternionReadOnly orientation, FrameVector3DReadOnly angularVelocity)
+   {
+      setReferenceFrame(orientation.getReferenceFrame());
+      set(orientation, angularVelocity);
+   }
+
+   public default void setIncludingFrame(ReferenceFrame referenceFrame, QuaternionReadOnly orientation, Vector3DReadOnly angularVelocity)
+   {
+      setReferenceFrame(referenceFrame);
+      set(orientation, angularVelocity);
+   }
+
+   public default void get(FrameQuaternionBasics orientationToPack, FrameVector3DBasics angularVelocityToPack)
+   {
+      getOrientation(orientationToPack);
+      getAngularVelocity(angularVelocityToPack);
+   }
+
+   public default void getIncludingFrame(FrameQuaternionBasics orientationToPack, FrameVector3DBasics angularVelocityToPack)
+   {
+      getOrientationIncludingFrame(orientationToPack);
+      getAngularVelocityIncludingFrame(angularVelocityToPack);
    }
 
    @Override

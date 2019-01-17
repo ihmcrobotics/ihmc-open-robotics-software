@@ -2,12 +2,11 @@ package us.ihmc.robotics.geometry.interfaces;
 
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameChangeable;
+import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DBasics;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
+import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DBasics;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
-import us.ihmc.euclid.referenceFrame.interfaces.ReferenceFrameHolder;
-import us.ihmc.euclid.tuple3D.interfaces.Point3DBasics;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
-import us.ihmc.euclid.tuple3D.interfaces.Vector3DBasics;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 
 public interface FrameEuclideanWaypointInterface<T extends FrameEuclideanWaypointInterface<T>> extends EuclideanWaypointInterface<T>, FrameChangeable
@@ -18,23 +17,15 @@ public interface FrameEuclideanWaypointInterface<T extends FrameEuclideanWaypoin
    @Override
    public abstract FrameVector3DReadOnly getLinearVelocity();
 
-   @Override
-   public default void setPosition(Point3DReadOnly position)
+   public default void setPosition(FramePoint3DReadOnly position)
    {
-      if (position instanceof ReferenceFrameHolder)
-      {
-         checkReferenceFrameMatch((ReferenceFrameHolder) position);
-      }
+      checkReferenceFrameMatch(position);
       setPosition(position.getX(), position.getY(), position.getZ());
    }
 
-   @Override
-   public default void setLinearVelocity(Vector3DReadOnly linearVelocity)
+   public default void setLinearVelocity(FrameVector3DReadOnly linearVelocity)
    {
-      if (linearVelocity instanceof ReferenceFrameHolder)
-      {
-         checkReferenceFrameMatch((ReferenceFrameHolder) linearVelocity);
-      }
+      checkReferenceFrameMatch(linearVelocity);
       setLinearVelocity(linearVelocity.getX(), linearVelocity.getY(), linearVelocity.getZ());
    }
 
@@ -44,24 +35,56 @@ public interface FrameEuclideanWaypointInterface<T extends FrameEuclideanWaypoin
       return getPosition().distance(other.getPosition());
    }
 
-   @Override
-   public default void getPosition(Point3DBasics positionToPack)
+   public default void getPosition(FramePoint3DBasics positionToPack)
    {
-      if (positionToPack instanceof ReferenceFrameHolder)
-      {
-         checkReferenceFrameMatch((ReferenceFrameHolder) positionToPack);
-      }
+      checkReferenceFrameMatch(positionToPack);
       positionToPack.set(getPosition());
    }
 
-   @Override
-   public default void getLinearVelocity(Vector3DBasics linearVelocityToPack)
+   public default void getLinearVelocity(FrameVector3DBasics linearVelocityToPack)
    {
-      if (linearVelocityToPack instanceof ReferenceFrameHolder)
-      {
-         checkReferenceFrameMatch((ReferenceFrameHolder) linearVelocityToPack);
-      }
+      checkReferenceFrameMatch(linearVelocityToPack);
       linearVelocityToPack.set(getLinearVelocity());
+   }
+
+   public default void getPositionIncludingFrame(FramePoint3DBasics positionToPack)
+   {
+      positionToPack.setIncludingFrame(getPosition());
+   }
+
+   public default void getLinearVelocityIncludingFrame(FrameVector3DBasics linearVelocityToPack)
+   {
+      linearVelocityToPack.setIncludingFrame(getLinearVelocity());
+   }
+
+   public default void set(FramePoint3DReadOnly position, FrameVector3DReadOnly linearVelocity)
+   {
+      setPosition(position);
+      setLinearVelocity(linearVelocity);
+   }
+
+   public default void setIncludingFrame(FramePoint3DReadOnly position, FrameVector3DReadOnly linearVelocity)
+   {
+      setReferenceFrame(position.getReferenceFrame());
+      set(position, linearVelocity);
+   }
+
+   public default void setIncludingFrame(ReferenceFrame referenceFrame, Point3DReadOnly position, Vector3DReadOnly linearVelocity)
+   {
+      setReferenceFrame(referenceFrame);
+      set(position, linearVelocity);
+   }
+
+   public default void get(FramePoint3DBasics positionToPack, FrameVector3DBasics linearVelocityToPack)
+   {
+      getPosition(positionToPack);
+      getLinearVelocity(linearVelocityToPack);
+   }
+
+   public default void getIncludingFrame(FramePoint3DBasics positionToPack, FrameVector3DBasics linearVelocityToPack)
+   {
+      getPositionIncludingFrame(positionToPack);
+      getLinearVelocityIncludingFrame(linearVelocityToPack);
    }
 
    @Override
