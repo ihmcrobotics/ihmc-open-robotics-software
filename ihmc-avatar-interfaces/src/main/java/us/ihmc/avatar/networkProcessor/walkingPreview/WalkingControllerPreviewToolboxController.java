@@ -5,8 +5,10 @@ import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
 
+import controller_msgs.msg.dds.KinematicsToolboxOutputStatus;
 import controller_msgs.msg.dds.RobotConfigurationData;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
+import us.ihmc.avatar.networkProcessor.kinematicsToolboxModule.KinematicsToolboxHelper;
 import us.ihmc.avatar.networkProcessor.modules.ToolboxController;
 import us.ihmc.commonWalkingControlModules.configurations.ICPWithTimeFreezingPlannerParameters;
 import us.ihmc.commonWalkingControlModules.configurations.JointPrivilegedConfigurationParameters;
@@ -15,6 +17,7 @@ import us.ihmc.commonWalkingControlModules.controllerCore.WholeBodyControlCoreTo
 import us.ihmc.commonWalkingControlModules.controllerCore.WholeBodyControllerCore;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.ControllerCoreCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.FeedbackControlCommandList;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.JointAccelerationIntegrationCommand;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.ContactableBodiesFactory;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.ControllerAPIDefinition;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.HighLevelControlManagerFactory;
@@ -25,13 +28,16 @@ import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.
 import us.ihmc.commonWalkingControlModules.sensors.footSwitch.SettableFootSwitch;
 import us.ihmc.communication.controllerAPI.CommandInputManager;
 import us.ihmc.communication.controllerAPI.StatusMessageOutputManager;
+import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactableFoot;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.FootstepDataListCommand;
 import us.ihmc.humanoidRobotics.communication.walkingPreviewToolboxAPI.WalkingControllerPreviewInputCommand;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
+import us.ihmc.mecano.multiBodySystem.interfaces.FloatingJointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.JointBasics;
+import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.contactable.ContactablePlaneBody;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -52,6 +58,9 @@ public class WalkingControllerPreviewToolboxController extends ToolboxController
    private final double gravityZ = 9.81;
    private final YoDouble previewTime;
    private final double integrationDT = 0.001;
+
+   private final FloatingJointBasics rootJoint;
+   private final OneDoFJointBasics[] controlledOneDoFJoints;
    private final FullHumanoidRobotModel fullRobotModel;
    private final CommonHumanoidReferenceFrames referenceFrames;
    // TODO Think how the foot switch should be updated/implemented. We can use the parameter WalkingControllerParameters.finishSingleSupportWhenICPPlannerIsDone to finish swing but is that enough?
@@ -68,9 +77,13 @@ public class WalkingControllerPreviewToolboxController extends ToolboxController
                                                                                    ControllerAPIDefinition.getControllerSupportedCommands());
    private final StatusMessageOutputManager walkingOutputManager = new StatusMessageOutputManager(ControllerAPIDefinition.getControllerSupportedStatusMessages());
 
+   private final JointAccelerationIntegrationCommand jointAccelerationIntegrationCommand = new JointAccelerationIntegrationCommand();
+
    private final TaskExecutor taskExecutor = new TaskExecutor();
 
    private final YoBoolean isDone = new YoBoolean("isDone", registry);
+
+   private final List<KinematicsToolboxOutputStatus> previewFrames = new ArrayList<>();
 
    public WalkingControllerPreviewToolboxController(DRCRobotModel robotModel, CommandInputManager toolboxInputManager,
                                                     StatusMessageOutputManager statusOutputManager, YoGraphicsListRegistry yoGraphicsListRegistry,
@@ -87,6 +100,8 @@ public class WalkingControllerPreviewToolboxController extends ToolboxController
       ICPWithTimeFreezingPlannerParameters capturePointPlannerParameters = robotModel.getCapturePointPlannerParameters();
 
       controllerToolbox = createHighLevelControllerToolbox(robotModel, yoGraphicsListRegistry);
+      rootJoint = fullRobotModel.getRootJoint();
+      controlledOneDoFJoints = controllerToolbox.getControlledOneDoFJoints();
 
       //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -103,10 +118,20 @@ public class WalkingControllerPreviewToolboxController extends ToolboxController
       WholeBodyControlCoreToolbox controlCoreToolbox = createControllerCoretoolbox(walkingControllerParameters, yoGraphicsListRegistry);
 
       FeedbackControlCommandList feedbackControlTemplate = managerFactory.createFeedbackControlTemplate();
-      JointDesiredOutputList jointDesiredOutputList = new JointDesiredOutputList(controllerToolbox.getControlledOneDoFJoints());
+      JointDesiredOutputList jointDesiredOutputList = new JointDesiredOutputList(controlledOneDoFJoints);
 
       controllerCore = new WholeBodyControllerCore(controlCoreToolbox, feedbackControlTemplate, jointDesiredOutputList, registry);
       walkingController.setControllerCoreOutput(controllerCore.getOutputForHighLevelController());
+
+      //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+      for (OneDoFJointBasics joint : controlledOneDoFJoints)
+      {
+         int jointIndex = jointAccelerationIntegrationCommand.getNumberOfJointsToComputeDesiredPositionFor();
+         jointAccelerationIntegrationCommand.addJointToComputeDesiredPositionFor(joint);
+         jointAccelerationIntegrationCommand.setBreakFrequencies(jointIndex, 0.0, 0.0); // Setup for pure integration without leak.
+         jointAccelerationIntegrationCommand.setJointMaxima(jointIndex, Double.POSITIVE_INFINITY, Double.POSITIVE_INFINITY);
+      }
 
       registry.addChild(walkingController.getYoVariableRegistry());
    }
@@ -187,35 +212,54 @@ public class WalkingControllerPreviewToolboxController extends ToolboxController
       if (robotConfigurationData == null)
          return false;
 
-      return false;
+      return true;
    }
 
    @Override
    public void updateInternal() throws Exception
    {
-      previewTime.add(integrationDT);
-      fullRobotModel.updateFrames();
-      referenceFrames.updateFrames();
-
       if (toolboxInputManager.isNewCommandAvailable(WalkingControllerPreviewInputCommand.class))
       {
          isDone.set(false);
+         previewTime.set(0.0);
+         previewFrames.clear();
+         // Initializes this desired robot to the most recent robot configuration data received from the walking controller.
+         KinematicsToolboxHelper.setRobotStateFromRobotConfigurationData(latestRobotConfigurationDataReference.get(), rootJoint, controlledOneDoFJoints);
+         fullRobotModel.updateFrames();
+         referenceFrames.updateFrames();
+         walkingController.initialize();
+
          taskExecutor.clear();
-         taskExecutor.submit(new WalkingPreviewResetTask());
+         taskExecutor.submit(new WalkingPreviewResetTask(fullRobotModel, controllerToolbox.getFootContactStates(), walkingInputManager, controllerToolbox)); // TODO Figure out what should be in the reset
 
          WalkingControllerPreviewInputCommand command = toolboxInputManager.pollNewestCommand(WalkingControllerPreviewInputCommand.class);
          FootstepDataListCommand foostepCommand = command.getFoostepCommand();
-         taskExecutor.submit(new FootstepListPreviewTask(foostepCommand, walkingInputManager, walkingOutputManager));
+         taskExecutor.submit(new FootstepListPreviewTask(foostepCommand, walkingInputManager, walkingOutputManager, controllerToolbox.getFootContactStates()));
+      }
+      else
+      {
+         previewTime.add(integrationDT);
+         fullRobotModel.updateFrames();
+         referenceFrames.updateFrames();
       }
 
       taskExecutor.doControl();
 
       walkingController.doAction();
       ControllerCoreCommand controllerCoreCommand = walkingController.getControllerCoreCommand();
+      controllerCoreCommand.addInverseDynamicsCommand(jointAccelerationIntegrationCommand);
+      controllerCoreCommand.addInverseDynamicsCommand(((WalkingPreviewTask) taskExecutor.getCurrentTask()).getOutput());
       controllerCore.submitControllerCoreCommand(controllerCoreCommand);
       controllerCore.compute();
 
+      KinematicsToolboxHelper.setRobotStateFromControllerCoreOutput(controllerCore.getControllerCoreOutput(), rootJoint, controlledOneDoFJoints);
+
+      previewFrames.add(MessageTools.createKinematicsToolboxOutputStatus(rootJoint, controlledOneDoFJoints));
+
       isDone.set(taskExecutor.isDone());
+
+      if (isDone.getValue())
+         reportMessage(MessageTools.createWalkingControllerPreviewOutputMessage(integrationDT, previewFrames));
    }
 
    @Override
