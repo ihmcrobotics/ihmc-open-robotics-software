@@ -84,7 +84,7 @@ public class NodeCheckerRenderer extends AnimationTimer
          }
       }
 
-      snapper = new SimplePlanarRegionFootstepNodeSnapper(footPolygons, parameters);
+      snapper = new SimplePlanarRegionFootstepNodeSnapper(footPolygons);
 
       SnapBasedNodeChecker snapBasedNodeChecker = new SnapBasedNodeChecker(parameters, footPolygons, snapper);
       BodyCollisionNodeChecker bodyCollisionNodeChecker = new BodyCollisionNodeChecker(parameters, snapper);

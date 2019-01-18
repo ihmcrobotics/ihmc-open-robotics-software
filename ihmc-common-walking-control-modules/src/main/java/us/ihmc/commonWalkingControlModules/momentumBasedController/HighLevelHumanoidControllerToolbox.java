@@ -1,7 +1,7 @@
 package us.ihmc.commonWalkingControlModules.momentumBasedController;
 
-import static us.ihmc.graphicsDescription.appearance.YoAppearance.Blue;
-import static us.ihmc.robotics.lists.FrameTuple2dArrayList.createFramePoint2dArrayList;
+import static us.ihmc.graphicsDescription.appearance.YoAppearance.*;
+import static us.ihmc.robotics.lists.FrameTuple2dArrayList.*;
 
 import java.awt.Color;
 import java.util.ArrayList;
@@ -171,10 +171,10 @@ public class HighLevelHumanoidControllerToolbox
 
    public HighLevelHumanoidControllerToolbox(FullHumanoidRobotModel fullRobotModel, CommonHumanoidReferenceFrames referenceFrames,
                                              SideDependentList<FootSwitchInterface> footSwitches, CenterOfMassDataHolderReadOnly centerOfMassDataHolder,
-                                             SideDependentList<ForceSensorDataReadOnly> wristForceSensors, YoDouble yoTime, double gravityZ,
-                                             double omega0, SideDependentList<ContactableFoot> feet, double controlDT,
-                                             ArrayList<Updatable> updatables, List<ContactablePlaneBody> contactableBodies,
-                                             YoGraphicsListRegistry yoGraphicsListRegistry, JointBasics... jointsToIgnore)
+                                             SideDependentList<ForceSensorDataReadOnly> wristForceSensors, YoDouble yoTime, double gravityZ, double omega0,
+                                             SideDependentList<ContactableFoot> feet, double controlDT, List<Updatable> updatables,
+                                             List<ContactablePlaneBody> contactableBodies, YoGraphicsListRegistry yoGraphicsListRegistry,
+                                             JointBasics... jointsToIgnore)
    {
       this.yoGraphicsListRegistry = yoGraphicsListRegistry;
 
@@ -972,6 +972,11 @@ public class HighLevelHumanoidControllerToolbox
    public void attachRobotMotionStatusChangedListener(RobotMotionStatusChangedListener listener)
    {
       robotMotionStatusChangedListeners.add(listener);
+   }
+
+   public void detachRobotMotionStatusChangedListener(RobotMotionStatusChangedListener listener)
+   {
+      robotMotionStatusChangedListeners.remove(listener);
    }
 
    public void reportChangeOfRobotMotionStatus(RobotMotionStatus newStatus)

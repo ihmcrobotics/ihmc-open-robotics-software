@@ -1,8 +1,8 @@
 package us.ihmc.valkyrie.parameters;
 
-import us.ihmc.footstepPlanning.graphSearch.graph.FootstepNode;
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerCostParameters;
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParameters;
+import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepProcessingParameters;
 
 public class ValkyrieFootstepPlannerParameters implements FootstepPlannerParameters
 {
@@ -154,5 +154,11 @@ public class ValkyrieFootstepPlannerParameters implements FootstepPlannerParamet
    public double getMaximumYawWiggle()
    {
       return 0.3;
+   }
+
+   @Override
+   public FootstepProcessingParameters getFootstepProcessingParameters()
+   {
+      return new ValkyrieFootstepProcessingParameters();
    }
 }
