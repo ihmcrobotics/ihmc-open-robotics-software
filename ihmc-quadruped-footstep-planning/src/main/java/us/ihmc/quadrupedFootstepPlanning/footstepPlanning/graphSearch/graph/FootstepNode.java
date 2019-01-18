@@ -28,20 +28,25 @@ public class FootstepNode
    private final int hashCode;
    private final int planarRegionsHashCode;
 
-   public FootstepNode(QuadrantDependentList<Point2DReadOnly> locations)
+   private final RobotQuadrant movingQuadrant;
+
+   public FootstepNode(RobotQuadrant movingQuadrant, QuadrantDependentList<Point2DReadOnly> locations)
    {
-      this(locations.get(RobotQuadrant.FRONT_LEFT), locations.get(RobotQuadrant.FRONT_RIGHT), locations.get(RobotQuadrant.HIND_LEFT),
+      this(movingQuadrant, locations.get(RobotQuadrant.FRONT_LEFT), locations.get(RobotQuadrant.FRONT_RIGHT), locations.get(RobotQuadrant.HIND_LEFT),
            locations.get(RobotQuadrant.HIND_RIGHT));
    }
 
-   public FootstepNode(Tuple2DReadOnly frontLeft, Tuple2DReadOnly frontRight, Tuple2DReadOnly hindLeft, Tuple2DReadOnly hindRight)
+   public FootstepNode(RobotQuadrant movingQuadrant, Tuple2DReadOnly frontLeft, Tuple2DReadOnly frontRight, Tuple2DReadOnly hindLeft, Tuple2DReadOnly hindRight)
    {
-      this(frontLeft.getX(), frontLeft.getY(), frontRight.getX(), frontRight.getY(), hindLeft.getX(), hindLeft.getY(), hindRight.getX(), hindRight.getY());
+      this(movingQuadrant, frontLeft.getX(), frontLeft.getY(), frontRight.getX(), frontRight.getY(), hindLeft.getX(), hindLeft.getY(), hindRight.getX(),
+           hindRight.getY());
    }
 
-   public FootstepNode(double frontLeftX, double frontLeftY, double frontRightX, double frontRightY, double hindLeftX, double hindLeftY, double hindRightX,
-                       double hindRightY)
+   public FootstepNode(RobotQuadrant movingQuadrant, double frontLeftX, double frontLeftY, double frontRightX, double frontRightY, double hindLeftX,
+                       double hindLeftY, double hindRightX, double hindRightY)
    {
+      this.movingQuadrant = movingQuadrant;
+
       int xFrontLeftIndex = (int) Math.round(frontLeftX / gridSizeXY);
       int yFrontLeftIndex = (int) Math.round(frontLeftY / gridSizeXY);
 
@@ -70,6 +75,11 @@ public class FootstepNode
 
       hashCode = computeHashCode(this);
       planarRegionsHashCode = computePlanarRegionsHashCode(this);
+   }
+
+   public RobotQuadrant getMovingQuadrant()
+   {
+      return movingQuadrant;
    }
 
    public double getX(RobotQuadrant robotQuadrant)
@@ -111,7 +121,7 @@ public class FootstepNode
 
    public static FootstepNode generateRandomFootstepNode(Random random, double minMaxXY)
    {
-      return new FootstepNode(
+      return new FootstepNode(RobotQuadrant.generateRandomRobotQuadrant(random),
             new QuadrantDependentList<>(EuclidCoreRandomTools.nextPoint2D(random, minMaxXY), EuclidCoreRandomTools.nextPoint2D(random, minMaxXY),
                                         EuclidCoreRandomTools.nextPoint2D(random, minMaxXY), EuclidCoreRandomTools.nextPoint2D(random, minMaxXY)));
    }
@@ -155,6 +165,7 @@ public class FootstepNode
    {
       final int prime = 31;
       int result = 1;
+      result = prime * result + ((node.movingQuadrant == null) ? 0 : node.movingQuadrant.hashCode());
       for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
       {
          result = prime * result + node.getXIndex(robotQuadrant);
@@ -211,6 +222,8 @@ public class FootstepNode
             return false;
          if (yIndices.get(robotQuadrant) != other.yIndices.get(robotQuadrant))
             return false;
+         if (movingQuadrant != other.movingQuadrant)
+            return false;
       }
       return true;
    }
@@ -219,6 +232,7 @@ public class FootstepNode
    public String toString()
    {
       String string = "Node: ";
+      string += "\n\t moving quadrant = " + movingQuadrant;
       for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
       {
          string += "\n\t quadrant= " + robotQuadrant.getCamelCaseName() + ", x= " + getX(robotQuadrant) + ", y= " + getY(robotQuadrant);

@@ -54,6 +54,7 @@ public class QuadrupedAStarFootstepPlanner implements QuadrupedFootstepPlanner
    private static final boolean debug = true;
 
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
+   private static final RobotQuadrant defaultFirstQuadrant = RobotQuadrant.FRONT_LEFT;
 
    private final String name = getClass().getSimpleName();
    private final YoVariableRegistry registry = new YoVariableRegistry(name);
@@ -171,7 +172,7 @@ public class QuadrupedAStarFootstepPlanner implements QuadrupedFootstepPlanner
          hindLeftStepPosition.changeFrame(worldFrame);
          hindRightStepPosition.changeFrame(worldFrame);
 
-         nodeToReturn = new FootstepNode(frontLeftStepPosition, frontRightStepPosition, hindLeftStepPosition, hindRightStepPosition);
+         nodeToReturn = new FootstepNode(defaultFirstQuadrant, frontLeftStepPosition, frontRightStepPosition, hindLeftStepPosition, hindRightStepPosition);
       }
       else if (target.getTargetType().equals(FootstepPlannerTargetType.FOOTSTEPS))
       {
@@ -185,7 +186,7 @@ public class QuadrupedAStarFootstepPlanner implements QuadrupedFootstepPlanner
          hindLeftGoalPosition.changeFrame(worldFrame);
          hindRightGoalPosition.changeFrame(worldFrame);
 
-         nodeToReturn = new FootstepNode(frontLeftGoalPosition.getX(), frontLeftGoalPosition.getY(), frontRightGoalPosition.getX(),
+         nodeToReturn = new FootstepNode(defaultFirstQuadrant, frontLeftGoalPosition.getX(), frontLeftGoalPosition.getY(), frontRightGoalPosition.getX(),
                                          frontRightGoalPosition.getY(), hindLeftGoalPosition.getX(), hindLeftGoalPosition.getY(), hindRightGoalPosition.getX(),
                                          hindRightGoalPosition.getY());
       }
