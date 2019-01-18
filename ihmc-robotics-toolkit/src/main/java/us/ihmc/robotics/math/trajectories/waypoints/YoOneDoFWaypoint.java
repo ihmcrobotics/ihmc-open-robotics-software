@@ -5,13 +5,11 @@ import static us.ihmc.robotics.math.frames.YoFrameVariableNameTools.createName;
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
 
-import us.ihmc.euclid.transform.interfaces.Transform;
-import us.ihmc.commons.MathTools;
+import us.ihmc.robotics.geometry.interfaces.OneDoFWaypointInterface;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.robotics.geometry.interfaces.OneDoFWaypointInterface;
 
-public class YoOneDoFWaypoint implements OneDoFWaypointInterface<YoOneDoFWaypoint>
+public class YoOneDoFWaypoint implements OneDoFWaypointInterface
 {
    private final String namePrefix;
    private final String nameSuffix;
@@ -40,51 +38,6 @@ public class YoOneDoFWaypoint implements OneDoFWaypointInterface<YoOneDoFWaypoin
       this.velocity.set(velocity);
    }
 
-   public void set(double position, double velocity)
-   {
-      setPosition(position);
-      setVelocity(velocity);
-   }
-
-   public void set(OneDoFWaypointInterface<?> waypoint)
-   {
-      position.set(waypoint.getPosition());
-      velocity.set(waypoint.getVelocity());
-   }
-
-   @Override
-   public void set(YoOneDoFWaypoint waypoint)
-   {
-      position.set(waypoint.getPosition());
-      velocity.set(waypoint.getVelocity());
-   }
-
-   public void set(double time, double position, double velocity)
-   {
-      this.position.set(position);
-      this.velocity.set(velocity);
-   }
-
-   @Override
-   public void setToZero()
-   {
-      position.set(0.0);
-      velocity.set(0.0);
-   }
-
-   @Override
-   public void setToNaN()
-   {
-      position.set(Double.NaN);
-      velocity.set(Double.NaN);
-   }
-
-   @Override
-   public boolean containsNaN()
-   {
-      return position.isNaN() || velocity.isNaN();
-   }
-
    @Override
    public double getPosition()
    {
@@ -108,39 +61,11 @@ public class YoOneDoFWaypoint implements OneDoFWaypointInterface<YoOneDoFWaypoin
    }
 
    @Override
-   public boolean epsilonEquals(YoOneDoFWaypoint other, double epsilon)
-   {
-      if (!MathTools.epsilonEquals(getPosition(), other.getPosition(), epsilon))
-         return false;
-      if (!MathTools.epsilonEquals(getVelocity(), other.getVelocity(), epsilon))
-         return false;
-      return true;
-   }
-
-   @Override
-   public boolean geometricallyEquals(YoOneDoFWaypoint other, double epsilon)
-   {
-      return epsilonEquals(other, epsilon);
-   }
-
-   @Override
    public String toString()
    {
       NumberFormat doubleFormat = new DecimalFormat(" 0.00;-0.00");
       String positionString = "position = " + doubleFormat.format(getPosition());
       String velocityString = "velocity = " + doubleFormat.format(getVelocity());
       return "Waypoint 1D: (" + positionString + ", " + velocityString + ")";
-   }
-
-   @Override
-   public void applyTransform(Transform transform)
-   {
-      // Do nothing since simple numbers here.
-   }
-
-   @Override
-   public void applyInverseTransform(Transform transform)
-   {
-      // Do nothing since simple numbers here.
    }
 }
