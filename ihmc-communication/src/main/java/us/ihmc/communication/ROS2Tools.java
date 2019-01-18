@@ -18,7 +18,6 @@ import us.ihmc.ros2.Ros2Node;
 import us.ihmc.ros2.Ros2QosProfile;
 import us.ihmc.ros2.Ros2Subscription;
 import us.ihmc.util.PeriodicNonRealtimeThreadSchedulerFactory;
-import us.ihmc.util.PeriodicRealtimeThreadSchedulerFactory;
 import us.ihmc.util.PeriodicThreadSchedulerFactory;
 
 public class ROS2Tools
@@ -35,6 +34,7 @@ public class ROS2Tools
    public static final String KINEMATICS_TOOLBOX = "/toolbox/ik";
    public static final String KINEMATICS_PLANNING_TOOLBOX = "/toolbox/ik_planning";
    public static final String WHOLE_BODY_TRAJECTORY_TOOLBOX = "/toolbox/ik_trajectory";
+   public static final String WALKING_PREVIEW_TOOLBOX = "/toolbox/walking_controller_preview";
 
    public static final String STEP_TELEOP_TOOLBOX = "/toolbox/teleop/step_teleop";
    public static final String HEIGHT_TELEOP_TOOLBOX = "/toolbox/teleop/height_teleop";
