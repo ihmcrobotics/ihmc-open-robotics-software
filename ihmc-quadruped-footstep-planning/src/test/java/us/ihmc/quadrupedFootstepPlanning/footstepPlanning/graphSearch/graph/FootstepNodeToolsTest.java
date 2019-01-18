@@ -23,6 +23,7 @@ public class FootstepNodeToolsTest
    {
       for (int i = 0; i < iters; i++)
       {
+         RobotQuadrant quadrant = RobotQuadrant.generateRandomRobotQuadrant(random);
          int frontLeftXLatticeIndex = random.nextInt(1000) - 500;
          int frontLeftYLatticeIndex = random.nextInt(1000) - 500;
          int frontRightXLatticeIndex = random.nextInt(1000) - 500;
@@ -41,26 +42,29 @@ public class FootstepNodeToolsTest
          double hindRightX = hindRightXLatticeIndex * FootstepNode.gridSizeXY;
          double hindRightY = hindRightYLatticeIndex * FootstepNode.gridSizeXY;
 
-         checkNodeTransform(frontLeftX, frontLeftY, frontRightX, frontRightY, hindLeftX, hindLeftY, hindRightX, hindRightY, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
-                            0.0);
-         checkNodeTransform(frontLeftX, frontLeftY, frontRightX, frontRightY, hindLeftX, hindLeftY, hindRightX, hindRightY, 0.4995 * FootstepNode.gridSizeXY,
-                            0.0, 0.4995 * FootstepNode.gridSizeXY, 0.0, 0.4995 * FootstepNode.gridSizeXY, 0.0, 0.4995 * FootstepNode.gridSizeXY, 0.0);
-         checkNodeTransform(frontLeftX, frontLeftY, frontRightX, frontRightY, hindLeftX, hindLeftY, hindRightX, hindRightY, -0.4995 * FootstepNode.gridSizeXY,
-                            0.0, -0.4995 * FootstepNode.gridSizeXY, 0.0, -0.4995 * FootstepNode.gridSizeXY, 0.0, -0.4995 * FootstepNode.gridSizeXY, 0.0);
-         checkNodeTransform(frontLeftX, frontLeftY, frontRightX, frontRightY, hindLeftX, hindLeftY, hindRightX, hindRightY, 0.0,
+         checkNodeTransform(quadrant, frontLeftX, frontLeftY, frontRightX, frontRightY, hindLeftX, hindLeftY, hindRightX, hindRightY, 0.0, 0.0, 0.0, 0.0, 0.0,
+                            0.0, 0.0, 0.0);
+         checkNodeTransform(quadrant, frontLeftX, frontLeftY, frontRightX, frontRightY, hindLeftX, hindLeftY, hindRightX, hindRightY,
+                            0.4995 * FootstepNode.gridSizeXY, 0.0, 0.4995 * FootstepNode.gridSizeXY, 0.0, 0.4995 * FootstepNode.gridSizeXY, 0.0,
+                            0.4995 * FootstepNode.gridSizeXY, 0.0);
+         checkNodeTransform(quadrant, frontLeftX, frontLeftY, frontRightX, frontRightY, hindLeftX, hindLeftY, hindRightX, hindRightY,
+                            -0.4995 * FootstepNode.gridSizeXY, 0.0, -0.4995 * FootstepNode.gridSizeXY, 0.0, -0.4995 * FootstepNode.gridSizeXY, 0.0,
+                            -0.4995 * FootstepNode.gridSizeXY, 0.0);
+         checkNodeTransform(quadrant, frontLeftX, frontLeftY, frontRightX, frontRightY, hindLeftX, hindLeftY, hindRightX, hindRightY, 0.0,
                             0.4995 * FootstepNode.gridSizeXY, 0.0, 0.4995 * FootstepNode.gridSizeXY, 0.0, 0.4995 * FootstepNode.gridSizeXY, 0.0,
                             0.4995 * FootstepNode.gridSizeXY);
-         checkNodeTransform(frontLeftX, frontLeftY, frontRightX, frontRightY, hindLeftX, hindLeftY, hindRightX, hindRightY, 0.0,
+         checkNodeTransform(quadrant, frontLeftX, frontLeftY, frontRightX, frontRightY, hindLeftX, hindLeftY, hindRightX, hindRightY, 0.0,
                             -0.4995 * FootstepNode.gridSizeXY, 0.0, -0.4995 * FootstepNode.gridSizeXY, 0.0, -0.4995 * FootstepNode.gridSizeXY, 0.0,
                             -0.4995 * FootstepNode.gridSizeXY);
       }
    }
 
-   private void checkNodeTransform(double frontLeftX, double frontLeftY, double frontRightX, double frontRightY, double hindLeftX, double hindLeftY,
-                                   double hindRightX, double hindRightY, double frontLeftXOffset, double frontLeftYOffset, double frontRightXOffset,
-                                   double frontRightYOffset, double hindLeftXOffset, double hindLeftYOffset, double hindRightXOffset, double hindRightYOffset)
+   private void checkNodeTransform(RobotQuadrant quadrant, double frontLeftX, double frontLeftY, double frontRightX, double frontRightY, double hindLeftX,
+                                   double hindLeftY, double hindRightX, double hindRightY, double frontLeftXOffset, double frontLeftYOffset,
+                                   double frontRightXOffset, double frontRightYOffset, double hindLeftXOffset, double hindLeftYOffset, double hindRightXOffset,
+                                   double hindRightYOffset)
    {
-      FootstepNode node = new FootstepNode(frontLeftX + frontLeftXOffset, frontLeftY + frontLeftYOffset, frontRightX + frontRightXOffset,
+      FootstepNode node = new FootstepNode(quadrant, frontLeftX + frontLeftXOffset, frontLeftY + frontLeftYOffset, frontRightX + frontRightXOffset,
                                            frontRightY + frontRightYOffset, hindLeftX + hindLeftXOffset, hindLeftY + hindLeftYOffset,
                                            hindRightX + hindRightXOffset, hindRightY + hindRightYOffset);
 
@@ -115,6 +119,7 @@ public class FootstepNodeToolsTest
 
       for (int i = 0; i < numTests; i++)
       {
+         RobotQuadrant robotQuadrant = RobotQuadrant.generateRandomRobotQuadrant(random);
          double frontLeftX = EuclidCoreRandomTools.nextDouble(random, 1.0);
          double frontLeftY = EuclidCoreRandomTools.nextDouble(random, 1.0);
          double frontRightX = EuclidCoreRandomTools.nextDouble(random, 1.0);
@@ -124,7 +129,7 @@ public class FootstepNodeToolsTest
          double hindRightX = EuclidCoreRandomTools.nextDouble(random, 1.0);
          double hindRightY = EuclidCoreRandomTools.nextDouble(random, 1.0);
 
-         FootstepNode node = new FootstepNode(frontLeftX, frontLeftY, frontRightX, frontRightY, hindLeftX, hindLeftY, hindRightX, hindRightY);
+         FootstepNode node = new FootstepNode(robotQuadrant, frontLeftX, frontLeftY, frontRightX, frontRightY, hindLeftX, hindLeftY, hindRightX, hindRightY);
 
          RigidBodyTransform frontLeftSnapTransform = EuclidCoreRandomTools.nextRigidBodyTransform(random);
          RigidBodyTransform frontRightSnapTransform = EuclidCoreRandomTools.nextRigidBodyTransform(random);

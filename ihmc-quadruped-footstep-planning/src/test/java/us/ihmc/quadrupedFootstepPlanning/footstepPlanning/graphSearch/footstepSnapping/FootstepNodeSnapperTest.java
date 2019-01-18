@@ -7,6 +7,7 @@ import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.graphSearch.graph.Foot
 import us.ihmc.robotics.geometry.PlanarRegion;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.robotSide.RobotQuadrant;
+import us.ihmc.robotics.robotSide.RobotSide;
 
 import java.util.Random;
 
@@ -50,14 +51,16 @@ public class FootstepNodeSnapperTest
                         {
                            for (int p = 0; p < hindRightYIndices.length; p++)
                            {
+                              RobotQuadrant robotQuadrant = RobotQuadrant.generateRandomRobotQuadrant(random);
+
                               testSnapper.snapFootstepNode(
-                                    new FootstepNode(frontLeftXIndices[i], frontLeftYIndices[j], frontRightXIndices[k], frontRightYIndices[l],
+                                    new FootstepNode(robotQuadrant, frontLeftXIndices[i], frontLeftYIndices[j], frontRightXIndices[k], frontRightYIndices[l],
                                                      hindLeftXIndices[m], hindLeftYIndices[n], hindRightXIndices[o], hindRightYIndices[p]));
                               assertTrue(testSnapper.dirtyBit);
                               testSnapper.dirtyBit = false;
 
                               testSnapper.snapFootstepNode(
-                                    new FootstepNode(frontLeftXIndices[i], frontLeftYIndices[j], frontRightXIndices[k], frontRightYIndices[l],
+                                    new FootstepNode(robotQuadrant, frontLeftXIndices[i], frontLeftYIndices[j], frontRightXIndices[k], frontRightYIndices[l],
                                                      hindLeftXIndices[m], hindLeftYIndices[n], hindRightXIndices[o], hindRightYIndices[p]));
                               assertTrue(!testSnapper.dirtyBit);
                            }
@@ -93,8 +96,10 @@ public class FootstepNodeSnapperTest
                         {
                            for (int p = 0; p < hindRightYIndices.length; p++)
                            {
+                              RobotQuadrant newQuadrant = RobotQuadrant.generateRandomRobotQuadrant(random);
+
                               FootstepNodeSnapData snapData = testSnapper.snapFootstepNode(
-                                    new FootstepNode(frontLeftXIndices[i], frontLeftYIndices[j], frontRightXIndices[k], frontRightYIndices[l],
+                                    new FootstepNode(newQuadrant, frontLeftXIndices[i], frontLeftYIndices[j], frontRightXIndices[k], frontRightYIndices[l],
                                                      hindLeftXIndices[m], hindLeftYIndices[n], hindRightXIndices[o], hindRightYIndices[p]));
                               assertTrue(!testSnapper.dirtyBit);
 

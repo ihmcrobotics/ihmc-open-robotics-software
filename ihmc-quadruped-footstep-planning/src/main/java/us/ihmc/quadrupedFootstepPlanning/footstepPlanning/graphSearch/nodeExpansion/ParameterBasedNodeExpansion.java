@@ -98,7 +98,9 @@ public class ParameterBasedNodeExpansion implements FootstepNodeExpansion
       rotation.transform(hindLeft);
       rotation.transform(hindRight);
 
-      return new FootstepNode(frontLeft, frontRight, hindLeft, hindRight);
+      RobotQuadrant nextQuadrant = node.getMovingQuadrant().getNextRegularGaitSwingQuadrant();
+
+      return new FootstepNode(nextQuadrant, frontLeft, frontRight, hindLeft, hindRight);
    }
 
 

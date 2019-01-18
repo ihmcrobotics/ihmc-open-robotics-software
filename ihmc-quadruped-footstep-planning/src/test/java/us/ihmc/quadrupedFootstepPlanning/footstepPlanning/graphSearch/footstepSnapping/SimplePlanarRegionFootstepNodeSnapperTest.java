@@ -50,7 +50,7 @@ public class SimplePlanarRegionFootstepNodeSnapperTest
    @Test(timeout = 30000)
    public void testIdentity()
    {
-      FootstepNode nodeToSnap = new FootstepNode(-0.3, 2.2, -0.35, 1.9, -0.85, 2.1, -0.8, 1.8);
+      FootstepNode nodeToSnap = new FootstepNode(RobotQuadrant.FRONT_LEFT, -0.3, 2.2, -0.35, 1.9, -0.85, 2.1, -0.8, 1.8);
 
       QuadrantDependentList<RigidBodyTransform> nodeTransforms = new QuadrantDependentList<>();
       QuadrantDependentList<RigidBodyTransform> transformsToWorld = new QuadrantDependentList<>();
@@ -73,7 +73,7 @@ public class SimplePlanarRegionFootstepNodeSnapperTest
    @Test(timeout = 30000)
    public void testVerticalTranslation()
    {
-      FootstepNode nodeToSnap = new FootstepNode(2.5, -0.5, 2.3, -0.9, 1.5, -0.4, 1.4, -0.8);
+      FootstepNode nodeToSnap = new FootstepNode(RobotQuadrant.FRONT_LEFT, 2.5, -0.5, 2.3, -0.9, 1.5, -0.4, 1.4, -0.8);
 
       QuadrantDependentList<RigidBodyTransform> nodeTransforms = new QuadrantDependentList<>();
       QuadrantDependentList<RigidBodyTransform> transformsToWorld = new QuadrantDependentList<>();
@@ -97,7 +97,7 @@ public class SimplePlanarRegionFootstepNodeSnapperTest
    @Test(timeout = 30000)
    public void testSimpleRotation()
    {
-      FootstepNode nodeToSnap = new FootstepNode(0.25, 0.25, 0.25, -0.25, -0.25, 0.25, -0.25, -0.25);
+      FootstepNode nodeToSnap = new FootstepNode(RobotQuadrant.FRONT_LEFT, 0.25, 0.25, 0.25, -0.25, -0.25, 0.25, -0.25, -0.25);
 
       QuadrantDependentList<RigidBodyTransform> nodeTransforms = new QuadrantDependentList<>();
       QuadrantDependentList<RigidBodyTransform> transformsToWorld = new QuadrantDependentList<>();
@@ -121,7 +121,7 @@ public class SimplePlanarRegionFootstepNodeSnapperTest
    @Test(timeout = 30000)
    public void testSimpleTranslationAndRotation()
    {
-      FootstepNode nodeToSnap = new FootstepNode(1.1, 0.0, 1.1, -0.5, 0.1, 0.0, 0.1, -0.5);
+      FootstepNode nodeToSnap = new FootstepNode(RobotQuadrant.FRONT_LEFT, 1.1, 0.0, 1.1, -0.5, 0.1, 0.0, 0.1, -0.5);
 
       QuadrantDependentList<RigidBodyTransform> nodeTransforms = new QuadrantDependentList<>();
       QuadrantDependentList<RigidBodyTransform> transformsToWorld = new QuadrantDependentList<>();
