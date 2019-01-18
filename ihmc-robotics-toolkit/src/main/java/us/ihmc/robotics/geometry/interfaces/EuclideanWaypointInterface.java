@@ -1,12 +1,13 @@
 package us.ihmc.robotics.geometry.interfaces;
 
-import us.ihmc.euclid.interfaces.GeometryObject;
+import us.ihmc.euclid.interfaces.Clearable;
+import us.ihmc.euclid.interfaces.Transformable;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DBasics;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DBasics;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 
-public interface EuclideanWaypointInterface<T extends EuclideanWaypointInterface<T>> extends GeometryObject<T>
+public interface EuclideanWaypointInterface extends Transformable, Clearable
 {
    public abstract Point3DReadOnly getPosition();
 
@@ -76,7 +77,7 @@ public interface EuclideanWaypointInterface<T extends EuclideanWaypointInterface
       setLinearVelocity(Double.NaN, Double.NaN, Double.NaN);
    }
 
-   public default double positionDistance(T other)
+   public default double positionDistance(EuclideanWaypointInterface other)
    {
       return getPosition().distance(other.getPosition());
    }
@@ -103,24 +104,21 @@ public interface EuclideanWaypointInterface<T extends EuclideanWaypointInterface
       getLinearVelocity(linearVelocityToPack);
    }
 
-   @Override
-   public default boolean epsilonEquals(T other, double epsilon)
+   public default boolean epsilonEquals(EuclideanWaypointInterface other, double epsilon)
    {
       boolean positionMatches = getPosition().epsilonEquals(other.getPosition(), epsilon);
       boolean linearVelocityMatches = getLinearVelocity().epsilonEquals(other.getLinearVelocity(), epsilon);
       return positionMatches && linearVelocityMatches;
    }
 
-   @Override
-   public default boolean geometricallyEquals(T other, double epsilon)
+   public default boolean geometricallyEquals(EuclideanWaypointInterface other, double epsilon)
    {
       boolean positionMatches = getPosition().geometricallyEquals(other.getPosition(), epsilon);
       boolean linearVelocityMatches = getLinearVelocity().geometricallyEquals(other.getLinearVelocity(), epsilon);
       return positionMatches && linearVelocityMatches;
    }
 
-   @Override
-   public default void set(T other)
+   public default void set(EuclideanWaypointInterface other)
    {
       setPosition(other.getPosition());
       setLinearVelocity(other.getLinearVelocity());

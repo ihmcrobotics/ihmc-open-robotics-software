@@ -7,7 +7,7 @@ import us.ihmc.euclid.transform.interfaces.Transform;
 import us.ihmc.robotics.geometry.frameObjects.FrameEuclideanWaypoint;
 import us.ihmc.robotics.math.trajectories.waypoints.interfaces.FrameEuclideanTrajectoryPointInterface;
 
-public class FrameEuclideanTrajectoryPoint implements FrameEuclideanTrajectoryPointInterface<FrameEuclideanTrajectoryPoint>
+public class FrameEuclideanTrajectoryPoint implements FrameEuclideanTrajectoryPointInterface
 {
    private final FrameEuclideanWaypoint euclideanWaypoint = new FrameEuclideanWaypoint();
    private final TrajectoryPoint trajectoryPoint = new TrajectoryPoint();

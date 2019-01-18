@@ -8,7 +8,7 @@ import us.ihmc.euclid.tuple4D.interfaces.QuaternionReadOnly;
 import us.ihmc.robotics.geometry.interfaces.SO3WaypointInterface;
 import us.ihmc.robotics.math.trajectories.waypoints.WaypointToStringTools;
 
-public class SO3Waypoint implements SO3WaypointInterface<SO3Waypoint>
+public class SO3Waypoint implements SO3WaypointInterface
 {
    private final Quaternion orientation = new Quaternion();
    private final Vector3D angularVelocity = new Vector3D();

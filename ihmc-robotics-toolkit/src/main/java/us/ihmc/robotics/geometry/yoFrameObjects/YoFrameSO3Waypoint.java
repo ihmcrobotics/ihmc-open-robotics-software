@@ -12,7 +12,7 @@ import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.frameObjects.YoMutableFrameQuaternion;
 import us.ihmc.yoVariables.variable.frameObjects.YoMutableFrameVector3D;
 
-public class YoFrameSO3Waypoint implements FrameSO3WaypointInterface<YoFrameSO3Waypoint>
+public class YoFrameSO3Waypoint implements FrameSO3WaypointInterface
 {
    private final FrameQuaternionBasics orientation;
    private final FrameVector3DBasics angularVelocity;

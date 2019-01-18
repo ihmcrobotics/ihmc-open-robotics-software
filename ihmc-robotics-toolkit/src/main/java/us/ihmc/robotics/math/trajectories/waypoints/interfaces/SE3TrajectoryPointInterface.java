@@ -6,7 +6,7 @@ import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.euclid.tuple4D.interfaces.QuaternionReadOnly;
 import us.ihmc.robotics.geometry.interfaces.SE3WaypointInterface;
 
-public interface SE3TrajectoryPointInterface<T extends SE3TrajectoryPointInterface<T>> extends TrajectoryPointInterface, SE3WaypointInterface<T>
+public interface SE3TrajectoryPointInterface extends TrajectoryPointInterface, SE3WaypointInterface
 {
    public default void set(double time, Point3DReadOnly position, QuaternionReadOnly orientation, Vector3DReadOnly linearVelocity,
                            Vector3DReadOnly angularVelocity)
@@ -15,15 +15,13 @@ public interface SE3TrajectoryPointInterface<T extends SE3TrajectoryPointInterfa
       set(position, orientation, linearVelocity, angularVelocity);
    }
 
-   @Override
-   default void set(T other)
+   default void set(SE3TrajectoryPointInterface other)
    {
       setTime(other.getTime());
       SE3WaypointInterface.super.set(other);
    }
 
-   @Override
-   default boolean epsilonEquals(T other, double epsilon)
+   default boolean epsilonEquals(SE3TrajectoryPointInterface other, double epsilon)
    {
       boolean timeEquals = EuclidCoreTools.epsilonEquals(getTime(), other.getTime(), epsilon);
       return timeEquals && SE3WaypointInterface.super.epsilonEquals(other, epsilon);

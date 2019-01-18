@@ -7,7 +7,7 @@ import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.euclid.tuple4D.interfaces.QuaternionBasics;
 import us.ihmc.euclid.tuple4D.interfaces.QuaternionReadOnly;
 
-public interface SE3WaypointInterface<T extends SE3WaypointInterface<T>> extends EuclideanWaypointInterface<T>, SO3WaypointInterface<T>
+public interface SE3WaypointInterface extends EuclideanWaypointInterface, SO3WaypointInterface
 {
    public default void set(Point3DReadOnly position, QuaternionReadOnly orientation, Vector3DReadOnly linearVelocity, Vector3DReadOnly angularVelocity)
    {
@@ -17,7 +17,8 @@ public interface SE3WaypointInterface<T extends SE3WaypointInterface<T>> extends
       setAngularVelocity(angularVelocity);
    }
 
-   public default void get(Point3DBasics positionToPack, QuaternionBasics orientationToPack, Vector3DBasics linearVelocityToPack, Vector3DBasics angularVelocityToPack)
+   public default void get(Point3DBasics positionToPack, QuaternionBasics orientationToPack, Vector3DBasics linearVelocityToPack,
+                           Vector3DBasics angularVelocityToPack)
    {
       getPosition(positionToPack);
       getOrientation(orientationToPack);
@@ -25,24 +26,21 @@ public interface SE3WaypointInterface<T extends SE3WaypointInterface<T>> extends
       getAngularVelocity(angularVelocityToPack);
    }
 
-   @Override
-   default boolean epsilonEquals(T other, double epsilon)
+   default boolean epsilonEquals(SE3WaypointInterface other, double epsilon)
    {
       boolean euclideanMatch = EuclideanWaypointInterface.super.epsilonEquals(other, epsilon);
       boolean so3Match = SO3WaypointInterface.super.epsilonEquals(other, epsilon);
       return euclideanMatch && so3Match;
    }
 
-   @Override
-   default boolean geometricallyEquals(T other, double epsilon)
+   default boolean geometricallyEquals(SE3WaypointInterface other, double epsilon)
    {
       boolean euclideanMatch = EuclideanWaypointInterface.super.geometricallyEquals(other, epsilon);
       boolean so3Match = SO3WaypointInterface.super.geometricallyEquals(other, epsilon);
       return euclideanMatch && so3Match;
    }
 
-   @Override
-   default void set(T other)
+   default void set(SE3WaypointInterface other)
    {
       EuclideanWaypointInterface.super.set(other);
       SO3WaypointInterface.super.set(other);

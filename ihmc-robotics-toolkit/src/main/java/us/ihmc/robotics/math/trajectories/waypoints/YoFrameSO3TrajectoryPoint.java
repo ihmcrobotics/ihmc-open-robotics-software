@@ -8,7 +8,7 @@ import us.ihmc.robotics.geometry.yoFrameObjects.YoFrameSO3Waypoint;
 import us.ihmc.robotics.math.trajectories.waypoints.interfaces.FrameSO3TrajectoryPointInterface;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 
-public class YoFrameSO3TrajectoryPoint implements FrameSO3TrajectoryPointInterface<YoFrameSO3TrajectoryPoint>
+public class YoFrameSO3TrajectoryPoint implements FrameSO3TrajectoryPointInterface
 {
    private final YoFrameSO3Waypoint so3Waypoint;
    private final YoTrajectoryPoint trajectoryPoint;

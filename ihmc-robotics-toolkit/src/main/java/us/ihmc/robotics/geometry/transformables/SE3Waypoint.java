@@ -7,7 +7,7 @@ import us.ihmc.euclid.tuple4D.interfaces.QuaternionReadOnly;
 import us.ihmc.robotics.geometry.interfaces.SE3WaypointInterface;
 import us.ihmc.robotics.math.trajectories.waypoints.WaypointToStringTools;
 
-public class SE3Waypoint implements SE3WaypointInterface<SE3Waypoint>
+public class SE3Waypoint implements SE3WaypointInterface
 {
    private final EuclideanWaypoint euclideanWaypoint = new EuclideanWaypoint();
    private final SO3Waypoint so3Waypoint = new SO3Waypoint();

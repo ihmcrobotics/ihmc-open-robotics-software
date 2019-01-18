@@ -6,7 +6,7 @@ import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.robotics.geometry.transformables.EuclideanWaypoint;
 import us.ihmc.robotics.math.trajectories.waypoints.interfaces.EuclideanTrajectoryPointInterface;
 
-public class SimpleEuclideanTrajectoryPoint implements EuclideanTrajectoryPointInterface<SimpleEuclideanTrajectoryPoint>
+public class SimpleEuclideanTrajectoryPoint implements EuclideanTrajectoryPointInterface
 {
    private final EuclideanWaypoint euclideanWaypoint = new EuclideanWaypoint();
    private final TrajectoryPoint trajectoryPoint = new TrajectoryPoint();

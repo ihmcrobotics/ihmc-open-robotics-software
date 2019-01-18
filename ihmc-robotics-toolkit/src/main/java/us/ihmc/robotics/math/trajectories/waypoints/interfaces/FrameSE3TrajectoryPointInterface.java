@@ -6,8 +6,8 @@ import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
 import us.ihmc.euclid.tools.EuclidCoreTools;
 import us.ihmc.robotics.geometry.interfaces.FrameSE3WaypointInterface;
 
-public interface FrameSE3TrajectoryPointInterface<T extends FrameSE3TrajectoryPointInterface<T>>
-      extends SE3TrajectoryPointInterface<T>, FrameSE3WaypointInterface<T>, FrameEuclideanTrajectoryPointInterface<T>, FrameSO3TrajectoryPointInterface<T>
+public interface FrameSE3TrajectoryPointInterface
+      extends SE3TrajectoryPointInterface, FrameSE3WaypointInterface, FrameEuclideanTrajectoryPointInterface, FrameSO3TrajectoryPointInterface
 {
    public default void set(double time, FramePoint3DReadOnly position, FrameQuaternionReadOnly orientation, FrameVector3DReadOnly linearVelocity,
                            FrameVector3DReadOnly angularVelocity)
@@ -23,15 +23,13 @@ public interface FrameSE3TrajectoryPointInterface<T extends FrameSE3TrajectoryPo
       setIncludingFrame(position, orientation, linearVelocity, angularVelocity);
    }
 
-   @Override
-   default void set(T other)
+   default void set(FrameSE3TrajectoryPointInterface other)
    {
       setTime(other.getTime());
       FrameSE3WaypointInterface.super.set(other);
    }
 
-   @Override
-   default boolean epsilonEquals(T other, double epsilon)
+   default boolean epsilonEquals(FrameSE3TrajectoryPointInterface other, double epsilon)
    {
       boolean timeEquals = EuclidCoreTools.epsilonEquals(getTime(), other.getTime(), epsilon);
       return timeEquals && FrameSE3WaypointInterface.super.epsilonEquals(other, epsilon);

@@ -7,7 +7,7 @@ import us.ihmc.euclid.tuple4D.interfaces.QuaternionReadOnly;
 import us.ihmc.robotics.geometry.transformables.SE3Waypoint;
 import us.ihmc.robotics.math.trajectories.waypoints.interfaces.SE3TrajectoryPointInterface;
 
-public class SimpleSE3TrajectoryPoint implements SE3TrajectoryPointInterface<SimpleSE3TrajectoryPoint>
+public class SimpleSE3TrajectoryPoint implements SE3TrajectoryPointInterface
 {
    private final SE3Waypoint se3Waypoint = new SE3Waypoint();
    private final TrajectoryPoint trajectoryPoint = new TrajectoryPoint();

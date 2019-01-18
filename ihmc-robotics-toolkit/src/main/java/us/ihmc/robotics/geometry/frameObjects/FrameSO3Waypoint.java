@@ -8,7 +8,7 @@ import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
 import us.ihmc.euclid.transform.interfaces.Transform;
 import us.ihmc.robotics.geometry.interfaces.FrameSO3WaypointInterface;
 
-public class FrameSO3Waypoint implements FrameSO3WaypointInterface<FrameSO3Waypoint>
+public class FrameSO3Waypoint implements FrameSO3WaypointInterface
 {
    private final FrameQuaternion orientation = new FrameQuaternion();
    private final FrameVector3D angularVelocity = new FrameVector3D();

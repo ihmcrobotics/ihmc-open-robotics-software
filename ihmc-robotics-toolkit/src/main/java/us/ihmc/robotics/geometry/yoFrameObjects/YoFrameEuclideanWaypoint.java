@@ -12,7 +12,7 @@ import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.frameObjects.YoMutableFramePoint3D;
 import us.ihmc.yoVariables.variable.frameObjects.YoMutableFrameVector3D;
 
-public class YoFrameEuclideanWaypoint implements FrameEuclideanWaypointInterface<YoFrameEuclideanWaypoint>
+public class YoFrameEuclideanWaypoint implements FrameEuclideanWaypointInterface
 {
    private final FramePoint3DBasics position;
    private final FrameVector3DBasics linearVelocity;

@@ -8,7 +8,7 @@ import us.ihmc.euclid.transform.interfaces.Transform;
 import us.ihmc.robotics.geometry.frameObjects.FrameSE3Waypoint;
 import us.ihmc.robotics.math.trajectories.waypoints.interfaces.FrameSE3TrajectoryPointInterface;
 
-public class FrameSE3TrajectoryPoint implements FrameSE3TrajectoryPointInterface<FrameSE3TrajectoryPoint>
+public class FrameSE3TrajectoryPoint implements FrameSE3TrajectoryPointInterface
 {
    private final FrameSE3Waypoint se3Waypoint = new FrameSE3Waypoint();
    private final TrajectoryPoint trajectoryPoint = new TrajectoryPoint();

@@ -8,7 +8,7 @@ import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.robotics.geometry.interfaces.EuclideanWaypointInterface;
 import us.ihmc.robotics.math.trajectories.waypoints.WaypointToStringTools;
 
-public class EuclideanWaypoint implements EuclideanWaypointInterface<EuclideanWaypoint>
+public class EuclideanWaypoint implements EuclideanWaypointInterface
 {
    private final Point3D position = new Point3D();
    private final Vector3D linearVelocity = new Vector3D();

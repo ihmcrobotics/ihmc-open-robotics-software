@@ -9,7 +9,7 @@ import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.euclid.tuple4D.interfaces.QuaternionReadOnly;
 
-public interface FrameSO3WaypointInterface<T extends FrameSO3WaypointInterface<T>> extends SO3WaypointInterface<T>, FrameChangeable
+public interface FrameSO3WaypointInterface extends SO3WaypointInterface, FrameChangeable
 {
    @Override
    public abstract FrameQuaternionReadOnly getOrientation();
@@ -29,8 +29,7 @@ public interface FrameSO3WaypointInterface<T extends FrameSO3WaypointInterface<T
       setAngularVelocity(angularVelocity.getX(), angularVelocity.getY(), angularVelocity.getZ());
    }
 
-   @Override
-   public default double orientationDistance(T other)
+   public default double orientationDistance(FrameSO3WaypointInterface other)
    {
       return getOrientation().distance(other.getOrientation());
    }
@@ -87,24 +86,21 @@ public interface FrameSO3WaypointInterface<T extends FrameSO3WaypointInterface<T
       getAngularVelocityIncludingFrame(angularVelocityToPack);
    }
 
-   @Override
-   public default boolean epsilonEquals(T other, double epsilon)
+   public default boolean epsilonEquals(FrameSO3WaypointInterface other, double epsilon)
    {
       boolean orientationMatches = getOrientation().epsilonEquals(other.getOrientation(), epsilon);
       boolean angularVelocityMatches = getAngularVelocity().epsilonEquals(other.getAngularVelocity(), epsilon);
       return orientationMatches && angularVelocityMatches;
    }
 
-   @Override
-   public default boolean geometricallyEquals(T other, double epsilon)
+   public default boolean geometricallyEquals(FrameSO3WaypointInterface other, double epsilon)
    {
       boolean orientationMatches = getOrientation().geometricallyEquals(other.getOrientation(), epsilon);
       boolean angularVelocityMatches = getAngularVelocity().geometricallyEquals(other.getAngularVelocity(), epsilon);
       return orientationMatches && angularVelocityMatches;
    }
 
-   @Override
-   public default void set(T other)
+   public default void set(FrameSO3WaypointInterface other)
    {
       setOrientation(other.getOrientation());
       setAngularVelocity(other.getAngularVelocity());
