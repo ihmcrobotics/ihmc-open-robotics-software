@@ -6,53 +6,54 @@ import java.text.NumberFormat;
 import us.ihmc.robotics.geometry.transformables.OneDoFWaypoint;
 import us.ihmc.robotics.math.trajectories.waypoints.interfaces.OneDoFTrajectoryPointInterface;
 
-public class SimpleTrajectoryPoint1D extends SimpleTrajectoryPoint<OneDoFWaypoint, SimpleTrajectoryPoint1D>
-      implements OneDoFTrajectoryPointInterface<SimpleTrajectoryPoint1D>
+public class SimpleTrajectoryPoint1D implements OneDoFTrajectoryPointInterface
 {
+   private final OneDoFWaypoint oneDoFWaypoint = new OneDoFWaypoint();
+   private final TrajectoryPoint trajectoryPoint = new TrajectoryPoint();
+
    public SimpleTrajectoryPoint1D()
    {
-      super(new OneDoFWaypoint());
    }
-   
+
    public SimpleTrajectoryPoint1D(double time, double position, double velocity)
    {
-      this();
       set(time, position, velocity);
    }
 
+   @Override
    public void setPosition(double position)
    {
-      waypointData.setPosition(position);
+      oneDoFWaypoint.setPosition(position);
    }
 
+   @Override
    public void setVelocity(double velocity)
    {
-      waypointData.setVelocity(velocity);
-   }
-
-   public void set(double time, double position, double velocity)
-   {
-      setTime(time);
-      waypointData.set(position, velocity);
-   }
-
-   public void set(OneDoFTrajectoryPointInterface<?> other)
-   {
-      setTime(other.getTime());
-      setPosition(other.getPosition());
-      setVelocity(other.getVelocity());
+      oneDoFWaypoint.setVelocity(velocity);
    }
 
    @Override
    public double getPosition()
    {
-      return waypointData.getPosition();
+      return oneDoFWaypoint.getPosition();
    }
 
    @Override
    public double getVelocity()
    {
-      return waypointData.getVelocity();
+      return oneDoFWaypoint.getVelocity();
+   }
+
+   @Override
+   public void setTime(double time)
+   {
+      trajectoryPoint.setTime(time);
+   }
+
+   @Override
+   public double getTime()
+   {
+      return trajectoryPoint.getTime();
    }
 
    @Override
@@ -60,6 +61,6 @@ public class SimpleTrajectoryPoint1D extends SimpleTrajectoryPoint<OneDoFWaypoin
    {
       NumberFormat doubleFormat = new DecimalFormat(" 0.00;-0.00");
       String timeString = "time = " + doubleFormat.format(getTime());
-      return "Trajectory point 1D: (" + timeString + ", " + waypointData + ")";
+      return "Trajectory point 1D: (" + timeString + ", " + oneDoFWaypoint + ")";
    }
 }
