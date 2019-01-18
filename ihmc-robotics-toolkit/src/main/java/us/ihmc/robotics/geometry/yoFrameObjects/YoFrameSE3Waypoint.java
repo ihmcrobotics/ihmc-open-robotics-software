@@ -9,7 +9,7 @@ import us.ihmc.robotics.geometry.interfaces.FrameSE3WaypointInterface;
 import us.ihmc.robotics.math.trajectories.waypoints.WaypointToStringTools;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 
-public class YoFrameSE3Waypoint implements FrameSE3WaypointInterface<YoFrameSE3Waypoint>
+public class YoFrameSE3Waypoint implements FrameSE3WaypointInterface
 {
    private final YoFrameEuclideanWaypoint euclideanWaypoint;
    private final YoFrameSO3Waypoint so3Waypoint;

@@ -1,12 +1,13 @@
 package us.ihmc.robotics.geometry.interfaces;
 
-import us.ihmc.euclid.interfaces.GeometryObject;
+import us.ihmc.euclid.interfaces.Clearable;
+import us.ihmc.euclid.interfaces.Transformable;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DBasics;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.euclid.tuple4D.interfaces.QuaternionBasics;
 import us.ihmc.euclid.tuple4D.interfaces.QuaternionReadOnly;
 
-public interface SO3WaypointInterface<T extends SO3WaypointInterface<T>> extends GeometryObject<T>
+public interface SO3WaypointInterface extends Transformable, Clearable
 {
    public abstract QuaternionReadOnly getOrientation();
 
@@ -81,7 +82,7 @@ public interface SO3WaypointInterface<T extends SO3WaypointInterface<T>> extends
       setAngularVelocity(Double.NaN, Double.NaN, Double.NaN);
    }
 
-   public default double orientationDistance(T other)
+   public default double orientationDistance(SO3WaypointInterface other)
    {
       return getOrientation().distance(other.getOrientation());
    }
@@ -108,24 +109,21 @@ public interface SO3WaypointInterface<T extends SO3WaypointInterface<T>> extends
       getAngularVelocity(angularVelocityToPack);
    }
 
-   @Override
-   public default boolean epsilonEquals(T other, double epsilon)
+   public default boolean epsilonEquals(SO3WaypointInterface other, double epsilon)
    {
       boolean orientationMatches = getOrientation().epsilonEquals(other.getOrientation(), epsilon);
       boolean angularVelocityMatches = getAngularVelocity().epsilonEquals(other.getAngularVelocity(), epsilon);
       return orientationMatches && angularVelocityMatches;
    }
 
-   @Override
-   public default boolean geometricallyEquals(T other, double epsilon)
+   public default boolean geometricallyEquals(SO3WaypointInterface other, double epsilon)
    {
       boolean orientationMatches = getOrientation().geometricallyEquals(other.getOrientation(), epsilon);
       boolean angularVelocityMatches = getAngularVelocity().geometricallyEquals(other.getAngularVelocity(), epsilon);
       return orientationMatches && angularVelocityMatches;
    }
 
-   @Override
-   public default void set(T other)
+   public default void set(SO3WaypointInterface other)
    {
       setOrientation(other.getOrientation());
       setAngularVelocity(other.getAngularVelocity());

@@ -7,7 +7,7 @@ import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
 import us.ihmc.euclid.transform.interfaces.Transform;
 import us.ihmc.robotics.geometry.interfaces.FrameSE3WaypointInterface;
 
-public class FrameSE3Waypoint implements FrameSE3WaypointInterface<FrameSE3Waypoint>
+public class FrameSE3Waypoint implements FrameSE3WaypointInterface
 {
    private final FrameEuclideanWaypoint euclideanWaypoint = new FrameEuclideanWaypoint();
    private final FrameSO3Waypoint so3Waypoint = new FrameSO3Waypoint();

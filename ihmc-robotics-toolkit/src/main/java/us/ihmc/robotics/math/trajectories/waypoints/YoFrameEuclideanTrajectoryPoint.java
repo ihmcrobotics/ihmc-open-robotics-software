@@ -8,7 +8,7 @@ import us.ihmc.robotics.geometry.yoFrameObjects.YoFrameEuclideanWaypoint;
 import us.ihmc.robotics.math.trajectories.waypoints.interfaces.FrameEuclideanTrajectoryPointInterface;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 
-public class YoFrameEuclideanTrajectoryPoint implements FrameEuclideanTrajectoryPointInterface<YoFrameEuclideanTrajectoryPoint>
+public class YoFrameEuclideanTrajectoryPoint implements FrameEuclideanTrajectoryPointInterface
 {
    private final YoFrameEuclideanWaypoint euclideanWaypoint;
    private final YoTrajectoryPoint trajectoryPoint;

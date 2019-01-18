@@ -9,7 +9,7 @@ import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 
-public interface FrameEuclideanWaypointInterface<T extends FrameEuclideanWaypointInterface<T>> extends EuclideanWaypointInterface<T>, FrameChangeable
+public interface FrameEuclideanWaypointInterface extends EuclideanWaypointInterface, FrameChangeable
 {
    @Override
    public abstract FramePoint3DReadOnly getPosition();
@@ -29,8 +29,7 @@ public interface FrameEuclideanWaypointInterface<T extends FrameEuclideanWaypoin
       setLinearVelocity(linearVelocity.getX(), linearVelocity.getY(), linearVelocity.getZ());
    }
 
-   @Override
-   public default double positionDistance(T other)
+   public default double positionDistance(FrameEuclideanWaypointInterface other)
    {
       return getPosition().distance(other.getPosition());
    }
@@ -87,24 +86,21 @@ public interface FrameEuclideanWaypointInterface<T extends FrameEuclideanWaypoin
       getLinearVelocityIncludingFrame(linearVelocityToPack);
    }
 
-   @Override
-   public default boolean epsilonEquals(T other, double epsilon)
+   public default boolean epsilonEquals(FrameEuclideanWaypointInterface other, double epsilon)
    {
       boolean positionMatches = getPosition().epsilonEquals(other.getPosition(), epsilon);
       boolean linearVelocityMatches = getLinearVelocity().epsilonEquals(other.getLinearVelocity(), epsilon);
       return positionMatches && linearVelocityMatches;
    }
 
-   @Override
-   public default boolean geometricallyEquals(T other, double epsilon)
+   public default boolean geometricallyEquals(FrameEuclideanWaypointInterface other, double epsilon)
    {
       boolean positionMatches = getPosition().geometricallyEquals(other.getPosition(), epsilon);
       boolean linearVelocityMatches = getLinearVelocity().geometricallyEquals(other.getLinearVelocity(), epsilon);
       return positionMatches && linearVelocityMatches;
    }
 
-   @Override
-   public default void set(T other)
+   public default void set(FrameEuclideanWaypointInterface other)
    {
       setPosition(other.getPosition());
       setLinearVelocity(other.getLinearVelocity());

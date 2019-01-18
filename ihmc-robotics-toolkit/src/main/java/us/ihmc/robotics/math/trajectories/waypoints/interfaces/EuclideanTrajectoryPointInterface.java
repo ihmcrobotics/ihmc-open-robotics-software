@@ -5,7 +5,7 @@ import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.robotics.geometry.interfaces.EuclideanWaypointInterface;
 
-public interface EuclideanTrajectoryPointInterface<T extends EuclideanTrajectoryPointInterface<T>> extends TrajectoryPointInterface, EuclideanWaypointInterface<T>
+public interface EuclideanTrajectoryPointInterface extends TrajectoryPointInterface, EuclideanWaypointInterface
 {
    public default void set(double time, Point3DReadOnly position, Vector3DReadOnly linearVelocity)
    {
@@ -13,15 +13,13 @@ public interface EuclideanTrajectoryPointInterface<T extends EuclideanTrajectory
       set(position, linearVelocity);
    }
 
-   @Override
-   default void set(T other)
+   default void set(EuclideanTrajectoryPointInterface other)
    {
       setTime(other.getTime());
       EuclideanWaypointInterface.super.set(other);
    }
 
-   @Override
-   default boolean epsilonEquals(T other, double epsilon)
+   default boolean epsilonEquals(EuclideanTrajectoryPointInterface other, double epsilon)
    {
       boolean timeEquals = EuclidCoreTools.epsilonEquals(getTime(), other.getTime(), epsilon);
       return timeEquals && EuclideanWaypointInterface.super.epsilonEquals(other, epsilon);

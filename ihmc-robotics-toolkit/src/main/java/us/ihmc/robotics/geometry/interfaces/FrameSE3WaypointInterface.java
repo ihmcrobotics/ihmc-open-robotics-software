@@ -11,7 +11,7 @@ import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.euclid.tuple4D.interfaces.QuaternionReadOnly;
 
-public interface FrameSE3WaypointInterface<T extends FrameSE3WaypointInterface<T>> extends FrameEuclideanWaypointInterface<T>, FrameSO3WaypointInterface<T>, SE3WaypointInterface<T>
+public interface FrameSE3WaypointInterface extends FrameEuclideanWaypointInterface, FrameSO3WaypointInterface, SE3WaypointInterface
 {
    public default void set(FramePoint3DReadOnly position, FrameQuaternionReadOnly orientation, FrameVector3DReadOnly linearVelocity,
                            FrameVector3DReadOnly angularVelocity)
@@ -60,24 +60,21 @@ public interface FrameSE3WaypointInterface<T extends FrameSE3WaypointInterface<T
       getAngularVelocityIncludingFrame(angularVelocityToPack);
    }
 
-   @Override
-   default boolean epsilonEquals(T other, double epsilon)
+   default boolean epsilonEquals(FrameSE3WaypointInterface other, double epsilon)
    {
       boolean euclideanMatch = FrameEuclideanWaypointInterface.super.epsilonEquals(other, epsilon);
       boolean so3Match = FrameSO3WaypointInterface.super.epsilonEquals(other, epsilon);
       return euclideanMatch && so3Match;
    }
 
-   @Override
-   default boolean geometricallyEquals(T other, double epsilon)
+   default boolean geometricallyEquals(FrameSE3WaypointInterface other, double epsilon)
    {
       boolean euclideanMatch = FrameEuclideanWaypointInterface.super.geometricallyEquals(other, epsilon);
       boolean so3Match = FrameSO3WaypointInterface.super.geometricallyEquals(other, epsilon);
       return euclideanMatch && so3Match;
    }
 
-   @Override
-   default void set(T other)
+   default void set(FrameSE3WaypointInterface other)
    {
       FrameEuclideanWaypointInterface.super.set(other);
       FrameSO3WaypointInterface.super.set(other);
