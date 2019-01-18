@@ -79,6 +79,7 @@ public class FootstepPlannerUI
    private final VisibilityGraphsRenderer visibilityGraphsRenderer;
    private final OccupancyMapRenderer graphRenderer;
    private final JavaFXRobotVisualizer robotVisualizer;
+   private final JavaFXRobotVisualizer walkingPreviewVisualizer;
 
    @FXML
    private FootstepPlannerMenuUIController footstepPlannerMenuUIController;
@@ -116,6 +117,15 @@ public class FootstepPlannerUI
    public FootstepPlannerUI(Stage primaryStage, JavaFXMessager messager, FootstepPlannerParameters plannerParameters,
                             VisibilityGraphsParameters visibilityGraphsParameters, FullHumanoidRobotModelFactory fullHumanoidRobotModelFactory,
                             RobotContactPointParameters<RobotSide> contactPointParameters, WalkingControllerParameters walkingControllerParameters) throws Exception
+   {
+      this(primaryStage, messager, plannerParameters, visibilityGraphsParameters, fullHumanoidRobotModelFactory, null, contactPointParameters,
+           walkingControllerParameters);
+   }
+
+   public FootstepPlannerUI(Stage primaryStage, JavaFXMessager messager, FootstepPlannerParameters plannerParameters,
+                            VisibilityGraphsParameters visibilityGraphsParameters, FullHumanoidRobotModelFactory fullHumanoidRobotModelFactory,
+                            FullHumanoidRobotModelFactory previewModelFactory, RobotContactPointParameters<RobotSide> contactPointParameters,
+                            WalkingControllerParameters walkingControllerParameters) throws Exception
    {
       this.primaryStage = primaryStage;
       this.messager = messager;
@@ -196,6 +206,17 @@ public class FootstepPlannerUI
          robotVisualizer.start();
       }
 
+      if(previewModelFactory == null)
+      {
+         walkingPreviewVisualizer = null;
+      }
+      else
+      {
+         walkingPreviewVisualizer = new JavaFXRobotVisualizer(previewModelFactory);
+         view3dFactory.addNodeToView(walkingPreviewVisualizer.getRootNode());
+         walkingPreviewVisualizer.start();
+      }
+
       if(walkingControllerParameters != null)
       {
          mainTabController.setDefaultTiming(walkingControllerParameters.getDefaultSwingTime(), walkingControllerParameters.getDefaultTransferTime());
@@ -256,8 +277,8 @@ public class FootstepPlannerUI
    }
 
    public static FootstepPlannerUI createMessagerUI(Stage primaryStage, JavaFXMessager messager, FootstepPlannerParameters plannerParameters,
-                                                    VisibilityGraphsParameters visibilityGraphsParameters, FullHumanoidRobotModelFactory fullHumanoidRobotModelFactory, RobotContactPointParameters<RobotSide> contactPointParameters, WalkingControllerParameters walkingControllerParameters) throws Exception
+                                                    VisibilityGraphsParameters visibilityGraphsParameters, FullHumanoidRobotModelFactory fullHumanoidRobotModelFactory, FullHumanoidRobotModelFactory previewModelFactory, RobotContactPointParameters<RobotSide> contactPointParameters, WalkingControllerParameters walkingControllerParameters) throws Exception
    {
-      return new FootstepPlannerUI(primaryStage, messager, plannerParameters, visibilityGraphsParameters, fullHumanoidRobotModelFactory, contactPointParameters, walkingControllerParameters);
+      return new FootstepPlannerUI(primaryStage, messager, plannerParameters, visibilityGraphsParameters, fullHumanoidRobotModelFactory, previewModelFactory, contactPointParameters, walkingControllerParameters);
    }
 }
