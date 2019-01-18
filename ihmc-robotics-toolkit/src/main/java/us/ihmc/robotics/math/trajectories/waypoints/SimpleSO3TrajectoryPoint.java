@@ -1,195 +1,67 @@
 package us.ihmc.robotics.math.trajectories.waypoints;
 
-import java.text.DecimalFormat;
-import java.text.NumberFormat;
-
 import us.ihmc.euclid.transform.interfaces.Transform;
-import us.ihmc.euclid.tuple3D.Vector3D;
-import us.ihmc.euclid.tuple3D.interfaces.Vector3DBasics;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
-import us.ihmc.euclid.tuple4D.Quaternion;
-import us.ihmc.euclid.tuple4D.interfaces.QuaternionBasics;
 import us.ihmc.euclid.tuple4D.interfaces.QuaternionReadOnly;
-import us.ihmc.robotics.geometry.interfaces.SO3WaypointInterface;
 import us.ihmc.robotics.geometry.transformables.SO3Waypoint;
 import us.ihmc.robotics.math.trajectories.waypoints.interfaces.SO3TrajectoryPointInterface;
 
-public class SimpleSO3TrajectoryPoint extends SimpleTrajectoryPoint<SO3Waypoint, SimpleSO3TrajectoryPoint>
-      implements SO3TrajectoryPointInterface<SimpleSO3TrajectoryPoint>
+public class SimpleSO3TrajectoryPoint implements SO3TrajectoryPointInterface<SimpleSO3TrajectoryPoint>
 {
-   public SimpleSO3TrajectoryPoint()
-   {
-      super(new SO3Waypoint());
-   }
+   private final SO3Waypoint so3Waypoint = new SO3Waypoint();
+   private final TrajectoryPoint trajectoryPoint = new TrajectoryPoint();
 
-   public SimpleSO3TrajectoryPoint(double time, QuaternionReadOnly orientation, Vector3DReadOnly angularVelocity)
+   @Override
+   public QuaternionReadOnly getOrientation()
    {
-      this();
-      set(time, orientation, angularVelocity);
-   }
-
-   public SimpleSO3TrajectoryPoint(SimpleSO3TrajectoryPoint simpleSO3TrajectoryPoint)
-   {
-      this();
-      set(simpleSO3TrajectoryPoint);
-   }
-
-   public SO3Waypoint getSO3Waypoint()
-   {
-      return waypointData;
+      return so3Waypoint.getOrientation();
    }
 
    @Override
-   public void setOrientation(QuaternionReadOnly orientation)
+   public void setOrientation(double x, double y, double z, double s)
    {
-      waypointData.setOrientation(orientation);
+      so3Waypoint.setOrientation(x, y, z, s);
    }
 
    @Override
-   public void setAngularVelocity(Vector3DReadOnly angularVelocity)
+   public Vector3DReadOnly getAngularVelocity()
    {
-      waypointData.setAngularVelocity(angularVelocity);
-   }
-
-   public void set(double time, QuaternionReadOnly orientation, Vector3DReadOnly angularVelocity)
-   {
-      setTime(time);
-      waypointData.set(orientation, angularVelocity);
-   }
-
-   public void set(double time, SO3WaypointInterface<?> so3Waypoint)
-   {
-      setTime(time);
-      waypointData.set(so3Waypoint);
-   }
-
-   public void set(SO3TrajectoryPointInterface<?> so3TrajectoryPoint)
-   {
-      setTime(so3TrajectoryPoint.getTime());
-      waypointData.set(so3TrajectoryPoint);
+      return so3Waypoint.getAngularVelocity();
    }
 
    @Override
-   public void setOrientationToZero()
+   public void setAngularVelocity(double x, double y, double z)
    {
-      waypointData.setOrientationToZero();
-   }
-
-   @Override
-   public void setAngularVelocityToZero()
-   {
-      waypointData.setAngularVelocityToZero();
-   }
-
-   @Override
-   public void setOrientationToNaN()
-   {
-      waypointData.setOrientationToNaN();
-   }
-
-   @Override
-   public void setAngularVelocityToNaN()
-   {
-      waypointData.setAngularVelocityToNaN();
-   }
-
-   @Override
-   public void getOrientation(QuaternionBasics orientationToPack)
-   {
-      waypointData.getOrientation(orientationToPack);
-   }
-
-   public Quaternion getOrientationCopy()
-   {
-      Quaternion orientationCopy = new Quaternion();
-      getOrientation(orientationCopy);
-      return orientationCopy;
-   }
-
-   @Override
-   public void getAngularVelocity(Vector3DBasics angularVelocityToPack)
-   {
-      waypointData.getAngularVelocity(angularVelocityToPack);
-   }
-   
-   public Vector3D getAngularVelocityCopy()
-   {
-      Vector3D angularVelocityCopy = new Vector3D();
-      getAngularVelocity(angularVelocityCopy);
-      return angularVelocityCopy;
-   }
-
-   public double get(QuaternionBasics orientationToPack, Vector3DBasics angularVelocityToPack)
-   {
-      waypointData.get(orientationToPack, angularVelocityToPack);
-      return getTime();
-   }
-
-   public void get(SimpleSO3TrajectoryPoint simpleSO3TrajectoryPointToPack)
-   {
-      simpleSO3TrajectoryPointToPack.setTime(getTime());
-      simpleSO3TrajectoryPointToPack.setOrientation(waypointData.getOrientation());
-      simpleSO3TrajectoryPointToPack.setAngularVelocity(waypointData.getAngularVelocity());
-   }
-
-   public double getOrientationQx()
-   {
-      return waypointData.getOrientationQx();
-   }
-
-   public double getOrientationQy()
-   {
-      return waypointData.getOrientationQy();
-   }
-
-   public double getOrientationQz()
-   {
-      return waypointData.getOrientationQz();
-   }
-
-   public double getOrientationQs()
-   {
-      return waypointData.getOrientationQs();
-   }
-
-   public double getAngularVelocityX()
-   {
-      return waypointData.getAngularVelocityX();
-   }
-
-   public double getAngularVelocityY()
-   {
-      return waypointData.getAngularVelocityY();
-   }
-
-   public double getAngularVelocityZ()
-   {
-      return waypointData.getAngularVelocityZ();
+      so3Waypoint.setAngularVelocity(x, y, z);
    }
 
    @Override
    public void applyTransform(Transform transform)
    {
-      waypointData.applyTransform(transform);
+      so3Waypoint.applyTransform(transform);
    }
 
-   QuaternionReadOnly getOrientation()
+   @Override
+   public void applyInverseTransform(Transform transform)
    {
-      return waypointData.getOrientation();
+      so3Waypoint.applyInverseTransform(transform);
    }
 
-   Vector3DReadOnly getAngularVelocity()
+   @Override
+   public void setTime(double time)
    {
-      return waypointData.getAngularVelocity();
+      trajectoryPoint.setTime(time);
+   }
+
+   @Override
+   public double getTime()
+   {
+      return trajectoryPoint.getTime();
    }
 
    @Override
    public String toString()
    {
-      NumberFormat doubleFormat = new DecimalFormat(" 0.00;-0.00");
-
-      String timeToString = "time = " + doubleFormat.format(getTime());
-
-      return "SO3 trajectory point: (" + timeToString + ", " + waypointData + ")";
+      return "SO3 trajectory point: (time = " + WaypointToStringTools.format(getTime()) + ", " + WaypointToStringTools.waypointToString(so3Waypoint) + ")";
    }
 }
