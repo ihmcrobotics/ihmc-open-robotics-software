@@ -1,18 +1,28 @@
 package us.ihmc.robotics.math.trajectories.waypoints.interfaces;
 
-import us.ihmc.euclid.interfaces.GeometryObject;
-
-public interface TrajectoryPointInterface<T extends TrajectoryPointInterface<T>> extends GeometryObject<T>
+public interface TrajectoryPointInterface
 {
    public abstract void setTime(double time);
 
-   public abstract void addTimeOffset(double timeOffsetToAdd);
-
-   public abstract void subtractTimeOffset(double timeOffsetToSubtract);
-
-   public abstract void setTimeToZero();
-
-   public abstract void setTimeToNaN();
-
    public abstract double getTime();
+
+   public default void addTimeOffset(double timeOffsetToAdd)
+   {
+      setTime(getTime() + timeOffsetToAdd);
+   }
+
+   public default void subtractTimeOffset(double timeOffsetToSubtract)
+   {
+      setTime(getTime() - timeOffsetToSubtract);
+   }
+
+   public default void setTimeToZero()
+   {
+      setTime(0.0);
+   }
+
+   public default void setTimeToNaN()
+   {
+      setTime(Double.NaN);
+   }
 }

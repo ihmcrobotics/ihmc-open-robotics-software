@@ -1,205 +1,87 @@
 package us.ihmc.robotics.math.trajectories.waypoints;
 
-import us.ihmc.euclid.referenceFrame.FrameQuaternion;
-import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.euclid.tuple3D.interfaces.Vector3DBasics;
-import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
-import us.ihmc.euclid.tuple4D.interfaces.QuaternionBasics;
-import us.ihmc.euclid.tuple4D.interfaces.QuaternionReadOnly;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.yoVariables.variable.YoFrameQuaternion;
-import us.ihmc.yoVariables.variable.YoFrameVector3D;
-import us.ihmc.robotics.geometry.transformables.SO3Waypoint;
+import us.ihmc.euclid.referenceFrame.interfaces.FrameQuaternionReadOnly;
+import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
+import us.ihmc.euclid.transform.interfaces.Transform;
 import us.ihmc.robotics.geometry.yoFrameObjects.YoFrameSO3Waypoint;
-import us.ihmc.robotics.math.trajectories.waypoints.interfaces.SO3TrajectoryPointInterface;
+import us.ihmc.robotics.math.trajectories.waypoints.interfaces.FrameSO3TrajectoryPointInterface;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
 
-public class YoFrameSO3TrajectoryPoint extends YoFrameTrajectoryPoint<YoFrameSO3TrajectoryPoint, FrameSO3TrajectoryPoint, SimpleSO3TrajectoryPoint>
-      implements SO3TrajectoryPointInterface<YoFrameSO3TrajectoryPoint>
+public class YoFrameSO3TrajectoryPoint implements FrameSO3TrajectoryPointInterface<YoFrameSO3TrajectoryPoint>
 {
-   private final YoFrameQuaternion orientation;
-   private final YoFrameVector3D angularVelocity;
+   private final YoFrameSO3Waypoint so3Waypoint;
+   private final YoTrajectoryPoint trajectoryPoint;
 
-   public YoFrameSO3TrajectoryPoint(String namePrefix, String nameSuffix, YoVariableRegistry registry, ReferenceFrame... referenceFrames)
+   public YoFrameSO3TrajectoryPoint(String namePrefix, String nameSuffix, YoVariableRegistry registry)
    {
-      super(new FrameSO3TrajectoryPoint(), namePrefix, nameSuffix, registry, referenceFrames);
-
-      orientation = YoFrameSO3Waypoint.createYoOrientation(this, namePrefix, nameSuffix, registry);
-      angularVelocity = YoFrameSO3Waypoint.createYoAngularVelocity(this, namePrefix, nameSuffix, registry);
+      so3Waypoint = new YoFrameSO3Waypoint(namePrefix, nameSuffix, registry);
+      trajectoryPoint = new YoTrajectoryPoint(namePrefix, nameSuffix, registry);
    }
 
    @Override
-   public void setOrientation(QuaternionReadOnly orientation)
+   public FrameQuaternionReadOnly getOrientation()
    {
-      this.orientation.set(orientation);
-   }
-
-   public void setOrientation(FrameQuaternion orientation)
-   {
-      this.orientation.set(orientation);
+      return so3Waypoint.getOrientation();
    }
 
    @Override
-   public void setAngularVelocity(Vector3DReadOnly angularVelocity)
+   public void setOrientation(double x, double y, double z, double s)
    {
-      this.angularVelocity.set(angularVelocity);
-   }
-
-   public void setAngularVelocity(FrameVector3D angularVelocity)
-   {
-      this.angularVelocity.set(angularVelocity);
-   }
-   public void set(SO3TrajectoryPointInterface<?> so3TrajectoryPoint)
-   {
-      frameWaypoint.setToZero(getReferenceFrame());
-      frameWaypoint.set(so3TrajectoryPoint);
-      getYoValuesFromFrameWaypoint();
-   }
-
-   public void set(double time, QuaternionReadOnly orientation, Vector3DReadOnly angularVelocity)
-   {
-      this.time.set(time);
-      this.orientation.set(orientation);
-      this.angularVelocity.set(angularVelocity);
-   }
-
-   public void set(double time, FrameQuaternion orientation, FrameVector3D angularVelocity)
-   {
-      this.time.set(time);
-      this.orientation.set(orientation);
-      this.angularVelocity.set(angularVelocity);
-   }
-
-   public void set(double time, YoFrameQuaternion orientation, YoFrameVector3D angularVelocity)
-   {
-      this.time.set(time);
-      this.orientation.set(orientation);
-      this.angularVelocity.set(angularVelocity);
-   }
-   
-   @Override
-   public void setOrientationToZero()
-   {
-      orientation.setToZero();
+      so3Waypoint.setOrientation(x, y, z, s);
    }
 
    @Override
-   public void setAngularVelocityToZero()
+   public FrameVector3DReadOnly getAngularVelocity()
    {
-      angularVelocity.setToZero();
+      return so3Waypoint.getAngularVelocity();
    }
 
    @Override
-   public void setOrientationToNaN()
+   public void setAngularVelocity(double x, double y, double z)
    {
-      orientation.setToNaN();
+      so3Waypoint.setAngularVelocity(x, y, z);
    }
 
    @Override
-   public void setAngularVelocityToNaN()
+   public void applyTransform(Transform transform)
    {
-      angularVelocity.setToNaN();
+      so3Waypoint.applyTransform(transform);
    }
 
    @Override
-   public void setToNaN()
+   public void applyInverseTransform(Transform transform)
    {
-      super.setToNaN();
-      setTimeToNaN();
-      setOrientationToNaN();
-      setAngularVelocityToNaN();
+      so3Waypoint.applyInverseTransform(transform);
    }
 
    @Override
-   public void setToNaN(ReferenceFrame referenceFrame)
+   public void setReferenceFrame(ReferenceFrame referenceFrame)
    {
-      super.setToNaN(referenceFrame);
-      setToNaN();
+      so3Waypoint.setReferenceFrame(referenceFrame);
    }
 
    @Override
-   public void getOrientation(QuaternionBasics orientationToPack)
+   public ReferenceFrame getReferenceFrame()
    {
-      orientationToPack.set(orientation);
+      return so3Waypoint.getReferenceFrame();
    }
 
    @Override
-   public void getAngularVelocity(Vector3DBasics angularVelocityToPack)
+   public void setTime(double time)
    {
-      angularVelocityToPack.set(angularVelocity);
-   }
-
-   public void getOrientation(FrameQuaternion orientationToPack)
-   {
-      orientationToPack.set(orientation);
-   }
-
-   public void getAngularVelocity(FrameVector3D angularVelocityToPack)
-   {
-      angularVelocityToPack.set(angularVelocity);
-   }
-
-   public void getOrientationIncludingFrame(FrameQuaternion orientationToPack)
-   {
-      orientationToPack.setIncludingFrame(orientation);
-   }
-
-   public void getAngularVelocityIncludingFrame(FrameVector3D angularVelocityToPack)
-   {
-      angularVelocityToPack.setIncludingFrame(angularVelocity);
-   }
-
-   public void getOrientation(YoFrameQuaternion orientationToPack)
-   {
-      orientationToPack.set(orientation);
-   }
-
-   public void getAngularVelocity(YoFrameVector3D angularVelocityToPack)
-   {
-      angularVelocityToPack.set(angularVelocity);
-   }
-
-   /**
-    * Return the original orientation held by this trajectory point.
-    */
-   public YoFrameQuaternion getOrientation()
-   {
-      return orientation;
-   }
-
-   /**
-    * Return the original angularVelocity held by this trajectory point.
-    */
-   public YoFrameVector3D getAngularVelocity()
-   {
-      return angularVelocity;
+      trajectoryPoint.setTime(time);
    }
 
    @Override
-   protected void getYoValuesFromFrameWaypoint()
+   public double getTime()
    {
-      SimpleSO3TrajectoryPoint simpleTrajectoryPoint = frameWaypoint.getGeometryObject();
-      SO3Waypoint so3Waypoint = simpleTrajectoryPoint.getSO3Waypoint();
-      
-      time.set(simpleTrajectoryPoint.getTime());
-      orientation.set(so3Waypoint.getOrientation());
-      angularVelocity.set(so3Waypoint.getAngularVelocity());
-   }
-
-   @Override
-   protected void putYoValuesIntoFrameWaypoint()
-   {
-      frameWaypoint.setToZero(getReferenceFrame());
-
-      frameWaypoint.setTime(time.getDoubleValue());
-      frameWaypoint.setOrientation(orientation);
-      frameWaypoint.setAngularVelocity(angularVelocity);
+      return trajectoryPoint.getTime();
    }
 
    @Override
    public String toString()
    {
-      putYoValuesIntoFrameWaypoint();
-      return frameWaypoint.toString();
+      return "SO3 trajectory point: (time = " + WaypointToStringTools.format(getTime()) + ", " + WaypointToStringTools.waypointToString(so3Waypoint) + ")";
    }
 }

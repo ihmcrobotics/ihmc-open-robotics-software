@@ -11,7 +11,7 @@ import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.euclid.tuple4D.interfaces.QuaternionReadOnly;
 
-public interface FrameSE3WaypointInterface<T extends FrameSE3WaypointInterface<T>> extends FrameEuclideanWaypointInterface<T>, FrameSO3WaypointInterface<T>
+public interface FrameSE3WaypointInterface<T extends FrameSE3WaypointInterface<T>> extends FrameEuclideanWaypointInterface<T>, FrameSO3WaypointInterface<T>, SE3WaypointInterface<T>
 {
    public default void set(FramePoint3DReadOnly position, FrameQuaternionReadOnly orientation, FrameVector3DReadOnly linearVelocity,
                            FrameVector3DReadOnly angularVelocity)
@@ -81,26 +81,6 @@ public interface FrameSE3WaypointInterface<T extends FrameSE3WaypointInterface<T
    {
       FrameEuclideanWaypointInterface.super.set(other);
       FrameSO3WaypointInterface.super.set(other);
-   }
-
-   @Override
-   default void setToNaN()
-   {
-      FrameEuclideanWaypointInterface.super.setToNaN();
-      FrameSO3WaypointInterface.super.setToNaN();
-   }
-
-   @Override
-   default void setToZero()
-   {
-      FrameEuclideanWaypointInterface.super.setToZero();
-      FrameSO3WaypointInterface.super.setToZero();
-   }
-
-   @Override
-   default boolean containsNaN()
-   {
-      return FrameEuclideanWaypointInterface.super.containsNaN() || FrameSO3WaypointInterface.super.containsNaN();
    }
 
    @Override

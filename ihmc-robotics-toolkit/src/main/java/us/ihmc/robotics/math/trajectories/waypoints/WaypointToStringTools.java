@@ -147,4 +147,9 @@ public abstract class WaypointToStringTools
       String sToString = format.format(tuple.getS());
       return "(" + xToString + ", " + yToString + ", " + zToString + ", " + sToString + ")";
    }
+
+   public static String format(double number)
+   {
+      return format.format(number);
+   }
 }
