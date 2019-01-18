@@ -1,6 +1,7 @@
 package us.ihmc.quadrupedFootstepPlanning.footstepPlanning.graphSearch.nodeExpansion;
 
 import us.ihmc.euclid.axisAngle.AxisAngle;
+import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple2D.Vector2D;
 import us.ihmc.euclid.tuple2D.interfaces.Tuple2DReadOnly;
 import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.graphSearch.graph.FootstepNode;
@@ -53,66 +54,59 @@ public class ParameterBasedNodeExpansion implements FootstepNodeExpansion
 
    private void addDefaultFootsteps(FootstepNode node, HashSet<FootstepNode> neighboringNodesToPack)
    {
-      for (double frontLeftX = parameters.getMinimumStepLength(); frontLeftX < parameters.getMaximumStepReach(); frontLeftX += FootstepNode.gridSizeXY)
+      for (double movingX = parameters.getMinimumStepLength(); movingX < parameters.getMaximumStepReach(); movingX += FootstepNode.gridSizeXY)
       {
-         for (double frontLeftY = parameters.getMinimumStepWidth(); frontLeftY < parameters.getMaximumStepWidth(); frontLeftY += FootstepNode.gridSizeXY)
+         for (double movingY = parameters.getMinimumStepWidth(); movingY < parameters.getMaximumStepWidth(); movingY += FootstepNode.gridSizeXY)
          {
-            for (double frontRightX = parameters.getMinimumStepLength(); frontRightX < parameters.getMaximumStepReach(); frontRightX += FootstepNode.gridSizeXY)
-            {
-               for (double frontRightY = parameters.getMinimumStepWidth(); frontRightY < parameters.getMaximumStepWidth(); frontRightY += FootstepNode.gridSizeXY)
-               {
-                  for (double hindLeftX = parameters.getMinimumStepLength(); hindLeftX < parameters.getMaximumStepReach(); hindLeftX += FootstepNode.gridSizeXY)
-                  {
-                     for (double hindLeftY = parameters.getMinimumStepWidth(); hindLeftY < parameters.getMaximumStepWidth(); hindLeftY += FootstepNode.gridSizeXY)
-                     {
-                        for (double hindRightX = parameters.getMinimumStepLength(); hindRightX < parameters.getMaximumStepReach(); hindRightX += FootstepNode.gridSizeXY)
-                        {
-                           for (double hindRightY = parameters.getMinimumStepWidth(); hindRightY < parameters.getMaximumStepWidth(); hindRightY += FootstepNode.gridSizeXY)
-                           {
-                              FootstepNode offsetNode = constructNodeInPreviousNodeFrame(frontLeftX, frontLeftY, frontRightX, frontRightY, hindLeftX, hindLeftY,
-                                                                                         hindRightX, hindRightY, node);
-                              neighboringNodesToPack.add(offsetNode);
-                           }
-                        }
-                     }
-                  }
-               }
-            }
+            FootstepNode offsetNode = constructNodeInPreviousNodeFrame(movingX, movingY, node);
+            neighboringNodesToPack.add(offsetNode);
          }
       }
    }
 
-   private static FootstepNode constructNodeInPreviousNodeFrame(double frontLeftX, double frontLeftY, double frontRightX, double frontRightY, double hindLeftX,
-                                                                double hindLeftY, double hindRightX, double hindRightY, FootstepNode node)
+   private static FootstepNode constructNodeInPreviousNodeFrame(double movingX, double movingY, FootstepNode previousNode)
    {
-      Vector2D frontLeft = new Vector2D(frontLeftX, frontLeftY);
-      Vector2D frontRight = new Vector2D(frontRightX, frontRightY);
-      Vector2D hindLeft = new Vector2D(hindLeftX, hindLeftY);
-      Vector2D hindRight = new Vector2D(hindRightX, hindRightY);
+      Vector2D movingVector = new Vector2D(movingX, movingY);
 
-      double nodeYaw = node.getNominalYaw();
+      double nodeYaw = previousNode.getNominalYaw();
 
       AxisAngle rotation = new AxisAngle(nodeYaw, 0.0, 0.0);
-      rotation.transform(frontLeft);
-      rotation.transform(frontRight);
-      rotation.transform(hindLeft);
-      rotation.transform(hindRight);
+      rotation.transform(movingVector);
 
-      RobotQuadrant nextQuadrant = node.getMovingQuadrant().getNextRegularGaitSwingQuadrant();
+      RobotQuadrant nextQuadrant = previousNode.getMovingQuadrant().getNextRegularGaitSwingQuadrant();
+      Point2D frontLeft = new Point2D(previousNode.getX(FRONT_LEFT), previousNode.getY(FRONT_LEFT));
+      Point2D frontRight = new Point2D(previousNode.getX(FRONT_RIGHT), previousNode.getY(FRONT_RIGHT));
+      Point2D hindLeft = new Point2D(previousNode.getX(HIND_LEFT), previousNode.getY(HIND_LEFT));
+      Point2D hindRight = new Point2D(previousNode.getX(HIND_RIGHT), previousNode.getY(HIND_RIGHT));
+
+      switch (nextQuadrant)
+      {
+      case FRONT_LEFT:
+         frontLeft.add(movingX, movingY);
+         break;
+      case FRONT_RIGHT:
+         frontRight.add(movingX, movingY);
+         break;
+      case HIND_LEFT:
+         hindLeft.add(movingX, movingY);
+         break;
+      default:
+         hindRight.add(movingX, movingY);
+         break;
+      }
 
       return new FootstepNode(nextQuadrant, frontLeft, frontRight, hindLeft, hindRight);
    }
 
-
    private static ArrayList<Double> constructArrayFromEndpointsAndSpacing(double minValue, double maxValue, double spacing)
    {
-      if(maxValue < minValue)
+      if (maxValue < minValue)
          throw new RuntimeException("Max value: " + maxValue + " should be less than min value: " + minValue);
 
       ArrayList<Double> array = new ArrayList<>();
       double value = minValue;
 
-      while(value < maxValue)
+      while (value < maxValue)
       {
          array.add(value);
          value += spacing;
