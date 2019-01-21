@@ -2,8 +2,10 @@ package us.ihmc.robotics.geometry.interfaces;
 
 import us.ihmc.euclid.interfaces.Clearable;
 import us.ihmc.euclid.interfaces.Transformable;
+import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DBasics;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
+import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.euclid.tuple4D.interfaces.QuaternionBasics;
 import us.ihmc.euclid.tuple4D.interfaces.QuaternionReadOnly;
 
@@ -103,6 +105,11 @@ public interface SO3WaypointInterface extends Transformable, Clearable
       setAngularVelocity(angularVelocity);
    }
 
+   public default void get(SO3WaypointInterface otherToPack)
+   {
+      otherToPack.set(this);
+   }
+
    public default void get(QuaternionBasics orientationToPack, Vector3DBasics angularVelocityToPack)
    {
       getOrientation(orientationToPack);
@@ -147,5 +154,15 @@ public interface SO3WaypointInterface extends Transformable, Clearable
    default boolean containsNaN()
    {
       return getOrientation().containsNaN() || getAngularVelocity().containsNaN();
+   }
+
+   public default QuaternionBasics getOrientationCopy()
+   {
+      return new Quaternion(getOrientation());
+   }
+
+   public default Vector3DBasics getAngularVelocityCopy()
+   {
+      return new Vector3D(getAngularVelocity());
    }
 }

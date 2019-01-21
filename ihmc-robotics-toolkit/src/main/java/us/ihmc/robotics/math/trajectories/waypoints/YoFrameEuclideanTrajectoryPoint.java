@@ -7,16 +7,46 @@ import us.ihmc.euclid.transform.interfaces.Transform;
 import us.ihmc.robotics.geometry.yoFrameObjects.YoFrameEuclideanWaypoint;
 import us.ihmc.robotics.math.trajectories.waypoints.interfaces.FrameEuclideanTrajectoryPointInterface;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoDouble;
 
 public class YoFrameEuclideanTrajectoryPoint implements FrameEuclideanTrajectoryPointInterface
 {
    private final YoFrameEuclideanWaypoint euclideanWaypoint;
    private final YoTrajectoryPoint trajectoryPoint;
 
+   private final String namePrefix;
+   private final String nameSuffix;
+
    public YoFrameEuclideanTrajectoryPoint(String namePrefix, String nameSuffix, YoVariableRegistry registry)
    {
       euclideanWaypoint = new YoFrameEuclideanWaypoint(namePrefix, nameSuffix, registry);
       trajectoryPoint = new YoTrajectoryPoint(namePrefix, nameSuffix, registry);
+      this.namePrefix = namePrefix;
+      this.nameSuffix = nameSuffix;
+   }
+
+   public YoFrameEuclideanTrajectoryPoint(String namePrefix, String nameSuffix, YoVariableRegistry registry, ReferenceFrame referenceFrame)
+   {
+      euclideanWaypoint = new YoFrameEuclideanWaypoint(namePrefix, nameSuffix, registry);
+      trajectoryPoint = new YoTrajectoryPoint(namePrefix, nameSuffix, registry);
+      this.namePrefix = namePrefix;
+      this.nameSuffix = nameSuffix;
+      setToZero(referenceFrame);
+   }
+
+   public YoDouble getYoX()
+   {
+      return euclideanWaypoint.getYoX();
+   }
+
+   public YoDouble getYoY()
+   {
+      return euclideanWaypoint.getYoY();
+   }
+
+   public YoDouble getYoZ()
+   {
+      return euclideanWaypoint.getYoZ();
    }
 
    @Override
@@ -77,6 +107,16 @@ public class YoFrameEuclideanTrajectoryPoint implements FrameEuclideanTrajectory
    public double getTime()
    {
       return trajectoryPoint.getTime();
+   }
+
+   public String getNamePrefix()
+   {
+      return namePrefix;
+   }
+
+   public String getNameSuffix()
+   {
+      return nameSuffix;
    }
 
    @Override

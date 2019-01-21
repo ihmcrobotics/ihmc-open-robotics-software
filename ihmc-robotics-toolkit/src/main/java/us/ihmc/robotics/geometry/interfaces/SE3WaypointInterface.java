@@ -26,6 +26,17 @@ public interface SE3WaypointInterface extends EuclideanWaypointInterface, SO3Way
       getAngularVelocity(angularVelocityToPack);
    }
 
+   public default void get(SE3WaypointInterface otherToPack)
+   {
+      otherToPack.set(this);
+   }
+
+   public default void get(EuclideanWaypointInterface euclideanWaypointToPack, SO3WaypointInterface so3WaypointToPack)
+   {
+      get(euclideanWaypointToPack);
+      get(so3WaypointToPack);
+   }
+
    default boolean epsilonEquals(SE3WaypointInterface other, double epsilon)
    {
       boolean euclideanMatch = EuclideanWaypointInterface.super.epsilonEquals(other, epsilon);

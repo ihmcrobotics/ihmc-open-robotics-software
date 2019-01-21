@@ -14,10 +14,24 @@ public class YoFrameSE3TrajectoryPoint implements FrameSE3TrajectoryPointInterfa
    private final YoFrameSE3Waypoint se3Waypoint;
    private final YoTrajectoryPoint trajectoryPoint;
 
+   private final String namePrefix;
+   private final String nameSuffix;
+
    public YoFrameSE3TrajectoryPoint(String namePrefix, String nameSuffix, YoVariableRegistry registry)
    {
       se3Waypoint = new YoFrameSE3Waypoint(namePrefix, nameSuffix, registry);
       trajectoryPoint = new YoTrajectoryPoint(namePrefix, nameSuffix, registry);
+      this.namePrefix = namePrefix;
+      this.nameSuffix = nameSuffix;
+   }
+
+   public YoFrameSE3TrajectoryPoint(String namePrefix, String nameSuffix, YoVariableRegistry registry, ReferenceFrame referenceFrame)
+   {
+      se3Waypoint = new YoFrameSE3Waypoint(namePrefix, nameSuffix, registry);
+      trajectoryPoint = new YoTrajectoryPoint(namePrefix, nameSuffix, registry);
+      this.namePrefix = namePrefix;
+      this.nameSuffix = nameSuffix;
+      setToZero(referenceFrame);
    }
 
    @Override
@@ -102,6 +116,16 @@ public class YoFrameSE3TrajectoryPoint implements FrameSE3TrajectoryPointInterfa
    public double getTime()
    {
       return trajectoryPoint.getTime();
+   }
+
+   public String getNamePrefix()
+   {
+      return namePrefix;
+   }
+
+   public String getNameSuffix()
+   {
+      return nameSuffix;
    }
 
    @Override

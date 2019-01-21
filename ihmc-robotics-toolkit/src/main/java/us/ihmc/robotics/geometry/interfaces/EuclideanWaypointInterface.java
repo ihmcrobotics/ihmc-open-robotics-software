@@ -2,6 +2,8 @@ package us.ihmc.robotics.geometry.interfaces;
 
 import us.ihmc.euclid.interfaces.Clearable;
 import us.ihmc.euclid.interfaces.Transformable;
+import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DBasics;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DBasics;
@@ -104,6 +106,11 @@ public interface EuclideanWaypointInterface extends Transformable, Clearable
       getLinearVelocity(linearVelocityToPack);
    }
 
+   public default void get(EuclideanWaypointInterface otherToPack)
+   {
+      otherToPack.set(this);
+   }
+
    public default boolean epsilonEquals(EuclideanWaypointInterface other, double epsilon)
    {
       boolean positionMatches = getPosition().epsilonEquals(other.getPosition(), epsilon);
@@ -142,5 +149,15 @@ public interface EuclideanWaypointInterface extends Transformable, Clearable
    default boolean containsNaN()
    {
       return getPosition().containsNaN() || getLinearVelocity().containsNaN();
+   }
+
+   public default Point3DBasics getPositionCopy()
+   {
+      return new Point3D(getPosition());
+   }
+
+   public default Vector3DBasics getLinearVelocityCopy()
+   {
+      return new Vector3D(getLinearVelocity());
    }
 }

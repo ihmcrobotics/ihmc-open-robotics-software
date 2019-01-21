@@ -11,6 +11,20 @@ public class SimpleSO3TrajectoryPoint implements SO3TrajectoryPointInterface
    private final SO3Waypoint so3Waypoint = new SO3Waypoint();
    private final TrajectoryPoint trajectoryPoint = new TrajectoryPoint();
 
+   public SimpleSO3TrajectoryPoint()
+   {
+   }
+
+   public SimpleSO3TrajectoryPoint(SO3TrajectoryPointInterface other)
+   {
+      set(other);
+   }
+
+   public SimpleSO3TrajectoryPoint(double time, QuaternionReadOnly orientation, Vector3DReadOnly angularVelocity)
+   {
+      set(time, orientation, angularVelocity);
+   }
+
    @Override
    public QuaternionReadOnly getOrientation()
    {

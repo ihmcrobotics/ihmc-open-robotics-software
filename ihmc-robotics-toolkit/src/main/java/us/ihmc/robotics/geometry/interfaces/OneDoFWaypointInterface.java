@@ -38,6 +38,11 @@ public interface OneDoFWaypointInterface
       setVelocity(velocity);
    }
 
+   public default void get(OneDoFWaypointInterface otherToPack)
+   {
+      otherToPack.set(this);
+   }
+
    public default boolean epsilonEquals(OneDoFWaypointInterface other, double epsilon)
    {
       return EuclidCoreTools.epsilonEquals(getPosition(), other.getPosition(), epsilon)

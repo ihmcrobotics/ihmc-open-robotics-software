@@ -42,6 +42,22 @@ public class SimpleTrajectoryPoint1DList implements TrajectoryPointListInterface
       return trajectoryPoints.size();
    }
 
+   public boolean epsilonEquals(SimpleTrajectoryPoint1DList other, double epsilon)
+   {
+      if (getNumberOfTrajectoryPoints() != other.getNumberOfTrajectoryPoints())
+      {
+         return false;
+      }
+      for (int i = 0; i < getNumberOfTrajectoryPoints(); i++)
+      {
+         if (!getTrajectoryPoint(i).epsilonEquals(other.getTrajectoryPoint(i), epsilon))
+         {
+            return false;
+         }
+      }
+      return true;
+   }
+
    @Override
    public String toString()
    {

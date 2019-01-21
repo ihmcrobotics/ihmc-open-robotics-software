@@ -12,6 +12,21 @@ public class SimpleSE3TrajectoryPoint implements SE3TrajectoryPointInterface
    private final SE3Waypoint se3Waypoint = new SE3Waypoint();
    private final TrajectoryPoint trajectoryPoint = new TrajectoryPoint();
 
+   public SimpleSE3TrajectoryPoint()
+   {
+   }
+
+   public SimpleSE3TrajectoryPoint(SE3TrajectoryPointInterface other)
+   {
+      set(other);
+   }
+
+   public SimpleSE3TrajectoryPoint(double time, Point3DReadOnly position, QuaternionReadOnly orientation, Vector3DReadOnly linearVelocity,
+                                   Vector3DReadOnly angularVelocity)
+   {
+      set(time, position, orientation, linearVelocity, angularVelocity);
+   }
+
    @Override
    public Point3DReadOnly getPosition()
    {

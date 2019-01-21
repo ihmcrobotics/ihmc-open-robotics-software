@@ -5,6 +5,7 @@ import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
 import us.ihmc.euclid.transform.interfaces.Transform;
 import us.ihmc.robotics.geometry.frameObjects.FrameEuclideanWaypoint;
+import us.ihmc.robotics.math.trajectories.waypoints.interfaces.EuclideanTrajectoryPointInterface;
 import us.ihmc.robotics.math.trajectories.waypoints.interfaces.FrameEuclideanTrajectoryPointInterface;
 
 public class FrameEuclideanTrajectoryPoint implements FrameEuclideanTrajectoryPointInterface
@@ -16,9 +17,24 @@ public class FrameEuclideanTrajectoryPoint implements FrameEuclideanTrajectoryPo
    {
    }
 
+   public FrameEuclideanTrajectoryPoint(ReferenceFrame referenceFrame)
+   {
+      setToZero(referenceFrame);
+   }
+
    public FrameEuclideanTrajectoryPoint(double time, FramePoint3DReadOnly position, FrameVector3DReadOnly linearVelocity)
    {
       setIncludingFrame(time, position, linearVelocity);
+   }
+
+   public FrameEuclideanTrajectoryPoint(FrameEuclideanTrajectoryPointInterface other)
+   {
+      setIncludingFrame(other);
+   }
+
+   public FrameEuclideanTrajectoryPoint(ReferenceFrame referenceFrame, EuclideanTrajectoryPointInterface other)
+   {
+      setIncludingFrame(referenceFrame, other);
    }
 
    @Override

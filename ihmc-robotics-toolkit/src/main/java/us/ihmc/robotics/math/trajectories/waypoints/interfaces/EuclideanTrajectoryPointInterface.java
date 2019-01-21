@@ -19,6 +19,12 @@ public interface EuclideanTrajectoryPointInterface extends TrajectoryPointInterf
       EuclideanWaypointInterface.super.set(other);
    }
 
+   default void set(double time, EuclideanWaypointInterface waypoint)
+   {
+      setTime(time);
+      set(waypoint);
+   }
+
    default boolean epsilonEquals(EuclideanTrajectoryPointInterface other, double epsilon)
    {
       boolean timeEquals = EuclidCoreTools.epsilonEquals(getTime(), other.getTime(), epsilon);
