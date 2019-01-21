@@ -72,7 +72,6 @@ import us.ihmc.robotics.math.trajectories.waypoints.SimpleSE3TrajectoryPoint;
 import us.ihmc.robotics.random.RandomGeometry;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
-import us.ihmc.robotics.screwTheory.ScrewTools;
 import us.ihmc.sensorProcessing.frames.CommonReferenceFrameIds;
 import us.ihmc.simulationConstructionSetTools.bambooTools.BambooTools;
 import us.ihmc.simulationConstructionSetTools.util.environments.CommonAvatarEnvironmentInterface;
@@ -330,7 +329,8 @@ public abstract class EndToEndHandTrajectoryMessageTest implements MultiRobotTes
             Quaternion desiredOrientation = new Quaternion(tempOrientation);
             Vector3D desiredAngularVelocity = new Vector3D();
 
-            double time = trajectoryPoints.get(i).get(desiredPosition, desiredLinearVelocity);
+            trajectoryPoints.get(i).get(desiredPosition, desiredLinearVelocity);
+            double time = trajectoryPoints.get(i).getTime();
 
             Graphics3DObject sphere = new Graphics3DObject();
             sphere.translate(desiredPosition);
@@ -564,7 +564,8 @@ public abstract class EndToEndHandTrajectoryMessageTest implements MultiRobotTes
             Quaternion desiredOrientation = new Quaternion(tempOrientation);
             Vector3D desiredAngularVelocity = new Vector3D();
 
-            double time = trajectoryPoints.get(calculatorIndex).get(desiredPosition, desiredLinearVelocity);
+            trajectoryPoints.get(calculatorIndex).get(desiredPosition, desiredLinearVelocity);
+            double time = trajectoryPoints.get(calculatorIndex).getTime();
 
             Graphics3DObject sphere = new Graphics3DObject();
             sphere.translate(desiredPosition);
@@ -759,7 +760,8 @@ public abstract class EndToEndHandTrajectoryMessageTest implements MultiRobotTes
                Quaternion desiredOrientation = new Quaternion(tempOrientation);
                Vector3D desiredAngularVelocity = new Vector3D();
 
-               double time = trajectoryPoints.get(calculatorIndex).get(desiredPosition, desiredLinearVelocity);
+               trajectoryPoints.get(calculatorIndex).get(desiredPosition, desiredLinearVelocity);
+               double time = trajectoryPoints.get(calculatorIndex).getTime();
 
                Graphics3DObject sphere = new Graphics3DObject();
                sphere.translate(desiredPosition);
@@ -877,7 +879,8 @@ public abstract class EndToEndHandTrajectoryMessageTest implements MultiRobotTes
                Quaternion desiredOrientation = new Quaternion(tempOrientation);
                Vector3D desiredAngularVelocity = new Vector3D();
 
-               double time = trajectoryPoints.get(calculatorIndex).get(desiredPosition, desiredLinearVelocity);
+               trajectoryPoints.get(calculatorIndex).get(desiredPosition, desiredLinearVelocity);
+               double time = trajectoryPoints.get(calculatorIndex).getTime();
 
                Graphics3DObject sphere = new Graphics3DObject();
                sphere.translate(desiredPosition);

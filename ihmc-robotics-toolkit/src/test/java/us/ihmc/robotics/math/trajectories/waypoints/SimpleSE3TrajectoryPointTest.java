@@ -22,6 +22,8 @@ import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
+import us.ihmc.robotics.geometry.interfaces.EuclideanWaypointInterface;
+import us.ihmc.robotics.geometry.interfaces.SO3WaypointInterface;
 import us.ihmc.robotics.geometry.transformables.EuclideanWaypoint;
 import us.ihmc.robotics.geometry.transformables.SE3Waypoint;
 import us.ihmc.robotics.geometry.transformables.SO3Waypoint;
@@ -370,10 +372,10 @@ public class SimpleSE3TrajectoryPointTest
          SimpleSE3TrajectoryPoint testedSimpleSE3TrajectoryPoint, double epsilon)
    {
       assertEquals(expectedTime, testedSimpleSE3TrajectoryPoint.getTime(), epsilon);
-      assertTrue(expectedPosition.epsilonEquals(testedSimpleSE3TrajectoryPoint.getEuclideanWaypoint().getPosition(), epsilon));
-      assertTrue(expectedOrientation + ", " + testedSimpleSE3TrajectoryPoint.getSO3Waypoint().getOrientation(), expectedOrientation.epsilonEquals(testedSimpleSE3TrajectoryPoint.getSO3Waypoint().getOrientation(), epsilon));
-      assertTrue(expectedLinearVelocity.epsilonEquals(testedSimpleSE3TrajectoryPoint.getEuclideanWaypoint().getLinearVelocity(), epsilon));
-      assertTrue(expectedAngularVelocity.epsilonEquals(testedSimpleSE3TrajectoryPoint.getSO3Waypoint().getAngularVelocity(), epsilon));
+      assertTrue(expectedPosition.epsilonEquals(testedSimpleSE3TrajectoryPoint.getPosition(), epsilon));
+      assertTrue(expectedOrientation + ", " + testedSimpleSE3TrajectoryPoint.getOrientation(), expectedOrientation.epsilonEquals(testedSimpleSE3TrajectoryPoint.getOrientation(), epsilon));
+      assertTrue(expectedLinearVelocity.epsilonEquals(testedSimpleSE3TrajectoryPoint.getLinearVelocity(), epsilon));
+      assertTrue(expectedAngularVelocity.epsilonEquals(testedSimpleSE3TrajectoryPoint.getAngularVelocity(), epsilon));
 
       Point3D actualPosition = new Point3D();
       Quaternion actualOrientation = new Quaternion();
@@ -440,7 +442,7 @@ public class SimpleSE3TrajectoryPointTest
       simpleTrajectoryPoint.set(time, position, orientation, linearVelocity, angularVelocity);
       simpleSE3TrajectoryPoint.set(simpleTrajectoryPoint);
 
-      // Check some get calls: 
+      // Check some get calls:
       Point3D pointForVerification = new Point3D();
       Quaternion quaternionForVerification = new Quaternion();
       Vector3D linearVelocityForVerification = new Vector3D();
@@ -536,12 +538,12 @@ public class SimpleSE3TrajectoryPointTest
       assertTrue(Double.isNaN(positionDistance));
       assertFalse(simpleSE3TrajectoryPoint.epsilonEquals(simpleSE3TrajectoryPointTwo, 1e-7));
 
-      SE3TrajectoryPointInterface<?> trajectoryPointAsInterface = simplePoint;
+      SE3TrajectoryPointInterface trajectoryPointAsInterface = simplePoint;
       simpleSE3TrajectoryPoint.set(trajectoryPointAsInterface);
 
       positionDistance = simpleSE3TrajectoryPoint.positionDistance(simpleSE3TrajectoryPointTwo);
       assertEquals(0.0, positionDistance, 1e-7);
-      
+
       assertTrue(simpleSE3TrajectoryPoint.epsilonEquals(simpleSE3TrajectoryPointTwo, 1e-7));
    }
 
@@ -613,19 +615,19 @@ public class SimpleSE3TrajectoryPointTest
       simpleSE3TrajectoryPointTwo.set(time, simpleSE3Waypoint);
       assertTrue(simpleSE3TrajectoryPointTwo.epsilonEquals(simpleSE3TrajectoryPoint, 1e-10));
 
-      
+
       simpleSE3TrajectoryPointTwo = new SimpleSE3TrajectoryPoint();
-      EuclideanWaypoint euclideanWaypoint = simpleSE3TrajectoryPoint.getEuclideanWaypoint();
-      SO3Waypoint so3Waypoint = simpleSE3TrajectoryPoint.getSO3Waypoint();
-      
+      EuclideanWaypointInterface euclideanWaypoint = simpleSE3TrajectoryPoint;
+      SO3WaypointInterface so3Waypoint = simpleSE3TrajectoryPoint;
+
       simpleSE3TrajectoryPointTwo.set(time, euclideanWaypoint, so3Waypoint);
       assertTrue(simpleSE3TrajectoryPointTwo.epsilonEquals(simpleSE3TrajectoryPoint, 1e-10));
-      
+
       simpleSE3TrajectoryPointTwo = new SimpleSE3TrajectoryPoint();
       euclideanWaypoint = new EuclideanWaypoint();
       so3Waypoint = new SO3Waypoint();
       simpleSE3TrajectoryPoint.get(euclideanWaypoint, so3Waypoint);
-      
+
       simpleSE3TrajectoryPointTwo.set(time, euclideanWaypoint, so3Waypoint);
       assertTrue(simpleSE3TrajectoryPointTwo.epsilonEquals(simpleSE3TrajectoryPoint, 1e-10));
 

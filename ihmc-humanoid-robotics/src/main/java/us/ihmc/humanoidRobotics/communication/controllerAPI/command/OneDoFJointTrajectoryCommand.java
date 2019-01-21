@@ -6,6 +6,7 @@ import java.util.Random;
 import controller_msgs.msg.dds.OneDoFJointTrajectoryMessage;
 import controller_msgs.msg.dds.TrajectoryPoint1DMessage;
 import us.ihmc.communication.controllerAPI.command.Command;
+import us.ihmc.euclid.tools.EuclidCoreTools;
 import us.ihmc.robotics.math.trajectories.waypoints.SimpleTrajectoryPoint1DList;
 
 public class OneDoFJointTrajectoryCommand extends SimpleTrajectoryPoint1DList implements Command<OneDoFJointTrajectoryCommand, OneDoFJointTrajectoryMessage>
@@ -30,7 +31,7 @@ public class OneDoFJointTrajectoryCommand extends SimpleTrajectoryPoint1DList im
    {
       super.clear();
       setWeight(Double.NaN);
-      
+
    }
 
    @Override
@@ -44,10 +45,10 @@ public class OneDoFJointTrajectoryCommand extends SimpleTrajectoryPoint1DList im
    public void setFromMessage(OneDoFJointTrajectoryMessage message)
    {
       this.clear();
-      
+
       List<TrajectoryPoint1DMessage> trajectoryPointMessages = message.getTrajectoryPoints();
       int numberOfPoints = trajectoryPointMessages.size();
-      
+
       for (int i = 0; i < numberOfPoints; i++)
       {
          TrajectoryPoint1DMessage trajectoryPoint1DMessage = trajectoryPointMessages.get(i);
@@ -82,5 +83,14 @@ public class OneDoFJointTrajectoryCommand extends SimpleTrajectoryPoint1DList im
          weightIsValid &= weight >= 0;
       }
       return numberOfTrajectoryPointsIsPositive && weightIsValid;
+   }
+
+   public boolean epsilonEquals(OneDoFJointTrajectoryCommand other, double epsilon)
+   {
+      if (!EuclidCoreTools.epsilonEquals(weight, other.weight, epsilon))
+      {
+         return false;
+      }
+      return super.epsilonEquals(other, epsilon);
    }
 }
