@@ -40,7 +40,7 @@ public class SO3TrajectoryPointCalculator
       {
          SimpleSO3TrajectoryPoint trajectoryPoint = trajectoryPoints.get(i);
          Vector3D orientation = new Vector3D();
-         // this conversion does not provide over 90 degree for pitch angle.         
+         // this conversion does not provide over 90 degree for pitch angle.
          //convertQuaternionToYawPitchRoll(trajectoryPoint.getOrientation(), orientation);
          RotationVectorConversion.convertQuaternionToRotationVector(trajectoryPoint.getOrientation(), orientation);
 
@@ -59,7 +59,7 @@ public class SO3TrajectoryPointCalculator
       }
    }
 
-   public List<? extends SO3TrajectoryPointInterface<?>> getTrajectoryPoints()
+   public List<? extends SO3TrajectoryPointInterface> getTrajectoryPoints()
    {
       return trajectoryPoints;
    }

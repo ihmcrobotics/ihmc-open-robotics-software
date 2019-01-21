@@ -105,12 +105,12 @@ public class MultipleWaypointsTrajectoryGenerator implements DoubleTrajectoryGen
          appendWaypointUnsafe(timeAtWaypoints[i], positions[i], velocities[i]);
    }
 
-   public void appendWaypoint(OneDoFTrajectoryPointInterface<?> waypoint1D)
+   public void appendWaypoint(OneDoFTrajectoryPointInterface waypoint1D)
    {
       appendWaypoint(waypoint1D.getTime(), waypoint1D.getPosition(), waypoint1D.getVelocity());
    }
 
-   public void appendWaypoints(OneDoFTrajectoryPointInterface<?>[] waypoints1D)
+   public void appendWaypoints(OneDoFTrajectoryPointInterface[] waypoints1D)
    {
       checkNumberOfWaypoints(numberOfWaypoints.getIntegerValue() + waypoints1D.length);
 
@@ -118,7 +118,7 @@ public class MultipleWaypointsTrajectoryGenerator implements DoubleTrajectoryGen
          appendWaypointUnsafe(waypoints1D[i].getTime(), waypoints1D[i].getPosition(), waypoints1D[i].getVelocity());
    }
 
-   public void appendWaypoints(RecyclingArrayList<? extends OneDoFTrajectoryPointInterface<?>> waypoints1D)
+   public void appendWaypoints(RecyclingArrayList<? extends OneDoFTrajectoryPointInterface> waypoints1D)
    {
       checkNumberOfWaypoints(numberOfWaypoints.getIntegerValue() + waypoints1D.size());
 
@@ -126,7 +126,7 @@ public class MultipleWaypointsTrajectoryGenerator implements DoubleTrajectoryGen
          appendWaypointUnsafe(waypoints1D.get(i).getTime(), waypoints1D.get(i).getPosition(), waypoints1D.get(i).getVelocity());
    }
 
-   public <W extends OneDoFTrajectoryPointInterface<W>> void appendWaypoints(TrajectoryPointListInterface<?, W> trajectoryWaypoint1DData)
+   public <W extends OneDoFTrajectoryPointInterface> void appendWaypoints(TrajectoryPointListInterface<W> trajectoryWaypoint1DData)
    {
       for (int i = 0; i < trajectoryWaypoint1DData.getNumberOfTrajectoryPoints(); i++)
          appendWaypoint(trajectoryWaypoint1DData.getTrajectoryPoint(i));
@@ -262,7 +262,7 @@ public class MultipleWaypointsTrajectoryGenerator implements DoubleTrajectoryGen
       return waypoints.get(numberOfWaypoints.getIntegerValue() - 1).getTime();
    }
 
-   public void getLastWaypoint(OneDoFTrajectoryPointInterface<?> pointToPack)
+   public void getLastWaypoint(OneDoFTrajectoryPointInterface pointToPack)
    {
       YoOneDoFTrajectoryPoint lastWaypoint = waypoints.get(numberOfWaypoints.getIntegerValue() - 1);
       pointToPack.setPosition(lastWaypoint.getPosition());

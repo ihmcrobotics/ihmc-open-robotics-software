@@ -63,7 +63,7 @@ public class EuclideanTrajectoryPointCalculator
       this.referenceFrame = referenceFrame;
    }
 
-   public void appendTrajectoryPoint(EuclideanTrajectoryPointInterface<?> trajectoryPoint)
+   public void appendTrajectoryPoint(EuclideanTrajectoryPointInterface trajectoryPoint)
    {
       trajectoryPoints.add().set(trajectoryPoint);
    }
@@ -173,7 +173,7 @@ public class EuclideanTrajectoryPointCalculator
             System.out.println(totalLength);
             System.out.println(weightedTotalLength);
          }
-         
+
          double time = firstTrajectoryPointTime;
 
          for (int i = 1; i <= numberOfTrajectoryPoints - 1; i++)
@@ -261,9 +261,10 @@ public class EuclideanTrajectoryPointCalculator
    private final FramePoint3D tempFramePoint = new FramePoint3D();
    private final FrameVector3D tempFrameVector = new FrameVector3D();
 
-   private void compute2ndTrajectoryPointVelocityWithVelocityConstraint(EuclideanTrajectoryPointInterface<?> firstTrajectoryPoint,
-         EuclideanTrajectoryPointInterface<?> secondTrajectoryPoint, EuclideanTrajectoryPointInterface<?> thirdTrajectoryPoint,
-         FrameVector3D linearVelocityToPack)
+   private void compute2ndTrajectoryPointVelocityWithVelocityConstraint(EuclideanTrajectoryPointInterface firstTrajectoryPoint,
+                                                                        EuclideanTrajectoryPointInterface secondTrajectoryPoint,
+                                                                        EuclideanTrajectoryPointInterface thirdTrajectoryPoint,
+                                                                        FrameVector3D linearVelocityToPack)
    {
       for (Axis axis : Axis.values)
       {
@@ -295,9 +296,9 @@ public class EuclideanTrajectoryPointCalculator
       FIRST, SECOND, THIRD
    };
 
-   private void computeTrajectoryPointVelocity(EuclideanTrajectoryPointInterface<?> firstTrajectoryPoint,
-         EuclideanTrajectoryPointInterface<?> secondTrajectoryPoint, EuclideanTrajectoryPointInterface<?> thirdTrajectoryPoint,
-         TrajectoryPoint trajectoryPointToComputeVelocityOf, FrameVector3D linearVelocityToPack)
+   private void computeTrajectoryPointVelocity(EuclideanTrajectoryPointInterface firstTrajectoryPoint, EuclideanTrajectoryPointInterface secondTrajectoryPoint,
+                                               EuclideanTrajectoryPointInterface thirdTrajectoryPoint, TrajectoryPoint trajectoryPointToComputeVelocityOf,
+                                               FrameVector3D linearVelocityToPack)
    {
       for (Axis axis : Axis.values)
       {
