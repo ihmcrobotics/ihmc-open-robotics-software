@@ -61,12 +61,12 @@ public class MultipleWaypointsOrientationTrajectoryGenerator extends Orientation
 
       for (int i = 0; i < maximumNumberOfWaypoints; i++)
       {
-         YoFrameSO3TrajectoryPoint waypoint = new YoFrameSO3TrajectoryPoint(namePrefix, "AtWaypoint" + i, registry, referenceFrame);
+         YoFrameSO3TrajectoryPoint waypoint = new YoFrameSO3TrajectoryPoint(namePrefix, "AtWaypoint" + i, registry);
          registerFrameChangeables(waypoint);
          waypoints.add(waypoint);
       }
 
-      clear();
+      clear(referenceFrame);
 
       parentRegistry.addChild(registry);
    }
@@ -112,7 +112,7 @@ public class MultipleWaypointsOrientationTrajectoryGenerator extends Orientation
       numberOfWaypoints.increment();
    }
 
-   public void appendWaypoint(SO3TrajectoryPointInterface<?> so3Waypoint)
+   public void appendWaypoint(SO3TrajectoryPointInterface so3Waypoint)
    {
       checkNumberOfWaypoints(numberOfWaypoints.getIntegerValue() + 1);
       appendWaypointUnsafe(so3Waypoint);
@@ -132,7 +132,7 @@ public class MultipleWaypointsOrientationTrajectoryGenerator extends Orientation
       appendWaypointUnsafe(frameSE3TrajectoryPoint);
    }
 
-   private void appendWaypointUnsafe(SO3TrajectoryPointInterface<?> so3Waypoint)
+   private void appendWaypointUnsafe(SO3TrajectoryPointInterface so3Waypoint)
    {
       waypoints.get(numberOfWaypoints.getIntegerValue()).set(so3Waypoint);
       numberOfWaypoints.increment();
@@ -162,7 +162,7 @@ public class MultipleWaypointsOrientationTrajectoryGenerator extends Orientation
       }
    }
 
-   public void appendWaypoints(SO3TrajectoryPointInterface<?>[] so3Waypoints)
+   public void appendWaypoints(SO3TrajectoryPointInterface[] so3Waypoints)
    {
       checkNumberOfWaypoints(numberOfWaypoints.getIntegerValue() + so3Waypoints.length);
 
@@ -172,7 +172,7 @@ public class MultipleWaypointsOrientationTrajectoryGenerator extends Orientation
       }
    }
 
-   public void appendWaypoints(TrajectoryPointListInterface<?, ? extends SO3TrajectoryPointInterface<?>> trajectoryPointList)
+   public void appendWaypoints(TrajectoryPointListInterface<? extends SO3TrajectoryPointInterface> trajectoryPointList)
    {
       checkNumberOfWaypoints(numberOfWaypoints.getIntegerValue() + trajectoryPointList.getNumberOfTrajectoryPoints());
 
