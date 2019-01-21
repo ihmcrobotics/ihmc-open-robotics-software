@@ -13,6 +13,7 @@ import us.ihmc.avatar.networkProcessor.modules.mocap.IHMCMOCAPLocalizationModule
 import us.ihmc.avatar.networkProcessor.modules.mocap.MocapPlanarRegionsListManager;
 import us.ihmc.avatar.networkProcessor.quadTreeHeightMap.HeightQuadTreeToolboxModule;
 import us.ihmc.avatar.networkProcessor.supportingPlanarRegionPublisher.BipedalSupportPlanarRegionPublisher;
+import us.ihmc.avatar.networkProcessor.walkingPreview.WalkingControllerPreviewToolboxModule;
 import us.ihmc.avatar.networkProcessor.wholeBodyTrajectoryToolboxModule.WholeBodyTrajectoryToolboxModule;
 import us.ihmc.avatar.sensors.DRCSensorSuiteManager;
 import us.ihmc.commons.PrintTools;
@@ -46,6 +47,7 @@ public class DRCNetworkProcessor
       tryToStartModule(() -> addTextToSpeechEngine(params));
       tryToStartModule(() -> setupHeightQuadTreeToolboxModule(robotModel, params));
       tryToStartModule(() -> setupRobotEnvironmentAwerenessModule(params));
+      tryToStartModule(() -> setupBipedalSupportPlanarRegionPublisherModule(robotModel, params));
       tryToStartModule(() -> setupBipedalSupportPlanarRegionPublisherModule(robotModel, params));
    }
 
@@ -193,6 +195,14 @@ public class DRCNetworkProcessor
       {
          BipedalSupportPlanarRegionPublisher module = new BipedalSupportPlanarRegionPublisher(robotModel);
          module.start();
+      }
+   }
+
+   private void setupWalkingPreviewModule(DRCRobotModel robotModel, DRCNetworkModuleParameters params) throws IOException
+   {
+      if(params.isWalkingPreviewToolboxEnabled())
+      {
+         new WalkingControllerPreviewToolboxModule(robotModel, false, PubSubImplementation.FAST_RTPS);
       }
    }
 
