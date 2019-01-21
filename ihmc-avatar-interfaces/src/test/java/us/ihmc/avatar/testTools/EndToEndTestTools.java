@@ -17,8 +17,8 @@ import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.euclid.tuple4D.interfaces.QuaternionReadOnly;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.robotics.math.frames.YoFrameVariableNameTools;
-import us.ihmc.robotics.math.trajectories.waypoints.MultipleWaypointsOrientationTrajectoryGenerator;
 import us.ihmc.robotics.math.trajectories.waypoints.SimpleSO3TrajectoryPoint;
+import us.ihmc.robotics.math.trajectories.waypoints.generators.MultipleWaypointsOrientationTrajectoryGenerator;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 
 public class EndToEndTestTools

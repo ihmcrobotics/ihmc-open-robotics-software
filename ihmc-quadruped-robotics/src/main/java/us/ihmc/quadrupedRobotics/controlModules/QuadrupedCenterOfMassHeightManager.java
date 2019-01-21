@@ -23,7 +23,7 @@ import us.ihmc.robotics.controllers.pidGains.implementations.ParameterizedPIDGai
 import us.ihmc.robotics.dataStructures.parameters.ParameterVector3D;
 import us.ihmc.robotics.math.trajectories.waypoints.FrameEuclideanTrajectoryPoint;
 import us.ihmc.robotics.math.trajectories.waypoints.FrameSE3TrajectoryPoint;
-import us.ihmc.robotics.math.trajectories.waypoints.MultipleWaypointsPositionTrajectoryGenerator;
+import us.ihmc.robotics.math.trajectories.waypoints.generators.MultipleWaypointsPositionTrajectoryGenerator;
 import us.ihmc.robotics.screwTheory.SelectionMatrix3D;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;

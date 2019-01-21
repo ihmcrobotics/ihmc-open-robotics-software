@@ -1,4 +1,4 @@
-package us.ihmc.robotics.math.trajectories.waypoints;
+package us.ihmc.robotics.geometry.yoWaypoints;
 
 import static us.ihmc.robotics.math.frames.YoFrameVariableNameTools.createName;
 

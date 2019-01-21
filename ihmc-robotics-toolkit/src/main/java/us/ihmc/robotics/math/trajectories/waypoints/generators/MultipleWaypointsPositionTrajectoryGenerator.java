@@ -1,6 +1,6 @@
-package us.ihmc.robotics.math.trajectories.waypoints;
+package us.ihmc.robotics.math.trajectories.waypoints.generators;
 
-import static us.ihmc.robotics.math.trajectories.waypoints.MultipleWaypointsTrajectoryGenerator.defaultMaximumNumberOfWaypoints;
+import static us.ihmc.robotics.math.trajectories.waypoints.generators.MultipleWaypointsTrajectoryGenerator.defaultMaximumNumberOfWaypoints;
 
 import java.util.ArrayList;
 
@@ -19,6 +19,9 @@ import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.robotics.math.trajectories.PositionTrajectoryGeneratorInMultipleFrames;
 import us.ihmc.robotics.math.trajectories.YoPolynomial3D;
+import us.ihmc.robotics.math.trajectories.waypoints.FrameEuclideanTrajectoryPoint;
+import us.ihmc.robotics.math.trajectories.waypoints.FrameSE3TrajectoryPoint;
+import us.ihmc.robotics.math.trajectories.waypoints.YoFrameEuclideanTrajectoryPoint;
 import us.ihmc.robotics.math.trajectories.waypoints.interfaces.EuclideanTrajectoryPointInterface;
 import us.ihmc.robotics.math.trajectories.waypoints.interfaces.TrajectoryPointListInterface;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;

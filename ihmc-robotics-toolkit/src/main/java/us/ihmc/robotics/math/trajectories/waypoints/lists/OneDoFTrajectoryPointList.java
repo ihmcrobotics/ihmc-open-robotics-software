@@ -1,15 +1,16 @@
-package us.ihmc.robotics.math.trajectories.waypoints;
+package us.ihmc.robotics.math.trajectories.waypoints.lists;
 
 import us.ihmc.commons.lists.RecyclingArrayList;
+import us.ihmc.robotics.math.trajectories.waypoints.OneDoFTrajectoryPoint;
 import us.ihmc.robotics.math.trajectories.waypoints.interfaces.OneDoFTrajectoryPointInterface;
 import us.ihmc.robotics.math.trajectories.waypoints.interfaces.TrajectoryPointListInterface;
 
-public class SimpleTrajectoryPoint1DList implements TrajectoryPointListInterface<SimpleTrajectoryPoint1D>
+public class OneDoFTrajectoryPointList implements TrajectoryPointListInterface<OneDoFTrajectoryPoint>
 {
-   private final RecyclingArrayList<SimpleTrajectoryPoint1D> trajectoryPoints = new RecyclingArrayList<>(SimpleTrajectoryPoint1D.class);
+   private final RecyclingArrayList<OneDoFTrajectoryPoint> trajectoryPoints = new RecyclingArrayList<>(OneDoFTrajectoryPoint.class);
 
    @Override
-   public void addTrajectoryPoint(SimpleTrajectoryPoint1D trajectoryPoint)
+   public void addTrajectoryPoint(OneDoFTrajectoryPoint trajectoryPoint)
    {
       trajectoryPoints.add().set(trajectoryPoint);
    }
@@ -31,7 +32,7 @@ public class SimpleTrajectoryPoint1DList implements TrajectoryPointListInterface
    }
 
    @Override
-   public SimpleTrajectoryPoint1D getTrajectoryPoint(int trajectoryPointIndex)
+   public OneDoFTrajectoryPoint getTrajectoryPoint(int trajectoryPointIndex)
    {
       return trajectoryPoints.get(trajectoryPointIndex);
    }
@@ -42,7 +43,7 @@ public class SimpleTrajectoryPoint1DList implements TrajectoryPointListInterface
       return trajectoryPoints.size();
    }
 
-   public boolean epsilonEquals(SimpleTrajectoryPoint1DList other, double epsilon)
+   public boolean epsilonEquals(OneDoFTrajectoryPointList other, double epsilon)
    {
       if (getNumberOfTrajectoryPoints() != other.getNumberOfTrajectoryPoints())
       {

@@ -16,7 +16,7 @@ import us.ihmc.robotics.geometry.interfaces.FrameSO3WaypointInterface;
 import us.ihmc.robotics.geometry.interfaces.SE3WaypointInterface;
 import us.ihmc.robotics.geometry.interfaces.SO3WaypointInterface;
 
-public abstract class WaypointToStringTools
+public class WaypointToStringTools
 {
    static final NumberFormat format = createNumberFormat();
 

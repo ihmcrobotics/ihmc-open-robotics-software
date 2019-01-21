@@ -1,4 +1,4 @@
-package us.ihmc.robotics.geometry.yoFrameObjects;
+package us.ihmc.robotics.geometry.yoWaypoints;
 
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameQuaternionBasics;

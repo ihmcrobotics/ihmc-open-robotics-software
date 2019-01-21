@@ -1,17 +1,19 @@
-package us.ihmc.robotics.math.trajectories.waypoints;
+package us.ihmc.robotics.math.trajectories.waypoints.generators;
 
 import us.ihmc.commons.MathTools;
 import us.ihmc.robotics.math.trajectories.YoPolynomial;
+import us.ihmc.robotics.math.trajectories.waypoints.OneDoFTrajectoryPoint;
 import us.ihmc.robotics.math.trajectories.waypoints.interfaces.OneDoFTrajectoryPointInterface;
+import us.ihmc.robotics.math.trajectories.waypoints.lists.OneDoFTrajectoryPointList;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 
-public class TrajectoryPoint1DCalculator
+public class OneDoFTrajectoryPointCalculator
 {
    private static final double EPSILON = 1.0e-7;
-   private final SimpleTrajectoryPoint1DList trajectory = new SimpleTrajectoryPoint1DList();
+   private final OneDoFTrajectoryPointList trajectory = new OneDoFTrajectoryPointList();
    private final YoPolynomial polynomial = new YoPolynomial("polynomial", 6, new YoVariableRegistry("Dummy"));
 
-   public TrajectoryPoint1DCalculator()
+   public OneDoFTrajectoryPointCalculator()
    {
       clear();
    }
@@ -87,9 +89,9 @@ public class TrajectoryPoint1DCalculator
       if (numberOfTrajectoryPoints < 3)
          throw new RuntimeException("Need at least 3 trajectory points.");
 
-      SimpleTrajectoryPoint1D firstTrajectoryPoint;
-      SimpleTrajectoryPoint1D secondTrajectoryPoint;
-      SimpleTrajectoryPoint1D thirdTrajectoryPoint;
+      OneDoFTrajectoryPoint firstTrajectoryPoint;
+      OneDoFTrajectoryPoint secondTrajectoryPoint;
+      OneDoFTrajectoryPoint thirdTrajectoryPoint;
 
       if (startAndFinishWithZeroVelocity)
       {
@@ -213,7 +215,7 @@ public class TrajectoryPoint1DCalculator
       return trajectory.getNumberOfTrajectoryPoints();
    }
 
-   public SimpleTrajectoryPoint1DList getTrajectoryData()
+   public OneDoFTrajectoryPointList getTrajectoryData()
    {
       return trajectory;
    }

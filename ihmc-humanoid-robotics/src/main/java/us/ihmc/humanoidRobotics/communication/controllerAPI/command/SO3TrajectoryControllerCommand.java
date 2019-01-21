@@ -16,7 +16,7 @@ import us.ihmc.euclid.tuple4D.interfaces.QuaternionReadOnly;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.converter.FrameBasedCommand;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.robotics.math.trajectories.waypoints.FrameSO3TrajectoryPoint;
-import us.ihmc.robotics.math.trajectories.waypoints.FrameSO3TrajectoryPointList;
+import us.ihmc.robotics.math.trajectories.waypoints.lists.FrameSO3TrajectoryPointList;
 import us.ihmc.robotics.random.RandomGeometry;
 import us.ihmc.robotics.screwTheory.SelectionMatrix3D;
 import us.ihmc.robotics.weightMatrices.WeightMatrix3D;

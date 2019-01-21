@@ -156,9 +156,9 @@ import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotModels.FullRobotModelUtils;
 import us.ihmc.robotics.kinematics.TimeStampedTransform3D;
-import us.ihmc.robotics.math.trajectories.waypoints.SimpleTrajectoryPoint1D;
-import us.ihmc.robotics.math.trajectories.waypoints.SimpleTrajectoryPoint1DList;
+import us.ihmc.robotics.math.trajectories.waypoints.OneDoFTrajectoryPoint;
 import us.ihmc.robotics.math.trajectories.waypoints.interfaces.OneDoFTrajectoryPointInterface;
+import us.ihmc.robotics.math.trajectories.waypoints.lists.OneDoFTrajectoryPointList;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.screwTheory.SelectionMatrix6D;
 import us.ihmc.robotics.trajectories.TrajectoryType;
@@ -1419,14 +1419,14 @@ public class HumanoidMessageTools
       return message;
    }
 
-   public static OneDoFJointTrajectoryMessage createOneDoFJointTrajectoryMessage(SimpleTrajectoryPoint1DList trajectoryData)
+   public static OneDoFJointTrajectoryMessage createOneDoFJointTrajectoryMessage(OneDoFTrajectoryPointList trajectoryData)
    {
       OneDoFJointTrajectoryMessage message = new OneDoFJointTrajectoryMessage();
       int numberOfPoints = trajectoryData.getNumberOfTrajectoryPoints();
 
       for (int i = 0; i < numberOfPoints; i++)
       {
-         SimpleTrajectoryPoint1D trajectoryPoint = trajectoryData.getTrajectoryPoint(i);
+         OneDoFTrajectoryPoint trajectoryPoint = trajectoryData.getTrajectoryPoint(i);
          message.getTrajectoryPoints().add().set(HumanoidMessageTools.createTrajectoryPoint1DMessage(trajectoryPoint));
       }
       return message;

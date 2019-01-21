@@ -1,16 +1,17 @@
-package us.ihmc.robotics.math.trajectories.waypoints;
+package us.ihmc.robotics.math.trajectories.waypoints.lists;
 
 import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
-import us.ihmc.euclid.tuple4D.interfaces.QuaternionReadOnly;
+import us.ihmc.robotics.math.trajectories.waypoints.FrameEuclideanTrajectoryPoint;
+import us.ihmc.robotics.math.trajectories.waypoints.interfaces.EuclideanTrajectoryPointInterface;
 import us.ihmc.robotics.math.trajectories.waypoints.interfaces.FrameTrajectoryPointListInterface;
-import us.ihmc.robotics.math.trajectories.waypoints.interfaces.SO3TrajectoryPointInterface;
 
-public class FrameSO3TrajectoryPointList implements FrameTrajectoryPointListInterface<FrameSO3TrajectoryPoint>
+public class FrameEuclideanTrajectoryPointList implements FrameTrajectoryPointListInterface<FrameEuclideanTrajectoryPoint>
 {
    private ReferenceFrame referenceFrame = ReferenceFrame.getWorldFrame();
-   private final RecyclingArrayList<FrameSO3TrajectoryPoint> trajectoryPoints = new RecyclingArrayList<>(FrameSO3TrajectoryPoint.class);
+   private final RecyclingArrayList<FrameEuclideanTrajectoryPoint> trajectoryPoints = new RecyclingArrayList<>(FrameEuclideanTrajectoryPoint.class);
 
    @Override
    public void clear()
@@ -18,21 +19,21 @@ public class FrameSO3TrajectoryPointList implements FrameTrajectoryPointListInte
       trajectoryPoints.clear();
    }
 
-   public void addTrajectoryPoint(double time, QuaternionReadOnly orientation, Vector3DReadOnly angularVelocity)
+   public void addTrajectoryPoint(double time, Point3DReadOnly position, Vector3DReadOnly linearVelocity)
    {
-      trajectoryPoints.add().setIncludingFrame(getReferenceFrame(), time, orientation, angularVelocity);
+      trajectoryPoints.add().setIncludingFrame(getReferenceFrame(), time, position, linearVelocity);
    }
 
    @Override
-   public void addTrajectoryPoint(FrameSO3TrajectoryPoint trajectoryPoint)
+   public void addTrajectoryPoint(FrameEuclideanTrajectoryPoint trajectoryPoint)
    {
       checkReferenceFrameMatch(trajectoryPoint);
       trajectoryPoints.add().set(trajectoryPoint);
    }
 
-   public void addTrajectoryPoint(SO3TrajectoryPointInterface trajectoryPoint)
+   public void addTrajectoryPoint(EuclideanTrajectoryPointInterface trajectoryPoint)
    {
-      FrameSO3TrajectoryPoint newTrajectoryPoint = trajectoryPoints.add();
+      FrameEuclideanTrajectoryPoint newTrajectoryPoint = trajectoryPoints.add();
       newTrajectoryPoint.setToZero(getReferenceFrame());
       newTrajectoryPoint.set(trajectoryPoint);
    }
@@ -47,7 +48,7 @@ public class FrameSO3TrajectoryPointList implements FrameTrajectoryPointListInte
    }
 
    @Override
-   public FrameSO3TrajectoryPoint getTrajectoryPoint(int trajectoryPointIndex)
+   public FrameEuclideanTrajectoryPoint getTrajectoryPoint(int trajectoryPointIndex)
    {
       return trajectoryPoints.get(trajectoryPointIndex);
    }
@@ -77,6 +78,6 @@ public class FrameSO3TrajectoryPointList implements FrameTrajectoryPointListInte
    @Override
    public String toString()
    {
-      return "Frame SO3 trajectory: number of frame SO3 trajectory points = " + getNumberOfTrajectoryPoints() + ".";
+      return "Frame Euclidean trajectory: number of frame Euclidean trajectory points = " + getNumberOfTrajectoryPoints() + ".";
    }
 }

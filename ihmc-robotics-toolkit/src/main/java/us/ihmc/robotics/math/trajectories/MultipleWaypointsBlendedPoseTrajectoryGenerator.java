@@ -6,7 +6,7 @@ import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.robotics.math.trajectories.waypoints.FrameEuclideanTrajectoryPoint;
 import us.ihmc.robotics.math.trajectories.waypoints.FrameSE3TrajectoryPoint;
-import us.ihmc.robotics.math.trajectories.waypoints.MultipleWaypointsPoseTrajectoryGenerator;
+import us.ihmc.robotics.math.trajectories.waypoints.generators.MultipleWaypointsPoseTrajectoryGenerator;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 
 public class MultipleWaypointsBlendedPoseTrajectoryGenerator extends BlendedPoseTrajectoryGenerator

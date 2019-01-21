@@ -3,6 +3,7 @@ package us.ihmc.robotics.math.trajectories.waypoints;
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
 
+import us.ihmc.robotics.geometry.yoWaypoints.YoOneDoFWaypoint;
 import us.ihmc.robotics.math.trajectories.waypoints.interfaces.OneDoFTrajectoryPointInterface;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 
