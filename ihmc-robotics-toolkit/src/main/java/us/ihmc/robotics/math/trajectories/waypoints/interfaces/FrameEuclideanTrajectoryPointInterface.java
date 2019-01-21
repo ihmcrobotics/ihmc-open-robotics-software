@@ -1,8 +1,11 @@
 package us.ihmc.robotics.math.trajectories.waypoints.interfaces;
 
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
 import us.ihmc.euclid.tools.EuclidCoreTools;
+import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
+import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.robotics.geometry.interfaces.FrameEuclideanWaypointInterface;
 
 public interface FrameEuclideanTrajectoryPointInterface extends EuclideanTrajectoryPointInterface, FrameEuclideanWaypointInterface
@@ -17,6 +20,12 @@ public interface FrameEuclideanTrajectoryPointInterface extends EuclideanTraject
    {
       setTime(time);
       setIncludingFrame(position, linearVelocity);
+   }
+
+   public default void setIncludingFrame(ReferenceFrame referenceFrame, double time, Point3DReadOnly position, Vector3DReadOnly linearVelocity)
+   {
+      setTime(time);
+      setIncludingFrame(referenceFrame, position, linearVelocity);
    }
 
    default void set(FrameEuclideanTrajectoryPointInterface other)
