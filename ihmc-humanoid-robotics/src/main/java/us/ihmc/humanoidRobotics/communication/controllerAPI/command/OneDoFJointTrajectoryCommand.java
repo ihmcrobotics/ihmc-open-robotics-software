@@ -18,7 +18,10 @@ public class OneDoFJointTrajectoryCommand extends SimpleTrajectoryPoint1DList im
 
    public OneDoFJointTrajectoryCommand(Random random)
    {
-      super(random);
+      for (int i = 0; i < 10; i++)
+      {
+         addTrajectoryPoint(i + random.nextDouble(), random.nextDouble() * 2.0 * Math.PI, random.nextDouble() * random.nextInt(20));
+      }
       weight = random.nextDouble() * random.nextInt(1000);
    }
 

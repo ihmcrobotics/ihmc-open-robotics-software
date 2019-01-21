@@ -1,24 +1,47 @@
 package us.ihmc.robotics.math.trajectories.waypoints.interfaces;
 
-import us.ihmc.euclid.interfaces.EpsilonComparable;
-
-public interface TrajectoryPointListInterface<T extends TrajectoryPointListInterface<T, P>, P extends TrajectoryPointInterface<P>> extends EpsilonComparable<T>
+public interface TrajectoryPointListInterface<T extends TrajectoryPointInterface>
 {
    public abstract void clear();
 
-   public abstract void addTrajectoryPoint(P trajectoryPoint);
+   public abstract void addTrajectoryPoint(T trajectoryPoint);
 
-   public abstract void set(T other);
-
-   public abstract void addTimeOffset(double timeOffsetToAdd);
-
-   public abstract void subtractTimeOffset(double timeOffsetToSubtract);
+   public abstract T getTrajectoryPoint(int trajectoryPointIndex);
 
    public abstract int getNumberOfTrajectoryPoints();
 
-   public abstract P getTrajectoryPoint(int trajectoryPointIndex);
+   public default void set(TrajectoryPointListInterface<T> other)
+   {
+      clear();
+      for (int i = 0; i < other.getNumberOfTrajectoryPoints(); i++)
+      {
+         addTrajectoryPoint(other.getTrajectoryPoint(i));
+      }
+   }
 
-   public abstract P getLastTrajectoryPoint();
+   public default void addTimeOffset(double timeOffsetToAdd)
+   {
+      for (int i = 0; i < getNumberOfTrajectoryPoints(); i++)
+      {
+         getTrajectoryPoint(i).addTimeOffset(timeOffsetToAdd);
+      }
+   }
 
-   public abstract double getTrajectoryTime();
+   public default void subtractTimeOffset(double timeOffsetToSubtract)
+   {
+      for (int i = 0; i < getNumberOfTrajectoryPoints(); i++)
+      {
+         getTrajectoryPoint(i).subtractTimeOffset(timeOffsetToSubtract);
+      }
+   }
+
+   public default T getLastTrajectoryPoint()
+   {
+      return getTrajectoryPoint(getNumberOfTrajectoryPoints());
+   }
+
+   public default double getTrajectoryTime()
+   {
+      return getLastTrajectoryPoint().getTime();
+   }
 }
