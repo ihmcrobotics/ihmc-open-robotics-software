@@ -13,6 +13,8 @@ import static us.ihmc.commonWalkingControlModules.dynamicReachability.CoMIntegra
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
+import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
 
 public class ICPPlannerTrajectoryGenerator implements PositionTrajectoryGenerator
 {
@@ -39,7 +41,7 @@ public class ICPPlannerTrajectoryGenerator implements PositionTrajectoryGenerato
       doubleSupportCapturePointTrajectory.setTrajectoryTime(duration);
    }
 
-   public void setInitialConditions(YoFramePoint3D initialPosition, YoFrameVector3D initialVelocity, ReferenceFrame attachedFrame)
+   public void setInitialConditions(FramePoint3DReadOnly initialPosition, FrameVector3DReadOnly initialVelocity, ReferenceFrame attachedFrame)
    {
       initialPositionInSpecificFrame.setIncludingFrame(initialPosition);
       initialVelocityInSpecificFrame.setIncludingFrame(initialVelocity);
@@ -47,13 +49,13 @@ public class ICPPlannerTrajectoryGenerator implements PositionTrajectoryGenerato
       initialVelocityInSpecificFrame.changeFrame(attachedFrame);
    }
 
-   public void setInitialCoMPosition(YoFramePoint3D initialCoMPosition, ReferenceFrame attachedFrame)
+   public void setInitialCoMPosition(FramePoint3DReadOnly initialCoMPosition, ReferenceFrame attachedFrame)
    {
       initialCoMPositionInSpecificFrame.setIncludingFrame(initialCoMPosition);
       initialCoMPositionInSpecificFrame.changeFrame(attachedFrame);
    }
-   
-   public void setFinalConditions(YoFramePoint3D finalPosition, YoFrameVector3D finalVelocity, ReferenceFrame attachedFrame)
+
+   public void setFinalConditions(FramePoint3DReadOnly finalPosition, FrameVector3DReadOnly finalVelocity, ReferenceFrame attachedFrame)
    {
       finalPositionInSpecificFrame.setIncludingFrame(finalPosition);
       finalVelocityInSpecificFrame.setIncludingFrame(finalVelocity);

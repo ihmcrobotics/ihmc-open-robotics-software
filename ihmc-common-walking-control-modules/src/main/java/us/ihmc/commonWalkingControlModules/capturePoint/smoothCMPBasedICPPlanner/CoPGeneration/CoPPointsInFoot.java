@@ -1,5 +1,9 @@
 package us.ihmc.commonWalkingControlModules.capturePoint.smoothCMPBasedICPPlanner.CoPGeneration;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.function.Supplier;
+
 import us.ihmc.commonWalkingControlModules.configurations.CoPPointName;
 import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
@@ -11,15 +15,11 @@ import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsList;
 import us.ihmc.graphicsDescription.yoGraphics.plotting.ArtifactList;
-import us.ihmc.robotics.math.frames.YoFramePointInMultipleFrames;
 import us.ihmc.robotics.math.trajectories.waypoints.FrameEuclideanTrajectoryPoint;
 import us.ihmc.robotics.math.trajectories.waypoints.YoFrameEuclideanTrajectoryPoint;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoFramePoint3D;
-
-import java.util.ArrayList;
-import java.util.List;
-import java.util.function.Supplier;
+import us.ihmc.yoVariables.variable.frameObjects.YoMutableFramePoint3D;
 
 public class CoPPointsInFoot
 {
@@ -33,11 +33,11 @@ public class CoPPointsInFoot
 
    private final RecyclingArrayList<YoFrameEuclideanTrajectoryPoint> copLocations; // Location of CoP points defined
 
-   private final YoFramePointInMultipleFrames swingFootCentroid;
-   private final YoFramePointInMultipleFrames supportFootCentroid;
+   private final YoMutableFramePoint3D swingFootCentroid;
+   private final YoMutableFramePoint3D supportFootCentroid;
    private final String name;
 
-   public CoPPointsInFoot(String namePrefix, int stepNumber, ReferenceFrame[] framesToRegister, YoVariableRegistry registry)
+   public CoPPointsInFoot(String namePrefix, int stepNumber, YoVariableRegistry registry)
    {
       if (registry == null)
          registry = new YoVariableRegistry("localRegistry");
@@ -48,8 +48,8 @@ public class CoPPointsInFoot
       copLocations.clear();
       pointsConstructed = true;
 
-      swingFootCentroid = new YoFramePointInMultipleFrames(name + "SwingCentroid", registry, framesToRegister);
-      supportFootCentroid = new YoFramePointInMultipleFrames(name + "SupportCentroid", registry, framesToRegister);
+      swingFootCentroid = new YoMutableFramePoint3D(name + "SwingCentroid", "", registry);
+      supportFootCentroid = new YoMutableFramePoint3D(name + "SupportCentroid", "", registry);
    }
 
    private int pointNumber = 0;
@@ -168,12 +168,6 @@ public class CoPPointsInFoot
       supportFootCentroid.changeFrame(desiredFrame);
       for (int i = 0; i < copLocations.size(); i++)
          copLocations.get(i).changeFrame(desiredFrame);
-   }
-
-   public void registerReferenceFrame(ReferenceFrame newReferenceFrame)
-   {
-      swingFootCentroid.registerReferenceFrame(newReferenceFrame);
-      supportFootCentroid.registerReferenceFrame(newReferenceFrame);
    }
 
    public void setSwingFootLocation(FramePoint3DReadOnly footLocation)

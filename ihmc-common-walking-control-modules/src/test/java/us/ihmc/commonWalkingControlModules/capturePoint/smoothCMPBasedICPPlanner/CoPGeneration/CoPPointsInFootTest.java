@@ -48,13 +48,12 @@ public class CoPPointsInFootTest
    private final YoVariableRegistry registry = new YoVariableRegistry(testClassName);
    private final FootSpoof footSpoof = new FootSpoof("DummyFoot", xToAnkle, yToAnkle, zToAnkle, footVertexList, 0.5);
    private final static ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
-   private final ReferenceFrame[] framesToRegister = {worldFrame, footSpoof.getSoleFrame()};
    private CoPPointsInFoot copPointsInFoot;
 
    @Before
    public void setup()
    {
-      copPointsInFoot = new CoPPointsInFoot(testClassName, 0, framesToRegister, registry);
+      copPointsInFoot = new CoPPointsInFoot(testClassName, 0, registry);
    }
 
    @After
@@ -198,7 +197,6 @@ public class CoPPointsInFootTest
                                                                                                                                                   newFrameOriginX,
                                                                                                                                                   newFrameOriginY,
                                                                                                                                                   newFrameOriginZ)));
-      copPointsInFoot.registerReferenceFrame(newFrameToRegister);
       copPointsInFoot.changeFrame(newFrameToRegister);
       FramePoint3D tempFramePoint = new FramePoint3D();
       copPointsInFoot.getSupportFootLocation(tempFramePoint);

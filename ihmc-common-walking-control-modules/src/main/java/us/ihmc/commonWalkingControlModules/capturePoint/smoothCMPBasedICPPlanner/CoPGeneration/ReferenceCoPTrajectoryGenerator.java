@@ -130,8 +130,6 @@ public class ReferenceCoPTrajectoryGenerator implements ReferenceCoPTrajectoryGe
    private final List<TransferCoPTrajectory> transferCoPTrajectories = new ArrayList<>();
    private final List<SwingCoPTrajectory> swingCoPTrajectories = new ArrayList<>();
 
-   private final ReferenceFrame[] framesToRegister;
-
    // Runtime variables
    private final FramePoint3D desiredCoPPosition = new FramePoint3D();
    private final FrameVector3D desiredCoPVelocity = new FrameVector3D();
@@ -270,8 +268,6 @@ public class ReferenceCoPTrajectoryGenerator implements ReferenceCoPTrajectoryGe
       transferCoPTrajectories.add(transferCoPTrajectory);
 
       soleZUpFrames = bipedSupportPolygons.getSoleZUpFrames();
-      framesToRegister = new ReferenceFrame[] {worldFrame, bipedSupportPolygons.getMidFeetZUpFrame(), soleZUpFrames.get(RobotSide.LEFT),
-            soleZUpFrames.get(RobotSide.RIGHT)};
 
       copLocationWaypoints = new RecyclingArrayList<>(maxNumberOfFootstepsToConsider + 2, new CoPPointsInFootSupplier());
       copLocationWaypoints.clear();
@@ -292,9 +288,9 @@ public class ReferenceCoPTrajectoryGenerator implements ReferenceCoPTrajectoryGe
       {
          CoPPointsInFoot pointsInFoot;
          if (!copPointsConstructed)
-            pointsInFoot = new CoPPointsInFoot(fullPrefix, copSegmentNumber, framesToRegister, registry);
+            pointsInFoot = new CoPPointsInFoot(fullPrefix, copSegmentNumber, registry);
          else
-            pointsInFoot = new CoPPointsInFoot(fullPrefix, copSegmentNumber, framesToRegister, null);
+            pointsInFoot = new CoPPointsInFoot(fullPrefix, copSegmentNumber, null);
 
          copSegmentNumber++;
          return pointsInFoot;
