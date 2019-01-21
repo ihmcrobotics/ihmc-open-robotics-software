@@ -65,16 +65,38 @@ public interface FrameSE3TrajectoryPointInterface
       setIncludingFrame(referenceFrame, position, orientation, linearVelocity, angularVelocity);
    }
 
+   default void setIncludingFrame(ReferenceFrame referenceFrame, SE3TrajectoryPointInterface trajectoryPoint)
+   {
+      setTime(trajectoryPoint.getTime());
+      FrameSE3WaypointInterface.super.setIncludingFrame(referenceFrame, trajectoryPoint);
+   }
+
    default void setIncludingFrame(ReferenceFrame referenceFrame, double time, SE3WaypointInterface waypoint)
    {
       setTime(time);
       setIncludingFrame(referenceFrame, waypoint);
    }
 
+   default void setIncludingFrame(FrameSE3TrajectoryPointInterface other)
+   {
+      setTime(other.getTime());
+      FrameSE3WaypointInterface.super.setIncludingFrame(other);
+   }
+
    default void set(FrameSE3TrajectoryPointInterface other)
    {
       setTime(other.getTime());
       FrameSE3WaypointInterface.super.set(other);
+   }
+
+   default void getIncludingFrame(FrameSE3TrajectoryPointInterface otherToPack)
+   {
+      otherToPack.setIncludingFrame(this);
+   }
+
+   default void get(FrameSE3TrajectoryPointInterface otherToPack)
+   {
+      otherToPack.set(this);
    }
 
    default boolean epsilonEquals(FrameSE3TrajectoryPointInterface other, double epsilon)

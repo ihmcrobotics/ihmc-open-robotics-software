@@ -434,7 +434,7 @@ public class YoFrameEuclideanTrajectoryPointTest
       assertTrue(yoFrameEuclideanTrajectoryPoint.epsilonEquals(yoFrameEuclideanTrajectoryPointTwo, 1e-7));
 
       String string = yoFrameEuclideanTrajectoryPoint.toString();
-      String expectedString = "Euclidean trajectory point: (time =  9.90, Euclidean trajectory point: (time =  9.90, Euclidean waypoint: [position = ( 3.900,  2.200,  1.100), linearVelocity = ( 8.800,  1.400,  9.220)].))-World";
+      String expectedString = "Euclidean trajectory point: (time =  9.90, Euclidean waypoint: [position = ( 3.900,  2.200,  1.100), linearVelocity = ( 8.800,  1.400,  9.220), World])";
       assertEquals(expectedString, string);
    }
 

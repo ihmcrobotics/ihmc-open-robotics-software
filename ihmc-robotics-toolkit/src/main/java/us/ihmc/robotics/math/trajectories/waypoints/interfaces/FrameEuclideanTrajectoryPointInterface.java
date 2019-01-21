@@ -41,16 +41,38 @@ public interface FrameEuclideanTrajectoryPointInterface extends EuclideanTraject
       setIncludingFrame(referenceFrame, position, linearVelocity);
    }
 
+   default void setIncludingFrame(ReferenceFrame referenceFrame, EuclideanTrajectoryPointInterface trajectoryPoint)
+   {
+      setTime(trajectoryPoint.getTime());
+      FrameEuclideanWaypointInterface.super.setIncludingFrame(referenceFrame, trajectoryPoint);
+   }
+
    default void setIncludingFrame(ReferenceFrame referenceFrame, double time, EuclideanWaypointInterface waypoint)
    {
       setTime(time);
       setIncludingFrame(referenceFrame, waypoint);
    }
 
+   default void setIncludingFrame(FrameEuclideanTrajectoryPointInterface other)
+   {
+      setTime(other.getTime());
+      FrameEuclideanWaypointInterface.super.setIncludingFrame(other);
+   }
+
    default void set(FrameEuclideanTrajectoryPointInterface other)
    {
       setTime(other.getTime());
       FrameEuclideanWaypointInterface.super.set(other);
+   }
+
+   default void getIncludingFrame(FrameEuclideanTrajectoryPointInterface otherToPack)
+   {
+      otherToPack.setIncludingFrame(this);
+   }
+
+   default void get(FrameEuclideanTrajectoryPointInterface otherToPack)
+   {
+      otherToPack.set(this);
    }
 
    default boolean epsilonEquals(FrameEuclideanTrajectoryPointInterface other, double epsilon)

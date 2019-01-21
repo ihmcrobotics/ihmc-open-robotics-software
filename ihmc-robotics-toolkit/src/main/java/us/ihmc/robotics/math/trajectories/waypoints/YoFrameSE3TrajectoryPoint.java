@@ -131,6 +131,6 @@ public class YoFrameSE3TrajectoryPoint implements FrameSE3TrajectoryPointInterfa
    @Override
    public String toString()
    {
-      return "SE3 trajectory point: (time = " + WaypointToStringTools.format(getTime()) + ", " + WaypointToStringTools.waypointToString(se3Waypoint) + ")";
+      return "SE3 trajectory point: (time = " + WaypointToStringTools.formatTime(getTime()) + ", " + WaypointToStringTools.waypointToString(se3Waypoint) + ")";
    }
 }

@@ -18,7 +18,8 @@ import us.ihmc.robotics.geometry.interfaces.SO3WaypointInterface;
 
 public class WaypointToStringTools
 {
-   static final NumberFormat format = createNumberFormat();
+   static final NumberFormat format = new DecimalFormat(" 0.000;-0.000");
+   static final NumberFormat timeFormat = new DecimalFormat(" 0.00;-0.00");
 
    public static String waypointToString(FrameEuclideanWaypointInterface frameEuclideanWaypoint)
    {
@@ -69,11 +70,6 @@ public class WaypointToStringTools
       return waypointToString(position, orientation, linearVelocity, angularVelocity, format);
    }
 
-   private static DecimalFormat createNumberFormat()
-   {
-      return new DecimalFormat(" 0.000;-0.000");
-   }
-
    public static String waypointToString(Point3DReadOnly position, Vector3DReadOnly linearVelocity, NumberFormat format)
    {
       return waypointToString(position, linearVelocity, null, format);
@@ -83,7 +79,7 @@ public class WaypointToStringTools
    {
       String referenceFrameToString = referenceFrame == null ? "" : ", " + referenceFrame.getName();
       return "Euclidean waypoint: " + "[" + positionToString(position, format) + ", " + linearVelocityToString(linearVelocity, format) + referenceFrameToString
-            + "].";
+            + "]";
    }
 
    public static String waypointToString(QuaternionReadOnly orientation, Vector3DReadOnly angularVelocity, NumberFormat format)
@@ -95,7 +91,7 @@ public class WaypointToStringTools
    {
       String referenceFrameToString = referenceFrame == null ? "" : ", " + referenceFrame.getName();
       return "SO3 waypoint: " + "[" + orientationToString(orientation, format) + ", " + angularVelocityToString(angularVelocity, format)
-            + referenceFrameToString + "].";
+            + referenceFrameToString + "]";
    }
 
    public static String waypointToString(Point3DReadOnly position, QuaternionReadOnly orientation, Vector3DReadOnly linearVelocity, Vector3DReadOnly angularVelocity, NumberFormat format)
@@ -108,7 +104,7 @@ public class WaypointToStringTools
    {
       String referenceFrameToString = referenceFrame == null ? "" : ", " + referenceFrame.getName();
       return "SE3 waypoint: " + "[" + positionToString(position, format) + ", " + orientationToString(orientation, format) + ", "
-            + linearVelocityToString(linearVelocity, format) + ", " + angularVelocityToString(angularVelocity, format) + referenceFrameToString + "].";
+            + linearVelocityToString(linearVelocity, format) + ", " + angularVelocityToString(angularVelocity, format) + referenceFrameToString + "]";
    }
 
    public static String positionToString(Point3DReadOnly position, NumberFormat format)
@@ -151,5 +147,10 @@ public class WaypointToStringTools
    public static String format(double number)
    {
       return format.format(number);
+   }
+
+   public static String formatTime(double number)
+   {
+      return timeFormat.format(number);
    }
 }

@@ -76,7 +76,7 @@ public class SimpleEuclideanTrajectoryPoint implements EuclideanTrajectoryPointI
    @Override
    public String toString()
    {
-      return "Euclidean trajectory point: (time = " + WaypointToStringTools.format(getTime()) + ", " + WaypointToStringTools.waypointToString(euclideanWaypoint)
+      return "Euclidean trajectory point: (time = " + WaypointToStringTools.formatTime(getTime()) + ", " + WaypointToStringTools.waypointToString(euclideanWaypoint)
       + ")";
    }
 }

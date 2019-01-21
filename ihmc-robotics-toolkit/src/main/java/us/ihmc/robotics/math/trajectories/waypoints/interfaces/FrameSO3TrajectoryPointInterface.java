@@ -41,16 +41,38 @@ public interface FrameSO3TrajectoryPointInterface extends SO3TrajectoryPointInte
       setIncludingFrame(referenceFrame, orientation, angularVelocity);
    }
 
+   default void setIncludingFrame(ReferenceFrame referenceFrame, SO3TrajectoryPointInterface trajectoryPoint)
+   {
+      setTime(trajectoryPoint.getTime());
+      FrameSO3WaypointInterface.super.setIncludingFrame(referenceFrame, trajectoryPoint);
+   }
+
    default void setIncludingFrame(ReferenceFrame referenceFrame, double time, SO3WaypointInterface waypoint)
    {
       setTime(time);
       setIncludingFrame(referenceFrame, waypoint);
    }
 
+   default void setIncludingFrame(FrameSO3TrajectoryPointInterface other)
+   {
+      setTime(other.getTime());
+      FrameSO3WaypointInterface.super.setIncludingFrame(other);
+   }
+
    default void set(FrameSO3TrajectoryPointInterface other)
    {
       setTime(other.getTime());
       FrameSO3WaypointInterface.super.set(other);
+   }
+
+   default void getIncludingFrame(FrameSO3TrajectoryPointInterface otherToPack)
+   {
+      otherToPack.setIncludingFrame(this);
+   }
+
+   default void get(FrameSO3TrajectoryPointInterface otherToPack)
+   {
+      otherToPack.set(this);
    }
 
    default boolean epsilonEquals(FrameSO3TrajectoryPointInterface other, double epsilon)
