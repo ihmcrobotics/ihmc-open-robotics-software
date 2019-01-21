@@ -60,7 +60,7 @@ public class DRCKinematicsBasedStateEstimator implements StateEstimatorControlle
 
    private final double estimatorDT;
 
-   private boolean visualizeMeasurementFrames = true;
+   private boolean visualizeMeasurementFrames = false;
    private final ArrayList<YoGraphicReferenceFrame> yoGraphicMeasurementFrames = new ArrayList<>();
 
    private final CenterOfPressureVisualizer copVisualizer;

@@ -7,13 +7,13 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import us.ihmc.commons.PrintTools;
+import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.communication.controllerAPI.MessageUnpackingTools.MessageUnpacker;
 import us.ihmc.communication.controllerAPI.command.Command;
 import us.ihmc.concurrent.Builder;
 import us.ihmc.concurrent.ConcurrentRingBuffer;
 import us.ihmc.euclid.interfaces.Settable;
-import us.ihmc.commons.lists.RecyclingArrayList;
+import us.ihmc.log.LogTools;
 
 /**
  * CommandInputManager is used to generate a thread-safe input API for a controller. Message
@@ -194,7 +194,7 @@ public class CommandInputManager
    {
       if (message == null)
       {
-         PrintTools.warn(this, printStatementPrefix + "Received a null message, ignored.");
+         LogTools.warn(printStatementPrefix + "Received a null message, ignored.");
          return;
       }
 
@@ -214,13 +214,13 @@ public class CommandInputManager
       ConcurrentRingBuffer buffer = messageClassToBufferMap.get(message.getClass());
       if (buffer == null)
       {
-         PrintTools.error(this, printStatementPrefix + "The message type " + message.getClass().getSimpleName() + " is not supported.");
+         LogTools.error(printStatementPrefix + "The message type " + message.getClass().getSimpleName() + " is not supported.");
          return;
       }
       Command nextCommand = (Command) buffer.next();
       if (nextCommand == null)
       {
-         PrintTools.warn(this, printStatementPrefix + "The buffer for the message: " + message.getClass().getSimpleName() + " is full. Message ignored.");
+         LogTools.warn(printStatementPrefix + "The buffer for the message: " + message.getClass().getSimpleName() + " is full. Message ignored.");
          return;
       }
 
@@ -295,14 +295,14 @@ public class CommandInputManager
       ConcurrentRingBuffer<? extends Command<?, ?>> buffer = commandClassToBufferMap.get(command.getClass());
       if (buffer == null)
       {
-         PrintTools.error(this, printStatementPrefix + "The command type " + command.getClass().getSimpleName() + " is not supported.");
+         LogTools.error(printStatementPrefix + "The command type " + command.getClass().getSimpleName() + " is not supported.");
          return;
       }
 
       Command<C, ?> nextModifiableMessage = (Command<C, ?>) buffer.next();
       if (nextModifiableMessage == null)
       {
-         PrintTools.warn(this, printStatementPrefix + "The buffer for the command: " + command.getClass().getSimpleName() + " is full. Command ignored.");
+         LogTools.warn(printStatementPrefix + "The buffer for the command: " + command.getClass().getSimpleName() + " is full. Command ignored.");
          return;
       }
       nextModifiableMessage.set(command);

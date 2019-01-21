@@ -67,7 +67,7 @@ public class JointAccelerationIntegrationCommand
     * the desired position of.
     * <p>
     * Optional: Specific integration parameters can be provided via
-    * {@link #setJointAlphas(int, double, double)} and {@link #setJointMaxima(int, double, double)}.
+    * {@link #setBreakFrequencies(int, double, double)} and {@link #setJointMaxima(int, double, double)}.
     * If not provided, the calculator will use a default set.
     * </p>
     *

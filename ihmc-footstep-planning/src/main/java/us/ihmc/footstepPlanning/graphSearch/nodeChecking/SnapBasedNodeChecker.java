@@ -97,8 +97,7 @@ public class SnapBasedNodeChecker extends FootstepNodeChecker
          return false;
       }
 
-      if (hasPlanarRegions() && isObstacleBetweenNodes(nodePosition, previousNodePosition,
-                                                       snapper.getOrCreateNearbyRegions(node.getRoundedX(), node.getRoundedY()),
+      if (hasPlanarRegions() && isObstacleBetweenNodes(nodePosition, previousNodePosition, planarRegionsList.getPlanarRegionsAsList(),
                                                        parameters.getBodyGroundClearance()))
       {
          if (DEBUG)

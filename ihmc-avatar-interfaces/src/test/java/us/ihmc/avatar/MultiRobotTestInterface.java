@@ -6,5 +6,8 @@ public interface MultiRobotTestInterface
 {
    public DRCRobotModel getRobotModel();
 
-   public String getSimpleRobotName();
+   public default String getSimpleRobotName()
+   {
+      return getRobotModel().getSimpleRobotName();
+   }
 }
