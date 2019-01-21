@@ -24,6 +24,11 @@ import us.ihmc.robotEnvironmentAwareness.communication.REAUIMessager;
  */
 public class LidarScanViewer implements Runnable
 {
+   public enum SourceType
+   {
+      Lidar, PointCloud2
+   }
+   
    private static final float SCAN_POINT_SIZE = 0.0075f;
    private static final Material defaultMaterial = new PhongMaterial(Color.DARKRED);
 
