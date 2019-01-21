@@ -17,10 +17,7 @@ import org.junit.Test;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.BipedSupportPolygons;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.YoPlaneContactState;
 import us.ihmc.commonWalkingControlModules.capturePoint.smoothCMPBasedICPPlanner.CMPGeneration.CMPTrajectory;
-import us.ihmc.commonWalkingControlModules.capturePoint.smoothCMPBasedICPPlanner.CMPGeneration.ReferenceCMPTrajectoryGenerator;
 import us.ihmc.commonWalkingControlModules.capturePoint.smoothCMPBasedICPPlanner.CoPGeneration.CoPPointsInFoot;
-import us.ihmc.commonWalkingControlModules.capturePoint.smoothCMPBasedICPPlanner.CoPGeneration.CoPTrajectoryPoint;
-import us.ihmc.commonWalkingControlModules.capturePoint.smoothCMPBasedICPPlanner.ICPGeneration.ReferenceICPTrajectoryGenerator;
 import us.ihmc.commonWalkingControlModules.configurations.SmoothCMPPlannerParameters;
 import us.ihmc.commonWalkingControlModules.controllers.Updatable;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.footstepGenerator.FootstepTestHelper;
@@ -53,9 +50,9 @@ import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.footstep.FootSpoof;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.humanoidRobotics.footstep.FootstepTiming;
-import us.ihmc.robotics.math.trajectories.FrameTrajectory3D;
 import us.ihmc.robotics.math.trajectories.Trajectory;
 import us.ihmc.robotics.math.trajectories.Trajectory3D;
+import us.ihmc.robotics.math.trajectories.waypoints.YoFrameEuclideanTrajectoryPoint;
 import us.ihmc.robotics.referenceFrames.MidFootZUpGroundFrame;
 import us.ihmc.robotics.referenceFrames.ZUpFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -1041,8 +1038,8 @@ public class SmoothCMPBasedICPPlannerTest
 
          for (int j = 0; j < pointsInFoot1.getNumberOfCoPPoints(); j++)
          {
-            CoPTrajectoryPoint coPTrajectoryPoint1 = pointsInFoot1.get(j);
-            CoPTrajectoryPoint coPTrajectoryPoint2 = pointsInFoot2.get(j);
+            YoFrameEuclideanTrajectoryPoint coPTrajectoryPoint1 = pointsInFoot1.get(j);
+            YoFrameEuclideanTrajectoryPoint coPTrajectoryPoint2 = pointsInFoot2.get(j);
             Assert.assertTrue(coPTrajectoryPoint1.epsilonEquals(coPTrajectoryPoint2, epsilon));
          }
       }
@@ -1225,7 +1222,7 @@ public class SmoothCMPBasedICPPlannerTest
       return comVelocity.epsilonEquals(comVelocityFromDynamics, epsilon);
    }
 
-   private static void assertTrajectoryPointEquals(String prefix, CoPTrajectoryPoint expected, CoPTrajectoryPoint actual, double epsilon)
+   private static void assertTrajectoryPointEquals(String prefix, YoFrameEuclideanTrajectoryPoint expected, YoFrameEuclideanTrajectoryPoint actual, double epsilon)
    {
       Assert.assertEquals(prefix, expected.getTime(), actual.getTime(), epsilon);
       EuclidCoreTestTools.assertPoint3DGeometricallyEquals(prefix, expected.getPosition(), actual.getPosition(), epsilon);

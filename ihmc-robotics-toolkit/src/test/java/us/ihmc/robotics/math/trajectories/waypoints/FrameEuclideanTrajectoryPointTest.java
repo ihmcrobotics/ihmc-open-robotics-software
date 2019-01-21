@@ -24,8 +24,8 @@ import us.ihmc.euclid.referenceFrame.tools.ReferenceFrameTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
-import us.ihmc.robotics.geometry.frameObjects.FrameEuclideanWaypoint;
-import us.ihmc.robotics.geometry.transformables.EuclideanWaypoint;
+import us.ihmc.robotics.geometry.interfaces.EuclideanWaypointInterface;
+import us.ihmc.robotics.geometry.interfaces.FrameEuclideanWaypointInterface;
 import us.ihmc.robotics.math.trajectories.waypoints.interfaces.EuclideanTrajectoryPointInterface;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 
@@ -323,8 +323,8 @@ public class FrameEuclideanTrajectoryPointTest
    {
       assertTrue(expectedFrame == testedFrameEuclideanTrajectoryPoint.getReferenceFrame());
       assertEquals(expectedTime, testedFrameEuclideanTrajectoryPoint.getTime(), epsilon);
-      assertTrue(expectedPosition.epsilonEquals(testedFrameEuclideanTrajectoryPoint.getGeometryObject().getPosition(), epsilon));
-      assertTrue(expectedLinearVelocity.epsilonEquals(testedFrameEuclideanTrajectoryPoint.getGeometryObject().getLinearVelocity(), epsilon));
+      assertTrue(expectedPosition.epsilonEquals(testedFrameEuclideanTrajectoryPoint.getPosition(), epsilon));
+      assertTrue(expectedLinearVelocity.epsilonEquals(testedFrameEuclideanTrajectoryPoint.getLinearVelocity(), epsilon));
 
       Point3D actualPosition = new Point3D();
       Vector3D actualLinearVelocity = new Vector3D();
@@ -353,7 +353,7 @@ public class FrameEuclideanTrajectoryPointTest
       assertTrue(expectedPosition.epsilonEquals(actualFramePosition, epsilon));
       assertTrue(expectedLinearVelocity.epsilonEquals(actualFrameLinearVelocity, epsilon));
    }
-   
+
    @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testSomeSetsAngGets()
@@ -372,7 +372,7 @@ public class FrameEuclideanTrajectoryPointTest
       simpleTrajectoryPoint.set(time, position, linearVelocity);
       FrameEuclideanTrajectoryPoint.setIncludingFrame(worldFrame, simpleTrajectoryPoint);
 
-      // Check some get calls: 
+      // Check some get calls:
       FramePoint3D pointForVerification = new FramePoint3D(worldFrame);
       FrameVector3D linearVelocityForVerification = new FrameVector3D(worldFrame);
 
@@ -438,7 +438,7 @@ public class FrameEuclideanTrajectoryPointTest
       assertTrue(Double.isNaN(positionDistance));
       assertFalse(FrameEuclideanTrajectoryPoint.epsilonEquals(FrameEuclideanTrajectoryPointTwo, 1e-7));
 
-      EuclideanTrajectoryPointInterface<?> trajectoryPointAsInterface = simplePoint;
+      EuclideanTrajectoryPointInterface trajectoryPointAsInterface = simplePoint;
       FrameEuclideanTrajectoryPoint.set(trajectoryPointAsInterface);
 
       positionDistance = FrameEuclideanTrajectoryPoint.positionDistance(FrameEuclideanTrajectoryPointTwo);
@@ -491,10 +491,9 @@ public class FrameEuclideanTrajectoryPointTest
       frameEuclideanTrajectoryPointTwo = new FrameEuclideanTrajectoryPoint(worldFrame);
       frameEuclideanTrajectoryPointTwo.setIncludingFrame(poseFrame, time, new Point3D(position), linearVelocity);
       assertTrue(frameEuclideanTrajectoryPointTwo.epsilonEquals(frameEuclideanTrajectoryPoint, 1e-10));
-   
+
       frameEuclideanTrajectoryPointTwo = new FrameEuclideanTrajectoryPoint(poseFrame);
-      EuclideanWaypoint euclideanWaypoint = new EuclideanWaypoint();
-      frameEuclideanTrajectoryPoint.getEuclideanWaypoint(euclideanWaypoint);
+      EuclideanWaypointInterface euclideanWaypoint = frameEuclideanTrajectoryPoint;
       frameEuclideanTrajectoryPointTwo.set(time, euclideanWaypoint);
       assertTrue(frameEuclideanTrajectoryPointTwo.epsilonEquals(frameEuclideanTrajectoryPoint, 1e-10));
 
@@ -503,8 +502,7 @@ public class FrameEuclideanTrajectoryPointTest
       assertTrue(frameEuclideanTrajectoryPointTwo.epsilonEquals(frameEuclideanTrajectoryPoint, 1e-10));
 
       frameEuclideanTrajectoryPointTwo = new FrameEuclideanTrajectoryPoint(poseFrame);
-      FrameEuclideanWaypoint frameEuclideanWaypoint = new FrameEuclideanWaypoint(poseFrame);
-      frameEuclideanTrajectoryPoint.getFrameEuclideanWaypoint(frameEuclideanWaypoint);
+      FrameEuclideanWaypointInterface frameEuclideanWaypoint = frameEuclideanTrajectoryPoint;
       frameEuclideanTrajectoryPointTwo.set(time, frameEuclideanWaypoint);
       assertTrue(frameEuclideanTrajectoryPointTwo.epsilonEquals(frameEuclideanTrajectoryPoint, 1e-10));
 

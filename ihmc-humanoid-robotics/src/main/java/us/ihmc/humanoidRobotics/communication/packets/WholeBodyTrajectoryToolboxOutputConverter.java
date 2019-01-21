@@ -8,6 +8,7 @@ import controller_msgs.msg.dds.SO3TrajectoryMessage;
 import controller_msgs.msg.dds.SO3TrajectoryPointMessage;
 import controller_msgs.msg.dds.WholeBodyTrajectoryMessage;
 import controller_msgs.msg.dds.WholeBodyTrajectoryToolboxOutputStatus;
+import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
@@ -15,7 +16,6 @@ import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.robotModels.FullHumanoidRobotModelFactory;
-import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.robotics.math.trajectories.waypoints.EuclideanTrajectoryPointCalculator;
 import us.ihmc.robotics.math.trajectories.waypoints.FrameEuclideanTrajectoryPoint;
 import us.ihmc.robotics.math.trajectories.waypoints.SO3TrajectoryPointCalculator;
@@ -112,7 +112,7 @@ public class WholeBodyTrajectoryToolboxOutputConverter
          orientationCalculator.appendTrajectoryPointOrientation(time, desiredOrientation);
       }
 
-      // get velocities.      
+      // get velocities.
       orientationCalculator.compute();
       euclideanTrajectoryPointCalculator.computeTrajectoryPointVelocities(false);
       RecyclingArrayList<FrameEuclideanTrajectoryPoint> trajectoryPoints = euclideanTrajectoryPointCalculator.getTrajectoryPoints();
@@ -123,7 +123,8 @@ public class WholeBodyTrajectoryToolboxOutputConverter
          Vector3D desiredLinearVelocity = new Vector3D();
          Vector3D desiredAngularVelocity = new Vector3D();
 
-         double time = trajectoryPoints.get(i).get(desiredPositions[i], desiredLinearVelocity);
+         trajectoryPoints.get(i).get(desiredPositions[i], desiredLinearVelocity);
+         double time = trajectoryPoints.get(i).getTime();
 
          orientationCalculator.getTrajectoryPoints().get(i).getAngularVelocity(desiredAngularVelocity);
 
@@ -168,7 +169,7 @@ public class WholeBodyTrajectoryToolboxOutputConverter
          orientationCalculator.appendTrajectoryPointOrientation(time, desiredOrientation);
       }
 
-      // get velocities.      
+      // get velocities.
       orientationCalculator.compute();
 
       // set trajectory points.
@@ -226,7 +227,7 @@ public class WholeBodyTrajectoryToolboxOutputConverter
          orientationCalculator.appendTrajectoryPointOrientation(time, desiredOrientation);
       }
 
-      // get velocities.      
+      // get velocities.
       orientationCalculator.compute();
       euclideanTrajectoryPointCalculator.computeTrajectoryPointVelocities(false);
       RecyclingArrayList<FrameEuclideanTrajectoryPoint> trajectoryPoints = euclideanTrajectoryPointCalculator.getTrajectoryPoints();
@@ -237,7 +238,8 @@ public class WholeBodyTrajectoryToolboxOutputConverter
          Vector3D desiredLinearVelocity = new Vector3D();
          Vector3D desiredAngularVelocity = new Vector3D();
 
-         double time = trajectoryPoints.get(i).get(desiredPositions[i], desiredLinearVelocity);
+         trajectoryPoints.get(i).get(desiredPositions[i], desiredLinearVelocity);
+         double time = trajectoryPoints.get(i).getTime();
 
          orientationCalculator.getTrajectoryPoints().get(i).getAngularVelocity(desiredAngularVelocity);
 

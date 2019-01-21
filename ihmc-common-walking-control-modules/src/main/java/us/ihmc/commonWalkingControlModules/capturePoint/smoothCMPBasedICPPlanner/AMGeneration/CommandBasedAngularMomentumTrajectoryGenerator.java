@@ -17,7 +17,7 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FixedFrameVector3DBasics;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
-import us.ihmc.robotics.geometry.transformables.EuclideanWaypoint;
+import us.ihmc.robotics.geometry.interfaces.EuclideanWaypointInterface;
 import us.ihmc.robotics.math.trajectories.waypoints.SimpleEuclideanTrajectoryPoint;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
@@ -30,7 +30,7 @@ public class CommandBasedAngularMomentumTrajectoryGenerator implements AngularMo
    private static final int waypointsPerWalkingPhase = 12;
    private static final int numberOfTrajectoryCoefficients = 4;
    private static final FramePoint3D zeroPoint = new FramePoint3D();
-   
+
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
    private final MomentumTrajectoryHandler momentumTrajectoryHandler;
    private final YoDouble time;
@@ -251,8 +251,8 @@ public class CommandBasedAngularMomentumTrajectoryGenerator implements AngularMo
          SimpleEuclideanTrajectoryPoint simpleStart = waypoints.get(i);
          SimpleEuclideanTrajectoryPoint simpleEnd = waypoints.get(i + 1);
 
-         EuclideanWaypoint startWaypoint = simpleStart.getEuclideanWaypoint();
-         EuclideanWaypoint endWaypoint = simpleEnd.getEuclideanWaypoint();
+         EuclideanWaypointInterface startWaypoint = simpleStart;
+         EuclideanWaypointInterface endWaypoint = simpleEnd;
          if (startWaypoint.containsNaN() || endWaypoint.containsNaN())
          {
             successfulTrajectory = false;

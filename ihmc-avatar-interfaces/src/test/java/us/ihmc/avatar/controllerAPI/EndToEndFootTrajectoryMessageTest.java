@@ -511,7 +511,8 @@ public abstract class EndToEndFootTrajectoryMessageTest implements MultiRobotTes
             Quaternion desiredOrientation = new Quaternion();
             Vector3D desiredAngularVelocity = new Vector3D();
 
-            double time = trajectoryPoints.get(calculatorIndex).get(desiredPosition, desiredLinearVelocity);
+            trajectoryPoints.get(calculatorIndex).get(desiredPosition, desiredLinearVelocity);
+            double time = trajectoryPoints.get(calculatorIndex).getTime();
 
             Graphics3DObject sphere = new Graphics3DObject();
             sphere.translate(desiredPosition);

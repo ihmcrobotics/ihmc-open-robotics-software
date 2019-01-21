@@ -27,6 +27,7 @@ import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsList;
 import us.ihmc.graphicsDescription.yoGraphics.plotting.ArtifactList;
 import us.ihmc.humanoidRobotics.footstep.FootSpoof;
+import us.ihmc.robotics.math.trajectories.waypoints.YoFrameEuclideanTrajectoryPoint;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoFramePoint3D;
 
@@ -118,8 +119,8 @@ public class CoPPointsInFootTest
    @Test(timeout = 30000)
    public void testAddAndSetIncludingFrameWithCoPTrajectoryPoint()
    {
-      CoPTrajectoryPoint testLocation1 = new CoPTrajectoryPoint("TestLocation1", "", null, framesToRegister);
-      CoPTrajectoryPoint testLocation2 = new CoPTrajectoryPoint("TestLocation2", "", null, framesToRegister);
+      YoFrameEuclideanTrajectoryPoint testLocation1 = new YoFrameEuclideanTrajectoryPoint("TestLocation1", "", null);
+      YoFrameEuclideanTrajectoryPoint testLocation2 = new YoFrameEuclideanTrajectoryPoint("TestLocation2", "", null);
       testLocation1.changeFrame(footSpoof.getSoleFrame());
       testLocation1.setPosition(new FramePoint3D(footSpoof.getSoleFrame(), Math.random(), Math.random(), Math.random()));
       testLocation2.changeFrame(footSpoof.getSoleFrame());
