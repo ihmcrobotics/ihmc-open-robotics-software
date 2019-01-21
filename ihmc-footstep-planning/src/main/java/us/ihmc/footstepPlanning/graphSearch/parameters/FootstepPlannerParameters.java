@@ -514,4 +514,12 @@ public interface FootstepPlannerParameters
          }
       };
    }
+
+   /**
+    * Parameters for setting swing times and trajectories after planning. Will use default values if this returns null
+    */
+   default FootstepProcessingParameters getFootstepProcessingParameters()
+   {
+      return null;
+   }
 }
