@@ -11,37 +11,37 @@ import us.ihmc.robotics.geometry.interfaces.FrameEuclideanWaypointInterface;
 
 public interface FrameEuclideanTrajectoryPointInterface extends EuclideanTrajectoryPointInterface, FrameEuclideanWaypointInterface
 {
-   public default void set(double time, FramePoint3DReadOnly position, FrameVector3DReadOnly linearVelocity)
+   default void set(double time, FramePoint3DReadOnly position, FrameVector3DReadOnly linearVelocity)
    {
       setTime(time);
       set(position, linearVelocity);
    }
 
-   public default void set(double time, FrameEuclideanWaypointInterface waypoint)
+   default void set(double time, FrameEuclideanWaypointInterface waypoint)
    {
       setTime(time);
       set(waypoint);
    }
 
-   public default void setIncludingFrame(double time, FrameEuclideanWaypointInterface waypoint)
+   default void setIncludingFrame(double time, FrameEuclideanWaypointInterface waypoint)
    {
       setTime(time);
       setIncludingFrame(waypoint);
    }
 
-   public default void setIncludingFrame(double time, FramePoint3DReadOnly position, FrameVector3DReadOnly linearVelocity)
+   default void setIncludingFrame(double time, FramePoint3DReadOnly position, FrameVector3DReadOnly linearVelocity)
    {
       setTime(time);
       setIncludingFrame(position, linearVelocity);
    }
 
-   public default void setIncludingFrame(ReferenceFrame referenceFrame, double time, Point3DReadOnly position, Vector3DReadOnly linearVelocity)
+   default void setIncludingFrame(ReferenceFrame referenceFrame, double time, Point3DReadOnly position, Vector3DReadOnly linearVelocity)
    {
       setTime(time);
       setIncludingFrame(referenceFrame, position, linearVelocity);
    }
 
-   public default void setIncludingFrame(ReferenceFrame referenceFrame, double time, EuclideanWaypointInterface waypoint)
+   default void setIncludingFrame(ReferenceFrame referenceFrame, double time, EuclideanWaypointInterface waypoint)
    {
       setTime(time);
       setIncludingFrame(referenceFrame, waypoint);

@@ -2,15 +2,15 @@ package us.ihmc.robotics.math.trajectories.waypoints.interfaces;
 
 public interface TrajectoryPointListInterface<T extends TrajectoryPointInterface>
 {
-   public abstract void clear();
+   abstract void clear();
 
-   public abstract void addTrajectoryPoint(T trajectoryPoint);
+   abstract void addTrajectoryPoint(T trajectoryPoint);
 
-   public abstract T getTrajectoryPoint(int trajectoryPointIndex);
+   abstract T getTrajectoryPoint(int trajectoryPointIndex);
 
-   public abstract int getNumberOfTrajectoryPoints();
+   abstract int getNumberOfTrajectoryPoints();
 
-   public default void set(TrajectoryPointListInterface<T> other)
+   default void set(TrajectoryPointListInterface<T> other)
    {
       clear();
       for (int i = 0; i < other.getNumberOfTrajectoryPoints(); i++)
@@ -19,7 +19,7 @@ public interface TrajectoryPointListInterface<T extends TrajectoryPointInterface
       }
    }
 
-   public default void addTimeOffset(double timeOffsetToAdd)
+   default void addTimeOffset(double timeOffsetToAdd)
    {
       for (int i = 0; i < getNumberOfTrajectoryPoints(); i++)
       {
@@ -27,7 +27,7 @@ public interface TrajectoryPointListInterface<T extends TrajectoryPointInterface
       }
    }
 
-   public default void subtractTimeOffset(double timeOffsetToSubtract)
+   default void subtractTimeOffset(double timeOffsetToSubtract)
    {
       for (int i = 0; i < getNumberOfTrajectoryPoints(); i++)
       {
@@ -35,12 +35,12 @@ public interface TrajectoryPointListInterface<T extends TrajectoryPointInterface
       }
    }
 
-   public default T getLastTrajectoryPoint()
+   default T getLastTrajectoryPoint()
    {
       return getTrajectoryPoint(getNumberOfTrajectoryPoints());
    }
 
-   public default double getTrajectoryTime()
+   default double getTrajectoryTime()
    {
       return getLastTrajectoryPoint().getTime();
    }

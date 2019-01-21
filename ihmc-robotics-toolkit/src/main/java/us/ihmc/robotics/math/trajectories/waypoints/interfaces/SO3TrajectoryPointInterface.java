@@ -7,7 +7,7 @@ import us.ihmc.robotics.geometry.interfaces.SO3WaypointInterface;
 
 public interface SO3TrajectoryPointInterface extends TrajectoryPointInterface, SO3WaypointInterface
 {
-   public default void set(double time, QuaternionReadOnly orientation, Vector3DReadOnly angularVelocity)
+   default void set(double time, QuaternionReadOnly orientation, Vector3DReadOnly angularVelocity)
    {
       setTime(time);
       set(orientation, angularVelocity);
