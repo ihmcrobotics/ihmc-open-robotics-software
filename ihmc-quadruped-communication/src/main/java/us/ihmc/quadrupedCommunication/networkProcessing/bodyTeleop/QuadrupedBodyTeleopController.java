@@ -80,6 +80,9 @@ public class QuadrupedBodyTeleopController extends QuadrupedToolboxController
       if (controllerStateChangeMessage.get().getEndHighLevelControllerName() != HighLevelStateChangeStatusMessage.WALKING)
          return true;
 
+      if (steppingStateChangeMessage.get() == null)
+         return false;
+
       return steppingStateChangeMessage.get().getEndQuadrupedSteppingStateEnum() != QuadrupedSteppingStateChangeMessage.STEP;
    }
 }
