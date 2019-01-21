@@ -169,6 +169,7 @@ public class MainTabController
 
    private AtomicReference<Integer> currentPlannerRequestId;
    private HumanoidReferenceFrames humanoidReferenceFrames;
+   private FullHumanoidRobotModel previewRobotModel = null;
    private AtomicReference<FootstepPlan> footstepPlanReference;
 
    private final Point3DProperty startPositionProperty = new Point3DProperty(this, "startPositionProperty", new Point3D());
@@ -295,6 +296,11 @@ public class MainTabController
    public void setFullRobotModel(FullHumanoidRobotModel fullHumanoidRobotModel)
    {
       this.humanoidReferenceFrames = new HumanoidReferenceFrames(fullHumanoidRobotModel);
+   }
+
+   public void setPreviewModel(FullHumanoidRobotModel previewRobotModel)
+   {
+      this.previewRobotModel = previewRobotModel;
    }
 
    public void setDefaultTiming(double swingTime, double transferTime)

@@ -19,6 +19,7 @@ import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.Pane;
 import javafx.stage.Stage;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
+import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI;
 import us.ihmc.footstepPlanning.graphSearch.parameters.DefaultFootstepPlanningParameters;
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParameters;
@@ -214,6 +215,8 @@ public class FootstepPlannerUI
       {
          walkingPreviewVisualizer = new JavaFXRobotVisualizer(previewModelFactory);
          view3dFactory.addNodeToView(walkingPreviewVisualizer.getRootNode());
+         mainTabController.setPreviewModel(walkingPreviewVisualizer.getFullRobotModel());
+         walkingPreviewVisualizer.getFullRobotModel().getRootJoint().setJointPosition(new Vector3D(Double.NaN, Double.NaN, Double.NaN));
          walkingPreviewVisualizer.start();
       }
 
