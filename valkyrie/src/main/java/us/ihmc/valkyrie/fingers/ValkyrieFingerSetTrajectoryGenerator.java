@@ -5,8 +5,8 @@ import java.util.EnumMap;
 import java.util.List;
 
 import gnu.trove.list.array.TDoubleArrayList;
-import us.ihmc.robotics.math.trajectories.waypoints.MultipleWaypointsTrajectoryGenerator;
-import us.ihmc.robotics.math.trajectories.waypoints.SimpleTrajectoryPoint1D;
+import us.ihmc.robotics.math.trajectories.waypoints.OneDoFTrajectoryPoint;
+import us.ihmc.robotics.math.trajectories.waypoints.generators.MultipleWaypointsTrajectoryGenerator;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.stateMachine.core.State;
 import us.ihmc.robotics.stateMachine.core.StateMachine;
@@ -148,7 +148,7 @@ public class ValkyrieFingerSetTrajectoryGenerator<T extends Enum<T>> implements 
             }
             else
             {
-               SimpleTrajectoryPoint1D lastPoint = new SimpleTrajectoryPoint1D();
+               OneDoFTrajectoryPoint lastPoint = new OneDoFTrajectoryPoint();
                multipleWaypointsTrajectoryGenerator.getLastWaypoint(lastPoint);
                desiredQ = lastPoint.getPosition();
                desiredQd = lastPoint.getVelocity();

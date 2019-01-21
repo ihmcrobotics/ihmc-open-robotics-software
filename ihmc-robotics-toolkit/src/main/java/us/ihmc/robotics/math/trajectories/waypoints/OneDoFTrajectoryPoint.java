@@ -6,16 +6,16 @@ import java.text.NumberFormat;
 import us.ihmc.robotics.geometry.transformables.OneDoFWaypoint;
 import us.ihmc.robotics.math.trajectories.waypoints.interfaces.OneDoFTrajectoryPointInterface;
 
-public class SimpleTrajectoryPoint1D implements OneDoFTrajectoryPointInterface
+public class OneDoFTrajectoryPoint implements OneDoFTrajectoryPointInterface
 {
    private final OneDoFWaypoint oneDoFWaypoint = new OneDoFWaypoint();
    private final TrajectoryPoint trajectoryPoint = new TrajectoryPoint();
 
-   public SimpleTrajectoryPoint1D()
+   public OneDoFTrajectoryPoint()
    {
    }
 
-   public SimpleTrajectoryPoint1D(double time, double position, double velocity)
+   public OneDoFTrajectoryPoint(double time, double position, double velocity)
    {
       set(time, position, velocity);
    }

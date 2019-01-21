@@ -1,6 +1,6 @@
-package us.ihmc.robotics.math.trajectories.waypoints;
+package us.ihmc.robotics.math.trajectories.waypoints.generators;
 
-import static us.ihmc.robotics.math.trajectories.waypoints.MultipleWaypointsTrajectoryGenerator.defaultMaximumNumberOfWaypoints;
+import static us.ihmc.robotics.math.trajectories.waypoints.generators.MultipleWaypointsTrajectoryGenerator.defaultMaximumNumberOfWaypoints;
 
 import java.util.ArrayList;
 
@@ -13,8 +13,12 @@ import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.euclid.tuple4D.interfaces.QuaternionReadOnly;
 import us.ihmc.robotics.math.trajectories.HermiteCurveBasedOrientationTrajectoryGenerator;
 import us.ihmc.robotics.math.trajectories.OrientationTrajectoryGeneratorInMultipleFrames;
+import us.ihmc.robotics.math.trajectories.waypoints.FrameSE3TrajectoryPoint;
+import us.ihmc.robotics.math.trajectories.waypoints.FrameSO3TrajectoryPoint;
+import us.ihmc.robotics.math.trajectories.waypoints.YoFrameSO3TrajectoryPoint;
 import us.ihmc.robotics.math.trajectories.waypoints.interfaces.SO3TrajectoryPointInterface;
 import us.ihmc.robotics.math.trajectories.waypoints.interfaces.TrajectoryPointListInterface;
+import us.ihmc.robotics.math.trajectories.waypoints.lists.FrameSO3TrajectoryPointList;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoInteger;

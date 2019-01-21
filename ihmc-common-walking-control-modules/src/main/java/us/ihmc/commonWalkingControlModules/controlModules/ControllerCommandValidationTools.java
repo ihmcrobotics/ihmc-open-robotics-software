@@ -9,7 +9,7 @@ import us.ihmc.humanoidRobotics.communication.controllerAPI.command.OneDoFJointT
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.SpineTrajectoryCommand;
 import us.ihmc.log.LogTools;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
-import us.ihmc.robotics.math.trajectories.waypoints.SimpleTrajectoryPoint1DList;
+import us.ihmc.robotics.math.trajectories.waypoints.lists.OneDoFTrajectoryPointList;
 
 public class ControllerCommandValidationTools
 {
@@ -54,7 +54,7 @@ public class ControllerCommandValidationTools
       return true;
    }
 
-   public static boolean checkJointspaceTrajectoryPointList(OneDoFJointBasics joint, SimpleTrajectoryPoint1DList trajectoryPointList)
+   public static boolean checkJointspaceTrajectoryPointList(OneDoFJointBasics joint, OneDoFTrajectoryPointList trajectoryPointList)
    {
       for (int i = 0; i < trajectoryPointList.getNumberOfTrajectoryPoints(); i++)
       {

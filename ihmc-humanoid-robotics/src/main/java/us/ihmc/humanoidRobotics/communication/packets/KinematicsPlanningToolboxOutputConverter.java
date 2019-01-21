@@ -16,9 +16,9 @@ import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.robotModels.FullHumanoidRobotModelFactory;
-import us.ihmc.robotics.math.trajectories.waypoints.EuclideanTrajectoryPointCalculator;
 import us.ihmc.robotics.math.trajectories.waypoints.FrameEuclideanTrajectoryPoint;
-import us.ihmc.robotics.math.trajectories.waypoints.SO3TrajectoryPointCalculator;
+import us.ihmc.robotics.math.trajectories.waypoints.generators.EuclideanTrajectoryPointCalculator;
+import us.ihmc.robotics.math.trajectories.waypoints.generators.SO3TrajectoryPointCalculator;
 import us.ihmc.robotics.robotSide.RobotSide;
 
 public class KinematicsPlanningToolboxOutputConverter

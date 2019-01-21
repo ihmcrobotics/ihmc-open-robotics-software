@@ -78,9 +78,9 @@ import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.EuclidCoreMissingTools;
 import us.ihmc.robotics.kinematics.NumericalInverseKinematicsCalculator;
 import us.ihmc.robotics.kinematics.TimeStampedTransform3D;
-import us.ihmc.robotics.math.trajectories.waypoints.SimpleTrajectoryPoint1D;
-import us.ihmc.robotics.math.trajectories.waypoints.SimpleTrajectoryPoint1DList;
-import us.ihmc.robotics.math.trajectories.waypoints.TrajectoryPoint1DCalculator;
+import us.ihmc.robotics.math.trajectories.waypoints.OneDoFTrajectoryPoint;
+import us.ihmc.robotics.math.trajectories.waypoints.generators.OneDoFTrajectoryPointCalculator;
+import us.ihmc.robotics.math.trajectories.waypoints.lists.OneDoFTrajectoryPointList;
 import us.ihmc.robotics.partNames.LimbName;
 import us.ihmc.robotics.random.RandomGeometry;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -1804,7 +1804,7 @@ public class DiagnosticBehavior extends AbstractBehavior
 
       int numberOfHandPoses = 10;
 
-      TrajectoryPoint1DCalculator calculator = new TrajectoryPoint1DCalculator();
+      OneDoFTrajectoryPointCalculator calculator = new OneDoFTrajectoryPointCalculator();
 
       for (RobotSide flyingSide : RobotSide.values)
       {
@@ -1844,13 +1844,13 @@ public class DiagnosticBehavior extends AbstractBehavior
             }
             calculator.computeTrajectoryPointTimes(0.0, flyingTrajectoryTime.getDoubleValue());
             calculator.computeTrajectoryPointVelocities(true);
-            SimpleTrajectoryPoint1DList trajectoryData = calculator.getTrajectoryData();
+            OneDoFTrajectoryPointList trajectoryData = calculator.getTrajectoryData();
             trajectoryData.addTimeOffset(trajectoryTime.getDoubleValue()); // Add time to reach the first waypoint.
 
             for (int i = 1; i < trajectoryData.getNumberOfTrajectoryPoints(); i++)
             {
-               SimpleTrajectoryPoint1D previousTrajectoryPoint = trajectoryData.getTrajectoryPoint(i - 1);
-               SimpleTrajectoryPoint1D trajectoryPoint = trajectoryData.getTrajectoryPoint(i);
+               OneDoFTrajectoryPoint previousTrajectoryPoint = trajectoryData.getTrajectoryPoint(i - 1);
+               OneDoFTrajectoryPoint trajectoryPoint = trajectoryData.getTrajectoryPoint(i);
                if (previousTrajectoryPoint.getTime() >= trajectoryPoint.getTime())
                   trajectoryPoint.setTime(previousTrajectoryPoint.getTime() + 1.0e-5); // Hack to get the controller to accept some of the waypoints, needs to be properly fixed at some point.
             }

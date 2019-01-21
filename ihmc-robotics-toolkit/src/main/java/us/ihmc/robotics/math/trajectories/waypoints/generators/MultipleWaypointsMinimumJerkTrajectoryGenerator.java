@@ -1,10 +1,11 @@
-package us.ihmc.robotics.math.trajectories.waypoints;
+package us.ihmc.robotics.math.trajectories.waypoints.generators;
 
 import java.util.ArrayList;
 
 import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.robotics.math.trajectories.DoubleTrajectoryGenerator;
 import us.ihmc.robotics.math.trajectories.QuinticPolynomialTrajectoryGenerator;
+import us.ihmc.robotics.math.trajectories.waypoints.YoOneDoFTrajectoryPoint;
 import us.ihmc.robotics.math.trajectories.waypoints.interfaces.OneDoFTrajectoryPointInterface;
 import us.ihmc.robotics.math.trajectories.waypoints.interfaces.TrajectoryPointListInterface;
 import us.ihmc.robotics.trajectories.providers.SettableDoubleProvider;

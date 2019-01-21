@@ -4,7 +4,7 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameQuaternionReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
 import us.ihmc.euclid.transform.interfaces.Transform;
-import us.ihmc.robotics.geometry.yoFrameObjects.YoFrameSO3Waypoint;
+import us.ihmc.robotics.geometry.yoWaypoints.YoFrameSO3Waypoint;
 import us.ihmc.robotics.math.trajectories.waypoints.interfaces.FrameSO3TrajectoryPointInterface;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 

@@ -14,6 +14,7 @@ import us.ihmc.euclid.referenceFrame.tools.ReferenceFrameTools;
 import us.ihmc.continuousIntegration.IntegrationCategory;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.robotics.math.trajectories.SimpleOrientationTrajectoryGenerator;
+import us.ihmc.robotics.math.trajectories.waypoints.generators.MultipleWaypointsOrientationTrajectoryGenerator;
 
 
 @ContinuousIntegrationPlan(categories = {IntegrationCategory.FAST})
