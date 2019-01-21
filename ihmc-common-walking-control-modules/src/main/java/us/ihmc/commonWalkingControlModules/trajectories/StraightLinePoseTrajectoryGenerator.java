@@ -1,6 +1,9 @@
 package us.ihmc.commonWalkingControlModules.trajectories;
 
 import java.util.ArrayList;
+import java.util.List;
+
+import org.apache.commons.lang3.tuple.ImmutablePair;
 
 import us.ihmc.commons.MathTools;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
@@ -8,16 +11,13 @@ import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.graphicsDescription.yoGraphics.BagOfBalls;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicCoordinateSystem;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsList;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
-import us.ihmc.robotics.math.frames.YoFramePointInMultipleFrames;
-import us.ihmc.robotics.math.frames.YoFrameQuaternionInMultipleFrames;
-import us.ihmc.robotics.math.frames.YoFrameVectorInMultipleFrames;
-import us.ihmc.robotics.math.frames.YoMultipleFramesHolder;
 import us.ihmc.robotics.math.interpolators.OrientationInterpolationCalculator;
 import us.ihmc.robotics.math.trajectories.PoseTrajectoryGenerator;
 import us.ihmc.robotics.math.trajectories.YoPolynomial;
@@ -25,32 +25,32 @@ import us.ihmc.yoVariables.listener.VariableChangedListener;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
+import us.ihmc.yoVariables.variable.YoFramePoint3D;
 import us.ihmc.yoVariables.variable.YoFrameYawPitchRoll;
 import us.ihmc.yoVariables.variable.YoVariable;
+import us.ihmc.yoVariables.variable.frameObjects.YoMutableFramePoint3D;
+import us.ihmc.yoVariables.variable.frameObjects.YoMutableFrameQuaternion;
+import us.ihmc.yoVariables.variable.frameObjects.YoMutableFrameVector3D;
 
 public class StraightLinePoseTrajectoryGenerator implements PoseTrajectoryGenerator
 {
-   private final boolean allowMultipleFrames;
-
    private final YoVariableRegistry registry;
 
-   private final YoFramePointInMultipleFrames initialPosition;
-   private final YoFramePointInMultipleFrames finalPosition;
+   private final YoMutableFramePoint3D initialPosition;
+   private final YoMutableFramePoint3D finalPosition;
 
-   private final YoFramePointInMultipleFrames currentPosition;
-   private final YoFrameVectorInMultipleFrames currentVelocity;
-   private final YoFrameVectorInMultipleFrames currentAcceleration;
+   private final YoMutableFramePoint3D currentPosition;
+   private final YoMutableFrameVector3D currentVelocity;
+   private final YoMutableFrameVector3D currentAcceleration;
 
-   private final YoFrameQuaternionInMultipleFrames initialOrientation;
-   private final YoFrameQuaternionInMultipleFrames finalOrientation;
+   private final YoMutableFrameQuaternion initialOrientation;
+   private final YoMutableFrameQuaternion finalOrientation;
    private final YoFrameYawPitchRoll initialOrientationForViz;
    private final YoFrameYawPitchRoll finalOrientationForViz;
 
-   private final YoFrameQuaternionInMultipleFrames currentOrientation;
-   private final YoFrameVectorInMultipleFrames currentAngularVelocity;
-   private final YoFrameVectorInMultipleFrames currentAngularAcceleration;
-
-   private final ArrayList<YoMultipleFramesHolder> multipleFramesHolders;
+   private final YoMutableFrameQuaternion currentOrientation;
+   private final YoMutableFrameVector3D currentAngularVelocity;
+   private final YoMutableFrameVector3D currentAngularAcceleration;
 
    // (Sylvain) I created 2 YoPolynomial to match the StraightLinePositionTrajectoryGenerator and OrientationInterpolationTrajectoryGenerator.
    // Not sure if that's actually necessary, the cubic one maybe enough.
@@ -76,54 +76,39 @@ public class StraightLinePoseTrajectoryGenerator implements PoseTrajectoryGenera
 
    private YoFrameYawPitchRoll currentOrientationForViz;
 
+   private final List<ImmutablePair<FramePoint3DReadOnly, YoFramePoint3D>> visualizationUpdatables = new ArrayList<>();
+
    public StraightLinePoseTrajectoryGenerator(String namePrefix, ReferenceFrame referenceFrame, YoVariableRegistry parentRegistry)
    {
-      this(namePrefix, false, referenceFrame, parentRegistry, false, null);
+      this(namePrefix, referenceFrame, parentRegistry, false, null);
    }
 
    public StraightLinePoseTrajectoryGenerator(String namePrefix, ReferenceFrame referenceFrame, YoVariableRegistry parentRegistry, boolean visualize,
-         YoGraphicsListRegistry yoGraphicsListRegistry)
+                                              YoGraphicsListRegistry yoGraphicsListRegistry)
    {
-      this(namePrefix, false, referenceFrame, parentRegistry, visualize, yoGraphicsListRegistry);
-   }
-
-   public StraightLinePoseTrajectoryGenerator(String namePrefix, boolean allowMultipleFrames, ReferenceFrame referenceFrame, YoVariableRegistry parentRegistry)
-   {
-      this(namePrefix, allowMultipleFrames, referenceFrame, parentRegistry, false, null);
-   }
-
-   public StraightLinePoseTrajectoryGenerator(String namePrefix, boolean allowMultipleFrames, ReferenceFrame referenceFrame, YoVariableRegistry parentRegistry,
-         boolean visualize, YoGraphicsListRegistry yoGraphicsListRegistry)
-   {
-      this.allowMultipleFrames = allowMultipleFrames;
-
       registry = new YoVariableRegistry(namePrefix + getClass().getSimpleName());
 
-      initialPosition = new YoFramePointInMultipleFrames(namePrefix + "InitialPosition", registry, referenceFrame);
-      finalPosition = new YoFramePointInMultipleFrames(namePrefix + "FinalPosition", registry, referenceFrame);
+      initialPosition = new YoMutableFramePoint3D(namePrefix + "InitialPosition", "", registry, referenceFrame);
+      finalPosition = new YoMutableFramePoint3D(namePrefix + "FinalPosition", "", registry, referenceFrame);
 
-      currentPosition = new YoFramePointInMultipleFrames(namePrefix + "CurrentPosition", registry, referenceFrame);
-      currentVelocity = new YoFrameVectorInMultipleFrames(namePrefix + "CurrentVelocity", registry, referenceFrame);
-      currentAcceleration = new YoFrameVectorInMultipleFrames(namePrefix + "CurrentAcceleration", registry, referenceFrame);
+      currentPosition = new YoMutableFramePoint3D(namePrefix + "CurrentPosition", "", registry, referenceFrame);
+      currentVelocity = new YoMutableFrameVector3D(namePrefix + "CurrentVelocity", "", registry, referenceFrame);
+      currentAcceleration = new YoMutableFrameVector3D(namePrefix + "CurrentAcceleration", "", registry, referenceFrame);
 
-      initialOrientation = new YoFrameQuaternionInMultipleFrames(namePrefix + "InitialOrientation", registry, referenceFrame);
-      finalOrientation = new YoFrameQuaternionInMultipleFrames(namePrefix + "FinalOrientation", registry, referenceFrame);
+      initialOrientation = new YoMutableFrameQuaternion(namePrefix + "InitialOrientation", "", registry, referenceFrame);
+      finalOrientation = new YoMutableFrameQuaternion(namePrefix + "FinalOrientation", "", registry, referenceFrame);
       initialOrientationForViz = new YoFrameYawPitchRoll(namePrefix + "InitialOrientationForViz", ReferenceFrame.getWorldFrame(), registry);
       finalOrientationForViz = new YoFrameYawPitchRoll(namePrefix + "FinalOrientationForViz", ReferenceFrame.getWorldFrame(), registry);
       currentOrientationForViz = new YoFrameYawPitchRoll(namePrefix + "CurrentOrientationForViz", ReferenceFrame.getWorldFrame(), registry);
 
-      currentOrientation = new YoFrameQuaternionInMultipleFrames(namePrefix + "CurrentOrientation", registry, referenceFrame);
-      currentAngularVelocity = new YoFrameVectorInMultipleFrames(namePrefix + "CurrentAngularVelocity", registry, referenceFrame);
-      currentAngularAcceleration = new YoFrameVectorInMultipleFrames(namePrefix + "CurrentAngularAcceleration", registry, referenceFrame);
+      currentOrientation = new YoMutableFrameQuaternion(namePrefix + "CurrentOrientation", "", registry, referenceFrame);
+      currentAngularVelocity = new YoMutableFrameVector3D(namePrefix + "CurrentAngularVelocity", "", registry, referenceFrame);
+      currentAngularAcceleration = new YoMutableFrameVector3D(namePrefix + "CurrentAngularAcceleration", "", registry, referenceFrame);
 
       quinticParameterPolynomial = new YoPolynomial(namePrefix + "QuinticParameterPolynomial", 6, registry);
 
       currentTime = new YoDouble(namePrefix + "Time", registry);
       trajectoryTime = new YoDouble(namePrefix + "TrajectoryTime", registry);
-
-      multipleFramesHolders = new ArrayList<YoMultipleFramesHolder>();
-      registerMultipleFramesHolders(initialPosition, finalPosition, currentPosition, currentVelocity, currentAcceleration);
-      registerMultipleFramesHolders(initialOrientation, finalOrientation, currentOrientation, currentAngularVelocity, currentAngularAcceleration);
 
       parentRegistry.addChild(registry);
 
@@ -131,16 +116,24 @@ public class StraightLinePoseTrajectoryGenerator implements PoseTrajectoryGenera
 
       if (this.visualize)
       {
-         final YoGraphicPosition currentPositionViz = new YoGraphicPosition(namePrefix + "CurrentPosition", currentPosition, 0.025, YoAppearance.Blue());
-         final YoGraphicPosition initialPositionViz = new YoGraphicPosition(namePrefix + "InitialPosition", initialPosition, 0.02, YoAppearance.BlueViolet());
-         final YoGraphicPosition finalPositionViz = new YoGraphicPosition(namePrefix + "FinalPosition", finalPosition, 0.02, YoAppearance.Red());
+         YoFramePoint3D currentPositionInWorld = new YoFramePoint3D(namePrefix + "CurrentPosition", "WorldViz", ReferenceFrame.getWorldFrame(), registry);
+         visualizationUpdatables.add(new ImmutablePair<FramePoint3DReadOnly, YoFramePoint3D>(currentPosition, currentPositionInWorld));
+         YoGraphicPosition currentPositionViz = new YoGraphicPosition(namePrefix + "CurrentPosition", currentPositionInWorld, 0.025, YoAppearance.Blue());
 
-         final YoGraphicCoordinateSystem initialPoseViz = new YoGraphicCoordinateSystem(namePrefix + "InitialPose",
-               initialPosition.buildUpdatedYoFramePointForVisualizationOnly(), initialOrientationForViz, 0.1);
-         final YoGraphicCoordinateSystem finalPoseViz = new YoGraphicCoordinateSystem(namePrefix + "FinalPose",
-               finalPosition.buildUpdatedYoFramePointForVisualizationOnly(), finalOrientationForViz, 0.1);
-         final YoGraphicCoordinateSystem currentPoseViz = new YoGraphicCoordinateSystem(namePrefix + "CurrentPose",
-               currentPosition.buildUpdatedYoFramePointForVisualizationOnly(), currentOrientationForViz, 0.25);
+         YoFramePoint3D initialPositionInWorld = new YoFramePoint3D(namePrefix + "InitialPosition", "WorldViz", ReferenceFrame.getWorldFrame(), registry);
+         visualizationUpdatables.add(new ImmutablePair<FramePoint3DReadOnly, YoFramePoint3D>(initialPosition, initialPositionInWorld));
+         YoGraphicPosition initialPositionViz = new YoGraphicPosition(namePrefix + "InitialPosition", initialPositionInWorld, 0.02, YoAppearance.BlueViolet());
+
+         YoFramePoint3D finalPositionInWorld = new YoFramePoint3D(namePrefix + "FinalPosition", "WorldViz", ReferenceFrame.getWorldFrame(), registry);
+         visualizationUpdatables.add(new ImmutablePair<FramePoint3DReadOnly, YoFramePoint3D>(finalPosition, finalPositionInWorld));
+         YoGraphicPosition finalPositionViz = new YoGraphicPosition(namePrefix + "FinalPosition", finalPositionInWorld, 0.02, YoAppearance.Red());
+
+         YoGraphicCoordinateSystem initialPoseViz = new YoGraphicCoordinateSystem(namePrefix + "InitialPose", initialPositionInWorld, initialOrientationForViz,
+                                                                                  0.1);
+         YoGraphicCoordinateSystem finalPoseViz = new YoGraphicCoordinateSystem(namePrefix + "FinalPose", finalPositionInWorld, finalOrientationForViz, 0.1);
+         YoGraphicCoordinateSystem currentPoseViz = new YoGraphicCoordinateSystem(namePrefix + "CurrentPose", currentPositionInWorld, currentOrientationForViz,
+                                                                                  0.25);
+
          yoGraphicsList = new YoGraphicsList(namePrefix + "StraightLineTrajectory");
          yoGraphicsList.add(currentPositionViz);
          yoGraphicsList.add(initialPositionViz);
@@ -155,6 +148,7 @@ public class StraightLinePoseTrajectoryGenerator implements PoseTrajectoryGenera
          showViz = new YoBoolean(namePrefix + "ShowViz", registry);
          showViz.addVariableChangedListener(new VariableChangedListener()
          {
+            @Override
             public void notifyOfVariableChange(YoVariable<?> v)
             {
                boolean visible = showViz.getBooleanValue();
@@ -174,46 +168,34 @@ public class StraightLinePoseTrajectoryGenerator implements PoseTrajectoryGenera
       }
    }
 
-   private void registerMultipleFramesHolders(YoMultipleFramesHolder... multipleFramesHolders)
-   {
-      for (YoMultipleFramesHolder multipleFramesHolder : multipleFramesHolders)
-         this.multipleFramesHolders.add(multipleFramesHolder);
-   }
-
-   public void registerAndSwitchFrame(ReferenceFrame desiredFrame)
-   {
-      registerNewTrajectoryFrame(desiredFrame);
-      switchTrajectoryFrame(desiredFrame);
-   }
-
-   public void registerNewTrajectoryFrame(ReferenceFrame newReferenceFrame)
-   {
-      checkIfMultipleFramesAllowed();
-
-      for (int i = 0; i < multipleFramesHolders.size(); i++)
-         multipleFramesHolders.get(i).registerReferenceFrame(newReferenceFrame);
-   }
-
    public void changeFrame(ReferenceFrame referenceFrame)
    {
-      changeFrame(referenceFrame, true);
-   }
+      initialPosition.changeFrame(referenceFrame);
+      finalPosition.changeFrame(referenceFrame);
+      currentPosition.changeFrame(referenceFrame);
+      currentVelocity.changeFrame(referenceFrame);
+      currentAcceleration.changeFrame(referenceFrame);
 
-   private void changeFrame(ReferenceFrame referenceFrame, boolean checkIfAllowed)
-   {
-      if (checkIfAllowed)
-         checkIfMultipleFramesAllowed();
-
-      for (int i = 0; i < multipleFramesHolders.size(); i++)
-         multipleFramesHolders.get(i).changeFrame(referenceFrame);
+      initialOrientation.changeFrame(referenceFrame);
+      finalOrientation.changeFrame(referenceFrame);
+      currentOrientation.changeFrame(referenceFrame);
+      currentAngularVelocity.changeFrame(referenceFrame);
+      currentAngularAcceleration.changeFrame(referenceFrame);
    }
 
    public void switchTrajectoryFrame(ReferenceFrame referenceFrame)
    {
-      checkIfMultipleFramesAllowed();
+      initialPosition.setToZero(referenceFrame);
+      finalPosition.setToZero(referenceFrame);
+      currentPosition.setToZero(referenceFrame);
+      currentVelocity.setToZero(referenceFrame);
+      currentAcceleration.setToZero(referenceFrame);
 
-      for (int i = 0; i < multipleFramesHolders.size(); i++)
-         multipleFramesHolders.get(i).switchCurrentReferenceFrame(referenceFrame);
+      initialOrientation.setToZero(referenceFrame);
+      finalOrientation.setToZero(referenceFrame);
+      currentOrientation.setToZero(referenceFrame);
+      currentAngularVelocity.setToZero(referenceFrame);
+      currentAngularAcceleration.setToZero(referenceFrame);
    }
 
    public void setTrajectoryTime(double newTrajectoryTime)
@@ -261,6 +243,7 @@ public class StraightLinePoseTrajectoryGenerator implements PoseTrajectoryGenera
       finalOrientationForViz.setMatchingFrame(tempOrientation);
    }
 
+   @Override
    public void initialize()
    {
       MathTools.checkIntervalContains(trajectoryTime.getDoubleValue(), 0.0, Double.POSITIVE_INFINITY);
@@ -283,6 +266,7 @@ public class StraightLinePoseTrajectoryGenerator implements PoseTrajectoryGenera
       currentAngularAcceleration.setToZero();
    }
 
+   @Override
    public void compute(double time)
    {
       this.currentTime.set(time);
@@ -316,16 +300,22 @@ public class StraightLinePoseTrajectoryGenerator implements PoseTrajectoryGenera
          orientationInterpolationCalculator.computeAngularVelocity(currentAngularVelocity, initialOrientation, finalOrientation, alphaAngVel);
          orientationInterpolationCalculator.computeAngularAcceleration(currentAngularAcceleration, initialOrientation, finalOrientation, alphaAngAcc);
       }
+
       tempOrientation.setIncludingFrame(currentOrientation);
       tempOrientation.changeFrame(currentOrientationForViz.getReferenceFrame());
       currentOrientationForViz.set(tempOrientation);
+      for (int i = 0; i < visualizationUpdatables.size(); i++)
+      {
+         ImmutablePair<FramePoint3DReadOnly, YoFramePoint3D> pair = visualizationUpdatables.get(i);
+         pair.getRight().setMatchingFrame(pair.getLeft());
+      }
    }
 
    private void visualizeTrajectory()
    {
       for (int i = 0; i < numberOfBalls; i++)
       {
-         double t = (double) i / ((double) numberOfBalls - 1) * trajectoryTime.getDoubleValue();
+         double t = i / ((double) numberOfBalls - 1) * trajectoryTime.getDoubleValue();
          compute(t);
          ballPosition.setIncludingFrame(currentPosition);
          ballPosition.changeFrame(ReferenceFrame.getWorldFrame());
@@ -334,6 +324,7 @@ public class StraightLinePoseTrajectoryGenerator implements PoseTrajectoryGenera
       reset();
    }
 
+   @Override
    public void showVisualization()
    {
       if (!visualize)
@@ -342,6 +333,7 @@ public class StraightLinePoseTrajectoryGenerator implements PoseTrajectoryGenera
       showViz.set(true);
    }
 
+   @Override
    public void hideVisualization()
    {
       if (!visualize)
@@ -350,36 +342,43 @@ public class StraightLinePoseTrajectoryGenerator implements PoseTrajectoryGenera
       showViz.set(false);
    }
 
+   @Override
    public void getPosition(FramePoint3D positionToPack)
    {
       positionToPack.setIncludingFrame(currentPosition);
    }
 
+   @Override
    public void getVelocity(FrameVector3D velocityToPack)
    {
       velocityToPack.setIncludingFrame(currentVelocity);
    }
 
+   @Override
    public void getAcceleration(FrameVector3D accelerationToPack)
    {
       accelerationToPack.setIncludingFrame(currentAcceleration);
    }
 
+   @Override
    public void getOrientation(FrameQuaternion orientationToPack)
    {
       orientationToPack.setIncludingFrame(currentOrientation);
    }
 
+   @Override
    public void getAngularVelocity(FrameVector3D angularVelocityToPack)
    {
       angularVelocityToPack.setIncludingFrame(currentAngularVelocity);
    }
 
+   @Override
    public void getAngularAcceleration(FrameVector3D angularAccelerationToPack)
    {
       angularAccelerationToPack.setIncludingFrame(currentAngularAcceleration);
    }
 
+   @Override
    public void getLinearData(FramePoint3D positionToPack, FrameVector3D velocityToPack, FrameVector3D accelerationToPack)
    {
       getPosition(positionToPack);
@@ -387,6 +386,7 @@ public class StraightLinePoseTrajectoryGenerator implements PoseTrajectoryGenera
       getAcceleration(accelerationToPack);
    }
 
+   @Override
    public void getAngularData(FrameQuaternion orientationToPack, FrameVector3D angularVelocityToPack, FrameVector3D angularAccelerationToPack)
    {
       getOrientation(orientationToPack);
@@ -394,6 +394,7 @@ public class StraightLinePoseTrajectoryGenerator implements PoseTrajectoryGenera
       getAngularAcceleration(angularAccelerationToPack);
    }
 
+   @Override
    public void getPose(FramePose3D framePoseToPack)
    {
       framePoseToPack.changeFrame(currentPosition.getReferenceFrame());
@@ -401,6 +402,7 @@ public class StraightLinePoseTrajectoryGenerator implements PoseTrajectoryGenera
       framePoseToPack.setOrientation(currentOrientation);
    }
 
+   @Override
    public boolean isDone()
    {
       return currentTime.getDoubleValue() >= trajectoryTime.getDoubleValue();
@@ -411,25 +413,17 @@ public class StraightLinePoseTrajectoryGenerator implements PoseTrajectoryGenera
       return currentPosition.getReferenceFrame();
    }
 
-   private void checkIfMultipleFramesAllowed()
-   {
-      if (!allowMultipleFrames)
-         throw new RuntimeException("Must set allowMultipleFrames to true in the constructor if you ever want to register a new frame.");
-   }
-
+   @Override
    public String toString()
    {
       String ret = "";
-
-      ReferenceFrame currentFrame = initialPosition.getReferenceFrame();
-
       ret += "Current time: " + currentTime.getDoubleValue() + ", trajectory time: " + trajectoryTime.getDoubleValue();
-      ret += "\nCurrent position: " + currentPosition.toStringForASingleReferenceFrame(currentFrame);
-      ret += "\nCurrent velocity: " + currentVelocity.toStringForASingleReferenceFrame(currentFrame);
-      ret += "\nCurrent acceleration: " + currentAcceleration.toStringForASingleReferenceFrame(currentFrame);
-      ret += "\nCurrent orientation: " + currentOrientation.toStringForASingleReferenceFrame(currentFrame);
-      ret += "\nCurrent angular velocity: " + currentAngularVelocity.toStringForASingleReferenceFrame(currentFrame);
-      ret += "\nCurrent angular acceleration: " + currentAngularAcceleration.toStringForASingleReferenceFrame(currentFrame);
+      ret += "\nCurrent position: " + currentPosition;
+      ret += "\nCurrent velocity: " + currentVelocity;
+      ret += "\nCurrent acceleration: " + currentAcceleration;
+      ret += "\nCurrent orientation: " + currentOrientation;
+      ret += "\nCurrent angular velocity: " + currentAngularVelocity;
+      ret += "\nCurrent angular acceleration: " + currentAngularAcceleration;
       return ret;
    }
 }
