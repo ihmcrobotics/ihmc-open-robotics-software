@@ -1,41 +1,20 @@
 package us.ihmc.robotics.math.trajectories.waypoints;
 
-import java.util.Random;
-
 import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.robotics.math.trajectories.waypoints.interfaces.OneDoFTrajectoryPointInterface;
+import us.ihmc.robotics.math.trajectories.waypoints.interfaces.TrajectoryPointListInterface;
 
-public class SimpleTrajectoryPoint1DList extends SimpleTrajectoryPointList<SimpleTrajectoryPoint1D>
+public class SimpleTrajectoryPoint1DList implements TrajectoryPointListInterface<SimpleTrajectoryPoint1D>
 {
-   public SimpleTrajectoryPoint1DList()
+   private final RecyclingArrayList<SimpleTrajectoryPoint1D> trajectoryPoints = new RecyclingArrayList<>(SimpleTrajectoryPoint1D.class);
+
+   @Override
+   public void addTrajectoryPoint(SimpleTrajectoryPoint1D trajectoryPoint)
    {
-      super(SimpleTrajectoryPoint1D.class);
+      trajectoryPoints.add().set(trajectoryPoint);
    }
 
-   public SimpleTrajectoryPoint1DList(int initialCapacity)
-   {
-      super(SimpleTrajectoryPoint1D.class, initialCapacity);
-   }
-
-   public SimpleTrajectoryPoint1DList(Random random)
-   {
-      super(SimpleTrajectoryPoint1D.class, 10);
-      for(int i = 0; i < 10; i++)
-      {
-         addTrajectoryPoint(i + random.nextDouble(), random.nextDouble() * 2.0 * Math.PI, random.nextDouble() * random.nextInt(20));
-      }
-   }
-
-   public void set(SimpleTrajectoryPoint1DList trajectory)
-   {
-      clear();
-      for (int i = 0; i < trajectory.getNumberOfTrajectoryPoints(); i++)
-      {
-         addTrajectoryPoint(trajectory.trajectoryPoints.get(i));
-      }
-   }
-
-   public void addTrajectoryPoint(OneDoFTrajectoryPointInterface<?> trajectoryPoint)
+   public void addTrajectoryPoint(OneDoFTrajectoryPointInterface trajectoryPoint)
    {
       trajectoryPoints.add().set(trajectoryPoint);
    }
@@ -45,18 +24,27 @@ public class SimpleTrajectoryPoint1DList extends SimpleTrajectoryPointList<Simpl
       trajectoryPoints.add().set(time, position, velocity);
    }
 
-   public RecyclingArrayList<? extends OneDoFTrajectoryPointInterface<?>> getTrajectoryPoints()
+   @Override
+   public void clear()
    {
-      return trajectoryPoints;
+      trajectoryPoints.clear();
+   }
+
+   @Override
+   public SimpleTrajectoryPoint1D getTrajectoryPoint(int trajectoryPointIndex)
+   {
+      return trajectoryPoints.get(trajectoryPointIndex);
+   }
+
+   @Override
+   public int getNumberOfTrajectoryPoints()
+   {
+      return trajectoryPoints.size();
    }
 
    @Override
    public String toString()
    {
-      if (trajectoryPoints != null)
-         return "Simple trajectory 1D: number of trajectory points 1D = " + getNumberOfTrajectoryPoints() + ".";
-      else
-         return "Simple trajectory 1D: no trajectory point 1D.";
+      return "Simple trajectory 1D: number of trajectory points 1D = " + getNumberOfTrajectoryPoints() + ".";
    }
-
 }
