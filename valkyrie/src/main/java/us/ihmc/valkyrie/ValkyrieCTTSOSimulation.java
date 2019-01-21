@@ -60,6 +60,7 @@ public class ValkyrieCTTSOSimulation
       networkProcessorParameters.enableControllerCommunicator(true);
       networkProcessorParameters.enableFootstepPlanningToolbox(true);
       networkProcessorParameters.enablePerceptionModule(true);
+      networkProcessorParameters.enableWalkingPreviewToolbox(true);
 
       // disable everything else
       networkProcessorParameters.enableUiModule(false);
