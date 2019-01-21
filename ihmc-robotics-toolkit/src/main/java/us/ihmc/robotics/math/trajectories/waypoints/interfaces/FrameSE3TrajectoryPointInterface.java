@@ -1,9 +1,13 @@
 package us.ihmc.robotics.math.trajectories.waypoints.interfaces;
 
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameQuaternionReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
 import us.ihmc.euclid.tools.EuclidCoreTools;
+import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
+import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
+import us.ihmc.euclid.tuple4D.interfaces.QuaternionReadOnly;
 import us.ihmc.robotics.geometry.interfaces.FrameSE3WaypointInterface;
 
 public interface FrameSE3TrajectoryPointInterface
@@ -21,6 +25,13 @@ public interface FrameSE3TrajectoryPointInterface
    {
       setTime(time);
       setIncludingFrame(position, orientation, linearVelocity, angularVelocity);
+   }
+
+   public default void setIncludingFrame(ReferenceFrame referenceFrame, double time, Point3DReadOnly position, QuaternionReadOnly orientation,
+                                         Vector3DReadOnly linearVelocity, Vector3DReadOnly angularVelocity)
+   {
+      setTime(time);
+      setIncludingFrame(referenceFrame, position, orientation, linearVelocity, angularVelocity);
    }
 
    default void set(FrameSE3TrajectoryPointInterface other)

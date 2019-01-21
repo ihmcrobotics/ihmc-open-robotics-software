@@ -1,8 +1,11 @@
 package us.ihmc.robotics.math.trajectories.waypoints.interfaces;
 
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameQuaternionReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
 import us.ihmc.euclid.tools.EuclidCoreTools;
+import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
+import us.ihmc.euclid.tuple4D.interfaces.QuaternionReadOnly;
 import us.ihmc.robotics.geometry.interfaces.FrameSO3WaypointInterface;
 
 public interface FrameSO3TrajectoryPointInterface extends SO3TrajectoryPointInterface, FrameSO3WaypointInterface
@@ -17,6 +20,12 @@ public interface FrameSO3TrajectoryPointInterface extends SO3TrajectoryPointInte
    {
       setTime(time);
       setIncludingFrame(orientation, angularVelocity);
+   }
+
+   public default void setIncludingFrame(ReferenceFrame referenceFrame, double time, QuaternionReadOnly orientation, Vector3DReadOnly angularVelocity)
+   {
+      setTime(time);
+      setIncludingFrame(referenceFrame, orientation, angularVelocity);
    }
 
    default void set(FrameSO3TrajectoryPointInterface other)
