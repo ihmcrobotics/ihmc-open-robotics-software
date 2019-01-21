@@ -9,7 +9,7 @@ import us.ihmc.euclid.tuple4D.interfaces.QuaternionReadOnly;
 
 public interface SE3WaypointInterface extends EuclideanWaypointInterface, SO3WaypointInterface
 {
-   public default void set(Point3DReadOnly position, QuaternionReadOnly orientation, Vector3DReadOnly linearVelocity, Vector3DReadOnly angularVelocity)
+   default void set(Point3DReadOnly position, QuaternionReadOnly orientation, Vector3DReadOnly linearVelocity, Vector3DReadOnly angularVelocity)
    {
       setPosition(position);
       setOrientation(orientation);
@@ -17,8 +17,7 @@ public interface SE3WaypointInterface extends EuclideanWaypointInterface, SO3Way
       setAngularVelocity(angularVelocity);
    }
 
-   public default void get(Point3DBasics positionToPack, QuaternionBasics orientationToPack, Vector3DBasics linearVelocityToPack,
-                           Vector3DBasics angularVelocityToPack)
+   default void get(Point3DBasics positionToPack, QuaternionBasics orientationToPack, Vector3DBasics linearVelocityToPack, Vector3DBasics angularVelocityToPack)
    {
       getPosition(positionToPack);
       getOrientation(orientationToPack);
@@ -26,12 +25,12 @@ public interface SE3WaypointInterface extends EuclideanWaypointInterface, SO3Way
       getAngularVelocity(angularVelocityToPack);
    }
 
-   public default void get(SE3WaypointInterface otherToPack)
+   default void get(SE3WaypointInterface otherToPack)
    {
       otherToPack.set(this);
    }
 
-   public default void get(EuclideanWaypointInterface euclideanWaypointToPack, SO3WaypointInterface so3WaypointToPack)
+   default void get(EuclideanWaypointInterface euclideanWaypointToPack, SO3WaypointInterface so3WaypointToPack)
    {
       get(euclideanWaypointToPack);
       get(so3WaypointToPack);

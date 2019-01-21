@@ -14,8 +14,8 @@ import us.ihmc.euclid.tuple4D.interfaces.QuaternionReadOnly;
 
 public interface FrameSE3WaypointInterface extends FrameEuclideanWaypointInterface, FrameSO3WaypointInterface, SE3WaypointInterface
 {
-   public default void set(FramePoint3DReadOnly position, FrameQuaternionReadOnly orientation, FrameVector3DReadOnly linearVelocity,
-                           FrameVector3DReadOnly angularVelocity)
+   default void set(FramePoint3DReadOnly position, FrameQuaternionReadOnly orientation, FrameVector3DReadOnly linearVelocity,
+                    FrameVector3DReadOnly angularVelocity)
    {
       setPosition(position);
       setOrientation(orientation);
@@ -23,8 +23,8 @@ public interface FrameSE3WaypointInterface extends FrameEuclideanWaypointInterfa
       setAngularVelocity(angularVelocity);
    }
 
-   public default void setIncludingFrame(FramePoint3DReadOnly position, FrameQuaternionReadOnly orientation, FrameVector3DReadOnly linearVelocity,
-                                         FrameVector3DReadOnly angularVelocity)
+   default void setIncludingFrame(FramePoint3DReadOnly position, FrameQuaternionReadOnly orientation, FrameVector3DReadOnly linearVelocity,
+                                  FrameVector3DReadOnly angularVelocity)
    {
       setReferenceFrame(position.getReferenceFrame());
       setPosition(position);
@@ -33,8 +33,8 @@ public interface FrameSE3WaypointInterface extends FrameEuclideanWaypointInterfa
       setAngularVelocity(angularVelocity);
    }
 
-   public default void setIncludingFrame(ReferenceFrame referenceFrame, Point3DReadOnly position, QuaternionReadOnly orientation,
-                                         Vector3DReadOnly linearVelocity, Vector3DReadOnly angularVelocity)
+   default void setIncludingFrame(ReferenceFrame referenceFrame, Point3DReadOnly position, QuaternionReadOnly orientation, Vector3DReadOnly linearVelocity,
+                                  Vector3DReadOnly angularVelocity)
    {
       setReferenceFrame(referenceFrame);
       setPosition(position);
@@ -43,42 +43,42 @@ public interface FrameSE3WaypointInterface extends FrameEuclideanWaypointInterfa
       setAngularVelocity(angularVelocity);
    }
 
-   public default void setIncludingFrame(ReferenceFrame referenceFrame, SE3WaypointInterface other)
+   default void setIncludingFrame(ReferenceFrame referenceFrame, SE3WaypointInterface other)
    {
       setReferenceFrame(referenceFrame);
       set(other);
    }
 
-   public default void setIncludingFrame(FrameSE3WaypointInterface other)
+   default void setIncludingFrame(FrameSE3WaypointInterface other)
    {
       setReferenceFrame(other.getReferenceFrame());
       set(other);
    }
 
-   public default void get(FrameSE3WaypointInterface otherToPack)
+   default void get(FrameSE3WaypointInterface otherToPack)
    {
       otherToPack.set(this);
    }
 
-   public default void getIncludingFrame(FrameSE3WaypointInterface otherToPack)
+   default void getIncludingFrame(FrameSE3WaypointInterface otherToPack)
    {
       otherToPack.setIncludingFrame(this);
    }
 
-   public default void get(FrameEuclideanWaypointInterface euclideanWaypointToPack, FrameSO3WaypointInterface so3WaypointToPack)
+   default void get(FrameEuclideanWaypointInterface euclideanWaypointToPack, FrameSO3WaypointInterface so3WaypointToPack)
    {
       get(euclideanWaypointToPack);
       get(so3WaypointToPack);
    }
 
-   public default void getIncludingFrame(FrameEuclideanWaypointInterface euclideanWaypointToPack, FrameSO3WaypointInterface so3WaypointToPack)
+   default void getIncludingFrame(FrameEuclideanWaypointInterface euclideanWaypointToPack, FrameSO3WaypointInterface so3WaypointToPack)
    {
       getIncludingFrame(euclideanWaypointToPack);
       getIncludingFrame(so3WaypointToPack);
    }
 
-   public default void get(FramePoint3DBasics positionToPack, FrameQuaternionBasics orientationToPack, FrameVector3DBasics linearVelocityToPack,
-                           FrameVector3DBasics angularVelocityToPack)
+   default void get(FramePoint3DBasics positionToPack, FrameQuaternionBasics orientationToPack, FrameVector3DBasics linearVelocityToPack,
+                    FrameVector3DBasics angularVelocityToPack)
    {
       getPosition(positionToPack);
       getOrientation(orientationToPack);
@@ -86,8 +86,8 @@ public interface FrameSE3WaypointInterface extends FrameEuclideanWaypointInterfa
       getAngularVelocity(angularVelocityToPack);
    }
 
-   public default void getIncludingFrame(FramePoint3DBasics positionToPack, FrameQuaternionBasics orientationToPack, FrameVector3DBasics linearVelocityToPack,
-                                         FrameVector3DBasics angularVelocityToPack)
+   default void getIncludingFrame(FramePoint3DBasics positionToPack, FrameQuaternionBasics orientationToPack, FrameVector3DBasics linearVelocityToPack,
+                                  FrameVector3DBasics angularVelocityToPack)
    {
       getPositionIncludingFrame(positionToPack);
       getOrientationIncludingFrame(orientationToPack);

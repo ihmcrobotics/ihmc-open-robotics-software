@@ -4,64 +4,64 @@ import us.ihmc.euclid.tools.EuclidCoreTools;
 
 public interface OneDoFWaypointInterface
 {
-   public abstract void setPosition(double position);
+   abstract void setPosition(double position);
 
-   public abstract void setVelocity(double velocity);
+   abstract void setVelocity(double velocity);
 
-   public abstract double getPosition();
+   abstract double getPosition();
 
-   public abstract double getVelocity();
+   abstract double getVelocity();
 
-   public default void setPositionToZero()
+   default void setPositionToZero()
    {
       setPosition(0.0);
    }
 
-   public default void setVelocityToZero()
+   default void setVelocityToZero()
    {
       setVelocity(0.0);
    }
 
-   public default void setPositionToNaN()
+   default void setPositionToNaN()
    {
       setPosition(Double.NaN);
    }
 
-   public default void setVelocityToNaN()
+   default void setVelocityToNaN()
    {
       setVelocity(Double.NaN);
    }
 
-   public default void set(double position, double velocity)
+   default void set(double position, double velocity)
    {
       setPosition(position);
       setVelocity(velocity);
    }
 
-   public default void get(OneDoFWaypointInterface otherToPack)
+   default void get(OneDoFWaypointInterface otherToPack)
    {
       otherToPack.set(this);
    }
 
-   public default boolean epsilonEquals(OneDoFWaypointInterface other, double epsilon)
+   default boolean epsilonEquals(OneDoFWaypointInterface other, double epsilon)
    {
       return EuclidCoreTools.epsilonEquals(getPosition(), other.getPosition(), epsilon)
             && EuclidCoreTools.epsilonEquals(getVelocity(), other.getVelocity(), epsilon);
    }
 
-   public default void set(OneDoFWaypointInterface other)
+   default void set(OneDoFWaypointInterface other)
    {
       setPosition(other.getPosition());
       setVelocity(other.getVelocity());
    }
 
-   public default void setToNaN()
+   default void setToNaN()
    {
       setPositionToNaN();
       setVelocityToNaN();
    }
 
-   public default void setToZero()
+   default void setToZero()
    {
       setPositionToZero();
       setVelocityToZero();

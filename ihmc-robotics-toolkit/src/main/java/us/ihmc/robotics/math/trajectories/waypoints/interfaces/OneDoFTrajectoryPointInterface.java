@@ -5,7 +5,7 @@ import us.ihmc.robotics.geometry.interfaces.OneDoFWaypointInterface;
 
 public interface OneDoFTrajectoryPointInterface extends TrajectoryPointInterface, OneDoFWaypointInterface
 {
-   public default void set(double time, double position, double velocity)
+   default void set(double time, double position, double velocity)
    {
       setTime(time);
       set(position, velocity);

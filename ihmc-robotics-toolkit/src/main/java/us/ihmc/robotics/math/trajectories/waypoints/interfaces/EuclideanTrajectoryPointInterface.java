@@ -7,7 +7,7 @@ import us.ihmc.robotics.geometry.interfaces.EuclideanWaypointInterface;
 
 public interface EuclideanTrajectoryPointInterface extends TrajectoryPointInterface, EuclideanWaypointInterface
 {
-   public default void set(double time, Point3DReadOnly position, Vector3DReadOnly linearVelocity)
+   default void set(double time, Point3DReadOnly position, Vector3DReadOnly linearVelocity)
    {
       setTime(time);
       set(position, linearVelocity);

@@ -11,37 +11,37 @@ import us.ihmc.robotics.geometry.interfaces.SO3WaypointInterface;
 
 public interface FrameSO3TrajectoryPointInterface extends SO3TrajectoryPointInterface, FrameSO3WaypointInterface
 {
-   public default void set(double time, FrameQuaternionReadOnly orientation, FrameVector3DReadOnly angularVelocity)
+   default void set(double time, FrameQuaternionReadOnly orientation, FrameVector3DReadOnly angularVelocity)
    {
       setTime(time);
       set(orientation, angularVelocity);
    }
 
-   public default void set(double time, FrameSO3WaypointInterface waypoint)
+   default void set(double time, FrameSO3WaypointInterface waypoint)
    {
       setTime(time);
       set(waypoint);
    }
 
-   public default void setIncludingFrame(double time, FrameSO3WaypointInterface waypoint)
+   default void setIncludingFrame(double time, FrameSO3WaypointInterface waypoint)
    {
       setTime(time);
       setIncludingFrame(waypoint);
    }
 
-   public default void setIncludingFrame(double time, FrameQuaternionReadOnly orientation, FrameVector3DReadOnly angularVelocity)
+   default void setIncludingFrame(double time, FrameQuaternionReadOnly orientation, FrameVector3DReadOnly angularVelocity)
    {
       setTime(time);
       setIncludingFrame(orientation, angularVelocity);
    }
 
-   public default void setIncludingFrame(ReferenceFrame referenceFrame, double time, QuaternionReadOnly orientation, Vector3DReadOnly angularVelocity)
+   default void setIncludingFrame(ReferenceFrame referenceFrame, double time, QuaternionReadOnly orientation, Vector3DReadOnly angularVelocity)
    {
       setTime(time);
       setIncludingFrame(referenceFrame, orientation, angularVelocity);
    }
 
-   public default void setIncludingFrame(ReferenceFrame referenceFrame, double time, SO3WaypointInterface waypoint)
+   default void setIncludingFrame(ReferenceFrame referenceFrame, double time, SO3WaypointInterface waypoint)
    {
       setTime(time);
       setIncludingFrame(referenceFrame, waypoint);

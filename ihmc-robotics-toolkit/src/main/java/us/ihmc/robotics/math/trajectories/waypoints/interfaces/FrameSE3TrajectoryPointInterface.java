@@ -16,14 +16,14 @@ import us.ihmc.robotics.geometry.interfaces.SE3WaypointInterface;
 public interface FrameSE3TrajectoryPointInterface
       extends SE3TrajectoryPointInterface, FrameSE3WaypointInterface, FrameEuclideanTrajectoryPointInterface, FrameSO3TrajectoryPointInterface
 {
-   public default void set(double time, FramePoint3DReadOnly position, FrameQuaternionReadOnly orientation, FrameVector3DReadOnly linearVelocity,
-                           FrameVector3DReadOnly angularVelocity)
+   default void set(double time, FramePoint3DReadOnly position, FrameQuaternionReadOnly orientation, FrameVector3DReadOnly linearVelocity,
+                    FrameVector3DReadOnly angularVelocity)
    {
       setTime(time);
       set(position, orientation, linearVelocity, angularVelocity);
    }
 
-   public default void set(double time, FrameSE3WaypointInterface waypoint)
+   default void set(double time, FrameSE3WaypointInterface waypoint)
    {
       setTime(time);
       set(waypoint);
@@ -45,27 +45,27 @@ public interface FrameSE3TrajectoryPointInterface
       set(so3Waypoint);
    }
 
-   public default void setIncludingFrame(double time, FrameSE3WaypointInterface waypoint)
+   default void setIncludingFrame(double time, FrameSE3WaypointInterface waypoint)
    {
       setTime(time);
       setIncludingFrame(waypoint);
    }
 
-   public default void setIncludingFrame(double time, FramePoint3DReadOnly position, FrameQuaternionReadOnly orientation, FrameVector3DReadOnly linearVelocity,
-                                         FrameVector3DReadOnly angularVelocity)
+   default void setIncludingFrame(double time, FramePoint3DReadOnly position, FrameQuaternionReadOnly orientation, FrameVector3DReadOnly linearVelocity,
+                                  FrameVector3DReadOnly angularVelocity)
    {
       setTime(time);
       setIncludingFrame(position, orientation, linearVelocity, angularVelocity);
    }
 
-   public default void setIncludingFrame(ReferenceFrame referenceFrame, double time, Point3DReadOnly position, QuaternionReadOnly orientation,
-                                         Vector3DReadOnly linearVelocity, Vector3DReadOnly angularVelocity)
+   default void setIncludingFrame(ReferenceFrame referenceFrame, double time, Point3DReadOnly position, QuaternionReadOnly orientation,
+                                  Vector3DReadOnly linearVelocity, Vector3DReadOnly angularVelocity)
    {
       setTime(time);
       setIncludingFrame(referenceFrame, position, orientation, linearVelocity, angularVelocity);
    }
 
-   public default void setIncludingFrame(ReferenceFrame referenceFrame, double time, SE3WaypointInterface waypoint)
+   default void setIncludingFrame(ReferenceFrame referenceFrame, double time, SE3WaypointInterface waypoint)
    {
       setTime(time);
       setIncludingFrame(referenceFrame, waypoint);
