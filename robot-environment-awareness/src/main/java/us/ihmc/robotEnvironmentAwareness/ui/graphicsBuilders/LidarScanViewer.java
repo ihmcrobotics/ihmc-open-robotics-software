@@ -4,7 +4,6 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 
 import controller_msgs.msg.dds.LidarScanMessage;
-import javafx.beans.property.Property;
 import javafx.collections.ObservableList;
 import javafx.scene.Group;
 import javafx.scene.Node;
@@ -25,11 +24,6 @@ import us.ihmc.robotEnvironmentAwareness.communication.REAUIMessager;
  */
 public class LidarScanViewer implements Runnable
 {
-   public enum SourceType
-   {
-      Lidar, PointCloud2
-   }
-
    private static final float SCAN_POINT_SIZE = 0.0075f;
    private static final Material defaultMaterial = new PhongMaterial(Color.DARKRED);
 
@@ -46,18 +40,12 @@ public class LidarScanViewer implements Runnable
    private final AtomicReference<Integer> numberOfScans;
    private final AtomicInteger currentScanIndex = new AtomicInteger(0);
 
-   private final Property<SourceType> sourceType;
-   private final AtomicReference<SourceType> currentSourceType;
-
    public LidarScanViewer(REAUIMessager uiMessager)
    {
       newMessageToRender = uiMessager.createInput(REAModuleAPI.LidarScanState);
       enable = uiMessager.createInput(REAModuleAPI.UILidarScanShow, false);
       clear = uiMessager.createInput(REAModuleAPI.UILidarScanClear, false);
       numberOfScans = uiMessager.createInput(REAModuleAPI.UILidarScanSize, 50);
-
-      sourceType = uiMessager.createPropertyInput(REAModuleAPI.UILidarScanSourceType, SourceType.Lidar);
-      currentSourceType = new AtomicReference<LidarScanViewer.SourceType>(SourceType.Lidar);
    }
 
    public void render()
@@ -95,12 +83,6 @@ public class LidarScanViewer implements Runnable
    {
       if (!enable.get())
          return;
-
-      if (currentSourceType.get() != sourceType.getValue())
-      {
-         System.out.println("type of source is changed.");
-         currentSourceType.set(sourceType.getValue());
-      }
 
       LidarScanMessage message = newMessageToRender.getAndSet(null);
 

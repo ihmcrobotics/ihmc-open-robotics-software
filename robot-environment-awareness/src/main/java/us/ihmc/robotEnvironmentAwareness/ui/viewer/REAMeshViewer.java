@@ -25,6 +25,11 @@ import us.ihmc.robotEnvironmentAwareness.ui.graphicsBuilders.PlanarRegionsMeshBu
 
 public class REAMeshViewer
 {
+   public enum SourceType
+   {
+      Lidar, PointCloud2;
+   }
+   
    private static final int SLOW_PACE_UPDATE_PERIOD = 2000;
    private static final int MEDIUM_PACE_UPDATE_PERIOD = 100;
    private static final int HIGH_PACE_UPDATE_PERIOD = 10;

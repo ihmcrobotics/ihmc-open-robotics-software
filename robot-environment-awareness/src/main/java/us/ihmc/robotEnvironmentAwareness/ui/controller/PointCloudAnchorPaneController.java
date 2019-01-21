@@ -8,7 +8,7 @@ import javafx.scene.control.Slider;
 import javafx.scene.control.ToggleButton;
 import us.ihmc.javaFXToolkit.messager.MessageBidirectionalBinding.PropertyToMessageTypeConverter;
 import us.ihmc.robotEnvironmentAwareness.communication.REAModuleAPI;
-import us.ihmc.robotEnvironmentAwareness.ui.graphicsBuilders.LidarScanViewer.SourceType;
+import us.ihmc.robotEnvironmentAwareness.ui.viewer.REAMeshViewer.SourceType;
 
 public class PointCloudAnchorPaneController extends REABasicUIController
 {
