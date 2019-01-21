@@ -22,7 +22,7 @@ import static us.ihmc.communication.ROS2Tools.getTopicNameGenerator;
 
 public class QuadrupedBodyTeleopModule extends QuadrupedToolboxModule
 {
-   private static final int updatePeriodMilliseconds = 50;
+   private static final int updatePeriodMilliseconds = 75;
 
    private final QuadrupedBodyTeleopController bodyTeleopController;
 
