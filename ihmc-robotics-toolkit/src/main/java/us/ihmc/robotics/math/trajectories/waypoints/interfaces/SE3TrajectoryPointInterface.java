@@ -35,6 +35,11 @@ public interface SE3TrajectoryPointInterface extends TrajectoryPointInterface, S
       set(so3Waypoint);
    }
 
+   default void get(SE3TrajectoryPointInterface otherToPack)
+   {
+      otherToPack.set(this);
+   }
+
    default boolean epsilonEquals(SE3TrajectoryPointInterface other, double epsilon)
    {
       boolean timeEquals = EuclidCoreTools.epsilonEquals(getTime(), other.getTime(), epsilon);

@@ -100,6 +100,6 @@ public class FrameSO3TrajectoryPoint implements FrameSO3TrajectoryPointInterface
    @Override
    public String toString()
    {
-      return "SO3 trajectory point: (time = " + WaypointToStringTools.format(getTime()) + ", " + WaypointToStringTools.waypointToString(so3Waypoint) + ")";
+      return "SO3 trajectory point: (time = " + WaypointToStringTools.formatTime(getTime()) + ", " + WaypointToStringTools.waypointToString(so3Waypoint) + ")";
    }
 }
