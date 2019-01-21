@@ -8,7 +8,10 @@ import us.ihmc.euclid.tools.EuclidCoreTools;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.euclid.tuple4D.interfaces.QuaternionReadOnly;
+import us.ihmc.robotics.geometry.interfaces.FrameEuclideanWaypointInterface;
 import us.ihmc.robotics.geometry.interfaces.FrameSE3WaypointInterface;
+import us.ihmc.robotics.geometry.interfaces.FrameSO3WaypointInterface;
+import us.ihmc.robotics.geometry.interfaces.SE3WaypointInterface;
 
 public interface FrameSE3TrajectoryPointInterface
       extends SE3TrajectoryPointInterface, FrameSE3WaypointInterface, FrameEuclideanTrajectoryPointInterface, FrameSO3TrajectoryPointInterface
@@ -18,6 +21,34 @@ public interface FrameSE3TrajectoryPointInterface
    {
       setTime(time);
       set(position, orientation, linearVelocity, angularVelocity);
+   }
+
+   public default void set(double time, FrameSE3WaypointInterface waypoint)
+   {
+      setTime(time);
+      set(waypoint);
+   }
+
+   default void set(double time, FrameEuclideanWaypointInterface euclideanWaypoint, FrameSO3WaypointInterface so3Waypoint)
+   {
+      setTime(time);
+      set(euclideanWaypoint);
+      set(so3Waypoint);
+   }
+
+   default void setIncludingFrame(double time, FrameEuclideanWaypointInterface euclideanWaypoint, FrameSO3WaypointInterface so3Waypoint)
+   {
+      setTime(time);
+      euclideanWaypoint.checkReferenceFrameMatch(so3Waypoint);
+      setReferenceFrame(euclideanWaypoint.getReferenceFrame());
+      set(euclideanWaypoint);
+      set(so3Waypoint);
+   }
+
+   public default void setIncludingFrame(double time, FrameSE3WaypointInterface waypoint)
+   {
+      setTime(time);
+      setIncludingFrame(waypoint);
    }
 
    public default void setIncludingFrame(double time, FramePoint3DReadOnly position, FrameQuaternionReadOnly orientation, FrameVector3DReadOnly linearVelocity,
@@ -32,6 +63,12 @@ public interface FrameSE3TrajectoryPointInterface
    {
       setTime(time);
       setIncludingFrame(referenceFrame, position, orientation, linearVelocity, angularVelocity);
+   }
+
+   public default void setIncludingFrame(ReferenceFrame referenceFrame, double time, SE3WaypointInterface waypoint)
+   {
+      setTime(time);
+      setIncludingFrame(referenceFrame, waypoint);
    }
 
    default void set(FrameSE3TrajectoryPointInterface other)

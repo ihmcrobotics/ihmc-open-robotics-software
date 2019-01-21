@@ -6,6 +6,7 @@ import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
 import us.ihmc.euclid.transform.interfaces.Transform;
 import us.ihmc.robotics.geometry.frameObjects.FrameSO3Waypoint;
 import us.ihmc.robotics.math.trajectories.waypoints.interfaces.FrameSO3TrajectoryPointInterface;
+import us.ihmc.robotics.math.trajectories.waypoints.interfaces.SO3TrajectoryPointInterface;
 
 public class FrameSO3TrajectoryPoint implements FrameSO3TrajectoryPointInterface
 {
@@ -16,9 +17,24 @@ public class FrameSO3TrajectoryPoint implements FrameSO3TrajectoryPointInterface
    {
    }
 
+   public FrameSO3TrajectoryPoint(ReferenceFrame referenceFrame)
+   {
+      setToZero(referenceFrame);
+   }
+
    public FrameSO3TrajectoryPoint(double time, FrameQuaternionReadOnly orientation, FrameVector3DReadOnly angularVelocity)
    {
       setIncludingFrame(time, orientation, angularVelocity);
+   }
+
+   public FrameSO3TrajectoryPoint(FrameSO3TrajectoryPointInterface other)
+   {
+      setIncludingFrame(other);
+   }
+
+   public FrameSO3TrajectoryPoint(ReferenceFrame referenceFrame, SO3TrajectoryPointInterface other)
+   {
+      setIncludingFrame(referenceFrame, other);
    }
 
    @Override

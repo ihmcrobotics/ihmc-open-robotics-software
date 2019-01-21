@@ -1,5 +1,7 @@
 package us.ihmc.robotics.geometry.interfaces;
 
+import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameChangeable;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DBasics;
@@ -74,6 +76,28 @@ public interface FrameEuclideanWaypointInterface extends EuclideanWaypointInterf
       set(position, linearVelocity);
    }
 
+   public default void setIncludingFrame(ReferenceFrame referenceFrame, EuclideanWaypointInterface other)
+   {
+      setReferenceFrame(referenceFrame);
+      set(other);
+   }
+
+   public default void setIncludingFrame(FrameEuclideanWaypointInterface other)
+   {
+      setReferenceFrame(other.getReferenceFrame());
+      set(other);
+   }
+
+   public default void get(FrameEuclideanWaypointInterface otherToPack)
+   {
+      otherToPack.set(this);
+   }
+
+   public default void getIncludingFrame(FrameEuclideanWaypointInterface otherToPack)
+   {
+      otherToPack.setIncludingFrame(this);
+   }
+
    public default void get(FramePoint3DBasics positionToPack, FrameVector3DBasics linearVelocityToPack)
    {
       getPosition(positionToPack);
@@ -116,5 +140,17 @@ public interface FrameEuclideanWaypointInterface extends EuclideanWaypointInterf
    {
       setReferenceFrame(referenceFrame);
       setToZero();
+   }
+
+   @Override
+   public default FramePoint3DBasics getPositionCopy()
+   {
+      return new FramePoint3D(getPosition());
+   }
+
+   @Override
+   public default FrameVector3DBasics getLinearVelocityCopy()
+   {
+      return new FrameVector3D(getLinearVelocity());
    }
 }

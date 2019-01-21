@@ -37,6 +37,15 @@ public class FrameSO3TrajectoryPointList implements FrameTrajectoryPointListInte
       newTrajectoryPoint.set(trajectoryPoint);
    }
 
+   public void setIncludingFrame(FrameSE3TrajectoryPointList trajectoryPointList)
+   {
+      clear(trajectoryPointList.getReferenceFrame());
+      for (int i = 0; i < trajectoryPointList.getNumberOfTrajectoryPoints(); i++)
+      {
+         addTrajectoryPoint(trajectoryPointList.getTrajectoryPoint(i));
+      }
+   }
+
    @Override
    public FrameSO3TrajectoryPoint getTrajectoryPoint(int trajectoryPointIndex)
    {

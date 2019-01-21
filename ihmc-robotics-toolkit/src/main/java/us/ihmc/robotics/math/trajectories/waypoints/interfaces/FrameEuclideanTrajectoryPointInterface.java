@@ -6,6 +6,7 @@ import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
 import us.ihmc.euclid.tools.EuclidCoreTools;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
+import us.ihmc.robotics.geometry.interfaces.EuclideanWaypointInterface;
 import us.ihmc.robotics.geometry.interfaces.FrameEuclideanWaypointInterface;
 
 public interface FrameEuclideanTrajectoryPointInterface extends EuclideanTrajectoryPointInterface, FrameEuclideanWaypointInterface
@@ -14,6 +15,18 @@ public interface FrameEuclideanTrajectoryPointInterface extends EuclideanTraject
    {
       setTime(time);
       set(position, linearVelocity);
+   }
+
+   public default void set(double time, FrameEuclideanWaypointInterface waypoint)
+   {
+      setTime(time);
+      set(waypoint);
+   }
+
+   public default void setIncludingFrame(double time, FrameEuclideanWaypointInterface waypoint)
+   {
+      setTime(time);
+      setIncludingFrame(waypoint);
    }
 
    public default void setIncludingFrame(double time, FramePoint3DReadOnly position, FrameVector3DReadOnly linearVelocity)
@@ -26,6 +39,12 @@ public interface FrameEuclideanTrajectoryPointInterface extends EuclideanTraject
    {
       setTime(time);
       setIncludingFrame(referenceFrame, position, linearVelocity);
+   }
+
+   public default void setIncludingFrame(ReferenceFrame referenceFrame, double time, EuclideanWaypointInterface waypoint)
+   {
+      setTime(time);
+      setIncludingFrame(referenceFrame, waypoint);
    }
 
    default void set(FrameEuclideanTrajectoryPointInterface other)

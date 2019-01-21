@@ -11,6 +11,20 @@ public class SimpleEuclideanTrajectoryPoint implements EuclideanTrajectoryPointI
    private final EuclideanWaypoint euclideanWaypoint = new EuclideanWaypoint();
    private final TrajectoryPoint trajectoryPoint = new TrajectoryPoint();
 
+   public SimpleEuclideanTrajectoryPoint()
+   {
+   }
+
+   public SimpleEuclideanTrajectoryPoint(EuclideanTrajectoryPointInterface other)
+   {
+      set(other);
+   }
+
+   public SimpleEuclideanTrajectoryPoint(double time, Point3DReadOnly position, Vector3DReadOnly linearVelocity)
+   {
+      set(time, position, linearVelocity);
+   }
+
    @Override
    public Point3DReadOnly getPosition()
    {

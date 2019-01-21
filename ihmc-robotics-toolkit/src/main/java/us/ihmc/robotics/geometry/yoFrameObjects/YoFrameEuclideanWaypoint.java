@@ -1,26 +1,40 @@
 package us.ihmc.robotics.geometry.yoFrameObjects;
 
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DBasics;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
-import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DBasics;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
 import us.ihmc.euclid.transform.interfaces.Transform;
 import us.ihmc.robotics.geometry.interfaces.FrameEuclideanWaypointInterface;
 import us.ihmc.robotics.math.trajectories.waypoints.WaypointToStringTools;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.frameObjects.YoMutableFramePoint3D;
 import us.ihmc.yoVariables.variable.frameObjects.YoMutableFrameVector3D;
 
 public class YoFrameEuclideanWaypoint implements FrameEuclideanWaypointInterface
 {
-   private final FramePoint3DBasics position;
-   private final FrameVector3DBasics linearVelocity;
+   private final YoMutableFramePoint3D position;
+   private final YoMutableFrameVector3D linearVelocity;
 
    public YoFrameEuclideanWaypoint(String namePrefix, String nameSuffix, YoVariableRegistry registry)
    {
       position = new YoMutableFramePoint3D(namePrefix + "Position", nameSuffix, registry);
       linearVelocity = new YoMutableFrameVector3D(namePrefix + "LinearVelocity", nameSuffix, registry);
+   }
+
+   public YoDouble getYoX()
+   {
+      return position.getYoX();
+   }
+
+   public YoDouble getYoY()
+   {
+      return position.getYoY();
+   }
+
+   public YoDouble getYoZ()
+   {
+      return position.getYoZ();
    }
 
    @Override

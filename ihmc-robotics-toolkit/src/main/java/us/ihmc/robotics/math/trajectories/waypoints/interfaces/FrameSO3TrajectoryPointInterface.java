@@ -7,6 +7,7 @@ import us.ihmc.euclid.tools.EuclidCoreTools;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.euclid.tuple4D.interfaces.QuaternionReadOnly;
 import us.ihmc.robotics.geometry.interfaces.FrameSO3WaypointInterface;
+import us.ihmc.robotics.geometry.interfaces.SO3WaypointInterface;
 
 public interface FrameSO3TrajectoryPointInterface extends SO3TrajectoryPointInterface, FrameSO3WaypointInterface
 {
@@ -14,6 +15,18 @@ public interface FrameSO3TrajectoryPointInterface extends SO3TrajectoryPointInte
    {
       setTime(time);
       set(orientation, angularVelocity);
+   }
+
+   public default void set(double time, FrameSO3WaypointInterface waypoint)
+   {
+      setTime(time);
+      set(waypoint);
+   }
+
+   public default void setIncludingFrame(double time, FrameSO3WaypointInterface waypoint)
+   {
+      setTime(time);
+      setIncludingFrame(waypoint);
    }
 
    public default void setIncludingFrame(double time, FrameQuaternionReadOnly orientation, FrameVector3DReadOnly angularVelocity)
@@ -26,6 +39,12 @@ public interface FrameSO3TrajectoryPointInterface extends SO3TrajectoryPointInte
    {
       setTime(time);
       setIncludingFrame(referenceFrame, orientation, angularVelocity);
+   }
+
+   public default void setIncludingFrame(ReferenceFrame referenceFrame, double time, SO3WaypointInterface waypoint)
+   {
+      setTime(time);
+      setIncludingFrame(referenceFrame, waypoint);
    }
 
    default void set(FrameSO3TrajectoryPointInterface other)
