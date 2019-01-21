@@ -1,10 +1,14 @@
 package us.ihmc.robotEnvironmentAwareness.ui.controller;
 
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
+import javafx.scene.control.ComboBox;
 import javafx.scene.control.Slider;
 import javafx.scene.control.ToggleButton;
 import us.ihmc.javaFXToolkit.messager.MessageBidirectionalBinding.PropertyToMessageTypeConverter;
 import us.ihmc.robotEnvironmentAwareness.communication.REAModuleAPI;
+import us.ihmc.robotEnvironmentAwareness.ui.graphicsBuilders.LidarScanViewer.SourceType;
 
 public class PointCloudAnchorPaneController extends REABasicUIController
 {
@@ -12,6 +16,8 @@ public class PointCloudAnchorPaneController extends REABasicUIController
    private ToggleButton enableButton;
    @FXML
    private Slider scanHistorySizeSlider;
+   @FXML
+   private ComboBox<SourceType> sourceTypeComboBox;
 
    private final PropertyToMessageTypeConverter<Integer, Number> numberToIntegerConverter = new PropertyToMessageTypeConverter<Integer, Number>()
    {
@@ -32,11 +38,21 @@ public class PointCloudAnchorPaneController extends REABasicUIController
    {
    }
 
+   public void setupControls()
+   {
+      ObservableList<SourceType> sourceTypeOptions = FXCollections.observableArrayList(SourceType.values());
+      sourceTypeComboBox.setItems(sourceTypeOptions);
+      sourceTypeComboBox.setValue(SourceType.Lidar);
+   }
+
    public void bindControls()
    {
+      setupControls();
       load();
       uiMessager.bindBidirectionalInternal(REAModuleAPI.UILidarScanShow, enableButton.selectedProperty(), true);
       uiMessager.bindBidirectionalInternal(REAModuleAPI.UILidarScanSize, scanHistorySizeSlider.valueProperty(), numberToIntegerConverter, true);
+      uiMessager.bindBidirectionalInternal(REAModuleAPI.UILidarScanSourceType, sourceTypeComboBox.valueProperty(), true);
+
    }
 
    @FXML
@@ -50,11 +66,13 @@ public class PointCloudAnchorPaneController extends REABasicUIController
    {
       saveUIControlProperty(REAModuleAPI.UILidarScanShow, enableButton);
       saveUIControlProperty(REAModuleAPI.UILidarScanSize, scanHistorySizeSlider);
+      saveUIControlProperty(REAModuleAPI.UILidarScanSourceType, sourceTypeComboBox);
    }
 
    public void load()
    {
       loadUIControlProperty(REAModuleAPI.UILidarScanShow, enableButton);
       loadUIControlProperty(REAModuleAPI.UILidarScanSize, scanHistorySizeSlider);
+      loadUIControlProperty(REAModuleAPI.UILidarScanSourceType, sourceTypeComboBox);
    }
 }

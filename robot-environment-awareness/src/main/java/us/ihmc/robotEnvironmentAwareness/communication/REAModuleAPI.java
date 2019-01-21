@@ -19,6 +19,7 @@ import us.ihmc.robotEnvironmentAwareness.geometry.ConcaveHullFactoryParameters;
 import us.ihmc.robotEnvironmentAwareness.planarRegion.IntersectionEstimationParameters;
 import us.ihmc.robotEnvironmentAwareness.planarRegion.PlanarRegionSegmentationParameters;
 import us.ihmc.robotEnvironmentAwareness.planarRegion.PolygonizerParameters;
+import us.ihmc.robotEnvironmentAwareness.ui.graphicsBuilders.LidarScanViewer.SourceType;
 import us.ihmc.robotEnvironmentAwareness.ui.graphicsBuilders.OcTreeMeshBuilder.ColoringType;
 import us.ihmc.robotEnvironmentAwareness.ui.graphicsBuilders.OcTreeMeshBuilder.DisplayType;
 
@@ -31,6 +32,7 @@ public class REAModuleAPI
 
    private static final CategoryTheme OcTree = apiFactory.createCategoryTheme("OcTree");
    private static final CategoryTheme Lidar = apiFactory.createCategoryTheme("Lidar");
+   private static final CategoryTheme StereoVisionPointCloud = apiFactory.createCategoryTheme("StereoVisionPointCloud");
    private static final CategoryTheme BoundingBox = apiFactory.createCategoryTheme("BoundingBox");
    private static final CategoryTheme NormalEstimation = apiFactory.createCategoryTheme("NormalEstimation");
    private static final CategoryTheme PlanarRegions = apiFactory.createCategoryTheme("PlanarRegions");
@@ -44,6 +46,7 @@ public class REAModuleAPI
    private static final CategoryTheme Node = apiFactory.createCategoryTheme("Node");
    private static final CategoryTheme Request = apiFactory.createCategoryTheme("Request");
    private static final CategoryTheme DataExporter = apiFactory.createCategoryTheme("DataExporter");
+   private static final CategoryTheme SourceType = apiFactory.createCategoryTheme("SourceType");
 
    private static final TypedTopicTheme<Boolean> Enable = apiFactory.createTypedTopicTheme("Enable");
    private static final TypedTopicTheme<Boolean> Clear = apiFactory.createTypedTopicTheme("Clear");
@@ -61,6 +64,7 @@ public class REAModuleAPI
    private static final TopicTheme Data = apiFactory.createTopicTheme("Data");
    private static final TopicTheme Color = apiFactory.createTopicTheme("Color");
    private static final TopicTheme Display = apiFactory.createTopicTheme("Display");
+   private static final TopicTheme Type = apiFactory.createTopicTheme("Type");
 
    private static final Category Root = apiFactory.createRootCategory(apiFactory.createCategoryTheme("REA"));
 
@@ -104,6 +108,7 @@ public class REAModuleAPI
    public static final Topic<Boolean> UILidarScanShow = Root.child(UI).child(Lidar).topic(Show);
    public static final Topic<Boolean> UILidarScanClear = Root.child(UI).child(Lidar).topic(Clear);
    public static final Topic<Integer> UILidarScanSize = Root.child(UI).child(Lidar).topic(Size);
+   public static final Topic<SourceType> UILidarScanSourceType = Root.child(UI).child(Lidar).topic(Type);
 
    public static final Topic<Boolean> UISegmentationDataExportRequest = Root.child(UI).child(DataExporter).child(Segmentation).topic(Export);
    public static final Topic<String> UISegmentationDataExporterDirectory = Root.child(UI).child(DataExporter).child(Segmentation).topic(Path);
