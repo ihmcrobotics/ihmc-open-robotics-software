@@ -2,6 +2,7 @@ package us.ihmc.robotEnvironmentAwareness.communication;
 
 import controller_msgs.msg.dds.LidarScanMessage;
 import controller_msgs.msg.dds.PlanarRegionsListMessage;
+import controller_msgs.msg.dds.StereoVisionPointCloudMessage;
 import us.ihmc.jOctoMap.normalEstimation.NormalEstimationParameters;
 import us.ihmc.messager.MessagerAPIFactory;
 import us.ihmc.messager.MessagerAPIFactory.Category;
@@ -19,9 +20,9 @@ import us.ihmc.robotEnvironmentAwareness.geometry.ConcaveHullFactoryParameters;
 import us.ihmc.robotEnvironmentAwareness.planarRegion.IntersectionEstimationParameters;
 import us.ihmc.robotEnvironmentAwareness.planarRegion.PlanarRegionSegmentationParameters;
 import us.ihmc.robotEnvironmentAwareness.planarRegion.PolygonizerParameters;
-import us.ihmc.robotEnvironmentAwareness.ui.graphicsBuilders.LidarScanViewer.SourceType;
 import us.ihmc.robotEnvironmentAwareness.ui.graphicsBuilders.OcTreeMeshBuilder.ColoringType;
 import us.ihmc.robotEnvironmentAwareness.ui.graphicsBuilders.OcTreeMeshBuilder.DisplayType;
+import us.ihmc.robotEnvironmentAwareness.ui.viewer.REAMeshViewer.SourceType;
 
 public class REAModuleAPI
 {
@@ -116,6 +117,7 @@ public class REAModuleAPI
    public static final Topic<String> UIPlanarRegionDataExporterDirectory = Root.child(UI).child(DataExporter).child(PlanarRegions).topic(Path);
 
    public static final Topic<LidarScanMessage> LidarScanState = ModuleCategory.child(Lidar).topic(Data);
+   public static final Topic<StereoVisionPointCloudMessage> StereoVisionPointCloudState = ModuleCategory.child(StereoVisionPointCloud).topic(Data);
    public static final Topic<NormalOcTreeMessage> OcTreeState = OcTreeCategory.topic(Data);
    public static final Topic<NormalOcTreeMessage> OcTreeBufferState = OcTreeCategory.child(Buffer).topic(Data);
    public static final Topic<PlanarRegionsListMessage> PlanarRegionsState = PlanarRegionsCategory.topic(Data);
