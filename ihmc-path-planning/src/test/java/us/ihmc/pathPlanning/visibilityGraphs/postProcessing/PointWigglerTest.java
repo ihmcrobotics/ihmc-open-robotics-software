@@ -18,7 +18,7 @@ import static junit.framework.TestCase.assertTrue;
 
 public class PointWigglerTest
 {
-   private static final long timeout = 30000;
+   private static final long timeout = 30000 * 100;
    private static final double epsilon = 1e-10;
    private static final int iters = 500;
 
@@ -116,6 +116,41 @@ public class PointWigglerTest
 
       EuclidCoreTestTools.assertVector2DGeometricallyEquals(expectedVector, calculatedVector, epsilon);
       EuclidCoreTestTools.assertPoint2DGeometricallyEquals(shiftedPointExpected, shiftedPoint, epsilon);
+   }
+
+   @Test(timeout = timeout)
+   public void testWithinBoundsOfOneButNotTheOther()
+   {
+      Point2DReadOnly pointToShift = new Point2D(0.15, 0.25);
+      double desiredDistance = 0.5;
+
+      Point2D leftBound = new Point2D(0.15, 0.3);
+      Point2D rightBound = new Point2D(0.15, -0.6);
+
+      Point2D codedPointExpected = new Point2D(0.15, -0.15);
+      Vector2D codedShiftExpected = new Vector2D(0.0, -0.3);
+
+
+      List<Point2DReadOnly> pointsToAvoidByDistance = new ArrayList<>();
+      pointsToAvoidByDistance.add(rightBound);
+      pointsToAvoidByDistance.add(leftBound);
+
+      Vector2DReadOnly expectedVector = computeShiftVectorAssumingNoLimits(pointsToAvoidByDistance, pointToShift, desiredDistance);
+      Vector2DReadOnly calculatedVector = PointWiggler
+            .computeVectorToMaximizeAverageDistanceFromPoints(pointToShift, pointsToAvoidByDistance, desiredDistance, 0.0);
+
+      EuclidCoreTestTools.assertVector2DGeometricallyEquals(expectedVector, calculatedVector, epsilon);
+
+      Point2D shiftedPointExpected = new Point2D(pointToShift);
+      shiftedPointExpected.add(expectedVector);
+
+      Point2D shiftedPoint = new Point2D(pointToShift);
+      shiftedPoint.add(calculatedVector);
+
+
+
+      EuclidCoreTestTools.assertPoint2DGeometricallyEquals(shiftedPointExpected, shiftedPoint, epsilon);
+      EuclidCoreTestTools.assertPoint2DGeometricallyEquals(codedPointExpected, shiftedPoint, epsilon);
    }
 
    @Test(timeout = timeout)

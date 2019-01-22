@@ -91,19 +91,19 @@ public class PointWiggler
 
          double minimumDistance = pointToShiftFromInfo.minimumDistanceToPoint;
 
-         if (pointToShiftFromInfo.distanceToShift > 0)
-         {
-            Vector2DReadOnly desiredVectorToPoint = pointToShiftFromInfo.desiredVector;
+         Vector2DReadOnly desiredVectorToPoint = pointToShiftFromInfo.desiredVector;
 
-            b.add(0, 0, -2.0 * (pointToShiftFrom.getX() + desiredVectorToPoint.getX()));
-            b.add(1, 0, -2.0 * (pointToShiftFrom.getY() + desiredVectorToPoint.getY()));
+         double desiredX = pointToShiftFrom.getX() + desiredVectorToPoint.getX();
+         double desiredY = pointToShiftFrom.getY() + desiredVectorToPoint.getY();
+         b.add(0, 0, -2.0 * desiredX);
+         b.add(1, 0, -2.0 * desiredY);
 
-            CI.set(numberOfPointsAdded, 0, -desiredVectorToPoint.getX());
-            CI.set(numberOfPointsAdded, 1, -desiredVectorToPoint.getY());
-            ci.set(numberOfPointsAdded, -minimumDistance - desiredVectorToPoint.getX() * pointToShiftFrom.getX() - desiredVectorToPoint.getY() * pointToShiftFrom.getY());
+         CI.set(numberOfPointsAdded, 0, -desiredVectorToPoint.getX());
+         CI.set(numberOfPointsAdded, 1, -desiredVectorToPoint.getY());
+         ci.set(numberOfPointsAdded,
+                -minimumDistance - desiredVectorToPoint.getX() * pointToShiftFrom.getX() - desiredVectorToPoint.getY() * pointToShiftFrom.getY());
 
-            numberOfPointsAdded++;
-         }
+         numberOfPointsAdded++;
       }
 
       // remove unused constraints
@@ -144,7 +144,8 @@ public class PointWiggler
       private final Point2DReadOnly pointToAvoid;
       private final Vector2D desiredVector;
 
-      public PointInfo(Point2DReadOnly pointToAvoid, Point2DReadOnly pointToShift, double desiredDistanceToPoint, double minimumDistanceToPoint, double distanceToPoint)
+      public PointInfo(Point2DReadOnly pointToAvoid, Point2DReadOnly pointToShift, double desiredDistanceToPoint, double minimumDistanceToPoint,
+                       double distanceToPoint)
       {
          this.desiredDistanceToPoint = desiredDistanceToPoint;
          this.minimumDistanceToPoint = minimumDistanceToPoint;
