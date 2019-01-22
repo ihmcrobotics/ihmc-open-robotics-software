@@ -8,7 +8,7 @@ import us.ihmc.robotics.geometry.interfaces.EuclideanWaypointInterface;
 import us.ihmc.robotics.geometry.interfaces.SE3WaypointInterface;
 import us.ihmc.robotics.geometry.interfaces.SO3WaypointInterface;
 
-public interface SE3TrajectoryPointInterface extends TrajectoryPointInterface, SE3WaypointInterface
+public interface SE3TrajectoryPointInterface extends TrajectoryPointInterface, SE3WaypointInterface, EuclideanTrajectoryPointInterface, SO3TrajectoryPointInterface
 {
    default void set(double time, Point3DReadOnly position, QuaternionReadOnly orientation, Vector3DReadOnly linearVelocity, Vector3DReadOnly angularVelocity)
    {
@@ -38,6 +38,12 @@ public interface SE3TrajectoryPointInterface extends TrajectoryPointInterface, S
    default void get(SE3TrajectoryPointInterface otherToPack)
    {
       otherToPack.set(this);
+   }
+
+   default void get(EuclideanTrajectoryPointInterface euclideanTrajectoryPointToPack, SO3TrajectoryPointInterface so3TrajectoryPointToPack)
+   {
+      get(euclideanTrajectoryPointToPack);
+      get(so3TrajectoryPointToPack);
    }
 
    default boolean epsilonEquals(SE3TrajectoryPointInterface other, double epsilon)
