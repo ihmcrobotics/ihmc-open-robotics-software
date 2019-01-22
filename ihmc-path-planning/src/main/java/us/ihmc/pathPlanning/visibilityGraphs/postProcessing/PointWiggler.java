@@ -8,6 +8,7 @@ import us.ihmc.euclid.tuple2D.Vector2D;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
 import us.ihmc.euclid.tuple2D.interfaces.Vector2DReadOnly;
 import us.ihmc.robotics.linearAlgebra.MatrixTools;
+import us.ihmc.tools.lists.PairList;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -25,65 +26,54 @@ public class PointWiggler
                                                                             List<Point2DReadOnly> pointsToAvoidByDistanceB, double desiredDistanceA,
                                                                             double desiredDistanceB, double minimumDistanceA, double minimumDistanceB)
    {
-
-      List<Point2DReadOnly> pointsToAvoidByDistanceACopy = new ArrayList<>(pointsToAvoidByDistanceA);
-      List<Point2DReadOnly> pointsToAvoidByDistanceBCopy = new ArrayList<>(pointsToAvoidByDistanceB);
-
-      // remove them if we know they can't be to close
       double maxShift = Math.max(desiredDistanceA, desiredDistanceB);
-      int pointIndex = 0;
-      while (pointIndex < pointsToAvoidByDistanceACopy.size())
+      List<PointInfo> pointsInfoToAvoid = new ArrayList<>();
+      for (Point2DReadOnly pointToAvoidByDistanceA : pointsToAvoidByDistanceA)
       {
-         if (pointsToAvoidByDistanceACopy.get(pointIndex).distance(pointToShift) > desiredDistanceA + maxShift)
-            pointsToAvoidByDistanceACopy.remove(pointIndex);
-         else
-            pointIndex++;
+         double distance = pointToAvoidByDistanceA.distance(pointToShift);
+         if (distance < desiredDistanceA + maxShift)
+            pointsInfoToAvoid.add(new PointInfo(pointToAvoidByDistanceA, desiredDistanceA, minimumDistanceA, distance));
       }
-      pointIndex = 0;
-      while (pointIndex < pointsToAvoidByDistanceBCopy.size())
+      for (Point2DReadOnly pointToAvoidByDistanceB : pointsToAvoidByDistanceB)
       {
-         if (pointsToAvoidByDistanceBCopy.get(pointIndex).distance(pointToShift) > desiredDistanceB + maxShift)
-            pointsToAvoidByDistanceBCopy.remove(pointIndex);
-         else
-            pointIndex++;
+         double distance = pointToAvoidByDistanceB.distance(pointToShift);
+         if (distance < desiredDistanceB + maxShift)
+            pointsInfoToAvoid.add(new PointInfo(pointToAvoidByDistanceB, desiredDistanceB, minimumDistanceB, pointToAvoidByDistanceB.distance(pointToShift)));
       }
 
-      // sort everything in ascending order
-      List<Point2DReadOnly> pointsToAvoid = new ArrayList<>(pointsToAvoidByDistanceACopy);
-      pointsToAvoid.addAll(pointsToAvoidByDistanceBCopy);
-      pointsToAvoid.sort((pointA, pointB) -> {
-         double distanceForPointA = pointsToAvoidByDistanceACopy.contains(pointA) ? desiredDistanceA : desiredDistanceB;
-         double distanceForPointB = pointsToAvoidByDistanceACopy.contains(pointB) ? desiredDistanceA : desiredDistanceB;
 
-         double aShiftDistance = pointToShift.distance(pointA) - distanceForPointA;
-         double bShiftDistance = pointToShift.distance(pointB) - distanceForPointB;
+
+      // sort everything in ascending distance order
+      pointsInfoToAvoid.sort((pointAInfo, pointBInfo) -> {
+         double aShiftDistance = pointAInfo.distanceToPoint - pointAInfo.desiredDistanceToPoint;
+         double bShiftDistance = pointBInfo.distanceToPoint - pointBInfo.desiredDistanceToPoint;
 
          return Double.compare(aShiftDistance, bShiftDistance);
       });
 
       int pointToCheckIndex = 0;
-      while (pointToCheckIndex < pointsToAvoid.size())
+      while (pointToCheckIndex < pointsInfoToAvoid.size())
       {
          int otherPointIndex = 0;
          Vector2D currentVector = new Vector2D();
-         Point2DReadOnly pointToAvoid = pointsToAvoid.get(pointToCheckIndex);
-         currentVector.sub(pointToShift, pointToAvoid);
-         double currentDistance = currentVector.length();
-         double currentDesiredDistance = pointsToAvoidByDistanceACopy.contains(pointToAvoid) ? desiredDistanceA : desiredDistanceB;
+         PointInfo pointToAvoidInfo = pointsInfoToAvoid.get(pointToCheckIndex);
+         currentVector.sub(pointToShift, pointToAvoidInfo.pointToAvoid);
+         double currentDistance = pointToAvoidInfo.distanceToPoint;
+         double currentDesiredDistance = pointToAvoidInfo.desiredDistanceToPoint;
 
          boolean affectedByOtherShift = currentDistance < currentDesiredDistance;
 
-         while (otherPointIndex < pointsToAvoid.size() && !affectedByOtherShift)
+         while (otherPointIndex < pointsInfoToAvoid.size() && !affectedByOtherShift)
          {
             if (otherPointIndex != pointToCheckIndex)
             {
-               Point2DReadOnly otherPointToAvoid = pointsToAvoid.get(otherPointIndex);
+               PointInfo otherPointToAvoidInfo = pointsInfoToAvoid.get(otherPointIndex);
 
-               double distance = pointsToAvoidByDistanceACopy.contains(otherPointToAvoid) ? desiredDistanceA : desiredDistanceB;
+               double desiredDistance = otherPointToAvoidInfo.desiredDistanceToPoint;
 
                Vector2D otherVector = new Vector2D();
-               otherVector.sub(pointToShift, otherPointToAvoid);
-               otherVector.scale(distance, otherVector.length());
+               otherVector.sub(pointToShift, pointToAvoidInfo.pointToAvoid);
+               otherVector.scale(desiredDistance, otherPointToAvoidInfo.distanceToPoint);
 
                affectedByOtherShift = currentDistance + otherVector.dot(currentVector) < currentDesiredDistance;
             }
@@ -91,12 +81,14 @@ public class PointWiggler
          }
 
          if (!affectedByOtherShift)
-            pointsToAvoid.remove(pointToCheckIndex);
+         {
+            pointsInfoToAvoid.remove(pointToCheckIndex);
+         }
          else
             pointToCheckIndex++;
       }
 
-      int numberOfPointsWithinProximity = pointsToAvoid.size();
+      int numberOfPointsWithinProximity = pointsInfoToAvoid.size();
 
       DenseMatrix64F A = new DenseMatrix64F(2, 2);
       DenseMatrix64F b = new DenseMatrix64F(2, 1);
@@ -106,17 +98,18 @@ public class PointWiggler
       int numberOfPointsAdded = 0;
       Vector2D vectorToPoint = new Vector2D();
 
-      for (Point2DReadOnly pointToShiftFrom : pointsToAvoid)
+      for (PointInfo pointToShiftFromInfo : pointsInfoToAvoid)
       {
-         vectorToPoint.sub(pointToShift, pointToShiftFrom);
+         Point2DReadOnly pointToShiftFrom = pointToShiftFromInfo.pointToAvoid;
 
-         double distanceToPoint = vectorToPoint.length();
-         double desiredDistance = pointsToAvoidByDistanceACopy.contains(pointToShiftFrom) ? desiredDistanceA : desiredDistanceB;
-         double minimumDistance = pointsToAvoidByDistanceACopy.contains(pointToShiftFrom) ? minimumDistanceA : minimumDistanceB;
+         double distanceToPoint = pointToShiftFromInfo.distanceToPoint;
+         double desiredDistance = pointToShiftFromInfo.desiredDistanceToPoint;
+         double minimumDistance = pointToShiftFromInfo.minimumDistanceToPoint;
          double distanceToShift = desiredDistance - distanceToPoint;
 
          if (distanceToShift > 0)
          {
+            vectorToPoint.sub(pointToShift, pointToShiftFrom);
             vectorToPoint.scale(desiredDistance / distanceToPoint);
 
             b.add(0, 0, -2.0 * (pointToShiftFrom.getX() + vectorToPoint.getX()));
@@ -124,8 +117,7 @@ public class PointWiggler
 
             CI.set(numberOfPointsAdded, 0, -vectorToPoint.getX());
             CI.set(numberOfPointsAdded, 1, -vectorToPoint.getY());
-            ci.set(numberOfPointsAdded,
-                   -minimumDistance - vectorToPoint.getX() * pointToShiftFrom.getX() - vectorToPoint.getY() * pointToShiftFrom.getY());
+            ci.set(numberOfPointsAdded, -minimumDistance - vectorToPoint.getX() * pointToShiftFrom.getX() - vectorToPoint.getY() * pointToShiftFrom.getY());
 
             numberOfPointsAdded++;
          }
@@ -158,5 +150,21 @@ public class PointWiggler
       shiftVector.sub(shiftedPoint, pointToShift);
 
       return shiftVector;
+   }
+
+   private static class PointInfo
+   {
+      private final double distanceToPoint;
+      private final double desiredDistanceToPoint;
+      private final double minimumDistanceToPoint;
+      private final Point2DReadOnly pointToAvoid;
+
+      public PointInfo(Point2DReadOnly pointToAvoid, double desiredDistanceToPoint, double minimumDistanceToPoint, double distanceToPoint)
+      {
+         this.desiredDistanceToPoint = desiredDistanceToPoint;
+         this.distanceToPoint = distanceToPoint;
+         this.minimumDistanceToPoint = minimumDistanceToPoint;
+         this.pointToAvoid = new Point2D(pointToAvoid);
+      }
    }
 }
