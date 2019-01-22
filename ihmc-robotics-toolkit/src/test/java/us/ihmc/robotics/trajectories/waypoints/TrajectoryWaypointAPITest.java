@@ -49,8 +49,6 @@ import us.ihmc.robotics.math.trajectories.waypoints.interfaces.SO3TrajectoryPoin
 
 public class TrajectoryWaypointAPITest
 {
-   private static final boolean printResults = true;
-
    private final static Map<Class<?>, Class<?>> framelessTypesToFrameTypesTable;
    static
    {
@@ -261,11 +259,6 @@ public class TrajectoryWaypointAPITest
       }).findFirst().isPresent();
 
       String methodString = createMethodString(methodName, signature, returnType);
-      if (!foundMatch && printResults)
-      {
-         System.out.println("Missing in class " + clazz.getSimpleName() + "\n   " + methodString);
-         return;
-      }
       Assert.assertTrue("Did not find method \n" + methodString + "\nIn class " + clazz.getSimpleName(), foundMatch);
    }
 
