@@ -11,14 +11,9 @@ import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FixedFramePoint3DBasics;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
-import us.ihmc.graphicsDescription.appearance.YoAppearance;
-import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition;
-import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsList;
-import us.ihmc.graphicsDescription.yoGraphics.plotting.ArtifactList;
 import us.ihmc.robotics.math.trajectories.waypoints.FrameEuclideanTrajectoryPoint;
 import us.ihmc.robotics.math.trajectories.waypoints.YoFrameEuclideanTrajectoryPoint;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.yoVariables.variable.YoFramePoint3D;
 import us.ihmc.yoVariables.variable.frameObjects.YoMutableFramePoint3D;
 
 public class CoPPointsInFoot
@@ -80,19 +75,6 @@ public class CoPPointsInFoot
          pointNumber++;
          return copPoint;
       }
-   }
-
-   public void setupVisualizers(YoGraphicsList graphicsList, ArtifactList artifactList, double pointSize)
-   {
-      for (int i = 0; i < maxNumberOfTrajectoryPoints; i++)
-      {
-         YoFramePoint3D copLocation = (YoFramePoint3D) copLocations.getAndGrowIfNeeded(i).getPosition();
-         YoGraphicPosition yoGraphicPosition = new YoGraphicPosition(copLocation.getNamePrefix(), copLocation, pointSize, YoAppearance.Green(),
-                                                                     YoGraphicPosition.GraphicType.BALL_WITH_CROSS);
-         graphicsList.add(yoGraphicPosition);
-         artifactList.add(yoGraphicPosition.createArtifact());
-      }
-      copLocations.clear();
    }
 
    public void reset()

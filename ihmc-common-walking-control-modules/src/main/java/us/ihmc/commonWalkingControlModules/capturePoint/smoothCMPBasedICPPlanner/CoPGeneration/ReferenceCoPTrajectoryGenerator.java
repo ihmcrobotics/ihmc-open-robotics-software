@@ -357,14 +357,6 @@ public class ReferenceCoPTrajectoryGenerator implements ReferenceCoPTrajectoryGe
    @Override
    public void createVisualizerForConstantCoPs(YoGraphicsList yoGraphicsList, ArtifactList artifactList)
    {
-      if (debug)
-      {
-         for (int footIndex = 0; footIndex < copLocationWaypoints.size(); footIndex++)
-         {
-            CoPPointsInFoot copPointsInFoot = copLocationWaypoints.get(footIndex);
-            copPointsInFoot.setupVisualizers(yoGraphicsList, artifactList, COP_POINT_SIZE);
-         }
-      }
       for (int waypointIndex = 0; waypointIndex < maxNumberOfCoPWaypoints; waypointIndex++)
       {
          YoFramePoint3D yoCoPWaypoint = new YoFramePoint3D("CoPWaypointAfterAdjustment" + waypointIndex, worldFrame, registry);
