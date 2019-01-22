@@ -103,8 +103,11 @@ public class QuadrupedBodyOrientationManager
    public void initialize()
    {
       desiredBodyOrientation.setToZero(bodyFrame);
-      desiredBodyAngularVelocity.setToZero();
-      desiredBodyAngularAcceleration.setToZero();
+
+      ReferenceFrame trajectoryFrame = offsetBodyOrientationTrajectory.getReferenceFrame();
+      desiredBodyOrientation.changeFrame(trajectoryFrame);
+      desiredBodyAngularVelocity.setToZero(trajectoryFrame);
+      desiredBodyAngularAcceleration.setToZero(trajectoryFrame);
 
       double currentTime = robotTimestamp.getDoubleValue();
 
