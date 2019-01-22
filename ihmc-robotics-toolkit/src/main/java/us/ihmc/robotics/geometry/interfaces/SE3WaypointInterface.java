@@ -1,5 +1,6 @@
 package us.ihmc.robotics.geometry.interfaces;
 
+import us.ihmc.euclid.geometry.interfaces.Pose3DBasics;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DBasics;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DBasics;
@@ -34,6 +35,11 @@ public interface SE3WaypointInterface extends EuclideanWaypointInterface, SO3Way
    {
       get(euclideanWaypointToPack);
       get(so3WaypointToPack);
+   }
+
+   default void getPose(Pose3DBasics poseToPack)
+   {
+      poseToPack.set(getPosition(), getOrientation());
    }
 
    default boolean epsilonEquals(SE3WaypointInterface other, double epsilon)

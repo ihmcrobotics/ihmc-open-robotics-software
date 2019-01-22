@@ -3,6 +3,8 @@ package us.ihmc.robotics.geometry.interfaces;
 import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.interfaces.FixedFrameQuaternionBasics;
+import us.ihmc.euclid.referenceFrame.interfaces.FixedFrameVector3DBasics;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameChangeable;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameQuaternionBasics;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameQuaternionReadOnly;
@@ -36,13 +38,13 @@ public interface FrameSO3WaypointInterface extends SO3WaypointInterface, FrameCh
       return getOrientation().distance(other.getOrientation());
    }
 
-   default void getOrientation(FrameQuaternionBasics orientationToPack)
+   default void getOrientation(FixedFrameQuaternionBasics orientationToPack)
    {
       checkReferenceFrameMatch(orientationToPack);
       orientationToPack.set(getOrientation());
    }
 
-   default void getAngularVelocity(FrameVector3DBasics angularVelocityToPack)
+   default void getAngularVelocity(FixedFrameVector3DBasics angularVelocityToPack)
    {
       checkReferenceFrameMatch(angularVelocityToPack);
       angularVelocityToPack.set(getAngularVelocity());
@@ -98,7 +100,7 @@ public interface FrameSO3WaypointInterface extends SO3WaypointInterface, FrameCh
       otherToPack.setIncludingFrame(this);
    }
 
-   default void get(FrameQuaternionBasics orientationToPack, FrameVector3DBasics angularVelocityToPack)
+   default void get(FixedFrameQuaternionBasics orientationToPack, FixedFrameVector3DBasics angularVelocityToPack)
    {
       getOrientation(orientationToPack);
       getAngularVelocity(angularVelocityToPack);

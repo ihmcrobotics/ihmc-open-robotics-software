@@ -99,6 +99,18 @@ public interface FrameSE3TrajectoryPointInterface
       otherToPack.set(this);
    }
 
+   default void getIncludingFrame(FrameEuclideanTrajectoryPointInterface euclideanTrajectoryPointToPack, FrameSO3TrajectoryPointInterface so3TrajectoryPointToPack)
+   {
+      getIncludingFrame(euclideanTrajectoryPointToPack);
+      getIncludingFrame(so3TrajectoryPointToPack);
+   }
+
+   default void get(FrameEuclideanTrajectoryPointInterface euclideanTrajectoryPointToPack, FrameSO3TrajectoryPointInterface so3TrajectoryPointToPack)
+   {
+      get(euclideanTrajectoryPointToPack);
+      get(so3TrajectoryPointToPack);
+   }
+
    default boolean epsilonEquals(FrameSE3TrajectoryPointInterface other, double epsilon)
    {
       boolean timeEquals = EuclidCoreTools.epsilonEquals(getTime(), other.getTime(), epsilon);

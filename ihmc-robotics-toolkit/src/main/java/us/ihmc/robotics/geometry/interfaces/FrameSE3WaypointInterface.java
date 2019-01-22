@@ -1,6 +1,10 @@
 package us.ihmc.robotics.geometry.interfaces;
 
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.interfaces.FixedFramePoint3DBasics;
+import us.ihmc.euclid.referenceFrame.interfaces.FixedFramePose3DBasics;
+import us.ihmc.euclid.referenceFrame.interfaces.FixedFrameQuaternionBasics;
+import us.ihmc.euclid.referenceFrame.interfaces.FixedFrameVector3DBasics;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DBasics;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DBasics;
@@ -77,8 +81,8 @@ public interface FrameSE3WaypointInterface extends FrameEuclideanWaypointInterfa
       getIncludingFrame(so3WaypointToPack);
    }
 
-   default void get(FramePoint3DBasics positionToPack, FrameQuaternionBasics orientationToPack, FrameVector3DBasics linearVelocityToPack,
-                    FrameVector3DBasics angularVelocityToPack)
+   default void get(FixedFramePoint3DBasics positionToPack, FixedFrameQuaternionBasics orientationToPack, FixedFrameVector3DBasics linearVelocityToPack,
+                    FixedFrameVector3DBasics angularVelocityToPack)
    {
       getPosition(positionToPack);
       getOrientation(orientationToPack);
@@ -95,7 +99,7 @@ public interface FrameSE3WaypointInterface extends FrameEuclideanWaypointInterfa
       getAngularVelocityIncludingFrame(angularVelocityToPack);
    }
 
-   default void getPose(FramePose3DBasics poseToPack)
+   default void getPose(FixedFramePose3DBasics poseToPack)
    {
       poseToPack.set(getPosition(), getOrientation());
    }
