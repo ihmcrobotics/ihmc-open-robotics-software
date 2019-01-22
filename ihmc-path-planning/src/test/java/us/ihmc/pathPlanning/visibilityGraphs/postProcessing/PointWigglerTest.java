@@ -40,7 +40,7 @@ public class PointWigglerTest
       pointsToAvoidByDistance.add(bottomRight);
 
       Vector2DReadOnly calculatedVector = PointWiggler
-            .computeVectorToMaximizeAverageDistanceFromPoints(pointAtOrigin, pointsToAvoidByDistance, 1.0, 0.0);
+            .computeBestShiftVectorToAvoidPoints(pointAtOrigin, pointsToAvoidByDistance, 1.0, 0.0);
       Vector2DReadOnly expectedVector = new Vector2D();
 
       EuclidCoreTestTools.assertVector2DGeometricallyEquals(expectedVector, calculatedVector, epsilon);
@@ -51,7 +51,7 @@ public class PointWigglerTest
       pointsToAvoidByDistance.add(new Point2D(0.5 * Math.sin(Math.PI / 3.0), -0.5 * Math.cos(Math.PI / 3.0)));
       pointsToAvoidByDistance.add(new Point2D(-0.5 * Math.sin(Math.PI / 3.0), -0.5 * Math.cos(Math.PI / 3.0)));
 
-      calculatedVector = PointWiggler.computeVectorToMaximizeAverageDistanceFromPoints(pointAtOrigin, pointsToAvoidByDistance, 1.0, 0.0);
+      calculatedVector = PointWiggler.computeBestShiftVectorToAvoidPoints(pointAtOrigin, pointsToAvoidByDistance, 1.0, 0.0);
       expectedVector = new Vector2D();
 
       EuclidCoreTestTools.assertVector2DGeometricallyEquals(expectedVector, calculatedVector, epsilon);
@@ -76,7 +76,7 @@ public class PointWigglerTest
 
       Vector2DReadOnly expectedVector = computeShiftVectorAssumingNoLimits(pointsToAvoidByDistance, pointToShift, desiredDistance);
       Vector2DReadOnly calculatedVector = PointWiggler
-            .computeVectorToMaximizeAverageDistanceFromPoints(pointToShift, pointsToAvoidByDistance, desiredDistance, 0.0);
+            .computeBestShiftVectorToAvoidPoints(pointToShift, pointsToAvoidByDistance, desiredDistance, 0.0);
 
       EuclidCoreTestTools.assertVector2DGeometricallyEquals(expectedVector, calculatedVector, epsilon);
 
@@ -109,7 +109,7 @@ public class PointWigglerTest
 
       assertTrue(polygon2D.isPointInside(pointToShift));
 
-      calculatedVector = PointWiggler.computeVectorToMaximizeAverageDistanceFromPoints(pointToShift, pointsToAvoidByDistance, desiredDistance, 0.0);
+      calculatedVector = PointWiggler.computeBestShiftVectorToAvoidPoints(pointToShift, pointsToAvoidByDistance, desiredDistance, 0.0);
 
       shiftedPoint.add(calculatedVector, pointToShift);
       shiftedPointExpected.add(expectedVector, pointToShift);
@@ -137,7 +137,7 @@ public class PointWigglerTest
 
       Vector2DReadOnly expectedVector = computeShiftVectorAssumingNoLimits(pointsToAvoidByDistance, pointToShift, desiredDistance);
       Vector2DReadOnly calculatedVector = PointWiggler
-            .computeVectorToMaximizeAverageDistanceFromPoints(pointToShift, pointsToAvoidByDistance, desiredDistance, 0.0);
+            .computeBestShiftVectorToAvoidPoints(pointToShift, pointsToAvoidByDistance, desiredDistance, 0.0);
 
       EuclidCoreTestTools.assertVector2DGeometricallyEquals(expectedVector, calculatedVector, epsilon);
 
@@ -181,7 +181,7 @@ public class PointWigglerTest
          }
 
          Vector2DReadOnly calculatedVector = PointWiggler
-               .computeVectorToMaximizeAverageDistanceFromPoints(pointToShift, pointsToAvoid, desiredDistanceAway, 0.0);
+               .computeBestShiftVectorToAvoidPoints(pointToShift, pointsToAvoid, desiredDistanceAway, 0.0);
 
          // it should just be the average of all these points
          Vector2D expectedVector = new Vector2D();
@@ -232,7 +232,7 @@ public class PointWigglerTest
          }
 
          Vector2DReadOnly calculatedVector = PointWiggler
-               .computeVectorToMaximizeAverageDistanceFromPoints(pointToShift, pointsToAvoid, desiredDistanceAway, 0.0);
+               .computeBestShiftVectorToAvoidPoints(pointToShift, pointsToAvoid, desiredDistanceAway, 0.0);
 
          // it should just be the average of all these points
          Vector2D expectedVector = computeShiftVectorAssumingNoLimits(pointsToAvoid, pointToShift, desiredDistanceAway);
