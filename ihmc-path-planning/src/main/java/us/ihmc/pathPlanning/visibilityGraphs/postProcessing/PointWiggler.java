@@ -25,7 +25,6 @@ public class PointWiggler
                                                                             List<Point2DReadOnly> pointsToAvoidByDistanceB, double desiredDistanceA,
                                                                             double desiredDistanceB, double minimumDistanceA, double minimumDistanceB)
    {
-      Vector2D averageShiftVector = new Vector2D();
 
       List<Point2DReadOnly> pointsToAvoidByDistanceACopy = new ArrayList<>(pointsToAvoidByDistanceA);
       List<Point2DReadOnly> pointsToAvoidByDistanceBCopy = new ArrayList<>(pointsToAvoidByDistanceB);
@@ -105,10 +104,10 @@ public class PointWiggler
       DenseMatrix64F ci = new DenseMatrix64F(numberOfPointsWithinProximity, 1);
 
       int numberOfPointsAdded = 0;
+      Vector2D vectorToPoint = new Vector2D();
 
       for (Point2DReadOnly pointToShiftFrom : pointsToAvoid)
       {
-         Vector2D vectorToPoint = new Vector2D();
          vectorToPoint.sub(pointToShift, pointToShiftFrom);
 
          double distanceToPoint = vectorToPoint.length();
@@ -118,23 +117,21 @@ public class PointWiggler
 
          if (distanceToShift > 0)
          {
-            Vector2D desiredVectorToPoint = new Vector2D(vectorToPoint);
-            desiredVectorToPoint.scale(desiredDistance / distanceToPoint);
-            Point2D desiredPoint = new Point2D(pointToShiftFrom);
-            desiredPoint.add(desiredVectorToPoint);
+            vectorToPoint.scale(desiredDistance / distanceToPoint);
 
-            b.add(0, 0, -2.0 * desiredPoint.getX());
-            b.add(1, 0, -2.0 * desiredPoint.getY());
+            b.add(0, 0, -2.0 * (pointToShiftFrom.getX() + vectorToPoint.getX()));
+            b.add(1, 0, -2.0 * (pointToShiftFrom.getY() + vectorToPoint.getY()));
 
-            CI.set(numberOfPointsAdded, 0, desiredVectorToPoint.getX());
-            CI.set(numberOfPointsAdded, 1, desiredVectorToPoint.getY());
+            CI.set(numberOfPointsAdded, 0, -vectorToPoint.getX());
+            CI.set(numberOfPointsAdded, 1, -vectorToPoint.getY());
             ci.set(numberOfPointsAdded,
-                   minimumDistance + desiredVectorToPoint.getX() * pointToShiftFrom.getX() + desiredVectorToPoint.getY() * pointToShiftFrom.getY());
+                   -minimumDistance - vectorToPoint.getX() * pointToShiftFrom.getX() - vectorToPoint.getY() * pointToShiftFrom.getY());
 
             numberOfPointsAdded++;
          }
       }
 
+      // remove unused constraints
       while (CI.getNumRows() > numberOfPointsAdded)
       {
          MatrixTools.removeRow(CI, numberOfPointsAdded);
@@ -146,10 +143,6 @@ public class PointWiggler
 
       // done because expectation is 0.5 x^T A x + b
       CommonOps.scale(2.0, A);
-      // done because expectation is CI^T x <= ci
-      CommonOps.scale(-1.0, CI);
-      CommonOps.scale(-1.0, ci);
-      //      CommonOps.transpose(CI);
 
       JavaQuadProgSolver solver = new JavaQuadProgSolver();
       solver.setQuadraticCostFunction(A, b, 0.0);
@@ -161,8 +154,9 @@ public class PointWiggler
       Point2D shiftedPoint = new Point2D();
       shiftedPoint.set(shiftedPointSolutionVector);
 
-      averageShiftVector.sub(shiftedPoint, pointToShift);
+      Vector2D shiftVector = new Vector2D();
+      shiftVector.sub(shiftedPoint, pointToShift);
 
-      return averageShiftVector;
+      return shiftVector;
    }
 }
