@@ -118,6 +118,20 @@ public interface FrameSE3TrajectoryPointInterface
    }
 
    @Override
+   default void setToNaN(ReferenceFrame referenceFrame)
+   {
+      setTimeToNaN();
+      FrameSE3WaypointInterface.super.setToNaN(referenceFrame);
+   }
+
+   @Override
+   default void setToZero(ReferenceFrame referenceFrame)
+   {
+      setTimeToZero();
+      FrameSE3WaypointInterface.super.setToZero(referenceFrame);
+   }
+
+   @Override
    default void setToNaN()
    {
       setTimeToNaN();
