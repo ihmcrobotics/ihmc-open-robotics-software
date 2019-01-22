@@ -44,8 +44,11 @@ import us.ihmc.robotics.math.trajectories.waypoints.interfaces.EuclideanTrajecto
 import us.ihmc.robotics.math.trajectories.waypoints.interfaces.FrameEuclideanTrajectoryPointInterface;
 import us.ihmc.robotics.math.trajectories.waypoints.interfaces.FrameSE3TrajectoryPointInterface;
 import us.ihmc.robotics.math.trajectories.waypoints.interfaces.FrameSO3TrajectoryPointInterface;
+import us.ihmc.robotics.math.trajectories.waypoints.interfaces.FrameTrajectoryPointListInterface;
 import us.ihmc.robotics.math.trajectories.waypoints.interfaces.SE3TrajectoryPointInterface;
 import us.ihmc.robotics.math.trajectories.waypoints.interfaces.SO3TrajectoryPointInterface;
+import us.ihmc.robotics.math.trajectories.waypoints.interfaces.TrajectoryPointInterface;
+import us.ihmc.robotics.math.trajectories.waypoints.interfaces.TrajectoryPointListInterface;
 
 public class TrajectoryWaypointAPITest
 {
@@ -61,6 +64,8 @@ public class TrajectoryWaypointAPITest
       modifiableMap.put(EuclideanTrajectoryPointInterface.class, FrameEuclideanTrajectoryPointInterface.class);
       modifiableMap.put(SO3TrajectoryPointInterface.class, FrameSO3TrajectoryPointInterface.class);
       modifiableMap.put(SE3TrajectoryPointInterface.class, FrameSE3TrajectoryPointInterface.class);
+
+      modifiableMap.put(TrajectoryPointListInterface.class, FrameTrajectoryPointListInterface.class);
 
       framelessTypesToFrameTypesTable = Collections.unmodifiableMap(modifiableMap);
    }
@@ -104,9 +109,13 @@ public class TrajectoryWaypointAPITest
       modifiableMap.put(Vector3DBasics.class, FixedFrameVector3DBasics.class);
       modifiableMap.put(Pose3DBasics.class, FixedFramePose3DBasics.class);
 
+      modifiableMap.put(TrajectoryPointListInterface.class, FrameTrajectoryPointListInterface.class);
+
       // unchanged:
       modifiableMap.put(double.class, double.class);
+      modifiableMap.put(int.class, int.class);
       modifiableMap.put(Transform.class, Transform.class);
+      modifiableMap.put(TrajectoryPointInterface.class, TrajectoryPointInterface.class);
 
       argumentTypeFramelessToFrameMap = Collections.unmodifiableMap(modifiableMap);
    }
@@ -128,7 +137,9 @@ public class TrajectoryWaypointAPITest
 
       // unchanged:
       modifiableMap.put(double.class, double.class);
+      modifiableMap.put(int.class, int.class);
       modifiableMap.put(boolean.class, boolean.class);
+      modifiableMap.put(TrajectoryPointInterface.class, TrajectoryPointInterface.class);
 
       returnTypeFramelessToFrameMap = Collections.unmodifiableMap(modifiableMap);
    }

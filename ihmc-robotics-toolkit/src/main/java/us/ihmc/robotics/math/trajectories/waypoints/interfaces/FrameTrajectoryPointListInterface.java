@@ -19,6 +19,12 @@ public interface FrameTrajectoryPointListInterface<T extends TrajectoryPointInte
       set(trajectoryPoints);
    }
 
+   default void set(FrameTrajectoryPointListInterface<T> trajectoryPoints)
+   {
+      checkReferenceFrameMatch(trajectoryPoints);
+      TrajectoryPointListInterface.super.set(trajectoryPoints);
+   }
+
    @Override
    default void applyTransform(Transform transform)
    {
