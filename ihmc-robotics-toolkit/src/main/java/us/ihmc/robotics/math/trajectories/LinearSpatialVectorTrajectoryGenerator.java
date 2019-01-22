@@ -89,7 +89,7 @@ public class LinearSpatialVectorTrajectoryGenerator
 
    private void appendWaypointUnsafe(double timeAtWaypoint, Vector3DReadOnly angularPart, Vector3DReadOnly linearPart)
    {
-      waypoints.get(numberOfWaypoints.getIntegerValue()).set(timeAtWaypoint, angularPart, linearPart);
+      waypoints.get(numberOfWaypoints.getIntegerValue()).setIncludingFrame(getCurrentTrajectoryFrame(), timeAtWaypoint, angularPart, linearPart);
       numberOfWaypoints.increment();
    }
 
@@ -101,7 +101,9 @@ public class LinearSpatialVectorTrajectoryGenerator
 
    private void appendWaypointUnsafe(double timeAtWaypoint, FrameVector3DReadOnly angularPart, FrameVector3DReadOnly linearPart)
    {
-      waypoints.get(numberOfWaypoints.getIntegerValue()).set(timeAtWaypoint, angularPart, linearPart);
+      angularPart.checkReferenceFrameMatch(getCurrentTrajectoryFrame());
+      linearPart.checkReferenceFrameMatch(getCurrentTrajectoryFrame());
+      waypoints.get(numberOfWaypoints.getIntegerValue()).setIncludingFrame(timeAtWaypoint, angularPart, linearPart);
       numberOfWaypoints.increment();
    }
 
