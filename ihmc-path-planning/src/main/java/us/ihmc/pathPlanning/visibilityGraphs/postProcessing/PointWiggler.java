@@ -8,9 +8,9 @@ import us.ihmc.euclid.tuple2D.Vector2D;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
 import us.ihmc.euclid.tuple2D.interfaces.Vector2DReadOnly;
 import us.ihmc.robotics.linearAlgebra.MatrixTools;
-import us.ihmc.tools.lists.PairList;
 
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 
 public class PointWiggler
@@ -32,25 +32,19 @@ public class PointWiggler
       {
          double distance = pointToAvoidByDistanceA.distance(pointToShift);
          if (distance < desiredDistanceA + maxShift)
-            pointsInfoToAvoid.add(new PointInfo(pointToAvoidByDistanceA, desiredDistanceA, minimumDistanceA, distance));
+            pointsInfoToAvoid.add(new PointInfo(pointToAvoidByDistanceA, pointToShift, desiredDistanceA, minimumDistanceA, distance));
       }
       for (Point2DReadOnly pointToAvoidByDistanceB : pointsToAvoidByDistanceB)
       {
          double distance = pointToAvoidByDistanceB.distance(pointToShift);
          if (distance < desiredDistanceB + maxShift)
-            pointsInfoToAvoid.add(new PointInfo(pointToAvoidByDistanceB, desiredDistanceB, minimumDistanceB, pointToAvoidByDistanceB.distance(pointToShift)));
+            pointsInfoToAvoid.add(new PointInfo(pointToAvoidByDistanceB, pointToShift, desiredDistanceB, minimumDistanceB, distance));
       }
 
-
-
       // sort everything in ascending distance order
-      pointsInfoToAvoid.sort((pointAInfo, pointBInfo) -> {
-         double aShiftDistance = pointAInfo.distanceToPoint - pointAInfo.desiredDistanceToPoint;
-         double bShiftDistance = pointBInfo.distanceToPoint - pointBInfo.desiredDistanceToPoint;
+      pointsInfoToAvoid.sort(Comparator.comparingDouble(pointInfo -> pointInfo.distanceToShift));
 
-         return Double.compare(aShiftDistance, bShiftDistance);
-      });
-
+      // filter out the points that won't be affected by any shifting
       int pointToCheckIndex = 0;
       while (pointToCheckIndex < pointsInfoToAvoid.size())
       {
@@ -58,6 +52,7 @@ public class PointWiggler
          Vector2D currentVector = new Vector2D();
          PointInfo pointToAvoidInfo = pointsInfoToAvoid.get(pointToCheckIndex);
          currentVector.sub(pointToShift, pointToAvoidInfo.pointToAvoid);
+
          double currentDistance = pointToAvoidInfo.distanceToPoint;
          double currentDesiredDistance = pointToAvoidInfo.desiredDistanceToPoint;
 
@@ -68,14 +63,7 @@ public class PointWiggler
             if (otherPointIndex != pointToCheckIndex)
             {
                PointInfo otherPointToAvoidInfo = pointsInfoToAvoid.get(otherPointIndex);
-
-               double desiredDistance = otherPointToAvoidInfo.desiredDistanceToPoint;
-
-               Vector2D otherVector = new Vector2D();
-               otherVector.sub(pointToShift, pointToAvoidInfo.pointToAvoid);
-               otherVector.scale(desiredDistance, otherPointToAvoidInfo.distanceToPoint);
-
-               affectedByOtherShift = currentDistance + otherVector.dot(currentVector) < currentDesiredDistance;
+               affectedByOtherShift = currentDistance + otherPointToAvoidInfo.desiredVector.dot(currentVector) < currentDesiredDistance;
             }
             otherPointIndex++;
          }
@@ -96,28 +84,23 @@ public class PointWiggler
       DenseMatrix64F ci = new DenseMatrix64F(numberOfPointsWithinProximity, 1);
 
       int numberOfPointsAdded = 0;
-      Vector2D vectorToPoint = new Vector2D();
 
       for (PointInfo pointToShiftFromInfo : pointsInfoToAvoid)
       {
          Point2DReadOnly pointToShiftFrom = pointToShiftFromInfo.pointToAvoid;
 
-         double distanceToPoint = pointToShiftFromInfo.distanceToPoint;
-         double desiredDistance = pointToShiftFromInfo.desiredDistanceToPoint;
          double minimumDistance = pointToShiftFromInfo.minimumDistanceToPoint;
-         double distanceToShift = desiredDistance - distanceToPoint;
 
-         if (distanceToShift > 0)
+         if (pointToShiftFromInfo.distanceToShift > 0)
          {
-            vectorToPoint.sub(pointToShift, pointToShiftFrom);
-            vectorToPoint.scale(desiredDistance / distanceToPoint);
+            Vector2DReadOnly desiredVectorToPoint = pointToShiftFromInfo.desiredVector;
 
-            b.add(0, 0, -2.0 * (pointToShiftFrom.getX() + vectorToPoint.getX()));
-            b.add(1, 0, -2.0 * (pointToShiftFrom.getY() + vectorToPoint.getY()));
+            b.add(0, 0, -2.0 * (pointToShiftFrom.getX() + desiredVectorToPoint.getX()));
+            b.add(1, 0, -2.0 * (pointToShiftFrom.getY() + desiredVectorToPoint.getY()));
 
-            CI.set(numberOfPointsAdded, 0, -vectorToPoint.getX());
-            CI.set(numberOfPointsAdded, 1, -vectorToPoint.getY());
-            ci.set(numberOfPointsAdded, -minimumDistance - vectorToPoint.getX() * pointToShiftFrom.getX() - vectorToPoint.getY() * pointToShiftFrom.getY());
+            CI.set(numberOfPointsAdded, 0, -desiredVectorToPoint.getX());
+            CI.set(numberOfPointsAdded, 1, -desiredVectorToPoint.getY());
+            ci.set(numberOfPointsAdded, -minimumDistance - desiredVectorToPoint.getX() * pointToShiftFrom.getX() - desiredVectorToPoint.getY() * pointToShiftFrom.getY());
 
             numberOfPointsAdded++;
          }
@@ -157,14 +140,22 @@ public class PointWiggler
       private final double distanceToPoint;
       private final double desiredDistanceToPoint;
       private final double minimumDistanceToPoint;
+      private final double distanceToShift;
       private final Point2DReadOnly pointToAvoid;
+      private final Vector2D desiredVector;
 
-      public PointInfo(Point2DReadOnly pointToAvoid, double desiredDistanceToPoint, double minimumDistanceToPoint, double distanceToPoint)
+      public PointInfo(Point2DReadOnly pointToAvoid, Point2DReadOnly pointToShift, double desiredDistanceToPoint, double minimumDistanceToPoint, double distanceToPoint)
       {
          this.desiredDistanceToPoint = desiredDistanceToPoint;
-         this.distanceToPoint = distanceToPoint;
          this.minimumDistanceToPoint = minimumDistanceToPoint;
          this.pointToAvoid = new Point2D(pointToAvoid);
+
+         this.distanceToPoint = distanceToPoint;
+         distanceToShift = desiredDistanceToPoint - distanceToPoint;
+
+         desiredVector = new Vector2D();
+         desiredVector.sub(pointToShift, pointToAvoid);
+         desiredVector.scale(desiredDistanceToPoint / distanceToPoint);
       }
    }
 }
