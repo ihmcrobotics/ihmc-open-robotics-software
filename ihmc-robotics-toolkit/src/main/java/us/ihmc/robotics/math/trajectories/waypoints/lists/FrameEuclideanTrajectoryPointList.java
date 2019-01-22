@@ -28,7 +28,7 @@ public class FrameEuclideanTrajectoryPointList implements FrameTrajectoryPointLi
    public void addTrajectoryPoint(FrameEuclideanTrajectoryPoint trajectoryPoint)
    {
       checkReferenceFrameMatch(trajectoryPoint);
-      trajectoryPoints.add().set(trajectoryPoint);
+      trajectoryPoints.add().setIncludingFrame(trajectoryPoint);
    }
 
    public void addTrajectoryPoint(EuclideanTrajectoryPointInterface trajectoryPoint)

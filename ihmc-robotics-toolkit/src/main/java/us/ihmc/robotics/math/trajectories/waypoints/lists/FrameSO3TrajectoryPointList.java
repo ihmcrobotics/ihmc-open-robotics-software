@@ -28,7 +28,7 @@ public class FrameSO3TrajectoryPointList implements FrameTrajectoryPointListInte
    public void addTrajectoryPoint(FrameSO3TrajectoryPoint trajectoryPoint)
    {
       checkReferenceFrameMatch(trajectoryPoint);
-      trajectoryPoints.add().set(trajectoryPoint);
+      trajectoryPoints.add().setIncludingFrame(trajectoryPoint);
    }
 
    public void addTrajectoryPoint(SO3TrajectoryPointInterface trajectoryPoint)
