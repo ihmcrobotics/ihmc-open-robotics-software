@@ -23,9 +23,6 @@ import us.ihmc.euclid.referenceFrame.tools.ReferenceFrameTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple4D.Quaternion;
-import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition;
-import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsList;
-import us.ihmc.graphicsDescription.yoGraphics.plotting.ArtifactList;
 import us.ihmc.humanoidRobotics.footstep.FootSpoof;
 import us.ihmc.robotics.math.trajectories.waypoints.YoFrameEuclideanTrajectoryPoint;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
@@ -215,22 +212,4 @@ public class CoPPointsInFootTest
       assertEquals(tempFramePoint.getY(), -0.05 + newFrameOriginY, epsilon);
       assertEquals(tempFramePoint.getZ(), 0.11 + newFrameOriginZ, epsilon);
    }
-
-   @ContinuousIntegrationTest(estimatedDuration = 0.1)
-   @Test(timeout = 30000)
-   public void testVisualization()
-   {
-      YoGraphicsList dummyGraphicsList = new YoGraphicsList("DummyGraphics");
-      ArtifactList dummyArtifactList = new ArtifactList("DummyArtifacts");
-      copPointsInFoot.setupVisualizers(dummyGraphicsList, dummyArtifactList, 0.05);
-      assertEquals(dummyArtifactList.getArtifacts().size(), 10);
-      assertEquals(dummyGraphicsList.getYoGraphics().size(), 10);
-      copPointsInFoot.addWaypoint(CoPPointName.MIDFOOT_COP, 1.0, new FramePoint3D(footSpoof.getSoleFrame(), 1.0, 2.1, 3.1));
-
-      YoGraphicPosition graphic = (YoGraphicPosition) dummyGraphicsList.getYoGraphics().get(0);
-      assertEquals(1.0 - xToAnkle, graphic.getX(), 1e-5);
-      assertEquals(2.1 - yToAnkle, graphic.getY(), 1e-5);
-      assertEquals(3.1 - zToAnkle, graphic.getZ(), 1e-5);
-   }
-
 }
