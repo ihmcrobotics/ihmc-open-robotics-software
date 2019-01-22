@@ -33,6 +33,7 @@ public class ObstacleAndCliffAvoidanceProcessor
    private static final double samePointEpsilon = 0.01;
 
    private final double desiredDistanceFromObstacleCluster;
+   private final double minimumDistanceFromObstacleCluster;
    private final double desiredDistanceFromCliff;
    private final double minimumDistanceFromCliff; // FIXME this is currently unused
    private final double maxInterRegionConnectionLength;
@@ -46,6 +47,7 @@ public class ObstacleAndCliffAvoidanceProcessor
       desiredDistanceFromCliff = parameters.getPreferredObstacleExtrusionDistance() - parameters.getNavigableExtrusionDistance();
       //      desiredDistanceFromCliff = 0.5;
       minimumDistanceFromCliff = parameters.getObstacleExtrusionDistance();
+      minimumDistanceFromObstacleCluster = 0.0;
       waypointResolution = 0.1;
    }
 
@@ -123,8 +125,8 @@ public class ObstacleAndCliffAvoidanceProcessor
          obstacleClusters.addAll(endRegion.getObstacleClusters());
 
       List<Point2DReadOnly> closestObstacleClusterPoints = getClosestPointsOnClusters(nextPointInWorld2D, obstacleClusters);
-      Vector2DReadOnly nodeShiftToAvoidObstacles = PointWiggler.computeVectorToMaximizeAverageDistanceFromPoints(nextPointInWorld2D, closestObstacleClusterPoints,
-                                                                                                    desiredDistanceFromObstacleCluster);
+      Vector2DReadOnly nodeShiftToAvoidObstacles = PointWiggler.computeVectorToMaximizeAverageDistanceFromPointsFancily(nextPointInWorld2D, closestObstacleClusterPoints,
+                                                                                                    desiredDistanceFromObstacleCluster, minimumDistanceFromObstacleCluster);
 
       Point2D shiftedPoint = new Point2D(nodeLocationToPack);
       shiftedPoint.add(nodeShiftToAvoidObstacles);
@@ -147,8 +149,8 @@ public class ObstacleAndCliffAvoidanceProcessor
             homeRegionClusters.add(endRegion.getHomeRegionCluster());
 
          List<Point2DReadOnly> closestCliffObstacleClusterPoints = getClosestPointsOnClusters(nextPointInWorld2D, homeRegionClusters);
-         nodeShift.set(PointWiggler.computeVectorToMaximizeAverageDistanceFromPoints(nextPointInWorld2D, closestObstacleClusterPoints, closestCliffObstacleClusterPoints,
-                                                                        desiredDistanceFromObstacleCluster, desiredDistanceFromCliff));
+         nodeShift.set(PointWiggler.computeVectorToMaximizeAverageDistanceFromPointsFancily(nextPointInWorld2D, closestObstacleClusterPoints, closestCliffObstacleClusterPoints,
+                                                                        desiredDistanceFromObstacleCluster, desiredDistanceFromCliff, minimumDistanceFromObstacleCluster, minimumDistanceFromCliff));
       }
       else
       {
