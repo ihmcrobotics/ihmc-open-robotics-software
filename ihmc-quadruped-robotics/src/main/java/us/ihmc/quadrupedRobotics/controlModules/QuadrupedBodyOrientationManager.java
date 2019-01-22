@@ -102,10 +102,8 @@ public class QuadrupedBodyOrientationManager
 
    public void initialize()
    {
-      desiredBodyOrientation.setToZero(bodyFrame);
-
       ReferenceFrame trajectoryFrame = offsetBodyOrientationTrajectory.getReferenceFrame();
-      desiredBodyOrientation.changeFrame(trajectoryFrame);
+      desiredBodyOrientation.setToZero(trajectoryFrame);
       desiredBodyAngularVelocity.setToZero(trajectoryFrame);
       desiredBodyAngularAcceleration.setToZero(trajectoryFrame);
 
@@ -269,7 +267,7 @@ public class QuadrupedBodyOrientationManager
          desiredBodyAngularAcceleration.setZ(desiredAbsoluteYawAcceleration.getZ());
       }
    }
-   
+
    public FeedbackControlCommand<?> createFeedbackControlTemplate()
    {
       return getFeedbackControlCommand();
