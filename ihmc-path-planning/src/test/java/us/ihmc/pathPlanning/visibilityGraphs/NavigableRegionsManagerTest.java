@@ -38,9 +38,9 @@ import static org.junit.Assert.fail;
 
 public class NavigableRegionsManagerTest
 {
-   private static final boolean visualize = false;
+   private static final boolean visualize = true;
    private static final double epsilon = 1e-4;
-   private static final long timeout = 30000;
+   private static final long timeout = 30000 * 100;
 
    private static final double obstacleExtrusionDistance = 0.2;
    private static final double preferredObstacleExtrusionDistance = 1.0;
@@ -462,7 +462,7 @@ public class NavigableRegionsManagerTest
       Point3D start = new Point3D(-15.0, 1.5, 0.0);
       Point3D goal = new Point3D(-5.0, 1.5, 0.0);
 
-      NavigableRegionsManager navigableRegionsManager = new NavigableRegionsManager(parameters, planarRegionsList.getPlanarRegionsAsList());
+      NavigableRegionsManager navigableRegionsManager = new NavigableRegionsManager(parameters, planarRegionsList.getPlanarRegionsAsList(), new ObstacleAndCliffAvoidanceProcessor(parameters));
       navigableRegionsManager.setPlanarRegions(planarRegionsList.getPlanarRegionsAsList());
 
       List<Point3DReadOnly> path = navigableRegionsManager.calculateBodyPathWithOcclusions(start, goal);
@@ -492,10 +492,10 @@ public class NavigableRegionsManagerTest
       Point3D goal = new Point3D(-5.0, 1.5, 0.0);
 
       ObstacleAndCliffAvoidanceProcessor postProcessor = new ObstacleAndCliffAvoidanceProcessor(parameters);
-      NavigableRegionsManager navigableRegionsManager = new NavigableRegionsManager(parameters, planarRegionsList.getPlanarRegionsAsList(), postProcessor);
+      NavigableRegionsManager navigableRegionsManager = new NavigableRegionsManager(parameters, planarRegionsList.getPlanarRegionsAsList(), new ObstacleAndCliffAvoidanceProcessor(parameters));
       navigableRegionsManager.setPlanarRegions(planarRegionsList.getPlanarRegionsAsList());
 
-      List<Point3DReadOnly> path = navigableRegionsManager.calculateBodyPathWithOcclusions(start, goal);
+      List<Point3DReadOnly> path = navigableRegionsManager.calculateBodyPath(start, goal);
 
       if (visualize)
       {
@@ -518,10 +518,10 @@ public class NavigableRegionsManagerTest
       Point3D goal = new Point3D(-5.0, 0.0, 0.0);
 
       ObstacleAndCliffAvoidanceProcessor postProcessor = new ObstacleAndCliffAvoidanceProcessor(parameters);
-      NavigableRegionsManager navigableRegionsManager = new NavigableRegionsManager(parameters, planarRegionsList.getPlanarRegionsAsList(), postProcessor);
+      NavigableRegionsManager navigableRegionsManager = new NavigableRegionsManager(parameters, planarRegionsList.getPlanarRegionsAsList(), new ObstacleAndCliffAvoidanceProcessor(parameters));
       navigableRegionsManager.setPlanarRegions(planarRegionsList.getPlanarRegionsAsList());
 
-      List<Point3DReadOnly> path = navigableRegionsManager.calculateBodyPathWithOcclusions(start, goal);
+      List<Point3DReadOnly> path = navigableRegionsManager.calculateBodyPath(start, goal);
 
       if (visualize)
       {
@@ -543,10 +543,10 @@ public class NavigableRegionsManagerTest
       Point3D start = new Point3D(-15.0, 0.0, 0.0);
       Point3D goal = new Point3D(-5.0, 0.0, 0.0);
 
-      NavigableRegionsManager navigableRegionsManager = new NavigableRegionsManager(parameters, planarRegionsList.getPlanarRegionsAsList());
+      NavigableRegionsManager navigableRegionsManager = new NavigableRegionsManager(parameters, planarRegionsList.getPlanarRegionsAsList(), new ObstacleAndCliffAvoidanceProcessor(parameters));
       navigableRegionsManager.setPlanarRegions(planarRegionsList.getPlanarRegionsAsList());
 
-      List<Point3DReadOnly> path = navigableRegionsManager.calculateBodyPathWithOcclusions(start, goal);
+      List<Point3DReadOnly> path = navigableRegionsManager.calculateBodyPath(start, goal);
 
       if (visualize)
       {
