@@ -15,16 +15,16 @@ import java.util.List;
 
 public class PointWiggler
 {
-   static Vector2DReadOnly computeVectorToMaximizeAverageDistanceFromPoints(Point2DReadOnly pointToShift, List<Point2DReadOnly> pointsToAvoidByDistance,
-                                                                            double desiredDistance, double minimumDistance)
+   static Vector2DReadOnly computeBestShiftVectorToAvoidPoints(Point2DReadOnly pointToShift, List<Point2DReadOnly> pointsToAvoidByDistance,
+                                                               double desiredDistance, double minimumDistance)
    {
-      return computeVectorToMaximizeAverageDistanceFromPoints(pointToShift, pointsToAvoidByDistance, new ArrayList<>(), desiredDistance, 0.0, minimumDistance,
-                                                              0.0);
+      return computeBestShiftVectorToAvoidPoints(pointToShift, pointsToAvoidByDistance, new ArrayList<>(), desiredDistance, 0.0, minimumDistance,
+                                                 0.0);
    }
 
-   static Vector2DReadOnly computeVectorToMaximizeAverageDistanceFromPoints(Point2DReadOnly pointToShift, List<Point2DReadOnly> pointsToAvoidByDistanceA,
-                                                                            List<Point2DReadOnly> pointsToAvoidByDistanceB, double desiredDistanceA,
-                                                                            double desiredDistanceB, double minimumDistanceA, double minimumDistanceB)
+   static Vector2DReadOnly computeBestShiftVectorToAvoidPoints(Point2DReadOnly pointToShift, List<Point2DReadOnly> pointsToAvoidByDistanceA,
+                                                               List<Point2DReadOnly> pointsToAvoidByDistanceB, double desiredDistanceA,
+                                                               double desiredDistanceB, double minimumDistanceA, double minimumDistanceB)
    {
       double maxShift = Math.max(desiredDistanceA, desiredDistanceB);
       List<PointInfo> pointsInfoToAvoid = new ArrayList<>();

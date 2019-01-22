@@ -125,8 +125,8 @@ public class ObstacleAndCliffAvoidanceProcessor
          obstacleClusters.addAll(endRegion.getObstacleClusters());
 
       List<Point2DReadOnly> closestObstacleClusterPoints = getClosestPointsOnClusters(nextPointInWorld2D, obstacleClusters);
-      Vector2DReadOnly nodeShiftToAvoidObstacles = PointWiggler.computeVectorToMaximizeAverageDistanceFromPoints(nextPointInWorld2D, closestObstacleClusterPoints,
-                                                                                                                 desiredDistanceFromObstacleCluster, minimumDistanceFromObstacleCluster);
+      Vector2DReadOnly nodeShiftToAvoidObstacles = PointWiggler.computeBestShiftVectorToAvoidPoints(nextPointInWorld2D, closestObstacleClusterPoints,
+                                                                                                    desiredDistanceFromObstacleCluster, minimumDistanceFromObstacleCluster);
 
       Point2D shiftedPoint = new Point2D(nodeLocationToPack);
       shiftedPoint.add(nodeShiftToAvoidObstacles);
@@ -149,8 +149,8 @@ public class ObstacleAndCliffAvoidanceProcessor
             homeRegionClusters.add(endRegion.getHomeRegionCluster());
 
          List<Point2DReadOnly> closestCliffObstacleClusterPoints = getClosestPointsOnClusters(nextPointInWorld2D, homeRegionClusters);
-         nodeShift.set(PointWiggler.computeVectorToMaximizeAverageDistanceFromPoints(nextPointInWorld2D, closestObstacleClusterPoints, closestCliffObstacleClusterPoints,
-                                                                                     desiredDistanceFromObstacleCluster, desiredDistanceFromCliff, minimumDistanceFromObstacleCluster, minimumDistanceFromCliff));
+         nodeShift.set(PointWiggler.computeBestShiftVectorToAvoidPoints(nextPointInWorld2D, closestObstacleClusterPoints, closestCliffObstacleClusterPoints,
+                                                                        desiredDistanceFromObstacleCluster, desiredDistanceFromCliff, minimumDistanceFromObstacleCluster, minimumDistanceFromCliff));
       }
       else
       {
