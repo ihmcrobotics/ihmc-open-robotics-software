@@ -49,6 +49,7 @@ public class DRCNetworkProcessor
       tryToStartModule(() -> setupRobotEnvironmentAwerenessModule(params));
       tryToStartModule(() -> setupBipedalSupportPlanarRegionPublisherModule(robotModel, params));
       tryToStartModule(() -> setupBipedalSupportPlanarRegionPublisherModule(robotModel, params));
+      tryToStartModule(() -> setupWalkingPreviewModule(robotModel, params));
    }
 
    private void addTextToSpeechEngine(DRCNetworkModuleParameters params)
