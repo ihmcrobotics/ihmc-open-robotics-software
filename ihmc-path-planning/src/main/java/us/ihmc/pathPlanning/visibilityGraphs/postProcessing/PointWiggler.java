@@ -84,6 +84,12 @@ public class PointWiggler
       return averageShiftVector;
    }
 
+   static Vector2DReadOnly computeVectorToMaximizeAverageDistanceFromPointsFancily(Point2DReadOnly pointToShift, List<Point2DReadOnly> pointsToAvoidByDistance,
+                                                                            double desiredDistance)
+   {
+      return computeVectorToMaximizeAverageDistanceFromPointsFancily(pointToShift, pointsToAvoidByDistance, new ArrayList<>(), desiredDistance, 0.0);
+   }
+
    static Vector2DReadOnly computeVectorToMaximizeAverageDistanceFromPointsFancily(Point2DReadOnly pointToShift, List<Point2DReadOnly> pointsToAvoidByDistanceA,
                                                                             List<Point2DReadOnly> pointsToAvoidByDistanceB, double desiredDistanceA,
                                                                                    double desiredDistanceB)
