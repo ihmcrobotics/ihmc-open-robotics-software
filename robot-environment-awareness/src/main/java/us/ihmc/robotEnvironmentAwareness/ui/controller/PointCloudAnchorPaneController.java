@@ -42,7 +42,7 @@ public class PointCloudAnchorPaneController extends REABasicUIController
    {
       ObservableList<SourceType> sourceTypeOptions = FXCollections.observableArrayList(SourceType.values());
       sourceTypeComboBox.setItems(sourceTypeOptions);
-      sourceTypeComboBox.setValue(SourceType.Lidar);
+      sourceTypeComboBox.setValue(SourceType.LidarScan);
    }
 
    public void bindControls()
