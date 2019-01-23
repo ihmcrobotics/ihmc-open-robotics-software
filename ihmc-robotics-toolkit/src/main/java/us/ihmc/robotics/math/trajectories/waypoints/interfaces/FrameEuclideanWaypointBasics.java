@@ -13,7 +13,7 @@ import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 
-public interface FrameEuclideanWaypointInterface extends EuclideanWaypointInterface, FrameChangeable
+public interface FrameEuclideanWaypointBasics extends EuclideanWaypointBasics, FrameChangeable
 {
    @Override
    abstract FramePoint3DReadOnly getPosition();
@@ -33,7 +33,7 @@ public interface FrameEuclideanWaypointInterface extends EuclideanWaypointInterf
       setLinearVelocity(linearVelocity.getX(), linearVelocity.getY(), linearVelocity.getZ());
    }
 
-   default double positionDistance(FrameEuclideanWaypointInterface other)
+   default double positionDistance(FrameEuclideanWaypointBasics other)
    {
       return getPosition().distance(other.getPosition());
    }
@@ -78,24 +78,24 @@ public interface FrameEuclideanWaypointInterface extends EuclideanWaypointInterf
       set(position, linearVelocity);
    }
 
-   default void setIncludingFrame(ReferenceFrame referenceFrame, EuclideanWaypointInterface other)
+   default void setIncludingFrame(ReferenceFrame referenceFrame, EuclideanWaypointBasics other)
    {
       setReferenceFrame(referenceFrame);
       set(other);
    }
 
-   default void setIncludingFrame(FrameEuclideanWaypointInterface other)
+   default void setIncludingFrame(FrameEuclideanWaypointBasics other)
    {
       setReferenceFrame(other.getReferenceFrame());
       set(other);
    }
 
-   default void get(FrameEuclideanWaypointInterface otherToPack)
+   default void get(FrameEuclideanWaypointBasics otherToPack)
    {
       otherToPack.set(this);
    }
 
-   default void getIncludingFrame(FrameEuclideanWaypointInterface otherToPack)
+   default void getIncludingFrame(FrameEuclideanWaypointBasics otherToPack)
    {
       otherToPack.setIncludingFrame(this);
    }
@@ -112,21 +112,21 @@ public interface FrameEuclideanWaypointInterface extends EuclideanWaypointInterf
       getLinearVelocityIncludingFrame(linearVelocityToPack);
    }
 
-   default boolean epsilonEquals(FrameEuclideanWaypointInterface other, double epsilon)
+   default boolean epsilonEquals(FrameEuclideanWaypointBasics other, double epsilon)
    {
       boolean positionMatches = getPosition().epsilonEquals(other.getPosition(), epsilon);
       boolean linearVelocityMatches = getLinearVelocity().epsilonEquals(other.getLinearVelocity(), epsilon);
       return positionMatches && linearVelocityMatches;
    }
 
-   default boolean geometricallyEquals(FrameEuclideanWaypointInterface other, double epsilon)
+   default boolean geometricallyEquals(FrameEuclideanWaypointBasics other, double epsilon)
    {
       boolean positionMatches = getPosition().geometricallyEquals(other.getPosition(), epsilon);
       boolean linearVelocityMatches = getLinearVelocity().geometricallyEquals(other.getLinearVelocity(), epsilon);
       return positionMatches && linearVelocityMatches;
    }
 
-   default void set(FrameEuclideanWaypointInterface other)
+   default void set(FrameEuclideanWaypointBasics other)
    {
       setPosition(other.getPosition());
       setLinearVelocity(other.getLinearVelocity());

@@ -23,8 +23,8 @@ import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.robotics.math.trajectories.trajectorypoints.EuclideanTrajectoryPoint;
-import us.ihmc.robotics.math.trajectories.trajectorypoints.interfaces.EuclideanTrajectoryPointInterface;
-import us.ihmc.robotics.math.trajectories.waypoints.interfaces.EuclideanWaypointInterface;
+import us.ihmc.robotics.math.trajectories.trajectorypoints.interfaces.EuclideanTrajectoryPointBasics;
+import us.ihmc.robotics.math.trajectories.waypoints.interfaces.EuclideanWaypointBasics;
 import us.ihmc.robotics.random.RandomGeometry;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 
@@ -426,7 +426,7 @@ public class SimpleEuclideanTrajectoryPointTest
       assertTrue(Double.isNaN(positionDistance));
       assertFalse(simpleEuclideanTrajectoryPoint.epsilonEquals(simpleEuclideanTrajectoryPointTwo, 1e-7));
 
-      EuclideanTrajectoryPointInterface trajectoryPointAsInterface = simplePoint;
+      EuclideanTrajectoryPointBasics trajectoryPointAsInterface = simplePoint;
       simpleEuclideanTrajectoryPoint.set(trajectoryPointAsInterface);
 
       positionDistance = simpleEuclideanTrajectoryPoint.positionDistance(simpleEuclideanTrajectoryPointTwo);
@@ -497,7 +497,7 @@ public class SimpleEuclideanTrajectoryPointTest
 
 
       simpleEuclideanTrajectoryPointTwo = new EuclideanTrajectoryPoint();
-      EuclideanWaypointInterface euclideanWaypoint = simpleEuclideanTrajectoryPoint;
+      EuclideanWaypointBasics euclideanWaypoint = simpleEuclideanTrajectoryPoint;
 
       simpleEuclideanTrajectoryPointTwo.set(time, euclideanWaypoint);
       assertTrue(simpleEuclideanTrajectoryPointTwo.epsilonEquals(simpleEuclideanTrajectoryPoint, 1e-10));

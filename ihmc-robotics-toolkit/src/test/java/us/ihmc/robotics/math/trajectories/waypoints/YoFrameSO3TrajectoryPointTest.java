@@ -28,7 +28,7 @@ import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.robotics.math.trajectories.trajectorypoints.FrameSO3TrajectoryPoint;
 import us.ihmc.robotics.math.trajectories.trajectorypoints.SO3TrajectoryPoint;
 import us.ihmc.robotics.math.trajectories.trajectorypoints.YoFrameSO3TrajectoryPoint;
-import us.ihmc.robotics.math.trajectories.trajectorypoints.interfaces.SO3TrajectoryPointInterface;
+import us.ihmc.robotics.math.trajectories.trajectorypoints.interfaces.SO3TrajectoryPointBasics;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoFrameQuaternion;
@@ -421,7 +421,7 @@ public class YoFrameSO3TrajectoryPointTest
       assertTrue(yoFrameSO3TrajectoryPoint.containsNaN());
       assertFalse(yoFrameSO3TrajectoryPoint.epsilonEquals(yoFrameSO3TrajectoryPointTwo, 1e-7));
 
-      SO3TrajectoryPointInterface trajectoryPointAsInterface = simplePoint;
+      SO3TrajectoryPointBasics trajectoryPointAsInterface = simplePoint;
       yoFrameSO3TrajectoryPoint.set(trajectoryPointAsInterface);
 
       assertTrue(yoFrameSO3TrajectoryPoint.epsilonEquals(yoFrameSO3TrajectoryPointTwo, 1e-7));

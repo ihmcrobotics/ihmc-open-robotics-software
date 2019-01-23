@@ -28,9 +28,9 @@ import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.robotics.math.trajectories.trajectorypoints.FrameSE3TrajectoryPoint;
 import us.ihmc.robotics.math.trajectories.trajectorypoints.SE3TrajectoryPoint;
-import us.ihmc.robotics.math.trajectories.trajectorypoints.interfaces.SE3TrajectoryPointInterface;
-import us.ihmc.robotics.math.trajectories.waypoints.interfaces.FrameSE3WaypointInterface;
-import us.ihmc.robotics.math.trajectories.waypoints.interfaces.SE3WaypointInterface;
+import us.ihmc.robotics.math.trajectories.trajectorypoints.interfaces.SE3TrajectoryPointBasics;
+import us.ihmc.robotics.math.trajectories.waypoints.interfaces.FrameSE3WaypointBasics;
+import us.ihmc.robotics.math.trajectories.waypoints.interfaces.SE3WaypointBasics;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 
 public class FrameSE3TrajectoryPointTest
@@ -566,7 +566,7 @@ public class FrameSE3TrajectoryPointTest
       assertTrue(Double.isNaN(positionDistance));
       assertFalse(FrameSE3TrajectoryPoint.epsilonEquals(FrameSE3TrajectoryPointTwo, 1e-7));
 
-      SE3TrajectoryPointInterface trajectoryPointAsInterface = simplePoint;
+      SE3TrajectoryPointBasics trajectoryPointAsInterface = simplePoint;
       FrameSE3TrajectoryPoint.set(trajectoryPointAsInterface);
 
       positionDistance = FrameSE3TrajectoryPoint.positionDistance(FrameSE3TrajectoryPointTwo);
@@ -635,7 +635,7 @@ public class FrameSE3TrajectoryPointTest
       assertTrue(frameSE3TrajectoryPointTwo.epsilonEquals(frameSE3TrajectoryPoint, 1e-10));
 
       frameSE3TrajectoryPointTwo = new FrameSE3TrajectoryPoint(poseFrame);
-      SE3WaypointInterface se3Waypoint = frameSE3TrajectoryPoint;
+      SE3WaypointBasics se3Waypoint = frameSE3TrajectoryPoint;
       frameSE3TrajectoryPointTwo.set(time, se3Waypoint);
       assertTrue(frameSE3TrajectoryPointTwo.epsilonEquals(frameSE3TrajectoryPoint, 1e-10));
 
@@ -644,7 +644,7 @@ public class FrameSE3TrajectoryPointTest
       assertTrue(frameSE3TrajectoryPointTwo.epsilonEquals(frameSE3TrajectoryPoint, 1e-10));
 
       frameSE3TrajectoryPointTwo = new FrameSE3TrajectoryPoint(poseFrame);
-      FrameSE3WaypointInterface frameSE3Waypoint = frameSE3TrajectoryPoint;
+      FrameSE3WaypointBasics frameSE3Waypoint = frameSE3TrajectoryPoint;
       frameSE3TrajectoryPointTwo.set(time, frameSE3Waypoint);
       assertTrue(frameSE3TrajectoryPointTwo.epsilonEquals(frameSE3TrajectoryPoint, 1e-10));
 

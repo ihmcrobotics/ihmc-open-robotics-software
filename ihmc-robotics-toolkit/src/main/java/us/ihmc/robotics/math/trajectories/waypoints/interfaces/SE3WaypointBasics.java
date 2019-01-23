@@ -8,7 +8,7 @@ import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.euclid.tuple4D.interfaces.QuaternionBasics;
 import us.ihmc.euclid.tuple4D.interfaces.QuaternionReadOnly;
 
-public interface SE3WaypointInterface extends EuclideanWaypointInterface, SO3WaypointInterface
+public interface SE3WaypointBasics extends EuclideanWaypointBasics, SO3WaypointBasics
 {
    default void set(Point3DReadOnly position, QuaternionReadOnly orientation, Vector3DReadOnly linearVelocity, Vector3DReadOnly angularVelocity)
    {
@@ -26,12 +26,12 @@ public interface SE3WaypointInterface extends EuclideanWaypointInterface, SO3Way
       getAngularVelocity(angularVelocityToPack);
    }
 
-   default void get(SE3WaypointInterface otherToPack)
+   default void get(SE3WaypointBasics otherToPack)
    {
       otherToPack.set(this);
    }
 
-   default void get(EuclideanWaypointInterface euclideanWaypointToPack, SO3WaypointInterface so3WaypointToPack)
+   default void get(EuclideanWaypointBasics euclideanWaypointToPack, SO3WaypointBasics so3WaypointToPack)
    {
       get(euclideanWaypointToPack);
       get(so3WaypointToPack);
@@ -42,43 +42,43 @@ public interface SE3WaypointInterface extends EuclideanWaypointInterface, SO3Way
       poseToPack.set(getPosition(), getOrientation());
    }
 
-   default boolean epsilonEquals(SE3WaypointInterface other, double epsilon)
+   default boolean epsilonEquals(SE3WaypointBasics other, double epsilon)
    {
-      boolean euclideanMatch = EuclideanWaypointInterface.super.epsilonEquals(other, epsilon);
-      boolean so3Match = SO3WaypointInterface.super.epsilonEquals(other, epsilon);
+      boolean euclideanMatch = EuclideanWaypointBasics.super.epsilonEquals(other, epsilon);
+      boolean so3Match = SO3WaypointBasics.super.epsilonEquals(other, epsilon);
       return euclideanMatch && so3Match;
    }
 
-   default boolean geometricallyEquals(SE3WaypointInterface other, double epsilon)
+   default boolean geometricallyEquals(SE3WaypointBasics other, double epsilon)
    {
-      boolean euclideanMatch = EuclideanWaypointInterface.super.geometricallyEquals(other, epsilon);
-      boolean so3Match = SO3WaypointInterface.super.geometricallyEquals(other, epsilon);
+      boolean euclideanMatch = EuclideanWaypointBasics.super.geometricallyEquals(other, epsilon);
+      boolean so3Match = SO3WaypointBasics.super.geometricallyEquals(other, epsilon);
       return euclideanMatch && so3Match;
    }
 
-   default void set(SE3WaypointInterface other)
+   default void set(SE3WaypointBasics other)
    {
-      EuclideanWaypointInterface.super.set(other);
-      SO3WaypointInterface.super.set(other);
+      EuclideanWaypointBasics.super.set(other);
+      SO3WaypointBasics.super.set(other);
    }
 
    @Override
    default void setToNaN()
    {
-      EuclideanWaypointInterface.super.setToNaN();
-      SO3WaypointInterface.super.setToNaN();
+      EuclideanWaypointBasics.super.setToNaN();
+      SO3WaypointBasics.super.setToNaN();
    }
 
    @Override
    default void setToZero()
    {
-      EuclideanWaypointInterface.super.setToZero();
-      SO3WaypointInterface.super.setToZero();
+      EuclideanWaypointBasics.super.setToZero();
+      SO3WaypointBasics.super.setToZero();
    }
 
    @Override
    default boolean containsNaN()
    {
-      return EuclideanWaypointInterface.super.containsNaN() || SO3WaypointInterface.super.containsNaN();
+      return EuclideanWaypointBasics.super.containsNaN() || SO3WaypointBasics.super.containsNaN();
    }
 }

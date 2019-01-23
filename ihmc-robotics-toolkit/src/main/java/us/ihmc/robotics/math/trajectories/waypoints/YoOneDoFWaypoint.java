@@ -5,11 +5,11 @@ import static us.ihmc.robotics.math.frames.YoFrameVariableNameTools.createName;
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
 
-import us.ihmc.robotics.math.trajectories.waypoints.interfaces.OneDoFWaypointInterface;
+import us.ihmc.robotics.math.trajectories.waypoints.interfaces.OneDoFWaypointBasics;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 
-public class YoOneDoFWaypoint implements OneDoFWaypointInterface
+public class YoOneDoFWaypoint implements OneDoFWaypointBasics
 {
    private final String namePrefix;
    private final String nameSuffix;

@@ -3,9 +3,9 @@ package us.ihmc.robotics.math.trajectories.trajectorypoints.interfaces;
 import us.ihmc.euclid.tools.EuclidCoreTools;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
-import us.ihmc.robotics.math.trajectories.waypoints.interfaces.EuclideanWaypointInterface;
+import us.ihmc.robotics.math.trajectories.waypoints.interfaces.EuclideanWaypointBasics;
 
-public interface EuclideanTrajectoryPointInterface extends TrajectoryPointInterface, EuclideanWaypointInterface
+public interface EuclideanTrajectoryPointBasics extends TrajectoryPointBasics, EuclideanWaypointBasics
 {
    default void set(double time, Point3DReadOnly position, Vector3DReadOnly linearVelocity)
    {
@@ -13,46 +13,46 @@ public interface EuclideanTrajectoryPointInterface extends TrajectoryPointInterf
       set(position, linearVelocity);
    }
 
-   default void set(EuclideanTrajectoryPointInterface other)
+   default void set(EuclideanTrajectoryPointBasics other)
    {
       setTime(other.getTime());
-      EuclideanWaypointInterface.super.set(other);
+      EuclideanWaypointBasics.super.set(other);
    }
 
-   default void set(double time, EuclideanWaypointInterface waypoint)
+   default void set(double time, EuclideanWaypointBasics waypoint)
    {
       setTime(time);
       set(waypoint);
    }
 
-   default void get(EuclideanTrajectoryPointInterface otherToPack)
+   default void get(EuclideanTrajectoryPointBasics otherToPack)
    {
       otherToPack.set(this);
    }
 
-   default boolean epsilonEquals(EuclideanTrajectoryPointInterface other, double epsilon)
+   default boolean epsilonEquals(EuclideanTrajectoryPointBasics other, double epsilon)
    {
       boolean timeEquals = EuclidCoreTools.epsilonEquals(getTime(), other.getTime(), epsilon);
-      return timeEquals && EuclideanWaypointInterface.super.epsilonEquals(other, epsilon);
+      return timeEquals && EuclideanWaypointBasics.super.epsilonEquals(other, epsilon);
    }
 
    @Override
    default void setToNaN()
    {
       setTimeToNaN();
-      EuclideanWaypointInterface.super.setToNaN();
+      EuclideanWaypointBasics.super.setToNaN();
    }
 
    @Override
    default void setToZero()
    {
       setTimeToZero();
-      EuclideanWaypointInterface.super.setToZero();
+      EuclideanWaypointBasics.super.setToZero();
    }
 
    @Override
    default boolean containsNaN()
    {
-      return Double.isNaN(getTime()) || EuclideanWaypointInterface.super.containsNaN();
+      return Double.isNaN(getTime()) || EuclideanWaypointBasics.super.containsNaN();
    }
 }

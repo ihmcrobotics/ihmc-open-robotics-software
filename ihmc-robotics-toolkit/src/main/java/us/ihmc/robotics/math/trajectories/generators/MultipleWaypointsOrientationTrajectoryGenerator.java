@@ -16,8 +16,8 @@ import us.ihmc.robotics.math.trajectories.OrientationTrajectoryGeneratorInMultip
 import us.ihmc.robotics.math.trajectories.trajectorypoints.FrameSE3TrajectoryPoint;
 import us.ihmc.robotics.math.trajectories.trajectorypoints.FrameSO3TrajectoryPoint;
 import us.ihmc.robotics.math.trajectories.trajectorypoints.YoFrameSO3TrajectoryPoint;
-import us.ihmc.robotics.math.trajectories.trajectorypoints.interfaces.SO3TrajectoryPointInterface;
-import us.ihmc.robotics.math.trajectories.trajectorypoints.interfaces.TrajectoryPointListInterface;
+import us.ihmc.robotics.math.trajectories.trajectorypoints.interfaces.SO3TrajectoryPointBasics;
+import us.ihmc.robotics.math.trajectories.trajectorypoints.interfaces.TrajectoryPointListBasics;
 import us.ihmc.robotics.math.trajectories.trajectorypoints.lists.FrameSO3TrajectoryPointList;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
@@ -116,7 +116,7 @@ public class MultipleWaypointsOrientationTrajectoryGenerator extends Orientation
       numberOfWaypoints.increment();
    }
 
-   public void appendWaypoint(SO3TrajectoryPointInterface so3Waypoint)
+   public void appendWaypoint(SO3TrajectoryPointBasics so3Waypoint)
    {
       checkNumberOfWaypoints(numberOfWaypoints.getIntegerValue() + 1);
       appendWaypointUnsafe(so3Waypoint);
@@ -136,7 +136,7 @@ public class MultipleWaypointsOrientationTrajectoryGenerator extends Orientation
       appendWaypointUnsafe(frameSE3TrajectoryPoint);
    }
 
-   private void appendWaypointUnsafe(SO3TrajectoryPointInterface so3Waypoint)
+   private void appendWaypointUnsafe(SO3TrajectoryPointBasics so3Waypoint)
    {
       waypoints.get(numberOfWaypoints.getIntegerValue()).set(so3Waypoint);
       numberOfWaypoints.increment();
@@ -166,7 +166,7 @@ public class MultipleWaypointsOrientationTrajectoryGenerator extends Orientation
       }
    }
 
-   public void appendWaypoints(SO3TrajectoryPointInterface[] so3Waypoints)
+   public void appendWaypoints(SO3TrajectoryPointBasics[] so3Waypoints)
    {
       checkNumberOfWaypoints(numberOfWaypoints.getIntegerValue() + so3Waypoints.length);
 
@@ -176,7 +176,7 @@ public class MultipleWaypointsOrientationTrajectoryGenerator extends Orientation
       }
    }
 
-   public void appendWaypoints(TrajectoryPointListInterface<? extends SO3TrajectoryPointInterface> trajectoryPointList)
+   public void appendWaypoints(TrajectoryPointListBasics<? extends SO3TrajectoryPointBasics> trajectoryPointList)
    {
       checkNumberOfWaypoints(numberOfWaypoints.getIntegerValue() + trajectoryPointList.getNumberOfTrajectoryPoints());
 

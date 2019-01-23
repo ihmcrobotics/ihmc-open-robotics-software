@@ -5,10 +5,10 @@ import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
-import us.ihmc.robotics.math.trajectories.waypoints.interfaces.EuclideanWaypointInterface;
+import us.ihmc.robotics.math.trajectories.waypoints.interfaces.EuclideanWaypointBasics;
 import us.ihmc.robotics.math.trajectories.waypoints.tools.WaypointToStringTools;
 
-public class EuclideanWaypoint implements EuclideanWaypointInterface
+public class EuclideanWaypoint implements EuclideanWaypointBasics
 {
    private final Point3D position = new Point3D();
    private final Vector3D linearVelocity = new Vector3D();

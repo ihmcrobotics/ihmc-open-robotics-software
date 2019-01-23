@@ -16,7 +16,7 @@ import us.ihmc.commons.MathTools;
 import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.robotics.math.trajectories.YoPolynomial;
 import us.ihmc.robotics.math.trajectories.trajectorypoints.FrameEuclideanTrajectoryPoint;
-import us.ihmc.robotics.math.trajectories.trajectorypoints.interfaces.EuclideanTrajectoryPointInterface;
+import us.ihmc.robotics.math.trajectories.trajectorypoints.interfaces.EuclideanTrajectoryPointBasics;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 
 /**
@@ -64,7 +64,7 @@ public class EuclideanTrajectoryPointCalculator
       this.referenceFrame = referenceFrame;
    }
 
-   public void appendTrajectoryPoint(EuclideanTrajectoryPointInterface trajectoryPoint)
+   public void appendTrajectoryPoint(EuclideanTrajectoryPointBasics trajectoryPoint)
    {
       trajectoryPoints.add().set(trajectoryPoint);
    }
@@ -262,9 +262,9 @@ public class EuclideanTrajectoryPointCalculator
    private final FramePoint3D tempFramePoint = new FramePoint3D();
    private final FrameVector3D tempFrameVector = new FrameVector3D();
 
-   private void compute2ndTrajectoryPointVelocityWithVelocityConstraint(EuclideanTrajectoryPointInterface firstTrajectoryPoint,
-                                                                        EuclideanTrajectoryPointInterface secondTrajectoryPoint,
-                                                                        EuclideanTrajectoryPointInterface thirdTrajectoryPoint,
+   private void compute2ndTrajectoryPointVelocityWithVelocityConstraint(EuclideanTrajectoryPointBasics firstTrajectoryPoint,
+                                                                        EuclideanTrajectoryPointBasics secondTrajectoryPoint,
+                                                                        EuclideanTrajectoryPointBasics thirdTrajectoryPoint,
                                                                         FrameVector3D linearVelocityToPack)
    {
       for (Axis axis : Axis.values)
@@ -297,8 +297,8 @@ public class EuclideanTrajectoryPointCalculator
       FIRST, SECOND, THIRD
    };
 
-   private void computeTrajectoryPointVelocity(EuclideanTrajectoryPointInterface firstTrajectoryPoint, EuclideanTrajectoryPointInterface secondTrajectoryPoint,
-                                               EuclideanTrajectoryPointInterface thirdTrajectoryPoint, TrajectoryPoint trajectoryPointToComputeVelocityOf,
+   private void computeTrajectoryPointVelocity(EuclideanTrajectoryPointBasics firstTrajectoryPoint, EuclideanTrajectoryPointBasics secondTrajectoryPoint,
+                                               EuclideanTrajectoryPointBasics thirdTrajectoryPoint, TrajectoryPoint trajectoryPointToComputeVelocityOf,
                                                FrameVector3D linearVelocityToPack)
    {
       for (Axis axis : Axis.values)

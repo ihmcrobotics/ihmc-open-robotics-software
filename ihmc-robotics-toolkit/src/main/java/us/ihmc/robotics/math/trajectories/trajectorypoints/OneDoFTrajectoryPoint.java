@@ -3,10 +3,10 @@ package us.ihmc.robotics.math.trajectories.trajectorypoints;
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
 
-import us.ihmc.robotics.math.trajectories.trajectorypoints.interfaces.OneDoFTrajectoryPointInterface;
+import us.ihmc.robotics.math.trajectories.trajectorypoints.interfaces.OneDoFTrajectoryPointBasics;
 import us.ihmc.robotics.math.trajectories.waypoints.OneDoFWaypoint;
 
-public class OneDoFTrajectoryPoint implements OneDoFTrajectoryPointInterface
+public class OneDoFTrajectoryPoint implements OneDoFTrajectoryPointBasics
 {
    private final OneDoFWaypoint oneDoFWaypoint = new OneDoFWaypoint();
    private double time;

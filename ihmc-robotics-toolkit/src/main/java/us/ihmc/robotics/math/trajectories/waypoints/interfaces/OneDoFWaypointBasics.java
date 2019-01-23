@@ -2,7 +2,7 @@ package us.ihmc.robotics.math.trajectories.waypoints.interfaces;
 
 import us.ihmc.euclid.tools.EuclidCoreTools;
 
-public interface OneDoFWaypointInterface
+public interface OneDoFWaypointBasics
 {
    abstract void setPosition(double position);
 
@@ -38,18 +38,18 @@ public interface OneDoFWaypointInterface
       setVelocity(velocity);
    }
 
-   default void get(OneDoFWaypointInterface otherToPack)
+   default void get(OneDoFWaypointBasics otherToPack)
    {
       otherToPack.set(this);
    }
 
-   default boolean epsilonEquals(OneDoFWaypointInterface other, double epsilon)
+   default boolean epsilonEquals(OneDoFWaypointBasics other, double epsilon)
    {
       return EuclidCoreTools.epsilonEquals(getPosition(), other.getPosition(), epsilon)
             && EuclidCoreTools.epsilonEquals(getVelocity(), other.getVelocity(), epsilon);
    }
 
-   default void set(OneDoFWaypointInterface other)
+   default void set(OneDoFWaypointBasics other)
    {
       setPosition(other.getPosition());
       setVelocity(other.getVelocity());

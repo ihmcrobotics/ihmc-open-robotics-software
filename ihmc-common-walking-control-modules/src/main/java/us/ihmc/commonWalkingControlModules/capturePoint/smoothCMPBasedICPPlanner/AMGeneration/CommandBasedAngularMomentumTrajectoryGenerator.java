@@ -18,7 +18,7 @@ import us.ihmc.euclid.referenceFrame.interfaces.FixedFrameVector3DBasics;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
 import us.ihmc.robotics.math.trajectories.trajectorypoints.EuclideanTrajectoryPoint;
-import us.ihmc.robotics.math.trajectories.waypoints.interfaces.EuclideanWaypointInterface;
+import us.ihmc.robotics.math.trajectories.waypoints.interfaces.EuclideanWaypointBasics;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
@@ -251,8 +251,8 @@ public class CommandBasedAngularMomentumTrajectoryGenerator implements AngularMo
          EuclideanTrajectoryPoint simpleStart = waypoints.get(i);
          EuclideanTrajectoryPoint simpleEnd = waypoints.get(i + 1);
 
-         EuclideanWaypointInterface startWaypoint = simpleStart;
-         EuclideanWaypointInterface endWaypoint = simpleEnd;
+         EuclideanWaypointBasics startWaypoint = simpleStart;
+         EuclideanWaypointBasics endWaypoint = simpleEnd;
          if (startWaypoint.containsNaN() || endWaypoint.containsNaN())
          {
             successfulTrajectory = false;

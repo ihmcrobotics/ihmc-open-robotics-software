@@ -3,11 +3,11 @@ package us.ihmc.robotics.math.trajectories.trajectorypoints;
 import us.ihmc.euclid.transform.interfaces.Transform;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.euclid.tuple4D.interfaces.QuaternionReadOnly;
-import us.ihmc.robotics.math.trajectories.trajectorypoints.interfaces.SO3TrajectoryPointInterface;
+import us.ihmc.robotics.math.trajectories.trajectorypoints.interfaces.SO3TrajectoryPointBasics;
 import us.ihmc.robotics.math.trajectories.waypoints.SO3Waypoint;
 import us.ihmc.robotics.math.trajectories.waypoints.tools.WaypointToStringTools;
 
-public class SO3TrajectoryPoint implements SO3TrajectoryPointInterface
+public class SO3TrajectoryPoint implements SO3TrajectoryPointBasics
 {
    private final SO3Waypoint so3Waypoint = new SO3Waypoint();
    private double time;
@@ -16,7 +16,7 @@ public class SO3TrajectoryPoint implements SO3TrajectoryPointInterface
    {
    }
 
-   public SO3TrajectoryPoint(SO3TrajectoryPointInterface other)
+   public SO3TrajectoryPoint(SO3TrajectoryPointBasics other)
    {
       set(other);
    }

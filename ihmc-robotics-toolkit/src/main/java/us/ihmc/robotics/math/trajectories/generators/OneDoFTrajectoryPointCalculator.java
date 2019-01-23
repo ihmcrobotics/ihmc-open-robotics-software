@@ -3,7 +3,7 @@ package us.ihmc.robotics.math.trajectories.generators;
 import us.ihmc.commons.MathTools;
 import us.ihmc.robotics.math.trajectories.YoPolynomial;
 import us.ihmc.robotics.math.trajectories.trajectorypoints.OneDoFTrajectoryPoint;
-import us.ihmc.robotics.math.trajectories.trajectorypoints.interfaces.OneDoFTrajectoryPointInterface;
+import us.ihmc.robotics.math.trajectories.trajectorypoints.interfaces.OneDoFTrajectoryPointBasics;
 import us.ihmc.robotics.math.trajectories.trajectorypoints.lists.OneDoFTrajectoryPointList;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 
@@ -23,7 +23,7 @@ public class OneDoFTrajectoryPointCalculator
       trajectory.clear();
    }
 
-   public void appendTrajectoryPoint(OneDoFTrajectoryPointInterface trajectoryPoint)
+   public void appendTrajectoryPoint(OneDoFTrajectoryPointBasics trajectoryPoint)
    {
       trajectory.addTrajectoryPoint(trajectoryPoint);
    }
@@ -133,16 +133,16 @@ public class OneDoFTrajectoryPointCalculator
       }
    }
 
-   public boolean shouldVelocityBeZero(OneDoFTrajectoryPointInterface firstTrajectoryPoint, OneDoFTrajectoryPointInterface secondTrajectoryPoint)
+   public boolean shouldVelocityBeZero(OneDoFTrajectoryPointBasics firstTrajectoryPoint, OneDoFTrajectoryPointBasics secondTrajectoryPoint)
    {
       double deltaPosition = Math.abs(secondTrajectoryPoint.getPosition() - firstTrajectoryPoint.getPosition());
       double deltaTime = Math.abs(secondTrajectoryPoint.getTime() - firstTrajectoryPoint.getTime());
       return MathTools.epsilonEquals(0.0, deltaPosition / deltaTime, 1.0e-7);
    }
 
-   private double compute2ndTrajectoryPointVelocityWithVelocityConstraint(OneDoFTrajectoryPointInterface firstTrajectoryPoint,
-                                                                          OneDoFTrajectoryPointInterface secondTrajectoryPoint,
-                                                                          OneDoFTrajectoryPointInterface thirdTrajectoryPoint)
+   private double compute2ndTrajectoryPointVelocityWithVelocityConstraint(OneDoFTrajectoryPointBasics firstTrajectoryPoint,
+                                                                          OneDoFTrajectoryPointBasics secondTrajectoryPoint,
+                                                                          OneDoFTrajectoryPointBasics thirdTrajectoryPoint)
    {
       double t0 = firstTrajectoryPoint.getTime();
       double z0 = firstTrajectoryPoint.getPosition();
@@ -173,8 +173,8 @@ public class OneDoFTrajectoryPointCalculator
       FIRST, SECOND, THIRD
    };
 
-   private double computeTrajectoryPointVelocity(OneDoFTrajectoryPointInterface firstTrajectoryPoint, OneDoFTrajectoryPointInterface secondTrajectoryPoint,
-                                                 OneDoFTrajectoryPointInterface thirdTrajectoryPoint, TrajectoryPoint trajectoryPointToComputeVelocityOf)
+   private double computeTrajectoryPointVelocity(OneDoFTrajectoryPointBasics firstTrajectoryPoint, OneDoFTrajectoryPointBasics secondTrajectoryPoint,
+                                                 OneDoFTrajectoryPointBasics thirdTrajectoryPoint, TrajectoryPoint trajectoryPointToComputeVelocityOf)
    {
       double t0 = firstTrajectoryPoint.getTime();
       double z0 = firstTrajectoryPoint.getPosition();

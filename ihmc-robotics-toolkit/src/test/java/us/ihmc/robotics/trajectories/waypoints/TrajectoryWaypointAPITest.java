@@ -44,15 +44,15 @@ import us.ihmc.robotics.math.trajectories.trajectorypoints.SO3TrajectoryPoint;
 import us.ihmc.robotics.math.trajectories.trajectorypoints.YoFrameEuclideanTrajectoryPoint;
 import us.ihmc.robotics.math.trajectories.trajectorypoints.YoFrameSE3TrajectoryPoint;
 import us.ihmc.robotics.math.trajectories.trajectorypoints.YoFrameSO3TrajectoryPoint;
-import us.ihmc.robotics.math.trajectories.trajectorypoints.interfaces.EuclideanTrajectoryPointInterface;
-import us.ihmc.robotics.math.trajectories.trajectorypoints.interfaces.FrameEuclideanTrajectoryPointInterface;
-import us.ihmc.robotics.math.trajectories.trajectorypoints.interfaces.FrameSE3TrajectoryPointInterface;
-import us.ihmc.robotics.math.trajectories.trajectorypoints.interfaces.FrameSO3TrajectoryPointInterface;
-import us.ihmc.robotics.math.trajectories.trajectorypoints.interfaces.FrameTrajectoryPointListInterface;
-import us.ihmc.robotics.math.trajectories.trajectorypoints.interfaces.SE3TrajectoryPointInterface;
-import us.ihmc.robotics.math.trajectories.trajectorypoints.interfaces.SO3TrajectoryPointInterface;
-import us.ihmc.robotics.math.trajectories.trajectorypoints.interfaces.TrajectoryPointInterface;
-import us.ihmc.robotics.math.trajectories.trajectorypoints.interfaces.TrajectoryPointListInterface;
+import us.ihmc.robotics.math.trajectories.trajectorypoints.interfaces.EuclideanTrajectoryPointBasics;
+import us.ihmc.robotics.math.trajectories.trajectorypoints.interfaces.FrameEuclideanTrajectoryPointBasics;
+import us.ihmc.robotics.math.trajectories.trajectorypoints.interfaces.FrameSE3TrajectoryPointBasics;
+import us.ihmc.robotics.math.trajectories.trajectorypoints.interfaces.FrameSO3TrajectoryPointBasics;
+import us.ihmc.robotics.math.trajectories.trajectorypoints.interfaces.FrameTrajectoryPointListBasics;
+import us.ihmc.robotics.math.trajectories.trajectorypoints.interfaces.SE3TrajectoryPointBasics;
+import us.ihmc.robotics.math.trajectories.trajectorypoints.interfaces.SO3TrajectoryPointBasics;
+import us.ihmc.robotics.math.trajectories.trajectorypoints.interfaces.TrajectoryPointBasics;
+import us.ihmc.robotics.math.trajectories.trajectorypoints.interfaces.TrajectoryPointListBasics;
 import us.ihmc.robotics.math.trajectories.waypoints.EuclideanWaypoint;
 import us.ihmc.robotics.math.trajectories.waypoints.FrameEuclideanTrajectoryPointTest;
 import us.ihmc.robotics.math.trajectories.waypoints.FrameEuclideanWaypoint;
@@ -75,12 +75,12 @@ import us.ihmc.robotics.math.trajectories.waypoints.YoFrameSE3TrajectoryPointTes
 import us.ihmc.robotics.math.trajectories.waypoints.YoFrameSE3Waypoint;
 import us.ihmc.robotics.math.trajectories.waypoints.YoFrameSO3TrajectoryPointTest;
 import us.ihmc.robotics.math.trajectories.waypoints.YoFrameSO3Waypoint;
-import us.ihmc.robotics.math.trajectories.waypoints.interfaces.EuclideanWaypointInterface;
-import us.ihmc.robotics.math.trajectories.waypoints.interfaces.FrameEuclideanWaypointInterface;
-import us.ihmc.robotics.math.trajectories.waypoints.interfaces.FrameSE3WaypointInterface;
-import us.ihmc.robotics.math.trajectories.waypoints.interfaces.FrameSO3WaypointInterface;
-import us.ihmc.robotics.math.trajectories.waypoints.interfaces.SE3WaypointInterface;
-import us.ihmc.robotics.math.trajectories.waypoints.interfaces.SO3WaypointInterface;
+import us.ihmc.robotics.math.trajectories.waypoints.interfaces.EuclideanWaypointBasics;
+import us.ihmc.robotics.math.trajectories.waypoints.interfaces.FrameEuclideanWaypointBasics;
+import us.ihmc.robotics.math.trajectories.waypoints.interfaces.FrameSE3WaypointBasics;
+import us.ihmc.robotics.math.trajectories.waypoints.interfaces.FrameSO3WaypointBasics;
+import us.ihmc.robotics.math.trajectories.waypoints.interfaces.SE3WaypointBasics;
+import us.ihmc.robotics.math.trajectories.waypoints.interfaces.SO3WaypointBasics;
 
 public class TrajectoryWaypointAPITest
 {
@@ -89,15 +89,15 @@ public class TrajectoryWaypointAPITest
    {
       HashMap<Class<?>, Class<?>> modifiableMap = new HashMap<>();
 
-      modifiableMap.put(EuclideanWaypointInterface.class, FrameEuclideanWaypointInterface.class);
-      modifiableMap.put(SO3WaypointInterface.class, FrameSO3WaypointInterface.class);
-      modifiableMap.put(SE3WaypointInterface.class, FrameSE3WaypointInterface.class);
+      modifiableMap.put(EuclideanWaypointBasics.class, FrameEuclideanWaypointBasics.class);
+      modifiableMap.put(SO3WaypointBasics.class, FrameSO3WaypointBasics.class);
+      modifiableMap.put(SE3WaypointBasics.class, FrameSE3WaypointBasics.class);
 
-      modifiableMap.put(EuclideanTrajectoryPointInterface.class, FrameEuclideanTrajectoryPointInterface.class);
-      modifiableMap.put(SO3TrajectoryPointInterface.class, FrameSO3TrajectoryPointInterface.class);
-      modifiableMap.put(SE3TrajectoryPointInterface.class, FrameSE3TrajectoryPointInterface.class);
+      modifiableMap.put(EuclideanTrajectoryPointBasics.class, FrameEuclideanTrajectoryPointBasics.class);
+      modifiableMap.put(SO3TrajectoryPointBasics.class, FrameSO3TrajectoryPointBasics.class);
+      modifiableMap.put(SE3TrajectoryPointBasics.class, FrameSE3TrajectoryPointBasics.class);
 
-      modifiableMap.put(TrajectoryPointListInterface.class, FrameTrajectoryPointListInterface.class);
+      modifiableMap.put(TrajectoryPointListBasics.class, FrameTrajectoryPointListBasics.class);
 
       framelessTypesToFrameTypesTable = Collections.unmodifiableMap(modifiableMap);
    }
@@ -107,13 +107,13 @@ public class TrajectoryWaypointAPITest
    {
       HashMap<Class<?>, Class<?>> modifiableMap = new HashMap<>();
 
-      modifiableMap.put(EuclideanWaypointInterface.class, EuclideanTrajectoryPointInterface.class);
-      modifiableMap.put(SO3WaypointInterface.class, SO3TrajectoryPointInterface.class);
-      modifiableMap.put(SE3WaypointInterface.class, SE3TrajectoryPointInterface.class);
+      modifiableMap.put(EuclideanWaypointBasics.class, EuclideanTrajectoryPointBasics.class);
+      modifiableMap.put(SO3WaypointBasics.class, SO3TrajectoryPointBasics.class);
+      modifiableMap.put(SE3WaypointBasics.class, SE3TrajectoryPointBasics.class);
 
-      modifiableMap.put(FrameEuclideanWaypointInterface.class, FrameEuclideanTrajectoryPointInterface.class);
-      modifiableMap.put(FrameSO3WaypointInterface.class, FrameSO3TrajectoryPointInterface.class);
-      modifiableMap.put(FrameSE3WaypointInterface.class, FrameSE3TrajectoryPointInterface.class);
+      modifiableMap.put(FrameEuclideanWaypointBasics.class, FrameEuclideanTrajectoryPointBasics.class);
+      modifiableMap.put(FrameSO3WaypointBasics.class, FrameSO3TrajectoryPointBasics.class);
+      modifiableMap.put(FrameSE3WaypointBasics.class, FrameSE3TrajectoryPointBasics.class);
 
       waypointTypesToTrajectoryTypesTable = Collections.unmodifiableMap(modifiableMap);
    }
@@ -123,13 +123,13 @@ public class TrajectoryWaypointAPITest
    {
       HashMap<Class<?>, Class<?>> modifiableMap = new HashMap<>();
 
-      modifiableMap.put(EuclideanWaypointInterface.class, FrameEuclideanWaypointInterface.class);
-      modifiableMap.put(SO3WaypointInterface.class, FrameSO3WaypointInterface.class);
-      modifiableMap.put(SE3WaypointInterface.class, FrameSE3WaypointInterface.class);
+      modifiableMap.put(EuclideanWaypointBasics.class, FrameEuclideanWaypointBasics.class);
+      modifiableMap.put(SO3WaypointBasics.class, FrameSO3WaypointBasics.class);
+      modifiableMap.put(SE3WaypointBasics.class, FrameSE3WaypointBasics.class);
 
-      modifiableMap.put(EuclideanTrajectoryPointInterface.class, FrameEuclideanTrajectoryPointInterface.class);
-      modifiableMap.put(SO3TrajectoryPointInterface.class, FrameSO3TrajectoryPointInterface.class);
-      modifiableMap.put(SE3TrajectoryPointInterface.class, FrameSE3TrajectoryPointInterface.class);
+      modifiableMap.put(EuclideanTrajectoryPointBasics.class, FrameEuclideanTrajectoryPointBasics.class);
+      modifiableMap.put(SO3TrajectoryPointBasics.class, FrameSO3TrajectoryPointBasics.class);
+      modifiableMap.put(SE3TrajectoryPointBasics.class, FrameSE3TrajectoryPointBasics.class);
 
       modifiableMap.put(Point3DReadOnly.class, FramePoint3DReadOnly.class);
       modifiableMap.put(QuaternionReadOnly.class, FrameQuaternionReadOnly.class);
@@ -141,13 +141,13 @@ public class TrajectoryWaypointAPITest
       modifiableMap.put(Vector3DBasics.class, FixedFrameVector3DBasics.class);
       modifiableMap.put(Pose3DBasics.class, FixedFramePose3DBasics.class);
 
-      modifiableMap.put(TrajectoryPointListInterface.class, FrameTrajectoryPointListInterface.class);
+      modifiableMap.put(TrajectoryPointListBasics.class, FrameTrajectoryPointListBasics.class);
 
       // unchanged:
       modifiableMap.put(double.class, double.class);
       modifiableMap.put(int.class, int.class);
       modifiableMap.put(Transform.class, Transform.class);
-      modifiableMap.put(TrajectoryPointInterface.class, TrajectoryPointInterface.class);
+      modifiableMap.put(TrajectoryPointBasics.class, TrajectoryPointBasics.class);
 
       argumentTypeFramelessToFrameMap = Collections.unmodifiableMap(modifiableMap);
    }
@@ -171,7 +171,7 @@ public class TrajectoryWaypointAPITest
       modifiableMap.put(double.class, double.class);
       modifiableMap.put(int.class, int.class);
       modifiableMap.put(boolean.class, boolean.class);
-      modifiableMap.put(TrajectoryPointInterface.class, TrajectoryPointInterface.class);
+      modifiableMap.put(TrajectoryPointBasics.class, TrajectoryPointBasics.class);
 
       returnTypeFramelessToFrameMap = Collections.unmodifiableMap(modifiableMap);
    }
@@ -181,13 +181,13 @@ public class TrajectoryWaypointAPITest
    {
       HashMap<Class<?>, Class<?>> modifiableMap = new HashMap<>();
 
-      modifiableMap.put(EuclideanWaypointInterface.class, EuclideanTrajectoryPointInterface.class);
-      modifiableMap.put(SO3WaypointInterface.class, SO3TrajectoryPointInterface.class);
-      modifiableMap.put(SE3WaypointInterface.class, SE3TrajectoryPointInterface.class);
+      modifiableMap.put(EuclideanWaypointBasics.class, EuclideanTrajectoryPointBasics.class);
+      modifiableMap.put(SO3WaypointBasics.class, SO3TrajectoryPointBasics.class);
+      modifiableMap.put(SE3WaypointBasics.class, SE3TrajectoryPointBasics.class);
 
-      modifiableMap.put(FrameEuclideanWaypointInterface.class, FrameEuclideanTrajectoryPointInterface.class);
-      modifiableMap.put(FrameSO3WaypointInterface.class, FrameSO3TrajectoryPointInterface.class);
-      modifiableMap.put(FrameSE3WaypointInterface.class, FrameSE3TrajectoryPointInterface.class);
+      modifiableMap.put(FrameEuclideanWaypointBasics.class, FrameEuclideanTrajectoryPointBasics.class);
+      modifiableMap.put(FrameSO3WaypointBasics.class, FrameSO3TrajectoryPointBasics.class);
+      modifiableMap.put(FrameSE3WaypointBasics.class, FrameSE3TrajectoryPointBasics.class);
 
       // unchanged:
       modifiableMap.put(Point3DReadOnly.class, Point3DReadOnly.class);
@@ -365,12 +365,12 @@ public class TrajectoryWaypointAPITest
       mutationTestFacilitator.addClassesToMutate(YoFrameEuclideanWaypoint.class);
       mutationTestFacilitator.addClassesToMutate(YoFrameEuclideanWaypoint.class);
       mutationTestFacilitator.addClassesToMutate(YoFrameEuclideanWaypoint.class);
-      mutationTestFacilitator.addClassesToMutate(EuclideanWaypointInterface.class);
-      mutationTestFacilitator.addClassesToMutate(EuclideanWaypointInterface.class);
-      mutationTestFacilitator.addClassesToMutate(EuclideanWaypointInterface.class);
-      mutationTestFacilitator.addClassesToMutate(FrameEuclideanWaypointInterface.class);
-      mutationTestFacilitator.addClassesToMutate(FrameEuclideanWaypointInterface.class);
-      mutationTestFacilitator.addClassesToMutate(FrameEuclideanWaypointInterface.class);
+      mutationTestFacilitator.addClassesToMutate(EuclideanWaypointBasics.class);
+      mutationTestFacilitator.addClassesToMutate(EuclideanWaypointBasics.class);
+      mutationTestFacilitator.addClassesToMutate(EuclideanWaypointBasics.class);
+      mutationTestFacilitator.addClassesToMutate(FrameEuclideanWaypointBasics.class);
+      mutationTestFacilitator.addClassesToMutate(FrameEuclideanWaypointBasics.class);
+      mutationTestFacilitator.addClassesToMutate(FrameEuclideanWaypointBasics.class);
       mutationTestFacilitator.addClassesToMutate(SO3Waypoint.class);
       mutationTestFacilitator.addClassesToMutate(SO3Waypoint.class);
       mutationTestFacilitator.addClassesToMutate(SO3Waypoint.class);
@@ -380,12 +380,12 @@ public class TrajectoryWaypointAPITest
       mutationTestFacilitator.addClassesToMutate(YoFrameSO3Waypoint.class);
       mutationTestFacilitator.addClassesToMutate(YoFrameSO3Waypoint.class);
       mutationTestFacilitator.addClassesToMutate(YoFrameSO3Waypoint.class);
-      mutationTestFacilitator.addClassesToMutate(SO3WaypointInterface.class);
-      mutationTestFacilitator.addClassesToMutate(SO3WaypointInterface.class);
-      mutationTestFacilitator.addClassesToMutate(SO3WaypointInterface.class);
-      mutationTestFacilitator.addClassesToMutate(FrameSO3WaypointInterface.class);
-      mutationTestFacilitator.addClassesToMutate(FrameSO3WaypointInterface.class);
-      mutationTestFacilitator.addClassesToMutate(FrameSO3WaypointInterface.class);
+      mutationTestFacilitator.addClassesToMutate(SO3WaypointBasics.class);
+      mutationTestFacilitator.addClassesToMutate(SO3WaypointBasics.class);
+      mutationTestFacilitator.addClassesToMutate(SO3WaypointBasics.class);
+      mutationTestFacilitator.addClassesToMutate(FrameSO3WaypointBasics.class);
+      mutationTestFacilitator.addClassesToMutate(FrameSO3WaypointBasics.class);
+      mutationTestFacilitator.addClassesToMutate(FrameSO3WaypointBasics.class);
       mutationTestFacilitator.addClassesToMutate(SE3Waypoint.class);
       mutationTestFacilitator.addClassesToMutate(SE3Waypoint.class);
       mutationTestFacilitator.addClassesToMutate(SE3Waypoint.class);
@@ -395,12 +395,12 @@ public class TrajectoryWaypointAPITest
       mutationTestFacilitator.addClassesToMutate(YoFrameSE3Waypoint.class);
       mutationTestFacilitator.addClassesToMutate(YoFrameSE3Waypoint.class);
       mutationTestFacilitator.addClassesToMutate(YoFrameSE3Waypoint.class);
-      mutationTestFacilitator.addClassesToMutate(SE3WaypointInterface.class);
-      mutationTestFacilitator.addClassesToMutate(SE3WaypointInterface.class);
-      mutationTestFacilitator.addClassesToMutate(SE3WaypointInterface.class);
-      mutationTestFacilitator.addClassesToMutate(FrameSE3WaypointInterface.class);
-      mutationTestFacilitator.addClassesToMutate(FrameSE3WaypointInterface.class);
-      mutationTestFacilitator.addClassesToMutate(FrameSE3WaypointInterface.class);
+      mutationTestFacilitator.addClassesToMutate(SE3WaypointBasics.class);
+      mutationTestFacilitator.addClassesToMutate(SE3WaypointBasics.class);
+      mutationTestFacilitator.addClassesToMutate(SE3WaypointBasics.class);
+      mutationTestFacilitator.addClassesToMutate(FrameSE3WaypointBasics.class);
+      mutationTestFacilitator.addClassesToMutate(FrameSE3WaypointBasics.class);
+      mutationTestFacilitator.addClassesToMutate(FrameSE3WaypointBasics.class);
 
       mutationTestFacilitator.addClassesToMutate(EuclideanTrajectoryPoint.class);
       mutationTestFacilitator.addClassesToMutate(EuclideanTrajectoryPoint.class);
@@ -411,12 +411,12 @@ public class TrajectoryWaypointAPITest
       mutationTestFacilitator.addClassesToMutate(YoFrameEuclideanTrajectoryPoint.class);
       mutationTestFacilitator.addClassesToMutate(YoFrameEuclideanTrajectoryPoint.class);
       mutationTestFacilitator.addClassesToMutate(YoFrameEuclideanTrajectoryPoint.class);
-      mutationTestFacilitator.addClassesToMutate(EuclideanTrajectoryPointInterface.class);
-      mutationTestFacilitator.addClassesToMutate(EuclideanTrajectoryPointInterface.class);
-      mutationTestFacilitator.addClassesToMutate(EuclideanTrajectoryPointInterface.class);
-      mutationTestFacilitator.addClassesToMutate(FrameEuclideanTrajectoryPointInterface.class);
-      mutationTestFacilitator.addClassesToMutate(FrameEuclideanTrajectoryPointInterface.class);
-      mutationTestFacilitator.addClassesToMutate(FrameEuclideanTrajectoryPointInterface.class);
+      mutationTestFacilitator.addClassesToMutate(EuclideanTrajectoryPointBasics.class);
+      mutationTestFacilitator.addClassesToMutate(EuclideanTrajectoryPointBasics.class);
+      mutationTestFacilitator.addClassesToMutate(EuclideanTrajectoryPointBasics.class);
+      mutationTestFacilitator.addClassesToMutate(FrameEuclideanTrajectoryPointBasics.class);
+      mutationTestFacilitator.addClassesToMutate(FrameEuclideanTrajectoryPointBasics.class);
+      mutationTestFacilitator.addClassesToMutate(FrameEuclideanTrajectoryPointBasics.class);
       mutationTestFacilitator.addClassesToMutate(SO3TrajectoryPoint.class);
       mutationTestFacilitator.addClassesToMutate(SO3TrajectoryPoint.class);
       mutationTestFacilitator.addClassesToMutate(SO3TrajectoryPoint.class);
@@ -426,12 +426,12 @@ public class TrajectoryWaypointAPITest
       mutationTestFacilitator.addClassesToMutate(YoFrameSO3TrajectoryPoint.class);
       mutationTestFacilitator.addClassesToMutate(YoFrameSO3TrajectoryPoint.class);
       mutationTestFacilitator.addClassesToMutate(YoFrameSO3TrajectoryPoint.class);
-      mutationTestFacilitator.addClassesToMutate(SO3TrajectoryPointInterface.class);
-      mutationTestFacilitator.addClassesToMutate(SO3TrajectoryPointInterface.class);
-      mutationTestFacilitator.addClassesToMutate(SO3TrajectoryPointInterface.class);
-      mutationTestFacilitator.addClassesToMutate(FrameSO3TrajectoryPointInterface.class);
-      mutationTestFacilitator.addClassesToMutate(FrameSO3TrajectoryPointInterface.class);
-      mutationTestFacilitator.addClassesToMutate(FrameSO3TrajectoryPointInterface.class);
+      mutationTestFacilitator.addClassesToMutate(SO3TrajectoryPointBasics.class);
+      mutationTestFacilitator.addClassesToMutate(SO3TrajectoryPointBasics.class);
+      mutationTestFacilitator.addClassesToMutate(SO3TrajectoryPointBasics.class);
+      mutationTestFacilitator.addClassesToMutate(FrameSO3TrajectoryPointBasics.class);
+      mutationTestFacilitator.addClassesToMutate(FrameSO3TrajectoryPointBasics.class);
+      mutationTestFacilitator.addClassesToMutate(FrameSO3TrajectoryPointBasics.class);
       mutationTestFacilitator.addClassesToMutate(SE3TrajectoryPoint.class);
       mutationTestFacilitator.addClassesToMutate(SE3TrajectoryPoint.class);
       mutationTestFacilitator.addClassesToMutate(SE3TrajectoryPoint.class);
@@ -441,12 +441,12 @@ public class TrajectoryWaypointAPITest
       mutationTestFacilitator.addClassesToMutate(YoFrameSE3TrajectoryPoint.class);
       mutationTestFacilitator.addClassesToMutate(YoFrameSE3TrajectoryPoint.class);
       mutationTestFacilitator.addClassesToMutate(YoFrameSE3TrajectoryPoint.class);
-      mutationTestFacilitator.addClassesToMutate(SE3TrajectoryPointInterface.class);
-      mutationTestFacilitator.addClassesToMutate(SE3TrajectoryPointInterface.class);
-      mutationTestFacilitator.addClassesToMutate(SE3TrajectoryPointInterface.class);
-      mutationTestFacilitator.addClassesToMutate(FrameSE3TrajectoryPointInterface.class);
-      mutationTestFacilitator.addClassesToMutate(FrameSE3TrajectoryPointInterface.class);
-      mutationTestFacilitator.addClassesToMutate(FrameSE3TrajectoryPointInterface.class);
+      mutationTestFacilitator.addClassesToMutate(SE3TrajectoryPointBasics.class);
+      mutationTestFacilitator.addClassesToMutate(SE3TrajectoryPointBasics.class);
+      mutationTestFacilitator.addClassesToMutate(SE3TrajectoryPointBasics.class);
+      mutationTestFacilitator.addClassesToMutate(FrameSE3TrajectoryPointBasics.class);
+      mutationTestFacilitator.addClassesToMutate(FrameSE3TrajectoryPointBasics.class);
+      mutationTestFacilitator.addClassesToMutate(FrameSE3TrajectoryPointBasics.class);
 
       mutationTestFacilitator.addTestClassesToRun(FrameEuclideanTrajectoryPointTest.class);
       mutationTestFacilitator.addTestClassesToRun(FrameSE3TrajectoryPointTest.class);

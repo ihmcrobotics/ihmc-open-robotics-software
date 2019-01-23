@@ -6,10 +6,10 @@ import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
 import us.ihmc.euclid.tools.EuclidCoreTools;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.euclid.tuple4D.interfaces.QuaternionReadOnly;
-import us.ihmc.robotics.math.trajectories.waypoints.interfaces.FrameSO3WaypointInterface;
-import us.ihmc.robotics.math.trajectories.waypoints.interfaces.SO3WaypointInterface;
+import us.ihmc.robotics.math.trajectories.waypoints.interfaces.FrameSO3WaypointBasics;
+import us.ihmc.robotics.math.trajectories.waypoints.interfaces.SO3WaypointBasics;
 
-public interface FrameSO3TrajectoryPointInterface extends SO3TrajectoryPointInterface, FrameSO3WaypointInterface
+public interface FrameSO3TrajectoryPointBasics extends SO3TrajectoryPointBasics, FrameSO3WaypointBasics
 {
    default void set(double time, FrameQuaternionReadOnly orientation, FrameVector3DReadOnly angularVelocity)
    {
@@ -17,13 +17,13 @@ public interface FrameSO3TrajectoryPointInterface extends SO3TrajectoryPointInte
       set(orientation, angularVelocity);
    }
 
-   default void set(double time, FrameSO3WaypointInterface waypoint)
+   default void set(double time, FrameSO3WaypointBasics waypoint)
    {
       setTime(time);
       set(waypoint);
    }
 
-   default void setIncludingFrame(double time, FrameSO3WaypointInterface waypoint)
+   default void setIncludingFrame(double time, FrameSO3WaypointBasics waypoint)
    {
       setTime(time);
       setIncludingFrame(waypoint);
@@ -41,43 +41,43 @@ public interface FrameSO3TrajectoryPointInterface extends SO3TrajectoryPointInte
       setIncludingFrame(referenceFrame, orientation, angularVelocity);
    }
 
-   default void setIncludingFrame(ReferenceFrame referenceFrame, SO3TrajectoryPointInterface trajectoryPoint)
+   default void setIncludingFrame(ReferenceFrame referenceFrame, SO3TrajectoryPointBasics trajectoryPoint)
    {
       setTime(trajectoryPoint.getTime());
-      FrameSO3WaypointInterface.super.setIncludingFrame(referenceFrame, trajectoryPoint);
+      FrameSO3WaypointBasics.super.setIncludingFrame(referenceFrame, trajectoryPoint);
    }
 
-   default void setIncludingFrame(ReferenceFrame referenceFrame, double time, SO3WaypointInterface waypoint)
+   default void setIncludingFrame(ReferenceFrame referenceFrame, double time, SO3WaypointBasics waypoint)
    {
       setTime(time);
       setIncludingFrame(referenceFrame, waypoint);
    }
 
-   default void setIncludingFrame(FrameSO3TrajectoryPointInterface other)
+   default void setIncludingFrame(FrameSO3TrajectoryPointBasics other)
    {
       setTime(other.getTime());
-      FrameSO3WaypointInterface.super.setIncludingFrame(other);
+      FrameSO3WaypointBasics.super.setIncludingFrame(other);
    }
 
-   default void set(FrameSO3TrajectoryPointInterface other)
+   default void set(FrameSO3TrajectoryPointBasics other)
    {
       setTime(other.getTime());
-      FrameSO3WaypointInterface.super.set(other);
+      FrameSO3WaypointBasics.super.set(other);
    }
 
-   default void getIncludingFrame(FrameSO3TrajectoryPointInterface otherToPack)
+   default void getIncludingFrame(FrameSO3TrajectoryPointBasics otherToPack)
    {
       otherToPack.setIncludingFrame(this);
    }
 
-   default void get(FrameSO3TrajectoryPointInterface otherToPack)
+   default void get(FrameSO3TrajectoryPointBasics otherToPack)
    {
       otherToPack.set(this);
    }
 
-   default boolean epsilonEquals(FrameSO3TrajectoryPointInterface other, double epsilon)
+   default boolean epsilonEquals(FrameSO3TrajectoryPointBasics other, double epsilon)
    {
       boolean timeEquals = EuclidCoreTools.epsilonEquals(getTime(), other.getTime(), epsilon);
-      return timeEquals && FrameSO3WaypointInterface.super.epsilonEquals(other, epsilon);
+      return timeEquals && FrameSO3WaypointBasics.super.epsilonEquals(other, epsilon);
    }
 }

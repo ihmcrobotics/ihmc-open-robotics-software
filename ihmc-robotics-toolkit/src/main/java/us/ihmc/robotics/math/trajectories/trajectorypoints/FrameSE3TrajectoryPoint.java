@@ -5,12 +5,12 @@ import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameQuaternionReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
 import us.ihmc.euclid.transform.interfaces.Transform;
-import us.ihmc.robotics.math.trajectories.trajectorypoints.interfaces.FrameSE3TrajectoryPointInterface;
-import us.ihmc.robotics.math.trajectories.trajectorypoints.interfaces.SE3TrajectoryPointInterface;
+import us.ihmc.robotics.math.trajectories.trajectorypoints.interfaces.FrameSE3TrajectoryPointBasics;
+import us.ihmc.robotics.math.trajectories.trajectorypoints.interfaces.SE3TrajectoryPointBasics;
 import us.ihmc.robotics.math.trajectories.waypoints.FrameSE3Waypoint;
 import us.ihmc.robotics.math.trajectories.waypoints.tools.WaypointToStringTools;
 
-public class FrameSE3TrajectoryPoint implements FrameSE3TrajectoryPointInterface
+public class FrameSE3TrajectoryPoint implements FrameSE3TrajectoryPointBasics
 {
    private final FrameSE3Waypoint se3Waypoint = new FrameSE3Waypoint();
    private double time;
@@ -30,12 +30,12 @@ public class FrameSE3TrajectoryPoint implements FrameSE3TrajectoryPointInterface
       setIncludingFrame(time, position, orientation, linearVelocity, angularVelocity);
    }
 
-   public FrameSE3TrajectoryPoint(FrameSE3TrajectoryPointInterface other)
+   public FrameSE3TrajectoryPoint(FrameSE3TrajectoryPointBasics other)
    {
       setIncludingFrame(other);
    }
 
-   public FrameSE3TrajectoryPoint(ReferenceFrame referenceFrame, SE3TrajectoryPointInterface other)
+   public FrameSE3TrajectoryPoint(ReferenceFrame referenceFrame, SE3TrajectoryPointBasics other)
    {
       setIncludingFrame(referenceFrame, other);
    }

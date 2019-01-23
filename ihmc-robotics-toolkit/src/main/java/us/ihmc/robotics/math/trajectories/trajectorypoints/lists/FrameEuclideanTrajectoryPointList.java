@@ -5,10 +5,10 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.robotics.math.trajectories.trajectorypoints.FrameEuclideanTrajectoryPoint;
-import us.ihmc.robotics.math.trajectories.trajectorypoints.interfaces.EuclideanTrajectoryPointInterface;
-import us.ihmc.robotics.math.trajectories.trajectorypoints.interfaces.FrameTrajectoryPointListInterface;
+import us.ihmc.robotics.math.trajectories.trajectorypoints.interfaces.EuclideanTrajectoryPointBasics;
+import us.ihmc.robotics.math.trajectories.trajectorypoints.interfaces.FrameTrajectoryPointListBasics;
 
-public class FrameEuclideanTrajectoryPointList implements FrameTrajectoryPointListInterface<FrameEuclideanTrajectoryPoint>
+public class FrameEuclideanTrajectoryPointList implements FrameTrajectoryPointListBasics<FrameEuclideanTrajectoryPoint>
 {
    private ReferenceFrame referenceFrame = ReferenceFrame.getWorldFrame();
    private final RecyclingArrayList<FrameEuclideanTrajectoryPoint> trajectoryPoints = new RecyclingArrayList<>(FrameEuclideanTrajectoryPoint.class);
@@ -31,7 +31,7 @@ public class FrameEuclideanTrajectoryPointList implements FrameTrajectoryPointLi
       trajectoryPoints.add().setIncludingFrame(trajectoryPoint);
    }
 
-   public void addTrajectoryPoint(EuclideanTrajectoryPointInterface trajectoryPoint)
+   public void addTrajectoryPoint(EuclideanTrajectoryPointBasics trajectoryPoint)
    {
       FrameEuclideanTrajectoryPoint newTrajectoryPoint = trajectoryPoints.add();
       newTrajectoryPoint.setToZero(getReferenceFrame());

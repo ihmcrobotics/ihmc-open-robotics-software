@@ -3,11 +3,11 @@ package us.ihmc.robotics.math.trajectories.trajectorypoints;
 import us.ihmc.euclid.transform.interfaces.Transform;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
-import us.ihmc.robotics.math.trajectories.trajectorypoints.interfaces.EuclideanTrajectoryPointInterface;
+import us.ihmc.robotics.math.trajectories.trajectorypoints.interfaces.EuclideanTrajectoryPointBasics;
 import us.ihmc.robotics.math.trajectories.waypoints.EuclideanWaypoint;
 import us.ihmc.robotics.math.trajectories.waypoints.tools.WaypointToStringTools;
 
-public class EuclideanTrajectoryPoint implements EuclideanTrajectoryPointInterface
+public class EuclideanTrajectoryPoint implements EuclideanTrajectoryPointBasics
 {
    private final EuclideanWaypoint euclideanWaypoint = new EuclideanWaypoint();
    private double time;
@@ -16,7 +16,7 @@ public class EuclideanTrajectoryPoint implements EuclideanTrajectoryPointInterfa
    {
    }
 
-   public EuclideanTrajectoryPoint(EuclideanTrajectoryPointInterface other)
+   public EuclideanTrajectoryPoint(EuclideanTrajectoryPointBasics other)
    {
       set(other);
    }

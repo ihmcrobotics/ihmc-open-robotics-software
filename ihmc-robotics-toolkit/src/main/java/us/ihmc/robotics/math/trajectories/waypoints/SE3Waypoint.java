@@ -4,10 +4,10 @@ import us.ihmc.euclid.transform.interfaces.Transform;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.euclid.tuple4D.interfaces.QuaternionReadOnly;
-import us.ihmc.robotics.math.trajectories.waypoints.interfaces.SE3WaypointInterface;
+import us.ihmc.robotics.math.trajectories.waypoints.interfaces.SE3WaypointBasics;
 import us.ihmc.robotics.math.trajectories.waypoints.tools.WaypointToStringTools;
 
-public class SE3Waypoint implements SE3WaypointInterface
+public class SE3Waypoint implements SE3WaypointBasics
 {
    private final EuclideanWaypoint euclideanWaypoint = new EuclideanWaypoint();
    private final SO3Waypoint so3Waypoint = new SO3Waypoint();

@@ -1,6 +1,6 @@
 package us.ihmc.robotics.math.trajectories.trajectorypoints.interfaces;
 
-public interface TrajectoryPointInterface
+public interface TrajectoryPointBasics
 {
    abstract void setTime(double time);
 

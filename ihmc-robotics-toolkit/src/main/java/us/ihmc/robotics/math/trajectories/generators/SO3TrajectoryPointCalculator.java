@@ -9,7 +9,7 @@ import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.robotics.math.trajectories.trajectorypoints.FrameEuclideanTrajectoryPoint;
 import us.ihmc.robotics.math.trajectories.trajectorypoints.SO3TrajectoryPoint;
-import us.ihmc.robotics.math.trajectories.trajectorypoints.interfaces.SO3TrajectoryPointInterface;
+import us.ihmc.robotics.math.trajectories.trajectorypoints.interfaces.SO3TrajectoryPointBasics;
 
 public class SO3TrajectoryPointCalculator
 {
@@ -61,7 +61,7 @@ public class SO3TrajectoryPointCalculator
       }
    }
 
-   public List<? extends SO3TrajectoryPointInterface> getTrajectoryPoints()
+   public List<? extends SO3TrajectoryPointBasics> getTrajectoryPoints()
    {
       return trajectoryPoints;
    }

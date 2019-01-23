@@ -6,13 +6,13 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameQuaternionReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
 import us.ihmc.euclid.transform.interfaces.Transform;
-import us.ihmc.robotics.math.trajectories.trajectorypoints.interfaces.FrameSO3TrajectoryPointInterface;
+import us.ihmc.robotics.math.trajectories.trajectorypoints.interfaces.FrameSO3TrajectoryPointBasics;
 import us.ihmc.robotics.math.trajectories.waypoints.YoFrameSO3Waypoint;
 import us.ihmc.robotics.math.trajectories.waypoints.tools.WaypointToStringTools;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 
-public class YoFrameSO3TrajectoryPoint implements FrameSO3TrajectoryPointInterface
+public class YoFrameSO3TrajectoryPoint implements FrameSO3TrajectoryPointBasics
 {
    private final YoFrameSO3Waypoint so3Waypoint;
    private final YoDouble time;

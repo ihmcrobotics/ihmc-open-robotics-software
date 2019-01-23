@@ -23,8 +23,8 @@ import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.robotics.math.trajectories.trajectorypoints.SO3TrajectoryPoint;
-import us.ihmc.robotics.math.trajectories.trajectorypoints.interfaces.SO3TrajectoryPointInterface;
-import us.ihmc.robotics.math.trajectories.waypoints.interfaces.SO3WaypointInterface;
+import us.ihmc.robotics.math.trajectories.trajectorypoints.interfaces.SO3TrajectoryPointBasics;
+import us.ihmc.robotics.math.trajectories.waypoints.interfaces.SO3WaypointBasics;
 import us.ihmc.robotics.random.RandomGeometry;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 
@@ -427,7 +427,7 @@ public class SimpleSO3TrajectoryPointTest
       assertTrue(simpleSO3TrajectoryPoint.containsNaN());
       assertFalse(simpleSO3TrajectoryPoint.epsilonEquals(simpleSO3TrajectoryPointTwo, 1e-7));
 
-      SO3TrajectoryPointInterface trajectoryPointAsInterface = simplePoint;
+      SO3TrajectoryPointBasics trajectoryPointAsInterface = simplePoint;
       simpleSO3TrajectoryPoint.set(trajectoryPointAsInterface);
 
       assertTrue(simpleSO3TrajectoryPoint.epsilonEquals(simpleSO3TrajectoryPointTwo, 1e-7));
@@ -491,7 +491,7 @@ public class SimpleSO3TrajectoryPointTest
 
 
       simpleSO3TrajectoryPointTwo = new SO3TrajectoryPoint();
-      SO3WaypointInterface so3Waypoint = simpleSO3TrajectoryPoint;
+      SO3WaypointBasics so3Waypoint = simpleSO3TrajectoryPoint;
 
       simpleSO3TrajectoryPointTwo.set(time, so3Waypoint);
       assertTrue(simpleSO3TrajectoryPointTwo.epsilonEquals(simpleSO3TrajectoryPoint, 1e-10));
