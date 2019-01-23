@@ -47,6 +47,8 @@ public class MainTabController
    @FXML
    private CheckBox acceptNewRegions;
    @FXML
+   private CheckBox assumeFlatGround;
+   @FXML
    private Spinner<Double> timeout;
    @FXML
    private Spinner<Double> horizonLength;
@@ -216,6 +218,7 @@ public class MainTabController
       messager.bindPropertyToTopic(FootstepPlannerMessagerAPI.StartPositionEditModeEnabledTopic, rotateGoal.disableProperty());
       messager.bindPropertyToTopic(FootstepPlannerMessagerAPI.GoalPositionEditModeEnabledTopic, rotateGoal.disableProperty());
       messager.bindPropertyToTopic(FootstepPlannerMessagerAPI.StartOrientationEditModeEnabledTopic, rotateGoal.disableProperty());
+      messager.bindBidirectional(FootstepPlannerMessagerAPI.AssumeFlatGround, assumeFlatGround.selectedProperty(), false);
 
       startPositionProperty.bindBidirectionalX(startXPosition.getValueFactory().valueProperty());
       startPositionProperty.bindBidirectionalY(startYPosition.getValueFactory().valueProperty());
