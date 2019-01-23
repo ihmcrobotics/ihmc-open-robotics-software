@@ -4,7 +4,7 @@ import controller_msgs.msg.dds.OneDoFJointTrajectoryMessage;
 import controller_msgs.msg.dds.ValkyrieHandFingerTrajectoryMessage;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.idl.IDLSequence.Object;
-import us.ihmc.robotics.math.trajectories.waypoints.SimpleTrajectoryPoint1DList;
+import us.ihmc.robotics.math.trajectories.trajectorypoints.lists.OneDoFTrajectoryPointList;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.valkyrie.fingers.ValkyrieFingerMotorName;
 
@@ -43,7 +43,7 @@ public class ValkyrieMessageTools
 
    public static ValkyrieHandFingerTrajectoryMessage createValkyrieHandFingerTrajectoryMessage(RobotSide robotSide,
                                                                                                ValkyrieFingerMotorName[] valkyrieFingerMotors,
-                                                                                               SimpleTrajectoryPoint1DList[] trajectoryData)
+                                                                                               OneDoFTrajectoryPointList[] trajectoryData)
    {
       int dimension = valkyrieFingerMotors.length;
       byte[] valkyrieFingerMotorNames = new byte[dimension];
@@ -53,7 +53,7 @@ public class ValkyrieMessageTools
    }
 
    public static ValkyrieHandFingerTrajectoryMessage createValkyrieHandFingerTrajectoryMessage(RobotSide robotSide, byte[] valkyrieFingerMotorNames,
-                                                                                               SimpleTrajectoryPoint1DList[] trajectoryData)
+                                                                                               OneDoFTrajectoryPointList[] trajectoryData)
    {
       if (valkyrieFingerMotorNames.length != trajectoryData.length)
          throw new RuntimeException("number of fingers should be same with number of trajectory data " + valkyrieFingerMotorNames.length);
@@ -87,13 +87,13 @@ public class ValkyrieMessageTools
       jointTrajectoryMessages.add().set(HumanoidMessageTools.createOneDoFJointTrajectoryMessage(time, desiredConfiguration));
    }
 
-   public static void appendDesiredFingerConfiguration(ValkyrieFingerMotorName motorNameToAppend, SimpleTrajectoryPoint1DList trajectoryData,
+   public static void appendDesiredFingerConfiguration(ValkyrieFingerMotorName motorNameToAppend, OneDoFTrajectoryPointList trajectoryData,
                                                        ValkyrieHandFingerTrajectoryMessage messageToAppend)
    {
       appendDesiredFingerConfiguration(motorNameToAppend.toByte(), trajectoryData, messageToAppend);
    }
 
-   public static void appendDesiredFingerConfiguration(byte motorNameByteToAppend, SimpleTrajectoryPoint1DList trajectoryData,
+   public static void appendDesiredFingerConfiguration(byte motorNameByteToAppend, OneDoFTrajectoryPointList trajectoryData,
                                                        ValkyrieHandFingerTrajectoryMessage messageToAppend)
    {
       messageToAppend.getValkyrieFingerMotorNames().add(motorNameByteToAppend);
