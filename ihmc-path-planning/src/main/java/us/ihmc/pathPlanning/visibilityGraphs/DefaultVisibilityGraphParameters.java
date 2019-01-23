@@ -30,7 +30,7 @@ public class DefaultVisibilityGraphParameters implements VisibilityGraphsParamet
    @Override
    public double getObstacleExtrusionDistance()
    {
-      return 0.1;
+      return 0.4;
    }
 
    /** {@inheritDoc} */
