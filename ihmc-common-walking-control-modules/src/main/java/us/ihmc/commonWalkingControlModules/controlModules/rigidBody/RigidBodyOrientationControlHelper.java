@@ -1,7 +1,5 @@
 package us.ihmc.commonWalkingControlModules.controlModules.rigidBody;
 
-import java.util.Collection;
-
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.OrientationFeedbackControlCommand;
 import us.ihmc.commons.lists.RecyclingArrayDeque;
 import us.ihmc.communication.packets.ExecutionMode;
@@ -18,8 +16,8 @@ import us.ihmc.humanoidRobotics.communication.controllerAPI.command.SO3Trajector
 import us.ihmc.log.LogTools;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.robotics.controllers.pidGains.PID3DGainsReadOnly;
-import us.ihmc.robotics.math.trajectories.waypoints.FrameSO3TrajectoryPoint;
-import us.ihmc.robotics.math.trajectories.waypoints.MultipleWaypointsOrientationTrajectoryGenerator;
+import us.ihmc.robotics.math.trajectories.generators.MultipleWaypointsOrientationTrajectoryGenerator;
+import us.ihmc.robotics.math.trajectories.trajectorypoints.FrameSO3TrajectoryPoint;
 import us.ihmc.robotics.screwTheory.SelectionMatrix3D;
 import us.ihmc.robotics.weightMatrices.WeightMatrix3D;
 import us.ihmc.yoVariables.providers.BooleanProvider;
@@ -64,8 +62,8 @@ public class RigidBodyOrientationControlHelper
    private final String warningPrefix;
 
    public RigidBodyOrientationControlHelper(String warningPrefix, RigidBodyBasics bodyToControl, RigidBodyBasics baseBody, RigidBodyBasics elevator,
-                                            Collection<ReferenceFrame> trajectoryFrames, ReferenceFrame controlFrame, ReferenceFrame baseFrame,
-                                            BooleanProvider useBaseFrameForControl, BooleanProvider useWeightFromMessage, YoVariableRegistry registry)
+                                            ReferenceFrame controlFrame, ReferenceFrame baseFrame, BooleanProvider useBaseFrameForControl,
+                                            BooleanProvider useWeightFromMessage, YoVariableRegistry registry)
    {
       this.warningPrefix = warningPrefix;
       this.useBaseFrameForControl = useBaseFrameForControl;
@@ -75,13 +73,8 @@ public class RigidBodyOrientationControlHelper
       String bodyName = bodyToControl.getName();
       String prefix = bodyName + "TaskspaceOrientation";
 
-      trajectoryGenerator = new MultipleWaypointsOrientationTrajectoryGenerator(bodyName, RigidBodyTaskspaceControlState.maxPointsInGenerator, true,
+      trajectoryGenerator = new MultipleWaypointsOrientationTrajectoryGenerator(bodyName, RigidBodyTaskspaceControlState.maxPointsInGenerator,
                                                                                 ReferenceFrame.getWorldFrame(), registry);
-      if (trajectoryFrames != null)
-      {
-         trajectoryFrames.forEach(frame -> trajectoryGenerator.registerNewTrajectoryFrame(frame));
-      }
-      trajectoryGenerator.registerNewTrajectoryFrame(baseFrame);
       trajectoryGenerator.clear(baseFrame);
 
       currentWeight = new YoFrameVector3D(prefix + "CurrentWeight", null, registry);
@@ -146,11 +139,11 @@ public class RigidBodyOrientationControlHelper
       holdCurrent();
 
       FrameSO3TrajectoryPoint trajectoryPoint = pointQueue.addLast();
-      trajectoryPoint.setToZero(trajectoryGenerator.getCurrentTrajectoryFrame());
+      trajectoryPoint.setToZero(trajectoryGenerator.getReferenceFrame());
       trajectoryPoint.setTime(trajectoryTime);
 
       desiredOrientation.setIncludingFrame(orientation);
-      desiredOrientation.changeFrame(trajectoryGenerator.getCurrentTrajectoryFrame());
+      desiredOrientation.changeFrame(trajectoryGenerator.getReferenceFrame());
       trajectoryPoint.setOrientation(desiredOrientation);
    }
 
@@ -159,11 +152,11 @@ public class RigidBodyOrientationControlHelper
       holdCurrentDesired();
 
       FrameSO3TrajectoryPoint trajectoryPoint = pointQueue.addLast();
-      trajectoryPoint.setToZero(trajectoryGenerator.getCurrentTrajectoryFrame());
+      trajectoryPoint.setToZero(trajectoryGenerator.getReferenceFrame());
       trajectoryPoint.setTime(trajectoryTime);
 
       desiredOrientation.setIncludingFrame(orientation);
-      desiredOrientation.changeFrame(trajectoryGenerator.getCurrentTrajectoryFrame());
+      desiredOrientation.changeFrame(trajectoryGenerator.getReferenceFrame());
       trajectoryPoint.setOrientation(desiredOrientation);
    }
 
@@ -172,7 +165,7 @@ public class RigidBodyOrientationControlHelper
       if (trajectoryGenerator.isEmpty())
       {
          orientationToPack.setIncludingFrame(controlFrameOrientation);
-         orientationToPack.changeFrame(trajectoryGenerator.getCurrentTrajectoryFrame());
+         orientationToPack.changeFrame(trajectoryGenerator.getReferenceFrame());
       }
       else
       {
@@ -202,7 +195,7 @@ public class RigidBodyOrientationControlHelper
       // This will improve the tracking with respect to moving trajectory frames.
       if (useBaseFrameForControl.getValue())
       {
-         feedbackControlCommand.setControlBaseFrame(trajectoryGenerator.getCurrentTrajectoryFrame());
+         feedbackControlCommand.setControlBaseFrame(trajectoryGenerator.getReferenceFrame());
       }
       else
       {
@@ -231,7 +224,7 @@ public class RigidBodyOrientationControlHelper
       if (!trajectoryGenerator.isEmpty())
       {
          trajectoryGenerator.clear();
-         lastPointAdded.changeFrame(trajectoryGenerator.getCurrentTrajectoryFrame());
+         lastPointAdded.changeFrame(trajectoryGenerator.getReferenceFrame());
          trajectoryGenerator.appendWaypoint(lastPointAdded);
       }
 
@@ -285,9 +278,9 @@ public class RigidBodyOrientationControlHelper
          }
          messageWeightValid = messageHasValidWeights;
       }
-      else if (command.getTrajectoryFrame() != trajectoryGenerator.getCurrentTrajectoryFrame())
+      else if (command.getTrajectoryFrame() != trajectoryGenerator.getReferenceFrame())
       {
-         LogTools.warn(warningPrefix + "Was executing in " + trajectoryGenerator.getCurrentTrajectoryFrame() + " can not switch to "
+         LogTools.warn(warningPrefix + "Was executing in " + trajectoryGenerator.getReferenceFrame() + " can not switch to "
                + command.getTrajectoryFrame() + " without override.");
          return false;
       }
@@ -298,7 +291,7 @@ public class RigidBodyOrientationControlHelper
          return false;
       }
 
-      command.getTrajectoryPointList().changeFrame(trajectoryGenerator.getCurrentTrajectoryFrame());
+      command.getTrajectoryPointList().changeFrame(trajectoryGenerator.getReferenceFrame());
       for (int i = 0; i < command.getNumberOfTrajectoryPoints(); i++)
       {
          if (!checkTime(command.getTrajectoryPoint(i).getTime()))
@@ -327,9 +320,9 @@ public class RigidBodyOrientationControlHelper
 
    private void queueInitialPoint(FrameQuaternion initialOrientation)
    {
-      initialOrientation.changeFrame(trajectoryGenerator.getCurrentTrajectoryFrame());
+      initialOrientation.changeFrame(trajectoryGenerator.getReferenceFrame());
       FrameSO3TrajectoryPoint initialPoint = pointQueue.addLast();
-      initialPoint.setToZero(trajectoryGenerator.getCurrentTrajectoryFrame());
+      initialPoint.setToZero(trajectoryGenerator.getReferenceFrame());
       initialPoint.setTime(0.0);
       initialPoint.setOrientation(initialOrientation);
    }

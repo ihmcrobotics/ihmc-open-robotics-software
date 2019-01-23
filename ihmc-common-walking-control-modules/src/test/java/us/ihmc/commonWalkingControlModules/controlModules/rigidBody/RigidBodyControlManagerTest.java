@@ -5,7 +5,6 @@ import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -508,11 +507,6 @@ public class RigidBodyControlManagerTest
       homeConfiguration.put(joint1.getName(), q1_home);
       homeConfiguration.put(joint2.getName(), q2_home);
 
-      // add some possible trajectory frames
-      Collection<ReferenceFrame> trajectoryFrames = new ArrayList<>();
-      trajectoryFrames.add(link1.getBodyFixedFrame());
-      trajectoryFrames.add(link2.getBodyFixedFrame());
-
       // create a contactable body
       ContactablePlaneBody contactableBody = new SimpleContactPointPlaneBody("ContactableBody", link2, new RigidBodyTransform());
 
@@ -539,8 +533,8 @@ public class RigidBodyControlManagerTest
       Vector3D taskspaceAngularWeight = new Vector3D(1.0, 1.0, 1.0);
       Vector3D taskspaceLinearWeight = new Vector3D(1.0, 1.0, 1.0);
 
-      RigidBodyControlManager manager = new RigidBodyControlManager(bodyToControl, baseBody, elevator, homeConfiguration, null, trajectoryFrames, controlFrame,
-                                                                    baseFrame, taskspaceAngularWeight, taskspaceLinearWeight, taskspaceOrientationGains,
+      RigidBodyControlManager manager = new RigidBodyControlManager(bodyToControl, baseBody, elevator, homeConfiguration, null, controlFrame, baseFrame,
+                                                                    taskspaceAngularWeight, taskspaceLinearWeight, taskspaceOrientationGains,
                                                                     taskspacePositionGains, contactableBody, null, yoTime, null, testRegistry);
       manager.setGains(jointspaceGains);
       manager.setWeights(jointspaceWeights, userModeWeights);

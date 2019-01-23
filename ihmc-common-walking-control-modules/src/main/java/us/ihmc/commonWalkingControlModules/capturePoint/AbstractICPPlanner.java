@@ -14,7 +14,6 @@ import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameVector2D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.robotics.math.frames.YoFramePointInMultipleFrames;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.time.ExecutionTimer;
@@ -26,6 +25,7 @@ import us.ihmc.yoVariables.variable.YoFramePoint2D;
 import us.ihmc.yoVariables.variable.YoFramePoint3D;
 import us.ihmc.yoVariables.variable.YoFrameVector3D;
 import us.ihmc.yoVariables.variable.YoInteger;
+import us.ihmc.yoVariables.variable.frameObjects.YoMutableFramePoint3D;
 
 public abstract class AbstractICPPlanner implements ICPPlannerInterface
 {
@@ -118,10 +118,10 @@ public abstract class AbstractICPPlanner implements ICPPlannerInterface
     */
    private final YoDouble velocityReductionFactor = new YoDouble(namePrefix + "VelocityReductionFactor", registry);
 
-   protected final YoFramePointInMultipleFrames singleSupportInitialICP;
+   protected final YoMutableFramePoint3D singleSupportInitialICP;
    protected final YoFrameVector3D singleSupportInitialICPVelocity = new YoFrameVector3D(namePrefix + "SingleSupportInitialICPVelocity", worldFrame, registry);
 
-   protected final YoFramePointInMultipleFrames singleSupportFinalICP;
+   protected final YoMutableFramePoint3D singleSupportFinalICP;
    protected final YoFrameVector3D singleSupportFinalICPVelocity = new YoFrameVector3D(namePrefix + "SingleSupportFinalICPVelocity", worldFrame, registry);
 
    protected final YoBoolean requestedHoldPosition = new YoBoolean(namePrefix + "RequestedHoldPosition", registry);
@@ -165,10 +165,8 @@ public abstract class AbstractICPPlanner implements ICPPlannerInterface
       midFeetZUpFrame = bipedSupportPolygons.getMidFeetZUpFrame();
       soleZUpFrames = bipedSupportPolygons.getSoleZUpFrames();
 
-      ReferenceFrame[] framesToRegister = new ReferenceFrame[] {worldFrame, midFeetZUpFrame, soleZUpFrames.get(RobotSide.LEFT),
-            soleZUpFrames.get(RobotSide.RIGHT)};
-      singleSupportInitialICP = new YoFramePointInMultipleFrames(namePrefix + "SingleSupportInitialICP", registry, framesToRegister);
-      singleSupportFinalICP = new YoFramePointInMultipleFrames(namePrefix + "SingleSupportFinalICP", registry, framesToRegister);
+      singleSupportInitialICP = new YoMutableFramePoint3D(namePrefix + "SingleSupportInitialICP", "", registry);
+      singleSupportFinalICP = new YoMutableFramePoint3D(namePrefix + "SingleSupportFinalICP", "", registry);
 
       transferToSide.set(null);
       previousTransferToSide.set(null);

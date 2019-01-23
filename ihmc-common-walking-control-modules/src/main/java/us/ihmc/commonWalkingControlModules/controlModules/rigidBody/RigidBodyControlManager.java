@@ -1,6 +1,5 @@
 package us.ihmc.commonWalkingControlModules.controlModules.rigidBody;
 
-import java.util.Collection;
 import java.util.Map;
 
 import gnu.trove.map.hash.TObjectDoubleHashMap;
@@ -61,9 +60,8 @@ public class RigidBodyControlManager
    private final YoBoolean stateSwitched;
 
    public RigidBodyControlManager(RigidBodyBasics bodyToControl, RigidBodyBasics baseBody, RigidBodyBasics elevator,
-                                  TObjectDoubleHashMap<String> homeConfiguration, Pose3D homePose, Collection<ReferenceFrame> trajectoryFrames,
-                                  ReferenceFrame controlFrame, ReferenceFrame baseFrame, Vector3DReadOnly taskspaceAngularWeight,
-                                  Vector3DReadOnly taskspaceLinearWeight, PID3DGainsReadOnly taskspaceOrientationGains,
+                                  TObjectDoubleHashMap<String> homeConfiguration, Pose3D homePose, ReferenceFrame controlFrame, ReferenceFrame baseFrame,
+                                  Vector3DReadOnly taskspaceAngularWeight, Vector3DReadOnly taskspaceLinearWeight, PID3DGainsReadOnly taskspaceOrientationGains,
                                   PID3DGainsReadOnly taskspacePositionGains, ContactablePlaneBody contactableBody, RigidBodyControlMode defaultControlMode,
                                   YoDouble yoTime, YoGraphicsListRegistry graphicsListRegistry, YoVariableRegistry parentRegistry)
    {
@@ -84,8 +82,8 @@ public class RigidBodyControlManager
 
       if (taskspaceAngularWeight != null && taskspaceLinearWeight == null)
       {
-         RigidBodyOrientationController taskspaceControlState = new RigidBodyOrientationController(bodyToControl, baseBody, elevator, trajectoryFrames,
-                                                                                                   baseFrame, yoTime, jointControlHelper, parentRegistry);
+         RigidBodyOrientationController taskspaceControlState = new RigidBodyOrientationController(bodyToControl, baseBody, elevator, baseFrame, yoTime,
+                                                                                                   jointControlHelper, parentRegistry);
          if (taskspaceOrientationGains == null)
          {
             throw new RuntimeException("Can not create orientation control manager with null gains for " + bodyName);
@@ -97,8 +95,8 @@ public class RigidBodyControlManager
       }
       else if (taskspaceAngularWeight == null && taskspaceLinearWeight != null)
       {
-         RigidBodyPositionController taskspaceControlState = new RigidBodyPositionController(bodyToControl, baseBody, elevator, trajectoryFrames, controlFrame,
-                                                                                             baseFrame, yoTime, parentRegistry, graphicsListRegistry);
+         RigidBodyPositionController taskspaceControlState = new RigidBodyPositionController(bodyToControl, baseBody, elevator, controlFrame, baseFrame, yoTime,
+                                                                                             parentRegistry, graphicsListRegistry);
          if (taskspacePositionGains == null)
          {
             throw new RuntimeException("Can not create position control manager with null gains for " + bodyName);
@@ -110,8 +108,8 @@ public class RigidBodyControlManager
       }
       else if (taskspaceAngularWeight != null && taskspaceLinearWeight != null)
       {
-         RigidBodyPoseController taskspaceControlState = new RigidBodyPoseController(bodyToControl, baseBody, elevator, trajectoryFrames, controlFrame,
-                                                                                     baseFrame, yoTime, jointControlHelper, graphicsListRegistry, registry);
+         RigidBodyPoseController taskspaceControlState = new RigidBodyPoseController(bodyToControl, baseBody, elevator, controlFrame, baseFrame, yoTime,
+                                                                                     jointControlHelper, graphicsListRegistry, registry);
          if (taskspaceOrientationGains == null || taskspacePositionGains == null)
          {
             System.out.println("Orientation gains exist: " + (taskspaceOrientationGains != null));
@@ -147,8 +145,7 @@ public class RigidBodyControlManager
       else
          this.homePose = null;
 
-      externalWrenchManager = new RigidBodyExternalWrenchManager(bodyToControl, baseBody, trajectoryFrames, controlFrame, yoTime, graphicsListRegistry,
-                                                                 registry);
+      externalWrenchManager = new RigidBodyExternalWrenchManager(bodyToControl, baseBody, controlFrame, yoTime, graphicsListRegistry, registry);
 
       defaultControlMode = defaultControlMode == null ? RigidBodyControlMode.JOINTSPACE : defaultControlMode;
       checkDefaultControlMode(defaultControlMode, this.homePose, bodyName);
