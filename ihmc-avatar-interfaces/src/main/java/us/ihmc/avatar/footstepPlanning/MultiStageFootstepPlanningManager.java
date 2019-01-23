@@ -661,6 +661,7 @@ public class MultiStageFootstepPlanningManager implements PlannerCompletionCallb
             sendMessageToUI("Result of step planning: " + planId.getIntegerValue() + ", " + stepStatus.toString());
 
             concatenateFootstepPlans();
+            setStepHeightsForFlatGround();
             FootstepPlan footstepPlan = this.footstepPlan.getAndSet(null);
             FootstepPlanningToolboxOutputStatus footstepPlanMessage = packStepResult(footstepPlan, bodyPathPlan.getAndSet(null), stepStatus,
                                                                                      plannerTime.getDoubleValue());
@@ -883,6 +884,23 @@ public class MultiStageFootstepPlanningManager implements PlannerCompletionCallb
       }
 
       footstepPlan.set(totalFootstepPlan);
+   }
+
+   private void setStepHeightsForFlatGround()
+   {
+      if(planarRegionsList.get() == null && footstepPlan.get() != null)
+      {
+         double groundHeight = mainObjective.getInitialStanceFootPose().getPosition().getZ();
+
+         FootstepPlan footstepPlan = this.footstepPlan.get();
+         for (int i = 0; i < footstepPlan.getNumberOfSteps(); i++)
+         {
+            FramePose3D footPose = new FramePose3D();
+            footstepPlan.getFootstep(i).getSoleFramePose(footPose);
+            footPose.getPosition().addZ(groundHeight);
+            footstepPlan.getFootstep(i).setSoleFramePose(footPose);
+         }
+      }
    }
 
    private void sendMessageToUI(String message)
