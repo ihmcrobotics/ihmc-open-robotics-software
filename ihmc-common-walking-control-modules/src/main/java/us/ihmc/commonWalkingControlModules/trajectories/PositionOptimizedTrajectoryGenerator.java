@@ -14,7 +14,7 @@ import us.ihmc.robotics.graphics.YoGraphicPolynomial3D.TrajectoryColorType;
 import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.robotics.math.trajectories.YoPolynomial;
 import us.ihmc.robotics.math.trajectories.YoPolynomial3D;
-import us.ihmc.robotics.math.trajectories.waypoints.TrajectoryPointOptimizer;
+import us.ihmc.robotics.math.trajectories.generators.TrajectoryPointOptimizer;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.*;
 

@@ -16,7 +16,7 @@ import us.ihmc.quadrupedRobotics.controller.toolbox.QuadrupedStepTransitionCallb
 import us.ihmc.quadrupedRobotics.controller.toolbox.QuadrupedWaypointCallback;
 import us.ihmc.quadrupedRobotics.planning.ContactState;
 import us.ihmc.quadrupedRobotics.util.YoQuadrupedTimedStep;
-import us.ihmc.robotics.math.trajectories.waypoints.FrameEuclideanTrajectoryPointList;
+import us.ihmc.robotics.math.trajectories.trajectorypoints.lists.FrameEuclideanTrajectoryPointList;
 import us.ihmc.robotics.robotSide.QuadrantDependentList;
 import us.ihmc.robotics.robotSide.RobotQuadrant;
 import us.ihmc.robotics.stateMachine.core.StateChangedListener;

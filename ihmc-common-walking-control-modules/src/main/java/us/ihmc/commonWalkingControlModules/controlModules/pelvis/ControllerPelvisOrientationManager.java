@@ -92,9 +92,6 @@ public class ControllerPelvisOrientationManager implements PelvisOrientationCont
       pelvisFrame = referenceFrames.getPelvisFrame();
 
       pelvisOrientationTrajectoryGenerator = new SimpleOrientationTrajectoryGenerator("pelvis", true, worldFrame, registry);
-      pelvisOrientationTrajectoryGenerator.registerNewTrajectoryFrame(midFeetZUpGroundFrame);
-      for (RobotSide robotSide : RobotSide.values)
-         pelvisOrientationTrajectoryGenerator.registerNewTrajectoryFrame(soleZUpFrames.get(robotSide));
 
       this.gains = gains;
       FullHumanoidRobotModel fullRobotModel = controllerToolbox.getFullRobotModel();
@@ -156,7 +153,7 @@ public class ControllerPelvisOrientationManager implements PelvisOrientationCont
       initialPelvisOrientation.changeFrame(desiredTrajectoryFrame);
       finalPelvisOrientation.changeFrame(desiredTrajectoryFrame);
 
-      pelvisOrientationTrajectoryGenerator.switchTrajectoryFrame(desiredTrajectoryFrame);
+      pelvisOrientationTrajectoryGenerator.setReferenceFrame(desiredTrajectoryFrame);
       pelvisOrientationTrajectoryGenerator.setInitialOrientation(initialPelvisOrientation);
       pelvisOrientationTrajectoryGenerator.setFinalOrientation(finalPelvisOrientation);
       pelvisOrientationTrajectoryGenerator.initialize();

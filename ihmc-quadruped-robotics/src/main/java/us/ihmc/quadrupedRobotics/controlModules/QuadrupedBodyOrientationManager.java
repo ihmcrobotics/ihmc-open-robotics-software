@@ -21,7 +21,7 @@ import us.ihmc.robotics.controllers.pidGains.GainCoupling;
 import us.ihmc.robotics.controllers.pidGains.implementations.DefaultPID3DGains;
 import us.ihmc.robotics.controllers.pidGains.implementations.ParameterizedPID3DGains;
 import us.ihmc.robotics.dataStructures.parameters.ParameterVector3D;
-import us.ihmc.robotics.math.trajectories.waypoints.MultipleWaypointsOrientationTrajectoryGenerator;
+import us.ihmc.robotics.math.trajectories.generators.MultipleWaypointsOrientationTrajectoryGenerator;
 import us.ihmc.robotics.screwTheory.SelectionMatrix3D;
 import us.ihmc.sensorProcessing.simulatedSensors.Vector3DProvider;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
@@ -102,9 +102,10 @@ public class QuadrupedBodyOrientationManager
 
    public void initialize()
    {
-      desiredBodyOrientation.setToZero(bodyFrame);
-      desiredBodyAngularVelocity.setToZero();
-      desiredBodyAngularAcceleration.setToZero();
+      ReferenceFrame trajectoryFrame = offsetBodyOrientationTrajectory.getReferenceFrame();
+      desiredBodyOrientation.setToZero(trajectoryFrame);
+      desiredBodyAngularVelocity.setToZero(trajectoryFrame);
+      desiredBodyAngularAcceleration.setToZero(trajectoryFrame);
 
       double currentTime = robotTimestamp.getDoubleValue();
 
@@ -266,7 +267,7 @@ public class QuadrupedBodyOrientationManager
          desiredBodyAngularAcceleration.setZ(desiredAbsoluteYawAcceleration.getZ());
       }
    }
-   
+
    public FeedbackControlCommand<?> createFeedbackControlTemplate()
    {
       return getFeedbackControlCommand();
