@@ -2,7 +2,6 @@ package us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelSt
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -159,21 +158,20 @@ public class WalkingHighLevelHumanoidController implements JointLoadStatusProvid
 
       unloadFraction = walkingControllerParameters.enforceSmoothFootUnloading() ? new DoubleParameter("unloadFraction", registry, 0.5) : null;
 
-      Collection<ReferenceFrame> trajectoryFrames = controllerToolbox.getTrajectoryFrames();
       ReferenceFrame pelvisZUpFrame = controllerToolbox.getPelvisZUpFrame();
 
       ReferenceFrame chestBodyFrame = null;
       if (chest != null)
       {
          chestBodyFrame = chest.getBodyFixedFrame();
-         RigidBodyControlManager chestManager = managerFactory.getOrCreateRigidBodyManager(chest, pelvis, chestBodyFrame, pelvisZUpFrame, trajectoryFrames);
+         RigidBodyControlManager chestManager = managerFactory.getOrCreateRigidBodyManager(chest, pelvis, chestBodyFrame, pelvisZUpFrame);
          bodyManagers.add(chestManager);
       }
 
       if (head != null)
       {
          ReferenceFrame headBodyFrame = head.getBodyFixedFrame();
-         RigidBodyControlManager headManager = managerFactory.getOrCreateRigidBodyManager(head, chest, headBodyFrame, chestBodyFrame, trajectoryFrames);
+         RigidBodyControlManager headManager = managerFactory.getOrCreateRigidBodyManager(head, chest, headBodyFrame, chestBodyFrame);
          bodyManagers.add(headManager);
       }
 
@@ -181,7 +179,7 @@ public class WalkingHighLevelHumanoidController implements JointLoadStatusProvid
       {
          RigidBodyBasics hand = fullRobotModel.getHand(robotSide);
          ReferenceFrame handControlFrame = fullRobotModel.getHandControlFrame(robotSide);
-         RigidBodyControlManager handManager = managerFactory.getOrCreateRigidBodyManager(hand, chest, handControlFrame, chestBodyFrame, trajectoryFrames);
+         RigidBodyControlManager handManager = managerFactory.getOrCreateRigidBodyManager(hand, chest, handControlFrame, chestBodyFrame);
          bodyManagers.add(handManager);
       }
 

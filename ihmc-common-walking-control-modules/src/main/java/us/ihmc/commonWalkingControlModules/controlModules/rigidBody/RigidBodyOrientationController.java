@@ -1,7 +1,5 @@
 package us.ihmc.commonWalkingControlModules.controlModules.rigidBody;
 
-import java.util.Collection;
-
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.FeedbackControlCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.FeedbackControlCommandList;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
@@ -34,9 +32,8 @@ public class RigidBodyOrientationController extends RigidBodyTaskspaceControlSta
    private final YoBoolean hybridModeActive;
    private final RigidBodyJointControlHelper jointControlHelper;
 
-   public RigidBodyOrientationController(RigidBodyBasics bodyToControl, RigidBodyBasics baseBody, RigidBodyBasics elevator, Collection<ReferenceFrame> trajectoryFrames,
-                                         ReferenceFrame baseFrame, YoDouble yoTime, RigidBodyJointControlHelper jointControlHelper,
-                                         YoVariableRegistry parentRegistry)
+   public RigidBodyOrientationController(RigidBodyBasics bodyToControl, RigidBodyBasics baseBody, RigidBodyBasics elevator, ReferenceFrame baseFrame,
+                                         YoDouble yoTime, RigidBodyJointControlHelper jointControlHelper, YoVariableRegistry parentRegistry)
    {
       super(RigidBodyControlMode.TASKSPACE, bodyToControl.getName(), yoTime, parentRegistry);
 
@@ -51,8 +48,8 @@ public class RigidBodyOrientationController extends RigidBodyTaskspaceControlSta
       BooleanParameter useBaseFrameForControl = new BooleanParameter(prefix + "UseBaseFrameForControl", registry, false);
       // Must be the body frame until the controller core allows custom control frame rotations for orientation commands:
       MovingReferenceFrame controlFrame = bodyToControl.getBodyFixedFrame();
-      orientationHelper = new RigidBodyOrientationControlHelper(prefix, bodyToControl, baseBody, elevator, trajectoryFrames, controlFrame, baseFrame,
-                                                                useBaseFrameForControl, usingWeightFromMessage, registry);
+      orientationHelper = new RigidBodyOrientationControlHelper(prefix, bodyToControl, baseBody, elevator, controlFrame, baseFrame, useBaseFrameForControl,
+                                                                usingWeightFromMessage, registry);
 
       this.jointControlHelper = jointControlHelper;
       hybridModeActive = new YoBoolean(prefix + "HybridModeActive", registry);
