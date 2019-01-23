@@ -83,7 +83,7 @@ public class ObstacleAndCliffAvoidanceProcessorTest
       }
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.0, categoriesOverride = IntegrationCategory.IN_DEVELOPMENT)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = timeout)
    public void testRemoveDuplicated2DPointsFromList()
    {
@@ -142,7 +142,7 @@ public class ObstacleAndCliffAvoidanceProcessorTest
       }
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.0, categoriesOverride = IntegrationCategory.IN_DEVELOPMENT)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = timeout)
    public void testRemoveDuplicateStartOrEndPointsFromList()
    {

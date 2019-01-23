@@ -2,6 +2,7 @@ package us.ihmc.pathPlanning.visibilityGraphs.postProcessing;
 
 import org.junit.Test;
 import us.ihmc.commons.RandomNumbers;
+import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.tools.EuclidCoreRandomTools;
 import us.ihmc.euclid.tools.EuclidCoreTestTools;
@@ -22,6 +23,7 @@ public class PointWigglerTest
    private static final double epsilon = 1e-10;
    private static final int iters = 500;
 
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = timeout)
    public void testAverageDistanceVectorCalculationEasy()
    {
@@ -57,6 +59,7 @@ public class PointWigglerTest
       EuclidCoreTestTools.assertVector2DGeometricallyEquals(expectedVector, calculatedVector, epsilon);
    }
 
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = timeout)
    public void testAverageDistanceVectorCalculationEasy2()
    {
@@ -118,6 +121,7 @@ public class PointWigglerTest
       EuclidCoreTestTools.assertPoint2DGeometricallyEquals(shiftedPointExpected, shiftedPoint, epsilon);
    }
 
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = timeout)
    public void testWithinBoundsOfOneButNotTheOther()
    {
@@ -153,6 +157,7 @@ public class PointWigglerTest
       EuclidCoreTestTools.assertPoint2DGeometricallyEquals(codedPointExpected, shiftedPoint, epsilon);
    }
 
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = timeout)
    public void testAverageDistanceVectorWithRandomlyGeneratedNearbyPoints()
    {
@@ -204,6 +209,7 @@ public class PointWigglerTest
       }
    }
 
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = timeout)
    public void testFancyAverageDistanceVectorWithRandomlyGeneratedNearbyPoints()
    {
