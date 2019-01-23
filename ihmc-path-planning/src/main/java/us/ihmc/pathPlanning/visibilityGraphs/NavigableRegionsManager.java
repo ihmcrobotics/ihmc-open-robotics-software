@@ -34,6 +34,7 @@ public class NavigableRegionsManager
    private VisibilityGraph visibilityGraph;
    private VisibilityGraphNode startNode;
    private VisibilityGraphNode goalNode;
+   private Point3DReadOnly goalInWorld;
    private PriorityQueue<VisibilityGraphNode> stack;
    private HashSet<VisibilityGraphNode> expandedNodes;
 
@@ -128,7 +129,7 @@ public class NavigableRegionsManager
       double searchHostEpsilon = parameters.getSearchHostRegionEpsilon();
       startNode = visibilityGraph.setStart(startInWorld, searchHostEpsilon);
       goalNode = visibilityGraph.setGoal(goalInWorld, searchHostEpsilon);
-
+      this.goalInWorld = goalInWorld;
 
       PathNodeComparator comparator = new PathNodeComparator();
       stack = new PriorityQueue<>(comparator);
@@ -147,7 +148,6 @@ public class NavigableRegionsManager
       long startBodyPathComputation = System.currentTimeMillis();
       long expandedNodesCount = 0;
       long iterations = 0;
-      Point3DReadOnly goalInWorld = goalNode.getPointInWorld();
 
       while (!stack.isEmpty())
       {
