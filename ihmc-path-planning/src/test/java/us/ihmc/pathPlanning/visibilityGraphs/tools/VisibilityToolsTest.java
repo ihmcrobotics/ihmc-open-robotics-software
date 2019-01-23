@@ -147,8 +147,8 @@ public class VisibilityToolsTest
       Point2D closestPointOnAboveHorizontalLine = new Point2D();
       Point2D closestPointOnAboveHorizontalCluster = new Point2D();
 
-      Point2DReadOnly closestPointOnAboveHorizontalLineExpected = new Point2D(0.0, 0.2);
-      Point2DReadOnly closestPointOnAboveHorizontalClusterExpected = new Point2D(0.0, 0.1);
+      Point2DReadOnly closestPointOnAboveHorizontalLineExpected = new Point2D(0.5, 0.2);
+      Point2DReadOnly closestPointOnAboveHorizontalClusterExpected = new Point2D(0.5, 0.1);
 
       distance = VisibilityTools.distanceToCluster(firstPointAboveHorizontal, secondPointAboveHorizontal, pointsInCluster, closestPointOnAboveHorizontalLine,
                                                    closestPointOnAboveHorizontalCluster, null, true);
