@@ -127,6 +127,8 @@ public abstract class AvatarSwingWithWaypointsTest implements MultiRobotTestInte
 
       double waypointHeight = drcSimulationTestHelper.getYoVariable("SwingWaypoint" + robotSide.getPascalCaseName() + waypoints + "Z").getValueAsDouble();
       Assert.assertEquals(0.0, waypointHeight, 0.05);
+
+      Assert.assertTrue(drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(swingDuration));
    }
 
    @ContinuousIntegrationTest(estimatedDuration = 137.9)
