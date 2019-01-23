@@ -276,6 +276,12 @@ public class WalkingSingleSupportState extends SingleSupportState
       double touchdownTime = footstepTiming.getTouchdownDuration();
       feetManager.requestSwing(swingSide, nextFootstep, swingTime, touchdownTime);
 
+      if (feetManager.adjustHeightIfNeeded(nextFootstep))
+      {
+         walkingMessageHandler.updateVisualizationAfterFootstepAdjustement(nextFootstep);
+         feetManager.adjustSwingTrajectory(swingSide, nextFootstep, swingTime);
+      }
+
       legConfigurationManager.startSwing(swingSide);
       legConfigurationManager.useHighWeight(swingSide.getOppositeSide());
       legConfigurationManager.setStepDuration(supportSide, footstepTiming.getStepTime());
@@ -381,11 +387,6 @@ public class WalkingSingleSupportState extends SingleSupportState
       // Update the contact states based on the footstep. If the footstep doesn't have any predicted contact points, then use the default ones in the ContactablePlaneBodies.
       controllerToolbox.updateContactPointsForUpcomingFootstep(nextFootstep);
       controllerToolbox.updateBipedSupportPolygons();
-
-      if (feetManager.adjustHeightIfNeeded(nextFootstep))
-      {
-         walkingMessageHandler.updateVisualizationAfterFootstepAdjustement(nextFootstep);
-      }
 
       pelvisOrientationManager.setTrajectoryTime(swingTime);
       pelvisOrientationManager.setUpcomingFootstep(nextFootstep);

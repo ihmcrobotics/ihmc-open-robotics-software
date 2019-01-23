@@ -105,6 +105,7 @@ public class SwingState extends AbstractFootControlState
    private final RecyclingArrayList<FramePoint3D> positionWaypointsForSole;
    private final RecyclingArrayList<FrameSE3TrajectoryPoint> swingWaypoints;
    private final List<FixedFramePoint3DBasics> swingWaypointsForViz = new ArrayList<>();
+   private final FramePoint3D tempWaypoint = new FramePoint3D();
 
    private final YoDouble swingDuration;
    private final YoDouble swingHeight;
@@ -355,7 +356,7 @@ public class SwingState extends AbstractFootControlState
       for (int i = 0; i < Footstep.maxNumberOfSwingWaypoints; i++)
       {
          YoFramePoint3D yoWaypoint = new YoFramePoint3D("SwingWaypoint" + robotSide.getPascalCaseName() + i, ReferenceFrame.getWorldFrame(), registry);
-         YoGraphicPosition waypointViz = new YoGraphicPosition("SwingWaypoint" + robotSide.getPascalCaseName() + i, yoWaypoint , 0.02, YoAppearance.GreenYellow());
+         YoGraphicPosition waypointViz = new YoGraphicPosition("SwingWaypoint" + robotSide.getPascalCaseName() + i, yoWaypoint , 0.01, YoAppearance.GreenYellow());
          yoWaypoint.setToNaN();
          yoGraphicsListRegistry.registerYoGraphic(getClass().getSimpleName(), waypointViz);
          swingWaypointsForViz.add(yoWaypoint);
@@ -395,8 +396,6 @@ public class SwingState extends AbstractFootControlState
       initialLinearVelocity.clipToMaxLength(maxInitialLinearVelocityMagnitude.getDoubleValue());
       initialAngularVelocity.clipToMaxLength(maxInitialAngularVelocityMagnitude.getDoubleValue());
       stanceFootPosition.setToZero(oppositeSoleFrame);
-
-      footstepWasAdjusted.set(false);
 
       fillAndInitializeTrajectories(true);
    }
@@ -441,6 +440,8 @@ public class SwingState extends AbstractFootControlState
       yoDesiredSoleAngularVelocity.setToNaN();
       yoDesiredPosition.setToNaN();
       yoDesiredLinearVelocity.setToNaN();
+
+      footstepWasAdjusted.set(false);
 
       for (int i = 0; i < swingWaypointsForViz.size(); i++)
       {
@@ -728,6 +729,16 @@ public class SwingState extends AbstractFootControlState
       }
       blendedSwingTrajectory.initialize();
       touchdownTrajectory.initialize();
+
+      if (!swingWaypointsForViz.isEmpty() && activeTrajectoryType.getEnumValue() == TrajectoryType.WAYPOINTS)
+      {
+         for (int i = 0; i < swingWaypoints.size(); i++)
+         {
+            blendedSwingTrajectory.compute(swingWaypoints.get(i).getTime());
+            blendedSwingTrajectory.getPosition(tempWaypoint);
+            swingWaypointsForViz.get(i).setMatchingFrame(tempWaypoint);
+         }
+      }
    }
 
    private void modifyFinalOrientationForTouchdown(FrameQuaternion finalOrientationToPack)
@@ -849,11 +860,6 @@ public class SwingState extends AbstractFootControlState
          for (int i = 0; i < swingWaypoints.size(); i++)
          {
             this.swingWaypoints.add().set(swingWaypoints.get(i));
-            if (!swingWaypointsForViz.isEmpty())
-            {
-               // TODO: remove allocation
-               swingWaypointsForViz.get(i).setMatchingFrame(swingWaypoints.get(i).getPositionCopy());
-            }
          }
       }
       else
