@@ -47,7 +47,6 @@ public class REAModuleAPI
    private static final CategoryTheme Node = apiFactory.createCategoryTheme("Node");
    private static final CategoryTheme Request = apiFactory.createCategoryTheme("Request");
    private static final CategoryTheme DataExporter = apiFactory.createCategoryTheme("DataExporter");
-   private static final CategoryTheme SourceType = apiFactory.createCategoryTheme("SourceType");
 
    private static final TypedTopicTheme<Boolean> Enable = apiFactory.createTypedTopicTheme("Enable");
    private static final TypedTopicTheme<Boolean> Clear = apiFactory.createTypedTopicTheme("Clear");
