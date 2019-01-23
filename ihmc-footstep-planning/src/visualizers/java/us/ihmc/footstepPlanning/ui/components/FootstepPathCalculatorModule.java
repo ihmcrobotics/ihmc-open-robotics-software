@@ -379,8 +379,8 @@ public class FootstepPathCalculatorModule
       snapBasedNodeChecker.addPlannerListener(plannerListener);
       bodyCollisionNodeChecker.addPlannerListener(plannerListener);
 
-      return new AStarFootstepPlanner(parameters, nodeChecker, heuristics, expansion, footstepCost, postProcessingSnapper, plannerListener,
-                                                              registry);
+      return new AStarFootstepPlanner(parameters, nodeChecker, heuristics, expansion, footstepCost, postProcessingSnapper, plannerListener, footPolygons,
+                                      registry);
    }
 
    private BodyPathAndFootstepPlanner createPlanarRegionBipedalPlanner(SideDependentList<ConvexPolygon2D> footPolygonsInSoleFrame, YoVariableRegistry registry)

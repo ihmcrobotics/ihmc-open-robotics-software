@@ -164,7 +164,7 @@ public class FootstepPlanningStage implements FootstepPlanner
       FootstepCost footstepCost = costBuilder.buildCost();
 
       AStarFootstepPlanner planner = new AStarFootstepPlanner(footstepPlanningParameters, nodeChecker, heuristics, expansion, footstepCost,
-                                                              postProcessingSnapper, plannerListener, registry);
+                                                              postProcessingSnapper, plannerListener, footPolygons, registry);
 
       heuristicPolicies.setCollisionNodeChecker(bodyCollisionNodeChecker);
       heuristicPolicies.setNodeSnapper(snapper);
