@@ -40,15 +40,9 @@ public class SnapBasedNodeChecker extends FootstepNodeChecker
       snapper.setPlanarRegions(planarRegions);
    }
 
-   // TODO make this faster
    @Override
-   public boolean isNodeValid(FootstepNode node, FootstepNode previousNode)
+   public boolean isNodeValidInternal(FootstepNode node, FootstepNode previousNode)
    {
-      if (previousNode != null && node.equals(previousNode))
-      {
-         throw new IllegalArgumentException("Checking node assuming it is following itself.");
-      }
-
       FootstepNodeSnapData snapData = snapper.snapFootstepNode(node);
       RigidBodyTransform snapTransform = snapData.getSnapTransform();
       if (snapTransform.containsNaN())

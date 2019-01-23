@@ -219,7 +219,7 @@ public class FootstepPlanningStage implements FootstepPlanner
    @Override
    public void setPlanarRegions(PlanarRegionsList planarRegionsList)
    {
-      this.planarRegionsList.set(planarRegionsList.copy());
+      this.planarRegionsList.set(planarRegionsList == null ? null : planarRegionsList.copy());
    }
 
    @Override
