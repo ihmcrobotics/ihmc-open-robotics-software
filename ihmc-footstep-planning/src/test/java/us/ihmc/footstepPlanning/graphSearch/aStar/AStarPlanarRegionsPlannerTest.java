@@ -238,7 +238,7 @@ public class AStarPlanarRegionsPlannerTest
       FootstepNodeVisualization viz = null;
       if (visualize)
          viz = new FootstepNodeVisualization(1000, 0.04, planarRegionsList);
-      AStarFootstepPlanner planner = new AStarFootstepPlanner(parameters, nodeChecker, heuristics, expansion, stepCostCalculator, snapper, viz, registry);
+      AStarFootstepPlanner planner = new AStarFootstepPlanner(parameters, nodeChecker, heuristics, expansion, stepCostCalculator, snapper, viz, null, registry);
 
       // plan
       planner.setPlanarRegions(planarRegionsList);
