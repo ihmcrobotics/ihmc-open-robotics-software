@@ -6,7 +6,7 @@ import us.ihmc.euclid.referenceFrame.interfaces.FrameQuaternionReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
 import us.ihmc.euclid.transform.interfaces.Transform;
 import us.ihmc.robotics.geometry.interfaces.FrameSE3WaypointInterface;
-import us.ihmc.robotics.math.trajectories.waypoints.WaypointToStringTools;
+import us.ihmc.robotics.math.trajectories.waypoints.tools.WaypointToStringTools;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 
 public class YoFrameSE3Waypoint implements FrameSE3WaypointInterface

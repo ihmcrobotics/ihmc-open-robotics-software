@@ -7,7 +7,7 @@ import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DBasics;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
 import us.ihmc.euclid.transform.interfaces.Transform;
 import us.ihmc.robotics.geometry.interfaces.FrameSO3WaypointInterface;
-import us.ihmc.robotics.math.trajectories.waypoints.WaypointToStringTools;
+import us.ihmc.robotics.math.trajectories.waypoints.tools.WaypointToStringTools;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.frameObjects.YoMutableFrameQuaternion;
 import us.ihmc.yoVariables.variable.frameObjects.YoMutableFrameVector3D;

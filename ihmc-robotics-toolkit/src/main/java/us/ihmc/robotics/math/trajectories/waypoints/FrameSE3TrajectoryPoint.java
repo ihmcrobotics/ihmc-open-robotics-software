@@ -8,11 +8,12 @@ import us.ihmc.euclid.transform.interfaces.Transform;
 import us.ihmc.robotics.geometry.frameObjects.FrameSE3Waypoint;
 import us.ihmc.robotics.math.trajectories.waypoints.interfaces.FrameSE3TrajectoryPointInterface;
 import us.ihmc.robotics.math.trajectories.waypoints.interfaces.SE3TrajectoryPointInterface;
+import us.ihmc.robotics.math.trajectories.waypoints.tools.WaypointToStringTools;
 
 public class FrameSE3TrajectoryPoint implements FrameSE3TrajectoryPointInterface
 {
    private final FrameSE3Waypoint se3Waypoint = new FrameSE3Waypoint();
-   private final TrajectoryPoint trajectoryPoint = new TrajectoryPoint();
+   private double time;
 
    public FrameSE3TrajectoryPoint()
    {
@@ -114,13 +115,13 @@ public class FrameSE3TrajectoryPoint implements FrameSE3TrajectoryPointInterface
    @Override
    public void setTime(double time)
    {
-      trajectoryPoint.setTime(time);
+      this.time = time;
    }
 
    @Override
    public double getTime()
    {
-      return trajectoryPoint.getTime();
+      return time;
    }
 
    @Override

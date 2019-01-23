@@ -1,11 +1,14 @@
 package us.ihmc.robotics.math.trajectories.waypoints;
 
+import static us.ihmc.robotics.math.frames.YoFrameVariableNameTools.createName;
+
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
 
 import us.ihmc.robotics.geometry.yoWaypoints.YoOneDoFWaypoint;
 import us.ihmc.robotics.math.trajectories.waypoints.interfaces.OneDoFTrajectoryPointInterface;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoDouble;
 
 public class YoOneDoFTrajectoryPoint implements OneDoFTrajectoryPointInterface
 {
@@ -13,14 +16,14 @@ public class YoOneDoFTrajectoryPoint implements OneDoFTrajectoryPointInterface
    private final String nameSuffix;
 
    private final YoOneDoFWaypoint waypoint;
-   private final YoTrajectoryPoint trajectoryPoint;
+   private final YoDouble time;
 
    public YoOneDoFTrajectoryPoint(String namePrefix, String nameSuffix, YoVariableRegistry registry)
    {
       this.namePrefix = namePrefix;
       this.nameSuffix = nameSuffix;
 
-      trajectoryPoint = new YoTrajectoryPoint(namePrefix, nameSuffix, registry);
+      time = new YoDouble(createName(namePrefix, "time", nameSuffix), registry);
       waypoint = new YoOneDoFWaypoint(namePrefix, nameSuffix, registry);
    }
 
@@ -51,13 +54,13 @@ public class YoOneDoFTrajectoryPoint implements OneDoFTrajectoryPointInterface
    @Override
    public void setTime(double time)
    {
-      trajectoryPoint.setTime(time);
+      this.time.set(time);
    }
 
    @Override
    public double getTime()
    {
-      return trajectoryPoint.getTime();
+      return time.getValue();
    }
 
    public String getNamePrefix()

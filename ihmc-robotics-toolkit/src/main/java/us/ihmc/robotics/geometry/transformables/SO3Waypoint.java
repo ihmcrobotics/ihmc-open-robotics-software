@@ -6,7 +6,7 @@ import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.euclid.tuple4D.interfaces.QuaternionReadOnly;
 import us.ihmc.robotics.geometry.interfaces.SO3WaypointInterface;
-import us.ihmc.robotics.math.trajectories.waypoints.WaypointToStringTools;
+import us.ihmc.robotics.math.trajectories.waypoints.tools.WaypointToStringTools;
 
 public class SO3Waypoint implements SO3WaypointInterface
 {

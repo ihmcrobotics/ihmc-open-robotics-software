@@ -1,18 +1,21 @@
 package us.ihmc.robotics.math.trajectories.waypoints;
 
+import static us.ihmc.robotics.math.frames.YoFrameVariableNameTools.createName;
+
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
 import us.ihmc.euclid.transform.interfaces.Transform;
 import us.ihmc.robotics.geometry.yoWaypoints.YoFrameEuclideanWaypoint;
 import us.ihmc.robotics.math.trajectories.waypoints.interfaces.FrameEuclideanTrajectoryPointInterface;
+import us.ihmc.robotics.math.trajectories.waypoints.tools.WaypointToStringTools;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 
 public class YoFrameEuclideanTrajectoryPoint implements FrameEuclideanTrajectoryPointInterface
 {
    private final YoFrameEuclideanWaypoint euclideanWaypoint;
-   private final YoTrajectoryPoint trajectoryPoint;
+   private final YoDouble time;
 
    private final String namePrefix;
    private final String nameSuffix;
@@ -20,7 +23,7 @@ public class YoFrameEuclideanTrajectoryPoint implements FrameEuclideanTrajectory
    public YoFrameEuclideanTrajectoryPoint(String namePrefix, String nameSuffix, YoVariableRegistry registry)
    {
       euclideanWaypoint = new YoFrameEuclideanWaypoint(namePrefix, nameSuffix, registry);
-      trajectoryPoint = new YoTrajectoryPoint(namePrefix, nameSuffix, registry);
+      time = new YoDouble(createName(namePrefix, "time", nameSuffix), registry);
       this.namePrefix = namePrefix;
       this.nameSuffix = nameSuffix;
    }
@@ -28,7 +31,7 @@ public class YoFrameEuclideanTrajectoryPoint implements FrameEuclideanTrajectory
    public YoFrameEuclideanTrajectoryPoint(String namePrefix, String nameSuffix, YoVariableRegistry registry, ReferenceFrame referenceFrame)
    {
       euclideanWaypoint = new YoFrameEuclideanWaypoint(namePrefix, nameSuffix, registry);
-      trajectoryPoint = new YoTrajectoryPoint(namePrefix, nameSuffix, registry);
+      time = new YoDouble(createName(namePrefix, "time", nameSuffix), registry);
       this.namePrefix = namePrefix;
       this.nameSuffix = nameSuffix;
       setToZero(referenceFrame);
@@ -100,13 +103,13 @@ public class YoFrameEuclideanTrajectoryPoint implements FrameEuclideanTrajectory
    @Override
    public void setTime(double time)
    {
-      trajectoryPoint.setTime(time);
+      this.time.set(time);
    }
 
    @Override
    public double getTime()
    {
-      return trajectoryPoint.getTime();
+      return time.getValue();
    }
 
    public String getNamePrefix()
