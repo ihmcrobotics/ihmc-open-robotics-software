@@ -19,11 +19,12 @@ public class FootstepNodeCheckerOfCheckers extends FootstepNodeChecker
    @Override
    public void setPlanarRegions(PlanarRegionsList planarRegions)
    {
+      super.setPlanarRegions(planarRegions);
       nodeCheckers.forEach(checker -> checker.setPlanarRegions(planarRegions));
    }
 
    @Override
-   public boolean isNodeValid(FootstepNode node, FootstepNode previousNode)
+   public boolean isNodeValidInternal(FootstepNode node, FootstepNode previousNode)
    {
       for(FootstepNodeChecker checker : nodeCheckers)
       {

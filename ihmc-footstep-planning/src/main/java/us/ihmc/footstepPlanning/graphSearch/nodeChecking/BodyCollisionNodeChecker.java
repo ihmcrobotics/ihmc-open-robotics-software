@@ -89,9 +89,9 @@ public class BodyCollisionNodeChecker extends FootstepNodeChecker
    private final Point3D pointToThrowAway2 = new Point3D();
 
    @Override
-   public boolean isNodeValid(FootstepNode node, FootstepNode previousNode)
+   public boolean isNodeValidInternal(FootstepNode node, FootstepNode previousNode)
    {
-      if (!hasPlanarRegions() || previousNode == null || !parameters.checkForBodyBoxCollisions())
+      if (previousNode == null || !parameters.checkForBodyBoxCollisions())
       {
          return true;
       }
