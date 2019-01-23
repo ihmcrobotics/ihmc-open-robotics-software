@@ -69,8 +69,7 @@ public class MultiStageFootstepPlanningManager implements PlannerCompletionCallb
    private final AtomicReference<List<Point3D>> waypointPlan = new AtomicReference<>(null);
    private final AtomicReference<BodyPathPlan> bodyPathPlan = new AtomicReference<>(null);
    private final AtomicReference<FootstepPlan> footstepPlan = new AtomicReference<>(null);
-
-   private Optional<PlanarRegionsList> planarRegionsList = Optional.empty();
+   private final AtomicReference<PlanarRegionsList> planarRegionsList = new AtomicReference<>(null);
 
    private final YoBoolean isDone = new YoBoolean("isDone", registry);
    private final YoBoolean requestedPlanarRegions = new YoBoolean("RequestedPlanarRegions", registry);
@@ -84,8 +83,6 @@ public class MultiStageFootstepPlanningManager implements PlannerCompletionCallb
    private final YoDouble planningHorizonLength = new YoDouble("planningHorizonLength", registry);
    private final YoEnum<FootstepPlanningResult> pathResult = new YoEnum<>("pathPlanningResult", registry, FootstepPlanningResult.class);
    private final YoEnum<FootstepPlanningResult> stepResult = new YoEnum<>("stepResult", registry, FootstepPlanningResult.class);
-
-   private final YoGraphicPlanarRegionsList yoGraphicPlanarRegionsList;
 
    private final List<FootstepPlannerObjective> pathPlanningObjectivePool = new ArrayList<>();
 
@@ -140,12 +137,11 @@ public class MultiStageFootstepPlanningManager implements PlannerCompletionCallb
 
    public MultiStageFootstepPlanningManager(RobotContactPointParameters<RobotSide> contactPointParameters, FootstepPlannerParameters footstepPlannerParameters,
                                             VisibilityGraphsParameters visibilityGraphsParameters, StatusMessageOutputManager statusOutputManager,
-                                            YoVariableRegistry parentRegistry, YoGraphicsListRegistry graphicsListRegistry, long tickDurationMs)
+                                            YoVariableRegistry parentRegistry, long tickDurationMs)
    {
       this.contactPointParameters = contactPointParameters;
       this.statusOutputManager = statusOutputManager;
       this.tickDurationMs = tickDurationMs;
-      this.yoGraphicPlanarRegionsList = new YoGraphicPlanarRegionsList("FootstepPlannerPlanarRegions", 200, 30, registry);
       goalRecommendationHandler = new PlannerGoalRecommendationHandler(allStepPlanningStages, stepPlanningStagesInProgress);
 
       CPUTopology topology = new CPUTopology();
@@ -158,8 +154,6 @@ public class MultiStageFootstepPlanningManager implements PlannerCompletionCallb
       this.visibilityGraphsParameters = new YoVisibilityGraphParameters(visibilityGraphsParameters, registry);
 
       activePlanner.set(FootstepPlannerType.PLANAR_REGION_BIPEDAL);
-
-      graphicsListRegistry.registerYoGraphic("footstepPlanning", yoGraphicPlanarRegionsList);
       isDone.set(false);
       planId.set(FootstepPlanningRequestPacket.NO_PLAN_ID);
 
@@ -346,21 +340,7 @@ public class MultiStageFootstepPlanningManager implements PlannerCompletionCallb
          globalPathSequenceIndex.increment();
          planner.setFootstepPlannerObjective(plannerGoal);
          planner.setPlanSequenceId(globalPathSequenceIndex.getIntegerValue());
-
-         PlanarRegionsList planarRegionsList;
-         if (this.planarRegionsList.isPresent())
-         {
-            planarRegionsList = this.planarRegionsList.get();
-            yoGraphicPlanarRegionsList.submitPlanarRegionsListToRender(planarRegionsList);
-            yoGraphicPlanarRegionsList.processPlanarRegionsListQueue();
-         }
-         else
-         {
-            planarRegionsList = null;
-            yoGraphicPlanarRegionsList.clear();
-         }
-
-         planner.setPlanarRegionsList(planarRegionsList);
+         planner.setPlanarRegionsList(planarRegionsList.get());
          planner.requestInitialize();
 
          Runnable runnable = planner.createStageRunnable();
@@ -391,20 +371,7 @@ public class MultiStageFootstepPlanningManager implements PlannerCompletionCallb
          planner.setFootstepPlannerObjective(plannerGoal);
          planner.setPlanSequenceId(globalStepSequenceIndex.getIntegerValue());
 
-         PlanarRegionsList planarRegionsList;
-         if (this.planarRegionsList.isPresent())
-         {
-            planarRegionsList = this.planarRegionsList.get();
-            yoGraphicPlanarRegionsList.submitPlanarRegionsListToRender(planarRegionsList);
-            yoGraphicPlanarRegionsList.processPlanarRegionsListQueue();
-         }
-         else
-         {
-            planarRegionsList = null;
-            yoGraphicPlanarRegionsList.clear();
-         }
-
-         planner.setPlanarRegions(planarRegionsList);
+         planner.setPlanarRegions(planarRegionsList.get());
          planner.requestInitialize();
 
          Runnable runnable = planner.createStageRunnable();
@@ -552,15 +519,13 @@ public class MultiStageFootstepPlanningManager implements PlannerCompletionCallb
          activePlanner.set(requestedPlannerType);
       }
 
-      PlanarRegionsListMessage planarRegionsListMessage = request.getPlanarRegionsListMessage();
-      if (planarRegionsListMessage == null)
+      if(request.getAssumeFlatGround() || request.getPlanarRegionsListMessage() == null || request.getPlanarRegionsListMessage().getConcaveHullsSize().size() == 0)
       {
-         this.planarRegionsList = Optional.empty();
+         planarRegionsList.set(null);
       }
       else
       {
-         PlanarRegionsList planarRegionsList = PlanarRegionMessageConverter.convertToPlanarRegionsList(planarRegionsListMessage);
-         this.planarRegionsList = Optional.of(planarRegionsList);
+         planarRegionsList.set(PlanarRegionMessageConverter.convertToPlanarRegionsList(request.getPlanarRegionsListMessage()));
       }
 
       mainObjective = new FootstepPlannerObjective();
@@ -932,13 +897,13 @@ public class MultiStageFootstepPlanningManager implements PlannerCompletionCallb
 
    private BodyPathPlanMessage packPathResult(BodyPathPlan bodyPathPlan, FootstepPlanningResult status)
    {
-      return FootstepPlanningMessageReporter.packPathResult(bodyPathPlan, status, planarRegionsList, planId.getIntegerValue());
+      return FootstepPlanningMessageReporter.packPathResult(bodyPathPlan, status, planarRegionsList.get(), planId.getIntegerValue());
    }
 
    private FootstepPlanningToolboxOutputStatus packStepResult(FootstepPlan footstepPlan, BodyPathPlan bodyPathPlan, FootstepPlanningResult status,
                                                               double timeTaken)
    {
-      return FootstepPlanningMessageReporter.packStepResult(footstepPlan, bodyPathPlan, status, timeTaken, planarRegionsList, planId.getIntegerValue());
+      return FootstepPlanningMessageReporter.packStepResult(footstepPlan, bodyPathPlan, status, timeTaken, planarRegionsList.get(), planId.getIntegerValue());
    }
 
    private void concatenateStatistics(EnumMap<StatisticsType, PlannerStatistics<?>> mapToPopulate, int segmentId, PlannerStatistics<?> plannerStatistics)
