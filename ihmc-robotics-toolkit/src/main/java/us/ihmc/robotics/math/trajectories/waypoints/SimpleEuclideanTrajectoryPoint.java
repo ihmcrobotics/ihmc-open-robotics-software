@@ -5,11 +5,12 @@ import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.robotics.geometry.transformables.EuclideanWaypoint;
 import us.ihmc.robotics.math.trajectories.waypoints.interfaces.EuclideanTrajectoryPointInterface;
+import us.ihmc.robotics.math.trajectories.waypoints.tools.WaypointToStringTools;
 
 public class SimpleEuclideanTrajectoryPoint implements EuclideanTrajectoryPointInterface
 {
    private final EuclideanWaypoint euclideanWaypoint = new EuclideanWaypoint();
-   private final TrajectoryPoint trajectoryPoint = new TrajectoryPoint();
+   private double time;
 
    public SimpleEuclideanTrajectoryPoint()
    {
@@ -64,13 +65,13 @@ public class SimpleEuclideanTrajectoryPoint implements EuclideanTrajectoryPointI
    @Override
    public void setTime(double time)
    {
-      trajectoryPoint.setTime(time);
+      this.time = time;
    }
 
    @Override
    public double getTime()
    {
-      return trajectoryPoint.getTime();
+      return time;
    }
 
    @Override

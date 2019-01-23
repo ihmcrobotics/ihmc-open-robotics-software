@@ -6,11 +6,12 @@ import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.euclid.tuple4D.interfaces.QuaternionReadOnly;
 import us.ihmc.robotics.geometry.transformables.SE3Waypoint;
 import us.ihmc.robotics.math.trajectories.waypoints.interfaces.SE3TrajectoryPointInterface;
+import us.ihmc.robotics.math.trajectories.waypoints.tools.WaypointToStringTools;
 
 public class SimpleSE3TrajectoryPoint implements SE3TrajectoryPointInterface
 {
    private final SE3Waypoint se3Waypoint = new SE3Waypoint();
-   private final TrajectoryPoint trajectoryPoint = new TrajectoryPoint();
+   private double time;
 
    public SimpleSE3TrajectoryPoint()
    {
@@ -90,13 +91,13 @@ public class SimpleSE3TrajectoryPoint implements SE3TrajectoryPointInterface
    @Override
    public void setTime(double time)
    {
-      trajectoryPoint.setTime(time);
+      this.time = time;
    }
 
    @Override
    public double getTime()
    {
-      return trajectoryPoint.getTime();
+      return time;
    }
 
    @Override

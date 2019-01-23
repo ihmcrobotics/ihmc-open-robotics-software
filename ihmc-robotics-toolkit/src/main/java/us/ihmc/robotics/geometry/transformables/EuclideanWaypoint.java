@@ -6,7 +6,7 @@ import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.robotics.geometry.interfaces.EuclideanWaypointInterface;
-import us.ihmc.robotics.math.trajectories.waypoints.WaypointToStringTools;
+import us.ihmc.robotics.math.trajectories.waypoints.tools.WaypointToStringTools;
 
 public class EuclideanWaypoint implements EuclideanWaypointInterface
 {

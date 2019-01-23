@@ -5,11 +5,12 @@ import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.euclid.tuple4D.interfaces.QuaternionReadOnly;
 import us.ihmc.robotics.geometry.transformables.SO3Waypoint;
 import us.ihmc.robotics.math.trajectories.waypoints.interfaces.SO3TrajectoryPointInterface;
+import us.ihmc.robotics.math.trajectories.waypoints.tools.WaypointToStringTools;
 
 public class SimpleSO3TrajectoryPoint implements SO3TrajectoryPointInterface
 {
    private final SO3Waypoint so3Waypoint = new SO3Waypoint();
-   private final TrajectoryPoint trajectoryPoint = new TrajectoryPoint();
+   private double time;
 
    public SimpleSO3TrajectoryPoint()
    {
@@ -64,13 +65,13 @@ public class SimpleSO3TrajectoryPoint implements SO3TrajectoryPointInterface
    @Override
    public void setTime(double time)
    {
-      trajectoryPoint.setTime(time);
+      this.time = time;
    }
 
    @Override
    public double getTime()
    {
-      return trajectoryPoint.getTime();
+      return time;
    }
 
    @Override

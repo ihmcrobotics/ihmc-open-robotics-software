@@ -9,7 +9,7 @@ import us.ihmc.robotics.math.trajectories.waypoints.interfaces.OneDoFTrajectoryP
 public class OneDoFTrajectoryPoint implements OneDoFTrajectoryPointInterface
 {
    private final OneDoFWaypoint oneDoFWaypoint = new OneDoFWaypoint();
-   private final TrajectoryPoint trajectoryPoint = new TrajectoryPoint();
+   private double time;
 
    public OneDoFTrajectoryPoint()
    {
@@ -47,13 +47,13 @@ public class OneDoFTrajectoryPoint implements OneDoFTrajectoryPointInterface
    @Override
    public void setTime(double time)
    {
-      trajectoryPoint.setTime(time);
+      this.time = time;
    }
 
    @Override
    public double getTime()
    {
-      return trajectoryPoint.getTime();
+      return time;
    }
 
    @Override

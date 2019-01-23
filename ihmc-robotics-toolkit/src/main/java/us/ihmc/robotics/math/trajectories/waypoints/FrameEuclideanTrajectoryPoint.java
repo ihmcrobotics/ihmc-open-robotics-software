@@ -7,11 +7,12 @@ import us.ihmc.euclid.transform.interfaces.Transform;
 import us.ihmc.robotics.geometry.frameObjects.FrameEuclideanWaypoint;
 import us.ihmc.robotics.math.trajectories.waypoints.interfaces.EuclideanTrajectoryPointInterface;
 import us.ihmc.robotics.math.trajectories.waypoints.interfaces.FrameEuclideanTrajectoryPointInterface;
+import us.ihmc.robotics.math.trajectories.waypoints.tools.WaypointToStringTools;
 
 public class FrameEuclideanTrajectoryPoint implements FrameEuclideanTrajectoryPointInterface
 {
    private final FrameEuclideanWaypoint euclideanWaypoint = new FrameEuclideanWaypoint();
-   private final TrajectoryPoint trajectoryPoint = new TrajectoryPoint();
+   private double time;
 
    public FrameEuclideanTrajectoryPoint()
    {
@@ -88,13 +89,13 @@ public class FrameEuclideanTrajectoryPoint implements FrameEuclideanTrajectoryPo
    @Override
    public void setTime(double time)
    {
-      trajectoryPoint.setTime(time);
+      this.time = time;
    }
 
    @Override
    public double getTime()
    {
-      return trajectoryPoint.getTime();
+      return time;
    }
 
    @Override
