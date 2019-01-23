@@ -46,13 +46,12 @@ public class MultiStageFootstepPlanningController
    public MultiStageFootstepPlanningController(RobotContactPointParameters<RobotSide> contactPointParameters,
                                                FootstepPlannerParameters footstepPlannerParameters, VisibilityGraphsParameters visibilityGraphsParameters,
                                                CommandInputManager commandInputManager, StatusMessageOutputManager statusOutputManager,
-                                               ScheduledExecutorService executorService, YoVariableRegistry parentRegistry,
-                                               YoGraphicsListRegistry graphicsListRegistry, long tickTimeMs)
+                                               ScheduledExecutorService executorService, YoVariableRegistry parentRegistry, long tickTimeMs)
    {
       this.tickTimeMs = tickTimeMs;
       this.executorService = executorService;
       stageManager = new MultiStageFootstepPlanningManager(contactPointParameters, footstepPlannerParameters, visibilityGraphsParameters, statusOutputManager,
-                                                           parentRegistry, graphicsListRegistry, tickTimeMs);
+                                                           parentRegistry, tickTimeMs);
 
       commandInputManager.registerHasReceivedInputListener(command -> receivedInput.set(true));
 
