@@ -382,7 +382,10 @@ public class WalkingSingleSupportState extends SingleSupportState
       controllerToolbox.updateContactPointsForUpcomingFootstep(nextFootstep);
       controllerToolbox.updateBipedSupportPolygons();
 
-      feetManager.adjustHeightIfNeeded(nextFootstep);
+      if (feetManager.adjustHeightIfNeeded(nextFootstep))
+      {
+         walkingMessageHandler.updateVisualizationAfterFootstepAdjustement(nextFootstep);
+      }
 
       pelvisOrientationManager.setTrajectoryTime(swingTime);
       pelvisOrientationManager.setUpcomingFootstep(nextFootstep);

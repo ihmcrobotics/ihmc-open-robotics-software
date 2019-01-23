@@ -1,5 +1,6 @@
 package us.ihmc.commonWalkingControlModules.controlModules.foot;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.commons.math3.util.Precision;
@@ -21,11 +22,14 @@ import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.interfaces.FixedFramePoint3DBasics;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
 import us.ihmc.euclid.referenceFrame.tools.ReferenceFrameTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DBasics;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
+import us.ihmc.graphicsDescription.appearance.YoAppearance;
+import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactableFoot;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
@@ -100,6 +104,7 @@ public class SwingState extends AbstractFootControlState
 
    private final RecyclingArrayList<FramePoint3D> positionWaypointsForSole;
    private final RecyclingArrayList<FrameSE3TrajectoryPoint> swingWaypoints;
+   private final List<FixedFramePoint3DBasics> swingWaypointsForViz = new ArrayList<>();
 
    private final YoDouble swingDuration;
    private final YoDouble swingHeight;
@@ -336,6 +341,25 @@ public class SwingState extends AbstractFootControlState
       yoDesiredSoleOrientation = new YoFrameQuaternion(namePrefix + "DesiredSoleOrientationInWorld", worldFrame, registry);
       yoDesiredSoleLinearVelocity = new YoFrameVector3D(namePrefix + "DesiredSoleLinearVelocityInWorld", worldFrame, registry);
       yoDesiredSoleAngularVelocity = new YoFrameVector3D(namePrefix + "DesiredSoleAngularVelocityInWorld", worldFrame, registry);
+
+      setupViz(yoGraphicsListRegistry, registry);
+   }
+
+   private void setupViz(YoGraphicsListRegistry yoGraphicsListRegistry, YoVariableRegistry registry)
+   {
+      if (yoGraphicsListRegistry == null)
+      {
+         return;
+      }
+
+      for (int i = 0; i < Footstep.maxNumberOfSwingWaypoints; i++)
+      {
+         YoFramePoint3D yoWaypoint = new YoFramePoint3D("SwingWaypoint" + robotSide.getPascalCaseName() + i, ReferenceFrame.getWorldFrame(), registry);
+         YoGraphicPosition waypointViz = new YoGraphicPosition("SwingWaypoint" + robotSide.getPascalCaseName() + i, yoWaypoint , 0.02, YoAppearance.GreenYellow());
+         yoWaypoint.setToNaN();
+         yoGraphicsListRegistry.registerYoGraphic(getClass().getSimpleName(), waypointViz);
+         swingWaypointsForViz.add(yoWaypoint);
+      }
    }
 
    private ReferenceFrame createToeFrame(RobotSide robotSide)
@@ -417,6 +441,11 @@ public class SwingState extends AbstractFootControlState
       yoDesiredSoleAngularVelocity.setToNaN();
       yoDesiredPosition.setToNaN();
       yoDesiredLinearVelocity.setToNaN();
+
+      for (int i = 0; i < swingWaypointsForViz.size(); i++)
+      {
+         swingWaypointsForViz.get(i).setToNaN();
+      }
    }
 
    @Override
@@ -818,7 +847,14 @@ public class SwingState extends AbstractFootControlState
       {
          List<FrameSE3TrajectoryPoint> swingWaypoints = footstep.getSwingTrajectory();
          for (int i = 0; i < swingWaypoints.size(); i++)
+         {
             this.swingWaypoints.add().set(swingWaypoints.get(i));
+            if (!swingWaypointsForViz.isEmpty())
+            {
+               // TODO: remove allocation
+               swingWaypointsForViz.get(i).setMatchingFrame(swingWaypoints.get(i).getPositionCopy());
+            }
+         }
       }
       else
       {
