@@ -47,12 +47,12 @@ import us.ihmc.robotics.geometry.SpiralBasedAlgorithm;
 public class VisibilityGraphsFrameworkTest
 {
    // Set that to MAX_VALUE when visualizing. Before pushing, it has to be reset to a reasonable value.
-   private static final long TIMEOUT = 100000; // Long.MAX_VALUE; // 
+   private static final long TIMEOUT = 100000; // Long.MAX_VALUE; //
    // Threshold used to assert that the body path starts and ends where we asked it to.
    private static final double START_GOAL_EPSILON = 1.0e-2;
 
    // Whether to start the UI or not.
-   private static boolean VISUALIZE = false;
+   private static boolean VISUALIZE = true;
 
    // Whether to fully expand the visibility graph or have it do efficient lazy evaluation.
    private static boolean fullyExpandVisibilityGraph = false;
@@ -757,7 +757,7 @@ public class VisibilityGraphsFrameworkTest
       VisibilityGraphsFrameworkTest test = new VisibilityGraphsFrameworkTest();
       String prefix = "unitTestData/testable/";
       test.setup();
-      test.runAssertionsOnDataset(dataset -> test.runAssertionsWithoutOcclusion(dataset), prefix + "20171218_205120_BodyPathPlannerEnvironment");
+      test.runAssertionsOnDataset(dataset -> test.runAssertionsWithoutOcclusion(dataset), prefix + "20171218_204953_FlatGroundWithWall");
       test.tearDown();
 
    }

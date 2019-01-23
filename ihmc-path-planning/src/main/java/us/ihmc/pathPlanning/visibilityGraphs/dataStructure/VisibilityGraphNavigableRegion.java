@@ -14,7 +14,8 @@ public class VisibilityGraphNavigableRegion
    private final NavigableRegion navigableRegion;
 
    private final ArrayList<VisibilityGraphNode> homeRegionNodes = new ArrayList<VisibilityGraphNode>();
-   private final ArrayList<List<VisibilityGraphNode>> obstacleNavigableNodes = new ArrayList<List<VisibilityGraphNode>>();
+   private final ArrayList<List<VisibilityGraphNode>> obstacleNavigableNodes = new ArrayList<>();
+   private final ArrayList<VisibilityGraphNode> intermediateObstacleNodes = new ArrayList<>();
 
    private final ArrayList<VisibilityGraphEdge> innerRegionEdges = new ArrayList<VisibilityGraphEdge>();
 
@@ -50,6 +51,11 @@ public class VisibilityGraphNavigableRegion
       }
 
       return allNavigableNodes;
+   }
+
+   public void addIntermediateObstacleNode(VisibilityGraphNode node)
+   {
+      intermediateObstacleNodes.add(node);
    }
 
    public List<List<VisibilityGraphNode>> getObstacleNavigableNodes()
@@ -114,7 +120,7 @@ public class VisibilityGraphNavigableRegion
          List<VisibilityGraphNode> obstacleNodes = obstacleNavigableNodes.get(sourceIndex);
          addClusterSelfVisibility(allClusters, regionId, obstacleNodes, innerRegionEdges);
       }
-      
+
       for (int sourceIndex = 0; sourceIndex < obstacleNavigableNodes.size(); sourceIndex++)
       {
          List<VisibilityGraphNode> sourceNodes = obstacleNavigableNodes.get(sourceIndex);
