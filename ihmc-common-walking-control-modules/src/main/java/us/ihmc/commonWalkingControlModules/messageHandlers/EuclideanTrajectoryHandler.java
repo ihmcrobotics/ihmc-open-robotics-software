@@ -8,8 +8,8 @@ import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.EuclideanTrajectoryControllerCommand;
 import us.ihmc.robotics.math.trajectories.YoPolynomial;
-import us.ihmc.robotics.math.trajectories.waypoints.SimpleEuclideanTrajectoryPoint;
-import us.ihmc.robotics.math.trajectories.waypoints.interfaces.EuclideanTrajectoryPointInterface;
+import us.ihmc.robotics.math.trajectories.trajectorypoints.EuclideanTrajectoryPoint;
+import us.ihmc.robotics.math.trajectories.trajectorypoints.interfaces.EuclideanTrajectoryPointInterface;
 import us.ihmc.yoVariables.providers.DoubleProvider;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoFramePoint3D;
@@ -28,13 +28,13 @@ public class EuclideanTrajectoryHandler
 
    private final YoVariableRegistry registry;
 
-   private final EuclideanTrajectoryPointInterface lastPoint = new SimpleEuclideanTrajectoryPoint();
-   private final EuclideanTrajectoryPointInterface firstPoint = new SimpleEuclideanTrajectoryPoint();
-   private final EuclideanTrajectoryPointInterface secondPoint = new SimpleEuclideanTrajectoryPoint();
-   private final EuclideanTrajectoryPointInterface tempPoint = new SimpleEuclideanTrajectoryPoint();
+   private final EuclideanTrajectoryPointInterface lastPoint = new EuclideanTrajectoryPoint();
+   private final EuclideanTrajectoryPointInterface firstPoint = new EuclideanTrajectoryPoint();
+   private final EuclideanTrajectoryPointInterface secondPoint = new EuclideanTrajectoryPoint();
+   private final EuclideanTrajectoryPointInterface tempPoint = new EuclideanTrajectoryPoint();
 
    private final RecyclingLinkedList<EuclideanTrajectoryPointInterface> trajectoryPoints = new RecyclingLinkedList<>(defaultMaxNumberOfPoints,
-                                                                                                                     SimpleEuclideanTrajectoryPoint::new,
+                                                                                                                     EuclideanTrajectoryPoint::new,
                                                                                                                      EuclideanTrajectoryPointInterface::set);
    private final RecyclingIterator<EuclideanTrajectoryPointInterface> trajectoryIterator = trajectoryPoints.createForwardIterator();
 

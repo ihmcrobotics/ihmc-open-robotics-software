@@ -7,7 +7,7 @@ import controller_msgs.msg.dds.OneDoFJointTrajectoryMessage;
 import controller_msgs.msg.dds.TrajectoryPoint1DMessage;
 import us.ihmc.communication.controllerAPI.command.Command;
 import us.ihmc.euclid.tools.EuclidCoreTools;
-import us.ihmc.robotics.math.trajectories.waypoints.lists.OneDoFTrajectoryPointList;
+import us.ihmc.robotics.math.trajectories.trajectorypoints.lists.OneDoFTrajectoryPointList;
 
 public class OneDoFJointTrajectoryCommand extends OneDoFTrajectoryPointList implements Command<OneDoFJointTrajectoryCommand, OneDoFJointTrajectoryMessage>
 {

@@ -9,12 +9,12 @@ import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.euclid.tuple4D.interfaces.QuaternionReadOnly;
 import us.ihmc.euclid.tuple4D.interfaces.Tuple4DReadOnly;
-import us.ihmc.robotics.geometry.interfaces.EuclideanWaypointInterface;
-import us.ihmc.robotics.geometry.interfaces.FrameEuclideanWaypointInterface;
-import us.ihmc.robotics.geometry.interfaces.FrameSE3WaypointInterface;
-import us.ihmc.robotics.geometry.interfaces.FrameSO3WaypointInterface;
-import us.ihmc.robotics.geometry.interfaces.SE3WaypointInterface;
-import us.ihmc.robotics.geometry.interfaces.SO3WaypointInterface;
+import us.ihmc.robotics.math.trajectories.waypoints.interfaces.EuclideanWaypointInterface;
+import us.ihmc.robotics.math.trajectories.waypoints.interfaces.FrameEuclideanWaypointInterface;
+import us.ihmc.robotics.math.trajectories.waypoints.interfaces.FrameSE3WaypointInterface;
+import us.ihmc.robotics.math.trajectories.waypoints.interfaces.FrameSO3WaypointInterface;
+import us.ihmc.robotics.math.trajectories.waypoints.interfaces.SE3WaypointInterface;
+import us.ihmc.robotics.math.trajectories.waypoints.interfaces.SO3WaypointInterface;
 
 public class WaypointToStringTools
 {

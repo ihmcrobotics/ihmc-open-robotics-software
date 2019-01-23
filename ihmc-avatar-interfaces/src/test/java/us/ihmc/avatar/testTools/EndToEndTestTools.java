@@ -17,8 +17,8 @@ import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.euclid.tuple4D.interfaces.QuaternionReadOnly;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.robotics.math.frames.YoFrameVariableNameTools;
-import us.ihmc.robotics.math.trajectories.waypoints.SimpleSO3TrajectoryPoint;
-import us.ihmc.robotics.math.trajectories.waypoints.generators.MultipleWaypointsOrientationTrajectoryGenerator;
+import us.ihmc.robotics.math.trajectories.generators.MultipleWaypointsOrientationTrajectoryGenerator;
+import us.ihmc.robotics.math.trajectories.trajectorypoints.SO3TrajectoryPoint;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 
 public class EndToEndTestTools
@@ -51,20 +51,20 @@ public class EndToEndTestTools
    public static void assertWaypointInGeneratorMatches(String bodyName, int index, SO3TrajectoryPointMessage waypoint, SimulationConstructionSet scs, double epsilon)
    {
       assertTrue("Index too high: " + index, index < RigidBodyTaskspaceControlState.maxPointsInGenerator);
-      SimpleSO3TrajectoryPoint actualWaypoint = findOrientationTrajectoryPoint(bodyName, index, scs);
+      SO3TrajectoryPoint actualWaypoint = findOrientationTrajectoryPoint(bodyName, index, scs);
       assertEquals("Time", waypoint.getTime(), actualWaypoint.getTime(), epsilon);
       EuclidCoreTestTools.assertQuaternionGeometricallyEquals("Orientation", waypoint.getOrientation(), actualWaypoint.getOrientationCopy(), epsilon, FORMAT);
       EuclidCoreTestTools.assertTuple3DEquals("Angular Velocity", waypoint.getAngularVelocity(), actualWaypoint.getAngularVelocityCopy(), epsilon, FORMAT);
    }
 
-   public static SimpleSO3TrajectoryPoint findOrientationTrajectoryPoint(String bodyName, int index, SimulationConstructionSet scs)
+   public static SO3TrajectoryPoint findOrientationTrajectoryPoint(String bodyName, int index, SimulationConstructionSet scs)
    {
       String orientationTrajectoryName = bodyName + MultipleWaypointsOrientationTrajectoryGenerator.class.getSimpleName();
       String suffix = "AtWaypoint" + index;
       String timeName = bodyName + "Time";
       String orientationName = bodyName + "Orientation";
       String angularVelocityName = bodyName + "AngularVelocity";
-      SimpleSO3TrajectoryPoint simpleSO3TrajectoryPoint = new SimpleSO3TrajectoryPoint();
+      SO3TrajectoryPoint simpleSO3TrajectoryPoint = new SO3TrajectoryPoint();
       simpleSO3TrajectoryPoint.setTime(scs.getVariable(orientationTrajectoryName, timeName + suffix).getValueAsDouble());
       simpleSO3TrajectoryPoint.setOrientation(findQuat4d(orientationTrajectoryName, orientationName, suffix, scs));
       simpleSO3TrajectoryPoint.setAngularVelocity(findVector3d(orientationTrajectoryName, angularVelocityName, suffix, scs));

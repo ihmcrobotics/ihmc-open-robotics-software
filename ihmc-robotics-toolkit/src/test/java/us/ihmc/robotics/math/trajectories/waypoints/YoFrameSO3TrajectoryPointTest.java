@@ -25,7 +25,10 @@ import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
-import us.ihmc.robotics.math.trajectories.waypoints.interfaces.SO3TrajectoryPointInterface;
+import us.ihmc.robotics.math.trajectories.trajectorypoints.FrameSO3TrajectoryPoint;
+import us.ihmc.robotics.math.trajectories.trajectorypoints.SO3TrajectoryPoint;
+import us.ihmc.robotics.math.trajectories.trajectorypoints.YoFrameSO3TrajectoryPoint;
+import us.ihmc.robotics.math.trajectories.trajectorypoints.interfaces.SO3TrajectoryPointInterface;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoFrameQuaternion;
@@ -57,7 +60,7 @@ public class YoFrameSO3TrajectoryPointTest
       poseFrame.setOrientationAndUpdate(poseOrientation);
 
       YoFrameSO3TrajectoryPoint yoFrameSO3TrajectoryPoint = new YoFrameSO3TrajectoryPoint(namePrefix, nameSuffix, registry);
-      SimpleSO3TrajectoryPoint simpleTrajectoryPoint = new SimpleSO3TrajectoryPoint();
+      SO3TrajectoryPoint simpleTrajectoryPoint = new SO3TrajectoryPoint();
 
       double time = 3.4;
       Quaternion orientation = new Quaternion(new Quaternion(0.1, 0.22, 0.34, 0.56));
@@ -346,7 +349,7 @@ public class YoFrameSO3TrajectoryPointTest
       YoFrameSO3TrajectoryPoint yoFrameSO3TrajectoryPoint = new YoFrameSO3TrajectoryPoint(namePrefix, nameSuffix, registry, worldFrame);
       yoFrameSO3TrajectoryPoint.checkReferenceFrameMatch(ReferenceFrame.getWorldFrame());
 
-      SimpleSO3TrajectoryPoint simpleTrajectoryPoint = new SimpleSO3TrajectoryPoint();
+      SO3TrajectoryPoint simpleTrajectoryPoint = new SO3TrajectoryPoint();
 
       double time = 3.4;
       Quaternion orientation = new Quaternion(new Quaternion(0.1, 0.22, 0.34, 0.56));
@@ -411,7 +414,7 @@ public class YoFrameSO3TrajectoryPointTest
       yoFrameSO3TrajectoryPointTwo.set(yoFrameSO3TrajectoryPoint);
       assertTrue(yoFrameSO3TrajectoryPoint.epsilonEquals(yoFrameSO3TrajectoryPointTwo, 1e-7));
 
-      SimpleSO3TrajectoryPoint simplePoint = new SimpleSO3TrajectoryPoint();
+      SO3TrajectoryPoint simplePoint = new SO3TrajectoryPoint();
       yoFrameSO3TrajectoryPoint.get(simplePoint);
 
       yoFrameSO3TrajectoryPoint.setToNaN();
