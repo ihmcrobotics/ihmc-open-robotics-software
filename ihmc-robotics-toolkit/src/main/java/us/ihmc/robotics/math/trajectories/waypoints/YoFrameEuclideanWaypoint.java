@@ -4,14 +4,14 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
 import us.ihmc.euclid.transform.interfaces.Transform;
-import us.ihmc.robotics.math.trajectories.waypoints.interfaces.FrameEuclideanWaypointInterface;
+import us.ihmc.robotics.math.trajectories.waypoints.interfaces.FrameEuclideanWaypointBasics;
 import us.ihmc.robotics.math.trajectories.waypoints.tools.WaypointToStringTools;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.frameObjects.YoMutableFramePoint3D;
 import us.ihmc.yoVariables.variable.frameObjects.YoMutableFrameVector3D;
 
-public class YoFrameEuclideanWaypoint implements FrameEuclideanWaypointInterface
+public class YoFrameEuclideanWaypoint implements FrameEuclideanWaypointBasics
 {
    private final YoMutableFramePoint3D position;
    private final YoMutableFrameVector3D linearVelocity;

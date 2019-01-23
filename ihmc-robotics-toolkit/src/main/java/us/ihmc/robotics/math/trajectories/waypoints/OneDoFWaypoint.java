@@ -3,9 +3,9 @@ package us.ihmc.robotics.math.trajectories.waypoints;
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
 
-import us.ihmc.robotics.math.trajectories.waypoints.interfaces.OneDoFWaypointInterface;
+import us.ihmc.robotics.math.trajectories.waypoints.interfaces.OneDoFWaypointBasics;
 
-public class OneDoFWaypoint implements OneDoFWaypointInterface
+public class OneDoFWaypoint implements OneDoFWaypointBasics
 {
    private double position;
    private double velocity;

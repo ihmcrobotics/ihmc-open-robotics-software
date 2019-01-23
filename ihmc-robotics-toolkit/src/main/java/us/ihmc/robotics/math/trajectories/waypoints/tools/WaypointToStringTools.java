@@ -9,19 +9,19 @@ import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.euclid.tuple4D.interfaces.QuaternionReadOnly;
 import us.ihmc.euclid.tuple4D.interfaces.Tuple4DReadOnly;
-import us.ihmc.robotics.math.trajectories.waypoints.interfaces.EuclideanWaypointInterface;
-import us.ihmc.robotics.math.trajectories.waypoints.interfaces.FrameEuclideanWaypointInterface;
-import us.ihmc.robotics.math.trajectories.waypoints.interfaces.FrameSE3WaypointInterface;
-import us.ihmc.robotics.math.trajectories.waypoints.interfaces.FrameSO3WaypointInterface;
-import us.ihmc.robotics.math.trajectories.waypoints.interfaces.SE3WaypointInterface;
-import us.ihmc.robotics.math.trajectories.waypoints.interfaces.SO3WaypointInterface;
+import us.ihmc.robotics.math.trajectories.waypoints.interfaces.EuclideanWaypointBasics;
+import us.ihmc.robotics.math.trajectories.waypoints.interfaces.FrameEuclideanWaypointBasics;
+import us.ihmc.robotics.math.trajectories.waypoints.interfaces.FrameSE3WaypointBasics;
+import us.ihmc.robotics.math.trajectories.waypoints.interfaces.FrameSO3WaypointBasics;
+import us.ihmc.robotics.math.trajectories.waypoints.interfaces.SE3WaypointBasics;
+import us.ihmc.robotics.math.trajectories.waypoints.interfaces.SO3WaypointBasics;
 
 public class WaypointToStringTools
 {
    static final NumberFormat format = new DecimalFormat(" 0.000;-0.000");
    static final NumberFormat timeFormat = new DecimalFormat(" 0.00;-0.00");
 
-   public static String waypointToString(FrameEuclideanWaypointInterface frameEuclideanWaypoint)
+   public static String waypointToString(FrameEuclideanWaypointBasics frameEuclideanWaypoint)
    {
       Point3DReadOnly position = frameEuclideanWaypoint.getPosition();
       Vector3DReadOnly linearVelocity = frameEuclideanWaypoint.getLinearVelocity();
@@ -29,7 +29,7 @@ public class WaypointToStringTools
       return waypointToString(position, linearVelocity, referenceFrame, format);
    }
 
-   public static String waypointToString(FrameSO3WaypointInterface frameSO3Waypoint)
+   public static String waypointToString(FrameSO3WaypointBasics frameSO3Waypoint)
    {
       QuaternionReadOnly orientation = frameSO3Waypoint.getOrientation();
       Vector3DReadOnly angularVelocity = frameSO3Waypoint.getAngularVelocity();
@@ -37,7 +37,7 @@ public class WaypointToStringTools
       return waypointToString(orientation, angularVelocity, referenceFrame, format);
    }
 
-   public static String waypointToString(FrameSE3WaypointInterface frameSE3Waypoint)
+   public static String waypointToString(FrameSE3WaypointBasics frameSE3Waypoint)
    {
       Point3DReadOnly position = frameSE3Waypoint.getPosition();
       QuaternionReadOnly orientation = frameSE3Waypoint.getOrientation();
@@ -47,21 +47,21 @@ public class WaypointToStringTools
       return waypointToString(position, orientation, linearVelocity, angularVelocity, referenceFrame, format);
    }
 
-   public static String waypointToString(EuclideanWaypointInterface simpleEuclideanWaypoint)
+   public static String waypointToString(EuclideanWaypointBasics simpleEuclideanWaypoint)
    {
       Point3DReadOnly position = simpleEuclideanWaypoint.getPosition();
       Vector3DReadOnly linearVelocity = simpleEuclideanWaypoint.getLinearVelocity();
       return waypointToString(position, linearVelocity, format);
    }
 
-   public static String waypointToString(SO3WaypointInterface simpleSO3Waypoint)
+   public static String waypointToString(SO3WaypointBasics simpleSO3Waypoint)
    {
       QuaternionReadOnly orientation = simpleSO3Waypoint.getOrientation();
       Vector3DReadOnly angularVelocity = simpleSO3Waypoint.getAngularVelocity();
       return waypointToString(orientation, angularVelocity, format);
    }
 
-   public static String waypointToString(SE3WaypointInterface simpleSE3Waypoint)
+   public static String waypointToString(SE3WaypointBasics simpleSE3Waypoint)
    {
       Point3DReadOnly position = simpleSE3Waypoint.getPosition();
       QuaternionReadOnly orientation = simpleSE3Waypoint.getOrientation();

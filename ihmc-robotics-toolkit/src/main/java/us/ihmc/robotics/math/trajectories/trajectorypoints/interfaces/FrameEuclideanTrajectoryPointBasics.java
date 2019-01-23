@@ -6,10 +6,10 @@ import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
 import us.ihmc.euclid.tools.EuclidCoreTools;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
-import us.ihmc.robotics.math.trajectories.waypoints.interfaces.EuclideanWaypointInterface;
-import us.ihmc.robotics.math.trajectories.waypoints.interfaces.FrameEuclideanWaypointInterface;
+import us.ihmc.robotics.math.trajectories.waypoints.interfaces.EuclideanWaypointBasics;
+import us.ihmc.robotics.math.trajectories.waypoints.interfaces.FrameEuclideanWaypointBasics;
 
-public interface FrameEuclideanTrajectoryPointInterface extends EuclideanTrajectoryPointInterface, FrameEuclideanWaypointInterface
+public interface FrameEuclideanTrajectoryPointBasics extends EuclideanTrajectoryPointBasics, FrameEuclideanWaypointBasics
 {
    default void set(double time, FramePoint3DReadOnly position, FrameVector3DReadOnly linearVelocity)
    {
@@ -17,13 +17,13 @@ public interface FrameEuclideanTrajectoryPointInterface extends EuclideanTraject
       set(position, linearVelocity);
    }
 
-   default void set(double time, FrameEuclideanWaypointInterface waypoint)
+   default void set(double time, FrameEuclideanWaypointBasics waypoint)
    {
       setTime(time);
       set(waypoint);
    }
 
-   default void setIncludingFrame(double time, FrameEuclideanWaypointInterface waypoint)
+   default void setIncludingFrame(double time, FrameEuclideanWaypointBasics waypoint)
    {
       setTime(time);
       setIncludingFrame(waypoint);
@@ -41,43 +41,43 @@ public interface FrameEuclideanTrajectoryPointInterface extends EuclideanTraject
       setIncludingFrame(referenceFrame, position, linearVelocity);
    }
 
-   default void setIncludingFrame(ReferenceFrame referenceFrame, EuclideanTrajectoryPointInterface trajectoryPoint)
+   default void setIncludingFrame(ReferenceFrame referenceFrame, EuclideanTrajectoryPointBasics trajectoryPoint)
    {
       setTime(trajectoryPoint.getTime());
-      FrameEuclideanWaypointInterface.super.setIncludingFrame(referenceFrame, trajectoryPoint);
+      FrameEuclideanWaypointBasics.super.setIncludingFrame(referenceFrame, trajectoryPoint);
    }
 
-   default void setIncludingFrame(ReferenceFrame referenceFrame, double time, EuclideanWaypointInterface waypoint)
+   default void setIncludingFrame(ReferenceFrame referenceFrame, double time, EuclideanWaypointBasics waypoint)
    {
       setTime(time);
       setIncludingFrame(referenceFrame, waypoint);
    }
 
-   default void setIncludingFrame(FrameEuclideanTrajectoryPointInterface other)
+   default void setIncludingFrame(FrameEuclideanTrajectoryPointBasics other)
    {
       setTime(other.getTime());
-      FrameEuclideanWaypointInterface.super.setIncludingFrame(other);
+      FrameEuclideanWaypointBasics.super.setIncludingFrame(other);
    }
 
-   default void set(FrameEuclideanTrajectoryPointInterface other)
+   default void set(FrameEuclideanTrajectoryPointBasics other)
    {
       setTime(other.getTime());
-      FrameEuclideanWaypointInterface.super.set(other);
+      FrameEuclideanWaypointBasics.super.set(other);
    }
 
-   default void getIncludingFrame(FrameEuclideanTrajectoryPointInterface otherToPack)
+   default void getIncludingFrame(FrameEuclideanTrajectoryPointBasics otherToPack)
    {
       otherToPack.setIncludingFrame(this);
    }
 
-   default void get(FrameEuclideanTrajectoryPointInterface otherToPack)
+   default void get(FrameEuclideanTrajectoryPointBasics otherToPack)
    {
       otherToPack.set(this);
    }
 
-   default boolean epsilonEquals(FrameEuclideanTrajectoryPointInterface other, double epsilon)
+   default boolean epsilonEquals(FrameEuclideanTrajectoryPointBasics other, double epsilon)
    {
       boolean timeEquals = EuclidCoreTools.epsilonEquals(getTime(), other.getTime(), epsilon);
-      return timeEquals && FrameEuclideanWaypointInterface.super.epsilonEquals(other, epsilon);
+      return timeEquals && FrameEuclideanWaypointBasics.super.epsilonEquals(other, epsilon);
    }
 }

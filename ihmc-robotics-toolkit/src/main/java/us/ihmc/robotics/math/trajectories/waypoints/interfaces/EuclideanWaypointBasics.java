@@ -9,7 +9,7 @@ import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DBasics;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 
-public interface EuclideanWaypointInterface extends Transformable, Clearable
+public interface EuclideanWaypointBasics extends Transformable, Clearable
 {
    abstract Point3DReadOnly getPosition();
 
@@ -79,7 +79,7 @@ public interface EuclideanWaypointInterface extends Transformable, Clearable
       setLinearVelocity(Double.NaN, Double.NaN, Double.NaN);
    }
 
-   default double positionDistance(EuclideanWaypointInterface other)
+   default double positionDistance(EuclideanWaypointBasics other)
    {
       return getPosition().distance(other.getPosition());
    }
@@ -106,26 +106,26 @@ public interface EuclideanWaypointInterface extends Transformable, Clearable
       getLinearVelocity(linearVelocityToPack);
    }
 
-   default void get(EuclideanWaypointInterface otherToPack)
+   default void get(EuclideanWaypointBasics otherToPack)
    {
       otherToPack.set(this);
    }
 
-   default boolean epsilonEquals(EuclideanWaypointInterface other, double epsilon)
+   default boolean epsilonEquals(EuclideanWaypointBasics other, double epsilon)
    {
       boolean positionMatches = getPosition().epsilonEquals(other.getPosition(), epsilon);
       boolean linearVelocityMatches = getLinearVelocity().epsilonEquals(other.getLinearVelocity(), epsilon);
       return positionMatches && linearVelocityMatches;
    }
 
-   default boolean geometricallyEquals(EuclideanWaypointInterface other, double epsilon)
+   default boolean geometricallyEquals(EuclideanWaypointBasics other, double epsilon)
    {
       boolean positionMatches = getPosition().geometricallyEquals(other.getPosition(), epsilon);
       boolean linearVelocityMatches = getLinearVelocity().geometricallyEquals(other.getLinearVelocity(), epsilon);
       return positionMatches && linearVelocityMatches;
    }
 
-   default void set(EuclideanWaypointInterface other)
+   default void set(EuclideanWaypointBasics other)
    {
       setPosition(other.getPosition());
       setLinearVelocity(other.getLinearVelocity());

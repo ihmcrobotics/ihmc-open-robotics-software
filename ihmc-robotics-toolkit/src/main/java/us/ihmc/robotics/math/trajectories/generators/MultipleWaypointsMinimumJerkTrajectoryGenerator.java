@@ -6,8 +6,8 @@ import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.robotics.math.trajectories.DoubleTrajectoryGenerator;
 import us.ihmc.robotics.math.trajectories.QuinticPolynomialTrajectoryGenerator;
 import us.ihmc.robotics.math.trajectories.trajectorypoints.YoOneDoFTrajectoryPoint;
-import us.ihmc.robotics.math.trajectories.trajectorypoints.interfaces.OneDoFTrajectoryPointInterface;
-import us.ihmc.robotics.math.trajectories.trajectorypoints.interfaces.TrajectoryPointListInterface;
+import us.ihmc.robotics.math.trajectories.trajectorypoints.interfaces.OneDoFTrajectoryPointBasics;
+import us.ihmc.robotics.math.trajectories.trajectorypoints.interfaces.TrajectoryPointListBasics;
 import us.ihmc.robotics.trajectories.providers.SettableDoubleProvider;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
@@ -108,12 +108,12 @@ public class MultipleWaypointsMinimumJerkTrajectoryGenerator implements DoubleTr
          appendWaypointUnsafe(timeAtWaypoints[i], positions[i], velocities[i]);
    }
 
-   public void appendWaypoint(OneDoFTrajectoryPointInterface waypoint1D)
+   public void appendWaypoint(OneDoFTrajectoryPointBasics waypoint1D)
    {
       appendWaypoint(waypoint1D.getTime(), waypoint1D.getPosition(), waypoint1D.getVelocity());
    }
 
-   public void appendWaypoints(OneDoFTrajectoryPointInterface[] waypoints1D)
+   public void appendWaypoints(OneDoFTrajectoryPointBasics[] waypoints1D)
    {
       checkNumberOfWaypoints(numberOfWaypoints.getIntegerValue() + waypoints1D.length);
 
@@ -121,7 +121,7 @@ public class MultipleWaypointsMinimumJerkTrajectoryGenerator implements DoubleTr
          appendWaypointUnsafe(waypoints1D[i].getTime(), waypoints1D[i].getPosition(), waypoints1D[i].getVelocity());
    }
 
-   public void appendWaypoints(RecyclingArrayList<? extends OneDoFTrajectoryPointInterface> waypoints1D)
+   public void appendWaypoints(RecyclingArrayList<? extends OneDoFTrajectoryPointBasics> waypoints1D)
    {
       checkNumberOfWaypoints(numberOfWaypoints.getIntegerValue() + waypoints1D.size());
 
@@ -129,7 +129,7 @@ public class MultipleWaypointsMinimumJerkTrajectoryGenerator implements DoubleTr
          appendWaypointUnsafe(waypoints1D.get(i).getTime(), waypoints1D.get(i).getPosition(), waypoints1D.get(i).getVelocity());
    }
 
-   public <W extends OneDoFTrajectoryPointInterface> void appendWaypoints(TrajectoryPointListInterface<W> trajectoryWaypoint1DData)
+   public <W extends OneDoFTrajectoryPointBasics> void appendWaypoints(TrajectoryPointListBasics<W> trajectoryWaypoint1DData)
    {
       for (int i = 0; i < trajectoryWaypoint1DData.getNumberOfTrajectoryPoints(); i++)
          appendWaypoint(trajectoryWaypoint1DData.getTrajectoryPoint(i));

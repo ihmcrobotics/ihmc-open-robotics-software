@@ -5,11 +5,11 @@ import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameQuaternionReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
 import us.ihmc.euclid.transform.interfaces.Transform;
-import us.ihmc.robotics.math.trajectories.waypoints.interfaces.FrameSE3WaypointInterface;
+import us.ihmc.robotics.math.trajectories.waypoints.interfaces.FrameSE3WaypointBasics;
 import us.ihmc.robotics.math.trajectories.waypoints.tools.WaypointToStringTools;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 
-public class YoFrameSE3Waypoint implements FrameSE3WaypointInterface
+public class YoFrameSE3Waypoint implements FrameSE3WaypointBasics
 {
    private final YoFrameEuclideanWaypoint euclideanWaypoint;
    private final YoFrameSO3Waypoint so3Waypoint;

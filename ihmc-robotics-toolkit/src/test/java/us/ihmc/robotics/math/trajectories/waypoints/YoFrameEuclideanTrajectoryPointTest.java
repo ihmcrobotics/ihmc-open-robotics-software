@@ -27,7 +27,7 @@ import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.robotics.math.trajectories.trajectorypoints.FrameEuclideanTrajectoryPoint;
 import us.ihmc.robotics.math.trajectories.trajectorypoints.EuclideanTrajectoryPoint;
 import us.ihmc.robotics.math.trajectories.trajectorypoints.YoFrameEuclideanTrajectoryPoint;
-import us.ihmc.robotics.math.trajectories.trajectorypoints.interfaces.EuclideanTrajectoryPointInterface;
+import us.ihmc.robotics.math.trajectories.trajectorypoints.interfaces.EuclideanTrajectoryPointBasics;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoFramePoint3D;
@@ -429,7 +429,7 @@ public class YoFrameEuclideanTrajectoryPointTest
       assertTrue(Double.isNaN(positionDistance));
       assertFalse(yoFrameEuclideanTrajectoryPoint.epsilonEquals(yoFrameEuclideanTrajectoryPointTwo, 1e-7));
 
-      EuclideanTrajectoryPointInterface trajectoryPointAsInterface = simplePoint;
+      EuclideanTrajectoryPointBasics trajectoryPointAsInterface = simplePoint;
       yoFrameEuclideanTrajectoryPoint.set(trajectoryPointAsInterface);
 
       positionDistance = yoFrameEuclideanTrajectoryPoint.positionDistance(yoFrameEuclideanTrajectoryPointTwo);

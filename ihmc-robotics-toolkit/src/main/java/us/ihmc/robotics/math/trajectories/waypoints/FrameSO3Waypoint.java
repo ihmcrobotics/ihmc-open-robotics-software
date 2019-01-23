@@ -6,9 +6,9 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameQuaternionReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
 import us.ihmc.euclid.transform.interfaces.Transform;
-import us.ihmc.robotics.math.trajectories.waypoints.interfaces.FrameSO3WaypointInterface;
+import us.ihmc.robotics.math.trajectories.waypoints.interfaces.FrameSO3WaypointBasics;
 
-public class FrameSO3Waypoint implements FrameSO3WaypointInterface
+public class FrameSO3Waypoint implements FrameSO3WaypointBasics
 {
    private final FrameQuaternion orientation = new FrameQuaternion();
    private final FrameVector3D angularVelocity = new FrameVector3D();

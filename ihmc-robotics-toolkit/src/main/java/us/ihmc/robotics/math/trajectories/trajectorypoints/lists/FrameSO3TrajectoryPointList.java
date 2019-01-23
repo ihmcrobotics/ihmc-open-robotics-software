@@ -5,10 +5,10 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.euclid.tuple4D.interfaces.QuaternionReadOnly;
 import us.ihmc.robotics.math.trajectories.trajectorypoints.FrameSO3TrajectoryPoint;
-import us.ihmc.robotics.math.trajectories.trajectorypoints.interfaces.FrameTrajectoryPointListInterface;
-import us.ihmc.robotics.math.trajectories.trajectorypoints.interfaces.SO3TrajectoryPointInterface;
+import us.ihmc.robotics.math.trajectories.trajectorypoints.interfaces.FrameTrajectoryPointListBasics;
+import us.ihmc.robotics.math.trajectories.trajectorypoints.interfaces.SO3TrajectoryPointBasics;
 
-public class FrameSO3TrajectoryPointList implements FrameTrajectoryPointListInterface<FrameSO3TrajectoryPoint>
+public class FrameSO3TrajectoryPointList implements FrameTrajectoryPointListBasics<FrameSO3TrajectoryPoint>
 {
    private ReferenceFrame referenceFrame = ReferenceFrame.getWorldFrame();
    private final RecyclingArrayList<FrameSO3TrajectoryPoint> trajectoryPoints = new RecyclingArrayList<>(FrameSO3TrajectoryPoint.class);
@@ -31,7 +31,7 @@ public class FrameSO3TrajectoryPointList implements FrameTrajectoryPointListInte
       trajectoryPoints.add().setIncludingFrame(trajectoryPoint);
    }
 
-   public void addTrajectoryPoint(SO3TrajectoryPointInterface trajectoryPoint)
+   public void addTrajectoryPoint(SO3TrajectoryPointBasics trajectoryPoint)
    {
       FrameSO3TrajectoryPoint newTrajectoryPoint = trajectoryPoints.add();
       newTrajectoryPoint.setToZero(getReferenceFrame());

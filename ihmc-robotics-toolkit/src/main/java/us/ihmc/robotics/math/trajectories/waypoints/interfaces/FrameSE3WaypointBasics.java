@@ -16,7 +16,7 @@ import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.euclid.tuple4D.interfaces.QuaternionReadOnly;
 
-public interface FrameSE3WaypointInterface extends FrameEuclideanWaypointInterface, FrameSO3WaypointInterface, SE3WaypointInterface
+public interface FrameSE3WaypointBasics extends FrameEuclideanWaypointBasics, FrameSO3WaypointBasics, SE3WaypointBasics
 {
    default void set(FramePoint3DReadOnly position, FrameQuaternionReadOnly orientation, FrameVector3DReadOnly linearVelocity,
                     FrameVector3DReadOnly angularVelocity)
@@ -47,35 +47,35 @@ public interface FrameSE3WaypointInterface extends FrameEuclideanWaypointInterfa
       setAngularVelocity(angularVelocity);
    }
 
-   default void setIncludingFrame(ReferenceFrame referenceFrame, SE3WaypointInterface other)
+   default void setIncludingFrame(ReferenceFrame referenceFrame, SE3WaypointBasics other)
    {
       setReferenceFrame(referenceFrame);
       set(other);
    }
 
-   default void setIncludingFrame(FrameSE3WaypointInterface other)
+   default void setIncludingFrame(FrameSE3WaypointBasics other)
    {
       setReferenceFrame(other.getReferenceFrame());
       set(other);
    }
 
-   default void get(FrameSE3WaypointInterface otherToPack)
+   default void get(FrameSE3WaypointBasics otherToPack)
    {
       otherToPack.set(this);
    }
 
-   default void getIncludingFrame(FrameSE3WaypointInterface otherToPack)
+   default void getIncludingFrame(FrameSE3WaypointBasics otherToPack)
    {
       otherToPack.setIncludingFrame(this);
    }
 
-   default void get(FrameEuclideanWaypointInterface euclideanWaypointToPack, FrameSO3WaypointInterface so3WaypointToPack)
+   default void get(FrameEuclideanWaypointBasics euclideanWaypointToPack, FrameSO3WaypointBasics so3WaypointToPack)
    {
       get(euclideanWaypointToPack);
       get(so3WaypointToPack);
    }
 
-   default void getIncludingFrame(FrameEuclideanWaypointInterface euclideanWaypointToPack, FrameSO3WaypointInterface so3WaypointToPack)
+   default void getIncludingFrame(FrameEuclideanWaypointBasics euclideanWaypointToPack, FrameSO3WaypointBasics so3WaypointToPack)
    {
       getIncludingFrame(euclideanWaypointToPack);
       getIncludingFrame(so3WaypointToPack);
@@ -109,37 +109,37 @@ public interface FrameSE3WaypointInterface extends FrameEuclideanWaypointInterfa
       poseToPack.setIncludingFrame(getPosition(), getOrientation());
    }
 
-   default boolean epsilonEquals(FrameSE3WaypointInterface other, double epsilon)
+   default boolean epsilonEquals(FrameSE3WaypointBasics other, double epsilon)
    {
-      boolean euclideanMatch = FrameEuclideanWaypointInterface.super.epsilonEquals(other, epsilon);
-      boolean so3Match = FrameSO3WaypointInterface.super.epsilonEquals(other, epsilon);
+      boolean euclideanMatch = FrameEuclideanWaypointBasics.super.epsilonEquals(other, epsilon);
+      boolean so3Match = FrameSO3WaypointBasics.super.epsilonEquals(other, epsilon);
       return euclideanMatch && so3Match;
    }
 
-   default boolean geometricallyEquals(FrameSE3WaypointInterface other, double epsilon)
+   default boolean geometricallyEquals(FrameSE3WaypointBasics other, double epsilon)
    {
-      boolean euclideanMatch = FrameEuclideanWaypointInterface.super.geometricallyEquals(other, epsilon);
-      boolean so3Match = FrameSO3WaypointInterface.super.geometricallyEquals(other, epsilon);
+      boolean euclideanMatch = FrameEuclideanWaypointBasics.super.geometricallyEquals(other, epsilon);
+      boolean so3Match = FrameSO3WaypointBasics.super.geometricallyEquals(other, epsilon);
       return euclideanMatch && so3Match;
    }
 
-   default void set(FrameSE3WaypointInterface other)
+   default void set(FrameSE3WaypointBasics other)
    {
-      FrameEuclideanWaypointInterface.super.set(other);
-      FrameSO3WaypointInterface.super.set(other);
+      FrameEuclideanWaypointBasics.super.set(other);
+      FrameSO3WaypointBasics.super.set(other);
    }
 
    @Override
    default void setToNaN(ReferenceFrame referenceFrame)
    {
-      FrameEuclideanWaypointInterface.super.setToNaN(referenceFrame);
-      FrameSO3WaypointInterface.super.setToNaN(referenceFrame);
+      FrameEuclideanWaypointBasics.super.setToNaN(referenceFrame);
+      FrameSO3WaypointBasics.super.setToNaN(referenceFrame);
    }
 
    @Override
    default void setToZero(ReferenceFrame referenceFrame)
    {
-      FrameEuclideanWaypointInterface.super.setToZero(referenceFrame);
-      FrameSO3WaypointInterface.super.setToZero(referenceFrame);
+      FrameEuclideanWaypointBasics.super.setToZero(referenceFrame);
+      FrameSO3WaypointBasics.super.setToZero(referenceFrame);
    }
 }

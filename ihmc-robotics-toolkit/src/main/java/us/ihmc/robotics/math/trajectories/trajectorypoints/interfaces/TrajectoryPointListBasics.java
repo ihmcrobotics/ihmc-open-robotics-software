@@ -1,6 +1,6 @@
 package us.ihmc.robotics.math.trajectories.trajectorypoints.interfaces;
 
-public interface TrajectoryPointListInterface<T extends TrajectoryPointInterface>
+public interface TrajectoryPointListBasics<T extends TrajectoryPointBasics>
 {
    abstract void clear();
 
@@ -10,7 +10,7 @@ public interface TrajectoryPointListInterface<T extends TrajectoryPointInterface
 
    abstract int getNumberOfTrajectoryPoints();
 
-   default void set(TrajectoryPointListInterface<T> other)
+   default void set(TrajectoryPointListBasics<T> other)
    {
       clear();
       for (int i = 0; i < other.getNumberOfTrajectoryPoints(); i++)

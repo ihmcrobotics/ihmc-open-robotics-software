@@ -4,8 +4,8 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameChangeable;
 import us.ihmc.euclid.transform.interfaces.Transform;
 
-public interface FrameTrajectoryPointListInterface<T extends TrajectoryPointInterface & FrameChangeable>
-      extends TrajectoryPointListInterface<T>, FrameChangeable
+public interface FrameTrajectoryPointListBasics<T extends TrajectoryPointBasics & FrameChangeable>
+      extends TrajectoryPointListBasics<T>, FrameChangeable
 {
    default void clear(ReferenceFrame referenceFrame)
    {
@@ -13,16 +13,16 @@ public interface FrameTrajectoryPointListInterface<T extends TrajectoryPointInte
       setReferenceFrame(referenceFrame);
    }
 
-   default void setIncludingFrame(FrameTrajectoryPointListInterface<T> trajectoryPoints)
+   default void setIncludingFrame(FrameTrajectoryPointListBasics<T> trajectoryPoints)
    {
       clear(trajectoryPoints.getReferenceFrame());
       set(trajectoryPoints);
    }
 
-   default void set(FrameTrajectoryPointListInterface<T> trajectoryPoints)
+   default void set(FrameTrajectoryPointListBasics<T> trajectoryPoints)
    {
       checkReferenceFrameMatch(trajectoryPoints);
-      TrajectoryPointListInterface.super.set(trajectoryPoints);
+      TrajectoryPointListBasics.super.set(trajectoryPoints);
    }
 
    @Override

@@ -6,9 +6,9 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
 import us.ihmc.euclid.transform.interfaces.Transform;
-import us.ihmc.robotics.math.trajectories.waypoints.interfaces.FrameEuclideanWaypointInterface;
+import us.ihmc.robotics.math.trajectories.waypoints.interfaces.FrameEuclideanWaypointBasics;
 
-public class FrameEuclideanWaypoint implements FrameEuclideanWaypointInterface
+public class FrameEuclideanWaypoint implements FrameEuclideanWaypointBasics
 {
    private final FramePoint3D position = new FramePoint3D();
    private final FrameVector3D linearVelocity = new FrameVector3D();

@@ -23,9 +23,9 @@ import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.robotics.math.trajectories.trajectorypoints.SE3TrajectoryPoint;
-import us.ihmc.robotics.math.trajectories.trajectorypoints.interfaces.SE3TrajectoryPointInterface;
-import us.ihmc.robotics.math.trajectories.waypoints.interfaces.EuclideanWaypointInterface;
-import us.ihmc.robotics.math.trajectories.waypoints.interfaces.SO3WaypointInterface;
+import us.ihmc.robotics.math.trajectories.trajectorypoints.interfaces.SE3TrajectoryPointBasics;
+import us.ihmc.robotics.math.trajectories.waypoints.interfaces.EuclideanWaypointBasics;
+import us.ihmc.robotics.math.trajectories.waypoints.interfaces.SO3WaypointBasics;
 import us.ihmc.robotics.random.RandomGeometry;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 
@@ -536,7 +536,7 @@ public class SimpleSE3TrajectoryPointTest
       assertTrue(Double.isNaN(positionDistance));
       assertFalse(simpleSE3TrajectoryPoint.epsilonEquals(simpleSE3TrajectoryPointTwo, 1e-7));
 
-      SE3TrajectoryPointInterface trajectoryPointAsInterface = simplePoint;
+      SE3TrajectoryPointBasics trajectoryPointAsInterface = simplePoint;
       simpleSE3TrajectoryPoint.set(trajectoryPointAsInterface);
 
       positionDistance = simpleSE3TrajectoryPoint.positionDistance(simpleSE3TrajectoryPointTwo);
@@ -615,8 +615,8 @@ public class SimpleSE3TrajectoryPointTest
 
 
       simpleSE3TrajectoryPointTwo = new SE3TrajectoryPoint();
-      EuclideanWaypointInterface euclideanWaypoint = simpleSE3TrajectoryPoint;
-      SO3WaypointInterface so3Waypoint = simpleSE3TrajectoryPoint;
+      EuclideanWaypointBasics euclideanWaypoint = simpleSE3TrajectoryPoint;
+      SO3WaypointBasics so3Waypoint = simpleSE3TrajectoryPoint;
 
       simpleSE3TrajectoryPointTwo.set(time, euclideanWaypoint, so3Waypoint);
       assertTrue(simpleSE3TrajectoryPointTwo.epsilonEquals(simpleSE3TrajectoryPoint, 1e-10));

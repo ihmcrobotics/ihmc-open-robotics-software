@@ -2,10 +2,10 @@ package us.ihmc.robotics.math.trajectories.trajectorypoints.lists;
 
 import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.robotics.math.trajectories.trajectorypoints.OneDoFTrajectoryPoint;
-import us.ihmc.robotics.math.trajectories.trajectorypoints.interfaces.OneDoFTrajectoryPointInterface;
-import us.ihmc.robotics.math.trajectories.trajectorypoints.interfaces.TrajectoryPointListInterface;
+import us.ihmc.robotics.math.trajectories.trajectorypoints.interfaces.OneDoFTrajectoryPointBasics;
+import us.ihmc.robotics.math.trajectories.trajectorypoints.interfaces.TrajectoryPointListBasics;
 
-public class OneDoFTrajectoryPointList implements TrajectoryPointListInterface<OneDoFTrajectoryPoint>
+public class OneDoFTrajectoryPointList implements TrajectoryPointListBasics<OneDoFTrajectoryPoint>
 {
    private final RecyclingArrayList<OneDoFTrajectoryPoint> trajectoryPoints = new RecyclingArrayList<>(OneDoFTrajectoryPoint.class);
 
@@ -15,7 +15,7 @@ public class OneDoFTrajectoryPointList implements TrajectoryPointListInterface<O
       trajectoryPoints.add().set(trajectoryPoint);
    }
 
-   public void addTrajectoryPoint(OneDoFTrajectoryPointInterface trajectoryPoint)
+   public void addTrajectoryPoint(OneDoFTrajectoryPointBasics trajectoryPoint)
    {
       trajectoryPoints.add().set(trajectoryPoint);
    }
