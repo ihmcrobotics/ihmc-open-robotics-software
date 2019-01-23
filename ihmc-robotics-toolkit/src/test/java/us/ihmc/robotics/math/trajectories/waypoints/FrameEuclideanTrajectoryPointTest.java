@@ -24,9 +24,11 @@ import us.ihmc.euclid.referenceFrame.tools.ReferenceFrameTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
-import us.ihmc.robotics.geometry.interfaces.EuclideanWaypointInterface;
-import us.ihmc.robotics.geometry.interfaces.FrameEuclideanWaypointInterface;
-import us.ihmc.robotics.math.trajectories.waypoints.interfaces.EuclideanTrajectoryPointInterface;
+import us.ihmc.robotics.math.trajectories.trajectorypoints.FrameEuclideanTrajectoryPoint;
+import us.ihmc.robotics.math.trajectories.trajectorypoints.EuclideanTrajectoryPoint;
+import us.ihmc.robotics.math.trajectories.trajectorypoints.interfaces.EuclideanTrajectoryPointInterface;
+import us.ihmc.robotics.math.trajectories.waypoints.interfaces.EuclideanWaypointInterface;
+import us.ihmc.robotics.math.trajectories.waypoints.interfaces.FrameEuclideanWaypointInterface;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 
 public class FrameEuclideanTrajectoryPointTest
@@ -51,7 +53,7 @@ public class FrameEuclideanTrajectoryPointTest
       poseFrame.setOrientationAndUpdate(poseOrientation);
 
       FrameEuclideanTrajectoryPoint frameEuclideanTrajectoryPoint = new FrameEuclideanTrajectoryPoint(worldFrame);
-      SimpleEuclideanTrajectoryPoint simpleTrajectoryPoint = new SimpleEuclideanTrajectoryPoint();
+      EuclideanTrajectoryPoint simpleTrajectoryPoint = new EuclideanTrajectoryPoint();
 
       double time = 3.4;
       Point3D position = new Point3D(1.0, 2.1, 3.7);
@@ -131,7 +133,7 @@ public class FrameEuclideanTrajectoryPointTest
       final FramePoint3D expectedFinalPosition = EuclidFrameRandomTools.nextFramePoint3D(random, expectedFinalFrame, 10.0, 10.0, 10.0);
       final FrameVector3D expectedFinalLinearVelocity = EuclidFrameRandomTools.nextFrameVector3D(random, expectedFinalFrame);
 
-      SimpleEuclideanTrajectoryPoint expectedEuclideanTrajectoryPoint = new SimpleEuclideanTrajectoryPoint();
+      EuclideanTrajectoryPoint expectedEuclideanTrajectoryPoint = new EuclideanTrajectoryPoint();
       expectedEuclideanTrajectoryPoint.setTime(expectedFinalTime);
       expectedEuclideanTrajectoryPoint.setPosition(expectedFinalPosition);
       expectedEuclideanTrajectoryPoint.setLinearVelocity(expectedFinalLinearVelocity);
@@ -215,7 +217,7 @@ public class FrameEuclideanTrajectoryPointTest
       final FramePoint3D expectedFinalPosition = EuclidFrameRandomTools.nextFramePoint3D(random, expectedFinalFrame, 10.0, 10.0, 10.0);
       final FrameVector3D expectedFinalLinearVelocity = EuclidFrameRandomTools.nextFrameVector3D(random, expectedFinalFrame);
 
-      SimpleEuclideanTrajectoryPoint expectedEuclideanTrajectoryPoint = new SimpleEuclideanTrajectoryPoint();
+      EuclideanTrajectoryPoint expectedEuclideanTrajectoryPoint = new EuclideanTrajectoryPoint();
       expectedEuclideanTrajectoryPoint.setTime(expectedFinalTime);
       expectedEuclideanTrajectoryPoint.setPosition(expectedFinalPosition);
       expectedEuclideanTrajectoryPoint.setLinearVelocity(expectedFinalLinearVelocity);
@@ -363,7 +365,7 @@ public class FrameEuclideanTrajectoryPointTest
       FrameEuclideanTrajectoryPoint frameEuclideanTrajectoryPoint = new FrameEuclideanTrajectoryPoint(worldFrame);
       frameEuclideanTrajectoryPoint.checkReferenceFrameMatch(ReferenceFrame.getWorldFrame());
 
-      SimpleEuclideanTrajectoryPoint simpleTrajectoryPoint = new SimpleEuclideanTrajectoryPoint();
+      EuclideanTrajectoryPoint simpleTrajectoryPoint = new EuclideanTrajectoryPoint();
 
       double time = 3.4;
       Point3D position = new Point3D(1.0, 2.1, 3.7);
@@ -429,7 +431,7 @@ public class FrameEuclideanTrajectoryPointTest
       assertEquals(0.0, positionDistance, 1e-7);
       assertTrue(frameEuclideanTrajectoryPoint.epsilonEquals(frameEuclideanTrajectoryPointTwo, 1e-7));
 
-      SimpleEuclideanTrajectoryPoint simplePoint = new SimpleEuclideanTrajectoryPoint();
+      EuclideanTrajectoryPoint simplePoint = new EuclideanTrajectoryPoint();
       frameEuclideanTrajectoryPoint.get(simplePoint);
 
       frameEuclideanTrajectoryPoint.setToNaN();

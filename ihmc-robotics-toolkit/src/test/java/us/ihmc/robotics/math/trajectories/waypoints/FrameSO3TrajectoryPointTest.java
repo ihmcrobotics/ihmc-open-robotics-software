@@ -25,9 +25,11 @@ import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
-import us.ihmc.robotics.geometry.interfaces.FrameSO3WaypointInterface;
-import us.ihmc.robotics.geometry.interfaces.SO3WaypointInterface;
-import us.ihmc.robotics.math.trajectories.waypoints.interfaces.SO3TrajectoryPointInterface;
+import us.ihmc.robotics.math.trajectories.trajectorypoints.FrameSO3TrajectoryPoint;
+import us.ihmc.robotics.math.trajectories.trajectorypoints.SO3TrajectoryPoint;
+import us.ihmc.robotics.math.trajectories.trajectorypoints.interfaces.SO3TrajectoryPointInterface;
+import us.ihmc.robotics.math.trajectories.waypoints.interfaces.FrameSO3WaypointInterface;
+import us.ihmc.robotics.math.trajectories.waypoints.interfaces.SO3WaypointInterface;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 
 public class FrameSO3TrajectoryPointTest
@@ -53,7 +55,7 @@ public class FrameSO3TrajectoryPointTest
       poseFrame.setOrientationAndUpdate(poseOrientation);
 
       FrameSO3TrajectoryPoint frameSO3TrajectoryPoint = new FrameSO3TrajectoryPoint(worldFrame);
-      SimpleSO3TrajectoryPoint simpleTrajectoryPoint = new SimpleSO3TrajectoryPoint();
+      SO3TrajectoryPoint simpleTrajectoryPoint = new SO3TrajectoryPoint();
 
       double time = 3.4;
       Quaternion orientation = new Quaternion(new Quaternion(0.1, 0.22, 0.34, 0.56));
@@ -138,7 +140,7 @@ public class FrameSO3TrajectoryPointTest
       final FrameQuaternion expectedFinalOrientation = EuclidFrameRandomTools.nextFrameQuaternion(random, expectedFinalFrame);
       final FrameVector3D expectedFinalAngularVelocity = EuclidFrameRandomTools.nextFrameVector3D(random, expectedFinalFrame);
 
-      SimpleSO3TrajectoryPoint expectedSO3TrajectoryPoint = new SimpleSO3TrajectoryPoint();
+      SO3TrajectoryPoint expectedSO3TrajectoryPoint = new SO3TrajectoryPoint();
       expectedSO3TrajectoryPoint.setTime(expectedFinalTime);
       expectedSO3TrajectoryPoint.setOrientation(expectedFinalOrientation);
       expectedSO3TrajectoryPoint.setAngularVelocity(expectedFinalAngularVelocity);
@@ -226,7 +228,7 @@ public class FrameSO3TrajectoryPointTest
       final FrameQuaternion expectedFinalOrientation = EuclidFrameRandomTools.nextFrameQuaternion(random, expectedFinalFrame);
       final FrameVector3D expectedFinalAngularVelocity = EuclidFrameRandomTools.nextFrameVector3D(random, expectedFinalFrame);
 
-      SimpleSO3TrajectoryPoint expectedSO3TrajectoryPoint = new SimpleSO3TrajectoryPoint();
+      SO3TrajectoryPoint expectedSO3TrajectoryPoint = new SO3TrajectoryPoint();
       expectedSO3TrajectoryPoint.setTime(expectedFinalTime);
       expectedSO3TrajectoryPoint.setOrientation(expectedFinalOrientation);
       expectedSO3TrajectoryPoint.setAngularVelocity(expectedFinalAngularVelocity);
@@ -378,7 +380,7 @@ public class FrameSO3TrajectoryPointTest
       FrameSO3TrajectoryPoint FrameSO3TrajectoryPoint = new FrameSO3TrajectoryPoint(worldFrame);
       FrameSO3TrajectoryPoint.checkReferenceFrameMatch(ReferenceFrame.getWorldFrame());
 
-      SimpleSO3TrajectoryPoint simpleTrajectoryPoint = new SimpleSO3TrajectoryPoint();
+      SO3TrajectoryPoint simpleTrajectoryPoint = new SO3TrajectoryPoint();
 
       double time = 3.4;
       Quaternion orientation = new Quaternion(new Quaternion(0.1, 0.22, 0.34, 0.56));
@@ -442,7 +444,7 @@ public class FrameSO3TrajectoryPointTest
       frameSO3TrajectoryPointTwo.set(FrameSO3TrajectoryPoint);
       assertTrue(FrameSO3TrajectoryPoint.epsilonEquals(frameSO3TrajectoryPointTwo, 1e-7));
 
-      SimpleSO3TrajectoryPoint simplePoint = new SimpleSO3TrajectoryPoint();
+      SO3TrajectoryPoint simplePoint = new SO3TrajectoryPoint();
       FrameSO3TrajectoryPoint.get(simplePoint);
 
       FrameSO3TrajectoryPoint.setToNaN();

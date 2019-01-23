@@ -17,8 +17,8 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FixedFrameVector3DBasics;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
-import us.ihmc.robotics.geometry.interfaces.EuclideanWaypointInterface;
-import us.ihmc.robotics.math.trajectories.waypoints.SimpleEuclideanTrajectoryPoint;
+import us.ihmc.robotics.math.trajectories.trajectorypoints.EuclideanTrajectoryPoint;
+import us.ihmc.robotics.math.trajectories.waypoints.interfaces.EuclideanWaypointInterface;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
@@ -40,8 +40,8 @@ public class CommandBasedAngularMomentumTrajectoryGenerator implements AngularMo
    private final YoBoolean atAStop = new YoBoolean("atAStop", registry);
    private final YoBoolean updateTrajectories = new YoBoolean("updateTrajectories", registry);
 
-   private final RecyclingArrayList<SimpleEuclideanTrajectoryPoint> waypoints = new RecyclingArrayList<>(waypointsPerWalkingPhase,
-                                                                                                         SimpleEuclideanTrajectoryPoint::new);
+   private final RecyclingArrayList<EuclideanTrajectoryPoint> waypoints = new RecyclingArrayList<>(waypointsPerWalkingPhase,
+                                                                                                         EuclideanTrajectoryPoint::new);
    private final List<AngularMomentumTrajectory> transferTrajectories;
    private final List<AngularMomentumTrajectory> swingTrajectories;
 
@@ -248,8 +248,8 @@ public class CommandBasedAngularMomentumTrajectoryGenerator implements AngularMo
 
       for (int i = 0; i < numberOfSegments; i++)
       {
-         SimpleEuclideanTrajectoryPoint simpleStart = waypoints.get(i);
-         SimpleEuclideanTrajectoryPoint simpleEnd = waypoints.get(i + 1);
+         EuclideanTrajectoryPoint simpleStart = waypoints.get(i);
+         EuclideanTrajectoryPoint simpleEnd = waypoints.get(i + 1);
 
          EuclideanWaypointInterface startWaypoint = simpleStart;
          EuclideanWaypointInterface endWaypoint = simpleEnd;

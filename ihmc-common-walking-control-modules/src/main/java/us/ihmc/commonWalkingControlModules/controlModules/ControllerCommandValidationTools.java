@@ -9,7 +9,7 @@ import us.ihmc.humanoidRobotics.communication.controllerAPI.command.OneDoFJointT
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.SpineTrajectoryCommand;
 import us.ihmc.log.LogTools;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
-import us.ihmc.robotics.math.trajectories.waypoints.lists.OneDoFTrajectoryPointList;
+import us.ihmc.robotics.math.trajectories.trajectorypoints.lists.OneDoFTrajectoryPointList;
 
 public class ControllerCommandValidationTools
 {
