@@ -1,7 +1,6 @@
 package us.ihmc.footstepPlanning.graphSearch.nodeChecking;
 
 import us.ihmc.euclid.transform.RigidBodyTransform;
-import us.ihmc.footstepPlanning.graphSearch.graph.FootstepGraph;
 import us.ihmc.footstepPlanning.graphSearch.graph.FootstepNode;
 import us.ihmc.footstepPlanning.graphSearch.graph.visualization.BipedalFootstepPlannerNodeRejectionReason;
 import us.ihmc.footstepPlanning.graphSearch.listeners.BipedalFootstepPlannerListener;
@@ -13,7 +12,6 @@ public abstract class FootstepNodeChecker
 {
    protected PlanarRegionsList planarRegionsList;
    protected final ArrayList<BipedalFootstepPlannerListener> listeners = new ArrayList<>();
-   protected FootstepGraph graph;
 
    public void setPlanarRegions(PlanarRegionsList planarRegions)
    {
@@ -35,11 +33,6 @@ public abstract class FootstepNodeChecker
    {
       if (listener != null)
          listeners.add(listener);
-   }
-
-   public void addFootstepGraph(FootstepGraph graph)
-   {
-      this.graph = graph;
    }
 
    public abstract boolean isNodeValid(FootstepNode node, FootstepNode previousNode);
