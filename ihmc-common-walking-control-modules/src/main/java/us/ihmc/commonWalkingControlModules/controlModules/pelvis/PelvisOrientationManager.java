@@ -211,7 +211,12 @@ public class PelvisOrientationManager
          requestState(PelvisOrientationControlMode.USER);
          return true;
       }
-      return false;
+      else
+      {
+         walkingManager.setToHoldCurrentInWorldFrame();
+         requestState(PelvisOrientationControlMode.WALKING_CONTROLLER);
+         return false;
+      }
    }
 
    private final PelvisOrientationTrajectoryCommand tempPelvisOrientationTrajectoryCommand = new PelvisOrientationTrajectoryCommand();

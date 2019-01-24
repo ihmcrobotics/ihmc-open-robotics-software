@@ -1,8 +1,8 @@
 package us.ihmc.robotics.geometry.shapes;
 
-import us.ihmc.euclid.geometry.Sphere3D;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.shape.Sphere3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DBasics;
 
 public class FrameSphere3d extends FrameShape3d<FrameSphere3d, Sphere3D>

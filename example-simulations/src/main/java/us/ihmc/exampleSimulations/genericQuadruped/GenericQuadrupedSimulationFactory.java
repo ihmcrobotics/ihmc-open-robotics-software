@@ -1,23 +1,21 @@
 package us.ihmc.exampleSimulations.genericQuadruped;
 
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.ControllerCoreOptimizationSettings;
-import us.ihmc.communication.net.NetClassList;
-import us.ihmc.exampleSimulations.genericQuadruped.model.GenericQuadrupedJointNameMapAndContactDefinition;
 import us.ihmc.exampleSimulations.genericQuadruped.model.GenericQuadrupedModelFactory;
 import us.ihmc.exampleSimulations.genericQuadruped.model.GenericQuadrupedPhysicalProperties;
 import us.ihmc.exampleSimulations.genericQuadruped.model.GenericQuadrupedSensorInformation;
 import us.ihmc.exampleSimulations.genericQuadruped.parameters.*;
 import us.ihmc.exampleSimulations.genericQuadruped.simulation.GenericQuadrupedGroundContactParameters;
-import us.ihmc.quadrupedRobotics.communication.QuadrupedNetClassList;
 import us.ihmc.quadrupedRobotics.controller.QuadrupedControlMode;
-import us.ihmc.quadrupedRobotics.controller.states.QuadrupedPositionBasedCrawlControllerParameters;
-import us.ihmc.quadrupedRobotics.estimator.referenceFrames.QuadrupedReferenceFrames;
+import us.ihmc.quadrupedBasics.referenceFrames.QuadrupedReferenceFrames;
+import us.ihmc.quadrupedRobotics.parameters.QuadrupedFallDetectionParameters;
 import us.ihmc.quadrupedRobotics.estimator.stateEstimator.QuadrupedSensorInformation;
 import us.ihmc.quadrupedRobotics.model.QuadrupedInitialOffsetAndYaw;
 import us.ihmc.quadrupedRobotics.model.QuadrupedInitialPositionParameters;
 import us.ihmc.quadrupedRobotics.model.QuadrupedModelFactory;
 import us.ihmc.quadrupedRobotics.model.QuadrupedPhysicalProperties;
 import us.ihmc.quadrupedRobotics.output.SimulatedQuadrupedOutputWriter;
+import us.ihmc.quadrupedRobotics.parameters.QuadrupedPrivilegedConfigurationParameters;
 import us.ihmc.quadrupedRobotics.simulation.GroundContactParameters;
 import us.ihmc.quadrupedRobotics.simulation.QuadrupedGroundContactModelType;
 import us.ihmc.quadrupedRobotics.simulation.QuadrupedSimulationFactory;
@@ -52,19 +50,19 @@ public class GenericQuadrupedSimulationFactory
    {
       QuadrupedModelFactory modelFactory = new GenericQuadrupedModelFactory();
       QuadrupedPhysicalProperties physicalProperties = new GenericQuadrupedPhysicalProperties();
-      NetClassList netClassList = new QuadrupedNetClassList();
       SimulationConstructionSetParameters scsParameters = new SimulationConstructionSetParameters();
       QuadrupedInitialPositionParameters initialPositionParameters = new GenericQuadrupedDefaultInitialPosition();
       GroundContactParameters groundContactParameters = new GenericQuadrupedGroundContactParameters();
       QuadrupedSensorInformation sensorInformation = new GenericQuadrupedSensorInformation();
       StateEstimatorParameters stateEstimatorParameters = new GenericQuadrupedStateEstimatorParameters(false, CONTROL_DT);
-      QuadrupedPositionBasedCrawlControllerParameters positionBasedCrawlControllerParameters = new GenericQuadrupedPositionBasedCrawlControllerParameters();
       GenericQuadrupedHighLevelControllerParameters highLevelControllerParameters = new GenericQuadrupedHighLevelControllerParameters(
             modelFactory.getJointMap());
       GenericQuadrupedSitDownParameters sitDownParameters = new GenericQuadrupedSitDownParameters();
+      QuadrupedPrivilegedConfigurationParameters privilegedConfigurationParameters = new GenericQuadrupedPrivilegedConfigurationParameters();
+      QuadrupedFallDetectionParameters fallDetectionParameters = new GenericQuadrupedFallDetectionParameters();
 
       FullQuadrupedRobotModel fullRobotModel = modelFactory.createFullRobotModel();
-      FloatingRootJointRobot sdfRobot = new FloatingRootJointRobot(modelFactory.createSdfRobot());
+      FloatingRootJointRobot sdfRobot = new FloatingRootJointRobot(modelFactory.getRobotDescription());
       ControllerCoreOptimizationSettings controllerCoreOptimizationSettings = new GenericQuadrupedControllerCoreOptimizationSettings(
             fullRobotModel.getTotalMass());
 
@@ -72,7 +70,7 @@ public class GenericQuadrupedSimulationFactory
       QuadrantDependentList<Double> kneeTorqueTouchdownDetectionThreshold = new QuadrantDependentList<>(20.0, 20.0, 20.0, 20.0);
 
       JointDesiredOutputList jointDesiredOutputList = new JointDesiredOutputList(fullRobotModel.getOneDoFJoints());
-      QuadrupedReferenceFrames referenceFrames = new QuadrupedReferenceFrames(fullRobotModel, physicalProperties);
+      QuadrupedReferenceFrames referenceFrames = new QuadrupedReferenceFrames(fullRobotModel);
       OutputWriter outputWriter = new SimulatedQuadrupedOutputWriter(sdfRobot, fullRobotModel, jointDesiredOutputList, CONTROL_DT);
 
       simulationFactory.setControlDT(CONTROL_DT);
@@ -100,11 +98,11 @@ public class GenericQuadrupedSimulationFactory
       simulationFactory.setSensorInformation(sensorInformation);
       simulationFactory.setJointDesiredOutputList(jointDesiredOutputList);
       simulationFactory.setReferenceFrames(referenceFrames);
-      simulationFactory.setNetClassList(netClassList);
-      simulationFactory.setPositionBasedCrawlControllerParameters(positionBasedCrawlControllerParameters);
       simulationFactory.setInitialOffset(new QuadrupedInitialOffsetAndYaw());
       simulationFactory.setHighLevelControllerParameters(highLevelControllerParameters);
       simulationFactory.setSitDownParameters(sitDownParameters);
+      simulationFactory.setPrivilegedConfigurationParameters(privilegedConfigurationParameters);
+      simulationFactory.setFallDetectionParameters(fallDetectionParameters);
 
       return simulationFactory.createSimulation();
    }

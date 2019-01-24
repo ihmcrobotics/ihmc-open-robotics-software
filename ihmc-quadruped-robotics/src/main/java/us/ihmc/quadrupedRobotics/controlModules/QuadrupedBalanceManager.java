@@ -1,8 +1,10 @@
 package us.ihmc.quadrupedRobotics.controlModules;
 
 import org.apache.commons.lang3.mutable.MutableInt;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.InverseDynamicsCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.virtualModelControl.VirtualModelControlCommand;
 import us.ihmc.commons.MathTools;
+import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.euclid.referenceFrame.*;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
@@ -14,22 +16,25 @@ import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsList;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.graphicsDescription.yoGraphics.plotting.ArtifactList;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.QuadrupedBodyHeightCommand;
+import us.ihmc.humanoidRobotics.communication.controllerAPI.command.QuadrupedBodyTrajectoryCommand;
+import us.ihmc.quadrupedBasics.gait.QuadrupedStep;
+import us.ihmc.quadrupedBasics.gait.QuadrupedTimedStep;
 import us.ihmc.quadrupedRobotics.controller.QuadrupedControllerToolbox;
 import us.ihmc.quadrupedRobotics.controller.toolbox.LinearInvertedPendulumModel;
-import us.ihmc.quadrupedRobotics.estimator.referenceFrames.QuadrupedReferenceFrames;
+import us.ihmc.quadrupedBasics.referenceFrames.QuadrupedReferenceFrames;
 import us.ihmc.quadrupedRobotics.model.QuadrupedPhysicalProperties;
 import us.ihmc.quadrupedRobotics.model.QuadrupedRuntimeEnvironment;
-import us.ihmc.quadrupedRobotics.planning.QuadrupedStep;
-import us.ihmc.quadrupedRobotics.planning.QuadrupedTimedStep;
-import us.ihmc.quadrupedRobotics.planning.YoQuadrupedTimedStep;
+import us.ihmc.quadrupedRobotics.util.YoQuadrupedTimedStep;
 import us.ihmc.quadrupedRobotics.planning.trajectory.DCMPlanner;
-import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.robotics.robotSide.QuadrantDependentList;
 import us.ihmc.robotics.robotSide.RobotQuadrant;
 import us.ihmc.yoVariables.parameters.BooleanParameter;
 import us.ihmc.yoVariables.providers.BooleanProvider;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.yoVariables.variable.*;
+import us.ihmc.yoVariables.variable.YoDouble;
+import us.ihmc.yoVariables.variable.YoFramePoint3D;
+import us.ihmc.yoVariables.variable.YoFrameVector3D;
+import us.ihmc.yoVariables.variable.YoInteger;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -52,6 +57,8 @@ public class QuadrupedBalanceManager
    private final QuadrupedCenterOfMassHeightManager centerOfMassHeightManager;
    private final QuadrupedMomentumRateOfChangeModule momentumRateOfChangeModule;
    private final QuadrupedStepAdjustmentController stepAdjustmentController;
+
+   private final QuadrupedBodyICPBasedTranslationManager bodyICPBasedTranslationManager;
 
    private final DCMPlanner dcmPlanner;
 
@@ -99,12 +106,14 @@ public class QuadrupedBalanceManager
       supportFrame = referenceFrames.getCenterOfFeetZUpFrameAveragingLowestZHeightsAcrossEnds();
       robotTimestamp = runtimeEnvironment.getRobotTimestamp();
 
-      double nominalHeight = physicalProperties.getNominalCoMHeight();
+      double nominalHeight = physicalProperties.getNominalBodyHeight();
       ReferenceFrame supportFrame = referenceFrames.getCenterOfFeetZUpFrameAveragingLowestZHeightsAcrossEnds();
       dcmPlanner = new DCMPlanner(runtimeEnvironment.getGravity(), nominalHeight, robotTimestamp, supportFrame, referenceFrames.getSoleFrames(), registry,
                                   yoGraphicsListRegistry, debug);
 
       linearInvertedPendulumModel = controllerToolbox.getLinearInvertedPendulumModel();
+
+      bodyICPBasedTranslationManager = new QuadrupedBodyICPBasedTranslationManager(controllerToolbox, 0.05, registry);
 
       centerOfMassHeightManager = new QuadrupedCenterOfMassHeightManager(controllerToolbox, physicalProperties, parentRegistry);
       momentumRateOfChangeModule = new QuadrupedMomentumRateOfChangeModule(controllerToolbox, registry);
@@ -195,6 +204,13 @@ public class QuadrupedBalanceManager
       centerOfMassHeightManager.handleBodyHeightCommand(command);
    }
 
+   public void handleBodyTrajectoryCommand(QuadrupedBodyTrajectoryCommand command)
+   {
+      bodyICPBasedTranslationManager.handleBodyTrajectoryCommand(command);
+      centerOfMassHeightManager.handleBodyTrajectoryCommand(command);
+   }
+
+
    public void clearStepSequence()
    {
       dcmPlanner.clearStepSequence();
@@ -228,8 +244,7 @@ public class QuadrupedBalanceManager
       }
    }
 
-
-   public void initializeForStanding()
+   public void initialize()
    {
       centerOfMassHeightManager.initialize();
 
@@ -249,6 +264,21 @@ public class QuadrupedBalanceManager
       dcmPlanner.initializeForStanding();
    }
 
+   public void initializeForStanding()
+   {
+      centerOfMassHeightManager.initialize();
+
+      // update model
+      centerOfMassHeightManager.update();
+      if (updateLipmHeightFromDesireds.getValue())
+         linearInvertedPendulumModel.setLipmHeight(centerOfMassHeightManager.getDesiredHeight(supportFrame));
+
+      momentumRateOfChangeModule.initialize();
+
+      // FIXME this should do something with the desired values
+      dcmPlanner.initializeForStanding();
+   }
+
    public void initializeForStepping()
    {
       // update model
@@ -256,7 +286,7 @@ public class QuadrupedBalanceManager
       if (updateLipmHeightFromDesireds.getValue())
          linearInvertedPendulumModel.setLipmHeight(centerOfMassHeightManager.getDesiredHeight(supportFrame));
 
-      dcmPlanner.initializeForStepping(controllerToolbox.getContactStates(), dcmPositionEstimate);
+      dcmPlanner.initializeForStepping(controllerToolbox.getContactStates(), yoDesiredDCMPosition, yoDesiredDCMVelocity);
    }
 
    public void completedStep(RobotQuadrant robotQuadrant)
@@ -275,8 +305,10 @@ public class QuadrupedBalanceManager
       dcmPlanner.setCoMHeight(linearInvertedPendulumModel.getLipmHeight());
 
       dcmPlanner.computeDcmSetpoints(controllerToolbox.getContactStates(), yoDesiredDCMPosition, yoDesiredDCMVelocity);
-      dcmPlanner.computeDcmSetpoints(controllerToolbox.getContactStates(), yoDesiredDCMPosition, yoDesiredDCMVelocity);
       dcmPlanner.getFinalDCMPosition(yoFinalDesiredDCM);
+
+      bodyICPBasedTranslationManager.compute(yoDesiredDCMPosition);
+      bodyICPBasedTranslationManager.addDCMOffset(yoDesiredDCMPosition);
 
       if (debug)
          runDebugChecks();
@@ -381,12 +413,27 @@ public class QuadrupedBalanceManager
          return Math.log(distanceRatio) / linearInvertedPendulumModel.getNaturalFrequency();
    }
 
+   public void enableBodyXYControl()
+   {
+      bodyICPBasedTranslationManager.enable();
+   }
+
+   public void disableBodyXYControl()
+   {
+      bodyICPBasedTranslationManager.disable();
+   }
+
    public void computeAchievedCMP(FrameVector3DReadOnly achievedLinearMomentumRate)
    {
       momentumRateOfChangeModule.computeAchievedECMP(achievedLinearMomentumRate, yoAchievedECMP);
    }
 
    public VirtualModelControlCommand<?> getVirtualModelControlCommand()
+   {
+      return momentumRateOfChangeModule.getMomentumRateCommand();
+   }
+
+   public InverseDynamicsCommand<?> getInverseDynamicsCommand()
    {
       return momentumRateOfChangeModule.getMomentumRateCommand();
    }

@@ -1,7 +1,10 @@
 package us.ihmc.simulationConstructionSetTools.util.environments;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import us.ihmc.euclid.axisAngle.AxisAngle;
-import us.ihmc.euclid.geometry.Box3D;
+import us.ihmc.euclid.shape.Box3D;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.graphicsDescription.appearance.AppearanceDefinition;
@@ -11,9 +14,6 @@ import us.ihmc.simulationconstructionset.ExternalForcePoint;
 import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.simulationconstructionset.util.ground.RotatableBoxTerrainObject;
 import us.ihmc.simulationconstructionset.util.ground.TerrainObject3D;
-
-import java.util.ArrayList;
-import java.util.List;
 
 public class SmallStepDownEnvironment implements CommonAvatarEnvironmentInterface
 {

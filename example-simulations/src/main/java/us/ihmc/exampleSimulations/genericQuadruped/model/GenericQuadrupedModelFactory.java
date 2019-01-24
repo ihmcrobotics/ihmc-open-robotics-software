@@ -62,12 +62,6 @@ public class GenericQuadrupedModelFactory extends QuadrupedModelFactory
    }
 
    @Override
-   public RobotDescription createSdfRobot()
-   {
-      return robotDescription;
-   }
-
-   @Override
    public FullQuadrupedRobotModel createFullRobotModel()
    {
       GeneralizedSDFRobotModel generalizedSDFRobotModel = getGeneralizedRobotModel();

@@ -32,6 +32,14 @@ public class AtlasEndToEndPelvisOrientationTest extends EndToEndPelvisOrientatio
    }
 
    @Override
+   @ContinuousIntegrationTest(estimatedDuration = 80.0)
+   @Test(timeout = 300000)
+   public void testQueue() throws SimulationExceededMaximumTimeException
+   {
+      super.testQueue();
+   }
+
+   @Override
    @ContinuousIntegrationTest(estimatedDuration = 42.5)
    @Test(timeout = 210000)
    public void testWalking() throws SimulationExceededMaximumTimeException

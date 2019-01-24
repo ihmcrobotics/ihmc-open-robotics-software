@@ -3,6 +3,7 @@ package us.ihmc.humanoidRobotics.communication.controllerAPI.command;
 import controller_msgs.msg.dds.QuadrupedBodyOrientationMessage;
 import us.ihmc.communication.controllerAPI.command.Command;
 import us.ihmc.euclid.interfaces.EpsilonComparable;
+import us.ihmc.humanoidRobotics.communication.controllerAPI.converter.CommandConversionTools;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.converter.FrameBasedCommand;
 import us.ihmc.sensorProcessing.frames.ReferenceFrameHashCodeResolver;
 
@@ -67,6 +68,12 @@ public class QuadrupedBodyOrientationCommand implements Command<QuadrupedBodyOri
       so3Trajectory.setFromMessage(message.getSo3Trajectory());
    }
 
+   public void set(QuadrupedBodyTrajectoryCommand command)
+   {
+      isExpressedInAbsoluteTime = command.isExpressedInAbsoluteTime();
+      isAnOffsetOrientation = true;
+      CommandConversionTools.convertToSO3(command.getSE3Trajectory(), so3Trajectory);
+   }
 
    @Override
    public boolean epsilonEquals(QuadrupedBodyOrientationCommand other, double epsilon)

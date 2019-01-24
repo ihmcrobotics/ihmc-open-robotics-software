@@ -1,7 +1,7 @@
 package us.ihmc.robotics.geometry.shapes;
 
-import us.ihmc.euclid.geometry.Ramp3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.shape.Ramp3D;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 
 public class FrameRamp3d extends FrameShape3d<FrameRamp3d, Ramp3D>

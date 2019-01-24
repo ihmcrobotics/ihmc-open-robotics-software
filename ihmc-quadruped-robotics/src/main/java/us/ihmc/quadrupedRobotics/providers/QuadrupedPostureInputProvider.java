@@ -57,7 +57,7 @@ public class QuadrupedPostureInputProvider implements QuadrupedPostureInputProvi
       comVelocityUpperLimitsParameter = new ParameterVector3D("comVelocityUpperLimit", positiveMaximumLimit, registry);
 
       // initialize com height
-      yoComPositionInputZ.set(physicalProperties.getNominalCoMHeight());
+      yoComPositionInputZ.set(physicalProperties.getNominalBodyHeight());
 
       if (globalDataProducer != null)
       {

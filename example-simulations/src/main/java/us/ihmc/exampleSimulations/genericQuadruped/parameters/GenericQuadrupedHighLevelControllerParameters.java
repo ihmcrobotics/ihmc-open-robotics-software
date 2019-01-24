@@ -52,7 +52,7 @@ public class GenericQuadrupedHighLevelControllerParameters implements HighLevelC
    @Override
    public boolean automaticallyTransitionToWalkingWhenReady()
    {
-      return true;
+      return false;
    }
 
    @Override

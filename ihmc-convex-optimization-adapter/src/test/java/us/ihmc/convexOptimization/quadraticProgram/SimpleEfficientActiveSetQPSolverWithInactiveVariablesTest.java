@@ -12,6 +12,45 @@ import static org.junit.Assert.assertEquals;
 public class SimpleEfficientActiveSetQPSolverWithInactiveVariablesTest extends AbstractSimpleActiveSetQPSolverWithInactiveVariablesTest
 {
    @Override
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
+   @Test(timeout = 30000)
+   public void testMaxIterations()
+   {
+      testMaxIterations(2, true);
+   }
+
+   @Override
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
+   @Test(timeout = 30000)
+   public void testClear()
+   {
+      testClear(2, 2, false);
+   }
+
+   @Override
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
+   @Test(timeout = 30000)
+   public void testSimpleCasesWithBoundsConstraints()
+   {
+      testSimpleCasesWithBoundsConstraints(1, 3, 2, 2, false);
+   }
+
+   @Override
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
+   @Test(timeout = 30000)
+   public void testSimpleCasesWithBoundsConstraintsAndInactiveVariables()
+   {
+      testSimpleCasesWithBoundsConstraintsAndInactiveVariables(1, 2, 2, 2, false);
+   }
+
+   @Override
+   public double[] getLowerBounds()
+   {
+      // Need to modify the bounds for some tests to get a valid problem for this type of solver.
+      return new double[] { -5.0, 6.0, -2.0 };
+   }
+
+   @Override
    public ActiveSetQPSolverWithInactiveVariablesInterface createSolverToTest()
    {
       SimpleEfficientActiveSetQPSolverWithInactiveVariables simpleEfficientActiveSetQPSolver = new SimpleEfficientActiveSetQPSolverWithInactiveVariables();

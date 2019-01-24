@@ -2,16 +2,17 @@ package us.ihmc.quadrupedRobotics.controlModules.foot;
 
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.FeedbackControlCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.FeedbackControlCommandList;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.InverseDynamicsCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.virtualModelControl.VirtualModelControlCommand;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
+import us.ihmc.quadrupedBasics.gait.QuadrupedTimedStep;
 import us.ihmc.quadrupedRobotics.controller.QuadrupedControllerToolbox;
 import us.ihmc.quadrupedRobotics.controller.toolbox.QuadrupedStepTransitionCallback;
 import us.ihmc.quadrupedRobotics.controller.toolbox.QuadrupedWaypointCallback;
 import us.ihmc.quadrupedRobotics.planning.ContactState;
-import us.ihmc.quadrupedRobotics.planning.QuadrupedTimedStep;
-import us.ihmc.quadrupedRobotics.planning.YoQuadrupedTimedStep;
-import us.ihmc.robotics.math.trajectories.waypoints.FrameEuclideanTrajectoryPointList;
+import us.ihmc.quadrupedRobotics.util.YoQuadrupedTimedStep;
+import us.ihmc.robotics.math.trajectories.trajectorypoints.lists.FrameEuclideanTrajectoryPointList;
 import us.ihmc.robotics.robotSide.RobotQuadrant;
 import us.ihmc.robotics.stateMachine.core.StateChangedListener;
 import us.ihmc.robotics.stateMachine.core.StateMachine;
@@ -218,6 +219,11 @@ public class QuadrupedFootControlModule
    public VirtualModelControlCommand<?> getVirtualModelControlCommand()
    {
       return footStateMachine.getCurrentState().getVirtualModelControlCommand();
+   }
+
+   public InverseDynamicsCommand<?> getInverseDynamicsCommand()
+   {
+      return footStateMachine.getCurrentState().getInverseDynamicsCommand();
    }
 
    public FeedbackControlCommand<?> getFeedbackControlCommand()

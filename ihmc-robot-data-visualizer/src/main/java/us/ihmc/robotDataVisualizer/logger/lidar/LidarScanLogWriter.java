@@ -13,21 +13,16 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 
 import controller_msgs.msg.dds.LidarScanMessage;
-import controller_msgs.msg.dds.RequestLidarScanMessage;
 import us.ihmc.commons.thread.ThreadTools;
-import us.ihmc.communication.net.NetClassList;
+import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.net.PacketConsumer;
-import us.ihmc.communication.packetCommunicator.PacketCommunicator;
-import us.ihmc.communication.util.NetworkPorts;
-import us.ihmc.humanoidRobotics.kryo.IHMCCommunicationKryoNetClassList;
 import us.ihmc.log.LogTools;
+import us.ihmc.ros2.Ros2Node;
+import us.ihmc.ros2.Ros2Subscription;
 
 public class LidarScanLogWriter
 {
    private static final boolean DEBUG = false;
-
-   private static final NetworkPorts port = NetworkPorts.LIDAR_SCAN_LOGGER_PORT;
-   private static final NetClassList netClassList = new IHMCCommunicationKryoNetClassList();
 
    private DataOutputStream logDataOutputStream = null;
 
@@ -35,28 +30,28 @@ public class LidarScanLogWriter
    private final ScheduledExecutorService executorService = Executors.newSingleThreadScheduledExecutor(ThreadTools.getNamedThreadFactory(threadName));
    private ScheduledFuture<?> currentLoggingTask = null;
 
-   private PacketCommunicator packetCommunicator = null;
-
    private final AtomicReference<LidarScanMessage> newMessage = new AtomicReference<>(null);
    private PacketConsumer<LidarScanMessage> lidarScanConsumer = null;
 
    private final AtomicBoolean loggingEnabled = new AtomicBoolean(false);
 
-   public LidarScanLogWriter()
+   private final Ros2Node ros2Node;
+   private Ros2Subscription<LidarScanMessage> subscription;
+
+   public LidarScanLogWriter(Ros2Node ros2Node)
    {
+      this.ros2Node = ros2Node;
    }
 
-   public void connectToNetworkProcessor(String host) throws IOException
+   public void connectToNetworkProcessor(String topicName) throws IOException
    {
-      if (packetCommunicator != null)
+      if (subscription != null)
       {
          LogTools.error("The logger is already connected to the network processor.");
       }
       else
       {
-         packetCommunicator = PacketCommunicator.createTCPPacketCommunicatorClient(host, port, netClassList);
-         packetCommunicator.attachListener(LidarScanMessage.class, this::receiveLidarScanMessage);
-         packetCommunicator.connect();
+         subscription = ROS2Tools.createCallbackSubscription(ros2Node, LidarScanMessage.class, topicName, subscriber -> receiveLidarScanMessage(subscriber.takeNextData()));
       }
 
       if (currentLoggingTask == null)
@@ -65,15 +60,14 @@ public class LidarScanLogWriter
 
    public void disconnectFromNetworkProcessor()
    {
-      if (packetCommunicator == null)
+      if (subscription == null)
       {
          LogTools.error("The logger is already disconnected from the network processor.");
       }
       else
       {
-         packetCommunicator.closeConnection();
-         packetCommunicator.disconnect();
-         packetCommunicator = null;
+         subscription.remove();
+         subscription = null;
       }
 
       if (currentLoggingTask != null)
@@ -132,10 +126,8 @@ public class LidarScanLogWriter
 
    private void writeData()
    {
-      if (!packetCommunicator.isConnected())
+      if (subscription == null)
          return;
-
-      packetCommunicator.send(new RequestLidarScanMessage());
 
       LidarScanMessage lidarScanMessage = newMessage.getAndSet(null);
 

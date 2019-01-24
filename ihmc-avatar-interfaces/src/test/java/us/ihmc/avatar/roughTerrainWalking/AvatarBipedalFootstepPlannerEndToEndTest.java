@@ -30,6 +30,7 @@ import us.ihmc.footstepPlanning.FootstepPlannerType;
 import us.ihmc.footstepPlanning.FootstepPlanningResult;
 import us.ihmc.footstepPlanning.communication.FootstepPlannerCommunicationProperties;
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParameters;
+import us.ihmc.footstepPlanning.tools.FootstepPlannerMessageTools;
 import us.ihmc.footstepPlanning.ui.RemoteUIMessageConverter;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicCoordinateSystem;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsList;
@@ -267,7 +268,7 @@ public abstract class AvatarBipedalFootstepPlannerEndToEndTest implements MultiR
 
       FootstepPlannerParameters parameters = getRobotModel().getFootstepPlannerParameters();
       FootstepPlannerParametersPacket parametersPacket = new FootstepPlannerParametersPacket();
-      RemoteUIMessageConverter.copyFootstepPlannerParametersToPacket(parametersPacket, parameters);
+      FootstepPlannerMessageTools.copyParametersToPacket(parametersPacket, parameters);
       parametersPacket.setCheckForBodyBoxCollisions(true);
       parametersPacket.setReturnBestEffortPlan(false);
       footstepPlannerParametersPublisher.publish(parametersPacket);
@@ -332,8 +333,8 @@ public abstract class AvatarBipedalFootstepPlannerEndToEndTest implements MultiR
       YoGraphicsListRegistry graphicsListRegistry = createStartAndGoalGraphics(initialStancePose, goalPose);
       drcSimulationTestHelper.getSimulationConstructionSet().addYoGraphicsListRegistry(graphicsListRegistry);
 
-      FootstepPlanningRequestPacket requestPacket = HumanoidMessageTools.createFootstepPlanningRequestPacket(initialStancePose, initialStanceSide, goalPose,
-                                                                                                             plannerType);
+      FootstepPlanningRequestPacket requestPacket = FootstepPlannerMessageTools.createFootstepPlanningRequestPacket(initialStancePose, initialStanceSide, goalPose,
+                                                 plannerType);
       if(planarRegionsList != null)
       {
          PlanarRegionsListMessage planarRegionsListMessage = PlanarRegionMessageConverter.convertToPlanarRegionsListMessage(planarRegionsList);

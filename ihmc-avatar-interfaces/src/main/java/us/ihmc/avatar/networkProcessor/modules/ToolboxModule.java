@@ -17,7 +17,6 @@ import controller_msgs.msg.dds.ToolboxStateMessage;
 import us.ihmc.commonWalkingControlModules.controllerAPI.input.ControllerNetworkSubscriber;
 import us.ihmc.commonWalkingControlModules.controllerAPI.input.ControllerNetworkSubscriber.MessageFilter;
 import us.ihmc.commons.Conversions;
-import us.ihmc.commons.PrintTools;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.controllerAPI.CommandInputManager;
@@ -27,6 +26,7 @@ import us.ihmc.communication.controllerAPI.command.Command;
 import us.ihmc.communication.packets.ToolboxState;
 import us.ihmc.euclid.interfaces.Settable;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
+import us.ihmc.log.LogTools;
 import us.ihmc.multicastLogDataProtocol.modelLoaders.LogModelProvider;
 import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
 import us.ihmc.robotDataLogger.YoVariableServer;
@@ -194,7 +194,7 @@ public abstract class ToolboxModule
                if (toolboxTaskScheduled == null)
                {
                   if (DEBUG)
-                     PrintTools.info(ToolboxModule.this, name + " is sleeping: " + message.getClass().getSimpleName() + " is ignored.");
+                     LogTools.info(name + " is sleeping: " + message.getClass().getSimpleName() + " is ignored.");
                   return false;
                }
                else
@@ -231,7 +231,7 @@ public abstract class ToolboxModule
    public void receivedPacket(ToolboxStateMessage message)
    {
       if (DEBUG)
-         PrintTools.info("Received a state message.");
+         LogTools.info("Received a state message.");
       
       if (toolboxTaskScheduled != null)
       {
@@ -257,12 +257,12 @@ public abstract class ToolboxModule
       if (toolboxTaskScheduled != null)
       {
          if (DEBUG)
-            PrintTools.error(this, "This toolbox is already running.");
+            LogTools.error("This toolbox is already running.");
          return;
       }
 
       if (DEBUG)
-         PrintTools.debug(this, "Waking up");
+         LogTools.debug("Waking up");
 
       createToolboxRunnable();
       toolboxTaskScheduled = executorService.scheduleAtFixedRate(toolboxRunnable, 0, updatePeriodMilliseconds, TimeUnit.MILLISECONDS);
@@ -280,14 +280,14 @@ public abstract class ToolboxModule
    {
 
       if (DEBUG)
-         PrintTools.debug(this, "Going to sleep");
+         LogTools.debug("Going to sleep");
 
       destroyToolboxRunnable();
 
       if (toolboxTaskScheduled == null)
       {
          if (DEBUG)
-            PrintTools.error(this, "There is no task running.");
+            LogTools.error("There is no task running.");
          return;
       }
 
@@ -315,7 +315,7 @@ public abstract class ToolboxModule
       realtimeRos2Node.destroy();
 
       if (DEBUG)
-         PrintTools.debug(this, "Destroyed");
+         LogTools.debug("Destroyed");
    }
 
    private void createToolboxRunnable()
@@ -323,7 +323,7 @@ public abstract class ToolboxModule
       if (toolboxRunnable != null)
       {
          if (DEBUG)
-            PrintTools.error(this, "toolboxRunnable is not null.");
+            LogTools.error("toolboxRunnable is not null.");
          return;
       }
 

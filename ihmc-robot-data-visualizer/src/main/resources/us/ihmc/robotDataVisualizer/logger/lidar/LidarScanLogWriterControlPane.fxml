@@ -11,7 +11,7 @@
       <ToggleButton fx:id="logDataToggleButton" layoutX="14.0" layoutY="8.0" mnemonicParsing="false" prefWidth="100.0" text="Start Logging" textOverrun="CLIP" />
       <Button layoutX="131.0" layoutY="8.0" mnemonicParsing="false" onAction="#clearScans" prefHeight="25.0" prefWidth="100.0" text="Clear Scans" />
       <ToggleButton fx:id="connectToggleButton" layoutX="251.0" layoutY="8.0" mnemonicParsing="false" prefWidth="100.0" selected="true" text="Disconnect" textOverrun="CLIP" />
-      <TextField fx:id="networkProcessorIPAdTextField" layoutX="189.0" layoutY="39.0" />
-      <Label layoutX="25.0" layoutY="43.0" text="Network Processor IP Adress" />
+      <TextField fx:id="lidarScanTopicNameTextField" layoutX="189.0" layoutY="39.0" />
+      <Label layoutX="25.0" layoutY="43.0" text="Lidar Scan Topic" />
    </children>
 </AnchorPane>

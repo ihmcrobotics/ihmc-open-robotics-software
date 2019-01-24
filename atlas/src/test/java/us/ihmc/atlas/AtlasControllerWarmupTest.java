@@ -5,7 +5,7 @@ import java.util.Collection;
 import java.util.EnumMap;
 import java.util.Map;
 
-import org.apache.commons.lang.mutable.MutableInt;
+import org.apache.commons.lang3.mutable.MutableInt;
 import org.junit.Assert;
 import org.junit.Test;
 

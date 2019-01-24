@@ -1,18 +1,20 @@
 package us.ihmc.quadrupedRobotics.messageHandling;
 
 import us.ihmc.commons.MathTools;
+import us.ihmc.commons.lists.RecyclingArrayDeque;
+import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.QuadrupedTimedStepCommand;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.QuadrupedTimedStepListCommand;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.SoleTrajectoryCommand;
-import us.ihmc.quadrupedRobotics.planning.YoQuadrupedTimedStep;
-import us.ihmc.quadrupedRobotics.util.TimeIntervalTools;
-import us.ihmc.commons.lists.RecyclingArrayDeque;
-import us.ihmc.commons.lists.RecyclingArrayList;
+import us.ihmc.quadrupedBasics.gait.QuadrupedTimedStep;
+import us.ihmc.quadrupedRobotics.util.YoQuadrupedTimedStep;
 import us.ihmc.robotics.lists.YoPreallocatedList;
 import us.ihmc.robotics.robotSide.QuadrantDependentList;
 import us.ihmc.robotics.robotSide.RobotQuadrant;
+import us.ihmc.robotics.time.TimeInterval;
+import us.ihmc.robotics.time.TimeIntervalTools;
 import us.ihmc.yoVariables.parameters.DoubleParameter;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
@@ -46,7 +48,7 @@ public class QuadrupedStepMessageHandler
       this.robotTimestamp = robotTimestamp;
       this.receivedStepSequence = new YoPreallocatedList<>(YoQuadrupedTimedStep.class, "receivedStepSequence", STEP_QUEUE_SIZE, registry);
 
-      initialTransferDurationForShifting.set(0.5);
+      initialTransferDurationForShifting.set(1.00);
 
       for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
          upcomingFootTrajectoryCommandList.put(robotQuadrant, new RecyclingArrayDeque<>(SoleTrajectoryCommand.class, SoleTrajectoryCommand::set));
@@ -144,6 +146,7 @@ public class QuadrupedStepMessageHandler
 
    private void pruneHaltedSteps()
    {
+      TimeIntervalTools.removeStartTimesGreaterThan(haltTime.getDoubleValue(), receivedStepSequence);
       for (int i = receivedStepSequence.size() - 1; i >= 0; i--)
       {
          if (receivedStepSequence.get(i).getTimeInterval().getStartTime() > haltTime.getDoubleValue())
@@ -210,6 +213,22 @@ public class QuadrupedStepMessageHandler
             activeSteps.add(receivedStepSequence.get(i));
          }
       }
+   }
+
+   public QuadrupedTimedStep getNextStep()
+   {
+      for (int i = 0; i < receivedStepSequence.size(); i++)
+      {
+         double currentTime = robotTimestamp.getDoubleValue();
+         double endTime = receivedStepSequence.get(i).getTimeInterval().getEndTime();
+
+         if (currentTime < endTime)
+         {
+            return receivedStepSequence.get(i);
+         }
+      }
+
+      return null;
    }
 
    public void reset()

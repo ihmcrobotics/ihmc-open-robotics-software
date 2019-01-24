@@ -5,28 +5,21 @@ import java.util.List;
 
 import us.ihmc.euclid.interfaces.Transformable;
 import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.pathPlanning.visibilityGraphs.clusterManagement.Cluster;
-import us.ihmc.pathPlanning.visibilityGraphs.interfaces.VisibilityMapHolder;
 import us.ihmc.robotics.geometry.PlanarRegion;
 
-/**
- * User: Matt Date: 1/14/13
- */
-public class NavigableRegion implements VisibilityMapHolder
+public class NavigableRegion
 {
-   private final PlanarRegion homeRegion;
-   private final RigidBodyTransform transformToWorld = new RigidBodyTransform();
+   private final PlanarRegion homePlanarRegion;
 
    private Cluster homeRegionCluster = null;
    private List<Cluster> obstacleClusters = new ArrayList<>();
    private List<Cluster> allClusters = new ArrayList<>();
-   private VisibilityMap visibilityMapInLocal = null;
-   private VisibilityMap visibilityMapInWorld = null;
 
-   public NavigableRegion(PlanarRegion homeRegion)
+   public NavigableRegion(PlanarRegion homePlanarRegion)
    {
-      this.homeRegion = homeRegion;
-      homeRegion.getTransformToWorld(transformToWorld);
+      this.homePlanarRegion = homePlanarRegion;
    }
 
    public void setHomeRegionCluster(Cluster homeCluster)
@@ -46,29 +39,16 @@ public class NavigableRegion implements VisibilityMapHolder
       allClusters.add(obstacleCluster);
    }
 
-   public void setVisibilityMapInLocal(VisibilityMap visibilityMap)
+   public PlanarRegion getHomePlanarRegion()
    {
-      visibilityMapInLocal = visibilityMap;
-   }
-
-   public void setVisibilityMapInWorld(VisibilityMap visibilityMap)
-   {
-      if (visibilityMapInLocal == null)
-         visibilityMapInLocal = new VisibilityMap();
-
-      visibilityMapInLocal.copy(visibilityMap);
-      transformFromWorldToLocal(visibilityMapInLocal);
-      visibilityMapInLocal.computeVertices();
-   }
-
-   public PlanarRegion getHomeRegion()
-   {
-      return homeRegion;
+      return homePlanarRegion;
    }
 
    public RigidBodyTransform getTransformToWorld()
    {
-      return new RigidBodyTransform(transformToWorld);
+      RigidBodyTransform transform = new RigidBodyTransform();
+      homePlanarRegion.getTransformToWorld(transform);
+      return transform;
    }
 
    public Cluster getHomeRegionCluster()
@@ -81,44 +61,34 @@ public class NavigableRegion implements VisibilityMapHolder
       return obstacleClusters;
    }
 
+   public List<Point3DReadOnly> getHomeRegionNavigableExtrusionsInWorld()
+   {
+      return homeRegionCluster.getNavigableExtrusionsInWorld();
+   }
+
    public List<Cluster> getAllClusters()
    {
       return allClusters;
    }
 
+   public double getPlaneZGivenXY(double xWorld, double yWorld)
+   {
+      return homePlanarRegion.getPlaneZGivenXY(xWorld, yWorld);
+   }
+
+
    public void transformFromLocalToWorld(Transformable objectToTransformToWorld)
    {
-      objectToTransformToWorld.applyTransform(transformToWorld);
+      homePlanarRegion.transformFromLocalToWorld(objectToTransformToWorld);
    }
 
    public void transformFromWorldToLocal(Transformable objectToTransformToWorld)
    {
-      objectToTransformToWorld.applyInverseTransform(transformToWorld);
+      homePlanarRegion.transformFromWorldToLocal(objectToTransformToWorld);
    }
 
-   @Override
    public int getMapId()
    {
-      return homeRegion.getRegionId();
-   }
-
-   @Override
-   public VisibilityMap getVisibilityMapInLocal()
-   {
-      return visibilityMapInLocal;
-   }
-
-   @Override
-   public VisibilityMap getVisibilityMapInWorld()
-   {
-      if (visibilityMapInWorld == null)
-      {
-         visibilityMapInWorld = new VisibilityMap();
-         visibilityMapInWorld.copy(visibilityMapInLocal);
-         transformFromLocalToWorld(visibilityMapInWorld);
-         visibilityMapInWorld.computeVertices();
-      }
-
-      return visibilityMapInWorld;
+      return homePlanarRegion.getRegionId();
    }
 }

@@ -10,9 +10,19 @@ import us.ihmc.quadrupedRobotics.controller.force.QuadrupedForceBasedStandContro
 @ContinuousIntegrationPlan(categories = IntegrationCategory.FAST)
 public class GenericQuadrupedForceBasedStandControllerTest extends QuadrupedForceBasedStandControllerTest
 {
-   public double getTranslationShift()
+   public double getHeightShift()
    {
       return 0.05;
+   }
+
+   public double getHeightDelta()
+   {
+      return 0.01;
+   }
+
+   public double getTranslationShift()
+   {
+      return 0.07;
    }
 
    public double getTranslationDelta()

@@ -9,11 +9,13 @@ import us.ihmc.robotics.math.trajectories.YoPolynomial;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutputBasics;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutputListReadOnly;
 import us.ihmc.tools.lists.PairList;
+import us.ihmc.yoVariables.parameters.DoubleParameter;
+import us.ihmc.yoVariables.providers.DoubleProvider;
 import us.ihmc.yoVariables.variable.YoDouble;
 
 public class SmoothTransitionControllerState extends HighLevelControllerState
 {
-   private final YoDouble standTransitionDuration;
+   private final DoubleProvider standTransitionDuration;
    private final YoDouble standTransitionRatioCurrentValue;
    private final YoPolynomial transitionRatioTrajectory;
 
@@ -32,10 +34,9 @@ public class SmoothTransitionControllerState extends HighLevelControllerState
       this.initialControllerState = initialControllerState;
       this.finalControllerState = finalControllerState;
 
-      standTransitionDuration = new YoDouble(namePrefix + "TransitionDuration", registry);
+      standTransitionDuration = new DoubleParameter(namePrefix + "TransitionDuration", registry, highLevelControllerParameters.getTimeInStandTransition());
       standTransitionRatioCurrentValue = new YoDouble(namePrefix + "TransitionRatioCurrentValue", registry);
       transitionRatioTrajectory = new YoPolynomial(namePrefix + "TransitionRatioTrajectory", 2, registry);
-      this.standTransitionDuration.set(highLevelControllerParameters.getTimeInStandTransition());
 
       lowLevelOneDoFJointDesiredDataHolder.registerJointsWithEmptyData(controlledJoints);
 
@@ -51,7 +52,7 @@ public class SmoothTransitionControllerState extends HighLevelControllerState
    {
       finalControllerState.onEntry();
 
-      transitionRatioTrajectory.setLinear(0.0, standTransitionDuration.getDoubleValue(), 0.0, 1.0);
+      transitionRatioTrajectory.setLinear(0.0, standTransitionDuration.getValue(), 0.0, 1.0);
    }
 
    @Override
@@ -60,7 +61,7 @@ public class SmoothTransitionControllerState extends HighLevelControllerState
       initialControllerState.doAction(timeInState);
       finalControllerState.doAction(timeInState);
 
-      double timeInBlending = MathTools.clamp(timeInState, 0.0, standTransitionDuration.getDoubleValue());
+      double timeInBlending = MathTools.clamp(timeInState, 0.0, standTransitionDuration.getValue());
       transitionRatioTrajectory.compute(timeInBlending);
       double gainRatio = transitionRatioTrajectory.getPosition();
       standTransitionRatioCurrentValue.set(gainRatio);
@@ -91,7 +92,7 @@ public class SmoothTransitionControllerState extends HighLevelControllerState
    @Override
    public boolean isDone(double timeInState)
    {
-      return timeInState > standTransitionDuration.getDoubleValue();
+      return timeInState > standTransitionDuration.getValue();
    }
 
    @Override

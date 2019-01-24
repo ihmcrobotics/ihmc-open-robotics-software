@@ -9,7 +9,7 @@ import java.util.Random;
 
 import javax.xml.bind.JAXBException;
 
-import us.ihmc.euclid.geometry.Box3D;
+import us.ihmc.euclid.shape.Box3D;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.graphicsDescription.Graphics3DObject;
@@ -23,11 +23,11 @@ import us.ihmc.modelFileLoaders.SdfLoader.SDFWorldLoader;
 import us.ihmc.modelFileLoaders.SdfLoader.xmlDescription.Collision;
 import us.ihmc.modelFileLoaders.SdfLoader.xmlDescription.SDFGeometry;
 import us.ihmc.modelFileLoaders.SdfLoader.xmlDescription.SDFVisual;
-import us.ihmc.simulationconstructionset.ExternalForcePoint;
-import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.simulationConstructionSetTools.util.environments.CommonAvatarEnvironmentInterface;
 import us.ihmc.simulationConstructionSetTools.util.environments.SelectableObjectListener;
 import us.ihmc.simulationConstructionSetTools.util.ground.CombinedTerrainObject3D;
+import us.ihmc.simulationconstructionset.ExternalForcePoint;
+import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.simulationconstructionset.util.ground.CylinderTerrainObject;
 import us.ihmc.simulationconstructionset.util.ground.RotatableBoxTerrainObject;
 import us.ihmc.simulationconstructionset.util.ground.TerrainObject3D;

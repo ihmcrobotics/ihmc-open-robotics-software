@@ -1,7 +1,5 @@
 package us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.walkingController.states;
 
-import java.util.Collection;
-
 import us.ihmc.commonWalkingControlModules.capturePoint.BalanceManager;
 import us.ihmc.commonWalkingControlModules.capturePoint.CenterOfMassHeightManager;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
@@ -51,20 +49,18 @@ public class StandingState extends WalkingState
       this.controllerToolbox = controllerToolbox;
       this.failureDetectionControlModule = failureDetectionControlModule;
 
-      Collection<ReferenceFrame> trajectoryFrames = controllerToolbox.getTrajectoryFrames();
-      
       RigidBodyBasics chest = controllerToolbox.getFullRobotModel().getChest();
       if(chest != null)
       {
          ReferenceFrame chestBodyFrame = chest.getBodyFixedFrame();
-         
+
          for (RobotSide robotSide : RobotSide.values)
          {
             RigidBodyBasics hand = controllerToolbox.getFullRobotModel().getHand(robotSide);
             if(hand != null)
             {
                ReferenceFrame handControlFrame = controllerToolbox.getFullRobotModel().getHandControlFrame(robotSide);
-               RigidBodyControlManager handManager = managerFactory.getOrCreateRigidBodyManager(hand, chest, handControlFrame, chestBodyFrame, trajectoryFrames);
+               RigidBodyControlManager handManager = managerFactory.getOrCreateRigidBodyManager(hand, chest, handControlFrame, chestBodyFrame);
                handManagers.put(robotSide, handManager);
             }
          }

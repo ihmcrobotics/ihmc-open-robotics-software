@@ -2,6 +2,7 @@ package us.ihmc.quadrupedRobotics.planning;
 
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.quadrupedBasics.gait.QuadrupedTimedStep;
 import us.ihmc.robotics.robotSide.QuadrantDependentList;
 import us.ihmc.robotics.robotSide.RobotQuadrant;
 import us.ihmc.yoVariables.parameters.DoubleParameter;

@@ -817,7 +817,7 @@ public class ICPOptimizationController implements ICPOptimizationControllerInter
       double finalRecursionMultiplier = Math.exp(-omega0 * timeInTransferForShifting);
 
       double minimumFootstepMultiplier = Math.min(this.minimumFootstepMultiplier.getValue(), finalRecursionMultiplier);
-      return minimumFootstepMultiplier + (1 - minimumFootstepMultiplier / finalRecursionMultiplier) * recursionMultiplier.getDoubleValue();
+      return minimumFootstepMultiplier + (1.0 - minimumFootstepMultiplier / finalRecursionMultiplier) * recursionMultiplier.getDoubleValue();
    }
 
    private boolean solveQP()

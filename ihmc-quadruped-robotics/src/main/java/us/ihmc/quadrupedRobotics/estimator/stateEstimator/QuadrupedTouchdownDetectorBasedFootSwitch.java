@@ -14,7 +14,7 @@ import us.ihmc.yoVariables.variable.YoFramePoint2D;
 
 public class QuadrupedTouchdownDetectorBasedFootSwitch extends TouchdownDetectorBasedFootswitch
 {
-   private static final int defaultGlitchWindow = 3;
+   private static final int defaultGlitchWindow = 10;
 
    private final ContactablePlaneBody foot;
    private final double totalRobotWeight;

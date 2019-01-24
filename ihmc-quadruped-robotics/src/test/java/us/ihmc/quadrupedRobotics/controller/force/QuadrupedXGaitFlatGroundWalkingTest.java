@@ -1,31 +1,25 @@
 package us.ihmc.quadrupedRobotics.controller.force;
 
-import java.io.IOException;
-
 import org.junit.After;
 import org.junit.Before;
-
 import org.junit.Test;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
-import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelControllerName;
-import us.ihmc.quadrupedRobotics.QuadrupedForceTestYoVariables;
-import us.ihmc.quadrupedRobotics.QuadrupedMultiRobotTestInterface;
-import us.ihmc.quadrupedRobotics.QuadrupedTestBehaviors;
-import us.ihmc.quadrupedRobotics.QuadrupedTestFactory;
-import us.ihmc.quadrupedRobotics.QuadrupedTestGoals;
+import us.ihmc.quadrupedBasics.QuadrupedSteppingStateEnum;
+import us.ihmc.quadrupedCommunication.teleop.RemoteQuadrupedTeleopManager;
+import us.ihmc.quadrupedRobotics.*;
 import us.ihmc.quadrupedRobotics.controller.QuadrupedControlMode;
-import us.ihmc.quadrupedRobotics.controller.QuadrupedSteppingStateEnum;
-import us.ihmc.quadrupedRobotics.input.managers.QuadrupedTeleopManager;
 import us.ihmc.quadrupedRobotics.simulation.QuadrupedGroundContactModelType;
 import us.ihmc.robotics.testing.YoVariableTestGoal;
 import us.ihmc.simulationConstructionSetTools.util.simulationrunner.GoalOrientedTestConductor;
 import us.ihmc.tools.MemoryTools;
 
+import java.io.IOException;
+
 public abstract class QuadrupedXGaitFlatGroundWalkingTest implements QuadrupedMultiRobotTestInterface
 {
    private GoalOrientedTestConductor conductor;
    private QuadrupedForceTestYoVariables variables;
-   private QuadrupedTeleopManager stepTeleopManager;
+   private RemoteQuadrupedTeleopManager stepTeleopManager;
    private QuadrupedTestFactory quadrupedTestFactory;
 
    public abstract double getPacingWidth();
@@ -48,14 +42,14 @@ public abstract class QuadrupedXGaitFlatGroundWalkingTest implements QuadrupedMu
          quadrupedTestFactory.setUseNetworking(true);
          conductor = quadrupedTestFactory.createTestConductor();
          variables = new QuadrupedForceTestYoVariables(conductor.getScs());
-         stepTeleopManager = quadrupedTestFactory.getStepTeleopManager();
+         stepTeleopManager = quadrupedTestFactory.getRemoteStepTeleopManager();
       }
       catch (IOException e)
       {
          throw new RuntimeException("Error loading simulation: " + e.getMessage());
       }
    }
-   
+
    @After
    public void tearDown()
    {
@@ -63,7 +57,7 @@ public abstract class QuadrupedXGaitFlatGroundWalkingTest implements QuadrupedMu
       conductor.concludeTesting();
       conductor = null;
       variables = null;
-      
+
       MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " after test.");
    }
 
@@ -185,11 +179,12 @@ public abstract class QuadrupedXGaitFlatGroundWalkingTest implements QuadrupedMu
    {
       QuadrupedTestBehaviors.readyXGait(conductor, variables, stepTeleopManager);
 
-      stepTeleopManager.getXGaitSettings().setEndPhaseShift(endPhaseShift);
+      stepTeleopManager.setEndPhaseShift(endPhaseShift);
 
-      double walkTime = 5.0;
+      double walkTime = 6.0;
       stepTeleopManager.requestXGait();
       stepTeleopManager.setDesiredVelocity(walkingSpeed, 0.0, 0.0);
+
       conductor.addSustainGoal(QuadrupedTestGoals.notFallen(variables));
       conductor.addTerminalGoal(YoVariableTestGoal.timeInFuture(variables.getYoTime(), walkTime));
 
@@ -228,7 +223,7 @@ public abstract class QuadrupedXGaitFlatGroundWalkingTest implements QuadrupedMu
       double expectedSemiCircleWalkTime = Math.PI / Math.abs(angularVelocity);
 
       stepTeleopManager.requestXGait();
-      stepTeleopManager.getXGaitSettings().setEndPhaseShift(endPhaseShift);
+      stepTeleopManager.setEndPhaseShift(endPhaseShift);
       stepTeleopManager.setDesiredVelocity(walkingSpeed, 0.0, angularVelocity);
       conductor.addSustainGoal(QuadrupedTestGoals.notFallen(variables));
       conductor.addTimeLimit(variables.getYoTime(), expectedSemiCircleWalkTime * 1.5);
@@ -309,11 +304,11 @@ public abstract class QuadrupedXGaitFlatGroundWalkingTest implements QuadrupedMu
 
    private void testFlatGroundPacing(double walkingSpeed)
    {
-      stepTeleopManager.getXGaitSettings().setStanceWidth(getPacingWidth());
+      stepTeleopManager.setStanceWidth(getPacingWidth());
 
       QuadrupedTestBehaviors.readyXGait(conductor, variables, stepTeleopManager);
 
-      stepTeleopManager.getXGaitSettings().setEndPhaseShift(0.0);
+      stepTeleopManager.setEndPhaseShift(0.0);
 
       double walkTime = 5.0;
       stepTeleopManager.requestXGait();
@@ -336,7 +331,7 @@ public abstract class QuadrupedXGaitFlatGroundWalkingTest implements QuadrupedMu
 
    private void testPacingInASemiCircle(double walkingSpeed, double angularVelocity)
    {
-      stepTeleopManager.getXGaitSettings().setStanceWidth(getPacingWidth());
+      stepTeleopManager.setStanceWidth(getPacingWidth());
 
       stepTeleopManager.setShiftPlanBasedOnStepAdjustment(false);
       QuadrupedTestBehaviors.readyXGait(conductor, variables, stepTeleopManager);
@@ -344,7 +339,7 @@ public abstract class QuadrupedXGaitFlatGroundWalkingTest implements QuadrupedMu
       double expectedSemiCircleWalkTime = Math.PI / Math.abs(angularVelocity);
 
       stepTeleopManager.requestXGait();
-      stepTeleopManager.getXGaitSettings().setEndPhaseShift(0.0);
+      stepTeleopManager.setEndPhaseShift(0.0);
       stepTeleopManager.setDesiredVelocity(walkingSpeed, 0.0, angularVelocity);
       conductor.addSustainGoal(QuadrupedTestGoals.notFallen(variables));
       conductor.addTimeLimit(variables.getYoTime(), expectedSemiCircleWalkTime * 1.5);

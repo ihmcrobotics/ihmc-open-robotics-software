@@ -1,8 +1,8 @@
 package us.ihmc.quadrupedRobotics.providers;
 
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.quadrupedRobotics.planning.QuadrupedTimedStep;
 import us.ihmc.commons.lists.RecyclingArrayList;
+import us.ihmc.quadrupedBasics.gait.QuadrupedTimedStep;
 import us.ihmc.robotics.robotSide.RobotQuadrant;
 import us.ihmc.yoVariables.listener.VariableChangedListener;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;

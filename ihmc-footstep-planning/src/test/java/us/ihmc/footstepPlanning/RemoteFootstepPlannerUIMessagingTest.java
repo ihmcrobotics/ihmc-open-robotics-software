@@ -606,10 +606,18 @@ public class RemoteFootstepPlannerUIMessagingTest
             return normalZThresholdForAccessibleRegions;
          }
 
+         private final double preferredExtrusionDistance = RandomNumbers.nextDouble(random, 0.01, 1.0);
+
+         @Override
+         public double getPreferredObstacleExtrusionDistance()
+         {
+            return preferredExtrusionDistance;
+         }
+
          private final double extrusionDistance = RandomNumbers.nextDouble(random, 0.01, 1.0);
 
          @Override
-         public double getExtrusionDistance()
+         public double getObstacleExtrusionDistance()
          {
             return extrusionDistance;
          }
@@ -617,7 +625,7 @@ public class RemoteFootstepPlannerUIMessagingTest
          private final double extrusionDistanceIfNotTooHighToStep = RandomNumbers.nextDouble(random, 0.01, 1.0);
 
          @Override
-         public double getExtrusionDistanceIfNotTooHighToStep()
+         public double getObstacleExtrusionDistanceIfNotTooHighToStep()
          {
             return extrusionDistanceIfNotTooHighToStep;
          }
@@ -832,8 +840,8 @@ public class RemoteFootstepPlannerUIMessagingTest
    {
       assertEquals(parameters.getMaxInterRegionConnectionLength(), packet.getMaxInterRegionConnectionLength(), epsilon);
       assertEquals(parameters.getNormalZThresholdForAccessibleRegions(), packet.getNormalZThresholdForAccessibleRegions(), epsilon);
-      assertEquals(parameters.getExtrusionDistance(), packet.getExtrusionDistance(), epsilon);
-      assertEquals(parameters.getExtrusionDistanceIfNotTooHighToStep(), packet.getExtrusionDistanceIfNotTooHighToStep(), epsilon);
+      assertEquals(parameters.getObstacleExtrusionDistance(), packet.getExtrusionDistance(), epsilon);
+      assertEquals(parameters.getObstacleExtrusionDistanceIfNotTooHighToStep(), packet.getExtrusionDistanceIfNotTooHighToStep(), epsilon);
       assertEquals(parameters.getTooHighToStepDistance(), packet.getTooHighToStepDistance(), epsilon);
       assertEquals(parameters.getClusterResolution(), packet.getClusterResolution(), epsilon);
       assertEquals(parameters.getExplorationDistanceFromStartGoal(), packet.getExplorationDistanceFromStartGoal(), epsilon);

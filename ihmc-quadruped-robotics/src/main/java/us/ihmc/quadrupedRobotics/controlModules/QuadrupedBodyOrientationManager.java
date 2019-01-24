@@ -2,12 +2,17 @@ package us.ihmc.quadrupedRobotics.controlModules;
 
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.FeedbackControlCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.OrientationFeedbackControlCommand;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.InverseDynamicsCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.virtualModelControl.VirtualModelControlCommand;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
+import us.ihmc.humanoidRobotics.communication.controllerAPI.command.PelvisOrientationTrajectoryCommand;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.QuadrupedBodyOrientationCommand;
+import us.ihmc.humanoidRobotics.communication.controllerAPI.command.QuadrupedBodyTrajectoryCommand;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.SO3TrajectoryControllerCommand;
 import us.ihmc.mecano.frames.MovingReferenceFrame;
 import us.ihmc.quadrupedRobotics.controller.QuadrupedControllerToolbox;
@@ -15,7 +20,10 @@ import us.ihmc.quadrupedRobotics.estimator.GroundPlaneEstimator;
 import us.ihmc.robotics.controllers.pidGains.GainCoupling;
 import us.ihmc.robotics.controllers.pidGains.implementations.DefaultPID3DGains;
 import us.ihmc.robotics.controllers.pidGains.implementations.ParameterizedPID3DGains;
-import us.ihmc.robotics.math.trajectories.waypoints.MultipleWaypointsOrientationTrajectoryGenerator;
+import us.ihmc.robotics.dataStructures.parameters.ParameterVector3D;
+import us.ihmc.robotics.math.trajectories.generators.MultipleWaypointsOrientationTrajectoryGenerator;
+import us.ihmc.robotics.screwTheory.SelectionMatrix3D;
+import us.ihmc.sensorProcessing.simulatedSensors.Vector3DProvider;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
@@ -38,7 +46,7 @@ public class QuadrupedBodyOrientationManager
    private final MovingReferenceFrame bodyFrame;
    private final YoFrameYawPitchRoll yoBodyOrientationSetpoint;
    private final YoFrameVector3D yoBodyAngularVelocitySetpoint;
-   private final YoFrameVector3D yoComTorqueFeedforwardSetpoint;
+   private final YoFrameVector3D yoBodyAngularAccelerationSetpoint;
 
    private final FrameQuaternion desiredBodyOrientation;
    private final FrameQuaternion desiredBodyOrientationOffset;
@@ -54,7 +62,7 @@ public class QuadrupedBodyOrientationManager
    private final YoDouble robotTimestamp;
 
    private final OrientationFeedbackControlCommand feedbackControlCommand = new OrientationFeedbackControlCommand();
-   private final YoFrameVector3D bodyAngularWeight = new YoFrameVector3D("bodyAngularWeight", worldFrame, registry);
+   private final Vector3DReadOnly bodyAngularWeight;
 
    public QuadrupedBodyOrientationManager(QuadrupedControllerToolbox controllerToolbox, YoVariableRegistry parentRegistry)
    {
@@ -65,12 +73,14 @@ public class QuadrupedBodyOrientationManager
       bodyOrientationDefaultGains.setProportionalGains(1000.0, 1000.0, 1000.0);
       bodyOrientationDefaultGains.setDerivativeGains(250.0, 250.0, 250.0);
       bodyOrientationDefaultGains.setIntegralGains(0.0, 0.0, 0.0, 0.0);
-      bodyOrientationGainsParameter = new ParameterizedPID3DGains("_bodyOrientation", GainCoupling.NONE, false, bodyOrientationDefaultGains, registry);
+      bodyOrientationGainsParameter = new ParameterizedPID3DGains("_bodyOrientation", GainCoupling.NONE, true, bodyOrientationDefaultGains, registry);
+
+      bodyAngularWeight = new ParameterVector3D("bodyAngularWeight", new Vector3D(2.5, 2.5, 1.0), registry);
 
       ReferenceFrame bodyFrame = controllerToolbox.getReferenceFrames().getBodyFrame();
       yoBodyOrientationSetpoint = new YoFrameYawPitchRoll("bodyOrientationSetpoint", worldFrame, registry);
       yoBodyAngularVelocitySetpoint = new YoFrameVector3D("bodyAngularVelocitySetpoint", worldFrame, registry);
-      yoComTorqueFeedforwardSetpoint = new YoFrameVector3D("comTorqueFeedforwardSetpoint", worldFrame, registry);
+      yoBodyAngularAccelerationSetpoint = new YoFrameVector3D("bodyAngularAccelerationSetpoint", worldFrame, registry);
 
       feedbackControlCommand.setGains(bodyOrientationDefaultGains);
       feedbackControlCommand.set(controllerToolbox.getFullRobotModel().getElevator(), controllerToolbox.getFullRobotModel().getBody());
@@ -86,16 +96,16 @@ public class QuadrupedBodyOrientationManager
       desiredBodyAngularVelocity = new FrameVector3D();
       desiredBodyAngularAcceleration = new FrameVector3D();
 
-      bodyAngularWeight.set(2.5, 2.5, 1.0);
 
       parentRegistry.addChild(registry);
    }
 
    public void initialize()
    {
-      desiredBodyOrientation.setToZero(bodyFrame);
-      desiredBodyAngularVelocity.setToZero();
-      desiredBodyAngularAcceleration.setToZero();
+      ReferenceFrame trajectoryFrame = offsetBodyOrientationTrajectory.getReferenceFrame();
+      desiredBodyOrientation.setToZero(trajectoryFrame);
+      desiredBodyAngularVelocity.setToZero(trajectoryFrame);
+      desiredBodyAngularAcceleration.setToZero(trajectoryFrame);
 
       double currentTime = robotTimestamp.getDoubleValue();
 
@@ -123,6 +133,19 @@ public class QuadrupedBodyOrientationManager
       {
          handleAbsoluteOrientationCommand(so3Trajectory);
          useAbsoluteBodyOrientationTrajectory.set(true);
+      }
+   }
+
+   private final QuadrupedBodyOrientationCommand tempBodyOrientationTrajectoryCommand = new QuadrupedBodyOrientationCommand();
+
+   public void handleBodyTrajectoryCommand(QuadrupedBodyTrajectoryCommand command)
+   {
+      SelectionMatrix3D angularSelectionMatrix = command.getSE3Trajectory().getSelectionMatrix().getAngularPart();
+
+      if (angularSelectionMatrix.isXSelected() || angularSelectionMatrix.isYSelected() || angularSelectionMatrix.isZSelected())
+      { // At least one axis is to be controlled, process the command
+         tempBodyOrientationTrajectoryCommand.set(command);
+         handleBodyOrientationCommand(tempBodyOrientationTrajectoryCommand);
       }
    }
 
@@ -204,15 +227,14 @@ public class QuadrupedBodyOrientationManager
       double bodyOrientationRoll = desiredBodyOrientation.getRoll();
       desiredBodyOrientation.setYawPitchRoll(bodyOrientationYaw, bodyOrientationPitch, bodyOrientationRoll);
 
-      yoComTorqueFeedforwardSetpoint.setToZero();
-
       feedbackControlCommand.setGains(bodyOrientationGainsParameter);
-      feedbackControlCommand.setFeedForwardAction(yoComTorqueFeedforwardSetpoint);
       feedbackControlCommand.set(desiredBodyOrientation, desiredBodyAngularVelocity);
+      feedbackControlCommand.setFeedForwardAction(desiredBodyAngularAcceleration);
       feedbackControlCommand.setWeightsForSolver(bodyAngularWeight);
 
       yoBodyOrientationSetpoint.set(desiredBodyOrientation);
       yoBodyAngularVelocitySetpoint.set(desiredBodyAngularVelocity);
+      yoBodyAngularAccelerationSetpoint.set(desiredBodyAngularAcceleration);
    }
 
    private void handleAbsoluteYawOrientationCommand()
@@ -245,7 +267,7 @@ public class QuadrupedBodyOrientationManager
          desiredBodyAngularAcceleration.setZ(desiredAbsoluteYawAcceleration.getZ());
       }
    }
-   
+
    public FeedbackControlCommand<?> createFeedbackControlTemplate()
    {
       return getFeedbackControlCommand();
@@ -257,6 +279,11 @@ public class QuadrupedBodyOrientationManager
    }
 
    public VirtualModelControlCommand<?> getVirtualModelControlCommand()
+   {
+      return null;
+   }
+
+   public InverseDynamicsCommand<?> getInverseDynamicsCommand()
    {
       return null;
    }

@@ -9,5 +9,5 @@ public interface FootstepNodeSnapperReadOnly
     * @param node
     * @return
     */
-   public FootstepNodeSnapData getSnapData(FootstepNode node);
+   FootstepNodeSnapData getSnapData(FootstepNode node);
 }

@@ -1,6 +1,6 @@
 package us.ihmc.sensorProcessing.pointClouds.combinationQuadTreeOctTree;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -9,13 +9,14 @@ import java.util.List;
 import org.junit.After;
 import org.junit.Test;
 
+import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.continuousIntegration.IntegrationCategory;
 import us.ihmc.euclid.geometry.BoundingBox2D;
-import us.ihmc.euclid.geometry.Box3D;
 import us.ihmc.euclid.geometry.Plane3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.tools.ReferenceFrameTools;
+import us.ihmc.euclid.shape.Box3D;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple3D.Point3D;
@@ -28,8 +29,6 @@ import us.ihmc.graphicsDescription.yoGraphics.BagOfBalls;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.jMonkeyEngineToolkit.GroundProfile3D;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.yoVariables.variable.YoFramePoint3D;
 import us.ihmc.robotics.quadTree.Box;
 import us.ihmc.robotics.quadTree.QuadTreeForGroundParameters;
 import us.ihmc.simulationConstructionSetTools.util.ground.CombinedTerrainObject3D;
@@ -37,7 +36,8 @@ import us.ihmc.simulationToolkit.visualizers.QuadTreeHeightMapVisualizer;
 import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.util.ground.RotatableBoxTerrainObject;
-import us.ihmc.commons.thread.ThreadTools;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoFramePoint3D;
 
 public class QuadTreeForGroundHeightMapSimulationTest
 {

@@ -8,6 +8,8 @@ int32 region_id
 
 geometry_msgs/Point region_origin
 
+geometry_msgs/Quaternion region_orientation
+
 geometry_msgs/Vector3 region_normal
 
 geometry_msgs/Point[] vertex_buffer

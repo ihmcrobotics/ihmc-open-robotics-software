@@ -2,10 +2,12 @@ package us.ihmc.avatar;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 import controller_msgs.msg.dds.ControllerCrashNotificationPacket;
+import controller_msgs.msg.dds.HighLevelStateChangeStatusMessage;
 import controller_msgs.msg.dds.RequestWristForceSensorCalibrationPacket;
-import controller_msgs.msg.dds.StateEstimatorModePacket;
+import gnu.trove.map.TObjectDoubleMap;
 import us.ihmc.commonWalkingControlModules.controlModules.ForceSensorToJointTorqueProjector;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.ContactableBodiesFactory;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.ControllerAPIDefinition;
@@ -18,9 +20,10 @@ import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
+import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelControllerName;
+import us.ihmc.humanoidRobotics.communication.packets.sensing.StateEstimatorMode;
 import us.ihmc.humanoidRobotics.communication.subscribers.PelvisPoseCorrectionCommunicatorInterface;
 import us.ihmc.humanoidRobotics.communication.subscribers.RequestWristForceSensorCalibrationSubscriber;
-import us.ihmc.humanoidRobotics.communication.subscribers.StateEstimatorModeSubscriber;
 import us.ihmc.humanoidRobotics.model.CenterOfPressureDataHolder;
 import us.ihmc.mecano.multiBodySystem.interfaces.FloatingJointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
@@ -190,16 +193,10 @@ public class DRCEstimatorThread implements MultiThreadedRobotControlElement
 
          if (realtimeRos2Node != null)
          {
-            StateEstimatorModeSubscriber stateEstimatorModeSubscriber = new StateEstimatorModeSubscriber();
             RequestWristForceSensorCalibrationSubscriber requestWristForceSensorCalibrationSubscriber = new RequestWristForceSensorCalibrationSubscriber();
-
             MessageTopicNameGenerator subscriberTopicNameGenerator = ControllerAPIDefinition.getSubscriberTopicNameGenerator(robotName);
-            ROS2Tools.createCallbackSubscription(realtimeRos2Node, StateEstimatorModePacket.class, subscriberTopicNameGenerator,
-                                                 subscriber -> stateEstimatorModeSubscriber.receivedPacket(subscriber.takeNextData()));
             ROS2Tools.createCallbackSubscription(realtimeRos2Node, RequestWristForceSensorCalibrationPacket.class, subscriberTopicNameGenerator,
                                                  subscriber -> requestWristForceSensorCalibrationSubscriber.receivedPacket(subscriber.takeNextData()));
-
-            estimatorFactory.setOperatingModeSubscriber(stateEstimatorModeSubscriber);
             forceSensorStateUpdater.setRequestWristForceSensorCalibrationSubscriber(requestWristForceSensorCalibrationSubscriber);
          }
 
@@ -272,6 +269,17 @@ public class DRCEstimatorThread implements MultiThreadedRobotControlElement
       {
          robotVisualizer.setMainRegistry(estimatorRegistry, estimatorFullRobotModel.getElevator(), yoGraphicsListRegistry);
       }
+   }
+
+   public void setupHighLevelControllerCallback(String robotName, RealtimeRos2Node realtimeRos2Node,
+                                                Map<HighLevelControllerName, StateEstimatorMode> stateModeMap)
+   {
+      MessageTopicNameGenerator publisherTopicNameGenerator = ControllerAPIDefinition.getPublisherTopicNameGenerator(robotName);
+      ROS2Tools.createCallbackSubscription(realtimeRos2Node, HighLevelStateChangeStatusMessage.class, publisherTopicNameGenerator, subscriber -> {
+         HighLevelStateChangeStatusMessage message = subscriber.takeNextData();
+         StateEstimatorMode requestedMode = stateModeMap.get(HighLevelControllerName.fromByte(message.getEndHighLevelControllerName()));
+         stateEstimator.requestStateEstimatorMode(requestedMode);
+      });
    }
 
    @Override
@@ -416,17 +424,10 @@ public class DRCEstimatorThread implements MultiThreadedRobotControlElement
       throw new RuntimeException("Estimator thread should not wake up based on clock");
    }
 
-   public void initializeEstimator(RigidBodyTransform rootJointTransform)
+   public void initializeEstimator(RigidBodyTransform rootJointTransform, TObjectDoubleMap<String> jointPositions)
    {
       if (stateEstimator != null)
-         stateEstimator.initializeEstimator(rootJointTransform);
-   }
-
-   // Used by the Atlas stand prep state.
-   @Deprecated
-   public StateEstimatorController getStateEstimator()
-   {
-      return stateEstimator;
+         stateEstimator.initializeEstimator(rootJointTransform, jointPositions);
    }
 
    public List<? extends IMUSensorReadOnly> getSimulatedIMUOutput()

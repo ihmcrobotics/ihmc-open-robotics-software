@@ -37,9 +37,14 @@ public class ConstantPlanarRegionsPublisher
 
    public void start()
    {
+      start(200);
+   }
+
+   public void start(int periodMillis)
+   {
       if(scheduled == null)
       {
-         scheduled = executorService.scheduleAtFixedRate(() -> publisher.update(true), 0, 200, TimeUnit.MILLISECONDS);
+         scheduled = executorService.scheduleAtFixedRate(() -> publisher.update(true), 0, periodMillis, TimeUnit.MILLISECONDS);
       }
    }
 

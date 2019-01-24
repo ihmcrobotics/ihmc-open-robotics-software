@@ -16,6 +16,7 @@ import us.ihmc.robotEnvironmentAwareness.communication.KryoMessager;
 import us.ihmc.robotEnvironmentAwareness.communication.REACommunicationProperties;
 import us.ihmc.robotEnvironmentAwareness.communication.REAModuleAPI;
 import us.ihmc.robotEnvironmentAwareness.communication.REAUIMessager;
+import us.ihmc.robotEnvironmentAwareness.ui.controller.CustomRegionMergeAnchorPaneController;
 import us.ihmc.robotEnvironmentAwareness.ui.controller.DataExporterAnchorPaneController;
 import us.ihmc.robotEnvironmentAwareness.ui.controller.LIDARFilterAnchorPaneController;
 import us.ihmc.robotEnvironmentAwareness.ui.controller.NormalEstimationAnchorPaneController;
@@ -48,6 +49,8 @@ public class LIDARBasedEnvironmentAwarenessUI
    private NormalEstimationAnchorPaneController normalEstimationAnchorPaneController;
    @FXML
    private RegionSegmentationAnchorPaneController regionSegmentationAnchorPaneController;
+   @FXML
+   private CustomRegionMergeAnchorPaneController customRegionMergeAnchorPaneController;
    @FXML
    private PolygonizerAnchorPaneController polygonizerAnchorPaneController;
    @FXML
@@ -130,6 +133,10 @@ public class LIDARBasedEnvironmentAwarenessUI
       regionSegmentationAnchorPaneController.setConfigurationFile(configurationFile);
       regionSegmentationAnchorPaneController.attachREAMessager(uiMessager);
       regionSegmentationAnchorPaneController.bindControls();
+      
+      customRegionMergeAnchorPaneController.setConfigurationFile(configurationFile);
+      customRegionMergeAnchorPaneController.attachREAMessager(uiMessager);
+      customRegionMergeAnchorPaneController.bindControls();
 
       polygonizerAnchorPaneController.setConfigurationFile(configurationFile);
       polygonizerAnchorPaneController.attachREAMessager(uiMessager);

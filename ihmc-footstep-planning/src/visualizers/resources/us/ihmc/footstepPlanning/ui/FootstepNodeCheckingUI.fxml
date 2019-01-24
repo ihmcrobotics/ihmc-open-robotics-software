@@ -1,14 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<?import java.lang.*?>
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
-<?import javafx.scene.control.Button?>
-<?import javafx.scene.layout.AnchorPane?>
-<?import javafx.scene.layout.ColumnConstraints?>
-<?import javafx.scene.layout.GridPane?>
-<?import javafx.scene.layout.RowConstraints?>
-
 <AnchorPane prefHeight="400.0" prefWidth="600.0" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="us.ihmc.footstepPlanning.ui.controllers.FootstepNodeCheckingUIController">
     <children>
         <GridPane hgap="5.0" layoutX="25.0" layoutY="27.0">
@@ -32,25 +25,15 @@
             </rowConstraints>
             <children>
                 <ToggleButton fx:id="enableNodeChecking" mnemonicParsing="false" text="Enable" />
+                <ToggleButton fx:id="nodeCheckerPositionToggleButton" mnemonicParsing="false" text="Place Step" GridPane.rowIndex="1"/>
 
-                <ToggleButton fx:id="nodeCheckerPositionToggleButton" mnemonicParsing="false" text="Place Foot" GridPane.rowIndex="1"/>
-                <ToggleButton fx:id="nodeCheckerRotationToggleButton" mnemonicParsing="false" text="Rotate Foot" GridPane.rowIndex="2" />
+                <Label text="yaw" GridPane.columnIndex="1" GridPane.rowIndex="1" />
+                <Label text="x" GridPane.columnIndex="1" GridPane.rowIndex="0"/>
+                <Label text="y" GridPane.columnIndex="3" GridPane.rowIndex="0"/>
 
-                <Label text="yaw" GridPane.columnIndex="1" GridPane.rowIndex="2" />
-                <Label text="x" GridPane.columnIndex="1" GridPane.rowIndex="1"/>
-                <Label text="y" GridPane.columnIndex="3" GridPane.rowIndex="1"/>
-                <Label text="z" GridPane.columnIndex="5" GridPane.rowIndex="1"/>
-
-                <Spinner fx:id="nodeCheckerFootXSpinner" editable="true" GridPane.columnIndex="2" GridPane.rowIndex="1"/>
-                <Spinner fx:id="nodeCheckerFootYSpinner" editable="true" GridPane.columnIndex="4" GridPane.rowIndex="1"/>
-                <Spinner fx:id="nodeCheckerFootZSpinner" editable="true" GridPane.columnIndex="7" GridPane.rowIndex="1"/>
-                <Spinner fx:id="nodeCheckerFootYaw" editable="true" GridPane.columnIndex="2" GridPane.rowIndex="2" />
-
-                <Label text="Cliff height" GridPane.columnIndex="1" GridPane.rowIndex="3" />
-                <Label text="Min cliff distance" GridPane.columnIndex="1" GridPane.rowIndex="4" />
-
-                <Spinner fx:id="cliffHeightToAvoid" editable="true" GridPane.rowIndex="3" GridPane.columnIndex="2"/>
-                <Spinner fx:id="minDistanceToCliff" editable="true" GridPane.rowIndex="4" GridPane.columnIndex="2"/>
+                <Spinner fx:id="nodeCheckerFootXSpinner" editable="true" GridPane.columnIndex="2" GridPane.rowIndex="0"/>
+                <Spinner fx:id="nodeCheckerFootYSpinner" editable="true" GridPane.columnIndex="4" GridPane.rowIndex="0"/>
+                <Spinner fx:id="nodeCheckerFootYaw" editable="true" GridPane.columnIndex="2" GridPane.rowIndex="1" />
             </children>
         </GridPane>
     </children>

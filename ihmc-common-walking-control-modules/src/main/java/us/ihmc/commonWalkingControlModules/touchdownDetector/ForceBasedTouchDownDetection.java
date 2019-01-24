@@ -14,6 +14,8 @@ import us.ihmc.robotModels.FullQuadrupedRobotModel;
 import us.ihmc.robotics.linearAlgebra.MatrixTools;
 import us.ihmc.robotics.robotSide.RobotQuadrant;
 import us.ihmc.robotics.screwTheory.GeometricJacobian;
+import us.ihmc.yoVariables.parameters.DoubleParameter;
+import us.ihmc.yoVariables.providers.DoubleProvider;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
@@ -31,7 +33,7 @@ public class ForceBasedTouchDownDetection implements TouchdownDetector
    private final List<OneDoFJointBasics> legOneDoFJoints;
    
    private final YoBoolean isInContact;
-   private final YoDouble zForceThreshold;
+   private final DoubleProvider zForceThreshold;
    private final YoDouble measuredZForce;
    private final FrameVector3D footForce = new FrameVector3D();
    
@@ -41,10 +43,8 @@ public class ForceBasedTouchDownDetection implements TouchdownDetector
       registry = new YoVariableRegistry(prefix);
       
       isInContact = new YoBoolean(prefix + "isInContact", registry);
-      zForceThreshold = new YoDouble(prefix + "zForceThreshold", registry);
+      zForceThreshold = new DoubleParameter(prefix + "zForceThreshold", registry, 40.0);
       measuredZForce = new YoDouble(prefix + "measuredZForce", registry);
-      
-      zForceThreshold.set(40.0);
       
       RigidBodyBasics body = robotModel.getRootBody();
       RigidBodyBasics foot = robotModel.getFoot(robotQuadrant);
@@ -86,7 +86,7 @@ public class ForceBasedTouchDownDetection implements TouchdownDetector
       footForce.set(footLinearForce);
       footForce.changeFrame(ReferenceFrame.getWorldFrame());
       measuredZForce.set(footForce.getZ() * -1.0);
-      isInContact.set(measuredZForce.getDoubleValue() > zForceThreshold.getDoubleValue());
+      isInContact.set(measuredZForce.getDoubleValue() > zForceThreshold.getValue());
    }
 
    public void reset()

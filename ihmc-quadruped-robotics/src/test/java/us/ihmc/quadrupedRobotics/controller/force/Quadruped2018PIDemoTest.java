@@ -7,14 +7,10 @@ import us.ihmc.commonWalkingControlModules.pushRecovery.PushRobotTestConductor;
 import us.ihmc.commons.PrintTools;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations;
 import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.quadrupedCommunication.teleop.RemoteQuadrupedTeleopManager;
 import us.ihmc.quadrupedRobotics.*;
 import us.ihmc.quadrupedRobotics.controller.QuadrupedControlMode;
-import us.ihmc.quadrupedRobotics.input.managers.QuadrupedTeleopManager;
 import us.ihmc.quadrupedRobotics.model.QuadrupedInitialOffsetAndYaw;
-import us.ihmc.quadrupedRobotics.planning.chooser.footstepChooser.DefaultPointFootSnapperParameters;
-import us.ihmc.quadrupedRobotics.planning.chooser.footstepChooser.PlanarGroundPointFootSnapper;
-import us.ihmc.quadrupedRobotics.planning.chooser.footstepChooser.PlanarRegionBasedPointFootSnapper;
-import us.ihmc.quadrupedRobotics.providers.YoQuadrupedXGaitSettings;
 import us.ihmc.quadrupedRobotics.simulation.QuadrupedGroundContactModelType;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.geometry.PlanarRegionsListGenerator;
@@ -35,7 +31,7 @@ public abstract class Quadruped2018PIDemoTest implements QuadrupedMultiRobotTest
    private QuadrupedForceTestYoVariables variables;
    private PushRobotTestConductor pusher;
    private QuadrupedTestFactory quadrupedTestFactory;
-   private QuadrupedTeleopManager stepTeleopManager;
+   private RemoteQuadrupedTeleopManager stepTeleopManager;
 
    @Before
    public void setup()
@@ -56,7 +52,7 @@ public abstract class Quadruped2018PIDemoTest implements QuadrupedMultiRobotTest
          conductor = quadrupedTestFactory.createTestConductor();
          variables = new QuadrupedForceTestYoVariables(conductor.getScs());
          pusher = new PushRobotTestConductor(conductor.getScs(), "body");
-         stepTeleopManager = quadrupedTestFactory.getStepTeleopManager();
+         stepTeleopManager = quadrupedTestFactory.getRemoteStepTeleopManager();
       }
       catch (IOException e)
       {
@@ -64,7 +60,7 @@ public abstract class Quadruped2018PIDemoTest implements QuadrupedMultiRobotTest
       }
    }
 
-   
+
    @After
    public void tearDown()
    {
@@ -75,7 +71,7 @@ public abstract class Quadruped2018PIDemoTest implements QuadrupedMultiRobotTest
       conductor = null;
       variables = null;
       pusher = null;
-      
+
       MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " after test.");
    }
 
@@ -87,8 +83,8 @@ public abstract class Quadruped2018PIDemoTest implements QuadrupedMultiRobotTest
       double walkingSpeed = 2.0;
       createTest();
 
-      stepTeleopManager.getXGaitSettings().setStanceWidth(0.25);
-      stepTeleopManager.getXGaitSettings().setStanceLength(0.7);
+      stepTeleopManager.setStanceWidth(0.25);
+      stepTeleopManager.setStanceLength(0.7);
 
       QuadrupedTestBehaviors.readyXGait(conductor, variables, stepTeleopManager);
       double initialDoubleSupportDuration = stepTeleopManager.getXGaitSettings().getEndDoubleSupportDuration();
@@ -97,9 +93,9 @@ public abstract class Quadruped2018PIDemoTest implements QuadrupedMultiRobotTest
       // this was sending a CoMPositionPacket and wasn't being used in the controller
 //      stepTeleopManager.setDesiredBodyHeight(0.8);
 
-      stepTeleopManager.getXGaitSettings().setEndPhaseShift(endPhaseShift);
-      stepTeleopManager.getXGaitSettings().setStepDuration(0.15);
-      stepTeleopManager.getXGaitSettings().setStepGroundClearance(0.05);
+      stepTeleopManager.setEndPhaseShift(endPhaseShift);
+      stepTeleopManager.setStepDuration(0.15);
+      stepTeleopManager.setStepGroundClearance(0.05);
 
       stepTeleopManager.requestXGait();
       stepTeleopManager.setDesiredVelocity(0.5 * walkingSpeed, 0.0, 0.0);
@@ -109,7 +105,7 @@ public abstract class Quadruped2018PIDemoTest implements QuadrupedMultiRobotTest
       conductor.addTerminalGoal(YoVariableTestGoal.timeInFuture(variables.getYoTime(), initialWalkTime));
 
       double walkTime = 5.0;
-      stepTeleopManager.getXGaitSettings().setEndDoubleSupportDuration(0.01);
+      stepTeleopManager.setEndDoubleSupportDuration(0.01);
       stepTeleopManager.setDesiredVelocity(walkingSpeed, 0.0, 0.0);
 
       conductor.addSustainGoal(QuadrupedTestGoals.notFallen(variables));
@@ -138,13 +134,13 @@ public abstract class Quadruped2018PIDemoTest implements QuadrupedMultiRobotTest
       double walkingSpeed = 1.0;
       createTest();
 
-      stepTeleopManager.getXGaitSettings().setStanceLength(0.7);
+      stepTeleopManager.setStanceLength(0.7);
 
       QuadrupedTestBehaviors.readyXGait(conductor, variables, stepTeleopManager);
 
-      stepTeleopManager.getXGaitSettings().setEndPhaseShift(endPhaseShift);
-      stepTeleopManager.getXGaitSettings().setStepDuration(0.2);
-      stepTeleopManager.getXGaitSettings().setEndDoubleSupportDuration(0.001);
+      stepTeleopManager.setEndPhaseShift(endPhaseShift);
+      stepTeleopManager.setStepDuration(0.2);
+      stepTeleopManager.setEndDoubleSupportDuration(0.001);
 
 
       stepTeleopManager.setDesiredVelocity(walkingSpeed, 0.0, 0.0);
@@ -197,14 +193,14 @@ public abstract class Quadruped2018PIDemoTest implements QuadrupedMultiRobotTest
    {
       createTest();
 
-      stepTeleopManager.getXGaitSettings().setStanceWidth(0.25);
-      stepTeleopManager.getXGaitSettings().setStanceLength(0.7);
+      stepTeleopManager.setStanceWidth(0.25);
+      stepTeleopManager.setStanceLength(0.7);
 //      stepTeleopManager.setDesiredBodyHeight(0.55);
 
       QuadrupedTestBehaviors.readyXGait(conductor, variables, stepTeleopManager);
 
-      stepTeleopManager.getXGaitSettings().setEndPhaseShift(90);
-      stepTeleopManager.getXGaitSettings().setStepDuration(0.3);
+      stepTeleopManager.setEndPhaseShift(90);
+      stepTeleopManager.setStepDuration(0.3);
 
       double startingStanceDuration = stepTeleopManager.getXGaitSettings().getEndDoubleSupportDuration();
 
@@ -225,20 +221,20 @@ public abstract class Quadruped2018PIDemoTest implements QuadrupedMultiRobotTest
       conductor.simulate();
 
       stepTeleopManager.setDesiredVelocity(0.7 , 0.0, 0.0);
-      stepTeleopManager.getXGaitSettings().setEndPhaseShift(180);
+      stepTeleopManager.setEndPhaseShift(180);
       conductor.addSustainGoal(QuadrupedTestGoals.notFallen(variables));
       conductor.addDurationGoal(variables.getYoTime(), 0.5);
       conductor.simulate();
 
-      stepTeleopManager.getXGaitSettings().setStepDuration(0.25);
-      stepTeleopManager.getXGaitSettings().setEndDoubleSupportDuration(0.001);
+      stepTeleopManager.setStepDuration(0.25);
+      stepTeleopManager.setEndDoubleSupportDuration(0.001);
 
       stepTeleopManager.setDesiredVelocity(1.0 , 0.0, 0.0);
       conductor.addSustainGoal(QuadrupedTestGoals.notFallen(variables));
       conductor.addDurationGoal(variables.getYoTime(), 4.0);
       conductor.simulate();
 
-      stepTeleopManager.getXGaitSettings().setEndDoubleSupportDuration(startingStanceDuration);
+      stepTeleopManager.setEndDoubleSupportDuration(startingStanceDuration);
       stepTeleopManager.setDesiredVelocity(0.6 , 0.0, 0.0);
       conductor.addSustainGoal(QuadrupedTestGoals.notFallen(variables));
       conductor.addDurationGoal(variables.getYoTime(), 0.5);
@@ -254,34 +250,34 @@ public abstract class Quadruped2018PIDemoTest implements QuadrupedMultiRobotTest
       conductor.addDurationGoal(variables.getYoTime(), 1.0);
       conductor.simulate();
 
-      stepTeleopManager.getXGaitSettings().setStepDuration(0.3);
-      stepTeleopManager.getXGaitSettings().setEndDoubleSupportDuration(startingStanceDuration);
+      stepTeleopManager.setStepDuration(0.3);
+      stepTeleopManager.setEndDoubleSupportDuration(startingStanceDuration);
 
 
       stepTeleopManager.setDesiredVelocity(0.4 , 0.0, 0.0);
-      stepTeleopManager.getXGaitSettings().setEndPhaseShift(90);
+      stepTeleopManager.setEndPhaseShift(90);
       conductor.addSustainGoal(QuadrupedTestGoals.notFallen(variables));
       conductor.addDurationGoal(variables.getYoTime(), 0.5);
       conductor.simulate();
 
-      stepTeleopManager.getXGaitSettings().setStepDuration(0.25);
-      stepTeleopManager.getXGaitSettings().setEndDoubleSupportDuration(0.001);
+      stepTeleopManager.setStepDuration(0.25);
+      stepTeleopManager.setEndDoubleSupportDuration(0.001);
 
       conductor.addSustainGoal(QuadrupedTestGoals.notFallen(variables));
       conductor.addDurationGoal(variables.getYoTime(), 0.5);
       conductor.simulate();
 
       stepTeleopManager.setDesiredVelocity(0.5 , 0.0, 0.0);
-      stepTeleopManager.getXGaitSettings().setEndPhaseShift(0);
+      stepTeleopManager.setEndPhaseShift(0);
       conductor.addSustainGoal(QuadrupedTestGoals.notFallen(variables));
       conductor.addDurationGoal(variables.getYoTime(), 5.0);
       conductor.simulate();
 
-      stepTeleopManager.getXGaitSettings().setStepDuration(0.3);
-      stepTeleopManager.getXGaitSettings().setEndDoubleSupportDuration(startingStanceDuration);
+      stepTeleopManager.setStepDuration(0.3);
+      stepTeleopManager.setEndDoubleSupportDuration(startingStanceDuration);
 
       stepTeleopManager.setDesiredVelocity(0.5, 0.0, 0.0);
-      stepTeleopManager.getXGaitSettings().setEndPhaseShift(90);
+      stepTeleopManager.setEndPhaseShift(90);
       conductor.addSustainGoal(QuadrupedTestGoals.notFallen(variables));
       conductor.addDurationGoal(variables.getYoTime(), 1.0);
       conductor.simulate();
@@ -325,15 +321,11 @@ public abstract class Quadruped2018PIDemoTest implements QuadrupedMultiRobotTest
 
       conductor = quadrupedTestFactory.createTestConductor();
       variables = new QuadrupedForceTestYoVariables(conductor.getScs());
-      stepTeleopManager = quadrupedTestFactory.getStepTeleopManager();
+      stepTeleopManager = quadrupedTestFactory.getRemoteStepTeleopManager();
 
-      YoQuadrupedXGaitSettings xGaitSettings = stepTeleopManager.getXGaitSettings();
-      xGaitSettings.setStanceLength(stanceLength);
+      stepTeleopManager.setStanceLength(stanceLength);
       stepTeleopManager.setDesiredBodyHeight(bodyHeight);
-
-      PlanarRegionBasedPointFootSnapper snapper = new PlanarRegionBasedPointFootSnapper(new DefaultPointFootSnapperParameters());
-      snapper.setPlanarRegionsList(staircaseEnvironment.getPlanarRegionsList());
-      stepTeleopManager.setStepSnapper(snapper);
+      stepTeleopManager.submitPlanarRegionsList(staircaseEnvironment.getPlanarRegionsList());
 
       QuadrupedTestBehaviors.readyXGait(conductor, variables, stepTeleopManager);
 
@@ -388,19 +380,15 @@ public abstract class Quadruped2018PIDemoTest implements QuadrupedMultiRobotTest
 
       conductor = quadrupedTestFactory.createTestConductor();
       variables = new QuadrupedForceTestYoVariables(conductor.getScs());
-      stepTeleopManager = quadrupedTestFactory.getStepTeleopManager();
+      stepTeleopManager = quadrupedTestFactory.getRemoteStepTeleopManager();
 
-      YoQuadrupedXGaitSettings xGaitSettings = stepTeleopManager.getXGaitSettings();
-      xGaitSettings.setStanceLength(stanceLength);
-      xGaitSettings.setStepGroundClearance(stepGroundClearance);
-      xGaitSettings.setEndDoubleSupportDuration(endDoubleSupportDuration);
-      xGaitSettings.setStanceWidth(stanceWidth);
-      xGaitSettings.setEndPhaseShift(endPhaseShift);
+      stepTeleopManager.setStanceLength(stanceLength);
+      stepTeleopManager.setStepGroundClearance(stepGroundClearance);
+      stepTeleopManager.setEndDoubleSupportDuration(endDoubleSupportDuration);
+      stepTeleopManager.setStanceWidth(stanceWidth);
+      stepTeleopManager.setEndPhaseShift(endPhaseShift);
       stepTeleopManager.setDesiredBodyHeight(bodyHeight);
-
-      PlanarRegionBasedPointFootSnapper snapper = new PlanarRegionBasedPointFootSnapper(new DefaultPointFootSnapperParameters());
-      snapper.setPlanarRegionsList(staircaseEnvironment.getPlanarRegionsList());
-      stepTeleopManager.setStepSnapper(snapper);
+      stepTeleopManager.submitPlanarRegionsList(staircaseEnvironment.getPlanarRegionsList());
 
       QuadrupedTestBehaviors.readyXGait(conductor, variables, stepTeleopManager);
 
@@ -441,10 +429,8 @@ public abstract class Quadruped2018PIDemoTest implements QuadrupedMultiRobotTest
 
       conductor = quadrupedTestFactory.createTestConductor();
       variables = new QuadrupedForceTestYoVariables(conductor.getScs());
-      stepTeleopManager = quadrupedTestFactory.getStepTeleopManager();
-      PlanarRegionBasedPointFootSnapper snapper = new PlanarRegionBasedPointFootSnapper(new DefaultPointFootSnapperParameters());
-      snapper.setPlanarRegionsList(planarRegionsList);
-      stepTeleopManager.setStepSnapper(snapper);
+      stepTeleopManager = quadrupedTestFactory.getRemoteStepTeleopManager();
+      stepTeleopManager.submitPlanarRegionsList(planarRegionsList);
 
       QuadrupedTestBehaviors.readyXGait(conductor, variables, stepTeleopManager);
 
@@ -479,19 +465,18 @@ public abstract class Quadruped2018PIDemoTest implements QuadrupedMultiRobotTest
       quadrupedTestFactory.setUseNetworking(true);
       conductor = quadrupedTestFactory.createTestConductor();
       variables = new QuadrupedForceTestYoVariables(conductor.getScs());
-      stepTeleopManager = quadrupedTestFactory.getStepTeleopManager();
-      stepTeleopManager.setStepSnapper(new PlanarGroundPointFootSnapper(quadrupedTestFactory.getRobotName(), stepTeleopManager.getReferenceFrames(), stepTeleopManager.getRos2Node()));
+      stepTeleopManager = quadrupedTestFactory.getRemoteStepTeleopManager();
 
       QuadrupedTestBehaviors.readyXGait(conductor, variables, stepTeleopManager);
 
       conductor.addTerminalGoal(YoVariableTestGoal.doubleGreaterThan(variables.getYoTime(), variables.getYoTime().getDoubleValue() + 0.5));
       conductor.simulate();
 
-      stepTeleopManager.getXGaitSettings().setEndPhaseShift(180.0);
-      stepTeleopManager.getXGaitSettings().setEndDoubleSupportDuration(0.07);
-      stepTeleopManager.getXGaitSettings().setStanceWidth(0.35);
-      stepTeleopManager.getXGaitSettings().setStepDuration(0.25);
-      stepTeleopManager.getXGaitSettings().setStepGroundClearance(0.08);
+      stepTeleopManager.setEndPhaseShift(180.0);
+      stepTeleopManager.setEndDoubleSupportDuration(0.07);
+      stepTeleopManager.setStanceWidth(0.35);
+      stepTeleopManager.setStepDuration(0.25);
+      stepTeleopManager.setStepGroundClearance(0.08);
       stepTeleopManager.requestXGait();
       stepTeleopManager.setDesiredVelocity(0.4, 0.0, 0.0);
       conductor.addSustainGoal(YoVariableTestGoal.doubleGreaterThan(variables.getRobotBodyZ(), 0.0));

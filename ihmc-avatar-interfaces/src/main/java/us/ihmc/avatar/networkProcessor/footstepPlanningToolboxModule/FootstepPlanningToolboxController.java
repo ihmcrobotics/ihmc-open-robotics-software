@@ -33,7 +33,7 @@ import us.ihmc.footstepPlanning.simplePlanners.PlanThenSnapPlanner;
 import us.ihmc.footstepPlanning.simplePlanners.TurnWalkTurnPlanner;
 import us.ihmc.footstepPlanning.tools.PlannerTools;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
-import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessageConverter;
+import us.ihmc.footstepPlanning.FootstepDataMessageConverter;
 import us.ihmc.pathPlanning.statistics.ListOfStatistics;
 import us.ihmc.pathPlanning.statistics.PlannerStatistics;
 import us.ihmc.pathPlanning.statistics.VisibilityGraphStatistics;
@@ -117,7 +117,7 @@ public class FootstepPlanningToolboxController extends ToolboxController
    {
       FootstepNodeExpansion expansion = new ParameterBasedNodeExpansion(footstepPlanningParameters);
 
-      SimplePlanarRegionFootstepNodeSnapper snapper = new SimplePlanarRegionFootstepNodeSnapper(footPolygons, footstepPlanningParameters);
+      SimplePlanarRegionFootstepNodeSnapper snapper = new SimplePlanarRegionFootstepNodeSnapper(footPolygons);
       FootstepNodeSnapAndWiggler postProcessingSnapper = new FootstepNodeSnapAndWiggler(footPolygons, footstepPlanningParameters);
 
       SnapBasedNodeChecker snapBasedNodeChecker = new SnapBasedNodeChecker(footstepPlanningParameters, footPolygons, snapper);

@@ -169,7 +169,7 @@ public class AtlasPointyRocksTest extends HumanoidPointyRocksTest
       @Override
       public double getSimulateDT()
       { // TODO See if feet can behave better with partial foothold, it causes the joints and and sim to freak out, so need a lower DT.
-         return getEstimatorDT() / 4.0;
+         return getEstimatorDT() / 10.0;
       }
 
       @Override
