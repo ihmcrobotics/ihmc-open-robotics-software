@@ -58,6 +58,8 @@ public class VisibilityGraphsParametersPacketPubSubType implements us.ihmc.pubsu
 
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
+
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
@@ -78,6 +80,9 @@ public class VisibilityGraphsParametersPacketPubSubType implements us.ihmc.pubsu
       int initial_alignment = current_alignment;
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+
+
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
 
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
@@ -125,6 +130,8 @@ public class VisibilityGraphsParametersPacketPubSubType implements us.ihmc.pubsu
 
       cdr.write_type_6(data.getNormalZThresholdForAccessibleRegions());
 
+      cdr.write_type_6(data.getPreferredExtrusionDistance());
+
       cdr.write_type_6(data.getExtrusionDistance());
 
       cdr.write_type_6(data.getExtrusionDistanceIfNotTooHighToStep());
@@ -153,6 +160,8 @@ public class VisibilityGraphsParametersPacketPubSubType implements us.ihmc.pubsu
       	
       data.setNormalZThresholdForAccessibleRegions(cdr.read_type_6());
       	
+      data.setPreferredExtrusionDistance(cdr.read_type_6());
+      	
       data.setExtrusionDistance(cdr.read_type_6());
       	
       data.setExtrusionDistanceIfNotTooHighToStep(cdr.read_type_6());
@@ -180,6 +189,7 @@ public class VisibilityGraphsParametersPacketPubSubType implements us.ihmc.pubsu
       ser.write_type_4("sequence_id", data.getSequenceId());
       ser.write_type_6("max_inter_region_connection_length", data.getMaxInterRegionConnectionLength());
       ser.write_type_6("normal_z_threshold_for_accessible_regions", data.getNormalZThresholdForAccessibleRegions());
+      ser.write_type_6("preferred_extrusion_distance", data.getPreferredExtrusionDistance());
       ser.write_type_6("extrusion_distance", data.getExtrusionDistance());
       ser.write_type_6("extrusion_distance_if_not_too_high_to_step", data.getExtrusionDistanceIfNotTooHighToStep());
       ser.write_type_6("too_high_to_step_distance", data.getTooHighToStepDistance());
@@ -197,6 +207,7 @@ public class VisibilityGraphsParametersPacketPubSubType implements us.ihmc.pubsu
       data.setSequenceId(ser.read_type_4("sequence_id"));
       data.setMaxInterRegionConnectionLength(ser.read_type_6("max_inter_region_connection_length"));
       data.setNormalZThresholdForAccessibleRegions(ser.read_type_6("normal_z_threshold_for_accessible_regions"));
+      data.setPreferredExtrusionDistance(ser.read_type_6("preferred_extrusion_distance"));
       data.setExtrusionDistance(ser.read_type_6("extrusion_distance"));
       data.setExtrusionDistanceIfNotTooHighToStep(ser.read_type_6("extrusion_distance_if_not_too_high_to_step"));
       data.setTooHighToStepDistance(ser.read_type_6("too_high_to_step_distance"));

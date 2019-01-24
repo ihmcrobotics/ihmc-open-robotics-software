@@ -70,9 +70,8 @@ public class MultiStageFootstepPlanningModule
       realtimeRos2Node = ROS2Tools.createRealtimeRos2Node(pubSubImplementation, "ihmc_" + CaseFormat.UPPER_CAMEL.to(CaseFormat.LOWER_UNDERSCORE, name));
       CommandInputManager commandInputManager = new CommandInputManager(name, FootstepPlannerCommunicationProperties.getSupportedCommands());
       StatusMessageOutputManager statusOutputManager = new StatusMessageOutputManager(FootstepPlannerCommunicationProperties.getSupportedStatusMessages());
-      ControllerNetworkSubscriber controllerNetworkSubscriber = new ControllerNetworkSubscriber(
-            FootstepPlannerCommunicationProperties.subscriberTopicNameGenerator(robotName), commandInputManager,
-            FootstepPlannerCommunicationProperties.publisherTopicNameGenerator(robotName), statusOutputManager, realtimeRos2Node);
+      new ControllerNetworkSubscriber(FootstepPlannerCommunicationProperties.subscriberTopicNameGenerator(robotName), commandInputManager,
+                                      FootstepPlannerCommunicationProperties.publisherTopicNameGenerator(robotName), statusOutputManager, realtimeRos2Node);
 
       ThreadFactory threadFactory = ThreadTools.getNamedThreadFactory(name);
       executorService = Executors.newScheduledThreadPool(1, threadFactory);
@@ -99,6 +98,10 @@ public class MultiStageFootstepPlanningModule
       ROS2Tools.createCallbackSubscription(realtimeRos2Node, PlanningStatisticsRequestMessage.class,
                                            FootstepPlannerCommunicationProperties.subscriberTopicNameGenerator(robotName),
                                            s -> footstepPlanningController.processPlanningStatisticsRequest());
+      ROS2Tools.createCallbackSubscription(realtimeRos2Node, RequestFootstepPlannerParametersMessage.class,
+                                           FootstepPlannerCommunicationProperties.subscriberTopicNameGenerator(robotName),
+                                           s -> footstepPlanningController.broadcastPlannerParameters());
+
       IHMCRealtimeROS2Publisher<TextToSpeechPacket> textToSpeechPublisher = ROS2Tools
             .createPublisher(realtimeRos2Node, TextToSpeechPacket.class, ROS2Tools::generateDefaultTopicName);
 

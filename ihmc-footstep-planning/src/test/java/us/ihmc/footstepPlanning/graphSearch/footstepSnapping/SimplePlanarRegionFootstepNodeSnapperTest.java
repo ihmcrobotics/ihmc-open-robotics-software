@@ -36,7 +36,7 @@ public class SimplePlanarRegionFootstepNodeSnapperTest
    private final Random random = new Random(1209L);
    private final double epsilon = 1e-8;
    private final SideDependentList<ConvexPolygon2D> footPolygons = PlannerTools.createDefaultFootPolygons();
-   private final SimplePlanarRegionFootstepNodeSnapper snapper = new SimplePlanarRegionFootstepNodeSnapper(footPolygons, new DefaultFootstepPlanningParameters());
+   private final SimplePlanarRegionFootstepNodeSnapper snapper = new SimplePlanarRegionFootstepNodeSnapper(footPolygons);
    private final ConvexPolygon2D unitSquare = new ConvexPolygon2D();
 
    private boolean visualize = true;

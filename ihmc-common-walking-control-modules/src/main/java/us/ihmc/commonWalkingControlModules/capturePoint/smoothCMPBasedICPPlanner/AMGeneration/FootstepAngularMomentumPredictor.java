@@ -169,7 +169,6 @@ public class FootstepAngularMomentumPredictor implements AngularMomentumTrajecto
       }
 
       this.numberOfRegisteredFootsteps = new YoInteger(fullPrefix + "NumberOfRegisteredFootsteps", registry);
-      ReferenceFrame[] referenceFrames = {worldFrame};
       for (int i = 0; i < maxNumberOfFootstepsToConsider; i++)
       {
          AngularMomentumTrajectory swingTrajectory = new AngularMomentumTrajectory(numberOfSwingSegments, 2 * maxNumberOfTrajectoryCoefficients);
@@ -202,7 +201,7 @@ public class FootstepAngularMomentumPredictor implements AngularMomentumTrajecto
       }
 
 
-      upcomingCoPsInFootsteps = new RecyclingArrayList<>(maxNumberOfFootstepsToConsider + 2, new CoPPointsInFootSupplier(fullPrefix, referenceFrames));
+      upcomingCoPsInFootsteps = new RecyclingArrayList<>(maxNumberOfFootstepsToConsider + 2, new CoPPointsInFootSupplier(fullPrefix));
       upcomingCoPsInFootsteps.clear();
       copPointsConstructed = true;
 
@@ -264,12 +263,10 @@ public class FootstepAngularMomentumPredictor implements AngularMomentumTrajecto
    private class CoPPointsInFootSupplier implements Supplier<CoPPointsInFoot>
    {
       private final String fullPrefix;
-      private final ReferenceFrame[] framesToRegister;
 
-      public CoPPointsInFootSupplier(String fullPrefix, ReferenceFrame[] framesToRegister)
+      public CoPPointsInFootSupplier(String fullPrefix)
       {
          this.fullPrefix = fullPrefix;
-         this.framesToRegister = framesToRegister;
       }
 
       @Override
@@ -277,9 +274,9 @@ public class FootstepAngularMomentumPredictor implements AngularMomentumTrajecto
       {
          CoPPointsInFoot pointsInFoot;
          if (!copPointsConstructed)
-            pointsInFoot = new CoPPointsInFoot(fullPrefix, copSegmentNumber, framesToRegister, registry);
+            pointsInFoot = new CoPPointsInFoot(fullPrefix, copSegmentNumber, registry);
          else
-            pointsInFoot = new CoPPointsInFoot(fullPrefix, copSegmentNumber, framesToRegister, null);
+            pointsInFoot = new CoPPointsInFoot(fullPrefix, copSegmentNumber, null);
 
          copSegmentNumber++;
          return pointsInFoot;

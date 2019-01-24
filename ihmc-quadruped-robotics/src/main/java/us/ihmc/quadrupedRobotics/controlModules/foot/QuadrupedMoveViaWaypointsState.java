@@ -9,8 +9,8 @@ import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.quadrupedRobotics.controller.QuadrupedControllerToolbox;
-import us.ihmc.robotics.math.trajectories.waypoints.FrameEuclideanTrajectoryPointList;
-import us.ihmc.robotics.math.trajectories.waypoints.MultipleWaypointsPositionTrajectoryGenerator;
+import us.ihmc.robotics.math.trajectories.generators.MultipleWaypointsPositionTrajectoryGenerator;
+import us.ihmc.robotics.math.trajectories.trajectorypoints.lists.FrameEuclideanTrajectoryPointList;
 import us.ihmc.robotics.robotSide.RobotQuadrant;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
@@ -22,11 +22,8 @@ public class QuadrupedMoveViaWaypointsState extends QuadrupedFootState
    // Yo variables
    private final YoDouble robotTime;
 
-   // SoleWaypoint variables
    private final MultipleWaypointsPositionTrajectoryGenerator quadrupedWaypointsPositionTrajectoryGenerator;
 
-   // Feedback controller
-   private final ReferenceFrame bodyFrame;
    private final FrameEuclideanTrajectoryPointList trajectoryPointList = new FrameEuclideanTrajectoryPointList();
 
    private final QuadrupedFootControlModuleParameters parameters;
@@ -38,6 +35,7 @@ public class QuadrupedMoveViaWaypointsState extends QuadrupedFootState
 
    private final FramePoint3D desiredFootPosition = new FramePoint3D();
    private final FrameVector3D desiredFootVelocity = new FrameVector3D();
+   private final FrameVector3D desiredFootAcceleration = new FrameVector3D();
 
    private final PointFeedbackControlCommand feedbackControlCommand = new PointFeedbackControlCommand();
 
@@ -48,14 +46,13 @@ public class QuadrupedMoveViaWaypointsState extends QuadrupedFootState
       this.robotQuadrant = robotQuadrant;
       this.controllerToolbox = controllerToolbox;
 
-      this.bodyFrame = controllerToolbox.getReferenceFrames().getBodyFrame();
       ReferenceFrame soleFrame = controllerToolbox.getSoleReferenceFrame(robotQuadrant);
       this.parameters = controllerToolbox.getFootControlModuleParameters();
       robotTime = controllerToolbox.getRuntimeEnvironment().getRobotTimestamp();
 
       // Create waypoint trajectory
       quadrupedWaypointsPositionTrajectoryGenerator = new MultipleWaypointsPositionTrajectoryGenerator(robotQuadrant.getCamelCaseName() + "SoleTrajectory",
-                                                                                                       bodyFrame, registry);
+                                                                                                       worldFrame, registry);
 
       RigidBodyBasics foot = controllerToolbox.getFullRobotModel().getFoot(robotQuadrant);
       FramePoint3D currentPosition = new FramePoint3D(soleFrame);
@@ -80,6 +77,8 @@ public class QuadrupedMoveViaWaypointsState extends QuadrupedFootState
    public void onEntry()
    {
       controllerToolbox.getFootContactState(robotQuadrant).clear();
+
+      initialize();
    }
 
    @Override
@@ -89,12 +88,17 @@ public class QuadrupedMoveViaWaypointsState extends QuadrupedFootState
 
       quadrupedWaypointsPositionTrajectoryGenerator.compute(currentTrajectoryTime);
       quadrupedWaypointsPositionTrajectoryGenerator.getPosition(desiredFootPosition);
-      desiredFootVelocity.setToZero();
+      quadrupedWaypointsPositionTrajectoryGenerator.getVelocity(desiredFootVelocity);
+      quadrupedWaypointsPositionTrajectoryGenerator.getAcceleration(desiredFootAcceleration);
 
       desiredFootPosition.changeFrame(worldFrame);
       desiredFootVelocity.changeFrame(worldFrame);
+      desiredFootAcceleration.changeFrame(worldFrame);
+
       feedbackControlCommand.set(desiredFootPosition, desiredFootVelocity);
+      feedbackControlCommand.setFeedForwardAction(desiredFootAcceleration);
       feedbackControlCommand.setGains(parameters.getSolePositionGains());
+      feedbackControlCommand.setWeightsForSolver(parameters.getSolePositionWeights());
    }
 
    @Override
@@ -110,6 +114,8 @@ public class QuadrupedMoveViaWaypointsState extends QuadrupedFootState
 
    private void createSoleWaypointTrajectory()
    {
+      quadrupedWaypointsPositionTrajectoryGenerator.changeFrame(trajectoryPointList.getReferenceFrame());
+
       quadrupedWaypointsPositionTrajectoryGenerator.clear();
       quadrupedWaypointsPositionTrajectoryGenerator.appendWaypoints(trajectoryPointList);
       if (trajectoryPointList.getNumberOfTrajectoryPoints() > 0)

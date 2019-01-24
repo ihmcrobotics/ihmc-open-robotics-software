@@ -6,11 +6,12 @@ import java.util.List;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.pathPlanning.visibilityGraphs.clusterManagement.Cluster;
-import us.ihmc.pathPlanning.visibilityGraphs.dataStructure.NavigableRegion;
+import us.ihmc.pathPlanning.visibilityGraphs.clusterManagement.Cluster.ClusterType;
+import us.ihmc.pathPlanning.visibilityGraphs.dataStructure.VisibilityMapWithNavigableRegion;
 
 public class OcclusionTools
 {
-   public static boolean isTheGoalIntersectingAnyObstacles(NavigableRegion region, Point3DReadOnly start, Point3DReadOnly goal)
+   public static boolean isTheGoalIntersectingAnyObstacles(VisibilityMapWithNavigableRegion region, Point3DReadOnly start, Point3DReadOnly goal)
    {
       for (Cluster cluster : region.getObstacleClusters())
       {
@@ -21,7 +22,8 @@ public class OcclusionTools
             list2D.add(new Point2D(point3d));
          }
 
-         boolean visible = VisibilityTools.isPointVisible(new Point2D(start), new Point2D(goal), list2D);
+         boolean closed = cluster.isClosed();
+         boolean visible = VisibilityTools.isPointVisible(new Point2D(start), new Point2D(goal), list2D, closed);
 
          if (!visible)
          {
@@ -44,7 +46,8 @@ public class OcclusionTools
             list2D.add(new Point2D(point3d));
          }
 
-         boolean visible = VisibilityTools.isPointVisible(new Point2D(start), new Point2D(goal), list2D);
+         boolean closed = cluster.isClosed();
+         boolean visible = VisibilityTools.isPointVisible(new Point2D(start), new Point2D(goal), list2D, closed);
 
          if (!visible)
          {

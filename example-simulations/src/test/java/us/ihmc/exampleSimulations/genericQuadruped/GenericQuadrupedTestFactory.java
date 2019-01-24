@@ -12,8 +12,8 @@ import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelControllerName;
 import us.ihmc.jMonkeyEngineToolkit.GroundProfile3D;
 import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
-import us.ihmc.quadrupedPlanning.input.QuadrupedTestTeleopScript;
-import us.ihmc.quadrupedPlanning.input.QuadrupedTeleopManager;
+import us.ihmc.quadrupedCommunication.teleop.RemoteQuadrupedTeleopManager;
+import us.ihmc.quadrupedCommunication.networkProcessing.QuadrupedNetworkProcessor;
 import us.ihmc.quadrupedRobotics.QuadrupedTestFactory;
 import us.ihmc.quadrupedRobotics.controller.QuadrupedControlMode;
 import us.ihmc.quadrupedBasics.referenceFrames.QuadrupedReferenceFrames;
@@ -29,7 +29,6 @@ import us.ihmc.quadrupedRobotics.simulation.GroundContactParameters;
 import us.ihmc.quadrupedRobotics.simulation.QuadrupedGroundContactModelType;
 import us.ihmc.quadrupedRobotics.simulation.QuadrupedSimulationFactory;
 import us.ihmc.robotModels.FullQuadrupedRobotModel;
-import us.ihmc.robotModels.FullRobotModel;
 import us.ihmc.robotModels.OutputWriter;
 import us.ihmc.robotics.robotSide.QuadrantDependentList;
 import us.ihmc.ros2.Ros2Node;
@@ -72,7 +71,8 @@ public class GenericQuadrupedTestFactory implements QuadrupedTestFactory
    private final OptionalFactoryField<SimulationConstructionSetParameters> scsParameters = new OptionalFactoryField<>("scsParameters");
 
    private FullQuadrupedRobotModel fullRobotModel;
-   private QuadrupedTeleopManager stepTeleopManager;
+   private QuadrupedNetworkProcessor networkProcessor;
+   private RemoteQuadrupedTeleopManager stepTeleopManager;
    private YoGraphicsListRegistry graphicsListRegistry;
    private String robotName;
    private QuadrupedSimulationFactory simulationFactory;
@@ -180,7 +180,9 @@ public class GenericQuadrupedTestFactory implements QuadrupedTestFactory
          Ros2Node ros2Node = ROS2Tools.createRos2Node(PubSubImplementation.INTRAPROCESS, "quadruped_teleop_manager");
 
          graphicsListRegistry = new YoGraphicsListRegistry();
-         stepTeleopManager = new QuadrupedTeleopManager(robotName, ros2Node, xGaitSettings, physicalProperties.getNominalBodyHeight(), referenceFrames, graphicsListRegistry, teleopRegistry);
+         networkProcessor = new GenericQuadrupedNetworkProcessor(modelFactory, physicalProperties.getNominalBodyHeight(), xGaitSettings,
+                                                                 new GenericQuadrupedPointFootSnapperParameters(), PubSubImplementation.INTRAPROCESS);
+         stepTeleopManager = new RemoteQuadrupedTeleopManager(robotName, ros2Node, networkProcessor, xGaitSettings, teleopRegistry);
 
          new DefaultParameterReader().readParametersInRegistry(teleopRegistry);
       }
@@ -194,7 +196,7 @@ public class GenericQuadrupedTestFactory implements QuadrupedTestFactory
 
       if(useNetworking.get())
       {
-         goalOrientedTestConductor.getScs().addScript(new QuadrupedTestTeleopScript(stepTeleopManager, TEST_INPUT_UPDATE_FREQUENCY, sdfRobot.getRobotsYoVariableRegistry()));
+//         goalOrientedTestConductor.getScs().addScript(new QuadrupedTestTeleopScript(stepTeleopManager, TEST_INPUT_UPDATE_FREQUENCY, sdfRobot.getRobotsYoVariableRegistry()));
          goalOrientedTestConductor.getScs().addYoGraphicsListRegistry(graphicsListRegistry);
       }
 
@@ -264,7 +266,7 @@ public class GenericQuadrupedTestFactory implements QuadrupedTestFactory
    }
 
    @Override
-   public QuadrupedTeleopManager getStepTeleopManager()
+   public RemoteQuadrupedTeleopManager getRemoteStepTeleopManager()
    {
       return stepTeleopManager;
    }
@@ -276,7 +278,7 @@ public class GenericQuadrupedTestFactory implements QuadrupedTestFactory
    }
 
    @Override
-   public FullRobotModel getFullRobotModel()
+   public FullQuadrupedRobotModel getFullRobotModel()
    {
       return fullRobotModel;
    }
@@ -284,6 +286,7 @@ public class GenericQuadrupedTestFactory implements QuadrupedTestFactory
    @Override
    public void close()
    {
+      networkProcessor.close();
       simulationFactory.close();
    }
 }

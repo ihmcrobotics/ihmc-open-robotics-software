@@ -1,7 +1,6 @@
 package us.ihmc.commonWalkingControlModules.trajectories;
 
 import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
 
 import java.util.Random;
 
@@ -40,55 +39,6 @@ public class VelocityConstrainedPoseTrajectoryGeneratorTest
    public void tearDown()
    {
       ReferenceFrameTools.clearWorldFrameTree();
-   }
-
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(timeout = 30000)
-   public void testRuntimeExceptions()
-   {
-      YoVariableRegistry registry = new YoVariableRegistry("youpiloup");
-      VelocityConstrainedPoseTrajectoryGenerator trajToTest1 = new VelocityConstrainedPoseTrajectoryGenerator("blop1", worldFrame, registry);
-      VelocityConstrainedPoseTrajectoryGenerator trajToTest2 = new VelocityConstrainedPoseTrajectoryGenerator("blop2", worldFrame, registry);
-
-      try
-      {
-         trajToTest1.registerNewTrajectoryFrame(frameA);
-         fail("Should have thrown an exception.");
-      }
-      catch (Exception e)
-      {
-         // Good
-      }
-
-      try
-      {
-         trajToTest1.switchTrajectoryFrame(worldFrame);
-         fail("Should have thrown an exception.");
-      }
-      catch (Exception e)
-      {
-         // Good
-      }
-
-      try
-      {
-         trajToTest2.registerNewTrajectoryFrame(frameA);
-         fail("Should have thrown an exception.");
-      }
-      catch (Exception e)
-      {
-         // Good
-      }
-
-      try
-      {
-         trajToTest2.switchTrajectoryFrame(worldFrame);
-         fail("Should have thrown an exception.");
-      }
-      catch (Exception e)
-      {
-         // Good
-      }
    }
 
    @ContinuousIntegrationTest(estimatedDuration = 0.0)
@@ -256,7 +206,7 @@ public class VelocityConstrainedPoseTrajectoryGeneratorTest
 
    /**
     * TODO: Get that working with final angular velocity.
-    * 
+    *
     **/
 
    @ContinuousIntegrationTest(estimatedDuration = 0.0)

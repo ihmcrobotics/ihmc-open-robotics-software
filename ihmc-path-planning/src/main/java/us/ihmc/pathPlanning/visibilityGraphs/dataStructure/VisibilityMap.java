@@ -1,6 +1,9 @@
 package us.ihmc.pathPlanning.visibilityGraphs.dataStructure;
 
-import java.util.*;
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.Set;
 
 import us.ihmc.euclid.interfaces.Transformable;
 import us.ihmc.euclid.transform.interfaces.Transform;
@@ -87,8 +90,6 @@ public class VisibilityMap implements Transformable, Iterable<Connection>
    {
       return connections;
    }
-
-
 
    public boolean isEmpty()
    {

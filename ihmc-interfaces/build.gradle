@@ -108,5 +108,6 @@ task generateMessages {
 
       generator.convertDirectoryToUnixEOL(file("src/main/generated-idl").toPath())
       generator.convertDirectoryToUnixEOL(file("src/main/generated-java").toPath())
+      generator.convertDirectoryToUnixEOL(file("src/main/messages/ros1").toPath())
    }
 }

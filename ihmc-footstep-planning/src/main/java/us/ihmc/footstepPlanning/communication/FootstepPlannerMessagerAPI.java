@@ -22,7 +22,7 @@ import us.ihmc.messager.MessagerAPIFactory.MessagerAPI;
 import us.ihmc.messager.MessagerAPIFactory.Topic;
 import us.ihmc.messager.MessagerAPIFactory.TopicTheme;
 import us.ihmc.messager.MessagerAPIFactory.TypedTopicTheme;
-import us.ihmc.pathPlanning.visibilityGraphs.dataStructure.NavigableRegion;
+import us.ihmc.pathPlanning.visibilityGraphs.dataStructure.VisibilityMapWithNavigableRegion;
 import us.ihmc.pathPlanning.visibilityGraphs.interfaces.VisibilityGraphsParameters;
 import us.ihmc.pathPlanning.visibilityGraphs.interfaces.VisibilityMapHolder;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
@@ -142,7 +142,7 @@ public class FootstepPlannerMessagerAPI
 
    public static final Topic<Boolean> ShowBodyPath = Root.child(BodyPath).topic(Show);
 
-   public static final Topic<List<NavigableRegion>> NavigableRegionData = Root.child(VisibilityGraphs).topic(Data);
+   public static final Topic<List<VisibilityMapWithNavigableRegion>> VisibilityMapWithNavigableRegionData = Root.child(VisibilityGraphs).topic(Data);
 
    public static final Topic<VisibilityMapHolder> StartVisibilityMap = Root.child(VisibilityGraphs).child(Start).child(Map).topic(Data);
    public static final Topic<VisibilityMapHolder> GoalVisibilityMap = Root.child(VisibilityGraphs).child(Goal).child(Map).topic(Data);

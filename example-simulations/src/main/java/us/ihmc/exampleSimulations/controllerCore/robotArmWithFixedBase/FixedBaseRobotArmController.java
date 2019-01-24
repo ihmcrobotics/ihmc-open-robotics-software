@@ -137,7 +137,7 @@ public class FixedBaseRobotArmController implements RobotController
       allPossibleCommands.addCommand(handSpatialCommand);
 
       JointDesiredOutputList lowLevelControllerCoreOutput = new JointDesiredOutputList(MultiBodySystemTools.filterJoints(controlledJoints, OneDoFJointBasics.class));
-      
+
       controllerCore = new WholeBodyControllerCore(controlCoreToolbox, allPossibleCommands, lowLevelControllerCoreOutput, registry);
 
       yoGraphicsListRegistry.registerYoGraphic("desireds", new YoGraphicCoordinateSystem("targetFrame", handTargetPosition, handTargetOrientation, 0.15,
@@ -146,7 +146,7 @@ public class FixedBaseRobotArmController implements RobotController
       privilegedConfigurationCommand.setPrivilegedConfigurationOption(PrivilegedConfigurationOption.AT_ZERO);
       privilegedConfigurationCommand.addJoint(robotArm.getElbowPitch(), Math.PI / 3.0);
 
-      trajectory = new StraightLinePoseTrajectoryGenerator("handTrajectory", false, worldFrame, registry, true, yoGraphicsListRegistry);
+      trajectory = new StraightLinePoseTrajectoryGenerator("handTrajectory", worldFrame, registry, true, yoGraphicsListRegistry);
 
       robotJointLimitWatcher = new RobotJointLimitWatcher(MultiBodySystemTools.filterJoints(controlledJoints, OneDoFJointBasics.class));
       registry.addChild(robotJointLimitWatcher.getYoVariableRegistry());

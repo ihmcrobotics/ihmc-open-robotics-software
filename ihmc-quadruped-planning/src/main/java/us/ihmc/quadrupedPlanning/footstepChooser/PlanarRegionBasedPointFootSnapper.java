@@ -30,6 +30,8 @@ public class PlanarRegionBasedPointFootSnapper implements PointFootSnapper
    private final ConvexPolygon2D shrunkPolygon = new ConvexPolygon2D();
    private final ConvexPolygonScaler scaler = new ConvexPolygonScaler();
 
+   private PointFootSnapper fallbackSnapper;
+
    public PlanarRegionBasedPointFootSnapper(PointFootSnapperParameters parameters)
    {
       this.parameters = parameters;
@@ -42,6 +44,11 @@ public class PlanarRegionBasedPointFootSnapper implements PointFootSnapper
             transformToParent.set(planarRegionTransformToWorld);
          }
       };
+   }
+
+   public void setFallbackSnapper(PointFootSnapper fallbackSnapper)
+   {
+      this.fallbackSnapper = fallbackSnapper;
    }
 
    public void setPlanarRegionsList(PlanarRegionsList planarRegionsList)
@@ -63,6 +70,16 @@ public class PlanarRegionBasedPointFootSnapper implements PointFootSnapper
    @Override
    public Point3DReadOnly snapStep(double xPosition, double yPosition, double minimumZPosition)
    {
+      if (planarRegionsList.isEmpty())
+      {
+         if (fallbackSnapper != null)
+            return fallbackSnapper.snapStep(xPosition, yPosition, minimumZPosition);
+
+         snappedPoint3D.set(xPosition, yPosition, 0.0);
+         return snappedPoint3D;
+      }
+
+
       List<PlanarRegion> intersectingRegions = planarRegionsList.findPlanarRegionsContainingPointByProjectionOntoXYPlane(xPosition, yPosition);
       if(intersectingRegions == null)
       {
