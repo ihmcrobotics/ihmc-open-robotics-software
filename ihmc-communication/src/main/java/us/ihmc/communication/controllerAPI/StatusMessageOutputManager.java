@@ -5,9 +5,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import us.ihmc.commons.PrintTools;
 import us.ihmc.concurrent.Builder;
 import us.ihmc.euclid.interfaces.Settable;
+import us.ihmc.log.LogTools;
 
 /**
  * StatusMessageOutputManager is used to create an output API for a controller.
@@ -98,7 +98,7 @@ public class StatusMessageOutputManager
    {
       if (statusClassToObjectMap.get(statusMessageClass) == null)
       {
-         PrintTools.error(this, "The status message " + statusMessageClass.getClass().getSimpleName() + " has not been registered or is not supported.");
+         LogTools.error("The status message " + statusMessageClass.getClass().getSimpleName() + " has not been registered or is not supported.");
          return;
       }
 
@@ -138,7 +138,7 @@ public class StatusMessageOutputManager
 
       if (statusMessageClone == null)
       {
-         PrintTools.error(this, "The status message " + statusMessage.getClass().getSimpleName() + " has not been registered or is not supported.");
+         LogTools.error("The status message " + statusMessage.getClass().getSimpleName() + " has not been registered or is not supported.");
          return;
       }
 

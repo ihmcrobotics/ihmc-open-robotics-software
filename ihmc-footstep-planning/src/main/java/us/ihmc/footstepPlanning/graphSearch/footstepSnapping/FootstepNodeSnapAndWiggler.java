@@ -24,6 +24,7 @@ public class FootstepNodeSnapAndWiggler extends FootstepNodeSnapper
 {
    private final List<BipedalFootstepPlannerListener> listeners = new ArrayList<>();
    private final SideDependentList<ConvexPolygon2D> footPolygonsInSoleFrame;
+   private final FootstepPlannerParameters parameters;
 
    private final WiggleParameters wiggleParameters = new WiggleParameters();
    private final PlanarRegion planarRegionToPack = new PlanarRegion();
@@ -31,7 +32,7 @@ public class FootstepNodeSnapAndWiggler extends FootstepNodeSnapper
 
    public FootstepNodeSnapAndWiggler(SideDependentList<ConvexPolygon2D> footPolygonsInSoleFrame, FootstepPlannerParameters parameters)
    {
-      super(parameters);
+      this.parameters = parameters;
       this.footPolygonsInSoleFrame = footPolygonsInSoleFrame;
    }
 

@@ -17,7 +17,7 @@ import us.ihmc.communication.packets.Packet;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.communication.packets.ExecutionMode;
 import us.ihmc.humanoidRobotics.communication.packets.RandomHumanoidMessages;
-import us.ihmc.robotics.math.trajectories.waypoints.SimpleTrajectoryPoint1D;
+import us.ihmc.robotics.math.trajectories.trajectorypoints.OneDoFTrajectoryPoint;
 import us.ihmc.robotics.robotSide.RobotSide;
 
 public class ArmTrajectoryCommandTest
@@ -106,7 +106,7 @@ public class ArmTrajectoryCommandTest
 
          for (int j = 0; j < numberOfJointTrajectoryPoints; j++)
          {
-            SimpleTrajectoryPoint1D trajectoryPoint = jointTrajectoryPointList.getTrajectoryPoint(j);
+            OneDoFTrajectoryPoint trajectoryPoint = jointTrajectoryPointList.getTrajectoryPoint(j);
             TrajectoryPoint1DMessage jointTrajectoryPoint = message.getJointspaceTrajectory().getJointTrajectoryMessages().get(i).getTrajectoryPoints().get(j);
 
             assertEquals(jointTrajectoryPoint.getPosition(), trajectoryPoint.getPosition(), 1e-9);
@@ -149,8 +149,8 @@ public class ArmTrajectoryCommandTest
 
          for (int j = 0; j < jointTrajectoryPointList.getNumberOfTrajectoryPoints(); j++)
          {
-            SimpleTrajectoryPoint1D trajectoryPoint = jointTrajectoryPointList.getTrajectoryPoint(j);
-            SimpleTrajectoryPoint1D otherTrajectoryPoint = otherJointTrajectoryPointList.getTrajectoryPoint(j);
+            OneDoFTrajectoryPoint trajectoryPoint = jointTrajectoryPointList.getTrajectoryPoint(j);
+            OneDoFTrajectoryPoint otherTrajectoryPoint = otherJointTrajectoryPointList.getTrajectoryPoint(j);
 
             trajectoryPoint.epsilonEquals(otherTrajectoryPoint, 1e-8);
          }

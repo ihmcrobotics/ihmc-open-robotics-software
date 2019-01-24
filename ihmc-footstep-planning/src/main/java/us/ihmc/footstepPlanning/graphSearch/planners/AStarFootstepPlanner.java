@@ -277,9 +277,6 @@ public class AStarFootstepPlanner implements BodyPathAndFootstepPlanner
 
       abortPlanning.set(false);
 
-      if (planarRegionsList != null)
-         checkStartHasPlanarRegion();
-
       graph.initialize(startNode);
       NodeComparator nodeComparator = new NodeComparator(graph, goalNodes, heuristics);
       stack = new PriorityQueue<>(nodeComparator);
@@ -310,33 +307,6 @@ public class AStarFootstepPlanner implements BodyPathAndFootstepPlanner
       }
 
       return true;
-   }
-
-   private void checkStartHasPlanarRegion()
-   {
-      Point3D startPoint = new Point3D(startNode.getX(), startNode.getY(), 0.0);
-      Point3DReadOnly startPos = PlanarRegionTools
-            .projectPointToPlanesVertically(startPoint, snapper.getOrCreateSteppableRegions(startNode.getRoundedX(), startNode.getRoundedY()));
-
-      if (startPos == null)
-      {
-         if (debug)
-            PrintTools.info("adding plane at start foot");
-         addPlanarRegionAtZeroHeight(startNode.getX(), startNode.getY());
-      }
-   }
-
-   private void addPlanarRegionAtZeroHeight(double xLocation, double yLocation)
-   {
-      ConvexPolygon2D polygon = new ConvexPolygon2D();
-      polygon.addVertex(0.3, 0.3);
-      polygon.addVertex(-0.3, 0.3);
-      polygon.addVertex(0.3, -0.3);
-      polygon.addVertex(-0.3, -0.25);
-      polygon.update();
-
-      PlanarRegion planarRegion = new PlanarRegion(new RigidBodyTransform(new AxisAngle(), new Vector3D(xLocation, yLocation, 0.0)), polygon);
-      planarRegionsList.addPlanarRegion(planarRegion);
    }
 
    @Override
@@ -493,7 +463,7 @@ public class AStarFootstepPlanner implements BodyPathAndFootstepPlanner
                                                     SideDependentList<ConvexPolygon2D> footPolygons, FootstepNodeExpansion expansion,
                                                     HeuristicSearchAndActionPolicyDefinitions policyDefinitions, YoVariableRegistry registry)
    {
-      SimplePlanarRegionFootstepNodeSnapper snapper = new SimplePlanarRegionFootstepNodeSnapper(footPolygons, parameters);
+      SimplePlanarRegionFootstepNodeSnapper snapper = new SimplePlanarRegionFootstepNodeSnapper(footPolygons);
       FootstepNodeSnapAndWiggler postProcessingSnapper = new FootstepNodeSnapAndWiggler(footPolygons, parameters);
 
       SnapBasedNodeChecker snapBasedNodeChecker = new SnapBasedNodeChecker(parameters, footPolygons, snapper);

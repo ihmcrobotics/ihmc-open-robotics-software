@@ -33,6 +33,7 @@ import us.ihmc.mecano.spatial.interfaces.SpatialForceReadOnly;
 import us.ihmc.mecano.tools.MultiBodySystemTools;
 import us.ihmc.robotics.linearAlgebra.DampedLeastSquaresNullspaceCalculator;
 import us.ihmc.robotics.linearAlgebra.MatrixTools;
+import us.ihmc.robotics.linearAlgebra.commonOps.NativeCommonOps;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
@@ -57,6 +58,7 @@ public class MotionQPInputCalculator
    private final DenseMatrix64F tempPrimaryTaskJacobian = new DenseMatrix64F(SpatialVector.SIZE, 12);
 
    private final DenseMatrix64F tempTaskJacobian = new DenseMatrix64F(SpatialVector.SIZE, 12);
+   private final DenseMatrix64F projectedTaskJacobian = new DenseMatrix64F(SpatialVector.SIZE, 12);
    private final DenseMatrix64F tempTaskObjective = new DenseMatrix64F(SpatialVector.SIZE, 1);
    private final DenseMatrix64F tempTaskWeight = new DenseMatrix64F(SpatialAcceleration.SIZE, SpatialAcceleration.SIZE);
    private final DenseMatrix64F tempTaskWeightSubspace = new DenseMatrix64F(SpatialAcceleration.SIZE, SpatialAcceleration.SIZE);
@@ -70,7 +72,6 @@ public class MotionQPInputCalculator
    private final JointIndexHandler jointIndexHandler;
 
    private final DenseMatrix64F allTaskJacobian;
-   private final DampedLeastSquaresNullspaceCalculator nullspaceCalculator;
 
    private final int numberOfDoFs;
 
@@ -88,13 +89,11 @@ public class MotionQPInputCalculator
          privilegedConfigurationHandler = new JointPrivilegedConfigurationHandler(oneDoFJoints, jointPrivilegedConfigurationParameters, registry);
          nullspaceProjectionAlpha = new YoDouble("nullspaceProjectionAlpha", registry);
          nullspaceProjectionAlpha.set(jointPrivilegedConfigurationParameters.getNullspaceProjectionAlpha());
-         nullspaceCalculator = new DampedLeastSquaresNullspaceCalculator(numberOfDoFs, nullspaceProjectionAlpha.getDoubleValue());
       }
       else
       {
          privilegedConfigurationHandler = null;
          nullspaceProjectionAlpha = null;
-         nullspaceCalculator = null;
       }
 
       allTaskJacobian = new DenseMatrix64F(numberOfDoFs, numberOfDoFs);
@@ -142,8 +141,6 @@ public class MotionQPInputCalculator
       motionQPInputToPack.setConstraintType(ConstraintType.OBJECTIVE);
       motionQPInputToPack.setUseWeightScalar(false);
 
-      nullspaceCalculator.setPseudoInverseAlpha(nullspaceProjectionAlpha.getDoubleValue());
-
       int taskSize = 0;
 
       DenseMatrix64F selectionMatrix = privilegedConfigurationHandler.getSelectionMatrix();
@@ -158,8 +155,9 @@ public class MotionQPInputCalculator
          if (success)
          {
             motionQPInputToPack.reshape(robotTaskSize);
-            nullspaceCalculator.projectOntoNullspace(tempTaskJacobian, allTaskJacobian);
-            CommonOps.insert(tempTaskJacobian, motionQPInputToPack.taskJacobian, taskSize, 0);
+            NativeCommonOps.projectOnNullspace(tempTaskJacobian, allTaskJacobian, projectedTaskJacobian, nullspaceProjectionAlpha.getValue());
+
+            CommonOps.insert(projectedTaskJacobian, motionQPInputToPack.taskJacobian, taskSize, 0);
             CommonOps.insert(privilegedConfigurationHandler.getPrivilegedJointAccelerations(), motionQPInputToPack.taskObjective, taskSize, 0);
             CommonOps.insert(privilegedConfigurationHandler.getWeights(), motionQPInputToPack.taskWeightMatrix, taskSize, taskSize);
          }
@@ -196,7 +194,8 @@ public class MotionQPInputCalculator
       if (!success)
          return false;
 
-      nullspaceCalculator.projectOntoNullspace(motionQPInputToPack.taskJacobian, allTaskJacobian);
+      NativeCommonOps.projectOnNullspace(motionQPInputToPack.taskJacobian, allTaskJacobian, projectedTaskJacobian, nullspaceProjectionAlpha.getValue());
+      motionQPInputToPack.taskJacobian.set(projectedTaskJacobian);
 
       return true;
    }

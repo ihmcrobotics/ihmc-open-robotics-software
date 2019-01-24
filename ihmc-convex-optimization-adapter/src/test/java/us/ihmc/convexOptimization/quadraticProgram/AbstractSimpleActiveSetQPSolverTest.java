@@ -319,7 +319,7 @@ public abstract class AbstractSimpleActiveSetQPSolverTest
    }
 
    public void testSimpleCasesWithBoundsConstraints(int expectedNumberOfIterations, int expectedNumberOfIterations2, int expectedNumberOfIterations3,
-                                                    int expectedNubmerOfIterations3, boolean ignoreLagrangeMultipliers)
+                                                    int expectedNumberOfIterations4, boolean ignoreLagrangeMultipliers)
    {
       SimpleActiveSetQPSolverInterface solver = createSolverToTest();
 
@@ -472,8 +472,8 @@ public abstract class AbstractSimpleActiveSetQPSolverTest
 
       assertEquals(1, solution.length);
       assertTrue(Double.isNaN(solution[0]));
-      assertTrue(Double.isInfinite(lagrangeLowerBoundMultipliers[0]));
-      assertTrue(Double.isInfinite(lagrangeUpperBoundMultipliers[0]));
+      assertFalse(Double.isFinite(lagrangeLowerBoundMultipliers[0]));
+      assertFalse(Double.isFinite(lagrangeUpperBoundMultipliers[0]));
 
       // Minimize x^2 + y^2 + z^2 subject to x + y = 2.0, y - z <= -8, -5 <= x <= 5, 6 <= y <= 10, 11 <= z
       solver.clear();
@@ -491,7 +491,7 @@ public abstract class AbstractSimpleActiveSetQPSolverTest
       double[] linearInqualityConstraintsDVector = new double[] {-8.0};
       solver.setLinearInequalityConstraints(linearInequalityConstraintsCMatrix, linearInqualityConstraintsDVector);
 
-      solver.setVariableBounds(new double[] {-5.0, 6.0, 11.0}, new double[] {5.0, 10.0, Double.POSITIVE_INFINITY});
+      solver.setVariableBounds(getLowerBounds(), getUpperBounds());
 
       solution = new double[3];
       lagrangeEqualityMultipliers = new double[1];
@@ -503,7 +503,7 @@ public abstract class AbstractSimpleActiveSetQPSolverTest
                                         lagrangeUpperBoundMultipliers);
       numberOfIterations = solver.solve(solution, lagrangeEqualityMultipliers, lagrangeInequalityMultipliers, lagrangeLowerBoundMultipliers,
                                         lagrangeUpperBoundMultipliers);
-      assertEquals(expectedNubmerOfIterations3, numberOfIterations);
+      assertEquals(expectedNumberOfIterations3, numberOfIterations);
 
       assertEquals(3, solution.length);
       assertEquals(-4.0, solution[0], 1e-7);
@@ -544,7 +544,7 @@ public abstract class AbstractSimpleActiveSetQPSolverTest
       linearInqualityConstraintsDVector = new double[] {-8.0};
       solver.setLinearInequalityConstraints(linearInequalityConstraintsCMatrix, linearInqualityConstraintsDVector);
 
-      solver.setVariableBounds(new double[] {3.0, 6.0, 11.0}, new double[] {5.0, 10.0, Double.POSITIVE_INFINITY});
+      solver.setVariableBounds(new double[] {3.0, 6.0, 11.0}, getUpperBounds());
 
       solution = new double[3];
       lagrangeEqualityMultipliers = new double[1];
@@ -556,7 +556,7 @@ public abstract class AbstractSimpleActiveSetQPSolverTest
                                         lagrangeUpperBoundMultipliers);
       numberOfIterations = solver.solve(solution, lagrangeEqualityMultipliers, lagrangeInequalityMultipliers, lagrangeLowerBoundMultipliers,
                                         lagrangeUpperBoundMultipliers);
-      assertEquals(expectedNumberOfIterations3, numberOfIterations);
+      assertEquals(expectedNumberOfIterations4, numberOfIterations);
 
       assertEquals(3, solution.length);
       assertTrue(Double.isNaN(solution[0]));
@@ -596,7 +596,7 @@ public abstract class AbstractSimpleActiveSetQPSolverTest
       double[] linearInqualityConstraintsDVector = new double[] {-8.0};
       solver.setLinearInequalityConstraints(linearInequalityConstraintsCMatrix, linearInqualityConstraintsDVector);
 
-      solver.setVariableBounds(new double[] {-5.0, 6.0, 11.0}, new double[] {5.0, 10.0, Double.POSITIVE_INFINITY});
+      solver.setVariableBounds(getLowerBounds(), getUpperBounds());
 
       double[] solution1 = new double[3];
       double[] solution2 = new double[3];
@@ -821,7 +821,7 @@ public abstract class AbstractSimpleActiveSetQPSolverTest
       assertEquals(56.0, objectiveCost, 1e-7);
 
       // Minimize x^2 + y^2 + z^2 subject to x + y = 2.0, y - z <= -8, -5 <= x <= 5, 6 <= y <= 10, 11 <= z (Added without clearing)
-      solver.setVariableBounds(new double[] {-5.0, 6.0, 11.0}, new double[] {5.0, 10.0, Double.POSITIVE_INFINITY});
+      solver.setVariableBounds(getLowerBounds(), getUpperBounds());
 
       solution1 = new double[3];
       solution2 = new double[3];
@@ -1629,7 +1629,7 @@ public abstract class AbstractSimpleActiveSetQPSolverTest
       double[] linearInqualityConstraintsDVector = new double[] {-8.0};
       solver.setLinearInequalityConstraints(linearInequalityConstraintsCMatrix, linearInqualityConstraintsDVector);
 
-      solver.setVariableBounds(new double[] {-5.0, 6.0, 11.0}, new double[] {5.0, 10.0, Double.POSITIVE_INFINITY});
+      solver.setVariableBounds(getLowerBounds(), getUpperBounds());
 
       double[] solution = new double[3];
       double[] lagrangeEqualityMultipliers = new double[1];
@@ -1674,6 +1674,16 @@ public abstract class AbstractSimpleActiveSetQPSolverTest
       solutionMatrix.setData(solution);
       double objectiveCost = solver.getObjectiveCost(solutionMatrix);
       assertEquals(248.0, objectiveCost, 1e-7);
+   }
+
+   public double[] getUpperBounds()
+   {
+      return new double[] {5.0, 10.0, Double.POSITIVE_INFINITY};
+   }
+
+   public double[] getLowerBounds()
+   {
+      return new double[] {-5.0, 6.0, 11.0};
    }
 
    @ContinuousIntegrationTest(estimatedDuration = 0.0)

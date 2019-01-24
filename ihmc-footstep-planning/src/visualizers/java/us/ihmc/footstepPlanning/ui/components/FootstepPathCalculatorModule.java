@@ -10,7 +10,7 @@ import static us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI.
 import static us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI.InterRegionVisibilityMap;
 import static us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI.LowLevelGoalOrientationTopic;
 import static us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI.LowLevelGoalPositionTopic;
-import static us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI.NavigableRegionData;
+import static us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI.VisibilityMapWithNavigableRegionData;
 import static us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI.PlanarRegionDataTopic;
 import static us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI.PlannerHorizonLengthTopic;
 import static us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI.PlannerParametersTopic;
@@ -79,7 +79,7 @@ import us.ihmc.pathPlanning.statistics.PlannerStatistics;
 import us.ihmc.pathPlanning.statistics.VisibilityGraphStatistics;
 import us.ihmc.pathPlanning.visibilityGraphs.DefaultVisibilityGraphParameters;
 import us.ihmc.pathPlanning.visibilityGraphs.dataStructure.InterRegionVisibilityMap;
-import us.ihmc.pathPlanning.visibilityGraphs.dataStructure.NavigableRegion;
+import us.ihmc.pathPlanning.visibilityGraphs.dataStructure.VisibilityMapWithNavigableRegion;
 import us.ihmc.pathPlanning.visibilityGraphs.dataStructure.VisibilityMap;
 import us.ihmc.pathPlanning.visibilityGraphs.interfaces.VisibilityGraphsParameters;
 import us.ihmc.pathPlanning.visibilityGraphs.interfaces.VisibilityMapHolder;
@@ -318,13 +318,13 @@ public class FootstepPathCalculatorModule
       InterRegionVisibilityMap interRegionVisibilityMap = new InterRegionVisibilityMap();
       interRegionVisibilityMap.addConnections(statistics.getInterRegionsVisibilityMap().getConnections());
 
-      List<NavigableRegion> navigableRegionList = new ArrayList<>();
+      List<VisibilityMapWithNavigableRegion> navigableRegionList = new ArrayList<>();
       for (int i = 0; i < statistics.getNumberOfNavigableRegions(); i++)
          navigableRegionList.add(statistics.getNavigableRegion(i));
 
       messager.submitMessage(StartVisibilityMap, startMap);
       messager.submitMessage(GoalVisibilityMap, goalMap);
-      messager.submitMessage(NavigableRegionData, navigableRegionList);
+      messager.submitMessage(VisibilityMapWithNavigableRegionData, navigableRegionList);
       messager.submitMessage(InterRegionVisibilityMap, interRegionVisibilityMap);
    }
 
@@ -354,7 +354,7 @@ public class FootstepPathCalculatorModule
    {
       FootstepPlannerParameters parameters = this.parameters.get();
       FootstepNodeExpansion expansion = new ParameterBasedNodeExpansion(parameters);
-      SimplePlanarRegionFootstepNodeSnapper snapper = new SimplePlanarRegionFootstepNodeSnapper(footPolygons, parameters);
+      SimplePlanarRegionFootstepNodeSnapper snapper = new SimplePlanarRegionFootstepNodeSnapper(footPolygons);
       FootstepNodeSnapAndWiggler postProcessingSnapper = new FootstepNodeSnapAndWiggler(footPolygons, parameters);
 
       SnapBasedNodeChecker snapBasedNodeChecker = new SnapBasedNodeChecker(parameters, footPolygons, snapper);

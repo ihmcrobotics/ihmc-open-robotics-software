@@ -41,7 +41,7 @@ public class CollisionEndStanceFreeSearchPolicy implements PlannerHeuristicNodeS
    private final BodyCollisionNodeChecker collisionNodeChecker;
    private final FootstepNodeSnapper snapper;
 
-   public CollisionEndStanceFreeSearchPolicy(FootstepNodeSnapper snapper, BodyCollisionNodeChecker collisionNodeChecker, FootstepPlannerParameters parameters)
+   public CollisionEndStanceFreeSearchPolicy(BodyCollisionNodeChecker collisionNodeChecker, FootstepNodeSnapper snapper, FootstepPlannerParameters parameters)
    {
       this.collisionNodeChecker = collisionNodeChecker;
       this.parameters = parameters;
@@ -146,6 +146,9 @@ public class CollisionEndStanceFreeSearchPolicy implements PlannerHeuristicNodeS
             newNode = new FootstepNode(rightFoot.getX(), rightFoot.getY(), rightFoot.getYaw(), RobotSide.RIGHT);
             newParentNode = new FootstepNode(leftFoot.getX(), leftFoot.getY(), leftFoot.getYaw(), RobotSide.LEFT);
          }
+
+         snapper.snapFootstepNode(newNode);
+         snapper.snapFootstepNode(newParentNode);
 
          boolean newNodeSnapIsValid = !snapper.snapFootstepNode(newNode).getSnapTransform().containsNaN();
          boolean newParentNodeSnapIsValid = !snapper.snapFootstepNode(newParentNode).getSnapTransform().containsNaN();

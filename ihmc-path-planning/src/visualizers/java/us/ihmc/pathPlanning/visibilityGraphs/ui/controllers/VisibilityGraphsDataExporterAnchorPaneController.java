@@ -9,8 +9,8 @@ import javafx.fxml.FXML;
 import javafx.scene.control.TextField;
 import javafx.stage.DirectoryChooser;
 import javafx.stage.Window;
-import us.ihmc.commons.PrintTools;
 import us.ihmc.javaFXToolkit.messager.JavaFXMessager;
+import us.ihmc.log.LogTools;
 import us.ihmc.pathPlanning.visibilityGraphs.tools.VisibilityGraphsIOTools;
 import us.ihmc.pathPlanning.visibilityGraphs.ui.messager.UIVisibilityGraphsTopics;
 
@@ -35,7 +35,7 @@ public class VisibilityGraphsDataExporterAnchorPaneController
       }
       catch(URISyntaxException e)
       {
-         PrintTools.error("Could not load test data folder with URL: " + VisibilityGraphsIOTools.TEST_DATA_URL);
+         LogTools.error("Could not load test data folder with URL: " + VisibilityGraphsIOTools.TEST_DATA_URL);
          e.printStackTrace();
       }
 

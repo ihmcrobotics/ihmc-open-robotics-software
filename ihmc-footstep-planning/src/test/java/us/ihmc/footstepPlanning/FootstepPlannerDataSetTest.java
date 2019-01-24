@@ -4,6 +4,7 @@ import static us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI.
 import static us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI.PlannerTypeTopic;
 import static us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI.PlanningResultTopic;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
 
@@ -174,6 +175,7 @@ public abstract class FootstepPlannerDataSetTest
          Assert.fail("Did not find any datasets to test.");
 
       int numberOfFailingTests = 0;
+      List<String> failingDatasets = new ArrayList<>();
       int numbberOfTestedSets = 0;
       for (int i = 0; i < allDatasets.size(); i++)
       {
@@ -192,7 +194,10 @@ public abstract class FootstepPlannerDataSetTest
          resetAllAtomics();
          String errorMessagesForCurrentFile = datasetTestRunner.testDataset(dataset);
          if (!errorMessagesForCurrentFile.isEmpty())
+         {
             numberOfFailingTests++;
+            failingDatasets.add(dataset.getDatasetName());
+         }
 
          if (DEBUG || VERBOSE)
          {
@@ -204,6 +209,11 @@ public abstract class FootstepPlannerDataSetTest
       }
 
       String message = "Number of failing datasets: " + numberOfFailingTests + " out of " + numbberOfTestedSets;
+      message += "\n Datasets failing: ";
+      for (int i = 0; i < failingDatasets.size(); i++)
+      {
+         message += "\n" + failingDatasets.get(i);
+      }
       if (VISUALIZE)
       {
          LogTools.info(message);
@@ -211,7 +221,7 @@ public abstract class FootstepPlannerDataSetTest
       }
       else
       {
-         Assert.assertEquals(message, numberOfFailingTests, 0);
+         Assert.assertEquals(message, 0, numberOfFailingTests);
       }
    }
 

@@ -100,6 +100,11 @@ public abstract class TransferState extends WalkingState
    @Override
    public void doAction(double timeInState)
    {
+      if (!isInTouchdown.getBooleanValue())
+      {
+         switchToToeOffIfPossible();
+      }
+
       boolean touchdownTimeElapsed = timeInState > touchdownDuration.getDoubleValue();
       boolean icpErrorTooGreat = balanceManager.getICPErrorMagnitude() > icpErrorThresholdToAbortTouchdown.getDoubleValue();
 
@@ -114,8 +119,6 @@ public abstract class TransferState extends WalkingState
       {
          feetManager.updateContactStatesInDoubleSupport(transferToSide);
       }
-
-      switchToToeOffIfPossible();
 
       // Always do this so that when a foot slips or is loaded in the air, the height gets adjusted.
       comHeightManager.setSupportLeg(transferToSide);
