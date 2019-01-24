@@ -19,6 +19,14 @@ public class AtlasSwingWithWaypointsTest extends AvatarSwingWithWaypointsTest
    @Override
    @ContinuousIntegrationTest(estimatedDuration = 137.9)
    @Test(timeout = 690000)
+   public void testSwingWithWaypointsAndNotTrustingHeight() throws SimulationExceededMaximumTimeException
+   {
+      super.testSwingWithWaypointsAndNotTrustingHeight();
+   }
+
+   @Override
+   @ContinuousIntegrationTest(estimatedDuration = 137.9)
+   @Test(timeout = 690000)
    public void testRegularSwingWithWaypoints() throws SimulationExceededMaximumTimeException
    {
       super.testRegularSwingWithWaypoints();
