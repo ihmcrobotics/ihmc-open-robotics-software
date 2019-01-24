@@ -1,4 +1,4 @@
-package us.ihmc.robotEnvironmentAwareness;
+package us.ihmc.valkyrie.apps;
 
 import us.ihmc.robotEnvironmentAwareness.updaters.LIDARBasedREAModule;
 
