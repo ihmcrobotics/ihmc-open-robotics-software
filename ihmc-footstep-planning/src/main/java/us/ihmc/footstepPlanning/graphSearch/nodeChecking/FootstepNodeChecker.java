@@ -35,7 +35,19 @@ public abstract class FootstepNodeChecker
          listeners.add(listener);
    }
 
-   public abstract boolean isNodeValid(FootstepNode node, FootstepNode previousNode);
+   public boolean isNodeValid(FootstepNode node, FootstepNode previousNode)
+   {
+      if(!hasPlanarRegions())
+      {
+         return true;
+      }
+      else
+      {
+         return isNodeValidInternal(node, previousNode);
+      }
+   }
+
+   abstract boolean isNodeValidInternal(FootstepNode node, FootstepNode previousNode);
 
    public abstract void addStartNode(FootstepNode startNode, RigidBodyTransform startNodeTransform);
 }

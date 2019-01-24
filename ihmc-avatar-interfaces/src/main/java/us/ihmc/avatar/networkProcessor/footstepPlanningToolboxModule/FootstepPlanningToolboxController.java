@@ -144,8 +144,8 @@ public class FootstepPlanningToolboxController extends ToolboxController
       snapBasedNodeChecker.addPlannerListener(plannerListener);
       bodyCollisionNodeChecker.addPlannerListener(plannerListener);
 
-      AStarFootstepPlanner planner = new AStarFootstepPlanner(footstepPlanningParameters, nodeChecker, heuristics, expansion, footstepCost, postProcessingSnapper, plannerListener,
-                                                              registry);
+      AStarFootstepPlanner planner = new AStarFootstepPlanner(footstepPlanningParameters, nodeChecker, heuristics, expansion, footstepCost,
+                                                              postProcessingSnapper, plannerListener, footPolygons, registry);
 
       return planner;
    }
