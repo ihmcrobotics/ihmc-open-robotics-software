@@ -1,111 +1,46 @@
 package us.ihmc.robotics.math.trajectories;
 
-import java.util.ArrayList;
-
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.robotics.math.frames.YoFramePointInMultipleFrames;
-import us.ihmc.robotics.math.frames.YoFrameQuaternionInMultipleFrames;
-import us.ihmc.robotics.math.frames.YoMultipleFramesHolder;
+import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DBasics;
+import us.ihmc.euclid.referenceFrame.interfaces.FrameQuaternionBasics;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.yoVariables.variable.YoFramePoint3D;
-import us.ihmc.yoVariables.variable.YoFrameQuaternion;
+import us.ihmc.yoVariables.variable.frameObjects.YoMutableFramePoint3D;
+import us.ihmc.yoVariables.variable.frameObjects.YoMutableFrameQuaternion;
 
 
 public class ConstantPoseTrajectoryGenerator implements PoseTrajectoryGenerator
 {
-   private final boolean allowMultipleFrames;
+   private final FramePoint3DBasics position;
+   private final FrameQuaternionBasics orientation;
 
-   private final YoFramePoint3D position;
-   private final YoFrameQuaternion orientation;
-
-   private final ArrayList<YoMultipleFramesHolder> multipleFramesHolders;
-
-   public ConstantPoseTrajectoryGenerator(YoFramePoint3D position, YoFrameQuaternion orientation)
+   public ConstantPoseTrajectoryGenerator(FramePoint3DBasics position, FrameQuaternionBasics orientation)
    {
       position.checkReferenceFrameMatch(orientation);
-
-      allowMultipleFrames = false;
-
       this.position = position;
       this.orientation = orientation;
-
-      multipleFramesHolders = null;
-   }
-
-   public ConstantPoseTrajectoryGenerator(YoFramePointInMultipleFrames position, YoFrameQuaternionInMultipleFrames orientation)
-   {
-      position.checkReferenceFrameMatch(orientation);
-
-      allowMultipleFrames = true;
-
-      this.position = position;
-      this.orientation = orientation;
-
-      multipleFramesHolders = new ArrayList<YoMultipleFramesHolder>();
-      multipleFramesHolders.add(position);
-      multipleFramesHolders.add(orientation);
    }
 
    public ConstantPoseTrajectoryGenerator(String namePrefix, ReferenceFrame referenceFrame, YoVariableRegistry parentRegistry)
    {
-      this(namePrefix, false, referenceFrame, parentRegistry);
-   }
-
-   public ConstantPoseTrajectoryGenerator(String namePrefix, boolean allowMultipleFrames, ReferenceFrame referenceFrame, YoVariableRegistry parentRegistry)
-   {
-      this.allowMultipleFrames = allowMultipleFrames;
-
       YoVariableRegistry registry = new YoVariableRegistry(namePrefix + getClass().getSimpleName());
-
-      YoFramePointInMultipleFrames yoFramePointInMultipleFrames = new YoFramePointInMultipleFrames(namePrefix + "ConstantPosition", registry, referenceFrame);
-      position = yoFramePointInMultipleFrames;
-      YoFrameQuaternionInMultipleFrames yoFrameQuaternionInMultiplesFrames = new YoFrameQuaternionInMultipleFrames(namePrefix + "ConstantOrientation",
-            registry, referenceFrame);
-      orientation = yoFrameQuaternionInMultiplesFrames;
-
-      multipleFramesHolders = new ArrayList<YoMultipleFramesHolder>();
-      multipleFramesHolders.add(yoFramePointInMultipleFrames);
-      multipleFramesHolders.add(yoFrameQuaternionInMultiplesFrames);
-   }
-
-   public void registerAndSwitchFrame(ReferenceFrame desiredFrame)
-   {
-      registerNewTrajectoryFrame(desiredFrame);
-      switchTrajectoryFrame(desiredFrame);
-   }
-
-   public void registerNewTrajectoryFrame(ReferenceFrame newReferenceFrame)
-   {
-      checkIfMultipleFramesAllowed();
-
-      for (int i = 0; i < multipleFramesHolders.size(); i++)
-         multipleFramesHolders.get(i).registerReferenceFrame(newReferenceFrame);
+      position = new YoMutableFramePoint3D(namePrefix + "ConstantPosition", "", registry, referenceFrame);
+      orientation = new YoMutableFrameQuaternion(namePrefix + "ConstantOrientation", "", registry, referenceFrame);
    }
 
    public void changeFrame(ReferenceFrame referenceFrame)
    {
-      checkIfMultipleFramesAllowed();
-
-      for (int i = 0; i < multipleFramesHolders.size(); i++)
-         multipleFramesHolders.get(i).changeFrame(referenceFrame);
+      position.changeFrame(referenceFrame);
+      orientation.changeFrame(referenceFrame);
    }
 
    public void switchTrajectoryFrame(ReferenceFrame referenceFrame)
    {
-      checkIfMultipleFramesAllowed();
-
-      for (int i = 0; i < multipleFramesHolders.size(); i++)
-         multipleFramesHolders.get(i).switchCurrentReferenceFrame(referenceFrame);
-   }
-
-   private void checkIfMultipleFramesAllowed()
-   {
-      if (!allowMultipleFrames)
-         throw new RuntimeException("Must set allowMultipleFrames to true in the constructor if you ever want to register a new frame.");
+      position.setToZero(referenceFrame);
+      orientation.setToZero(referenceFrame);
    }
 
    public void setConstantPose(FramePose3D constantPose)
@@ -121,36 +56,43 @@ public class ConstantPoseTrajectoryGenerator implements PoseTrajectoryGenerator
       this.orientation.set(orientation);
    }
 
+   @Override
    public void initialize()
    {
       // Do nothing
    }
 
+   @Override
    public void compute(double time)
    {
       // Do nothing
    }
 
+   @Override
    public boolean isDone()
    {
       return true;
    }
 
+   @Override
    public void getPosition(FramePoint3D positionToPack)
    {
       positionToPack.setIncludingFrame(position);
    }
 
+   @Override
    public void getVelocity(FrameVector3D velocityToPack)
    {
       velocityToPack.setToZero(position.getReferenceFrame());
    }
 
+   @Override
    public void getAcceleration(FrameVector3D accelerationToPack)
    {
       accelerationToPack.setToZero(position.getReferenceFrame());
    }
 
+   @Override
    public void getLinearData(FramePoint3D positionToPack, FrameVector3D velocityToPack, FrameVector3D accelerationToPack)
    {
       getPosition(positionToPack);
@@ -158,21 +100,25 @@ public class ConstantPoseTrajectoryGenerator implements PoseTrajectoryGenerator
       getAcceleration(accelerationToPack);
    }
 
+   @Override
    public void getOrientation(FrameQuaternion orientationToPack)
    {
       orientationToPack.setIncludingFrame(orientation);
    }
 
+   @Override
    public void getAngularVelocity(FrameVector3D angularVelocityToPack)
    {
       angularVelocityToPack.setToZero(orientation.getReferenceFrame());
    }
 
+   @Override
    public void getAngularAcceleration(FrameVector3D angularAccelerationToPack)
    {
       angularAccelerationToPack.setToZero(orientation.getReferenceFrame());
    }
 
+   @Override
    public void getAngularData(FrameQuaternion orientationToPack, FrameVector3D angularVelocityToPack, FrameVector3D angularAccelerationToPack)
    {
       getOrientation(orientationToPack);
@@ -180,13 +126,15 @@ public class ConstantPoseTrajectoryGenerator implements PoseTrajectoryGenerator
       getAngularAcceleration(angularAccelerationToPack);
    }
 
+   @Override
    public void getPose(FramePose3D framePoseToPack)
    {
       framePoseToPack.changeFrame(position.getReferenceFrame());
       framePoseToPack.setPosition(position);
       framePoseToPack.setOrientation(orientation);
    }
-   
+
+   @Override
    public String toString()
    {
       String ret = "";
@@ -195,10 +143,12 @@ public class ConstantPoseTrajectoryGenerator implements PoseTrajectoryGenerator
       return ret;
    }
 
+   @Override
    public void showVisualization()
    {
    }
 
+   @Override
    public void hideVisualization()
    {
    }

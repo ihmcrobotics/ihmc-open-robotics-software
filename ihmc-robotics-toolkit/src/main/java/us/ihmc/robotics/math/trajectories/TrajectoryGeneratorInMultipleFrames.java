@@ -1,103 +1,54 @@
 package us.ihmc.robotics.math.trajectories;
 
 import java.util.ArrayList;
+import java.util.List;
 
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.robotics.math.frames.YoMultipleFramesHolder;
+import us.ihmc.euclid.referenceFrame.interfaces.FrameChangeable;
+import us.ihmc.euclid.transform.interfaces.Transform;
 
-public abstract class TrajectoryGeneratorInMultipleFrames
+public abstract class TrajectoryGeneratorInMultipleFrames implements FrameChangeable
 {
-   private final boolean allowMultipleFrames;
+   private final List<FrameChangeable> frameChangeables = new ArrayList<>();
 
-   private final ReferenceFrame initialTrajectoryFrame;
-   private final ArrayList<YoMultipleFramesHolder> multipleFramesHolders;
-   private final ArrayList<TrajectoryGeneratorInMultipleFrames> trajectoryGeneratorsInMultipleFrames;
-
-   public TrajectoryGeneratorInMultipleFrames(boolean allowMultipleFrames, ReferenceFrame initialTrajectoryFrame)
+   protected void registerFrameChangeables(FrameChangeable... frameChangeables)
    {
-      this.allowMultipleFrames = allowMultipleFrames;
-      this.initialTrajectoryFrame = initialTrajectoryFrame;
-
-      multipleFramesHolders = new ArrayList<>();
-      trajectoryGeneratorsInMultipleFrames = new ArrayList<>();
-   }
-
-   protected void registerMultipleFramesHolders(YoMultipleFramesHolder... multipleFramesHolders)
-   {
-      for (YoMultipleFramesHolder multipleFramesHolder : multipleFramesHolders)
-         this.multipleFramesHolders.add(multipleFramesHolder);
-   }
-
-   protected void registerTrajectoryGeneratorsInMultipleFrames(TrajectoryGeneratorInMultipleFrames... trajectoryGeneratorsInMultipleFrames)
-   {
-      for (TrajectoryGeneratorInMultipleFrames trajectoryGeneratorInMultipleFrames : trajectoryGeneratorsInMultipleFrames)
-         this.trajectoryGeneratorsInMultipleFrames.add(trajectoryGeneratorInMultipleFrames);
-   }
-
-   public void registerAndSwitchFrame(ReferenceFrame desiredFrame)
-   {
-      registerNewTrajectoryFrame(desiredFrame);
-      switchTrajectoryFrame(desiredFrame);
-   }
-
-   public void registerNewTrajectoryFrame(ReferenceFrame newReferenceFrame)
-   {
-      checkIfMultipleFramesAllowed();
-
-      for (int i = 0; i < multipleFramesHolders.size(); i++)
-         multipleFramesHolders.get(i).registerReferenceFrame(newReferenceFrame);
-      for (int i = 0; i < trajectoryGeneratorsInMultipleFrames.size(); i++)
-         trajectoryGeneratorsInMultipleFrames.get(i).registerNewTrajectoryFrame(newReferenceFrame);
-   }
-
-   public void changeFrame(ReferenceFrame referenceFrame)
-   {
-      checkIfMultipleFramesAllowed();
-
-      for (int i = 0; i < multipleFramesHolders.size(); i++)
+      for (FrameChangeable frameChangeable : frameChangeables)
       {
-         YoMultipleFramesHolder multipleFramesHolder = multipleFramesHolders.get(i);
-         if (multipleFramesHolder.containsNaN())
-            multipleFramesHolder.setToNaN(referenceFrame);
-         else
-            multipleFramesHolder.changeFrame(referenceFrame);
+         this.frameChangeables.add(frameChangeable);
       }
-      for (int i = 0; i < trajectoryGeneratorsInMultipleFrames.size(); i++)
-         trajectoryGeneratorsInMultipleFrames.get(i).changeFrame(referenceFrame, false);
    }
 
-   protected void changeFrame(ReferenceFrame referenceFrame, boolean checkIfAllowed)
+   @Override
+   public ReferenceFrame getReferenceFrame()
    {
-      if (checkIfAllowed)
-         checkIfMultipleFramesAllowed();
-
-      for (int i = 0; i < multipleFramesHolders.size(); i++)
-         multipleFramesHolders.get(i).changeFrame(referenceFrame);
-      for (int i = 0; i < trajectoryGeneratorsInMultipleFrames.size(); i++)
-         trajectoryGeneratorsInMultipleFrames.get(i).changeFrame(referenceFrame, false);
+      return frameChangeables.get(0).getReferenceFrame();
    }
 
-   public void switchTrajectoryFrame(ReferenceFrame referenceFrame)
+   @Override
+   public void setReferenceFrame(ReferenceFrame referenceFrame)
    {
-      checkIfMultipleFramesAllowed();
-
-      for (int i = 0; i < multipleFramesHolders.size(); i++)
-         multipleFramesHolders.get(i).switchCurrentReferenceFrame(referenceFrame);
-      for (int i = 0; i < trajectoryGeneratorsInMultipleFrames.size(); i++)
-         trajectoryGeneratorsInMultipleFrames.get(i).switchTrajectoryFrame(referenceFrame);
+      for (int i = 0; i < frameChangeables.size(); i++)
+      {
+         frameChangeables.get(i).setReferenceFrame(referenceFrame);
+      }
    }
 
-   private void checkIfMultipleFramesAllowed()
+   @Override
+   public void applyTransform(Transform transform)
    {
-      if (!allowMultipleFrames)
-         throw new RuntimeException("Must set allowMultipleFrames to true in the constructor if you ever want to register a new frame.");
+      for (int i = 0; i < frameChangeables.size(); i++)
+      {
+         frameChangeables.get(i).applyTransform(transform);
+      }
    }
 
-   public ReferenceFrame getCurrentTrajectoryFrame()
+   @Override
+   public void applyInverseTransform(Transform transform)
    {
-      if (!allowMultipleFrames)
-         return initialTrajectoryFrame;
-      else
-         return multipleFramesHolders.get(0).getReferenceFrame();
+      for (int i = 0; i < frameChangeables.size(); i++)
+      {
+         frameChangeables.get(i).applyInverseTransform(transform);
+      }
    }
 }

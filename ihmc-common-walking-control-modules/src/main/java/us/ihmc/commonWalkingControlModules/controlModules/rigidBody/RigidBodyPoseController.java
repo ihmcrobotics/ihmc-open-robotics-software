@@ -1,7 +1,5 @@
 package us.ihmc.commonWalkingControlModules.controlModules.rigidBody;
 
-import java.util.Collection;
-
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.FeedbackControlCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.FeedbackControlCommandList;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.OrientationFeedbackControlCommand;
@@ -47,8 +45,8 @@ public class RigidBodyPoseController extends RigidBodyTaskspaceControlState
    private final YoBoolean hybridModeActive;
    private final RigidBodyJointControlHelper jointControlHelper;
 
-   public RigidBodyPoseController(RigidBodyBasics bodyToControl, RigidBodyBasics baseBody, RigidBodyBasics elevator, Collection<ReferenceFrame> trajectoryFrames,
-                                  ReferenceFrame controlFrame, ReferenceFrame baseFrame, YoDouble yoTime, RigidBodyJointControlHelper jointControlHelper,
+   public RigidBodyPoseController(RigidBodyBasics bodyToControl, RigidBodyBasics baseBody, RigidBodyBasics elevator, ReferenceFrame controlFrame,
+                                  ReferenceFrame baseFrame, YoDouble yoTime, RigidBodyJointControlHelper jointControlHelper,
                                   YoGraphicsListRegistry graphicsListRegistry, YoVariableRegistry parentRegistry)
    {
       super(RigidBodyControlMode.TASKSPACE, bodyToControl.getName(), yoTime, parentRegistry);
@@ -61,9 +59,9 @@ public class RigidBodyPoseController extends RigidBodyTaskspaceControlState
 
       usingWeightFromMessage = new YoBoolean(prefix + "UsingWeightFromMessage", registry);
       BooleanParameter useBaseFrameForControl = new BooleanParameter(prefix + "UseBaseFrameForControl", registry, false);
-      positionHelper = new RigidBodyPositionControlHelper(warningPrefix, bodyToControl, baseBody, elevator, trajectoryFrames, controlFrame, baseFrame,
-                                                          useBaseFrameForControl, usingWeightFromMessage, registry, graphicsListRegistry);
-      orientationHelper = new RigidBodyOrientationControlHelper(warningPrefix, bodyToControl, baseBody, elevator, trajectoryFrames, controlFrame, baseFrame,
+      positionHelper = new RigidBodyPositionControlHelper(warningPrefix, bodyToControl, baseBody, elevator, controlFrame, baseFrame, useBaseFrameForControl,
+                                                          usingWeightFromMessage, registry, graphicsListRegistry);
+      orientationHelper = new RigidBodyOrientationControlHelper(warningPrefix, bodyToControl, baseBody, elevator, controlFrame, baseFrame,
                                                                 useBaseFrameForControl, usingWeightFromMessage, registry);
 
       this.jointControlHelper = jointControlHelper;

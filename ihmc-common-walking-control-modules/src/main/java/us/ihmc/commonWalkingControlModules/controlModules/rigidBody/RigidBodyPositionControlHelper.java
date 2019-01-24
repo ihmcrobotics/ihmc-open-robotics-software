@@ -1,7 +1,6 @@
 package us.ihmc.commonWalkingControlModules.controlModules.rigidBody;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
 
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.PointFeedbackControlCommand;
@@ -23,8 +22,8 @@ import us.ihmc.humanoidRobotics.communication.controllerAPI.command.EuclideanTra
 import us.ihmc.log.LogTools;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.robotics.controllers.pidGains.PID3DGainsReadOnly;
-import us.ihmc.robotics.math.trajectories.waypoints.FrameEuclideanTrajectoryPoint;
-import us.ihmc.robotics.math.trajectories.waypoints.MultipleWaypointsPositionTrajectoryGenerator;
+import us.ihmc.robotics.math.trajectories.generators.MultipleWaypointsPositionTrajectoryGenerator;
+import us.ihmc.robotics.math.trajectories.trajectorypoints.FrameEuclideanTrajectoryPoint;
 import us.ihmc.robotics.screwTheory.SelectionMatrix3D;
 import us.ihmc.robotics.weightMatrices.WeightMatrix3D;
 import us.ihmc.yoVariables.providers.BooleanProvider;
@@ -75,9 +74,8 @@ public class RigidBodyPositionControlHelper
    private final String warningPrefix;
 
    public RigidBodyPositionControlHelper(String warningPrefix, RigidBodyBasics bodyToControl, RigidBodyBasics baseBody, RigidBodyBasics elevator,
-                                         Collection<ReferenceFrame> trajectoryFrames, ReferenceFrame controlFrame, ReferenceFrame baseFrame,
-                                         BooleanProvider useBaseFrameForControl, BooleanProvider useWeightFromMessage, YoVariableRegistry registry,
-                                         YoGraphicsListRegistry graphicsListRegistry)
+                                         ReferenceFrame controlFrame, ReferenceFrame baseFrame, BooleanProvider useBaseFrameForControl,
+                                         BooleanProvider useWeightFromMessage, YoVariableRegistry registry, YoGraphicsListRegistry graphicsListRegistry)
    {
       this.warningPrefix = warningPrefix;
       this.useBaseFrameForControl = useBaseFrameForControl;
@@ -87,13 +85,8 @@ public class RigidBodyPositionControlHelper
       String bodyName = bodyToControl.getName();
       String prefix = bodyName + "TaskspacePosition";
 
-      trajectoryGenerator = new MultipleWaypointsPositionTrajectoryGenerator(bodyName, RigidBodyTaskspaceControlState.maxPointsInGenerator, true,
+      trajectoryGenerator = new MultipleWaypointsPositionTrajectoryGenerator(bodyName, RigidBodyTaskspaceControlState.maxPointsInGenerator,
                                                                              ReferenceFrame.getWorldFrame(), registry);
-      if (trajectoryFrames != null)
-      {
-         trajectoryFrames.forEach(frame -> trajectoryGenerator.registerNewTrajectoryFrame(frame));
-      }
-      trajectoryGenerator.registerNewTrajectoryFrame(baseFrame);
       trajectoryGenerator.clear(baseFrame);
 
       currentWeight = new YoFrameVector3D(prefix + "CurrentWeight", null, registry);
@@ -200,11 +193,11 @@ public class RigidBodyPositionControlHelper
       holdCurrent();
 
       FrameEuclideanTrajectoryPoint trajectoryPoint = pointQueue.addLast();
-      trajectoryPoint.setToZero(trajectoryGenerator.getCurrentTrajectoryFrame());
+      trajectoryPoint.setToZero(trajectoryGenerator.getReferenceFrame());
       trajectoryPoint.setTime(trajectoryTime);
 
       desiredPosition.setIncludingFrame(position);
-      desiredPosition.changeFrame(trajectoryGenerator.getCurrentTrajectoryFrame());
+      desiredPosition.changeFrame(trajectoryGenerator.getReferenceFrame());
       trajectoryPoint.setPosition(desiredPosition);
    }
 
@@ -213,11 +206,11 @@ public class RigidBodyPositionControlHelper
       holdCurrentDesired(currentDesiredOrientation);
 
       FrameEuclideanTrajectoryPoint trajectoryPoint = pointQueue.addLast();
-      trajectoryPoint.setToZero(trajectoryGenerator.getCurrentTrajectoryFrame());
+      trajectoryPoint.setToZero(trajectoryGenerator.getReferenceFrame());
       trajectoryPoint.setTime(trajectoryTime);
 
       desiredPosition.setIncludingFrame(position);
-      desiredPosition.changeFrame(trajectoryGenerator.getCurrentTrajectoryFrame());
+      desiredPosition.changeFrame(trajectoryGenerator.getReferenceFrame());
       trajectoryPoint.setPosition(desiredPosition);
    }
 
@@ -226,7 +219,7 @@ public class RigidBodyPositionControlHelper
       if (trajectoryGenerator.isEmpty())
       {
          positionToPack.setIncludingFrame(bodyFrame, controlFramePose.getTranslationVector());
-         positionToPack.changeFrame(trajectoryGenerator.getCurrentTrajectoryFrame());
+         positionToPack.changeFrame(trajectoryGenerator.getReferenceFrame());
       }
       else
       {
@@ -256,7 +249,7 @@ public class RigidBodyPositionControlHelper
       // This will improve the tracking with respect to moving trajectory frames.
       if (useBaseFrameForControl.getValue())
       {
-         feedbackControlCommand.setControlBaseFrame(trajectoryGenerator.getCurrentTrajectoryFrame());
+         feedbackControlCommand.setControlBaseFrame(trajectoryGenerator.getReferenceFrame());
       }
       else
       {
@@ -292,7 +285,7 @@ public class RigidBodyPositionControlHelper
       if (!trajectoryGenerator.isEmpty())
       {
          trajectoryGenerator.clear();
-         lastPointAdded.changeFrame(trajectoryGenerator.getCurrentTrajectoryFrame());
+         lastPointAdded.changeFrame(trajectoryGenerator.getReferenceFrame());
          trajectoryGenerator.appendWaypoint(lastPointAdded);
       }
 
@@ -346,9 +339,9 @@ public class RigidBodyPositionControlHelper
          }
          messageWeightValid = messageHasValidWeights;
       }
-      else if (command.getTrajectoryFrame() != trajectoryGenerator.getCurrentTrajectoryFrame())
+      else if (command.getTrajectoryFrame() != trajectoryGenerator.getReferenceFrame())
       {
-         LogTools.warn(warningPrefix + "Was executing in " + trajectoryGenerator.getCurrentTrajectoryFrame() + " can not switch to "
+         LogTools.warn(warningPrefix + "Was executing in " + trajectoryGenerator.getReferenceFrame() + " can not switch to "
                + command.getTrajectoryFrame() + " without override.");
          return false;
       }
@@ -359,7 +352,7 @@ public class RigidBodyPositionControlHelper
          return false;
       }
 
-      command.getTrajectoryPointList().changeFrame(trajectoryGenerator.getCurrentTrajectoryFrame());
+      command.getTrajectoryPointList().changeFrame(trajectoryGenerator.getReferenceFrame());
       for (int i = 0; i < command.getNumberOfTrajectoryPoints(); i++)
       {
          if (!checkTime(command.getTrajectoryPoint(i).getTime()))
@@ -388,9 +381,9 @@ public class RigidBodyPositionControlHelper
 
    private void queueInitialPoint(FramePoint3D initialPosition)
    {
-      initialPosition.changeFrame(trajectoryGenerator.getCurrentTrajectoryFrame());
+      initialPosition.changeFrame(trajectoryGenerator.getReferenceFrame());
       FrameEuclideanTrajectoryPoint initialPoint = pointQueue.addLast();
-      initialPoint.setToZero(trajectoryGenerator.getCurrentTrajectoryFrame());
+      initialPoint.setToZero(trajectoryGenerator.getReferenceFrame());
       initialPoint.setTime(0.0);
       initialPoint.setPosition(initialPosition);
    }

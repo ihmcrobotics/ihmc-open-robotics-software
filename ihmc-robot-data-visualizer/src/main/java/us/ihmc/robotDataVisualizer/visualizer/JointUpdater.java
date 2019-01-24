@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
+import us.ihmc.log.LogTools;
 import us.ihmc.robotDataLogger.jointState.JointState;
 import us.ihmc.robotDataLogger.jointState.OneDoFState;
 import us.ihmc.robotDataLogger.jointState.SixDoFState;
@@ -37,7 +38,7 @@ public abstract class JointUpdater
          Joint joint = joints.get(jointState.getName());
          if (joint == null)
          {
-            System.err.println("Cannot find joint " + jointState.getName());
+            LogTools.error("Cannot find joint " + jointState.getName());
 
             continue;
          }
