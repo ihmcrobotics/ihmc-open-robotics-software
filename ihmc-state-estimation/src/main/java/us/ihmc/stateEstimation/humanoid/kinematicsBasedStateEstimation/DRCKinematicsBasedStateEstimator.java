@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicReference;
 
+import gnu.trove.map.TObjectDoubleMap;
 import us.ihmc.commonWalkingControlModules.visualizer.EstimatedFromTorquesWrenchVisualizer;
 import us.ihmc.commons.Conversions;
 import us.ihmc.commons.PrintTools;
@@ -14,7 +15,6 @@ import us.ihmc.graphicsDescription.yoGraphics.YoGraphicReferenceFrame;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.communication.packets.sensing.StateEstimatorMode;
 import us.ihmc.humanoidRobotics.communication.subscribers.PelvisPoseCorrectionCommunicatorInterface;
-import us.ihmc.humanoidRobotics.communication.subscribers.StateEstimatorModeSubscriber;
 import us.ihmc.humanoidRobotics.model.CenterOfPressureDataHolder;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.robotics.contactable.ContactablePlaneBody;
@@ -60,7 +60,7 @@ public class DRCKinematicsBasedStateEstimator implements StateEstimatorControlle
 
    private final double estimatorDT;
 
-   private boolean visualizeMeasurementFrames = true;
+   private boolean visualizeMeasurementFrames = false;
    private final ArrayList<YoGraphicReferenceFrame> yoGraphicMeasurementFrames = new ArrayList<>();
 
    private final CenterOfPressureVisualizer copVisualizer;
@@ -69,8 +69,6 @@ public class DRCKinematicsBasedStateEstimator implements StateEstimatorControlle
    private final SensorOutputMapReadOnly sensorOutputMapReadOnly;
 
    private final JointTorqueFromForceSensorVisualizer jointTorqueFromForceSensorVisualizer;
-
-   private StateEstimatorModeSubscriber stateEstimatorModeSubscriber = null;
 
    private final YoBoolean reinitializeStateEstimator = new YoBoolean("reinitializeStateEstimator", registry);
 
@@ -232,13 +230,10 @@ public class DRCKinematicsBasedStateEstimator implements StateEstimatorControlle
       if (fusedIMUSensor != null)
          fusedIMUSensor.update();
 
-      if (stateEstimatorModeSubscriber != null && stateEstimatorModeSubscriber.checkForNewOperatingModeRequest())
-      {
-         operatingMode.set(stateEstimatorModeSubscriber.getRequestedOperatingMode());
-      }
-
       if (atomicOperationMode.get() != null)
+      {
          operatingMode.set(atomicOperationMode.getAndSet(null));
+      }
 
       jointStateUpdater.updateJointState();
 
@@ -292,9 +287,9 @@ public class DRCKinematicsBasedStateEstimator implements StateEstimatorControlle
    }
 
    @Override
-   public void initializeEstimator(RigidBodyTransform initialRootJointTranform)
+   public void initializeEstimator(RigidBodyTransform rootJointTransform, TObjectDoubleMap<String> jointPositions)
    {
-      pelvisLinearStateUpdater.initializeRootJointPosition(initialRootJointTranform.getTranslationVector());
+      pelvisLinearStateUpdater.initializeRootJointPosition(rootJointTransform.getTranslationVector());
       // Do nothing for the orientation since the IMU is trusted
    }
 
@@ -321,11 +316,7 @@ public class DRCKinematicsBasedStateEstimator implements StateEstimatorControlle
       pelvisPoseHistoryCorrection.setExternalPelvisCorrectorSubscriber(externalPelvisPoseSubscriber);
    }
 
-   public void setOperatingModeSubscriber(StateEstimatorModeSubscriber stateEstimatorModeSubscriber)
-   {
-      this.stateEstimatorModeSubscriber = stateEstimatorModeSubscriber;
-   }
-
+   @Override
    public void requestStateEstimatorMode(StateEstimatorMode stateEstimatorMode)
    {
       atomicOperationMode.set(stateEstimatorMode);

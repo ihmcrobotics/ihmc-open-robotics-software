@@ -6,9 +6,12 @@ import java.util.List;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 
 import controller_msgs.msg.dds.StampedPosePacket;
+import gnu.trove.map.TObjectDoubleMap;
+import gnu.trove.map.hash.TObjectDoubleHashMap;
 import us.ihmc.avatar.DRCEstimatorThread;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.SimulatedDRCRobotTimeProvider;
+import us.ihmc.avatar.drcRobot.shapeContactSettings.DRCRobotModelShapeCollisionSettings;
 import us.ihmc.avatar.initialSetup.DRCGuiInitialSetup;
 import us.ihmc.avatar.initialSetup.DRCRobotInitialSetup;
 import us.ihmc.avatar.initialSetup.DRCSCSInitialSetup;
@@ -52,6 +55,7 @@ import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.SimulationConstructionSetParameters;
 import us.ihmc.simulationconstructionset.UnreasonableAccelerationException;
 import us.ihmc.simulationconstructionset.gui.tools.SimulationOverheadPlotterFactory;
+import us.ihmc.simulationconstructionset.physics.collision.DefaultCollisionHandler;
 import us.ihmc.simulationconstructionset.physics.collision.HybridImpulseSpringDamperCollisionHandler;
 import us.ihmc.simulationconstructionset.physics.collision.simple.CollisionManager;
 import us.ihmc.tools.factories.FactoryTools;
@@ -101,7 +105,7 @@ public class AvatarSimulationFactory
    private SimulatedDRCRobotTimeProvider simulatedRobotTimeProvider;
    private ActualCMPComputer actualCMPComputer;
 
-   private boolean useShapeCollision;
+   private DRCRobotModelShapeCollisionSettings shapeCollisionSettings;
 
    private void createHumanoidFloatingRootJointRobot()
    {
@@ -110,17 +114,27 @@ public class AvatarSimulationFactory
 
    private void initializeCollisionManager()
    {
-      if (useShapeCollision)
+      if (shapeCollisionSettings != null && shapeCollisionSettings.useShapeCollision())
       {
-         double coefficientOfRestitution = 0.0;
-         double coefficientOfFriction = 0.9;
-         HybridImpulseSpringDamperCollisionHandler collisionHandler = new HybridImpulseSpringDamperCollisionHandler(coefficientOfRestitution,
-                                                                                                                    coefficientOfFriction,
-                                                                                                                    simulationConstructionSet.getRootRegistry(),
-                                                                                                                    new YoGraphicsListRegistry());
-         collisionHandler.setKp(100000);
-         collisionHandler.setKd(500);
-         CollisionManager collisionManager = new CollisionManager(commonAvatarEnvironment.get().getTerrainObject3D(), collisionHandler);
+         CollisionManager collisionManager;
+         if (shapeCollisionSettings.useHybridImpulseHandler())
+         {
+            HybridImpulseSpringDamperCollisionHandler collisionHandler = new HybridImpulseSpringDamperCollisionHandler(shapeCollisionSettings.getRestitutionCoefficient(),
+                                                                                                                       shapeCollisionSettings.getFrictionCoefficient(),
+                                                                                                                       simulationConstructionSet.getRootRegistry(),
+                                                                                                                       new YoGraphicsListRegistry());
+
+            collisionHandler.setKp(shapeCollisionSettings.getHybridSpringCoefficient());
+            collisionHandler.setKd(shapeCollisionSettings.getHybridDamperCoefficient());
+
+            collisionManager = new CollisionManager(commonAvatarEnvironment.get().getTerrainObject3D(), collisionHandler);
+         }
+         else
+         {
+            DefaultCollisionHandler collisionHandler = new DefaultCollisionHandler(shapeCollisionSettings.getRestitutionCoefficient(),
+                                                                                   shapeCollisionSettings.getFrictionCoefficient());
+            collisionManager = new CollisionManager(commonAvatarEnvironment.get().getTerrainObject3D(), collisionHandler);
+         }
          simulationConstructionSet.initializeShapeCollision(collisionManager);
       }
    }
@@ -300,7 +314,14 @@ public class AvatarSimulationFactory
          humanoidFloatingRootJointRobot.computeCenterOfMass(initialCoMPosition);
 
          RigidBodyTransform rootJointTransform = humanoidFloatingRootJointRobot.getRootJoint().getJointTransform3D();
-         stateEstimationThread.initializeEstimator(rootJointTransform);
+
+         TObjectDoubleMap<String> jointPositions = new TObjectDoubleHashMap<>();
+         for (OneDegreeOfFreedomJoint joint : humanoidFloatingRootJointRobot.getOneDegreeOfFreedomJoints())
+         {
+            jointPositions.put(joint.getName(), joint.getQ());
+         }
+
+         stateEstimationThread.initializeEstimator(rootJointTransform, jointPositions);
       }
    }
 
@@ -342,7 +363,6 @@ public class AvatarSimulationFactory
             JointRole jointRole = robotModel.get().getJointMap().getJointRole(positionControlledJointName);
             boolean isUpperBodyJoint = ((jointRole != JointRole.LEG) && (jointRole != JointRole.SPINE));
             boolean isBackJoint = jointRole == JointRole.SPINE;
-
 
             JointLowLevelJointControlSimulator positionControlSimulator = new JointLowLevelJointControlSimulator(simulatedJoint, controllerJoint,
                                                                                                                  controllerDesiredOutput, isUpperBodyJoint,
@@ -538,9 +558,9 @@ public class AvatarSimulationFactory
       this.gravity.set(gravity);
    }
 
-   public void setShapeCollision(boolean useShapeCollision)
+   public void setShapeCollisionSettings(DRCRobotModelShapeCollisionSettings shapeCollisionSettings)
    {
-      this.useShapeCollision = useShapeCollision;
+      this.shapeCollisionSettings = shapeCollisionSettings;
    }
 
    public void setExternalPelvisCorrectorSubscriber(PelvisPoseCorrectionCommunicatorInterface externalPelvisCorrectorSubscriber)

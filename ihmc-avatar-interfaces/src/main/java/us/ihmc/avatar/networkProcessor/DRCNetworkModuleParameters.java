@@ -27,6 +27,7 @@ public class DRCNetworkModuleParameters
    private boolean useWholeBodyTrajectoryToolbox;
    private boolean useWholeBodyTrajectoryToolboxVisualizer;
    private boolean useKinematicsToolbox;
+   private boolean useKinematicsPlanningToolbox;
    private boolean useFootstepPlanningToolbox;
    private boolean useKinematicsToolboxVisualizer;
    private boolean useFootstepPlanningToolboxVisualizer;
@@ -37,6 +38,7 @@ public class DRCNetworkModuleParameters
    private boolean useLidarScanLogger;
    private boolean filterControllerInputMessages;
    private boolean enableJoystickBasedStepping;
+   private boolean useBipedalSupportPlanarRegionPublisher;
 
    private LocalObjectCommunicator simulatedSensorCommunicator;
 
@@ -63,7 +65,7 @@ public class DRCNetworkModuleParameters
    {
       return useBehaviorVisualizer;
    }
-   
+
    public boolean isWholeBodyTrajectoryToolboxEnabled()
    {
       return useWholeBodyTrajectoryToolbox;
@@ -72,6 +74,11 @@ public class DRCNetworkModuleParameters
    public boolean isKinematicsToolboxEnabled()
    {
       return useKinematicsToolbox;
+   }
+   
+   public boolean isKinematicsPlanningToolboxEnabled()
+   {
+      return useKinematicsPlanningToolbox;
    }
 
    public boolean isFootstepPlanningToolboxEnabled()
@@ -83,7 +90,7 @@ public class DRCNetworkModuleParameters
    {
       return useKinematicsToolboxVisualizer;
    }
-   
+
    public boolean isWholeBodyTrajectoryToolboxVisualizerEnabled()
    {
       return useWholeBodyTrajectoryToolboxVisualizer;
@@ -117,6 +124,11 @@ public class DRCNetworkModuleParameters
    public boolean isRobotEnvironmentAwerenessModuleEnabled()
    {
       return useRobotEnvironmentAwarenessModule;
+   }
+
+   public boolean isBipedalSupportPlanarRegionPublisherEnabled()
+   {
+      return useBipedalSupportPlanarRegionPublisher;
    }
 
    public boolean isHeightQuadTreeToolboxEnabled()
@@ -167,12 +179,17 @@ public class DRCNetworkModuleParameters
    {
       this.useKinematicsToolbox = useKinematicsToolbox;
    }
+
+   public void enableKinematicsPlanningToolbox(boolean useKinematicsPlanningToolbox)
+   {
+      this.useKinematicsPlanningToolbox = useKinematicsPlanningToolbox;
+   }
    
    public void enableWholeBodyTrajectoryToolbox(boolean useConstrainedWholeBodyPlanningToolbox)
    {
       this.useWholeBodyTrajectoryToolbox = useConstrainedWholeBodyPlanningToolbox;
    }
-   
+
    public void enableFootstepPlanningToolbox(boolean useFootstepPlanningToolbox)
    {
       this.useFootstepPlanningToolbox = useFootstepPlanningToolbox;
@@ -182,7 +199,7 @@ public class DRCNetworkModuleParameters
    {
       this.useKinematicsToolboxVisualizer = useKinematicsToolboxVisualizer;
    }
-   
+
    public void enableConstrainedWholeBodyPlanningToolboxVisualizer(boolean useConstrainedWholeBodyPlanningToolboxVisualizer)
    {
       this.useWholeBodyTrajectoryToolboxVisualizer = useConstrainedWholeBodyPlanningToolboxVisualizer;
@@ -208,6 +225,11 @@ public class DRCNetworkModuleParameters
    public void enableRobotEnvironmentAwerenessModule(boolean enable)
    {
       this.useRobotEnvironmentAwarenessModule = enable;
+   }
+
+   public void enableBipedalSupportPlanarRegionPublisher(boolean enable)
+   {
+      this.useBipedalSupportPlanarRegionPublisher = enable;
    }
 
    public void enableHeightQuadTreeToolbox(boolean useHeightQuadTreeToolbox)
@@ -252,7 +274,7 @@ public class DRCNetworkModuleParameters
    public void enableLocalControllerCommunicator(boolean useLocalControllerCommunicator)
    {
       this.useLocalControllerCommunicator = useLocalControllerCommunicator;
-      if(useLocalControllerCommunicator)
+      if (useLocalControllerCommunicator)
       {
          this.useController = true;
       }
@@ -376,9 +398,9 @@ public class DRCNetworkModuleParameters
    {
       return "DRCNetworkModuleParameters [useController=" + useController + "\n useSensorModule=" + useSensorModule + "\n useSimulatedSensors="
             + useSimulatedSensors + "\n useUiModule=" + useUiModule + "\n useBehaviorModule=" + useBehaviorModule + "\n useBehaviorVisualizer="
-            + useBehaviorVisualizer + "\n useHandModule=" + useHandModule + "\n usePerceptionModule=" + usePerceptionModule + "\n useRosModule="
-            + useRosModule + "\n useDrillDetectionModule=" + useDrillDetectionModule + "\n simulatedSensorCommunicator=" + simulatedSensorCommunicator
-            + "\n rosUri=" + rosUri + "]";
+            + useBehaviorVisualizer + "\n useHandModule=" + useHandModule + "\n usePerceptionModule=" + usePerceptionModule + "\n useRosModule=" + useRosModule
+            + "\n useDrillDetectionModule=" + useDrillDetectionModule + "\n simulatedSensorCommunicator=" + simulatedSensorCommunicator + "\n rosUri=" + rosUri
+            + "]";
    }
 
    public boolean isFilterControllerInputMessages()

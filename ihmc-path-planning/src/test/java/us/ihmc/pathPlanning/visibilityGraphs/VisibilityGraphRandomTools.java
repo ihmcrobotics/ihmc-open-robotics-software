@@ -1,5 +1,11 @@
 package us.ihmc.pathPlanning.visibilityGraphs;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Random;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
+
 import us.ihmc.commons.RandomNumbers;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.geometry.tools.EuclidGeometryRandomTools;
@@ -11,19 +17,19 @@ import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.pathPlanning.visibilityGraphs.clusterManagement.Cluster;
-import us.ihmc.pathPlanning.visibilityGraphs.dataStructure.*;
+import us.ihmc.pathPlanning.visibilityGraphs.dataStructure.Connection;
+import us.ihmc.pathPlanning.visibilityGraphs.dataStructure.InterRegionVisibilityMap;
+import us.ihmc.pathPlanning.visibilityGraphs.dataStructure.SingleSourceVisibilityMap;
+import us.ihmc.pathPlanning.visibilityGraphs.dataStructure.VisibilityMap;
+import us.ihmc.pathPlanning.visibilityGraphs.dataStructure.VisibilityMapWithNavigableRegion;
 import us.ihmc.pathPlanning.visibilityGraphs.interfaces.VisibilityMapHolder;
 import us.ihmc.robotics.geometry.PlanarRegion;
-
-import java.util.*;
-import java.util.stream.Collectors;
-import java.util.stream.IntStream;
 
 public class VisibilityGraphRandomTools
 {
    public static Cluster getRandomCluster(Random random)
    {
-      byte typeByte = (byte) RandomNumbers.nextInt(random, 0, Cluster.Type.values.length - 1);
+      byte typeByte = (byte) RandomNumbers.nextInt(random, 0, Cluster.ClusterType.values.length - 1);
       byte extrusionSideByte = (byte) RandomNumbers.nextInt(random, 0, Cluster.ExtrusionSide.values.length - 1);
 
       int numberOfRawPoints = RandomNumbers.nextInt(random, 1, 100);
@@ -42,10 +48,8 @@ public class VisibilityGraphRandomTools
       for (int i = 0; i < numberOfNonNavigableExtrusions; i++)
          nonNavigableExtrusionsInLocalExpected.add(EuclidCoreRandomTools.nextPoint2D(random, 100.0));
 
-      Cluster cluster = new Cluster();
+      Cluster cluster = new Cluster(Cluster.ExtrusionSide.fromByte(extrusionSideByte), Cluster.ClusterType.fromByte(typeByte));
       cluster.setTransformToWorld(transformToWorld);
-      cluster.setType(Cluster.Type.fromByte(typeByte));
-      cluster.setExtrusionSide(Cluster.ExtrusionSide.fromByte(extrusionSideByte));
 
       for (int i = 0; i < numberOfRawPoints; i++)
          cluster.addRawPointInLocal(rawPointsInLocalExpected.get(i));
@@ -57,13 +61,13 @@ public class VisibilityGraphRandomTools
       return cluster;
    }
 
-   public static NavigableRegion getRandomNavigableRegion(Random random)
+   public static VisibilityMapWithNavigableRegion getRandomNavigableRegion(Random random)
    {
       int numberOfObstacleClusters = RandomNumbers.nextInt(random, 1, 50);
       PlanarRegion homeRegion = nextPlanarRegion(random);
       Cluster homeCluster = getRandomCluster(random);
 
-      NavigableRegion navigableRegion = new NavigableRegion(homeRegion);
+      VisibilityMapWithNavigableRegion navigableRegion = new VisibilityMapWithNavigableRegion(homeRegion);
       navigableRegion.setHomeRegionCluster(homeCluster);
       for (int i = 0; i < numberOfObstacleClusters; i++)
          navigableRegion.addObstacleCluster(getRandomCluster(random));
@@ -88,7 +92,7 @@ public class VisibilityGraphRandomTools
    {
       int numberOfConnections = RandomNumbers.nextInt(random, 2, 50);
 
-      Set<Connection> connections = new HashSet<>();
+      List<Connection> connections = new ArrayList<Connection>();
       for (int i = 0; i < numberOfConnections; i++)
          connections.add(VisibilityGraphRandomTools.getRandomConnection(random));
 
@@ -105,7 +109,7 @@ public class VisibilityGraphRandomTools
 
       int numberOfConnections = RandomNumbers.nextInt(random, 2, 100);
 
-      Set<Connection> connections = new HashSet<>();
+      List<Connection> connections = new ArrayList<>();
       for (int i = 0; i < numberOfConnections; i++)
          connections.add((VisibilityGraphRandomTools.getRandomConnection(random)));
       map.addConnections(connections);
@@ -119,7 +123,7 @@ public class VisibilityGraphRandomTools
    {
       int numberOfConnections = RandomNumbers.nextInt(random, 2, 100);
 
-      Set<Connection> connections = new HashSet<>();
+      List<Connection> connections = new ArrayList<>();
       for (int i = 0; i < numberOfConnections; i++)
          connections.add(VisibilityGraphRandomTools.getRandomConnection(random));
 

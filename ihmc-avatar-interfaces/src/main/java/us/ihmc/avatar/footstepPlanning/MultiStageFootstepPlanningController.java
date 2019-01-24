@@ -86,6 +86,16 @@ public class MultiStageFootstepPlanningController
       stageManager.processPlanningStatisticsRequest();
    }
 
+   public void broadcastPlannerParameters()
+   {
+      stageManager.broadcastPlannerParameters();
+   }
+
+   public void setParametersPublisher(IHMCRealtimeROS2Publisher<FootstepPlannerParametersPacket> parametersPublisher)
+   {
+      stageManager.setParametersPublisher(parametersPublisher);
+   }
+
    public void setTextToSpeechPublisher(IHMCRealtimeROS2Publisher<TextToSpeechPacket> textToSpeechPublisher)
    {
       stageManager.setTextToSpeechPublisher(textToSpeechPublisher);

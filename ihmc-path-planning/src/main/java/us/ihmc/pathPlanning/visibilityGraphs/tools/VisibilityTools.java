@@ -1,45 +1,46 @@
 package us.ihmc.pathPlanning.visibilityGraphs.tools;
 
-import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 
-import us.ihmc.commons.MathTools;
 import us.ihmc.euclid.geometry.BoundingBox2D;
+import us.ihmc.euclid.geometry.LineSegment2D;
+import us.ihmc.euclid.geometry.tools.EuclidGeometryPolygonTools;
 import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
 import us.ihmc.euclid.tuple2D.Point2D;
-import us.ihmc.euclid.tuple2D.Vector2D;
+import us.ihmc.euclid.tuple2D.interfaces.Point2DBasics;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
-import us.ihmc.euclid.tuple2D.interfaces.Vector2DReadOnly;
-import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.euclid.tuple2D.interfaces.Vector2DBasics;
+import us.ihmc.euclid.tuple3D.interfaces.Point3DBasics;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.pathPlanning.visibilityGraphs.clusterManagement.Cluster;
 import us.ihmc.pathPlanning.visibilityGraphs.clusterManagement.Cluster.ExtrusionSide;
-import us.ihmc.pathPlanning.visibilityGraphs.dataStructure.Connection;
-import us.ihmc.pathPlanning.visibilityGraphs.dataStructure.NavigableRegion;
 import us.ihmc.robotics.geometry.PlanarRegion;
-import us.ihmc.commons.lists.ListWrappingIndexTools;
+
+import static us.ihmc.euclid.geometry.tools.EuclidGeometryTools.*;
+import static us.ihmc.euclid.geometry.tools.EuclidGeometryTools.distanceSquaredFromPoint2DToLineSegment2D;
+import static us.ihmc.euclid.tools.EuclidCoreTools.norm;
+import static us.ihmc.euclid.tools.EuclidCoreTools.normSquared;
 
 public class VisibilityTools
 {
-   private static final double MAGIC_NUMBER = MathTools.square(0.01);
-   /**
-    * Filter that reduces a little the computation time. When enabled, the tests are still passing,
-    * and the path found still looks good, but the inner-region maps look slightly different. Until
-    * this is fixed, I'd rather leave the filter disabled.
-    */
-   private static final boolean ENABLE_EXPERIMENTAL_QUICK_CHECK = false;
-
-   public static boolean isPointVisible(Point2DReadOnly observer, Point2DReadOnly targetPoint, List<? extends Point2DReadOnly> listOfPointsInCluster)
+   public static boolean isPointVisible(Point2DReadOnly observer, Point2DReadOnly targetPoint, List<? extends Point2DReadOnly> listOfPointsInCluster,
+                                        boolean closed)
    {
-      for (int i = 0; i < listOfPointsInCluster.size() - 1; i++)
+      int size = listOfPointsInCluster.size();
+      int endIndex = size - 1;
+      if (closed)
+         endIndex++;
+
+      for (int i = 0; i < endIndex; i++)
       {
          Point2DReadOnly first = listOfPointsInCluster.get(i);
-         Point2DReadOnly second = listOfPointsInCluster.get(i + 1);
+
+         int nextIndex = i + 1;
+         if (nextIndex == size)
+            nextIndex = 0;
+
+         Point2DReadOnly second = listOfPointsInCluster.get(nextIndex);
 
          if (EuclidGeometryTools.doLineSegment2DsIntersect(first, second, observer, targetPoint))
          {
@@ -49,302 +50,362 @@ public class VisibilityTools
       return true;
    }
 
-   public static List<Connection> getConnectionsThatAreInsideRegion(Collection<Connection> connections, PlanarRegion region)
+   public static double distanceToCluster(Point2DReadOnly firstPointOfLine, Point2DReadOnly secondPointOfLine,
+                                          List<? extends Point2DReadOnly> listOfPointsInCluster, Point2DBasics closestPointOnLineToPack,
+                                          Point2DBasics closestPointOnClusterToPack, Vector2DBasics normalToClusterToPack, boolean closed)
    {
-      List<Connection> filteredConnections = new ArrayList<>();
+      int numberOfVertices = listOfPointsInCluster.size();
 
-      for (Connection connection : connections)
+      if (numberOfVertices == 0)
       {
+         if (closestPointOnLineToPack != null)
+            closestPointOnLineToPack.setToNaN();
+         if (closestPointOnClusterToPack != null)
+            closestPointOnClusterToPack.setToNaN();
+         if (normalToClusterToPack != null)
+            normalToClusterToPack.setToNaN();
+         return Double.NaN;
+      }
 
-         if (PlanarRegionTools.areBothPointsInsidePlanarRegion(connection.getSourcePoint2D(), connection.getTargetPoint2D(), region))
+      if (numberOfVertices == 1)
+      {
+         Point2DReadOnly clusterPoint = listOfPointsInCluster.get(0);
+         orthogonalProjectionOnLineSegment2D(clusterPoint, firstPointOfLine, secondPointOfLine, closestPointOnLineToPack);
+         if (normalToClusterToPack != null)
+            normalToClusterToPack.setToZero();
+         if (closestPointOnClusterToPack != null)
+            closestPointOnClusterToPack.set(clusterPoint);
+         return clusterPoint.distance(closestPointOnLineToPack);
+      }
+
+      if (numberOfVertices == 2)
+      {
+         if (normalToClusterToPack != null)
          {
-            filteredConnections.add(connection);
+            normalToClusterToPack.sub(listOfPointsInCluster.get(1), listOfPointsInCluster.get(0));
+            EuclidGeometryTools.perpendicularVector2D(normalToClusterToPack, normalToClusterToPack);
+            normalToClusterToPack.normalize();
+         }
+
+         return closestPoint2DsBetweenTwoLineSegment2Ds(firstPointOfLine, secondPointOfLine, listOfPointsInCluster.get(0), listOfPointsInCluster.get(1),
+                                                        closestPointOnLineToPack, closestPointOnClusterToPack);
+      }
+
+      boolean pointIsVisible = isPointVisible(firstPointOfLine, secondPointOfLine, listOfPointsInCluster, closed);
+
+      double minDistance = Double.POSITIVE_INFINITY;
+
+      Point2DBasics closestPointOnLine = new Point2D();
+      Point2DBasics closestPointOnCluster = new Point2D();
+
+      for (int index = 0; index < numberOfVertices; index++)
+      {
+         Point2DReadOnly edgeStart = listOfPointsInCluster.get(index);
+         Point2DReadOnly edgeEnd = listOfPointsInCluster.get(next(index, numberOfVertices));
+
+         double distance = closestPoint2DsBetweenTwoLineSegment2Ds(firstPointOfLine, secondPointOfLine, edgeStart, edgeEnd, closestPointOnLine,
+                                                                   closestPointOnCluster);
+         if (distance < minDistance)
+         {
+            minDistance = distance;
+            if (closestPointOnLineToPack != null)
+               closestPointOnLineToPack.set(closestPointOnLine);
+            if (closestPointOnClusterToPack != null)
+               closestPointOnClusterToPack.set(closestPointOnCluster);
+
+            if (normalToClusterToPack != null)
+            {
+               normalToClusterToPack.sub(edgeEnd, edgeStart);
+               EuclidGeometryTools.perpendicularVector2D(normalToClusterToPack, normalToClusterToPack);
+               normalToClusterToPack.normalize();
+            }
          }
       }
 
-      return filteredConnections;
+      if (!pointIsVisible)
+         minDistance = -minDistance;
+      return minDistance;
    }
 
-   public static Set<Connection> createStaticVisibilityMap(List<Cluster> clusters, NavigableRegion navigableRegion)
+   public static double distanceToCluster(Point2DReadOnly point, List<? extends Point2DReadOnly> listOfPointsInCluster,
+                                          Point2DBasics closestPointInCluster, Vector2DBasics normalToCluster)
    {
-      int regionId = navigableRegion.getMapId();
-      PlanarRegion homeRegion = navigableRegion.getHomeRegion();
-      Set<Connection> connections = new HashSet<>();
-      List<boolean[]> navigability = new ArrayList<>(clusters.size());
+      int numberOfVertices = listOfPointsInCluster.size();
 
-      for (Cluster cluster : clusters)
+      if (numberOfVertices == 0)
       {
-         navigability.add(addClusterSelfVisibility(cluster, homeRegion, clusters, regionId, connections));
+         closestPointInCluster.setToNaN();
+         if (normalToCluster != null)
+            normalToCluster.setToNaN();
+         return Double.NaN;
       }
 
-      for (int sourceIndex = 0; sourceIndex < clusters.size(); sourceIndex++)
+      if (numberOfVertices == 1)
       {
-         Cluster source = clusters.get(sourceIndex);
-         boolean[] sourceNavigability = navigability.get(sourceIndex);
+         closestPointInCluster.set(listOfPointsInCluster.get(0));
+         if (normalToCluster != null)
+            normalToCluster.setToZero();
+         return distanceBetweenPoint2Ds(point.getX(), point.getY(), listOfPointsInCluster.get(0));
+      }
 
-         for (int targetIndex = sourceIndex + 1; targetIndex < clusters.size(); targetIndex++)
+      if (numberOfVertices == 2)
+      {
+         orthogonalProjectionOnLineSegment2D(point, listOfPointsInCluster.get(0), listOfPointsInCluster.get(1), closestPointInCluster);
+
+         if (normalToCluster != null)
          {
-            Cluster target = clusters.get(targetIndex);
-            boolean[] targetNavigability = navigability.get(targetIndex);
+            normalToCluster.sub(listOfPointsInCluster.get(1), listOfPointsInCluster.get(0));
+            EuclidGeometryTools.perpendicularVector2D(normalToCluster, normalToCluster);
+            normalToCluster.normalize();
+         }
 
-            addCrossClusterVisibility(source, sourceNavigability, target, targetNavigability, clusters, regionId, connections);
+         return point.distance(closestPointInCluster);
+      }
+
+      Point2DBasics tempPoint = new Point2D();
+      boolean isQueryOutsidePolygon = false;
+      double minDistance = Double.POSITIVE_INFINITY;
+
+      for (int index = 0; index < numberOfVertices; index++)
+      {
+         Point2DReadOnly edgeStart = listOfPointsInCluster.get(index);
+         Point2DReadOnly edgeEnd = listOfPointsInCluster.get(next(index, numberOfVertices));
+
+         isQueryOutsidePolygon |= isPoint2DOnSideOfLine2D(point.getX(), point.getY(), edgeStart, edgeEnd, true);
+
+         orthogonalProjectionOnLineSegment2D(point, edgeStart, edgeEnd, tempPoint);
+         double distance = point.distance(tempPoint);
+
+         if (distance < minDistance)
+         {
+            minDistance = distance;
+            closestPointInCluster.set(tempPoint);
+
+            if (normalToCluster != null)
+            {
+               normalToCluster.sub(edgeEnd, edgeStart);
+               EuclidGeometryTools.perpendicularVector2D(normalToCluster, normalToCluster);
+               normalToCluster.normalize();
+            }
          }
       }
 
-      return connections;
+      if (!isQueryOutsidePolygon)
+         minDistance = -minDistance;
+      return minDistance;
    }
 
    /**
-    * Finds all the possible and valid connections using only the vertices from a single cluster,
-    * i.e. {@code clusterToBuildMapOf} while considering all the clusters, including
-    * {@code clusterToBuildMapOf}, for the visibility check when creating connections.
-    * 
-    * @param clusterToBuildMapOf the only cluster used to create new connection using its navigable
-    *           extrusions. Not modified.
-    * @param homeRegion the region to which the clusters belong to. Not modified.
-    * @param allClusters list containing all the clusters to consider for the visibility check
-    *           including {@code clusterToBuildMapOf}. Not modified.
-    * @param mapId the ID used to create the connections.
-    * @param connectionsToPack the collection in which the connections are stored. Modified.
-    * @return an array of booleans informing on whether each individual navigable extrusion of
-    *         {@code clusterToBuildMapOf} is actually navigable or not.
+    * This methods computes the minimum distance between the two 2D line segments with finite length.
+    * <a href="http://geomalgorithms.com/a07-_distance.html"> Useful link</a>.
+    *
+    * @param lineSegmentStart1 the first endpoint of the first line segment. Not modified.
+    * @param lineSegmentEnd1 the second endpoint of the first line segment. Not modified.
+    * @param lineSegmentStart2 the first endpoint of the second line segment. Not modified.
+    * @param lineSegmentEnd2 the second endpoint of the second line segment. Not modified.
+    * @return the minimum distance between the two line segments.
     */
-   private static boolean[] addClusterSelfVisibility(Cluster clusterToBuildMapOf, PlanarRegion homeRegion, List<Cluster> allClusters, int mapId,
-                                                     Collection<Connection> connectionsToPack)
+   public static double distanceBetweenTwoLineSegment2Ds(Point2DReadOnly lineSegmentStart1, Point2DReadOnly lineSegmentEnd1, Point2DReadOnly lineSegmentStart2,
+                                                         Point2DReadOnly lineSegmentEnd2)
    {
-      List<? extends Point2DReadOnly> navigableExtrusions = clusterToBuildMapOf.getNavigableExtrusionsInLocal();
+      return closestPoint2DsBetweenTwoLineSegment2Ds(lineSegmentStart1, lineSegmentEnd1, lineSegmentStart2, lineSegmentEnd2, null, null);
+   }
 
+
+   /**
+    * Given two 2D line segments with finite length, this methods computes two points P &in;
+    * lineSegment1 and Q &in; lineSegment2 such that the distance || P - Q || is the minimum distance
+    * between the two 2D line segments. <a href="http://geomalgorithms.com/a07-_distance.html"> Useful
+    * link</a>.
+    *
+    * @param lineSegmentStart1 the first endpoint of the first line segment. Not modified.
+    * @param lineSegmentEnd1 the second endpoint of the first line segment. Not modified.
+    * @param lineSegmentStart2 the first endpoint of the second line segment. Not modified.
+    * @param lineSegmentEnd2 the second endpoint of the second line segment. Not modified.
+    * @param closestPointOnLineSegment1ToPack the 2D coordinates of the point P are packed in this 2D
+    *           point. Modified. Can be {@code null}.
+    * @param closestPointOnLineSegment2ToPack the 2D coordinates of the point Q are packed in this 2D
+    *           point. Modified. Can be {@code null}.
+    * @return the minimum distance between the two line segments.
+    */
+   public static double closestPoint2DsBetweenTwoLineSegment2Ds(Point2DReadOnly lineSegmentStart1, Point2DReadOnly lineSegmentEnd1,
+                                                                Point2DReadOnly lineSegmentStart2, Point2DReadOnly lineSegmentEnd2,
+                                                                Point2DBasics closestPointOnLineSegment1ToPack, Point2DBasics closestPointOnLineSegment2ToPack)
+   {
+      // Switching to the notation used in http://geomalgorithms.com/a07-_distance.html.
+      // The line1 is defined by (P0, u) and the line2 by (Q0, v).
+      Point2DReadOnly P0 = lineSegmentStart1;
+      double ux = lineSegmentEnd1.getX() - lineSegmentStart1.getX();
+      double uy = lineSegmentEnd1.getY() - lineSegmentStart1.getY();
+      Point2DReadOnly Q0 = lineSegmentStart2;
+      double vx = lineSegmentEnd2.getX() - lineSegmentStart2.getX();
+      double vy = lineSegmentEnd2.getY() - lineSegmentStart2.getY();
+
+      Point2DBasics Psc = closestPointOnLineSegment1ToPack;
+      Point2DBasics Qtc = closestPointOnLineSegment2ToPack;
+
+      double w0X = P0.getX() - Q0.getX();
+      double w0Y = P0.getY() - Q0.getY();
+
+      double a = ux * ux + uy * uy;
+      double b = ux * vx + uy * vy;
+      double c = vx * vx + vy * vy;
+      double d = ux * w0X + uy * w0Y;
+      double e = vx * w0X + vy * w0Y;
+
+      double delta = a * c - b * b;
+
+      double sc, sNumerator, sDenominator = delta;
+      double tc, tNumerator, tDenominator = delta;
+
+      // check to see if the lines are parallel
+      if (delta <= ONE_MILLIONTH)
+      {
+         /*
+          * The lines are parallel, there's an infinite number of pairs, but for one chosen point on one of
+          * the lines, there's only one closest point to it on the other line. So let's choose arbitrarily a
+          * point on the lineSegment1 and calculate the point that is closest to it on the lineSegment2.
+          */
+         sNumerator = 0.0;
+         sDenominator = 1.0;
+         tNumerator = e;
+         tDenominator = c;
+      }
+      else
+      {
+         sNumerator = b * e - c * d;
+         tNumerator = a * e - b * d;
+
+         if (sNumerator < 0.0)
+         {
+            sNumerator = 0.0;
+            tNumerator = e;
+            tDenominator = c;
+         }
+         else if (sNumerator > sDenominator)
+         {
+            sNumerator = sDenominator;
+            tNumerator = e + b;
+            tDenominator = c;
+         }
+      }
+
+      if (tNumerator < 0.0)
+      {
+         tNumerator = 0.0;
+         sNumerator = -d;
+         if (sNumerator < 0.0)
+            sNumerator = 0.0;
+         else if (sNumerator > a)
+            sNumerator = a;
+         sDenominator = a;
+      }
+      else if (tNumerator > tDenominator)
+      {
+         tNumerator = tDenominator;
+         sNumerator = -d + b;
+         if (sNumerator < 0.0)
+            sNumerator = 0.0;
+         else if (sNumerator > a)
+            sNumerator = a;
+         sDenominator = a;
+      }
+
+      sc = Math.abs(sNumerator) < ONE_MILLIONTH ? 0.0 : sNumerator / sDenominator;
+      tc = Math.abs(tNumerator) < ONE_MILLIONTH ? 0.0 : tNumerator / tDenominator;
+
+      double PscX = sc * ux + P0.getX();
+      double PscY = sc * uy + P0.getY();
+
+      double QtcX = tc * vx + Q0.getX();
+      double QtcY = tc * vy + Q0.getY();
+
+      if (Psc != null)
+         Psc.set(PscX, PscY);
+      if (Qtc != null)
+         Qtc.set(QtcX, QtcY);
+
+      double dx = PscX - QtcX;
+      double dy = PscY - QtcY;
+      return Math.sqrt(normSquared(dx, dy));
+   }
+
+   /**
+    * Increments then recomputes the given {@code index} such that it is &in; [0, {@code listSize}[.
+    * Examples:
+    * <ul>
+    * <li>{@code next(-1, 10)} returns 0.
+    * <li>{@code next(10, 10)} returns 1.
+    * <li>{@code next( 5, 10)} returns 6.
+    * <li>{@code next(15, 10)} returns 6.
+    * </ul>
+    * </p>
+    *
+    * @param index the index to be incremented and wrapped if necessary.
+    * @param listSize the size of the list around which the index is to be wrapped.
+    * @return the wrapped incremented index.
+    */
+   public static int next(int index, int listSize)
+   {
+      return wrap(index + 1, listSize);
+   }
+
+   /**
+    * Recomputes the given {@code index} such that it is &in; [0, {@code listSize}[.
+    * <p>
+    * The {@code index} remains unchanged if already &in; [0, {@code listSize}[.
+    * <p>
+    * Examples:
+    * <ul>
+    * <li>{@code wrap(-1, 10)} returns 9.
+    * <li>{@code wrap(10, 10)} returns 0.
+    * <li>{@code wrap( 5, 10)} returns 5.
+    * <li>{@code wrap(15, 10)} returns 5.
+    * </ul>
+    * </p>
+    *
+    * @param index the index to be wrapped if necessary.
+    * @param listSize the size of the list around which the index is to be wrapped.
+    * @return the wrapped index.
+    */
+   public static int wrap(int index, int listSize)
+   {
+      index %= listSize;
+      if (index < 0)
+         index += listSize;
+      return index;
+   }
+
+   private static boolean isNotInsideANonNavigableZone(Point2DReadOnly query, List<Cluster> clusters)
+   {
+      return clusters.stream().noneMatch(cluster -> cluster.isInsideNonNavigableZone(query));
+   }
+
+   public static boolean[] checkIfPointsInsidePlanarRegionAndOutsideNonNavigableZones(PlanarRegion homeRegion, List<Cluster> allClusters,
+                                                                                      List<? extends Point2DReadOnly> navigableExtrusionPoints)
+   {
       // We first go through the extrusions and check if they are actually navigable, i.e. inside the home region and not inside any non-navigable zone.
-      boolean[] areActuallyNavigable = new boolean[navigableExtrusions.size()];
-      Arrays.fill(areActuallyNavigable, true);
+      boolean[] arePointsActuallyNavigable = new boolean[navigableExtrusionPoints.size()];
+      Arrays.fill(arePointsActuallyNavigable, true);
 
-      for (int i = 0; i < navigableExtrusions.size() - 1; i++) // <= the extrusions are actually closed by replicating the first extrusion at the end
-      { // Check that the point is actually navigable
-         Point2DReadOnly query = navigableExtrusions.get(i);
+      for (int i = 0; i < navigableExtrusionPoints.size(); i++)
+      {
+         // Check that the point is actually navigable
+         Point2DReadOnly query = navigableExtrusionPoints.get(i);
 
          boolean isNavigable = PlanarRegionTools.isPointInLocalInsidePlanarRegion(homeRegion, query);
 
          if (isNavigable)
-            isNavigable = allClusters.stream().noneMatch(cluster -> cluster.isInsideNonNavigableZone(query));
-
-         areActuallyNavigable[i] = isNavigable;
-      }
-
-      for (int i = 0; i < navigableExtrusions.size() - 1; i++)
-      { // Adding the edges of the navigable extrusion. As long as both the current and next vertices are navigable, the connection is valid.
-         if (areActuallyNavigable[i] && areActuallyNavigable[i + 1])
-            connectionsToPack.add(new Connection(navigableExtrusions.get(i), mapId, navigableExtrusions.get(i + 1), mapId));
-      }
-
-      Vector2D directionToCheck = new Vector2D();
-      Vector2D nextEdge = new Vector2D();
-      Vector2D prevEdge = new Vector2D();
-
-      // Going through all the other possible combinations for finding connections
-      for (int sourceIndex = 0; sourceIndex < navigableExtrusions.size() - 1; sourceIndex++)
-      {
-         if (!areActuallyNavigable[sourceIndex])
-            continue; // Both source and target have to be navigable for the connection to be valid
-
-         Point2DReadOnly source = navigableExtrusions.get(sourceIndex);
-
-         // Starting from after the next vertex of the source as we already added all the edges as connections
-         for (int targetIndex = sourceIndex + 2; targetIndex < navigableExtrusions.size() - 1; targetIndex++)
          {
-            if (!areActuallyNavigable[targetIndex])
-               continue; // Both source and target have to be navigable for the connection to be valid
-
-            Point2DReadOnly target = navigableExtrusions.get(targetIndex);
-
-            if (ENABLE_EXPERIMENTAL_QUICK_CHECK)
-            {
-               directionToCheck.sub(target, source);
-
-               { // Perform quick check on source
-                  prevEdge.sub(source, ListWrappingIndexTools.getPrevious(sourceIndex, navigableExtrusions));
-                  nextEdge.sub(ListWrappingIndexTools.getNext(sourceIndex, navigableExtrusions), source);
-                  if (!quickFeasibilityCheck(directionToCheck, prevEdge, nextEdge, clusterToBuildMapOf.getExtrusionSide()))
-                     continue;
-               }
-
-               { // Perform quick check on target
-                  directionToCheck.negate();
-                  prevEdge.sub(target, ListWrappingIndexTools.getPrevious(targetIndex, navigableExtrusions));
-                  nextEdge.sub(ListWrappingIndexTools.getNext(targetIndex, navigableExtrusions), target);
-                  if (!quickFeasibilityCheck(directionToCheck, prevEdge, nextEdge, clusterToBuildMapOf.getExtrusionSide()))
-                     continue;
-               }
-            }
-
-            // Finally run the expensive test to verify if the target can be seen from the source.
-            if (isPointVisibleForStaticMaps(allClusters, source, target))
-               connectionsToPack.add(new Connection(source, mapId, target, mapId));
+            isNavigable = isNotInsideANonNavigableZone(query, allClusters);
          }
-      }
 
-      return areActuallyNavigable;
+         arePointsActuallyNavigable[i] = isNavigable;
+      }
+      return arePointsActuallyNavigable;
    }
 
-   /**
-    * Finds all the possible and valid connections going from the navigable extrusions of
-    * {@code sourceCluster} to the ones of {@code targetCluster} while considering all the clusters,
-    * including {@code sourceCluster} and {@code targetCluster} when performing the visibility check
-    * when creating connections.
-    * 
-    * @param sourceCluster the cluster which the navigable extrusions are used as source points for
-    *           the connections. Not modified.
-    * @param sourceNavigability the array containing the information of whether or not each
-    *           individual navigable extrusion of {@code sourceCluster} is actually navigable. Not
-    *           modified.
-    * @param targetCluster the cluster which the navigable extrusions are used as target points for
-    *           the connections. Not modified.
-    * @param targetNavigability the array containing the information of whether or not each
-    *           individual navigable extrusion of {@code targetCluster} is actually navigable. Not
-    *           modified.
-    * @param allClusters list containing all the clusters to consider for the visibility check
-    *           including {@code sourceCluster} and {@code targetCluster}. Not modified.
-    * @param mapId the ID used to create the connections.
-    * @param connectionsToPack the collection in which the connections are stored. Modified.
-    */
-   private static void addCrossClusterVisibility(Cluster sourceCluster, boolean[] sourceNavigability, Cluster targetCluster, boolean[] targetNavigability,
-                                                 List<Cluster> allClusters, int mapId, Collection<Connection> connectionsToPack)
-   {
-      Vector2D directionToCheck = new Vector2D();
-      Vector2D nextEdge = new Vector2D();
-      Vector2D prevEdge = new Vector2D();
-
-      List<? extends Point2DReadOnly> sources = sourceCluster.getNavigableExtrusionsInLocal();
-      List<? extends Point2DReadOnly> targets = targetCluster.getNavigableExtrusionsInLocal();
-
-      for (int sourceIndex = 0; sourceIndex < sourceNavigability.length - 1; sourceIndex++)
-      {
-         if (!sourceNavigability[sourceIndex])
-            continue;
-
-         Point2DReadOnly source = sources.get(sourceIndex);
-
-         for (int targetIndex = 0; targetIndex < targetNavigability.length - 1; targetIndex++)
-         {
-            if (!targetNavigability[targetIndex])
-               continue;
-
-            Point2DReadOnly target = targets.get(targetIndex);
-
-            if (ENABLE_EXPERIMENTAL_QUICK_CHECK)
-            {
-
-               directionToCheck.sub(target, source);
-
-               { // Perform quick check on source
-                  prevEdge.sub(source, ListWrappingIndexTools.getPrevious(sourceIndex, sources));
-                  nextEdge.sub(ListWrappingIndexTools.getNext(sourceIndex, sources), source);
-                  if (!quickFeasibilityCheck(directionToCheck, prevEdge, nextEdge, sourceCluster.getExtrusionSide()))
-                     continue;
-               }
-
-               { // Perform quick check on target
-                  directionToCheck.negate();
-                  prevEdge.sub(target, ListWrappingIndexTools.getPrevious(targetIndex, targets));
-                  nextEdge.sub(ListWrappingIndexTools.getNext(targetIndex, targets), target);
-                  if (!quickFeasibilityCheck(directionToCheck, prevEdge, nextEdge, targetCluster.getExtrusionSide()))
-                     continue;
-               }
-            }
-
-            if (isPointVisibleForStaticMaps(allClusters, source, target))
-               connectionsToPack.add(new Connection(source, mapId, target, mapId));
-         }
-      }
-   }
-
-   public static Set<Connection> createStaticVisibilityMap(Point3DReadOnly observer, int observerRegionId, List<Cluster> clusters, int clustersRegionId)
-   {
-      Set<Connection> connections = new HashSet<>();
-      List<Point2DReadOnly> listOfTargetPoints = new ArrayList<>();
-      Point2D observer2D = new Point2D(observer);
-
-      // Add all navigable points (including dynamic objects) to a list
-      for (Cluster cluster : clusters)
-      {
-         if (cluster.isInsideNonNavigableZone(observer2D))
-            return Collections.emptySet();
-
-         for (Point2DReadOnly point : cluster.getNavigableExtrusionsInLocal())
-         {
-            listOfTargetPoints.add(point);
-         }
-      }
-
-      for (int j = 0; j < listOfTargetPoints.size(); j++)
-      {
-         Point2DReadOnly target = listOfTargetPoints.get(j);
-
-         if (observer.distanceXYSquared(target) > MAGIC_NUMBER)
-         {
-            boolean targetIsVisible = isPointVisibleForStaticMaps(clusters, observer2D, target);
-
-            if (targetIsVisible)
-            {
-               connections.add(new Connection(observer, observerRegionId, new Point3D(target), clustersRegionId));
-            }
-         }
-      }
-
-      return connections;
-   }
-
-   /**
-    * The main idea of the quick check is to verifying that when attempting to connect a vertex of a
-    * clockwise polygon to a target that the direction to that target goes the "proper way" with
-    * respect to the next and previous edges of the source.
-    * 
-    * @param directionToCheck
-    * @param previousEdgeDirection
-    * @param nexEdgeDirection
-    * @param extrusionSide
-    * @return
-    */
-   private static boolean quickFeasibilityCheck(Vector2DReadOnly directionToCheck, Vector2DReadOnly previousEdgeDirection, Vector2DReadOnly nexEdgeDirection,
-                                                ExtrusionSide extrusionSide)
-   {
-      double epsilon = 1.0e-8;
-      double prevCrossDirection = previousEdgeDirection.cross(directionToCheck);
-      if (MathTools.epsilonEquals(0.0, prevCrossDirection, epsilon))
-         return true;
-      double nextCrossDirection = nexEdgeDirection.cross(directionToCheck);
-      if (MathTools.epsilonEquals(0.0, nextCrossDirection, epsilon))
-         return true;
-
-      if (extrusionSide == ExtrusionSide.OUTSIDE)
-      {
-         boolean isGoingToTheLeftOfPreviousEdge = prevCrossDirection > 0.0;
-         boolean isGoingToTheLeftOfNextEdge = nextCrossDirection > 0.0;
-
-         if (previousEdgeDirection.cross(nexEdgeDirection) < 0.0)
-         { // Concave at vertex: direction has to go to the left of both previous and next edges
-            return isGoingToTheLeftOfPreviousEdge && isGoingToTheLeftOfNextEdge;
-         }
-         else
-         { // Convex at vertex: direction has to go to the left of either previous and next edges
-            return isGoingToTheLeftOfPreviousEdge || isGoingToTheLeftOfNextEdge;
-         }
-      }
-      else
-      {
-         boolean isGoingToTheRightOfPreviousEdge = prevCrossDirection < 0.0;
-         boolean isGoingToTheRightOfNextEdge = nextCrossDirection < 0.0;
-
-         if (previousEdgeDirection.cross(nexEdgeDirection) < 0.0)
-         { // Concave at vertex: direction has to go to the right of either previous and next edges
-            return isGoingToTheRightOfPreviousEdge || isGoingToTheRightOfNextEdge;
-         }
-         else
-         { // Convex at vertex: direction has to go to the right of both previous and next edges
-            return isGoingToTheRightOfPreviousEdge && isGoingToTheRightOfNextEdge;
-         }
-      }
-   }
-
+   //TODO: Rename.
    public static boolean isPointVisibleForStaticMaps(List<Cluster> clusters, Point2DReadOnly observer, Point2DReadOnly targetPoint)
    {
       for (Cluster cluster : clusters)
@@ -353,53 +414,25 @@ public class VisibilityTools
          {
             BoundingBox2D boundingBox = cluster.getNonNavigableExtrusionsBoundingBox();
 
-            // If both the target and observer are in the bounding box, we have to do the thorough check.
-            if (!boundingBox.isInsideInclusive(observer) || !boundingBox.isInsideInclusive(targetPoint))
+            // If either the target or observer or both are in the bounding box, we have to do the thorough check.
+            // If both are outside the bounding box, then we can check if the line segment does not intersect.
+            // If that is the case, then the point is visible and we can check the next one.
+            if (!boundingBox.isInsideInclusive(observer) && !boundingBox.isInsideInclusive(targetPoint))
             {
                if (!boundingBox.doesIntersectWithLineSegment2D(observer, targetPoint))
+               {
                   continue;
+               }
             }
          }
 
-         if (!VisibilityTools.isPointVisible(observer, targetPoint, cluster.getNonNavigableExtrusionsInLocal()))
+         boolean closed = cluster.isClosed();
+         if (!VisibilityTools.isPointVisible(observer, targetPoint, cluster.getNonNavigableExtrusionsInLocal(), closed))
          {
             return false;
          }
       }
 
       return true;
-   }
-
-   public static List<Connection> removeConnectionsFromExtrusionsOutsideRegions(Collection<Connection> connections, PlanarRegion homeRegion)
-   {
-      return VisibilityTools.getConnectionsThatAreInsideRegion(connections, homeRegion);
-   }
-
-   public static List<Connection> removeConnectionsFromExtrusionsInsideNoGoZones(Collection<Connection> connectionsToClean, List<Cluster> clusters)
-   {
-      List<Connection> validConnections = new ArrayList<>(connectionsToClean);
-
-      for (Cluster cluster : clusters)
-      {
-         validConnections = getValidConnections(validConnections, cluster);
-      }
-
-      return validConnections;
-   }
-
-   public static List<Connection> getValidConnections(Collection<Connection> connections, Cluster cluster)
-   {
-      List<Connection> filteredConnections = new ArrayList<>();
-
-      for (Connection connection : connections)
-      {
-         Point2D source = connection.getSourcePoint2D();
-         Point2D target = connection.getTargetPoint2D();
-
-         if (!cluster.isInsideNonNavigableZone(source) && !cluster.isInsideNonNavigableZone(target))
-            filteredConnections.add(connection);
-      }
-
-      return filteredConnections;
    }
 }

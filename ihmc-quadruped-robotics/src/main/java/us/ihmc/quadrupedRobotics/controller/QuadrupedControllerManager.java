@@ -1,11 +1,19 @@
 package us.ihmc.quadrupedRobotics.controller;
 
+import java.util.concurrent.atomic.AtomicReference;
+
 import controller_msgs.msg.dds.HighLevelStateChangeStatusMessage;
 import controller_msgs.msg.dds.WalkingControllerFailureStatusMessage;
 import us.ihmc.commonWalkingControlModules.configurations.HighLevelControllerParameters;
 import us.ihmc.commonWalkingControlModules.controllerAPI.input.ControllerNetworkSubscriber;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.lowLevel.YoLowLevelOneDoFJointDesiredDataHolder;
-import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.*;
+import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.DoNothingControllerState;
+import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.FreezeControllerState;
+import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.HighLevelControllerState;
+import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.SmoothTransitionControllerState;
+import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.StandPrepControllerState;
+import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.StandReadyControllerState;
+import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.stateTransitions.QuadrupedFeetLoadedToWalkingStandTransition;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.controllerAPI.CommandInputManager;
 import us.ihmc.communication.controllerAPI.StatusMessageOutputManager;
@@ -13,25 +21,24 @@ import us.ihmc.humanoidRobotics.communication.controllerAPI.command.HighLevelCon
 import us.ihmc.humanoidRobotics.communication.controllerAPI.converter.ClearDelayQueueConverter;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelControllerName;
 import us.ihmc.humanoidRobotics.communication.packets.sensing.StateEstimatorMode;
-import us.ihmc.humanoidRobotics.communication.subscribers.StateEstimatorModeSubscriber;
-import us.ihmc.mecano.multiBodySystem.OneDoFJoint;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
-import us.ihmc.quadrupedRobotics.communication.QuadrupedControllerAPIDefinition;
+import us.ihmc.quadrupedCommunication.QuadrupedControllerAPIDefinition;
 import us.ihmc.quadrupedRobotics.controlModules.QuadrupedControlManagerFactory;
+import us.ihmc.quadrupedRobotics.controller.states.QuadrupedExitWalkingControllerState;
 import us.ihmc.quadrupedRobotics.controller.states.QuadrupedSitDownControllerState;
-import us.ihmc.quadrupedRobotics.controller.states.QuadrupedSitDownParameters;
 import us.ihmc.quadrupedRobotics.controller.states.QuadrupedWalkingControllerState;
 import us.ihmc.quadrupedRobotics.model.QuadrupedPhysicalProperties;
 import us.ihmc.quadrupedRobotics.model.QuadrupedRuntimeEnvironment;
 import us.ihmc.quadrupedRobotics.output.JointIntegratorComponent;
 import us.ihmc.quadrupedRobotics.output.OutputProcessorBuilder;
 import us.ihmc.quadrupedRobotics.output.StateChangeSmootherComponent;
+import us.ihmc.quadrupedRobotics.parameters.QuadrupedSitDownParameters;
 import us.ihmc.quadrupedRobotics.planning.ContactState;
 import us.ihmc.robotics.robotController.OutputProcessor;
 import us.ihmc.robotics.robotSide.RobotQuadrant;
 import us.ihmc.robotics.stateMachine.core.State;
-import us.ihmc.robotics.stateMachine.core.StateChangedListener;
 import us.ihmc.robotics.stateMachine.core.StateMachine;
+import us.ihmc.robotics.stateMachine.core.StateTransition;
 import us.ihmc.robotics.stateMachine.core.StateTransitionCondition;
 import us.ihmc.robotics.stateMachine.factories.StateMachineFactory;
 import us.ihmc.ros2.RealtimeRos2Node;
@@ -40,15 +47,14 @@ import us.ihmc.sensorProcessing.outputData.JointDesiredOutputList;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutputListReadOnly;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutputReadOnly;
 import us.ihmc.simulationconstructionset.util.RobotController;
+import us.ihmc.stateEstimation.humanoid.StateEstimatorController;
+import us.ihmc.stateEstimation.humanoid.StateEstimatorModeSubscriber;
 import us.ihmc.tools.thread.CloseableAndDisposable;
 import us.ihmc.tools.thread.CloseableAndDisposableRegistry;
-import us.ihmc.yoVariables.listener.VariableChangedListener;
+import us.ihmc.yoVariables.parameters.BooleanParameter;
 import us.ihmc.yoVariables.providers.BooleanProvider;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoEnum;
-import us.ihmc.yoVariables.variable.YoVariable;
-
-import java.util.concurrent.atomic.AtomicReference;
 
 /**
  * A {@link RobotController} for switching between other robot controllers according to an internal
@@ -82,6 +88,8 @@ public class QuadrupedControllerManager implements RobotController, CloseableAnd
    private final HighLevelStateChangeStatusMessage stateChangeMessage = new HighLevelStateChangeStatusMessage();
    private final WalkingControllerFailureStatusMessage walkingControllerFailureStatusMessage = new WalkingControllerFailureStatusMessage();
 
+   private final BooleanProvider trustFootSwitches;
+
    private StateEstimatorModeSubscriber stateEstimatorModeSubscriber;
 
    public QuadrupedControllerManager(QuadrupedRuntimeEnvironment runtimeEnvironment, QuadrupedPhysicalProperties physicalProperties,
@@ -99,6 +107,7 @@ public class QuadrupedControllerManager implements RobotController, CloseableAnd
 
       HighLevelControllerName.setName(sitDownStateName, QuadrupedSitDownControllerState.name);
       requestedControllerState = new YoEnum<>("requestedControllerState", registry, HighLevelControllerName.class, true);
+      trustFootSwitches = new BooleanParameter("trustFootSwitches", registry, physicalProperties.trustFootSwitches());
 
       commandInputManager = new CommandInputManager(QuadrupedControllerAPIDefinition.getQuadrupedSupportedCommands());
       try
@@ -181,23 +190,23 @@ public class QuadrupedControllerManager implements RobotController, CloseableAnd
          runtimeEnvironment.getFootSwitches().get(RobotQuadrant.HIND_LEFT).setFootContactState(false);
          runtimeEnvironment.getFootSwitches().get(RobotQuadrant.HIND_RIGHT).setFootContactState(true);
          if (stateEstimatorModeSubscriber != null)
-            stateEstimatorModeSubscriber.requestMode(StateEstimatorMode.FROZEN);
+            stateEstimatorModeSubscriber.requestStateEstimatorMode(StateEstimatorMode.FROZEN);
          break;
       case STAND_READY:
          for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
          {
-            runtimeEnvironment.getFootSwitches().get(robotQuadrant).trustFootSwitch(false);
+            runtimeEnvironment.getFootSwitches().get(robotQuadrant).trustFootSwitch(trustFootSwitches.getValue());
             runtimeEnvironment.getFootSwitches().get(robotQuadrant).setFootContactState(true);
          }
          if (stateEstimatorModeSubscriber != null)
-            stateEstimatorModeSubscriber.requestMode(StateEstimatorMode.NORMAL);
+            stateEstimatorModeSubscriber.requestStateEstimatorMode(StateEstimatorMode.NORMAL);
          break;
       case STAND_TRANSITION_STATE:
       case WALKING:
       default:
          for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
          {
-            runtimeEnvironment.getFootSwitches().get(robotQuadrant).trustFootSwitch(true);
+            runtimeEnvironment.getFootSwitches().get(robotQuadrant).trustFootSwitch(trustFootSwitches.getValue());
             boolean inContact = controllerToolbox.getContactState(robotQuadrant) == ContactState.IN_CONTACT;
             runtimeEnvironment.getFootSwitches().get(robotQuadrant).setFootContactState(inContact);
          }
@@ -260,8 +269,8 @@ public class QuadrupedControllerManager implements RobotController, CloseableAnd
       SmoothTransitionControllerState standTransitionState = new SmoothTransitionControllerState("toWalking", HighLevelControllerName.STAND_TRANSITION_STATE,
                                                                                                  standReadyState, walkingState, controlledJoints,
                                                                                                  highLevelControllerParameters);
-      SmoothTransitionControllerState exitWalkingState = new SmoothTransitionControllerState("exitWalking", HighLevelControllerName.EXIT_WALKING, walkingState,
-                                                                                             freezeState, controlledJoints, highLevelControllerParameters);
+      SmoothTransitionControllerState exitWalkingState = new QuadrupedExitWalkingControllerState(walkingState, freezeState, controlledJoints,
+                                                                                                 highLevelControllerParameters);
 
       QuadrupedSitDownControllerState sitDownState = new QuadrupedSitDownControllerState(sitDownStateName, controlledJoints, highLevelControllerParameters,
                                                                                          sitDownParameters, jointDesiredOutputList);
@@ -287,8 +296,6 @@ public class QuadrupedControllerManager implements RobotController, CloseableAnd
                             createRequestedTransition(HighLevelControllerName.STAND_PREP_STATE));
       factory.addTransition(HighLevelControllerName.STAND_READY, sitDownStateName, createRequestedTransition(sitDownStateName));
       factory.addTransition(HighLevelControllerName.FREEZE_STATE, sitDownStateName, createRequestedTransition(sitDownStateName));
-      factory.addTransition(HighLevelControllerName.FREEZE_STATE, HighLevelControllerName.STAND_TRANSITION_STATE,
-                            createRequestedTransition(HighLevelControllerName.WALKING));
       factory.addTransition(HighLevelControllerName.FREEZE_STATE, HighLevelControllerName.STAND_PREP_STATE,
                             createRequestedTransition(HighLevelControllerName.STAND_PREP_STATE));
       factory.addTransition(HighLevelControllerName.STAND_PREP_STATE, HighLevelControllerName.FREEZE_STATE,
@@ -329,7 +336,7 @@ public class QuadrupedControllerManager implements RobotController, CloseableAnd
       factory.addDoneTransition(HighLevelControllerName.STAND_PREP_STATE, HighLevelControllerName.STAND_READY);
       factory.addDoneTransition(HighLevelControllerName.STAND_TRANSITION_STATE, HighLevelControllerName.WALKING);
       factory.addDoneTransition(sitDownStateName, HighLevelControllerName.FREEZE_STATE);
-      factory.addDoneTransition(HighLevelControllerName.EXIT_WALKING, HighLevelControllerName.FREEZE_STATE);
+      factory.addDoneTransition(HighLevelControllerName.EXIT_WALKING, sitDownStateName);
 
       // Set up walking controller failure transition
       HighLevelControllerName fallbackControllerState = highLevelControllerParameters.getFallbackControllerState();
@@ -337,6 +344,17 @@ public class QuadrupedControllerManager implements RobotController, CloseableAnd
       factory.addTransition(HighLevelControllerName.WALKING, fallbackControllerState, t -> isFallDetected.getValue());
       factory.addTransition(fallbackControllerState, HighLevelControllerName.STAND_PREP_STATE,
                             createRequestedTransition(HighLevelControllerName.STAND_PREP_STATE));
+
+      // Set up foot loaded transition
+      StateTransitionCondition footLoadedTransition = new QuadrupedFeetLoadedToWalkingStandTransition(HighLevelControllerName.WALKING, requestedControllerState,
+                                                                                                      runtimeEnvironment.getFootSwitches(),
+                                                                                                      runtimeEnvironment.getControlDT(),
+                                                                                                      runtimeEnvironment.getFullRobotModel().getTotalMass(),
+                                                                                                      runtimeEnvironment.getGravity(),
+                                                                                                      runtimeEnvironment.getHighLevelControllerParameters(),
+                                                                                                      registry);
+      factory.addTransition(HighLevelControllerName.STAND_READY, new StateTransition<>(HighLevelControllerName.WALKING, footLoadedTransition));
+
 
       factory.addStateChangedListener((from, to) -> {
          byte fromByte = from == null ? -1 : from.toByte();

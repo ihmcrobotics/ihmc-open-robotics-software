@@ -1,25 +1,18 @@
 package us.ihmc.communication;
 
+import com.google.common.base.CaseFormat;
+import org.apache.commons.lang3.StringUtils;
+import us.ihmc.commons.exception.ExceptionHandler;
+import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
+import us.ihmc.pubsub.TopicDataType;
+import us.ihmc.ros2.*;
+import us.ihmc.util.PeriodicNonRealtimeThreadSchedulerFactory;
+import us.ihmc.util.PeriodicThreadSchedulerFactory;
+
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.function.Supplier;
-
-import org.apache.commons.lang3.StringUtils;
-
-import com.google.common.base.CaseFormat;
-
-import us.ihmc.commons.exception.ExceptionHandler;
-import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
-import us.ihmc.pubsub.TopicDataType;
-import us.ihmc.ros2.NewMessageListener;
-import us.ihmc.ros2.RealtimeRos2Node;
-import us.ihmc.ros2.Ros2Node;
-import us.ihmc.ros2.Ros2QosProfile;
-import us.ihmc.ros2.Ros2Subscription;
-import us.ihmc.util.PeriodicNonRealtimeThreadSchedulerFactory;
-import us.ihmc.util.PeriodicRealtimeThreadSchedulerFactory;
-import us.ihmc.util.PeriodicThreadSchedulerFactory;
 
 public class ROS2Tools
 {
@@ -35,6 +28,12 @@ public class ROS2Tools
    public static final String KINEMATICS_TOOLBOX = "/toolbox/ik";
    public static final String KINEMATICS_PLANNING_TOOLBOX = "/toolbox/ik_planning";
    public static final String WHOLE_BODY_TRAJECTORY_TOOLBOX = "/toolbox/ik_trajectory";
+   public static final String WALKING_PREVIEW_TOOLBOX = "/toolbox/walking_controller_preview";
+
+   public static final String STEP_TELEOP_TOOLBOX = "/toolbox/teleop/step_teleop";
+   public static final String HEIGHT_TELEOP_TOOLBOX = "/toolbox/teleop/height_teleop";
+   public static final String BODY_TELEOP_TOOLBOX = "/toolbox/teleop/body_teleop";
+   public static final String XBOX_TELEOP_TOOLBOX = "/toolbox/teleop/xbox_teleop";
 
    public static final String BEHAVIOR_MODULE = "/behavior";
    public static final String REA_MODULE = "/rea";
@@ -75,7 +74,7 @@ public class ROS2Tools
    /**
     * Creates a ROS2 node that shares the same implementation as a real-time node <b>but that should
     * not be run in a real-time environment</b>.
-    * 
+    *
     * @param pubSubImplementation the implementation to use.
     * @param nodeName the name of the new ROS node.
     * @return the ROS node.
@@ -88,7 +87,7 @@ public class ROS2Tools
    /**
     * Creates a ROS2 node that shares the same implementation as a real-time node <b>but that should
     * not be run in a real-time environment</b>.
-    * 
+    *
     * @param pubSubImplementation the implementation to use.
     * @param nodeName the name of the new ROS node.
     * @param exceptionHandler how to handle exceptions thrown during the instantiation.
@@ -102,7 +101,7 @@ public class ROS2Tools
    /**
     * Creates a ROS2 node that is meant to run in real-time environment if the given
     * {@code periodicThreadSchedulerFactory} is a {@link PeriodicRealtimeThreadSchedulerFactory}.
-    * 
+    *
     * @param pubSubImplementation the implementation to use.
     * @param periodicThreadSchedulerFactory the factory used to create a periodic thread.
     * @param nodeName the name of the new ROS node.
@@ -117,7 +116,7 @@ public class ROS2Tools
    /**
     * Creates a ROS2 node that is meant to run in real-time environment if the given
     * {@code periodicThreadSchedulerFactory} is a {@link PeriodicRealtimeThreadSchedulerFactory}.
-    * 
+    *
     * @param pubSubImplementation the implementation to use.
     * @param periodicThreadSchedulerFactory the factory used to create a periodic thread.
     * @param nodeName the name of the new ROS node.
@@ -212,6 +211,31 @@ public class ROS2Tools
       }
    }
 
+   public static <T> RealtimeRos2Subscription<T> createQueuedSubscription(RealtimeRos2Node realtimeRos2Node, Class<T> messageType, MessageTopicNameGenerator topicNameGenerator)
+   {
+      String topicName = topicNameGenerator.generateTopicName(messageType);
+      return createQueuedSubscription(realtimeRos2Node, messageType, topicName, RUNTIME_EXCEPTION);
+   }
+
+   public static <T> RealtimeRos2Subscription<T> createQueuedSubscription(RealtimeRos2Node realtimeRos2Node, Class<T> messageType, String topicName)
+   {
+      return createQueuedSubscription(realtimeRos2Node, messageType, topicName, RUNTIME_EXCEPTION);
+   }
+
+   public static <T> RealtimeRos2Subscription<T> createQueuedSubscription(RealtimeRos2Node realtimeRos2Node, Class<T> messageType, String topicName, ExceptionHandler exceptionHandler)
+   {
+      try
+      {
+         TopicDataType<T> topicDataType = newMessageTopicDataTypeInstance(messageType);
+         return realtimeRos2Node.createQueuedSubscription(topicDataType, topicName, Ros2QosProfile.DEFAULT(), 10);
+      }
+      catch (IOException e)
+      {
+         exceptionHandler.handleException(e);
+         return null;
+      }
+   }
+
    public static <T> IHMCRealtimeROS2Publisher<T> createPublisher(RealtimeRos2Node realtimeRos2Node, Class<T> messageType,
                                                                   MessageTopicNameGenerator topicNameGenerator)
    {
@@ -280,7 +304,7 @@ public class ROS2Tools
     * {@code "/ihmc/arm_trajectory"}.
     * </ul>
     * </p>
-    * 
+    *
     * @return the default generator.
     */
    public static MessageTopicNameGenerator getDefaultTopicNameGenerator()
@@ -304,7 +328,7 @@ public class ROS2Tools
     * {@code "/ihmc/valkyrie/arm_trajectory"}.
     * </ul>
     * </p>
-    * 
+    *
     * @return the default generator.
     */
    public static MessageTopicNameGenerator getDefaultTopicNameGenerator(String robotName)
@@ -328,7 +352,7 @@ public class ROS2Tools
     * {@code "/ihmc/valkyrie/arm_trajectory"}.
     * </ul>
     * </p>
-    * 
+    *
     * @return the generator.
     */
    public static MessageTopicNameGenerator getTopicNameGenerator(String robotName, String moduleName, ROS2TopicQualifier qualifier)
@@ -339,7 +363,7 @@ public class ROS2Tools
    /**
     * Generates a default topic name using the class name of the message, for instance:<br>
     * For {@code TextToSpeechPacket} this generates the topic name: {@code "/ihmc/text_to_speech"}.
-    * 
+    *
     * @param messageClass the class of the message to generate the topic name for.
     * @return the topic name.
     */
@@ -352,7 +376,7 @@ public class ROS2Tools
     * Generates a default topic name using the class name of the message, for instance:<br>
     * For {@code TextToSpeechPacket} when running Valkyrie this generates the topic name:
     * {@code "/ihmc/valkyrie/text_to_speech"}.
-    * 
+    *
     * @param messageClass the class of the message to generate the topic name for.
     * @return the topic name.
     */
@@ -366,8 +390,8 @@ public class ROS2Tools
     * {@link #generateDefaultTopicName(Class, String)}:<br>
     * For {@code TextToSpeechPacket} when running Valkyrie this generates the topic name:<br>
     * {@code "/ihmc/valkyrie/" + moduleName.toLowerCase() + qualifier + "/text_to_speech"}.
-    * 
-    * 
+    *
+    *
     * @param messageClass the class of the message to generate the topic name for.
     * @return the topic name.
     */
@@ -405,7 +429,7 @@ public class ROS2Tools
     * <li>{@code TextToSpeechPacket} becomes: {@code "/text_to_speech"}.
     * <li>{@code WholeBodyTrajectoryMessage} becomes: {@code "/whole_body_trajectory"}.
     * </ul>
-    * 
+    *
     * @param prefix the prefix of the returned {@code String}.
     * @param messageClass used for its simple name to generate a suffix.
     * @return the composed {@code String}.

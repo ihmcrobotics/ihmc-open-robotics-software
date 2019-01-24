@@ -43,6 +43,7 @@ public class ValkyrieROSNetworkProcessor
          networkProcessorParameters.enableUiModule(true);
          networkProcessorParameters.enableROSAPICommunicator(true);
          networkProcessorParameters.enableControllerCommunicator(true);
+         networkProcessorParameters.enableKinematicsPlanningToolbox(true);
          DRCNetworkProcessor networkProcessor = new DRCNetworkProcessor(robotModel, networkProcessorParameters);
 //         new UiPacketToRosMsgRedirector(robotModel, rosUri, rosAPICommunicator, networkProcessor.getPacketRouter(), defaultRosNameSpace);
       }

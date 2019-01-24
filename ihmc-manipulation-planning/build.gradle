@@ -1,5 +1,5 @@
 plugins {
-   id("us.ihmc.ihmc-build") version "0.15.4"
+   id("us.ihmc.ihmc-build") version "0.15.5"
    id("us.ihmc.ihmc-ci-plugin") version "0.18.0"
    id("us.ihmc.log-tools") version "0.2.2"
 }
@@ -25,8 +25,8 @@ mainDependencies {
    compile group: "org.ejml", name: "dense64", version: "0.28"
    compile group: "org.boofcv", name: "geo", version: "0.24.1"
 
-   compile group: "us.ihmc", name: "ihmc-graphics-description", version: "0.12.7"
-   compile group: "us.ihmc", name: "simulation-construction-set", version: "0.12.7"
+   compile group: "us.ihmc", name: "ihmc-graphics-description", version: "0.12.9"
+   compile group: "us.ihmc", name: "simulation-construction-set", version: "0.12.9"
    compile group: "us.ihmc", name: "ihmc-java-toolkit", version: "source"
    compile group: "us.ihmc", name: "ihmc-robotics-toolkit", version: "source"
    compile group: "us.ihmc", name: "ihmc-communication", version: "source"
@@ -38,6 +38,7 @@ mainDependencies {
 
 testDependencies {
    compile group: "junit", name: "junit", version: "4.12"
+   compile group: "org.junit.vintage", name: "junit-vintage-engine", version: "5.3.1"
 
    compile group: "us.ihmc", name: "ihmc-ci-core-api", version: "0.18.0"
    compile group: "us.ihmc", name: "ihmc-communication-test", version: "source"

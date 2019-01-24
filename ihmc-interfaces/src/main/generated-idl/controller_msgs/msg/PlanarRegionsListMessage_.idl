@@ -2,6 +2,7 @@
 #define __controller_msgs__msg__PlanarRegionsListMessage__idl__
 
 #include "geometry_msgs/msg/./Point_.idl"
+#include "geometry_msgs/msg/./Quaternion_.idl"
 #include "geometry_msgs/msg/./Vector3_.idl"
 module controller_msgs
 {
@@ -13,6 +14,8 @@ module controller_msgs
       /**
        * This message is part of the IHMC robot environment awareness module.
        * This message contains a list of planar regions.
+       * A planar region is a finite area that lies on a 3D plane and that is delimited by a concave hull.
+       * As concave hulls are complex to manipulate, a set of convex polygons are also provided, altogether they approximate the area of the planar region.
        */
       @TypeCode(type="controller_msgs::msg::dds_::PlanarRegionsListMessage_")
       struct PlanarRegionsListMessage
@@ -21,12 +24,37 @@ module controller_msgs
          * Unique ID used to identify this message, should preferably be consecutively increasing.
          */
         unsigned long sequence_id;
+        /**
+         * ID number referring to each planar region, it should be unique.
+         */
         sequence<long, 300> region_id;
+        /**
+         * The coordinates in world of the origin of each planar region.
+         */
         sequence<geometry_msgs::msg::dds::Point, 300> region_origin;
+        /**
+         * The orientation with respect to world of each planar region.
+         */
+        sequence<geometry_msgs::msg::dds::Quaternion, 300> region_orientation;
+        /**
+         * The normal expressed in world of each planar region.
+         */
         sequence<geometry_msgs::msg::dds::Vector3, 300> region_normal;
+        /**
+         * Indicates for each planar region the number of vertices for the concave hull.
+         */
         sequence<long, 300> concave_hulls_size;
+        /**
+         * Indicates for each planar region the number of convex polygons.
+         */
         sequence<long, 300> number_of_convex_polygons;
+        /**
+         * Indicates successively the number of vertices for each convex polygon of each planar region.
+         */
         sequence<long, 1000> convex_polygons_size;
+        /**
+         * Single buffer used to store for each planar the vertices of the concave hull and the convex polygons.
+         */
         sequence<geometry_msgs::msg::dds::Point, 5000> vertex_buffer;
       };
     };

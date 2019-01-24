@@ -1,6 +1,6 @@
 package us.ihmc.simulationConstructionSetTools.util.environments.environmentRobots;
 
-import us.ihmc.euclid.geometry.Sphere3D;
+import us.ihmc.euclid.shape.Sphere3D;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;

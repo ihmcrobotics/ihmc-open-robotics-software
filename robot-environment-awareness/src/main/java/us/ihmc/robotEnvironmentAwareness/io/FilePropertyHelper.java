@@ -80,7 +80,8 @@ public final class FilePropertyHelper
 
          try
          {
-            fileOut.close();
+            if (fileOut != null)
+               fileOut.close();
          }
          catch (IOException e)
          {

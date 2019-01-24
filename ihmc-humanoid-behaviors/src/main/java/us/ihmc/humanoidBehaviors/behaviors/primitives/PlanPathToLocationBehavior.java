@@ -10,6 +10,7 @@ import us.ihmc.communication.packets.ToolboxState;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.footstepPlanning.FootstepPlanningResult;
+import us.ihmc.footstepPlanning.tools.FootstepPlannerMessageTools;
 import us.ihmc.humanoidBehaviors.behaviors.AbstractBehavior;
 import us.ihmc.humanoidBehaviors.behaviors.simpleBehaviors.BehaviorAction;
 import us.ihmc.humanoidBehaviors.behaviors.simpleBehaviors.SimpleDoNothingBehavior;
@@ -101,8 +102,8 @@ public class PlanPathToLocationBehavior extends AbstractBehavior
             {
                publishTextToSpeack("Requesting Plan");
             }
-            footstepPlanningRequestPublisher.publish(HumanoidMessageTools.createFootstepPlanningRequestPacket(initialStanceFootPose, initialStanceSide,
-                                                                                                              goalPose));
+            footstepPlanningRequestPublisher.publish(FootstepPlannerMessageTools.createFootstepPlanningRequestPacket(initialStanceFootPose, initialStanceSide,
+                                                                                                                     goalPose));
          }
       };
 

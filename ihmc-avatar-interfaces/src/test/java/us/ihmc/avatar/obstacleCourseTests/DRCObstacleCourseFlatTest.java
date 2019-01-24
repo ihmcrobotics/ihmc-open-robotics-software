@@ -7,12 +7,16 @@ import java.io.InputStream;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
 import org.junit.After;
+import org.junit.Assert;
 import org.junit.Before;
 
 import controller_msgs.msg.dds.FootstepDataListMessage;
+import controller_msgs.msg.dds.FootstepDataMessage;
+
 import org.junit.Test;
 import us.ihmc.avatar.DRCObstacleCourseStartingLocation;
 import us.ihmc.avatar.MultiRobotTestInterface;
+import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.testTools.DRCSimulationTestHelper;
 import us.ihmc.avatar.testTools.ScriptedFootstepGenerator;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
@@ -25,6 +29,7 @@ import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations;
 import us.ihmc.continuousIntegration.IntegrationCategory;
 import us.ihmc.euclid.geometry.BoundingBox3D;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
@@ -34,10 +39,11 @@ import us.ihmc.humanoidRobotics.communication.controllerAPI.command.ChestTraject
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.FootTrajectoryCommand;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.FootstepDataCommand;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.FootstepDataListCommand;
+import us.ihmc.mecano.frames.MovingReferenceFrame;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.math.frames.YoFrameVariableNameTools;
-import us.ihmc.robotics.math.trajectories.waypoints.FrameSE3TrajectoryPointList;
-import us.ihmc.robotics.math.trajectories.waypoints.FrameSO3TrajectoryPointList;
+import us.ihmc.robotics.math.trajectories.trajectorypoints.lists.FrameSE3TrajectoryPointList;
+import us.ihmc.robotics.math.trajectories.trajectorypoints.lists.FrameSO3TrajectoryPointList;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.simulationConstructionSetTools.bambooTools.BambooTools;
@@ -649,6 +655,56 @@ public abstract class DRCObstacleCourseFlatTest implements MultiRobotTestInterfa
       Vector3D plusMinusVector = new Vector3D(0.2, 0.2, 0.5);
       BoundingBox3D boundingBox = BoundingBox3D.createUsingCenterAndPlusMinusVector(center, plusMinusVector);
       drcSimulationTestHelper.assertRobotsRootJointIsInBoundingBox(boundingBox);
+
+      BambooTools.reportTestFinishedMessage(simulationTestingParameters.getShowWindows());
+   }
+
+   @ContinuousIntegrationAnnotations.ContinuousIntegrationTest(estimatedDuration = 68.6)
+   @Test(timeout = 340000)
+   public void testRepeatedWalking() throws SimulationExceededMaximumTimeException
+   {
+      BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
+
+      DRCRobotModel robotModel = getRobotModel();
+      drcSimulationTestHelper = new DRCSimulationTestHelper(simulationTestingParameters, robotModel, new FlatGroundEnvironment());
+      drcSimulationTestHelper.createSimulation("DRCWalkingOccasionallyStraightKneesTest");
+
+      Point3D cameraFix = new Point3D(0.0, 0.0, 0.89);
+      Point3D cameraPosition = new Point3D(-7.0, 0.0, 1.0);
+      drcSimulationTestHelper.setupCameraForUnitTest(cameraFix, cameraPosition);
+
+      ThreadTools.sleep(1000);
+      Assert.assertTrue(drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(0.5));
+
+      SideDependentList<MovingReferenceFrame> soleFrames = drcSimulationTestHelper.getReferenceFrames().getSoleFrames();
+      FootstepDataListMessage footsteps = new FootstepDataListMessage();
+      for (RobotSide side : RobotSide.values)
+      {
+         FootstepDataMessage footstep = footsteps.getFootstepDataList().add();
+         FramePose3D pose = new FramePose3D(soleFrames.get(side));
+         pose.changeFrame(ReferenceFrame.getWorldFrame());
+         footstep.getLocation().set(pose.getPosition());
+         footstep.getOrientation().set(pose.getOrientation());
+         footstep.setRobotSide(side.toByte());
+      }
+
+      WalkingControllerParameters parameters = robotModel.getWalkingControllerParameters();
+      double initialTransferDuration = parameters.getDefaultInitialTransferTime();
+      double swingDuration = parameters.getDefaultSwingTime();
+      double transferDuration = parameters.getDefaultTransferTime();
+      double finalTransferDuration = parameters.getDefaultFinalTransferTime();
+      double duration = initialTransferDuration + transferDuration + 2.0 * swingDuration + finalTransferDuration;
+
+      drcSimulationTestHelper.publishToController(footsteps);
+      Assert.assertTrue(drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(duration - 0.5 * finalTransferDuration));
+
+      double vy_bef = drcSimulationTestHelper.getYoVariable("desiredICPVelocityY").getValueAsDouble();
+
+      drcSimulationTestHelper.publishToController(footsteps);
+      Assert.assertTrue(drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(transferDuration / 10.0));
+
+      double vy_aft = drcSimulationTestHelper.getYoVariable("desiredICPVelocityY").getValueAsDouble();
+      Assert.assertTrue(Math.signum(vy_bef) == Math.signum(vy_aft));
 
       BambooTools.reportTestFinishedMessage(simulationTestingParameters.getShowWindows());
    }

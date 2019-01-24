@@ -14,6 +14,7 @@ public class YoVisibilityGraphParameters implements VisibilityGraphsParameters
    private final YoDouble normalZThresholdForAccessibleRegions = new YoDouble("normalZThresholdForAccessibleRegions", registry);
    private final YoDouble regionOrthogonalAngle = new YoDouble("regionOrthogonalAngle", registry);
    private final YoDouble extrusionDistance = new YoDouble("extrusionDistance", registry);
+   private final YoDouble preferredExtrusionDistance = new YoDouble("preferredExtrusionDistance", registry);
    private final YoDouble extrusionDistanceIfNotTooHighToStep = new YoDouble("extrusionDistanceIfNotTooHighToStep", registry);
    private final YoDouble tooHighToStepDistance = new YoDouble("tooHighToStepDistance", registry);
    private final YoDouble clusterResolution = new YoDouble("clusterResolution", registry);
@@ -34,8 +35,9 @@ public class YoVisibilityGraphParameters implements VisibilityGraphsParameters
       setMaxInterRegionConnectionLength(parameters.getMaxInterRegionConnectionLength());
       setNormalZThresholdForAccessibleRegions(parameters.getNormalZThresholdForAccessibleRegions());
       setRegionOrthogonalAngle(parameters.getRegionOrthogonalAngle());
-      setExtrusionDistance(parameters.getExtrusionDistance());
-      setExtrusionDistanceIfNotTooHighToStep(parameters.getExtrusionDistanceIfNotTooHighToStep());
+      setExtrusionDistance(parameters.getObstacleExtrusionDistance());
+      setPreferredExtrusionDistance(parameters.getPreferredObstacleExtrusionDistance());
+      setExtrusionDistanceIfNotTooHighToStep(parameters.getObstacleExtrusionDistanceIfNotTooHighToStep());
       setTooHighToStepDistance(parameters.getTooHighToStepDistance());
       setClusterResolution(parameters.getClusterResolution());
       setExplorationDistanceFromStartGoal(parameters.getExplorationDistanceFromStartGoal());
@@ -52,6 +54,8 @@ public class YoVisibilityGraphParameters implements VisibilityGraphsParameters
          setNormalZThresholdForAccessibleRegions(packet.getNormalZThresholdForAccessibleRegions());
       if (packet.getExtrusionDistance() != -1.0)
          setExtrusionDistance(packet.getExtrusionDistance());
+      if (packet.getPreferredExtrusionDistance() != -1.0)
+         setPreferredExtrusionDistance(packet.getPreferredExtrusionDistance());
       if (packet.getExtrusionDistanceIfNotTooHighToStep() != -1.0)
          setExtrusionDistanceIfNotTooHighToStep(packet.getExtrusionDistanceIfNotTooHighToStep());
       if (packet.getTooHighToStepDistance() != -1.0)
@@ -89,13 +93,19 @@ public class YoVisibilityGraphParameters implements VisibilityGraphsParameters
    }
 
    @Override
-   public double getExtrusionDistance()
+   public double getPreferredObstacleExtrusionDistance()
+   {
+      return preferredExtrusionDistance.getDoubleValue();
+   }
+
+   @Override
+   public double getObstacleExtrusionDistance()
    {
       return extrusionDistance.getDoubleValue();
    }
 
    @Override
-   public double getExtrusionDistanceIfNotTooHighToStep()
+   public double getObstacleExtrusionDistanceIfNotTooHighToStep()
    {
       return extrusionDistanceIfNotTooHighToStep.getDoubleValue();
    }
@@ -149,6 +159,11 @@ public class YoVisibilityGraphParameters implements VisibilityGraphsParameters
    public void setRegionOrthogonalAngle(double regionOrthogonalAngle)
    {
       this.regionOrthogonalAngle.set(regionOrthogonalAngle);
+   }
+
+   public void setPreferredExtrusionDistance(double preferredExtrusionDistance)
+   {
+      this.preferredExtrusionDistance.set(preferredExtrusionDistance);
    }
 
    public void setExtrusionDistance(double extrusionDistance)

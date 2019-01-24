@@ -4,6 +4,8 @@ import org.ejml.data.DenseMatrix64F;
 import org.ejml.ops.CommonOps;
 
 import us.ihmc.commonWalkingControlModules.capturePoint.optimization.qpInput.*;
+import us.ihmc.convexOptimization.quadraticProgram.AbstractSimpleActiveSetQPSolver;
+import us.ihmc.convexOptimization.quadraticProgram.JavaQuadProgSolver;
 import us.ihmc.convexOptimization.quadraticProgram.SimpleEfficientActiveSetQPSolver;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.referenceFrame.FrameConvexPolygon2D;
@@ -31,6 +33,7 @@ public class ICPOptimizationQPSolver
    private static final double convergenceThreshold = 1.0e-20;
 
    private boolean resetActiveSet;
+   private boolean previousTickFailed = false;
 
    /** Index handler that manages the indices for the objectives and solutions in the quadratic program. */
    private final ICPQPIndexHandler indexHandler;
@@ -124,7 +127,7 @@ public class ICPOptimizationQPSolver
    private final DenseMatrix64F feedbackGain = new DenseMatrix64F(2, 2);
 
    /** Flag to use the quad prog QP solver vs. the active set QP solver. **/
-   private final SimpleEfficientActiveSetQPSolver solver = new SimpleEfficientActiveSetQPSolver();
+   private final AbstractSimpleActiveSetQPSolver solver = new JavaQuadProgSolver();
 
    /** Full solution vector to the quadratic program. */
    private final DenseMatrix64F solution;
@@ -819,10 +822,14 @@ public class ICPOptimizationQPSolver
             addPlanarRegionConstraint();
       }
 
-      addMaximumFeedbackMagnitudeConstraint();
-      addMaximumFeedbackRateConstraint();
+      if (!previousTickFailed)
+      { // this can occasionally over-constrain the problem, so remove it if the previous tick failed.
+         addMaximumFeedbackMagnitudeConstraint();
+         addMaximumFeedbackRateConstraint();
+      }
 
       boolean foundSolution = solve(solution);
+      previousTickFailed = !foundSolution;
 
       if (foundSolution)
       {

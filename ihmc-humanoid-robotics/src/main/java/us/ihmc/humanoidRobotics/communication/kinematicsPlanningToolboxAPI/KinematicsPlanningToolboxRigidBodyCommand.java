@@ -3,6 +3,7 @@ package us.ihmc.humanoidRobotics.communication.kinematicsPlanningToolboxAPI;
 import java.util.Map;
 
 import controller_msgs.msg.dds.KinematicsPlanningToolboxRigidBodyMessage;
+import controller_msgs.msg.dds.RigidBodyExplorationConfigurationMessage;
 import controller_msgs.msg.dds.SelectionMatrix3DMessage;
 import controller_msgs.msg.dds.WeightMatrix3DMessage;
 import gnu.trove.list.array.TDoubleArrayList;
@@ -11,12 +12,13 @@ import us.ihmc.communication.controllerAPI.command.Command;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.humanoidRobotics.communication.wholeBodyTrajectoryToolboxAPI.WholeBodyTrajectoryToolboxAPI;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.robotics.screwTheory.SelectionMatrix6D;
 import us.ihmc.robotics.weightMatrices.WeightMatrix6D;
 import us.ihmc.sensorProcessing.frames.ReferenceFrameHashCodeResolver;
 
-public class KinematicsPlanningToolboxRigidBodyCommand implements Command<KinematicsPlanningToolboxRigidBodyCommand, KinematicsPlanningToolboxRigidBodyMessage>
+public class KinematicsPlanningToolboxRigidBodyCommand implements Command<KinematicsPlanningToolboxRigidBodyCommand, KinematicsPlanningToolboxRigidBodyMessage>, KinematicsPlanningToolboxAPI<KinematicsPlanningToolboxRigidBodyMessage>
 {
    /** This is the unique hash code of the end-effector to be solved for. */
    private int endEffectorHashCode;
@@ -35,6 +37,7 @@ public class KinematicsPlanningToolboxRigidBodyCommand implements Command<Kinema
    @Override
    public void set(KinematicsPlanningToolboxRigidBodyCommand other)
    {
+      clear();
       endEffectorHashCode = other.endEffectorHashCode;
       endEffector = other.endEffector;
 
@@ -58,6 +61,7 @@ public class KinematicsPlanningToolboxRigidBodyCommand implements Command<Kinema
    public void set(KinematicsPlanningToolboxRigidBodyMessage message, Map<Integer, RigidBodyBasics> rigidBodyHashMap,
                    ReferenceFrameHashCodeResolver referenceFrameResolver)
    {
+      clear();
       endEffectorHashCode = message.getEndEffectorHashCode();
       if (rigidBodyHashMap == null)
          endEffector = null;

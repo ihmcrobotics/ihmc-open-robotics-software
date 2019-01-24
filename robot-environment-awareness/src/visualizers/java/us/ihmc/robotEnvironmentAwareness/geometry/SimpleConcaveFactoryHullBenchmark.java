@@ -17,7 +17,7 @@ public class SimpleConcaveFactoryHullBenchmark
 {
    public static void main(String[] args) throws IOException
    {
-      PlanarRegionSegmentationRawDataImporter dataImporter = new PlanarRegionSegmentationRawDataImporter(new File("../../Data/20161210_185643_PlanarRegionSegmentation_Atlas_CB"));
+      PlanarRegionSegmentationRawDataImporter dataImporter = new PlanarRegionSegmentationRawDataImporter(new File("../../Data/Segmentation/20161210_185643_PlanarRegionSegmentation_Atlas_CB"));
       dataImporter.loadPlanarRegionSegmentationData();
       List<PlanarRegionSegmentationRawData> regionsRawData = dataImporter.getPlanarRegionSegmentationRawData();
       ConcaveHullFactoryParameters parameters = new ConcaveHullFactoryParameters();

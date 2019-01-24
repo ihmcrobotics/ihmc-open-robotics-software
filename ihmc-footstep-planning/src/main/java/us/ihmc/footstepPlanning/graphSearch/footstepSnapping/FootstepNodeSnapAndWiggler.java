@@ -1,28 +1,30 @@
 package us.ihmc.footstepPlanning.graphSearch.footstepSnapping;
 
-import java.util.ArrayList;
-import java.util.List;
-
+import us.ihmc.commonWalkingControlModules.polygonWiggling.PolygonWiggler;
+import us.ihmc.commonWalkingControlModules.polygonWiggling.WiggleParameters;
+import us.ihmc.commons.MathTools;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
 import us.ihmc.euclid.tuple3D.Point3D;
-import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParameters;
 import us.ihmc.footstepPlanning.graphSearch.graph.FootstepNode;
 import us.ihmc.footstepPlanning.graphSearch.graph.FootstepNodeTools;
-import us.ihmc.footstepPlanning.graphSearch.listeners.BipedalFootstepPlannerListener;
 import us.ihmc.footstepPlanning.graphSearch.graph.visualization.BipedalFootstepPlannerNodeRejectionReason;
+import us.ihmc.footstepPlanning.graphSearch.listeners.BipedalFootstepPlannerListener;
+import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParameters;
 import us.ihmc.footstepPlanning.polygonSnapping.PlanarRegionsListPolygonSnapper;
-import us.ihmc.footstepPlanning.polygonWiggling.PolygonWiggler;
-import us.ihmc.footstepPlanning.polygonWiggling.WiggleParameters;
 import us.ihmc.pathPlanning.visibilityGraphs.tools.PlanarRegionTools;
 import us.ihmc.robotics.geometry.PlanarRegion;
 import us.ihmc.robotics.robotSide.SideDependentList;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public class FootstepNodeSnapAndWiggler extends FootstepNodeSnapper
 {
    private final List<BipedalFootstepPlannerListener> listeners = new ArrayList<>();
    private final SideDependentList<ConvexPolygon2D> footPolygonsInSoleFrame;
+   private final FootstepPlannerParameters parameters;
 
    private final WiggleParameters wiggleParameters = new WiggleParameters();
    private final PlanarRegion planarRegionToPack = new PlanarRegion();
@@ -30,7 +32,7 @@ public class FootstepNodeSnapAndWiggler extends FootstepNodeSnapper
 
    public FootstepNodeSnapAndWiggler(SideDependentList<ConvexPolygon2D> footPolygonsInSoleFrame, FootstepPlannerParameters parameters)
    {
-      super(parameters);
+      this.parameters = parameters;
       this.footPolygonsInSoleFrame = footPolygonsInSoleFrame;
    }
 
@@ -48,7 +50,6 @@ public class FootstepNodeSnapAndWiggler extends FootstepNodeSnapper
       }
 
       FootstepNodeTools.getFootPolygon(footstepNode, footPolygonsInSoleFrame.get(footstepNode.getRobotSide()), footPolygon);
-      List<PlanarRegion> planarRegionsList = getOrCreateSteppableRegions(footstepNode.getRoundedX(), footstepNode.getRoundedY());
       RigidBodyTransform snapTransform = PlanarRegionsListPolygonSnapper.snapPolygonToPlanarRegionsList(footPolygon, planarRegionsList, planarRegionToPack);
 
       if (snapTransform == null)
@@ -92,8 +93,41 @@ public class FootstepNodeSnapAndWiggler extends FootstepNodeSnapper
       ConvexPolygon2D wiggledFootholdPolygonInLocalFrame = FootstepNodeSnappingTools
             .getConvexHullOfPolygonIntersections(planarRegionToPack, footPolygon, snapAndWiggleTransform);
       FootstepNodeSnappingTools.changeFromPlanarRegionToSoleFrame(planarRegionToPack, footstepNode, snapAndWiggleTransform, wiggledFootholdPolygonInLocalFrame);
+      checkForExtraContactPoints(wiggledFootholdPolygonInLocalFrame, footPolygonsInSoleFrame.get(footstepNode.getRobotSide()));
 
       return new FootstepNodeSnapData(snapAndWiggleTransform, wiggledFootholdPolygonInLocalFrame);
+   }
+
+   private static void checkForExtraContactPoints(ConvexPolygon2D croppedFootPolygon, ConvexPolygon2D defaultFootPolygon)
+   {
+      if(croppedFootPolygon.getNumberOfVertices() <= 4)
+         return;
+
+      double epsilonContactPointCheck = 5e-3;
+      outerLoop: for (int i = 0; i < defaultFootPolygon.getNumberOfVertices(); i++)
+      {
+         for (int j = 0; j < croppedFootPolygon.getNumberOfVertices(); j++)
+         {
+            if(croppedFootPolygon.getVertex(j).epsilonEquals(defaultFootPolygon.getVertex(i), epsilonContactPointCheck))
+               continue outerLoop;
+         }
+
+         return;
+      }
+
+      // contains all default contact points, remove any extra
+      outerLoop: for (int i = 0; i < croppedFootPolygon.getNumberOfVertices(); i++)
+      {
+         for (int j = 0; j < defaultFootPolygon.getNumberOfVertices(); j++)
+         {
+            if(croppedFootPolygon.getVertex(i).epsilonEquals(defaultFootPolygon.getVertex(j), epsilonContactPointCheck))
+               continue outerLoop;
+         }
+
+         croppedFootPolygon.removeVertex(i);
+         croppedFootPolygon.update();
+         i--;
+      }
    }
 
    private RigidBodyTransform getWiggleTransformInPlanarRegionFrame(ConvexPolygon2D footholdPolygon)

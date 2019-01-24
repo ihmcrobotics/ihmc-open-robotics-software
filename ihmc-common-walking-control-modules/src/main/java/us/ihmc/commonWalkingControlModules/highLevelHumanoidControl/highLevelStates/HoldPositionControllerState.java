@@ -38,6 +38,16 @@ public class HoldPositionControllerState extends HighLevelControllerState
       lowLevelOneDoFJointDesiredDataHolder.registerJointsWithEmptyData(controlledJoints);
    }
 
+   public void setToCurrent()
+   {
+      for (int jointIndex = 0; jointIndex < jointSetpoints.size(); jointIndex++)
+      {
+         OneDoFJointBasics joint = jointSetpoints.get(jointIndex).getLeft();
+         YoDouble setpoint = jointSetpoints.get(jointIndex).getRight();
+         setpoint.set(joint.getQ());
+      }
+   }
+
    @Override
    public void onEntry()
    {

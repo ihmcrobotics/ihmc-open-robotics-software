@@ -26,6 +26,8 @@ find_package(catkin REQUIRED COMPONENTS
    BehaviorControlModeResponsePacket.msg
    BehaviorStatusPacket.msg
    BlackFlyParameterPacket.msg
+   BodyPathPlanMessage.msg
+   BodyPathPlanStatisticsMessage.msg
    BoundingBox3DMessage.msg
    BoundingBoxesPacket.msg
    CapturabilityBasedStatus.msg
@@ -35,6 +37,7 @@ find_package(catkin REQUIRED COMPONENTS
    ClearDelayQueueMessage.msg
    ComPositionPacket.msg
    ComVelocityPacket.msg
+   ConnectionMessage.msg
    ControllerCrashNotificationPacket.msg
    DesiredAccelerationsMessage.msg
    DetectedFacesPacket.msg
@@ -48,7 +51,14 @@ find_package(catkin REQUIRED COMPONENTS
    FootLoadBearingMessage.msg
    FootstepDataListMessage.msg
    FootstepDataMessage.msg
+   FootstepNodeDataListMessage.msg
+   FootstepNodeDataMessage.msg
    FootstepPathPlanPacket.msg
+   FootstepPlannerCellMessage.msg
+   FootstepPlannerCostParametersPacket.msg
+   FootstepPlannerOccupancyMapMessage.msg
+   FootstepPlannerParametersPacket.msg
+   FootstepPlannerStatusMessage.msg
    FootstepPlanningRequestPacket.msg
    FootstepPlanningToolboxOutputStatus.msg
    FootstepPlanRequestPacket.msg
@@ -77,6 +87,9 @@ find_package(catkin REQUIRED COMPONENTS
    IntrinsicParametersMessage.msg
    InvalidPacketNotificationPacket.msg
    JointspaceTrajectoryMessage.msg
+   KinematicsPlanningToolboxCenterOfMassMessage.msg
+   KinematicsPlanningToolboxOutputStatus.msg
+   KinematicsPlanningToolboxRigidBodyMessage.msg
    KinematicsToolboxCenterOfMassMessage.msg
    KinematicsToolboxConfigurationMessage.msg
    KinematicsToolboxOutputStatus.msg
@@ -110,6 +123,7 @@ find_package(catkin REQUIRED COMPONENTS
    PlanarRegionMessage.msg
    PlanarRegionsListMessage.msg
    PlanarVelocityPacket.msg
+   PlanningStatisticsRequestMessage.msg
    PlanOffsetStatus.msg
    PointCloudWorldPacket.msg
    Polygon2DMessage.msg
@@ -117,10 +131,9 @@ find_package(catkin REQUIRED COMPONENTS
    QuadrupedBodyHeightMessage.msg
    QuadrupedBodyOrientationMessage.msg
    QuadrupedBodyPathPlanMessage.msg
-   QuadrupedControllerStateChangeMessage.msg
+   QuadrupedBodyTrajectoryMessage.msg
    QuadrupedFootstepStatusMessage.msg
    QuadrupedGroundPlaneMessage.msg
-   QuadrupedRequestedControllerStateMessage.msg
    QuadrupedRequestedSteppingStateMessage.msg
    QuadrupedStepMessage.msg
    QuadrupedSteppingStateChangeMessage.msg
@@ -157,9 +170,14 @@ find_package(catkin REQUIRED COMPONENTS
    TrajectoryPoint1DMessage.msg
    UIConnectedPacket.msg
    UIPositionCheckerPacket.msg
+   ValkyrieHandFingerTrajectoryMessage.msg
    ValveLocationPacket.msg
    VehiclePosePacket.msg
    VideoPacket.msg
+   VisibilityClusterMessage.msg
+   VisibilityGraphsParametersPacket.msg
+   VisibilityMapWithNavigableRegionMessage.msg
+   VisibilityMapMessage.msg
    WalkingControllerFailureStatusMessage.msg
    WalkingStatusMessage.msg
    WalkOverTerrainGoalPacket.msg
@@ -171,6 +189,8 @@ find_package(catkin REQUIRED COMPONENTS
    WholeBodyTrajectoryToolboxConfigurationMessage.msg
    WholeBodyTrajectoryToolboxMessage.msg
    WholeBodyTrajectoryToolboxOutputStatus.msg
+   WrenchTrajectoryMessage.msg
+   WrenchTrajectoryPointMessage.msg
  )
 
  generate_messages(
