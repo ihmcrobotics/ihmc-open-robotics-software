@@ -8,7 +8,8 @@ import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.EuclideanTrajectoryControllerCommand;
 import us.ihmc.robotics.math.trajectories.YoPolynomial;
-import us.ihmc.robotics.math.trajectories.waypoints.SimpleEuclideanTrajectoryPoint;
+import us.ihmc.robotics.math.trajectories.trajectorypoints.EuclideanTrajectoryPoint;
+import us.ihmc.robotics.math.trajectories.trajectorypoints.interfaces.EuclideanTrajectoryPointBasics;
 import us.ihmc.yoVariables.providers.DoubleProvider;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoFramePoint3D;
@@ -27,15 +28,15 @@ public class EuclideanTrajectoryHandler
 
    private final YoVariableRegistry registry;
 
-   private final SimpleEuclideanTrajectoryPoint lastPoint = new SimpleEuclideanTrajectoryPoint();
-   private final SimpleEuclideanTrajectoryPoint firstPoint = new SimpleEuclideanTrajectoryPoint();
-   private final SimpleEuclideanTrajectoryPoint secondPoint = new SimpleEuclideanTrajectoryPoint();
-   private final SimpleEuclideanTrajectoryPoint tempPoint = new SimpleEuclideanTrajectoryPoint();
+   private final EuclideanTrajectoryPointBasics lastPoint = new EuclideanTrajectoryPoint();
+   private final EuclideanTrajectoryPointBasics firstPoint = new EuclideanTrajectoryPoint();
+   private final EuclideanTrajectoryPointBasics secondPoint = new EuclideanTrajectoryPoint();
+   private final EuclideanTrajectoryPointBasics tempPoint = new EuclideanTrajectoryPoint();
 
-   private final RecyclingLinkedList<SimpleEuclideanTrajectoryPoint> trajectoryPoints = new RecyclingLinkedList<>(defaultMaxNumberOfPoints,
-                                                                                                                  SimpleEuclideanTrajectoryPoint.class,
-                                                                                                                  SimpleEuclideanTrajectoryPoint::set);
-   private final RecyclingIterator<SimpleEuclideanTrajectoryPoint> trajectoryIterator = trajectoryPoints.createForwardIterator();
+   private final RecyclingLinkedList<EuclideanTrajectoryPointBasics> trajectoryPoints = new RecyclingLinkedList<>(defaultMaxNumberOfPoints,
+                                                                                                                     EuclideanTrajectoryPoint::new,
+                                                                                                                     EuclideanTrajectoryPointBasics::set);
+   private final RecyclingIterator<EuclideanTrajectoryPointBasics> trajectoryIterator = trajectoryPoints.createForwardIterator();
 
    private final DoubleProvider yoTime;
    private final YoPolynomial polynomial;
@@ -126,7 +127,7 @@ public class EuclideanTrajectoryHandler
 
       for (int idx = 0; idx < command.getNumberOfTrajectoryPoints(); idx++)
       {
-         trajectoryPoints.addLast(command.getTrajectoryPoint(idx).getGeometryObject());
+         trajectoryPoints.addLast(command.getTrajectoryPoint(idx));
       }
 
       numberOfPoints.set(trajectoryPoints.size());
@@ -222,10 +223,10 @@ public class EuclideanTrajectoryHandler
 
       for (int i = 0; i < 3; i++)
       {
-         double p0 = firstPoint.getEuclideanWaypoint().getPosition().getElement(i);
-         double v0 = firstPoint.getEuclideanWaypoint().getLinearVelocity().getElement(i);
-         double p1 = secondPoint.getEuclideanWaypoint().getPosition().getElement(i);
-         double v1 = secondPoint.getEuclideanWaypoint().getLinearVelocity().getElement(i);
+         double p0 = firstPoint.getPosition().getElement(i);
+         double v0 = firstPoint.getLinearVelocity().getElement(i);
+         double p1 = secondPoint.getPosition().getElement(i);
+         double v1 = secondPoint.getLinearVelocity().getElement(i);
 
          polynomial.setCubic(t0, t1, p0, v0, p1, v1);
          polynomial.compute(time);

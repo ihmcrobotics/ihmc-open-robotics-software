@@ -17,8 +17,8 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FixedFrameVector3DBasics;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
-import us.ihmc.robotics.geometry.transformables.EuclideanWaypoint;
-import us.ihmc.robotics.math.trajectories.waypoints.SimpleEuclideanTrajectoryPoint;
+import us.ihmc.robotics.math.trajectories.trajectorypoints.EuclideanTrajectoryPoint;
+import us.ihmc.robotics.math.trajectories.waypoints.interfaces.EuclideanWaypointBasics;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
@@ -30,7 +30,7 @@ public class CommandBasedAngularMomentumTrajectoryGenerator implements AngularMo
    private static final int waypointsPerWalkingPhase = 12;
    private static final int numberOfTrajectoryCoefficients = 4;
    private static final FramePoint3D zeroPoint = new FramePoint3D();
-   
+
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
    private final MomentumTrajectoryHandler momentumTrajectoryHandler;
    private final YoDouble time;
@@ -40,8 +40,8 @@ public class CommandBasedAngularMomentumTrajectoryGenerator implements AngularMo
    private final YoBoolean atAStop = new YoBoolean("atAStop", registry);
    private final YoBoolean updateTrajectories = new YoBoolean("updateTrajectories", registry);
 
-   private final RecyclingArrayList<SimpleEuclideanTrajectoryPoint> waypoints = new RecyclingArrayList<>(waypointsPerWalkingPhase,
-                                                                                                         SimpleEuclideanTrajectoryPoint::new);
+   private final RecyclingArrayList<EuclideanTrajectoryPoint> waypoints = new RecyclingArrayList<>(waypointsPerWalkingPhase,
+                                                                                                         EuclideanTrajectoryPoint::new);
    private final List<AngularMomentumTrajectory> transferTrajectories;
    private final List<AngularMomentumTrajectory> swingTrajectories;
 
@@ -248,11 +248,11 @@ public class CommandBasedAngularMomentumTrajectoryGenerator implements AngularMo
 
       for (int i = 0; i < numberOfSegments; i++)
       {
-         SimpleEuclideanTrajectoryPoint simpleStart = waypoints.get(i);
-         SimpleEuclideanTrajectoryPoint simpleEnd = waypoints.get(i + 1);
+         EuclideanTrajectoryPoint simpleStart = waypoints.get(i);
+         EuclideanTrajectoryPoint simpleEnd = waypoints.get(i + 1);
 
-         EuclideanWaypoint startWaypoint = simpleStart.getEuclideanWaypoint();
-         EuclideanWaypoint endWaypoint = simpleEnd.getEuclideanWaypoint();
+         EuclideanWaypointBasics startWaypoint = simpleStart;
+         EuclideanWaypointBasics endWaypoint = simpleEnd;
          if (startWaypoint.containsNaN() || endWaypoint.containsNaN())
          {
             successfulTrajectory = false;

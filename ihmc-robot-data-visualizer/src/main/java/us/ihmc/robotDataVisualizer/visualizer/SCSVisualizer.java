@@ -13,10 +13,12 @@ import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 
 import gnu.trove.map.hash.TObjectDoubleHashMap;
+import sun.rmi.runtime.Log;
 import us.ihmc.commons.Conversions;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphic;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsList;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
+import us.ihmc.log.LogTools;
 import us.ihmc.multicastLogDataProtocol.modelLoaders.LogModelLoader;
 import us.ihmc.multicastLogDataProtocol.modelLoaders.SDFModelLoader;
 import us.ihmc.robotDataLogger.YoVariableClient;
@@ -122,7 +124,7 @@ public class SCSVisualizer implements YoVariablesUpdatedListener, ExitActionList
    {
       synchronized(disconnectLock)
       {
-         System.out.println("Disconnected. Sliders now enabled.");
+         LogTools.info("Disconnected. Sliders now enabled.");
          disconnectButton.setText(DISCONNECT_RECONNECT);
          disconnectButton.setEnabled(true);
          scs.setScrollGraphsEnabled(true);
@@ -229,7 +231,7 @@ public class SCSVisualizer implements YoVariablesUpdatedListener, ExitActionList
          }
          catch (Exception e)
          {
-            System.err.println("Could not instantiate LogModelLoader: " + handshake.getModelLoaderClass() + ". Defaulting to SDFModelLoader.");
+            LogTools.error("Could not instantiate LogModelLoader: {}. Defaulting to SDFModelLoader.", handshake.getModelLoaderClass());
             modelLoader = new SDFModelLoader();
          }
          modelLoader.load(handshake.getModelName(), handshake.getModel(), handshake.getResourceDirectories(), handshake.getResourceZip(), null);
@@ -267,7 +269,7 @@ public class SCSVisualizer implements YoVariablesUpdatedListener, ExitActionList
                {
                   try
                   {
-                     System.out.println("Reconnecting. Disabling sliders.");
+                     LogTools.info("Reconnecting. Disabling sliders.");
                      scs.gotoOutPointNow();
                      scs.setScrollGraphsEnabled(false);
                      scs.tick(0);
@@ -280,7 +282,7 @@ public class SCSVisualizer implements YoVariablesUpdatedListener, ExitActionList
                      {
                         JOptionPane.showMessageDialog(scs.getJFrame(), "Cannot reconnect. No matching sessions found.", "Cannot reconnect",
                                                       JOptionPane.ERROR_MESSAGE);
-                        System.out.println("Reconnect failed. Enabling sliders.");
+                        LogTools.warn("Reconnect failed. Enabling sliders.");
                         scs.setScrollGraphsEnabled(true);
 
                      }

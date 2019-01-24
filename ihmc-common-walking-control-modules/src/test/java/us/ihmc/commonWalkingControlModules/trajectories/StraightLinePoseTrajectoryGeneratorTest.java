@@ -1,11 +1,9 @@
 package us.ihmc.commonWalkingControlModules.trajectories;
 
 import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
 
 import java.util.Random;
 
-import org.junit.After;
 import org.junit.Test;
 
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
@@ -15,7 +13,6 @@ import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.tools.EuclidFrameRandomTools;
-import us.ihmc.euclid.referenceFrame.tools.ReferenceFrameTools;
 import us.ihmc.euclid.tools.EuclidCoreRandomTools;
 import us.ihmc.robotics.math.trajectories.OrientationInterpolationTrajectoryGenerator;
 import us.ihmc.robotics.math.trajectories.StraightLinePositionTrajectoryGenerator;
@@ -36,55 +33,6 @@ public class StraightLinePoseTrajectoryGeneratorTest
          EuclidCoreRandomTools.nextRigidBodyTransform(random));
 
    private static final double EPSILON = 1.0e-10;
-
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(timeout = 30000)
-   public void testRuntimeExceptions()
-   {
-      YoVariableRegistry registry = new YoVariableRegistry("youpiloup");
-      StraightLinePoseTrajectoryGenerator trajToTest1 = new StraightLinePoseTrajectoryGenerator("blop1", worldFrame, registry);
-      StraightLinePoseTrajectoryGenerator trajToTest2 = new StraightLinePoseTrajectoryGenerator("blop2", false, worldFrame, registry);
-
-      try
-      {
-         trajToTest1.registerNewTrajectoryFrame(frameA);
-         fail("Should have thrown an exception.");
-      }
-      catch (Exception e)
-      {
-         // Good
-      }
-
-      try
-      {
-         trajToTest1.switchTrajectoryFrame(worldFrame);
-         fail("Should have thrown an exception.");
-      }
-      catch (Exception e)
-      {
-         // Good
-      }
-
-      try
-      {
-         trajToTest2.registerNewTrajectoryFrame(frameA);
-         fail("Should have thrown an exception.");
-      }
-      catch (Exception e)
-      {
-         // Good
-      }
-
-      try
-      {
-         trajToTest2.switchTrajectoryFrame(worldFrame);
-         fail("Should have thrown an exception.");
-      }
-      catch (Exception e)
-      {
-         // Good
-      }
-   }
 
    @ContinuousIntegrationTest(estimatedDuration = 0.2)
    @Test(timeout = 30000)
@@ -250,7 +198,7 @@ public class StraightLinePoseTrajectoryGeneratorTest
    public void testMultipleFramesWithSingleFrameTrajectoryGenerators()
    {
       YoVariableRegistry registry = new YoVariableRegistry("youpiloup");
-      StraightLinePoseTrajectoryGenerator trajToTest = new StraightLinePoseTrajectoryGenerator("blop", true, worldFrame, registry);
+      StraightLinePoseTrajectoryGenerator trajToTest = new StraightLinePoseTrajectoryGenerator("blop", worldFrame, registry);
 
       DoubleProvider trajectoryTimeProvider = new ConstantDoubleProvider(10.0);
       FramePoint3D initialPosition = EuclidFrameRandomTools.nextFramePoint3D(random, worldFrame, 100.0, 100.0, 100.0);
@@ -327,7 +275,6 @@ public class StraightLinePoseTrajectoryGeneratorTest
       originalOrientation = new OrientationInterpolationTrajectoryGenerator("orientation2", frameA, trajectoryTimeProvider, initialOrientationProvider,
             finalOrientationProvider, registry);
 
-      trajToTest.registerNewTrajectoryFrame(frameA);
       trajToTest.switchTrajectoryFrame(frameA);
       trajToTest.setInitialPose(initialPosition, initialOrientation);
       trajToTest.setFinalPose(new FramePose3D(finalPosition, finalOrientation));
