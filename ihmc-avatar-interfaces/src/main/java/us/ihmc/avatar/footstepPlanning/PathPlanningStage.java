@@ -16,7 +16,6 @@ import us.ihmc.footstepPlanning.graphSearch.pathPlanners.VisibilityGraphPathPlan
 import us.ihmc.footstepPlanning.graphSearch.pathPlanners.WaypointsForFootstepsPlanner;
 import us.ihmc.pathPlanning.statistics.PlannerStatistics;
 import us.ihmc.pathPlanning.visibilityGraphs.interfaces.VisibilityGraphsParameters;
-import us.ihmc.pathPlanning.visibilityGraphs.tools.BodyPathPlan;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.yoVariables.providers.EnumProvider;
@@ -123,7 +122,7 @@ public class PathPlanningStage implements WaypointsForFootstepsPlanner
    @Override
    public void setPlanarRegionsList(PlanarRegionsList planarRegionsList)
    {
-      this.planarRegionsList.set(planarRegionsList.copy());
+      this.planarRegionsList.set(planarRegionsList == null ? null : planarRegionsList.copy());
    }
 
    @Override

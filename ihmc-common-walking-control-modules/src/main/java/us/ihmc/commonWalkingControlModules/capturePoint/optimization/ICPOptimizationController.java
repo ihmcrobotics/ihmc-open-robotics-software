@@ -30,8 +30,10 @@ import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.time.ExecutionTimer;
 import us.ihmc.yoVariables.parameters.BooleanParameter;
 import us.ihmc.yoVariables.parameters.DoubleParameter;
+import us.ihmc.yoVariables.parameters.IntegerParameter;
 import us.ihmc.yoVariables.providers.BooleanProvider;
 import us.ihmc.yoVariables.providers.DoubleProvider;
+import us.ihmc.yoVariables.providers.IntegerProvider;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.*;
 
@@ -137,7 +139,10 @@ public class ICPOptimizationController implements ICPOptimizationControllerInter
 
    private final YoInteger numberOfIterations = new YoInteger(yoNamePrefix + "NumberOfIterations", registry);
    private final YoBoolean hasNotConvergedInPast = new YoBoolean(yoNamePrefix + "HasNotConvergedInPast", registry);
+   private final YoBoolean previousTickFailed = new YoBoolean(yoNamePrefix + "PreviousTickFailed", registry);
    private final YoInteger hasNotConvergedCounts = new YoInteger(yoNamePrefix + "HasNotConvergedCounts", registry);
+
+   private final IntegerProvider maxNumberOfIterations = new IntegerParameter(yoNamePrefix + "MaxNumberOfIterations", registry, 100);
 
    private final YoDouble footstepMultiplier = new YoDouble(yoNamePrefix + "TotalFootstepMultiplier", registry);
    private final YoDouble recursionTime = new YoDouble(yoNamePrefix + "RecursionTime", registry);
@@ -297,7 +302,7 @@ public class ICPOptimizationController implements ICPOptimizationControllerInter
          totalVertices += contactableFeet.get(robotSide).getTotalNumberOfContactPoints();
 
       boolean updateRateAutomatically = true;
-      solver = new ICPOptimizationQPSolver(totalVertices, COMPUTE_COST_TO_GO, updateRateAutomatically);
+      solver = new ICPOptimizationQPSolver(totalVertices, COMPUTE_COST_TO_GO, updateRateAutomatically, registry);
 
       considerAngularMomentumInAdjustment = new BooleanParameter(yoNamePrefix + "ConsiderAngularMomentumInAdjustment", registry,
                                                                  icpOptimizationParameters.considerAngularMomentumInAdjustment());
@@ -670,6 +675,8 @@ public class ICPOptimizationController implements ICPOptimizationControllerInter
 
       submitSolverTaskConditions(omega0, includeFootsteps);
 
+      solver.setMaxNumberOfIterations(maxNumberOfIterations.getValue());
+
       qpSolverTimer.startMeasurement();
       boolean converged = solveQP();
       qpSolverTimer.stopMeasurement();
@@ -824,6 +831,7 @@ public class ICPOptimizationController implements ICPOptimizationControllerInter
    {
       perfectCoP.set(yoPerfectCoP);
       boolean converged = solver.compute(icpError, perfectCoP, perfectCMPOffset);
+      previousTickFailed.set(solver.previousTickFailed());
       if (!converged)
       {
          if (!hasNotConvergedInPast.getBooleanValue())
@@ -840,11 +848,11 @@ public class ICPOptimizationController implements ICPOptimizationControllerInter
 
    private void extractSolutionsFromSolver(boolean converged, boolean includeFootsteps)
    {
+      numberOfIterations.set(solver.getNumberOfIterations());
+
       // Don't pole the new solutions if the solver has not converged.
       if (converged)
       {
-         numberOfIterations.set(solver.getNumberOfIterations());
-
          if (localUseStepAdjustment && includeFootsteps)
          {
             if (planarRegionConstraintProvider != null)
@@ -875,8 +883,6 @@ public class ICPOptimizationController implements ICPOptimizationControllerInter
       }
       else
       {
-         numberOfIterations.set(solver.getNumberOfIterations());
-
          if (localUseStepAdjustment && includeFootsteps)
             solutionHandler.zeroAdjustment();
       }

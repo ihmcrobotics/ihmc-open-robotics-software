@@ -32,6 +32,7 @@ public class FootstepPlanningRequestPacket extends Packet<FootstepPlanningReques
    public double timeout_;
    public double horizon_length_;
    public controller_msgs.msg.dds.PlanarRegionsListMessage planar_regions_list_message_;
+   public boolean assume_flat_ground_;
    public int planner_request_id_ = -1;
 
    public FootstepPlanningRequestPacket()
@@ -66,6 +67,8 @@ public class FootstepPlanningRequestPacket extends Packet<FootstepPlanningReques
       horizon_length_ = other.horizon_length_;
 
       controller_msgs.msg.dds.PlanarRegionsListMessagePubSubType.staticCopy(other.planar_regions_list_message_, planar_regions_list_message_);
+      assume_flat_ground_ = other.assume_flat_ground_;
+
       planner_request_id_ = other.planner_request_id_;
 
    }
@@ -151,6 +154,15 @@ public class FootstepPlanningRequestPacket extends Packet<FootstepPlanningReques
       return planar_regions_list_message_;
    }
 
+   public void setAssumeFlatGround(boolean assume_flat_ground)
+   {
+      assume_flat_ground_ = assume_flat_ground;
+   }
+   public boolean getAssumeFlatGround()
+   {
+      return assume_flat_ground_;
+   }
+
    public void setPlannerRequestId(int planner_request_id)
    {
       planner_request_id_ = planner_request_id;
@@ -193,6 +205,8 @@ public class FootstepPlanningRequestPacket extends Packet<FootstepPlanningReques
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.horizon_length_, other.horizon_length_, epsilon)) return false;
 
       if (!this.planar_regions_list_message_.epsilonEquals(other.planar_regions_list_message_, epsilon)) return false;
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsBoolean(this.assume_flat_ground_, other.assume_flat_ground_, epsilon)) return false;
+
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.planner_request_id_, other.planner_request_id_, epsilon)) return false;
 
 
@@ -223,6 +237,8 @@ public class FootstepPlanningRequestPacket extends Packet<FootstepPlanningReques
       if(this.horizon_length_ != otherMyClass.horizon_length_) return false;
 
       if (!this.planar_regions_list_message_.equals(otherMyClass.planar_regions_list_message_)) return false;
+      if(this.assume_flat_ground_ != otherMyClass.assume_flat_ground_) return false;
+
       if(this.planner_request_id_ != otherMyClass.planner_request_id_) return false;
 
 
@@ -255,6 +271,8 @@ public class FootstepPlanningRequestPacket extends Packet<FootstepPlanningReques
       builder.append(this.horizon_length_);      builder.append(", ");
       builder.append("planar_regions_list_message=");
       builder.append(this.planar_regions_list_message_);      builder.append(", ");
+      builder.append("assume_flat_ground=");
+      builder.append(this.assume_flat_ground_);      builder.append(", ");
       builder.append("planner_request_id=");
       builder.append(this.planner_request_id_);
       builder.append("}");
