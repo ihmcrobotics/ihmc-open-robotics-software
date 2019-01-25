@@ -96,7 +96,7 @@ public class BodyCollisionNodeChecker extends FootstepNodeChecker
    @Override
    public boolean isNodeValidInternal(FootstepNode node, FootstepNode previousNode)
    {
-      if (previousNode == null || !parameters.checkForBodyBoxCollisions())
+      if (previousNode == null || !parameters.checkForBodyBoxCollisions() || !hasPlanarRegions())
       {
          return true;
       }

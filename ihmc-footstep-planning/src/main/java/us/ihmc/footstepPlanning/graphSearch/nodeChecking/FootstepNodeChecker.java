@@ -24,7 +24,7 @@ public abstract class FootstepNodeChecker
          listener.rejectNode(node, parentNode, rejectionReason);
    }
 
-   protected boolean hasPlanarRegions()
+   boolean hasPlanarRegions()
    {
       return planarRegionsList != null && !planarRegionsList.isEmpty();
    }
@@ -37,9 +37,9 @@ public abstract class FootstepNodeChecker
 
    public boolean isNodeValid(FootstepNode node, FootstepNode previousNode)
    {
-      if(!hasPlanarRegions())
+      if(node.equals(previousNode))
       {
-         return true;
+         throw new RuntimeException("Cannot check a node with itself");
       }
       else
       {
