@@ -186,7 +186,7 @@ public class HighLevelControlManagerFactory
    }
 
    public RigidBodyControlManager getOrCreateRigidBodyManager(RigidBodyBasics bodyToControl, RigidBodyBasics baseBody, ReferenceFrame controlFrame,
-                                                              ReferenceFrame baseFrame, Collection<ReferenceFrame> trajectoryFrames)
+                                                              ReferenceFrame baseFrame)
    {
       if (bodyToControl == null)
          return null;
@@ -221,10 +221,9 @@ public class HighLevelControlManagerFactory
       YoGraphicsListRegistry graphicsListRegistry = controllerToolbox.getYoGraphicsListRegistry();
       RigidBodyControlMode defaultControlMode = walkingControllerParameters.getDefaultControlModesForRigidBodies().get(bodyName);
 
-      RigidBodyControlManager manager = new RigidBodyControlManager(bodyToControl, baseBody, elevator, homeConfiguration, homePose, trajectoryFrames,
-                                                                    controlFrame, baseFrame, taskspaceAngularWeight, taskspaceLinearWeight,
-                                                                    taskspaceOrientationGains, taskspacePositionGains, contactableBody, defaultControlMode,
-                                                                    yoTime, graphicsListRegistry, registry);
+      RigidBodyControlManager manager = new RigidBodyControlManager(bodyToControl, baseBody, elevator, homeConfiguration, homePose, controlFrame, baseFrame,
+                                                                    taskspaceAngularWeight, taskspaceLinearWeight, taskspaceOrientationGains,
+                                                                    taskspacePositionGains, contactableBody, defaultControlMode, yoTime, graphicsListRegistry, registry);
       manager.setGains(jointGainMap);
       manager.setWeights(jointspaceWeightMap, userModeWeightMap);
 

@@ -366,8 +366,8 @@ public class ICPPlannerSegmentedTrajectoryGenerator implements PositionTrajector
       double segmentDuration = spline.getTrajectoryTime();
 
       startOfSplineCoM.set(yoStartOfSplineCoM);
-      integrateCoMPositionUsingCubicICP(timeInSecondSegment, segmentDuration, omega0.getDoubleValue(), spline.getCurrentTrajectoryFrame(),
-                                        spline.getXPolynomial(), spline.getYPolynomial(), startOfSplineCoM, comToPack);
+      integrateCoMPositionUsingCubicICP(timeInSecondSegment, segmentDuration, omega0.getDoubleValue(), spline.getReferenceFrame(), spline.getXPolynomial(),
+                                        spline.getYPolynomial(), startOfSplineCoM, comToPack);
    }
 
    private void initializeSpline()

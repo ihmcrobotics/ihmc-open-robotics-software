@@ -1,7 +1,5 @@
 package us.ihmc.commonWalkingControlModules.controlModules.pelvis;
 
-import java.util.Collection;
-
 import us.ihmc.commonWalkingControlModules.controlModules.rigidBody.RigidBodyOrientationController;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.FeedbackControlCommand;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHumanoidControllerToolbox;
@@ -27,11 +25,10 @@ public class UserPelvisOrientationManager implements PelvisOrientationControlSta
    {
       RigidBodyBasics pelvis = controllerToolbox.getFullRobotModel().getPelvis();
       RigidBodyBasics elevator = controllerToolbox.getFullRobotModel().getElevator();
-      Collection<ReferenceFrame> trajectoryFrames = controllerToolbox.getTrajectoryFrames();
       baseFrame = controllerToolbox.getReferenceFrames().getMidFootZUpGroundFrame();
       YoDouble yoTime = controllerToolbox.getYoTime();
 
-      orientationController = new RigidBodyOrientationController(pelvis, elevator, elevator, trajectoryFrames, baseFrame, yoTime, null, registry);
+      orientationController = new RigidBodyOrientationController(pelvis, elevator, elevator, baseFrame, yoTime, null, registry);
       orientationController.setGains(gains);
 
       homeOrientation = new FrameQuaternion(baseFrame);

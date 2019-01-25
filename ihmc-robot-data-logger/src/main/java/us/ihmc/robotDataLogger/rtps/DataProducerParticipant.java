@@ -5,6 +5,7 @@ import java.net.InetAddress;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
 
+import us.ihmc.log.LogTools;
 import us.ihmc.multicastLogDataProtocol.modelLoaders.LogModelProvider;
 import us.ihmc.pubsub.Domain;
 import us.ihmc.pubsub.DomainFactory;
@@ -271,7 +272,8 @@ public class DataProducerParticipant
 
       String handshakeHash = HandshakeHashCalculator.calculateHash(handshake);
       announcement.setReconnectKey(handshakeHash);
-      
+
+      LogTools.info("Publishing handshake...");
       handshakePublisher.write(handshake);
       announcementPublisher.write(announcement);
       

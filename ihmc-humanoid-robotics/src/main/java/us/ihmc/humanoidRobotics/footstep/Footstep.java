@@ -16,7 +16,7 @@ import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.FootstepDataCommand;
-import us.ihmc.robotics.math.trajectories.waypoints.FrameSE3TrajectoryPoint;
+import us.ihmc.robotics.math.trajectories.trajectorypoints.FrameSE3TrajectoryPoint;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.trajectories.TrajectoryType;

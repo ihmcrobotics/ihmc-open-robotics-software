@@ -1,24 +1,18 @@
 package us.ihmc.communication;
 
+import com.google.common.base.CaseFormat;
+import org.apache.commons.lang3.StringUtils;
+import us.ihmc.commons.exception.ExceptionHandler;
+import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
+import us.ihmc.pubsub.TopicDataType;
+import us.ihmc.ros2.*;
+import us.ihmc.util.PeriodicNonRealtimeThreadSchedulerFactory;
+import us.ihmc.util.PeriodicThreadSchedulerFactory;
+
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.function.Supplier;
-
-import org.apache.commons.lang3.StringUtils;
-
-import com.google.common.base.CaseFormat;
-
-import us.ihmc.commons.exception.ExceptionHandler;
-import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
-import us.ihmc.pubsub.TopicDataType;
-import us.ihmc.ros2.NewMessageListener;
-import us.ihmc.ros2.RealtimeRos2Node;
-import us.ihmc.ros2.Ros2Node;
-import us.ihmc.ros2.Ros2QosProfile;
-import us.ihmc.ros2.Ros2Subscription;
-import us.ihmc.util.PeriodicNonRealtimeThreadSchedulerFactory;
-import us.ihmc.util.PeriodicThreadSchedulerFactory;
 
 public class ROS2Tools
 {
@@ -214,6 +208,31 @@ public class ROS2Tools
       catch (IOException e)
       {
          exceptionHandler.handleException(e);
+      }
+   }
+
+   public static <T> RealtimeRos2Subscription<T> createQueuedSubscription(RealtimeRos2Node realtimeRos2Node, Class<T> messageType, MessageTopicNameGenerator topicNameGenerator)
+   {
+      String topicName = topicNameGenerator.generateTopicName(messageType);
+      return createQueuedSubscription(realtimeRos2Node, messageType, topicName, RUNTIME_EXCEPTION);
+   }
+
+   public static <T> RealtimeRos2Subscription<T> createQueuedSubscription(RealtimeRos2Node realtimeRos2Node, Class<T> messageType, String topicName)
+   {
+      return createQueuedSubscription(realtimeRos2Node, messageType, topicName, RUNTIME_EXCEPTION);
+   }
+
+   public static <T> RealtimeRos2Subscription<T> createQueuedSubscription(RealtimeRos2Node realtimeRos2Node, Class<T> messageType, String topicName, ExceptionHandler exceptionHandler)
+   {
+      try
+      {
+         TopicDataType<T> topicDataType = newMessageTopicDataTypeInstance(messageType);
+         return realtimeRos2Node.createQueuedSubscription(topicDataType, topicName, Ros2QosProfile.DEFAULT(), 10);
+      }
+      catch (IOException e)
+      {
+         exceptionHandler.handleException(e);
+         return null;
       }
    }
 

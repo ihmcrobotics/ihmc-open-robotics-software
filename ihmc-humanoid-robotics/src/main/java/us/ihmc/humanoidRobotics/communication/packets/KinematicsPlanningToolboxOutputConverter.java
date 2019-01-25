@@ -16,9 +16,9 @@ import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.robotModels.FullHumanoidRobotModelFactory;
-import us.ihmc.robotics.math.trajectories.waypoints.EuclideanTrajectoryPointCalculator;
-import us.ihmc.robotics.math.trajectories.waypoints.FrameEuclideanTrajectoryPoint;
-import us.ihmc.robotics.math.trajectories.waypoints.SO3TrajectoryPointCalculator;
+import us.ihmc.robotics.math.trajectories.generators.EuclideanTrajectoryPointCalculator;
+import us.ihmc.robotics.math.trajectories.generators.SO3TrajectoryPointCalculator;
+import us.ihmc.robotics.math.trajectories.trajectorypoints.FrameEuclideanTrajectoryPoint;
 import us.ihmc.robotics.robotSide.RobotSide;
 
 public class KinematicsPlanningToolboxOutputConverter
@@ -83,7 +83,8 @@ public class KinematicsPlanningToolboxOutputConverter
          Vector3D desiredLinearVelocity = new Vector3D();
          Vector3D desiredAngularVelocity = new Vector3D();
 
-         double time = trajectoryPoints.get(i).get(desiredPositions[i], desiredLinearVelocity);
+         trajectoryPoints.get(i).get(desiredPositions[i], desiredLinearVelocity);
+         double time = trajectoryPoints.get(i).getTime();
 
          orientationCalculator.getTrajectoryPoints().get(i).getAngularVelocity(desiredAngularVelocity);
 
@@ -189,7 +190,8 @@ public class KinematicsPlanningToolboxOutputConverter
          Vector3D desiredLinearVelocity = new Vector3D();
          Vector3D desiredAngularVelocity = new Vector3D();
 
-         double time = trajectoryPoints.get(i).get(desiredPositions[i], desiredLinearVelocity);
+         trajectoryPoints.get(i).get(desiredPositions[i], desiredLinearVelocity);
+         double time = trajectoryPoints.get(i).getTime();
 
          orientationCalculator.getTrajectoryPoints().get(i).getAngularVelocity(desiredAngularVelocity);
 

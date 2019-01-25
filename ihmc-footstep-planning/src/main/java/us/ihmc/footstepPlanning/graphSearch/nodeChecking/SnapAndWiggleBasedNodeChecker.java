@@ -58,11 +58,8 @@ public class SnapAndWiggleBasedNodeChecker extends FootstepNodeChecker
    }
 
    @Override
-   public boolean isNodeValid(FootstepNode nodeToExpand, FootstepNode previousNode)
+   public boolean isNodeValidInternal(FootstepNode nodeToExpand, FootstepNode previousNode)
    {
-      if (!hasPlanarRegions())
-         return true;
-
       FootstepNodeSnapData snapData = snapAndWiggler.snapFootstepNode(nodeToExpand);
       RigidBodyTransform snapTransform = snapData.getSnapTransform();
 

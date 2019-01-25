@@ -4,7 +4,6 @@ import us.ihmc.euclid.referenceFrame.FramePoint2D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.mecano.spatial.Wrench;
 import us.ihmc.robotics.contactable.ContactablePlaneBody;
-import us.ihmc.robotics.robotSide.RobotQuadrant;
 import us.ihmc.robotics.sensors.FootSwitchInterface;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
@@ -16,10 +15,12 @@ public class SettableFootSwitch implements FootSwitchInterface
    private final ContactablePlaneBody foot;
    private final double totalRobotWeight;
    private final YoFramePoint2D yoResolvedCoP;
+   private final int totalNumberOfFeet;
 
-   public SettableFootSwitch(ContactablePlaneBody foot, RobotQuadrant quadrant, double totalRobotWeight, YoVariableRegistry registry)
+   public SettableFootSwitch(ContactablePlaneBody foot, double totalRobotWeight, int totalNumberOfFeet, YoVariableRegistry registry)
    {
-      this.hasFootHitGround = new YoBoolean(quadrant.getCamelCaseName() + "_SettableFootSwitch", registry);
+      this.totalNumberOfFeet = totalNumberOfFeet;
+      this.hasFootHitGround = new YoBoolean(foot.getName() + "_SettableFootSwitch", registry);
       this.totalRobotWeight = totalRobotWeight;
       this.foot = foot;
       hasFootHitGround.set(false);
@@ -55,7 +56,7 @@ public class SettableFootSwitch implements FootSwitchInterface
    {
       footWrenchToPack.setToZero();
       if (hasFootHitGround())
-         footWrenchToPack.setLinearPartZ(totalRobotWeight / 4.0);
+         footWrenchToPack.setLinearPartZ(totalRobotWeight / totalNumberOfFeet);
    }
 
    @Override
