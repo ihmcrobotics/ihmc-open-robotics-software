@@ -136,4 +136,23 @@ public interface FootstepPlannerCostParameters
    {
       return 0.0;
    }
+
+   /**
+    * If this value is non-zero, nodes will be given cost if the bounding box is within this xy distance of a planar region
+    * @see FootstepPlannerCostParameters#getBoundingBoxCost
+    */
+   default double getMaximum2dDistanceFromBoundingBoxToPenalize()
+   {
+      return 0.0;
+   }
+
+   /**
+    * If a node doesn't have bounding box collisions at the default dimensions, but does when increasing the xy dimensions by d,
+    * where d < getMaximum2DDistanceFromBoundingBoxToPenalize, there will be a cost given to the node of:
+    * {@code c * (1 - d / d_max)}, where d_max is this value.
+    */
+   default double getBoundingBoxCost()
+   {
+      return 0.0;
+   }
 }
