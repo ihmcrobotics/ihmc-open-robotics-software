@@ -60,6 +60,8 @@ public class FootstepPlanningRequestPacketPubSubType implements us.ihmc.pubsub.T
 
       current_alignment += controller_msgs.msg.dds.PlanarRegionsListMessagePubSubType.getMaxCdrSerializedSize(current_alignment);
 
+      current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
+
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 
 
@@ -100,6 +102,9 @@ public class FootstepPlanningRequestPacketPubSubType implements us.ihmc.pubsub.T
 
       current_alignment += controller_msgs.msg.dds.PlanarRegionsListMessagePubSubType.getCdrSerializedSize(data.getPlanarRegionsListMessage(), current_alignment);
 
+      current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
+
+
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 
 
@@ -124,6 +129,8 @@ public class FootstepPlanningRequestPacketPubSubType implements us.ihmc.pubsub.T
       cdr.write_type_6(data.getHorizonLength());
 
       controller_msgs.msg.dds.PlanarRegionsListMessagePubSubType.write(data.getPlanarRegionsListMessage(), cdr);
+      cdr.write_type_7(data.getAssumeFlatGround());
+
       cdr.write_type_2(data.getPlannerRequestId());
 
    }
@@ -145,6 +152,8 @@ public class FootstepPlanningRequestPacketPubSubType implements us.ihmc.pubsub.T
       data.setHorizonLength(cdr.read_type_6());
       	
       controller_msgs.msg.dds.PlanarRegionsListMessagePubSubType.read(data.getPlanarRegionsListMessage(), cdr);	
+      data.setAssumeFlatGround(cdr.read_type_7());
+      	
       data.setPlannerRequestId(cdr.read_type_2());
       	
 
@@ -168,6 +177,7 @@ public class FootstepPlanningRequestPacketPubSubType implements us.ihmc.pubsub.T
       ser.write_type_6("horizon_length", data.getHorizonLength());
       ser.write_type_a("planar_regions_list_message", new controller_msgs.msg.dds.PlanarRegionsListMessagePubSubType(), data.getPlanarRegionsListMessage());
 
+      ser.write_type_7("assume_flat_ground", data.getAssumeFlatGround());
       ser.write_type_2("planner_request_id", data.getPlannerRequestId());
    }
 
@@ -189,6 +199,7 @@ public class FootstepPlanningRequestPacketPubSubType implements us.ihmc.pubsub.T
       data.setHorizonLength(ser.read_type_6("horizon_length"));
       ser.read_type_a("planar_regions_list_message", new controller_msgs.msg.dds.PlanarRegionsListMessagePubSubType(), data.getPlanarRegionsListMessage());
 
+      data.setAssumeFlatGround(ser.read_type_7("assume_flat_ground"));
       data.setPlannerRequestId(ser.read_type_2("planner_request_id"));
    }
 

@@ -1,7 +1,5 @@
 package us.ihmc.commonWalkingControlModules.controlModules.pelvis;
 
-import java.util.Collection;
-
 import us.ihmc.commonWalkingControlModules.controlModules.YoSE3OffsetFrame;
 import us.ihmc.commonWalkingControlModules.controlModules.foot.FeetManager;
 import us.ihmc.commonWalkingControlModules.controlModules.rigidBody.RigidBodyPositionController;
@@ -104,7 +102,6 @@ public class PelvisHeightControlState implements PelvisAndCenterOfMassHeightCont
       // The base frame could be switched to the mid foot frame at some point.
       baseFrame = elevator.getBodyFixedFrame();
 
-      Collection<ReferenceFrame> trajectoryFrames = controllerToolbox.getTrajectoryFrames();
       YoDouble yoTime = controllerToolbox.getYoTime();
       YoGraphicsListRegistry graphicsListRegistry = controllerToolbox.getYoGraphicsListRegistry();
 
@@ -114,7 +111,7 @@ public class PelvisHeightControlState implements PelvisAndCenterOfMassHeightCont
                                                                             derivativeGain, () -> 0.0, registry);
       yoControlFrame = new YoSE3OffsetFrame(pelvis.getName() + "HeightBodyFixedControlFrame", pelvis.getBodyFixedFrame(), registry);
 
-      positionController = new RigidBodyPositionController(pelvis, elevator, elevator, trajectoryFrames, pelvisFrame, baseFrame, yoTime, registry, graphicsListRegistry);
+      positionController = new RigidBodyPositionController(pelvis, elevator, elevator, pelvisFrame, baseFrame, yoTime, registry, graphicsListRegistry);
 
       defaultHeight = new DoubleParameter(getClass().getSimpleName() + "DefaultHeight", registry);
       minHeight = new DoubleParameter(getClass().getSimpleName() + "MinHeight", registry, 0.0);

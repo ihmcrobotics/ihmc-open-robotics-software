@@ -1,18 +1,20 @@
 package us.ihmc.commonWalkingControlModules.capturePoint.optimization.qpInput;
 
+import static junit.framework.TestCase.assertTrue;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+
+import java.util.Random;
+
 import org.ejml.data.DenseMatrix64F;
 import org.ejml.ops.CommonOps;
 import org.junit.Test;
+
 import us.ihmc.commons.MathTools;
 import us.ihmc.commons.RandomNumbers;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.robotics.testing.JUnitTools;
-
-import java.util.Random;
-
-import static junit.framework.TestCase.assertTrue;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
 
 public class ICPQPConstraintCalculatorTest
 {
@@ -23,7 +25,7 @@ public class ICPQPConstraintCalculatorTest
    @Test(timeout = 30000)
    public void testFeedbackMaxValueConstraint()
    {
-      ICPQPIndexHandler indexHandler = new ICPQPIndexHandler();
+      ICPQPIndexHandler indexHandler = new ICPQPIndexHandler(new YoVariableRegistry("dummy"));
       ICPQPConstraintCalculator inputCalculator = new ICPQPConstraintCalculator(indexHandler);
       ICPInequalityInput inequalityConstraint = new ICPInequalityInput(10, 10);
 
@@ -46,7 +48,7 @@ public class ICPQPConstraintCalculatorTest
    @Test(timeout = 30000)
    public void testFeedbackMaxValueConstraintWithCMP()
    {
-      ICPQPIndexHandler indexHandler = new ICPQPIndexHandler();
+      ICPQPIndexHandler indexHandler = new ICPQPIndexHandler(new YoVariableRegistry("dummy"));
       ICPQPConstraintCalculator inputCalculator = new ICPQPConstraintCalculator(indexHandler);
       ICPInequalityInput inequalityConstraint = new ICPInequalityInput(10, 10);
       indexHandler.setHasCMPFeedbackTask(true);
@@ -70,7 +72,7 @@ public class ICPQPConstraintCalculatorTest
    @Test(timeout = 30000)
    public void testFeedbackMaxValueConstraintWithInfiniteLimits()
    {
-      ICPQPIndexHandler indexHandler = new ICPQPIndexHandler();
+      ICPQPIndexHandler indexHandler = new ICPQPIndexHandler(new YoVariableRegistry("dummy"));
       ICPQPConstraintCalculator inputCalculator = new ICPQPConstraintCalculator(indexHandler);
       ICPInequalityInput inequalityConstraint = new ICPInequalityInput(10, 10);
 
@@ -173,7 +175,7 @@ public class ICPQPConstraintCalculatorTest
    @Test(timeout = 30000)
    public void testFeedbackMaxRateConstraint()
    {
-      ICPQPIndexHandler indexHandler = new ICPQPIndexHandler();
+      ICPQPIndexHandler indexHandler = new ICPQPIndexHandler(new YoVariableRegistry("dummy"));
       ICPQPConstraintCalculator inputCalculator = new ICPQPConstraintCalculator(indexHandler);
       ICPInequalityInput inequalityConstraint = new ICPInequalityInput(10, 10);
 
@@ -201,7 +203,7 @@ public class ICPQPConstraintCalculatorTest
    @Test(timeout = 30000)
    public void testFeedbackMaxRateConstraintWithCMP()
    {
-      ICPQPIndexHandler indexHandler = new ICPQPIndexHandler();
+      ICPQPIndexHandler indexHandler = new ICPQPIndexHandler(new YoVariableRegistry("dummy"));
       ICPQPConstraintCalculator inputCalculator = new ICPQPConstraintCalculator(indexHandler);
       ICPInequalityInput inequalityConstraint = new ICPInequalityInput(10, 10);
       indexHandler.setHasCMPFeedbackTask(true);
@@ -230,7 +232,7 @@ public class ICPQPConstraintCalculatorTest
    @Test(timeout = 30000)
    public void testFeedbackMaxRateConstraintWithInfiniteLimits()
    {
-      ICPQPIndexHandler indexHandler = new ICPQPIndexHandler();
+      ICPQPIndexHandler indexHandler = new ICPQPIndexHandler(new YoVariableRegistry("dummy"));
       ICPQPConstraintCalculator inputCalculator = new ICPQPConstraintCalculator(indexHandler);
       ICPInequalityInput inequalityConstraint = new ICPInequalityInput(10, 10);
 

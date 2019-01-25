@@ -1,6 +1,5 @@
 package us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.walkingController;
 
-import java.util.Collection;
 import java.util.List;
 
 import controller_msgs.msg.dds.ManipulationAbortedStatus;
@@ -95,7 +94,6 @@ public class WalkingCommandConsumer
       RigidBodyBasics head = controllerToolbox.getFullRobotModel().getHead();
       RigidBodyBasics chest = controllerToolbox.getFullRobotModel().getChest();
       RigidBodyBasics pelvis = controllerToolbox.getFullRobotModel().getPelvis();
-      Collection<ReferenceFrame> trajectoryFrames = controllerToolbox.getTrajectoryFrames();
 
       ReferenceFrame pelvisZUpFrame = controllerToolbox.getPelvisZUpFrame();
 
@@ -103,7 +101,7 @@ public class WalkingCommandConsumer
       if(chest != null)
       {
          chestBodyFrame = chest.getBodyFixedFrame();
-         this.chestManager = managerFactory.getOrCreateRigidBodyManager(chest, pelvis, chestBodyFrame, pelvisZUpFrame, trajectoryFrames);
+         this.chestManager = managerFactory.getOrCreateRigidBodyManager(chest, pelvis, chestBodyFrame, pelvisZUpFrame);
       }
       else
       {
@@ -113,7 +111,7 @@ public class WalkingCommandConsumer
       if (head != null)
       {
          ReferenceFrame headBodyFrame = head.getBodyFixedFrame();
-         this.headManager = managerFactory.getOrCreateRigidBodyManager(head, chest, headBodyFrame, chestBodyFrame, trajectoryFrames);
+         this.headManager = managerFactory.getOrCreateRigidBodyManager(head, chest, headBodyFrame, chestBodyFrame);
       }
       else
       {
@@ -126,7 +124,7 @@ public class WalkingCommandConsumer
          if(hand != null)
          {
             ReferenceFrame handControlFrame = controllerToolbox.getFullRobotModel().getHandControlFrame(robotSide);
-            RigidBodyControlManager handManager = managerFactory.getOrCreateRigidBodyManager(hand, chest, handControlFrame, chestBodyFrame, trajectoryFrames);
+            RigidBodyControlManager handManager = managerFactory.getOrCreateRigidBodyManager(hand, chest, handControlFrame, chestBodyFrame);
             handManagers.put(robotSide, handManager);
          }
       }
@@ -418,12 +416,12 @@ public class WalkingCommandConsumer
          if (handManagers.get(robotSide) != null)
             handManagers.get(robotSide).handleStopAllTrajectoryCommand(command);
       }
-      
+
       if(chestManager != null)
       {
          chestManager.handleStopAllTrajectoryCommand(command);
       }
-      
+
       feetManager.handleStopAllTrajectoryCommand(command);
       comHeightManager.handleStopAllTrajectoryCommand(command);
       balanceManager.handleStopAllTrajectoryCommand(command);

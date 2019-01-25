@@ -64,6 +64,7 @@ public class AStarFootstepPlanner implements BodyPathAndFootstepPlanner
    private final FootstepNodeExpansion nodeExpansion;
    private final FootstepCost stepCostCalculator;
    private final FootstepNodeSnapper snapper;
+   private final SideDependentList<ConvexPolygon2D> footPolygons;
 
    private final ArrayList<StartAndGoalListener> startAndGoalListeners = new ArrayList<>();
 
@@ -81,12 +82,12 @@ public class AStarFootstepPlanner implements BodyPathAndFootstepPlanner
    public AStarFootstepPlanner(FootstepPlannerParameters parameters, FootstepNodeChecker nodeChecker, CostToGoHeuristics heuristics,
                                FootstepNodeExpansion expansion, FootstepCost stepCostCalculator, FootstepNodeSnapper snapper, YoVariableRegistry parentRegistry)
    {
-      this(parameters, nodeChecker, heuristics, expansion, stepCostCalculator, snapper, null, parentRegistry);
+      this(parameters, nodeChecker, heuristics, expansion, stepCostCalculator, snapper, null, null, parentRegistry);
    }
 
    public AStarFootstepPlanner(FootstepPlannerParameters parameters, FootstepNodeChecker nodeChecker, CostToGoHeuristics heuristics,
                                FootstepNodeExpansion nodeExpansion, FootstepCost stepCostCalculator, FootstepNodeSnapper snapper,
-                               BipedalFootstepPlannerListener listener, YoVariableRegistry parentRegistry)
+                               BipedalFootstepPlannerListener listener, SideDependentList<ConvexPolygon2D> footPolygons, YoVariableRegistry parentRegistry)
    {
       this.parameters = parameters;
       this.nodeChecker = nodeChecker;
@@ -98,6 +99,7 @@ public class AStarFootstepPlanner implements BodyPathAndFootstepPlanner
       this.graph = new FootstepGraph();
       timeout.set(Double.POSITIVE_INFINITY);
       this.initialize.set(true);
+      this.footPolygons = footPolygons;
 
       parentRegistry.addChild(registry);
    }
@@ -242,8 +244,12 @@ public class AStarFootstepPlanner implements BodyPathAndFootstepPlanner
          plan.addFootstep(robotSide, new FramePose3D(ReferenceFrame.getWorldFrame(), footstepPose));
 
          ConvexPolygon2D foothold = snapData.getCroppedFoothold();
+         SimpleFootstep footstep = plan.getFootstep(i - 1);
+
+         if(foothold.isEmpty() && footPolygons != null)
+            footstep.setFoothold(footPolygons.get(footstep.getRobotSide()));
          if (!foothold.isEmpty())
-            plan.getFootstep(i - 1).setFoothold(foothold);
+            footstep.setFoothold(foothold);
       }
 
       plan.setLowLevelPlanGoal(goalPoseInWorld);
@@ -479,7 +485,7 @@ public class AStarFootstepPlanner implements BodyPathAndFootstepPlanner
       FootstepCost footstepCost = costBuilder.buildCost();
 
       AStarFootstepPlanner planner = new AStarFootstepPlanner(parameters, nodeChecker, heuristics, expansion, footstepCost, postProcessingSnapper, listener,
-                                                              registry);
+                                                              footPolygons, registry);
 
       if (policyDefinitions != null)
       {

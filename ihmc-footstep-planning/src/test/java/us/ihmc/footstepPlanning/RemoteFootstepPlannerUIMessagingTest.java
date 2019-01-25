@@ -606,6 +606,14 @@ public class RemoteFootstepPlannerUIMessagingTest
             return normalZThresholdForAccessibleRegions;
          }
 
+         private final double preferredExtrusionDistance = RandomNumbers.nextDouble(random, 0.01, 1.0);
+
+         @Override
+         public double getPreferredObstacleExtrusionDistance()
+         {
+            return preferredExtrusionDistance;
+         }
+
          private final double extrusionDistance = RandomNumbers.nextDouble(random, 0.01, 1.0);
 
          @Override

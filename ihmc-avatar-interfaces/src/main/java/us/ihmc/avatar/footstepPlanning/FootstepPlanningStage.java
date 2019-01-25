@@ -164,7 +164,7 @@ public class FootstepPlanningStage implements FootstepPlanner
       FootstepCost footstepCost = costBuilder.buildCost();
 
       AStarFootstepPlanner planner = new AStarFootstepPlanner(footstepPlanningParameters, nodeChecker, heuristics, expansion, footstepCost,
-                                                              postProcessingSnapper, plannerListener, registry);
+                                                              postProcessingSnapper, plannerListener, footPolygons, registry);
 
       heuristicPolicies.setCollisionNodeChecker(bodyCollisionNodeChecker);
       heuristicPolicies.setNodeSnapper(snapper);
@@ -219,7 +219,7 @@ public class FootstepPlanningStage implements FootstepPlanner
    @Override
    public void setPlanarRegions(PlanarRegionsList planarRegionsList)
    {
-      this.planarRegionsList.set(planarRegionsList.copy());
+      this.planarRegionsList.set(planarRegionsList == null ? null : planarRegionsList.copy());
    }
 
    @Override
