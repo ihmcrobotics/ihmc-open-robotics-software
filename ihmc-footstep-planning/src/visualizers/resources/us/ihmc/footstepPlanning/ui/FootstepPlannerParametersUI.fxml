@@ -48,7 +48,7 @@
                             <CheckBox fx:id="returnBestEffortPlan" mnemonicParsing="false" prefWidth="250.0" text="Return Best Effort Plan" />
             
                             <CheckBox fx:id="performHeuristicSearchPolicies" mnemonicParsing="false" prefWidth="250.0" text="Perform Heuristic Search Actions" GridPane.rowIndex="1" />
-            
+
                             <Label text="Max step length" GridPane.columnIndex="1" GridPane.halignment="RIGHT" />
                             <Label text="Max step width" GridPane.columnIndex="1" GridPane.halignment="RIGHT" GridPane.rowIndex="2" />
                             <Label text="Min step width" GridPane.columnIndex="1" GridPane.halignment="RIGHT" GridPane.rowIndex="3" />

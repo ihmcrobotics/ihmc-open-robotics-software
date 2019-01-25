@@ -47,6 +47,8 @@ public class MainTabController
    @FXML
    private CheckBox acceptNewRegions;
    @FXML
+   private CheckBox assumeFlatGround;
+   @FXML
    private Spinner<Double> timeout;
    @FXML
    private Spinner<Double> horizonLength;
@@ -104,6 +106,7 @@ public class MainTabController
       if (verbose)
          PrintTools.info(this, "Clicked compute path...");
 
+      setStartFromRobot();
       int newRequestID = currentPlannerRequestId.get() + 1;
       messager.submitMessage(FootstepPlannerMessagerAPI.PlannerRequestIdTopic, newRequestID);
       messager.submitMessage(ComputePathTopic, true);
@@ -122,7 +125,7 @@ public class MainTabController
    public void sendPlan()
    {
       FootstepPlan footstepPlan = footstepPlanReference.get();
-      if(footstepPlan == null)
+      if (footstepPlan == null)
          return;
       double swingTime = 1.2;
       double transferTime = 0.8;
@@ -134,8 +137,6 @@ public class MainTabController
    private JavaFXMessager messager;
 
    private AtomicReference<Integer> currentPlannerRequestId;
-   private final AtomicBoolean requestSetStartPoseFromRobot = new AtomicBoolean(false);
-   private AnimationTimer robotPoseHandler;
    private HumanoidReferenceFrames humanoidReferenceFrames;
    private AtomicReference<FootstepPlan> footstepPlanReference;
 
@@ -181,7 +182,6 @@ public class MainTabController
    {
       setupControls();
 
-
       // control
       messager.bindBidirectional(FootstepPlannerMessagerAPI.PlannerTypeTopic, plannerType.valueProperty(), true);
       messager.registerJavaFXSyncedTopicListener(FootstepPlannerMessagerAPI.PlannerRequestIdTopic, new TextViewerListener<>(sentRequestId));
@@ -194,8 +194,8 @@ public class MainTabController
 
       messager.bindBidirectional(FootstepPlannerMessagerAPI.PlannerTimeoutTopic, timeout.getValueFactory().valueProperty(), doubleToDoubleConverter, true);
 
-      messager.bindBidirectional(FootstepPlannerMessagerAPI.PlannerHorizonLengthTopic, horizonLength.getValueFactory().valueProperty(), doubleToDoubleConverter, true);
-
+      messager.bindBidirectional(FootstepPlannerMessagerAPI.PlannerHorizonLengthTopic, horizonLength.getValueFactory().valueProperty(), doubleToDoubleConverter,
+                                 true);
 
       // set goal
       messager.bindBidirectional(FootstepPlannerMessagerAPI.StartPositionEditModeEnabledTopic, placeStart.selectedProperty(), false);
@@ -218,6 +218,7 @@ public class MainTabController
       messager.bindPropertyToTopic(FootstepPlannerMessagerAPI.StartPositionEditModeEnabledTopic, rotateGoal.disableProperty());
       messager.bindPropertyToTopic(FootstepPlannerMessagerAPI.GoalPositionEditModeEnabledTopic, rotateGoal.disableProperty());
       messager.bindPropertyToTopic(FootstepPlannerMessagerAPI.StartOrientationEditModeEnabledTopic, rotateGoal.disableProperty());
+      messager.bindBidirectional(FootstepPlannerMessagerAPI.AssumeFlatGround, assumeFlatGround.selectedProperty(), false);
 
       startPositionProperty.bindBidirectionalX(startXPosition.getValueFactory().valueProperty());
       startPositionProperty.bindBidirectionalY(startYPosition.getValueFactory().valueProperty());
@@ -238,37 +239,23 @@ public class MainTabController
       goalRotationProperty.bindBidirectionalYaw(goalYaw.getValueFactory().valueProperty());
       messager.bindBidirectional(GoalOrientationTopic, goalRotationProperty, false);
 
-      robotPoseHandler = new AnimationTimer()
-      {
-         @Override
-         public void handle(long now)
-         {
-            if(requestSetStartPoseFromRobot.getAndSet(false))
-            {
-               humanoidReferenceFrames.updateFrames();
-               MovingReferenceFrame midFeetZUpFrame = humanoidReferenceFrames.getMidFeetZUpFrame();
-               FramePose3D startPose = new FramePose3D();
-               startPose.setToZero(midFeetZUpFrame);
-               startPose.changeFrame(ReferenceFrame.getWorldFrame());
-
-               double x = startPose.getX();
-               double y = startPose.getY();
-               double yaw = startPose.getYaw();
-
-               startPositionProperty.set(new Point3D(x, y, startPositionProperty.get().getZ()));
-               startRotationProperty.set(new Quaternion(yaw, 0.0, 0.0));
-            }
-         }
-      };
-      robotPoseHandler.start();
-
       messager.registerTopicListener(GlobalResetTopic, reset -> clearStartGoalTextFields());
    }
 
-   @FXML
-   private void setStartPoseFromRobot()
+   private void setStartFromRobot()
    {
-      requestSetStartPoseFromRobot.set(true);
+      humanoidReferenceFrames.updateFrames();
+      MovingReferenceFrame midFeetZUpFrame = humanoidReferenceFrames.getMidFeetZUpFrame();
+      FramePose3D startPose = new FramePose3D();
+      startPose.setToZero(midFeetZUpFrame);
+      startPose.changeFrame(ReferenceFrame.getWorldFrame());
+
+      double x = startPose.getX();
+      double y = startPose.getY();
+      double yaw = startPose.getYaw();
+
+      startPositionProperty.set(new Point3D(x, y, startPositionProperty.get().getZ()));
+      startRotationProperty.set(new Quaternion(yaw, 0.0, 0.0));
    }
 
    public void setFullRobotModel(FullHumanoidRobotModel fullHumanoidRobotModel)
