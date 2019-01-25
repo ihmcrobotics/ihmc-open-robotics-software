@@ -32,7 +32,7 @@ public class MultisenseStereoVisionPointCloudReceiver extends AbstractRosTopicSu
 
    private final IHMCROS2Publisher<StereoVisionPointCloudMessage> stereoVisionPublisher;
 
-   private static final Point3D translationToFixedFrame = new Point3D();
+   private static final Point3D translationToFixedFrame = new Point3D(0.0, 0.035, -0.002);
    private static final Quaternion rotationToFixedFrame = new Quaternion(-0.5, 0.5, -0.5, 0.5);
    private static final RigidBodyTransform transformToFixedFrame = new RigidBodyTransform(rotationToFixedFrame, translationToFixedFrame);
 
