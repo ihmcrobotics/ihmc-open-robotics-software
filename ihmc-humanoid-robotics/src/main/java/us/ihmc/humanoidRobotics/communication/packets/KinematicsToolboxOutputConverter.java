@@ -184,4 +184,14 @@ public class KinematicsToolboxOutputConverter
       if (Double.isNaN(trajectoryTime))
          throw new RuntimeException("Need to call setTrajectoryTime() first.");
    }
+
+   public FloatingJointBasics getRootJoint()
+   {
+      return rootJoint;
+   }
+
+   public OneDoFJointBasics[] getOneDoFJoints()
+   {
+      return oneDoFJoints;
+   }
 }
