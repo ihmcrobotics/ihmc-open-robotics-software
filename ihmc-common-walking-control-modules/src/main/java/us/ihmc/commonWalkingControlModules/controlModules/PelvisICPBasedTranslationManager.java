@@ -23,7 +23,7 @@ import us.ihmc.log.LogTools;
 import us.ihmc.mecano.frames.MovingReferenceFrame;
 import us.ihmc.robotics.dataStructures.parameters.ParameterVector2D;
 import us.ihmc.robotics.geometry.ConvexPolygonScaler;
-import us.ihmc.robotics.math.trajectories.waypoints.MultipleWaypointsPositionTrajectoryGenerator;
+import us.ihmc.robotics.math.trajectories.generators.MultipleWaypointsPositionTrajectoryGenerator;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.screwTheory.SelectionMatrix3D;
@@ -111,11 +111,7 @@ public class PelvisICPBasedTranslationManager
 
       this.bipedSupportPolygons = bipedSupportPolygons;
 
-      boolean allowMultipleFrames = true;
-      positionTrajectoryGenerator = new MultipleWaypointsPositionTrajectoryGenerator("pelvisOffset", RigidBodyTaskspaceControlState.maxPointsInGenerator, allowMultipleFrames, worldFrame, registry);
-      positionTrajectoryGenerator.registerNewTrajectoryFrame(midFeetZUpFrame);
-      for (RobotSide robotSide : RobotSide.values)
-         positionTrajectoryGenerator.registerNewTrajectoryFrame(soleZUpFrames.get(robotSide));
+      positionTrajectoryGenerator = new MultipleWaypointsPositionTrajectoryGenerator("pelvisOffset", RigidBodyTaskspaceControlState.maxPointsInGenerator, worldFrame, registry);
 
       proportionalGain.set(0.5);
       integralGain.set(1.5);
@@ -494,8 +490,7 @@ public class PelvisICPBasedTranslationManager
       tempPosition.setToZero(pelvisZUpFrame);
       tempPosition.changeFrame(worldFrame);
       tempVelocity.setToZero(worldFrame);
-      positionTrajectoryGenerator.clear();
-      positionTrajectoryGenerator.switchTrajectoryFrame(worldFrame);
+      positionTrajectoryGenerator.clear(worldFrame);
       positionTrajectoryGenerator.appendWaypoint(0.0, tempPosition, tempVelocity);
       positionTrajectoryGenerator.initialize();
       isTrajectoryStopped.set(false);

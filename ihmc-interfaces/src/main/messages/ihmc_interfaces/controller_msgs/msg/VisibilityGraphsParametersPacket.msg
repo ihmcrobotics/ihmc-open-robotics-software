@@ -7,6 +7,8 @@ float64 max_inter_region_connection_length -1.0
 
 float64 normal_z_threshold_for_accessible_regions -1.0
 
+float64 preferred_extrusion_distance -1.0
+
 float64 extrusion_distance -1.0
 
 float64 extrusion_distance_if_not_too_high_to_step -1.0

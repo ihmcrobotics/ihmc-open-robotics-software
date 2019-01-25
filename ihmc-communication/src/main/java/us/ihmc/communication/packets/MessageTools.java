@@ -25,6 +25,7 @@ import controller_msgs.msg.dds.StereoVisionPointCloudMessage;
 import controller_msgs.msg.dds.TextToSpeechPacket;
 import controller_msgs.msg.dds.ToolboxStateMessage;
 import controller_msgs.msg.dds.UIPositionCheckerPacket;
+import controller_msgs.msg.dds.WalkingControllerPreviewOutputMessage;
 import controller_msgs.msg.dds.WeightMatrix3DMessage;
 import gnu.trove.list.array.TByteArrayList;
 import gnu.trove.list.array.TDoubleArrayList;
@@ -333,6 +334,18 @@ public class MessageTools
       KinematicsToolboxOutputStatus message = new KinematicsToolboxOutputStatus();
       message.setJointNameHash(Arrays.hashCode(newJointData));
       MessageTools.packDesiredJointState(message, rootJoint, newJointData);
+      return message;
+   }
+
+   public static WalkingControllerPreviewOutputMessage createWalkingControllerPreviewOutputMessage(double dt, List<KinematicsToolboxOutputStatus> previewFrames)
+   {
+      // TODO down-sample frames when going over the message maximum size.
+      WalkingControllerPreviewOutputMessage message = new WalkingControllerPreviewOutputMessage();
+      message.setFrameDt(dt);
+      for (KinematicsToolboxOutputStatus frame : previewFrames)
+      {
+         message.getRobotConfigurations().add().set(frame);
+      }
       return message;
    }
 

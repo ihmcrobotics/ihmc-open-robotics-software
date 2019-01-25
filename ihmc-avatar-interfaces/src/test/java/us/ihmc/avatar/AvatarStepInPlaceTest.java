@@ -237,7 +237,7 @@ public abstract class AvatarStepInPlaceTest implements MultiRobotTestInterface
       for (int i = 0; i < (simulationTime - initialTransfer) / dt; i++)
       {
          assertTrue(drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(dt));
-         if (i > 2)
+         if (i > 2 && singleSupportStartConditions.get(RobotSide.LEFT).testCondition(Double.NaN))
             assertTrue("Footstep wasn't adjusted, when it should have been", leftFootstepWasAdjusted.getBooleanValue());
       }
 

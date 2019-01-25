@@ -48,10 +48,10 @@ import us.ihmc.humanoidRobotics.communication.packets.walking.LoadBearingRequest
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
-import us.ihmc.robotics.math.trajectories.waypoints.EuclideanTrajectoryPointCalculator;
-import us.ihmc.robotics.math.trajectories.waypoints.FrameEuclideanTrajectoryPoint;
-import us.ihmc.robotics.math.trajectories.waypoints.FrameSE3TrajectoryPoint;
-import us.ihmc.robotics.math.trajectories.waypoints.SimpleSE3TrajectoryPoint;
+import us.ihmc.robotics.math.trajectories.generators.EuclideanTrajectoryPointCalculator;
+import us.ihmc.robotics.math.trajectories.trajectorypoints.FrameEuclideanTrajectoryPoint;
+import us.ihmc.robotics.math.trajectories.trajectorypoints.FrameSE3TrajectoryPoint;
+import us.ihmc.robotics.math.trajectories.trajectorypoints.SE3TrajectoryPoint;
 import us.ihmc.robotics.random.RandomGeometry;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.simulationConstructionSetTools.bambooTools.BambooTools;
@@ -297,8 +297,8 @@ public abstract class EndToEndFootTrajectoryMessageTest implements MultiRobotTes
          {
             FrameSE3TrajectoryPoint framePoint = frameSE3TrajectoryPoints.removeFirst();
 
-            SimpleSE3TrajectoryPoint controllerTrajectoryPoint = EndToEndHandTrajectoryMessageTest.findTrajectoryPoint(footName, trajectoryPointIndex, scs);
-            SimpleSE3TrajectoryPoint expectedTrajectoryPoint = new SimpleSE3TrajectoryPoint();
+            SE3TrajectoryPoint controllerTrajectoryPoint = EndToEndHandTrajectoryMessageTest.findTrajectoryPoint(footName, trajectoryPointIndex, scs);
+            SE3TrajectoryPoint expectedTrajectoryPoint = new SE3TrajectoryPoint();
             framePoint.get(expectedTrajectoryPoint);
 
             assertEquals(expectedTrajectoryPoint.getTime(), controllerTrajectoryPoint.getTime(), EPSILON_FOR_DESIREDS);
@@ -308,8 +308,8 @@ public abstract class EndToEndFootTrajectoryMessageTest implements MultiRobotTes
          success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(trajectoryTime + firstTrajectoryPointTime);
          assertTrue(success);
 
-         SimpleSE3TrajectoryPoint controllerTrajectoryPoint = EndToEndHandTrajectoryMessageTest.findCurrentDesiredTrajectoryPoint(footName, scs);
-         SimpleSE3TrajectoryPoint expectedTrajectoryPoint = new SimpleSE3TrajectoryPoint();
+         SE3TrajectoryPoint controllerTrajectoryPoint = EndToEndHandTrajectoryMessageTest.findCurrentDesiredTrajectoryPoint(footName, scs);
+         SE3TrajectoryPoint expectedTrajectoryPoint = new SE3TrajectoryPoint();
          lastFramePoint.get(expectedTrajectoryPoint);
 
          controllerTrajectoryPoint.setTime(expectedTrajectoryPoint.getTime());
@@ -440,8 +440,8 @@ public abstract class EndToEndFootTrajectoryMessageTest implements MultiRobotTes
          {
             FrameSE3TrajectoryPoint framePoint = footTrajectoryPoints.removeFirst();
 
-            SimpleSE3TrajectoryPoint controllerTrajectoryPoint = EndToEndHandTrajectoryMessageTest.findTrajectoryPoint(footName, trajectoryPointIndex, scs);
-            SimpleSE3TrajectoryPoint expectedTrajectoryPoint = new SimpleSE3TrajectoryPoint();
+            SE3TrajectoryPoint controllerTrajectoryPoint = EndToEndHandTrajectoryMessageTest.findTrajectoryPoint(footName, trajectoryPointIndex, scs);
+            SE3TrajectoryPoint expectedTrajectoryPoint = new SE3TrajectoryPoint();
             framePoint.get(expectedTrajectoryPoint);
             assertEquals(expectedTrajectoryPoint.getTime(), controllerTrajectoryPoint.getTime(), EPSILON_FOR_DESIREDS);
             assertTrue(expectedTrajectoryPoint.epsilonEquals(controllerTrajectoryPoint, 0.01));
@@ -511,7 +511,8 @@ public abstract class EndToEndFootTrajectoryMessageTest implements MultiRobotTes
             Quaternion desiredOrientation = new Quaternion();
             Vector3D desiredAngularVelocity = new Vector3D();
 
-            double time = trajectoryPoints.get(calculatorIndex).get(desiredPosition, desiredLinearVelocity);
+            trajectoryPoints.get(calculatorIndex).get(desiredPosition, desiredLinearVelocity);
+            double time = trajectoryPoints.get(calculatorIndex).getTime();
 
             Graphics3DObject sphere = new Graphics3DObject();
             sphere.translate(desiredPosition);

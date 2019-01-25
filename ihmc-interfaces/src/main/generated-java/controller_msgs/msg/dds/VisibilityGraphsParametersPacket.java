@@ -17,6 +17,7 @@ public class VisibilityGraphsParametersPacket extends Packet<VisibilityGraphsPar
    public long sequence_id_;
    public double max_inter_region_connection_length_ = -1.0;
    public double normal_z_threshold_for_accessible_regions_ = -1.0;
+   public double preferred_extrusion_distance_ = -1.0;
    public double extrusion_distance_ = -1.0;
    public double extrusion_distance_if_not_too_high_to_step_ = -1.0;
    public double too_high_to_step_distance_ = -1.0;
@@ -55,6 +56,8 @@ public class VisibilityGraphsParametersPacket extends Packet<VisibilityGraphsPar
       max_inter_region_connection_length_ = other.max_inter_region_connection_length_;
 
       normal_z_threshold_for_accessible_regions_ = other.normal_z_threshold_for_accessible_regions_;
+
+      preferred_extrusion_distance_ = other.preferred_extrusion_distance_;
 
       extrusion_distance_ = other.extrusion_distance_;
 
@@ -107,6 +110,15 @@ public class VisibilityGraphsParametersPacket extends Packet<VisibilityGraphsPar
    public double getNormalZThresholdForAccessibleRegions()
    {
       return normal_z_threshold_for_accessible_regions_;
+   }
+
+   public void setPreferredExtrusionDistance(double preferred_extrusion_distance)
+   {
+      preferred_extrusion_distance_ = preferred_extrusion_distance;
+   }
+   public double getPreferredExtrusionDistance()
+   {
+      return preferred_extrusion_distance_;
    }
 
    public void setExtrusionDistance(double extrusion_distance)
@@ -236,6 +248,8 @@ public class VisibilityGraphsParametersPacket extends Packet<VisibilityGraphsPar
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.normal_z_threshold_for_accessible_regions_, other.normal_z_threshold_for_accessible_regions_, epsilon)) return false;
 
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.preferred_extrusion_distance_, other.preferred_extrusion_distance_, epsilon)) return false;
+
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.extrusion_distance_, other.extrusion_distance_, epsilon)) return false;
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.extrusion_distance_if_not_too_high_to_step_, other.extrusion_distance_if_not_too_high_to_step_, epsilon)) return false;
@@ -273,6 +287,8 @@ public class VisibilityGraphsParametersPacket extends Packet<VisibilityGraphsPar
 
       if(this.normal_z_threshold_for_accessible_regions_ != otherMyClass.normal_z_threshold_for_accessible_regions_) return false;
 
+      if(this.preferred_extrusion_distance_ != otherMyClass.preferred_extrusion_distance_) return false;
+
       if(this.extrusion_distance_ != otherMyClass.extrusion_distance_) return false;
 
       if(this.extrusion_distance_if_not_too_high_to_step_ != otherMyClass.extrusion_distance_if_not_too_high_to_step_) return false;
@@ -307,6 +323,8 @@ public class VisibilityGraphsParametersPacket extends Packet<VisibilityGraphsPar
       builder.append(this.max_inter_region_connection_length_);      builder.append(", ");
       builder.append("normal_z_threshold_for_accessible_regions=");
       builder.append(this.normal_z_threshold_for_accessible_regions_);      builder.append(", ");
+      builder.append("preferred_extrusion_distance=");
+      builder.append(this.preferred_extrusion_distance_);      builder.append(", ");
       builder.append("extrusion_distance=");
       builder.append(this.extrusion_distance_);      builder.append(", ");
       builder.append("extrusion_distance_if_not_too_high_to_step=");

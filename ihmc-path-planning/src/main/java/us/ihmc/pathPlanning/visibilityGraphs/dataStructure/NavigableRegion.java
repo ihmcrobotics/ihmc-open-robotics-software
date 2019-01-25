@@ -71,8 +71,14 @@ public class NavigableRegion
       return allClusters;
    }
 
+   public double getPlaneZGivenXY(double xWorld, double yWorld)
+   {
+      return homePlanarRegion.getPlaneZGivenXY(xWorld, yWorld);
+   }
+
+
    public void transformFromLocalToWorld(Transformable objectToTransformToWorld)
-   { 
+   {
       homePlanarRegion.transformFromLocalToWorld(objectToTransformToWorld);
    }
 

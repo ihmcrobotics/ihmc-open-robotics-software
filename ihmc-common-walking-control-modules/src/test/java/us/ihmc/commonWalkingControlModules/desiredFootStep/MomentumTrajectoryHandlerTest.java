@@ -16,7 +16,7 @@ import us.ihmc.euclid.tools.EuclidCoreTestTools;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.MomentumTrajectoryCommand;
-import us.ihmc.robotics.math.trajectories.waypoints.SimpleEuclideanTrajectoryPoint;
+import us.ihmc.robotics.math.trajectories.trajectorypoints.EuclideanTrajectoryPoint;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 
@@ -45,23 +45,23 @@ public class MomentumTrajectoryHandlerTest
 
       // get trajectory for time 6.0 to 7.0 which should be equivalent to 1.0 to 2.0 before time offset
       int samples = 3;
-      RecyclingArrayList<SimpleEuclideanTrajectoryPoint> momentumTrajectory = new RecyclingArrayList<>(SimpleEuclideanTrajectoryPoint.class);
+      RecyclingArrayList<EuclideanTrajectoryPoint> momentumTrajectory = new RecyclingArrayList<>(EuclideanTrajectoryPoint.class);
       handler.getAngularMomentumTrajectory(6.0, 7.0, samples, momentumTrajectory);
 
       // for three samples we expect the following result
       assertEquals(samples, momentumTrajectory.size());
 
       assertEquals(0.0, momentumTrajectory.get(0).getTime(), Double.MIN_VALUE);
-      EuclidCoreTestTools.assertTuple3DEquals(new Point3D(1.0, 1.0, 0.0), momentumTrajectory.get(0).getEuclideanWaypoint().getPosition(), Double.MIN_VALUE);
-      EuclidCoreTestTools.assertTuple3DEquals(new Vector3D(1.5, 1.5, 0.0), momentumTrajectory.get(0).getEuclideanWaypoint().getLinearVelocity(), Double.MIN_VALUE);
+      EuclidCoreTestTools.assertTuple3DEquals(new Point3D(1.0, 1.0, 0.0), momentumTrajectory.get(0).getPosition(), Double.MIN_VALUE);
+      EuclidCoreTestTools.assertTuple3DEquals(new Vector3D(1.5, 1.5, 0.0), momentumTrajectory.get(0).getLinearVelocity(), Double.MIN_VALUE);
 
       assertEquals(0.5, momentumTrajectory.get(1).getTime(), Double.MIN_VALUE);
-      EuclidCoreTestTools.assertTuple3DEquals(new Point3D(27.0 / 16.0, 27.0 / 16.0, 0.0), momentumTrajectory.get(1).getEuclideanWaypoint().getPosition(), Double.MIN_VALUE);
-      EuclidCoreTestTools.assertTuple3DEquals(new Vector3D(9.0 / 8.0, 9.0 / 8.0, 0.0), momentumTrajectory.get(1).getEuclideanWaypoint().getLinearVelocity(), Double.MIN_VALUE);
+      EuclidCoreTestTools.assertTuple3DEquals(new Point3D(27.0 / 16.0, 27.0 / 16.0, 0.0), momentumTrajectory.get(1).getPosition(), Double.MIN_VALUE);
+      EuclidCoreTestTools.assertTuple3DEquals(new Vector3D(9.0 / 8.0, 9.0 / 8.0, 0.0), momentumTrajectory.get(1).getLinearVelocity(), Double.MIN_VALUE);
 
       assertEquals(1.0, momentumTrajectory.get(2).getTime(), Double.MIN_VALUE);
-      EuclidCoreTestTools.assertTuple3DEquals(new Point3D(2.0, 2.0, 0.0), momentumTrajectory.get(2).getEuclideanWaypoint().getPosition(), Double.MIN_VALUE);
-      EuclidCoreTestTools.assertTuple3DEquals(new Vector3D(0.0, 0.0, 0.0), momentumTrajectory.get(2).getEuclideanWaypoint().getLinearVelocity(), Double.MIN_VALUE);
+      EuclidCoreTestTools.assertTuple3DEquals(new Point3D(2.0, 2.0, 0.0), momentumTrajectory.get(2).getPosition(), Double.MIN_VALUE);
+      EuclidCoreTestTools.assertTuple3DEquals(new Vector3D(0.0, 0.0, 0.0), momentumTrajectory.get(2).getLinearVelocity(), Double.MIN_VALUE);
    }
 
    @ContinuousIntegrationTest(estimatedDuration = 0.0)
@@ -84,7 +84,7 @@ public class MomentumTrajectoryHandlerTest
       handler.handleMomentumTrajectory(command);
 
       // get trajectory for time 6.0 to 7.0 which should be equivalent to 1.0 to 2.0 before time offset
-      RecyclingArrayList<SimpleEuclideanTrajectoryPoint> momentumTrajectory = new RecyclingArrayList<>(SimpleEuclideanTrajectoryPoint.class);
+      RecyclingArrayList<EuclideanTrajectoryPoint> momentumTrajectory = new RecyclingArrayList<>(EuclideanTrajectoryPoint.class);
 
       Random random = new Random(1738L);
       for (int i = 0; i < 100; i++)
@@ -133,7 +133,7 @@ public class MomentumTrajectoryHandlerTest
 
          for (int sampleIndex = 0; sampleIndex < samples; sampleIndex++)
          {
-            double timeFraction = (double) sampleIndex / ((double) samples - 1.0);
+            double timeFraction = sampleIndex / (samples - 1.0);
             double time = timeFraction * duration;
             assertEquals("index " + sampleIndex + " of " + samples + " failed. time fraction was " + timeFraction, time, momentumTrajectory.get(sampleIndex).getTime(), 1e-5);
          }
@@ -158,7 +158,7 @@ public class MomentumTrajectoryHandlerTest
       handler.handleMomentumTrajectory(command);
 
       int samples = 3;
-      RecyclingArrayList<SimpleEuclideanTrajectoryPoint> momentumTrajectory = new RecyclingArrayList<>(SimpleEuclideanTrajectoryPoint.class);
+      RecyclingArrayList<EuclideanTrajectoryPoint> momentumTrajectory = new RecyclingArrayList<>(EuclideanTrajectoryPoint.class);
 
       // try some examples that are invalid
       handler.getAngularMomentumTrajectory(-1.0, 0.0, samples, momentumTrajectory);
@@ -194,23 +194,23 @@ public class MomentumTrajectoryHandlerTest
 
       // get trajectory for time 0.5 to 1.5
       int samples = 3;
-      RecyclingArrayList<SimpleEuclideanTrajectoryPoint> momentumTrajectory = new RecyclingArrayList<>(SimpleEuclideanTrajectoryPoint.class);
+      RecyclingArrayList<EuclideanTrajectoryPoint> momentumTrajectory = new RecyclingArrayList<>(EuclideanTrajectoryPoint.class);
       handler.getAngularMomentumTrajectory(0.5, 1.5, samples, momentumTrajectory);
 
       // for three samples we expect the following result
       assertEquals(samples, momentumTrajectory.size());
 
       assertEquals(0.0, momentumTrajectory.get(0).getTime(), Double.MIN_VALUE);
-      EuclidCoreTestTools.assertTuple3DEquals(new Point3D(5.0 / 16.0, 5.0 / 16.0, 0.0), momentumTrajectory.get(0).getEuclideanWaypoint().getPosition(), Double.MIN_VALUE);
-      EuclidCoreTestTools.assertTuple3DEquals(new Vector3D(9.0 / 8.0, 9.0 / 8.0, 0.0), momentumTrajectory.get(0).getEuclideanWaypoint().getLinearVelocity(), Double.MIN_VALUE);
+      EuclidCoreTestTools.assertTuple3DEquals(new Point3D(5.0 / 16.0, 5.0 / 16.0, 0.0), momentumTrajectory.get(0).getPosition(), Double.MIN_VALUE);
+      EuclidCoreTestTools.assertTuple3DEquals(new Vector3D(9.0 / 8.0, 9.0 / 8.0, 0.0), momentumTrajectory.get(0).getLinearVelocity(), Double.MIN_VALUE);
 
       assertEquals(0.5, momentumTrajectory.get(1).getTime(), Double.MIN_VALUE);
-      EuclidCoreTestTools.assertTuple3DEquals(new Point3D(1.0, 1.0, 0.0), momentumTrajectory.get(1).getEuclideanWaypoint().getPosition(), Double.MIN_VALUE);
-      EuclidCoreTestTools.assertTuple3DEquals(new Vector3D(1.5, 1.5, 0.0), momentumTrajectory.get(1).getEuclideanWaypoint().getLinearVelocity(), Double.MIN_VALUE);
+      EuclidCoreTestTools.assertTuple3DEquals(new Point3D(1.0, 1.0, 0.0), momentumTrajectory.get(1).getPosition(), Double.MIN_VALUE);
+      EuclidCoreTestTools.assertTuple3DEquals(new Vector3D(1.5, 1.5, 0.0), momentumTrajectory.get(1).getLinearVelocity(), Double.MIN_VALUE);
 
       assertEquals(1.0, momentumTrajectory.get(2).getTime(), Double.MIN_VALUE);
-      EuclidCoreTestTools.assertTuple3DEquals(new Point3D(27.0 / 16.0, 27.0 / 16.0, 0.0), momentumTrajectory.get(2).getEuclideanWaypoint().getPosition(), Double.MIN_VALUE);
-      EuclidCoreTestTools.assertTuple3DEquals(new Vector3D(9.0 / 8.0, 9.0 / 8.0, 0.0), momentumTrajectory.get(2).getEuclideanWaypoint().getLinearVelocity(), Double.MIN_VALUE);
+      EuclidCoreTestTools.assertTuple3DEquals(new Point3D(27.0 / 16.0, 27.0 / 16.0, 0.0), momentumTrajectory.get(2).getPosition(), Double.MIN_VALUE);
+      EuclidCoreTestTools.assertTuple3DEquals(new Vector3D(9.0 / 8.0, 9.0 / 8.0, 0.0), momentumTrajectory.get(2).getLinearVelocity(), Double.MIN_VALUE);
    }
 
    public static void main(String[] args)

@@ -1,6 +1,9 @@
 package us.ihmc.commonWalkingControlModules.trajectories;
 
 import java.util.ArrayList;
+import java.util.List;
+
+import org.apache.commons.lang3.tuple.ImmutablePair;
 
 import us.ihmc.commons.MathTools;
 import us.ihmc.euclid.axisAngle.AxisAngle;
@@ -10,6 +13,8 @@ import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.interfaces.FixedFrameTuple3DBasics;
+import us.ihmc.euclid.referenceFrame.interfaces.FrameTuple3DReadOnly;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
@@ -20,10 +25,6 @@ import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicVector;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsList;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
-import us.ihmc.robotics.math.frames.YoFramePointInMultipleFrames;
-import us.ihmc.robotics.math.frames.YoFrameQuaternionInMultipleFrames;
-import us.ihmc.robotics.math.frames.YoFrameVectorInMultipleFrames;
-import us.ihmc.robotics.math.frames.YoMultipleFramesHolder;
 import us.ihmc.robotics.math.trajectories.PoseTrajectoryGenerator;
 import us.ihmc.robotics.math.trajectories.YoPolynomial;
 import us.ihmc.yoVariables.listener.VariableChangedListener;
@@ -31,35 +32,38 @@ import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoFramePoint3D;
+import us.ihmc.yoVariables.variable.YoFrameVector3D;
 import us.ihmc.yoVariables.variable.YoFrameYawPitchRoll;
 import us.ihmc.yoVariables.variable.YoVariable;
+import us.ihmc.yoVariables.variable.frameObjects.YoMutableFramePoint3D;
+import us.ihmc.yoVariables.variable.frameObjects.YoMutableFrameQuaternion;
+import us.ihmc.yoVariables.variable.frameObjects.YoMutableFrameVector3D;
 
 public class VelocityConstrainedPoseTrajectoryGenerator implements PoseTrajectoryGenerator
 {
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
 
-   private final boolean allowMultipleFrames;
    private final YoVariableRegistry registry;
 
-   private final YoFramePointInMultipleFrames initialPosition;
-   private final YoFrameVectorInMultipleFrames initialVelocity;
-   private final YoFramePointInMultipleFrames finalPosition;
-   private final YoFrameVectorInMultipleFrames finalVelocity;
+   private final YoMutableFramePoint3D initialPosition;
+   private final YoMutableFrameVector3D initialVelocity;
+   private final YoMutableFramePoint3D finalPosition;
+   private final YoMutableFrameVector3D finalVelocity;
    private final YoFramePoint3D finalPositionForViz;
 
-   private final YoFrameQuaternionInMultipleFrames initialOrientation;
-   private final YoFrameVectorInMultipleFrames initialAngularVelocity;
-   private final YoFrameQuaternionInMultipleFrames finalOrientation;
-   private final YoFrameVectorInMultipleFrames finalAngularVelocity;
+   private final YoMutableFrameQuaternion initialOrientation;
+   private final YoMutableFrameVector3D initialAngularVelocity;
+   private final YoMutableFrameQuaternion finalOrientation;
+   private final YoMutableFrameVector3D finalAngularVelocity;
    private final YoFrameYawPitchRoll finalOrientationForViz;
 
-   private final YoFramePointInMultipleFrames currentPosition;
-   private final YoFrameVectorInMultipleFrames currentVelocity;
-   private final YoFrameVectorInMultipleFrames currentAcceleration;
+   private final YoMutableFramePoint3D currentPosition;
+   private final YoMutableFrameVector3D currentVelocity;
+   private final YoMutableFrameVector3D currentAcceleration;
 
-   private final YoFrameQuaternionInMultipleFrames currentOrientation;
-   private final YoFrameVectorInMultipleFrames currentAngularVelocity;
-   private final YoFrameVectorInMultipleFrames currentAngularAcceleration;
+   private final YoMutableFrameQuaternion currentOrientation;
+   private final YoMutableFrameVector3D currentAngularVelocity;
+   private final YoMutableFrameVector3D currentAngularAcceleration;
    private final YoFrameYawPitchRoll currentOrientationForViz;
 
    private final FrameQuaternion tempCurrentOrientation;
@@ -84,8 +88,6 @@ public class VelocityConstrainedPoseTrajectoryGenerator implements PoseTrajector
    private final YoPolynomial xPolynomial, yPolynomial, zPolynomial;
    private final YoPolynomial xRotPolynomial, yRotPolynomial, zRotPolynomial;
 
-   private final ArrayList<YoMultipleFramesHolder> multipleFramesHolders;
-
    private ReferenceFrame trajectoryFrame;
    private final ReferenceFrame interpolationFrame;
    private ReferenceFrame currentTrajectoryFrame;
@@ -105,27 +107,16 @@ public class VelocityConstrainedPoseTrajectoryGenerator implements PoseTrajector
    /** Use a YoBoolean to hide and show visualization with a VariableChangedListener, so it is still working in playback mode. */
    private final YoBoolean showViz;
 
+   private final List<ImmutablePair<FrameTuple3DReadOnly, FixedFrameTuple3DBasics>> visualizationUpdatables = new ArrayList<>();
+
    public VelocityConstrainedPoseTrajectoryGenerator(String namePrefix, ReferenceFrame referenceFrame, YoVariableRegistry parentRegistry)
    {
-      this(namePrefix, false, referenceFrame, parentRegistry, false, null);
+      this(namePrefix, referenceFrame, parentRegistry, false, null);
    }
 
    public VelocityConstrainedPoseTrajectoryGenerator(String namePrefix, ReferenceFrame referenceFrame, YoVariableRegistry parentRegistry, boolean visualize,
-         YoGraphicsListRegistry yoGraphicsListRegistry)
+                                                     YoGraphicsListRegistry yoGraphicsListRegistry)
    {
-      this(namePrefix, false, referenceFrame, parentRegistry, visualize, yoGraphicsListRegistry);
-   }
-
-   public VelocityConstrainedPoseTrajectoryGenerator(String namePrefix, boolean allowMultipleFrames, ReferenceFrame referenceFrame,
-         YoVariableRegistry parentRegistry)
-   {
-      this(namePrefix, allowMultipleFrames, referenceFrame, parentRegistry, false, null);
-   }
-
-   public VelocityConstrainedPoseTrajectoryGenerator(String namePrefix, boolean allowMultipleFrames, ReferenceFrame referenceFrame,
-         YoVariableRegistry parentRegistry, boolean visualize, YoGraphicsListRegistry yoGraphicsListRegistry)
-   {
-      this.allowMultipleFrames = allowMultipleFrames;
       this.trajectoryFrame = referenceFrame;
 
       quatFD1 = new Quaternion();
@@ -135,25 +126,25 @@ public class VelocityConstrainedPoseTrajectoryGenerator implements PoseTrajector
 
       registry = new YoVariableRegistry(namePrefix + getClass().getSimpleName());
 
-      initialPosition = new YoFramePointInMultipleFrames(namePrefix + "InitialPosition", registry, referenceFrame);
-      initialVelocity = new YoFrameVectorInMultipleFrames(namePrefix + "InitialVelocity", registry, referenceFrame);
-      finalPosition = new YoFramePointInMultipleFrames(namePrefix + "FinalPosition", registry, referenceFrame);
-      finalVelocity = new YoFrameVectorInMultipleFrames(namePrefix + "FinalVelocity", registry, referenceFrame);
+      initialPosition = new YoMutableFramePoint3D(namePrefix + "InitialPosition", "", registry, referenceFrame);
+      initialVelocity = new YoMutableFrameVector3D(namePrefix + "InitialVelocity", "", registry, referenceFrame);
+      finalPosition = new YoMutableFramePoint3D(namePrefix + "FinalPosition", "", registry, referenceFrame);
+      finalVelocity = new YoMutableFrameVector3D(namePrefix + "FinalVelocity", "", registry, referenceFrame);
       finalPositionForViz = new YoFramePoint3D(namePrefix + "FinalPositionForViz", worldFrame, registry);
 
-      initialOrientation = new YoFrameQuaternionInMultipleFrames(namePrefix + "InitialOrientation", registry, referenceFrame);
-      initialAngularVelocity = new YoFrameVectorInMultipleFrames(namePrefix + "InitialAngularVelocity", registry, referenceFrame);
-      finalOrientation = new YoFrameQuaternionInMultipleFrames(namePrefix + "FinalOrientation", registry, referenceFrame);
-      finalAngularVelocity = new YoFrameVectorInMultipleFrames(namePrefix + "FinalAngularVelocity", registry, referenceFrame);
+      initialOrientation = new YoMutableFrameQuaternion(namePrefix + "InitialOrientation", "", registry, referenceFrame);
+      initialAngularVelocity = new YoMutableFrameVector3D(namePrefix + "InitialAngularVelocity", "", registry, referenceFrame);
+      finalOrientation = new YoMutableFrameQuaternion(namePrefix + "FinalOrientation", "", registry, referenceFrame);
+      finalAngularVelocity = new YoMutableFrameVector3D(namePrefix + "FinalAngularVelocity", "", registry, referenceFrame);
       finalOrientationForViz = new YoFrameYawPitchRoll(namePrefix + "FinalOrientationForViz", worldFrame, registry);
 
-      currentPosition = new YoFramePointInMultipleFrames(namePrefix + "CurrentPosition", registry, referenceFrame);
-      currentVelocity = new YoFrameVectorInMultipleFrames(namePrefix + "CurrentVelocity", registry, referenceFrame);
-      currentAcceleration = new YoFrameVectorInMultipleFrames(namePrefix + "CurrentAcceleration", registry, referenceFrame);
+      currentPosition = new YoMutableFramePoint3D(namePrefix + "CurrentPosition", "", registry, referenceFrame);
+      currentVelocity = new YoMutableFrameVector3D(namePrefix + "CurrentVelocity", "", registry, referenceFrame);
+      currentAcceleration = new YoMutableFrameVector3D(namePrefix + "CurrentAcceleration", "", registry, referenceFrame);
 
-      currentOrientation = new YoFrameQuaternionInMultipleFrames(namePrefix + "CurrentOrientation", registry, referenceFrame);
-      currentAngularVelocity = new YoFrameVectorInMultipleFrames(namePrefix + "CurrentAngularVelocity", registry, referenceFrame);
-      currentAngularAcceleration = new YoFrameVectorInMultipleFrames(namePrefix + "CurrentAngularAcceleration", registry, referenceFrame);
+      currentOrientation = new YoMutableFrameQuaternion(namePrefix + "CurrentOrientation", "", registry, referenceFrame);
+      currentAngularVelocity = new YoMutableFrameVector3D(namePrefix + "CurrentAngularVelocity", "", registry, referenceFrame);
+      currentAngularAcceleration = new YoMutableFrameVector3D(namePrefix + "CurrentAngularAcceleration", "", registry, referenceFrame);
       currentOrientationForViz = new YoFrameYawPitchRoll(namePrefix + "CurrentOrientationForViz", worldFrame, registry);
 
       tempCurrentOrientation = new FrameQuaternion();
@@ -179,11 +170,6 @@ public class VelocityConstrainedPoseTrajectoryGenerator implements PoseTrajector
       xRotPolynomial = new YoPolynomial(namePrefix + "PolynomialRoll", 6, registry);
       yRotPolynomial = new YoPolynomial(namePrefix + "PolynomialPitch", 6, registry);
       zRotPolynomial = new YoPolynomial(namePrefix + "PolynomialYaw", 6, registry);
-
-      multipleFramesHolders = new ArrayList<YoMultipleFramesHolder>();
-      registerMultipleFramesHolders(initialPosition, initialVelocity, finalPosition, finalVelocity, currentPosition, currentVelocity, currentAcceleration);
-      registerMultipleFramesHolders(initialOrientation, initialAngularVelocity, finalOrientation, finalAngularVelocity, currentOrientation,
-            currentAngularVelocity, currentAngularAcceleration);
 
       interpolationFrame = new ReferenceFrame("interPolationFrame", ReferenceFrame.getWorldFrame())
       {
@@ -238,21 +224,32 @@ public class VelocityConstrainedPoseTrajectoryGenerator implements PoseTrajector
 
       if (this.visualize)
       {
-         final YoGraphicPosition currentPositionViz = new YoGraphicPosition(namePrefix + "CurrentPosition", currentPosition, 0.025, YoAppearance.Blue());
-         final YoGraphicPosition initialPositionViz = new YoGraphicPosition(namePrefix + "InitialPosition", initialPosition, 0.02, YoAppearance.BlueViolet());
-         final YoGraphicVector currentVelocityViz = new YoGraphicVector(namePrefix + "CurrentVelocity",
-               currentPosition.buildUpdatedYoFramePointForVisualizationOnly(), currentVelocity.buildUpdatedYoFrameVectorForVisualizationOnly(), 0.2,
-               YoAppearance.Chartreuse());
-         final YoGraphicPosition finalPositionViz = new YoGraphicPosition(namePrefix + "FinalPosition", finalPosition, 0.02, YoAppearance.Red());
-         final YoGraphicVector currentAngularVelocityViz = new YoGraphicVector(namePrefix + "CurrentAngularVelocity",
-               currentPosition.buildUpdatedYoFramePointForVisualizationOnly(), currentAngularVelocity.buildUpdatedYoFrameVectorForVisualizationOnly(), 0.2,
-               YoAppearance.Green());
+         YoFramePoint3D currentPositionInWorld = new YoFramePoint3D(namePrefix + "CurrentPosition", "WorldViz", ReferenceFrame.getWorldFrame(), registry);
+         visualizationUpdatables.add(new ImmutablePair<>(currentPosition, currentPositionInWorld));
+         YoGraphicPosition currentPositionViz = new YoGraphicPosition(namePrefix + "CurrentPosition", currentPositionInWorld, 0.025, YoAppearance.Blue());
 
-         final YoGraphicCoordinateSystem interpolationCoordinateSystemViz = new YoGraphicCoordinateSystem(namePrefix + "interpolationCoordinateSystem",
-               initialPosition.buildUpdatedYoFramePointForVisualizationOnly(), interpolationFrameForViz, 0.3, YoAppearance.Black());
+         YoFramePoint3D initialPositionInWorld = new YoFramePoint3D(namePrefix + "InitialPosition", "WorldViz", ReferenceFrame.getWorldFrame(), registry);
+         visualizationUpdatables.add(new ImmutablePair<>(initialPosition, initialPositionInWorld));
+         YoGraphicPosition initialPositionViz = new YoGraphicPosition(namePrefix + "InitialPosition", initialPositionInWorld, 0.02, YoAppearance.BlueViolet());
 
-         final YoGraphicCoordinateSystem currentPoseViz = new YoGraphicCoordinateSystem(namePrefix + "CurrentPose",
-               currentPosition.buildUpdatedYoFramePointForVisualizationOnly(), currentOrientationForViz, 0.3);
+         YoFramePoint3D finalPositionInWorld = new YoFramePoint3D(namePrefix + "FinalPosition", "WorldViz", ReferenceFrame.getWorldFrame(), registry);
+         visualizationUpdatables.add(new ImmutablePair<>(finalPosition, finalPositionInWorld));
+         YoGraphicPosition finalPositionViz = new YoGraphicPosition(namePrefix + "FinalPosition", finalPositionInWorld, 0.02, YoAppearance.Red());
+
+         YoFrameVector3D currentLinearVelocityInWorld = new YoFrameVector3D(namePrefix + "CurrentLinearVelocity", "WorldViz", ReferenceFrame.getWorldFrame(), registry);
+         visualizationUpdatables.add(new ImmutablePair<>(currentVelocity, currentLinearVelocityInWorld));
+         YoGraphicVector currentVelocityViz = new YoGraphicVector(namePrefix + "CurrentVelocity", currentPositionInWorld, currentLinearVelocityInWorld, 0.2,
+                                                                  YoAppearance.Chartreuse());
+         YoFrameVector3D currentAngularVelocityInWorld = new YoFrameVector3D(namePrefix + "CurrentAngularVelocity", "WorldViz", ReferenceFrame.getWorldFrame(), registry);
+         visualizationUpdatables.add(new ImmutablePair<>(currentAngularVelocity, currentAngularVelocityInWorld));
+         YoGraphicVector currentAngularVelocityViz = new YoGraphicVector(namePrefix + "CurrentAngularVelocity", currentPositionInWorld,
+                                                                         currentAngularVelocityInWorld, 0.2, YoAppearance.Green());
+
+         YoGraphicCoordinateSystem interpolationCoordinateSystemViz = new YoGraphicCoordinateSystem(namePrefix + "interpolationCoordinateSystem",
+                                                                                                    initialPositionInWorld, interpolationFrameForViz, 0.3,
+                                                                                                    YoAppearance.Black());
+         YoGraphicCoordinateSystem currentPoseViz = new YoGraphicCoordinateSystem(namePrefix + "CurrentPose", currentPositionInWorld, currentOrientationForViz,
+                                                                                  0.3);
 
          yoGraphicsList = new YoGraphicsList(namePrefix + "VelocityConstrainedTrajectory");
          //         yoGraphicsList.add(currentPositionViz);
@@ -270,6 +267,7 @@ public class VelocityConstrainedPoseTrajectoryGenerator implements PoseTrajector
          showViz = new YoBoolean(namePrefix + "ShowViz", registry);
          showViz.addVariableChangedListener(new VariableChangedListener()
          {
+            @Override
             public void notifyOfVariableChange(YoVariable<?> v)
             {
                boolean visible = showViz.getBooleanValue();
@@ -291,46 +289,42 @@ public class VelocityConstrainedPoseTrajectoryGenerator implements PoseTrajector
       }
    }
 
-   private void registerMultipleFramesHolders(YoMultipleFramesHolder... multipleFramesHolders)
-   {
-      for (YoMultipleFramesHolder multipleFramesHolder : multipleFramesHolders)
-         this.multipleFramesHolders.add(multipleFramesHolder);
-   }
-
-   public void registerAndSwitchFrame(ReferenceFrame desiredFrame)
-   {
-      registerNewTrajectoryFrame(desiredFrame);
-      switchTrajectoryFrame(desiredFrame);
-   }
-
-   public void registerNewTrajectoryFrame(ReferenceFrame newReferenceFrame)
-   {
-      checkIfMultipleFramesAllowed();
-
-      for (int i = 0; i < multipleFramesHolders.size(); i++)
-         multipleFramesHolders.get(i).registerReferenceFrame(newReferenceFrame);
-   }
-
    public void changeFrame(ReferenceFrame referenceFrame)
    {
-      changeFrame(referenceFrame, true);
-   }
+      initialPosition.changeFrame(referenceFrame);
+      initialVelocity.changeFrame(referenceFrame);
+      finalPosition.changeFrame(referenceFrame);
+      finalVelocity.changeFrame(referenceFrame);
+      currentPosition.changeFrame(referenceFrame);
+      currentVelocity.changeFrame(referenceFrame);
+      currentAcceleration.changeFrame(referenceFrame);
 
-   private void changeFrame(ReferenceFrame referenceFrame, boolean checkIfAllowed)
-   {
-      if (checkIfAllowed)
-         checkIfMultipleFramesAllowed();
-
-      for (int i = 0; i < multipleFramesHolders.size(); i++)
-         multipleFramesHolders.get(i).changeFrame(referenceFrame);
+      initialOrientation.changeFrame(referenceFrame);
+      initialAngularVelocity.changeFrame(referenceFrame);
+      finalOrientation.changeFrame(referenceFrame);
+      finalAngularVelocity.changeFrame(referenceFrame);
+      currentOrientation.changeFrame(referenceFrame);
+      currentAngularVelocity.changeFrame(referenceFrame);
+      currentAngularAcceleration.changeFrame(referenceFrame);
    }
 
    public void switchTrajectoryFrame(ReferenceFrame referenceFrame)
    {
-      checkIfMultipleFramesAllowed();
+      initialPosition.setToZero(referenceFrame);
+      initialVelocity.setToZero(referenceFrame);
+      finalPosition.setToZero(referenceFrame);
+      finalVelocity.setToZero(referenceFrame);
+      currentPosition.setToZero(referenceFrame);
+      currentVelocity.setToZero(referenceFrame);
+      currentAcceleration.setToZero(referenceFrame);
 
-      for (int i = 0; i < multipleFramesHolders.size(); i++)
-         multipleFramesHolders.get(i).switchCurrentReferenceFrame(referenceFrame);
+      initialOrientation.setToZero(referenceFrame);
+      initialAngularVelocity.setToZero(referenceFrame);
+      finalOrientation.setToZero(referenceFrame);
+      finalAngularVelocity.setToZero(referenceFrame);
+      currentOrientation.setToZero(referenceFrame);
+      currentAngularVelocity.setToZero(referenceFrame);
+      currentAngularAcceleration.setToZero(referenceFrame);
    }
 
    public void setTrajectoryTime(double newTrajectoryTime)
@@ -378,7 +372,7 @@ public class VelocityConstrainedPoseTrajectoryGenerator implements PoseTrajector
 
    /**
     * TODO Get that working with final angular velocity.
-    * 
+    *
     */
    /*
     * public void setFinalPoseWithFinalVelocity(FramePose finalPose, FrameVector
@@ -413,6 +407,7 @@ public class VelocityConstrainedPoseTrajectoryGenerator implements PoseTrajector
       this.finalAngularVelocity.setToZero();
    }
 
+   @Override
    public void initialize()
 
    {
@@ -476,6 +471,7 @@ public class VelocityConstrainedPoseTrajectoryGenerator implements PoseTrajector
       currentAngularAcceleration.setToZero();
    }
 
+   @Override
    public void compute(double time)
    {
       this.currentTime.set(time);
@@ -601,16 +597,20 @@ public class VelocityConstrainedPoseTrajectoryGenerator implements PoseTrajector
          currentAngularVelocity.set(finalAngularVelocity);
          currentAcceleration.set(0.0, 0.0, 0.0);
       }
+
       //      currentOrientationForViz.set(currentOrientation);
       currentOrientationForViz.set(currentTrajectoryFrame.getTransformToWorldFrame());
-
+      for (int i = 0; i < visualizationUpdatables.size(); i++)
+      {
+         visualizationUpdatables.get(i).getRight().setMatchingFrame(visualizationUpdatables.get(i).getLeft());
+      }
    }
 
    private void visualizeTrajectory()
    {
       for (int i = 0; i < numberOfBalls; i++)
       {
-         double t = (double) i / ((double) numberOfBalls - 1) * trajectoryTime.getDoubleValue();
+         double t = i / ((double) numberOfBalls - 1) * trajectoryTime.getDoubleValue();
          compute(t);
          ballPosition.setIncludingFrame(currentPosition);
          ballPosition.changeFrame(ReferenceFrame.getWorldFrame());
@@ -620,6 +620,7 @@ public class VelocityConstrainedPoseTrajectoryGenerator implements PoseTrajector
       reset();
    }
 
+   @Override
    public void showVisualization()
    {
       if (!visualize)
@@ -628,6 +629,7 @@ public class VelocityConstrainedPoseTrajectoryGenerator implements PoseTrajector
       showViz.set(true);
    }
 
+   @Override
    public void hideVisualization()
    {
       if (!visualize)
@@ -636,36 +638,43 @@ public class VelocityConstrainedPoseTrajectoryGenerator implements PoseTrajector
       showViz.set(false);
    }
 
+   @Override
    public void getPosition(FramePoint3D positionToPack)
    {
       positionToPack.setIncludingFrame(currentPosition);
    }
 
+   @Override
    public void getVelocity(FrameVector3D velocityToPack)
    {
       velocityToPack.setIncludingFrame(currentVelocity);
    }
 
+   @Override
    public void getAcceleration(FrameVector3D accelerationToPack)
    {
       accelerationToPack.setIncludingFrame(currentAcceleration);
    }
 
+   @Override
    public void getOrientation(FrameQuaternion orientationToPack)
    {
       orientationToPack.setIncludingFrame(currentOrientation);
    }
 
+   @Override
    public void getAngularVelocity(FrameVector3D angularVelocityToPack)
    {
       angularVelocityToPack.setIncludingFrame(currentAngularVelocity);
    }
 
+   @Override
    public void getAngularAcceleration(FrameVector3D angularAccelerationToPack)
    {
       angularAccelerationToPack.setIncludingFrame(currentAngularAcceleration);
    }
 
+   @Override
    public void getLinearData(FramePoint3D positionToPack, FrameVector3D velocityToPack, FrameVector3D accelerationToPack)
    {
       getPosition(positionToPack);
@@ -673,6 +682,7 @@ public class VelocityConstrainedPoseTrajectoryGenerator implements PoseTrajector
       getAcceleration(accelerationToPack);
    }
 
+   @Override
    public void getAngularData(FrameQuaternion orientationToPack, FrameVector3D angularVelocityToPack, FrameVector3D angularAccelerationToPack)
    {
       getOrientation(orientationToPack);
@@ -680,6 +690,7 @@ public class VelocityConstrainedPoseTrajectoryGenerator implements PoseTrajector
       getAngularAcceleration(angularAccelerationToPack);
    }
 
+   @Override
    public void getPose(FramePose3D framePoseToPack)
    {
       framePoseToPack.changeFrame(currentPosition.getReferenceFrame());
@@ -687,30 +698,23 @@ public class VelocityConstrainedPoseTrajectoryGenerator implements PoseTrajector
       framePoseToPack.setOrientation(currentOrientation);
    }
 
+   @Override
    public boolean isDone()
    {
       return currentTime.getDoubleValue() >= trajectoryTime.getDoubleValue();
    }
 
-   private void checkIfMultipleFramesAllowed()
-   {
-      if (!allowMultipleFrames)
-         throw new RuntimeException("Must set allowMultipleFrames to true in the constructor if you ever want to register a new frame.");
-   }
-
+   @Override
    public String toString()
    {
       String ret = "";
-
-      ReferenceFrame currentFrame = initialPosition.getReferenceFrame();
-
       ret += "Current time: " + currentTime.getDoubleValue() + ", trajectory time: " + trajectoryTime.getDoubleValue();
-      ret += "\nCurrent position: " + currentPosition.toStringForASingleReferenceFrame(currentFrame);
-      ret += "\nCurrent velocity: " + currentVelocity.toStringForASingleReferenceFrame(currentFrame);
-      ret += "\nCurrent acceleration: " + currentAcceleration.toStringForASingleReferenceFrame(currentFrame);
-      ret += "\nCurrent orientation: " + currentOrientation.toStringForASingleReferenceFrame(currentFrame);
-      ret += "\nCurrent angular velocity: " + currentAngularVelocity.toStringForASingleReferenceFrame(currentFrame);
-      ret += "\nCurrent angular acceleration: " + currentAngularAcceleration.toStringForASingleReferenceFrame(currentFrame);
+      ret += "\nCurrent position: " + currentPosition;
+      ret += "\nCurrent velocity: " + currentVelocity;
+      ret += "\nCurrent acceleration: " + currentAcceleration;
+      ret += "\nCurrent orientation: " + currentOrientation;
+      ret += "\nCurrent angular velocity: " + currentAngularVelocity;
+      ret += "\nCurrent angular acceleration: " + currentAngularAcceleration;
       return ret;
    }
 }
