@@ -4,12 +4,12 @@ import org.junit.Test;
 
 import us.ihmc.atlas.AtlasRobotModel;
 import us.ihmc.atlas.AtlasRobotVersion;
-import us.ihmc.avatar.AvatarEndToEndForwadDynamicsCalculatorTest;
+import us.ihmc.avatar.AvatarEndToEndForwardDynamicsCalculatorTest;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.RobotTarget;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 
-public class AtlasEndToEndForwadDynamicsCalculatorTest extends AvatarEndToEndForwadDynamicsCalculatorTest
+public class AtlasEndToEndForwardDynamicsCalculatorTest extends AvatarEndToEndForwardDynamicsCalculatorTest
 {
    private final AtlasRobotModel robotModel = new AtlasRobotModel(AtlasRobotVersion.ATLAS_UNPLUGGED_V5_NO_HANDS, RobotTarget.SCS, false);
 
