@@ -56,6 +56,7 @@ module controller_msgs
         double timeout;
         double horizon_length;
         controller_msgs::msg::dds::PlanarRegionsListMessage planar_regions_list_message;
+        boolean assume_flat_ground;
         @defaultValue(value=-1)
         long planner_request_id;
       };

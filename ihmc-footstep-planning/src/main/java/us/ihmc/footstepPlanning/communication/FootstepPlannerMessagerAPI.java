@@ -53,6 +53,7 @@ public class FootstepPlannerMessagerAPI
    private static final CategoryTheme NonNavigable = apiFactory.createCategoryTheme("NonNavigable");
    private static final CategoryTheme OccupancyMap = apiFactory.createCategoryTheme("OccupancyMap");
    private static final CategoryTheme PlannerData = apiFactory.createCategoryTheme("PlannerData");
+   private static final CategoryTheme FlatGround = apiFactory.createCategoryTheme("FlatGround");
 
    private static final CategoryTheme Parameters = apiFactory.createCategoryTheme("Parameters");
 
@@ -98,6 +99,7 @@ public class FootstepPlannerMessagerAPI
    public static final Topic<Boolean> ComputePathTopic = Root.child(FootstepPlan).topic(ComputePath);
    public static final Topic<Boolean> AbortPlanningTopic = Root.child(FootstepPlan).topic(AbortPlanning);
    public static final Topic<Boolean> RequestPlannerStatistics = Root.child(Statistics).topic(Show);
+   public static final Topic<Boolean> AssumeFlatGround = Root.child(FlatGround).topic(Enable);
    public static final Topic<FootstepPlannerParameters> PlannerParametersTopic = Root.child(Parameters).topic(FootstepPlannerParameters);
    public static final Topic<FootstepDataListMessage> FootstepDataListTopic = Root.child(FootstepPlan).topic(FootstepDataListMessage);
 

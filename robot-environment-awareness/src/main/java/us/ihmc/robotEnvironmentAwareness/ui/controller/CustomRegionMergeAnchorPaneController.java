@@ -5,6 +5,7 @@ import javafx.scene.control.Slider;
 import javafx.scene.control.ToggleButton;
 import us.ihmc.javaFXToolkit.StringConverterTools;
 import us.ihmc.robotEnvironmentAwareness.communication.REAModuleAPI;
+import us.ihmc.robotEnvironmentAwareness.ui.properties.CustomRegionMergeParametersProperty;
 import us.ihmc.robotEnvironmentAwareness.ui.properties.PlanarRegionSegmentationParametersProperty;
 
 public class CustomRegionMergeAnchorPaneController extends REABasicUIController
@@ -18,8 +19,8 @@ public class CustomRegionMergeAnchorPaneController extends REABasicUIController
    @FXML
    private Slider maxAngleFromPlaneSlider;
 
-   private final PlanarRegionSegmentationParametersProperty customRegionMergingParametersProperty = new PlanarRegionSegmentationParametersProperty(this,
-                                                                                                                                                   "customRegionMergingParameters");
+   private final CustomRegionMergeParametersProperty customRegionMergingParametersProperty = new CustomRegionMergeParametersProperty(this,
+                                                                                                                                            "customRegionMergingParameters");
 
    public CustomRegionMergeAnchorPaneController()
    {
