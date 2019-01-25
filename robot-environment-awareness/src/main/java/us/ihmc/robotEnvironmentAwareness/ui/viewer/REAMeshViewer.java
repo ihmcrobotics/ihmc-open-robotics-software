@@ -98,9 +98,11 @@ public class REAMeshViewer
             switch (currentSourceType.get())
             {
             case LidarScan:
+               stereoVisionPointCloudViewer.clear();
                lidarScanViewer.render();
                break;
             case StereoVisionPointCloud:
+               lidarScanViewer.clear();
                stereoVisionPointCloudViewer.render();
                break;
             }
