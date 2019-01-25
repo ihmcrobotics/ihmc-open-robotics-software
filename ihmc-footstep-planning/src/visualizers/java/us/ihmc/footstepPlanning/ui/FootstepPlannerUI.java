@@ -124,6 +124,8 @@ public class FootstepPlannerUI
       footstepNodeCheckingUIController.bindControls();
       visibilityGraphsUIController.bindControls();
 
+      footstepPlannerParametersUIController.loadFromFile();
+
       View3DFactory view3dFactory = View3DFactory.createSubscene();
       view3dFactory.addCameraController(true);
       view3dFactory.addWorldCoordinateSystem(0.3);
