@@ -67,7 +67,7 @@ public class ValkyrieOrderedJointMap
 
    public final static int numberOfJoints = RightThumbPitch3 + 1;
 
-   public static String[]  jointNames = new String[numberOfJoints];
+   public final static String[]  jointNames = new String[numberOfJoints];
    static
    {
       jointNames[LeftHipYaw] = "leftHipYaw";

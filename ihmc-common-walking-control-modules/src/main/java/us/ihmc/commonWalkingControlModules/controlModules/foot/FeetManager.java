@@ -144,14 +144,16 @@ public class FeetManager
       }
    }
 
-   public void adjustHeightIfNeeded(Footstep footstep)
+   public boolean adjustHeightIfNeeded(Footstep footstep)
    {
       if (!footstep.getTrustHeight())
       {
          tempSolePosition.setToZero(soleZUpFrames.get(footstep.getRobotSide().getOppositeSide()));
          tempSolePosition.changeFrame(footstep.getFootstepPose().getReferenceFrame());
          footstep.setZ(tempSolePosition.getZ() + blindFootstepsHeightOffset.getValue());
+         return true;
       }
+      return false;
    }
 
    public void requestSwing(RobotSide upcomingSwingSide, Footstep footstep, double swingTime, double touchdownTime)

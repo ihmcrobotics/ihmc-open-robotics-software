@@ -6,6 +6,8 @@ import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
+import java.util.Random;
+
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -15,6 +17,7 @@ import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.tools.EuclidFrameRandomTools;
 import us.ihmc.euclid.referenceFrame.tools.ReferenceFrameTools;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.robotics.trajectories.providers.ConstantOrientationProvider;
@@ -37,7 +40,7 @@ public class WrapperForPositionAndOrientationTrajectoryGeneratorsTest
    public void setUp()
    {
       parentRegistry = new YoVariableRegistry("parentRegistryTEST");
-      referenceFrame = ReferenceFrame.constructARootFrame("rootNameTEST");
+      referenceFrame = EuclidFrameRandomTools.nextReferenceFrame(new Random(302L));
 
       orientation = new FrameQuaternion(referenceFrame);
       positionTrajectoryGenerator = new ConstantPoseTrajectoryGenerator("positionTGenPrefix", referenceFrame, parentRegistry);

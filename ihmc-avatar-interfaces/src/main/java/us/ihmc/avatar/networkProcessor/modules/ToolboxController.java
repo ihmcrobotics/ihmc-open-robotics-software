@@ -1,10 +1,7 @@
 package us.ihmc.avatar.networkProcessor.modules;
 
-import java.io.IOException;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ScheduledFuture;
-
-import javax.management.RuntimeErrorException;
 
 import us.ihmc.communication.controllerAPI.StatusMessageOutputManager;
 import us.ihmc.euclid.interfaces.Settable;
