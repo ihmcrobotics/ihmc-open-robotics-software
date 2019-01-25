@@ -23,4 +23,5 @@ byte requested_footstep_planner_type 255
 float64 timeout
 float64 horizon_length
 PlanarRegionsListMessage planar_regions_list_message
+bool assume_flat_ground
 int32 planner_request_id -1

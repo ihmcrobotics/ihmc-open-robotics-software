@@ -57,7 +57,7 @@ import us.ihmc.simulationconstructionset.util.simulationTesting.SimulationTestin
 import us.ihmc.tools.MemoryTools;
 import us.ihmc.yoVariables.variable.YoEnum;
 
-public abstract class AvatarEndToEndForwadDynamicsCalculatorTest implements MultiRobotTestInterface
+public abstract class AvatarEndToEndForwardDynamicsCalculatorTest implements MultiRobotTestInterface
 {
    private SimulationTestingParameters simulationTestingParameters;
    private DRCSimulationTestHelper drcSimulationTestHelper;

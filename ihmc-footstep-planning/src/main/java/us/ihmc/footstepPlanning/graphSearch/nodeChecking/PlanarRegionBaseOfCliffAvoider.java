@@ -42,7 +42,7 @@ public class PlanarRegionBaseOfCliffAvoider extends FootstepNodeChecker
       this.startNode = startNode;
    }
 
-   public boolean isNodeValid(FootstepNode node, FootstepNode previousNode)
+   public boolean isNodeValidInternal(FootstepNode node, FootstepNode previousNode)
    {
       if(startNode != null && startNode.equals(node))
          return true;
