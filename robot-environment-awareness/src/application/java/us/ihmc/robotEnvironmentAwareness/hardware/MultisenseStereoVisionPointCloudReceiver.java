@@ -14,7 +14,9 @@ import sensor_msgs.PointCloud2;
 import us.ihmc.communication.IHMCROS2Publisher;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.packets.MessageTools;
+import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
 import us.ihmc.ros2.Ros2Node;
 import us.ihmc.utilities.ros.RosMainNode;
@@ -24,11 +26,15 @@ import us.ihmc.utilities.ros.subscriber.RosPointCloudSubscriber.UnpackedPointClo
 
 public class MultisenseStereoVisionPointCloudReceiver extends AbstractRosTopicSubscriber<PointCloud2>
 {
-   private static final int MAX_NUMBER_OF_POINTS = 20000;
+   private static final int MAX_NUMBER_OF_POINTS = 100000;
 
    private final Ros2Node ros2Node = ROS2Tools.createRos2Node(PubSubImplementation.FAST_RTPS, "stereoVisionPublisherNode");
 
    private final IHMCROS2Publisher<StereoVisionPointCloudMessage> stereoVisionPublisher;
+
+   private static final Point3D translationToFixedFrame = new Point3D();
+   private static final Quaternion rotationToFixedFrame = new Quaternion(-0.5, 0.5, -0.5, 0.5);
+   private static final RigidBodyTransform transformToFixedFrame = new RigidBodyTransform(rotationToFixedFrame, translationToFixedFrame);
 
    public MultisenseStereoVisionPointCloudReceiver() throws URISyntaxException
    {
@@ -47,7 +53,7 @@ public class MultisenseStereoVisionPointCloudReceiver extends AbstractRosTopicSu
    {
       UnpackedPointCloud pointCloudData = RosPointCloudSubscriber.unpackPointsAndIntensities(cloudHolder);
 
-      Point3D[] pointCloud = pointCloudData.getPoints();
+      Point3D[] pointCloud = transformPointCloud(pointCloudData.getPoints());
       Color[] colors = pointCloudData.getPointColors();
 
       List<Point3D> pointCloudToPublish = Arrays.stream(pointCloud).collect(Collectors.toList());
@@ -88,5 +94,18 @@ public class MultisenseStereoVisionPointCloudReceiver extends AbstractRosTopicSu
    public static void main(String[] args) throws URISyntaxException
    {
       new MultisenseStereoVisionPointCloudReceiver();
+   }
+
+   private Point3D[] transformPointCloud(Point3D[] pointCloud)
+   {
+      Point3D[] transformedPointCloud = new Point3D[pointCloud.length];
+
+      for (int i = 0; i < pointCloud.length; i++)
+      {
+         transformedPointCloud[i] = new Point3D();
+         transformToFixedFrame.transform(pointCloud[i], transformedPointCloud[i]);
+      }
+
+      return transformedPointCloud;
    }
 }
