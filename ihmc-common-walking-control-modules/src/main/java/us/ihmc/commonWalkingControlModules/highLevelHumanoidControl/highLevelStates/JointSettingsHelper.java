@@ -25,7 +25,8 @@ public class JointSettingsHelper
    private final YoVariableRegistry registry;
 
    private final String[] jointNames;
-   private final YoBoolean[] jointsLoaded;
+   private final boolean[] jointsLoaded;
+   private final YoBoolean[] yoJointsLoaded;
 
    private final JointAccelerationIntegrationParametersReadOnly[] accelerationIntegrationSettingsNoLoad;
    private final JointAccelerationIntegrationParametersReadOnly[] accelerationIntegrationSettingsLoaded;
@@ -78,7 +79,8 @@ public class JointSettingsHelper
       ParameterTools.extractJointBehaviorMap("Loaded", configuration.getDesiredJointBehaviorsUnderLoad(), jointBehaviorMapLoaded, registry);
 
       jointNames = new String[joints.length];
-      jointsLoaded = new YoBoolean[joints.length];
+      yoJointsLoaded = new YoBoolean[joints.length];
+      jointsLoaded = new boolean[joints.length];
       accelerationIntegrationSettingsNoLoad = new JointAccelerationIntegrationParametersReadOnly[joints.length];
       accelerationIntegrationSettingsLoaded = new JointAccelerationIntegrationParametersReadOnly[joints.length];
       jointDesiredBehaviorNoLoad = new JointDesiredBehaviorReadOnly[joints.length];
@@ -113,11 +115,11 @@ public class JointSettingsHelper
 
          if ((integrationParametersNoLoad == null && desiredBehaviorNoLoad == null) || (integrationParametersLoaded == null && desiredBehaviorLoaded == null))
          {
-            jointsLoaded[jointIdx] = null;
+            yoJointsLoaded[jointIdx] = null;
          }
          else
          {
-            jointsLoaded[jointIdx] = new YoBoolean(jointName + "_isUnderLoad", registry);
+            yoJointsLoaded[jointIdx] = new YoBoolean(jointName + "_isUnderLoad", registry);
          }
       }
 
@@ -140,15 +142,13 @@ public class JointSettingsHelper
       {
          JointDesiredOutputBasics jointDesiredOutput = stateSpecificJointSettings.getJointDesiredOutput(jointIdx);
          boolean isLoaded = jointLoadStatusProvider.isJointLoadBearing(jointNames[jointIdx]);
-         if (jointsLoaded[jointIdx] != null)
+         boolean wasLoaded = jointsLoaded[jointIdx];
+         jointDesiredOutput.setResetIntegrators(isLoaded != wasLoaded);
+         jointsLoaded[jointIdx] = isLoaded;
+
+         if (yoJointsLoaded[jointIdx] != null)
          {
-            boolean wasLoaded = jointsLoaded[jointIdx].getValue();
-            jointDesiredOutput.setResetIntegrators(isLoaded != wasLoaded);
-            jointsLoaded[jointIdx].set(isLoaded);
-         }
-         else
-         {
-            jointDesiredOutput.setResetIntegrators(false);
+            yoJointsLoaded[jointIdx].set(isLoaded);
          }
 
          JointAccelerationIntegrationParametersReadOnly integrationParametersNoLoad = accelerationIntegrationSettingsNoLoad[jointIdx];
