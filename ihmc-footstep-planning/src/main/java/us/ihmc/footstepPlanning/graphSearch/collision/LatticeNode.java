@@ -10,7 +10,7 @@ class LatticeNode
 
    private final int hashCode;
 
-   public LatticeNode(double x, double y, double yaw)
+   LatticeNode(double x, double y, double yaw)
    {
       this.xIndex = (int) Math.round(x / FootstepNode.gridSizeXY);
       this.yIndex = (int) Math.round(y / FootstepNode.gridSizeXY);

@@ -1,16 +1,25 @@
 package us.ihmc.footstepPlanning.graphSearch.collision;
 
-import us.ihmc.euclid.tuple2D.Point2D;
-import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
-
 class BodyCollisionData
 {
-   private final Point2D collisionPointInBodyFrame = new Point2D();
+   /**
+    * Whether bounding box collision was detected
+    */
    private boolean collisionDetected = false;
 
-   public BodyCollisionData()
+   /**
+    * Distance of closest detected point to bounding box
+    */
+   private double distanceFromBoundingBox = Double.NaN;
+
+   public boolean isCollisionDetected()
    {
-      collisionPointInBodyFrame.setToNaN();
+      return collisionDetected;
+   }
+
+   public void setDistanceFromBoundingBox(double distanceFromBoundingBox)
+   {
+      this.distanceFromBoundingBox = distanceFromBoundingBox;
    }
 
    public void setCollisionDetected(boolean collisionDetected)
@@ -18,18 +27,8 @@ class BodyCollisionData
       this.collisionDetected = collisionDetected;
    }
 
-   public void setCollisionPointInBodyFrame(double x, double y)
+   public double getDistanceFromBoundingBox()
    {
-      this.collisionPointInBodyFrame.set(x, y);
-   }
-
-   public boolean isCollisionDetected()
-   {
-      return collisionDetected;
-   }
-
-   public Point2DReadOnly getCollisionPointInBodyFrame()
-   {
-      return collisionPointInBodyFrame;
+      return distanceFromBoundingBox;
    }
 }
