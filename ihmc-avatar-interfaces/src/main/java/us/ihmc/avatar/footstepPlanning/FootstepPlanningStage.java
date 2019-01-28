@@ -11,6 +11,7 @@ import us.ihmc.euclid.geometry.interfaces.Vertex2DSupplier;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.footstepPlanning.*;
+import us.ihmc.footstepPlanning.graphSearch.collision.BoundingBoxCollisionChecker;
 import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.FootstepNodeSnapAndWiggler;
 import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.SimplePlanarRegionFootstepNodeSnapper;
 import us.ihmc.footstepPlanning.graphSearch.graph.visualization.MultiStagePlannerListener;
@@ -141,9 +142,10 @@ public class FootstepPlanningStage implements FootstepPlanner
 
       SimplePlanarRegionFootstepNodeSnapper snapper = new SimplePlanarRegionFootstepNodeSnapper(footPolygons);
       FootstepNodeSnapAndWiggler postProcessingSnapper = new FootstepNodeSnapAndWiggler(footPolygons, footstepPlanningParameters);
+      BoundingBoxCollisionChecker collisionChecker = new BoundingBoxCollisionChecker(footstepPlanningParameters);
 
       SnapBasedNodeChecker snapBasedNodeChecker = new SnapBasedNodeChecker(footstepPlanningParameters, footPolygons, snapper);
-      BodyCollisionNodeChecker bodyCollisionNodeChecker = new BodyCollisionNodeChecker(footstepPlanningParameters, snapper);
+      BodyCollisionNodeChecker bodyCollisionNodeChecker = new BodyCollisionNodeChecker(collisionChecker, footstepPlanningParameters, snapper);
       PlanarRegionBaseOfCliffAvoider cliffAvoider = new PlanarRegionBaseOfCliffAvoider(footstepPlanningParameters, snapper, footPolygons);
 
       DistanceAndYawBasedHeuristics heuristics = new DistanceAndYawBasedHeuristics(footstepPlanningParameters.getCostParameters().getAStarHeuristicsWeight(),

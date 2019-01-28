@@ -1,6 +1,6 @@
 package us.ihmc.footstepPlanning.graphSearch.collision;
 
-class BodyCollisionData
+public class BodyCollisionData
 {
    /**
     * Whether bounding box collision was detected
