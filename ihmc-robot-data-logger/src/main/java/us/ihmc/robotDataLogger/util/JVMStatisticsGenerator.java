@@ -13,6 +13,7 @@ import java.util.concurrent.TimeUnit;
 import us.ihmc.robotDataLogger.RobotVisualizer;
 import us.ihmc.robotDataLogger.YoVariableServer;
 import us.ihmc.util.PeriodicNonRealtimeThreadScheduler;
+import us.ihmc.util.PeriodicNonRealtimeThreadSchedulerFactory;
 import us.ihmc.util.PeriodicThreadScheduler;
 import us.ihmc.util.PeriodicThreadSchedulerFactory;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
@@ -50,6 +51,11 @@ public class JVMStatisticsGenerator
    private final ClassLoadingMXBean classLoadingMXBean = ManagementFactory.getClassLoadingMXBean();
    private final CompilationMXBean compilationMXBean = ManagementFactory.getCompilationMXBean();
    private final OperatingSystemMXBean operatingSystemMXBean = ManagementFactory.getOperatingSystemMXBean();
+   
+   public JVMStatisticsGenerator(RobotVisualizer visualizer)
+   {
+      this(visualizer, new PeriodicNonRealtimeThreadSchedulerFactory());
+   }
 
    public JVMStatisticsGenerator(RobotVisualizer visualizer, PeriodicThreadSchedulerFactory schedulerFactory)
    {
