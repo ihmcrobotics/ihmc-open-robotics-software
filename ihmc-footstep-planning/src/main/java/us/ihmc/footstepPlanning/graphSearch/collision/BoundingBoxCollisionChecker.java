@@ -58,7 +58,6 @@ public class BoundingBoxCollisionChecker
 
          for (Point2DReadOnly point : pointsInPlanarRegion)
          {
-            tempPoint1.setToZero();
             tempPoint1.set(point.getX(), point.getY(), 0.0);
             tempPoint1.applyTransform(tempTransform);
             planarRegionPolytope.addVertex(tempPoint1.getX(), tempPoint1.getY(), tempPoint1.getZ());

@@ -11,6 +11,7 @@ import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerCostParame
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParameters;
 import us.ihmc.robotics.geometry.PlanarRegion;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
+import us.ihmc.robotics.geometry.PlanarRegionsListGenerator;
 
 import java.util.Arrays;
 
@@ -231,6 +232,77 @@ public class BoundingBoxCollisionCheckerTest
 
       // check when body is just above too low
       collisionChecker.setBoxPose(0.0, 0.0, -0.49, 0.0);
+      Assert.assertTrue(collisionChecker.checkForCollision().isCollisionDetected());
+   }
+
+   @ContinuousIntegrationAnnotations.ContinuousIntegrationTest(estimatedDuration = 0.0)
+   @Test(timeout = 30000)
+   public void testCollidingWithACube()
+   {
+      FootstepPlannerParameters plannerParameters = new DefaultFootstepPlanningParameters()
+      {
+         @Override
+         public double getBodyBoxDepth()
+         {
+            return 0.5;
+         }
+
+         @Override
+         public double getBodyBoxWidth()
+         {
+            return 1.0;
+         }
+
+         @Override
+         public double getBodyBoxHeight()
+         {
+            return 1.0;
+         }
+
+         @Override
+         public FootstepPlannerCostParameters getCostParameters()
+         {
+            return new DefaultFootstepPlannerCostParameters()
+            {
+               @Override
+               public double getMaximum2dDistanceFromBoundingBoxToPenalize()
+               {
+                  return 0.25;
+               }
+            };
+         }
+      };
+
+      PlanarRegionsListGenerator generator = new PlanarRegionsListGenerator();
+
+      double cubeX = 0.25;
+      double cubeY = -0.5;
+      double cubeZ = -0.25;
+      generator.translate(cubeX, cubeY, cubeZ);
+
+      double cubeDepth = 1.0;
+      double cubeWidth = 0.5;
+      double cubeHeight = 1.0;
+      generator.addCubeReferencedAtBottomMiddle(cubeDepth, cubeWidth, cubeHeight);
+      PlanarRegionsList planarRegionsList = generator.getPlanarRegionsList();
+
+      BoundingBoxCollisionChecker collisionChecker = new BoundingBoxCollisionChecker(plannerParameters);
+      collisionChecker.setPlanarRegionsList(planarRegionsList);
+
+      // test just outside along y
+      collisionChecker.setBoxPose(0.25, 0.01, 0.0, Math.toRadians(90.0));
+      Assert.assertFalse(collisionChecker.checkForCollision().isCollisionDetected());
+
+      // test just inside along y
+      collisionChecker.setBoxPose(0.15, -0.01, 0.0, Math.toRadians(90.0));
+      Assert.assertTrue(collisionChecker.checkForCollision().isCollisionDetected());
+
+      // test just outside along x
+      collisionChecker.setBoxPose(-0.75 - 0.01, -0.55, 0.0, Math.toRadians(90.0));
+      Assert.assertFalse(collisionChecker.checkForCollision().isCollisionDetected());
+
+      // test just inside along x
+      collisionChecker.setBoxPose(-0.75 + 0.01, -0.45, 0.0, Math.toRadians(90.0));
       Assert.assertTrue(collisionChecker.checkForCollision().isCollisionDetected());
    }
 
