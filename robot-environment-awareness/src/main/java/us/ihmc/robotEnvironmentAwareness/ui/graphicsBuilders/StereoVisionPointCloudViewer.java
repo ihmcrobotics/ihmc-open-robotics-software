@@ -7,6 +7,7 @@ import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.euclid.tuple3D.Point3D32;
 import us.ihmc.graphicsDescription.MeshDataGenerator;
 import us.ihmc.messager.MessagerAPIFactory.Topic;
+import us.ihmc.robotEnvironmentAwareness.communication.REAModuleAPI;
 import us.ihmc.robotEnvironmentAwareness.communication.REAUIMessager;
 
 public class StereoVisionPointCloudViewer extends AbstractSourceViewer<StereoVisionPointCloudMessage>
@@ -56,5 +57,17 @@ public class StereoVisionPointCloudViewer extends AbstractSourceViewer<StereoVis
       scanMeshView.setMaterial(meshBuilder.generateMaterial());
       scanMeshToRender.set(scanMeshView);
       meshBuilder.clear();
+   }
+
+   @Override
+   protected Topic<Boolean> createEnableInput()
+   {
+      return REAModuleAPI.UIStereoVisionPointCloudShow;
+   }
+
+   @Override
+   protected Topic<Boolean> createClearInput()
+   {
+      return REAModuleAPI.UIStereoVisionPointCloudClear;
    }
 }

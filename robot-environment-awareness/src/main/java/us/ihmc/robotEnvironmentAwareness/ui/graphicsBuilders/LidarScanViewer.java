@@ -86,4 +86,16 @@ public class LidarScanViewer extends AbstractSourceViewer<LidarScanMessage>
       scanMeshToRender.set(scanMeshView);
       meshBuilder.clear();
    }
+
+   @Override
+   protected Topic<Boolean> createEnableInput()
+   {
+      return REAModuleAPI.UILidarScanShow;
+   }
+
+   @Override
+   protected Topic<Boolean> createClearInput()
+   {
+      return REAModuleAPI.UILidarScanClear;
+   }
 }

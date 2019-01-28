@@ -29,11 +29,6 @@ import us.ihmc.robotEnvironmentAwareness.ui.graphicsBuilders.StereoVisionPointCl
 
 public class REAMeshViewer
 {
-   public enum SourceType
-   {
-      LidarScan, StereoVisionPointCloud;
-   }
-
    private static final int SLOW_PACE_UPDATE_PERIOD = 2000;
    private static final int MEDIUM_PACE_UPDATE_PERIOD = 100;
    private static final int HIGH_PACE_UPDATE_PERIOD = 10;
@@ -57,9 +52,6 @@ public class REAMeshViewer
    private final PlanarRegionsIntersectionsMeshBuilder intersectionsMeshBuilder;
    private final BoundingBoxMeshView boundingBoxMeshView;
 
-   private final AtomicReference<SourceType> currentSourceType;
-   private final Property<SourceType> sourceTypeFromUI;
-
    public REAMeshViewer(REAUIMessager uiMessager)
    {
       // TEST Communication over network
@@ -70,9 +62,6 @@ public class REAMeshViewer
       planarRegionsMeshBuilder = new PlanarRegionsMeshBuilder(uiMessager);
       intersectionsMeshBuilder = new PlanarRegionsIntersectionsMeshBuilder(uiMessager);
       boundingBoxMeshView = new BoundingBoxMeshView(uiMessager);
-
-      sourceTypeFromUI = uiMessager.createPropertyInput(REAModuleAPI.UILidarScanSourceType, SourceType.LidarScan);
-      currentSourceType = new AtomicReference<SourceType>(SourceType.LidarScan);
 
       Node lidarScanRootNode = lidarScanViewer.getRoot();
       lidarScanRootNode.setMouseTransparent(true);
@@ -89,24 +78,8 @@ public class REAMeshViewer
          @Override
          public void handle(long now)
          {
-            if (currentSourceType.get() != sourceTypeFromUI.getValue())
-            {
-               System.out.println("" + currentSourceType.get() + " " + sourceTypeFromUI.getValue());
-               currentSourceType.set(sourceTypeFromUI.getValue());
-            }
-
-            switch (currentSourceType.get())
-            {
-            case LidarScan:
-               stereoVisionPointCloudViewer.clear();
-               lidarScanViewer.render();
-               break;
-            case StereoVisionPointCloud:
-               lidarScanViewer.clear();
-               stereoVisionPointCloudViewer.render();
-               break;
-            }
-
+            lidarScanViewer.render();
+            stereoVisionPointCloudViewer.render();
             ocTreeViewer.render();
 
             if (bufferOctreeMeshBuilder.hasNewMeshAndMaterial())
