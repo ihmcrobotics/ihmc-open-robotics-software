@@ -863,6 +863,6 @@ public class SmoothCoMIntegrationToolbox
       double[] polynomialCoefficients = cmpPolynomial.getCoefficients();
 
       polynomialCoefficientVector.reshape(cmpPolynomial.getNumberOfCoefficients(), 1);
-      polynomialCoefficientVector.setData(polynomialCoefficients);
+      System.arraycopy(polynomialCoefficients, 0, polynomialCoefficientVector.data, 0, cmpPolynomial.getNumberOfCoefficients());
    }
 }
