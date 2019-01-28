@@ -1,61 +1,92 @@
 package us.ihmc.footstepPlanning.graphSearch.collision;
 
 import us.ihmc.euclid.geometry.BoundingBox3D;
-import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.shape.Box3D;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
 import us.ihmc.euclid.tuple3D.Point3D;
-import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.FootstepNodeSnapData;
-import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.FootstepNodeSnapperReadOnly;
-import us.ihmc.footstepPlanning.graphSearch.graph.FootstepNode;
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParameters;
+import us.ihmc.geometry.polytope.ConvexPolytope;
+import us.ihmc.geometry.polytope.GilbertJohnsonKeerthiCollisionDetector;
 import us.ihmc.robotics.geometry.PlanarRegion;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
-import us.ihmc.robotics.robotSide.RobotSide;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 
 public class BoundingBoxCollisionChecker
 {
-   private final FootstepNodeSnapperReadOnly snapDataHolder;
    private final FootstepPlannerParameters parameters;
    private PlanarRegionsList planarRegionsList;
    private final HashMap<LatticeNode, BodyCollisionData> collisionDataHolder = new HashMap<>();
+   private final List<ConvexPolytope> planarRegionPolytopes = new ArrayList<>();
+   private final GilbertJohnsonKeerthiCollisionDetector collisionDetector = new GilbertJohnsonKeerthiCollisionDetector();
 
    private double bodyPoseX = Double.NaN;
    private double bodyPoseY = Double.NaN;
+   private double bodyPoseZ = Double.NaN;
    private double bodyPoseYaw = Double.NaN;
 
-   private final Box3D bodyBox;
+   private final Box3D bodyBox = new Box3D();
    private final BoundingBox3D boundingBox = new BoundingBox3D();
+   private final ConvexPolytope bodyBoxPolytope = new ConvexPolytope();
 
    private final RigidBodyTransform tempTransform = new RigidBodyTransform();
-   private final Point3D tempPoint = new Point3D();
+   private final Point3D tempPoint1 = new Point3D();
+   private final Point3D tempPoint2 = new Point3D();
 
-   public BoundingBoxCollisionChecker(FootstepPlannerParameters parameters, FootstepNodeSnapperReadOnly snapDataHolder)
+   public BoundingBoxCollisionChecker(FootstepPlannerParameters parameters)
    {
       this.parameters = parameters;
-      this.snapDataHolder = snapDataHolder;
-      this.bodyBox = new Box3D(0.5 * parameters.getMaximumBodyBoxDepthToPenalize(), 0.5 * parameters.getMaximumBodyBoxWidthToPenalize(),
-                               0.5 * parameters.getBodyBoxHeight());
    }
 
-   public void setPlanarRegionsList(PlanarRegionsList planarRegionsList)
+   public void setPlanarRegionsList(PlanarRegionsList planarRegions)
    {
       collisionDataHolder.clear();
-      this.planarRegionsList = planarRegionsList;
+      planarRegionPolytopes.clear();
+      this.planarRegionsList = planarRegions;
+
+      List<PlanarRegion> planarRegionsList = planarRegions.getPlanarRegionsAsList();
+      for (int i = 0; i < planarRegionsList.size(); i++)
+      {
+         PlanarRegion planarRegion = planarRegionsList.get(i);
+         ConvexPolytope planarRegionPolytope = new ConvexPolytope();
+
+         List<? extends Point2DReadOnly> pointsInPlanarRegion = planarRegion.getConvexHull().getVertexBufferView();
+         planarRegion.getTransformToWorld(tempTransform);
+
+         for (Point2DReadOnly point : pointsInPlanarRegion)
+         {
+            tempPoint1.setToZero();
+            tempPoint1.set(point.getX(), point.getY(), 0.0);
+            tempPoint1.applyTransform(tempTransform);
+            planarRegionPolytope.addVertex(tempPoint1.getX(), tempPoint1.getY(), tempPoint1.getZ());
+         }
+
+         planarRegionPolytopes.add(planarRegionPolytope);
+      }
    }
 
    public void reset()
    {
       collisionDataHolder.clear();
+      planarRegionPolytopes.clear();
    }
 
-   public void setBoxPose(double bodyPoseX, double bodyPoseY, double bodyPoseYaw)
+   public void setBoxPose(double bodyPoseX, double bodyPoseY, double bodyPoseZ, double bodyPoseYaw)
    {
       this.bodyPoseX = bodyPoseX;
       this.bodyPoseY = bodyPoseY;
+      this.bodyPoseZ = bodyPoseZ;
+      this.bodyPoseYaw = bodyPoseYaw;
+   }
+
+   public void setBoxDimensions(double bodyPoseX, double bodyPoseY, double bodyPoseZ, double bodyPoseYaw)
+   {
+      this.bodyPoseX = bodyPoseX;
+      this.bodyPoseY = bodyPoseY;
+      this.bodyPoseZ = bodyPoseZ;
       this.bodyPoseYaw = bodyPoseYaw;
    }
 
@@ -67,37 +98,35 @@ public class BoundingBoxCollisionChecker
       if(collisionDataHolder.containsKey(node))
          return collisionDataHolder.get(node);
 
-      setBoundingBox();
+      setBoundingBoxPosition();
+      setDimensionsToUpperBound();
       BodyCollisionData collisionData = new BodyCollisionData();
 
-      for(PlanarRegion planarRegion : planarRegionsList.getPlanarRegionsAsList())
+      for(int i = 0; i < planarRegionsList.getNumberOfPlanarRegions(); i++)
       {
+         PlanarRegion planarRegion = planarRegionsList.getPlanarRegion(i);
          if(planarRegion.getBoundingBox3dInWorld().intersectsExclusive(boundingBox))
          {
-            collisionData.setCollisionDetected(true);
-
-            ConvexPolygon2D convexHull = planarRegion.getConvexHull();
-            planarRegion.getTransformToWorld(tempTransform);
-
-            for (int i = 0; i < convexHull.getNumberOfVertices(); i++)
+            ConvexPolytope planarRegionPolytope = planarRegionPolytopes.get(i);
+            if(collisionDetector.arePolytopesColliding(planarRegionPolytope, bodyBoxPolytope, tempPoint1, tempPoint2))
             {
-               tempPoint.set(convexHull.getVertex(i));
-               tempPoint.setZ(0.0);
-               tempTransform.transform(tempPoint);
+               setDimensionsToLowerBound();
 
-               if(boundingBox.isInsideInclusive(tempPoint))
+               if(collisionDetector.arePolytopesColliding(planarRegionPolytope, bodyBoxPolytope, tempPoint1, tempPoint2))
                {
-                  tempTransform.setTranslation(bodyBox.getPositionX(), bodyBox.getPositionY(), bodyBox.getPositionZ());
-                  tempTransform.setRotation(bodyBox.getOrientation());
-                  tempTransform.invert();
-                  tempTransform.transform(tempPoint);
-
-                  double xBodyFrame = tempPoint.getX();
-                  double yBodyFrame = tempPoint.getY();
-
-                  if(closerToBody(xBodyFrame, yBodyFrame, collisionData))
-                     collisionData.setCollisionPointInBodyFrame(xBodyFrame, yBodyFrame);
+                  collisionData.setCollisionDetected(true);
+                  break;
                }
+               else
+               {
+                  planarRegion.getTransformToWorld(tempTransform);
+                  tempTransform.transform(tempPoint1);
+                  double dx = Math.abs(tempPoint1.getX() - 0.5 * parameters.getBodyBoxDepth());
+                  double dy = Math.abs(tempPoint1.getY() - 0.5 * parameters.getBodyBoxWidth());
+                  collisionData.setDistanceFromBoundingBox(Math.min(dx, dy));
+               }
+
+               setDimensionsToUpperBound();
             }
          }
       }
@@ -106,40 +135,42 @@ public class BoundingBoxCollisionChecker
       return collisionData;
    }
 
-   private boolean closerToBody(double x, double y, BodyCollisionData collisionData)
+   private void setBoundingBoxPosition()
    {
-      Point2DReadOnly collisionPointInBodyFrame = collisionData.getCollisionPointInBodyFrame();
-      if(collisionPointInBodyFrame.containsNaN())
-         return true;
-
-      double minX = parameters.getBodyBoxDepth();
-      double maxX = parameters.getMaximumBodyBoxDepthToPenalize();
-      double minY = parameters.getBodyBoxWidth();
-      double maxY = parameters.getMaximumBodyBoxWidthToPenalize();
-
-      double oldProximityRatio = Math.min((collisionPointInBodyFrame.getX() - minX) / (maxX - minX), (collisionPointInBodyFrame.getY() - minY) / (maxY - minY));
-      double newProximityRatio = Math.min((x - minX) / (maxX - minX), (y - minY) / (maxY - minY));
-      return newProximityRatio < oldProximityRatio;
+      bodyBox.setPosition(bodyPoseX, bodyPoseY, bodyPoseZ + 0.5 * parameters.getBodyBoxHeight());
+      bodyBox.setOrientationYawPitchRoll(bodyPoseYaw, 0.0, 0.0);
    }
 
-   private void setBoundingBox()
+   private void setDimensionsToLowerBound()
    {
-      FootstepNodeSnapData snapData = snapDataHolder.getSnapData(new FootstepNode(bodyPoseX, bodyPoseY, bodyPoseYaw, RobotSide.LEFT));
-      if(snapData == null)
-         snapData = snapDataHolder.getSnapData(new FootstepNode(bodyPoseX, bodyPoseY, bodyPoseYaw, RobotSide.RIGHT));
-
-      double groundHeight = 0.0;
-      if(snapData != null)
-         groundHeight = snapData.getSnapTransform().getTranslationZ();
-
-      bodyBox.setPosition(bodyPoseX, bodyPoseY, groundHeight + parameters.getBodyBoxBaseZ() + 0.5 * parameters.getBodyBoxHeight());
-      bodyBox.setOrientationYawPitchRoll(bodyPoseYaw, 0.0, 0.0);
+      bodyBox.setSize(parameters.getBodyBoxDepth(), parameters.getBodyBoxWidth(), parameters.getBodyBoxHeight());
       bodyBox.getBoundingBox3D(boundingBox);
+      updateBodyBoxPolytope();
+   }
+
+   private void setDimensionsToUpperBound()
+   {
+      double planarDimensionIncrease = parameters.getCostParameters().getBoundingBoxCost();
+      bodyBox.setSize(parameters.getBodyBoxDepth() + planarDimensionIncrease, parameters.getBodyBoxWidth() + planarDimensionIncrease,
+                      parameters.getBodyBoxHeight());
+      bodyBox.getBoundingBox3D(boundingBox);
+      updateBodyBoxPolytope();
+   }
+
+   private void updateBodyBoxPolytope()
+   {
+      bodyBoxPolytope.getVertices().clear();
+
+      Point3D[] vertices = bodyBox.getVertices();
+      for (int i = 0; i < vertices.length; i++)
+      {
+         bodyBoxPolytope.addVertex(vertices[i]);
+      }
    }
 
    private void checkInputs()
    {
-      if(Double.isNaN(bodyPoseX) || Double.isNaN(bodyPoseY) || Double.isNaN(bodyPoseYaw))
+      if(Double.isNaN(bodyPoseX) || Double.isNaN(bodyPoseY) || Double.isNaN(bodyPoseZ) || Double.isNaN(bodyPoseYaw))
          throw new RuntimeException("Bounding box position has not been set");
    }
 }
