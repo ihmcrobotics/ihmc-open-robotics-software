@@ -8,6 +8,7 @@ import io.netty.channel.group.ChannelGroup;
 import io.netty.channel.group.ChannelMatcher;
 import io.netty.channel.group.DefaultChannelGroup;
 import io.netty.handler.codec.http.websocketx.BinaryWebSocketFrame;
+import io.netty.handler.codec.http.websocketx.TextWebSocketFrame;
 import io.netty.util.concurrent.GlobalEventExecutor;
 
 public class WebsocketDataBroadcaster
@@ -49,14 +50,10 @@ public class WebsocketDataBroadcaster
       System.out.println(clients);
    }
 
-   public void write(ByteBuf sendBuffer) throws IOException
+   public void write(BinaryWebSocketFrame frame) throws IOException
    {
-
-      
-      BinaryWebSocketFrame frame = new BinaryWebSocketFrame(sendBuffer);
-      clients.writeAndFlush(frame, WRITABLE_CHANNEL_MATCHER, true);
-      
-      
+//      TextWebSocketFrame frame = new TextWebSocketFrame(sendBuffer.toString());
+      clients.writeAndFlush(frame, WRITABLE_CHANNEL_MATCHER, false).syncUninterruptibly();
       
    }
 

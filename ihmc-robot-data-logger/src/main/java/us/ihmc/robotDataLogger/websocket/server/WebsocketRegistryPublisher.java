@@ -4,6 +4,7 @@ import java.util.concurrent.TimeUnit;
 
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
+import io.netty.handler.codec.http.websocketx.BinaryWebSocketFrame;
 import us.ihmc.concurrent.ConcurrentRingBuffer;
 import us.ihmc.pubsub.common.SerializedPayload;
 import us.ihmc.robotDataLogger.dataBuffers.LoggerDebugRegistry;
@@ -32,7 +33,7 @@ public class WebsocketRegistryPublisher implements RegistryPublisher
    private final CustomLogDataPublisherType publisherType;
    private final ByteBuf sendBuffer;
    private final SerializedPayload serializedPayload;
-
+   private final BinaryWebSocketFrame frame;
 
    private final int numberOfVariables;
    
@@ -50,8 +51,8 @@ public class WebsocketRegistryPublisher implements RegistryPublisher
       
       
       serializedPayload = new SerializedPayload(publisherType.getMaximumTypeSize());
-      sendBuffer = Unpooled.wrappedBuffer(serializedPayload.getData());
-
+      sendBuffer = Unpooled.unreleasableBuffer(Unpooled.wrappedBuffer(serializedPayload.getData()));
+      frame = new BinaryWebSocketFrame(sendBuffer);
 
    }
 
@@ -121,8 +122,8 @@ public class WebsocketRegistryPublisher implements RegistryPublisher
                   serializedPayload.getData().clear();
                   sendBuffer.clear();
                   publisherType.serialize(buffer, serializedPayload);
-                  serializedPayload.getData().flip();
-                  broadcaster.write(Unpooled.wrappedBuffer(serializedPayload.getData()));
+                  sendBuffer.setIndex(0, serializedPayload.getLength());
+                  broadcaster.write(frame);
 
                   if(previousUid != -1)
                   {
