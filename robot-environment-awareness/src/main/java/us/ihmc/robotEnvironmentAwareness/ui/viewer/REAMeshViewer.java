@@ -5,10 +5,8 @@ import java.util.List;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicReference;
 
 import javafx.animation.AnimationTimer;
-import javafx.beans.property.Property;
 import javafx.scene.Group;
 import javafx.scene.Node;
 import javafx.scene.paint.Material;
@@ -55,8 +53,8 @@ public class REAMeshViewer
    public REAMeshViewer(REAUIMessager uiMessager)
    {
       // TEST Communication over network
-      lidarScanViewer = new LidarScanViewer(REAModuleAPI.LidarScanState, uiMessager, 128);
-      stereoVisionPointCloudViewer = new StereoVisionPointCloudViewer(REAModuleAPI.StereoVisionPointCloudState, uiMessager, 2048);
+      lidarScanViewer = new LidarScanViewer(REAModuleAPI.LidarScanState, uiMessager);
+      stereoVisionPointCloudViewer = new StereoVisionPointCloudViewer(REAModuleAPI.StereoVisionPointCloudState, uiMessager);
       bufferOctreeMeshBuilder = new BufferOctreeMeshBuilder(uiMessager);
       ocTreeViewer = new OcTreeMeshBuilder(uiMessager);
       planarRegionsMeshBuilder = new PlanarRegionsMeshBuilder(uiMessager);

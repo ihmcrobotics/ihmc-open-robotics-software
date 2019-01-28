@@ -25,9 +25,9 @@ public class LidarScanViewer extends AbstractSourceViewer<LidarScanMessage>
 
    private static final Material defaultMaterial = new PhongMaterial(Color.DARKRED);
 
-   public LidarScanViewer(Topic<LidarScanMessage> messageState, REAUIMessager uiMessager, int palleteSizeForMeshBuilder)
+   public LidarScanViewer(Topic<LidarScanMessage> messageState, REAUIMessager uiMessager)
    {
-      super(messageState, uiMessager, palleteSizeForMeshBuilder);
+      super(messageState, uiMessager);
       numberOfScans = uiMessager.createInput(REAModuleAPI.UILidarScanSize, 50);
    }
 

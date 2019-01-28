@@ -12,9 +12,9 @@ import us.ihmc.robotEnvironmentAwareness.communication.REAUIMessager;
 
 public class StereoVisionPointCloudViewer extends AbstractSourceViewer<StereoVisionPointCloudMessage>
 {
-   public StereoVisionPointCloudViewer(Topic<StereoVisionPointCloudMessage> messageState, REAUIMessager uiMessager, int palleteSizeForMeshBuilder)
+   public StereoVisionPointCloudViewer(Topic<StereoVisionPointCloudMessage> messageState, REAUIMessager uiMessager)
    {
-      super(messageState, uiMessager, palleteSizeForMeshBuilder);
+      super(messageState, uiMessager);
    }
 
    public void render()

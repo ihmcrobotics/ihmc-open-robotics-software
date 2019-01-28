@@ -15,6 +15,7 @@ import us.ihmc.robotEnvironmentAwareness.communication.REAUIMessager;
 public abstract class AbstractSourceViewer<T extends Packet<?>> implements SourceViewerInterface<T>
 {
    protected static final float SCAN_POINT_SIZE = 0.0075f;
+   private static final int palleteSizeForMeshBuilder = 2048;
 
    private final Group root = new Group();
    protected final ObservableList<Node> children = root.getChildren();
@@ -27,7 +28,7 @@ public abstract class AbstractSourceViewer<T extends Packet<?>> implements Sourc
    protected final AtomicReference<Boolean> enable;
    protected final AtomicReference<Boolean> clear;
 
-   public AbstractSourceViewer(Topic<T> messageState, REAUIMessager uiMessager, int palleteSizeForMeshBuilder)
+   public AbstractSourceViewer(Topic<T> messageState, REAUIMessager uiMessager)
    {
       newMessageToRender = uiMessager.createInput(messageState);
       meshBuilder = new JavaFXMultiColorMeshBuilder(new TextureColorAdaptivePalette(palleteSizeForMeshBuilder));
