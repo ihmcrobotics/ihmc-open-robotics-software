@@ -9,10 +9,11 @@ import us.ihmc.robotDataLogger.dataBuffers.LoggerDebugRegistry;
 import us.ihmc.robotDataLogger.dataBuffers.RegistryBuffer;
 import us.ihmc.robotDataLogger.dataBuffers.RegistrySendBuffer;
 import us.ihmc.robotDataLogger.dataBuffers.RegistrySendBufferBuilder;
+import us.ihmc.robotDataLogger.interfaces.RegistryPublisher;
 import us.ihmc.util.PeriodicThreadScheduler;
 import us.ihmc.util.PeriodicThreadSchedulerFactory;
 
-public class RegistryPublisher
+public class RTPSRegistryPublisher implements RegistryPublisher
 {
    private static final int BUFFER_CAPACITY = 128;
 
@@ -31,7 +32,7 @@ public class RegistryPublisher
    private final int[] segmentOffsets;
 
 
-   public RegistryPublisher(PeriodicThreadSchedulerFactory schedulerFactory, RegistrySendBufferBuilder builder, Publisher publisher) throws IOException
+   public RTPSRegistryPublisher(PeriodicThreadSchedulerFactory schedulerFactory, RegistrySendBufferBuilder builder, Publisher publisher) throws IOException
    {
       this.segmentSizes = LogParticipantTools.calculateLogSegmentSizes(builder.getNumberOfVariables(), builder.getNumberOfJointStates());
       this.segmentOffsets = LogParticipantTools.calculateOffsets(this.segmentSizes);
@@ -43,11 +44,13 @@ public class RegistryPublisher
       this.loggerDebugRegistry = builder.getLoggerDebugRegistry();
    }
 
+   @Override
    public void start()
    {
       scheduler.schedule(variableUpdateThread, 1, TimeUnit.MILLISECONDS);
    }
 
+   @Override
    public void stop()
    {
       scheduler.shutdown();
@@ -61,6 +64,7 @@ public class RegistryPublisher
       }
    }
 
+   @Override
    public void update(long timestamp)
    {
       for(int segment = 0; segment < segmentSizes.length; segment++)

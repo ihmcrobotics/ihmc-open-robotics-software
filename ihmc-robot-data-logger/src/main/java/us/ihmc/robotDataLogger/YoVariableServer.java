@@ -9,6 +9,7 @@ import org.apache.commons.lang3.tuple.ImmutablePair;
 
 import gnu.trove.list.array.TByteArrayList;
 import us.ihmc.commons.Conversions;
+import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.concurrent.ConcurrentRingBuffer;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
@@ -16,14 +17,14 @@ import us.ihmc.multicastLogDataProtocol.modelLoaders.LogModelProvider;
 import us.ihmc.robotDataLogger.dataBuffers.RegistrySendBufferBuilder;
 import us.ihmc.robotDataLogger.handshake.SummaryProvider;
 import us.ihmc.robotDataLogger.handshake.YoVariableHandShakeBuilder;
+import us.ihmc.robotDataLogger.interfaces.DataProducer;
+import us.ihmc.robotDataLogger.interfaces.RegistryPublisher;
 import us.ihmc.robotDataLogger.listeners.VariableChangedListener;
 import us.ihmc.robotDataLogger.logger.LogSettings;
 import us.ihmc.robotDataLogger.rtps.CustomLogDataPublisherType;
-import us.ihmc.robotDataLogger.rtps.DataProducerParticipant;
-import us.ihmc.robotDataLogger.rtps.RegistryPublisher;
 import us.ihmc.robotDataLogger.rtps.TimestampPublisher;
+import us.ihmc.robotDataLogger.websocket.server.WebsocketDataProducer;
 import us.ihmc.simulationconstructionset.util.TickAndUpdatable;
-import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.util.PeriodicThreadScheduler;
 import us.ihmc.util.PeriodicThreadSchedulerFactory;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
@@ -51,7 +52,7 @@ public class YoVariableServer implements RobotVisualizer, TickAndUpdatable, Vari
    private final PeriodicThreadSchedulerFactory schedulerFactory;
 
    // Servers
-   private final DataProducerParticipant dataProducerParticipant;
+   private final DataProducer dataProducerParticipant;
    private YoVariableHandShakeBuilder handshakeBuilder;
 
    private boolean sendKeepAlive = false;
@@ -131,20 +132,12 @@ public class YoVariableServer implements RobotVisualizer, TickAndUpdatable, Vari
       this.dt = dt;
       this.schedulerFactory = schedulerFactory;
 
-      try
-      {
-         this.dataProducerParticipant = new DataProducerParticipant(mainClazz, logModelProvider, this, config.getPublicBroadcast());
-         this.dataProducerParticipant.setLog(logSettings.isLog());
-         addCameras(config, logSettings);
-         
-         this.timestampScheduler = schedulerFactory.createPeriodicThreadScheduler("timestampPublisher");
-         this.timestampPublisher = new TimestampPublisher(dataProducerParticipant);
-
-      }
-      catch (IOException e)
-      {
-         throw new RuntimeException(e);
-      }
+      this.dataProducerParticipant = new WebsocketDataProducer(mainClazz, logModelProvider, this, config.getPublicBroadcast());
+      this.dataProducerParticipant.setLog(logSettings.isLog());
+      addCameras(config, logSettings);
+      
+      this.timestampScheduler = schedulerFactory.createPeriodicThreadScheduler("timestampPublisher");
+      this.timestampPublisher = new TimestampPublisher(dataProducerParticipant);
 
    }
    
