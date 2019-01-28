@@ -152,7 +152,7 @@ public class CollisionEndStanceFreeSearchPolicy implements PlannerHeuristicNodeS
 
          boolean newNodeSnapIsValid = !snapper.snapFootstepNode(newNode).getSnapTransform().containsNaN();
          boolean newParentNodeSnapIsValid = !snapper.snapFootstepNode(newParentNode).getSnapTransform().containsNaN();
-         newNodeIsValid = newNodeSnapIsValid && newParentNodeSnapIsValid && collisionNodeChecker.isNodeValidInternal(newNode, newParentNode, 1.0);
+         newNodeIsValid = newNodeSnapIsValid && newParentNodeSnapIsValid && collisionNodeChecker.isNodeValid(newNode, newParentNode);
       }
 
       if (newNodeIsValid && Math.abs(currentRotation) > minimumRotation)
@@ -193,7 +193,7 @@ public class CollisionEndStanceFreeSearchPolicy implements PlannerHeuristicNodeS
 
          boolean newNodeSnapIsValid = !snapper.snapFootstepNode(newNode).getSnapTransform().containsNaN();
          boolean newParentNodeSnapIsValid = !snapper.snapFootstepNode(newParentNode).getSnapTransform().containsNaN();
-         newNodeIsValid = newNodeSnapIsValid && newParentNodeSnapIsValid && collisionNodeChecker.isNodeValidInternal(newNode, newParentNode, 1.0);
+         newNodeIsValid = newNodeSnapIsValid && newParentNodeSnapIsValid && collisionNodeChecker.isNodeValid(newNode, newParentNode);
       }
 
       if (newNodeIsValid && Math.abs(currentRotation) > minimumRotation)
