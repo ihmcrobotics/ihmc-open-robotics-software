@@ -32,7 +32,6 @@ public class WebsocketLogServerInitializer extends ChannelInitializer<SocketChan
       pipeline.addLast(new WebSocketServerCompressionHandler());
       pipeline.addLast(new WebSocketServerProtocolHandler(WEBSOCKET_PATH, null, true));
       pipeline.addLast(new WebsocketLogFrameHandler(broadcaster));
-
    }
 
 }

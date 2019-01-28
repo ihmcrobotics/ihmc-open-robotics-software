@@ -3,8 +3,8 @@ package us.ihmc.robotDataLogger.example;
 import java.util.List;
 import java.util.Random;
 
-import us.ihmc.commons.PrintTools;
 import us.ihmc.commons.thread.ThreadTools;
+import us.ihmc.log.LogTools;
 import us.ihmc.robotDataLogger.YoVariableServer;
 import us.ihmc.robotDataLogger.logger.LogSettings;
 import us.ihmc.util.PeriodicNonRealtimeThreadSchedulerFactory;
@@ -24,7 +24,7 @@ public class ExampleServer
    }
 
    private static final int variablesPerType = 1000;
-   private static final double dt = 0.0001;
+   private static final double dt = 0.001;
    private static final LogSettings logSettings = LogSettings.TEST_LOGGER;
 
    private final Random random = new Random(127L);
@@ -46,7 +46,7 @@ public class ExampleServer
    {
       yoVariableServer.start();
 
-      PrintTools.info("Starting to loop.");
+      LogTools.info("Starting to loop.");
       while (true)
       {
          updateVariables();
@@ -107,7 +107,7 @@ public class ExampleServer
 
    public static void main(String[] args)
    {
-      PrintTools.info("Starting " + ExampleServer.class.getSimpleName());
+      LogTools.info("Starting " + ExampleServer.class.getSimpleName());
       ExampleServer exampleServer = new ExampleServer();
       exampleServer.start();
    }
