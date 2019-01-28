@@ -43,10 +43,7 @@ public class StereoVisionPointCloudViewer extends AbstractSourceViewer<StereoVis
       for (int i = 0; i < numberOfScanPoints; i++)
       {
          int colorValue = message.getColors().get(i);
-         int r = colorValue >> 16 & 0xFF;
-         int g = colorValue >> 8 & 0xFF;
-         int b = colorValue >> 0 & 0xFF;
-         Color color = Color.rgb(r, g, b);
+         Color color = intToColor(colorValue);
 
          MessageTools.unpackScanPoint(message, i, scanPoint);
 
@@ -69,5 +66,13 @@ public class StereoVisionPointCloudViewer extends AbstractSourceViewer<StereoVis
    protected Topic<Boolean> createClearInput()
    {
       return REAModuleAPI.UIStereoVisionPointCloudClear;
+   }
+
+   private static javafx.scene.paint.Color intToColor(int value)
+   {
+      int r = value >> 16 & 0xFF;
+      int g = value >> 8 & 0xFF;
+      int b = value >> 0 & 0xFF;
+      return Color.rgb(r, g, b);
    }
 }
