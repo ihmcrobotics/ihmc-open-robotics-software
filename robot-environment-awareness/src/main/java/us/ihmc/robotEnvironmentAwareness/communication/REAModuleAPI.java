@@ -23,7 +23,6 @@ import us.ihmc.robotEnvironmentAwareness.planarRegion.PlanarRegionSegmentationPa
 import us.ihmc.robotEnvironmentAwareness.planarRegion.PolygonizerParameters;
 import us.ihmc.robotEnvironmentAwareness.ui.graphicsBuilders.OcTreeMeshBuilder.ColoringType;
 import us.ihmc.robotEnvironmentAwareness.ui.graphicsBuilders.OcTreeMeshBuilder.DisplayType;
-import us.ihmc.robotEnvironmentAwareness.ui.viewer.REAMeshViewer.SourceType;
 
 public class REAModuleAPI
 {
@@ -65,14 +64,12 @@ public class REAModuleAPI
    private static final TopicTheme Data = apiFactory.createTopicTheme("Data");
    private static final TopicTheme Color = apiFactory.createTopicTheme("Color");
    private static final TopicTheme Display = apiFactory.createTopicTheme("Display");
-   private static final TopicTheme Type = apiFactory.createTopicTheme("Type");
 
    private static final Category Root = apiFactory.createRootCategory(apiFactory.createCategoryTheme("REA"));
 
    private static final Category ModuleCategory = Root.child(Module);
    private static final Category OcTreeCategory = ModuleCategory.child(OcTree);
    private static final Category PlanarRegionsCategory = ModuleCategory.child(PlanarRegions);
-
 
    public static final Topic<Boolean> OcTreeEnable = OcTreeCategory.topic(Enable);
    public static final Topic<Boolean> OcTreeClear = OcTreeCategory.topic(Clear);
@@ -86,10 +83,11 @@ public class REAModuleAPI
 
    public static final Topic<Double> LidarMinRange = ModuleCategory.child(Lidar).child(Range).topic(Min);
    public static final Topic<Double> LidarMaxRange = ModuleCategory.child(Lidar).child(Range).topic(Max);
-   
+
    public static final Topic<Boolean> PlanarRegionsSegmentationEnable = PlanarRegionsCategory.child(Segmentation).topic(Enable);
    public static final Topic<Boolean> PlanarRegionsSegmentationClear = PlanarRegionsCategory.child(Segmentation).topic(Clear);
-   public static final Topic<PlanarRegionSegmentationParameters> PlanarRegionsSegmentationParameters = PlanarRegionsCategory.child(Segmentation).topic(Parameters);
+   public static final Topic<PlanarRegionSegmentationParameters> PlanarRegionsSegmentationParameters = PlanarRegionsCategory.child(Segmentation)
+                                                                                                                            .topic(Parameters);
    public static final Topic<Boolean> CustomRegionsMergingEnable = PlanarRegionsCategory.child(Custom).topic(Enable);
    public static final Topic<Boolean> CustomRegionsClear = PlanarRegionsCategory.child(Custom).topic(Clear);
    public static final Topic<CustomRegionMergeParameters> CustomRegionsMergingParameters = PlanarRegionsCategory.child(Custom).topic(Parameters);
@@ -109,7 +107,8 @@ public class REAModuleAPI
    public static final Topic<Boolean> UILidarScanShow = Root.child(UI).child(Lidar).topic(Show);
    public static final Topic<Boolean> UILidarScanClear = Root.child(UI).child(Lidar).topic(Clear);
    public static final Topic<Integer> UILidarScanSize = Root.child(UI).child(Lidar).topic(Size);
-   public static final Topic<SourceType> UILidarScanSourceType = Root.child(UI).child(Lidar).topic(Type);
+   public static final Topic<Boolean> UIStereoVisionPointCloudShow = Root.child(UI).child(StereoVisionPointCloud).topic(Show);
+   public static final Topic<Boolean> UIStereoVisionPointCloudClear = Root.child(UI).child(StereoVisionPointCloud).topic(Clear);
 
    public static final Topic<Boolean> UISegmentationDataExportRequest = Root.child(UI).child(DataExporter).child(Segmentation).topic(Export);
    public static final Topic<String> UISegmentationDataExporterDirectory = Root.child(UI).child(DataExporter).child(Segmentation).topic(Path);

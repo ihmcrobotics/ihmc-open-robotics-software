@@ -10,7 +10,6 @@ import us.ihmc.communication.packets.Packet;
 import us.ihmc.javaFXToolkit.shapes.JavaFXMultiColorMeshBuilder;
 import us.ihmc.javaFXToolkit.shapes.TextureColorAdaptivePalette;
 import us.ihmc.messager.MessagerAPIFactory.Topic;
-import us.ihmc.robotEnvironmentAwareness.communication.REAModuleAPI;
 import us.ihmc.robotEnvironmentAwareness.communication.REAUIMessager;
 
 public abstract class AbstractSourceViewer<T extends Packet<?>> implements SourceViewerInterface<T>
@@ -33,8 +32,8 @@ public abstract class AbstractSourceViewer<T extends Packet<?>> implements Sourc
       newMessageToRender = uiMessager.createInput(messageState);
       meshBuilder = new JavaFXMultiColorMeshBuilder(new TextureColorAdaptivePalette(palleteSizeForMeshBuilder));
 
-      enable = uiMessager.createInput(REAModuleAPI.UILidarScanShow, false);
-      clear = uiMessager.createInput(REAModuleAPI.UILidarScanClear, false);
+      enable = uiMessager.createInput(createEnableInput(), false);
+      clear = uiMessager.createInput(createClearInput(), false);
    }
 
    @Override
@@ -43,9 +42,9 @@ public abstract class AbstractSourceViewer<T extends Packet<?>> implements Sourc
       if (!enable.get())
          return;
 
-      if(newMessageToRender.get() == null)
+      if (newMessageToRender.get() == null)
          return;
-      
+
       unpackPointCloud(newMessageToRender.getAndSet(null));
    }
 
@@ -60,4 +59,8 @@ public abstract class AbstractSourceViewer<T extends Packet<?>> implements Sourc
    {
       return root;
    }
+
+   protected abstract Topic<Boolean> createEnableInput();
+
+   protected abstract Topic<Boolean> createClearInput();
 }
