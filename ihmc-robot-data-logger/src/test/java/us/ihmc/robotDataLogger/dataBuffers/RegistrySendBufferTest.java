@@ -25,7 +25,7 @@ import us.ihmc.robotDataLogger.jointState.OneDoFJointHolder;
 import us.ihmc.robotDataLogger.jointState.OneDoFState;
 import us.ihmc.robotDataLogger.rtps.CustomLogDataPublisherType;
 import us.ihmc.robotDataLogger.rtps.CustomLogDataSubscriberType;
-import us.ihmc.robotDataLogger.rtps.DataProducerParticipant;
+import us.ihmc.robotDataLogger.rtps.RTPSDataProducerParticipant;
 import us.ihmc.robotDataLogger.rtps.LogParticipantTools;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoLong;
@@ -46,7 +46,7 @@ public class RegistrySendBufferTest
       Random random = new Random(23589735l);
       
       
-      SerializedPayload payload = new SerializedPayload(DataProducerParticipant.getMaximumSynchronousPacketSize());
+      SerializedPayload payload = new SerializedPayload(RTPSDataProducerParticipant.getMaximumSynchronousPacketSize());
       
 //      int numberOfVariables = 10000;
       for(int numberOfVariables = 1000; numberOfVariables <= 33000; numberOfVariables+= 1000)

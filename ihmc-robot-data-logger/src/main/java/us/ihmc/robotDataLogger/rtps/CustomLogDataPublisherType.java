@@ -155,13 +155,18 @@ public class CustomLogDataPublisherType implements TopicDataType<RegistrySendBuf
       return null;
    }
 
+   public int getMaximumTypeSize()
+   {
+      return getTypeSize(compressor.maxCompressedLength(numberOfVariables * 8), numberOfStates);
+   }
+   
    @Override
    public int getTypeSize()
    {
       int rawSize = getTypeSize(compressor.maxCompressedLength(numberOfVariables * 8), numberOfStates);
-      if(rawSize > DataProducerParticipant.getMaximumSynchronousPacketSize())
+      if(rawSize > RTPSDataProducerParticipant.getMaximumSynchronousPacketSize())
       {
-         return DataProducerParticipant.getMaximumSynchronousPacketSize();
+         return RTPSDataProducerParticipant.getMaximumSynchronousPacketSize();
       }
       else
       {

@@ -53,10 +53,10 @@ public class LogParticipantTools
       int maxCompressedSize = compressor.maxCompressedLength(variables * 8);
       int maxSize = CustomLogDataPublisherType.getTypeSize(maxCompressedSize, jointStates);
 
-      if (maxSize > DataProducerParticipant.getMaximumSynchronousPacketSize())
+      if (maxSize > RTPSDataProducerParticipant.getMaximumSynchronousPacketSize())
       {
          // Space available in bytes for variables
-         int remaining = DataProducerParticipant.getMaximumSynchronousPacketSize() - CustomLogDataPublisherType.getTypeSize(0, 0);
+         int remaining = RTPSDataProducerParticipant.getMaximumSynchronousPacketSize() - CustomLogDataPublisherType.getTypeSize(0, 0);
 
          // Total variables in packet. Adding the number of uncompressed joint states gives us a slightly larger estimate of how much space we need.
          int totalVariables = variables + jointStates;

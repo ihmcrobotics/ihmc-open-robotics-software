@@ -7,7 +7,7 @@ import org.junit.Test;
 
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.robotDataLogger.rtps.CustomLogDataPublisherType;
-import us.ihmc.robotDataLogger.rtps.DataProducerParticipant;
+import us.ihmc.robotDataLogger.rtps.RTPSDataProducerParticipant;
 import us.ihmc.robotDataLogger.rtps.LogParticipantTools;
 import us.ihmc.tools.compression.CompressionImplementation;
 import us.ihmc.tools.compression.CompressionImplementationFactory;
@@ -21,7 +21,7 @@ public class LogParticipantToolsTest
    public void testSegmentation()
    {
       CompressionImplementation compressor = CompressionImplementationFactory.instance();
-      int maxJointStates = (DataProducerParticipant.getMaximumSynchronousPacketSize() - CustomLogDataPublisherType.getTypeSize(0, 0)) / 8 - 1;
+      int maxJointStates = (RTPSDataProducerParticipant.getMaximumSynchronousPacketSize() - CustomLogDataPublisherType.getTypeSize(0, 0)) / 8 - 1;
       for(int vars = 1; vars < 100000; vars+=11)
       {
          for(int states = 0; states < maxJointStates; states++)
@@ -33,7 +33,7 @@ public class LogParticipantToolsTest
             {
                int size = sizes[i];
                int packetStates = i == 0 ? states : 0;
-               assertTrue("Packet too big", CustomLogDataPublisherType.getTypeSize(compressor.maxCompressedLength(size), packetStates) < DataProducerParticipant.getMaximumSynchronousPacketSize());
+               assertTrue("Packet too big", CustomLogDataPublisherType.getTypeSize(compressor.maxCompressedLength(size), packetStates) < RTPSDataProducerParticipant.getMaximumSynchronousPacketSize());
                totalSize += size;
             }
             assertEquals(vars, totalSize);

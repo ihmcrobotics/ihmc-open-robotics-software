@@ -43,9 +43,9 @@ public class RegistrySendBuffer extends RegistryBuffer
    protected RegistrySendBuffer(int registeryID, List<YoVariable<?>> variables, List<JointHolder> jointHolders)
    {
       int numberOfJointStates = RegistrySendBufferBuilder.getNumberOfJointStates(jointHolders);
-      int maximumNumberOfVariables = LogParticipantTools.calculateMaximumNumberOfVariables(variables.size(), numberOfJointStates);
+      int maximumNumberOfVariables = variables.size() + numberOfJointStates;//LogParticipantTools.calculateMaximumNumberOfVariables(variables.size(), numberOfJointStates);
       this.buffer = ByteBuffer.allocate(maximumNumberOfVariables * 8);
-
+      
       this.data = this.buffer.asLongBuffer();
       this.registryID = registeryID;
 

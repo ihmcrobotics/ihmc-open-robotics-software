@@ -106,9 +106,9 @@ public class CustomLogDataSubscriberType implements TopicDataType<RegistryReceiv
    public int getTypeSize()
    {
       int rawSize = CustomLogDataPublisherType.getTypeSize(compressor.maxCompressedLength(numberOfVariables * 8), numberOfStates);
-      if(rawSize > DataProducerParticipant.getMaximumSynchronousPacketSize())
+      if(rawSize > RTPSDataProducerParticipant.getMaximumSynchronousPacketSize())
       {
-         return DataProducerParticipant.getMaximumSynchronousPacketSize();
+         return RTPSDataProducerParticipant.getMaximumSynchronousPacketSize();
       }
       else
       {

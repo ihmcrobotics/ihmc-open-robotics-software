@@ -37,6 +37,7 @@ import us.ihmc.robotDataLogger.TimestampPubSubType;
 import us.ihmc.robotDataLogger.VariableChangeRequest;
 import us.ihmc.robotDataLogger.VariableChangeRequestPubSubType;
 import us.ihmc.robotDataLogger.dataBuffers.RegistrySendBufferBuilder;
+import us.ihmc.robotDataLogger.interfaces.DataProducer;
 import us.ihmc.robotDataLogger.listeners.VariableChangedListener;
 import us.ihmc.rtps.impl.fastRTPS.WriterTimes;
 import us.ihmc.util.PeriodicThreadSchedulerFactory;
@@ -47,7 +48,7 @@ import us.ihmc.util.PeriodicThreadSchedulerFactory;
  * @author Jesper Smith
  *
  */
-public class DataProducerParticipant
+public class RTPSDataProducerParticipant implements DataProducer
 {
    private final Domain domain = DomainFactory.getDomain(PubSubImplementation.FAST_RTPS);
    private final Participant participant;
@@ -94,7 +95,7 @@ public class DataProducerParticipant
 
    }
 
-   public DataProducerParticipant(String name, LogModelProvider logModelProvider, VariableChangedListener variableChangedListener, boolean publicBroadcast) throws IOException
+   public RTPSDataProducerParticipant(String name, LogModelProvider logModelProvider, VariableChangedListener variableChangedListener, boolean publicBroadcast) throws IOException
    {
       announcement.setName(name);
       this.dataProducerListener = variableChangedListener;
@@ -176,6 +177,7 @@ public class DataProducerParticipant
     * 
     * After calling this function, the producer cannot be reactivated
     */
+   @Override
    public void remove()
    {
       domain.removeParticipant(participant);
@@ -188,6 +190,7 @@ public class DataProducerParticipant
     * 
     * @param handshake
     */
+   @Override
    public void setHandshake(Handshake handshake)
    {
       this.handshake = handshake;
@@ -230,6 +233,7 @@ public class DataProducerParticipant
     * @param name User friendly name to show in the log files
     * @param cameraId ID of the camera on the logger machine
     */
+   @Override
    public void addCamera(CameraType type, String name, String cameraId)
    {
       CameraAnnouncement cameraAnnouncement = new CameraAnnouncement();
@@ -244,6 +248,7 @@ public class DataProducerParticipant
     * 
     * @throws IOException
     */
+   @Override
    public void announce() throws IOException
    {
       if (activated)
@@ -286,6 +291,7 @@ public class DataProducerParticipant
     * 
     * @param log
     */
+   @Override
    public void setLog(boolean log)
    {
       this.log = log;
@@ -296,6 +302,7 @@ public class DataProducerParticipant
     * @param timestamp
     * @throws IOException 
     */
+   @Override
    public void publishTimestamp(long timestamp)
    {
       try
@@ -313,7 +320,8 @@ public class DataProducerParticipant
    }
    
    
-   public RegistryPublisher createRegistryPublisher(CustomLogDataPublisherType type, PeriodicThreadSchedulerFactory schedulerFactory,
+   @Override
+   public RTPSRegistryPublisher createRegistryPublisher(CustomLogDataPublisherType type, PeriodicThreadSchedulerFactory schedulerFactory,
                                                     RegistrySendBufferBuilder builder)
          throws IOException
    {
@@ -324,8 +332,9 @@ public class DataProducerParticipant
 
       
       
-      return new RegistryPublisher(schedulerFactory, builder, publisher);
+      return new RTPSRegistryPublisher(schedulerFactory, builder, publisher);
    }
+   @Override
    public void sendKeepAlive(PeriodicThreadSchedulerFactory schedulerFactory) throws IOException
    {
       CustomLogDataPublisherType type = new CustomLogDataPublisherType(0, 0);

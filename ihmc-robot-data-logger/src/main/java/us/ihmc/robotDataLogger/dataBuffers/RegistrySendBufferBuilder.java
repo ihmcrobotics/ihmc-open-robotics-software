@@ -9,7 +9,7 @@ import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.robotDataLogger.jointState.JointHolder;
 import us.ihmc.robotDataLogger.jointState.JointHolderFactory;
 import us.ihmc.robotDataLogger.rtps.CustomLogDataPublisherType;
-import us.ihmc.robotDataLogger.rtps.DataProducerParticipant;
+import us.ihmc.robotDataLogger.rtps.RTPSDataProducerParticipant;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoVariable;
 
@@ -59,9 +59,9 @@ public class RegistrySendBufferBuilder implements us.ihmc.concurrent.Builder<Reg
          }
 
          int numberOfJointStates = getNumberOfJointStates();
-         if (CustomLogDataPublisherType.getTypeSize(0, numberOfJointStates) > DataProducerParticipant.getMaximumSynchronousPacketSize())
+         if (CustomLogDataPublisherType.getTypeSize(0, numberOfJointStates) > RTPSDataProducerParticipant.getMaximumSynchronousPacketSize())
          {
-            throw new RuntimeException("Exceeded maximum number of joint states (Approx. " + ((DataProducerParticipant.getMaximumSynchronousPacketSize() - CustomLogDataPublisherType.getTypeSize(0, 0)) / 8 - 1) + ")");
+            throw new RuntimeException("Exceeded maximum number of joint states (Approx. " + ((RTPSDataProducerParticipant.getMaximumSynchronousPacketSize() - CustomLogDataPublisherType.getTypeSize(0, 0)) / 8 - 1) + ")");
          }
       }
 
