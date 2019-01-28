@@ -82,14 +82,6 @@ public class BoundingBoxCollisionChecker
       this.bodyPoseYaw = bodyPoseYaw;
    }
 
-   public void setBoxDimensions(double bodyPoseX, double bodyPoseY, double bodyPoseZ, double bodyPoseYaw)
-   {
-      this.bodyPoseX = bodyPoseX;
-      this.bodyPoseY = bodyPoseY;
-      this.bodyPoseZ = bodyPoseZ;
-      this.bodyPoseYaw = bodyPoseYaw;
-   }
-
    public BodyCollisionData checkForCollision()
    {
       checkInputs();
@@ -119,11 +111,17 @@ public class BoundingBoxCollisionChecker
                }
                else
                {
-                  planarRegion.getTransformToWorld(tempTransform);
+                  tempTransform.setTranslationAndIdentityRotation(bodyPoseX, bodyPoseY, bodyPoseZ);
+                  tempTransform.setRotationYaw(bodyPoseYaw);
+                  tempTransform.invert();
                   tempTransform.transform(tempPoint1);
-                  double dx = Math.abs(tempPoint1.getX() - 0.5 * parameters.getBodyBoxDepth());
-                  double dy = Math.abs(tempPoint1.getY() - 0.5 * parameters.getBodyBoxWidth());
-                  collisionData.setDistanceFromBoundingBox(Math.min(dx, dy));
+
+                  double dx = Math.abs(tempPoint1.getX()) - 0.5 * parameters.getBodyBoxDepth();
+                  double dy = Math.abs(tempPoint1.getY()) - 0.5 * parameters.getBodyBoxWidth();
+                  if(dx > 0.0)
+                     collisionData.setDistanceFromBoundingBox(dx);
+                  else
+                     collisionData.setDistanceFromBoundingBox(dy);
                }
 
                setDimensionsToUpperBound();
@@ -150,8 +148,8 @@ public class BoundingBoxCollisionChecker
 
    private void setDimensionsToUpperBound()
    {
-      double planarDimensionIncrease = parameters.getCostParameters().getBoundingBoxCost();
-      bodyBox.setSize(parameters.getBodyBoxDepth() + planarDimensionIncrease, parameters.getBodyBoxWidth() + planarDimensionIncrease,
+      double planarDimensionIncrease = parameters.getCostParameters().getMaximum2dDistanceFromBoundingBoxToPenalize();
+      bodyBox.setSize(parameters.getBodyBoxDepth() + 2.0 * planarDimensionIncrease, parameters.getBodyBoxWidth() + 2.0 * planarDimensionIncrease,
                       parameters.getBodyBoxHeight());
       bodyBox.getBoundingBox3D(boundingBox);
       updateBodyBoxPolytope();
