@@ -5,8 +5,6 @@ import us.ihmc.footstepPlanning.graphSearch.collision.BodyCollisionData;
 import us.ihmc.footstepPlanning.graphSearch.collision.FootstepNodeBodyCollisionDetector;
 import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.FootstepNodeSnapperReadOnly;
 import us.ihmc.footstepPlanning.graphSearch.graph.FootstepNode;
-import us.ihmc.footstepPlanning.graphSearch.graph.FootstepNodeTools;
-import us.ihmc.footstepPlanning.graphSearch.graph.LatticeNode;
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParameters;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 
@@ -38,9 +36,8 @@ public class BodyCollisionNodeChecker extends FootstepNodeChecker
          return true;
       }
 
-      LatticeNode midFootNode = FootstepNodeTools.computeAverage(node.getLatticeNode(), previousNode.getLatticeNode());
       double height = snapper.getSnapData(node).getSnapTransform().getTranslationZ();
-      BodyCollisionData collisionData = collisionDetector.checkForCollision(midFootNode, height);
+      BodyCollisionData collisionData = collisionDetector.checkForCollision(node.getLatticeNode(), height);
       return !collisionData.isCollisionDetected();
    }
 
