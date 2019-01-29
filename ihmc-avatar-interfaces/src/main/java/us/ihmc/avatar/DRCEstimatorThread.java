@@ -170,8 +170,9 @@ public class DRCEstimatorThread implements MultiThreadedRobotControlElement
 
          double estimatorDT = stateEstimatorParameters.getEstimatorDT();
          SideDependentList<String> footForceSensorNames = sensorInformation.getFeetForceSensorNames();
+         String primaryImuName = sensorInformation.getPrimaryBodyImu();
          Collection<String> imuSensorNames = Arrays.asList(sensorInformation.getIMUSensorsToUseInStateEstimator());
-         stateEstimator = new HumanoidRobotEKFWithSimpleJoints(estimatorFullRobotModel, imuSensorNames, footForceSensorNames, sensorRawOutputMapReadOnly,
+         stateEstimator = new HumanoidRobotEKFWithSimpleJoints(estimatorFullRobotModel, primaryImuName, imuSensorNames, footForceSensorNames, sensorRawOutputMapReadOnly,
                                                                estimatorDT, gravity, sensorOutputMapReadOnly, yoGraphicsListRegistry);
 
          estimatorController.addRobotController(stateEstimator);
