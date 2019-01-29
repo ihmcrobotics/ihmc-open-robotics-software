@@ -12,7 +12,7 @@ import us.ihmc.footstepPlanning.FootstepPlan;
 import us.ihmc.footstepPlanning.FootstepPlannerStatus;
 import us.ihmc.footstepPlanning.FootstepPlannerType;
 import us.ihmc.footstepPlanning.*;
-import us.ihmc.footstepPlanning.graphSearch.collision.BoundingBoxCollisionChecker;
+import us.ihmc.footstepPlanning.graphSearch.collision.BoundingBoxCollisionDetector;
 import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.FootstepNodeSnapAndWiggler;
 import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.SimplePlanarRegionFootstepNodeSnapper;
 import us.ihmc.footstepPlanning.graphSearch.graph.visualization.MessageBasedPlannerListener;
@@ -326,7 +326,7 @@ public class FootstepPathCalculatorModule
       FootstepNodeExpansion expansion = new ParameterBasedNodeExpansion(parameters);
       SimplePlanarRegionFootstepNodeSnapper snapper = new SimplePlanarRegionFootstepNodeSnapper(footPolygons);
       FootstepNodeSnapAndWiggler postProcessingSnapper = new FootstepNodeSnapAndWiggler(footPolygons, parameters);
-      BoundingBoxCollisionChecker collisionChecker = new BoundingBoxCollisionChecker(parameters);
+      BoundingBoxCollisionDetector collisionChecker = new BoundingBoxCollisionDetector(parameters);
 
       SnapBasedNodeChecker snapBasedNodeChecker = new SnapBasedNodeChecker(parameters, footPolygons, snapper);
       BodyCollisionNodeChecker bodyCollisionNodeChecker = new BodyCollisionNodeChecker(collisionChecker, parameters, snapper);

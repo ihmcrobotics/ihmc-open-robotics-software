@@ -11,7 +11,7 @@ import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI;
-import us.ihmc.footstepPlanning.graphSearch.collision.BoundingBoxCollisionChecker;
+import us.ihmc.footstepPlanning.graphSearch.collision.BoundingBoxCollisionDetector;
 import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.FootstepNodeSnapData;
 import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.SimplePlanarRegionFootstepNodeSnapper;
 import us.ihmc.footstepPlanning.graphSearch.graph.FootstepNode;
@@ -87,7 +87,7 @@ public class NodeCheckerRenderer extends AnimationTimer
 
       snapper = new SimplePlanarRegionFootstepNodeSnapper(footPolygons);
 
-      BoundingBoxCollisionChecker collisionChecker = new BoundingBoxCollisionChecker(parameters);
+      BoundingBoxCollisionDetector collisionChecker = new BoundingBoxCollisionDetector(parameters);
       SnapBasedNodeChecker snapBasedNodeChecker = new SnapBasedNodeChecker(parameters, footPolygons, snapper);
       BodyCollisionNodeChecker bodyCollisionNodeChecker = new BodyCollisionNodeChecker(collisionChecker, parameters, snapper);
       PlanarRegionBaseOfCliffAvoider cliffAvoider = new PlanarRegionBaseOfCliffAvoider(parameters, snapper, footPolygons);
