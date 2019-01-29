@@ -1,7 +1,6 @@
 package us.ihmc.robotEnvironmentAwareness.hardware;
 
 import java.awt.Color;
-import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.Arrays;
@@ -31,12 +30,12 @@ public class MultisenseStereoVisionPointCloudReceiver extends AbstractRosTopicSu
 
    private final IHMCROS2Publisher<StereoVisionPointCloudMessage> stereoVisionPublisher;
 
-   public MultisenseStereoVisionPointCloudReceiver() throws URISyntaxException, IOException
+   public MultisenseStereoVisionPointCloudReceiver() throws URISyntaxException
    {
       super(PointCloud2._TYPE);
       URI masterURI = new URI("http://10.6.192.14:11311");
       RosMainNode rosMainNode = new RosMainNode(masterURI, "StereoVisionPublisher", true);
-      rosMainNode.attachSubscriber("/multisense/image_points2_color", this);
+      rosMainNode.attachSubscriber("/multisense/image_points2_color_world", this);
 
       rosMainNode.execute();
 
@@ -86,7 +85,7 @@ public class MultisenseStereoVisionPointCloudReceiver extends AbstractRosTopicSu
       stereoVisionPublisher.publish(stereoVisionMessage);
    }
 
-   public static void main(String[] args) throws URISyntaxException, IOException
+   public static void main(String[] args) throws URISyntaxException
    {
       new MultisenseStereoVisionPointCloudReceiver();
    }

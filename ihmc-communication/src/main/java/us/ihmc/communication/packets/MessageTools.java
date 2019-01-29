@@ -892,4 +892,12 @@ public class MessageTools
       }
       return scanPoints;
    }
+   
+   public static void unpackScanPoint(StereoVisionPointCloudMessage stereoVisionPointCloudMessage, int index, Point3DBasics scanPointToPack)
+   {
+      index *= 3;
+      scanPointToPack.setX(stereoVisionPointCloudMessage.getPointCloud().get(index++));
+      scanPointToPack.setY(stereoVisionPointCloudMessage.getPointCloud().get(index++));
+      scanPointToPack.setZ(stereoVisionPointCloudMessage.getPointCloud().get(index++));
+   }
 }
