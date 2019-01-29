@@ -61,7 +61,7 @@ public class FootstepCostBuilder
       if (includePitchAndRollCost.get())
          compositeFootstepCost.addFootstepCost(new PitchAndRollBasedCost(footstepPlannerParameters.get().getCostParameters(), snapper.get()));
 
-      if(includeBoundingBoxCost.get() && collisionDetector.get() != null)
+      if(includeBoundingBoxCost.get() && collisionDetector.hasValue())
          compositeFootstepCost.addFootstepCost(new BodyCollisionNodeCost(collisionDetector.get(), footstepPlannerParameters.get().getCostParameters(), snapper.get()));
 
       compositeFootstepCost.addFootstepCost(new DistanceAndYawBasedCost(footstepPlannerParameters.get()));
