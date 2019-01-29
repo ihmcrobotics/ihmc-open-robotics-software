@@ -24,6 +24,7 @@ import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicCoordinateSystem;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition;
@@ -63,9 +64,10 @@ public class LeggedRobotEKF implements StateEstimatorController
    private final List<OneDoFJointBasics> oneDoFJoints;
    private final List<JointState> jointStates = new ArrayList<>();
 
-   private final List<IMUSensorReadOnly> imuOutputs;
    private final List<AngularVelocitySensor> angularVelocitySensors = new ArrayList<>();
+   private final List<IMUSensorReadOnly> angularVelocitySensorOutputs = new ArrayList<>();
    private final List<LinearAccelerationSensor> linearAccelerationSensors = new ArrayList<>();
+   private final List<IMUSensorReadOnly> linearAccelerationSensorOutputs = new ArrayList<>();
 
    private final SensorRawOutputMapReadOnly sensorOutput;
    private final List<JointPositionSensor> jointPositionSensors = new ArrayList<>();
@@ -94,8 +96,8 @@ public class LeggedRobotEKF implements StateEstimatorController
 
    private final AtomicBoolean fixRobotRequest = new AtomicBoolean(false);
    private final YoBoolean fixRobot = new YoBoolean("FixRobot", registry);
-   
-   public LeggedRobotEKF(FloatingJointBasics rootJoint, List<OneDoFJointBasics> oneDoFJoints, Collection<String> imuNames,
+
+   public LeggedRobotEKF(FloatingJointBasics rootJoint, List<OneDoFJointBasics> oneDoFJoints, String primaryImuName, Collection<String> imuNames,
                          Map<String, ReferenceFrame> forceSensorMap, SensorRawOutputMapReadOnly sensorOutput, double dt, double gravity,
                          YoGraphicsListRegistry graphicsListRegistry)
    {
@@ -103,41 +105,29 @@ public class LeggedRobotEKF implements StateEstimatorController
       this.rootJoint = rootJoint;
       this.oneDoFJoints = oneDoFJoints;
 
-      String rootBodyName = rootJoint.getSuccessor().getName();
-      LogTools.info("Creating pose state for " + rootBodyName);
-      rootState = new PoseState(rootBodyName, dt, rootJoint.getFrameAfterJoint(), registry);
+      weight = -Arrays.asList(ScrewTools.computeSubtreeSuccessors(rootJoint.getPredecessor())).stream().collect(Collectors.summingDouble(body -> body.getInertia().getMass())) * gravity;
+
       List<Sensor> sensors = new ArrayList<>();
-      for (OneDoFJointBasics oneDoFJoint : oneDoFJoints)
-      {
-         LogTools.info("Creating joint state for " + oneDoFJoint.getName());
-         JointState jointState = new JointState(oneDoFJoint.getName(), dt, registry);
-         jointStates.add(jointState);
-         JointPositionSensor jointPositionSensor = new JointPositionSensorWithBacklash(oneDoFJoint.getName(), dt, registry);
-         jointPositionSensors.add(jointPositionSensor);
-         sensors.add(jointPositionSensor);
-         jointAngles.add(new YoDouble(oneDoFJoint.getName() + "JointAngle", registry));
-      }
+      rootState = createState(rootJoint, oneDoFJoints, dt, sensors);
+      createImuSensors(primaryImuName, imuNames, sensorOutput, dt, sensors);
+      createFootSensors(rootJoint, forceSensorMap, sensorOutput, dt, gravity, graphicsListRegistry, sensors);
 
-      imuOutputs = sensorOutput.getIMURawOutputs().stream().filter(imu -> imuNames.contains(imu.getSensorName())).collect(Collectors.toList());
-      for (IMUSensorReadOnly imuOutput : imuOutputs)
-      {
-         LogTools.info("Adding IMU sensor " + imuOutput.getSensorName());
-         String name = FilterTools.stringToPrefix(imuOutput.getSensorName());
-         RigidBodyBasics imuBody = imuOutput.getMeasurementLink();
-         ReferenceFrame imuFrame = imuOutput.getMeasurementFrame();
-         AngularVelocitySensor angularVelocitySensor = new AngularVelocitySensor(name + "AngularVelocity", dt, imuBody, imuFrame, false, registry);
-         LinearAccelerationSensor linearAccelerationSensor = new LinearAccelerationSensor(name + "LinearAcceleration", dt, imuBody, imuFrame, false, registry);
-         angularVelocitySensors.add(angularVelocitySensor);
-         linearAccelerationSensors.add(linearAccelerationSensor);
-         sensors.add(angularVelocitySensor);
-         sensors.add(linearAccelerationSensor);
-      }
+      RobotState robotState = new RobotState(rootState, jointStates);
+      stateEstimator = new StateEstimator(sensors, robotState, registry);
 
+      if (graphicsListRegistry != null)
+      {
+         graphicsListRegistry.registerYoGraphic("EKF", pelvisVisualization);
+      }
+   }
+
+   private void createFootSensors(FloatingJointBasics rootJoint, Map<String, ReferenceFrame> forceSensorMap, SensorRawOutputMapReadOnly sensorOutput, double dt,
+                          double gravity, YoGraphicsListRegistry graphicsListRegistry, List<Sensor> sensors)
+   {
       DoubleProvider forceFilter = new DoubleParameter("ForceFilter", registry, 100.0);
       DoubleProvider forceAlpha = () -> AlphaFilteredYoVariable.computeAlphaGivenBreakFrequencyProperly(forceFilter .getValue(), dt);
       DoubleProvider torqueFilter = new DoubleParameter("TorqueFilter", registry, 100.0);
       DoubleProvider torqueAlpha = () -> AlphaFilteredYoVariable.computeAlphaGivenBreakFrequencyProperly(torqueFilter .getValue(), dt);
-      weight = -Arrays.asList(ScrewTools.computeSubtreeSuccessors(rootJoint.getPredecessor())).stream().collect(Collectors.summingDouble(body -> body.getInertia().getMass())) * gravity;
       for (String forceSensorName : forceSensorMap.keySet())
       {
          ReferenceFrame soleFrame = forceSensorMap.get(forceSensorName);
@@ -195,14 +185,50 @@ public class LeggedRobotEKF implements StateEstimatorController
          copFrames.add(copFrame);
          sensors.add(footVelocitySensor);
       }
+   }
 
-      RobotState robotState = new RobotState(rootState, jointStates);
-      stateEstimator = new StateEstimator(sensors, robotState, registry);
-
-      if (graphicsListRegistry != null)
+   private void createImuSensors(String primaryImuName, Collection<String> imuNames, SensorRawOutputMapReadOnly sensorOutput, double dt, List<Sensor> sensors)
+   {
+      List<IMUSensorReadOnly> imuOutputs = sensorOutput.getIMURawOutputs().stream().filter(imu -> imuNames.contains(imu.getSensorName())).collect(Collectors.toList());
+      for (IMUSensorReadOnly imuOutput : imuOutputs)
       {
-         graphicsListRegistry.registerYoGraphic("EKF", pelvisVisualization);
+         String name = FilterTools.stringToPrefix(imuOutput.getSensorName());
+         RigidBodyBasics imuBody = imuOutput.getMeasurementLink();
+         ReferenceFrame imuFrame = imuOutput.getMeasurementFrame();
+
+         LogTools.info("Adding angular velocity sensor " + imuOutput.getSensorName());
+         AngularVelocitySensor angularVelocitySensor = new AngularVelocitySensor(name + "AngularVelocity", dt, imuBody, imuFrame, false, registry);
+         angularVelocitySensors.add(angularVelocitySensor);
+         angularVelocitySensorOutputs.add(imuOutput);
+         sensors.add(angularVelocitySensor);
+
+         if (imuOutput.getSensorName().equals(primaryImuName))
+         {
+            LogTools.info("Adding linear acceleration sensor " + imuOutput.getSensorName());
+            LinearAccelerationSensor linearAccelerationSensor = new LinearAccelerationSensor(name + "LinearAcceleration", dt, imuBody, imuFrame, false, registry);
+            linearAccelerationSensors.add(linearAccelerationSensor);
+            linearAccelerationSensorOutputs.add(imuOutput);
+            sensors.add(linearAccelerationSensor);
+         }
       }
+   }
+
+   private PoseState createState(FloatingJointBasics rootJoint, List<OneDoFJointBasics> oneDoFJoints, double dt, List<Sensor> sensors)
+   {
+      String rootBodyName = rootJoint.getSuccessor().getName();
+      LogTools.info("Creating pose state for " + rootBodyName);
+      PoseState rootState = new PoseState(rootBodyName, dt, rootJoint.getFrameAfterJoint(), registry);
+      for (OneDoFJointBasics oneDoFJoint : oneDoFJoints)
+      {
+         LogTools.info("Creating joint state for " + oneDoFJoint.getName());
+         JointState jointState = new JointState(oneDoFJoint.getName(), dt, registry);
+         jointStates.add(jointState);
+         JointPositionSensor jointPositionSensor = new JointPositionSensorWithBacklash(oneDoFJoint.getName(), dt, registry);
+         jointPositionSensors.add(jointPositionSensor);
+         sensors.add(jointPositionSensor);
+         jointAngles.add(new YoDouble(oneDoFJoint.getName() + "JointAngle", registry));
+      }
+      return rootState;
    }
 
    @Override
@@ -245,12 +271,19 @@ public class LeggedRobotEKF implements StateEstimatorController
          double jointPositionMeasurement = sensorOutput.getJointPositionRawOutput(oneDoFJoints.get(jointIdx));
          jointPositionSensors.get(jointIdx).setJointPositionMeasurement(jointPositionMeasurement);
       }
-      for (int imuIdx = 0; imuIdx < imuOutputs.size(); imuIdx++)
+
+      for (int imuIdx = 0; imuIdx < angularVelocitySensors.size(); imuIdx++)
       {
-         IMUSensorReadOnly imuOutput = imuOutputs.get(imuIdx);
-         angularVelocitySensors.get(imuIdx).setMeasurement(imuOutput.getAngularVelocityMeasurement());
-         linearAccelerationSensors.get(imuIdx).setMeasurement(imuOutput.getLinearAccelerationMeasurement());
+         Vector3DReadOnly angularVelocityMeasurement = angularVelocitySensorOutputs.get(imuIdx).getAngularVelocityMeasurement();
+         angularVelocitySensors.get(imuIdx).setMeasurement(angularVelocityMeasurement);
       }
+
+      for (int imuIdx = 0; imuIdx < linearAccelerationSensors.size(); imuIdx++)
+      {
+         Vector3DReadOnly linearAccelerationMeasurement = linearAccelerationSensorOutputs.get(imuIdx).getLinearAccelerationMeasurement();
+         linearAccelerationSensors.get(imuIdx).setMeasurement(linearAccelerationMeasurement);
+      }
+
       for (int footIdx = 0; footIdx < footVelocitySensors.size(); footIdx++)
       {
          forceSensorOutputs.get(footIdx).getWrench(footWrench);

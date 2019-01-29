@@ -222,9 +222,7 @@
                 <parameter name="RLegAkxAccelerationVariance" type="DoubleParameter" min="0.0" max="1.0" value="1000.0"/>
                 <parameter name="RLegAkxJointPositionVariance" type="DoubleParameter" min="0.0" max="1.0" value="1.0E-4"/>
                 <parameter name="PelvisImuSensorAtPelvisFrameAngularVelocityVariance" type="DoubleParameter" min="0.0" max="1.0" value="0.01"/>
-                <parameter name="PelvisImuSensorAtPelvisFrameAngularVelocityBiasVariance" type="DoubleParameter" min="0.0" max="1.0" value="1.0E-10"/>
                 <parameter name="PelvisImuSensorAtPelvisFrameLinearAccelerationVariance" type="DoubleParameter" min="0.0" max="1.0" value="0.01"/>
-                <parameter name="PelvisImuSensorAtPelvisFrameLinearAccelerationBiasVariance" type="DoubleParameter" min="0.0" max="1.0" value="1.0E-10"/>
                 <parameter name="LFootMinVariance" type="DoubleParameter" min="0.0" max="1.0" value="0.01"/>
                 <parameter name="RFootMinVariance" type="DoubleParameter" min="0.0" max="1.0" value="0.01"/>
                 <parameter name="LFootWeightFractionForNoTrust" type="DoubleParameter" min="0.0" max="1.0" value="0.05"/>
