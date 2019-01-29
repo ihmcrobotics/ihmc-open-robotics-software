@@ -446,17 +446,6 @@ public interface FootstepPlannerParameters
    }
 
    /**
-    * The bounding box for body collision checking (see {@link #checkForBodyBoxCollisions}) places the box
-    * at the mid-foot frame between consecutive steps. If {@code t} if the xy-translation between these two steps
-    * in mid-foot frame, the box's depth and with are expanded by {@code alpha * t.x} and {@code alpha * t.y} respectively.
-    * @return
-    */
-   default double getStepTranslationBoundingBoxScaleFactor()
-   {
-      return 0.0;
-   }
-
-   /**
     * Parameter used inside the node expansion to avoid footsteps that would be on top of the stance foot.
     * Nodes are only added to the expanded list if they are outside the box around the stance foot defined by
     * this parameter.

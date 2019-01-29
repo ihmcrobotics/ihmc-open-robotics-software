@@ -133,12 +133,6 @@ public class ValkyrieFootstepPlannerParameters implements FootstepPlannerParamet
    }
 
    @Override
-   public double getStepTranslationBoundingBoxScaleFactor()
-   {
-      return 0.65;
-   }
-
-   @Override
    public double getMaximumXYWiggleDistance()
    {
       return 0.04;

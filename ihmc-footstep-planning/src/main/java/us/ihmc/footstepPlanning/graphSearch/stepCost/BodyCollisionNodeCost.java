@@ -24,6 +24,11 @@ public class BodyCollisionNodeCost implements FootstepCost
    @Override
    public double compute(FootstepNode startNode, FootstepNode endNode)
    {
+      if(costParameters.getBoundingBoxCost() <= 0.0 || costParameters.getMaximum2dDistanceFromBoundingBoxToPenalize() <= 0.0)
+      {
+         return 0.0;
+      }
+
       double height = snapper.getSnapData(endNode).getSnapTransform().getTranslationZ();
       BodyCollisionData collisionData = collisionDetector.checkForCollision(endNode.getLatticeNode(), height);
 
@@ -37,7 +42,7 @@ public class BodyCollisionNodeCost implements FootstepCost
       }
       else
       {
-         return costParameters.getBoundingBoxCost() * (costParameters.getMaximum2dDistanceFromBoundingBoxToPenalize() - collisionData.getDistanceFromBoundingBox());
+         return costParameters.getBoundingBoxCost() * (1.0 - collisionData.getDistanceFromBoundingBox() / costParameters.getMaximum2dDistanceFromBoundingBoxToPenalize());
       }
    }
 }
