@@ -24,7 +24,7 @@ public class FootstepNodeBodyCollisionDetector
 
    public BodyCollisionData checkForCollision(LatticeNode node, double height)
    {
-      if(collisionDataHolder.containsKey(node))
+      if (collisionDataHolder.containsKey(node))
       {
          return collisionDataHolder.get(node);
       }

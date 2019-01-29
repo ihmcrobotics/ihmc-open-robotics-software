@@ -162,6 +162,7 @@ public class FootstepPlanningStage implements FootstepPlanner
       costBuilder.setIncludeHeightCost(true);
       costBuilder.setIncludePitchAndRollCost(true);
       costBuilder.setIncludeBoundingBoxCost(true);
+      costBuilder.setCollisionDetector(collisionDetector);
 
       FootstepCost footstepCost = costBuilder.buildCost();
 

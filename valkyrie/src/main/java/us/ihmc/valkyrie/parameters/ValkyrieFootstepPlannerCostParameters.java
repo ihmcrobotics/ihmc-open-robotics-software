@@ -8,7 +8,7 @@ public class ValkyrieFootstepPlannerCostParameters implements FootstepPlannerCos
    @Override
    public DoubleProvider getAStarHeuristicsWeight()
    {
-      return () -> 3.0;
+      return () -> 5.0;
    }
 
    @Override
@@ -27,5 +27,17 @@ public class ValkyrieFootstepPlannerCostParameters implements FootstepPlannerCos
    public double getForwardWeight()
    {
       return 2.5;
+   }
+
+   @Override
+   public double getMaximum2dDistanceFromBoundingBoxToPenalize()
+   {
+      return 0.2;
+   }
+
+   @Override
+   public double getBoundingBoxCost()
+   {
+      return 40.0;
    }
 }
