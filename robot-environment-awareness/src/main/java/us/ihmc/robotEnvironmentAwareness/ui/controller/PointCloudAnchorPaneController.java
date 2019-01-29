@@ -2,6 +2,8 @@ package us.ihmc.robotEnvironmentAwareness.ui.controller;
 
 import javafx.fxml.FXML;
 import javafx.scene.control.Slider;
+import javafx.scene.control.Spinner;
+import javafx.scene.control.SpinnerValueFactory.IntegerSpinnerValueFactory;
 import javafx.scene.control.ToggleButton;
 import us.ihmc.javaFXToolkit.messager.MessageBidirectionalBinding.PropertyToMessageTypeConverter;
 import us.ihmc.robotEnvironmentAwareness.communication.REAModuleAPI;
@@ -14,6 +16,12 @@ public class PointCloudAnchorPaneController extends REABasicUIController
    private Slider scanHistorySizeSlider;
    @FXML
    private ToggleButton enableStereoButton;
+   @FXML
+   private Spinner<Integer> sizeOfPointCloudSpinner;
+   
+   private static final int maximumSizeOfPointCloud = 200000;
+   private static final int minimumSizeOfPointCloud = 10000;
+   public static final int initialSizeOfPointCloud = 50000;
 
    private final PropertyToMessageTypeConverter<Integer, Number> numberToIntegerConverter = new PropertyToMessageTypeConverter<Integer, Number>()
    {
@@ -26,7 +34,7 @@ public class PointCloudAnchorPaneController extends REABasicUIController
       @Override
       public Number interpret(Integer newValue)
       {
-         return new Double(newValue.doubleValue());
+         return new Double(newValue.intValue());
       }
    };
 
@@ -37,10 +45,11 @@ public class PointCloudAnchorPaneController extends REABasicUIController
    public void bindControls()
    {
       load();
+      sizeOfPointCloudSpinner.setValueFactory(createNumberOfPointsValueFactory(initialSizeOfPointCloud));
       uiMessager.bindBidirectionalInternal(REAModuleAPI.UILidarScanShow, enableLidarButton.selectedProperty(), true);
       uiMessager.bindBidirectionalInternal(REAModuleAPI.UILidarScanSize, scanHistorySizeSlider.valueProperty(), numberToIntegerConverter, true);
       uiMessager.bindBidirectionalInternal(REAModuleAPI.UIStereoVisionPointCloudShow, enableStereoButton.selectedProperty(), true);
-
+      uiMessager.bindBidirectionalGlobal(REAModuleAPI.UIStereoVisionPointCloudSize, sizeOfPointCloudSpinner.getValueFactory().valueProperty());
    }
 
    @FXML
@@ -68,5 +77,13 @@ public class PointCloudAnchorPaneController extends REABasicUIController
       loadUIControlProperty(REAModuleAPI.UILidarScanShow, enableLidarButton);
       loadUIControlProperty(REAModuleAPI.UILidarScanSize, scanHistorySizeSlider);
       loadUIControlProperty(REAModuleAPI.UIStereoVisionPointCloudShow, enableStereoButton);
+   }
+
+   private IntegerSpinnerValueFactory createNumberOfPointsValueFactory(int initialValue)
+   {
+      int min = minimumSizeOfPointCloud;
+      int max = maximumSizeOfPointCloud;
+      int amountToStepBy = minimumSizeOfPointCloud;
+      return new IntegerSpinnerValueFactory(min, max, initialValue, amountToStepBy);
    }
 }

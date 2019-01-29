@@ -109,6 +109,7 @@ public class REAModuleAPI
    public static final Topic<Integer> UILidarScanSize = Root.child(UI).child(Lidar).topic(Size);
    public static final Topic<Boolean> UIStereoVisionPointCloudShow = Root.child(UI).child(StereoVisionPointCloud).topic(Show);
    public static final Topic<Boolean> UIStereoVisionPointCloudClear = Root.child(UI).child(StereoVisionPointCloud).topic(Clear);
+   public static final Topic<Integer> UIStereoVisionPointCloudSize = Root.child(UI).child(StereoVisionPointCloud).topic(Size);
 
    public static final Topic<Boolean> UISegmentationDataExportRequest = Root.child(UI).child(DataExporter).child(Segmentation).topic(Export);
    public static final Topic<String> UISegmentationDataExporterDirectory = Root.child(UI).child(DataExporter).child(Segmentation).topic(Path);

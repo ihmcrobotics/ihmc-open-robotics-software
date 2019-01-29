@@ -53,7 +53,6 @@ public class MultisenseStereoVisionPointCloudReceiver extends AbstractRosTopicSu
       List<Point3D> pointCloudToPublish = Arrays.stream(pointCloud).collect(Collectors.toList());
       List<Color> colorsToPublish = Arrays.stream(colors).collect(Collectors.toList());
 
-      System.out.println("" + pointCloudToPublish.size());
       Random random = new Random();
       while (pointCloudToPublish.size() > MAX_NUMBER_OF_POINTS)
       {
