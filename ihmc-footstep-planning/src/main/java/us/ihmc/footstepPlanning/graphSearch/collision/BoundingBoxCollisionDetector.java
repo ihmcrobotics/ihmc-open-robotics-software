@@ -16,11 +16,10 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
-public class BoundingBoxCollisionDetector
+class BoundingBoxCollisionDetector
 {
    private final FootstepPlannerParameters parameters;
    private PlanarRegionsList planarRegionsList;
-   private final HashMap<LatticeNode, BodyCollisionData> collisionDataHolder = new HashMap<>();
    private final List<ConvexPolytope> planarRegionPolytopes = new ArrayList<>();
    private final GilbertJohnsonKeerthiCollisionDetector collisionDetector = new GilbertJohnsonKeerthiCollisionDetector();
 
@@ -37,14 +36,13 @@ public class BoundingBoxCollisionDetector
    private final Point3D tempPoint1 = new Point3D();
    private final Point3D tempPoint2 = new Point3D();
 
-   public BoundingBoxCollisionDetector(FootstepPlannerParameters parameters)
+   BoundingBoxCollisionDetector(FootstepPlannerParameters parameters)
    {
       this.parameters = parameters;
    }
 
    public void setPlanarRegionsList(PlanarRegionsList planarRegions)
    {
-      collisionDataHolder.clear();
       planarRegionPolytopes.clear();
       this.planarRegionsList = planarRegions;
 
@@ -68,12 +66,6 @@ public class BoundingBoxCollisionDetector
       }
    }
 
-   public void reset()
-   {
-      collisionDataHolder.clear();
-      planarRegionPolytopes.clear();
-   }
-
    public void setBoxPose(double bodyPoseX, double bodyPoseY, double bodyPoseZ, double bodyPoseYaw)
    {
       this.bodyPoseX = bodyPoseX;
@@ -85,10 +77,6 @@ public class BoundingBoxCollisionDetector
    public BodyCollisionData checkForCollision()
    {
       checkInputs();
-
-      LatticeNode node = new LatticeNode(bodyPoseX, bodyPoseY, bodyPoseYaw);
-      if(collisionDataHolder.containsKey(node))
-         return collisionDataHolder.get(node);
 
       setBoundingBoxPosition();
       setDimensionsToUpperBound();
@@ -129,7 +117,6 @@ public class BoundingBoxCollisionDetector
          }
       }
 
-      collisionDataHolder.put(node, collisionData);
       return collisionData;
    }
 

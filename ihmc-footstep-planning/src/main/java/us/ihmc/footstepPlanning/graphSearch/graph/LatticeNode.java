@@ -36,6 +36,21 @@ public class LatticeNode
       return yawIndex;
    }
 
+   public double getX()
+   {
+      return LatticeNode.gridSizeXY * getXIndex();
+   }
+
+   public double getY()
+   {
+      return LatticeNode.gridSizeXY * getYIndex();
+   }
+
+   public double getYaw()
+   {
+      return LatticeNode.gridSizeYaw * getYawIndex();
+   }
+
    private static int computeHashCode(LatticeNode cell)
    {
       int result = 1;

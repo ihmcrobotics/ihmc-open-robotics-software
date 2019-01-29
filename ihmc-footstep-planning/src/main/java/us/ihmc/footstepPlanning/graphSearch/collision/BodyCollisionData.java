@@ -8,7 +8,7 @@ public class BodyCollisionData
    private boolean collisionDetected = false;
 
    /**
-    * Distance of closest detected point to bounding box
+    * Distance of closest detected point to bounding box if no collision was detected
     */
    private double distanceFromBoundingBox = Double.NaN;
 

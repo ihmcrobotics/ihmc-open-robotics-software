@@ -5,6 +5,7 @@ import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple2D.Vector2D;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.robotics.geometry.AngleTools;
 
 public class FootstepNodeTools
 {
@@ -59,5 +60,10 @@ public class FootstepNodeTools
       FootstepNodeTools.getNodeTransform(node, nodeTransform);
 
       footPolygonToPack.applyTransform(nodeTransform);
+   }
+
+   public static LatticeNode computeAverage(LatticeNode nodeA, LatticeNode nodeB)
+   {
+      return new LatticeNode(0.5 * (nodeA.getX() + nodeB.getX()), 0.5 * (nodeA.getY() + nodeB.getY()),AngleTools.computeAngleAverage(nodeA.getYaw(), nodeB.getYaw()));
    }
 }
