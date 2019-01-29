@@ -1,6 +1,12 @@
 package us.ihmc.pathPlanning.visibilityGraphs.dijkstra;
 
+import static junit.framework.TestCase.assertTrue;
+
+import java.util.ArrayList;
+import java.util.List;
+
 import org.junit.Test;
+
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations;
 import us.ihmc.continuousIntegration.IntegrationCategory;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
@@ -8,11 +14,6 @@ import us.ihmc.pathPlanning.visibilityGraphs.dataStructure.Connection;
 import us.ihmc.pathPlanning.visibilityGraphs.dataStructure.ConnectionPoint3D;
 import us.ihmc.pathPlanning.visibilityGraphs.dataStructure.VisibilityMap;
 import us.ihmc.pathPlanning.visibilityGraphs.interfaces.VisibilityMapHolder;
-
-import java.util.ArrayList;
-import java.util.List;
-
-import static junit.framework.TestCase.assertTrue;
 
 @ContinuousIntegrationAnnotations.ContinuousIntegrationPlan(categories = {IntegrationCategory.FAST})
 public class DijkstraVisibilityGraphPlannerTest

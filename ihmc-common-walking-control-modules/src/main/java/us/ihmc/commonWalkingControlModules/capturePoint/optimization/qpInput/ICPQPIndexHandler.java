@@ -1,12 +1,15 @@
 package us.ihmc.commonWalkingControlModules.capturePoint.optimization.qpInput;
 
 import us.ihmc.commonWalkingControlModules.capturePoint.optimization.ICPOptimizationQPSolver;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoBoolean;
 
 /**
  * Class intended to manage the indices of all components used in the {@link ICPOptimizationQPSolver}.
  */
 public class ICPQPIndexHandler
 {
+   private static final String prefix = "indexHandler";
    /** Number of footsteps registered with the solver. */
    private int numberOfFootstepsToConsider = 0;
    /** The total number of free variables for consideration in the optimization. */
@@ -22,18 +25,27 @@ public class ICPQPIndexHandler
    private int cmpFeedbackIndex;
 
    /** Whether or not to use step adjustment in the optimization. If {@link #numberOfFootstepsToConsider} is 0, this term should be false */
-   private boolean useStepAdjustment;
+   private final YoBoolean useStepAdjustment;
    /** Whether or not to include cmp feedback task in the optimization. */
-   private boolean hasCMPFeedbackTask = false;
+   private final YoBoolean hasCMPFeedbackTask;
    /** Whether or not to use angular momentum during feedback. This means the CMP will be constrained to being in the support polygon. */
-   private boolean useAngularMomentum = false;
+   private final YoBoolean useAngularMomentum;
+
+   public ICPQPIndexHandler(YoVariableRegistry registry)
+   {
+      useStepAdjustment = new YoBoolean(prefix + "UseStepAdjustment", registry);
+      hasCMPFeedbackTask = new YoBoolean(prefix + "HasCMPFeedbackTask", registry);
+      useAngularMomentum = new YoBoolean(prefix + "UseAngularMomentum", registry);
+      hasCMPFeedbackTask.set(false);
+      useAngularMomentum.set(false);
+   }
 
    /**
     * Resets the number of footsteps for the controller to consider.
     */
    public void resetFootsteps()
    {
-      useStepAdjustment = false;
+      useStepAdjustment.set(false);
       numberOfFootstepsToConsider = 0;
    }
 
@@ -42,7 +54,7 @@ public class ICPQPIndexHandler
     */
    public void registerFootstep()
    {
-      useStepAdjustment = true;
+      useStepAdjustment.set(true);
       numberOfFootstepsToConsider++;
    }
 
@@ -63,7 +75,7 @@ public class ICPQPIndexHandler
     */
    public boolean useStepAdjustment()
    {
-      return useStepAdjustment;
+      return useStepAdjustment.getBooleanValue();
    }
 
    /**
@@ -72,7 +84,7 @@ public class ICPQPIndexHandler
     */
    public void setHasCMPFeedbackTask(boolean hasCMPFeedbackTask)
    {
-      this.hasCMPFeedbackTask = hasCMPFeedbackTask;
+      this.hasCMPFeedbackTask.set(hasCMPFeedbackTask);
    }
 
    /**
@@ -81,7 +93,7 @@ public class ICPQPIndexHandler
     */
    public void setUseAngularMomentum(boolean useAngularMomentum)
    {
-      this.useAngularMomentum = useAngularMomentum;
+      this.useAngularMomentum.set(useAngularMomentum);
    }
 
    /**
@@ -90,7 +102,7 @@ public class ICPQPIndexHandler
     */
    public boolean hasCMPFeedbackTask()
    {
-      return hasCMPFeedbackTask;
+      return hasCMPFeedbackTask.getBooleanValue();
    }
 
    /**
@@ -99,7 +111,7 @@ public class ICPQPIndexHandler
     */
    public boolean useAngularMomentum()
    {
-      return useAngularMomentum;
+      return useAngularMomentum.getBooleanValue();
    }
 
    /**
@@ -109,16 +121,16 @@ public class ICPQPIndexHandler
    {
       copFeedbackIndex = 0;
       cmpFeedbackIndex = copFeedbackIndex + 2;
-      if (hasCMPFeedbackTask)
+      if (hasCMPFeedbackTask.getBooleanValue())
          footstepStartingIndex = cmpFeedbackIndex + 2;
       else
          footstepStartingIndex = copFeedbackIndex + 2;
 
       numberOfFootstepVariables = 2 * numberOfFootstepsToConsider;
       numberOfFreeVariables = 2; // the CMP delta
-      if (useStepAdjustment)
+      if (useStepAdjustment.getBooleanValue())
          numberOfFreeVariables += numberOfFootstepVariables; // all the footstep locations
-      if (hasCMPFeedbackTask)
+      if (hasCMPFeedbackTask.getBooleanValue())
          numberOfFreeVariables += 2;
    }
 

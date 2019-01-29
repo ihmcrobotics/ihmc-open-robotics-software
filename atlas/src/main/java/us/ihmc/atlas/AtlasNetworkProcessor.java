@@ -60,11 +60,12 @@ public class AtlasNetworkProcessor
         networkModuleParams.enableKinematicsToolboxVisualizer(ENABLE_KINEMATICS_TOOLBOX_SERVER);
         networkModuleParams.enableMocapModule(ENABLE_MOCAP_MODULE);
         networkModuleParams.enableKinematicsToolboxVisualizer(true);
-        networkModuleParams.enableFootstepPlanningToolbox(true);
+        networkModuleParams.enableFootstepPlanningToolbox(false);
         networkModuleParams.enableKinematicsToolbox(true);
-        networkModuleParams.enableFootstepPlanningToolboxVisualizer(true);
+        networkModuleParams.enableFootstepPlanningToolboxVisualizer(false);
         networkModuleParams.setFilterControllerInputMessages(true);
         networkModuleParams.setEnableJoystickBasedStepping(true);
+        networkModuleParams.enableBipedalSupportPlanarRegionPublisher(true);
 
         networkModuleParams.enableWholeBodyTrajectoryToolbox(true);
 

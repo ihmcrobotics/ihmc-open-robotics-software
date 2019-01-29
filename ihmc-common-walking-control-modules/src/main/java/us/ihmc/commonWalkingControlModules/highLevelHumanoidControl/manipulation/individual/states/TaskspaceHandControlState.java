@@ -1,10 +1,15 @@
 package us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.manipulation.individual.states;
 
+import static us.ihmc.communication.packets.Packet.INVALID_MESSAGE_ID;
+
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.SpatialFeedbackControlCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.InverseDynamicsCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.PrivilegedConfigurationCommand;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.manipulation.individual.HandControlMode;
+import us.ihmc.commons.FormattingTools;
 import us.ihmc.commons.PrintTools;
+import us.ihmc.commons.lists.RecyclingArrayDeque;
+import us.ihmc.communication.packets.ExecutionMode;
 import us.ihmc.communication.packets.Packet;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
@@ -18,24 +23,17 @@ import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsList;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.HandTrajectoryCommand;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
-import us.ihmc.communication.packets.ExecutionMode;
+import us.ihmc.robotics.controllers.pidGains.YoPIDSE3Gains;
+import us.ihmc.robotics.math.trajectories.generators.MultipleWaypointsOrientationTrajectoryGenerator;
+import us.ihmc.robotics.math.trajectories.generators.MultipleWaypointsPositionTrajectoryGenerator;
+import us.ihmc.robotics.math.trajectories.trajectorypoints.FrameSE3TrajectoryPoint;
+import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
+import us.ihmc.robotics.weightMatrices.SolverWeightLevels;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoFramePoseUsingYawPitchRoll;
 import us.ihmc.yoVariables.variable.YoFrameVector3D;
 import us.ihmc.yoVariables.variable.YoLong;
-import us.ihmc.robotics.controllers.pidGains.YoPIDSE3Gains;
-import us.ihmc.commons.lists.RecyclingArrayDeque;
-import us.ihmc.robotics.math.trajectories.waypoints.FrameSE3TrajectoryPoint;
-import us.ihmc.robotics.math.trajectories.waypoints.MultipleWaypointsOrientationTrajectoryGenerator;
-import us.ihmc.robotics.math.trajectories.waypoints.MultipleWaypointsPositionTrajectoryGenerator;
-import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
-import us.ihmc.robotics.weightMatrices.SolverWeightLevels;
-import us.ihmc.commons.FormattingTools;
-
-import java.util.Collection;
-
-import static us.ihmc.communication.packets.Packet.INVALID_MESSAGE_ID;
 
 /**
  * @author twan
@@ -87,8 +85,7 @@ public class TaskspaceHandControlState extends HandControlState
    private final RecyclingArrayDeque<HandTrajectoryCommand> commandQueue = new RecyclingArrayDeque<>(HandTrajectoryCommand.class, HandTrajectoryCommand::set);
 
    public TaskspaceHandControlState(String namePrefix, RigidBodyBasics base, RigidBodyBasics endEffector, RigidBodyBasics chest, YoPIDSE3Gains gains,
-         Collection<ReferenceFrame> trajectoryFrames, YoGraphicsListRegistry yoGraphicsListRegistry,
-         YoVariableRegistry parentRegistry)
+                                    YoGraphicsListRegistry yoGraphicsListRegistry, YoVariableRegistry parentRegistry)
    {
       super(HandControlMode.TASKSPACE);
       this.gains = gains;
@@ -111,14 +108,8 @@ public class TaskspaceHandControlState extends HandControlState
       controlFrame = new PoseReferenceFrame("trackingFrame", endEffectorFrame);
       yoDesiredPose = new YoFramePoseUsingYawPitchRoll(namePrefix + "DesiredPose", worldFrame, registry);
 
-      positionTrajectoryGenerator = new MultipleWaypointsPositionTrajectoryGenerator(namePrefix, true, worldFrame, registry);
-      orientationTrajectoryGenerator = new MultipleWaypointsOrientationTrajectoryGenerator(namePrefix, true, worldFrame, registry);
-
-      for (ReferenceFrame frameToRegister : trajectoryFrames)
-      {
-         positionTrajectoryGenerator.registerNewTrajectoryFrame(frameToRegister);
-         orientationTrajectoryGenerator.registerNewTrajectoryFrame(frameToRegister);
-      }
+      positionTrajectoryGenerator = new MultipleWaypointsPositionTrajectoryGenerator(namePrefix, worldFrame, registry);
+      orientationTrajectoryGenerator = new MultipleWaypointsOrientationTrajectoryGenerator(namePrefix, worldFrame, registry);
 
       setupVisualization(namePrefix, yoGraphicsListRegistry);
 
@@ -378,7 +369,7 @@ public class TaskspaceHandControlState extends HandControlState
 
    public ReferenceFrame getTrajectoryFrame()
    {
-      return positionTrajectoryGenerator.getCurrentTrajectoryFrame();
+      return positionTrajectoryGenerator.getReferenceFrame();
    }
 
    @Override

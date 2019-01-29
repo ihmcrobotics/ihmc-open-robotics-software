@@ -1,5 +1,5 @@
 plugins {
-   id("us.ihmc.ihmc-build") version "0.15.4"
+   id("us.ihmc.ihmc-build") version "0.15.5"
    id("us.ihmc.ihmc-ci-plugin") version "0.18.0"
    id("us.ihmc.log-tools") version "0.2.2"
 }
@@ -26,8 +26,8 @@ mainDependencies {
    compile group: "com.google.guava", name: "guava", version: "18.0"
 
    compile group: "us.ihmc", name: "ihmc-commons", version: "0.24.0"
-   compile group: "us.ihmc", name: "euclid-core", version: "0.7.0"
-   compile group: "us.ihmc", name: "ihmc-graphics-description", version: "0.12.7"
+   compile group: "us.ihmc", name: "euclid", version: "0.11.0"
+   compile group: "us.ihmc", name: "ihmc-graphics-description", version: "0.12.9"
 }
 
 testDependencies {

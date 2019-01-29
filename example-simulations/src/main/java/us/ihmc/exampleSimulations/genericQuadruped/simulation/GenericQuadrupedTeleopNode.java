@@ -1,7 +1,6 @@
 package us.ihmc.exampleSimulations.genericQuadruped.simulation;
 
 import java.io.IOException;
-import java.io.InputStream;
 
 import javax.swing.JFrame;
 
@@ -11,11 +10,10 @@ import us.ihmc.exampleSimulations.genericQuadruped.GenericQuadrupedSimulationFac
 import us.ihmc.exampleSimulations.genericQuadruped.model.GenericQuadrupedModelFactory;
 import us.ihmc.exampleSimulations.genericQuadruped.model.GenericQuadrupedPhysicalProperties;
 import us.ihmc.exampleSimulations.genericQuadruped.parameters.GenericQuadrupedXGaitSettings;
-import us.ihmc.quadrupedRobotics.input.QuadrupedXBoxAdapter;
+import us.ihmc.quadrupedCommunication.teleop.QuadrupedXBoxAdapter;
 import us.ihmc.robotModels.FullQuadrupedRobotModel;
 import us.ihmc.tools.inputDevices.joystick.Joystick;
 import us.ihmc.tools.inputDevices.joystick.JoystickModel;
-import us.ihmc.wholeBodyController.parameters.ParameterLoaderHelper;
 
 /**
  * To run with simulation, make sure {@link GenericQuadrupedSimulationFactory#USE_NETWORKING} is true
@@ -31,7 +29,7 @@ public class GenericQuadrupedTeleopNode
 
       String robotName = modelFactory.getRobotDescription().getName();
       Joystick joystick = new Joystick(JoystickModel.XBOX_ONE, 0);
-      QuadrupedXBoxAdapter eventListener = new QuadrupedXBoxAdapter(robotName, joystick, fullRobotModel, xGaitSettings, physicalProperties);
+      QuadrupedXBoxAdapter eventListener = new QuadrupedXBoxAdapter(robotName, joystick, fullRobotModel, xGaitSettings, physicalProperties.getNominalBodyHeight());
 
       eventListener.start();
       joystick.addJoystickEventListener(eventListener);

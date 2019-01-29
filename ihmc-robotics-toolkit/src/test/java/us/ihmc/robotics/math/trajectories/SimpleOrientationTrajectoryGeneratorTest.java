@@ -1,7 +1,6 @@
 package us.ihmc.robotics.math.trajectories;
 
 import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
 
 import java.util.Random;
 
@@ -28,55 +27,6 @@ public class SimpleOrientationTrajectoryGeneratorTest
          EuclidCoreRandomTools.nextRigidBodyTransform(random));
 
    private static final double EPSILON = 1.0e-10;
-
-	@ContinuousIntegrationTest(estimatedDuration = 0.0)
-	@Test(timeout = 30000)
-   public void testRuntimeExceptions()
-   {
-      YoVariableRegistry registry = new YoVariableRegistry("youpiloup");
-      SimpleOrientationTrajectoryGenerator trajToTest1 = new SimpleOrientationTrajectoryGenerator("blop1", worldFrame, registry);
-      SimpleOrientationTrajectoryGenerator trajToTest2 = new SimpleOrientationTrajectoryGenerator("blop2", false, worldFrame, registry);
-
-      try
-      {
-         trajToTest1.registerNewTrajectoryFrame(frameA);
-         fail("Should have thrown an exception.");
-      }
-      catch (Exception e)
-      {
-         // Good
-      }
-
-      try
-      {
-         trajToTest1.switchTrajectoryFrame(worldFrame);
-         fail("Should have thrown an exception.");
-      }
-      catch (Exception e)
-      {
-         // Good
-      }
-
-      try
-      {
-         trajToTest2.registerNewTrajectoryFrame(frameA);
-         fail("Should have thrown an exception.");
-      }
-      catch (Exception e)
-      {
-         // Good
-      }
-
-      try
-      {
-         trajToTest2.switchTrajectoryFrame(worldFrame);
-         fail("Should have thrown an exception.");
-      }
-      catch (Exception e)
-      {
-         // Good
-      }
-   }
 
 	@ContinuousIntegrationTest(estimatedDuration = 0.1)
 	@Test(timeout = 30000)
@@ -251,8 +201,7 @@ public class SimpleOrientationTrajectoryGeneratorTest
       originalOrientation = new OrientationInterpolationTrajectoryGenerator("orientation2", frameA,
             trajectoryTimeProvider, initialOrientationProvider, finalOrientationProvider, registry);
 
-      trajToTest.registerNewTrajectoryFrame(frameA);
-      trajToTest.switchTrajectoryFrame(frameA);
+      trajToTest.setReferenceFrame(frameA);
       trajToTest.setInitialOrientation(initialOrientation);
       trajToTest.setFinalOrientation(finalOrientation);
       trajToTest.setTrajectoryTime(trajectoryTimeProvider.getValue());

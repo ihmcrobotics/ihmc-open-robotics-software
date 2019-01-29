@@ -2,6 +2,7 @@ package us.ihmc.robotDataLogger;
 
 import java.io.IOException;
 
+import us.ihmc.log.LogTools;
 import us.ihmc.robotDataLogger.handshake.IDLYoVariableHandshakeParser;
 import us.ihmc.robotDataLogger.handshake.LogHandshake;
 import us.ihmc.robotDataLogger.rtps.DataConsumerParticipant;
@@ -15,7 +16,6 @@ import us.ihmc.yoVariables.registry.YoVariableRegistry;
  * This is a general client for a logging sessions. A listener can be attached to provide desired functionality.
  * 
  * @author jesper
- *
  */
 public class YoVariableClientImplementation implements YoVariableClientInterface
 {
@@ -63,7 +63,7 @@ public class YoVariableClientImplementation implements YoVariableClientInterface
     */
    public void connectionClosed()
    {
-      System.out.println("Disconnected, closing client.");
+      LogTools.info("Disconnected, closing client.");
       dataConsumerParticipant.disconnectSession();
       yoVariablesUpdatedListener.disconnected();
    }
@@ -86,7 +86,7 @@ public class YoVariableClientImplementation implements YoVariableClientInterface
          throw new RuntimeException("Client already started");
       }
       
-      System.out.println("Requesting handshake");
+      LogTools.info("Requesting handshake");
       Handshake handshake = dataConsumerParticipant.getHandshake(announcement, timeout);
 
       handshakeParser.parseFrom(handshake);
@@ -96,16 +96,16 @@ public class YoVariableClientImplementation implements YoVariableClientInterface
       if (announcement.getModelFileDescription().getHasModel())
       {
          logHandshake.setModelName(announcement.getModelFileDescription().getNameAsString());
-         System.out.println("Requesting model file");
+         LogTools.info("Requesting model file");
          logHandshake.setModel(dataConsumerParticipant.getModelFile(announcement, timeout));
          logHandshake.setModelLoaderClass(announcement.getModelFileDescription().getModelLoaderClassAsString());
          logHandshake.setResourceDirectories(announcement.getModelFileDescription().getResourceDirectories().toStringArray());
          if (announcement.getModelFileDescription().getHasResourceZip())
          {
-            System.out.println("Requesting resource bundle");
+            LogTools.info("Requesting resource bundle");
             logHandshake.setResourceZip(dataConsumerParticipant.getResourceZip(announcement, timeout));
          }
-         System.out.println("Received model");
+         LogTools.info("Received model");
 
       }
 
@@ -136,7 +136,7 @@ public class YoVariableClientImplementation implements YoVariableClientInterface
       }
       if(!dataConsumerParticipant.isConnectedToDomain())
       {
-         throw new RuntimeException("Client has closed completly");
+         throw new RuntimeException("Client has closed completely");
       }
       dataConsumerParticipant.createSession(announcement, handshakeParser, this, variableChangedProducer, yoVariablesUpdatedListener, yoVariablesUpdatedListener, debugRegistry);
    }
@@ -151,8 +151,7 @@ public class YoVariableClientImplementation implements YoVariableClientInterface
    {
       dataConsumerParticipant.remove();
    }
-   
-   
+
    /**
     * Broadcast a clear log request for the current session
     * 
@@ -216,5 +215,4 @@ public class YoVariableClientImplementation implements YoVariableClientInterface
    {
       yoVariablesUpdatedListener.connected();
    }
-
 }

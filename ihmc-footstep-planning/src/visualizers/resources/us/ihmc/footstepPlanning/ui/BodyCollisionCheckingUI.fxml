@@ -26,6 +26,7 @@
 
                 <Label text="Body Box Width" GridPane.halignment="RIGHT" GridPane.columnIndex="2" GridPane.rowIndex="2"/>
                 <Label text="Body Box Depth" GridPane.halignment="RIGHT" GridPane.columnIndex="2" GridPane.rowIndex="3"/>
+                <Label text="Step BB scale" GridPane.halignment="RIGHT" GridPane.columnIndex="2" GridPane.rowIndex="4" />
 
                 <Label text="Body Box Height" GridPane.halignment="RIGHT" GridPane.columnIndex="4" GridPane.rowIndex="2"/>
                 <Label text="Body Box Base X" GridPane.halignment="RIGHT" GridPane.columnIndex="4" GridPane.rowIndex="3"/>
@@ -35,6 +36,7 @@
 
                 <Spinner fx:id="bodyWidth" GridPane.halignment="CENTER" prefHeight="38.0" prefWidth="175.0" GridPane.columnIndex="3" GridPane.rowIndex="2"/>
                 <Spinner fx:id="bodyDepth" GridPane.halignment="CENTER" prefHeight="38.0" prefWidth="175.0" GridPane.columnIndex="3" GridPane.rowIndex="3"/>
+                <Spinner fx:id="stepBBScale" GridPane.halignment="CENTER" prefHeight="38.0" prefWidth="175.0" GridPane.columnIndex="3" GridPane.rowIndex="4" />
 
                 <Spinner fx:id="bodyHeight" GridPane.halignment="CENTER" prefHeight="38.0" prefWidth="175.0" GridPane.columnIndex="5" GridPane.rowIndex="2"/>
                 <Spinner fx:id="bodyBoxBaseX" GridPane.halignment="CENTER" prefHeight="38.0" prefWidth="175.0" GridPane.columnIndex="5" GridPane.rowIndex="3"/>

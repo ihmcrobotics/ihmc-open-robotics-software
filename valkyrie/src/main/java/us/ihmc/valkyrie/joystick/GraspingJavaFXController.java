@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
 
+import controller_msgs.msg.dds.KinematicsPlanningToolboxInputMessage;
 import controller_msgs.msg.dds.KinematicsPlanningToolboxOutputStatus;
 import controller_msgs.msg.dds.KinematicsPlanningToolboxRigidBodyMessage;
 import controller_msgs.msg.dds.ToolboxStateMessage;
@@ -87,7 +88,7 @@ public class GraspingJavaFXController
    private final HandFingerTrajectoryMessagePublisher handFingerTrajectoryMessagePublisher;
    private final IHMCROS2Publisher<WholeBodyTrajectoryMessage> wholeBodyTrajectoryPublisher;
    private final IHMCROS2Publisher<ToolboxStateMessage> toolboxStatePublisher;
-   private final IHMCROS2Publisher<KinematicsPlanningToolboxRigidBodyMessage> toolboxMessagePublisher;
+   private final IHMCROS2Publisher<KinematicsPlanningToolboxInputMessage> toolboxMessagePublisher;
 
    private final AtomicReference<List<Node>> objectsToVisualizeReference = new AtomicReference<>(new ArrayList<>());
    private final RigidBodyTransform controlTransform = new RigidBodyTransform();
@@ -166,7 +167,8 @@ public class GraspingJavaFXController
 
       wholeBodyTrajectoryPublisher = ROS2Tools.createPublisher(ros2Node, WholeBodyTrajectoryMessage.class, subscriberTopicNameGenerator);
       toolboxStatePublisher = ROS2Tools.createPublisher(ros2Node, ToolboxStateMessage.class, toolboxRequestTopicNameGenerator);
-      toolboxMessagePublisher = ROS2Tools.createPublisher(ros2Node, KinematicsPlanningToolboxRigidBodyMessage.class, toolboxRequestTopicNameGenerator);
+      //toolboxMessagePublisher = ROS2Tools.createPublisher(ros2Node, KinematicsPlanningToolboxRigidBodyMessage.class, toolboxRequestTopicNameGenerator);
+      toolboxMessagePublisher = ROS2Tools.createPublisher(ros2Node, KinematicsPlanningToolboxInputMessage.class, toolboxRequestTopicNameGenerator);
       this.handFingerTrajectoryMessagePublisher = handFingerTrajectoryMessagePublisher;
 
       ROS2Tools.createCallbackSubscription(ros2Node, KinematicsPlanningToolboxOutputStatus.class, toolboxResponseTopicNameGenerator,
@@ -299,6 +301,7 @@ public class GraspingJavaFXController
          /*
           * generate key frames for sending message.
           */
+         KinematicsPlanningToolboxInputMessage message = new KinematicsPlanningToolboxInputMessage();
          for (RobotSide robotSide : RobotSide.values)
          {
             List<RigidBodyTransform> selectedKeyFramePoses = sideDependentKeyFramePoses.get(robotSide);
@@ -319,7 +322,6 @@ public class GraspingJavaFXController
                      double alpha = (j + 1) / (double) (sideDependentNumberOfWayPointsForMessage.get(robotSide) + 1);
                      Pose3D poseToAppend = new Pose3D(posePrevious);
                      poseToAppend.interpolate(pose, alpha);
-                     System.out.println(poseToAppend);
                      sideDependentKeyFramePosesForMessage.get(robotSide).add(poseToAppend);
                   }
                }
@@ -340,9 +342,15 @@ public class GraspingJavaFXController
                endEffectorMessage.getControlFramePositionInEndEffector().set(controlFrameToHand.getPosition());
                endEffectorMessage.getControlFrameOrientationInEndEffector().set(controlFrameToHand.getOrientation());
 
-               toolboxMessagePublisher.publish(endEffectorMessage);
+               message.getRigidBodyMessages().add().set(endEffectorMessage);
+
                System.out.println(robotSide + " message sent ");
             }
+         }
+         if (message.getRigidBodyMessages().size() != 0)
+         {
+            System.out.println("getRigidBodyMessages " + message.getRigidBodyMessages().size());
+            toolboxMessagePublisher.publish(message);
          }
       }
    }

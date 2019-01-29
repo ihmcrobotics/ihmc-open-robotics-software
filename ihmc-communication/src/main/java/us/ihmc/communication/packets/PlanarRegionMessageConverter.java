@@ -13,6 +13,7 @@ import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.idl.IDLSequence.Object;
+import us.ihmc.robotics.geometry.AngleTools;
 import us.ihmc.robotics.geometry.PlanarRegion;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 
@@ -24,6 +25,9 @@ public class PlanarRegionMessageConverter
       message.setRegionId(planarRegion.getRegionId());
       planarRegion.getPointInRegion(message.getRegionOrigin());
       planarRegion.getNormal(message.getRegionNormal());
+      RigidBodyTransform transform = new RigidBodyTransform();
+      planarRegion.getTransformToWorld(transform);
+      message.getRegionOrientation().set(transform.getRotationMatrix());
 
       message.setConcaveHullSize(planarRegion.getConcaveHullSize());
       message.setNumberOfConvexPolygons(planarRegion.getNumberOfConvexPolygons());
@@ -54,10 +58,16 @@ public class PlanarRegionMessageConverter
    {
       RigidBodyTransform transformToWorld = new RigidBodyTransform();
 
-      Vector3D regionOrigin = new Vector3D(message.getRegionOrigin());
-      Vector3D regionNormal = new Vector3D(message.getRegionNormal());
-      AxisAngle regionOrientation = EuclidGeometryTools.axisAngleFromZUpToVector3D(regionNormal);
-      transformToWorld.set(regionOrientation, regionOrigin);
+      if (Math.abs(AngleTools.trimAngleMinusPiToPi(message.getRegionOrientation().getAngle())) < 1.0e-3)
+      {
+         Vector3D regionNormal = new Vector3D(message.getRegionNormal());
+         AxisAngle regionOrientation = EuclidGeometryTools.axisAngleFromZUpToVector3D(regionNormal);
+         transformToWorld.set(regionOrientation, message.getRegionOrigin());
+      }
+      else
+      {
+         transformToWorld.set(message.getRegionOrientation(), message.getRegionOrigin());
+      }
 
       Object<Point3D> vertexBuffer = message.getVertexBuffer();
 
@@ -98,7 +108,9 @@ public class PlanarRegionMessageConverter
 
       for (PlanarRegion planarRegion : planarRegionsList.getPlanarRegionsAsList())
       {
-         planarRegion.getPointInRegion(message.getRegionOrigin().add());
+         RigidBodyTransform transform = new RigidBodyTransform();
+         planarRegion.getTransformToWorld(transform);
+         transform.get(message.getRegionOrientation().add(), message.getRegionOrigin().add());
          planarRegion.getNormal(message.getRegionNormal().add());
          message.getRegionId().add(planarRegion.getRegionId());
 
@@ -141,8 +153,16 @@ public class PlanarRegionMessageConverter
       for (int regionIndex = 0; regionIndex < message.getConcaveHullsSize().size(); regionIndex++)
       {
          RigidBodyTransform transformToWorld = new RigidBodyTransform();
-         AxisAngle regionOrientation = EuclidGeometryTools.axisAngleFromZUpToVector3D(normals.get(regionIndex));
-         transformToWorld.set(regionOrientation, origins.get(regionIndex));
+         if (message.getRegionOrientation().isEmpty()
+               || Math.abs(AngleTools.trimAngleMinusPiToPi(message.getRegionOrientation().get(regionIndex).getAngle())) < 1.0e-3)
+         {
+            AxisAngle regionOrientation = EuclidGeometryTools.axisAngleFromZUpToVector3D(normals.get(regionIndex));
+            transformToWorld.set(regionOrientation, origins.get(regionIndex));
+         }
+         else
+         {
+            transformToWorld.set(message.getRegionOrientation().get(regionIndex), message.getRegionOrigin().get(regionIndex));
+         }
 
          upperBound += message.getConcaveHullsSize().get(regionIndex);
          List<Point2D> concaveHullVertices = new ArrayList<>();
@@ -181,6 +201,7 @@ public class PlanarRegionMessageConverter
       {
          message.getRegionId().add(planarRegionMessage.getRegionId());
          message.getRegionOrigin().add().set(planarRegionMessage.getRegionOrigin());
+         message.getRegionOrientation().add().set(planarRegionMessage.getRegionOrientation());
          message.getRegionNormal().add().set(planarRegionMessage.getRegionNormal());
          message.getConcaveHullsSize().add(planarRegionMessage.getConcaveHullSize());
          message.getNumberOfConvexPolygons().add(planarRegionMessage.getNumberOfConvexPolygons());

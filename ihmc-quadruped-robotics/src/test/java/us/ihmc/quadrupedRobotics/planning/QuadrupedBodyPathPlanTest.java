@@ -6,10 +6,13 @@ import org.junit.Before;
 import org.junit.Test;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.euclid.tuple3D.Vector3D;
-import us.ihmc.quadrupedRobotics.*;
+import us.ihmc.quadrupedCommunication.teleop.RemoteQuadrupedTeleopManager;
+import us.ihmc.quadrupedRobotics.QuadrupedForceTestYoVariables;
+import us.ihmc.quadrupedRobotics.QuadrupedMultiRobotTestInterface;
+import us.ihmc.quadrupedRobotics.QuadrupedTestBehaviors;
+import us.ihmc.quadrupedRobotics.QuadrupedTestFactory;
 import us.ihmc.quadrupedRobotics.controller.QuadrupedControlMode;
 import us.ihmc.quadrupedRobotics.environments.SimpleMazeEnvironment;
-import us.ihmc.quadrupedRobotics.input.managers.QuadrupedTeleopManager;
 import us.ihmc.quadrupedRobotics.simulation.QuadrupedGroundContactModelType;
 import us.ihmc.simulationConstructionSetTools.util.simulationrunner.GoalOrientedTestConductor;
 import us.ihmc.simulationconstructionset.util.ground.TerrainObject3D;
@@ -21,7 +24,7 @@ public abstract class QuadrupedBodyPathPlanTest implements QuadrupedMultiRobotTe
 {
    private GoalOrientedTestConductor conductor;
    private QuadrupedForceTestYoVariables variables;
-   private QuadrupedTeleopManager stepTeleopManager;
+   private RemoteQuadrupedTeleopManager stepTeleopManager;
    private QuadrupedTestFactory quadrupedTestFactory;
 
    @Before
@@ -45,7 +48,7 @@ public abstract class QuadrupedBodyPathPlanTest implements QuadrupedMultiRobotTe
 
          conductor = quadrupedTestFactory.createTestConductor();
          variables = new QuadrupedForceTestYoVariables(conductor.getScs());
-         stepTeleopManager = quadrupedTestFactory.getStepTeleopManager();
+         stepTeleopManager = quadrupedTestFactory.getRemoteStepTeleopManager();
       }
       catch (IOException e)
       {
@@ -72,7 +75,7 @@ public abstract class QuadrupedBodyPathPlanTest implements QuadrupedMultiRobotTe
       setUpSimulation(null);
 
       QuadrupedTestBehaviors.readyXGait(conductor, variables, stepTeleopManager);
-      stepTeleopManager.getXGaitSettings().setEndPhaseShift(180);
+      stepTeleopManager.setEndPhaseShift(180);
 
       EuclideanTrajectoryPointMessage point1 = new EuclideanTrajectoryPointMessage();
       point1.setTime(3.0);
@@ -102,7 +105,7 @@ public abstract class QuadrupedBodyPathPlanTest implements QuadrupedMultiRobotTe
       setUpSimulation(new SimpleMazeEnvironment());
 
       QuadrupedTestBehaviors.readyXGait(conductor, variables, stepTeleopManager);
-      stepTeleopManager.getXGaitSettings().setEndPhaseShift(180);
+      stepTeleopManager.setEndPhaseShift(180);
 
       double time = 0.0;
       time += 3.0;

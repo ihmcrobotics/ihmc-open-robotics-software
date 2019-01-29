@@ -41,7 +41,7 @@ import us.ihmc.humanoidRobotics.communication.packets.walking.WalkingStatus;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.humanoidRobotics.footstep.FootstepTiming;
 import us.ihmc.robotics.contactable.ContactablePlaneBody;
-import us.ihmc.robotics.math.trajectories.waypoints.SimpleEuclideanTrajectoryPoint;
+import us.ihmc.robotics.math.trajectories.trajectorypoints.EuclideanTrajectoryPoint;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.yoVariables.parameters.DoubleParameter;
@@ -300,7 +300,7 @@ public class WalkingMessageHandler
     * @param trajectoryToPack the trajectory will be packed in here
     */
    public void getAngularMomentumTrajectory(double startTime, double endTime, int numberOfPoints,
-                                            RecyclingArrayList<SimpleEuclideanTrajectoryPoint> trajectoryToPack)
+                                            RecyclingArrayList<EuclideanTrajectoryPoint> trajectoryToPack)
    {
       momentumTrajectoryHandler.getAngularMomentumTrajectory(startTime, endTime, numberOfPoints, trajectoryToPack);
    }

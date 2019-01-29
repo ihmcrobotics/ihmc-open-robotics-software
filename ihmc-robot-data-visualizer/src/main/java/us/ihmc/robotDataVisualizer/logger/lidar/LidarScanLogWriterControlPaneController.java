@@ -4,7 +4,6 @@ import javafx.beans.value.ChangeListener;
 import javafx.fxml.FXML;
 import javafx.scene.control.TextField;
 import javafx.scene.control.ToggleButton;
-import us.ihmc.javaFXToolkit.TextFormatterTools;
 
 public class LidarScanLogWriterControlPaneController
 {
@@ -13,7 +12,7 @@ public class LidarScanLogWriterControlPaneController
    @FXML
    private ToggleButton connectToggleButton;
    @FXML
-   private TextField networkProcessorIPAdTextField;
+   private TextField lidarScanTopicNameTextField;
 
    private LidarScanLogViewer lidarScanLogViewer;
 
@@ -35,8 +34,7 @@ public class LidarScanLogWriterControlPaneController
 //      logDataToggleButton.selectedProperty().bindBidirectional(connectToggleButton.disableProperty());
 //      connectToggleButton.selectedProperty().bindBidirectional(logDataToggleButton.disableProperty());
 
-      networkProcessorIPAdTextField.setTextFormatter(TextFormatterTools.ipAddressTextFormatter());
-      networkProcessorIPAdTextField.setText(loggerController.networkProcessorAddressProperty().get());
+      lidarScanTopicNameTextField.setText(loggerController.lidarScanTopicNameProperty().get());
    }
 
    @FXML

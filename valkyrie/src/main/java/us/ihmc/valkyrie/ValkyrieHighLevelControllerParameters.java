@@ -126,8 +126,8 @@ public class ValkyrieHighLevelControllerParameters implements HighLevelControlle
 
          // position controlled on the real robot:
          configureSymmetricBehavior(behaviors, jointMap, ArmJointName.ELBOW_ROLL, JointDesiredControlMode.POSITION, 7.0, 0.0);
-         configureSymmetricBehavior(behaviors, jointMap, ArmJointName.WRIST_ROLL, JointDesiredControlMode.POSITION, 20.0, 0.5);
-         configureSymmetricBehavior(behaviors, jointMap, ArmJointName.FIRST_WRIST_PITCH, JointDesiredControlMode.POSITION, 20.0, 0.5);
+         configureSymmetricBehavior(behaviors, jointMap, ArmJointName.WRIST_ROLL, JointDesiredControlMode.POSITION, 20.0, 0.3);
+         configureSymmetricBehavior(behaviors, jointMap, ArmJointName.FIRST_WRIST_PITCH, JointDesiredControlMode.POSITION, 20.0, 0.3);
 
          configureBehavior(behaviors, jointMap, NeckJointName.DISTAL_NECK_PITCH, JointDesiredControlMode.POSITION, 0.0, 0.0);
          configureBehavior(behaviors, jointMap, NeckJointName.PROXIMAL_NECK_PITCH, JointDesiredControlMode.POSITION, 0.0, 0.0);

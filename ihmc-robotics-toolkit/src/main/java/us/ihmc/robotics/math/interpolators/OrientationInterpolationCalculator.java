@@ -1,8 +1,8 @@
 package us.ihmc.robotics.math.interpolators;
 
-import us.ihmc.euclid.referenceFrame.FrameQuaternion;
-import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.interfaces.FrameQuaternionBasics;
+import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DBasics;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.robotics.math.QuaternionCalculus;
@@ -31,7 +31,8 @@ public class OrientationInterpolationCalculator
     * @param alphaDot the interpolation rate
     * @return the angular velocity of the interpolated frame, w.r.t. the startOrientation, expressed in the frame in which the orientations were expressed
     */
-   public void computeAngularVelocity(FrameVector3D angularVelocityToPack, FrameQuaternion startOrientation, FrameQuaternion endOrientation, double alphaDot)
+   public void computeAngularVelocity(FrameVector3DBasics angularVelocityToPack, FrameQuaternionBasics startOrientation, FrameQuaternionBasics endOrientation,
+                                      double alphaDot)
    {
       startOrientation.checkReferenceFrameMatch(endOrientation);
       ReferenceFrame frame = startOrientation.getReferenceFrame();
@@ -71,7 +72,8 @@ public class OrientationInterpolationCalculator
     * @param alphaDoubleDot the interpolation acceleration
     * @return the angular acceleration of the interpolated frame, w.r.t. the startOrientation, expressed in the interpolated reference frame.
     */
-   public void computeAngularAcceleration(FrameVector3D angularAccelerationToPack, FrameQuaternion startOrientation, FrameQuaternion endOrientation, double alphaDoubleDot)
+   public void computeAngularAcceleration(FrameVector3DBasics angularAccelerationToPack, FrameQuaternionBasics startOrientation,
+                                          FrameQuaternionBasics endOrientation, double alphaDoubleDot)
    {
       computeAngularVelocity(angularAccelerationToPack, startOrientation, endOrientation, alphaDoubleDot); // it's really the same computation...
    }

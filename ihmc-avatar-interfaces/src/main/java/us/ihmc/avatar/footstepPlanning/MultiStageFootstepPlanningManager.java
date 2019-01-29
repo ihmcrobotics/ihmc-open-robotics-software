@@ -1,5 +1,6 @@
 package us.ihmc.avatar.footstepPlanning;
 
+import com.badlogic.gdx.graphics.g3d.particles.ParticleSorter.Distance;
 import controller_msgs.msg.dds.*;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.opencv.core.Point3;
@@ -16,14 +17,19 @@ import us.ihmc.euclid.geometry.Pose2D;
 import us.ihmc.euclid.referenceFrame.FramePoint2D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple2D.Vector2D;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.footstepPlanning.*;
 import us.ihmc.footstepPlanning.graphSearch.graph.visualization.MultiStagePlannerListener;
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParameters;
+import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepProcessingParameters;
 import us.ihmc.footstepPlanning.graphSearch.parameters.YoFootstepPlannerParameters;
+import us.ihmc.footstepPlanning.tools.FootstepPlannerIOTools;
+import us.ihmc.footstepPlanning.tools.FootstepPlannerMessageTools;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
+import us.ihmc.idl.IDLSequence.Object;
 import us.ihmc.pathPlanning.bodyPathPlanner.WaypointDefinedBodyPathPlanner;
 import us.ihmc.pathPlanning.statistics.ListOfStatistics;
 import us.ihmc.pathPlanning.statistics.PlannerStatistics;
@@ -36,6 +42,7 @@ import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.graphics.YoGraphicPlanarRegionsList;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
+import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.tools.lists.PairList;
 import us.ihmc.wholeBodyController.RobotContactPointParameters;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
@@ -69,8 +76,7 @@ public class MultiStageFootstepPlanningManager implements PlannerCompletionCallb
    private final AtomicReference<List<Point3D>> waypointPlan = new AtomicReference<>(null);
    private final AtomicReference<BodyPathPlan> bodyPathPlan = new AtomicReference<>(null);
    private final AtomicReference<FootstepPlan> footstepPlan = new AtomicReference<>(null);
-
-   private Optional<PlanarRegionsList> planarRegionsList = Optional.empty();
+   private final AtomicReference<PlanarRegionsList> planarRegionsList = new AtomicReference<>(null);
 
    private final YoBoolean isDone = new YoBoolean("isDone", registry);
    private final YoBoolean requestedPlanarRegions = new YoBoolean("RequestedPlanarRegions", registry);
@@ -84,8 +90,6 @@ public class MultiStageFootstepPlanningManager implements PlannerCompletionCallb
    private final YoDouble planningHorizonLength = new YoDouble("planningHorizonLength", registry);
    private final YoEnum<FootstepPlanningResult> pathResult = new YoEnum<>("pathPlanningResult", registry, FootstepPlanningResult.class);
    private final YoEnum<FootstepPlanningResult> stepResult = new YoEnum<>("stepResult", registry, FootstepPlanningResult.class);
-
-   private final YoGraphicPlanarRegionsList yoGraphicPlanarRegionsList;
 
    private final List<FootstepPlannerObjective> pathPlanningObjectivePool = new ArrayList<>();
 
@@ -123,6 +127,7 @@ public class MultiStageFootstepPlanningManager implements PlannerCompletionCallb
    private final YoFootstepPlannerParameters footstepPlanningParameters;
    private final YoVisibilityGraphParameters visibilityGraphsParameters;
    private IHMCRealtimeROS2Publisher<TextToSpeechPacket> textToSpeechPublisher;
+   private IHMCRealtimeROS2Publisher<FootstepPlannerParametersPacket> parametersPublisher;
 
    private final RobotContactPointParameters<RobotSide> contactPointParameters;
 
@@ -131,20 +136,21 @@ public class MultiStageFootstepPlanningManager implements PlannerCompletionCallb
    private final StatusMessageOutputManager statusOutputManager;
    private final ScheduledExecutorService executorService;
    private final YoBoolean initialize = new YoBoolean("initialize" + registry.getName(), registry);
+   private final YoBoolean waitingForPlanningRequest = new YoBoolean("waitingForPlanningRequest", registry);
 
    private final MultiStagePlannerListener plannerListener;
+   private final DistanceBasedSwingTimeCalculator swingTimeCalculator;
 
    private final int maxNumberOfPathPlanners;
    private final int maxNumberOfStepPlanners;
 
    public MultiStageFootstepPlanningManager(RobotContactPointParameters<RobotSide> contactPointParameters, FootstepPlannerParameters footstepPlannerParameters,
                                             VisibilityGraphsParameters visibilityGraphsParameters, StatusMessageOutputManager statusOutputManager,
-                                            YoVariableRegistry parentRegistry, YoGraphicsListRegistry graphicsListRegistry, long tickDurationMs)
+                                            YoVariableRegistry parentRegistry, long tickDurationMs)
    {
       this.contactPointParameters = contactPointParameters;
       this.statusOutputManager = statusOutputManager;
       this.tickDurationMs = tickDurationMs;
-      this.yoGraphicPlanarRegionsList = new YoGraphicPlanarRegionsList("FootstepPlannerPlanarRegions", 200, 30, registry);
       goalRecommendationHandler = new PlannerGoalRecommendationHandler(allStepPlanningStages, stepPlanningStagesInProgress);
 
       CPUTopology topology = new CPUTopology();
@@ -157,8 +163,6 @@ public class MultiStageFootstepPlanningManager implements PlannerCompletionCallb
       this.visibilityGraphsParameters = new YoVisibilityGraphParameters(visibilityGraphsParameters, registry);
 
       activePlanner.set(FootstepPlannerType.PLANAR_REGION_BIPEDAL);
-
-      graphicsListRegistry.registerYoGraphic("footstepPlanning", yoGraphicPlanarRegionsList);
       isDone.set(false);
       planId.set(FootstepPlanningRequestPacket.NO_PLAN_ID);
 
@@ -185,6 +189,7 @@ public class MultiStageFootstepPlanningManager implements PlannerCompletionCallb
 
       isDonePlanningPath.set(false);
       isDonePlanningSteps.set(false);
+      waitingForPlanningRequest.set(false);
 
       isDonePlanningPath.addVariableChangedListener(v -> {
          if (!isDonePlanningPath.getBooleanValue())
@@ -196,6 +201,19 @@ public class MultiStageFootstepPlanningManager implements PlannerCompletionCallb
          if (isDonePlanningSteps.getBooleanValue())
             statusOutputManager.reportStatusMessage(FootstepPlanningMessageReporter.packStatus(FootstepPlannerStatus.IDLE));
       });
+
+      FootstepProcessingParameters footstepProcessingParameters = footstepPlannerParameters.getFootstepProcessingParameters();
+      if(footstepProcessingParameters == null)
+      {
+         swingTimeCalculator = null;
+      }
+      else
+      {
+         swingTimeCalculator = new DistanceBasedSwingTimeCalculator(footstepProcessingParameters.getMinimumSwingTime(),
+                                                                    footstepProcessingParameters.getMaximumStepTranslationForMinimumSwingTime(),
+                                                                    footstepProcessingParameters.getMaximumSwingTime(),
+                                                                    footstepProcessingParameters.getMinimumStepTranslationForMaximumSwingTime());
+      }
 
       parentRegistry.addChild(registry);
       initialize.set(true);
@@ -344,21 +362,7 @@ public class MultiStageFootstepPlanningManager implements PlannerCompletionCallb
          globalPathSequenceIndex.increment();
          planner.setFootstepPlannerObjective(plannerGoal);
          planner.setPlanSequenceId(globalPathSequenceIndex.getIntegerValue());
-
-         PlanarRegionsList planarRegionsList;
-         if (this.planarRegionsList.isPresent())
-         {
-            planarRegionsList = this.planarRegionsList.get();
-            yoGraphicPlanarRegionsList.submitPlanarRegionsListToRender(planarRegionsList);
-            yoGraphicPlanarRegionsList.processPlanarRegionsListQueue();
-         }
-         else
-         {
-            planarRegionsList = null;
-            yoGraphicPlanarRegionsList.clear();
-         }
-
-         planner.setPlanarRegionsList(planarRegionsList);
+         planner.setPlanarRegionsList(planarRegionsList.get());
          planner.requestInitialize();
 
          Runnable runnable = planner.createStageRunnable();
@@ -389,20 +393,7 @@ public class MultiStageFootstepPlanningManager implements PlannerCompletionCallb
          planner.setFootstepPlannerObjective(plannerGoal);
          planner.setPlanSequenceId(globalStepSequenceIndex.getIntegerValue());
 
-         PlanarRegionsList planarRegionsList;
-         if (this.planarRegionsList.isPresent())
-         {
-            planarRegionsList = this.planarRegionsList.get();
-            yoGraphicPlanarRegionsList.submitPlanarRegionsListToRender(planarRegionsList);
-            yoGraphicPlanarRegionsList.processPlanarRegionsListQueue();
-         }
-         else
-         {
-            planarRegionsList = null;
-            yoGraphicPlanarRegionsList.clear();
-         }
-
-         planner.setPlanarRegions(planarRegionsList);
+         planner.setPlanarRegions(planarRegionsList.get());
          planner.requestInitialize();
 
          Runnable runnable = planner.createStageRunnable();
@@ -463,10 +454,14 @@ public class MultiStageFootstepPlanningManager implements PlannerCompletionCallb
 
    public void processRequest(FootstepPlanningRequestPacket request)
    {
+      if (!waitingForPlanningRequest.getBooleanValue())
+         return;
+
       isDone.set(false);
       isDonePlanningSteps.set(false);
       isDonePlanningPath.set(false);
       latestRequestReference.set(request);
+      waitingForPlanningRequest.set(false);
    }
 
    public void processFootstepPlannerParameters(FootstepPlannerParametersPacket parameters)
@@ -505,6 +500,22 @@ public class MultiStageFootstepPlanningManager implements PlannerCompletionCallb
 
       ListOfStatistics statistics = convertToListOfStatistics(mapToPopulate);
       sendPlannerStatistics(statistics);
+   }
+
+   public void broadcastPlannerParameters()
+   {
+      FootstepPlannerParametersPacket parametersPacket = new FootstepPlannerParametersPacket();
+
+      if(latestFootstepPlannerParametersReference.get() != null)
+      {
+         parametersPacket.set(latestFootstepPlannerParametersReference.get());
+      }
+      else
+      {
+         FootstepPlannerMessageTools.copyParametersToPacket(parametersPacket, footstepPlanningParameters);
+      }
+
+      parametersPublisher.publish(parametersPacket);
    }
 
    private boolean initialize()
@@ -546,15 +557,13 @@ public class MultiStageFootstepPlanningManager implements PlannerCompletionCallb
          activePlanner.set(requestedPlannerType);
       }
 
-      PlanarRegionsListMessage planarRegionsListMessage = request.getPlanarRegionsListMessage();
-      if (planarRegionsListMessage == null)
+      if(request.getAssumeFlatGround() || request.getPlanarRegionsListMessage() == null || request.getPlanarRegionsListMessage().getConcaveHullsSize().size() == 0)
       {
-         this.planarRegionsList = Optional.empty();
+         planarRegionsList.set(null);
       }
       else
       {
-         PlanarRegionsList planarRegionsList = PlanarRegionMessageConverter.convertToPlanarRegionsList(planarRegionsListMessage);
-         this.planarRegionsList = Optional.of(planarRegionsList);
+         planarRegionsList.set(PlanarRegionMessageConverter.convertToPlanarRegionsList(request.getPlanarRegionsListMessage()));
       }
 
       mainObjective = new FootstepPlannerObjective();
@@ -604,6 +613,9 @@ public class MultiStageFootstepPlanningManager implements PlannerCompletionCallb
          assignGoalsToAvailableStepPlanners();
       }
 
+      completedPathResults.clear();
+      completedStepResults.clear();
+
       return true;
    }
 
@@ -650,8 +662,8 @@ public class MultiStageFootstepPlanningManager implements PlannerCompletionCallb
             pathResult.set(pathStatus);
 
             sendMessageToUI("Result of path planning: " + planId.getIntegerValue() + ", " + pathStatus.toString());
-
             concatenatePathWaypoints();
+
             if (!computeBodyPath())
                reportPlannerFailed(pathResult.getEnumValue());
 
@@ -687,9 +699,15 @@ public class MultiStageFootstepPlanningManager implements PlannerCompletionCallb
             sendMessageToUI("Result of step planning: " + planId.getIntegerValue() + ", " + stepStatus.toString());
 
             concatenateFootstepPlans();
+            setStepHeightsForFlatGround();
             FootstepPlan footstepPlan = this.footstepPlan.getAndSet(null);
+
             FootstepPlanningToolboxOutputStatus footstepPlanMessage = packStepResult(footstepPlan, bodyPathPlan.getAndSet(null), stepStatus,
                                                                                      plannerTime.getDoubleValue());
+
+            if(swingTimeCalculator != null)
+               processSwingTimes(footstepPlanMessage.getFootstepDataList());
+
             statusOutputManager.reportStatusMessage(footstepPlanMessage);
 
             timeSpentInFootstepPlanner.set(plannerTime.getDoubleValue() - timeSpentBeforeFootstepPlanner.getDoubleValue());
@@ -712,6 +730,45 @@ public class MultiStageFootstepPlanningManager implements PlannerCompletionCallb
          plannerListener.plannerFinished(null);
 
       this.isDone.set(isDone);
+   }
+
+   private void processSwingTimes(FootstepDataListMessage footstepDataListMessage)
+   {
+      FramePose3D firstStepStancePose = new FramePose3D();
+      FramePose3D secondStepStancePose = new FramePose3D();
+
+      firstStepStancePose.set(mainObjective.getInitialStanceFootPose());
+
+      double idealStanceWidth = footstepPlanningParameters.getIdealFootstepWidth();
+      RobotSide initialStanceSide = mainObjective.getInitialStanceFootSide();
+      double yaw = firstStepStancePose.getYaw();
+      double vx = initialStanceSide.negateIfRightSide(Math.sin(yaw) * idealStanceWidth);
+      double vy = - initialStanceSide.negateIfRightSide(Math.cos(yaw) * idealStanceWidth);
+
+      secondStepStancePose.set(mainObjective.getInitialStanceFootPose());
+      secondStepStancePose.prependTranslation(vx, vy, 0.0);
+
+      Object<FootstepDataMessage> footstepDataList = footstepDataListMessage.getFootstepDataList();
+      for (int i = 0; i < footstepDataList.size(); i++)
+      {
+         FootstepDataMessage footstepDataMessage = footstepDataList.get(i);
+         Point3D startPoint = new Point3D();
+         Point3D endPoint = new Point3D();
+
+         startPoint.set(footstepDataMessage.getLocation());
+         if(i < 2)
+         {
+            endPoint.set(footstepDataMessage.getRobotSide() == initialStanceSide.toByte() ?
+                               firstStepStancePose.getPosition() :
+                               secondStepStancePose.getPosition());
+         }
+         else
+         {
+            endPoint.set(footstepDataList.get(i - 2).getLocation());
+         }
+
+         footstepDataMessage.setSwingDuration(swingTimeCalculator.calculateSwingTime(startPoint, endPoint));
+      }
    }
 
    private void checkPlannersForFailures()
@@ -911,6 +968,23 @@ public class MultiStageFootstepPlanningManager implements PlannerCompletionCallb
       footstepPlan.set(totalFootstepPlan);
    }
 
+   private void setStepHeightsForFlatGround()
+   {
+      if(planarRegionsList.get() == null && footstepPlan.get() != null)
+      {
+         double groundHeight = mainObjective.getInitialStanceFootPose().getPosition().getZ();
+
+         FootstepPlan footstepPlan = this.footstepPlan.get();
+         for (int i = 0; i < footstepPlan.getNumberOfSteps(); i++)
+         {
+            FramePose3D footPose = new FramePose3D();
+            footstepPlan.getFootstep(i).getSoleFramePose(footPose);
+            footPose.getPosition().addZ(groundHeight);
+            footstepPlan.getFootstep(i).setSoleFramePose(footPose);
+         }
+      }
+   }
+
    private void sendMessageToUI(String message)
    {
       textToSpeechPublisher.publish(MessageTools.createTextToSpeechPacket(message));
@@ -923,13 +997,13 @@ public class MultiStageFootstepPlanningManager implements PlannerCompletionCallb
 
    private BodyPathPlanMessage packPathResult(BodyPathPlan bodyPathPlan, FootstepPlanningResult status)
    {
-      return FootstepPlanningMessageReporter.packPathResult(bodyPathPlan, status, planarRegionsList, planId.getIntegerValue());
+      return FootstepPlanningMessageReporter.packPathResult(bodyPathPlan, status, planarRegionsList.get(), planId.getIntegerValue());
    }
 
    private FootstepPlanningToolboxOutputStatus packStepResult(FootstepPlan footstepPlan, BodyPathPlan bodyPathPlan, FootstepPlanningResult status,
                                                               double timeTaken)
    {
-      return FootstepPlanningMessageReporter.packStepResult(footstepPlan, bodyPathPlan, status, timeTaken, planarRegionsList, planId.getIntegerValue());
+      return FootstepPlanningMessageReporter.packStepResult(footstepPlan, bodyPathPlan, status, timeTaken, planarRegionsList.get(), planId.getIntegerValue());
    }
 
    private void concatenateStatistics(EnumMap<StatisticsType, PlannerStatistics<?>> mapToPopulate, int segmentId, PlannerStatistics<?> plannerStatistics)
@@ -1011,18 +1085,22 @@ public class MultiStageFootstepPlanningManager implements PlannerCompletionCallb
       this.textToSpeechPublisher = textToSpeechPublisher;
    }
 
+   public void setParametersPublisher(IHMCRealtimeROS2Publisher<FootstepPlannerParametersPacket> parametersPublisher)
+   {
+      this.parametersPublisher = parametersPublisher;
+   }
+
    public void wakeUp()
    {
       if (debug)
          PrintTools.debug(this, "Waking up");
 
       initialize.set(true);
+      waitingForPlanningRequest.set(true);
    }
 
    public void sleep()
    {
-//      processPlanningStatisticsRequest();
-
       if (debug)
          PrintTools.debug(this, "Going to sleep");
 
@@ -1031,6 +1109,7 @@ public class MultiStageFootstepPlanningManager implements PlannerCompletionCallb
 
       for (FootstepPlanningStage planningTask : stepPlanningTasks.iterator())
          stepPlanningTasks.remove(planningTask).cancel(true);
+      waitingForPlanningRequest.set(false);
    }
 
    public void destroy()

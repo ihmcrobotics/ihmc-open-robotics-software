@@ -61,12 +61,61 @@ public class YoVariableServer implements RobotVisualizer, TickAndUpdatable, Vari
    private final SummaryProvider summaryProvider = new SummaryProvider();
    private final PeriodicThreadScheduler timestampScheduler;
    private final TimestampPublisher timestampPublisher;
-  
+
+   /**
+    * Create a YoVariable server with mainClazz.getSimpleName(). For example, see other constructor.
+    *
+    * @param mainClazz
+    * @param schedulerFactory
+    * @param logModelProvider
+    * @param logSettings
+    * @param dt
+    */
    public YoVariableServer(Class<?> mainClazz, PeriodicThreadSchedulerFactory schedulerFactory, LogModelProvider logModelProvider, LogSettings logSettings, double dt)
    {
       this(mainClazz.getSimpleName(), schedulerFactory, logModelProvider, logSettings, dt);
    }
 
+   /**
+    * To create a YoVariableServer:
+    *
+    * <ol>
+    * <li>Create a YoVariableRegistry</li>
+    * <li>Add YoVariables</li>
+    * <li>Create YoVariableServer</li>
+    * <li>Set the YoVariableServer's main registry to the one you made</li>
+    * <li>Call YoVariableServer.start()</li>
+    * <li>Schedule a thread that calls YoVariableServer.update() periodically</li>
+    * </ol>
+    *
+    * Pseuo-code for starting a YoVariableServer:
+    *
+    * <pre>
+    * {@code
+    * YoVariableRegistry registry = new YoVariableRegistry("hello"); // cannot be "root", reserved word
+    * YoDouble doubleYo = new YoDouble("x", registry);
+    *
+    * PeriodicNonRealtimeThreadSchedulerFactory schedulerFactory = new PeriodicNonRealtimeThreadSchedulerFactory();
+    * YoVariableServer yoVariableServer = new YoVariableServer("HelloYoServer", schedulerFactory,
+    *                                                          null, new LogSettings(false), 0.01);
+    * yoVariableServer.setMainRegistry(registry, null, null);
+    * yoVariableServer.start();
+    *
+    * PeriodicThreadScheduler updateScheduler = schedulerFactory.createPeriodicThreadScheduler("update");
+    *
+    * AtomicLong timestamp = new AtomicLong();   // must schedule updates yourself or the server will timeout
+    * updateScheduler.schedule(() -> {
+    *    yoVariableServer.update(timestamp.getAndAdd(10000));
+    * }, 10, TimeUnit.MILLISECONDS);
+    * }
+    * </pre>
+    *
+    * @param mainClazz
+    * @param schedulerFactory
+    * @param logModelProvider
+    * @param logSettings
+    * @param dt
+    */
    public YoVariableServer(String mainClazz, PeriodicThreadSchedulerFactory schedulerFactory, LogModelProvider logModelProvider, LogSettings logSettings, double dt)
    {
       LoggerConfigurationLoader config;

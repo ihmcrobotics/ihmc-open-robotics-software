@@ -1,5 +1,5 @@
 plugins {
-   id("us.ihmc.ihmc-build") version "0.15.4"
+   id("us.ihmc.ihmc-build") version "0.15.5"
    id("us.ihmc.ihmc-ci-plugin") version "0.18.0"
    id("us.ihmc.log-tools") version "0.2.2"
 }
@@ -19,11 +19,11 @@ testSuites {
 mainDependencies {
    compile group: "org.apache.commons", name: "commons-lang3", version: "3.8.1"
 
-   compile group: "us.ihmc", name: "euclid-core", version: "0.7.0"
-   compile group: "us.ihmc", name: "ihmc-yovariables", version: "0.3.6"
+   compile group: "us.ihmc", name: "euclid", version: "0.11.0"
+   compile group: "us.ihmc", name: "ihmc-yovariables", version: "0.3.7"
    compile group: "us.ihmc", name: "IHMCRealtime", version: "1.1.2"
    compile group: "us.ihmc", name: "ihmc-commons", version: "0.24.0"
-   compile group: "us.ihmc", name: "ihmc-jmonkey-engine-toolkit", version: "0.12.3"
+   compile group: "us.ihmc", name: "ihmc-jmonkey-engine-toolkit", version: "0.12.5"
    compile group: "us.ihmc", name: "ihmc-java-toolkit", version: "source"
    compile group: "us.ihmc", name: "ihmc-robotics-toolkit", version: "source"
    compile group: "us.ihmc", name: "ihmc-robot-models", version: "source"

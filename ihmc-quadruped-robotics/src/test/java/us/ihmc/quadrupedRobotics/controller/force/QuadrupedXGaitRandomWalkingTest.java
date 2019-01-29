@@ -1,33 +1,27 @@
 package us.ihmc.quadrupedRobotics.controller.force;
 
-import java.io.IOException;
-import java.util.Random;
-
 import org.junit.After;
 import org.junit.Before;
-
 import org.junit.Test;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
-import us.ihmc.continuousIntegration.IntegrationCategory;
-import us.ihmc.quadrupedRobotics.QuadrupedForceTestYoVariables;
-import us.ihmc.quadrupedRobotics.QuadrupedMultiRobotTestInterface;
-import us.ihmc.quadrupedRobotics.QuadrupedTestBehaviors;
-import us.ihmc.quadrupedRobotics.QuadrupedTestFactory;
-import us.ihmc.quadrupedRobotics.QuadrupedTestGoals;
+import us.ihmc.quadrupedCommunication.teleop.RemoteQuadrupedTeleopManager;
+import us.ihmc.quadrupedRobotics.*;
 import us.ihmc.quadrupedRobotics.controller.QuadrupedControlMode;
-import us.ihmc.quadrupedRobotics.input.managers.QuadrupedTeleopManager;
 import us.ihmc.quadrupedRobotics.simulation.QuadrupedGroundContactModelType;
 import us.ihmc.robotics.testing.YoVariableTestGoal;
+import us.ihmc.simulationConstructionSetTools.util.simulationrunner.GoalOrientedTestConductor;
 import us.ihmc.simulationconstructionset.util.ControllerFailureException;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
-import us.ihmc.simulationConstructionSetTools.util.simulationrunner.GoalOrientedTestConductor;
 import us.ihmc.tools.MemoryTools;
+
+import java.io.IOException;
+import java.util.Random;
 
 public abstract class QuadrupedXGaitRandomWalkingTest implements QuadrupedMultiRobotTestInterface
 {
    private GoalOrientedTestConductor conductor;
    private QuadrupedForceTestYoVariables variables;
-   private QuadrupedTeleopManager stepTeleopManager;
+   private RemoteQuadrupedTeleopManager stepTeleopManager;
    private QuadrupedTestFactory quadrupedTestFactory;
 
    @Before
@@ -43,7 +37,7 @@ public abstract class QuadrupedXGaitRandomWalkingTest implements QuadrupedMultiR
          quadrupedTestFactory.setUseNetworking(true);
          conductor = quadrupedTestFactory.createTestConductor();
          variables = new QuadrupedForceTestYoVariables(conductor.getScs());
-         stepTeleopManager = quadrupedTestFactory.getStepTeleopManager();
+         stepTeleopManager = quadrupedTestFactory.getRemoteStepTeleopManager();
       }
       catch (IOException e)
       {
@@ -89,6 +83,8 @@ public abstract class QuadrupedXGaitRandomWalkingTest implements QuadrupedMultiR
       Random random = new Random(1447L);
       double runningDuration = variables.getYoTime().getDoubleValue();
 
+      stepTeleopManager.requestXGait();
+
       for (int i = 0; i < 10; i++)
       {
          runningDuration += randomSimulationDuration(random);
@@ -108,6 +104,7 @@ public abstract class QuadrupedXGaitRandomWalkingTest implements QuadrupedMultiR
       Random random = new Random(1547L);
       double runningDuration = variables.getYoTime().getDoubleValue();
 
+      stepTeleopManager.requestXGait();
       for (int i = 0; i < 10; i++)
       {
          runningDuration += randomSimulationDuration(random);

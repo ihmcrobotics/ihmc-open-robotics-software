@@ -1,15 +1,13 @@
 package us.ihmc.exampleSimulations.genericQuadruped.controller.force;
 
 import us.ihmc.exampleSimulations.genericQuadruped.GenericQuadrupedTestFactory;
+import us.ihmc.quadrupedCommunication.teleop.RemoteQuadrupedTeleopManager;
 import us.ihmc.quadrupedRobotics.QuadrupedForceTestYoVariables;
 import us.ihmc.quadrupedRobotics.QuadrupedTestBehaviors;
 import us.ihmc.quadrupedRobotics.controller.QuadrupedControlMode;
-import us.ihmc.quadrupedRobotics.input.managers.QuadrupedTeleopManager;
 import us.ihmc.quadrupedRobotics.simulation.QuadrupedGroundContactModelType;
 import us.ihmc.robotics.testing.YoVariableTestGoal;
 import us.ihmc.simulationConstructionSetTools.util.simulationrunner.GoalOrientedTestConductor;
-
-import java.io.IOException;
 
 /**
  * Simulation of the generic quadruped walking in circles on flat ground.
@@ -20,18 +18,16 @@ public class GenericQuadrupedCircleWalkingDemo
 {
    public static void main(String[] args)
    {
-      try
-      {
          GenericQuadrupedTestFactory quadrupedTestFactory = new GenericQuadrupedTestFactory();
          quadrupedTestFactory.setControlMode(QuadrupedControlMode.FORCE);
          quadrupedTestFactory.setGroundContactModelType(QuadrupedGroundContactModelType.FLAT);
          quadrupedTestFactory.setUseNetworking(true);
          GoalOrientedTestConductor conductor = quadrupedTestFactory.createTestConductor();
          QuadrupedForceTestYoVariables variables = new QuadrupedForceTestYoVariables(conductor.getScs());
-         QuadrupedTeleopManager stepTeleopManager = quadrupedTestFactory.getStepTeleopManager();
+         RemoteQuadrupedTeleopManager stepTeleopManager = quadrupedTestFactory.getRemoteStepTeleopManager();
 
          QuadrupedTestBehaviors.readyXGait(conductor, variables, stepTeleopManager);
-         stepTeleopManager.getXGaitSettings().setEndPhaseShift(180);
+         stepTeleopManager.setEndPhaseShift(180);
          double walkingSpeed = 0.25;
          double angularSpeed = 0.1;
          stepTeleopManager.requestXGait();
@@ -52,10 +48,5 @@ public class GenericQuadrupedCircleWalkingDemo
          });
 
          conductor.simulate();
-      }
-      catch (IOException e)
-      {
-         throw new RuntimeException("Error loading simulation: " + e.getMessage());
-      }
    }
 }

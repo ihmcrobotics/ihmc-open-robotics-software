@@ -5,13 +5,11 @@ import static org.junit.Assert.*;
 import java.util.List;
 import java.util.Random;
 
-import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations;
+import org.junit.Test;
+
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
-
-import org.junit.Test;
-
 import us.ihmc.robotics.random.RandomGeometry;
 
 public class IntersectionPlaneBoxCalculatorTest

@@ -6,16 +6,16 @@ import java.util.List;
 import us.ihmc.commons.MathTools;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FixedFrameVector3DBasics;
+import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DBasics;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.mecano.spatial.SpatialVector;
 import us.ihmc.mecano.spatial.interfaces.SpatialVectorBasics;
 import us.ihmc.mecano.spatial.interfaces.SpatialVectorReadOnly;
-import us.ihmc.robotics.math.frames.YoMultipleFramesHelper;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.yoVariables.variable.YoFrameVector3D;
 import us.ihmc.yoVariables.variable.YoInteger;
+import us.ihmc.yoVariables.variable.frameObjects.YoMutableFrameVector3D;
 
 public class LinearSpatialVectorTrajectoryGenerator
 {
@@ -30,7 +30,6 @@ public class LinearSpatialVectorTrajectoryGenerator
    private final YoInteger numberOfWaypoints;
    private final YoInteger currentWaypointIndex;
 
-   private final YoMultipleFramesHelper multipleFramesHelper;
    private final List<YoSpatialWaypoint> waypoints;
    private final YoSpatialWaypoint currentValue;
 
@@ -48,15 +47,13 @@ public class LinearSpatialVectorTrajectoryGenerator
       numberOfWaypoints.set(0);
       currentWaypointIndex = new YoInteger(namePrefix + "CurrentWaypointIndex", registry);
 
-      multipleFramesHelper = new YoMultipleFramesHelper(namePrefix, registry, referenceFrame);
-
-      currentValue = new YoSpatialWaypoint(namePrefix + "CurrentValue", multipleFramesHelper, registry, referenceFrame);
+      currentValue = new YoSpatialWaypoint(namePrefix + "CurrentValue", registry, referenceFrame);
 
       waypoints = new ArrayList<>(maximumNumberOfWaypoints);
 
       for (int i = 0; i < maximumNumberOfWaypoints; i++)
       {
-         YoSpatialWaypoint waypoint = new YoSpatialWaypoint(namePrefix + "Waypoint" + i, multipleFramesHelper, registry, referenceFrame);
+         YoSpatialWaypoint waypoint = new YoSpatialWaypoint(namePrefix + "Waypoint" + i, registry, referenceFrame);
          waypoints.add(waypoint);
       }
    }
@@ -74,13 +71,14 @@ public class LinearSpatialVectorTrajectoryGenerator
 
    public void clear(ReferenceFrame referenceFrame)
    {
-      clear();
-      multipleFramesHelper.switchCurrentReferenceFrame(referenceFrame);
-   }
+      numberOfWaypoints.set(0);
+      currentWaypointIndex.set(0);
 
-   public void registerNewTrajectoryFrame(ReferenceFrame newReferenceFrame)
-   {
-      multipleFramesHelper.registerReferenceFrame(newReferenceFrame);
+      for (int i = 0; i < maximumNumberOfWaypoints; i++)
+      {
+         waypoints.get(i).setToNaN(referenceFrame);
+      }
+      currentValue.setReferenceFrame(referenceFrame);
    }
 
    public void appendWaypoint(double timeAtWaypoint, Vector3DReadOnly angularPart, Vector3DReadOnly linearPart)
@@ -91,7 +89,7 @@ public class LinearSpatialVectorTrajectoryGenerator
 
    private void appendWaypointUnsafe(double timeAtWaypoint, Vector3DReadOnly angularPart, Vector3DReadOnly linearPart)
    {
-      waypoints.get(numberOfWaypoints.getIntegerValue()).set(timeAtWaypoint, angularPart, linearPart);
+      waypoints.get(numberOfWaypoints.getIntegerValue()).setIncludingFrame(getCurrentTrajectoryFrame(), timeAtWaypoint, angularPart, linearPart);
       numberOfWaypoints.increment();
    }
 
@@ -103,7 +101,9 @@ public class LinearSpatialVectorTrajectoryGenerator
 
    private void appendWaypointUnsafe(double timeAtWaypoint, FrameVector3DReadOnly angularPart, FrameVector3DReadOnly linearPart)
    {
-      waypoints.get(numberOfWaypoints.getIntegerValue()).set(timeAtWaypoint, angularPart, linearPart);
+      angularPart.checkReferenceFrameMatch(getCurrentTrajectoryFrame());
+      linearPart.checkReferenceFrameMatch(getCurrentTrajectoryFrame());
+      waypoints.get(numberOfWaypoints.getIntegerValue()).setIncludingFrame(timeAtWaypoint, angularPart, linearPart);
       numberOfWaypoints.increment();
    }
 
@@ -112,7 +112,7 @@ public class LinearSpatialVectorTrajectoryGenerator
       checkNumberOfWaypoints(numberOfWaypoints.getIntegerValue() + 1);
       appendWaypointUnsafe(timeAtWaypoint, waypoint.getAngularPart(), waypoint.getLinearPart());
    }
-   
+
    public void appendWaypoint(SpatialWaypointBasics waypoint)
    {
       checkNumberOfWaypoints(numberOfWaypoints.getIntegerValue() + 1);
@@ -140,7 +140,6 @@ public class LinearSpatialVectorTrajectoryGenerator
       for (int i = 0; i < numberOfWaypoints.getIntegerValue(); i++)
          waypoints.get(i).changeFrame(desiredFrame);
       currentValue.changeFrame(desiredFrame);
-      multipleFramesHelper.switchCurrentReferenceFrame(desiredFrame);
    }
 
    public void compute(double time)
@@ -211,7 +210,7 @@ public class LinearSpatialVectorTrajectoryGenerator
 
    public ReferenceFrame getCurrentTrajectoryFrame()
    {
-      return multipleFramesHelper.getCurrentReferenceFrame();
+      return currentValue.getReferenceFrame();
    }
 
    public String getNamePrefix()
@@ -221,39 +220,24 @@ public class LinearSpatialVectorTrajectoryGenerator
 
    private static class YoSpatialWaypoint implements SpatialWaypointBasics
    {
-      private final YoMultipleFramesHelper multipleFramesHelper;
       private final YoDouble time;
-      private final FixedFrameVector3DBasics angularPart, linearPart;
+      private final FrameVector3DBasics angularPart, linearPart;
 
-      public YoSpatialWaypoint(String namePrefix, YoMultipleFramesHelper multipleFramesHelper, YoVariableRegistry registry, ReferenceFrame... expressedInFrames)
+      public YoSpatialWaypoint(String namePrefix, YoVariableRegistry registry, ReferenceFrame referenceFrame)
       {
-         this.multipleFramesHelper = multipleFramesHelper;
-
          time = new YoDouble(namePrefix + "Time", registry);
 
-         angularPart = new YoFrameVector3D(namePrefix + "Angular", null, registry)
-         {
-            @Override
-            public ReferenceFrame getReferenceFrame()
-            {
-               return multipleFramesHelper.getCurrentReferenceFrame();
-            }
-         };
-         linearPart = new YoFrameVector3D(namePrefix + "Linear", null, registry)
-         {
-            @Override
-            public ReferenceFrame getReferenceFrame()
-            {
-               return multipleFramesHelper.getCurrentReferenceFrame();
-            }
-         };
+         angularPart = new YoMutableFrameVector3D(namePrefix + "Angular", "", registry, referenceFrame);
+         linearPart = new YoMutableFrameVector3D(namePrefix + "Linear", "", registry, referenceFrame);
       }
 
+      @Override
       public void setTime(double time)
       {
          this.time.set(time);
       }
 
+      @Override
       public double getTime()
       {
          return time.getValue();
@@ -274,12 +258,14 @@ public class LinearSpatialVectorTrajectoryGenerator
       @Override
       public ReferenceFrame getReferenceFrame()
       {
-         return multipleFramesHelper.getCurrentReferenceFrame();
+         return linearPart.getReferenceFrame();
       }
 
       @Override
       public void setReferenceFrame(ReferenceFrame expressedInFrame)
       {
+         linearPart.setReferenceFrame(expressedInFrame);
+         angularPart.setReferenceFrame(expressedInFrame);
       }
    }
 
@@ -293,11 +279,13 @@ public class LinearSpatialVectorTrajectoryGenerator
          setToZero();
       }
 
+      @Override
       public void setTime(double time)
       {
          this.time = time;
       }
 
+      @Override
       public double getTime()
       {
          return time;

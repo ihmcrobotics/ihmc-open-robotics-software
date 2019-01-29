@@ -1,20 +1,51 @@
 package us.ihmc.convexOptimization.quadraticProgram;
 
+import static junit.framework.TestCase.assertFalse;
+import static junit.framework.TestCase.assertTrue;
+import static org.junit.Assert.assertEquals;
+
 import org.ejml.data.DenseMatrix64F;
 import org.junit.Test;
-import us.ihmc.commons.PrintTools;
+
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationPlan;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.continuousIntegration.IntegrationCategory;
 import us.ihmc.robotics.linearAlgebra.MatrixTools;
 
-import static junit.framework.TestCase.assertFalse;
-import static junit.framework.TestCase.assertTrue;
-import static org.junit.Assert.assertEquals;
-
 @ContinuousIntegrationPlan(categories = {IntegrationCategory.FAST})
 public class SimpleEfficientActiveSetQPSolverTest extends AbstractSimpleActiveSetQPSolverTest
 {
+   @Override
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
+   @Test(timeout = 30000)
+   public void testMaxIterations()
+   {
+      testMaxIterations(2, true);
+   }
+
+   @Override
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
+   @Test(timeout = 30000)
+   public void testClear()
+   {
+      testClear(2, 2, false);
+   }
+
+   @Override
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
+   @Test(timeout = 30000)
+   public void testSimpleCasesWithBoundsConstraints()
+   {
+      testSimpleCasesWithBoundsConstraints(1, 3, 2, 2, false);
+   }
+
+   @Override
+   public double[] getLowerBounds()
+   {
+      // Need to modify the bounds for some tests to get a valid problem for this type of solver.
+      return new double[] {-5.0, 6.0, 0.0};
+   }
+
    @Override
    public SimpleActiveSetQPSolverInterface createSolverToTest()
    {
@@ -23,6 +54,7 @@ public class SimpleEfficientActiveSetQPSolverTest extends AbstractSimpleActiveSe
       return simpleEfficientActiveSetQPSolver;
 
    }
+
    @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testChallengingCasesWithPolygonConstraintsCheckFailsWithSimpleSolverWithWarmStart()
@@ -34,13 +66,13 @@ public class SimpleEfficientActiveSetQPSolverTest extends AbstractSimpleActiveSe
       // Minimize x^2 + y^2 subject to x + y >= 2 (-x -y <= -2), y <= 10x - 2 (-10x + y <= -2), x <= 10y - 2 (x - 10y <= -2),
       // Equality solution will violate all three constraints, but optimal only has the first constraint active.
       // However, if you set all three constraints active, there is no solution.
-      double[][] costQuadraticMatrix = new double[][] { { 2.0, 0.0 }, { 0.0, 2.0 } };
-      double[] costLinearVector = new double[] { 0.0, 0.0 };
+      double[][] costQuadraticMatrix = new double[][] {{2.0, 0.0}, {0.0, 2.0}};
+      double[] costLinearVector = new double[] {0.0, 0.0};
       double quadraticCostScalar = 0.0;
       solver.setQuadraticCostFunction(costQuadraticMatrix, costLinearVector, quadraticCostScalar);
 
-      double[][] linearInequalityConstraintsCMatrix = new double[][] { { -1.0, -1.0 }, { -10.0, 1.0 }, { 1.0, -10.0 } };
-      double[] linearInqualityConstraintsDVector = new double[] { -2.0, -2.0, -2.0 };
+      double[][] linearInequalityConstraintsCMatrix = new double[][] {{-1.0, -1.0}, {-10.0, 1.0}, {1.0, -10.0}};
+      double[] linearInqualityConstraintsDVector = new double[] {-2.0, -2.0, -2.0};
       solver.setLinearInequalityConstraints(linearInequalityConstraintsCMatrix, linearInqualityConstraintsDVector);
 
       double[] solution = new double[2];
@@ -134,7 +166,6 @@ public class SimpleEfficientActiveSetQPSolverTest extends AbstractSimpleActiveSe
 
       SimpleActiveSetQPSolverInterface solver = createSolverToTest();
       solver.setUseWarmStart(true);
-
 
       solver.clear();
       solver.setQuadraticCostFunction(datasetA.getCostQuadraticMatrix(), datasetA.getCostLinearVector(), 0.0);

@@ -164,7 +164,7 @@ public final class SpatialFeedbackControllerTest
    @Test(timeout = 30000)
    public void testConvergenceWithJerryQP() throws Exception
    {
-      Random random = new Random(5641654L);
+      Random random = new Random(54654L);
 
       int numberOfJoints = 10;
       Vector3D[] jointAxes = new Vector3D[numberOfJoints];

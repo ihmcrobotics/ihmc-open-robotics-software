@@ -37,6 +37,8 @@ float64 horizon_length
 
 controller_msgs/PlanarRegionsListMessage planar_regions_list_message
 
+bool assume_flat_ground
+
 # Field default value -1
 int32 planner_request_id
 

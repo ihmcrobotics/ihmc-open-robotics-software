@@ -19,12 +19,12 @@ import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.commons.lang3.tuple.Pair;
 
 import com.vividsolutions.jts.geom.Coordinate;
-import com.vividsolutions.jts.geom.GeometryFactory;
 import com.vividsolutions.jts.geom.LineString;
 import com.vividsolutions.jts.geom.MultiLineString;
 import com.vividsolutions.jts.geom.MultiPoint;
 import com.vividsolutions.jts.triangulate.ConformingDelaunayTriangulationBuilder;
 import com.vividsolutions.jts.triangulate.ConstraintEnforcementException;
+import com.vividsolutions.jts.triangulate.quadedge.LocateFailureException;
 import com.vividsolutions.jts.triangulate.quadedge.QuadEdge;
 import com.vividsolutions.jts.triangulate.quadedge.QuadEdgeSubdivision;
 import com.vividsolutions.jts.triangulate.quadedge.QuadEdgeTriangle;
@@ -33,23 +33,23 @@ import com.vividsolutions.jts.triangulate.quadedge.Vertex;
 import us.ihmc.commons.Conversions;
 import us.ihmc.commons.Epsilons;
 import us.ihmc.commons.lists.ListWrappingIndexTools;
-import us.ihmc.euclid.geometry.LineSegment2D;
+import us.ihmc.euclid.geometry.interfaces.LineSegment2DReadOnly;
 import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
 import us.ihmc.euclid.tuple2D.Point2D;
+import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
 import us.ihmc.log.LogTools;
 
 /**
  * Computes the concave hull of a 2D point cloud based on the paper
  * <a href="http://worboys.org/publications/Duckham%20Worboys%20Galton%20PatRec%20final%202008.pdf">
- *  Efficient generation of simple polygons for characterizing the shape of a set of points in the plane </a>.
- *  <p>
- *  To summarize, it is based on the Delaunay triangulation.
- *  The only parameter for this algorithm is the maximum edge length the concave hull.
- *  The resulting concave hull is simple:
- *  <li> no self intersections,
- *  <li> no holes,
- *  <li> no detached polygons.
- *  
+ * Efficient generation of simple polygons for characterizing the shape of a set of points in the
+ * plane </a>.
+ * <p>
+ * To summarize, it is based on the Delaunay triangulation. The only parameter for this algorithm is
+ * the maximum edge length the concave hull. The resulting concave hull is simple:
+ * <li>no self intersections,
+ * <li>no holes,
+ * 
  * @author Sylvain
  *
  */
@@ -58,12 +58,14 @@ public abstract class SimpleConcaveHullFactory
    private static final boolean VERBOSE = false;
    private static final boolean REPORT_TIME = false;
 
-   public static ConcaveHullCollection createConcaveHullCollection(List<Point2D> pointCloud2d, ConcaveHullFactoryParameters parameters)
+   public static ConcaveHullCollection createConcaveHullCollection(List<? extends Point2DReadOnly> pointCloud2d, ConcaveHullFactoryParameters parameters)
    {
-      return createConcaveHullCollection(pointCloud2d, null, parameters);
+      return createConcaveHullCollection(pointCloud2d, Collections.emptyList(), parameters);
    }
 
-   public static ConcaveHullCollection createConcaveHullCollection(List<Point2D> pointCloud2d, List<LineSegment2D> lineConstraints, ConcaveHullFactoryParameters parameters)
+   public static ConcaveHullCollection createConcaveHullCollection(List<? extends Point2DReadOnly> pointCloud2d,
+                                                                   List<? extends LineSegment2DReadOnly> lineConstraints,
+                                                                   ConcaveHullFactoryParameters parameters)
    {
       if (pointCloud2d.size() <= 3)
          return new ConcaveHullCollection(pointCloud2d);
@@ -71,20 +73,22 @@ public abstract class SimpleConcaveHullFactory
       return createConcaveHull(pointCloud2d, lineConstraints, parameters).getConcaveHullCollection();
    }
 
-   public static ConcaveHullFactoryResult createConcaveHull(List<Point2D> pointCloud2d, ConcaveHullFactoryParameters parameters)
+   public static ConcaveHullFactoryResult createConcaveHull(List<? extends Point2DReadOnly> pointCloud2d, ConcaveHullFactoryParameters parameters)
    {
-      return createConcaveHull(pointCloud2d, null, parameters);
+      return createConcaveHull(pointCloud2d, Collections.emptyList(), parameters);
    }
 
-   public static ConcaveHullFactoryResult createConcaveHull(List<Point2D> pointCloud2d, List<LineSegment2D> lineConstraints, ConcaveHullFactoryParameters parameters)
+   public static ConcaveHullFactoryResult createConcaveHull(List<? extends Point2DReadOnly> pointCloud2d, List<? extends LineSegment2DReadOnly> lineConstraints,
+                                                            ConcaveHullFactoryParameters parameters)
    {
       if (pointCloud2d.size() <= 3)
          return null;
 
-      MultiPoint sites = filterAndCreateMultiPoint(pointCloud2d, lineConstraints, 0.01);
-      MultiLineString constraintSegments = createMultiLineString(lineConstraints);
+      double triangulationTolerance = parameters.getTriangulationTolerance();
+      MultiPoint sites = filterAndCreateMultiPoint(pointCloud2d, lineConstraints, triangulationTolerance);
+      MultiLineString constraintSegments = JTSTools.createMultiLineString(lineConstraints);
       ConcaveHullFactoryResult result = new ConcaveHullFactoryResult();
-      ConcaveHullVariables initialVariables = initializeTriangulation(sites, constraintSegments, result);
+      ConcaveHullVariables initialVariables = initializeTriangulation(sites, constraintSegments, triangulationTolerance, result);
       List<ConcaveHullVariables> variablesList = computeConcaveHullBorderEdgesRecursive(parameters, initialVariables);
       result.intermediateVariables.addAll(variablesList);
 
@@ -101,115 +105,39 @@ public abstract class SimpleConcaveHullFactory
       return result;
    }
 
-   public static MultiPoint filterAndCreateMultiPoint(List<Point2D> pointCloud2d, List<LineSegment2D> lineConstraints, double tolerance)
+   public static MultiPoint filterAndCreateMultiPoint(List<? extends Point2DReadOnly> pointCloud2d, List<? extends LineSegment2DReadOnly> lineConstraints,
+                                                      double tolerance)
    {
-      List<Point2D> filteredPointCloud2d = new ArrayList<>();
+      List<Point2DReadOnly> filteredPointCloud2d = new ArrayList<>();
 
-      for (Point2D point : pointCloud2d)
+      for (Point2DReadOnly point : pointCloud2d)
       {
          if (!isTooCloseToConstraintSegments(point, lineConstraints, tolerance))
             filteredPointCloud2d.add(point);
       }
-      return createMultiPoint(filteredPointCloud2d);
+      return JTSTools.point2DsToMultiPoint(filteredPointCloud2d);
    }
 
-   public static boolean isTooCloseToConstraintSegments(Point2D point, List<LineSegment2D> lineConstraints, double tolerance)
+   public static boolean isTooCloseToConstraintSegments(Point2DReadOnly point, List<? extends LineSegment2DReadOnly> lineConstraints, double tolerance)
    {
-      for (LineSegment2D lineConstraint : lineConstraints)
+      try
       {
-         if (lineConstraint.distance(point) < tolerance)
-            return true;
+         for (LineSegment2DReadOnly lineConstraint : lineConstraints)
+         {
+            if (lineConstraint.distance(point) < tolerance)
+               return true;
+         }
+      }
+      catch (NullPointerException e)
+      {
+         e.printStackTrace();
       }
       return false;
    }
 
-   public static MultiPoint createMultiPoint(List<Point2D> pointCloud2d)
-   {
-      Coordinate[] coordinates = new Coordinate[pointCloud2d.size()];
-
-      for (int i = 0; i < pointCloud2d.size(); i++)
-      {
-         Point2D point2d = pointCloud2d.get(i);
-         coordinates[i] = new Coordinate(point2d.getX(), point2d.getY());
-      }
-
-      return new GeometryFactory().createMultiPoint(coordinates);
-   }
-
-   public static MultiLineString createMultiLineString(List<LineSegment2D> lineSegments)
-   {
-      if (lineSegments == null)
-         return null;
-
-      List<LineString> lineStrings = lineSegments.stream()
-                                                 .map(SimpleConcaveHullFactory::createLineString)
-                                                 .collect(Collectors.toList());
-
-      GeometryFactory geometryFactory = new GeometryFactory();
-
-      // Try to merge lineStrings
-      for (int i = 0; i < lineStrings.size(); i++)
-      {
-         LineString firstLineString = lineStrings.get(i);
-         List<Coordinate> firstCoordinates = new ArrayList<>(Arrays.asList(firstLineString.getCoordinates()));
-
-         for (int j = lineStrings.size() - 1; j >= i + 1; j--)
-         {
-            LineString secondLineString = lineStrings.get(j);
-            List<Coordinate> secondCoordinates = new ArrayList<>(Arrays.asList(secondLineString.getCoordinates()));
-
-            boolean concatenate = false;
-
-            double tolerance = 1.0e-3;
-            if (firstLineString.getEndPoint().equalsExact(secondLineString.getStartPoint(), tolerance))
-            {
-               concatenate = true;
-            }
-            else if (firstLineString.getEndPoint().equalsExact(secondLineString.getEndPoint(), tolerance))
-            {
-               concatenate = true;
-               Collections.reverse(secondCoordinates);
-            }
-            else if (firstLineString.getStartPoint().equalsExact(secondLineString.getEndPoint(), tolerance))
-            {
-               concatenate = true;
-               Collections.reverse(firstCoordinates);
-               Collections.reverse(secondCoordinates);
-            }
-            else if (firstLineString.getStartPoint().equalsExact(secondLineString.getStartPoint(), tolerance))
-            {
-               concatenate = true;
-               Collections.reverse(firstCoordinates);
-            }
-
-            if (concatenate)
-            {
-               lineStrings.remove(j);
-               secondCoordinates.remove(0);
-               firstCoordinates.addAll(secondCoordinates);
-               firstLineString = geometryFactory.createLineString(firstCoordinates.toArray(new Coordinate[firstCoordinates.size()]));
-               lineStrings.set(i, firstLineString);
-            }
-         }
-      }
-
-      return geometryFactory.createMultiLineString(lineStrings.toArray(new LineString[lineStrings.size()]));
-   }
-
-   public static LineString createLineString(LineSegment2D lineSegment)
-   {
-      Coordinate lineSegmentStart = new Coordinate(lineSegment.getFirstEndpointX(), lineSegment.getFirstEndpointY());
-      Coordinate lineSegmentEnd = new Coordinate(lineSegment.getSecondEndpointX(), lineSegment.getSecondEndpointY());
-      
-      Coordinate[] endPoints = {lineSegmentStart, lineSegmentEnd};
-      return new GeometryFactory().createLineString(endPoints);
-   }
-
    private static ConcaveHull computeConcaveHull(List<QuadEdge> orderedBorderEdges)
    {
-      List<Point2D> orderedConcaveHullVertices = orderedBorderEdges.stream()
-                                                                   .map(QuadEdge::orig)
-                                                                   .map(vertex -> new Point2D(vertex.getX(), vertex.getY()))
+      List<Point2D> orderedConcaveHullVertices = orderedBorderEdges.stream().map(QuadEdge::orig).map(vertex -> new Point2D(vertex.getX(), vertex.getY()))
                                                                    .collect(Collectors.toList());
       return new ConcaveHull(orderedConcaveHullVertices);
    }
@@ -217,12 +145,13 @@ public abstract class SimpleConcaveHullFactory
    /**
     * 
     * @param sites the point cloud from which a concave hull is to be computed.
-    * @param constraintSegments 
+    * @param constraintSegments
     * @param concaveHullFactoryResult
     * @return
     */
    @SuppressWarnings("unchecked")
-   private static ConcaveHullVariables initializeTriangulation(MultiPoint sites, MultiLineString constraintSegments, ConcaveHullFactoryResult concaveHullFactoryResult)
+   private static ConcaveHullVariables initializeTriangulation(MultiPoint sites, MultiLineString constraintSegments, double delaunayTriangulationTolerance,
+                                                               ConcaveHullFactoryResult concaveHullFactoryResult)
    {
       StopWatch stopWatch = REPORT_TIME ? new StopWatch() : null;
 
@@ -234,7 +163,7 @@ public abstract class SimpleConcaveHullFactory
 
       // NOTE: The DelaunayTriangulatorBuilder is 30% to 40% faster than the ConformingDelaunayTriangulationBuilder.
       ConformingDelaunayTriangulationBuilder conformingDelaunayTriangulationBuilder = new ConformingDelaunayTriangulationBuilder();
-      conformingDelaunayTriangulationBuilder.setTolerance(10.0e-3);
+      conformingDelaunayTriangulationBuilder.setTolerance(delaunayTriangulationTolerance);
       conformingDelaunayTriangulationBuilder.setSites(sites);
       QuadEdgeSubdivision subdivision;
       try
@@ -243,7 +172,7 @@ public abstract class SimpleConcaveHullFactory
             conformingDelaunayTriangulationBuilder.setConstraints(constraintSegments);
          subdivision = conformingDelaunayTriangulationBuilder.getSubdivision();
       }
-      catch (ConstraintEnforcementException e)
+      catch (ConstraintEnforcementException | LocateFailureException e)
       { // Adding the line segments as constraints failed, removing them.
          if (VERBOSE)
             LogTools.warn("Delaunay triangulation failed, removing line segment constraints.");
@@ -305,7 +234,6 @@ public abstract class SimpleConcaveHullFactory
       {
          for (QuadEdgeTriangle triangle : delaunayTriangles)
          {
-            
             for (int edgeIndex = 0; edgeIndex < 3; edgeIndex++)
             {
                QuadEdge edge = triangle.getEdge(edgeIndex);
@@ -390,7 +318,8 @@ public abstract class SimpleConcaveHullFactory
       Point2D secondPointOnLine2 = toPoint2d(lineSegmentEnd);
       double angleEpsilon = Epsilons.ONE_MILLIONTH;
       double distanceEpsilon = Epsilons.ONE_TRILLIONTH;
-      return EuclidGeometryTools.areLine2DsCollinear(firstPointOnLine1, secondPointOnLine1, firstPointOnLine2, secondPointOnLine2, angleEpsilon, distanceEpsilon);
+      return EuclidGeometryTools.areLine2DsCollinear(firstPointOnLine1, secondPointOnLine1, firstPointOnLine2, secondPointOnLine2, angleEpsilon,
+                                                     distanceEpsilon);
    }
 
    private static Point2D toPoint2d(Vertex vertex)
@@ -404,14 +333,22 @@ public abstract class SimpleConcaveHullFactory
    }
 
    /**
-    * Computes the border edges {@link QuadEdge} that will define the concave hull.
-    * This is an iterative process that starts a first guess of the concave hull, and then each iteration consists "breaking" edges that are too long according to the {@code edgeLengthThreshold}.
-    * The algorithm is based on the <a href="https://en.wikipedia.org/wiki/Delaunay_triangulation"> Delaunay triangulation </a>.
+    * Computes the border edges {@link QuadEdge} that will define the concave hull. This is an
+    * iterative process that starts a first guess of the concave hull, and then each iteration
+    * consists "breaking" edges that are too long according to the {@code edgeLengthThreshold}. The
+    * algorithm is based on the <a href="https://en.wikipedia.org/wiki/Delaunay_triangulation">
+    * Delaunay triangulation </a>.
+    * 
     * @param edgeLengthThreshold maximum edge length the concave hull can have.
-    * @param maxNumberOfIterations option to limit the maximum number of iterations of this algorithm.
-    * @param removeAllTrianglesWithTwoBorderEdges when set to true, any triangle with two border edges with be removed regardless of the edges length. This tends to smoothen the resulting concave hull in general.
-    * @param variables the set of variables pre-initialized used internally to find the border edges of the concave hull.
-    * @return list of new intermediate variables containing the sets of edges defining the concave hull(s).
+    * @param maxNumberOfIterations option to limit the maximum number of iterations of this
+    *           algorithm.
+    * @param removeAllTrianglesWithTwoBorderEdges when set to true, any triangle with two border
+    *           edges with be removed regardless of the edges length. This tends to smoothen the
+    *           resulting concave hull in general.
+    * @param variables the set of variables pre-initialized used internally to find the border edges
+    *           of the concave hull.
+    * @return list of new intermediate variables containing the sets of edges defining the concave
+    *         hull(s).
     */
    private static List<ConcaveHullVariables> computeConcaveHullBorderEdgesRecursive(ConcaveHullFactoryParameters parameters, ConcaveHullVariables variables)
    {
@@ -481,10 +418,8 @@ public abstract class SimpleConcaveHullFactory
             int vertexIndexOppositeToCandidateEdge = indexOfVertexOppositeToEdge(candidateTriangle.getEdgeIndex(uniqueNonBorderEdge));
             List<QuadEdgeTriangle> adjacentTrianglesToVertex = candidateTriangle.getTrianglesAdjacentToVertex(vertexIndexOppositeToCandidateEdge);
 
-            boolean isIntersectionTriangle = adjacentTrianglesToVertex.stream()
-                                                                      .filter(borderTriangles::contains)
-                                                                      .filter(triangle -> triangle != candidateTriangle)
-                                                                      .findAny().isPresent();
+            boolean isIntersectionTriangle = adjacentTrianglesToVertex.stream().filter(borderTriangles::contains)
+                                                                      .filter(triangle -> triangle != candidateTriangle).findAny().isPresent();
             if (isIntersectionTriangle)
                return parameters.isSplittingConcaveHullAllowed() ? Case.INTERSECTION_TRIANGLE : Case.KEEP_TRIANGLE;
             else
@@ -505,7 +440,8 @@ public abstract class SimpleConcaveHullFactory
          return Case.THREE_BORDER_EDGES_THREE_BORDER_VERTICES;
    }
 
-   private static List<ConcaveHullVariables> computeConcaveHullBorderEdgesRecursive(ConcaveHullFactoryParameters parameters, List<ConcaveHullVariables> variables, MutableInt currentIteration)
+   private static List<ConcaveHullVariables> computeConcaveHullBorderEdgesRecursive(ConcaveHullFactoryParameters parameters,
+                                                                                    List<ConcaveHullVariables> variables, MutableInt currentIteration)
    {
       List<ConcaveHullVariables> result = new ArrayList<>();
       for (ConcaveHullVariables hullVariables : variables)
@@ -516,7 +452,8 @@ public abstract class SimpleConcaveHullFactory
       return result;
    }
 
-   private static List<ConcaveHullVariables> computeConcaveHullBorderEdgesRecursive(ConcaveHullFactoryParameters parameters, ConcaveHullVariables variables, MutableInt currentIteration)
+   private static List<ConcaveHullVariables> computeConcaveHullBorderEdgesRecursive(ConcaveHullFactoryParameters parameters, ConcaveHullVariables variables,
+                                                                                    MutableInt currentIteration)
    {
       if (currentIteration.intValue() >= parameters.getMaxNumberOfIterations())
       {
@@ -666,7 +603,8 @@ public abstract class SimpleConcaveHullFactory
       sortedByLengthMap.add(new ImmutablePair<>(newBorderEdge, newBorderTriangle));
 
       List<QuadEdge> orderedBorderEdges = variables.orderedBorderEdges;
-      replaceTwoEdgesWithOneInOrderedList(orderedBorderEdges, borderTriangleToRemove.getEdge((newBorderEdgeIndex + 2) % 3), borderTriangleToRemove.getEdge((newBorderEdgeIndex + 1) % 3), newBorderEdge);
+      replaceTwoEdgesWithOneInOrderedList(orderedBorderEdges, borderTriangleToRemove.getEdge((newBorderEdgeIndex + 2) % 3),
+                                          borderTriangleToRemove.getEdge((newBorderEdgeIndex + 1) % 3), newBorderEdge);
    }
 
    private static List<ConcaveHullVariables> removeTriangleAndDivideHull(ConcaveHullVariables variables, Pair<QuadEdge, QuadEdgeTriangle> entryToRemove)
@@ -680,7 +618,8 @@ public abstract class SimpleConcaveHullFactory
       return divideHullAtIntersectionVertex(variables, intersectionVertex);
    }
 
-   private static List<ConcaveHullVariables> divideHullAtIntersectionTriangle(ConcaveHullVariables variables, Pair<QuadEdge, QuadEdgeTriangle> entryWithIntersectionTriangle)
+   private static List<ConcaveHullVariables> divideHullAtIntersectionTriangle(ConcaveHullVariables variables,
+                                                                              Pair<QuadEdge, QuadEdgeTriangle> entryWithIntersectionTriangle)
    {
       Set<QuadEdge> borderEdges = variables.borderEdges;
 
@@ -696,10 +635,7 @@ public abstract class SimpleConcaveHullFactory
       PriorityQueue<Pair<QuadEdge, QuadEdgeTriangle>> sortedByLengthQueue = variables.sortedByLengthQueue;
       List<ConcaveHullVariables> dividedHullVariables = new ArrayList<>();
 
-      int startIndex = IntStream.range(0, orderedBorderEdges.size())
-                                .filter(i -> orderedBorderEdges.get(i).orig() == intersectionVertex)
-                                .findAny()
-                                .getAsInt();
+      int startIndex = IntStream.range(0, orderedBorderEdges.size()).filter(i -> orderedBorderEdges.get(i).orig() == intersectionVertex).findAny().getAsInt();
       int previousEndIndex = ListWrappingIndexTools.previous(startIndex, orderedBorderEdges);
 
       do
@@ -731,15 +667,14 @@ public abstract class SimpleConcaveHullFactory
          checkOrderedBorderEdgeListValid(subOrderedBorderEdges);
          subBorderEdges.addAll(subOrderedBorderEdges);
          subBorderEdges.forEach(borderEdge -> subBorderVertices.add(borderEdge.orig()));
-         sortedByLengthQueue.stream()
-                            .filter(pair -> isBorderEdge(pair.getLeft(), subBorderEdges))
-                            .forEach(subSortedByLengthQueue::add);
+         sortedByLengthQueue.stream().filter(pair -> isBorderEdge(pair.getLeft(), subBorderEdges)).forEach(subSortedByLengthQueue::add);
          subSortedByLengthQueue.forEach(pair -> subBorderTriangles.add(pair.getRight()));
          subConstraintEdges.addAll(variables.constraintEdges);
 
          dividedHullVariables.add(subHullVariables);
 
-      } while (ListWrappingIndexTools.next(previousEndIndex, orderedBorderEdges) != startIndex);
+      }
+      while (ListWrappingIndexTools.next(previousEndIndex, orderedBorderEdges) != startIndex);
 
       return dividedHullVariables;
    }
@@ -760,7 +695,7 @@ public abstract class SimpleConcaveHullFactory
 
       QuadEdge firstEdge;
       QuadEdge secondEdge;
-      
+
       if (doesVertexBelongToQuadEdge(previousVertex, newEdge1))
       {
          firstEdge = newEdge1.orig() == previousVertex ? newEdge1 : newEdge1.sym();
@@ -785,7 +720,8 @@ public abstract class SimpleConcaveHullFactory
       checkOrderedBorderEdgeListValid(orderedBorderEdges);
    }
 
-   private static void replaceTwoEdgesWithOneInOrderedList(List<QuadEdge> orderedBorderEdges, QuadEdge edgeToReplace1, QuadEdge edgeToReplace2, QuadEdge newEdge)
+   private static void replaceTwoEdgesWithOneInOrderedList(List<QuadEdge> orderedBorderEdges, QuadEdge edgeToReplace1, QuadEdge edgeToReplace2,
+                                                           QuadEdge newEdge)
    {
       int firstEdgeIndex = orderedBorderEdges.indexOf(edgeToReplace1);
       if (firstEdgeIndex == -1)
@@ -941,7 +877,10 @@ public abstract class SimpleConcaveHullFactory
          return allTriangles;
       }
 
-      /** @return the intermediate variables used internally by the factory to compute a concave hull. */
+      /**
+       * @return the intermediate variables used internally by the factory to compute a concave
+       *         hull.
+       */
       public List<ConcaveHullVariables> getIntermediateVariables()
       {
          return intermediateVariables;

@@ -1,6 +1,6 @@
 package us.ihmc.quadrupedRobotics.controller.toolbox;
 
-import us.ihmc.quadrupedRobotics.planning.QuadrupedTimedStep;
+import us.ihmc.quadrupedBasics.gait.QuadrupedTimedStep;
 import us.ihmc.robotics.robotSide.RobotQuadrant;
 
 public interface QuadrupedStepTransitionCallback

@@ -1,6 +1,7 @@
 package us.ihmc.robotics.controllers;
 
 import us.ihmc.robotics.geometry.AngleTools;
+import us.ihmc.robotics.math.DeadbandTools;
 import us.ihmc.yoVariables.providers.DoubleProvider;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
@@ -45,7 +46,7 @@ public abstract class AbstractPDController
 
    public double compute(double currentPosition, double desiredPosition, double currentRate, double desiredRate)
    {
-      positionError.set(applyDeadband(desiredPosition - currentPosition));
+      positionError.set(DeadbandTools.applyDeadband(getPositionDeadband(), desiredPosition - currentPosition));
       rateError.set(desiredRate - currentRate);
 
       actionP.set(getProportionalGain() * positionError.getDoubleValue());
@@ -57,25 +58,13 @@ public abstract class AbstractPDController
    public double computeForAngles(double currentPosition, double desiredPosition, double currentRate, double desiredRate)
    {
       //      System.out.println("PGain: " + proportionalGain.getDoubleValue() + "DGain: " + derivativeGain.getDoubleValue());
-      this.positionError.set(applyDeadband(AngleTools.computeAngleDifferenceMinusPiToPi(desiredPosition, currentPosition)));
+      this.positionError.set(DeadbandTools.applyDeadband(getPositionDeadband(), AngleTools.computeAngleDifferenceMinusPiToPi(desiredPosition, currentPosition)));
       rateError.set(desiredRate - currentRate);
 
       actionP.set(getProportionalGain() * positionError.getDoubleValue());
       actionD.set(getDerivativeGain() * rateError.getDoubleValue());
 
       return actionP.getDoubleValue() + actionD.getDoubleValue();
-   }
-
-   private double applyDeadband(double positionError)
-   {
-      if (positionError >= getPositionDeadband())
-         positionError -= getPositionDeadband();
-      else if (positionError <= -getPositionDeadband())
-         positionError += getPositionDeadband();
-      else
-         positionError = 0.0;
-
-      return positionError;
    }
 
    public static AbstractPDController createPDController(String suffix, DoubleProvider proportionalGain, DoubleProvider derivativeGain, DoubleProvider deadband,

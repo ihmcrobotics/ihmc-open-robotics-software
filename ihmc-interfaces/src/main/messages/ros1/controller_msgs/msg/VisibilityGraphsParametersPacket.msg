@@ -8,6 +8,9 @@ float64 max_inter_region_connection_length
 float64 normal_z_threshold_for_accessible_regions
 
 # Field default value -1.0
+float64 preferred_extrusion_distance
+
+# Field default value -1.0
 float64 extrusion_distance
 
 # Field default value -1.0

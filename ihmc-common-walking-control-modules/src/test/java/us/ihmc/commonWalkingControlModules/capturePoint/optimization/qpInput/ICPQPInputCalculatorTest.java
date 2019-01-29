@@ -1,10 +1,13 @@
 package us.ihmc.commonWalkingControlModules.capturePoint.optimization.qpInput;
 
+import java.util.Random;
+
 import org.ejml.data.DenseMatrix64F;
 import org.ejml.ops.CommonOps;
 import org.ejml.ops.RandomMatrices;
 import org.junit.Assert;
 import org.junit.Test;
+
 import us.ihmc.commons.RandomNumbers;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationPlan;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
@@ -12,9 +15,7 @@ import us.ihmc.continuousIntegration.IntegrationCategory;
 import us.ihmc.robotics.linearAlgebra.DiagonalMatrixTools;
 import us.ihmc.robotics.linearAlgebra.MatrixTools;
 import us.ihmc.robotics.testing.JUnitTools;
-
-import javax.print.attribute.standard.JobOriginatingUserName;
-import java.util.Random;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
 
 @ContinuousIntegrationPlan(categories = {IntegrationCategory.FAST})
 public class ICPQPInputCalculatorTest
@@ -38,7 +39,7 @@ public class ICPQPInputCalculatorTest
          DenseMatrix64F weight = RandomMatrices.createRandom(subSize, subSize, random);
          DenseMatrix64F objective = RandomMatrices.createRandom(subSize, 1, random);
 
-         ICPQPIndexHandler indexHandler = new ICPQPIndexHandler();
+         ICPQPIndexHandler indexHandler = new ICPQPIndexHandler(new YoVariableRegistry("dummy"));
          ICPQPInputCalculator inputCalculator = new ICPQPInputCalculator(indexHandler);
          inputCalculator.tmpObjective.reshape(subSize, 1);
 
@@ -78,7 +79,7 @@ public class ICPQPInputCalculatorTest
       DenseMatrix64F weight = RandomMatrices.createRandom(subSize, subSize, random);
       DenseMatrix64F objective = RandomMatrices.createRandom(subSize, 1, random);
 
-      ICPQPIndexHandler indexHandler = new ICPQPIndexHandler();
+      ICPQPIndexHandler indexHandler = new ICPQPIndexHandler(new YoVariableRegistry("dummy"));
       ICPQPInputCalculator inputCalculator = new ICPQPInputCalculator(indexHandler);
       inputCalculator.tmpObjective.reshape(subSize, 1);
 
@@ -135,7 +136,7 @@ public class ICPQPInputCalculatorTest
    @Test(timeout = 30000)
    public void testCoPFeedbackRateTask()
    {
-      ICPQPIndexHandler indexHandler = new ICPQPIndexHandler();
+      ICPQPIndexHandler indexHandler = new ICPQPIndexHandler(new YoVariableRegistry("dummy"));
       ICPQPInputCalculator inputCalculator = new ICPQPInputCalculator(indexHandler);
 
       ICPQPInput icpQPInputToTest = new ICPQPInput(2);
@@ -186,7 +187,7 @@ public class ICPQPInputCalculatorTest
    @Test(timeout = 30000)
    public void testCMPFeedbackRateTask()
    {
-      ICPQPIndexHandler indexHandler = new ICPQPIndexHandler();
+      ICPQPIndexHandler indexHandler = new ICPQPIndexHandler(new YoVariableRegistry("dummy"));
       ICPQPInputCalculator inputCalculator = new ICPQPInputCalculator(indexHandler);
       indexHandler.computeProblemSize();
 
@@ -252,7 +253,7 @@ public class ICPQPInputCalculatorTest
    @Test(timeout = 30000)
    public void testFeedbackRateTask()
    {
-      ICPQPIndexHandler indexHandler = new ICPQPIndexHandler();
+      ICPQPIndexHandler indexHandler = new ICPQPIndexHandler(new YoVariableRegistry("dummy"));
       ICPQPInputCalculator inputCalculator = new ICPQPInputCalculator(indexHandler);
 
       ICPQPInput icpQPInputToTestWithoutCMP = new ICPQPInput(2);
@@ -378,7 +379,7 @@ public class ICPQPInputCalculatorTest
    @Test(timeout = 30000)
    public void testFootstepTask()
    {
-      ICPQPIndexHandler indexHandler = new ICPQPIndexHandler();
+      ICPQPIndexHandler indexHandler = new ICPQPIndexHandler(new YoVariableRegistry("dummy"));
       ICPQPInputCalculator inputCalculator = new ICPQPInputCalculator(indexHandler);
 
       ICPQPInput icpQPInputToTest = new ICPQPInput(2);
@@ -460,7 +461,7 @@ public class ICPQPInputCalculatorTest
    @Test(timeout = 30000)
    public void testFootstepRateTask()
    {
-      ICPQPIndexHandler indexHandler = new ICPQPIndexHandler();
+      ICPQPIndexHandler indexHandler = new ICPQPIndexHandler(new YoVariableRegistry("dummy"));
       ICPQPInputCalculator inputCalculator = new ICPQPInputCalculator(indexHandler);
 
       ICPQPInput icpQPInputToTest = new ICPQPInput(2);
@@ -543,7 +544,7 @@ public class ICPQPInputCalculatorTest
    @Test(timeout = 30000)
    public void testComputeDynamicsTaskWithFeedbackAndAngularMomentum()
    {
-      ICPQPIndexHandler indexHandler = new ICPQPIndexHandler();
+      ICPQPIndexHandler indexHandler = new ICPQPIndexHandler(new YoVariableRegistry("dummy"));
       ICPQPInputCalculator inputCalculator = new ICPQPInputCalculator(indexHandler);
 
       // problem requirements
@@ -761,7 +762,7 @@ public class ICPQPInputCalculatorTest
    @Test(timeout = 30000)
    public void testComputeDynamicsTaskWithFeedback()
    {
-      ICPQPIndexHandler indexHandler = new ICPQPIndexHandler();
+      ICPQPIndexHandler indexHandler = new ICPQPIndexHandler(new YoVariableRegistry("dummy"));
       ICPQPInputCalculator inputCalculator = new ICPQPInputCalculator(indexHandler);
 
       // problem requirements
@@ -988,7 +989,7 @@ public class ICPQPInputCalculatorTest
    @Test(timeout = 30000)
    public void testComputeDynamicsTaskWithAngularMomentum()
    {
-      ICPQPIndexHandler indexHandler = new ICPQPIndexHandler();
+      ICPQPIndexHandler indexHandler = new ICPQPIndexHandler(new YoVariableRegistry("dummy"));
       ICPQPInputCalculator inputCalculator = new ICPQPInputCalculator(indexHandler);
 
       // problem requirements
@@ -1218,7 +1219,7 @@ public class ICPQPInputCalculatorTest
    @Test(timeout = 30000)
    public void testComputeDynamicsTaskWithSeparateAdjustment()
    {
-      ICPQPIndexHandler indexHandler = new ICPQPIndexHandler();
+      ICPQPIndexHandler indexHandler = new ICPQPIndexHandler(new YoVariableRegistry("dummy"));
       ICPQPInputCalculator inputCalculator = new ICPQPInputCalculator(indexHandler);
 
       // problem requirements
@@ -1450,7 +1451,7 @@ public class ICPQPInputCalculatorTest
    @Test(timeout = 30000)
    public void testSubmitCoPeedbackTask()
    {
-      ICPQPIndexHandler indexHandler = new ICPQPIndexHandler();
+      ICPQPIndexHandler indexHandler = new ICPQPIndexHandler(new YoVariableRegistry("dummy"));
       ICPQPInputCalculator inputCalculator = new ICPQPInputCalculator(indexHandler);
 
       indexHandler.computeProblemSize();
@@ -1504,7 +1505,7 @@ public class ICPQPInputCalculatorTest
    @Test(timeout = 30000)
    public void testSubmitFeedbackRateTask()
    {
-      ICPQPIndexHandler indexHandler = new ICPQPIndexHandler();
+      ICPQPIndexHandler indexHandler = new ICPQPIndexHandler(new YoVariableRegistry("dummy"));
       ICPQPInputCalculator inputCalculator = new ICPQPInputCalculator(indexHandler);
 
       indexHandler.setHasCMPFeedbackTask(true);
@@ -1569,7 +1570,7 @@ public class ICPQPInputCalculatorTest
    @Test(timeout = 30000)
    public void testSubmitDynamicsTask()
    {
-      ICPQPIndexHandler indexHandler = new ICPQPIndexHandler();
+      ICPQPIndexHandler indexHandler = new ICPQPIndexHandler(new YoVariableRegistry("dummy"));
       ICPQPInputCalculator inputCalculator = new ICPQPInputCalculator(indexHandler);
 
       indexHandler.setHasCMPFeedbackTask(true);
@@ -1627,7 +1628,7 @@ public class ICPQPInputCalculatorTest
    @Test(timeout = 30000)
    public void testSubmitCMPFeedbackTask()
    {
-      ICPQPIndexHandler indexHandler = new ICPQPIndexHandler();
+      ICPQPIndexHandler indexHandler = new ICPQPIndexHandler(new YoVariableRegistry("dummy"));
       ICPQPInputCalculator inputCalculator = new ICPQPInputCalculator(indexHandler);
 
       indexHandler.setHasCMPFeedbackTask(true);
@@ -1664,7 +1665,7 @@ public class ICPQPInputCalculatorTest
    @Test(timeout = 30000)
    public void testSubmitFootstepTask()
    {
-      ICPQPIndexHandler indexHandler = new ICPQPIndexHandler();
+      ICPQPIndexHandler indexHandler = new ICPQPIndexHandler(new YoVariableRegistry("dummy"));
       ICPQPInputCalculator inputCalculator = new ICPQPInputCalculator(indexHandler);
 
       indexHandler.registerFootstep();
@@ -1748,7 +1749,7 @@ public class ICPQPInputCalculatorTest
    @Test(timeout = 30000)
    public void testSubmitCoPAndCMPOFeedbackTasks()
    {
-      ICPQPIndexHandler indexHandler = new ICPQPIndexHandler();
+      ICPQPIndexHandler indexHandler = new ICPQPIndexHandler(new YoVariableRegistry("dummy"));
       ICPQPInputCalculator inputCalculator = new ICPQPInputCalculator(indexHandler);
 
       indexHandler.setHasCMPFeedbackTask(true);
@@ -1798,7 +1799,7 @@ public class ICPQPInputCalculatorTest
    @Test(timeout = 30000)
    public void testSubmitFeedbackAndDynamicsTask()
    {
-      ICPQPIndexHandler indexHandler = new ICPQPIndexHandler();
+      ICPQPIndexHandler indexHandler = new ICPQPIndexHandler(new YoVariableRegistry("dummy"));
       ICPQPInputCalculator inputCalculator = new ICPQPInputCalculator(indexHandler);
 
       indexHandler.setHasCMPFeedbackTask(true);
@@ -1869,7 +1870,7 @@ public class ICPQPInputCalculatorTest
    @Test(timeout = 30000)
    public void testSubmitFeedbackAndFootstepTask()
    {
-      ICPQPIndexHandler indexHandler = new ICPQPIndexHandler();
+      ICPQPIndexHandler indexHandler = new ICPQPIndexHandler(new YoVariableRegistry("dummy"));
       ICPQPInputCalculator inputCalculator = new ICPQPInputCalculator(indexHandler);
 
       indexHandler.registerFootstep();
@@ -1940,7 +1941,7 @@ public class ICPQPInputCalculatorTest
    @Test(timeout = 30000)
    public void testSubmitFeedbackAndFootstepAndDynamicsTask()
    {
-      ICPQPIndexHandler indexHandler = new ICPQPIndexHandler();
+      ICPQPIndexHandler indexHandler = new ICPQPIndexHandler(new YoVariableRegistry("dummy"));
       ICPQPInputCalculator inputCalculator = new ICPQPInputCalculator(indexHandler);
 
       indexHandler.setHasCMPFeedbackTask(true);
@@ -2043,7 +2044,7 @@ public class ICPQPInputCalculatorTest
    @Test(timeout = 30000)
    public void testSubmitFeedbackAndFootstepAndDynamicsAndAngularMomentumTask()
    {
-      ICPQPIndexHandler indexHandler = new ICPQPIndexHandler();
+      ICPQPIndexHandler indexHandler = new ICPQPIndexHandler(new YoVariableRegistry("dummy"));
       ICPQPInputCalculator inputCalculator = new ICPQPInputCalculator(indexHandler);
 
       indexHandler.setHasCMPFeedbackTask(true);
@@ -2160,7 +2161,7 @@ public class ICPQPInputCalculatorTest
    @Test(timeout = 30000)
    public void testComputeDynamicsConstraintError()
    {
-      ICPQPIndexHandler indexHandler = new ICPQPIndexHandler();
+      ICPQPIndexHandler indexHandler = new ICPQPIndexHandler(new YoVariableRegistry("dummy"));
       ICPQPInputCalculator inputCalculator = new ICPQPInputCalculator(indexHandler);
       Random random = new Random(1738L);
 

@@ -1,13 +1,8 @@
 package us.ihmc.footstepPlanning.ui.components;
 
 import org.junit.Test;
-import us.ihmc.footstepPlanning.FootstepPlan;
-import us.ihmc.footstepPlanning.FootstepPlanningResult;
 import us.ihmc.footstepPlanning.FootstepPlanningTestTools;
-import us.ihmc.footstepPlanning.graphSearch.graph.FootstepNode;
-import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerCostParameters;
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParameters;
-import us.ihmc.footstepPlanning.polygonWiggling.PolygonWiggler;
 
 import java.util.Random;
 
