@@ -8,14 +8,16 @@ import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.footstepPlanning.*;
-import us.ihmc.footstepPlanning.graphSearch.collision.BoundingBoxCollisionDetector;
+import us.ihmc.footstepPlanning.graphSearch.collision.FootstepNodeBodyCollisionDetector;
 import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.*;
 import us.ihmc.footstepPlanning.graphSearch.graph.FootstepGraph;
 import us.ihmc.footstepPlanning.graphSearch.graph.FootstepNode;
 import us.ihmc.footstepPlanning.graphSearch.heuristics.CostToGoHeuristics;
 import us.ihmc.footstepPlanning.graphSearch.heuristics.DistanceAndYawBasedHeuristics;
 import us.ihmc.footstepPlanning.graphSearch.heuristics.NodeComparator;
-import us.ihmc.footstepPlanning.graphSearch.listeners.*;
+import us.ihmc.footstepPlanning.graphSearch.listeners.BipedalFootstepPlannerListener;
+import us.ihmc.footstepPlanning.graphSearch.listeners.HeuristicSearchAndActionPolicyDefinitions;
+import us.ihmc.footstepPlanning.graphSearch.listeners.StartAndGoalListener;
 import us.ihmc.footstepPlanning.graphSearch.nodeChecking.*;
 import us.ihmc.footstepPlanning.graphSearch.nodeExpansion.FootstepNodeExpansion;
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParameters;
@@ -460,10 +462,10 @@ public class AStarFootstepPlanner implements BodyPathAndFootstepPlanner
    {
       SimplePlanarRegionFootstepNodeSnapper snapper = new SimplePlanarRegionFootstepNodeSnapper(footPolygons);
       FootstepNodeSnapAndWiggler postProcessingSnapper = new FootstepNodeSnapAndWiggler(footPolygons, parameters);
-      BoundingBoxCollisionDetector collisionChecker = new BoundingBoxCollisionDetector(parameters);
+      FootstepNodeBodyCollisionDetector collisionDetector = new FootstepNodeBodyCollisionDetector(parameters);
 
       SnapBasedNodeChecker snapBasedNodeChecker = new SnapBasedNodeChecker(parameters, footPolygons, snapper);
-      BodyCollisionNodeChecker bodyCollisionNodeChecker = new BodyCollisionNodeChecker(collisionChecker, parameters, snapper);
+      BodyCollisionNodeChecker bodyCollisionNodeChecker = new BodyCollisionNodeChecker(collisionDetector, parameters, snapper);
       PlanarRegionBaseOfCliffAvoider cliffAvoider = new PlanarRegionBaseOfCliffAvoider(parameters, snapper, footPolygons);
 
       DistanceAndYawBasedHeuristics heuristics = new DistanceAndYawBasedHeuristics(parameters.getCostParameters().getAStarHeuristicsWeight(), parameters);

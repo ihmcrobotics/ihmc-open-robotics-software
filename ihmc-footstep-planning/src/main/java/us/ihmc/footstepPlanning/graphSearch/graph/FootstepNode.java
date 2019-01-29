@@ -23,24 +23,29 @@ public class FootstepNode
 
    public FootstepNode(double x, double y, double yaw, RobotSide robotSide)
    {
-      this.latticeNode = new LatticeNode(x, y, yaw);
+      this(new LatticeNode(x, y, yaw), robotSide);
+   }
+
+   public FootstepNode(LatticeNode latticeNode, RobotSide robotSide)
+   {
+      this.latticeNode = latticeNode;
       this.robotSide = robotSide;
       hashCode = computeHashCode(this);
    }
 
    public double getX()
    {
-      return LatticeNode.gridSizeXY * latticeNode.getXIndex();
+      return latticeNode.getX();
    }
 
    public double getY()
    {
-      return LatticeNode.gridSizeXY * latticeNode.getYIndex();
+      return latticeNode.getY();
    }
 
    public double getYaw()
    {
-      return LatticeNode.gridSizeYaw * latticeNode.getYawIndex();
+      return latticeNode.getYaw();
    }
 
    public int getXIndex()
