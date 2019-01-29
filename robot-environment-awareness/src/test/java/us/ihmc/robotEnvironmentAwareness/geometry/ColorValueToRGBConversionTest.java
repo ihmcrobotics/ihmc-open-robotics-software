@@ -8,8 +8,11 @@ import java.util.Random;
 import org.junit.Test;
 
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
+import us.ihmc.continuousIntegration.ContinuousIntegrationSuite.ContinuousIntegrationSuiteCategory;
+import us.ihmc.continuousIntegration.IntegrationCategory;
 import us.ihmc.robotEnvironmentAwareness.ui.graphicsBuilders.StereoVisionPointCloudViewer;
 
+@ContinuousIntegrationSuiteCategory(IntegrationCategory.FAST)
 public class ColorValueToRGBConversionTest
 {
    private static final int NUMBER_OF_TESTS = 100;
