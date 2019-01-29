@@ -68,7 +68,7 @@ public class StereoVisionPointCloudViewer extends AbstractSourceViewer<StereoVis
       return REAModuleAPI.UIStereoVisionPointCloudClear;
    }
 
-   private static javafx.scene.paint.Color intToColor(int value)
+   public static javafx.scene.paint.Color intToColor(int value)
    {
       int r = value >> 16 & 0xFF;
       int g = value >> 8 & 0xFF;
