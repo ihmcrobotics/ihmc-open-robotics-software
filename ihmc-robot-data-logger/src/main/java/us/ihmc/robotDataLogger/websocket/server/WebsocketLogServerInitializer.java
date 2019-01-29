@@ -7,7 +7,6 @@ import io.netty.channel.socket.SocketChannel;
 import io.netty.handler.codec.http.HttpObjectAggregator;
 import io.netty.handler.codec.http.HttpServerCodec;
 import io.netty.handler.codec.http.websocketx.WebSocketServerProtocolHandler;
-import io.netty.handler.codec.http.websocketx.extensions.compression.WebSocketServerCompressionHandler;
 
 public class WebsocketLogServerInitializer extends ChannelInitializer<SocketChannel>
 
@@ -15,10 +14,12 @@ public class WebsocketLogServerInitializer extends ChannelInitializer<SocketChan
    private static final String WEBSOCKET_PATH = "/websocket";
 
    private final WebsocketDataBroadcaster broadcaster;
+   private final int dataSize;
    
-   public WebsocketLogServerInitializer(WebsocketDataBroadcaster broadcaster)
+   public WebsocketLogServerInitializer(WebsocketDataBroadcaster broadcaster, int dataSize)
    {
       this.broadcaster = broadcaster;
+      this.dataSize = dataSize;
    }
 
 
@@ -29,9 +30,8 @@ public class WebsocketLogServerInitializer extends ChannelInitializer<SocketChan
 
       pipeline.addLast(new HttpServerCodec());
       pipeline.addLast(new HttpObjectAggregator(65536));
-      pipeline.addLast(new WebSocketServerCompressionHandler());
       pipeline.addLast(new WebSocketServerProtocolHandler(WEBSOCKET_PATH, null, true));
-      pipeline.addLast(new WebsocketLogFrameHandler(broadcaster));
+      pipeline.addLast(new WebsocketLogFrameHandler(broadcaster, dataSize));
    }
 
 }
