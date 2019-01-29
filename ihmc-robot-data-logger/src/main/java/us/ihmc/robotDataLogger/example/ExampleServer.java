@@ -1,5 +1,6 @@
 package us.ihmc.robotDataLogger.example;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
@@ -30,6 +31,8 @@ public class ExampleServer
    private final Random random = new Random(127L);
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
    private final YoVariableServer yoVariableServer;
+   
+   private final List<YoVariable> allVariables = new ArrayList<>();
 
    private long timestamp = 0;
 
@@ -40,6 +43,8 @@ public class ExampleServer
       PeriodicNonRealtimeThreadSchedulerFactory schedulerFactory = new PeriodicNonRealtimeThreadSchedulerFactory();
       yoVariableServer = new YoVariableServer(getClass(), schedulerFactory, null, logSettings, dt);
       yoVariableServer.setMainRegistry(registry , null, null);
+      
+      
    }
 
    public void start()
@@ -65,14 +70,15 @@ public class ExampleServer
          new YoLong("Long" + i, registry);
          new YoEnum<>("Enum" + i, registry, SomeEnum.class, random.nextBoolean());
       }
+      
+      allVariables.addAll(registry.getAllVariablesIncludingDescendants());
    }
 
    private void updateVariables()
    {
-      List<YoVariable<?>> variables = registry.getAllVariables();
-      for (int varIdx = 0; varIdx < variables.size(); varIdx++)
+      for (int varIdx = 0; varIdx < allVariables.size(); varIdx++)
       {
-         updateVariable(variables.get(varIdx));
+         updateVariable(allVariables.get(varIdx));
       }
    }
 

@@ -10,6 +10,8 @@ import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.nio.NioServerSocketChannel;
 import io.netty.handler.logging.LogLevel;
 import io.netty.handler.logging.LoggingHandler;
+import io.netty.util.ResourceLeakDetector;
+import io.netty.util.ResourceLeakDetector.Level;
 import us.ihmc.multicastLogDataProtocol.modelLoaders.LogModelProvider;
 import us.ihmc.robotDataLogger.CameraType;
 import us.ihmc.robotDataLogger.Handshake;
@@ -30,6 +32,8 @@ public class WebsocketDataProducer implements DataProducer
    private Channel ch = null;
    private EventLoopGroup bossGroup;
    private EventLoopGroup workerGroup;
+   
+   private int maximumBufferSize = 0;
 
    public WebsocketDataProducer(String mainClazz, LogModelProvider logModelProvider, YoVariableServer yoVariableServer, boolean publicBroadcast)
    {
@@ -59,8 +63,6 @@ public class WebsocketDataProducer implements DataProducer
    @Override
    public void setHandshake(Handshake handshake)
    {
-      // TODO Auto-generated method stub
-      
    }
 
    @Override
@@ -73,15 +75,17 @@ public class WebsocketDataProducer implements DataProducer
    @Override
    public void announce() throws IOException
    {
+      
       synchronized(lock)
       {
+         ResourceLeakDetector.setLevel(Level.DISABLED);
          bossGroup = new NioEventLoopGroup(1);
          workerGroup = new NioEventLoopGroup();
          try
          {
             ServerBootstrap b = new ServerBootstrap();
             b.group(bossGroup, workerGroup).channel(NioServerSocketChannel.class).handler(new LoggingHandler(LogLevel.INFO))
-             .childHandler(new WebsocketLogServerInitializer(broadcaster));
+             .childHandler(new WebsocketLogServerInitializer(broadcaster, maximumBufferSize));
    
             ch = b.bind(PORT).sync().channel();
    
@@ -114,7 +118,12 @@ public class WebsocketDataProducer implements DataProducer
                                                     RegistrySendBufferBuilder builder)
          throws IOException
    {
-      return new WebsocketRegistryPublisher(schedulerFactory, builder, broadcaster);
+      WebsocketRegistryPublisher websocketRegistryPublisher = new WebsocketRegistryPublisher(schedulerFactory, builder, broadcaster);
+      if(websocketRegistryPublisher.getMaximumBufferSize() > maximumBufferSize)
+      {
+         maximumBufferSize = websocketRegistryPublisher.getMaximumBufferSize();
+      }
+      return websocketRegistryPublisher;
    }
 
    @Override

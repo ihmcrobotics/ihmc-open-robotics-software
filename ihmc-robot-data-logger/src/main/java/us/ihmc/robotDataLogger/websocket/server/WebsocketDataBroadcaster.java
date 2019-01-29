@@ -1,60 +1,42 @@
 package us.ihmc.robotDataLogger.websocket.server;
 
 import java.io.IOException;
-
-import io.netty.buffer.ByteBuf;
-import io.netty.channel.Channel;
-import io.netty.channel.group.ChannelGroup;
-import io.netty.channel.group.ChannelMatcher;
-import io.netty.channel.group.DefaultChannelGroup;
-import io.netty.handler.codec.http.websocketx.BinaryWebSocketFrame;
-import io.netty.handler.codec.http.websocketx.TextWebSocketFrame;
-import io.netty.util.concurrent.GlobalEventExecutor;
+import java.nio.ByteBuffer;
+import java.util.ArrayList;
 
 public class WebsocketDataBroadcaster
 {
-   private final ChannelGroup clients = new DefaultChannelGroup(GlobalEventExecutor.INSTANCE);
-   private static final ChannelMatcher WRITABLE_CHANNEL_MATCHER = new WritableChannelMatcher();
+   private final Object channelLock = new Object();
 
-   
+   private final ArrayList<WebsocketLogFrameHandler> channels = new ArrayList<WebsocketLogFrameHandler>();
+
    public WebsocketDataBroadcaster()
    {
    }
-   
-         
-         
-         
-   private static class WritableChannelMatcher implements ChannelMatcher
+
+   public void addClient(WebsocketLogFrameHandler websocketLogFrameHandler)
    {
 
-      @Override
-      public boolean matches(Channel channel)
+      System.out.println("Adding new channel {} to list of channels " + websocketLogFrameHandler.remoteAddress());
+
+      synchronized (channelLock)
       {
-         if (channel.isWritable())
+         channels.add(websocketLogFrameHandler);
+      }
+
+      System.out.println(channels);
+   }
+
+   public void write(ByteBuffer frame) throws IOException
+   {
+      synchronized (channelLock)
+      {
+         for (int i = 0; i < channels.size(); i++)
          {
-            return true;
-         }
-         else
-         {
-            return false;
+            channels.get(i).write(frame);
          }
       }
 
-   }
-
-   public void addClient(Channel channel)
-   {
-
-      System.out.println("Adding new channel {} to list of channels " + channel.remoteAddress());
-      clients.add(channel);
-      System.out.println(clients);
-   }
-
-   public void write(BinaryWebSocketFrame frame) throws IOException
-   {
-//      TextWebSocketFrame frame = new TextWebSocketFrame(sendBuffer.toString());
-      clients.writeAndFlush(frame, WRITABLE_CHANNEL_MATCHER, false).syncUninterruptibly();
-      
    }
 
 }
