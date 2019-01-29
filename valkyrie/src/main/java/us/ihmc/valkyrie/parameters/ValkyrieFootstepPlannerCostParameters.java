@@ -32,12 +32,12 @@ public class ValkyrieFootstepPlannerCostParameters implements FootstepPlannerCos
    @Override
    public double getMaximum2dDistanceFromBoundingBoxToPenalize()
    {
-      return 0.2;
+      return 0.15;
    }
 
    @Override
    public double getBoundingBoxCost()
    {
-      return 40.0;
+      return 200.0;
    }
 }

@@ -106,8 +106,7 @@ class BoundingBoxCollisionDetector
 
                   double dx = Math.abs(tempPoint1.getX()) - 0.5 * parameters.getBodyBoxDepth();
                   double dy = Math.abs(tempPoint1.getY()) - 0.5 * parameters.getBodyBoxWidth();
-                  double distanceFromBox = Math.min(Math.max(dx, 0.0), Math.max(dy, 0.0));
-                  collisionData.setDistanceFromBoundingBox(Math.min(distanceFromBox, collisionData.getDistanceFromBoundingBox()));
+                  collisionData.setDistanceFromBoundingBox(getMinimumPositiveValue(dx, dy, collisionData.getDistanceFromBoundingBox()));
                }
 
                setDimensionsToUpperBound();
@@ -116,6 +115,23 @@ class BoundingBoxCollisionDetector
       }
 
       return collisionData;
+   }
+
+   private static double getMinimumPositiveValue(double... values)
+   {
+      double min = Double.POSITIVE_INFINITY;
+      for (int i = 0; i < values.length; i++)
+      {
+         if(Double.isNaN(values[i]) || values[i] < 0.0)
+            continue;
+         if(values[i] > 0.0)
+            min = Math.min(min, values[i]);
+      }
+
+      if(Double.isInfinite(min))
+         return Double.NaN;
+      else
+         return min;
    }
    
    private void setBoundingBoxPosition()
@@ -133,8 +149,8 @@ class BoundingBoxCollisionDetector
 
    private void setDimensionsToUpperBound()
    {
-      double planarDimensionIncrease = parameters.getCostParameters().getMaximum2dDistanceFromBoundingBoxToPenalize();
-      bodyBox.setSize(parameters.getBodyBoxDepth() + 2.0 * planarDimensionIncrease, parameters.getBodyBoxWidth() + 2.0 * planarDimensionIncrease,
+      double planarDimensionIncrease = 2.0 * parameters.getCostParameters().getMaximum2dDistanceFromBoundingBoxToPenalize();
+      bodyBox.setSize(parameters.getBodyBoxDepth() + planarDimensionIncrease, parameters.getBodyBoxWidth() + planarDimensionIncrease,
                       parameters.getBodyBoxHeight());
       bodyBox.getBoundingBox3D(boundingBox);
       updateBodyBoxPolytope();
