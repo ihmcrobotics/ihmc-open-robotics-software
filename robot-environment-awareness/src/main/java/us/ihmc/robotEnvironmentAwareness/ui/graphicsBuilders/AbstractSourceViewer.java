@@ -12,7 +12,7 @@ import us.ihmc.javaFXToolkit.shapes.TextureColorAdaptivePalette;
 import us.ihmc.messager.MessagerAPIFactory.Topic;
 import us.ihmc.robotEnvironmentAwareness.communication.REAUIMessager;
 
-public abstract class AbstractSourceViewer<T extends Packet<?>> implements SourceViewerInterface<T>
+public abstract class AbstractSourceViewer<T extends Packet<?>> implements Runnable
 {
    protected static final float SCAN_POINT_SIZE = 0.0075f;
    private static final int palleteSizeForMeshBuilder = 2048;
@@ -49,17 +49,19 @@ public abstract class AbstractSourceViewer<T extends Packet<?>> implements Sourc
       unpackPointCloud(newMessageToRender.getAndSet(null));
    }
 
-   @Override
    public void clear()
    {
       children.clear();
    }
 
-   @Override
    public Node getRoot()
    {
       return root;
    }
+
+   public abstract void render();
+
+   public abstract void unpackPointCloud(T message);
 
    protected abstract Topic<Boolean> createEnableInput();
 
