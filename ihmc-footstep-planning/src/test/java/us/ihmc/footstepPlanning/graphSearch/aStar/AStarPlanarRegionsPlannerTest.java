@@ -13,12 +13,12 @@ import org.junit.Test;
 
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationPlan;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
-import us.ihmc.continuousIntegration.ContinuousIntegrationTools;
 import us.ihmc.continuousIntegration.IntegrationCategory;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.tools.ReferenceFrameTools;
 import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.footstepPlanning.graphSearch.graph.LatticeNode;
 import us.ihmc.footstepPlanning.graphSearch.parameters.DefaultFootstepPlannerCostParameters;
 import us.ihmc.footstepPlanning.graphSearch.parameters.DefaultFootstepPlanningParameters;
 import us.ihmc.footstepPlanning.FootstepPlan;
@@ -121,8 +121,8 @@ public class AStarPlanarRegionsPlannerTest
    @Test(timeout = 30000)
    public void testFootstepNode()
    {
-      double gridX = FootstepNode.gridSizeXY;
-      double gridY = FootstepNode.gridSizeXY;
+      double gridX = LatticeNode.gridSizeXY;
+      double gridY = LatticeNode.gridSizeXY;
       FootstepNode node;
 
       node = new FootstepNode(gridX * 0.3, 0.0);
@@ -254,7 +254,7 @@ public class AStarPlanarRegionsPlannerTest
          lastStep.getSoleFramePose(achievedGoalPose);
 
          goalPose.setY(-parameters.getIdealFootstepWidth() / 2.0);
-         assertTrue(goalPose.epsilonEquals(achievedGoalPose, FootstepNode.gridSizeXY));
+         assertTrue(goalPose.epsilonEquals(achievedGoalPose, LatticeNode.gridSizeXY));
 
          heuristicCost.set(5.0);
 
