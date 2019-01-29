@@ -35,6 +35,8 @@ public class FootstepPlannerParametersProperty extends ParametersProperty<Settab
    private DoubleField stepUpWeight = new DoubleField(SettableFootstepPlannerParameters::getStepUpWeight, SettableFootstepPlannerParameters::setStepUpWeight);
    private DoubleField stepDownWeight = new DoubleField(SettableFootstepPlannerParameters::getStepDownWeight, SettableFootstepPlannerParameters::setStepDownWeight);
    private DoubleField costPerStep = new DoubleField(SettableFootstepPlannerParameters::getCostPerStep, SettableFootstepPlannerParameters::setCostPerStep);
+   private DoubleField boundingBoxCost = new DoubleField(SettableFootstepPlannerParameters::getBoundingBoxCost, SettableFootstepPlannerParameters::setBoundingBoxCost);
+   private DoubleField maximum2dDistanceFromBoundingBoxToPenalize = new DoubleField(SettableFootstepPlannerParameters::getMaximum2dDistanceFromBoundingBoxToPenalize, SettableFootstepPlannerParameters::setMaximum2dDistanceFromBoundingBoxToPenalize);
    private DoubleField aStarHeuristicsWeight = new DoubleField(SettableFootstepPlannerParameters::getAStarHeuristicsWeight, SettableFootstepPlannerParameters::setAStarHeuristicsWeight);
    private DoubleField visGraphWithAStarHeuristicsWeight = new DoubleField(SettableFootstepPlannerParameters::getVisGraphWithAStarHeuristicsWeight, SettableFootstepPlannerParameters::setVisGraphWithAStarHeuristicsWeight);
    private DoubleField depthFirstHeuristicsWeight = new DoubleField(SettableFootstepPlannerParameters::getDepthFirstHeuristicsWeight, SettableFootstepPlannerParameters::setDepthFirstHeuristicsWeight);
@@ -48,7 +50,6 @@ public class FootstepPlannerParametersProperty extends ParametersProperty<Settab
    private DoubleField bodyBoxBaseX = new DoubleField(SettableFootstepPlannerParameters::getBodyBoxBaseX, SettableFootstepPlannerParameters::setBodyBoxBaseX);
    private DoubleField bodyBoxBaseY = new DoubleField(SettableFootstepPlannerParameters::getBodyBoxBaseY, SettableFootstepPlannerParameters::setBodyBoxBaseY);
    private DoubleField bodyBoxBaseZ = new DoubleField(SettableFootstepPlannerParameters::getBodyBoxBaseZ, SettableFootstepPlannerParameters::setBodyBoxBaseZ);
-   private DoubleField stepTranslationBoundingBoxScaleFactor = new DoubleField(SettableFootstepPlannerParameters::getStepTranslationBoundingBoxScaleFactor, SettableFootstepPlannerParameters::setStepTranslationBoundingBoxScaleFactor);
 
    private DoubleField cliffHeight = new DoubleField(SettableFootstepPlannerParameters::getCliffHeightToAvoid, SettableFootstepPlannerParameters::setCliffHeightToAvoid);
    private DoubleField cliffClearance = new DoubleField(SettableFootstepPlannerParameters::getMinimumDistanceFromCliffBottoms, SettableFootstepPlannerParameters::setMinimumDistanceFromCliffBottoms);
@@ -253,9 +254,14 @@ public class FootstepPlannerParametersProperty extends ParametersProperty<Settab
       bindFieldBidirectionalToNumberProperty(property, cliffClearance);
    }
 
-   public void bidirectionalBindStepTranslationBoundingBoxScaleFactor(Property<? extends Number> property)
+   public void bidirectionalBindMaximum2dDistanceFromBoundingBoxToPenalize(Property<? extends Number> property)
    {
-      bindFieldBidirectionalToNumberProperty(property, stepTranslationBoundingBoxScaleFactor);
+      bindFieldBidirectionalToNumberProperty(property, maximum2dDistanceFromBoundingBoxToPenalize);
+   }
+
+   public void bidirectionalBindBoundingBoxCost(Property<? extends Number> property)
+   {
+      bindFieldBidirectionalToNumberProperty(property, boundingBoxCost);
    }
 
    public void bidirectionalBindAStarHeuristicsWeight(Property<? extends Number> property)
