@@ -4,9 +4,6 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 
 import controller_msgs.msg.dds.LidarScanMessage;
-import javafx.collections.ObservableList;
-import javafx.scene.Group;
-import javafx.scene.Node;
 import javafx.scene.paint.Color;
 import javafx.scene.paint.Material;
 import javafx.scene.paint.PhongMaterial;
@@ -14,40 +11,27 @@ import javafx.scene.shape.MeshView;
 import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.euclid.tuple3D.Point3D32;
 import us.ihmc.graphicsDescription.MeshDataGenerator;
-import us.ihmc.javaFXToolkit.shapes.JavaFXMultiColorMeshBuilder;
-import us.ihmc.javaFXToolkit.shapes.TextureColorAdaptivePalette;
+import us.ihmc.messager.MessagerAPIFactory.Topic;
 import us.ihmc.robotEnvironmentAwareness.communication.REAModuleAPI;
 import us.ihmc.robotEnvironmentAwareness.communication.REAUIMessager;
 
 /**
  * Created by adrien on 11/20/16.
  */
-public class LidarScanViewer implements Runnable
+public class LidarScanViewer extends AbstractSourceViewer<LidarScanMessage>
 {
-   private static final float SCAN_POINT_SIZE = 0.0075f;
-   private static final Material defaultMaterial = new PhongMaterial(Color.DARKRED);
-
-   private final Group root = new Group();
-   private final ObservableList<Node> children = root.getChildren();
-
-   private final JavaFXMultiColorMeshBuilder meshBuilder = new JavaFXMultiColorMeshBuilder(new TextureColorAdaptivePalette(128));
-
-   private final AtomicReference<LidarScanMessage> newMessageToRender;
-   private final AtomicReference<MeshView> scanMeshToRender = new AtomicReference<>(null);
-
-   private final AtomicReference<Boolean> enable;
-   private final AtomicReference<Boolean> clear;
    private final AtomicReference<Integer> numberOfScans;
    private final AtomicInteger currentScanIndex = new AtomicInteger(0);
 
-   public LidarScanViewer(REAUIMessager uiMessager)
+   private static final Material defaultMaterial = new PhongMaterial(Color.DARKRED);
+
+   public LidarScanViewer(Topic<LidarScanMessage> messageState, REAUIMessager uiMessager)
    {
-      newMessageToRender = uiMessager.createInput(REAModuleAPI.LidarScanState);
-      enable = uiMessager.createInput(REAModuleAPI.UILidarScanShow, false);
-      clear = uiMessager.createInput(REAModuleAPI.UILidarScanClear, false);
+      super(messageState, uiMessager);
       numberOfScans = uiMessager.createInput(REAModuleAPI.UILidarScanSize, 50);
    }
 
+   @Override
    public void render()
    {
       MeshView newScanMeshView = scanMeshToRender.getAndSet(null);
@@ -79,13 +63,8 @@ public class LidarScanViewer implements Runnable
    }
 
    @Override
-   public void run()
+   public void unpackPointCloud(LidarScanMessage message)
    {
-      if (!enable.get())
-         return;
-
-      LidarScanMessage message = newMessageToRender.getAndSet(null);
-
       if (message == null)
          return;
 
@@ -108,8 +87,15 @@ public class LidarScanViewer implements Runnable
       meshBuilder.clear();
    }
 
-   public Node getRoot()
+   @Override
+   protected Topic<Boolean> createEnableInput()
    {
-      return root;
+      return REAModuleAPI.UILidarScanShow;
+   }
+
+   @Override
+   protected Topic<Boolean> createClearInput()
+   {
+      return REAModuleAPI.UILidarScanClear;
    }
 }
