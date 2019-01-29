@@ -5,6 +5,8 @@ import static org.junit.Assert.assertTrue;
 import java.awt.Color;
 import java.util.Random;
 
+import org.junit.Test;
+
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.robotEnvironmentAwareness.ui.graphicsBuilders.StereoVisionPointCloudViewer;
 
@@ -15,6 +17,7 @@ public class ColorValueToRGBConversionTest
    private static final double rgbScale = 255.0;
 
    @ContinuousIntegrationTest(estimatedDuration = 0.1)
+   @Test(timeout = 30000)
    public void testRandomColor()
    {
       Random random = new Random(0612L);
