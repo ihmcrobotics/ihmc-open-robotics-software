@@ -1,5 +1,8 @@
 package us.ihmc.robotEnvironmentAwareness.ui.graphicsBuilders;
 
+import java.util.Random;
+import java.util.concurrent.atomic.AtomicReference;
+
 import controller_msgs.msg.dds.StereoVisionPointCloudMessage;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.MeshView;
@@ -9,12 +12,16 @@ import us.ihmc.graphicsDescription.MeshDataGenerator;
 import us.ihmc.messager.MessagerAPIFactory.Topic;
 import us.ihmc.robotEnvironmentAwareness.communication.REAModuleAPI;
 import us.ihmc.robotEnvironmentAwareness.communication.REAUIMessager;
+import us.ihmc.robotEnvironmentAwareness.ui.controller.PointCloudAnchorPaneController;
 
 public class StereoVisionPointCloudViewer extends AbstractSourceViewer<StereoVisionPointCloudMessage>
 {
+   private final AtomicReference<Integer> sizeOfPointCloud;
+
    public StereoVisionPointCloudViewer(Topic<StereoVisionPointCloudMessage> messageState, REAUIMessager uiMessager)
    {
       super(messageState, uiMessager);
+      sizeOfPointCloud = uiMessager.createInput(REAModuleAPI.UIStereoVisionPointCloudSize, PointCloudAnchorPaneController.initialSizeOfPointCloud);
    }
 
    public void render()
@@ -40,12 +47,21 @@ public class StereoVisionPointCloudViewer extends AbstractSourceViewer<StereoVis
       Point3D32 scanPoint = new Point3D32();
       meshBuilder.clear();
       int numberOfScanPoints = message.getPointCloud().size() / 3;
-      for (int i = 0; i < numberOfScanPoints; i++)
+      int sizeOfPointCloudToVisualize = Math.min(numberOfScanPoints, sizeOfPointCloud.get());
+
+      Random random = new Random();
+      for (int i = 0; i < sizeOfPointCloudToVisualize; i++)
       {
-         int colorValue = message.getColors().get(i);
+         int indexToVisualize;
+         if (numberOfScanPoints < sizeOfPointCloud.get())
+            indexToVisualize = i;
+         else
+            indexToVisualize = random.nextInt(numberOfScanPoints);
+
+         int colorValue = message.getColors().get(indexToVisualize);
          Color color = intToColor(colorValue);
 
-         MessageTools.unpackScanPoint(message, i, scanPoint);
+         MessageTools.unpackScanPoint(message, indexToVisualize, scanPoint);
 
          meshBuilder.addMesh(MeshDataGenerator.Tetrahedron(SCAN_POINT_SIZE), scanPoint, color);
       }
