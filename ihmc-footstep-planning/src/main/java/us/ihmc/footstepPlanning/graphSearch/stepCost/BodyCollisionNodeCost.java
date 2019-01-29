@@ -24,9 +24,8 @@ public class BodyCollisionNodeCost implements FootstepCost
    @Override
    public double compute(FootstepNode startNode, FootstepNode endNode)
    {
-      LatticeNode midFootNode = FootstepNodeTools.computeAverage(startNode.getLatticeNode(), endNode.getLatticeNode());
       double height = snapper.getSnapData(endNode).getSnapTransform().getTranslationZ();
-      BodyCollisionData collisionData = collisionDetector.checkForCollision(midFootNode, height);
+      BodyCollisionData collisionData = collisionDetector.checkForCollision(endNode.getLatticeNode(), height);
 
       if(collisionData.isCollisionDetected())
       {

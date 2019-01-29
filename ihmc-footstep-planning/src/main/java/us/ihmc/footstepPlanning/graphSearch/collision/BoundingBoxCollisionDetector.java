@@ -106,10 +106,8 @@ class BoundingBoxCollisionDetector
 
                   double dx = Math.abs(tempPoint1.getX()) - 0.5 * parameters.getBodyBoxDepth();
                   double dy = Math.abs(tempPoint1.getY()) - 0.5 * parameters.getBodyBoxWidth();
-                  if(dx > 0.0)
-                     collisionData.setDistanceFromBoundingBox(dx);
-                  else
-                     collisionData.setDistanceFromBoundingBox(dy);
+                  double distanceFromBox = Math.min(Math.max(dx, 0.0), Math.max(dy, 0.0));
+                  collisionData.setDistanceFromBoundingBox(Math.min(distanceFromBox, collisionData.getDistanceFromBoundingBox()));
                }
 
                setDimensionsToUpperBound();
@@ -119,7 +117,7 @@ class BoundingBoxCollisionDetector
 
       return collisionData;
    }
-
+   
    private void setBoundingBoxPosition()
    {
       bodyBox.setPosition(bodyPoseX, bodyPoseY, bodyPoseZ + 0.5 * parameters.getBodyBoxHeight());
