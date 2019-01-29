@@ -1,21 +1,39 @@
-package us.ihmc.footstepPlanning.graphSearch.collision;
+package us.ihmc.footstepPlanning.graphSearch.graph;
 
-import us.ihmc.footstepPlanning.graphSearch.graph.FootstepNode;
+import us.ihmc.robotics.geometry.AngleTools;
 
-class LatticeNode
+public class LatticeNode
 {
+   public static final double gridSizeXY = 0.05;
+   public static final double gridSizeYaw = Math.PI / 18.0;
+
    private final int xIndex;
    private final int yIndex;
    private final int yawIndex;
 
    private final int hashCode;
 
-   LatticeNode(double x, double y, double yaw)
+   public LatticeNode(double x, double y, double yaw)
    {
-      this.xIndex = (int) Math.round(x / FootstepNode.gridSizeXY);
-      this.yIndex = (int) Math.round(y / FootstepNode.gridSizeXY);
-      this.yawIndex = (int) Math.round(yaw / FootstepNode.gridSizeYaw);
+      this.xIndex = (int) Math.round(x / gridSizeXY);
+      this.yIndex = (int) Math.round(y / gridSizeXY);
+      this.yawIndex = (int) Math.round(AngleTools.trimAngleMinusPiToPi(yaw) / gridSizeYaw);
       hashCode = computeHashCode(this);
+   }
+
+   public int getXIndex()
+   {
+      return xIndex;
+   }
+
+   public int getYIndex()
+   {
+      return yIndex;
+   }
+
+   public int getYawIndex()
+   {
+      return yawIndex;
    }
 
    private static int computeHashCode(LatticeNode cell)

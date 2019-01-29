@@ -5,7 +5,7 @@ import us.ihmc.footstepPlanning.FootstepPlan;
 import us.ihmc.footstepPlanning.FootstepPlanningResult;
 import us.ihmc.footstepPlanning.filters.BodyCollisionRegionFilter;
 import us.ihmc.footstepPlanning.filters.SteppableRegionFilter;
-import us.ihmc.footstepPlanning.graphSearch.graph.FootstepNode;
+import us.ihmc.footstepPlanning.graphSearch.graph.LatticeNode;
 import us.ihmc.robotics.geometry.PlanarRegion;
 
 public interface FootstepPlannerParameters
@@ -283,7 +283,7 @@ public interface FootstepPlannerParameters
     */
    default double getMaximumXYWiggleDistance()
    {
-      return FootstepNode.gridSizeXY / 2.0;
+      return LatticeNode.gridSizeXY / 2.0;
    }
 
    /**
@@ -292,7 +292,7 @@ public interface FootstepPlannerParameters
     */
    default double getMaximumYawWiggle()
    {
-      return FootstepNode.gridSizeYaw / 2.0;
+      return LatticeNode.gridSizeYaw / 2.0;
    }
 
    /**
