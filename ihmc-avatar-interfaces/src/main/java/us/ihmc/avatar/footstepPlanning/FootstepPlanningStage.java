@@ -160,8 +160,8 @@ public class FootstepPlanningStage implements FootstepPlanner
       costBuilder.setFootstepPlannerParameters(footstepPlanningParameters);
       costBuilder.setSnapper(snapper);
       costBuilder.setIncludeHeightCost(true);
-      costBuilder.setIncludeHeightCost(true);
       costBuilder.setIncludePitchAndRollCost(true);
+      costBuilder.setIncludeBoundingBoxCost(true);
 
       FootstepCost footstepCost = costBuilder.buildCost();
 
