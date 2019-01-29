@@ -15,7 +15,7 @@ import us.ihmc.robotics.geometry.PlanarRegionsListGenerator;
 
 import java.util.Arrays;
 
-public class BoundingBoxCollisionCheckerTest
+public class BoundingBoxCollisionDetectorTest
 {
    @ContinuousIntegrationAnnotations.ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
@@ -55,7 +55,7 @@ public class BoundingBoxCollisionCheckerTest
          }
       };
 
-      BoundingBoxCollisionChecker collisionChecker = new BoundingBoxCollisionChecker(plannerParameters);
+      BoundingBoxCollisionDetector collisionChecker = new BoundingBoxCollisionDetector(plannerParameters);
       collisionChecker.setBoxPose(0.25, 0.5, 0.0, 0.0);
       double distanceFromBox = 1e-3;
 
@@ -154,7 +154,7 @@ public class BoundingBoxCollisionCheckerTest
          }
       };
 
-      BoundingBoxCollisionChecker collisionChecker = new BoundingBoxCollisionChecker(plannerParameters);
+      BoundingBoxCollisionDetector collisionChecker = new BoundingBoxCollisionDetector(plannerParameters);
       double distanceFromRegionAtZeroYaw = 0.025;
       PlanarRegionsList planarRegionsList = getSquarePlanarRegionsList(0.75, 0.75, 0.5, 0.0, 0.5 - 2.0 * distanceFromRegionAtZeroYaw);
       collisionChecker.setPlanarRegionsList(planarRegionsList);
@@ -214,7 +214,7 @@ public class BoundingBoxCollisionCheckerTest
          }
       };
 
-      BoundingBoxCollisionChecker collisionChecker = new BoundingBoxCollisionChecker(plannerParameters);
+      BoundingBoxCollisionDetector collisionChecker = new BoundingBoxCollisionDetector(plannerParameters);
       PlanarRegionsList planarRegionsList = getSquarePlanarRegionsList(0.25, 0.25, 0.5, 0.0, 0.5);
       collisionChecker.setPlanarRegionsList(planarRegionsList);
 
@@ -286,7 +286,7 @@ public class BoundingBoxCollisionCheckerTest
       generator.addCubeReferencedAtBottomMiddle(cubeDepth, cubeWidth, cubeHeight);
       PlanarRegionsList planarRegionsList = generator.getPlanarRegionsList();
 
-      BoundingBoxCollisionChecker collisionChecker = new BoundingBoxCollisionChecker(plannerParameters);
+      BoundingBoxCollisionDetector collisionChecker = new BoundingBoxCollisionDetector(plannerParameters);
       collisionChecker.setPlanarRegionsList(planarRegionsList);
 
       // test just outside along y

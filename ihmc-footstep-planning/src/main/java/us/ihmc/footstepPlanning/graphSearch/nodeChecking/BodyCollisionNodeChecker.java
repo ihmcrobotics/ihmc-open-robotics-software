@@ -3,11 +3,10 @@ package us.ihmc.footstepPlanning.graphSearch.nodeChecking;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.footstepPlanning.graphSearch.collision.BodyCollisionData;
-import us.ihmc.footstepPlanning.graphSearch.collision.BoundingBoxCollisionChecker;
+import us.ihmc.footstepPlanning.graphSearch.collision.BoundingBoxCollisionDetector;
 import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.FootstepNodeSnapData;
 import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.FootstepNodeSnapper;
 import us.ihmc.footstepPlanning.graphSearch.graph.FootstepNode;
-import us.ihmc.footstepPlanning.graphSearch.graph.FootstepNodeTools;
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParameters;
 import us.ihmc.robotics.geometry.AngleTools;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
@@ -15,14 +14,14 @@ import us.ihmc.robotics.robotSide.RobotSide;
 
 public class BodyCollisionNodeChecker extends FootstepNodeChecker
 {
-   private final BoundingBoxCollisionChecker collisionChecker;
+   private final BoundingBoxCollisionDetector collisionChecker;
    private final FootstepPlannerParameters parameters;
    private final FootstepNodeSnapper snapper;
 
    private final Point3D tempPoint1 = new Point3D();
    private final Point3D tempPoint2 = new Point3D();
 
-   public BodyCollisionNodeChecker(BoundingBoxCollisionChecker collisionChecker, FootstepPlannerParameters parameters, FootstepNodeSnapper snapper)
+   public BodyCollisionNodeChecker(BoundingBoxCollisionDetector collisionChecker, FootstepPlannerParameters parameters, FootstepNodeSnapper snapper)
    {
       this.parameters = parameters;
       this.collisionChecker = collisionChecker;

@@ -16,7 +16,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
-public class BoundingBoxCollisionChecker
+public class BoundingBoxCollisionDetector
 {
    private final FootstepPlannerParameters parameters;
    private PlanarRegionsList planarRegionsList;
@@ -37,7 +37,7 @@ public class BoundingBoxCollisionChecker
    private final Point3D tempPoint1 = new Point3D();
    private final Point3D tempPoint2 = new Point3D();
 
-   public BoundingBoxCollisionChecker(FootstepPlannerParameters parameters)
+   public BoundingBoxCollisionDetector(FootstepPlannerParameters parameters)
    {
       this.parameters = parameters;
    }
