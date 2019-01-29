@@ -93,16 +93,17 @@ public class JointTorqueOffsetEstimatorController implements RobotController, Jo
       {
          OneDoFJointBasics joint = oneDoFJoints.get(i);
 
-         if (!hasTorqueOffsetForJoint(joint))
-            continue;
-
          String jointName = joint.getName();
-         PDController controller = new PDController(jointName + "Calibration", registry);
-         pdControllers.put(joint, controller);
-
          YoDouble desiredPosition = new YoDouble("q_d_calib_" + jointName, registry);
          desiredPosition.set(wholeBodySetpointParameters.getSetpoint(jointName));
          desiredPositions.put(joint, desiredPosition);
+
+         if (!hasTorqueOffsetForJoint(joint))
+            continue;
+
+         PDController controller = new PDController(jointName + "Calibration", registry);
+         pdControllers.put(joint, controller);
+
       }
 
       setDefaultPDControllerGains();
@@ -141,6 +142,17 @@ public class JointTorqueOffsetEstimatorController implements RobotController, Jo
       }
 
       lowLevelOneDoFJointDesiredDataHolder.setDesiredTorqueFromJoints(oneDoFJoints);
+
+      for (int i = 0; i < oneDoFJoints.size(); i++)
+      {
+         OneDoFJointBasics joint = oneDoFJoints.get(i);
+         if (!hasTorqueOffsetForJoint(joint))
+         {
+            lowLevelOneDoFJointDesiredDataHolder.setDesiredJointTorque(joint, 0.0);
+            lowLevelOneDoFJointDesiredDataHolder.setDesiredJointPosition(joint, desiredPositions.get(joint).getValue());
+            lowLevelOneDoFJointDesiredDataHolder.setDesiredJointVelocity(joint, 0.0);
+         }
+      }
    }
 
    public void updateDiagnosticsWhenHangingHelpers()

@@ -17,13 +17,13 @@ import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.mecano.frames.MovingReferenceFrame;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.quadrupedRobotics.controller.QuadrupedControllerToolbox;
-import us.ihmc.quadrupedRobotics.planning.YoQuadrupedTimedStep;
+import us.ihmc.quadrupedRobotics.util.YoQuadrupedTimedStep;
 import us.ihmc.robotics.dataStructures.parameters.FrameParameterVector3D;
 import us.ihmc.robotics.math.filters.GlitchFilteredYoBoolean;
 import us.ihmc.robotics.math.trajectories.MultipleWaypointsBlendedPositionTrajectoryGenerator;
 import us.ihmc.robotics.math.trajectories.PositionTrajectoryGenerator;
-import us.ihmc.robotics.math.trajectories.waypoints.FrameEuclideanTrajectoryPoint;
-import us.ihmc.robotics.math.trajectories.waypoints.MultipleWaypointsPositionTrajectoryGenerator;
+import us.ihmc.robotics.math.trajectories.generators.MultipleWaypointsPositionTrajectoryGenerator;
+import us.ihmc.robotics.math.trajectories.trajectorypoints.FrameEuclideanTrajectoryPoint;
 import us.ihmc.robotics.robotSide.RobotQuadrant;
 import us.ihmc.robotics.sensors.FootSwitchInterface;
 import us.ihmc.robotics.trajectories.TrajectoryType;
@@ -31,7 +31,11 @@ import us.ihmc.robotics.trajectories.providers.CurrentRigidBodyStateProvider;
 import us.ihmc.yoVariables.parameters.BooleanParameter;
 import us.ihmc.yoVariables.parameters.DoubleParameter;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.yoVariables.variable.*;
+import us.ihmc.yoVariables.variable.YoBoolean;
+import us.ihmc.yoVariables.variable.YoDouble;
+import us.ihmc.yoVariables.variable.YoEnum;
+import us.ihmc.yoVariables.variable.YoFramePoint3D;
+import us.ihmc.yoVariables.variable.YoFrameVector3D;
 
 public class QuadrupedSwingState extends QuadrupedFootState
 {
@@ -83,6 +87,7 @@ public class QuadrupedSwingState extends QuadrupedFootState
    private final YoBoolean hasMinimumTimePassed;
 
    private final DoubleParameter minHeightDifferenceForObstacleClearance;
+   private final DoubleParameter minPhaseThroughSwingForContact;
 
    private final DoubleParameter percentPastSwingForDone;
    private final YoBoolean isSwingPastDone;
@@ -119,6 +124,7 @@ public class QuadrupedSwingState extends QuadrupedFootState
       String namePrefix = robotQuadrant.getPascalCaseName();
 
       minHeightDifferenceForObstacleClearance = new DoubleParameter(namePrefix + "MinHeightDifferenceForObstacleClearance", registry, 0.04);
+      minPhaseThroughSwingForContact = new DoubleParameter(namePrefix + "minPhaseThroughSwingForContact", registry, 0.8);
 
       timeInState = new YoDouble(namePrefix + "TimeInState", registry);
       timeInStateWithSwingSpeedUp = new YoDouble(namePrefix + "TimeInStateWithSwingSpeedUp", registry);
@@ -158,7 +164,7 @@ public class QuadrupedSwingState extends QuadrupedFootState
       swingTrajectoryWaypointCalculator.setStanceFootPosition(dummyPoint);
 
       MultipleWaypointsPositionTrajectoryGenerator baseTrajectory = new MultipleWaypointsPositionTrajectoryGenerator(this.robotQuadrant.getPascalCaseName(),
-                                                                                                                     true, worldFrame, registry);
+                                                                                                                     worldFrame, registry);
       blendedSwingTrajectory = new MultipleWaypointsBlendedPositionTrajectoryGenerator(this.robotQuadrant.getPascalCaseName(), baseTrajectory, worldFrame,
                                                                                        registry);
       touchdownTrajectory = new SoftTouchdownPositionTrajectoryGenerator(namePrefix, registry);
@@ -304,7 +310,7 @@ public class QuadrupedSwingState extends QuadrupedFootState
 
    private boolean hasMinimumTimePassed(double timeInState)
    {
-      return timeInState / swingDuration.getDoubleValue() > 0.6;
+      return timeInState / swingDuration.getDoubleValue() > minPhaseThroughSwingForContact.getValue();
    }
 
    private void updateEndOfStateConditions(double timeInState)

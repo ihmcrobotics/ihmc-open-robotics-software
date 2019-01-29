@@ -4,7 +4,6 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
 
 import org.junit.After;
 import org.junit.Before;
@@ -15,14 +14,13 @@ import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.euclid.referenceFrame.exceptions.ReferenceFrameMismatchException;
+import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DBasics;
+import us.ihmc.euclid.referenceFrame.interfaces.FrameQuaternionBasics;
 import us.ihmc.euclid.referenceFrame.tools.ReferenceFrameTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.yoVariables.variable.YoFramePoint3D;
-import us.ihmc.yoVariables.variable.YoFrameQuaternion;
-import us.ihmc.robotics.math.frames.YoFramePointInMultipleFrames;
-import us.ihmc.robotics.math.frames.YoFrameQuaternionInMultipleFrames;
+import us.ihmc.yoVariables.variable.frameObjects.YoMutableFramePoint3D;
+import us.ihmc.yoVariables.variable.frameObjects.YoMutableFrameQuaternion;
 
 
 public class ConstantPoseTrajectoryGeneratorTest
@@ -30,111 +28,27 @@ public class ConstantPoseTrajectoryGeneratorTest
    private static final double EPSILON = 1e-12;
 
    private YoVariableRegistry registry = new YoVariableRegistry("registry");
-   private final boolean allowMultipleFrames = true;
    private ReferenceFrame referenceFrame;
-   private YoFramePoint3D positionYoFramePoint;
-   private YoFrameQuaternion orientationQuaternion;
-   private YoFramePointInMultipleFrames positionMultipleFrames;
-   private YoFrameQuaternionInMultipleFrames orientationMultipleFrames;
+   private FramePoint3DBasics positionMultipleFrames;
+   private FrameQuaternionBasics orientationMultipleFrames;
    private ReferenceFrame rootFrame1 = ReferenceFrame.constructARootFrame("root1");
    private ConstantPoseTrajectoryGenerator generator;
-   private ReferenceFrame frame2;
 
    @Before
    public void setUp()
    {
       RigidBodyTransform transformToParent = new RigidBodyTransform();
-      //      referenceFrame = ReferenceFrame.constructARootFrame("rootFrame");
       referenceFrame = ReferenceFrame.constructFrameWithUnchangingTransformToParent("referenceFrame", rootFrame1, transformToParent);
-
-      positionYoFramePoint = new YoFramePoint3D("prefixTEST", referenceFrame, registry);
-      orientationQuaternion = new YoFrameQuaternion("orientationPrefix", referenceFrame, registry);
-      frame2 = ReferenceFrame.constructFrameWithUnchangingTransformToParent("frame2", rootFrame1, transformToParent);
-      positionMultipleFrames = new YoFramePointInMultipleFrames("positionMultipleFrames", registry, rootFrame1, frame2);
-      orientationMultipleFrames = new YoFrameQuaternionInMultipleFrames("orientationMultipleFrames", registry, rootFrame1, frame2);
-      generator = new ConstantPoseTrajectoryGenerator(positionYoFramePoint, orientationQuaternion);
+      positionMultipleFrames = new YoMutableFramePoint3D("positionMultipleFrames", "", registry);
+      orientationMultipleFrames = new YoMutableFrameQuaternion("orientationMultipleFrames", "", registry);
+      generator = new ConstantPoseTrajectoryGenerator(positionMultipleFrames, orientationMultipleFrames);
+      generator.switchTrajectoryFrame(referenceFrame);
    }
 
    @After
    public void tearDown()
    {
       ReferenceFrameTools.clearWorldFrameTree();
-   }
-
-	@ContinuousIntegrationTest(estimatedDuration = 0.0)
-	@Test(timeout=300000)
-   public void testConstructors()
-   {
-      ConstantPoseTrajectoryGenerator generator1 = new ConstantPoseTrajectoryGenerator(positionYoFramePoint, orientationQuaternion);
-      ConstantPoseTrajectoryGenerator generator2 = new ConstantPoseTrajectoryGenerator(positionMultipleFrames, orientationMultipleFrames);
-      ConstantPoseTrajectoryGenerator generator3 = new ConstantPoseTrajectoryGenerator("generator3", referenceFrame, registry);
-      ConstantPoseTrajectoryGenerator generator4 = new ConstantPoseTrajectoryGenerator("generator4", allowMultipleFrames, referenceFrame, registry);
-
-      try
-      {
-         generator1.registerNewTrajectoryFrame(referenceFrame);
-         fail();
-      }
-      catch (RuntimeException rte)
-      {
-      }
-
-      generator2.registerAndSwitchFrame(referenceFrame);
-
-      try
-      {
-         generator3.registerNewTrajectoryFrame(referenceFrame);
-         fail();
-      }
-      catch (RuntimeException rte)
-      {
-      }
-
-      generator4.registerNewTrajectoryFrame(referenceFrame);
-
-      try
-      {
-         ConstantPoseTrajectoryGenerator generator04 = new ConstantPoseTrajectoryGenerator("generator4", false, referenceFrame, registry);
-         generator04.registerNewTrajectoryFrame(referenceFrame);
-         fail();
-      }
-      catch (RuntimeException rte)
-      {
-      }
-
-      try
-      {
-         YoFrameQuaternion orientationQuaternion2 = new YoFrameQuaternion("orientationPrefix2", ReferenceFrame.constructARootFrame("worldFrame"), registry);
-         generator1 = null;
-         generator1 = new ConstantPoseTrajectoryGenerator(positionYoFramePoint, orientationQuaternion2);
-         fail();
-      }
-      catch (ReferenceFrameMismatchException rfme)
-      {
-      }
-
-      try
-      {
-         YoFrameQuaternionInMultipleFrames orientationMultipleFrames2 = new YoFrameQuaternionInMultipleFrames("orientationMultipleFrames2", registry,
-               ReferenceFrame.constructARootFrame("worldFrame2"), frame2);
-         generator2 = null;
-         generator2 = new ConstantPoseTrajectoryGenerator(positionMultipleFrames, orientationMultipleFrames2);
-         fail();
-      }
-      catch (ReferenceFrameMismatchException rfme)
-      {
-      }
-   }
-
-	@ContinuousIntegrationTest(estimatedDuration = 0.0)
-	@Test(timeout=300000)
-   //TODO: Find a way to test this.
-   public void testRegisterNewTrajectoryFrame()
-   {
-      ConstantPoseTrajectoryGenerator generator2 = new ConstantPoseTrajectoryGenerator(positionMultipleFrames, orientationMultipleFrames);
-      generator2.registerNewTrajectoryFrame(rootFrame1);
-
-      //      System.out.println(generator2);
    }
 
 	@ContinuousIntegrationTest(estimatedDuration = 0.0)
@@ -156,14 +70,6 @@ public class ConstantPoseTrajectoryGeneratorTest
 	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout=300000)
    //TODO: Find a way to test this.
-   public void testRegisterAndSwitchFrame()
-   {
-
-   }
-
-	@ContinuousIntegrationTest(estimatedDuration = 0.0)
-	@Test(timeout=300000)
-   //TODO: Find a way to test this.
    public void testSetConstantPose()
    {
 
@@ -173,7 +79,7 @@ public class ConstantPoseTrajectoryGeneratorTest
 	@Test(timeout=300000)
    public void testIsDone()
    {
-      ConstantPoseTrajectoryGenerator generator1 = new ConstantPoseTrajectoryGenerator(positionYoFramePoint, orientationQuaternion);
+      ConstantPoseTrajectoryGenerator generator1 = new ConstantPoseTrajectoryGenerator(positionMultipleFrames, orientationMultipleFrames);
       assertTrue(generator1.isDone());
    }
 
@@ -356,7 +262,7 @@ public class ConstantPoseTrajectoryGeneratorTest
 	@Test(timeout=300000)
    public void testToString()
    {
-      String expectedString = "Current position: " + positionYoFramePoint.toString() + "\nCurrent orientation: " + orientationQuaternion.toString();
+      String expectedString = "Current position: " + positionMultipleFrames.toString() + "\nCurrent orientation: " + orientationMultipleFrames.toString();
       assertEquals(expectedString, generator.toString());
    }
 }

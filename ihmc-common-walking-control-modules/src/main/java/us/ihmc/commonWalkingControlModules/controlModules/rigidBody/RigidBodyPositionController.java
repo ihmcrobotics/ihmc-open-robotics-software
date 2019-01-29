@@ -31,9 +31,8 @@ public class RigidBodyPositionController extends RigidBodyTaskspaceControlState
    private final FrameQuaternion currentOrientation = new FrameQuaternion();
    private final RigidBodyPositionControlHelper positionHelper;
 
-   public RigidBodyPositionController(RigidBodyBasics bodyToControl, RigidBodyBasics baseBody, RigidBodyBasics elevator, Collection<ReferenceFrame> trajectoryFrames,
-                                      ReferenceFrame controlFrame, ReferenceFrame baseFrame, YoDouble yoTime, YoVariableRegistry parentRegistry,
-                                      YoGraphicsListRegistry graphicsListRegistry)
+   public RigidBodyPositionController(RigidBodyBasics bodyToControl, RigidBodyBasics baseBody, RigidBodyBasics elevator, ReferenceFrame controlFrame,
+                                      ReferenceFrame baseFrame, YoDouble yoTime, YoVariableRegistry parentRegistry, YoGraphicsListRegistry graphicsListRegistry)
    {
       super(RigidBodyControlMode.TASKSPACE, bodyToControl.getName(), yoTime, parentRegistry);
 
@@ -53,8 +52,8 @@ public class RigidBodyPositionController extends RigidBodyTaskspaceControlState
 
       usingWeightFromMessage = new YoBoolean(prefix + "UsingWeightFromMessage", registry);
       BooleanParameter useBaseFrameForControl = new BooleanParameter(prefix + "UseBaseFrameForControl", registry, false);
-      positionHelper = new RigidBodyPositionControlHelper(prefix, bodyToControl, baseBody, elevator, trajectoryFrames, controlFrame, baseFrame,
-                                                          useBaseFrameForControl, usingWeightFromMessage, registry, graphicsListRegistry);
+      positionHelper = new RigidBodyPositionControlHelper(prefix, bodyToControl, baseBody, elevator, controlFrame, baseFrame, useBaseFrameForControl,
+                                                          usingWeightFromMessage, registry, graphicsListRegistry);
 
       graphics.addAll(positionHelper.getGraphics());
       hideGraphics();

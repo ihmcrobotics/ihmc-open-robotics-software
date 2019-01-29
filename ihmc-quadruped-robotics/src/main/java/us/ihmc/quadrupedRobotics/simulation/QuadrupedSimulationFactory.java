@@ -20,24 +20,22 @@ import us.ihmc.jMonkeyEngineToolkit.GroundProfile3D;
 import us.ihmc.jMonkeyEngineToolkit.camera.CameraConfiguration;
 import us.ihmc.mecano.multiBodySystem.interfaces.FloatingJointBasics;
 import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
-import us.ihmc.quadrupedRobotics.communication.QuadrupedControllerAPIDefinition;
+import us.ihmc.quadrupedCommunication.QuadrupedControllerAPIDefinition;
 import us.ihmc.quadrupedRobotics.controller.QuadrupedControlMode;
 import us.ihmc.quadrupedRobotics.controller.QuadrupedControllerManager;
 import us.ihmc.quadrupedRobotics.controller.QuadrupedSimulationController;
 import us.ihmc.quadrupedRobotics.estimator.SimulatedQuadrupedFootSwitchFactory;
-import us.ihmc.quadrupedRobotics.estimator.referenceFrames.QuadrupedReferenceFrames;
+import us.ihmc.quadrupedBasics.referenceFrames.QuadrupedReferenceFrames;
 import us.ihmc.quadrupedRobotics.estimator.sensorProcessing.simulatedSensors.SDFQuadrupedPerfectSimulatedSensor;
 import us.ihmc.quadrupedRobotics.estimator.stateEstimator.QuadrupedSensorInformation;
 import us.ihmc.quadrupedRobotics.estimator.stateEstimator.QuadrupedSensorReaderWrapper;
 import us.ihmc.quadrupedRobotics.estimator.stateEstimator.QuadrupedStateEstimatorFactory;
-import us.ihmc.quadrupedRobotics.mechanics.inverseKinematics.QuadrupedInverseKinematicsCalculators;
-import us.ihmc.quadrupedRobotics.mechanics.inverseKinematics.QuadrupedLegInverseKinematicsCalculator;
 import us.ihmc.quadrupedRobotics.model.QuadrupedInitialOffsetAndYaw;
 import us.ihmc.quadrupedRobotics.model.QuadrupedInitialPositionParameters;
 import us.ihmc.quadrupedRobotics.model.QuadrupedModelFactory;
 import us.ihmc.quadrupedRobotics.model.QuadrupedPhysicalProperties;
 import us.ihmc.quadrupedRobotics.model.QuadrupedRuntimeEnvironment;
-import us.ihmc.quadrupedRobotics.parameters.QuadrupedPositionBasedCrawlControllerParameters;
+import us.ihmc.quadrupedRobotics.parameters.QuadrupedFallDetectionParameters;
 import us.ihmc.quadrupedRobotics.parameters.QuadrupedPrivilegedConfigurationParameters;
 import us.ihmc.quadrupedRobotics.parameters.QuadrupedSitDownParameters;
 import us.ihmc.robotDataLogger.YoVariableServer;
@@ -117,11 +115,11 @@ public class QuadrupedSimulationFactory
    private final RequiredFactoryField<QuadrupedSensorInformation> sensorInformation = new RequiredFactoryField<>("sensorInformation");
    private final RequiredFactoryField<StateEstimatorParameters> stateEstimatorParameters = new RequiredFactoryField<>("stateEstimatorParameters");
    private final RequiredFactoryField<QuadrupedReferenceFrames> referenceFrames = new RequiredFactoryField<>("referenceFrames");
-   private final RequiredFactoryField<QuadrupedPositionBasedCrawlControllerParameters> positionBasedCrawlControllerParameters = new RequiredFactoryField<>("positionBasedCrawlControllerParameters");
    private final RequiredFactoryField<JointDesiredOutputList> jointDesiredOutputList = new RequiredFactoryField<>("jointDesiredOutputList");
    private final RequiredFactoryField<HighLevelControllerParameters> highLevelControllerParameters = new RequiredFactoryField<>("highLevelControllerParameters");
    private final RequiredFactoryField<QuadrupedSitDownParameters> sitDownParameters = new RequiredFactoryField<>("sitDownParameters");
    private final RequiredFactoryField<QuadrupedPrivilegedConfigurationParameters> privilegedConfigurationParameters = new RequiredFactoryField<>("privilegedConfigurationParameters");
+   private final RequiredFactoryField<QuadrupedFallDetectionParameters> fallDetectionParameters = new RequiredFactoryField<>("fallDetectionParameters");
 
    private final OptionalFactoryField<SimulatedElasticityParameters> simulatedElasticityParameters = new OptionalFactoryField<>("simulatedElasticityParameters");
    private final OptionalFactoryField<CoulombViscousStribeckFrictionParameters> simulatedFrictionParameters = new OptionalFactoryField<>("jointFrictionParameters");
@@ -149,13 +147,11 @@ public class QuadrupedSimulationFactory
    private StateEstimatorController stateEstimator;
    private CenterOfMassDataHolder centerOfMassDataHolder = null;
    private RealtimeRos2Node realtimeRos2Node;
-   private RobotController headController;
    private QuadrupedControllerManager controllerManager;
    private DRCPoseCommunicator poseCommunicator;
    private GroundProfile3D groundProfile3D;
    private LinearGroundContactModel groundContactModel;
    private QuadrupedSimulationController simulationController;
-   private QuadrupedLegInverseKinematicsCalculator legInverseKinematicsCalculator;
    private List<CameraConfiguration> cameraConfigurations = new ArrayList<>();
    private YoVariableServer yoVariableServer;
 
@@ -255,7 +251,7 @@ public class QuadrupedSimulationFactory
       footSwitchFactory.setFullRobotModel(fullRobotModel.get());
       footSwitchFactory.setGravity(gravity.get());
       footSwitchFactory.setSimulatedRobot(sdfRobot.get());
-      footSwitchFactory.setYoVariableRegistry(sdfRobot.get().getRobotsYoVariableRegistry());
+      footSwitchFactory.setYoVariableRegistry(factoryRegistry);
       footSwitchFactory.setFootSwitchType(footSwitchType.get());
       footSwitchFactory.setKneeTouchdownThresholds(kneeTorqueTouchdownDetectionThreshold.get());
 
@@ -305,16 +301,6 @@ public class QuadrupedSimulationFactory
       }
    }
 
-   private void createInverseKinematicsCalculator()
-   {
-      if (controlMode.get() == QuadrupedControlMode.POSITION)
-      {
-         legInverseKinematicsCalculator = new QuadrupedInverseKinematicsCalculators(modelFactory.get(), jointDesiredOutputList.get(), physicalProperties.get(),
-                                                                                    fullRobotModel.get(), referenceFrames.get(),
-                                                                                    sdfRobot.get().getRobotsYoVariableRegistry(), yoGraphicsListRegistry);
-      }
-   }
-
    public void createControllerManager()
    {
       QuadrupedRuntimeEnvironment runtimeEnvironment = new QuadrupedRuntimeEnvironment(controlDT.get(), sdfRobot.get().getYoTime(), fullRobotModel.get(),
@@ -323,7 +309,8 @@ public class QuadrupedSimulationFactory
                                                                                        yoGraphicsListRegistryForDetachedOverhead, contactableFeet,
                                                                                        contactablePlaneBodies, centerOfMassDataHolder, footSwitches,
                                                                                        gravity.get(), highLevelControllerParameters.get(),
-                                                                                       sitDownParameters.get(), privilegedConfigurationParameters.get());
+                                                                                       sitDownParameters.get(), privilegedConfigurationParameters.get(),
+                                                                                       fallDetectionParameters.get());
 
       if(controlMode.get() == QuadrupedControlMode.POSITION)
       {
@@ -413,7 +400,7 @@ public class QuadrupedSimulationFactory
    private void createSimulationController()
    {
       simulationController = new QuadrupedSimulationController(sdfRobot.get(), sensorReader, outputWriter.get(), controllerManager, stateEstimator,
-                                                               poseCommunicator, headController, yoVariableServer);
+                                                               poseCommunicator, yoVariableServer);
       simulationController.getYoVariableRegistry().addChild(factoryRegistry);
    }
 
@@ -512,7 +499,6 @@ public class QuadrupedSimulationFactory
       createFootSwitches();
       createStateEstimator();
       createRealtimeRos2Node();
-      createInverseKinematicsCalculator();
       createControllerManager();
       createControllerNetworkSubscriber();
       createPoseCommunicator();
@@ -638,6 +624,11 @@ public class QuadrupedSimulationFactory
       this.privilegedConfigurationParameters.set(privilegedConfigurationParameters);
    }
 
+   public void setFallDetectionParameters(QuadrupedFallDetectionParameters fallDetectionParameters)
+   {
+      this.fallDetectionParameters.set(fallDetectionParameters);
+   }
+
    public void setGravity(double gravity)
    {
       this.gravity.set(gravity);
@@ -761,11 +752,6 @@ public class QuadrupedSimulationFactory
    public void setReferenceFrames(QuadrupedReferenceFrames referenceFrames)
    {
       this.referenceFrames.set(referenceFrames);
-   }
-
-   public void setPositionBasedCrawlControllerParameters(QuadrupedPositionBasedCrawlControllerParameters positionBasedCrawlControllerParameters)
-   {
-      this.positionBasedCrawlControllerParameters.set(positionBasedCrawlControllerParameters);
    }
 
    public void setGroundProfile3D(GroundProfile3D groundProfile3D)

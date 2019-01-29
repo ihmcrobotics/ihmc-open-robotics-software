@@ -68,7 +68,7 @@ public class DelaunayTriangulationVisualizer extends Application
       {
          Node regionGraphics = createRegionGraphics(rawData);
          regionGraphics.setManaged(false);
-         PolygonizerVisualizer.translateNode(regionGraphics, average);
+         REAGraphics3DTools.translateNode(regionGraphics, average);
          nodeToRegionId.put(regionGraphics, rawData.getRegionId());
          view3dFactory.addNodeToView(regionGraphics);
       }
@@ -132,7 +132,7 @@ public class DelaunayTriangulationVisualizer extends Application
    private static QuadEdgeSubdivision createQuadEdgeSubdivision(PlanarRegionSegmentationRawData rawData)
    {
       List<Point2D> point2ds = rawData.getPointCloudInPlane();
-      MultiPoint multiPoint = SimpleConcaveHullFactory.createMultiPoint(point2ds);
+      MultiPoint multiPoint = JTSTools.point2DsToMultiPoint(point2ds);
 
       ConformingDelaunayTriangulationBuilder conformingDelaunayTriangulationBuilder = new ConformingDelaunayTriangulationBuilder();
       conformingDelaunayTriangulationBuilder.setSites(multiPoint);

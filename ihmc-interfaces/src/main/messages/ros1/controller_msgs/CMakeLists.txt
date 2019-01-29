@@ -107,7 +107,6 @@ find_package(catkin REQUIRED COMPONENTS
    MessageCollectionNotification.msg
    MomentumTrajectoryMessage.msg
    MultisenseParameterPacket.msg
-   NavigableRegionMessage.msg
    NeckDesiredAccelerationsMessage.msg
    NeckTrajectoryMessage.msg
    ObjectDetectorResultPacket.msg
@@ -177,6 +176,7 @@ find_package(catkin REQUIRED COMPONENTS
    VideoPacket.msg
    VisibilityClusterMessage.msg
    VisibilityGraphsParametersPacket.msg
+   VisibilityMapWithNavigableRegionMessage.msg
    VisibilityMapMessage.msg
    WalkingControllerFailureStatusMessage.msg
    WalkingStatusMessage.msg

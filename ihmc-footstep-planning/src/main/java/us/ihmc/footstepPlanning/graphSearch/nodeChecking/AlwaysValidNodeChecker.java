@@ -7,7 +7,7 @@ import us.ihmc.robotics.geometry.PlanarRegionsList;
 public class AlwaysValidNodeChecker extends FootstepNodeChecker
 {
    @Override
-   public boolean isNodeValid(FootstepNode node, FootstepNode previosNode)
+   public boolean isNodeValidInternal(FootstepNode node, FootstepNode previosNode)
    {
       return true;
    }

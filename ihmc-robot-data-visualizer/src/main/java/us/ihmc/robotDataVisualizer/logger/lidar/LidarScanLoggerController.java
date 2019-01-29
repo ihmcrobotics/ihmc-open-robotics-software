@@ -15,16 +15,17 @@ import javafx.beans.value.ObservableValue;
 import javafx.stage.FileChooser;
 import javafx.stage.FileChooser.ExtensionFilter;
 import javafx.stage.Window;
-import us.ihmc.communication.configuration.NetworkParameterKeys;
-import us.ihmc.communication.configuration.NetworkParameters;
+import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.net.PacketConsumer;
 import us.ihmc.communication.util.NetworkPorts;
+import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
+import us.ihmc.ros2.Ros2Node;
 
 public class LidarScanLoggerController
 {
-   private static final String DEFAULT_HOST = NetworkParameters.getHost(NetworkParameterKeys.networkManager);
+   private final Ros2Node ros2Node = ROS2Tools.createRos2Node(PubSubImplementation.FAST_RTPS, "lidar_scan_logger");
 
-   private final LidarScanLogWriter logWriter = new LidarScanLogWriter();
+   private final LidarScanLogWriter logWriter = new LidarScanLogWriter(ros2Node);
    private final LidarScanLogReader logReader = new LidarScanLogReader();
 
    private Window mainWindow;
@@ -89,15 +90,15 @@ public class LidarScanLoggerController
       return readingProperty;
    }
 
-   private StringProperty networkProcessorAddressProperty;
+   private StringProperty lidarScanTopicNameProperty;
 
-   public StringProperty networkProcessorAddressProperty()
+   public StringProperty lidarScanTopicNameProperty()
    {
-      if (networkProcessorAddressProperty == null)
+      if (lidarScanTopicNameProperty == null)
       {
-         networkProcessorAddressProperty = new SimpleStringProperty(this, "networkProcessorAddressProperty", DEFAULT_HOST);
+         lidarScanTopicNameProperty = new SimpleStringProperty(this, "networkProcessorAddressProperty", "/ihmc/lidar_scan");
       }
-      return networkProcessorAddressProperty;
+      return lidarScanTopicNameProperty;
    }
 
    private BooleanProperty enableNetworkProcessorClientProperty;
@@ -228,7 +229,7 @@ public class LidarScanLoggerController
       {
          try
          {
-            logWriter.connectToNetworkProcessor(networkProcessorAddressProperty().get());
+            logWriter.connectToNetworkProcessor(lidarScanTopicNameProperty().get());
          }
          catch (IOException e)
          {

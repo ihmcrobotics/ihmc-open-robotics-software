@@ -24,7 +24,10 @@ import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelContr
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.mecano.tools.MultiBodySystemTools;
-import us.ihmc.quadrupedRobotics.communication.commands.QuadrupedRequestedSteppingStateCommand;
+import us.ihmc.quadrupedBasics.QuadrupedSteppingRequestedEvent;
+import us.ihmc.quadrupedBasics.QuadrupedSteppingStateEnum;
+import us.ihmc.quadrupedBasics.gait.QuadrupedTimedStep;
+import us.ihmc.quadrupedCommunication.QuadrupedRequestedSteppingStateCommand;
 import us.ihmc.quadrupedRobotics.controlModules.QuadrupedBalanceManager;
 import us.ihmc.quadrupedRobotics.controlModules.QuadrupedBodyOrientationManager;
 import us.ihmc.quadrupedRobotics.controlModules.QuadrupedControlManagerFactory;
@@ -32,15 +35,12 @@ import us.ihmc.quadrupedRobotics.controlModules.QuadrupedJointSpaceManager;
 import us.ihmc.quadrupedRobotics.controlModules.foot.QuadrupedFeetManager;
 import us.ihmc.quadrupedRobotics.controller.ControllerEvent;
 import us.ihmc.quadrupedRobotics.controller.QuadrupedControllerToolbox;
-import us.ihmc.quadrupedRobotics.controller.QuadrupedSteppingRequestedEvent;
-import us.ihmc.quadrupedRobotics.controller.QuadrupedSteppingStateEnum;
 import us.ihmc.quadrupedRobotics.controller.toolbox.QuadrupedStepTransitionCallback;
 import us.ihmc.quadrupedRobotics.estimator.GroundPlaneEstimator;
 import us.ihmc.quadrupedRobotics.messageHandling.QuadrupedStepCommandConsumer;
 import us.ihmc.quadrupedRobotics.messageHandling.QuadrupedStepMessageHandler;
 import us.ihmc.quadrupedRobotics.model.QuadrupedRuntimeEnvironment;
 import us.ihmc.quadrupedRobotics.planning.ContactState;
-import us.ihmc.quadrupedRobotics.planning.QuadrupedTimedStep;
 import us.ihmc.robotModels.FullQuadrupedRobotModel;
 import us.ihmc.robotics.robotSide.QuadrantDependentList;
 import us.ihmc.robotics.robotSide.RobotQuadrant;
@@ -149,7 +149,7 @@ public class QuadrupedWalkingControllerState extends HighLevelControllerState im
          RigidBodyBasics foot = fullRobotModel.getFoot(robotQuadrant);
          OneDoFJointBasics[] legJoints = MultiBodySystemTools.filterJoints(MultiBodySystemTools.createJointPath(fullRobotModel.getBody(), foot), OneDoFJointBasics.class);
          Set<String> jointNames = new HashSet<>();
-         Arrays.asList(legJoints).stream().forEach(legJoint -> jointNames.add(legJoint.getName()));
+         Arrays.stream(legJoints).forEach(legJoint -> jointNames.add(legJoint.getName()));
          legJointNames.put(robotQuadrant, jointNames);
       }
 
@@ -214,7 +214,7 @@ public class QuadrupedWalkingControllerState extends HighLevelControllerState im
       // Manually triggered events to transition to main controllers.
       factory.addTransition(QuadrupedSteppingRequestedEvent.REQUEST_STEP, QuadrupedSteppingStateEnum.STAND, QuadrupedSteppingStateEnum.STEP);
 
-      Runnable stepToStandCallback = () -> stepController.halt();
+      Runnable stepToStandCallback = stepController::halt;
       factory.addCallback(QuadrupedSteppingRequestedEvent.REQUEST_STAND, QuadrupedSteppingStateEnum.STEP, stepToStandCallback);
 
       factory.addStateChangedListener(new StateChangedListener<QuadrupedSteppingStateEnum>()
@@ -264,6 +264,8 @@ public class QuadrupedWalkingControllerState extends HighLevelControllerState im
       footstepStatusMessage.getActualStepInterval().setEndTime(Double.NaN);
       step.getGoalPosition(footstepStatusMessage.getDesiredTouchdownPositionInWorld());
       statusMessageOutputManager.reportStatusMessage(footstepStatusMessage);
+
+      controllerToolbox.getFallDetector().setNextFootstep(quadrant, step);
    }
 
    @Override
@@ -289,6 +291,8 @@ public class QuadrupedWalkingControllerState extends HighLevelControllerState im
       stepMessageHandler.shiftPlanBasedOnStepAdjustment(balanceManager.getStepAdjustment(thisStepQuadrant));
 
       balanceManager.completedStep(thisStepQuadrant);
+
+      controllerToolbox.getFallDetector().setNextFootstep(thisStepQuadrant, null);
    }
 
    @Override
@@ -326,6 +330,8 @@ public class QuadrupedWalkingControllerState extends HighLevelControllerState im
       upcomingGroundPlaneEstimator.compute();
 
       feetManager.registerStepTransitionCallback(this);
+
+      balanceManager.initialize();
 
       stateMachine.resetToInitialState();
 

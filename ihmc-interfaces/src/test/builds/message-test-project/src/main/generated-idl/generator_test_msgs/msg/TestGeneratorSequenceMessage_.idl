@@ -1,0 +1,20 @@
+#ifndef __generator_test_msgs__msg__TestGeneratorSequenceMessage__idl__
+#define __generator_test_msgs__msg__TestGeneratorSequenceMessage__idl__
+
+module generator_test_msgs
+{
+  module msg
+  {
+    module dds
+    {
+
+      @TypeCode(type="generator_test_msgs::msg::dds_::TestGeneratorSequenceMessage_")
+      struct TestGeneratorSequenceMessage
+      {
+        unsigned long sequence_id;
+      };
+    };
+  };
+};
+
+#endif

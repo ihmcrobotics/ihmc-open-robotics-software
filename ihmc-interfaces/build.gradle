@@ -8,13 +8,13 @@ buildscript {
       jcenter()
    }
    dependencies {
-      classpath "us.ihmc:ros2-msg-to-pubsub-generator:0.13.0"
+      classpath "us.ihmc:ros2-msg-to-pubsub-generator:0.13.3"
 //      classpath "com.bmuschko:gradle-docker-plugin:4.0.1"
    }
 }
 
 plugins {
-   id("us.ihmc.ihmc-build") version "0.15.4"
+   id("us.ihmc.ihmc-build") version "0.15.5"
    id("us.ihmc.ihmc-ci-plugin") version "0.18.0"
    id("us.ihmc.log-tools") version "0.2.2"
 }
@@ -38,21 +38,21 @@ testSuites {
 }
 
 mainDependencies {
-   compile group: "us.ihmc", name: "euclid-core", version: "0.7.0"
-   compile group: "us.ihmc", name: "euclid", version: "0.10.0"
-   compile group: "us.ihmc", name: "ihmc-pub-sub", version: "0.10.0"
-   compile group: "us.ihmc", name: "ros2-common-interfaces", version: "0.13.0"
+   compile group: "us.ihmc", name: "euclid", version: "0.11.0"
+   compile group: "us.ihmc", name: "euclid-geometry", version: "0.11.0"
+   compile group: "us.ihmc", name: "ihmc-pub-sub", version: "0.10.1"
+   compile group: "us.ihmc", name: "ros2-common-interfaces", version: "0.13.3"
    compile group: "us.ihmc", name: "ihmc-commons", version: "0.24.0"
 }
 
 testDependencies {
    compile group: "us.ihmc", name: "ihmc-ci-core-api", version: "0.18.0"
-   compile group: "us.ihmc", name: "ihmc-ros2-library", version: "0.13.0"
+   compile group: "us.ihmc", name: "ihmc-ros2-library", version: "0.13.3"
 }
 
 generatorDependencies {
    compile group: "us.ihmc", name: "ihmc-commons", version: "0.24.0"
-   compile group: "us.ihmc", name: "ros2-msg-to-pubsub-generator", version: "0.13.0"
+   compile group: "us.ihmc", name: "ros2-msg-to-pubsub-generator", version: "0.13.3"
 }
 
 //task buildImage(type: com.bmuschko.gradle.docker.tasks.image.DockerBuildImage) {
@@ -108,5 +108,6 @@ task generateMessages {
 
       generator.convertDirectoryToUnixEOL(file("src/main/generated-idl").toPath())
       generator.convertDirectoryToUnixEOL(file("src/main/generated-java").toPath())
+      generator.convertDirectoryToUnixEOL(file("src/main/messages/ros1").toPath())
    }
 }

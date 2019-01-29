@@ -10,7 +10,7 @@ import us.ihmc.communication.packets.PlanarRegionMessageConverter;
 import us.ihmc.footstepPlanning.FootstepPlan;
 import us.ihmc.footstepPlanning.FootstepPlannerStatus;
 import us.ihmc.footstepPlanning.FootstepPlanningResult;
-import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessageConverter;
+import us.ihmc.footstepPlanning.FootstepDataMessageConverter;
 import us.ihmc.pathPlanning.visibilityGraphs.tools.BodyPathPlan;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 
@@ -29,7 +29,7 @@ public class FootstepPlanningMessageReporter
       return message;
    }
 
-   public static BodyPathPlanMessage packPathResult(BodyPathPlan bodyPathPlan, FootstepPlanningResult status, Optional<PlanarRegionsList> planarRegionsList, int planId)
+   public static BodyPathPlanMessage packPathResult(BodyPathPlan bodyPathPlan, FootstepPlanningResult status, PlanarRegionsList planarRegionsList, int planId)
    {
       if (debug)
       {
@@ -46,14 +46,15 @@ public class FootstepPlanningMessageReporter
          result.getPathPlannerGoalPose().set(bodyPathPlan.getGoalPose());
       }
 
-      planarRegionsList.ifPresent(regions -> result.getPlanarRegionsList().set(PlanarRegionMessageConverter.convertToPlanarRegionsListMessage(regions)));
+      if(planarRegionsList != null)
+         result.getPlanarRegionsList().set(PlanarRegionMessageConverter.convertToPlanarRegionsListMessage(planarRegionsList));
       result.setPlanId(planId);
       result.setFootstepPlanningResult(status.toByte());
       return result;
    }
 
    public static FootstepPlanningToolboxOutputStatus packStepResult(FootstepPlan footstepPlan, BodyPathPlan bodyPathPlan, FootstepPlanningResult status,
-                                                              double timeTaken, Optional<PlanarRegionsList> planarRegionsList, int planId)
+                                                              double timeTaken, PlanarRegionsList planarRegionsList, int planId)
    {
       if (debug)
       {
@@ -81,7 +82,8 @@ public class FootstepPlanningMessageReporter
             result.getBodyPath().add().set(bodyPathPlan.getWaypoint(i));
       }
 
-      planarRegionsList.ifPresent(regions -> result.getPlanarRegionsList().set(PlanarRegionMessageConverter.convertToPlanarRegionsListMessage(regions)));
+      if(planarRegionsList != null)
+         result.getPlanarRegionsList().set(PlanarRegionMessageConverter.convertToPlanarRegionsListMessage(planarRegionsList));
       result.setPlanId(planId);
       result.setFootstepPlanningResult(status.toByte());
       result.setTimeTaken(timeTaken);

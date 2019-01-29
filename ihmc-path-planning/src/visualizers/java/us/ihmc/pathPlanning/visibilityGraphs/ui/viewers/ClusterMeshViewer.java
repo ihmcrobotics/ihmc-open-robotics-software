@@ -20,7 +20,7 @@ import us.ihmc.javaFXToolkit.shapes.JavaFXMeshBuilder;
 import us.ihmc.messager.Messager;
 import us.ihmc.messager.MessagerAPIFactory.Topic;
 import us.ihmc.pathPlanning.visibilityGraphs.clusterManagement.Cluster;
-import us.ihmc.pathPlanning.visibilityGraphs.dataStructure.NavigableRegion;
+import us.ihmc.pathPlanning.visibilityGraphs.dataStructure.VisibilityMapWithNavigableRegion;
 import us.ihmc.pathPlanning.visibilityGraphs.ui.VisualizationParameters;
 
 public class ClusterMeshViewer extends AnimationTimer
@@ -41,7 +41,7 @@ public class ClusterMeshViewer extends AnimationTimer
    private AtomicReference<Boolean> showNavigableExtrusions;
    private AtomicReference<Boolean> showNonNavigableExtrusions;
 
-   private AtomicReference<List<NavigableRegion>> newRequestReference;
+   private AtomicReference<List<VisibilityMapWithNavigableRegion>> newRequestReference;
 
    private final Messager messager;
 
@@ -66,7 +66,7 @@ public class ClusterMeshViewer extends AnimationTimer
    }
 
    public void setTopics(Topic<Boolean> resetRequestedTopic, Topic<Boolean> showClusterRawPointsTopic, Topic<Boolean> showClusterNavigableExtrusionsTopic,
-                         Topic<Boolean> showClusterNonNavigableExtrusionsTopic, Topic<List<NavigableRegion>> navigableRegionDataTopic)
+                         Topic<Boolean> showClusterNonNavigableExtrusionsTopic, Topic<List<VisibilityMapWithNavigableRegion>> navigableRegionDataTopic)
    {
       resetRequested = messager.createInput(resetRequestedTopic, false);
       showRawPoints = messager.createInput(showClusterRawPointsTopic, false);
@@ -121,19 +121,19 @@ public class ClusterMeshViewer extends AnimationTimer
 
       if (showRawPoints.get() || showNavigableExtrusions.get() || showNonNavigableExtrusions.get())
       {
-         List<NavigableRegion> newRequest = newRequestReference.getAndSet(null);
+         List<VisibilityMapWithNavigableRegion> newRequest = newRequestReference.getAndSet(null);
 
          if (newRequest != null)
             processNavigableRegionsOnThread(newRequest);
       }
    }
 
-   private void processNavigableRegionsOnThread(List<NavigableRegion> navigableRegionLocalPlanners)
+   private void processNavigableRegionsOnThread(List<VisibilityMapWithNavigableRegion> navigableRegionLocalPlanners)
    {
       executorService.execute(() -> processNavigableRegions(navigableRegionLocalPlanners));
    }
 
-   private void processNavigableRegions(List<NavigableRegion> navigableRegionLocalPlanners)
+   private void processNavigableRegions(List<VisibilityMapWithNavigableRegion> navigableRegionLocalPlanners)
    {
       Map<Integer, JavaFXMeshBuilder> rawPointsMeshBuilders = new HashMap<>();
       Map<Integer, JavaFXMeshBuilder> navigableExtrusionsMeshBuilders = new HashMap<>();
@@ -141,22 +141,27 @@ public class ClusterMeshViewer extends AnimationTimer
       Map<Integer, Material> navigableMaterials = new HashMap<>();
       Map<Integer, Material> nonNavigableMaterials = new HashMap<>();
 
-      for (NavigableRegion navigableRegionLocalPlanner : navigableRegionLocalPlanners)
+      for (VisibilityMapWithNavigableRegion navigableRegionLocalPlanner : navigableRegionLocalPlanners)
       {
          int regionId = navigableRegionLocalPlanner.getMapId();
          JavaFXMeshBuilder rawPointsMeshBuilder = getOrCreate(rawPointsMeshBuilders, regionId);
          JavaFXMeshBuilder navigableExtrusionsMeshBuilder = getOrCreate(navigableExtrusionsMeshBuilders, regionId);
          JavaFXMeshBuilder nonNavigableExtrusionsMeshBuilder = getOrCreate(nonNavigableExtrusionsMeshBuilders, regionId);
 
-         List<Cluster> clusters = navigableRegionLocalPlanner.getAllClusters();
-         for (Cluster cluster : clusters)
+         buildNavigableExtrusion(navigableExtrusionsMeshBuilder, navigableRegionLocalPlanner.getHomeRegionCluster());
+
+         List<Cluster> allClusters = navigableRegionLocalPlanner.getAllClusters();
+         for (Cluster cluster : allClusters)
          {
-            for (Point3DReadOnly rawPoint : cluster.getRawPointsInWorld())
-               rawPointsMeshBuilder.addTetrahedron(VisualizationParameters.CLUSTER_RAWPOINT_SIZE, rawPoint);
-            navigableExtrusionsMeshBuilder
-                  .addMultiLine(cluster.getNavigableExtrusionsInWorld(), VisualizationParameters.NAVIGABLECLUSTER_LINE_THICKNESS, false);
-            nonNavigableExtrusionsMeshBuilder
-                  .addMultiLine(cluster.getNonNavigableExtrusionsInWorld(), VisualizationParameters.NON_NAVIGABLECLUSTER_LINE_THICKNESS, false);
+            buildRawClusterPoints(rawPointsMeshBuilder, cluster);
+         }
+         
+         //TODO: +++JerryPratt: Show Nonnavigable regions for all clusters or just obstacle clusters?
+         //TODO: +++JerryPratt: Or make a third boolean checkbox to show obstacle non-navigable vs. homeRegion non-navigable.
+         List<Cluster> obstacleClusters = navigableRegionLocalPlanner.getObstacleClusters();
+         for (Cluster cluster : obstacleClusters)
+         {
+            buildNonNavigableExtrusion(nonNavigableExtrusionsMeshBuilder, cluster);
          }
 
          navigableMaterials.put(regionId, new PhongMaterial(getNavigableLineColor(regionId)));
@@ -185,6 +190,30 @@ public class ClusterMeshViewer extends AnimationTimer
       rawPointsToRenderReference.set(rawPointsMapToRender);
       navigableExtrusionsToRenderReference.set(navigableExtrusionsMapToRender);
       nonNavigableExtrusionsToRenderReference.set(nonNavigableExtrusionsMapToRender);
+   }
+
+   private void buildRawClusterPoints(JavaFXMeshBuilder rawPointsMeshBuilder, Cluster cluster)
+   {
+      for (Point3DReadOnly rawPoint : cluster.getRawPointsInWorld())
+      {
+         rawPointsMeshBuilder.addTetrahedron(VisualizationParameters.CLUSTER_RAWPOINT_SIZE, rawPoint);
+      }
+   }
+ 
+   private void buildNavigableExtrusion(JavaFXMeshBuilder navigableExtrusionsMeshBuilder, Cluster cluster)
+   {
+      boolean close = cluster.isClosed();
+      
+      navigableExtrusionsMeshBuilder
+            .addMultiLine(cluster.getNavigableExtrusionsInWorld(), VisualizationParameters.NAVIGABLECLUSTER_LINE_THICKNESS, close);
+   }
+   
+   private void buildNonNavigableExtrusion(JavaFXMeshBuilder nonNavigableExtrusionsMeshBuilder, Cluster cluster)
+   {
+      boolean close = cluster.isClosed();
+
+      nonNavigableExtrusionsMeshBuilder
+            .addMultiLine(cluster.getNonNavigableExtrusionsInWorld(), VisualizationParameters.NON_NAVIGABLECLUSTER_LINE_THICKNESS, close);
    }
 
    private JavaFXMeshBuilder getOrCreate(Map<Integer, JavaFXMeshBuilder> meshBuilders, int regionId)

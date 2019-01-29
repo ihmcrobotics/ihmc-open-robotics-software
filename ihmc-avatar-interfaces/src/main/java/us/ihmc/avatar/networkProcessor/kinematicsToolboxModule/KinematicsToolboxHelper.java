@@ -26,7 +26,6 @@ import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.humanoidRobotics.communication.kinematicsToolboxAPI.KinematicsToolboxCenterOfMassCommand;
 import us.ihmc.humanoidRobotics.communication.kinematicsToolboxAPI.KinematicsToolboxConfigurationCommand;
 import us.ihmc.humanoidRobotics.communication.kinematicsToolboxAPI.KinematicsToolboxRigidBodyCommand;
-import us.ihmc.mecano.multiBodySystem.OneDoFJoint;
 import us.ihmc.mecano.multiBodySystem.interfaces.FloatingJointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
@@ -80,16 +79,16 @@ public class KinematicsToolboxHelper
    }
 
    /**
-    * Convenience method that updates the robot state, i.e. configuration and velocity, from the
-    * output of the controller core.
+    * Convenience method that updates the robot state, i.e. configuration and velocity, from the output
+    * of the controller core.
     *
-    * @param controllerCoreOutput the output of the controller core from which the robot state is to
-    *           be extracted. Not modified.
+    * @param controllerCoreOutput the output of the controller core from which the robot state is to be
+    *           extracted. Not modified.
     * @param rootJoint the floating joint to update. Modified.
     * @param oneDoFJoints the one degree-of-freedom joints to update. Modified.
     */
-   static void setRobotStateFromControllerCoreOutput(ControllerCoreOutputReadOnly controllerCoreOutput, FloatingJointBasics rootJoint,
-                                                     OneDoFJointBasics[] oneDoFJoints)
+   public static void setRobotStateFromControllerCoreOutput(ControllerCoreOutputReadOnly controllerCoreOutput, FloatingJointBasics rootJoint,
+                                                            OneDoFJointBasics[] oneDoFJoints)
    {
       RootJointDesiredConfigurationDataReadOnly outputForRootJoint = controllerCoreOutput.getRootJointDesiredConfigurationData();
 
@@ -124,8 +123,8 @@ public class KinematicsToolboxHelper
     * Only the configuration is updated, the joint velocities are all set to zero.
     * </p>
     *
-    * @param robotConfigurationData the configuration received from the walking controller from
-    *           which the robot configuration is to be extracted. Not modified.
+    * @param robotConfigurationData the configuration received from the walking controller from which
+    *           the robot configuration is to be extracted. Not modified.
     * @param rootJoint the floating joint to update. Modified.
     * @param oneDoFJoints the one degree-of-freedom joints to update. Modified.
     */
@@ -205,14 +204,14 @@ public class KinematicsToolboxHelper
    }
 
    /**
-    * Convenience method which goes through the given list of active feedback control command to sum
-    * up their tracking error from which the solution quality is calculated.
+    * Convenience method which goes through the given list of active feedback control command to sum up
+    * their tracking error from which the solution quality is calculated.
     * <p>
     * For each command, the quality is computed by:
     * <ul>
     * <li>applying the command weight to the error such that the tracking for a command with a high
-    * weight value will affect more the solution quality, whereas commands with small weight value
-    * will barely make a change.
+    * weight value will affect more the solution quality, whereas commands with small weight value will
+    * barely make a change.
     * <li>this weighted error is then multiplied with the selection matrix from the command. So
     * uncontrolled axes do not affect the solution quality.
     * <li>finally the Euclidean norm of the resulting error provides the quality for the command.
@@ -222,9 +221,9 @@ public class KinematicsToolboxHelper
     *
     * @param activeCommands the list of feedback control commands that have been submitted to the
     *           controller core this control tick. Not modified.
-    * @param feedbackControllerDataHolder the data holder that belongs to the controller core to
-    *           which the commands were submitted. It is used to find the tracking error for each
-    *           command. Not modified.
+    * @param feedbackControllerDataHolder the data holder that belongs to the controller core to which
+    *           the commands were submitted. It is used to find the tracking error for each command.
+    *           Not modified.
     * @return the overall solution quality.
     */
    static double calculateSolutionQuality(FeedbackControlCommandList activeCommands, FeedbackControllerDataReadOnly feedbackControllerDataHolder)
@@ -256,9 +255,9 @@ public class KinematicsToolboxHelper
     * {@link CenterOfMassFeedbackControlCommand}.
     *
     * @param command the command to compute the quality of. Not modified.
-    * @param feedbackControllerDataHolder the data holder that belongs to the controller core to
-    *           which the commands were submitted. It is used to find the tracking error for each
-    *           command. Not modified.
+    * @param feedbackControllerDataHolder the data holder that belongs to the controller core to which
+    *           the commands were submitted. It is used to find the tracking error for each command.
+    *           Not modified.
     * @return the quality of the command.
     */
    private static double calculateCommandQuality(CenterOfMassFeedbackControlCommand command, FeedbackControllerDataReadOnly feedbackControllerDataHolder)
@@ -277,13 +276,12 @@ public class KinematicsToolboxHelper
    }
 
    /**
-    * Calculates the quality based on the tracking of the given
-    * {@link SpatialFeedbackControlCommand}.
+    * Calculates the quality based on the tracking of the given {@link SpatialFeedbackControlCommand}.
     *
     * @param accelerationCommand the command to compute the quality of. Not modified.
-    * @param feedbackControllerDataHolder the data holder that belongs to the controller core to
-    *           which the commands were submitted. It is used to find the tracking error for each
-    *           command. Not modified.
+    * @param feedbackControllerDataHolder the data holder that belongs to the controller core to which
+    *           the commands were submitted. It is used to find the tracking error for each command.
+    *           Not modified.
     * @return the quality of the command.
     */
    private static double calculateCommandQuality(SpatialFeedbackControlCommand command, FeedbackControllerDataReadOnly feedbackControllerDataHolder)

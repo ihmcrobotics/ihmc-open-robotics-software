@@ -12,24 +12,22 @@ import us.ihmc.humanoidRobotics.communication.controllerAPI.command.QuadrupedBod
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.QuadrupedBodyTrajectoryCommand;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.SE3TrajectoryControllerCommand;
 import us.ihmc.mecano.frames.MovingReferenceFrame;
+import us.ihmc.quadrupedBasics.gait.QuadrupedTimedStep;
 import us.ihmc.quadrupedRobotics.controller.QuadrupedControllerToolbox;
 import us.ihmc.quadrupedRobotics.estimator.GroundPlaneEstimator;
-import us.ihmc.quadrupedRobotics.estimator.referenceFrames.QuadrupedReferenceFrames;
+import us.ihmc.quadrupedBasics.referenceFrames.QuadrupedReferenceFrames;
 import us.ihmc.quadrupedRobotics.model.QuadrupedPhysicalProperties;
-import us.ihmc.quadrupedRobotics.planning.QuadrupedTimedStep;
 import us.ihmc.robotics.controllers.PIDController;
 import us.ihmc.robotics.controllers.pidGains.implementations.PIDGains;
 import us.ihmc.robotics.controllers.pidGains.implementations.ParameterizedPIDGains;
 import us.ihmc.robotics.dataStructures.parameters.ParameterVector3D;
-import us.ihmc.robotics.math.trajectories.waypoints.FrameEuclideanTrajectoryPoint;
-import us.ihmc.robotics.math.trajectories.waypoints.FrameSE3TrajectoryPoint;
-import us.ihmc.robotics.math.trajectories.waypoints.MultipleWaypointsPositionTrajectoryGenerator;
+import us.ihmc.robotics.math.trajectories.generators.MultipleWaypointsPositionTrajectoryGenerator;
+import us.ihmc.robotics.math.trajectories.trajectorypoints.FrameEuclideanTrajectoryPoint;
+import us.ihmc.robotics.math.trajectories.trajectorypoints.FrameSE3TrajectoryPoint;
 import us.ihmc.robotics.screwTheory.SelectionMatrix3D;
-import us.ihmc.yoVariables.parameters.DoubleParameter;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.yoVariables.variable.YoFramePoint3D;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -108,7 +106,7 @@ public class QuadrupedCenterOfMassHeightManager
       controlBodyHeight.set(true);
       heightCommandHasBeenReceived.set(false);
 
-      nominalPosition = new ParameterVector3D("nominalCoMPosition", new Vector3D(0.0, 0.0, physicalProperties.getNominalCoMHeight()), registry);
+      nominalPosition = new ParameterVector3D("nominalCoMPosition", new Vector3D(0.0, 0.0, physicalProperties.getNominalBodyHeight()), registry);
       nominalVelocity = new FrameVector3D(supportFrame);
 
       centerOfMassHeightTrajectory = new MultipleWaypointsPositionTrajectoryGenerator("centerOfMassHeight", supportFrame, registry);
@@ -269,7 +267,6 @@ public class QuadrupedCenterOfMassHeightManager
       desiredVelocity.changeFrame(worldFrame);
 
 
-
       // compute desired height in upcoming support frame
       tempDesiredPosition.changeFrame(upcomingGroundPlaneEstimator.getGroundPlaneFrame());
       tempDesiredPosition.setZ(desiredZHeight);
@@ -310,6 +307,8 @@ public class QuadrupedCenterOfMassHeightManager
       desiredVelocityInWorld.set(blendedHeightVelocity);
 
       computeCurrentState();
+
+      controllerToolbox.getFallDetector().setHeightForFallDetection(desiredHeightInWorld.getDoubleValue(), currentHeightInWorld.getDoubleValue());
    }
 
    public double getDesiredHeight(ReferenceFrame referenceFrame)

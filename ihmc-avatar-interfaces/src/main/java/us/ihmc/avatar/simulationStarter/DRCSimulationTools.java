@@ -80,6 +80,7 @@ public abstract class DRCSimulationTools
          networkProcessorParameters.enableKinematicsPlanningToolbox(true);
          boolean startREAModule = modulesToStart.contains(Modules.REA_MODULE) && !modulesToStart.contains(Modules.REA_UI);
          networkProcessorParameters.enableRobotEnvironmentAwerenessModule(startREAModule);
+         networkProcessorParameters.enableBipedalSupportPlanarRegionPublisher(modulesToStart.contains(Modules.SENSOR_MODULE));
          networkProcessorParameters.enableMocapModule(modulesToStart.contains(Modules.MOCAP_MODULE));
       }
       else
@@ -318,10 +319,11 @@ public abstract class DRCSimulationTools
    }
 
    /**
-    * Creates and starts the operator interface.
-    * The operator interface needs the simulation and network processor to work properly, if started before any of these it will simply hang and wait for these two to start.
-    * Use {@link #spawnOperatorInterfaceInDifferentProcess} to either start the operator interface in the same process or a different one.
-    * Note that if started in a different process the debug mode will not work.
+    * Creates and starts the operator interface. The operator interface needs the simulation and
+    * network processor to work properly, if started before any of these it will simply hang and
+    * wait for these two to start. Use {@link #spawnOperatorInterfaceInDifferentProcess} to either
+    * start the operator interface in the same process or a different one. Note that if started in a
+    * different process the debug mode will not work.
     */
    public static void startOpertorInterfaceUsingProcessSpawner(Class<?> operatorInterfaceClass, String[] operatorInterfaceArgs)
    {

@@ -1,7 +1,5 @@
 package us.ihmc.commonWalkingControlModules.controlModules.foot;
 
-import java.util.Collection;
-
 import us.ihmc.commonWalkingControlModules.controlModules.rigidBody.RigidBodyPoseController;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.SpatialFeedbackControlCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.InverseDynamicsCommand;
@@ -57,13 +55,11 @@ public class MoveViaWaypointsState extends AbstractFootControlState
 
       YoDouble yoTime = controllerToolbox.getYoTime();
       YoGraphicsListRegistry graphicsListRegistry = controllerToolbox.getYoGraphicsListRegistry();
-      Collection<ReferenceFrame> trajectoryFrames = controllerToolbox.getTrajectoryFrames();
       ReferenceFrame pelvisFrame = pelvis.getBodyFixedFrame();
       ankleFrame = foot.getParentJoint().getFrameAfterJoint();
       controlFrame = ankleFrame;
 
-      poseController = new RigidBodyPoseController(foot, pelvis, rootBody, trajectoryFrames, controlFrame, pelvisFrame, yoTime, null, graphicsListRegistry,
-                                                   registry);
+      poseController = new RigidBodyPoseController(foot, pelvis, rootBody, controlFrame, pelvisFrame, yoTime, null, graphicsListRegistry, registry);
       poseController.setGains(gains.getOrientationGains(), gains.getPositionGains());
 
       spatialFeedbackControlCommand.set(rootBody, foot);

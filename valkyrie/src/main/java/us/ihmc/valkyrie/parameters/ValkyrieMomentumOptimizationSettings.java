@@ -38,8 +38,8 @@ public class ValkyrieMomentumOptimizationSettings extends MomentumOptimizationSe
    private final double rhoMin = 4.0;
    private final double rhoRateDefaultWeight = 5E-8;
    private final double rhoRateHighWeight = 8.0E-7;
-   private final Vector2D copWeight = new Vector2D(0.001, 0.002);
-   private final Vector2D copRateDefaultWeight = new Vector2D(0.0000032, 0.0000032);
+   private final Vector2D copWeight = new Vector2D(200.0, 200.0);
+   private final Vector2D copRateDefaultWeight = new Vector2D(0.32, 0.32);
    private final Vector2D copRateHighWeight = new Vector2D(0.0004, 0.0016);
 
    private final double neckJointspaceWeight = 5.0;

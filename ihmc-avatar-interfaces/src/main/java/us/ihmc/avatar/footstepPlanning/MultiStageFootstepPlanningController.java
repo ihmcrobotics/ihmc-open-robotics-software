@@ -46,13 +46,12 @@ public class MultiStageFootstepPlanningController
    public MultiStageFootstepPlanningController(RobotContactPointParameters<RobotSide> contactPointParameters,
                                                FootstepPlannerParameters footstepPlannerParameters, VisibilityGraphsParameters visibilityGraphsParameters,
                                                CommandInputManager commandInputManager, StatusMessageOutputManager statusOutputManager,
-                                               ScheduledExecutorService executorService, YoVariableRegistry parentRegistry,
-                                               YoGraphicsListRegistry graphicsListRegistry, long tickTimeMs)
+                                               ScheduledExecutorService executorService, YoVariableRegistry parentRegistry, long tickTimeMs)
    {
       this.tickTimeMs = tickTimeMs;
       this.executorService = executorService;
       stageManager = new MultiStageFootstepPlanningManager(contactPointParameters, footstepPlannerParameters, visibilityGraphsParameters, statusOutputManager,
-                                                           parentRegistry, graphicsListRegistry, tickTimeMs);
+                                                           parentRegistry, tickTimeMs);
 
       commandInputManager.registerHasReceivedInputListener(command -> receivedInput.set(true));
 
@@ -84,6 +83,16 @@ public class MultiStageFootstepPlanningController
    public void processPlanningStatisticsRequest()
    {
       stageManager.processPlanningStatisticsRequest();
+   }
+
+   public void broadcastPlannerParameters()
+   {
+      stageManager.broadcastPlannerParameters();
+   }
+
+   public void setParametersPublisher(IHMCRealtimeROS2Publisher<FootstepPlannerParametersPacket> parametersPublisher)
+   {
+      stageManager.setParametersPublisher(parametersPublisher);
    }
 
    public void setTextToSpeechPublisher(IHMCRealtimeROS2Publisher<TextToSpeechPacket> textToSpeechPublisher)

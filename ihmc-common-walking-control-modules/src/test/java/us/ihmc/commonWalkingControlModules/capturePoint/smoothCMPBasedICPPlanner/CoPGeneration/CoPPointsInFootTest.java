@@ -23,10 +23,8 @@ import us.ihmc.euclid.referenceFrame.tools.ReferenceFrameTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple4D.Quaternion;
-import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition;
-import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsList;
-import us.ihmc.graphicsDescription.yoGraphics.plotting.ArtifactList;
 import us.ihmc.humanoidRobotics.footstep.FootSpoof;
+import us.ihmc.robotics.math.trajectories.trajectorypoints.YoFrameEuclideanTrajectoryPoint;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoFramePoint3D;
 
@@ -47,13 +45,12 @@ public class CoPPointsInFootTest
    private final YoVariableRegistry registry = new YoVariableRegistry(testClassName);
    private final FootSpoof footSpoof = new FootSpoof("DummyFoot", xToAnkle, yToAnkle, zToAnkle, footVertexList, 0.5);
    private final static ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
-   private final ReferenceFrame[] framesToRegister = {worldFrame, footSpoof.getSoleFrame()};
    private CoPPointsInFoot copPointsInFoot;
 
    @Before
    public void setup()
    {
-      copPointsInFoot = new CoPPointsInFoot(testClassName, 0, framesToRegister, registry);
+      copPointsInFoot = new CoPPointsInFoot(testClassName, 0, registry);
    }
 
    @After
@@ -118,8 +115,8 @@ public class CoPPointsInFootTest
    @Test(timeout = 30000)
    public void testAddAndSetIncludingFrameWithCoPTrajectoryPoint()
    {
-      CoPTrajectoryPoint testLocation1 = new CoPTrajectoryPoint("TestLocation1", "", null, framesToRegister);
-      CoPTrajectoryPoint testLocation2 = new CoPTrajectoryPoint("TestLocation2", "", null, framesToRegister);
+      YoFrameEuclideanTrajectoryPoint testLocation1 = new YoFrameEuclideanTrajectoryPoint("TestLocation1", "", null);
+      YoFrameEuclideanTrajectoryPoint testLocation2 = new YoFrameEuclideanTrajectoryPoint("TestLocation2", "", null);
       testLocation1.changeFrame(footSpoof.getSoleFrame());
       testLocation1.setPosition(new FramePoint3D(footSpoof.getSoleFrame(), Math.random(), Math.random(), Math.random()));
       testLocation2.changeFrame(footSpoof.getSoleFrame());
@@ -197,7 +194,6 @@ public class CoPPointsInFootTest
                                                                                                                                                   newFrameOriginX,
                                                                                                                                                   newFrameOriginY,
                                                                                                                                                   newFrameOriginZ)));
-      copPointsInFoot.registerReferenceFrame(newFrameToRegister);
       copPointsInFoot.changeFrame(newFrameToRegister);
       FramePoint3D tempFramePoint = new FramePoint3D();
       copPointsInFoot.getSupportFootLocation(tempFramePoint);
@@ -216,22 +212,4 @@ public class CoPPointsInFootTest
       assertEquals(tempFramePoint.getY(), -0.05 + newFrameOriginY, epsilon);
       assertEquals(tempFramePoint.getZ(), 0.11 + newFrameOriginZ, epsilon);
    }
-
-   @ContinuousIntegrationTest(estimatedDuration = 0.1)
-   @Test(timeout = 30000)
-   public void testVisualization()
-   {
-      YoGraphicsList dummyGraphicsList = new YoGraphicsList("DummyGraphics");
-      ArtifactList dummyArtifactList = new ArtifactList("DummyArtifacts");
-      copPointsInFoot.setupVisualizers(dummyGraphicsList, dummyArtifactList, 0.05);
-      assertEquals(dummyArtifactList.getArtifacts().size(), 10);
-      assertEquals(dummyGraphicsList.getYoGraphics().size(), 10);
-      copPointsInFoot.addWaypoint(CoPPointName.MIDFOOT_COP, 1.0, new FramePoint3D(footSpoof.getSoleFrame(), 1.0, 2.1, 3.1));
-
-      YoGraphicPosition graphic = (YoGraphicPosition) dummyGraphicsList.getYoGraphics().get(0);
-      assertEquals(1.0 - xToAnkle, graphic.getX(), 1e-5);
-      assertEquals(2.1 - yToAnkle, graphic.getY(), 1e-5);
-      assertEquals(3.1 - zToAnkle, graphic.getZ(), 1e-5);
-   }
-
 }

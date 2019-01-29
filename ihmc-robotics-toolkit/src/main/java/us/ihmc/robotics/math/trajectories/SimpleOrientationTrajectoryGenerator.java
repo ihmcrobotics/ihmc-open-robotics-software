@@ -1,17 +1,17 @@
 package us.ihmc.robotics.math.trajectories;
 
+import us.ihmc.commons.MathTools;
 import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.interfaces.FrameQuaternionBasics;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameQuaternionReadOnly;
-import us.ihmc.commons.MathTools;
+import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DBasics;
+import us.ihmc.robotics.math.interpolators.OrientationInterpolationCalculator;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.yoVariables.variable.YoFrameQuaternion;
-import us.ihmc.yoVariables.variable.YoFrameVector3D;
-import us.ihmc.robotics.math.frames.YoFrameQuaternionInMultipleFrames;
-import us.ihmc.robotics.math.frames.YoFrameVectorInMultipleFrames;
-import us.ihmc.robotics.math.interpolators.OrientationInterpolationCalculator;
+import us.ihmc.yoVariables.variable.frameObjects.YoMutableFrameQuaternion;
+import us.ihmc.yoVariables.variable.frameObjects.YoMutableFrameVector3D;
 
 public class SimpleOrientationTrajectoryGenerator extends OrientationTrajectoryGeneratorInMultipleFrames
 {
@@ -21,12 +21,12 @@ public class SimpleOrientationTrajectoryGenerator extends OrientationTrajectoryG
    private final YoDouble trajectoryTime;
    private final YoPolynomial parameterPolynomial;
 
-   private final YoFrameQuaternion initialOrientation;
-   private final YoFrameQuaternion finalOrientation;
+   private final FrameQuaternionBasics initialOrientation;
+   private final FrameQuaternionBasics finalOrientation;
 
-   private final YoFrameQuaternion currentOrientation;
-   private final YoFrameVector3D currentAngularVelocity;
-   private final YoFrameVector3D currentAngularAcceleration;
+   private final FrameQuaternionBasics currentOrientation;
+   private final FrameVector3DBasics currentAngularVelocity;
+   private final FrameVector3DBasics currentAngularAcceleration;
 
    private final OrientationInterpolationCalculator orientationInterpolationCalculator = new OrientationInterpolationCalculator();
 
@@ -37,7 +37,6 @@ public class SimpleOrientationTrajectoryGenerator extends OrientationTrajectoryG
 
    public SimpleOrientationTrajectoryGenerator(String namePrefix, boolean allowMultipleFrames, ReferenceFrame referenceFrame, YoVariableRegistry parentRegistry)
    {
-      super(allowMultipleFrames, referenceFrame);
       registry = new YoVariableRegistry(namePrefix + getClass().getSimpleName());
       trajectoryTime = new YoDouble(namePrefix + "TrajectoryTime", registry);
       currentTime = new YoDouble(namePrefix + "Time", registry);
@@ -49,30 +48,13 @@ public class SimpleOrientationTrajectoryGenerator extends OrientationTrajectoryG
       String currentAngularVelocityName = namePrefix + "CurrentAngularVelocity";
       String currentAngularAccelerationName = namePrefix + "CurrentAngularAcceleration";
 
-      if (allowMultipleFrames)
-      {
-         YoFrameQuaternionInMultipleFrames initialOrientation = new YoFrameQuaternionInMultipleFrames(initialOrientationName, registry, referenceFrame);
-         YoFrameQuaternionInMultipleFrames finalOrientation = new YoFrameQuaternionInMultipleFrames(finalOrientationName, registry, referenceFrame);
-         YoFrameQuaternionInMultipleFrames currentOrientation = new YoFrameQuaternionInMultipleFrames(currentOrientationName, registry, referenceFrame);
-         YoFrameVectorInMultipleFrames currentAngularVelocity = new YoFrameVectorInMultipleFrames(currentAngularVelocityName, registry, referenceFrame);
-         YoFrameVectorInMultipleFrames currentAngularAcceleration = new YoFrameVectorInMultipleFrames(currentAngularAccelerationName, registry, referenceFrame);
+      initialOrientation = new YoMutableFrameQuaternion(initialOrientationName, "", registry, referenceFrame);
+      finalOrientation = new YoMutableFrameQuaternion(finalOrientationName, "", registry, referenceFrame);
+      currentOrientation = new YoMutableFrameQuaternion(currentOrientationName, "", registry, referenceFrame);
+      currentAngularVelocity = new YoMutableFrameVector3D(currentAngularVelocityName, "", registry, referenceFrame);
+      currentAngularAcceleration = new YoMutableFrameVector3D(currentAngularAccelerationName, "", registry, referenceFrame);
 
-         registerMultipleFramesHolders(initialOrientation, finalOrientation, currentOrientation, currentAngularVelocity, currentAngularAcceleration);
-
-         this.initialOrientation = initialOrientation;
-         this.finalOrientation = finalOrientation;
-         this.currentOrientation = currentOrientation;
-         this.currentAngularVelocity = currentAngularVelocity;
-         this.currentAngularAcceleration = currentAngularAcceleration;
-      }
-      else
-      {
-         initialOrientation = new YoFrameQuaternion(initialOrientationName, referenceFrame, registry);
-         finalOrientation = new YoFrameQuaternion(finalOrientationName, referenceFrame, registry);
-         currentOrientation = new YoFrameQuaternion(currentOrientationName, referenceFrame, registry);
-         currentAngularVelocity = new YoFrameVector3D(currentAngularVelocityName, referenceFrame, registry);
-         currentAngularAcceleration = new YoFrameVector3D(currentAngularAccelerationName, referenceFrame, registry);
-      }
+      registerFrameChangeables(initialOrientation, finalOrientation, currentOrientation, currentAngularVelocity, currentAngularAcceleration);
 
       parentRegistry.addChild(registry);
    }

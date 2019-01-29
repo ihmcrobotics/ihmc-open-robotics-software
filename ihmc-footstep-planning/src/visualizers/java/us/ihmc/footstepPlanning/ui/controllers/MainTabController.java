@@ -8,27 +8,34 @@ import static us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI.
 import static us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI.StartOrientationTopic;
 import static us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI.StartPositionTopic;
 
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 
+import controller_msgs.msg.dds.FootstepDataListMessage;
+import javafx.animation.AnimationTimer;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
-import javafx.scene.control.CheckBox;
-import javafx.scene.control.ComboBox;
-import javafx.scene.control.Spinner;
-import javafx.scene.control.SpinnerValueFactory;
+import javafx.scene.control.*;
 import javafx.scene.control.SpinnerValueFactory.DoubleSpinnerValueFactory;
-import javafx.scene.control.TextField;
-import javafx.scene.control.ToggleButton;
 import us.ihmc.commons.PrintTools;
+import us.ihmc.communication.packets.ExecutionMode;
+import us.ihmc.euclid.referenceFrame.FramePose3D;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.euclid.tuple4D.Quaternion;
+import us.ihmc.footstepPlanning.FootstepPlan;
 import us.ihmc.footstepPlanning.FootstepPlannerType;
 import us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI;
+import us.ihmc.footstepPlanning.FootstepDataMessageConverter;
+import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.javaFXToolkit.messager.JavaFXMessager;
 import us.ihmc.javaFXToolkit.messager.MessageBidirectionalBinding.PropertyToMessageTypeConverter;
+import us.ihmc.mecano.frames.MovingReferenceFrame;
 import us.ihmc.messager.TopicListener;
 import us.ihmc.pathPlanning.visibilityGraphs.ui.properties.Point3DProperty;
 import us.ihmc.pathPlanning.visibilityGraphs.ui.properties.YawProperty;
+import us.ihmc.robotModels.FullHumanoidRobotModel;
 
 public class MainTabController
 {
@@ -39,6 +46,8 @@ public class MainTabController
    private ComboBox<FootstepPlannerType> plannerType;
    @FXML
    private CheckBox acceptNewRegions;
+   @FXML
+   private CheckBox assumeFlatGround;
    @FXML
    private Spinner<Double> timeout;
    @FXML
@@ -86,6 +95,10 @@ public class MainTabController
    @FXML
    private Spinner<Double> goalYaw;
 
+   @FXML
+   private Spinner<Double> swingTimeSpinner;
+   @FXML
+   private Spinner<Double> transferTimeSpinner;
 
    @FXML
    public void computePath()
@@ -93,6 +106,7 @@ public class MainTabController
       if (verbose)
          PrintTools.info(this, "Clicked compute path...");
 
+      setStartFromRobot();
       int newRequestID = currentPlannerRequestId.get() + 1;
       messager.submitMessage(FootstepPlannerMessagerAPI.PlannerRequestIdTopic, newRequestID);
       messager.submitMessage(ComputePathTopic, true);
@@ -107,10 +121,24 @@ public class MainTabController
       messager.submitMessage(AbortPlanningTopic, true);
    }
 
+   @FXML
+   public void sendPlan()
+   {
+      FootstepPlan footstepPlan = footstepPlanReference.get();
+      if (footstepPlan == null)
+         return;
+      double swingTime = 1.2;
+      double transferTime = 0.8;
+      FootstepDataListMessage footstepDataListMessage = FootstepDataMessageConverter
+            .createFootstepDataListFromPlan(footstepPlan, swingTime, transferTime, ExecutionMode.OVERRIDE);
+      messager.submitMessage(FootstepPlannerMessagerAPI.FootstepDataListTopic, footstepDataListMessage);
+   }
 
    private JavaFXMessager messager;
 
    private AtomicReference<Integer> currentPlannerRequestId;
+   private HumanoidReferenceFrames humanoidReferenceFrames;
+   private AtomicReference<FootstepPlan> footstepPlanReference;
 
    private final Point3DProperty startPositionProperty = new Point3DProperty(this, "startPositionProperty", new Point3D());
    private final Point3DProperty goalPositionProperty = new Point3DProperty(this, "goalPositionProperty", new Point3D());
@@ -123,7 +151,7 @@ public class MainTabController
       this.messager = messager;
 
       currentPlannerRequestId = messager.createInput(FootstepPlannerMessagerAPI.PlannerRequestIdTopic, -1);
-
+      footstepPlanReference = messager.createInput(FootstepPlannerMessagerAPI.FootstepPlanTopic, null);
    }
 
    private void setupControls()
@@ -139,6 +167,9 @@ public class MainTabController
       startYaw.setValueFactory(createStartGoalOrientationValueFactory());
       goalYaw.setValueFactory(createStartGoalOrientationValueFactory());
 
+      swingTimeSpinner.setValueFactory(new SpinnerValueFactory.DoubleSpinnerValueFactory(0.3, 3.5, 1.2, 0.1));
+      transferTimeSpinner.setValueFactory(new SpinnerValueFactory.DoubleSpinnerValueFactory(0.3, 3.5, 0.8, 0.1));
+
       ObservableList<us.ihmc.footstepPlanning.FootstepPlannerType> plannerTypeOptions = FXCollections.observableArrayList(FootstepPlannerType.values);
       plannerType.setItems(plannerTypeOptions);
       plannerType.setValue(FootstepPlannerType.A_STAR);
@@ -150,7 +181,6 @@ public class MainTabController
    public void bindControls()
    {
       setupControls();
-
 
       // control
       messager.bindBidirectional(FootstepPlannerMessagerAPI.PlannerTypeTopic, plannerType.valueProperty(), true);
@@ -164,8 +194,8 @@ public class MainTabController
 
       messager.bindBidirectional(FootstepPlannerMessagerAPI.PlannerTimeoutTopic, timeout.getValueFactory().valueProperty(), doubleToDoubleConverter, true);
 
-      messager.bindBidirectional(FootstepPlannerMessagerAPI.PlannerHorizonLengthTopic, horizonLength.getValueFactory().valueProperty(), doubleToDoubleConverter, true);
-
+      messager.bindBidirectional(FootstepPlannerMessagerAPI.PlannerHorizonLengthTopic, horizonLength.getValueFactory().valueProperty(), doubleToDoubleConverter,
+                                 true);
 
       // set goal
       messager.bindBidirectional(FootstepPlannerMessagerAPI.StartPositionEditModeEnabledTopic, placeStart.selectedProperty(), false);
@@ -188,6 +218,7 @@ public class MainTabController
       messager.bindPropertyToTopic(FootstepPlannerMessagerAPI.StartPositionEditModeEnabledTopic, rotateGoal.disableProperty());
       messager.bindPropertyToTopic(FootstepPlannerMessagerAPI.GoalPositionEditModeEnabledTopic, rotateGoal.disableProperty());
       messager.bindPropertyToTopic(FootstepPlannerMessagerAPI.StartOrientationEditModeEnabledTopic, rotateGoal.disableProperty());
+      messager.bindBidirectional(FootstepPlannerMessagerAPI.AssumeFlatGround, assumeFlatGround.selectedProperty(), false);
 
       startPositionProperty.bindBidirectionalX(startXPosition.getValueFactory().valueProperty());
       startPositionProperty.bindBidirectionalY(startYPosition.getValueFactory().valueProperty());
@@ -208,12 +239,34 @@ public class MainTabController
       goalRotationProperty.bindBidirectionalYaw(goalYaw.getValueFactory().valueProperty());
       messager.bindBidirectional(GoalOrientationTopic, goalRotationProperty, false);
 
-
-
-
-
-
       messager.registerTopicListener(GlobalResetTopic, reset -> clearStartGoalTextFields());
+   }
+
+   private void setStartFromRobot()
+   {
+      humanoidReferenceFrames.updateFrames();
+      MovingReferenceFrame midFeetZUpFrame = humanoidReferenceFrames.getMidFeetZUpFrame();
+      FramePose3D startPose = new FramePose3D();
+      startPose.setToZero(midFeetZUpFrame);
+      startPose.changeFrame(ReferenceFrame.getWorldFrame());
+
+      double x = startPose.getX();
+      double y = startPose.getY();
+      double yaw = startPose.getYaw();
+
+      startPositionProperty.set(new Point3D(x, y, startPositionProperty.get().getZ()));
+      startRotationProperty.set(new Quaternion(yaw, 0.0, 0.0));
+   }
+
+   public void setFullRobotModel(FullHumanoidRobotModel fullHumanoidRobotModel)
+   {
+      this.humanoidReferenceFrames = new HumanoidReferenceFrames(fullHumanoidRobotModel);
+   }
+
+   public void setDefaultTiming(double swingTime, double transferTime)
+   {
+      swingTimeSpinner.getValueFactory().setValue(swingTime);
+      transferTimeSpinner.getValueFactory().setValue(transferTime);
    }
 
    private void clearStartGoalTextFields()

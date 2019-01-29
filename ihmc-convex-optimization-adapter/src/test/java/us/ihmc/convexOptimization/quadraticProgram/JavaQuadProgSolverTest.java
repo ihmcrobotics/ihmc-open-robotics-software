@@ -294,7 +294,7 @@ public class JavaQuadProgSolverTest extends AbstractSimpleActiveSetQPSolverTest
    @Test(timeout = 30000)
    public void testSimpleCasesWithBoundsConstraints()
    {
-      testSimpleCasesWithBoundsConstraints(0, 1, 2, 6, true);
+      testSimpleCasesWithBoundsConstraints(0, 1, 6, 2, true);
    }
 
    @Override /** have to override because quad prog uses different iterations */
@@ -305,6 +305,7 @@ public class JavaQuadProgSolverTest extends AbstractSimpleActiveSetQPSolverTest
       testClear(6, 1, true);
    }
 
+   @Override
    @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testMaxIterations()
@@ -312,6 +313,7 @@ public class JavaQuadProgSolverTest extends AbstractSimpleActiveSetQPSolverTest
       testMaxIterations(6, false);
    }
 
+   @Override
    @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void test2DCasesWithPolygonConstraints()
@@ -320,6 +322,7 @@ public class JavaQuadProgSolverTest extends AbstractSimpleActiveSetQPSolverTest
    }
 
 
+   @Override
    @Ignore
    @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)

@@ -8,16 +8,18 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FixedFramePoint3DBasics;
 import us.ihmc.euclid.referenceFrame.interfaces.FixedFrameVector3DBasics;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
+import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsList;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.graphicsDescription.yoGraphics.plotting.ArtifactList;
 import us.ihmc.mecano.frames.MovingReferenceFrame;
+import us.ihmc.quadrupedBasics.gait.QuadrupedTimedStep;
 import us.ihmc.quadrupedRobotics.planning.ContactState;
 import us.ihmc.quadrupedRobotics.planning.QuadrupedTimedContactSequence;
-import us.ihmc.quadrupedRobotics.planning.QuadrupedTimedStep;
 import us.ihmc.robotics.math.trajectories.FrameTrajectory3D;
+import us.ihmc.robotics.math.trajectories.YoFrameTrajectory3D;
 import us.ihmc.robotics.robotSide.QuadrantDependentList;
 import us.ihmc.yoVariables.parameters.DoubleParameter;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
@@ -39,7 +41,7 @@ public class DCMPlanner
 
    private final QuadrupedPiecewiseConstantCopTrajectory piecewiseConstantCopTrajectory;
    private final PiecewiseReverseDcmTrajectory dcmTrajectory;
-   private final FrameTrajectory3D dcmTransitionTrajectory;
+   private final YoFrameTrajectory3D dcmTransitionTrajectory;
 
    private final DoubleParameter initialTransitionDurationParameter = new DoubleParameter("initialTransitionDuration", registry, 0.5);
 
@@ -53,15 +55,18 @@ public class DCMPlanner
    private final YoInteger numberOfStepsInPlanner = new YoInteger("numberOfStepsInPlanner", registry);
    private final YoFramePoint3D perfectCMPPosition = new YoFramePoint3D("perfectCMPPosition", worldFrame, registry);
 
-
    private final YoBoolean isStanding = new YoBoolean("isStanding", registry);
 
    private final ReferenceFrame supportFrame;
    private final YoFramePoint3D dcmPositionAtStartOfState = new YoFramePoint3D("dcmPositionAtStartOfState", ReferenceFrame.getWorldFrame(), registry);
+   private final YoFrameVector3D dcmVelocityAtStartOfState = new YoFrameVector3D("dcmVelocityAtStartOfState", ReferenceFrame.getWorldFrame(), registry);
    private final YoFramePoint3D dcmPositionAtEndOfTransition = new YoFramePoint3D("dcmPositionAtEndOfTransition", ReferenceFrame.getWorldFrame(), registry);
+   private final YoFrameVector3D dcmVelocityAtEndOfTransition = new YoFrameVector3D("dcmVelocityAtEndOfTransition", ReferenceFrame.getWorldFrame(), registry);
    private final YoDouble timeAtStartOfState = new YoDouble("timeAtStartOfState", registry);
-   private final FramePoint3D initialTransitionDCM = new FramePoint3D();
-   private final FramePoint3D finalTransitionDCM = new FramePoint3D();
+   private final FramePoint3D initialTransitionDCMPosition = new FramePoint3D();
+   private final FrameVector3D initialTransitionDCMVelocity = new FrameVector3D();
+   private final FramePoint3D finalTransitionDCMPosition = new FramePoint3D();
+   private final FrameVector3D finalTransitionDCMVelocity = new FrameVector3D();
    private final FramePoint3D finalDCM = new FramePoint3D();
 
    private final FramePoint3D tempPoint = new FramePoint3D();
@@ -83,7 +88,7 @@ public class DCMPlanner
       this.supportFrame = supportFrame;
       this.soleFrames = soleFrames;
       this.debug = debug;
-      this.dcmTransitionTrajectory = new FrameTrajectory3D(6, supportFrame);
+      this.dcmTransitionTrajectory = new YoFrameTrajectory3D("dcmTransitionTrajectory", 4, supportFrame, registry);
       dcmTrajectory = new PiecewiseReverseDcmTrajectory(STEP_SEQUENCE_CAPACITY, gravity, nominalHeight, registry);
       piecewiseConstantCopTrajectory = new QuadrupedPiecewiseConstantCopTrajectory(2 * STEP_SEQUENCE_CAPACITY, registry);
 
@@ -138,7 +143,8 @@ public class DCMPlanner
       dcmTrajectory.resetVariables();
    }
 
-   public void initializeForStepping(QuadrantDependentList<YoEnum<ContactState>> currentContactStates, FramePoint3DReadOnly dcmPosition)
+   public void initializeForStepping(QuadrantDependentList<YoEnum<ContactState>> currentContactStates, FramePoint3DReadOnly dcmPosition,
+                                     FrameVector3DReadOnly dcmVelocity)
    {
       isStanding.set(false);
 
@@ -151,6 +157,7 @@ public class DCMPlanner
          computeDcmTrajectory(currentContactStates);
 
          dcmPositionAtStartOfState.setMatchingFrame(dcmPosition);
+         dcmVelocityAtStartOfState.setMatchingFrame(dcmVelocity);
          timeAtStartOfState.set(controllerTime.getDoubleValue());
          computeTransitionTrajectory();
       }
@@ -181,14 +188,22 @@ public class DCMPlanner
       double transitionStartTime = Math.max(timeAtStartOfState.getDoubleValue(), transitionEndTime - initialTransitionDurationParameter.getValue());
 
       dcmTrajectory.computeTrajectory(transitionEndTime);
-      dcmTrajectory.getPosition(finalTransitionDCM);
+      dcmTrajectory.getPosition(finalTransitionDCMPosition);
+      dcmTrajectory.getVelocity(finalTransitionDCMVelocity);
 
-      initialTransitionDCM.setIncludingFrame(dcmPositionAtStartOfState);
-      initialTransitionDCM.changeFrame(dcmTransitionTrajectory.getReferenceFrame());
-      finalTransitionDCM.changeFrame(dcmTransitionTrajectory.getReferenceFrame());
+      initialTransitionDCMPosition.setIncludingFrame(dcmPositionAtStartOfState);
+      initialTransitionDCMVelocity.setIncludingFrame(dcmVelocityAtStartOfState);
+      initialTransitionDCMPosition.changeFrame(dcmTransitionTrajectory.getReferenceFrame());
+      initialTransitionDCMVelocity.changeFrame(dcmTransitionTrajectory.getReferenceFrame());
+      finalTransitionDCMPosition.changeFrame(dcmTransitionTrajectory.getReferenceFrame());
+      finalTransitionDCMVelocity.changeFrame(dcmTransitionTrajectory.getReferenceFrame());
 
-      dcmPositionAtEndOfTransition.setMatchingFrame(finalTransitionDCM);
-      dcmTransitionTrajectory.setQuinticWithZeroTerminalVelocityAndAcceleration(transitionStartTime, transitionEndTime, initialTransitionDCM, finalTransitionDCM);
+      dcmTransitionTrajectory
+            .setCubic(transitionStartTime, transitionEndTime, initialTransitionDCMPosition, initialTransitionDCMVelocity, finalTransitionDCMPosition,
+                      finalTransitionDCMVelocity);
+
+      dcmPositionAtEndOfTransition.setMatchingFrame(finalTransitionDCMPosition);
+      dcmVelocityAtEndOfTransition.setMatchingFrame(finalTransitionDCMVelocity);
 
       if (debug)
          runTransitionDebugChecks(transitionStartTime, transitionEndTime);
@@ -196,16 +211,20 @@ public class DCMPlanner
 
    private void runTransitionDebugChecks(double transitionStartTime, double transitionEndTime)
    {
-      if (finalTransitionDCM.containsNaN())
-         throw new IllegalArgumentException("Final DCM at end of transition contains NaN.");
+      if (finalTransitionDCMPosition.containsNaN())
+         throw new IllegalArgumentException("Final DCM position at end of transition contains NaN.");
+      if (finalTransitionDCMVelocity.containsNaN())
+         throw new IllegalArgumentException("Final DCM velocity at end of transition contains NaN.");
       if (dcmPositionAtStartOfState.containsNaN())
-         throw new IllegalArgumentException("DCM Position at start of state contains NaN.");
+         throw new IllegalArgumentException("DCM position at start of state contains NaN.");
+      if (dcmVelocityAtStartOfState.containsNaN())
+         throw new IllegalArgumentException("DCM velocity at start of state contains NaN.");
       if (!Double.isFinite(transitionStartTime))
          throw new IllegalArgumentException("Transition start time is not valid.");
       if (!Double.isFinite(transitionEndTime))
          throw new IllegalArgumentException("Transition end time is not valid.");
       if (transitionStartTime > transitionEndTime)
-         throw new IllegalArgumentException("Transition start time " + transitionStartTime + " is after the transition end time " + transitionEndTime +".");
+         throw new IllegalArgumentException("Transition start time " + transitionStartTime + " is after the transition end time " + transitionEndTime + ".");
       if (!dcmTransitionTrajectory.isValidTrajectory())
          throw new IllegalArgumentException("Transition trajectory is invalid.");
    }
@@ -220,6 +239,7 @@ public class DCMPlanner
       {
          // update desired dcm position
          desiredDCMPosition.setToZero(supportFrame);
+         desiredDCMPosition.setZ(comHeight.getDoubleValue());
          desiredDCMVelocity.setToZero(supportFrame);
       }
       else
@@ -235,7 +255,6 @@ public class DCMPlanner
             dcmTransitionTrajectory.compute(currentTime);
             dcmTransitionTrajectory.getFramePosition(desiredDCMPosition);
             dcmTransitionTrajectory.getFrameVelocity(desiredDCMVelocity);
-
          }
          else
          {
@@ -268,7 +287,7 @@ public class DCMPlanner
 
    public void getDCMAtEndOfTransition(FixedFramePoint3DBasics finalDesiredDCMToPack)
    {
-      finalDesiredDCMToPack.setMatchingFrame(finalTransitionDCM);
+      finalDesiredDCMToPack.setMatchingFrame(finalTransitionDCMPosition);
    }
 
    public void getFinalDCMPosition(FixedFramePoint3DBasics finalDesiredDCMToPack)

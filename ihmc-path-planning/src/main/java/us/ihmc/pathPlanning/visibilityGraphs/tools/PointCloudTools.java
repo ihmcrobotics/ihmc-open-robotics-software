@@ -22,6 +22,8 @@ import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.pathPlanning.visibilityGraphs.clusterManagement.Cluster;
+import us.ihmc.pathPlanning.visibilityGraphs.clusterManagement.Cluster.ClusterType;
+import us.ihmc.pathPlanning.visibilityGraphs.clusterManagement.Cluster.ExtrusionSide;
 import us.ihmc.robotics.geometry.PlanarRegion;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 
@@ -154,35 +156,40 @@ public class PointCloudTools
       return (ptA.getX() - refPt.getX()) * (ptB.getY() - refPt.getY()) - (ptB.getX() - refPt.getX()) * (ptA.getY() - refPt.getY());
    }
 
-   public static void main(String args[])
+   public static List<Point2DReadOnly> addPointsAlongPolygon(List<Point2DReadOnly> polygonPoints, double brakeDownThreshold)
    {
-      new PointCloudTools();
-   }
+      List<Point2DReadOnly> pointsToReturn = new ArrayList<>();
 
-   public static void doBrakeDownOn2DPoints(List<Point2DReadOnly> pointsToBrakeDown, double brakeDownThreshold)
-   {
-      for (int i = 1; i < pointsToBrakeDown.size(); i++)
+      int size = polygonPoints.size();
+
+      for (int i = 0; i < size; i++)
       {
-         Point2DReadOnly point1 = pointsToBrakeDown.get(i - 1);
-         Point2DReadOnly point2 = pointsToBrakeDown.get(i);
+         Point2DReadOnly point1 = polygonPoints.get(i);
+         Point2DReadOnly point2 = polygonPoints.get((i + 1) % size);
 
-         doBrakeDown2D(pointsToBrakeDown, i, point1, point2, brakeDownThreshold);
+         pointsToReturn.add(point1);
+         doBrakeDown2D(pointsToReturn, point1, point2, brakeDownThreshold);
       }
+
+      return pointsToReturn;
    }
 
-   private static void doBrakeDown2D(List<Point2DReadOnly> points, int index, Point2DReadOnly point1, Point2DReadOnly point2, double brakeDownThreshold)
+   private static void doBrakeDown2D(List<Point2DReadOnly> pointList, Point2DReadOnly point1, Point2DReadOnly point2, double brakeDownThreshold)
    {
-      double nOfPointsToAddToSegment = Math.floor(point2.distance(point1) / brakeDownThreshold);
+      double distance = point2.distance(point1);
+
+      double nOfPointsToAddToSegment = Math.floor(distance / brakeDownThreshold);
+      brakeDownThreshold = distance / (((double) nOfPointsToAddToSegment) + 1.0);
+
       Vector2D direction = new Vector2D(point2.getX() - point1.getX(), point2.getY() - point1.getY());
-      direction.normalize();
+      direction.scale(1.0 / distance);
 
       for (int i = 0; i < nOfPointsToAddToSegment; i++)
       {
          double xPos = point1.getX() + direction.getX() * brakeDownThreshold * (i + 1);
          double yPos = point1.getY() + direction.getY() * brakeDownThreshold * (i + 1);
 
-         points.add(index, new Point2D(xPos, yPos));
-         index++;
+         pointList.add(new Point2D(xPos, yPos));
       }
    }
 
@@ -310,7 +317,7 @@ public class PointCloudTools
 
          int index = 0;
 
-         Cluster cluster = new Cluster();
+         Cluster cluster = new Cluster(ExtrusionSide.OUTSIDE, ClusterType.POLYGON);
          int nPacketsRead = 0;
 
          ArrayList<Point3D> pointsTemp = new ArrayList<>();
@@ -329,7 +336,7 @@ public class PointCloudTools
                   pointsTemp.clear();
                }
 
-               cluster = new Cluster();
+               cluster = new Cluster(ExtrusionSide.OUTSIDE, ClusterType.POLYGON);
                clusters.add(cluster);
                nPacketsRead++;
                //               System.out.println("New cluster created");
@@ -415,7 +422,6 @@ public class PointCloudTools
             ConvexPolygon2D convexPolygon = new ConvexPolygon2D(Vertex2DSupplier.asVertex2DSupplier(cluster1.getRawPointsInLocal2D()));
 
             PlanarRegion planarRegion = new PlanarRegion(cluster1.getTransformToWorld(), convexPolygon);
-            
 
             regions.add(planarRegion);
          }

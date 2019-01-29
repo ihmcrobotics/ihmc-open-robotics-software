@@ -24,7 +24,7 @@ public abstract class FootstepNodeChecker
          listener.rejectNode(node, parentNode, rejectionReason);
    }
 
-   protected boolean hasPlanarRegions()
+   boolean hasPlanarRegions()
    {
       return planarRegionsList != null && !planarRegionsList.isEmpty();
    }
@@ -35,7 +35,19 @@ public abstract class FootstepNodeChecker
          listeners.add(listener);
    }
 
-   public abstract boolean isNodeValid(FootstepNode node, FootstepNode previousNode);
+   public boolean isNodeValid(FootstepNode node, FootstepNode previousNode)
+   {
+      if(node.equals(previousNode))
+      {
+         throw new RuntimeException("Cannot check a node with itself");
+      }
+      else
+      {
+         return isNodeValidInternal(node, previousNode);
+      }
+   }
+
+   abstract boolean isNodeValidInternal(FootstepNode node, FootstepNode previousNode);
 
    public abstract void addStartNode(FootstepNode startNode, RigidBodyTransform startNodeTransform);
 }

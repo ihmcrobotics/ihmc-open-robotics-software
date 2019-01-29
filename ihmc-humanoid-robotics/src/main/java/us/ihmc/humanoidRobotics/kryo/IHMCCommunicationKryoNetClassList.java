@@ -167,8 +167,6 @@ import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.Vector3D32;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.euclid.tuple4D.Quaternion32;
-import us.ihmc.footstepPlanning.FootstepPlannerType;
-import us.ihmc.footstepPlanning.FootstepPlanningResult;
 import us.ihmc.humanoidRobotics.communication.packets.atlas.AtlasLowLevelControlMode;
 import us.ihmc.humanoidRobotics.communication.packets.bdi.BDIRobotBehavior;
 import us.ihmc.humanoidRobotics.communication.packets.behaviors.BehaviorControlModeEnum;
@@ -650,7 +648,6 @@ public class IHMCCommunicationKryoNetClassList extends NetClassList
       registerPacketField(ToolboxState.class);
       registerPacketClass(FootstepPlanningToolboxOutputStatus.class);
       registerPacketClass(FootstepPlanningRequestPacket.class);
-      registerPacketField(FootstepPlanningResult.class);
       registerPacketField(Pose2D.class);
       registerPacketField(Point2D.class);
       registerPacketField(Vector2D.class);
@@ -788,7 +785,6 @@ public class IHMCCommunicationKryoNetClassList extends NetClassList
       registerPacketClass(FootstepPlanRequestPacket.class);
       registerPacketField(FootstepDataMessage.class);
       registerPacketField(FootstepDataMessage[].class);
-      registerPacketField(FootstepPlannerType.class);
       registerPacketClass(SimpleCoactiveBehaviorDataPacket.class);
       registerPacketClass(WallPosePacket.class);
       registerPacketClass(WalkOverTerrainGoalPacket.class);

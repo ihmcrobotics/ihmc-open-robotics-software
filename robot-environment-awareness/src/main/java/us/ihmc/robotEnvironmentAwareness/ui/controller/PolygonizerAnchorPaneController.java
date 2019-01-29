@@ -127,14 +127,14 @@ public class PolygonizerAnchorPaneController extends REABasicUIController
       loadUIControlProperty(REAModuleAPI.UIPlanarRegionHideNodes, hideRegionNodes);
    }
 
-   private DoubleSpinnerValueFactory createLengthValueFactory(double min, double max, double initialValue, double amountToStepBy)
+   public static DoubleSpinnerValueFactory createLengthValueFactory(double min, double max, double initialValue, double amountToStepBy)
    {
       DoubleSpinnerValueFactory doubleSpinnerValueFactory = new DoubleSpinnerValueFactory(min, max, initialValue, amountToStepBy);
       doubleSpinnerValueFactory.setConverter(StringConverterTools.metersToRoundedCentimeters());
       return doubleSpinnerValueFactory;
    }
 
-   private DoubleSpinnerValueFactory createAngleValueFactory(double min, double max, double initialValue, double amountToStepBy)
+   public static DoubleSpinnerValueFactory createAngleValueFactory(double min, double max, double initialValue, double amountToStepBy)
    {
       DoubleSpinnerValueFactory doubleSpinnerValueFactory = new DoubleSpinnerValueFactory(min, max, initialValue, amountToStepBy);
       doubleSpinnerValueFactory.setConverter(StringConverterTools.radiansToRoundedDegrees());

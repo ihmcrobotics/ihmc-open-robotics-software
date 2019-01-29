@@ -2,28 +2,25 @@ package us.ihmc.quadrupedRobotics.controller;
 
 import static us.ihmc.humanoidRobotics.footstep.FootstepUtils.worldFrame;
 
-import java.awt.Color;
 import java.util.List;
 
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.QuadrupedSupportPolygons;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.YoPlaneContactState;
+import us.ihmc.commonWalkingControlModules.referenceFrames.CommonQuadrupedReferenceFramesVisualizer;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
-import us.ihmc.graphicsDescription.yoGraphics.plotting.YoArtifactPolygon;
 import us.ihmc.mecano.algorithms.CenterOfMassJacobian;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.quadrupedRobotics.controlModules.foot.QuadrupedFootControlModuleParameters;
 import us.ihmc.quadrupedRobotics.controller.toolbox.DivergentComponentOfMotionEstimator;
 import us.ihmc.quadrupedRobotics.controller.toolbox.LinearInvertedPendulumModel;
 import us.ihmc.quadrupedRobotics.controller.toolbox.QuadrupedFallDetector;
-import us.ihmc.quadrupedRobotics.controller.toolbox.QuadrupedSoleForceEstimator;
 import us.ihmc.quadrupedRobotics.estimator.GroundPlaneEstimator;
 import us.ihmc.quadrupedRobotics.estimator.YoGroundPlaneEstimator;
-import us.ihmc.quadrupedRobotics.estimator.referenceFrames.QuadrupedReferenceFrames;
-import us.ihmc.quadrupedRobotics.geometry.supportPolygon.QuadrupedSupportPolygon;
+import us.ihmc.quadrupedBasics.referenceFrames.QuadrupedReferenceFrames;
 import us.ihmc.quadrupedRobotics.model.QuadrupedPhysicalProperties;
 import us.ihmc.quadrupedRobotics.model.QuadrupedRuntimeEnvironment;
 import us.ihmc.quadrupedRobotics.planning.ContactState;
@@ -34,13 +31,13 @@ import us.ihmc.robotics.robotSide.RobotQuadrant;
 import us.ihmc.robotics.sensors.CenterOfMassDataHolderReadOnly;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoEnum;
-import us.ihmc.yoVariables.variable.YoFrameConvexPolygon2D;
 import us.ihmc.yoVariables.variable.YoFramePoint3D;
 import us.ihmc.yoVariables.variable.YoFrameVector3D;
 
 public class QuadrupedControllerToolbox
 {
    private final QuadrupedReferenceFrames referenceFrames;
+   private final CommonQuadrupedReferenceFramesVisualizer referenceFramesVisualizer;
    private final LinearInvertedPendulumModel linearInvertedPendulumModel;
    private final DivergentComponentOfMotionEstimator dcmPositionEstimator;
 
@@ -49,7 +46,6 @@ public class QuadrupedControllerToolbox
    private final QuadrantDependentList<YoFramePoint3D> groundPlanePositions;
    private final QuadrantDependentList<YoFramePoint3D> upcomingGroundPlanePositions;
 
-   private final QuadrupedSoleForceEstimator soleForceEstimator;
    private final QuadrupedFallDetector fallDetector;
 
    private final CenterOfMassJacobian comJacobian;
@@ -87,11 +83,9 @@ public class QuadrupedControllerToolbox
 
 
       // create controllers and estimators
-      referenceFrames = new QuadrupedReferenceFrames(runtimeEnvironment.getFullRobotModel(), physicalProperties);
+      referenceFrames = new QuadrupedReferenceFrames(runtimeEnvironment.getFullRobotModel());
 
-      soleForceEstimator = new QuadrupedSoleForceEstimator(fullRobotModel, referenceFrames, registry);
-
-      linearInvertedPendulumModel = new LinearInvertedPendulumModel(referenceFrames.getCenterOfMassFrame(), mass, gravity, physicalProperties.getNominalCoMHeight(), registry);
+      linearInvertedPendulumModel = new LinearInvertedPendulumModel(referenceFrames.getCenterOfMassFrame(), mass, gravity, physicalProperties.getNominalBodyHeight(), registry);
 //      upcomingGroundPlaneEstimator = new YoGroundPlaneEstimator("upcoming", registry, runtimeEnvironment.getGraphicsListRegistry(), YoAppearance.PlaneMaterial());
       upcomingGroundPlaneEstimator = new GroundPlaneEstimator();
       groundPlaneEstimator = new YoGroundPlaneEstimator(registry, runtimeEnvironment.getGraphicsListRegistry());
@@ -106,7 +100,8 @@ public class QuadrupedControllerToolbox
       comJacobian = new CenterOfMassJacobian(fullRobotModel.getElevator(), worldFrame);
       dcmPositionEstimator = new DivergentComponentOfMotionEstimator(referenceFrames.getCenterOfMassFrame(), linearInvertedPendulumModel, registry, yoGraphicsListRegistry);
 
-      fallDetector = new QuadrupedFallDetector(referenceFrames.getBodyFrame(), referenceFrames.getSoleFrames(), dcmPositionEstimator, registry);
+      fallDetector = new QuadrupedFallDetector(referenceFrames.getBodyFrame(), referenceFrames.getSoleFrames(), dcmPositionEstimator,
+                                               runtimeEnvironment.getFallDetectionParameters(), registry);
 
       contactablePlaneBodies = runtimeEnvironment.getContactablePlaneBodies();
       centerOfMassDataHolder = runtimeEnvironment.getCenterOfMassDataHolder();
@@ -128,6 +123,11 @@ public class QuadrupedControllerToolbox
          contactStates.put(robotQuadrant, contactState);
       }
 
+      if (yoGraphicsListRegistry != null)
+         referenceFramesVisualizer = new CommonQuadrupedReferenceFramesVisualizer(referenceFrames, yoGraphicsListRegistry, registry);
+      else
+         referenceFramesVisualizer = null;
+
 
       supportPolygon = new QuadrupedSupportPolygons(referenceFrames.getCenterOfFeetZUpFrameAveragingLowestZHeightsAcrossEnds(), footContactStates,
                                                     referenceFrames.getSoleZUpFrames(), registry, yoGraphicsListRegistry);
@@ -139,8 +139,10 @@ public class QuadrupedControllerToolbox
    public void update()
    {
       referenceFrames.updateFrames();
-      soleForceEstimator.compute();
       supportPolygon.updateUsingContactStates(footContactStates);
+
+      if (referenceFramesVisualizer != null)
+         referenceFramesVisualizer.update();
 
       if(centerOfMassDataHolder == null)
       {
@@ -244,11 +246,6 @@ public class QuadrupedControllerToolbox
    public FrameVector3DReadOnly getCoMVelocityEstimate()
    {
       return yoCoMVelocityEstimate;
-   }
-
-   public FrameVector3D getSoleContactForce(RobotQuadrant robotQuadrant)
-   {
-      return soleForceEstimator.getSoleContactForce(robotQuadrant);
    }
 
    public QuadrupedSupportPolygons getSupportPolygons()

@@ -12,6 +12,7 @@ import us.ihmc.avatar.networkProcessor.modules.ZeroPoseMockRobotConfigurationDat
 import us.ihmc.avatar.networkProcessor.modules.mocap.IHMCMOCAPLocalizationModule;
 import us.ihmc.avatar.networkProcessor.modules.mocap.MocapPlanarRegionsListManager;
 import us.ihmc.avatar.networkProcessor.quadTreeHeightMap.HeightQuadTreeToolboxModule;
+import us.ihmc.avatar.networkProcessor.supportingPlanarRegionPublisher.BipedalSupportPlanarRegionPublisher;
 import us.ihmc.avatar.networkProcessor.wholeBodyTrajectoryToolboxModule.WholeBodyTrajectoryToolboxModule;
 import us.ihmc.avatar.sensors.DRCSensorSuiteManager;
 import us.ihmc.commons.PrintTools;
@@ -45,6 +46,7 @@ public class DRCNetworkProcessor
       tryToStartModule(() -> addTextToSpeechEngine(params));
       tryToStartModule(() -> setupHeightQuadTreeToolboxModule(robotModel, params));
       tryToStartModule(() -> setupRobotEnvironmentAwerenessModule(params));
+      tryToStartModule(() -> setupBipedalSupportPlanarRegionPublisherModule(robotModel, params));
    }
 
    private void addTextToSpeechEngine(DRCNetworkModuleParameters params)
@@ -183,6 +185,15 @@ public class DRCNetworkProcessor
             throw new RuntimeException(e);
          }
       ;
+   }
+
+   private void setupBipedalSupportPlanarRegionPublisherModule(DRCRobotModel robotModel, DRCNetworkModuleParameters params)
+   {
+      if (params.isBipedalSupportPlanarRegionPublisherEnabled())
+      {
+         BipedalSupportPlanarRegionPublisher module = new BipedalSupportPlanarRegionPublisher(robotModel);
+         module.start();
+      }
    }
 
    protected void connect(PacketCommunicator communicator)

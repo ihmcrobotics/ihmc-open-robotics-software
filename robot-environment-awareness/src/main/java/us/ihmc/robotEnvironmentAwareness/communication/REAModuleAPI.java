@@ -16,6 +16,7 @@ import us.ihmc.robotEnvironmentAwareness.communication.packets.LineSegment3DMess
 import us.ihmc.robotEnvironmentAwareness.communication.packets.NormalOcTreeMessage;
 import us.ihmc.robotEnvironmentAwareness.communication.packets.PlanarRegionSegmentationMessage;
 import us.ihmc.robotEnvironmentAwareness.geometry.ConcaveHullFactoryParameters;
+import us.ihmc.robotEnvironmentAwareness.planarRegion.CustomRegionMergeParameters;
 import us.ihmc.robotEnvironmentAwareness.planarRegion.IntersectionEstimationParameters;
 import us.ihmc.robotEnvironmentAwareness.planarRegion.PlanarRegionSegmentationParameters;
 import us.ihmc.robotEnvironmentAwareness.planarRegion.PolygonizerParameters;
@@ -35,6 +36,7 @@ public class REAModuleAPI
    private static final CategoryTheme NormalEstimation = apiFactory.createCategoryTheme("NormalEstimation");
    private static final CategoryTheme PlanarRegions = apiFactory.createCategoryTheme("PlanarRegions");
    private static final CategoryTheme Segmentation = apiFactory.createCategoryTheme("Segmentation");
+   private static final CategoryTheme Custom = apiFactory.createCategoryTheme("Custom");
    private static final CategoryTheme Intersection = apiFactory.createCategoryTheme("Intersection");
    private static final CategoryTheme ConcaveHull = apiFactory.createCategoryTheme("ConcaveHull");
    private static final CategoryTheme Polygonizer = apiFactory.createCategoryTheme("Polygonizer");
@@ -84,6 +86,9 @@ public class REAModuleAPI
    public static final Topic<Boolean> PlanarRegionsSegmentationEnable = PlanarRegionsCategory.child(Segmentation).topic(Enable);
    public static final Topic<Boolean> PlanarRegionsSegmentationClear = PlanarRegionsCategory.child(Segmentation).topic(Clear);
    public static final Topic<PlanarRegionSegmentationParameters> PlanarRegionsSegmentationParameters = PlanarRegionsCategory.child(Segmentation).topic(Parameters);
+   public static final Topic<Boolean> CustomRegionsMergingEnable = PlanarRegionsCategory.child(Custom).topic(Enable);
+   public static final Topic<Boolean> CustomRegionsClear = PlanarRegionsCategory.child(Custom).topic(Clear);
+   public static final Topic<CustomRegionMergeParameters> CustomRegionsMergingParameters = PlanarRegionsCategory.child(Custom).topic(Parameters);
    public static final Topic<Boolean> PlanarRegionsPolygonizerEnable = PlanarRegionsCategory.child(Polygonizer).topic(Enable);
    public static final Topic<Boolean> PlanarRegionsPolygonizerClear = PlanarRegionsCategory.child(Polygonizer).topic(Clear);
    public static final Topic<ConcaveHullFactoryParameters> PlanarRegionsConcaveHullParameters = PlanarRegionsCategory.child(ConcaveHull).topic(Parameters);

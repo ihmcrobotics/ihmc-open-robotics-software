@@ -1,5 +1,5 @@
 plugins {
-   id("us.ihmc.ihmc-build") version "0.15.4"
+   id("us.ihmc.ihmc-build") version "0.15.5"
    id("us.ihmc.ihmc-ci-plugin") version "0.18.0"
    id("us.ihmc.log-tools") version "0.2.2"
 }
@@ -17,36 +17,36 @@ testSuites {
 }
 
 mainDependencies {
-   compile group: 'us.ihmc.thirdparty.org.opencv', name: 'opencv', version: '3.2.0-170503'
-   compile group: 'org.apache.commons', name: 'commons-lang3', version: '3.8.1'
-   compile group: 'us.ihmc', name: 'IHMCNativeLibraryLoader', version: '1.0'
-   compile group: 'org.georegression', name: 'georegression', version: '0.11'
-   compile group: 'org.ejml', name: 'core', version: '0.30'
-   compile group: 'org.ejml', name: 'dense64', version: '0.30'
-   compile group: 'net.java.dev.jna', name: 'jna', version: '4.1.0'
-   compile group: 'org.boofcv', name: 'geo', version: '0.24.1'
-   compile group: 'org.boofcv', name: 'ip', version: '0.24.1'
-   compile group: 'org.ros.rosjava_core', name: 'rosjava', version: '0.2.1'
-   compile group: 'org.ros.rosjava_bootstrap', name: 'message_generation', version: '0.2.1'
-   compile group: 'org.ros.rosjava_messages', name: 'std_msgs', version: '0.5.9'
-   compile group: 'org.ros.rosjava_messages', name: 'geometry_msgs', version: '1.11.7'
-   compile group: 'org.ros.rosjava_messages', name: 'sensor_msgs', version: '1.11.7'
-   compile group: 'org.ros.rosjava_messages', name: 'std_srvs', version: '1.11.1'
-   compile group: 'org.ros.rosjava_messages', name: 'people_msgs', version: '1.0.4'
-   compile group: 'org.boofcv', name: 'visualize', version: '0.24.1'
-   compile group: 'org.boofcv', name: 'io', version: '0.24.1'
-   compile group: 'org.boofcv', name: 'recognition', version: '0.24.1'
-   compile group: 'org.boofcv', name: 'calibration', version: '0.24.1'
-   compile group: 'us.ihmc.ihmcPerception', name: 'valvenet', version: '0.0.4'
-   compile group: 'us.ihmc.ihmcPerception', name: 'cuda', version: '7.5'
+   compile group: "us.ihmc.thirdparty.org.opencv", name: "opencv", version: "3.2.0-170503"
+   compile group: "org.apache.commons", name: "commons-lang3", version: "3.8.1"
+   compile group: "us.ihmc", name: "IHMCNativeLibraryLoader", version: "1.0"
+   compile group: "org.georegression", name: "georegression", version: "0.11"
+   compile group: "org.ejml", name: "core", version: "0.30"
+   compile group: "org.ejml", name: "dense64", version: "0.30"
+   compile group: "net.java.dev.jna", name: "jna", version: "4.1.0"
+   compile group: "org.boofcv", name: "geo", version: "0.24.1"
+   compile group: "org.boofcv", name: "ip", version: "0.24.1"
+   compile group: "org.ros.rosjava_core", name: "rosjava", version: "0.2.1"
+   compile group: "org.ros.rosjava_bootstrap", name: "message_generation", version: "0.2.1"
+   compile group: "org.ros.rosjava_messages", name: "std_msgs", version: "0.5.9"
+   compile group: "org.ros.rosjava_messages", name: "geometry_msgs", version: "1.11.7"
+   compile group: "org.ros.rosjava_messages", name: "sensor_msgs", version: "1.11.7"
+   compile group: "org.ros.rosjava_messages", name: "std_srvs", version: "1.11.1"
+   compile group: "org.ros.rosjava_messages", name: "people_msgs", version: "1.0.4"
+   compile group: "org.boofcv", name: "visualize", version: "0.24.1"
+   compile group: "org.boofcv", name: "io", version: "0.24.1"
+   compile group: "org.boofcv", name: "recognition", version: "0.24.1"
+   compile group: "org.boofcv", name: "calibration", version: "0.24.1"
+   compile group: "us.ihmc.ihmcPerception", name: "valvenet", version: "0.0.4"
+   compile group: "us.ihmc.ihmcPerception", name: "cuda", version: "7.5"
    compile "org.ddogleg:ddogleg:0.7"
 
-   compile group: "us.ihmc", name: "euclid-core", version: "0.7.0"
-   compile group: "us.ihmc", name: "ihmc-yovariables", version: "0.3.6"
+   compile group: "us.ihmc", name: "euclid", version: "0.11.0"
+   compile group: "us.ihmc", name: "ihmc-yovariables", version: "0.3.7"
    compile group: "us.ihmc", name: "ihmc-commons", version: "0.24.0"
-   compile group: "us.ihmc", name: "simulation-construction-set", version: "0.12.7"
-   compile group: "us.ihmc", name: "ihmc-jmonkey-engine-toolkit", version: "0.12.3"
-   compile group: "us.ihmc", name: "ihmc-graphics-description", version: "0.12.7"
+   compile group: "us.ihmc", name: "simulation-construction-set", version: "0.12.9"
+   compile group: "us.ihmc", name: "ihmc-jmonkey-engine-toolkit", version: "0.12.5"
+   compile group: "us.ihmc", name: "ihmc-graphics-description", version: "0.12.9"
    compile group: "us.ihmc", name: "ihmc-humanoid-robotics", version: "source"
    compile group: "us.ihmc", name: "ihmc-communication", version: "source"
    compile group: "us.ihmc", name: "ihmc-ros-tools", version: "source"
@@ -63,8 +63,8 @@ testDependencies {
 
    compile group: "us.ihmc", name: "ihmc-ci-core-api", version: "0.18.0"
    compile group: "us.ihmc", name: "ihmc-commons-testing", version: "0.24.0"
-   compile group: "us.ihmc", name: "simulation-construction-set", version: "0.12.7"
-   compile group: "us.ihmc", name: "simulation-construction-set-test", version: "0.12.7"
+   compile group: "us.ihmc", name: "simulation-construction-set", version: "0.12.9"
+   compile group: "us.ihmc", name: "simulation-construction-set-test", version: "0.12.9"
    compile group: "us.ihmc", name: "ihmc-robotics-toolkit", version: "source"
    compile group: "us.ihmc", name: "simulation-construction-set-tools", version: "source"
    compile group: "us.ihmc", name: "simulation-construction-set-tools-test", version: "source"
