@@ -17,7 +17,7 @@ import us.ihmc.robotics.robotSide.SideDependentList;
 
 public class HandJointAngleProvider implements PacketConsumer<HandJointAnglePacket>
 {
-   public static final SideDependentList<Boolean> HAND_ENABLED = new SideDependentList<>(false, true);
+   public static final SideDependentList<Boolean> HAND_ENABLED = new SideDependentList<>(true, true);
    private final SideDependentList<HashMap<HandJointName, OneDoFJointBasics>> handJoints = new SideDependentList<HashMap<HandJointName, OneDoFJointBasics>>();
 
    private final SideDependentList<AtomicReference<HandJointAnglePacket>> packets = new SideDependentList<AtomicReference<HandJointAnglePacket>>();
