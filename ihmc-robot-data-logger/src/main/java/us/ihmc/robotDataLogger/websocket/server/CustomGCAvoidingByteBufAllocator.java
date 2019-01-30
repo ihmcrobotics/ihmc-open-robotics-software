@@ -5,6 +5,7 @@ import java.util.ArrayList;
 
 import io.netty.buffer.AbstractByteBufAllocator;
 import io.netty.buffer.ByteBuf;
+import io.netty.buffer.ByteBufAllocator;
 import io.netty.buffer.Unpooled;
 
 public class CustomGCAvoidingByteBufAllocator extends AbstractByteBufAllocator
@@ -18,10 +19,13 @@ public class CustomGCAvoidingByteBufAllocator extends AbstractByteBufAllocator
 
    private int index = 0;
 
-   public CustomGCAvoidingByteBufAllocator()
+   private final ByteBufAllocator backupAllocator;
+
+   public CustomGCAvoidingByteBufAllocator(ByteBufAllocator backupAllocator)
    {
       super(true);
       refill(INITIAL_MAX_CAPACITY);
+      this.backupAllocator = backupAllocator;
    }
 
    private ByteBuf add(int capacity)
@@ -51,44 +55,32 @@ public class CustomGCAvoidingByteBufAllocator extends AbstractByteBufAllocator
    @Override
    protected ByteBuf newHeapBuffer(int initialCapacity, int maxCapacity)
    {
-      throw new RuntimeException("Heap buffers unsupported by this allocator");
+      return backupAllocator.heapBuffer(initialCapacity, maxCapacity);
    }
 
    @Override
    protected ByteBuf newDirectBuffer(int initialCapacity, int maxCapacity)
    {
-      try
+      if (initialCapacity > capacity)
       {
-         if (initialCapacity > capacity)
-         {
-            System.err.println("Requested capacity " + initialCapacity + " exceeds " + capacity);
-            Thread.dumpStack();
-            refill(initialCapacity);
-         }
-
-         for (int i = index; i < index + pool.size(); i++)
-         {
-            int item = i < pool.size() ? i : i - pool.size();
-
-            ByteBuf byteBuf = pool.get(item);
-            if (byteBuf.refCnt() == 1)
-            {
-               index = item + 1;
-               System.out.println(initialCapacity);
-               byteBuf.clear();
-               byteBuf.internalNioBuffer(0, 0); // Force allocation of temporary object
-               return byteBuf.retain();
-            }
-         }
-
-         System.err.println("Pool overflowed, adding item");
-         return add(capacity);
+         return backupAllocator.directBuffer(initialCapacity, maxCapacity);
       }
-      catch (Exception e)
+
+      for (int i = index; i < index + pool.size(); i++)
       {
-         e.printStackTrace();
-         throw e;
+         int item = i < pool.size() ? i : i - pool.size();
+
+         ByteBuf byteBuf = pool.get(item);
+         if (byteBuf.refCnt() == 1)
+         {
+            index = item + 1;
+            byteBuf.clear();
+            byteBuf.internalNioBuffer(0, 0); // Force allocation of temporary object
+            return byteBuf.retain();
+         }
       }
+
+      return add(capacity);
    }
 
 }
