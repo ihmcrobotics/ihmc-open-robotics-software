@@ -32,7 +32,7 @@ public class ExampleServer
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
    private final YoVariableServer yoVariableServer;
    
-   private final List<YoVariable> allVariables = new ArrayList<>();
+   private final List<YoVariable<?>> allVariables = new ArrayList<>();
 
    private long timestamp = 0;
 
