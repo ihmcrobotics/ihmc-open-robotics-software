@@ -2,14 +2,11 @@ package us.ihmc.quadrupedFootstepPlanning.footstepPlanning.graphSearch.visualiza
 
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.graphSearch.graph.FootstepNode;
-import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.graphSearch.nodeExpansion.FootstepNodeExpansion;
 import us.ihmc.robotics.robotSide.QuadrantDependentList;
 import us.ihmc.robotics.robotSide.RobotQuadrant;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoEnum;
 import us.ihmc.yoVariables.variable.YoFramePoint2D;
-
-import java.awt.*;
 
 public class YoFootstepNode
 {
@@ -38,7 +35,12 @@ public class YoFootstepNode
       movingNodePosition.set(nodePositions.get(movingQuadrant.getEnumValue()));
    }
 
-   public YoFramePoint2D getYoPosition()
+   public YoFramePoint2D getYoPosition(RobotQuadrant robotQuadrant)
+   {
+      return nodePositions.get(robotQuadrant);
+   }
+
+   public YoFramePoint2D getMovingYoPosition()
    {
       return movingNodePosition;
    }

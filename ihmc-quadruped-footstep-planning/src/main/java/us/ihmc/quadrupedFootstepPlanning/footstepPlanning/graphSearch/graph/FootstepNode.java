@@ -166,11 +166,15 @@ public class FootstepNode
       final int prime = 31;
       int result = 1;
       result = prime * result + ((node.movingQuadrant == null) ? 0 : node.movingQuadrant.hashCode());
+      /*
       for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
       {
          result = prime * result + node.getXIndex(robotQuadrant);
          result = prime * result + node.getYIndex(robotQuadrant);
       }
+      */
+      result = prime * result + node.getXIndex(node.movingQuadrant);
+      result = prime * result + node.getYIndex(node.movingQuadrant);
       return result;
    }
 
@@ -203,6 +207,33 @@ public class FootstepNode
    public static double round(double value)
    {
       return Math.round(value * INV_PRECISION) * PRECISION;
+   }
+
+   public boolean geometricallyEquals(Object obj)
+   {
+      if (this == obj)
+         return true;
+      if (obj == null)
+         return false;
+      if (getClass() != obj.getClass())
+         return false;
+      FootstepNode other = (FootstepNode) obj;
+
+
+      if (xIndices.get(movingQuadrant) != other.xIndices.get(movingQuadrant))
+         return false;
+
+      return yIndices.get(movingQuadrant) == other.yIndices.get(movingQuadrant);
+      /*
+      for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
+      {
+         if (xIndices.get(robotQuadrant) != other.xIndices.get(robotQuadrant))
+            return false;
+         if (yIndices.get(robotQuadrant) != other.yIndices.get(robotQuadrant))
+            return false;
+      }
+      return true;
+      */
    }
 
    @Override

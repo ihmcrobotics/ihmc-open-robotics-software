@@ -23,7 +23,8 @@ public class NodeComparator implements Comparator<FootstepNode>
    {
       double cost1 = graph.getCostFromStart(o1) + heuristics.compute(o1, goalNode);
       double cost2 = graph.getCostFromStart(o2) + heuristics.compute(o2, goalNode);
-      if (cost1 == cost2) return 0;
+      if (cost1 == cost2)
+         return 0;
       return cost1 < cost2 ? -1 : 1;
    }
 }

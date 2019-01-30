@@ -8,6 +8,7 @@ import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.graphicsDescription.Graphics3DObject;
+import us.ihmc.graphicsDescription.appearance.AppearanceDefinition;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.quadrupedBasics.gait.QuadrupedTimedStep;
@@ -23,6 +24,7 @@ import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.graphSearch.visualizat
 import us.ihmc.quadrupedPlanning.QuadrupedXGaitSettings;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.graphics.Graphics3DObjectTools;
+import us.ihmc.robotics.robotSide.QuadrantDependentList;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.SimulationConstructionSetParameters;
 import us.ihmc.simulationconstructionset.gui.YoGraph;
@@ -36,7 +38,9 @@ public class QuadrupedAStarFootstepPlannerTest
 {
    private static final long timeout = 30000 * 100;
    private static final boolean visualize = true;
-   private static final boolean activelyVisualize = true;
+   private static final boolean activelyVisualize = false;
+
+   private static final QuadrantDependentList<AppearanceDefinition> colorDefinitions = new QuadrantDependentList<>(YoAppearance.Red(), YoAppearance.Green(), YoAppearance.DarkRed(), YoAppearance.DarkGreen());
 
    @Test(timeout = timeout)
    public void test()
@@ -46,7 +50,7 @@ public class QuadrupedAStarFootstepPlannerTest
       xGaitSettings.setStanceLength(1.0);
       xGaitSettings.setStanceWidth(0.5);
       FootstepPlannerParameters parameters = new DefaultFootstepPlannerParameters();
-      FootstepNodeExpansion expansion = new ParameterBasedNodeExpansion(parameters);
+      FootstepNodeExpansion expansion = new ParameterBasedNodeExpansion(parameters, xGaitSettings);
       QuadrupedAStarFootstepPlannerVisualizer visualizer;
       if (activelyVisualize)
          visualizer = new QuadrupedAStarFootstepPlannerVisualizer(null);
@@ -106,42 +110,26 @@ public class QuadrupedAStarFootstepPlannerTest
       graphics3DObject.identity();
       graphics3DObject.translate(goal);
       graphics3DObject.translate(0.0, 0.0, 0.05);
-      graphics3DObject.addCone(0.3, 0.05, YoAppearance.Red());
+      graphics3DObject.addCone(0.3, 0.05, YoAppearance.Black());
 
       if (steps != null)
       {
          for (int i = 0; i < steps.size(); i++)
          {
             Point3DReadOnly point = steps.get(i).getGoalPosition();
+            AppearanceDefinition appearanceDefinition = colorDefinitions.get(steps.get(i).getRobotQuadrant());
 
             graphics3DObject.identity();
             graphics3DObject.translate(point);
-            graphics3DObject.addSphere(0.1, YoAppearance.Orange());
+            graphics3DObject.addSphere(0.1, appearanceDefinition);
 
-            if (i != steps.size() - 1)
-            {
-               Point3DReadOnly nextPoint = steps.get(i + 1).getGoalPosition();
-               Vector3D direction = new Vector3D(nextPoint);
-               direction.sub(point);
-               int pathPoints = (int) Math.round(point.distance(nextPoint) / 0.05);
-
-               for (int j = 1; j < pathPoints; j++)
-               {
-                  Vector3D offset = new Vector3D(direction);
-                  offset.scaleAdd(((double) j) / pathPoints, point);
-
-                  graphics3DObject.identity();
-                  graphics3DObject.translate(offset);
-                  graphics3DObject.addSphere(0.025, YoAppearance.Orange());
-               }
-            }
          }
       }
 
       scs.addStaticLinkGraphics(graphics3DObject);
 
-      scs.setCameraPosition(-15, -1.0, 25.0);
-      scs.setCameraFix(-10, 0.0, 0.0);
+      scs.setCameraFix(0.0, 0.0, 0.0);
+      scs.setCameraPosition(-0.001, 0.0, 15.0);
       scs.startOnAThread();
 
       ThreadTools.sleepForever();

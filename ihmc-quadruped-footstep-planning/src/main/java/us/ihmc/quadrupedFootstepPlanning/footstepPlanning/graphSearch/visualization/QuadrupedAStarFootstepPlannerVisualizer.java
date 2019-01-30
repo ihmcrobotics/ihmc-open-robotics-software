@@ -8,7 +8,6 @@ import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicReferenceFrame;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsList;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
-import us.ihmc.graphicsDescription.yoGraphics.plotting.YoArtifactPolygon;
 import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.graphSearch.QuadrupedFootstepPlannerNodeRejectionReason;
 import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.graphSearch.graph.FootstepNode;
 import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.graphSearch.listeners.QuadrupedFootstepPlannerListener;
@@ -73,7 +72,7 @@ public class QuadrupedAStarFootstepPlannerVisualizer implements QuadrupedFootste
 
    public QuadrupedAStarFootstepPlannerVisualizer(PlanarRegionsList regions)
    {
-      this(0.01, regions);
+      this(0.1, regions);
    }
 
    public QuadrupedAStarFootstepPlannerVisualizer(double playbackRate, PlanarRegionsList regions)
@@ -126,7 +125,13 @@ public class QuadrupedAStarFootstepPlannerVisualizer implements QuadrupedFootste
       graphicsListRegistry.registerYoGraphicsList(expandedNodesVis);
       graphicsListRegistry.registerYoGraphicsList(rejectedNodesVis);
 
-      YoGraphicPosition nodeVis = new YoGraphicPosition("activeNode", currentFootstepNode.getYoPosition(), nodeSize, YoAppearance.Orange());
+      for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
+      {
+         YoGraphicPosition otherFeet = new YoGraphicPosition(robotQuadrant.getShortName() + "activeNodeFeet", currentFootstepNode.getYoPosition(robotQuadrant), nodeSize, YoAppearance.OrangeRed());
+         graphicsListRegistry.registerYoGraphic("plannerListener", otherFeet);
+
+      }
+      YoGraphicPosition nodeVis = new YoGraphicPosition("activeNode", currentFootstepNode.getMovingYoPosition(), nodeSize, YoAppearance.Orange());
 
       graphicsListRegistry.registerYoGraphic("plannerListener", nodeVis);
 
