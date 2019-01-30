@@ -9,6 +9,7 @@ import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.graphicsDescription.Graphics3DObject;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
+import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.quadrupedBasics.gait.QuadrupedTimedStep;
 import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.FootstepPlanningResult;
 import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.QuadrupedFootstepPlanner;
@@ -18,10 +19,13 @@ import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.graphSearch.nodeExpans
 import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.graphSearch.nodeExpansion.ParameterBasedNodeExpansion;
 import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.graphSearch.parameters.DefaultFootstepPlannerParameters;
 import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.graphSearch.parameters.FootstepPlannerParameters;
+import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.graphSearch.visualization.QuadrupedAStarFootstepPlannerVisualizer;
 import us.ihmc.quadrupedPlanning.QuadrupedXGaitSettings;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.graphics.Graphics3DObjectTools;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
+import us.ihmc.simulationconstructionset.SimulationConstructionSetParameters;
+import us.ihmc.simulationconstructionset.gui.YoGraph;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 
 import java.util.List;
@@ -30,8 +34,9 @@ import static junit.framework.TestCase.assertTrue;
 
 public class QuadrupedAStarFootstepPlannerTest
 {
-   private static final long timeout = 30000;
+   private static final long timeout = 30000 * 100;
    private static final boolean visualize = true;
+   private static final boolean activelyVisualize = true;
 
    @Test(timeout = timeout)
    public void test()
@@ -42,7 +47,14 @@ public class QuadrupedAStarFootstepPlannerTest
       xGaitSettings.setStanceWidth(0.5);
       FootstepPlannerParameters parameters = new DefaultFootstepPlannerParameters();
       FootstepNodeExpansion expansion = new ParameterBasedNodeExpansion(parameters);
-      QuadrupedAStarFootstepPlanner planner = QuadrupedAStarFootstepPlanner.createPlanner(parameters, xGaitSettings, null, expansion, registry);
+      QuadrupedAStarFootstepPlannerVisualizer visualizer;
+      if (activelyVisualize)
+         visualizer = new QuadrupedAStarFootstepPlannerVisualizer(null);
+      else
+         visualizer = null;
+      QuadrupedAStarFootstepPlanner planner = QuadrupedAStarFootstepPlanner.createPlanner(parameters, xGaitSettings, visualizer, expansion, registry);
+
+      PlanarRegionsList planarRegionsList = null;
 
       FramePose3D startPose = new FramePose3D();
       FramePose3D goalPose = new FramePose3D();
@@ -57,12 +69,19 @@ public class QuadrupedAStarFootstepPlannerTest
       planner.setGoal(goal);
       planner.setTimeout(10.0);
 
+
+
       FootstepPlanningResult result = planner.plan();
+
+      if (activelyVisualize)
+      {
+         visualizer.showAndSleep(true);
+      }
 
       assertTrue(result.validForExecution());
       List<? extends QuadrupedTimedStep> steps = planner.getSteps();
 
-      if (visualize)
+      if (visualize && !activelyVisualize)
          visualizePlan(steps, null, startPose.getPosition(), goalPose.getPosition());
 
    }
