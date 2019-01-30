@@ -11,13 +11,13 @@ public class WebsocketDataBroadcaster implements ChannelFutureListener
 {
    private final Object channelLock = new Object();
 
-   private final ArrayList<WebsocketLogFrameHandler> channels = new ArrayList<WebsocketLogFrameHandler>();
+   private final ArrayList<WebsocketDataServerFrameHandler> channels = new ArrayList<WebsocketDataServerFrameHandler>();
 
    public WebsocketDataBroadcaster()
    {
    }
 
-   public void addClient(WebsocketLogFrameHandler websocketLogFrameHandler)
+   public void addClient(WebsocketDataServerFrameHandler websocketLogFrameHandler)
    {
 
       synchronized (channelLock)

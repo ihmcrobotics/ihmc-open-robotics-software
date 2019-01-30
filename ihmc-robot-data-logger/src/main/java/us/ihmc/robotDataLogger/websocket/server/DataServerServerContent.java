@@ -12,7 +12,7 @@ import us.ihmc.robotDataLogger.AnnouncementPubSubType;
 import us.ihmc.robotDataLogger.Handshake;
 import us.ihmc.robotDataLogger.HandshakePubSubType;
 
-public class LogServerContent
+public class DataServerServerContent
 {
    private final String name;
    private final String hostName;
@@ -24,7 +24,7 @@ public class LogServerContent
    private final ByteBuf model;
    private final ByteBuf resourceZip;
 
-   public LogServerContent(Announcement announcement, Handshake handshake, LogModelProvider logModelProvider)
+   public DataServerServerContent(Announcement announcement, Handshake handshake, LogModelProvider logModelProvider)
    {
       try
       {

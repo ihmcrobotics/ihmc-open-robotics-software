@@ -8,16 +8,16 @@ import io.netty.handler.codec.http.HttpObjectAggregator;
 import io.netty.handler.codec.http.HttpServerCodec;
 import io.netty.handler.codec.http.websocketx.WebSocketServerProtocolHandler;
 
-public class WebsocketLogServerInitializer extends ChannelInitializer<SocketChannel>
+public class WebsocketDataServerInitializer extends ChannelInitializer<SocketChannel>
 
 {
    private static final String WEBSOCKET_PATH = "/websocket";
 
-   private final LogServerContent logServerContent;
+   private final DataServerServerContent logServerContent;
    private final WebsocketDataBroadcaster broadcaster;
    private final int dataSize;
    
-   public WebsocketLogServerInitializer(LogServerContent logServerContent, WebsocketDataBroadcaster broadcaster, int dataSize)
+   public WebsocketDataServerInitializer(DataServerServerContent logServerContent, WebsocketDataBroadcaster broadcaster, int dataSize)
    {
       this.logServerContent = logServerContent;
       this.broadcaster = broadcaster;
@@ -33,8 +33,8 @@ public class WebsocketLogServerInitializer extends ChannelInitializer<SocketChan
       pipeline.addLast(new HttpServerCodec());
       pipeline.addLast(new HttpObjectAggregator(65536));
       pipeline.addLast(new WebSocketServerProtocolHandler(WEBSOCKET_PATH, null, true));
-      pipeline.addLast(new WebsocketLogDescriptionServer(logServerContent));
-      pipeline.addLast(new WebsocketLogFrameHandler(broadcaster, dataSize));
+      pipeline.addLast(new HTTPDataServerDescriptionServer(logServerContent));
+      pipeline.addLast(new WebsocketDataServerFrameHandler(broadcaster, dataSize));
    }
 
 }

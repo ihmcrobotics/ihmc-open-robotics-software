@@ -24,12 +24,12 @@ import us.ihmc.robotDataLogger.websocket.LogHTTPPaths;
 /**
  * Outputs index page content.
  */
-public class WebsocketLogDescriptionServer extends SimpleChannelInboundHandler<FullHttpRequest>
+public class HTTPDataServerDescriptionServer extends SimpleChannelInboundHandler<FullHttpRequest>
 {
 
-   private final LogServerContent logServerContent;
+   private final DataServerServerContent logServerContent;
 
-   public WebsocketLogDescriptionServer(LogServerContent logServerContent)
+   public HTTPDataServerDescriptionServer(DataServerServerContent logServerContent)
    {
       this.logServerContent = logServerContent;
    }
