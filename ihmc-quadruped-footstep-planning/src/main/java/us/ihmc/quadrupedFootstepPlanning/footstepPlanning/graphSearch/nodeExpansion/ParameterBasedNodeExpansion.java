@@ -3,9 +3,12 @@ package us.ihmc.quadrupedFootstepPlanning.footstepPlanning.graphSearch.nodeExpan
 import us.ihmc.euclid.axisAngle.AxisAngle;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple2D.Vector2D;
+import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
 import us.ihmc.euclid.tuple2D.interfaces.Tuple2DReadOnly;
 import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.graphSearch.graph.FootstepNode;
 import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.graphSearch.parameters.FootstepPlannerParameters;
+import us.ihmc.quadrupedPlanning.QuadrupedXGaitSettings;
+import us.ihmc.quadrupedPlanning.QuadrupedXGaitSettingsReadOnly;
 import us.ihmc.robotics.robotSide.RobotQuadrant;
 
 import java.util.ArrayList;
@@ -17,10 +20,12 @@ public class ParameterBasedNodeExpansion implements FootstepNodeExpansion
 {
    private FootstepNode goalNode;
    private final FootstepPlannerParameters parameters;
+   private final QuadrupedXGaitSettingsReadOnly xGaitSettings;
 
-   public ParameterBasedNodeExpansion(FootstepPlannerParameters parameters)
+   public ParameterBasedNodeExpansion(FootstepPlannerParameters parameters, QuadrupedXGaitSettingsReadOnly xGaitSettings)
    {
       this.parameters = parameters;
+      this.xGaitSettings = xGaitSettings;
    }
 
    public void setGoalNode(FootstepNode goalNode)
@@ -64,7 +69,7 @@ public class ParameterBasedNodeExpansion implements FootstepNodeExpansion
       }
    }
 
-   private static FootstepNode constructNodeInPreviousNodeFrame(double movingX, double movingY, FootstepNode previousNode)
+   private FootstepNode constructNodeInPreviousNodeFrame(double movingX, double movingY, FootstepNode previousNode)
    {
       Vector2D movingVector = new Vector2D(movingX, movingY);
 
@@ -74,6 +79,7 @@ public class ParameterBasedNodeExpansion implements FootstepNodeExpansion
       rotation.transform(movingVector);
 
       RobotQuadrant nextQuadrant = previousNode.getMovingQuadrant().getNextRegularGaitSwingQuadrant();
+      Point2DReadOnly midstancePoint = previousNode.getOrComputeMidStancePoint();
       Point2D frontLeft = new Point2D(previousNode.getX(FRONT_LEFT), previousNode.getY(FRONT_LEFT));
       Point2D frontRight = new Point2D(previousNode.getX(FRONT_RIGHT), previousNode.getY(FRONT_RIGHT));
       Point2D hindLeft = new Point2D(previousNode.getX(HIND_LEFT), previousNode.getY(HIND_LEFT));
@@ -82,36 +88,27 @@ public class ParameterBasedNodeExpansion implements FootstepNodeExpansion
       switch (nextQuadrant)
       {
       case FRONT_LEFT:
-         frontLeft.add(movingX, movingY);
+         frontLeft.set(midstancePoint);
+         frontLeft.addX(0.5 * xGaitSettings.getStanceLength() + movingX);
+         frontLeft.addY(0.5 * xGaitSettings.getStanceWidth() + movingY);
          break;
       case FRONT_RIGHT:
-         frontRight.add(movingX, movingY);
+         frontRight.set(midstancePoint);
+         frontRight.addX(0.5 * xGaitSettings.getStanceLength() + movingX);
+         frontRight.addY(-0.5 * xGaitSettings.getStanceWidth() + movingY);
          break;
       case HIND_LEFT:
-         hindLeft.add(movingX, movingY);
+         hindLeft.set(midstancePoint);
+         hindLeft.addX(-0.5 * xGaitSettings.getStanceLength() + movingX);
+         hindLeft.addY(0.5 * xGaitSettings.getStanceWidth() + movingY);
          break;
       default:
-         hindRight.add(movingX, movingY);
+         hindRight.set(midstancePoint);
+         hindRight.addX(-0.5 * xGaitSettings.getStanceLength() + movingX);
+         hindRight.addY(-0.5 * xGaitSettings.getStanceWidth() + movingY);
          break;
       }
 
       return new FootstepNode(nextQuadrant, frontLeft, frontRight, hindLeft, hindRight);
-   }
-
-   private static ArrayList<Double> constructArrayFromEndpointsAndSpacing(double minValue, double maxValue, double spacing)
-   {
-      if (maxValue < minValue)
-         throw new RuntimeException("Max value: " + maxValue + " should be less than min value: " + minValue);
-
-      ArrayList<Double> array = new ArrayList<>();
-      double value = minValue;
-
-      while (value < maxValue)
-      {
-         array.add(value);
-         value += spacing;
-      }
-
-      return array;
    }
 }

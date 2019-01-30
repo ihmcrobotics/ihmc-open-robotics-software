@@ -261,7 +261,9 @@ public class QuadrupedAStarFootstepPlanner implements QuadrupedFootstepPlanner
       {
          currentTime += xGaitSettings.getEndDoubleSupportDuration();
 
-         RobotQuadrant robotQuadrant = path.get(i).getMovingQuadrant();
+         FootstepNode node = path.get(i);
+
+         RobotQuadrant robotQuadrant = node.getMovingQuadrant();
 
          QuadrupedTimedOrientedStep newStep = new QuadrupedTimedOrientedStep();
          newStep.setRobotQuadrant(robotQuadrant);
@@ -270,7 +272,12 @@ public class QuadrupedAStarFootstepPlanner implements QuadrupedFootstepPlanner
          timeInterval.setStartTime(currentTime);
          currentTime += xGaitSettings.getStepDuration();
          timeInterval.setEndTime(currentTime);
-         
+
+         Point3D position = new Point3D(node.getX(robotQuadrant), node.getY(robotQuadrant), 0.0);
+         FootstepNodeSnapData snapData = snapper.getSnapData(node);
+//         position.applyTransform(snapData.getSnapTransform(robotQuadrant));
+
+         newStep.setGoalPosition(position);
 
          steps.add(newStep);
       }
@@ -446,7 +453,7 @@ public class QuadrupedAStarFootstepPlanner implements QuadrupedFootstepPlanner
       if (!validGoalNode.getBooleanValue())
          return false;
 
-      if (goalNode.equals(nodeToExpand))
+      if (goalNode.geometricallyEquals(nodeToExpand))
       {
          endNode = goalNode;
          graph.checkAndSetEdge(nodeToExpand, endNode, 0.0);
