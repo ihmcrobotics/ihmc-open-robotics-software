@@ -78,6 +78,9 @@ public class ParameterBasedNodeExpansion implements FootstepNodeExpansion
       AxisAngle rotation = new AxisAngle(nodeYaw, 0.0, 0.0);
       rotation.transform(movingVector);
 
+      movingX = movingVector.getX();
+      movingY = movingVector.getY();
+
       RobotQuadrant nextQuadrant = previousNode.getMovingQuadrant().getNextRegularGaitSwingQuadrant();
       Point2DReadOnly midstancePoint = previousNode.getOrComputeMidStancePoint();
       Point2D frontLeft = new Point2D(previousNode.getX(FRONT_LEFT), previousNode.getY(FRONT_LEFT));

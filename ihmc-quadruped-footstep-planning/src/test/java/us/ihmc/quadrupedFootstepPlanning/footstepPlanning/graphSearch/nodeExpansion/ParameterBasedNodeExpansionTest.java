@@ -32,6 +32,8 @@ import static junit.framework.TestCase.fail;
 
 public class ParameterBasedNodeExpansionTest
 {
+   private static final double stanceLength = 1.0;
+   private static final double stanceWidth = 0.5;
    private static final boolean visualize = true;
    private static final QuadrantDependentList<AppearanceDefinition> colorDefinitions = new QuadrantDependentList<>(YoAppearance.Red(), YoAppearance.Green(),
                                                                                                                    YoAppearance.DarkRed(),
@@ -41,10 +43,14 @@ public class ParameterBasedNodeExpansionTest
    public void testExpandNodeWithBaseAtOrigin()
    {
       FootstepPlannerParameters parameters = new DefaultFootstepPlannerParameters();
-      QuadrupedXGaitSettingsReadOnly xGaitSettingsReadOnly = new QuadrupedXGaitSettings();
+      QuadrupedXGaitSettings xGaitSettingsReadOnly = new QuadrupedXGaitSettings();
+      xGaitSettingsReadOnly.setStanceWidth(stanceWidth);
+      xGaitSettingsReadOnly.setStanceLength(stanceLength);
+
       FootstepNodeExpansion expansion = new ParameterBasedNodeExpansion(parameters, xGaitSettingsReadOnly);
 
-      FootstepNode baseNode = new FootstepNode(RobotQuadrant.FRONT_LEFT, 0.5, 0.25, 0.5, -0.25, -0.5, 0.25, -0.5, -0.25);
+      FootstepNode baseNode = new FootstepNode(RobotQuadrant.FRONT_LEFT, 0.5 * stanceLength, 0.5 * stanceWidth, 0.5 * stanceLength, -0.5 * stanceWidth,
+                                               -0.5 * stanceLength, 0.5 * stanceWidth, -0.5 * stanceLength, -0.5 * stanceWidth);
 
       HashSet<FootstepNode> expandedNodes = expansion.expandNode(baseNode);
 
@@ -58,14 +64,16 @@ public class ParameterBasedNodeExpansionTest
    public void testExpandNodeWithTranslatedAndRotated()
    {
       FootstepPlannerParameters parameters = new DefaultFootstepPlannerParameters();
-      QuadrupedXGaitSettingsReadOnly xGaitSettingsReadOnly = new QuadrupedXGaitSettings();
+      QuadrupedXGaitSettings xGaitSettingsReadOnly = new QuadrupedXGaitSettings();
+      xGaitSettingsReadOnly.setStanceLength(stanceLength);
+      xGaitSettingsReadOnly.setStanceWidth(stanceWidth);
       FootstepNodeExpansion expansion = new ParameterBasedNodeExpansion(parameters, xGaitSettingsReadOnly);
 
       PoseReferenceFrame centerFrame = new PoseReferenceFrame("centerFrame", ReferenceFrame.getWorldFrame());
-      FramePoint2D frontLeft = new FramePoint2D(centerFrame, 0.5, 0.25);
-      FramePoint2D frontRight = new FramePoint2D(centerFrame, 0.5, -0.25);
-      FramePoint2D hindLeft = new FramePoint2D(centerFrame, -0.5, 0.25);
-      FramePoint2D hindRight = new FramePoint2D(centerFrame, -0.5, -0.25);
+      FramePoint2D frontLeft = new FramePoint2D(centerFrame, 0.5 * stanceLength, 0.5 * stanceWidth);
+      FramePoint2D frontRight = new FramePoint2D(centerFrame, 0.5 * stanceLength, -0.5 * stanceWidth);
+      FramePoint2D hindLeft = new FramePoint2D(centerFrame, -0.5 * stanceLength, 0.5 * stanceWidth);
+      FramePoint2D hindRight = new FramePoint2D(centerFrame, -0.5 * stanceLength, -0.5 * stanceWidth);
 
       FramePose3D poseInWorld = new FramePose3D();
       poseInWorld.getPosition().set(1.1, -0.5, 0.0);
