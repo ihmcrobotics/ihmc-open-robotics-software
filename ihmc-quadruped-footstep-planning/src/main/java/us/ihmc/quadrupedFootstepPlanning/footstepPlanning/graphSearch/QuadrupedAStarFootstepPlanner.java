@@ -15,6 +15,7 @@ import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.pathPlanning.visibilityGraphs.tools.PlanarRegionTools;
+import us.ihmc.quadrupedBasics.gait.QuadrupedTimedOrientedStep;
 import us.ihmc.quadrupedBasics.gait.QuadrupedTimedStep;
 import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.*;
 import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.graphSearch.footstepSnapping.FootstepNodeSnapData;
@@ -41,6 +42,7 @@ import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 import us.ihmc.robotics.robotSide.QuadrantDependentList;
 import us.ihmc.robotics.robotSide.RobotQuadrant;
+import us.ihmc.robotics.time.TimeInterval;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
@@ -250,15 +252,25 @@ public class QuadrupedAStarFootstepPlanner implements QuadrupedFootstepPlanner
       if (endNode == null || !graph.doesNodeExist(endNode))
          return null;
 
-      List<? extends QuadrupedTimedStep> steps = new ArrayList<>();
+      List<QuadrupedTimedOrientedStep> steps = new ArrayList<>();
       List<FootstepNode> path = graph.getPathFromStart(endNode);
 
-      for (int i = 1; i < path.size(); i++)
+      double currentTime = 0;
+
+      for (int i = 0; i < path.size(); i++)
       {
+         currentTime += xGaitSettings.getEndDoubleSupportDuration();
+
          RobotQuadrant robotQuadrant = path.get(i).getMovingQuadrant();
 
-         QuadrupedTimedStep newStep = new QuadrupedTimedStep();
+         QuadrupedTimedOrientedStep newStep = new QuadrupedTimedOrientedStep();
          newStep.setRobotQuadrant(robotQuadrant);
+
+         TimeInterval timeInterval = newStep.getTimeInterval();
+         timeInterval.setStartTime(currentTime);
+         currentTime += xGaitSettings.getStepDuration();
+         timeInterval.setEndTime(currentTime);
+         
 
          steps.add(newStep);
       }
