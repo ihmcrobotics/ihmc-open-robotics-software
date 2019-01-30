@@ -118,42 +118,7 @@ public class RTPSDataProducerParticipant implements DataProducer
       announcementPublisher = createPublisher(LogParticipantSettings.partition, LogParticipantSettings.annoucement.getKey(),
                                               LogParticipantSettings.annoucement.getValue(), new AnnouncementPubSubType());
 
-      if (logModelProvider != null)
-      {
-         byte[] model = logModelProvider.getModel();
-         ByteBufferPubSubType modelFilePubSubType = new ByteBufferPubSubType(LogParticipantSettings.modelFileTypeName, model.length);
-         announcement.getModelFileDescription().setHasModel(true);
-         announcement.getModelFileDescription().setName(logModelProvider.getModelName());
-         announcement.getModelFileDescription().setModelLoaderClass(logModelProvider.getLoader().getCanonicalName());
-         announcement.getModelFileDescription().setModelFileSize(model.length);
-         for (String resourceDirectory : logModelProvider.getResourceDirectories())
-         {
-            announcement.getModelFileDescription().getResourceDirectories().add(resourceDirectory);
-         }
 
-         ByteBuffer modelBuffer = ByteBuffer.wrap(model);
-         Publisher logModelFilePublisher = createPublisher(partition, LogParticipantSettings.modelFile.getKey(),
-                                                           LogParticipantSettings.modelFile.getValue(), modelFilePubSubType);
-         logModelFilePublisher.write(modelBuffer);
-
-         byte[] resourceZip = logModelProvider.getResourceZip();
-         if (resourceZip != null && resourceZip.length > 0)
-         {
-            ByteBufferPubSubType resourcesPubSubType = new ByteBufferPubSubType(LogParticipantSettings.resourceBundleTypeName, resourceZip.length);
-            ByteBuffer resourcesBuffer = ByteBuffer.wrap(resourceZip);
-            Publisher resourcesPublisher = createPublisher(partition, LogParticipantSettings.resourceBundle.getKey(),
-                                                           LogParticipantSettings.resourceBundle.getValue(), resourcesPubSubType);
-            resourcesPublisher.write(resourcesBuffer);
-
-            announcement.getModelFileDescription().setHasResourceZip(true);
-            announcement.getModelFileDescription().setResourceZipSize(resourceZip.length);
-
-         }
-      }
-      else
-      {
-         announcement.getModelFileDescription().setHasModel(false);
-      }
 
       TimestampPubSubType timestampPubSubType = new TimestampPubSubType();
       PublisherAttributes timestampPublisherAttributes = domain.createPublisherAttributes(participant, timestampPubSubType,
