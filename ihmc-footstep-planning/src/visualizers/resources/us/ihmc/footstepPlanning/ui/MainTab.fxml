@@ -8,6 +8,7 @@
 <?import javafx.scene.control.SplitPane?>
 <?import javafx.scene.control.TextField?>
 <?import javafx.scene.control.ToggleButton?>
+<?import javafx.scene.layout.Region?>
 <?import javafx.scene.layout.AnchorPane?>
 <?import javafx.scene.layout.ColumnConstraints?>
 <?import javafx.scene.layout.GridPane?>
@@ -151,6 +152,9 @@
                   <Spinner fx:id="goalZPosition" layoutX="578.0" layoutY="8.0" GridPane.columnIndex="7" GridPane.rowIndex="1" />
                   <Spinner fx:id="goalYPosition" layoutX="578.0" layoutY="89.0" GridPane.columnIndex="5" GridPane.rowIndex="1" />
                   <Spinner fx:id="goalYaw" layoutX="243.0" layoutY="89.0" GridPane.columnIndex="9" GridPane.rowIndex="1" />
+                  <Region prefHeight="26.0" prefWidth="20.0" GridPane.columnIndex="10" GridPane.halignment="RIGHT" GridPane.rowIndex="0" />
+                  <Label text="initialSupport" textAlignment="RIGHT" GridPane.columnIndex="11" GridPane.halignment="RIGHT" GridPane.rowIndex="0" />
+                  <ComboBox fx:id="initialSupportSide" prefHeight="26.0" prefWidth="100.0" GridPane.columnIndex="12" GridPane.halignment="RIGHT" GridPane.rowIndex="0" />
                </children>
             </GridPane>
          </children></AnchorPane>
