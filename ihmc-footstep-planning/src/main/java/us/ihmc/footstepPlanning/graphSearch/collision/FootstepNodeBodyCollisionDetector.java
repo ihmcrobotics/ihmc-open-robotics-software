@@ -20,7 +20,8 @@ public class FootstepNodeBodyCollisionDetector
 
    public void setPlanarRegionsList(PlanarRegionsList planarRegionsList)
    {
-      collisionDetector.setPlanarRegionsList(planarRegionsList);
+      if(planarRegionsList != null)
+         collisionDetector.setPlanarRegionsList(planarRegionsList);
       collisionDataHolder.clear();
    }
 
