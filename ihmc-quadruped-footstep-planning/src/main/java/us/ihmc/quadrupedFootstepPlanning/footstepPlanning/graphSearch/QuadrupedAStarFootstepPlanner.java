@@ -439,7 +439,7 @@ public class QuadrupedAStarFootstepPlanner implements QuadrupedFootstepPlanner
          }
       }
 
-      while (!endNode.geometricallyEquals(goalNode))
+      while (endNode != null && !endNode.geometricallyEquals(goalNode))
       {
          RobotQuadrant nextQuadrant = endNode.getMovingQuadrant().getNextRegularGaitSwingQuadrant();
          Point2D nextFrontLeft = new Point2D(endNode.getX(RobotQuadrant.FRONT_LEFT), endNode.getY(RobotQuadrant.FRONT_LEFT));
@@ -482,7 +482,7 @@ public class QuadrupedAStarFootstepPlanner implements QuadrupedFootstepPlanner
       if (!validGoalNode.getBooleanValue())
          return false;
 
-      if (goalNode.quadrantGeometricallyEquals(nodeToExpand))
+      if (goalNode.quadrantGeometricallyEquals(nodeToExpand) || goalNode.midstanceGeometricallyEquals(nodeToExpand))
       {
          endNode = nodeToExpand;
          graph.checkAndSetEdge(nodeToExpand, endNode, 0.0);
