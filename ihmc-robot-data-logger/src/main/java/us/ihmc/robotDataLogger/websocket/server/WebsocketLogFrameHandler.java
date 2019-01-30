@@ -39,6 +39,10 @@ public class WebsocketLogFrameHandler extends SimpleChannelInboundHandler<WebSoc
       if (evt instanceof HandshakeComplete)
       {
          System.out.println("Client upgraded to websocket");
+         
+         System.out.println("TODO: Switch to custom allocator to avoid object allocations deep inside netty");
+         ctx.channel().config().setAllocator(new CustomGCAvoidingByteBufAllocator());
+         
          channel = ctx.channel();
          broadcaster.addClient(this);
       }
@@ -91,7 +95,7 @@ public class WebsocketLogFrameHandler extends SimpleChannelInboundHandler<WebSoc
       }
       else
       {
-         System.err.println("Cannot add frame to queue");
+//         System.err.println("Cannot add frame to queue");
       }
       
       synchronized(lock)
@@ -132,9 +136,9 @@ public class WebsocketLogFrameHandler extends SimpleChannelInboundHandler<WebSoc
             
             for(int i = 0; i < queueCopy.size(); i++)
             {
-               channel.write(queueCopy.get(i), voidPromise);
+               channel.writeAndFlush(queueCopy.get(i), voidPromise);
             }
-            channel.flush();
+//            channel.flush();
             queueCopy.clear();
          }
          
