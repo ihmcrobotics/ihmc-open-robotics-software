@@ -27,7 +27,7 @@ public class TestClient
 
    public TestClient() throws IOException, InterruptedException
    {
-      final WebSocketLogClientHandler handler = new WebSocketLogClientHandler(WebSocketClientHandshakerFactory.newHandshaker(uri, WebSocketVersion.V13, null,
+      final WebSocketDataServerClientHandler handler = new WebSocketDataServerClientHandler(WebSocketClientHandshakerFactory.newHandshaker(uri, WebSocketVersion.V13, null,
                                                                                                                              true, new DefaultHttpHeaders()));
 
       Bootstrap b = new Bootstrap();

@@ -121,7 +121,7 @@ public class WebsocketDataProducer implements DataProducer
       }
       
       Announcement announcement = createAnnouncement();
-      LogServerContent logServerContent = new LogServerContent(announcement, handshake, logModelProvider);
+      DataServerServerContent logServerContent = new DataServerServerContent(announcement, handshake, logModelProvider);
       
       synchronized(lock)
       {
@@ -132,7 +132,7 @@ public class WebsocketDataProducer implements DataProducer
          {
             ServerBootstrap b = new ServerBootstrap();
             b.group(bossGroup, workerGroup).channel(NioServerSocketChannel.class).handler(new LoggingHandler(LogLevel.INFO))
-             .childHandler(new WebsocketLogServerInitializer(logServerContent, broadcaster, maximumBufferSize));
+             .childHandler(new WebsocketDataServerInitializer(logServerContent, broadcaster, maximumBufferSize));
    
             ch = b.bind(PORT).sync().channel();
    

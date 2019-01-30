@@ -15,12 +15,12 @@ import io.netty.handler.codec.http.websocketx.WebSocketFrame;
 import io.netty.handler.codec.http.websocketx.WebSocketHandshakeException;
 import io.netty.util.CharsetUtil;
 
-class WebSocketLogClientHandler extends SimpleChannelInboundHandler<Object> {
+class WebSocketDataServerClientHandler extends SimpleChannelInboundHandler<Object> {
 
       private final WebSocketClientHandshaker handshaker;
       private ChannelPromise handshakeFuture;
 
-      public WebSocketLogClientHandler(WebSocketClientHandshaker handshaker) {
+      public WebSocketDataServerClientHandler(WebSocketClientHandshaker handshaker) {
           this.handshaker = handshaker;
       }
 

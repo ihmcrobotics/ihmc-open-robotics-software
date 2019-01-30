@@ -13,7 +13,7 @@ import io.netty.handler.codec.http.websocketx.TextWebSocketFrame;
 import io.netty.handler.codec.http.websocketx.WebSocketFrame;
 import io.netty.handler.codec.http.websocketx.WebSocketServerProtocolHandler.HandshakeComplete;
 
-public class WebsocketLogFrameHandler extends SimpleChannelInboundHandler<WebSocketFrame>
+public class WebsocketDataServerFrameHandler extends SimpleChannelInboundHandler<WebSocketFrame>
 {
    private static final int POOL_SIZE = 12;
    
@@ -29,7 +29,7 @@ public class WebsocketLogFrameHandler extends SimpleChannelInboundHandler<WebSoc
    
    private final ArrayList<WebSocketFrame> queue = new ArrayList<WebSocketFrame>(POOL_SIZE);
 
-   public WebsocketLogFrameHandler(WebsocketDataBroadcaster broadcaster, int dataSize)
+   public WebsocketDataServerFrameHandler(WebsocketDataBroadcaster broadcaster, int dataSize)
    {
       this.broadcaster = broadcaster;
       this.dataSize = dataSize;
