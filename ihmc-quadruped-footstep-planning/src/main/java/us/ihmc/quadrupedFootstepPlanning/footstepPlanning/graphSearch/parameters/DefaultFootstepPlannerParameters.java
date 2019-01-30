@@ -70,7 +70,7 @@ public class DefaultFootstepPlannerParameters implements FootstepPlannerParamete
 
    public double getYawWeight()
    {
-      return 0.25;
+      return 0.10;
    }
 
    public double getCostPerStep()

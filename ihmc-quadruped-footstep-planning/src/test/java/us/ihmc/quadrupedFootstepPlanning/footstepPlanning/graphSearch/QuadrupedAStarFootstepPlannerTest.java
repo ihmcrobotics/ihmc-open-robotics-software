@@ -38,7 +38,7 @@ public class QuadrupedAStarFootstepPlannerTest
 {
    private static final long timeout = 30000 * 100;
    private static final boolean visualize = true;
-   private static final boolean activelyVisualize = true;
+   private static final boolean activelyVisualize = false;
 
    private static final QuadrantDependentList<AppearanceDefinition> colorDefinitions = new QuadrantDependentList<>(YoAppearance.Red(), YoAppearance.Green(), YoAppearance.DarkRed(), YoAppearance.DarkGreen());
 
@@ -111,7 +111,7 @@ public class QuadrupedAStarFootstepPlannerTest
       FramePose3D startPose = new FramePose3D();
       FramePose3D goalPose = new FramePose3D();
       goalPose.setPosition(2.5, 2.5, 0.0);
-      goalPose.setOrientationYawPitchRoll(-Math.PI / 4.0, 0.0, 0.0);
+      goalPose.setOrientationYawPitchRoll(Math.PI / 3.0, 0.0, 0.0);
 
       QuadrupedFootstepPlannerStart start = new QuadrupedFootstepPlannerStart();
       QuadrupedFootstepPlannerGoal goal = new QuadrupedFootstepPlannerGoal();
