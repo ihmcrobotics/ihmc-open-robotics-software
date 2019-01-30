@@ -1,5 +1,7 @@
 package us.ihmc.atlas.networkProcessor.kinematicsToolboxModule;
 
+import org.junit.jupiter.api.Test;
+
 import us.ihmc.atlas.AtlasRobotModel;
 import us.ihmc.atlas.AtlasRobotVersion;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
@@ -12,24 +14,28 @@ public class AtlasHumanoidKinematicsToolboxControllerTest extends AvatarHumanoid
    private DRCRobotModel ghostRobotModel = new AtlasRobotModel(AtlasRobotVersion.ATLAS_UNPLUGGED_V5_NO_HANDS, RobotTarget.SCS, false);
 
    @Override
+   @Test // (timeout = 30000)
    public void testHoldBodyPose() throws Exception
    {
       super.testHoldBodyPose();
    }
 
    @Override
+   @Test // (timeout = 30000)
    public void testRandomHandPositions() throws Exception
    {
       super.testRandomHandPositions();
    }
 
    @Override
+   @Test // (timeout = 30000)
    public void testRandomHandPoses() throws Exception
    {
       super.testRandomHandPoses();
    }
 
    @Override
+   @Test // (timeout = 30000)
    public void testSingleSupport() throws Exception
    {
       super.testSingleSupport();
