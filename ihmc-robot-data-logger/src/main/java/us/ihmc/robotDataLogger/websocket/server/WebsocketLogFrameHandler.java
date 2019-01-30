@@ -22,7 +22,10 @@ public class WebsocketLogFrameHandler extends SimpleChannelInboundHandler<WebSoc
    private final WebsocketDataBroadcaster broadcaster;
    private final WriteTask task = new WriteTask();
    private final WebsocketFramePool pool;
-   private Channel channel;
+   
+   
+   private Channel channel = null;
+   private CustomGCAvoidingByteBufAllocator alloc = null;
    
    private final ArrayList<WebSocketFrame> queue = new ArrayList<WebSocketFrame>(POOL_SIZE);
 
@@ -38,9 +41,8 @@ public class WebsocketLogFrameHandler extends SimpleChannelInboundHandler<WebSoc
 
       if (evt instanceof HandshakeComplete)
       {
-         System.out.println("Client upgraded to websocket");
-         System.out.println("Switching to custom allocator to avoid object allocations deep inside netty");         
-         ctx.channel().config().setAllocator(new CustomGCAvoidingByteBufAllocator(ctx.alloc()));
+         alloc = new CustomGCAvoidingByteBufAllocator(ctx.alloc());
+         ctx.channel().config().setAllocator(alloc);
          
          channel = ctx.channel();
          broadcaster.addClient(this);
@@ -80,6 +82,11 @@ public class WebsocketLogFrameHandler extends SimpleChannelInboundHandler<WebSoc
    {
       return channel.remoteAddress();
    }
+   
+   Channel channel()
+   {
+      return channel;
+   }
 
    public void write(ByteBuffer frame)
    {
@@ -94,7 +101,7 @@ public class WebsocketLogFrameHandler extends SimpleChannelInboundHandler<WebSoc
       }
       else
       {
-//         System.err.println("Cannot add frame to queue");
+         System.err.println("Cannot add frame to queue");
       }
       
       synchronized(lock)
@@ -135,7 +142,7 @@ public class WebsocketLogFrameHandler extends SimpleChannelInboundHandler<WebSoc
             
             for(int i = 0; i < queueCopy.size(); i++)
             {
-               channel.writeAndFlush(queueCopy.get(i), voidPromise);
+               channel.write(queueCopy.get(i), voidPromise);
             }
             channel.flush();
             queueCopy.clear();
@@ -144,5 +151,23 @@ public class WebsocketLogFrameHandler extends SimpleChannelInboundHandler<WebSoc
          scheduled = false;
       }
 
+   }
+
+   public void release()
+   {
+      synchronized(lock)
+      {
+         if(channel.isActive() || channel.isWritable())
+         {
+            throw new RuntimeException("Trying to release an active channel");
+         }
+         
+         if(alloc != null)
+         {
+            alloc.release();
+         }
+         
+         pool.release();
+      }
    }
 }

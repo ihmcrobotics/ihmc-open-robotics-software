@@ -82,5 +82,13 @@ public class CustomGCAvoidingByteBufAllocator extends AbstractByteBufAllocator
 
       return add(capacity);
    }
+   
+   public void release()
+   {
+      for (int i = 0; i < pool.size(); i++)
+      {
+         pool.get(i).release();
+      }
+   }
 
 }
