@@ -19,6 +19,7 @@ import io.netty.handler.codec.http.FullHttpResponse;
 import io.netty.handler.codec.http.HttpHeaderNames;
 import io.netty.handler.codec.http.HttpUtil;
 import io.netty.util.CharsetUtil;
+import us.ihmc.robotDataLogger.websocket.LogHTTPPaths;
 
 /**
  * Outputs index page content.
@@ -51,23 +52,23 @@ public class WebsocketLogDescriptionServer extends SimpleChannelInboundHandler<F
       }
 
       // Send the index page
-      if ("/".equals(req.uri()) || "/index.html".equals(req.uri()))
+      if ("/".equals(req.uri()) || LogHTTPPaths.index.equals(req.uri()))
       {
          sendContent(ctx, req, logServerContent.getIndex(), logServerContent.getIndexContentType());
       }
-      else if ("/announcement".equals(req.uri()))
+      else if (LogHTTPPaths.announcement.equals(req.uri()))
       {
          sendContent(ctx, req, logServerContent.getAnnouncement(), logServerContent.getAnnouncementContentType());
       }
-      else if ("/handshake".equals(req.uri()))
+      else if (LogHTTPPaths.handshake.equals(req.uri()))
       {
          sendContent(ctx, req, logServerContent.getHandshake(), logServerContent.getHandshakeContentType());
       }
-      else if (logServerContent.hasModel() && "/model".equals(req.uri()))
+      else if (logServerContent.hasModel() && LogHTTPPaths.model.equals(req.uri()))
       {
          sendContent(ctx, req, logServerContent.getModel(), logServerContent.getModelContentType());
       }
-      else if (logServerContent.hasResourceZip() && "/resources".equals(req.uri()))
+      else if (logServerContent.hasResourceZip() && LogHTTPPaths.resources.equals(req.uri()))
       {
          sendContent(ctx, req, logServerContent.getResourceZip(), logServerContent.getResourceZipContentType());
       }         

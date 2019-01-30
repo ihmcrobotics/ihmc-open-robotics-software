@@ -30,7 +30,7 @@ import us.ihmc.util.PeriodicThreadSchedulerFactory;
 
 public class WebsocketDataProducer implements DataProducer
 {
-   public static final int PORT = 8080;
+   public static final int PORT = 8008;
    private final WebsocketDataBroadcaster broadcaster = new WebsocketDataBroadcaster();
    private final String name;
    private final LogModelProvider logModelProvider;
