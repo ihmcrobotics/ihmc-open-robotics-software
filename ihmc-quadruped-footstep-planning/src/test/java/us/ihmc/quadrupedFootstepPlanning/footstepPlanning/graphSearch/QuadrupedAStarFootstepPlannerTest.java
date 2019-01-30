@@ -38,12 +38,12 @@ public class QuadrupedAStarFootstepPlannerTest
 {
    private static final long timeout = 30000 * 100;
    private static final boolean visualize = true;
-   private static final boolean activelyVisualize = false;
+   private static final boolean activelyVisualize = true;
 
    private static final QuadrantDependentList<AppearanceDefinition> colorDefinitions = new QuadrantDependentList<>(YoAppearance.Red(), YoAppearance.Green(), YoAppearance.DarkRed(), YoAppearance.DarkGreen());
 
    @Test(timeout = timeout)
-   public void test()
+   public void testSimpleWalkForward()
    {
       YoVariableRegistry registry = new YoVariableRegistry("test");
       QuadrupedXGaitSettings xGaitSettings = new QuadrupedXGaitSettings();
@@ -63,6 +63,55 @@ public class QuadrupedAStarFootstepPlannerTest
       FramePose3D startPose = new FramePose3D();
       FramePose3D goalPose = new FramePose3D();
       goalPose.setPosition(2.0, 0.0, 0.0);
+
+      QuadrupedFootstepPlannerStart start = new QuadrupedFootstepPlannerStart();
+      QuadrupedFootstepPlannerGoal goal = new QuadrupedFootstepPlannerGoal();
+      start.setStartPose(startPose);
+      goal.setGoalPose(goalPose);
+
+      planner.setStart(start);
+      planner.setGoal(goal);
+      planner.setTimeout(10.0);
+
+
+
+      FootstepPlanningResult result = planner.plan();
+
+      if (activelyVisualize)
+      {
+         visualizer.showAndSleep(true);
+      }
+
+      assertTrue(result.validForExecution());
+      List<? extends QuadrupedTimedStep> steps = planner.getSteps();
+
+      if (visualize && !activelyVisualize)
+         visualizePlan(steps, null, startPose.getPosition(), goalPose.getPosition());
+
+   }
+
+   @Test(timeout = timeout)
+   public void testWalkAndTurn()
+   {
+      YoVariableRegistry registry = new YoVariableRegistry("test");
+      QuadrupedXGaitSettings xGaitSettings = new QuadrupedXGaitSettings();
+      xGaitSettings.setStanceLength(1.0);
+      xGaitSettings.setStanceWidth(0.5);
+      FootstepPlannerParameters parameters = new DefaultFootstepPlannerParameters();
+      FootstepNodeExpansion expansion = new ParameterBasedNodeExpansion(parameters, xGaitSettings);
+      QuadrupedAStarFootstepPlannerVisualizer visualizer;
+      if (activelyVisualize)
+         visualizer = new QuadrupedAStarFootstepPlannerVisualizer(null);
+      else
+         visualizer = null;
+      QuadrupedAStarFootstepPlanner planner = QuadrupedAStarFootstepPlanner.createPlanner(parameters, xGaitSettings, visualizer, expansion, registry);
+
+      PlanarRegionsList planarRegionsList = null;
+
+      FramePose3D startPose = new FramePose3D();
+      FramePose3D goalPose = new FramePose3D();
+      goalPose.setPosition(2.5, 2.5, 0.0);
+      goalPose.setOrientationYawPitchRoll(-Math.PI / 4.0, 0.0, 0.0);
 
       QuadrupedFootstepPlannerStart start = new QuadrupedFootstepPlannerStart();
       QuadrupedFootstepPlannerGoal goal = new QuadrupedFootstepPlannerGoal();
