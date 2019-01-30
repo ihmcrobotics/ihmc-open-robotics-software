@@ -41,25 +41,33 @@ import us.ihmc.robotDataLogger.websocket.LogHTTPPaths;
 public class HTTPDataServerConnection extends SimpleChannelInboundHandler<HttpObject>
 {
    private final EventLoopGroup group = new NioEventLoopGroup();
-   private final String host;
+   private final HTTPDataServerDescription host;
    private final HTTPDataServerConnectionListener listener;
-
 
    private Channel channel;
 
    private CompletableFuture<ByteBuf> requestFuture;
    private ByteBuf requestedBuffer;
-   
-   public HTTPDataServerConnection(String host, int port, HTTPDataServerConnectionListener listener)
+
+   public interface HTTPDataServerConnectionListener
    {
-      this.host = host;
+      public void connected(HTTPDataServerDescription target, HTTPDataServerConnection connection, Announcement announcement);
+
+      public void disconnected(HTTPDataServerDescription target, HTTPDataServerConnection connection);
+
+      public void connectionRefused(HTTPDataServerDescription target);
+   }
+
+   public HTTPDataServerConnection(HTTPDataServerDescription target, HTTPDataServerConnectionListener listener)
+   {
+      this.host = target;
       this.listener = listener;
-      
+
       Bootstrap b = new Bootstrap();
       b.group(group).channel(NioSocketChannel.class).handler(new HttpSnoopClientInitializer());
       b.option(ChannelOption.CONNECT_TIMEOUT_MILLIS, 1000);
 
-      ChannelFuture connectFuture = b.connect(host, port);
+      ChannelFuture connectFuture = b.connect(target.getHost(), target.getPort());
       connectFuture.addListener((f) -> {
          if (f.isSuccess())
          {
@@ -67,8 +75,7 @@ public class HTTPDataServerConnection extends SimpleChannelInboundHandler<HttpOb
          }
          else
          {
-            listener.connectionRefused();
-            System.err.println(f.cause().getMessage());
+            listener.connectionRefused(host);
             group.shutdownGracefully();
          }
       });
@@ -80,14 +87,15 @@ public class HTTPDataServerConnection extends SimpleChannelInboundHandler<HttpOb
       requestResource(LogHTTPPaths.announcement, (buf) -> receivedAnnouncement(buf));
 
    }
-   
+
    private void receivedAnnouncement(ByteBuf buf)
    {
       JSONSerializer<Announcement> serializer = new JSONSerializer<Announcement>(new AnnouncementPubSubType());
       try
       {
          Announcement announcement = serializer.deserialize(buf.toString(CharsetUtil.UTF_8));
-         listener.connected(this, announcement);;
+         listener.connected(host, this, announcement);
+         ;
       }
       catch (IOException e)
       {
@@ -95,7 +103,6 @@ public class HTTPDataServerConnection extends SimpleChannelInboundHandler<HttpOb
          channel.close();
       }
    }
-   
 
    public Future<ByteBuf> requestResource(String path)
    {
@@ -104,11 +111,11 @@ public class HTTPDataServerConnection extends SimpleChannelInboundHandler<HttpOb
 
    public Future<ByteBuf> requestResource(String path, Consumer<ByteBuf> action)
    {
-      if(requestFuture != null && !requestFuture.isDone())
+      if (requestFuture != null && !requestFuture.isDone())
       {
          throw new RuntimeException("Previous request still pending");
       }
-      
+
       requestFuture = new CompletableFuture<ByteBuf>();
 
       if (action != null)
@@ -150,7 +157,6 @@ public class HTTPDataServerConnection extends SimpleChannelInboundHandler<HttpOb
       }
    }
 
-
    private class HttpSnoopClientInitializer extends ChannelInitializer<SocketChannel>
    {
 
@@ -189,22 +195,22 @@ public class HTTPDataServerConnection extends SimpleChannelInboundHandler<HttpOb
                ctx.close();
                return;
             }
-            
+
             int contentLength = response.headers().getInt("content-length", 0);
-            if(contentLength <= 0)
+            if (contentLength <= 0)
             {
                requestFuture.completeExceptionally(new IOException("No content-length set."));
                ctx.close();
                return;
             }
-            
+
             requestedBuffer = Unpooled.buffer(contentLength);
          }
          if (msg instanceof HttpContent)
          {
             HttpContent content = (HttpContent) msg;
 
-            if(requestedBuffer.isWritable(content.content().readableBytes()))
+            if (requestedBuffer.isWritable(content.content().readableBytes()))
             {
                requestedBuffer.writeBytes(((HttpContent) msg).content());
             }
@@ -214,7 +220,6 @@ public class HTTPDataServerConnection extends SimpleChannelInboundHandler<HttpOb
                ctx.close();
                return;
             }
-            
 
             if (content instanceof LastHttpContent)
             {
@@ -228,7 +233,7 @@ public class HTTPDataServerConnection extends SimpleChannelInboundHandler<HttpOb
    @Override
    public void channelInactive(ChannelHandlerContext ctx) throws Exception
    {
-      listener.disconnected(this);
+      listener.disconnected(host, this);
       group.shutdownGracefully();
 
    }
@@ -242,27 +247,31 @@ public class HTTPDataServerConnection extends SimpleChannelInboundHandler<HttpOb
 
    public static void main(String[] args)
    {
-      HTTPDataServerConnection connection = new HTTPDataServerConnection("127.0.0.1", 8008, new HTTPDataServerConnectionListener()
-      {
-         
-         @Override
-         public void disconnected(HTTPDataServerConnection connection)
-         {
-            System.out.println("Disconnected");
-         }
-         
-         @Override
-         public void connectionRefused()
-         {
-            System.out.println("Connection refused");
-         }
-         
-         @Override
-         public void connected(HTTPDataServerConnection connection, Announcement announcement)
-         {
-            System.out.println("Connected");
-         }
-      });
+      new HTTPDataServerConnection(new HTTPDataServerDescription("127.0.0.1", 8008),
+                                                                         new HTTPDataServerConnectionListener()
+                                                                         {
+
+                                                                            @Override
+                                                                            public void disconnected(HTTPDataServerDescription target,
+                                                                                                     HTTPDataServerConnection connection)
+                                                                            {
+                                                                               System.out.println("Disconnected");
+                                                                            }
+
+                                                                            @Override
+                                                                            public void connectionRefused(HTTPDataServerDescription target)
+                                                                            {
+                                                                               System.out.println("Connection refused");
+                                                                            }
+
+                                                                            @Override
+                                                                            public void connected(HTTPDataServerDescription target,
+                                                                                                  HTTPDataServerConnection connection,
+                                                                                                  Announcement announcement)
+                                                                            {
+                                                                               System.out.println("Connected");
+                                                                            }
+                                                                         });
 
    }
 
