@@ -91,14 +91,14 @@ public class FootstepGraph
     * Returns all nodes required to travel from the start node to the given node.
     * The nodes returned include start and end node of the path.
     */
-   public List<FootstepNode> getPathFromStart(FootstepNode node)
+   public List<FootstepNode> getPathFromStart(FootstepNode endNode)
    {
-      checkNodeExists(node);
+      checkNodeExists(endNode);
 
       ArrayList<FootstepNode> path = new ArrayList<>();
-      path.add(node);
+      path.add(endNode);
 
-      FootstepEdge edgeFromParent = incomingBestEdge.get(node);
+      FootstepEdge edgeFromParent = incomingBestEdge.get(endNode);
       while (edgeFromParent.getStartNode() != null)
       {
          FootstepNode parentNode = edgeFromParent.getStartNode();
