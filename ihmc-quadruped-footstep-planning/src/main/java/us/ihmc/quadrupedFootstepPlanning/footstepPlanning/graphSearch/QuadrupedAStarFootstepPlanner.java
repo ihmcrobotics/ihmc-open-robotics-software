@@ -14,6 +14,7 @@ import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
+import us.ihmc.pathPlanning.visibilityGraphs.tools.BodyPathPlan;
 import us.ihmc.pathPlanning.visibilityGraphs.tools.PlanarRegionTools;
 import us.ihmc.quadrupedBasics.gait.QuadrupedTimedOrientedStep;
 import us.ihmc.quadrupedBasics.gait.QuadrupedTimedStep;
@@ -37,6 +38,7 @@ import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.graphSearch.parameters
 import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.graphSearch.stepCost.FootstepCost;
 import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.graphSearch.stepCost.FootstepCostBuilder;
 import us.ihmc.quadrupedPlanning.QuadrupedXGaitSettings;
+import us.ihmc.quadrupedPlanning.QuadrupedXGaitSettingsReadOnly;
 import us.ihmc.robotics.geometry.PlanarRegion;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
@@ -51,7 +53,7 @@ import us.ihmc.yoVariables.variable.YoLong;
 import java.util.*;
 import java.util.List;
 
-public class QuadrupedAStarFootstepPlanner implements QuadrupedFootstepPlanner
+public class QuadrupedAStarFootstepPlanner implements QuadrupedBodyPathAndFootstepPlanner
 {
    private static final boolean debug = true;
 
@@ -62,7 +64,7 @@ public class QuadrupedAStarFootstepPlanner implements QuadrupedFootstepPlanner
    private final YoVariableRegistry registry = new YoVariableRegistry(name);
 
    private final FootstepPlannerParameters parameters;
-   private final QuadrupedXGaitSettings xGaitSettings;
+   private final QuadrupedXGaitSettingsReadOnly xGaitSettings;
 
    private HashSet<FootstepNode> expandedNodes;
    private PriorityQueue<FootstepNode> stack;
@@ -95,7 +97,7 @@ public class QuadrupedAStarFootstepPlanner implements QuadrupedFootstepPlanner
    private final YoBoolean validGoalNode = new YoBoolean("validGoalNode", registry);
    private final YoBoolean abortPlanning = new YoBoolean("abortPlanning", registry);
 
-   public QuadrupedAStarFootstepPlanner(FootstepPlannerParameters parameters, QuadrupedXGaitSettings xGaitSettings, FootstepNodeChecker nodeChecker,
+   public QuadrupedAStarFootstepPlanner(FootstepPlannerParameters parameters, QuadrupedXGaitSettingsReadOnly xGaitSettings, FootstepNodeChecker nodeChecker,
                                         CostToGoHeuristics heuristics, FootstepNodeExpansion nodeExpansion, FootstepCost stepCostCalculator,
                                         FootstepNodeSnapper snapper, QuadrupedFootstepPlannerListener listener, YoVariableRegistry parentRegistry)
    {
@@ -117,6 +119,16 @@ public class QuadrupedAStarFootstepPlanner implements QuadrupedFootstepPlanner
    public void addStartAndGoalListener(StartAndGoalListener startAndGoalListener)
    {
       startAndGoalListeners.add(startAndGoalListener);
+   }
+
+   public FootstepPlanningResult planPath()
+   {
+      return FootstepPlanningResult.OPTIMAL_SOLUTION;
+   }
+
+   public BodyPathPlan getPathPlan()
+   {
+      return null;
    }
 
    @Override
@@ -201,7 +213,6 @@ public class QuadrupedAStarFootstepPlanner implements QuadrupedFootstepPlanner
    {
    }
 
-
    @Override
    public void setPlanarRegionsList(PlanarRegionsList planarRegionsList)
    {
@@ -275,7 +286,7 @@ public class QuadrupedAStarFootstepPlanner implements QuadrupedFootstepPlanner
 
          Point3D position = new Point3D(node.getX(robotQuadrant), node.getY(robotQuadrant), 0.0);
          FootstepNodeSnapData snapData = snapper.getSnapData(node);
-//         position.applyTransform(snapData.getSnapTransform(robotQuadrant));
+         //         position.applyTransform(snapData.getSnapTransform(robotQuadrant));
 
          newStep.setGoalPosition(position);
 
@@ -290,7 +301,6 @@ public class QuadrupedAStarFootstepPlanner implements QuadrupedFootstepPlanner
    {
       return planningTime.getDoubleValue();
    }
-
 
    private boolean initialize()
    {
@@ -334,14 +344,14 @@ public class QuadrupedAStarFootstepPlanner implements QuadrupedFootstepPlanner
       for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
       {
          Point3D startPoint = new Point3D(startNode.getX(robotQuadrant), startNode.getY(robotQuadrant), 0.0);
-         Point3DReadOnly startPos = PlanarRegionTools
-               .projectPointToPlanesVertically(startPoint, snapper.getOrCreateSteppableRegions(startNode.getRoundedX(robotQuadrant), startNode.getRoundedY(robotQuadrant)));
+         Point3DReadOnly startPos = PlanarRegionTools.projectPointToPlanesVertically(startPoint, snapper
+               .getOrCreateSteppableRegions(startNode.getRoundedX(robotQuadrant), startNode.getRoundedY(robotQuadrant)));
 
          if (startPos == null)
          {
             if (debug)
                PrintTools.info("adding plane at start foot");
-               addPlanarRegionAtZeroHeight(startNode.getX(robotQuadrant), startNode.getY(robotQuadrant));
+            addPlanarRegionAtZeroHeight(startNode.getX(robotQuadrant), startNode.getY(robotQuadrant));
          }
       }
    }
@@ -532,7 +542,7 @@ public class QuadrupedAStarFootstepPlanner implements QuadrupedFootstepPlanner
          throw new IllegalArgumentException("Planner does not support goals other than " + supportedGoalType1 + " and " + supportedGoalType2);
    }
 
-   public static QuadrupedAStarFootstepPlanner createPlanner(FootstepPlannerParameters parameters, QuadrupedXGaitSettings xGaitSettings,
+   public static QuadrupedAStarFootstepPlanner createPlanner(FootstepPlannerParameters parameters, QuadrupedXGaitSettingsReadOnly xGaitSettings,
                                                              QuadrupedFootstepPlannerListener listener, FootstepNodeExpansion expansion,
                                                              YoVariableRegistry registry)
    {
