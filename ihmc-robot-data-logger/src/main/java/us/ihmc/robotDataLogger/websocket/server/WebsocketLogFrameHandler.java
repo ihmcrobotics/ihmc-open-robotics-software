@@ -18,12 +18,12 @@ public class WebsocketLogFrameHandler extends SimpleChannelInboundHandler<WebSoc
    private static final int POOL_SIZE = 12;
    
    
-   private final Object lock = new Object();
    private final WebsocketDataBroadcaster broadcaster;
-   private final WriteTask task = new WriteTask();
-   private final WebsocketFramePool pool;
+   private final int dataSize;
    
-   
+   private Object lock;
+   private WriteTask task;
+   private WebsocketFramePool pool;
    private Channel channel = null;
    private CustomGCAvoidingByteBufAllocator alloc = null;
    
@@ -32,7 +32,7 @@ public class WebsocketLogFrameHandler extends SimpleChannelInboundHandler<WebSoc
    public WebsocketLogFrameHandler(WebsocketDataBroadcaster broadcaster, int dataSize)
    {
       this.broadcaster = broadcaster;
-      this.pool = new WebsocketFramePool(dataSize, POOL_SIZE);
+      this.dataSize = dataSize;
    }
 
    @Override
@@ -41,6 +41,11 @@ public class WebsocketLogFrameHandler extends SimpleChannelInboundHandler<WebSoc
 
       if (evt instanceof HandshakeComplete)
       {
+         this.lock = new Object();
+         this.pool = new WebsocketFramePool(dataSize, POOL_SIZE);
+         this.task = new WriteTask();
+         
+         
          alloc = new CustomGCAvoidingByteBufAllocator(ctx.alloc());
          ctx.channel().config().setAllocator(alloc);
          
@@ -167,7 +172,10 @@ public class WebsocketLogFrameHandler extends SimpleChannelInboundHandler<WebSoc
             alloc.release();
          }
          
-         pool.release();
+         if(pool != null)
+         {
+            pool.release();
+         }
       }
    }
 }

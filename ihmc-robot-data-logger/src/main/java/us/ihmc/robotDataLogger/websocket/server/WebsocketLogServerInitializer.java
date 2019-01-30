@@ -13,11 +13,13 @@ public class WebsocketLogServerInitializer extends ChannelInitializer<SocketChan
 {
    private static final String WEBSOCKET_PATH = "/websocket";
 
+   private final LogServerContent logServerContent;
    private final WebsocketDataBroadcaster broadcaster;
    private final int dataSize;
    
-   public WebsocketLogServerInitializer(WebsocketDataBroadcaster broadcaster, int dataSize)
+   public WebsocketLogServerInitializer(LogServerContent logServerContent, WebsocketDataBroadcaster broadcaster, int dataSize)
    {
+      this.logServerContent = logServerContent;
       this.broadcaster = broadcaster;
       this.dataSize = dataSize;
    }
@@ -31,6 +33,7 @@ public class WebsocketLogServerInitializer extends ChannelInitializer<SocketChan
       pipeline.addLast(new HttpServerCodec());
       pipeline.addLast(new HttpObjectAggregator(65536));
       pipeline.addLast(new WebSocketServerProtocolHandler(WEBSOCKET_PATH, null, true));
+      pipeline.addLast(new WebsocketLogDescriptionServer(logServerContent));
       pipeline.addLast(new WebsocketLogFrameHandler(broadcaster, dataSize));
    }
 
