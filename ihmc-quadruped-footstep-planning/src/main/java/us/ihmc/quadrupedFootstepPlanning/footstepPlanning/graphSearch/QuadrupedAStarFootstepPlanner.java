@@ -253,32 +253,17 @@ public class QuadrupedAStarFootstepPlanner implements QuadrupedFootstepPlanner
       List<? extends QuadrupedTimedStep> steps = new ArrayList<>();
       List<FootstepNode> path = graph.getPathFromStart(endNode);
 
-      throw new RuntimeException("This hasn't been completed yet");
-      // FIXME todo
-      /*
       for (int i = 1; i < path.size(); i++)
       {
-         RobotSide robotSide = path.get(i).getRobotSide();
+         RobotQuadrant robotQuadrant = path.get(i).getMovingQuadrant();
 
-         RigidBodyTransform footstepPose = new RigidBodyTransform();
-         footstepPose.setRotationYawAndZeroTranslation(path.get(i).getYaw());
-         footstepPose.setTranslationX(path.get(i).getX());
-         footstepPose.setTranslationY(path.get(i).getY());
+         QuadrupedTimedStep newStep = new QuadrupedTimedStep();
+         newStep.setRobotQuadrant(robotQuadrant);
 
-         FootstepNodeSnapData snapData = snapper.snapFootstepNode(path.get(i));
-         RigidBodyTransform snapTransform = snapData.getSnapTransform();
-         snapTransform.transform(footstepPose);
-         plan.addFootstep(robotSide, new FramePose3D(ReferenceFrame.getWorldFrame(), footstepPose));
-
-         ConvexPolygon2D foothold = snapData.getCroppedFoothold();
-         if (!foothold.isEmpty())
-            plan.getFootstep(i - 1).setFoothold(foothold);
+         steps.add(newStep);
       }
 
-      plan.setLowLevelPlanGoal(goalPoseInWorld);
-      */
-
-//      return steps;
+      return steps;
    }
 
    @Override
