@@ -617,10 +617,10 @@ public class ValkyrieWalkingControllerParameters extends WalkingControllerParame
          }
       }
 
-      // Do not commit this!
-      jointToIgnoreList.add(ValkyrieOrderedJointMap.jointNames[ValkyrieOrderedJointMap.LeftForearmYaw]);  // change to actual missing arm side
-      jointToIgnoreList.add(ValkyrieOrderedJointMap.jointNames[ValkyrieOrderedJointMap.LeftWristRoll]);
-      jointToIgnoreList.add(ValkyrieOrderedJointMap.jointNames[ValkyrieOrderedJointMap.LeftWristPitch]);
+      // Uncomment to disable left forearm
+//      jointToIgnoreList.add(ValkyrieOrderedJointMap.jointNames[ValkyrieOrderedJointMap.LeftForearmYaw]);  // change to actual missing arm side
+//      jointToIgnoreList.add(ValkyrieOrderedJointMap.jointNames[ValkyrieOrderedJointMap.LeftWristRoll]);
+//      jointToIgnoreList.add(ValkyrieOrderedJointMap.jointNames[ValkyrieOrderedJointMap.LeftWristPitch]);
 
       return jointToIgnoreList.toArray(new String[0]);
    }
