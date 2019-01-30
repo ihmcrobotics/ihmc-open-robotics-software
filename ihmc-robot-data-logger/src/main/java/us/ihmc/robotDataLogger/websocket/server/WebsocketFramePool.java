@@ -67,4 +67,12 @@ public class WebsocketFramePool
          return null;
       }
    }
+   
+   public void release()
+   {
+      for(int i = 0; i < pool.length; i++)
+      {
+         pool[i].buffer.release();
+      }
+   }
 }

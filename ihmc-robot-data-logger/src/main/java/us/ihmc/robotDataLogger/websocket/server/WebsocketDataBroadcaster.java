@@ -4,7 +4,10 @@ import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
 
-public class WebsocketDataBroadcaster
+import io.netty.channel.ChannelFuture;
+import io.netty.channel.ChannelFutureListener;
+
+public class WebsocketDataBroadcaster implements ChannelFutureListener
 {
    private final Object channelLock = new Object();
 
@@ -17,14 +20,11 @@ public class WebsocketDataBroadcaster
    public void addClient(WebsocketLogFrameHandler websocketLogFrameHandler)
    {
 
-      System.out.println("Adding new channel {} to list of channels " + websocketLogFrameHandler.remoteAddress());
-
       synchronized (channelLock)
       {
          channels.add(websocketLogFrameHandler);
+         websocketLogFrameHandler.addCloseFutureListener(this);
       }
-
-      System.out.println(channels);
    }
 
    public void write(ByteBuffer frame) throws IOException
@@ -37,6 +37,23 @@ public class WebsocketDataBroadcaster
          }
       }
 
+   }
+
+   @Override
+   public void operationComplete(ChannelFuture future) throws Exception
+   {
+      synchronized (channelLock)
+      {
+         for (int i = 0; i < channels.size(); i++)
+         {
+            if(channels.get(i).channel() == future.channel())
+            {
+               System.out.println("Client disconnect " + future.channel());
+               channels.remove(i).release();
+               return;
+            }
+         }
+      }
    }
 
 }
