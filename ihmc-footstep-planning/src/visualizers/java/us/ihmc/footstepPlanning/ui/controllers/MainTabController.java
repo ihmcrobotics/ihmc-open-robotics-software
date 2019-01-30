@@ -23,8 +23,10 @@ import javafx.scene.control.TextField;
 import javafx.scene.control.ToggleButton;
 import us.ihmc.commons.PrintTools;
 import us.ihmc.communication.packets.ExecutionMode;
+import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.footstepPlanning.FootstepDataMessageConverter;
@@ -38,6 +40,8 @@ import us.ihmc.messager.TopicListener;
 import us.ihmc.pathPlanning.visibilityGraphs.ui.properties.Point3DProperty;
 import us.ihmc.pathPlanning.visibilityGraphs.ui.properties.YawProperty;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
+import us.ihmc.robotics.geometry.PlanarRegion;
+import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.robotSide.RobotSide;
 
 public class MainTabController
@@ -137,6 +141,28 @@ public class MainTabController
       FootstepDataListMessage footstepDataListMessage = FootstepDataMessageConverter
             .createFootstepDataListFromPlan(footstepPlan, swingTime, transferTime, ExecutionMode.OVERRIDE);
       messager.submitMessage(FootstepPlannerMessagerAPI.FootstepDataListTopic, footstepDataListMessage);
+   }
+
+   @FXML
+   public void clearFlat()
+   {
+      acceptNewRegions.setSelected(false);
+      assumeFlatGround.setSelected(true);
+      messager.submitMessage(FootstepPlannerMessagerAPI.PlanarRegionDataTopic, buildFlatGround());
+   }
+
+   private PlanarRegionsList buildFlatGround()
+   {
+      humanoidReferenceFrames.updateFrames();
+      RigidBodyTransform transformToWorld = humanoidReferenceFrames.getMidFeetZUpFrame().getTransformToWorldFrame();
+      ConvexPolygon2D convexPolygon = new ConvexPolygon2D();
+      convexPolygon.addVertex(10.0, 10.0);
+      convexPolygon.addVertex(-10.0, 10.0);
+      convexPolygon.addVertex(-10.0, -10.0);
+      convexPolygon.addVertex(10.0, -10.0);
+      convexPolygon.update();
+      PlanarRegion groundPlane = new PlanarRegion(transformToWorld, convexPolygon);
+      return new PlanarRegionsList(groundPlane);
    }
 
    private JavaFXMessager messager;
@@ -257,13 +283,8 @@ public class MainTabController
       humanoidReferenceFrames.updateFrames();
       FramePose3D startPose = new FramePose3D(humanoidReferenceFrames.getSoleFrame(initialSupportSide.getValue()));
       startPose.changeFrame(ReferenceFrame.getWorldFrame());
-
-      double x = startPose.getX();
-      double y = startPose.getY();
-      double yaw = startPose.getYaw();
-
-      startPositionProperty.set(new Point3D(x, y, startPositionProperty.get().getZ()));
-      startRotationProperty.set(new Quaternion(yaw, 0.0, 0.0));
+      startPositionProperty.set(new Point3D(startPose.getPosition()));
+      startRotationProperty.set(new Quaternion(startPose.getYaw(), 0.0, 0.0));
    }
 
    public void setFullRobotModel(FullHumanoidRobotModel fullHumanoidRobotModel)
