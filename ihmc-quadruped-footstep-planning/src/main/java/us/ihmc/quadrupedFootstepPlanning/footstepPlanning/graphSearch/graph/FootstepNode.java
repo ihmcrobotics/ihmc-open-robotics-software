@@ -224,16 +224,19 @@ public class FootstepNode
          return false;
 
       return yIndices.get(movingQuadrant) == other.yIndices.get(movingQuadrant);
-      /*
-      for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
-      {
-         if (xIndices.get(robotQuadrant) != other.xIndices.get(robotQuadrant))
-            return false;
-         if (yIndices.get(robotQuadrant) != other.yIndices.get(robotQuadrant))
-            return false;
-      }
-      return true;
-      */
+   }
+
+   public boolean midstanceGeometricallyEquals(Object obj)
+   {
+      if (this == obj)
+         return true;
+      if (obj == null)
+         return false;
+      if (getClass() != obj.getClass())
+         return false;
+      FootstepNode other = (FootstepNode) obj;
+
+      return getOrComputeMidStancePoint().geometricallyEquals((other).getOrComputeMidStancePoint(), PRECISION);
    }
 
    public boolean geometricallyEquals(Object obj)
