@@ -439,6 +439,35 @@ public class QuadrupedAStarFootstepPlanner implements QuadrupedFootstepPlanner
          }
       }
 
+      while (!endNode.geometricallyEquals(goalNode))
+      {
+         RobotQuadrant nextQuadrant = endNode.getMovingQuadrant().getNextRegularGaitSwingQuadrant();
+         Point2D nextFrontLeft = new Point2D(endNode.getX(RobotQuadrant.FRONT_LEFT), endNode.getY(RobotQuadrant.FRONT_LEFT));
+         Point2D nextFrontRight = new Point2D(endNode.getX(RobotQuadrant.FRONT_RIGHT), endNode.getY(RobotQuadrant.FRONT_RIGHT));
+         Point2D nextHindLeft = new Point2D(endNode.getX(RobotQuadrant.HIND_LEFT), endNode.getY(RobotQuadrant.HIND_LEFT));
+         Point2D nextHindRight = new Point2D(endNode.getX(RobotQuadrant.HIND_RIGHT), endNode.getY(RobotQuadrant.HIND_RIGHT));
+
+         switch (nextQuadrant)
+         {
+         case FRONT_LEFT:
+            nextFrontLeft.set(goalNode.getX(nextQuadrant), goalNode.getY(nextQuadrant));
+            break;
+         case FRONT_RIGHT:
+            nextFrontRight.set(goalNode.getX(nextQuadrant), goalNode.getY(nextQuadrant));
+            break;
+         case HIND_LEFT:
+            nextHindLeft.set(goalNode.getX(nextQuadrant), goalNode.getY(nextQuadrant));
+            break;
+         case HIND_RIGHT:
+            nextHindRight.set(goalNode.getX(nextQuadrant), goalNode.getY(nextQuadrant));
+            break;
+         }
+
+         FootstepNode nextNode = new FootstepNode(nextQuadrant, nextFrontLeft, nextFrontRight, nextHindLeft, nextHindRight);
+         graph.checkAndSetEdge(endNode, nextNode, stepCostCalculator.compute(endNode, nextNode));
+         endNode = nextNode;
+      }
+
       long timeInNano = System.nanoTime();
       planningTime.set(Conversions.nanosecondsToSeconds(timeInNano - planningStartTime));
       percentRejectedNodes.set(100.0 * rejectedNodesCount / expandedNodesCount);
@@ -453,9 +482,9 @@ public class QuadrupedAStarFootstepPlanner implements QuadrupedFootstepPlanner
       if (!validGoalNode.getBooleanValue())
          return false;
 
-      if (goalNode.geometricallyEquals(nodeToExpand))
+      if (goalNode.quadrantGeometricallyEquals(nodeToExpand))
       {
-         endNode = goalNode;
+         endNode = nodeToExpand;
          graph.checkAndSetEdge(nodeToExpand, endNode, 0.0);
          return true;
       }

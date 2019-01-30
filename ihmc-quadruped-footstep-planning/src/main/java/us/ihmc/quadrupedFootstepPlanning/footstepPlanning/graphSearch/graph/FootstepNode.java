@@ -209,7 +209,7 @@ public class FootstepNode
       return Math.round(value * INV_PRECISION) * PRECISION;
    }
 
-   public boolean geometricallyEquals(Object obj)
+   public boolean quadrantGeometricallyEquals(Object obj)
    {
       if (this == obj)
          return true;
@@ -234,6 +234,26 @@ public class FootstepNode
       }
       return true;
       */
+   }
+
+   public boolean geometricallyEquals(Object obj)
+   {
+      if (this == obj)
+         return true;
+      if (obj == null)
+         return false;
+      if (getClass() != obj.getClass())
+         return false;
+      FootstepNode other = (FootstepNode) obj;
+
+      for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
+      {
+         if (xIndices.get(robotQuadrant) != other.xIndices.get(robotQuadrant))
+            return false;
+         if (yIndices.get(robotQuadrant) != other.yIndices.get(robotQuadrant))
+            return false;
+      }
+      return true;
    }
 
    @Override
