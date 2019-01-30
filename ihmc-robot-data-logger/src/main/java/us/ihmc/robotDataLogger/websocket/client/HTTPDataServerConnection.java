@@ -1,6 +1,13 @@
 package us.ihmc.robotDataLogger.websocket.client;
 
+import java.io.IOException;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.Future;
+import java.util.function.Consumer;
+
 import io.netty.bootstrap.Bootstrap;
+import io.netty.buffer.ByteBuf;
+import io.netty.buffer.Unpooled;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelHandlerContext;
@@ -22,23 +29,31 @@ import io.netty.handler.codec.http.HttpMethod;
 import io.netty.handler.codec.http.HttpObject;
 import io.netty.handler.codec.http.HttpRequest;
 import io.netty.handler.codec.http.HttpResponse;
-import io.netty.handler.codec.http.HttpUtil;
+import io.netty.handler.codec.http.HttpResponseStatus;
 import io.netty.handler.codec.http.HttpVersion;
 import io.netty.handler.codec.http.LastHttpContent;
 import io.netty.util.CharsetUtil;
+import us.ihmc.idl.serializers.extra.JSONSerializer;
+import us.ihmc.robotDataLogger.Announcement;
+import us.ihmc.robotDataLogger.AnnouncementPubSubType;
 import us.ihmc.robotDataLogger.websocket.LogHTTPPaths;
 
 public class HTTPDataServerConnection extends SimpleChannelInboundHandler<HttpObject>
 {
    private final EventLoopGroup group = new NioEventLoopGroup();
    private final String host;
-   
-   private volatile boolean connected = false;
-   private volatile boolean connectionRefused = false;
+   private final HTTPDataServerConnectionListener listener;
 
-   public HTTPDataServerConnection(String host, int port)
+
+   private Channel channel;
+
+   private CompletableFuture<ByteBuf> requestFuture;
+   private ByteBuf requestedBuffer;
+   
+   public HTTPDataServerConnection(String host, int port, HTTPDataServerConnectionListener listener)
    {
       this.host = host;
+      this.listener = listener;
       
       Bootstrap b = new Bootstrap();
       b.group(group).channel(NioSocketChannel.class).handler(new HttpSnoopClientInitializer());
@@ -49,11 +64,10 @@ public class HTTPDataServerConnection extends SimpleChannelInboundHandler<HttpOb
          if (f.isSuccess())
          {
             connected(((ChannelFuture) f.sync()).channel());
-            connected = true;
          }
          else
          {
-            connectionRefused = true;
+            listener.connectionRefused();
             System.err.println(f.cause().getMessage());
             group.shutdownGracefully();
          }
@@ -62,31 +76,80 @@ public class HTTPDataServerConnection extends SimpleChannelInboundHandler<HttpOb
 
    private void connected(Channel channel)
    {
+      this.channel = channel;
+      requestResource(LogHTTPPaths.announcement, (buf) -> receivedAnnouncement(buf));
 
-      System.out.println("Connected");
-      // Prepare the HTTP request.
-      HttpRequest request = new DefaultFullHttpRequest(HttpVersion.HTTP_1_1, HttpMethod.GET, LogHTTPPaths.announcement);
-      request.headers().set(HttpHeaderNames.HOST, host);
-      request.headers().set(HttpHeaderNames.CONNECTION, HttpHeaderValues.KEEP_ALIVE);
-      request.headers().set(HttpHeaderNames.ACCEPT_ENCODING, HttpHeaderValues.GZIP);
-      // Send the HTTP request.
-      channel.writeAndFlush(request);
    }
    
-   
-   
-
-   public boolean isConnected()
+   private void receivedAnnouncement(ByteBuf buf)
    {
-      return false;
-
+      JSONSerializer<Announcement> serializer = new JSONSerializer<Announcement>(new AnnouncementPubSubType());
+      try
+      {
+         Announcement announcement = serializer.deserialize(buf.toString(CharsetUtil.UTF_8));
+         listener.connected(this, announcement);;
+      }
+      catch (IOException e)
+      {
+         e.printStackTrace();
+         channel.close();
+      }
    }
+   
 
-   public boolean hasConnectionRefused()
+   public Future<ByteBuf> requestResource(String path)
    {
-      return connectionRefused;
-
+      return requestResource(path, null);
    }
+
+   public Future<ByteBuf> requestResource(String path, Consumer<ByteBuf> action)
+   {
+      if(requestFuture != null && !requestFuture.isDone())
+      {
+         throw new RuntimeException("Previous request still pending");
+      }
+      
+      requestFuture = new CompletableFuture<ByteBuf>();
+
+      if (action != null)
+      {
+         requestFuture.thenAccept(action);
+      }
+
+      if (channel != null)
+      {
+         // Prepare the HTTP request.
+         HttpRequest request = new DefaultFullHttpRequest(HttpVersion.HTTP_1_1, HttpMethod.GET, path);
+         request.headers().set(HttpHeaderNames.HOST, host);
+         request.headers().set(HttpHeaderNames.CONNECTION, HttpHeaderValues.KEEP_ALIVE);
+         request.headers().set(HttpHeaderNames.ACCEPT_ENCODING, HttpHeaderValues.GZIP);
+         // Send the HTTP request.
+         try
+         {
+            channel.writeAndFlush(request).syncUninterruptibly();
+         }
+         catch (Exception e)
+         {
+            requestFuture.completeExceptionally(e);
+            channel.close();
+         }
+      }
+      else
+      {
+         requestFuture.completeExceptionally(new IOException("Channel not open"));
+      }
+
+      return requestFuture;
+   }
+
+   public void close()
+   {
+      if (channel != null)
+      {
+         channel.close();
+      }
+   }
+
 
    private class HttpSnoopClientInitializer extends ChannelInitializer<SocketChannel>
    {
@@ -109,45 +172,63 @@ public class HTTPDataServerConnection extends SimpleChannelInboundHandler<HttpOb
    @Override
    protected void channelRead0(ChannelHandlerContext ctx, HttpObject msg) throws Exception
    {
-      if (msg instanceof HttpResponse) {
-         HttpResponse response = (HttpResponse) msg;
-
-         System.err.println("STATUS: " + response.status());
-         System.err.println("VERSION: " + response.protocolVersion());
-         System.err.println();
-
-         if (!response.headers().isEmpty()) {
-             for (CharSequence name: response.headers().names()) {
-                 for (CharSequence value: response.headers().getAll(name)) {
-                     System.err.println("HEADER: " + name + " = " + value);
-                 }
-             }
-             System.err.println();
+      if (msg instanceof HttpResponse || msg instanceof HttpContent)
+      {
+         if (requestFuture == null || requestFuture.isDone())
+         {
+            throw new IOException("HTTP response received without matching request");
          }
 
-         if (HttpUtil.isTransferEncodingChunked(response)) {
-             System.err.println("CHUNKED CONTENT {");
-         } else {
-             System.err.println("CONTENT {");
-         }
-     }
-     if (msg instanceof HttpContent) {
-         HttpContent content = (HttpContent) msg;
+         if (msg instanceof HttpResponse)
+         {
+            HttpResponse response = (HttpResponse) msg;
 
-         System.err.print(content.content().toString(CharsetUtil.UTF_8));
-         System.err.flush();
-
-         if (content instanceof LastHttpContent) {
-             System.err.println("} END OF CONTENT");
-             ctx.close();
+            if (response.status() != HttpResponseStatus.OK)
+            {
+               requestFuture.completeExceptionally(new IOException("Invalid response received " + response.status()));
+               ctx.close();
+               return;
+            }
+            
+            int contentLength = response.headers().getInt("content-length", 0);
+            if(contentLength <= 0)
+            {
+               requestFuture.completeExceptionally(new IOException("No content-length set."));
+               ctx.close();
+               return;
+            }
+            
+            requestedBuffer = Unpooled.buffer(contentLength);
          }
-}
+         if (msg instanceof HttpContent)
+         {
+            HttpContent content = (HttpContent) msg;
+
+            if(requestedBuffer.isWritable(content.content().readableBytes()))
+            {
+               requestedBuffer.writeBytes(((HttpContent) msg).content());
+            }
+            else
+            {
+               requestFuture.completeExceptionally(new IOException("Content-length exceeds allocated space"));
+               ctx.close();
+               return;
+            }
+            
+
+            if (content instanceof LastHttpContent)
+            {
+               requestFuture.complete(requestedBuffer);
+               requestedBuffer = null;
+            }
+         }
+      }
    }
 
    @Override
    public void channelInactive(ChannelHandlerContext ctx) throws Exception
    {
-      System.out.println("CHANNEL CLOSED!!!");
+      listener.disconnected(this);
       group.shutdownGracefully();
 
    }
@@ -161,7 +242,27 @@ public class HTTPDataServerConnection extends SimpleChannelInboundHandler<HttpOb
 
    public static void main(String[] args)
    {
-      HTTPDataServerConnection connection = new HTTPDataServerConnection("127.0.0.1", 8008);
+      HTTPDataServerConnection connection = new HTTPDataServerConnection("127.0.0.1", 8008, new HTTPDataServerConnectionListener()
+      {
+         
+         @Override
+         public void disconnected(HTTPDataServerConnection connection)
+         {
+            System.out.println("Disconnected");
+         }
+         
+         @Override
+         public void connectionRefused()
+         {
+            System.out.println("Connection refused");
+         }
+         
+         @Override
+         public void connected(HTTPDataServerConnection connection, Announcement announcement)
+         {
+            System.out.println("Connected");
+         }
+      });
 
    }
 
