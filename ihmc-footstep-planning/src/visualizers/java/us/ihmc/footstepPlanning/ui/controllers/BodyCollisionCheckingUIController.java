@@ -44,12 +44,12 @@ public class BodyCollisionCheckingUIController
 
    public void setupControls()
    {
-      bodyWidth.setValueFactory(new SpinnerValueFactory.DoubleSpinnerValueFactory(0.25, 1.5, 0.0, 0.05));
-      bodyDepth.setValueFactory(new SpinnerValueFactory.DoubleSpinnerValueFactory(0.25, 1.0, 0.0, 0.05));
-      bodyHeight.setValueFactory(new SpinnerValueFactory.DoubleSpinnerValueFactory(0.5, 2.0, 0.0, 0.1));
+      bodyWidth.setValueFactory(new SpinnerValueFactory.DoubleSpinnerValueFactory(0.0, 1.5, 0.0, 0.05));
+      bodyDepth.setValueFactory(new SpinnerValueFactory.DoubleSpinnerValueFactory(0.0, 1.0, 0.0, 0.05));
+      bodyHeight.setValueFactory(new SpinnerValueFactory.DoubleSpinnerValueFactory(0.0, 2.0, 0.0, 0.1));
 
-      bodyBoxBaseX.setValueFactory(new SpinnerValueFactory.DoubleSpinnerValueFactory(-0.5, 0.5, 0.0, 0.05));
-      bodyBoxBaseY.setValueFactory(new SpinnerValueFactory.DoubleSpinnerValueFactory(-0.5, 0.5, 0.0, 0.05));
+      bodyBoxBaseX.setValueFactory(new SpinnerValueFactory.DoubleSpinnerValueFactory(-1.0, 1.0, 0.0, 0.05));
+      bodyBoxBaseY.setValueFactory(new SpinnerValueFactory.DoubleSpinnerValueFactory(-1.0, 1.0, 0.0, 0.05));
       bodyBoxBaseZ.setValueFactory(new SpinnerValueFactory.DoubleSpinnerValueFactory(0.0, 1.5, 0.0, 0.1));
 
       maximum2dDistanceFromBoundingBoxToPenalize.setValueFactory(new SpinnerValueFactory.DoubleSpinnerValueFactory(0.0, 1.0, 0.0, 0.05));
