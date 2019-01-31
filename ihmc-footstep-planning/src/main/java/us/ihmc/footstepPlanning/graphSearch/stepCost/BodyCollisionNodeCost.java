@@ -34,7 +34,7 @@ public class BodyCollisionNodeCost implements FootstepCost
 
       if(collisionData.isCollisionDetected())
       {
-         throw new RuntimeException("Collision detector detected collision. This node should be invalid");
+         return 0.0;
       }
       else if(Double.isNaN(collisionData.getDistanceFromBoundingBox()))
       {
