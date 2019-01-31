@@ -195,6 +195,17 @@ public class MainTabController
       transferTimeSpinner.setValueFactory(new SpinnerValueFactory.DoubleSpinnerValueFactory(0.0, 3.5, 0.8, 0.1));
       swingHeightSpinner.setValueFactory(new SpinnerValueFactory.DoubleSpinnerValueFactory(0.0, 1.0, 0.05, 0.01));
 
+      overrideTiming.setSelected(true);
+      overrideSwingHeight.setSelected(true);
+
+      overrideTiming.selectedProperty().addListener(s ->
+                                                    {
+                                                       swingTimeSpinner.disableProperty().set(!overrideTiming.isSelected());
+                                                       transferTimeSpinner.disableProperty().set(!overrideTiming.isSelected());
+                                                    });
+
+      overrideSwingHeight.selectedProperty().addListener(s -> swingHeightSpinner.disableProperty().set(!overrideSwingHeight.isSelected()));
+
       ObservableList<us.ihmc.footstepPlanning.FootstepPlannerType> plannerTypeOptions = FXCollections.observableArrayList(FootstepPlannerType.values);
       plannerType.setItems(plannerTypeOptions);
       plannerType.setValue(FootstepPlannerType.A_STAR);
