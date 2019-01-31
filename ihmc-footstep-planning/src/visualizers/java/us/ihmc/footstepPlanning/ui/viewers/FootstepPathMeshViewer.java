@@ -28,7 +28,7 @@ import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.footstepPlanning.FootstepPlan;
 import us.ihmc.footstepPlanning.SimpleFootstep;
 import us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI;
-import us.ihmc.footstepPlanning.graphSearch.graph.FootstepNode;
+import us.ihmc.footstepPlanning.graphSearch.graph.LatticeNode;
 import us.ihmc.footstepPlanning.tools.PlannerTools;
 import us.ihmc.idl.IDLSequence;
 import us.ihmc.jMonkeyEngineToolkit.tralala.Pair;
@@ -95,9 +95,9 @@ public class FootstepPathMeshViewer extends AnimationTimer
       RobotSide robotSide = RobotSide.fromByte(nodeData.getRobotSide());
 
       RigidBodyTransform footstepPose = new RigidBodyTransform();
-      footstepPose.setRotationYawAndZeroTranslation(nodeData.getYawIndex() * FootstepNode.gridSizeYaw);
-      footstepPose.setTranslationX(nodeData.getXIndex() * FootstepNode.gridSizeXY);
-      footstepPose.setTranslationY(nodeData.getYIndex() * FootstepNode.gridSizeXY);
+      footstepPose.setRotationYawAndZeroTranslation(nodeData.getYawIndex() * LatticeNode.gridSizeYaw);
+      footstepPose.setTranslationX(nodeData.getXIndex() * LatticeNode.gridSizeXY);
+      footstepPose.setTranslationY(nodeData.getYIndex() * LatticeNode.gridSizeXY);
 
       RigidBodyTransform snapTransform = new RigidBodyTransform();
       snapTransform.set(nodeData.getSnapRotation(), nodeData.getSnapTranslation());

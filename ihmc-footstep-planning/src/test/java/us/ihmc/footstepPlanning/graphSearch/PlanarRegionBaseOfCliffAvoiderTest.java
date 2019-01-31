@@ -12,6 +12,7 @@ import us.ihmc.euclid.Axis;
 import us.ihmc.euclid.axisAngle.AxisAngle;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.tuple2D.Vector2D;
+import us.ihmc.footstepPlanning.graphSearch.graph.LatticeNode;
 import us.ihmc.footstepPlanning.graphSearch.parameters.DefaultFootstepPlanningParameters;
 import us.ihmc.footstepPlanning.graphSearch.nodeChecking.PlanarRegionBaseOfCliffAvoider;
 import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.SimplePlanarRegionFootstepNodeSnapper;
@@ -114,12 +115,12 @@ public class PlanarRegionBaseOfCliffAvoiderTest
       snapper.snapFootstepNode(node);
       assertTrue(avoider.isNodeValid(node, null));
 
-      x = closestNodeDistanceToCliff + FootstepNode.gridSizeXY;
+      x = closestNodeDistanceToCliff + LatticeNode.gridSizeXY;
       node = new FootstepNode(x, y, 0.0, footstepSide);
       snapper.snapFootstepNode(node);
       assertFalse(avoider.isNodeValid(node, null));
 
-      x = closestNodeDistanceToCliff - FootstepNode.gridSizeXY;
+      x = closestNodeDistanceToCliff - LatticeNode.gridSizeXY;
       node = new FootstepNode(x, y, 0.0, footstepSide);
       snapper.snapFootstepNode(node);
       assertTrue(avoider.isNodeValid(node, null));
@@ -171,10 +172,10 @@ public class PlanarRegionBaseOfCliffAvoiderTest
       cliffAvoider.setPlanarRegions(planarRegionsList);
       snapper.setPlanarRegions(planarRegionsList);
 
-      Vector2D frontNearNodeOffset = new Vector2D(0.5 * boxWidth + minimumDistanceFromCliffBottom + 0.5 * footLength - FootstepNode.gridSizeXY, 0.0);
-      Vector2D frontFarNodeOffset = new Vector2D(0.5 * boxWidth + minimumDistanceFromCliffBottom + 0.5 * footLength + FootstepNode.gridSizeXY, 0.0);
-      Vector2D sideNearNodeOffset = new Vector2D(0.0, 0.5 * boxWidth + 0.5 * footWidth + minimumDistanceFromCliffBottom - FootstepNode.gridSizeXY);
-      Vector2D sideFarNodeOffset = new Vector2D(0.0, 0.5 * boxWidth + 0.5 * footWidth + minimumDistanceFromCliffBottom + FootstepNode.gridSizeXY);
+      Vector2D frontNearNodeOffset = new Vector2D(0.5 * boxWidth + minimumDistanceFromCliffBottom + 0.5 * footLength - LatticeNode.gridSizeXY, 0.0);
+      Vector2D frontFarNodeOffset = new Vector2D(0.5 * boxWidth + minimumDistanceFromCliffBottom + 0.5 * footLength + LatticeNode.gridSizeXY, 0.0);
+      Vector2D sideNearNodeOffset = new Vector2D(0.0, 0.5 * boxWidth + 0.5 * footWidth + minimumDistanceFromCliffBottom - LatticeNode.gridSizeXY);
+      Vector2D sideFarNodeOffset = new Vector2D(0.0, 0.5 * boxWidth + 0.5 * footWidth + minimumDistanceFromCliffBottom + LatticeNode.gridSizeXY);
 
       AxisAngle rotationTransform = new AxisAngle(rotation, 0.0, 0.0);
       rotationTransform.transform(frontNearNodeOffset);

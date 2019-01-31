@@ -5,7 +5,7 @@ import us.ihmc.footstepPlanning.FootstepPlan;
 import us.ihmc.footstepPlanning.FootstepPlanningResult;
 import us.ihmc.footstepPlanning.filters.BodyCollisionRegionFilter;
 import us.ihmc.footstepPlanning.filters.SteppableRegionFilter;
-import us.ihmc.footstepPlanning.graphSearch.graph.FootstepNode;
+import us.ihmc.footstepPlanning.graphSearch.graph.LatticeNode;
 import us.ihmc.robotics.geometry.PlanarRegion;
 
 public interface FootstepPlannerParameters
@@ -283,7 +283,7 @@ public interface FootstepPlannerParameters
     */
    default double getMaximumXYWiggleDistance()
    {
-      return FootstepNode.gridSizeXY / 2.0;
+      return LatticeNode.gridSizeXY / 2.0;
    }
 
    /**
@@ -292,7 +292,7 @@ public interface FootstepPlannerParameters
     */
    default double getMaximumYawWiggle()
    {
-      return FootstepNode.gridSizeYaw / 2.0;
+      return LatticeNode.gridSizeYaw / 2.0;
    }
 
    /**
@@ -443,17 +443,6 @@ public interface FootstepPlannerParameters
    default double getBodyBoxBaseZ()
    {
       return 0.25;
-   }
-
-   /**
-    * The bounding box for body collision checking (see {@link #checkForBodyBoxCollisions}) places the box
-    * at the mid-foot frame between consecutive steps. If {@code t} if the xy-translation between these two steps
-    * in mid-foot frame, the box's depth and with are expanded by {@code alpha * t.x} and {@code alpha * t.y} respectively.
-    * @return
-    */
-   default double getStepTranslationBoundingBoxScaleFactor()
-   {
-      return 0.0;
    }
 
    /**

@@ -21,6 +21,8 @@ public class SettableFootstepPlannerCostParameters implements FootstepPlannerCos
    private double visGraphWithAStarHeuristicsWeight;
    private double depthFirstHeuristicsWeight;
    private double bodyPathBasedHeuristicsWeight;
+   private double boundingBoxCost;
+   private double maximum2dDistanceFromBoundingBoxToPenalize;
 
    private final DoubleProvider aStarHeuristicsProvider = () -> aStarHeuristicsWeight;
    private final DoubleProvider visGraphWithAStarHeuristicsProvider = () -> visGraphWithAStarHeuristicsWeight;
@@ -50,6 +52,8 @@ public class SettableFootstepPlannerCostParameters implements FootstepPlannerCos
       this.visGraphWithAStarHeuristicsWeight = parameters.getVisGraphWithAStarHeuristicsWeight().getValue();
       this.depthFirstHeuristicsWeight = parameters.getDepthFirstHeuristicsWeight().getValue();
       this.bodyPathBasedHeuristicsWeight = parameters.getBodyPathBasedHeuristicsWeight().getValue();
+      this.boundingBoxCost = parameters.getBoundingBoxCost();
+      this.maximum2dDistanceFromBoundingBoxToPenalize = parameters.getMaximum2dDistanceFromBoundingBoxToPenalize();
    }
 
    public void setUseQuadraticDistanceCost(boolean useQuadraticDistanceCost)
@@ -120,6 +124,16 @@ public class SettableFootstepPlannerCostParameters implements FootstepPlannerCos
    public void setStepDownWeight(double stepDownWeight)
    {
       this.stepDownWeight = stepDownWeight;
+   }
+
+   public void setBoundingBoxCost(double boundingBoxCost)
+   {
+      this.boundingBoxCost = boundingBoxCost;
+   }
+
+   public void setMaximum2dDistanceFromBoundingBoxToPenalize(double maximum2dDistanceFromBoundingBoxToPenalize)
+   {
+      this.maximum2dDistanceFromBoundingBoxToPenalize = maximum2dDistanceFromBoundingBoxToPenalize;
    }
 
    @Override
@@ -204,5 +218,17 @@ public class SettableFootstepPlannerCostParameters implements FootstepPlannerCos
    public DoubleProvider getBodyPathBasedHeuristicsWeight()
    {
       return bodyPathBasedHeuristicsProvider;
+   }
+
+   @Override
+   public double getMaximum2dDistanceFromBoundingBoxToPenalize()
+   {
+      return maximum2dDistanceFromBoundingBoxToPenalize;
+   }
+
+   @Override
+   public double getBoundingBoxCost()
+   {
+      return boundingBoxCost;
    }
 }
