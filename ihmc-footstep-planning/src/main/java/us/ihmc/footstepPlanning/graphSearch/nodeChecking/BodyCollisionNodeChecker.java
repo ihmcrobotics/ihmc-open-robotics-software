@@ -5,6 +5,7 @@ import us.ihmc.footstepPlanning.graphSearch.collision.BodyCollisionData;
 import us.ihmc.footstepPlanning.graphSearch.collision.FootstepNodeBodyCollisionDetector;
 import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.FootstepNodeSnapperReadOnly;
 import us.ihmc.footstepPlanning.graphSearch.graph.FootstepNode;
+import us.ihmc.footstepPlanning.graphSearch.graph.visualization.BipedalFootstepPlannerNodeRejectionReason;
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParameters;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 
@@ -38,7 +39,10 @@ public class BodyCollisionNodeChecker extends FootstepNodeChecker
 
       double height = snapper.getSnapData(node).getSnapTransform().getTranslationZ();
       BodyCollisionData collisionData = collisionDetector.checkForCollision(node.getLatticeNode(), height);
-      return !collisionData.isCollisionDetected();
+      boolean collisionDetected = collisionData.isCollisionDetected();
+      if(collisionDetected)
+         rejectNode(node, previousNode, BipedalFootstepPlannerNodeRejectionReason.OBSTACLE_HITTING_BODY);
+      return !collisionDetected;
    }
 
    @Override
