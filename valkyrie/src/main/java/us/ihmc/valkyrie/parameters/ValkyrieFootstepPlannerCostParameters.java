@@ -38,6 +38,6 @@ public class ValkyrieFootstepPlannerCostParameters implements FootstepPlannerCos
    @Override
    public double getBoundingBoxCost()
    {
-      return 20.0;
+      return 0.0;
    }
 }
