@@ -1,6 +1,7 @@
 package us.ihmc.robotDataLogger.websocket.server;
 
 import java.io.IOException;
+import java.util.UUID;
 
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
@@ -31,6 +32,8 @@ public class DataServerServerContent
          this.name = announcement.getNameAsString();
          this.hostName = announcement.getHostNameAsString();
 
+         
+         announcement.setIdentifier(UUID.randomUUID().toString());
          if (logModelProvider != null)
          {
             byte[] model = logModelProvider.getModel();
