@@ -8,7 +8,6 @@ import us.ihmc.robotDataLogger.handshake.IDLYoVariableHandshakeParser;
 import us.ihmc.robotDataLogger.listeners.ClearLogListener;
 import us.ihmc.robotDataLogger.listeners.TimestampListener;
 import us.ihmc.robotDataLogger.rtps.RTPSDebugRegistry;
-import us.ihmc.robotDataLogger.rtps.VariableChangedProducer;
 
 public interface DataConsumer
 {
@@ -98,6 +97,14 @@ public interface DataConsumer
     * @return true if the reconnect is successful
     */
    boolean reconnect();
+
+   /**
+    * Send a request to the session to change a variable
+    * 
+    * @param identifier
+    * @param valueAsDouble
+    */
+   void writeVariableChangeRequest(int identifier, double valueAsDouble);
 
 
 }

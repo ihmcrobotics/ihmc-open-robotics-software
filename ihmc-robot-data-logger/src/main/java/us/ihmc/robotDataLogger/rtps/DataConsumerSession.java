@@ -24,6 +24,7 @@ import us.ihmc.robotDataLogger.YoVariableClientImplementation;
 import us.ihmc.robotDataLogger.dataBuffers.CustomLogDataSubscriberType;
 import us.ihmc.robotDataLogger.dataBuffers.RegistryConsumer;
 import us.ihmc.robotDataLogger.handshake.IDLYoVariableHandshakeParser;
+import us.ihmc.robotDataLogger.interfaces.VariableChangedProducer;
 import us.ihmc.robotDataLogger.listeners.ClearLogListener;
 import us.ihmc.robotDataLogger.listeners.TimestampListener;
 
@@ -57,7 +58,6 @@ public class DataConsumerSession
    {
       if(variableChangeDataPublisher != null)
       {
-         variableChangedProducer.setSession(null);
       }
       
       domain.removeParticipant(participant);
@@ -78,7 +78,6 @@ public class DataConsumerSession
          VariableChangeRequestPubSubType topicDataType = new VariableChangeRequestPubSubType();
          PublisherAttributes attributes = domain.createPublisherAttributes(participant, topicDataType, LogParticipantSettings.variableChange.getKey(), LogParticipantSettings.variableChange.getValue(), RTPSDataConsumerParticipant.getPartition(announcement.getIdentifierAsString()));
          variableChangeDataPublisher = domain.createPublisher(participant, attributes);
-         variableChangedProducer.setSession(this);
       }
       else
       {

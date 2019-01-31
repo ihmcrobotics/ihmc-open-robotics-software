@@ -6,8 +6,8 @@ import us.ihmc.log.LogTools;
 import us.ihmc.robotDataLogger.handshake.IDLYoVariableHandshakeParser;
 import us.ihmc.robotDataLogger.handshake.LogHandshake;
 import us.ihmc.robotDataLogger.interfaces.DataConsumer;
+import us.ihmc.robotDataLogger.interfaces.VariableChangedProducer;
 import us.ihmc.robotDataLogger.rtps.RTPSDebugRegistry;
-import us.ihmc.robotDataLogger.rtps.VariableChangedProducer;
 import us.ihmc.robotDataLogger.websocket.client.WebsocketDataConsumer;
 import us.ihmc.robotDataLogger.websocket.client.discovery.HTTPDataServerConnection;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
@@ -113,7 +113,7 @@ public class YoVariableClientImplementation implements YoVariableClientInterface
 
       if(variableChangedProducer != null)
       {
-         variableChangedProducer.startVariableChangedProducers(handshakeParser.getYoVariablesList());
+         variableChangedProducer.startVariableChangedProducers(handshakeParser.getYoVariablesList(), dataConsumer);
       }
       yoVariablesUpdatedListener.start(this, logHandshake, handshakeParser);
 

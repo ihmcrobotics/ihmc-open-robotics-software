@@ -13,10 +13,10 @@ import us.ihmc.robotDataLogger.YoVariableClientImplementation;
 import us.ihmc.robotDataLogger.dataBuffers.RegistryConsumer;
 import us.ihmc.robotDataLogger.handshake.IDLYoVariableHandshakeParser;
 import us.ihmc.robotDataLogger.interfaces.DataConsumer;
+import us.ihmc.robotDataLogger.interfaces.VariableChangedProducer;
 import us.ihmc.robotDataLogger.listeners.ClearLogListener;
 import us.ihmc.robotDataLogger.listeners.TimestampListener;
 import us.ihmc.robotDataLogger.rtps.RTPSDebugRegistry;
-import us.ihmc.robotDataLogger.rtps.VariableChangedProducer;
 import us.ihmc.robotDataLogger.websocket.LogHTTPPaths;
 import us.ihmc.robotDataLogger.websocket.client.discovery.HTTPDataServerConnection;
 
@@ -176,6 +176,18 @@ public class WebsocketDataConsumer implements DataConsumer
    public boolean reconnect()
    {
       return false;
+   }
+
+   @Override
+   public void writeVariableChangeRequest(int identifier, double valueAsDouble)
+   {
+      synchronized(lock)
+      {
+         if(session != null && session.isActive())
+         {
+            session.writeVariableChangeRequest(identifier, valueAsDouble);
+         }
+      }
    }
 
 }

@@ -2,6 +2,7 @@ package us.ihmc.robotDataLogger.websocket.client.discovery;
 
 import java.io.IOException;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 import java.util.function.Consumer;
 
@@ -66,7 +67,10 @@ public class HTTPDataServerConnection
        * 
        * @param connection
        */
-      public void disconnected(HTTPDataServerConnection connection);
+      default void disconnected(HTTPDataServerConnection connection)
+      {
+
+      }
 
       /**
        * Connection has been refused
@@ -80,9 +84,61 @@ public class HTTPDataServerConnection
        * 
        * @param httpDataServerConnection
        */
-      public void closed(HTTPDataServerConnection httpDataServerConnection);
+      default void closed(HTTPDataServerConnection httpDataServerConnection)
+      {
+
+      }
    }
 
+   /**
+    * 
+    * Connect to a given host
+    * 
+    * @param host IP or hostname
+    * @param port port
+    * @throws IOException if connection failed
+    * 
+    * @return A connection if successful
+    */
+   public static HTTPDataServerConnection connect(String host, int port) throws IOException
+   {
+      HTTPDataServerDescription target = new HTTPDataServerDescription(host, port, false);
+
+      CompletableFuture<HTTPDataServerConnection> connectionFuture = new CompletableFuture<HTTPDataServerConnection>();
+
+      new HTTPDataServerConnection(target, new HTTPDataServerConnection.HTTPDataServerConnectionListener()
+      {
+         @Override
+         public void connectionRefused(HTTPDataServerDescription target)
+         {
+            connectionFuture.completeExceptionally(new IOException("Connection refused"));
+         }
+
+         @Override
+         public void connected(HTTPDataServerConnection connection)
+         {
+            connectionFuture.complete(connection);
+         }
+      });
+
+      try
+      {
+         return connectionFuture.get();
+      }
+      catch (Exception e)
+      {
+         throw new IOException(e);
+      }
+   }
+
+   /**
+    * Setup a new connection
+    * 
+    * If you want a blocking connect call, use the static {@link connect()} function
+    * 
+    * @param target
+    * @param listener
+    */
    public HTTPDataServerConnection(HTTPDataServerDescription target, HTTPDataServerConnectionListener listener)
    {
       this.target = target;
@@ -103,8 +159,7 @@ public class HTTPDataServerConnection
             group.shutdownGracefully().addListener(e -> {
                listener.connectionRefused(target);
             });
-            
-            
+
          }
       });
    }
@@ -114,10 +169,10 @@ public class HTTPDataServerConnection
       this.channel = channel;
       requestResource(LogHTTPPaths.announcement, (buf) -> receivedAnnouncement(buf));
    }
-   
+
    public boolean isConnected()
    {
-      if(channel != null)
+      if (channel != null)
       {
          return channel.isActive();
       }
@@ -285,7 +340,7 @@ public class HTTPDataServerConnection
       public void channelInactive(ChannelHandlerContext ctx) throws Exception
       {
          listener.disconnected(HTTPDataServerConnection.this);
-         group.shutdownGracefully().addListener((e ) -> listener.closed(HTTPDataServerConnection.this));
+         group.shutdownGracefully().addListener((e) -> listener.closed(HTTPDataServerConnection.this));
 
       }
 
