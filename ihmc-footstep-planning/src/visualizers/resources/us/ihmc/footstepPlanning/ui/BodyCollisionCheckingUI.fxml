@@ -28,17 +28,17 @@
                 <Label text="Body Box Width" GridPane.halignment="RIGHT" GridPane.columnIndex="2" GridPane.rowIndex="3"/>
                 <Label text="Body Box Height" GridPane.halignment="RIGHT" GridPane.columnIndex="2" GridPane.rowIndex="4"/>
 
-                <Spinner fx:id="bodyDepth" GridPane.halignment="CENTER" prefHeight="38.0" prefWidth="175.0" GridPane.columnIndex="3" GridPane.rowIndex="2"/>
-                <Spinner fx:id="bodyWidth" GridPane.halignment="CENTER" prefHeight="38.0" prefWidth="175.0" GridPane.columnIndex="3" GridPane.rowIndex="3"/>
-                <Spinner fx:id="bodyHeight" GridPane.halignment="CENTER" prefHeight="38.0" prefWidth="175.0" GridPane.columnIndex="3" GridPane.rowIndex="4"/>
+                <Spinner fx:id="bodyDepth" GridPane.halignment="CENTER" editable="true" prefHeight="38.0" prefWidth="175.0" GridPane.columnIndex="3" GridPane.rowIndex="2"/>
+                <Spinner fx:id="bodyWidth" GridPane.halignment="CENTER" editable="true" prefHeight="38.0" prefWidth="175.0" GridPane.columnIndex="3" GridPane.rowIndex="3"/>
+                <Spinner fx:id="bodyHeight" GridPane.halignment="CENTER" editable="true" prefHeight="38.0" prefWidth="175.0" GridPane.columnIndex="3" GridPane.rowIndex="4"/>
 
                 <Label text="Body Box Base X" GridPane.halignment="RIGHT" GridPane.columnIndex="4" GridPane.rowIndex="2"/>
                 <Label text="Body Box Base Y" GridPane.halignment="RIGHT" GridPane.columnIndex="4" GridPane.rowIndex="3"/>
                 <Label text="Body Box Base Z" GridPane.halignment="RIGHT" GridPane.columnIndex="4" GridPane.rowIndex="4"/>
 
-                <Spinner fx:id="bodyBoxBaseX" GridPane.halignment="CENTER" prefHeight="38.0" prefWidth="175.0" GridPane.columnIndex="5" GridPane.rowIndex="2"/>
-                <Spinner fx:id="bodyBoxBaseY" GridPane.halignment="CENTER" prefHeight="38.0" prefWidth="175.0" GridPane.columnIndex="5" GridPane.rowIndex="3"/>
-                <Spinner fx:id="bodyBoxBaseZ" GridPane.halignment="CENTER" prefHeight="38.0" prefWidth="175.0" GridPane.columnIndex="5" GridPane.rowIndex="4"/>
+                <Spinner fx:id="bodyBoxBaseX" GridPane.halignment="CENTER" editable="true" prefHeight="38.0" prefWidth="175.0" GridPane.columnIndex="5" GridPane.rowIndex="2"/>
+                <Spinner fx:id="bodyBoxBaseY" GridPane.halignment="CENTER" editable="true" prefHeight="38.0" prefWidth="175.0" GridPane.columnIndex="5" GridPane.rowIndex="3"/>
+                <Spinner fx:id="bodyBoxBaseZ" GridPane.halignment="CENTER" editable="true" prefHeight="38.0" prefWidth="175.0" GridPane.columnIndex="5" GridPane.rowIndex="4"/>
 
                 <Label text="Distance from BB to penalize" GridPane.halignment="RIGHT" GridPane.columnIndex="6" GridPane.rowIndex="2"/>
                 <Label text="Bounding box cost" GridPane.halignment="RIGHT" GridPane.columnIndex="6" GridPane.rowIndex="3"/>
