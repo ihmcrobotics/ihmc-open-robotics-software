@@ -175,16 +175,17 @@ public class QuadrupedAStarFootstepPlanner implements QuadrupedBodyPathAndFootst
       {
          FramePose3DReadOnly goalPose = target.getTargetPose();
          ReferenceFrame goalFrame = new PoseReferenceFrame("GoalFrame", goalPose);
+         goalFrame.update();
 
          FramePoint2D frontLeftStepPosition = new FramePoint2D(goalFrame, xGaitSettings.getStanceLength() / 2.0, xGaitSettings.getStanceWidth() / 2.0);
          FramePoint2D frontRightStepPosition = new FramePoint2D(goalFrame, xGaitSettings.getStanceLength() / 2.0, -xGaitSettings.getStanceWidth() / 2.0);
          FramePoint2D hindLeftStepPosition = new FramePoint2D(goalFrame, -xGaitSettings.getStanceLength() / 2.0, xGaitSettings.getStanceWidth() / 2.0);
          FramePoint2D hindRightStepPosition = new FramePoint2D(goalFrame, -xGaitSettings.getStanceLength() / 2.0, -xGaitSettings.getStanceWidth() / 2.0);
 
-         frontLeftStepPosition.changeFrame(worldFrame);
-         frontRightStepPosition.changeFrame(worldFrame);
-         hindLeftStepPosition.changeFrame(worldFrame);
-         hindRightStepPosition.changeFrame(worldFrame);
+         frontLeftStepPosition.changeFrameAndProjectToXYPlane(worldFrame);
+         frontRightStepPosition.changeFrameAndProjectToXYPlane(worldFrame);
+         hindLeftStepPosition.changeFrameAndProjectToXYPlane(worldFrame);
+         hindRightStepPosition.changeFrameAndProjectToXYPlane(worldFrame);
 
          nodeToReturn = new FootstepNode(defaultFirstQuadrant, frontLeftStepPosition, frontRightStepPosition, hindLeftStepPosition, hindRightStepPosition);
       }
@@ -311,7 +312,7 @@ public class QuadrupedAStarFootstepPlanner implements QuadrupedBodyPathAndFootst
 
       abortPlanning.set(false);
 
-      if (planarRegionsList != null)
+      if (planarRegionsList != null && !planarRegionsList.isEmpty())
          checkStartHasPlanarRegion();
 
       graph.initialize(startNode);
