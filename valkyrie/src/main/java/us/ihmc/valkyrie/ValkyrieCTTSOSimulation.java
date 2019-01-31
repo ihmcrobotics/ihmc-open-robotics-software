@@ -18,7 +18,7 @@ import java.nio.file.Paths;
 
 public class ValkyrieCTTSOSimulation
 {
-   private static final Environment environment = Environment.JERSEY_BARRIERS_4;
+   private static final Environment environment = Environment.CINDERS;
 
    private enum Environment
    {
