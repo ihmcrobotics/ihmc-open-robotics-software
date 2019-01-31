@@ -98,6 +98,7 @@ public class AStarFootstepPlanner implements BodyPathAndFootstepPlanner
       this.initialize.set(true);
       this.footPolygons = footPolygons;
 
+      nodeChecker.addFootstepGraph(graph);
       parentRegistry.addChild(registry);
    }
 

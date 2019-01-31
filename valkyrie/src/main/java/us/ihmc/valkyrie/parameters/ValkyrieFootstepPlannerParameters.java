@@ -27,7 +27,7 @@ public class ValkyrieFootstepPlannerParameters implements FootstepPlannerParamet
    @Override
    public double getMaximumStepReach()
    {
-      return 0.35;
+      return 0.4;
    }
 
    @Override
@@ -154,5 +154,23 @@ public class ValkyrieFootstepPlannerParameters implements FootstepPlannerParamet
    public FootstepProcessingParameters getFootstepProcessingParameters()
    {
       return new ValkyrieFootstepProcessingParameters();
+   }
+
+   @Override
+   public double getMaximumStepReachWhenSteppingUp()
+   {
+      return 0.35;
+   }
+
+   @Override
+   public double getMaximumStepZWhenForwardAndDown()
+   {
+      return 0.07;
+   }
+
+   @Override
+   public double getMaximumStepXWhenForwardAndDown()
+   {
+      return 0.35;
    }
 }
