@@ -106,8 +106,8 @@ public class WebsocketDataServerClient
       try
       {
          VariableChangeRequest msg = new VariableChangeRequest();
-         msg.setUniqueId(identifier);
          msg.setVariableID(identifier);
+         msg.setRequestedValue(valueAsDouble);
          variableChangeRequestType.serialize(msg, variableChangeRequestPayload);
          
          ByteBuf data = Unpooled.wrappedBuffer(variableChangeRequestPayload.getData());
