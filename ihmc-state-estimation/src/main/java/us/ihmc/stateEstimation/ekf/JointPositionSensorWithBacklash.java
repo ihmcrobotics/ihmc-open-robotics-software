@@ -16,25 +16,25 @@ public class JointPositionSensorWithBacklash extends JointPositionSensor
 {
    private final String jointName;
    private final double dt;
-   
+
    private double previousVelocity;
    private int ticksWithoutSignChange;
-   
+
    private final DoubleParameter slopTime;
    private final DoubleParameter maxVarianceMultiplier;
    private final YoDouble currentVarianceMultiplier;
-   
-   public JointPositionSensorWithBacklash(String jointName, double dt, YoVariableRegistry registry)
+
+   public JointPositionSensorWithBacklash(String jointName, String parameterGroup, double dt, YoVariableRegistry registry)
    {
-      super(jointName, dt, registry);
+      super(jointName, parameterGroup, dt, registry);
       this.dt = dt;
       this.jointName = jointName;
       String prefix = FilterTools.stringToPrefix(jointName);
-      maxVarianceMultiplier = new DoubleParameter(prefix + "MaxVarianceMultiplier", registry, 1.0);
-      slopTime = new DoubleParameter(prefix + "SlopTime", registry, 0.03);
+      maxVarianceMultiplier = FilterTools.findOrCreate(parameterGroup + "MaxVarianceMultiplier", registry, 1.0);
+      slopTime = FilterTools.findOrCreate(parameterGroup + "SlopTime", registry, 0.03);
       currentVarianceMultiplier = new YoDouble(prefix + "CurrentVarianceMultiplier", registry);
    }
-   
+
    @Override
    public void getRobotJacobianAndResidual(DenseMatrix64F jacobianToPack, DenseMatrix64F residualToPack, RobotState robotState)
    {
@@ -58,7 +58,7 @@ public class JointPositionSensorWithBacklash extends JointPositionSensor
 
       previousVelocity = currentVelocity;
    }
-   
+
    // TODO: pass robot state here.
    @Override
    public void getRMatrix(DenseMatrix64F matrixToPack)
