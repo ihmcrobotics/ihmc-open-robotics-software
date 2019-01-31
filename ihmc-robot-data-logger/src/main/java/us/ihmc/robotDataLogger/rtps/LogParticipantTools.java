@@ -3,6 +3,7 @@ package us.ihmc.robotDataLogger.rtps;
 import java.util.Arrays;
 
 import us.ihmc.pubsub.common.Guid;
+import us.ihmc.robotDataLogger.dataBuffers.CustomLogDataPublisherType;
 import us.ihmc.tools.compression.CompressionImplementation;
 import us.ihmc.tools.compression.CompressionImplementationFactory;
 

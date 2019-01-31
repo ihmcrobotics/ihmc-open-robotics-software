@@ -1,4 +1,4 @@
-package us.ihmc.robotDataLogger.rtps;
+package us.ihmc.robotDataLogger.util;
 
 import java.nio.ByteBuffer;
 import java.security.MessageDigest;

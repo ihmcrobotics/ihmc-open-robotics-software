@@ -4,11 +4,11 @@ import java.util.concurrent.TimeUnit;
 
 import us.ihmc.concurrent.ConcurrentRingBuffer;
 import us.ihmc.pubsub.common.SerializedPayload;
+import us.ihmc.robotDataLogger.dataBuffers.CustomLogDataPublisherType;
 import us.ihmc.robotDataLogger.dataBuffers.LoggerDebugRegistry;
 import us.ihmc.robotDataLogger.dataBuffers.RegistrySendBuffer;
 import us.ihmc.robotDataLogger.dataBuffers.RegistrySendBufferBuilder;
 import us.ihmc.robotDataLogger.interfaces.RegistryPublisher;
-import us.ihmc.robotDataLogger.rtps.CustomLogDataPublisherType;
 import us.ihmc.util.PeriodicThreadScheduler;
 import us.ihmc.util.PeriodicThreadSchedulerFactory;
 

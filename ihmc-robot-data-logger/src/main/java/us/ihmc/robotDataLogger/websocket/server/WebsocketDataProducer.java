@@ -21,11 +21,11 @@ import us.ihmc.robotDataLogger.CameraAnnouncement;
 import us.ihmc.robotDataLogger.CameraType;
 import us.ihmc.robotDataLogger.Handshake;
 import us.ihmc.robotDataLogger.YoVariableServer;
+import us.ihmc.robotDataLogger.dataBuffers.CustomLogDataPublisherType;
 import us.ihmc.robotDataLogger.dataBuffers.RegistrySendBufferBuilder;
 import us.ihmc.robotDataLogger.interfaces.DataProducer;
 import us.ihmc.robotDataLogger.interfaces.RegistryPublisher;
-import us.ihmc.robotDataLogger.rtps.CustomLogDataPublisherType;
-import us.ihmc.robotDataLogger.rtps.HandshakeHashCalculator;
+import us.ihmc.robotDataLogger.util.HandshakeHashCalculator;
 import us.ihmc.util.PeriodicThreadSchedulerFactory;
 
 public class WebsocketDataProducer implements DataProducer
