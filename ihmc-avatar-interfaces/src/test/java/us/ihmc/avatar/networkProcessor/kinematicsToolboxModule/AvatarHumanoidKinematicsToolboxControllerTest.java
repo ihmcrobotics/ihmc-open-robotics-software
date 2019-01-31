@@ -249,7 +249,7 @@ public abstract class AvatarHumanoidKinematicsToolboxControllerTest implements M
          double solutionQuality = toolboxController.getSolution().getSolutionQuality();
          if (VERBOSE)
             LogTools.info("Solution quality: " + solutionQuality);
-         assertTrue("Poor solution quality: " + solutionQuality, solutionQuality < 1.0e-4);
+         assertTrue("Poor solution quality: " + solutionQuality, solutionQuality < 2.0e-3);
       }
    }
 
@@ -309,8 +309,8 @@ public abstract class AvatarHumanoidKinematicsToolboxControllerTest implements M
       {
          LogTools.info("Solution quality: average = " + averageSolutionQuality + ", worst = " + worstSolutionQuality);
       }
-      assertTrue("Poor worst solution quality: " + worstSolutionQuality, worstSolutionQuality < 5.0e-4);
-      assertTrue("Poor average solution quality: " + averageSolutionQuality, averageSolutionQuality < 5.0e-5);
+      assertTrue("Poor worst solution quality: " + worstSolutionQuality, worstSolutionQuality < 5.0e-3);
+      assertTrue("Poor average solution quality: " + averageSolutionQuality, averageSolutionQuality < 1.0e-3);
    }
 
    @Test
@@ -338,7 +338,7 @@ public abstract class AvatarHumanoidKinematicsToolboxControllerTest implements M
 
       for (int i = 0; i < numberOfTests; i++)
       {
-         randomizeJointPositions(random, randomizedFullRobotModel.getOneDoFJoints(), 0.5);
+         randomizeJointPositions(random, randomizedFullRobotModel.getOneDoFJoints(), 0.33);
          randomizedFullRobotModel.updateFrames();
          ReferenceFrame rootJointFrame = randomizedFullRobotModel.getRootJoint().getFrameAfterJoint();
          ReferenceFrame supportFootFrame = randomizedFullRobotModel.getFoot(supportFootSide).getBodyFixedFrame();
@@ -388,8 +388,8 @@ public abstract class AvatarHumanoidKinematicsToolboxControllerTest implements M
       {
          LogTools.info("Solution quality: average = " + averageSolutionQuality + ", worst = " + worstSolutionQuality);
       }
-      assertTrue("Poor worst solution quality: " + worstSolutionQuality, worstSolutionQuality < 2.0e-3);
-      assertTrue("Poor average solution quality: " + averageSolutionQuality, averageSolutionQuality < 1.0e-4);
+      assertTrue("Poor worst solution quality: " + worstSolutionQuality, worstSolutionQuality < 3.0e-2);
+      assertTrue("Poor average solution quality: " + averageSolutionQuality, averageSolutionQuality < 2.0e-3);
    }
 
    private void runKinematicsToolboxController(int numberOfIterations) throws SimulationExceededMaximumTimeException
