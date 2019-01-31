@@ -30,7 +30,6 @@ import us.ihmc.robotDataLogger.Handshake;
 import us.ihmc.robotDataLogger.HandshakePubSubType;
 import us.ihmc.robotDataLogger.YoVariableClientImplementation;
 import us.ihmc.robotDataLogger.handshake.IDLYoVariableHandshakeParser;
-import us.ihmc.robotDataLogger.interfaces.DataConsumer;
 import us.ihmc.robotDataLogger.listeners.ClearLogListener;
 import us.ihmc.robotDataLogger.listeners.LogAnnouncementListener;
 import us.ihmc.robotDataLogger.listeners.TimestampListener;
@@ -41,7 +40,7 @@ import us.ihmc.robotDataLogger.listeners.TimestampListener;
  * @author jesper
  *
  */
-public class RTPSDataConsumerParticipant implements DataConsumer
+public class RTPSDataConsumerParticipant
 {
 
    private final ReentrantLock announcementLock = new ReentrantLock();
@@ -223,7 +222,6 @@ public class RTPSDataConsumerParticipant implements DataConsumer
     * @throws IOException if no reply has been received within  the timeout
     * @throws RuntimeException if no model file is announced in the announcement
     */
-   @Override
    public byte[] getModelFile(Announcement announcement, int timeout) throws IOException
    {
       if (!announcement.getModelFileDescription().getHasModel())
@@ -250,7 +248,6 @@ public class RTPSDataConsumerParticipant implements DataConsumer
     * @throws IOException if no reply has been received within the timeout
     * @throws RuntimeException if no resource bundle is announced in the announcement
     */
-   @Override
    public byte[] getResourceZip(Announcement announcement, int timeout) throws IOException
    {
       if (!announcement.getModelFileDescription().getHasResourceZip())
@@ -277,7 +274,6 @@ public class RTPSDataConsumerParticipant implements DataConsumer
     * 
     * @throws IOException if no reply has been received within the timeout
     */
-   @Override
    public Handshake getHandshake(Announcement announcement, int timeout) throws IOException
    {
       HandshakePubSubType handshakePubSubType = new HandshakePubSubType();
@@ -338,7 +334,6 @@ public class RTPSDataConsumerParticipant implements DataConsumer
     * 
     * After calling this function 
     */
-   @Override
    public synchronized void remove()
    {
       if (participant != null)
@@ -377,7 +372,6 @@ public class RTPSDataConsumerParticipant implements DataConsumer
     * 
     * @throws IOException
     */
-   @Override
    public synchronized void sendClearLogRequest() throws IOException
    {
       if (session != null)
