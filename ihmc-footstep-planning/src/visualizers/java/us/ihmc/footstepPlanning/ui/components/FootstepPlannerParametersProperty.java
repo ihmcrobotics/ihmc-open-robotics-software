@@ -1,5 +1,6 @@
 package us.ihmc.footstepPlanning.ui.components;
 
+import com.fasterxml.jackson.databind.annotation.JsonAppend.Prop;
 import javafx.beans.property.Property;
 import us.ihmc.footstepPlanning.FootstepPlannerType;
 import us.ihmc.footstepPlanning.graphSearch.parameters.DefaultFootstepPlanningParameters;
@@ -23,6 +24,10 @@ public class FootstepPlannerParametersProperty extends ParametersProperty<Settab
    private DoubleField maxStepWidth = new DoubleField(SettableFootstepPlannerParameters::getMaximumStepWidth, SettableFootstepPlannerParameters::setMaximumStepWidth);
    private DoubleField minXClearanceFromStance = new DoubleField(SettableFootstepPlannerParameters::getMinXClearanceFromStance, SettableFootstepPlannerParameters::setMinXClearanceFromStance);
    private DoubleField minYClearanceFromStance = new DoubleField(SettableFootstepPlannerParameters::getMinYClearanceFromStance, SettableFootstepPlannerParameters::setMinYClearanceFromStance);
+   private DoubleField maxXForStepUp = new DoubleField(SettableFootstepPlannerParameters::getMaximumStepReachWhenSteppingUp, SettableFootstepPlannerParameters::setMaximumStepReachWhenSteppingUp);
+   private DoubleField minZToConsiderStepUp = new DoubleField(SettableFootstepPlannerParameters::getMaximumStepZWhenSteppingUp, SettableFootstepPlannerParameters::setMaximumStepZWhenSteppingUp);
+   private DoubleField maxXForStepDown = new DoubleField(SettableFootstepPlannerParameters::getMaximumStepXWhenForwardAndDown, SettableFootstepPlannerParameters::setMaximumStepXWhenForwardAndDown);
+   private DoubleField minZToConsiderStepDown = new DoubleField(SettableFootstepPlannerParameters::getMaximumStepZWhenForwardAndDown, SettableFootstepPlannerParameters::setMaximumStepZWhenForwardAndDown);
 
    private BooleanField returnBestEffortPlan = new BooleanField(SettableFootstepPlannerParameters::getReturnBestEffortPlan, SettableFootstepPlannerParameters::setReturnBestEffortPlan);
    private BooleanField useQuadraticDistanceCost = new BooleanField(SettableFootstepPlannerParameters::useQuadraticDistanceCost, SettableFootstepPlannerParameters::setUseQuadraticDistanceCost);
@@ -277,5 +282,25 @@ public class FootstepPlannerParametersProperty extends ParametersProperty<Settab
    public void bidirectionalBindUseQuadraticDistanceCost(Property<Boolean> property)
    {
       bindFieldBidirectionalToBooleanProperty(property, useQuadraticDistanceCost);
+   }
+
+   public void bidirectionBindMaxXForStepUp(Property<Double> property)
+   {
+      bindFieldBidirectionalToNumberProperty(property, maxXForStepUp);
+   }
+
+   public void bidirectionBindMinZToConsiderStepUp(Property<Double> property)
+   {
+      bindFieldBidirectionalToNumberProperty(property, minZToConsiderStepUp);
+   }
+
+   public void bidirectionBindMaxXForStepDown(Property<Double> property)
+   {
+      bindFieldBidirectionalToNumberProperty(property, maxXForStepDown);
+   }
+
+   public void bidirectionBindMinZToConsiderStepDown(Property<Double> property)
+   {
+      bindFieldBidirectionalToNumberProperty(property, minZToConsiderStepDown);
    }
 }

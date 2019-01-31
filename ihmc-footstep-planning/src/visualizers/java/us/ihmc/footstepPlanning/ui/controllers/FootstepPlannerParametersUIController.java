@@ -69,6 +69,15 @@ public class FootstepPlannerParametersUIController
    @FXML
    private Spinner<Double> wiggleInsideDeltaSpinner;
 
+   @FXML
+   private Spinner<Double> maxStepUpX;
+   @FXML
+   private Spinner<Double> stepUpHeight;
+   @FXML
+   private Spinner<Double> maxStepDownX;
+   @FXML
+   private Spinner<Double> stepDownHeight;
+
    private static final double footWidth = 0.15;
    private static final double footLength = 0.25;
    private static final double leftFootOriginX = 30;
@@ -95,6 +104,10 @@ public class FootstepPlannerParametersUIController
       minStepLength.setValueFactory(new DoubleSpinnerValueFactory(-0.6, 0.0, 0.0, 0.05));
       maxStepZ.setValueFactory(new DoubleSpinnerValueFactory(0.0, 0.5, 0.0, 0.02));
       minSurfaceIncline.setValueFactory(new DoubleSpinnerValueFactory(0.0, 1.5, 0.0, 0.1));
+      maxStepUpX.setValueFactory(new DoubleSpinnerValueFactory(0.0, 1.5, 0.0, 0.01));
+      stepUpHeight.setValueFactory(new DoubleSpinnerValueFactory(0.0, 1.5, 0.0, 0.01));
+      maxStepDownX.setValueFactory(new DoubleSpinnerValueFactory(0.0, 1.5, 0.0, 0.01));
+      stepDownHeight.setValueFactory(new DoubleSpinnerValueFactory(0.0, 1.5, 0.0, 0.01));
 
       maxStepYaw.setValueFactory(new DoubleSpinnerValueFactory(0.0, 1.5, 0.0, 0.1));
       minStepYaw.setValueFactory(new DoubleSpinnerValueFactory(-1.5, 0.0, 0.0, 0.1));
@@ -147,6 +160,11 @@ public class FootstepPlannerParametersUIController
       parametersProperty.bidirectionalBindMaxWiggleXY(maxXYWiggleSpinner.getValueFactory().valueProperty());
       parametersProperty.bidirectionalBindMaxWiggleYaw(maxYawWiggleSpinner.getValueFactory().valueProperty());
       parametersProperty.bidirectionalBindWiggleInsideDelta(wiggleInsideDeltaSpinner.getValueFactory().valueProperty());
+
+      parametersProperty.bidirectionBindMaxXForStepUp(maxStepUpX.getValueFactory().valueProperty());
+      parametersProperty.bidirectionBindMinZToConsiderStepUp(stepUpHeight.getValueFactory().valueProperty());
+      parametersProperty.bidirectionBindMaxXForStepDown(maxStepDownX.getValueFactory().valueProperty());
+      parametersProperty.bidirectionBindMinZToConsiderStepDown(stepDownHeight.getValueFactory().valueProperty());
 
       messager.bindBidirectional(FootstepPlannerMessagerAPI.PlannerParametersTopic, parametersProperty, createConverter(), true);
 
