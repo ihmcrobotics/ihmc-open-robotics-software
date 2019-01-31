@@ -1,5 +1,6 @@
 package us.ihmc.robotDataLogger.websocket.client;
 
+import io.netty.buffer.ByteBuf;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelHandlerContext;
@@ -14,8 +15,11 @@ import io.netty.handler.codec.http.websocketx.WebSocketClientHandshaker;
 import io.netty.handler.codec.http.websocketx.WebSocketFrame;
 import io.netty.handler.codec.http.websocketx.WebSocketHandshakeException;
 import io.netty.util.CharsetUtil;
+import us.ihmc.pubsub.common.SerializedPayload;
 import us.ihmc.robotDataLogger.YoVariableClientImplementation;
 import us.ihmc.robotDataLogger.dataBuffers.RegistryConsumer;
+import us.ihmc.robotDataLogger.dataBuffers.RegistryReceiveBuffer;
+import us.ihmc.robotDataLogger.rtps.CustomLogDataSubscriberType;
 
 public class WebSocketDataServerClientHandler extends SimpleChannelInboundHandler<Object>
 {
@@ -24,13 +28,19 @@ public class WebSocketDataServerClientHandler extends SimpleChannelInboundHandle
    private final RegistryConsumer consumer;
    private final YoVariableClientImplementation yoVariableClient;
 
+   private final CustomLogDataSubscriberType type;
+   private final SerializedPayload payload;
+   
    private ChannelPromise handshakeFuture;
 
-   public WebSocketDataServerClientHandler(WebSocketClientHandshaker handshaker, YoVariableClientImplementation yoVariableClient, RegistryConsumer consumer)
+   public WebSocketDataServerClientHandler(WebSocketClientHandshaker handshaker, YoVariableClientImplementation yoVariableClient, RegistryConsumer consumer, CustomLogDataSubscriberType type)
    {
       this.handshaker = handshaker;
-      this.consumer = consumer;
       this.yoVariableClient = yoVariableClient;
+      this.consumer = consumer;
+      this.type = type;
+      
+      this.payload = new SerializedPayload(type.getTypeSize());
    }
 
    public ChannelFuture handshakeFuture()
@@ -53,7 +63,6 @@ public class WebSocketDataServerClientHandler extends SimpleChannelInboundHandle
    @Override
    public void channelInactive(ChannelHandlerContext ctx)
    {
-      System.out.println("WebSocket Client disconnected!");
       consumer.stopImmediatly();
    }
 
@@ -66,13 +75,12 @@ public class WebSocketDataServerClientHandler extends SimpleChannelInboundHandle
          try
          {
             handshaker.finishHandshake(ch, (FullHttpResponse) msg);
-            System.out.println("WebSocket Client connected!");
             yoVariableClient.connected();
             handshakeFuture.setSuccess();
          }
          catch (WebSocketHandshakeException e)
          {
-            System.out.println("WebSocket Client failed to connect");
+            e.printStackTrace();
             consumer.stopImmediatly();
             handshakeFuture.setFailure(e);
          }
@@ -93,7 +101,13 @@ public class WebSocketDataServerClientHandler extends SimpleChannelInboundHandle
       }
       else if (frame instanceof BinaryWebSocketFrame)
       {
-         System.out.println("Received binary package of " + frame.content());
+         RegistryReceiveBuffer buffer = new RegistryReceiveBuffer(System.nanoTime());
+         payload.getData().clear();
+         payload.getData().limit(frame.content().readableBytes());
+         frame.content().readBytes(payload.getData());
+         payload.getData().flip();
+         type.deserialize(payload, buffer);
+         consumer.onNewDataMessage(buffer);
       }
       else if (frame instanceof PongWebSocketFrame)
       {

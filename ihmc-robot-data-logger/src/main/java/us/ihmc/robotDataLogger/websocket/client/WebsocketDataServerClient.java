@@ -22,6 +22,7 @@ import io.netty.handler.codec.http.websocketx.extensions.compression.WebSocketCl
 import us.ihmc.robotDataLogger.YoVariableClientImplementation;
 import us.ihmc.robotDataLogger.dataBuffers.RegistryConsumer;
 import us.ihmc.robotDataLogger.handshake.IDLYoVariableHandshakeParser;
+import us.ihmc.robotDataLogger.rtps.CustomLogDataSubscriberType;
 import us.ihmc.robotDataLogger.rtps.RTPSDebugRegistry;
 import us.ihmc.robotDataLogger.websocket.client.discovery.HTTPDataServerDescription;
 
@@ -46,11 +47,11 @@ public class WebsocketDataServerClient
       
       this.consumer = new RegistryConsumer(parser, yoVariableClient, rtpsDebugRegistry);
       
-
+      CustomLogDataSubscriberType type = new CustomLogDataSubscriberType(parser.getNumberOfVariables(), parser.getNumberOfStates());
       final WebSocketDataServerClientHandler handler = new WebSocketDataServerClientHandler(WebSocketClientHandshakerFactory.newHandshaker(uri,
                                                                                                                                            WebSocketVersion.V13,
                                                                                                                                            null, true,
-                                                                                                                                           new DefaultHttpHeaders()), yoVariableClient, consumer);
+                                                                                                                                           new DefaultHttpHeaders()), yoVariableClient, consumer, type);
 
       Bootstrap b = new Bootstrap();
       b.group(group).channel(NioSocketChannel.class).handler(new ChannelInitializer<SocketChannel>()

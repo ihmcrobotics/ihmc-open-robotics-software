@@ -102,22 +102,14 @@ public class WebsocketDataServerFrameHandler extends SimpleChannelInboundHandler
          synchronized(lock)
          {
             queue.add(websocketFrame);            
+
+            if(!task.scheduled)
+            {
+               task.init();
+               channel.eventLoop().execute(task);
+            }
          }
       }
-      else
-      {
-         System.err.println("Cannot add frame to queue");
-      }
-      
-      synchronized(lock)
-      {
-         if(!task.scheduled)
-         {
-            task.init();
-            channel.eventLoop().execute(task);
-         }
-      }
-      
    }
 
    private class WriteTask implements Runnable

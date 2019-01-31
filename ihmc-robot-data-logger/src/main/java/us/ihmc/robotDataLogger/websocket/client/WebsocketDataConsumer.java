@@ -103,8 +103,8 @@ public class WebsocketDataConsumer implements DataConsumer
          {
             throw new IOException("Not connected");
          }
-         connection.close();
 
+         connection.close();
          session = new WebsocketDataServerClient(connection.getTarget(), parser, yoVariableClient, rtpsDebugRegistry);
       }
    }
