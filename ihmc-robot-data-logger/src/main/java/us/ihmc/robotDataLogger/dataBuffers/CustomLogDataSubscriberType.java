@@ -1,4 +1,4 @@
-package us.ihmc.robotDataLogger.rtps;
+package us.ihmc.robotDataLogger.dataBuffers;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
@@ -8,7 +8,7 @@ import us.ihmc.idl.InterchangeSerializer;
 import us.ihmc.pubsub.TopicDataType;
 import us.ihmc.pubsub.common.SerializedPayload;
 import us.ihmc.robotDataLogger.LogDataType;
-import us.ihmc.robotDataLogger.dataBuffers.RegistryReceiveBuffer;
+import us.ihmc.robotDataLogger.rtps.RTPSDataProducerParticipant;
 import us.ihmc.tools.compression.CompressionImplementation;
 import us.ihmc.tools.compression.CompressionImplementationFactory;
 

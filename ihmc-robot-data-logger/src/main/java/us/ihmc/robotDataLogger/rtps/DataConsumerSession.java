@@ -21,6 +21,7 @@ import us.ihmc.robotDataLogger.TimestampPubSubType;
 import us.ihmc.robotDataLogger.VariableChangeRequest;
 import us.ihmc.robotDataLogger.VariableChangeRequestPubSubType;
 import us.ihmc.robotDataLogger.YoVariableClientImplementation;
+import us.ihmc.robotDataLogger.dataBuffers.CustomLogDataSubscriberType;
 import us.ihmc.robotDataLogger.dataBuffers.RegistryConsumer;
 import us.ihmc.robotDataLogger.handshake.IDLYoVariableHandshakeParser;
 import us.ihmc.robotDataLogger.listeners.ClearLogListener;

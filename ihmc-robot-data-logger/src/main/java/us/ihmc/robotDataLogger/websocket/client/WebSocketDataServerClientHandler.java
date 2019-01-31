@@ -17,9 +17,9 @@ import io.netty.handler.codec.http.websocketx.WebSocketHandshakeException;
 import io.netty.util.CharsetUtil;
 import us.ihmc.pubsub.common.SerializedPayload;
 import us.ihmc.robotDataLogger.YoVariableClientImplementation;
+import us.ihmc.robotDataLogger.dataBuffers.CustomLogDataSubscriberType;
 import us.ihmc.robotDataLogger.dataBuffers.RegistryConsumer;
 import us.ihmc.robotDataLogger.dataBuffers.RegistryReceiveBuffer;
-import us.ihmc.robotDataLogger.rtps.CustomLogDataSubscriberType;
 
 public class WebSocketDataServerClientHandler extends SimpleChannelInboundHandler<Object>
 {

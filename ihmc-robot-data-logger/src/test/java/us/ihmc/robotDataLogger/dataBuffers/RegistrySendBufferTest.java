@@ -23,8 +23,6 @@ import us.ihmc.robotDataLogger.jointState.JointHolder;
 import us.ihmc.robotDataLogger.jointState.JointState;
 import us.ihmc.robotDataLogger.jointState.OneDoFJointHolder;
 import us.ihmc.robotDataLogger.jointState.OneDoFState;
-import us.ihmc.robotDataLogger.rtps.CustomLogDataPublisherType;
-import us.ihmc.robotDataLogger.rtps.CustomLogDataSubscriberType;
 import us.ihmc.robotDataLogger.rtps.RTPSDataProducerParticipant;
 import us.ihmc.robotDataLogger.rtps.LogParticipantTools;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;

@@ -20,9 +20,9 @@ import io.netty.handler.codec.http.websocketx.WebSocketClientHandshakerFactory;
 import io.netty.handler.codec.http.websocketx.WebSocketVersion;
 import io.netty.handler.codec.http.websocketx.extensions.compression.WebSocketClientCompressionHandler;
 import us.ihmc.robotDataLogger.YoVariableClientImplementation;
+import us.ihmc.robotDataLogger.dataBuffers.CustomLogDataSubscriberType;
 import us.ihmc.robotDataLogger.dataBuffers.RegistryConsumer;
 import us.ihmc.robotDataLogger.handshake.IDLYoVariableHandshakeParser;
-import us.ihmc.robotDataLogger.rtps.CustomLogDataSubscriberType;
 import us.ihmc.robotDataLogger.rtps.RTPSDebugRegistry;
 import us.ihmc.robotDataLogger.websocket.client.discovery.HTTPDataServerDescription;
 

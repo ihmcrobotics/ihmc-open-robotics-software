@@ -6,8 +6,8 @@ import static org.junit.Assert.assertTrue;
 import org.junit.Test;
 
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
-import us.ihmc.robotDataLogger.rtps.CustomLogDataPublisherType;
 import us.ihmc.robotDataLogger.rtps.RTPSDataProducerParticipant;
+import us.ihmc.robotDataLogger.dataBuffers.CustomLogDataPublisherType;
 import us.ihmc.robotDataLogger.rtps.LogParticipantTools;
 import us.ihmc.tools.compression.CompressionImplementation;
 import us.ihmc.tools.compression.CompressionImplementationFactory;

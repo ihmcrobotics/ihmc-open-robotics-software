@@ -32,7 +32,7 @@ public class ExampleServer
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
    private final YoVariableServer yoVariableServer;
    
-   private final List<YoVariable<?>> allVariables = new ArrayList<>();
+   private final List<YoVariable<?>> allChangingVariables = new ArrayList<>();
 
    private long timestamp = 0;
 
@@ -71,14 +71,21 @@ public class ExampleServer
          new YoEnum<>("Enum" + i, registry, SomeEnum.class, random.nextBoolean());
       }
       
-      allVariables.addAll(registry.getAllVariablesIncludingDescendants());
+      
+      allChangingVariables.addAll(registry.getAllVariablesIncludingDescendants());
+      
+      
+      YoDouble input = new YoDouble("input", registry);
+      YoDouble output = new YoDouble("output", registry);
+      input.addVariableChangedListener((v) -> output.set(input.getValue()));
+      
    }
 
    private void updateVariables()
    {
-      for (int varIdx = 0; varIdx < allVariables.size(); varIdx++)
+      for (int varIdx = 0; varIdx < allChangingVariables.size(); varIdx++)
       {
-         updateVariable(allVariables.get(varIdx));
+         updateVariable(allChangingVariables.get(varIdx));
       }
    }
 

@@ -8,7 +8,6 @@ import us.ihmc.mecano.multiBodySystem.interfaces.JointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.robotDataLogger.jointState.JointHolder;
 import us.ihmc.robotDataLogger.jointState.JointHolderFactory;
-import us.ihmc.robotDataLogger.rtps.CustomLogDataPublisherType;
 import us.ihmc.robotDataLogger.rtps.RTPSDataProducerParticipant;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoVariable;

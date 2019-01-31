@@ -3,9 +3,9 @@ package us.ihmc.robotDataLogger.example;
 import java.io.IOException;
 
 import us.ihmc.commons.thread.ThreadTools;
+import us.ihmc.robotDataLogger.dataBuffers.CustomLogDataPublisherType;
 import us.ihmc.robotDataLogger.dataBuffers.RegistrySendBufferBuilder;
 import us.ihmc.robotDataLogger.interfaces.RegistryPublisher;
-import us.ihmc.robotDataLogger.rtps.CustomLogDataPublisherType;
 import us.ihmc.robotDataLogger.util.PeriodicGCFreeNonRealtimeThreadSchedulerFactory;
 import us.ihmc.robotDataLogger.websocket.server.WebsocketDataProducer;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
