@@ -3,13 +3,15 @@ package us.ihmc.robotDataLogger;
 import java.io.IOException;
 
 import us.ihmc.robotDataLogger.rtps.RTPSDataConsumerParticipant;
+import us.ihmc.robotDataLogger.websocket.client.discovery.DataServerDiscoveryClient;
+import us.ihmc.robotDataLogger.websocket.client.discovery.DataServerDiscoveryListener;
+import us.ihmc.robotDataLogger.websocket.client.discovery.HTTPDataServerConnection;
 import us.ihmc.robotDataLogger.rtps.LogProducerDisplay;
 
 public class YoVariableClient
 {
    private final YoVariableClientImplementation yoVariableClientImplementation;
    private final LogProducerDisplay.LogSessionFilter[] sessionFilters;
-   private final RTPSDataConsumerParticipant dataConsumerParticipant;
 
    /**
     * Start a new client while allowing the user to select a desired logging session
@@ -19,15 +21,7 @@ public class YoVariableClient
     */
    public YoVariableClient(YoVariablesUpdatedListener listener, LogProducerDisplay.LogSessionFilter... filters)
    {
-      try
-      {
-         this.dataConsumerParticipant = new RTPSDataConsumerParticipant("YoVariableClient");
-      }
-      catch (IOException e)
-      {
-         throw new RuntimeException(e);
-      }
-      this.yoVariableClientImplementation = new YoVariableClientImplementation(dataConsumerParticipant, listener);
+      this.yoVariableClientImplementation = new YoVariableClientImplementation(listener);
       this.sessionFilters = filters;
    }
 
@@ -38,9 +32,7 @@ public class YoVariableClient
     */
    public YoVariableClient(RTPSDataConsumerParticipant participant, final YoVariablesUpdatedListener yoVariablesUpdatedListener)
    {
-      this.dataConsumerParticipant = participant;
-      this.yoVariableClientImplementation = new YoVariableClientImplementation(participant, yoVariablesUpdatedListener);
-      this.sessionFilters = null;
+      throw new RuntimeException("TODO: Remove me");
    }
 
    public void start()
@@ -57,13 +49,49 @@ public class YoVariableClient
 
    public void start(int timeout) throws IOException
    {
-      Announcement announcement = LogProducerDisplay.getAnnounceRequest(dataConsumerParticipant, sessionFilters);
-      start(timeout, announcement);
+//      Announcement announcement = LogProducerDisplay.getAnnounceRequest(dataConsumerParticipant, sessionFilters);
+//      start(timeout, announcement);
+      
+      DataServerDiscoveryClient discoveryClient = new DataServerDiscoveryClient(new DataServerDiscoveryListener()
+      {
+         
+         @Override
+         public void disconnected(HTTPDataServerConnection connection)
+         {
+            // TODO Auto-generated method stub
+            
+         }
+         
+         @Override
+         public void connected(HTTPDataServerConnection connection)
+         {
+            System.out.println("Connected to host, starting visualizer");
+            new Thread(() -> {
+               
+               try
+               {
+                  start(timeout, connection);
+               }
+               catch (IOException e)
+               {
+                  e.printStackTrace();
+               }
+            }).start();
+         }
+      });
+      
+      discoveryClient.addHost("127.0.0.1", 8008, true);
+      
    }
 
    public void start(int timeout, Announcement announcement) throws IOException
    {
-      yoVariableClientImplementation.start(timeout, announcement);
+      throw new RuntimeException("TODO: Remove me");
+   }
+   
+   public void start(int timeout, HTTPDataServerConnection connection) throws IOException
+   {
+      yoVariableClientImplementation.start(timeout, connection);
    }
    
    

@@ -2,8 +2,13 @@ package us.ihmc.robotDataLogger.interfaces;
 
 import java.io.IOException;
 
-import us.ihmc.robotDataLogger.Announcement;
 import us.ihmc.robotDataLogger.Handshake;
+import us.ihmc.robotDataLogger.YoVariableClientImplementation;
+import us.ihmc.robotDataLogger.handshake.IDLYoVariableHandshakeParser;
+import us.ihmc.robotDataLogger.listeners.ClearLogListener;
+import us.ihmc.robotDataLogger.listeners.TimestampListener;
+import us.ihmc.robotDataLogger.rtps.RTPSDebugRegistry;
+import us.ihmc.robotDataLogger.rtps.VariableChangedProducer;
 
 public interface DataConsumer
 {
@@ -18,7 +23,7 @@ public interface DataConsumer
     * @throws IOException if no reply has been received within  the timeout
     * @throws RuntimeException if no model file is announced in the announcement
     */
-   byte[] getModelFile(Announcement announcement, int timeout) throws IOException;
+   byte[] getModelFile(int timeout) throws IOException;
 
    /**
     * Requests the resource zip 
@@ -30,7 +35,7 @@ public interface DataConsumer
     * @throws IOException if no reply has been received within the timeout
     * @throws RuntimeException if no resource bundle is announced in the announcement
     */
-   byte[] getResourceZip(Announcement announcement, int timeout) throws IOException;
+   byte[] getResourceZip(int timeout) throws IOException;
 
    /**
     * Request the handshake 
@@ -42,14 +47,7 @@ public interface DataConsumer
     * 
     * @throws IOException if no reply has been received within the timeout
     */
-   Handshake getHandshake(Announcement announcement, int timeout) throws IOException;
-
-   /**
-    * Remove the participant from the domain.
-    * 
-    * After calling this function 
-    */
-   void remove();
+   Handshake getHandshake(int timeout) throws IOException;
 
    /**
     * Broadcast a clear log request for the current session
@@ -59,5 +57,47 @@ public interface DataConsumer
     * @throws IOException
     */
    void sendClearLogRequest() throws IOException;
+
+   /**
+    * Start a new session
+    * 
+    * @param parser
+    * @param yoVariableClient
+    * @param variableChangedProducer
+    * @param timeStampListener
+    * @param clearLogListener
+    * @param rtpsDebugRegistry
+    */
+   void startSession(IDLYoVariableHandshakeParser parser, YoVariableClientImplementation yoVariableClient, VariableChangedProducer variableChangedProducer,
+                      TimestampListener timeStampListener, ClearLogListener clearLogListener, RTPSDebugRegistry rtpsDebugRegistry);
+
+   /**
+    * 
+    * @return true if the current session is connected
+    */
+   boolean isSessionActive();
+   
+   /**
+    * Disconnect the session, but allow to reconnect
+    */
+   void disconnectSession();
+
+   /**
+    * Close the connection completely. This makes reconnecting impossible.
+    */
+   void close();
+
+   /**
+    * @return true if the consumer is closed.
+    */
+   boolean isClosed();
+
+   /**
+    * Reconnect to the same host to continue the log.
+    * 
+    * @return true if the reconnect is successful
+    */
+   boolean reconnect();
+
 
 }

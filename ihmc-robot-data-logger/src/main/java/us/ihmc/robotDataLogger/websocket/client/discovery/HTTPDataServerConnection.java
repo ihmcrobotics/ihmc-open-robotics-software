@@ -115,7 +115,7 @@ public class HTTPDataServerConnection
       requestResource(LogHTTPPaths.announcement, (buf) -> receivedAnnouncement(buf));
    }
    
-   public boolean isConnectected()
+   public boolean isConnected()
    {
       if(channel != null)
       {
