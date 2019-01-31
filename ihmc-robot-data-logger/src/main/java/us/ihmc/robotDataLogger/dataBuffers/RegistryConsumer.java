@@ -15,7 +15,7 @@ import us.ihmc.robotDataLogger.LogDataType;
 import us.ihmc.robotDataLogger.YoVariableClientImplementation;
 import us.ihmc.robotDataLogger.handshake.IDLYoVariableHandshakeParser;
 import us.ihmc.robotDataLogger.rtps.LogParticipantTools;
-import us.ihmc.robotDataLogger.rtps.RTPSDebugRegistry;
+import us.ihmc.robotDataLogger.util.DebugRegistry;
 
 public class RegistryConsumer extends Thread implements SubscriberListener
 {
@@ -53,9 +53,9 @@ public class RegistryConsumer extends Thread implements SubscriberListener
    
    private long lastPacketReceived;
    
-   private final RTPSDebugRegistry debugRegistry;
+   private final DebugRegistry debugRegistry;
    
-   public RegistryConsumer(IDLYoVariableHandshakeParser parser, YoVariableClientImplementation yoVariableClient, RTPSDebugRegistry debugRegistry)
+   public RegistryConsumer(IDLYoVariableHandshakeParser parser, YoVariableClientImplementation yoVariableClient, DebugRegistry debugRegistry)
    {
       this.parser = parser;
       this.registryDecompressor = new RegistryDecompressor(parser.getYoVariablesList(), parser.getJointStates());

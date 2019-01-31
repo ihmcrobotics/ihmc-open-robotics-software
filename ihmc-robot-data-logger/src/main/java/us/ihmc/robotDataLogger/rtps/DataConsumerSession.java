@@ -27,6 +27,7 @@ import us.ihmc.robotDataLogger.handshake.IDLYoVariableHandshakeParser;
 import us.ihmc.robotDataLogger.interfaces.VariableChangedProducer;
 import us.ihmc.robotDataLogger.listeners.ClearLogListener;
 import us.ihmc.robotDataLogger.listeners.TimestampListener;
+import us.ihmc.robotDataLogger.util.DebugRegistry;
 
 /**
  * A single connection to a variable server.
@@ -65,7 +66,7 @@ public class DataConsumerSession
       
    }
    
-   DataConsumerSession(Domain domain, Announcement announcement, IDLYoVariableHandshakeParser parser, YoVariableClientImplementation yoVariableClient, VariableChangedProducer variableChangedProducer, TimestampListener timeStampListener, ClearLogListener clearLogListener, RTPSDebugRegistry rtpsDebugRegistry) throws IOException
+   DataConsumerSession(Domain domain, Announcement announcement, IDLYoVariableHandshakeParser parser, YoVariableClientImplementation yoVariableClient, VariableChangedProducer variableChangedProducer, TimestampListener timeStampListener, ClearLogListener clearLogListener, DebugRegistry rtpsDebugRegistry) throws IOException
    {
       this.announcement = announcement;
       this.domain = domain;

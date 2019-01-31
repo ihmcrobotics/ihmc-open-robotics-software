@@ -37,7 +37,7 @@ import io.netty.util.CharsetUtil;
 import us.ihmc.idl.serializers.extra.JSONSerializer;
 import us.ihmc.robotDataLogger.Announcement;
 import us.ihmc.robotDataLogger.AnnouncementPubSubType;
-import us.ihmc.robotDataLogger.websocket.LogHTTPPaths;
+import us.ihmc.robotDataLogger.websocket.HTTPDataServerPaths;
 
 public class HTTPDataServerConnection
 {
@@ -167,7 +167,7 @@ public class HTTPDataServerConnection
    private void connected(Channel channel)
    {
       this.channel = channel;
-      requestResource(LogHTTPPaths.announcement, (buf) -> receivedAnnouncement(buf));
+      requestResource(HTTPDataServerPaths.announcement, (buf) -> receivedAnnouncement(buf));
    }
 
    public boolean isConnected()

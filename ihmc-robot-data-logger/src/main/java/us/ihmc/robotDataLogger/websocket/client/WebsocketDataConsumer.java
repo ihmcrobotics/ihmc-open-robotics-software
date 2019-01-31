@@ -7,6 +7,7 @@ import java.util.concurrent.TimeUnit;
 import io.netty.buffer.ByteBuf;
 import io.netty.util.CharsetUtil;
 import us.ihmc.idl.serializers.extra.JSONSerializer;
+import us.ihmc.robotDataLogger.Announcement;
 import us.ihmc.robotDataLogger.Handshake;
 import us.ihmc.robotDataLogger.HandshakePubSubType;
 import us.ihmc.robotDataLogger.YoVariableClientImplementation;
@@ -16,9 +17,11 @@ import us.ihmc.robotDataLogger.interfaces.DataConsumer;
 import us.ihmc.robotDataLogger.interfaces.VariableChangedProducer;
 import us.ihmc.robotDataLogger.listeners.ClearLogListener;
 import us.ihmc.robotDataLogger.listeners.TimestampListener;
-import us.ihmc.robotDataLogger.rtps.RTPSDebugRegistry;
-import us.ihmc.robotDataLogger.websocket.LogHTTPPaths;
+import us.ihmc.robotDataLogger.util.DebugRegistry;
+import us.ihmc.robotDataLogger.websocket.HTTPDataServerPaths;
 import us.ihmc.robotDataLogger.websocket.client.discovery.HTTPDataServerConnection;
+import us.ihmc.robotDataLogger.websocket.client.discovery.HTTPDataServerDescription;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
 
 public class WebsocketDataConsumer implements DataConsumer
 {
@@ -27,6 +30,11 @@ public class WebsocketDataConsumer implements DataConsumer
 
    private WebsocketDataServerClient session;
    private boolean closed = false;
+   
+   
+   private IDLYoVariableHandshakeParser parser;
+   private YoVariableClientImplementation yoVariableClient;
+   private DebugRegistry debugRegistry;
 
    public WebsocketDataConsumer(HTTPDataServerConnection initialConnection)
    {
@@ -59,7 +67,7 @@ public class WebsocketDataConsumer implements DataConsumer
    @Override
    public byte[] getModelFile(int timeout) throws IOException
    {
-      ByteBuf model = getResource(LogHTTPPaths.model, timeout);
+      ByteBuf model = getResource(HTTPDataServerPaths.model, timeout);
       byte[] retVal = new byte[model.readableBytes()];
       model.readBytes(retVal);
 
@@ -69,7 +77,7 @@ public class WebsocketDataConsumer implements DataConsumer
    @Override
    public byte[] getResourceZip(int timeout) throws IOException
    {
-      ByteBuf resourceZip = getResource(LogHTTPPaths.resources, timeout);
+      ByteBuf resourceZip = getResource(HTTPDataServerPaths.resources, timeout);
       byte[] retVal = new byte[resourceZip.readableBytes()];
       resourceZip.readBytes(retVal);
       return retVal;
@@ -78,7 +86,7 @@ public class WebsocketDataConsumer implements DataConsumer
    @Override
    public Handshake getHandshake(int timeout) throws IOException
    {
-      ByteBuf handshake = getResource(LogHTTPPaths.handshake, timeout);
+      ByteBuf handshake = getResource(HTTPDataServerPaths.handshake, timeout);
 
       JSONSerializer<Handshake> serializer = new JSONSerializer<Handshake>(new HandshakePubSubType());
       return serializer.deserialize(handshake.toString(CharsetUtil.UTF_8));
@@ -94,7 +102,7 @@ public class WebsocketDataConsumer implements DataConsumer
    @Override
    public void startSession(IDLYoVariableHandshakeParser parser, YoVariableClientImplementation yoVariableClient,
                             VariableChangedProducer variableChangedProducer, TimestampListener timeStampListener, ClearLogListener clearLogListener,
-                            RTPSDebugRegistry rtpsDebugRegistry)
+                            DebugRegistry debugRegistry)
          throws IOException
    {
       synchronized (lock)
@@ -105,7 +113,11 @@ public class WebsocketDataConsumer implements DataConsumer
          }
 
          connection.close();
-         session = new WebsocketDataServerClient(connection.getTarget(), parser, yoVariableClient, rtpsDebugRegistry);
+         this.parser = parser;
+         this.yoVariableClient = yoVariableClient;
+         this.debugRegistry = debugRegistry;
+         
+         session = new WebsocketDataServerClient(connection.getTarget(), parser, yoVariableClient, debugRegistry);
       }
    }
 
@@ -173,9 +185,41 @@ public class WebsocketDataConsumer implements DataConsumer
    }
 
    @Override
-   public boolean reconnect()
+   public boolean reconnect() throws IOException
    {
-      return false;
+      synchronized(lock)
+      {
+         if(session != null && session.isActive())
+         {
+            throw new RuntimeException("Session is still active");
+         }
+
+         try
+         {
+            HTTPDataServerDescription oldDescription = connection.getTarget();
+            HTTPDataServerConnection newConnection = HTTPDataServerConnection.connect(oldDescription.getHost(), oldDescription.getPort());
+            newConnection.close();
+            
+            Announcement announcement = newConnection.getAnnouncement();
+            Announcement oldAnnouncement = connection.getAnnouncement();
+            if(announcement.getReconnectKeyAsString().equals(oldAnnouncement.getReconnectKeyAsString()))
+            {
+               connection = newConnection;
+               session = new WebsocketDataServerClient(connection.getTarget(), parser, yoVariableClient, debugRegistry);
+               return true;
+            }
+            else
+            {
+               return false;
+            }
+         }
+         catch(IOException e)
+         {
+            System.err.println(e.getMessage());
+            return false;
+         }   
+      }
+      
    }
 
    @Override

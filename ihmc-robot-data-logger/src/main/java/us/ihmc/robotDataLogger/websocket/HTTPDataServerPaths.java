@@ -1,6 +1,6 @@
 package us.ihmc.robotDataLogger.websocket;
 
-public class LogHTTPPaths
+public class HTTPDataServerPaths
 {
    public static final String index = "/index.html";
    public static final String announcement = "/announcement.json";
