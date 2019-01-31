@@ -20,7 +20,6 @@ import us.ihmc.avatar.MultiRobotTestInterface;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.jointAnglesWriter.JointAnglesWriter;
 import us.ihmc.commons.MathTools;
-import us.ihmc.commons.PrintTools;
 import us.ihmc.commons.RandomNumbers;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.communication.controllerAPI.CommandInputManager;
@@ -28,11 +27,11 @@ import us.ihmc.communication.controllerAPI.StatusMessageOutputManager;
 import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.euclid.referenceFrame.tools.ReferenceFrameTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.graphicsDescription.appearance.YoAppearanceRGBColor;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
+import us.ihmc.log.LogTools;
 import us.ihmc.mecano.algorithms.CenterOfMassCalculator;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
@@ -111,7 +110,7 @@ public abstract class AvatarHumanoidKinematicsToolboxControllerTest implements M
       StatusMessageOutputManager statusOutputManager = new StatusMessageOutputManager(KinematicsToolboxModule.supportedStatus());
 
       toolboxController = new HumanoidKinematicsToolboxController(commandInputManager, statusOutputManager, desiredFullRobotModel, yoGraphicsListRegistry,
-                                                          mainRegistry);
+                                                                  mainRegistry);
 
       robot = robotModel.createHumanoidFloatingRootJointRobot(false);
       toolboxUpdater = createToolboxUpdater();
@@ -178,8 +177,6 @@ public abstract class AvatarHumanoidKinematicsToolboxControllerTest implements M
          scs.closeAndDispose();
          scs = null;
       }
-
-      ReferenceFrameTools.clearWorldFrameTree();
    }
 
    @Test
@@ -210,7 +207,7 @@ public abstract class AvatarHumanoidKinematicsToolboxControllerTest implements M
    public void testRandomHandPositions() throws Exception
    {
       if (VERBOSE)
-         PrintTools.info(this, "Entering: testRandomHandPositions");
+         LogTools.info("Entering: testRandomHandPositions");
       Random random = new Random(2135);
       FullHumanoidRobotModel initialFullRobotModel = createFullRobotModelAtInitialConfiguration();
       RobotConfigurationData robotConfigurationData = extractRobotConfigurationData(initialFullRobotModel);
@@ -251,7 +248,7 @@ public abstract class AvatarHumanoidKinematicsToolboxControllerTest implements M
          assertTrue(KinematicsToolboxController.class.getSimpleName() + " did not manage to initialize.", initializationSucceeded.getBooleanValue());
          double solutionQuality = toolboxController.getSolution().getSolutionQuality();
          if (VERBOSE)
-            PrintTools.info(this, "Solution quality: " + solutionQuality);
+            LogTools.info("Solution quality: " + solutionQuality);
          assertTrue("Poor solution quality: " + solutionQuality, solutionQuality < 1.0e-4);
       }
    }
@@ -260,7 +257,7 @@ public abstract class AvatarHumanoidKinematicsToolboxControllerTest implements M
    public void testRandomHandPoses() throws Exception
    {
       if (VERBOSE)
-         PrintTools.info(this, "Entering: testRandomHandPoses");
+         LogTools.info("Entering: testRandomHandPoses");
       Random random = new Random(2134);
       FullHumanoidRobotModel initialFullRobotModel = createFullRobotModelAtInitialConfiguration();
       RobotConfigurationData robotConfigurationData = extractRobotConfigurationData(initialFullRobotModel);
@@ -303,14 +300,14 @@ public abstract class AvatarHumanoidKinematicsToolboxControllerTest implements M
          assertTrue(KinematicsToolboxController.class.getSimpleName() + " did not manage to initialize.", initializationSucceeded.getBooleanValue());
          double solutionQuality = toolboxController.getSolution().getSolutionQuality();
          if (VERBOSE)
-            PrintTools.info(this, "Solution quality: " + solutionQuality);
+            LogTools.info("Solution quality: " + solutionQuality);
          averageSolutionQuality += solutionQuality / numberOfTests;
          worstSolutionQuality = Math.max(worstSolutionQuality, solutionQuality);
       }
 
       if (VERBOSE)
       {
-         PrintTools.info(this, "Solution quality: average = " + averageSolutionQuality + ", worst = " + worstSolutionQuality);
+         LogTools.info("Solution quality: average = " + averageSolutionQuality + ", worst = " + worstSolutionQuality);
       }
       assertTrue("Poor worst solution quality: " + worstSolutionQuality, worstSolutionQuality < 5.0e-4);
       assertTrue("Poor average solution quality: " + averageSolutionQuality, averageSolutionQuality < 5.0e-5);
@@ -320,7 +317,7 @@ public abstract class AvatarHumanoidKinematicsToolboxControllerTest implements M
    public void testSingleSupport() throws Exception
    {
       if (VERBOSE)
-         PrintTools.info(this, "Entering: testSingleSupport");
+         LogTools.info("Entering: testSingleSupport");
       Random random = new Random(2134);
       FullHumanoidRobotModel initialFullRobotModel = createFullRobotModelAtInitialConfiguration();
       RobotConfigurationData robotConfigurationData = extractRobotConfigurationData(initialFullRobotModel);
@@ -348,7 +345,7 @@ public abstract class AvatarHumanoidKinematicsToolboxControllerTest implements M
          RigidBodyTransform transformFromRootJointToWorldFrame = rootJointFrame.getTransformToDesiredFrame(supportFootFrame);
          RigidBodyTransform initialSupportFootTransform = initialFullRobotModel.getFoot(supportFootSide).getBodyFixedFrame().getTransformToWorldFrame();
          transformFromRootJointToWorldFrame.preMultiply(initialSupportFootTransform);
-         
+
          randomizedFullRobotModel.getRootJoint().setJointConfiguration(transformFromRootJointToWorldFrame);
          randomizedFullRobotModel.updateFrames();
 
@@ -382,14 +379,14 @@ public abstract class AvatarHumanoidKinematicsToolboxControllerTest implements M
          assertTrue(KinematicsToolboxController.class.getSimpleName() + " did not manage to initialize.", initializationSucceeded.getBooleanValue());
          double solutionQuality = toolboxController.getSolution().getSolutionQuality();
          if (VERBOSE)
-            PrintTools.info(this, "Solution quality: " + solutionQuality);
+            LogTools.info("Solution quality: " + solutionQuality);
          averageSolutionQuality += solutionQuality / numberOfTests;
          worstSolutionQuality = Math.max(worstSolutionQuality, solutionQuality);
       }
 
       if (VERBOSE)
       {
-         PrintTools.info(this, "Solution quality: average = " + averageSolutionQuality + ", worst = " + worstSolutionQuality);
+         LogTools.info("Solution quality: average = " + averageSolutionQuality + ", worst = " + worstSolutionQuality);
       }
       assertTrue("Poor worst solution quality: " + worstSolutionQuality, worstSolutionQuality < 2.0e-3);
       assertTrue("Poor average solution quality: " + averageSolutionQuality, averageSolutionQuality < 1.0e-4);
