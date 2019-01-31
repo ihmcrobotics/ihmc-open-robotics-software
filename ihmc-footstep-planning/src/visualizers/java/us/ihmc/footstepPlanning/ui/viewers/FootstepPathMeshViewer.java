@@ -1,6 +1,6 @@
 package us.ihmc.footstepPlanning.ui.viewers;
 
-import static us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI.FootstepPlanTopic;
+import static us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI.FootstepPlanResponseTopic;
 import static us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI.NodeDataTopic;
 import static us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI.ShowFootstepPlanTopic;
 import static us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI.ShowNodeDataTopic;
@@ -10,6 +10,8 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 
+import controller_msgs.msg.dds.FootstepDataListMessage;
+import controller_msgs.msg.dds.FootstepDataMessage;
 import controller_msgs.msg.dds.FootstepNodeDataListMessage;
 import controller_msgs.msg.dds.FootstepNodeDataMessage;
 import javafx.animation.AnimationTimer;
@@ -20,11 +22,13 @@ import javafx.scene.paint.Material;
 import javafx.scene.shape.Mesh;
 import javafx.scene.shape.MeshView;
 import us.ihmc.commons.thread.ThreadTools;
+import us.ihmc.communication.packets.ExecutionMode;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple2D.Point2D;
+import us.ihmc.footstepPlanning.FootstepDataMessageConverter;
 import us.ihmc.footstepPlanning.FootstepPlan;
 import us.ihmc.footstepPlanning.SimpleFootstep;
 import us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI;
@@ -59,7 +63,7 @@ public class FootstepPathMeshViewer extends AnimationTimer
 
    public FootstepPathMeshViewer(Messager messager)
    {
-      messager.registerTopicListener(FootstepPlanTopic, footstepPlan -> executorService.submit(() -> {
+      messager.registerTopicListener(FootstepPlanResponseTopic, footstepPlan -> executorService.submit(() -> {
          solutionWasReceived.set(true);
          processFootstepPath(footstepPlan);
       }));
@@ -81,31 +85,32 @@ public class FootstepPathMeshViewer extends AnimationTimer
          return;
 
       IDLSequence.Object<FootstepNodeDataMessage> nodeDataList = message.getNodeData();
-      FootstepPlan footstepPlan = new FootstepPlan();
+      FootstepDataListMessage footstepDataListMessage = new FootstepDataListMessage();
       for (int i = 0; i < nodeDataList.size(); i++)
       {
-         addNodeDataToFootstepPlan(footstepPlan, nodeDataList.get(i));
+         addNodeDataToFootstepPlan(footstepDataListMessage, nodeDataList.get(i));
       }
 
-      processFootstepPath(footstepPlan);
+      processFootstepPath(footstepDataListMessage);
    }
 
-   private static void addNodeDataToFootstepPlan(FootstepPlan footstepPlan, FootstepNodeDataMessage nodeData)
+   private static void addNodeDataToFootstepPlan(FootstepDataListMessage footstepDataListMessage, FootstepNodeDataMessage nodeData)
    {
-      RobotSide robotSide = RobotSide.fromByte(nodeData.getRobotSide());
-
       RigidBodyTransform footstepPose = new RigidBodyTransform();
       footstepPose.setRotationYawAndZeroTranslation(nodeData.getYawIndex() * LatticeNode.gridSizeYaw);
       footstepPose.setTranslationX(nodeData.getXIndex() * LatticeNode.gridSizeXY);
       footstepPose.setTranslationY(nodeData.getYIndex() * LatticeNode.gridSizeXY);
 
+      FootstepDataMessage footstepDataMessage = footstepDataListMessage.getFootstepDataList().add();
       RigidBodyTransform snapTransform = new RigidBodyTransform();
       snapTransform.set(nodeData.getSnapRotation(), nodeData.getSnapTranslation());
       snapTransform.transform(footstepPose);
-      footstepPlan.addFootstep(robotSide, new FramePose3D(ReferenceFrame.getWorldFrame(), footstepPose));
+      footstepDataMessage.getLocation().set(footstepPose.getTranslationVector());
+      footstepDataMessage.getOrientation().set(footstepPose.getRotationMatrix());
+      footstepDataMessage.setRobotSide(nodeData.getRobotSide());
    }
 
-   private synchronized void processFootstepPath(FootstepPlan plan)
+   private synchronized void processFootstepPath(FootstepDataListMessage footstepDataListMessage)
    {
       meshBuilder.clear();
       SideDependentList<Color> colors = solutionWasReceived.get() ? solutionFootstepColors : intermediateFootstepColors;
@@ -113,6 +118,7 @@ public class FootstepPathMeshViewer extends AnimationTimer
       FramePose3D footPose = new FramePose3D();
       RigidBodyTransform transformToWorld = new RigidBodyTransform();
       ConvexPolygon2D foothold = new ConvexPolygon2D();
+      FootstepPlan plan = FootstepDataMessageConverter.convertToFootstepPlan(footstepDataListMessage);
 
       for (int i = 0; i < plan.getNumberOfSteps(); i++)
       {

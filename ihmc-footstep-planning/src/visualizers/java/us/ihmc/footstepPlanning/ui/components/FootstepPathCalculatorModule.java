@@ -2,6 +2,7 @@ package us.ihmc.footstepPlanning.ui.components;
 
 import us.ihmc.commons.PrintTools;
 import us.ihmc.commons.thread.ThreadTools;
+import us.ihmc.communication.packets.ExecutionMode;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
@@ -206,7 +207,7 @@ public class FootstepPathCalculatorModule
 
          if (planningResult.validForExecution())
          {
-            messager.submitMessage(FootstepPlanTopic, footstepPlan);
+            messager.submitMessage(FootstepPlanResponseTopic, FootstepDataMessageConverter.createFootstepDataListFromPlan(footstepPlan, -1.0, -1.0, ExecutionMode.OVERRIDE));
             if (footstepPlan.getLowLevelPlanGoal() != null)
             {
                messager.submitMessage(LowLevelGoalPositionTopic, new Point3D(footstepPlan.getLowLevelPlanGoal().getPosition()));
