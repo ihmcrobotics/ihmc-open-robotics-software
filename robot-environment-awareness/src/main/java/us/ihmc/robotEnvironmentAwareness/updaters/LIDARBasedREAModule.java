@@ -54,6 +54,8 @@ public class LIDARBasedREAModule
 
    private final REAOcTreeBuffer bufferUpdater;
    private final REAOcTreeUpdater mainUpdater;
+   private final REAStereoVisionBuffer stereoVisionBufferUpdater;
+   private final REAStereoVisionUpdater stereoVisionMainUpdater;
    private final REAPlanarRegionFeatureUpdater planarRegionFeatureUpdater;
 
    private final REAModuleStateReporter moduleStateReporter;
@@ -63,6 +65,10 @@ public class LIDARBasedREAModule
 
    private ScheduledExecutorService executorService = ExecutorServiceTools.newScheduledThreadPool(3, getClass(), ExceptionHandling.CATCH_AND_REPORT);
    private ScheduledFuture<?> scheduled;
+   
+   private ScheduledExecutorService stereoVisionExecutorService = ExecutorServiceTools.newScheduledThreadPool(4, getClass(), ExceptionHandling.CATCH_AND_REPORT);
+   private ScheduledFuture<?> stereoVisionScheduled;
+   
    private final Messager reaMessager;
 
    private LIDARBasedREAModule(Messager reaMessager, File configurationFile) throws IOException
@@ -72,6 +78,8 @@ public class LIDARBasedREAModule
       moduleStateReporter = new REAModuleStateReporter(reaMessager);
       bufferUpdater = new REAOcTreeBuffer(mainOctree.getResolution(), reaMessager, moduleStateReporter);
       mainUpdater = new REAOcTreeUpdater(mainOctree, bufferUpdater, reaMessager);
+      stereoVisionBufferUpdater = new REAStereoVisionBuffer(reaMessager, moduleStateReporter);
+      stereoVisionMainUpdater = new REAStereoVisionUpdater(stereoVisionBufferUpdater, reaMessager);
       planarRegionFeatureUpdater = new REAPlanarRegionFeatureUpdater(mainOctree, reaMessager);
 
       ROS2Tools.createCallbackSubscription(ros2Node, LidarScanMessage.class, "/ihmc/lidar_scan", this::dispatchLidarScanMessage);
@@ -104,6 +112,7 @@ public class LIDARBasedREAModule
    {
       StereoVisionPointCloudMessage message = subscriber.takeNextData();
       moduleStateReporter.registerStereoVisionPointCloudMessage(message);
+      stereoVisionBufferUpdater.handleStereoVisionPointCloudMessage(message);
    }
 
    private void dispatchCustomPlanarRegion(Subscriber<PlanarRegionsListMessage> subscriber)
@@ -176,6 +185,14 @@ public class LIDARBasedREAModule
       if (ocTreeUpdateSuccess)
          lastCompleteUpdate.set(currentTime);
    }
+   
+   private void stereoVisionMainUpdate()
+   {
+      if(Thread.interrupted() || stereoVisionScheduled == null || stereoVisionScheduled.isCancelled())
+         return;
+      
+      stereoVisionMainUpdater.update();   // TODO : any algorithm with Stereo Vision data.
+   }
 
    private boolean isThreadInterrupted()
    {
@@ -188,6 +205,12 @@ public class LIDARBasedREAModule
       {
          scheduled = executorService.scheduleAtFixedRate(this::mainUpdate, 0, THREAD_PERIOD_MILLISECONDS, TimeUnit.MILLISECONDS);
          executorService.scheduleAtFixedRate(bufferUpdater.createBufferThread(), 0, BUFFER_THREAD_PERIOD_MILLISECONDS, TimeUnit.MILLISECONDS);
+      }
+      
+      if (stereoVisionScheduled == null)
+      {
+         stereoVisionScheduled = stereoVisionExecutorService.scheduleAtFixedRate(this::stereoVisionMainUpdate, 0, THREAD_PERIOD_MILLISECONDS, TimeUnit.MILLISECONDS);
+         stereoVisionExecutorService.scheduleAtFixedRate(stereoVisionBufferUpdater.createBufferThread(), 0, BUFFER_THREAD_PERIOD_MILLISECONDS, TimeUnit.MILLISECONDS);
       }
    }
 
@@ -208,6 +231,18 @@ public class LIDARBasedREAModule
       {
          executorService.shutdownNow();
          executorService = null;
+      }
+      
+      if (stereoVisionScheduled != null)
+      {
+         stereoVisionScheduled.cancel(true);
+         stereoVisionScheduled = null;
+      }
+
+      if (stereoVisionExecutorService != null)
+      {
+         stereoVisionExecutorService.shutdownNow();
+         stereoVisionExecutorService = null;
       }
    }
 
