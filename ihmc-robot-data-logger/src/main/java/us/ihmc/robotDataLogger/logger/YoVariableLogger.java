@@ -9,7 +9,7 @@ import java.util.Calendar;
 
 import us.ihmc.robotDataLogger.Announcement;
 import us.ihmc.robotDataLogger.YoVariableClient;
-import us.ihmc.robotDataLogger.rtps.DataConsumerParticipant;
+import us.ihmc.robotDataLogger.rtps.RTPSDataConsumerParticipant;
 
 public class YoVariableLogger
 {
@@ -19,7 +19,7 @@ public class YoVariableLogger
 
    public YoVariableLogger(Announcement request, YoVariableLoggerOptions options) throws IOException
    {
-      DataConsumerParticipant participant = new DataConsumerParticipant(request.getName() + "Logger");
+      RTPSDataConsumerParticipant participant = new RTPSDataConsumerParticipant(request.getName() + "Logger");
       DateFormat dateFormat = new SimpleDateFormat("yyyyMMdd_HHmmss");
       Calendar calendar = Calendar.getInstance();
       String timestamp = dateFormat.format(calendar.getTime());

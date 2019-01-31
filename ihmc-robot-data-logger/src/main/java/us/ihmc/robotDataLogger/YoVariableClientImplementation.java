@@ -5,7 +5,7 @@ import java.io.IOException;
 import us.ihmc.log.LogTools;
 import us.ihmc.robotDataLogger.handshake.IDLYoVariableHandshakeParser;
 import us.ihmc.robotDataLogger.handshake.LogHandshake;
-import us.ihmc.robotDataLogger.rtps.DataConsumerParticipant;
+import us.ihmc.robotDataLogger.rtps.RTPSDataConsumerParticipant;
 import us.ihmc.robotDataLogger.rtps.RTPSDebugRegistry;
 import us.ihmc.robotDataLogger.rtps.VariableChangedProducer;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
@@ -22,7 +22,7 @@ public class YoVariableClientImplementation implements YoVariableClientInterface
    private String serverName;
 
    //DDS
-   private final DataConsumerParticipant dataConsumerParticipant;
+   private final RTPSDataConsumerParticipant dataConsumerParticipant;
    private final VariableChangedProducer variableChangedProducer;
 
    // Callback
@@ -33,7 +33,7 @@ public class YoVariableClientImplementation implements YoVariableClientInterface
    private final RTPSDebugRegistry debugRegistry = new RTPSDebugRegistry();
    private Announcement handshakeAnnouncement;
 
-   YoVariableClientImplementation(DataConsumerParticipant participant, final YoVariablesUpdatedListener yoVariablesUpdatedListener)
+   YoVariableClientImplementation(RTPSDataConsumerParticipant participant, final YoVariablesUpdatedListener yoVariablesUpdatedListener)
    {
       this.dataConsumerParticipant = participant;
       this.yoVariablesUpdatedListener = yoVariablesUpdatedListener;

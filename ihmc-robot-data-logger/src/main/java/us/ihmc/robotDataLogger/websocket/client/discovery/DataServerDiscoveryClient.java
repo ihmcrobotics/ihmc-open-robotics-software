@@ -106,23 +106,7 @@ public class DataServerDiscoveryClient
       @Override
       public void disconnected(HTTPDataServerConnection connection)
       {
-         synchronized (lock)
-         {
-            LogTools.debug("Disconnected from {}.", connection.getTarget());
-            connections.remove(connection);
-            listenerExecutor.execute(() -> listener.disconnected(connection));
-
-            if (!clientClosed && hosts.get(connection.getTarget()).isPersistant())
-            {
-               LogTools.debug("{} is marked persistant, reconnecting.", connection.getTarget());
-               connectionExecutor.execute(() -> tryConnection(connection.getTarget()));
-            }
-            else
-            {
-               LogTools.debug("{} is volatile. Dropping.", connection.getTarget());
-               hosts.remove(connection.getTarget());
-            }
-         }
+         listenerExecutor.execute(() -> listener.disconnected(connection));
       }
 
       @Override
@@ -145,6 +129,27 @@ public class DataServerDiscoveryClient
 
          }
       }
+
+      @Override
+      public void closed(HTTPDataServerConnection connection)
+      {
+         synchronized (lock)
+         {
+            LogTools.debug("Disconnected from {}.", connection.getTarget());
+            connections.remove(connection);
+
+            if (!clientClosed && hosts.get(connection.getTarget()).isPersistant())
+            {
+               LogTools.debug("{} is marked persistant, reconnecting.", connection.getTarget());
+               connectionExecutor.execute(() -> tryConnection(connection.getTarget()));
+            }
+            else
+            {
+               LogTools.debug("{} is volatile. Dropping.", connection.getTarget());
+               hosts.remove(connection.getTarget());
+            }
+         }
+      }
    }
 
    public static void main(String[] args)
@@ -155,14 +160,14 @@ public class DataServerDiscoveryClient
          @Override
          public void disconnected(HTTPDataServerConnection connection)
          {
-            System.out.println("DISCONNECTED FROM " + connection.getTarget());
+            System.out.println("Disconnected from " + connection.getTarget());
          }
 
          @Override
          public void connected(HTTPDataServerConnection connection)
          {
-            System.out.println("CONNECTED TO " + connection.getTarget());
-
+            System.out.println("Connected " + connection.getTarget());
+            connection.close();
          }
       });
 

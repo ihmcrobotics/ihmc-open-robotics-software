@@ -8,11 +8,11 @@ import com.martiansoftware.jsap.JSAPException;
 import us.ihmc.commons.PrintTools;
 import us.ihmc.robotDataLogger.Announcement;
 import us.ihmc.robotDataLogger.listeners.LogAnnouncementListener;
-import us.ihmc.robotDataLogger.rtps.DataConsumerParticipant;
+import us.ihmc.robotDataLogger.rtps.RTPSDataConsumerParticipant;
 
 public class YoVariableLoggerDispatcher implements LogAnnouncementListener
 {
-   private final DataConsumerParticipant participant;
+   private final RTPSDataConsumerParticipant participant;
 
    private final LinkedBlockingQueue<Announcement> announcenments = new LinkedBlockingQueue<>();
 
@@ -21,7 +21,7 @@ public class YoVariableLoggerDispatcher implements LogAnnouncementListener
 
       System.out.println("Starting YoVariableLoggerDispatcher");
       
-      participant = new DataConsumerParticipant("YoVariableLoggerDispatcher");
+      participant = new RTPSDataConsumerParticipant("YoVariableLoggerDispatcher");
       participant.listenForAnnouncements(this);
       System.out.println("Client started, waiting for announcements");
       

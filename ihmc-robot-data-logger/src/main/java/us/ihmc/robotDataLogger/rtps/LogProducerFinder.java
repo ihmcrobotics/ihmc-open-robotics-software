@@ -12,7 +12,7 @@ public class LogProducerFinder
    private final LinkedBlockingQueue<Announcement> sessions = new LinkedBlockingQueue<>();
 
    
-   public LogProducerFinder(DataConsumerParticipant participant) throws IOException
+   public LogProducerFinder(RTPSDataConsumerParticipant participant) throws IOException
    {
       participant.listenForAnnouncements(new LogSessionCallback());
    }
