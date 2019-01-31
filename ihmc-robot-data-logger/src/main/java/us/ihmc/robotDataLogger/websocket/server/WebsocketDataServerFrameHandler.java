@@ -13,6 +13,10 @@ import io.netty.handler.codec.http.websocketx.BinaryWebSocketFrame;
 import io.netty.handler.codec.http.websocketx.TextWebSocketFrame;
 import io.netty.handler.codec.http.websocketx.WebSocketFrame;
 import io.netty.handler.codec.http.websocketx.WebSocketServerProtocolHandler.HandshakeComplete;
+import us.ihmc.pubsub.common.SerializedPayload;
+import us.ihmc.robotDataLogger.VariableChangeRequest;
+import us.ihmc.robotDataLogger.VariableChangeRequestPubSubType;
+import us.ihmc.robotDataLogger.listeners.VariableChangedListener;
 
 public class WebsocketDataServerFrameHandler extends SimpleChannelInboundHandler<WebSocketFrame>
 {
@@ -20,6 +24,7 @@ public class WebsocketDataServerFrameHandler extends SimpleChannelInboundHandler
    
    
    private final WebsocketDataBroadcaster broadcaster;
+   private final VariableChangedListener variableChangedListener;
    private final int dataSize;
    
    private Object lock;
@@ -29,11 +34,18 @@ public class WebsocketDataServerFrameHandler extends SimpleChannelInboundHandler
    private CustomGCAvoidingByteBufAllocator alloc = null;
    
    private final ArrayList<WebSocketFrame> queue = new ArrayList<WebSocketFrame>(POOL_SIZE);
+   
+   
+   private final VariableChangeRequestPubSubType variableChangeRequestType = new VariableChangeRequestPubSubType();
+   private final SerializedPayload variableChangeRequestPayload = new SerializedPayload(variableChangeRequestType.getTypeSize());
+   private final VariableChangeRequest request = new VariableChangeRequest();
+   
 
-   public WebsocketDataServerFrameHandler(WebsocketDataBroadcaster broadcaster, int dataSize)
+   public WebsocketDataServerFrameHandler(WebsocketDataBroadcaster broadcaster, int dataSize, VariableChangedListener variableChangedListener)
    {
       this.broadcaster = broadcaster;
       this.dataSize = dataSize;
+      this.variableChangedListener = variableChangedListener;
    }
 
    @Override
@@ -62,19 +74,32 @@ public class WebsocketDataServerFrameHandler extends SimpleChannelInboundHandler
    @Override
    protected void channelRead0(ChannelHandlerContext ctx, WebSocketFrame frame) throws Exception
    {
-      if (frame instanceof TextWebSocketFrame)
+      try
       {
-         String request = ((TextWebSocketFrame) frame).text();
-         System.out.println(request);
+         if (frame instanceof TextWebSocketFrame)
+         {
+            String request = ((TextWebSocketFrame) frame).text();
+            System.out.println(request);
+         }
+         else if (frame instanceof BinaryWebSocketFrame)
+         {
+            variableChangeRequestPayload.getData().clear();
+            variableChangeRequestPayload.getData().limit(frame.content().readableBytes());
+            frame.content().readBytes(variableChangeRequestPayload.getData());
+            variableChangeRequestPayload.getData().flip();
+            variableChangeRequestType.deserialize(variableChangeRequestPayload, request);
+            variableChangedListener.changeVariable(request.getVariableID(), request.getRequestedValue());
+            
+         }
+         else
+         {
+            String message = "unsupported frame type: " + frame.getClass().getName();
+            throw new UnsupportedOperationException(message);
+         }
       }
-      else if (frame instanceof BinaryWebSocketFrame)
+      catch(Exception e)
       {
-         System.out.println("Received: " + frame.content());
-      }
-      else
-      {
-         String message = "unsupported frame type: " + frame.getClass().getName();
-         throw new UnsupportedOperationException(message);
+         e.printStackTrace();
       }
    }
 
@@ -83,6 +108,14 @@ public class WebsocketDataServerFrameHandler extends SimpleChannelInboundHandler
    {
    }
 
+
+   @Override
+   public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause)
+   {
+      cause.printStackTrace();
+      ctx.close();
+   }
+   
    public void addCloseFutureListener(ChannelFutureListener listener)
    {
       channel.closeFuture().addListener(listener);

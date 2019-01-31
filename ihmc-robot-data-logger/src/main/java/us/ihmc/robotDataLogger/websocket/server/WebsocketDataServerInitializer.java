@@ -7,6 +7,7 @@ import io.netty.channel.socket.SocketChannel;
 import io.netty.handler.codec.http.HttpObjectAggregator;
 import io.netty.handler.codec.http.HttpServerCodec;
 import io.netty.handler.codec.http.websocketx.WebSocketServerProtocolHandler;
+import us.ihmc.robotDataLogger.listeners.VariableChangedListener;
 
 public class WebsocketDataServerInitializer extends ChannelInitializer<SocketChannel>
 
@@ -15,13 +16,15 @@ public class WebsocketDataServerInitializer extends ChannelInitializer<SocketCha
 
    private final DataServerServerContent logServerContent;
    private final WebsocketDataBroadcaster broadcaster;
+   private final VariableChangedListener variableChangedListener;
    private final int dataSize;
    
-   public WebsocketDataServerInitializer(DataServerServerContent logServerContent, WebsocketDataBroadcaster broadcaster, int dataSize)
+   public WebsocketDataServerInitializer(DataServerServerContent logServerContent, WebsocketDataBroadcaster broadcaster, VariableChangedListener variableChangedListener, int dataSize)
    {
       this.logServerContent = logServerContent;
       this.broadcaster = broadcaster;
       this.dataSize = dataSize;
+      this.variableChangedListener = variableChangedListener;
    }
 
 
@@ -34,7 +37,7 @@ public class WebsocketDataServerInitializer extends ChannelInitializer<SocketCha
       pipeline.addLast(new HttpObjectAggregator(65536));
       pipeline.addLast(new WebSocketServerProtocolHandler(WEBSOCKET_PATH, null, true));
       pipeline.addLast(new HTTPDataServerDescriptionServer(logServerContent));
-      pipeline.addLast(new WebsocketDataServerFrameHandler(broadcaster, dataSize));
+      pipeline.addLast(new WebsocketDataServerFrameHandler(broadcaster, dataSize, variableChangedListener));
    }
 
 }

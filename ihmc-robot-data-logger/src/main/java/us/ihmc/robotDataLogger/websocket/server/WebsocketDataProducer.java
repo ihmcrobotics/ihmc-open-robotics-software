@@ -20,11 +20,11 @@ import us.ihmc.robotDataLogger.Announcement;
 import us.ihmc.robotDataLogger.CameraAnnouncement;
 import us.ihmc.robotDataLogger.CameraType;
 import us.ihmc.robotDataLogger.Handshake;
-import us.ihmc.robotDataLogger.YoVariableServer;
 import us.ihmc.robotDataLogger.dataBuffers.CustomLogDataPublisherType;
 import us.ihmc.robotDataLogger.dataBuffers.RegistrySendBufferBuilder;
 import us.ihmc.robotDataLogger.interfaces.DataProducer;
 import us.ihmc.robotDataLogger.interfaces.RegistryPublisher;
+import us.ihmc.robotDataLogger.listeners.VariableChangedListener;
 import us.ihmc.robotDataLogger.util.HandshakeHashCalculator;
 import us.ihmc.util.PeriodicThreadSchedulerFactory;
 
@@ -34,6 +34,7 @@ public class WebsocketDataProducer implements DataProducer
    private final WebsocketDataBroadcaster broadcaster = new WebsocketDataBroadcaster();
    private final String name;
    private final LogModelProvider logModelProvider;
+   private final VariableChangedListener variableChangedListener;
    
    
    private final Object lock = new Object();
@@ -49,10 +50,11 @@ public class WebsocketDataProducer implements DataProducer
    private boolean log = false;
 
 
-   public WebsocketDataProducer(String name, LogModelProvider logModelProvider, YoVariableServer yoVariableServer, boolean publicBroadcast)
+   public WebsocketDataProducer(String name, LogModelProvider logModelProvider, VariableChangedListener variableChangedListener, boolean publicBroadcast)
    {
       this.name = name;
       this.logModelProvider = logModelProvider;
+      this.variableChangedListener = variableChangedListener;
    }
 
    @Override
@@ -132,7 +134,7 @@ public class WebsocketDataProducer implements DataProducer
          {
             ServerBootstrap b = new ServerBootstrap();
             b.group(bossGroup, workerGroup).channel(NioServerSocketChannel.class).handler(new LoggingHandler(LogLevel.INFO))
-             .childHandler(new WebsocketDataServerInitializer(logServerContent, broadcaster, maximumBufferSize));
+             .childHandler(new WebsocketDataServerInitializer(logServerContent, broadcaster, variableChangedListener, maximumBufferSize));
    
             ch = b.bind(PORT).sync().channel();
    
