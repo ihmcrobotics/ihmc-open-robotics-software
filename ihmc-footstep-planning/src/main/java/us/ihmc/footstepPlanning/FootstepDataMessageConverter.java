@@ -43,6 +43,9 @@ public class FootstepDataMessageConverter
             ConvexPolygon2D foothold = new ConvexPolygon2D();
             footstep.getFoothold(foothold);
 
+            if(foothold.getNumberOfVertices() < 4)
+               continue;
+
             if (foothold.getNumberOfVertices() != 4)
                ConvexPolygonTools.limitVerticesConservative(foothold, 4);
 

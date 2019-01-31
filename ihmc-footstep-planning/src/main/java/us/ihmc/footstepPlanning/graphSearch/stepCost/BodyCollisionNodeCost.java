@@ -1,5 +1,6 @@
 package us.ihmc.footstepPlanning.graphSearch.stepCost;
 
+import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.footstepPlanning.graphSearch.collision.BodyCollisionData;
 import us.ihmc.footstepPlanning.graphSearch.collision.FootstepNodeBodyCollisionDetector;
 import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.FootstepNodeSnapperReadOnly;
@@ -29,7 +30,11 @@ public class BodyCollisionNodeCost implements FootstepCost
          return 0.0;
       }
 
-      double height = snapper.getSnapData(endNode).getSnapTransform().getTranslationZ();
+      RigidBodyTransform snapTransform = snapper.getSnapData(endNode).getSnapTransform();
+      if(snapTransform == null)
+         return 0.0;
+
+      double height = snapTransform.getTranslationZ();
       BodyCollisionData collisionData = collisionDetector.checkForCollision(endNode.getLatticeNode(), height);
 
       if(collisionData.isCollisionDetected())
