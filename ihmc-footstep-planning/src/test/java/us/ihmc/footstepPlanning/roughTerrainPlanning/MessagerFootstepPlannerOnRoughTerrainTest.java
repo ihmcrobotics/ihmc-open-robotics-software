@@ -2,7 +2,7 @@ package us.ihmc.footstepPlanning.roughTerrainPlanning;
 
 import static org.junit.Assert.assertTrue;
 import static us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI.ComputePathTopic;
-import static us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI.FootstepPlanTopic;
+import static us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI.FootstepPlanResponseTopic;
 import static us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI.PlannerTypeTopic;
 import static us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI.PlanningResultTopic;
 import static us.ihmc.footstepPlanning.testTools.PlannerTestEnvironments.box;
@@ -25,6 +25,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
 
+import controller_msgs.msg.dds.FootstepDataListMessage;
 import org.junit.After;
 import org.junit.Before;
 
@@ -36,6 +37,7 @@ import us.ihmc.commons.PrintTools;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.continuousIntegration.ContinuousIntegrationTools;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.footstepPlanning.FootstepDataMessageConverter;
 import us.ihmc.footstepPlanning.FootstepPlan;
 import us.ihmc.footstepPlanning.FootstepPlannerType;
 import us.ihmc.footstepPlanning.FootstepPlanningResult;
@@ -152,9 +154,9 @@ public abstract class MessagerFootstepPlannerOnRoughTerrainTest
 
       AtomicReference<Boolean> receivedPlan = new AtomicReference<>(false);
       AtomicReference<Boolean> receivedResult = new AtomicReference<>(false);
-      messager.registerTopicListener(FootstepPlanTopic, request -> receivedPlan.set(true));
+      messager.registerTopicListener(FootstepPlanResponseTopic, request -> receivedPlan.set(true));
       messager.registerTopicListener(PlanningResultTopic, request -> receivedResult.set(true));
-      AtomicReference<FootstepPlan> footstepPlanReference = messager.createInput(FootstepPlanTopic);
+      AtomicReference<FootstepDataListMessage> footstepPlanReference = messager.createInput(FootstepPlanResponseTopic);
       AtomicReference<FootstepPlanningResult> footstepPlanningResult = messager.createInput(PlanningResultTopic);
 
       messager.submitMessage(ComputePathTopic, true);
@@ -174,7 +176,7 @@ public abstract class MessagerFootstepPlannerOnRoughTerrainTest
       ThreadTools.sleep(10);
 
       assertTrue("Planning result is invalid, result was " + footstepPlanningResult.get(), footstepPlanningResult.get().validForExecution());
-      assertTrue(PlannerTools.isGoalNextToLastStep(testData.getGoalPose(), footstepPlanReference.get()));
+      assertTrue(PlannerTools.isGoalNextToLastStep(testData.getGoalPose(), FootstepDataMessageConverter.convertToFootstepPlan(footstepPlanReference.get())));
 
       if (keepUIUp)
          ThreadTools.sleepForever();

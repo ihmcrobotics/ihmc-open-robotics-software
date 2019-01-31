@@ -11,7 +11,9 @@ import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
+import us.ihmc.idl.IDLSequence;
 import us.ihmc.robotics.geometry.ConvexPolygonTools;
+import us.ihmc.robotics.robotSide.RobotSide;
 
 public class FootstepDataMessageConverter
 {
@@ -85,5 +87,32 @@ public class FootstepDataMessageConverter
 
          footstepDataListMessage.getFootstepDataList().add().set(footstepData);
       }
+   }
+
+   public static FootstepPlan convertToFootstepPlan(FootstepDataListMessage footstepDataListMessage)
+   {
+      FootstepPlan footstepPlan = new FootstepPlan();
+
+      for (FootstepDataMessage footstepMessage : footstepDataListMessage.getFootstepDataList())
+      {
+         FramePose3D stepPose = new FramePose3D();
+         stepPose.setPosition(footstepMessage.getLocation());
+         stepPose.setOrientation(footstepMessage.getOrientation());
+         SimpleFootstep simpleFootstep = footstepPlan.addFootstep(RobotSide.fromByte(footstepMessage.getRobotSide()), stepPose);
+
+         IDLSequence.Object<Point3D> predictedContactPoints = footstepMessage.getPredictedContactPoints2d();
+         if (!predictedContactPoints.isEmpty())
+         {
+            ConvexPolygon2D foothold = new ConvexPolygon2D();
+            for (int i = 0; i < predictedContactPoints.size(); i++)
+            {
+               foothold.addVertex(predictedContactPoints.get(i));
+            }
+            foothold.update();
+            simpleFootstep.setFoothold(foothold);
+         }
+      }
+
+      return footstepPlan;
    }
 }

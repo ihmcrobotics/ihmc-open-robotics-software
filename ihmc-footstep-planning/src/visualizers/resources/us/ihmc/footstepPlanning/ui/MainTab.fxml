@@ -97,10 +97,16 @@
                                   <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
                               </rowConstraints>
 
-                              <Label text="Swing time (s)" GridPane.halignment="RIGHT" GridPane.columnIndex="0" GridPane.rowIndex="0" />
-                              <Label text="Transfer time (s)" GridPane.halignment="RIGHT" GridPane.columnIndex="0" GridPane.rowIndex="1" />
-                              <Spinner fx:id="swingTimeSpinner" GridPane.columnIndex="1" GridPane.rowIndex="0" />
-                              <Spinner fx:id="transferTimeSpinner" GridPane.columnIndex="1" GridPane.rowIndex="1" />
+                              <CheckBox fx:id="overrideTiming" text="Override timing" GridPane.columnIndex="0" GridPane.rowIndex="0"/>
+                              <CheckBox fx:id="overrideSwingHeight" text="Override swing height" GridPane.columnIndex="0" GridPane.rowIndex="2"/>
+
+                              <Label text="Swing time (s)" GridPane.halignment="RIGHT" GridPane.columnIndex="1" GridPane.rowIndex="0" />
+                              <Label text="Transfer time (s)" GridPane.halignment="RIGHT" GridPane.columnIndex="1" GridPane.rowIndex="1" />
+                              <Label text="Swing height (m)" GridPane.halignment="RIGHT" GridPane.columnIndex="1" GridPane.rowIndex="2" />
+
+                              <Spinner fx:id="swingTimeSpinner" GridPane.columnIndex="2" GridPane.rowIndex="0" />
+                              <Spinner fx:id="transferTimeSpinner" GridPane.columnIndex="2" GridPane.rowIndex="1" />
+                              <Spinner fx:id="swingHeightSpinner" GridPane.columnIndex="2" GridPane.rowIndex="1" />
 
                               <Button mnemonicParsing="false" onAction="#sendPlan" prefWidth="130.0" text="Send Plan" GridPane.halignment="CENTER" GridPane.columnIndex="0" GridPane.rowIndex="2" />
                           </GridPane>
