@@ -17,6 +17,7 @@ import us.ihmc.mecano.multiBodySystem.OneDoFJoint;
 import us.ihmc.mecano.multiBodySystem.interfaces.FloatingJointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.JointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
+import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.mecano.tools.MultiBodySystemTools;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -62,8 +63,48 @@ public class HumanoidRobotEKFWithSimpleJoints implements StateEstimatorControlle
          forceSensorMap.put(footForceSensorNames.get(robotSide), soleFrames.get(robotSide));
       }
 
+      Map<String, String> jointParameterGroups = createJointGroups(estimatorFullRobotModel);
+
       FloatingJointBasics rootJoint = estimatorFullRobotModel.getRootJoint();
-      leggedRobotEKF = new LeggedRobotEKF(rootJoint, jointsForEKF, primaryImuName, imuNames, forceSensorMap, sensorOutput, dt, gravity, graphicsListRegistry);
+      leggedRobotEKF = new LeggedRobotEKF(rootJoint, jointsForEKF, primaryImuName, imuNames, forceSensorMap, sensorOutput, dt, gravity, jointParameterGroups,
+                                          graphicsListRegistry);
+   }
+
+   private static Map<String, String> createJointGroups(FullHumanoidRobotModel fullRobotModel)
+   {
+      Map<String, String> ret = new HashMap<>();
+
+      RigidBodyBasics leftBody = fullRobotModel.getFoot(RobotSide.LEFT);
+      RigidBodyBasics rightBody = fullRobotModel.getFoot(RobotSide.RIGHT);
+      while (leftBody != rightBody)
+      {
+         String leftName = leftBody.getParentJoint().getName();
+         String rightName = rightBody.getParentJoint().getName();
+         String name = "";
+         int leftIdx = leftName.length() - 1;
+         for (int rightIdx = rightName.length() - 1; rightIdx >= 0; rightIdx--)
+         {
+            if (leftIdx < 0)
+            {
+               break;
+            }
+            if (rightName.charAt(rightIdx) == leftName.charAt(leftIdx))
+            {
+               name = rightName.charAt(rightIdx) + name;
+            }
+            else
+            {
+               break;
+            }
+            leftIdx--;
+         }
+         ret.put(leftName, name);
+         ret.put(rightName, name);
+         leftBody = leftBody.getParentJoint().getPredecessor();
+         rightBody = rightBody.getParentJoint().getPredecessor();
+      }
+
+      return ret;
    }
 
    @Override

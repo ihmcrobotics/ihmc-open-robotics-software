@@ -99,7 +99,7 @@ public class LeggedRobotEKF implements StateEstimatorController
 
    public LeggedRobotEKF(FloatingJointBasics rootJoint, List<OneDoFJointBasics> oneDoFJoints, String primaryImuName, Collection<String> imuNames,
                          Map<String, ReferenceFrame> forceSensorMap, SensorRawOutputMapReadOnly sensorOutput, double dt, double gravity,
-                         YoGraphicsListRegistry graphicsListRegistry)
+                         Map<String, String> jointGroups, YoGraphicsListRegistry graphicsListRegistry)
    {
       this.sensorOutput = sensorOutput;
       this.rootJoint = rootJoint;
@@ -108,7 +108,7 @@ public class LeggedRobotEKF implements StateEstimatorController
       weight = -Arrays.asList(ScrewTools.computeSubtreeSuccessors(rootJoint.getPredecessor())).stream().collect(Collectors.summingDouble(body -> body.getInertia().getMass())) * gravity;
 
       List<Sensor> sensors = new ArrayList<>();
-      rootState = createState(rootJoint, oneDoFJoints, dt, sensors);
+      rootState = createState(rootJoint, oneDoFJoints, dt, sensors, jointGroups);
       createImuSensors(primaryImuName, imuNames, sensorOutput, dt, sensors);
       createFootSensors(rootJoint, forceSensorMap, sensorOutput, dt, gravity, graphicsListRegistry, sensors);
 
@@ -124,10 +124,13 @@ public class LeggedRobotEKF implements StateEstimatorController
    private void createFootSensors(FloatingJointBasics rootJoint, Map<String, ReferenceFrame> forceSensorMap, SensorRawOutputMapReadOnly sensorOutput, double dt,
                           double gravity, YoGraphicsListRegistry graphicsListRegistry, List<Sensor> sensors)
    {
-      DoubleProvider forceFilter = new DoubleParameter("ForceFilter", registry, 100.0);
+      String parameterGroup = "Foot";
+
+      DoubleProvider forceFilter = new DoubleParameter(parameterGroup + "ForceFilter", registry, 100.0);
       DoubleProvider forceAlpha = () -> AlphaFilteredYoVariable.computeAlphaGivenBreakFrequencyProperly(forceFilter .getValue(), dt);
-      DoubleProvider torqueFilter = new DoubleParameter("TorqueFilter", registry, 100.0);
+      DoubleProvider torqueFilter = new DoubleParameter(parameterGroup + "TorqueFilter", registry, 100.0);
       DoubleProvider torqueAlpha = () -> AlphaFilteredYoVariable.computeAlphaGivenBreakFrequencyProperly(torqueFilter .getValue(), dt);
+
       for (String forceSensorName : forceSensorMap.keySet())
       {
          ReferenceFrame soleFrame = forceSensorMap.get(forceSensorName);
@@ -179,7 +182,7 @@ public class LeggedRobotEKF implements StateEstimatorController
             graphicsListRegistry.registerYoGraphic("EKF", copViz);
          }
 
-         FootVelocitySensor footVelocitySensor = new FootVelocitySensor(dt, foot, copFrame, registry);
+         FootVelocitySensor footVelocitySensor = new FootVelocitySensor(dt, foot, copFrame, parameterGroup, registry);
          footVelocitySensors.add(footVelocitySensor);
          forceSensorOutputs.add(forceSensorOutput);
          copFrames.add(copFrame);
@@ -213,20 +216,23 @@ public class LeggedRobotEKF implements StateEstimatorController
       }
    }
 
-   private PoseState createState(FloatingJointBasics rootJoint, List<OneDoFJointBasics> oneDoFJoints, double dt, List<Sensor> sensors)
+   private PoseState createState(FloatingJointBasics rootJoint, List<OneDoFJointBasics> oneDoFJoints, double dt, List<Sensor> sensors,
+                                 Map<String, String> jointGroups)
    {
       String rootBodyName = rootJoint.getSuccessor().getName();
       LogTools.info("Creating pose state for " + rootBodyName);
       PoseState rootState = new PoseState(rootBodyName, dt, rootJoint.getFrameAfterJoint(), registry);
       for (OneDoFJointBasics oneDoFJoint : oneDoFJoints)
       {
-         LogTools.info("Creating joint state for " + oneDoFJoint.getName());
-         JointState jointState = new JointState(oneDoFJoint.getName(), dt, registry);
+         String jointName = oneDoFJoint.getName();
+         LogTools.info("Creating joint state for " + jointName);
+         String parameterGroup = FilterTools.stringToPrefix(jointGroups.containsKey(jointName) ? jointGroups.get(jointName) : jointName);
+         JointState jointState = new JointState(jointName, parameterGroup, dt, registry);
          jointStates.add(jointState);
-         JointPositionSensor jointPositionSensor = new JointPositionSensorWithBacklash(oneDoFJoint.getName(), dt, registry);
+         JointPositionSensor jointPositionSensor = new JointPositionSensorWithBacklash(jointName, parameterGroup, dt, registry);
          jointPositionSensors.add(jointPositionSensor);
          sensors.add(jointPositionSensor);
-         jointAngles.add(new YoDouble(oneDoFJoint.getName() + "JointAngle", registry));
+         jointAngles.add(new YoDouble(jointName + "JointAngle", registry));
       }
       return rootState;
    }
