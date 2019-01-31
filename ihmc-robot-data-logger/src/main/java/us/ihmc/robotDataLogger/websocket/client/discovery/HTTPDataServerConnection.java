@@ -38,7 +38,7 @@ import us.ihmc.robotDataLogger.Announcement;
 import us.ihmc.robotDataLogger.AnnouncementPubSubType;
 import us.ihmc.robotDataLogger.websocket.LogHTTPPaths;
 
-public class HTTPDataServerConnection extends SimpleChannelInboundHandler<HttpObject>
+public class HTTPDataServerConnection
 {
    private final EventLoopGroup group = new NioEventLoopGroup();
    private final HTTPDataServerDescription target;
@@ -52,11 +52,35 @@ public class HTTPDataServerConnection extends SimpleChannelInboundHandler<HttpOb
 
    public interface HTTPDataServerConnectionListener
    {
+      /**
+       * Channel has successfully connected and received a announcement 
+       * 
+       * @param connection
+       */
       public void connected(HTTPDataServerConnection connection);
 
+      /**
+       * Channel has been disconnected.
+       * 
+       * The channel is still cleaning up. closed() will be called when cleanup is finished 
+       * 
+       * @param connection
+       */
       public void disconnected(HTTPDataServerConnection connection);
 
+      /**
+       * Connection has been refused
+       * 
+       * @param target
+       */
       public void connectionRefused(HTTPDataServerDescription target);
+
+      /**
+       * The channel is closed and all threads have shut down.
+       * 
+       * @param httpDataServerConnection
+       */
+      public void closed(HTTPDataServerConnection httpDataServerConnection);
    }
 
    public HTTPDataServerConnection(HTTPDataServerDescription target, HTTPDataServerConnectionListener listener)
@@ -76,8 +100,11 @@ public class HTTPDataServerConnection extends SimpleChannelInboundHandler<HttpOb
          }
          else
          {
-            listener.connectionRefused(target);
-            group.shutdownGracefully();
+            group.shutdownGracefully().addListener(e -> {
+               listener.connectionRefused(target);
+            });
+            
+            
          }
       });
    }
@@ -86,7 +113,18 @@ public class HTTPDataServerConnection extends SimpleChannelInboundHandler<HttpOb
    {
       this.channel = channel;
       requestResource(LogHTTPPaths.announcement, (buf) -> receivedAnnouncement(buf));
-
+   }
+   
+   public boolean isConnectected()
+   {
+      if(channel != null)
+      {
+         return channel.isActive();
+      }
+      else
+      {
+         return false;
+      }
    }
 
    private void receivedAnnouncement(ByteBuf buf)
@@ -181,78 +219,82 @@ public class HTTPDataServerConnection extends SimpleChannelInboundHandler<HttpOb
 
          p.addLast(new HttpClientCodec());
          p.addLast(new HttpContentDecompressor());
-         p.addLast(HTTPDataServerConnection.this);
+         p.addLast(new Handler());
       }
    }
 
-   @Override
-   protected void channelRead0(ChannelHandlerContext ctx, HttpObject msg) throws Exception
+   private class Handler extends SimpleChannelInboundHandler<HttpObject>
    {
-      if (msg instanceof HttpResponse || msg instanceof HttpContent)
+
+      @Override
+      protected void channelRead0(ChannelHandlerContext ctx, HttpObject msg) throws Exception
       {
-         if (requestFuture == null || requestFuture.isDone())
+         if (msg instanceof HttpResponse || msg instanceof HttpContent)
          {
-            throw new IOException("HTTP response received without matching request");
-         }
-
-         if (msg instanceof HttpResponse)
-         {
-            HttpResponse response = (HttpResponse) msg;
-
-            if (response.status() != HttpResponseStatus.OK)
+            if (requestFuture == null || requestFuture.isDone())
             {
-               requestFuture.completeExceptionally(new IOException("Invalid response received " + response.status()));
-               ctx.close();
-               return;
+               throw new IOException("HTTP response received without matching request");
             }
 
-            int contentLength = response.headers().getInt("content-length", 0);
-            if (contentLength <= 0)
+            if (msg instanceof HttpResponse)
             {
-               requestFuture.completeExceptionally(new IOException("No content-length set."));
-               ctx.close();
-               return;
-            }
+               HttpResponse response = (HttpResponse) msg;
 
-            requestedBuffer = Unpooled.buffer(contentLength);
-         }
-         if (msg instanceof HttpContent)
-         {
-            HttpContent content = (HttpContent) msg;
+               if (response.status() != HttpResponseStatus.OK)
+               {
+                  requestFuture.completeExceptionally(new IOException("Invalid response received " + response.status()));
+                  ctx.close();
+                  return;
+               }
 
-            if (requestedBuffer.isWritable(content.content().readableBytes()))
-            {
-               requestedBuffer.writeBytes(((HttpContent) msg).content());
-            }
-            else
-            {
-               requestFuture.completeExceptionally(new IOException("Content-length exceeds allocated space"));
-               ctx.close();
-               return;
-            }
+               int contentLength = response.headers().getInt("content-length", 0);
+               if (contentLength <= 0)
+               {
+                  requestFuture.completeExceptionally(new IOException("No content-length set."));
+                  ctx.close();
+                  return;
+               }
 
-            if (content instanceof LastHttpContent)
+               requestedBuffer = Unpooled.buffer(contentLength);
+            }
+            if (msg instanceof HttpContent)
             {
-               requestFuture.complete(requestedBuffer);
-               requestedBuffer = null;
+               HttpContent content = (HttpContent) msg;
+
+               if (requestedBuffer.isWritable(content.content().readableBytes()))
+               {
+                  requestedBuffer.writeBytes(((HttpContent) msg).content());
+               }
+               else
+               {
+                  requestFuture.completeExceptionally(new IOException("Content-length exceeds allocated space"));
+                  ctx.close();
+                  return;
+               }
+
+               if (content instanceof LastHttpContent)
+               {
+                  requestFuture.complete(requestedBuffer);
+                  requestedBuffer = null;
+               }
             }
          }
       }
-   }
 
-   @Override
-   public void channelInactive(ChannelHandlerContext ctx) throws Exception
-   {
-      listener.disconnected(this);
-      group.shutdownGracefully();
+      @Override
+      public void channelInactive(ChannelHandlerContext ctx) throws Exception
+      {
+         listener.disconnected(HTTPDataServerConnection.this);
+         group.shutdownGracefully().addListener((e ) -> listener.closed(HTTPDataServerConnection.this));
 
-   }
+      }
 
-   @Override
-   public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) throws Exception
-   {
-      cause.printStackTrace();
-      ctx.close();
+      @Override
+      public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) throws Exception
+      {
+         cause.printStackTrace();
+         ctx.close();
+      }
    }
 
    public static void main(String[] args)
@@ -276,6 +318,12 @@ public class HTTPDataServerConnection extends SimpleChannelInboundHandler<HttpOb
          public void connected(HTTPDataServerConnection connection)
          {
             System.out.println("Connected");
+         }
+
+         @Override
+         public void closed(HTTPDataServerConnection httpDataServerConnection)
+         {
+            System.out.println("Connection closed");
          }
       });
 

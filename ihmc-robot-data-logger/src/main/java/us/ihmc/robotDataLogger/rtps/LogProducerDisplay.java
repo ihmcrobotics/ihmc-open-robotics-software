@@ -28,12 +28,12 @@ public class LogProducerDisplay extends JFrame
    
    private static LogSessionFilter[] filters;
 
-   public LogProducerDisplay(DataConsumerParticipant dataConsumerParticipant) throws IOException
+   public LogProducerDisplay(RTPSDataConsumerParticipant dataConsumerParticipant) throws IOException
    {
       this(dataConsumerParticipant, null);
    }
 
-   public LogProducerDisplay(DataConsumerParticipant dataConsumerParticipant, MouseAdapter mouseAdapter) throws IOException
+   public LogProducerDisplay(RTPSDataConsumerParticipant dataConsumerParticipant, MouseAdapter mouseAdapter) throws IOException
    {
       super("Control sessions");
       setMinimumSize(new Dimension(1024, 320));
@@ -76,7 +76,7 @@ public class LogProducerDisplay extends JFrame
       return (address[0] & 0xFF) + "." + (address[1] & 0xFF) + "." + (address[2] & 0xFF) + "." + (address[3] & 0xFF);
    }
 
-   public static Announcement getAnnounceRequest(DataConsumerParticipant dataConsumerParticipant, LogSessionFilter... filters)
+   public static Announcement getAnnounceRequest(RTPSDataConsumerParticipant dataConsumerParticipant, LogSessionFilter... filters)
    {
       LogProducerDisplay.filters = filters;
 
@@ -90,7 +90,7 @@ public class LogProducerDisplay extends JFrame
       }
    }
 
-   private static Announcement selectLogSession(DataConsumerParticipant dataConsumerParticipant) throws IOException
+   private static Announcement selectLogSession(RTPSDataConsumerParticipant dataConsumerParticipant) throws IOException
    {
       final LinkedBlockingQueue<String> request = new LinkedBlockingQueue<>();
       MouseAdapter adapter = new MouseAdapter()
@@ -232,6 +232,6 @@ public class LogProducerDisplay extends JFrame
 
    public static void main(String[] args) throws IOException
    {
-      System.out.println(getAnnounceRequest(new DataConsumerParticipant("Test")));
+      System.out.println(getAnnounceRequest(new RTPSDataConsumerParticipant("Test")));
    }
 }

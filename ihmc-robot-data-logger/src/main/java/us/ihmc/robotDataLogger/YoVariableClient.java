@@ -2,14 +2,14 @@ package us.ihmc.robotDataLogger;
 
 import java.io.IOException;
 
-import us.ihmc.robotDataLogger.rtps.DataConsumerParticipant;
+import us.ihmc.robotDataLogger.rtps.RTPSDataConsumerParticipant;
 import us.ihmc.robotDataLogger.rtps.LogProducerDisplay;
 
 public class YoVariableClient
 {
    private final YoVariableClientImplementation yoVariableClientImplementation;
    private final LogProducerDisplay.LogSessionFilter[] sessionFilters;
-   private final DataConsumerParticipant dataConsumerParticipant;
+   private final RTPSDataConsumerParticipant dataConsumerParticipant;
 
    /**
     * Start a new client while allowing the user to select a desired logging session
@@ -21,7 +21,7 @@ public class YoVariableClient
    {
       try
       {
-         this.dataConsumerParticipant = new DataConsumerParticipant("YoVariableClient");
+         this.dataConsumerParticipant = new RTPSDataConsumerParticipant("YoVariableClient");
       }
       catch (IOException e)
       {
@@ -36,7 +36,7 @@ public class YoVariableClient
     * @param request
     * @param yoVariablesUpdatedListener
     */
-   public YoVariableClient(DataConsumerParticipant participant, final YoVariablesUpdatedListener yoVariablesUpdatedListener)
+   public YoVariableClient(RTPSDataConsumerParticipant participant, final YoVariablesUpdatedListener yoVariablesUpdatedListener)
    {
       this.dataConsumerParticipant = participant;
       this.yoVariableClientImplementation = new YoVariableClientImplementation(participant, yoVariablesUpdatedListener);

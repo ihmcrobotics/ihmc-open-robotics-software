@@ -21,6 +21,7 @@ import us.ihmc.robotDataLogger.TimestampPubSubType;
 import us.ihmc.robotDataLogger.VariableChangeRequest;
 import us.ihmc.robotDataLogger.VariableChangeRequestPubSubType;
 import us.ihmc.robotDataLogger.YoVariableClientImplementation;
+import us.ihmc.robotDataLogger.dataBuffers.RegistryConsumer;
 import us.ihmc.robotDataLogger.handshake.IDLYoVariableHandshakeParser;
 import us.ihmc.robotDataLogger.listeners.ClearLogListener;
 import us.ihmc.robotDataLogger.listeners.TimestampListener;
@@ -74,7 +75,7 @@ public class DataConsumerSession
       if(variableChangedProducer != null)
       {
          VariableChangeRequestPubSubType topicDataType = new VariableChangeRequestPubSubType();
-         PublisherAttributes attributes = domain.createPublisherAttributes(participant, topicDataType, LogParticipantSettings.variableChange.getKey(), LogParticipantSettings.variableChange.getValue(), DataConsumerParticipant.getPartition(announcement.getIdentifierAsString()));
+         PublisherAttributes attributes = domain.createPublisherAttributes(participant, topicDataType, LogParticipantSettings.variableChange.getKey(), LogParticipantSettings.variableChange.getValue(), RTPSDataConsumerParticipant.getPartition(announcement.getIdentifierAsString()));
          variableChangeDataPublisher = domain.createPublisher(participant, attributes);
          variableChangedProducer.setSession(this);
       }
@@ -86,12 +87,12 @@ public class DataConsumerSession
       if(clearLogListener != null)
       {
          ClearLogRequestPubSubType clearLogRequestPubSubType = new ClearLogRequestPubSubType();
-         PublisherAttributes publisherAttributes = domain.createPublisherAttributes(participant, clearLogRequestPubSubType, LogParticipantSettings.clearLog.getKey(), LogParticipantSettings.clearLog.getValue(), DataConsumerParticipant.getPartition(announcement.getIdentifierAsString()));
+         PublisherAttributes publisherAttributes = domain.createPublisherAttributes(participant, clearLogRequestPubSubType, LogParticipantSettings.clearLog.getKey(), LogParticipantSettings.clearLog.getValue(), RTPSDataConsumerParticipant.getPartition(announcement.getIdentifierAsString()));
          publisherAttributes.getQos().setDurabilityKind(DurabilityKind.VOLATILE_DURABILITY_QOS); // make sure we do not persist
          clearLogRequest.setGuid(announcement.getIdentifierAsString());
          clearLogPublisher = domain.createPublisher(participant, publisherAttributes);
          
-         SubscriberAttributes subscriberAttributes = domain.createSubscriberAttributes(participant, clearLogRequestPubSubType, LogParticipantSettings.clearLog.getKey(), LogParticipantSettings.clearLog.getValue(), DataConsumerParticipant.getPartition(announcement.getIdentifierAsString()));
+         SubscriberAttributes subscriberAttributes = domain.createSubscriberAttributes(participant, clearLogRequestPubSubType, LogParticipantSettings.clearLog.getKey(), LogParticipantSettings.clearLog.getValue(), RTPSDataConsumerParticipant.getPartition(announcement.getIdentifierAsString()));
          domain.createSubscriber(participant, subscriberAttributes, new ClearLogListenerImpl(clearLogListener, announcement.getIdentifierAsString()));
       }
       else
@@ -102,13 +103,13 @@ public class DataConsumerSession
       if(timeStampListener != null)
       {
          TimestampPubSubType pubSubType = new TimestampPubSubType();
-         SubscriberAttributes attributes = domain.createSubscriberAttributes(participant, pubSubType, LogParticipantSettings.timestamp.getKey(), LogParticipantSettings.timestamp.getValue(), DataConsumerParticipant.getPartition(announcement.getIdentifierAsString()));
+         SubscriberAttributes attributes = domain.createSubscriberAttributes(participant, pubSubType, LogParticipantSettings.timestamp.getKey(), LogParticipantSettings.timestamp.getValue(), RTPSDataConsumerParticipant.getPartition(announcement.getIdentifierAsString()));
          domain.createSubscriber(participant, attributes, new TimestampListenerImpl(timeStampListener));
 
       }
       
       CustomLogDataSubscriberType pubSubType = new CustomLogDataSubscriberType(parser.getNumberOfVariables(), parser.getNumberOfJointStateVariables());
-      SubscriberAttributes attributes = domain.createSubscriberAttributes(participant, pubSubType, LogParticipantSettings.data.getKey(), LogParticipantSettings.data.getValue(), DataConsumerParticipant.getPartition(announcement.getIdentifierAsString()));
+      SubscriberAttributes attributes = domain.createSubscriberAttributes(participant, pubSubType, LogParticipantSettings.data.getKey(), LogParticipantSettings.data.getValue(), RTPSDataConsumerParticipant.getPartition(announcement.getIdentifierAsString()));
       registryConsumer = new RegistryConsumer(parser, yoVariableClient,rtpsDebugRegistry);
       domain.createSubscriber(participant, attributes, registryConsumer);
    }

@@ -30,6 +30,7 @@ import us.ihmc.robotDataLogger.Handshake;
 import us.ihmc.robotDataLogger.HandshakePubSubType;
 import us.ihmc.robotDataLogger.YoVariableClientImplementation;
 import us.ihmc.robotDataLogger.handshake.IDLYoVariableHandshakeParser;
+import us.ihmc.robotDataLogger.interfaces.DataConsumer;
 import us.ihmc.robotDataLogger.listeners.ClearLogListener;
 import us.ihmc.robotDataLogger.listeners.LogAnnouncementListener;
 import us.ihmc.robotDataLogger.listeners.TimestampListener;
@@ -40,7 +41,7 @@ import us.ihmc.robotDataLogger.listeners.TimestampListener;
  * @author jesper
  *
  */
-public class DataConsumerParticipant
+public class RTPSDataConsumerParticipant implements DataConsumer
 {
 
    private final ReentrantLock announcementLock = new ReentrantLock();
@@ -144,7 +145,7 @@ public class DataConsumerParticipant
     * @param name for this log consumer participant
     * @throws IOException if no connection to the network is possibile
     */
-   public DataConsumerParticipant(String name) throws IOException
+   public RTPSDataConsumerParticipant(String name) throws IOException
    {
       domain.setLogLevel(LogLevel.ERROR);
       ParticipantAttributes att = domain.createParticipantAttributes(LogParticipantSettings.domain, name);
@@ -222,6 +223,7 @@ public class DataConsumerParticipant
     * @throws IOException if no reply has been received within  the timeout
     * @throws RuntimeException if no model file is announced in the announcement
     */
+   @Override
    public byte[] getModelFile(Announcement announcement, int timeout) throws IOException
    {
       if (!announcement.getModelFileDescription().getHasModel())
@@ -248,6 +250,7 @@ public class DataConsumerParticipant
     * @throws IOException if no reply has been received within the timeout
     * @throws RuntimeException if no resource bundle is announced in the announcement
     */
+   @Override
    public byte[] getResourceZip(Announcement announcement, int timeout) throws IOException
    {
       if (!announcement.getModelFileDescription().getHasResourceZip())
@@ -274,6 +277,7 @@ public class DataConsumerParticipant
     * 
     * @throws IOException if no reply has been received within the timeout
     */
+   @Override
    public Handshake getHandshake(Announcement announcement, int timeout) throws IOException
    {
       HandshakePubSubType handshakePubSubType = new HandshakePubSubType();
@@ -295,7 +299,7 @@ public class DataConsumerParticipant
     * @return
     * @throws IOException
     */
-   public synchronized DataConsumerSession createSession(Announcement announcement, IDLYoVariableHandshakeParser parser, YoVariableClientImplementation yoVariableClient,
+   public synchronized void createSession(Announcement announcement, IDLYoVariableHandshakeParser parser, YoVariableClientImplementation yoVariableClient,
                                                          VariableChangedProducer variableChangedProducer, TimestampListener timeStampListener,
                                                          ClearLogListener clearLogListener, RTPSDebugRegistry rtpsDebugRegistry)
          throws IOException
@@ -312,7 +316,6 @@ public class DataConsumerParticipant
       
       session = new DataConsumerSession(domain, announcement, parser, yoVariableClient, variableChangedProducer, timeStampListener,
                                         clearLogListener, rtpsDebugRegistry);
-      return session;
    }
 
    /**
@@ -335,6 +338,7 @@ public class DataConsumerParticipant
     * 
     * After calling this function 
     */
+   @Override
    public synchronized void remove()
    {
       if (participant != null)
@@ -373,6 +377,7 @@ public class DataConsumerParticipant
     * 
     * @throws IOException
     */
+   @Override
    public synchronized void sendClearLogRequest() throws IOException
    {
       if (session != null)

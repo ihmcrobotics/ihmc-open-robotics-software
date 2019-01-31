@@ -1,6 +1,5 @@
-package us.ihmc.robotDataLogger.rtps;
+package us.ihmc.robotDataLogger.dataBuffers;
 
-import java.io.IOException;
 import java.util.concurrent.PriorityBlockingQueue;
 
 import gnu.trove.map.hash.TIntLongHashMap;
@@ -14,9 +13,9 @@ import us.ihmc.pubsub.subscriber.Subscriber;
 import us.ihmc.pubsub.subscriber.SubscriberListener;
 import us.ihmc.robotDataLogger.LogDataType;
 import us.ihmc.robotDataLogger.YoVariableClientImplementation;
-import us.ihmc.robotDataLogger.dataBuffers.RegistryDecompressor;
-import us.ihmc.robotDataLogger.dataBuffers.RegistryReceiveBuffer;
 import us.ihmc.robotDataLogger.handshake.IDLYoVariableHandshakeParser;
+import us.ihmc.robotDataLogger.rtps.LogParticipantTools;
+import us.ihmc.robotDataLogger.rtps.RTPSDebugRegistry;
 
 public class RegistryConsumer extends Thread implements SubscriberListener
 {
@@ -204,43 +203,50 @@ public class RegistryConsumer extends Thread implements SubscriberListener
       RegistryReceiveBuffer buffer = new RegistryReceiveBuffer(System.nanoTime());
       if (subscriber.takeNextData(buffer, sampleInfo))
       {
-         // RFC 1889 jitter estimate
-         if (previousTransmitTime != -1)
-         {
-            long D = (buffer.getReceivedTimestamp() - previousReceiveTime) - (buffer.getTransmitTime() - previousTransmitTime);
-            if (D < 0)
-               D = -D;
-
-            jitterEstimate += (D - jitterEstimate) / 16;
-
-            ++samples;
-            averageTimeBetweenPackets += ((buffer.getTransmitTime() - previousTransmitTime) - averageTimeBetweenPackets) / samples;
-
-            jitterBufferSamples = (int) (Math.ceil(jitterEstimate / averageTimeBetweenPackets) + 1);
-
-            if (jitterBufferSamples > MAXIMUM_ELEMENTS / 2)
-            {
-               jitterBufferSamples = MAXIMUM_ELEMENTS / 2;
-            }
-         }
-         previousTransmitTime = buffer.getTransmitTime();
-         previousReceiveTime = buffer.getReceivedTimestamp();
-
          if (sampleIdentities.get(sampleInfo.getSampleIdentity().getGuid()) != sampleIdentities.getNoEntryValue()
                && sampleIdentities.get(sampleInfo.getSampleIdentity().getGuid()) + 1 != sampleInfo.getSampleIdentity().getSequenceNumber().get())
          {
             debugRegistry.getSkippedIncomingPackets().increment();
          }
          sampleIdentities.put(sampleInfo.getSampleIdentity().getGuid(), sampleInfo.getSampleIdentity().getSequenceNumber().get());
+         
+         onNewDataMessage(buffer);
+      }
+   }
+   
+   public void onNewDataMessage(RegistryReceiveBuffer buffer)
+   {
+      // RFC 1889 jitter estimate
+      if (previousTransmitTime != -1)
+      {
+         long D = (buffer.getReceivedTimestamp() - previousReceiveTime) - (buffer.getTransmitTime() - previousTransmitTime);
+         if (D < 0)
+            D = -D;
 
-         if (orderedBuffers.size() < MAXIMUM_ELEMENTS)
+         jitterEstimate += (D - jitterEstimate) / 16;
+
+         ++samples;
+         averageTimeBetweenPackets += ((buffer.getTransmitTime() - previousTransmitTime) - averageTimeBetweenPackets) / samples;
+
+         jitterBufferSamples = (int) (Math.ceil(jitterEstimate / averageTimeBetweenPackets) + 1);
+
+         if (jitterBufferSamples > MAXIMUM_ELEMENTS / 2)
          {
-            orderedBuffers.add(buffer);
+            jitterBufferSamples = MAXIMUM_ELEMENTS / 2;
          }
-         else
-         {
-            debugRegistry.getSkippedPacketDueToFullBuffer().increment();
-         }
+      }
+      previousTransmitTime = buffer.getTransmitTime();
+      previousReceiveTime = buffer.getReceivedTimestamp();
+
+      
+
+      if (orderedBuffers.size() < MAXIMUM_ELEMENTS)
+      {
+         orderedBuffers.add(buffer);
+      }
+      else
+      {
+         debugRegistry.getSkippedPacketDueToFullBuffer().increment();
       }
    }
 }
