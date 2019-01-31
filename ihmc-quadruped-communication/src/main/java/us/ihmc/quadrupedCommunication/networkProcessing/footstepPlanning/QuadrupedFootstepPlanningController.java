@@ -50,7 +50,6 @@ public class QuadrupedFootstepPlanningController extends QuadrupedToolboxControl
    private final AtomicReference<QuadrupedFootstepPlanningRequestPacket> latestRequestReference = new AtomicReference<>(null);
    private Optional<PlanarRegionsList> planarRegionsList = Optional.empty();
 
-
    private final YoQuadrupedXGaitSettings xGaitSettings;
    private final YoVisibilityGraphParameters visibilityGraphParameters;
    private final AtomicLong robotTimestampNanos = new AtomicLong();
@@ -60,9 +59,8 @@ public class QuadrupedFootstepPlanningController extends QuadrupedToolboxControl
 
    public QuadrupedFootstepPlanningController(QuadrupedXGaitSettingsReadOnly defaultXGaitSettings, VisibilityGraphsParameters visibilityGraphParameters,
                                               FootstepPlannerParameters footstepPlannerParameters, PointFootSnapperParameters pointFootSnapperParameters,
-                                              OutputManager statusOutputManager,
-                                              QuadrupedRobotDataReceiver robotDataReceiver, YoVariableRegistry parentRegistry,
-                                              YoGraphicsListRegistry graphicsListRegistry, long tickTimeMs)
+                                              OutputManager statusOutputManager, QuadrupedRobotDataReceiver robotDataReceiver,
+                                              YoVariableRegistry parentRegistry, YoGraphicsListRegistry graphicsListRegistry, long tickTimeMs)
    {
       super(robotDataReceiver, statusOutputManager, parentRegistry);
 
@@ -76,7 +74,8 @@ public class QuadrupedFootstepPlanningController extends QuadrupedToolboxControl
       plannerMap.put(FootstepPlannerType.VIS_GRAPH_WITH_TURN_WALK_TURN,
                      new QuadrupedVisGraphWithTurnWalkTurnPlanner(xGaitSettings, this.visibilityGraphParameters, robotTimestamp, pointFootSnapperParameters,
                                                                   robotDataReceiver.getReferenceFrames(), null, registry));
-      plannerMap.put(FootstepPlannerType.A_STAR, QuadrupedAStarFootstepPlanner.createPlanner(footstepPlannerParameters, defaultXGaitSettings, null, expansion, registry));
+      plannerMap.put(FootstepPlannerType.A_STAR,
+                     QuadrupedAStarFootstepPlanner.createPlanner(footstepPlannerParameters, defaultXGaitSettings, null, expansion, registry));
       activePlanner.set(FootstepPlannerType.SIMPLE_PATH_TURN_WALK_TURN);
    }
 
@@ -144,7 +143,10 @@ public class QuadrupedFootstepPlanningController extends QuadrupedToolboxControl
       else
       {
          PlanarRegionsList planarRegionsList = PlanarRegionMessageConverter.convertToPlanarRegionsList(planarRegionsListMessage);
-         this.planarRegionsList = Optional.of(planarRegionsList);
+         if (planarRegionsList.isEmpty())
+            this.planarRegionsList = Optional.empty();
+         else
+            this.planarRegionsList = Optional.of(planarRegionsList);
       }
 
       QuadrupedBodyPathAndFootstepPlanner planner = plannerMap.get(activePlanner.getEnumValue());
@@ -203,6 +205,6 @@ public class QuadrupedFootstepPlanningController extends QuadrupedToolboxControl
          stepMessages.add(QuadrupedMessageTools.createQuadrupedTimedStepMessage(steps.get(i)));
       }
 
-      return QuadrupedMessageTools.createQuadrupedTimedStepListMessage(stepMessages, true);
+      return QuadrupedMessageTools.createQuadrupedTimedStepListMessage(stepMessages, false);
    }
 }
