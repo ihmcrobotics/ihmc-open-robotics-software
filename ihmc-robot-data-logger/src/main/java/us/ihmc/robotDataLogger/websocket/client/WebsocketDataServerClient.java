@@ -5,6 +5,8 @@ import java.net.URI;
 import java.net.URISyntaxException;
 
 import io.netty.bootstrap.Bootstrap;
+import io.netty.buffer.ByteBuf;
+import io.netty.buffer.Unpooled;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelInitializer;
 import io.netty.channel.ChannelOption;
@@ -16,9 +18,13 @@ import io.netty.channel.socket.nio.NioSocketChannel;
 import io.netty.handler.codec.http.DefaultHttpHeaders;
 import io.netty.handler.codec.http.HttpClientCodec;
 import io.netty.handler.codec.http.HttpObjectAggregator;
+import io.netty.handler.codec.http.websocketx.BinaryWebSocketFrame;
 import io.netty.handler.codec.http.websocketx.WebSocketClientHandshakerFactory;
 import io.netty.handler.codec.http.websocketx.WebSocketVersion;
 import io.netty.handler.codec.http.websocketx.extensions.compression.WebSocketClientCompressionHandler;
+import us.ihmc.pubsub.common.SerializedPayload;
+import us.ihmc.robotDataLogger.VariableChangeRequest;
+import us.ihmc.robotDataLogger.VariableChangeRequestPubSubType;
 import us.ihmc.robotDataLogger.YoVariableClientImplementation;
 import us.ihmc.robotDataLogger.dataBuffers.CustomLogDataSubscriberType;
 import us.ihmc.robotDataLogger.dataBuffers.RegistryConsumer;
@@ -31,6 +37,9 @@ public class WebsocketDataServerClient
    private final EventLoopGroup group = new NioEventLoopGroup();
    private final RegistryConsumer consumer;
 
+   private final VariableChangeRequestPubSubType variableChangeRequestType = new VariableChangeRequestPubSubType();
+   private final SerializedPayload variableChangeRequestPayload = new SerializedPayload(variableChangeRequestType.getTypeSize());
+   
    private final Channel ch;
 
    public WebsocketDataServerClient(HTTPDataServerDescription target, IDLYoVariableHandshakeParser parser, YoVariableClientImplementation yoVariableClient, RTPSDebugRegistry rtpsDebugRegistry) throws IOException
@@ -87,5 +96,25 @@ public class WebsocketDataServerClient
    public void close()
    {
       ch.close();
+   }
+
+
+   public void writeVariableChangeRequest(int identifier, double valueAsDouble)
+   {
+      try
+      {
+         VariableChangeRequest msg = new VariableChangeRequest();
+         msg.setUniqueId(identifier);
+         msg.setVariableID(identifier);
+         variableChangeRequestType.serialize(msg, variableChangeRequestPayload);
+         
+         ByteBuf data = Unpooled.wrappedBuffer(variableChangeRequestPayload.getData());
+         BinaryWebSocketFrame frame = new BinaryWebSocketFrame(data);
+         ch.writeAndFlush(frame);
+      }
+      catch(Exception e)
+      {
+         e.printStackTrace();
+      }
    }
 }

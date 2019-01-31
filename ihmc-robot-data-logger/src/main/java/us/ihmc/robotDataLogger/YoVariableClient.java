@@ -8,10 +8,13 @@ import us.ihmc.robotDataLogger.rtps.RTPSDataConsumerParticipant;
 import us.ihmc.robotDataLogger.websocket.client.discovery.DataServerDiscoveryClient;
 import us.ihmc.robotDataLogger.websocket.client.discovery.DataServerDiscoveryListener;
 import us.ihmc.robotDataLogger.websocket.client.discovery.HTTPDataServerConnection;
+import us.ihmc.robotDataLogger.websocket.client.discovery.HTTPDataServerDescription;
 import us.ihmc.robotDataLogger.rtps.LogProducerDisplay;
 
 public class YoVariableClient
 {
+   public static final int DEFAULT_TIMEOUT = 15000; //ms
+   
    private final YoVariableClientImplementation yoVariableClientImplementation;
    private final LogProducerDisplay.LogSessionFilter[] sessionFilters;
 
@@ -37,61 +40,62 @@ public class YoVariableClient
       throw new RuntimeException("TODO: Remove me");
    }
 
+   /**
+    * Use {@link startWithHostSelector}
+    * 
+    */
+   @Deprecated
    public void start()
+   {
+      start("127.0.0.1", 8008);
+//      startWithHostSelector();
+   }
+
+   
+   /**
+    * Start a client for a host selected in the host selector GUI
+    */
+   public void startWithHostSelector()
+   {
+      throw new RuntimeException("IMPLEMENT ME");
+   }
+   
+   
+   /**
+    * Start a logger connecting to a specified host.
+    * @param host
+    * @param port
+    */
+   public void start(String host, int port)
    {
       try
       {
-         start(15000);
+      HTTPDataServerConnection connection = HTTPDataServerConnection.connect(host, port);
+      start(15000, connection);
       }
-      catch (IOException e)
+      catch(IOException e)
       {
          throw new RuntimeException(e);
       }
    }
-
-   public void start(int timeout) throws IOException
-   {
-//      Announcement announcement = LogProducerDisplay.getAnnounceRequest(dataConsumerParticipant, sessionFilters);
-//      start(timeout, announcement);
-      
-      CompletableFuture<HTTPDataServerConnection> connectionFuture = new CompletableFuture<HTTPDataServerConnection>();
-      
-      final DataServerDiscoveryClient discoveryClient = new DataServerDiscoveryClient(new DataServerDiscoveryListener()
-      {
-         
-         @Override
-         public void disconnected(HTTPDataServerConnection connection)
-         {
-            // TODO Auto-generated method stub
-            
-         }
-         
-         @Override
-         public void connected(HTTPDataServerConnection connection)
-         {
-            connectionFuture.complete(connection);
-         }
-      });
-      
-      discoveryClient.addHost("127.0.0.1", 8008, true);
-      
-      try
-      {
-         HTTPDataServerConnection connection = connectionFuture.get();
-         start(15000, connection);
-      }
-      catch (InterruptedException | ExecutionException e)
-      {
-         // TODO Auto-generated catch block
-         e.printStackTrace();
-      }
-   }
+   
+   
 
    public void start(int timeout, Announcement announcement) throws IOException
    {
       throw new RuntimeException("TODO: Remove me");
    }
    
+   /**
+    * Start the logger re-using an already existing HTTPDataServerConnection
+    * 
+    * This method is used by the logger and the GUI popup to avoid an extra connection. This saves some object allocations on the server side
+    * 
+    * @param timeout Timeout for requesting resources
+    * @param connection An existing HTTPDataServerConnection
+    * 
+    * @throws IOException 
+    */
    public void start(int timeout, HTTPDataServerConnection connection) throws IOException
    {
       yoVariableClientImplementation.start(timeout, connection);
@@ -107,5 +111,5 @@ public class YoVariableClient
    {
       yoVariableClientImplementation.disconnect();
    }
-   
+
 }
