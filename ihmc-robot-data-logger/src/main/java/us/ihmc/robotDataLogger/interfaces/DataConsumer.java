@@ -69,7 +69,7 @@ public interface DataConsumer
     * @param rtpsDebugRegistry
     */
    void startSession(IDLYoVariableHandshakeParser parser, YoVariableClientImplementation yoVariableClient, VariableChangedProducer variableChangedProducer,
-                      TimestampListener timeStampListener, ClearLogListener clearLogListener, RTPSDebugRegistry rtpsDebugRegistry);
+                      TimestampListener timeStampListener, ClearLogListener clearLogListener, RTPSDebugRegistry rtpsDebugRegistry) throws IOException;
 
    /**
     * 

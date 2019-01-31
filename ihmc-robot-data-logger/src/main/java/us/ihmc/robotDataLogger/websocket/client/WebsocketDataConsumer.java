@@ -10,6 +10,7 @@ import us.ihmc.idl.serializers.extra.JSONSerializer;
 import us.ihmc.robotDataLogger.Handshake;
 import us.ihmc.robotDataLogger.HandshakePubSubType;
 import us.ihmc.robotDataLogger.YoVariableClientImplementation;
+import us.ihmc.robotDataLogger.dataBuffers.RegistryConsumer;
 import us.ihmc.robotDataLogger.handshake.IDLYoVariableHandshakeParser;
 import us.ihmc.robotDataLogger.interfaces.DataConsumer;
 import us.ihmc.robotDataLogger.listeners.ClearLogListener;
@@ -21,7 +22,11 @@ import us.ihmc.robotDataLogger.websocket.client.discovery.HTTPDataServerConnecti
 
 public class WebsocketDataConsumer implements DataConsumer
 {
+   private final Object lock = new Object();
    private HTTPDataServerConnection connection;
+
+   private WebsocketDataServerClient session;
+   private boolean closed = false;
 
    public WebsocketDataConsumer(HTTPDataServerConnection initialConnection)
    {
@@ -30,20 +35,23 @@ public class WebsocketDataConsumer implements DataConsumer
 
    private ByteBuf getResource(String path, int timeout) throws IOException
    {
-      if (!connection.isConnected())
+      synchronized (lock)
       {
-         throw new IOException("Not connected");
-      }
+         if (!connection.isConnected())
+         {
+            throw new IOException("Not connected");
+         }
 
-      Future<ByteBuf> resourceFuture = connection.requestResource(path);
+         Future<ByteBuf> resourceFuture = connection.requestResource(path);
 
-      try
-      {
-         return resourceFuture.get(timeout, TimeUnit.MILLISECONDS);
-      }
-      catch (Exception e)
-      {
-         throw new IOException(e);
+         try
+         {
+            return resourceFuture.get(timeout, TimeUnit.MILLISECONDS);
+         }
+         catch (Exception e)
+         {
+            throw new IOException(e);
+         }
       }
 
    }
@@ -87,33 +95,81 @@ public class WebsocketDataConsumer implements DataConsumer
    public void startSession(IDLYoVariableHandshakeParser parser, YoVariableClientImplementation yoVariableClient,
                             VariableChangedProducer variableChangedProducer, TimestampListener timeStampListener, ClearLogListener clearLogListener,
                             RTPSDebugRegistry rtpsDebugRegistry)
+         throws IOException
    {
-      // TODO Auto-generated method stub
+      synchronized (lock)
+      {
+         if (!connection.isConnected())
+         {
+            throw new IOException("Not connected");
+         }
+         connection.close();
 
+         session = new WebsocketDataServerClient(connection.getTarget(), parser, yoVariableClient, rtpsDebugRegistry);
+      }
    }
 
    @Override
    public boolean isSessionActive()
    {
-      return connection.isConnected();
+      synchronized (lock)
+      {
+         if (session == null)
+         {
+            return false;
+         }
+         else
+         {
+            return session.isActive();
+         }
+      }
    }
 
    @Override
    public void disconnectSession()
    {
-      connection.close();
+      synchronized (lock)
+      {
+
+         if (session == null)
+         {
+            throw new RuntimeException("Session not started");
+         }
+
+         session.close();
+      }
    }
 
    @Override
    public void close()
    {
-      connection.close();
+      synchronized (lock)
+      {
+
+         if (connection.isConnected())
+         {
+            connection.close();
+         }
+
+         if (session != null)
+         {
+            if (session.isActive())
+            {
+               session.close();
+            }
+         }
+
+         closed = true;
+      }
    }
 
    @Override
    public boolean isClosed()
    {
-      return connection.isConnected();
+      synchronized (lock)
+      {
+         return closed;
+      }
    }
 
    @Override

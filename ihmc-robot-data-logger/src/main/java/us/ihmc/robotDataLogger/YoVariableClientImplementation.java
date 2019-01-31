@@ -6,7 +6,6 @@ import us.ihmc.log.LogTools;
 import us.ihmc.robotDataLogger.handshake.IDLYoVariableHandshakeParser;
 import us.ihmc.robotDataLogger.handshake.LogHandshake;
 import us.ihmc.robotDataLogger.interfaces.DataConsumer;
-import us.ihmc.robotDataLogger.rtps.RTPSDataConsumerParticipant;
 import us.ihmc.robotDataLogger.rtps.RTPSDebugRegistry;
 import us.ihmc.robotDataLogger.rtps.VariableChangedProducer;
 import us.ihmc.robotDataLogger.websocket.client.WebsocketDataConsumer;
@@ -79,7 +78,6 @@ public class YoVariableClientImplementation implements YoVariableClientInterface
     */
    public synchronized void start(int timeout, HTTPDataServerConnection connection) throws IOException
    {
-
       if (dataConsumer != null)
       {
          throw new RuntimeException("Client already started");
@@ -137,7 +135,7 @@ public class YoVariableClientImplementation implements YoVariableClientInterface
       {
          throw new RuntimeException("Client already connected");
       }
-      if(!dataConsumer.isClosed())
+      if(dataConsumer.isClosed())
       {
          throw new RuntimeException("Client has closed completely");
       }

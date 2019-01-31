@@ -1,6 +1,8 @@
 package us.ihmc.robotDataLogger;
 
 import java.io.IOException;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
 
 import us.ihmc.robotDataLogger.rtps.RTPSDataConsumerParticipant;
 import us.ihmc.robotDataLogger.websocket.client.discovery.DataServerDiscoveryClient;
@@ -52,7 +54,9 @@ public class YoVariableClient
 //      Announcement announcement = LogProducerDisplay.getAnnounceRequest(dataConsumerParticipant, sessionFilters);
 //      start(timeout, announcement);
       
-      DataServerDiscoveryClient discoveryClient = new DataServerDiscoveryClient(new DataServerDiscoveryListener()
+      CompletableFuture<HTTPDataServerConnection> connectionFuture = new CompletableFuture<HTTPDataServerConnection>();
+      
+      final DataServerDiscoveryClient discoveryClient = new DataServerDiscoveryClient(new DataServerDiscoveryListener()
       {
          
          @Override
@@ -65,23 +69,22 @@ public class YoVariableClient
          @Override
          public void connected(HTTPDataServerConnection connection)
          {
-            System.out.println("Connected to host, starting visualizer");
-            new Thread(() -> {
-               
-               try
-               {
-                  start(timeout, connection);
-               }
-               catch (IOException e)
-               {
-                  e.printStackTrace();
-               }
-            }).start();
+            connectionFuture.complete(connection);
          }
       });
       
       discoveryClient.addHost("127.0.0.1", 8008, true);
       
+      try
+      {
+         HTTPDataServerConnection connection = connectionFuture.get();
+         start(15000, connection);
+      }
+      catch (InterruptedException | ExecutionException e)
+      {
+         // TODO Auto-generated catch block
+         e.printStackTrace();
+      }
    }
 
    public void start(int timeout, Announcement announcement) throws IOException
