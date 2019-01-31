@@ -48,7 +48,6 @@ public class WebsocketDataBroadcaster implements ChannelFutureListener
          {
             if(channels.get(i).channel() == future.channel())
             {
-               System.out.println("Client disconnect " + future.channel());
                channels.remove(i).release();
                return;
             }
