@@ -9,6 +9,7 @@ import io.netty.channel.ChannelFutureListener;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelPromise;
 import io.netty.channel.SimpleChannelInboundHandler;
+import io.netty.handler.codec.http.websocketx.BinaryWebSocketFrame;
 import io.netty.handler.codec.http.websocketx.TextWebSocketFrame;
 import io.netty.handler.codec.http.websocketx.WebSocketFrame;
 import io.netty.handler.codec.http.websocketx.WebSocketServerProtocolHandler.HandshakeComplete;
@@ -65,6 +66,10 @@ public class WebsocketDataServerFrameHandler extends SimpleChannelInboundHandler
       {
          String request = ((TextWebSocketFrame) frame).text();
          System.out.println(request);
+      }
+      else if (frame instanceof BinaryWebSocketFrame)
+      {
+         System.out.println("Received: " + frame.content());
       }
       else
       {

@@ -7,7 +7,7 @@ import us.ihmc.robotDataLogger.handshake.IDLYoVariableHandshakeParser;
 import us.ihmc.robotDataLogger.handshake.LogHandshake;
 import us.ihmc.robotDataLogger.interfaces.DataConsumer;
 import us.ihmc.robotDataLogger.interfaces.VariableChangedProducer;
-import us.ihmc.robotDataLogger.rtps.RTPSDebugRegistry;
+import us.ihmc.robotDataLogger.util.DebugRegistry;
 import us.ihmc.robotDataLogger.websocket.client.WebsocketDataConsumer;
 import us.ihmc.robotDataLogger.websocket.client.discovery.HTTPDataServerConnection;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
@@ -30,7 +30,7 @@ public class YoVariableClientImplementation implements YoVariableClientInterface
 
    // Internal values
    private final IDLYoVariableHandshakeParser handshakeParser;
-   private final RTPSDebugRegistry debugRegistry = new RTPSDebugRegistry();
+   private final DebugRegistry debugRegistry = new DebugRegistry();
    
    private DataConsumer dataConsumer;
 

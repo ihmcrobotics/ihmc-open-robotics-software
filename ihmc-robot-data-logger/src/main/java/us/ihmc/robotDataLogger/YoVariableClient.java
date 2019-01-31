@@ -1,15 +1,10 @@
 package us.ihmc.robotDataLogger;
 
 import java.io.IOException;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ExecutionException;
 
-import us.ihmc.robotDataLogger.rtps.RTPSDataConsumerParticipant;
-import us.ihmc.robotDataLogger.websocket.client.discovery.DataServerDiscoveryClient;
-import us.ihmc.robotDataLogger.websocket.client.discovery.DataServerDiscoveryListener;
-import us.ihmc.robotDataLogger.websocket.client.discovery.HTTPDataServerConnection;
-import us.ihmc.robotDataLogger.websocket.client.discovery.HTTPDataServerDescription;
 import us.ihmc.robotDataLogger.rtps.LogProducerDisplay;
+import us.ihmc.robotDataLogger.rtps.RTPSDataConsumerParticipant;
+import us.ihmc.robotDataLogger.websocket.client.discovery.HTTPDataServerConnection;
 
 public class YoVariableClient
 {

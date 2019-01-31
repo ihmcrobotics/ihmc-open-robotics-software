@@ -1,16 +1,14 @@
 package us.ihmc.robotDataLogger.websocket.server;
 
-import java.nio.ByteBuffer;
 import java.util.ArrayList;
 
 import io.netty.buffer.AbstractByteBufAllocator;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.ByteBufAllocator;
-import io.netty.buffer.Unpooled;
 
 public class CustomGCAvoidingByteBufAllocator extends AbstractByteBufAllocator
 {
-   private final static int INITIAL_MAX_CAPACITY = 128;
+   private final static int INITIAL_MAX_CAPACITY = 2048;
    private final static int INITIAL_POOL_SIZE = 16;
 
    private final ArrayList<ByteBuf> pool = new ArrayList<ByteBuf>(INITIAL_POOL_SIZE);
@@ -30,7 +28,7 @@ public class CustomGCAvoidingByteBufAllocator extends AbstractByteBufAllocator
 
    private ByteBuf add(int capacity)
    {
-      ByteBuf wrappedBuffer = Unpooled.wrappedBuffer(ByteBuffer.allocateDirect(capacity));
+      ByteBuf wrappedBuffer = new ResizeableUnpooledUnsafeDirectByteBuf(capacity, capacity);
       wrappedBuffer.internalNioBuffer(0, 0); // Force allocation of temporary object
       pool.add(wrappedBuffer);
       return wrappedBuffer;
@@ -63,7 +61,8 @@ public class CustomGCAvoidingByteBufAllocator extends AbstractByteBufAllocator
    {
       if (initialCapacity > capacity)
       {
-         return backupAllocator.directBuffer(initialCapacity, maxCapacity);
+         ByteBuf newBuf = backupAllocator.directBuffer(initialCapacity, maxCapacity); 
+         return newBuf;
       }
 
       for (int i = index; i < index + pool.size(); i++)
@@ -74,6 +73,7 @@ public class CustomGCAvoidingByteBufAllocator extends AbstractByteBufAllocator
          if (byteBuf.refCnt() == 1)
          {
             index = item + 1;
+            byteBuf.capacity(initialCapacity);
             byteBuf.clear();
             byteBuf.internalNioBuffer(0, 0); // Force allocation of temporary object
             return byteBuf.retain();

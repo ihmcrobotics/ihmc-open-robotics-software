@@ -1,9 +1,9 @@
-package us.ihmc.robotDataLogger.rtps;
+package us.ihmc.robotDataLogger.util;
 
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoInteger;
 
-public class RTPSDebugRegistry
+public class DebugRegistry
 {
    private final YoInteger skippedPackets;
    private final YoInteger skippedIncomingPackets;
@@ -16,7 +16,7 @@ public class RTPSDebugRegistry
 
    private final YoVariableRegistry loggerDebugRegistry = new YoVariableRegistry("loggerStatus");
    
-   public RTPSDebugRegistry()
+   public DebugRegistry()
    {
       
       this.skippedPackets = new YoInteger("skippedPackets", loggerDebugRegistry);

@@ -34,6 +34,7 @@ import us.ihmc.robotDataLogger.interfaces.VariableChangedProducer;
 import us.ihmc.robotDataLogger.listeners.ClearLogListener;
 import us.ihmc.robotDataLogger.listeners.LogAnnouncementListener;
 import us.ihmc.robotDataLogger.listeners.TimestampListener;
+import us.ihmc.robotDataLogger.util.DebugRegistry;
 
 /**
  * This class implements all communication for a data consumer inside a DDS logging network
@@ -298,7 +299,7 @@ public class RTPSDataConsumerParticipant
     */
    public synchronized void createSession(Announcement announcement, IDLYoVariableHandshakeParser parser, YoVariableClientImplementation yoVariableClient,
                                                          VariableChangedProducer variableChangedProducer, TimestampListener timeStampListener,
-                                                         ClearLogListener clearLogListener, RTPSDebugRegistry rtpsDebugRegistry)
+                                                         ClearLogListener clearLogListener, DebugRegistry rtpsDebugRegistry)
          throws IOException
    {
       if (session != null)

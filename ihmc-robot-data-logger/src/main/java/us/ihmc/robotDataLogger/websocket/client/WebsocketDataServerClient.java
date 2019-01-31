@@ -29,7 +29,7 @@ import us.ihmc.robotDataLogger.YoVariableClientImplementation;
 import us.ihmc.robotDataLogger.dataBuffers.CustomLogDataSubscriberType;
 import us.ihmc.robotDataLogger.dataBuffers.RegistryConsumer;
 import us.ihmc.robotDataLogger.handshake.IDLYoVariableHandshakeParser;
-import us.ihmc.robotDataLogger.rtps.RTPSDebugRegistry;
+import us.ihmc.robotDataLogger.util.DebugRegistry;
 import us.ihmc.robotDataLogger.websocket.client.discovery.HTTPDataServerDescription;
 
 public class WebsocketDataServerClient
@@ -42,7 +42,7 @@ public class WebsocketDataServerClient
    
    private final Channel ch;
 
-   public WebsocketDataServerClient(HTTPDataServerDescription target, IDLYoVariableHandshakeParser parser, YoVariableClientImplementation yoVariableClient, RTPSDebugRegistry rtpsDebugRegistry) throws IOException
+   public WebsocketDataServerClient(HTTPDataServerDescription target, IDLYoVariableHandshakeParser parser, YoVariableClientImplementation yoVariableClient, DebugRegistry debugRegistry) throws IOException
    {
       URI uri;
       try
@@ -54,7 +54,7 @@ public class WebsocketDataServerClient
          throw new IOException(e);
       }
       
-      this.consumer = new RegistryConsumer(parser, yoVariableClient, rtpsDebugRegistry);
+      this.consumer = new RegistryConsumer(parser, yoVariableClient, debugRegistry);
       
       CustomLogDataSubscriberType type = new CustomLogDataSubscriberType(parser.getNumberOfVariables(), parser.getNumberOfStates());
       final WebSocketDataServerClientHandler handler = new WebSocketDataServerClientHandler(WebSocketClientHandshakerFactory.newHandshaker(uri,
@@ -78,9 +78,11 @@ public class WebsocketDataServerClient
       try
       {
          ch = b.connect(uri.getHost(), uri.getPort()).syncUninterruptibly().channel();
+         ch.closeFuture().addListener((e) -> group.shutdownGracefully());
       }
       catch (Exception e)
       {
+         group.shutdownGracefully();
          throw new IOException(e);
       }
 

@@ -7,7 +7,7 @@ import us.ihmc.robotDataLogger.YoVariableClientImplementation;
 import us.ihmc.robotDataLogger.handshake.IDLYoVariableHandshakeParser;
 import us.ihmc.robotDataLogger.listeners.ClearLogListener;
 import us.ihmc.robotDataLogger.listeners.TimestampListener;
-import us.ihmc.robotDataLogger.rtps.RTPSDebugRegistry;
+import us.ihmc.robotDataLogger.util.DebugRegistry;
 
 public interface DataConsumer
 {
@@ -68,7 +68,7 @@ public interface DataConsumer
     * @param rtpsDebugRegistry
     */
    void startSession(IDLYoVariableHandshakeParser parser, YoVariableClientImplementation yoVariableClient, VariableChangedProducer variableChangedProducer,
-                      TimestampListener timeStampListener, ClearLogListener clearLogListener, RTPSDebugRegistry rtpsDebugRegistry) throws IOException;
+                      TimestampListener timeStampListener, ClearLogListener clearLogListener, DebugRegistry rtpsDebugRegistry) throws IOException;
 
    /**
     * 
@@ -96,7 +96,7 @@ public interface DataConsumer
     * 
     * @return true if the reconnect is successful
     */
-   boolean reconnect();
+   boolean reconnect() throws IOException;
 
    /**
     * Send a request to the session to change a variable
