@@ -1,4 +1,4 @@
-package us.ihmc.robotDataLogger.websocket.client;
+package us.ihmc.robotDataLogger.websocket.client.discovery;
 
 import java.io.IOException;
 import java.util.concurrent.CompletableFuture;
@@ -41,8 +41,9 @@ import us.ihmc.robotDataLogger.websocket.LogHTTPPaths;
 public class HTTPDataServerConnection extends SimpleChannelInboundHandler<HttpObject>
 {
    private final EventLoopGroup group = new NioEventLoopGroup();
-   private final HTTPDataServerDescription host;
+   private final HTTPDataServerDescription target;
    private final HTTPDataServerConnectionListener listener;
+   private final Announcement announcement = new Announcement();
 
    private Channel channel;
 
@@ -51,16 +52,16 @@ public class HTTPDataServerConnection extends SimpleChannelInboundHandler<HttpOb
 
    public interface HTTPDataServerConnectionListener
    {
-      public void connected(HTTPDataServerDescription target, HTTPDataServerConnection connection, Announcement announcement);
+      public void connected(HTTPDataServerConnection connection);
 
-      public void disconnected(HTTPDataServerDescription target, HTTPDataServerConnection connection);
+      public void disconnected(HTTPDataServerConnection connection);
 
       public void connectionRefused(HTTPDataServerDescription target);
    }
 
    public HTTPDataServerConnection(HTTPDataServerDescription target, HTTPDataServerConnectionListener listener)
    {
-      this.host = target;
+      this.target = target;
       this.listener = listener;
 
       Bootstrap b = new Bootstrap();
@@ -75,7 +76,7 @@ public class HTTPDataServerConnection extends SimpleChannelInboundHandler<HttpOb
          }
          else
          {
-            listener.connectionRefused(host);
+            listener.connectionRefused(target);
             group.shutdownGracefully();
          }
       });
@@ -93,9 +94,8 @@ public class HTTPDataServerConnection extends SimpleChannelInboundHandler<HttpOb
       JSONSerializer<Announcement> serializer = new JSONSerializer<Announcement>(new AnnouncementPubSubType());
       try
       {
-         Announcement announcement = serializer.deserialize(buf.toString(CharsetUtil.UTF_8));
-         listener.connected(host, this, announcement);
-         ;
+         announcement.set(serializer.deserialize(buf.toString(CharsetUtil.UTF_8)));
+         listener.connected(this);
       }
       catch (IOException e)
       {
@@ -127,7 +127,7 @@ public class HTTPDataServerConnection extends SimpleChannelInboundHandler<HttpOb
       {
          // Prepare the HTTP request.
          HttpRequest request = new DefaultFullHttpRequest(HttpVersion.HTTP_1_1, HttpMethod.GET, path);
-         request.headers().set(HttpHeaderNames.HOST, host);
+         request.headers().set(HttpHeaderNames.HOST, target);
          request.headers().set(HttpHeaderNames.CONNECTION, HttpHeaderValues.KEEP_ALIVE);
          request.headers().set(HttpHeaderNames.ACCEPT_ENCODING, HttpHeaderValues.GZIP);
          // Send the HTTP request.
@@ -155,6 +155,16 @@ public class HTTPDataServerConnection extends SimpleChannelInboundHandler<HttpOb
       {
          channel.close();
       }
+   }
+
+   public HTTPDataServerDescription getTarget()
+   {
+      return target;
+   }
+
+   public Announcement getAnnouncement()
+   {
+      return announcement;
    }
 
    private class HttpSnoopClientInitializer extends ChannelInitializer<SocketChannel>
@@ -233,7 +243,7 @@ public class HTTPDataServerConnection extends SimpleChannelInboundHandler<HttpOb
    @Override
    public void channelInactive(ChannelHandlerContext ctx) throws Exception
    {
-      listener.disconnected(host, this);
+      listener.disconnected(this);
       group.shutdownGracefully();
 
    }
@@ -247,31 +257,27 @@ public class HTTPDataServerConnection extends SimpleChannelInboundHandler<HttpOb
 
    public static void main(String[] args)
    {
-      new HTTPDataServerConnection(new HTTPDataServerDescription("127.0.0.1", 8008),
-                                                                         new HTTPDataServerConnectionListener()
-                                                                         {
+      new HTTPDataServerConnection(new HTTPDataServerDescription("127.0.0.1", 8008, false), new HTTPDataServerConnectionListener()
+      {
 
-                                                                            @Override
-                                                                            public void disconnected(HTTPDataServerDescription target,
-                                                                                                     HTTPDataServerConnection connection)
-                                                                            {
-                                                                               System.out.println("Disconnected");
-                                                                            }
+         @Override
+         public void disconnected(HTTPDataServerConnection connection)
+         {
+            System.out.println("Disconnected");
+         }
 
-                                                                            @Override
-                                                                            public void connectionRefused(HTTPDataServerDescription target)
-                                                                            {
-                                                                               System.out.println("Connection refused");
-                                                                            }
+         @Override
+         public void connectionRefused(HTTPDataServerDescription target)
+         {
+            System.out.println("Connection refused");
+         }
 
-                                                                            @Override
-                                                                            public void connected(HTTPDataServerDescription target,
-                                                                                                  HTTPDataServerConnection connection,
-                                                                                                  Announcement announcement)
-                                                                            {
-                                                                               System.out.println("Connected");
-                                                                            }
-                                                                         });
+         @Override
+         public void connected(HTTPDataServerConnection connection)
+         {
+            System.out.println("Connected");
+         }
+      });
 
    }
 

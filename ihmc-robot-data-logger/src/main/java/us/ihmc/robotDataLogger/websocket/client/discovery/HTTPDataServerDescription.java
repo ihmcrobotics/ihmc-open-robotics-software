@@ -1,14 +1,16 @@
-package us.ihmc.robotDataLogger.websocket.client;
+package us.ihmc.robotDataLogger.websocket.client.discovery;
 
 public class HTTPDataServerDescription
 {
    private final String host;
    private final int port;
+   private final boolean persistant;
 
-   public HTTPDataServerDescription(String host, int port)
+   public HTTPDataServerDescription(String host, int port, boolean persistant)
    {
       this.host = host;
       this.port = port;
+      this.persistant = persistant;
    }
 
    public String getHost()
@@ -19,6 +21,17 @@ public class HTTPDataServerDescription
    public int getPort()
    {
       return port;
+   }
+
+   public boolean isPersistant()
+   {
+      return persistant;
+   }
+   
+   @Override
+   public String toString()
+   {
+      return host + ":" + port;
    }
 
    @Override
