@@ -32,6 +32,14 @@ public class GenericQuadrupedScriptedFlatGroundWalkingTest extends QuadrupedScri
    }
 
    @Override
+   @ContinuousIntegrationTest(estimatedDuration = 74.7)
+   @Test(timeout = 370000)
+   public void testScriptedTroublingSteps()
+   {
+      super.testScriptedTroublingSteps();
+   }
+
+   @Override
    public Point3D getFinalPlanarPosition()
    {
       return new Point3D(1.684, 0.077, 0.0);
