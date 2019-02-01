@@ -1,5 +1,6 @@
 package us.ihmc.stateEstimation.ekf;
 
+import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -7,6 +8,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.stream.Collectors;
+
+import org.ejml.data.DenseMatrix64F;
+import org.ejml.ops.CommonOps;
 
 import gnu.trove.map.TObjectDoubleMap;
 import us.ihmc.commons.Conversions;
@@ -52,6 +56,7 @@ public class LeggedRobotEKF implements StateEstimatorController
    private final FloatingJointBasics rootJoint;
    private final PoseState rootState;
    private final List<OneDoFJointBasics> oneDoFJoints;
+   private final List<OneDoFJointBasics> referenceJoints;
    private final List<JointState> jointStates = new ArrayList<>();
 
    private final List<AngularVelocitySensor> angularVelocitySensors = new ArrayList<>();
@@ -78,11 +83,12 @@ public class LeggedRobotEKF implements StateEstimatorController
 
    public LeggedRobotEKF(FloatingJointBasics rootJoint, List<OneDoFJointBasics> oneDoFJoints, String primaryImuName, Collection<String> imuNames,
                          Map<String, ReferenceFrame> forceSensorMap, SensorRawOutputMapReadOnly sensorOutput, double dt, double gravity,
-                         Map<String, String> jointGroups, YoGraphicsListRegistry graphicsListRegistry)
+                         Map<String, String> jointGroups, YoGraphicsListRegistry graphicsListRegistry, List<OneDoFJointBasics> referenceJoints)
    {
       this.sensorOutput = sensorOutput;
       this.rootJoint = rootJoint;
       this.oneDoFJoints = oneDoFJoints;
+      this.referenceJoints = referenceJoints;
 
       List<Sensor> sensors = new ArrayList<>();
       rootState = createState(rootJoint, oneDoFJoints, dt, sensors, jointGroups);
@@ -208,7 +214,7 @@ public class LeggedRobotEKF implements StateEstimatorController
    {
       for (int jointIdx = 0; jointIdx < oneDoFJoints.size(); jointIdx++)
       {
-         double jointPositionMeasurement = sensorOutput.getJointPositionRawOutput(oneDoFJoints.get(jointIdx));
+         double jointPositionMeasurement = sensorOutput.getJointPositionRawOutput(referenceJoints.get(jointIdx));
          jointPositionSensors.get(jointIdx).setJointPositionMeasurement(jointPositionMeasurement);
       }
 
