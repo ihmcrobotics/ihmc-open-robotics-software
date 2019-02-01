@@ -55,7 +55,6 @@ public class LIDARBasedREAModule
    private final REAOcTreeBuffer bufferUpdater;
    private final REAOcTreeUpdater mainUpdater;
    private final REAStereoVisionBuffer stereoVisionBufferUpdater;
-   private final REAStereoVisionUpdater stereoVisionMainUpdater;
    private final REAPlanarRegionFeatureUpdater planarRegionFeatureUpdater;
 
    private final REAModuleStateReporter moduleStateReporter;
@@ -79,7 +78,6 @@ public class LIDARBasedREAModule
       bufferUpdater = new REAOcTreeBuffer(mainOctree.getResolution(), reaMessager, moduleStateReporter);
       mainUpdater = new REAOcTreeUpdater(mainOctree, bufferUpdater, reaMessager);
       stereoVisionBufferUpdater = new REAStereoVisionBuffer(reaMessager, moduleStateReporter);
-      stereoVisionMainUpdater = new REAStereoVisionUpdater(stereoVisionBufferUpdater, reaMessager);
       planarRegionFeatureUpdater = new REAPlanarRegionFeatureUpdater(mainOctree, reaMessager);
 
       ROS2Tools.createCallbackSubscription(ros2Node, LidarScanMessage.class, "/ihmc/lidar_scan", this::dispatchLidarScanMessage);
@@ -185,14 +183,6 @@ public class LIDARBasedREAModule
       if (ocTreeUpdateSuccess)
          lastCompleteUpdate.set(currentTime);
    }
-   
-   private void stereoVisionMainUpdate()
-   {
-      if(Thread.interrupted() || stereoVisionScheduled == null || stereoVisionScheduled.isCancelled())
-         return;
-      
-      stereoVisionMainUpdater.update();   // TODO : any algorithm with Stereo Vision data.
-   }
 
    private boolean isThreadInterrupted()
    {
@@ -209,7 +199,7 @@ public class LIDARBasedREAModule
       
       if (stereoVisionScheduled == null)
       {
-         stereoVisionScheduled = stereoVisionExecutorService.scheduleAtFixedRate(this::stereoVisionMainUpdate, 0, THREAD_PERIOD_MILLISECONDS, TimeUnit.MILLISECONDS);
+         //stereoVisionScheduled = stereoVisionExecutorService.scheduleAtFixedRate(this::stereoVisionMainUpdate, 0, THREAD_PERIOD_MILLISECONDS, TimeUnit.MILLISECONDS);
          stereoVisionExecutorService.scheduleAtFixedRate(stereoVisionBufferUpdater.createBufferThread(), 0, BUFFER_THREAD_PERIOD_MILLISECONDS, TimeUnit.MILLISECONDS);
       }
    }
