@@ -133,7 +133,8 @@ public class QuadrupedFootstepPlanningController extends QuadrupedToolboxControl
       if (request == null)
          return false;
 
-      activePlanner.set(FootstepPlannerType.fromByte(request.getRequestedFootstepPlannerType()));
+      if (request.getRequestedFootstepPlannerType() >= 0)
+         activePlanner.set(FootstepPlannerType.fromByte(request.getRequestedFootstepPlannerType()));
 
       PlanarRegionsListMessage planarRegionsListMessage = request.getPlanarRegionsListMessage();
       if (planarRegionsListMessage == null)
