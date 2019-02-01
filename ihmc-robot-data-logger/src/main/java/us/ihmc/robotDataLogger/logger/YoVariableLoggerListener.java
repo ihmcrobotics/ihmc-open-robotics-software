@@ -8,7 +8,6 @@ import java.nio.ByteBuffer;
 import java.nio.LongBuffer;
 import java.nio.channels.FileChannel;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 import us.ihmc.commons.PrintTools;
@@ -25,6 +24,7 @@ import us.ihmc.robotDataLogger.handshake.LogHandshake;
 import us.ihmc.robotDataLogger.handshake.YoVariableHandshakeParser;
 import us.ihmc.robotDataLogger.jointState.JointState;
 import us.ihmc.robotDataLogger.rtps.LogParticipantSettings;
+import us.ihmc.robotDataLogger.websocket.command.DataServerCommand;
 import us.ihmc.tools.compression.SnappyUtils;
 import us.ihmc.yoVariables.variable.YoVariable;
 
@@ -433,8 +433,7 @@ public class YoVariableLoggerListener implements YoVariablesUpdatedListener
       }
    }
 
-   @Override
-   public void clearLog(String guid)
+   private void clearLog()
    {
       synchronized (synchronizer)
       {
@@ -469,5 +468,14 @@ public class YoVariableLoggerListener implements YoVariablesUpdatedListener
    public void connected()
    {
       
+   }
+
+   @Override
+   public void receivedCommand(DataServerCommand command, int argument)
+   {
+      if(command == DataServerCommand.CLEAR_LOG)
+      {
+         clearLog();
+      }
    }
 }

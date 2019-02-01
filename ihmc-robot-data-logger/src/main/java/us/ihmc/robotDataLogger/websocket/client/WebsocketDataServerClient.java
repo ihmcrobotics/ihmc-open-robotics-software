@@ -19,6 +19,7 @@ import io.netty.handler.codec.http.DefaultHttpHeaders;
 import io.netty.handler.codec.http.HttpClientCodec;
 import io.netty.handler.codec.http.HttpObjectAggregator;
 import io.netty.handler.codec.http.websocketx.BinaryWebSocketFrame;
+import io.netty.handler.codec.http.websocketx.TextWebSocketFrame;
 import io.netty.handler.codec.http.websocketx.WebSocketClientHandshakerFactory;
 import io.netty.handler.codec.http.websocketx.WebSocketVersion;
 import io.netty.handler.codec.http.websocketx.extensions.compression.WebSocketClientCompressionHandler;
@@ -31,6 +32,7 @@ import us.ihmc.robotDataLogger.dataBuffers.RegistryConsumer;
 import us.ihmc.robotDataLogger.handshake.IDLYoVariableHandshakeParser;
 import us.ihmc.robotDataLogger.util.DebugRegistry;
 import us.ihmc.robotDataLogger.websocket.client.discovery.HTTPDataServerDescription;
+import us.ihmc.robotDataLogger.websocket.command.DataServerCommand;
 
 public class WebsocketDataServerClient
 {
@@ -39,10 +41,12 @@ public class WebsocketDataServerClient
 
    private final VariableChangeRequestPubSubType variableChangeRequestType = new VariableChangeRequestPubSubType();
    private final SerializedPayload variableChangeRequestPayload = new SerializedPayload(variableChangeRequestType.getTypeSize());
-   
+
    private final Channel ch;
 
-   public WebsocketDataServerClient(HTTPDataServerDescription target, IDLYoVariableHandshakeParser parser, YoVariableClientImplementation yoVariableClient, DebugRegistry debugRegistry) throws IOException
+   public WebsocketDataServerClient(HTTPDataServerDescription target, IDLYoVariableHandshakeParser parser, YoVariableClientImplementation yoVariableClient,
+                                    DebugRegistry debugRegistry)
+         throws IOException
    {
       URI uri;
       try
@@ -53,14 +57,15 @@ public class WebsocketDataServerClient
       {
          throw new IOException(e);
       }
-      
+
       this.consumer = new RegistryConsumer(parser, yoVariableClient, debugRegistry);
-      
+
       CustomLogDataSubscriberType type = new CustomLogDataSubscriberType(parser.getNumberOfVariables(), parser.getNumberOfStates());
       final WebSocketDataServerClientHandler handler = new WebSocketDataServerClientHandler(WebSocketClientHandshakerFactory.newHandshaker(uri,
                                                                                                                                            WebSocketVersion.V13,
                                                                                                                                            null, true,
-                                                                                                                                           new DefaultHttpHeaders()), yoVariableClient, consumer, type);
+                                                                                                                                           new DefaultHttpHeaders()),
+                                                                                            yoVariableClient, consumer, type);
 
       Bootstrap b = new Bootstrap();
       b.group(group).channel(NioSocketChannel.class).handler(new ChannelInitializer<SocketChannel>()
@@ -88,18 +93,15 @@ public class WebsocketDataServerClient
 
    }
 
-   
    public boolean isActive()
    {
       return ch.isActive();
    }
 
-
    public void close()
    {
       ch.close();
    }
-
 
    public void writeVariableChangeRequest(int identifier, double valueAsDouble)
    {
@@ -109,14 +111,31 @@ public class WebsocketDataServerClient
          msg.setVariableID(identifier);
          msg.setRequestedValue(valueAsDouble);
          variableChangeRequestType.serialize(msg, variableChangeRequestPayload);
-         
+
          ByteBuf data = Unpooled.wrappedBuffer(variableChangeRequestPayload.getData());
          BinaryWebSocketFrame frame = new BinaryWebSocketFrame(data);
          ch.writeAndFlush(frame);
       }
-      catch(Exception e)
+      catch (Exception e)
       {
          e.printStackTrace();
       }
    }
+
+   public void sendCommand(DataServerCommand command, int argument)
+   {
+      try
+      {
+         ByteBuf cmdBuf = ch.alloc().buffer(DataServerCommand.MaxCommandSize());
+         command.getBytes(cmdBuf, argument);
+         TextWebSocketFrame frame = new TextWebSocketFrame(cmdBuf);
+
+         ch.writeAndFlush(frame);
+      }
+      catch (Exception e)
+      {
+         e.printStackTrace();
+      }
+   }
+
 }

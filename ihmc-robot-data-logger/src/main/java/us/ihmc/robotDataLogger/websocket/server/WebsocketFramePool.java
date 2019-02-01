@@ -75,6 +75,20 @@ class WebsocketFramePool
    }
    
    
+   public WebSocketFrame createFrame()
+   {
+      WebsocketFrameAndBuffer next = getNext();
+      if(next != null)
+      {
+         next.buffer.clear();
+         return next.frame;
+      }
+      else
+      {
+         return null;
+      }
+   }
+   
    public WebSocketFrame createFrame(ByteBuffer data)
    {
       WebsocketFrameAndBuffer next = getNext();

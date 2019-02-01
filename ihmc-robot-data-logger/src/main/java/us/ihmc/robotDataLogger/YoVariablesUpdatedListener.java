@@ -2,10 +2,10 @@ package us.ihmc.robotDataLogger;
 
 import us.ihmc.robotDataLogger.handshake.LogHandshake;
 import us.ihmc.robotDataLogger.handshake.YoVariableHandshakeParser;
-import us.ihmc.robotDataLogger.listeners.ClearLogListener;
+import us.ihmc.robotDataLogger.interfaces.CommandListener;
 import us.ihmc.robotDataLogger.listeners.TimestampListener;
 
-public interface YoVariablesUpdatedListener extends TimestampListener, ClearLogListener
+public interface YoVariablesUpdatedListener extends TimestampListener, CommandListener
 {
    /**
     * 

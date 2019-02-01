@@ -62,13 +62,13 @@ class WebsocketDataBroadcaster implements ChannelFutureListener
       }
    }
 
-   public void writeCommand(DataServerCommand command)
+   public void writeCommand(DataServerCommand command, int argument)
    {
       synchronized (channelLock)
       {
          for (int i = 0; i < channels.size(); i++)
          {
-            channels.get(i).writeCommand(command);
+            channels.get(i).writeCommand(command, argument);
          }
       }
 

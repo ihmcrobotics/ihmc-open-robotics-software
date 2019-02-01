@@ -13,40 +13,57 @@ import io.netty.util.CharsetUtil;
  */
 public enum DataServerCommand
 {
-   CLEAR_LOG(true),
-   START_LOG(true),
-   STOP_LOG(true),
-   SEND_TIMESTAMPS(false)
-   ;
- 
+   CLEAR_LOG(true), START_LOG(true), STOP_LOG(true), SEND_TIMESTAMPS(false);
+
    private static final int MAX_ARGUMENT_SIZE = 5;
-   
+
    public static DataServerCommand[] values = values();
-   
+
    public static int MaxCommandSize()
    {
       int maxSize = 0;
-      for(DataServerCommand cmd : values)
+      for (DataServerCommand cmd : values)
       {
-         if(cmd.toString().length() > maxSize)
+         if (cmd.toString().length() > maxSize)
          {
             maxSize = cmd.length;
          }
       }
-      
+
       return maxSize + MAX_ARGUMENT_SIZE;
    }
-   
+
+   public static DataServerCommand getCommand(ByteBuf in)
+   {
+      for (DataServerCommand cmd : values)
+      {
+         if (cmd.startsWith(in))
+         {
+            return cmd;
+         }
+      }
+      return null;
+   }
+
    private final ByteBuf content;
    private final int length;
-   
-   
+   private final boolean broadcast;
+
    DataServerCommand(boolean broadcast)
    {
-      content = Unpooled.copiedBuffer(toString(), CharsetUtil.UTF_8);
-      length = content.readableBytes();
+      this.content = Unpooled.copiedBuffer(toString(), CharsetUtil.UTF_8);
+      this.length = content.readableBytes();
+      this.broadcast = broadcast;
    }
-   
+
+   /**
+    * @return true if the server should send this packet to all clients
+    */
+   public boolean broadcast()
+   {
+      return broadcast;
+   }
+
    /**
     * Check if this buffer matches this command
     * 
@@ -55,26 +72,25 @@ public enum DataServerCommand
     */
    public boolean startsWith(ByteBuf test)
    {
-      if(test.readableBytes() < content.readableBytes())
+      if (test.readableBytes() < content.readableBytes())
       {
          return false;
       }
-      
-      
-      for(int i = 0; i < content.readableBytes(); i++)
+
+      for (int i = 0; i < content.readableBytes(); i++)
       {
          byte in = test.getByte(test.readerIndex() + i);
          byte orig = content.getByte(i);
-         
-         if(in != orig)
+
+         if (in != orig)
          {
             return false;
          }
       }
-      
+
       return true;
    }
-   
+
    /**
     * Get the argument for this call
     * 
@@ -83,7 +99,7 @@ public enum DataServerCommand
     */
    public int getArgument(ByteBuf in)
    {
-      if(in.readableBytes() == length)
+      if (in.readableBytes() == length)
       {
          return 0;
       }
@@ -104,31 +120,30 @@ public enum DataServerCommand
          return -1;
       }
    }
-   
+
    public void getBytes(ByteBuf out)
    {
       out.writeBytes(content, 0, content.readableBytes());
    }
-   
+
    public void getBytes(ByteBuf out, int argument)
    {
       int multiplier = (int) Math.pow(10, MAX_ARGUMENT_SIZE);
-      if(argument < 0 || argument >= multiplier)
+      if (argument < 0 || argument >= multiplier)
       {
          throw new RuntimeException("Invalid argument");
       }
-      
+
       out.writeBytes(content, 0, content.readableBytes());
-      
-      
-      for(int i = 0; i < MAX_ARGUMENT_SIZE; i++)
+
+      for (int i = 0; i < MAX_ARGUMENT_SIZE; i++)
       {
          multiplier /= 10;
          int val = (argument / multiplier) % 10;
-                  
+
          out.writeByte(val + 48);
-         
+
       }
    }
-   
+
 }

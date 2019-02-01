@@ -30,8 +30,8 @@ import us.ihmc.robotDataLogger.Handshake;
 import us.ihmc.robotDataLogger.HandshakePubSubType;
 import us.ihmc.robotDataLogger.YoVariableClientImplementation;
 import us.ihmc.robotDataLogger.handshake.IDLYoVariableHandshakeParser;
+import us.ihmc.robotDataLogger.interfaces.CommandListener;
 import us.ihmc.robotDataLogger.interfaces.VariableChangedProducer;
-import us.ihmc.robotDataLogger.listeners.ClearLogListener;
 import us.ihmc.robotDataLogger.listeners.LogAnnouncementListener;
 import us.ihmc.robotDataLogger.listeners.TimestampListener;
 import us.ihmc.robotDataLogger.util.DebugRegistry;
@@ -299,7 +299,7 @@ public class RTPSDataConsumerParticipant
     */
    public synchronized void createSession(Announcement announcement, IDLYoVariableHandshakeParser parser, YoVariableClientImplementation yoVariableClient,
                                                          VariableChangedProducer variableChangedProducer, TimestampListener timeStampListener,
-                                                         ClearLogListener clearLogListener, DebugRegistry rtpsDebugRegistry)
+                                                         CommandListener clearLogListener, DebugRegistry rtpsDebugRegistry)
          throws IOException
    {
       if (session != null)

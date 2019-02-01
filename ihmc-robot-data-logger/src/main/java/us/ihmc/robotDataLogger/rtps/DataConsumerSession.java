@@ -24,10 +24,11 @@ import us.ihmc.robotDataLogger.YoVariableClientImplementation;
 import us.ihmc.robotDataLogger.dataBuffers.CustomLogDataSubscriberType;
 import us.ihmc.robotDataLogger.dataBuffers.RegistryConsumer;
 import us.ihmc.robotDataLogger.handshake.IDLYoVariableHandshakeParser;
+import us.ihmc.robotDataLogger.interfaces.CommandListener;
 import us.ihmc.robotDataLogger.interfaces.VariableChangedProducer;
-import us.ihmc.robotDataLogger.listeners.ClearLogListener;
 import us.ihmc.robotDataLogger.listeners.TimestampListener;
 import us.ihmc.robotDataLogger.util.DebugRegistry;
+import us.ihmc.robotDataLogger.websocket.command.DataServerCommand;
 
 /**
  * A single connection to a variable server.
@@ -66,7 +67,7 @@ public class DataConsumerSession
       
    }
    
-   DataConsumerSession(Domain domain, Announcement announcement, IDLYoVariableHandshakeParser parser, YoVariableClientImplementation yoVariableClient, VariableChangedProducer variableChangedProducer, TimestampListener timeStampListener, ClearLogListener clearLogListener, DebugRegistry rtpsDebugRegistry) throws IOException
+   DataConsumerSession(Domain domain, Announcement announcement, IDLYoVariableHandshakeParser parser, YoVariableClientImplementation yoVariableClient, VariableChangedProducer variableChangedProducer, TimestampListener timeStampListener, CommandListener clearLogListener, DebugRegistry rtpsDebugRegistry) throws IOException
    {
       this.announcement = announcement;
       this.domain = domain;
@@ -184,9 +185,9 @@ public class DataConsumerSession
    private class ClearLogListenerImpl implements SubscriberListener
    {
       private final String logGuid;
-      private final ClearLogListener clearLogListener;
+      private final CommandListener clearLogListener;
 
-      private ClearLogListenerImpl(ClearLogListener clearLogListener, String logGuid)
+      private ClearLogListenerImpl(CommandListener clearLogListener, String logGuid)
       {
          this.clearLogListener = clearLogListener;
          this.logGuid = logGuid;
@@ -202,7 +203,7 @@ public class DataConsumerSession
          {
             if (clearLogListener != null && clearLogRequest.getGuidAsString().equals(logGuid))
             {
-               clearLogListener.clearLog(LogParticipantTools.createGuidString(info.getSampleIdentity().getGuid()));
+               clearLogListener.receivedCommand(DataServerCommand.CLEAR_LOG, 0);
             }
             else
             {

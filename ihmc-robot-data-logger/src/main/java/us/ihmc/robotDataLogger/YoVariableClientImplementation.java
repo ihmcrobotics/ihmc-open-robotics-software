@@ -1,6 +1,8 @@
 package us.ihmc.robotDataLogger;
 
 import java.io.IOException;
+import java.util.concurrent.Executor;
+import java.util.concurrent.Executors;
 
 import us.ihmc.log.LogTools;
 import us.ihmc.robotDataLogger.handshake.IDLYoVariableHandshakeParser;
@@ -10,6 +12,7 @@ import us.ihmc.robotDataLogger.interfaces.VariableChangedProducer;
 import us.ihmc.robotDataLogger.util.DebugRegistry;
 import us.ihmc.robotDataLogger.websocket.client.WebsocketDataConsumer;
 import us.ihmc.robotDataLogger.websocket.client.discovery.HTTPDataServerConnection;
+import us.ihmc.robotDataLogger.websocket.command.DataServerCommand;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 
 /**
@@ -25,6 +28,9 @@ public class YoVariableClientImplementation implements YoVariableClientInterface
 
    private final VariableChangedProducer variableChangedProducer;
 
+   // Command executor
+   private final Executor commandExecutor = Executors.newSingleThreadExecutor();
+   
    // Callback
    private final YoVariablesUpdatedListener yoVariablesUpdatedListener;
 
@@ -167,7 +173,7 @@ public class YoVariableClientImplementation implements YoVariableClientInterface
    {
       try
       {
-         dataConsumer.sendClearLogRequest();
+         dataConsumer.sendCommand(DataServerCommand.CLEAR_LOG, 0);
       }
       catch (IOException e)
       {
@@ -224,6 +230,11 @@ public class YoVariableClientImplementation implements YoVariableClientInterface
 //      }
    }
 
+   public void receivedCommand(DataServerCommand command, int argument)
+   {
+      commandExecutor.execute(() -> yoVariablesUpdatedListener.receivedCommand(command, argument));
+   }
+   
    public void connected()
    {
       yoVariablesUpdatedListener.connected();
