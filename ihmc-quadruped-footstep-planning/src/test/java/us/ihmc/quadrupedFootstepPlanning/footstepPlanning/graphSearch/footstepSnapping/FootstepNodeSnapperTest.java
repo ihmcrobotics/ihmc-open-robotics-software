@@ -1,5 +1,6 @@
 package us.ihmc.quadrupedFootstepPlanning.footstepPlanning.graphSearch.footstepSnapping;
 
+import org.junit.Ignore;
 import org.junit.Test;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations;
 import us.ihmc.euclid.transform.RigidBodyTransform;
@@ -27,6 +28,7 @@ public class FootstepNodeSnapperTest
    private int[] hindLeftYIndices = new int[] {-35, 0, -777, 87, -50, 28};
    private int[] hindRightYIndices = new int[] {-35, 0, -777, 87, -50, 28};
 
+   @Ignore
    @ContinuousIntegrationAnnotations.ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testFootstepCacheing()
