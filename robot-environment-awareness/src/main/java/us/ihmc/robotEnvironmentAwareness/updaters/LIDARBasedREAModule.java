@@ -64,10 +64,6 @@ public class LIDARBasedREAModule
 
    private ScheduledExecutorService executorService = ExecutorServiceTools.newScheduledThreadPool(3, getClass(), ExceptionHandling.CATCH_AND_REPORT);
    private ScheduledFuture<?> scheduled;
-   
-   private ScheduledExecutorService stereoVisionExecutorService = ExecutorServiceTools.newScheduledThreadPool(4, getClass(), ExceptionHandling.CATCH_AND_REPORT);
-   private ScheduledFuture<?> stereoVisionScheduled;
-   
    private final Messager reaMessager;
 
    private LIDARBasedREAModule(Messager reaMessager, File configurationFile) throws IOException
@@ -195,12 +191,7 @@ public class LIDARBasedREAModule
       {
          scheduled = executorService.scheduleAtFixedRate(this::mainUpdate, 0, THREAD_PERIOD_MILLISECONDS, TimeUnit.MILLISECONDS);
          executorService.scheduleAtFixedRate(bufferUpdater.createBufferThread(), 0, BUFFER_THREAD_PERIOD_MILLISECONDS, TimeUnit.MILLISECONDS);
-      }
-      
-      if (stereoVisionScheduled == null)
-      {
-         //stereoVisionScheduled = stereoVisionExecutorService.scheduleAtFixedRate(this::stereoVisionMainUpdate, 0, THREAD_PERIOD_MILLISECONDS, TimeUnit.MILLISECONDS);
-         stereoVisionExecutorService.scheduleAtFixedRate(stereoVisionBufferUpdater.createBufferThread(), 0, BUFFER_THREAD_PERIOD_MILLISECONDS, TimeUnit.MILLISECONDS);
+         executorService.scheduleAtFixedRate(stereoVisionBufferUpdater.createBufferThread(), 0, BUFFER_THREAD_PERIOD_MILLISECONDS, TimeUnit.MILLISECONDS);
       }
    }
 
@@ -221,18 +212,6 @@ public class LIDARBasedREAModule
       {
          executorService.shutdownNow();
          executorService = null;
-      }
-      
-      if (stereoVisionScheduled != null)
-      {
-         stereoVisionScheduled.cancel(true);
-         stereoVisionScheduled = null;
-      }
-
-      if (stereoVisionExecutorService != null)
-      {
-         stereoVisionExecutorService.shutdownNow();
-         stereoVisionExecutorService = null;
       }
    }
 
