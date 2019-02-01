@@ -6,7 +6,7 @@ import java.util.ArrayList;
 
 import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelFutureListener;
-
+import us.ihmc.robotDataLogger.websocket.command.DataServerCommand;
 
 /**
  * Helper class that keep track of active connections and writes data to all connections
@@ -53,13 +53,25 @@ class WebsocketDataBroadcaster implements ChannelFutureListener
       {
          for (int i = 0; i < channels.size(); i++)
          {
-            if(channels.get(i).channel() == future.channel())
+            if (channels.get(i).channel() == future.channel())
             {
                channels.remove(i).release();
                return;
             }
          }
       }
+   }
+
+   public void writeCommand(DataServerCommand command)
+   {
+      synchronized (channelLock)
+      {
+         for (int i = 0; i < channels.size(); i++)
+         {
+            channels.get(i).writeCommand(command);
+         }
+      }
+
    }
 
 }

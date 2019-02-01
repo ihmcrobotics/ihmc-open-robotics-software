@@ -5,6 +5,7 @@ import java.nio.ByteBuffer;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
 import io.netty.handler.codec.http.websocketx.BinaryWebSocketFrame;
+import io.netty.handler.codec.http.websocketx.TextWebSocketFrame;
 import io.netty.handler.codec.http.websocketx.WebSocketFrame;
 
 /**
@@ -24,24 +25,35 @@ class WebsocketFramePool
    {
 
       private final ByteBuf buffer;
-      private final BinaryWebSocketFrame frame;
+      private final WebSocketFrame frame;
 
-      private WebsocketFrameAndBuffer(int bufferSize)
+      private WebsocketFrameAndBuffer(int bufferSize, Class<? extends WebSocketFrame> type)
       {
          buffer = Unpooled.directBuffer(bufferSize, bufferSize);
-         frame = new BinaryWebSocketFrame(buffer);
+         if(type == BinaryWebSocketFrame.class)
+         {
+            frame = new BinaryWebSocketFrame(buffer);            
+         }
+         else if(type == TextWebSocketFrame.class)
+         {
+            frame = new TextWebSocketFrame(buffer);
+         }
+         else
+         {
+            throw new RuntimeException("Invalid type");
+         }
       }
    }
 
    private int index = 0;
    private final WebsocketFrameAndBuffer pool[];
 
-   public WebsocketFramePool(int bufferSize, int poolSize)
+   public WebsocketFramePool(int bufferSize, int poolSize, Class<? extends WebSocketFrame> type)
    {
       pool = new WebsocketFrameAndBuffer[poolSize];
       for (int i = 0; i < poolSize; i++)
       {
-         pool[i] = new WebsocketFrameAndBuffer(bufferSize);
+         pool[i] = new WebsocketFrameAndBuffer(bufferSize, type);
       }
    }
    
