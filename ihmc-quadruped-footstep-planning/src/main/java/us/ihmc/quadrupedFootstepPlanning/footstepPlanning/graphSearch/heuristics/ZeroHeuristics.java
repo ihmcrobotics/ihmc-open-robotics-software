@@ -12,7 +12,7 @@ public class ZeroHeuristics extends CostToGoHeuristics
    }
 
    @Override
-   public void setBodyHasReachedGoal(boolean bodyHasReachedGoal)
+   public void setGoalHasBeenReached(boolean bodyHasReachedGoal)
    {
    }
 
