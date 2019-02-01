@@ -1,5 +1,6 @@
 package us.ihmc.quadrupedPlanning.footstepChooser;
 
+import org.junit.Ignore;
 import org.junit.Test;
 import us.ihmc.commons.MutationTestFacilitator;
 import us.ihmc.commons.RandomNumbers;
@@ -89,6 +90,7 @@ public class PlanarRegionsListPointSnapperTest
       doATest(planarRegionsList, xyYawToTest);
    }
 
+   @Ignore
    @ContinuousIntegrationTest(estimatedDuration = 0.7)
    @Test(timeout = 30000)
    public void testRandomPlanarRegions()
