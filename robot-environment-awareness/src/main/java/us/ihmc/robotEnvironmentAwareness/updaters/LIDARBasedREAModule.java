@@ -72,8 +72,8 @@ public class LIDARBasedREAModule
 
       moduleStateReporter = new REAModuleStateReporter(reaMessager);
       bufferUpdater = new REAOcTreeBuffer(mainOctree.getResolution(), reaMessager, moduleStateReporter);
-      mainUpdater = new REAOcTreeUpdater(mainOctree, bufferUpdater, reaMessager);
       stereoVisionBufferUpdater = new REAStereoVisionBuffer(reaMessager, moduleStateReporter);
+      mainUpdater = new REAOcTreeUpdater(mainOctree, bufferUpdater, stereoVisionBufferUpdater, reaMessager);
       planarRegionFeatureUpdater = new REAPlanarRegionFeatureUpdater(mainOctree, reaMessager);
 
       ROS2Tools.createCallbackSubscription(ros2Node, LidarScanMessage.class, "/ihmc/lidar_scan", this::dispatchLidarScanMessage);
@@ -145,6 +145,7 @@ public class LIDARBasedREAModule
          else
          {
             timeReporter.run(mainUpdater::update, ocTreeTimeReport);
+            timeReporter.run(mainUpdater::updateWithStereoBuffer, ocTreeTimeReport);
             timeReporter.run(() -> moduleStateReporter.reportOcTreeState(mainOctree), reportOcTreeStateTimeReport);
 
             if (isThreadInterrupted())

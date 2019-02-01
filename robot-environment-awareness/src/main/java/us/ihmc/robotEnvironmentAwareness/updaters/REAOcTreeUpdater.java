@@ -26,6 +26,7 @@ public class REAOcTreeUpdater
    private final Messager reaMessager;
    private final NormalOcTree referenceOctree;
    private final REAOcTreeBuffer reaOcTreeBuffer;
+   private final REAStereoVisionBuffer reaStereoVisionBuffer;
 
    private final AtomicReference<Pose3D> latestLidarPoseReference = new AtomicReference<>(null);
 
@@ -41,10 +42,11 @@ public class REAOcTreeUpdater
    private final AtomicReference<Boolean> useBoundingBox;
    private final AtomicReference<BoundingBoxParametersMessage> atomicBoundingBoxParameters;
 
-   public REAOcTreeUpdater(NormalOcTree octree, REAOcTreeBuffer buffer, Messager reaMessager)
+   public REAOcTreeUpdater(NormalOcTree octree, REAOcTreeBuffer buffer, REAStereoVisionBuffer reaStereoVisionBuffer, Messager reaMessager)
    {
       this.referenceOctree = octree;
       reaOcTreeBuffer = buffer;
+      this.reaStereoVisionBuffer = reaStereoVisionBuffer;
       this.reaMessager = reaMessager;
       referenceOctree.enableParallelComputationForNormals(true);
       referenceOctree.enableParallelInsertionOfMisses(true);
@@ -136,6 +138,52 @@ public class REAOcTreeUpdater
          reaOcTreeBuffer.submitBufferRequest();
 
       NormalOcTree bufferOctree = reaOcTreeBuffer.pollNewBuffer();
+
+      if (bufferOctree != null)
+      {
+         PointCloud pointCloud = new PointCloud();
+         bufferOctree.forEach(node -> pointCloud.add(node.getHitLocationX(), node.getHitLocationY(), node.getHitLocationZ()));
+         Scan scan = new Scan(sensorOrigin, pointCloud);
+         Set<NormalOcTreeNode> updatedNodes = new HashSet<>();
+         referenceOctree.insertScan(scan, updatedNodes, null);
+      }
+
+      if (clearNormals.getAndSet(false))
+      {
+         referenceOctree.clearNormals();
+         return;
+      }
+
+      if (bufferOctree == null || !enableNormalEstimation.get())
+         return;
+
+      referenceOctree.updateNormals();
+   }
+
+   public void updateWithStereoBuffer()
+   {
+      if (!enable.get())
+         return;
+
+      handleBoundingBox();
+
+      if (minRange.get() != null && maxRange.get() != null)
+      {
+         referenceOctree.setBoundsInsertRange(minRange.get(), maxRange.get());
+      }
+
+      referenceOctree.setNormalEstimationParameters(normalEstimationParameters.get());
+
+      if (latestLidarPoseReference.get() == null)
+         latestLidarPoseReference.set(new Pose3D());
+
+      Point3DReadOnly sensorOrigin = latestLidarPoseReference.get().getPosition();
+
+      boolean isStereoBufferFull = reaStereoVisionBuffer.isBufferFull();
+      if (isStereoBufferFull)
+         reaStereoVisionBuffer.submitBufferRequest();
+
+      NormalOcTree bufferOctree = reaStereoVisionBuffer.pollNewBuffer();
 
       if (bufferOctree != null)
       {
