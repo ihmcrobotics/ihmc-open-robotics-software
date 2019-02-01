@@ -28,6 +28,22 @@ import us.ihmc.robotDataLogger.listeners.VariableChangedListener;
 import us.ihmc.robotDataLogger.util.HandshakeHashCalculator;
 import us.ihmc.util.PeriodicThreadSchedulerFactory;
 
+/**
+ * Implementation of the DataProducer using Websockets
+ * 
+ * An HTTP server runs on port 8008, and the announcement, handshake, model and resources are 
+ * downloadable from that server.
+ * 
+ * Registry data is send as binary websocket frames, variable changes are received as binary websocket frames. 
+ * The underlying encoding format uses DDS IDL/CDR format.
+ * 
+ * A simple command and echo server using text websocket frames is implemented to send control messages to the server and logger.
+ * 
+ * Timestamps are send as raw UDP packets after requested over the command server. See {@link us.ihmc.robotDataLogger.websocket.command.DataServerCommands}
+ * 
+ * @author Jesper Smith
+ *
+ */
 public class WebsocketDataProducer implements DataProducer
 {
    public static final int PORT = 8008;
