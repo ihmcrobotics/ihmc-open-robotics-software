@@ -37,7 +37,6 @@ import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.graphSearch.nodeExpans
 import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.graphSearch.parameters.FootstepPlannerParameters;
 import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.graphSearch.stepCost.FootstepCost;
 import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.graphSearch.stepCost.FootstepCostBuilder;
-import us.ihmc.quadrupedPlanning.QuadrupedXGaitSettings;
 import us.ihmc.quadrupedPlanning.QuadrupedXGaitSettingsReadOnly;
 import us.ihmc.robotics.geometry.PlanarRegion;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
@@ -97,6 +96,9 @@ public class QuadrupedAStarFootstepPlanner implements QuadrupedBodyPathAndFootst
    private final YoBoolean validGoalNode = new YoBoolean("validGoalNode", registry);
    private final YoBoolean abortPlanning = new YoBoolean("abortPlanning", registry);
 
+   private final QuadrantDependentList<YoBoolean> footReachedTheGoal = new QuadrantDependentList<>();
+   private final YoBoolean midstanceReachedTheGoal = new YoBoolean("midstanceReachedTheGoal", registry);
+
    public QuadrupedAStarFootstepPlanner(FootstepPlannerParameters parameters, QuadrupedXGaitSettingsReadOnly xGaitSettings, FootstepNodeChecker nodeChecker,
                                         CostToGoHeuristics heuristics, FootstepNodeExpansion nodeExpansion, FootstepCost stepCostCalculator,
                                         FootstepNodeSnapper snapper, QuadrupedFootstepPlannerListener listener, YoVariableRegistry parentRegistry)
@@ -112,6 +114,9 @@ public class QuadrupedAStarFootstepPlanner implements QuadrupedBodyPathAndFootst
       this.graph = new FootstepGraph();
       timeout.set(Double.POSITIVE_INFINITY);
       this.initialize.set(true);
+
+      for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
+         footReachedTheGoal.put(robotQuadrant, new YoBoolean(robotQuadrant.getShortName() + "FootReachedTheGoal", registry));
 
       parentRegistry.addChild(registry);
    }
@@ -315,6 +320,7 @@ public class QuadrupedAStarFootstepPlanner implements QuadrupedBodyPathAndFootst
       if (planarRegionsList != null && !planarRegionsList.isEmpty())
          checkStartHasPlanarRegion();
 
+      heuristics.setBodyHasReachedGoal(false);
       graph.initialize(startNode);
       NodeComparator nodeComparator = new NodeComparator(graph, goalNode, heuristics);
       stack = new PriorityQueue<>(nodeComparator);
@@ -330,6 +336,10 @@ public class QuadrupedAStarFootstepPlanner implements QuadrupedBodyPathAndFootst
       stack.add(startNode);
       expandedNodes = new HashSet<>();
       endNode = null;
+
+      for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
+         footReachedTheGoal.get(robotQuadrant).set(false);
+      midstanceReachedTheGoal.set(false);
 
       if (listener != null)
       {
@@ -411,7 +421,9 @@ public class QuadrupedAStarFootstepPlanner implements QuadrupedBodyPathAndFootst
             continue;
          expandedNodes.add(nodeToExpand);
 
-         if (checkAndHandleNodeAtGoal(nodeToExpand))
+         checkAndHandleNodeAtAnyGoal(nodeToExpand);
+
+         if (checkAndHandleNodeAtFinalGoal(nodeToExpand))
             break;
 
          //         checkAndHandleBestEffortNode(nodeToExpand);
@@ -488,15 +500,42 @@ public class QuadrupedAStarFootstepPlanner implements QuadrupedBodyPathAndFootst
       return true;
    }
 
-   private boolean checkAndHandleNodeAtGoal(FootstepNode nodeToExpand)
+   private boolean checkAndHandleNodeAtAnyGoal(FootstepNode nodeToExpand)
    {
       if (!validGoalNode.getBooleanValue())
          return false;
 
-      if (goalNode.quadrantGeometricallyEquals(nodeToExpand) || goalNode.midstanceGeometricallyEquals(nodeToExpand))
+      boolean footIsAtGoal = goalNode.quadrantGeometricallyEquals(nodeToExpand);
+      boolean midstanceIsAtGoal = goalNode.midstanceGeometricallyEquals(nodeToExpand) && !midstanceReachedTheGoal.getBooleanValue(); // don't check this if we've already reached
+
+      if (footIsAtGoal || midstanceIsAtGoal)
+      {
+         graph.checkAndSetEdge(nodeToExpand, endNode, 0.0);
+
+         if (footIsAtGoal)
+            footReachedTheGoal.get(nodeToExpand.getMovingQuadrant()).set(true);
+         if (midstanceIsAtGoal)
+         {
+            heuristics.setBodyHasReachedGoal(true);
+            midstanceReachedTheGoal.set(true);
+         }
+
+         stack.clear();
+         stack.add(nodeToExpand);
+         return true;
+      }
+
+      return false;
+   }
+
+   private boolean checkAndHandleNodeAtFinalGoal(FootstepNode nodeToExpand)
+   {
+      if (!validGoalNode.getBooleanValue())
+         return false;
+
+      if (goalNode.geometricallyEquals(nodeToExpand))// || goalNode.midstanceGeometricallyEquals(nodeToExpand))
       {
          endNode = nodeToExpand;
-         graph.checkAndSetEdge(nodeToExpand, endNode, 0.0);
          return true;
       }
 
