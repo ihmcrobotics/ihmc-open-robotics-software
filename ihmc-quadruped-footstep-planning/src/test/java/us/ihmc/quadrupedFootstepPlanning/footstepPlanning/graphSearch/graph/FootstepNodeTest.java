@@ -4,6 +4,7 @@ import org.junit.Test;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.euclid.tools.EuclidCoreRandomTools;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
+import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.graphSearch.FootstepPlanningRandomTools;
 import us.ihmc.robotics.robotSide.RobotQuadrant;
 
 import java.util.Random;
@@ -23,14 +24,8 @@ public class FootstepNodeTest
       for (int i = 0; i < numTrials; i++)
       {
          // test for exact same transform
-         RobotQuadrant robotQuadrant = RobotQuadrant.generateRandomRobotQuadrant(random);
-         Point2DReadOnly frontLeft = EuclidCoreRandomTools.nextPoint2D(random, 1.0);
-         Point2DReadOnly frontRight= EuclidCoreRandomTools.nextPoint2D(random, 1.0);
-         Point2DReadOnly hindLeft = EuclidCoreRandomTools.nextPoint2D(random, 1.0);
-         Point2DReadOnly hindRight = EuclidCoreRandomTools.nextPoint2D(random, 1.0);
-
-         nodeA = new FootstepNode(robotQuadrant, frontLeft, frontRight, hindLeft, hindRight);
-         nodeB = new FootstepNode(robotQuadrant, frontLeft, frontRight, hindLeft, hindRight);
+         nodeA = FootstepPlanningRandomTools.createRandomFootstepNode(random);
+         nodeB = new FootstepNode(nodeA);
 
          assertTrue(nodeA.equals(nodeB));
          assertTrue(nodeA.hashCode() == nodeB.hashCode());
