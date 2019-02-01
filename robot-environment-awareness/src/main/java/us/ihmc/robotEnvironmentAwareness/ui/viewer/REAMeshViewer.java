@@ -13,6 +13,7 @@ import javafx.scene.paint.Material;
 import javafx.scene.shape.Mesh;
 import javafx.scene.shape.MeshView;
 import javafx.util.Pair;
+import us.ihmc.robotEnvironmentAwareness.communication.REAModuleAPI;
 import us.ihmc.robotEnvironmentAwareness.communication.REAUIMessager;
 import us.ihmc.robotEnvironmentAwareness.tools.ExecutorServiceTools;
 import us.ihmc.robotEnvironmentAwareness.tools.ExecutorServiceTools.ExceptionHandling;
@@ -22,6 +23,7 @@ import us.ihmc.robotEnvironmentAwareness.ui.graphicsBuilders.LidarScanViewer;
 import us.ihmc.robotEnvironmentAwareness.ui.graphicsBuilders.OcTreeMeshBuilder;
 import us.ihmc.robotEnvironmentAwareness.ui.graphicsBuilders.PlanarRegionsIntersectionsMeshBuilder;
 import us.ihmc.robotEnvironmentAwareness.ui.graphicsBuilders.PlanarRegionsMeshBuilder;
+import us.ihmc.robotEnvironmentAwareness.ui.graphicsBuilders.StereoVisionPointCloudViewer;
 
 public class REAMeshViewer
 {
@@ -41,6 +43,7 @@ public class REAMeshViewer
    private final AnimationTimer renderMeshAnimation;
 
    private final LidarScanViewer lidarScanViewer;
+   private final StereoVisionPointCloudViewer stereoVisionPointCloudViewer;
    private final BufferOctreeMeshBuilder bufferOctreeMeshBuilder;
    private final OcTreeMeshBuilder ocTreeViewer;
    private final PlanarRegionsMeshBuilder planarRegionsMeshBuilder;
@@ -50,7 +53,8 @@ public class REAMeshViewer
    public REAMeshViewer(REAUIMessager uiMessager)
    {
       // TEST Communication over network
-      lidarScanViewer = new LidarScanViewer(uiMessager);
+      lidarScanViewer = new LidarScanViewer(REAModuleAPI.LidarScanState, uiMessager);
+      stereoVisionPointCloudViewer = new StereoVisionPointCloudViewer(REAModuleAPI.StereoVisionPointCloudState, uiMessager);
       bufferOctreeMeshBuilder = new BufferOctreeMeshBuilder(uiMessager);
       ocTreeViewer = new OcTreeMeshBuilder(uiMessager);
       planarRegionsMeshBuilder = new PlanarRegionsMeshBuilder(uiMessager);
@@ -59,10 +63,13 @@ public class REAMeshViewer
 
       Node lidarScanRootNode = lidarScanViewer.getRoot();
       lidarScanRootNode.setMouseTransparent(true);
+      Node stereoVisionPointCloudRootNode = stereoVisionPointCloudViewer.getRoot();
+      stereoVisionPointCloudRootNode.setMouseTransparent(true);
       bufferOcTreeMeshView.setMouseTransparent(true);
       ocTreeViewer.getRoot().setMouseTransparent(true);
       boundingBoxMeshView.setMouseTransparent(true);
-      root.getChildren().addAll(lidarScanRootNode, bufferOcTreeMeshView, ocTreeViewer.getRoot(), planarRegionMeshView, intersectionsMeshView, boundingBoxMeshView);
+      root.getChildren().addAll(lidarScanRootNode, stereoVisionPointCloudRootNode, bufferOcTreeMeshView, ocTreeViewer.getRoot(), planarRegionMeshView,
+                                intersectionsMeshView, boundingBoxMeshView);
 
       renderMeshAnimation = new AnimationTimer()
       {
@@ -70,6 +77,7 @@ public class REAMeshViewer
          public void handle(long now)
          {
             lidarScanViewer.render();
+            stereoVisionPointCloudViewer.render();
             ocTreeViewer.render();
 
             if (bufferOctreeMeshBuilder.hasNewMeshAndMaterial())
@@ -97,6 +105,7 @@ public class REAMeshViewer
          return;
       renderMeshAnimation.start();
       meshBuilderScheduledFutures.add(executorService.scheduleAtFixedRate(lidarScanViewer, 0, HIGH_PACE_UPDATE_PERIOD, TimeUnit.MILLISECONDS));
+      meshBuilderScheduledFutures.add(executorService.scheduleAtFixedRate(stereoVisionPointCloudViewer, 0, HIGH_PACE_UPDATE_PERIOD, TimeUnit.MILLISECONDS));
       meshBuilderScheduledFutures.add(executorService.scheduleAtFixedRate(bufferOctreeMeshBuilder, 0, HIGH_PACE_UPDATE_PERIOD, TimeUnit.MILLISECONDS));
       meshBuilderScheduledFutures.add(executorService.scheduleAtFixedRate(ocTreeViewer, 0, SLOW_PACE_UPDATE_PERIOD, TimeUnit.MILLISECONDS));
       meshBuilderScheduledFutures.add(executorService.scheduleAtFixedRate(planarRegionsMeshBuilder, 0, MEDIUM_PACE_UPDATE_PERIOD, TimeUnit.MILLISECONDS));
