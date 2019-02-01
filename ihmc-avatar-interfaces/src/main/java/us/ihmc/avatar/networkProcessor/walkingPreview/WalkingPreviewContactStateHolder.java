@@ -15,7 +15,7 @@ import us.ihmc.mecano.tools.MultiBodySystemTools;
 import us.ihmc.robotics.controllers.pidGains.GainCalculator;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 
-public class WalkingPreviewContactPointHolder
+public class WalkingPreviewContactStateHolder
 {
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
 
@@ -30,14 +30,14 @@ public class WalkingPreviewContactPointHolder
 
    private final InverseDynamicsCommandList commandList = new InverseDynamicsCommandList();
 
-   public static WalkingPreviewContactPointHolder holdAtCurrent(PlaneContactState contactStateToHold)
+   public static WalkingPreviewContactStateHolder holdAtCurrent(PlaneContactState contactStateToHold)
    {
       FramePose3D desiredPose = new FramePose3D(contactStateToHold.getPlaneFrame());
       desiredPose.changeFrame(worldFrame);
-      return new WalkingPreviewContactPointHolder(contactStateToHold, desiredPose);
+      return new WalkingPreviewContactStateHolder(contactStateToHold, desiredPose);
    }
 
-   public WalkingPreviewContactPointHolder(PlaneContactState contactStateToHold, FramePose3DReadOnly desiredPlaneFramePose)
+   public WalkingPreviewContactStateHolder(PlaneContactState contactStateToHold, FramePose3DReadOnly desiredPlaneFramePose)
    {
       this.contactStateToHold = contactStateToHold;
       currentPlaneFrame = (MovingReferenceFrame) contactStateToHold.getPlaneFrame();
