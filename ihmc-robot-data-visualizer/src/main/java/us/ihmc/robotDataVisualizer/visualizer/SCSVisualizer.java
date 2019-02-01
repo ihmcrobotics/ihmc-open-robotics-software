@@ -26,6 +26,7 @@ import us.ihmc.robotDataLogger.YoVariablesUpdatedListener;
 import us.ihmc.robotDataLogger.handshake.LogHandshake;
 import us.ihmc.robotDataLogger.handshake.YoVariableHandshakeParser;
 import us.ihmc.robotDataLogger.jointState.JointState;
+import us.ihmc.robotDataLogger.websocket.command.DataServerCommand;
 import us.ihmc.simulationconstructionset.ExitActionListener;
 import us.ihmc.simulationconstructionset.PlaybackListener;
 import us.ihmc.simulationconstructionset.Robot;
@@ -386,10 +387,6 @@ public class SCSVisualizer implements YoVariablesUpdatedListener, ExitActionList
       lastTimestamp = timestamp;
    }
 
-   @Override
-   public void clearLog(String guid)
-   {
-   }
 
    private PlaybackListener createYoGraphicsUpdater()
    {
@@ -426,5 +423,11 @@ public class SCSVisualizer implements YoVariablesUpdatedListener, ExitActionList
             yoGraphic.update();
       }
       yoGraphicsListRegistry.update();
+   }
+
+   @Override
+   public void receivedCommand(DataServerCommand command, int argument)
+   {
+      System.out.println("Received command " + command + " with argument " + argument);
    }
 }

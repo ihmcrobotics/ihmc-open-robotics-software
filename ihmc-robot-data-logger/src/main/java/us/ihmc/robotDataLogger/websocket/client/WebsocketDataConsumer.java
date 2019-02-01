@@ -11,17 +11,16 @@ import us.ihmc.robotDataLogger.Announcement;
 import us.ihmc.robotDataLogger.Handshake;
 import us.ihmc.robotDataLogger.HandshakePubSubType;
 import us.ihmc.robotDataLogger.YoVariableClientImplementation;
-import us.ihmc.robotDataLogger.dataBuffers.RegistryConsumer;
 import us.ihmc.robotDataLogger.handshake.IDLYoVariableHandshakeParser;
+import us.ihmc.robotDataLogger.interfaces.CommandListener;
 import us.ihmc.robotDataLogger.interfaces.DataConsumer;
 import us.ihmc.robotDataLogger.interfaces.VariableChangedProducer;
-import us.ihmc.robotDataLogger.listeners.ClearLogListener;
 import us.ihmc.robotDataLogger.listeners.TimestampListener;
 import us.ihmc.robotDataLogger.util.DebugRegistry;
 import us.ihmc.robotDataLogger.websocket.HTTPDataServerPaths;
 import us.ihmc.robotDataLogger.websocket.client.discovery.HTTPDataServerConnection;
 import us.ihmc.robotDataLogger.websocket.client.discovery.HTTPDataServerDescription;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.robotDataLogger.websocket.command.DataServerCommand;
 
 public class WebsocketDataConsumer implements DataConsumer
 {
@@ -92,16 +91,10 @@ public class WebsocketDataConsumer implements DataConsumer
       return serializer.deserialize(handshake.toString(CharsetUtil.UTF_8));
    }
 
-   @Override
-   public void sendClearLogRequest() throws IOException
-   {
-      // TODO Auto-generated method stub
-
-   }
 
    @Override
    public void startSession(IDLYoVariableHandshakeParser parser, YoVariableClientImplementation yoVariableClient,
-                            VariableChangedProducer variableChangedProducer, TimestampListener timeStampListener, ClearLogListener clearLogListener,
+                            VariableChangedProducer variableChangedProducer, TimestampListener timeStampListener, CommandListener clearLogListener,
                             DebugRegistry debugRegistry)
          throws IOException
    {
@@ -230,6 +223,18 @@ public class WebsocketDataConsumer implements DataConsumer
          if(session != null && session.isActive())
          {
             session.writeVariableChangeRequest(identifier, valueAsDouble);
+         }
+      }
+   }
+
+   @Override
+   public void sendCommand(DataServerCommand command, int argument) throws IOException
+   {
+      synchronized(lock)
+      {
+         if(session != null && session.isActive())
+         {
+            session.sendCommand(command, argument);
          }
       }
    }

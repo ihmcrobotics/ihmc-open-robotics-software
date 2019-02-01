@@ -5,9 +5,9 @@ import java.io.IOException;
 import us.ihmc.robotDataLogger.Handshake;
 import us.ihmc.robotDataLogger.YoVariableClientImplementation;
 import us.ihmc.robotDataLogger.handshake.IDLYoVariableHandshakeParser;
-import us.ihmc.robotDataLogger.listeners.ClearLogListener;
 import us.ihmc.robotDataLogger.listeners.TimestampListener;
 import us.ihmc.robotDataLogger.util.DebugRegistry;
+import us.ihmc.robotDataLogger.websocket.command.DataServerCommand;
 
 public interface DataConsumer
 {
@@ -49,13 +49,15 @@ public interface DataConsumer
    Handshake getHandshake(int timeout) throws IOException;
 
    /**
-    * Broadcast a clear log request for the current session
+    * Send a command to the server. 
+    * 
+    * If the command is a broadcast command, this gets broadcast to all clients (including this one) by the server.
     * 
     * If no session is available, this request gets silently ignored.
     * 
     * @throws IOException
     */
-   void sendClearLogRequest() throws IOException;
+   void sendCommand(DataServerCommand command, int argument) throws IOException;
 
    /**
     * Start a new session
@@ -68,7 +70,7 @@ public interface DataConsumer
     * @param rtpsDebugRegistry
     */
    void startSession(IDLYoVariableHandshakeParser parser, YoVariableClientImplementation yoVariableClient, VariableChangedProducer variableChangedProducer,
-                      TimestampListener timeStampListener, ClearLogListener clearLogListener, DebugRegistry rtpsDebugRegistry) throws IOException;
+                      TimestampListener timeStampListener, CommandListener clearLogListener, DebugRegistry rtpsDebugRegistry) throws IOException;
 
    /**
     * 

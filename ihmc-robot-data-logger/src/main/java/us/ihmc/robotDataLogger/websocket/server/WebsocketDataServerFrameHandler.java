@@ -32,7 +32,8 @@ import us.ihmc.robotDataLogger.websocket.command.DataServerCommand;
  */
 class WebsocketDataServerFrameHandler extends SimpleChannelInboundHandler<WebSocketFrame>
 {
-   private static final int POOL_SIZE = 12;
+   private static final int BINARY_POOL_SIZE = 12;
+   private static final int TEXT_POOL_SIZE = 128;
    
    
    private final WebsocketDataBroadcaster broadcaster;
@@ -41,11 +42,12 @@ class WebsocketDataServerFrameHandler extends SimpleChannelInboundHandler<WebSoc
    
    private Object lock;
    private WriteTask task;
-   private WebsocketFramePool pool;
+   private WebsocketFramePool binaryPool;
+   private WebsocketFramePool textPool = new WebsocketFramePool(DataServerCommand.MaxCommandSize(), TEXT_POOL_SIZE, TextWebSocketFrame.class);
    private Channel channel = null;
    private CustomGCAvoidingByteBufAllocator alloc = null;
    
-   private final ArrayList<WebSocketFrame> queue = new ArrayList<WebSocketFrame>(POOL_SIZE);
+   private final ArrayList<WebSocketFrame> queue = new ArrayList<WebSocketFrame>(BINARY_POOL_SIZE);
    
    
    private final VariableChangeRequestPubSubType variableChangeRequestType = new VariableChangeRequestPubSubType();
@@ -67,7 +69,7 @@ class WebsocketDataServerFrameHandler extends SimpleChannelInboundHandler<WebSoc
       if (evt instanceof HandshakeComplete)
       {
          this.lock = new Object();
-         this.pool = new WebsocketFramePool(dataSize, POOL_SIZE, BinaryWebSocketFrame.class);
+         this.binaryPool = new WebsocketFramePool(dataSize, BINARY_POOL_SIZE, BinaryWebSocketFrame.class);
          this.task = new WriteTask();
          
          
@@ -90,8 +92,19 @@ class WebsocketDataServerFrameHandler extends SimpleChannelInboundHandler<WebSoc
       {
          if (frame instanceof TextWebSocketFrame)
          {
-            String request = ((TextWebSocketFrame) frame).text();
-            System.out.println(request);
+            DataServerCommand command = DataServerCommand.getCommand(frame.content());
+            if(command != null)
+            {
+               int argument = command.getArgument(frame.content());
+               if(argument != -1)
+               {
+                  System.out.println("Got " + command + " " + argument);
+                  if(command.broadcast())
+                  {
+                     broadcaster.writeCommand(command, argument);
+                  }
+               }
+            }
          }
          else if (frame instanceof BinaryWebSocketFrame)
          {
@@ -146,7 +159,7 @@ class WebsocketDataServerFrameHandler extends SimpleChannelInboundHandler<WebSoc
    public void write(ByteBuffer frame)
    {
       
-      WebSocketFrame websocketFrame = pool.createFrame(frame);
+      WebSocketFrame websocketFrame = binaryPool.createFrame(frame);
       if(websocketFrame != null)
       {
          synchronized(lock)
@@ -165,7 +178,7 @@ class WebsocketDataServerFrameHandler extends SimpleChannelInboundHandler<WebSoc
    private class WriteTask implements Runnable
    {
       private volatile boolean scheduled = false;
-      private final ArrayList<WebSocketFrame> queueCopy = new ArrayList<>(POOL_SIZE);
+      private final ArrayList<WebSocketFrame> queueCopy = new ArrayList<>(BINARY_POOL_SIZE + TEXT_POOL_SIZE);
       
       public void init()
       {
@@ -214,16 +227,30 @@ class WebsocketDataServerFrameHandler extends SimpleChannelInboundHandler<WebSoc
             alloc.release();
          }
          
-         if(pool != null)
+         if(binaryPool != null)
          {
-            pool.release();
+            binaryPool.release();
          }
       }
    }
 
-   public void writeCommand(DataServerCommand command)
+   public void writeCommand(DataServerCommand command, int argument)
    {
-      // TODO Auto-generated method stub
-      
+      WebSocketFrame websocketFrame = textPool.createFrame();
+      if(websocketFrame != null)
+      {
+         synchronized(lock)
+         {
+            
+            command.getBytes(websocketFrame.content(), argument);
+            queue.add(websocketFrame);            
+
+            if(!task.scheduled)
+            {
+               task.init();
+               channel.eventLoop().execute(task);
+            }
+         }
+      }
    }
 }

@@ -1,6 +1,5 @@
 package us.ihmc.robotDataLogger.websocket.client;
 
-import io.netty.buffer.ByteBuf;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelHandlerContext;
@@ -20,6 +19,7 @@ import us.ihmc.robotDataLogger.YoVariableClientImplementation;
 import us.ihmc.robotDataLogger.dataBuffers.CustomLogDataSubscriberType;
 import us.ihmc.robotDataLogger.dataBuffers.RegistryConsumer;
 import us.ihmc.robotDataLogger.dataBuffers.RegistryReceiveBuffer;
+import us.ihmc.robotDataLogger.websocket.command.DataServerCommand;
 
 public class WebSocketDataServerClientHandler extends SimpleChannelInboundHandler<Object>
 {
@@ -97,7 +97,15 @@ public class WebSocketDataServerClientHandler extends SimpleChannelInboundHandle
       WebSocketFrame frame = (WebSocketFrame) msg;
       if (frame instanceof TextWebSocketFrame)
       {
-         // Discard
+         DataServerCommand command = DataServerCommand.getCommand(frame.content());
+         if(command != null)
+         {
+            int argument = command.getArgument(frame.content());
+            if(argument != -1)
+            {
+               yoVariableClient.receivedCommand(command, argument);
+            }
+         }
       }
       else if (frame instanceof BinaryWebSocketFrame)
       {
