@@ -173,8 +173,7 @@ public class WebsocketDataProducer implements DataProducer
    @Override
    public void publishTimestamp(long timestamp)
    {
-      // TODO Auto-generated method stub
-      
+      broadcaster.publishTimestamp(timestamp);
    }
 
    @Override
