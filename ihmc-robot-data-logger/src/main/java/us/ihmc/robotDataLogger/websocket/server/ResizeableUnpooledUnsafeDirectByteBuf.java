@@ -1,11 +1,20 @@
 package us.ihmc.robotDataLogger.websocket.server;
 
 import io.netty.buffer.ByteBuf;
-import io.netty.buffer.ByteBufAllocator;
 import io.netty.buffer.UnpooledByteBufAllocator;
 import io.netty.buffer.UnpooledUnsafeDirectByteBuf;
 
-public class ResizeableUnpooledUnsafeDirectByteBuf extends UnpooledUnsafeDirectByteBuf
+
+/**
+ * 
+ * Netty ByteBuf that allows changing the internal capacity without re-allocating the bytebuffer.
+ * 
+ * Used by the {@link CustomGCAvoidingByteBufAllocator}
+ * 
+ * @author Jesper Smith
+ *
+ */
+class ResizeableUnpooledUnsafeDirectByteBuf extends UnpooledUnsafeDirectByteBuf
 {
 
    private int internalCapacity;
@@ -28,6 +37,10 @@ public class ResizeableUnpooledUnsafeDirectByteBuf extends UnpooledUnsafeDirectB
       if (newCapacity < maxCapacity())
       {
          this.internalCapacity = newCapacity;
+      }
+      else
+      {
+         throw new IllegalArgumentException("newCapacity is larger than maxCapacity");
       }
       
       return this;

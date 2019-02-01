@@ -22,9 +22,13 @@ import io.netty.util.CharsetUtil;
 import us.ihmc.robotDataLogger.websocket.HTTPDataServerPaths;
 
 /**
- * Outputs index page content.
+ * 
+ * Implementation of the HTTP server providing static resources
+ * 
+ * @author Jesper Smith
+ *
  */
-public class HTTPDataServerDescriptionServer extends SimpleChannelInboundHandler<FullHttpRequest>
+class HTTPDataServerDescriptionServer extends SimpleChannelInboundHandler<FullHttpRequest>
 {
 
    private final DataServerServerContent logServerContent;

@@ -12,7 +12,15 @@ import us.ihmc.robotDataLogger.interfaces.RegistryPublisher;
 import us.ihmc.util.PeriodicThreadScheduler;
 import us.ihmc.util.PeriodicThreadSchedulerFactory;
 
-public class WebsocketRegistryPublisher implements RegistryPublisher
+/**
+ * Publishing thread for registry data
+ * 
+ * This thread reads all variables on a realtime thread, puts them in a ConcurrentRingBuffer and periodically sends them out on the websocket connection.
+ * 
+ * @author Jesper Smith
+ *
+ */
+class WebsocketRegistryPublisher implements RegistryPublisher
 {
    
    private static final int BUFFER_CAPACITY = 128;

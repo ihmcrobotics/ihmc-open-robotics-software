@@ -1,5 +1,11 @@
 package us.ihmc.robotDataLogger.websocket;
 
+/**
+ * Paths for resources on the HTTP server
+ * 
+ * @author Jesper Smith
+ *
+ */
 public class HTTPDataServerPaths
 {
    public static final String index = "/index.html";
