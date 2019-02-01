@@ -1,7 +1,11 @@
 package us.ihmc.robotDataLogger.websocket.server;
 
+import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
@@ -12,8 +16,20 @@ import us.ihmc.robotDataLogger.Announcement;
 import us.ihmc.robotDataLogger.AnnouncementPubSubType;
 import us.ihmc.robotDataLogger.Handshake;
 import us.ihmc.robotDataLogger.HandshakePubSubType;
+import us.ihmc.robotDataLogger.websocket.HTTPDataServerPaths;
 
-public class DataServerServerContent
+/**
+ *
+ * This class holds all the content that is available on the HTTP server.
+ * 
+ * This includes the index page, announcement, handshake, model and resource zip.
+ * 
+ * It is cached and ready to server with minimal object allocations.
+ * 
+ * @author Jesper Smith
+ *
+ */
+class DataServerServerContent
 {
    private final String name;
    private final String hostName;
@@ -32,7 +48,6 @@ public class DataServerServerContent
          this.name = announcement.getNameAsString();
          this.hostName = announcement.getHostNameAsString();
 
-         
          announcement.setIdentifier(UUID.randomUUID().toString());
          if (logModelProvider != null)
          {
@@ -118,32 +133,32 @@ public class DataServerServerContent
    {
       return "text/html; charset=UTF-8";
    }
-   
+
    public boolean hasModel()
    {
       return model != null;
    }
-   
+
    public ByteBuf getModel()
    {
       return model.retainedDuplicate();
    }
-   
+
    public String getModelContentType()
    {
       return "text/xml; charset=UTF-8";
    }
-   
+
    public boolean hasResourceZip()
    {
       return resourceZip != null;
    }
-   
+
    public ByteBuf getResourceZip()
    {
       return resourceZip.retainedDuplicate();
    }
-   
+
    public String getResourceZipContentType()
    {
       return "application/zip";
@@ -151,8 +166,23 @@ public class DataServerServerContent
 
    private ByteBuf createIndex()
    {
-      return Unpooled.copiedBuffer("<html><head><title>Robot Data Logger</title></head><body><p>This is the log server for " + name + " running on " + hostName
-            + "</p></body><html>", CharsetUtil.UTF_8);
+      InputStream is = getClass().getResourceAsStream("index.html");
+      if (is != null)
+      {
+         BufferedReader reader = new BufferedReader(new InputStreamReader(is));
+         String index = reader.lines().collect(Collectors.joining(System.lineSeparator()));
+
+         index = index.replace("{NAME}", name);
+         index = index.replace("{HOSTNAME}", hostName);
+
+         return Unpooled.copiedBuffer(index, CharsetUtil.UTF_8);
+
+      }
+      else
+      {
+         throw new RuntimeException("Cannot load index.html");
+      }
+
    }
 
 }

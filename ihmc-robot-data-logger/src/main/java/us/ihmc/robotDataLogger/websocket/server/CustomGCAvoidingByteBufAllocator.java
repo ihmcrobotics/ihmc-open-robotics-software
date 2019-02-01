@@ -6,12 +6,23 @@ import io.netty.buffer.AbstractByteBufAllocator;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.ByteBufAllocator;
 
-public class CustomGCAvoidingByteBufAllocator extends AbstractByteBufAllocator
+/**
+ * Custom allocator that has a pool of ByteBuf available.
+ * 
+ * When a ByteBuf is requested, the refcnt is increased by 1 using retain(). If the refcnt is 1 the buffer is available to be re-used.
+ * 
+ * If the pool runs out, an exception is thrown which results in a closed connection. 
+ * It should be possible to reconnect with a new connection after this event.
+ * 
+ * @author Jesper Smith
+ *
+ */
+class CustomGCAvoidingByteBufAllocator extends AbstractByteBufAllocator
 {
    private final static int INITIAL_MAX_CAPACITY = 2048;
-   private final static int INITIAL_POOL_SIZE = 16;
+   private final static int POOL_SIZE = 128;
 
-   private final ArrayList<ByteBuf> pool = new ArrayList<ByteBuf>(INITIAL_POOL_SIZE);
+   private final ArrayList<ByteBuf> pool = new ArrayList<ByteBuf>(POOL_SIZE);
 
    private int capacity = INITIAL_MAX_CAPACITY;
 
@@ -37,7 +48,7 @@ public class CustomGCAvoidingByteBufAllocator extends AbstractByteBufAllocator
    private void refill(int capacity)
    {
       pool.clear();
-      for (int i = 0; i < INITIAL_POOL_SIZE; i++)
+      for (int i = 0; i < POOL_SIZE; i++)
       {
          add(capacity);
       }
@@ -79,8 +90,9 @@ public class CustomGCAvoidingByteBufAllocator extends AbstractByteBufAllocator
             return byteBuf.retain();
          }
       }
-
-      return add(capacity);
+    
+      
+      throw new RuntimeException("Pool ran out of capacity. Crashing connection.");
    }
    
    public void release()
