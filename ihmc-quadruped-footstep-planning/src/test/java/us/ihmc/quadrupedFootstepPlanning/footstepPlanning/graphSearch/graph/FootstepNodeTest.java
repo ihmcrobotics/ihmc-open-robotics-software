@@ -36,4 +36,31 @@ public class FootstepNodeTest
          assertTrue(nodeA.hashCode() == nodeB.hashCode());
       }
    }
+
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
+   @Test(timeout = 30000)
+   public void testQuadrantEquals()
+   {
+      Random random = new Random(3823L);
+      int numTrials = 100;
+      FootstepNode nodeA, nodeB;
+
+      for (int i = 0; i < numTrials; i++)
+      {
+         // test for exact same transform
+         RobotQuadrant robotQuadrant = RobotQuadrant.FRONT_LEFT;
+         Point2DReadOnly frontLeft = EuclidCoreRandomTools.nextPoint2D(random, 1.0);
+         Point2DReadOnly frontRight= EuclidCoreRandomTools.nextPoint2D(random, 1.0);
+         Point2DReadOnly otherFrontRight= EuclidCoreRandomTools.nextPoint2D(random, 1.0);
+         Point2DReadOnly hindLeft = EuclidCoreRandomTools.nextPoint2D(random, 1.0);
+         Point2DReadOnly otherHindLeft = EuclidCoreRandomTools.nextPoint2D(random, 1.0);
+         Point2DReadOnly hindRight = EuclidCoreRandomTools.nextPoint2D(random, 1.0);
+         Point2DReadOnly otherHindRight = EuclidCoreRandomTools.nextPoint2D(random, 1.0);
+
+         nodeA = new FootstepNode(robotQuadrant, frontLeft, frontRight, hindLeft, hindRight);
+         nodeB = new FootstepNode(robotQuadrant, frontLeft, otherFrontRight, otherHindLeft, otherHindRight);
+
+         assertTrue(nodeA.quadrantGeometricallyEquals(nodeB));
+      }
+   }
 }
