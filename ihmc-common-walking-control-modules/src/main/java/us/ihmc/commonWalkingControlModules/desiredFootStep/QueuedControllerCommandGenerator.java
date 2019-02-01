@@ -20,26 +20,30 @@ import us.ihmc.humanoidRobotics.communication.controllerAPI.command.PelvisHeight
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.PelvisTrajectoryCommand;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepStatus;
 import us.ihmc.humanoidRobotics.communication.packets.walking.WalkingStatus;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.robotics.contactable.ContactablePlaneBody;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.sensorProcessing.frames.CommonHumanoidReferenceFrames;
+import us.ihmc.sensorProcessing.model.RobotMotionStatus;
+import us.ihmc.sensorProcessing.model.RobotMotionStatusChangedListener;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
 
-public class QueuedControllerCommandGenerator implements Updatable
+public class QueuedControllerCommandGenerator implements Updatable, RobotMotionStatusChangedListener
 {
    private static final boolean DEBUG = false;
 
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
 
    private boolean waitingForWalkingStatusToComplete = false;
-   
+
    private final CommandInputManager commandInputManager;
    private final StatusMessageOutputManager statusOutputManager;
 
    private final List<Updatable> updatables = new ArrayList<>();
 
    private final ConcurrentLinkedQueue<Command<?, ?>> controllerCommands;
-   
+
+   private boolean robotReady = false;
+
    public QueuedControllerCommandGenerator(ConcurrentLinkedQueue<Command<?, ?>> controllerCommands,
          CommandInputManager commandInputManager, StatusMessageOutputManager statusOutputManager,
          WalkingControllerParameters walkingControllerParameters, CommonHumanoidReferenceFrames referenceFrames,
@@ -52,12 +56,17 @@ public class QueuedControllerCommandGenerator implements Updatable
       createFootstepStatusListener();
 
       parentRegistry.addChild(registry);
-      
+
       updatables.add(this);
    }
 
    private void pollAndSubmitNextCommandIfReady()
    {
+      if (!robotReady)
+      {
+         return;
+      }
+
       if (waitingForWalkingStatusToComplete) return;
 
       if (controllerCommands.isEmpty())
@@ -67,7 +76,7 @@ public class QueuedControllerCommandGenerator implements Updatable
       }
 
       Command<?, ?> controllerCommand = controllerCommands.poll();
-      if (controllerCommand == null) 
+      if (controllerCommand == null)
       {
          waitingForWalkingStatusToComplete = false;
          return;
@@ -81,25 +90,25 @@ public class QueuedControllerCommandGenerator implements Updatable
          commandInputManager.submitCommand(footstepDataListControllerCommand);
          waitingForWalkingStatusToComplete = true;
       }
-      
+
       else if (controllerCommand instanceof ChestTrajectoryCommand)
       {
          ChestTrajectoryCommand chestTrajectoryControllerCommand = (ChestTrajectoryCommand) controllerCommand;
          commandInputManager.submitCommand(chestTrajectoryControllerCommand);
       }
-      
+
       else if (controllerCommand instanceof FootTrajectoryCommand)
       {
          FootTrajectoryCommand footTrajectoryControllerCommand = (FootTrajectoryCommand) controllerCommand;
          commandInputManager.submitCommand(footTrajectoryControllerCommand);
       }
-      
+
       else if (controllerCommand instanceof HandTrajectoryCommand)
       {
          HandTrajectoryCommand handTrajectoryControllerCommand = (HandTrajectoryCommand) controllerCommand;
          commandInputManager.submitCommand(handTrajectoryControllerCommand);
       }
-      
+
       else if (controllerCommand instanceof PelvisHeightTrajectoryCommand)
       {
          PelvisHeightTrajectoryCommand pelvisHeightTrajectoryControllerCommand = (PelvisHeightTrajectoryCommand) controllerCommand;
@@ -111,20 +120,20 @@ public class QueuedControllerCommandGenerator implements Updatable
          PelvisTrajectoryCommand pelvisTrajectoryControllerCommand = (PelvisTrajectoryCommand) controllerCommand;
          commandInputManager.submitCommand(pelvisTrajectoryControllerCommand);
       }
-      
+
       else
       {
          System.err.println("QueuedControllerCommandGenerator: No plan for how to deal with commands of type " + controllerCommand.getClass().getSimpleName());
       }
 
    }
-   
+
    public void addControllerCommand(Command<?, ?> controllerCommand)
    {
       controllerCommands.add(controllerCommand);
    }
-   
-   
+
+
    private void createFootstepStatusListener()
    {
       StatusMessageListener<FootstepStatusMessage> footstepStatusListener = new StatusMessageListener<FootstepStatusMessage>()
@@ -165,7 +174,7 @@ public class QueuedControllerCommandGenerator implements Updatable
                   System.out.println("Walking Completed!");
                   System.out.println("waitingForWalkingStatusToComplete = " + waitingForWalkingStatusToComplete);
                }
-               
+
                waitingForWalkingStatusToComplete = false;
 
             }
@@ -189,6 +198,15 @@ public class QueuedControllerCommandGenerator implements Updatable
       if (!waitingForWalkingStatusToComplete)
       {
          this.pollAndSubmitNextCommandIfReady();
+      }
+   }
+
+   @Override
+   public void robotMotionStatusHasChanged(RobotMotionStatus newStatus, double time)
+   {
+      if (newStatus == RobotMotionStatus.STANDING)
+      {
+         robotReady = true;
       }
    }
 }
