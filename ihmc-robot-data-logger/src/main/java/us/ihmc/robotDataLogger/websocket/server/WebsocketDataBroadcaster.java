@@ -74,4 +74,15 @@ class WebsocketDataBroadcaster implements ChannelFutureListener
 
    }
 
+   public void publishTimestamp(long timestamp)
+   {
+      synchronized (channelLock)
+      {
+         for (int i = 0; i < channels.size(); i++)
+         {
+            channels.get(i).publishTimestamp(timestamp);
+         }
+      }
+   }
+
 }

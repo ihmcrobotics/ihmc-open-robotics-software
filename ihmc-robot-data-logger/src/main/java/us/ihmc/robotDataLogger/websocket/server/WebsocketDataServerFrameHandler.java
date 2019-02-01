@@ -1,6 +1,7 @@
 package us.ihmc.robotDataLogger.websocket.server;
 
-import java.net.SocketAddress;
+import java.net.InetSocketAddress;
+import java.net.SocketException;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
 
@@ -54,12 +55,15 @@ class WebsocketDataServerFrameHandler extends SimpleChannelInboundHandler<WebSoc
    private final SerializedPayload variableChangeRequestPayload = new SerializedPayload(variableChangeRequestType.getTypeSize());
    private final VariableChangeRequest request = new VariableChangeRequest();
    
+   private final UDPTimestampServer udpTimestampServer;
+   
 
-   public WebsocketDataServerFrameHandler(WebsocketDataBroadcaster broadcaster, int dataSize, VariableChangedListener variableChangedListener)
+   public WebsocketDataServerFrameHandler(WebsocketDataBroadcaster broadcaster, int dataSize, VariableChangedListener variableChangedListener) throws SocketException
    {
       this.broadcaster = broadcaster;
       this.dataSize = dataSize;
       this.variableChangedListener = variableChangedListener;
+      this.udpTimestampServer= new UDPTimestampServer();
    }
 
    @Override
@@ -98,7 +102,11 @@ class WebsocketDataServerFrameHandler extends SimpleChannelInboundHandler<WebSoc
                int argument = command.getArgument(frame.content());
                if(argument != -1)
                {
-                  System.out.println("Got " + command + " " + argument);
+                  if(command == DataServerCommand.SEND_TIMESTAMPS)
+                  {
+                     udpTimestampServer.startSending(remoteAddress().getAddress(), argument);
+                  }
+                  
                   if(command.broadcast())
                   {
                      broadcaster.writeCommand(command, argument);
@@ -146,9 +154,9 @@ class WebsocketDataServerFrameHandler extends SimpleChannelInboundHandler<WebSoc
       channel.closeFuture().addListener(listener);
    }
 
-   public SocketAddress remoteAddress()
+   public InetSocketAddress remoteAddress()
    {
-      return channel.remoteAddress();
+      return (InetSocketAddress) channel.remoteAddress();
    }
    
    Channel channel()
@@ -222,6 +230,8 @@ class WebsocketDataServerFrameHandler extends SimpleChannelInboundHandler<WebSoc
             throw new RuntimeException("Trying to release an active channel");
          }
          
+         udpTimestampServer.close();
+         
          if(alloc != null)
          {
             alloc.release();
@@ -252,5 +262,10 @@ class WebsocketDataServerFrameHandler extends SimpleChannelInboundHandler<WebSoc
             }
          }
       }
+   }
+
+   public void publishTimestamp(long timestamp)
+   {
+      udpTimestampServer.sendTimestamp(timestamp);
    }
 }

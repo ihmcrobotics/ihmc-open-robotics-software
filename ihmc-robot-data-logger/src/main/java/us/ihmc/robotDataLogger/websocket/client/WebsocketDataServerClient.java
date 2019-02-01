@@ -30,6 +30,7 @@ import us.ihmc.robotDataLogger.YoVariableClientImplementation;
 import us.ihmc.robotDataLogger.dataBuffers.CustomLogDataSubscriberType;
 import us.ihmc.robotDataLogger.dataBuffers.RegistryConsumer;
 import us.ihmc.robotDataLogger.handshake.IDLYoVariableHandshakeParser;
+import us.ihmc.robotDataLogger.listeners.TimestampListener;
 import us.ihmc.robotDataLogger.util.DebugRegistry;
 import us.ihmc.robotDataLogger.websocket.client.discovery.HTTPDataServerDescription;
 import us.ihmc.robotDataLogger.websocket.command.DataServerCommand;
@@ -44,7 +45,7 @@ public class WebsocketDataServerClient
 
    private final Channel ch;
 
-   public WebsocketDataServerClient(HTTPDataServerDescription target, IDLYoVariableHandshakeParser parser, YoVariableClientImplementation yoVariableClient,
+   public WebsocketDataServerClient(HTTPDataServerDescription target, IDLYoVariableHandshakeParser parser, TimestampListener timestampListener, YoVariableClientImplementation yoVariableClient,
                                     DebugRegistry debugRegistry)
          throws IOException
    {
@@ -65,7 +66,7 @@ public class WebsocketDataServerClient
                                                                                                                                            WebSocketVersion.V13,
                                                                                                                                            null, true,
                                                                                                                                            new DefaultHttpHeaders()),
-                                                                                            yoVariableClient, consumer, type);
+                                                                                            yoVariableClient, timestampListener, consumer, type);
 
       Bootstrap b = new Bootstrap();
       b.group(group).channel(NioSocketChannel.class).handler(new ChannelInitializer<SocketChannel>()

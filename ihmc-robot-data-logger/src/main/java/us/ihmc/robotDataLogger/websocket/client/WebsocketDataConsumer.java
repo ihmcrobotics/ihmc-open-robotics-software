@@ -33,6 +33,7 @@ public class WebsocketDataConsumer implements DataConsumer
    
    private IDLYoVariableHandshakeParser parser;
    private YoVariableClientImplementation yoVariableClient;
+   private TimestampListener timestampListener;
    private DebugRegistry debugRegistry;
 
    public WebsocketDataConsumer(HTTPDataServerConnection initialConnection)
@@ -107,10 +108,11 @@ public class WebsocketDataConsumer implements DataConsumer
 
          connection.close();
          this.parser = parser;
+         this.timestampListener = timeStampListener;
          this.yoVariableClient = yoVariableClient;
          this.debugRegistry = debugRegistry;
          
-         session = new WebsocketDataServerClient(connection.getTarget(), parser, yoVariableClient, debugRegistry);
+         session = new WebsocketDataServerClient(connection.getTarget(), parser, timeStampListener, yoVariableClient, debugRegistry);
       }
    }
 
@@ -198,7 +200,7 @@ public class WebsocketDataConsumer implements DataConsumer
             if(announcement.getReconnectKeyAsString().equals(oldAnnouncement.getReconnectKeyAsString()))
             {
                connection = newConnection;
-               session = new WebsocketDataServerClient(connection.getTarget(), parser, yoVariableClient, debugRegistry);
+               session = new WebsocketDataServerClient(connection.getTarget(), parser, timestampListener, yoVariableClient, debugRegistry);
                return true;
             }
             else
