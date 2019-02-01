@@ -14,7 +14,7 @@ public class DistanceAndYawBasedHeuristics extends CostToGoHeuristics
    }
 
    @Override
-   public void setBodyHasReachedGoal(boolean bodyHasReachedGoal)
+   public void setGoalHasBeenReached(boolean bodyHasReachedGoal)
    {
       this.bodyHasReachedGoal = bodyHasReachedGoal;
    }

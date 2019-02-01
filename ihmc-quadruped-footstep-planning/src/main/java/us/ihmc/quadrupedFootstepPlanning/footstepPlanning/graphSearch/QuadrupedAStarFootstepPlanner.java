@@ -320,7 +320,7 @@ public class QuadrupedAStarFootstepPlanner implements QuadrupedBodyPathAndFootst
       if (planarRegionsList != null && !planarRegionsList.isEmpty())
          checkStartHasPlanarRegion();
 
-      heuristics.setBodyHasReachedGoal(false);
+      heuristics.setGoalHasBeenReached(false);
       graph.initialize(startNode);
       NodeComparator nodeComparator = new NodeComparator(graph, goalNode, heuristics);
       stack = new PriorityQueue<>(nodeComparator);
@@ -513,10 +513,13 @@ public class QuadrupedAStarFootstepPlanner implements QuadrupedBodyPathAndFootst
          graph.checkAndSetEdge(nodeToExpand, endNode, 0.0);
 
          if (footIsAtGoal)
+         {
+            heuristics.setGoalHasBeenReached(true);
             footReachedTheGoal.get(nodeToExpand.getMovingQuadrant()).set(true);
+         }
          if (midstanceIsAtGoal)
          {
-            heuristics.setBodyHasReachedGoal(true);
+            heuristics.setGoalHasBeenReached(true);
             midstanceReachedTheGoal.set(true);
          }
 
