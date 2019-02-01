@@ -7,7 +7,18 @@ import io.netty.buffer.Unpooled;
 import io.netty.handler.codec.http.websocketx.BinaryWebSocketFrame;
 import io.netty.handler.codec.http.websocketx.WebSocketFrame;
 
-public class WebsocketFramePool
+/**
+ * 
+ * Pooled buffer of BinaryWebsocketFrames and ByteBuf to avoid object allocation on transmit.
+ * 
+ * When a ByteBuf is requested, the refcnt is increased using retain(). When the refcnt is reset to 1, it is re-usable
+ * 
+ * If the buffer is full, no element is returned and the transmission should be skipped.
+ * 
+ * @author Jesper Smith
+ *
+ */
+class WebsocketFramePool
 {
    private static class WebsocketFrameAndBuffer
    {

@@ -18,7 +18,18 @@ import us.ihmc.robotDataLogger.VariableChangeRequest;
 import us.ihmc.robotDataLogger.VariableChangeRequestPubSubType;
 import us.ihmc.robotDataLogger.listeners.VariableChangedListener;
 
-public class WebsocketDataServerFrameHandler extends SimpleChannelInboundHandler<WebSocketFrame>
+
+/**
+ * Handler for websocket connection
+ * 
+ * - Handles writing data to channel
+ * - Passes incoming variableChangeRequests to the variablechangedlistener
+ * - Handles the simple command server 
+ * 
+ * @author Jesper Smith
+ *
+ */
+class WebsocketDataServerFrameHandler extends SimpleChannelInboundHandler<WebSocketFrame>
 {
    private static final int POOL_SIZE = 12;
    

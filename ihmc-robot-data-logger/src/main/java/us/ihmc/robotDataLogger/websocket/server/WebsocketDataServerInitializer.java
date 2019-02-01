@@ -9,8 +9,13 @@ import io.netty.handler.codec.http.HttpServerCodec;
 import io.netty.handler.codec.http.websocketx.WebSocketServerProtocolHandler;
 import us.ihmc.robotDataLogger.listeners.VariableChangedListener;
 
-public class WebsocketDataServerInitializer extends ChannelInitializer<SocketChannel>
-
+/**
+ * Initializes a connection
+ * 
+ * @author Jesper Smith
+ *
+ */
+class WebsocketDataServerInitializer extends ChannelInitializer<SocketChannel>
 {
    private static final String WEBSOCKET_PATH = "/websocket";
 

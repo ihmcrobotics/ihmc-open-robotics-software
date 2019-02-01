@@ -16,11 +16,10 @@ import us.ihmc.robotDataLogger.Announcement;
 import us.ihmc.robotDataLogger.AnnouncementPubSubType;
 import us.ihmc.robotDataLogger.Handshake;
 import us.ihmc.robotDataLogger.HandshakePubSubType;
-import us.ihmc.robotDataLogger.websocket.HTTPDataServerPaths;
 
 /**
  *
- * This class holds all the content that is available on the HTTP server.
+ * This class holds all the static content that is available on the HTTP server.
  * 
  * This includes the index page, announcement, handshake, model and resource zip.
  * 

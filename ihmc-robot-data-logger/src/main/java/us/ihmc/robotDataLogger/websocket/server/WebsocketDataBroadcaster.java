@@ -7,7 +7,14 @@ import java.util.ArrayList;
 import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelFutureListener;
 
-public class WebsocketDataBroadcaster implements ChannelFutureListener
+
+/**
+ * Helper class that keep track of active connections and writes data to all connections
+ * 
+ * @author Jesper Smith
+ *
+ */
+class WebsocketDataBroadcaster implements ChannelFutureListener
 {
    private final Object channelLock = new Object();
 
