@@ -3,6 +3,7 @@ package us.ihmc.avatar.networkProcessor.walkingPreview;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Stream;
 
+import controller_msgs.msg.dds.ArmTrajectoryMessage;
 import controller_msgs.msg.dds.PelvisTrajectoryMessage;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.YoPlaneContactState;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.InverseDynamicsCommand;
@@ -34,6 +35,7 @@ public class WalkingPreviewResetTask implements WalkingPreviewTask
    private final CommandInputManager walkingInputManager;
    private final HighLevelHumanoidControllerToolbox controllerToolbox;
 
+   private boolean haveResetCommandsBeenSubmitted = false;
    private final AtomicReference<RobotMotionStatus> latestMotionStatus = new AtomicReference<>(null);
    private RobotMotionStatusChangedListener robotMotionStatusChangedListener = (newStatus, time) -> latestMotionStatus.set(newStatus);
 
@@ -54,16 +56,14 @@ public class WalkingPreviewResetTask implements WalkingPreviewTask
       controllerToolbox.attachRobotMotionStatusChangedListener(robotMotionStatusChangedListener);
 
       // FIXME The controller crashes when sending trajectory messages at the very beginning.
-      //      snapToInitialRobotConfiguration();
+      snapToInitialRobotConfiguration();
    }
 
    private void snapToInitialRobotConfiguration()
-   {
-      // Get the controller to be initialized to hold the initial robot configuration.
-
+   { // Get the controller to be initialized to hold the initial robot configuration.
       FramePose3D initialPelvisPose = new FramePose3D(fullRobotModel.getRootJoint().getFrameAfterJoint());
       initialPelvisPose.changeFrame(worldFrame);
-      PelvisTrajectoryMessage pelvisTrajectoryMessage = HumanoidMessageTools.createPelvisTrajectoryMessage(0.01, initialPelvisPose.getPosition(),
+      PelvisTrajectoryMessage pelvisTrajectoryMessage = HumanoidMessageTools.createPelvisTrajectoryMessage(0.0, initialPelvisPose.getPosition(),
                                                                                                            initialPelvisPose.getOrientation());
       walkingInputManager.submitMessage(pelvisTrajectoryMessage);
 
@@ -72,22 +72,29 @@ public class WalkingPreviewResetTask implements WalkingPreviewTask
       for (RobotSide robotSide : RobotSide.values)
       {
          RigidBodyBasics hand = fullRobotModel.getHand(robotSide);
-         double[] desiredJointPositions = Stream.of(MultiBodySystemTools.createOneDoFJointPath(chest, hand)).mapToDouble(OneDoFJointBasics::getQ).toArray();
-         walkingInputManager.submitMessage(HumanoidMessageTools.createArmTrajectoryMessage(robotSide, 0.01, desiredJointPositions));
+         double[] desiredJointPositions = Stream.of(MultiBodySystemTools.createOneDoFJointPath(chest, hand)).mapToDouble(joint -> joint.getQ()).toArray();
+         ArmTrajectoryMessage armTrajectoryMessage = HumanoidMessageTools.createArmTrajectoryMessage(robotSide, 0.0, desiredJointPositions);
+         walkingInputManager.submitMessage(armTrajectoryMessage);
       }
 
       RigidBodyBasics head = fullRobotModel.getHead();
       double[] desiredJointPositions = Stream.of(MultiBodySystemTools.createOneDoFJointPath(chest, head)).mapToDouble(OneDoFJointBasics::getQ).toArray();
-      walkingInputManager.submitMessage(HumanoidMessageTools.createNeckTrajectoryMessage(0.01, desiredJointPositions));
+      walkingInputManager.submitMessage(HumanoidMessageTools.createNeckTrajectoryMessage(0.0, desiredJointPositions));
 
       FrameQuaternion initialChestOrientation = new FrameQuaternion(chest.getBodyFixedFrame());
       initialChestOrientation.changeFrame(worldFrame);
-      walkingInputManager.submitMessage(HumanoidMessageTools.createChestTrajectoryMessage(0.01, initialChestOrientation, worldFrame));
+      walkingInputManager.submitMessage(HumanoidMessageTools.createChestTrajectoryMessage(0.0, initialChestOrientation, worldFrame));
    }
 
    @Override
    public void doAction()
    {
+      if (!haveResetCommandsBeenSubmitted && latestMotionStatus.get() == RobotMotionStatus.STANDING)
+      {
+         snapToInitialRobotConfiguration();
+         haveResetCommandsBeenSubmitted = true;
+      }
+
       commandList.clear();
 
       for (RobotSide robotSide : RobotSide.values)
@@ -106,7 +113,7 @@ public class WalkingPreviewResetTask implements WalkingPreviewTask
    @Override
    public boolean isDone()
    {
-      return latestMotionStatus.get() != null && latestMotionStatus.get() == RobotMotionStatus.STANDING;
+      return haveResetCommandsBeenSubmitted;
    }
 
    @Override
