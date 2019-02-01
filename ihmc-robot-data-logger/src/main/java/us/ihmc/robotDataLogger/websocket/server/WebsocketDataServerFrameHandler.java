@@ -17,6 +17,7 @@ import us.ihmc.pubsub.common.SerializedPayload;
 import us.ihmc.robotDataLogger.VariableChangeRequest;
 import us.ihmc.robotDataLogger.VariableChangeRequestPubSubType;
 import us.ihmc.robotDataLogger.listeners.VariableChangedListener;
+import us.ihmc.robotDataLogger.websocket.command.DataServerCommand;
 
 
 /**
@@ -66,7 +67,7 @@ class WebsocketDataServerFrameHandler extends SimpleChannelInboundHandler<WebSoc
       if (evt instanceof HandshakeComplete)
       {
          this.lock = new Object();
-         this.pool = new WebsocketFramePool(dataSize, POOL_SIZE);
+         this.pool = new WebsocketFramePool(dataSize, POOL_SIZE, BinaryWebSocketFrame.class);
          this.task = new WriteTask();
          
          
@@ -218,5 +219,11 @@ class WebsocketDataServerFrameHandler extends SimpleChannelInboundHandler<WebSoc
             pool.release();
          }
       }
+   }
+
+   public void writeCommand(DataServerCommand command)
+   {
+      // TODO Auto-generated method stub
+      
    }
 }

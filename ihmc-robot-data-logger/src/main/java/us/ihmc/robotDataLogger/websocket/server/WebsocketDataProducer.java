@@ -39,7 +39,7 @@ import us.ihmc.util.PeriodicThreadSchedulerFactory;
  * 
  * A simple command and echo server using text websocket frames is implemented to send control messages to the server and logger.
  * 
- * Timestamps are send as raw UDP packets after requested over the command server. See {@link us.ihmc.robotDataLogger.websocket.command.DataServerCommands}
+ * Timestamps are send as raw UDP packets after requested over the command server. See {@link us.ihmc.robotDataLogger.websocket.command.DataServerCommand}
  * 
  * @author Jesper Smith
  *
