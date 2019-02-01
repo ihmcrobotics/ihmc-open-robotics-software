@@ -2,6 +2,7 @@ package us.ihmc.quadrupedFootstepPlanning.footstepPlanning.graphSearch;
 
 import org.junit.Test;
 import us.ihmc.commons.thread.ThreadTools;
+import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.continuousIntegration.ContinuousIntegrationTools;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.tuple3D.Point3D;
@@ -42,6 +43,7 @@ public class QuadrupedAStarFootstepPlannerTest
 
    private static final QuadrantDependentList<AppearanceDefinition> colorDefinitions = new QuadrantDependentList<>(YoAppearance.Red(), YoAppearance.Green(), YoAppearance.DarkRed(), YoAppearance.DarkGreen());
 
+   @ContinuousIntegrationTest(estimatedDuration = 120)
    @Test(timeout = timeout)
    public void testSimpleWalkForward()
    {
@@ -90,6 +92,7 @@ public class QuadrupedAStarFootstepPlannerTest
 
    }
 
+   @ContinuousIntegrationTest(estimatedDuration = 120)
    @Test(timeout = timeout)
    public void testWalkAndTurn()
    {
@@ -139,6 +142,7 @@ public class QuadrupedAStarFootstepPlannerTest
 
    }
 
+   @ContinuousIntegrationTest(estimatedDuration = 120)
    @Test(timeout = timeout)
    public void testSimpleForwardPoint()
    {
@@ -169,7 +173,7 @@ public class QuadrupedAStarFootstepPlannerTest
 
       planner.setStart(start);
       planner.setGoal(goal);
-      planner.setTimeout(10.0);
+      planner.setTimeout(20.0);
 
 
 
