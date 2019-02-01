@@ -76,8 +76,9 @@ public class FootWrenchSensor
 
       if (graphicsListRegistry != null)
       {
-         YoGraphicPosition copViz = new YoGraphicPosition(copFrame.getName(), yoCopPosition, 0.02, YoAppearance.Green());
+         YoGraphicPosition copViz = new YoGraphicPosition(copFrame.getName(), yoCopPosition, 0.01, YoAppearance.Green());
          graphicsListRegistry.registerYoGraphic("EKF", copViz);
+         graphicsListRegistry.registerArtifact("EKF", copViz.createArtifact());
       }
 
       footVelocitySensor = new FootVelocitySensor(dt, foot, copFrame, parameterGroup, registry);
