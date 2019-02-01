@@ -5,8 +5,10 @@ import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.continuousIntegration.ContinuousIntegrationTools;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
+import us.ihmc.euclid.tools.EuclidCoreTestTools;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.euclid.tuple3D.interfaces.Point3DBasics;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.graphicsDescription.Graphics3DObject;
 import us.ihmc.graphicsDescription.appearance.AppearanceDefinition;
@@ -17,6 +19,7 @@ import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.FootstepPlanningResult
 import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.QuadrupedFootstepPlanner;
 import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.QuadrupedFootstepPlannerGoal;
 import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.QuadrupedFootstepPlannerStart;
+import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.graphSearch.graph.FootstepNode;
 import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.graphSearch.nodeExpansion.FootstepNodeExpansion;
 import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.graphSearch.nodeExpansion.ParameterBasedNodeExpansion;
 import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.graphSearch.parameters.DefaultFootstepPlannerParameters;
@@ -26,6 +29,7 @@ import us.ihmc.quadrupedPlanning.QuadrupedXGaitSettings;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.graphics.Graphics3DObjectTools;
 import us.ihmc.robotics.robotSide.QuadrantDependentList;
+import us.ihmc.robotics.robotSide.RobotQuadrant;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.SimulationConstructionSetParameters;
 import us.ihmc.simulationconstructionset.gui.YoGraph;
@@ -34,12 +38,14 @@ import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import java.util.List;
 
 import static junit.framework.TestCase.assertTrue;
+import static org.junit.Assert.assertEquals;
 
 public class QuadrupedAStarFootstepPlannerTest
 {
    private static final long timeout = 30000 * 100;
-   private static final boolean visualize = true;
-   private static final boolean activelyVisualize = true;
+   private static final double epsilon = 1e-3;
+   private static final boolean visualize = false;
+   private static final boolean activelyVisualize = false;
 
    private static final QuadrantDependentList<AppearanceDefinition> colorDefinitions = new QuadrantDependentList<>(YoAppearance.Red(), YoAppearance.Green(), YoAppearance.DarkRed(), YoAppearance.DarkGreen());
 
@@ -90,6 +96,7 @@ public class QuadrupedAStarFootstepPlannerTest
       if (visualize && !activelyVisualize)
          visualizePlan(steps, null, startPose.getPosition(), goalPose.getPosition());
 
+      assertPlanIsValid(steps, goalPose.getPosition(), goalPose.getYaw());
    }
 
    @ContinuousIntegrationTest(estimatedDuration = 120)
@@ -140,6 +147,7 @@ public class QuadrupedAStarFootstepPlannerTest
       if (visualize && !activelyVisualize)
          visualizePlan(steps, null, startPose.getPosition(), goalPose.getPosition());
 
+      assertPlanIsValid(steps, goalPose.getPosition(), goalPose.getYaw());
    }
 
    @ContinuousIntegrationTest(estimatedDuration = 120)
@@ -190,6 +198,43 @@ public class QuadrupedAStarFootstepPlannerTest
       if (visualize && !activelyVisualize)
          visualizePlan(steps, null, startPose.getPosition(), goalPose.getPosition());
 
+      assertPlanIsValid(steps, goalPose.getPosition(), goalPose.getYaw());
+   }
+
+   private static void assertPlanIsValid(List<? extends QuadrupedTimedStep> plannedSteps, Point3DReadOnly goalPosition, double goalYaw)
+   {
+      QuadrantDependentList<Point3DBasics> finalSteps = getFinalStepPositions(plannedSteps);
+
+      Point3D centerPoint = new Point3D();
+      for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
+      {
+         centerPoint.add(finalSteps.get(robotQuadrant));
+      }
+
+      double nominalYaw = FootstepNode.computeNominalYaw(finalSteps.get(RobotQuadrant.FRONT_LEFT).getX(), finalSteps.get(RobotQuadrant.FRONT_LEFT).getY(),
+                                                         finalSteps.get(RobotQuadrant.FRONT_RIGHT).getX(), finalSteps.get(RobotQuadrant.FRONT_RIGHT).getY(),
+                                                         finalSteps.get(RobotQuadrant.HIND_LEFT).getX(), finalSteps.get(RobotQuadrant.HIND_LEFT).getY(),
+                                                         finalSteps.get(RobotQuadrant.HIND_RIGHT).getX(), finalSteps.get(RobotQuadrant.HIND_RIGHT).getY());
+
+      centerPoint.scale(0.25);
+
+      EuclidCoreTestTools.assertPoint3DGeometricallyEquals(goalPosition, centerPoint, epsilon);
+      assertEquals(goalYaw, nominalYaw, 0.02);
+   }
+
+   private static QuadrantDependentList<Point3DBasics> getFinalStepPositions(List<? extends QuadrupedTimedStep> plannedSteps)
+   {
+      QuadrantDependentList<Point3DBasics> finalSteps = new QuadrantDependentList<>();
+      for (int i = plannedSteps.size() - 1; i >= 0; i--)
+      {
+         QuadrupedTimedStep step = plannedSteps.get(i);
+         if (finalSteps.containsKey(step.getRobotQuadrant()))
+            continue;
+         else
+            finalSteps.put(step.getRobotQuadrant(), step.getGoalPosition());
+      }
+
+      return finalSteps;
    }
 
    private void visualizePlan(List<? extends QuadrupedTimedStep> steps, PlanarRegionsList planarRegionsList, Point3DReadOnly start, Point3DReadOnly goal)
