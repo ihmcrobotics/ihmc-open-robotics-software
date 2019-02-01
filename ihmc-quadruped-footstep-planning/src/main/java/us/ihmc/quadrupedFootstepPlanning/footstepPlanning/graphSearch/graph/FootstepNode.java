@@ -30,6 +30,13 @@ public class FootstepNode
 
    private final RobotQuadrant movingQuadrant;
 
+   public FootstepNode(FootstepNode other)
+   {
+      this(other.getMovingQuadrant(), other.getX(RobotQuadrant.FRONT_LEFT), other.getY(RobotQuadrant.FRONT_LEFT), other.getX(RobotQuadrant.FRONT_RIGHT),
+           other.getY(RobotQuadrant.FRONT_RIGHT), other.getX(RobotQuadrant.HIND_LEFT), other.getY(RobotQuadrant.HIND_LEFT), other.getX(RobotQuadrant.HIND_RIGHT),
+           other.getY(RobotQuadrant.HIND_RIGHT));
+   }
+
    public FootstepNode(RobotQuadrant movingQuadrant, QuadrantDependentList<Point2DReadOnly> locations)
    {
       this(movingQuadrant, locations.get(RobotQuadrant.FRONT_LEFT), locations.get(RobotQuadrant.FRONT_RIGHT), locations.get(RobotQuadrant.HIND_LEFT),
