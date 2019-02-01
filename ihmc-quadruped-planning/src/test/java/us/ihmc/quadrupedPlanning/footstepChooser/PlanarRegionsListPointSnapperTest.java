@@ -211,20 +211,14 @@ public class PlanarRegionsListPointSnapperTest
       PlanarRegion planarRegion = new PlanarRegion();
       RigidBodyTransform polygonSnappingTransform = PlanarRegionsListPointSnapper.snapPointToPlanarRegionsList(pointToSnap, planarRegionList, planarRegion);
 
-      // Make sure the two equally high vertices just got projected vertically
-      Point3D highVertexOne = new Point3D(-1.0, -1.0, 0.0);
+      // Make sure the vertex just got projected vertically
+      Point3D highVertexOne = new Point3D(0.0, 0.0, 0.0);
       polygonSnappingTransform.transform(highVertexOne);
 
-      assertEquals(-1.0, highVertexOne.getX(), epsilon);
-      assertEquals(-1.0, highVertexOne.getY(), epsilon);
-      assertEquals(planarRegionToSnapTo.getPlaneZGivenXY(-1.0, -1.0), highVertexOne.getZ(), epsilon);
+      assertEquals(0.0, highVertexOne.getX(), epsilon);
+      assertEquals(0.0, highVertexOne.getY(), epsilon);
+      assertEquals(planarRegionToSnapTo.getPlaneZGivenXY(0.0, 0.0), highVertexOne.getZ(), epsilon);
 
-      Point3D highVertexTwo = new Point3D(-1.0, 1.0, 0.0);
-      polygonSnappingTransform.transform(highVertexTwo);
-
-      assertEquals(-1.0, highVertexTwo.getX(), epsilon);
-      assertEquals(1.0, highVertexTwo.getY(), epsilon);
-      assertEquals(planarRegionToSnapTo.getPlaneZGivenXY(-1.0, 1.0), highVertexTwo.getZ(), epsilon);
 
       assertSurfaceNormalsMatchAndSnapPreservesXFromAbove(polygonSnappingTransform, planarRegionTransformToWorld);
    }
@@ -259,12 +253,12 @@ public class PlanarRegionsListPointSnapperTest
       RigidBodyTransform polygonSnappingTransform = PlanarRegionsListPointSnapper.snapPointToPlanarRegionsList(pointToSnap, planarRegionList, planarRegion);
 
       // Make sure the two equally high vertices just got projected vertically
-      Point3D highVertexOne = new Point3D(-1.0, -1.0, 0.0);
+      Point3D highVertexOne = new Point3D(0.0, 0.0, 0.0);
       polygonSnappingTransform.transform(highVertexOne);
 
-      assertEquals(-1.0, highVertexOne.getX(), epsilon);
-      assertEquals(-1.0, highVertexOne.getY(), epsilon);
-      assertEquals(planarRegionToSnapTo.getPlaneZGivenXY(-1.0, -1.0), highVertexOne.getZ(), epsilon);
+      assertEquals(0.0, highVertexOne.getX(), epsilon);
+      assertEquals(0.0, highVertexOne.getY(), epsilon);
+      assertEquals(planarRegionToSnapTo.getPlaneZGivenXY(0.0, 0.0), highVertexOne.getZ(), epsilon);
 
       assertSurfaceNormalsMatchAndSnapPreservesXFromAbove(polygonSnappingTransform, planarRegionTransformToWorld);
    }
