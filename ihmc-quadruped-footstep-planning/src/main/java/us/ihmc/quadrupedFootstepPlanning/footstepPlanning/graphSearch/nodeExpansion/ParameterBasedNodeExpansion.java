@@ -1,19 +1,17 @@
 package us.ihmc.quadrupedFootstepPlanning.footstepPlanning.graphSearch.nodeExpansion;
 
+import us.ihmc.commons.MathTools;
 import us.ihmc.euclid.axisAngle.AxisAngle;
 import us.ihmc.euclid.orientation.interfaces.Orientation3DReadOnly;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple2D.Vector2D;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
-import us.ihmc.euclid.tuple2D.interfaces.Tuple2DReadOnly;
 import us.ihmc.euclid.tuple2D.interfaces.Vector2DReadOnly;
 import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.graphSearch.graph.FootstepNode;
 import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.graphSearch.parameters.FootstepPlannerParameters;
-import us.ihmc.quadrupedPlanning.QuadrupedXGaitSettings;
 import us.ihmc.quadrupedPlanning.QuadrupedXGaitSettingsReadOnly;
 import us.ihmc.robotics.robotSide.RobotQuadrant;
 
-import java.util.ArrayList;
 import java.util.HashSet;
 
 import static us.ihmc.robotics.robotSide.RobotQuadrant.*;
@@ -109,7 +107,7 @@ public class ParameterBasedNodeExpansion implements FootstepNodeExpansion
       return newPoint;
    }
 
-   private static boolean checkNodeIsFarEnoughFromOtherFeet(Point2DReadOnly nodePositionToCheck, Vector2DReadOnly requiredClearance, FootstepNode previousNode)
+   static boolean checkNodeIsFarEnoughFromOtherFeet(Point2DReadOnly nodePositionToCheck, Vector2DReadOnly requiredClearance, FootstepNode previousNode)
    {
       RobotQuadrant nextQuadrant = previousNode.getMovingQuadrant().getNextRegularGaitSwingQuadrant();
 
@@ -121,22 +119,27 @@ public class ParameterBasedNodeExpansion implements FootstepNodeExpansion
          double otherNodeX = previousNode.getX(otherQuadrant);
          double otherNodeY = previousNode.getY(otherQuadrant);
 
-         if (!checkNodeIsFarEnoughFromOtherNode(nodePositionToCheck, requiredClearance, otherNodeX, otherNodeY))
+         if (!checkNodeIsFarEnoughFromOtherFoot(nodePositionToCheck, requiredClearance, otherNodeX, otherNodeY))
             return false;
       }
 
       return true;
    }
 
-   private static boolean checkNodeIsFarEnoughFromOtherNode(Point2DReadOnly nodePositionToCheck, Vector2DReadOnly requiredClearance, double otherNodeX, double otherNodeY)
+   /**
+    * Checks if the node position being added {@param nodePositionToCheck} is too close to another foot position, defined by ({@param otherFootX}, {@param otherFootY})
+    *
+    */
+   static boolean checkNodeIsFarEnoughFromOtherFoot(Point2DReadOnly nodePositionToCheck, Vector2DReadOnly requiredClearance, double otherFootX, double otherFootY)
    {
-      double maxForward = otherNodeX + requiredClearance.getX();
-      double maxBackward = otherNodeX - requiredClearance.getX();
+      double maxForward = otherFootX + Math.abs(requiredClearance.getX());
+      double maxBackward = otherFootX - Math.abs(requiredClearance.getX());
 
-      double maxLeft = otherNodeY + requiredClearance.getY();
-      double maxRight = otherNodeY - requiredClearance.getY();
+      double maxLeft = otherFootY + Math.abs(requiredClearance.getY());
+      double maxRight = otherFootY - Math.abs(requiredClearance.getY());
 
-      if (maxForward >= nodePositionToCheck.getX() && maxBackward <= nodePositionToCheck.getX() && nodePositionToCheck.getY() >= maxRight && nodePositionToCheck.getY() <= maxLeft)
+      if (MathTools.intervalContains(nodePositionToCheck.getX(), maxBackward, maxForward, true, true) && MathTools.intervalContains(nodePositionToCheck.getY(),
+                                                                                                                                    maxRight, maxLeft, true, true))
          return false;
       else
          return true;
