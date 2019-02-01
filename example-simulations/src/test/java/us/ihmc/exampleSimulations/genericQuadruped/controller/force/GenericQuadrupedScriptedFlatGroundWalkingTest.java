@@ -33,7 +33,7 @@ public class GenericQuadrupedScriptedFlatGroundWalkingTest extends QuadrupedScri
 
    @Override
    @ContinuousIntegrationTest(estimatedDuration = 74.7)
-   @Test(timeout = 370000)
+   @Test(timeout = 600000)
    public void testScriptedTroublingSteps()
    {
       super.testScriptedTroublingSteps();
