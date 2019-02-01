@@ -84,6 +84,7 @@ public class FootWrenchSensor
    }
 
    private final FrameVector3D tempVector = new FrameVector3D();
+   private int loadedCount = 0;
 
    public void update(WrenchReadOnly footWrench, boolean fixRobot)
    {
@@ -97,9 +98,28 @@ public class FootWrenchSensor
 
       copFrame.update();
 
-      // When fixing the robot this will cause the state estimator to assume the feet are not moving:
-      double loadPercentage = fixRobot ? 1.0 : filteredForce.getZ() / weight;
-      footVelocitySensor.setLoad(loadPercentage);
+      if (fixRobot)
+      {
+         footVelocitySensor.setLoad(1.0);
+      }
+      else if (loadedCount > 20)
+      {
+         footVelocitySensor.setLoad(1.0);
+      }
+      else
+      {
+         footVelocitySensor.setLoad(0.0);
+      }
+
+      boolean loaded = filteredForce.getZ() / weight > 0.3;
+      if (!loaded)
+      {
+         loadedCount = 0;
+      }
+      else
+      {
+         loadedCount++;
+      }
    }
 
    public Sensor getSensor()
