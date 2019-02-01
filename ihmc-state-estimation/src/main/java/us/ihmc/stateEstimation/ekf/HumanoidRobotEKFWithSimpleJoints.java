@@ -31,12 +31,14 @@ public class HumanoidRobotEKFWithSimpleJoints implements StateEstimatorControlle
 {
    private final SensorOutputMapReadOnly processedSensorOutput;
    private final List<OneDoFJoint> simpleJoints;
+   private final List<OneDoFJoint> referenceJoints;
 
    private final LeggedRobotEKF leggedRobotEKF;
 
    public HumanoidRobotEKFWithSimpleJoints(FullHumanoidRobotModel estimatorFullRobotModel, String primaryImuName, Collection<String> imuNames,
                                            SideDependentList<String> footForceSensorNames, SensorRawOutputMapReadOnly sensorOutput, double dt, double gravity,
-                                           SensorOutputMapReadOnly processedSensorOutput, YoGraphicsListRegistry graphicsListRegistry)
+                                           SensorOutputMapReadOnly processedSensorOutput, YoGraphicsListRegistry graphicsListRegistry,
+                                           FullHumanoidRobotModel referenceModel)
    {
       this.processedSensorOutput = processedSensorOutput;
 
@@ -47,12 +49,17 @@ public class HumanoidRobotEKFWithSimpleJoints implements StateEstimatorControlle
          throw new RuntimeException("Can only handle OneDoFJoints in a robot.");
       }
 
+      JointBasics[] referenceChestSubtreeJoints = MultiBodySystemTools.collectSubtreeJoints(referenceModel.getChest());
+      referenceJoints = Arrays.asList(MultiBodySystemTools.filterJoints(referenceChestSubtreeJoints, OneDoFJoint.class));
+
       List<OneDoFJointBasics> jointsForEKF = new ArrayList<>();
+      List<OneDoFJointBasics> referenceJointsForEKF = new ArrayList<>();
       for (OneDoFJointBasics oneDoFJoint : estimatorFullRobotModel.getOneDoFJoints())
       {
          if (!simpleJoints.contains(oneDoFJoint))
          {
             jointsForEKF.add(oneDoFJoint);
+            referenceJointsForEKF.add(referenceModel.getOneDoFJointByName(oneDoFJoint.getName()));
          }
       }
 
@@ -67,7 +74,7 @@ public class HumanoidRobotEKFWithSimpleJoints implements StateEstimatorControlle
 
       FloatingJointBasics rootJoint = estimatorFullRobotModel.getRootJoint();
       leggedRobotEKF = new LeggedRobotEKF(rootJoint, jointsForEKF, primaryImuName, imuNames, forceSensorMap, sensorOutput, dt, gravity, jointParameterGroups,
-                                          graphicsListRegistry);
+                                          graphicsListRegistry, referenceJointsForEKF);
    }
 
    private static Map<String, String> createJointGroups(FullHumanoidRobotModel fullRobotModel)
@@ -113,8 +120,9 @@ public class HumanoidRobotEKFWithSimpleJoints implements StateEstimatorControlle
       for (int jointIdx = 0; jointIdx < simpleJoints.size(); jointIdx++)
       {
          OneDoFJoint simpleJoint = simpleJoints.get(jointIdx);
-         simpleJoint.setQ(processedSensorOutput.getJointPositionProcessedOutput(simpleJoint));
-         simpleJoint.setQd(processedSensorOutput.getJointVelocityProcessedOutput(simpleJoint));
+         OneDoFJoint referenceJoint = referenceJoints.get(jointIdx);
+         simpleJoint.setQ(processedSensorOutput.getJointPositionProcessedOutput(referenceJoint));
+         simpleJoint.setQd(processedSensorOutput.getJointVelocityProcessedOutput(referenceJoint));
       }
 
       leggedRobotEKF.doControl();
