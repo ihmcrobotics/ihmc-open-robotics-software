@@ -92,4 +92,16 @@ public class DefaultFootstepPlannerParameters implements FootstepPlannerParamete
    {
       return 5.0;
    }
+
+   @Override
+   public double getMinXClearanceFromFoot()
+   {
+      return 0.05;
+   }
+
+   @Override
+   public double getMinYClearanceFromFoot()
+   {
+      return 0.05;
+   }
 }
