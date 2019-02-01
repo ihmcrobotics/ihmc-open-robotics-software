@@ -23,5 +23,7 @@ public abstract class CostToGoHeuristics
       return parameters.getHeuristicsWeight() * computeHeuristics(node, goalNode);
    }
 
+   public abstract void setBodyHasReachedGoal(boolean bodyHasReachedGoal);
+
    protected abstract double computeHeuristics(FootstepNode node, FootstepNode goalNode);
 }
