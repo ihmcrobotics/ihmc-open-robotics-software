@@ -51,7 +51,14 @@ public class WalkingPreviewResetTask implements WalkingPreviewTask
    {
       for (RobotSide robotSide : RobotSide.values)
          contactStateHolders.put(robotSide, WalkingPreviewContactPointHolder.holdAtCurrent(footContactStates.get(robotSide)));
+      controllerToolbox.attachRobotMotionStatusChangedListener(robotMotionStatusChangedListener);
 
+      // FIXME The controller crashes when sending trajectory messages at the very beginning.
+      //      snapToInitialRobotConfiguration();
+   }
+
+   private void snapToInitialRobotConfiguration()
+   {
       // Get the controller to be initialized to hold the initial robot configuration.
 
       FramePose3D initialPelvisPose = new FramePose3D(fullRobotModel.getRootJoint().getFrameAfterJoint());
@@ -76,8 +83,6 @@ public class WalkingPreviewResetTask implements WalkingPreviewTask
       FrameQuaternion initialChestOrientation = new FrameQuaternion(chest.getBodyFixedFrame());
       initialChestOrientation.changeFrame(worldFrame);
       walkingInputManager.submitMessage(HumanoidMessageTools.createChestTrajectoryMessage(0.01, initialChestOrientation, worldFrame));
-
-      controllerToolbox.attachRobotMotionStatusChangedListener(robotMotionStatusChangedListener);
    }
 
    @Override
@@ -101,7 +106,7 @@ public class WalkingPreviewResetTask implements WalkingPreviewTask
    @Override
    public boolean isDone()
    {
-      return true;
+      return latestMotionStatus.get() != null && latestMotionStatus.get() == RobotMotionStatus.STANDING;
    }
 
    @Override
