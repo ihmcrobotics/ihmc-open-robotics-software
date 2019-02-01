@@ -219,7 +219,6 @@ public class FootstepNode
          return false;
       FootstepNode other = (FootstepNode) obj;
 
-
       if (xIndices.get(movingQuadrant) != other.xIndices.get(movingQuadrant))
          return false;
 
