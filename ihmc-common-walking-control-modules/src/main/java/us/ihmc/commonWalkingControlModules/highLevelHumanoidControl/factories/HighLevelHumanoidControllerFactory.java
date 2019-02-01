@@ -209,6 +209,7 @@ public class HighLevelHumanoidControllerFactory implements CloseableAndDisposabl
                                                                                  walkingControllerParameters, referenceFrames, contactableFeet, controlDT,
                                                                                  useHeadingAndVelocityScript, registry);
 
+         controllerToolbox.attachRobotMotionStatusChangedListener(queuedControllerCommandGenerator);
          controllerToolbox.addUpdatables(queuedControllerCommandGenerator.getModulesToUpdate());
       }
       else
