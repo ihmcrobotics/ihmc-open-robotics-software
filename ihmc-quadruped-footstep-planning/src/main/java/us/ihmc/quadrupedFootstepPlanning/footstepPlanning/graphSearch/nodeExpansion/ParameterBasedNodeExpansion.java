@@ -1,10 +1,12 @@
 package us.ihmc.quadrupedFootstepPlanning.footstepPlanning.graphSearch.nodeExpansion;
 
 import us.ihmc.euclid.axisAngle.AxisAngle;
+import us.ihmc.euclid.orientation.interfaces.Orientation3DReadOnly;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple2D.Vector2D;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
 import us.ihmc.euclid.tuple2D.interfaces.Tuple2DReadOnly;
+import us.ihmc.euclid.tuple2D.interfaces.Vector2DReadOnly;
 import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.graphSearch.graph.FootstepNode;
 import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.graphSearch.parameters.FootstepPlannerParameters;
 import us.ihmc.quadrupedPlanning.QuadrupedXGaitSettings;
@@ -59,30 +61,90 @@ public class ParameterBasedNodeExpansion implements FootstepNodeExpansion
 
    private void addDefaultFootsteps(FootstepNode node, HashSet<FootstepNode> neighboringNodesToPack)
    {
+      Orientation3DReadOnly nodeOrientation = getNodeOrientation(node);
+      Point2DReadOnly nominalMovingNodePosition = getNominalMovingNodePosition(node, nodeOrientation);
+
+      Vector2D clearanceVector = new Vector2D(parameters.getMinXClearanceFromFoot(), parameters.getMinYClearanceFromFoot());
+      nodeOrientation.transform(clearanceVector);
+
+
       for (double movingX = parameters.getMinimumStepLength(); movingX < parameters.getMaximumStepReach(); movingX += FootstepNode.gridSizeXY)
       {
          for (double movingY = parameters.getMinimumStepWidth(); movingY < parameters.getMaximumStepWidth(); movingY += FootstepNode.gridSizeXY)
          {
-            FootstepNode offsetNode = constructNodeInPreviousNodeFrame(movingX, movingY, node);
+            Vector2D movingVector = new Vector2D(movingX, movingY);
+            nodeOrientation.transform(movingVector);
+
+            Point2D newNodePosition = new Point2D(nominalMovingNodePosition);
+            newNodePosition.add(movingVector);
+
+            if (!checkNodeIsFarEnoughFromOtherFeet(newNodePosition, clearanceVector, node))
+               continue;
+
+            FootstepNode offsetNode = constructNodeInPreviousNodeFrame(newNodePosition, node);
             neighboringNodesToPack.add(offsetNode);
          }
       }
    }
 
-   private FootstepNode constructNodeInPreviousNodeFrame(double movingX, double movingY, FootstepNode previousNode)
+   private static Orientation3DReadOnly getNodeOrientation(FootstepNode node)
    {
-      Vector2D movingVector = new Vector2D(movingX, movingY);
+      double nodeYaw = node.getNominalYaw();
+      return new AxisAngle(nodeYaw, 0.0, 0.0);
+   }
 
-      double nodeYaw = previousNode.getNominalYaw();
-
-      AxisAngle rotation = new AxisAngle(nodeYaw, 0.0, 0.0);
-      rotation.transform(movingVector);
-
-      movingX = movingVector.getX();
-      movingY = movingVector.getY();
-
+   private Point2DReadOnly getNominalMovingNodePosition(FootstepNode previousNode, Orientation3DReadOnly previousOrientation)
+   {
       RobotQuadrant nextQuadrant = previousNode.getMovingQuadrant().getNextRegularGaitSwingQuadrant();
       Point2DReadOnly midstancePoint = previousNode.getOrComputeMidStancePoint();
+
+      Vector2D offsetVector = new Vector2D(nextQuadrant.getEnd().negateIfHindEnd(xGaitSettings.getStanceLength()), nextQuadrant.getSide().negateIfRightSide(xGaitSettings.getStanceWidth()));
+      offsetVector.scale(0.5);
+
+      previousOrientation.transform(offsetVector);
+
+      Point2D newPoint = new Point2D(midstancePoint);
+      newPoint.add(offsetVector);
+
+      return newPoint;
+   }
+
+   private static boolean checkNodeIsFarEnoughFromOtherFeet(Point2DReadOnly nodePositionToCheck, Vector2DReadOnly requiredClearance, FootstepNode previousNode)
+   {
+      RobotQuadrant nextQuadrant = previousNode.getMovingQuadrant().getNextRegularGaitSwingQuadrant();
+
+      for (RobotQuadrant otherQuadrant : RobotQuadrant.values)
+      {
+         if (nextQuadrant == otherQuadrant)
+            continue;
+
+         double otherNodeX = previousNode.getX(otherQuadrant);
+         double otherNodeY = previousNode.getY(otherQuadrant);
+
+         if (!checkNodeIsFarEnoughFromOtherNode(nodePositionToCheck, requiredClearance, otherNodeX, otherNodeY))
+            return false;
+      }
+
+      return true;
+   }
+
+   private static boolean checkNodeIsFarEnoughFromOtherNode(Point2DReadOnly nodePositionToCheck, Vector2DReadOnly requiredClearance, double otherNodeX, double otherNodeY)
+   {
+      double maxForward = otherNodeX + requiredClearance.getX();
+      double maxBackward = otherNodeX - requiredClearance.getX();
+
+      double maxLeft = otherNodeY + requiredClearance.getY();
+      double maxRight = otherNodeY - requiredClearance.getY();
+
+      if (maxForward >= nodePositionToCheck.getX() && maxBackward <= nodePositionToCheck.getX() && nodePositionToCheck.getY() >= maxRight && nodePositionToCheck.getY() <= maxLeft)
+         return false;
+      else
+         return true;
+   }
+
+   private static FootstepNode constructNodeInPreviousNodeFrame(Point2DReadOnly newNodePosition, FootstepNode previousNode)
+   {
+      RobotQuadrant nextQuadrant = previousNode.getMovingQuadrant().getNextRegularGaitSwingQuadrant();
       Point2D frontLeft = new Point2D(previousNode.getX(FRONT_LEFT), previousNode.getY(FRONT_LEFT));
       Point2D frontRight = new Point2D(previousNode.getX(FRONT_RIGHT), previousNode.getY(FRONT_RIGHT));
       Point2D hindLeft = new Point2D(previousNode.getX(HIND_LEFT), previousNode.getY(HIND_LEFT));
@@ -91,24 +153,16 @@ public class ParameterBasedNodeExpansion implements FootstepNodeExpansion
       switch (nextQuadrant)
       {
       case FRONT_LEFT:
-         frontLeft.set(midstancePoint);
-         frontLeft.addX(0.5 * xGaitSettings.getStanceLength() + movingX);
-         frontLeft.addY(0.5 * xGaitSettings.getStanceWidth() + movingY);
+         frontLeft.set(newNodePosition);
          break;
       case FRONT_RIGHT:
-         frontRight.set(midstancePoint);
-         frontRight.addX(0.5 * xGaitSettings.getStanceLength() + movingX);
-         frontRight.addY(-0.5 * xGaitSettings.getStanceWidth() + movingY);
+         frontRight.set(newNodePosition);
          break;
       case HIND_LEFT:
-         hindLeft.set(midstancePoint);
-         hindLeft.addX(-0.5 * xGaitSettings.getStanceLength() + movingX);
-         hindLeft.addY(0.5 * xGaitSettings.getStanceWidth() + movingY);
+         hindLeft.set(newNodePosition);
          break;
       default:
-         hindRight.set(midstancePoint);
-         hindRight.addX(-0.5 * xGaitSettings.getStanceLength() + movingX);
-         hindRight.addY(-0.5 * xGaitSettings.getStanceWidth() + movingY);
+         hindRight.set(newNodePosition);
          break;
       }
 
