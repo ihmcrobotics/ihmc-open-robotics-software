@@ -1,16 +1,22 @@
 package us.ihmc.quadrupedFootstepPlanning.footstepPlanning.graphSearch.heuristics;
 
-import us.ihmc.commons.MathTools;
 import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.graphSearch.graph.FootstepNode;
 import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.graphSearch.parameters.FootstepPlannerParameters;
 import us.ihmc.robotics.geometry.AngleTools;
-import us.ihmc.robotics.robotSide.RobotQuadrant;
 
 public class DistanceAndYawBasedHeuristics extends CostToGoHeuristics
 {
+   private boolean bodyHasReachedGoal = false;
+
    public DistanceAndYawBasedHeuristics(FootstepPlannerParameters parameters)
    {
       super(parameters);
+   }
+
+   @Override
+   public void setBodyHasReachedGoal(boolean bodyHasReachedGoal)
+   {
+      this.bodyHasReachedGoal = bodyHasReachedGoal;
    }
 
    @Override
@@ -23,11 +29,11 @@ public class DistanceAndYawBasedHeuristics extends CostToGoHeuristics
 
       double bodyBasedHeuristicDistance = node.euclideanDistance(goalNode);
       double quadrantBasedDistance = node.quadrantEuclideanDistance(node.getMovingQuadrant(), goalNode);
-      double averageDistance = 0.5 * (quadrantBasedDistance + bodyBasedHeuristicDistance);
 
       double yawHeuristicCost = parameters.getYawWeight() * Math.abs(yaw);
       double stepHeuristicCost = parameters.getCostPerStep() * minSteps;
+      double distanceCost = distanceWeight * (bodyHasReachedGoal ? quadrantBasedDistance : bodyBasedHeuristicDistance);
 
-      return distanceWeight * bodyBasedHeuristicDistance + yawHeuristicCost + stepHeuristicCost;
+      return distanceCost + yawHeuristicCost + stepHeuristicCost;
    }
 }

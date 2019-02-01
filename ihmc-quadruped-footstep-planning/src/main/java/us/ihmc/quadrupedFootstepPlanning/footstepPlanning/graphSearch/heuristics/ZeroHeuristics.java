@@ -12,6 +12,11 @@ public class ZeroHeuristics extends CostToGoHeuristics
    }
 
    @Override
+   public void setBodyHasReachedGoal(boolean bodyHasReachedGoal)
+   {
+   }
+
+   @Override
    protected double computeHeuristics(FootstepNode node, FootstepNode goalNode)
    {
       return 0.0;
