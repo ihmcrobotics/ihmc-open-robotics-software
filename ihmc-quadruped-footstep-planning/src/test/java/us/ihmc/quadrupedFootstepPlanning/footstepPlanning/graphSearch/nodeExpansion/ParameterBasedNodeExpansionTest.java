@@ -1,44 +1,54 @@
 package us.ihmc.quadrupedFootstepPlanning.footstepPlanning.graphSearch.nodeExpansion;
 
 import org.junit.Test;
+import us.ihmc.commons.MathTools;
 import us.ihmc.commons.thread.ThreadTools;
+import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.continuousIntegration.ContinuousIntegrationTools;
+import us.ihmc.euclid.axisAngle.AxisAngle;
 import us.ihmc.euclid.referenceFrame.FramePoint2D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.tools.EuclidCoreRandomTools;
 import us.ihmc.euclid.tuple2D.Point2D;
+import us.ihmc.euclid.tuple2D.Vector2D;
+import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
 import us.ihmc.euclid.tuple3D.Point3D;
-import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.graphicsDescription.Graphics3DObject;
 import us.ihmc.graphicsDescription.appearance.AppearanceDefinition;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
-import us.ihmc.quadrupedBasics.gait.QuadrupedTimedStep;
+import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.graphSearch.FootstepPlanningRandomTools;
 import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.graphSearch.graph.FootstepNode;
 import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.graphSearch.parameters.DefaultFootstepPlannerParameters;
 import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.graphSearch.parameters.FootstepPlannerParameters;
 import us.ihmc.quadrupedPlanning.QuadrupedXGaitSettings;
-import us.ihmc.quadrupedPlanning.QuadrupedXGaitSettingsReadOnly;
-import us.ihmc.robotics.geometry.PlanarRegionsList;
-import us.ihmc.robotics.graphics.Graphics3DObjectTools;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 import us.ihmc.robotics.robotSide.QuadrantDependentList;
 import us.ihmc.robotics.robotSide.RobotQuadrant;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 
 import java.util.HashSet;
-import java.util.List;
+import java.util.Random;
 
+import static junit.framework.TestCase.assertTrue;
 import static junit.framework.TestCase.fail;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 
 public class ParameterBasedNodeExpansionTest
 {
+   private static final int iters = 1000;
+
+   private static final double epsilon = 1e-7;
+
    private static final double stanceLength = 1.0;
    private static final double stanceWidth = 0.5;
-   private static final boolean visualize = true;
+   private static final boolean visualize = false;
    private static final QuadrantDependentList<AppearanceDefinition> colorDefinitions = new QuadrantDependentList<>(YoAppearance.Red(), YoAppearance.Green(),
                                                                                                                    YoAppearance.DarkRed(),
                                                                                                                    YoAppearance.DarkGreen());
 
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 300000)
    public void testExpandNodeWithBaseAtOrigin()
    {
@@ -54,12 +64,42 @@ public class ParameterBasedNodeExpansionTest
 
       HashSet<FootstepNode> expandedNodes = expansion.expandNode(baseNode);
 
+      double stepBoxLength = parameters.getMaximumStepReach() - parameters.getMinimumStepLength();
+      double stepBoxWidth = parameters.getMaximumStepWidth() - parameters.getMinimumStepWidth();
+
+      int numberWide = (int) (stepBoxWidth / FootstepNode.gridSizeXY);
+      int numberLong = (int) (stepBoxLength / FootstepNode.gridSizeXY);
+
       if (visualize)
          visualizeNodes(expandedNodes, baseNode);
 
-      fail();
+      assertEquals(numberLong * numberWide, expandedNodes.size());
+
+      RobotQuadrant expectedNewQuadrant = RobotQuadrant.FRONT_LEFT.getNextRegularGaitSwingQuadrant();
+
+      for (FootstepNode node : expandedNodes)
+      {
+         assertEquals(expectedNewQuadrant, node.getMovingQuadrant());
+
+         for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
+         {
+            if (expectedNewQuadrant == robotQuadrant)
+            {
+               assertTrue(MathTools.intervalContains(node.getX(robotQuadrant), baseNode.getX(robotQuadrant) - 0.5 * stepBoxLength,
+                                                     baseNode.getX(robotQuadrant) + 0.5 * stepBoxLength, true, true));
+               assertTrue(MathTools.intervalContains(node.getY(robotQuadrant), baseNode.getY(robotQuadrant) - 0.5 * stepBoxWidth,
+                                                     baseNode.getY(robotQuadrant) + 0.5 * stepBoxWidth, true, true));
+            }
+            else
+            {
+               assertEquals(baseNode.getX(robotQuadrant), node.getX(robotQuadrant), epsilon);
+               assertEquals(baseNode.getY(robotQuadrant), node.getY(robotQuadrant), epsilon);
+            }
+         }
+      }
    }
 
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 300000)
    public void testExpandNodeWithTranslatedAndRotated()
    {
@@ -92,8 +132,89 @@ public class ParameterBasedNodeExpansionTest
       if (visualize)
          visualizeNodes(expandedNodes, baseNode);
 
-      fail();
+      RobotQuadrant expectedNewQuadrant = RobotQuadrant.FRONT_LEFT.getNextRegularGaitSwingQuadrant();
+
+      for (FootstepNode node : expandedNodes)
+      {
+         assertEquals(expectedNewQuadrant, node.getMovingQuadrant());
+
+         for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
+         {
+            if (expectedNewQuadrant == robotQuadrant)
+               continue;
+
+            assertEquals(baseNode.getX(robotQuadrant), node.getX(robotQuadrant), epsilon);
+            assertEquals(baseNode.getY(robotQuadrant), node.getY(robotQuadrant), epsilon);
+         }
+      }
    }
+
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
+   @Test(timeout = 30000)
+   public void testCheckNodeIsFarEnoughFromOtherFoot()
+   {
+      Random random = new Random(1738L);
+
+      for (int iter = 0; iter < iters; iter++)
+      {
+         Vector2D requiredClearance = EuclidCoreRandomTools.nextVector2D(random);
+         requiredClearance.setX(Math.abs(requiredClearance.getX()));
+         requiredClearance.setY(Math.abs(requiredClearance.getY()));
+
+         Point2DReadOnly previousNodePoint = EuclidCoreRandomTools.nextPoint2D(random);
+
+         String message = "iter = " + iter + " failed.";
+
+         // check right on the edge
+         Vector2D offset = new Vector2D(requiredClearance);
+
+         Point2D positionToCheck = new Point2D();
+         positionToCheck.set(previousNodePoint);
+         positionToCheck.add(offset);
+
+         assertFalse(message, ParameterBasedNodeExpansion
+               .checkNodeIsFarEnoughFromOtherFoot(positionToCheck, requiredClearance, previousNodePoint.getX(), previousNodePoint.getY()));
+
+         positionToCheck.set(previousNodePoint);
+         positionToCheck.sub(offset);
+
+         assertFalse(message, ParameterBasedNodeExpansion
+               .checkNodeIsFarEnoughFromOtherFoot(positionToCheck, requiredClearance, previousNodePoint.getX(), previousNodePoint.getY()));
+
+         // check slightly within the edge
+         offset.set(requiredClearance);
+         offset.scale(0.9);
+
+         positionToCheck.set(previousNodePoint);
+         positionToCheck.add(offset);
+
+         assertFalse(message, ParameterBasedNodeExpansion
+               .checkNodeIsFarEnoughFromOtherFoot(positionToCheck, requiredClearance, previousNodePoint.getX(), previousNodePoint.getY()));
+
+         positionToCheck.set(previousNodePoint);
+         positionToCheck.sub(offset);
+
+         assertFalse(message, ParameterBasedNodeExpansion
+               .checkNodeIsFarEnoughFromOtherFoot(positionToCheck, requiredClearance, previousNodePoint.getX(), previousNodePoint.getY()));
+
+         // check slightly outside the edge
+         offset.set(requiredClearance);
+         offset.scale(1.1);
+
+         positionToCheck.set(previousNodePoint);
+         positionToCheck.add(offset);
+
+         assertTrue(message, ParameterBasedNodeExpansion
+               .checkNodeIsFarEnoughFromOtherFoot(positionToCheck, requiredClearance, previousNodePoint.getX(), previousNodePoint.getY()));
+
+         positionToCheck.set(previousNodePoint);
+         positionToCheck.sub(offset);
+
+         assertTrue(message, ParameterBasedNodeExpansion
+               .checkNodeIsFarEnoughFromOtherFoot(positionToCheck, requiredClearance, previousNodePoint.getX(), previousNodePoint.getY()));
+      }
+   }
+
 
    private void visualizeNodes(HashSet<FootstepNode> neighboringNodes, FootstepNode baseNode)
    {
