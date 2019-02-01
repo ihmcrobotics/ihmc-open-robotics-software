@@ -98,7 +98,7 @@ public class AtlasSensorInformation implements DRCRobotSensorInformation
    private static final String multisense_ground_point_cloud_topic_string = multisense_namespace+"/highly_filtered_cloud";
    private static final String bodyIMUSensor = "pelvis_imu_sensor_at_pelvis_frame";
    private static final String chestIMUSensor = "utorso_imu_sensor_chest";
-   private static final String[] imuSensorsToUseInStateEstimator = { bodyIMUSensor, chestIMUSensor };
+   private static final String[] imuSensorsToUseInStateEstimator = { bodyIMUSensor };
    private static EnumMap<RobotTarget, ReferenceFrame> headIMUFramesWhenLevel=new EnumMap<>(RobotTarget.class);
 
    /**

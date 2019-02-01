@@ -36,7 +36,7 @@ public class HumanoidRobotEKFWithSimpleJoints implements StateEstimatorControlle
    private final LeggedRobotEKF leggedRobotEKF;
 
    public HumanoidRobotEKFWithSimpleJoints(FullHumanoidRobotModel estimatorFullRobotModel, String primaryImuName, Collection<String> imuNames,
-                                           SideDependentList<String> footForceSensorNames, SensorRawOutputMapReadOnly sensorOutput, double dt, double gravity,
+                                           SideDependentList<String> footForceSensorNames, SensorRawOutputMapReadOnly rawSensorOutput, double dt, double gravity,
                                            SensorOutputMapReadOnly processedSensorOutput, YoGraphicsListRegistry graphicsListRegistry,
                                            FullHumanoidRobotModel referenceModel)
    {
@@ -73,8 +73,8 @@ public class HumanoidRobotEKFWithSimpleJoints implements StateEstimatorControlle
       Map<String, String> jointParameterGroups = createJointGroups(estimatorFullRobotModel);
 
       FloatingJointBasics rootJoint = estimatorFullRobotModel.getRootJoint();
-      leggedRobotEKF = new LeggedRobotEKF(rootJoint, jointsForEKF, primaryImuName, imuNames, forceSensorMap, sensorOutput, dt, gravity, jointParameterGroups,
-                                          graphicsListRegistry, referenceJointsForEKF);
+      leggedRobotEKF = new LeggedRobotEKF(rootJoint, jointsForEKF, primaryImuName, imuNames, forceSensorMap, rawSensorOutput, processedSensorOutput, dt, gravity,
+                                          jointParameterGroups, graphicsListRegistry, referenceJointsForEKF);
    }
 
    private static Map<String, String> createJointGroups(FullHumanoidRobotModel fullRobotModel)
