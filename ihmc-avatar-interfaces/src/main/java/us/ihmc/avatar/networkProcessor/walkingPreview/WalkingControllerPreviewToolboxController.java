@@ -69,7 +69,6 @@ public class WalkingControllerPreviewToolboxController extends ToolboxController
    private final OneDoFJointBasics[] controlledOneDoFJoints;
    private final FullHumanoidRobotModel fullRobotModel;
    private final CommonHumanoidReferenceFrames referenceFrames;
-   // TODO Think how the foot switch should be updated/implemented. We can use the parameter WalkingControllerParameters.finishSingleSupportWhenICPPlannerIsDone to finish swing but is that enough?
    private final SideDependentList<SettableFootSwitch> footSwitches = new SideDependentList<>();
 
    private final HighLevelHumanoidControllerToolbox controllerToolbox;
