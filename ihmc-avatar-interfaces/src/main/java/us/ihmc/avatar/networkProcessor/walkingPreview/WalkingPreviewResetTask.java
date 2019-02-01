@@ -27,7 +27,7 @@ public class WalkingPreviewResetTask implements WalkingPreviewTask
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
 
    private final SideDependentList<YoPlaneContactState> footContactStates;
-   private final SideDependentList<WalkingPreviewContactPointHolder> contactStateHolders = new SideDependentList<>();
+   private final SideDependentList<WalkingPreviewContactStateHolder> contactStateHolders = new SideDependentList<>();
    private final InverseDynamicsCommandList commandList = new InverseDynamicsCommandList();
 
    private final FullHumanoidRobotModel fullRobotModel;
@@ -50,7 +50,7 @@ public class WalkingPreviewResetTask implements WalkingPreviewTask
    public void doTransitionIntoAction()
    {
       for (RobotSide robotSide : RobotSide.values)
-         contactStateHolders.put(robotSide, WalkingPreviewContactPointHolder.holdAtCurrent(footContactStates.get(robotSide)));
+         contactStateHolders.put(robotSide, WalkingPreviewContactStateHolder.holdAtCurrent(footContactStates.get(robotSide)));
       controllerToolbox.attachRobotMotionStatusChangedListener(robotMotionStatusChangedListener);
 
       // FIXME The controller crashes when sending trajectory messages at the very beginning.

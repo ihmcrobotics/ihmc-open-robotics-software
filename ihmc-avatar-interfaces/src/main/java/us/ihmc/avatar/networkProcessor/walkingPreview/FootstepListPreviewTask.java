@@ -37,7 +37,7 @@ public class FootstepListPreviewTask implements WalkingPreviewTask
    private StatusMessageListener<WalkingStatusMessage> walkingStatusMessageListener = this::processWalkingStatus;
 
    private final SideDependentList<YoPlaneContactState> footContactStates;
-   private final SideDependentList<WalkingPreviewContactPointHolder> contactStateHolders = new SideDependentList<>();
+   private final SideDependentList<WalkingPreviewContactStateHolder> contactStateHolders = new SideDependentList<>();
    private final InverseDynamicsCommandList commandList = new InverseDynamicsCommandList();
 
    private final SideDependentList<SettableFootSwitch> footSwitches;
@@ -77,7 +77,7 @@ public class FootstepListPreviewTask implements WalkingPreviewTask
    public void doTransitionIntoAction()
    {
       for (RobotSide robotSide : RobotSide.values)
-         contactStateHolders.put(robotSide, WalkingPreviewContactPointHolder.holdAtCurrent(footContactStates.get(robotSide)));
+         contactStateHolders.put(robotSide, WalkingPreviewContactStateHolder.holdAtCurrent(footContactStates.get(robotSide)));
 
       walkingInputManager.submitCommand(footstepList);
       numberOfFootstepsRemaining = footstepList.getNumberOfFootsteps();
@@ -101,7 +101,7 @@ public class FootstepListPreviewTask implements WalkingPreviewTask
          break;
       case COMPLETED:
          numberOfFootstepsRemaining--;
-         contactStateHolders.put(side, new WalkingPreviewContactPointHolder(footContactStates.get(side), desiredFootstep));
+         contactStateHolders.put(side, new WalkingPreviewContactStateHolder(footContactStates.get(side), desiredFootstep));
          currentSwingSide = null;
          break;
       default:
@@ -121,7 +121,7 @@ public class FootstepListPreviewTask implements WalkingPreviewTask
 
       for (RobotSide robotSide : RobotSide.values)
       {
-         WalkingPreviewContactPointHolder contactStateHolder = contactStateHolders.get(robotSide);
+         WalkingPreviewContactStateHolder contactStateHolder = contactStateHolders.get(robotSide);
          if (contactStateHolder == null)
             continue;
          contactStateHolder.doControl();
