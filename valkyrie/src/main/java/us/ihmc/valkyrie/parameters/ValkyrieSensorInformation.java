@@ -363,12 +363,18 @@ public class ValkyrieSensorInformation implements DRCRobotSensorInformation
 
    private void setupStaticTransformsForRos()
    {
+      RigidBodyTransform staticTransform = getTransformFromHeadToUpperNeckPitchLink();
+      ImmutableTriple<String, String, RigidBodyTransform> headToHeadRootStaticTransform = new ImmutableTriple<String, String, RigidBodyTransform>("upperNeckPitchLink", "multisense/head",
+            staticTransform);
+      staticTranformsForRos.add(headToHeadRootStaticTransform);
+   }
+
+   public static RigidBodyTransform getTransformFromHeadToUpperNeckPitchLink()
+   {
       Quaternion orientation = new Quaternion();
       Vector3D translation = new Vector3D(0.183585961, 0.0, 0.075353826);
       orientation.setYawPitchRoll(0.0, 0.130899694, -Math.PI);
       RigidBodyTransform staticTransform = new RigidBodyTransform(orientation, translation);
-      ImmutableTriple<String, String, RigidBodyTransform> headToHeadRootStaticTransform = new ImmutableTriple<String, String, RigidBodyTransform>("upperNeckPitchLink", "multisense/head",
-            staticTransform);
-      staticTranformsForRos.add(headToHeadRootStaticTransform);
+      return staticTransform;
    }
 }
