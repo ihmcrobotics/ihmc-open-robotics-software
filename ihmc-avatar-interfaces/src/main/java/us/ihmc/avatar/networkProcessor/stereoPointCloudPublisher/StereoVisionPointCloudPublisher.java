@@ -21,6 +21,8 @@ import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.communication.IHMCROS2Publisher;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.packets.MessageTools;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.tools.ReferenceFrameTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.humanoidRobotics.kryo.PPSTimestampOffsetProvider;
@@ -48,14 +50,17 @@ public class StereoVisionPointCloudPublisher
 
    private final IHMCROS2Publisher<StereoVisionPointCloudMessage> pointcloudPublisher;
 
-   public StereoVisionPointCloudPublisher(FullHumanoidRobotModelFactory modelFactory, Ros2Node ros2Node, String robotConfigurationDataTopicName)
+   private final ReferenceFrame dataFrame;
+
+   public StereoVisionPointCloudPublisher(FullHumanoidRobotModelFactory modelFactory, Ros2Node ros2Node, String robotConfigurationDataTopicName, RigidBodyTransform transform)
    {
       robotName = modelFactory.getRobotDescription().getName();
       fullRobotModel = modelFactory.createFullRobotModel();
 
       ROS2Tools.createCallbackSubscription(ros2Node, RobotConfigurationData.class, robotConfigurationDataTopicName,
                                            s -> robotConfigurationDataBuffer.receivedPacket(s.takeNextData()));
-      pointcloudPublisher = ROS2Tools.createPublisher(ros2Node, StereoVisionPointCloudMessage.class, ROS2Tools.getDefaultTopicNameGenerator(robotName));
+      pointcloudPublisher = ROS2Tools.createPublisher(ros2Node, StereoVisionPointCloudMessage.class, ROS2Tools.getDefaultTopicNameGenerator());
+      dataFrame = ReferenceFrameTools.constructFrameWithUnchangingTransformToParent("stereoFrame", fullRobotModel.getHead().getBodyFixedFrame(), transform);
    }
 
    public void start()
@@ -97,6 +102,8 @@ public class StereoVisionPointCloudPublisher
             Color[] colors = pointCloudData.getPointColors();
             long timestamp = pointCloud.getHeader().getStamp().totalNsecs();
 
+            System.out.println("Receiving point cloud, n points: " + scanPoints.length);
+
             pointCloudDataToPublish.set(new ColorPointCloudData(timestamp, scanPoints, colors));
          }
       };
@@ -130,6 +137,9 @@ public class StereoVisionPointCloudPublisher
                   return;
             }
 
+            RigidBodyTransform transformToWorldFrame = dataFrame.getTransformToWorldFrame();
+            pointCloudData.transform(transformToWorldFrame);
+
             if (pointCloudData.numberOfPoints > MAX_NUMBER_OF_POINTS)
                pointCloudData = pointCloudData.trim(MAX_NUMBER_OF_POINTS);
 
@@ -137,6 +147,7 @@ public class StereoVisionPointCloudPublisher
 
             int[] colors = pointCloudData.getColors();
             StereoVisionPointCloudMessage message = MessageTools.createStereoVisionPointCloudMessage(robotTimestamp, scanPointBuffer, colors);
+            System.out.println("Publishing stereo data, number of points: " + (message.getPointCloud().size() / 3));
             pointcloudPublisher.publish(message);
          }
       };
