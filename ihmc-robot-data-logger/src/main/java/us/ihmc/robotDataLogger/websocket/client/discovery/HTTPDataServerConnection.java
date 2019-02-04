@@ -2,7 +2,6 @@ package us.ihmc.robotDataLogger.websocket.client.discovery;
 
 import java.io.IOException;
 import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 import java.util.function.Consumer;
 
@@ -340,6 +339,7 @@ public class HTTPDataServerConnection
       public void channelInactive(ChannelHandlerContext ctx) throws Exception
       {
          listener.disconnected(HTTPDataServerConnection.this);
+         System.out.println("Closing group");
          group.shutdownGracefully().addListener((e) -> listener.closed(HTTPDataServerConnection.this));
 
       }
