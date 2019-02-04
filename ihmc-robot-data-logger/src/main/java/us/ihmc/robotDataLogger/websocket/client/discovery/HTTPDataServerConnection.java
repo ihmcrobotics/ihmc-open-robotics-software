@@ -339,7 +339,6 @@ public class HTTPDataServerConnection
       public void channelInactive(ChannelHandlerContext ctx) throws Exception
       {
          listener.disconnected(HTTPDataServerConnection.this);
-         System.out.println("Closing group");
          group.shutdownGracefully().addListener((e) -> listener.closed(HTTPDataServerConnection.this));
 
       }
