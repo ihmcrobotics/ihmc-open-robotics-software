@@ -11,12 +11,15 @@ import us.ihmc.quadrupedBasics.referenceFrames.QuadrupedReferenceFrames;
 import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.FootstepPlanningResult;
 import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.QuadrupedBodyPathAndFootstepPlanner;
 import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.QuadrupedFootstepPlannerGoal;
+import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.QuadrupedFootstepPlannerStart;
 import us.ihmc.quadrupedFootstepPlanning.pathPlanning.WaypointsForQuadrupedFootstepPlanner;
 import us.ihmc.quadrupedPlanning.YoQuadrupedXGaitSettings;
 import us.ihmc.quadrupedPlanning.footstepChooser.PlanarGroundPointFootSnapper;
 import us.ihmc.quadrupedPlanning.footstepChooser.PlanarRegionBasedPointFootSnapper;
 import us.ihmc.quadrupedPlanning.footstepChooser.PointFootSnapperParameters;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
+import us.ihmc.robotics.time.TimeInterval;
+import us.ihmc.robotics.time.TimeIntervalTools;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 
@@ -58,6 +61,22 @@ public abstract class QuadrupedPathWithTurnWalkTurnPlanner implements QuadrupedB
    }
 
    @Override
+   public void setTimeout(double timeout)
+   {
+   }
+
+   @Override
+   public void cancelPlanning()
+   {
+   }
+
+   @Override
+  public double getPlanningDuration()
+   {
+      return 0.0;
+   }
+
+   @Override
    public void setGroundPlane(QuadrupedGroundPlaneMessage message)
    {
       groundPlaneSnapper.submitGroundPlane(message);
@@ -71,20 +90,15 @@ public abstract class QuadrupedPathWithTurnWalkTurnPlanner implements QuadrupedB
    }
 
    @Override
-   public void setInitialBodyPose(FramePose3DReadOnly bodyPose)
+   public void setStart(QuadrupedFootstepPlannerStart start)
    {
-      waypointPathPlanner.setInitialBodyPose(bodyPose);
+      waypointPathPlanner.setInitialBodyPose(start.getTargetPose());
    }
 
    @Override
    public void setGoal(QuadrupedFootstepPlannerGoal goal)
    {
       waypointPathPlanner.setGoal(goal);
-   }
-
-   @Override
-   public void initialize()
-   {
    }
 
 
@@ -100,7 +114,7 @@ public abstract class QuadrupedPathWithTurnWalkTurnPlanner implements QuadrupedB
    }
 
    @Override
-   public void plan()
+   public FootstepPlanningResult plan()
    {
       BodyPathPlan bodyPathPlan = bodyPathPlanner.getPlan();
       bodyPathPlan.setStartPose(waypointPathPlanner.getInitialBodyPose().getPosition().getX(), waypointPathPlanner.getInitialBodyPose().getPosition().getY(), waypointPathPlanner
@@ -113,12 +127,8 @@ public abstract class QuadrupedPathWithTurnWalkTurnPlanner implements QuadrupedB
       stepCalculator.setBodyPathPlan(quadBodyPathPlanner.getPlan());
       stepCalculator.setGoalPose(waypointPathPlanner.getGoalBodyPose());
       stepCalculator.onEntry();
-   }
 
-   @Override
-   public void update()
-   {
-//      stepPlanner.updateOnline();
+      return FootstepPlanningResult.OPTIMAL_SOLUTION;
    }
 
    @Override
@@ -130,6 +140,10 @@ public abstract class QuadrupedPathWithTurnWalkTurnPlanner implements QuadrupedB
    @Override
    public List<? extends QuadrupedTimedStep> getSteps()
    {
-      return stepCalculator.getSteps();
+      List<? extends QuadrupedTimedStep> steps = stepCalculator.getSteps();
+      TimeIntervalTools.sortByStartTime(steps);
+      double startTime = steps.get(0).getTimeInterval().getStartTime();
+      steps.forEach(step -> step.getTimeInterval().shiftInterval(-startTime));
+      return steps;
    }
 }

@@ -12,6 +12,9 @@ import us.ihmc.pubsub.TopicDataType;
 public class QuadrupedFootstepPlanningRequestPacket extends Packet<QuadrupedFootstepPlanningRequestPacket> implements Settable<QuadrupedFootstepPlanningRequestPacket>, EpsilonComparable<QuadrupedFootstepPlanningRequestPacket>
 {
    public static final int NO_PLAN_ID = -1;
+   public static final byte FOOTSTEP_PLANNER_TYPE_SIMPLE_PATH_TURN_WALK_TURN = (byte) 0;
+   public static final byte FOOTSTEP_PLANNER_TYPE_VIS_GRAPH_WITH_TURN_WALK_TURN = (byte) 1;
+   public static final byte FOOTSTEP_PLANNER_TYPE_A_STAR = (byte) 2;
    /**
             * Unique ID used to identify this message, should preferably be consecutively increasing.
             */
@@ -22,6 +25,7 @@ public class QuadrupedFootstepPlanningRequestPacket extends Packet<QuadrupedFoot
    public us.ihmc.euclid.tuple4D.Quaternion goal_orientation_in_world_;
    public controller_msgs.msg.dds.PlanarRegionsListMessage planar_regions_list_message_;
    public int planner_request_id_ = -1;
+   public byte requested_footstep_planner_type_ = (byte) 255;
 
    public QuadrupedFootstepPlanningRequestPacket()
    {
@@ -48,6 +52,8 @@ public class QuadrupedFootstepPlanningRequestPacket extends Packet<QuadrupedFoot
       geometry_msgs.msg.dds.QuaternionPubSubType.staticCopy(other.goal_orientation_in_world_, goal_orientation_in_world_);
       controller_msgs.msg.dds.PlanarRegionsListMessagePubSubType.staticCopy(other.planar_regions_list_message_, planar_regions_list_message_);
       planner_request_id_ = other.planner_request_id_;
+
+      requested_footstep_planner_type_ = other.requested_footstep_planner_type_;
 
    }
 
@@ -105,6 +111,15 @@ public class QuadrupedFootstepPlanningRequestPacket extends Packet<QuadrupedFoot
       return planner_request_id_;
    }
 
+   public void setRequestedFootstepPlannerType(byte requested_footstep_planner_type)
+   {
+      requested_footstep_planner_type_ = requested_footstep_planner_type;
+   }
+   public byte getRequestedFootstepPlannerType()
+   {
+      return requested_footstep_planner_type_;
+   }
+
 
    public static Supplier<QuadrupedFootstepPlanningRequestPacketPubSubType> getPubSubType()
    {
@@ -132,6 +147,8 @@ public class QuadrupedFootstepPlanningRequestPacket extends Packet<QuadrupedFoot
       if (!this.planar_regions_list_message_.epsilonEquals(other.planar_regions_list_message_, epsilon)) return false;
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.planner_request_id_, other.planner_request_id_, epsilon)) return false;
 
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.requested_footstep_planner_type_, other.requested_footstep_planner_type_, epsilon)) return false;
+
 
       return true;
    }
@@ -153,6 +170,8 @@ public class QuadrupedFootstepPlanningRequestPacket extends Packet<QuadrupedFoot
       if (!this.goal_orientation_in_world_.equals(otherMyClass.goal_orientation_in_world_)) return false;
       if (!this.planar_regions_list_message_.equals(otherMyClass.planar_regions_list_message_)) return false;
       if(this.planner_request_id_ != otherMyClass.planner_request_id_) return false;
+
+      if(this.requested_footstep_planner_type_ != otherMyClass.requested_footstep_planner_type_) return false;
 
 
       return true;
@@ -177,7 +196,9 @@ public class QuadrupedFootstepPlanningRequestPacket extends Packet<QuadrupedFoot
       builder.append("planar_regions_list_message=");
       builder.append(this.planar_regions_list_message_);      builder.append(", ");
       builder.append("planner_request_id=");
-      builder.append(this.planner_request_id_);
+      builder.append(this.planner_request_id_);      builder.append(", ");
+      builder.append("requested_footstep_planner_type=");
+      builder.append(this.requested_footstep_planner_type_);
       builder.append("}");
       return builder.toString();
    }
