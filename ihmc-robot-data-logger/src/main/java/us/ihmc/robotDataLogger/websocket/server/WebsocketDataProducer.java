@@ -55,8 +55,16 @@ public class WebsocketDataProducer implements DataProducer
    
    private final Object lock = new Object();
    private Channel ch = null;
-   private EventLoopGroup bossGroup;
-   private EventLoopGroup workerGroup;
+   
+   private EventLoopGroup bossGroup = new NioEventLoopGroup(1);
+   
+   /**
+    * Create a single worker. 
+    * 
+    * If "writeAndFlush" is called in the eventloop of the outbound channel, no extra objects will be created. 
+    * The registryPublisher is scheduled on the main eventloop to avoid having extra threads and delay.
+    */
+   private EventLoopGroup workerGroup = new NioEventLoopGroup(1);
    
    private Handshake handshake = null;
    
@@ -144,8 +152,6 @@ public class WebsocketDataProducer implements DataProducer
       synchronized(lock)
       {
          ResourceLeakDetector.setLevel(Level.DISABLED);
-         bossGroup = new NioEventLoopGroup(1);
-         workerGroup = new NioEventLoopGroup();
          try
          {
             ServerBootstrap b = new ServerBootstrap();
@@ -181,7 +187,7 @@ public class WebsocketDataProducer implements DataProducer
                                                     RegistrySendBufferBuilder builder)
          throws IOException
    {
-      WebsocketRegistryPublisher websocketRegistryPublisher = new WebsocketRegistryPublisher(schedulerFactory, builder, broadcaster);
+      WebsocketRegistryPublisher websocketRegistryPublisher = new WebsocketRegistryPublisher(workerGroup, builder, broadcaster);
       if(websocketRegistryPublisher.getMaximumBufferSize() > maximumBufferSize)
       {
          maximumBufferSize = websocketRegistryPublisher.getMaximumBufferSize();

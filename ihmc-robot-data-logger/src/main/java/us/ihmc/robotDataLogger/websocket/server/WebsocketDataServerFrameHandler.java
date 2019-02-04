@@ -3,7 +3,6 @@ package us.ihmc.robotDataLogger.websocket.server;
 import java.net.InetSocketAddress;
 import java.net.SocketException;
 import java.nio.ByteBuffer;
-import java.util.ArrayList;
 
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelFutureListener;
@@ -20,7 +19,6 @@ import us.ihmc.robotDataLogger.VariableChangeRequestPubSubType;
 import us.ihmc.robotDataLogger.listeners.VariableChangedListener;
 import us.ihmc.robotDataLogger.websocket.command.DataServerCommand;
 
-
 /**
  * Handler for websocket connection
  * 
@@ -35,35 +33,31 @@ class WebsocketDataServerFrameHandler extends SimpleChannelInboundHandler<WebSoc
 {
    private static final int BINARY_POOL_SIZE = 12;
    private static final int TEXT_POOL_SIZE = 128;
-   
-   
+
    private final WebsocketDataBroadcaster broadcaster;
    private final VariableChangedListener variableChangedListener;
    private final int dataSize;
-   
+
    private Object lock;
-   private WriteTask task;
    private WebsocketFramePool binaryPool;
    private WebsocketFramePool textPool = new WebsocketFramePool(DataServerCommand.MaxCommandSize(), TEXT_POOL_SIZE, TextWebSocketFrame.class);
    private Channel channel = null;
    private CustomGCAvoidingByteBufAllocator alloc = null;
-   
-   private final ArrayList<WebSocketFrame> queue = new ArrayList<WebSocketFrame>(BINARY_POOL_SIZE);
-   
-   
+
+
    private final VariableChangeRequestPubSubType variableChangeRequestType = new VariableChangeRequestPubSubType();
    private final SerializedPayload variableChangeRequestPayload = new SerializedPayload(variableChangeRequestType.getTypeSize());
    private final VariableChangeRequest request = new VariableChangeRequest();
-   
-   private final UDPTimestampServer udpTimestampServer;
-   
 
-   public WebsocketDataServerFrameHandler(WebsocketDataBroadcaster broadcaster, int dataSize, VariableChangedListener variableChangedListener) throws SocketException
+   private final UDPTimestampServer udpTimestampServer;
+
+   public WebsocketDataServerFrameHandler(WebsocketDataBroadcaster broadcaster, int dataSize, VariableChangedListener variableChangedListener)
+         throws SocketException
    {
       this.broadcaster = broadcaster;
       this.dataSize = dataSize;
       this.variableChangedListener = variableChangedListener;
-      this.udpTimestampServer= new UDPTimestampServer();
+      this.udpTimestampServer = new UDPTimestampServer();
    }
 
    @Override
@@ -74,12 +68,10 @@ class WebsocketDataServerFrameHandler extends SimpleChannelInboundHandler<WebSoc
       {
          this.lock = new Object();
          this.binaryPool = new WebsocketFramePool(dataSize, BINARY_POOL_SIZE, BinaryWebSocketFrame.class);
-         this.task = new WriteTask();
-         
-         
+
          alloc = new CustomGCAvoidingByteBufAllocator(ctx.alloc());
          ctx.channel().config().setAllocator(alloc);
-         
+
          channel = ctx.channel();
          broadcaster.addClient(this);
       }
@@ -97,17 +89,17 @@ class WebsocketDataServerFrameHandler extends SimpleChannelInboundHandler<WebSoc
          if (frame instanceof TextWebSocketFrame)
          {
             DataServerCommand command = DataServerCommand.getCommand(frame.content());
-            if(command != null)
+            if (command != null)
             {
                int argument = command.getArgument(frame.content());
-               if(argument != -1)
+               if (argument != -1)
                {
-                  if(command == DataServerCommand.SEND_TIMESTAMPS)
+                  if (command == DataServerCommand.SEND_TIMESTAMPS)
                   {
                      udpTimestampServer.startSending(remoteAddress().getAddress(), argument);
                   }
-                  
-                  if(command.broadcast())
+
+                  if (command.broadcast())
                   {
                      broadcaster.writeCommand(command, argument);
                   }
@@ -122,7 +114,7 @@ class WebsocketDataServerFrameHandler extends SimpleChannelInboundHandler<WebSoc
             variableChangeRequestPayload.getData().flip();
             variableChangeRequestType.deserialize(variableChangeRequestPayload, request);
             variableChangedListener.changeVariable(request.getVariableID(), request.getRequestedValue());
-            
+
          }
          else
          {
@@ -130,7 +122,7 @@ class WebsocketDataServerFrameHandler extends SimpleChannelInboundHandler<WebSoc
             throw new UnsupportedOperationException(message);
          }
       }
-      catch(Exception e)
+      catch (Exception e)
       {
          e.printStackTrace();
       }
@@ -141,14 +133,13 @@ class WebsocketDataServerFrameHandler extends SimpleChannelInboundHandler<WebSoc
    {
    }
 
-
    @Override
    public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause)
    {
       cause.printStackTrace();
       ctx.close();
    }
-   
+
    public void addCloseFutureListener(ChannelFutureListener listener)
    {
       channel.closeFuture().addListener(listener);
@@ -158,108 +149,85 @@ class WebsocketDataServerFrameHandler extends SimpleChannelInboundHandler<WebSoc
    {
       return (InetSocketAddress) channel.remoteAddress();
    }
-   
+
    Channel channel()
    {
       return channel;
    }
 
+   /**
+    * Write binary data in "frame"
+    * 
+    * If called from the channel outbound event loop, no objects will be allocated.
+    * 
+    * @param frame
+    */
    public void write(ByteBuffer frame)
    {
-      
-      WebSocketFrame websocketFrame = binaryPool.createFrame(frame);
-      if(websocketFrame != null)
+      if(!channel.eventLoop().inEventLoop())
       {
-         synchronized(lock)
+         throw new RuntimeException("Call this function from the channels event loop");
+      }
+      synchronized(lock)
+      {
+         WebSocketFrame websocketFrame = binaryPool.createFrame(frame);
+         if (websocketFrame != null)
          {
-            queue.add(websocketFrame);            
-
-            if(!task.scheduled)
+            if (channel.isActive() && channel.isWritable())
             {
-               task.init();
-               channel.eventLoop().execute(task);
+               ChannelPromise voidPromise = channel.voidPromise();
+               channel.writeAndFlush(websocketFrame, voidPromise);
             }
          }
       }
-   }
-
-   private class WriteTask implements Runnable
-   {
-      private volatile boolean scheduled = false;
-      private final ArrayList<WebSocketFrame> queueCopy = new ArrayList<>(BINARY_POOL_SIZE + TEXT_POOL_SIZE);
-      
-      public void init()
-      {
-         this.scheduled = true;
-      }
-
-      @Override
-      public void run()
-      {
-         ChannelPromise voidPromise = channel.voidPromise();
-         if(channel.isActive() && channel.isWritable())
-         {
-            synchronized(lock)
-            {
-               for(int i = 0; i < queue.size(); i++)
-               {
-                  queueCopy.add(queue.get(i));
-               }
-               queue.clear();
-            }
-            
-            for(int i = 0; i < queueCopy.size(); i++)
-            {
-               channel.write(queueCopy.get(i), voidPromise);
-            }
-            channel.flush();
-            queueCopy.clear();
-         }
-         
-         scheduled = false;
-      }
-
    }
 
    public void release()
    {
-      synchronized(lock)
+      synchronized (lock)
       {
-         if(channel.isActive() || channel.isWritable())
+         if (channel.isActive() || channel.isWritable())
          {
             throw new RuntimeException("Trying to release an active channel");
          }
-         
+
          udpTimestampServer.close();
-         
-         if(alloc != null)
+
+         if (alloc != null)
          {
             alloc.release();
          }
-         
-         if(binaryPool != null)
+
+         if (binaryPool != null)
          {
             binaryPool.release();
+         }
+         
+         if (textPool != null)
+         {
+            textPool.release();
          }
       }
    }
 
    public void writeCommand(DataServerCommand command, int argument)
    {
-      WebSocketFrame websocketFrame = textPool.createFrame();
-      if(websocketFrame != null)
+      if(!channel.eventLoop().inEventLoop())
       {
-         synchronized(lock)
+         throw new RuntimeException("Call this function from the channels event loop");
+      }
+      synchronized (lock)
+      {
+         WebSocketFrame websocketFrame = textPool.createFrame();
+         if (websocketFrame != null)
          {
-            
-            command.getBytes(websocketFrame.content(), argument);
-            queue.add(websocketFrame);            
 
-            if(!task.scheduled)
+            command.getBytes(websocketFrame.content(), argument);
+            if (channel.isActive()) // Do not check if the channel is writable. We want the commands to go out.
             {
-               task.init();
-               channel.eventLoop().execute(task);
+               channel.writeAndFlush(command);
             }
+
          }
       }
    }
