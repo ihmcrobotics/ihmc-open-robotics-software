@@ -1,6 +1,6 @@
-package us.ihmc.robotDataLogger.websocket.client.discovery;
+package us.ihmc.robotDataLogger.interfaces;
 
-import us.ihmc.robotDataLogger.Announcement;
+import us.ihmc.robotDataLogger.websocket.client.discovery.HTTPDataServerConnection;
 
 public interface DataServerDiscoveryListener
 {

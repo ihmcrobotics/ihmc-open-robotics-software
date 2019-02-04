@@ -8,6 +8,7 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
 import us.ihmc.log.LogTools;
+import us.ihmc.robotDataLogger.interfaces.DataServerDiscoveryListener;
 import us.ihmc.robotDataLogger.websocket.client.discovery.HTTPDataServerConnection.HTTPDataServerConnectionListener;
 
 public class DataServerDiscoveryClient
@@ -30,10 +31,14 @@ public class DataServerDiscoveryClient
 
    public void addHost(String host, int port, boolean persistant)
    {
+      HTTPDataServerDescription description = new HTTPDataServerDescription(host, port, persistant);
+      addHost(description);
+   }
+   
+   public void addHost(HTTPDataServerDescription description)
+   {
       synchronized (lock)
       {
-         HTTPDataServerDescription description = new HTTPDataServerDescription(host, port, persistant);
-
          if (hosts.containsKey(description))
          {
             if (description.isPersistant())
