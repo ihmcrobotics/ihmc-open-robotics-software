@@ -130,6 +130,8 @@ public class ValkyrieFingerSetTrajectoryGenerator<T extends Enum<T>> implements 
          }
       }
 
+      private final OneDoFTrajectoryPoint lastPoint = new OneDoFTrajectoryPoint();
+
       @Override
       public void doAction(double timeInState)
       {
@@ -148,7 +150,6 @@ public class ValkyrieFingerSetTrajectoryGenerator<T extends Enum<T>> implements 
             }
             else
             {
-               OneDoFTrajectoryPoint lastPoint = new OneDoFTrajectoryPoint();
                multipleWaypointsTrajectoryGenerator.getLastWaypoint(lastPoint);
                desiredQ = lastPoint.getPosition();
                desiredQd = lastPoint.getVelocity();

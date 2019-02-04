@@ -8,22 +8,23 @@ import java.lang.management.OperatingSystemMXBean;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
 import us.ihmc.robotDataLogger.RobotVisualizer;
 import us.ihmc.robotDataLogger.YoVariableServer;
+import us.ihmc.util.PeriodicNonRealtimeThreadScheduler;
+import us.ihmc.util.PeriodicNonRealtimeThreadSchedulerFactory;
+import us.ihmc.util.PeriodicThreadScheduler;
+import us.ihmc.util.PeriodicThreadSchedulerFactory;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoInteger;
 import us.ihmc.yoVariables.variable.YoLong;
 import us.ihmc.yoVariables.variable.YoVariable;
-import us.ihmc.commons.thread.ThreadTools;
 
 public class JVMStatisticsGenerator
 {
-   private final ScheduledExecutorService executor = Executors.newSingleThreadScheduledExecutor(ThreadTools.getNamedThreadFactory(getClass().getSimpleName()));
+   private final PeriodicThreadScheduler scheduler;
    private final JVMStatisticsGeneratorThread jvmStatisticsGeneratorThread = new JVMStatisticsGeneratorThread();
 
    private final YoVariableRegistry registry = new YoVariableRegistry("JVMStatistics");
@@ -50,8 +51,13 @@ public class JVMStatisticsGenerator
    private final ClassLoadingMXBean classLoadingMXBean = ManagementFactory.getClassLoadingMXBean();
    private final CompilationMXBean compilationMXBean = ManagementFactory.getCompilationMXBean();
    private final OperatingSystemMXBean operatingSystemMXBean = ManagementFactory.getOperatingSystemMXBean();
-
+   
    public JVMStatisticsGenerator(RobotVisualizer visualizer)
+   {
+      this(visualizer, new PeriodicNonRealtimeThreadSchedulerFactory());
+   }
+
+   public JVMStatisticsGenerator(RobotVisualizer visualizer, PeriodicThreadSchedulerFactory schedulerFactory)
    {
       this.visualizer = visualizer;
       createGCBeanHolders();
@@ -60,6 +66,8 @@ public class JVMStatisticsGenerator
       maxMemory.set(Runtime.getRuntime().maxMemory());
 
       visualizer.addRegistry(registry, null);
+
+      scheduler = schedulerFactory.createPeriodicThreadScheduler(getClass().getSimpleName());
    }
 
    public JVMStatisticsGenerator(YoVariableRegistry parentRegistry)
@@ -71,12 +79,13 @@ public class JVMStatisticsGenerator
       maxMemory.set(Runtime.getRuntime().maxMemory());
 
       parentRegistry.addChild(registry);
-   }
 
+      scheduler = new PeriodicNonRealtimeThreadScheduler(getClass().getSimpleName());
+   }
 
    public void start()
    {
-      executor.scheduleAtFixedRate(jvmStatisticsGeneratorThread, 0, 1, TimeUnit.SECONDS);
+      scheduler.schedule(jvmStatisticsGeneratorThread, 1, TimeUnit.SECONDS);
    }
    
    public void runManual()
