@@ -14,7 +14,6 @@ import java.util.stream.Collectors;
 
 import controller_msgs.msg.dds.RobotConfigurationData;
 import controller_msgs.msg.dds.StereoVisionPointCloudMessage;
-import gnu.trove.list.array.TFloatArrayList;
 import gnu.trove.list.array.TIntArrayList;
 import sensor_msgs.PointCloud2;
 import us.ihmc.commons.thread.ThreadTools;
@@ -196,18 +195,18 @@ public class StereoVisionPointCloudPublisher
 
       public float[] getPointCloudBuffer()
       {
-         TFloatArrayList pointCloudBuffer = new TFloatArrayList();
+         float[] pointCloudBuffer = new float[3 * numberOfPoints];
 
          for (int i = 0; i < numberOfPoints; i++)
          {
             Point3D scanPoint = pointCloud[i];
 
-            pointCloudBuffer.add((float) scanPoint.getX());
-            pointCloudBuffer.add((float) scanPoint.getY());
-            pointCloudBuffer.add((float) scanPoint.getZ());
+            pointCloudBuffer[3 * i + 0] = (float) scanPoint.getX();
+            pointCloudBuffer[3 * i + 1] = (float) scanPoint.getY();
+            pointCloudBuffer[3 * i + 2] = (float) scanPoint.getZ();
          }
 
-         return pointCloudBuffer.toArray();
+         return pointCloudBuffer;
       }
 
       public int[] getColors()
