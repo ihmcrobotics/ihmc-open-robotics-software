@@ -22,6 +22,7 @@ public class PlanarGroundPointFootSnapper implements PointFootSnapper
       this.centroidFrame = referenceFrames.getCenterOfFeetZUpFrameAveragingLowestZHeightsAcrossEnds();
    }
 
+
    public void submitGroundPlane(QuadrupedGroundPlaneMessage groundPlaneMessage)
    {
       this.groundPlaneMessage.set(groundPlaneMessage);
