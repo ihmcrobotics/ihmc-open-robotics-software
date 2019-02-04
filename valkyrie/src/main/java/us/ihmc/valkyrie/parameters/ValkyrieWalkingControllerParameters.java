@@ -605,9 +605,6 @@ public class ValkyrieWalkingControllerParameters extends WalkingControllerParame
 
          if (target == RobotTarget.REAL_ROBOT)
          {
-//            jointToIgnoreList.add(forcedSideJointNames[ValkyrieOrderedJointMap.UpperNeckPitch]);
-//            jointToIgnoreList.add(forcedSideJointNames[ValkyrieOrderedJointMap.LowerNeckPitch]);
-//            jointToIgnoreList.add(forcedSideJointNames[ValkyrieOrderedJointMap.NeckYaw]);
             if (!ValkyrieRosControlController.HAS_FOREARMS_ON)
             {
                jointToIgnoreList.add(forcedSideJointNames[ValkyrieOrderedJointMap.LeftForearmYaw]);

@@ -8,6 +8,8 @@ import us.ihmc.euclid.Axis;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
+import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.robotics.graphics.YoGraphicPolynomial3D;
 import us.ihmc.robotics.graphics.YoGraphicPolynomial3D.TrajectoryColorType;
@@ -203,7 +205,8 @@ public class PositionOptimizedTrajectoryGenerator
     * @param finalPosition
     * @param finalVelocity
     */
-   public void setEndpointConditions(FramePoint3D initialPosition, FrameVector3D initialVelocity, FramePoint3D finalPosition, FrameVector3D finalVelocity)
+   public void setEndpointConditions(FramePoint3DReadOnly initialPosition, FrameVector3DReadOnly initialVelocity, FramePoint3DReadOnly finalPosition,
+                                     FrameVector3DReadOnly finalVelocity)
    {
       this.initialPosition.setIncludingFrame(initialPosition);
       this.initialVelocity.setIncludingFrame(initialVelocity);
@@ -231,7 +234,7 @@ public class PositionOptimizedTrajectoryGenerator
     *
     * @param waypointPositions
     */
-   public void setWaypoints(ArrayList<FramePoint3D> waypointPositions)
+   public void setWaypoints(List<? extends FramePoint3DReadOnly> waypointPositions)
    {
       if (waypointPositions.size() > waypointTimes.size())
          throw new RuntimeException("Too many waypoints");

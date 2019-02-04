@@ -2,11 +2,12 @@ package us.ihmc.commonWalkingControlModules.capturePoint.optimization.qpInput;
 
 import org.junit.Assert;
 import org.junit.Test;
-import us.ihmc.commonWalkingControlModules.capturePoint.optimization.qpInput.ICPQPIndexHandler;
+
 import us.ihmc.commons.MutationTestFacilitator;
-import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationPlan;
+import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.continuousIntegration.IntegrationCategory;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
 
 @ContinuousIntegrationPlan(categories = {IntegrationCategory.FAST})
 public class ICPQPIndexHandlerTest
@@ -15,7 +16,7 @@ public class ICPQPIndexHandlerTest
    @Test(timeout = 30000)
    public void testRegisterFootstep()
    {
-      ICPQPIndexHandler indexHandler = new ICPQPIndexHandler();
+      ICPQPIndexHandler indexHandler = new ICPQPIndexHandler(new YoVariableRegistry("dummy"));
       indexHandler.registerFootstep();
 
       Assert.assertTrue(indexHandler.useStepAdjustment());
@@ -26,7 +27,7 @@ public class ICPQPIndexHandlerTest
    @Test(timeout = 30000)
    public void testSizing()
    {
-      ICPQPIndexHandler indexHandler = new ICPQPIndexHandler();
+      ICPQPIndexHandler indexHandler = new ICPQPIndexHandler(new YoVariableRegistry("dummy"));
 
       Assert.assertEquals(0, indexHandler.getCoPFeedbackIndex());
       Assert.assertFalse(indexHandler.hasCMPFeedbackTask());

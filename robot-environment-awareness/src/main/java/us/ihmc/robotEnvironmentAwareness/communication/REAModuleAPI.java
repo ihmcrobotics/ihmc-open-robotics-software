@@ -2,6 +2,7 @@ package us.ihmc.robotEnvironmentAwareness.communication;
 
 import controller_msgs.msg.dds.LidarScanMessage;
 import controller_msgs.msg.dds.PlanarRegionsListMessage;
+import controller_msgs.msg.dds.StereoVisionPointCloudMessage;
 import us.ihmc.jOctoMap.normalEstimation.NormalEstimationParameters;
 import us.ihmc.messager.MessagerAPIFactory;
 import us.ihmc.messager.MessagerAPIFactory.Category;
@@ -16,6 +17,7 @@ import us.ihmc.robotEnvironmentAwareness.communication.packets.LineSegment3DMess
 import us.ihmc.robotEnvironmentAwareness.communication.packets.NormalOcTreeMessage;
 import us.ihmc.robotEnvironmentAwareness.communication.packets.PlanarRegionSegmentationMessage;
 import us.ihmc.robotEnvironmentAwareness.geometry.ConcaveHullFactoryParameters;
+import us.ihmc.robotEnvironmentAwareness.planarRegion.CustomRegionMergeParameters;
 import us.ihmc.robotEnvironmentAwareness.planarRegion.IntersectionEstimationParameters;
 import us.ihmc.robotEnvironmentAwareness.planarRegion.PlanarRegionSegmentationParameters;
 import us.ihmc.robotEnvironmentAwareness.planarRegion.PolygonizerParameters;
@@ -31,6 +33,7 @@ public class REAModuleAPI
 
    private static final CategoryTheme OcTree = apiFactory.createCategoryTheme("OcTree");
    private static final CategoryTheme Lidar = apiFactory.createCategoryTheme("Lidar");
+   private static final CategoryTheme StereoVisionPointCloud = apiFactory.createCategoryTheme("StereoVisionPointCloud");
    private static final CategoryTheme BoundingBox = apiFactory.createCategoryTheme("BoundingBox");
    private static final CategoryTheme NormalEstimation = apiFactory.createCategoryTheme("NormalEstimation");
    private static final CategoryTheme PlanarRegions = apiFactory.createCategoryTheme("PlanarRegions");
@@ -68,7 +71,6 @@ public class REAModuleAPI
    private static final Category OcTreeCategory = ModuleCategory.child(OcTree);
    private static final Category PlanarRegionsCategory = ModuleCategory.child(PlanarRegions);
 
-
    public static final Topic<Boolean> OcTreeEnable = OcTreeCategory.topic(Enable);
    public static final Topic<Boolean> OcTreeClear = OcTreeCategory.topic(Clear);
    public static final Topic<Integer> OcTreeBufferSize = OcTreeCategory.child(Buffer).topic(Size);
@@ -81,13 +83,14 @@ public class REAModuleAPI
 
    public static final Topic<Double> LidarMinRange = ModuleCategory.child(Lidar).child(Range).topic(Min);
    public static final Topic<Double> LidarMaxRange = ModuleCategory.child(Lidar).child(Range).topic(Max);
-   
+
    public static final Topic<Boolean> PlanarRegionsSegmentationEnable = PlanarRegionsCategory.child(Segmentation).topic(Enable);
    public static final Topic<Boolean> PlanarRegionsSegmentationClear = PlanarRegionsCategory.child(Segmentation).topic(Clear);
-   public static final Topic<PlanarRegionSegmentationParameters> PlanarRegionsSegmentationParameters = PlanarRegionsCategory.child(Segmentation).topic(Parameters);
+   public static final Topic<PlanarRegionSegmentationParameters> PlanarRegionsSegmentationParameters = PlanarRegionsCategory.child(Segmentation)
+                                                                                                                            .topic(Parameters);
    public static final Topic<Boolean> CustomRegionsMergingEnable = PlanarRegionsCategory.child(Custom).topic(Enable);
    public static final Topic<Boolean> CustomRegionsClear = PlanarRegionsCategory.child(Custom).topic(Clear);
-   public static final Topic<PlanarRegionSegmentationParameters> CustomRegionsMergingParameters = PlanarRegionsCategory.child(Custom).topic(Parameters);
+   public static final Topic<CustomRegionMergeParameters> CustomRegionsMergingParameters = PlanarRegionsCategory.child(Custom).topic(Parameters);
    public static final Topic<Boolean> PlanarRegionsPolygonizerEnable = PlanarRegionsCategory.child(Polygonizer).topic(Enable);
    public static final Topic<Boolean> PlanarRegionsPolygonizerClear = PlanarRegionsCategory.child(Polygonizer).topic(Clear);
    public static final Topic<ConcaveHullFactoryParameters> PlanarRegionsConcaveHullParameters = PlanarRegionsCategory.child(ConcaveHull).topic(Parameters);
@@ -104,6 +107,9 @@ public class REAModuleAPI
    public static final Topic<Boolean> UILidarScanShow = Root.child(UI).child(Lidar).topic(Show);
    public static final Topic<Boolean> UILidarScanClear = Root.child(UI).child(Lidar).topic(Clear);
    public static final Topic<Integer> UILidarScanSize = Root.child(UI).child(Lidar).topic(Size);
+   public static final Topic<Boolean> UIStereoVisionPointCloudShow = Root.child(UI).child(StereoVisionPointCloud).topic(Show);
+   public static final Topic<Boolean> UIStereoVisionPointCloudClear = Root.child(UI).child(StereoVisionPointCloud).topic(Clear);
+   public static final Topic<Integer> UIStereoVisionPointCloudSize = Root.child(UI).child(StereoVisionPointCloud).topic(Size);
 
    public static final Topic<Boolean> UISegmentationDataExportRequest = Root.child(UI).child(DataExporter).child(Segmentation).topic(Export);
    public static final Topic<String> UISegmentationDataExporterDirectory = Root.child(UI).child(DataExporter).child(Segmentation).topic(Path);
@@ -111,6 +117,7 @@ public class REAModuleAPI
    public static final Topic<String> UIPlanarRegionDataExporterDirectory = Root.child(UI).child(DataExporter).child(PlanarRegions).topic(Path);
 
    public static final Topic<LidarScanMessage> LidarScanState = ModuleCategory.child(Lidar).topic(Data);
+   public static final Topic<StereoVisionPointCloudMessage> StereoVisionPointCloudState = ModuleCategory.child(StereoVisionPointCloud).topic(Data);
    public static final Topic<NormalOcTreeMessage> OcTreeState = OcTreeCategory.topic(Data);
    public static final Topic<NormalOcTreeMessage> OcTreeBufferState = OcTreeCategory.child(Buffer).topic(Data);
    public static final Topic<PlanarRegionsListMessage> PlanarRegionsState = PlanarRegionsCategory.topic(Data);

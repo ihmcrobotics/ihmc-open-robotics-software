@@ -42,8 +42,25 @@ public class PlannerGoalAdditionActionPolicy implements PlannerHeuristicNodeActi
       RigidBodyTransform newNodeTransform = new RigidBodyTransform();
       RigidBodyTransform previousNodeTransform = new RigidBodyTransform();
 
-      FootstepNodeTools.getSnappedNodeTransform(newValidNode, newNodeSnapData.getSnapTransform(), newNodeTransform);
-      FootstepNodeTools.getSnappedNodeTransform(newValidParentNode, previousSnapData.getSnapTransform(), previousNodeTransform);
+      if(newNodeSnapData.getSnapTransform().containsNaN())
+      {
+         // assume flat ground in case of bad snap
+         FootstepNodeTools.getNodeTransform(newValidNode, newNodeTransform);
+      }
+      else
+      {
+         FootstepNodeTools.getSnappedNodeTransform(newValidNode, newNodeSnapData.getSnapTransform(), newNodeTransform);
+      }
+
+      if(previousSnapData.getSnapTransform().containsNaN())
+      {
+         // assume flat ground in case of bad snap
+         FootstepNodeTools.getNodeTransform(newValidParentNode, previousNodeTransform);
+      }
+      else
+      {
+         FootstepNodeTools.getSnappedNodeTransform(newValidParentNode, previousSnapData.getSnapTransform(), previousNodeTransform);
+      }
 
       SideDependentList<SimpleFootstep> doubleFootstepGoal = new SideDependentList<>();
 
