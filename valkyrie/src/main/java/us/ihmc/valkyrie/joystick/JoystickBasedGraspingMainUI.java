@@ -32,7 +32,7 @@ public class JoystickBasedGraspingMainUI
    private final Stage primaryStage;
    private final BorderPane mainPane;
 
-   private final JavaFXArmController graspingJavaFXController;
+   private final GraspingJavaFXController graspingJavaFXController;
    private final JavaFXRobotVisualizer javaFXRobotVisualizer;
    private final JavaFXPlanarRegionsViewer planarRegionsViewer;
 
@@ -77,7 +77,7 @@ public class JoystickBasedGraspingMainUI
                                            s -> planarRegionsViewer.submitPlanarRegions(s.takeNextData()));
       view3dFactory.addNodeToView(planarRegionsViewer.getRootNode());
       
-      graspingJavaFXController = new JavaFXArmController(robotName, messager, ros2Node, fullRobotModelFactory, javaFXRobotVisualizer,
+      graspingJavaFXController = new GraspingJavaFXController(robotName, messager, ros2Node, fullRobotModelFactory, javaFXRobotVisualizer,
                                                               handFingerTrajectoryMessagePublisher);
       view3dFactory.addNodeToView(graspingJavaFXController.getRootNode());
 
