@@ -29,6 +29,8 @@ import us.ihmc.utilities.ros.subscriber.RosPointCloudSubscriber;
 
 public class StereoVisionPointCloudPublisher
 {
+   private static final boolean Debug = false;
+   
    private static final int MAX_NUMBER_OF_POINTS = 200000;
 
    private final String name = getClass().getSimpleName();
@@ -97,7 +99,8 @@ public class StereoVisionPointCloudPublisher
             Color[] colors = pointCloudData.getPointColors();
             long timestamp = pointCloud.getHeader().getStamp().totalNsecs();
 
-            System.out.println("Receiving point cloud, n points: " + scanPoints.length);
+            if(Debug)
+               System.out.println("Receiving point cloud, n points: " + scanPoints.length);
 
             pointCloudDataToPublish.set(new ColorPointCloudData(timestamp, scanPoints, colors));
          }
@@ -134,7 +137,8 @@ public class StereoVisionPointCloudPublisher
 
             RigidBodyTransform transformToWorldFrame = dataFrame.getTransformToWorldFrame();
             StereoVisionPointCloudMessage message = pointCloudData.createStereoVisionPointCloudMessage(transformToWorldFrame, MAX_NUMBER_OF_POINTS);
-            System.out.println("Publishing stereo data, number of points: " + (message.getPointCloud().size() / 3));
+            if(Debug)
+               System.out.println("Publishing stereo data, number of points: " + (message.getPointCloud().size() / 3));
             pointcloudPublisher.publish(message);
          }
       };
