@@ -18,6 +18,8 @@ import us.ihmc.quadrupedPlanning.footstepChooser.PlanarGroundPointFootSnapper;
 import us.ihmc.quadrupedPlanning.footstepChooser.PlanarRegionBasedPointFootSnapper;
 import us.ihmc.quadrupedPlanning.footstepChooser.PointFootSnapperParameters;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
+import us.ihmc.robotics.time.TimeInterval;
+import us.ihmc.robotics.time.TimeIntervalTools;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 
@@ -138,6 +140,10 @@ public abstract class QuadrupedPathWithTurnWalkTurnPlanner implements QuadrupedB
    @Override
    public List<? extends QuadrupedTimedStep> getSteps()
    {
-      return stepCalculator.getSteps();
+      List<? extends QuadrupedTimedStep> steps = stepCalculator.getSteps();
+      TimeIntervalTools.sortByStartTime(steps);
+      double startTime = steps.get(0).getTimeInterval().getStartTime();
+      steps.forEach(step -> step.getTimeInterval().shiftInterval(-startTime));
+      return steps;
    }
 }
