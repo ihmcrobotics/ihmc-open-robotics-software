@@ -2,6 +2,8 @@ package us.ihmc.robotDataLogger.websocket.server;
 
 import java.util.concurrent.TimeUnit;
 
+import io.netty.channel.EventLoopGroup;
+import io.netty.util.concurrent.ScheduledFuture;
 import us.ihmc.concurrent.ConcurrentRingBuffer;
 import us.ihmc.pubsub.common.SerializedPayload;
 import us.ihmc.robotDataLogger.dataBuffers.CustomLogDataPublisherType;
@@ -9,8 +11,6 @@ import us.ihmc.robotDataLogger.dataBuffers.LoggerDebugRegistry;
 import us.ihmc.robotDataLogger.dataBuffers.RegistrySendBuffer;
 import us.ihmc.robotDataLogger.dataBuffers.RegistrySendBufferBuilder;
 import us.ihmc.robotDataLogger.interfaces.RegistryPublisher;
-import us.ihmc.util.PeriodicThreadScheduler;
-import us.ihmc.util.PeriodicThreadSchedulerFactory;
 
 /**
  * Publishing thread for registry data
@@ -31,21 +31,23 @@ class WebsocketRegistryPublisher implements RegistryPublisher
    private final WebsocketDataBroadcaster broadcaster;
    private final LoggerDebugRegistry loggerDebugRegistry;
 
-   private final PeriodicThreadScheduler scheduler;
+   private final EventLoopGroup eventLoopGroup;
 
    private final VariableUpdateThread variableUpdateThread = new VariableUpdateThread();
    
    private final CustomLogDataPublisherType publisherType;
    private final SerializedPayload serializedPayload;
+   
+   private ScheduledFuture<?> scheduledFuture;
 
    private final int numberOfVariables;
    
-   public WebsocketRegistryPublisher(PeriodicThreadSchedulerFactory schedulerFactory, RegistrySendBufferBuilder builder, WebsocketDataBroadcaster broadcaster)
+   public WebsocketRegistryPublisher(EventLoopGroup workerGroup, RegistrySendBufferBuilder builder, WebsocketDataBroadcaster broadcaster)
    {
       this.broadcaster = broadcaster;
       
       this.ringBuffer = new ConcurrentRingBuffer<>(builder, BUFFER_CAPACITY);
-      this.scheduler = schedulerFactory.createPeriodicThreadScheduler("Registry-" + builder.getRegistryID() + "-Publisher");
+      this.eventLoopGroup = workerGroup;
       
       this.loggerDebugRegistry = builder.getLoggerDebugRegistry();
       this.numberOfVariables = builder.getNumberOfVariables();
@@ -62,20 +64,24 @@ class WebsocketRegistryPublisher implements RegistryPublisher
       return publisherType.getMaximumTypeSize();
    }
    
+   /**
+    * Starts the registry publisher and schedules it on the main eventLoopGroup
+    */
    @Override
    public void start()
    {
-      scheduler.schedule(variableUpdateThread, 1, TimeUnit.MILLISECONDS);
-
+      scheduledFuture = eventLoopGroup.scheduleAtFixedRate(variableUpdateThread, 0, 1, TimeUnit.MILLISECONDS);
    }
 
    @Override
    public void stop()
    {
-      scheduler.shutdown();
+      scheduledFuture.cancel(false);
+      
+      
       try
       {
-         scheduler.awaitTermination(5, TimeUnit.SECONDS);
+         scheduledFuture.await(5, TimeUnit.SECONDS);
       }
       catch (InterruptedException e)
       {
