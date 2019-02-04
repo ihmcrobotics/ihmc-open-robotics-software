@@ -35,6 +35,7 @@ import us.ihmc.multicastLogDataProtocol.modelLoaders.LogModelProvider;
 import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
 import us.ihmc.robotDataLogger.YoVariableServer;
 import us.ihmc.robotDataLogger.logger.LogSettings;
+import us.ihmc.robotDataLogger.util.JVMStatisticsGenerator;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.ros2.RealtimeRos2Node;
@@ -396,6 +397,15 @@ public class ValkyrieRosControlController extends IHMCWholeRobotControlJavaBridg
       sensorReaderFactory.attachControllerAPI(commandInputManager, statusOutputManager);
       sensorReaderFactory.attachJointTorqueOffsetEstimator(calibrationControllerState.getJointTorqueOffsetEstimatorController());
       sensorReaderFactory.setupLowLevelControlCommunication(robotName, estimatorRealtimeRos2Node);
+
+      /*
+       * Setup and start the JVM memory statistics
+       */
+
+      PeriodicRealtimeThreadSchedulerFactory schedulerFactory = new PeriodicRealtimeThreadSchedulerFactory(ValkyriePriorityParameters.JVM_STATISTICS_PRIORITY);
+      JVMStatisticsGenerator jvmStatisticsGenerator = new JVMStatisticsGenerator(yoVariableServer, schedulerFactory);
+      jvmStatisticsGenerator.addVariablesToStatisticsGenerator(yoVariableServer);
+      jvmStatisticsGenerator.start();
 
       /*
        * Connect all servers
