@@ -17,7 +17,7 @@ public abstract class RigidBodyHashTest
 
    @ContinuousIntegrationTest(estimatedDuration = 2.0)
    @Test(timeout = 30000)
-   public void testHandHashCode()
+   public void testSignificantRigidBodiesHashCode()
    {
       DRCRobotModel robotModel = getRobotModel();
       FullHumanoidRobotModel fullRobotModel = robotModel.createFullRobotModel();
@@ -25,8 +25,10 @@ public abstract class RigidBodyHashTest
       for (RobotSide robotSide : RobotSide.values)
       {
          RigidBodyBasics hand = fullRobotModel.getHand(robotSide);
-
          printNameIDAndHashCode(hand);
+         
+         RigidBodyBasics foot = fullRobotModel.getFoot(robotSide);
+         printNameIDAndHashCode(foot);
       }
 
       RigidBodyBasics chest = fullRobotModel.getChest();
@@ -34,6 +36,9 @@ public abstract class RigidBodyHashTest
 
       RigidBodyBasics pelvis = fullRobotModel.getPelvis();
       printNameIDAndHashCode(pelvis);
+
+      RigidBodyBasics head = fullRobotModel.getHead();
+      printNameIDAndHashCode(head);
       assertTrue(true);
    }
 
@@ -68,6 +73,16 @@ public abstract class RigidBodyHashTest
 
             foot = foot.getParentJoint().getPredecessor();
          }
+      }
+      
+      RigidBodyBasics head = fullRobotModel.getHead();
+
+      for (int i = 0; i < maximumNumberOfTimes; i++)
+      {
+         if (printNameIDAndHashCode(head) == getElevatorHashCode())
+            break;
+
+         head = head.getParentJoint().getPredecessor();
       }
       assertTrue(true);
    }

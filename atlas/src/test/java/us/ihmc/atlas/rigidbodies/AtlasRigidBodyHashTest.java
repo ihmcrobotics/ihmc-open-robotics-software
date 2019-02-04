@@ -9,9 +9,9 @@ import us.ihmc.avatar.rigidbodies.RigidBodyHashTest;
 public class AtlasRigidBodyHashTest extends RigidBodyHashTest
 {
    @Override
-   public void testHandHashCode()
+   public void testSignificantRigidBodiesHashCode()
    {
-      super.testHandHashCode();
+      super.testSignificantRigidBodiesHashCode();
    }
 
    @Override

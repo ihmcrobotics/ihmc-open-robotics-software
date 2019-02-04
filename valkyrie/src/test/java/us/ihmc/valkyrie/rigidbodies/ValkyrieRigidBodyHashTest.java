@@ -8,9 +8,9 @@ import us.ihmc.valkyrie.ValkyrieRobotModel;
 public class ValkyrieRigidBodyHashTest extends RigidBodyHashTest
 {
    @Override
-   public void testHandHashCode()
+   public void testSignificantRigidBodiesHashCode()
    {
-      super.testHandHashCode();
+      super.testSignificantRigidBodiesHashCode();
    }
 
    @Override
