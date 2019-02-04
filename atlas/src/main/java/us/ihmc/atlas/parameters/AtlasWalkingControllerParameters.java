@@ -317,7 +317,7 @@ public class AtlasWalkingControllerParameters extends WalkingControllerParameter
       jointHomeConfiguration.put(jointMap.getSpineJointName(SpineJointName.SPINE_ROLL), 0.0);
       jointHomeConfiguration.put(jointMap.getSpineJointName(SpineJointName.SPINE_YAW), 0.0);
 
-      jointHomeConfiguration.put(jointMap.getNeckJointName(NeckJointName.PROXIMAL_NECK_PITCH), 0.0);
+      jointHomeConfiguration.put(jointMap.getNeckJointName(NeckJointName.PROXIMAL_NECK_PITCH), runningOnRealRobot ? 0.7 : 0.0);
 
       for (RobotSide robotSide : RobotSide.values)
       {
@@ -343,6 +343,10 @@ public class AtlasWalkingControllerParameters extends WalkingControllerParameter
       bodyHomeConfiguration = new HashMap<String, Pose3D>();
 
       Pose3D homeChestPoseInPelvisZUpFrame = new Pose3D();
+      if (runningOnRealRobot)
+      {
+         homeChestPoseInPelvisZUpFrame.appendPitchRotation(Math.toRadians(10.0));
+      }
       bodyHomeConfiguration.put(jointMap.getChestName(), homeChestPoseInPelvisZUpFrame);
 
       return bodyHomeConfiguration;
@@ -378,6 +382,7 @@ public class AtlasWalkingControllerParameters extends WalkingControllerParameter
       return (runningOnRealRobot ? 1.2 : 0.6); //Math.sqrt(jointMap.getModelScale()) *
    }
 
+   @Override
    public FootSwitchFactory getFootSwitchFactory()
    {
       WrenchBasedFootSwitchFactory footSwitchFactory = new WrenchBasedFootSwitchFactory();

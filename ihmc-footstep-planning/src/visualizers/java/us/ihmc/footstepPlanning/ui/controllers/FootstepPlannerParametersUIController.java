@@ -1,18 +1,21 @@
 package us.ihmc.footstepPlanning.ui.controllers;
 
+import java.io.File;
+import java.io.IOException;
+
 import javafx.fxml.FXML;
 import javafx.scene.control.CheckBox;
 import javafx.scene.control.Spinner;
-import javafx.scene.control.SpinnerValueFactory;
 import javafx.scene.control.SpinnerValueFactory.DoubleSpinnerValueFactory;
-import javafx.scene.control.ToggleButton;
 import javafx.scene.shape.Rectangle;
+import us.ihmc.commons.PrintTools;
 import us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI;
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParameters;
 import us.ihmc.footstepPlanning.ui.components.FootstepPlannerParametersProperty;
 import us.ihmc.footstepPlanning.ui.components.SettableFootstepPlannerParameters;
 import us.ihmc.javaFXToolkit.messager.JavaFXMessager;
 import us.ihmc.javaFXToolkit.messager.MessageBidirectionalBinding.PropertyToMessageTypeConverter;
+import us.ihmc.robotEnvironmentAwareness.io.FilePropertyHelper;
 
 public class FootstepPlannerParametersUIController
 {
@@ -76,6 +79,25 @@ public class FootstepPlannerParametersUIController
 
    private static final double metersToPixel = 200;
 
+   private static final String CONFIGURATION_FILE_NAME = "./Configurations/footstepPlannerParameters.txt";
+   private FilePropertyHelper filePropertyHelper;
+
+   public FootstepPlannerParametersUIController()
+   {
+      File configurationFile = new File(CONFIGURATION_FILE_NAME);
+      try
+      {
+         configurationFile.getParentFile().mkdirs();
+         configurationFile.createNewFile();
+         filePropertyHelper = new FilePropertyHelper(configurationFile);
+      }
+      catch (IOException e)
+      {
+         System.out.println(configurationFile.getAbsolutePath());
+         e.printStackTrace();
+      }
+   }
+
    public void attachMessager(JavaFXMessager messager)
    {
       this.messager = messager;
@@ -90,7 +112,7 @@ public class FootstepPlannerParametersUIController
    {
       maxStepLength.setValueFactory(new DoubleSpinnerValueFactory(0.0, 0.7, 0.0, 0.05));
       maxStepWidth.setValueFactory(new DoubleSpinnerValueFactory(0.0, 0.5, 0.0, 0.02));
-      minStepWidth.setValueFactory(new DoubleSpinnerValueFactory(0.0, 0.2, 0.0, 0.01));
+      minStepWidth.setValueFactory(new DoubleSpinnerValueFactory(0.0, 0.3, 0.0, 0.01));
 
       minStepLength.setValueFactory(new DoubleSpinnerValueFactory(-0.6, 0.0, 0.0, 0.05));
       maxStepZ.setValueFactory(new DoubleSpinnerValueFactory(0.0, 0.5, 0.0, 0.02));
@@ -161,6 +183,77 @@ public class FootstepPlannerParametersUIController
       swingFootShape.setLayoutY(leftFootOriginY);
 
       updateStepShape();
+   }
+
+   @FXML
+   public void saveToFile()
+   {
+      if (filePropertyHelper == null)
+      {
+         PrintTools.warn("Can not save to file.");
+         return;
+      }
+
+      System.out.println("Saving Parameters to file.");
+
+      filePropertyHelper.saveProperty("maxStepLength", maxStepLength.getValue());
+      filePropertyHelper.saveProperty("maxStepWidth", maxStepWidth.getValue());
+      filePropertyHelper.saveProperty("minStepWidth", minStepWidth.getValue());
+      filePropertyHelper.saveProperty("minStepLength", minStepLength.getValue());
+      filePropertyHelper.saveProperty("maxStepZ", maxStepZ.getValue());
+      filePropertyHelper.saveProperty("minSurfaceIncline", minSurfaceIncline.getValue());
+      filePropertyHelper.saveProperty("maxStepYaw", maxStepYaw.getValue());
+      filePropertyHelper.saveProperty("minStepYaw", minStepYaw.getValue());
+      filePropertyHelper.saveProperty("minFootholdPercent", minFootholdPercent.getValue());
+      filePropertyHelper.saveProperty("minXClearance", minXClearance.getValue());
+      filePropertyHelper.saveProperty("minYClearance", minYClearance.getValue());
+      filePropertyHelper.saveProperty("cliffHeightSpinner", cliffHeightSpinner.getValue());
+      filePropertyHelper.saveProperty("cliffClearance", cliffClearance.getValue());
+      filePropertyHelper.saveProperty("maxXYWiggleSpinner", maxXYWiggleSpinner.getValue());
+      filePropertyHelper.saveProperty("maxYawWiggleSpinner", maxYawWiggleSpinner.getValue());
+      filePropertyHelper.saveProperty("wiggleInsideDeltaSpinner", wiggleInsideDeltaSpinner.getValue());
+   }
+
+   public void loadFromFile()
+   {
+      if (filePropertyHelper == null)
+      {
+         return;
+      }
+
+      Double value;
+      if ((value = filePropertyHelper.loadDoubleProperty("maxStepLength")) != null)
+         maxStepLength.getValueFactory().setValue(value);
+      if ((value = filePropertyHelper.loadDoubleProperty("maxStepWidth")) != null)
+         maxStepWidth.getValueFactory().setValue(value);
+      if ((value = filePropertyHelper.loadDoubleProperty("minStepWidth")) != null)
+         minStepWidth.getValueFactory().setValue(value);
+      if ((value = filePropertyHelper.loadDoubleProperty("minStepLength")) != null)
+         minStepLength.getValueFactory().setValue(value);
+      if ((value = filePropertyHelper.loadDoubleProperty("maxStepZ")) != null)
+         maxStepZ.getValueFactory().setValue(value);
+      if ((value = filePropertyHelper.loadDoubleProperty("minSurfaceIncline")) != null)
+         minSurfaceIncline.getValueFactory().setValue(value);
+      if ((value = filePropertyHelper.loadDoubleProperty("maxStepYaw")) != null)
+         maxStepYaw.getValueFactory().setValue(value);
+      if ((value = filePropertyHelper.loadDoubleProperty("minStepYaw")) != null)
+         minStepYaw.getValueFactory().setValue(value);
+      if ((value = filePropertyHelper.loadDoubleProperty("minFootholdPercent")) != null)
+         minFootholdPercent.getValueFactory().setValue(value);
+      if ((value = filePropertyHelper.loadDoubleProperty("minXClearance")) != null)
+         minXClearance.getValueFactory().setValue(value);
+      if ((value = filePropertyHelper.loadDoubleProperty("minYClearance")) != null)
+         minYClearance.getValueFactory().setValue(value);
+      if ((value = filePropertyHelper.loadDoubleProperty("cliffHeightSpinner")) != null)
+         cliffHeightSpinner.getValueFactory().setValue(value);
+      if ((value = filePropertyHelper.loadDoubleProperty("cliffClearance")) != null)
+         cliffClearance.getValueFactory().setValue(value);
+      if ((value = filePropertyHelper.loadDoubleProperty("maxXYWiggleSpinner")) != null)
+         maxXYWiggleSpinner.getValueFactory().setValue(value);
+      if ((value = filePropertyHelper.loadDoubleProperty("maxYawWiggleSpinner")) != null)
+         maxYawWiggleSpinner.getValueFactory().setValue(value);
+      if ((value = filePropertyHelper.loadDoubleProperty("wiggleInsideDeltaSpinner")) != null)
+         wiggleInsideDeltaSpinner.getValueFactory().setValue(value);
    }
 
    private void updateStepShape()

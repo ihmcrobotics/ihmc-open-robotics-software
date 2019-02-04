@@ -12,11 +12,8 @@ import us.ihmc.robotics.geometry.PlanarRegionsList;
 public class SimpleNodeChecker extends FootstepNodeChecker
 {
    @Override
-   public boolean isNodeValid(FootstepNode node, FootstepNode previousNode)
+   public boolean isNodeValidInternal(FootstepNode node, FootstepNode previousNode)
    {
-      if(!hasPlanarRegions())
-         return true;
-
       Point2D nodePosition = new Point2D(node.getX(), node.getY());
       List<PlanarRegion> intersection = planarRegionsList.findPlanarRegionsContainingPointByProjectionOntoXYPlane(nodePosition);
       boolean intersectsPlanarRegions = intersection != null;

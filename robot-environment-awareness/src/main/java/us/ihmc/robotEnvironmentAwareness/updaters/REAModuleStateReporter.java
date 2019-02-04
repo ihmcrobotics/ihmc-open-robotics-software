@@ -3,6 +3,7 @@ package us.ihmc.robotEnvironmentAwareness.updaters;
 import java.util.concurrent.atomic.AtomicReference;
 
 import controller_msgs.msg.dds.LidarScanMessage;
+import controller_msgs.msg.dds.StereoVisionPointCloudMessage;
 import us.ihmc.communication.packets.PlanarRegionMessageConverter;
 import us.ihmc.jOctoMap.ocTree.NormalOcTree;
 import us.ihmc.messager.Messager;
@@ -49,9 +50,11 @@ public class REAModuleStateReporter
    public void reportPlanarRegionsState(RegionFeaturesProvider regionFeaturesProvider)
    {
       if (regionFeaturesProvider.getPlanarRegionsList() != null && arePlanarRegionsRequested.getAndSet(false))
-         reaMessager.submitMessage(REAModuleAPI.PlanarRegionsState, PlanarRegionMessageConverter.convertToPlanarRegionsListMessage(regionFeaturesProvider.getPlanarRegionsList()));
+         reaMessager.submitMessage(REAModuleAPI.PlanarRegionsState,
+                                   PlanarRegionMessageConverter.convertToPlanarRegionsListMessage(regionFeaturesProvider.getPlanarRegionsList()));
       if (isPlanarRegionSegmentationRequested.getAndSet(false))
-         reaMessager.submitMessage(REAModuleAPI.PlanarRegionsSegmentationState, REAPlanarRegionsConverter.createPlanarRegionSegmentationMessages(regionFeaturesProvider));
+         reaMessager.submitMessage(REAModuleAPI.PlanarRegionsSegmentationState,
+                                   REAPlanarRegionsConverter.createPlanarRegionSegmentationMessages(regionFeaturesProvider));
       if (arePlanarRegionsIntersectionsRequested.getAndSet(false))
          reaMessager.submitMessage(REAModuleAPI.PlanarRegionsIntersectionState, REAPlanarRegionsConverter.createLineSegment3dMessages(regionFeaturesProvider));
    }
@@ -59,5 +62,10 @@ public class REAModuleStateReporter
    public void registerLidarScanMessage(LidarScanMessage message)
    {
       reaMessager.submitMessage(REAModuleAPI.LidarScanState, new LidarScanMessage(message));
+   }
+
+   public void registerStereoVisionPointCloudMessage(StereoVisionPointCloudMessage message)
+   {
+      reaMessager.submitMessage(REAModuleAPI.StereoVisionPointCloudState, new StereoVisionPointCloudMessage(message));
    }
 }

@@ -24,6 +24,7 @@ import com.vividsolutions.jts.geom.MultiLineString;
 import com.vividsolutions.jts.geom.MultiPoint;
 import com.vividsolutions.jts.triangulate.ConformingDelaunayTriangulationBuilder;
 import com.vividsolutions.jts.triangulate.ConstraintEnforcementException;
+import com.vividsolutions.jts.triangulate.quadedge.LocateFailureException;
 import com.vividsolutions.jts.triangulate.quadedge.QuadEdge;
 import com.vividsolutions.jts.triangulate.quadedge.QuadEdgeSubdivision;
 import com.vividsolutions.jts.triangulate.quadedge.QuadEdgeTriangle;
@@ -171,7 +172,7 @@ public abstract class SimpleConcaveHullFactory
             conformingDelaunayTriangulationBuilder.setConstraints(constraintSegments);
          subdivision = conformingDelaunayTriangulationBuilder.getSubdivision();
       }
-      catch (ConstraintEnforcementException e)
+      catch (ConstraintEnforcementException | LocateFailureException e)
       { // Adding the line segments as constraints failed, removing them.
          if (VERBOSE)
             LogTools.warn("Delaunay triangulation failed, removing line segment constraints.");
