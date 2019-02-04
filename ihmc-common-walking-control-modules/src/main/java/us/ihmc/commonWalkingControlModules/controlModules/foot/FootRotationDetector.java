@@ -3,11 +3,10 @@ package us.ihmc.commonWalkingControlModules.controlModules.foot;
 import java.awt.Color;
 
 import us.ihmc.commonWalkingControlModules.momentumBasedController.ParameterProvider;
-import us.ihmc.euclid.referenceFrame.FrameLine2D;
 import us.ihmc.euclid.referenceFrame.FrameLine3D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.euclid.referenceFrame.interfaces.FrameLine2DBasics;
+import us.ihmc.euclid.referenceFrame.interfaces.FixedFrameLine2DBasics;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameLine2DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameLine3DBasics;
 import us.ihmc.graphicsDescription.plotting.artifact.Artifact;
@@ -23,7 +22,9 @@ import us.ihmc.yoVariables.providers.DoubleProvider;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
+import us.ihmc.yoVariables.variable.YoFrameLine2D;
 import us.ihmc.yoVariables.variable.YoFramePoint2D;
+import us.ihmc.yoVariables.variable.YoFrameVector2D;
 
 /**
  * This class computes whether a foot is rotating.</br>
@@ -62,7 +63,7 @@ public class FootRotationDetector
    private final AlphaFilteredYoFramePoint2d filteredPointOfRotation;
    private final AlphaFilteredYoFrameVector2d filteredAxisOfRotation;
 
-   private final FrameLine2DBasics lineOfRotationInSole = new FrameLine2D();
+   private final FixedFrameLine2DBasics lineOfRotationInSole;
    private final YoDouble integratedRotationAngle;
    private final YoDouble absoluteFootOmega;
    private final YoBoolean isRotating;
@@ -94,6 +95,10 @@ public class FootRotationDetector
       absoluteFootOmega = new YoDouble(side.getLowerCaseName() + "AbsoluteFootOmega", registry);
       isRotating = new YoBoolean(side.getLowerCaseName() + "IsRotating", registry);
 
+      YoFramePoint2D point = new YoFramePoint2D(side.getLowerCaseName() + "LineOfRotationPoint", soleFrame, registry);
+      YoFrameVector2D direction = new YoFrameVector2D(side.getLowerCaseName() + "LineOfRotationDirection", soleFrame, registry);
+      lineOfRotationInSole = new YoFrameLine2D(point, direction);
+
       DoubleProvider alpha = () -> AlphaFilteredYoVariable.computeAlphaGivenBreakFrequencyProperly(filterBreakFrequency.getValue(), dt);
       filteredPointOfRotation = new AlphaFilteredYoFramePoint2d(side + "FilteredPointOfRotation", "", registry, alpha, soleFrame);
       filteredAxisOfRotation = new AlphaFilteredYoFrameVector2d(side + "FilteredAxisOfRotation", "", registry, alpha, soleFrame);
@@ -120,7 +125,7 @@ public class FootRotationDetector
          tempPointOfRotation.setToZero(soleFrame);
          tempPointOfRotation.cross(soleFrameTwist.getAngularPart(), soleFrameTwist.getLinearPart());
          tempPointOfRotation.scale(1.0 / omegaSquared);
-         lineOfRotationInSole.setToZero(soleFrame);
+         lineOfRotationInSole.setToZero();
          lineOfRotationInSole.getPoint().set(tempPointOfRotation);
          lineOfRotationInSole.getDirection().set(soleFrameTwist.getAngularPart());
 
@@ -144,7 +149,7 @@ public class FootRotationDetector
       {
          filteredPointOfRotation.reset();
          filteredAxisOfRotation.reset();
-         lineOfRotationInSole.setToZero(soleFrame);
+         lineOfRotationInSole.setToZero();
       }
 
       if (!isRotating.getValue())
@@ -194,7 +199,7 @@ public class FootRotationDetector
       linePointB.setToNaN();
       filteredPointOfRotation.reset();
       filteredAxisOfRotation.reset();
-      lineOfRotationInSole.setToZero(soleFrame);
+      lineOfRotationInSole.setToZero();
       integratedRotationAngle.set(0.0);
       absoluteFootOmega.set(0.0);
       isRotating.set(false);
