@@ -65,7 +65,7 @@ public class GUICaptureViewer
       {
          if (setting.getVideoStream() != null)
          {
-            new GUICaptureReceiver(LogParticipantSettings.domain, setting.getVideoStream(), new Handler()).start();
+            new GUICaptureReceiver(LogParticipantSettings.videoDomain, setting.getVideoStream(), new Handler()).start();
          }
 
       }

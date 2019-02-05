@@ -391,7 +391,7 @@ public class YoVariableLoggerListener implements YoVariablesUpdatedListener
                   videoDataLoggers.add(new BlackmagicVideoDataLogger(camera.getNameAsString(), tempDirectory, logProperties, Byte.parseByte(camera.getIdentifierAsString()), options));
                   break;
                case NETWORK_STREAM:
-                  videoDataLoggers.add(new NetworkStreamVideoDataLogger(tempDirectory, logProperties, LogParticipantSettings.domain, camera.getIdentifierAsString()));
+                  videoDataLoggers.add(new NetworkStreamVideoDataLogger(tempDirectory, logProperties, LogParticipantSettings.videoDomain, camera.getIdentifierAsString()));
                   break;
                }
             }

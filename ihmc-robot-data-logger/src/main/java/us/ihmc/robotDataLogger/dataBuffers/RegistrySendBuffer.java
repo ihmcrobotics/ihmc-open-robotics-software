@@ -6,7 +6,6 @@ import java.util.List;
 
 import us.ihmc.robotDataLogger.LogDataType;
 import us.ihmc.robotDataLogger.jointState.JointHolder;
-import us.ihmc.robotDataLogger.rtps.LogParticipantTools;
 import us.ihmc.yoVariables.variable.YoVariable;
 
 public class RegistrySendBuffer extends RegistryBuffer

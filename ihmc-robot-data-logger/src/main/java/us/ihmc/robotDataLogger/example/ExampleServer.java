@@ -8,7 +8,6 @@ import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.log.LogTools;
 import us.ihmc.robotDataLogger.YoVariableServer;
 import us.ihmc.robotDataLogger.logger.DataServerSettings;
-import us.ihmc.robotDataLogger.util.PeriodicGCFreeNonRealtimeThreadSchedulerFactory;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
@@ -40,8 +39,7 @@ public class ExampleServer
    {
       createVariables();
 
-      PeriodicGCFreeNonRealtimeThreadSchedulerFactory schedulerFactory = new PeriodicGCFreeNonRealtimeThreadSchedulerFactory();
-      yoVariableServer = new YoVariableServer(getClass(), schedulerFactory, null, logSettings, dt);
+      yoVariableServer = new YoVariableServer(getClass(), null, logSettings, dt);
       yoVariableServer.setMainRegistry(registry , null, null);
       
       

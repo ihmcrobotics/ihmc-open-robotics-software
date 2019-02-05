@@ -4,6 +4,7 @@ import java.util.concurrent.atomic.AtomicLong;
 
 import us.ihmc.robotDataLogger.interfaces.DataProducer;
 
+@Deprecated
 public class TimestampPublisher implements Runnable
 {
 
