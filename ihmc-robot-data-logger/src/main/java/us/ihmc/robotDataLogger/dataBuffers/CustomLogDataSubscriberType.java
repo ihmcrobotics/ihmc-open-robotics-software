@@ -8,7 +8,6 @@ import us.ihmc.idl.InterchangeSerializer;
 import us.ihmc.pubsub.TopicDataType;
 import us.ihmc.pubsub.common.SerializedPayload;
 import us.ihmc.robotDataLogger.LogDataType;
-import us.ihmc.robotDataLogger.rtps.RTPSDataProducerParticipant;
 import us.ihmc.tools.compression.CompressionImplementation;
 import us.ihmc.tools.compression.CompressionImplementationFactory;
 
@@ -105,15 +104,8 @@ public class CustomLogDataSubscriberType implements TopicDataType<RegistryReceiv
    @Override
    public int getTypeSize()
    {
-      int rawSize = CustomLogDataPublisherType.getTypeSize(compressor.maxCompressedLength(numberOfVariables * 8), numberOfStates);
-      if(rawSize > RTPSDataProducerParticipant.getMaximumSynchronousPacketSize())
-      {
-         return RTPSDataProducerParticipant.getMaximumSynchronousPacketSize();
-      }
-      else
-      {
-         return rawSize;
-      }
+      return CustomLogDataPublisherType.getTypeSize(compressor.maxCompressedLength(numberOfVariables * 8), numberOfStates);
+     
    }
 
 

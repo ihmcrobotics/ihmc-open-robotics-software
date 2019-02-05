@@ -3,28 +3,19 @@ package us.ihmc.robotDataLogger.dataBuffers;
 import java.util.concurrent.PriorityBlockingQueue;
 
 import gnu.trove.map.hash.TIntLongHashMap;
-import gnu.trove.map.hash.TObjectLongHashMap;
-import us.ihmc.commons.Conversions;
 import us.ihmc.commons.thread.ThreadTools;
-import us.ihmc.pubsub.common.Guid;
-import us.ihmc.pubsub.common.MatchingInfo;
-import us.ihmc.pubsub.common.SampleInfo;
-import us.ihmc.pubsub.subscriber.Subscriber;
-import us.ihmc.pubsub.subscriber.SubscriberListener;
 import us.ihmc.robotDataLogger.LogDataType;
 import us.ihmc.robotDataLogger.YoVariableClientImplementation;
 import us.ihmc.robotDataLogger.handshake.IDLYoVariableHandshakeParser;
-import us.ihmc.robotDataLogger.rtps.LogParticipantTools;
 import us.ihmc.robotDataLogger.util.DebugRegistry;
 
-public class RegistryConsumer extends Thread implements SubscriberListener
+public class RegistryConsumer extends Thread
 {
    private final static int MAXIMUM_ELEMENTS = 4096;
    
   
 //   private final ConcurrentSkipListSet<RegistryReceiveBuffer> orderedBuffers = new ConcurrentSkipListSet<>();
    private final PriorityBlockingQueue<RegistryReceiveBuffer> orderedBuffers = new PriorityBlockingQueue<>();
-   private final SampleInfo sampleInfo = new SampleInfo();
    private volatile boolean running = true;
    
    private boolean firstSample = true;
@@ -34,7 +25,6 @@ public class RegistryConsumer extends Thread implements SubscriberListener
    private final YoVariableClientImplementation listener;
    
    private final TIntLongHashMap lastRegistryUid = new TIntLongHashMap();
-   private final TObjectLongHashMap<Guid> sampleIdentities = new TObjectLongHashMap<>();
    
    // Standard deviation calculation
    private long previousTransmitTime = - 1;
@@ -44,7 +34,6 @@ public class RegistryConsumer extends Thread implements SubscriberListener
    private double averageTimeBetweenPackets = 0;
    
    private volatile int jitterBufferSamples = 1;
-   private final int segmentsForAllVariables;
    
    private long previousTimestamp = -1;
 
@@ -61,7 +50,6 @@ public class RegistryConsumer extends Thread implements SubscriberListener
 
       this.debugRegistry = debugRegistry;
 
-      this.segmentsForAllVariables = LogParticipantTools.calculateLogSegmentSizes(parser.getNumberOfVariables(), parser.getNumberOfJointStateVariables()).length;
       
       start();
    }
@@ -74,7 +62,7 @@ public class RegistryConsumer extends Thread implements SubscriberListener
       {
          ThreadTools.sleep(1);
          
-         while(orderedBuffers.size() > (jitterBufferSamples + lastRegistryUid.size() + segmentsForAllVariables + 1))
+         while(orderedBuffers.size() > (jitterBufferSamples + lastRegistryUid.size() + 1))
          {
             try
             {
@@ -182,28 +170,6 @@ public class RegistryConsumer extends Thread implements SubscriberListener
       else
       {
          //Received keep alive, ignore
-      }
-   }
-   
-   @Override
-   public void onSubscriptionMatched(Subscriber subscriber, MatchingInfo info)
-   {
-   }
-
-   @Override
-   public void onNewDataMessage(Subscriber subscriber)
-   {
-      RegistryReceiveBuffer buffer = new RegistryReceiveBuffer(System.nanoTime());
-      if (subscriber.takeNextData(buffer, sampleInfo))
-      {
-         if (sampleIdentities.get(sampleInfo.getSampleIdentity().getGuid()) != sampleIdentities.getNoEntryValue()
-               && sampleIdentities.get(sampleInfo.getSampleIdentity().getGuid()) + 1 != sampleInfo.getSampleIdentity().getSequenceNumber().get())
-         {
-            debugRegistry.getSkippedIncomingPackets().increment();
-         }
-         sampleIdentities.put(sampleInfo.getSampleIdentity().getGuid(), sampleInfo.getSampleIdentity().getSequenceNumber().get());
-         
-         onNewDataMessage(buffer);
       }
    }
    
