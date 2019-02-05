@@ -11,8 +11,12 @@ import us.ihmc.avatar.initialSetup.OffsetAndYawRobotInitialSetup;
 import us.ihmc.avatar.testTools.DRCSimulationTestHelper;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commons.thread.ThreadTools;
+import us.ihmc.euclid.geometry.Line2D;
+import us.ihmc.euclid.geometry.interfaces.Line2DReadOnly;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.tuple2D.Point2D;
+import us.ihmc.euclid.tuple2D.Vector2D;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
@@ -30,14 +34,68 @@ public abstract class AvatarFootWobbleTest implements MultiRobotTestInterface
    private SimulationTestingParameters simulationTestingParameters;
    private DRCSimulationTestHelper testHelper;
 
-   public void testICPReplanning() throws SimulationExceededMaximumTimeException
+   public void testICPReplanningInSwing() throws SimulationExceededMaximumTimeException
    {
       testHelper = new DRCSimulationTestHelper(simulationTestingParameters, getRobotModel(), new FlatGroundEnvironment());
       testHelper.createSimulation(getSimpleRobotName() + "FootWobbleTest");
       Assert.assertTrue(testHelper.simulateAndBlockAndCatchExceptions(0.25));
 
-      // Create step in place:
+      // Create step messages:
+      int steps = 3;
       RobotSide stepSide = RobotSide.LEFT;
+      FootstepDataListMessage stepsInPlace = createStepsInPlace(testHelper, stepSide, steps);
+      FootstepDataListMessage stepInPlace = createStepInPlace(testHelper, stepSide);
+
+      // Step and simulate until the swing is half over:
+      testHelper.publishToController(stepInPlace);
+      double initialTransferTime = getRobotModel().getWalkingControllerParameters().getDefaultInitialTransferTime();
+      double finalTransferTime = getRobotModel().getWalkingControllerParameters().getDefaultFinalTransferTime();
+      double swingTime = getRobotModel().getWalkingControllerParameters().getDefaultSwingTime();
+      Assert.assertTrue(testHelper.simulateAndBlockAndCatchExceptions(initialTransferTime + swingTime / 2.0));
+
+      // Trigger a fake rotation detection - the rotation detector is set up so these variables can be changed like this:
+      Line2D lineOfRotation = new Line2D(new Point2D(0.0, 0.0), new Vector2D(0.0, 1.0));
+      setLineOfRotation(testHelper, stepSide, lineOfRotation);
+
+      // Simulate some more and then observe the CoP waypoints in the ICP planner. They should have shifted away from the line of rotation.
+      Assert.assertTrue(testHelper.simulateAndBlockAndCatchExceptions(swingTime / 2.0 + finalTransferTime + 0.25));
+      // TODO: add checks.
+
+      // Assert that the line of rotation has not changed. This would happen if the foot was actually rotating or the rotation detector changes such
+      // that the above method for changing the line of rotation does not persist anymore.
+      assertLineOfRotation(testHelper, stepSide, lineOfRotation, Double.MIN_VALUE);
+
+      // Send a few more steps in place and make sure the rotation indicator resets to false.
+      testHelper.publishToController(stepsInPlace);
+      double transferTime = getRobotModel().getWalkingControllerParameters().getDefaultTransferTime();
+      Assert.assertTrue(testHelper.simulateAndBlockAndCatchExceptions(initialTransferTime + steps * swingTime + (steps - 1) * transferTime + finalTransferTime + 0.25));
+      String sidePrefix = stepSide.getOppositeSide().getLowerCaseName();
+      Assert.assertEquals(0.0, testHelper.getYoVariable(sidePrefix + "IsRotating").getValueAsDouble(), Double.MIN_VALUE);
+   }
+
+   private static void assertLineOfRotation(DRCSimulationTestHelper testHelper, RobotSide side, Line2DReadOnly line, double epsilon)
+   {
+      String sidePrefix = side.getOppositeSide().getLowerCaseName();
+      String message = "Line of rotation has changed from what it was set to.";
+      Assert.assertEquals(message, 1.0, testHelper.getYoVariable(sidePrefix + "IsRotating").getValueAsDouble(), epsilon);
+      Assert.assertEquals(message, line.getPointX(), testHelper.getYoVariable(sidePrefix + "LineOfRotationPointX").getValueAsDouble(), epsilon);
+      Assert.assertEquals(message, line.getPointY(), testHelper.getYoVariable(sidePrefix + "LineOfRotationPointY").getValueAsDouble(), epsilon);
+      Assert.assertEquals(message, line.getDirectionX(), testHelper.getYoVariable(sidePrefix + "LineOfRotationDirectionX").getValueAsDouble(), epsilon);
+      Assert.assertEquals(message, line.getDirectionY(), testHelper.getYoVariable(sidePrefix + "LineOfRotationDirectionY").getValueAsDouble(), epsilon);
+   }
+
+   private static void setLineOfRotation(DRCSimulationTestHelper testHelper, RobotSide side, Line2DReadOnly line)
+   {
+      String sidePrefix = side.getOppositeSide().getLowerCaseName();
+      testHelper.getYoVariable(sidePrefix + "IsRotating").setValueFromDouble(1.0);
+      testHelper.getYoVariable(sidePrefix + "LineOfRotationPointX").setValueFromDouble(line.getPointX());
+      testHelper.getYoVariable(sidePrefix + "LineOfRotationPointY").setValueFromDouble(line.getPointY());
+      testHelper.getYoVariable(sidePrefix + "LineOfRotationDirectionX").setValueFromDouble(line.getDirectionX());
+      testHelper.getYoVariable(sidePrefix + "LineOfRotationDirectionY").setValueFromDouble(line.getDirectionY());
+   }
+
+   private static FootstepDataListMessage createStepInPlace(DRCSimulationTestHelper testHelper, RobotSide stepSide)
+   {
       FramePose3D footPose = new FramePose3D(testHelper.getReferenceFrames().getSoleFrame(stepSide));
       footPose.changeFrame(ReferenceFrame.getWorldFrame());
       FootstepDataListMessage steps = new FootstepDataListMessage();
@@ -45,32 +103,23 @@ public abstract class AvatarFootWobbleTest implements MultiRobotTestInterface
       step.getLocation().set(footPose.getPosition());
       step.getOrientation().set(footPose.getOrientation());
       step.setRobotSide(stepSide.toByte());
-      testHelper.publishToController(steps);
+      return steps;
+   }
 
-      // Simulate until the swing is half over:
-      Assert.assertTrue(testHelper.simulateAndBlockAndCatchExceptions(getRobotModel().getWalkingControllerParameters().getDefaultInitialTransferTime()));
-      Assert.assertTrue(testHelper.simulateAndBlockAndCatchExceptions(getRobotModel().getWalkingControllerParameters().getDefaultSwingTime() / 2.0));
-
-      // Trigger a fake rotation detection - the rotation detector is set up so these variables can be changed like this:
-      String sidePrefix = stepSide.getOppositeSide().getLowerCaseName();
-      testHelper.getYoVariable(sidePrefix + "IsRotating").setValueFromDouble(1.0);
-      testHelper.getYoVariable(sidePrefix + "LineOfRotationPointX").setValueFromDouble(0.0);
-      testHelper.getYoVariable(sidePrefix + "LineOfRotationPointY").setValueFromDouble(0.0);
-      testHelper.getYoVariable(sidePrefix + "LineOfRotationDirectionX").setValueFromDouble(0.0);
-      testHelper.getYoVariable(sidePrefix + "LineOfRotationDirectionY").setValueFromDouble(1.0);
-
-      // Simulate some more and then observe the CoP waypoints in the ICP planner. They should have shifted away from the line of rotation.
-      Assert.assertTrue(testHelper.simulateAndBlockAndCatchExceptions(getRobotModel().getControllerDT() * 5.0));
-      // TODO: add checks.
-
-      // Assert that the line of rotation has not changed. This would happen if the foot was actually rotating or the rotation detector changes such
-      // that the above method for changing the line of rotation does not persist anymore.
-      String message = "Line of rotation has changed from what it was set to.";
-      Assert.assertEquals(message, 1.0, testHelper.getYoVariable(sidePrefix + "IsRotating").getValueAsDouble(), Double.MIN_VALUE);
-      Assert.assertEquals(message, 0.0, testHelper.getYoVariable(sidePrefix + "LineOfRotationPointX").getValueAsDouble(), Double.MIN_VALUE);
-      Assert.assertEquals(message, 0.0, testHelper.getYoVariable(sidePrefix + "LineOfRotationPointY").getValueAsDouble(), Double.MIN_VALUE);
-      Assert.assertEquals(message, 0.0, testHelper.getYoVariable(sidePrefix + "LineOfRotationDirectionX").getValueAsDouble(), Double.MIN_VALUE);
-      Assert.assertEquals(message, 1.0, testHelper.getYoVariable(sidePrefix + "LineOfRotationDirectionY").getValueAsDouble(), Double.MIN_VALUE);
+   private static FootstepDataListMessage createStepsInPlace(DRCSimulationTestHelper testHelper, RobotSide startSide, int numberOfSteps)
+   {
+      FootstepDataListMessage steps = new FootstepDataListMessage();
+      for (int i = 0; i < numberOfSteps; i++)
+      {
+         FramePose3D footPose = new FramePose3D(testHelper.getReferenceFrames().getSoleFrame(startSide));
+         footPose.changeFrame(ReferenceFrame.getWorldFrame());
+         FootstepDataMessage step = steps.getFootstepDataList().add();
+         step.getLocation().set(footPose.getPosition());
+         step.getOrientation().set(footPose.getOrientation());
+         step.setRobotSide(startSide.toByte());
+         startSide = startSide.getOppositeSide();
+      }
+      return steps;
    }
 
    private static final double stepLenght = 0.15;
@@ -177,6 +226,7 @@ public abstract class AvatarFootWobbleTest implements MultiRobotTestInterface
    {
       if (simulationTestingParameters.getKeepSCSUp())
       {
+         testHelper.getSimulationConstructionSet().cropBuffer();
          ThreadTools.sleepForever();
       }
 
