@@ -16,7 +16,6 @@ import us.ihmc.communication.IHMCROS2Publisher;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.euclid.referenceFrame.tools.ReferenceFrameTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.humanoidRobotics.kryo.PPSTimestampOffsetProvider;
@@ -30,8 +29,9 @@ import us.ihmc.utilities.ros.subscriber.RosPointCloudSubscriber;
 public class StereoVisionPointCloudPublisher
 {
    private static final boolean Debug = false;
-   
+
    private static final int MAX_NUMBER_OF_POINTS = 200000;
+   private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
 
    private final String name = getClass().getSimpleName();
    private final ScheduledExecutorService executorService = Executors.newSingleThreadScheduledExecutor(ThreadTools.getNamedThreadFactory(name));
@@ -40,16 +40,19 @@ public class StereoVisionPointCloudPublisher
 
    private final String robotName;
    private final FullHumanoidRobotModel fullRobotModel;
+   private final ReferenceFrame lidarBaseFrame;
+   private ReferenceFrame lidarSensorFrame;
+   private ReferenceFrame stereoVisionPointsFrame = worldFrame;
+   private StereoVisionTransformer stereoVisionTransformer = null;
+
    private final RobotConfigurationDataBuffer robotConfigurationDataBuffer = new RobotConfigurationDataBuffer();
 
    private PPSTimestampOffsetProvider ppsTimestampOffsetProvider = null;
 
    private final IHMCROS2Publisher<StereoVisionPointCloudMessage> pointcloudPublisher;
 
-   private final ReferenceFrame dataFrame;
-
-   public StereoVisionPointCloudPublisher(FullHumanoidRobotModelFactory modelFactory, Ros2Node ros2Node, String robotConfigurationDataTopicName,
-                                          RigidBodyTransform transform)
+   public StereoVisionPointCloudPublisher(String lidarSensorName, FullHumanoidRobotModelFactory modelFactory, Ros2Node ros2Node,
+                                          String robotConfigurationDataTopicName)
    {
       robotName = modelFactory.getRobotDescription().getName();
       fullRobotModel = modelFactory.createFullRobotModel();
@@ -57,7 +60,9 @@ public class StereoVisionPointCloudPublisher
       ROS2Tools.createCallbackSubscription(ros2Node, RobotConfigurationData.class, robotConfigurationDataTopicName,
                                            s -> robotConfigurationDataBuffer.receivedPacket(s.takeNextData()));
       pointcloudPublisher = ROS2Tools.createPublisher(ros2Node, StereoVisionPointCloudMessage.class, ROS2Tools.getDefaultTopicNameGenerator());
-      dataFrame = ReferenceFrameTools.constructFrameWithUnchangingTransformToParent("stereoFrame", fullRobotModel.getHead().getBodyFixedFrame(), transform);
+      lidarBaseFrame = fullRobotModel.getLidarBaseFrame(lidarSensorName);
+      RigidBodyTransform transformToLidarBaseFrame = fullRobotModel.getLidarBaseToSensorTransform(lidarSensorName);
+      lidarSensorFrame = ReferenceFrame.constructFrameWithUnchangingTransformToParent("lidarSensorFrame", lidarBaseFrame, transformToLidarBaseFrame);
    }
 
    public void start()
@@ -87,6 +92,21 @@ public class StereoVisionPointCloudPublisher
       this.ppsTimestampOffsetProvider = ppsTimestampOffsetProvider;
    }
 
+   public void setCustomStereoVisionTransformer(StereoVisionTransformer transformer)
+   {
+      stereoVisionTransformer = transformer;
+   }
+
+   public void setScanFrameToWorldFrame()
+   {
+      stereoVisionPointsFrame = worldFrame;
+   }
+
+   public void setScanFrameToLidarSensorFrame()
+   {
+      stereoVisionPointsFrame = lidarSensorFrame;
+   }
+
    private RosPointCloudSubscriber createROSPointCloud2Subscriber()
    {
       return new RosPointCloudSubscriber()
@@ -99,7 +119,7 @@ public class StereoVisionPointCloudPublisher
             Color[] colors = pointCloudData.getPointColors();
             long timestamp = pointCloud.getHeader().getStamp().totalNsecs();
 
-            if(Debug)
+            if (Debug)
                System.out.println("Receiving point cloud, n points: " + scanPoints.length);
 
             pointCloudDataToPublish.set(new ColorPointCloudData(timestamp, scanPoints, colors));
@@ -111,6 +131,8 @@ public class StereoVisionPointCloudPublisher
    {
       return new Runnable()
       {
+         private final RigidBodyTransform transformToWorld = new RigidBodyTransform();
+
          @Override
          public void run()
          {
@@ -135,16 +157,24 @@ public class StereoVisionPointCloudPublisher
                   return;
             }
 
-            RigidBodyTransform transformToWorldFrame = dataFrame.getTransformToWorldFrame();
-            StereoVisionPointCloudMessage message = pointCloudData.createStereoVisionPointCloudMessage(transformToWorldFrame, MAX_NUMBER_OF_POINTS);
-            if(Debug)
+            if (stereoVisionTransformer != null)
+            {
+               stereoVisionTransformer.transform(fullRobotModel, robotConfigurationDataBuffer, stereoVisionPointsFrame, pointCloudData);
+            }
+            else if (!stereoVisionPointsFrame.isWorldFrame())
+            {
+               stereoVisionPointsFrame.getTransformToDesiredFrame(transformToWorld, worldFrame);
+            }
+
+            StereoVisionPointCloudMessage message = pointCloudData.createStereoVisionPointCloudMessage(transformToWorld, MAX_NUMBER_OF_POINTS);
+            if (Debug)
                System.out.println("Publishing stereo data, number of points: " + (message.getPointCloud().size() / 3));
             pointcloudPublisher.publish(message);
          }
       };
    }
 
-   private class ColorPointCloudData
+   public class ColorPointCloudData
    {
       private final long timestamp;
       private final Point3D[] pointCloud;
@@ -208,5 +238,11 @@ public class StereoVisionPointCloudPublisher
 
          return MessageTools.createStereoVisionPointCloudMessage(timestamp, pointCloudBuffer, colorsInteger);
       }
+   }
+
+   public static interface StereoVisionTransformer
+   {
+      public void transform(FullHumanoidRobotModel fullRobotModel, RobotConfigurationDataBuffer robotConfigurationDataBuffer, ReferenceFrame scanPointsFrame,
+                            ColorPointCloudData scanDataToTransformToWorld);
    }
 }
