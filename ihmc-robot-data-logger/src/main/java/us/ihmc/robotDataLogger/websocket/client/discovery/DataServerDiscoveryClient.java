@@ -1,7 +1,9 @@
 package us.ihmc.robotDataLogger.websocket.client.discovery;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
@@ -155,6 +157,22 @@ public class DataServerDiscoveryClient
             }
          }
       }
+   }
+   
+   public List<HTTPDataServerDescription> getPersistantHostList()
+   {
+      ArrayList<HTTPDataServerDescription> list = new ArrayList<>();
+      
+      for (HTTPDataServerDescription description : hosts.values())
+      {
+         if(description.isPersistant())
+         {
+            list.add(description);
+         }
+      }
+      
+      return list;
+      
    }
 
    public static void main(String[] args)

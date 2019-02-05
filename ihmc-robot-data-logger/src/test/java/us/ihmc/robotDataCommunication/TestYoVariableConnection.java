@@ -4,7 +4,7 @@ import java.io.IOException;
 
 import us.ihmc.commons.Conversions;
 import us.ihmc.robotDataLogger.YoVariableServer;
-import us.ihmc.robotDataLogger.logger.LogSettings;
+import us.ihmc.robotDataLogger.logger.DataServerSettings;
 import us.ihmc.robotDataLogger.util.JVMStatisticsGenerator;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.util.PeriodicNonRealtimeThreadSchedulerFactory;
@@ -46,7 +46,7 @@ public class TestYoVariableConnection
    private final YoDouble param1Echo = new YoDouble("param1Echo", registry);
    private final YoDouble param2Echo = new YoDouble("param2Echo", registry);
    
-   private final YoVariableServer server = new YoVariableServer(getClass(), new PeriodicNonRealtimeThreadSchedulerFactory(), null, LogSettings.TEST_LOGGER, 0.001);
+   private final YoVariableServer server = new YoVariableServer(getClass(), new PeriodicNonRealtimeThreadSchedulerFactory(), null, new DataServerSettings(false), 0.001);
    private final JVMStatisticsGenerator jvmStatisticsGenerator = new JVMStatisticsGenerator(server);
    
    

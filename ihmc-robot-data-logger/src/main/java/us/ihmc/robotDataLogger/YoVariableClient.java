@@ -2,6 +2,7 @@ package us.ihmc.robotDataLogger;
 
 import java.io.IOException;
 
+import us.ihmc.robotDataLogger.gui.DataServerSelectorGUI;
 import us.ihmc.robotDataLogger.rtps.LogProducerDisplay;
 import us.ihmc.robotDataLogger.rtps.RTPSDataConsumerParticipant;
 import us.ihmc.robotDataLogger.websocket.client.discovery.HTTPDataServerConnection;
@@ -42,8 +43,7 @@ public class YoVariableClient
    @Deprecated
    public void start()
    {
-      start("127.0.0.1", 8008);
-//      startWithHostSelector();
+      startWithHostSelector();
    }
 
    
@@ -52,7 +52,8 @@ public class YoVariableClient
     */
    public void startWithHostSelector()
    {
-      throw new RuntimeException("IMPLEMENT ME");
+      DataServerSelectorGUI selector = new DataServerSelectorGUI();
+      
    }
    
    
