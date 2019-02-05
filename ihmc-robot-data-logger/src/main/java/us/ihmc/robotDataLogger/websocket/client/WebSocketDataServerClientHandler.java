@@ -37,7 +37,7 @@ public class WebSocketDataServerClientHandler extends SimpleChannelInboundHandle
    
    
    private final UDPTimestampClient udpTimestampClient;
-   
+      
    private ChannelPromise handshakeFuture;
 
    private boolean sendConfiguration = false;

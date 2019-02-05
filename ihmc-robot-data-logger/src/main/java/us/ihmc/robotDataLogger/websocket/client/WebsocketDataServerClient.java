@@ -32,7 +32,9 @@ import us.ihmc.robotDataLogger.dataBuffers.RegistryConsumer;
 import us.ihmc.robotDataLogger.handshake.IDLYoVariableHandshakeParser;
 import us.ihmc.robotDataLogger.listeners.TimestampListener;
 import us.ihmc.robotDataLogger.util.DebugRegistry;
+import us.ihmc.robotDataLogger.websocket.client.discovery.HTTPDataServerConnection;
 import us.ihmc.robotDataLogger.websocket.client.discovery.HTTPDataServerDescription;
+import us.ihmc.robotDataLogger.websocket.client.discovery.HTTPDataServerConnection.DisconnectPromise;
 import us.ihmc.robotDataLogger.websocket.command.DataServerCommand;
 
 public class WebsocketDataServerClient
@@ -45,10 +47,15 @@ public class WebsocketDataServerClient
 
    private final Channel ch;
 
-   public WebsocketDataServerClient(HTTPDataServerDescription target, IDLYoVariableHandshakeParser parser, TimestampListener timestampListener, YoVariableClientImplementation yoVariableClient,
-                                    DebugRegistry debugRegistry)
+   private final DisconnectPromise disconnectPromise;
+
+   public WebsocketDataServerClient(HTTPDataServerConnection connection, IDLYoVariableHandshakeParser parser, TimestampListener timestampListener,
+                                    YoVariableClientImplementation yoVariableClient, DebugRegistry debugRegistry)
          throws IOException
    {
+      this.disconnectPromise = connection.take();
+      HTTPDataServerDescription target = connection.getTarget();
+
       URI uri;
       try
       {
@@ -84,14 +91,20 @@ public class WebsocketDataServerClient
       try
       {
          ch = b.connect(uri.getHost(), uri.getPort()).syncUninterruptibly().channel();
-         ch.closeFuture().addListener((e) -> group.shutdownGracefully());
+         ch.closeFuture().addListener((e) -> disconnected());
       }
       catch (Exception e)
       {
-         group.shutdownGracefully();
+         disconnected();
          throw new IOException(e);
       }
 
+   }
+
+   private void disconnected()
+   {
+      group.shutdownGracefully();
+      disconnectPromise.complete();
    }
 
    public boolean isActive()

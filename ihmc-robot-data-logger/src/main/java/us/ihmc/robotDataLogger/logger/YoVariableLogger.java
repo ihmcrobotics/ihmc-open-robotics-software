@@ -2,24 +2,24 @@ package us.ihmc.robotDataLogger.logger;
 
 import java.io.File;
 import java.io.IOException;
-import java.net.SocketTimeoutException;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 
 import us.ihmc.robotDataLogger.Announcement;
 import us.ihmc.robotDataLogger.YoVariableClient;
-import us.ihmc.robotDataLogger.rtps.RTPSDataConsumerParticipant;
+import us.ihmc.robotDataLogger.websocket.client.discovery.HTTPDataServerConnection;
 
 public class YoVariableLogger
 {
-   public static final int timeout = 10000;
+   public static final int timeout = 2500;
 
    private final YoVariableClient client;
 
-   public YoVariableLogger(Announcement request, YoVariableLoggerOptions options) throws IOException
+   public YoVariableLogger(HTTPDataServerConnection connection, YoVariableLoggerOptions options) throws IOException
    {
-      RTPSDataConsumerParticipant participant = new RTPSDataConsumerParticipant(request.getName() + "Logger");
+      Announcement request = connection.getAnnouncement();
+      
       DateFormat dateFormat = new SimpleDateFormat("yyyyMMdd_HHmmss");
       Calendar calendar = Calendar.getInstance();
       String timestamp = dateFormat.format(calendar.getTime());
@@ -42,13 +42,13 @@ public class YoVariableLogger
       }
 
       YoVariableLoggerListener logger = new YoVariableLoggerListener(tempDirectory, finalDirectory, timestamp, request, options);
-      client = new YoVariableClient(participant, logger);
+      client = new YoVariableClient(logger);
 
       try
       {
-         client.start(timeout, request);
+         client.start(timeout, connection);
       }
-      catch (SocketTimeoutException e)
+      catch (IOException e)
       {
          finalDirectory.delete();
          throw e;

@@ -50,6 +50,14 @@ public class DataServerDiscoveryClient implements DataServerLocationBroadcastRec
       this.broadcastReceiver = broadcastReceiver;
       
    }
+   
+   public void addHosts(List<HTTPDataServerDescription> descriptions)
+   {
+      for(HTTPDataServerDescription description : descriptions)
+      {
+         addHost(description);
+      }
+   }
 
    @Override
    public void addHost(String host, int port, boolean persistant)
