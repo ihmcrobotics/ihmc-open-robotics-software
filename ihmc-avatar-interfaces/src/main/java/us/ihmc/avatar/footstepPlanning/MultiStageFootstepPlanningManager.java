@@ -661,8 +661,8 @@ public class MultiStageFootstepPlanningManager implements PlannerCompletionCallb
          {
             pathResult.set(pathStatus);
 
-            sendMessageToUI("Result of path planning: " + planId.getIntegerValue() + ", " + pathStatus.toString());
             concatenatePathWaypoints();
+            sendMessageToUI("Result of path planning: " + planId.getIntegerValue() + ", " + pathStatus.toString());
 
             if (!computeBodyPath())
                reportPlannerFailed(pathResult.getEnumValue());
@@ -695,24 +695,31 @@ public class MultiStageFootstepPlanningManager implements PlannerCompletionCallb
          if (noMoreStepsToPlan) // step planning just finished.
          {
             stepResult.set(stepStatus);
-
-            sendMessageToUI("Result of step planning: " + planId.getIntegerValue() + ", " + stepStatus.toString());
-
             concatenateFootstepPlans();
             setStepHeightsForFlatGround();
-            FootstepPlan footstepPlan = this.footstepPlan.getAndSet(null);
 
-            FootstepPlanningToolboxOutputStatus footstepPlanMessage = packStepResult(footstepPlan, bodyPathPlan.getAndSet(null), stepStatus,
-                                                                                     plannerTime.getDoubleValue());
+            if(footstepPlan.get().getNumberOfSteps() > new FootstepDataListMessage().getFootstepDataList().capacity())
+            {
+               reportPlannerFailed(FootstepPlanningResult.PLANNER_FAILED);
+               stepStatus = FootstepPlanningResult.PLANNER_FAILED;
+            }
+            else
+            {
+               FootstepPlan footstepPlan = this.footstepPlan.getAndSet(null);
+               FootstepPlanningToolboxOutputStatus footstepPlanMessage = packStepResult(footstepPlan, bodyPathPlan.getAndSet(null), stepStatus,
+                                                                                        plannerTime.getDoubleValue());
 
-            if(swingTimeCalculator != null)
-               processSwingTimes(footstepPlanMessage.getFootstepDataList());
+               if(swingTimeCalculator != null)
+                  processSwingTimes(footstepPlanMessage.getFootstepDataList());
 
-            statusOutputManager.reportStatusMessage(footstepPlanMessage);
+               statusOutputManager.reportStatusMessage(footstepPlanMessage);
 
-            timeSpentInFootstepPlanner.set(plannerTime.getDoubleValue() - timeSpentBeforeFootstepPlanner.getDoubleValue());
+               timeSpentInFootstepPlanner.set(plannerTime.getDoubleValue() - timeSpentBeforeFootstepPlanner.getDoubleValue());
 
-            isDonePlanningSteps.set(true);
+               isDonePlanningSteps.set(true);
+            }
+
+            sendMessageToUI("Result of step planning: " + planId.getIntegerValue() + ", " + stepStatus.toString());
          }
       }
 
@@ -797,7 +804,7 @@ public class MultiStageFootstepPlanningManager implements PlannerCompletionCallb
                   ex.getCause().printStackTrace();
                }
 
-               throw new RuntimeException("Something killed path planning stage " + stage.getStageId() + " before it could complete.");
+               reportPlannerFailed(FootstepPlanningResult.PLANNER_FAILED);
             }
          }
       }
@@ -826,7 +833,7 @@ public class MultiStageFootstepPlanningManager implements PlannerCompletionCallb
                   ex.getCause().printStackTrace();
                }
 
-               throw new RuntimeException("Something killed step planning stage " + stage.getStageId() + " before it could complete.");
+               reportPlannerFailed(FootstepPlanningResult.PLANNER_FAILED);
             }
          }
       }
