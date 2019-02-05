@@ -598,6 +598,11 @@ public class HumanoidMessageTools
       return message;
    }
 
+   public static PelvisTrajectoryMessage createPelvisTrajectoryMessage(double trajectoryTime, Pose3DReadOnly desiredPose)
+   {
+      return createPelvisTrajectoryMessage(trajectoryTime, desiredPose.getPosition(), desiredPose.getOrientation());
+   }
+
    /**
     * Use this constructor to execute a straight line trajectory in taskspace. Set the id of the
     * message to {@link Packet#VALID_MESSAGE_DEFAULT_ID}.
