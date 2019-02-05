@@ -9,6 +9,7 @@ import us.ihmc.multicastLogDataProtocol.modelLoaders.LogModelProvider;
 import us.ihmc.pathPlanning.visibilityGraphs.DefaultVisibilityGraphParameters;
 import us.ihmc.pubsub.DomainFactory;
 import us.ihmc.quadrupedCommunication.QuadrupedControllerAPIDefinition;
+import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.graphSearch.parameters.DefaultFootstepPlannerParameters;
 import us.ihmc.quadrupedPlanning.QuadrupedXGaitSettingsReadOnly;
 import us.ihmc.quadrupedPlanning.footstepChooser.PointFootSnapperParameters;
 import us.ihmc.quadrupedCommunication.networkProcessing.QuadrupedToolboxController;
@@ -38,7 +39,7 @@ public class QuadrupedFootstepPlanningModule extends QuadrupedToolboxModule
             pubSubImplementation);
 
 
-      footstepPlanningController = new QuadrupedFootstepPlanningController(defaultXGaitSettings, new DefaultVisibilityGraphParameters(),
+      footstepPlanningController = new QuadrupedFootstepPlanningController(defaultXGaitSettings, new DefaultVisibilityGraphParameters(), new DefaultFootstepPlannerParameters(),
                                                                            pointFootSnapperParameters, outputManager, robotDataReceiver, registry,
                                                                            yoGraphicsListRegistry, updatePeriodMilliseconds);
       new DefaultParameterReader().readParametersInRegistry(registry);

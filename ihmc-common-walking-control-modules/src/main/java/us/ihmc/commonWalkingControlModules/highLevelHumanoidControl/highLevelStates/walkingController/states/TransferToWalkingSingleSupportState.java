@@ -46,16 +46,23 @@ public class TransferToWalkingSingleSupportState extends TransferState
    protected void updateICPPlan()
    {
       super.updateICPPlan();
-      boolean initialTransfer = isInitialTransfer();
 
-      if (initialTransfer)
+      // This needs to check `TO_STANDING` as well as messages could be received on the very first controller tick at which point
+      // the robot is not in the standing state but not yet walking either.
+      if (getPreviousWalkingStateEnum() == WalkingStateEnum.STANDING || getPreviousWalkingStateEnum() == WalkingStateEnum.TO_STANDING)
       {
          walkingMessageHandler.reportWalkingStarted();
+      }
+
+      if (isInitialTransfer())
+      {
          pelvisOrientationManager.moveToAverageInSupportFoot(transferToSide);
       }
-      // In middle of walking or leaving foot pose, pelvis is good leave it like that.
       else
+      {
+         // In middle of walking or leaving foot pose, pelvis is good leave it like that.
          pelvisOrientationManager.setToHoldCurrentDesiredInSupportFoot(transferToSide);
+      }
 
       double finalTransferTime = walkingMessageHandler.getFinalTransferTime();
       walkingMessageHandler.requestPlanarRegions();

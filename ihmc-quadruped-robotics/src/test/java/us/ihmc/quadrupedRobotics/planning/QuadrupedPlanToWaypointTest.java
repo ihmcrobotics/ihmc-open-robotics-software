@@ -6,6 +6,7 @@ import org.junit.Before;
 import org.junit.Test;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.quadrupedCommunication.teleop.RemoteQuadrupedTeleopManager;
+import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.FootstepPlannerType;
 import us.ihmc.quadrupedRobotics.QuadrupedForceTestYoVariables;
 import us.ihmc.quadrupedRobotics.QuadrupedMultiRobotTestInterface;
 import us.ihmc.quadrupedRobotics.QuadrupedTestBehaviors;
@@ -84,6 +85,7 @@ public abstract class QuadrupedPlanToWaypointTest implements QuadrupedMultiRobot
 
       planningRequestPacket.getGoalPositionInWorld().set(1.5, 0.5, 0.0);
       planningRequestPacket.getGoalOrientationInWorld().setToYawQuaternion(-Math.PI * 0.25);
+      planningRequestPacket.setRequestedFootstepPlannerType(FootstepPlannerType.SIMPLE_PATH_TURN_WALK_TURN.toByte());
 
       stepTeleopManager.publishPlanningRequest(planningRequestPacket);
 
