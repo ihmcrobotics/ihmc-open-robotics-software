@@ -52,10 +52,7 @@ public interface DataProducer
     */
    void publishTimestamp(long timestamp);
 
-   RegistryPublisher createRegistryPublisher(CustomLogDataPublisherType type, PeriodicThreadSchedulerFactory schedulerFactory,
-                                             RegistrySendBufferBuilder builder)
-         throws IOException;
+   RegistryPublisher createRegistryPublisher(CustomLogDataPublisherType type, RegistrySendBufferBuilder builder) throws IOException;
 
-   void sendKeepAlive(PeriodicThreadSchedulerFactory schedulerFactory) throws IOException;
 
 }

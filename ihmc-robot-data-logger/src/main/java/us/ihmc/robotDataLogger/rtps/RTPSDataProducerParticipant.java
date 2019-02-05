@@ -50,7 +50,7 @@ import us.ihmc.util.PeriodicThreadSchedulerFactory;
  * @author Jesper Smith
  *
  */
-public class RTPSDataProducerParticipant implements DataProducer
+public class RTPSDataProducerParticipant
 {
    private final Domain domain = DomainFactory.getDomain(PubSubImplementation.FAST_RTPS);
    private final Participant participant;
@@ -144,7 +144,7 @@ public class RTPSDataProducerParticipant implements DataProducer
     * 
     * After calling this function, the producer cannot be reactivated
     */
-   @Override
+   
    public void remove()
    {
       domain.removeParticipant(participant);
@@ -157,7 +157,7 @@ public class RTPSDataProducerParticipant implements DataProducer
     * 
     * @param handshake
     */
-   @Override
+   
    public void setHandshake(Handshake handshake)
    {
       this.handshake = handshake;
@@ -200,7 +200,7 @@ public class RTPSDataProducerParticipant implements DataProducer
     * @param name User friendly name to show in the log files
     * @param cameraId ID of the camera on the logger machine
     */
-   @Override
+   
    public void addCamera(CameraType type, String name, String cameraId)
    {
       CameraAnnouncement cameraAnnouncement = new CameraAnnouncement();
@@ -215,7 +215,7 @@ public class RTPSDataProducerParticipant implements DataProducer
     * 
     * @throws IOException
     */
-   @Override
+   
    public void announce() throws IOException
    {
       if (activated)
@@ -268,7 +268,7 @@ public class RTPSDataProducerParticipant implements DataProducer
     * @param timestamp
     * @throws IOException 
     */
-   @Override
+  
    public void publishTimestamp(long timestamp)
    {
       try
@@ -286,7 +286,7 @@ public class RTPSDataProducerParticipant implements DataProducer
    }
    
    
-   @Override
+   
    public RTPSRegistryPublisher createRegistryPublisher(CustomLogDataPublisherType type, PeriodicThreadSchedulerFactory schedulerFactory,
                                                     RegistrySendBufferBuilder builder)
          throws IOException
@@ -300,7 +300,7 @@ public class RTPSDataProducerParticipant implements DataProducer
       
       return new RTPSRegistryPublisher(schedulerFactory, builder, publisher);
    }
-   @Override
+   
    public void sendKeepAlive(PeriodicThreadSchedulerFactory schedulerFactory) throws IOException
    {
       CustomLogDataPublisherType type = new CustomLogDataPublisherType(0, 0);

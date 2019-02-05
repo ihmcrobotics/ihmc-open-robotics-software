@@ -58,7 +58,6 @@ public class TestYoVariableConnection
       new YoEnum<TestEnum>("var6", "", registry, TestEnum.class, true);
       parameterReader = new XmlParameterReader(getClass().getResourceAsStream("TestParameters.xml"));
       
-      server.setSendKeepAlive(true);
       server.setMainRegistry(registry, null, null);
       
       server.createSummary("tester.startVariableSummary");
