@@ -1,7 +1,7 @@
 package us.ihmc.footstepPlanning;
 
-import static junit.framework.TestCase.assertEquals;
-import static junit.framework.TestCase.assertTrue;
+import static us.ihmc.robotics.Assert.*;
+
 import static us.ihmc.robotics.Assert.*;
 
 import java.util.ArrayList;

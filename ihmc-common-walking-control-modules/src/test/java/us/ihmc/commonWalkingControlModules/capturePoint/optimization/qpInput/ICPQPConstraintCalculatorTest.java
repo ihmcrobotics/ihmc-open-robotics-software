@@ -1,6 +1,7 @@
 package us.ihmc.commonWalkingControlModules.capturePoint.optimization.qpInput;
 
-import static junit.framework.TestCase.assertTrue;
+import static us.ihmc.robotics.Assert.*;
+
 import static us.ihmc.robotics.Assert.*;
 
 import java.util.Random;

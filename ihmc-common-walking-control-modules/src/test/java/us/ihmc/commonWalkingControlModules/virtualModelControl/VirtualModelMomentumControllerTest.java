@@ -1,6 +1,6 @@
 package us.ihmc.commonWalkingControlModules.virtualModelControl;
 
-import static junit.framework.TestCase.assertTrue;
+import static us.ihmc.robotics.Assert.*;
 
 import java.util.ArrayList;
 import java.util.List;

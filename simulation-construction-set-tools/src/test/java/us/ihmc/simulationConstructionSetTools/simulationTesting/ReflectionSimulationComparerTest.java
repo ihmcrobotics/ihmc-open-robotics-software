@@ -6,7 +6,7 @@ import java.lang.reflect.Field;
 import java.util.Collection;
 
 import org.junit.After;
-import org.junit.Assert;
+import us.ihmc.robotics.Assert;
 import org.junit.Before;
 import org.junit.Test;
 

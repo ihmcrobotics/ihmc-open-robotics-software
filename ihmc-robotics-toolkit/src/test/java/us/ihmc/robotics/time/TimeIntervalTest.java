@@ -4,7 +4,8 @@ import org.junit.Test;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.robotics.time.TimeInterval;
 
-import static junit.framework.TestCase.assertEquals;
+import static us.ihmc.robotics.Assert.*;
+
 import static us.ihmc.robotics.Assert.*;
 
 public class TimeIntervalTest

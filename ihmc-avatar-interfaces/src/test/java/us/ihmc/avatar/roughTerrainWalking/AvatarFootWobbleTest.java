@@ -1,7 +1,7 @@
 package us.ihmc.avatar.roughTerrainWalking;
 
 import org.junit.After;
-import org.junit.Assert;
+import us.ihmc.robotics.Assert;
 import org.junit.Before;
 
 import controller_msgs.msg.dds.FootstepDataListMessage;

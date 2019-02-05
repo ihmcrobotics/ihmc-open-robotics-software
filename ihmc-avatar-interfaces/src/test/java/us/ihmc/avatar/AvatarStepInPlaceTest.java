@@ -1,6 +1,7 @@
 package us.ihmc.avatar;
 
-import static junit.framework.TestCase.assertFalse;
+import static us.ihmc.robotics.Assert.*;
+
 import static us.ihmc.robotics.Assert.*;
 
 import org.junit.After;
