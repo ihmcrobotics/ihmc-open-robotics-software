@@ -373,7 +373,7 @@ public class SupportState extends AbstractFootControlState
 
       if (footRotationDetector.compute() && avoidFootRotations.getValue())
       {
-         footRotationHelper.compute(footRotationDetector.getLineOfRotation());
+         footRotationHelper.compute(footRotationDetector.getLineOfRotation(), footPolygon);
       }
    }
 

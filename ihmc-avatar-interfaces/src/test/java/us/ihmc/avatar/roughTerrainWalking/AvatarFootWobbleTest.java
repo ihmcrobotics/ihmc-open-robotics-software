@@ -1,5 +1,7 @@
 package us.ihmc.avatar.roughTerrainWalking;
 
+import java.util.Random;
+
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
@@ -15,8 +17,7 @@ import us.ihmc.euclid.geometry.Line2D;
 import us.ihmc.euclid.geometry.interfaces.Line2DReadOnly;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.euclid.tuple2D.Point2D;
-import us.ihmc.euclid.tuple2D.Vector2D;
+import us.ihmc.euclid.tools.EuclidCoreRandomTools;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
@@ -34,6 +35,8 @@ public abstract class AvatarFootWobbleTest implements MultiRobotTestInterface
    private SimulationTestingParameters simulationTestingParameters;
    private DRCSimulationTestHelper testHelper;
 
+   private static final Random random = new Random(203L);
+
    public void testICPReplanningInSwing() throws SimulationExceededMaximumTimeException
    {
       testHelper = new DRCSimulationTestHelper(simulationTestingParameters, getRobotModel(), new FlatGroundEnvironment());
@@ -41,9 +44,7 @@ public abstract class AvatarFootWobbleTest implements MultiRobotTestInterface
       Assert.assertTrue(testHelper.simulateAndBlockAndCatchExceptions(0.25));
 
       // Create step messages:
-      int steps = 3;
       RobotSide stepSide = RobotSide.LEFT;
-      FootstepDataListMessage stepsInPlace = createStepsInPlace(testHelper, stepSide, steps);
       FootstepDataListMessage stepInPlace = createStepInPlace(testHelper, stepSide);
 
       // Step and simulate until the swing is half over:
@@ -54,7 +55,7 @@ public abstract class AvatarFootWobbleTest implements MultiRobotTestInterface
       Assert.assertTrue(testHelper.simulateAndBlockAndCatchExceptions(initialTransferTime + swingTime / 2.0));
 
       // Trigger a fake rotation detection - the rotation detector is set up so these variables can be changed like this:
-      Line2D lineOfRotation = new Line2D(new Point2D(0.0, 0.0), new Vector2D(0.0, 1.0));
+      Line2D lineOfRotation = new Line2D(EuclidCoreRandomTools.nextPoint2D(random, 0.05), EuclidCoreRandomTools.nextVector2DWithFixedLength(random, 0.1));
       setLineOfRotation(testHelper, stepSide, lineOfRotation);
 
       // Simulate some more and then observe the CoP waypoints in the ICP planner. They should have shifted away from the line of rotation.
@@ -64,13 +65,6 @@ public abstract class AvatarFootWobbleTest implements MultiRobotTestInterface
       // Assert that the line of rotation has not changed. This would happen if the foot was actually rotating or the rotation detector changes such
       // that the above method for changing the line of rotation does not persist anymore.
       assertLineOfRotation(testHelper, stepSide, lineOfRotation, Double.MIN_VALUE);
-
-      // Send a few more steps in place and make sure the rotation indicator resets to false.
-      testHelper.publishToController(stepsInPlace);
-      double transferTime = getRobotModel().getWalkingControllerParameters().getDefaultTransferTime();
-      Assert.assertTrue(testHelper.simulateAndBlockAndCatchExceptions(initialTransferTime + steps * swingTime + (steps - 1) * transferTime + finalTransferTime + 0.25));
-      String sidePrefix = stepSide.getOppositeSide().getLowerCaseName();
-      Assert.assertEquals(0.0, testHelper.getYoVariable(sidePrefix + "IsRotating").getValueAsDouble(), Double.MIN_VALUE);
    }
 
    private static void assertLineOfRotation(DRCSimulationTestHelper testHelper, RobotSide side, Line2DReadOnly line, double epsilon)
@@ -94,7 +88,7 @@ public abstract class AvatarFootWobbleTest implements MultiRobotTestInterface
       testHelper.getYoVariable(sidePrefix + "LineOfRotationDirectionY").setValueFromDouble(line.getDirectionY());
    }
 
-   private static FootstepDataListMessage createStepInPlace(DRCSimulationTestHelper testHelper, RobotSide stepSide)
+   public static FootstepDataListMessage createStepInPlace(DRCSimulationTestHelper testHelper, RobotSide stepSide)
    {
       FramePose3D footPose = new FramePose3D(testHelper.getReferenceFrames().getSoleFrame(stepSide));
       footPose.changeFrame(ReferenceFrame.getWorldFrame());
@@ -106,7 +100,7 @@ public abstract class AvatarFootWobbleTest implements MultiRobotTestInterface
       return steps;
    }
 
-   private static FootstepDataListMessage createStepsInPlace(DRCSimulationTestHelper testHelper, RobotSide startSide, int numberOfSteps)
+   public static FootstepDataListMessage createStepsInPlace(DRCSimulationTestHelper testHelper, RobotSide startSide, int numberOfSteps)
    {
       FootstepDataListMessage steps = new FootstepDataListMessage();
       for (int i = 0; i < numberOfSteps; i++)
