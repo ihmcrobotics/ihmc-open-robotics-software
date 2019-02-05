@@ -118,6 +118,7 @@ public class SupportState extends AbstractFootControlState
    private final BooleanProvider avoidFootRotations;
    private final FootRotationDetector footRotationDetector;
    private final FootRotationHelper footRotationHelper;
+   private final FramePoint2D capturePoint = new FramePoint2D();
 
    public SupportState(FootControlHelper footControlHelper, PIDSE3GainsReadOnly holdPositionGains, YoVariableRegistry parentRegistry)
    {
@@ -373,7 +374,10 @@ public class SupportState extends AbstractFootControlState
 
       if (footRotationDetector.compute() && avoidFootRotations.getValue())
       {
-         footRotationHelper.compute(footRotationDetector.getLineOfRotation(), footPolygon);
+         controllerToolbox.getCapturePoint(tempPoint);
+         tempPoint.changeFrame(footPolygon.getReferenceFrame());
+         capturePoint.setIncludingFrame(tempPoint);
+         footRotationHelper.compute(footRotationDetector.getLineOfRotation(), footPolygon, capturePoint);
       }
    }
 

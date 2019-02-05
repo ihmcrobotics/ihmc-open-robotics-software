@@ -2,6 +2,8 @@ package us.ihmc.commonWalkingControlModules.controlModules.foot.wobble;
 
 import java.awt.Color;
 
+import us.ihmc.commonWalkingControlModules.controlModules.foot.FeetManager;
+import us.ihmc.commonWalkingControlModules.momentumBasedController.ParameterProvider;
 import us.ihmc.euclid.referenceFrame.FrameConvexPolygon2D;
 import us.ihmc.euclid.referenceFrame.FramePoint2D;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
@@ -16,7 +18,9 @@ import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.graphicsDescription.yoGraphics.plotting.YoArtifactPolygon;
 import us.ihmc.log.LogTools;
 import us.ihmc.robotics.robotSide.RobotSide;
+import us.ihmc.yoVariables.providers.DoubleProvider;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoFrameConvexPolygon2D;
 
 public class FootRotationHelper
@@ -35,6 +39,9 @@ public class FootRotationHelper
    private final YoFrameConvexPolygon2D yoPolygonA;
    private final YoFrameConvexPolygon2D yoPolygonB;
 
+   private final DoubleProvider areaPecentToSelect;
+   private final YoBoolean sideSelected;
+
    @SuppressWarnings("unused")
    public FootRotationHelper(RobotSide side, ReferenceFrame soleFrame, FootRotationInformation rotationInformation, YoVariableRegistry parentRegistry,
                              YoGraphicsListRegistry graphicsRegistry)
@@ -48,6 +55,11 @@ public class FootRotationHelper
 
       YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName() + side.getPascalCaseName());
       parentRegistry.addChild(registry);
+
+      String feetManagerName = FeetManager.class.getSimpleName();
+      String paramRegistryName = getClass().getSimpleName() + "Parameters";
+      areaPecentToSelect = ParameterProvider.getOrCreateParameter(feetManagerName, paramRegistryName, "AreaPecentToSelect", registry, 0.7);
+      sideSelected = new YoBoolean(side.getPascalCaseName() + "SelectedSide", registry);
 
       if (graphicsRegistry != null && visualize)
       {
@@ -67,10 +79,17 @@ public class FootRotationHelper
       reset();
    }
 
-   public void compute(FrameLine2DReadOnly lineOfRotation, FrameConvexPolygon2D footPolygon)
+   public void compute(FrameLine2DReadOnly lineOfRotation, FrameConvexPolygon2DReadOnly footPolygon, FramePoint2DReadOnly icp)
    {
       footPolygon.checkReferenceFrameMatch(desiredCop);
       lineOfRotation.checkReferenceFrameMatch(desiredCop);
+      icp.checkReferenceFrameMatch(desiredCop);
+
+      // Do not update the foothold continuously. If we have committed to a partial foothold stick with it.
+      if (sideSelected.getValue())
+      {
+         return;
+      }
 
       if (!computeIntersections(lineOfRotation, footPolygon, intersection1, intersection2))
       {
@@ -83,15 +102,39 @@ public class FootRotationHelper
       extractPartialFoothold(footPolygon, intersection1, intersection2, index1, index2, polygonA);
       extractPartialFoothold(footPolygon, intersection1, intersection2, index2, index1, polygonB);
 
-      updateViz();
-
-      desiredCop.set(findBestPolygon(polygonA, polygonB).getCentroid());
+      desiredCop.set(findBestPolygon(polygonA, polygonB, icp, areaPecentToSelect.getValue()).getCentroid());
       rotationInformation.setRotating(side, desiredCop);
+
+      updateViz();
+      sideSelected.set(true);
    }
 
-   private static FrameConvexPolygon2DReadOnly findBestPolygon(FrameConvexPolygon2DReadOnly polygonA, FrameConvexPolygon2DReadOnly polygonB)
+   private static FrameConvexPolygon2DReadOnly findBestPolygon(FrameConvexPolygon2DReadOnly polygonA, FrameConvexPolygon2DReadOnly polygonB,
+                                                               FramePoint2DReadOnly icp, double areaPercentToSelect)
    {
-      return polygonA.getArea() > polygonB.getArea() ? polygonA : polygonB;
+      // 1. Check the polygon areas. If one is really large go with that.
+      double totalArea = polygonA.getArea() + polygonB.getArea();
+      if (polygonA.getArea() > areaPercentToSelect * totalArea)
+      {
+         return polygonA;
+      }
+      if (polygonB.getArea() > areaPercentToSelect * totalArea)
+      {
+         return polygonB;
+      }
+
+      // 2. Check if the ICP is in one of the polygons. If that is the case use that polygon.
+      if (polygonA.isPointInside(icp))
+      {
+         return polygonA;
+      }
+      if (polygonB.isPointInside(icp))
+      {
+         return polygonB;
+      }
+
+      // 3. Use the polygon that is closer to the ICP.
+      return polygonA.distance(icp) > polygonB.distance(icp) ? polygonB : polygonA;
    }
 
    private static boolean computeIntersections(FrameLine2DReadOnly lineOfRotation, FrameConvexPolygon2DReadOnly footPolygon,
@@ -145,6 +188,7 @@ public class FootRotationHelper
    public void reset()
    {
       hideViz();
+      sideSelected.set(false);
       rotationInformation.reset(side);
    }
 }
