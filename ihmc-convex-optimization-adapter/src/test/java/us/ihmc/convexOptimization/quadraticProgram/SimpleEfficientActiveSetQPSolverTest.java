@@ -1,7 +1,7 @@
 package us.ihmc.convexOptimization.quadraticProgram;
 
-import static junit.framework.TestCase.assertFalse;
-import static junit.framework.TestCase.assertTrue;
+import static us.ihmc.robotics.Assert.*;
+
 import static us.ihmc.robotics.Assert.*;
 
 import org.ejml.data.DenseMatrix64F;

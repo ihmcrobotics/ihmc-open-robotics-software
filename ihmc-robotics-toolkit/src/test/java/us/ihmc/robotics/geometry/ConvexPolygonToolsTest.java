@@ -8,7 +8,7 @@ import java.util.List;
 import java.util.Random;
 
 import org.junit.After;
-import org.junit.Assert;
+import us.ihmc.robotics.Assert;
 import org.junit.Ignore;
 import org.junit.Test;
 

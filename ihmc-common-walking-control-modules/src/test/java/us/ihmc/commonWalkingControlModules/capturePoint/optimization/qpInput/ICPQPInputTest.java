@@ -4,7 +4,7 @@ import java.util.Random;
 
 import org.ejml.data.DenseMatrix64F;
 import org.ejml.ops.CommonOps;
-import org.junit.Assert;
+import us.ihmc.robotics.Assert;
 import org.junit.Test;
 
 import us.ihmc.commons.RandomNumbers;

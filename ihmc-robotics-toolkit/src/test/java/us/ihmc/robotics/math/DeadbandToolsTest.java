@@ -16,7 +16,7 @@ import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 
 import java.util.Random;
 
-import static junit.framework.TestCase.assertEquals;
+import static us.ihmc.robotics.Assert.*;
 
 public class DeadbandToolsTest
 {

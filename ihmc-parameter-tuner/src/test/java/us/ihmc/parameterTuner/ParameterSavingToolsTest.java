@@ -2,7 +2,7 @@ package us.ihmc.parameterTuner;
 
 import java.util.List;
 
-import org.junit.Assert;
+import us.ihmc.robotics.Assert;
 import org.junit.Test;
 
 import us.ihmc.commons.PrintTools;

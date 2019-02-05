@@ -2,7 +2,7 @@ package us.ihmc.robotics.dataStructures.parameters;
 
 import java.util.Random;
 
-import org.junit.Assert;
+import us.ihmc.robotics.Assert;
 import org.junit.Test;
 
 import us.ihmc.robotics.math.trajectories.YoPolynomial;

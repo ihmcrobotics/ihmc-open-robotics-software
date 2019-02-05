@@ -1,6 +1,6 @@
 package us.ihmc.exampleSimulations.simple3DWalkerTest;
 
-import org.junit.Assert;
+import us.ihmc.robotics.Assert;
 import org.junit.Test;
 import us.ihmc.commons.PrintTools;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
