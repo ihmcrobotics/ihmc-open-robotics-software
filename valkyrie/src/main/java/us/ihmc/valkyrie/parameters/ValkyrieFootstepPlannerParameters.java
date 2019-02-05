@@ -123,7 +123,7 @@ public class ValkyrieFootstepPlannerParameters implements FootstepPlannerParamet
    @Override
    public double getWiggleInsideDelta()
    {
-      return 0.01;
+      return 0.03;
    }
 
    @Override
