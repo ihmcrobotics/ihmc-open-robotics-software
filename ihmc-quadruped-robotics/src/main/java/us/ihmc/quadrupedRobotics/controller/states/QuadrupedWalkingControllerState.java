@@ -149,7 +149,7 @@ public class QuadrupedWalkingControllerState extends HighLevelControllerState im
          RigidBodyBasics foot = fullRobotModel.getFoot(robotQuadrant);
          OneDoFJointBasics[] legJoints = MultiBodySystemTools.filterJoints(MultiBodySystemTools.createJointPath(fullRobotModel.getBody(), foot), OneDoFJointBasics.class);
          Set<String> jointNames = new HashSet<>();
-         Arrays.asList(legJoints).stream().forEach(legJoint -> jointNames.add(legJoint.getName()));
+         Arrays.stream(legJoints).forEach(legJoint -> jointNames.add(legJoint.getName()));
          legJointNames.put(robotQuadrant, jointNames);
       }
 
@@ -214,7 +214,7 @@ public class QuadrupedWalkingControllerState extends HighLevelControllerState im
       // Manually triggered events to transition to main controllers.
       factory.addTransition(QuadrupedSteppingRequestedEvent.REQUEST_STEP, QuadrupedSteppingStateEnum.STAND, QuadrupedSteppingStateEnum.STEP);
 
-      Runnable stepToStandCallback = () -> stepController.halt();
+      Runnable stepToStandCallback = stepController::halt;
       factory.addCallback(QuadrupedSteppingRequestedEvent.REQUEST_STAND, QuadrupedSteppingStateEnum.STEP, stepToStandCallback);
 
       factory.addStateChangedListener(new StateChangedListener<QuadrupedSteppingStateEnum>()

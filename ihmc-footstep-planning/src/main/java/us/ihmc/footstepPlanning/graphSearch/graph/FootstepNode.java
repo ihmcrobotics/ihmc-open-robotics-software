@@ -1,30 +1,20 @@
 package us.ihmc.footstepPlanning.graphSearch.graph;
 
+import java.util.Objects;
 import java.util.Random;
 
 import us.ihmc.euclid.tools.EuclidCoreRandomTools;
 import us.ihmc.euclid.tuple2D.Point2D;
-import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
 import us.ihmc.robotics.geometry.AngleTools;
 import us.ihmc.robotics.robotSide.RobotSide;
 
 public class FootstepNode
 {
-   public static final double gridSizeXY = 0.05;
-   public static final double gridSizeYaw = Math.PI / 18.0;
-
-   public static final double PRECISION     = 0.05;
-   public static final double INV_PRECISION = 1.0 / PRECISION;
-
-   private final int xIndex;
-   private final int yIndex;
-   private final int yawIndex;
+   private final LatticeNode latticeNode;
    private final RobotSide robotSide;
 
    private Point2D midFootPoint;
-
    private final int hashCode;
-   private final int planarRegionsHashCode;
 
    public FootstepNode(double x, double y)
    {
@@ -33,48 +23,54 @@ public class FootstepNode
 
    public FootstepNode(double x, double y, double yaw, RobotSide robotSide)
    {
-      xIndex = (int) Math.round(x / gridSizeXY);
-      yIndex = (int) Math.round(y / gridSizeXY);
-      yawIndex = (int) Math.round(AngleTools.trimAngleMinusPiToPi(yaw) / gridSizeYaw);
-      this.robotSide = robotSide;
+      this(new LatticeNode(x, y, yaw), robotSide);
+   }
 
+   public FootstepNode(LatticeNode latticeNode, RobotSide robotSide)
+   {
+      this.latticeNode = latticeNode;
+      this.robotSide = robotSide;
       hashCode = computeHashCode(this);
-      planarRegionsHashCode = computePlanarRegionsHashCode(this);
    }
 
    public double getX()
    {
-      return gridSizeXY * xIndex;
+      return latticeNode.getX();
    }
 
    public double getY()
    {
-      return gridSizeXY * yIndex;
+      return latticeNode.getY();
    }
 
    public double getYaw()
    {
-      return gridSizeYaw * yawIndex;
+      return latticeNode.getYaw();
+   }
+
+   public int getXIndex()
+   {
+      return latticeNode.getXIndex();
+   }
+
+   public int getYIndex()
+   {
+      return latticeNode.getYIndex();
+   }
+
+   public int getYawIndex()
+   {
+      return latticeNode.getYawIndex();
+   }
+
+   public LatticeNode getLatticeNode()
+   {
+      return latticeNode;
    }
 
    public RobotSide getRobotSide()
    {
       return robotSide;
-   }
-
-   public int getXIndex()
-   {
-      return xIndex;
-   }
-
-   public int getYIndex()
-   {
-      return yIndex;
-   }
-
-   public int getYawIndex()
-   {
-      return yawIndex;
    }
 
    public double euclideanDistance(FootstepNode other)
@@ -113,51 +109,6 @@ public class FootstepNode
       return hashCode;
    }
 
-   public int getPlanarRegionsHashCode()
-   {
-      return planarRegionsHashCode;
-   }
-
-   private static int computeHashCode(FootstepNode node)
-   {
-      final int prime = 31;
-      int result = 1;
-      result = prime * result + ((node.robotSide == null) ? 0 : node.robotSide.hashCode());
-      result = prime * result + node.xIndex;
-      result = prime * result + node.yIndex;
-      result = prime * result + node.yawIndex;
-      return result;
-   }
-
-   public double getRoundedX()
-   {
-      return round(getX());
-   }
-
-   public double getRoundedY()
-   {
-      return round(getY());
-   }
-
-   private static int computePlanarRegionsHashCode(FootstepNode node)
-   {
-      return computePlanarRegionsHashCode(node.getRoundedX(), node.getRoundedY());
-   }
-
-   public static int computePlanarRegionsHashCode(double x, double y)
-   {
-      final long prime = 31L;
-      long bits = 1L;
-      bits = prime * bits + Double.doubleToLongBits(x);
-      bits = prime * bits + Double.doubleToLongBits(y);
-      return (int) (bits ^ bits >> 32);
-   }
-
-   public static double round(double value)
-   {
-      return Math.round(value * INV_PRECISION) * PRECISION;
-   }
-
    @Override
    public boolean equals(Object obj)
    {
@@ -170,13 +121,20 @@ public class FootstepNode
       FootstepNode other = (FootstepNode) obj;
       if (robotSide != other.robotSide)
          return false;
-      if (xIndex != other.xIndex)
-         return false;
-      if (yIndex != other.yIndex)
-         return false;
-      if (yawIndex != other.yawIndex)
+      if(!latticeNode.equals(other.latticeNode))
          return false;
       return true;
+   }
+
+   private static int computeHashCode(FootstepNode node)
+   {
+      final int prime = 31;
+      int result = 1;
+      result = prime * result + ((node.robotSide == null) ? 0 : node.robotSide.hashCode());
+      result = prime * result + node.getLatticeNode().getXIndex();
+      result = prime * result + node.getLatticeNode().getYIndex();
+      result = prime * result + node.getLatticeNode().getYawIndex();
+      return result;
    }
 
    @Override

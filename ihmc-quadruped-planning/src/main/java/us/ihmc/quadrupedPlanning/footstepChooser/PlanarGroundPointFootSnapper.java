@@ -1,15 +1,11 @@
 package us.ihmc.quadrupedPlanning.footstepChooser;
 
 import controller_msgs.msg.dds.QuadrupedGroundPlaneMessage;
-import us.ihmc.communication.ROS2Tools;
-import us.ihmc.communication.ROS2Tools.MessageTopicNameGenerator;
 import us.ihmc.euclid.geometry.Plane3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.quadrupedBasics.referenceFrames.QuadrupedReferenceFrames;
-import us.ihmc.quadrupedCommunication.QuadrupedControllerAPIDefinition;
-import us.ihmc.ros2.Ros2Node;
 
 import java.util.concurrent.atomic.AtomicReference;
 
@@ -21,11 +17,14 @@ public class PlanarGroundPointFootSnapper implements PointFootSnapper
 
    private final ReferenceFrame centroidFrame;
 
-   public PlanarGroundPointFootSnapper(String robotName, QuadrupedReferenceFrames referenceFrames, Ros2Node ros2Node)
+   public PlanarGroundPointFootSnapper(QuadrupedReferenceFrames referenceFrames)
    {
       this.centroidFrame = referenceFrames.getCenterOfFeetZUpFrameAveragingLowestZHeightsAcrossEnds();
-      MessageTopicNameGenerator topicNameGenerator = QuadrupedControllerAPIDefinition.getPublisherTopicNameGenerator(robotName);
-      ROS2Tools.createCallbackSubscription(ros2Node, QuadrupedGroundPlaneMessage.class, topicNameGenerator, s -> groundPlaneMessage.set(s.takeNextData()));
+   }
+
+   public void submitGroundPlane(QuadrupedGroundPlaneMessage groundPlaneMessage)
+   {
+      this.groundPlaneMessage.set(groundPlaneMessage);
    }
 
    @Override

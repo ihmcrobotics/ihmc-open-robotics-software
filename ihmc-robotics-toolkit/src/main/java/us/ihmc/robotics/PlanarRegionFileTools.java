@@ -24,7 +24,6 @@ import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.mutable.MutableInt;
 
 import gnu.trove.list.array.TIntArrayList;
-import us.ihmc.commons.PrintTools;
 import us.ihmc.euclid.axisAngle.AxisAngle;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
@@ -33,6 +32,7 @@ import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.log.LogTools;
 import us.ihmc.robotics.geometry.PlanarRegion;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 
@@ -111,7 +111,7 @@ public class PlanarRegionFileTools
       {
          PlanarRegionsList loadedRegions = importPlanarRegionDataInternal(filename -> new File(dataFolder, filename));
          if (loadedRegions == null)
-            PrintTools.error(PlanarRegionFileTools.class, "Could not load the file: " + dataFolder.getName());
+            LogTools.error("Could not load the file: " + dataFolder.getName());
          return loadedRegions;
       }
       catch (IOException e)
@@ -134,11 +134,17 @@ public class PlanarRegionFileTools
       try
       {
          PlanarRegionsList loadedRegions = importPlanarRegionDataInternalForTests(filename -> {
-            InputStream inputStream = clazz.getResourceAsStream(dataFolder + "/" + filename);
+            String resourceName = dataFolder + "/" + filename;
+            InputStream inputStream = clazz.getResourceAsStream(resourceName);
+            if (inputStream == null)
+            {
+               LogTools.error("Could not open resource: " + resourceName, PlanarRegionsList.class);
+               return null;
+            }
             return new BufferedReader(new InputStreamReader(inputStream));
          });
          if (loadedRegions == null)
-            PrintTools.error(PlanarRegionFileTools.class, "Could not load the file: " + dataFolder);
+            LogTools.error("Could not load the file: " + dataFolder);
          return loadedRegions;
       }
       catch (IOException e)
@@ -161,7 +167,7 @@ public class PlanarRegionFileTools
       {
          PlanarRegionsList loadedRegions = importPlanarRegionDataInternal(filename -> fileFromClassPath(loadingClass, Paths.get(dataFolderRelativePath.toString(), filename)));
          if (loadedRegions == null)
-            PrintTools.error(PlanarRegionFileTools.class, "Could not load the file: " + dataFolderRelativePath.toString());
+            LogTools.error("Could not load the file: " + dataFolderRelativePath.toString());
          return loadedRegions;
       }
       catch (IOException e)
@@ -239,6 +245,9 @@ public class PlanarRegionFileTools
             break;
 
          BufferedReader regionFile = readerCreator.createReader(fileName);
+         if (regionFile == null)
+            return null;
+         
          PlanarRegion loadedRegion = loadPlanarRegionVertices(regionFile, concaveHullSize.intValue(), convexPolygonsSize.toArray(),
                                                               regionId.intValue(), origin, normal);
          regionFile.close();
@@ -376,6 +385,9 @@ public class PlanarRegionFileTools
    private static PlanarRegion loadPlanarRegionVertices(BufferedReader regionFile, int concaveHullSize, int[] convexPolygonsSize, int regionId, Point3D origin,
                                                         Vector3D normal)
    {
+      if (regionFile == null)
+         return null;
+
       try
       {
          String line = "";

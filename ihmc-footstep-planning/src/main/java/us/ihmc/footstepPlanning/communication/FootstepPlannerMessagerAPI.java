@@ -22,7 +22,7 @@ import us.ihmc.messager.MessagerAPIFactory.MessagerAPI;
 import us.ihmc.messager.MessagerAPIFactory.Topic;
 import us.ihmc.messager.MessagerAPIFactory.TopicTheme;
 import us.ihmc.messager.MessagerAPIFactory.TypedTopicTheme;
-import us.ihmc.pathPlanning.visibilityGraphs.dataStructure.NavigableRegion;
+import us.ihmc.pathPlanning.visibilityGraphs.dataStructure.VisibilityMapWithNavigableRegion;
 import us.ihmc.pathPlanning.visibilityGraphs.interfaces.VisibilityGraphsParameters;
 import us.ihmc.pathPlanning.visibilityGraphs.interfaces.VisibilityMapHolder;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
@@ -93,7 +93,8 @@ public class FootstepPlannerMessagerAPI
    public static final Topic<Boolean> ShowPlanarRegionsTopic = Root.child(PlanarRegion).topic(Show);
    public static final Topic<Boolean> AcceptNewPlanarRegions = Root.child(PlanarRegion).topic(Enable);
 
-   public static final Topic<FootstepPlan> FootstepPlanTopic = Root.child(FootstepPlan).topic(Data);
+   public static final Topic<FootstepDataListMessage> FootstepPlanResponseTopic = Root.child(FootstepPlan).topic(Data);
+   public static final Topic<FootstepDataListMessage> FootstepPlanToRobotTopic = Root.child(FootstepPlan).topic(FootstepDataListMessage);
    public static final Topic<Boolean> ShowFootstepPlanTopic = Root.child(FootstepPlan).topic(Show);
 
    public static final Topic<Boolean> ComputePathTopic = Root.child(FootstepPlan).topic(ComputePath);
@@ -101,7 +102,6 @@ public class FootstepPlannerMessagerAPI
    public static final Topic<Boolean> RequestPlannerStatistics = Root.child(Statistics).topic(Show);
    public static final Topic<Boolean> AssumeFlatGround = Root.child(FlatGround).topic(Enable);
    public static final Topic<FootstepPlannerParameters> PlannerParametersTopic = Root.child(Parameters).topic(FootstepPlannerParameters);
-   public static final Topic<FootstepDataListMessage> FootstepDataListTopic = Root.child(FootstepPlan).topic(FootstepDataListMessage);
 
    public static final Topic<VisibilityGraphsParameters> VisibilityGraphsParametersTopic = Root.child(Parameters).topic(VisibilityGraphsParameters);
    public static final Topic<Double> PlannerTimeoutTopic = Root.child(FootstepPlan).topic(PlannerTimeout);
@@ -142,7 +142,7 @@ public class FootstepPlannerMessagerAPI
 
    public static final Topic<Boolean> ShowBodyPath = Root.child(BodyPath).topic(Show);
 
-   public static final Topic<List<NavigableRegion>> NavigableRegionData = Root.child(VisibilityGraphs).topic(Data);
+   public static final Topic<List<VisibilityMapWithNavigableRegion>> VisibilityMapWithNavigableRegionData = Root.child(VisibilityGraphs).topic(Data);
 
    public static final Topic<VisibilityMapHolder> StartVisibilityMap = Root.child(VisibilityGraphs).child(Start).child(Map).topic(Data);
    public static final Topic<VisibilityMapHolder> GoalVisibilityMap = Root.child(VisibilityGraphs).child(Goal).child(Map).topic(Data);

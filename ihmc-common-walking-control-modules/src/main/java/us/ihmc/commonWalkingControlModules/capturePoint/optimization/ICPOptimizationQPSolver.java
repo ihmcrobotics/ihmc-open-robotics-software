@@ -4,6 +4,8 @@ import org.ejml.data.DenseMatrix64F;
 import org.ejml.ops.CommonOps;
 
 import us.ihmc.commonWalkingControlModules.capturePoint.optimization.qpInput.*;
+import us.ihmc.convexOptimization.quadraticProgram.AbstractSimpleActiveSetQPSolver;
+import us.ihmc.convexOptimization.quadraticProgram.JavaQuadProgSolver;
 import us.ihmc.convexOptimization.quadraticProgram.SimpleEfficientActiveSetQPSolver;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.referenceFrame.FrameConvexPolygon2D;
@@ -127,7 +129,7 @@ public class ICPOptimizationQPSolver
    private final DenseMatrix64F feedbackGain = new DenseMatrix64F(2, 2);
 
    /** Flag to use the quad prog QP solver vs. the active set QP solver. **/
-   private final SimpleEfficientActiveSetQPSolver solver = new SimpleEfficientActiveSetQPSolver();
+   private final AbstractSimpleActiveSetQPSolver solver = new JavaQuadProgSolver();
 
    /** Full solution vector to the quadratic program. */
    private final DenseMatrix64F solution;

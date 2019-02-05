@@ -18,12 +18,14 @@ import java.nio.file.Paths;
 
 public class ValkyrieCTTSOSimulation
 {
-   private static final Environment environment = Environment.JERSEY_BARRIERS_2;
+   private static final Environment environment = Environment.CINDERS;
 
    private enum Environment
    {
       JERSEY_BARRIERS("20181210_JerseyBarrierData", 0.54, 0.32, -0.24, true),
       JERSEY_BARRIERS_2("20181213_JerseyBarrierData2", -0.75, 3.47, 2.7, true),
+      JERSEY_BARRIERS_3("20190130_IHMCJerseyBarriers_55cm", 0.0, 0.0, -0.6, true),
+      JERSEY_BARRIERS_4("20190130_IHMCJerseyBarriers_65cm", 0.0, 0.0, -0.6, true),
       CINDERS("20181211_CinderBlocksData", 0.38, 0.0, -0.4, true);
 
       final String fileName;

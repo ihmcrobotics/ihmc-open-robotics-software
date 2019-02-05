@@ -4,7 +4,6 @@ import org.junit.Test;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations;
 import us.ihmc.continuousIntegration.IntegrationCategory;
 import us.ihmc.euclid.tools.EuclidCoreRandomTools;
-import us.ihmc.euclid.tools.EuclidCoreTestTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.robotics.geometry.AngleTools;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -32,18 +31,18 @@ public class FootstepNodeToolsTest
          int yLatticeIndex = random.nextInt(1000) - 500;
          int yawLatticeIndex = random.nextInt(100) - 50;
 
-         double x = xLatticeIndex * FootstepNode.gridSizeXY;
-         double y = yLatticeIndex * FootstepNode.gridSizeXY;
-         double yaw = AngleTools.trimAngleMinusPiToPi(yawLatticeIndex * FootstepNode.gridSizeYaw);
+         double x = xLatticeIndex * LatticeNode.gridSizeXY;
+         double y = yLatticeIndex * LatticeNode.gridSizeXY;
+         double yaw = AngleTools.trimAngleMinusPiToPi(yawLatticeIndex * LatticeNode.gridSizeYaw);
          RobotSide robotSide = RobotSide.generateRandomRobotSide(random);
 
          checkNodeTransform(x, y, yaw, robotSide, 0.0, 0.0, 0.0);
-         checkNodeTransform(x, y, yaw, robotSide, 0.4995 * FootstepNode.gridSizeXY, 0.0, 0.0);
-         checkNodeTransform(x, y, yaw, robotSide, -0.4995 * FootstepNode.gridSizeXY, 0.0, 0.0);
-         checkNodeTransform(x, y, yaw, robotSide, 0.0, 0.4995 * FootstepNode.gridSizeXY, 0.0);
-         checkNodeTransform(x, y, yaw, robotSide, 0.0, -0.4995 * FootstepNode.gridSizeXY, 0.0);
-         checkNodeTransform(x, y, yaw, robotSide, 0.0, 0.0, 0.4995 * FootstepNode.gridSizeYaw);
-         checkNodeTransform(x, y, yaw, robotSide, 0.0, 0.0, -0.4995 * FootstepNode.gridSizeYaw);
+         checkNodeTransform(x, y, yaw, robotSide, 0.4995 * LatticeNode.gridSizeXY, 0.0, 0.0);
+         checkNodeTransform(x, y, yaw, robotSide, -0.4995 * LatticeNode.gridSizeXY, 0.0, 0.0);
+         checkNodeTransform(x, y, yaw, robotSide, 0.0, 0.4995 * LatticeNode.gridSizeXY, 0.0);
+         checkNodeTransform(x, y, yaw, robotSide, 0.0, -0.4995 * LatticeNode.gridSizeXY, 0.0);
+         checkNodeTransform(x, y, yaw, robotSide, 0.0, 0.0, 0.4995 * LatticeNode.gridSizeYaw);
+         checkNodeTransform(x, y, yaw, robotSide, 0.0, 0.0, -0.4995 * LatticeNode.gridSizeYaw);
       }
    }
 

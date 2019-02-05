@@ -2,21 +2,25 @@ package us.ihmc.robotics.math.trajectories;
 
 import org.apache.commons.math3.util.Precision;
 
+import us.ihmc.commons.MathTools;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DBasics;
+import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
+import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DBasics;
+import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
-import us.ihmc.commons.MathTools;
-import us.ihmc.robotics.math.frames.YoFramePointInMultipleFrames;
-import us.ihmc.robotics.math.frames.YoFrameVectorInMultipleFrames;
-import us.ihmc.robotics.math.trajectories.waypoints.FrameEuclideanTrajectoryPoint;
-import us.ihmc.robotics.math.trajectories.waypoints.YoFrameEuclideanTrajectoryPoint;
+import us.ihmc.robotics.math.trajectories.trajectorypoints.FrameEuclideanTrajectoryPoint;
+import us.ihmc.robotics.math.trajectories.trajectorypoints.YoFrameEuclideanTrajectoryPoint;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoFramePoint2D;
 import us.ihmc.yoVariables.variable.YoFramePoint3D;
 import us.ihmc.yoVariables.variable.YoFrameVector3D;
+import us.ihmc.yoVariables.variable.frameObjects.YoMutableFramePoint3D;
+import us.ihmc.yoVariables.variable.frameObjects.YoMutableFrameVector3D;
 
 public class VelocityConstrainedPositionTrajectoryGenerator extends PositionTrajectoryGeneratorInMultipleFrames
 {
@@ -26,24 +30,18 @@ public class VelocityConstrainedPositionTrajectoryGenerator extends PositionTraj
    private final YoDouble currentTime;
    private final YoDouble trajectoryTime;
 
-   private final YoFramePoint3D initialPosition;
-   private final YoFrameVector3D initialVelocity;
+   private final FramePoint3DBasics initialPosition;
+   private final FrameVector3DBasics initialVelocity;
 
-   private final YoFramePoint3D finalPosition;
-   private final YoFrameVector3D finalVelocity;
+   private final FramePoint3DBasics finalPosition;
+   private final FrameVector3DBasics finalVelocity;
 
-   private final YoFramePoint3D currentPosition;
-   private final YoFrameVector3D currentVelocity;
-   private final YoFrameVector3D currentAcceleration;
+   private final FramePoint3DBasics currentPosition;
+   private final FrameVector3DBasics currentVelocity;
+   private final FrameVector3DBasics currentAcceleration;
 
    public VelocityConstrainedPositionTrajectoryGenerator(String name, ReferenceFrame referenceFrame, YoVariableRegistry parentRegistry)
    {
-      this(name, false, referenceFrame, parentRegistry);
-   }
-
-   public VelocityConstrainedPositionTrajectoryGenerator(String name, boolean allowMultipleFrames, ReferenceFrame referenceFrame, YoVariableRegistry parentRegistry)
-   {
-      super(allowMultipleFrames, referenceFrame);
       registry = new YoVariableRegistry(name);
 
       String initialPositionName = name + "InitialPosition";
@@ -54,40 +52,17 @@ public class VelocityConstrainedPositionTrajectoryGenerator extends PositionTraj
       String currentVelocityName = name + "CurrentVelocity";
       String currentAccelerationName = name + "CurrentAcceleration";
 
-      if (allowMultipleFrames)
-      {
-         YoFramePointInMultipleFrames initialPosition = new YoFramePointInMultipleFrames(initialPositionName, registry, referenceFrame);
-         YoFrameVectorInMultipleFrames initialVelocity = new YoFrameVectorInMultipleFrames(initialVelocityName, registry, referenceFrame);
+      initialPosition = new YoMutableFramePoint3D(initialPositionName, "", registry, referenceFrame);
+      initialVelocity = new YoMutableFrameVector3D(initialVelocityName, "", registry, referenceFrame);
 
-         YoFramePointInMultipleFrames finalPosition = new YoFramePointInMultipleFrames(finalPositionName, registry, referenceFrame);
-         YoFrameVectorInMultipleFrames finalVelocity = new YoFrameVectorInMultipleFrames(finalVelocityName, registry, referenceFrame);
+      finalPosition = new YoMutableFramePoint3D(finalPositionName, "", registry, referenceFrame);
+      finalVelocity = new YoMutableFrameVector3D(finalVelocityName, "", registry, referenceFrame);
 
-         YoFramePointInMultipleFrames currentPosition = new YoFramePointInMultipleFrames(currentPositionName, registry, referenceFrame);
-         YoFrameVectorInMultipleFrames currentVelocity = new YoFrameVectorInMultipleFrames(currentVelocityName, registry, referenceFrame);
-         YoFrameVectorInMultipleFrames currentAcceleration = new YoFrameVectorInMultipleFrames(currentAccelerationName, registry, referenceFrame);
+      currentPosition = new YoMutableFramePoint3D(currentPositionName, "", registry, referenceFrame);
+      currentVelocity = new YoMutableFrameVector3D(currentVelocityName, "", registry, referenceFrame);
+      currentAcceleration = new YoMutableFrameVector3D(currentAccelerationName, "", registry, referenceFrame);
 
-         registerMultipleFramesHolders(initialPosition, initialVelocity, finalPosition, finalVelocity, currentPosition, currentVelocity, currentAcceleration);
-
-         this.initialPosition = initialPosition;
-         this.initialVelocity = initialVelocity;
-         this.finalPosition = finalPosition;
-         this.finalVelocity = finalVelocity;
-         this.currentPosition = currentPosition;
-         this.currentVelocity = currentVelocity;
-         this.currentAcceleration = currentAcceleration;
-      }
-      else
-      {
-         initialPosition = new YoFramePoint3D(initialPositionName, referenceFrame, registry);
-         initialVelocity = new YoFrameVector3D(initialVelocityName, referenceFrame, registry);
-
-         finalPosition = new YoFramePoint3D(finalPositionName, referenceFrame, registry);
-         finalVelocity = new YoFrameVector3D(finalVelocityName, referenceFrame, registry);
-
-         currentPosition = new YoFramePoint3D(currentPositionName, referenceFrame, registry);
-         currentVelocity = new YoFrameVector3D(currentVelocityName, referenceFrame, registry);
-         currentAcceleration = new YoFrameVector3D(currentAccelerationName, referenceFrame, registry);
-      }
+      registerFrameChangeables(initialPosition, initialVelocity, finalPosition, finalVelocity, currentPosition, currentVelocity, currentAcceleration);
 
       currentTime = new YoDouble(name + "CurrentTime", registry);
       trajectoryTime = new YoDouble(name + "TrajectoryTime", registry);
@@ -349,22 +324,22 @@ public class VelocityConstrainedPositionTrajectoryGenerator extends PositionTraj
       finalPosition.set(this.finalPosition);
    }
 
-   public YoFramePoint3D getFinalPosition()
+   public FramePoint3DReadOnly getFinalPosition()
    {
       return finalPosition;
    }
 
-   public YoFramePoint3D getInitialPosition()
+   public FramePoint3DReadOnly getInitialPosition()
    {
       return initialPosition;
    }
 
-   public YoFrameVector3D getInitialVelocity()
+   public FrameVector3DReadOnly getInitialVelocity()
    {
       return initialVelocity;
    }
 
-   public YoFrameVector3D getFinalVelocity()
+   public FrameVector3DReadOnly getFinalVelocity()
    {
       return finalVelocity;
    }

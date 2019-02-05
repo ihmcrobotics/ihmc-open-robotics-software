@@ -9,10 +9,12 @@ import org.junit.Test;
 import us.ihmc.commons.Conversions;
 import us.ihmc.commons.PrintTools;
 import us.ihmc.commons.thread.ThreadTools;
+import us.ihmc.communication.packets.ExecutionMode;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.continuousIntegration.ContinuousIntegrationTools;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.tools.ReferenceFrameTools;
+import us.ihmc.footstepPlanning.FootstepDataMessageConverter;
 import us.ihmc.footstepPlanning.FootstepPlan;
 import us.ihmc.footstepPlanning.FootstepPlanner;
 import us.ihmc.footstepPlanning.FootstepPlannerStatus;
@@ -32,7 +34,6 @@ import java.util.concurrent.atomic.AtomicReference;
 
 import static org.junit.Assert.assertTrue;
 import static us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI.ComputePathTopic;
-import static us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI.FootstepPlanTopic;
 import static us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI.PlannerParametersTopic;
 import static us.ihmc.footstepPlanning.testTools.PlannerTestEnvironments.*;
 
@@ -327,7 +328,7 @@ public abstract class FootstepPlannerOnRoughTerrainTest implements PlanningTest
             // TODO set parameters from message
          });
 
-         messager.submitMessage(FootstepPlannerMessagerAPI.FootstepPlanTopic, footstepPlan);
+         messager.submitMessage(FootstepPlannerMessagerAPI.FootstepPlanResponseTopic, FootstepDataMessageConverter.createFootstepDataListFromPlan(footstepPlan, -1.0, -1.0, ExecutionMode.OVERRIDE));
          messager.submitMessage(FootstepPlannerMessagerAPI.PlannerStatusTopic, FootstepPlannerStatus.IDLE);
          messager.submitMessage(FootstepPlannerMessagerAPI.PlannerTimeTakenTopic, planner.getPlanningDuration());
 
@@ -347,7 +348,7 @@ public abstract class FootstepPlannerOnRoughTerrainTest implements PlanningTest
             .runPlanner(getPlanner(), testData.getStartPose(), testData.getStartSide(), testData.getGoalPose(), testData.getPlanarRegionsList(),
                         assertPlannerReturnedResult());
 
-      messager.submitMessage(FootstepPlannerMessagerAPI.FootstepPlanTopic, footstepPlan);
+      messager.submitMessage(FootstepPlannerMessagerAPI.FootstepPlanResponseTopic, FootstepDataMessageConverter.createFootstepDataListFromPlan(footstepPlan, -1.0, -1.0, ExecutionMode.OVERRIDE));
    }
 
    private void submitInfoToUI(PlannerTestEnvironments.PlannerTestData testData)

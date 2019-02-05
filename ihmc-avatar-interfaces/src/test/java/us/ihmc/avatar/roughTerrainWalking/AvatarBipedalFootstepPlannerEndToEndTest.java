@@ -268,7 +268,7 @@ public abstract class AvatarBipedalFootstepPlannerEndToEndTest implements MultiR
 
       FootstepPlannerParameters parameters = getRobotModel().getFootstepPlannerParameters();
       FootstepPlannerParametersPacket parametersPacket = new FootstepPlannerParametersPacket();
-      RemoteUIMessageConverter.copyFootstepPlannerParametersToPacket(parametersPacket, parameters);
+      FootstepPlannerMessageTools.copyParametersToPacket(parametersPacket, parameters);
       parametersPacket.setCheckForBodyBoxCollisions(true);
       parametersPacket.setReturnBestEffortPlan(false);
       footstepPlannerParametersPublisher.publish(parametersPacket);

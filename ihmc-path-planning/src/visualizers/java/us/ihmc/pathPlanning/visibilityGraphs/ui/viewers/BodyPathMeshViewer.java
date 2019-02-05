@@ -20,7 +20,6 @@ import javafx.scene.shape.Mesh;
 import javafx.scene.shape.MeshView;
 import javafx.scene.shape.Sphere;
 import javafx.util.Pair;
-import us.ihmc.commons.PrintTools;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.euclid.tools.EuclidCoreTools;
 import us.ihmc.euclid.tuple3D.Point3D;
@@ -28,6 +27,7 @@ import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.javaFXToolkit.shapes.JavaFXMultiColorMeshBuilder;
 import us.ihmc.javaFXToolkit.shapes.TextureColorAdaptivePalette;
+import us.ihmc.log.LogTools;
 import us.ihmc.messager.Messager;
 import us.ihmc.pathPlanning.visibilityGraphs.tools.PathTools;
 import us.ihmc.pathPlanning.visibilityGraphs.ui.messager.UIVisibilityGraphsTopics;
@@ -120,7 +120,7 @@ public class BodyPathMeshViewer extends AnimationTimer
       if (newMesh != null)
       {
          if (VERBOSE)
-            PrintTools.info(this, "Rendering body path line.");
+            LogTools.info("Rendering body path line.", this);
          bodyPathMeshView.setMesh(newMesh.getKey());
          bodyPathMeshView.setMaterial(newMesh.getValue());
       }
@@ -187,7 +187,7 @@ public class BodyPathMeshViewer extends AnimationTimer
       {
          bodyPathMeshToRender.set(new Pair<>(null, null));
          activeBodyPathReference.set(null);
-         PrintTools.warn("Received body path that is null.");
+         LogTools.warn("Received body path that is null.");
          return;
       }
 
@@ -195,7 +195,7 @@ public class BodyPathMeshViewer extends AnimationTimer
       bodyPath = bodyPath.stream().map(Point3D::new).collect(Collectors.toList());
 
       if (VERBOSE)
-         PrintTools.info(this, "Building mesh for body path.");
+         LogTools.info("Building mesh for body path.", this);
 
       double totalPathLength = PathTools.computePathLength(bodyPath);
       double currentLength = 0.0;

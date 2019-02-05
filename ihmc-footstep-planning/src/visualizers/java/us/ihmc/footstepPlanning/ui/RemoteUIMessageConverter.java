@@ -12,33 +12,23 @@ import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.communication.packets.PlanarRegionMessageConverter;
 import us.ihmc.communication.packets.ToolboxState;
-import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.geometry.Pose3D;
-import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.euclid.tuple4D.Quaternion;
-import us.ihmc.footstepPlanning.FootstepPlan;
-import us.ihmc.footstepPlanning.FootstepPlannerStatus;
-import us.ihmc.footstepPlanning.FootstepPlannerType;
-import us.ihmc.footstepPlanning.FootstepPlanningResult;
-import us.ihmc.footstepPlanning.SimpleFootstep;
-import us.ihmc.footstepPlanning.VisibilityGraphMessagesConverter;
+import us.ihmc.footstepPlanning.*;
 import us.ihmc.footstepPlanning.communication.FootstepPlannerCommunicationProperties;
 import us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI;
-import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerCostParameters;
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParameters;
-import us.ihmc.idl.IDLSequence;
+import us.ihmc.footstepPlanning.tools.FootstepPlannerMessageTools;
 import us.ihmc.messager.Messager;
-import us.ihmc.pathPlanning.visibilityGraphs.dataStructure.NavigableRegion;
+import us.ihmc.pathPlanning.visibilityGraphs.dataStructure.VisibilityMapWithNavigableRegion;
 import us.ihmc.pathPlanning.visibilityGraphs.interfaces.VisibilityGraphsParameters;
 import us.ihmc.pathPlanning.visibilityGraphs.interfaces.VisibilityMapHolder;
 import us.ihmc.pubsub.DomainFactory;
-import us.ihmc.pubsub.subscriber.Subscriber;
 import us.ihmc.robotEnvironmentAwareness.communication.REACommunicationProperties;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.robotSide.RobotSide;
-import us.ihmc.ros2.NewMessageListener;
 import us.ihmc.ros2.RealtimeRos2Node;
 
 /**
@@ -184,7 +174,7 @@ public class RemoteUIMessageConverter
       messager.registerTopicListener(FootstepPlannerMessagerAPI.ComputePathTopic, request -> requestNewPlan());
       messager.registerTopicListener(FootstepPlannerMessagerAPI.RequestPlannerStatistics, request -> requestPlannerStatistics());
       messager.registerTopicListener(FootstepPlannerMessagerAPI.AbortPlanningTopic, request -> requestAbortPlanning());
-      messager.registerTopicListener(FootstepPlannerMessagerAPI.FootstepDataListTopic, footstepDataListPublisher::publish);
+      messager.registerTopicListener(FootstepPlannerMessagerAPI.FootstepPlanToRobotTopic, footstepDataListPublisher::publish);
    }
 
    private void processFootstepPlanningRequestPacket(FootstepPlanningRequestPacket packet)
@@ -240,11 +230,11 @@ public class RemoteUIMessageConverter
       VisibilityMapHolder goalVisibilityMap = VisibilityGraphMessagesConverter.convertToSingleSourceVisibilityMap(packet.getGoalVisibilityMap());
       VisibilityMapHolder interRegionVisibilityMap = VisibilityGraphMessagesConverter.convertToInterRegionsVisibilityMap(packet.getInterRegionsMap());
 
-      List<NavigableRegion> navigableRegionList = VisibilityGraphMessagesConverter.convertToNavigableRegionsList(packet.getNavigableRegions());
+      List<VisibilityMapWithNavigableRegion> navigableRegionList = VisibilityGraphMessagesConverter.convertToNavigableRegionsList(packet.getNavigableRegions());
 
       messager.submitMessage(FootstepPlannerMessagerAPI.StartVisibilityMap, startVisibilityMap);
       messager.submitMessage(FootstepPlannerMessagerAPI.GoalVisibilityMap, goalVisibilityMap);
-      messager.submitMessage(FootstepPlannerMessagerAPI.NavigableRegionData, navigableRegionList);
+      messager.submitMessage(FootstepPlannerMessagerAPI.VisibilityMapWithNavigableRegionData, navigableRegionList);
       messager.submitMessage(FootstepPlannerMessagerAPI.InterRegionVisibilityMap, interRegionVisibilityMap);
    }
 
@@ -258,7 +248,6 @@ public class RemoteUIMessageConverter
       FootstepDataListMessage footstepDataListMessage = packet.getFootstepDataList();
       int plannerRequestId = packet.getPlanId();
       FootstepPlanningResult result = FootstepPlanningResult.fromByte(packet.getFootstepPlanningResult());
-      FootstepPlan footstepPlan = convertToFootstepPlan(footstepDataListMessage);
       List<? extends Point3DReadOnly> bodyPath = packet.getBodyPath();
       Pose3D lowLevelGoal = packet.getLowLevelPlannerGoal();
 
@@ -267,7 +256,7 @@ public class RemoteUIMessageConverter
      
       ThreadTools.sleep(100);
 
-      messager.submitMessage(FootstepPlannerMessagerAPI.FootstepPlanTopic, footstepPlan);
+      messager.submitMessage(FootstepPlannerMessagerAPI.FootstepPlanResponseTopic, footstepDataListMessage);
       messager.submitMessage(FootstepPlannerMessagerAPI.ReceivedPlanIdTopic, plannerRequestId);
       messager.submitMessage(FootstepPlannerMessagerAPI.PlanningResultTopic, result);
       messager.submitMessage(FootstepPlannerMessagerAPI.PlannerTimeTakenTopic, packet.getTimeTaken());
@@ -303,13 +292,13 @@ public class RemoteUIMessageConverter
       FootstepPlannerParametersPacket plannerParametersPacket = new FootstepPlannerParametersPacket();
       FootstepPlannerParameters footstepPlannerParameters = plannerParametersReference.get();
 
-      copyFootstepPlannerParametersToPacket(plannerParametersPacket, footstepPlannerParameters);
+      FootstepPlannerMessageTools.copyParametersToPacket(plannerParametersPacket, footstepPlannerParameters);
       plannerParametersPublisher.publish(plannerParametersPacket);
 
       VisibilityGraphsParametersPacket visibilityGraphsParametersPacket = new VisibilityGraphsParametersPacket();
       VisibilityGraphsParameters visibilityGraphsParameters = visibilityGraphParametersReference.get();
 
-      copyVisibilityGraphsParametersToPacket(visibilityGraphsParametersPacket, visibilityGraphsParameters);
+      FootstepPlannerMessageTools.copyParametersToPacket(visibilityGraphsParametersPacket, visibilityGraphsParameters);
       visibilityGraphsParametersPublisher.publish(visibilityGraphsParametersPacket);
       
       if (verbose)
@@ -328,91 +317,6 @@ public class RemoteUIMessageConverter
       if (verbose)
          PrintTools.info("Sending out a sleep request.");
       toolboxStatePublisher.publish(MessageTools.createToolboxStateMessage(ToolboxState.SLEEP));
-   }
-
-   public static void copyFootstepPlannerParametersToPacket(FootstepPlannerParametersPacket packet, FootstepPlannerParameters parameters)
-   {
-      if (parameters == null)
-      {
-         return;
-      }
-
-      packet.setCheckForBodyBoxCollisions(parameters.checkForBodyBoxCollisions());
-      packet.setPerformHeuristicSearchPolicies(parameters.performHeuristicSearchPolicies());
-      packet.setIdealFootstepWidth(parameters.getIdealFootstepWidth());
-      packet.setIdealFootstepLength(parameters.getIdealFootstepLength());
-      packet.setWiggleInsideDelta(parameters.getWiggleInsideDelta());
-      packet.setMaximumStepReach(parameters.getMaximumStepReach());
-      packet.setMaximumStepYaw(parameters.getMaximumStepYaw());
-      packet.setMinimumStepWidth(parameters.getMinimumStepWidth());
-      packet.setMinimumStepLength(parameters.getMinimumStepLength());
-      packet.setMinimumStepYaw(parameters.getMinimumStepYaw());
-      packet.setMaximumStepReachWhenSteppingUp(parameters.getMaximumStepReachWhenSteppingUp());
-      packet.setMaximumStepZWhenSteppingUp(parameters.getMaximumStepZWhenSteppingUp());
-      packet.setMaximumStepXWhenForwardAndDown(parameters.getMaximumStepXWhenForwardAndDown());
-      packet.setMaximumStepZWhenForwardAndDown(parameters.getMaximumStepZWhenForwardAndDown());
-      packet.setMaximumStepZ(parameters.getMaximumStepZ());
-      packet.setMinimumFootholdPercent(parameters.getMinimumFootholdPercent());
-      packet.setMinimumSurfaceInclineRadians(parameters.getMinimumSurfaceInclineRadians());
-      packet.setWiggleIntoConvexHullOfPlanarRegions(parameters.getWiggleIntoConvexHullOfPlanarRegions());
-      packet.setRejectIfCannotFullyWiggleInside(parameters.getRejectIfCannotFullyWiggleInside());
-      packet.setMaximumXyWiggleDistance(parameters.getMaximumXYWiggleDistance());
-      packet.setMaximumYawWiggle(parameters.getMaximumYawWiggle());
-      packet.setMaximumZPenetrationOnValleyRegions(parameters.getMaximumZPenetrationOnValleyRegions());
-      packet.setMaximumStepWidth(parameters.getMaximumStepWidth());
-      packet.setMinimumDistanceFromCliffBottoms(parameters.getMinimumDistanceFromCliffBottoms());
-      packet.setCliffHeightToAvoid(parameters.getCliffHeightToAvoid());
-      packet.setReturnBestEffortPlan(parameters.getReturnBestEffortPlan());
-      packet.setMinimumStepsForBestEffortPlan(parameters.getMinimumStepsForBestEffortPlan());
-      packet.setBodyGroundClearance(parameters.getBodyGroundClearance());
-      packet.setBodyBoxHeight(parameters.getBodyBoxHeight());
-      packet.setBodyBoxDepth(parameters.getBodyBoxDepth());
-      packet.setBodyBoxWidth(parameters.getBodyBoxWidth());
-      packet.setBodyBoxBaseX(parameters.getBodyBoxBaseX());
-      packet.setBodyBoxBaseY(parameters.getBodyBoxBaseY());
-      packet.setBodyBoxBaseZ(parameters.getBodyBoxBaseZ());
-      packet.setMinXClearanceFromStance(parameters.getMinXClearanceFromStance());
-      packet.setMinYClearanceFromStance(parameters.getMinYClearanceFromStance());
-      packet.setStepTranslationBoundingBoxScaleFactor(parameters.getStepTranslationBoundingBoxScaleFactor());
-
-      FootstepPlannerCostParameters costParameters = parameters.getCostParameters();
-
-      packet.getCostParameters().setUseQuadraticDistanceCost(costParameters.useQuadraticDistanceCost());
-      packet.getCostParameters().setUseQuadraticHeightCost(costParameters.useQuadraticHeightCost());
-
-      packet.getCostParameters().setAStarHeuristicsWeight(costParameters.getAStarHeuristicsWeight().getValue());
-      packet.getCostParameters().setVisGraphWithAStarHeuristicsWeight(costParameters.getVisGraphWithAStarHeuristicsWeight().getValue());
-      packet.getCostParameters().setDepthFirstHeuristicsWeight(costParameters.getDepthFirstHeuristicsWeight().getValue());
-      packet.getCostParameters().setBodyPathBasedHeuristicsWeight(costParameters.getBodyPathBasedHeuristicsWeight().getValue());
-
-      packet.getCostParameters().setYawWeight(costParameters.getYawWeight());
-      packet.getCostParameters().setPitchWeight(costParameters.getPitchWeight());
-      packet.getCostParameters().setRollWeight(costParameters.getRollWeight());
-      packet.getCostParameters().setStepUpWeight(costParameters.getStepUpWeight());
-      packet.getCostParameters().setStepDownWeight(costParameters.getStepDownWeight());
-      packet.getCostParameters().setForwardWeight(costParameters.getForwardWeight());
-      packet.getCostParameters().setLateralWeight(costParameters.getLateralWeight());
-      packet.getCostParameters().setCostPerStep(costParameters.getCostPerStep());
-   }
-
-   public static void copyVisibilityGraphsParametersToPacket(VisibilityGraphsParametersPacket packet, VisibilityGraphsParameters parameters)
-   {
-      if (parameters == null)
-      {
-         return;
-      }
-
-      packet.setMaxInterRegionConnectionLength(parameters.getMaxInterRegionConnectionLength());
-      packet.setNormalZThresholdForAccessibleRegions(parameters.getNormalZThresholdForAccessibleRegions());
-      packet.setExtrusionDistance(parameters.getExtrusionDistance());
-      packet.setExtrusionDistanceIfNotTooHighToStep(parameters.getExtrusionDistanceIfNotTooHighToStep());
-      packet.setTooHighToStepDistance(parameters.getTooHighToStepDistance());
-      packet.setClusterResolution(parameters.getClusterResolution());
-      packet.setExplorationDistanceFromStartGoal(parameters.getExplorationDistanceFromStartGoal());
-      packet.setPlanarRegionMinArea(parameters.getPlanarRegionMinArea());
-      packet.setPlanarRegionMinSize(parameters.getPlanarRegionMinSize());
-      packet.setRegionOrthogonalAngle(parameters.getRegionOrthogonalAngle());
-      packet.setSearchHostRegionEpsilon(parameters.getSearchHostRegionEpsilon());
    }
 
    private void submitFootstepPlanningRequestPacket()
@@ -437,32 +341,5 @@ public class RemoteUIMessageConverter
       packet.setAssumeFlatGround(assumeFlatGround.get());
 
       footstepPlanningRequestPublisher.publish(packet);
-   }
-
-   private static FootstepPlan convertToFootstepPlan(FootstepDataListMessage footstepDataListMessage)
-   {
-      FootstepPlan footstepPlan = new FootstepPlan();
-
-      for (FootstepDataMessage footstepMessage : footstepDataListMessage.getFootstepDataList())
-      {
-         FramePose3D stepPose = new FramePose3D();
-         stepPose.setPosition(footstepMessage.getLocation());
-         stepPose.setOrientation(footstepMessage.getOrientation());
-         SimpleFootstep simpleFootstep = footstepPlan.addFootstep(RobotSide.fromByte(footstepMessage.getRobotSide()), stepPose);
-
-         IDLSequence.Object<Point3D> predictedContactPoints = footstepMessage.getPredictedContactPoints2d();
-         if (!predictedContactPoints.isEmpty())
-         {
-            ConvexPolygon2D foothold = new ConvexPolygon2D();
-            for (int i = 0; i < predictedContactPoints.size(); i++)
-            {
-               foothold.addVertex(predictedContactPoints.get(i));
-            }
-            foothold.update();
-            simpleFootstep.setFoothold(foothold);
-         }
-      }
-
-      return footstepPlan;
    }
 }

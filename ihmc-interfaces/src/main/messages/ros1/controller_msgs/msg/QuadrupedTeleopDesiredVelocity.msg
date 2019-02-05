@@ -1,0 +1,10 @@
+# Unique ID used to identify this message, should preferably be consecutively increasing.
+uint32 sequence_id
+
+float64 desired_x_velocity
+
+float64 desired_y_velocity
+
+float64 desired_yaw_velocity
+
+

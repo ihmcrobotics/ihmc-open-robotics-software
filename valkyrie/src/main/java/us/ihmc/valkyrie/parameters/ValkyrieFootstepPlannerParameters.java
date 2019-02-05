@@ -1,8 +1,8 @@
 package us.ihmc.valkyrie.parameters;
 
-import us.ihmc.footstepPlanning.graphSearch.graph.FootstepNode;
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerCostParameters;
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParameters;
+import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepProcessingParameters;
 
 public class ValkyrieFootstepPlannerParameters implements FootstepPlannerParameters
 {
@@ -27,7 +27,7 @@ public class ValkyrieFootstepPlannerParameters implements FootstepPlannerParamet
    @Override
    public double getMaximumStepReach()
    {
-      return 0.35;
+      return 0.4;
    }
 
    @Override
@@ -69,7 +69,7 @@ public class ValkyrieFootstepPlannerParameters implements FootstepPlannerParamet
    @Override
    public double getBodyBoxBaseX()
    {
-      return 0.0;
+      return 0.03;
    }
 
    @Override
@@ -133,12 +133,6 @@ public class ValkyrieFootstepPlannerParameters implements FootstepPlannerParamet
    }
 
    @Override
-   public double getStepTranslationBoundingBoxScaleFactor()
-   {
-      return 0.65;
-   }
-
-   @Override
    public double getMaximumXYWiggleDistance()
    {
       return 0.04;
@@ -154,5 +148,35 @@ public class ValkyrieFootstepPlannerParameters implements FootstepPlannerParamet
    public double getMaximumYawWiggle()
    {
       return 0.3;
+   }
+
+   @Override
+   public FootstepProcessingParameters getFootstepProcessingParameters()
+   {
+      return new ValkyrieFootstepProcessingParameters();
+   }
+
+   @Override
+   public double getMaximumStepZWhenSteppingUp()
+   {
+      return 0.07;
+   }
+
+   @Override
+   public double getMaximumStepReachWhenSteppingUp()
+   {
+      return 0.35;
+   }
+
+   @Override
+   public double getMaximumStepZWhenForwardAndDown()
+   {
+      return 0.07;
+   }
+
+   @Override
+   public double getMaximumStepXWhenForwardAndDown()
+   {
+      return 0.35;
    }
 }

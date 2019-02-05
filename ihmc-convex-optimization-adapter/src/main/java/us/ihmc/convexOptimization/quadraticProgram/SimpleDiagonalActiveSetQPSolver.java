@@ -8,6 +8,7 @@ import org.ejml.ops.CommonOps;
 import gnu.trove.list.array.TIntArrayList;
 import us.ihmc.robotics.linearAlgebra.DiagonalMatrixTools;
 import us.ihmc.robotics.linearAlgebra.MatrixTools;
+import us.ihmc.robotics.linearAlgebra.commonOps.NativeCommonOps;
 
 /**
  * Utilizes the same procedure as the Simple Efficient Active Set QP Solver, but assumes that the
@@ -164,7 +165,7 @@ public class SimpleDiagonalActiveSetQPSolver extends SimpleEfficientActiveSetQPS
    @Override
    public double getObjectiveCost(DenseMatrix64F x)
    {
-      multQuad(x, quadraticCostQMatrix, computedObjectiveFunctionValue);
+      NativeCommonOps.multQuad(x, quadraticCostQMatrix, computedObjectiveFunctionValue);
       CommonOps.scale(0.5, computedObjectiveFunctionValue);
       CommonOps.multAddTransA(quadraticCostQVector, x, computedObjectiveFunctionValue);
       return computedObjectiveFunctionValue.get(0, 0) + quadraticCostScalar;

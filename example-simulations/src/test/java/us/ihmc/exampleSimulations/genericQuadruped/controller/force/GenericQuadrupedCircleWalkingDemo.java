@@ -1,7 +1,7 @@
 package us.ihmc.exampleSimulations.genericQuadruped.controller.force;
 
 import us.ihmc.exampleSimulations.genericQuadruped.GenericQuadrupedTestFactory;
-import us.ihmc.quadrupedPlanning.input.QuadrupedTeleopManager;
+import us.ihmc.quadrupedCommunication.teleop.RemoteQuadrupedTeleopManager;
 import us.ihmc.quadrupedRobotics.QuadrupedForceTestYoVariables;
 import us.ihmc.quadrupedRobotics.QuadrupedTestBehaviors;
 import us.ihmc.quadrupedRobotics.controller.QuadrupedControlMode;
@@ -24,10 +24,10 @@ public class GenericQuadrupedCircleWalkingDemo
          quadrupedTestFactory.setUseNetworking(true);
          GoalOrientedTestConductor conductor = quadrupedTestFactory.createTestConductor();
          QuadrupedForceTestYoVariables variables = new QuadrupedForceTestYoVariables(conductor.getScs());
-         QuadrupedTeleopManager stepTeleopManager = quadrupedTestFactory.getStepTeleopManager();
+         RemoteQuadrupedTeleopManager stepTeleopManager = quadrupedTestFactory.getRemoteStepTeleopManager();
 
          QuadrupedTestBehaviors.readyXGait(conductor, variables, stepTeleopManager);
-         stepTeleopManager.getXGaitSettings().setEndPhaseShift(180);
+         stepTeleopManager.setEndPhaseShift(180);
          double walkingSpeed = 0.25;
          double angularSpeed = 0.1;
          stepTeleopManager.requestXGait();

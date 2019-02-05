@@ -5,6 +5,7 @@ import org.ejml.ops.CommonOps;
 
 import us.ihmc.commons.MathTools;
 import us.ihmc.robotics.linearAlgebra.MatrixTools;
+import us.ihmc.robotics.linearAlgebra.commonOps.NativeCommonOps;
 
 public class SimpleEfficientActiveSetQPSolverWithInactiveVariables extends SimpleEfficientActiveSetQPSolver implements
       ActiveSetQPSolverWithInactiveVariablesInterface
@@ -159,7 +160,7 @@ public class SimpleEfficientActiveSetQPSolverWithInactiveVariables extends Simpl
    @Override
    public double getObjectiveCost(DenseMatrix64F x)
    {
-      multQuad(x, originalQuadraticCostQMatrix, computedObjectiveFunctionValue);
+      NativeCommonOps.multQuad(x, originalQuadraticCostQMatrix, computedObjectiveFunctionValue);
       CommonOps.scale(0.5, computedObjectiveFunctionValue);
       CommonOps.multAddTransA(originalQuadraticCostQVector, x, computedObjectiveFunctionValue);
       return computedObjectiveFunctionValue.get(0, 0) + quadraticCostScalar;

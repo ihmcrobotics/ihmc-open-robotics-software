@@ -100,13 +100,13 @@ public class ConvexPolygon2dTestHelpers
       throw new RuntimeException("List doesn't contain " + framePointToTest);
    }
 
-   public static ArrayList<FrameConvexPolygon2D> generateRandomPolygons(Random random, ReferenceFrame zUpFrame, double xMin, double xMax, double yMin,
-         double yMax, double widthMax, double heightMax, int numberOfPoints, int numberOfPolygons)
+   public static ArrayList<FrameConvexPolygon2D> generateRandomPolygons(Random random, ReferenceFrame zUpFrame, double centerXMin, double centerXMax, double centerYMin,
+         double centerYMax, double widthMax, double heightMax, int numberOfPoints, int numberOfPolygons)
    {
       ArrayList<FrameConvexPolygon2D> ret = new ArrayList<FrameConvexPolygon2D>(numberOfPolygons);
       for (int i = 0; i < numberOfPolygons; i++)
       {
-         FramePoint2D center = EuclidFrameRandomTools.nextFramePoint2D(random, zUpFrame, xMin, xMax, yMin, yMax);
+         FramePoint2D center = EuclidFrameRandomTools.nextFramePoint2D(random, zUpFrame, centerXMin, centerXMax, centerYMin, centerYMax);
 
          //       double x2A = xMin + widthMax/2.0 + random.nextDouble() * (xMax - xMin - widthMax);
          //       double x2B = xMin + widthMax/2.0 + random.nextDouble() * (xMax - xMin - widthMax);

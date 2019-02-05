@@ -1,6 +1,6 @@
 package us.ihmc.avatar.networkProcessor.footstepPlanningToolboxModule;
 
-import static us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI.FootstepPlanTopic;
+import static us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI.FootstepPlanResponseTopic;
 import static us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI.PlannerTypeTopic;
 import static us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI.PlanningResultTopic;
 
@@ -51,10 +51,7 @@ import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
-import us.ihmc.footstepPlanning.FootstepPlan;
-import us.ihmc.footstepPlanning.FootstepPlannerType;
-import us.ihmc.footstepPlanning.FootstepPlanningResult;
-import us.ihmc.footstepPlanning.SimpleFootstep;
+import us.ihmc.footstepPlanning.*;
 import us.ihmc.footstepPlanning.communication.FootstepPlannerCommunicationProperties;
 import us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI;
 import us.ihmc.footstepPlanning.graphSearch.parameters.DefaultFootstepPlanningParameters;
@@ -62,6 +59,7 @@ import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParameters
 import us.ihmc.footstepPlanning.tools.FootstepPlannerDataExporter;
 import us.ihmc.footstepPlanning.tools.FootstepPlannerIOTools;
 import us.ihmc.footstepPlanning.tools.FootstepPlannerIOTools.FootstepPlannerUnitTestDataset;
+import us.ihmc.footstepPlanning.tools.FootstepPlannerMessageTools;
 import us.ihmc.footstepPlanning.tools.PlannerTools;
 import us.ihmc.footstepPlanning.ui.ApplicationRunner;
 import us.ihmc.footstepPlanning.ui.FootstepPlannerUI;
@@ -124,7 +122,7 @@ public abstract class FootstepPlannerToolboxDataSetTest
    private final AtomicReference<Boolean> plannerReceivedPlan = new AtomicReference<>(false);
    private final AtomicReference<Boolean> plannerReceivedResult = new AtomicReference<>(false);
 
-   private AtomicReference<FootstepPlan> uiFootstepPlanReference;
+   private AtomicReference<FootstepDataListMessage> uiFootstepPlanReference;
    private AtomicReference<FootstepPlanningResult> uiPlanningResultReference;
    private final AtomicReference<Boolean> uiReceivedPlan = new AtomicReference<>(false);
    private final AtomicReference<Boolean> uiReceivedResult = new AtomicReference<>(false);
@@ -162,10 +160,10 @@ public abstract class FootstepPlannerToolboxDataSetTest
 
       tryToStartModule(() -> setupFootstepPlanningToolboxModule());
 
-      messager.registerTopicListener(FootstepPlanTopic, request -> uiReceivedPlan.set(true));
+      messager.registerTopicListener(FootstepPlanResponseTopic, request -> uiReceivedPlan.set(true));
       messager.registerTopicListener(PlanningResultTopic, request -> uiReceivedResult.set(true));
 
-      uiFootstepPlanReference = messager.createInput(FootstepPlanTopic);
+      uiFootstepPlanReference = messager.createInput(FootstepPlanResponseTopic);
       uiPlanningResultReference = messager.createInput(PlanningResultTopic);
 
       ros2Node = ROS2Tools.createRealtimeRos2Node(pubSubImplementation, "ihmc_footstep_planner_test");
@@ -606,7 +604,7 @@ public abstract class FootstepPlannerToolboxDataSetTest
       {
          if (DEBUG)
             PrintTools.info("Received a plan from the UI.");
-         actualPlan.set(uiFootstepPlanReference.getAndSet(null));
+         actualPlan.set(FootstepDataMessageConverter.convertToFootstepPlan(uiFootstepPlanReference.getAndSet(null)));
          uiReceivedPlan.set(false);
       }
 
@@ -657,7 +655,7 @@ public abstract class FootstepPlannerToolboxDataSetTest
          messager.submitMessage(FootstepPlannerMessagerAPI.PlanarRegionDataTopic, testData.getPlanarRegionsList());
       }
 
-      RemoteUIMessageConverter.copyFootstepPlannerParametersToPacket(parametersPacket, parameters);
+      FootstepPlannerMessageTools.copyParametersToPacket(parametersPacket, parameters);
 
       footstepPlannerParametersPublisher.publish(parametersPacket);
 

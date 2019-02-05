@@ -47,7 +47,7 @@ public class BodyPathBasedAStarPlanner implements FootstepPlanner
 
       heuristics = new BodyPathHeuristics(heuristicWeight, parameters, this.bodyPathPlanner);
 
-      FootstepNodeSnapper snapper = new SimplePlanarRegionFootstepNodeSnapper(footPolygons, parameters);
+      FootstepNodeSnapper snapper = new SimplePlanarRegionFootstepNodeSnapper(footPolygons);
       FootstepNodeChecker nodeChecker = new SnapBasedNodeChecker(parameters, footPolygons, snapper);
       FootstepNodeExpansion expansion = new ParameterBasedNodeExpansion(parameters);
       FootstepNodeSnapper postProcessingSnapper = new FootstepNodeSnapAndWiggler(footPolygons, parameters);

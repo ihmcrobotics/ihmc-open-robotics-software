@@ -1,6 +1,7 @@
 package us.ihmc.footstepPlanning.graphSearch.nodeChecking;
 
 import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.footstepPlanning.graphSearch.graph.FootstepGraph;
 import us.ihmc.footstepPlanning.graphSearch.graph.FootstepNode;
 import us.ihmc.footstepPlanning.graphSearch.graph.visualization.BipedalFootstepPlannerNodeRejectionReason;
 import us.ihmc.footstepPlanning.graphSearch.listeners.BipedalFootstepPlannerListener;
@@ -12,6 +13,7 @@ public abstract class FootstepNodeChecker
 {
    protected PlanarRegionsList planarRegionsList;
    protected final ArrayList<BipedalFootstepPlannerListener> listeners = new ArrayList<>();
+   protected FootstepGraph graph;
 
    public void setPlanarRegions(PlanarRegionsList planarRegions)
    {
@@ -24,7 +26,7 @@ public abstract class FootstepNodeChecker
          listener.rejectNode(node, parentNode, rejectionReason);
    }
 
-   protected boolean hasPlanarRegions()
+   boolean hasPlanarRegions()
    {
       return planarRegionsList != null && !planarRegionsList.isEmpty();
    }
@@ -37,14 +39,19 @@ public abstract class FootstepNodeChecker
 
    public boolean isNodeValid(FootstepNode node, FootstepNode previousNode)
    {
-      if(!hasPlanarRegions())
+      if(node.equals(previousNode))
       {
-         return true;
+         throw new RuntimeException("Cannot check a node with itself");
       }
       else
       {
          return isNodeValidInternal(node, previousNode);
       }
+   }
+
+   public void addFootstepGraph(FootstepGraph graph)
+   {
+      this.graph = graph;
    }
 
    abstract boolean isNodeValidInternal(FootstepNode node, FootstepNode previousNode);

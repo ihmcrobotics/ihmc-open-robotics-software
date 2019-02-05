@@ -7,8 +7,8 @@ import javafx.fxml.FXML;
 import javafx.scene.control.MenuItem;
 import javafx.stage.DirectoryChooser;
 import javafx.stage.Window;
-import us.ihmc.commons.PrintTools;
 import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.log.LogTools;
 import us.ihmc.messager.Messager;
 import us.ihmc.pathPlanning.visibilityGraphs.tools.VisibilityGraphsIOTools;
 import us.ihmc.pathPlanning.visibilityGraphs.ui.messager.UIVisibilityGraphsTopics;
@@ -82,7 +82,7 @@ public class SimpleUIMenuController
       if (loadedPlanarRegions != null)
       {
          if (VERBOSE)
-            PrintTools.info(this, "Loaded planar regions, broadcasting data.");
+            LogTools.info("Loaded planar regions, broadcasting data.", this);
          messager.submitMessage(UIVisibilityGraphsTopics.GlobalReset, true);
          messager.submitMessage(UIVisibilityGraphsTopics.PlanarRegionData, loadedPlanarRegions);
          messager.submitMessage(UIVisibilityGraphsTopics.StartPosition, new Point3D());
@@ -92,7 +92,7 @@ public class SimpleUIMenuController
       else
       {
          if (VERBOSE)
-            PrintTools.info(this, "Failed to load planar regions.");
+            LogTools.info("Failed to load planar regions.", this);
          reloadMenuItem.setDisable(true);
          loadedFile = null;
       }

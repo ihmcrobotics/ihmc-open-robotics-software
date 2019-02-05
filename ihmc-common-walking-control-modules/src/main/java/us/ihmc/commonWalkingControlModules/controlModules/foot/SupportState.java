@@ -18,6 +18,7 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicReferenceFrame;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
+import us.ihmc.mecano.frames.MovingReferenceFrame;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.mecano.spatial.Twist;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
@@ -111,6 +112,8 @@ public class SupportState extends AbstractFootControlState
 
    private final PIDSE3GainsReadOnly gains;
 
+   private final FootRotationDetector footRotationDetector;
+
    public SupportState(FootControlHelper footControlHelper, PIDSE3GainsReadOnly holdPositionGains, YoVariableRegistry parentRegistry)
    {
       super(footControlHelper);
@@ -184,6 +187,10 @@ public class SupportState extends AbstractFootControlState
       {
          frameViz = null;
       }
+
+      MovingReferenceFrame soleFrame = fullRobotModel.getSoleFrame(robotSide);
+      double dt = controllerToolbox.getControlDT();
+      footRotationDetector = new FootRotationDetector(robotSide, soleFrame, dt, registry, graphicsListRegistry);
    }
 
    @Override
@@ -210,18 +217,21 @@ public class SupportState extends AbstractFootControlState
       if (frameViz != null)
          frameViz.hide();
       explorationHelper.stopExploring();
+      footRotationDetector.reset();
    }
 
    @Override
    public void doSpecificAction(double timeInState)
    {
+      computeFootPolygon();
+      controllerToolbox.getDesiredCenterOfPressure(contactableFoot, desiredCoP);
+
       // handle partial foothold detection
       boolean recoverTimeHasPassed = timeInState > recoverTime.getDoubleValue();
       boolean contactStateHasChanged = false;
       if (partialFootholdControlModule != null && recoverTimeHasPassed)
       {
          footSwitch.computeAndPackCoP(cop);
-         controllerToolbox.getDesiredCenterOfPressure(contactableFoot, desiredCoP);
          partialFootholdControlModule.compute(desiredCoP, cop);
          YoPlaneContactState contactState = controllerToolbox.getFootContactState(robotSide);
          contactStateHasChanged = partialFootholdControlModule.applyShrunkPolygon(contactState);
@@ -243,7 +253,6 @@ public class SupportState extends AbstractFootControlState
       // toe contact point loading //// TODO: 6/5/17
       if (rampUpAllowableToeLoadAfterContact && timeInState < toeLoadingDuration.getDoubleValue())
       {
-         computeFootPolygon();
 
          double maxContactPointX = footPolygon.getMaxX();
          double minContactPointX = footPolygon.getMinX();
@@ -348,6 +357,8 @@ public class SupportState extends AbstractFootControlState
       // update visualization
       if (frameViz != null)
          frameViz.setToReferenceFrame(controlFrame);
+
+      footRotationDetector.compute();
    }
 
 
