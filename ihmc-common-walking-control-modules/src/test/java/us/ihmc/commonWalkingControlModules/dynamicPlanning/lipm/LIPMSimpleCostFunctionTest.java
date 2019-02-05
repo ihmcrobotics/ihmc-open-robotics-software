@@ -9,7 +9,7 @@ import us.ihmc.robotics.testing.JUnitTools;
 import us.ihmc.trajectoryOptimization.DefaultDiscreteState;
 import us.ihmc.trajectoryOptimization.LQTrackingCostFunction;
 
-import static org.junit.Assert.assertEquals;
+import static us.ihmc.robotics.Assert.*;
 
 public class LIPMSimpleCostFunctionTest extends TrackingCostFunctionTest<DefaultDiscreteState>
 {

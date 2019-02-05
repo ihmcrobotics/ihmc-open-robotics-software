@@ -7,7 +7,7 @@ import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.turnWalkTurn.Quadruped
 
 import java.util.Random;
 
-import static org.junit.Assert.assertEquals;
+import static us.ihmc.robotics.Assert.*;
 
 public class QuadrupedTurnWalkTurnPathPlannerTest
 {

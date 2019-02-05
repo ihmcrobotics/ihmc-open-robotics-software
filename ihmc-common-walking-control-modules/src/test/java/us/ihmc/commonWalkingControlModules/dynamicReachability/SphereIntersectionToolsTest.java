@@ -6,7 +6,7 @@ import us.ihmc.euclid.tools.EuclidCoreRandomTools;
 
 import java.util.Random;
 
-import static org.junit.Assert.*;
+import static us.ihmc.robotics.Assert.*;
 
 public class SphereIntersectionToolsTest
 {

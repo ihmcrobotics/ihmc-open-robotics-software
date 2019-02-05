@@ -17,7 +17,7 @@ import us.ihmc.robotics.robotSide.RobotSide;
 
 import java.util.Random;
 
-import static org.junit.Assert.assertTrue;
+import static us.ihmc.robotics.Assert.*;
 
 public abstract class FootstepPlannerOnFlatGroundTest implements PlanningTest
 {

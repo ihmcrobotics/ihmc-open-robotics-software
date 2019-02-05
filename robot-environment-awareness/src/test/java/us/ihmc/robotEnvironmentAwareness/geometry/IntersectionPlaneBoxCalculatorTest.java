@@ -1,6 +1,6 @@
 package us.ihmc.robotEnvironmentAwareness.geometry;
 
-import static org.junit.Assert.*;
+import static us.ihmc.robotics.Assert.*;
 
 import java.util.List;
 import java.util.Random;

@@ -1,7 +1,6 @@
 package us.ihmc.avatar.testTools;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import static us.ihmc.robotics.Assert.*;
 
 import controller_msgs.msg.dds.SO3TrajectoryPointMessage;
 import us.ihmc.commonWalkingControlModules.controlModules.rigidBody.RigidBodyTaskspaceControlState;

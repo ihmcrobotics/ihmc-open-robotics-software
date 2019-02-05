@@ -12,7 +12,7 @@ import java.util.List;
 import java.util.Random;
 import java.util.function.Supplier;
 
-import static org.junit.Assert.assertEquals;
+import static us.ihmc.robotics.Assert.*;
 
 public class ControllerAPIDefinitionTest
 {

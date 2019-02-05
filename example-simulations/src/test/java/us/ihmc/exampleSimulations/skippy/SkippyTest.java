@@ -1,6 +1,6 @@
 package us.ihmc.exampleSimulations.skippy;
 
-import static org.junit.Assert.assertTrue;
+import static us.ihmc.robotics.Assert.*;
 
 import org.junit.After;
 import org.junit.Before;

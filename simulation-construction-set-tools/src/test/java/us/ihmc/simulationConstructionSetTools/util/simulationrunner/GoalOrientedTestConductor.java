@@ -16,7 +16,7 @@ import us.ihmc.simulationconstructionset.SimulationDoneListener;
 import us.ihmc.simulationconstructionset.util.simulationTesting.SimulationTestingParameters;
 import us.ihmc.commons.thread.ThreadTools;
 
-import static org.junit.Assert.fail;
+import static us.ihmc.robotics.Assert.*;
 
 public class GoalOrientedTestConductor implements SimulationDoneListener
 {

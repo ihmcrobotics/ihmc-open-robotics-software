@@ -1,6 +1,6 @@
 package us.ihmc.tools.inputDevices.mouse;
 
-import static org.junit.Assert.assertTrue;
+import static us.ihmc.robotics.Assert.*;
 
 import java.awt.event.InputEvent;
 

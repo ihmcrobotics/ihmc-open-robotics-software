@@ -1,6 +1,6 @@
 package us.ihmc.tools.calibration;
 
-import static org.junit.Assert.assertEquals;
+import static us.ihmc.robotics.Assert.*;
 
 import java.io.File;
 import java.util.Random;

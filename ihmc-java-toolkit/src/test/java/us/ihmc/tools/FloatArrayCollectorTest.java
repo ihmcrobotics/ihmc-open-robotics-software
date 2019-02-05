@@ -9,7 +9,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.stream.IntStream;
 
-import static org.junit.Assert.*;
+import static us.ihmc.robotics.Assert.*;
 
 public class FloatArrayCollectorTest
 {

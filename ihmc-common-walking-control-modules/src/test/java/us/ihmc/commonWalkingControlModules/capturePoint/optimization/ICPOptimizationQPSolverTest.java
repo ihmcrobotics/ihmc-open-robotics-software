@@ -1,6 +1,6 @@
 package us.ihmc.commonWalkingControlModules.capturePoint.optimization;
 
-import static org.junit.Assert.assertTrue;
+import static us.ihmc.robotics.Assert.*;
 
 import org.ejml.data.DenseMatrix64F;
 import org.ejml.factory.LinearSolverFactory;

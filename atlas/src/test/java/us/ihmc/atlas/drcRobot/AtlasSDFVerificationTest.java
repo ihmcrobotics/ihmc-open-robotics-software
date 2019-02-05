@@ -1,7 +1,6 @@
 package us.ihmc.atlas.drcRobot;
 
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import static us.ihmc.robotics.Assert.*;
 
 import java.io.BufferedReader;
 import java.io.File;

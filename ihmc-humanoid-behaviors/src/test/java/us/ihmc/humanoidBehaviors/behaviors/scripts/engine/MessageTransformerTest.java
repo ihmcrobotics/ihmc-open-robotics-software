@@ -1,6 +1,6 @@
 package us.ihmc.humanoidBehaviors.behaviors.scripts.engine;
 
-import static org.junit.Assert.assertTrue;
+import static us.ihmc.robotics.Assert.*;
 
 import java.util.List;
 import java.util.Random;

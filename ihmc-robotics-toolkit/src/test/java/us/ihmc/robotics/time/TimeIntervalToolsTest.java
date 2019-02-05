@@ -8,7 +8,7 @@ import us.ihmc.robotics.time.TimeIntervalTools;
 
 import java.util.ArrayList;
 
-import static org.junit.Assert.assertEquals;
+import static us.ihmc.robotics.Assert.*;
 
 public class TimeIntervalToolsTest
 {

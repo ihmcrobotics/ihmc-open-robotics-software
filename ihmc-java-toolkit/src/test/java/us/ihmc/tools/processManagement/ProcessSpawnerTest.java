@@ -1,6 +1,6 @@
 package us.ihmc.tools.processManagement;
 
-import static org.junit.Assert.fail;
+import static us.ihmc.robotics.Assert.*;
 
 import java.io.DataInputStream;
 import java.io.DataOutputStream;

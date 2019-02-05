@@ -1,6 +1,6 @@
 package us.ihmc.quadrupedRobotics.providers;
 
-import static org.junit.Assert.assertTrue;
+import static us.ihmc.robotics.Assert.*;
 
 import java.io.IOException;
 import java.util.ArrayList;

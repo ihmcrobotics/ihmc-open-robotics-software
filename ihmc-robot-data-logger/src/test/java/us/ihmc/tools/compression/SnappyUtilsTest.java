@@ -1,7 +1,6 @@
 package us.ihmc.tools.compression;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import static us.ihmc.robotics.Assert.*;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
