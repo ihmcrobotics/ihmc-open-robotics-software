@@ -62,7 +62,7 @@ public class YoVariableServer implements RobotVisualizer, TickAndUpdatable, Vari
    private final SummaryProvider summaryProvider = new SummaryProvider();
    private final PeriodicThreadScheduler timestampScheduler;
    private final TimestampPublisher timestampPublisher;
-
+   
    /**
     * Create a YoVariable server with mainClazz.getSimpleName(). For example, see other constructor.
     *

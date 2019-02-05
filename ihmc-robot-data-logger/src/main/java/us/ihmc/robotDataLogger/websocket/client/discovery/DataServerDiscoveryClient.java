@@ -1,5 +1,6 @@
 package us.ihmc.robotDataLogger.websocket.client.discovery;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -13,7 +14,7 @@ import us.ihmc.log.LogTools;
 import us.ihmc.robotDataLogger.interfaces.DataServerDiscoveryListener;
 import us.ihmc.robotDataLogger.websocket.client.discovery.HTTPDataServerConnection.HTTPDataServerConnectionListener;
 
-public class DataServerDiscoveryClient
+public class DataServerDiscoveryClient implements DataServerLocationBroadcastReceiver.DataServerLocationFoundListener
 {
    private final Object lock = new Object();
    private final DataServerDiscoveryListener listener;
@@ -26,11 +27,31 @@ public class DataServerDiscoveryClient
    private boolean clientClosed = false;
    private final HashSet<HTTPDataServerConnection> connections = new HashSet<HTTPDataServerConnection>();
 
-   public DataServerDiscoveryClient(DataServerDiscoveryListener listener)
+   private final DataServerLocationBroadcastReceiver broadcastReceiver;
+   
+   public DataServerDiscoveryClient(DataServerDiscoveryListener listener, boolean enableAutoDiscovery)
    {
       this.listener = listener;
+      
+      DataServerLocationBroadcastReceiver broadcastReceiver = null;
+      if(enableAutoDiscovery)
+      {
+         try
+         {
+            broadcastReceiver = new DataServerLocationBroadcastReceiver(this);
+            broadcastReceiver.start();
+         }
+         catch (IOException e)
+         {
+            LogTools.warn("Cannot start broadcast receiver. " + e.getMessage());
+            broadcastReceiver = null;
+         }         
+      }
+      this.broadcastReceiver = broadcastReceiver;
+      
    }
 
+   @Override
    public void addHost(String host, int port, boolean persistant)
    {
       HTTPDataServerDescription description = new HTTPDataServerDescription(host, port, persistant);
@@ -80,6 +101,8 @@ public class DataServerDiscoveryClient
          {
             connection.close();
          }
+         
+         broadcastReceiver.stop();
       }
    }
 
@@ -192,7 +215,7 @@ public class DataServerDiscoveryClient
             System.out.println("Connected " + connection.getTarget());
             connection.close();
          }
-      });
+      }, true);
 
       client.addHost("127.0.0.1", 8008, true);
    }
