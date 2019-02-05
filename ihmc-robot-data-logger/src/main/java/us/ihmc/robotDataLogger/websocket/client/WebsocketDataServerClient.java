@@ -3,6 +3,7 @@ package us.ihmc.robotDataLogger.websocket.client;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.util.concurrent.TimeUnit;
 
 import io.netty.bootstrap.Bootstrap;
 import io.netty.buffer.ByteBuf;
@@ -23,6 +24,7 @@ import io.netty.handler.codec.http.websocketx.TextWebSocketFrame;
 import io.netty.handler.codec.http.websocketx.WebSocketClientHandshakerFactory;
 import io.netty.handler.codec.http.websocketx.WebSocketVersion;
 import io.netty.handler.codec.http.websocketx.extensions.compression.WebSocketClientCompressionHandler;
+import io.netty.handler.timeout.IdleStateHandler;
 import us.ihmc.pubsub.common.SerializedPayload;
 import us.ihmc.robotDataLogger.VariableChangeRequest;
 import us.ihmc.robotDataLogger.VariableChangeRequestPubSubType;
@@ -33,8 +35,8 @@ import us.ihmc.robotDataLogger.handshake.IDLYoVariableHandshakeParser;
 import us.ihmc.robotDataLogger.listeners.TimestampListener;
 import us.ihmc.robotDataLogger.util.DebugRegistry;
 import us.ihmc.robotDataLogger.websocket.client.discovery.HTTPDataServerConnection;
-import us.ihmc.robotDataLogger.websocket.client.discovery.HTTPDataServerDescription;
 import us.ihmc.robotDataLogger.websocket.client.discovery.HTTPDataServerConnection.DisconnectPromise;
+import us.ihmc.robotDataLogger.websocket.client.discovery.HTTPDataServerDescription;
 import us.ihmc.robotDataLogger.websocket.command.DataServerCommand;
 
 public class WebsocketDataServerClient
@@ -50,7 +52,7 @@ public class WebsocketDataServerClient
    private final DisconnectPromise disconnectPromise;
 
    public WebsocketDataServerClient(HTTPDataServerConnection connection, IDLYoVariableHandshakeParser parser, TimestampListener timestampListener,
-                                    YoVariableClientImplementation yoVariableClient, DebugRegistry debugRegistry)
+                                    YoVariableClientImplementation yoVariableClient, int timeoutInMs, DebugRegistry debugRegistry)
          throws IOException
    {
       this.disconnectPromise = connection.take();
@@ -82,7 +84,7 @@ public class WebsocketDataServerClient
          protected void initChannel(SocketChannel ch)
          {
             ChannelPipeline p = ch.pipeline();
-            p.addLast(new HttpClientCodec(), new HttpObjectAggregator(65536), WebSocketClientCompressionHandler.INSTANCE, handler);
+            p.addLast(new HttpClientCodec(), new HttpObjectAggregator(65536), WebSocketClientCompressionHandler.INSTANCE, new IdleStateHandler(timeoutInMs, 0, 0, TimeUnit.MILLISECONDS), handler);
          }
       });
 

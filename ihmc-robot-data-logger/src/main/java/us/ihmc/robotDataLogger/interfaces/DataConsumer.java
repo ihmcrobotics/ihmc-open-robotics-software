@@ -15,38 +15,34 @@ public interface DataConsumer
    /**
     * Requests the model file 
     *  
-    * @param announcement
     * 
     * @return byte[] array of the model file
     * 
     * @throws IOException if no reply has been received within  the timeout
     * @throws RuntimeException if no model file is announced in the announcement
     */
-   byte[] getModelFile(int timeout) throws IOException;
+   byte[] getModelFile() throws IOException;
 
    /**
     * Requests the resource zip 
     *  
-    * @param announcement
     * 
     * @return byte[] array of the resource bundle
     * 
     * @throws IOException if no reply has been received within the timeout
     * @throws RuntimeException if no resource bundle is announced in the announcement
     */
-   byte[] getResourceZip(int timeout) throws IOException;
+   byte[] getResourceZip() throws IOException;
 
    /**
     * Request the handshake 
     * 
     * 
-    * @param announcement 
-    * 
     * @return Handshake
     * 
     * @throws IOException if no reply has been received within the timeout
     */
-   Handshake getHandshake(int timeout) throws IOException;
+   Handshake getHandshake() throws IOException;
 
    /**
     * Send a command to the server. 
