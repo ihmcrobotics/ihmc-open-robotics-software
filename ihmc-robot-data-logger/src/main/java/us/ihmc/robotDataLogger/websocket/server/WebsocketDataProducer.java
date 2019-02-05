@@ -28,7 +28,6 @@ import us.ihmc.robotDataLogger.listeners.VariableChangedListener;
 import us.ihmc.robotDataLogger.logger.DataServerSettings;
 import us.ihmc.robotDataLogger.util.HandshakeHashCalculator;
 import us.ihmc.robotDataLogger.websocket.server.discovery.DataServerLocationBroadcastSender;
-import us.ihmc.util.PeriodicThreadSchedulerFactory;
 
 /**
  * Implementation of the DataProducer using Websockets
@@ -196,8 +195,7 @@ public class WebsocketDataProducer implements DataProducer
    }
 
    @Override
-   public RegistryPublisher createRegistryPublisher(CustomLogDataPublisherType type, PeriodicThreadSchedulerFactory schedulerFactory,
-                                                    RegistrySendBufferBuilder builder)
+   public RegistryPublisher createRegistryPublisher(CustomLogDataPublisherType type, RegistrySendBufferBuilder builder)
          throws IOException
    {
       WebsocketRegistryPublisher websocketRegistryPublisher = new WebsocketRegistryPublisher(workerGroup, builder, broadcaster);
@@ -207,12 +205,4 @@ public class WebsocketDataProducer implements DataProducer
       }
       return websocketRegistryPublisher;
    }
-
-   @Override
-   public void sendKeepAlive(PeriodicThreadSchedulerFactory schedulerFactory) throws IOException
-   {
-      // TODO Auto-generated method stub
-      
-   }
-
 }
