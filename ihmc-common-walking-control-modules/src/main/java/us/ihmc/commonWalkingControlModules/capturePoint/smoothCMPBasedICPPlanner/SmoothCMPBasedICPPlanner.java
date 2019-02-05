@@ -12,11 +12,13 @@ import us.ihmc.commonWalkingControlModules.capturePoint.smoothCMPBasedICPPlanner
 import us.ihmc.commonWalkingControlModules.capturePoint.smoothCMPBasedICPPlanner.CMPGeneration.ReferenceCMPTrajectoryGenerator;
 import us.ihmc.commonWalkingControlModules.capturePoint.smoothCMPBasedICPPlanner.CoMGeneration.ReferenceCoMTrajectoryGenerator;
 import us.ihmc.commonWalkingControlModules.capturePoint.smoothCMPBasedICPPlanner.CoPGeneration.CoPPointsInFoot;
+import us.ihmc.commonWalkingControlModules.capturePoint.smoothCMPBasedICPPlanner.CoPGeneration.CoPTrajectory;
 import us.ihmc.commonWalkingControlModules.capturePoint.smoothCMPBasedICPPlanner.CoPGeneration.FootstepData;
 import us.ihmc.commonWalkingControlModules.capturePoint.smoothCMPBasedICPPlanner.CoPGeneration.ReferenceCoPTrajectoryGenerator;
 import us.ihmc.commonWalkingControlModules.capturePoint.smoothCMPBasedICPPlanner.ICPGeneration.ReferenceICPTrajectoryGenerator;
 import us.ihmc.commonWalkingControlModules.configurations.ICPPlannerParameters;
 import us.ihmc.commonWalkingControlModules.configurations.SmoothCMPPlannerParameters;
+import us.ihmc.commonWalkingControlModules.controlModules.foot.wobble.FootRotationInformation;
 import us.ihmc.commonWalkingControlModules.messageHandlers.MomentumTrajectoryHandler;
 import us.ihmc.commons.MathTools;
 import us.ihmc.commons.PrintTools;
@@ -39,6 +41,7 @@ import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.humanoidRobotics.footstep.FootstepTiming;
 import us.ihmc.robotModels.FullRobotModel;
 import us.ihmc.robotics.contactable.ContactablePlaneBody;
+import us.ihmc.robotics.math.trajectories.FrameTrajectory3D;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
@@ -249,6 +252,18 @@ public class SmoothCMPBasedICPPlanner extends AbstractICPPlanner
       yoGraphicsListRegistry.registerArtifactList(artifactList);
    }
 
+   private FootRotationInformation footRotationInformation;
+
+   public void setFootRotationIndicator(FootRotationInformation footRotationInformation)
+   {
+      this.footRotationInformation = footRotationInformation;
+   }
+
+   private boolean isRotating(RobotSide supportSide)
+   {
+      return footRotationInformation != null && footRotationInformation.isRotating(supportSide) && !isStanding.getValue();
+   }
+
    /** {@inheritDoc} */
    @Override
    public void clearPlan()
@@ -434,16 +449,47 @@ public class SmoothCMPBasedICPPlanner extends AbstractICPPlanner
       if (transferToSide == null)
          transferToSide = defaultTransferToSide;
 
+      boolean isTransferToSideRotating = isRotating(transferToSide);
+      boolean isTransferFromSideRotating = isRotating(transferToSide.getOppositeSide());
+
       boolean smoothForInitialContinuity = (adjustPlanForInitialDSContinuity.getBooleanValue() && (isStanding.getBooleanValue() || isInitialTransfer
             .getBooleanValue()));
       boolean smoothForFinalContinuity = numberOfUpcomingFootsteps.getIntegerValue() == 0 && adjustPlanForStandingContinuity.getBooleanValue();
       boolean smoothForContinuity = adjustPlanForDSContinuity.getBooleanValue() || smoothForInitialContinuity || smoothForFinalContinuity;
-      boolean performSmoothingAdjustment = maintainContinuity && smoothForContinuity;
+      boolean performSmoothingAdjustment = maintainContinuity && smoothForContinuity && !isTransferToSideRotating && !isTransferFromSideRotating;
       referenceCoPGenerator.setGoingToPerformDSSmoothingAdjustment(performSmoothingAdjustment);
 
       // TODO set up the CoP Generator to be able to only update the current Support Feet CMPs
       referenceCoPGenerator
             .computeReferenceCoPsStartingFromDoubleSupport(isInitialTransfer.getBooleanValue(), transferToSide, previousTransferToSide.getEnumValue());
+
+      if (isTransferFromSideRotating)
+      {
+         FramePoint3D temp = new FramePoint3D();
+         temp.setIncludingFrame(footRotationInformation.getDesiredCoP(transferToSide.getOppositeSide()));
+         temp.changeFrame(worldFrame);
+         CoPTrajectory copTrajectory = referenceCoPGenerator.getTransferCoPTrajectories().get(0);
+         FrameTrajectory3D segment = copTrajectory.getSegment(0);
+         segment.compute(segment.getFinalTime());
+         segment.setLinear(segment.getInitialTime(), segment.getFinalTime(), temp, segment.getFramePosition());
+      }
+      if (isTransferToSideRotating)
+      {
+         FramePoint3D temp = new FramePoint3D();
+         temp.setIncludingFrame(footRotationInformation.getDesiredCoP(transferToSide));
+         temp.changeFrame(worldFrame);
+         CoPTrajectory copTrajectory = referenceCoPGenerator.getTransferCoPTrajectories().get(0);
+         FrameTrajectory3D segment = copTrajectory.getSegment(copTrajectory.getNumberOfSegments() - 1);
+         segment.compute(segment.getInitialTime());
+         segment.setLinear(segment.getInitialTime(), segment.getFinalTime(), segment.getFramePosition(), temp);
+         copTrajectory = referenceCoPGenerator.getSwingCoPTrajectories().get(0);
+         for (int i = 0; i < copTrajectory.getNumberOfSegments(); i++)
+         {
+            segment = copTrajectory.getSegment(i);
+            segment.setConstant(segment.getInitialTime(), segment.getFinalTime(), temp);
+         }
+      }
+
       referenceCMPGenerator.setNumberOfRegisteredSteps(referenceCoPGenerator.getNumberOfFootstepsRegistered());
       referenceICPGenerator.setNumberOfRegisteredSteps(referenceCoPGenerator.getNumberOfFootstepsRegistered());
 
@@ -500,11 +546,30 @@ public class SmoothCMPBasedICPPlanner extends AbstractICPPlanner
       clearPlanWithoutClearingPlannedFootsteps();
       RobotSide supportSide = this.supportSide.getEnumValue();
 
-      boolean goingToPerformSmoothingAdjustment = maintainContinuity && adjustPlanForSSContinuity.getBooleanValue();
+      boolean isSupportRotating = isRotating(supportSide);
+      boolean goingToPerformSmoothingAdjustment = maintainContinuity && adjustPlanForSSContinuity.getBooleanValue() && !isSupportRotating;
       referenceCoPGenerator.setGoingToPerformSSSmoothingAdjustment(goingToPerformSmoothingAdjustment);
 
       // TODO set up the CoP Generator to be able to only update the current Support Feet CMPs
       referenceCoPGenerator.computeReferenceCoPsStartingFromSingleSupport(supportSide);
+
+      if (isSupportRotating)
+      {
+         FramePoint3D temp = new FramePoint3D();
+         temp.setIncludingFrame(footRotationInformation.getDesiredCoP(supportSide));
+         temp.changeFrame(worldFrame);
+         CoPTrajectory copTrajectory = referenceCoPGenerator.getSwingCoPTrajectories().get(0);
+         for (int i = 0; i < copTrajectory.getNumberOfSegments(); i++)
+         {
+            FrameTrajectory3D segment = copTrajectory.getSegment(i);
+            segment.setConstant(segment.getInitialTime(), segment.getFinalTime(), temp);
+         }
+         copTrajectory = referenceCoPGenerator.getTransferCoPTrajectories().get(1);
+         FrameTrajectory3D segment = copTrajectory.getSegment(0);
+         segment.compute(segment.getFinalTime());
+         segment.setLinear(segment.getInitialTime(), segment.getFinalTime(), temp, segment.getFramePosition());
+      }
+
       referenceCMPGenerator.setNumberOfRegisteredSteps(referenceCoPGenerator.getNumberOfFootstepsRegistered());
       referenceICPGenerator.setNumberOfRegisteredSteps(referenceCoPGenerator.getNumberOfFootstepsRegistered());
 
