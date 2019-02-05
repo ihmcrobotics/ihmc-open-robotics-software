@@ -115,6 +115,9 @@ public class SmoothCMPBasedICPPlanner extends AbstractICPPlanner
 
    private final List<ImmutablePair<FrameTuple3DReadOnly, FixedFrameTuple3DBasics>> visualizationUpdatables = new ArrayList<>();
 
+   private FootRotationInformation footRotationInformation;
+   private final FramePoint3D tempCoP = new FramePoint3D();
+
    public SmoothCMPBasedICPPlanner(FullRobotModel fullRobotModel, BipedSupportPolygons bipedSupportPolygons,
                                    SideDependentList<? extends ContactablePlaneBody> contactableFeet, int maxNumberOfFootstepsToConsider,
                                    MomentumTrajectoryHandler momentumTrajectoryHandler, YoDouble yoTime, YoVariableRegistry parentRegistry,
@@ -251,8 +254,6 @@ public class SmoothCMPBasedICPPlanner extends AbstractICPPlanner
       yoGraphicsListRegistry.registerYoGraphicsList(yoGraphicsList);
       yoGraphicsListRegistry.registerArtifactList(artifactList);
    }
-
-   private FootRotationInformation footRotationInformation;
 
    public void setFootRotationIndicator(FootRotationInformation footRotationInformation)
    {
@@ -465,28 +466,26 @@ public class SmoothCMPBasedICPPlanner extends AbstractICPPlanner
 
       if (isTransferFromSideRotating)
       {
-         FramePoint3D temp = new FramePoint3D();
-         temp.setIncludingFrame(footRotationInformation.getDesiredCoP(transferToSide.getOppositeSide()));
-         temp.changeFrame(worldFrame);
+         tempCoP.setIncludingFrame(footRotationInformation.getDesiredCoP(transferToSide.getOppositeSide()));
+         tempCoP.changeFrame(worldFrame);
          CoPTrajectory copTrajectory = referenceCoPGenerator.getTransferCoPTrajectories().get(0);
          FrameTrajectory3D segment = copTrajectory.getSegment(0);
          segment.compute(segment.getFinalTime());
-         segment.setLinear(segment.getInitialTime(), segment.getFinalTime(), temp, segment.getFramePosition());
+         segment.setLinear(segment.getInitialTime(), segment.getFinalTime(), tempCoP, segment.getFramePosition());
       }
       if (isTransferToSideRotating)
       {
-         FramePoint3D temp = new FramePoint3D();
-         temp.setIncludingFrame(footRotationInformation.getDesiredCoP(transferToSide));
-         temp.changeFrame(worldFrame);
+         tempCoP.setIncludingFrame(footRotationInformation.getDesiredCoP(transferToSide));
+         tempCoP.changeFrame(worldFrame);
          CoPTrajectory copTrajectory = referenceCoPGenerator.getTransferCoPTrajectories().get(0);
          FrameTrajectory3D segment = copTrajectory.getSegment(copTrajectory.getNumberOfSegments() - 1);
          segment.compute(segment.getInitialTime());
-         segment.setLinear(segment.getInitialTime(), segment.getFinalTime(), segment.getFramePosition(), temp);
+         segment.setLinear(segment.getInitialTime(), segment.getFinalTime(), segment.getFramePosition(), tempCoP);
          copTrajectory = referenceCoPGenerator.getSwingCoPTrajectories().get(0);
          for (int i = 0; i < copTrajectory.getNumberOfSegments(); i++)
          {
             segment = copTrajectory.getSegment(i);
-            segment.setConstant(segment.getInitialTime(), segment.getFinalTime(), temp);
+            segment.setConstant(segment.getInitialTime(), segment.getFinalTime(), tempCoP);
          }
       }
 
@@ -555,19 +554,18 @@ public class SmoothCMPBasedICPPlanner extends AbstractICPPlanner
 
       if (isSupportRotating)
       {
-         FramePoint3D temp = new FramePoint3D();
-         temp.setIncludingFrame(footRotationInformation.getDesiredCoP(supportSide));
-         temp.changeFrame(worldFrame);
+         tempCoP.setIncludingFrame(footRotationInformation.getDesiredCoP(supportSide));
+         tempCoP.changeFrame(worldFrame);
          CoPTrajectory copTrajectory = referenceCoPGenerator.getSwingCoPTrajectories().get(0);
          for (int i = 0; i < copTrajectory.getNumberOfSegments(); i++)
          {
             FrameTrajectory3D segment = copTrajectory.getSegment(i);
-            segment.setConstant(segment.getInitialTime(), segment.getFinalTime(), temp);
+            segment.setConstant(segment.getInitialTime(), segment.getFinalTime(), tempCoP);
          }
          copTrajectory = referenceCoPGenerator.getTransferCoPTrajectories().get(1);
          FrameTrajectory3D segment = copTrajectory.getSegment(0);
          segment.compute(segment.getFinalTime());
-         segment.setLinear(segment.getInitialTime(), segment.getFinalTime(), temp, segment.getFramePosition());
+         segment.setLinear(segment.getInitialTime(), segment.getFinalTime(), tempCoP, segment.getFramePosition());
       }
 
       referenceCMPGenerator.setNumberOfRegisteredSteps(referenceCoPGenerator.getNumberOfFootstepsRegistered());
