@@ -109,7 +109,11 @@ public class SnapBasedNodeChecker extends FootstepNodeChecker
          FootstepNode grandparentNode = graph.getParentNode(previousNode);
          if(grandparentNode != null)
          {
-            RigidBodyTransform grandparentSnapTransform = snapper.getSnapData(grandparentNode).getSnapTransform();
+            FootstepNodeSnapData grandparentSnapData = snapper.getSnapData(grandparentNode);
+            if(grandparentSnapData == null)
+               return true;
+
+            RigidBodyTransform grandparentSnapTransform = grandparentSnapData.getSnapTransform();
             RigidBodyTransform grandparentNodeTransform = new RigidBodyTransform();
             FootstepNodeTools.getSnappedNodeTransform(grandparentNode, grandparentSnapTransform, grandparentNodeTransform);
             double grandparentTranslationScaleFactor = 1.5;
