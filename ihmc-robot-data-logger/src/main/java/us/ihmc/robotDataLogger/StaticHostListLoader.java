@@ -17,6 +17,7 @@ public class StaticHostListLoader
    public static List<HTTPDataServerDescription> load()
    {
       YAMLSerializer<StaticHostList> ser = new YAMLSerializer<StaticHostList>(new StaticHostListPubSubType());
+      ser.setAddTypeAsRootNode(false);
       
       File in = new File(location);
       try
@@ -49,6 +50,7 @@ public class StaticHostListLoader
    public static void save(List<HTTPDataServerDescription> list) throws IOException
    {
       YAMLSerializer<StaticHostList> ser = new YAMLSerializer<StaticHostList>(new StaticHostListPubSubType());
+      ser.setAddTypeAsRootNode(false);
       
       File in = new File(location);
       StaticHostList staticHostList = new StaticHostList();

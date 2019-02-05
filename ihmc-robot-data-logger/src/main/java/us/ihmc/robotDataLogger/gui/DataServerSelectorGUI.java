@@ -110,7 +110,7 @@ public class DataServerSelectorGUI implements HostAddedListener
       {
          connection.close();
       }
-      
+      System.exit(0);
    }
 
 }
