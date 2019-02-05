@@ -8,6 +8,7 @@ import java.net.SocketTimeoutException;
 import java.nio.ByteBuffer;
 
 import us.ihmc.robotDataLogger.listeners.TimestampListener;
+import us.ihmc.robotDataLogger.websocket.server.UDPTimestampServer;
 
 /**
  * Simple client for the UDP timestamps
@@ -76,15 +77,18 @@ public class UDPTimestampClient
       @Override
       public void run()
       {
-         byte[] data = new byte[8];
+         byte[] data = new byte[12];
          ByteBuffer wrappedData = ByteBuffer.wrap(data);
-         DatagramPacket incoming = new DatagramPacket(data, 8);
+         DatagramPacket incoming = new DatagramPacket(data, 12);
          while (running)
          {
             try
             {
                clientSocket.receive(incoming);
-               listener.receivedTimestampOnly(wrappedData.getLong(0));
+               if(wrappedData.getInt(0) == UDPTimestampServer.TIMESTAMP_HEADER)
+               {
+                  listener.receivedTimestampOnly(wrappedData.getLong(4));
+               }
             }
             catch (SocketTimeoutException e)
             {

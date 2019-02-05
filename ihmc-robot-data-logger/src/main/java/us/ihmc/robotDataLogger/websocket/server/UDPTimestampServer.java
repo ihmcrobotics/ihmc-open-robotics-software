@@ -9,10 +9,12 @@ import java.nio.ByteBuffer;
 
 public class UDPTimestampServer
 {
+   public static final int TIMESTAMP_HEADER = 0x5d35bc23;
+   
    private final Object lock = new Object();
    
    private final DatagramSocket serverSocket ;
-   private final byte[] sendData = new byte[8];
+   private final byte[] sendData = new byte[12];
    private final ByteBuffer sendDataBuffer = ByteBuffer.wrap(sendData);
    private final DatagramPacket sendPacket = new DatagramPacket(sendData, sendData.length);
    
@@ -42,7 +44,8 @@ public class UDPTimestampServer
       {
          if(active)
          {
-            sendDataBuffer.putLong(0, timestamp);
+            sendDataBuffer.putInt(0, TIMESTAMP_HEADER);
+            sendDataBuffer.putLong(4, timestamp);
             sendPacket.setAddress(address);
             sendPacket.setPort(port);
             try

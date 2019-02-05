@@ -10,6 +10,7 @@ import java.util.Collections;
 import java.util.List;
 
 import com.fasterxml.jackson.core.JsonFactory;
+import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
@@ -24,8 +25,11 @@ import us.ihmc.robotDataLogger.StaticHostList;
  */
 public abstract class DataServerLocationBroadcast
 {
+   private static final String PORT_MESSAGE_HEADER = "DataServerPort";
+   
    public static class PortPOJO
    {
+      public String header;
       public int port;
       
       public PortPOJO()
@@ -35,6 +39,7 @@ public abstract class DataServerLocationBroadcast
       
       public PortPOJO(int port)
       {
+         this.header = PORT_MESSAGE_HEADER;
          this.port = port;
       }
    }
@@ -104,6 +109,15 @@ public abstract class DataServerLocationBroadcast
    
    protected static int parseMessage(String message, ObjectMapper mapper) throws IOException
    {
-      return mapper.readValue(message, PortPOJO.class).port;
+      PortPOJO portPOJO = mapper.readValue(message, PortPOJO.class);
+      if(PORT_MESSAGE_HEADER.equals(portPOJO.header))
+      {
+         return portPOJO.port;         
+      }
+      else
+      {
+         throw new JsonParseException(null, "Invalid header.");
+      }
+      
    }
 }

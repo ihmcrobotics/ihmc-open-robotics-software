@@ -378,7 +378,7 @@ public class SCSVisualizer implements YoVariablesUpdatedListener, ExitActionList
       visualizer.setShowOverheadView(false);
 
       YoVariableClient client = new YoVariableClient(visualizer);
-      client.start();
+      client.startWithHostSelector();
    }
 
    @Override
