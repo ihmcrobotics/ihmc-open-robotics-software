@@ -5,6 +5,7 @@ import java.util.EnumMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.function.Function;
+import java.util.function.Supplier;
 
 public class QuadrantDependentList<V> extends SegmentDependentList<RobotQuadrant, V>
 {
@@ -20,6 +21,11 @@ public class QuadrantDependentList<V> extends SegmentDependentList<RobotQuadrant
    public QuadrantDependentList()
    {
       super(RobotQuadrant.class);
+   }
+
+   public QuadrantDependentList(Supplier<V> allocator)
+   {
+      this(allocator.get(), allocator.get(), allocator.get(), allocator.get());
    }
    
    public QuadrantDependentList(V frontLeftObject, V frontRightObject, V hindLeftObject, V hindRightObject)

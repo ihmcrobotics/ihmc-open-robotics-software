@@ -54,6 +54,8 @@ public class QuadrupedFootstepPlanningRequestPacketPubSubType implements us.ihmc
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 
+      current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
+
 
       return current_alignment - initial_alignment;
    }
@@ -83,6 +85,9 @@ public class QuadrupedFootstepPlanningRequestPacketPubSubType implements us.ihmc
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 
 
+      current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
+
+
 
       return current_alignment - initial_alignment;
    }
@@ -98,6 +103,8 @@ public class QuadrupedFootstepPlanningRequestPacketPubSubType implements us.ihmc
       controller_msgs.msg.dds.PlanarRegionsListMessagePubSubType.write(data.getPlanarRegionsListMessage(), cdr);
       cdr.write_type_2(data.getPlannerRequestId());
 
+      cdr.write_type_9(data.getRequestedFootstepPlannerType());
+
    }
 
    public static void read(controller_msgs.msg.dds.QuadrupedFootstepPlanningRequestPacket data, us.ihmc.idl.CDR cdr)
@@ -110,6 +117,8 @@ public class QuadrupedFootstepPlanningRequestPacketPubSubType implements us.ihmc
       geometry_msgs.msg.dds.QuaternionPubSubType.read(data.getGoalOrientationInWorld(), cdr);	
       controller_msgs.msg.dds.PlanarRegionsListMessagePubSubType.read(data.getPlanarRegionsListMessage(), cdr);	
       data.setPlannerRequestId(cdr.read_type_2());
+      	
+      data.setRequestedFootstepPlannerType(cdr.read_type_9());
       	
 
    }
@@ -129,6 +138,7 @@ public class QuadrupedFootstepPlanningRequestPacketPubSubType implements us.ihmc
       ser.write_type_a("planar_regions_list_message", new controller_msgs.msg.dds.PlanarRegionsListMessagePubSubType(), data.getPlanarRegionsListMessage());
 
       ser.write_type_2("planner_request_id", data.getPlannerRequestId());
+      ser.write_type_9("requested_footstep_planner_type", data.getRequestedFootstepPlannerType());
    }
 
    @Override
@@ -146,6 +156,7 @@ public class QuadrupedFootstepPlanningRequestPacketPubSubType implements us.ihmc
       ser.read_type_a("planar_regions_list_message", new controller_msgs.msg.dds.PlanarRegionsListMessagePubSubType(), data.getPlanarRegionsListMessage());
 
       data.setPlannerRequestId(ser.read_type_2("planner_request_id"));
+      data.setRequestedFootstepPlannerType(ser.read_type_9("requested_footstep_planner_type"));
    }
 
    public static void staticCopy(controller_msgs.msg.dds.QuadrupedFootstepPlanningRequestPacket src, controller_msgs.msg.dds.QuadrupedFootstepPlanningRequestPacket dest)
