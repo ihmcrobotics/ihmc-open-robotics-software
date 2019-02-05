@@ -28,6 +28,13 @@ public class ValkyrieWalkingControllerPreviewToolboxControllerTest extends Avata
    }
 
    @Override
+   @Test//(timeout = 300000)
+   public void testResetFeature() throws SimulationExceededMaximumTimeException
+   {
+      super.testResetFeature();
+   }
+
+   @Override
    public DRCRobotModel getRobotModel()
    {
       return robotModel;

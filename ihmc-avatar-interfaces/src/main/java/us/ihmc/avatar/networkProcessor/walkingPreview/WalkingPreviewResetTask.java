@@ -4,6 +4,8 @@ import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Stream;
 
 import controller_msgs.msg.dds.ArmTrajectoryMessage;
+import controller_msgs.msg.dds.ChestTrajectoryMessage;
+import controller_msgs.msg.dds.NeckTrajectoryMessage;
 import controller_msgs.msg.dds.PelvisTrajectoryMessage;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.YoPlaneContactState;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.InverseDynamicsCommand;
@@ -31,7 +33,6 @@ public class WalkingPreviewResetTask implements WalkingPreviewTask
    private final SideDependentList<WalkingPreviewContactStateHolder> contactStateHolders = new SideDependentList<>();
    private final InverseDynamicsCommandList commandList = new InverseDynamicsCommandList();
 
-   private final FullHumanoidRobotModel fullRobotModel;
    private final CommandInputManager walkingInputManager;
    private final HighLevelHumanoidControllerToolbox controllerToolbox;
 
@@ -39,13 +40,53 @@ public class WalkingPreviewResetTask implements WalkingPreviewTask
    private final AtomicReference<RobotMotionStatus> latestMotionStatus = new AtomicReference<>(null);
    private RobotMotionStatusChangedListener robotMotionStatusChangedListener = (newStatus, time) -> latestMotionStatus.set(newStatus);
 
-   public WalkingPreviewResetTask(FullHumanoidRobotModel fullRobotModel, SideDependentList<YoPlaneContactState> footContactStates,
-                                  CommandInputManager walkingInputManager, HighLevelHumanoidControllerToolbox controllerToolbox)
+   private NeckTrajectoryMessage resetNeckMessage = null;
+   private SideDependentList<ArmTrajectoryMessage> resetArmMessages = null;
+   private ChestTrajectoryMessage resetChestMessage = null;
+   private PelvisTrajectoryMessage resetPelvisMessage = null;
+
+   private int countSinceMessageSent = 0;
+   private int numberOfControlTicksBeforeDone = 10;
+
+   public WalkingPreviewResetTask(SideDependentList<YoPlaneContactState> footContactStates, CommandInputManager walkingInputManager,
+                                  HighLevelHumanoidControllerToolbox controllerToolbox)
    {
-      this.fullRobotModel = fullRobotModel;
       this.footContactStates = footContactStates;
       this.walkingInputManager = walkingInputManager;
       this.controllerToolbox = controllerToolbox;
+   }
+
+   public void resetToFullRobotModel(FullHumanoidRobotModel fullRobotModel)
+   { // Get the controller to be initialized to hold the initial robot configuration.
+
+      RigidBodyBasics head = fullRobotModel.getHead();
+      RigidBodyBasics chest = fullRobotModel.getChest();
+      RigidBodyBasics pelvis = fullRobotModel.getPelvis();
+
+      { // Neck
+         double[] desiredJointPositions = Stream.of(MultiBodySystemTools.createOneDoFJointPath(chest, head)).mapToDouble(OneDoFJointBasics::getQ).toArray();
+         resetNeckMessage = HumanoidMessageTools.createNeckTrajectoryMessage(0.0, desiredJointPositions);
+      }
+
+      { // Chest
+         FrameQuaternion initialChestOrientation = new FrameQuaternion(chest.getBodyFixedFrame());
+         initialChestOrientation.changeFrame(worldFrame);
+         resetChestMessage = HumanoidMessageTools.createChestTrajectoryMessage(0.0, initialChestOrientation, worldFrame);
+      }
+
+      resetArmMessages = new SideDependentList<>();
+      for (RobotSide robotSide : RobotSide.values)
+      { // Arms
+         RigidBodyBasics hand = fullRobotModel.getHand(robotSide);
+         double[] desiredJointPositions = Stream.of(MultiBodySystemTools.createOneDoFJointPath(chest, hand)).mapToDouble(joint -> joint.getQ()).toArray();
+         resetArmMessages.put(robotSide, HumanoidMessageTools.createArmTrajectoryMessage(robotSide, 0.0, desiredJointPositions));
+      }
+
+      { // Pelvis
+         FramePose3D initialPelvisPose = new FramePose3D(pelvis.getBodyFixedFrame());
+         initialPelvisPose.changeFrame(worldFrame);
+         resetPelvisMessage = HumanoidMessageTools.createPelvisTrajectoryMessage(0.0, initialPelvisPose.getPosition(), initialPelvisPose.getOrientation());
+      }
    }
 
    @Override
@@ -54,36 +95,15 @@ public class WalkingPreviewResetTask implements WalkingPreviewTask
       for (RobotSide robotSide : RobotSide.values)
          contactStateHolders.put(robotSide, WalkingPreviewContactStateHolder.holdAtCurrent(footContactStates.get(robotSide)));
       controllerToolbox.attachRobotMotionStatusChangedListener(robotMotionStatusChangedListener);
-
-      // FIXME The controller crashes when sending trajectory messages at the very beginning.
-      snapToInitialRobotConfiguration();
    }
 
    private void snapToInitialRobotConfiguration()
    { // Get the controller to be initialized to hold the initial robot configuration.
-      FramePose3D initialPelvisPose = new FramePose3D(fullRobotModel.getRootJoint().getFrameAfterJoint());
-      initialPelvisPose.changeFrame(worldFrame);
-      PelvisTrajectoryMessage pelvisTrajectoryMessage = HumanoidMessageTools.createPelvisTrajectoryMessage(0.0, initialPelvisPose.getPosition(),
-                                                                                                           initialPelvisPose.getOrientation());
-      walkingInputManager.submitMessage(pelvisTrajectoryMessage);
-
-      RigidBodyBasics chest = fullRobotModel.getChest();
-
+      walkingInputManager.submitMessage(resetPelvisMessage);
+      walkingInputManager.submitMessage(resetNeckMessage);
+      walkingInputManager.submitMessage(resetChestMessage);
       for (RobotSide robotSide : RobotSide.values)
-      {
-         RigidBodyBasics hand = fullRobotModel.getHand(robotSide);
-         double[] desiredJointPositions = Stream.of(MultiBodySystemTools.createOneDoFJointPath(chest, hand)).mapToDouble(joint -> joint.getQ()).toArray();
-         ArmTrajectoryMessage armTrajectoryMessage = HumanoidMessageTools.createArmTrajectoryMessage(robotSide, 0.0, desiredJointPositions);
-         walkingInputManager.submitMessage(armTrajectoryMessage);
-      }
-
-      RigidBodyBasics head = fullRobotModel.getHead();
-      double[] desiredJointPositions = Stream.of(MultiBodySystemTools.createOneDoFJointPath(chest, head)).mapToDouble(OneDoFJointBasics::getQ).toArray();
-      walkingInputManager.submitMessage(HumanoidMessageTools.createNeckTrajectoryMessage(0.0, desiredJointPositions));
-
-      FrameQuaternion initialChestOrientation = new FrameQuaternion(chest.getBodyFixedFrame());
-      initialChestOrientation.changeFrame(worldFrame);
-      walkingInputManager.submitMessage(HumanoidMessageTools.createChestTrajectoryMessage(0.0, initialChestOrientation, worldFrame));
+         walkingInputManager.submitMessage(resetArmMessages.get(robotSide));
    }
 
    @Override
@@ -102,6 +122,9 @@ public class WalkingPreviewResetTask implements WalkingPreviewTask
          contactStateHolders.get(robotSide).doControl();
          commandList.addCommand(contactStateHolders.get(robotSide).getOutput());
       }
+
+      if (haveResetCommandsBeenSubmitted)
+         countSinceMessageSent++;
    }
 
    @Override
@@ -113,7 +136,7 @@ public class WalkingPreviewResetTask implements WalkingPreviewTask
    @Override
    public boolean isDone()
    {
-      return haveResetCommandsBeenSubmitted;
+      return countSinceMessageSent >= numberOfControlTicksBeforeDone;
    }
 
    @Override
