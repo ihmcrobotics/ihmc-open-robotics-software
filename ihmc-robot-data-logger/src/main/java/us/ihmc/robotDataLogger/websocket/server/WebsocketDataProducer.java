@@ -25,6 +25,7 @@ import us.ihmc.robotDataLogger.dataBuffers.RegistrySendBufferBuilder;
 import us.ihmc.robotDataLogger.interfaces.DataProducer;
 import us.ihmc.robotDataLogger.interfaces.RegistryPublisher;
 import us.ihmc.robotDataLogger.listeners.VariableChangedListener;
+import us.ihmc.robotDataLogger.logger.DataServerSettings;
 import us.ihmc.robotDataLogger.util.HandshakeHashCalculator;
 import us.ihmc.util.PeriodicThreadSchedulerFactory;
 
@@ -46,12 +47,12 @@ import us.ihmc.util.PeriodicThreadSchedulerFactory;
  */
 public class WebsocketDataProducer implements DataProducer
 {
-   public static final int PORT = 8008;
    private final WebsocketDataBroadcaster broadcaster = new WebsocketDataBroadcaster();
    private final String name;
    private final LogModelProvider logModelProvider;
    private final VariableChangedListener variableChangedListener;
    
+   private final int port;
    
    private final Object lock = new Object();
    private Channel ch = null;
@@ -71,14 +72,16 @@ public class WebsocketDataProducer implements DataProducer
    private int maximumBufferSize = 0;
    
    private final ArrayList<CameraAnnouncement> cameras = new ArrayList<>();
-   private boolean log = false;
+   private final boolean log;
 
 
-   public WebsocketDataProducer(String name, LogModelProvider logModelProvider, VariableChangedListener variableChangedListener, boolean publicBroadcast)
+   public WebsocketDataProducer(String name, LogModelProvider logModelProvider, VariableChangedListener variableChangedListener, DataServerSettings dataServerSettings)
    {
       this.name = name;
       this.logModelProvider = logModelProvider;
       this.variableChangedListener = variableChangedListener;
+      this.port = dataServerSettings.getPort();
+      this.log = dataServerSettings.isLogSession();
    }
 
    @Override
@@ -137,6 +140,10 @@ public class WebsocketDataProducer implements DataProducer
       return announcement;
    }
    
+   public void setPort(int port)
+   {
+      
+   }
 
    @Override
    public void announce() throws IOException
@@ -158,9 +165,9 @@ public class WebsocketDataProducer implements DataProducer
             b.group(bossGroup, workerGroup).channel(NioServerSocketChannel.class).handler(new LoggingHandler(LogLevel.INFO))
              .childHandler(new WebsocketDataServerInitializer(logServerContent, broadcaster, variableChangedListener, maximumBufferSize));
    
-            ch = b.bind(PORT).sync().channel();
+            ch = b.bind(port).sync().channel();
    
-            System.out.println("Open your web browser and navigate to http://127.0.0.1:" + PORT + '/');
+            System.out.println("Open your web browser and navigate to http://127.0.0.1:" + port + '/');
    
          }
          catch (InterruptedException e)
@@ -168,12 +175,6 @@ public class WebsocketDataProducer implements DataProducer
             throw new RuntimeException(e);
          } 
       }
-   }
-
-   @Override
-   public void setLog(boolean log)
-   {
-      this.log = log;
    }
 
    @Override

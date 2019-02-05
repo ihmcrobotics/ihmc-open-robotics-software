@@ -21,7 +21,7 @@ import us.ihmc.robotDataLogger.handshake.YoVariableHandShakeBuilder;
 import us.ihmc.robotDataLogger.interfaces.DataProducer;
 import us.ihmc.robotDataLogger.interfaces.RegistryPublisher;
 import us.ihmc.robotDataLogger.listeners.VariableChangedListener;
-import us.ihmc.robotDataLogger.logger.LogSettings;
+import us.ihmc.robotDataLogger.logger.DataServerSettings;
 import us.ihmc.robotDataLogger.rtps.TimestampPublisher;
 import us.ihmc.robotDataLogger.websocket.server.WebsocketDataProducer;
 import us.ihmc.simulationconstructionset.util.TickAndUpdatable;
@@ -69,12 +69,12 @@ public class YoVariableServer implements RobotVisualizer, TickAndUpdatable, Vari
     * @param mainClazz
     * @param schedulerFactory
     * @param logModelProvider
-    * @param logSettings
+    * @param dataServerSettings
     * @param dt
     */
-   public YoVariableServer(Class<?> mainClazz, PeriodicThreadSchedulerFactory schedulerFactory, LogModelProvider logModelProvider, LogSettings logSettings, double dt)
+   public YoVariableServer(Class<?> mainClazz, PeriodicThreadSchedulerFactory schedulerFactory, LogModelProvider logModelProvider, DataServerSettings dataServerSettings, double dt)
    {
-      this(mainClazz.getSimpleName(), schedulerFactory, logModelProvider, logSettings, dt);
+      this(mainClazz.getSimpleName(), schedulerFactory, logModelProvider, dataServerSettings, dt);
    }
 
    /**
@@ -114,10 +114,10 @@ public class YoVariableServer implements RobotVisualizer, TickAndUpdatable, Vari
     * @param mainClazz
     * @param schedulerFactory
     * @param logModelProvider
-    * @param logSettings
+    * @param dataServerSettings
     * @param dt
     */
-   public YoVariableServer(String mainClazz, PeriodicThreadSchedulerFactory schedulerFactory, LogModelProvider logModelProvider, LogSettings logSettings, double dt)
+   public YoVariableServer(String mainClazz, PeriodicThreadSchedulerFactory schedulerFactory, LogModelProvider logModelProvider, DataServerSettings dataServerSettings, double dt)
    {
       LoggerConfigurationLoader config;
       try
@@ -132,9 +132,8 @@ public class YoVariableServer implements RobotVisualizer, TickAndUpdatable, Vari
       this.dt = dt;
       this.schedulerFactory = schedulerFactory;
 
-      this.dataProducerParticipant = new WebsocketDataProducer(mainClazz, logModelProvider, this, config.getPublicBroadcast());
-      this.dataProducerParticipant.setLog(logSettings.isLog());
-      addCameras(config, logSettings);
+      this.dataProducerParticipant = new WebsocketDataProducer(mainClazz, logModelProvider, this, dataServerSettings);
+      addCameras(config, dataServerSettings);
       
       this.timestampScheduler = schedulerFactory.createPeriodicThreadScheduler("timestampPublisher");
       this.timestampPublisher = new TimestampPublisher(dataProducerParticipant);
@@ -146,7 +145,7 @@ public class YoVariableServer implements RobotVisualizer, TickAndUpdatable, Vari
       this.rootRegistryName = name;
    }
 
-   private void addCameras(LoggerConfigurationLoader config, LogSettings logSettings)
+   private void addCameras(LoggerConfigurationLoader config, DataServerSettings logSettings)
    {
       TByteArrayList cameras = config.getCameras();
       for (int i = 0; i < cameras.size(); i++)

@@ -44,12 +44,6 @@ public interface DataProducer
     */
    void announce() throws IOException;
 
-   /**
-    * Set if the logger should record this session or not
-    * 
-    * @param log
-    */
-   void setLog(boolean log);
 
    /** 
     * Publisher a timestamp update

@@ -258,7 +258,6 @@ public class RTPSDataProducerParticipant implements DataProducer
     * 
     * @param log
     */
-   @Override
    public void setLog(boolean log)
    {
       this.log = log;

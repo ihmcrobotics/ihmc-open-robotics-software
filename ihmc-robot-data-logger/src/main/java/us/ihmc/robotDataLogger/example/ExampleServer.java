@@ -7,7 +7,7 @@ import java.util.Random;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.log.LogTools;
 import us.ihmc.robotDataLogger.YoVariableServer;
-import us.ihmc.robotDataLogger.logger.LogSettings;
+import us.ihmc.robotDataLogger.logger.DataServerSettings;
 import us.ihmc.robotDataLogger.util.PeriodicGCFreeNonRealtimeThreadSchedulerFactory;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
@@ -26,7 +26,7 @@ public class ExampleServer
 
    private static final int variablesPerType = 1000;
    private static final double dt = 0.001;
-   private static final LogSettings logSettings = LogSettings.TEST_LOGGER;
+   private static final DataServerSettings logSettings = new DataServerSettings(false);
 
    private final Random random = new Random(127L);
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());

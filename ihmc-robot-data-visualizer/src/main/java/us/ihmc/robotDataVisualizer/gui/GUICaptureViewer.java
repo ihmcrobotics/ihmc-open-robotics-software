@@ -20,6 +20,7 @@ import us.ihmc.codecs.yuv.JPEGDecoder;
 import us.ihmc.codecs.yuv.YUVPictureConverter;
 import us.ihmc.robotDataLogger.guiRecorder.GUICaptureHandler;
 import us.ihmc.robotDataLogger.guiRecorder.GUICaptureReceiver;
+import us.ihmc.robotDataLogger.logger.DataServerSettings;
 import us.ihmc.robotDataLogger.logger.LogSettings;
 import us.ihmc.robotDataLogger.rtps.LogParticipantSettings;
 
@@ -60,7 +61,7 @@ public class GUICaptureViewer
       }
 
 
-      for (final LogSettings setting : LogSettings.values())
+      for (final DataServerSettings setting : LogSettings.values())
       {
          if (setting.getVideoStream() != null)
          {
