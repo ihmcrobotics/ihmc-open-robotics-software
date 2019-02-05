@@ -248,13 +248,14 @@ public class WalkingControllerPreviewToolboxController extends ToolboxController
       KinematicsToolboxHelper.setRobotStateFromRobotConfigurationData(robotConfigurationData, rootJoint,
                                                                       FullRobotModelUtils.getAllJointsExcludingHands(fullRobotModel));
 
-      fullRobotModel.updateFrames();
       referenceFrames.updateFrames();
       controllerToolbox.update();
       walkingController.initialize();
 
       taskExecutor.clear();
-      taskExecutor.submit(new WalkingPreviewResetTask(fullRobotModel, controllerToolbox.getFootContactStates(), walkingInputManager, controllerToolbox));
+      WalkingPreviewResetTask resetTask = new WalkingPreviewResetTask(controllerToolbox.getFootContactStates(), walkingInputManager, controllerToolbox);
+      resetTask.resetToFullRobotModel(fullRobotModel);
+      taskExecutor.submit(resetTask);
       isInitialized.set(true);
    }
 
@@ -263,8 +264,11 @@ public class WalkingControllerPreviewToolboxController extends ToolboxController
    {
       if (isDone())
       {
-         fullRobotModel.getElevator().childrenSubtreeIterable().forEach(JointBasics::setJointAccelerationToZero);
-         fullRobotModel.getElevator().childrenSubtreeIterable().forEach(JointBasics::setJointTwistToZero);
+         for (JointBasics joint : fullRobotModel.getElevator().childrenSubtreeIterable())
+         {
+            joint.setJointAccelerationToZero();
+            joint.setJointTwistToZero();
+         }
          return;
       }
 
