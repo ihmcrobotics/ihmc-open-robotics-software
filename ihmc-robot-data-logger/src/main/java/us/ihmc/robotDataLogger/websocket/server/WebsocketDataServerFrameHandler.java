@@ -120,7 +120,6 @@ class WebsocketDataServerFrameHandler extends SimpleChannelInboundHandler<WebSoc
          }
          else if (frame instanceof PingWebSocketFrame)
          {
-            System.out.println("PING");
          }
          else if (frame instanceof PongWebSocketFrame)
          {
@@ -134,7 +133,7 @@ class WebsocketDataServerFrameHandler extends SimpleChannelInboundHandler<WebSoc
       }
       catch (Exception e)
       {
-         e.printStackTrace();
+         // Swallow exceptions to avoid object allocations
       }
    }
 
@@ -146,7 +145,7 @@ class WebsocketDataServerFrameHandler extends SimpleChannelInboundHandler<WebSoc
    @Override
    public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause)
    {
-      cause.printStackTrace();
+      // Swallow exceptions to avoid object allocations
       ctx.close();
    }
 
