@@ -7,16 +7,21 @@ import controller_msgs.msg.dds.RobotConfigurationData;
 import us.ihmc.avatar.drcRobot.RobotTarget;
 import us.ihmc.avatar.networkProcessor.lidarScanPublisher.LidarScanPublisher;
 import us.ihmc.avatar.networkProcessor.stereoPointCloudPublisher.StereoVisionPointCloudPublisher;
+import us.ihmc.avatar.networkProcessor.stereoPointCloudPublisher.StereoVisionPointCloudPublisher.ColorPointCloudData;
+import us.ihmc.avatar.networkProcessor.stereoPointCloudPublisher.StereoVisionPointCloudPublisher.StereoVisionTransformer;
 import us.ihmc.avatar.ros.DRCROSPPSTimestampOffsetProvider;
 import us.ihmc.avatar.sensors.DRCSensorSuiteManager;
 import us.ihmc.avatar.sensors.multisense.MultiSenseSensorManager;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.ControllerAPIDefinition;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.net.ObjectCommunicator;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.ihmcPerception.camera.CameraDataReceiver;
 import us.ihmc.ihmcPerception.camera.SCSCameraDataReceiver;
 import us.ihmc.ihmcPerception.depthData.CollisionBoxProvider;
 import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
+import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotModels.FullHumanoidRobotModelFactory;
 import us.ihmc.ros2.Ros2Node;
 import us.ihmc.sensorProcessing.communication.producers.RobotConfigurationDataBuffer;
@@ -61,8 +66,10 @@ public class ValkyrieSensorSuiteManager implements DRCSensorSuiteManager
 
       if (ENABLE_STEREO_PUBLISHER)
       {
-         stereoVisionPointCloudPublisher = new StereoVisionPointCloudPublisher(fullRobotModelFactory, ros2Node, rcdTopicName, ValkyrieSensorInformation.getTransformFromHeadToUpperNeckPitchLink());
+         stereoVisionPointCloudPublisher = new StereoVisionPointCloudPublisher(sensorName, fullRobotModelFactory, ros2Node, rcdTopicName);
          stereoVisionPointCloudPublisher.setPPSTimestampOffsetProvider(ppsTimestampOffsetProvider);
+         stereoVisionPointCloudPublisher.setScanFrameToWorldFrame();
+         stereoVisionPointCloudPublisher.setCustomStereoVisionTransformer(createCustonStereoTransformer());
       }
       else
       {
@@ -127,5 +134,27 @@ public class ValkyrieSensorSuiteManager implements DRCSensorSuiteManager
    @Override
    public void connect() throws IOException
    {
+   }
+
+   private StereoVisionTransformer createCustonStereoTransformer()
+   {
+      return new StereoVisionTransformer()
+      {
+         private final RigidBodyTransform transform = new RigidBodyTransform();
+         private final RigidBodyTransform transformFromHeadToWorld = new RigidBodyTransform();
+
+         @Override
+         public void transform(FullHumanoidRobotModel fullRobotModel, RobotConfigurationDataBuffer robotConfigurationDataBuffer, ReferenceFrame scanPointsFrame,
+                               ColorPointCloudData scanDataToTransformToWorld)
+         {
+            ReferenceFrame headFrame = fullRobotModel.getHeadBaseFrame();
+
+            scanPointsFrame.getTransformToDesiredFrame(transform, headFrame);
+            headFrame.getTransformToDesiredFrame(transformFromHeadToWorld, ReferenceFrame.getWorldFrame());
+
+            transform.multiply(transformFromHeadToWorld);
+            //scanDataToTransformToWorld.transform(transform);
+         }
+      };
    }
 }
