@@ -180,7 +180,12 @@ public class FeetManager
 
    public void adjustSwingTrajectory(RobotSide swingSide, Footstep adjustedFootstep, double swingTime)
    {
-      footControlModules.get(swingSide).setAdjustedFootstepAndTime(adjustedFootstep, swingTime);
+      footControlModules.get(swingSide).setAdjustedFootstepAndTime(adjustedFootstep, swingTime, true);
+   }
+
+   public void adjustSwingTrajectory(RobotSide swingSide, Footstep adjustedFootstep, double swingTime, boolean useVelocityCorrection)
+   {
+      footControlModules.get(swingSide).setAdjustedFootstepAndTime(adjustedFootstep, swingTime, useVelocityCorrection);
    }
 
    public void requestMoveStraightTouchdownForDisturbanceRecovery(RobotSide swingSide)
