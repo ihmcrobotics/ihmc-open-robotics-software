@@ -1,5 +1,8 @@
 package us.ihmc.atlas.roughTerrainWalking;
 
+import java.io.InputStream;
+
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -17,14 +20,23 @@ public class AtlasFootWobbleTest extends AvatarFootWobbleTest
    @Before
    public void createRobotModel()
    {
-      robotModel = new AtlasRobotModel(AtlasRobotVersion.ATLAS_UNPLUGGED_V5_NO_HANDS, RobotTarget.SCS, false);
+      robotModel = new AtlasRobotModel(AtlasRobotVersion.ATLAS_UNPLUGGED_V5_NO_HANDS, RobotTarget.SCS, false)
+      {
+         @Override
+         public InputStream getParameterOverwrites()
+         {
+            InputStream overwrites = AvatarFootWobbleTest.class.getResourceAsStream("/foot_wobble_test.xml");
+            Assert.assertNotNull(overwrites);
+            return overwrites;
+         }
+      };
    }
 
    @Override
    @Test(timeout = 300000)
-   public void testICPReplanning() throws SimulationExceededMaximumTimeException
+   public void testICPReplanningInSwing() throws SimulationExceededMaximumTimeException
    {
-      super.testICPReplanning();
+      super.testICPReplanningInSwing();
    }
 
    @Override

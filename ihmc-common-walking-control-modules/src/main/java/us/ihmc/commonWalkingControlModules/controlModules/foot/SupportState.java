@@ -3,10 +3,13 @@ package us.ihmc.commonWalkingControlModules.controlModules.foot;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.YoContactPoint;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.YoPlaneContactState;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
+import us.ihmc.commonWalkingControlModules.controlModules.foot.wobble.FootRotationHelper;
+import us.ihmc.commonWalkingControlModules.controlModules.foot.wobble.FootRotationInformation;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.SpatialFeedbackControlCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.InverseDynamicsCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.InverseDynamicsCommandList;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.SpatialAccelerationCommand;
+import us.ihmc.commonWalkingControlModules.momentumBasedController.ParameterProvider;
 import us.ihmc.commons.InterpolationTools;
 import us.ihmc.euclid.referenceFrame.FrameConvexPolygon2D;
 import us.ihmc.euclid.referenceFrame.FramePoint2D;
@@ -112,7 +115,9 @@ public class SupportState extends AbstractFootControlState
 
    private final PIDSE3GainsReadOnly gains;
 
+   private final BooleanProvider avoidFootRotations;
    private final FootRotationDetector footRotationDetector;
+   private final FootRotationHelper footRotationHelper;
 
    public SupportState(FootControlHelper footControlHelper, PIDSE3GainsReadOnly holdPositionGains, YoVariableRegistry parentRegistry)
    {
@@ -191,6 +196,13 @@ public class SupportState extends AbstractFootControlState
       MovingReferenceFrame soleFrame = fullRobotModel.getSoleFrame(robotSide);
       double dt = controllerToolbox.getControlDT();
       footRotationDetector = new FootRotationDetector(robotSide, soleFrame, dt, registry, graphicsListRegistry);
+
+      FootRotationInformation rotationInformation = footControlHelper.getHighLevelHumanoidControllerToolbox().getFootRotationInformation();
+      footRotationHelper = new FootRotationHelper(robotSide, soleFrame, rotationInformation, registry, graphicsListRegistry);
+
+      String feetManagerName = FeetManager.class.getSimpleName();
+      String paramRegistryName = getClass().getSimpleName() + "Parameters";
+      avoidFootRotations = ParameterProvider.getOrCreateParameter(feetManagerName, paramRegistryName, "avoidFootRotations", registry, false);
    }
 
    @Override
@@ -218,6 +230,7 @@ public class SupportState extends AbstractFootControlState
          frameViz.hide();
       explorationHelper.stopExploring();
       footRotationDetector.reset();
+      footRotationHelper.reset();
    }
 
    @Override
@@ -358,7 +371,10 @@ public class SupportState extends AbstractFootControlState
       if (frameViz != null)
          frameViz.setToReferenceFrame(controlFrame);
 
-      footRotationDetector.compute();
+      if (footRotationDetector.compute() && avoidFootRotations.getValue())
+      {
+         footRotationHelper.compute(footRotationDetector.getLineOfRotation());
+      }
    }
 
 
