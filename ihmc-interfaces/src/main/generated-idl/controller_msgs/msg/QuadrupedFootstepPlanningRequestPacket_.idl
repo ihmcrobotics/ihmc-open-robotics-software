@@ -13,6 +13,15 @@ module controller_msgs
       const long NO_PLAN_ID =
       -1;
 
+      const octet FOOTSTEP_PLANNER_TYPE_SIMPLE_PATH_TURN_WALK_TURN =
+      0;
+
+      const octet FOOTSTEP_PLANNER_TYPE_VIS_GRAPH_WITH_TURN_WALK_TURN =
+      1;
+
+      const octet FOOTSTEP_PLANNER_TYPE_A_STAR =
+      2;
+
 
       /**
        * This message is part of the IHMC quadruped footstep planning module.
@@ -31,6 +40,8 @@ module controller_msgs
         controller_msgs::msg::dds::PlanarRegionsListMessage planar_regions_list_message;
         @defaultValue(value=-1)
         long planner_request_id;
+        @defaultValue(value=255)
+        octet requested_footstep_planner_type;
       };
     };
   };

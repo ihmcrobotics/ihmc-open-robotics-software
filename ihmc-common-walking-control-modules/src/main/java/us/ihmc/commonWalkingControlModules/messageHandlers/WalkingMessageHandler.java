@@ -586,6 +586,11 @@ public class WalkingMessageHandler
 
    public void reportWalkingStarted()
    {
+      if (isWalking.getValue())
+      {
+         return;
+      }
+
       walkingStatusMessage.setWalkingStatus(WalkingStatus.STARTED.toByte());
       statusOutputManager.reportStatusMessage(walkingStatusMessage);
       reusableSpeechPacket.setTextToSpeak(TextToSpeechPacket.WALKING);
@@ -595,6 +600,11 @@ public class WalkingMessageHandler
 
    public void reportWalkingComplete()
    {
+      if (!isWalking.getValue())
+      {
+         return;
+      }
+
       // If we have transitioned to standing this will be called. However, we might just be taking a break because of a long
       // transfer. In that case do not report walking complete. Instead compute when to continue walking.
       if (!upcomingFootsteps.isEmpty())

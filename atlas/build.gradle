@@ -75,6 +75,7 @@ mainDependencies {
    compile group: "us.ihmc", name: "ihmc-robot-data-visualizer", version: "source"
    compile group: "us.ihmc", name: "ihmc-manipulation-planning", version: "source"
    compile group: "us.ihmc", name: "ihmc-parameter-tuner", version: "source"
+   compile group: "us.ihmc", name: "ihmc-footstep-planning-visualizers", version: "source"
 }
 
 testDependencies {
