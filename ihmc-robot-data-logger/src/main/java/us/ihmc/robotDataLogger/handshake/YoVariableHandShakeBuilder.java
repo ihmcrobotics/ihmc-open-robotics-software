@@ -26,7 +26,6 @@ import us.ihmc.robotDataLogger.YoType;
 import us.ihmc.robotDataLogger.YoVariableDefinition;
 import us.ihmc.robotDataLogger.dataBuffers.RegistrySendBufferBuilder;
 import us.ihmc.robotDataLogger.jointState.JointHolder;
-import us.ihmc.robotics.graphics.RoboticsRemoteYoGraphicFactory;
 import us.ihmc.yoVariables.parameters.ParameterLoadStatus;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoEnum;
