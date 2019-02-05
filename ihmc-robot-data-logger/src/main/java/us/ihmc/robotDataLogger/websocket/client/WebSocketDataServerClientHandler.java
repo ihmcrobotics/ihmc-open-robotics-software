@@ -11,12 +11,15 @@ import io.netty.channel.SimpleChannelInboundHandler;
 import io.netty.handler.codec.http.FullHttpResponse;
 import io.netty.handler.codec.http.websocketx.BinaryWebSocketFrame;
 import io.netty.handler.codec.http.websocketx.CloseWebSocketFrame;
+import io.netty.handler.codec.http.websocketx.PingWebSocketFrame;
 import io.netty.handler.codec.http.websocketx.PongWebSocketFrame;
 import io.netty.handler.codec.http.websocketx.TextWebSocketFrame;
 import io.netty.handler.codec.http.websocketx.WebSocketClientHandshaker;
 import io.netty.handler.codec.http.websocketx.WebSocketFrame;
-import io.netty.handler.codec.http.websocketx.WebSocketHandshakeException;
+import io.netty.handler.timeout.IdleState;
+import io.netty.handler.timeout.IdleStateEvent;
 import io.netty.util.CharsetUtil;
+import us.ihmc.log.LogTools;
 import us.ihmc.pubsub.common.SerializedPayload;
 import us.ihmc.robotDataLogger.YoVariableClientImplementation;
 import us.ihmc.robotDataLogger.dataBuffers.CustomLogDataSubscriberType;
@@ -41,6 +44,8 @@ public class WebSocketDataServerClientHandler extends SimpleChannelInboundHandle
    private ChannelPromise handshakeFuture;
 
    private boolean sendConfiguration = false;
+   
+   private volatile boolean waitingForPong = false;
    
    public WebSocketDataServerClientHandler(WebSocketClientHandshaker handshaker, YoVariableClientImplementation yoVariableClient, TimestampListener timestampListener, RegistryConsumer consumer, CustomLogDataSubscriberType type) throws SocketException
    {
@@ -85,18 +90,10 @@ public class WebSocketDataServerClientHandler extends SimpleChannelInboundHandle
       Channel ch = ctx.channel();
       if (!handshaker.isHandshakeComplete())
       {
-         try
-         {
-            handshaker.finishHandshake(ch, (FullHttpResponse) msg);
-            yoVariableClient.connected();
-            handshakeFuture.setSuccess();
-         }
-         catch (WebSocketHandshakeException e)
-         {
-            e.printStackTrace();
-            consumer.stopImmediatly();
-            handshakeFuture.setFailure(e);
-         }
+         handshaker.finishHandshake(ch, (FullHttpResponse) msg);
+         yoVariableClient.connected();
+         handshakeFuture.setSuccess();
+         
          return;
       }
 
@@ -141,7 +138,7 @@ public class WebSocketDataServerClientHandler extends SimpleChannelInboundHandle
       }
       else if (frame instanceof PongWebSocketFrame)
       {
-         System.out.println("WebSocket Client received pong");
+         waitingForPong = false;
       }
       else if (frame instanceof CloseWebSocketFrame)
       {
@@ -150,6 +147,29 @@ public class WebSocketDataServerClientHandler extends SimpleChannelInboundHandle
       }
    }
 
+   @Override
+   public void userEventTriggered(ChannelHandlerContext ctx,
+                                  Object evt)
+   {
+      if(evt instanceof IdleStateEvent)
+      {
+         IdleState idleState = ((IdleStateEvent) evt).state();
+         if(idleState == IdleState.READER_IDLE)
+         {
+            if(waitingForPong)
+            {
+               LogTools.warn("Timeout receiving websocket pong. Closing connection.");
+               ctx.close();
+            }
+            else
+            {
+               waitingForPong = true;
+               ctx.channel().writeAndFlush(new PingWebSocketFrame());
+            }
+         }
+      }
+   }
+   
    @Override
    public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause)
    {

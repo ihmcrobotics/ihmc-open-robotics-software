@@ -14,6 +14,18 @@ import us.ihmc.log.LogTools;
 import us.ihmc.robotDataLogger.interfaces.DataServerDiscoveryListener;
 import us.ihmc.robotDataLogger.websocket.client.discovery.HTTPDataServerConnection.HTTPDataServerConnectionListener;
 
+/**
+ * Client to discover active logging sessions.
+ * 
+ * This client will take a list of hardcoded hosts and optionally listens for auto discoverable hosts.
+ * 
+ * For every hosts, it tries to connect and download the announcement. If this is possible, it stays connected to the host and marks the host as connected.
+ * 
+ * If the host disconnects, or if the connection is refused it will clean up and try again.
+ * 
+ * @author Jesper Smith
+ *
+ */
 public class DataServerDiscoveryClient implements DataServerLocationBroadcastReceiver.DataServerLocationFoundListener
 {
    private final Object lock = new Object();

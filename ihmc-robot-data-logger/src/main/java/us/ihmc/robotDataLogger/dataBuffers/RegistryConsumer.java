@@ -19,8 +19,6 @@ import us.ihmc.robotDataLogger.util.DebugRegistry;
 
 public class RegistryConsumer extends Thread implements SubscriberListener
 {
-   private final static long TIMEOUT = Conversions.secondsToNanoseconds(10);
-   
    private final static int MAXIMUM_ELEMENTS = 4096;
    
   
@@ -87,11 +85,6 @@ public class RegistryConsumer extends Thread implements SubscriberListener
             {
                // Try next time
             }
-         }
-         
-         if(System.nanoTime() - lastPacketReceived > TIMEOUT)
-         {
-            running = false;
          }
       }
       

@@ -10,6 +10,8 @@ import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelPromise;
 import io.netty.channel.SimpleChannelInboundHandler;
 import io.netty.handler.codec.http.websocketx.BinaryWebSocketFrame;
+import io.netty.handler.codec.http.websocketx.PingWebSocketFrame;
+import io.netty.handler.codec.http.websocketx.PongWebSocketFrame;
 import io.netty.handler.codec.http.websocketx.TextWebSocketFrame;
 import io.netty.handler.codec.http.websocketx.WebSocketFrame;
 import io.netty.handler.codec.http.websocketx.WebSocketServerProtocolHandler.HandshakeComplete;
@@ -115,6 +117,14 @@ class WebsocketDataServerFrameHandler extends SimpleChannelInboundHandler<WebSoc
             variableChangeRequestType.deserialize(variableChangeRequestPayload, request);
             variableChangedListener.changeVariable(request.getVariableID(), request.getRequestedValue());
 
+         }
+         else if (frame instanceof PingWebSocketFrame)
+         {
+            System.out.println("PING");
+         }
+         else if (frame instanceof PongWebSocketFrame)
+         {
+            
          }
          else
          {

@@ -30,18 +30,21 @@ public class WebsocketDataConsumer implements DataConsumer
    private WebsocketDataServerClient session;
    private boolean closed = false;
    
+   private final int timeoutInMs;
+   
    
    private IDLYoVariableHandshakeParser parser;
    private YoVariableClientImplementation yoVariableClient;
    private TimestampListener timestampListener;
    private DebugRegistry debugRegistry;
 
-   public WebsocketDataConsumer(HTTPDataServerConnection initialConnection)
+   public WebsocketDataConsumer(HTTPDataServerConnection initialConnection, int timeoutInMs)
    {
       this.connection = initialConnection;
+      this.timeoutInMs = timeoutInMs;
    }
 
-   private ByteBuf getResource(String path, int timeout) throws IOException
+   private ByteBuf getResource(String path) throws IOException
    {
       synchronized (lock)
       {
@@ -54,7 +57,7 @@ public class WebsocketDataConsumer implements DataConsumer
 
          try
          {
-            return resourceFuture.get(timeout, TimeUnit.MILLISECONDS);
+            return resourceFuture.get(timeoutInMs, TimeUnit.MILLISECONDS);
          }
          catch (Exception e)
          {
@@ -65,9 +68,9 @@ public class WebsocketDataConsumer implements DataConsumer
    }
 
    @Override
-   public byte[] getModelFile(int timeout) throws IOException
+   public byte[] getModelFile() throws IOException
    {
-      ByteBuf model = getResource(HTTPDataServerPaths.model, timeout);
+      ByteBuf model = getResource(HTTPDataServerPaths.model);
       byte[] retVal = new byte[model.readableBytes()];
       model.readBytes(retVal);
 
@@ -75,18 +78,18 @@ public class WebsocketDataConsumer implements DataConsumer
    }
 
    @Override
-   public byte[] getResourceZip(int timeout) throws IOException
+   public byte[] getResourceZip() throws IOException
    {
-      ByteBuf resourceZip = getResource(HTTPDataServerPaths.resources, timeout);
+      ByteBuf resourceZip = getResource(HTTPDataServerPaths.resources);
       byte[] retVal = new byte[resourceZip.readableBytes()];
       resourceZip.readBytes(retVal);
       return retVal;
    }
 
    @Override
-   public Handshake getHandshake(int timeout) throws IOException
+   public Handshake getHandshake() throws IOException
    {
-      ByteBuf handshake = getResource(HTTPDataServerPaths.handshake, timeout);
+      ByteBuf handshake = getResource(HTTPDataServerPaths.handshake);
 
       JSONSerializer<Handshake> serializer = new JSONSerializer<Handshake>(new HandshakePubSubType());
       return serializer.deserialize(handshake.toString(CharsetUtil.UTF_8));
@@ -112,7 +115,7 @@ public class WebsocketDataConsumer implements DataConsumer
          this.yoVariableClient = yoVariableClient;
          this.debugRegistry = debugRegistry;
          
-         session = new WebsocketDataServerClient(connection, parser, timeStampListener, yoVariableClient, debugRegistry);
+         session = new WebsocketDataServerClient(connection, parser, timeStampListener, yoVariableClient, timeoutInMs, debugRegistry);
       }
    }
 
@@ -200,7 +203,7 @@ public class WebsocketDataConsumer implements DataConsumer
             if(announcement.getReconnectKeyAsString().equals(oldAnnouncement.getReconnectKeyAsString()))
             {
                connection = newConnection;
-               session = new WebsocketDataServerClient(connection, parser, timestampListener, yoVariableClient, debugRegistry);
+               session = new WebsocketDataServerClient(connection, parser, timestampListener, yoVariableClient, timeoutInMs, debugRegistry);
                return true;
             }
             else
