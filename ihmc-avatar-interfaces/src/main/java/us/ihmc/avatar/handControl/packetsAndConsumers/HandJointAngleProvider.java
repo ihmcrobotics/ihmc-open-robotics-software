@@ -17,6 +17,7 @@ import us.ihmc.robotics.robotSide.SideDependentList;
 
 public class HandJointAngleProvider implements PacketConsumer<HandJointAnglePacket>
 {
+   public static final SideDependentList<Boolean> HAND_ENABLED = new SideDependentList<>(true, true);
    private final SideDependentList<HashMap<HandJointName, OneDoFJointBasics>> handJoints = new SideDependentList<HashMap<HandJointName, OneDoFJointBasics>>();
 
    private final SideDependentList<AtomicReference<HandJointAnglePacket>> packets = new SideDependentList<AtomicReference<HandJointAnglePacket>>();
@@ -71,8 +72,11 @@ public class HandJointAngleProvider implements PacketConsumer<HandJointAnglePack
                      OneDoFJointBasics oneDoFJoint = joints.get(jointName);
                      if (oneDoFJoint != null)
                      {
-                        double jointAngle = HumanoidMessageTools.unpackJointAngle(handJointAngles, jointName);
-                        oneDoFJoint.setQ(jointAngle);
+                        if (HAND_ENABLED.get(robotSide))
+                        {
+                           double jointAngle = HumanoidMessageTools.unpackJointAngle(handJointAngles, jointName);
+                           oneDoFJoint.setQ(jointAngle);
+                        }
                      }
                   }
                }
