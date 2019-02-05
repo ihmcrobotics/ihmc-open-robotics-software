@@ -26,6 +26,10 @@ If a server is marked AutoDiscoverable in the DataServerSettings, it sends out m
 The message is formated as JSON and the format is described in DataServerLocationBroadcast.PortPOJO.
 
 
+## Keep alive
+
+After a timeout (default 2500ms), the client will send the server a Websocket "Ping" packet. If the server does not respond after another timeout (by default, 5000ms in total), the server is considered "disconnected". This is to avoid hanging connection due to sudden disconnects of the network.
+
 
 ## FAQ
 Note: the previous protocol was based on RTPS/DDS so some questions compare it to this implementation
