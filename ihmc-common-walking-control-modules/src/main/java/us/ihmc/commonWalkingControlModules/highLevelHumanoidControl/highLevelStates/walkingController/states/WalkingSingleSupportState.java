@@ -115,7 +115,14 @@ public class WalkingSingleSupportState extends SingleSupportState
 
             balanceManager.updateCurrentICPPlan();
          }
-
+      }
+      else if (balanceManager.computeRotationAdjustment(supportSide, nextFootstep))
+      {
+         walkingMessageHandler.updateVisualizationAfterFootstepAdjustement(nextFootstep);
+         failureDetectionControlModule.setNextFootstep(nextFootstep);
+         updateFootstepParameters();
+         feetManager.adjustSwingTrajectory(swingSide, nextFootstep, swingTime, false);
+         balanceManager.updateCurrentICPPlan();
       }
       else if (balanceManager.useICPOptimization()) // TODO figure out a way of combining the two following modules
       {
