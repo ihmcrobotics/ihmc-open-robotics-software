@@ -26,7 +26,7 @@ public class ExampleServer
 
    private static final int variablesPerType = 1000;
    private static final double dt = 0.001;
-   private static final DataServerSettings logSettings = new DataServerSettings(false);
+   private static final DataServerSettings logSettings = new DataServerSettings(true);
 
    private final Random random = new Random(127L);
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());

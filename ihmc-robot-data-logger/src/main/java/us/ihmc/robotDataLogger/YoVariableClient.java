@@ -8,9 +8,15 @@ import us.ihmc.robotDataLogger.rtps.LogProducerDisplay;
 import us.ihmc.robotDataLogger.rtps.RTPSDataConsumerParticipant;
 import us.ihmc.robotDataLogger.websocket.client.discovery.HTTPDataServerConnection;
 
+/**
+ * Main entry point to write a client to the data server 
+ * 
+ * @author Jesper Smith
+ *
+ */
 public class YoVariableClient
 {
-   public static final int DEFAULT_TIMEOUT = 15000; //ms
+   public static final int DEFAULT_TIMEOUT = 2500; //ms
    
    private final YoVariableClientImplementation yoVariableClientImplementation;
 
@@ -35,16 +41,6 @@ public class YoVariableClient
    public YoVariableClient(YoVariablesUpdatedListener listener)
    {
       this.yoVariableClientImplementation = new YoVariableClientImplementation(listener);
-   }
-
-   /**
-    * Connect to an already selected log session
-    * @param request
-    * @param yoVariablesUpdatedListener
-    */
-   public YoVariableClient(RTPSDataConsumerParticipant participant, final YoVariablesUpdatedListener yoVariablesUpdatedListener)
-   {
-      throw new RuntimeException("TODO: Remove me");
    }
 
    /**
@@ -110,13 +106,6 @@ public class YoVariableClient
       }
    }
    
-   
-
-   public void start(int timeout, Announcement announcement) throws IOException
-   {
-      throw new RuntimeException("TODO: Remove me");
-   }
-   
    /**
     * Start the logger re-using an already existing HTTPDataServerConnection
     * 
@@ -133,11 +122,21 @@ public class YoVariableClient
    }
    
    
+   /**
+    * Reconnect to the same session.
+    * 
+    * This will work as long as the IP, port, controller name and complete variable registry match.
+    * 
+    * @throws IOException
+    */
    public void reconnect() throws IOException
    {
       yoVariableClientImplementation.reconnect();
    }
    
+   /**
+    * Disconnect and cleanup
+    */
    public void disconnect()
    {
       yoVariableClientImplementation.disconnect();

@@ -49,6 +49,8 @@ public class HTTPDataServerConnection
 
    private CompletableFuture<ByteBuf> requestFuture;
    private ByteBuf requestedBuffer;
+   
+   private boolean taken = false;
 
    public interface HTTPDataServerConnectionListener
    {
@@ -86,6 +88,32 @@ public class HTTPDataServerConnection
       default void closed(HTTPDataServerConnection httpDataServerConnection)
       {
 
+      }
+   }
+   
+   /**
+    * A promise to disconnect later.
+    * 
+    * Used in the logger to avoid a reconnect. 
+    * 
+    * @author Jesper Smith
+    *
+    */
+   public static class DisconnectPromise
+   {
+      private final HTTPDataServerConnectionListener listener;
+      private final HTTPDataServerConnection connection;
+      
+      private DisconnectPromise(HTTPDataServerConnectionListener listener, HTTPDataServerConnection connection)
+      {
+         this.listener = listener;
+         this.connection = connection;
+      }
+      
+      public void complete()
+      {
+         listener.disconnected(connection);
+         listener.closed(connection);
       }
    }
 
@@ -241,12 +269,32 @@ public class HTTPDataServerConnection
       return requestFuture;
    }
 
+   /**
+    * Close the channel. 
+    * 
+    * The DataDiscoveryClient will re-try to connect.
+    * 
+    */
    public void close()
    {
       if (channel != null)
       {
          channel.close();
       }
+   }
+   
+   /**
+    * Take over the connection to start a session.
+    * 
+    * This closes the channel and stops the discovery client from re-trying.
+    * 
+    */
+   public DisconnectPromise take()
+   {
+      taken = true;
+      channel.close();
+      
+      return new DisconnectPromise(listener, this);
    }
 
    public HTTPDataServerDescription getTarget()
@@ -338,8 +386,15 @@ public class HTTPDataServerConnection
       @Override
       public void channelInactive(ChannelHandlerContext ctx) throws Exception
       {
-         listener.disconnected(HTTPDataServerConnection.this);
-         group.shutdownGracefully().addListener((e) -> listener.closed(HTTPDataServerConnection.this));
+         if(!taken)
+         {
+            listener.disconnected(HTTPDataServerConnection.this);
+            group.shutdownGracefully().addListener((e) -> listener.closed(HTTPDataServerConnection.this));
+         }
+         else
+         {
+            group.shutdownGracefully();
+         }
 
       }
 

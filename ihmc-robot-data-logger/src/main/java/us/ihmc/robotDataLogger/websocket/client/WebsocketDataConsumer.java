@@ -106,13 +106,13 @@ public class WebsocketDataConsumer implements DataConsumer
             throw new IOException("Not connected");
          }
 
-         connection.close();
+         connection.take();
          this.parser = parser;
          this.timestampListener = timeStampListener;
          this.yoVariableClient = yoVariableClient;
          this.debugRegistry = debugRegistry;
          
-         session = new WebsocketDataServerClient(connection.getTarget(), parser, timeStampListener, yoVariableClient, debugRegistry);
+         session = new WebsocketDataServerClient(connection, parser, timeStampListener, yoVariableClient, debugRegistry);
       }
    }
 
@@ -200,7 +200,7 @@ public class WebsocketDataConsumer implements DataConsumer
             if(announcement.getReconnectKeyAsString().equals(oldAnnouncement.getReconnectKeyAsString()))
             {
                connection = newConnection;
-               session = new WebsocketDataServerClient(connection.getTarget(), parser, timestampListener, yoVariableClient, debugRegistry);
+               session = new WebsocketDataServerClient(connection, parser, timestampListener, yoVariableClient, debugRegistry);
                return true;
             }
             else
