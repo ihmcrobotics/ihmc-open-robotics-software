@@ -1,7 +1,7 @@
 package us.ihmc.robotics.kinematics.fourbar;
 
 import static java.lang.Math.PI;
-import static org.junit.Assert.assertEquals;
+import static us.ihmc.robotics.Assert.*;
 
 import org.junit.Test;
 

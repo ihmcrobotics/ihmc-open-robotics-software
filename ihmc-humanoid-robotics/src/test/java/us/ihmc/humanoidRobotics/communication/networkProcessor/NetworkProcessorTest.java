@@ -1,7 +1,6 @@
 package us.ihmc.humanoidRobotics.communication.networkProcessor;
 
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import static us.ihmc.robotics.Assert.*;
 
 import java.io.IOException;
 import java.lang.reflect.Constructor;

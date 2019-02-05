@@ -1,6 +1,6 @@
 package us.ihmc.communication.kryo;
 
-import static org.junit.Assert.assertTrue;
+import static us.ihmc.robotics.Assert.*;
 
 import java.io.ByteArrayOutputStream;
 import java.util.Random;

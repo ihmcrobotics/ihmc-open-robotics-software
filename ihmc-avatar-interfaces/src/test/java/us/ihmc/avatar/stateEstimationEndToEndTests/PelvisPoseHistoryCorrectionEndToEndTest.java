@@ -1,6 +1,6 @@
 package us.ihmc.avatar.stateEstimationEndToEndTests;
 
-import static org.junit.Assert.assertTrue;
+import static us.ihmc.robotics.Assert.*;
 
 import java.io.InputStream;
 import java.util.ArrayList;

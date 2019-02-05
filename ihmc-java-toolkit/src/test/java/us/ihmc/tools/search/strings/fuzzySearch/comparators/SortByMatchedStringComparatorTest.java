@@ -1,7 +1,6 @@
 package us.ihmc.tools.search.strings.fuzzySearch.comparators;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import static us.ihmc.robotics.Assert.*;
 
 import org.junit.Test;
 

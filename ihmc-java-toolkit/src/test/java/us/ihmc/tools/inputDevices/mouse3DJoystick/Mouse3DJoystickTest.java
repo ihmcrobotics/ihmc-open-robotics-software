@@ -1,6 +1,6 @@
 package us.ihmc.tools.inputDevices.mouse3DJoystick;
 
-import static org.junit.Assert.assertTrue;
+import static us.ihmc.robotics.Assert.*;
 
 import org.junit.Test;
 

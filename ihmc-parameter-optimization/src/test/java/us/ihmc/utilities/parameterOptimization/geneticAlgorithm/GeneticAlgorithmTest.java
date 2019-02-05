@@ -1,6 +1,6 @@
 package us.ihmc.utilities.parameterOptimization.geneticAlgorithm;
 
-import static org.junit.Assert.assertTrue;
+import static us.ihmc.robotics.Assert.*;
 
 import java.util.Random;
 

@@ -9,7 +9,7 @@ import us.ihmc.trajectoryOptimization.DefaultDiscreteState;
 
 import java.util.Random;
 
-import static org.junit.Assert.assertEquals;
+import static us.ihmc.robotics.Assert.*;
 
 public class SimpleLIPMDynamicsTest
 {

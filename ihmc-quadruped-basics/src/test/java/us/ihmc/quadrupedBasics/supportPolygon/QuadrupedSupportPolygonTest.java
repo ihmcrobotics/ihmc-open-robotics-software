@@ -33,7 +33,7 @@ import us.ihmc.yoVariables.variable.YoFramePoint3D;
 
 import java.util.Random;
 
-import static org.junit.Assert.*;
+import static us.ihmc.robotics.Assert.*;
 
 @ContinuousIntegrationPlan(categories = IntegrationCategory.FAST)
 @VmOptions("-XX:-TieredCompilation")

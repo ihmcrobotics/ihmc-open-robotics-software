@@ -1,6 +1,6 @@
 package us.ihmc.robotics.kinematics;
 
-import static org.junit.Assert.assertArrayEquals;
+import static us.ihmc.robotics.Assert.*;
 
 import java.util.Random;
 

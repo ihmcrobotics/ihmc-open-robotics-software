@@ -1,6 +1,6 @@
 package us.ihmc.robotics.trajectories.providers;
 
-import static org.junit.Assert.assertEquals;
+import static us.ihmc.robotics.Assert.*;
 
 import org.junit.After;
 import org.junit.Before;

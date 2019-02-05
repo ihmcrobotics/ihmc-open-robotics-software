@@ -1,7 +1,6 @@
 package us.ihmc.systemIdentification;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNull;
+import static us.ihmc.robotics.Assert.*;
 
 import org.junit.Test;
 

@@ -1,6 +1,6 @@
 package us.ihmc.avatar.circleWalkTest;
 
-import static org.junit.Assert.assertTrue;
+import static us.ihmc.robotics.Assert.*;
 
 import java.util.ArrayList;
 import java.util.Random;

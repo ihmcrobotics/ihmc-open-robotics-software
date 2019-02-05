@@ -1,6 +1,7 @@
 package us.ihmc.avatar.networkProcessor.kinematicsToolboxModule;
 
-import static org.junit.Assert.assertTrue;
+import static us.ihmc.robotics.Assert.*;
+
 import static us.ihmc.humanoidRobotics.communication.packets.KinematicsToolboxMessageFactory.holdRigidBodyCurrentPose;
 
 import java.awt.Color;

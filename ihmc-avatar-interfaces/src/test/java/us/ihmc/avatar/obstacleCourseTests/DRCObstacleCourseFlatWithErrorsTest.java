@@ -51,7 +51,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
-import static org.junit.Assert.assertTrue;
+import static us.ihmc.robotics.Assert.*;
 
 public abstract class DRCObstacleCourseFlatWithErrorsTest implements MultiRobotTestInterface
 {

@@ -1,6 +1,6 @@
 package us.ihmc.robotics.hyperCubeTree;
 
-import static org.junit.Assert.assertEquals;
+import static us.ihmc.robotics.Assert.*;
 
 import org.junit.After;
 import org.junit.Test;

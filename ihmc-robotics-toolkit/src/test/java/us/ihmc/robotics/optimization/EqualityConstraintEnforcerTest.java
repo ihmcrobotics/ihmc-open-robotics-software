@@ -1,6 +1,6 @@
 package us.ihmc.robotics.optimization;
 
-import static org.junit.Assert.assertEquals;
+import static us.ihmc.robotics.Assert.*;
 
 import org.ejml.data.DenseMatrix64F;
 import org.junit.Test;

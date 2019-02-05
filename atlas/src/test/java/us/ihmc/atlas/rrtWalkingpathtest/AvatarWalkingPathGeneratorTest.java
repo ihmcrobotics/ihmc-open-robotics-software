@@ -1,6 +1,6 @@
 package us.ihmc.atlas.rrtWalkingpathtest;
 
-import static org.junit.Assert.assertTrue;
+import static us.ihmc.robotics.Assert.*;
 
 import java.awt.geom.Line2D;
 import java.awt.geom.Point2D;

@@ -1,7 +1,6 @@
 package us.ihmc.robotics.linearDynamicSystems;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.fail;
+import static us.ihmc.robotics.Assert.*;
 
 import org.junit.After;
 import org.junit.Before;

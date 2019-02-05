@@ -15,7 +15,7 @@ import us.ihmc.robotics.testing.JUnitTools;
 import us.ihmc.robotics.time.ExecutionTimer;
 import us.ihmc.tools.exceptions.NoConvergenceException;
 
-import static org.junit.Assert.assertEquals;
+import static us.ihmc.robotics.Assert.*;
 
 @ContinuousIntegrationPlan(categories = {IntegrationCategory.FAST})
 public class JavaQuadProgSolverTest extends AbstractSimpleActiveSetQPSolverTest

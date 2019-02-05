@@ -1,7 +1,6 @@
 package us.ihmc.robotics.geometry.shapes;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.fail;
+import static us.ihmc.robotics.Assert.*;
 
 import org.ejml.data.DenseMatrix64F;
 import org.junit.After;

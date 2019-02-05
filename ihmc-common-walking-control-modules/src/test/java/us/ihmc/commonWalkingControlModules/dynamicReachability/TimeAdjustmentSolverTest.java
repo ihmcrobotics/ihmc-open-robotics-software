@@ -8,7 +8,7 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.tools.ReferenceFrameTools;
 import us.ihmc.tools.exceptions.NoConvergenceException;
 
-import static org.junit.Assert.*;
+import static us.ihmc.robotics.Assert.*;
 
 import org.junit.After;
 

@@ -1,6 +1,6 @@
 package us.ihmc.ihmcPerception.fiducial;
 
-import static org.junit.Assert.assertEquals;
+import static us.ihmc.robotics.Assert.*;
 
 import java.awt.Graphics2D;
 import java.awt.image.BufferedImage;

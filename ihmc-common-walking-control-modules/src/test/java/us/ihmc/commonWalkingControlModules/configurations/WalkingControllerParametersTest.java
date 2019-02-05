@@ -1,6 +1,6 @@
 package us.ihmc.commonWalkingControlModules.configurations;
 
-import static org.junit.Assert.fail;
+import static us.ihmc.robotics.Assert.*;
 
 import java.lang.reflect.Method;
 
