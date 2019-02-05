@@ -7,7 +7,6 @@ import java.util.HashMap;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 
 import gnu.trove.list.array.TByteArrayList;
-import us.ihmc.commons.Conversions;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.concurrent.ConcurrentRingBuffer;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
@@ -22,12 +21,11 @@ import us.ihmc.robotDataLogger.interfaces.RegistryPublisher;
 import us.ihmc.robotDataLogger.listeners.VariableChangedListener;
 import us.ihmc.robotDataLogger.logger.DataServerSettings;
 import us.ihmc.robotDataLogger.websocket.server.WebsocketDataProducer;
-import us.ihmc.simulationconstructionset.util.TickAndUpdatable;
 import us.ihmc.util.PeriodicThreadSchedulerFactory;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoVariable;
 
-public class YoVariableServer implements RobotVisualizer, TickAndUpdatable, VariableChangedListener
+public class YoVariableServer implements RobotVisualizer, VariableChangedListener
 {
    private static final int CHANGED_BUFFER_CAPACITY = 128;
 
@@ -262,17 +260,6 @@ public class YoVariableServer implements RobotVisualizer, TickAndUpdatable, Vari
       }
    }
 
-   @Override
-   public void tickAndUpdate()
-   {
-      this.tickAndUpdate(0.0);
-   }
-
-   @Override
-   public void tickAndUpdate(double timeToSetInSeconds)
-   {
-      this.update(Conversions.secondsToNanoseconds(timeToSetInSeconds));
-   }
 
    /**
     * Update main buffer data.

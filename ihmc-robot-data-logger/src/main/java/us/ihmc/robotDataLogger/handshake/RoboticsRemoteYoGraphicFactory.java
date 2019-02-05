@@ -1,6 +1,8 @@
-package us.ihmc.robotics.graphics;
+package us.ihmc.robotDataLogger.handshake;
 
 import us.ihmc.graphicsDescription.yoGraphics.RemoteYoGraphicFactory;
+import us.ihmc.robotics.graphics.YoGraphicPlanarRegionsList;
+import us.ihmc.robotics.graphics.YoGraphicPolynomial3D;
 
 public class RoboticsRemoteYoGraphicFactory extends RemoteYoGraphicFactory
 {

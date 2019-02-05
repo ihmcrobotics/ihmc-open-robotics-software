@@ -56,9 +56,10 @@ mainDependencies {
    compile group: "us.ihmc", name: "ihmc-commons", version: "0.24.0"
    compile group: "us.ihmc", name: "ihmc-graphics-description", version: "0.12.9"
    compile group: "us.ihmc", name: "ihmc-robot-description", version: "0.12.5"
+   compile group: "us.ihmc", name: "mecano", version: "0.0.17"
+   compile group: "us.ihmc", name: "mecano-yovariables", version: "0.0.17"
+   
    compile group: "us.ihmc", name: "ihmc-model-file-loader", version: "source"
-   compile group: "us.ihmc", name: "ihmc-robotics-toolkit", version: "source"
-    
    
 }
 
