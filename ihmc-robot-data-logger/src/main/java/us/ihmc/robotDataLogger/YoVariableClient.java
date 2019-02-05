@@ -2,6 +2,7 @@ package us.ihmc.robotDataLogger;
 
 import java.io.IOException;
 
+import us.ihmc.log.LogTools;
 import us.ihmc.robotDataLogger.gui.DataServerSelectorGUI;
 import us.ihmc.robotDataLogger.rtps.LogProducerDisplay;
 import us.ihmc.robotDataLogger.rtps.RTPSDataConsumerParticipant;
@@ -53,7 +54,23 @@ public class YoVariableClient
    public void startWithHostSelector()
    {
       DataServerSelectorGUI selector = new DataServerSelectorGUI();
-      
+      HTTPDataServerConnection connection = selector.select();
+      if(connection != null)
+      {
+         try
+         {
+            start(15000, connection);
+         }
+         catch (IOException e)
+         {
+            throw new RuntimeException(e);
+         }
+      }
+      else
+      {
+         LogTools.warn("No host selected. Shutting down.");
+         System.exit(0);
+      }
    }
    
    
