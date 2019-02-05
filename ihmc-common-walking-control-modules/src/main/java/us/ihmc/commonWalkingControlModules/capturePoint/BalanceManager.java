@@ -159,6 +159,7 @@ public class BalanceManager
 
    private final YoBoolean icpPlannerDone = new YoBoolean("ICPPlannerDone", registry);
 
+   private final DoubleProvider maxAdjustmentForRotation = new DoubleParameter("MaxAdjustmentForRotation", registry, 0.2);
    private final FootRotationInformation footRotationInformation;
    private final FrameVector2D stepAdjustment = new FrameVector2D();
 
@@ -445,6 +446,12 @@ public class BalanceManager
          double d1 = desiredCoP.distanceXY(footstep.getFootstepPose().getPosition());
          double d2 = desiredCoP.distance(finalDesiredCapturePoint2d);
          stepAdjustment.scale(d1 / d2);
+
+         double adjustmentLength = stepAdjustment.length();
+         if (adjustmentLength > maxAdjustmentForRotation.getValue())
+         {
+            stepAdjustment.scale(maxAdjustmentForRotation.getValue() / adjustmentLength);
+         }
 
          footstep.setX(footstep.getX() + stepAdjustment.getX());
          footstep.setY(footstep.getY() + stepAdjustment.getY());
