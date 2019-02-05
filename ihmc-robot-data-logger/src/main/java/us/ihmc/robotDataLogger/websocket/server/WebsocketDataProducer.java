@@ -27,6 +27,7 @@ import us.ihmc.robotDataLogger.interfaces.RegistryPublisher;
 import us.ihmc.robotDataLogger.listeners.VariableChangedListener;
 import us.ihmc.robotDataLogger.logger.DataServerSettings;
 import us.ihmc.robotDataLogger.util.HandshakeHashCalculator;
+import us.ihmc.robotDataLogger.websocket.server.discovery.DataServerLocationBroadcastSender;
 import us.ihmc.util.PeriodicThreadSchedulerFactory;
 
 /**
@@ -57,7 +58,7 @@ public class WebsocketDataProducer implements DataProducer
    private final Object lock = new Object();
    private Channel ch = null;
    
-   private EventLoopGroup bossGroup = new NioEventLoopGroup(1);
+   private final EventLoopGroup bossGroup = new NioEventLoopGroup(1);
    
    /**
     * Create a single worker. 
@@ -65,7 +66,9 @@ public class WebsocketDataProducer implements DataProducer
     * If "writeAndFlush" is called in the eventloop of the outbound channel, no extra objects will be created. 
     * The registryPublisher is scheduled on the main eventloop to avoid having extra threads and delay.
     */
-   private EventLoopGroup workerGroup = new NioEventLoopGroup(1);
+   private final EventLoopGroup workerGroup = new NioEventLoopGroup(1);
+   
+   private DataServerLocationBroadcastSender broadcastSender;
    
    private Handshake handshake = null;
    
@@ -73,6 +76,7 @@ public class WebsocketDataProducer implements DataProducer
    
    private final ArrayList<CameraAnnouncement> cameras = new ArrayList<>();
    private final boolean log;
+   private final boolean autoDiscoverable;
 
 
    public WebsocketDataProducer(String name, LogModelProvider logModelProvider, VariableChangedListener variableChangedListener, DataServerSettings dataServerSettings)
@@ -82,6 +86,7 @@ public class WebsocketDataProducer implements DataProducer
       this.variableChangedListener = variableChangedListener;
       this.port = dataServerSettings.getPort();
       this.log = dataServerSettings.isLogSession();
+      this.autoDiscoverable = dataServerSettings.isAutoDiscoverable();
    }
 
    @Override
@@ -91,6 +96,8 @@ public class WebsocketDataProducer implements DataProducer
       {
          try
          {
+            broadcastSender.stop();
+            
             ch.close().sync();
             
             bossGroup.shutdownGracefully();
@@ -139,11 +146,6 @@ public class WebsocketDataProducer implements DataProducer
 
       return announcement;
    }
-   
-   public void setPort(int port)
-   {
-      
-   }
 
    @Override
    public void announce() throws IOException
@@ -167,6 +169,16 @@ public class WebsocketDataProducer implements DataProducer
    
             ch = b.bind(port).sync().channel();
    
+            if(autoDiscoverable)
+            {
+               broadcastSender = new DataServerLocationBroadcastSender(port);
+               broadcastSender.start();
+            }
+            else
+            {
+               broadcastSender = null;
+            }
+            
             System.out.println("Open your web browser and navigate to http://127.0.0.1:" + port + '/');
    
          }

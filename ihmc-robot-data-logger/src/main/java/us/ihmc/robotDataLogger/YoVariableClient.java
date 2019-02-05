@@ -13,18 +13,28 @@ public class YoVariableClient
    public static final int DEFAULT_TIMEOUT = 15000; //ms
    
    private final YoVariableClientImplementation yoVariableClientImplementation;
-   private final LogProducerDisplay.LogSessionFilter[] sessionFilters;
 
+   /**
+    * LogSessionFilters are not implemented anymore. 
+    * 
+    * Advised is to set listenForBroadcasts to false and manually set the IP of the target
+    * 
+    */
+   @Deprecated
+   public YoVariableClient(YoVariablesUpdatedListener listener, LogProducerDisplay.LogSessionFilter... filters)
+   {
+      this(listener);
+   }
+   
+   
    /**
     * Start a new client while allowing the user to select a desired logging session
     * 
     * @param listener
-    * @param filters
     */
-   public YoVariableClient(YoVariablesUpdatedListener listener, LogProducerDisplay.LogSessionFilter... filters)
+   public YoVariableClient(YoVariablesUpdatedListener listener)
    {
       this.yoVariableClientImplementation = new YoVariableClientImplementation(listener);
-      this.sessionFilters = filters;
    }
 
    /**
@@ -47,19 +57,27 @@ public class YoVariableClient
       startWithHostSelector();
    }
 
-   
    /**
     * Start a client for a host selected in the host selector GUI
     */
    public void startWithHostSelector()
    {
-      DataServerSelectorGUI selector = new DataServerSelectorGUI();
+      startWithHostSelector(true);
+   }
+   
+   /**
+    * Start a client for a host selected in the host selector GUI
+    * @param enableAutoDiscovery If true, the client will add hosts broadcasting their existence.
+    */
+   public void startWithHostSelector(boolean enableAutoDiscovery)
+   {
+      DataServerSelectorGUI selector = new DataServerSelectorGUI(true);
       HTTPDataServerConnection connection = selector.select();
       if(connection != null)
       {
          try
          {
-            start(15000, connection);
+            start(DEFAULT_TIMEOUT, connection);
          }
          catch (IOException e)
          {
@@ -84,7 +102,7 @@ public class YoVariableClient
       try
       {
       HTTPDataServerConnection connection = HTTPDataServerConnection.connect(host, port);
-      start(15000, connection);
+      start(DEFAULT_TIMEOUT, connection);
       }
       catch(IOException e)
       {

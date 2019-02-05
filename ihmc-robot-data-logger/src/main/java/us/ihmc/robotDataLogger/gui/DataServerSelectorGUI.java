@@ -13,6 +13,14 @@ import us.ihmc.robotDataLogger.websocket.client.discovery.DataServerDiscoveryCli
 import us.ihmc.robotDataLogger.websocket.client.discovery.HTTPDataServerConnection;
 import us.ihmc.robotDataLogger.websocket.client.discovery.HTTPDataServerDescription;
 
+/**
+ * Simple popup GUI to select which host to connect to.
+ * 
+ * Has the ability for the user to specify the host manually. Manually added IP's get stored for later use in ~/.ihmc/ControllerHosts.yaml
+ * 
+ * @author Jesper Smith
+ *
+ */
 public class DataServerSelectorGUI implements HostAddedListener
 {
    
@@ -20,9 +28,9 @@ public class DataServerSelectorGUI implements HostAddedListener
    private final DataServerDiscoveryClient client;
    
    
-   public DataServerSelectorGUI()
+   public DataServerSelectorGUI(boolean enableAutoDiscovery)
    {
-      this.client = new DataServerDiscoveryClient(new Listener());
+      this.client = new DataServerDiscoveryClient(new Listener(), true);
       
       List<HTTPDataServerDescription> hosts = StaticHostListLoader.load();
       
@@ -104,7 +112,7 @@ public class DataServerSelectorGUI implements HostAddedListener
    
    public static void main(String[] args) throws IOException
    {
-      HTTPDataServerConnection connection = new DataServerSelectorGUI().select();
+      HTTPDataServerConnection connection = new DataServerSelectorGUI(true).select();
       System.out.println(connection);
       if(connection != null)
       {
