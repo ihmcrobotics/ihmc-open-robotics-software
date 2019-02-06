@@ -47,7 +47,6 @@ public class ComparePushRodTransmissionsTest
    }
 
 	@Disabled
-	@Disabled
 	@Test
    public void testTiming()
    {

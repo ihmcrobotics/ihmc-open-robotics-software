@@ -112,7 +112,6 @@ public class YoMinimumJerkTrajectoryTest
 
 	// FIXME That test is stuck in an infinite loop of some sort.
 	@Disabled
-   @Disabled
    @Test
    public void testTimeExtension()
    {

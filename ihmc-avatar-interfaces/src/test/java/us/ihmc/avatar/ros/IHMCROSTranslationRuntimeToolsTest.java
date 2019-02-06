@@ -13,7 +13,6 @@ import java.util.stream.Stream;
 
 import org.junit.Rule;
 import org.junit.jupiter.api.Test;
-import org.junit.rules.DisableOnDebug;
 import org.junit.rules.Timeout;
 import org.reflections.Reflections;
 import org.ros.internal.message.Message;
@@ -36,9 +35,6 @@ import us.ihmc.humanoidRobotics.communication.packets.RandomHumanoidMessages;
  */
 public class IHMCROSTranslationRuntimeToolsTest
 {
-   @Rule
-   public DisableOnDebug disableOnDebug = new DisableOnDebug(new Timeout(5, TimeUnit.MINUTES));
-
    @SuppressWarnings({"rawtypes", "unchecked"})
    @Test
    public void testBidirectionalConversionWithRandomConstructors()

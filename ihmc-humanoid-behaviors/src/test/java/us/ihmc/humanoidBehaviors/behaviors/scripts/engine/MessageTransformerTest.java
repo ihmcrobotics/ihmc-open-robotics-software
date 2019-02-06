@@ -9,7 +9,6 @@ import java.util.concurrent.TimeUnit;
 import controller_msgs.msg.dds.*;
 import org.junit.Rule;
 import org.junit.jupiter.api.Test;
-import org.junit.rules.DisableOnDebug;
 import org.junit.rules.Timeout;
 
 import org.junit.jupiter.api.Tag;
@@ -21,9 +20,6 @@ import us.ihmc.humanoidRobotics.communication.packets.RandomHumanoidMessages;
 
 public class MessageTransformerTest
 {
-   @Rule
-   public DisableOnDebug disableOnDebug = new DisableOnDebug(new Timeout(30, TimeUnit.SECONDS));
-
    @Test
    public void testHandTrajectoryMessage()
    {
