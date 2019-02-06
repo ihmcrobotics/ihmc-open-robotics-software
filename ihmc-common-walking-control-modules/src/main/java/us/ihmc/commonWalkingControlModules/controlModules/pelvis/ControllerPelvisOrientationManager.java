@@ -236,6 +236,7 @@ public class ControllerPelvisOrientationManager implements PelvisOrientationCont
       tempOrientation.setIncludingFrame(offset);
       tempOrientation.changeFrame(desiredPelvisFrame);
       pelvisOrientationOffsetTrajectoryGenerator.setInitialOrientation(tempOrientation);
+      tempOrientation.setToZero(desiredPelvisFrame);
       pelvisOrientationOffsetTrajectoryGenerator.setFinalOrientation(tempOrientation);
       pelvisOrientationOffsetTrajectoryGenerator.setTrajectoryTime(0.0);
       pelvisOrientationOffsetTrajectoryGenerator.initialize();
