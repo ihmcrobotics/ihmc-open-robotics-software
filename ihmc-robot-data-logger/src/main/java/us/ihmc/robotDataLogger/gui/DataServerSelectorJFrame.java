@@ -56,7 +56,7 @@ public class DataServerSelectorJFrame extends JFrame
       JPanel hostPanel = new JPanel(new BorderLayout());
       JScrollPane scroller = new JScrollPane();
 
-      String[] columnNames = {"Host", "Port", "Controller"};
+      String[] columnNames = {"Host", "Port", "Hostname", "Controller"};
       model = new DefaultTableModel(columnNames, 0)
       {
          private static final long serialVersionUID = 7807098301637938830L;
@@ -213,7 +213,8 @@ public class DataServerSelectorJFrame extends JFrame
    private class SelectorRow extends Vector<Object>
    {
       private static final long serialVersionUID = 6875046233769595894L;
-      private final static String OFFLINE_DESCRIPTION = "[Offline]";
+      private final static String OFFLINE_HOSTNAME_DESCRIPTION = "[Offline]";
+      private final static String OFFLINE_CONTROLLER_DESCRIPTION = "";
 
       private HTTPDataServerConnection activeConnection;
 
@@ -221,19 +222,22 @@ public class DataServerSelectorJFrame extends JFrame
       {
          add(description.getHost());
          add(description.getPort());
-         add(OFFLINE_DESCRIPTION);
+         add(OFFLINE_HOSTNAME_DESCRIPTION);
+         add(OFFLINE_CONTROLLER_DESCRIPTION);
       }
 
       public synchronized void update(HTTPDataServerConnection connection)
       {
          if (connection.isConnected())
          {
-            set(2, connection.getAnnouncement().getNameAsString());
+            set(2, connection.getAnnouncement().getHostNameAsString());
+            set(3, connection.getAnnouncement().getNameAsString());
             activeConnection = connection;
          }
          else
          {
-            set(2, OFFLINE_DESCRIPTION);
+            set(2, OFFLINE_HOSTNAME_DESCRIPTION);
+            set(3, OFFLINE_CONTROLLER_DESCRIPTION);
             activeConnection = null;
          }
       }
