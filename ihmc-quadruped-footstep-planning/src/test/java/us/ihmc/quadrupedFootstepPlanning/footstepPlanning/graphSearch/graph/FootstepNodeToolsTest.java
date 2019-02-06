@@ -10,7 +10,7 @@ import us.ihmc.robotics.robotSide.RobotQuadrant;
 
 import java.util.Random;
 
-import static org.junit.Assert.assertEquals;
+import static us.ihmc.robotics.Assert.*;
 
 public class FootstepNodeToolsTest
 {

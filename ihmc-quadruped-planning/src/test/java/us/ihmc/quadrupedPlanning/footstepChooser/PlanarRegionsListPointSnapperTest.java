@@ -25,8 +25,7 @@ import java.util.List;
 import java.util.Random;
 
 import static org.fest.assertions.Fail.fail;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import static us.ihmc.robotics.Assert.*;
 
 public class PlanarRegionsListPointSnapperTest
 {
