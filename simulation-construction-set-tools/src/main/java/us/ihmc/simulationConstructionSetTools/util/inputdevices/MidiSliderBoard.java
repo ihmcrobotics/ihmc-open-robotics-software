@@ -46,7 +46,7 @@ public class MidiSliderBoard implements ExitActionListener, CloseableAndDisposab
    private Devices preferedDevice = Devices.XTOUCH_COMPACT;
    private int preferdDeviceNumber = -1;
 
-   private static final boolean DEBUG = true;
+   private static final boolean DEBUG = false;
 
    private MidiDevice inDevice = null;
    private Receiver midiOut = null;
