@@ -25,6 +25,7 @@ import us.ihmc.messager.MessagerAPIFactory.TypedTopicTheme;
 import us.ihmc.pathPlanning.visibilityGraphs.dataStructure.VisibilityMapWithNavigableRegion;
 import us.ihmc.pathPlanning.visibilityGraphs.interfaces.VisibilityGraphsParameters;
 import us.ihmc.pathPlanning.visibilityGraphs.interfaces.VisibilityMapHolder;
+import us.ihmc.robotics.geometry.PlanarRegion;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.robotSide.RobotSide;
 
@@ -36,6 +37,8 @@ public class FootstepPlannerMessagerAPI
    private static final CategoryTheme Start = apiFactory.createCategoryTheme("Start");
    private static final CategoryTheme Intermediate = apiFactory.createCategoryTheme("Intermediate");
    private static final CategoryTheme Goal = apiFactory.createCategoryTheme("Goal");
+   private static final CategoryTheme Any = apiFactory.createCategoryTheme("Any");
+   private static final CategoryTheme SelectedRegion = apiFactory.createCategoryTheme("SelectedRegion");
    private static final CategoryTheme PositionTheme = apiFactory.createCategoryTheme("PositionTheme");
    private static final CategoryTheme OrientationTheme = apiFactory.createCategoryTheme("OrientationTheme");
    private static final CategoryTheme EditMode = apiFactory.createCategoryTheme("EditMode");
@@ -92,6 +95,7 @@ public class FootstepPlannerMessagerAPI
    public static final Topic<PlanarRegionsList> PlanarRegionDataTopic = Root.child(PlanarRegion).topic(Data);
    public static final Topic<Boolean> ShowPlanarRegionsTopic = Root.child(PlanarRegion).topic(Show);
    public static final Topic<Boolean> AcceptNewPlanarRegions = Root.child(PlanarRegion).topic(Enable);
+   public static final Topic<PlanarRegion> SelectedRegionTopic = Root.child(SelectedRegion).topic(Data);
 
    public static final Topic<FootstepPlan> FootstepPlanTopic = Root.child(FootstepPlan).topic(Data);
    public static final Topic<Boolean> ShowFootstepPlanTopic = Root.child(FootstepPlan).topic(Show);
@@ -113,6 +117,7 @@ public class FootstepPlannerMessagerAPI
    public static final Topic<Integer> PlannerRequestIdTopic = Root.child(FootstepPlan).topic(PlannerRequestId);
    public static final Topic<Integer> ReceivedPlanIdTopic = Root.child(FootstepPlan).topic(ReceivedPlanId);
 
+   public static final Topic<Boolean> EditModeEnabledTopic = Root.child(Any).child(EditMode).topic(Enable);
    public static final Topic<Boolean> StartPositionEditModeEnabledTopic = Root.child(Start).child(EditMode).child(PositionTheme).topic(Enable);
    public static final Topic<Boolean> GoalPositionEditModeEnabledTopic = Root.child(Goal).child(EditMode).child(PositionTheme).topic(Enable);
 

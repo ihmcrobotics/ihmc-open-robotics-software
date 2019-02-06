@@ -36,8 +36,8 @@
                               <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
                           </rowConstraints>
                            <children>
-                              <Button mnemonicParsing="false" onAction="#computePath" prefWidth="130.0" text="Compute Path" GridPane.halignment="CENTER" />
-                              <Button mnemonicParsing="false" onAction="#abortPlanning" prefWidth="130.0" text="Cancel Planning" GridPane.halignment="CENTER" GridPane.rowIndex="1" />
+                              <Button mnemonicParsing="false" onAction="#computePath" fx:id="computePath" prefWidth="130.0" text="Compute Path" GridPane.halignment="CENTER" />
+                              <Button mnemonicParsing="false" onAction="#abortPlanning" fx:id="abortPlanning" prefWidth="130.0" text="Cancel Planning" GridPane.halignment="CENTER" GridPane.rowIndex="1" />
                               <CheckBox fx:id="acceptNewRegions" mnemonicParsing="false" text="Accept New Planar Regions" GridPane.columnIndex="1" GridPane.columnSpan="2" />
                               <CheckBox fx:id="assumeFlatGround" text="Flat ground" GridPane.columnIndex="3" GridPane.columnSpan="2"/>
                               <Region prefHeight="26.0" prefWidth="20.0" GridPane.columnIndex="5" GridPane.halignment="RIGHT" />
@@ -134,10 +134,10 @@
                   <RowConstraints maxHeight="38.0" minHeight="10.0" prefHeight="38.0" vgrow="SOMETIMES" />
               </rowConstraints>
                <children>
-                <ToggleButton fx:id="placeStart" mnemonicParsing="false" prefWidth="120.0" text="Place Start" textAlignment="CENTER" GridPane.halignment="CENTER" />
-                  <ToggleButton fx:id="rotateStart" layoutX="15.0" layoutY="7.0" mnemonicParsing="false" prefWidth="120.0" text="Rotate Start" textAlignment="CENTER" GridPane.columnIndex="1" GridPane.halignment="CENTER" />
-                  <ToggleButton fx:id="placeGoal" layoutX="10.0" layoutY="27.0" mnemonicParsing="false" prefWidth="120.0" text="Place Goal" textAlignment="CENTER" GridPane.halignment="CENTER" GridPane.rowIndex="1" />
-                  <ToggleButton fx:id="rotateGoal" layoutX="10.0" layoutY="67.0" mnemonicParsing="false" prefWidth="120.0" text="Rotate Goal" textAlignment="CENTER" GridPane.columnIndex="1" GridPane.halignment="CENTER" GridPane.rowIndex="1" />
+                  <Button onAction="#placeStart" fx:id="placeStart" mnemonicParsing="false" prefWidth="120.0" text="Place Start" textAlignment="CENTER" GridPane.halignment="CENTER" />
+                  <Region prefWidth="20.0" GridPane.columnIndex="1" GridPane.rowIndex="0" />
+                  <Button onAction="#placeGoal" fx:id="placeGoal" layoutX="10.0" layoutY="27.0" mnemonicParsing="false" prefWidth="120.0" text="Place Goal" textAlignment="CENTER" GridPane.halignment="CENTER" GridPane.rowIndex="1" />
+                  <Region prefWidth="20.0" GridPane.columnIndex="1" GridPane.rowIndex="1" />
                   <Label text="x" textAlignment="RIGHT" GridPane.columnIndex="2" GridPane.halignment="RIGHT" />
                   <Label text="yaw" textAlignment="RIGHT" GridPane.columnIndex="8" GridPane.halignment="RIGHT" />
                   <Label text="yaw" textAlignment="RIGHT" GridPane.columnIndex="8" GridPane.halignment="RIGHT" GridPane.rowIndex="1" />
