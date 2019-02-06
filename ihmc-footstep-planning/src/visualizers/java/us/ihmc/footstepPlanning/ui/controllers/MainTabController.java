@@ -460,7 +460,7 @@ public class MainTabController
             setToFrame(playbackCounter);
 
             playbackCounter += playbackSpeed;
-            if(playbackCounter > walkingPreviewOutput.get().getRobotConfigurations().size())
+            if (playbackCounter >= walkingPreviewOutput.get().getRobotConfigurations().size())
             {
                playbackCounter = 0;
             }
