@@ -140,8 +140,8 @@ public class MainTabController
          return;
       double swingTime = 1.2;
       double transferTime = 0.8;
-      FootstepDataListMessage footstepDataListMessage = FootstepDataMessageConverter
-            .createFootstepDataListFromPlan(footstepPlan, swingTime, transferTime, ExecutionMode.OVERRIDE);
+      FootstepDataListMessage footstepDataListMessage = FootstepDataMessageConverter.createFootstepDataListFromPlan(footstepPlan, swingTime, transferTime,
+                                                                                                                    ExecutionMode.OVERRIDE);
       messager.submitMessage(FootstepPlannerMessagerAPI.FootstepDataListTopic, footstepDataListMessage);
    }
 
@@ -301,7 +301,7 @@ public class MainTabController
       requestMessage.setSequenceId(walkingPreviewRequestId.incrementAndGet());
 
       FootstepPlan footstepPlan = footstepPlanReference.get();
-      if(footstepPlan == null)
+      if (footstepPlan == null)
          return;
 
       double swingTime = 1.2;
@@ -390,6 +390,7 @@ public class MainTabController
    private class TextViewerListener<T> implements TopicListener<T>
    {
       private final TextField textField;
+
       public TextViewerListener(TextField textField)
       {
          this.textField = textField;
@@ -422,9 +423,8 @@ public class MainTabController
       WalkingPreviewPlaybackManager(Messager messager)
       {
          walkingPreviewOutput = messager.createInput(FootstepPlannerMessagerAPI.WalkingPreviewOutput);
-         messager.registerTopicListener(FootstepPlannerMessagerAPI.WalkingPreviewOutput, output ->
-         {
-            if(active.get())
+         messager.registerTopicListener(FootstepPlannerMessagerAPI.WalkingPreviewOutput, output -> {
+            if (active.get())
                stop();
             else
                start();
@@ -455,7 +455,7 @@ public class MainTabController
       @Override
       public void handle(long now)
       {
-         if(playbackModeActive.get())
+         if (playbackModeActive.get())
          {
             setToFrame(playbackCounter);
 
@@ -480,9 +480,10 @@ public class MainTabController
          KinematicsToolboxOutputStatus kinematicsToolboxOutputStatus = robotConfigurations.get(frameIndex);
 
          Float jointAngles = kinematicsToolboxOutputStatus.getDesiredJointAngles();
-         if(jointAngles.size() != previewRobotModel.getOneDoFJoints().length)
+         if (jointAngles.size() != previewRobotModel.getOneDoFJoints().length)
          {
-            System.err.println("Received " + jointAngles.size() + " from walking controller preview toolbox, expected " + previewRobotModel.getOneDoFJoints().length);
+            System.err.println("Received " + jointAngles.size() + " from walking controller preview toolbox, expected "
+                  + previewRobotModel.getOneDoFJoints().length);
             walkingPreviewOutput.set(null);
             return;
          }
