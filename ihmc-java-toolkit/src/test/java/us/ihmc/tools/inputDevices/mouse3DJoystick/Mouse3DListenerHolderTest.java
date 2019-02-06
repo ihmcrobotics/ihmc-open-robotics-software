@@ -4,14 +4,10 @@ import static us.ihmc.robotics.Assert.*;
 
 import org.junit.jupiter.api.Test;
 
-import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationPlan;
-import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Disabled;
 import us.ihmc.graphicsDescription.input.mouse.Mouse3DListener;
 import us.ihmc.graphicsDescription.input.mouse.Mouse3DListenerHolder;
-import us.ihmc.continuousIntegration.IntegrationCategory;
-
 public class Mouse3DListenerHolderTest
 {
    int count1 = 0;

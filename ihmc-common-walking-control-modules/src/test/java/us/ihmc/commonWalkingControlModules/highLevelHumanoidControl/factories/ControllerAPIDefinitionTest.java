@@ -5,7 +5,6 @@ import org.junit.jupiter.api.Test;
 import us.ihmc.communication.controllerAPI.command.Command;
 import us.ihmc.communication.controllerAPI.command.QueueableCommand;
 import us.ihmc.communication.packets.ExecutionMode;
-import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Disabled;
 import us.ihmc.commons.lists.SupplierBuilder;

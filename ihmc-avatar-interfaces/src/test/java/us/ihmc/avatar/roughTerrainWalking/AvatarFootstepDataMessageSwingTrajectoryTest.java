@@ -22,7 +22,6 @@ import us.ihmc.commonWalkingControlModules.desiredFootStep.FootstepListVisualize
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.communication.packets.ExecutionTiming;
 import us.ihmc.communication.packets.MessageTools;
-import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Disabled;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;

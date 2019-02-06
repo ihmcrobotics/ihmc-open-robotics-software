@@ -3,10 +3,8 @@ package us.ihmc.robotics.math;
 import org.junit.jupiter.api.Test;
 import static us.ihmc.robotics.Assert.*;
 
-import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Disabled;
-import us.ihmc.continuousIntegration.IntegrationCategory;
 import us.ihmc.robotics.dataStructures.ComplexNumber;
 import us.ihmc.commons.Epsilons;
 import us.ihmc.commons.MathTools;

@@ -16,14 +16,11 @@ import org.apache.commons.lang3.SystemUtils;
 import us.ihmc.robotics.Assert;
 import org.junit.jupiter.api.Test;
 
-import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationPlan;
-import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Disabled;
 import us.ihmc.commons.PrintTools;
 import us.ihmc.commons.exception.DefaultExceptionHandler;
 import us.ihmc.commons.nio.FileTools;
-import us.ihmc.continuousIntegration.IntegrationCategory;
 import us.ihmc.commons.thread.ThreadTools;
 
 public class ProcessSpawnerTest

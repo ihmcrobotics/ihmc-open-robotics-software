@@ -2,11 +2,9 @@ package us.ihmc.simulationConstructionSetTools.gui;
 
 import org.junit.jupiter.api.Test;
 
-import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Disabled;
 import us.ihmc.commons.Conversions;
-import us.ihmc.continuousIntegration.IntegrationCategory;
 import us.ihmc.robotics.linearDynamicSystems.TransferFunction;
 import us.ihmc.simulationconstructionset.gui.BodePlotConstructor;
 import us.ihmc.simulationconstructionset.gui.FFTPlotter;

@@ -15,7 +15,6 @@ import org.junit.jupiter.api.Test;
 
 import gnu.trove.list.array.TIntArrayList;
 import us.ihmc.commons.RandomNumbers;
-import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Disabled;
 import us.ihmc.euclid.matrix.Matrix3D;

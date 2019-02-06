@@ -23,8 +23,6 @@ import org.junit.jupiter.api.Test;
 import us.ihmc.commons.exception.DefaultExceptionHandler;
 import us.ihmc.commons.nio.FileTools;
 import us.ihmc.commons.nio.WriteOption;
-import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
-
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Disabled;
 public class DeprecatedFileToolsTest

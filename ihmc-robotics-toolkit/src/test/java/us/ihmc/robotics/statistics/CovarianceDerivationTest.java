@@ -7,8 +7,6 @@ import java.util.Random;
 import org.apache.commons.math3.stat.descriptive.SummaryStatistics;
 import org.junit.jupiter.api.Test;
 
-import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
-
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Disabled;
 public class CovarianceDerivationTest

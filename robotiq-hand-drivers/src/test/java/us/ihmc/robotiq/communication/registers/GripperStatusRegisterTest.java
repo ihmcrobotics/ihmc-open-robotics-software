@@ -1,9 +1,7 @@
 package us.ihmc.robotiq.communication.registers;
 
-import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationPlan;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Disabled;
-import us.ihmc.continuousIntegration.IntegrationCategory;
 import us.ihmc.robotiq.communication.registers.GripperStatusRegister.gACT;
 import us.ihmc.robotiq.communication.registers.GripperStatusRegister.gGTO;
 import us.ihmc.robotiq.communication.registers.GripperStatusRegister.gIMC;

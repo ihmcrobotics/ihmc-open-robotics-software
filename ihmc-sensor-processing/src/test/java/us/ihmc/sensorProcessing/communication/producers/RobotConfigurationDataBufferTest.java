@@ -9,7 +9,6 @@ import org.junit.jupiter.api.Test;
 
 import controller_msgs.msg.dds.RobotConfigurationData;
 import us.ihmc.commons.thread.ThreadTools;
-import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Disabled;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;

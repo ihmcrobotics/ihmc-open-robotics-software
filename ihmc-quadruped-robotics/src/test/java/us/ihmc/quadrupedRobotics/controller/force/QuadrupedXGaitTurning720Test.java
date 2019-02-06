@@ -3,7 +3,6 @@ package us.ihmc.quadrupedRobotics.controller.force;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Disabled;
 import us.ihmc.quadrupedCommunication.teleop.RemoteQuadrupedTeleopManager;
