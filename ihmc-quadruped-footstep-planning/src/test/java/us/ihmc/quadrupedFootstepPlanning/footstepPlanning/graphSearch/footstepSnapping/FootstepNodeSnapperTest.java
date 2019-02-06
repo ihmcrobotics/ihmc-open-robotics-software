@@ -13,7 +13,7 @@ import us.ihmc.robotics.robotSide.RobotSide;
 
 import java.util.Random;
 
-import static junit.framework.TestCase.assertTrue;
+import static us.ihmc.robotics.Assert.*;
 
 public class FootstepNodeSnapperTest
 {

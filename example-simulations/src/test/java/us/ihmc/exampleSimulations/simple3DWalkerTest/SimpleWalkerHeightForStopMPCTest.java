@@ -5,7 +5,7 @@ import org.junit.jupiter.api.Test;
 import us.ihmc.commons.PrintTools;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Disabled;
-import us.ihmc.continuousIntegration.ContinuousIntegrationTools;
+import us.ihmc.commons.ContinuousIntegrationTools;
 import us.ihmc.exampleSimulations.simple3DWalker.SimpleWalkerHeightStopMPC;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 
