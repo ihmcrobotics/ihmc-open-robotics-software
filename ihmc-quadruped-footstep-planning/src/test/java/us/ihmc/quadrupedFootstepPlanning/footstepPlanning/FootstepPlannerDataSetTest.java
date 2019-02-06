@@ -14,23 +14,19 @@ import us.ihmc.continuousIntegration.IntegrationCategory;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI;
 import us.ihmc.footstepPlanning.tools.FootstepPlannerDataExporter;
-import us.ihmc.footstepPlanning.tools.FootstepPlannerIOTools;
-import us.ihmc.footstepPlanning.tools.FootstepPlannerIOTools.FootstepPlannerUnitTestDataset;
-import us.ihmc.footstepPlanning.tools.PlannerTools;
-import us.ihmc.footstepPlanning.ui.ApplicationRunner;
-import us.ihmc.footstepPlanning.ui.FootstepPlannerUI;
 import us.ihmc.footstepPlanning.ui.components.FootstepPathCalculatorModule;
 import us.ihmc.javaFXToolkit.messager.SharedMemoryJavaFXMessager;
 import us.ihmc.log.LogTools;
 import us.ihmc.messager.Messager;
 import us.ihmc.messager.SharedMemoryMessager;
+import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.tools.FootstepPlannerIOTools;
+import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.tools.FootstepPlannerIOTools.FootstepPlannerUnitTestDataset;
 import us.ihmc.robotics.Assert;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
 
-import static us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI.*;
 
 public abstract class FootstepPlannerDataSetTest
 {
@@ -50,8 +46,6 @@ public abstract class FootstepPlannerDataSetTest
    private final AtomicReference<Boolean> plannerReceivedPlan = new AtomicReference<>(false);
    private final AtomicReference<Boolean> plannerReceivedResult = new AtomicReference<>(false);
 
-   private AtomicReference<FootstepPlan> uiFootstepPlanReference;
-   private AtomicReference<FootstepPlanningResult> uiPlanningResultReference;
    private final AtomicReference<Boolean> uiReceivedPlan = new AtomicReference<>(false);
    private final AtomicReference<Boolean> uiReceivedResult = new AtomicReference<>(false);
 
@@ -60,7 +54,7 @@ public abstract class FootstepPlannerDataSetTest
    private final AtomicReference<FootstepPlanningResult> expectedResult = new AtomicReference<>(null);
    private final AtomicReference<FootstepPlanningResult> actualResult = new AtomicReference<>(null);
 
-   private FootstepPathCalculatorModule module = null;
+   private QuadrupedBodyPathAndFootstepPlanner planner = null;
 
    protected abstract FootstepPlannerType getPlannerType();
 
@@ -69,72 +63,17 @@ public abstract class FootstepPlannerDataSetTest
    {
       VISUALIZE = VISUALIZE && !ContinuousIntegrationTools.isRunningOnContinuousIntegrationServer();
 
-      if (VISUALIZE)
-         messager = new SharedMemoryJavaFXMessager(FootstepPlannerMessagerAPI.API);
-      else
-         messager = new SharedMemoryMessager(FootstepPlannerMessagerAPI.API);
-
-      module = new FootstepPathCalculatorModule(messager);
-      module.start();
-
-      try
-      {
-         messager.startMessager();
-      }
-      catch (Exception e)
-      {
-         throw new RuntimeException("Failed to start messager.");
-      }
-
-      if (VISUALIZE)
-      {
-         createUI(messager);
-      }
-
-      ThreadTools.sleep(1000);
-
-      messager.registerTopicListener(FootstepPlanTopic, request -> uiReceivedPlan.set(true));
-      messager.registerTopicListener(PlanningResultTopic, request -> uiReceivedResult.set(true));
-
-      uiFootstepPlanReference = messager.createInput(FootstepPlanTopic);
-      uiPlanningResultReference = messager.createInput(PlanningResultTopic);
+      planner = createPlanner();
    }
 
    @After
-   public void tearDown() throws Exception
+   public void tearDown()
    {
-      module.stop();
-      messager.closeMessager();
-      if (ui != null)
-         ui.stop();
-      ui = null;
-
-      uiFootstepPlanReference = null;
-      uiPlanningResultReference = null;
-
-      module = null;
-      messager = null;
+      planner = null;
    }
 
-   private void resetAllAtomics()
-   {
-      plannerPlanReference.set(null);
-      plannerResultReference.set(null);
-      plannerReceivedPlan.set(false);
-      plannerReceivedResult.set(false);
+   protected abstract QuadrupedBodyPathAndFootstepPlanner createPlanner();
 
-      if (uiFootstepPlanReference != null)
-         uiFootstepPlanReference.set(null);
-      if (uiPlanningResultReference != null)
-         uiPlanningResultReference.set(null);
-      uiReceivedPlan.set(false);
-      uiReceivedResult.set(false);
-
-      expectedPlan.set(null);
-      actualPlan.set(null);
-      expectedResult.set(null);
-      actualResult.set(null);
-   }
 
    @Test(timeout = 500000)
    @ContinuousIntegrationTest(estimatedDuration = 13.0)
@@ -158,7 +97,6 @@ public abstract class FootstepPlannerDataSetTest
    {
       FootstepPlannerUnitTestDataset dataset = FootstepPlannerIOTools.loadDataset(FootstepPlannerDataExporter.class, datasetName);
 
-      resetAllAtomics();
       String errorMessages = datasetTestRunner.testDataset(dataset);
       Assert.assertTrue("Errors:" + errorMessages, errorMessages.isEmpty());
    }
@@ -188,7 +126,6 @@ public abstract class FootstepPlannerDataSetTest
          }
 
          numbberOfTestedSets++;
-         resetAllAtomics();
          String errorMessagesForCurrentFile = datasetTestRunner.testDataset(dataset);
          if (!errorMessagesForCurrentFile.isEmpty())
          {
@@ -273,37 +210,6 @@ public abstract class FootstepPlannerDataSetTest
       return errorMessage;
    }
 
-   private void createUI(Messager messager)
-   {
-      ApplicationRunner.runApplication(new Application()
-      {
-         @Override
-         public void start(Stage stage) throws Exception
-         {
-            ui = FootstepPlannerUI.createMessagerUI(stage, (SharedMemoryJavaFXMessager) messager);
-            ui.show();
-         }
-
-         @Override
-         public void stop() throws Exception
-         {
-            ui.stop();
-            Platform.exit();
-         }
-      });
-
-      double maxWaitTime = 5.0;
-      double totalTime = 0.0;
-      long sleepDuration = 100;
-
-      while (ui == null)
-      {
-         if (totalTime > maxWaitTime)
-            throw new RuntimeException("Timed out waiting for the UI to start.");
-         ThreadTools.sleep(sleepDuration);
-         totalTime += Conversions.millisecondsToSeconds(sleepDuration);
-      }
-   }
 
    private double totalTimeTaken;
 
