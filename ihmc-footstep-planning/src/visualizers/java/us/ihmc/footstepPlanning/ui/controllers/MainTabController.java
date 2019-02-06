@@ -286,6 +286,12 @@ public class MainTabController
       startRotationProperty.set(new Quaternion(startPose.getYaw(), 0.0, 0.0));
    }
 
+   @FXML
+   private void requestWalkingPreview()
+   {
+
+   }
+
    public void setFullRobotModel(FullHumanoidRobotModel fullHumanoidRobotModel)
    {
       this.humanoidReferenceFrames = new HumanoidReferenceFrames(fullHumanoidRobotModel);
