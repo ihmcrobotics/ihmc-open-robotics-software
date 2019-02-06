@@ -51,7 +51,6 @@ public class AStarOnRoughTerrainTest extends FootstepPlannerOnRoughTerrainTest
 
    @Override
    @Disabled
-   @Disabled
    @Test
    public void testPartialGaps()
    {
@@ -59,7 +58,6 @@ public class AStarOnRoughTerrainTest extends FootstepPlannerOnRoughTerrainTest
    }
 
    @Override
-   @Disabled
    @Disabled
    @Test
    public void testSpiralStaircase()

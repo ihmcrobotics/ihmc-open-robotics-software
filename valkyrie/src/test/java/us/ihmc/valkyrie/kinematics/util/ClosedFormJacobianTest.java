@@ -89,8 +89,6 @@ public class ClosedFormJacobianTest
 
    // The following test is just for achieving proper renishaw jacobian matrix signs/element indices. It should never be used in Bamboo.
    @Disabled
-
-   @Disabled
    @Test
    public void testEfficientKindaMatchesInefficientJacobianAnkle()
    {

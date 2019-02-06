@@ -26,7 +26,6 @@ import org.apache.commons.lang3.StringUtils;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.Rule;
 import org.junit.jupiter.api.Test;
-import org.junit.rules.DisableOnDebug;
 import org.junit.rules.Timeout;
 import org.reflections.Reflections;
 
@@ -57,8 +56,6 @@ import us.ihmc.idl.IDLSequence;
 public class PacketCodeQualityTest
 {
    private static final String PACKETS_LOCATION = "controller_msgs.msg.dds";
-   @Rule
-   public DisableOnDebug disableOnDebug = new DisableOnDebug(new Timeout(30, TimeUnit.SECONDS));
 
    @AfterEach
    public void tearDown()

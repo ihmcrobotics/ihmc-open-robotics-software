@@ -9,10 +9,8 @@ import org.junit.jupiter.api.Test;
 
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Disabled;
-import us.ihmc.continuousIntegration.ContinuousIntegrationSuite.ContinuousIntegrationSuiteCategory;
 import us.ihmc.robotEnvironmentAwareness.ui.graphicsBuilders.StereoVisionPointCloudViewer;
 
-@ContinuousIntegrationSuiteCategory(IntegrationCategory.FAST)
 public class ColorValueToRGBConversionTest
 {
    private static final int NUMBER_OF_TESTS = 100;

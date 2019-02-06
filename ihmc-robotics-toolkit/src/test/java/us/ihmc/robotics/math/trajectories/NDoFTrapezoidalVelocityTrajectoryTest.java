@@ -143,7 +143,6 @@ public class NDoFTrapezoidalVelocityTrajectoryTest
       plot(time, positions, "Position for multiple trajectories (simple)");
    }
 
-   @Disabled
 	@Disabled
 	@Test
    public void testVelocityAndAcceleration()

@@ -119,7 +119,6 @@ public class VisibilityGraphsFrameworkTest
    //TODO: Fix and make this pass.
    @Disabled("This needs to be fixed for when start and goal are invalid.")
    @Test
-   @Disabled
    public void testDatasetsNoOcclusionSimulateDynamicReplanning() throws Exception
    {
       if (VISUALIZE)
@@ -132,7 +131,6 @@ public class VisibilityGraphsFrameworkTest
    //TODO: Fix and make this pass.
    @Disabled("Occlusion planning needs to be implemented better.")
    @Test
-   @Disabled
    public void testDatasetsSimulateOcclusionAndDynamicReplanning() throws Exception
    {
       if (VISUALIZE)
