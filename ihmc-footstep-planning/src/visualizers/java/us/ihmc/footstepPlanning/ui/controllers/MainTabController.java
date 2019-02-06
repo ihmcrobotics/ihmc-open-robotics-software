@@ -37,6 +37,7 @@ import us.ihmc.robotics.geometry.PlanarRegion;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.robotSide.RobotSide;
 
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 
@@ -405,19 +406,25 @@ public class MainTabController
    private class WalkingPreviewPlaybackManager extends AnimationTimer
    {
       final AtomicReference<WalkingControllerPreviewOutputMessage> walkingPreviewOutput;
-      final int playbackSpeed = 1; // frames per call to handle()
+
+      // frames per call to handle()
+      final int playbackSpeed = 1;
 
       int playbackCounter = 0;
       FullHumanoidRobotModel previewRobotModel = null;
-      boolean active = false;
-      boolean playbackModeActive = false;
+
+      // whether to show ghost robot
+      final AtomicBoolean active = new AtomicBoolean(false);
+
+      // whether to animate ghost robot
+      final AtomicBoolean playbackModeActive = new AtomicBoolean(false);
 
       WalkingPreviewPlaybackManager(Messager messager)
       {
          walkingPreviewOutput = messager.createInput(FootstepPlannerMessagerAPI.WalkingPreviewOutput);
          messager.registerTopicListener(FootstepPlannerMessagerAPI.WalkingPreviewOutput, output ->
          {
-            if(active)
+            if(active.get())
                stop();
             else
                start();
@@ -433,8 +440,8 @@ public class MainTabController
       public void start()
       {
          super.start();
-         active = true;
-         playbackModeActive = true;
+         active.set(true);
+         playbackModeActive.set(true);
       }
 
       @Override
@@ -442,13 +449,13 @@ public class MainTabController
       {
          previewRobotModel.getRootJoint().setJointPosition(new Vector3D(Double.NaN, Double.NaN, Double.NaN));
          super.stop();
-         active = false;
+         active.set(false);
       }
 
       @Override
       public void handle(long now)
       {
-         if(playbackModeActive)
+         if(playbackModeActive.get())
          {
             setToFrame(playbackCounter);
 
@@ -462,7 +469,7 @@ public class MainTabController
 
       void requestSpecificFrame(int frameIndex)
       {
-         playbackModeActive = false;
+         playbackModeActive.set(false);
          setToFrame(frameIndex);
       }
 
