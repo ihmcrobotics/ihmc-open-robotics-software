@@ -6,6 +6,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 
 import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -176,13 +177,14 @@ public abstract class ReferenceFrameHashTest
    @Test
    public void testAddingTwoFramesWithTheSameNameThrowsException()
    {
-      DRCRobotModel robotModelA = getRobotModel();
-      FullHumanoidRobotModel fullRobotModel = robotModelA.createFullRobotModel();
-      TestReferenceFrames referenceFrames = new TestReferenceFrames();
-   
-      //should throw an IllegalArgumentException
-      ReferenceFrameHashCodeResolver referenceFrameHashCodeResolverA = new ReferenceFrameHashCodeResolver(fullRobotModel, referenceFrames);
-   
+      Assertions.assertThrows(IllegalArgumentException.class, () -> {
+         DRCRobotModel robotModelA = getRobotModel();
+         FullHumanoidRobotModel fullRobotModel = robotModelA.createFullRobotModel();
+         TestReferenceFrames referenceFrames = new TestReferenceFrames();
+         
+         //should throw an IllegalArgumentException
+         ReferenceFrameHashCodeResolver referenceFrameHashCodeResolverA = new ReferenceFrameHashCodeResolver(fullRobotModel, referenceFrames);
+      });
    }
 
    private void checkReferenceFramesMatch(ReferenceFrame referenceFrameA, ReferenceFrame referenceFrameB)
