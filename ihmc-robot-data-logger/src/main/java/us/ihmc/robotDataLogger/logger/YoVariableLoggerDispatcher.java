@@ -75,7 +75,7 @@ public class YoVariableLoggerDispatcher implements DataServerDiscoveryListener
             {
                try
                {
-                  new YoVariableLogger(connection, options);
+                  new YoVariableLogger(connection, options, (request) -> finishedLog(request));
                   activeLogSessions.add(hashAnnouncement);
                }
                catch(Exception e)
@@ -97,6 +97,21 @@ public class YoVariableLoggerDispatcher implements DataServerDiscoveryListener
    {
    }
 
+   /**
+    * When a log is finished succesfully, this function removes the active session from the list of sessions
+    * 
+    * This is useful in the case the network connection to the robot gets interrupted. When the robot regains network connectivity, a new log will start.
+    *  
+    * @param request
+    */
+   private void finishedLog(Announcement request)
+   {
+      synchronized (lock)
+      {
+         HashAnnouncement hashRequest = new HashAnnouncement(request);
+         activeLogSessions.remove(hashRequest);
+      }
+   }
    
    /**
     * Simple hashcode calculator for announcements to allow it in a HashSet
