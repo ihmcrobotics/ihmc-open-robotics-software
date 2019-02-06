@@ -260,15 +260,15 @@ public class WalkingControllerPreviewToolboxController extends ToolboxController
    @Override
    public void updateInternal()
    {
-      //      if (isDone())
-      //      {
-      //         for (JointBasics joint : fullRobotModel.getElevator().childrenSubtreeIterable())
-      //         {
-      //            joint.setJointAccelerationToZero();
-      //            joint.setJointTwistToZero();
-      //         }
-      //         return;
-      //      }
+      if (isDone())
+      {
+         for (JointBasics joint : fullRobotModel.getElevator().childrenSubtreeIterable())
+         {
+            joint.setJointAccelerationToZero();
+            joint.setJointTwistToZero();
+         }
+         return;
+      }
 
       if (toolboxInputManager.isNewCommandAvailable(WalkingControllerPreviewInputCommand.class))
       {
@@ -302,7 +302,7 @@ public class WalkingControllerPreviewToolboxController extends ToolboxController
       MultiBodySystemStateIntegrator integrator = new MultiBodySystemStateIntegrator(integrationDT);
       integrator.doubleIntegrateFromAcceleration(Arrays.asList(controllerToolbox.getControlledJoints()));
 
-      if (!taskExecutor.isDone() && !(taskExecutor.getCurrentTask() instanceof WalkingPreviewResetTask)) // Skip the frames that are to reset the controller.
+      if (!(taskExecutor.getCurrentTask() instanceof WalkingPreviewResetTask)) // Skip the frames that are to reset the controller.
          previewFrames.add(MessageTools.createKinematicsToolboxOutputStatus(rootJoint, FullRobotModelUtils.getAllJointsExcludingHands(fullRobotModel)));
 
       isDone.set(taskExecutor.isDone() || hasControllerFailed.getValue());
@@ -322,7 +322,7 @@ public class WalkingControllerPreviewToolboxController extends ToolboxController
 
    public boolean isWalkingControllerResetDone()
    {
-      return isInitialized.getValue() && !isDone.getValue() && !(taskExecutor.getCurrentTask() instanceof WalkingPreviewResetTask);
+      return isInitialized.getValue() && !(taskExecutor.getCurrentTask() instanceof WalkingPreviewResetTask);
    }
 
    public void updateRobotConfigurationData(RobotConfigurationData newConfigurationData)

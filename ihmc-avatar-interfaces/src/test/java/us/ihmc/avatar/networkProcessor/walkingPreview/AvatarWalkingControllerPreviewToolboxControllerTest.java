@@ -9,6 +9,7 @@ import java.util.List;
 import java.util.Random;
 import java.util.stream.Stream;
 
+import org.apache.commons.lang3.mutable.MutableObject;
 import org.apache.commons.math3.stat.descriptive.moment.Mean;
 import org.junit.After;
 import org.junit.Test;
@@ -19,6 +20,7 @@ import controller_msgs.msg.dds.FootstepDataMessage;
 import controller_msgs.msg.dds.NeckTrajectoryMessage;
 import controller_msgs.msg.dds.RobotConfigurationData;
 import controller_msgs.msg.dds.WalkingControllerPreviewInputMessage;
+import controller_msgs.msg.dds.WalkingControllerPreviewOutputMessage;
 import us.ihmc.avatar.MultiRobotTestInterface;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.initialSetup.OffsetAndYawRobotInitialSetup;
@@ -37,6 +39,7 @@ import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tools.EuclidCoreIOTools;
 import us.ihmc.euclid.tools.EuclidCoreRandomTools;
+import us.ihmc.euclid.tools.EuclidCoreTools;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.graphicsDescription.appearance.YoAppearanceRGBColor;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
@@ -74,12 +77,15 @@ import us.ihmc.yoVariables.variable.YoInteger;
 public abstract class AvatarWalkingControllerPreviewToolboxControllerTest implements MultiRobotTestInterface
 {
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
+   private static final double EPSILON = 1.0e-12;
    private static final YoAppearanceRGBColor ghostApperance = new YoAppearanceRGBColor(Color.YELLOW, 0.75);
    private static final SimulationTestingParameters simulationTestingParameters = SimulationTestingParameters.createFromSystemProperties();
 
    private DRCSimulationTestHelper drcSimulationTestHelper;
+   private SimulationConstructionSet scs;
 
    private CommandInputManager toolboxInputManager;
+   private StatusMessageOutputManager toolboxOutputManager;
    private YoVariableRegistry toolboxMainRegistry;
    private YoGraphicsListRegistry yoGraphicsListRegistry;
    private WalkingControllerPreviewToolboxController toolboxController;
@@ -109,7 +115,7 @@ public abstract class AvatarWalkingControllerPreviewToolboxControllerTest implem
 
       DRCRobotModel robotModel = getRobotModel();
       toolboxInputManager = new CommandInputManager(WalkingControllerPreviewToolboxModule.supportedCommands());
-      StatusMessageOutputManager toolboxOutputManager = new StatusMessageOutputManager(WalkingControllerPreviewToolboxModule.supportedStatus());
+      toolboxOutputManager = new StatusMessageOutputManager(WalkingControllerPreviewToolboxModule.supportedStatus());
       toolboxController = new WalkingControllerPreviewToolboxController(robotModel, integrationDT, toolboxInputManager, toolboxOutputManager,
                                                                         yoGraphicsListRegistry, toolboxMainRegistry);
 
@@ -137,13 +143,20 @@ public abstract class AvatarWalkingControllerPreviewToolboxControllerTest implem
          drcSimulationTestHelper = null;
       }
 
+      if (scs != null)
+      {
+         scs.closeAndDispose();
+         scs = null;
+      }
+
       MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " after test.");
    }
 
    @Test
    public void testWalkingPreviewAlone() throws SimulationExceededMaximumTimeException, ControllerFailureException
    {
-      setup(0.02);
+      double dt = 0.02;
+      setup(dt);
       BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
 
       HumanoidFloatingRootJointRobot robot = getRobotModel().createHumanoidFloatingRootJointRobot(false);
@@ -151,7 +164,7 @@ public abstract class AvatarWalkingControllerPreviewToolboxControllerTest implem
       toolboxUpdater = createToolboxUpdater(robot);
       robot.setController(toolboxUpdater);
 
-      SimulationConstructionSet scs = new SimulationConstructionSet(robot, simulationTestingParameters);
+      scs = new SimulationConstructionSet(robot, simulationTestingParameters);
       scs.setDT(toolboxController.getIntegrationDT(), 1);
       scs.addYoGraphicsListRegistry(yoGraphicsListRegistry, true);
       scs.setCameraFix(0.0, 0.0, 1.0);
@@ -191,9 +204,17 @@ public abstract class AvatarWalkingControllerPreviewToolboxControllerTest implem
 
       enableToolboxUpdater.set(true);
 
+      MutableObject<WalkingControllerPreviewOutputMessage> latestOutput = new MutableObject<>();
+      toolboxOutputManager.attachStatusMessageListener(WalkingControllerPreviewOutputMessage.class, latestOutput::setValue);
+      int expectedNumberOfFrames = 0;
+
       for (int i = 0; i < 50000; i++)
       {
          toolboxUpdater.doControl();
+
+         if (toolboxController.isWalkingControllerResetDone())
+            expectedNumberOfFrames++;
+
          scs.tickAndUpdate();
 
          if (toolboxController.isDone())
@@ -201,6 +222,11 @@ public abstract class AvatarWalkingControllerPreviewToolboxControllerTest implem
       }
 
       enableToolboxUpdater.set(false);
+
+      assertNotNull(latestOutput.getValue());
+      assertEquals(dt, latestOutput.getValue().getFrameDt(), EPSILON);
+      int actualNumberOfFrames = latestOutput.getValue().getRobotConfigurations().size();
+      assertEquals(expectedNumberOfFrames, actualNumberOfFrames);
    }
 
    @SuppressWarnings("unchecked")
@@ -415,7 +441,7 @@ public abstract class AvatarWalkingControllerPreviewToolboxControllerTest implem
       { // The pelvis
          FramePose3D pelvisPose = new FramePose3D(pelvisFrame);
          pelvisPose.changeFrame(worldFrame);
-         pelvisPose.appendRotation(EuclidCoreRandomTools.nextQuaternion(random, Math.toRadians(0.0)));
+         pelvisPose.appendRotation(EuclidCoreRandomTools.nextQuaternion(random, Math.toRadians(10.0)));
          pelvisPose.prependTranslation(EuclidCoreRandomTools.nextPoint3D(random, 0.15));
          drcSimulationTestHelper.publishToController(HumanoidMessageTools.createPelvisTrajectoryMessage(1.0, pelvisPose));
       }
@@ -469,7 +495,7 @@ public abstract class AvatarWalkingControllerPreviewToolboxControllerTest implem
       for (RobotSide robotSide : RobotSide.values)
       {
          assertTrackingErrorMeanIsLow(footTrackingWatchers.get(robotSide), 0.01, 0.015, 0.06, 0.20);
-         assertTrackingErrorMeanIsLow(handTrackingWatchers.get(robotSide), 0.02, 0.25, 0.06, 0.10); // I wonder if the tracking is off because the control is in joint-space.
+         assertTrackingErrorMeanIsLow(handTrackingWatchers.get(robotSide), 0.05, 0.3, 0.06, 0.15); // I wonder if the tracking is off because the control is in joint-space.
       }
 
       BambooTools.reportTestFinishedMessage(simulationTestingParameters.getShowWindows());
@@ -628,7 +654,7 @@ public abstract class AvatarWalkingControllerPreviewToolboxControllerTest implem
          controllerBodyPose.changeFrame(previewBodyFixedFrame);
 
          positionTrackingErrorMagnitude.set(controllerBodyPose.getPosition().distanceFromOrigin());
-         orientationTrackingErrorMagnitude.set(controllerBodyPose.getOrientation().getAngle());
+         orientationTrackingErrorMagnitude.set(EuclidCoreTools.trimAngleMinusPiToPi(controllerBodyPose.getOrientation().getAngle()));
 
          SpatialVector controllerVelocity = new SpatialVector(controllerBodyFixedFrame.getTwistOfFrame());
          controllerVelocity.changeFrame(worldFrame);
