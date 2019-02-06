@@ -142,13 +142,6 @@ class WebsocketDataServerFrameHandler extends SimpleChannelInboundHandler<WebSoc
    {
    }
 
-   @Override
-   public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause)
-   {
-      // Swallow exceptions to avoid object allocations
-      ctx.close();
-   }
-
    public void addCloseFutureListener(ChannelFutureListener listener)
    {
       channel.closeFuture().addListener(listener);

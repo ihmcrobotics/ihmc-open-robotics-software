@@ -50,6 +50,7 @@ public class WebsocketDataServerClient
    private final Channel ch;
 
    private final DisconnectPromise disconnectPromise;
+   private final UDPTimestampClient udpTimestampClient;
 
    public WebsocketDataServerClient(HTTPDataServerConnection connection, IDLYoVariableHandshakeParser parser, TimestampListener timestampListener,
                                     YoVariableClientImplementation yoVariableClient, int timeoutInMs, DebugRegistry debugRegistry)
@@ -69,13 +70,16 @@ public class WebsocketDataServerClient
       }
 
       this.consumer = new RegistryConsumer(parser, yoVariableClient, debugRegistry);
+      this.udpTimestampClient = new UDPTimestampClient(timestampListener);
+      this.udpTimestampClient.start();
+
 
       CustomLogDataSubscriberType type = new CustomLogDataSubscriberType(parser.getNumberOfVariables(), parser.getNumberOfStates());
       final WebSocketDataServerClientHandler handler = new WebSocketDataServerClientHandler(WebSocketClientHandshakerFactory.newHandshaker(uri,
                                                                                                                                            WebSocketVersion.V13,
                                                                                                                                            null, true,
                                                                                                                                            new DefaultHttpHeaders()),
-                                                                                            yoVariableClient, timestampListener, consumer, type);
+                                                                                            yoVariableClient, udpTimestampClient.getPort(), consumer, type);
 
       Bootstrap b = new Bootstrap();
       b.group(group).channel(NioSocketChannel.class).handler(new ChannelInitializer<SocketChannel>()
@@ -105,8 +109,18 @@ public class WebsocketDataServerClient
 
    private void disconnected()
    {
-      group.shutdownGracefully();
+      this.udpTimestampClient.stop();
+      this.udpTimestampClient.join();
+      consumer.stopImmediatly();
+      try
+      {
+         consumer.join();
+      }
+      catch (InterruptedException e)
+      {
+      }
       disconnectPromise.complete();
+      group.shutdownGracefully();
    }
 
    public boolean isActive()

@@ -82,13 +82,6 @@ class HTTPDataServerDescriptionServer extends SimpleChannelInboundHandler<FullHt
       }
    }
 
-   @Override
-   public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause)
-   {
-      cause.printStackTrace();
-      ctx.close();
-   }
-
    private static void sendContent(ChannelHandlerContext ctx, FullHttpRequest req, ByteBuf content, String contentType)
    {
       FullHttpResponse res = new DefaultFullHttpResponse(HTTP_1_1, OK, content);

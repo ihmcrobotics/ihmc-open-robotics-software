@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
+import java.util.function.Consumer;
 
 import us.ihmc.robotDataLogger.Announcement;
 import us.ihmc.robotDataLogger.YoVariableClient;
@@ -16,7 +17,7 @@ public class YoVariableLogger
 
    private final YoVariableClient client;
 
-   public YoVariableLogger(HTTPDataServerConnection connection, YoVariableLoggerOptions options) throws IOException
+   public YoVariableLogger(HTTPDataServerConnection connection, YoVariableLoggerOptions options, Consumer<Announcement> doneListener) throws IOException
    {
       Announcement request = connection.getAnnouncement();
       
@@ -41,7 +42,7 @@ public class YoVariableLogger
          throw new IOException("Cannot create directory " + finalDirectory.getAbsolutePath());
       }
 
-      YoVariableLoggerListener logger = new YoVariableLoggerListener(tempDirectory, finalDirectory, timestamp, request, options);
+      YoVariableLoggerListener logger = new YoVariableLoggerListener(tempDirectory, finalDirectory, timestamp, request, options, doneListener);
       client = new YoVariableClient(logger);
 
       try

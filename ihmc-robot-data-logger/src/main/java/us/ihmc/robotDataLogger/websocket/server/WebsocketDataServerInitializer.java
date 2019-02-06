@@ -38,6 +38,7 @@ class WebsocketDataServerInitializer extends ChannelInitializer<SocketChannel>
    {
       ChannelPipeline pipeline = ch.pipeline();
 
+      pipeline.addLast(new DataServerIOExceptionHandler());
       pipeline.addLast(new HttpServerCodec());
       pipeline.addLast(new HttpObjectAggregator(65536));
       pipeline.addLast(new WebSocketServerProtocolHandler(WEBSOCKET_PATH, null, true));

@@ -25,7 +25,6 @@ import us.ihmc.robotDataLogger.YoVariableClientImplementation;
 import us.ihmc.robotDataLogger.dataBuffers.CustomLogDataSubscriberType;
 import us.ihmc.robotDataLogger.dataBuffers.RegistryConsumer;
 import us.ihmc.robotDataLogger.dataBuffers.RegistryReceiveBuffer;
-import us.ihmc.robotDataLogger.listeners.TimestampListener;
 import us.ihmc.robotDataLogger.websocket.command.DataServerCommand;
 
 public class WebSocketDataServerClientHandler extends SimpleChannelInboundHandler<Object>
@@ -39,7 +38,7 @@ public class WebSocketDataServerClientHandler extends SimpleChannelInboundHandle
    private final SerializedPayload payload;
    
    
-   private final UDPTimestampClient udpTimestampClient;
+   private final int timestampPort;
       
    private ChannelPromise handshakeFuture;
 
@@ -47,14 +46,13 @@ public class WebSocketDataServerClientHandler extends SimpleChannelInboundHandle
    
    private volatile boolean waitingForPong = false;
    
-   public WebSocketDataServerClientHandler(WebSocketClientHandshaker handshaker, YoVariableClientImplementation yoVariableClient, TimestampListener timestampListener, RegistryConsumer consumer, CustomLogDataSubscriberType type) throws SocketException
+   public WebSocketDataServerClientHandler(WebSocketClientHandshaker handshaker, YoVariableClientImplementation yoVariableClient, int timestampPort, RegistryConsumer consumer, CustomLogDataSubscriberType type) throws SocketException
    {
       this.handshaker = handshaker;
       this.yoVariableClient = yoVariableClient;
       this.consumer = consumer;
       this.type = type;
-      this.udpTimestampClient = new UDPTimestampClient(timestampListener);
-      this.udpTimestampClient.start();
+      this.timestampPort = timestampPort;
       
       this.payload = new SerializedPayload(type.getTypeSize());
    }
@@ -74,14 +72,6 @@ public class WebSocketDataServerClientHandler extends SimpleChannelInboundHandle
    public void channelActive(ChannelHandlerContext ctx)
    {
       handshaker.handshake(ctx.channel());
-   }
-
-   @Override
-   public void channelInactive(ChannelHandlerContext ctx)
-   {
-      this.udpTimestampClient.stop();
-      this.udpTimestampClient.join();
-      consumer.stopImmediatly();
    }
 
    @Override
@@ -130,7 +120,7 @@ public class WebSocketDataServerClientHandler extends SimpleChannelInboundHandle
          if(!sendConfiguration)
          {
             ByteBuf sendTimestampCmd = ctx.alloc().buffer(DataServerCommand.MaxCommandSize());
-            DataServerCommand.SEND_TIMESTAMPS.getBytes(sendTimestampCmd, udpTimestampClient.getPort());
+            DataServerCommand.SEND_TIMESTAMPS.getBytes(sendTimestampCmd, timestampPort);
             TextWebSocketFrame sendTimestampFrame = new TextWebSocketFrame(sendTimestampCmd);
             ch.writeAndFlush(sendTimestampFrame);
             sendConfiguration = true;

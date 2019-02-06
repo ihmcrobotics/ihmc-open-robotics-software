@@ -9,10 +9,11 @@ import java.nio.LongBuffer;
 import java.nio.channels.FileChannel;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.Consumer;
 
-import us.ihmc.commons.PrintTools;
 import us.ihmc.idl.IDLSequence;
 import us.ihmc.idl.serializers.extra.YAMLSerializer;
+import us.ihmc.log.LogTools;
 import us.ihmc.robotDataLogger.Announcement;
 import us.ihmc.robotDataLogger.CameraAnnouncement;
 import us.ihmc.robotDataLogger.Handshake;
@@ -39,7 +40,7 @@ public class YoVariableLoggerListener implements YoVariablesUpdatedListener
    private static final String modelResourceBundle = "resources.zip";
    private static final String indexFilename = "robotData.dat";
    private static final String summaryFilename = "summary.csv";
-
+   
    private final Object synchronizer = new Object();
    private final Object timestampUpdater = new Object();
    
@@ -67,6 +68,9 @@ public class YoVariableLoggerListener implements YoVariablesUpdatedListener
 
    private long lastReceivedTimestamp = Long.MIN_VALUE;
    
+   private final Announcement request;
+   private final Consumer<Announcement> doneListener;
+   
    private YoVariableSummarizer yoVariableSummarizer = null;
    
    // Reconstruction variables for disk data format
@@ -75,13 +79,15 @@ public class YoVariableLoggerListener implements YoVariablesUpdatedListener
    private ByteBuffer dataBuffer;
    private LongBuffer dataBufferAsLong;
    
-   public YoVariableLoggerListener(File tempDirectory, File finalDirectory, String timestamp, Announcement request, YoVariableLoggerOptions options)
+   public YoVariableLoggerListener(File tempDirectory, File finalDirectory, String timestamp, Announcement request, YoVariableLoggerOptions options, Consumer<Announcement> doneListener)
    {
       System.out.println(request);
       this.flushAggressivelyToDisk = options.isFlushAggressivelyToDisk();
       this.tempDirectory = tempDirectory;
       this.finalDirectory = finalDirectory;
       this.options = options;
+      this.request = request;
+      this.doneListener = doneListener;
       logProperties = new LogPropertiesWriter(new File(tempDirectory, propertyFile));
       logProperties.getVariables().setHandshake(handshakeFilename);
       logProperties.getVariables().setData(dataFilename);
@@ -105,7 +111,7 @@ public class YoVariableLoggerListener implements YoVariablesUpdatedListener
       }
       else
       {
-         PrintTools.warn(this, "Video capture disabled. Ignoring camera's and network streams");
+         LogTools.warn("Video capture disabled. Ignoring camera's and network streams");
       }
 
    }
@@ -324,6 +330,8 @@ public class YoVariableLoggerListener implements YoVariablesUpdatedListener
          }
 
          tempDirectory.renameTo(finalDirectory);
+         
+         doneListener.accept(request);
       }
    }
 
