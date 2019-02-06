@@ -16,8 +16,6 @@ mainDependencies {
    compile group: "org.ejml", name: "core", version: "0.30"
    compile group: "org.ejml", name: "dense64", version: "0.30"
    compile group: "org.apache.commons", name: "commons-lang3", version: "3.8.1"
-   compile group: "junit", name: "junit", version: "4.12"
-   compile group: "org.junit.vintage", name: "junit-vintage-engine", version: "5.3.1"
    compile group: "org.georegression", name: "georegression", version: "0.11"
    compile group: "org.boofcv", name: "geo", version: "0.24.1"
    compile group: "us.ihmc.thirdparty.org.opencv", name: "opencv", version: "3.2.0-170503"
@@ -47,10 +45,7 @@ mainDependencies {
 }
 
 testDependencies {
-   compile group: "junit", name: "junit", version: "4.12"
-   compile group: "org.junit.vintage", name: "junit-vintage-engine", version: "5.3.1"
 
-   compile group: "us.ihmc", name: "ihmc-ci-core-api", version: "0.18.0"
    compile group: "us.ihmc", name: "ihmc-commons-testing", version: "0.25.0"
    compile group: "us.ihmc", name: "ihmc-robotics-toolkit-test", version: "source"
 }
