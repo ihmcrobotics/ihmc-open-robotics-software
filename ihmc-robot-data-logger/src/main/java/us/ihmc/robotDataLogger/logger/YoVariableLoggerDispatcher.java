@@ -77,12 +77,12 @@ public class YoVariableLoggerDispatcher implements DataServerDiscoveryListener
                {
                   new YoVariableLogger(connection, options, (request) -> finishedLog(request));
                   activeLogSessions.add(hashAnnouncement);
+                  LogTools.info("Logging session started for " + announcement.getNameAsString());
                }
                catch(Exception e)
                {
                   e.printStackTrace();
                }
-               LogTools.info("Logging session started for " + announcement.getNameAsString());
             }
          }
          
@@ -110,6 +110,8 @@ public class YoVariableLoggerDispatcher implements DataServerDiscoveryListener
       {
          HashAnnouncement hashRequest = new HashAnnouncement(request);
          activeLogSessions.remove(hashRequest);
+         LogTools.info("Logging session for " + request.getNameAsString() + " has finished.");
+
       }
    }
    
