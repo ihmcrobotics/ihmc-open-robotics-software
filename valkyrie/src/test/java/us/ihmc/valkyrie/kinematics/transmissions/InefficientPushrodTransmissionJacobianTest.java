@@ -1,6 +1,6 @@
 package us.ihmc.valkyrie.kinematics.transmissions;
 
-import static org.junit.Assert.assertEquals;
+import static us.ihmc.robotics.Assert.*;
 
 import org.junit.Ignore;
 import org.junit.Test;

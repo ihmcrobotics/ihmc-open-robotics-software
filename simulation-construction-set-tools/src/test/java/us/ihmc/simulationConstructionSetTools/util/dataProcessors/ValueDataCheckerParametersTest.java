@@ -1,6 +1,6 @@
 package us.ihmc.simulationConstructionSetTools.util.dataProcessors;
 
-import static org.junit.Assert.*;
+import static us.ihmc.robotics.Assert.*;
 
 import org.junit.Test;
 

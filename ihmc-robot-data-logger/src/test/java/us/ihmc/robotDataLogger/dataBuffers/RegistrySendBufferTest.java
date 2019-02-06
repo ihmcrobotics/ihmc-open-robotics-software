@@ -1,6 +1,6 @@
 package us.ihmc.robotDataLogger.dataBuffers;
 
-import static org.junit.Assert.assertEquals;
+import static us.ihmc.robotics.Assert.*;
 
 import java.io.IOException;
 import java.util.ArrayList;

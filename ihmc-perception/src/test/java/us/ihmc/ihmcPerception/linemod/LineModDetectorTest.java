@@ -1,8 +1,6 @@
 package us.ihmc.ihmcPerception.linemod;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
+import static us.ihmc.robotics.Assert.*;
 
 import java.awt.image.BufferedImage;
 import java.io.File;

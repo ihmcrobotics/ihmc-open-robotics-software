@@ -17,7 +17,7 @@ import us.ihmc.yoVariables.variable.YoDouble;
 
 import java.io.IOException;
 
-import static org.junit.Assert.assertEquals;
+import static us.ihmc.robotics.Assert.*;
 
 public abstract class QuadrupedStepControllerTest implements QuadrupedMultiRobotTestInterface
 {

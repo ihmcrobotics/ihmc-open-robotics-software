@@ -1,7 +1,6 @@
 package us.ihmc.avatar.icpPlannerTests;
 
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
+import static us.ihmc.robotics.Assert.*;
 
 import java.util.ArrayList;
 import java.util.Random;

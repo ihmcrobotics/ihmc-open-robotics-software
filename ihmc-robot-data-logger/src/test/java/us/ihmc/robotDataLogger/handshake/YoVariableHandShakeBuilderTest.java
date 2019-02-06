@@ -1,6 +1,6 @@
 package us.ihmc.robotDataLogger.handshake;
 
-import static org.junit.Assert.*;
+import static us.ihmc.robotics.Assert.*;
 
 import java.util.List;
 import java.util.Random;

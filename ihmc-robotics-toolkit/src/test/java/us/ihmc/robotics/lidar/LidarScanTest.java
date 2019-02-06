@@ -1,13 +1,13 @@
 package us.ihmc.robotics.lidar;
 
-import static org.junit.Assert.assertEquals;
+import static us.ihmc.robotics.Assert.*;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Random;
 
 import org.apache.commons.lang3.ArrayUtils;
-import org.junit.Assert;
+import us.ihmc.robotics.Assert;
 import org.junit.Test;
 
 import us.ihmc.commons.Assertions;

@@ -1,7 +1,8 @@
 package us.ihmc.communication.streamingData;
 
-import static junit.framework.Assert.assertTrue;
-import static org.junit.Assert.assertEquals;
+import static us.ihmc.robotics.Assert.*;
+
+import static us.ihmc.robotics.Assert.*;
 
 import java.io.IOException;
 import java.io.ObjectInputStream;

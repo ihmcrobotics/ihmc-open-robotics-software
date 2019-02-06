@@ -5,7 +5,7 @@ import org.ejml.ops.CommonOps;
 import org.junit.Test;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations;
 
-import static org.junit.Assert.assertEquals;
+import static us.ihmc.robotics.Assert.*;
 
 public class DampedQRNullspaceCalculatorTest extends DampedNullspaceCalculatorTest
 {

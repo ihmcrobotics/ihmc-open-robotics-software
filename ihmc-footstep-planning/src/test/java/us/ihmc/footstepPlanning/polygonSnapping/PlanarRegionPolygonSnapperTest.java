@@ -1,7 +1,6 @@
 package us.ihmc.footstepPlanning.polygonSnapping;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import static us.ihmc.robotics.Assert.*;
 
 import java.util.ArrayList;
 

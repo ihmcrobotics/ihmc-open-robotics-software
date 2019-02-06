@@ -1,6 +1,6 @@
 package us.ihmc.robotics.time;
 
-import org.junit.Assert;
+import us.ihmc.robotics.Assert;
 import org.junit.Test;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.robotics.time.TimeInterval;
@@ -8,7 +8,7 @@ import us.ihmc.robotics.time.TimeIntervalTools;
 
 import java.util.ArrayList;
 
-import static org.junit.Assert.assertEquals;
+import static us.ihmc.robotics.Assert.*;
 
 public class TimeIntervalToolsTest
 {

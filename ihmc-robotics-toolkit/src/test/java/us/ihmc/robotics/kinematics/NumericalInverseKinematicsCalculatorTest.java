@@ -1,6 +1,6 @@
 package us.ihmc.robotics.kinematics;
 
-import static org.junit.Assert.fail;
+import static us.ihmc.robotics.Assert.*;
 
 import java.util.List;
 import java.util.Random;

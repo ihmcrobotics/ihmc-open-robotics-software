@@ -12,7 +12,7 @@ import java.util.HashSet;
 import java.util.Random;
 import java.util.function.UnaryOperator;
 
-import static org.junit.Assert.*;
+import static us.ihmc.robotics.Assert.*;
 
 public class YoPreallocatedListTest
 {

@@ -2,7 +2,7 @@ package us.ihmc.convexOptimization.quadraticProgram;
 
 import org.ejml.data.DenseMatrix64F;
 import org.ejml.ops.CommonOps;
-import org.junit.Assert;
+import us.ihmc.robotics.Assert;
 import org.junit.Ignore;
 import org.junit.Test;
 import us.ihmc.commons.PrintTools;
@@ -15,7 +15,7 @@ import us.ihmc.robotics.testing.JUnitTools;
 import us.ihmc.robotics.time.ExecutionTimer;
 import us.ihmc.tools.exceptions.NoConvergenceException;
 
-import static org.junit.Assert.assertEquals;
+import static us.ihmc.robotics.Assert.*;
 
 @ContinuousIntegrationPlan(categories = {IntegrationCategory.FAST})
 public class JavaQuadProgSolverTest extends AbstractSimpleActiveSetQPSolverTest

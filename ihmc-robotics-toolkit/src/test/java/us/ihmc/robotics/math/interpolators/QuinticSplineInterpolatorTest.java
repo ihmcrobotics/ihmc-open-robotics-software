@@ -1,7 +1,6 @@
 package us.ihmc.robotics.math.interpolators;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import static us.ihmc.robotics.Assert.*;
 
 import java.io.IOException;
 import java.util.Random;

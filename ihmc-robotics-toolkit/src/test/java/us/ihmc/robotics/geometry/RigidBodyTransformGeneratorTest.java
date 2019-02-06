@@ -1,6 +1,6 @@
 package us.ihmc.robotics.geometry;
 
-import static org.junit.Assert.assertTrue;
+import static us.ihmc.robotics.Assert.*;
 
 import org.junit.Test;
 

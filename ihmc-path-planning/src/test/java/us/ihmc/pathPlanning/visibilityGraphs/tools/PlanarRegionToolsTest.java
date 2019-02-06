@@ -1,9 +1,7 @@
 package us.ihmc.pathPlanning.visibilityGraphs.tools;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
+import static us.ihmc.robotics.Assert.*;
+
 import static us.ihmc.euclid.tools.EuclidCoreRandomTools.nextDouble;
 
 import java.util.ArrayList;

@@ -1,6 +1,6 @@
 package us.ihmc.robotics.trajectories.providers;
 
-import static org.junit.Assert.assertEquals;
+import static us.ihmc.robotics.Assert.*;
 
 import java.util.Random;
 

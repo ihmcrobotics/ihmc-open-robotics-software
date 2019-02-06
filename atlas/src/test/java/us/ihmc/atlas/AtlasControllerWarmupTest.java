@@ -6,7 +6,7 @@ import java.util.EnumMap;
 import java.util.Map;
 
 import org.apache.commons.lang3.mutable.MutableInt;
-import org.junit.Assert;
+import us.ihmc.robotics.Assert;
 import org.junit.Test;
 
 import us.ihmc.avatar.warmup.HumanoidControllerWarumupTools;

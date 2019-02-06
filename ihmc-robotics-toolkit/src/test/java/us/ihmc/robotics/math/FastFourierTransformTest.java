@@ -1,7 +1,7 @@
 package us.ihmc.robotics.math;
 
 import org.junit.Test;
-import static org.junit.Assert.*;
+import static us.ihmc.robotics.Assert.*;
 
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.continuousIntegration.IntegrationCategory;

@@ -1,6 +1,6 @@
 package us.ihmc.utilities.ros;
 
-import static org.junit.Assert.assertTrue;
+import static us.ihmc.robotics.Assert.*;
 
 import java.net.URISyntaxException;
 import java.util.concurrent.CountDownLatch;

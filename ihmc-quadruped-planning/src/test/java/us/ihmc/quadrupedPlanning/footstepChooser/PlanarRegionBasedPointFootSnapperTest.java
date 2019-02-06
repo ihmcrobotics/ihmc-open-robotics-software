@@ -10,7 +10,7 @@ import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.geometry.PlanarRegionsListGenerator;
 
-import static org.junit.Assert.assertTrue;
+import static us.ihmc.robotics.Assert.*;
 
 @ContinuousIntegrationPlan(categories = IntegrationCategory.FAST)
 public class PlanarRegionBasedPointFootSnapperTest

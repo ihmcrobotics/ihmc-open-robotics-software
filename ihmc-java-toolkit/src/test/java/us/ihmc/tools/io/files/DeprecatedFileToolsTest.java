@@ -1,9 +1,6 @@
 package us.ihmc.tools.io.files;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
+import static us.ihmc.robotics.Assert.*;
 
 import java.io.BufferedReader;
 import java.io.DataInputStream;
