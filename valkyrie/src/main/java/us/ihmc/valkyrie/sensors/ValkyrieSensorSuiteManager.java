@@ -140,20 +140,38 @@ public class ValkyrieSensorSuiteManager implements DRCSensorSuiteManager
    {
       return new StereoVisionTransformer()
       {
-         private final RigidBodyTransform transform = new RigidBodyTransform();
-         private final RigidBodyTransform transformFromHeadToWorld = new RigidBodyTransform();
+         private RigidBodyTransform transform = new RigidBodyTransform();
+         private final RigidBodyTransform transformFromNeckToWorld = new RigidBodyTransform();
 
          @Override
-         public void transform(FullHumanoidRobotModel fullRobotModel, RobotConfigurationDataBuffer robotConfigurationDataBuffer, ReferenceFrame scanPointsFrame,
-                               ColorPointCloudData scanDataToTransformToWorld)
+         public void transform(FullHumanoidRobotModel fullRobotModel, ReferenceFrame scanPointsFrame,
+                               ColorPointCloudData pointCloudDataToTransformToWorld)
          {
-            ReferenceFrame headFrame = fullRobotModel.getHeadBaseFrame();
-
-            scanPointsFrame.getTransformToDesiredFrame(transform, headFrame);
-            headFrame.getTransformToDesiredFrame(transformFromHeadToWorld, ReferenceFrame.getWorldFrame());
-
-            transform.multiply(transformFromHeadToWorld);
-            //scanDataToTransformToWorld.transform(transform);
+            transform = new RigidBodyTransform();
+            
+            ReferenceFrame neckFrame = fullRobotModel.getHeadBaseFrame();
+            // NOTE : neckFrame name is ```afterUpperNeckPitch```.
+            scanPointsFrame.getTransformToDesiredFrame(transform, neckFrame);
+            
+            neckFrame.getTransformToDesiredFrame(transformFromNeckToWorld, ReferenceFrame.getWorldFrame());
+            
+//            LogTools.info("transform");
+//            System.out.println(transform);
+//            
+//            LogTools.info("transformFromNeckToWorld");
+//            System.out.println(transformFromNeckToWorld);
+            
+            RigidBodyTransform transformFromHeadToNeck = new RigidBodyTransform(ValkyrieSensorInformation.getTransformFromHeadToUpperNeckPitchLink());
+//            LogTools.info("transformFromHeadToNeck");
+//            System.out.println(transformFromHeadToNeck);
+            
+            transformFromHeadToNeck.multiply(transformFromNeckToWorld);
+            transform.multiply(transformFromHeadToNeck);
+            
+//            LogTools.info("transform");
+//            System.out.println(transform);
+            
+            pointCloudDataToTransformToWorld.setTransform(transformFromHeadToNeck);
          }
       };
    }

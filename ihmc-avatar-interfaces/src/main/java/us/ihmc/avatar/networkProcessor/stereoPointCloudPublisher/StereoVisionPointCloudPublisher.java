@@ -19,6 +19,7 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.humanoidRobotics.kryo.PPSTimestampOffsetProvider;
+import us.ihmc.log.LogTools;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotModels.FullHumanoidRobotModelFactory;
 import us.ihmc.ros2.Ros2Node;
@@ -94,6 +95,7 @@ public class StereoVisionPointCloudPublisher
 
    public void setCustomStereoVisionTransformer(StereoVisionTransformer transformer)
    {
+      LogTools.info("setCustomStereoVisionTransformer()");
       stereoVisionTransformer = transformer;
    }
 
@@ -159,14 +161,17 @@ public class StereoVisionPointCloudPublisher
 
             if (stereoVisionTransformer != null)
             {
-               stereoVisionTransformer.transform(fullRobotModel, robotConfigurationDataBuffer, stereoVisionPointsFrame, pointCloudData);
+               LogTools.info("not null");
+               stereoVisionTransformer.transform(fullRobotModel, stereoVisionPointsFrame, pointCloudData);
             }
             else if (!stereoVisionPointsFrame.isWorldFrame())
             {
+               LogTools.info("!stereoVisionPointsFrame.isWorldFrame()");
                stereoVisionPointsFrame.getTransformToDesiredFrame(transformToWorld, worldFrame);
+               pointCloudData.setTransform(transformToWorld);
             }
 
-            StereoVisionPointCloudMessage message = pointCloudData.createStereoVisionPointCloudMessage(transformToWorld, MAX_NUMBER_OF_POINTS);
+            StereoVisionPointCloudMessage message = pointCloudData.createStereoVisionPointCloudMessage(MAX_NUMBER_OF_POINTS);
             if (Debug)
                System.out.println("Publishing stereo data, number of points: " + (message.getPointCloud().size() / 3));
             pointcloudPublisher.publish(message);
@@ -179,6 +184,7 @@ public class StereoVisionPointCloudPublisher
       private final long timestamp;
       private final Point3D[] pointCloud;
       private final int[] colors;
+      private RigidBodyTransform transform = new RigidBodyTransform();
 
       public ColorPointCloudData(long timestamp, Point3D[] pointCloud, Color[] colors)
       {
@@ -202,7 +208,7 @@ public class StereoVisionPointCloudPublisher
          return colors;
       }
 
-      public StereoVisionPointCloudMessage createStereoVisionPointCloudMessage(RigidBodyTransform transform, int maximumSize)
+      public StereoVisionPointCloudMessage createStereoVisionPointCloudMessage(int maximumSize)
       {
          int numberOfPoints = pointCloud.length;
 
@@ -219,7 +225,7 @@ public class StereoVisionPointCloudPublisher
          }
 
          for (int i = 0; i < numberOfPoints; i++)
-            transform.transform(pointCloud[i]);
+            this.transform.transform(pointCloud[i]);
 
          long timestamp = this.timestamp;
          float[] pointCloudBuffer = new float[3 * numberOfPoints];
@@ -238,11 +244,16 @@ public class StereoVisionPointCloudPublisher
 
          return MessageTools.createStereoVisionPointCloudMessage(timestamp, pointCloudBuffer, colorsInteger);
       }
+
+      public void setTransform(RigidBodyTransform transform)
+      {
+         this.transform.set(transform);         
+      }
    }
 
    public static interface StereoVisionTransformer
    {
-      public void transform(FullHumanoidRobotModel fullRobotModel, RobotConfigurationDataBuffer robotConfigurationDataBuffer, ReferenceFrame scanPointsFrame,
+      public void transform(FullHumanoidRobotModel fullRobotModel, ReferenceFrame scanPointsFrame,
                             ColorPointCloudData scanDataToTransformToWorld);
    }
 }
