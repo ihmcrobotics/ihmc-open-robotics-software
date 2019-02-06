@@ -253,24 +253,22 @@ public class WalkingControllerPreviewToolboxController extends ToolboxController
       walkingController.initialize();
 
       taskExecutor.clear();
-      WalkingPreviewResetTask resetTask = new WalkingPreviewResetTask(controllerToolbox.getFootContactStates(), walkingInputManager, controllerToolbox);
-      resetTask.resetToFullRobotModel(fullRobotModel);
-      taskExecutor.submit(resetTask);
+      taskExecutor.submit(new WalkingPreviewResetTask(walkingController, controllerToolbox.getFootContactStates()));
       isInitialized.set(true);
    }
 
    @Override
    public void updateInternal()
    {
-      if (isDone())
-      {
-         for (JointBasics joint : fullRobotModel.getElevator().childrenSubtreeIterable())
-         {
-            joint.setJointAccelerationToZero();
-            joint.setJointTwistToZero();
-         }
-         return;
-      }
+      //      if (isDone())
+      //      {
+      //         for (JointBasics joint : fullRobotModel.getElevator().childrenSubtreeIterable())
+      //         {
+      //            joint.setJointAccelerationToZero();
+      //            joint.setJointTwistToZero();
+      //         }
+      //         return;
+      //      }
 
       if (toolboxInputManager.isNewCommandAvailable(WalkingControllerPreviewInputCommand.class))
       {
