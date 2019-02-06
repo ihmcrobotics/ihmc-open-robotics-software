@@ -76,7 +76,8 @@ public class YoVariableClient
          }
          catch (IOException e)
          {
-            throw new RuntimeException(e);
+            e.printStackTrace();
+            System.exit(0);
          }
       }
       else

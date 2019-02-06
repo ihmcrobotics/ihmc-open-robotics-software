@@ -40,6 +40,8 @@ import us.ihmc.robotDataLogger.websocket.HTTPDataServerPaths;
 
 public class HTTPDataServerConnection
 {
+   private static final int TIMEOUT_MS = 1000;
+   
    private final EventLoopGroup group = new NioEventLoopGroup();
    private final HTTPDataServerDescription target;
    private final HTTPDataServerConnectionListener listener;
@@ -173,7 +175,7 @@ public class HTTPDataServerConnection
 
       Bootstrap b = new Bootstrap();
       b.group(group).channel(NioSocketChannel.class).handler(new HttpSnoopClientInitializer());
-      b.option(ChannelOption.CONNECT_TIMEOUT_MILLIS, 1000);
+      b.option(ChannelOption.CONNECT_TIMEOUT_MILLIS, TIMEOUT_MS);
 
       ChannelFuture connectFuture = b.connect(target.getHost(), target.getPort());
       connectFuture.addListener((f) -> {
