@@ -152,7 +152,7 @@ public abstract class AvatarWalkingControllerPreviewToolboxControllerTest implem
       MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " after test.");
    }
 
-   @Test
+   @Test(timeout = 300000)
    public void testWalkingPreviewAlone() throws SimulationExceededMaximumTimeException, ControllerFailureException
    {
       double dt = 0.02;
@@ -230,7 +230,7 @@ public abstract class AvatarWalkingControllerPreviewToolboxControllerTest implem
    }
 
    @SuppressWarnings("unchecked")
-   @Test
+   @Test(timeout = 300000)
    public void testStepsInPlacePreviewAtControllerDT() throws SimulationExceededMaximumTimeException
    {
       setup(getRobotModel().getControllerDT());
@@ -327,7 +327,7 @@ public abstract class AvatarWalkingControllerPreviewToolboxControllerTest implem
    }
 
    @SuppressWarnings("unchecked")
-   @Test
+   @Test(timeout = 300000)
    public void testResetFeature() throws SimulationExceededMaximumTimeException
    { // We check that the preview properly snaps to the current robot configuration before starting the preview.
       Random random = new Random(4720615);
