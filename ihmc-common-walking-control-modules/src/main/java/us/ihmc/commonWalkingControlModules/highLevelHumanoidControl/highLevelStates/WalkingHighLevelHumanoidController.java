@@ -469,6 +469,13 @@ public class WalkingHighLevelHumanoidController implements JointLoadStatusProvid
       commandConsumer.avoidManipulationAbortForDuration(RigidBodyControlManager.INITIAL_GO_HOME_TIME);
    }
 
+   /**
+    * Request the controller to set all its desireds to match the current configuration of the robot.
+    * <p>
+    * Calling that method right after {@link #initialize()} will cause the controller to maintain the
+    * current robot configuration.
+    * </p>
+    */
    public void requestImmediateTransitionToStandingAndHoldCurrent()
    {
       stateMachine.performTransition(WalkingStateEnum.STANDING);
