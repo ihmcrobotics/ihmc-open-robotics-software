@@ -1650,6 +1650,11 @@ public class HumanoidMessageTools
       return message;
    }
 
+   public static FootstepDataMessage createFootstepDataMessage(RobotSide robotSide, Pose3DReadOnly pose)
+   {
+      return createFootstepDataMessage(robotSide, pose.getPosition(), pose.getOrientation());
+   }
+
    public static FootstepDataMessage createFootstepDataMessage(RobotSide robotSide, Point3DReadOnly location, QuaternionReadOnly orientation)
    {
       return createFootstepDataMessage(robotSide, location, orientation, null);
