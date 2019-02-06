@@ -208,7 +208,7 @@ public abstract class AvatarWalkingControllerPreviewToolboxControllerTest implem
       toolboxOutputManager.attachStatusMessageListener(WalkingControllerPreviewOutputMessage.class, latestOutput::setValue);
       int expectedNumberOfFrames = 0;
 
-      for (int i = 0; i < 50000; i++)
+      for (int i = 0; i < 1000; i++)
       {
          toolboxUpdater.doControl();
 
@@ -254,7 +254,8 @@ public abstract class AvatarWalkingControllerPreviewToolboxControllerTest implem
 
       FullHumanoidRobotModel controllerFullRobotModel = drcSimulationTestHelper.getControllerFullRobotModel();
       FullHumanoidRobotModel previewFullRobotModel = toolboxController.getFullRobotModel();
-      drcSimulationTestHelper.addRobotControllerOnControllerThread(toolboxUpdater);
+      drcSimulationTestHelper.getAvatarSimulation().getHighLevelHumanoidControllerFactory().addUpdatable(t -> toolboxUpdater.doControl());
+      drcSimulationTestHelper.getSimulationConstructionSet().addYoVariableRegistry(toolboxMainRegistry);
       drcSimulationTestHelper.addRobotControllerOnControllerThread(new Synchronizer(controllerWalkingState, previewWalkingState));
 
       SideDependentList<RigidBodyTrackingWatcher> footTrackingWatchers = new SideDependentList<>();
@@ -356,7 +357,8 @@ public abstract class AvatarWalkingControllerPreviewToolboxControllerTest implem
 
       FullHumanoidRobotModel controllerFullRobotModel = drcSimulationTestHelper.getControllerFullRobotModel();
       FullHumanoidRobotModel previewFullRobotModel = toolboxController.getFullRobotModel();
-      drcSimulationTestHelper.addRobotControllerOnControllerThread(toolboxUpdater);
+      drcSimulationTestHelper.getAvatarSimulation().getHighLevelHumanoidControllerFactory().addUpdatable(t -> toolboxUpdater.doControl());
+      drcSimulationTestHelper.getSimulationConstructionSet().addYoVariableRegistry(toolboxMainRegistry);
       Synchronizer synchronizer = new Synchronizer(controllerWalkingState, previewWalkingState);
       synchronizer.synchronize.set(false);
       drcSimulationTestHelper.addRobotControllerOnControllerThread(synchronizer);
@@ -494,7 +496,7 @@ public abstract class AvatarWalkingControllerPreviewToolboxControllerTest implem
 
       for (RobotSide robotSide : RobotSide.values)
       {
-         assertTrackingErrorMeanIsLow(footTrackingWatchers.get(robotSide), 0.01, 0.015, 0.06, 0.20);
+         assertTrackingErrorMeanIsLow(footTrackingWatchers.get(robotSide), 0.01, 0.02, 0.06, 0.20);
          assertTrackingErrorMeanIsLow(handTrackingWatchers.get(robotSide), 0.05, 0.3, 0.06, 0.15); // I wonder if the tracking is off because the control is in joint-space.
       }
 
