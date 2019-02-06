@@ -1,6 +1,6 @@
 package us.ihmc.simulationconstructionset.physics;
 
-import static junit.framework.TestCase.fail;
+import static us.ihmc.robotics.Assert.*;
 
 import java.util.ArrayList;
 import java.util.Random;

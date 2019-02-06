@@ -32,9 +32,9 @@ import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import java.util.ArrayList;
 import java.util.List;
 
-import static junit.framework.TestCase.assertTrue;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.fail;
+import static us.ihmc.robotics.Assert.*;
+
+import static us.ihmc.robotics.Assert.*;
 
 public class NavigableRegionsManagerTest
 {

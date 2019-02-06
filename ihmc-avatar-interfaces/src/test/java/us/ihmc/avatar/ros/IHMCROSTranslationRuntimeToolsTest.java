@@ -1,6 +1,6 @@
 package us.ihmc.avatar.ros;
 
-import static org.junit.Assert.assertTrue;
+import static us.ihmc.robotics.Assert.*;
 
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;

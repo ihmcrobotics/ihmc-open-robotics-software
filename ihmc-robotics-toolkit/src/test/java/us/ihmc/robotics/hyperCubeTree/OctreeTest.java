@@ -1,6 +1,6 @@
 package us.ihmc.robotics.hyperCubeTree;
 
-import static org.junit.Assert.*;
+import static us.ihmc.robotics.Assert.*;
 
 import java.util.List;
 

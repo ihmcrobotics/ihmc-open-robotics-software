@@ -7,8 +7,7 @@ import us.ihmc.continuousIntegration.IntegrationCategory;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.tuple2D.Point2D;
 
-import static junit.framework.TestCase.assertFalse;
-import static junit.framework.TestCase.assertTrue;
+import static us.ihmc.robotics.Assert.*;
 
 @ContinuousIntegrationPlan(categories = {IntegrationCategory.FAST})
 public class ConvexPolygonScalerTest

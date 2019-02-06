@@ -2,7 +2,7 @@ package us.ihmc.commonWalkingControlModules.capturePoint.optimization;
 
 import org.ejml.data.DenseMatrix64F;
 import org.junit.After;
-import org.junit.Assert;
+import us.ihmc.robotics.Assert;
 import org.junit.Test;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationPlan;

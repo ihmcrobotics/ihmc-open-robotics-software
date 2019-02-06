@@ -24,7 +24,7 @@ import us.ihmc.tools.MemoryTools;
 
 import java.io.IOException;
 
-import static junit.framework.TestCase.assertEquals;
+import static us.ihmc.robotics.Assert.*;
 
 public abstract class QuadrupedSoleWaypointControllerTest implements QuadrupedMultiRobotTestInterface
 {

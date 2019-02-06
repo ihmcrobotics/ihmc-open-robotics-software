@@ -9,7 +9,7 @@ import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
 
 import org.junit.After;
-import org.junit.Assert;
+import us.ihmc.robotics.Assert;
 import org.junit.Before;
 import org.junit.Test;
 

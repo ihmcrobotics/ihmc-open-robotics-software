@@ -1,7 +1,6 @@
 package us.ihmc.avatar.referenceFrames;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
+import static us.ihmc.robotics.Assert.*;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;

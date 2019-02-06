@@ -5,7 +5,7 @@ import org.ejml.ops.CommonOps;
 import org.junit.Test;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 
-import static org.junit.Assert.*;
+import static us.ihmc.robotics.Assert.*;
 
 public abstract class AbstractSimpleActiveSetQPSolverWithInactiveVariablesTest extends AbstractSimpleActiveSetQPSolverTest
 {

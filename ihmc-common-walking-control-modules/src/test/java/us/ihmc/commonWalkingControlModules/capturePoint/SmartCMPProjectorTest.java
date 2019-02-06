@@ -1,7 +1,7 @@
 package us.ihmc.commonWalkingControlModules.capturePoint;
 
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import static us.ihmc.robotics.Assert.*;
+
 import static us.ihmc.graphicsDescription.appearance.YoAppearance.Beige;
 import static us.ihmc.graphicsDescription.appearance.YoAppearance.Blue;
 import static us.ihmc.graphicsDescription.appearance.YoAppearance.DarkRed;

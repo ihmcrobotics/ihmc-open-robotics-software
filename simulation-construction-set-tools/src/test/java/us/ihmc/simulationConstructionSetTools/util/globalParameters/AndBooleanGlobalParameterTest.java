@@ -1,7 +1,7 @@
 package us.ihmc.simulationConstructionSetTools.util.globalParameters;
 
 
-import static org.junit.Assert.*;
+import static us.ihmc.robotics.Assert.*;
 
 import org.junit.After;
 import org.junit.Before;

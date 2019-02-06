@@ -1,6 +1,6 @@
 package us.ihmc.simulationconstructionset.utilities.screwTheory;
 
-import static org.junit.Assert.assertEquals;
+import static us.ihmc.robotics.Assert.*;
 
 import java.util.ArrayList;
 import java.util.HashMap;

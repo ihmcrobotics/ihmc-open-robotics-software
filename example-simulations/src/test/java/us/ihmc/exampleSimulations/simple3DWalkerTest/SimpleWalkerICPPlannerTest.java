@@ -1,7 +1,7 @@
 package us.ihmc.exampleSimulations.simple3DWalkerTest;
 
 import org.junit.After;
-import org.junit.Assert;
+import us.ihmc.robotics.Assert;
 import org.junit.Before;
 import org.junit.Test;
 

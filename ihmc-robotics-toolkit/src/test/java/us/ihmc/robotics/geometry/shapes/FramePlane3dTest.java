@@ -1,6 +1,6 @@
 package us.ihmc.robotics.geometry.shapes;
 
-import static org.junit.Assert.*;
+import static us.ihmc.robotics.Assert.*;
 
 import org.junit.After;
 import org.junit.Test;

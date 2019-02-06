@@ -1,6 +1,6 @@
 package us.ihmc.simulationConstructionSetTools.bambooTools;
 
-import static org.junit.Assert.*;
+import static us.ihmc.robotics.Assert.*;
 
 import java.io.BufferedReader;
 import java.io.FileInputStream;

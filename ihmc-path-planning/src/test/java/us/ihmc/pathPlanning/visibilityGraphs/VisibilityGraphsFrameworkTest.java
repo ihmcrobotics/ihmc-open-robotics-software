@@ -8,7 +8,7 @@ import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
 
 import org.junit.After;
-import org.junit.Assert;
+import us.ihmc.robotics.Assert;
 import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;

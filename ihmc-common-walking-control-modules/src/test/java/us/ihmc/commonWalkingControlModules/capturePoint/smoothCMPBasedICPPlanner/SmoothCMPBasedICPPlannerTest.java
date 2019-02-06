@@ -1,7 +1,6 @@
 package us.ihmc.commonWalkingControlModules.capturePoint.smoothCMPBasedICPPlanner;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import static us.ihmc.robotics.Assert.*;
 
 import java.awt.Color;
 import java.util.ArrayList;
@@ -10,7 +9,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import org.junit.After;
-import org.junit.Assert;
+import us.ihmc.robotics.Assert;
 import org.junit.Before;
 import org.junit.Test;
 

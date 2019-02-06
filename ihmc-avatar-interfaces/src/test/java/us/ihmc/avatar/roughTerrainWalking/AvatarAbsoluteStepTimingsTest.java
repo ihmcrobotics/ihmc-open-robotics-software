@@ -1,14 +1,13 @@
 package us.ihmc.avatar.roughTerrainWalking;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import static us.ihmc.robotics.Assert.*;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
 import org.junit.After;
-import org.junit.Assert;
+import us.ihmc.robotics.Assert;
 import org.junit.Before;
 import org.junit.Test;
 

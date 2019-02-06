@@ -1,6 +1,6 @@
 package us.ihmc.tools.io;
 
-import static org.junit.Assert.assertEquals;
+import static us.ihmc.robotics.Assert.*;
 
 import java.io.DataInputStream;
 import java.io.DataOutputStream;

@@ -1,6 +1,6 @@
 package us.ihmc.robotics.trajectories;
 
-import static junit.framework.Assert.assertEquals;
+import static us.ihmc.robotics.Assert.*;
 
 import org.junit.Test;
 

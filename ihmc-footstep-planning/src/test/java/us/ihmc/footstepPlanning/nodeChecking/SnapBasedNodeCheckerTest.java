@@ -1,6 +1,6 @@
 package us.ihmc.footstepPlanning.nodeChecking;
 
-import org.junit.Assert;
+import us.ihmc.robotics.Assert;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TestName;

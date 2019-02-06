@@ -1,6 +1,6 @@
 package us.ihmc.simulationconstructionset.simulatedSensors;
 
-import static org.junit.Assert.assertEquals;
+import static us.ihmc.robotics.Assert.*;
 
 import org.junit.Before;
 import org.junit.Test;

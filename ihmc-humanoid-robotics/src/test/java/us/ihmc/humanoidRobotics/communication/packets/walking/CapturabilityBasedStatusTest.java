@@ -1,6 +1,6 @@
 package us.ihmc.humanoidRobotics.communication.packets.walking;
 
-import static org.junit.Assert.assertTrue;
+import static us.ihmc.robotics.Assert.*;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;

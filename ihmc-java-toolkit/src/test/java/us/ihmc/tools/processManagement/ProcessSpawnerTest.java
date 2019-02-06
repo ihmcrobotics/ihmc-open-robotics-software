@@ -1,6 +1,6 @@
 package us.ihmc.tools.processManagement;
 
-import static org.junit.Assert.fail;
+import static us.ihmc.robotics.Assert.*;
 
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
@@ -13,7 +13,7 @@ import java.util.List;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.SystemUtils;
-import org.junit.Assert;
+import us.ihmc.robotics.Assert;
 import org.junit.Test;
 
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationPlan;

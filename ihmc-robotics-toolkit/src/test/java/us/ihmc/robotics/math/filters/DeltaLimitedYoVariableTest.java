@@ -2,7 +2,7 @@ package us.ihmc.robotics.math.filters;
 
 import java.util.Random;
 
-import org.junit.Assert;
+import us.ihmc.robotics.Assert;
 import org.junit.Test;
 
 import us.ihmc.commons.RandomNumbers;

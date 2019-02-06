@@ -1,7 +1,6 @@
 package us.ihmc.commonWalkingControlModules.trajectories;
 
-import static org.junit.Assert.assertArrayEquals;
-import static org.junit.Assert.assertTrue;
+import static us.ihmc.robotics.Assert.*;
 
 import java.awt.BorderLayout;
 import java.awt.Color;

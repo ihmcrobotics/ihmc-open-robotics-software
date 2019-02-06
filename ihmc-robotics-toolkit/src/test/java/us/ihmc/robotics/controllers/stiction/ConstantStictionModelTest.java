@@ -10,7 +10,7 @@ import us.ihmc.yoVariables.variable.YoDouble;
 
 import java.util.Random;
 
-import static org.junit.Assert.assertEquals;
+import static us.ihmc.robotics.Assert.*;
 
 @ContinuousIntegrationPlan(categories = {IntegrationCategory.FAST})
 public class ConstantStictionModelTest

@@ -1,7 +1,6 @@
 package us.ihmc.commonWalkingControlModules.captureRegion;
 
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import static us.ihmc.robotics.Assert.*;
 
 import java.awt.Color;
 import java.util.ArrayList;

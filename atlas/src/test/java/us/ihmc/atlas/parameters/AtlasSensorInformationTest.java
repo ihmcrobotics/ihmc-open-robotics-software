@@ -1,6 +1,6 @@
 package us.ihmc.atlas.parameters;
 
-import static org.junit.Assert.assertFalse;
+import static us.ihmc.robotics.Assert.*;
 
 import org.junit.Test;
 

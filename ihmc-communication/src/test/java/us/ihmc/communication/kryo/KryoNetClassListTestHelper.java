@@ -1,6 +1,6 @@
 package us.ihmc.communication.kryo;
 
-import static org.junit.Assert.assertTrue;
+import static us.ihmc.robotics.Assert.*;
 
 import java.lang.reflect.Array;
 import java.lang.reflect.Field;

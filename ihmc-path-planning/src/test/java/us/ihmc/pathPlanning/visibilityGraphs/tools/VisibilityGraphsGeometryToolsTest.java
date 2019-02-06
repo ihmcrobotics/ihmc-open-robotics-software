@@ -1,9 +1,7 @@
 package us.ihmc.pathPlanning.visibilityGraphs.tools;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
+import static us.ihmc.robotics.Assert.*;
+
 import static us.ihmc.pathPlanning.visibilityGraphs.tools.VisibilityGraphsGeometryTools.intersectionBetweenRay2DAndCircle2D;
 
 import java.util.Random;

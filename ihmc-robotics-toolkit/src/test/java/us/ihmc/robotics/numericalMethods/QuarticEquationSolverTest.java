@@ -1,6 +1,6 @@
 package us.ihmc.robotics.numericalMethods;
 
-import static org.junit.Assert.fail;
+import static us.ihmc.robotics.Assert.*;
 
 import org.junit.Test;
 

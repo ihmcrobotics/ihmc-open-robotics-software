@@ -8,7 +8,7 @@ import org.ejml.alg.dense.decomposition.chol.CholeskyDecompositionCommon_D64;
 import org.ejml.alg.dense.decomposition.lu.LUDecompositionBase_D64;
 import org.ejml.data.DenseMatrix64F;
 import org.junit.After;
-import org.junit.Assert;
+import us.ihmc.robotics.Assert;
 import org.junit.Before;
 import org.junit.Test;
 

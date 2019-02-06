@@ -1,8 +1,6 @@
 package us.ihmc.ihmcPerception.chessboardDetection;
 
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
+import static us.ihmc.robotics.Assert.*;
 
 import java.awt.Color;
 import java.awt.image.BufferedImage;

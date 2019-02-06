@@ -1,7 +1,7 @@
 package us.ihmc.simulationConstructionSetTools.whiteBoard;
 
 
-import static org.junit.Assert.*;
+import static us.ihmc.robotics.Assert.*;
 
 import java.io.IOException;
 import java.util.ArrayList;

@@ -30,7 +30,8 @@ import us.ihmc.javaFXToolkit.messager.SharedMemoryJavaFXMessager;
 import java.util.Random;
 import java.util.concurrent.atomic.AtomicReference;
 
-import static org.junit.Assert.assertTrue;
+import static us.ihmc.robotics.Assert.*;
+
 import static us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI.ComputePathTopic;
 import static us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI.FootstepPlanTopic;
 import static us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI.PlannerParametersTopic;
