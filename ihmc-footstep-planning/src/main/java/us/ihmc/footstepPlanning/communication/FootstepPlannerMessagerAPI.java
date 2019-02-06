@@ -5,6 +5,8 @@ import java.util.List;
 import controller_msgs.msg.dds.FootstepDataListMessage;
 import controller_msgs.msg.dds.FootstepNodeDataListMessage;
 import controller_msgs.msg.dds.FootstepPlannerOccupancyMapMessage;
+import controller_msgs.msg.dds.GoHomeMessage;
+import controller_msgs.msg.dds.HighLevelStateMessage;
 import controller_msgs.msg.dds.RobotConfigurationData;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.tuple3D.Point3D;
@@ -43,6 +45,8 @@ public class FootstepPlannerMessagerAPI
    private static final CategoryTheme OrientationTheme = apiFactory.createCategoryTheme("OrientationTheme");
    private static final CategoryTheme EditMode = apiFactory.createCategoryTheme("EditMode");
    private static final CategoryTheme FootstepPlan = apiFactory.createCategoryTheme("FootstepPlan");
+   private static final CategoryTheme GoHome = apiFactory.createCategoryTheme("GoHome");
+   private static final CategoryTheme HighLevelState = apiFactory.createCategoryTheme("HighLevelState");
    private static final CategoryTheme BodyPath = apiFactory.createCategoryTheme("BodyPath");
    private static final CategoryTheme VisibilityGraphs = apiFactory.createCategoryTheme("VisibilityGraphs");
    private static final CategoryTheme NodeChecking = apiFactory.createCategoryTheme("NodeChecking");
@@ -78,6 +82,8 @@ public class FootstepPlannerMessagerAPI
    private static final TypedTopicTheme<FootstepPlannerStatus> FootstepPlannerStatus = apiFactory.createTypedTopicTheme("FootstepPlannerStatus");
    private static final TypedTopicTheme<FootstepPlannerParameters> FootstepPlannerParameters = apiFactory.createTypedTopicTheme("FootstepPlannerParameters");
    private static final TypedTopicTheme<FootstepDataListMessage> FootstepDataListMessage = apiFactory.createTypedTopicTheme("FootstepDataListMessage");
+   private static final TypedTopicTheme<GoHomeMessage> GoHomeMessage = apiFactory.createTypedTopicTheme("GoHomeMessage");
+   private static final TypedTopicTheme<HighLevelStateMessage> HighLevelStateMessage = apiFactory.createTypedTopicTheme("HighLevelStateMessage");
 
    private static final TypedTopicTheme<VisibilityGraphsParameters> VisibilityGraphsParameters = apiFactory.createTypedTopicTheme("VisibilityGraphsParameters");
    private static final TypedTopicTheme<Boolean> Export = apiFactory.createTypedTopicTheme("Export");
@@ -106,6 +112,8 @@ public class FootstepPlannerMessagerAPI
    public static final Topic<Boolean> AssumeFlatGround = Root.child(FlatGround).topic(Enable);
    public static final Topic<FootstepPlannerParameters> PlannerParametersTopic = Root.child(Parameters).topic(FootstepPlannerParameters);
    public static final Topic<FootstepDataListMessage> FootstepDataListTopic = Root.child(FootstepPlan).topic(FootstepDataListMessage);
+   public static final Topic<GoHomeMessage> GoHomeTopic = Root.child(GoHome).topic(GoHomeMessage);
+   public static final Topic<HighLevelStateMessage> HighLevelStateTopic = Root.child(HighLevelState).topic(HighLevelStateMessage);
 
    public static final Topic<VisibilityGraphsParameters> VisibilityGraphsParametersTopic = Root.child(Parameters).topic(VisibilityGraphsParameters);
    public static final Topic<Double> PlannerTimeoutTopic = Root.child(FootstepPlan).topic(PlannerTimeout);
