@@ -5,10 +5,12 @@ import java.util.Random;
 
 import org.ejml.data.DenseMatrix64F;
 import org.ejml.ops.CommonOps;
-import org.junit.After;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.Test;
 
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
+import org.junit.jupiter.api.Tag;
+import org.junit.jupiter.api.Disabled;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.tools.ReferenceFrameTools;
 import us.ihmc.euclid.tuple3D.Vector3D;
@@ -49,14 +51,13 @@ public class CentroidalMomentumRateTermCalculatorSCSTest
    private final DenseMatrix64F aDotVNumerical = new DenseMatrix64F(6, 1);
    private final DenseMatrix64F aDotVAnalytical = new DenseMatrix64F(6, 1);
 
-   @After
+   @AfterEach
    public void tearDown()
    {
       ReferenceFrameTools.clearWorldFrameTree();
    }
 
-	@ContinuousIntegrationTest(estimatedDuration = 0.0)
-	@Test(timeout = 30000)
+	@Test
    public void chainTest() throws UnreasonableAccelerationException
    {
       Random random = new Random(12651L);
@@ -74,8 +75,7 @@ public class CentroidalMomentumRateTermCalculatorSCSTest
       assertAAndADotV(random, joints, elevator, robot,numberOfJoints);
    }
 
-	@ContinuousIntegrationTest(estimatedDuration = 0.0)
-	@Test(timeout = 30000)
+	@Test
    public void treeTest() throws UnreasonableAccelerationException
    {
       Random random = new Random(12651L);
@@ -93,8 +93,7 @@ public class CentroidalMomentumRateTermCalculatorSCSTest
       assertAAndADotV(random, joints, elevator, robot, numberOfJoints);
    }
 
-	@ContinuousIntegrationTest(estimatedDuration = 0.0)
-	@Test(timeout = 30000)
+	@Test
    public void floatingChainTest() throws UnreasonableAccelerationException
    {
       Random random = new Random(12651L);

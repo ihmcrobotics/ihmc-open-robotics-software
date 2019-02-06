@@ -1,11 +1,13 @@
 package us.ihmc.simulationConstructionSetTools.util.globalParameters;
 
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 
+import org.junit.jupiter.api.Tag;
+import org.junit.jupiter.api.Disabled;
 import static us.ihmc.robotics.Assert.*;
 
 public class DoubleGlobalParameterTest
@@ -14,20 +16,19 @@ public class DoubleGlobalParameterTest
    private final double DEFAULT_VALUE = 11.99;
    private final double eps = 1e-10;
 
-   @Before
+   @BeforeEach
    public void setUp() throws Exception
    {
       GlobalParameter.clearGlobalRegistry();
    }
 
-   @After
+   @AfterEach
    public void tearDown() throws Exception
    {
       GlobalParameter.clearGlobalRegistry();
    }
 
-	@ContinuousIntegrationTest(estimatedDuration = 0.0)
-	@Test(timeout=300000)
+	@Test
    public void testGetValue()
    {
       SystemOutGlobalParameterChangedListener systemOutGlobalParameterChangedListener = null;
@@ -38,8 +39,7 @@ public class DoubleGlobalParameterTest
       assertEquals(DEFAULT_VALUE, doubleGlobalParameter.getValue(), eps);
    }
 
-	@ContinuousIntegrationTest(estimatedDuration = 0.0)
-	@Test(timeout=300000)
+	@Test
    public void testSetValue()
    {
       SystemOutGlobalParameterChangedListener systemOutGlobalParameterChangedListener = null;
@@ -66,8 +66,7 @@ public class DoubleGlobalParameterTest
       assertEquals(newValue, doubleGlobalParameter.getValue(), eps);
    }
 
-	@ContinuousIntegrationTest(estimatedDuration = 0.0)
-	@Test(timeout=300000,expected = RuntimeException.class)
+	@Test
    public void testThatCantHaveParentsUnlessOverwriteUpdateMethodOne()
    {
       DoubleGlobalParameter parent = new DoubleGlobalParameter("parent", "parent", DEFAULT_VALUE, null);
@@ -76,8 +75,7 @@ public class DoubleGlobalParameterTest
       parent.set(1.0);
    }
 
-	@ContinuousIntegrationTest(estimatedDuration = 0.0)
-	@Test(timeout=300000,expected = RuntimeException.class)
+	@Test
    public void testCantSetChild()
    {
       DoubleGlobalParameter parent = new DoubleGlobalParameter("parent", "", 0.7, null);

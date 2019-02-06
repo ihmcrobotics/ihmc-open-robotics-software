@@ -2,15 +2,15 @@ package us.ihmc.avatar.roughTerrainWalking;
 
 import static us.ihmc.robotics.Assert.*;
 
-import org.junit.After;
+import org.junit.jupiter.api.AfterEach;
 import us.ihmc.robotics.Assert;
-import org.junit.Before;
+import org.junit.jupiter.api.BeforeEach;
 
 import controller_msgs.msg.dds.FootstepDataListMessage;
 import controller_msgs.msg.dds.FootstepDataMessage;
 import controller_msgs.msg.dds.PelvisHeightTrajectoryMessage;
 import controller_msgs.msg.dds.SE3TrajectoryPointMessage;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import us.ihmc.avatar.DRCObstacleCourseStartingLocation;
 import us.ihmc.avatar.DRCStartingLocation;
 import us.ihmc.avatar.MultiRobotTestInterface;
@@ -23,6 +23,8 @@ import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.communication.packets.ExecutionTiming;
 import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
+import org.junit.jupiter.api.Tag;
+import org.junit.jupiter.api.Disabled;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
@@ -70,15 +72,13 @@ public abstract class AvatarFootstepDataMessageSwingTrajectoryTest implements Mu
     */
    public abstract double getLegLength();
 
-   @ContinuousIntegrationTest(estimatedDuration = 33.7)
-   @Test(timeout = 170000)
+   @Test
    public void testSwingTrajectoryTouchdownSpeed() throws SimulationExceededMaximumTimeException
    {
       runTestTouchdownSpeed();
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 33.7)
-   @Test(timeout = 170000)
+   @Test
    public void testSwingTrajectoryTouchdownWithAdjustment() throws SimulationExceededMaximumTimeException
    {
       runTestTouchdownSpeed();
@@ -165,8 +165,7 @@ public abstract class AvatarFootstepDataMessageSwingTrajectoryTest implements Mu
       Assert.assertEquals(touchdownVelocity, desiredVelocity.getValueAsDouble(), 1.0e-10);
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 33.7)
-   @Test(timeout = 170000)
+   @Test
    public void testSwingTrajectoryInWorld() throws SimulationExceededMaximumTimeException
    {
       DRCRobotModel robotModel = setup(DRCObstacleCourseStartingLocation.DEFAULT_BUT_ALMOST_PI);
@@ -319,14 +318,14 @@ public abstract class AvatarFootstepDataMessageSwingTrajectoryTest implements Mu
       return robotModel;
    }
 
-   @Before
+   @BeforeEach
    public void showMemoryUsageBeforeTest()
    {
       pushAndAdjust = null;
       BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
    }
 
-   @After
+   @AfterEach
    public void destroySimulationAndRecycleMemory()
    {
       if (simulationTestingParameters.getKeepSCSUp())

@@ -2,7 +2,7 @@ package us.ihmc.atlas.referenceFrames;
 
 import java.lang.reflect.InvocationTargetException;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import us.ihmc.atlas.AtlasRobotModel;
 import us.ihmc.atlas.AtlasRobotVersion;
@@ -11,6 +11,8 @@ import us.ihmc.avatar.drcRobot.RobotTarget;
 import us.ihmc.avatar.referenceFrames.ReferenceFrameHashTest;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 
+import org.junit.jupiter.api.Tag;
+import org.junit.jupiter.api.Disabled;
 public class AtlasReferenceFrameHashTest extends ReferenceFrameHashTest
 {
    public DRCRobotModel getRobotModel()
@@ -19,24 +21,21 @@ public class AtlasReferenceFrameHashTest extends ReferenceFrameHashTest
    }
    
    @Override
-   @ContinuousIntegrationTest(estimatedDuration = 1.6)
-   @Test(timeout = 30000, expected = IllegalArgumentException.class)
+   @Test
    public void testAddingTwoFramesWithTheSameNameThrowsException()
    {
       super.testAddingTwoFramesWithTheSameNameThrowsException();
    }
    
    @Override
-   @ContinuousIntegrationTest(estimatedDuration = 0.8)
-   @Test(timeout = 30000)
+   @Test
    public void testAllFramesGottenFromFullRobotModelMethodsAreInTheHashList() throws IllegalAccessException, IllegalArgumentException, InvocationTargetException
    {
       super.testAllFramesGottenFromFullRobotModelMethodsAreInTheHashList();
    }
    
    @Override
-   @ContinuousIntegrationTest(estimatedDuration = 0.9)
-   @Test(timeout = 30000)
+   @Test
    public void testAllFramesGottenFromHumanoidReferenceFrameMethodsAreInTheHashList()
          throws IllegalAccessException, IllegalArgumentException, InvocationTargetException
    {
@@ -44,16 +43,14 @@ public class AtlasReferenceFrameHashTest extends ReferenceFrameHashTest
    }
    
    @Override
-   @ContinuousIntegrationTest(estimatedDuration = 1.4)
-   @Test(timeout = 30000)
+   @Test
    public void testAllFramesInFullRobotModelMatchHumanoidReferenceFramesThroughHashCode()
    {
       super.testAllFramesInFullRobotModelMatchHumanoidReferenceFramesThroughHashCode();
    }
    
    @Override
-   @ContinuousIntegrationTest(estimatedDuration = 0.7)
-   @Test(timeout = 30000)
+   @Test
    public void testGetReferenceFrameFromHashCodeReturnsSameNamedFrames()
    {
       super.testGetReferenceFrameFromHashCodeReturnsSameNamedFrames();

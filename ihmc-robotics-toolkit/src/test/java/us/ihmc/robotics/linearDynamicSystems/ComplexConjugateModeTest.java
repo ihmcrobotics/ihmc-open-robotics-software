@@ -2,27 +2,28 @@ package us.ihmc.robotics.linearDynamicSystems;
 
 import static us.ihmc.robotics.Assert.*;
 
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
+import org.junit.jupiter.api.Tag;
+import org.junit.jupiter.api.Disabled;
 import us.ihmc.robotics.dataStructures.ComplexNumber;
 
 public class ComplexConjugateModeTest
 {
-   @Before
+   @BeforeEach
    public void setUp() throws Exception
    {
    }
 
-   @After
+   @AfterEach
    public void tearDown() throws Exception
    {
    }
 
-	@ContinuousIntegrationTest(estimatedDuration = 0.0)
-	@Test(timeout = 30000)
+	@Test
    public void testSecondOrderMassSpringDamper()
    {
       double wn = 7.2;
@@ -62,8 +63,7 @@ public class ComplexConjugateModeTest
       assertTrue(expectedTransferFunction10.epsilonEquals(transferFunction10, 1e-7));
    }
 
-	@ContinuousIntegrationTest(estimatedDuration = 0.0)
-	@Test(timeout = 30000)
+	@Test
    public void testCircleGenerator()
    {
       ComplexNumber[] leftEigenvectorV = new ComplexNumber[] {new ComplexNumber(1.0, 0.0), new ComplexNumber(0.0, -1.0)};

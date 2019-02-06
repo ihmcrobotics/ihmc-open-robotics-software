@@ -2,11 +2,13 @@ package us.ihmc.robotics.math.trajectories.providers;
 
 import static us.ihmc.robotics.Assert.*;
 
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
+import org.junit.jupiter.api.Tag;
+import org.junit.jupiter.api.Disabled;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.FrameQuaternion;
@@ -23,14 +25,14 @@ public class YoSE3ConfigurationProviderTest
 
    private YoSE3ConfigurationProvider provider;
 
-   @Before
+   @BeforeEach
    public void setUp()
    {
       referenceFrame = ReferenceFrame.constructARootFrame("rootNameTEST");
       registry = new YoVariableRegistry("registryTEST");
    }
 
-   @After
+   @AfterEach
    public void tearDown()
    {
       referenceFrame = null;
@@ -38,16 +40,14 @@ public class YoSE3ConfigurationProviderTest
       ReferenceFrameTools.clearWorldFrameTree();
    }
 
-	@ContinuousIntegrationTest(estimatedDuration = 0.0)
-	@Test(timeout = 30000)
+	@Test
    public void testConstructor()
    {
       provider = new YoSE3ConfigurationProvider(name, referenceFrame, null);
       provider = new YoSE3ConfigurationProvider(name, referenceFrame, registry);
    }
 
-	@ContinuousIntegrationTest(estimatedDuration = 0.0)
-	@Test(timeout = 30000)
+	@Test
    public void testGet()
    {
       provider = new YoSE3ConfigurationProvider(name, referenceFrame, registry);
@@ -62,8 +62,7 @@ public class YoSE3ConfigurationProviderTest
       assertEquals(referenceFrame, framePointToPack.getReferenceFrame());
    }
 
-	@ContinuousIntegrationTest(estimatedDuration = 0.0)
-	@Test(timeout = 30000)
+	@Test
    public void testSetPose()
    {
       provider = new YoSE3ConfigurationProvider(name, referenceFrame, registry);

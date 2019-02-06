@@ -8,11 +8,13 @@ import java.util.Random;
 import org.ejml.data.DenseMatrix64F;
 import org.ejml.ops.CommonOps;
 import org.ejml.simple.SimpleMatrix;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
+import org.junit.jupiter.api.Tag;
+import org.junit.jupiter.api.Disabled;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.tools.ReferenceFrameTools;
 import us.ihmc.euclid.tuple3D.Vector3D;
@@ -39,13 +41,13 @@ public abstract class MassMatrixCalculatorTest
 
    private final Random random = new Random(1776L);
 
-   @Before
+   @BeforeEach
    public void setUp()
    {
       elevator = new RigidBody("elevator", worldFrame);
    }
 
-   @After
+   @AfterEach
    public void tearDown()
    {
       ReferenceFrameTools.clearWorldFrameTree();
@@ -98,8 +100,7 @@ public abstract class MassMatrixCalculatorTest
       return 0.5 * kineticEnergy.get(0, 0);
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 1.7)
-   @Test(timeout = 30000)
+   @Test
    public void compareMassMatrixCalculators()
    {
       double eps = 1e-10;

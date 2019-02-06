@@ -3,10 +3,12 @@ package us.ihmc.robotics.math.filters;
 import java.util.Random;
 
 import us.ihmc.robotics.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import us.ihmc.commons.RandomNumbers;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
+import org.junit.jupiter.api.Tag;
+import org.junit.jupiter.api.Disabled;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 
 /**
@@ -20,8 +22,7 @@ public class DeltaLimitedYoVariableTest
    private YoVariableRegistry registry;
    private DeltaLimitedYoVariable variable;
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(timeout=300000)
+   @Test
    public void testReferenceAndInputBothNegativeNoOvershootInputGreaterThanReference()
    {
       Random random = new Random(1976L);
@@ -45,8 +46,7 @@ public class DeltaLimitedYoVariableTest
       }
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(timeout=300000)
+   @Test
    public void testReferenceAndInputBothNegativeNoOvershootReferenceGreaterThanInput()
    {
       Random random = new Random(1976L);
@@ -70,8 +70,7 @@ public class DeltaLimitedYoVariableTest
       }
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(timeout=300000)
+   @Test
    public void testReferenceAndInputBothPositiveNoOvershootReferenceGreaterThanInput()
    {
       Random random = new Random(1976L);
@@ -95,8 +94,7 @@ public class DeltaLimitedYoVariableTest
       }
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(timeout=300000)
+   @Test
    public void testReferenceAndInputBothPositiveNoOvershootInputGreaterThanReference()
    {
       Random random = new Random(1976L);
@@ -120,8 +118,7 @@ public class DeltaLimitedYoVariableTest
       }
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(timeout=300000)
+   @Test
    public void testPositiveReferenceNegativeInputNoOvershoot()
    {
       Random random = new Random(1976L);
@@ -145,8 +142,7 @@ public class DeltaLimitedYoVariableTest
       }
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(timeout=300000)
+   @Test
    public void testNegativeReferencePositiveInputNoOvershoot()
    {
       Random random = new Random(1976L);
@@ -170,8 +166,7 @@ public class DeltaLimitedYoVariableTest
       }
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.1)
-   @Test(timeout=300000)
+   @Test
    public void testReferenceAndInputBothNegativeWithOvershootInputGreaterThanReference()
    {
       Random random = new Random(1976L);
@@ -199,8 +194,7 @@ public class DeltaLimitedYoVariableTest
       }
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.1)
-   @Test(timeout=300000)
+   @Test
    public void testReferenceAndInputBothNegativeWithOvershootReferenceGreaterThanInput()
    {
       Random random = new Random(1976L);
@@ -228,8 +222,7 @@ public class DeltaLimitedYoVariableTest
       }
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.1)
-   @Test(timeout=300000)
+   @Test
    public void testReferenceAndInputBothPositiveWithOvershootInputGreaterThanReference()
    {
       Random random = new Random(1976L);
@@ -257,8 +250,7 @@ public class DeltaLimitedYoVariableTest
       }
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.1)
-   @Test(timeout=300000)
+   @Test
    public void testReferenceAndInputBothPositiveWithOvershootReferenceGreaterThanInput()
    {
       Random random = new Random(1976L);
@@ -286,8 +278,7 @@ public class DeltaLimitedYoVariableTest
       }
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.1)
-   @Test(timeout=300000)
+   @Test
    public void testPositiveReferenceNegativeInputWithOvershoot()
    {
       Random random = new Random(1976L);
@@ -315,8 +306,7 @@ public class DeltaLimitedYoVariableTest
       }
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.1)
-   @Test(timeout=300000)
+   @Test
    public void testNegativeReferencePositiveInputWithOvershoot()
    {
       Random random = new Random(1976L);
@@ -344,8 +334,7 @@ public class DeltaLimitedYoVariableTest
       }
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.2)
-   @Test(timeout=300000)
+   @Test
    public void testOvershootThenNoOvershoot()
    {
       Random random = new Random(1976L);

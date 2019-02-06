@@ -2,16 +2,18 @@ package us.ihmc.avatar.behaviorTests;
 
 import static us.ihmc.robotics.Assert.*;
 
-import org.junit.After;
-import org.junit.AfterClass;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import us.ihmc.avatar.DRCObstacleCourseStartingLocation;
 import us.ihmc.avatar.MultiRobotTestInterface;
 import us.ihmc.avatar.testTools.DRCBehaviorTestHelper;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
+import org.junit.jupiter.api.Tag;
+import org.junit.jupiter.api.Disabled;
 import us.ihmc.humanoidBehaviors.behaviors.primitives.HighLevelStateBehavior;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelControllerName;
@@ -26,14 +28,14 @@ public abstract class DRCHighLevelStateBehaviorTest implements MultiRobotTestInt
 {
    private static final SimulationTestingParameters simulationTestingParameters = SimulationTestingParameters.createFromSystemProperties();
 
-   @Before
+   @BeforeEach
    public void showMemoryUsageBeforeTest()
    {
       MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " before test.");
       BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
    }
 
-   @After
+   @AfterEach
    public void destroySimulationAndRecycleMemory()
    {
       BambooTools.reportTestFinishedMessage(simulationTestingParameters.getShowWindows());
@@ -53,7 +55,7 @@ public abstract class DRCHighLevelStateBehaviorTest implements MultiRobotTestInt
       MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " after test.");
    }
 
-   @AfterClass
+   @AfterAll
    public static void printMemoryUsageAfterClass()
    {
       MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(DRCHighLevelStateBehaviorTest.class + " after class.");
@@ -61,7 +63,7 @@ public abstract class DRCHighLevelStateBehaviorTest implements MultiRobotTestInt
 
    private DRCBehaviorTestHelper drcBehaviorTestHelper;
 
-   @Before
+   @BeforeEach
    public void setUp()
    {
       DefaultCommonAvatarEnvironment testEnvironment = new DefaultCommonAvatarEnvironment();
@@ -70,15 +72,13 @@ public abstract class DRCHighLevelStateBehaviorTest implements MultiRobotTestInt
                                                         simulationTestingParameters, getRobotModel());
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 21.5)
-   @Test(timeout = 64580)
+   @Test
    public void testWalkingState() throws SimulationExceededMaximumTimeException
    {
       testState(HighLevelControllerName.WALKING);
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 21.5)
-   @Test(timeout = 64580)
+   @Test
    public void testDoNothingBahviourState() throws SimulationExceededMaximumTimeException
    {
       testState(HighLevelControllerName.DO_NOTHING_BEHAVIOR);
@@ -97,8 +97,7 @@ public abstract class DRCHighLevelStateBehaviorTest implements MultiRobotTestInt
       }
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 21.5)
-   @Test(timeout = 64580)
+   @Test
    public void testDiagnosticsState() throws SimulationExceededMaximumTimeException
    {
       testState(HighLevelControllerName.DIAGNOSTICS);

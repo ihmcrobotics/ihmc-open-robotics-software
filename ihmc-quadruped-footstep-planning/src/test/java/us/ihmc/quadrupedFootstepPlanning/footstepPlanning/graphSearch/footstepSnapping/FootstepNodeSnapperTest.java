@@ -1,8 +1,10 @@
 package us.ihmc.quadrupedFootstepPlanning.footstepPlanning.graphSearch.footstepSnapping;
 
-import org.junit.Ignore;
-import org.junit.Test;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations;
+import org.junit.jupiter.api.Tag;
+import org.junit.jupiter.api.Disabled;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.graphSearch.graph.FootstepNode;
 import us.ihmc.robotics.geometry.PlanarRegion;
@@ -28,9 +30,8 @@ public class FootstepNodeSnapperTest
    private int[] hindLeftYIndices = new int[] {-35, 0, -777, 87, -50, 28};
    private int[] hindRightYIndices = new int[] {-35, 0, -777, 87, -50, 28};
 
-   @Ignore
-   @ContinuousIntegrationAnnotations.ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(timeout = 30000)
+   @Disabled
+   @Test
    public void testFootstepCacheing()
    {
       TestSnapper testSnapper = new TestSnapper();
@@ -75,8 +76,7 @@ public class FootstepNodeSnapperTest
       }
    }
 
-   @ContinuousIntegrationAnnotations.ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(timeout = 30000)
+   @Test
    public void testWithoutPlanarRegions()
    {
       TestSnapper testSnapper = new TestSnapper();

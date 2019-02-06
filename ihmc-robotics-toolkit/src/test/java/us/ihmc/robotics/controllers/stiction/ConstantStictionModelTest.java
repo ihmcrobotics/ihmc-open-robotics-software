@@ -1,9 +1,11 @@
 package us.ihmc.robotics.controllers.stiction;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import us.ihmc.commons.RandomNumbers;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationPlan;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
+import org.junit.jupiter.api.Tag;
+import org.junit.jupiter.api.Disabled;
 import us.ihmc.continuousIntegration.IntegrationCategory;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
@@ -12,14 +14,12 @@ import java.util.Random;
 
 import static us.ihmc.robotics.Assert.*;
 
-@ContinuousIntegrationPlan(categories = {IntegrationCategory.FAST})
 public class ConstantStictionModelTest
 {
    private static final int iters = 100;
    private static final double epsilon = 1e-8;
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(timeout = 30000)
+   @Test
    public void testGetStictionMagnitude()
    {
       YoVariableRegistry registry = new YoVariableRegistry("test");

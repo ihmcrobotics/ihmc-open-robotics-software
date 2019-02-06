@@ -1,6 +1,6 @@
 package us.ihmc.atlas.ObstacleCourseTests;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import us.ihmc.atlas.AtlasRobotModel;
 import us.ihmc.atlas.AtlasRobotVersion;
@@ -9,6 +9,8 @@ import us.ihmc.avatar.drcRobot.RobotTarget;
 import us.ihmc.avatar.obstacleCourseTests.DRCObstacleCourseTrialsTerrainTest;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationPlan;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
+import org.junit.jupiter.api.Tag;
+import org.junit.jupiter.api.Disabled;
 import us.ihmc.continuousIntegration.IntegrationCategory;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.simulationConstructionSetTools.bambooTools.BambooTools;
@@ -16,7 +18,6 @@ import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulatio
 import us.ihmc.wholeBodyController.AdditionalSimulationContactPoints;
 import us.ihmc.wholeBodyController.FootContactPoints;
 
-@ContinuousIntegrationPlan(categories = {IntegrationCategory.FAST, IntegrationCategory.VIDEO})
 public class AtlasObstacleCourseTrialsTerrainTest extends DRCObstacleCourseTrialsTerrainTest
 {
 
@@ -41,40 +42,36 @@ public class AtlasObstacleCourseTrialsTerrainTest extends DRCObstacleCourseTrial
    }
 
    @Override
-   @ContinuousIntegrationTest(estimatedDuration = 139.1)
-   @Test(timeout = 700000)
+   @Test
    public void testTrialsTerrainSlopeScript() throws SimulationExceededMaximumTimeException
    {
       super.testTrialsTerrainSlopeScript();
    }
 
    @Override
-   @ContinuousIntegrationTest(estimatedDuration = 157.5)
-   @Test(timeout = 790000)
+   @Test
    public void testTrialsTerrainSlopeScriptRandomFootSlip() throws SimulationExceededMaximumTimeException
    {
       super.testTrialsTerrainSlopeScriptRandomFootSlip();
    }
 
    @Override
-   @ContinuousIntegrationTest(estimatedDuration = 86.6)
-   @Test(timeout = 430000)
+   @Test
    public void testTrialsTerrainZigzagHurdlesScript() throws SimulationExceededMaximumTimeException
    {
       super.testTrialsTerrainZigzagHurdlesScript();
    }
 
    @Override
-   @ContinuousIntegrationTest(estimatedDuration = 47.1, categoriesOverride = IntegrationCategory.EXCLUDE)
-   @Test(timeout = 240000)
+   @Disabled
+   @Test
    public void testTrialsTerrainZigzagHurdlesScriptRandomFootSlip() throws SimulationExceededMaximumTimeException
    {
       super.testTrialsTerrainZigzagHurdlesScriptRandomFootSlip();
    }
 
    @Override
-   @ContinuousIntegrationTest(estimatedDuration = 117.9)
-   @Test(timeout = 590000)
+   @Test
    public void testWalkingOntoAndOverSlopesSideways() throws SimulationExceededMaximumTimeException
    {
       super.testWalkingOntoAndOverSlopesSideways();

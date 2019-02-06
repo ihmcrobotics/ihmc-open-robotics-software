@@ -12,15 +12,17 @@ import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.HashMap;
 
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import us.ihmc.atlas.AtlasRobotModel;
 import us.ihmc.atlas.AtlasRobotVersion;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.RobotTarget;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
+import org.junit.jupiter.api.Tag;
+import org.junit.jupiter.api.Disabled;
 import us.ihmc.continuousIntegration.IntegrationCategory;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
@@ -47,14 +49,14 @@ public class AtlasSDFVerificationTest
    private SimulationTestingParameters simulationTestingParameters;   
    private BlockingSimulationRunner blockingSimulationRunner;
 
-   @Before
+   @BeforeEach
    public void showMemoryUsageBeforeTest()
    {
       simulationTestingParameters = SimulationTestingParameters.createFromSystemProperties();
       MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " before test.");
    }
 
-   @After
+   @AfterEach
    public void destroySimulationAndRecycleMemory()
    {
       if (simulationTestingParameters.getKeepSCSUp())
@@ -83,8 +85,8 @@ public class AtlasSDFVerificationTest
     * @throws IOException
     * @throws ControllerFailureException
     */
-	@ContinuousIntegrationTest(estimatedDuration = 10.4, categoriesOverride = IntegrationCategory.EXCLUDE)
-	@Test(timeout = 41302)
+	@Disabled
+	@Test
    public void testSimpleLegSwing() throws BlockingSimulationRunner.SimulationExceededMaximumTimeException, IOException, ControllerFailureException
    {
       BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());

@@ -7,10 +7,10 @@ import org.ejml.alg.dense.decomposition.bidiagonal.BidiagonalDecompositionRow_D6
 import org.ejml.alg.dense.decomposition.chol.CholeskyDecompositionCommon_D64;
 import org.ejml.alg.dense.decomposition.lu.LUDecompositionBase_D64;
 import org.ejml.data.DenseMatrix64F;
-import org.junit.After;
+import org.junit.jupiter.api.AfterEach;
 import us.ihmc.robotics.Assert;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import controller_msgs.msg.dds.ArmTrajectoryMessage;
 import controller_msgs.msg.dds.ChestTrajectoryMessage;
@@ -32,6 +32,8 @@ import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.communication.controllerAPI.StatusMessageOutputManager;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
+import org.junit.jupiter.api.Tag;
+import org.junit.jupiter.api.Disabled;
 import us.ihmc.continuousIntegration.IntegrationCategory;
 import us.ihmc.euclid.geometry.BoundingBox3D;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
@@ -77,7 +79,7 @@ public class AtlasAllocationTest
    private DRCSimulationTestHelper testHelper;
    private AllocationProfiler allocationProfiler = new AllocationProfiler();
    
-   @Before
+   @BeforeEach
    public void before() throws SimulationExceededMaximumTimeException
    {
       MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " before test.");
@@ -110,8 +112,8 @@ public class AtlasAllocationTest
       setup();
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 300.0, categoriesOverride = {IntegrationCategory.SLOW})
-   @Test(timeout = 600000)
+   @Tag("allocation")
+   @Test
    public void testForAllocationsStanding() throws SimulationExceededMaximumTimeException
    {
       testInternal(() -> {
@@ -126,8 +128,8 @@ public class AtlasAllocationTest
       });
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 300.0, categoriesOverride = {IntegrationCategory.SLOW})
-   @Test(timeout = 900000)
+   @Tag("allocation")
+   @Test
    public void testForAllocationsWalking() throws SimulationExceededMaximumTimeException
    {
       double defaultSwingDuration = 0.5;
@@ -155,8 +157,8 @@ public class AtlasAllocationTest
       testHelper.assertRobotsRootJointIsInBoundingBox(new BoundingBox3D(0.9, -0.1, 0.0, 1.1, 0.1, 5.0));
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 300.0, categoriesOverride = {IntegrationCategory.SLOW})
-   @Test(timeout = 600000)
+   @Tag("allocation")
+   @Test
    public void testForAllocationsDuringPelvisMotion() throws SimulationExceededMaximumTimeException
    {
       Random random = new Random(42884L);
@@ -178,8 +180,8 @@ public class AtlasAllocationTest
       });
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 300.0, categoriesOverride = {IntegrationCategory.SLOW})
-   @Test(timeout = 600000)
+   @Tag("allocation")
+   @Test
    public void testForAllocationsWithPelvisUserControl() throws SimulationExceededMaximumTimeException
    {
       Random random = new Random(4281284L);
@@ -204,8 +206,8 @@ public class AtlasAllocationTest
       });
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 300.0, categoriesOverride = {IntegrationCategory.SLOW})
-   @Test(timeout = 600000)
+   @Tag("allocation")
+   @Test
    public void testForAllocationsDuringArmMotion() throws SimulationExceededMaximumTimeException
    {
       Random random = new Random(4281284L);
@@ -225,8 +227,8 @@ public class AtlasAllocationTest
       });
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 300.0, categoriesOverride = {IntegrationCategory.SLOW})
-   @Test(timeout = 600000)
+   @Tag("allocation")
+   @Test
    public void testForAllocationsDuringChestMotion() throws SimulationExceededMaximumTimeException
    {
       Random random = new Random(4281284L);
@@ -346,7 +348,7 @@ public class AtlasAllocationTest
       }
    }
 
-   @After
+   @AfterEach
    public void destroySimulationAndRecycleMemory()
    {
       BambooTools.reportTestFinishedMessage(simulationTestingParameters.getShowWindows());

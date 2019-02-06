@@ -1,11 +1,13 @@
 package us.ihmc.valkyrie.controllerAPI;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import us.ihmc.avatar.controllerAPI.EndToEndArmDesiredAccelerationsMessageTest;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.RobotTarget;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
+import org.junit.jupiter.api.Tag;
+import org.junit.jupiter.api.Disabled;
 import us.ihmc.simulationConstructionSetTools.bambooTools.BambooTools;
 import us.ihmc.valkyrie.ValkyrieRobotModel;
 
@@ -26,8 +28,7 @@ public class ValkyrieEndToEndArmDesiredAccelerationsMessageTest extends EndToEnd
    }
 
    @Override
-   @ContinuousIntegrationTest(estimatedDuration = 20.5)
-   @Test(timeout = 100000)
+   @Test
    public void testSimpleCommands() throws Exception
    {
       super.testSimpleCommands();

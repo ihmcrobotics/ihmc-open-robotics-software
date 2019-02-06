@@ -16,6 +16,8 @@ import us.ihmc.commons.allocations.AllocationRecord;
 import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.communication.controllerAPI.StatusMessageOutputManager;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
+import org.junit.jupiter.api.Tag;
+import org.junit.jupiter.api.Disabled;
 import us.ihmc.continuousIntegration.IntegrationCategory;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.referenceFrame.FrameConvexPolygon2D;
@@ -45,7 +47,7 @@ public class GenericQuadrupedAllocationTest
    private RemoteQuadrupedTeleopManager stepTeleopManager;
    private AllocationProfiler allocationProfiler = new AllocationProfiler();
 
-   @Before
+   @BeforeEach
    public void before() throws SimulationExceededMaximumTimeException
    {
       MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " before test.");
@@ -77,7 +79,7 @@ public class GenericQuadrupedAllocationTest
       setup();
    }
 
-   @After
+   @AfterEach
    public void tearDown()
    {
       quadrupedTestFactory.close();
@@ -108,8 +110,8 @@ public class GenericQuadrupedAllocationTest
       }
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 300.0, categoriesOverride = {IntegrationCategory.SLOW})
-   @Test(timeout = 600000)
+   @Tag("allocation")
+   @Test
    public void testForAllocationStanding()
    {
       QuadrupedTestBehaviors.standUp(conductor, variables);
@@ -122,9 +124,9 @@ public class GenericQuadrupedAllocationTest
    }
 
 
-   @Ignore
-   @ContinuousIntegrationTest(estimatedDuration = 300.0, categoriesOverride = {IntegrationCategory.SLOW})
-   @Test(timeout = 600000)
+   @Disabled
+   @Tag("allocation")
+   @Test
    public void testForAllocationStepping()
    {
       QuadrupedTestBehaviors.readyXGait(conductor, variables, stepTeleopManager);

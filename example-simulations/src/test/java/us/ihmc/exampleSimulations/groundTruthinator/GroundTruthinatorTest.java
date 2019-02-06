@@ -4,11 +4,13 @@ import static us.ihmc.robotics.Assert.*;
 
 import java.util.Random;
 
-import org.junit.After;
-import org.junit.Ignore;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
 
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
+import org.junit.jupiter.api.Tag;
+import org.junit.jupiter.api.Disabled;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.FrameQuaternion;
@@ -19,14 +21,13 @@ import us.ihmc.robotics.random.RandomGeometry;
 
 public class GroundTruthinatorTest
 {
-   @After
+   @AfterEach
    public void tearDown()
    {
       ReferenceFrameTools.clearWorldFrameTree();
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.2)
-   @Test(timeout = 30000)
+   @Test
    public void testSimpleTranslationGroundTruthinator()
    {
       ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
@@ -94,9 +95,8 @@ public class GroundTruthinatorTest
    }
 
 
-   @Ignore
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(timeout = 30000)
+   @Disabled
+   @Test
    public void testSimpleRotationGroundTruthinator()
    {
       ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();

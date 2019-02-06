@@ -2,9 +2,11 @@ package us.ihmc.commonWalkingControlModules.dynamicPlanning.slipJumping;
 
 import org.ejml.data.DenseMatrix64F;
 import org.ejml.ops.CommonOps;
-import org.junit.After;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.Test;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
+import org.junit.jupiter.api.Tag;
+import org.junit.jupiter.api.Disabled;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.tools.ReferenceFrameTools;
@@ -19,14 +21,13 @@ import static us.ihmc.commonWalkingControlModules.dynamicPlanning.slipJumping.SL
 
 public class ContinuousSimpleReactionDynamicsTest
 {
-   @After
+   @AfterEach
    public void tearDown()
    {
       ReferenceFrameTools.clearWorldFrameTree();
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(timeout = 30000)
+   @Test
    public void testDynamics()
    {
       double mass = 10.0;
@@ -76,8 +77,7 @@ public class ContinuousSimpleReactionDynamicsTest
       JUnitTools.assertMatrixEquals(functionExpected, function, 1e-7);
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(timeout = 30000)
+   @Test
    public void testDynamicsStateGradient()
    {
       double mass = 10.0;
@@ -109,8 +109,7 @@ public class ContinuousSimpleReactionDynamicsTest
       JUnitTools.assertMatrixEquals(gradientExpected, gradient, 1e-7);
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(timeout = 30000)
+   @Test
    public void testStateGradientNumericalDifferentiationStance()
    {
       double epsilon = 1e-9;
@@ -146,8 +145,7 @@ public class ContinuousSimpleReactionDynamicsTest
       JUnitTools.assertMatrixEquals(expectedGradient, gradient, 1e-2);
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(timeout = 30000)
+   @Test
    public void testStateGradientNumericalDifferentiationFlight()
    {
       double epsilon = 1e-9;
@@ -183,8 +181,7 @@ public class ContinuousSimpleReactionDynamicsTest
       JUnitTools.assertMatrixEquals(expectedGradient, gradient, 1e-2);
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(timeout = 30000)
+   @Test
    public void testControlGradientNumericalDifferentiationStance()
    {
       double epsilon = 1e-9;
@@ -220,8 +217,7 @@ public class ContinuousSimpleReactionDynamicsTest
       JUnitTools.assertMatrixEquals(expectedGradient, gradient, 1e-2);
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(timeout = 30000)
+   @Test
    public void testControlGradientNumericalDifferentiationFlight()
    {
       double epsilon = 1e-9;
@@ -257,8 +253,7 @@ public class ContinuousSimpleReactionDynamicsTest
       JUnitTools.assertMatrixEquals(expectedGradient, gradient, 1e-2);
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(timeout = 30000)
+   @Test
    public void testDynamicsControlGradient()
    {
       double mass = 10.0;
@@ -298,8 +293,7 @@ public class ContinuousSimpleReactionDynamicsTest
       JUnitTools.assertMatrixEquals(gradientExpected, gradient, 1e-7);
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(timeout = 30000)
+   @Test
    public void testDynamicsStateGradientNumericalDifferentiationStance()
    {
       double mass = 11.0;
@@ -376,8 +370,7 @@ public class ContinuousSimpleReactionDynamicsTest
       JUnitTools.assertMatrixEquals(gradientExpected, gradient, 1e-7);
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(timeout = 30000)
+   @Test
    public void testDynamicsStateGradientNumericalDifferentiationFlight()
    {
       double mass = 11.0;
@@ -454,8 +447,7 @@ public class ContinuousSimpleReactionDynamicsTest
       JUnitTools.assertMatrixEquals(gradientExpected, gradient, 1e-7);
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(timeout = 30000)
+   @Test
    public void testDynamicsControlGradientNumericalDifferentiationStance()
    {
       double mass = 11.0;
@@ -561,8 +553,7 @@ public class ContinuousSimpleReactionDynamicsTest
       JUnitTools.assertMatrixEquals(gradientExpected, gradient, 1e-7);
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(timeout = 30000)
+   @Test
    public void testDynamicsControlGradientNumericalDifferentiationFlight()
    {
       double mass = 11.0;

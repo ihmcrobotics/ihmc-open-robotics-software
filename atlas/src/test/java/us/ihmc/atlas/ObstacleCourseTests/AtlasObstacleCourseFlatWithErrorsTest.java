@@ -1,6 +1,6 @@
 package us.ihmc.atlas.ObstacleCourseTests;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import us.ihmc.atlas.AtlasRobotModel;
 import us.ihmc.atlas.AtlasRobotVersion;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
@@ -9,6 +9,8 @@ import us.ihmc.avatar.obstacleCourseTests.DRCObstacleCourseFlatTest;
 import us.ihmc.avatar.obstacleCourseTests.DRCObstacleCourseFlatWithErrorsTest;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationPlan;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
+import org.junit.jupiter.api.Tag;
+import org.junit.jupiter.api.Disabled;
 import us.ihmc.continuousIntegration.IntegrationCategory;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.simulationConstructionSetTools.bambooTools.BambooTools;
@@ -18,7 +20,6 @@ import java.io.IOException;
 
 import static us.ihmc.continuousIntegration.IntegrationCategory.SLOW;
 
-@ContinuousIntegrationPlan(categories = {IntegrationCategory.FAST, IntegrationCategory.VIDEO})
 public class AtlasObstacleCourseFlatWithErrorsTest extends DRCObstacleCourseFlatWithErrorsTest
 {
    private final DRCRobotModel robotModel = new AtlasRobotModel(AtlasRobotVersion.ATLAS_UNPLUGGED_V5_NO_HANDS, RobotTarget.SCS, false);
@@ -36,48 +37,43 @@ public class AtlasObstacleCourseFlatWithErrorsTest extends DRCObstacleCourseFlat
    }
 
    @Override
-   @ContinuousIntegrationTest(estimatedDuration = 84.6)
-   @Test(timeout = 420000)
+   @Test
    public void testSideStepsWithRandomSlipping() throws SimulationExceededMaximumTimeException
    {
       super.testSideStepsWithRandomSlipping();
    }
 
    @Override
-   @ContinuousIntegrationTest(estimatedDuration = 74.6, categoriesOverride = SLOW)
-   @Test(timeout = 370000)
+   @Tag("allocation")
+   @Test
    public void testSideStepsWithSlipping() throws SimulationExceededMaximumTimeException
    {
       super.testSideStepsWithSlipping();
    }
 
    @Override
-   @ContinuousIntegrationTest(estimatedDuration = 92.6)
-   @Test(timeout = 460000)
+   @Test
    public void testSimpleFlatGroundScriptWithOscillatingFeet() throws SimulationExceededMaximumTimeException
    {
       super.testSimpleFlatGroundScriptWithOscillatingFeet();
    }
 
    @Override
-   @ContinuousIntegrationTest(estimatedDuration = 82.6)
-   @Test(timeout = 410000)
+   @Test
    public void testSimpleFlatGroundScriptWithRandomFootSlip() throws SimulationExceededMaximumTimeException
    {
       super.testSimpleFlatGroundScriptWithRandomFootSlip();
    }
 
    @Override
-   @ContinuousIntegrationTest(estimatedDuration = 43.2)
-   @Test(timeout = 220000)
+   @Test
    public void testStandingWithOscillatingFeet() throws SimulationExceededMaximumTimeException
    {
       super.testStandingWithOscillatingFeet();
    }
    
    @Override
-   @ContinuousIntegrationTest(estimatedDuration = 43.2)
-   @Test(timeout = 220000)
+   @Test
    public void testStandingWithStateEstimatorDrift() throws SimulationExceededMaximumTimeException
    {
       super.testStandingWithStateEstimatorDrift();

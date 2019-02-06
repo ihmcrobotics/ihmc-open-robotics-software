@@ -9,10 +9,12 @@ import org.ejml.factory.LinearSolverFactory;
 import org.ejml.interfaces.linsol.LinearSolver;
 import org.ejml.ops.CommonOps;
 import org.ejml.ops.RandomMatrices;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import us.ihmc.commons.Conversions;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
+import org.junit.jupiter.api.Tag;
+import org.junit.jupiter.api.Disabled;
 import us.ihmc.robotics.functionApproximation.DampedLeastSquaresSolver;
 import us.ihmc.robotics.linearAlgebra.DampedLeastSquaresNullspaceCalculator;
 import us.ihmc.robotics.testing.JUnitTools;
@@ -24,8 +26,7 @@ public class NativeCommonOpsTest
    private static final int iterations = 5000;
    private static final double epsilon = 1.0e-8;
 
-   @ContinuousIntegrationTest(estimatedDuration = 1.0)
-   @Test(timeout = 20000)
+   @Test
    public void testMult()
    {
       Random random = new Random(40L);
@@ -74,8 +75,7 @@ public class NativeCommonOpsTest
       System.out.println("Native takes " + Precision.round((100.0 * nativeTime / ejmlTime), 0) + "% of EJML time.\n");
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 1.0)
-   @Test(timeout = 20000)
+   @Test
    public void testMultQuad()
    {
       Random random = new Random(40L);
@@ -127,8 +127,7 @@ public class NativeCommonOpsTest
       System.out.println("Native takes " + Precision.round((100.0 * nativeTime / ejmlTime), 0) + "% of EJML time.\n");
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 1.0)
-   @Test(timeout = 20000)
+   @Test
    public void testInvert()
    {
       Random random = new Random(40L);
@@ -176,8 +175,7 @@ public class NativeCommonOpsTest
       System.out.println("Native takes " + Precision.round((100.0 * nativeTime / ejmlTime), 0) + "% of EJML time.\n");
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 1.0)
-   @Test(timeout = 20000)
+   @Test
    public void testSolve()
    {
       Random random = new Random(40L);
@@ -232,8 +230,7 @@ public class NativeCommonOpsTest
       System.out.println("Native takes " + Precision.round((100.0 * nativeTime / ejmlTime), 0) + "% of EJML time.\n");
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 1.0)
-   @Test(timeout = 20000)
+   @Test
    public void testSolveLeastSquare()
    {
       Random random = new Random(40L);
@@ -312,8 +309,7 @@ public class NativeCommonOpsTest
       System.out.println("Native undamped takes " + Precision.round((100.0 * nativeUndampedTime / ejmlUndampedTime), 0) + "% of EJML time.\n");
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 1.0)
-   @Test(timeout = 20000)
+   @Test
    public void testNullspaceProjection()
    {
       Random random = new Random(40L);

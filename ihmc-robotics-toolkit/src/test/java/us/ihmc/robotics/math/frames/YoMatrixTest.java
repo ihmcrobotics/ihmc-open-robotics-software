@@ -5,9 +5,11 @@ import static us.ihmc.robotics.Assert.*;
 import java.util.Random;
 
 import org.ejml.data.DenseMatrix64F;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
+import org.junit.jupiter.api.Tag;
+import org.junit.jupiter.api.Disabled;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.robotics.random.RandomGeometry;
@@ -15,8 +17,7 @@ import us.ihmc.robotics.testing.JUnitTools;
 
 public class YoMatrixTest
 {
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(timeout = 30000)
+   @Test
    public void testSimpleYoMatrixExample()
    {
       int maxNumberOfRows = 4;
@@ -44,8 +45,7 @@ public class YoMatrixTest
       assertEquals(registry.getVariable("testMatrix_0_0").getValueAsDouble(), checkMatrix.get(0, 0), 1e-10);
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(timeout = 30000)
+   @Test
    public void testYoMatrixDimensioning()
    {
       int maxNumberOfRows = 4;
@@ -103,8 +103,7 @@ public class YoMatrixTest
       checkMatrixYoVariablesEqualsCheckMatrixAndOutsideValuesAreNaN(name, maxNumberOfRows, maxNumberOfColumns, checkMatrix2, registry);
    }
    
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(timeout = 30000)
+   @Test
    public void testYoMatrixSetToZero()
    {
       int maxNumberOfRows = 4;
@@ -127,8 +126,7 @@ public class YoMatrixTest
       checkMatrixYoVariablesEqualsCheckMatrixAndOutsideValuesAreNaN(name, maxNumberOfRows, maxNumberOfColumns, zeroMatrix, registry);  
    }
    
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(timeout = 30000)
+   @Test
    public void testYoMatrixSetTooBig()
    {
       int maxNumberOfRows = 4;

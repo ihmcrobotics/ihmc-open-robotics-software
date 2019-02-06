@@ -2,11 +2,13 @@ package us.ihmc.commonWalkingControlModules.dynamicPlanning.slipJumping.costs;
 
 import org.ejml.data.DenseMatrix64F;
 import us.ihmc.robotics.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import us.ihmc.commonWalkingControlModules.dynamicPlanning.CostFunctionTest;
 import us.ihmc.commonWalkingControlModules.dynamicPlanning.slipJumping.SLIPState;
 import us.ihmc.commons.RandomNumbers;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
+import org.junit.jupiter.api.Tag;
+import org.junit.jupiter.api.Disabled;
 import us.ihmc.robotics.random.RandomGeometry;
 import us.ihmc.robotics.testing.JUnitTools;
 import us.ihmc.trajectoryOptimization.LQCostFunction;
@@ -54,8 +56,7 @@ public class SLIPRegularizationCostTest extends CostFunctionTest<SLIPState>
    }
 
    @Override
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(timeout = 30000)
+   @Test
    public void testCost()
    {
       LQCostFunction<SLIPState> costFunction = getCostFunction();
@@ -101,40 +102,35 @@ public class SLIPRegularizationCostTest extends CostFunctionTest<SLIPState>
    }
 
    @Override
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(timeout = 30000)
+   @Test
    public void testCostStateGradientNumerically()
    {
       super.testCostStateGradientNumerically();
    }
 
    @Override
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(timeout = 30000)
+   @Test
    public void testCostControlGradientNumerically()
    {
       super.testCostControlGradientNumerically();
    }
 
    @Override
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(timeout = 30000)
+   @Test
    public void testCostStateHessianNumerically()
    {
       super.testCostStateHessianNumerically();
    }
 
    @Override
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(timeout = 30000)
+   @Test
    public void testCostControlHessianNumerically()
    {
       super.testCostControlHessianNumerically();
    }
 
    @Override
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(timeout = 30000)
+   @Test
    public void testCostStateControlHessianNumerically()
    {
       super.testCostStateControlHessianNumerically();
@@ -145,8 +141,7 @@ public class SLIPRegularizationCostTest extends CostFunctionTest<SLIPState>
 
 
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(timeout = 30000)
+   @Test
    public void testCostStateGradient()
    {
       double mass = 15.0;
@@ -251,8 +246,7 @@ public class SLIPRegularizationCostTest extends CostFunctionTest<SLIPState>
       JUnitTools.assertMatrixEquals(expectedGradient, gradient, 1e-7);
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(timeout = 30000)
+   @Test
    public void testCostControlGradient()
    {
       double mass = 15.0;

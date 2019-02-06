@@ -1,17 +1,19 @@
 package us.ihmc.atlas.communication.producers;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import us.ihmc.atlas.AtlasRobotModel;
 import us.ihmc.atlas.AtlasRobotVersion;
 import us.ihmc.avatar.drcRobot.RobotTarget;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationPlan;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
+import org.junit.jupiter.api.Tag;
+import org.junit.jupiter.api.Disabled;
 import us.ihmc.continuousIntegration.IntegrationCategory;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.sensorProcessing.communication.producers.RobotConfigurationDataBufferTest;
 
-@ContinuousIntegrationPlan(categories = IntegrationCategory.FLAKY)
+@Disabled
 public class AtlasRobotConfigurationDataBufferTest extends RobotConfigurationDataBufferTest
 {
 
@@ -22,16 +24,14 @@ public class AtlasRobotConfigurationDataBufferTest extends RobotConfigurationDat
    }
 
    @Override
-   @ContinuousIntegrationTest(estimatedDuration = 0.5)
-   @Test(timeout = 30000)
+   @Test
    public void testAddingStuff()
    {
       super.testAddingStuff();
    }
 
    @Override
-   @ContinuousIntegrationTest(estimatedDuration = 100.0)
-   @Test(timeout = 30000)
+   @Test
    public void testWaitForTimestamp()
    {
       super.testWaitForTimestamp();

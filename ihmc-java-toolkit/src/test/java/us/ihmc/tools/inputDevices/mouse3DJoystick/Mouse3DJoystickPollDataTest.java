@@ -2,18 +2,18 @@ package us.ihmc.tools.inputDevices.mouse3DJoystick;
 
 import static us.ihmc.robotics.Assert.*;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationPlan;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
+import org.junit.jupiter.api.Tag;
+import org.junit.jupiter.api.Disabled;
 import us.ihmc.graphicsDescription.input.mouse.Mouse3DPollData;
 import us.ihmc.continuousIntegration.IntegrationCategory;
 
-@ContinuousIntegrationPlan(categories = IntegrationCategory.FAST)
 public class Mouse3DJoystickPollDataTest
 {
-	@ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(timeout = 30000)
+   @Test
    public void testPollData()
    {
       Mouse3DPollData pollData = new Mouse3DPollData(-1.0, -2.0, 0.0, 1.0, 2.0, 3.0);

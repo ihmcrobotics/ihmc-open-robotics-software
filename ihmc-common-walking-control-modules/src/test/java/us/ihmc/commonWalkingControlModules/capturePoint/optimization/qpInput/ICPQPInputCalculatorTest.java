@@ -6,24 +6,24 @@ import org.ejml.data.DenseMatrix64F;
 import org.ejml.ops.CommonOps;
 import org.ejml.ops.RandomMatrices;
 import us.ihmc.robotics.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import us.ihmc.commons.RandomNumbers;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationPlan;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
+import org.junit.jupiter.api.Tag;
+import org.junit.jupiter.api.Disabled;
 import us.ihmc.continuousIntegration.IntegrationCategory;
 import us.ihmc.robotics.linearAlgebra.DiagonalMatrixTools;
 import us.ihmc.robotics.linearAlgebra.MatrixTools;
 import us.ihmc.robotics.testing.JUnitTools;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 
-@ContinuousIntegrationPlan(categories = {IntegrationCategory.FAST})
 public class ICPQPInputCalculatorTest
 {
    private static final double epsilon = 1e-7;
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(timeout = 30000)
+   @Test
    public void testComputeQuadraticTask()
    {
       Random random = new Random(1738L);
@@ -113,8 +113,7 @@ public class ICPQPInputCalculatorTest
       }
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(timeout = 30000)
+   @Test
    public void testFeedbackTask()
    {
       ICPQPInput icpQPInputToTest = new ICPQPInput(2);
@@ -132,8 +131,7 @@ public class ICPQPInputCalculatorTest
       assertInputEquals(icpQPInputExpected, icpQPInputToTest, epsilon);
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(timeout = 30000)
+   @Test
    public void testCoPFeedbackRateTask()
    {
       ICPQPIndexHandler indexHandler = new ICPQPIndexHandler(new YoVariableRegistry("dummy"));
@@ -183,8 +181,7 @@ public class ICPQPInputCalculatorTest
       }
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(timeout = 30000)
+   @Test
    public void testCMPFeedbackRateTask()
    {
       ICPQPIndexHandler indexHandler = new ICPQPIndexHandler(new YoVariableRegistry("dummy"));
@@ -249,8 +246,7 @@ public class ICPQPInputCalculatorTest
       }
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(timeout = 30000)
+   @Test
    public void testFeedbackRateTask()
    {
       ICPQPIndexHandler indexHandler = new ICPQPIndexHandler(new YoVariableRegistry("dummy"));
@@ -375,8 +371,7 @@ public class ICPQPInputCalculatorTest
    }
 
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(timeout = 30000)
+   @Test
    public void testFootstepTask()
    {
       ICPQPIndexHandler indexHandler = new ICPQPIndexHandler(new YoVariableRegistry("dummy"));
@@ -457,8 +452,7 @@ public class ICPQPInputCalculatorTest
       assertInputEquals(icpQPInputExpected, icpQPInputToTest, epsilon);
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(timeout = 30000)
+   @Test
    public void testFootstepRateTask()
    {
       ICPQPIndexHandler indexHandler = new ICPQPIndexHandler(new YoVariableRegistry("dummy"));
@@ -540,8 +534,7 @@ public class ICPQPInputCalculatorTest
       assertInputEquals(icpQPInputExpected, icpQPInputToTest, epsilon);
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(timeout = 30000)
+   @Test
    public void testComputeDynamicsTaskWithFeedbackAndAngularMomentum()
    {
       ICPQPIndexHandler indexHandler = new ICPQPIndexHandler(new YoVariableRegistry("dummy"));
@@ -758,8 +751,7 @@ public class ICPQPInputCalculatorTest
       JUnitTools.assertMatrixEquals(icpQPInputExpected.residualCost, icpQPInputToTest.residualCost, epsilon);
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(timeout = 30000)
+   @Test
    public void testComputeDynamicsTaskWithFeedback()
    {
       ICPQPIndexHandler indexHandler = new ICPQPIndexHandler(new YoVariableRegistry("dummy"));
@@ -985,8 +977,7 @@ public class ICPQPInputCalculatorTest
       JUnitTools.assertMatrixEquals(icpQPInputExpected.residualCost, icpQPInputToTest.residualCost, epsilon);
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(timeout = 30000)
+   @Test
    public void testComputeDynamicsTaskWithAngularMomentum()
    {
       ICPQPIndexHandler indexHandler = new ICPQPIndexHandler(new YoVariableRegistry("dummy"));
@@ -1215,8 +1206,7 @@ public class ICPQPInputCalculatorTest
       JUnitTools.assertMatrixEquals(icpQPInputExpected.residualCost, icpQPInputToTest.residualCost, epsilon);
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(timeout = 30000)
+   @Test
    public void testComputeDynamicsTaskWithSeparateAdjustment()
    {
       ICPQPIndexHandler indexHandler = new ICPQPIndexHandler(new YoVariableRegistry("dummy"));
@@ -1447,8 +1437,7 @@ public class ICPQPInputCalculatorTest
       JUnitTools.assertMatrixEquals(icpQPInputExpected.residualCost, icpQPInputToTest.residualCost, epsilon);
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(timeout = 30000)
+   @Test
    public void testSubmitCoPeedbackTask()
    {
       ICPQPIndexHandler indexHandler = new ICPQPIndexHandler(new YoVariableRegistry("dummy"));
@@ -1501,8 +1490,7 @@ public class ICPQPInputCalculatorTest
 
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(timeout = 30000)
+   @Test
    public void testSubmitFeedbackRateTask()
    {
       ICPQPIndexHandler indexHandler = new ICPQPIndexHandler(new YoVariableRegistry("dummy"));
@@ -1566,8 +1554,7 @@ public class ICPQPInputCalculatorTest
 
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(timeout = 30000)
+   @Test
    public void testSubmitDynamicsTask()
    {
       ICPQPIndexHandler indexHandler = new ICPQPIndexHandler(new YoVariableRegistry("dummy"));
@@ -1624,8 +1611,7 @@ public class ICPQPInputCalculatorTest
       JUnitTools.assertMatrixEquals(scalarExpected, scalar, 1e-7);
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(timeout = 30000)
+   @Test
    public void testSubmitCMPFeedbackTask()
    {
       ICPQPIndexHandler indexHandler = new ICPQPIndexHandler(new YoVariableRegistry("dummy"));
@@ -1661,8 +1647,7 @@ public class ICPQPInputCalculatorTest
       JUnitTools.assertMatrixEquals(scalarExpected, scalar, 1e-7);
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(timeout = 30000)
+   @Test
    public void testSubmitFootstepTask()
    {
       ICPQPIndexHandler indexHandler = new ICPQPIndexHandler(new YoVariableRegistry("dummy"));
@@ -1745,8 +1730,7 @@ public class ICPQPInputCalculatorTest
       JUnitTools.assertMatrixEquals(scalarExpected, scalar, 1e-7);
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(timeout = 30000)
+   @Test
    public void testSubmitCoPAndCMPOFeedbackTasks()
    {
       ICPQPIndexHandler indexHandler = new ICPQPIndexHandler(new YoVariableRegistry("dummy"));
@@ -1795,8 +1779,7 @@ public class ICPQPInputCalculatorTest
       JUnitTools.assertMatrixEquals(scalarExpected, scalar, 1e-7);
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(timeout = 30000)
+   @Test
    public void testSubmitFeedbackAndDynamicsTask()
    {
       ICPQPIndexHandler indexHandler = new ICPQPIndexHandler(new YoVariableRegistry("dummy"));
@@ -1866,8 +1849,7 @@ public class ICPQPInputCalculatorTest
       JUnitTools.assertMatrixEquals(scalarExpected, scalar, 1e-7);
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(timeout = 30000)
+   @Test
    public void testSubmitFeedbackAndFootstepTask()
    {
       ICPQPIndexHandler indexHandler = new ICPQPIndexHandler(new YoVariableRegistry("dummy"));
@@ -1937,8 +1919,7 @@ public class ICPQPInputCalculatorTest
       JUnitTools.assertMatrixEquals(scalarExpected, scalar, 1e-7);
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(timeout = 30000)
+   @Test
    public void testSubmitFeedbackAndFootstepAndDynamicsTask()
    {
       ICPQPIndexHandler indexHandler = new ICPQPIndexHandler(new YoVariableRegistry("dummy"));
@@ -2040,8 +2021,7 @@ public class ICPQPInputCalculatorTest
       JUnitTools.assertMatrixEquals(scalarExpected, scalar, 1e-7);
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(timeout = 30000)
+   @Test
    public void testSubmitFeedbackAndFootstepAndDynamicsAndAngularMomentumTask()
    {
       ICPQPIndexHandler indexHandler = new ICPQPIndexHandler(new YoVariableRegistry("dummy"));
@@ -2157,8 +2137,7 @@ public class ICPQPInputCalculatorTest
       JUnitTools.assertMatrixEquals(scalarExpected, scalar, epsilon);
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(timeout = 30000)
+   @Test
    public void testComputeDynamicsConstraintError()
    {
       ICPQPIndexHandler indexHandler = new ICPQPIndexHandler(new YoVariableRegistry("dummy"));

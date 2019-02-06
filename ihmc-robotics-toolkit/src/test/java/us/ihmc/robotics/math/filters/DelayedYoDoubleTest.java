@@ -2,17 +2,18 @@ package us.ihmc.robotics.math.filters;
 
 import static us.ihmc.robotics.Assert.*;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
+import org.junit.jupiter.api.Tag;
+import org.junit.jupiter.api.Disabled;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 
 public class DelayedYoDoubleTest
 {
 
-	@ContinuousIntegrationTest(estimatedDuration = 0.0)
-	@Test(timeout=300000)
+	@Test
    public void testDelayedYoVariableMultipleTickDelays()
    {
       YoVariableRegistry registry = new YoVariableRegistry("registry");
@@ -53,8 +54,7 @@ public class DelayedYoDoubleTest
 
    }
 
-	@ContinuousIntegrationTest(estimatedDuration = 0.0)
-	@Test(timeout=300000)
+	@Test
    public void testDelayedYoVariableOneTickDelay()
    {
       YoVariableRegistry registry = new YoVariableRegistry("registry");
@@ -88,8 +88,7 @@ public class DelayedYoDoubleTest
       assertEquals(delayedYoVariable.getDoubleValue(), 3.0, 1e-7);
    }
 
-	@ContinuousIntegrationTest(estimatedDuration = 0.0)
-	@Test(timeout=300000)
+	@Test
    public void testDelayedYoVariableZeroTickDelay()
    {
       YoVariableRegistry registry = new YoVariableRegistry("registry");

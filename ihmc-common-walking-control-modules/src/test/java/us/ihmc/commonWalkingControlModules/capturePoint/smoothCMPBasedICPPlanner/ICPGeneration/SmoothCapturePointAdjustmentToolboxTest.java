@@ -4,13 +4,15 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationPlan;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
+import org.junit.jupiter.api.Tag;
+import org.junit.jupiter.api.Disabled;
 import us.ihmc.continuousIntegration.IntegrationCategory;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
@@ -22,7 +24,6 @@ import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.robotics.math.trajectories.FrameTrajectory3D;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 
-@ContinuousIntegrationPlan(categories = {IntegrationCategory.FAST})
 public class SmoothCapturePointAdjustmentToolboxTest
 {
    private static final int nTests = 10000;
@@ -38,7 +39,7 @@ public class SmoothCapturePointAdjustmentToolboxTest
    private final SmoothCapturePointAdjustmentToolbox icpAdjustmentToolbox = new SmoothCapturePointAdjustmentToolbox();
    private final List<FrameTuple3DBasics> icpQuantityInitialConditionList = new ArrayList<>();
 
-   @Before
+   @BeforeEach
    public void setupTest()
    {
       icpQuantityInitialConditionList.clear();
@@ -47,14 +48,13 @@ public class SmoothCapturePointAdjustmentToolboxTest
          icpQuantityInitialConditionList.add(new FrameVector3D());
    }
 
-   @After
+   @AfterEach
    public void tearDown()
    {
       ReferenceFrameTools.clearWorldFrameTree();
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.4)
-   @Test(timeout = 30000)
+   @Test
    public void testAdjustICPDuringInitialTransfer3DLinear()
    {
       // Linear polynomial: y(x) = a0 + a1*x
@@ -158,8 +158,7 @@ public class SmoothCapturePointAdjustmentToolboxTest
       }
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.9)
-   @Test(timeout = 30000)
+   @Test
    public void testAdjustICPDuringRegularTransfer3DLinear()
    {
       // Linear polynomial: y(x) = a0 + a1*x
@@ -287,8 +286,7 @@ public class SmoothCapturePointAdjustmentToolboxTest
       }
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.5)
-   @Test(timeout = 30000)
+   @Test
    public void testAdjustICPDuringRegularTransferRecomputed3DLinear()
    {
       // Linear polynomial: y(x) = a0 + a1*x
@@ -445,8 +443,7 @@ public class SmoothCapturePointAdjustmentToolboxTest
       }
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.9)
-   @Test(timeout = 30000)
+   @Test
    public void testAdjustICPDuringInitialTransfer3DCubic()
    {
       // Linear polynomial: y(x) = a0 + a1*x + a2*x + a3*x
@@ -550,8 +547,7 @@ public class SmoothCapturePointAdjustmentToolboxTest
       }
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 1.3)
-   @Test(timeout = 30000)
+   @Test
    public void testAdjustICPDuringRegularTransfer3DCubic()
    {
       // Linear polynomial: y(x) = a0 + a1*x + a2*x + a3*x

@@ -4,24 +4,24 @@ import static us.ihmc.robotics.Assert.*;
 
 import java.util.ArrayList;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import gnu.trove.list.array.TDoubleArrayList;
 import us.ihmc.commons.MutationTestFacilitator;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationPlan;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
+import org.junit.jupiter.api.Tag;
+import org.junit.jupiter.api.Disabled;
 import us.ihmc.robotics.math.trajectories.generators.TrajectoryPointOptimizer;
 import us.ihmc.continuousIntegration.IntegrationCategory;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 
-@ContinuousIntegrationPlan(categories = {IntegrationCategory.FAST})
 public class TrajectoryPointOptimizerTest
 {
    private static final double epsilon = 10E-7;
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(timeout = 30000, expected=RuntimeException.class)
+   @Test
    public void testEndPointSetters()
    {
       int dimensions = 3;
@@ -38,8 +38,7 @@ public class TrajectoryPointOptimizerTest
       optimizer.setEndPoints(rightSize, wrongSize, rightSize, rightSize);
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(timeout = 30000, expected=RuntimeException.class)
+   @Test
    public void testWaypointSetters()
    {
       int dimensions = 1;
@@ -65,8 +64,7 @@ public class TrajectoryPointOptimizerTest
       optimizer.setWaypoints(waypoints);
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(timeout = 30000)
+   @Test
    public void testYoVariables()
    {
       int dimensions = 3;
@@ -78,8 +76,7 @@ public class TrajectoryPointOptimizerTest
 
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(timeout = 30000)
+   @Test
    public void testSimpleSymmetricProblem()
    {
       int dimensions = 1;
@@ -146,8 +143,7 @@ public class TrajectoryPointOptimizerTest
       assertEquals(waypointVelocity.get(0), 1.5, epsilon);
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(timeout = 30000)
+   @Test
    public void testSimpleProblem()
    {
       int dimensions = 1;
@@ -175,8 +171,7 @@ public class TrajectoryPointOptimizerTest
          assertEquals(coefficients.get(0).get(i), expected[i], epsilon);
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(timeout = 30000)
+   @Test
    public void testTrivialProblem()
    {
       int dimensions = 1;
@@ -204,8 +199,7 @@ public class TrajectoryPointOptimizerTest
          assertEquals(expected[i], coefficients.get(0).get(i), epsilon);
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(timeout = 30000)
+   @Test
    public void testTimeDescent()
    {
       int dimensions = 2;

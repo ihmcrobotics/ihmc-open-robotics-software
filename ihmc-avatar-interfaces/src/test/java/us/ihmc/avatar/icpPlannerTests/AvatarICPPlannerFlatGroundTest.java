@@ -5,12 +5,12 @@ import static us.ihmc.robotics.Assert.*;
 import java.util.ArrayList;
 import java.util.Random;
 
-import org.junit.After;
-import org.junit.Before;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
 
 import controller_msgs.msg.dds.FootstepDataListMessage;
 import controller_msgs.msg.dds.FootstepDataMessage;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import us.ihmc.avatar.DRCObstacleCourseStartingLocation;
 import us.ihmc.avatar.MultiRobotTestInterface;
 import us.ihmc.avatar.testTools.DRCSimulationTestHelper;
@@ -18,6 +18,8 @@ import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParam
 import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHumanoidControllerToolbox;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations;
+import org.junit.jupiter.api.Tag;
+import org.junit.jupiter.api.Disabled;
 import us.ihmc.continuousIntegration.IntegrationCategory;
 import us.ihmc.euclid.geometry.BoundingBox3D;
 import us.ihmc.euclid.geometry.interfaces.Vertex2DSupplier;
@@ -63,14 +65,14 @@ public abstract class AvatarICPPlannerFlatGroundTest implements MultiRobotTestIn
 
    private DRCSimulationTestHelper drcSimulationTestHelper;
 
-   @Before
+   @BeforeEach
    public void showMemoryUsageBeforeTest()
    {
       MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " before test.");
       simulationTestingParameters = SimulationTestingParameters.createFromEnvironmentVariables();
    }
 
-   @After
+   @AfterEach
    public void destroySimulationAndRecycleMemory()
    {
       if (simulationTestingParameters.getKeepSCSUp())
@@ -92,8 +94,8 @@ public abstract class AvatarICPPlannerFlatGroundTest implements MultiRobotTestIn
    /**
     * This test will drop the floor out from underneath the sim randomly while standing. Tests if detection and hold position are working well.
     */
-   @ContinuousIntegrationAnnotations.ContinuousIntegrationTest(estimatedDuration = 74.3, categoriesOverride = {IntegrationCategory.EXCLUDE})
-   @Test(timeout = 370000)
+   @Disabled
+   @Test
    public void testChangeOfSupport() throws SimulationExceededMaximumTimeException, RuntimeException
    {
       BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
@@ -194,8 +196,7 @@ public abstract class AvatarICPPlannerFlatGroundTest implements MultiRobotTestIn
    /**
     * This test pauses walking after the first two steps to check that functionality, and then finishes the plan.
     */
-   @ContinuousIntegrationAnnotations.ContinuousIntegrationTest(estimatedDuration = 64.8, categoriesOverride = {IntegrationCategory.FAST})
-   @Test(timeout = 320000)
+   @Test
    public void testPauseWalkingInSwing() throws SimulationExceededMaximumTimeException, RuntimeException
    {
       BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
@@ -264,8 +265,7 @@ public abstract class AvatarICPPlannerFlatGroundTest implements MultiRobotTestIn
    /**
     * This test pauses walking on the first step to check that functionality, and then finishes the plan.
     */
-   @ContinuousIntegrationAnnotations.ContinuousIntegrationTest(estimatedDuration = 69.9, categoriesOverride = {IntegrationCategory.FAST})
-   @Test(timeout = 350000)
+   @Test
    public void testPauseWalkingInTransferFirstStep() throws SimulationExceededMaximumTimeException, RuntimeException
    {
       BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
@@ -334,8 +334,7 @@ public abstract class AvatarICPPlannerFlatGroundTest implements MultiRobotTestIn
    /**
     * This test pauses walking after the first two steps to check that functionality, and then finishes the plan.
     */
-   @ContinuousIntegrationAnnotations.ContinuousIntegrationTest(estimatedDuration = 68.1, categoriesOverride = {IntegrationCategory.FAST})
-   @Test(timeout = 340000)
+   @Test
    public void testPauseWalkingInTransfer() throws SimulationExceededMaximumTimeException, RuntimeException
    {
       BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());

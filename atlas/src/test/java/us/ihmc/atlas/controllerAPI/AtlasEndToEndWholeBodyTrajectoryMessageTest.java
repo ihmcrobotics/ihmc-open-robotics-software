@@ -1,6 +1,6 @@
 package us.ihmc.atlas.controllerAPI;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import us.ihmc.atlas.AtlasRobotModel;
 import us.ihmc.atlas.AtlasRobotVersion;
@@ -8,6 +8,8 @@ import us.ihmc.avatar.controllerAPI.EndToEndWholeBodyTrajectoryMessageTest;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.RobotTarget;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
+import org.junit.jupiter.api.Tag;
+import org.junit.jupiter.api.Disabled;
 import us.ihmc.simulationConstructionSetTools.bambooTools.BambooTools;
 
 public class AtlasEndToEndWholeBodyTrajectoryMessageTest extends EndToEndWholeBodyTrajectoryMessageTest
@@ -28,40 +30,35 @@ public class AtlasEndToEndWholeBodyTrajectoryMessageTest extends EndToEndWholeBo
    }
 
    @Override
-   @ContinuousIntegrationTest(estimatedDuration = 16.8)
-   @Test(timeout = 84000)
+   @Test
    public void testIssue47BadChestTrajectoryMessage() throws Exception
    {
       super.testIssue47BadChestTrajectoryMessage();
    }
 
    @Override
-   @ContinuousIntegrationTest(estimatedDuration = 15.8)
-   @Test(timeout = 79000)
+   @Test
    public void testIssue47BadPelvisTrajectoryMessage() throws Exception
    {
       super.testIssue47BadPelvisTrajectoryMessage();
    }
 
    @Override
-   @ContinuousIntegrationTest(estimatedDuration = 36.1)
-   @Test(timeout = 180000)
+   @Test
    public void testSingleWaypoint() throws Exception
    {
       super.testSingleWaypoint();
    }
 
    @Override
-   @ContinuousIntegrationTest(estimatedDuration = 36.4)
-   @Test(timeout = 180000)
+   @Test
    public void testSingleWaypointUsingMessageOfMessages() throws Exception
    {
       super.testSingleWaypointUsingMessageOfMessages();
    }
 
    @Override
-   @ContinuousIntegrationTest(estimatedDuration = 63.1)
-   @Test(timeout = 320000)
+   @Test
    public void testSingleWaypointUsingMessageOfMessagesWithDelays() throws Exception
    {
       super.testSingleWaypointUsingMessageOfMessagesWithDelays();

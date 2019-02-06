@@ -2,7 +2,7 @@ package us.ihmc.commonWalkingControlModules.desiredFootStep;
 
 import static us.ihmc.robotics.Assert.*;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import us.ihmc.commonWalkingControlModules.messageHandlers.MomentumTrajectoryHandler;
 import us.ihmc.commons.MutationTestFacilitator;
@@ -11,6 +11,8 @@ import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.communication.packets.ExecutionMode;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationPlan;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
+import org.junit.jupiter.api.Tag;
+import org.junit.jupiter.api.Disabled;
 import us.ihmc.continuousIntegration.IntegrationCategory;
 import us.ihmc.euclid.tools.EuclidCoreTestTools;
 import us.ihmc.euclid.tuple3D.Point3D;
@@ -22,11 +24,9 @@ import us.ihmc.yoVariables.variable.YoDouble;
 
 import java.util.Random;
 
-@ContinuousIntegrationPlan(categories = {IntegrationCategory.FAST})
 public class MomentumTrajectoryHandlerTest
 {
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(timeout = 30000)
+   @Test
    public void testSimpleExample()
    {
       YoVariableRegistry registry = new YoVariableRegistry("TestRegistry");
@@ -64,8 +64,7 @@ public class MomentumTrajectoryHandlerTest
       EuclidCoreTestTools.assertTuple3DEquals(new Vector3D(0.0, 0.0, 0.0), momentumTrajectory.get(2).getLinearVelocity(), Double.MIN_VALUE);
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(timeout = 30000)
+   @Test
    public void testSamplingDurations()
    {
       YoVariableRegistry registry = new YoVariableRegistry("TestRegistry");
@@ -140,8 +139,7 @@ public class MomentumTrajectoryHandlerTest
       }
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(timeout = 30000)
+   @Test
    public void testOutOfBounds()
    {
       YoVariableRegistry registry = new YoVariableRegistry("TestRegistry");
@@ -171,8 +169,7 @@ public class MomentumTrajectoryHandlerTest
       assertEquals(3, momentumTrajectory.size());
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(timeout = 30000)
+   @Test
    public void testQueuing()
    {
       YoVariableRegistry registry = new YoVariableRegistry("TestRegistry");

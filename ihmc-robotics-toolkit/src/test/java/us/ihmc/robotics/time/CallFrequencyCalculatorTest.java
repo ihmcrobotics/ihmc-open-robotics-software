@@ -2,16 +2,17 @@ package us.ihmc.robotics.time;
 
 import static us.ihmc.robotics.Assert.*;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
+import org.junit.jupiter.api.Tag;
+import org.junit.jupiter.api.Disabled;
 import us.ihmc.continuousIntegration.IntegrationCategory;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 
 public class CallFrequencyCalculatorTest
 {
-   @ContinuousIntegrationTest(estimatedDuration = 5.0, categoriesOverride = IntegrationCategory.FAST)
-   @Test(timeout = 30000)
+   @Test
    public void testDetermineCallFrequency()
    {
       CallFrequencyCalculator callFrequencyCalculator = new CallFrequencyCalculator(new YoVariableRegistry("test"), "");

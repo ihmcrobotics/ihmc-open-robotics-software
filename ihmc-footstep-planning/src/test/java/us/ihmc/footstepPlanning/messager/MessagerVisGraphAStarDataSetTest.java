@@ -1,14 +1,15 @@
 package us.ihmc.footstepPlanning.messager;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationPlan;
+import org.junit.jupiter.api.Tag;
+import org.junit.jupiter.api.Disabled;
 import us.ihmc.continuousIntegration.IntegrationCategory;
 import us.ihmc.footstepPlanning.FootstepPlannerDataSetTest;
 import us.ihmc.footstepPlanning.FootstepPlannerType;
 
-@ContinuousIntegrationPlan(categories = IntegrationCategory.FAST)
 public class MessagerVisGraphAStarDataSetTest extends FootstepPlannerDataSetTest
 {
    @Override
@@ -18,16 +19,15 @@ public class MessagerVisGraphAStarDataSetTest extends FootstepPlannerDataSetTest
    }
 
    @Override
-   @Test(timeout = 500000)
-   @ContinuousIntegrationAnnotations.ContinuousIntegrationTest(estimatedDuration = 90.0)
+   @Test
    public void testDatasetsWithoutOcclusion()
    {
       super.testDatasetsWithoutOcclusion();
    }
 
    @Override
-   @Test(timeout = 500000)
-   @ContinuousIntegrationAnnotations.ContinuousIntegrationTest(estimatedDuration = 90.0, categoriesOverride = IntegrationCategory.IN_DEVELOPMENT)
+   @Test
+   @Disabled
    public void testDatasetsWithoutOcclusionInDevelopment()
    {
       super.testDatasetsWithoutOcclusionInDevelopment();

@@ -4,15 +4,17 @@ import static us.ihmc.robotics.Assert.*;
 
 import java.util.Random;
 
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import controller_msgs.msg.dds.LocalizationPacket;
 import controller_msgs.msg.dds.PelvisPoseErrorPacket;
 import controller_msgs.msg.dds.StampedPosePacket;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationPlan;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
+import org.junit.jupiter.api.Tag;
+import org.junit.jupiter.api.Disabled;
 import us.ihmc.continuousIntegration.IntegrationCategory;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
@@ -38,7 +40,6 @@ import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoFramePoseUsingYawPitchRoll;
 
-@ContinuousIntegrationPlan(categories={IntegrationCategory.FAST})
 public class NewPelvisPoseHistoryCorrectionTest
 {
    private YoVariableRegistry registry;
@@ -73,7 +74,7 @@ public class NewPelvisPoseHistoryCorrectionTest
 
    private boolean angleErrorTooBigDetectedAndPacketSent = false;
 
-   @Before
+   @BeforeEach
    public void setUp()
    {
       MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " before test.");
@@ -85,7 +86,7 @@ public class NewPelvisPoseHistoryCorrectionTest
 
    }
 
-   @After
+   @AfterEach
    public void showMemoryAfterTests()
    {
       MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " after test.");
@@ -245,8 +246,8 @@ public class NewPelvisPoseHistoryCorrectionTest
    private YoDouble maximumErrorTranslation;
    private YoDouble maximumErrorAngleInDegrees;
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.8, categoriesOverride = {IntegrationCategory.EXCLUDE})
-   @Test(timeout = 30000)
+   @Disabled
+   @Test
    public void testTranslationCorrectionOnlyWithPelvisFollowingAKnownPathAndRandomLocalizationOffsets()
    {
       isRotationCorrectionEnabled = (YoBoolean) registry.getVariable("ClippedSpeedOffsetErrorInterpolator", "isRotationCorrectionEnabled");
@@ -321,8 +322,8 @@ public class NewPelvisPoseHistoryCorrectionTest
       }
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 1.0, categoriesOverride = {IntegrationCategory.EXCLUDE}) // This test used to hack the rootBody and 6-DoF joint in a way that is not possible since the feature 'feature/moving-reference-frame'.
-   @Test(timeout = 30000)
+   @Disabled
+   @Test
    public void testTooBigAngleErrorAreDetectedAndPacketIsSent()
    {
       boolean checkPacketHasBeenSentNextLoopIteration = false;

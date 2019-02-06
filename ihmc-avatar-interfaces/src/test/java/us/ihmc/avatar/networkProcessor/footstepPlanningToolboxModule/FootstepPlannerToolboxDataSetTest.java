@@ -10,10 +10,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicReference;
 
-import org.junit.After;
+import org.junit.jupiter.api.AfterEach;
 import us.ihmc.robotics.Assert;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import com.jme3.math.Transform;
 
@@ -45,6 +45,8 @@ import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.communication.packets.PlanarRegionMessageConverter;
 import us.ihmc.communication.packets.ToolboxState;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
+import org.junit.jupiter.api.Tag;
+import org.junit.jupiter.api.Disabled;
 import us.ihmc.continuousIntegration.ContinuousIntegrationTools;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
@@ -149,7 +151,7 @@ public abstract class FootstepPlannerToolboxDataSetTest
 
    public abstract FootstepPlannerType getPlannerType();
 
-   @Before
+   @BeforeEach
    public void setup()
    {
       VISUALIZE = VISUALIZE && !ContinuousIntegrationTools.isRunningOnContinuousIntegrationServer();
@@ -202,8 +204,7 @@ public abstract class FootstepPlannerToolboxDataSetTest
          ThreadTools.sleep(10);
    }
 
-   @Test(timeout = 500000)
-   @ContinuousIntegrationTest(estimatedDuration = 13.0)
+   @Test
    public void testDatasetsWithoutOcclusion()
    {
       List<FootstepPlannerUnitTestDataset> allDatasets = FootstepPlannerIOTools
@@ -212,7 +213,7 @@ public abstract class FootstepPlannerToolboxDataSetTest
    }
 
 
-   @After
+   @AfterEach
    public void tearDown() throws Exception
    {
       ros2Node.destroy();

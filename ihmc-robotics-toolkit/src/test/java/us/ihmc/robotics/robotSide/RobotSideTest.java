@@ -2,15 +2,16 @@ package us.ihmc.robotics.robotSide;
 
 import static us.ihmc.robotics.Assert.*;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 
+import org.junit.jupiter.api.Tag;
+import org.junit.jupiter.api.Disabled;
 public class RobotSideTest
 {
 
-	@ContinuousIntegrationTest(estimatedDuration = 0.0)
-	@Test(timeout = 30000)
+	@Test
    public void testRobotSide()
    {
       RobotSide leftRobotSide = RobotSide.LEFT;
@@ -58,8 +59,7 @@ public class RobotSideTest
       assertEquals(numberToTest, leftRobotSide.negateIfRightSide(numberToTest), 1e-7);
    }
 
-	@ContinuousIntegrationTest(estimatedDuration = 0.0)
-	@Test(timeout = 30000)
+	@Test
    public void testCheckRobotSideMatch()
    {
       RobotSide leftRobotSide = RobotSide.LEFT;

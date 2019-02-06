@@ -1,7 +1,7 @@
 package us.ihmc.robotics.lists;
 
 import org.apache.commons.lang3.math.NumberUtils;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoInteger;
@@ -16,7 +16,7 @@ import static us.ihmc.robotics.Assert.*;
 
 public class YoPreallocatedListTest
 {
-   @Test(timeout = 30000)
+   @Test
    public void testConstructor()
    {
       YoPreallocatedList<YoDouble> list = new YoPreallocatedList<>(YoDouble.class, "Test", 10, new YoVariableRegistry("Test"));
@@ -25,7 +25,7 @@ public class YoPreallocatedListTest
       assertTrue(list.getLast() == null);
    }
 
-   @Test(timeout = 30000)
+   @Test
    public void testAddAndGet()
    {
       YoPreallocatedList<YoDouble> list = new YoPreallocatedList<>(YoDouble.class, "Test", 20, new YoVariableRegistry("Test"));
@@ -98,7 +98,7 @@ public class YoPreallocatedListTest
       assertTrue(list.getLast() == expectedList.get(finalSize - 1));
    }
 
-   @Test(timeout = 30000)
+   @Test
    public void testRemove()
    {
       YoPreallocatedList<YoInteger> list = new YoPreallocatedList<>(YoInteger.class, "Test", 10, new YoVariableRegistry("Test"));
@@ -143,7 +143,7 @@ public class YoPreallocatedListTest
       }
    }
 
-   @Test(timeout = 30000)
+   @Test
    public void testSwap()
    {
       Random rand = new Random(541964L);
@@ -191,7 +191,7 @@ public class YoPreallocatedListTest
       }
    }
 
-   @Test(timeout = 30000)
+   @Test
    public void testSort()
    {
       YoPreallocatedList<YoInteger> list = new YoPreallocatedList<>(YoInteger.class, "Test", 10, new YoVariableRegistry("Test"));
@@ -208,7 +208,7 @@ public class YoPreallocatedListTest
       assertTrue(list.get(4).getValue() == 50);
    }
 
-   @Test(timeout = 30000)
+   @Test
    public void testRemoveIndex()
    {
       int size = 10;
@@ -228,7 +228,7 @@ public class YoPreallocatedListTest
       assertTrue(list.size() == size - 4);
    }
 
-   @Test(timeout = 30000)
+   @Test
    public void testUnsupportedOperations()
    {
       int size = 5;

@@ -1,12 +1,14 @@
 package us.ihmc.quadrupedPlanning.footstepChooser;
 
-import org.junit.Ignore;
-import org.junit.Test;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
 import us.ihmc.commons.MutationTestFacilitator;
 import us.ihmc.commons.RandomNumbers;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
+import org.junit.jupiter.api.Tag;
+import org.junit.jupiter.api.Disabled;
 import us.ihmc.continuousIntegration.IntegrationCategory;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.tools.EuclidCoreTestTools;
@@ -29,13 +31,11 @@ import static org.fest.assertions.Fail.fail;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
-@ContinuousIntegrationAnnotations.ContinuousIntegrationPlan(categories = IntegrationCategory.FAST)
 public class PlanarRegionsListPointSnapperTest
 {
    private static final double epsilon = 1e-7;
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(timeout = 30000)
+   @Test
    public void testSimpleVerticalSnap()
    {
       Point2D pointToSnap = new Point2D();
@@ -54,8 +54,7 @@ public class PlanarRegionsListPointSnapperTest
       EuclidCoreTestTools.assertRigidBodyTransformEquals(expectedTransform, snapTransform, epsilon);
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(timeout = 30000)
+   @Test
    public void testSimpleVerticalAndRotatedSnap()
    {
       Point2D pointToSnap = new Point2D();
@@ -76,8 +75,7 @@ public class PlanarRegionsListPointSnapperTest
       assertSurfaceNormalsMatchAndSnapPreservesXFromAbove(snapTransform, planarRegionTransform);
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(timeout = 30000)
+   @Test
    public void testMovingAcrossStaircase()
    {
       PlanarRegionsList planarRegionsList = PlanarRegionsListExamples.generateStairCase();
@@ -90,9 +88,8 @@ public class PlanarRegionsListPointSnapperTest
       doATest(planarRegionsList, xyYawToTest);
    }
 
-   @Ignore
-   @ContinuousIntegrationTest(estimatedDuration = 0.7)
-   @Test(timeout = 30000)
+   @Disabled
+   @Test
    public void testRandomPlanarRegions()
    {
       Random random = new Random(1776L);
@@ -118,8 +115,7 @@ public class PlanarRegionsListPointSnapperTest
       doATest(planarRegionsList, xyYawToTest);
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(timeout = 30000)
+   @Test
    public void testBumpyGround()
    {
       Random random = new Random(1776L);
@@ -144,8 +140,7 @@ public class PlanarRegionsListPointSnapperTest
       doATest(planarRegionsList, xyYawToTest);
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(timeout = 30000)
+   @Test
    public void testSnapPolygonToFlatPlanarRegion()
    {
       Point2D pointToSnap = new Point2D();
@@ -184,8 +179,7 @@ public class PlanarRegionsListPointSnapperTest
       EuclidCoreTestTools.assertRigidBodyTransformEquals(expectedTransform, polygonSnappingTransform, epsilon);
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(timeout = 30000)
+   @Test
    public void testSnapPolygonToLargeRotatedRegion()
    {
       Point2D pointToSnap = new Point2D();
@@ -225,8 +219,7 @@ public class PlanarRegionsListPointSnapperTest
       assertSurfaceNormalsMatchAndSnapPreservesXFromAbove(polygonSnappingTransform, planarRegionTransformToWorld);
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(timeout = 30000)
+   @Test
    public void testYawOfRegionDoesNotYawSnappedPolygon()
    {
       Point2D pointToSnap = new Point2D();

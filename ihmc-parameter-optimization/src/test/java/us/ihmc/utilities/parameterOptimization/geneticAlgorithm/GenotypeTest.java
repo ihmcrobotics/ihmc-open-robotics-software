@@ -4,15 +4,16 @@ import static us.ihmc.robotics.Assert.*;
 
 import java.util.Random;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 
+import org.junit.jupiter.api.Tag;
+import org.junit.jupiter.api.Disabled;
 public class GenotypeTest
 {
 
-	@ContinuousIntegrationTest(estimatedDuration = 0.0)
-	@Test(timeout = 30000)
+	@Test
    public void testGenotype()
    {
       Random random = new Random(1776L);
@@ -90,8 +91,7 @@ public class GenotypeTest
       }
    }
 
-	@ContinuousIntegrationTest(estimatedDuration = 0.0)
-	@Test(timeout = 30000) 
+	@Test 
    public void testGenotypeAtExactlyOneAndZero()
    {
       Genotype genotype = new Genotype(new int[] { 8, 8 });
@@ -106,8 +106,7 @@ public class GenotypeTest
       }
    }
 
-	@ContinuousIntegrationTest(estimatedDuration = 0.0)
-	@Test(timeout = 30000) 
+	@Test 
    public void testGenotypeNearOneAndZero()
    {
       Genotype genotype = new Genotype(new int[] { 8, 8 });
@@ -122,8 +121,7 @@ public class GenotypeTest
       }
    }
 
-	@ContinuousIntegrationTest(estimatedDuration = 0.0)
-	@Test(timeout = 30000)
+	@Test
    public void testPhenotypeTwo()
    {
       Genotype genotype = new Genotype(new int[] { 8, 8 });
@@ -147,8 +145,7 @@ public class GenotypeTest
       } 
    }
 
-	@ContinuousIntegrationTest(estimatedDuration = 0.0)
-	@Test(timeout = 30000) 
+	@Test 
    public void testPhenotypeReconstruction()
    {
       Random random = new Random(1984L);

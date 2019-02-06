@@ -2,10 +2,12 @@ package us.ihmc.avatar.rigidbodies;
 
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
+import org.junit.jupiter.api.Tag;
+import org.junit.jupiter.api.Disabled;
 import us.ihmc.log.LogTools;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
@@ -15,8 +17,7 @@ public abstract class RigidBodyHashTest
 {
    private static final int maximumNumberOfTimes = 30;
 
-   @ContinuousIntegrationTest(estimatedDuration = 2.0)
-   @Test(timeout = 30000)
+   @Test
    public void testSignificantRigidBodiesHashCode()
    {
       DRCRobotModel robotModel = getRobotModel();
@@ -42,8 +43,7 @@ public abstract class RigidBodyHashTest
       assertTrue(true);
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 3.0)
-   @Test(timeout = 50000)
+   @Test
    public void testAllRigidBodiesHashCode()
    {
       DRCRobotModel robotModel = getRobotModel();

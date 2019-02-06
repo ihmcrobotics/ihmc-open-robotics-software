@@ -2,9 +2,11 @@ package us.ihmc.robotics.math.filters;
 
 import static us.ihmc.robotics.Assert.*;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
+import org.junit.jupiter.api.Tag;
+import org.junit.jupiter.api.Disabled;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.robotics.math.filters.FirstOrderFilteredYoVariable.FirstOrderFilterType;
@@ -16,8 +18,7 @@ public class FirstOrderFilteredYoVariableTest
 
    private final double DT = 0.001;
 
-	@ContinuousIntegrationTest(estimatedDuration = 1.1)
-	@Test(timeout=300000)
+	@Test
    public void testHighPassAttenuationForSinusoidalInput()
    {
       double inputFrequencyRadPerSec = 15.0;
@@ -40,8 +41,7 @@ public class FirstOrderFilteredYoVariableTest
       }
    }
 
-	@ContinuousIntegrationTest(estimatedDuration = 0.2)
-	@Test(timeout=300000)
+	@Test
    public void testLowPassAttenuationForSinusoidalInput()
    {
       double inputFrequencyRadPerSec = 10.0;
@@ -64,8 +64,7 @@ public class FirstOrderFilteredYoVariableTest
       }
    }
 
-	@ContinuousIntegrationTest(estimatedDuration = 0.1)
-	@Test(timeout=300000)
+	@Test
    public void testBandPassAttenuationForSinusoidalInput()
    {
       double inputFrequencyRadPerSec = 10.0;

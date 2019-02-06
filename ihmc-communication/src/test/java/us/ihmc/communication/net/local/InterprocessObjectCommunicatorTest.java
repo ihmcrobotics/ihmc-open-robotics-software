@@ -6,8 +6,8 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Random;
 
-import org.junit.After;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.Test;
 
 import std_msgs.msg.dds.Float64;
 import std_msgs.msg.dds.Int32;
@@ -16,10 +16,11 @@ import us.ihmc.communication.net.ObjectConsumer;
 import us.ihmc.communication.packets.Packet;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 
+import org.junit.jupiter.api.Tag;
+import org.junit.jupiter.api.Disabled;
 public class InterprocessObjectCommunicatorTest
 {
-	@ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(timeout = 30000)
+   @Test
    public void testOpeningAndClosingALotOfPorts() throws IOException
    {
       TestNetClassList classList = new TestNetClassList();
@@ -42,8 +43,7 @@ public class InterprocessObjectCommunicatorTest
 
    }
 
-	@ContinuousIntegrationTest(estimatedDuration = 1.4)
-   @Test(timeout = 30000)
+   @Test
    public void testSendingObjectsToClients() throws IOException
    {
       IntraprocessObjectCommunicator port128ClientA = new IntraprocessObjectCommunicator(128, new TestNetClassList());
@@ -93,7 +93,7 @@ public class InterprocessObjectCommunicatorTest
 
    }
 
-   @After
+   @AfterEach
    public void closeNetwork()
    {
       IntraprocessCommunicationNetwork.closeAllConnectionsForMyJUnitTests();

@@ -3,11 +3,13 @@ package us.ihmc.quadrupedRobotics.controller.position;
 import java.io.IOException;
 import java.util.Random;
 
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
+import org.junit.jupiter.api.Tag;
+import org.junit.jupiter.api.Disabled;
 import us.ihmc.continuousIntegration.IntegrationCategory;
 import us.ihmc.quadrupedRobotics.QuadrupedMultiRobotTestInterface;
 import us.ihmc.quadrupedRobotics.QuadrupedPositionTestYoVariables;
@@ -27,7 +29,7 @@ public abstract class QuadrupedPositionCrawlTurningVelocityTest implements Quadr
    private GoalOrientedTestConductor conductor;
    private QuadrupedPositionTestYoVariables variables;
 
-   @Before
+   @BeforeEach
    public void setup()
    {
       try
@@ -45,7 +47,7 @@ public abstract class QuadrupedPositionCrawlTurningVelocityTest implements Quadr
       }
    }
 
-   @After
+   @AfterEach
    public void tearDown()
    {
       conductor.concludeTesting();
@@ -55,8 +57,7 @@ public abstract class QuadrupedPositionCrawlTurningVelocityTest implements Quadr
       MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " after test.");
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 150.0, categoriesOverride = {IntegrationCategory.FAST, IntegrationCategory.VIDEO})
-   @Test(timeout = 600000)
+   @Test
    public void testTurnInPlaceRegularSpeed() throws SimulationExceededMaximumTimeException, ControllerFailureException, IOException
    {
       QuadrupedTestBehaviors.standUp(conductor, variables);
@@ -69,8 +70,8 @@ public abstract class QuadrupedPositionCrawlTurningVelocityTest implements Quadr
    }
 
    //"Turn in place slowly still fails due to CoM shifting outside support polygon. Need to fix it..."
-   @ContinuousIntegrationTest(estimatedDuration = 150.0, categoriesOverride = {IntegrationCategory.EXCLUDE, IntegrationCategory.VIDEO})
-   @Test(timeout = 600000)
+   @Disabled
+   @Test
    public void testTurnInPlaceSlowly() throws SimulationExceededMaximumTimeException, ControllerFailureException, IOException
    {
       QuadrupedTestBehaviors.standUp(conductor, variables);
@@ -83,8 +84,7 @@ public abstract class QuadrupedPositionCrawlTurningVelocityTest implements Quadr
       conductor.simulate();
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 500.0)
-   @Test(timeout = 2000000)
+   @Test
    public void testWalkingBackwardStoppingAndTurning() throws SimulationExceededMaximumTimeException, ControllerFailureException, IOException
    {
       Random random = new Random(1234L);

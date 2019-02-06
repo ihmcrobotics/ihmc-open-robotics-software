@@ -1,8 +1,10 @@
 package us.ihmc.robotics.time;
 
 import us.ihmc.robotics.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
+import org.junit.jupiter.api.Tag;
+import org.junit.jupiter.api.Disabled;
 import us.ihmc.robotics.time.TimeInterval;
 import us.ihmc.robotics.time.TimeIntervalTools;
 
@@ -12,8 +14,7 @@ import static us.ihmc.robotics.Assert.*;
 
 public class TimeIntervalToolsTest
 {
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(timeout = 30000)
+   @Test
    public void testSortMethods()
    {
       double epsilon = 1e-6;
@@ -53,8 +54,7 @@ public class TimeIntervalToolsTest
       }
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(timeout = 30000)
+   @Test
    public void testRemoveMethods()
    {
       double epsilon = 1e-6;

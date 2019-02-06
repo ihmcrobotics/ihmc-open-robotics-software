@@ -5,29 +5,30 @@ import static us.ihmc.robotics.Assert.*;
 import java.util.ArrayList;
 import java.util.Random;
 
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
+import org.junit.jupiter.api.Tag;
+import org.junit.jupiter.api.Disabled;
 import us.ihmc.continuousIntegration.IntegrationCategory;
 
 public class TrapezoidalVelocityTrajectoryTest
 {
    private static final boolean VERBOSE = false;
 
-   @Before
+   @BeforeEach
    public void setUp() throws Exception
    {
    }
 
-   @After
+   @AfterEach
    public void tearDown() throws Exception
    {
    }
 
-	@ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(timeout = 30000)
+   @Test
    public void testGetState()
    {
       double t0 = 3.0;
@@ -91,8 +92,7 @@ public class TrapezoidalVelocityTrajectoryTest
 
 
 
-	@ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(timeout = 30000)
+   @Test
    public void DONTtestOne()
    {
       double t0 = 1.0;
@@ -119,8 +119,7 @@ public class TrapezoidalVelocityTrajectoryTest
 //    sleepForever();
    }
 
-	@ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(timeout = 30000)
+   @Test
    public void testTwo()
    {
       // Should we overshoot in this case, or just brake fast and violate acceleration limits...
@@ -149,8 +148,7 @@ public class TrapezoidalVelocityTrajectoryTest
 //    sleepForever();
    }
 
-	@ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(timeout = 30000)
+   @Test
    public void testWithoutEnforcingFinalVelocity()
    {
       double t0 = 0.0;
@@ -178,8 +176,7 @@ public class TrapezoidalVelocityTrajectoryTest
 //    sleepForever();
    }
 
-	@ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(timeout = 30000)
+   @Test
    public void testNotEnforcingFinalVelocityBadCase()
    {
       // +++tk 090219 added this test.
@@ -214,8 +211,7 @@ public class TrapezoidalVelocityTrajectoryTest
       assertTrue("endSpeed=" + endSpeed + ", : " + errorMessage, endSpeed <= maxVelocity);
    }
 
-	@ContinuousIntegrationTest(estimatedDuration = 0.3)
-   @Test(timeout = 30000)
+   @Test
    public void testRandomStuff()
    {
       Random random = new Random(1458L);
@@ -262,8 +258,7 @@ public class TrapezoidalVelocityTrajectoryTest
          throw new RuntimeException("testRandomStuff Failed. Check output.");
    }
 
-	@ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(timeout = 30000)
+   @Test
    public void testProblemOnDog()
    {
       double t0 = 0.0;
@@ -279,8 +274,7 @@ public class TrapezoidalVelocityTrajectoryTest
       performTests(trap, t0, x0, v0, xF, vF, vMax, aMax);
    }
 
-	@ContinuousIntegrationTest(estimatedDuration = 1.2)
-   @Test(timeout = 30000)
+   @Test
    public void testNotEnforcingFinalVelocity()
    {
       double maxInitialVelocity = 0.2;
@@ -352,8 +346,7 @@ public class TrapezoidalVelocityTrajectoryTest
    }
 
 
-	@ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(timeout = 30000)
+   @Test
    public void testProblemOne()
    {
       // Sometimes have a problem when vF == vMax.
@@ -371,8 +364,7 @@ public class TrapezoidalVelocityTrajectoryTest
 
    }
 
-	@ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(timeout = 30000)
+   @Test
    public void testProblemTwo()
    {
       double t0 = -6.454075981539176;
@@ -395,8 +387,8 @@ public class TrapezoidalVelocityTrajectoryTest
 	/**
 	 * Never really worked yet. Some day maybe.
 	 */
-   @ContinuousIntegrationTest(estimatedDuration = 0.1, categoriesOverride = IntegrationCategory.EXCLUDE)
-   @Test(timeout = 300000)
+   @Disabled
+   @Test
    public void DONTtestRandomSamples()
    {
       //TODO: This test binds at test number 110 or so!!!

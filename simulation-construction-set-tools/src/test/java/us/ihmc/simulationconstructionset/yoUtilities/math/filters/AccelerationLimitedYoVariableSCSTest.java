@@ -4,9 +4,11 @@ import static us.ihmc.robotics.Assert.*;
 
 import java.util.Random;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
+import org.junit.jupiter.api.Tag;
+import org.junit.jupiter.api.Disabled;
 import us.ihmc.continuousIntegration.IntegrationCategory;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
@@ -86,8 +88,7 @@ public class AccelerationLimitedYoVariableSCSTest
       }
    }
 
-	@ContinuousIntegrationTest(estimatedDuration = 0.0)
-	@Test(timeout=300000)
+	@Test
          public void makeSureGUIIsNotUpWhenRunning()
          {
             if ( VISUALIZE) throw new RuntimeException(this.getClass() + "was checked in with the GUI enabled. Better fix that."); 
@@ -114,8 +115,7 @@ public class AccelerationLimitedYoVariableSCSTest
       }
    }
 
-	@ContinuousIntegrationTest(estimatedDuration = 0.0)
-	@Test(timeout=300000)
+	@Test
    public void test_ZeroVelocity()
    {
       setupSCSStuff();
@@ -163,8 +163,7 @@ public class AccelerationLimitedYoVariableSCSTest
       shutdownSCSStuff(scs);
    }
 
-	@ContinuousIntegrationTest(estimatedDuration = 0.0)
-	@Test(timeout=300000)
+	@Test
    public void test_ConstantVelocity()
    {
       setupSCSStuff();
@@ -201,8 +200,7 @@ public class AccelerationLimitedYoVariableSCSTest
       shutdownSCSStuff(scs);
    }
 
-	@ContinuousIntegrationTest(estimatedDuration = 0.0)
-	@Test(timeout=300000)
+	@Test
    public void test_ConstantAcceleration_PlusInitialize()
    {
       setupSCSStuff();
@@ -250,8 +248,7 @@ public class AccelerationLimitedYoVariableSCSTest
       shutdownSCSStuff(scs);
    }
 
-	@ContinuousIntegrationTest(estimatedDuration = 0.0)
-	@Test(timeout=300000)
+	@Test
    public void test_Sine_Plus_Reset_Plus_Update()
    {
       setupSCSStuff();
@@ -303,8 +300,7 @@ public class AccelerationLimitedYoVariableSCSTest
       shutdownSCSStuff(scs);
    }
 
-	@ContinuousIntegrationTest(estimatedDuration = 0.0)
-	@Test(timeout=300000)
+	@Test
    public void test_RiseTimeSquareWave()
    {
       setupSCSStuff();
@@ -357,8 +353,7 @@ public class AccelerationLimitedYoVariableSCSTest
       shutdownSCSStuff(scs);
    }
 
-	@ContinuousIntegrationTest(estimatedDuration = 0.0)
-	@Test(timeout=300000)
+	@Test
    public void test_SquareWaves()
    {
       setupSCSStuff();
@@ -400,8 +395,7 @@ public class AccelerationLimitedYoVariableSCSTest
       shutdownSCSStuff(scs);
    }
 
-	@ContinuousIntegrationTest(estimatedDuration = 0.0)
-	@Test(timeout=300000)
+	@Test
    public void test_Chirp_Plus_UpdateWithoutNoArguments()
    {
       setupSCSStuff();
@@ -456,8 +450,7 @@ public class AccelerationLimitedYoVariableSCSTest
       shutdownSCSStuff(scs);
    }
 
-	@ContinuousIntegrationTest(estimatedDuration = 0.0)
-	@Test(timeout=300000)
+	@Test
    public void testSetAndGetGainsByPolePlacement()
    {
       setupSCSStuff();
@@ -479,8 +472,7 @@ public class AccelerationLimitedYoVariableSCSTest
       assertEquals(velocityGainResult, processed.getVelocityGain().getDoubleValue(), EPSILON);
    }
 
-	@ContinuousIntegrationTest(estimatedDuration = 0.0)
-	@Test(timeout=300000)
+	@Test
    public void testUpdate()
    {
       setupSCSStuff();
@@ -503,8 +495,7 @@ public class AccelerationLimitedYoVariableSCSTest
       }
    }
 
-	@ContinuousIntegrationTest(estimatedDuration = 0.0)
-	@Test(timeout=300000)
+	@Test
    public void testGetAndSetMaximumRateaAndAcceleration()
    {
       setupSCSStuff();
@@ -530,8 +521,8 @@ public class AccelerationLimitedYoVariableSCSTest
       assertEquals(maxAcceleration, processed.getMaximumAcceleration(), EPSILON);
    }
 
-	@ContinuousIntegrationTest(estimatedDuration = 0.1, categoriesOverride = IntegrationCategory.EXCLUDE)
-	@Test(timeout=300000)
+	@Disabled
+	@Test
    public void testDump()
    {
       double dt = 0.006;
@@ -594,8 +585,7 @@ public class AccelerationLimitedYoVariableSCSTest
       ThreadTools.sleepForever();
    }
 
-	@ContinuousIntegrationTest(estimatedDuration = 0.0)
-	@Test(timeout=300000)
+	@Test
    public void testErrorTooHigh()
    {
       assertFalse(isValueWithinMarginOfError(1.0, 0.0, 0.1));

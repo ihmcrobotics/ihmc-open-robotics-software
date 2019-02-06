@@ -2,14 +2,16 @@ package us.ihmc.commonWalkingControlModules.capturePoint.smoothCMPBasedICPPlanne
 
 import static us.ihmc.robotics.Assert.*;
 
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import us.ihmc.commons.Epsilons;
 import us.ihmc.commons.RandomNumbers;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationPlan;
+import org.junit.jupiter.api.Tag;
+import org.junit.jupiter.api.Disabled;
 import us.ihmc.continuousIntegration.IntegrationCategory;
 import us.ihmc.euclid.Axis;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
@@ -21,21 +23,19 @@ import us.ihmc.robotics.math.trajectories.TrajectoryMathTools;
 
 import java.util.Random;
 
-@ContinuousIntegrationPlan(categories = {IntegrationCategory.FAST})
 public class TorqueTrajectoryTest
 {
    private final static ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
    private static final double epsilon = 1e-6;
    private static final int iters = 100;
 
-   @After
+   @AfterEach
    public void tearDown()
    {
       ReferenceFrameTools.clearWorldFrameTree();
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(timeout = 30000)
+   @Test
    public void testSetter()
    {
       Random random = new Random(1738L);
@@ -71,8 +71,7 @@ public class TorqueTrajectoryTest
       }
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(timeout = 30000)
+   @Test
    public void testSetter2()
    {
       Random random = new Random(1738L);

@@ -1,11 +1,13 @@
 package us.ihmc.footstepPlanning.graphSearch;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import us.ihmc.commons.MutationTestFacilitator;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
+import org.junit.jupiter.api.Tag;
+import org.junit.jupiter.api.Disabled;
 import us.ihmc.continuousIntegration.ContinuousIntegrationTools;
 import us.ihmc.continuousIntegration.IntegrationCategory;
 import us.ihmc.euclid.Axis;
@@ -34,20 +36,18 @@ import java.util.Random;
 
 import static us.ihmc.robotics.Assert.*;
 
-@ContinuousIntegrationAnnotations.ContinuousIntegrationPlan(categories = IntegrationCategory.FAST)
 public class PlanarRegionBaseOfCliffAvoiderTest
 {
    private boolean visualize = true;
    private final Random random = new Random(4587L);
 
-   @Before
+   @BeforeEach
    public void setup()
    {
       visualize = visualize && !ContinuousIntegrationTools.isRunningOnContinuousIntegrationServer();
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(timeout = 30000)
+   @Test
    public void testBaseOfCliffAvoiderWithSimpleQueriesOnABlock()
    {
       double stepHeight = 0.2;
@@ -124,8 +124,7 @@ public class PlanarRegionBaseOfCliffAvoiderTest
       assertTrue(avoider.isNodeValid(node, null));
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(timeout = 3000000)
+   @Test
    public void testAvoidingRotatedAndElevatedCliff()
    {
       YoVariableRegistry registry = new YoVariableRegistry("TestRegistry");

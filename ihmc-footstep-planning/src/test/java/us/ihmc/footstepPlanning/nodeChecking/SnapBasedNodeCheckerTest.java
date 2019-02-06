@@ -2,10 +2,12 @@ package us.ihmc.footstepPlanning.nodeChecking;
 
 import us.ihmc.robotics.Assert;
 import org.junit.Rule;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.junit.rules.TestName;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
+import org.junit.jupiter.api.Tag;
+import org.junit.jupiter.api.Disabled;
 import us.ihmc.euclid.Axis;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.geometry.LineSegment3D;
@@ -43,8 +45,7 @@ public class SnapBasedNodeCheckerTest
    @Rule
    public TestName name = new TestName();
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(timeout = 30000)
+   @Test
    public void testSwingingThroughObstacle0()
    {
       FootstepPlannerParameters parameters = new DefaultFootstepPlanningParameters();
@@ -120,8 +121,7 @@ public class SnapBasedNodeCheckerTest
       }
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(timeout = 30000)
+   @Test
    public void testSwingingThroughObstacle1()
    {
       FootstepPlannerParameters parameters = new DefaultFootstepPlanningParameters();
@@ -197,8 +197,7 @@ public class SnapBasedNodeCheckerTest
       }
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(timeout = 30000)
+   @Test
    public void testValidNode()
    {
       FootstepNodeSnapper snapper = new TestSnapper();
@@ -213,8 +212,7 @@ public class SnapBasedNodeCheckerTest
       Assert.assertTrue(checker.isNodeValid(node0, node1));
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(timeout = 30000)
+   @Test
    public void testStartNodeValid()
    {
       FootstepNodeSnapper snapper = new TestSnapper();
@@ -228,8 +226,7 @@ public class SnapBasedNodeCheckerTest
       Assert.assertTrue(checker.isNodeValid(node, null));
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(timeout = 30000, expected = RuntimeException.class)
+   @Test
    public void testSameNodes()
    {
       FootstepPlannerParameters parameters = new DefaultFootstepPlanningParameters();
@@ -241,8 +238,7 @@ public class SnapBasedNodeCheckerTest
       checker.isNodeValid(node, node);
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(timeout = 30000)
+   @Test
    public void testTooHighNode()
    {
       FootstepPlannerParameters parameters = new DefaultFootstepPlanningParameters()
@@ -283,8 +279,7 @@ public class SnapBasedNodeCheckerTest
       Assert.assertTrue(checker.isNodeValid(node0, node3));
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(timeout = 30000)
+   @Test
    public void testTooSmallFoothold()
    {
       FootstepPlannerParameters parameters = new DefaultFootstepPlanningParameters();

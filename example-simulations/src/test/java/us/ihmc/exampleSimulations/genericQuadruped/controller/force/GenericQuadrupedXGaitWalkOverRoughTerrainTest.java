@@ -1,9 +1,11 @@
 package us.ihmc.exampleSimulations.genericQuadruped.controller.force;
 
 import junit.framework.AssertionFailedError;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationPlan;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
+import org.junit.jupiter.api.Tag;
+import org.junit.jupiter.api.Disabled;
 import us.ihmc.continuousIntegration.IntegrationCategory;
 import us.ihmc.exampleSimulations.genericQuadruped.GenericQuadrupedTestFactory;
 import us.ihmc.exampleSimulations.genericQuadruped.parameters.GenericQuadrupedXGaitSettings;
@@ -17,40 +19,36 @@ public class GenericQuadrupedXGaitWalkOverRoughTerrainTest extends QuadrupedXGai
 {
    private QuadrupedXGaitSettingsReadOnly xGaitSettings;
 
-   @ContinuousIntegrationTest(estimatedDuration = 80.0)
-   @Test(timeout = 2000000)
+   @Test
    public void testWalkingUpStaircase() throws IOException
    {
       xGaitSettings = new GenericQuadrupedXGaitSettings();
       super.testWalkingUpStaircase();
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 80.0)
-   @Test(timeout = 2000000)
+   @Test
    public void testWalkingOverTiledGround() throws IOException, AssertionFailedError
    {
       xGaitSettings = new GenericQuadrupedXGaitSettings();
       super.testWalkingOverTiledGround();
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 80.0)
-   @Test(timeout = 2000000)
+   @Test
    public void testWalkingOverSingleStepUp() throws IOException, AssertionFailedError
    {
       xGaitSettings = new GenericQuadrupedXGaitSettings();
       super.testWalkingOverSingleStepUp(Double.NaN);
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 80.0)
-   @Test(timeout = 2000000)
+   @Test
    public void testWalkingOverConsecutiveRamps() throws IOException, AssertionFailedError
    {
       xGaitSettings = new GenericQuadrupedXGaitSettings();
       super.testWalkingOverConsecutiveRamps();
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 80.0, categoriesOverride = IntegrationCategory.EXCLUDE)
-   @Test(timeout = 2000000)
+   @Disabled
+   @Test
    public void testWalkingOverCinderBlockField() throws IOException, AssertionFailedError
    {
       xGaitSettings = new GenericQuadrupedXGaitSettings();

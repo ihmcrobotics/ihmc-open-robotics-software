@@ -4,10 +4,12 @@ import static us.ihmc.robotics.Assert.*;
 
 import java.util.Random;
 
-import org.junit.After;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.Test;
 
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
+import org.junit.jupiter.api.Tag;
+import org.junit.jupiter.api.Disabled;
 import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
@@ -24,14 +26,13 @@ public class HermiteCurveBasedOrientationTrajectoryGeneratorTest
 {
    private static final boolean DEBUG = false;
 
-   @After
+   @AfterEach
    public void tearDown()
    {
       ReferenceFrameTools.clearWorldFrameTree();
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.8)
-   @Test(timeout = 30000)
+   @Test
    public void testDerivativesConsistency() throws Exception
    {
       ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
@@ -93,8 +94,7 @@ public class HermiteCurveBasedOrientationTrajectoryGeneratorTest
       }
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.1)
-   @Test(timeout = 30000)
+   @Test
    public void testLimitConditions() throws Exception
    {
       ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
@@ -193,8 +193,7 @@ public class HermiteCurveBasedOrientationTrajectoryGeneratorTest
       }
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.3)
-   @Test(timeout = 30000)
+   @Test
    public void testContinuityForSlowTrajectory() throws Exception
    {
       QuaternionCalculus quaternionCalculus = new QuaternionCalculus();
@@ -300,8 +299,7 @@ public class HermiteCurveBasedOrientationTrajectoryGeneratorTest
       }
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.6)
-   @Test(timeout = 30000)
+   @Test
    public void testContinuityForFastishTrajectory() throws Exception
    {
       QuaternionCalculus quaternionCalculus = new QuaternionCalculus();
@@ -414,8 +412,7 @@ public class HermiteCurveBasedOrientationTrajectoryGeneratorTest
    }
 
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.5)
-   @Test(timeout = 30000)
+   @Test
    public void testMostBasicTrajectory() throws Exception
    {
       ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();

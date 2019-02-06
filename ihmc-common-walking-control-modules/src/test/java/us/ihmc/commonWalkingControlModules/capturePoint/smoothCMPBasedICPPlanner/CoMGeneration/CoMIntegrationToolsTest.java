@@ -1,14 +1,16 @@
 package us.ihmc.commonWalkingControlModules.capturePoint.smoothCMPBasedICPPlanner.CoMGeneration;
 
-import org.junit.After;
+import org.junit.jupiter.api.AfterEach;
 import us.ihmc.robotics.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import us.ihmc.commonWalkingControlModules.capturePoint.CapturePointTools;
 import us.ihmc.commonWalkingControlModules.capturePoint.ICPPlannerSegmentedTrajectoryGenerator;
 import us.ihmc.commonWalkingControlModules.capturePoint.ICPPlannerTrajectoryGenerator;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationPlan;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
+import org.junit.jupiter.api.Tag;
+import org.junit.jupiter.api.Disabled;
 import us.ihmc.continuousIntegration.IntegrationCategory;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
@@ -18,21 +20,19 @@ import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoFramePoint3D;
 import us.ihmc.yoVariables.variable.YoFrameVector3D;
 
-@ContinuousIntegrationPlan(categories = {IntegrationCategory.FAST})
 public class CoMIntegrationToolsTest
 {
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
    private static final double integrationDT = 0.0001;
    private static final double epsilon = 0.005;
 
-   @After
+   @AfterEach
    public void tearDown()
    {
       ReferenceFrameTools.clearWorldFrameTree();
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.1)
-   @Test(timeout = 30000)
+   @Test
    public void testTransferIntegration()
    {
       YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
@@ -100,8 +100,7 @@ public class CoMIntegrationToolsTest
 
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.1)
-   @Test(timeout = 30000)
+   @Test
    public void testSwingIntegration()
    {
       YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
@@ -185,8 +184,7 @@ public class CoMIntegrationToolsTest
 
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(timeout = 30000)
+   @Test
    public void testSwingIntegrationWithSpline()
    {
       YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());

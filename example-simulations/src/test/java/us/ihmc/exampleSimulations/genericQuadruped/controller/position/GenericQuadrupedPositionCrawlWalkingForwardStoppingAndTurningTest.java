@@ -1,8 +1,10 @@
 package us.ihmc.exampleSimulations.genericQuadruped.controller.position;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationPlan;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
+import org.junit.jupiter.api.Tag;
+import org.junit.jupiter.api.Disabled;
 import us.ihmc.continuousIntegration.IntegrationCategory;
 import us.ihmc.exampleSimulations.genericQuadruped.GenericQuadrupedTestFactory;
 import us.ihmc.quadrupedRobotics.QuadrupedTestFactory;
@@ -12,7 +14,7 @@ import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulatio
 
 import java.io.IOException;
 
-@ContinuousIntegrationPlan(categories = IntegrationCategory.EXCLUDE)
+@Disabled
 public class GenericQuadrupedPositionCrawlWalkingForwardStoppingAndTurningTest extends QuadrupedPositionCrawlWalkingForwardStoppingAndTurningTest
 {
    @Override
@@ -22,8 +24,7 @@ public class GenericQuadrupedPositionCrawlWalkingForwardStoppingAndTurningTest e
    }
    
    @Override
-   @ContinuousIntegrationTest(estimatedDuration = 700.0)
-   @Test(timeout = 2000000)
+   @Test
    public void testWalkingForwardStoppingAndTurning() throws SimulationExceededMaximumTimeException, ControllerFailureException, IOException
    {
       super.testWalkingForwardStoppingAndTurning();

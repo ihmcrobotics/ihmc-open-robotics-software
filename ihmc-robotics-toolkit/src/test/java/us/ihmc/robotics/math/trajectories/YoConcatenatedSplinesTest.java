@@ -5,11 +5,13 @@ import static us.ihmc.robotics.Assert.*;
 import java.util.Arrays;
 import java.util.Random;
 
-import org.junit.After;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.Test;
 
 import us.ihmc.commons.RandomNumbers;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
+import org.junit.jupiter.api.Tag;
+import org.junit.jupiter.api.Disabled;
 import us.ihmc.euclid.Axis;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
@@ -24,14 +26,13 @@ public class YoConcatenatedSplinesTest
    private final static double EPSILON = 1;
    private final static Random random = new Random(2468642L);
 
-   @After
+   @AfterEach
    public void tearDown()
    {
       ReferenceFrameTools.clearWorldFrameTree();
    }
 
-	@ContinuousIntegrationTest(estimatedDuration = 1.7)
-	@Test(timeout = 30000)
+	@Test
    public void testSimpleCubicQuinticCubic()
    {
       int trials = 50;
@@ -63,8 +64,8 @@ public class YoConcatenatedSplinesTest
       }
    }
    
-	@ContinuousIntegrationTest(estimatedDuration = 0.1, categoriesOverride = IntegrationCategory.EXCLUDE)
-	@Test(timeout=300000)
+	@Disabled
+	@Test
    public void testSimpleCubicQuinticCubicTroublesome()
    {
       YoVariableRegistry registry = new YoVariableRegistry("ConcatenatedSplinesTest");
@@ -102,8 +103,7 @@ public class YoConcatenatedSplinesTest
       }
    }
 
-	@ContinuousIntegrationTest(estimatedDuration = 4.3)
-	@Test(timeout = 30000)
+	@Test
    public void testQuinticsFromCubicQuinticCubic()
    {
       int trials = 50;
@@ -141,8 +141,7 @@ public class YoConcatenatedSplinesTest
       }
    }
 
-	@ContinuousIntegrationTest(estimatedDuration = 1.7)
-	@Test(timeout = 30000)
+	@Test
    public void testTimeFromArcLength()
    {
       int trials = 50;

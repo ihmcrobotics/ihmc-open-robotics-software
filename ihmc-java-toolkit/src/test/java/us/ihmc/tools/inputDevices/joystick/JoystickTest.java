@@ -4,12 +4,14 @@ import static us.ihmc.robotics.Assert.*;
 
 import java.io.IOException;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import net.java.games.input.Component.Identifier;
 import net.java.games.input.Event;
 import net.java.games.input.test.ControllerReadTest;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
+import org.junit.jupiter.api.Tag;
+import org.junit.jupiter.api.Disabled;
 import us.ihmc.commons.Assertions;
 import us.ihmc.commons.RunnableThatThrows;
 import us.ihmc.continuousIntegration.IntegrationCategory;
@@ -18,8 +20,7 @@ import us.ihmc.tools.inputDevices.joystick.virtualJoystick.VirtualJoystick;
 
 public class JoystickTest
 {
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(timeout = 30000)
+   @Test
    public void testCreateJoystick()
    {
       try
@@ -50,8 +51,7 @@ public class JoystickTest
       }
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.1)
-   @Test(timeout = 30000)
+   @Test
    public void testCreateVirtualJoystick()
    {
       final Object monitor = new Object();
@@ -99,8 +99,7 @@ public class JoystickTest
       }
    }
    
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(timeout = 30000)
+   @Test
    public void testFindNonExistentJoystick()
    {
       Assertions.assertExceptionThrown(JoystickNotFoundException.class, new RunnableThatThrows()
@@ -116,8 +115,8 @@ public class JoystickTest
    boolean madCatz5Status = false;
    boolean madCatz1Status = false;
 
-   @ContinuousIntegrationTest(estimatedDuration = 10.0, categoriesOverride = IntegrationCategory.MANUAL)
-   @Test(timeout = 300000)
+   @Disabled
+   @Test
    public void testCreateTwoJoysticks()
    {
       final Object monitor1 = new Object();

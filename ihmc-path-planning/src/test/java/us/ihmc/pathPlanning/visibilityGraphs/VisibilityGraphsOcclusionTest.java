@@ -5,17 +5,19 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
-import org.junit.After;
+import org.junit.jupiter.api.AfterEach;
 import us.ihmc.robotics.Assert;
-import org.junit.Before;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.Rule;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.junit.rules.TestName;
 
 import us.ihmc.commons.MathTools;
 import us.ihmc.commons.PrintTools;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
+import org.junit.jupiter.api.Tag;
+import org.junit.jupiter.api.Disabled;
 import us.ihmc.continuousIntegration.ContinuousIntegrationTools;
 import us.ihmc.continuousIntegration.IntegrationCategory;
 import us.ihmc.euclid.Axis;
@@ -84,7 +86,7 @@ public class VisibilityGraphsOcclusionTest
 
    private enum OcclusionMethod {OCCLUSION, OCCLUSION_PLUS_GROUND, NO_OCCLUSION};
 
-   @Before
+   @BeforeEach
    public void setup()
    {
       visualize = visualize && !ContinuousIntegrationTools.isRunningOnContinuousIntegrationServer();
@@ -93,14 +95,14 @@ public class VisibilityGraphsOcclusionTest
    @Rule
    public TestName name = new TestName();
 
-   @After
+   @AfterEach
    public void tearDown()
    {
       ReferenceFrameTools.clearWorldFrameTree();
    }
 
-   @Test(timeout = TIMEOUT)
-   @ContinuousIntegrationTest(estimatedDuration = 10.0, categoriesOverride = {IntegrationCategory.IN_DEVELOPMENT})
+   @Test
+   @Disabled
    public void testFlatGround()
    {
       Point3D startPose = new Point3D();
@@ -109,8 +111,8 @@ public class VisibilityGraphsOcclusionTest
       runTest(startPose, goalPose, regions, OcclusionMethod.OCCLUSION, defaultMaxAllowedSolveTime, 3.0);
    }
 
-   @Test(timeout = TIMEOUT)
-   @ContinuousIntegrationTest(estimatedDuration = 10.0, categoriesOverride = {IntegrationCategory.IN_DEVELOPMENT})
+   @Test
+   @Disabled
    public void testFlatGroundWithWall()
    {
       Point3D startPose = new Point3D(-4.805, 0.001, 0.0);
@@ -128,8 +130,8 @@ public class VisibilityGraphsOcclusionTest
       runTest(startPose, goalPose, regions, OcclusionMethod.OCCLUSION, defaultMaxAllowedSolveTime);
    }
 
-   @Test(timeout = TIMEOUT)
-   @ContinuousIntegrationTest(estimatedDuration = 10.0, categoriesOverride = {IntegrationCategory.IN_DEVELOPMENT})
+   @Test
+   @Disabled
    public void testSimpleOcclusions()
    {
       Point3D startPose = new Point3D();
@@ -138,8 +140,8 @@ public class VisibilityGraphsOcclusionTest
       runTest(startPose, goalPose, regions, OcclusionMethod.OCCLUSION_PLUS_GROUND, defaultMaxAllowedSolveTime);
    }
 
-   @Test(timeout = TIMEOUT)
-   @ContinuousIntegrationTest(estimatedDuration = 0.5, categoriesOverride = {IntegrationCategory.IN_DEVELOPMENT})
+   @Test
+   @Disabled
    public void testMazeWithOcclusions()
    {
       Point3D startPose = new Point3D();
@@ -148,8 +150,8 @@ public class VisibilityGraphsOcclusionTest
       runTest(startPose, goalPose, regions, OcclusionMethod.OCCLUSION_PLUS_GROUND, defaultMaxAllowedSolveTime);
    }
 
-   @Test(timeout = TIMEOUT)
-   @ContinuousIntegrationTest(estimatedDuration = 10.0, categoriesOverride = {IntegrationCategory.IN_DEVELOPMENT})
+   @Test
+   @Disabled
    public void testCrazyBridgeEnvironment()
    {
       Point3D startPose = new Point3D(0.4, 0.5, 0.001);

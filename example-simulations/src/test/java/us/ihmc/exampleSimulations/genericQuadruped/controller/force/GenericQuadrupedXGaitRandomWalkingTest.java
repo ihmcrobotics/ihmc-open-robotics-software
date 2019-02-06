@@ -1,8 +1,10 @@
 package us.ihmc.exampleSimulations.genericQuadruped.controller.force;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationPlan;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
+import org.junit.jupiter.api.Tag;
+import org.junit.jupiter.api.Disabled;
 import us.ihmc.continuousIntegration.IntegrationCategory;
 import us.ihmc.exampleSimulations.genericQuadruped.GenericQuadrupedTestFactory;
 import us.ihmc.quadrupedRobotics.QuadrupedTestFactory;
@@ -12,7 +14,6 @@ import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulatio
 
 import java.io.IOException;
 
-@ContinuousIntegrationPlan(categories = IntegrationCategory.FAST)
 public class GenericQuadrupedXGaitRandomWalkingTest extends QuadrupedXGaitRandomWalkingTest
 {
    @Override
@@ -22,32 +23,29 @@ public class GenericQuadrupedXGaitRandomWalkingTest extends QuadrupedXGaitRandom
    }
 
    @Override
-   @ContinuousIntegrationTest(estimatedDuration = 45.0, categoriesOverride = IntegrationCategory.EXCLUDE)
-   @Test(timeout = 500000)
+   @Disabled
+   @Test
    public void testExtremeRandomWalking() throws SimulationExceededMaximumTimeException, ControllerFailureException, IOException
    {
       super.testExtremeRandomWalking();
    }
 
    @Override
-   @ContinuousIntegrationTest(estimatedDuration = 45.0)
-   @Test(timeout = 1200000)
+   @Test
    public void testWalkingRandomly() throws SimulationExceededMaximumTimeException, ControllerFailureException, IOException
    {
       super.testWalkingRandomly();
    }
 
    @Override
-   @ContinuousIntegrationTest(estimatedDuration = 60.0)
-   @Test(timeout = 860000)
+   @Test
    public void testWalkingAtRandomSpeedsWithStops() throws SimulationExceededMaximumTimeException, ControllerFailureException, IOException
    {
       super.testWalkingAtRandomSpeedsWithStops();
    }
 
    @Override
-   @ContinuousIntegrationTest(estimatedDuration = 65.0)
-   @Test(timeout = 1200000)
+   @Test
    public void testWalkingRandomVelocitiesStoppingAndTurning() throws SimulationExceededMaximumTimeException, ControllerFailureException, IOException
    {
       super.testWalkingRandomVelocitiesStoppingAndTurning();

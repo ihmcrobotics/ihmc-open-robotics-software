@@ -4,9 +4,11 @@ import static us.ihmc.robotics.Assert.*;
 
 import java.util.Random;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
+import org.junit.jupiter.api.Tag;
+import org.junit.jupiter.api.Disabled;
 import us.ihmc.tools.search.strings.fuzzySearch.CombinedFuzzySearchResult;
 
 /**
@@ -14,8 +16,7 @@ import us.ihmc.tools.search.strings.fuzzySearch.CombinedFuzzySearchResult;
  */
 public class SortFuzzyMatchesDescendingByFuzzyDistanceComparatorTest
 {
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(timeout = 30000)
+   @Test
    public void testCompare()
    {
       Random random = new Random(1976L);

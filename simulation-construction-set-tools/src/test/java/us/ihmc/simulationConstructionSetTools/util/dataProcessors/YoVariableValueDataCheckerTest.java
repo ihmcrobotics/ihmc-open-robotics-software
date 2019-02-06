@@ -4,11 +4,13 @@ import static us.ihmc.robotics.Assert.*;
 
 import java.util.Random;
 
-import org.junit.After;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.Test;
 
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationPlan;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
+import org.junit.jupiter.api.Tag;
+import org.junit.jupiter.api.Disabled;
 import us.ihmc.continuousIntegration.IntegrationCategory;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
@@ -17,14 +19,13 @@ import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.SimulationConstructionSetParameters;
 import us.ihmc.simulationconstructionset.util.simulationTesting.SimulationTestingParameters;
 
-@ContinuousIntegrationPlan(categories = {IntegrationCategory.FAST})
 public class YoVariableValueDataCheckerTest
 {
    private double EPSILON = 1e-10;
 
    private SimulationTestingParameters simulationTestingParameters = SimulationTestingParameters.createFromSystemProperties();
 
-   @After
+   @AfterEach
    public void destroySimulationAndRecycleMemory()
    {
       if (simulationTestingParameters.getKeepSCSUp())
@@ -35,8 +36,7 @@ public class YoVariableValueDataCheckerTest
       simulationTestingParameters = null;
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(timeout = 30000)
+   @Test
    public void testSimpleSmoothDerviativeNoExeeded()
    {
       Robot robot = new Robot("Derivative");
@@ -84,8 +84,7 @@ public class YoVariableValueDataCheckerTest
       assertTrue(!yoVariableValueDataChecker.isMinValueExeeded());
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(timeout = 30000)
+   @Test
    public void testSimpleSmoothDerviativeNoExeededWithSecondDerivateProvided()
    {
       Robot robot = new Robot("Derivative");
@@ -140,8 +139,7 @@ public class YoVariableValueDataCheckerTest
       assertTrue(!yoVariableValueDataChecker.isDerivativeCompErrorOccurred());
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(timeout = 30000)
+   @Test
    public void testSimpleSmoothDerviativeNoExeededWithSecondDerivateProvidedAndError()
    {
       Robot robot = new Robot("Derivative");
@@ -197,8 +195,7 @@ public class YoVariableValueDataCheckerTest
    }
 
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(timeout = 30000)
+   @Test
    public void testSimpleSmoothDerviativeExceed()
    {
       Robot robot = new Robot("Derivative");
@@ -244,8 +241,7 @@ public class YoVariableValueDataCheckerTest
    }
 
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(timeout = 30000, expected=RuntimeException.class)
+   @Test
    public void testMinGreaterThanMax()
    {
       Robot robot = new Robot("Derivative");
@@ -272,8 +268,7 @@ public class YoVariableValueDataCheckerTest
       yoVariableValueDataChecker.setMinimumValue(2.0);
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(timeout = 30000, expected=RuntimeException.class)
+   @Test
    public void testMaxGreaterThanMin()
    {
       Robot robot = new Robot("Derivative");
@@ -298,8 +293,7 @@ public class YoVariableValueDataCheckerTest
       yoVariableValueDataChecker.setMaximumValue(1.0);
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(timeout = 30000)
+   @Test
       public void testErrorThresholdOnDerivativeComparison()
    {
       Robot robot = new Robot("Derivative");
@@ -325,8 +319,7 @@ public class YoVariableValueDataCheckerTest
    }
 
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(timeout = 30000)
+   @Test
       public void testMaximumDerivative()
    {
       Robot robot = new Robot("Derivative");
@@ -352,8 +345,7 @@ public class YoVariableValueDataCheckerTest
    }
 
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(timeout = 30000)
+   @Test
    public void testMaximumSecondDerivative()
    {
       ValueDataCheckerParameters valueDataCheckerParametersOriginal = new ValueDataCheckerParameters();
@@ -367,8 +359,7 @@ public class YoVariableValueDataCheckerTest
       assertEquals(valueDataCheckerParametersOriginal.getMaximumSecondDerivative(), value, EPSILON);
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(timeout = 30000)
+   @Test
       public void testMaximumValue()
    {
       Robot robot = new Robot("Derivative");
@@ -394,8 +385,7 @@ public class YoVariableValueDataCheckerTest
    }
 
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(timeout = 30000)
+   @Test
    public void testMinimumValue()
    {
       ValueDataCheckerParameters valueDataCheckerParametersOriginal = new ValueDataCheckerParameters();
@@ -410,8 +400,7 @@ public class YoVariableValueDataCheckerTest
       assertFalse(valueDataCheckerParametersOriginal.getMinimumValue() == value);
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(timeout = 30000, expected=RuntimeException.class)
+   @Test
    public void testSetMinGreaterThanMax()
    {
       Robot robot = new Robot("Derivative");
@@ -432,8 +421,7 @@ public class YoVariableValueDataCheckerTest
       yoVariableValueDataChecker.setMinimumValue(value + 1.0);
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(timeout = 30000, expected=RuntimeException.class)
+   @Test
    public void testSetMaxLessThanMin()
    {
       Robot robot = new Robot("Derivative");

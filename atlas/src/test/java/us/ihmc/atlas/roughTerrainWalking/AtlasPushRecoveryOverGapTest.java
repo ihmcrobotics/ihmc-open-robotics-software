@@ -1,6 +1,6 @@
 package us.ihmc.atlas.roughTerrainWalking;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import us.ihmc.atlas.AtlasRobotModel;
 import us.ihmc.atlas.AtlasRobotVersion;
 import us.ihmc.atlas.parameters.AtlasICPOptimizationParameters;
@@ -14,32 +14,31 @@ import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParam
 import us.ihmc.commonWalkingControlModules.capturePoint.optimization.ICPOptimizationParameters;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationPlan;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
+import org.junit.jupiter.api.Tag;
+import org.junit.jupiter.api.Disabled;
 import us.ihmc.continuousIntegration.IntegrationCategory;
 import us.ihmc.simulationConstructionSetTools.bambooTools.BambooTools;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
 
-@ContinuousIntegrationPlan(categories = {IntegrationCategory.FAST, IntegrationCategory.VIDEO})
 public class AtlasPushRecoveryOverGapTest extends AvatarPushRecoveryOverGapTest
 {
    @Override
-   @ContinuousIntegrationTest(estimatedDuration = 33.4)
-   @Test(timeout = 170000)
+   @Test
    public void testNoPush() throws SimulationExceededMaximumTimeException
    {
       super.testNoPush();
    }
 
    @Override
-   @ContinuousIntegrationTest(estimatedDuration = 34.9)
-   @Test(timeout = 170000)
+   @Test
    public void testForwardPush() throws SimulationExceededMaximumTimeException
    {
       super.testForwardPush();
    }
 
    @Override
-   @ContinuousIntegrationTest(estimatedDuration = 30.0, categoriesOverride = {IntegrationCategory.EXCLUDE})
-   @Test(timeout = 70000)
+   @Disabled
+   @Test
    public void testSidePush() throws SimulationExceededMaximumTimeException
    {
       super.testSidePush();

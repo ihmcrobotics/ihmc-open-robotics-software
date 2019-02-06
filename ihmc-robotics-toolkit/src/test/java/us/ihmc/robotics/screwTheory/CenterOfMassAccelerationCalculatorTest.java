@@ -4,11 +4,13 @@ import static us.ihmc.robotics.Assert.*;
 
 import java.util.Random;
 
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
+import org.junit.jupiter.api.Tag;
+import org.junit.jupiter.api.Disabled;
 import us.ihmc.euclid.matrix.Matrix3D;
 import us.ihmc.euclid.matrix.RotationMatrix;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
@@ -26,19 +28,18 @@ import us.ihmc.mecano.spatial.SpatialAcceleration;
 
 public class CenterOfMassAccelerationCalculatorTest
 {
-   @Before
+   @BeforeEach
    public void setUp()
    {
    }
 
-   @After
+   @AfterEach
    public void tearDown()
    {
       ReferenceFrameTools.clearWorldFrameTree();
    }
 
-	@ContinuousIntegrationTest(estimatedDuration = 0.0)
-	@Test(timeout = 30000)
+	@Test
    public void testOneRigidBody()
    {
       Random random = new Random(1779L);
@@ -74,8 +75,7 @@ public class CenterOfMassAccelerationCalculatorTest
       EuclidCoreTestTools.assertTuple3DEquals(expected, comAcceleration, 1e-5);
    }
 
-	@ContinuousIntegrationTest(estimatedDuration = 0.0)
-	@Test(timeout = 30000)
+	@Test
    public void testTwoSliderJointsZeroAcceleration()
    {
       Random random = new Random(1779L);
@@ -114,8 +114,7 @@ public class CenterOfMassAccelerationCalculatorTest
       EuclidCoreTestTools.assertTuple3DEquals(new Vector3D(), comAcceleration, 1e-5);
    }
 
-	@ContinuousIntegrationTest(estimatedDuration = 0.0)
-	@Test(timeout = 30000)
+	@Test
    public void testPendulumCentripetalAcceleration()
    {
       Random random = new Random(1779L);
@@ -151,8 +150,7 @@ public class CenterOfMassAccelerationCalculatorTest
 
    // Just tests whether it will crash or not for now
 
-	@ContinuousIntegrationTest(estimatedDuration = 0.0)
-	@Test(timeout = 30000)
+	@Test
    public void testTree()
    {
       Random random = new Random(1779L);
