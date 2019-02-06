@@ -5,11 +5,13 @@ import static us.ihmc.robotics.Assert.*;
 import java.util.ArrayList;
 import java.util.Random;
 
-import org.junit.After;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.Test;
 
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationPlan;
+import org.junit.jupiter.api.Tag;
+import org.junit.jupiter.api.Disabled;
 import us.ihmc.continuousIntegration.IntegrationCategory;
 import us.ihmc.euclid.referenceFrame.FrameLine3D;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
@@ -21,18 +23,16 @@ import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.robotics.referenceFrames.OrientationFrame;
 
-@ContinuousIntegrationPlan(categories = {IntegrationCategory.FAST})
 public class FrameLineTest
 {
 
-   @After
+   @AfterEach
    public void tearDown()
    {
       ReferenceFrameTools.clearWorldFrameTree();
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.1)
-   @Test(timeout = 30000)
+   @Test
    public void testChangeFrameCopy()
    {
       Random random = new Random(1776L);
@@ -91,8 +91,7 @@ public class FrameLineTest
 
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(timeout = 30000)
+   @Test
    public void testGetFrameVector()
    {
       Random random = new Random(1234L);
@@ -121,8 +120,7 @@ public class FrameLineTest
       assertTrue(frameVector.epsilonEquals(vector, 1e-12));
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(timeout = 30000)
+   @Test
    public void testGetFramePoint()
    {
       Random random = new Random(4567L);
@@ -151,8 +149,7 @@ public class FrameLineTest
       assertTrue(frameNormalizedVectorCopy.epsilonEquals(vector, 1e-12));
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(timeout = 30000, expected = RuntimeException.class)
+   @Test
    public void testConstructorC()
    {
       FramePoint3D origin = new FramePoint3D(ReferenceFrame.getWorldFrame(), 1.0, 2.0, 3.0);

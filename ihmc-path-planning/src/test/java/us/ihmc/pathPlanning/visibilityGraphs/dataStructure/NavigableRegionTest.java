@@ -4,7 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import us.ihmc.commons.MutationTestFacilitator;
 import us.ihmc.commons.RandomNumbers;
@@ -21,7 +21,7 @@ public class NavigableRegionTest
 
    private static final double epsilon = 1e-12;
 
-   @Test(timeout = 30000)
+   @Test
    public void testNavigableRegions()
    {
       Random random = new Random(1738L);

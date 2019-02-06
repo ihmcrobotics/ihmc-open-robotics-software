@@ -1,15 +1,16 @@
 package us.ihmc.footstepPlanning.roughTerrainPlanning;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationPlan;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
+import org.junit.jupiter.api.Tag;
+import org.junit.jupiter.api.Disabled;
 import us.ihmc.continuousIntegration.IntegrationCategory;
 import us.ihmc.footstepPlanning.FootstepPlanner;
 import us.ihmc.footstepPlanning.simplePlanners.PlanThenSnapPlanner;
 import us.ihmc.footstepPlanning.simplePlanners.TurnWalkTurnPlanner;
 import us.ihmc.footstepPlanning.tools.PlannerTools;
 
-@ContinuousIntegrationPlan(categories = IntegrationCategory.FAST)
 public class PlanThenSnapPlannerTest extends FootstepPlannerOnRoughTerrainTest
 {
    private PlanThenSnapPlanner planner;
@@ -42,8 +43,8 @@ public class PlanThenSnapPlannerTest extends FootstepPlannerOnRoughTerrainTest
       return keepUp;
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.2, categoriesOverride = {IntegrationCategory.IN_DEVELOPMENT})
-   @Test(timeout = 30000)
+   @Disabled
+   @Test
    public void testSteppingStones()
    {
       super.testSteppingStones();

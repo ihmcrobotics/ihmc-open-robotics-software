@@ -6,11 +6,13 @@ import java.util.List;
 import java.util.Random;
 
 import org.apache.commons.math3.stat.descriptive.SummaryStatistics;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import us.ihmc.commons.Conversions;
 import us.ihmc.commons.RandomNumbers;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
+import org.junit.jupiter.api.Tag;
+import org.junit.jupiter.api.Disabled;
 import us.ihmc.euclid.axisAngle.AxisAngle;
 import us.ihmc.euclid.matrix.RotationMatrix;
 import us.ihmc.euclid.transform.RigidBodyTransform;
@@ -35,8 +37,7 @@ public class NumericalInverseKinematicsCalculatorTest
     * make sure there are no exceptions when you pass in an infeasible desired transform
     */
 
-	@ContinuousIntegrationTest(estimatedDuration = 2.8)
-	@Test(timeout = 30000)
+	@Test
    public void testInfeasible()
    {
       Random random = new Random(1235125L);
@@ -77,8 +78,7 @@ public class NumericalInverseKinematicsCalculatorTest
       if (DEBUG) printStatistics(iterationStatistics, timeStatistics);
    }
 
-	@ContinuousIntegrationTest(estimatedDuration = 1.1)
-	@Test(timeout = 30000)
+	@Test
    public void testForwardThenInverse()
    {
       Random random = new Random(125125L);

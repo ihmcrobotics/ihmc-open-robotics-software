@@ -1,8 +1,10 @@
 package us.ihmc.avatar.pushRecovery;
 
 import controller_msgs.msg.dds.FootstepDataListMessage;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
+import org.junit.jupiter.api.Tag;
+import org.junit.jupiter.api.Disabled;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.stateMachine.core.StateTransitionCondition;
@@ -13,8 +15,7 @@ import static us.ihmc.robotics.Assert.*;
 
 public abstract class AvatarICPOptimizationPushRecoveryBTest extends AvatarICPOptimizationPushRecoveryTestSetup
 {
-   @ContinuousIntegrationTest(estimatedDuration = 60.0)
-   @Test(timeout = 150000)
+   @Test
    public void testPushICPOptimizationNoPush() throws Exception
    {
       FootstepDataListMessage footsteps = createForwardWalkingFootstepMessage();
@@ -22,8 +23,7 @@ public abstract class AvatarICPOptimizationPushRecoveryBTest extends AvatarICPOp
       validateTest(footsteps);
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 60.0)
-   @Test(timeout = 150000)
+   @Test
    public void testPushICPOptimizationOutwardPushInSwing() throws Exception
    {
       FootstepDataListMessage footsteps = createForwardWalkingFootstepMessage();
@@ -42,8 +42,7 @@ public abstract class AvatarICPOptimizationPushRecoveryBTest extends AvatarICPOp
       validateTest(footsteps);
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 60.0)
-   @Test(timeout = 150000)
+   @Test
    public void testPushICPOptimizationOutwardPushInSlowSwing() throws Exception
    {
       FootstepDataListMessage footsteps = createSlowForwardWalkingFootstepMessage();
@@ -63,8 +62,7 @@ public abstract class AvatarICPOptimizationPushRecoveryBTest extends AvatarICPOp
       validateTest(footsteps);
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 60.0)
-   @Test(timeout = 150000)
+   @Test
    public void testPushICPOptimizationDiagonalOutwardPushInSwing() throws Exception
    {
       FootstepDataListMessage footsteps = createForwardWalkingFootstepMessage();
@@ -84,8 +82,7 @@ public abstract class AvatarICPOptimizationPushRecoveryBTest extends AvatarICPOp
       validateTest(footsteps);
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 60.0)
-   @Test(timeout = 150000)
+   @Test
    public void testPushICPOptimizationDiagonalYawingOutwardPushInSwing() throws Exception
    {
       FootstepDataListMessage footsteps = createYawingForwardWalkingFootstepMessage();
@@ -136,8 +133,7 @@ public abstract class AvatarICPOptimizationPushRecoveryBTest extends AvatarICPOp
       validateTest(footsteps, false);
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 60.0)
-   @Test(timeout = 150000)
+   @Test
    public void testPushICPOptimizationRandomPushInSwing() throws Exception
    {
       FootstepDataListMessage footsteps = createForwardWalkingFootstepMessage();
@@ -161,8 +157,7 @@ public abstract class AvatarICPOptimizationPushRecoveryBTest extends AvatarICPOp
       validateTest(footsteps);
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 60.0)
-   @Test(timeout = 150000)
+   @Test
    public void testPushICPOptimizationLongForwardPushInSwing() throws Exception
    {
       FootstepDataListMessage footsteps = createForwardWalkingFootstepMessage();
@@ -182,8 +177,7 @@ public abstract class AvatarICPOptimizationPushRecoveryBTest extends AvatarICPOp
       validateTest(footsteps);
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 60.0)
-   @Test(timeout = 150000)
+   @Test
    public void testPushICPOptimizationLongBackwardPushInSwing() throws Exception
    {
       FootstepDataListMessage footsteps = createForwardWalkingFootstepMessage();

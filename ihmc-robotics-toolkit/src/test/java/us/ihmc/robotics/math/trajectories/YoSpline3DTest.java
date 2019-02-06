@@ -4,10 +4,12 @@ import static us.ihmc.robotics.Assert.*;
 
 import java.util.Random;
 
-import org.junit.After;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.Test;
 
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
+import org.junit.jupiter.api.Tag;
+import org.junit.jupiter.api.Disabled;
 import us.ihmc.euclid.Axis;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
@@ -20,14 +22,13 @@ public class YoSpline3DTest
    private static ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
    private static double EPSILON = 1e-6;
 
-   @After
+   @AfterEach
    public void tearDown()
    {
       ReferenceFrameTools.clearWorldFrameTree();
    }
 
-	@ContinuousIntegrationTest(estimatedDuration = 0.0)
-	@Test(timeout = 30000)
+	@Test
    public void testCubic()
    {
       //cubic is constructed such that x(t) = t^3 + 2t^2 + t + 1, y(t) = 2t^3 + t + 4, z(t) = t^2 + 7
@@ -53,8 +54,7 @@ public class YoSpline3DTest
       
    }
 
-	@ContinuousIntegrationTest(estimatedDuration = 0.0)
-	@Test(timeout = 30000)
+	@Test
    public void testQuintic()
    {
       YoVariableRegistry registry = new YoVariableRegistry("Spline3DTest");
@@ -81,8 +81,7 @@ public class YoSpline3DTest
 	   }   
 	}
 
-	@ContinuousIntegrationTest(estimatedDuration = 0.0)
-	@Test(timeout = 30000)
+	@Test
    public void testGetVelocity()
    {
 	   Random random = new Random(557975L);
@@ -101,8 +100,7 @@ public class YoSpline3DTest
 	   assertEquals(numerical.getZ(), actual.getZ(), 1e-5);
    }
 
-	@ContinuousIntegrationTest(estimatedDuration = 0.0)
-	@Test(timeout = 30000)
+	@Test
    public void testGetAcceleration()
    {
 	   Random random = new Random(4561955L);
@@ -144,8 +142,7 @@ public class YoSpline3DTest
 	   return spline;
 	}
 
-	@ContinuousIntegrationTest(estimatedDuration = 0.0)
-	@Test(timeout = 30000)
+	@Test
    public void testArcLengthMethods()
    {
 	   // find arc length from t=0 to t=1 of: x = t, y = t, z = t

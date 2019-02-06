@@ -1,8 +1,10 @@
 package us.ihmc.exampleSimulations.genericQuadruped.controller.position;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationPlan;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
+import org.junit.jupiter.api.Tag;
+import org.junit.jupiter.api.Disabled;
 import us.ihmc.continuousIntegration.IntegrationCategory;
 import us.ihmc.exampleSimulations.genericQuadruped.GenericQuadrupedTestFactory;
 import us.ihmc.quadrupedRobotics.QuadrupedTestFactory;
@@ -12,7 +14,7 @@ import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulatio
 
 import java.io.IOException;
 
-@ContinuousIntegrationPlan(categories = IntegrationCategory.EXCLUDE)
+@Disabled
 public class GenericQuadrupedPositionCrawlTurningTest extends QuadrupedPositionCrawlTurningTest
 {
    @Override
@@ -22,32 +24,28 @@ public class GenericQuadrupedPositionCrawlTurningTest extends QuadrupedPositionC
    }
    
    @Override
-   @ContinuousIntegrationTest(estimatedDuration = 42.0)
-   @Test(timeout = 800000)
+   @Test
    public void testYawingRightFastNinetyDegrees() throws SimulationExceededMaximumTimeException, ControllerFailureException, IOException
    {
       super.testYawingRightFastNinetyDegrees();
    }
    
    @Override
-   @ContinuousIntegrationTest(estimatedDuration = 42.0)
-   @Test(timeout = 800000)
+   @Test
    public void testYawingLeftFastNinetyDegrees() throws SimulationExceededMaximumTimeException, ControllerFailureException, IOException
    {
       super.testYawingLeftFastNinetyDegrees();
    }
    
    @Override
-   @ContinuousIntegrationTest(estimatedDuration = 80.0)
-   @Test(timeout = 800000)
+   @Test
    public void testYawingRightSlowNinetyDegrees() throws SimulationExceededMaximumTimeException, ControllerFailureException, IOException
    {
       super.testYawingRightSlowNinetyDegrees();
    }
 
    @Override
-   @ContinuousIntegrationTest(estimatedDuration = 80.0)
-   @Test(timeout = 800000)
+   @Test
    public void testYawingLeftSlowNinetyDegrees() throws SimulationExceededMaximumTimeException, ControllerFailureException, IOException
    {
       super.testYawingLeftSlowNinetyDegrees();

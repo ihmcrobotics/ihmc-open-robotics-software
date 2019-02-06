@@ -14,17 +14,18 @@ import java.util.List;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.SystemUtils;
 import us.ihmc.robotics.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationPlan;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
+import org.junit.jupiter.api.Tag;
+import org.junit.jupiter.api.Disabled;
 import us.ihmc.commons.PrintTools;
 import us.ihmc.commons.exception.DefaultExceptionHandler;
 import us.ihmc.commons.nio.FileTools;
 import us.ihmc.continuousIntegration.IntegrationCategory;
 import us.ihmc.commons.thread.ThreadTools;
 
-@ContinuousIntegrationPlan(categories = {IntegrationCategory.FAST})
 public class ProcessSpawnerTest
 {
    private static final Path testFilePath = Paths.get(System.getProperty("java.io.tmpdir"), "ProcessSpawnerTest.tmp");
@@ -39,8 +40,8 @@ public class ProcessSpawnerTest
       Assert.assertEquals(expectedContent, content);
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 1.0, categoriesOverride = IntegrationCategory.EXCLUDE)
-   @Test(timeout = 30000)
+   @Disabled
+   @Test
    public void testForkedShellProcessSpawner() throws Exception
    {
       String randomString = Long.toString(System.nanoTime());
@@ -58,8 +59,8 @@ public class ProcessSpawnerTest
       validateFileContents(randomString);
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 1.0, categoriesOverride = IntegrationCategory.EXCLUDE)
-   @Test(timeout = 30000)
+   @Disabled
+   @Test
    public void testShelloutProcessSpawnerOnShellScript() throws Exception
    {
       if (SystemUtils.IS_OS_WINDOWS)
@@ -85,8 +86,7 @@ public class ProcessSpawnerTest
       validateFileContents(randomString);
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.5)
-   @Test(timeout = 30000)
+   @Test
    public void testJavaProcessSpawnerWithClasspathAsArgument() throws Exception
    {
       String randomString = Long.toString(System.nanoTime());
@@ -102,8 +102,7 @@ public class ProcessSpawnerTest
       validateFileContents(randomString);
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.5)
-   @Test(timeout = 30000)
+   @Test
    public void testJavaProcessSpawnerWithClasspathAsEnvironmentVariable() throws Exception
    {
       String randomString = Long.toString(System.nanoTime());
@@ -119,8 +118,8 @@ public class ProcessSpawnerTest
       validateFileContents(randomString);
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 2.1, categoriesOverride = IntegrationCategory.FLAKY)
-   @Test(timeout = 30000)
+   @Disabled
+   @Test
    public void testExitListeners() throws Exception
    {
       if (SystemUtils.IS_OS_WINDOWS)

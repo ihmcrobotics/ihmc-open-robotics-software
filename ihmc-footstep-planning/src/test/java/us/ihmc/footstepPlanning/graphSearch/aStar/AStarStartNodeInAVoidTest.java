@@ -1,10 +1,12 @@
 package us.ihmc.footstepPlanning.graphSearch.aStar;
 
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import us.ihmc.continuousIntegration.ContinuousIntegrationTools;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
+import org.junit.jupiter.api.Tag;
+import org.junit.jupiter.api.Disabled;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.referenceFrame.FramePose2D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
@@ -32,7 +34,7 @@ public class AStarStartNodeInAVoidTest
    private final YoVariableRegistry registry = new YoVariableRegistry("testRegistry");
    private AStarFootstepPlanner planner;
 
-   @Before
+   @BeforeEach
    public void setup()
    {
       visualize = visualize && !ContinuousIntegrationTools.isRunningOnContinuousIntegrationServer();
@@ -43,14 +45,13 @@ public class AStarStartNodeInAVoidTest
       planner = AStarFootstepPlanner.createPlanner(parameters, null, footPolygons, expansion, registry);
    }
 
-   @After
+   @AfterEach
    public void tearDown()
    {
       ReferenceFrameTools.clearWorldFrameTree();
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(timeout = 30000)
+   @Test
    public void testStartNodeInAVoid()
    {
       ConvexPolygon2D groundPlane = new ConvexPolygon2D();

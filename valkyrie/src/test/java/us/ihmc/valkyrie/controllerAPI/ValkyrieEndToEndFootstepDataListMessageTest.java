@@ -1,6 +1,6 @@
 package us.ihmc.valkyrie.controllerAPI;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import controller_msgs.msg.dds.FootstepDataListMessage;
 import controller_msgs.msg.dds.FootstepDataMessage;
@@ -9,6 +9,8 @@ import us.ihmc.avatar.controllerAPI.EndToEndFootstepDataListMessageTest;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.RobotTarget;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
+import org.junit.jupiter.api.Tag;
+import org.junit.jupiter.api.Disabled;
 import us.ihmc.simulationConstructionSetTools.bambooTools.BambooTools;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
 import us.ihmc.valkyrie.ValkyrieRobotModel;
@@ -29,8 +31,7 @@ public class ValkyrieEndToEndFootstepDataListMessageTest extends EndToEndFootste
       return BambooTools.getSimpleRobotNameFor(BambooTools.SimpleRobotNameKeys.VALKYRIE);
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 17.0)
-   @Test(timeout = 85000)
+   @Test
    public void testProblematicNasaMessage() throws SimulationExceededMaximumTimeException
    {
       testMessageIsHandled(createProblematicNasaMessage());

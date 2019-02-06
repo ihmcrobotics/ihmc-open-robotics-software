@@ -5,9 +5,9 @@ import static us.ihmc.robotics.Assert.*;
 import java.util.ArrayList;
 import java.util.Random;
 
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import us.ihmc.commons.Assertions;
 import us.ihmc.commons.Epsilons;
@@ -16,6 +16,8 @@ import us.ihmc.commons.RandomNumbers;
 import us.ihmc.commons.RunnableThatThrows;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationPlan;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
+import org.junit.jupiter.api.Tag;
+import org.junit.jupiter.api.Disabled;
 import us.ihmc.continuousIntegration.IntegrationCategory;
 import us.ihmc.euclid.Axis;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
@@ -35,17 +37,16 @@ import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Tuple3DBasics;
 import us.ihmc.robotics.random.RandomGeometry;
 
-@ContinuousIntegrationPlan(categories = {IntegrationCategory.FAST})
 public class GeometryToolsTest
 {
    private static final int ITERATIONS = 1000;
 
-   @Before
+   @BeforeEach
    public void setUp() throws Exception
    {
    }
 
-   @After
+   @AfterEach
    public void tearDown() throws Exception
    {
       ReferenceFrameTools.clearWorldFrameTree();
@@ -53,8 +54,7 @@ public class GeometryToolsTest
 
    private static final double EPSILON = 1e-6;
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(timeout = 30000)
+   @Test
    public void testGetDistanceBetweenPointAndPlane1()
    {
       FramePoint3D pointOnPlane = new FramePoint3D(ReferenceFrame.getWorldFrame(), 0, 0, 0);
@@ -107,8 +107,7 @@ public class GeometryToolsTest
       assertEquals("FAILED: Distance from point to plane", expected, actual, EPSILON);
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(timeout = 30000)
+   @Test
    public void testIsLineSegmentIntersectingPlane1()
    {
       FramePoint3D pointOnPlane = new FramePoint3D(ReferenceFrame.getWorldFrame(), 0, 0, 0);
@@ -142,8 +141,7 @@ public class GeometryToolsTest
       assertFalse(GeometryTools.isLineSegmentIntersectingPlane(pointOnPlane, planeNormal, lineStart, lineEnd));
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(timeout = 30000)
+   @Test
    public void testGetPerpendicularVectorFromLineToPoint1()
    {
       FramePoint3D point0 = new FramePoint3D(ReferenceFrame.getWorldFrame(), 0, 0, 0);
@@ -181,8 +179,7 @@ public class GeometryToolsTest
       assertTrue("Test Failed", expectedReturn1.epsilonEquals(actualReturn1, EPSILON));
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(timeout = 30000)
+   @Test
    public void testGetPlaneNormalGivenThreePoints()
    {
       FramePoint3D point1 = new FramePoint3D(ReferenceFrame.getWorldFrame(), 0, 5, 0);
@@ -244,8 +241,7 @@ public class GeometryToolsTest
       assertTrue("Test Failed", expectedReturn3.epsilonEquals(actualReturn3, EPSILON));
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(timeout = 30000)
+   @Test
    public void testIsPointOnLeftSideOfLine()
    {
       FramePoint3D lineStart = new FramePoint3D(ReferenceFrame.getWorldFrame(), 5.0, 0.0, 0.0);
@@ -260,8 +256,7 @@ public class GeometryToolsTest
       /** @todo fill in the test code */
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(timeout = 30000)
+   @Test
    public void testClipToBoundingBox()
    {
       Tuple3DBasics tuple3d = new Point3D(1.0, -1.0, 0.0);
@@ -275,8 +270,7 @@ public class GeometryToolsTest
       EuclidCoreTestTools.assertTuple3DEquals("not equal", new Point3D(0.5, -0.5, 1.0), tuple3d, 0.0);
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(timeout = 30000)
+   @Test
    public void testCombine()
    {
       Random random = new Random(1176L);
@@ -326,8 +320,7 @@ public class GeometryToolsTest
       }
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(timeout = 30000)
+   @Test
    public void testNormalizeSafeZUp() throws Exception
    {
       Vector3D actualVector;
@@ -354,8 +347,7 @@ public class GeometryToolsTest
       }
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(timeout = 30000)
+   @Test
    public void testIsZero() throws Exception
    {
       Random random = new Random(23423L);
@@ -398,8 +390,7 @@ public class GeometryToolsTest
       }
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.3)
-   @Test(timeout = 30000)
+   @Test
    public void testConstructFrameFromPointAndAxis()
    {
       Random random = new Random(1776L);
@@ -424,8 +415,7 @@ public class GeometryToolsTest
       }
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(timeout = 30000)
+   @Test
    public void testYawAboutPointRegression()
    {
       double epsilon = 1e-10;
@@ -472,8 +462,7 @@ public class GeometryToolsTest
       assertEquals("not equal", -3096.5574256022164, result.getZ(), epsilon);
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(timeout = 30000)
+   @Test
    public void testPitchAboutPointRegression()
    {
       double epsilon = 1e-10;
@@ -520,8 +509,7 @@ public class GeometryToolsTest
       assertEquals("not equal", 8214.605434738955, result.getZ(), epsilon);
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(timeout = 30000)
+   @Test
    public void testYawAboutPoint()
    {
       ReferenceFrame theFrame = ReferenceFrame.constructARootFrame("theFrame");
@@ -566,8 +554,7 @@ public class GeometryToolsTest
       assertEquals("These should be equal", 1.0, result.getZ(), epsilon);
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(timeout = 30000)
+   @Test
    public void testPitchAboutPoint()
    {
       ReferenceFrame theFrame = ReferenceFrame.constructARootFrame("theFrame");
@@ -607,8 +594,7 @@ public class GeometryToolsTest
       return (random.nextDouble() - 0.5) * 2.0 * Math.PI;
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(timeout = 30000)
+   @Test
    public void testYawAboutPoint_FramePoint2d_double()
    {
       ReferenceFrame theFrame = ReferenceFrame.constructARootFrame("theFrame");

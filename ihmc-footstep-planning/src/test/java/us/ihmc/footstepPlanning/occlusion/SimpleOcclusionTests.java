@@ -1,13 +1,15 @@
 package us.ihmc.footstepPlanning.occlusion;
 
 import us.ihmc.robotics.Assert;
-import org.junit.Ignore;
+import org.junit.jupiter.api.Disabled;
 import org.junit.Rule;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.junit.rules.TestName;
 import us.ihmc.commons.PrintTools;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
+import org.junit.jupiter.api.Tag;
+import org.junit.jupiter.api.Disabled;
 import us.ihmc.continuousIntegration.IntegrationCategory;
 import us.ihmc.euclid.Axis;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
@@ -70,8 +72,8 @@ public class SimpleOcclusionTests
    @Rule
    public TestName name = new TestName();
 
-   @Test(timeout = 300000)
-   @ContinuousIntegrationTest(estimatedDuration = 2.2, categoriesOverride = {IntegrationCategory.EXCLUDE})
+   @Test
+   @Disabled
    public void testSimpleOcclusions()
    {
       FramePose3D startPose = new FramePose3D();
@@ -80,9 +82,8 @@ public class SimpleOcclusionTests
       runTest(startPose, goalPose, regions, defaultMaxAllowedSolveTime);
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.1)
-   @Test(timeout = 300000)
-   @Ignore // Resource file does not seem to exist.
+   @Test
+   @Disabled // Resource file does not seem to exist.
    public void testOcclusionsFromData()
    {
       FramePose3D startPose = new FramePose3D(worldFrame);
@@ -113,9 +114,8 @@ public class SimpleOcclusionTests
       }
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.1)
-   @Test(timeout = 300000)
-   @Ignore
+   @Test
+   @Disabled
    public void testMazeWithOcclusions()
    {
       FramePose3D startPose = new FramePose3D();

@@ -7,9 +7,11 @@ import java.io.DataOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
+import org.junit.jupiter.api.Tag;
+import org.junit.jupiter.api.Disabled;
 import us.ihmc.continuousIntegration.IntegrationCategory;
 
 public class DatagramOutputStreamTest
@@ -18,7 +20,7 @@ public class DatagramOutputStreamTest
    private static final boolean VERBOSE = false;
    
    //works half of the time.
-   @ContinuousIntegrationTest(estimatedDuration = 0.1, categoriesOverride = IntegrationCategory.EXCLUDE)
+   @Disabled
    public void testDatagramOutputStreamThrowOutStalePackets() throws IOException
    {
       boolean throwOutStalePackets = true;
@@ -31,8 +33,7 @@ public class DatagramOutputStreamTest
       runATest(1776, throwOutStalePackets, expectedMessagesToReceive);
    }
 
-	@ContinuousIntegrationTest(estimatedDuration = 8.6)
-	@Test(timeout = 43000)
+	@Test
    public void testDatagramOutputStreamDoNotThrowOutStalePackets() throws IOException
    {
       boolean throwOutStalePackets = false;

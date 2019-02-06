@@ -6,10 +6,12 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import us.ihmc.commons.MutationTestFacilitator;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
+import org.junit.jupiter.api.Tag;
+import org.junit.jupiter.api.Disabled;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.geometry.Line2D;
 import us.ihmc.euclid.geometry.interfaces.Vertex2DSupplier;
@@ -35,8 +37,7 @@ public class ClusterToolsTest
 {
    private static final double EPSILON = 1.0e-12;
 
-   @Test(timeout = 30000)
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
+   @Test
    public void testExtrudeLine() throws Exception
    {
       Point2D endpoint1 = new Point2D(0.0, 0.0);
@@ -60,8 +61,7 @@ public class ClusterToolsTest
       EuclidCoreTestTools.assertPoint2DGeometricallyEquals(new Point2D(1.0, -0.5), extrusions.get(index++), EPSILON);
    }
 
-   @Test(timeout = 30000)
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
+   @Test
    public void testFilterVerticalPolygonForMultiLineExtrusion() throws Exception
    {
       List<Point3D> rawPoints = new ArrayList<>();
@@ -78,8 +78,7 @@ public class ClusterToolsTest
       }
    }
 
-   @Test(timeout = 30000)
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
+   @Test
    public void testExtrudeCorner()
    {
       Point2D previous = new Point2D(1.0, 0.0);
@@ -108,8 +107,7 @@ public class ClusterToolsTest
       EuclidCoreTestTools.assertPoint2DGeometricallyEquals(extrusionExpected2, extrusions.get(2), EPSILON);
    }
 
-   @Test(timeout = 30000)
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
+   @Test
    public void testExtrudePolygon() throws Exception
    {
       // Simple Square with counterclockwise vertices. Extruding the points to the inside, so should just be a smaller quad.
@@ -199,8 +197,7 @@ public class ClusterToolsTest
 
    }
 
-   @Test(timeout = 30000)
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
+   @Test
    public void testExtrudeTwoPointMultiLine() throws Exception
    {
       Point2D pointA = new Point2D(0.0, 0.0);
@@ -233,8 +230,7 @@ public class ClusterToolsTest
       EuclidCoreTestTools.assertPoint2DGeometricallyEquals(new Point2D(1.0, -0.1), extrudedLine.get(index++), EPSILON);
    }
 
-   @Test(timeout = 30000)
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
+   @Test
    public void testExtrudeMultiLine() throws Exception
    {
       Point2D pointA = new Point2D(-1.0, 1.0);
@@ -274,8 +270,7 @@ public class ClusterToolsTest
       EuclidCoreTestTools.assertPoint2DGeometricallyEquals(new Point2D(-0.1 * sqrt2By2, -0.1 * sqrt2By2), extrudedLine.get(index++), EPSILON);
    }
 
-   @Test(timeout = 30000)
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
+   @Test
    public void testExtrudeSinglePointAtInsideCorner() throws Exception
    {
       Point2D pointA = new Point2D(-1.0, 1.0);
@@ -368,8 +363,7 @@ public class ClusterToolsTest
       return extrudedPoint;
    }
 
-   @Test(timeout = 30000)
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
+   @Test
    public void testSquareOnTopOfSquare() throws Exception
    {
       double tiltedPointHeight = 0.1;
@@ -485,8 +479,7 @@ public class ClusterToolsTest
       }
    }
 
-   @Test(timeout = 30000)
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
+   @Test
    public void testTwoSquaresOneObstacle() throws Exception
    {
       Point2D[] region0_1Points = new Point2D[] {new Point2D(-3.0, 3.0), new Point2D(3.0, 3.0), new Point2D(3.0, -3.0), new Point2D(-3.0, -3.0)};
@@ -548,8 +541,7 @@ public class ClusterToolsTest
       assertEquals(12, nonNavigableExtrusionsInLocal.size());
    }
 
-   @Test(timeout = 30000)
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
+   @Test
    public void testCreateObstaclesVerticalSegmentOverRotatedBase()
    {
       Point2D pointA = new Point2D(0.0, -0.5);
@@ -628,8 +620,7 @@ public class ClusterToolsTest
 
    }
 
-   @Test(timeout = 30000)
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
+   @Test
    public void testFilterPointsWithSameXYCoordinatesKeepingHighest()
    {
       List<Point3D> pointsToFilter = new ArrayList<>();
@@ -704,8 +695,7 @@ public class ClusterToolsTest
       assertTrue(listContains(filteredPoints, new Point3D(0.0, 0.0, 3.0)));
    }
 
-   @Test(timeout = 30000)
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
+   @Test
    public void testVerticalObstacleOne()
    {
       Point2D[] region0_1Points = new Point2D[] {new Point2D(-1.0, 1.0), new Point2D(1.0, 1.0), new Point2D(1.0, -1.0), new Point2D(-1.0, -1.0)};

@@ -2,7 +2,7 @@ package us.ihmc.ihmcPerception.fiducialDetector;
 
 import java.awt.image.BufferedImage;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import boofcv.struct.calib.IntrinsicParameters;
 import us.ihmc.communication.net.AtomicSettableTimestampProvider;
@@ -11,6 +11,8 @@ import us.ihmc.communication.producers.VideoDataServerImageCallback;
 import us.ihmc.communication.producers.VideoSource;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationPlan;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
+import org.junit.jupiter.api.Tag;
+import org.junit.jupiter.api.Disabled;
 import us.ihmc.continuousIntegration.ContinuousIntegrationTools;
 import us.ihmc.continuousIntegration.IntegrationCategory;
 import us.ihmc.euclid.transform.RigidBodyTransform;
@@ -40,13 +42,12 @@ import us.ihmc.simulationconstructionset.util.simulationTesting.SimulationTestin
 import us.ihmc.tools.TimestampProvider;
 import us.ihmc.commons.thread.ThreadTools;
 
-@ContinuousIntegrationPlan(categories = IntegrationCategory.EXCLUDE)
+@Disabled
 public class FiducialDetectorFromCameraImagesTest
 {
    private static final SimulationTestingParameters simulationTestingParameters = SimulationTestingParameters.createFromSystemProperties();
 
-   @ContinuousIntegrationTest(estimatedDuration = 5.0)
-   @Test(timeout = 300000)
+   @Test
    public void testUsingSimulationConstructionSet()
    {
       double fieldOfView = 0.81;

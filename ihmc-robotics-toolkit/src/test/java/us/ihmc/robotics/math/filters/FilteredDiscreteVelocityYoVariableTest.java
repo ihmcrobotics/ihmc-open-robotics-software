@@ -2,9 +2,11 @@ package us.ihmc.robotics.math.filters;
 
 import static us.ihmc.robotics.Assert.*;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
+import org.junit.jupiter.api.Tag;
+import org.junit.jupiter.api.Disabled;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 
@@ -13,8 +15,7 @@ public class FilteredDiscreteVelocityYoVariableTest
 
    private static final double DT = 0.1;
 
-	@ContinuousIntegrationTest(estimatedDuration = 0.0)
-	@Test(timeout=300000)
+	@Test
    public void testFilteredDiscreteVelocityNoDirectionChange()
    {
       double alpha = 0.99;
@@ -37,8 +38,7 @@ public class FilteredDiscreteVelocityYoVariableTest
       assertEquals(10, filteredDiscreteVelocityYoVariable.getDoubleValue(), 1e-7);
    }
 
-	@ContinuousIntegrationTest(estimatedDuration = 0.0)
-	@Test(timeout=300000)
+	@Test
    public void testFilteredDiscreteVelocityWithDirectionChange()
    {
       double alpha = 0.99;

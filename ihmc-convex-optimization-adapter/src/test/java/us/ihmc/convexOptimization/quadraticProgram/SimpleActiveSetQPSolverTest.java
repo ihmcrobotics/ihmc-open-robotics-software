@@ -2,18 +2,18 @@ package us.ihmc.convexOptimization.quadraticProgram;
 
 import static us.ihmc.robotics.Assert.*;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
+import org.junit.jupiter.api.Tag;
+import org.junit.jupiter.api.Disabled;
 import us.ihmc.continuousIntegration.IntegrationCategory;
 
-@ContinuousIntegrationAnnotations.ContinuousIntegrationPlan(categories = {IntegrationCategory.FAST})
 public class SimpleActiveSetQPSolverTest
 {
 
-	@ContinuousIntegrationTest(estimatedDuration = 0.0)
-	@Test(timeout = 30000)
+	@Test
    public void testSimpleUnconstrainedOptimization()
    {
       // Minimize 1/2 * (x1^2 + x2^2) - x1 - 2.0 * x2; (Solution = [1, 2])
@@ -35,8 +35,7 @@ public class SimpleActiveSetQPSolverTest
       assertEquals(2.0, solution[1], 1e-7);
    }
 
-	@ContinuousIntegrationTest(estimatedDuration = 0.0)
-	@Test(timeout = 30000)
+	@Test
    public void testSimpleEqualityConstrainedOptimization()
    {
       // Minimize 1/2 * (x1^2 + x2^2) subject to x1 + x2 = 2; (Solution = [1, 1])
@@ -65,8 +64,7 @@ public class SimpleActiveSetQPSolverTest
       assertEquals(1.0, solution[1], 1e-7);
    }
 
-	@ContinuousIntegrationTest(estimatedDuration = 0.0)
-	@Test(timeout = 30000)
+	@Test
    public void testSimpleInequalityConstrainedOptimizationWithActiveConstraint()
    {
       // Minimize 1/2 * (x1^2 + x2^2) subject to x1 + x2 <= -2; (Solution = [-1, -1])
@@ -95,8 +93,7 @@ public class SimpleActiveSetQPSolverTest
       assertEquals(-1.0, solution[1], 1e-7);
    }
 
-	@ContinuousIntegrationTest(estimatedDuration = 0.0)
-	@Test(timeout = 30000)
+	@Test
    public void testSimpleInequalityConstrainedOptimizationWithInactiveConstraint()
    {
       // Minimize 1/2 * (x1^2 + x2^2) - x1 - 2.0 * x2 subject to x1 + x2 <= 4; (Solution = [1, 2])
@@ -125,8 +122,7 @@ public class SimpleActiveSetQPSolverTest
       assertEquals(2.0, solution[1], 1e-7);
    }
 
-	@ContinuousIntegrationTest(estimatedDuration = 0.0)
-	@Test(timeout = 30000)
+	@Test
    public void testNoValidSolutionDueToNonSolvableEqualityConstraints()
    {
       // Minimize 1/2 * (x1^2 + x2^2) - x1 - 2.0 * x2 subject to x1 + x2 = 1; x1 + x2 = 2; (No solution)
@@ -156,8 +152,8 @@ public class SimpleActiveSetQPSolverTest
    }
 
    // Fails when conflicting constraints are active... Need to fix this case.
-	@ContinuousIntegrationTest(estimatedDuration = 0.1, categoriesOverride = IntegrationCategory.EXCLUDE)
-	@Test(timeout=300000)
+	@Disabled
+	@Test
    public void testConflictingInequalityAndEqualityConstraintsIfActive()
    {
       // Minimize 1/2 * (x1^2 + x2^2) - x1 - 2.0 * x2 subject to x1 = -4; x1 < 4; (Solution = [-4, 2])

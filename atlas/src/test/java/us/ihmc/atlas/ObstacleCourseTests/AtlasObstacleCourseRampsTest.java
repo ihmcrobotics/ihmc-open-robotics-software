@@ -1,6 +1,6 @@
 package us.ihmc.atlas.ObstacleCourseTests;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import us.ihmc.atlas.AtlasRobotModel;
 import us.ihmc.atlas.AtlasRobotVersion;
@@ -9,11 +9,12 @@ import us.ihmc.avatar.drcRobot.RobotTarget;
 import us.ihmc.avatar.obstacleCourseTests.DRCObstacleCourseRampsTest;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationPlan;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
+import org.junit.jupiter.api.Tag;
+import org.junit.jupiter.api.Disabled;
 import us.ihmc.continuousIntegration.IntegrationCategory;
 import us.ihmc.simulationConstructionSetTools.bambooTools.BambooTools;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
 
-@ContinuousIntegrationPlan(categories = {IntegrationCategory.FAST, IntegrationCategory.VIDEO})
 public class AtlasObstacleCourseRampsTest extends DRCObstacleCourseRampsTest
 {
    private final DRCRobotModel robotModel = new AtlasRobotModel(AtlasRobotVersion.ATLAS_UNPLUGGED_V5_NO_HANDS, RobotTarget.SCS, false);
@@ -31,40 +32,35 @@ public class AtlasObstacleCourseRampsTest extends DRCObstacleCourseRampsTest
    }
 
    @Override
-   @ContinuousIntegrationTest(estimatedDuration = 72.0)
-   @Test(timeout = 500000)
+   @Test
    public void testWalkingDownRampWithMediumSteps() throws SimulationExceededMaximumTimeException
    {
       super.testWalkingDownRampWithMediumSteps();
    }
 
    @Override
-   @ContinuousIntegrationTest(estimatedDuration = 84.3)
-   @Test(timeout = 480000)
+   @Test
    public void testWalkingUpRampWithMediumSteps() throws SimulationExceededMaximumTimeException
    {
       super.testWalkingUpRampWithMediumSteps();
    }
 
    @Override
-   @ContinuousIntegrationTest(estimatedDuration = 88.8)
-   @Test(timeout = 470000)
+   @Test
    public void testWalkingUpRampWithShortSteps() throws SimulationExceededMaximumTimeException
    {
       super.testWalkingUpRampWithShortSteps();
    }
 
    @Override
-   @ContinuousIntegrationTest(estimatedDuration = 88.8)
-   @Test(timeout = 470000)
+   @Test
    public void testWalkingUpRampWithShortStepsALittleTooHigh() throws SimulationExceededMaximumTimeException
    {
       super.testWalkingUpRampWithShortStepsALittleTooHigh();
    }
 
    @Override
-   @ContinuousIntegrationTest(estimatedDuration = 88.8)
-   @Test(timeout = 470000)
+   @Test
    public void testWalkingUpRampWithShortStepsALittleTooLow() throws SimulationExceededMaximumTimeException
    {
       super.testWalkingUpRampWithShortStepsALittleTooLow();

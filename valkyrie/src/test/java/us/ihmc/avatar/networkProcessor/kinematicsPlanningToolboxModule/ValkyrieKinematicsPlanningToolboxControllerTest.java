@@ -1,10 +1,12 @@
 package us.ihmc.avatar.networkProcessor.kinematicsPlanningToolboxModule;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.RobotTarget;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
+import org.junit.jupiter.api.Tag;
+import org.junit.jupiter.api.Disabled;
 import us.ihmc.simulationconstructionset.UnreasonableAccelerationException;
 import us.ihmc.valkyrie.ValkyrieRobotModel;
 
@@ -31,29 +33,25 @@ public class ValkyrieKinematicsPlanningToolboxControllerTest extends AvatarKinem
       return ghostRobotModel;
    }
    
-   @ContinuousIntegrationTest(estimatedDuration = 20.0)
-   @Test(timeout = 30000)
+   @Test
    public void testDualHandTrajectory() throws Exception, UnreasonableAccelerationException
    {
       super.testDualHandTrajectory();
    }
    
-   @ContinuousIntegrationTest(estimatedDuration = 20.0)
-   @Test(timeout = 30000)
+   @Test
    public void testLinearInterpolatedTrajectory() throws Exception, UnreasonableAccelerationException
    {
       super.testLinearInterpolatedTrajectory();
    }
    
-   @ContinuousIntegrationTest(estimatedDuration = 20.0)
-   @Test(timeout = 30000)
+   @Test
    public void testReachToAPoint() throws Exception, UnreasonableAccelerationException
    {
       super.testReachToAPoint();
    }
    
-   @ContinuousIntegrationTest(estimatedDuration = 20.0)
-   @Test(timeout = 30000)
+   @Test
    public void testDifferentDistanceBetweenKeyFrames() throws Exception, UnreasonableAccelerationException
    {
       super.testDifferentDistanceBetweenKeyFrames();

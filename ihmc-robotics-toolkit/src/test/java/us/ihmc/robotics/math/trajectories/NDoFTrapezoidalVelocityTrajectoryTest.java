@@ -2,12 +2,14 @@ package us.ihmc.robotics.math.trajectories;
 
 import java.util.ArrayList;
 
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Ignore;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
 
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
+import org.junit.jupiter.api.Tag;
+import org.junit.jupiter.api.Disabled;
 import us.ihmc.continuousIntegration.IntegrationCategory;
 import us.ihmc.robotics.math.trajectories.NDoFTrapezoidalVelocityTrajectory.AlphaToAlphaType;
 
@@ -24,12 +26,12 @@ public class NDoFTrapezoidalVelocityTrajectoryTest
       // empty
    }
 
-   @Before
+   @BeforeEach
    public void setUp() throws Exception
    {
    }
 
-   @After
+   @AfterEach
    public void tearDown() throws Exception
    {
    }
@@ -143,9 +145,9 @@ public class NDoFTrapezoidalVelocityTrajectoryTest
       plot(time, positions, "Position for multiple trajectories (simple)");
    }
 
-   @Ignore
-	@ContinuousIntegrationTest(estimatedDuration = 0.1, categoriesOverride = IntegrationCategory.EXCLUDE)
-	@Test(timeout=300000)
+   @Disabled
+	@Disabled
+	@Test
    public void testVelocityAndAcceleration()
    {
       double t0 = 1.0;

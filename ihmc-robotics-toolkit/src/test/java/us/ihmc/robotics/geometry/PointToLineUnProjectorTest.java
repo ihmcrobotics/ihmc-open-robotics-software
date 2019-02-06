@@ -4,23 +4,23 @@ import static us.ihmc.robotics.Assert.*;
 
 import java.util.Random;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import us.ihmc.commons.RandomNumbers;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationPlan;
+import org.junit.jupiter.api.Tag;
+import org.junit.jupiter.api.Disabled;
 import us.ihmc.continuousIntegration.IntegrationCategory;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.robotics.random.RandomGeometry;
 
-@ContinuousIntegrationPlan(categories = {IntegrationCategory.FAST})
 public class PointToLineUnProjectorTest
 {
    private static final double eps = 1e-7;
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(timeout = 30000)
+   @Test
    public void testsimpleCase()
    {
       double x0 = 1.0;
@@ -35,8 +35,7 @@ public class PointToLineUnProjectorTest
       runTest(x0, y0, z0, x1, y1, z1, x2, y2, z2);
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.1)
-   @Test(timeout = 30000)
+   @Test
    public void testGeneralCase()
    {
       Random gen = new Random(124L);
@@ -55,8 +54,7 @@ public class PointToLineUnProjectorTest
       }
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.1)
-   @Test(timeout = 30000)
+   @Test
    public void testDegenerateCase()
    {
       Random gen = new Random(124L);
@@ -75,8 +73,7 @@ public class PointToLineUnProjectorTest
       }
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.1)
-   @Test(timeout = 30000)
+   @Test
    public void testYCase()
    {
       Random gen = new Random(124L);
@@ -96,8 +93,7 @@ public class PointToLineUnProjectorTest
       }
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.1)
-   @Test(timeout = 30000)
+   @Test
    public void testXCase()
    {
       Random gen = new Random(124L);

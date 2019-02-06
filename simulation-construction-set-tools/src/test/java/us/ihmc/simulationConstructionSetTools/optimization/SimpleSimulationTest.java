@@ -4,9 +4,11 @@ import static us.ihmc.robotics.Assert.*;
 
 import java.util.Random;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
+import org.junit.jupiter.api.Tag;
+import org.junit.jupiter.api.Disabled;
 import us.ihmc.utilities.parameterOptimization.IndividualToEvaluate;
 import us.ihmc.utilities.parameterOptimization.ListOfParametersToOptimize;
 import us.ihmc.utilities.parameterOptimization.OptimizationProblem;
@@ -15,8 +17,7 @@ import us.ihmc.utilities.parameterOptimization.SimpleRandomGradientDecentParamet
 public class SimpleSimulationTest
 {
 
-	@ContinuousIntegrationTest(estimatedDuration = 1.6)
-	@Test(timeout=300000)
+	@Test
    public void testSimpleSimulation()
    {
       SimpleRobotToOptimize robot = new SimpleRobotToOptimize();

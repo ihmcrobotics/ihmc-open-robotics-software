@@ -5,10 +5,12 @@ import static us.ihmc.robotics.Assert.*;
 import org.ejml.data.DenseMatrix64F;
 import org.ejml.ops.CommonOps;
 import us.ihmc.robotics.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import us.ihmc.commons.PrintTools;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
+import org.junit.jupiter.api.Tag;
+import org.junit.jupiter.api.Disabled;
 import us.ihmc.commons.MathTools;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.robotics.testing.JUnitTools;
@@ -18,8 +20,7 @@ public class ConstrainedQPSolverTest
 {
    private final YoVariableRegistry registry = new YoVariableRegistry("root");
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.4)
-   @Test(timeout = 30000)
+   @Test
    public void testSolveContrainedQP() throws NoConvergenceException
    {
       int numberOfInequalityConstraints = 1;
@@ -128,8 +129,7 @@ public class ConstrainedQPSolverTest
       }
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.1)
-   @Test(timeout = 30000)
+   @Test
    public void testSolveProblemWithParallelConstraints() throws NoConvergenceException
    {
       // our simple active set solver can not solve this:

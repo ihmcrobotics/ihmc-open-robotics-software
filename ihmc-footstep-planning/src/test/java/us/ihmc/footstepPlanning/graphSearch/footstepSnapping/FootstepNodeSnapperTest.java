@@ -1,7 +1,9 @@
 package us.ihmc.footstepPlanning.graphSearch.footstepSnapping;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations;
+import org.junit.jupiter.api.Tag;
+import org.junit.jupiter.api.Disabled;
 import us.ihmc.continuousIntegration.IntegrationCategory;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.footstepPlanning.graphSearch.graph.FootstepNode;
@@ -13,7 +15,6 @@ import java.util.Random;
 
 import static us.ihmc.robotics.Assert.*;
 
-@ContinuousIntegrationAnnotations.ContinuousIntegrationPlan(categories = IntegrationCategory.FAST)
 public class FootstepNodeSnapperTest
 {
    private final Random random = new Random(320L);
@@ -23,8 +24,7 @@ public class FootstepNodeSnapperTest
    private int[] yIndices = new int[]{-35, 0, -777, 87, -50, 28};
    private int[] yawIndices = new int[]{-2, 4, 0};
 
-   @ContinuousIntegrationAnnotations.ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(timeout = 30000)
+   @Test
    public void testFootstepCacheing()
    {
       TestSnapper testSnapper = new TestSnapper();
@@ -50,8 +50,7 @@ public class FootstepNodeSnapperTest
       }
    }
 
-   @ContinuousIntegrationAnnotations.ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(timeout = 30000)
+   @Test
    public void testWithoutPlanarRegions()
    {
       TestSnapper testSnapper = new TestSnapper();

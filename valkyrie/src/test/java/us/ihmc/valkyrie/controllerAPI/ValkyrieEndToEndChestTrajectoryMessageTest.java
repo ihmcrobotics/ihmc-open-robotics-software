@@ -1,11 +1,13 @@
 package us.ihmc.valkyrie.controllerAPI;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import us.ihmc.avatar.controllerAPI.EndToEndChestTrajectoryMessageTest;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.RobotTarget;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
+import org.junit.jupiter.api.Tag;
+import org.junit.jupiter.api.Disabled;
 import us.ihmc.simulationConstructionSetTools.bambooTools.BambooTools;
 import us.ihmc.valkyrie.ValkyrieRobotModel;
 
@@ -26,120 +28,105 @@ public class ValkyrieEndToEndChestTrajectoryMessageTest extends EndToEndChestTra
    }
 
    @Override
-   @ContinuousIntegrationTest(estimatedDuration = 38.4)
-   @Test(timeout = 190000)
+   @Test
    public void testLookingLeftAndRight() throws Exception
    {
       super.testLookingLeftAndRight();
    }
 
    @Override
-   @ContinuousIntegrationTest(estimatedDuration = 39.9)
-   @Test(timeout = 200000)
+   @Test
    public void testLookingLeftAndRightInVariousTrajectoryFrames() throws Exception
    {
       super.testLookingLeftAndRightInVariousTrajectoryFrames();
    }
 
    @Override
-   @ContinuousIntegrationTest(estimatedDuration = 40.4)
-   @Test(timeout = 200000)
+   @Test
    public void testMessageWithALotOfTrajectoryPoints() throws Exception
    {
       super.testMessageWithALotOfTrajectoryPoints();
    }
 
    @Override
-   @ContinuousIntegrationTest(estimatedDuration = 39.6)
-   @Test(timeout = 200000)
+   @Test
    public void testMessageWithALotOfTrajectoryPointsExpressedInPelvisZUp() throws Exception
    {
       super.testMessageWithALotOfTrajectoryPointsExpressedInPelvisZUp();
    }
 
    @Override
-   @ContinuousIntegrationTest(estimatedDuration = 26.2)
-   @Test(timeout = 130000)
+   @Test
    public void testMultipleTrajectoryPoints() throws Exception
    {
       super.testMultipleTrajectoryPoints();
    }
 
    @Override
-   @ContinuousIntegrationTest(estimatedDuration = 49.3)
-   @Test(timeout = 250000)
+   @Test
    public void testQueuedMessages() throws Exception
    {
       super.testQueuedMessages();
    }
 
    @Override
-   @ContinuousIntegrationTest(estimatedDuration = 27.6)
-   @Test(timeout = 140000)
+   @Test
    public void testQueueStoppedWithOverrideMessage() throws Exception
    {
       super.testQueueStoppedWithOverrideMessage();
    }
 
    @Override
-   @ContinuousIntegrationTest(estimatedDuration = 44.8)
-   @Test(timeout = 220000)
+   @Test
    public void testQueueWithUsingDifferentTrajectoryFrameWithoutOverride() throws Exception
    {
       super.testQueueWithUsingDifferentTrajectoryFrameWithoutOverride();
    }
 
    @Override
-   @ContinuousIntegrationTest(estimatedDuration = 16.5)
-   @Test(timeout = 83000)
+   @Test
    public void testQueueWithWrongPreviousId() throws Exception
    {
       super.testQueueWithWrongPreviousId();
    }
 
    @Override
-   @ContinuousIntegrationTest(estimatedDuration = 25.4)
-   @Test(timeout = 130000)
+   @Test
    public void testSelectionMatrixDisableRandomAxisWithSingleTrajectoryPoint() throws Exception
    {
       super.testSelectionMatrixDisableRandomAxisWithSingleTrajectoryPoint();
    }
 
    @Override
-   @ContinuousIntegrationTest(estimatedDuration = 28.1)
-   @Test(timeout = 140000)
+   @Test
    public void testSelectionMatrixWithAllAxisOffUsingSingleTrajectoryPoint() throws Exception
    {
       super.testSelectionMatrixWithAllAxisOffUsingSingleTrajectoryPoint();
    }
 
    @Override
-   @ContinuousIntegrationTest(estimatedDuration = 24.4)
-   @Test(timeout = 120000)
+   @Test
    public void testSettingWeightMatrixUsingSingleTrajectoryPoint() throws Exception
    {
       super.testSettingWeightMatrixUsingSingleTrajectoryPoint();
    }
 
    @Override
-   @ContinuousIntegrationTest(estimatedDuration = 26.2)
-   @Test(timeout = 130000)
+   @Test
    public void testSingleTrajectoryPoint() throws Exception
    {
       super.testSingleTrajectoryPoint();
    }
 
    @Override
-   @ContinuousIntegrationTest(estimatedDuration = 37.7)
-   @Test(timeout = 190000)
+   @Test
    public void testStopAllTrajectory() throws Exception
    {
       super.testStopAllTrajectory();
    }
 
    @Override
-   @ContinuousIntegrationTest(estimatedDuration = 37.7)
-   @Test(timeout = 190000)
+   @Test
    public void testStopAllTrajectoryRepeatedly() throws Exception
    {
       super.testStopAllTrajectoryRepeatedly();

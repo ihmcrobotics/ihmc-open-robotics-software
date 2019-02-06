@@ -1,11 +1,13 @@
 package us.ihmc.valkyrie.controllerAPI;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import us.ihmc.avatar.controllerAPI.EndToEndFootTrajectoryMessageTest;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.RobotTarget;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
+import org.junit.jupiter.api.Tag;
+import org.junit.jupiter.api.Disabled;
 import us.ihmc.simulationConstructionSetTools.bambooTools.BambooTools;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
 import us.ihmc.valkyrie.ValkyrieRobotModel;
@@ -14,48 +16,42 @@ public class ValkyrieEndToEndFootTrajectoryMessageTest extends EndToEndFootTraje
 {
    private final ValkyrieRobotModel robotModel = new ValkyrieRobotModel(RobotTarget.SCS, false);
 
-   @ContinuousIntegrationTest(estimatedDuration = 23.0)
-   @Test(timeout = 120000)
+   @Test
    @Override
    public void testCustomControlPoint() throws SimulationExceededMaximumTimeException
    {
       super.testCustomControlPoint();
    }
    
-   @ContinuousIntegrationTest(estimatedDuration = 94.3)
-   @Test(timeout = 470000)
+   @Test
    @Override
    public void testSingleWaypoint() throws SimulationExceededMaximumTimeException
    {
       super.testSingleWaypoint();
    }
    
-   @ContinuousIntegrationTest(estimatedDuration = 99.5)
-   @Test(timeout = 500000)
+   @Test
    @Override
    public void testMultipleTrajectoryPoints() throws SimulationExceededMaximumTimeException
    {
       super.testMultipleTrajectoryPoints();
    }
    
-   @ContinuousIntegrationTest(estimatedDuration = 113.5)
-   @Test(timeout = 570000)
+   @Test
    @Override
    public void testQueuedMessages() throws SimulationExceededMaximumTimeException
    {
       super.testQueuedMessages();
    }
    
-   @ContinuousIntegrationTest(estimatedDuration = 83.5)
-   @Test(timeout = 420000)
+   @Test
    @Override
    public void testQueueStoppedWithOverrideMessage() throws SimulationExceededMaximumTimeException
    {
       super.testQueueStoppedWithOverrideMessage();
    }
    
-   @ContinuousIntegrationTest(estimatedDuration = 64.5)
-   @Test(timeout = 320000)
+   @Test
    @Override
    public void testQueueWithWrongPreviousId() throws SimulationExceededMaximumTimeException
    {

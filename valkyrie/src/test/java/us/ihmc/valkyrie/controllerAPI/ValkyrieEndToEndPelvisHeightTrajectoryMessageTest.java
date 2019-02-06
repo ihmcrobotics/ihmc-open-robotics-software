@@ -1,11 +1,13 @@
 package us.ihmc.valkyrie.controllerAPI;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import us.ihmc.avatar.controllerAPI.EndToEndPelvisHeightTrajectoryMessageTest;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.RobotTarget;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
+import org.junit.jupiter.api.Tag;
+import org.junit.jupiter.api.Disabled;
 import us.ihmc.simulationConstructionSetTools.bambooTools.BambooTools;
 import us.ihmc.valkyrie.ValkyrieRobotModel;
 
@@ -26,32 +28,28 @@ public class ValkyrieEndToEndPelvisHeightTrajectoryMessageTest extends EndToEndP
    }
 
    @Override
-   @ContinuousIntegrationTest(estimatedDuration = 42.4)
-   @Test(timeout = 210000)
+   @Test
    public void testSingleWaypoint() throws Exception
    {
       super.testSingleWaypoint();
    }
 
    @Override
-   @ContinuousIntegrationTest(estimatedDuration = 27.3)
-   @Test(timeout = 140000)
+   @Test
    public void testSingleWaypointInUserMode() throws Exception
    {
       super.testSingleWaypointInUserMode();
    }
 
    @Override
-   @ContinuousIntegrationTest(estimatedDuration = 99.8)
-   @Test(timeout = 500000)
+   @Test
    public void testSingleWaypointThenManualChange() throws Exception
    {
       super.testSingleWaypointThenManualChange();
    }
 
    @Override
-   @ContinuousIntegrationTest(estimatedDuration = 42.4)
-   @Test(timeout = 210000)
+   @Test
    public void testStopAllTrajectory() throws Exception
    {
       super.testStopAllTrajectory();

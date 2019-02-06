@@ -4,10 +4,12 @@ import static us.ihmc.robotics.Assert.*;
 
 import java.util.Random;
 
-import org.junit.After;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.Test;
 
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
+import org.junit.jupiter.api.Tag;
+import org.junit.jupiter.api.Disabled;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
@@ -18,14 +20,13 @@ import us.ihmc.robotics.random.RandomGeometry;
 
 public class YoParabolicTrajectoryGeneratorTest
 {
-   @After
+   @AfterEach
    public void tearDown()
    {
       ReferenceFrameTools.clearWorldFrameTree();
    }
 
-	@ContinuousIntegrationTest(estimatedDuration = 0.0)
-	@Test(timeout = 30000)
+	@Test
    public void testConditions()
    {
       YoVariableRegistry registry = new YoVariableRegistry("registry");
@@ -52,8 +53,7 @@ public class YoParabolicTrajectoryGeneratorTest
       EuclidCoreTestTools.assertTuple3DEquals(finalPosition, positionToPack, delta);
    }
 
-	@ContinuousIntegrationTest(estimatedDuration = 0.0)
-	@Test(timeout = 30000,expected = RuntimeException.class)
+	@Test
    public void testIllegalParameter1()
    {
       double intermediateParameter = 1.1;
@@ -66,8 +66,7 @@ public class YoParabolicTrajectoryGeneratorTest
       trajectoryGenerator.initialize(initialPosition, intermediatePosition, finalPosition, intermediateParameter);
    }
 
-	@ContinuousIntegrationTest(estimatedDuration = 0.0)
-	@Test(timeout = 30000,expected = RuntimeException.class)
+	@Test
    public void testIllegalParameter2()
    {
       double intermediateParameter = -0.1;
@@ -80,8 +79,7 @@ public class YoParabolicTrajectoryGeneratorTest
       trajectoryGenerator.initialize(initialPosition, intermediatePosition, finalPosition, intermediateParameter);
    }
 
-	@ContinuousIntegrationTest(estimatedDuration = 0.0)
-	@Test(timeout = 30000,expected = RuntimeException.class)
+	@Test
    public void testIllegalParameter3()
    {
       ReferenceFrame referenceFrame = ReferenceFrame.getWorldFrame();
@@ -106,8 +104,7 @@ public class YoParabolicTrajectoryGeneratorTest
       trajectoryGenerator.getPosition(positionToPack, 1.1);
    }
 
-	@ContinuousIntegrationTest(estimatedDuration = 0.0)
-	@Test(timeout = 30000)
+	@Test
    public void testApex()
    {
       YoVariableRegistry registry = new YoVariableRegistry("registry");
@@ -139,8 +136,7 @@ public class YoParabolicTrajectoryGeneratorTest
       assertTrue(smallestDifference >= 0.0);
    }
 
-	@ContinuousIntegrationTest(estimatedDuration = 0.0)
-	@Test(timeout = 30000)
+	@Test
    public void testVelocity()
    {
       YoVariableRegistry registry = new YoVariableRegistry("registry");
@@ -178,8 +174,7 @@ public class YoParabolicTrajectoryGeneratorTest
       }
    }
 
-	@ContinuousIntegrationTest(estimatedDuration = 0.0)
-	@Test(timeout = 30000)
+	@Test
    public void testInitialVelocity()
    {
       YoVariableRegistry registry = new YoVariableRegistry("registry");

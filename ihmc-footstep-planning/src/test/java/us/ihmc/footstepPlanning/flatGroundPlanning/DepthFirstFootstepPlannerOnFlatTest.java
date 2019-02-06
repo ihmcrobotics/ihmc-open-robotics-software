@@ -1,10 +1,12 @@
 package us.ihmc.footstepPlanning.flatGroundPlanning;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
+import org.junit.jupiter.api.Tag;
+import org.junit.jupiter.api.Disabled;
 import us.ihmc.continuousIntegration.IntegrationCategory;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.footstepPlanning.graphSearch.parameters.DefaultFootstepPlanningParameters;
@@ -18,7 +20,7 @@ import us.ihmc.footstepPlanning.graphSearch.stepCost.ConstantFootstepCost;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 
-@ContinuousIntegrationAnnotations.ContinuousIntegrationPlan(categories = IntegrationCategory.EXCLUDE)
+@Disabled
 public class DepthFirstFootstepPlannerOnFlatTest extends FootstepPlannerOnFlatGroundTest
 {
    private YoVariableRegistry registry;
@@ -36,8 +38,7 @@ public class DepthFirstFootstepPlannerOnFlatTest extends FootstepPlannerOnFlatGr
    }
 
    @Override
-   @ContinuousIntegrationTest(estimatedDuration = 0.1)
-   @Test(timeout = 300000)
+   @Test
    public void testJustStraightLine()
    {
       planner.setMaximumNumberOfNodesToExpand(10000);
@@ -46,8 +47,7 @@ public class DepthFirstFootstepPlannerOnFlatTest extends FootstepPlannerOnFlatGr
    }
 
    @Override
-   @ContinuousIntegrationTest(estimatedDuration = 0.1)
-   @Test(timeout = 300000)
+   @Test
    public void testATightTurn()
    {
       planner.setMaximumNumberOfNodesToExpand(Integer.MAX_VALUE);
@@ -57,8 +57,7 @@ public class DepthFirstFootstepPlannerOnFlatTest extends FootstepPlannerOnFlatGr
    }
 
    @Override
-   @ContinuousIntegrationTest(estimatedDuration = 0.1)
-   @Test(timeout = 300000)
+   @Test
    public void testStraightLineWithInitialTurn()
    {
       planner.setMaximumNumberOfNodesToExpand(Integer.MAX_VALUE);
@@ -68,8 +67,7 @@ public class DepthFirstFootstepPlannerOnFlatTest extends FootstepPlannerOnFlatGr
    }
 
    @Override
-   @ContinuousIntegrationTest(estimatedDuration = 0.1)
-   @Test(timeout = 300000)
+   @Test
    public void testJustTurnInPlace()
    {
       planner.setMaximumNumberOfNodesToExpand(Integer.MAX_VALUE);
@@ -79,8 +77,7 @@ public class DepthFirstFootstepPlannerOnFlatTest extends FootstepPlannerOnFlatGr
    }
 
    @Override
-   @ContinuousIntegrationTest(estimatedDuration = 2.0, categoriesOverride = IntegrationCategory.FAST)
-   @Test(timeout = 30000)
+   @Test
    public void testRandomPoses()
    {
       planner.setMaximumNumberOfNodesToExpand(Integer.MAX_VALUE);
@@ -89,7 +86,7 @@ public class DepthFirstFootstepPlannerOnFlatTest extends FootstepPlannerOnFlatGr
       super.testRandomPoses();
    }
 
-   @Before
+   @BeforeEach
    public void setupPlanner()
    {
       registry = new YoVariableRegistry("test");

@@ -3,9 +3,11 @@ package us.ihmc.robotics.optimization;
 import static us.ihmc.robotics.Assert.*;
 
 import org.ejml.data.DenseMatrix64F;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
+import org.junit.jupiter.api.Tag;
+import org.junit.jupiter.api.Disabled;
 import us.ihmc.robotics.functionApproximation.DampedLeastSquaresSolver;
 import us.ihmc.robotics.testing.JUnitTools;
 
@@ -13,8 +15,7 @@ public class EqualityConstraintEnforcerTest
 {
    //TODO: Add test where JQ doesn't equal zero after constraint due to damped least squares.
 
-	@ContinuousIntegrationTest(estimatedDuration = 0.0)
-	@Test(timeout = 30000)
+	@Test
    public void testSimpleCaseOne()
    {
       int matrixSize = 1;
@@ -50,8 +51,7 @@ public class EqualityConstraintEnforcerTest
       assertEquals(xSolution.get(1), 3.0, 1e-7);
    }
 
-	@ContinuousIntegrationTest(estimatedDuration = 0.0)
-	@Test(timeout = 30000)
+	@Test
    public void testSimpleCaseTwo()
    {
       int matrixSize = 1;
@@ -86,8 +86,7 @@ public class EqualityConstraintEnforcerTest
       assertEquals(xSolution.get(2), 4.0, 1e-7);
    }
 
-	@ContinuousIntegrationTest(estimatedDuration = 0.0)
-	@Test(timeout = 30000)
+	@Test
    public void testSimpleCaseThree()
    {
       int matrixSize = 1;
@@ -123,8 +122,7 @@ public class EqualityConstraintEnforcerTest
       assertEquals(xSolution.get(2), 4.0, 1e-7);
    }
 
-	@ContinuousIntegrationTest(estimatedDuration = 0.0)
-	@Test(timeout = 30000)
+	@Test
    public void testSimpleOverconstrainedCaseFour()
    {
       int matrixSize = 1;

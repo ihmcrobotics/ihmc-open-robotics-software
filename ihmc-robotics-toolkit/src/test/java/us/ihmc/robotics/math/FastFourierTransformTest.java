@@ -1,9 +1,11 @@
 package us.ihmc.robotics.math;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import static us.ihmc.robotics.Assert.*;
 
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
+import org.junit.jupiter.api.Tag;
+import org.junit.jupiter.api.Disabled;
 import us.ihmc.continuousIntegration.IntegrationCategory;
 import us.ihmc.robotics.dataStructures.ComplexNumber;
 import us.ihmc.commons.Epsilons;
@@ -11,8 +13,7 @@ import us.ihmc.commons.MathTools;
 
 public class FastFourierTransformTest
 {
-   @ContinuousIntegrationTest(estimatedDuration = 0.0, categoriesOverride = {IntegrationCategory.FAST})
-   @Test(timeout = 30000)
+   @Test
    public void testBitReverse()
    {
       FastFourierTransform fft = FastFourierTransform.getFourierTransformer();
@@ -26,8 +27,7 @@ public class FastFourierTransformTest
       assertTrue (fft.bitReverse(7, 3) == 7);
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.0, categoriesOverride = {IntegrationCategory.FAST})
-   @Test(timeout = 30000)
+   @Test
    public void testFourierTransform()
    {
       double[] testArray = {1, 1, 1, 1, 1};
@@ -44,8 +44,7 @@ public class FastFourierTransformTest
 
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.0, categoriesOverride = {IntegrationCategory.FAST})
-   @Test(timeout = 30000)
+   @Test
    public void testFourierTransform2()
    {
       double[] testArray1 = {1, 1};

@@ -1,19 +1,21 @@
 package us.ihmc.atlas;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import us.ihmc.avatar.DRCFlatGroundRewindabilityTest;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.RobotTarget;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationPlan;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
+import org.junit.jupiter.api.Tag;
+import org.junit.jupiter.api.Disabled;
 import us.ihmc.continuousIntegration.IntegrationCategory;
 import us.ihmc.simulationConstructionSetTools.bambooTools.BambooTools;
 import us.ihmc.simulationconstructionset.UnreasonableAccelerationException;
 import us.ihmc.simulationconstructionset.util.ControllerFailureException;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
 
-@ContinuousIntegrationPlan(categories = IntegrationCategory.FLAKY)
+@Disabled
 public class AtlasFlatGroundRewindabilityTest extends DRCFlatGroundRewindabilityTest
 {
 
@@ -30,16 +32,15 @@ public class AtlasFlatGroundRewindabilityTest extends DRCFlatGroundRewindability
    }
 
    @Override
-   @ContinuousIntegrationTest(estimatedDuration = 9.2)
-   @Test(timeout = 520000)
+   @Test
    public void testCanRewindAndGoForward() throws UnreasonableAccelerationException
    {
       super.testCanRewindAndGoForward();
    }
 
    @Override
-   @ContinuousIntegrationTest(estimatedDuration = 0.1, categoriesOverride = IntegrationCategory.EXCLUDE)
-   @Test(timeout = 520000)
+   @Disabled
+   @Test
    public void testRewindabilityWithSimpleFastMethod() throws UnreasonableAccelerationException, SimulationExceededMaximumTimeException
    {
       super.testRewindabilityWithSimpleFastMethod();
@@ -47,16 +48,15 @@ public class AtlasFlatGroundRewindabilityTest extends DRCFlatGroundRewindability
 
    @Override
    // This takes a long time. Use it for debugging where the broken changes were made when the tests above fail.
-   @ContinuousIntegrationTest(estimatedDuration = 0.1, categoriesOverride = IntegrationCategory.EXCLUDE)
-   @Test(timeout = 520000)
+   @Disabled
+   @Test
    public void testRewindabilityWithSlowerMoreExtensiveMethod() throws UnreasonableAccelerationException, SimulationExceededMaximumTimeException
    {
       super.testRewindabilityWithSlowerMoreExtensiveMethod();
    }
 
    @Override
-   @ContinuousIntegrationTest(estimatedDuration = 43.4)
-   @Test(timeout = 520000)
+   @Test
    public void testRunsTheSameWayTwice() throws UnreasonableAccelerationException, SimulationExceededMaximumTimeException, ControllerFailureException
    {
       super.testRunsTheSameWayTwice();

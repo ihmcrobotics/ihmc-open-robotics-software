@@ -2,21 +2,21 @@ package us.ihmc.robotics.geometry;
 
 import static us.ihmc.robotics.Assert.*;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import us.ihmc.commons.MutationTestFacilitator;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationPlan;
+import org.junit.jupiter.api.Tag;
+import org.junit.jupiter.api.Disabled;
 import us.ihmc.continuousIntegration.IntegrationCategory;
 import us.ihmc.euclid.Axis;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Vector3D;
 
-@ContinuousIntegrationPlan(categories = {IntegrationCategory.FAST})
 public class RigidBodyTransformGeneratorTest
 {
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(timeout = 30000)
+   @Test
    public void testSimpleTransformGeneration()
    {
       RigidBodyTransformGenerator generator = new RigidBodyTransformGenerator();
@@ -72,8 +72,7 @@ public class RigidBodyTransformGeneratorTest
 
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(timeout = 30000)
+   @Test
    public void testTranslateThenRotateTransformGeneration()
    {
       RigidBodyTransformGenerator generator = new RigidBodyTransformGenerator();
@@ -87,8 +86,7 @@ public class RigidBodyTransformGeneratorTest
       assertTrue(transform.epsilonEquals(expectedTransform, 1e-10));
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(timeout = 30000)
+   @Test
    public void testMultiStepTransformGeneration()
    {
       RigidBodyTransformGenerator generator = new RigidBodyTransformGenerator();

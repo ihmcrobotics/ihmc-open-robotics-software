@@ -1,6 +1,6 @@
 package us.ihmc.atlas.ObstacleCourseTests;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import us.ihmc.atlas.AtlasRobotModel;
 import us.ihmc.atlas.AtlasRobotVersion;
@@ -9,29 +9,28 @@ import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.RobotTarget;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 
+import org.junit.jupiter.api.Tag;
+import org.junit.jupiter.api.Disabled;
 public class AtlasEndToEndForwardDynamicsCalculatorTest extends AvatarEndToEndForwardDynamicsCalculatorTest
 {
    private final AtlasRobotModel robotModel = new AtlasRobotModel(AtlasRobotVersion.ATLAS_UNPLUGGED_V5_NO_HANDS, RobotTarget.SCS, false);
 
    @Override
-   @ContinuousIntegrationTest(estimatedDuration = 35.0)
-   @Test(timeout = 300000)
+   @Test
    public void testStanding() throws Exception
    {
       super.testStanding();
    }
 
    @Override
-   @ContinuousIntegrationTest(estimatedDuration = 35.0)
-   @Test(timeout = 300000)
+   @Test
    public void testFloating() throws Exception
    {
       super.testFloating();
    }
 
    @Override
-   @ContinuousIntegrationTest(estimatedDuration = 50.0)
-   @Test(timeout = 300000)
+   @Test
    public void testWalking() throws Exception
    {
       super.testWalking();

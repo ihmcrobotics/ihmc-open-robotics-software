@@ -5,14 +5,16 @@ import static us.ihmc.robotics.Assert.*;
 import java.util.Arrays;
 import java.util.List;
 
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import us.ihmc.commonWalkingControlModules.configurations.CoPPointName;
 import us.ihmc.commons.Epsilons;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationPlan;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
+import org.junit.jupiter.api.Tag;
+import org.junit.jupiter.api.Disabled;
 import us.ihmc.continuousIntegration.IntegrationCategory;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
@@ -27,7 +29,6 @@ import us.ihmc.robotics.math.trajectories.trajectorypoints.YoFrameEuclideanTraje
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoFramePoint3D;
 
-@ContinuousIntegrationPlan(categories = {IntegrationCategory.FAST})
 public class CoPPointsInFootTest
 {
    private static final String testClassName = "CoPPointsInFootTestRegistry";
@@ -46,13 +47,13 @@ public class CoPPointsInFootTest
    private final static ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
    private CoPPointsInFoot copPointsInFoot;
 
-   @Before
+   @BeforeEach
    public void setup()
    {
       copPointsInFoot = new CoPPointsInFoot(testClassName, 0, registry);
    }
 
-   @After
+   @AfterEach
    public void clean()
    {
       copPointsInFoot.reset();
@@ -60,8 +61,7 @@ public class CoPPointsInFootTest
       ReferenceFrameTools.clearWorldFrameTree();
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.1)
-   @Test(timeout = 30000)
+   @Test
    public void testAddCoPPointToList()
    {
       assertTrue(copPointsInFoot.isEmpty());
@@ -74,8 +74,7 @@ public class CoPPointsInFootTest
       assertTrue(copPointsInFoot.getCoPPointList().isEmpty());
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.1)
-   @Test(timeout = 30000)
+   @Test
    public void testAddAndSetIncludingFrameWithFramePoint()
    {
       FramePoint3D testLocation = new FramePoint3D(footSpoof.getSoleFrame(), Math.random(), Math.random(), Math.random());
@@ -88,8 +87,7 @@ public class CoPPointsInFootTest
       assertEquals(0.2, copPointsInFoot.get(0).getTime(), epsilon);
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.1)
-   @Test(timeout = 30000)
+   @Test
    public void testAddAndSetIncludingFrameWithYoFramePoint()
    {
       YoFramePoint3D testLocation1 = new YoFramePoint3D("TestLocation1", footSpoof.getSoleFrame(), null);
@@ -110,8 +108,7 @@ public class CoPPointsInFootTest
       assertEquals(0.12, copPointsInFoot.get(1).getTime(), epsilon);
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(timeout = 30000)
+   @Test
    public void testAddAndSetIncludingFrameWithCoPTrajectoryPoint()
    {
       YoFrameEuclideanTrajectoryPoint testLocation1 = new YoFrameEuclideanTrajectoryPoint("TestLocation1", "", null);
@@ -133,8 +130,7 @@ public class CoPPointsInFootTest
       EuclidFrameTestTools.assertFramePoint3DGeometricallyEquals(testLocation2.getPosition(), tempFramePointForTesting, epsilon);
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.1)
-   @Test(timeout = 30000)
+   @Test
    public void testSetFeetLocations()
    {
       copPointsInFoot.setFeetLocation(new FramePoint3D(worldFrame, 0.2, 1.35, 2.1), new FramePoint3D(worldFrame, 1.3, 2.4, 6.6));
@@ -150,8 +146,7 @@ public class CoPPointsInFootTest
       assertEquals(framePointForTesting.getZ(), 6.6, epsilon);
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(timeout = 30000)
+   @Test
    public void testChangeFrame()
    {
       copPointsInFoot.setFeetLocation(new FramePoint3D(worldFrame, 0.2, 0.1, 0.1), new FramePoint3D(worldFrame, 0.2, -0.1, 0.1));
@@ -176,8 +171,7 @@ public class CoPPointsInFootTest
       assertEquals(tempFramePoint.getZ(), 0.11 + zToAnkle, epsilon);
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.1)
-   @Test(timeout = 30000)
+   @Test
    public void testRegisterFrame()
    {
       double newFrameOriginX = 1;

@@ -2,19 +2,19 @@ package us.ihmc.commonWalkingControlModules.capturePoint.optimization.qpInput;
 
 import org.ejml.ops.CommonOps;
 import us.ihmc.robotics.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import us.ihmc.commons.RandomNumbers;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationPlan;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
+import org.junit.jupiter.api.Tag;
+import org.junit.jupiter.api.Disabled;
 import us.ihmc.continuousIntegration.IntegrationCategory;
 
 import java.util.Random;
 
-@ContinuousIntegrationPlan(categories = {IntegrationCategory.FAST})
 public class ICPInequalityInputTest
 {
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(timeout = 30000)
+   @Test
    public void testSize()
    {
       Random random = new Random(10L);
@@ -32,8 +32,7 @@ public class ICPInequalityInputTest
       }
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.1)
-   @Test(timeout = 30000)
+   @Test
    public void testReshape()
    {
       Random random = new Random(10L);
@@ -66,8 +65,7 @@ public class ICPInequalityInputTest
    }
 
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.1)
-   @Test(timeout = 30000)
+   @Test
    public void testReset()
    {
       Random random = new Random(10L);

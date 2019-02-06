@@ -1,24 +1,25 @@
 package us.ihmc.robotics.math.trajectories;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import us.ihmc.commons.MathTools;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
+import org.junit.jupiter.api.Tag;
+import org.junit.jupiter.api.Disabled;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 
 public class YoTrajectoryTest
 {
    YoVariableRegistry registry = new YoVariableRegistry("TrajectoryTestRegistry");
 
-   @Before
+   @BeforeEach
    public void setup()
    {
       registry.clear();
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(timeout = 30000)
+   @Test
    public void testGetDerivative()
    {
       YoTrajectory traj = new YoTrajectory("Trajectory", 10, registry);

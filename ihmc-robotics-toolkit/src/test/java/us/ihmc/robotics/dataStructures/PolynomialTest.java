@@ -2,20 +2,21 @@ package us.ihmc.robotics.dataStructures;
 
 import static us.ihmc.robotics.Assert.*;
 
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationPlan;
+import org.junit.jupiter.api.Tag;
+import org.junit.jupiter.api.Disabled;
 import us.ihmc.continuousIntegration.IntegrationCategory;
 
-@ContinuousIntegrationPlan(categories = {IntegrationCategory.FAST})
 public class PolynomialTest
 {
    private Polynomial constant5Polynomial, twoXPlus3Polynomial, fourX4ThreeX3TwoX2OneX1Polynomial;
 
-   @Before
+   @BeforeEach
    public void setUp()
    {
       constant5Polynomial = new Polynomial(new double[] {5.0});
@@ -23,7 +24,7 @@ public class PolynomialTest
       fourX4ThreeX3TwoX2OneX1Polynomial = new Polynomial(new double[] {4.0, 3.0, 2.0, 1.0, 0.0});
    }
 
-   @After
+   @AfterEach
    public void tearDown()
    {
       constant5Polynomial = null;
@@ -31,8 +32,7 @@ public class PolynomialTest
       fourX4ThreeX3TwoX2OneX1Polynomial = null;
    }
 
-	@ContinuousIntegrationTest(estimatedDuration = 0.0)
-	@Test(timeout = 30000)
+	@Test
    public void testConstructFromRealRoot()
    {
       double realRoot = 7.7;
@@ -43,8 +43,7 @@ public class PolynomialTest
       assertEquals(-realRoot, polynomial.evaluate(0.0), 1e-7);
    }
 
-	@ContinuousIntegrationTest(estimatedDuration = 0.0)
-	@Test(timeout = 30000)
+	@Test
    public void testConstructFromScaleFactorAndRoots()
    {
       double scaleFactor = 3.3;
@@ -64,8 +63,7 @@ public class PolynomialTest
       }
    }
 
-	@ContinuousIntegrationTest(estimatedDuration = 0.0)
-	@Test(timeout = 30000)
+	@Test
    public void testConstructFromComplexPairRoot()
    {
       verifyComplexPair(2.1, 3.3);
@@ -86,8 +84,7 @@ public class PolynomialTest
       assertEquals(expectedValue, evaluation, 1e-7);
    }
 
-	@ContinuousIntegrationTest(estimatedDuration = 0.0)
-	@Test(timeout = 30000)
+	@Test
    public void testEvaluate()
    {
       verifyEvaluations(0.0);
@@ -101,8 +98,7 @@ public class PolynomialTest
 
    }
 
-	@ContinuousIntegrationTest(estimatedDuration = 0.0)
-	@Test(timeout = 30000)
+	@Test
    public void testSetQuintic()
    {
 	   Polynomial quintic = new Polynomial(new double[]{1.0, 1.0, 1.0, 1.0, 1.0, 1.0});
@@ -127,8 +123,7 @@ public class PolynomialTest
       assertEquals(quintic.evaluateDoubleDerivative(1),   6.0, 1e-7);	   
    }
 
-	@ContinuousIntegrationTest(estimatedDuration = 0.0)
-	@Test(timeout = 30000)
+	@Test
    public void testSetCubic()
    {
 	   Polynomial quintic = new Polynomial(new double[]{1.0, 1.0, 1.0, 1.0});
@@ -147,8 +142,7 @@ public class PolynomialTest
       assertEquals(quintic.evaluateDerivative(1),  2.0, 1e-7);  
    }
 
-	@ContinuousIntegrationTest(estimatedDuration = 0.0)
-	@Test(timeout = 30000)
+	@Test
    public void testDerivatives()
    {
 	   double[] expectedCoeffs = constant5Polynomial.getDerivativeCoefficients();
@@ -167,8 +161,7 @@ public class PolynomialTest
 	   assertTrue(expectedCoeffs[3] == 1.0);	   
    }
 
-	@ContinuousIntegrationTest(estimatedDuration = 0.0)
-	@Test(timeout = 30000)
+	@Test
    public void testDoubleDerivatives()
    {
 	   double[] expectedCoeffs = constant5Polynomial.getDoubleDerivativeCoefficients();
@@ -216,8 +209,7 @@ public class PolynomialTest
       verifyEpsilonEquals(fourX4ThreeX3TwoX2OneX1, fourX4ThreeX3TwoX2OneX1Polynomial.evaluate(x), 1e-7);
    }
 
-	@ContinuousIntegrationTest(estimatedDuration = 0.0)
-	@Test(timeout = 30000)
+	@Test
    public void testGetOrder()
    {
       assertEquals(0, constant5Polynomial.getOrder());
@@ -225,8 +217,7 @@ public class PolynomialTest
       assertEquals(4, fourX4ThreeX3TwoX2OneX1Polynomial.getOrder());
    }
 
-	@ContinuousIntegrationTest(estimatedDuration = 0.0)
-	@Test(timeout = 30000)
+	@Test
    public void testGetCoefficients()
    {
       verifyEpsilonEquals(new double[] {5.0}, constant5Polynomial.getCoefficients(), 1e-7);
@@ -234,8 +225,7 @@ public class PolynomialTest
       verifyEpsilonEquals(new double[] {4.0, 3.0, 2.0, 1.0, 0.0}, fourX4ThreeX3TwoX2OneX1Polynomial.getCoefficients(), 1e-7);
    }
 
-	@ContinuousIntegrationTest(estimatedDuration = 0.0)
-	@Test(timeout = 30000)
+	@Test
    public void testImmutable()
    {
       double[] coefficients = constant5Polynomial.getCoefficients();
@@ -259,8 +249,7 @@ public class PolynomialTest
       assertEquals(expectedComplexNumber.imag(), actualComplexNumber.imag(), epsilon);
    }
 
-	@ContinuousIntegrationTest(estimatedDuration = 0.0)
-	@Test(timeout = 30000)
+	@Test
    public void testTimes()
    {
       Polynomial tenXPlus15Polynomial = constant5Polynomial.times(twoXPlus3Polynomial);
@@ -273,16 +262,14 @@ public class PolynomialTest
       }, multipliedPolynomial.getCoefficients(), 1e-7);
    }
 
-	@ContinuousIntegrationTest(estimatedDuration = 0.0)
-	@Test(timeout = 30000)
+	@Test
    public void testTimesScalar()
    {
       Polynomial eighteenXPlus27Polynomial = twoXPlus3Polynomial.times(9.0);
       verifyEpsilonEquals(new double[] {18.0, 27.0}, eighteenXPlus27Polynomial.getCoefficients(), 1e-7);
    }
 
-	@ContinuousIntegrationTest(estimatedDuration = 0.0)
-	@Test(timeout = 30000)
+	@Test
    public void testPlus()
    {
       Polynomial twoXPlus8Polynomial = constant5Polynomial.plus(twoXPlus3Polynomial);
@@ -299,8 +286,7 @@ public class PolynomialTest
       assertTrue(zero3.epsilonEquals(zero, 1e-7));
    }
 
-	@ContinuousIntegrationTest(estimatedDuration = 0.0)
-	@Test(timeout = 30000)
+	@Test
    public void testEpsilonEquals()
    {
       assertTrue(constant5Polynomial.epsilonEquals(constant5Polynomial, 1e-30));
@@ -309,8 +295,7 @@ public class PolynomialTest
       assertFalse(twoXPlus3Polynomial.epsilonEquals(twoXPlus3Polynomial.plus(new Polynomial(new double[] {1.0})), 1e-1));
    }
 
-	@ContinuousIntegrationTest(estimatedDuration = 0.0)
-	@Test(timeout = 30000)
+	@Test
    public void testToString()
    {
       // System.out.println(constant5Polynomial);
@@ -322,8 +307,7 @@ public class PolynomialTest
       assertEquals("4.0 * x^4 + 3.0 * x^3 + 2.0 * x^2 + 1.0 * x + 0.0", fourX4ThreeX3TwoX2OneX1Polynomial.toString());
    }
 
-	@ContinuousIntegrationTest(estimatedDuration = 0.0)
-	@Test(timeout = 30000)
+	@Test
    public void testEqualsZero()
    {
       Polynomial zeroPolynomial = new Polynomial(new double[] {0.0});

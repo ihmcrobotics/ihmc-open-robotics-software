@@ -4,13 +4,15 @@ import static us.ihmc.robotics.Assert.*;
 
 import java.util.Random;
 
-import org.junit.After;
-import org.junit.Ignore;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
 
 import us.ihmc.commons.RandomNumbers;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationPlan;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
+import org.junit.jupiter.api.Tag;
+import org.junit.jupiter.api.Disabled;
 import us.ihmc.continuousIntegration.IntegrationCategory;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.referenceFrame.FramePoint2D;
@@ -26,19 +28,17 @@ import us.ihmc.robotics.referenceFrames.TranslationReferenceFrame;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 
-@ContinuousIntegrationPlan(categories = {IntegrationCategory.FAST})
 public class ICPControlPlaneTest
 {
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
 
-   @After
+   @AfterEach
    public void tearDown()
    {
       ReferenceFrameTools.clearWorldFrameTree();
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(timeout = 30000)
+   @Test
    public void testProjectPointForwardAndLeftOntoPlane()
    {
       YoVariableRegistry registry = new YoVariableRegistry("robert");
@@ -243,9 +243,8 @@ public class ICPControlPlaneTest
     * filled up with NaNs, now the test fails as it should have always been.
     * </p>
     */
-   @Ignore
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(timeout = 30000)
+   @Disabled
+   @Test
    public void testProjectPointForwardAndLeftOntoPlaneEdgeCase()
    {
       YoVariableRegistry registry = new YoVariableRegistry("robert");
@@ -282,8 +281,7 @@ public class ICPControlPlaneTest
       expectedProjectedPoint.checkReferenceFrameMatch(projectedPoint);
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.3)
-   @Test(timeout = 30000)
+   @Test
    public void testRandomProjectOntoPlane()
    {
       Random random = new Random(12345);
@@ -327,8 +325,7 @@ public class ICPControlPlaneTest
       }
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(timeout = 30000)
+   @Test
    public void testProjectPointForwardAndLeftFromPlaneOntoSurface()
    {
       YoVariableRegistry registry = new YoVariableRegistry("robert");
@@ -523,8 +520,7 @@ public class ICPControlPlaneTest
       EuclidCoreTestTools.assertTuple3DEquals(expectedProjectedPoint, projectedPoint, 1e-10);
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.3)
-   @Test(timeout = 30000)
+   @Test
    public void testRandomProjectOntoSurface()
    {
       Random random = new Random(12345);
@@ -569,8 +565,7 @@ public class ICPControlPlaneTest
       }
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(timeout = 30000)
+   @Test
    public void testProjectPlanarRegionMostBasic()
    {
       YoVariableRegistry registry = new YoVariableRegistry("robert");
@@ -624,8 +619,7 @@ public class ICPControlPlaneTest
       EuclidCoreTestTools.assertTuple2DEquals(predictedProjectPoint4, projectedConvexPolygon.getVertex(3), 1e-10);
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(timeout = 30000)
+   @Test
    public void testProjectPlanarRegion()
    {
       YoVariableRegistry registry = new YoVariableRegistry("robert");

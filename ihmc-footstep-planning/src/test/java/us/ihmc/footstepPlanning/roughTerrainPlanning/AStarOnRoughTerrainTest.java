@@ -1,11 +1,13 @@
 package us.ihmc.footstepPlanning.roughTerrainPlanning;
 
-import org.junit.After;
-import org.junit.Ignore;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationPlan;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
+import org.junit.jupiter.api.Tag;
+import org.junit.jupiter.api.Disabled;
 import us.ihmc.continuousIntegration.IntegrationCategory;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.footstepPlanning.FootstepPlanner;
@@ -16,7 +18,6 @@ import us.ihmc.footstepPlanning.tools.PlannerTools;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 
-@ContinuousIntegrationPlan(categories = IntegrationCategory.FAST)
 public class AStarOnRoughTerrainTest extends FootstepPlannerOnRoughTerrainTest
 {
    private AStarFootstepPlanner planner;
@@ -33,8 +34,7 @@ public class AStarOnRoughTerrainTest extends FootstepPlannerOnRoughTerrainTest
    }
 
    @Override
-   @ContinuousIntegrationTest(estimatedDuration = 2.5)
-   @Test(timeout = 1000000)
+   @Test
    public void testDownCorridor()
    {
       setCheckForBodyBoxCollision(true);
@@ -42,8 +42,7 @@ public class AStarOnRoughTerrainTest extends FootstepPlannerOnRoughTerrainTest
    }
 
    @Override
-   @ContinuousIntegrationTest(estimatedDuration = 2.5)
-   @Test(timeout = 1000000)
+   @Test
    public void testBetweenTwoBollards()
    {
       setCheckForBodyBoxCollision(true);
@@ -54,24 +53,24 @@ public class AStarOnRoughTerrainTest extends FootstepPlannerOnRoughTerrainTest
    }
 
    @Override
-   @Ignore
-   @ContinuousIntegrationTest(estimatedDuration = 10.2, categoriesOverride = {IntegrationCategory.EXCLUDE})
-   @Test(timeout = 51000)
+   @Disabled
+   @Disabled
+   @Test
    public void testPartialGaps()
    {
       super.testPartialGaps();
    }
 
    @Override
-   @Ignore
-   @ContinuousIntegrationTest(estimatedDuration = 10.2, categoriesOverride = {IntegrationCategory.EXCLUDE})
-   @Test(timeout = 51000)
+   @Disabled
+   @Disabled
+   @Test
    public void testSpiralStaircase()
    {
       super.testSpiralStaircase();
    }
 
-   @After
+   @AfterEach
    public void destroyPlanner()
    {
       planner = null;

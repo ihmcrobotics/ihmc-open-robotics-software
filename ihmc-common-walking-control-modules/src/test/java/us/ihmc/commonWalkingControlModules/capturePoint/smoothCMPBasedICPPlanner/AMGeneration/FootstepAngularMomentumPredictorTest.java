@@ -5,9 +5,9 @@ import static us.ihmc.robotics.Assert.*;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.BipedSupportPolygons;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.YoPlaneContactState;
@@ -22,6 +22,8 @@ import us.ihmc.commons.Epsilons;
 import us.ihmc.commons.MutationTestFacilitator;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationPlan;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
+import org.junit.jupiter.api.Tag;
+import org.junit.jupiter.api.Disabled;
 import us.ihmc.continuousIntegration.IntegrationCategory;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameQuaternion;
@@ -46,7 +48,6 @@ import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoInteger;
 
-@ContinuousIntegrationPlan(categories = {IntegrationCategory.FAST})
 public class FootstepAngularMomentumPredictorTest
 {
    // Physical parameters used for testing
@@ -131,7 +132,7 @@ public class FootstepAngularMomentumPredictorTest
    private TrajectoryMathTools trajectoryMathTools = new TrajectoryMathTools(14);
    private FrameVector3D zeroVector = new FrameVector3D(worldFrame);
 
-   @Before
+   @BeforeEach
    public void setupTest()
    {
       omega.set(omega0);
@@ -239,14 +240,13 @@ public class FootstepAngularMomentumPredictorTest
       numberOfUpcomingFootsteps.set(0);
    }
 
-   @After
+   @AfterEach
    public void tearDownTest()
    {
       clear();
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.9)
-   @Test(timeout = 30000)
+   @Test
    public void testAngularMomentumInitialTransfer()
    {
       setupInputs();
@@ -329,8 +329,7 @@ public class FootstepAngularMomentumPredictorTest
       return comListCounter + 1;
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.9)
-   @Test(timeout = 30000)
+   @Test
    public void testAngularMomentumNormalTransfer()
    {
       setupInputs();
@@ -480,8 +479,7 @@ public class FootstepAngularMomentumPredictorTest
       return comListCounter;
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 1.2)
-   @Test(timeout = 30000)
+   @Test
    public void testAngularMomentumSwing()
    {
       setupInputs();

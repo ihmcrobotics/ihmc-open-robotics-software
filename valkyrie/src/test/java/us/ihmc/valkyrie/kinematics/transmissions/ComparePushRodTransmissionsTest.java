@@ -4,12 +4,14 @@ import static us.ihmc.robotics.Assert.*;
 
 import java.util.Random;
 
-import org.junit.Ignore;
-import org.junit.Test;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
 
 import us.ihmc.commons.RandomNumbers;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationPlan;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
+import org.junit.jupiter.api.Tag;
+import org.junit.jupiter.api.Disabled;
 import us.ihmc.continuousIntegration.IntegrationCategory;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
@@ -21,14 +23,12 @@ import us.ihmc.valkyrie.kinematics.LinearActuator;
 import us.ihmc.valkyrie.kinematics.ValkyrieJointInterface;
 import us.ihmc.valkyrie.kinematics.YoValkyrieJointWriter;
 
-@ContinuousIntegrationPlan(categories = {IntegrationCategory.FAST})
 public class ComparePushRodTransmissionsTest
 {
    private static final boolean DEBUG = true;
    private static final boolean VISUALIZE = false;
 
-	@ContinuousIntegrationTest(estimatedDuration = 0.2)
-	@Test(timeout = 30000)
+	@Test
    public void testCompareInefficientToEfficientAnkle()
    {
       Random random = new Random(1255L);
@@ -49,9 +49,9 @@ public class ComparePushRodTransmissionsTest
       compareTwoPushRodTransmissionForce(random, epsilon, inefficientPushrodTransmission, efficientPushrodTransmission, registry, yoGraphicsListRegistry);
    }
 
-	@Ignore
-	@ContinuousIntegrationTest(estimatedDuration = 0.0, categoriesOverride = IntegrationCategory.EXCLUDE)
-	@Test(timeout=300000)
+	@Disabled
+	@Disabled
+	@Test
    public void testTiming()
    {
       Random random = new Random(1255L);
@@ -72,8 +72,8 @@ public class ComparePushRodTransmissionsTest
       testTimingTwoPushRodTransmissionInterfaces(random, epsilon, inefficientPushrodTransmission, efficientPushrodTransmission, registry, yoGraphicsListRegistry);
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.0, categoriesOverride = IntegrationCategory.EXCLUDE)
-   @Test(timeout = 30000)
+   @Disabled
+   @Test
    public void testCompareInefficientToEfficientWaist()
    {
       Random random = new Random(1255L);
@@ -94,8 +94,8 @@ public class ComparePushRodTransmissionsTest
       compareTwoPushRodTransmissionForce(random, epsilon, inefficientPushrodTransmission, efficientPushrodTransmission, registry, yoGraphicsListRegistry);
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.0, categoriesOverride = IntegrationCategory.EXCLUDE)
-   @Test(timeout = 30000)
+   @Disabled
+   @Test
    public void testCompareInefficientToJSCWaist()
    {
       Random random = new Random(1255L);
@@ -117,8 +117,8 @@ public class ComparePushRodTransmissionsTest
       compareTwoPushRodTransmissionForce(random, epsilon, inefficientPushrodTransmission, nasaPushrodTransmission, registry, yoGraphicsListRegistry);
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.0, categoriesOverride = IntegrationCategory.EXCLUDE)
-   @Test(timeout = 30000)
+   @Disabled
+   @Test
    public void testCompareInefficientToEfficientWaistOverRenishaw()
    {
       Random random = new Random(1255L);
@@ -141,8 +141,8 @@ public class ComparePushRodTransmissionsTest
       compareTwoPushRodTransmissionForce(random, epsilon, inefficientPushrodTransmission, efficientPushrodTransmission, registry, yoGraphicsListRegistry);
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.0, categoriesOverride = IntegrationCategory.EXCLUDE)
-   @Test(timeout = 30000)
+   @Disabled
+   @Test
    public void testCompareEfficientToJSCWaist()
    {
       Random random = new Random(1255L);

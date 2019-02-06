@@ -5,35 +5,33 @@ import static us.ihmc.robotics.Assert.*;
 import static us.ihmc.robotics.Assert.*;
 
 import org.ejml.data.DenseMatrix64F;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationPlan;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
+import org.junit.jupiter.api.Tag;
+import org.junit.jupiter.api.Disabled;
 import us.ihmc.continuousIntegration.IntegrationCategory;
 import us.ihmc.robotics.linearAlgebra.MatrixTools;
 
-@ContinuousIntegrationPlan(categories = {IntegrationCategory.FAST})
 public class SimpleEfficientActiveSetQPSolverTest extends AbstractSimpleActiveSetQPSolverTest
 {
    @Override
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(timeout = 30000)
+   @Test
    public void testMaxIterations()
    {
       testMaxIterations(2, true);
    }
 
    @Override
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(timeout = 30000)
+   @Test
    public void testClear()
    {
       testClear(2, 2, false);
    }
 
    @Override
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(timeout = 30000)
+   @Test
    public void testSimpleCasesWithBoundsConstraints()
    {
       testSimpleCasesWithBoundsConstraints(1, 3, 2, 2, false);
@@ -55,8 +53,7 @@ public class SimpleEfficientActiveSetQPSolverTest extends AbstractSimpleActiveSe
 
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(timeout = 30000)
+   @Test
    public void testChallengingCasesWithPolygonConstraintsCheckFailsWithSimpleSolverWithWarmStart()
    {
       SimpleActiveSetQPSolverInterface solver = createSolverToTest();
@@ -94,8 +91,7 @@ public class SimpleEfficientActiveSetQPSolverTest extends AbstractSimpleActiveSe
    /**
     *  Test with dataset from sim that revealed a bug with the variable lower/upper bounds handling.
     */
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(timeout = 30000)
+   @Test
    public void testFindValidSolutionForDataset20160319WithWarmStart()
    {
       ActualDatasetFrom20160319 dataset = new ActualDatasetFrom20160319();
@@ -113,8 +109,7 @@ public class SimpleEfficientActiveSetQPSolverTest extends AbstractSimpleActiveSe
       assertEquals(numberOfIterations, 1);
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(timeout = 30000)
+   @Test
    public void testFindValidSolutionForKiwiDataset20170712WithWarmStart()
    {
       ActualDatasetFromKiwi20170712 dataset = new ActualDatasetFromKiwi20170712();
@@ -137,8 +132,7 @@ public class SimpleEfficientActiveSetQPSolverTest extends AbstractSimpleActiveSe
     * It seems that the problem is related to the fact that the robot has 6 contact points per foot.
     * The solver still fails when increasing the max number of iterations.
     */
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(timeout = 30000)
+   @Test
    public void testFindValidSolutionForKiwiDataset20171013WithWarmStart()
    {
       ActualDatasetFromKiwi20171013 dataset = new ActualDatasetFromKiwi20171013();
@@ -156,8 +150,7 @@ public class SimpleEfficientActiveSetQPSolverTest extends AbstractSimpleActiveSe
       assertEquals(1, numberOfIterations);
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(timeout = 30000)
+   @Test
    public void testFindValidSolutionForKiwiDatasetProblemWithWarmStart()
    {
       ActualDatasetFromKiwi20171015A datasetA = new ActualDatasetFromKiwi20171015A();

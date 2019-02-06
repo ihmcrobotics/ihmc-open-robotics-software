@@ -1,8 +1,10 @@
 package us.ihmc.quadrupedFootstepPlanning.footstepPlanning.graphSearch;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
+import org.junit.jupiter.api.Tag;
+import org.junit.jupiter.api.Disabled;
 import us.ihmc.continuousIntegration.ContinuousIntegrationTools;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.tools.EuclidCoreTestTools;
@@ -49,8 +51,7 @@ public class QuadrupedAStarFootstepPlannerTest
 
    private static final QuadrantDependentList<AppearanceDefinition> colorDefinitions = new QuadrantDependentList<>(YoAppearance.Red(), YoAppearance.Green(), YoAppearance.DarkRed(), YoAppearance.DarkGreen());
 
-   @ContinuousIntegrationTest(estimatedDuration = 120)
-   @Test(timeout = timeout)
+   @Test
    public void testSimpleWalkForward()
    {
       YoVariableRegistry registry = new YoVariableRegistry("test");
@@ -99,8 +100,7 @@ public class QuadrupedAStarFootstepPlannerTest
       assertPlanIsValid(steps, goalPose.getPosition(), goalPose.getYaw());
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 120)
-   @Test(timeout = timeout)
+   @Test
    public void testWalkAndTurn()
    {
       YoVariableRegistry registry = new YoVariableRegistry("test");
@@ -150,8 +150,7 @@ public class QuadrupedAStarFootstepPlannerTest
       assertPlanIsValid(steps, goalPose.getPosition(), goalPose.getYaw());
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 120)
-   @Test(timeout = timeout)
+   @Test
    public void testSimpleForwardPoint()
    {
       YoVariableRegistry registry = new YoVariableRegistry("test");

@@ -6,10 +6,12 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
-import org.junit.Ignore;
-import org.junit.Test;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
 
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
+import org.junit.jupiter.api.Tag;
+import org.junit.jupiter.api.Disabled;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.geometry.interfaces.Vertex2DSupplier;
 import us.ihmc.euclid.transform.RigidBodyTransform;
@@ -36,8 +38,7 @@ public class VisibilityGraphTest
 {
    private static final double EPSILON = 1e-10;
 
-   @Test(timeout = 30000)
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
+   @Test
    public void testVisibilityGraphJustOneSquare()
    {
       VisibilityGraphsParameters parameters = createVisibilityGraphParametersForTest();
@@ -196,8 +197,7 @@ public class VisibilityGraphTest
       assertEquals(9, startEdges.size());
    }
 
-   @Test(timeout = 30000)
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
+   @Test
    public void testVisibilityGraphTwoSquares()
    {
       VisibilityGraphsParameters parameters = createVisibilityGraphParametersForTest();
@@ -386,9 +386,8 @@ public class VisibilityGraphTest
    }
 
    //TODO: +++JerryPratt: Get this test to pass and clean it up and make it better.
-   @Ignore("Need to double check this test and fix it.")
-   @Test(timeout = 30000)
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
+   @Disabled("Need to double check this test and fix it.")
+   @Test
    public void testVisibilityGraphTwoSquaresWithImpassableBarrier()
    {
       VisibilityGraphsParameters parameters = createVisibilityGraphParametersForTest();
@@ -512,8 +511,7 @@ public class VisibilityGraphTest
       assertEquals(0, crossRegionEdges.size());
    }
 
-   @Test(timeout = 30000)
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
+   @Test
    public void testVisibilityGraphSquareInSquare()
    {
       VisibilityGraphsParameters parameters = createVisibilityGraphParametersForTest();

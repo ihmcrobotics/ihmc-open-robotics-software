@@ -4,9 +4,11 @@ import static us.ihmc.robotics.Assert.*;
 
 import java.util.Random;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
+import org.junit.jupiter.api.Tag;
+import org.junit.jupiter.api.Disabled;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.FrameQuaternion;
@@ -34,8 +36,7 @@ public class StraightLinePoseTrajectoryGeneratorTest
 
    private static final double EPSILON = 1.0e-10;
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.2)
-   @Test(timeout = 30000)
+   @Test
    public void testCompareWithSingleFrameTrajectoryGenerators()
    {
       YoVariableRegistry registry = new YoVariableRegistry("youpiloup");
@@ -101,8 +102,7 @@ public class StraightLinePoseTrajectoryGeneratorTest
       }
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(timeout = 30000)
+   @Test
    public void testNegativeTime()
    {
       YoVariableRegistry registry = new YoVariableRegistry("youpiloup");
@@ -147,8 +147,7 @@ public class StraightLinePoseTrajectoryGeneratorTest
       assertTrue(angularAcceleration1.epsilonEquals(angularAcceleration2, EPSILON));
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(timeout = 30000)
+   @Test
    public void testTooBigTime()
    {
       YoVariableRegistry registry = new YoVariableRegistry("youpiloup");
@@ -193,8 +192,7 @@ public class StraightLinePoseTrajectoryGeneratorTest
       assertTrue(angularAcceleration1.epsilonEquals(angularAcceleration2, EPSILON));
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.2)
-   @Test(timeout = 30000)
+   @Test
    public void testMultipleFramesWithSingleFrameTrajectoryGenerators()
    {
       YoVariableRegistry registry = new YoVariableRegistry("youpiloup");

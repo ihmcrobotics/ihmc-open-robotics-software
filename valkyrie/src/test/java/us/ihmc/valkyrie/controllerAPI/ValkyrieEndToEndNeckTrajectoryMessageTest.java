@@ -1,11 +1,13 @@
 package us.ihmc.valkyrie.controllerAPI;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import us.ihmc.avatar.controllerAPI.EndToEndNeckTrajectoryMessageTest;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.RobotTarget;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
+import org.junit.jupiter.api.Tag;
+import org.junit.jupiter.api.Disabled;
 import us.ihmc.simulationConstructionSetTools.bambooTools.BambooTools;
 import us.ihmc.valkyrie.ValkyrieRobotModel;
 
@@ -26,8 +28,7 @@ public class ValkyrieEndToEndNeckTrajectoryMessageTest extends EndToEndNeckTraje
    }
 
    @Override
-   @ContinuousIntegrationTest(estimatedDuration = 27.7)
-   @Test(timeout = 140000)
+   @Test
    public void testSingleWaypoint() throws Exception
    {
       super.testSingleWaypoint();

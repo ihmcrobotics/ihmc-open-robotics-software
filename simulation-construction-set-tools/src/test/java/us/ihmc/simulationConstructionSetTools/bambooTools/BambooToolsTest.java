@@ -9,17 +9,18 @@ import java.io.InputStreamReader;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
+import org.junit.jupiter.api.Tag;
+import org.junit.jupiter.api.Disabled;
 import us.ihmc.continuousIntegration.IntegrationCategory;
 
 public class BambooToolsTest
 {
    private static final boolean SHOW_GUI = true;
    
-	@ContinuousIntegrationTest(estimatedDuration = 0.0)
-	@Test(timeout=300000)
+	@Test
    public void testGetClassAndMethodName()
    {
       String classAndMethodName = BambooTools.getClassAndMethodName();
@@ -29,8 +30,8 @@ public class BambooToolsTest
       assertEquals("BambooToolsTest.testGetClassAndMethodName", classAndMethodName);
    }
 
-	@ContinuousIntegrationTest(estimatedDuration = 0.1, categoriesOverride = { IntegrationCategory.UI })
-	@Test(timeout=300000)
+	@Tag("gui")
+	@Test
    public void testLogMessagesToFile() throws IOException
    {
       BambooTools.reportTestStartedMessage(SHOW_GUI);

@@ -1,11 +1,12 @@
 package us.ihmc.footstepPlanning.flatGroundPlanning;
 
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations;
+import org.junit.jupiter.api.Tag;
+import org.junit.jupiter.api.Disabled;
 import us.ihmc.continuousIntegration.IntegrationCategory;
 import us.ihmc.footstepPlanning.FootstepPlanner;
 import us.ihmc.footstepPlanning.simplePlanners.TurnWalkTurnPlanner;
 
-@ContinuousIntegrationAnnotations.ContinuousIntegrationPlan(categories = IntegrationCategory.FAST)
 public class TurnWalkTurnPlannerTest extends FootstepPlannerOnFlatGroundTest
 {
    private static final boolean visualize = false;

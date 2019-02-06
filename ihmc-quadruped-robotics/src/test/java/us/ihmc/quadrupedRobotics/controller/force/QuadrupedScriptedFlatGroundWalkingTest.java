@@ -2,10 +2,12 @@ package us.ihmc.quadrupedRobotics.controller.force;
 
 import controller_msgs.msg.dds.QuadrupedTimedStepListMessage;
 import controller_msgs.msg.dds.QuadrupedTimedStepMessage;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
+import org.junit.jupiter.api.Tag;
+import org.junit.jupiter.api.Disabled;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.quadrupedCommunication.QuadrupedMessageTools;
 import us.ihmc.quadrupedCommunication.teleop.RemoteQuadrupedTeleopManager;
@@ -29,7 +31,7 @@ public abstract class QuadrupedScriptedFlatGroundWalkingTest implements Quadrupe
    private RemoteQuadrupedTeleopManager stepTeleopManager;
    private QuadrupedTestFactory quadrupedTestFactory;
 
-   @Before
+   @BeforeEach
    public void setup() throws IOException
    {
       MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " before test.");
@@ -43,7 +45,7 @@ public abstract class QuadrupedScriptedFlatGroundWalkingTest implements Quadrupe
       stepTeleopManager = quadrupedTestFactory.getRemoteStepTeleopManager();
    }
 
-   @After
+   @AfterEach
    public void tearDown()
    {
       quadrupedTestFactory.close();
@@ -55,8 +57,7 @@ public abstract class QuadrupedScriptedFlatGroundWalkingTest implements Quadrupe
       MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " after test.");
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 74.7)
-   @Test(timeout = 370000)
+   @Test
    public void testScriptedFlatGroundWalking() throws BlockingSimulationRunner.SimulationExceededMaximumTimeException
    {
       QuadrupedTestBehaviors.standUp(conductor, variables);
@@ -84,8 +85,7 @@ public abstract class QuadrupedScriptedFlatGroundWalkingTest implements Quadrupe
       conductor.concludeTesting();
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 74.7)
-   @Test(timeout = 370000)
+   @Test
    public void testScriptedTroublingSteps()
    {
       QuadrupedTestBehaviors.standUp(conductor, variables);

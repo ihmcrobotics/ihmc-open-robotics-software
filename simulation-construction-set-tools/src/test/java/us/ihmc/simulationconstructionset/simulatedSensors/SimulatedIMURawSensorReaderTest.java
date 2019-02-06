@@ -2,10 +2,12 @@ package us.ihmc.simulationconstructionset.simulatedSensors;
 
 import static us.ihmc.robotics.Assert.*;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
+import org.junit.jupiter.api.Tag;
+import org.junit.jupiter.api.Disabled;
 import us.ihmc.euclid.axisAngle.AxisAngle;
 import us.ihmc.euclid.matrix.RotationMatrix;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
@@ -61,7 +63,7 @@ public class SimulatedIMURawSensorReaderTest
 
    private SimulatedIMURawSensorReader simulatedIMURawSensorReader;
 
-   @Before
+   @BeforeEach
    public void setUp() throws Exception
    {
       transformIMUToJoint.setRotation(jointToIMURotation);
@@ -81,8 +83,7 @@ public class SimulatedIMURawSensorReaderTest
       simulatedIMURawSensorReader.initialize();
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.3)
-   @Test(timeout = 30000)
+   @Test
    public void testRead()
    {
       for (int i = 0; i < 10000; i++)

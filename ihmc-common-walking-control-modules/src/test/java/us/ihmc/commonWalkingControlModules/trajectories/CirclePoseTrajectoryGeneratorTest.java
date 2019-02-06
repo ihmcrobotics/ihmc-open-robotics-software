@@ -4,11 +4,13 @@ import static us.ihmc.robotics.Assert.*;
 
 import java.util.Random;
 
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
+import org.junit.jupiter.api.Tag;
+import org.junit.jupiter.api.Disabled;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.FrameQuaternion;
@@ -37,7 +39,7 @@ public class CirclePoseTrajectoryGeneratorTest
    private DoubleProvider trajectoryTimeProvider;
    private CirclePoseTrajectoryGenerator trajectoryGenerator;
 
-   @Before
+   @BeforeEach
    public void setUp()
    {
       worldFrame = ReferenceFrame.getWorldFrame();
@@ -55,7 +57,7 @@ public class CirclePoseTrajectoryGeneratorTest
       trajectoryGenerator.initialize();
    }
 
-   @After
+   @AfterEach
    public void tearDown()
    {
       worldFrame = null;
@@ -67,8 +69,7 @@ public class CirclePoseTrajectoryGeneratorTest
       ReferenceFrameTools.clearWorldFrameTree();
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(timeout = 30000)
+   @Test
    public void testOrientation()
    {
       trajectoryGenerator.setControlHandAngleAboutAxis(true);
@@ -79,8 +80,7 @@ public class CirclePoseTrajectoryGeneratorTest
       checkOrientationAtVariousPoints(trajectoryGenerator, initialOrientationProvider, trajectoryTimeProvider.getValue(), worldFrame);
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(timeout = 30000)
+   @Test
    public void testCompute()
    {
       trajectoryGenerator.setControlHandAngleAboutAxis(true);
@@ -111,8 +111,7 @@ public class CirclePoseTrajectoryGeneratorTest
       assertEquals(0.0, accelerationToPack.getZ(), EPSILON);
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(timeout = 30000)
+   @Test
    //TODO: implement a real test
    public void testGetPosition()
    {
@@ -122,8 +121,7 @@ public class CirclePoseTrajectoryGeneratorTest
       currentPosition.getX();
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(timeout = 30000)
+   @Test
    public void testIsDone()
    {
       trajectoryGenerator.compute(trajectoryTimeProvider.getValue() / 2.0);
@@ -133,8 +131,7 @@ public class CirclePoseTrajectoryGeneratorTest
       assertTrue(trajectoryGenerator.isDone());
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(timeout = 30000)
+   @Test
    public void testGet_FramePoint()
    {
       FramePoint3D positionToPack = new FramePoint3D();
@@ -144,8 +141,7 @@ public class CirclePoseTrajectoryGeneratorTest
       assertEquals(worldFrame, positionToPack.getReferenceFrame());
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(timeout = 30000)
+   @Test
    public void testGet_FrameOrientation()
    {
       FrameQuaternion orientationToPack = new FrameQuaternion();
@@ -155,8 +151,7 @@ public class CirclePoseTrajectoryGeneratorTest
       assertEquals(worldFrame, orientationToPack.getReferenceFrame());
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(timeout = 30000)
+   @Test
    public void testPackVelocity()
    {
       FrameVector3D velocityToPack = new FrameVector3D(ReferenceFrame.constructARootFrame("root"), 10.0, 10.0, 10.0);
@@ -171,8 +166,7 @@ public class CirclePoseTrajectoryGeneratorTest
       assertSame(worldFrame, velocityToPack.getReferenceFrame());
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(timeout = 30000)
+   @Test
    public void testPackAcceleration()
    {
       FrameVector3D accelerationToPack = new FrameVector3D(ReferenceFrame.constructARootFrame("root"), 10.0, 10.0, 10.0);
@@ -187,8 +181,7 @@ public class CirclePoseTrajectoryGeneratorTest
       assertSame(worldFrame, accelerationToPack.getReferenceFrame());
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(timeout = 30000)
+   @Test
    public void testPackAngularVelocity()
    {
       FrameVector3D angularVelocityToPack = new FrameVector3D(ReferenceFrame.constructARootFrame("root"), 10.0, 10.0, 10.0);
@@ -203,8 +196,7 @@ public class CirclePoseTrajectoryGeneratorTest
       assertSame(worldFrame, angularVelocityToPack.getReferenceFrame());
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(timeout = 30000)
+   @Test
    public void testPackAngularAcceleration()
    {
       FrameVector3D angularAccelerationToPack = new FrameVector3D(ReferenceFrame.constructARootFrame("root"), 10.0, 10.0, 10.0);
@@ -219,8 +211,7 @@ public class CirclePoseTrajectoryGeneratorTest
       assertSame(worldFrame, angularAccelerationToPack.getReferenceFrame());
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(timeout = 30000)
+   @Test
    public void testPackLinearData()
    {
       FramePoint3D positionToPack = new FramePoint3D(worldFrame);
@@ -261,8 +252,7 @@ public class CirclePoseTrajectoryGeneratorTest
       assertSame(worldFrame, accelerationToPack.getReferenceFrame());
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(timeout = 30000)
+   @Test
    public void testPackAngularData()
    {
       FramePoint3D positionToPack = new FramePoint3D(worldFrame);

@@ -1,7 +1,9 @@
 package us.ihmc.quadrupedFootstepPlanning.footstepPlanning.graphSearch.graph;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations;
+import org.junit.jupiter.api.Tag;
+import org.junit.jupiter.api.Disabled;
 import us.ihmc.euclid.tools.EuclidCoreRandomTools;
 import us.ihmc.euclid.tools.EuclidCoreTestTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
@@ -17,8 +19,7 @@ public class FootstepNodeToolsTest
    private static final int iters = 1000;
    private final double epsilon = 1e-8;
 
-   @ContinuousIntegrationAnnotations.ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(timeout = 30000)
+   @Test
    public void testGetNodeTransform()
    {
       for (int i = 0; i < iters; i++)
@@ -111,8 +112,7 @@ public class FootstepNodeToolsTest
       assertEquals(hindRightRotationYawPitchRoll[2], 0.0, epsilon);
    }
 
-   @ContinuousIntegrationAnnotations.ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(timeout = 30000)
+   @Test
    public void testGetSnappedNodeTransform()
    {
       int numTests = 10;

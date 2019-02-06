@@ -5,12 +5,14 @@ import static us.ihmc.robotics.Assert.*;
 import java.util.ArrayList;
 import java.util.Random;
 
-import org.junit.After;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.Test;
 
 import us.ihmc.commonWalkingControlModules.capturePoint.CapturePointTools;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationPlan;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
+import org.junit.jupiter.api.Tag;
+import org.junit.jupiter.api.Disabled;
 import us.ihmc.continuousIntegration.IntegrationCategory;
 import us.ihmc.euclid.geometry.Line2D;
 import us.ihmc.euclid.referenceFrame.FramePoint2D;
@@ -28,7 +30,6 @@ import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoFramePoint3D;
 import us.ihmc.yoVariables.variable.YoFrameVector3D;
 
-@ContinuousIntegrationPlan(categories = {IntegrationCategory.FAST})
 public class CapturePointToolsTest
 {
    int nTests = 20;
@@ -37,14 +38,13 @@ public class CapturePointToolsTest
    
    private static final double EPSILON = 10e-6;
 
-   @After
+   @AfterEach
    public void tearDown()
    {
       ReferenceFrameTools.clearWorldFrameTree();
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(timeout = 30000)
+   @Test
    public void testComputeConstantCMPPointsWithBeginningAndEndBetweenFeetWith2Steps()
    {
       int nFootsteps = 2;
@@ -88,8 +88,7 @@ public class CapturePointToolsTest
       }
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(timeout = 30000)
+   @Test
    public void testComputeConstantCMPPointsOnFeetAndEndBetweenFeetWith2Steps()
    {
       int nFootsteps = 2;
@@ -135,8 +134,7 @@ public class CapturePointToolsTest
       }
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(timeout = 30000)
+   @Test
    public void testComputeConstantCentersOfPressuresOnFeet()
    {
       int nFootsteps = 10;
@@ -176,8 +174,7 @@ public class CapturePointToolsTest
       }
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(timeout = 30000)
+   @Test
    public void testComputeConstantCentersOfPressureWithStartBetweenFeetAndRestOnFeet()
    {
       int nFootsteps = 10;
@@ -225,8 +222,7 @@ public class CapturePointToolsTest
       }
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(timeout = 30000)
+   @Test
    public void testComputeConstantCentersOfPressureWithEndBetweenFeetAndRestOnFeet()
    {
       int nFootsteps = 10;
@@ -274,8 +270,7 @@ public class CapturePointToolsTest
       }
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(timeout = 30000)
+   @Test
    public void testComputeConstantCentersOfPressureWithEndAndBeginningBetweenFeet()
    {
       int nFootsteps = 10;
@@ -329,8 +324,7 @@ public class CapturePointToolsTest
       }
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(timeout = 30000)
+   @Test
    public void testComputeDesiredEndOfStepCapturePointLocations()
    {
       int nFootsteps = 10;
@@ -395,8 +389,7 @@ public class CapturePointToolsTest
       }
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(timeout = 30000)
+   @Test
    public void testComputeDesiredCapturePointLocations()
    {
       int nFootsteps = 10;
@@ -460,8 +453,7 @@ public class CapturePointToolsTest
       }
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(timeout = 30000)
+   @Test
    public void testComputeDesiredCapturePointVelocity()
    {
       YoFramePoint3D initialCapturePointPosition = new YoFramePoint3D("", ReferenceFrame.getWorldFrame(), registry);
@@ -495,8 +487,7 @@ public class CapturePointToolsTest
       }
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(timeout = 30000)
+   @Test
    public void testComputeDesiredCapturePointAcceleration()
    {
       YoFramePoint3D initialCapturePointPosition = new YoFramePoint3D("", ReferenceFrame.getWorldFrame(), registry);
@@ -527,8 +518,7 @@ public class CapturePointToolsTest
       }
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(timeout = 30000)
+   @Test
    public void testComputeConstantCenterOfPressureFromInitialAndFinalCapturePointLocations()
    {
       YoFramePoint3D constantCenterOfPressure = new YoFramePoint3D("COP", ReferenceFrame.getWorldFrame(), registry);

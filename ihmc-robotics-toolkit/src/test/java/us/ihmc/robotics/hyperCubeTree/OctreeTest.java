@@ -4,9 +4,11 @@ import static us.ihmc.robotics.Assert.*;
 
 import java.util.List;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
+import org.junit.jupiter.api.Tag;
+import org.junit.jupiter.api.Disabled;
 import us.ihmc.euclid.geometry.LineSegment3D;
 import us.ihmc.euclid.tuple3D.Point3D;
 
@@ -14,8 +16,7 @@ public class OctreeTest
 {
    private static final String[] axes = { "x", "y", "z" };
 
-	@ContinuousIntegrationTest(estimatedDuration = 0.0)
-	@Test(timeout = 30000)
+	@Test
    public void testSimplePutGetOctree()
    {
       HyperCubeTree<Boolean, Void> tree = setupUnitCubeOctree(0.5);
@@ -45,8 +46,7 @@ public class OctreeTest
       assertEquals(2, tree.listAllLeaves().size());
    }
 
-	@ContinuousIntegrationTest(estimatedDuration = 0.0)
-	@Test(timeout = 30000)
+	@Test
    public void test3DPutGetRemoveTwoLevel()
    {
       HyperCubeTree<Boolean, Void> tree = setupUnitCubeOctree(0.25);
@@ -86,8 +86,7 @@ public class OctreeTest
 
    }
 
-	@ContinuousIntegrationTest(estimatedDuration = 0.0)
-	@Test(timeout = 30000)
+	@Test
    public void testOctreeInternalBoarders()
    {
       HyperCubeTree<Boolean, Void> tree = setupUnitCubeOctree(0.25);
@@ -98,8 +97,7 @@ public class OctreeTest
       assertEquals(2, tree.listAllLeaves().size());
    }
 
-	@ContinuousIntegrationTest(estimatedDuration = 0.0)
-	@Test(timeout = 30000)
+	@Test
    public void testOctreeLineSearch()
    {
 
@@ -122,16 +120,14 @@ public class OctreeTest
 
    }
 
-	@ContinuousIntegrationTest(estimatedDuration = 0.0)
-	@Test(timeout = 30000)
+	@Test
    public void testPrint()
    {
       HyperCubeTree<Boolean, Void> tree = createStandardTestOctree();
       System.out.println(tree.toString());
    }
 
-	@ContinuousIntegrationTest(estimatedDuration = 0.0)
-	@Test(timeout = 30000)
+	@Test
    public void testPutLidarInOctree()
    {
       Octree tree = createStandardTestOctree();
@@ -147,8 +143,7 @@ public class OctreeTest
       assertEquals(true, tree.get(new double[] { 0.375, 0.0, 0.0 }).getValue());
    }
 
-	@ContinuousIntegrationTest(estimatedDuration = 0.2)
-	@Test(timeout = 30000)
+	@Test
    public void testShootOctreeIntoSphereWithLidarBullets()
    {
       long time = System.currentTimeMillis();

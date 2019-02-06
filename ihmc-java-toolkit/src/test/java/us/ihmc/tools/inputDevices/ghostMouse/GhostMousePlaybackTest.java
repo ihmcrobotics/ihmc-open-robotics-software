@@ -3,19 +3,20 @@ package us.ihmc.tools.inputDevices.ghostMouse;
 
 import java.awt.AWTException;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationPlan;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
+import org.junit.jupiter.api.Tag;
+import org.junit.jupiter.api.Disabled;
 import us.ihmc.continuousIntegration.IntegrationCategory;
 
-@ContinuousIntegrationPlan(categories = {IntegrationCategory.UI})
+@Tag("gui")
 public class GhostMousePlaybackTest
 {
    private final boolean PLAY_IT_BACK = false;    // Keep false in SVN so we don't mess up Bamboo. Set to true when manually testing...
 
-	@ContinuousIntegrationTest(estimatedDuration = 0.0)
-	@Test(timeout = 30000)
+	@Test
    public void testGhostMousePlayback() throws AWTException
    {
       GhostMousePlayback playback = new GhostMousePlayback();
@@ -404,8 +405,8 @@ public class GhostMousePlaybackTest
          playback.playback();
    }
 
-	@ContinuousIntegrationTest(estimatedDuration = 0.1, categoriesOverride = IntegrationCategory.EXCLUDE)
-	@Test(timeout=300000)
+	@Disabled
+	@Test
    public void testLoad() throws AWTException
    {
       GhostMousePlayback playback = new GhostMousePlayback();

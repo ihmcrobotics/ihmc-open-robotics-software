@@ -10,24 +10,26 @@ import java.util.concurrent.TimeUnit;
 
 import geometry_msgs.msg.dds.PointStamped;
 import geometry_msgs.msg.dds.Vector3Stamped;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import com.esotericsoftware.minlog.Log;
 
 import us.ihmc.communication.packets.Packet;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationPlan;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
+import org.junit.jupiter.api.Tag;
+import org.junit.jupiter.api.Disabled;
 import us.ihmc.continuousIntegration.IntegrationCategory;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.commons.thread.ThreadTools;
 
-@ContinuousIntegrationPlan(categories = {IntegrationCategory.FLAKY})
+@Disabled
 public class KryoObjectCommunicatorTest
 {
 
    // This test causes problems on Linux due to a bug in the way Java does its epoll wrapper
-	@ContinuousIntegrationTest(estimatedDuration = 0.1, categoriesOverride = IntegrationCategory.EXCLUDE)
-	@Test(timeout=300000)
+	@Disabled
+	@Test
    public void testAutomaticReconnect() throws IOException, InterruptedException
    {
       int TCP_PORT = 49152 + (int)(Math.random() * (65535 - 49152));
@@ -99,8 +101,7 @@ public class KryoObjectCommunicatorTest
       server.disconnect();
    }
 
-	@ContinuousIntegrationTest(estimatedDuration = 0.0)
-	@Test(timeout=300000) 
+	@Test 
    public void testStateListener() throws IOException, InterruptedException
    {
       int TCP_PORT = 49152 + (int)(Math.random() * (65535 - 49152));
@@ -154,8 +155,7 @@ public class KryoObjectCommunicatorTest
    }
 
 	@SuppressWarnings("unused")
-   @ContinuousIntegrationTest(estimatedDuration = 0.2)
-	@Test(timeout=300000)
+	@Test
    public void testConnectionLimiter() throws IOException, InterruptedException
    {
       int TCP_PORT = 49152 + (int)(Math.random() * (65535 - 49152));
@@ -229,8 +229,7 @@ public class KryoObjectCommunicatorTest
       
    }
 
-	@ContinuousIntegrationTest(estimatedDuration = 0.4)
-	@Test(timeout=300000)
+	@Test
    public void testSendAndReceive() throws IOException, InterruptedException
    {
       int TCP_PORT = 49152 + (int)(Math.random() * (65535 - 49152));

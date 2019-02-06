@@ -12,8 +12,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicReference;
 
-import org.junit.After;
-import org.junit.Before;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
 
 import com.jme3.math.Transform;
 
@@ -152,7 +152,7 @@ public abstract class RoughTerrainDataSetTest
 
    public abstract FootstepPlannerType getPlannerType();
 
-   @Before
+   @BeforeEach
    public void setup()
    {
       VISUALIZE = VISUALIZE && !ContinuousIntegrationTools.isRunningOnContinuousIntegrationServer();
@@ -226,7 +226,7 @@ public abstract class RoughTerrainDataSetTest
    }
 
 
-   @After
+   @AfterEach
    public void tearDown() throws Exception
    {
       ros2Node.destroy();

@@ -6,12 +6,14 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import us.ihmc.commons.MutationTestFacilitator;
 import us.ihmc.commons.RandomNumbers;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
+import org.junit.jupiter.api.Tag;
+import org.junit.jupiter.api.Disabled;
 import us.ihmc.continuousIntegration.IntegrationCategory;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.transform.RigidBodyTransform;
@@ -24,11 +26,9 @@ import us.ihmc.robotics.geometry.PlanarRegionsListGenerator;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.simulationConstructionSetTools.util.planarRegions.PlanarRegionsListExamples;
 
-@ContinuousIntegrationAnnotations.ContinuousIntegrationPlan(categories = IntegrationCategory.FAST)
 public class PlanarRegionsListPolygonSnapperTest
 {
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(timeout = 30000)
+   @Test
    public void testSimpleVerticalSnap()
    {
       boolean visualize = false;
@@ -65,8 +65,7 @@ public class PlanarRegionsListPolygonSnapperTest
       }
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(timeout = 30000)
+   @Test
    public void testSimpleVerticalAndRotatedSnap()
    {
       boolean visualize = false;
@@ -105,8 +104,7 @@ public class PlanarRegionsListPolygonSnapperTest
       }
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(timeout = 30000)
+   @Test
    public void testMovingAcrossStaircase()
    {
       boolean visualize = false;
@@ -120,8 +118,7 @@ public class PlanarRegionsListPolygonSnapperTest
       doATest(planarRegionsList, xyYawToTest, visualize);
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.7)
-   @Test(timeout = 30000)
+   @Test
    public void testRandomPlanarRegions()
    {
       Random random = new Random(1776L);
@@ -148,8 +145,7 @@ public class PlanarRegionsListPolygonSnapperTest
       doATest(planarRegionsList, xyYawToTest, visualize);
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(timeout = 30000)
+   @Test
    public void testBumpyGround()
    {
       Random random = new Random(1776L);

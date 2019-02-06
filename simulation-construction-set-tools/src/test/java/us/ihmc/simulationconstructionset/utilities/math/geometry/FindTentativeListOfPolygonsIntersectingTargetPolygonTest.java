@@ -10,9 +10,11 @@ import java.util.Random;
 import javax.swing.JFrame;
 import javax.swing.JScrollPane;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
+import org.junit.jupiter.api.Tag;
+import org.junit.jupiter.api.Disabled;
 import us.ihmc.euclid.geometry.BoundingBox2D;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.geometry.interfaces.Vertex2DSupplier;
@@ -29,8 +31,7 @@ public class FindTentativeListOfPolygonsIntersectingTargetPolygonTest
    private static final boolean VERBOSE = false;
    private static final boolean SHOW_PLOTTER = false;
 
-	@ContinuousIntegrationTest(estimatedDuration = 0.5)
-	@Test(timeout=300000)
+	@Test
    public void testFindTentativeListOfPolygonsIntersectingTargetPolygon()
    {
 
@@ -128,8 +129,7 @@ public class FindTentativeListOfPolygonsIntersectingTargetPolygonTest
 
    }
 
-	@ContinuousIntegrationTest(estimatedDuration = 0.5)
-	@Test(timeout=300000)
+	@Test
    public void testFindTentativeListOfPolygonsIntersectingTargetPolygonTwo()
    {
       PlotterPanel plotterpanel = createPlotterPanel();
@@ -186,8 +186,7 @@ public class FindTentativeListOfPolygonsIntersectingTargetPolygonTest
       }
    }
 
-	@ContinuousIntegrationTest(estimatedDuration = 0.5)
-	@Test(timeout=300000)
+	@Test
    public void testFindTentativeListOfPolygonsIntersectingTargetPolygonThree()
    {
       PlotterPanel plotterpanel = createPlotterPanel();
@@ -284,8 +283,7 @@ public class FindTentativeListOfPolygonsIntersectingTargetPolygonTest
       }
    }
 
-	@ContinuousIntegrationTest(estimatedDuration = 2.0)
-	@Test(timeout=300000)
+	@Test
    public void testFindTentativeListOfPolygonsIntersectingTargetPolygonTiming()
    {
       Random random = new Random(1776L);
@@ -381,8 +379,7 @@ public class FindTentativeListOfPolygonsIntersectingTargetPolygonTest
 
    }
 
-	@ContinuousIntegrationTest(estimatedDuration = 0.0)
-	@Test(timeout=300000)
+	@Test
    public void testBadCase()
    {
       ArrayList<Point2D> points = new ArrayList<Point2D>();

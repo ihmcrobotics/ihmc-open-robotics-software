@@ -4,7 +4,7 @@ import static us.ihmc.robotics.Assert.*;
 
 import java.util.Random;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import us.ihmc.atlas.AtlasRobotModel;
 import us.ihmc.atlas.AtlasRobotVersion;
@@ -12,6 +12,8 @@ import us.ihmc.avatar.NumericalInverseKinematicsCalculatorWithRobotTest;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.RobotTarget;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
+import org.junit.jupiter.api.Tag;
+import org.junit.jupiter.api.Disabled;
 import us.ihmc.continuousIntegration.IntegrationCategory;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameQuaternion;
@@ -32,8 +34,8 @@ public class AtlasNumericalInverseKinematicsCalculatorWithRobotTest extends Nume
       return BambooTools.getSimpleRobotNameFor(BambooTools.SimpleRobotNameKeys.ATLAS);
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.0, categoriesOverride = IntegrationCategory.EXCLUDE)
-   @Test(timeout = 120000)
+   @Disabled
+   @Test
    public void testTroublesomeCaseOne()
    {
       Random random = new Random(1234L);
@@ -49,16 +51,14 @@ public class AtlasNumericalInverseKinematicsCalculatorWithRobotTest extends Nume
    }
 
    @Override
-   @ContinuousIntegrationTest(estimatedDuration = 16.2)
-   @Test(timeout = 81000)
+   @Test
    public void testRandomFeasibleRobotPoses()
    {
       super.testRandomFeasibleRobotPoses();
    }
 
    @Override
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(timeout = 30000)
+   @Test
    public void testSimpleCase()
    {
       super.testSimpleCase();

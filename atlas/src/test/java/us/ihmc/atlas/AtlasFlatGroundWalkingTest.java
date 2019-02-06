@@ -1,8 +1,8 @@
 package us.ihmc.atlas;
 
 import org.junit.Assume;
-import org.junit.Ignore;
-import org.junit.Test;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
 import org.junit.internal.AssumptionViolatedException;
 
 import us.ihmc.avatar.DRCFlatGroundWalkingTest;
@@ -10,13 +10,14 @@ import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.RobotTarget;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationPlan;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
+import org.junit.jupiter.api.Tag;
+import org.junit.jupiter.api.Disabled;
 import us.ihmc.continuousIntegration.IntegrationCategory;
 import us.ihmc.simulationConstructionSetTools.bambooTools.BambooTools;
 import us.ihmc.simulationconstructionset.util.ControllerFailureException;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
 
 // This test is slow but very important, let's keep it in the FAST build please. (Sylvain)
-@ContinuousIntegrationPlan(categories = {IntegrationCategory.FAST, IntegrationCategory.VIDEO})
 public class AtlasFlatGroundWalkingTest extends DRCFlatGroundWalkingTest
 {
    private DRCRobotModel robotModel;
@@ -27,25 +28,23 @@ public class AtlasFlatGroundWalkingTest extends DRCFlatGroundWalkingTest
    }
 
    @Override
-   @ContinuousIntegrationTest(estimatedDuration = 348.7)
-   @Test(timeout = 1700000)
+   @Test
    public void testFlatGroundWalking() throws SimulationExceededMaximumTimeException, ControllerFailureException
    {
       robotModel = new AtlasRobotModel(AtlasRobotVersion.ATLAS_UNPLUGGED_V5_NO_HANDS, RobotTarget.SCS, false);
       super.testFlatGroundWalking();
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 348.7, categoriesOverride = IntegrationCategory.EXCLUDE)
-   @Test(timeout = 1700000)
+   @Disabled
+   @Test
    public void testAtlasFlatGroundWalkingWithShapeCollision() throws SimulationExceededMaximumTimeException, ControllerFailureException
    {
       robotModel = new AtlasRobotModel(AtlasRobotVersion.ATLAS_UNPLUGGED_V5_NO_HANDS, RobotTarget.SCS, false, false, true);
       runFlatGroundWalking();
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.3)
-   @Test(timeout = 30000)
-   @Ignore // Not working because of multithreading. Should be switched over to use the DRCSimulationTestHelper.
+   @Test
+   @Disabled // Not working because of multithreading. Should be switched over to use the DRCSimulationTestHelper.
    public void testFlatGroundWalkingRunsSameWayTwice() throws SimulationExceededMaximumTimeException, ControllerFailureException
    {
       try

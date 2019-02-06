@@ -4,7 +4,7 @@ import static us.ihmc.robotics.Assert.*;
 
 import java.util.ArrayList;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import controller_msgs.msg.dds.OneDoFJointTrajectoryMessage;
 import controller_msgs.msg.dds.TrajectoryPoint1DMessage;
@@ -13,6 +13,8 @@ import us.ihmc.avatar.controllerAPI.EndToEndHandFingerTrajectoryMessageTest;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.RobotTarget;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
+import org.junit.jupiter.api.Tag;
+import org.junit.jupiter.api.Disabled;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HandConfiguration;
 import us.ihmc.idl.IDLSequence.Object;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -43,24 +45,21 @@ public class ValkyrieEndToEndHandFingerTrajectoryMessageTest extends EndToEndHan
    }
 
    @Override
-   @ContinuousIntegrationTest(estimatedDuration = 30.0)
-   @Test(timeout = 150000)
+   @Test
    public void testCloseAndStopAndOpen() throws SimulationExceededMaximumTimeException
    {
       super.testCloseAndStopAndOpen();
    }
 
    @Override
-   @ContinuousIntegrationTest(estimatedDuration = 30.0)
-   @Test(timeout = 150000)
+   @Test
    public void testCloseAndOpenFingers() throws SimulationExceededMaximumTimeException
    {
       super.testCloseAndOpenFingers();
    }
 
    @Override
-   @ContinuousIntegrationTest(estimatedDuration = 30.0)
-   @Test(timeout = 150000)
+   @Test
    public void testClose() throws SimulationExceededMaximumTimeException
    {
       super.testClose();

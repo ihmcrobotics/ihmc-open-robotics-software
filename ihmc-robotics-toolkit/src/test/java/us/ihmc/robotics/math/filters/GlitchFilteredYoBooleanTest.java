@@ -2,11 +2,13 @@ package us.ihmc.robotics.math.filters;
 
 import static us.ihmc.robotics.Assert.*;
 
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
+import org.junit.jupiter.api.Tag;
+import org.junit.jupiter.api.Disabled;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 
@@ -17,7 +19,7 @@ public class GlitchFilteredYoBooleanTest
    private YoBoolean yoVariableToFilter;
    private GlitchFilteredYoBoolean filteredVariable;
 
-   @Before
+   @BeforeEach
    public void setUp()
    {
       registry = new YoVariableRegistry("testRegistry");
@@ -25,7 +27,7 @@ public class GlitchFilteredYoBooleanTest
       filteredVariable = new GlitchFilteredYoBoolean("filteredVariable", registry, yoVariableToFilter, WINDOW_SIZE);
    }
 
-   @After
+   @AfterEach
    public void tearDown()
    {
       registry = null;
@@ -33,8 +35,7 @@ public class GlitchFilteredYoBooleanTest
       filteredVariable = null;
    }
 
-	@ContinuousIntegrationTest(estimatedDuration = 0.0)
-	@Test(timeout=300000)
+	@Test
    public void testConstructors_Set_Get()
    {
       GlitchFilteredYoBoolean number1 = new GlitchFilteredYoBoolean("stringInt", WINDOW_SIZE);
@@ -60,8 +61,7 @@ public class GlitchFilteredYoBooleanTest
       }
    }
 
-	@ContinuousIntegrationTest(estimatedDuration = 0.0)
-	@Test(timeout=300000)
+	@Test
    public void testUpdate()
    {
       int windowSize = 3;
@@ -116,8 +116,7 @@ public class GlitchFilteredYoBooleanTest
       }
    }
 
-	@ContinuousIntegrationTest(estimatedDuration = 0.0)
-	@Test(timeout=300000)
+	@Test
    public void testCounter()
    {
       int windowSize = 10;
@@ -133,8 +132,7 @@ public class GlitchFilteredYoBooleanTest
       
    }
 
-	@ContinuousIntegrationTest(estimatedDuration = 0.0)
-	@Test(timeout=300000)
+	@Test
    public void testFiltering()
    {
       yoVariableToFilter.set(true);

@@ -11,7 +11,7 @@ import java.util.List;
 import java.util.Random;
 import java.util.StringTokenizer;
 
-import org.junit.After;
+import org.junit.jupiter.api.AfterEach;
 
 import controller_msgs.msg.dds.FootstepDataMessage;
 import us.ihmc.commons.RandomNumbers;
@@ -64,7 +64,7 @@ import us.ihmc.yoVariables.variable.YoFramePoseUsingYawPitchRoll;
 
 public class FootstepSnapperSimulationTest
 {
-   @After
+   @AfterEach
    public void tearDown()
    {
       ReferenceFrameTools.clearWorldFrameTree();
