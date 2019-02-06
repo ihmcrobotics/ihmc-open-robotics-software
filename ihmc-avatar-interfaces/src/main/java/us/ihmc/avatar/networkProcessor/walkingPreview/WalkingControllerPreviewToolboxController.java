@@ -14,6 +14,7 @@ import us.ihmc.avatar.networkProcessor.modules.ToolboxController;
 import us.ihmc.commonWalkingControlModules.configurations.ICPWithTimeFreezingPlannerParameters;
 import us.ihmc.commonWalkingControlModules.configurations.JointPrivilegedConfigurationParameters;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
+import us.ihmc.commonWalkingControlModules.controlModules.pelvis.PelvisHeightControlState;
 import us.ihmc.commonWalkingControlModules.controllerCore.WholeBodyControlCoreToolbox;
 import us.ihmc.commonWalkingControlModules.controllerCore.WholeBodyControllerCore;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.ControllerCoreCommand;
@@ -58,6 +59,7 @@ import us.ihmc.wholeBodyController.parameters.ParameterLoaderHelper;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
+import us.ihmc.yoVariables.variable.YoVariable;
 
 public class WalkingControllerPreviewToolboxController extends ToolboxController
 {
@@ -111,22 +113,35 @@ public class WalkingControllerPreviewToolboxController extends ToolboxController
       WalkingControllerParameters walkingControllerParameters = robotModel.getWalkingControllerParameters();
       ICPWithTimeFreezingPlannerParameters capturePointPlannerParameters = robotModel.getCapturePointPlannerParameters();
 
+      // Create registries to match controller so the XML gets loaded properly.
+      YoVariableRegistry drcControllerThread = new YoVariableRegistry("DRCControllerThread");
+      YoVariableRegistry drcMomentumBasedController = new YoVariableRegistry("DRCMomentumBasedController");
+      YoVariableRegistry humanoidHighLevelControllerManager = new YoVariableRegistry("HumanoidHighLevelControllerManager");
+      YoVariableRegistry managerParentRegistry = new YoVariableRegistry("HighLevelHumanoidControllerFactory");
+      YoVariableRegistry walkingParentRegistry = new YoVariableRegistry("WalkingControllerState");
+      registry.addChild(drcControllerThread);
+      drcControllerThread.addChild(drcMomentumBasedController);
+      drcMomentumBasedController.addChild(humanoidHighLevelControllerManager);
+      humanoidHighLevelControllerManager.addChild(walkingParentRegistry);
+      humanoidHighLevelControllerManager.addChild(managerParentRegistry);
+
       controllerToolbox = createHighLevelControllerToolbox(robotModel, yoGraphicsListRegistry);
       controllerToolbox.attachControllerFailureListener(fallingDirection -> hasControllerFailed.set(true));
-      registry.addChild(controllerToolbox.getYoVariableRegistry());
+      humanoidHighLevelControllerManager.addChild(controllerToolbox.getYoVariableRegistry());
       setupWalkingMessageHandler(walkingControllerParameters, yoGraphicsListRegistry);
       rootJoint = fullRobotModel.getRootJoint();
       controlledOneDoFJoints = controllerToolbox.getControlledOneDoFJoints();
 
       //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-      managerFactory = new HighLevelControlManagerFactory(statusOutputManager, registry);
+      managerFactory = new HighLevelControlManagerFactory(statusOutputManager, managerParentRegistry);
       managerFactory.setHighLevelHumanoidControllerToolbox(controllerToolbox);
       managerFactory.setCapturePointPlannerParameters(capturePointPlannerParameters);
       managerFactory.setWalkingControllerParameters(walkingControllerParameters);
 
       walkingController = new WalkingHighLevelHumanoidController(walkingInputManager, walkingOutputManager, managerFactory, walkingControllerParameters,
                                                                  controllerToolbox);
+      walkingParentRegistry.addChild(walkingController.getYoVariableRegistry());
 
       //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -140,9 +155,14 @@ public class WalkingControllerPreviewToolboxController extends ToolboxController
 
       //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-      registry.addChild(walkingController.getYoVariableRegistry());
+      ParameterLoaderHelper.loadParameters(this, robotModel, drcControllerThread);
 
-      ParameterLoaderHelper.loadParameters(this, robotModel, registry);
+      YoVariable<?> defaultHeight = registry.getVariable(PelvisHeightControlState.class.getSimpleName(),
+                                                         PelvisHeightControlState.class.getSimpleName() + "DefaultHeight");
+      if (Double.isNaN(defaultHeight.getValueAsDouble()))
+      {
+         throw new RuntimeException("Need to load a default height.");
+      }
    }
 
    private HighLevelHumanoidControllerToolbox createHighLevelControllerToolbox(DRCRobotModel robotModel, YoGraphicsListRegistry yoGraphicsListRegistry)
@@ -182,7 +202,7 @@ public class WalkingControllerPreviewToolboxController extends ToolboxController
       WalkingMessageHandler walkingMessageHandler = new WalkingMessageHandler(defaultTransferTime, defaultSwingTime, defaultTouchdownTime,
                                                                               defaultInitialTransferTime, defaultFinalTransferTime,
                                                                               controllerToolbox.getContactableFeet(), walkingOutputManager, previewTime,
-                                                                              yoGraphicsListRegistry, registry);
+                                                                              yoGraphicsListRegistry, controllerToolbox.getYoVariableRegistry());
       controllerToolbox.setWalkingMessageHandler(walkingMessageHandler);
    }
 
