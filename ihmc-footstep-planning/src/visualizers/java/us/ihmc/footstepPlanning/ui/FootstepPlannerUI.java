@@ -280,8 +280,14 @@ public class FootstepPlannerUI
    }
 
    public static FootstepPlannerUI createMessagerUI(Stage primaryStage, JavaFXMessager messager, FootstepPlannerParameters plannerParameters,
-                                                    VisibilityGraphsParameters visibilityGraphsParameters, FullHumanoidRobotModelFactory fullHumanoidRobotModelFactory, FullHumanoidRobotModelFactory previewModelFactory, RobotContactPointParameters<RobotSide> contactPointParameters, WalkingControllerParameters walkingControllerParameters) throws Exception
+                                                    VisibilityGraphsParameters visibilityGraphsParameters,
+                                                    FullHumanoidRobotModelFactory fullHumanoidRobotModelFactory,
+                                                    FullHumanoidRobotModelFactory previewModelFactory,
+                                                    RobotContactPointParameters<RobotSide> contactPointParameters,
+                                                    WalkingControllerParameters walkingControllerParameters)
+         throws Exception
    {
-      return new FootstepPlannerUI(primaryStage, messager, plannerParameters, visibilityGraphsParameters, fullHumanoidRobotModelFactory, previewModelFactory, contactPointParameters, walkingControllerParameters);
+      return new FootstepPlannerUI(primaryStage, messager, plannerParameters, visibilityGraphsParameters, fullHumanoidRobotModelFactory, previewModelFactory,
+                                   contactPointParameters, walkingControllerParameters);
    }
 }
