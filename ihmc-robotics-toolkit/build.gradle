@@ -43,11 +43,8 @@ mainDependencies {
 }
 
 testDependencies {
-   compile group: "junit", name: "junit", version: "4.12"
-   compile group: "org.junit.vintage", name: "junit-vintage-engine", version: "5.3.1"
    compile group: "org.jfree", name: "jfreechart", version: "1.0.17"
    compile group: "org.jfree", name: "jcommon", version: "1.0.21"
 
-   compile group: "us.ihmc", name: "ihmc-ci-core-api", version: "0.18.0"
    compile group: "us.ihmc", name: "ihmc-commons-testing", version: "0.25.0"
 }

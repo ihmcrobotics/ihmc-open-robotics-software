@@ -41,7 +41,6 @@ mainDependencies {
 }
 
 testDependencies {
-   compile group: "us.ihmc", name: "ihmc-ci-core-api", version: "0.18.0"
    compile group: "us.ihmc", name: "ihmc-ros2-library", version: "0.13.3"
 }
 
