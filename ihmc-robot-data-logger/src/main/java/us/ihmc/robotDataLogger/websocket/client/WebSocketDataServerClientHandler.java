@@ -142,7 +142,7 @@ public class WebSocketDataServerClientHandler extends SimpleChannelInboundHandle
       }
       else if (frame instanceof CloseWebSocketFrame)
       {
-         System.out.println("WebSocket Client received closing");
+         LogTools.info("Connection closed by server");
          ch.close();
       }
    }
@@ -158,7 +158,7 @@ public class WebSocketDataServerClientHandler extends SimpleChannelInboundHandle
          {
             if(waitingForPong)
             {
-               LogTools.warn("Timeout receiving websocket pong. Closing connection.");
+               LogTools.warn("Timeout receiving pong. Closing connection.");
                ctx.close();
             }
             else
@@ -173,7 +173,7 @@ public class WebSocketDataServerClientHandler extends SimpleChannelInboundHandle
    @Override
    public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause)
    {
-      cause.printStackTrace();
+      LogTools.warn("Connection closed: " + cause.getMessage());
       if (!handshakeFuture.isDone())
       {
          handshakeFuture.setFailure(cause);
