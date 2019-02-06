@@ -4,6 +4,7 @@ import org.junit.Test;
 
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.RobotTarget;
+import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.simulationconstructionset.util.ControllerFailureException;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
 import us.ihmc.valkyrie.ValkyrieRobotModel;
@@ -14,6 +15,7 @@ public class ValkyrieWalkingControllerPreviewToolboxControllerTest extends Avata
    private final ValkyrieRobotModel ghostRobotModel = new ValkyrieRobotModel(RobotTarget.SCS, false);
 
    @Override
+   @ContinuousIntegrationTest(estimatedDuration = 15.0)
    @Test(timeout = 300000)
    public void testWalkingPreviewAlone() throws SimulationExceededMaximumTimeException, ControllerFailureException
    {
@@ -21,6 +23,7 @@ public class ValkyrieWalkingControllerPreviewToolboxControllerTest extends Avata
    }
 
    @Override
+   @ContinuousIntegrationTest(estimatedDuration = 44.0)
    @Test(timeout = 300000)
    public void testStepsInPlacePreviewAtControllerDT() throws SimulationExceededMaximumTimeException
    {
@@ -28,7 +31,8 @@ public class ValkyrieWalkingControllerPreviewToolboxControllerTest extends Avata
    }
 
    @Override
-   @Test//(timeout = 300000)
+   @ContinuousIntegrationTest(estimatedDuration = 42.0)
+   @Test(timeout = 300000)
    public void testResetFeature() throws SimulationExceededMaximumTimeException
    {
       super.testResetFeature();
