@@ -170,10 +170,13 @@ public abstract class AvatarWalkingControllerPreviewToolboxControllerTest implem
       scs.setCameraFix(0.0, 0.0, 1.0);
       scs.setCameraPosition(8.0, 0.0, 3.0);
       scs.startOnAThread();
-      SimulationOverheadPlotterFactory plotterFactory = scs.createSimulationOverheadPlotterFactory();
-      plotterFactory.setShowOnStart(true);
-      plotterFactory.addYoGraphicsListRegistries(yoGraphicsListRegistry);
-      plotterFactory.createOverheadPlotter();
+      if (simulationTestingParameters.getCreateGUI())
+      {
+         SimulationOverheadPlotterFactory plotterFactory = scs.createSimulationOverheadPlotterFactory();
+         plotterFactory.setShowOnStart(true);
+         plotterFactory.addYoGraphicsListRegistries(yoGraphicsListRegistry);
+         plotterFactory.createOverheadPlotter();
+      }
 
       getRobotModel().getDefaultRobotInitialSetup(0.0, 0.0).initializeRobot(robot, getRobotModel().getJointMap());
       FullHumanoidRobotModel fullRobotModelAtInitialConfiguration = createFullRobotModelAtInitialConfiguration(2.0);
