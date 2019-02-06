@@ -33,6 +33,7 @@ import us.ihmc.footstepPlanning.ui.controllers.FootstepPlannerDataExporterAnchor
 import us.ihmc.footstepPlanning.ui.controllers.FootstepPlannerMenuUIController;
 import us.ihmc.footstepPlanning.ui.controllers.FootstepPlannerParametersUIController;
 import us.ihmc.footstepPlanning.ui.controllers.MainTabController;
+import us.ihmc.footstepPlanning.ui.controllers.UIRobotController;
 import us.ihmc.footstepPlanning.ui.controllers.VisibilityGraphsParametersUIController;
 import us.ihmc.footstepPlanning.ui.controllers.VisualizationController;
 import us.ihmc.footstepPlanning.ui.viewers.BodyPathMeshViewer;
@@ -95,6 +96,8 @@ public class FootstepPlannerUI
    private FootstepPlannerDataExporterAnchorPaneController dataExporterAnchorPaneController;
    @FXML
    private MainTabController mainTabController;
+   @FXML
+   private UIRobotController uiRobotController;
 
    @FXML
    private VisualizationController visibilityGraphsUIController;
@@ -136,6 +139,7 @@ public class FootstepPlannerUI
       footstepNodeCheckingUIController.attachMessager(messager);
       visibilityGraphsUIController.attachMessager(messager);
       dataExporterAnchorPaneController.attachMessager(messager);
+      uiRobotController.attachMessager(messager);
 
       footstepPlannerMenuUIController.setMainWindow(primaryStage);
 
