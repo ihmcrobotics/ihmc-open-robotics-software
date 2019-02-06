@@ -1,0 +1,5 @@
+regionId: -1398215160, index: 1, origin: -2.0, 0.0, 0.5348984003067017, normal: -0.25881904712649256, -0.0, 0.9659258257467467, concave hull size: 4, number of convex polygons: 1, [4]
+regionId: 904966349, index: 1, origin: 2.0, 2.4492937051703357E-16, 0.5348984003067017, normal: 0.25881904712649256, -3.169619168936025E-17, 0.9659258257467467, concave hull size: 4, number of convex polygons: 1, [4]
+regionId: 409471041, index: 1, origin: 0.0, 0.0, 0.0, normal: 0.0, 0.0, 1.0, concave hull size: 8, number of convex polygons: 3, [5, 5, 4]
+regionId: -199893281, index: 1, origin: -4.0, -1.0, -0.0010000000474974513, normal: 0.0, -1.0, 6.123233995736766E-17, concave hull size: 3, number of convex polygons: 1, [3]
+regionId: 796451544, index: 1, origin: -4.0, 1.0, -0.0010000000474974513, normal: 0.0, 1.0, 6.123233995736766E-17, concave hull size: 3, number of convex polygons: 1, [3]
