@@ -17,7 +17,6 @@ import us.ihmc.avatar.initialSetup.OffsetAndYawRobotInitialSetup;
 import us.ihmc.avatar.networkProcessor.kinematicsPlanningToolboxModule.KinematicsPlanningToolboxModule;
 import us.ihmc.avatar.testTools.DRCBehaviorTestHelper;
 import us.ihmc.commons.thread.ThreadTools;
-import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Disabled;
 import us.ihmc.euclid.geometry.Pose3D;

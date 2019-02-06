@@ -4,7 +4,6 @@ import org.ejml.data.DenseMatrix64F;
 import org.ejml.ops.CommonOps;
 import org.junit.jupiter.api.Test;
 import us.ihmc.commons.RandomNumbers;
-import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Disabled;
 import us.ihmc.euclid.tuple3D.Vector3D;

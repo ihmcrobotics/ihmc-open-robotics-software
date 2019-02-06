@@ -10,11 +10,8 @@ import org.junit.jupiter.api.Test;
 
 import us.ihmc.commons.MutationTestFacilitator;
 import us.ihmc.commons.RandomNumbers;
-import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations;
-import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Disabled;
-import us.ihmc.continuousIntegration.IntegrationCategory;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;

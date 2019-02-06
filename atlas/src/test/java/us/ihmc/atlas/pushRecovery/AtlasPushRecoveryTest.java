@@ -9,11 +9,8 @@ import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.RobotTarget;
 import us.ihmc.avatar.pushRecovery.DRCPushRecoveryTest;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
-import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationPlan;
-import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Disabled;
-import us.ihmc.continuousIntegration.IntegrationCategory;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
 
 public class AtlasPushRecoveryTest extends DRCPushRecoveryTest

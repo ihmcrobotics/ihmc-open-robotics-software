@@ -16,12 +16,8 @@ import com.joptimizer.optimizers.JOptimizer;
 import com.joptimizer.optimizers.OptimizationRequest;
 import com.joptimizer.optimizers.OptimizationResponse;
 
-import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationPlan;
-import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Disabled;
-import us.ihmc.continuousIntegration.IntegrationCategory;
-
 @Disabled
 public class SimpleJOptimizerTest
 {

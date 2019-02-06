@@ -17,7 +17,6 @@ import us.ihmc.avatar.MultiRobotTestInterface;
 import us.ihmc.avatar.testTools.DRCBehaviorTestHelper;
 import us.ihmc.avatar.testTools.DRCSimulationTestHelper;
 import us.ihmc.commons.PrintTools;
-import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Disabled;
 import us.ihmc.euclid.axisAngle.AxisAngle;

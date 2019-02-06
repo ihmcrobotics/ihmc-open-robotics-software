@@ -19,7 +19,6 @@ import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamic
 import us.ihmc.commonWalkingControlModules.inverseKinematics.RobotJointVelocityAccelerationIntegrator;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.MotionQPInputCalculator;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.QPInput;
-import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Disabled;
 import us.ihmc.convexOptimization.quadraticProgram.OASESConstrainedQPSolver;

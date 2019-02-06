@@ -21,11 +21,8 @@ import org.ros.internal.message.Message;
 import us.ihmc.commons.PrintTools;
 import us.ihmc.communication.packets.Packet;
 import us.ihmc.communication.ros.generators.RosMessagePacket;
-import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationPlan;
-import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Disabled;
-import us.ihmc.continuousIntegration.IntegrationCategory;
 import us.ihmc.humanoidRobotics.communication.packets.RandomHumanoidMessages;
 
 /**

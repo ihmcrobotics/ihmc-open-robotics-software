@@ -4,13 +4,9 @@ import static us.ihmc.robotics.Assert.*;
 
 import org.junit.jupiter.api.Test;
 
-import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationPlan;
-import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Disabled;
 import us.ihmc.graphicsDescription.input.mouse.Mouse3DPollData;
-import us.ihmc.continuousIntegration.IntegrationCategory;
-
 public class Mouse3DJoystickPollDataTest
 {
    @Test

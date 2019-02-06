@@ -3,8 +3,6 @@ package us.ihmc.robotics.linearAlgebra;
 import org.ejml.data.DenseMatrix64F;
 import org.ejml.ops.CommonOps;
 import org.junit.jupiter.api.Test;
-import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations;
-
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Disabled;
 import static us.ihmc.robotics.Assert.*;

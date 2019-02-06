@@ -19,7 +19,6 @@ import georegression.struct.point.Point3D_F64;
 import georegression.struct.se.Se3_F64;
 import georegression.transform.se.SePointOps_F64;
 import us.ihmc.commons.RandomNumbers;
-import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Disabled;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;

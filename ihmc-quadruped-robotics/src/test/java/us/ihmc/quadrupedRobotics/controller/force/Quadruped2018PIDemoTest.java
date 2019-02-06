@@ -5,7 +5,6 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import us.ihmc.commonWalkingControlModules.pushRecovery.PushRobotTestConductor;
 import us.ihmc.commons.PrintTools;
-import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Disabled;
 import us.ihmc.euclid.tuple3D.Vector3D;

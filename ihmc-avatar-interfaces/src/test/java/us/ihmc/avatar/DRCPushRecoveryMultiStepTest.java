@@ -12,7 +12,6 @@ import us.ihmc.avatar.initialSetup.DRCSCSInitialSetup;
 import us.ihmc.avatar.testTools.DRCSimulationTestHelper;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.walkingController.states.WalkingStateEnum;
 import us.ihmc.commons.thread.ThreadTools;
-import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Disabled;
 import us.ihmc.euclid.geometry.BoundingBox3D;

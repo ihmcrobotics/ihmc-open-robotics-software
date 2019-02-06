@@ -17,7 +17,6 @@ import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParam
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.RequestedControllerStateTransitionFactory;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.StandPrepControllerStateFactory;
 import us.ihmc.commons.thread.ThreadTools;
-import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Disabled;
 import us.ihmc.euclid.geometry.BoundingBox3D;

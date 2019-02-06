@@ -6,7 +6,6 @@ import org.junit.jupiter.api.Test;
 
 import net.wimpi.modbus.procimg.Register;
 import net.wimpi.modbus.procimg.SimpleRegister;
-import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Disabled;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HandConfiguration;

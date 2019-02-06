@@ -9,7 +9,6 @@ import org.ejml.interfaces.linsol.LinearSolver;
 import org.junit.jupiter.api.Test;
 import us.ihmc.commons.PrintTools;
 import us.ihmc.commons.RandomNumbers;
-import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Disabled;
 import us.ihmc.robotics.time.ExecutionTimer;

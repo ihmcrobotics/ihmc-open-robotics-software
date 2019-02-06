@@ -14,8 +14,6 @@ import std_msgs.msg.dds.Int32;
 import us.ihmc.communication.net.NetClassList;
 import us.ihmc.communication.net.ObjectConsumer;
 import us.ihmc.communication.packets.Packet;
-import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
-
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Disabled;
 public class InterprocessObjectCommunicatorTest

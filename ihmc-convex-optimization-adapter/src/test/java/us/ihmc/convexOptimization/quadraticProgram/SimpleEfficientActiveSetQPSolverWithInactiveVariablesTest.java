@@ -2,7 +2,6 @@ package us.ihmc.convexOptimization.quadraticProgram;
 
 import org.ejml.data.DenseMatrix64F;
 import org.junit.jupiter.api.Test;
-import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Disabled;
 import us.ihmc.robotics.linearAlgebra.MatrixTools;

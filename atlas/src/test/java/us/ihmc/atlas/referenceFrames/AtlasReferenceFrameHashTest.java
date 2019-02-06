@@ -9,8 +9,6 @@ import us.ihmc.atlas.AtlasRobotVersion;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.RobotTarget;
 import us.ihmc.avatar.referenceFrames.ReferenceFrameHashTest;
-import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
-
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Disabled;
 public class AtlasReferenceFrameHashTest extends ReferenceFrameHashTest

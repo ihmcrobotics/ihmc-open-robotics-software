@@ -8,7 +8,6 @@ import org.ejml.simple.SimpleMatrix;
 import us.ihmc.robotics.Assert;
 import org.junit.jupiter.api.Test;
 
-import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Disabled;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;

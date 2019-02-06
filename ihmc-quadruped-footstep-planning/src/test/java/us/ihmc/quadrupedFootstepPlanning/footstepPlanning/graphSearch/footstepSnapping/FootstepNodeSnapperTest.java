@@ -2,7 +2,6 @@ package us.ihmc.quadrupedFootstepPlanning.footstepPlanning.graphSearch.footstepS
 
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
-import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Disabled;
 import us.ihmc.euclid.transform.RigidBodyTransform;
