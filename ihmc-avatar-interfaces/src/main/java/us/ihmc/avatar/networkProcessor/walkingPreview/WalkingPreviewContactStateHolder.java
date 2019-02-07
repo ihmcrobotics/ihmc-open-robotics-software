@@ -10,11 +10,12 @@ import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DReadOnly;
 import us.ihmc.mecano.frames.MovingReferenceFrame;
+import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.mecano.tools.MultiBodySystemTools;
 import us.ihmc.robotics.controllers.pidGains.GainCalculator;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 
-public class WalkingPreviewContactPointHolder
+public class WalkingPreviewContactStateHolder
 {
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
 
@@ -22,21 +23,21 @@ public class WalkingPreviewContactPointHolder
    private final MovingReferenceFrame currentPlaneFrame;
    private final ReferenceFrame desiredPlaneFrame;
 
-   private final double kp = 100.0;
+   private final double kp = 500.0;
    private final double zeta = 1.0;
    private final double kd = GainCalculator.computeDerivativeGain(kp, zeta);
    private final double weight = 50.0;
 
    private final InverseDynamicsCommandList commandList = new InverseDynamicsCommandList();
 
-   public static WalkingPreviewContactPointHolder holdAtCurrent(PlaneContactState contactStateToHold)
+   public static WalkingPreviewContactStateHolder holdAtCurrent(PlaneContactState contactStateToHold)
    {
       FramePose3D desiredPose = new FramePose3D(contactStateToHold.getPlaneFrame());
       desiredPose.changeFrame(worldFrame);
-      return new WalkingPreviewContactPointHolder(contactStateToHold, desiredPose);
+      return new WalkingPreviewContactStateHolder(contactStateToHold, desiredPose);
    }
 
-   public WalkingPreviewContactPointHolder(PlaneContactState contactStateToHold, FramePose3DReadOnly desiredPlaneFramePose)
+   public WalkingPreviewContactStateHolder(PlaneContactState contactStateToHold, FramePose3DReadOnly desiredPlaneFramePose)
    {
       this.contactStateToHold = contactStateToHold;
       currentPlaneFrame = (MovingReferenceFrame) contactStateToHold.getPlaneFrame();
@@ -52,9 +53,7 @@ public class WalkingPreviewContactPointHolder
       for (FramePoint3D currentContactPoint : contactStateToHold.getContactFramePointsInContactCopy())
       {
          currentContactPoint.changeFrame(currentPlaneFrame);
-         FrameVector3D toContactPoint = new FrameVector3D(currentContactPoint);
-         toContactPoint.changeFrame(desiredPlaneFrame);
-         FramePoint3D desiredContactPoint = new FramePoint3D(toContactPoint);
+         FramePoint3D desiredContactPoint = new FramePoint3D(desiredPlaneFrame, currentContactPoint);
          PoseReferenceFrame controlFrame = new PoseReferenceFrame("atContactPoint", currentPlaneFrame);
          controlFrame.setPositionAndUpdate(currentContactPoint);
 
@@ -68,10 +67,12 @@ public class WalkingPreviewContactPointHolder
          FrameVector3D desiredLinearAcceleration = new FrameVector3D();
          desiredLinearAcceleration.sub(desiredContactPoint, currentContactPoint);
          desiredLinearAcceleration.scale(kp);
-         desiredLinearAcceleration.scaleAdd(kd, currentLinearVelocity, desiredLinearAcceleration);
+         desiredLinearAcceleration.scaleAdd(-kd, currentLinearVelocity, desiredLinearAcceleration);
+         desiredLinearAcceleration.changeFrame(controlFrame);
 
          SpatialAccelerationCommand command = new SpatialAccelerationCommand();
-         command.set(MultiBodySystemTools.getRootBody(contactStateToHold.getRigidBody()), contactStateToHold.getRigidBody());
+         RigidBodyBasics contactingBody = contactStateToHold.getRigidBody();
+         command.set(MultiBodySystemTools.getRootBody(contactingBody), contactingBody);
          command.setLinearAcceleration(controlFrame, desiredLinearAcceleration);
          command.setWeight(0.0, weight);
          command.setSelectionMatrixForLinearControl();

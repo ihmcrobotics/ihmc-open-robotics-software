@@ -1,8 +1,7 @@
 package us.ihmc.avatar.networkProcessor.kinematicsToolboxModule;
 
-import static us.ihmc.robotics.Assert.*;
-
-import static us.ihmc.humanoidRobotics.communication.packets.KinematicsToolboxMessageFactory.holdRigidBodyCurrentPose;
+import static org.junit.Assert.*;
+import static us.ihmc.humanoidRobotics.communication.packets.KinematicsToolboxMessageFactory.*;
 
 import java.awt.Color;
 import java.util.ArrayList;
@@ -35,6 +34,7 @@ import us.ihmc.graphicsDescription.instructions.Graphics3DPrimitiveInstruction;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.mecano.multiBodySystem.interfaces.FloatingJointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
+import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointReadOnly;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.mecano.tools.MultiBodySystemTools;
 import us.ihmc.robotics.robotDescription.JointDescription;
@@ -312,18 +312,24 @@ public class KinematicsToolboxControllerTest
    {
       for (OneDoFJointBasics joint : randomizedFullRobotModel.getRight())
       {
-         double jointLimitLower = joint.getJointLimitLower();
-         if (Double.isInfinite(jointLimitLower))
-            jointLimitLower = -Math.PI;
-         double jointLimitUpper = joint.getJointLimitUpper();
-         if (Double.isInfinite(jointLimitUpper))
-            jointLimitUpper = -Math.PI;
-         double rangeReduction = (1.0 - percentOfMotionRangeAllowed) * (jointLimitUpper - jointLimitLower);
-         jointLimitLower += 0.5 * rangeReduction;
-         jointLimitUpper -= 0.5 * rangeReduction;
-         joint.setQ(RandomNumbers.nextDouble(random, jointLimitLower, jointLimitUpper));
+         double q = nextJointConfiguration(random, percentOfMotionRangeAllowed, joint);
+         joint.setQ(q);
       }
       MultiBodySystemTools.getRootBody(randomizedFullRobotModel.getRight()[0].getPredecessor()).updateFramesRecursively();
+   }
+
+   public static double nextJointConfiguration(Random random, double percentOfMotionRangeAllowed, OneDoFJointReadOnly joint)
+   {
+      double jointLimitLower = joint.getJointLimitLower();
+      if (Double.isInfinite(jointLimitLower))
+         jointLimitLower = -Math.PI;
+      double jointLimitUpper = joint.getJointLimitUpper();
+      if (Double.isInfinite(jointLimitUpper))
+         jointLimitUpper = -Math.PI;
+      double rangeReduction = (1.0 - percentOfMotionRangeAllowed) * (jointLimitUpper - jointLimitLower);
+      jointLimitLower += 0.5 * rangeReduction;
+      jointLimitUpper -= 0.5 * rangeReduction;
+      return RandomNumbers.nextDouble(random, jointLimitLower, jointLimitUpper);
    }
 
    private RobotController createToolboxUpdater()
