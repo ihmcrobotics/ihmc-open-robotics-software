@@ -1,5 +1,5 @@
 <Start, 2.555, 2.631, 0.000,Start>
-<Goal,11.031,10.698, 0.000,Goal>
+<Goal,10.5,10.698, 0.000,Goal>
 <Type,A_STAR,Type>
 <Timeout,10.0,Timeout>
 
