@@ -2,13 +2,9 @@ package us.ihmc.robotics.linearDynamicSystems;
 
 import static us.ihmc.robotics.Assert.*;
 
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.*;
 
 import Jama.Matrix;
-import org.junit.jupiter.api.Tag;
-import org.junit.jupiter.api.Disabled;
 import us.ihmc.robotics.dataStructures.Polynomial;
 
 public class TransferFunctionMatrixTest
@@ -97,11 +93,13 @@ public class TransferFunctionMatrixTest
 	@Test
    public void testPreMultiplyException()
    {
+      Assertions.assertThrows(RuntimeException.class, () -> {
       int rows = transferFunctionMatrix.getRows();
       int columns = transferFunctionMatrix.getColumns();
       Matrix testMatrix = Matrix.random(rows, columns - 1);
 
       transferFunctionMatrix.preMultiply(testMatrix);
+      });
    }
 
 	@Test
@@ -132,11 +130,13 @@ public class TransferFunctionMatrixTest
 	@Test
    public void testTimesException()
    {
+      Assertions.assertThrows(RuntimeException.class, () -> {
       int rows = transferFunctionMatrix.getRows();
       int columns = transferFunctionMatrix.getColumns();
       Matrix testMatrix = Matrix.random(rows - 1, columns);
 
       transferFunctionMatrix.times(testMatrix);
+      });
    }
 
 	@Test
@@ -183,11 +183,13 @@ public class TransferFunctionMatrixTest
 	@Test
    public void testPlusDoubleException()
    {
+      Assertions.assertThrows(RuntimeException.class, () -> {
       Matrix testMatrix = new Matrix(new double[][]
       {
          {2.0, 5.0}
       });
       transferFunctionMatrix.plus(testMatrix);
+      });
    }
 
 	@Test
@@ -241,11 +243,13 @@ public class TransferFunctionMatrixTest
 	@Test
    public void testPlusTransferFunctionException()
    {
+      Assertions.assertThrows(RuntimeException.class, () -> {
       TransferFunctionMatrix testMatrix = new TransferFunctionMatrix(new TransferFunction[][]
       {
          {secondOrderResponseOne, secondOrderResponseTwo}
       });
       transferFunctionMatrix.plus(testMatrix);
+      });
    }
 
 }

@@ -1,12 +1,8 @@
 package us.ihmc.simulationConstructionSetTools.util.globalParameters;
 
 
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.*;
 
-import org.junit.jupiter.api.Tag;
-import org.junit.jupiter.api.Disabled;
 import static us.ihmc.robotics.Assert.*;
 
 public class BooleanGlobalParameterTest
@@ -67,20 +63,24 @@ public class BooleanGlobalParameterTest
 	@Test
    public void testThatCantHaveParentsUnlessOverwriteUpdateMethodOne()
    {
+      Assertions.assertThrows(RuntimeException.class, () -> {
       BooleanGlobalParameter parent = new BooleanGlobalParameter("parent", "parent", DEFAULT_VALUE, null);
       @SuppressWarnings("unused")
       BooleanGlobalParameter invalidChild = new BooleanGlobalParameter("invalidChild", "test description", new GlobalParameter[] {parent}, null);
 
       parent.set(false);
+      });
    }
 
 	@Test
    public void testCantSetChild()
    {
+      Assertions.assertThrows(RuntimeException.class, () -> {
       BooleanGlobalParameter parent = new BooleanGlobalParameter("parent", "", true, null);
       BooleanGlobalParameter child = new BooleanGlobalParameter("child", "", new GlobalParameter[] {parent}, null);
 
       child.set(false, "Shouldn't be able to change this!");
+      });
    }
 
 

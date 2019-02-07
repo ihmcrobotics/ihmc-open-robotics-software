@@ -4,11 +4,8 @@ import static us.ihmc.robotics.Assert.*;
 
 import java.util.Random;
 
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.*;
 
-import org.junit.jupiter.api.Tag;
-import org.junit.jupiter.api.Disabled;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.simulationconstructionset.Robot;
@@ -241,6 +238,7 @@ public class YoVariableValueDataCheckerTest
    @Test
    public void testMinGreaterThanMax()
    {
+      Assertions.assertThrows(RuntimeException.class, () -> {
       Robot robot = new Robot("Derivative");
 
       YoVariableRegistry registry = new YoVariableRegistry("variables");
@@ -263,11 +261,13 @@ public class YoVariableValueDataCheckerTest
 
       yoVariableValueDataChecker.setMaximumValue(1.0);
       yoVariableValueDataChecker.setMinimumValue(2.0);
+      });
    }
 
    @Test
    public void testMaxGreaterThanMin()
    {
+      Assertions.assertThrows(RuntimeException.class, () -> {
       Robot robot = new Robot("Derivative");
 
       YoVariableRegistry registry = new YoVariableRegistry("variables");
@@ -288,6 +288,7 @@ public class YoVariableValueDataCheckerTest
 
       yoVariableValueDataChecker.setMinimumValue(2.0);
       yoVariableValueDataChecker.setMaximumValue(1.0);
+      });
    }
 
    @Test
@@ -400,6 +401,7 @@ public class YoVariableValueDataCheckerTest
    @Test
    public void testSetMinGreaterThanMax()
    {
+      Assertions.assertThrows(RuntimeException.class, () -> {
       Robot robot = new Robot("Derivative");
 
       YoVariableRegistry registry = new YoVariableRegistry("variables");
@@ -416,11 +418,13 @@ public class YoVariableValueDataCheckerTest
       double value = 10.0;
       yoVariableValueDataChecker.setMaximumValue(value);
       yoVariableValueDataChecker.setMinimumValue(value + 1.0);
+      });
    }
 
    @Test
    public void testSetMaxLessThanMin()
    {
+      Assertions.assertThrows(RuntimeException.class, () -> {
       Robot robot = new Robot("Derivative");
 
       YoVariableRegistry registry = new YoVariableRegistry("variables");
@@ -437,6 +441,7 @@ public class YoVariableValueDataCheckerTest
       double value = 10.0;
       yoVariableValueDataChecker.setMinimumValue(value);
       yoVariableValueDataChecker.setMaximumValue(value - 10.0);
+      });
    }
 
 }

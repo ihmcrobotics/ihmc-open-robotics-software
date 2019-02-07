@@ -2,6 +2,7 @@ package us.ihmc.simulationConstructionSetTools.util.dataProcessors;
 
 import static us.ihmc.robotics.Assert.*;
 
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
 import org.junit.jupiter.api.Tag;
@@ -100,21 +101,25 @@ public class ValueDataCheckerParametersTest
    @Test
    public void testSetMinGreaterThanMax()
    {
+      Assertions.assertThrows(RuntimeException.class, () -> {
       ValueDataCheckerParameters valueDataCheckerParametersOriginal = new ValueDataCheckerParameters();
 
       double value = 10.0;
       valueDataCheckerParametersOriginal.setMaximumValue(value);
       valueDataCheckerParametersOriginal.setMinimumValue(value + 1.0);
+      });
    }
    
    @Test
    public void testSetMaxLessThanMin()
    {
+      Assertions.assertThrows(RuntimeException.class, () -> {
       ValueDataCheckerParameters valueDataCheckerParametersOriginal = new ValueDataCheckerParameters();
 
       double value = 10.0;
       valueDataCheckerParametersOriginal.setMinimumValue(value);
       valueDataCheckerParametersOriginal.setMaximumValue(value - 10.0);
+      });
    }
 
 }

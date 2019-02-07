@@ -1,11 +1,7 @@
 package us.ihmc.simulationConstructionSetTools.util.globalParameters;
 
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.*;
 
-import org.junit.jupiter.api.Tag;
-import org.junit.jupiter.api.Disabled;
 import static us.ihmc.robotics.Assert.*;
 
 public class DoubleGlobalParameterTest
@@ -67,18 +63,22 @@ public class DoubleGlobalParameterTest
 	@Test
    public void testThatCantHaveParentsUnlessOverwriteUpdateMethodOne()
    {
+      Assertions.assertThrows(RuntimeException.class, () -> {
       DoubleGlobalParameter parent = new DoubleGlobalParameter("parent", "parent", DEFAULT_VALUE, null);
       new DoubleGlobalParameter("invalidChild", "test description", new GlobalParameter[] {parent}, null); // invalid
 
       parent.set(1.0);
+      });
    }
 
 	@Test
    public void testCantSetChild()
    {
+      Assertions.assertThrows(RuntimeException.class, () -> {
       DoubleGlobalParameter parent = new DoubleGlobalParameter("parent", "", 0.7, null);
       DoubleGlobalParameter child = new DoubleGlobalParameter("child", "", new GlobalParameter[] {parent}, null);
 
       child.set(0.99, "Shouldn't be able to change this!");
+      });
    }
 }
