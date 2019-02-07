@@ -8,6 +8,7 @@ import java.util.concurrent.atomic.AtomicReference;
 
 import controller_msgs.msg.dds.KinematicsToolboxOutputStatus;
 import controller_msgs.msg.dds.RobotConfigurationData;
+import controller_msgs.msg.dds.WalkingControllerPreviewOutputMessage;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.networkProcessor.kinematicsToolboxModule.KinematicsToolboxHelper;
 import us.ihmc.avatar.networkProcessor.modules.ToolboxController;
@@ -68,7 +69,7 @@ public class WalkingControllerPreviewToolboxController extends ToolboxController
    private final double integrationDT;
 
    private final FloatingJointBasics rootJoint;
-   private final OneDoFJointBasics[] controlledOneDoFJoints;
+   private final OneDoFJointBasics[] allOneDoFJointsExcludingHands;
    private final FullHumanoidRobotModel fullRobotModel;
    private final CommonHumanoidReferenceFrames referenceFrames;
    private final SideDependentList<SettableFootSwitch> footSwitches = new SideDependentList<>();
@@ -130,7 +131,7 @@ public class WalkingControllerPreviewToolboxController extends ToolboxController
       humanoidHighLevelControllerManager.addChild(controllerToolbox.getYoVariableRegistry());
       setupWalkingMessageHandler(walkingControllerParameters, yoGraphicsListRegistry);
       rootJoint = fullRobotModel.getRootJoint();
-      controlledOneDoFJoints = controllerToolbox.getControlledOneDoFJoints();
+      allOneDoFJointsExcludingHands = FullRobotModelUtils.getAllJointsExcludingHands(fullRobotModel);
 
       //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -148,7 +149,7 @@ public class WalkingControllerPreviewToolboxController extends ToolboxController
       WholeBodyControlCoreToolbox controlCoreToolbox = createControllerCoretoolbox(walkingControllerParameters, yoGraphicsListRegistry);
 
       FeedbackControlCommandList feedbackControlTemplate = managerFactory.createFeedbackControlTemplate();
-      JointDesiredOutputList jointDesiredOutputList = new JointDesiredOutputList(controlledOneDoFJoints);
+      JointDesiredOutputList jointDesiredOutputList = new JointDesiredOutputList(controllerToolbox.getControlledOneDoFJoints());
 
       controllerCore = new WholeBodyControllerCore(controlCoreToolbox, feedbackControlTemplate, jointDesiredOutputList, registry);
       walkingController.setControllerCoreOutput(controllerCore.getOutputForHighLevelController());
@@ -268,7 +269,14 @@ public class WalkingControllerPreviewToolboxController extends ToolboxController
       KinematicsToolboxHelper.setRobotStateFromRobotConfigurationData(robotConfigurationData, rootJoint,
                                                                       FullRobotModelUtils.getAllJointsExcludingHands(fullRobotModel));
 
+      for (JointBasics joint : fullRobotModel.getElevator().childrenSubtreeIterable())
+      {
+         joint.setJointTwistToZero();
+         joint.setJointAccelerationToZero();
+      }
+
       referenceFrames.updateFrames();
+      controllerCore.initialize();
       controllerToolbox.update();
       walkingController.initialize();
 
@@ -322,14 +330,18 @@ public class WalkingControllerPreviewToolboxController extends ToolboxController
       MultiBodySystemStateIntegrator integrator = new MultiBodySystemStateIntegrator(integrationDT);
       integrator.doubleIntegrateFromAcceleration(Arrays.asList(controllerToolbox.getControlledJoints()));
 
-      if (!(taskExecutor.getCurrentTask() instanceof WalkingPreviewResetTask)) // Skip the frames that are to reset the controller.
-         previewFrames.add(MessageTools.createKinematicsToolboxOutputStatus(rootJoint, FullRobotModelUtils.getAllJointsExcludingHands(fullRobotModel)));
+      if (!(taskExecutor.getCurrentTask() instanceof WalkingPreviewResetTask))
+         previewFrames.add(MessageTools.createKinematicsToolboxOutputStatus(rootJoint, allOneDoFJointsExcludingHands));
 
       isDone.set(taskExecutor.isDone() || hasControllerFailed.getValue());
 
       if (isDone())
       {
-         reportMessage(MessageTools.createWalkingControllerPreviewOutputMessage(integrationDT, previewFrames));
+         LogTools.info("Preview is done, packing and sending result, number of frames: " + previewFrames.size());
+         if (hasControllerFailed.getValue())
+            LogTools.info("Controller has failed.");
+         WalkingControllerPreviewOutputMessage output = MessageTools.createWalkingControllerPreviewOutputMessage(integrationDT, previewFrames);
+         reportMessage(output);
          taskExecutor.clear();
       }
    }
