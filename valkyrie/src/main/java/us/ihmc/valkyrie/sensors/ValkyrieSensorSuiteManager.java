@@ -140,38 +140,21 @@ public class ValkyrieSensorSuiteManager implements DRCSensorSuiteManager
    {
       return new StereoVisionTransformer()
       {
-         private RigidBodyTransform transform = new RigidBodyTransform();
-         private final RigidBodyTransform transformFromNeckToWorld = new RigidBodyTransform();
+         private RigidBodyTransform transformFromNeckToWorld = new RigidBodyTransform();
 
          @Override
-         public void transform(FullHumanoidRobotModel fullRobotModel, ReferenceFrame scanPointsFrame,
-                               ColorPointCloudData pointCloudDataToTransformToWorld)
+         public void transform(FullHumanoidRobotModel fullRobotModel, ReferenceFrame scanPointsFrame, ColorPointCloudData pointCloudDataToTransformToWorld)
          {
-            transform = new RigidBodyTransform();
-            
+            transformFromNeckToWorld = new RigidBodyTransform();
+
             ReferenceFrame neckFrame = fullRobotModel.getHeadBaseFrame();
-            // NOTE : neckFrame name is ```afterUpperNeckPitch```.
-            scanPointsFrame.getTransformToDesiredFrame(transform, neckFrame);
-            
-            neckFrame.getTransformToDesiredFrame(transformFromNeckToWorld, ReferenceFrame.getWorldFrame());
-            
-//            LogTools.info("transform");
-//            System.out.println(transform);
-//            
-//            LogTools.info("transformFromNeckToWorld");
-//            System.out.println(transformFromNeckToWorld);
-            
             RigidBodyTransform transformFromHeadToNeck = new RigidBodyTransform(ValkyrieSensorInformation.getTransformFromHeadToUpperNeckPitchLink());
-//            LogTools.info("transformFromHeadToNeck");
-//            System.out.println(transformFromHeadToNeck);
-            
-            transformFromHeadToNeck.multiply(transformFromNeckToWorld);
-            transform.multiply(transformFromHeadToNeck);
-            
-//            LogTools.info("transform");
-//            System.out.println(transform);
-            
-            pointCloudDataToTransformToWorld.setTransform(transformFromHeadToNeck);
+
+            neckFrame.getTransformToDesiredFrame(transformFromNeckToWorld, ReferenceFrame.getWorldFrame());
+
+            transformFromNeckToWorld.multiply(transformFromHeadToNeck);
+            pointCloudDataToTransformToWorld.setTransform(transformFromNeckToWorld);
+
          }
       };
    }

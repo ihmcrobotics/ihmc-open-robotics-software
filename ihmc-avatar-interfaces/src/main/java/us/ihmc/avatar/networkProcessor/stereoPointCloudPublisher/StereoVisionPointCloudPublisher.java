@@ -161,12 +161,10 @@ public class StereoVisionPointCloudPublisher
 
             if (stereoVisionTransformer != null)
             {
-               LogTools.info("not null");
                stereoVisionTransformer.transform(fullRobotModel, stereoVisionPointsFrame, pointCloudData);
             }
             else if (!stereoVisionPointsFrame.isWorldFrame())
             {
-               LogTools.info("!stereoVisionPointsFrame.isWorldFrame()");
                stereoVisionPointsFrame.getTransformToDesiredFrame(transformToWorld, worldFrame);
                pointCloudData.setTransform(transformToWorld);
             }
@@ -247,13 +245,12 @@ public class StereoVisionPointCloudPublisher
 
       public void setTransform(RigidBodyTransform transform)
       {
-         this.transform.set(transform);         
+         this.transform.set(transform);
       }
    }
 
    public static interface StereoVisionTransformer
    {
-      public void transform(FullHumanoidRobotModel fullRobotModel, ReferenceFrame scanPointsFrame,
-                            ColorPointCloudData scanDataToTransformToWorld);
+      public void transform(FullHumanoidRobotModel fullRobotModel, ReferenceFrame scanPointsFrame, ColorPointCloudData scanDataToTransformToWorld);
    }
 }
