@@ -49,28 +49,28 @@ public class ValkyrieObstacleCourseFlatTest extends DRCObstacleCourseFlatTest
       super.testRotatedStepInTheAir();
    }
 
-   @Tag("allocation")
+   @Tag("allocation-slow")
    @Test
    public void testSimpleScripts() throws SimulationExceededMaximumTimeException, IOException
    {
       super.testSimpleScripts();
    }
 
-   @Tag("allocation")
+   @Tag("allocation-slow")
    @Test
    public void testACoupleStepsUsingQueuedControllerCommands() throws SimulationExceededMaximumTimeException
    {
       super.testACoupleStepsUsingQueuedControllerCommands();
    }
 
-   @Tag("allocation")
+   @Tag("allocation-slow")
    @Test
    public void testACoupleQueuedControllerCommands() throws SimulationExceededMaximumTimeException
    {
       super.testACoupleQueuedControllerCommands();
    }
 
-   @Tag("allocation")
+   @Tag("allocation-slow")
    @Test
    public void testACoupleMoreQueuedControllerCommands() throws SimulationExceededMaximumTimeException
    {
@@ -92,7 +92,7 @@ public class ValkyrieObstacleCourseFlatTest extends DRCObstacleCourseFlatTest
    }
 
    @Override
-   @Tag("allocation")
+   @Tag("allocation-slow")
    @Test
    public void testStandingForACoupleSeconds() throws SimulationExceededMaximumTimeException
    {

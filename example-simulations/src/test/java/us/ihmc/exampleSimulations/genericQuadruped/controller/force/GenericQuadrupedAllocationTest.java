@@ -39,6 +39,7 @@ import us.ihmc.simulationconstructionset.dataBuffer.MirroredYoVariableRegistry;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
 import us.ihmc.tools.MemoryTools;
 
+@Tag("allocation-slow")
 public class GenericQuadrupedAllocationTest
 {
    private QuadrupedTestFactory quadrupedTestFactory;
@@ -110,7 +111,6 @@ public class GenericQuadrupedAllocationTest
       }
    }
 
-   @Tag("allocation")
    @Test
    public void testForAllocationStanding()
    {
@@ -125,7 +125,6 @@ public class GenericQuadrupedAllocationTest
 
 
    @Disabled
-   @Tag("allocation")
    @Test
    public void testForAllocationStepping()
    {

@@ -87,7 +87,7 @@ public abstract class AvatarDoubleStepTest implements MultiRobotTestInterface
       assertTrue(drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(9.0));
    }
 
-   @Tag("allocation")
+   @Tag("allocation-slow")
    @Test
    public void testTwoStepsInARowSameSideAfterFirstSep() throws SimulationExceededMaximumTimeException
    {
@@ -121,7 +121,7 @@ public abstract class AvatarDoubleStepTest implements MultiRobotTestInterface
    }
 
 
-   @Tag("allocation")
+   @Tag("allocation-slow")
    @Test
    public void testTwoStepsInARowLongTransferSameSide() throws SimulationExceededMaximumTimeException
    {
