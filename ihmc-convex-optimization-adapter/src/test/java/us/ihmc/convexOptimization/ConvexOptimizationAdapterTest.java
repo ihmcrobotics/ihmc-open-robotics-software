@@ -9,7 +9,7 @@ import java.io.InputStream;
 import java.util.Map;
 
 import org.ejml.data.DenseMatrix64F;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.yaml.snakeyaml.Yaml;
 
 import com.joptimizer.functions.ConvexMultivariateRealFunction;
@@ -17,8 +17,8 @@ import com.joptimizer.functions.LinearMultivariateRealFunction;
 import com.joptimizer.optimizers.JOptimizer;
 import com.joptimizer.optimizers.OptimizationRequest;
 
-import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
-import us.ihmc.continuousIntegration.IntegrationCategory;
+import org.junit.jupiter.api.Tag;
+import org.junit.jupiter.api.Disabled;
 import us.ihmc.robotics.linearAlgebra.MatrixTools;
 
 public abstract class ConvexOptimizationAdapterTest
@@ -27,8 +27,8 @@ public abstract class ConvexOptimizationAdapterTest
    public abstract double getTestErrorEpsilon();
    
    @SuppressWarnings("unchecked")
-   @ContinuousIntegrationTest(estimatedDuration = 0.1, categoriesOverride = IntegrationCategory.EXCLUDE)
-   @Test(timeout = 300000)
+   @Disabled
+   @Test
    public void qpsFileTest() throws IOException
    {
 
@@ -61,8 +61,7 @@ public abstract class ConvexOptimizationAdapterTest
       }
    }
 
-	@ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(timeout = 30000)
+   @Test
    public void testASimpleRedundantEqualityCase()
    {
       // Minimize x subject to x = 2 and x = 2;
@@ -77,8 +76,7 @@ public abstract class ConvexOptimizationAdapterTest
       assertEquals(2.0, solution[0], getTestErrorEpsilon());
    }
 
-	@ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(timeout = 30000)
+   @Test
    public void testASimpleRedundantEqualityCase2d()
    {
 	   // Minimize x + y subject to x + 2y = 2, 2x + 4y = 4, 3x + 7y = 7; Solution is (0, 1)
@@ -94,8 +92,7 @@ public abstract class ConvexOptimizationAdapterTest
       assertEquals(1.0, solution[1], getTestErrorEpsilon());
    }
 
-	@ContinuousIntegrationTest(estimatedDuration = 0.1)
-   @Test(timeout = 30000)
+   @Test
   public void JOptimizerWebpageLPExample() throws Exception
   {
       //from http://www.joptimizer.com/linearProgramming.html
@@ -143,8 +140,7 @@ public abstract class ConvexOptimizationAdapterTest
       assertEquals(0, sol2[1], 1e-5);
    }
 
-	@ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(timeout = 30000)
+   @Test
    public void testASimpleInequalityCase() throws Exception
    {
       // Minimize x subject to -x <= -2; (x >= 2)
@@ -158,8 +154,7 @@ public abstract class ConvexOptimizationAdapterTest
       assertEquals(2.0, solution[0], 1e-7);
    }
 
-	@ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(timeout = 30000)
+   @Test
    public void testASimpleMaximizationInequalityCase()
    {
       // Minimize -x subject to x <= 5
@@ -174,8 +169,8 @@ public abstract class ConvexOptimizationAdapterTest
    }
    
    // Need to implement addQuadraticInequalities
-	@ContinuousIntegrationTest(estimatedDuration = 0.1, categoriesOverride = IntegrationCategory.EXCLUDE)
-	@Test(timeout=300000)
+	@Disabled
+	@Test
    public void testLinearCostQuadraticInequalityOptimizationProblem()
    {
       // Minimize -x-y subject to x^2 + y^2 <= 4  (1/2 [x y] [I] [x y]^T - 2 <= 0)
@@ -198,8 +193,7 @@ public abstract class ConvexOptimizationAdapterTest
       assertEquals(Math.sqrt(2.0), solution[1], 1e-5);
    }
 
-	@ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(timeout = 30000)
+   @Test
    public void testLinearCostFullyLinearConstrainedEqualityOptimizationProblem()
    {
       // Minimize x subject to x+y=4 and x-y=2. Should return (3,1).
@@ -220,8 +214,7 @@ public abstract class ConvexOptimizationAdapterTest
       assertEquals(1.0, solution[1], getTestErrorEpsilon());
    }
 
-	@ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(timeout = 30000)
+   @Test
    public void testZeroCostLinearEqualityOptimizationProblem() throws Exception
    {
       // Minimize 0 subject to x+y=4. Should return any feasible solution.
@@ -242,8 +235,8 @@ public abstract class ConvexOptimizationAdapterTest
    }
    
    //Not implemented yet!
-	@ContinuousIntegrationTest(estimatedDuration = 0.1, categoriesOverride = IntegrationCategory.EXCLUDE)
-	@Test(timeout=300000)
+	@Disabled
+	@Test
    public void testLinearCostLinearEqualityQuadraticInequalityOptimizationProblem() throws Exception
    {
       // Minimize x subject to x+y=4 and y >= x^2. Answer should be ((-1-sqrt(17))/2, (9+sqrt(17))/2))
@@ -272,8 +265,8 @@ public abstract class ConvexOptimizationAdapterTest
    }
 
    //Not implemented yet!
-	@ContinuousIntegrationTest(estimatedDuration = 0.1, categoriesOverride = IntegrationCategory.EXCLUDE)
-	@Test(timeout=300000)
+	@Disabled
+	@Test
    public void testASecondOrderLorenzConeProblemUsingSOCP() throws Exception
    {
       // Minimize -(x + y) subject to z <= sqrt(18) and sqrt(x^2 + y^2) <= z. Answer should be (3, 3, sqrt(18))

@@ -15,8 +15,8 @@ import java.util.Random;
 import org.ddogleg.optimization.FactoryOptimization;
 import org.ddogleg.optimization.UnconstrainedLeastSquares;
 import org.ddogleg.optimization.UtilOptimize;
-import org.junit.After;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.Test;
 
 import boofcv.abst.fiducial.calib.CalibrationDetectorChessboard;
 import boofcv.abst.fiducial.calib.ConfigChessboard;
@@ -29,8 +29,7 @@ import us.ihmc.atlas.AtlasRobotModel;
 import us.ihmc.atlas.AtlasRobotVersion;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.RobotTarget;
-import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
-import us.ihmc.continuousIntegration.IntegrationCategory;
+import org.junit.jupiter.api.Disabled;
 import us.ihmc.euclid.axisAngle.AxisAngle;
 import us.ihmc.euclid.matrix.RotationMatrix;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
@@ -82,7 +81,6 @@ public class KinematicCalibrationHeadLoopResidualTest
 
    }
    
-   
    public KinematicCalibrationHeadLoopResidualTest()
    {
       intrinsic = loadXML("/us/ihmc/atlas/calib/intrinsic_ros.xml");
@@ -101,7 +99,6 @@ public class KinematicCalibrationHeadLoopResidualTest
       targetToEE.setRotation(rotFull);
    }
 
-   @After
    public void tearDown()
    {
       ReferenceFrameTools.clearWorldFrameTree();
@@ -112,8 +109,6 @@ public class KinematicCalibrationHeadLoopResidualTest
     * 
     * @throws IOException
     */
-	@ContinuousIntegrationTest(estimatedDuration = 50.0, categoriesOverride = IntegrationCategory.EXCLUDE)
-	@Test(timeout=300000)
    public void perfect() throws IOException
    {
       // No offsets to make things easy
@@ -162,8 +157,6 @@ public class KinematicCalibrationHeadLoopResidualTest
     * 
     * @throws IOException
     */
-	@ContinuousIntegrationTest(estimatedDuration = 50.0, categoriesOverride = IntegrationCategory.EXCLUDE)
-	@Test(timeout=300000)
    public void smallError() throws IOException
    {
       // some small offests, which won't be provided to the algorithm
@@ -216,8 +209,6 @@ public class KinematicCalibrationHeadLoopResidualTest
     * 
     * @throws IOException
     */
-	@ContinuousIntegrationTest(estimatedDuration = 50.0, categoriesOverride = IntegrationCategory.EXCLUDE)
-	@Test(timeout=300000)
    public void optimize() throws IOException
    {
       // some small offests, which won't be provided to the algorithm

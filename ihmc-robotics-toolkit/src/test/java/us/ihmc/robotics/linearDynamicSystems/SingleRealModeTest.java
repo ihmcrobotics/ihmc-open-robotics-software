@@ -2,27 +2,27 @@ package us.ihmc.robotics.linearDynamicSystems;
 
 import static us.ihmc.robotics.Assert.*;
 
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
-import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
+import org.junit.jupiter.api.Tag;
+import org.junit.jupiter.api.Disabled;
 import us.ihmc.robotics.dataStructures.Polynomial;
 
 public class SingleRealModeTest
 {
-   @Before
+   @BeforeEach
    public void setUp() throws Exception
    {
    }
 
-   @After
+   @AfterEach
    public void tearDown() throws Exception
    {
    }
 
-	@ContinuousIntegrationTest(estimatedDuration = 0.0)
-	@Test(timeout = 30000)
+	@Test
    public void testDifferentLengths()
    {
       double eigenvalue = -2.0;
@@ -39,8 +39,7 @@ public class SingleRealModeTest
       }
    }
 
-	@ContinuousIntegrationTest(estimatedDuration = 0.0)
-	@Test(timeout = 30000)
+	@Test
    public void testDotEqualsOne()
    {
       double eigenvalue = -2.0;
@@ -58,8 +57,7 @@ public class SingleRealModeTest
       }
    }
 
-	@ContinuousIntegrationTest(estimatedDuration = 0.0)
-	@Test(timeout = 30000)
+	@Test
    public void testConstructTransferFunctionMatrixSISO()
    {
       double eigenvalue = -2.0;
@@ -86,8 +84,7 @@ public class SingleRealModeTest
       DynamicSystemsTestHelpers.assertEpsilonEquals(new double[] {1.0, -eigenvalue}, denominatorCoefficients, 1e-7);
    }
 
-	@ContinuousIntegrationTest(estimatedDuration = 0.0)
-	@Test(timeout = 30000)
+	@Test
    public void testConstructTransferFunctionMatrixMIMO()
    {
       double eigenvalue = -5.0;

@@ -5,10 +5,11 @@ import static us.ihmc.robotics.Assert.*;
 import java.util.Random;
 
 import org.apache.commons.lang3.mutable.MutableDouble;
-import org.junit.After;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.Test;
 
-import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
+import org.junit.jupiter.api.Tag;
+import org.junit.jupiter.api.Disabled;
 import us.ihmc.euclid.axisAngle.AxisAngle;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.tools.ReferenceFrameTools;
@@ -22,14 +23,13 @@ import us.ihmc.robotics.random.RandomGeometry;
 public class AlphaFilteredYoFrameQuaternionTest
 {
 
-   @After
+   @AfterEach
    public void tearDown()
    {
       ReferenceFrameTools.clearWorldFrameTree();
    }
 
-	@ContinuousIntegrationTest(estimatedDuration = 0.0)
-	@Test(timeout=300000)
+	@Test
    public void testInitialValue()
    {
 	   MutableDouble alpha = new MutableDouble();
@@ -48,8 +48,7 @@ public class AlphaFilteredYoFrameQuaternionTest
       EuclidCoreTestTools.assertQuaternionEquals(qMeasured, qFiltered, 1e-12);
    }
 
-	@ContinuousIntegrationTest(estimatedDuration = 0.0)
-	@Test(timeout=300000)
+	@Test
    public void testAlpha1()
    {
       MutableDouble alpha = new MutableDouble();
@@ -72,8 +71,7 @@ public class AlphaFilteredYoFrameQuaternionTest
       EuclidCoreTestTools.assertQuaternionGeometricallyEquals(qInitial, qFiltered, 1e-12);
    }
 
-	@ContinuousIntegrationTest(estimatedDuration = 0.0)
-	@Test(timeout=300000)
+	@Test
    public void testAlpha0()
    {
       MutableDouble alpha = new MutableDouble();
@@ -96,8 +94,7 @@ public class AlphaFilteredYoFrameQuaternionTest
       EuclidCoreTestTools.assertQuaternionGeometricallyEquals(qFinal, qFiltered, 1e-12);
    }
 
-	@ContinuousIntegrationTest(estimatedDuration = 0.0)
-	@Test(timeout=300000)
+	@Test
    public void testStepChange()
    {
       MutableDouble alpha = new MutableDouble();

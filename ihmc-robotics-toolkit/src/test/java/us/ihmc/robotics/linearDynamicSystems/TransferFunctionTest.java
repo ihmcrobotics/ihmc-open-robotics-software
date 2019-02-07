@@ -2,11 +2,12 @@ package us.ihmc.robotics.linearDynamicSystems;
 
 import static us.ihmc.robotics.Assert.*;
 
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
-import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
+import org.junit.jupiter.api.Tag;
+import org.junit.jupiter.api.Disabled;
 import us.ihmc.robotics.dataStructures.Polynomial;
 import us.ihmc.robotics.geometry.AngleTools;
 
@@ -14,18 +15,17 @@ public class TransferFunctionTest
 {
     private double epsilon = 1e-7;
 
-   @Before
+   @BeforeEach
    public void setUp() throws Exception
    {
    }
 
-   @After
+   @AfterEach
    public void tearDown() throws Exception
    {
    }
 
-	@ContinuousIntegrationTest(estimatedDuration = 0.0)
-	@Test(timeout = 30000)
+	@Test
    public void testGetNumeratorAndGetDenominatorCoefficients()
    {
       double[] numerator = new double[] {1.0, 2.0};
@@ -40,8 +40,7 @@ public class TransferFunctionTest
       DynamicSystemsTestHelpers.assertEpsilonEquals(expectedDenominator, transferFunction.getDenominatorCoefficients(), 1e-7);
    }
 
-	@ContinuousIntegrationTest(estimatedDuration = 0.0)
-	@Test(timeout = 30000)
+	@Test
    public void testOneOverOne()
    {
       double[] numerator = new double[] {1};
@@ -55,8 +54,7 @@ public class TransferFunctionTest
       assertEquals(magnitude, 1.0, epsilon);
    }
 
-	@ContinuousIntegrationTest(estimatedDuration = 0.0)
-	@Test(timeout = 30000)
+	@Test
    public void testZero()
    {
       double[] numerator = new double[] {0};
@@ -69,8 +67,7 @@ public class TransferFunctionTest
       assertEquals(magnitude, 0.0, epsilon);
    }
 
-	@ContinuousIntegrationTest(estimatedDuration = 0.0)
-	@Test(timeout = 30000)
+	@Test
    public void testOneOverS2()
    {
       double[] numerator = new double[] {1.0};
@@ -85,8 +82,7 @@ public class TransferFunctionTest
       assertEquals(0.0, AngleTools.computeAngleDifferenceMinusPiToPi(Math.PI, transferFunction.getPhase(5.0)), 1e-7);
    }
 
-	@ContinuousIntegrationTest(estimatedDuration = 0.0)
-	@Test(timeout = 30000)
+	@Test
    public void testOneOverSplusA()
    {
       double a = 3.0;
@@ -103,8 +99,7 @@ public class TransferFunctionTest
       assertEquals(0.0, AngleTools.computeAngleDifferenceMinusPiToPi(-Math.atan2(omega, a), transferFunction.getPhase(omega)), 1e-7);
    }
 
-	@ContinuousIntegrationTest(estimatedDuration = 0.0)
-	@Test(timeout = 30000)
+	@Test
    public void testSecondOrderResponse()
    {
       double wn = 30.0;
@@ -117,8 +112,7 @@ public class TransferFunctionTest
       verify(transferFunction, 100000000.0, 0.0, -Math.PI);
    }
 
-	@ContinuousIntegrationTest(estimatedDuration = 0.0)
-	@Test(timeout = 30000)
+	@Test
    public void testSecondOrderResponseArray()
    {
       double wn = 30.0;
@@ -135,14 +129,13 @@ public class TransferFunctionTest
       verify(transferFunction, w, expectedMagnitude, expectedPhase);
    }
 
-//   @Test(timeout=300000)
+//   @Test
 //   public void testScalarTimes()
 //   {
 //      fail("Implement me!");
 //   }
 
-	@ContinuousIntegrationTest(estimatedDuration = 0.0)
-	@Test(timeout = 30000)
+	@Test
    public void testTimes()
    {
       double a1 = 1.0, a2 = 2.0, b1 = 3.0, b2 = 4.0;
@@ -166,8 +159,7 @@ public class TransferFunctionTest
       DynamicSystemsTestHelpers.assertEpsilonEquals(expectedDenominator, productDenominator, 1e-7);
    }
 
-	@ContinuousIntegrationTest(estimatedDuration = 0.0)
-	@Test(timeout = 30000)
+	@Test
    public void testPlus()
    {
       double a1 = 1.0, a2 = 2.0, b1 = 3.0, b2 = 4.0;
@@ -191,8 +183,7 @@ public class TransferFunctionTest
       DynamicSystemsTestHelpers.assertEpsilonEquals(expectedDenominator, sumDenominator, 1e-7);
    }
 
-	@ContinuousIntegrationTest(estimatedDuration = 0.0)
-	@Test(timeout = 30000)
+	@Test
    public void testPlusWithSameDenominator()
    {
       double a1 = 1.0, a2 = 2.0, b1 = 3.0;
@@ -235,8 +226,7 @@ public class TransferFunctionTest
       }
    }
 
-	@ContinuousIntegrationTest(estimatedDuration = 0.0)
-	@Test(timeout = 30000)
+	@Test
    public void testEpsilonEquals()
    {
       double a = 1.0, b = 2.0, c = 3.0, d = 4.0;
@@ -280,8 +270,7 @@ public class TransferFunctionTest
 
    }
 
-	@ContinuousIntegrationTest(estimatedDuration = 0.0)
-	@Test(timeout = 30000)
+	@Test
    public void testEqualsZero()
    {
       Polynomial numerator = new Polynomial(new double[] {1.0, 2.0});

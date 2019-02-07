@@ -2,9 +2,10 @@ package us.ihmc.robotics.math.filters;
 
 import static us.ihmc.robotics.Assert.*;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
-import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
+import org.junit.jupiter.api.Tag;
+import org.junit.jupiter.api.Disabled;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 
@@ -13,8 +14,7 @@ public class FilteredVelocityYoVariableTest
 
    private static final double DT = 0.1;
 
-	@ContinuousIntegrationTest(estimatedDuration = 0.0)
-	@Test(timeout=300000)
+	@Test
    public void testUpdateForTranslationalVelocity()
    {
       YoVariableRegistry registry = new YoVariableRegistry("testRegistry");
@@ -37,8 +37,7 @@ public class FilteredVelocityYoVariableTest
 
    }
 
-	@ContinuousIntegrationTest(estimatedDuration = 0.0)
-	@Test(timeout=300000)
+	@Test
    public void testUpdateForRotationalVelocity()
    {
       YoVariableRegistry registry = new YoVariableRegistry("testRegistry");

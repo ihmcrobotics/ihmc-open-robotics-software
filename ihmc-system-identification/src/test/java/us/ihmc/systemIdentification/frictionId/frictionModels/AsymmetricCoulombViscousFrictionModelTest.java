@@ -2,10 +2,10 @@ package us.ihmc.systemIdentification.frictionId.frictionModels;
 
 import static us.ihmc.robotics.Assert.*;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
-import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
-
+import org.junit.jupiter.api.Tag;
+import org.junit.jupiter.api.Disabled;
 public class AsymmetricCoulombViscousFrictionModelTest
 {
    private static double epsilon = 1e-10;
@@ -19,8 +19,7 @@ public class AsymmetricCoulombViscousFrictionModelTest
    private double negativeVelocity = -1.5;
    private double zeroVelocity = 0.0;
 
-	@ContinuousIntegrationTest(estimatedDuration = 0.0)
-	@Test(timeout = 30000)
+	@Test
    public void testConstructorAndFormula()
    {
       AsymmetricCoulombViscousFrictionModel model = new AsymmetricCoulombViscousFrictionModel(positiveCoulomb, positiveViscous,

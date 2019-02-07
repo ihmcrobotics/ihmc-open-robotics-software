@@ -5,10 +5,11 @@ import static us.ihmc.robotics.Assert.*;
 import java.io.IOException;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import us.ihmc.commons.thread.ThreadTools;
-import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
+import org.junit.jupiter.api.Tag;
+import org.junit.jupiter.api.Disabled;
 import us.ihmc.pubsub.Domain;
 import us.ihmc.pubsub.DomainFactory;
 import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
@@ -28,8 +29,7 @@ import us.ihmc.robotDataLogger.VariableChangeRequestPubSubType;
 public class VariableChangeRequestTest
 {
 
-   @ContinuousIntegrationTest(estimatedDuration = 11)
-   @Test(timeout = 100000)
+   @Test
    public void testSendingVariableChangedMessage() throws IOException
    {
       Domain domain = DomainFactory.getDomain(PubSubImplementation.FAST_RTPS);

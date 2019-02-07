@@ -7,16 +7,15 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
-import org.junit.After;
+import org.junit.jupiter.api.AfterEach;
 import us.ihmc.robotics.Assert;
-import org.junit.Ignore;
-import org.junit.Test;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
 
 import us.ihmc.commons.MutationTestFacilitator;
 import us.ihmc.commons.PrintTools;
-import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationPlan;
-import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
-import us.ihmc.continuousIntegration.IntegrationCategory;
+import org.junit.jupiter.api.Tag;
+import org.junit.jupiter.api.Disabled;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.geometry.Line2D;
 import us.ihmc.euclid.geometry.LineSegment2D;
@@ -34,21 +33,19 @@ import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DBasics;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
 
-@ContinuousIntegrationPlan(categories = {IntegrationCategory.FAST})
 public class ConvexPolygonToolsTest
 {
    private static final boolean PLOT_RESULTS = false;
    private static final boolean WAIT_FOR_BUTTON_PUSH = false;
    private static final double epsilon = 1e-7;
 
-   @After
+   @AfterEach
    public void tearDown()
    {
       ReferenceFrameTools.clearWorldFrameTree();
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.1)
-   @Test(timeout = 30000)
+   @Test
    public void testCombineDisjointPolygons()
    {
       Random random = new Random(1776L);
@@ -211,8 +208,7 @@ public class ConvexPolygonToolsTest
       ConvexPolygon2dTestHelpers.verifyPointsAreNotInside(polygon2, pointsThatShouldNotBeInOriginals, 0.0);
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(timeout = 30000)
+   @Test
    public void testCombineDisjointPolygons2() throws Exception
    {
       Random random = new Random(234234L);
@@ -252,8 +248,7 @@ public class ConvexPolygonToolsTest
       }
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(timeout = 30000)
+   @Test
    public void testLimitVerticesConservative()
    {
       Random random = new Random(123821L);
@@ -315,110 +310,96 @@ public class ConvexPolygonToolsTest
       //      System.out.println("Tested " + decrease + " point decreases");
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(timeout = 30000)
+   @Test
    public void testDistanceBetweenPolygonsNegativeAngle()
    {
       assertMinimumDistancePointsMatchExpected(new double[] {0, 5, 2, -2, 2, 0}, new double[] {2.5, 1, 2.8, 1, 3, .9, 4, 0, 3, -1},
                                                new double[] {2, 0, 46.0 / 17, 6.0 / 34}, .001);
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(timeout = 30000)
+   @Test
    public void testDistanceBetweenPolygonsThirdQuadrant()
    {
       assertMinimumDistancePointsMatchExpected(new double[] {-2, -1, -1, -1, -1, -2}, new double[] {-2, -2, -2, -3, -4, -4, -4, -2},
                                                new double[] {-1.5, -1.5, -2, -2}, .001);
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(timeout = 30000)
+   @Test
    public void testDistanceBetweenPolygonsNegativeAngleAndTwoVisibleVerticesOnPolygon1()
    {
       assertMinimumDistancePointsMatchExpected(new double[] {0, 0, 1, 2, 1, 0}, new double[] {2, 2, 0, 3, -1, 4}, new double[] {1, 2, 1.2, 2.4}, .001);
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(timeout = 30000)
+   @Test
    public void testDistanceBetweenPolygonsParalellEdges()
    {
       assertMinimumDistancePointsMatchExpected(new double[] {0, 0, 0, 1, 1, 0, 2, 1, 1, 2}, new double[] {0, 3, 2, 3, -1, 4, 3, 4}, new double[] {1, 2, 1, 3},
                                                .001);
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(timeout = 30000)
+   @Test
    public void testDistanceBetweenPolygonsMultiplePossibleAnswers()
    {
       assertMinimumDistancePointsMatchExpected(new double[] {0, 0, 0, 1, 1, 0, 2, 1, 1, 2}, new double[] {3, 2, 2, 3, 2, 4, 4, 2}, new double[] {1, 2, 2, 3},
                                                .001);
    }
 
-   @Ignore
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(timeout = 30000)
+   @Disabled
+   @Test
    public void testDistanceBetweenPolygonsTwoVisiblePoints()
    {
       assertMinimumDistancePointsMatchExpected(new double[] {0, 0, 0, 1, 1, 0, 2, 1, 1, 2}, new double[] {4, 1, 1, 4, 2, 4, 4, 2}, new double[] {2, 1, 3, 2},
                                                .001);
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(timeout = 30000)
+   @Test
    public void testDistanceBetweenPolygonsTwoVisiblePoints2()
    {
       assertMinimumDistancePointsMatchExpected(new double[] {0, 0, 0, 1, 1, 0, 2, 1, 1, 2}, new double[] {4, 1, 1.5, 4, 2, 4, 4, 2},
                                                new double[] {2, 1, 194.0 / 61, 121.0 / 61}, .001);
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(timeout = 30000)
+   @Test
    public void testDistanceBetweenPolygonsOneOfTheAnglesIsZero()
    {
       assertMinimumDistancePointsMatchExpected(new double[] {0, 0, 0, 1, 1, 0, 2, 1, 1, 2}, new double[] {0, 2, 0, 3, 1, 3, .8, 2},
                                                new double[] {.9, 1.9, .8, 2}, .001);
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(timeout = 30000)
+   @Test
    public void testDistanceBetweenPolygonsTriangles()
    {
       assertMinimumDistancePointsMatchExpected(new double[] {0, 1, 1, 0, 2, 0}, new double[] {0, 3, 4, 3, 1, 2}, new double[] {.4, .8, 1, 2}, .001);
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(timeout = 300000)
+   @Test
    public void testDistanceBetweenPolygonsSharedPoint()
    {
       assertMinimumDistancePointsMatchExpected(new double[] {0, 0, 0, 1, 1, 0, 2, 1, 1, 2}, new double[] {0, 2, 0, 3, 1, 3, 1, 2}, new double[] {1, 2, 1, 2},
                                                .001);
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(timeout = 30000)
+   @Test
    public void testDistanceBetweenPolygonsPointOnEdge()
    {
       assertMinimumDistancePointsMatchExpected(new double[] {0, 0, 0, 1, 1, 0, 2, 1, 1, 2}, new double[] {0, 2, 0, 3, 1, 3, .5, 1.5},
                                                new double[] {.5, 1.5, .5, 1.5}, .001);
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(timeout = 30000)
+   @Test
    public void testDistanceBetweenPolygonsNegativeAngle2()
    {
       assertMinimumDistancePointsMatchExpected(new double[] {0, 0, 0, 1, 1, 0, 2, 1, 1, 2}, new double[] {0, 2, 0, 3, 1, 3, .4, 1.5},
                                                new double[] {.45, 1.45, .4, 1.5}, .001);
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(timeout = 30000)
+   @Test
    public void testDistanceBetweenPolygonsSolutionIsTwoVertices()
    {
       assertMinimumDistancePointsMatchExpected(new double[] {0, 0, 2, 0, 2, 2}, new double[] {4, 3, 6, 3, 6, 7}, new double[] {2, 2, 4, 3}, 0);
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(timeout = 30000)
+   @Test
    public void testDistanceBetweenPolygonsIntersectingPolygons()
    {
       ConvexPolygon2D polygon1 = ctreatePolygonFromListOfXYPoints(new double[] {0, 0, 0, 1, 1, 0, 2, 1, 1, 2});
@@ -447,8 +428,7 @@ public class ConvexPolygonToolsTest
       }
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(timeout = 30000)
+   @Test
    public void testAllMethodsForPolygonWithOnePoint()
    {
       int numberOfTrials = 100;
@@ -548,8 +528,7 @@ public class ConvexPolygonToolsTest
       }
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(timeout = 30000)
+   @Test
    public void testAllMethodsForPolygonWithTwoPoints()
    {
       int numberOfTrials = 100;
@@ -778,8 +757,7 @@ public class ConvexPolygonToolsTest
       }
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(timeout = 30000)
+   @Test
    public void testIntersectionWhenFullyInside()
    {
       ConvexPolygonTools convexPolygonTools = new ConvexPolygonTools();
@@ -865,8 +843,7 @@ public class ConvexPolygonToolsTest
       assertTrue(epsilonEquals);
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(timeout = 30000)
+   @Test
    public void testIntersectionWhenFullyInsideWithRepeatedPoint()
    {
       ConvexPolygonTools convexPolygonTools = new ConvexPolygonTools();
@@ -895,9 +872,8 @@ public class ConvexPolygonToolsTest
       assertTrue(epsilonEquals);
    }
 
-   @Ignore("Broken. Have a smoking gun test to fix.")
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(timeout = 30000)
+   @Disabled("Broken. Have a smoking gun test to fix.")
+   @Test
    public void testComputeMinimumDistancePointsSimpleCases()
    {
       //Test two simple squares.
@@ -955,9 +931,8 @@ public class ConvexPolygonToolsTest
       assertTrue("closestPointOnTwo = " + closestPointOnTwo, closestPointOnTwo.epsilonEquals(new Point2D(1.5, 1.5), epsilon));
    }
 
-   @Ignore
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(timeout = 30000)
+   @Disabled
+   @Test
    public void testComputeMinimumDistancePointsTroublesomeOneNotCorrectAnswer()
    {
       double[][] verticesOne = new double[][] {{0.597, 0.111}, {0.746, 0.846}, {0.728, 0.219}};
@@ -1022,9 +997,8 @@ public class ConvexPolygonToolsTest
       assertTrue(success);
    }
 
-   @Ignore
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(timeout = 30000)
+   @Disabled
+   @Test
    public void testComputeMinimumDistancePointsWithRandomExamples()
    {
       Random random = new Random(1234L);
@@ -1099,9 +1073,8 @@ public class ConvexPolygonToolsTest
       return midPoint;
    }
 
-   @Ignore
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(timeout = 30000)
+   @Disabled
+   @Test
    public void testComputeMinimumDistancePointsTroublesomeOneWithOutOfBoundsException()
    {
       double[][] verticesOne = new double[][] {{5.147, -1.271}, {5.215, -1.234}, {7.149, -0.379}, {7.375, -0.379}, {7.480, -0.403}, {9.429, -1.753},
@@ -1122,8 +1095,7 @@ public class ConvexPolygonToolsTest
    }
 
 
-   @ContinuousIntegrationTest(estimatedDuration = 3.8)
-   @Test(timeout = 30000)
+   @Test
    public void testPolygonIntersections()
    {
       ConvexPolygonTools convexPolygonTools = new ConvexPolygonTools();

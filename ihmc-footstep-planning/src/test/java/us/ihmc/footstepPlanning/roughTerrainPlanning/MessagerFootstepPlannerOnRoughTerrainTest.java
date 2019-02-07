@@ -26,8 +26,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
 
-import org.junit.After;
-import org.junit.Before;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
 
 import javafx.application.Application;
 import javafx.application.Platform;
@@ -35,7 +35,7 @@ import javafx.stage.Stage;
 import us.ihmc.commons.Conversions;
 import us.ihmc.commons.PrintTools;
 import us.ihmc.commons.thread.ThreadTools;
-import us.ihmc.continuousIntegration.ContinuousIntegrationTools;
+import us.ihmc.commons.ContinuousIntegrationTools;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.footstepPlanning.FootstepPlan;
 import us.ihmc.footstepPlanning.FootstepPlannerType;
@@ -62,7 +62,7 @@ public abstract class MessagerFootstepPlannerOnRoughTerrainTest
 
    private static boolean visualize = false;
 
-   @Before
+   @BeforeEach
    public void setup()
    {
       visualize = visualize && !ContinuousIntegrationTools.isRunningOnContinuousIntegrationServer();
@@ -120,7 +120,7 @@ public abstract class MessagerFootstepPlannerOnRoughTerrainTest
 
    }
 
-   @After
+   @AfterEach
    public void tearDown() throws Exception
    {
       module.stop();
