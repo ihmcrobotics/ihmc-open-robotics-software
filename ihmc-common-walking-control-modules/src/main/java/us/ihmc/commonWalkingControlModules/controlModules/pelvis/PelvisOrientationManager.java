@@ -120,7 +120,9 @@ public class PelvisOrientationManager
 
    public void goToHomeFromCurrentDesired(double trajectoryTime)
    {
-      stateMachine.getCurrentState().goToHomeFromCurrentDesired(trajectoryTime);
+      updateOffsetInWalkingManager();
+      walkingManager.goToHomeFromCurrentDesired(trajectoryTime);
+      requestState(PelvisOrientationControlMode.WALKING_CONTROLLER);
    }
 
    public void setTrajectoryTime(double transferTime)
