@@ -30,6 +30,7 @@ import us.ihmc.yoVariables.variable.YoDouble;
  * It seems to have something to do with either some sort of problem in the HighLevelHumanoidControllerToolbox or InverseDynamicsCalculator or State Estimator.
  *
  */
+@Tag("humanoid-flat-ground")
 public abstract class DRCPelvisLowGainsTest implements MultiRobotTestInterface
 {
    private static final SimulationTestingParameters simulationTestingParameters = SimulationTestingParameters.createFromSystemProperties();
