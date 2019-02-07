@@ -16,8 +16,7 @@ mainDependencies {
 }
 
 testDependencies {
-//    compile ihmc.sourceSetProject("visualizers")
-
+    compile ihmc.sourceSetProject("visualizers")
     compile group: "us.ihmc", name: "ihmc-quadruped-planning-test", version: "source"
 }
 
