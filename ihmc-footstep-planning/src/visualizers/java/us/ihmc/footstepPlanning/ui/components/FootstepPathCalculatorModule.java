@@ -10,7 +10,6 @@ import static us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI.
 import static us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI.InterRegionVisibilityMap;
 import static us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI.LowLevelGoalOrientationTopic;
 import static us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI.LowLevelGoalPositionTopic;
-import static us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI.VisibilityMapWithNavigableRegionData;
 import static us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI.PlanarRegionDataTopic;
 import static us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI.PlannerHorizonLengthTopic;
 import static us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI.PlannerParametersTopic;
@@ -24,6 +23,7 @@ import static us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI.
 import static us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI.StartPositionTopic;
 import static us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI.StartVisibilityMap;
 import static us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI.VisibilityGraphsParametersTopic;
+import static us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI.VisibilityMapWithNavigableRegionData;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -79,8 +79,8 @@ import us.ihmc.pathPlanning.statistics.PlannerStatistics;
 import us.ihmc.pathPlanning.statistics.VisibilityGraphStatistics;
 import us.ihmc.pathPlanning.visibilityGraphs.DefaultVisibilityGraphParameters;
 import us.ihmc.pathPlanning.visibilityGraphs.dataStructure.InterRegionVisibilityMap;
-import us.ihmc.pathPlanning.visibilityGraphs.dataStructure.VisibilityMapWithNavigableRegion;
 import us.ihmc.pathPlanning.visibilityGraphs.dataStructure.VisibilityMap;
+import us.ihmc.pathPlanning.visibilityGraphs.dataStructure.VisibilityMapWithNavigableRegion;
 import us.ihmc.pathPlanning.visibilityGraphs.interfaces.VisibilityGraphsParameters;
 import us.ihmc.pathPlanning.visibilityGraphs.interfaces.VisibilityMapHolder;
 import us.ihmc.pathPlanning.visibilityGraphs.tools.BodyPathPlan;
@@ -283,16 +283,19 @@ public class FootstepPathCalculatorModule
    {
       VisibilityMapHolder startMap = new VisibilityMapHolder()
       {
+         @Override
          public int getMapId()
          {
             return statistics.getStartMapId();
          }
 
+         @Override
          public VisibilityMap getVisibilityMapInLocal()
          {
             return statistics.getStartVisibilityMap();
          }
 
+         @Override
          public VisibilityMap getVisibilityMapInWorld()
          {
             return statistics.getStartVisibilityMap();
@@ -300,16 +303,19 @@ public class FootstepPathCalculatorModule
       };
       VisibilityMapHolder goalMap = new VisibilityMapHolder()
       {
+         @Override
          public int getMapId()
          {
             return statistics.getGoalMapId();
          }
 
+         @Override
          public VisibilityMap getVisibilityMapInLocal()
          {
             return statistics.getGoalVisibilityMap();
          }
 
+         @Override
          public VisibilityMap getVisibilityMapInWorld()
          {
             return statistics.getGoalVisibilityMap();
@@ -338,7 +344,7 @@ public class FootstepPathCalculatorModule
       case PLANAR_REGION_BIPEDAL:
          return createPlanarRegionBipedalPlanner(contactPointsInSoleFrame, registry);
       case PLAN_THEN_SNAP:
-         return new PlanThenSnapPlanner(new TurnWalkTurnPlanner(), contactPointsInSoleFrame);
+         return new PlanThenSnapPlanner(new TurnWalkTurnPlanner(parameters.get()), contactPointsInSoleFrame);
       case A_STAR:
          return createAStarPlanner(contactPointsInSoleFrame, registry);
       case SIMPLE_BODY_PATH:
