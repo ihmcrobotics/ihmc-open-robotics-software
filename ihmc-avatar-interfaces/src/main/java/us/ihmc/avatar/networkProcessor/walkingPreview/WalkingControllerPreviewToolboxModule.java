@@ -30,7 +30,7 @@ public class WalkingControllerPreviewToolboxModule extends ToolboxModule
             pubSubImplementation);
       setTimeWithoutInputsBeforeGoingToSleep(60.0);
 
-      controller = new WalkingControllerPreviewToolboxController(robotModel, commandInputManager, statusOutputManager, yoGraphicsListRegistry, registry);
+      controller = new WalkingControllerPreviewToolboxController(robotModel, 0.02, commandInputManager, statusOutputManager, yoGraphicsListRegistry, registry);
    }
 
    @Override
@@ -53,11 +53,21 @@ public class WalkingControllerPreviewToolboxModule extends ToolboxModule
    @Override
    public List<Class<? extends Command<?, ?>>> createListOfSupportedCommands()
    {
+      return supportedCommands();
+   }
+
+   public static List<Class<? extends Command<?, ?>>> supportedCommands()
+   {
       return Collections.singletonList(WalkingControllerPreviewInputCommand.class);
    }
 
    @Override
    public List<Class<? extends Settable<?>>> createListOfSupportedStatus()
+   {
+      return supportedStatus();
+   }
+
+   public static List<Class<? extends Settable<?>>> supportedStatus()
    {
       return Collections.singletonList(WalkingControllerPreviewOutputMessage.class);
    }

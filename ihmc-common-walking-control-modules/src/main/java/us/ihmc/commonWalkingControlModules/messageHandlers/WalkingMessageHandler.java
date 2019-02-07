@@ -23,10 +23,9 @@ import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
 import us.ihmc.euclid.tuple2D.Point2D;
-import us.ihmc.euclid.tuple3D.Point3D;
-import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.AdjustFootstepCommand;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.CenterOfMassTrajectoryCommand;
@@ -536,50 +535,39 @@ public class WalkingMessageHandler
       updateVisualization();
    }
 
-   private final Point3D desiredFootPositionInWorld = new Point3D();
-   private final Quaternion desiredFootOrientationInWorld = new Quaternion();
-   private final Point3D actualFootPositionInWorld = new Point3D();
-   private final Quaternion actualFootOrientationInWorld = new Quaternion();
    private final TextToSpeechPacket reusableSpeechPacket = new TextToSpeechPacket();
    private final WalkingControllerFailureStatusMessage failureStatusMessage = new WalkingControllerFailureStatusMessage();
    private final FootstepStatusMessage footstepStatus = new FootstepStatusMessage();
 
-   public void reportFootstepStarted(RobotSide robotSide, FramePose3D desiredFootPoseInWorld, FramePose3D actualFootPoseInWorld)
+   public void reportFootstepStarted(RobotSide robotSide, FramePose3DReadOnly desiredFootPoseInWorld, FramePose3DReadOnly actualFootPoseInWorld)
    {
-      desiredFootPoseInWorld.get(desiredFootPositionInWorld, desiredFootOrientationInWorld);
-      actualFootPoseInWorld.get(actualFootPositionInWorld, actualFootOrientationInWorld);
-
-      footstepStatus.setFootstepStatus(FootstepStatus.STARTED.toByte());
-      footstepStatus.setRobotSide(robotSide.toByte());
-      footstepStatus.setFootstepIndex(currentFootstepIndex.getIntegerValue());
-      footstepStatus.getActualFootOrientationInWorld().set(actualFootOrientationInWorld);
-      footstepStatus.getActualFootPositionInWorld().set(actualFootPositionInWorld);
-      footstepStatus.getDesiredFootOrientationInWorld().set(desiredFootOrientationInWorld);
-      footstepStatus.getDesiredFootPositionInWorld().set(desiredFootPositionInWorld);
-      statusOutputManager.reportStatusMessage(footstepStatus);
-
+      reportFootstepStatus(robotSide, FootstepStatus.STARTED, desiredFootPoseInWorld, actualFootPoseInWorld);
       executingFootstep.set(true);
 
       if (yoTime != null)
          timeElapsedWhenFootstepExecuted.set(yoTime.getDoubleValue() - footstepDataListReceivedTime.getDoubleValue());
    }
 
-   public void reportFootstepCompleted(RobotSide robotSide, FramePose3D actualFootPoseInWorld)
+   public void reportFootstepCompleted(RobotSide robotSide, FramePose3DReadOnly desiredFootPoseInWorld, FramePose3DReadOnly actualFootPoseInWorld)
    {
-      actualFootPoseInWorld.get(actualFootPositionInWorld, actualFootOrientationInWorld);
-      desiredFootOrientationInWorld.setToNaN();
-      desiredFootPositionInWorld.setToNaN();
+      reportFootstepStatus(robotSide, FootstepStatus.COMPLETED, desiredFootPoseInWorld, actualFootPoseInWorld);
+      executingFootstep.set(false);
+   }
 
-      footstepStatus.setFootstepStatus(FootstepStatus.COMPLETED.toByte());
+   private void reportFootstepStatus(RobotSide robotSide, FootstepStatus status, FramePose3DReadOnly desiredFootPoseInWorld,
+                                     FramePose3DReadOnly actualFootPoseInWorld)
+   {
+      desiredFootPoseInWorld.checkReferenceFrameMatch(worldFrame);
+      actualFootPoseInWorld.checkReferenceFrameMatch(worldFrame);
+
+      footstepStatus.setFootstepStatus(status.toByte());
       footstepStatus.setRobotSide(robotSide.toByte());
       footstepStatus.setFootstepIndex(currentFootstepIndex.getIntegerValue());
-      footstepStatus.getActualFootOrientationInWorld().set(actualFootOrientationInWorld);
-      footstepStatus.getActualFootPositionInWorld().set(actualFootPositionInWorld);
-      footstepStatus.getDesiredFootOrientationInWorld().set(desiredFootOrientationInWorld);
-      footstepStatus.getDesiredFootPositionInWorld().set(desiredFootPositionInWorld);
+      footstepStatus.getActualFootOrientationInWorld().set(actualFootPoseInWorld.getOrientation());
+      footstepStatus.getActualFootPositionInWorld().set(actualFootPoseInWorld.getPosition());
+      footstepStatus.getDesiredFootOrientationInWorld().set(desiredFootPoseInWorld.getOrientation());
+      footstepStatus.getDesiredFootPositionInWorld().set(desiredFootPoseInWorld.getPosition());
       statusOutputManager.reportStatusMessage(footstepStatus);
-
-      executingFootstep.set(false);
    }
 
    private final WalkingStatusMessage walkingStatusMessage = new WalkingStatusMessage();
@@ -831,7 +819,7 @@ public class WalkingMessageHandler
       }
 
       double touchdownDuration = footstep.getTouchdownDuration();
-      if(Double.isNaN(touchdownDuration) || touchdownDuration < 0.0)
+      if (Double.isNaN(touchdownDuration) || touchdownDuration < 0.0)
       {
          touchdownDuration = defaultTouchdownTime.getDoubleValue();
       }
@@ -936,7 +924,6 @@ public class WalkingMessageHandler
       {
          return;
       }
-
 
       for (int stepIdx = 0; stepIdx < upcomingFootsteps.size(); stepIdx++)
       {
