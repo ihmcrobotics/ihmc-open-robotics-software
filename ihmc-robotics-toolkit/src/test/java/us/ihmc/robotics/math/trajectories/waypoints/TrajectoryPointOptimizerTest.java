@@ -4,6 +4,7 @@ import static us.ihmc.robotics.Assert.*;
 
 import java.util.ArrayList;
 
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
 import gnu.trove.list.array.TDoubleArrayList;
@@ -21,6 +22,7 @@ public class TrajectoryPointOptimizerTest
    @Test
    public void testEndPointSetters()
    {
+      Assertions.assertThrows(RuntimeException.class, () -> {
       int dimensions = 3;
       YoVariableRegistry registry = new YoVariableRegistry("");
       TrajectoryPointOptimizer optimizer = new TrajectoryPointOptimizer(dimensions, registry);
@@ -33,11 +35,13 @@ public class TrajectoryPointOptimizerTest
 
       optimizer.setEndPoints(rightSize, rightSize, rightSize, rightSize);
       optimizer.setEndPoints(rightSize, wrongSize, rightSize, rightSize);
+      });
    }
 
    @Test
    public void testWaypointSetters()
    {
+      Assertions.assertThrows(RuntimeException.class, () -> {
       int dimensions = 1;
       TrajectoryPointOptimizer optimizer = new TrajectoryPointOptimizer(dimensions);
 
@@ -59,6 +63,7 @@ public class TrajectoryPointOptimizerTest
       waypointD.add(1.7);
       waypoints.add(waypointD);
       optimizer.setWaypoints(waypoints);
+      });
    }
 
    @Test

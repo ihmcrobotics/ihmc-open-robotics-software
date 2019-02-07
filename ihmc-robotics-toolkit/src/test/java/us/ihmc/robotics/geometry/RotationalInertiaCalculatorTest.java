@@ -4,11 +4,8 @@ import static us.ihmc.robotics.Assert.*;
 
 import java.util.Random;
 
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.*;
 
-import org.junit.jupiter.api.Tag;
-import org.junit.jupiter.api.Disabled;
 import us.ihmc.euclid.Axis;
 import us.ihmc.euclid.matrix.Matrix3D;
 import us.ihmc.commons.MathTools;
@@ -94,31 +91,37 @@ public class RotationalInertiaCalculatorTest
 	@Test
    public void testBasicCylinderNegativeMass()
    {
-      double mass = -1.0;
-      double radius = 1.0;
-      double height = 1.0;
-      Axis axis = Axis.Z;
-      RotationalInertiaCalculator.getIxxIyyIzzOfSolidCylinder(mass, radius, height, axis);
+      Assertions.assertThrows(RuntimeException.class, () -> {
+         double mass = -1.0;
+         double radius = 1.0;
+         double height = 1.0;
+         Axis axis = Axis.Z;
+         RotationalInertiaCalculator.getIxxIyyIzzOfSolidCylinder(mass, radius, height, axis);
+      });
    }
 
 	@Test
    public void testBasicCylinderNegativeRadius()
    {
+      Assertions.assertThrows(RuntimeException.class, () -> {
       double mass = 1.0;
       double radius = -1.0;
       double height = 1.0;
       Axis axis = Axis.Z;
       RotationalInertiaCalculator.getIxxIyyIzzOfSolidCylinder(mass, radius, height, axis);
+      });
    }
 
 	@Test
    public void testBasicCylinderNegativeHeight()
    {
+      Assertions.assertThrows(RuntimeException.class, () -> {
       double mass = 1.0;
       double radius = 1.0;
       double height = -1.0;
       Axis axis = Axis.Z;
       RotationalInertiaCalculator.getIxxIyyIzzOfSolidCylinder(mass, radius, height, axis);
+      });
    }
 
 	@Test
@@ -146,45 +149,53 @@ public class RotationalInertiaCalculatorTest
 	@Test
    public void testSolidEllipsoidNegativeMass()
    {
+      Assertions.assertThrows(RuntimeException.class, () -> {
 	   double mass = -1.0;
 	   double xRadius = 1.0;
 	   double yRadius = 1.0;
 	   double zRadius = 1.0;
 	   
 	   RotationalInertiaCalculator.getRotationalInertiaMatrixOfSolidEllipsoid(mass, xRadius, yRadius, zRadius);
+      });
    }
 
 	@Test
    public void testSolidEllipsoidNegativeXRadius()
    {
+      Assertions.assertThrows(RuntimeException.class, () -> {
 	   double mass = 1.0;
 	   double xRadius = -1.0;
 	   double yRadius = 1.0;
 	   double zRadius = 1.0;
 	   
 	   RotationalInertiaCalculator.getRotationalInertiaMatrixOfSolidEllipsoid(mass, xRadius, yRadius, zRadius);
+      });
    }
 
 	@Test
    public void testSolidEllipsoidNegativeYRadius()
    {
+      Assertions.assertThrows(RuntimeException.class, () -> {
 	   double mass = 1.0;
 	   double xRadius = 1.0;
 	   double yRadius = -1.0;
 	   double zRadius = 1.0;
 	   
 	   RotationalInertiaCalculator.getRotationalInertiaMatrixOfSolidEllipsoid(mass, xRadius, yRadius, zRadius);
+      });
    }
 
 	@Test
    public void testSolidEllipsoidNegativeZRadius()
    {
+      Assertions.assertThrows(RuntimeException.class, () -> {
 	   double mass = 1.0;
 	   double xRadius = 1.0;
 	   double yRadius = 1.0;
 	   double zRadius = -1.0;
 	   
 	   RotationalInertiaCalculator.getRotationalInertiaMatrixOfSolidEllipsoid(mass, xRadius, yRadius, zRadius);
+      });
    }
 
 	@Test
@@ -214,44 +225,52 @@ public class RotationalInertiaCalculatorTest
 	@Test
    public void testRadiiOfGyrationNegativeMass()
    {
+      Assertions.assertThrows(RuntimeException.class, () -> {
 	   double mass = -1.0;
 	   double xRadius = 1.0;
 	   double yRadius = 1.0;
 	   double zRadius = 1.0;
 	   
 	   RotationalInertiaCalculator.getRotationalInertiaFromRadiiOfGyration(mass, xRadius, yRadius, zRadius);
+      });
    }
 
 	@Test
    public void testRadiiOfGyrationNegativeXRadius()
    {
+      Assertions.assertThrows(RuntimeException.class, () -> {
 	   double mass = 1.0;
 	   double xRadius = -1.0;
 	   double yRadius = 1.0;
 	   double zRadius = 1.0;
 	   
 	   RotationalInertiaCalculator.getRotationalInertiaFromRadiiOfGyration(mass, xRadius, yRadius, zRadius);
+      });
    }
 
 	@Test
    public void testRadiiOfGyrationNegativeYRadius()
    {
+      Assertions.assertThrows(RuntimeException.class, () -> {
 	   double mass = 1.0;
 	   double xRadius = 1.0;
 	   double yRadius = -1.0;
 	   double zRadius = 1.0;
 	   
 	   RotationalInertiaCalculator.getRotationalInertiaFromRadiiOfGyration(mass, xRadius, yRadius, zRadius);
+      });
    }
 
 	@Test
    public void testRadiiOfGyrationNegativeZRadius()
    {
+      Assertions.assertThrows(RuntimeException.class, () -> {
 	   double mass = 1.0;
 	   double xRadius = 1.0;
 	   double yRadius = 1.0;
 	   double zRadius = -1.0;
 	   
 	   RotationalInertiaCalculator.getRotationalInertiaFromRadiiOfGyration(mass, xRadius, yRadius, zRadius);
+      });
    }
 }

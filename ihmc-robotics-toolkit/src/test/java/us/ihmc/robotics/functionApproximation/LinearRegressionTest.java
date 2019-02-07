@@ -1,14 +1,13 @@
 package us.ihmc.robotics.functionApproximation;
 
-import static us.ihmc.robotics.Assert.*;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 
 import java.util.ArrayList;
 import java.util.Random;
 
-import org.junit.jupiter.api.Test;
-
-import org.junit.jupiter.api.Tag;
-import org.junit.jupiter.api.Disabled;
+import static us.ihmc.robotics.Assert.assertEquals;
+import static us.ihmc.robotics.Assert.assertTrue;
 public class LinearRegressionTest
 {
    private static final boolean VERBOSE = false;
@@ -175,55 +174,54 @@ public class LinearRegressionTest
 	@Test
    public void testNotEnoughPoints()
    {
-      ArrayList<double[]> inputs = new ArrayList<double[]>();
-      ArrayList<Double> outputs = new ArrayList<Double>();
+      Assertions.assertThrows(IllegalArgumentException.class, () -> {
+         ArrayList<double[]> inputs = new ArrayList<double[]>();
+         ArrayList<Double> outputs = new ArrayList<Double>();
 
-      inputs.add(new double[]{1.0});
-      outputs.add(2.0);
-      outputs.add(3.0);
+         inputs.add(new double[]{1.0});
+         outputs.add(2.0);
+         outputs.add(3.0);
 
-      LinearRegression linearRegression = new LinearRegression(inputs, outputs);
-      boolean foundSolution = linearRegression.solve();
+         LinearRegression linearRegression = new LinearRegression(inputs, outputs);
+         boolean foundSolution = linearRegression.solve();
+      });
    }
 
 	@Test
    public void testAskingForAnswerBeforeDone()
    {
-      double[][] inputs = new double[][]
-      {
-         {1.0}, {1.0}
-      };
-      double[] outputs = new double[] {1.0, 1.0};
-      double[] coefficientVector = new double[1];
+      Assertions.assertThrows(IllegalStateException.class, () -> {
+         double[][] inputs = new double[][] {{1.0}, {1.0}};
+         double[] outputs = new double[] {1.0, 1.0};
+         double[] coefficientVector = new double[1];
 
-      LinearRegression linearRegression = new LinearRegression(inputs, outputs);
-      linearRegression.getCoefficientVector(coefficientVector);
+         LinearRegression linearRegression = new LinearRegression(inputs, outputs);
+         linearRegression.getCoefficientVector(coefficientVector);
+      });
    }
 
 	@Test
    public void testAskingForSquaredErrorBeforeDone()
    {
-      double[][] inputs = new double[][]
-      {
-         {1.0}, {1.0}
-      };
-      double[] outputs = new double[] {1.0, 1.0};
+      Assertions.assertThrows(IllegalStateException.class, () -> {
+         double[][] inputs = new double[][] {{1.0}, {1.0}};
+         double[] outputs = new double[] {1.0, 1.0};
 
-      LinearRegression linearRegression = new LinearRegression(inputs, outputs);
-      linearRegression.getSquaredError();
+         LinearRegression linearRegression = new LinearRegression(inputs, outputs);
+         linearRegression.getSquaredError();
+      });
    }
 
-	@Test
+   @Test
    public void testAskingForCoefficientVectorAsMatrixBeforeDone()
    {
-      double[][] inputs = new double[][]
-      {
-         {1.0}, {1.0}
-      };
-      double[] outputs = new double[] {1.0, 1.0};
+      Assertions.assertThrows(IllegalStateException.class, () -> {
+         double[][] inputs = new double[][] {{1.0}, {1.0}};
+         double[] outputs = new double[] {1.0, 1.0};
 
-      LinearRegression linearRegression = new LinearRegression(inputs, outputs);
-      linearRegression.getCoefficientVectorAsMatrix();
+         LinearRegression linearRegression = new LinearRegression(inputs, outputs);
+         linearRegression.getCoefficientVectorAsMatrix();
+      });
    }
 
 

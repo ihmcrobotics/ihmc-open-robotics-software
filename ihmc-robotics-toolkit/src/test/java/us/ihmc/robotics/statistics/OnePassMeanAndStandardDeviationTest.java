@@ -2,12 +2,8 @@ package us.ihmc.robotics.statistics;
 
 import static us.ihmc.robotics.Assert.*;
 
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.*;
 
-import org.junit.jupiter.api.Tag;
-import org.junit.jupiter.api.Disabled;
 import us.ihmc.robotics.statistics.OnePassMeanAndStandardDeviation.InsufficientMeasurementsException;
 
 public class OnePassMeanAndStandardDeviationTest
@@ -67,15 +63,19 @@ public class OnePassMeanAndStandardDeviationTest
 	@Test
    public void testCalculateAverageNoValue()
    {
+      Assertions.assertThrows(InsufficientMeasurementsException.class, () -> {
       double delta = 1e-10;
       assertEquals(0.0, meanAndStandardDeviation.getAverage(), delta);
+      });
    }
 
 	@Test
    public void testCalculateVarianceNoValue()
    {
+      Assertions.assertThrows(InsufficientMeasurementsException.class, () -> {
       double delta = 1e-10;
       assertEquals(0.0, meanAndStandardDeviation.getVariance(), delta);
+      });
    }
 
 }

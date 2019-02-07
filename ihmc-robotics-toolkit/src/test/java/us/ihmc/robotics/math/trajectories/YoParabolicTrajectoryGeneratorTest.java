@@ -4,11 +4,8 @@ import static us.ihmc.robotics.Assert.*;
 
 import java.util.Random;
 
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.*;
 
-import org.junit.jupiter.api.Tag;
-import org.junit.jupiter.api.Disabled;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
@@ -55,6 +52,7 @@ public class YoParabolicTrajectoryGeneratorTest
 	@Test
    public void testIllegalParameter1()
    {
+      Assertions.assertThrows(RuntimeException.class, () -> {
       double intermediateParameter = 1.1;
       ReferenceFrame referenceFrame = ReferenceFrame.getWorldFrame();
       FramePoint3D initialPosition = new FramePoint3D(referenceFrame, 0.0, 0.0, 0.0);
@@ -63,11 +61,13 @@ public class YoParabolicTrajectoryGeneratorTest
       YoVariableRegistry registry = new YoVariableRegistry("registry");
       YoParabolicTrajectoryGenerator trajectoryGenerator = new YoParabolicTrajectoryGenerator("test", referenceFrame, registry);
       trajectoryGenerator.initialize(initialPosition, intermediatePosition, finalPosition, intermediateParameter);
+      });
    }
 
 	@Test
    public void testIllegalParameter2()
    {
+      Assertions.assertThrows(RuntimeException.class, () -> {
       double intermediateParameter = -0.1;
       ReferenceFrame referenceFrame = ReferenceFrame.getWorldFrame();
       FramePoint3D initialPosition = new FramePoint3D(referenceFrame, 0.0, 0.0, 0.0);
@@ -76,11 +76,13 @@ public class YoParabolicTrajectoryGeneratorTest
       YoVariableRegistry registry = new YoVariableRegistry("registry");
       YoParabolicTrajectoryGenerator trajectoryGenerator = new YoParabolicTrajectoryGenerator("test", referenceFrame, registry);
       trajectoryGenerator.initialize(initialPosition, intermediatePosition, finalPosition, intermediateParameter);
+      });
    }
 
 	@Test
    public void testIllegalParameter3()
    {
+      Assertions.assertThrows(RuntimeException.class, () -> {
       ReferenceFrame referenceFrame = ReferenceFrame.getWorldFrame();
       YoParabolicTrajectoryGenerator trajectoryGenerator = null;
 
@@ -101,6 +103,7 @@ public class YoParabolicTrajectoryGeneratorTest
 
       FramePoint3D positionToPack = new FramePoint3D(referenceFrame);
       trajectoryGenerator.getPosition(positionToPack, 1.1);
+      });
    }
 
 	@Test
