@@ -12,6 +12,7 @@ import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DBasics;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
+import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.graphicsDescription.Graphics3DObject;
 import us.ihmc.graphicsDescription.appearance.AppearanceDefinition;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
@@ -200,13 +201,13 @@ public abstract class FootstepPlannerDataSetTest
       if (!planResult.validForExecution())
          return "Footstep plan for " + datasetName + " is invalid.";
 
-      String errorMessage = assertPlanIsValid(datasetName, planner.getSteps(), dataset.getGoal(), dataset.getGoalOrientation().getYaw());
+      String errorMessage = assertPlanIsValid(datasetName, planner.getSteps(), dataset.getGoal(), dataset.getGoalOrientation());
 
       ThreadTools.sleep(1000);
       return errorMessage;
    }
 
-   private static String assertPlanIsValid(String datasetName, List<? extends QuadrupedTimedStep> plannedSteps, Point3DReadOnly goalPosition, double goalYaw)
+   private static String assertPlanIsValid(String datasetName, List<? extends QuadrupedTimedStep> plannedSteps, Point3DReadOnly goalPosition, Quaternion goalOrientation)
    {
       QuadrantDependentList<Point3DBasics> finalSteps = getFinalStepPositions(plannedSteps);
 
@@ -226,8 +227,12 @@ public abstract class FootstepPlannerDataSetTest
       String errorMessage = "";
       if (!goalPosition.epsilonEquals(centerPoint, epsilon))
          errorMessage = datasetName + " did not reach goal position. Made it to " + centerPoint + ", trying to get to " + goalPosition;
-      if (!MathTools.epsilonEquals(goalYaw, nominalYaw, 0.02))
-         errorMessage = datasetName + " did not reach goal yaw. Made it to " + nominalYaw + ", trying to get to " + goalYaw;
+      if (goalOrientation != null)
+      {
+         double goalYaw = goalOrientation.getYaw();
+         if (!MathTools.epsilonEquals(goalYaw, nominalYaw, 0.02))
+            errorMessage = datasetName + " did not reach goal yaw. Made it to " + nominalYaw + ", trying to get to " + goalYaw;
+      }
 
       if ((VISUALIZE || DEBUG) && !errorMessage.isEmpty())
          LogTools.error(errorMessage);
