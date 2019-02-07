@@ -497,14 +497,17 @@ public class MainTabController
             }
 
             setToFrame(playbackCounter);
-
             playbackCounter += playbackSpeed;
-
+            double alpha = ((double) playbackCounter) / (walkingPreviewOutput.get().getRobotConfigurations().size() - 1);
+            previewSlider.setValue(MathTools.clamp(alpha, 0.0, 1.0));
          }
       }
 
       void requestSpecificPercentageInPreview(double alpha)
       {
+         if(playbackModeActive.get())
+            return;
+
          alpha = MathTools.clamp(alpha, 0.0, 1.0);
          WalkingControllerPreviewOutputMessage walkingControllerPreviewOutputMessage = walkingPreviewOutput.get();
 
@@ -517,12 +520,6 @@ public class MainTabController
          }
 
          int frameIndex = (int) (alpha * (walkingControllerPreviewOutputMessage.getRobotConfigurations().size() - 1));
-         requestSpecificFrame(frameIndex);
-      }
-
-      void requestSpecificFrame(int frameIndex)
-      {
-         playbackModeActive.set(false);
          setToFrame(frameIndex);
       }
 
