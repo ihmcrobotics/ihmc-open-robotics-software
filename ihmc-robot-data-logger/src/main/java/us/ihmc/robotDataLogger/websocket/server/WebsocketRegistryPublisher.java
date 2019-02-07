@@ -42,7 +42,9 @@ class WebsocketRegistryPublisher implements RegistryPublisher
 
    private final int numberOfVariables;
    
-   public WebsocketRegistryPublisher(EventLoopGroup workerGroup, RegistrySendBufferBuilder builder, WebsocketDataBroadcaster broadcaster)
+   private final int bufferID;
+   
+   public WebsocketRegistryPublisher(EventLoopGroup workerGroup, RegistrySendBufferBuilder builder, WebsocketDataBroadcaster broadcaster, int bufferID)
    {
       this.broadcaster = broadcaster;
       
@@ -51,6 +53,8 @@ class WebsocketRegistryPublisher implements RegistryPublisher
       
       this.loggerDebugRegistry = builder.getLoggerDebugRegistry();
       this.numberOfVariables = builder.getNumberOfVariables();
+      
+      this.bufferID = bufferID;
       
       publisherType = new CustomLogDataPublisherType(builder.getNumberOfVariables(), builder.getNumberOfJointStates());
       
@@ -133,7 +137,7 @@ class WebsocketRegistryPublisher implements RegistryPublisher
 
                   serializedPayload.getData().clear();
                   publisherType.serialize(buffer, serializedPayload);
-                  broadcaster.write(serializedPayload.getData());
+                  broadcaster.write(bufferID, buffer.getTimestamp(), serializedPayload.getData());
 
                   if(previousUid != -1)
                   {

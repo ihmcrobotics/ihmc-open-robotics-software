@@ -264,6 +264,8 @@ public class YoVariableServer implements RobotVisualizer, VariableChangedListene
    /**
     * Update main buffer data.
     * 
+    * Note: If the timestamp is not increasing between updates(), no data might be send to clients.
+    * 
     * @param timestamp timestamp to send to logger
     */
    public void update(long timestamp)
@@ -273,6 +275,8 @@ public class YoVariableServer implements RobotVisualizer, VariableChangedListene
 
    /**
     * Update registry data
+    * 
+    * Note: If the timestamp is not increasing between updates(), no data might be send to clients.
     * 
     * @param timestamp timestamp to send to the logger
     * @param registry Top level registry to update

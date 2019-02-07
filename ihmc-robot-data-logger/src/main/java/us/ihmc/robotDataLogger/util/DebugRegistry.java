@@ -28,6 +28,18 @@ public class DebugRegistry
       this.skippedPacketDueToFullBuffer = new YoInteger("skippedPacketDueToFullBuffer", loggerDebugRegistry);
       this.firstSegmentsMissing = new YoInteger("firstSegmentsMissing", loggerDebugRegistry);
    }
+   
+   public void reset()
+   {
+      skippedPackets.set(0);                                
+      skippedIncomingPackets.set(0);                        
+      nonIncreasingTimestamps.set(0);                       
+      packetsOutOfOrder.set(0);                             
+      mergedPackets.set(0);                                 
+      totalPackets.set(0);                                  
+      skippedPacketDueToFullBuffer.set(0);                  
+      firstSegmentsMissing.set(0);                          
+   }
 
    public YoInteger getSkippedPackets()
    {

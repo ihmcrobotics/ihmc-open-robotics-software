@@ -77,6 +77,7 @@ public class WebsocketDataProducer implements DataProducer
    private final boolean log;
    private final boolean autoDiscoverable;
 
+   private int nextBufferID = 0;
 
    public WebsocketDataProducer(String name, LogModelProvider logModelProvider, VariableChangedListener variableChangedListener, DataServerSettings dataServerSettings)
    {
@@ -162,9 +163,10 @@ public class WebsocketDataProducer implements DataProducer
          ResourceLeakDetector.setLevel(Level.DISABLED);
          try
          {
+            int numberOfRegistryBuffers = nextBufferID;  // Next buffer ID is incremented the last time a registry was added
             ServerBootstrap b = new ServerBootstrap();
             b.group(bossGroup, workerGroup).channel(NioServerSocketChannel.class).handler(new LoggingHandler(LogLevel.INFO))
-             .childHandler(new WebsocketDataServerInitializer(logServerContent, broadcaster, variableChangedListener, maximumBufferSize));
+             .childHandler(new WebsocketDataServerInitializer(logServerContent, broadcaster, variableChangedListener, maximumBufferSize, numberOfRegistryBuffers));
    
             ch = b.bind(port).sync().channel();
    
@@ -198,11 +200,12 @@ public class WebsocketDataProducer implements DataProducer
    public RegistryPublisher createRegistryPublisher(CustomLogDataPublisherType type, RegistrySendBufferBuilder builder)
          throws IOException
    {
-      WebsocketRegistryPublisher websocketRegistryPublisher = new WebsocketRegistryPublisher(workerGroup, builder, broadcaster);
+      WebsocketRegistryPublisher websocketRegistryPublisher = new WebsocketRegistryPublisher(workerGroup, builder, broadcaster, nextBufferID);
       if(websocketRegistryPublisher.getMaximumBufferSize() > maximumBufferSize)
       {
          maximumBufferSize = websocketRegistryPublisher.getMaximumBufferSize();
       }
+      nextBufferID++;
       return websocketRegistryPublisher;
    }
 }

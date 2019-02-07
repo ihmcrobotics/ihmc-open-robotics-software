@@ -34,13 +34,13 @@ class WebsocketDataBroadcaster implements ChannelFutureListener
       }
    }
 
-   public void write(ByteBuffer frame) throws IOException
+   public void write(int bufferID, long timestamp, ByteBuffer frame) throws IOException
    {
       synchronized (channelLock)
       {
          for (int i = 0; i < channels.size(); i++)
          {
-            channels.get(i).write(frame);
+            channels.get(i).write(bufferID, timestamp, frame);
          }
       }
 

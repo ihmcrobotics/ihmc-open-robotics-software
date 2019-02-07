@@ -343,12 +343,6 @@ public class YoVariableLoggerListener implements YoVariablesUpdatedListener
    }
 
    @Override
-   public int getDisplayOneInNPackets()
-   {
-      return 1;
-   }
-
-   @Override
    public void setShowOverheadView(boolean showOverheadView)
    {
    }

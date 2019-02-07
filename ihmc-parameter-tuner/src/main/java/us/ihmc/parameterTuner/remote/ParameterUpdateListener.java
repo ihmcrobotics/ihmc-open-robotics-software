@@ -115,12 +115,6 @@ public class ParameterUpdateListener implements YoVariablesUpdatedListener
    }
 
    @Override
-   public int getDisplayOneInNPackets()
-   {
-      return 0;
-   }
-
-   @Override
    public void receivedTimestampAndData(long timestamp)
    {
       GuiParameter userChangedParameter;
