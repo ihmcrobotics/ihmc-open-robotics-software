@@ -166,7 +166,7 @@ public class WholeBodyControllerCore
          if (inverseDynamicsSolver != null)
          {
             if (reinitializationRequested)
-               inverseDynamicsSolver.reinitialize();
+               inverseDynamicsSolver.initialize();
             feedbackController.submitFeedbackControlCommandList(controllerCoreCommand.getFeedbackControlCommandList());
             inverseDynamicsSolver.submitInverseDynamicsCommandList(controllerCoreCommand.getInverseDynamicsCommandList());
          }
