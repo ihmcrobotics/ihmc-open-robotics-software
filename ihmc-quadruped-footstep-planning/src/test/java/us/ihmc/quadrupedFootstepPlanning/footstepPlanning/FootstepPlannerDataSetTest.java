@@ -18,7 +18,6 @@ import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.log.LogTools;
 import us.ihmc.quadrupedBasics.gait.QuadrupedTimedStep;
 import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.graphSearch.graph.FootstepNode;
-import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.tools.FootstepPlannerDataExporter;
 import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.tools.FootstepPlannerIOTools;
 import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.tools.FootstepPlannerIOTools.FootstepPlannerUnitTestDataset;
 import us.ihmc.robotics.Assert;
@@ -70,9 +69,7 @@ public abstract class FootstepPlannerDataSetTest
    @ContinuousIntegrationTest(estimatedDuration = 13.0)
    public void testDatasetsWithoutOcclusion()
    {
-      List<FootstepPlannerUnitTestDataset> allDatasets = FootstepPlannerIOTools
-                        .loadAllFootstepPlannerDatasetsWithoutOcclusions(FootstepPlannerDataExporter.class);
-//            .loadAllFootstepPlannerDatasetsWithoutOcclusions(FootstepPlannerIOTools.class);
+      List<FootstepPlannerUnitTestDataset> allDatasets = FootstepPlannerIOTools.loadAllFootstepPlannerDatasetsWithoutOcclusions(FootstepPlannerIOTools.class);
       runAssertionsOnAllDatasets(this::runAssertions, allDatasets);
    }
 
@@ -81,15 +78,13 @@ public abstract class FootstepPlannerDataSetTest
    public void testDatasetsWithoutOcclusionInDevelopment()
    {
       List<FootstepPlannerUnitTestDataset> allDatasets = FootstepPlannerIOTools
-                        .loadAllFootstepPlannerDatasetsWithoutOcclusionsInDevelopment(FootstepPlannerDataExporter.class);
-//            .loadAllFootstepPlannerDatasetsWithoutOcclusionsInDevelopment(FootstepPlannerIOTools.class);
+            .loadAllFootstepPlannerDatasetsWithoutOcclusionsInDevelopment(FootstepPlannerIOTools.class);
       runAssertionsOnAllDatasets(this::runAssertions, allDatasets);
    }
 
    protected void runAssertionsOnDataset(DatasetTestRunner datasetTestRunner, String datasetName)
    {
-            FootstepPlannerUnitTestDataset dataset = FootstepPlannerIOTools.loadDataset(FootstepPlannerDataExporter.class, datasetName);
-//      FootstepPlannerUnitTestDataset dataset = FootstepPlannerIOTools.loadDataset(FootstepPlannerIOTools.class, datasetName);
+      FootstepPlannerUnitTestDataset dataset = FootstepPlannerIOTools.loadDataset(FootstepPlannerIOTools.class, datasetName);
 
       String errorMessages = datasetTestRunner.testDataset(dataset);
       Assert.assertTrue("Errors:" + errorMessages, errorMessages.isEmpty());
