@@ -29,7 +29,6 @@ import us.ihmc.atlas.AtlasRobotModel;
 import us.ihmc.atlas.AtlasRobotVersion;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.RobotTarget;
-import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Disabled;
 import us.ihmc.euclid.axisAngle.AxisAngle;
 import us.ihmc.euclid.matrix.RotationMatrix;
@@ -82,7 +81,6 @@ public class KinematicCalibrationHeadLoopResidualTest
 
    }
    
-   
    public KinematicCalibrationHeadLoopResidualTest()
    {
       intrinsic = loadXML("/us/ihmc/atlas/calib/intrinsic_ros.xml");
@@ -101,7 +99,6 @@ public class KinematicCalibrationHeadLoopResidualTest
       targetToEE.setRotation(rotFull);
    }
 
-   @AfterEach
    public void tearDown()
    {
       ReferenceFrameTools.clearWorldFrameTree();
@@ -112,8 +109,6 @@ public class KinematicCalibrationHeadLoopResidualTest
     * 
     * @throws IOException
     */
-	@Disabled
-	@Test
    public void perfect() throws IOException
    {
       // No offsets to make things easy
@@ -162,8 +157,6 @@ public class KinematicCalibrationHeadLoopResidualTest
     * 
     * @throws IOException
     */
-	@Disabled
-	@Test
    public void smallError() throws IOException
    {
       // some small offests, which won't be provided to the algorithm
@@ -216,8 +209,6 @@ public class KinematicCalibrationHeadLoopResidualTest
     * 
     * @throws IOException
     */
-	@Disabled
-	@Test
    public void optimize() throws IOException
    {
       // some small offests, which won't be provided to the algorithm
