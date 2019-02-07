@@ -421,7 +421,11 @@ public class QuadrupedAStarFootstepPlanner implements QuadrupedBodyPathAndFootst
             continue;
          expandedNodes.add(nodeToExpand);
 
-         checkAndHandleNodeAtAnyGoal(nodeToExpand);
+         if (checkAndHandleNodeAtAnyGoal(nodeToExpand))
+         {
+            stack.clear();
+            stack.add(nodeToExpand);
+         }
 
          if (checkAndHandleNodeAtFinalGoal(nodeToExpand))
             break;
@@ -510,8 +514,6 @@ public class QuadrupedAStarFootstepPlanner implements QuadrupedBodyPathAndFootst
 
       if (footIsAtGoal || midstanceIsAtGoal)
       {
-         graph.checkAndSetEdge(nodeToExpand, endNode, 0.0);
-
          if (footIsAtGoal)
          {
             heuristics.setGoalHasBeenReached(true);
@@ -523,8 +525,6 @@ public class QuadrupedAStarFootstepPlanner implements QuadrupedBodyPathAndFootst
             midstanceReachedTheGoal.set(true);
          }
 
-         stack.clear();
-         stack.add(nodeToExpand);
          return true;
       }
 
