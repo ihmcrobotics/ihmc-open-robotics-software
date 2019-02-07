@@ -33,7 +33,7 @@ public class AtlasDoubleStepTest extends AvatarDoubleStepTest
       super.testTwoStepsInARowSameSide();
    }
 
-   @Tag("allocation")
+   @Tag("allocation-slow")
    @Test
    @Override
    public void testTwoStepsInARowSameSideAfterFirstSep() throws SimulationExceededMaximumTimeException
@@ -41,7 +41,7 @@ public class AtlasDoubleStepTest extends AvatarDoubleStepTest
       super.testTwoStepsInARowSameSideAfterFirstSep();
    }
 
-   @Tag("allocation")
+   @Tag("allocation-slow")
    @Test
    @Override
    public void testTwoStepsInARowLongTransferSameSide() throws SimulationExceededMaximumTimeException
@@ -49,7 +49,7 @@ public class AtlasDoubleStepTest extends AvatarDoubleStepTest
       super.testTwoStepsInARowLongTransferSameSide();
    }
 
-   @Tag("allocation")
+   @Tag("allocation-slow")
    @Test
    @Override
    public void testTwoStepsStandingInBetween() throws SimulationExceededMaximumTimeException
