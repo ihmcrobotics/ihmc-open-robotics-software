@@ -36,7 +36,7 @@ public class TurnWalkTurnPlanner implements FootstepPlanner
 
    public TurnWalkTurnPlanner()
    {
-      this(new DefaultParameters());
+      this(new DefaultTurnWalkTurnPlannerParameters());
    }
 
    public TurnWalkTurnPlanner(FootstepPlannerParameters parameters)
@@ -285,7 +285,7 @@ public class TurnWalkTurnPlanner implements FootstepPlanner
    {
    }
 
-   private static class DefaultParameters implements FootstepPlannerParameters
+   private static class DefaultTurnWalkTurnPlannerParameters implements FootstepPlannerParameters
    {
       @Override
       public double getIdealFootstepWidth()
