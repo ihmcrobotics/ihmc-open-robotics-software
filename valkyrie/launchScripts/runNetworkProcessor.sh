@@ -29,13 +29,17 @@ fi
 
 echo "Starting Network Processor"
 
-java -Djava.library.path=lib/ -cp ValkyrieController.jar $NETWORK_PROCESSOR_CLASS &
-NETWORK_PROCESSOR_PID=$!
-trap "rosnode kill /darpaRoboticsChallange/networkProcessor \
-      && rosnode kill /networkProcessor/rosModule \
-      && sleep 2 \
-      && kill $NETWORK_PROCESSOR_PID \
-      && sleep 5 \
-      && kill -9 $NETWORK_PROCESSOR_PID; exit 0" INT TERM
+IHMC_LOGS_DIR=$HOME/.ihmc/logs
+if [[ ! -d $IHMC_LOGS_DIR ]]; then
+    mkdir -p $IHMC_LOGS_DIR
+fi
+java -Djava.library.path=lib/ -cp ValkyrieController.jar $NETWORK_PROCESSOR_CLASS | tee $HOME/.ihmc/logs/ValkyrieNetworkProc_$(date '+%Y%m%d_%H%M%S').log &
+# Some time for process to get established
+sleep 1
+find_network_processor_pids
+
+trap "kill $old_processes; \
+      sleep 5; \
+      kill -9 $old_processes; exit 0" INT TERM
 wait
 
