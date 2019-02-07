@@ -66,9 +66,8 @@ public class ValkyrieSensorSuiteManager implements DRCSensorSuiteManager
 
       if (ENABLE_STEREO_PUBLISHER)
       {
-         stereoVisionPointCloudPublisher = new StereoVisionPointCloudPublisher(sensorName, fullRobotModelFactory, ros2Node, rcdTopicName);
+         stereoVisionPointCloudPublisher = new StereoVisionPointCloudPublisher(fullRobotModelFactory, ros2Node, rcdTopicName);
          stereoVisionPointCloudPublisher.setPPSTimestampOffsetProvider(ppsTimestampOffsetProvider);
-         stereoVisionPointCloudPublisher.setScanFrameToWorldFrame();
          stereoVisionPointCloudPublisher.setCustomStereoVisionTransformer(createCustonStereoTransformer());
       }
       else
