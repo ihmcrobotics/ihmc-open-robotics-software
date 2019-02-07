@@ -305,7 +305,10 @@ public class ICPPlannerSegmentedTrajectoryGenerator implements PositionTrajector
    public void compute(double time)
    {
       time = MathTools.clamp(time, 0.0, totalTrajectoryTime.getDoubleValue());
-      progressionInPercent.set(time / totalTrajectoryTime.getDoubleValue());
+      if (totalTrajectoryTime.getValue() <= 1.0e-7)
+         progressionInPercent.set(1.0);
+      else
+         progressionInPercent.set(time / totalTrajectoryTime.getDoubleValue());
 
       updateSplineBoundaries();
 

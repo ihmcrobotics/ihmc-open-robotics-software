@@ -219,15 +219,27 @@ public class ControllerPelvisOrientationManager implements PelvisOrientationCont
    public void goToHomeFromCurrentDesired(double trajectoryTime)
    {
       initialPelvisOrientationOffsetTime.set(yoTime.getDoubleValue());
-      pelvisOrientationOffsetTrajectoryGenerator.setTrajectoryTime(trajectoryTime);
 
       pelvisOrientationOffsetTrajectoryGenerator.getOrientation(tempOrientation);
 
       tempOrientation.changeFrame(desiredPelvisFrame);
       pelvisOrientationOffsetTrajectoryGenerator.setInitialOrientation(tempOrientation);
-
       tempOrientation.setToZero(desiredPelvisFrame);
       pelvisOrientationOffsetTrajectoryGenerator.setFinalOrientation(tempOrientation);
+      pelvisOrientationOffsetTrajectoryGenerator.setTrajectoryTime(trajectoryTime);
+      pelvisOrientationOffsetTrajectoryGenerator.initialize();
+   }
+
+   public void goToHomeFromOffset(FrameQuaternionReadOnly offset, double trajectoryTime)
+   {
+      initialPelvisOrientationOffsetTime.set(yoTime.getDoubleValue());
+
+      tempOrientation.setIncludingFrame(offset);
+      tempOrientation.changeFrame(desiredPelvisFrame);
+      pelvisOrientationOffsetTrajectoryGenerator.setInitialOrientation(tempOrientation);
+      tempOrientation.setToZero(desiredPelvisFrame);
+      pelvisOrientationOffsetTrajectoryGenerator.setFinalOrientation(tempOrientation);
+      pelvisOrientationOffsetTrajectoryGenerator.setTrajectoryTime(trajectoryTime);
       pelvisOrientationOffsetTrajectoryGenerator.initialize();
    }
 

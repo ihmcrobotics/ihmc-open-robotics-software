@@ -175,11 +175,7 @@ public abstract class EndToEndPelvisOrientationTest implements MultiRobotTestInt
    {
       double epsilon = 3.0e-3;
 
-      WalkingControllerParameters walkingControllerParameters = getRobotModel().getWalkingControllerParameters();
-      if (!walkingControllerParameters.doPreparePelvisForLocomotion())
-      {
-         fail("This test requires that doPreparePelvisForLocomotion() is true.");
-      }
+      drcSimulationTestHelper.getSimulationConstructionSet().getVariable(PelvisOrientationManager.class.getSimpleName(), "doPreparePelvisForLocomotion").setValueFromDouble(0.0);
 
       assertEquals("Control Mode", PelvisOrientationControlMode.WALKING_CONTROLLER, findCurrentControlMode());
       testSingleTrajectoryPoint();

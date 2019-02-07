@@ -181,6 +181,7 @@ public class HighLevelControlManagerFactory
       Vector3DReadOnly pelvisLinearWeight = taskspaceLinearWeightMap.get(pelvisName);
       centerOfMassHeightManager = new CenterOfMassHeightManager(controllerToolbox, walkingControllerParameters, registry);
       centerOfMassHeightManager.setPelvisTaskspaceWeights(pelvisLinearWeight);
+      centerOfMassHeightManager.setPrepareForLocomotion(walkingControllerParameters.doPreparePelvisForLocomotion());
       centerOfMassHeightManager.setComHeightGains(walkingControllerComHeightGains, walkingControllerMaxComHeightVelocity, userModeComHeightGains);
       return centerOfMassHeightManager;
    }
@@ -305,6 +306,7 @@ public class HighLevelControlManagerFactory
       pelvisOrientationManager = new PelvisOrientationManager(pelvisGains, pelvisOffsetWhileWalkingParameters, leapOfFaithParameters, controllerToolbox,
                                                               registry);
       pelvisOrientationManager.setWeights(pelvisAngularWeight);
+      pelvisOrientationManager.setPrepareForLocomotion(walkingControllerParameters.doPreparePelvisForLocomotion());
       return pelvisOrientationManager;
    }
 

@@ -462,7 +462,10 @@ public class HighLevelHumanoidControllerFactory implements CloseableAndDisposabl
 
    public void addUpdatable(Updatable updatable)
    {
-      this.updatables.add(updatable);
+      if (controllerToolbox == null)
+         this.updatables.add(updatable);
+      else
+         controllerToolbox.addUpdatable(updatable);
    }
 
    @Override
