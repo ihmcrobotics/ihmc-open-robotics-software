@@ -18,6 +18,7 @@ import us.ihmc.tools.MemoryTools;
 
 import java.io.IOException;
 
+@Tag("quadruped-xgait")
 public abstract class QuadrupedXGaitWalkingOverRampsTest implements QuadrupedMultiRobotTestInterface
 {
    protected GoalOrientedTestConductor conductor;

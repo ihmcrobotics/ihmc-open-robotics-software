@@ -21,6 +21,7 @@ import us.ihmc.tools.MemoryTools;
 
 import java.io.IOException;
 
+@Tag("quadruped-planning")
 public abstract class QuadrupedPlanToWaypointTest implements QuadrupedMultiRobotTestInterface
 {
    private GoalOrientedTestConductor conductor;

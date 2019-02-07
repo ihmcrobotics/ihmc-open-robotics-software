@@ -28,6 +28,7 @@ import static us.ihmc.robotics.Assert.*;
 
 import static us.ihmc.robotics.Assert.*;
 
+@Tag("quadruped-force-based")
 public abstract class QuadrupedForceBasedStandControllerTest implements QuadrupedMultiRobotTestInterface
 {
    private GoalOrientedTestConductor conductor;
