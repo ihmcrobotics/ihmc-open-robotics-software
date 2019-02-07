@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
 
+import us.ihmc.commons.MathTools;
 import us.ihmc.log.LogTools;
 import us.ihmc.robotDataLogger.handshake.IDLYoVariableHandshakeParser;
 import us.ihmc.robotDataLogger.handshake.LogHandshake;
@@ -215,6 +216,7 @@ public class YoVariableClientImplementation implements YoVariableClientInterface
          throw new RuntimeException("Session not started");
       }
       
+      debugRegistry.reset();
       return dataConsumer.reconnect();
       
       
@@ -238,5 +240,26 @@ public class YoVariableClientImplementation implements YoVariableClientInterface
    public void connected()
    {
       yoVariablesUpdatedListener.connected();
+   }
+
+   @Override
+   public void setVariableUpdateRate(int updateRate)
+   {
+      updateRate = MathTools.clamp(updateRate, 0, 99999);
+      
+      try
+      {
+         dataConsumer.sendCommand(DataServerCommand.LIMIT_RATE, updateRate);
+      }
+      catch (IOException e)
+      {
+         e.printStackTrace();
+      }
+   }
+
+   @Override
+   public boolean isConnected()
+   {
+      return dataConsumer.isSessionActive();
    }
 }

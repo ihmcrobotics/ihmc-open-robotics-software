@@ -23,13 +23,15 @@ class WebsocketDataServerInitializer extends ChannelInitializer<SocketChannel>
    private final WebsocketDataBroadcaster broadcaster;
    private final VariableChangedListener variableChangedListener;
    private final int dataSize;
+   private final int numberOfRegistryBuffers;
    
-   public WebsocketDataServerInitializer(DataServerServerContent logServerContent, WebsocketDataBroadcaster broadcaster, VariableChangedListener variableChangedListener, int dataSize)
+   public WebsocketDataServerInitializer(DataServerServerContent logServerContent, WebsocketDataBroadcaster broadcaster, VariableChangedListener variableChangedListener, int dataSize, int numberOfRegistryBuffers)
    {
       this.logServerContent = logServerContent;
       this.broadcaster = broadcaster;
       this.dataSize = dataSize;
       this.variableChangedListener = variableChangedListener;
+      this.numberOfRegistryBuffers = numberOfRegistryBuffers;
    }
 
 
@@ -43,7 +45,7 @@ class WebsocketDataServerInitializer extends ChannelInitializer<SocketChannel>
       pipeline.addLast(new HttpObjectAggregator(65536));
       pipeline.addLast(new WebSocketServerProtocolHandler(WEBSOCKET_PATH, null, true));
       pipeline.addLast(new HTTPDataServerDescriptionServer(logServerContent));
-      pipeline.addLast(new WebsocketDataServerFrameHandler(broadcaster, dataSize, variableChangedListener));
+      pipeline.addLast(new WebsocketDataServerFrameHandler(broadcaster, dataSize, numberOfRegistryBuffers, variableChangedListener));
    }
 
 }

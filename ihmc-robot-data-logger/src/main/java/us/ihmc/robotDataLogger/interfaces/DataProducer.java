@@ -6,7 +6,6 @@ import us.ihmc.robotDataLogger.CameraType;
 import us.ihmc.robotDataLogger.Handshake;
 import us.ihmc.robotDataLogger.dataBuffers.CustomLogDataPublisherType;
 import us.ihmc.robotDataLogger.dataBuffers.RegistrySendBufferBuilder;
-import us.ihmc.util.PeriodicThreadSchedulerFactory;
 
 public interface DataProducer
 {

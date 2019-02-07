@@ -28,16 +28,6 @@ public interface YoVariablesUpdatedListener extends TimestampListener, CommandLi
    void disconnected();
 
    /**
-    * On connect, the return value of this function is send to the server. The server will only send
-    * one in n packets to this client
-    *  
-    * @return Rate of packets to send
-    */
-   int getDisplayOneInNPackets();
-
-
-
-   /**
     * Data and timestamp is received over the TCP channel. Significant delay can occur depending on the
     * network conditions. Use receivedTimestampOnly for synchronization purposes.
     * 
