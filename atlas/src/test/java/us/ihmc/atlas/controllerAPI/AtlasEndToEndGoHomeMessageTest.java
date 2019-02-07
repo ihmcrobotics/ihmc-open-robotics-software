@@ -1,7 +1,7 @@
 package us.ihmc.atlas.controllerAPI;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import us.ihmc.atlas.AtlasRobotModel;
 import us.ihmc.atlas.AtlasRobotVersion;
@@ -14,27 +14,27 @@ public class AtlasEndToEndGoHomeMessageTest extends EndToEndGoHomeMessageTest
    private DRCRobotModel robotModel;
 
    @Override
-   @Test(timeout = 300000)
+   @Test
    public void testGoHomeArms() throws SimulationExceededMaximumTimeException
    {
       super.testGoHomeArms();
    }
 
    @Override
-   @Test(timeout = 300000)
+   @Test
    public void testGoHomeChest() throws SimulationExceededMaximumTimeException
    {
       super.testGoHomeChest();
    }
 
    @Override
-   @Test(timeout = 300000)
+   @Test
    public void testGoHomePelvis() throws SimulationExceededMaximumTimeException
    {
       super.testGoHomePelvis();
    }
 
-   @Before
+   @BeforeEach
    public void createRobotModel()
    {
       robotModel = new AtlasRobotModel(AtlasRobotVersion.ATLAS_UNPLUGGED_V5_NO_HANDS);
