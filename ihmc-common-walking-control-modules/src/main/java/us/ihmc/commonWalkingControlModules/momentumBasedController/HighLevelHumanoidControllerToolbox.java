@@ -764,7 +764,7 @@ public class HighLevelHumanoidControllerToolbox
       }
    }
 
-   private void resetFootPlaneContactPoint(RobotSide robotSide)
+   public void resetFootPlaneContactPoint(RobotSide robotSide)
    {
       ContactablePlaneBody foot = feet.get(robotSide);
       YoPlaneContactState footContactState = footContactStates.get(robotSide);

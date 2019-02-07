@@ -500,6 +500,7 @@ public class WalkingHighLevelHumanoidController implements JointLoadStatusProvid
 
       for (RobotSide robotSide : RobotSide.values)
       {
+         controllerToolbox.resetFootPlaneContactPoint(robotSide);
          feetManager.setFlatFootContactState(robotSide);
       }
    }
