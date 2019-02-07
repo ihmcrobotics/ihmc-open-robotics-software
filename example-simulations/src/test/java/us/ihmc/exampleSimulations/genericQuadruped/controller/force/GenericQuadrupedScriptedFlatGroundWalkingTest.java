@@ -1,8 +1,9 @@
 package us.ihmc.exampleSimulations.genericQuadruped.controller.force;
 
 import controller_msgs.msg.dds.QuadrupedTimedStepMessage;
-import org.junit.Test;
-import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Tag;
+import org.junit.jupiter.api.Disabled;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.exampleSimulations.genericQuadruped.GenericQuadrupedTestFactory;
 import us.ihmc.robotics.time.TimeInterval;
@@ -24,16 +25,14 @@ public class GenericQuadrupedScriptedFlatGroundWalkingTest extends QuadrupedScri
    }
 
    @Override
-   @ContinuousIntegrationTest(estimatedDuration = 74.7)
-   @Test(timeout = 370000)
+   @Test
    public void testScriptedFlatGroundWalking() throws BlockingSimulationRunner.SimulationExceededMaximumTimeException
    {
       super.testScriptedFlatGroundWalking();
    }
 
    @Override
-   @ContinuousIntegrationTest(estimatedDuration = 74.7)
-   @Test(timeout = 600000)
+   @Test
    public void testScriptedTroublingSteps()
    {
       super.testScriptedTroublingSteps();

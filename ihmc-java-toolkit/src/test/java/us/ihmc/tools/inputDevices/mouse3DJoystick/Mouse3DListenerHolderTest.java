@@ -2,22 +2,18 @@ package us.ihmc.tools.inputDevices.mouse3DJoystick;
 
 import static us.ihmc.robotics.Assert.*;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
-import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationPlan;
-import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
+import org.junit.jupiter.api.Tag;
+import org.junit.jupiter.api.Disabled;
 import us.ihmc.graphicsDescription.input.mouse.Mouse3DListener;
 import us.ihmc.graphicsDescription.input.mouse.Mouse3DListenerHolder;
-import us.ihmc.continuousIntegration.IntegrationCategory;
-
-@ContinuousIntegrationPlan(categories = IntegrationCategory.FAST)
 public class Mouse3DListenerHolderTest
 {
    int count1 = 0;
    int count2 = 0;
    
-	@ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(timeout = 30000)
+   @Test
    public void testListenersGetNotified()
    {
       Mouse3DListenerHolder holder = new Mouse3DListenerHolder();

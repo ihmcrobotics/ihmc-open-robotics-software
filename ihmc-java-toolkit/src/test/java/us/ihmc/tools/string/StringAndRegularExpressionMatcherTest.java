@@ -2,15 +2,14 @@ package us.ihmc.tools.string;
 
 import static us.ihmc.robotics.Assert.*;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
-import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
-
+import org.junit.jupiter.api.Tag;
+import org.junit.jupiter.api.Disabled;
 public class StringAndRegularExpressionMatcherTest
 {
 
-	@ContinuousIntegrationTest(estimatedDuration = 0.0)
-	@Test(timeout = 30000)
+	@Test
    public void testSimpleExactMatch()
    {
       StringAndRegularExpressionMatcher matcher = new StringAndRegularExpressionMatcher();
@@ -21,8 +20,7 @@ public class StringAndRegularExpressionMatcherTest
       assertFalse(matcher.matches("banana"));
    }
 
-	@ContinuousIntegrationTest(estimatedDuration = 0.0)
-	@Test(timeout = 30000)
+	@Test
    public void testCaseInsensitiveExactMatch()
    {
       StringAndRegularExpressionMatcher matcher = new StringAndRegularExpressionMatcher(false);
@@ -33,8 +31,7 @@ public class StringAndRegularExpressionMatcherTest
       assertFalse(matcher.matches("banana"));
    }
 
-	@ContinuousIntegrationTest(estimatedDuration = 0.0)
-	@Test(timeout = 30000)
+	@Test
    public void testRegularExpression()
    {
       StringAndRegularExpressionMatcher matcher = new StringAndRegularExpressionMatcher();
@@ -52,8 +49,7 @@ public class StringAndRegularExpressionMatcherTest
       assertTrue(matcher.matches("helloworld"));
    }
 
-	@ContinuousIntegrationTest(estimatedDuration = 0.0)
-	@Test(timeout = 30000)
+	@Test
    public void testRegularExpressionsAndStrings()
    {
       StringAndRegularExpressionMatcher matcher = new StringAndRegularExpressionMatcher();

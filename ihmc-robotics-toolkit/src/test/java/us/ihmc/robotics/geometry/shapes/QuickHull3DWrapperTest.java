@@ -6,11 +6,10 @@ import java.util.ArrayList;
 import java.util.List;
 
 import us.ihmc.robotics.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
-import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
-import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationPlan;
-import us.ihmc.continuousIntegration.IntegrationCategory;
+import org.junit.jupiter.api.Tag;
+import org.junit.jupiter.api.Disabled;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.geometry.Plane3D;
 import us.ihmc.euclid.geometry.Pose3D;
@@ -21,11 +20,9 @@ import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.robotics.geometry.HullFace;
 import us.ihmc.robotics.geometry.QuickHull3dWrapper;
 
-@ContinuousIntegrationPlan(categories = {IntegrationCategory.FAST})
 public class QuickHull3DWrapperTest
 {
-	@ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(timeout = 30000)
+   @Test
    public void testSimplexHull()
    {
       List<Point3D> points = new ArrayList<Point3D>();
@@ -40,8 +37,7 @@ public class QuickHull3DWrapperTest
       assertTrue(quickHull.getNumFaces() == 4);
    }
 
-	@ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(timeout = 30000)
+   @Test
    public void testExtraPointInSimplex()
    {
       List<Point3D> points = new ArrayList<Point3D>();
@@ -58,8 +54,7 @@ public class QuickHull3DWrapperTest
 
    }
 
-	@ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(timeout = 30000)
+   @Test
    public void testExtraPointOnSimplex()
    {
       List<Point3D> points = new ArrayList<Point3D>();
@@ -75,8 +70,7 @@ public class QuickHull3DWrapperTest
       assertTrue(quickHull.getNumFaces() == 4);
    }
 
-	@ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(timeout = 30000)
+   @Test
    public void testFivePointHull()
    {
       List<Point3D> points = new ArrayList<Point3D>();
@@ -92,8 +86,7 @@ public class QuickHull3DWrapperTest
       assertTrue(quickHull.getNumFaces() == 6);
    }
 
-	@ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(timeout = 30000)
+   @Test
    public void testExtraPointApproximatelyOnSimplex()
    {
       double testTolerance = 1e-15;
@@ -118,8 +111,7 @@ public class QuickHull3DWrapperTest
       }
    }
 
-	@ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(timeout = 30000)
+   @Test
    public void testCubeHull()
    {
       List<Point3D> points = new ArrayList<Point3D>();
@@ -144,8 +136,7 @@ public class QuickHull3DWrapperTest
       }
    }
 
-	@ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(timeout = 30000)
+   @Test
    public void testTrapezoidalPrismHull()
    {
       List<Point3D> points = new ArrayList<Point3D>();
@@ -189,8 +180,7 @@ public class QuickHull3DWrapperTest
       }
    }
 
-	@ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(timeout = 30000)
+   @Test
    public void testFaceToPolygonTrapezoidalPrismHull()
    {
       List<Point3D> points = new ArrayList<Point3D>();

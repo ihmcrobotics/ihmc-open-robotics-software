@@ -2,15 +2,14 @@ package us.ihmc.tools.taskExecutor;
 
 import static us.ihmc.robotics.Assert.*;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
-import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
-
+import org.junit.jupiter.api.Tag;
+import org.junit.jupiter.api.Disabled;
 public class TaskExecutorTest
 {
 
-	@ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(timeout = 30000)
+   @Test
    public void testEmptyExecutor()
    {
       TaskExecutor taskExecutor = new TaskExecutor();
@@ -27,8 +26,7 @@ public class TaskExecutorTest
       assertNull(lastTask);
    }
 
-	@ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(timeout = 30000)
+   @Test
    public void testWithOneNullTask()
    {
       TaskExecutor taskExecutor = new TaskExecutor();
@@ -54,8 +52,7 @@ public class TaskExecutorTest
       assertTrue(taskExecutor.isDone());
    }
 
-	@ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(timeout = 30000)
+   @Test
    public void testWithSeveralNullTasks()
    {
       TaskExecutor taskExecutor = new TaskExecutor();
@@ -115,8 +112,7 @@ public class TaskExecutorTest
       assertTrue(taskExecutor.getCurrentTask() instanceof NullTask);
    }
 
-	@ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(timeout = 30000)
+   @Test
    public void testSomeTasks()
    {
       int[] doActionsPerTask = new int[] { 1 };
@@ -136,8 +132,7 @@ public class TaskExecutorTest
 
    }
 
-	@ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(timeout = 30000)
+   @Test
    public void testAddingTasksOnTheFly()
    {
       TaskExecutor taskExecutor = new TaskExecutor();

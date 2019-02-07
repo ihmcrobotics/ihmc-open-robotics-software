@@ -2,12 +2,9 @@ package us.ihmc.robotics.linearDynamicSystems;
 
 import static us.ihmc.robotics.Assert.*;
 
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.*;
 
 import Jama.Matrix;
-import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.robotics.dataStructures.Polynomial;
 
 public class TransferFunctionMatrixTest
@@ -16,7 +13,7 @@ public class TransferFunctionMatrixTest
    private TransferFunction simpleDecayTwo, secondOrderResponseTwo;
    private TransferFunctionMatrix transferFunctionMatrix;
 
-   @Before
+   @BeforeEach
    public void setUp() throws Exception
    {
       secondOrderResponseOne = TransferFunction.constructSecondOrderTransferFunction(1.0, 10.0, 0.3);
@@ -32,7 +29,7 @@ public class TransferFunctionMatrixTest
       transferFunctionMatrix = new TransferFunctionMatrix(transferFunctions);
    }
 
-   @After
+   @AfterEach
    public void tearDown() throws Exception
    {
       simpleDecayOne = null;
@@ -43,8 +40,7 @@ public class TransferFunctionMatrixTest
       transferFunctionMatrix = null;
    }
 
-	@ContinuousIntegrationTest(estimatedDuration = 0.0)
-	@Test(timeout = 30000)
+	@Test
    public void testGet()
    {
       verifyEpsilonEqual(simpleDecayOne, transferFunctionMatrix.get(0, 0), 1e-7);
@@ -69,8 +65,7 @@ public class TransferFunctionMatrixTest
       }
    }
 
-	@ContinuousIntegrationTest(estimatedDuration = 0.0)
-	@Test(timeout = 30000)
+	@Test
    public void testPremultiply()
    {
       Matrix matrixC = new Matrix(new double[][]
@@ -95,19 +90,19 @@ public class TransferFunctionMatrixTest
       assertTrue(newTransferFunctionMatrix.epsilonEquals(transferFunctionMatrix, 1e-7));
    }
 
-	@ContinuousIntegrationTest(estimatedDuration = 0.0)
-	@Test(timeout = 30000,expected = RuntimeException.class)
+	@Test
    public void testPreMultiplyException()
    {
+      Assertions.assertThrows(RuntimeException.class, () -> {
       int rows = transferFunctionMatrix.getRows();
       int columns = transferFunctionMatrix.getColumns();
       Matrix testMatrix = Matrix.random(rows, columns - 1);
 
       transferFunctionMatrix.preMultiply(testMatrix);
+      });
    }
 
-	@ContinuousIntegrationTest(estimatedDuration = 0.0)
-	@Test(timeout = 30000)
+	@Test
    public void testTimes()
    {
       Matrix matrixC = new Matrix(new double[][]
@@ -132,19 +127,19 @@ public class TransferFunctionMatrixTest
       assertTrue(newTransferFunctionMatrix.epsilonEquals(transferFunctionMatrix, 1e-7));
    }
 
-	@ContinuousIntegrationTest(estimatedDuration = 0.0)
-	@Test(timeout = 30000,expected = RuntimeException.class)
+	@Test
    public void testTimesException()
    {
+      Assertions.assertThrows(RuntimeException.class, () -> {
       int rows = transferFunctionMatrix.getRows();
       int columns = transferFunctionMatrix.getColumns();
       Matrix testMatrix = Matrix.random(rows - 1, columns);
 
       transferFunctionMatrix.times(testMatrix);
+      });
    }
 
-	@ContinuousIntegrationTest(estimatedDuration = 0.0)
-	@Test(timeout = 30000)
+	@Test
    public void testPlusDouble()
    {
       Matrix testMatrix = Matrix.random(transferFunctionMatrix.getRows(), transferFunctionMatrix.getRows());
@@ -185,19 +180,19 @@ public class TransferFunctionMatrixTest
       }
    }
 
-	@ContinuousIntegrationTest(estimatedDuration = 0.0)
-	@Test(timeout = 30000,expected = RuntimeException.class)
+	@Test
    public void testPlusDoubleException()
    {
+      Assertions.assertThrows(RuntimeException.class, () -> {
       Matrix testMatrix = new Matrix(new double[][]
       {
          {2.0, 5.0}
       });
       transferFunctionMatrix.plus(testMatrix);
+      });
    }
 
-	@ContinuousIntegrationTest(estimatedDuration = 0.0)
-	@Test(timeout = 30000)
+	@Test
    public void testPlusTransferFunctionDouble()
    {
       TransferFunction[][] transferFunctions = new TransferFunction[][]
@@ -245,15 +240,16 @@ public class TransferFunctionMatrixTest
       }
    }
 
-	@ContinuousIntegrationTest(estimatedDuration = 0.0)
-	@Test(timeout = 30000,expected = RuntimeException.class)
+	@Test
    public void testPlusTransferFunctionException()
    {
+      Assertions.assertThrows(RuntimeException.class, () -> {
       TransferFunctionMatrix testMatrix = new TransferFunctionMatrix(new TransferFunction[][]
       {
          {secondOrderResponseOne, secondOrderResponseTwo}
       });
       transferFunctionMatrix.plus(testMatrix);
+      });
    }
 
 }

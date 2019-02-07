@@ -9,9 +9,9 @@ import java.util.Arrays;
 import java.util.Random;
 import java.util.stream.Collectors;
 
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import controller_msgs.msg.dds.CapturabilityBasedStatus;
 import controller_msgs.msg.dds.KinematicsToolboxCenterOfMassMessage;
@@ -27,7 +27,8 @@ import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.communication.controllerAPI.CommandInputManager;
 import us.ihmc.communication.controllerAPI.StatusMessageOutputManager;
 import us.ihmc.communication.packets.MessageTools;
-import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
+import org.junit.jupiter.api.Tag;
+import org.junit.jupiter.api.Disabled;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.tools.ReferenceFrameTools;
@@ -96,7 +97,7 @@ public abstract class AvatarHumanoidKinematicsToolboxControllerTest implements M
     */
    public abstract DRCRobotModel getGhostRobotModel();
 
-   @Before
+   @BeforeEach
    public void setup()
    {
       mainRegistry = new YoVariableRegistry("main");
@@ -152,7 +153,7 @@ public abstract class AvatarHumanoidKinematicsToolboxControllerTest implements M
       new JointAnglesWriter(ghost, fullHumanoidRobotModel).updateRobotConfigurationBasedOnFullRobotModel();
    }
 
-   @After
+   @AfterEach
    public void tearDown()
    {
       if (simulationTestingParameters.getKeepSCSUp())
@@ -185,8 +186,7 @@ public abstract class AvatarHumanoidKinematicsToolboxControllerTest implements M
       ReferenceFrameTools.clearWorldFrameTree();
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 20.0)
-   @Test(timeout = 30000)
+   @Test
    public void testHoldBodyPose() throws Exception
    {
       FullHumanoidRobotModel initialFullRobotModel = createFullRobotModelAtInitialConfiguration();
@@ -210,8 +210,7 @@ public abstract class AvatarHumanoidKinematicsToolboxControllerTest implements M
                  toolboxController.getSolution().getSolutionQuality() < 1.0e-4);
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 20.0)
-   @Test(timeout = 30000)
+   @Test
    public void testRandomHandPositions() throws Exception
    {
       if (VERBOSE)
@@ -261,8 +260,7 @@ public abstract class AvatarHumanoidKinematicsToolboxControllerTest implements M
       }
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 20.0)
-   @Test(timeout = 30000)
+   @Test
    public void testRandomHandPoses() throws Exception
    {
       if (VERBOSE)
@@ -322,8 +320,7 @@ public abstract class AvatarHumanoidKinematicsToolboxControllerTest implements M
       assertTrue("Poor average solution quality: " + averageSolutionQuality, averageSolutionQuality < 5.0e-5);
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 20.0)
-   @Test(timeout = 30000)
+   @Test
    public void testSingleSupport() throws Exception
    {
       if (VERBOSE)

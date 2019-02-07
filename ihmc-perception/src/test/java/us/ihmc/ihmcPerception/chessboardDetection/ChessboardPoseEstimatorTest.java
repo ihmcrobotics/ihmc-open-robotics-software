@@ -12,20 +12,18 @@ import java.io.InputStream;
 
 import javax.imageio.ImageIO;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
-import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationPlan;
-import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
-import us.ihmc.continuousIntegration.IntegrationCategory;
+import org.junit.jupiter.api.Tag;
+import org.junit.jupiter.api.Disabled;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 
-@ContinuousIntegrationPlan(categories = IntegrationCategory.EXCLUDE)
+@Disabled
 public class ChessboardPoseEstimatorTest
 {
    static final boolean DEBUG = false;
 
-   @ContinuousIntegrationTest(estimatedDuration = 2.6)
-   @Test(timeout = 30000)
+   @Test
    public void testOpenCVRegression4x7() throws IOException
    {
 
@@ -42,8 +40,7 @@ public class ChessboardPoseEstimatorTest
 
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.6)
-   @Test(timeout = 30000)
+   @Test
    public void testOpenCVRegression4x5() throws IOException
          {
 
@@ -63,8 +60,7 @@ public class ChessboardPoseEstimatorTest
       }
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.6)
-   @Test(timeout = 30000)
+   @Test
    public void testSimpleAlmostFrontChessboard() throws IOException
    {
 
@@ -75,8 +71,7 @@ public class ChessboardPoseEstimatorTest
       testSingleImage(image, squareNumRow, squareNumCol, gridWidth, 1e-2);
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 1.2)
-   @Test(timeout = 30000)
+   @Test
    public void testDrivingSimCheckerBoard() throws IOException
    {
 
@@ -88,8 +83,8 @@ public class ChessboardPoseEstimatorTest
    }
 
    //boofCV can't find checker board
-   @ContinuousIntegrationTest(estimatedDuration = 0.1, categoriesOverride = IntegrationCategory.EXCLUDE)
-   @Test(timeout = 5000)
+   @Disabled
+   @Test
    public void testImage3() throws IOException
    {
 
@@ -101,8 +96,7 @@ public class ChessboardPoseEstimatorTest
    }
 
    //boofcv found checkerboard but pose estimated poorly
-   @ContinuousIntegrationTest(estimatedDuration = 1.6)
-   @Test(timeout = 30000)
+   @Test
    public void testImage1() throws IOException
    {
 

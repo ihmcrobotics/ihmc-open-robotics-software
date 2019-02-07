@@ -7,10 +7,10 @@ import static us.ihmc.robotics.Assert.*;
 
 import java.util.Random;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
-import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
-
+import org.junit.jupiter.api.Tag;
+import org.junit.jupiter.api.Disabled;
 /**
  * It makes sure that the four bar calculator including derivatives and the calculator used in Beast, Steppr, and Wanderer give the same result
  */
@@ -41,8 +41,7 @@ public class FourBarCalculatorsComparisonTest
     */
    private static final double eps = 1e-7;
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.6)
-   @Test(timeout = 30000)
+   @Test
    public void equalOuputAnglesForRandomQuadrilatteralTest()
    {
       Random rand = new Random(1986L);

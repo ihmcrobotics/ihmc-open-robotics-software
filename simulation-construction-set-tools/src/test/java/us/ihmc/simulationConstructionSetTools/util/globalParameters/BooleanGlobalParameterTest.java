@@ -1,11 +1,7 @@
 package us.ihmc.simulationConstructionSetTools.util.globalParameters;
 
 
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
-
-import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
+import org.junit.jupiter.api.*;
 
 import static us.ihmc.robotics.Assert.*;
 
@@ -14,20 +10,19 @@ public class BooleanGlobalParameterTest
    private static final boolean VERBOSE = false;
    private final boolean DEFAULT_VALUE = true;
 
-   @Before
+   @BeforeEach
    public void setUp() throws Exception
    {
       GlobalParameter.clearGlobalRegistry();
    }
 
-   @After
+   @AfterEach
    public void tearDown() throws Exception
    {
       GlobalParameter.clearGlobalRegistry();
    }
 
-	@ContinuousIntegrationTest(estimatedDuration = 0.0)
-	@Test(timeout=300000)
+	@Test
    public void testGetValue()
    {
       SystemOutGlobalParameterChangedListener systemOutGlobalParameterChangedListener = null;
@@ -38,8 +33,7 @@ public class BooleanGlobalParameterTest
       assertEquals(DEFAULT_VALUE, booleanGlobalParameter.getValue());
    }
 
-	@ContinuousIntegrationTest(estimatedDuration = 0.0)
-	@Test(timeout=300000)
+	@Test
    public void testSetValue()
    {
       SystemOutGlobalParameterChangedListener systemOutGlobalParameterChangedListener = null;
@@ -66,25 +60,27 @@ public class BooleanGlobalParameterTest
       assertEquals(newValue, booleanGlobalParameter.getValue());
    }
 
-	@ContinuousIntegrationTest(estimatedDuration = 0.0)
-	@Test(timeout=300000,expected = RuntimeException.class)
+	@Test
    public void testThatCantHaveParentsUnlessOverwriteUpdateMethodOne()
    {
+      Assertions.assertThrows(RuntimeException.class, () -> {
       BooleanGlobalParameter parent = new BooleanGlobalParameter("parent", "parent", DEFAULT_VALUE, null);
       @SuppressWarnings("unused")
       BooleanGlobalParameter invalidChild = new BooleanGlobalParameter("invalidChild", "test description", new GlobalParameter[] {parent}, null);
 
       parent.set(false);
+      });
    }
 
-	@ContinuousIntegrationTest(estimatedDuration = 0.0)
-	@Test(timeout=300000,expected = RuntimeException.class)
+	@Test
    public void testCantSetChild()
    {
+      Assertions.assertThrows(RuntimeException.class, () -> {
       BooleanGlobalParameter parent = new BooleanGlobalParameter("parent", "", true, null);
       BooleanGlobalParameter child = new BooleanGlobalParameter("child", "", new GlobalParameter[] {parent}, null);
 
       child.set(false, "Shouldn't be able to change this!");
+      });
    }
 
 

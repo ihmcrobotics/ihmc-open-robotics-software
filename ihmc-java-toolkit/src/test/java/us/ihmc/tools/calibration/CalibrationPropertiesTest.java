@@ -5,20 +5,19 @@ import static us.ihmc.robotics.Assert.*;
 import java.io.File;
 import java.util.Random;
 
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
-import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
-
-
+import org.junit.jupiter.api.Tag;
+import org.junit.jupiter.api.Disabled;
 public class CalibrationPropertiesTest
 {
    private String fileName = "testCalFile";
    private File currentPropertiesFile;
    private CalibrationProperties calibrationProperties;
    
-   @Before
+   @BeforeEach
    public void setUp()
    {
       // create a calibration file with the specifies path.
@@ -27,14 +26,13 @@ public class CalibrationPropertiesTest
       calibrationProperties = new CalibrationProperties(".", fileName);
    }
    
-   @After
+   @AfterEach
    public void tearDown()
    {
       currentPropertiesFile.delete();
    }
 
-	@ContinuousIntegrationTest(estimatedDuration = 0.0)
-	@Test(timeout = 30000)
+	@Test
    public void testSetIntegerProperty()
    {
       Random random = new Random(1984L);
@@ -52,8 +50,7 @@ public class CalibrationPropertiesTest
       assertEquals(0, calibrationProperties.getIntegerProperty("notAKey"));
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(timeout = 30000)
+   @Test
    public void testSetDoubleProperty()
    {
       final Random random = new Random(1984L);
@@ -72,8 +69,7 @@ public class CalibrationPropertiesTest
       assertEquals(0.0, calibrationProperties.getDoubleProperty("notAKey"), EPSILON);
    }
 
-	@ContinuousIntegrationTest(estimatedDuration = 0.0)
-	@Test(timeout = 30000)
+	@Test
    public void testSaveAndLoad()
    {
       String key = "abcd";
@@ -85,8 +81,7 @@ public class CalibrationPropertiesTest
       assertEquals(value, calibrationProperties2.getIntegerProperty(key));
    }
 
-	@ContinuousIntegrationTest(estimatedDuration = 0.0)
-	@Test(timeout = 30000)
+	@Test
    public void testArithmetic1()
    {
       String key = "abcd";
@@ -97,8 +92,7 @@ public class CalibrationPropertiesTest
       assertEquals(value1 + value2, calibrationProperties.getIntegerProperty(key));
    }
 
-	@ContinuousIntegrationTest(estimatedDuration = 0.0)
-	@Test(timeout = 30000)
+	@Test
    public void testArithmetic2()
    {
       String key = "abcd";

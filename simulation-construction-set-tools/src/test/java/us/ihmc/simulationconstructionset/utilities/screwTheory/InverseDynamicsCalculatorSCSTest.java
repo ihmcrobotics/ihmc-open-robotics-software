@@ -8,10 +8,11 @@ import java.util.LinkedHashMap;
 import java.util.Random;
 import java.util.stream.Collectors;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
-import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
+import org.junit.jupiter.api.Tag;
+import org.junit.jupiter.api.Disabled;
 import us.ihmc.euclid.matrix.Matrix3D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
@@ -63,13 +64,12 @@ public class InverseDynamicsCalculatorSCSTest
    
    private final Random random = new Random(100L);
 
-   @Before
+   @BeforeEach
    public void setUp()
    {
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(timeout=300000)
+   @Test
    public void testOneFreeRigidBody()
    {
       Robot robot = new Robot("robot");
@@ -134,8 +134,7 @@ public class InverseDynamicsCalculatorSCSTest
       compareWrenches(inputWrench, outputWrench);
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(timeout=300000)
+   @Test
    public void testChainNoGravity()
    {
       Robot robot = new Robot("robot");
@@ -153,8 +152,7 @@ public class InverseDynamicsCalculatorSCSTest
       assertAccelerationsEqual(jointMap);
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(timeout=300000)
+   @Test
    public void testTreeWithNoGravity()
    {
       Robot robot = new Robot("robot");
@@ -178,8 +176,7 @@ public class InverseDynamicsCalculatorSCSTest
       assertAccelerationsEqual(jointMap);
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.1)
-   @Test(timeout=300000)
+   @Test
    public void testTreeWithGravity()
    {
       Robot robot = new Robot("robot");
@@ -203,8 +200,7 @@ public class InverseDynamicsCalculatorSCSTest
       assertAccelerationsEqual(jointMap);
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.1)
-   @Test(timeout=300000)
+   @Test
    public void testDoingInverseDynamicsTermPerTerm()
    {
       Robot robot = new Robot("robot");
@@ -246,8 +242,7 @@ public class InverseDynamicsCalculatorSCSTest
       assertAccelerationsEqual(jointMap);
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(timeout=300000)
+   @Test
    public void testDoingNothing()
    {
       Robot robot = new Robot("robot");
@@ -275,8 +270,7 @@ public class InverseDynamicsCalculatorSCSTest
       }
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(timeout=300000)
+   @Test
    public void testGravityCompensationForChain()
    {
       Robot robot = new Robot("robot");
@@ -293,8 +287,7 @@ public class InverseDynamicsCalculatorSCSTest
       assertZeroAccelerations(jointMap);
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(timeout=300000)
+   @Test
    public void testChainWithGravity()
    {
       Robot robot = new Robot("robot");

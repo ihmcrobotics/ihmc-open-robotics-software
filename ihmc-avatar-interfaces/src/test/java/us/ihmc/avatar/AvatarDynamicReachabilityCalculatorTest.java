@@ -1,14 +1,14 @@
 package us.ihmc.avatar;
 
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.testTools.DRCSimulationTestHelper;
 import us.ihmc.commonWalkingControlModules.controlModules.foot.FootControlModule.ConstraintType;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.walkingController.states.WalkingStateEnum;
-import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.*;
-import us.ihmc.continuousIntegration.IntegrationCategory;
+import org.junit.jupiter.api.Tag;
+import org.junit.jupiter.api.Disabled;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
@@ -41,14 +41,14 @@ public abstract class AvatarDynamicReachabilityCalculatorTest
    private double swingTime, transferTime;
    private double totalMass;
 
-   @Before
+   @BeforeEach
    public void showMemoryUsageBeforeTest()
    {
       MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " before test.");
       BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
    }
 
-   @After
+   @AfterEach
    public void destroySimulationAndRecycleMemory()
    {
       if (simulationTestingParameters.getKeepSCSUp())
@@ -69,8 +69,8 @@ public abstract class AvatarDynamicReachabilityCalculatorTest
 
    protected abstract DRCRobotModel getRobotModel();
 
-   @ContinuousIntegrationTest(estimatedDuration = 100.0, categoriesOverride = IntegrationCategory.IN_DEVELOPMENT)
-   @Test(timeout = 100000)
+   @Disabled
+   @Test
    public void testForwardWalkingShort() throws SimulationExceededMaximumTimeException
    {
       setupTest(shortScript);
@@ -80,8 +80,8 @@ public abstract class AvatarDynamicReachabilityCalculatorTest
       assertTrue(success);
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 100.0, categoriesOverride = IntegrationCategory.IN_DEVELOPMENT)
-   @Test(timeout = 100000)
+   @Disabled
+   @Test
    public void testForwardWalkingMedium() throws SimulationExceededMaximumTimeException
    {
       setupTest(mediumScript);
@@ -91,8 +91,8 @@ public abstract class AvatarDynamicReachabilityCalculatorTest
       assertTrue(success);
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 100.0, categoriesOverride = IntegrationCategory.IN_DEVELOPMENT)
-   @Test(timeout = 100000)
+   @Disabled
+   @Test
    public void testForwardWalkingLong() throws SimulationExceededMaximumTimeException
    {
       setupTest(longScript);

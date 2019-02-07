@@ -2,12 +2,11 @@ package us.ihmc.robotics.geometry.shapes;
 
 import static us.ihmc.robotics.Assert.*;
 
-import org.junit.After;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.Test;
 
-import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
-import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationPlan;
-import us.ihmc.continuousIntegration.IntegrationCategory;
+import org.junit.jupiter.api.Tag;
+import org.junit.jupiter.api.Disabled;
 import us.ihmc.euclid.referenceFrame.FrameLine3D;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
@@ -17,20 +16,18 @@ import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 
-@ContinuousIntegrationPlan(categories = {IntegrationCategory.FAST})
 public class FramePlane3dTest
 {
 	private static ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
 	private static double epsilon = 1e-14;
 
-   @After
+   @AfterEach
    public void tearDown()
    {
       ReferenceFrameTools.clearWorldFrameTree();
    }
 
-	@ContinuousIntegrationTest(estimatedDuration = 0.0)
-	@Test(timeout = 30000)
+	@Test
    public void testIsOnOrAbove()
    {
       FramePlane3d plane = new FramePlane3d(worldFrame, new Point3D(), new Vector3D(0.0, 0.0, 1.0));
@@ -42,8 +39,7 @@ public class FramePlane3dTest
       assertFalse(plane.isOnOrAbove(q));
    }
 
-	@ContinuousIntegrationTest(estimatedDuration = 0.0)
-	@Test(timeout = 30000)
+	@Test
    public void testIsOnOrBelow()
    {
       FramePlane3d plane = new FramePlane3d(worldFrame, new Point3D(), new Vector3D(0.0, 0.0, 1.0));
@@ -53,8 +49,7 @@ public class FramePlane3dTest
       assertFalse(plane.isOnOrBelow(q));
    }
 
-	@ContinuousIntegrationTest(estimatedDuration = 0.0)
-	@Test(timeout = 30000)
+	@Test
    public void testOrthogonalProjection()
    {
       FramePoint3D point = new FramePoint3D(worldFrame, 1.0, 2.0, -3.0);
@@ -69,8 +64,7 @@ public class FramePlane3dTest
       assertTrue(expectedPoint.epsilonEquals(plane.orthogonalProjectionCopy(point), 1e-14));
    }
 
-	@ContinuousIntegrationTest(estimatedDuration = 0.0)
-	@Test(timeout = 30000)
+	@Test
    public void testDistance()
    {
       FramePoint3D point = new FramePoint3D(worldFrame, 1.0, 1.0, 1.0);
@@ -83,8 +77,7 @@ public class FramePlane3dTest
       assertEquals(Math.sqrt(2), plane.distance(point), epsilon);
    }
 
-	@ContinuousIntegrationTest(estimatedDuration = 0.0)
-	@Test(timeout = 30000)
+	@Test
    public void testApplyTransform()
    {
       RigidBodyTransform transformation = new RigidBodyTransform();
@@ -125,8 +118,7 @@ public class FramePlane3dTest
       assertTrue(plane5.epsilonEquals(new FramePlane3d(expectedNormal, expectedPoint), epsilon));
    }
 
-	@ContinuousIntegrationTest(estimatedDuration = 0.0)
-	@Test(timeout = 30000)
+	@Test
    public void testIntersectionWithLine()
    {
 	   FrameVector3D normal = new FrameVector3D(worldFrame, 0.0, 0.0, 1.0);

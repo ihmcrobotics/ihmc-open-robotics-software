@@ -11,18 +11,18 @@ import static us.ihmc.avatar.roughTerrainWalking.AvatarBipedalFootstepPlannerEnd
 
 import java.io.IOException;
 
-import org.junit.Before;
+import org.junit.jupiter.api.BeforeEach;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import us.ihmc.avatar.MultiRobotTestInterface;
 import us.ihmc.avatar.networkProcessor.DRCNetworkModuleParameters;
 import us.ihmc.avatar.testTools.DRCSimulationTestHelper;
 import us.ihmc.communication.packetCommunicator.PacketCommunicator;
 import us.ihmc.communication.packets.PlanarRegionMessageConverter;
 import us.ihmc.communication.util.NetworkPorts;
-import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
-import us.ihmc.continuousIntegration.ContinuousIntegrationTools;
-import us.ihmc.continuousIntegration.IntegrationCategory;
+import org.junit.jupiter.api.Tag;
+import org.junit.jupiter.api.Disabled;
+import us.ihmc.commons.ContinuousIntegrationTools;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.robotics.geometry.PlanarRegionsListGenerator;
@@ -43,7 +43,7 @@ public abstract class AvatarWalkOverTerrainBehaviorTest implements MultiRobotTes
    private DRCSimulationTestHelper simulationTestHelper;
    private PlanarRegionsList cinderBlockField;
 
-   @Before
+   @BeforeEach
    public void setUp()
    {
       PlanarRegionsListGenerator generator = new PlanarRegionsListGenerator();
@@ -65,8 +65,7 @@ public abstract class AvatarWalkOverTerrainBehaviorTest implements MultiRobotTes
                                                      allowablePenetrationThickness, generateGroundPlane);
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 63.6)
-   @Test(timeout = 400000)
+   @Test
    public void testWalkOverCinderBlocks() throws IOException, BlockingSimulationRunner.SimulationExceededMaximumTimeException, ControllerFailureException
    {
       DRCNetworkModuleParameters networkModuleParameters = new DRCNetworkModuleParameters();

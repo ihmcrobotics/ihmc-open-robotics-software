@@ -5,12 +5,13 @@ import static us.ihmc.robotics.Assert.*;
 import java.lang.reflect.Field;
 import java.util.Collection;
 
-import org.junit.After;
+import org.junit.jupiter.api.AfterEach;
 import us.ihmc.robotics.Assert;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
-import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
+import org.junit.jupiter.api.Tag;
+import org.junit.jupiter.api.Disabled;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoInteger;
@@ -27,20 +28,19 @@ import us.ihmc.tools.MemoryTools;
 public class ReflectionSimulationComparerTest
 {
 
-   @Before
+   @BeforeEach
    public void showMemoryUsageBeforeTest()
    {
       MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " before test.");
    }
    
-   @After
+   @AfterEach
    public void showMemoryUsageAfterTest()
    {
       MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " after test.");
    }
 
-	@ContinuousIntegrationTest(estimatedDuration = 0.2)
-	@Test(timeout = 30000)
+	@Test
    public void testTwoEmptySimulations()
    {
       ReflectionSimulationComparer comparer = new ReflectionSimulationComparer(Integer.MAX_VALUE, Integer.MAX_VALUE);
@@ -90,8 +90,7 @@ public class ReflectionSimulationComparerTest
       }
    }
 
-	@ContinuousIntegrationTest(estimatedDuration = 0.6)
-	@Test(timeout = 30000)
+	@Test
    public void testTwoRewindableSimulationsWithAScript() throws IllegalArgumentException, SecurityException, IllegalAccessException, NoSuchFieldException, UnreasonableAccelerationException
    {      
       Robot robot0 = createSimpleRobot();
@@ -131,8 +130,7 @@ public class ReflectionSimulationComparerTest
       return robot0;
    }
 
-	@ContinuousIntegrationTest(estimatedDuration = 0.5)
-	@Test(timeout = 30000)
+	@Test
    public void testTwoNonRewindableSimulationsWithAScript() throws IllegalArgumentException, SecurityException, IllegalAccessException, NoSuchFieldException, UnreasonableAccelerationException
    {      
       Robot robot0 = new Robot("robot");
