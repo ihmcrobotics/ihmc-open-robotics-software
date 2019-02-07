@@ -1,15 +1,23 @@
 package us.ihmc.footstepPlanning.ui.controllers;
 
+import static us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI.*;
+
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicReference;
+
 import controller_msgs.msg.dds.FootstepDataListMessage;
 import controller_msgs.msg.dds.KinematicsToolboxOutputStatus;
 import controller_msgs.msg.dds.WalkingControllerPreviewInputMessage;
 import controller_msgs.msg.dds.WalkingControllerPreviewOutputMessage;
 import javafx.animation.AnimationTimer;
+import javafx.beans.value.ChangeListener;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
 import javafx.scene.control.SpinnerValueFactory.DoubleSpinnerValueFactory;
+import us.ihmc.commons.MathTools;
 import us.ihmc.commons.PrintTools;
 import us.ihmc.communication.packets.ExecutionMode;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
@@ -28,6 +36,8 @@ import us.ihmc.idl.IDLSequence.Float;
 import us.ihmc.idl.IDLSequence.Object;
 import us.ihmc.javaFXToolkit.messager.JavaFXMessager;
 import us.ihmc.javaFXToolkit.messager.MessageBidirectionalBinding.PropertyToMessageTypeConverter;
+import us.ihmc.log.LogTools;
+import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.messager.Messager;
 import us.ihmc.messager.TopicListener;
 import us.ihmc.pathPlanning.visibilityGraphs.ui.properties.Point3DProperty;
@@ -36,12 +46,7 @@ import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.geometry.PlanarRegion;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.robotSide.RobotSide;
-
-import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.concurrent.atomic.AtomicInteger;
-import java.util.concurrent.atomic.AtomicReference;
-
-import static us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI.*;
+import us.ihmc.robotModels.FullRobotModelUtils;
 
 public class MainTabController
 {
@@ -269,6 +274,9 @@ public class MainTabController
       messager.registerTopicListener(GlobalResetTopic, reset -> clearStartGoalTextFields());
 
       walkingPreviewPlaybackManager = new WalkingPreviewPlaybackManager(messager);
+      previewSlider.valueProperty()
+                   .addListener((ChangeListener<Number>) (observable, oldValue,
+                                                          newValue) -> walkingPreviewPlaybackManager.requestSpecificPercentageInPreview(newValue.doubleValue()));
    }
 
    @FXML
@@ -308,6 +316,24 @@ public class MainTabController
       double transferTime = 1.0;
       requestMessage.footsteps_.set(FootstepDataMessageConverter.createFootstepDataListFromPlan(footstepPlan, swingTime, transferTime, ExecutionMode.OVERRIDE));
       messager.submitMessage(FootstepPlannerMessagerAPI.RequestWalkingPreview, requestMessage);
+   }
+
+   @FXML
+   private void playWalkingPreview()
+   {
+      walkingPreviewPlaybackManager.start();
+   }
+
+   @FXML
+   private void pauseWalkingPreview()
+   {
+      walkingPreviewPlaybackManager.playbackModeActive.set(false);
+   }
+
+   @FXML
+   private void stopWalkingPreview()
+   {
+      walkingPreviewPlaybackManager.stop();
    }
 
    public void setFullRobotModel(FullHumanoidRobotModel fullHumanoidRobotModel)
@@ -413,6 +439,7 @@ public class MainTabController
 
       int playbackCounter = 0;
       FullHumanoidRobotModel previewRobotModel = null;
+      OneDoFJointBasics[] previewModelOneDoFJoints = null;
 
       // whether to show ghost robot
       final AtomicBoolean active = new AtomicBoolean(false);
@@ -423,22 +450,19 @@ public class MainTabController
       WalkingPreviewPlaybackManager(Messager messager)
       {
          walkingPreviewOutput = messager.createInput(FootstepPlannerMessagerAPI.WalkingPreviewOutput);
-         messager.registerTopicListener(FootstepPlannerMessagerAPI.WalkingPreviewOutput, output -> {
-            if (active.get())
-               stop();
-            else
-               start();
-         });
+         messager.registerTopicListener(FootstepPlannerMessagerAPI.WalkingPreviewOutput, output -> start());
       }
 
       void setRobotModel(FullHumanoidRobotModel previewRobotModel)
       {
          this.previewRobotModel = previewRobotModel;
+         previewModelOneDoFJoints = FullRobotModelUtils.getAllJointsExcludingHands(previewRobotModel);
       }
 
       @Override
       public void start()
       {
+         playbackCounter = 0;
          super.start();
          active.set(true);
          playbackModeActive.set(true);
@@ -457,14 +481,43 @@ public class MainTabController
       {
          if (playbackModeActive.get())
          {
-            setToFrame(playbackCounter);
+            WalkingControllerPreviewOutputMessage walkingControllerPreviewOutputMessage = walkingPreviewOutput.get();
 
-            playbackCounter += playbackSpeed;
-            if (playbackCounter >= walkingPreviewOutput.get().getRobotConfigurations().size())
+            if (walkingControllerPreviewOutputMessage == null)
+            {
+               LogTools.info("No preview in memory.");
+               playbackModeActive.set(false);
+               stop();
+               return;
+            }
+
+            if (playbackCounter >= walkingControllerPreviewOutputMessage.getRobotConfigurations().size())
             {
                playbackCounter = 0;
             }
+
+            setToFrame(playbackCounter);
+
+            playbackCounter += playbackSpeed;
+
          }
+      }
+
+      void requestSpecificPercentageInPreview(double alpha)
+      {
+         alpha = MathTools.clamp(alpha, 0.0, 1.0);
+         WalkingControllerPreviewOutputMessage walkingControllerPreviewOutputMessage = walkingPreviewOutput.get();
+
+         if (walkingControllerPreviewOutputMessage == null)
+         {
+            LogTools.info("No preview in memory.");
+            playbackModeActive.set(false);
+            stop();
+            return;
+         }
+
+         int frameIndex = (int) (alpha * (walkingControllerPreviewOutputMessage.getRobotConfigurations().size() - 1));
+         requestSpecificFrame(frameIndex);
       }
 
       void requestSpecificFrame(int frameIndex)
@@ -476,21 +529,38 @@ public class MainTabController
       private void setToFrame(int frameIndex)
       {
          WalkingControllerPreviewOutputMessage walkingControllerPreviewOutputMessage = walkingPreviewOutput.get();
+
+         if (walkingControllerPreviewOutputMessage == null)
+         {
+            LogTools.info("No preview in memory.");
+            playbackModeActive.set(false);
+            stop();
+            return;
+         }
+
          Object<KinematicsToolboxOutputStatus> robotConfigurations = walkingControllerPreviewOutputMessage.getRobotConfigurations();
+
+         if (frameIndex >= robotConfigurations.size())
+         {
+            LogTools.info("frameIndex out of bound.");
+            stop();
+            return;
+         }
+
          KinematicsToolboxOutputStatus kinematicsToolboxOutputStatus = robotConfigurations.get(frameIndex);
 
          Float jointAngles = kinematicsToolboxOutputStatus.getDesiredJointAngles();
-         if (jointAngles.size() != previewRobotModel.getOneDoFJoints().length)
+
+         if (jointAngles.size() != previewModelOneDoFJoints.length)
          {
-            System.err.println("Received " + jointAngles.size() + " from walking controller preview toolbox, expected "
-                  + previewRobotModel.getOneDoFJoints().length);
+            System.err.println("Received " + jointAngles.size() + " from walking controller preview toolbox, expected " + previewModelOneDoFJoints.length);
             walkingPreviewOutput.set(null);
             return;
          }
 
          for (int i = 0; i < jointAngles.size(); i++)
          {
-            previewRobotModel.getOneDoFJoints()[i].setQ(jointAngles.get(i));
+            previewModelOneDoFJoints[i].setQ(jointAngles.get(i));
          }
 
          previewRobotModel.getRootJoint().setJointPosition(kinematicsToolboxOutputStatus.getDesiredRootTranslation());
