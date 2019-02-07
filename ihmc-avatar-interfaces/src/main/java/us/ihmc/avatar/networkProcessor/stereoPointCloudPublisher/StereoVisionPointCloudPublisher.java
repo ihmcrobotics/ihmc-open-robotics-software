@@ -41,8 +41,6 @@ public class StereoVisionPointCloudPublisher
 
    private final String robotName;
    private final FullHumanoidRobotModel fullRobotModel;
-   private final ReferenceFrame lidarBaseFrame;
-   private ReferenceFrame lidarSensorFrame;
    private ReferenceFrame stereoVisionPointsFrame = worldFrame;
    private StereoVisionTransformer stereoVisionTransformer = null;
 
@@ -52,8 +50,7 @@ public class StereoVisionPointCloudPublisher
 
    private final IHMCROS2Publisher<StereoVisionPointCloudMessage> pointcloudPublisher;
 
-   public StereoVisionPointCloudPublisher(String lidarSensorName, FullHumanoidRobotModelFactory modelFactory, Ros2Node ros2Node,
-                                          String robotConfigurationDataTopicName)
+   public StereoVisionPointCloudPublisher(FullHumanoidRobotModelFactory modelFactory, Ros2Node ros2Node, String robotConfigurationDataTopicName)
    {
       robotName = modelFactory.getRobotDescription().getName();
       fullRobotModel = modelFactory.createFullRobotModel();
@@ -61,9 +58,6 @@ public class StereoVisionPointCloudPublisher
       ROS2Tools.createCallbackSubscription(ros2Node, RobotConfigurationData.class, robotConfigurationDataTopicName,
                                            s -> robotConfigurationDataBuffer.receivedPacket(s.takeNextData()));
       pointcloudPublisher = ROS2Tools.createPublisher(ros2Node, StereoVisionPointCloudMessage.class, ROS2Tools.getDefaultTopicNameGenerator());
-      lidarBaseFrame = fullRobotModel.getLidarBaseFrame(lidarSensorName);
-      RigidBodyTransform transformToLidarBaseFrame = fullRobotModel.getLidarBaseToSensorTransform(lidarSensorName);
-      lidarSensorFrame = ReferenceFrame.constructFrameWithUnchangingTransformToParent("lidarSensorFrame", lidarBaseFrame, transformToLidarBaseFrame);
    }
 
    public void start()
@@ -97,16 +91,6 @@ public class StereoVisionPointCloudPublisher
    {
       LogTools.info("setCustomStereoVisionTransformer()");
       stereoVisionTransformer = transformer;
-   }
-
-   public void setScanFrameToWorldFrame()
-   {
-      stereoVisionPointsFrame = worldFrame;
-   }
-
-   public void setScanFrameToLidarSensorFrame()
-   {
-      stereoVisionPointsFrame = lidarSensorFrame;
    }
 
    private RosPointCloudSubscriber createROSPointCloud2Subscriber()
