@@ -78,8 +78,14 @@ public class ParameterBasedNodeExpansion implements FootstepNodeExpansion
 
             if (!checkNodeIsFarEnoughFromOtherFeet(newNodePosition, clearanceVector, node))
                continue;
+            if (MathTools.epsilonEquals(movingVector.lengthSquared(), 0.0, 1e-3))
+               continue;
 
             FootstepNode offsetNode = constructNodeInPreviousNodeFrame(newNodePosition, node);
+
+            if (offsetNode.geometricallyEquals(node))
+               throw new RuntimeException("This shouldn't be created.");
+
             neighboringNodesToPack.add(offsetNode);
          }
       }
