@@ -1,14 +1,15 @@
 package us.ihmc.avatar.obstacleCourseTests;
 
-import static org.junit.Assert.assertTrue;
+import static us.ihmc.robotics.Assert.*;
 
 import java.util.Random;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import us.ihmc.avatar.MultiRobotTestInterface;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
-import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
+import org.junit.jupiter.api.Tag;
+import org.junit.jupiter.api.Disabled;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotModels.FullRobotModel;
 import us.ihmc.simulationConstructionSetTools.util.HumanoidFloatingRootJointRobot;
@@ -20,8 +21,7 @@ import us.ihmc.commons.thread.ThreadTools;
 
 public abstract class DRCInverseDynamicsCalculatorTest implements MultiRobotTestInterface
 {
-	@ContinuousIntegrationTest(estimatedDuration = 0.5)
-   @Test(timeout = 30000)
+   @Test
    public void testInverseDynamicsStartingWithRandomTorquesInSCS() throws UnreasonableAccelerationException
    {
       Random random = new Random(1776L);
@@ -92,8 +92,7 @@ public abstract class DRCInverseDynamicsCalculatorTest implements MultiRobotTest
    }
 
 
-	@ContinuousIntegrationTest(estimatedDuration = 0.2)
-   @Test(timeout = 30000)
+   @Test
    public void testInverseDynamicsStartingWithRandomAccelerationsInInverseDynamics() throws UnreasonableAccelerationException
    {
       Random random = new Random(1984L);

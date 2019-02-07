@@ -1,18 +1,19 @@
 package us.ihmc.commonWalkingControlModules.capturePoint.optimization.qpInput;
 
-import static junit.framework.TestCase.assertTrue;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
+import static us.ihmc.robotics.Assert.*;
+
+import static us.ihmc.robotics.Assert.*;
 
 import java.util.Random;
 
 import org.ejml.data.DenseMatrix64F;
 import org.ejml.ops.CommonOps;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import us.ihmc.commons.MathTools;
 import us.ihmc.commons.RandomNumbers;
-import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
+import org.junit.jupiter.api.Tag;
+import org.junit.jupiter.api.Disabled;
 import us.ihmc.robotics.testing.JUnitTools;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 
@@ -21,8 +22,7 @@ public class ICPQPConstraintCalculatorTest
    private final static int iters = 100;
    private final static double epsilon = 1e-7;
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(timeout = 30000)
+   @Test
    public void testFeedbackMaxValueConstraint()
    {
       ICPQPIndexHandler indexHandler = new ICPQPIndexHandler(new YoVariableRegistry("dummy"));
@@ -44,8 +44,7 @@ public class ICPQPConstraintCalculatorTest
       }
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(timeout = 30000)
+   @Test
    public void testFeedbackMaxValueConstraintWithCMP()
    {
       ICPQPIndexHandler indexHandler = new ICPQPIndexHandler(new YoVariableRegistry("dummy"));
@@ -68,8 +67,7 @@ public class ICPQPConstraintCalculatorTest
       }
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(timeout = 30000)
+   @Test
    public void testFeedbackMaxValueConstraintWithInfiniteLimits()
    {
       ICPQPIndexHandler indexHandler = new ICPQPIndexHandler(new YoVariableRegistry("dummy"));
@@ -171,8 +169,7 @@ public class ICPQPConstraintCalculatorTest
       }
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(timeout = 30000)
+   @Test
    public void testFeedbackMaxRateConstraint()
    {
       ICPQPIndexHandler indexHandler = new ICPQPIndexHandler(new YoVariableRegistry("dummy"));
@@ -199,8 +196,7 @@ public class ICPQPConstraintCalculatorTest
       }
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(timeout = 30000)
+   @Test
    public void testFeedbackMaxRateConstraintWithCMP()
    {
       ICPQPIndexHandler indexHandler = new ICPQPIndexHandler(new YoVariableRegistry("dummy"));
@@ -228,8 +224,7 @@ public class ICPQPConstraintCalculatorTest
       }
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(timeout = 30000)
+   @Test
    public void testFeedbackMaxRateConstraintWithInfiniteLimits()
    {
       ICPQPIndexHandler indexHandler = new ICPQPIndexHandler(new YoVariableRegistry("dummy"));

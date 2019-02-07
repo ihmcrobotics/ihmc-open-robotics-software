@@ -16,6 +16,11 @@ import us.ihmc.quadrupedCommunication.networkProcessing.QuadrupedToolboxControll
 import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.FootstepPlannerType;
 import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.QuadrupedBodyPathAndFootstepPlanner;
 import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.QuadrupedFootstepPlannerGoal;
+import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.QuadrupedFootstepPlannerStart;
+import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.graphSearch.QuadrupedAStarFootstepPlanner;
+import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.graphSearch.nodeExpansion.FootstepNodeExpansion;
+import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.graphSearch.nodeExpansion.ParameterBasedNodeExpansion;
+import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.graphSearch.parameters.FootstepPlannerParameters;
 import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.turnWalkTurn.QuadrupedSplineWithTurnWalkTurnPlanner;
 import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.turnWalkTurn.QuadrupedVisGraphWithTurnWalkTurnPlanner;
 import us.ihmc.quadrupedPlanning.QuadrupedXGaitSettingsReadOnly;
@@ -45,7 +50,6 @@ public class QuadrupedFootstepPlanningController extends QuadrupedToolboxControl
    private final AtomicReference<QuadrupedFootstepPlanningRequestPacket> latestRequestReference = new AtomicReference<>(null);
    private Optional<PlanarRegionsList> planarRegionsList = Optional.empty();
 
-
    private final YoQuadrupedXGaitSettings xGaitSettings;
    private final YoVisibilityGraphParameters visibilityGraphParameters;
    private final AtomicLong robotTimestampNanos = new AtomicLong();
@@ -54,21 +58,24 @@ public class QuadrupedFootstepPlanningController extends QuadrupedToolboxControl
    private final YoDouble timeout = new YoDouble("toolboxTimeout", registry);
 
    public QuadrupedFootstepPlanningController(QuadrupedXGaitSettingsReadOnly defaultXGaitSettings, VisibilityGraphsParameters visibilityGraphParameters,
-                                              PointFootSnapperParameters pointFootSnapperParameters, OutputManager statusOutputManager,
-                                              QuadrupedRobotDataReceiver robotDataReceiver, YoVariableRegistry parentRegistry,
-                                              YoGraphicsListRegistry graphicsListRegistry, long tickTimeMs)
+                                              FootstepPlannerParameters footstepPlannerParameters, PointFootSnapperParameters pointFootSnapperParameters,
+                                              OutputManager statusOutputManager, QuadrupedRobotDataReceiver robotDataReceiver,
+                                              YoVariableRegistry parentRegistry, YoGraphicsListRegistry graphicsListRegistry, long tickTimeMs)
    {
       super(robotDataReceiver, statusOutputManager, parentRegistry);
 
       xGaitSettings = new YoQuadrupedXGaitSettings(defaultXGaitSettings, registry);
       this.visibilityGraphParameters = new YoVisibilityGraphParameters(visibilityGraphParameters, registry);
 
+      FootstepNodeExpansion expansion = new ParameterBasedNodeExpansion(footstepPlannerParameters, xGaitSettings);
       plannerMap.put(FootstepPlannerType.SIMPLE_PATH_TURN_WALK_TURN,
                      new QuadrupedSplineWithTurnWalkTurnPlanner(xGaitSettings, robotTimestamp, pointFootSnapperParameters,
                                                                 robotDataReceiver.getReferenceFrames(), null, registry));
       plannerMap.put(FootstepPlannerType.VIS_GRAPH_WITH_TURN_WALK_TURN,
                      new QuadrupedVisGraphWithTurnWalkTurnPlanner(xGaitSettings, this.visibilityGraphParameters, robotTimestamp, pointFootSnapperParameters,
                                                                   robotDataReceiver.getReferenceFrames(), null, registry));
+      plannerMap.put(FootstepPlannerType.A_STAR,
+                     QuadrupedAStarFootstepPlanner.createPlanner(footstepPlannerParameters, defaultXGaitSettings, null, expansion, registry));
       activePlanner.set(FootstepPlannerType.SIMPLE_PATH_TURN_WALK_TURN);
    }
 
@@ -126,6 +133,9 @@ public class QuadrupedFootstepPlanningController extends QuadrupedToolboxControl
       if (request == null)
          return false;
 
+      if (request.getRequestedFootstepPlannerType() >= 0)
+         activePlanner.set(FootstepPlannerType.fromByte(request.getRequestedFootstepPlannerType()));
+
       PlanarRegionsListMessage planarRegionsListMessage = request.getPlanarRegionsListMessage();
       if (planarRegionsListMessage == null)
       {
@@ -134,7 +144,10 @@ public class QuadrupedFootstepPlanningController extends QuadrupedToolboxControl
       else
       {
          PlanarRegionsList planarRegionsList = PlanarRegionMessageConverter.convertToPlanarRegionsList(planarRegionsListMessage);
-         this.planarRegionsList = Optional.of(planarRegionsList);
+         if (planarRegionsList.isEmpty())
+            this.planarRegionsList = Optional.empty();
+         else
+            this.planarRegionsList = Optional.of(planarRegionsList);
       }
 
       QuadrupedBodyPathAndFootstepPlanner planner = plannerMap.get(activePlanner.getEnumValue());
@@ -142,13 +155,13 @@ public class QuadrupedFootstepPlanningController extends QuadrupedToolboxControl
       FramePose3D initialPose = new FramePose3D(ReferenceFrame.getWorldFrame(), request.getBodyPositionInWorld(), request.getBodyOrientationInWorld());
       FramePose3D goalPose = new FramePose3D(ReferenceFrame.getWorldFrame(), request.getGoalPositionInWorld(), request.getGoalOrientationInWorld());
 
+      QuadrupedFootstepPlannerStart start = new QuadrupedFootstepPlannerStart();
       QuadrupedFootstepPlannerGoal goal = new QuadrupedFootstepPlannerGoal();
+      start.setStartPose(initialPose);
       goal.setGoalPose(goalPose);
 
-      planner.setInitialBodyPose(initialPose);
+      planner.setStart(start);
       planner.setGoal(goal);
-
-      planner.initialize();
 
       return true;
    }
@@ -193,6 +206,6 @@ public class QuadrupedFootstepPlanningController extends QuadrupedToolboxControl
          stepMessages.add(QuadrupedMessageTools.createQuadrupedTimedStepMessage(steps.get(i)));
       }
 
-      return QuadrupedMessageTools.createQuadrupedTimedStepListMessage(stepMessages, true);
+      return QuadrupedMessageTools.createQuadrupedTimedStepListMessage(stepMessages, false);
    }
 }

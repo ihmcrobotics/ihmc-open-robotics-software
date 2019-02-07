@@ -1,19 +1,18 @@
 package us.ihmc.tools;
 
-import static org.junit.Assert.assertEquals;
+import static us.ihmc.robotics.Assert.*;
 
 import java.util.Random;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
-import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
-
+import org.junit.jupiter.api.Tag;
+import org.junit.jupiter.api.Disabled;
 public class UnitConversionsTest
 {
    private static final double EPS = 1e-12;
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(timeout = 30000)
+   @Test
    public void inchToMeter()
    {
       Random rand = new Random();
@@ -25,8 +24,7 @@ public class UnitConversionsTest
       }
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(timeout = 30000)
+   @Test
    public void squareInchToSquareMeter()
    {
       Random rand = new Random();
@@ -41,8 +39,7 @@ public class UnitConversionsTest
       }
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(timeout = 30000)
+   @Test
    public void cubicInchToCubicMeter()
    {
       Random rand = new Random();
@@ -60,8 +57,7 @@ public class UnitConversionsTest
       }
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(timeout = 30000)
+   @Test
    public void degreesToRadians()
    {
       Random rand = new Random();
@@ -72,8 +68,7 @@ public class UnitConversionsTest
       }
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(timeout = 30000)
+   @Test
    public void psiToPascals()
    {
       Random rand = new Random();

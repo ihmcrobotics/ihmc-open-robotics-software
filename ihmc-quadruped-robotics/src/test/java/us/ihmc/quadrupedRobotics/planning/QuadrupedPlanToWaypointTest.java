@@ -1,11 +1,13 @@
 package us.ihmc.quadrupedRobotics.planning;
 
 import controller_msgs.msg.dds.QuadrupedFootstepPlanningRequestPacket;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
-import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Tag;
+import org.junit.jupiter.api.Disabled;
 import us.ihmc.quadrupedCommunication.teleop.RemoteQuadrupedTeleopManager;
+import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.FootstepPlannerType;
 import us.ihmc.quadrupedRobotics.QuadrupedForceTestYoVariables;
 import us.ihmc.quadrupedRobotics.QuadrupedMultiRobotTestInterface;
 import us.ihmc.quadrupedRobotics.QuadrupedTestBehaviors;
@@ -26,7 +28,7 @@ public abstract class QuadrupedPlanToWaypointTest implements QuadrupedMultiRobot
    private RemoteQuadrupedTeleopManager stepTeleopManager;
    private QuadrupedTestFactory quadrupedTestFactory;
 
-   @Before
+   @BeforeEach
    public void setup()
    {
       MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " before test.");
@@ -55,7 +57,7 @@ public abstract class QuadrupedPlanToWaypointTest implements QuadrupedMultiRobot
       }
    }
 
-   @After
+   @AfterEach
    public void tearDown()
    {
       quadrupedTestFactory.close();
@@ -67,8 +69,7 @@ public abstract class QuadrupedPlanToWaypointTest implements QuadrupedMultiRobot
       MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " after test.");
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 120)
-   @Test(timeout = 200000)
+   @Test
    public void testSimpleForwardPoint()
    {
       setUpSimulation(null);
@@ -84,6 +85,7 @@ public abstract class QuadrupedPlanToWaypointTest implements QuadrupedMultiRobot
 
       planningRequestPacket.getGoalPositionInWorld().set(1.5, 0.5, 0.0);
       planningRequestPacket.getGoalOrientationInWorld().setToYawQuaternion(-Math.PI * 0.25);
+      planningRequestPacket.setRequestedFootstepPlannerType(FootstepPlannerType.SIMPLE_PATH_TURN_WALK_TURN.toByte());
 
       stepTeleopManager.publishPlanningRequest(planningRequestPacket);
 

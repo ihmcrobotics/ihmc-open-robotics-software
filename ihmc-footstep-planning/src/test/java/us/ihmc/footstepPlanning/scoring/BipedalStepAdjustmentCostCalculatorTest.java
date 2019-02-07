@@ -1,12 +1,13 @@
 package us.ihmc.footstepPlanning.scoring;
 
-import org.junit.After;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.Test;
 import us.ihmc.commons.MathTools;
 import us.ihmc.commons.RandomNumbers;
 import us.ihmc.commons.thread.ThreadTools;
-import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
-import us.ihmc.continuousIntegration.ContinuousIntegrationTools;
+import org.junit.jupiter.api.Tag;
+import org.junit.jupiter.api.Disabled;
+import us.ihmc.commons.ContinuousIntegrationTools;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
@@ -35,8 +36,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Random;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import static us.ihmc.robotics.Assert.*;
 
 public class BipedalStepAdjustmentCostCalculatorTest
 {
@@ -56,14 +56,13 @@ public class BipedalStepAdjustmentCostCalculatorTest
    private int numInX = (int) ((xMax - xMin) / incrementX);
    private int numInY = (int) ((xMax - yMin) / incrementY);
 
-   @After
+   @AfterEach
    public void tearDown()
    {
       ReferenceFrameTools.clearWorldFrameTree();
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.1)
-   @Test(timeout = 30000)
+   @Test
    public void testIdealFootstepAlwaysBetterThanOthers()
    {
       Random random = new Random(1776L);
@@ -126,8 +125,7 @@ public class BipedalStepAdjustmentCostCalculatorTest
 
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 2.3)
-   @Test(timeout = 30000)
+   @Test
    public void testScoringFootsteps()
    {
       SimulationTestingParameters simulationTestingParameters = new SimulationTestingParameters();

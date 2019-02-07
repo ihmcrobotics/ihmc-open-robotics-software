@@ -1,7 +1,7 @@
 package us.ihmc.avatar.networkProcessor.wholeBodyTrajectoryToolboxModule;
 
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.fail;
+import static us.ihmc.robotics.Assert.*;
+
 import static us.ihmc.avatar.networkProcessor.kinematicsToolboxModule.AvatarHumanoidKinematicsToolboxControllerTest.createCapturabilityBasedStatus;
 import static us.ihmc.avatar.networkProcessor.kinematicsToolboxModule.AvatarHumanoidKinematicsToolboxControllerTest.extractRobotConfigurationData;
 import static us.ihmc.humanoidRobotics.communication.packets.manipulation.wholeBodyTrajectory.ConfigurationSpaceName.PITCH;
@@ -16,9 +16,9 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.IntStream;
 
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import controller_msgs.msg.dds.KinematicsToolboxOutputStatus;
 import controller_msgs.msg.dds.KinematicsToolboxRigidBodyMessage;
@@ -42,7 +42,8 @@ import us.ihmc.communication.controllerAPI.CommandInputManager;
 import us.ihmc.communication.controllerAPI.MessageUnpackingTools;
 import us.ihmc.communication.controllerAPI.StatusMessageOutputManager;
 import us.ihmc.communication.packets.MessageTools;
-import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
+import org.junit.jupiter.api.Tag;
+import org.junit.jupiter.api.Disabled;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
@@ -123,7 +124,7 @@ public abstract class AvatarWholeBodyTrajectoryToolboxControllerTest implements 
    private static final double TRACKING_TRAJECTORY_POSITION_ERROR_THRESHOLD = 0.05;
    private static final double TRACKING_TRAJECTORY_ORIENTATION_ERROR_THRESHOLD = 0.05;
 
-   @Before
+   @BeforeEach
    public void setup()
    {
       mainRegistry = new YoVariableRegistry("main");
@@ -188,7 +189,7 @@ public abstract class AvatarWholeBodyTrajectoryToolboxControllerTest implements 
       new JointAnglesWriter(ghost, fullHumanoidRobotModel).updateRobotConfigurationBasedOnFullRobotModel();
    }
 
-   @After
+   @AfterEach
    public void tearDown()
    {
       if (simulationTestingParameters.getKeepSCSUp())
@@ -219,8 +220,7 @@ public abstract class AvatarWholeBodyTrajectoryToolboxControllerTest implements 
       }
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 20.0)
-   @Test(timeout = 100000)
+   @Test
    public void testOneBigCircle() throws Exception, UnreasonableAccelerationException
    {
       // Trajectory parameters
@@ -286,8 +286,7 @@ public abstract class AvatarWholeBodyTrajectoryToolboxControllerTest implements 
       runTrajectoryTest(message, 100000);
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 20.0)
-   @Test(timeout = 100000)
+   @Test
    public void testHandCirclePositionAndYaw() throws Exception, UnreasonableAccelerationException
    {
       // Trajectory parameters
@@ -348,8 +347,7 @@ public abstract class AvatarWholeBodyTrajectoryToolboxControllerTest implements 
       runTrajectoryTest(message, 100000);
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 20.0)
-   @Test(timeout = 100000)
+   @Test
    public void testHandCirclePositionAndYawPitchRoll() throws Exception, UnreasonableAccelerationException
    {
       // Trajectory parameters

@@ -1,11 +1,12 @@
 package us.ihmc.avatar;
 
-import static junit.framework.TestCase.assertFalse;
-import static org.junit.Assert.assertTrue;
+import static us.ihmc.robotics.Assert.*;
 
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
+import static us.ihmc.robotics.Assert.*;
+
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import controller_msgs.msg.dds.FootstepDataListMessage;
 import controller_msgs.msg.dds.FootstepDataMessage;
@@ -17,7 +18,8 @@ import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelSta
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.walkingController.states.WalkingStateEnum;
 import us.ihmc.commons.PrintTools;
 import us.ihmc.commons.thread.ThreadTools;
-import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
+import org.junit.jupiter.api.Tag;
+import org.junit.jupiter.api.Disabled;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
@@ -76,7 +78,7 @@ public abstract class AvatarStepInPlaceTest implements MultiRobotTestInterface
       return new OffsetAndYawRobotInitialSetup();
    }
 
-   @Before
+   @BeforeEach
    public void setup()
    {
       MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " before test.");
@@ -112,7 +114,7 @@ public abstract class AvatarStepInPlaceTest implements MultiRobotTestInterface
       }
    }
 
-   @After
+   @AfterEach
    public void tearDown()
    {
       if (simulationTestingParameters.getKeepSCSUp())
@@ -131,8 +133,7 @@ public abstract class AvatarStepInPlaceTest implements MultiRobotTestInterface
       MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " after test.");
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 30.0)
-   @Test(timeout = 100000)
+   @Test
    public void testStepInPlace() throws SimulationExceededMaximumTimeException
    {
       setupCameraSideView();
@@ -166,8 +167,7 @@ public abstract class AvatarStepInPlaceTest implements MultiRobotTestInterface
       assertTrue(drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(simulationTime));
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 49.0)
-   @Test(timeout = 100000)
+   @Test
    public void testStepInPlaceWithPush() throws SimulationExceededMaximumTimeException
    {
       setupCameraSideView();

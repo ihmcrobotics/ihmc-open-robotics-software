@@ -1,8 +1,6 @@
 package us.ihmc.modelFileLoaders.SdfLoader;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
+import static us.ihmc.robotics.Assert.*;
 
 import java.io.FileNotFoundException;
 import java.io.InputStream;
@@ -11,10 +9,11 @@ import java.util.List;
 
 import javax.xml.bind.JAXBException;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import us.ihmc.commons.PrintTools;
-import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
+import org.junit.jupiter.api.Tag;
+import org.junit.jupiter.api.Disabled;
 import us.ihmc.euclid.matrix.Matrix3D;
 import us.ihmc.euclid.tools.EuclidCoreTestTools;
 import us.ihmc.euclid.tuple3D.Vector3D;
@@ -33,8 +32,7 @@ import us.ihmc.simulationconstructionset.RobotFromDescription;
 
 public class SDFRobotTest
 {
-	@ContinuousIntegrationTest(estimatedDuration = 5.8)
-   @Test(timeout = 30000)
+   @Test
    public void testSDFRobotVersusRobotDescription() throws FileNotFoundException, JAXBException
    {
 	   List<String> resourceDirectories = (List<String>) null;

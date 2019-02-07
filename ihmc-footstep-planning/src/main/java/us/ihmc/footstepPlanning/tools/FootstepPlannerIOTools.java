@@ -1,6 +1,6 @@
 package us.ihmc.footstepPlanning.tools;
 
-import org.junit.Assert;
+import us.ihmc.robotics.Assert;
 import us.ihmc.commons.PrintTools;
 import us.ihmc.euclid.tools.EuclidCoreIOTools;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;

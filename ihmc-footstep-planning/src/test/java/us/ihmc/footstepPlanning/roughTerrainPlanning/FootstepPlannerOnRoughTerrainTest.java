@@ -3,14 +3,15 @@ package us.ihmc.footstepPlanning.roughTerrainPlanning;
 import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.stage.Stage;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import us.ihmc.commons.Conversions;
 import us.ihmc.commons.PrintTools;
 import us.ihmc.commons.thread.ThreadTools;
-import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
-import us.ihmc.continuousIntegration.ContinuousIntegrationTools;
+import org.junit.jupiter.api.Tag;
+import org.junit.jupiter.api.Disabled;
+import us.ihmc.commons.ContinuousIntegrationTools;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.tools.ReferenceFrameTools;
 import us.ihmc.footstepPlanning.FootstepPlan;
@@ -30,7 +31,8 @@ import us.ihmc.javaFXToolkit.messager.SharedMemoryJavaFXMessager;
 import java.util.Random;
 import java.util.concurrent.atomic.AtomicReference;
 
-import static org.junit.Assert.assertTrue;
+import static us.ihmc.robotics.Assert.*;
+
 import static us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI.ComputePathTopic;
 import static us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI.FootstepPlanTopic;
 import static us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI.PlannerParametersTopic;
@@ -49,7 +51,7 @@ public abstract class FootstepPlannerOnRoughTerrainTest implements PlanningTest
    private double bodyBoxWidth = 0.7;
    private double bodyBoxOffsetX = 0.0;
 
-   @Before
+   @BeforeEach
    public void setup()
    {
       visualize = visualize && !ContinuousIntegrationTools.isRunningOnContinuousIntegrationServer();
@@ -93,7 +95,7 @@ public abstract class FootstepPlannerOnRoughTerrainTest implements PlanningTest
       setupInternal();
    }
 
-   @After
+   @AfterEach
    public void tearDown()
    {
       ReferenceFrameTools.clearWorldFrameTree();
@@ -135,16 +137,14 @@ public abstract class FootstepPlannerOnRoughTerrainTest implements PlanningTest
 
    public abstract boolean assertPlannerReturnedResult();
 
-   @ContinuousIntegrationTest(estimatedDuration = 10.0)
-   @Test(timeout = 50000)
+   @Test
    public void testOnStaircase()
    {
       // run the test
       runTestAndAssert(getTestData(staircase));
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 2.5)
-   @Test(timeout = 30000)
+   @Test
    public void testWithWall()
    {
       // run the test
@@ -161,103 +161,89 @@ public abstract class FootstepPlannerOnRoughTerrainTest implements PlanningTest
       runTestAndAssert(getTestData(bollards));
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.6)
-   @Test(timeout = 30000)
+   @Test
    public void testOverCinderBlockField()
    {
       // run the test
       runTestAndAssert(getTestData(overCinderBlockField));
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.2)
-   @Test(timeout = 3000000)
+   @Test
    public void testSteppingStones()
    {
       // run the test
       runTestAndAssert(getTestData(steppingStones));
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.1)
-   @Test(timeout = 30000)
+   @Test
    public void testStepUpsAndDownsScoringDifficult()
    {
       runTestAndAssert(getTestData(stepUpsAndDownsScoringDifficult));
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 10.0)
-   @Test(timeout = 50000)
+   @Test
    public void testStepAfterPitchedUp()
    {
       runTestAndAssert(getTestData(stepAfterPitchUp));
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 10.0)
-   @Test(timeout = 50000)
+   @Test
    public void testStepAfterPitchedDown()
    {
       runTestAndAssert(getTestData(stepAfterPitchDown));
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 10.0)
-   @Test(timeout = 50000)
+   @Test
    public void testCompareStepBeforeGap()
    {
       runTestAndAssert(getTestData(compareStepBeforeGap));
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 10.0)
-   @Test(timeout = 50000)
+   @Test
    public void testSimpleStepOnBox()
    {
       runTestAndAssert(getTestData(simpleStepOnBox));
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 10.0)
-   @Test(timeout = 50000)
+   @Test
    public void testSimpleStepOnBoxTwo()
    {
       runTestAndAssert(getTestData(simpleStepOnBoxTwo));
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.2)
-   @Test(timeout = 30000)
+   @Test
    public void testRandomEnvironment()
    {
       runTestAndAssert(getTestData(random));
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.6)
-   @Test(timeout = 30000)
+   @Test
    public void testSimpleGaps()
    {
       runTestAndAssert(getTestData(simpleGaps));
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.6)
-   @Test(timeout = 30000)
+   @Test
    public void testPartialGaps()
    {
       runTestAndAssert(getTestData(partialGaps));
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.6)
-   @Test(timeout = 30000)
+   @Test
    public void testWalkingAroundBox()
    {
       // run the test
       runTestAndAssert(getTestData(box));
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.6)
-   @Test(timeout = 30000)
+   @Test
    public void testSpiralStaircase()
    {
       // run the test
       runTestAndAssert(getTestData(spiralStaircase));
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.1)
-   @Test(timeout = 30000)
+   @Test
    public void testWalkingAroundHole()
    {
       // run the test

@@ -1,15 +1,14 @@
 package us.ihmc.simulationConstructionSetTools.util.ground;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import static us.ihmc.robotics.Assert.*;
 
 import java.util.ArrayList;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
-import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
+import org.junit.jupiter.api.Tag;
+import org.junit.jupiter.api.Disabled;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.geometry.Plane3D;
 import us.ihmc.euclid.geometry.interfaces.Vertex2DSupplier;
@@ -29,7 +28,7 @@ public class RotatableConvexPolygonTerrainObjectTest
    private double centroidHeight;
    private double epsilon = 1e-8;
 
-   @Before
+   @BeforeEach
    public void setUp() throws Exception
    {
       normalZVector = new Vector3D(0.0, 0.0, 1.0);
@@ -51,8 +50,7 @@ public class RotatableConvexPolygonTerrainObjectTest
       inclinedTopFaceOctagon3dSecond = new RotatableConvexPolygonTerrainObject(normalYZVector, convexPolygon, 3.0);
    }
 
-	@ContinuousIntegrationTest(estimatedDuration = 0.0)
-	@Test(timeout=300000)
+	@Test
    public void testHeightAt()
    {
       Point2DReadOnly centroid = convexPolygon.getCentroid();
@@ -67,8 +65,7 @@ public class RotatableConvexPolygonTerrainObjectTest
       assertEquals(0.0, flatTopFaceOctagon3d.heightAt(5.0, 5.0, 5.0), epsilon);
    }
 
-	@ContinuousIntegrationTest(estimatedDuration = 0.0)
-	@Test(timeout=300000)
+	@Test
    public void testIsClose()
    {
       assertTrue(flatTopFaceOctagon3d.isClose(0.0, 0.0, 0.5));    // Point Inside
@@ -81,8 +78,7 @@ public class RotatableConvexPolygonTerrainObjectTest
 
    }
 
-	@ContinuousIntegrationTest(estimatedDuration = 0.0)
-	@Test(timeout=300000)
+	@Test
    public void testClosestIntersectionTo()
    {
       Point3D pointToPack = new Point3D();
@@ -158,8 +154,7 @@ public class RotatableConvexPolygonTerrainObjectTest
 
    }
 
-	@ContinuousIntegrationTest(estimatedDuration = 0.0)
-	@Test(timeout=300000)
+	@Test
    public void testIsInsideTheFace()
    {
       Point3D faceCenter = new Point3D(1.0, 0.0, 0.0);
@@ -182,8 +177,7 @@ public class RotatableConvexPolygonTerrainObjectTest
       assertFalse(flatTopFaceOctagon3d.isInsideTheFace(facePlane, faceVertices3d, pointToCheck));
    }
 
-	@ContinuousIntegrationTest(estimatedDuration = 0.0)
-	@Test(timeout=300000)
+	@Test
    public void testSurfaceNormalAt()
    {
       Vector3D normalToPack = new Vector3D();
@@ -201,8 +195,7 @@ public class RotatableConvexPolygonTerrainObjectTest
       EuclidCoreTestTools.assertTuple3DEquals(expected, normalToPack, epsilon);
    }
 
-	@ContinuousIntegrationTest(estimatedDuration = 0.0)
-	@Test(timeout=300000)
+	@Test
    public void testClosestIntersectionAndNormalAt()
    {
       Point3D pointToPack = new Point3D();
@@ -327,29 +320,25 @@ public class RotatableConvexPolygonTerrainObjectTest
       EuclidCoreTestTools.assertTuple3DEquals(expectedVector, normalToPack, epsilon);
    }
 
-	@ContinuousIntegrationTest(estimatedDuration = 0.0)
-	@Test(timeout=300000)
+	@Test
    public void testGetXMin()
    {
       assertEquals(-2.0, flatTopFaceOctagon3d.getBoundingBox().getMinX(), epsilon);
    }
 
-	@ContinuousIntegrationTest(estimatedDuration = 0.0)
-	@Test(timeout=300000)
+	@Test
    public void testGetXMax()
    {
       assertEquals(2.0, flatTopFaceOctagon3d.getBoundingBox().getMaxX(), epsilon);
    }
 
-	@ContinuousIntegrationTest(estimatedDuration = 0.0)
-	@Test(timeout=300000)
+	@Test
    public void testGetYMin()
    {
       assertEquals(-2.0, flatTopFaceOctagon3d.getBoundingBox().getMinY(), epsilon);
    }
 
-	@ContinuousIntegrationTest(estimatedDuration = 0.0)
-	@Test(timeout=300000)
+	@Test
    public void testGetYMax()
    {
       assertEquals(2.0, flatTopFaceOctagon3d.getBoundingBox().getMaxY(), epsilon);
@@ -357,7 +346,7 @@ public class RotatableConvexPolygonTerrainObjectTest
 
    public void testSetupInEnvironment()
    {
-      // Not an actual test, could be given @Test(timeout=300000) for visual confirmation though
+      // Not an actual test, could be given @Test for visual confirmation though
       SimulationConstructionSet scs = new SimulationConstructionSet();
       scs.addStaticLinkGraphics(inclinedTopFaceOctagon3d.getLinkGraphics());
 

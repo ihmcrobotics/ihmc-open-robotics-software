@@ -1,7 +1,8 @@
 package us.ihmc.communication.streamingData;
 
-import static junit.framework.Assert.assertTrue;
-import static org.junit.Assert.assertEquals;
+import static us.ihmc.robotics.Assert.*;
+
+import static us.ihmc.robotics.Assert.*;
 
 import java.io.IOException;
 import java.io.ObjectInputStream;
@@ -10,16 +11,16 @@ import java.io.OutputStream;
 import java.net.ServerSocket;
 import java.net.Socket;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
-import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
+import org.junit.jupiter.api.Tag;
+import org.junit.jupiter.api.Disabled;
 import us.ihmc.commons.thread.ThreadTools;
 
 public class PersistentTCPClientTest
 {
 
-	@ContinuousIntegrationTest(estimatedDuration = 0.4)
-	@Test(timeout = 30000)
+	@Test
    public void test() throws IOException
    {
       String serverIPAddress = "localHost";

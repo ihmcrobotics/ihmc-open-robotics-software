@@ -1,18 +1,15 @@
 package us.ihmc.tools.gui;
 
-import static org.junit.Assert.assertEquals;
+import static us.ihmc.robotics.Assert.*;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
-import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationPlan;
-import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
-import us.ihmc.continuousIntegration.IntegrationCategory;
-
-@ContinuousIntegrationPlan(categories = {IntegrationCategory.UI})
+import org.junit.jupiter.api.Tag;
+import org.junit.jupiter.api.Disabled;
+@Tag("gui")
 public class GUIMessagePanelTest
 {
-	@ContinuousIntegrationTest(estimatedDuration = 0.4)
-	@Test(timeout = 30000)
+	@Test
    public void testGetText()
    {
       GUIMessagePanel guiMessagePanel = new GUIMessagePanel("Test");

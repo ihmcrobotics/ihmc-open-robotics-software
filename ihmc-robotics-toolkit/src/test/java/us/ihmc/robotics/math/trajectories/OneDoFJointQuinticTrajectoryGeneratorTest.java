@@ -1,14 +1,12 @@
 package us.ihmc.robotics.math.trajectories;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
+import static us.ihmc.robotics.Assert.*;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
-import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
+import org.junit.jupiter.api.Tag;
+import org.junit.jupiter.api.Disabled;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.mecano.multiBodySystem.RevoluteJoint;
@@ -37,7 +35,7 @@ public class OneDoFJointQuinticTrajectoryGeneratorTest
 
    private OneDoFJointQuinticTrajectoryGenerator generator;
 
-   @Before
+   @BeforeEach
    public void setUp()
    {
       joint.setQ(0.0);
@@ -46,8 +44,7 @@ public class OneDoFJointQuinticTrajectoryGeneratorTest
       trajectoryTimeProvider = new ConstantDoubleProvider(timeRequired);
    }
 
-	@ContinuousIntegrationTest(estimatedDuration = 0.0)
-	@Test(timeout=300000)
+	@Test
    public void testConstructor()
    {
       try
@@ -60,8 +57,7 @@ public class OneDoFJointQuinticTrajectoryGeneratorTest
       }
    }
 
-	@ContinuousIntegrationTest(estimatedDuration = 0.0)
-	@Test(timeout=300000)
+	@Test
    public void testIsDone()
    {
       generator = new OneDoFJointQuinticTrajectoryGenerator(namePrefix, joint, trajectoryTimeProvider, parentRegistry);
@@ -74,8 +70,7 @@ public class OneDoFJointQuinticTrajectoryGeneratorTest
       assertTrue(generator.isDone());
    }
 
-	@ContinuousIntegrationTest(estimatedDuration = 0.0)
-	@Test(timeout=300000)
+	@Test
    public void test()
    {
       generator = new OneDoFJointQuinticTrajectoryGenerator(namePrefix, joint, trajectoryTimeProvider, parentRegistry);

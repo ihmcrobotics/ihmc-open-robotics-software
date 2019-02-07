@@ -19,7 +19,6 @@ import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.sensorProcessing.model.RobotMotionStatus;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
-import us.ihmc.yoVariables.variable.YoDouble;
 
 public class StandingState extends WalkingState
 {
@@ -35,8 +34,6 @@ public class StandingState extends WalkingState
    private final SideDependentList<RigidBodyControlManager> handManagers = new SideDependentList<>();
 
    private final YoBoolean doPrepareManipulationForLocomotion = new YoBoolean("doPrepareManipulationForLocomotion", registry);
-   private final YoBoolean doPreparePelvisForLocomotion = new YoBoolean("doPreparePelvisForLocomotion", registry);
-   private final YoDouble finalTransferTime = new YoDouble("finalTransferTime", registry);
 
    public StandingState(CommandInputManager commandInputManager, WalkingMessageHandler walkingMessageHandler, HighLevelHumanoidControllerToolbox controllerToolbox,
          HighLevelControlManagerFactory managerFactory, WalkingFailureDetectionControlModule failureDetectionControlModule,
@@ -72,8 +69,6 @@ public class StandingState extends WalkingState
       legConfigurationManager = managerFactory.getOrCreateLegConfigurationManager();
 
       doPrepareManipulationForLocomotion.set(walkingControllerParameters.doPrepareManipulationForLocomotion());
-      doPreparePelvisForLocomotion.set(walkingControllerParameters.doPreparePelvisForLocomotion());
-      finalTransferTime.set(walkingControllerParameters.getDefaultFinalTransferTime());
    }
 
    @Override
@@ -124,9 +119,9 @@ public class StandingState extends WalkingState
          }
       }
 
-      if (pelvisOrientationManager != null && doPreparePelvisForLocomotion.getBooleanValue())
+      if (pelvisOrientationManager != null)
       {
-         pelvisOrientationManager.prepareForLocomotion();
+         pelvisOrientationManager.prepareForLocomotion(walkingMessageHandler.getNextStepTime());
          comHeightManager.prepareForLocomotion();
       }
 
@@ -152,7 +147,8 @@ public class StandingState extends WalkingState
       {
          PrepareForLocomotionCommand command = commandInputManager.pollNewestCommand(PrepareForLocomotionCommand.class);
          doPrepareManipulationForLocomotion.set(command.isPrepareManipulation());
-         doPreparePelvisForLocomotion.set(command.isPreparePelvis());
+         pelvisOrientationManager.setPrepareForLocomotion(command.isPreparePelvis());
+         comHeightManager.setPrepareForLocomotion(command.isPreparePelvis());
       }
    }
 

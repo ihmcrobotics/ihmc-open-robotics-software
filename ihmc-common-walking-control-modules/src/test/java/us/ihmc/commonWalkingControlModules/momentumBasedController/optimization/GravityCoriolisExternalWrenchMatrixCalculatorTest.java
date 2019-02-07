@@ -5,13 +5,14 @@ import java.util.HashMap;
 import java.util.Random;
 
 import org.ejml.data.DenseMatrix64F;
-import org.junit.After;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.Test;
 
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.ContactablePlaneBodyTools;
 import us.ihmc.commonWalkingControlModules.controllerCore.WholeBodyControlCoreToolbox;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHumanoidControllerToolbox;
-import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
+import org.junit.jupiter.api.Tag;
+import org.junit.jupiter.api.Disabled;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.tools.ReferenceFrameTools;
 import us.ihmc.euclid.tuple2D.Vector2D;
@@ -54,7 +55,7 @@ public class GravityCoriolisExternalWrenchMatrixCalculatorTest
    int floatingBaseDoFs;
    int bodyDoFs;
 
-   @After
+   @AfterEach
    public void tearDown()
    {
       ReferenceFrameTools.clearWorldFrameTree();
@@ -64,8 +65,7 @@ public class GravityCoriolisExternalWrenchMatrixCalculatorTest
     * This should return equivalence, as acceleration should not play a factor in the coriolis, centrifugal, and gravity force matrix.
     * @throws Exception
     */
-   @ContinuousIntegrationTest(estimatedDuration = 0.3)
-   @Test(timeout = 30000)
+   @Test
    public void testWithAndWithoutAcceleration() throws Exception
    {
       setupTest();

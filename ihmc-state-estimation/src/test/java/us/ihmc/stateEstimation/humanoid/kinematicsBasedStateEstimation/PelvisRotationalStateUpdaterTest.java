@@ -1,17 +1,18 @@
 package us.ihmc.stateEstimation.humanoid.kinematicsBasedStateEstimation;
 
-import static org.junit.Assert.fail;
+import static us.ihmc.robotics.Assert.*;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
 import org.ejml.data.DenseMatrix64F;
-import org.junit.After;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.Test;
 
 import us.ihmc.commons.RandomNumbers;
-import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
+import org.junit.jupiter.api.Tag;
+import org.junit.jupiter.api.Disabled;
 import us.ihmc.euclid.matrix.RotationMatrix;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.tools.ReferenceFrameTools;
@@ -49,14 +50,13 @@ public class PelvisRotationalStateUpdaterTest
 
    private final List<IMUSensorReadOnly> imuSensors = new ArrayList<>();
 
-   @After
+   @AfterEach
    public void tearDown()
    {
       ReferenceFrameTools.clearWorldFrameTree();
    }
 
-	@ContinuousIntegrationTest(estimatedDuration = 0.0)
-	@Test(timeout=300000)
+	@Test
    public void testConstructorWithOneIMU()
    {
       YoVariableRegistry registry = new YoVariableRegistry("Blop");
@@ -83,8 +83,7 @@ public class PelvisRotationalStateUpdaterTest
       }
    }
 
-	@ContinuousIntegrationTest(estimatedDuration = 0.0)
-	@Test(timeout=300000)
+	@Test
    public void testConstructorWithZeroIMUSensor()
    {
       YoVariableRegistry registry = new YoVariableRegistry("Blop");
@@ -112,8 +111,7 @@ public class PelvisRotationalStateUpdaterTest
          fail("RuntimeException expected, no orientation sensor attached to the sensor map.");
    }
 
-	@ContinuousIntegrationTest(estimatedDuration = 0.1)
-	@Test(timeout=300000)
+	@Test
    public void testInitializeAndReadWithOneIMU()
    {
       YoVariableRegistry registry = new YoVariableRegistry("Blop");

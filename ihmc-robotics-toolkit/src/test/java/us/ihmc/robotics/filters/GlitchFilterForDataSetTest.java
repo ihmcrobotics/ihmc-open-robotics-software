@@ -1,24 +1,20 @@
 package us.ihmc.robotics.filters;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotEquals;
+import static us.ihmc.robotics.Assert.*;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Random;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
-import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
-import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationPlan;
-import us.ihmc.continuousIntegration.IntegrationCategory;
+import org.junit.jupiter.api.Tag;
+import org.junit.jupiter.api.Disabled;
 import us.ihmc.robotics.testing.JUnitTools;
 
-@ContinuousIntegrationPlan(categories = {IntegrationCategory.FAST})
 public class GlitchFilterForDataSetTest
 {
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(timeout = 30000)
+   @Test
    public void testBasic0()
    {
       GlitchFilterForDataSet glitchFilterForDataSet = new GlitchFilterForDataSet(10, 4.0);
@@ -47,8 +43,7 @@ public class GlitchFilterForDataSetTest
       JUnitTools.assertDoubleArrayEquals(filteredFata, answerFromMatlab, 1e-8);
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(timeout = 30000)
+   @Test
    public void testBasic1()
    {
       GlitchFilterForDataSet glitchFilterForDataSet = new GlitchFilterForDataSet(10, 4.0);
@@ -76,8 +71,7 @@ public class GlitchFilterForDataSetTest
 
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(timeout = 30000)
+   @Test
    public void testBasic2()
    {
       GlitchFilterForDataSet glitchFilterForDataSet = new GlitchFilterForDataSet(10, 4.0);
@@ -205,8 +199,7 @@ public class GlitchFilterForDataSetTest
       return ret;
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(timeout = 30000)
+   @Test
    public void testNull()
    {
       double[] dataSet = null;
@@ -215,8 +208,7 @@ public class GlitchFilterForDataSetTest
       assertEquals(null, ret);
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(timeout = 30000)
+   @Test
    public void testWindowSize()
    {
       double[] dataSet = new double[] { 1.0, 5345.345, 34598034.40899, 48904980.9322398, 234.234, 7654.23890 };
@@ -235,8 +227,7 @@ public class GlitchFilterForDataSetTest
    }
 
    
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(timeout = 30000)
+   @Test
    public void testData()
    {
       double[] dataSet = new double[] { 0.191761336, 0.701365152, 0.670840424, 0.219631948, 0.08436868, 0.563715164, 0.900281017, 0.910817898, 0.465219833, 0.252544002, 0.605959691, 0.179189433, 0.990209646, 0.845536796, 0.803289242, 0.206219591,

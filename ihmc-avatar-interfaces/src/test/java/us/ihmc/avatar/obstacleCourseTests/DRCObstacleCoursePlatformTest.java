@@ -1,23 +1,22 @@
 package us.ihmc.avatar.obstacleCourseTests;
 
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
+import static us.ihmc.robotics.Assert.*;
 
 import java.util.ArrayList;
 
-import org.junit.After;
-import org.junit.Before;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
 
 import controller_msgs.msg.dds.FootstepDataListMessage;
 import controller_msgs.msg.dds.PelvisHeightTrajectoryMessage;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import us.ihmc.avatar.DRCObstacleCourseStartingLocation;
 import us.ihmc.avatar.MultiRobotTestInterface;
 import us.ihmc.avatar.testTools.DRCSimulationTestHelper;
 import us.ihmc.avatar.testTools.ScriptedFootstepGenerator;
 import us.ihmc.commons.thread.ThreadTools;
-import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations;
-import us.ihmc.continuousIntegration.IntegrationCategory;
+import org.junit.jupiter.api.Tag;
+import org.junit.jupiter.api.Disabled;
 import us.ihmc.euclid.geometry.BoundingBox3D;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameQuaternion;
@@ -46,13 +45,13 @@ public abstract class DRCObstacleCoursePlatformTest implements MultiRobotTestInt
    protected SimulationTestingParameters simulationTestingParameters;
    protected DRCSimulationTestHelper drcSimulationTestHelper;
 
-   @Before
+   @BeforeEach
    public void showMemoryUsageBeforeTest()
    {
       MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " before test.");
    }
 
-   @After
+   @AfterEach
    public void destroySimulationAndRecycleMemory()
    {
       if (simulationTestingParameters.getKeepSCSUp())
@@ -71,8 +70,7 @@ public abstract class DRCObstacleCoursePlatformTest implements MultiRobotTestInt
       MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " after test.");
    }
 
-   @ContinuousIntegrationAnnotations.ContinuousIntegrationTest(estimatedDuration = 48.6)
-   @Test(timeout = 180000)
+   @Test
    public void testRunsTheSameWayTwiceJustStanding() throws UnreasonableAccelerationException, SimulationExceededMaximumTimeException
    {
       simulationTestingParameters = SimulationTestingParameters.createFromSystemProperties();
@@ -154,8 +152,7 @@ public abstract class DRCObstacleCoursePlatformTest implements MultiRobotTestInt
       BambooTools.reportTestFinishedMessage(simulationTestingParameters.getShowWindows());
    }
 
-   @ContinuousIntegrationAnnotations.ContinuousIntegrationTest(estimatedDuration = 39.4)
-   @Test(timeout = 200000)
+   @Test
    public void testWalkingOverSmallPlatformQuickly() throws SimulationExceededMaximumTimeException
    {
       simulationTestingParameters = SimulationTestingParameters.createFromSystemProperties();
@@ -199,8 +196,7 @@ public abstract class DRCObstacleCoursePlatformTest implements MultiRobotTestInt
       BambooTools.reportTestFinishedMessage(simulationTestingParameters.getShowWindows());
    }
 
-   @ContinuousIntegrationAnnotations.ContinuousIntegrationTest(estimatedDuration = 67.5)
-   @Test(timeout = 340000)
+   @Test
    public void testSidestepOverSmallPlatform() throws SimulationExceededMaximumTimeException
    {
       simulationTestingParameters = SimulationTestingParameters.createFromSystemProperties();
@@ -236,8 +232,7 @@ public abstract class DRCObstacleCoursePlatformTest implements MultiRobotTestInt
       BambooTools.reportTestFinishedMessage(simulationTestingParameters.getShowWindows());
    }
 
-   @ContinuousIntegrationAnnotations.ContinuousIntegrationTest(estimatedDuration = 65.5)
-   @Test(timeout = 330000)
+   @Test
    public void testSidestepOverSmallWall() throws SimulationExceededMaximumTimeException
    {
       simulationTestingParameters = SimulationTestingParameters.createFromSystemProperties();
@@ -273,8 +268,7 @@ public abstract class DRCObstacleCoursePlatformTest implements MultiRobotTestInt
       BambooTools.reportTestFinishedMessage(simulationTestingParameters.getShowWindows());
    }
 
-   @ContinuousIntegrationAnnotations.ContinuousIntegrationTest(estimatedDuration = 59.6)
-   @Test(timeout = 300000)
+   @Test
    public void testWalkingOverSmallPlatform() throws SimulationExceededMaximumTimeException
    {
       simulationTestingParameters = SimulationTestingParameters.createFromSystemProperties();
@@ -320,8 +314,7 @@ public abstract class DRCObstacleCoursePlatformTest implements MultiRobotTestInt
       BambooTools.reportTestFinishedMessage(simulationTestingParameters.getShowWindows());
    }
 
-   @ContinuousIntegrationAnnotations.ContinuousIntegrationTest(estimatedDuration = 39.0)
-   @Test(timeout = 190000)
+   @Test
    public void testWalkingOntoMediumPlatformToesTouching() throws SimulationExceededMaximumTimeException
    {
       simulationTestingParameters = SimulationTestingParameters.createFromSystemProperties();
@@ -359,8 +352,7 @@ public abstract class DRCObstacleCoursePlatformTest implements MultiRobotTestInt
    }
 
 
-   @ContinuousIntegrationAnnotations.ContinuousIntegrationTest(estimatedDuration = 38.5)
-   @Test(timeout = 190000)
+   @Test
    public void testWalkingOffOfMediumPlatform() throws SimulationExceededMaximumTimeException
    {
       simulationTestingParameters = SimulationTestingParameters.createFromSystemProperties();
@@ -398,8 +390,7 @@ public abstract class DRCObstacleCoursePlatformTest implements MultiRobotTestInt
    }
 
 
-   @ContinuousIntegrationAnnotations.ContinuousIntegrationTest(estimatedDuration = 58.5)
-   @Test(timeout = 290000)
+   @Test
 	public void testWalkingOffOfMediumPlatformSlowSteps() throws SimulationExceededMaximumTimeException
 	{
 	   simulationTestingParameters = SimulationTestingParameters.createFromSystemProperties();

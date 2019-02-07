@@ -1,9 +1,9 @@
 package us.ihmc.pathPlanning.visibilityGraphs.postProcessing;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import us.ihmc.commons.RandomNumbers;
-import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
-import us.ihmc.continuousIntegration.IntegrationCategory;
+import org.junit.jupiter.api.Tag;
+import org.junit.jupiter.api.Disabled;
 import us.ihmc.euclid.tools.EuclidCoreRandomTools;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple2D.Vector2D;
@@ -16,7 +16,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
-import static junit.framework.TestCase.assertTrue;
+import static us.ihmc.robotics.Assert.*;
 
 public class ObstacleAndCliffAvoidanceProcessorTest
 {
@@ -24,8 +24,7 @@ public class ObstacleAndCliffAvoidanceProcessorTest
    private static final double epsilon = 1e-10;
    private static final int iters = 500;
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(timeout = timeout)
+   @Test
    public void testRemoveDuplicated3DPointsFromList()
    {
       Random random = new Random(1738L);
@@ -83,8 +82,7 @@ public class ObstacleAndCliffAvoidanceProcessorTest
       }
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(timeout = timeout)
+   @Test
    public void testRemoveDuplicated2DPointsFromList()
    {
       Random random = new Random(1738L);
@@ -142,8 +140,7 @@ public class ObstacleAndCliffAvoidanceProcessorTest
       }
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(timeout = timeout)
+   @Test
    public void testRemoveDuplicateStartOrEndPointsFromList()
    {
       Random random = new Random(1738L);

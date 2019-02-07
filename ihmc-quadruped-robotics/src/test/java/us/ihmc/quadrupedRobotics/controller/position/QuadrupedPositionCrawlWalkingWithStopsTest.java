@@ -3,12 +3,12 @@ package us.ihmc.quadrupedRobotics.controller.position;
 import java.io.IOException;
 import java.util.Random;
 
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
-import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
-import us.ihmc.continuousIntegration.IntegrationCategory;
+import org.junit.jupiter.api.Tag;
+import org.junit.jupiter.api.Disabled;
 import us.ihmc.quadrupedRobotics.QuadrupedMultiRobotTestInterface;
 import us.ihmc.quadrupedRobotics.QuadrupedPositionTestYoVariables;
 import us.ihmc.quadrupedRobotics.QuadrupedTestBehaviors;
@@ -27,7 +27,7 @@ public abstract class QuadrupedPositionCrawlWalkingWithStopsTest implements Quad
    private GoalOrientedTestConductor conductor;
    private QuadrupedPositionTestYoVariables variables;
    
-   @Before
+   @BeforeEach
    public void setup()
    {
       try
@@ -45,7 +45,7 @@ public abstract class QuadrupedPositionCrawlWalkingWithStopsTest implements Quad
       }
    }
    
-   @After
+   @AfterEach
    public void tearDown()
    {
       conductor.concludeTesting();
@@ -55,8 +55,7 @@ public abstract class QuadrupedPositionCrawlWalkingWithStopsTest implements Quad
       MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " after test.");
    }
    
-   @ContinuousIntegrationTest(estimatedDuration = 150.0)
-   @Test(timeout = 600000)
+   @Test
    public void testWalkingForwardFastWithStops() throws SimulationExceededMaximumTimeException, ControllerFailureException, IOException
    {
       Random random = new Random(1888L);
@@ -77,8 +76,7 @@ public abstract class QuadrupedPositionCrawlWalkingWithStopsTest implements Quad
       }
    }
    
-   @ContinuousIntegrationTest(estimatedDuration = 120.0)
-   @Test(timeout = 600000)
+   @Test
    public void testWalkingForwardSlowWithStops() throws SimulationExceededMaximumTimeException, ControllerFailureException, IOException
    {
       Random random = new Random(1987L);
@@ -99,8 +97,7 @@ public abstract class QuadrupedPositionCrawlWalkingWithStopsTest implements Quad
       }
    }
    
-   @ContinuousIntegrationTest(estimatedDuration = 150.0)
-   @Test(timeout = 600000)
+   @Test
    public void testWalkingBackwardSlowWithStops() throws SimulationExceededMaximumTimeException, ControllerFailureException, IOException
    {
       Random random = new Random(15567L);
@@ -121,8 +118,8 @@ public abstract class QuadrupedPositionCrawlWalkingWithStopsTest implements Quad
       }
    }
    
-   @ContinuousIntegrationTest(estimatedDuration = 150.0, categoriesOverride = {IntegrationCategory.EXCLUDE, IntegrationCategory.VIDEO})
-   @Test(timeout = 600000)
+   @Disabled
+   @Test
    public void testWalkingBackwardFastWithStops() throws SimulationExceededMaximumTimeException, ControllerFailureException, IOException
    {
       Random random = new Random(1889L);

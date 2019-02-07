@@ -96,7 +96,7 @@ public class SimpleOrientationTrajectoryGenerator extends OrientationTrajectoryG
       double alphaDot = shouldBeZero ? 0.0 : parameterPolynomial.getVelocity();
       double alphaDDot = shouldBeZero ? 0.0 : parameterPolynomial.getAcceleration();
 
-      if (!isDone())
+      if (!isDone() && trajectoryTime.getValue() >= 1.0e-6)
       {
          currentOrientation.interpolate(initialOrientation, finalOrientation, parameterPolynomial.getPosition());
          orientationInterpolationCalculator.computeAngularVelocity(currentAngularVelocity, initialOrientation, finalOrientation, alphaDot);

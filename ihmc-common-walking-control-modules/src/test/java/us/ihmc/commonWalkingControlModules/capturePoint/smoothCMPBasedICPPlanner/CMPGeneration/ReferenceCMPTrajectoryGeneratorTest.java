@@ -1,13 +1,13 @@
 package us.ihmc.commonWalkingControlModules.capturePoint.smoothCMPBasedICPPlanner.CMPGeneration;
 
-import static org.junit.Assert.assertTrue;
+import static us.ihmc.robotics.Assert.*;
 
 import java.util.ArrayList;
 import java.util.List;
 
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import us.ihmc.commonWalkingControlModules.configurations.CoPSplineType;
 import us.ihmc.commonWalkingControlModules.capturePoint.smoothCMPBasedICPPlanner.WalkingTrajectoryType;
@@ -15,9 +15,8 @@ import us.ihmc.commonWalkingControlModules.capturePoint.smoothCMPBasedICPPlanner
 import us.ihmc.commonWalkingControlModules.capturePoint.smoothCMPBasedICPPlanner.AMGeneration.TorqueTrajectory;
 import us.ihmc.commonWalkingControlModules.capturePoint.smoothCMPBasedICPPlanner.CoPGeneration.CoPTrajectory;
 import us.ihmc.commons.Epsilons;
-import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
-import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationPlan;
-import us.ihmc.continuousIntegration.IntegrationCategory;
+import org.junit.jupiter.api.Tag;
+import org.junit.jupiter.api.Disabled;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
@@ -27,7 +26,6 @@ import us.ihmc.robotics.math.trajectories.TrajectoryMathTools;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoInteger;
 
-@ContinuousIntegrationPlan(categories = {IntegrationCategory.FAST})
 public class ReferenceCMPTrajectoryGeneratorTest
 {
    private final int numberOfFootsteps = 3;
@@ -48,7 +46,7 @@ public class ReferenceCMPTrajectoryGeneratorTest
    private FrameTrajectory3D cmpSegmentTrajectory = new FrameTrajectory3D(numberOfCoefficients, worldFrame);
    private TorqueTrajectory torqueTrajectory = new TorqueTrajectory(Math.max(numberOfSwingSegments, numberOfTransferSegments), numberOfCoefficients);
 
-   @Before
+   @BeforeEach
    public void setupTest()
    {
       clear();
@@ -111,14 +109,13 @@ public class ReferenceCMPTrajectoryGeneratorTest
       return new FrameVector3D(worldFrame, Math.random(), Math.random(), Math.random());
    }
 
-   @After
+   @AfterEach
    public void tearDownTest()
    {
       ReferenceFrameTools.clearWorldFrameTree();
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(timeout = 30000)
+   @Test
    public void testDoubleSupportWithoutAngularMomentum()
    {
       cmpTrajectoryGenerator.setNumberOfRegisteredSteps(numberOfFootsteps);
@@ -127,8 +124,7 @@ public class ReferenceCMPTrajectoryGeneratorTest
       checkSwingTrajectoriesForCopy();
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(timeout = 30000)
+   @Test
    public void testSingleSupportWithoutAngularMomentum()
    {
       cmpTrajectoryGenerator.setNumberOfRegisteredSteps(numberOfFootsteps);
@@ -137,8 +133,7 @@ public class ReferenceCMPTrajectoryGeneratorTest
       checkSwingTrajectoriesForCopy();
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(timeout = 30000)
+   @Test
    public void testDoubleSupportWithAngularMomentum()
    {
       cmpTrajectoryGenerator.setNumberOfRegisteredSteps(numberOfFootsteps);
@@ -148,8 +143,7 @@ public class ReferenceCMPTrajectoryGeneratorTest
       checkSwingTrajectoriesForAddition();
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(timeout = 30000)
+   @Test
    public void testSingleSupportWithAngularMomentum()
    {
       cmpTrajectoryGenerator.setNumberOfRegisteredSteps(numberOfFootsteps);

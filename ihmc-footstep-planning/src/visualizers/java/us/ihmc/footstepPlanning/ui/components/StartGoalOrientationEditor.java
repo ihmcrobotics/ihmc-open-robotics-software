@@ -3,19 +3,24 @@ package us.ihmc.footstepPlanning.ui.components;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 
+import com.sun.javafx.scene.CameraHelper;
+
 import javafx.animation.AnimationTimer;
 import javafx.event.EventHandler;
-import javafx.scene.Node;
+import javafx.scene.Camera;
 import javafx.scene.SubScene;
 import javafx.scene.input.MouseButton;
 import javafx.scene.input.MouseEvent;
-import javafx.scene.input.PickResult;
 import us.ihmc.commons.PrintTools;
+import us.ihmc.euclid.geometry.Line3D;
+import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
+import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI;
 import us.ihmc.messager.Messager;
+import us.ihmc.robotics.geometry.PlanarRegion;
 
 public class StartGoalOrientationEditor extends AnimationTimer
 {
@@ -50,21 +55,11 @@ public class StartGoalOrientationEditor extends AnimationTimer
       startPositionReference = messager.createInput(FootstepPlannerMessagerAPI.StartPositionTopic);
       goalPositionReference = messager.createInput(FootstepPlannerMessagerAPI.GoalPositionTopic);
 
+      AtomicReference<PlanarRegion> selectedRegionReference = messager.createInput(FootstepPlannerMessagerAPI.SelectedRegionTopic);
+
       rayCastInterceptor = (event) ->
       {
-         PickResult pickResult = event.getPickResult();
-         Node intersectedNode = pickResult.getIntersectedNode();
-         if (intersectedNode == null || intersectedNode instanceof SubScene)
-            return;
-         javafx.geometry.Point3D localPoint = pickResult.getIntersectedPoint();
-         javafx.geometry.Point3D scenePoint = intersectedNode.getLocalToSceneTransform().transform(localPoint);
-
-         Point3D interception = new Point3D();
-         interception.setX(scenePoint.getX());
-         interception.setY(scenePoint.getY());
-         interception.setZ(scenePoint.getZ());
-
-         latestInterception.set(interception);
+         latestInterception.set(intersectRayWithPlane(subScene.getCamera(), selectedRegionReference.get(), event));
       };
 
       leftClickInterceptor = (event) ->
@@ -75,6 +70,35 @@ public class StartGoalOrientationEditor extends AnimationTimer
          if (event.isStillSincePress() && event.getEventType() == MouseEvent.MOUSE_CLICKED)
             orientationValidated.set(true);
       };
+   }
+
+   private static Point3D intersectRayWithPlane(Camera camera, PlanarRegion planarRegion, MouseEvent event)
+   {
+      Line3D line = getPickRay(camera, event);
+
+      RigidBodyTransform regionTransform = new RigidBodyTransform();
+      planarRegion.getTransformToWorld(regionTransform);
+      Vector3D planeNormal = planarRegion.getNormal();
+      Point3D pointOnPlane = new Point3D();
+      regionTransform.getTranslation(pointOnPlane);
+
+      return EuclidGeometryTools.intersectionBetweenLine3DAndPlane3D(pointOnPlane, planeNormal, line.getPoint(), line.getDirection());
+   }
+
+   private static Line3D getPickRay(Camera camera, MouseEvent event)
+   {
+      Point3D point1 = new Point3D();
+      point1.setX(camera.getLocalToSceneTransform().getTx());
+      point1.setY(camera.getLocalToSceneTransform().getTy());
+      point1.setZ(camera.getLocalToSceneTransform().getTz());
+
+      Point3D point2 = new Point3D();
+      javafx.geometry.Point3D pointOnProjectionPlane = CameraHelper.pickProjectPlane(camera, event.getSceneX(), event.getSceneY());
+      point2.setX(pointOnProjectionPlane.getX());
+      point2.setY(pointOnProjectionPlane.getY());
+      point2.setZ(pointOnProjectionPlane.getZ());
+
+      return new Line3D(point1, point2);
    }
 
    @Override
@@ -111,6 +135,7 @@ public class StartGoalOrientationEditor extends AnimationTimer
          if(orientationValidated.getAndSet(false))
          {
             messager.submitMessage(FootstepPlannerMessagerAPI.StartOrientationEditModeEnabledTopic, false);
+            messager.submitMessage(FootstepPlannerMessagerAPI.EditModeEnabledTopic, false);
          }
       }
 
@@ -132,6 +157,7 @@ public class StartGoalOrientationEditor extends AnimationTimer
          if(orientationValidated.getAndSet(false))
          {
             messager.submitMessage(FootstepPlannerMessagerAPI.GoalOrientationEditModeEnabledTopic, false);
+            messager.submitMessage(FootstepPlannerMessagerAPI.EditModeEnabledTopic, false);
          }
       }
    }

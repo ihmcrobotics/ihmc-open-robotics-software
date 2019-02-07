@@ -1,7 +1,6 @@
 package us.ihmc.humanoidRobotics.communication.packets;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import static us.ihmc.robotics.Assert.*;
 
 import java.lang.reflect.Method;
 import java.lang.reflect.ParameterizedType;
@@ -10,19 +9,14 @@ import java.util.Random;
 import java.util.concurrent.TimeUnit;
 
 import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.DisableOnDebug;
+import org.junit.jupiter.api.Test;
 import org.junit.rules.Timeout;
 
-import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
-
+import org.junit.jupiter.api.Tag;
+import org.junit.jupiter.api.Disabled;
 public class RandomHumanoidMessagesTest
 {
-   @Rule
-   public DisableOnDebug disableOnDebug = new DisableOnDebug(new Timeout(5, TimeUnit.SECONDS));
-
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(timeout = 30000)
+   @Test
    public void testMethodName()
    { // Assert that all the methods are following the convention: ReturnedObjectType nextReturnedObjectType(Random)
       for (Method method : RandomHumanoidMessages.class.getDeclaredMethods())

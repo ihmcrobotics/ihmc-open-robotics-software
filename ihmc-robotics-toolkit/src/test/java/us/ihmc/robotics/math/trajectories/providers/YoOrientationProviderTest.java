@@ -1,13 +1,13 @@
 package us.ihmc.robotics.math.trajectories.providers;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertSame;
+import static us.ihmc.robotics.Assert.*;
 
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
-import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
+import org.junit.jupiter.api.Tag;
+import org.junit.jupiter.api.Disabled;
 import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.tools.ReferenceFrameTools;
@@ -25,7 +25,7 @@ public class YoOrientationProviderTest
    private YoFrameYawPitchRoll yoFrameOrientation;
    public FrameQuaternion frameOrientationToPack;
    
-   @Before
+   @BeforeEach
    public void setUp()
    {
       referenceFrame =ReferenceFrame.constructARootFrame("rootFrame");
@@ -34,14 +34,13 @@ public class YoOrientationProviderTest
       frameOrientationToPack = new FrameQuaternion();
    }
 
-   @After
+   @AfterEach
    public void tearDown()
    {
       ReferenceFrameTools.clearWorldFrameTree();
    }
 
-	@ContinuousIntegrationTest(estimatedDuration = 0.0)
-	@Test(timeout = 30000)
+	@Test
    public void testConstructor_Get()
    {
       YoOrientationProvider yoOrientationProvider = new YoOrientationProvider(yoFrameOrientation);

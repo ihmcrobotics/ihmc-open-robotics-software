@@ -1,23 +1,20 @@
 package us.ihmc.communication.streamingData;
 
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import static us.ihmc.robotics.Assert.*;
 
 import java.util.ArrayList;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
-import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationPlan;
-import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
-import us.ihmc.continuousIntegration.IntegrationCategory;
+import org.junit.jupiter.api.Tag;
+import org.junit.jupiter.api.Disabled;
 import us.ihmc.commons.thread.ThreadTools;
 
-@ContinuousIntegrationPlan(categories = {IntegrationCategory.FLAKY})
+@Disabled
 public class StreamingDataTCPServerTest
 {
 
-	@ContinuousIntegrationTest(estimatedDuration = 1.0)
-	@Test(timeout=90000)
+	@Test
    public void testTypicalUsage()
    {
       String hostname = "localhost";
@@ -50,8 +47,7 @@ public class StreamingDataTCPServerTest
       streamingDataTCPServer.closeAndBlockTillFullyClosed();
    }
 
-	@ContinuousIntegrationTest(estimatedDuration = 2.2)
-	@Test(timeout=90000)
+	@Test
    public void testMultipleProducersAndConsumersRobustly()
    {
       String hostname = "localhost";
@@ -103,8 +99,7 @@ public class StreamingDataTCPServerTest
       
    }
 
-	@ContinuousIntegrationTest(estimatedDuration = 3.1)
-	@Test(timeout=90000)
+	@Test
    public void testPersistentConsumerToServerRestart()
    {
       String hostname = "localhost";

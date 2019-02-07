@@ -1,8 +1,6 @@
 package us.ihmc.robotics.screwTheory;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
+import static us.ihmc.robotics.Assert.*;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -11,11 +9,12 @@ import java.util.Random;
 import org.ejml.data.DenseMatrix64F;
 import org.ejml.ops.MatrixFeatures;
 import org.ejml.ops.RandomMatrices;
-import org.junit.After;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.Test;
 
 import us.ihmc.commons.MutationTestFacilitator;
-import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
+import org.junit.jupiter.api.Tag;
+import org.junit.jupiter.api.Disabled;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.tools.EuclidFrameRandomTools;
 import us.ihmc.euclid.referenceFrame.tools.ReferenceFrameTools;
@@ -28,7 +27,7 @@ import us.ihmc.robotics.weightMatrices.WeightMatrix6D;
 
 public class WeightMatrix6DTest
 {
-   @After
+   @AfterEach
    public void tearDown()
    {
       ReferenceFrameTools.clearWorldFrameTree();
@@ -36,8 +35,7 @@ public class WeightMatrix6DTest
 
    private static final int ITERATIONS = 500;
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(timeout = 30000)
+   @Test
    public void testGettersSetters()
    {
       Random random = new Random(123423L);
@@ -170,8 +168,7 @@ public class WeightMatrix6DTest
       }
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 1.2)
-   @Test(timeout = 30000)
+   @Test
    public void testGetFullSelectionMatrixInFrame() throws Exception
    {
       Random random = new Random(456465L);
@@ -266,8 +263,7 @@ public class WeightMatrix6DTest
       }
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 1.3)
-   @Test(timeout = 30000)
+   @Test
    public void testGetEfficientSelectionMatrixInFrame() throws Exception
    {
       Random random = new Random(456465L);
