@@ -1,13 +1,12 @@
 package us.ihmc.pathPlanning.visibilityGraphs.tools;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import static us.ihmc.robotics.Assert.*;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import us.ihmc.commons.MutationTestFacilitator;
-import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
+import org.junit.jupiter.api.Tag;
+import org.junit.jupiter.api.Disabled;
 import us.ihmc.euclid.geometry.BoundingBox2D;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.pathPlanning.visibilityGraphs.clusterManagement.Cluster;
@@ -18,8 +17,7 @@ public class ClusterTest
 {
    private static final double EPSILON = 1e-10;
 
-   @Test(timeout = 30000)
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
+   @Test
    public void testIsInsideNonNavigableZone()
    {
       Point2D pointA = new Point2D(0.0, 0.0);
@@ -40,8 +38,7 @@ public class ClusterTest
       assertFalse(obstacleCluster.isInsideNonNavigableZone(pointD));
    }
 
-   @Test(timeout = 30000)
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
+   @Test
    public void testBoundingBox()
    {
       Cluster obstacleCluster = new Cluster(ExtrusionSide.OUTSIDE, ClusterType.POLYGON);

@@ -3,10 +3,10 @@ package us.ihmc.avatar.roughTerrainWalking;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.junit.After;
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import us.ihmc.robotics.Assert;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import controller_msgs.msg.dds.FootstepDataListMessage;
 import controller_msgs.msg.dds.FootstepDataMessage;
@@ -19,7 +19,8 @@ import us.ihmc.avatar.testTools.DRCSimulationTestHelper;
 import us.ihmc.commonWalkingControlModules.trajectories.PositionOptimizedTrajectoryGenerator;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.communication.packets.MessageTools;
-import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
+import org.junit.jupiter.api.Tag;
+import org.junit.jupiter.api.Disabled;
 import us.ihmc.euclid.Axis;
 import us.ihmc.euclid.geometry.BoundingBox3D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
@@ -53,7 +54,7 @@ public abstract class AvatarSwingWithWaypointsTest implements MultiRobotTestInte
    private SimulationTestingParameters simulationTestingParameters = SimulationTestingParameters.createFromSystemProperties();
    private DRCSimulationTestHelper drcSimulationTestHelper;
 
-   @Test(timeout = 690000)
+   @Test
    public void testSwingWithWaypointsAndNotTrustingHeight() throws SimulationExceededMaximumTimeException
    {
       DRCRobotModel robotModel = getRobotModel();
@@ -131,8 +132,7 @@ public abstract class AvatarSwingWithWaypointsTest implements MultiRobotTestInte
       Assert.assertTrue(drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(swingDuration));
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 137.9)
-   @Test(timeout = 690000)
+   @Test
    public void testRegularSwingWithWaypoints() throws SimulationExceededMaximumTimeException
    {
       String className = getClass().getSimpleName();
@@ -262,8 +262,7 @@ public abstract class AvatarSwingWithWaypointsTest implements MultiRobotTestInte
       drcSimulationTestHelper.createVideo(getSimpleRobotName(), 2);
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 33.9)
-   @Test(timeout = 170000)
+   @Test
    public void testSwingWithWaypointsRotated() throws SimulationExceededMaximumTimeException
    {
       String className = getClass().getSimpleName();
@@ -311,13 +310,13 @@ public abstract class AvatarSwingWithWaypointsTest implements MultiRobotTestInte
       drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(simulationTime);
    }
 
-   @Before
+   @BeforeEach
    public void showMemoryUsageBeforeTest()
    {
       BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
    }
 
-   @After
+   @AfterEach
    public void destroySimulationAndRecycleMemory()
    {
       if (simulationTestingParameters.getKeepSCSUp())

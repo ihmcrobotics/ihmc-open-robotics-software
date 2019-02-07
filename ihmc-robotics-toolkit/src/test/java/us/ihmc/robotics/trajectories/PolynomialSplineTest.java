@@ -1,13 +1,14 @@
 package us.ihmc.robotics.trajectories;
 
-import static org.junit.Assert.assertEquals;
+import static us.ihmc.robotics.Assert.*;
 
 import java.util.Random;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
-import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
+import org.junit.jupiter.api.Tag;
+import org.junit.jupiter.api.Disabled;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.robotics.math.trajectories.YoPolynomial;
 
@@ -15,14 +16,13 @@ public class PolynomialSplineTest
 {
    private YoVariableRegistry registry;
 
-   @Before
+   @BeforeEach
    public void setUp()
    {
       registry = new YoVariableRegistry("test");
    }
 
-	@ContinuousIntegrationTest(estimatedDuration = 0.0)
-	@Test(timeout = 30000)
+	@Test
    public void testGetPosition()
    {
       Random random = new Random(165L);
@@ -37,8 +37,7 @@ public class PolynomialSplineTest
       assertEquals(yCheck, y, 1e-12);
    }
 
-	@ContinuousIntegrationTest(estimatedDuration = 0.0)
-	@Test(timeout = 30000)
+	@Test
    public void testGetVelocity()
    {
       Random random = new Random(1675L);
@@ -58,8 +57,7 @@ public class PolynomialSplineTest
       assertEquals(dydxNumerical, dydx, 1e-6);
    }
 
-	@ContinuousIntegrationTest(estimatedDuration = 0.0)
-	@Test(timeout = 30000)
+	@Test
    public void testGetAcceleration()
    {
       Random random = new Random(1675L);
@@ -79,8 +77,7 @@ public class PolynomialSplineTest
       assertEquals(d2ydx2Numerical, d2ydx2, 1e-6);
    }
 
-	@ContinuousIntegrationTest(estimatedDuration = 0.0)
-	@Test(timeout = 30000)
+	@Test
    public void testGetIntegral()
    {
       int order = 5;
@@ -95,8 +92,7 @@ public class PolynomialSplineTest
       assertEquals(expected, actual, 1e-12);
    }
 
-	@ContinuousIntegrationTest(estimatedDuration = 0.0)
-	@Test(timeout = 30000)
+	@Test
    public void testSetBasedOnMidPoint()
    {
       Random random = new Random(1635L);
@@ -124,8 +120,7 @@ public class PolynomialSplineTest
       assertEquals(zdFinal, spline.getVelocity(), epsilon);
    }
 
-	@ContinuousIntegrationTest(estimatedDuration = 0.0)
-	@Test(timeout = 30000)
+	@Test
    public void testSetBasedOnFinalAcceleration()
    {
       Random random = new Random(1635L);
@@ -150,8 +145,7 @@ public class PolynomialSplineTest
       assertEquals(zddFinal, spline.getAcceleration(), epsilon);
    }
 
-	@ContinuousIntegrationTest(estimatedDuration = 0.0)
-	@Test(timeout = 30000)
+	@Test
    public void testConstant()
    {
       Random random = new Random(1635L);

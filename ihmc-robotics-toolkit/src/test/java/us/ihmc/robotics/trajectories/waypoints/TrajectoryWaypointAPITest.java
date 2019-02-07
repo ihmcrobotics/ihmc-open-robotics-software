@@ -8,8 +8,8 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
-import org.junit.Assert;
-import org.junit.Test;
+import us.ihmc.robotics.Assert;
+import org.junit.jupiter.api.Test;
 
 import us.ihmc.commons.MutationTestFacilitator;
 import us.ihmc.euclid.geometry.interfaces.Pose3DBasics;
@@ -236,7 +236,7 @@ public class TrajectoryWaypointAPITest
       geometryMethodsToIgnore = Collections.unmodifiableSet(modifiableSet);
    }
 
-   @Test(timeout = 3000)
+   @Test
    public void testFrameOverwrites()
    {
       framelessTypesToFrameTypesTable.forEach((framelessClass, frameClass) -> {
@@ -244,7 +244,7 @@ public class TrajectoryWaypointAPITest
       });
    }
 
-   @Test(timeout = 3000)
+   @Test
    public void testTrajectoryOverwrites()
    {
       waypointTypesToTrajectoryTypesTable.forEach((framelessClass, frameClass) -> {

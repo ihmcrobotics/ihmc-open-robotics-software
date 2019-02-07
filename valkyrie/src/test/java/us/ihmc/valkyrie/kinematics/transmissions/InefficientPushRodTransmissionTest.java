@@ -1,13 +1,14 @@
 package us.ihmc.valkyrie.kinematics.transmissions;
 
-import static org.junit.Assert.assertEquals;
+import static us.ihmc.robotics.Assert.*;
 
 import java.util.Random;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import us.ihmc.commons.RandomNumbers;
-import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
+import org.junit.jupiter.api.Tag;
+import org.junit.jupiter.api.Disabled;
 import us.ihmc.valkyrie.kinematics.LinearActuator;
 import us.ihmc.valkyrie.kinematics.ValkyrieJointInterface;
 import us.ihmc.valkyrie.kinematics.YoValkyrieJointWriter;
@@ -16,8 +17,7 @@ public class InefficientPushRodTransmissionTest
 {
    private static final boolean DEBUG = false;
 
-	@ContinuousIntegrationTest(estimatedDuration = 0.1)
-	@Test(timeout = 30000)
+	@Test
    public void testForwardBackward()
    {
       Random random = new Random(1234L);
@@ -81,8 +81,7 @@ public class InefficientPushRodTransmissionTest
       }
    }
 
-	@ContinuousIntegrationTest(estimatedDuration = 0.0)
-	@Test(timeout = 30000)
+	@Test
    public void testRegression()
    {
       double reflectBottom = 1.0;

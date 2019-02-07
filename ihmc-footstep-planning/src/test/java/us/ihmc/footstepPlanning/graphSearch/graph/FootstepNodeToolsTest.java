@@ -1,8 +1,8 @@
 package us.ihmc.footstepPlanning.graphSearch.graph;
 
-import org.junit.Test;
-import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations;
-import us.ihmc.continuousIntegration.IntegrationCategory;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Tag;
+import org.junit.jupiter.api.Disabled;
 import us.ihmc.euclid.tools.EuclidCoreRandomTools;
 import us.ihmc.euclid.tools.EuclidCoreTestTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
@@ -11,17 +11,14 @@ import us.ihmc.robotics.robotSide.RobotSide;
 
 import java.util.Random;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import static us.ihmc.robotics.Assert.*;
 
-@ContinuousIntegrationAnnotations.ContinuousIntegrationPlan(categories = {IntegrationCategory.FAST})
 public class FootstepNodeToolsTest
 {
    private final Random random = new Random(456789L);
    private final double epsilon = 1e-8;
 
-   @ContinuousIntegrationAnnotations.ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(timeout = 30000)
+   @Test
    public void testGetNodeTransform()
    {
       int numTests = 1000;
@@ -65,8 +62,7 @@ public class FootstepNodeToolsTest
       assertEquals(rotationYawPitchRoll[2], 0.0, epsilon);
    }
 
-   @ContinuousIntegrationAnnotations.ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(timeout = 30000)
+   @Test
    public void testGetSnappedNodeTransform()
    {
       int numTests = 10;

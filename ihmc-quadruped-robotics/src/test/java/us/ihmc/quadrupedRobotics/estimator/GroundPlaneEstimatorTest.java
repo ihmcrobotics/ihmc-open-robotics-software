@@ -1,20 +1,17 @@
 package us.ihmc.quadrupedRobotics.estimator;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import static us.ihmc.robotics.Assert.*;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
-import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationPlan;
-import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
-import us.ihmc.continuousIntegration.IntegrationCategory;
+import org.junit.jupiter.api.Tag;
+import org.junit.jupiter.api.Disabled;
 import us.ihmc.euclid.geometry.Plane3D;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
@@ -30,24 +27,22 @@ import us.ihmc.robotics.robotSide.RobotQuadrant;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.tools.MemoryTools;
 
-@ContinuousIntegrationPlan(categories = IntegrationCategory.FAST)
 public class GroundPlaneEstimatorTest
 {
-   @Before
+   @BeforeEach
    public void showMemoryUsageBeforeTest()
    {
       MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " before test.");
    }
 
-   @After
+   @AfterEach
    public void destroySimulationAndRecycleMemory()
    {
       ReferenceFrameTools.clearWorldFrameTree();
       MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " after test.");
    }
    
-   @ContinuousIntegrationTest(estimatedDuration = 0.3)
-   @Test(timeout = 30000)
+   @Test
    public void testPointsWithSamePitchAndDifferentPositionGetSameAnswer()
    {
       GroundPlaneEstimator groundPlaneEstimator = new GroundPlaneEstimator();
@@ -77,8 +72,7 @@ public class GroundPlaneEstimatorTest
       assertTrue(normalA.epsilonEquals(normalB, 1e-7));
    }
    
-   @ContinuousIntegrationTest(estimatedDuration = 0.3)
-   @Test(timeout = 30000)
+   @Test
    public void testPointsWithSamePitchAndDifferentPositionGetSameAnswer2()
    {
       double epsilon = 0.001;
@@ -115,8 +109,8 @@ public class GroundPlaneEstimatorTest
       assertEquals(actualPitch, computedPitch, epsilon);
    }
    
-   @ContinuousIntegrationTest(estimatedDuration = 0.4, categoriesOverride = IntegrationCategory.EXCLUDE)
-   @Test(timeout = 30000)
+   @Disabled
+   @Test
    public void testGetPitchWithFeetOnPlane()
    {
       double epsilon = 0.00001;

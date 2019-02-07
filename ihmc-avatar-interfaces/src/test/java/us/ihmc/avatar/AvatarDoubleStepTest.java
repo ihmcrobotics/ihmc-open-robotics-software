@@ -1,16 +1,16 @@
 package us.ihmc.avatar;
 
 import controller_msgs.msg.dds.FootstepDataListMessage;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.initialSetup.OffsetAndYawRobotInitialSetup;
 import us.ihmc.avatar.testTools.DRCSimulationTestHelper;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.walkingController.states.WalkingStateEnum;
 import us.ihmc.commons.thread.ThreadTools;
-import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
-import us.ihmc.continuousIntegration.IntegrationCategory;
+import org.junit.jupiter.api.Tag;
+import org.junit.jupiter.api.Disabled;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.Point3D;
@@ -25,8 +25,7 @@ import us.ihmc.simulationconstructionset.util.simulationTesting.SimulationTestin
 import us.ihmc.tools.MemoryTools;
 import us.ihmc.yoVariables.variable.YoEnum;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import static us.ihmc.robotics.Assert.*;
 
 public abstract class AvatarDoubleStepTest implements MultiRobotTestInterface
 {
@@ -39,14 +38,14 @@ public abstract class AvatarDoubleStepTest implements MultiRobotTestInterface
       return 0.02;
    }
 
-   @Before
+   @BeforeEach
    public void showMemoryUsageBeforeTest()
    {
       MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " before test.");
       BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
    }
 
-   @After
+   @AfterEach
    public void destroySimulationAndRecycleMemory()
    {
       System.out.println("blah? " + simulationTestingParameters.getKeepSCSUp());
@@ -67,8 +66,7 @@ public abstract class AvatarDoubleStepTest implements MultiRobotTestInterface
       BambooTools.reportTestFinishedMessage(simulationTestingParameters.getShowWindows());
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 100.0)
-   @Test(timeout = 100000)
+   @Test
    public void testTwoStepsInARowSameSide() throws SimulationExceededMaximumTimeException
    {
       setupTest();
@@ -89,8 +87,8 @@ public abstract class AvatarDoubleStepTest implements MultiRobotTestInterface
       assertTrue(drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(9.0));
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 76.4, categoriesOverride = IntegrationCategory.SLOW)
-   @Test(timeout = 100000)
+   @Tag("allocation")
+   @Test
    public void testTwoStepsInARowSameSideAfterFirstSep() throws SimulationExceededMaximumTimeException
    {
       setupTest();
@@ -123,8 +121,8 @@ public abstract class AvatarDoubleStepTest implements MultiRobotTestInterface
    }
 
 
-   @ContinuousIntegrationTest(estimatedDuration = 76.4, categoriesOverride = IntegrationCategory.SLOW)
-   @Test(timeout = 100000)
+   @Tag("allocation")
+   @Test
    public void testTwoStepsInARowLongTransferSameSide() throws SimulationExceededMaximumTimeException
    {
       setupTest();
@@ -145,8 +143,7 @@ public abstract class AvatarDoubleStepTest implements MultiRobotTestInterface
       assertTrue(drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(9.0));
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 100.0)
-   @Test(timeout = 100000)
+   @Test
    public void testTwoStepsStandingInBetween() throws SimulationExceededMaximumTimeException
    {
       setupTest();

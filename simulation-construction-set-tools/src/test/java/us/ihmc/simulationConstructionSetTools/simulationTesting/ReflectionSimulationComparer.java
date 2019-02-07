@@ -1,6 +1,6 @@
 package us.ihmc.simulationConstructionSetTools.simulationTesting;
 
-import static org.junit.Assert.*;
+import static us.ihmc.robotics.Assert.*;
 
 import java.lang.reflect.Field;
 import java.util.AbstractList;

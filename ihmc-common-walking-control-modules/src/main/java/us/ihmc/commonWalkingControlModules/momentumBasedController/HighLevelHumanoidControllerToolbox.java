@@ -171,7 +171,8 @@ public class HighLevelHumanoidControllerToolbox
    private final YoBoolean controllerFailed = new YoBoolean("controllerFailed", registry);
 
    public HighLevelHumanoidControllerToolbox(FullHumanoidRobotModel fullRobotModel, CommonHumanoidReferenceFrames referenceFrames,
-                                             SideDependentList<FootSwitchInterface> footSwitches, CenterOfMassDataHolderReadOnly centerOfMassDataHolder,
+                                             SideDependentList<? extends FootSwitchInterface> footSwitches,
+                                             CenterOfMassDataHolderReadOnly centerOfMassDataHolder,
                                              SideDependentList<ForceSensorDataReadOnly> wristForceSensors, YoDouble yoTime, double gravityZ, double omega0,
                                              SideDependentList<ContactableFoot> feet, double controlDT, List<Updatable> updatables,
                                              List<ContactablePlaneBody> contactableBodies, YoGraphicsListRegistry yoGraphicsListRegistry,
@@ -188,7 +189,7 @@ public class HighLevelHumanoidControllerToolbox
       bipedSupportPolygons = new BipedSupportPolygons(midFeetZUpFrame, soleZUpFrames, registry, yoGraphicsListRegistry);
       icpControlPolygons = new ICPControlPolygons(icpControlPlane, midFeetZUpFrame, registry, yoGraphicsListRegistry);
 
-      this.footSwitches = footSwitches;
+      this.footSwitches = new SideDependentList<>(footSwitches);
       this.wristForceSensors = wristForceSensors;
 
       referenceFrameHashCodeResolver = new ReferenceFrameHashCodeResolver(fullRobotModel, referenceFrames);
@@ -766,7 +767,7 @@ public class HighLevelHumanoidControllerToolbox
       }
    }
 
-   private void resetFootPlaneContactPoint(RobotSide robotSide)
+   public void resetFootPlaneContactPoint(RobotSide robotSide)
    {
       ContactablePlaneBody foot = feet.get(robotSide);
       YoPlaneContactState footContactState = footContactStates.get(robotSide);

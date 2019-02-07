@@ -1,6 +1,6 @@
 package us.ihmc.pathPlanning.visibilityGraphs;
 
-import static org.junit.Assert.assertEquals;
+import static us.ihmc.robotics.Assert.*;
 
 import java.util.Arrays;
 import java.util.Comparator;

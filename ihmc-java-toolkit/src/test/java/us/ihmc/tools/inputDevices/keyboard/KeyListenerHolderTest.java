@@ -1,21 +1,21 @@
 package us.ihmc.tools.inputDevices.keyboard;
 
-import static org.junit.Assert.assertEquals;
+import static us.ihmc.robotics.Assert.*;
 
 import java.util.ArrayList;
 import java.util.List;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
-import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
+import org.junit.jupiter.api.Tag;
+import org.junit.jupiter.api.Disabled;
 import us.ihmc.graphicsDescription.input.keyboard.KeyListener;
 import us.ihmc.graphicsDescription.input.keyboard.KeyListenerHolder;
 import us.ihmc.tools.inputDevices.keyboard.Key;
 
 public class KeyListenerHolderTest
 {
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(timeout = 30000)
+   @Test
    public void testKeyListenerHolder()
    {
       final List<Key> pressed1 = new ArrayList<>();

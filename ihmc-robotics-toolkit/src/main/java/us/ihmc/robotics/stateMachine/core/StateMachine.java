@@ -236,7 +236,8 @@ public class StateMachine<K extends Enum<K>, S extends State>
    /**
     * Changes immediately the active state.
     * <p>
-    * This method should not be part of the public API.
+    * This method should be used cautiously and only for exceptional scenario, it is not the regular
+    * way of using a state machine.
     * </p>
     * <p>
     * In order, this method calls {@link State#onExit()} on the state being exited, notifies the
@@ -247,7 +248,7 @@ public class StateMachine<K extends Enum<K>, S extends State>
     * @param nextStateKey the key of the state to transition into.
     * @throws RuntimeException if there is no state mapped to {@code nextStateKey}.
     */
-   private void performTransition(K nextStateKey)
+   public void performTransition(K nextStateKey)
    {
       if (currentStateKey.getEnumValue() != null)
       {

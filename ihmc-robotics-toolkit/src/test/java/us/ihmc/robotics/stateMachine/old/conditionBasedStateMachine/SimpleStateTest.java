@@ -1,10 +1,11 @@
 package us.ihmc.robotics.stateMachine.old.conditionBasedStateMachine;
 
-import static org.junit.Assert.assertEquals;
+import static us.ihmc.robotics.Assert.*;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
-import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
+import org.junit.jupiter.api.Tag;
+import org.junit.jupiter.api.Disabled;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.robotics.stateMachine.old.conditionBasedStateMachine.SimpleState;
 import us.ihmc.robotics.stateMachine.old.conditionBasedStateMachine.StateMachine;
@@ -12,8 +13,7 @@ import us.ihmc.robotics.trajectories.providers.SettableDoubleProvider;
 
 public class SimpleStateTest
 {
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(timeout = 30000)
+   @Test
    public void testSimpleStateMachine()
    {
       SettableDoubleProvider timeProvider = new SettableDoubleProvider();

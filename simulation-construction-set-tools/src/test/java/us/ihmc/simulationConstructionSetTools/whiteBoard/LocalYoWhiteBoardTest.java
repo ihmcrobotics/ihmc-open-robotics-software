@@ -3,16 +3,16 @@ package us.ihmc.simulationConstructionSetTools.whiteBoard;
 
 import java.io.IOException;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
-import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
+import org.junit.jupiter.api.Tag;
+import org.junit.jupiter.api.Disabled;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 
 public class LocalYoWhiteBoardTest extends YoWhiteBoardTest
 {
 
-	@ContinuousIntegrationTest(estimatedDuration = 1.8)
-	@Test(timeout=300000)
+	@Test
    public void testLocalYoWhiteBoardOne() throws IOException
    {
       LocalYoWhiteBoard leftWhiteBoard = new LocalYoWhiteBoard("left", new YoVariableRegistry("leftRegistry"));
@@ -24,8 +24,7 @@ public class LocalYoWhiteBoardTest extends YoWhiteBoardTest
       doASynchronizedWriteThenReadTest(leftWhiteBoard, rightWhiteBoard, numberOfTests, 1000, 2000);
    }
 
-	@ContinuousIntegrationTest(estimatedDuration = 2.8)
-	@Test(timeout=300000)
+	@Test
    public void testLocalYoWhiteBoardTwo() throws IOException
    {
       LocalYoWhiteBoard leftWhiteBoard = new LocalYoWhiteBoard("left", new YoVariableRegistry("leftRegistry"));

@@ -1,22 +1,21 @@
 package us.ihmc.communication.kryo;
 
-import static org.junit.Assert.assertTrue;
+import static us.ihmc.robotics.Assert.*;
 
 import java.io.ByteArrayOutputStream;
 import java.util.Random;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import com.esotericsoftware.kryo.Kryo;
 import com.esotericsoftware.kryo.io.Output;
 import com.esotericsoftware.kryo.serializers.FieldSerializer.Optional;
 
-import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
-
+import org.junit.jupiter.api.Tag;
+import org.junit.jupiter.api.Disabled;
 public class KryoAnnotationTest
 {
-   @Test(timeout = 30000)
-	@ContinuousIntegrationTest(estimatedDuration = 0.1)
+   @Test
    public void testOptionalAnnotation()
    {
       final int ITERATIONS = 1000;

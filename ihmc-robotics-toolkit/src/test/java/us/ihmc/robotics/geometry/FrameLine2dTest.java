@@ -1,12 +1,11 @@
 package us.ihmc.robotics.geometry;
 
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
-import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
-import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationPlan;
-import us.ihmc.continuousIntegration.IntegrationCategory;
+import org.junit.jupiter.api.Tag;
+import org.junit.jupiter.api.Disabled;
 import us.ihmc.euclid.referenceFrame.FrameLine2D;
 import us.ihmc.euclid.referenceFrame.FramePoint2D;
 import us.ihmc.euclid.referenceFrame.FrameVector2D;
@@ -14,7 +13,6 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint2DBasics;
 import us.ihmc.euclid.referenceFrame.tools.ReferenceFrameTools;
 
-@ContinuousIntegrationPlan(categories = {IntegrationCategory.FAST})
 public class FrameLine2dTest
 {
    private static final boolean VERBOSE = false;
@@ -22,19 +20,18 @@ public class FrameLine2dTest
    private final boolean DISPLAY_PANEL = false;
    private final boolean WAIT_FOR_BUTTON_PUSH = false;
 
-   @Before
+   @BeforeEach
    public void setUp() throws Exception
    {
    }
 
-   @After
+   @AfterEach
    public void tearDown() throws Exception
    {
       ReferenceFrameTools.clearWorldFrameTree();
    }
 
-	@ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(timeout = 30000)
+   @Test
    public void testIntersectionOne()
    {
       double xMin = -1.0, xMax = 2.0, yMin = -1.0, yMax = 2.0;

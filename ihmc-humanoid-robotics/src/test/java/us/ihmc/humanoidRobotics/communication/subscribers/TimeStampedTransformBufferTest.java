@@ -1,16 +1,15 @@
 package us.ihmc.humanoidRobotics.communication.subscribers;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import static us.ihmc.robotics.Assert.*;
 
 import java.util.ArrayList;
 import java.util.Random;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import us.ihmc.commons.RandomNumbers;
-import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
+import org.junit.jupiter.api.Tag;
+import org.junit.jupiter.api.Disabled;
 import us.ihmc.euclid.tools.EuclidCoreRandomTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.robotics.kinematics.TimeStampedTransform3D;
@@ -18,8 +17,7 @@ import us.ihmc.robotics.kinematics.TransformInterpolationCalculator;
 
 public class TimeStampedTransformBufferTest
 {
-	@ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(timeout = 30000)
+   @Test
    public void testEmptyBuffer()
    {
       Random random = new Random(5616L);
@@ -33,8 +31,7 @@ public class TimeStampedTransformBufferTest
          assertFalse(timeStampedPelvisPoseBuffer.isInRange(random.nextLong()));
    }
 
-	@ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(timeout = 30000)
+   @Test
    public void testThatPosesAreProperlyStored()
    {
       int bufferSize = 100;
@@ -74,8 +71,7 @@ public class TimeStampedTransformBufferTest
       }
    }
 
-	@ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(timeout = 30000)
+   @Test
    public void testThatPosesAreProperlyStoredEvenAfterFillingTheBuffer()
    {
       int bufferSize = 100;
@@ -116,8 +112,7 @@ public class TimeStampedTransformBufferTest
       }
    }
 
-	@ContinuousIntegrationTest(estimatedDuration = 0.1)
-   @Test(timeout = 30000)
+   @Test
    public void testInterpolationBetweenPoses()
    {
       int bufferSize = 100;
@@ -164,8 +159,7 @@ public class TimeStampedTransformBufferTest
       }
    }
 
-	@ContinuousIntegrationTest(estimatedDuration = 0.9)
-   @Test(timeout = 30000)
+   @Test
    public void testInterpolationBetweenPosesAfterFillingBuffer()
    {
       int bufferSize = 100;

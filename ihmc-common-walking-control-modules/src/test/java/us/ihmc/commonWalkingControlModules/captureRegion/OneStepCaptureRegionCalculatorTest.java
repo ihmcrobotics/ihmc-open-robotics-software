@@ -1,7 +1,6 @@
 package us.ihmc.commonWalkingControlModules.captureRegion;
 
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import static us.ihmc.robotics.Assert.*;
 
 import java.awt.Color;
 import java.util.ArrayList;
@@ -9,11 +8,12 @@ import java.util.ArrayList;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 
-import org.junit.After;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.Test;
 
 import us.ihmc.commonWalkingControlModules.capturePoint.CapturePointTools;
-import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
+import org.junit.jupiter.api.Tag;
+import org.junit.jupiter.api.Disabled;
 import us.ihmc.euclid.geometry.interfaces.Vertex2DSupplier;
 import us.ihmc.euclid.referenceFrame.FrameConvexPolygon2D;
 import us.ihmc.euclid.referenceFrame.FramePoint2D;
@@ -60,7 +60,7 @@ public class OneStepCaptureRegionCalculatorTest
 
    private final YoVariableRegistry registry = new YoVariableRegistry("CaptureRegionCalculatorTest");
 
-   @After
+   @AfterEach
    public void tearDown()
    {
       ReferenceFrameTools.clearWorldFrameTree();
@@ -68,8 +68,7 @@ public class OneStepCaptureRegionCalculatorTest
 
    @SuppressWarnings("unused")
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(timeout = 30000)
+   @Test
    public void testConstructor()
    {
       double footWidth = 0.5;
@@ -79,8 +78,7 @@ public class OneStepCaptureRegionCalculatorTest
             ankleZUpFrames, registry, null);
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(timeout = 30000000)
+   @Test
    public void testPointsInsideCaptureRegion()
    {
       // do not change parameters
@@ -164,8 +162,7 @@ public class OneStepCaptureRegionCalculatorTest
       }
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(timeout = 30000)
+   @Test
    public void testProjectedFootCorners()
    {
       // do not change parameters
@@ -240,8 +237,7 @@ public class OneStepCaptureRegionCalculatorTest
       }
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(timeout = 30000)
+   @Test
    public void testCalculationWithICPInFootPolygon()
    {
       double footWidth = 0.5;
@@ -313,8 +309,7 @@ public class OneStepCaptureRegionCalculatorTest
       }
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(timeout = 30000)
+   @Test
    public void testCalculationWithHighSwingTime()
    {
       // do not change parameters

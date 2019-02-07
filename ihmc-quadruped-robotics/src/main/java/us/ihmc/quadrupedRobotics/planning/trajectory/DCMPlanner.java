@@ -184,8 +184,8 @@ public class DCMPlanner
 
    private void computeTransitionTrajectory()
    {
-      double transitionEndTime = piecewiseConstantCopTrajectory.getTimeAtStartOfInterval(1);
-      double transitionStartTime = Math.max(timeAtStartOfState.getDoubleValue(), transitionEndTime - initialTransitionDurationParameter.getValue());
+      double transitionStartTime = timeAtStartOfState.getDoubleValue();
+      double transitionEndTime = Math.min(piecewiseConstantCopTrajectory.getTimeAtStartOfInterval(1), transitionStartTime + initialTransitionDurationParameter.getValue());
 
       dcmTrajectory.computeTrajectory(transitionEndTime);
       dcmTrajectory.getPosition(finalTransitionDCMPosition);

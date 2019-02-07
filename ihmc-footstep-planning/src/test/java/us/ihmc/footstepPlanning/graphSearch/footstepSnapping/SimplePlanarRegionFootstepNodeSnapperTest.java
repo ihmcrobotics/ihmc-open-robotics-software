@@ -1,11 +1,10 @@
 package us.ihmc.footstepPlanning.graphSearch.footstepSnapping;
 
-import org.junit.Before;
-import org.junit.Test;
-import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations;
-import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
-import us.ihmc.continuousIntegration.ContinuousIntegrationTools;
-import us.ihmc.continuousIntegration.IntegrationCategory;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Tag;
+import org.junit.jupiter.api.Disabled;
+import us.ihmc.commons.ContinuousIntegrationTools;
 import us.ihmc.euclid.axisAngle.AxisAngle;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.tools.EuclidCoreRandomTools;
@@ -28,9 +27,8 @@ import us.ihmc.commons.thread.ThreadTools;
 
 import java.util.Random;
 
-import static org.junit.Assert.assertEquals;
+import static us.ihmc.robotics.Assert.*;
 
-@ContinuousIntegrationAnnotations.ContinuousIntegrationPlan(categories = IntegrationCategory.FAST)
 public class SimplePlanarRegionFootstepNodeSnapperTest
 {
    private final Random random = new Random(1209L);
@@ -42,7 +40,7 @@ public class SimplePlanarRegionFootstepNodeSnapperTest
    private boolean visualize = true;
    private PolygonSnapperVisualizer visualizer;
 
-   @Before
+   @BeforeEach
    public void setup()
    {
       visualize = visualize && !ContinuousIntegrationTools.isRunningOnContinuousIntegrationServer();
@@ -59,8 +57,7 @@ public class SimplePlanarRegionFootstepNodeSnapperTest
       unitSquare.update();
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(timeout = 30000)
+   @Test
    public void testIdentity()
    {
       FootstepNode nodeToSnap = new FootstepNode(-0.3, 2.2);
@@ -72,8 +69,7 @@ public class SimplePlanarRegionFootstepNodeSnapperTest
       doAFullFootholdTest(transformToWorld, nodeToSnap);
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(timeout = 30000)
+   @Test
    public void testVerticalTranslation()
    {
       FootstepNode nodeToSnap = new FootstepNode(2.5, -0.5);
@@ -86,8 +82,7 @@ public class SimplePlanarRegionFootstepNodeSnapperTest
       doAFullFootholdTest(transformToWorld, nodeToSnap);
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(timeout = 30000)
+   @Test
    public void testSimpleRotation()
    {
       FootstepNode nodeToSnap = new FootstepNode(0.0, 0.0);
@@ -100,8 +95,7 @@ public class SimplePlanarRegionFootstepNodeSnapperTest
       doAFullFootholdTest(transformToWorld, nodeToSnap);
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(timeout = 30000)
+   @Test
    public void testSimpleTranslationAndRotation()
    {
       FootstepNode nodeToSnap = new FootstepNode(1.1, 0.0);
@@ -115,8 +109,7 @@ public class SimplePlanarRegionFootstepNodeSnapperTest
       doAFullFootholdTest(transformToWorld, nodeToSnap);
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(timeout = 30000)
+   @Test
    public void testSimplePartialFoothold()
    {
       FootstepNode nodeToSnap = new FootstepNode(1.0, 0.0);
@@ -147,8 +140,7 @@ public class SimplePlanarRegionFootstepNodeSnapperTest
       PlanarRegionPolygonSnapperTest.assertSurfaceNormalsMatchAndSnapPreservesXFromAbove(snapData.getSnapTransform(), transformToWorld);
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(timeout = 30000)
+   @Test
    public void testRandomFullFootholds()
    {
       int numTests = 100;

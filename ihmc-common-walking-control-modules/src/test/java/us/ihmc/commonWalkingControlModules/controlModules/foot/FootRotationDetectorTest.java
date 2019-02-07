@@ -2,9 +2,10 @@ package us.ihmc.commonWalkingControlModules.controlModules.foot;
 
 import java.util.Random;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
-import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
+import org.junit.jupiter.api.Tag;
+import org.junit.jupiter.api.Disabled;
 import us.ihmc.euclid.geometry.tools.EuclidGeometryTestTools;
 import us.ihmc.euclid.referenceFrame.FrameLine2D;
 import us.ihmc.euclid.referenceFrame.FramePoint2D;
@@ -23,8 +24,7 @@ import us.ihmc.yoVariables.registry.YoVariableRegistry;
 
 public class FootRotationDetectorTest
 {
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(timeout = 3000)
+   @Test
    public void testRotationDetectionMath()
    {
       Random random = new Random(429L);
