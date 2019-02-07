@@ -1,13 +1,19 @@
 package us.ihmc.quadrupedFootstepPlanning.footstepPlanning;
 
+import org.junit.Test;
 import us.ihmc.commons.thread.ThreadTools;
+import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations;
+import us.ihmc.continuousIntegration.IntegrationCategory;
 import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.graphSearch.QuadrupedAStarFootstepPlanner;
 import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.graphSearch.nodeExpansion.FootstepNodeExpansion;
 import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.graphSearch.nodeExpansion.ParameterBasedNodeExpansion;
 import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.graphSearch.parameters.DefaultFootstepPlannerParameters;
 import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.graphSearch.parameters.FootstepPlannerParameters;
+import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.tools.FootstepPlannerIOTools;
 import us.ihmc.quadrupedPlanning.QuadrupedXGaitSettings;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
+
+import java.util.List;
 
 public class QuadrupedAStarFootstepPlannerDataSetTest extends FootstepPlannerDataSetTest
 {
@@ -25,6 +31,13 @@ public class QuadrupedAStarFootstepPlannerDataSetTest extends FootstepPlannerDat
       FootstepPlannerParameters parameters = new DefaultFootstepPlannerParameters();
       FootstepNodeExpansion expansion = new ParameterBasedNodeExpansion(parameters, xGaitSettings);
       return QuadrupedAStarFootstepPlanner.createPlanner(parameters, xGaitSettings, null, expansion, registry);
+   }
+
+   @Test(timeout = 500000)
+   @ContinuousIntegrationAnnotations.ContinuousIntegrationTest(estimatedDuration = 13.0, categoriesOverride = IntegrationCategory.IN_DEVELOPMENT)
+   public void testDatasetsWithoutOcclusion()
+   {
+      super.testDatasetsWithoutOcclusion();
    }
 
    public static void main(String[] args) throws Exception
