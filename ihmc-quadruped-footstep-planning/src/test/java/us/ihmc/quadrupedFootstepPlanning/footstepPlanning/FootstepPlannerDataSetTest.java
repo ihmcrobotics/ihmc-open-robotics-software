@@ -3,41 +3,45 @@ package us.ihmc.quadrupedFootstepPlanning.footstepPlanning;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
-import us.ihmc.commons.Conversions;
 import us.ihmc.commons.MathTools;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.continuousIntegration.ContinuousIntegrationTools;
 import us.ihmc.continuousIntegration.IntegrationCategory;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
-import us.ihmc.euclid.tools.EuclidCoreTestTools;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DBasics;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
+import us.ihmc.graphicsDescription.Graphics3DObject;
+import us.ihmc.graphicsDescription.appearance.AppearanceDefinition;
+import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.log.LogTools;
-import us.ihmc.messager.Messager;
 import us.ihmc.quadrupedBasics.gait.QuadrupedTimedStep;
 import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.graphSearch.graph.FootstepNode;
+import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.tools.FootstepPlannerDataExporter;
 import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.tools.FootstepPlannerIOTools;
 import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.tools.FootstepPlannerIOTools.FootstepPlannerUnitTestDataset;
 import us.ihmc.robotics.Assert;
+import us.ihmc.robotics.geometry.PlanarRegionsList;
+import us.ihmc.robotics.graphics.Graphics3DObjectTools;
 import us.ihmc.robotics.robotSide.QuadrantDependentList;
 import us.ihmc.robotics.robotSide.RobotQuadrant;
+import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.atomic.AtomicReference;
-
-import static org.junit.Assert.assertEquals;
 
 public abstract class FootstepPlannerDataSetTest
 {
    protected static final double bambooTimeScaling = 4.0;
    private static final double epsilon = 1e-3;
 
+   private static final QuadrantDependentList<AppearanceDefinition> colorDefinitions = new QuadrantDependentList<>(YoAppearance.Red(), YoAppearance.Green(),
+                                                                                                                   YoAppearance.DarkRed(),
+                                                                                                                   YoAppearance.DarkGreen());
 
    // Whether to start the UI or not.
-   protected static boolean VISUALIZE = true;
+   protected static boolean VISUALIZE = false;
    // For enabling helpful prints.
    protected static boolean DEBUG = true;
    protected static boolean VERBOSE = true;
@@ -62,13 +66,13 @@ public abstract class FootstepPlannerDataSetTest
       planner = null;
    }
 
-
    @Test(timeout = 500000)
    @ContinuousIntegrationTest(estimatedDuration = 13.0)
    public void testDatasetsWithoutOcclusion()
    {
       List<FootstepPlannerUnitTestDataset> allDatasets = FootstepPlannerIOTools
-            .loadAllFootstepPlannerDatasetsWithoutOcclusions(FootstepPlannerDataExporter.class);
+                        .loadAllFootstepPlannerDatasetsWithoutOcclusions(FootstepPlannerDataExporter.class);
+//            .loadAllFootstepPlannerDatasetsWithoutOcclusions(FootstepPlannerIOTools.class);
       runAssertionsOnAllDatasets(this::runAssertions, allDatasets);
    }
 
@@ -77,13 +81,15 @@ public abstract class FootstepPlannerDataSetTest
    public void testDatasetsWithoutOcclusionInDevelopment()
    {
       List<FootstepPlannerUnitTestDataset> allDatasets = FootstepPlannerIOTools
-            .loadAllFootstepPlannerDatasetsWithoutOcclusionsInDevelopment(FootstepPlannerDataExporter.class);
+                        .loadAllFootstepPlannerDatasetsWithoutOcclusionsInDevelopment(FootstepPlannerDataExporter.class);
+//            .loadAllFootstepPlannerDatasetsWithoutOcclusionsInDevelopment(FootstepPlannerIOTools.class);
       runAssertionsOnAllDatasets(this::runAssertions, allDatasets);
    }
 
    protected void runAssertionsOnDataset(DatasetTestRunner datasetTestRunner, String datasetName)
    {
-      FootstepPlannerUnitTestDataset dataset = FootstepPlannerIOTools.loadDataset(FootstepPlannerDataExporter.class, datasetName);
+            FootstepPlannerUnitTestDataset dataset = FootstepPlannerIOTools.loadDataset(FootstepPlannerDataExporter.class, datasetName);
+//      FootstepPlannerUnitTestDataset dataset = FootstepPlannerIOTools.loadDataset(FootstepPlannerIOTools.class, datasetName);
 
       String errorMessages = datasetTestRunner.testDataset(dataset);
       Assert.assertTrue("Errors:" + errorMessages, errorMessages.isEmpty());
@@ -106,9 +112,9 @@ public abstract class FootstepPlannerDataSetTest
          if (DEBUG || VERBOSE)
             LogTools.info("Testing file: " + dataset.getDatasetName());
 
-         if(!dataset.getTypes().contains(getPlannerType()))
+         if (!dataset.getTypes().contains(getPlannerType()))
          {
-            if(DEBUG || VERBOSE)
+            if (DEBUG || VERBOSE)
                LogTools.info(dataset.getDatasetName() + " does not contain planner type " + getPlannerType() + ", skipping");
             continue;
          }
@@ -151,7 +157,11 @@ public abstract class FootstepPlannerDataSetTest
    {
       ThreadTools.sleep(1000);
       packPlanningRequest(dataset);
-      return findPlanAndAssertGoodResult(dataset);
+      String errorMessage = findPlanAndAssertGoodResult(dataset);
+
+      visualizePlan(planner.getSteps(), dataset.getPlanarRegionsList(), dataset.getStart(), dataset.getGoal());
+
+      return errorMessage;
    }
 
    protected void packPlanningRequest(FootstepPlannerUnitTestDataset dataset)
@@ -177,17 +187,11 @@ public abstract class FootstepPlannerDataSetTest
       planner.setGoal(goal);
       planner.setPlanarRegionsList(dataset.getPlanarRegionsList());
       planner.setTimeout(timeout);
-//      planner.setHorizonLengthTopic(Double.MAX_VALUE);
+      //      planner.setHorizonLengthTopic(Double.MAX_VALUE);
 
       if (DEBUG)
          LogTools.info("Set planner parameters.");
    }
-
-
-
-
-
-
 
    private String findPlanAndAssertGoodResult(FootstepPlannerUnitTestDataset dataset)
    {
@@ -200,7 +204,6 @@ public abstract class FootstepPlannerDataSetTest
       FootstepPlanningResult planResult = planner.plan();
       if (!planResult.validForExecution())
          return "Footstep plan for " + datasetName + " is invalid.";
-
 
       String errorMessage = assertPlanIsValid(datasetName, planner.getSteps(), dataset.getGoal(), dataset.getGoalOrientation().getYaw());
 
@@ -231,7 +234,7 @@ public abstract class FootstepPlannerDataSetTest
       if (!MathTools.epsilonEquals(goalYaw, nominalYaw, 0.02))
          errorMessage = datasetName + " did not reach goal yaw. Made it to " + nominalYaw + ", trying to get to " + goalYaw;
 
-      if((VISUALIZE || DEBUG) && !errorMessage.isEmpty())
+      if ((VISUALIZE || DEBUG) && !errorMessage.isEmpty())
          LogTools.error(errorMessage);
 
       return errorMessage;
@@ -255,5 +258,50 @@ public abstract class FootstepPlannerDataSetTest
    protected interface DatasetTestRunner
    {
       String testDataset(FootstepPlannerUnitTestDataset dataset);
+   }
+
+   private void visualizePlan(List<? extends QuadrupedTimedStep> steps, PlanarRegionsList planarRegionsList, Point3DReadOnly start, Point3DReadOnly goal)
+   {
+      if (!VISUALIZE || ContinuousIntegrationTools.isRunningOnContinuousIntegrationServer())
+         return;
+
+      SimulationConstructionSet scs = new SimulationConstructionSet();
+
+      Graphics3DObject graphics3DObject = new Graphics3DObject();
+      if (planarRegionsList != null)
+         Graphics3DObjectTools.addPlanarRegionsList(graphics3DObject, planarRegionsList, YoAppearance.White(), YoAppearance.Grey(), YoAppearance.DarkGray());
+      scs.setGroundVisible(false);
+
+      graphics3DObject.identity();
+      graphics3DObject.translate(start);
+      graphics3DObject.translate(0.0, 0.0, 0.05);
+      graphics3DObject.addCone(0.3, 0.05, YoAppearance.Blue());
+
+      graphics3DObject.identity();
+      graphics3DObject.translate(goal);
+      graphics3DObject.translate(0.0, 0.0, 0.05);
+      graphics3DObject.addCone(0.3, 0.05, YoAppearance.Black());
+
+      if (steps != null)
+      {
+         for (int i = 0; i < steps.size(); i++)
+         {
+            Point3DReadOnly point = steps.get(i).getGoalPosition();
+            AppearanceDefinition appearanceDefinition = colorDefinitions.get(steps.get(i).getRobotQuadrant());
+
+            graphics3DObject.identity();
+            graphics3DObject.translate(point);
+            graphics3DObject.addSphere(0.1, appearanceDefinition);
+
+         }
+      }
+
+      scs.addStaticLinkGraphics(graphics3DObject);
+
+      scs.setCameraFix(0.0, 0.0, 0.0);
+      scs.setCameraPosition(-0.001, 0.0, 15.0);
+      scs.startOnAThread();
+
+      ThreadTools.sleepForever();
    }
 }
