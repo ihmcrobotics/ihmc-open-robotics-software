@@ -3,9 +3,8 @@ package us.ihmc.avatar.controllerAPI;
 import java.util.Map;
 import java.util.Random;
 
-import org.junit.After;
-import org.junit.Assert;
-import org.junit.Before;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
 
 import gnu.trove.map.hash.TObjectDoubleHashMap;
 import us.ihmc.avatar.MultiRobotTestInterface;
@@ -26,6 +25,7 @@ import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.mecano.tools.MultiBodySystemTools;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
+import us.ihmc.robotics.Assert;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.simulationConstructionSetTools.bambooTools.BambooTools;
 import us.ihmc.simulationConstructionSetTools.util.environments.FlatGroundEnvironment;
@@ -165,14 +165,14 @@ public abstract class EndToEndGoHomeMessageTest implements MultiRobotTestInterfa
       Assert.assertTrue(testHelper.simulateAndBlockAndCatchExceptions(0.25));
    }
 
-   @Before
+   @BeforeEach
    public void setup()
    {
       simulationTestingParameters = SimulationTestingParameters.createFromSystemProperties();
       BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
    }
 
-   @After
+   @AfterEach
    public void destroy()
    {
       if (simulationTestingParameters.getKeepSCSUp())
