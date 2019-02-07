@@ -27,6 +27,7 @@ import us.ihmc.tools.MemoryTools;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.yoVariables.variable.YoDouble;
 
+@Tag("humanoid-obstacle")
 public abstract class DRCObstacleCourseWobblyFootTest implements MultiRobotTestInterface
 {
    private SimulationTestingParameters simulationTestingParameters;
