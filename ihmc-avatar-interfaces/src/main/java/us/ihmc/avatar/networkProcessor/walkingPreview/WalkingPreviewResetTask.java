@@ -16,7 +16,7 @@ public class WalkingPreviewResetTask implements WalkingPreviewTask
    private final WalkingHighLevelHumanoidController walkingController;
 
    private int count = 0;
-   private int numberOfTicksBeforeDone = 1;
+   private final int numberOfTicksBeforeDone = 2; // 2 ticks seem necessary when reinitializing the controller.
 
    public WalkingPreviewResetTask(WalkingHighLevelHumanoidController walkingController, SideDependentList<YoPlaneContactState> footContactStates)
    {
