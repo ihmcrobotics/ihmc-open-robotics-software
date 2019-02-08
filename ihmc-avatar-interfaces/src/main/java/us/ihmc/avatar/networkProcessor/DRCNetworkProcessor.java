@@ -48,7 +48,6 @@ public class DRCNetworkProcessor
       tryToStartModule(() -> setupHeightQuadTreeToolboxModule(robotModel, params));
       tryToStartModule(() -> setupRobotEnvironmentAwerenessModule(params));
       tryToStartModule(() -> setupBipedalSupportPlanarRegionPublisherModule(robotModel, params));
-      tryToStartModule(() -> setupBipedalSupportPlanarRegionPublisherModule(robotModel, params));
       tryToStartModule(() -> setupWalkingPreviewModule(robotModel, params));
    }
 
