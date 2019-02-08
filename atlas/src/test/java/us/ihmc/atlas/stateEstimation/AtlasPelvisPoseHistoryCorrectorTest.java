@@ -1,20 +1,19 @@
 package us.ihmc.atlas.stateEstimation;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import us.ihmc.atlas.AtlasRobotModel;
 import us.ihmc.atlas.AtlasRobotVersion;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.RobotTarget;
 import us.ihmc.avatar.stateEstimationEndToEndTests.PelvisPoseHistoryCorrectionEndToEndTest;
-import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationPlan;
-import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
-import us.ihmc.continuousIntegration.IntegrationCategory;
+import org.junit.jupiter.api.Tag;
+import org.junit.jupiter.api.Disabled;
 import us.ihmc.simulationConstructionSetTools.bambooTools.BambooTools;
 import us.ihmc.simulationconstructionset.util.ControllerFailureException;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
 
-@ContinuousIntegrationPlan(categories = {IntegrationCategory.EXCLUDE})
+@Disabled
 public class AtlasPelvisPoseHistoryCorrectorTest extends PelvisPoseHistoryCorrectionEndToEndTest
 {
 
@@ -31,48 +30,42 @@ public class AtlasPelvisPoseHistoryCorrectorTest extends PelvisPoseHistoryCorrec
    }
 
    @Override
-   @ContinuousIntegrationTest(estimatedDuration = 7.7)
-   @Test(timeout = 30000)
+   @Test
    public void testBigYawInDoubleSupport() throws SimulationExceededMaximumTimeException
    {
       super.testBigYawInDoubleSupport();
    }
 
    @Override
-   @ContinuousIntegrationTest(estimatedDuration = 9.4)
-   @Test(timeout = 30000)
+   @Test
    public void testBigYawInSingleSupport() throws SimulationExceededMaximumTimeException
    {
       super.testBigYawInSingleSupport();
    }
 
    @Override
-   @ContinuousIntegrationTest(estimatedDuration = 8.1)
-   @Test(timeout = 30000)
+   @Test
    public void testLocalizationOffsetOutsideOfFootInSingleSupport() throws SimulationExceededMaximumTimeException
    {
       super.testLocalizationOffsetOutsideOfFootInSingleSupport();
    }
 
    @Override
-   @ContinuousIntegrationTest(estimatedDuration = 7.8)
-   @Test(timeout = 30000)
+   @Test
    public void testPelvisCorrectionControllerOutOfTheLoop() throws SimulationExceededMaximumTimeException
    {
       super.testPelvisCorrectionControllerOutOfTheLoop();
    }
 
    @Override
-   @ContinuousIntegrationTest(estimatedDuration = 12.1)
-   @Test(timeout = 30000)
+   @Test
    public void testPelvisCorrectionDuringSimpleFlatGroundScriptWithOscillatingFeet() throws SimulationExceededMaximumTimeException
    {
       super.testPelvisCorrectionDuringSimpleFlatGroundScriptWithOscillatingFeet();
    }
 
    @Override
-   @ContinuousIntegrationTest(estimatedDuration = 5.0)
-   @Test(timeout = 30000)
+   @Test
    public void testWalkingDuringBigPelvisCorrection() throws SimulationExceededMaximumTimeException, ControllerFailureException
    {
       super.testWalkingDuringBigPelvisCorrection();

@@ -1,8 +1,9 @@
 package us.ihmc.tools;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
-import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
+import org.junit.jupiter.api.Tag;
+import org.junit.jupiter.api.Disabled;
 import us.ihmc.tools.FloatArrayCollector;
 
 import java.util.Arrays;
@@ -13,16 +14,14 @@ import static us.ihmc.robotics.Assert.*;
 
 public class FloatArrayCollectorTest
 {
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(timeout = 30000)
+   @Test
    public void testCollectZeroItemsToAZeroLengthArray()
    {
       float[] collectedArrayOfFloats = Collections.<Double> emptyList().stream().collect(FloatArrayCollector.create());
       assertEquals(0, collectedArrayOfFloats.length);
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(timeout = 30000)
+   @Test
    public void testCollectOneItem()
    {
       float[] collectedArrayOfFloats = Collections.singletonList(1.0).stream().collect(FloatArrayCollector.create());
@@ -30,8 +29,7 @@ public class FloatArrayCollectorTest
       assertEquals(1.0f, collectedArrayOfFloats[0], 1e-5);
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(timeout = 30000)
+   @Test
    public void testCollectManyItems()
    {
       float[] collectedArrayOfFloats = Arrays.stream(new double[8192]).mapToObj(Double::new).collect(FloatArrayCollector.create());
@@ -42,8 +40,7 @@ public class FloatArrayCollectorTest
       assertEquals(0, sum, 1e-5);
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(timeout = 30000)
+   @Test
    public void testCollectParallel()
    {
       final int n = 8192;

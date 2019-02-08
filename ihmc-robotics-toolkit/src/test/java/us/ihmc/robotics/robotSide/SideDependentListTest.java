@@ -1,5 +1,6 @@
 package us.ihmc.robotics.robotSide;
 
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static us.ihmc.robotics.Assert.*;
 
 import java.util.ArrayList;
@@ -9,15 +10,14 @@ import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.Map;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
-import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
-
+import org.junit.jupiter.api.Tag;
+import org.junit.jupiter.api.Disabled;
 public class SideDependentListTest
 {
 
-	@ContinuousIntegrationTest(estimatedDuration = 0.0)
-	@Test(timeout = 30000)
+	@Test
    public void testCommonUse()
    {
       double leftFavoriteNumber = Math.PI;
@@ -42,8 +42,7 @@ public class SideDependentListTest
       System.out.println(sideDependentList);
    }
 
-	@ContinuousIntegrationTest(estimatedDuration = 0.0)
-	@Test(timeout = 30000)
+	@Test
    public void testWitGenericObjects()
    {
       ArrayList<Integer> leftObject = new ArrayList<Integer>();
@@ -56,8 +55,7 @@ public class SideDependentListTest
       assertTrue(rightObject == sideDependentList.get(RobotSide.RIGHT));
    }
 
-	@ContinuousIntegrationTest(estimatedDuration = 0.0)
-	@Test(timeout = 30000) 
+	@Test 
    public void testCopyConstructor()
    {
       Object leftObject = new Object();
@@ -76,27 +74,27 @@ public class SideDependentListTest
       
    }
 
-	@ContinuousIntegrationTest(estimatedDuration = 0.0)
-	@Test(timeout = 30000,expected = IndexOutOfBoundsException.class)
+	@Test
    public void testIndexOutOfBoundsException()
    {
-      Object leftObject = new Object();
-      Object rightObject = new Object();
-      
-      SideDependentList<Object> sideDependentList = new SideDependentList<Object>(leftObject, rightObject);
-      
-      Iterator<Object> iterator = sideDependentList.iterator();
-      
-      while(iterator.hasNext())
-      {
+      assertThrows(IndexOutOfBoundsException.class, () -> {
+         Object leftObject = new Object();
+         Object rightObject = new Object();
+
+         SideDependentList<Object> sideDependentList = new SideDependentList<Object>(leftObject, rightObject);
+
+         Iterator<Object> iterator = sideDependentList.iterator();
+
+         while (iterator.hasNext())
+         {
+            iterator.next();
+         }
+
          iterator.next();
-      }
-      
-      iterator.next();
+      });
    }
 
-	@ContinuousIntegrationTest(estimatedDuration = 0.0)
-	@Test(timeout = 30000,expected = UnsupportedOperationException.class)
+	@Test
    public void testIteratorCannotRemove()
    {
       Object leftObject = new Object();
@@ -105,11 +103,10 @@ public class SideDependentListTest
       SideDependentList<Object> sideDependentList = new SideDependentList<Object>(leftObject, rightObject);
       
       Iterator<Object> iterator = sideDependentList.iterator();
-      iterator.remove();
+      assertThrows(UnsupportedOperationException.class, () -> iterator.remove());
    }
 
-	@ContinuousIntegrationTest(estimatedDuration = 0.0)
-	@Test(timeout = 30000)
+	@Test
    public void testSet()
    {
       Object leftObject = new Object();
@@ -128,8 +125,7 @@ public class SideDependentListTest
 
    }
 
-	@ContinuousIntegrationTest(estimatedDuration = 0.0)
-	@Test(timeout = 30000)
+	@Test
    public void testCreateListOfHashMaps()
    {
       SideDependentList<Map<Double,String>> sideDependentList = SideDependentList.createListOfHashMaps();
@@ -151,8 +147,7 @@ public class SideDependentListTest
       assertEquals(sideDependentList.get(RobotSide.RIGHT).get(4.0), "4.0");
    }
 
-	@ContinuousIntegrationTest(estimatedDuration = 0.0)
-	@Test(timeout = 30000)
+	@Test
    public void testCreateListOfEnumMaps()
    {
       SideDependentList<EnumMap<IceCreamFlavor,String>> sideDependentList = SideDependentList.createListOfEnumMaps(IceCreamFlavor.class);

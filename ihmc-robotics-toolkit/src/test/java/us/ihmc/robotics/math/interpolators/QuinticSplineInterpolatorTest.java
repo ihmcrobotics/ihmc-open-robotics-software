@@ -5,10 +5,10 @@ import static us.ihmc.robotics.Assert.*;
 import java.io.IOException;
 import java.util.Random;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
-import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
-
+import org.junit.jupiter.api.Tag;
+import org.junit.jupiter.api.Disabled;
 public class QuinticSplineInterpolatorTest
 {
 
@@ -18,8 +18,7 @@ public class QuinticSplineInterpolatorTest
     * made in Matlab.
     */
 
-	@ContinuousIntegrationTest(estimatedDuration = 0.0)
-	@Test(timeout=300000)
+	@Test
    public void testQuinticSplineInterpolator()
    {
       double[] x = new double[] { 0, 3.333, 6, 10.0, 12.0 };
@@ -76,8 +75,7 @@ public class QuinticSplineInterpolatorTest
     * timing parameters.
     */
 
-	@ContinuousIntegrationTest(estimatedDuration = 0.7)
-	@Test(timeout=300000)
+	@Test
    public void testQuinticSplineCalculationSpeed() throws IOException
    {
 
@@ -148,8 +146,7 @@ public class QuinticSplineInterpolatorTest
 
    }
 
-	@ContinuousIntegrationTest(estimatedDuration = 0.0)
-	@Test(timeout=300000)
+	@Test
    public void testTwoPointsQuinticSpline()
    {
       double[] x = new double[] { 0.0, 1.0 };

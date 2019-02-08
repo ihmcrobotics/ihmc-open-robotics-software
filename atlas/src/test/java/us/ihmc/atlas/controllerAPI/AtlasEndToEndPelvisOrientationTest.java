@@ -1,13 +1,14 @@
 package us.ihmc.atlas.controllerAPI;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import us.ihmc.atlas.AtlasRobotModel;
 import us.ihmc.atlas.AtlasRobotVersion;
 import us.ihmc.avatar.controllerAPI.EndToEndPelvisOrientationTest;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.RobotTarget;
-import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
+import org.junit.jupiter.api.Tag;
+import org.junit.jupiter.api.Disabled;
 import us.ihmc.simulationConstructionSetTools.bambooTools.BambooTools;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
 
@@ -16,64 +17,56 @@ public class AtlasEndToEndPelvisOrientationTest extends EndToEndPelvisOrientatio
    private DRCRobotModel robotModel = new AtlasRobotModel(AtlasRobotVersion.ATLAS_UNPLUGGED_V5_NO_HANDS, RobotTarget.SCS, false);
 
    @Override
-   @ContinuousIntegrationTest(estimatedDuration = 26.9)
-   @Test(timeout = 130000)
+   @Test
    public void testGoHome() throws SimulationExceededMaximumTimeException
    {
       super.testGoHome();
    }
 
    @Override
-   @ContinuousIntegrationTest(estimatedDuration = 25.5)
-   @Test(timeout = 130000)
+   @Test
    public void testSingleTrajectoryPoint() throws SimulationExceededMaximumTimeException
    {
       super.testSingleTrajectoryPoint();
    }
 
    @Override
-   @ContinuousIntegrationTest(estimatedDuration = 80.0)
-   @Test(timeout = 300000)
+   @Test
    public void testQueue() throws SimulationExceededMaximumTimeException
    {
       super.testQueue();
    }
 
    @Override
-   @ContinuousIntegrationTest(estimatedDuration = 42.5)
-   @Test(timeout = 210000)
+   @Test
    public void testWalking() throws SimulationExceededMaximumTimeException
    {
       super.testWalking();
    }
 
    @Override
-   @ContinuousIntegrationTest(estimatedDuration = 40.8)
-   @Test(timeout = 200000)
+   @Test
    public void testWalkingAfterTrajectory() throws SimulationExceededMaximumTimeException
    {
       super.testWalkingAfterTrajectory();
    }
 
    @Override
-   @ContinuousIntegrationTest(estimatedDuration = 33.4)
-   @Test(timeout = 170000)
+   @Test
    public void testMultipleTrajectoryPoints() throws SimulationExceededMaximumTimeException
    {
       super.testMultipleTrajectoryPoints();
    }
 
    @Override
-   @ContinuousIntegrationTest(estimatedDuration = 34.9)
-   @Test(timeout = 170000)
+   @Test
    public void testWalkingWithUserControl() throws SimulationExceededMaximumTimeException
    {
       super.testWalkingWithUserControl();
    }
 
    @Override
-   @ContinuousIntegrationTest(estimatedDuration = 29.3)
-   @Test(timeout = 150000)
+   @Test
    public void testCustomControlFrame() throws SimulationExceededMaximumTimeException
    {
       super.testCustomControlFrame();

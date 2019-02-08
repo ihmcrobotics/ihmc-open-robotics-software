@@ -1,9 +1,8 @@
 package us.ihmc.quadrupedPlanning.footstepChooser;
 
-import org.junit.Test;
-import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationPlan;
-import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
-import us.ihmc.continuousIntegration.IntegrationCategory;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Tag;
+import org.junit.jupiter.api.Disabled;
 import us.ihmc.euclid.Axis;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
@@ -12,13 +11,11 @@ import us.ihmc.robotics.geometry.PlanarRegionsListGenerator;
 
 import static us.ihmc.robotics.Assert.*;
 
-@ContinuousIntegrationPlan(categories = IntegrationCategory.FAST)
 public class PlanarRegionBasedPointFootSnapperTest
 {
    private static final double epsilon = 1e-6;
 
-   @Test(timeout = 2000)
-   @ContinuousIntegrationTest(estimatedDuration = 100)
+   @Test
    public void testSnappingToFlatSquare()
    {
       PointFootSnapperParameters testParameters = new PointFootSnapperParameters()
@@ -59,8 +56,7 @@ public class PlanarRegionBasedPointFootSnapperTest
       assertTrue(snappedStep.epsilonEquals(new Point3D(1.4, 2.25, -0.5), epsilon));
    }
 
-   @Test(timeout = 2000)
-   @ContinuousIntegrationTest(estimatedDuration = 100)
+   @Test
    public void testSnappingToRotatedSquare()
    {
       PointFootSnapperParameters testParameters = new PointFootSnapperParameters()

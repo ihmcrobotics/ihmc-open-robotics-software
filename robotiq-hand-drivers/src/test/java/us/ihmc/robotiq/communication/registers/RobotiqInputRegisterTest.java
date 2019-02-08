@@ -2,18 +2,17 @@ package us.ihmc.robotiq.communication.registers;
 
 import static us.ihmc.robotics.Assert.*;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
-import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
-
+import org.junit.jupiter.api.Tag;
+import org.junit.jupiter.api.Disabled;
 public abstract class RobotiqInputRegisterTest
 {
    protected abstract RobotiqInputRegister getInputRegister();
    protected abstract RobotiqInputRegister getExpectedRegister();
    protected abstract byte getValueToSet();
    
-   @Test(timeout = 30000)
-	@ContinuousIntegrationTest(estimatedDuration = 0.0)
+   @Test
    public void testSetRegister()
    {
       RobotiqInputRegister inputRegister = getInputRegister();
@@ -22,8 +21,7 @@ public abstract class RobotiqInputRegisterTest
       assertTrue(getExpectedRegister().equals(inputRegister));
    }
 
-   @Test(timeout = 30000)
-	@ContinuousIntegrationTest(estimatedDuration = 0.0)
+   @Test
    public void testGetRegister()
    {
       assertEquals(getValueToSet(), getExpectedRegister().getRegisterValue());

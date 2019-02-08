@@ -52,6 +52,7 @@ public class CenterOfMassHeightManager
 
    /** if the manager is in user mode before walking then stay in it while walking (PelvisHeightControlState) **/
    private final YoBoolean enableUserPelvisControlDuringWalking = new YoBoolean("centerOfMassHeightManagerEnableUserPelvisControlDuringWalking", registry);
+   private final YoBoolean doPrepareForLocomotion = new YoBoolean("doPrepareCenterOfMassHeightForLocomotion", registry);
 
    private final boolean useStateMachine;
 
@@ -118,6 +119,11 @@ public class CenterOfMassHeightManager
       pelvisHeightControlState.setWeights(weight);
    }
 
+   public void setPrepareForLocomotion(boolean value)
+   {
+      doPrepareForLocomotion.set(value);
+   }
+
    public void compute()
    {
       if (useStateMachine)
@@ -136,10 +142,11 @@ public class CenterOfMassHeightManager
     */
    public void prepareForLocomotion()
    {
-      if (!useStateMachine)
-      {
+      if (!doPrepareForLocomotion.getValue())
          return;
-      }
+
+      if (!useStateMachine)
+         return;
 
       if (enableUserPelvisControlDuringWalking.getBooleanValue())
          return;

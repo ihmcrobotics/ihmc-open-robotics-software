@@ -2,11 +2,12 @@ package us.ihmc.robotics.math.trajectories.providers;
 
 import static us.ihmc.robotics.Assert.*;
 
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
-import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
+import org.junit.jupiter.api.Tag;
+import org.junit.jupiter.api.Disabled;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.tools.ReferenceFrameTools;
@@ -29,7 +30,7 @@ public class YoPositionProviderTest
    private static double yValue = Math.random();
    private static double zValue = Math.random();
    
-   @Before
+   @BeforeEach
    public void setUp()
    {
       referenceFrame = ReferenceFrame.constructARootFrame("rootNameTEST");
@@ -38,7 +39,7 @@ public class YoPositionProviderTest
       yoFramePoint.set(xValue, yValue, zValue);
    }
    
-   @After
+   @AfterEach
    public void tearDown()
    {
       referenceFrame = null;
@@ -47,16 +48,14 @@ public class YoPositionProviderTest
       ReferenceFrameTools.clearWorldFrameTree();
    }
 
-	@ContinuousIntegrationTest(estimatedDuration = 0.0)
-	@Test(timeout = 30000)
+	@Test
    public void testConstructor()
    {
       provider = new YoPositionProvider(null);
       provider = new YoPositionProvider(yoFramePoint);
    }
 
-	@ContinuousIntegrationTest(estimatedDuration = 0.0)
-	@Test(timeout = 30000)
+	@Test
    public void testSetAndGet()
    {
       provider = new YoPositionProvider(yoFramePoint);

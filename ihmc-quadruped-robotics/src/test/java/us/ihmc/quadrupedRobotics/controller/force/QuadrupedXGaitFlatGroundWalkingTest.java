@@ -1,9 +1,10 @@
 package us.ihmc.quadrupedRobotics.controller.force;
 
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
-import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Tag;
+import org.junit.jupiter.api.Disabled;
 import us.ihmc.quadrupedBasics.QuadrupedSteppingStateEnum;
 import us.ihmc.quadrupedCommunication.teleop.RemoteQuadrupedTeleopManager;
 import us.ihmc.quadrupedRobotics.*;
@@ -15,6 +16,7 @@ import us.ihmc.tools.MemoryTools;
 
 import java.io.IOException;
 
+@Tag("quadruped-xgait")
 public abstract class QuadrupedXGaitFlatGroundWalkingTest implements QuadrupedMultiRobotTestInterface
 {
    private GoalOrientedTestConductor conductor;
@@ -29,7 +31,7 @@ public abstract class QuadrupedXGaitFlatGroundWalkingTest implements QuadrupedMu
    public abstract double getWalkingAngularVelocity();
    public abstract double getWalkingSpeedWhileTurning();
 
-   @Before
+   @BeforeEach
    public void setup()
    {
       MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " before test.");
@@ -50,7 +52,7 @@ public abstract class QuadrupedXGaitFlatGroundWalkingTest implements QuadrupedMu
       }
    }
 
-   @After
+   @AfterEach
    public void tearDown()
    {
       quadrupedTestFactory.close();
@@ -62,114 +64,98 @@ public abstract class QuadrupedXGaitFlatGroundWalkingTest implements QuadrupedMu
    }
 
 
-   @ContinuousIntegrationTest(estimatedDuration = 30.0)
-   @Test(timeout = 630000)
+   @Test
    public void testWalkingForwardFast()
    {
       testFlatGroundWalking(90.0, getFastWalkingSpeed());
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 30.0)
-   @Test(timeout = 720000)
+   @Test
    public void testWalkingForwardSlow()
    {
       testFlatGroundWalking(90.0, getSlowWalkingSpeed());
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 30.0)
-   @Test(timeout = 460000)
+   @Test
    public void testWalkingBackwardsFast()
    {
       testFlatGroundWalking(90.0, -getFastWalkingSpeed());
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 30.0)
-   @Test(timeout = 670000)
+   @Test
    public void testWalkingBackwardsSlow()
    {
       testFlatGroundWalking(90.0, -getSlowWalkingSpeed());
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 45.0)
-   @Test(timeout = 1100000)
+   @Test
    public void testWalkingInAForwardLeftCircle()
    {
       testWalkingInASemiCircle(90.0, getWalkingSpeedWhileTurning(), getWalkingAngularVelocity());
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 45.0)
-   @Test(timeout = 1200000)
+   @Test
    public void testWalkingInAForwardRightCircle()
    {
       testWalkingInASemiCircle(90.0, getWalkingSpeedWhileTurning(), -getWalkingAngularVelocity());
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 45.0)
-   @Test(timeout = 1200000)
+   @Test
    public void testWalkingInABackwardLeftCircle()
    {
       testWalkingInASemiCircle(90.0, -getWalkingSpeedWhileTurning(), -getWalkingAngularVelocity());
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 45.0)
-   @Test(timeout = 1500000)
+   @Test
    public void testWalkingInABackwardRightCircle()
    {
       testWalkingInASemiCircle(90.0, -getWalkingSpeedWhileTurning(), getWalkingAngularVelocity());
    }
 
 
-   @ContinuousIntegrationTest(estimatedDuration = 30.0)
-   @Test(timeout = 630000)
+   @Test
    public void testTrottingForwardFast()
    {
       testFlatGroundWalking(180.0, getFastWalkingSpeed());
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 30.0)
-   @Test(timeout = 720000)
+   @Test
    public void testTrottingForwardSlow()
    {
       testFlatGroundWalking(180.0, getSlowWalkingSpeed());
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 30.0)
-   @Test(timeout = 460000)
+   @Test
    public void testTrottingBackwardsFast()
    {
       testFlatGroundWalking(180.0, -getFastWalkingSpeed());
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 30.0)
-   @Test(timeout = 670000)
+   @Test
    public void testTrottingBackwardsSlow()
    {
       testFlatGroundWalking(180.0, -getSlowWalkingSpeed());
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 45.0)
-   @Test(timeout = 1100000)
+   @Test
    public void testTrottingInAForwardLeftCircle()
    {
       testWalkingInASemiCircle(180.0, getWalkingSpeedWhileTurning(), getWalkingAngularVelocity());
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 45.0)
-   @Test(timeout = 1200000)
+   @Test
    public void testTrottingInAForwardRightCircle()
    {
       testWalkingInASemiCircle(180.0, getWalkingSpeedWhileTurning(), -getWalkingAngularVelocity());
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 45.0)
-   @Test(timeout = 1200000)
+   @Test
    public void testTrottingInABackwardLeftCircle()
    {
       testWalkingInASemiCircle(180.0, -getWalkingSpeedWhileTurning(), -getWalkingAngularVelocity());
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 45.0)
-   @Test(timeout = 1500000)
+   @Test
    public void testTrottingInABackwardRightCircle()
    {
       testWalkingInASemiCircle(180.0, -getWalkingSpeedWhileTurning(), getWalkingAngularVelocity());
@@ -245,57 +231,49 @@ public abstract class QuadrupedXGaitFlatGroundWalkingTest implements QuadrupedMu
       conductor.simulate();
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 30.0)
-   @Test(timeout = 630000)
+   @Test
    public void testPacingForwardFast()
    {
       testFlatGroundPacing(getFastWalkingSpeed());
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 30.0)
-   @Test(timeout = 720000)
+   @Test
    public void testPacingForwardSlow()
    {
       testFlatGroundPacing(getSlowWalkingSpeed());
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 30.0)
-   @Test(timeout = 460000)
+   @Test
    public void testPacingBackwardsFast()
    {
       testFlatGroundPacing(-getFastWalkingSpeed());
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 30.0)
-   @Test(timeout = 670000)
+   @Test
    public void testPacingBackwardsSlow()
    {
       testFlatGroundPacing(-getSlowWalkingSpeed());
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 45.0)
-   @Test(timeout = 1100000)
+   @Test
    public void testPacingInAForwardLeftCircle()
    {
       testPacingInASemiCircle(getWalkingSpeedWhileTurning(), getWalkingAngularVelocity());
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 246.9)
-   @Test(timeout = 1200000)
+   @Test
    public void testPacingInAForwardRightCircle()
    {
       testPacingInASemiCircle(getWalkingSpeedWhileTurning(), -getWalkingAngularVelocity());
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 45.0)
-   @Test(timeout = 1200000)
+   @Test
    public void testPacingInABackwardLeftCircle()
    {
       testPacingInASemiCircle(-getWalkingSpeedWhileTurning(), -getWalkingAngularVelocity());
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 45.0)
-   @Test(timeout = 1500000)
+   @Test
    public void testPacingInABackwardRightCircle()
    {
       testPacingInASemiCircle(-getWalkingSpeedWhileTurning(), getWalkingAngularVelocity());

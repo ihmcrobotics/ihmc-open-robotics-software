@@ -7,7 +7,6 @@ import java.util.List;
 import controller_msgs.msg.dds.RobotConfigurationData;
 import controller_msgs.msg.dds.WalkingControllerPreviewOutputMessage;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
-import us.ihmc.avatar.networkProcessor.modules.ToolboxController;
 import us.ihmc.avatar.networkProcessor.modules.ToolboxModule;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.ControllerAPIDefinition;
 import us.ihmc.communication.ROS2Tools;
@@ -15,9 +14,11 @@ import us.ihmc.communication.ROS2Tools.MessageTopicNameGenerator;
 import us.ihmc.communication.ROS2Tools.ROS2TopicQualifier;
 import us.ihmc.communication.controllerAPI.command.Command;
 import us.ihmc.euclid.interfaces.Settable;
+import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.communication.walkingPreviewToolboxAPI.WalkingControllerPreviewInputCommand;
 import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
 import us.ihmc.ros2.RealtimeRos2Node;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
 
 public class WalkingControllerPreviewToolboxModule extends ToolboxModule
 {
@@ -30,7 +31,7 @@ public class WalkingControllerPreviewToolboxModule extends ToolboxModule
             pubSubImplementation);
       setTimeWithoutInputsBeforeGoingToSleep(60.0);
 
-      controller = new WalkingControllerPreviewToolboxController(robotModel, commandInputManager, statusOutputManager, yoGraphicsListRegistry, registry);
+      controller = new WalkingControllerPreviewToolboxController(robotModel, 0.02, commandInputManager, statusOutputManager, yoGraphicsListRegistry, registry);
    }
 
    @Override
@@ -45,7 +46,7 @@ public class WalkingControllerPreviewToolboxModule extends ToolboxModule
    }
 
    @Override
-   public ToolboxController getToolboxController()
+   public WalkingControllerPreviewToolboxController getToolboxController()
    {
       return controller;
    }
@@ -53,11 +54,21 @@ public class WalkingControllerPreviewToolboxModule extends ToolboxModule
    @Override
    public List<Class<? extends Command<?, ?>>> createListOfSupportedCommands()
    {
+      return supportedCommands();
+   }
+
+   public static List<Class<? extends Command<?, ?>>> supportedCommands()
+   {
       return Collections.singletonList(WalkingControllerPreviewInputCommand.class);
    }
 
    @Override
    public List<Class<? extends Settable<?>>> createListOfSupportedStatus()
+   {
+      return supportedStatus();
+   }
+
+   public static List<Class<? extends Settable<?>>> supportedStatus()
    {
       return Collections.singletonList(WalkingControllerPreviewOutputMessage.class);
    }
@@ -82,5 +93,15 @@ public class WalkingControllerPreviewToolboxModule extends ToolboxModule
    public static MessageTopicNameGenerator getSubscriberTopicNameGenerator(String robotName)
    {
       return ROS2Tools.getTopicNameGenerator(robotName, ROS2Tools.WALKING_PREVIEW_TOOLBOX, ROS2TopicQualifier.INPUT);
+   }
+
+   public YoVariableRegistry getRegistry()
+   {
+      return registry;
+   }
+
+   public YoGraphicsListRegistry getYoGraphicsListRegistry()
+   {
+      return yoGraphicsListRegistry;
    }
 }

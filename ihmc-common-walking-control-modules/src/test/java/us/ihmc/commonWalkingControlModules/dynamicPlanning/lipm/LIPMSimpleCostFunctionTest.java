@@ -2,9 +2,10 @@ package us.ihmc.commonWalkingControlModules.dynamicPlanning.lipm;
 
 import org.ejml.data.DenseMatrix64F;
 import org.ejml.ops.CommonOps;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import us.ihmc.commonWalkingControlModules.dynamicPlanning.TrackingCostFunctionTest;
-import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
+import org.junit.jupiter.api.Tag;
+import org.junit.jupiter.api.Disabled;
 import us.ihmc.robotics.testing.JUnitTools;
 import us.ihmc.trajectoryOptimization.DefaultDiscreteState;
 import us.ihmc.trajectoryOptimization.LQTrackingCostFunction;
@@ -48,8 +49,7 @@ public class LIPMSimpleCostFunctionTest extends TrackingCostFunctionTest<Default
    }
 
    @Override
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(timeout = 30000)
+   @Test
    public void testCost()
    {
       LIPMSimpleCostFunction costFunction = new LIPMSimpleCostFunction();
@@ -91,8 +91,7 @@ public class LIPMSimpleCostFunctionTest extends TrackingCostFunctionTest<Default
       assertEquals(stateCost + controlCost, cost, 1e-5);
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(timeout = 30000)
+   @Test
    public void testComputeCostStateGradient()
    {
       LIPMSimpleCostFunction costFunction = new LIPMSimpleCostFunction();
@@ -140,8 +139,7 @@ public class LIPMSimpleCostFunctionTest extends TrackingCostFunctionTest<Default
       JUnitTools.assertMatrixEquals(gradientExpected, gradient, 1e-10);
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(timeout = 30000)
+   @Test
    public void testComputeCostControlGradient()
    {
       LIPMSimpleCostFunction costFunction = new LIPMSimpleCostFunction();
@@ -186,8 +184,7 @@ public class LIPMSimpleCostFunctionTest extends TrackingCostFunctionTest<Default
       JUnitTools.assertMatrixEquals(gradientExpected, gradient, 1e-10);
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(timeout = 30000)
+   @Test
    public void testComputeCostControlHessian()
    {
       DenseMatrix64F R = new DenseMatrix64F(3, 3);
@@ -220,8 +217,7 @@ public class LIPMSimpleCostFunctionTest extends TrackingCostFunctionTest<Default
       JUnitTools.assertMatrixEquals(R, hessian, 1e-10);
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(timeout = 30000)
+   @Test
    public void testComputeCostStateHessian()
    {
       DenseMatrix64F Q = new DenseMatrix64F(6, 6);
@@ -257,8 +253,7 @@ public class LIPMSimpleCostFunctionTest extends TrackingCostFunctionTest<Default
       JUnitTools.assertMatrixEquals(Q, hessian, 1e-10);
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(timeout = 30000)
+   @Test
    public void testComputeCostStateGradientOfControlGradient()
    {
       LIPMSimpleCostFunction costFunction = new LIPMSimpleCostFunction();
@@ -290,40 +285,35 @@ public class LIPMSimpleCostFunctionTest extends TrackingCostFunctionTest<Default
 
 
    @Override
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(timeout = 30000)
+   @Test
    public void testCostStateGradientNumerically()
    {
       super.testCostStateGradientNumerically();
    }
 
    @Override
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(timeout = 30000)
+   @Test
    public void testCostControlGradientNumerically()
    {
       super.testCostControlGradientNumerically();
    }
 
    @Override
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(timeout = 30000)
+   @Test
    public void testCostStateHessianNumerically()
    {
       super.testCostStateHessianNumerically();
    }
 
    @Override
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(timeout = 30000)
+   @Test
    public void testCostControlHessianNumerically()
    {
       super.testCostControlHessianNumerically();
    }
 
    @Override
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(timeout = 30000)
+   @Test
    public void testCostStateControlHessianNumerically()
    {
       super.testCostStateControlHessianNumerically();

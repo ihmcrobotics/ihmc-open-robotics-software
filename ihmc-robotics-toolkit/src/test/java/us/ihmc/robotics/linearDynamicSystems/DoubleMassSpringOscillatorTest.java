@@ -4,10 +4,11 @@ import static us.ihmc.robotics.Assert.*;
 
 import java.util.ArrayList;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import Jama.Matrix;
-import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
+import org.junit.jupiter.api.Tag;
+import org.junit.jupiter.api.Disabled;
 import us.ihmc.robotics.dataStructures.ComplexNumber;
 import us.ihmc.robotics.dataStructures.Polynomial;
 
@@ -15,8 +16,7 @@ public class DoubleMassSpringOscillatorTest
 {
    private static final boolean VERBOSE = true;
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(timeout = 30000)
+   @Test
    public void testDecomposerGotEigenvaluesRight()
    {
       Matrix matrixA = new Matrix(new double[][] { { 0.0, 1.0, 0.0, 0.0 }, { -2.0, 0.0, 1.0, 0.0 }, { 0.0, 0.0, 0.0, 1.0 }, { 1.0, 0.0, -2.0, 0.0 } });

@@ -1,7 +1,6 @@
 package us.ihmc.humanoidRobotics.communication.packets;
 
 import java.awt.image.BufferedImage;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -597,6 +596,11 @@ public class HumanoidMessageTools
          message.getLinearSelectionMatrix().setZSelected(selectionMatrix.isLinearZSelected());
       }
       return message;
+   }
+
+   public static PelvisTrajectoryMessage createPelvisTrajectoryMessage(double trajectoryTime, Pose3DReadOnly desiredPose)
+   {
+      return createPelvisTrajectoryMessage(trajectoryTime, desiredPose.getPosition(), desiredPose.getOrientation());
    }
 
    /**
@@ -1646,30 +1650,31 @@ public class HumanoidMessageTools
       return message;
    }
 
-   public static FootstepDataMessage createFootstepDataMessage(RobotSide robotSide, Point3DReadOnly location, QuaternionReadOnly orientation)
+   public static FootstepDataMessage createFootstepDataMessage(RobotSide robotSide, Pose3DReadOnly pose)
    {
-      return createFootstepDataMessage(robotSide, new Point3D(location), new Quaternion(orientation), null);
+      return createFootstepDataMessage(robotSide, pose.getPosition(), pose.getOrientation());
    }
 
-   public static FootstepDataMessage createFootstepDataMessage(RobotSide robotSide, Point3D location, Quaternion orientation)
+   public static FootstepDataMessage createFootstepDataMessage(RobotSide robotSide, Point3DReadOnly location, QuaternionReadOnly orientation)
    {
       return createFootstepDataMessage(robotSide, location, orientation, null);
    }
 
-   public static FootstepDataMessage createFootstepDataMessage(RobotSide robotSide, Point3D location, Quaternion orientation,
-                                                               ArrayList<Point2D> predictedContactPoints)
+   public static FootstepDataMessage createFootstepDataMessage(RobotSide robotSide, Point3DReadOnly location, QuaternionReadOnly orientation,
+                                                               List<? extends Point2DReadOnly> predictedContactPoints)
    {
       return createFootstepDataMessage(robotSide, location, orientation, predictedContactPoints, TrajectoryType.DEFAULT, 0.0);
    }
 
-   public static FootstepDataMessage createFootstepDataMessage(RobotSide robotSide, Point3D location, Quaternion orientation, TrajectoryType trajectoryType,
-                                                               double swingHeight)
+   public static FootstepDataMessage createFootstepDataMessage(RobotSide robotSide, Point3DReadOnly location, QuaternionReadOnly orientation,
+                                                               TrajectoryType trajectoryType, double swingHeight)
    {
       return createFootstepDataMessage(robotSide, location, orientation, null, trajectoryType, swingHeight);
    }
 
-   public static FootstepDataMessage createFootstepDataMessage(RobotSide robotSide, Point3D location, Quaternion orientation,
-                                                               List<Point2D> predictedContactPoints, TrajectoryType trajectoryType, double swingHeight)
+   public static FootstepDataMessage createFootstepDataMessage(RobotSide robotSide, Point3DReadOnly location, QuaternionReadOnly orientation,
+                                                               List<? extends Point2DReadOnly> predictedContactPoints, TrajectoryType trajectoryType,
+                                                               double swingHeight)
    {
       FootstepDataMessage message = new FootstepDataMessage();
       message.setRobotSide(robotSide.toByte());

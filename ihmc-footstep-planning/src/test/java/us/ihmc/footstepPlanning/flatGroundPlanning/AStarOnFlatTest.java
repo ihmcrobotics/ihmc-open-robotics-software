@@ -1,11 +1,11 @@
 package us.ihmc.footstepPlanning.flatGroundPlanning;
 
-import org.junit.After;
-import org.junit.Before;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
 
-import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationPlan;
-import us.ihmc.continuousIntegration.ContinuousIntegrationTools;
-import us.ihmc.continuousIntegration.IntegrationCategory;
+import org.junit.jupiter.api.Tag;
+import org.junit.jupiter.api.Disabled;
+import us.ihmc.commons.ContinuousIntegrationTools;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.footstepPlanning.graphSearch.parameters.DefaultFootstepPlanningParameters;
 import us.ihmc.footstepPlanning.FootstepPlanner;
@@ -17,7 +17,6 @@ import us.ihmc.footstepPlanning.graphSearch.planners.AStarFootstepPlanner;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 
-@ContinuousIntegrationPlan(categories = IntegrationCategory.FAST)
 public class AStarOnFlatTest extends FootstepPlannerOnFlatGroundTest
 {
    private static final boolean visualize = !ContinuousIntegrationTools.isRunningOnContinuousIntegrationServer();
@@ -32,7 +31,7 @@ public class AStarOnFlatTest extends FootstepPlannerOnFlatGroundTest
       return true;
    }
 
-   @Before
+   @BeforeEach
    public void createPlanner()
    {
       if (visualizePlanner)
@@ -43,7 +42,7 @@ public class AStarOnFlatTest extends FootstepPlannerOnFlatGroundTest
       planner = AStarFootstepPlanner.createPlanner(parameters, visualization, footPolygons, expansion, new YoVariableRegistry("TestRegistry"));
    }
 
-   @After
+   @AfterEach
    public void destroyPlanner()
    {
       planner = null;
