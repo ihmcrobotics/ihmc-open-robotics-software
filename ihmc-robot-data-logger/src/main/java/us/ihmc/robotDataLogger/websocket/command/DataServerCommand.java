@@ -13,7 +13,39 @@ import io.netty.util.CharsetUtil;
  */
 public enum DataServerCommand
 {
-   CLEAR_LOG(true), START_LOG(true), STOP_LOG(true), SEND_TIMESTAMPS(false);
+   /**
+    * Start sending timestamps to the client
+    * 
+    * Argument: Client port. Valid range [1025 - 65535]
+    */
+   SEND_TIMESTAMPS(false),
+   
+   /**
+    * Limit the amount of packets to the rate argument
+    * 
+    * Set the rate argument
+    * 
+    * Argument: Rate in milliseconds. Valid range: [1 - 99999]ms
+    */
+   LIMIT_RATE(false),
+   
+   /**
+    * Broadcast a clear log message. All loggers will restart their log session
+    */
+   CLEAR_LOG(true),
+   /**
+    * Broadcast a start log message. 
+    * 
+    * Not implemented
+    */
+   START_LOG(true), 
+   /**
+    * Broadcast a stop log message
+    * 
+    * Not implemented
+    */
+   STOP_LOG(true);
+   
 
    private static final int MAX_ARGUMENT_SIZE = 5;
 
