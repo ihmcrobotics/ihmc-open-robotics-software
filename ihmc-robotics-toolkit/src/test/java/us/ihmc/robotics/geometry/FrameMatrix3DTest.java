@@ -5,11 +5,10 @@ import static us.ihmc.robotics.Assert.*;
 import java.util.Random;
 
 import org.ejml.data.DenseMatrix64F;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
-import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationPlan;
-import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
-import us.ihmc.continuousIntegration.IntegrationCategory;
+import org.junit.jupiter.api.Tag;
+import org.junit.jupiter.api.Disabled;
 import us.ihmc.euclid.matrix.Matrix3D;
 import us.ihmc.euclid.matrix.RotationMatrix;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
@@ -21,7 +20,6 @@ import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.robotics.random.RandomGeometry;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 
-@ContinuousIntegrationPlan(categories = {IntegrationCategory.FAST})
 public class FrameMatrix3DTest
 {
    private static final double EPSILON = 1e-10;
@@ -32,8 +30,7 @@ public class FrameMatrix3DTest
    private static final ReferenceFrame bFrame = ReferenceFrame.constructFrameWithUnchangingTransformToParent("bFrame", worldFrame,
                                                                                                              EuclidCoreRandomTools.nextRigidBodyTransform(random));
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(timeout = 30000)
+   @Test
    public void testConstructors()
    {
       Matrix3D matrixTested = new Matrix3D();
@@ -61,8 +58,7 @@ public class FrameMatrix3DTest
       assertTrue(matrixExpected.epsilonEquals(matrixTested, EPSILON));
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(timeout = 30000)
+   @Test
    public void testSetters()
    {
       Matrix3D matrixTested = new Matrix3D();
@@ -156,8 +152,7 @@ public class FrameMatrix3DTest
       assertTrue(matrixExpected.epsilonEquals(matrixTested, EPSILON));
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(timeout = 30000)
+   @Test
    public void testGetters()
    {
       FrameMatrix3D frameMatrix3D = new FrameMatrix3D();
@@ -201,8 +196,7 @@ public class FrameMatrix3DTest
       }
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(timeout = 30000)
+   @Test
    public void testSetToNaN()
    {
       FrameMatrix3D frameMatrix3D = new FrameMatrix3D();
@@ -230,8 +224,7 @@ public class FrameMatrix3DTest
       }
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(timeout = 30000)
+   @Test
    public void testSetToZero()
    {
       FrameMatrix3D frameMatrix3D = new FrameMatrix3D();
@@ -259,8 +252,7 @@ public class FrameMatrix3DTest
       }
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(timeout = 30000)
+   @Test
    public void testSetToIdentity()
    {
       FrameMatrix3D frameMatrix3D = new FrameMatrix3D();
@@ -294,8 +286,7 @@ public class FrameMatrix3DTest
       }
    }
    
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(timeout = 30000)
+   @Test
    public void testSetMainDiagonal()
    {
       for (int testIndex = 0; testIndex < 1000; testIndex++)
@@ -332,8 +323,7 @@ public class FrameMatrix3DTest
     * Check that changing frame applies the expected transformation to the matrix3d held in
     * FrameMatrix3D
     */
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(timeout = 30000)
+   @Test
    public void testChangeFrame()
    {
       for (int i = 0; i < 1000; i++)
@@ -362,8 +352,7 @@ public class FrameMatrix3DTest
     * Test the changeFrame method by check that transforming a random vector in two different frames
     * using the FrameMatrix3D ends up being the same.
     */
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(timeout = 30000)
+   @Test
    public void testChangeFrameByTransformingAVectorInTwoDifferentFrames()
    {
       PoseReferenceFrame randomFrameA = new PoseReferenceFrame("randomFrameA", worldFrame);

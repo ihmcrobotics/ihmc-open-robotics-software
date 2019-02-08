@@ -1,7 +1,8 @@
 package us.ihmc.robotics.time;
 
-import org.junit.Test;
-import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Tag;
+import org.junit.jupiter.api.Disabled;
 import us.ihmc.robotics.time.TimeInterval;
 
 import static us.ihmc.robotics.Assert.*;
@@ -10,8 +11,7 @@ import static us.ihmc.robotics.Assert.*;
 
 public class TimeIntervalTest
 {
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(timeout = 30000)
+   @Test
    public void testAccessors()
    {
       double epsilon = 1e-6;
@@ -37,8 +37,7 @@ public class TimeIntervalTest
       assertTrue(timeInterval.epsilonEquals(other, epsilon));
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(timeout = 30000)
+   @Test
    public void testShiftInterval()
    {
       double epsilon = 1e-6;

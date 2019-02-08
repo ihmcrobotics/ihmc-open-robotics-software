@@ -4,15 +4,14 @@ import static us.ihmc.robotics.Assert.*;
 
 import java.util.Random;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
-import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
-
+import org.junit.jupiter.api.Tag;
+import org.junit.jupiter.api.Disabled;
 public class ExampleOptimizationProblemOneTest
 {
 
-	@ContinuousIntegrationTest(estimatedDuration = 0.0)
-	@Test(timeout = 30000)
+	@Test
    public void testSimpleXSquaredOptimization()
    {
       SimpleXSquaredCostFunction sampleCostFunction = new SimpleXSquaredCostFunction();      
@@ -87,8 +86,7 @@ public class ExampleOptimizationProblemOneTest
       }
    }
 
-	@ContinuousIntegrationTest(estimatedDuration = 0.0)
-	@Test(timeout = 30000)
+	@Test
    public void testSimpleThreeParameterCostFunction()
    {      
       SimpleThreeParameterCostFunction sampleCostFunction = new SimpleThreeParameterCostFunction();

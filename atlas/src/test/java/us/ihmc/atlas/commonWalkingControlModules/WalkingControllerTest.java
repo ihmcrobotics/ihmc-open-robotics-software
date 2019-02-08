@@ -5,9 +5,9 @@ import java.util.List;
 
 import org.ejml.data.DenseMatrix64F;
 import org.jcodec.common.Assert;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import controller_msgs.msg.dds.ArmTrajectoryMessage;
 import controller_msgs.msg.dds.ChestTrajectoryMessage;
@@ -43,7 +43,8 @@ import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.communication.controllerAPI.CommandInputManager;
 import us.ihmc.communication.controllerAPI.StatusMessageOutputManager;
 import us.ihmc.communication.packets.MessageTools;
-import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
+import org.junit.jupiter.api.Tag;
+import org.junit.jupiter.api.Disabled;
 import us.ihmc.euclid.geometry.BoundingBox3D;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameQuaternion;
@@ -156,8 +157,7 @@ public class WalkingControllerTest
 
    private static final double maxDriftRate = 0.2;
 
-   @ContinuousIntegrationTest(estimatedDuration = 17.4)
-   @Test(timeout = 87000)
+   @Test
    public void testForGarbage()
    {
       walkingController.initialize();
@@ -491,7 +491,7 @@ public class WalkingControllerTest
    }
 
    @SuppressWarnings("unchecked")
-   @Before
+   @BeforeEach
    public void setupTest()
    {
       MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " before test.");
@@ -570,7 +570,7 @@ public class WalkingControllerTest
       referenceFrames.updateFrames();
    }
 
-   @After
+   @AfterEach
    public void tearDown()
    {
       if (showSCS)

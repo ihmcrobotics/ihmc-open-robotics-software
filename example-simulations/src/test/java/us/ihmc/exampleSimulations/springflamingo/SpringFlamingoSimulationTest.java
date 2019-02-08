@@ -4,13 +4,12 @@ import static us.ihmc.robotics.Assert.*;
 
 import java.util.ArrayList;
 
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
-import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationPlan;
-import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
-import us.ihmc.continuousIntegration.IntegrationCategory;
+import org.junit.jupiter.api.Tag;
+import org.junit.jupiter.api.Disabled;
 import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.SimulationConstructionSetParameters;
@@ -21,13 +20,13 @@ import us.ihmc.simulationconstructionset.util.ControllerFailureException;
 import us.ihmc.simulationconstructionset.util.simulationRunner.SimulationRewindabilityVerifier;
 import us.ihmc.simulationconstructionset.util.simulationRunner.VariableDifference;
 
-@ContinuousIntegrationPlan(categories={IntegrationCategory.UI})
+@Tag("gui")
 public class SpringFlamingoSimulationTest
 {
    private SimulationGUITestFixture testFixture;
    private SimulationConstructionSet scs;
 
-   @Before
+   @BeforeEach
    public void setUp() throws SimulationExceededMaximumTimeException, ControllerFailureException
    {
       SpringFlamingoSimulation springFlamingoSimulation = new SpringFlamingoSimulation();
@@ -37,7 +36,7 @@ public class SpringFlamingoSimulationTest
       testFixture = new SimulationGUITestFixture(scs);
    }
 
-   @After
+   @AfterEach
    public void tearDown()
    {
       testFixture.closeAndDispose();
@@ -46,8 +45,7 @@ public class SpringFlamingoSimulationTest
       testFixture = null;
    }
 
-	@ContinuousIntegrationTest(estimatedDuration = 8.5)
-	@Test(timeout = 42000)
+	@Test
    public void testSpringFlamingoSimulationAndGUI() throws SimulationExceededMaximumTimeException
    {
       testFixture.showWindow();
@@ -117,8 +115,7 @@ public class SpringFlamingoSimulationTest
    }
 
 
-	@ContinuousIntegrationTest(estimatedDuration = 3.6)
-	@Test(timeout = 30000)
+	@Test
 	public void testRewindability() throws UnreasonableAccelerationException, SimulationExceededMaximumTimeException
 	{
       int numTicksToTest = 1000;

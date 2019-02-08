@@ -8,10 +8,11 @@ import java.util.Random;
 import org.ejml.data.DenseMatrix64F;
 import org.ejml.ops.CommonOps;
 import org.ejml.ops.NormOps;
-import org.junit.After;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.Test;
 
-import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
+import org.junit.jupiter.api.Tag;
+import org.junit.jupiter.api.Disabled;
 import us.ihmc.euclid.matrix.Matrix3D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
@@ -37,14 +38,13 @@ public class MomentumCalculatorTest
 {
    private final ReferenceFrame world = ReferenceFrame.getWorldFrame();
 
-   @After
+   @AfterEach
    public void tearDown()
    {
       ReferenceFrameTools.clearWorldFrameTree();
    }
 
-	@ContinuousIntegrationTest(estimatedDuration = 0.0)
-	@Test(timeout = 30000)
+	@Test
    public void testSingleRigidBodyTranslation()
    {
       Random random = new Random(1766L);
@@ -74,8 +74,7 @@ public class MomentumCalculatorTest
       assertTrue(linearMomentum.length() > epsilon);
    }
 
-	@ContinuousIntegrationTest(estimatedDuration = 0.0)
-	@Test(timeout = 30000)
+	@Test
    public void testSingleRigidBodyRotation()
    {
       Random random = new Random(1766L);
@@ -111,8 +110,7 @@ public class MomentumCalculatorTest
       assertTrue(angularMomentum.length() > epsilon);
    }
 
-	@ContinuousIntegrationTest(estimatedDuration = 0.0)
-	@Test(timeout = 30000)
+	@Test
    public void testChainAgainstCentroidalMomentumMatrix()
    {
       Random random = new Random(17679L);

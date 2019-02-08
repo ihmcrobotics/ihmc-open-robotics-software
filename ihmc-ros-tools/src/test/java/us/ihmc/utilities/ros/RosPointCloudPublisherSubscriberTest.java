@@ -7,30 +7,27 @@ import java.net.URISyntaxException;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import sensor_msgs.PointCloud2;
-import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationPlan;
-import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
-import us.ihmc.continuousIntegration.IntegrationCategory;
+import org.junit.jupiter.api.Tag;
+import org.junit.jupiter.api.Disabled;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.graphicsDescription.color.MutableColor;
 import us.ihmc.utilities.ros.publisher.RosPointCloudPublisher;
 import us.ihmc.utilities.ros.subscriber.RosPointCloudSubscriber;
 import us.ihmc.utilities.ros.types.PointType;
 
-@ContinuousIntegrationPlan(categories=IntegrationCategory.FLAKY)
+@Disabled
 public class RosPointCloudPublisherSubscriberTest extends IHMCRosTestWithRosCore
 {
-   @ContinuousIntegrationTest(estimatedDuration = 0.2)
-   @Test(timeout = 30000)
+   @Test
    public void testPubSubSinglePointXYZICloud() throws URISyntaxException, InterruptedException
    {
       testPubSubSingleCloud(PointType.XYZI);
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.1)
-   @Test(timeout = 2000)
+   @Test
    public void testPubSubSinglePointXYZRGBCloud() throws URISyntaxException, InterruptedException
    {
       testPubSubSingleCloud(PointType.XYZRGB);

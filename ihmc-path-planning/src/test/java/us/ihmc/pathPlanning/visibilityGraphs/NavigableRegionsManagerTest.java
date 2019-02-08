@@ -1,9 +1,10 @@
 package us.ihmc.pathPlanning.visibilityGraphs;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import us.ihmc.commons.thread.ThreadTools;
-import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
-import us.ihmc.continuousIntegration.ContinuousIntegrationTools;
+import org.junit.jupiter.api.Tag;
+import org.junit.jupiter.api.Disabled;
+import us.ihmc.commons.ContinuousIntegrationTools;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.geometry.Pose2D;
 import us.ihmc.euclid.geometry.interfaces.Vertex2DSupplier;
@@ -45,8 +46,7 @@ public class NavigableRegionsManagerTest
    private static final double obstacleExtrusionDistance = 0.2;
    private static final double preferredObstacleExtrusionDistance = 1.0;
 
-   @Test(timeout = timeout)
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
+   @Test
    public void testFlatGroundWithWallInlineWithWall()
    {
       VisibilityGraphsParameters parameters = createVisibilityGraphParametersForTest();
@@ -71,8 +71,7 @@ public class NavigableRegionsManagerTest
       checkPath(path, start, goal, parameters, planarRegionsList, navigableRegionsManager.getNavigableRegionsList());
    }
 
-   @Test(timeout = timeout)
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
+   @Test
    public void testFlatGroundWithWallOnOppositeSidesOfWall()
    {
       VisibilityGraphsParameters parameters = createVisibilityGraphParametersForTest();
@@ -97,8 +96,7 @@ public class NavigableRegionsManagerTest
       checkPath(path, start, goal, parameters, planarRegionsList, navigableRegionsManager.getNavigableRegionsList());
    }
 
-   @Test(timeout = timeout)
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
+   @Test
    public void testFlatGroundWithWallStraightShotButVeryNearWall()
    {
       VisibilityGraphsParameters parameters = createVisibilityGraphParametersForTest();
@@ -124,8 +122,7 @@ public class NavigableRegionsManagerTest
 
    }
 
-   @Test(timeout = timeout)
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
+   @Test
    public void testFlatGroundWithWallStraightShotButNearWall()
    {
       VisibilityGraphsParameters parameters = createVisibilityGraphParametersForTest();
@@ -150,8 +147,7 @@ public class NavigableRegionsManagerTest
       checkPath(path, start, goal, parameters, planarRegionsList, navigableRegionsManager.getNavigableRegionsList());
    }
 
-   @Test(timeout = timeout)
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
+   @Test
    public void testFlatGroundWithWallAlmostStraightShot()
    {
       VisibilityGraphsParameters parameters = createVisibilityGraphParametersForTest();
@@ -176,8 +172,7 @@ public class NavigableRegionsManagerTest
       checkPath(path, start, goal, parameters, planarRegionsList, navigableRegionsManager.getNavigableRegionsList());
    }
 
-   @Test(timeout = timeout)
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
+   @Test
    public void testFlatGroundWithWallStraightShot()
    {
       VisibilityGraphsParameters parameters = createVisibilityGraphParametersForTest();
@@ -202,8 +197,7 @@ public class NavigableRegionsManagerTest
       checkPath(path, start, goal, parameters, planarRegionsList, navigableRegionsManager.getNavigableRegionsList());
    }
 
-   @Test(timeout = timeout)
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
+   @Test
    public void testFlatGroundWithBoxInlineWithWall()
    {
       VisibilityGraphsParameters parameters = createVisibilityGraphParametersForTest();
@@ -228,8 +222,7 @@ public class NavigableRegionsManagerTest
       checkPath(path, start, goal, parameters, planarRegionsList, navigableRegionsManager.getNavigableRegionsList());
    }
 
-   @Test(timeout = timeout)
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
+   @Test
    public void testFlatGroundWithBoxOnOppositeSidesOfWall()
    {
       VisibilityGraphsParameters parameters = createVisibilityGraphParametersForTest();
@@ -254,8 +247,7 @@ public class NavigableRegionsManagerTest
       checkPath(path, start, goal, parameters, planarRegionsList, navigableRegionsManager.getNavigableRegionsList());
    }
 
-   @Test(timeout = timeout)
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
+   @Test
    public void testFlatGroundWithBoxStraightShotButVeryNearWall()
    {
       VisibilityGraphsParameters parameters = createVisibilityGraphParametersForTest();
@@ -280,8 +272,7 @@ public class NavigableRegionsManagerTest
       checkPath(path, start, goal, parameters, planarRegionsList, navigableRegionsManager.getNavigableRegionsList());
    }
 
-   @Test(timeout = timeout)
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
+   @Test
    public void testFlatGroundWithBoxStraightShotButNearWall()
    {
       VisibilityGraphsParameters parameters = createVisibilityGraphParametersForTest();
@@ -306,8 +297,7 @@ public class NavigableRegionsManagerTest
       checkPath(path, start, goal, parameters, planarRegionsList, navigableRegionsManager.getNavigableRegionsList());
    }
 
-   @Test(timeout = timeout)
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
+   @Test
    public void testFlatGroundWithBoxAlmostStraightShot()
    {
       VisibilityGraphsParameters parameters = createVisibilityGraphParametersForTest();
@@ -332,8 +322,7 @@ public class NavigableRegionsManagerTest
       checkPath(path, start, goal, parameters, planarRegionsList, navigableRegionsManager.getNavigableRegionsList());
    }
 
-   @Test(timeout = timeout)
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
+   @Test
    public void testFlatGroundWithBoxStraightShot()
    {
       VisibilityGraphsParameters parameters = createVisibilityGraphParametersForTest();
@@ -358,8 +347,7 @@ public class NavigableRegionsManagerTest
       checkPath(path, start, goal, parameters, planarRegionsList, navigableRegionsManager.getNavigableRegionsList());
    }
 
-   @Test(timeout = timeout)
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
+   @Test
    public void testFlatGroundWithTwoDifferentWalls()
    {
       VisibilityGraphsParameters parameters = createVisibilityGraphParametersForTest();
@@ -397,8 +385,7 @@ public class NavigableRegionsManagerTest
       checkPath(path, start, goal, parameters, planarRegionsList, navigableRegionsManager.getNavigableRegionsList());
    }
 
-   @Test(timeout = timeout)
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
+   @Test
    public void testFlatGroundBetweenWallOpening()
    {
       VisibilityGraphsParameters parameters = createVisibilityGraphParametersForTest();
@@ -423,8 +410,7 @@ public class NavigableRegionsManagerTest
       checkPath(path, start, goal, parameters, planarRegionsList, navigableRegionsManager.getNavigableRegionsList());
    }
 
-   @Test(timeout = timeout)
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
+   @Test
    public void testFlatGroundBetweenWallOpeningStraightShot()
    {
       VisibilityGraphsParameters parameters = createVisibilityGraphParametersForTest();
@@ -450,8 +436,7 @@ public class NavigableRegionsManagerTest
 
    }
 
-   @Test(timeout = timeout)
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
+   @Test
    public void testFlatGroundBetweenAwkwardWallOpening()
    {
       VisibilityGraphsParameters parameters = createVisibilityGraphParametersForTest();
@@ -475,8 +460,7 @@ public class NavigableRegionsManagerTest
       checkPath(path, start, goal, parameters, planarRegionsList, navigableRegionsManager.getNavigableRegionsList());
    }
 
-   @Test(timeout = timeout)
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
+   @Test
    public void testFlatGroundBetweenBoxesOpening()
    {
       /*
@@ -505,8 +489,7 @@ public class NavigableRegionsManagerTest
       checkPath(path, start, goal, parameters, planarRegionsList, navigableRegionsManager.getNavigableRegionsList());
    }
 
-   @Test(timeout = timeout)
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
+   @Test
    public void testFlatGroundBetweenBoxesOpeningStraightShot()
    {
       VisibilityGraphsParameters parameters = createVisibilityGraphParametersForTest();
@@ -531,8 +514,7 @@ public class NavigableRegionsManagerTest
       checkPath(path, start, goal, parameters, planarRegionsList, navigableRegionsManager.getNavigableRegionsList());
    }
 
-   @Test(timeout = timeout)
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
+   @Test
    public void testFlatGroundBetweenBoxInMiddle()
    {
       VisibilityGraphsParameters parameters = createVisibilityGraphParametersForTest();

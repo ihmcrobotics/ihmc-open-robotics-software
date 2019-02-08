@@ -4,11 +4,12 @@ import static us.ihmc.robotics.Assert.*;
 
 import java.util.Random;
 
-import org.junit.After;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.Test;
 
 import us.ihmc.commons.RandomNumbers;
-import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
+import org.junit.jupiter.api.Tag;
+import org.junit.jupiter.api.Disabled;
 import us.ihmc.euclid.axisAngle.AxisAngle;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
@@ -29,14 +30,13 @@ import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 
 public class SimpleSE3TrajectoryPointTest
 {
-   @After
+   @AfterEach
    public void tearDown()
    {
       ReferenceFrameTools.clearWorldFrameTree();
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(timeout = 30000)
+   @Test
    public void testCommonUsageExample()
    {
       ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
@@ -84,8 +84,7 @@ public class SimpleSE3TrajectoryPointTest
       assertTrue(expectedSimpleSE3TrajectoryPoint.epsilonEquals(simpleSE3TrajectoryPoint, 1e-10));
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(timeout = 30000)
+   @Test
    public void testConstructors()
    {
       double epsilon = 1.0e-14;
@@ -159,8 +158,7 @@ public class SimpleSE3TrajectoryPointTest
 
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(timeout = 30000)
+   @Test
    public void testSetters()
    {
       double epsilon = 1.0e-14;
@@ -257,8 +255,7 @@ public class SimpleSE3TrajectoryPointTest
 
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.2)
-   @Test(timeout = 30000)
+   @Test
    public void testChangeFrame() throws Exception
    {
       double epsilon = 1.0e-10;
@@ -289,8 +286,7 @@ public class SimpleSE3TrajectoryPointTest
       }
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(timeout = 30000)
+   @Test
    public void testSetToZero() throws Exception
    {
       double epsilon = 1.0e-10;
@@ -332,8 +328,7 @@ public class SimpleSE3TrajectoryPointTest
             expectedAngularVelocity, testedSimpleSE3TrajectoryPoint, epsilon);
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(timeout = 30000)
+   @Test
    public void testSetToNaN() throws Exception
    {
       Random random = new Random(21651016L);
@@ -419,8 +414,7 @@ public class SimpleSE3TrajectoryPointTest
       assertTrue(expectedAngularVelocity.epsilonEquals(actualFrameAngularVelocity, epsilon));
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(timeout = 30000)
+   @Test
    public void testSomeSetsAngGets()
    {
       SE3TrajectoryPoint simpleSE3TrajectoryPoint = new SE3TrajectoryPoint();
@@ -543,8 +537,7 @@ public class SimpleSE3TrajectoryPointTest
       assertTrue(simpleSE3TrajectoryPoint.epsilonEquals(simpleSE3TrajectoryPointTwo, 1e-7));
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(timeout = 30000)
+   @Test
    public void testSomeMoreSettersAndGetters()
    {
       ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();

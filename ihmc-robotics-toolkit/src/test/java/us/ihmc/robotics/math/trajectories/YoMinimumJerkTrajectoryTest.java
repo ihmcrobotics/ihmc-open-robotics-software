@@ -4,18 +4,17 @@ import static us.ihmc.robotics.Assert.*;
 
 import java.util.Random;
 
-import org.junit.Ignore;
-import org.junit.Test;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
 
-import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
-import us.ihmc.continuousIntegration.IntegrationCategory;
+import org.junit.jupiter.api.Tag;
+import org.junit.jupiter.api.Disabled;
 import us.ihmc.commons.MathTools;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 
 public class YoMinimumJerkTrajectoryTest
 {
-	@ContinuousIntegrationTest(estimatedDuration = 0.4)
-	@Test(timeout = 30000)
+	@Test
    public void testRandomInitialFinalConditions()
    {
       YoVariableRegistry registry = new YoVariableRegistry("test");
@@ -60,8 +59,7 @@ public class YoMinimumJerkTrajectoryTest
       return min + Math.random() * (max - min);
    }
    
-	@ContinuousIntegrationTest(estimatedDuration = 0.1)
-   @Test(timeout = 30000)
+   @Test
    public void testTimeExtensionRuntime()
    {
       YoVariableRegistry registry = new YoVariableRegistry("TestMinimumJerkTrajectory");
@@ -87,8 +85,7 @@ public class YoMinimumJerkTrajectoryTest
       System.out.println("TestMinimumJerkTrajectory.testTimeExtensionRuntime: Execution Time = " + (runtime) + "ms per 6 calls");
    }
 
-	@ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(timeout = 30000)
+   @Test
    public void testFindMaxVals()
    {
       YoVariableRegistry registry = new YoVariableRegistry("TestMinimumJerkTrajectory");
@@ -114,9 +111,8 @@ public class YoMinimumJerkTrajectoryTest
    }
 
 	// FIXME That test is stuck in an infinite loop of some sort.
-	@Ignore
-   @ContinuousIntegrationTest(estimatedDuration = 0.1, categoriesOverride = IntegrationCategory.EXCLUDE)
-   @Test(timeout=300000)
+	@Disabled
+   @Test
    public void testTimeExtension()
    {
       YoVariableRegistry registry = new YoVariableRegistry("TestMinimumJerkTrajectory");
@@ -134,8 +130,7 @@ public class YoMinimumJerkTrajectoryTest
       }
    }
 
-	@ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(timeout = 30000)
+   @Test
    public void testZeroLength()
    {
       YoVariableRegistry registry = new YoVariableRegistry("TestMinimumJerkTrajectory");
@@ -166,8 +161,7 @@ public class YoMinimumJerkTrajectoryTest
 
    }
 
-	@ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(timeout = 30000)
+   @Test
    public void testBadInitialParams()
    {
       YoVariableRegistry registry = new YoVariableRegistry("TestMinimumJerkTrajectory");

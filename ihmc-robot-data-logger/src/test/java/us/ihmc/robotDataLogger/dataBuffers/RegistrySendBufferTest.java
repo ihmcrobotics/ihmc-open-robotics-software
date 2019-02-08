@@ -1,6 +1,6 @@
 package us.ihmc.robotDataLogger.dataBuffers;
 
-import static us.ihmc.robotics.Assert.*;
+import static us.ihmc.robotics.Assert.assertEquals;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -8,9 +8,8 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Random;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
-import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.mecano.multiBodySystem.RevoluteJoint;
@@ -123,8 +122,7 @@ public class RegistrySendBufferTest
 
 
 
-   @ContinuousIntegrationTest(estimatedDuration = 57.0)
-   @Test(timeout = 280000)
+   @Test
    public void testYoVariables() throws IOException
    {
       Random random = new Random(23589735l);
