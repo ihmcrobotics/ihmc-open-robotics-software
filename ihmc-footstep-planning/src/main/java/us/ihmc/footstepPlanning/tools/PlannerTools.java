@@ -10,7 +10,6 @@ import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.footstepPlanning.*;
-import us.ihmc.graphicsDescription.appearance.AppearanceDefinition;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
@@ -22,8 +21,6 @@ import us.ihmc.robotics.time.ExecutionTimer;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoFramePoint3D;
 import us.ihmc.yoVariables.variable.YoFrameVector3D;
-
-import static us.ihmc.robotics.Assert.*;
 
 public class PlannerTools
 {
@@ -110,8 +107,8 @@ public class PlannerTools
       PrintTools.info("Planning took " + timer.getCurrentTime().getDoubleValue() + "s");
 
       FootstepPlan footstepPlan = planner.getPlan();
-      if (assertPlannerReturnedResult)
-         assertTrue("Planner was not able to provide valid result. Result: " + result, result.validForExecution());
+      if (assertPlannerReturnedResult && !result.validForExecution())
+         throw new RuntimeException("Planner was not able to provide valid result. Result: " + result);
       return footstepPlan;
    }
 
