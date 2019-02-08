@@ -2,17 +2,18 @@ package us.ihmc.avatar.obstacleCourseTests;
 
 import static us.ihmc.robotics.Assert.*;
 
-import org.junit.After;
-import org.junit.Before;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
 
 import controller_msgs.msg.dds.FootstepDataListMessage;
 import controller_msgs.msg.dds.FootstepDataMessage;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import us.ihmc.avatar.MultiRobotTestInterface;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.testTools.DRCSimulationTestHelper;
 import us.ihmc.commons.thread.ThreadTools;
-import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
+import org.junit.jupiter.api.Tag;
+import org.junit.jupiter.api.Disabled;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.Point3D;
@@ -24,6 +25,7 @@ import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulatio
 import us.ihmc.simulationconstructionset.util.simulationTesting.SimulationTestingParameters;
 import us.ihmc.tools.MemoryTools;
 
+@Tag("humanoid-flat-ground")
 public abstract class AvatarToeOffTest implements MultiRobotTestInterface
 {
    private static final SimulationTestingParameters simulationTestingParameters = SimulationTestingParameters.createFromSystemProperties();
@@ -40,14 +42,14 @@ public abstract class AvatarToeOffTest implements MultiRobotTestInterface
    public abstract double getStepLength();
    public abstract int getNumberOfSteps();
 
-   @Before
+   @BeforeEach
    public void showMemoryUsageBeforeTest()
    {
 
       MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " before test.");
    }
 
-   @After
+   @AfterEach
    public void destroySimulationAndRecycleMemory()
    {
       if (simulationTestingParameters.getKeepSCSUp())
@@ -67,8 +69,7 @@ public abstract class AvatarToeOffTest implements MultiRobotTestInterface
 
 
 
-   @ContinuousIntegrationTest(estimatedDuration = 36.8)
-   @Test(timeout = 180000)
+   @Test
    public void testShortSteps() throws SimulationExceededMaximumTimeException
    {
       setupTest();

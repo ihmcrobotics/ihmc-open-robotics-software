@@ -2,35 +2,32 @@ package us.ihmc.commonWalkingControlModules.capturePoint.smoothCMPBasedICPPlanne
 
 import static us.ihmc.robotics.Assert.*;
 
-import org.junit.After;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.Test;
 
 import us.ihmc.commonWalkingControlModules.configurations.CoPSplineType;
 import us.ihmc.commonWalkingControlModules.capturePoint.smoothCMPBasedICPPlanner.WalkingTrajectoryType;
 import us.ihmc.commons.Epsilons;
-import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationPlan;
-import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
-import us.ihmc.continuousIntegration.IntegrationCategory;
+import org.junit.jupiter.api.Tag;
+import org.junit.jupiter.api.Disabled;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.tools.ReferenceFrameTools;
 import us.ihmc.commons.MathTools;
 
-@ContinuousIntegrationPlan(categories = {IntegrationCategory.FAST})
 public class CoPTrajectoryTest
 {
    private static int maxNumberOfSegments = 2;
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
    private static final double epsilon = Epsilons.ONE_BILLIONTH;
 
-   @After
+   @AfterEach
    public void tearDown()
    {
       ReferenceFrameTools.clearWorldFrameTree();
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(timeout = 30000)
+   @Test
    public void testLinear()
    {
       CoPTrajectory testTrajectory = new CoPTrajectory(CoPSplineType.LINEAR, maxNumberOfSegments, WalkingTrajectoryType.TRANSFER);
@@ -64,8 +61,7 @@ public class CoPTrajectoryTest
    }
 
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(timeout = 30000)
+   @Test
    public void testCubic()
    {
       CoPTrajectory testTrajectory = new CoPTrajectory(CoPSplineType.CUBIC, maxNumberOfSegments, WalkingTrajectoryType.SWING);

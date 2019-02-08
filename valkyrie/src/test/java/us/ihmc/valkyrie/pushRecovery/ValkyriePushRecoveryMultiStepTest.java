@@ -1,20 +1,19 @@
 package us.ihmc.valkyrie.pushRecovery;
 
-import org.junit.Ignore;
-import org.junit.Test;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
 
 import us.ihmc.avatar.DRCPushRecoveryMultiStepTest;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.RobotTarget;
-import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationPlan;
-import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
-import us.ihmc.continuousIntegration.IntegrationCategory;
+import org.junit.jupiter.api.Tag;
+import org.junit.jupiter.api.Disabled;
 import us.ihmc.simulationConstructionSetTools.bambooTools.BambooTools;
 import us.ihmc.simulationconstructionset.util.ControllerFailureException;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
 import us.ihmc.valkyrie.ValkyrieRobotModel;
 
-@ContinuousIntegrationPlan(categories = IntegrationCategory.EXCLUDE)
+@Disabled
 public class ValkyriePushRecoveryMultiStepTest extends DRCPushRecoveryMultiStepTest
 {
    @Override
@@ -44,17 +43,15 @@ public class ValkyriePushRecoveryMultiStepTest extends DRCPushRecoveryMultiStepT
    }
 
    @Override
-   @ContinuousIntegrationTest(estimatedDuration = 53.2)
-   @Test(timeout = 30000)
+   @Test
    public void testMultiStepBackwardAndContinueWalking() throws SimulationExceededMaximumTimeException, InterruptedException, ControllerFailureException
    {
       super.testMultiStepBackwardAndContinueWalking();
    }
 
    @Override
-   @ContinuousIntegrationTest(estimatedDuration = 67.1)
-   @Test(timeout = 30000)
-   @Ignore("Needs to be improved")
+   @Test
+   @Disabled("Needs to be improved")
    public void testMultiStepForwardAndContinueWalking() throws SimulationExceededMaximumTimeException, InterruptedException, ControllerFailureException
    {
       super.testMultiStepForwardAndContinueWalking();

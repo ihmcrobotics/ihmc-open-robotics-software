@@ -1,34 +1,54 @@
 package us.ihmc.avatar.footstepPlanning;
 
-import com.badlogic.gdx.graphics.g3d.particles.ParticleSorter.Distance;
-import controller_msgs.msg.dds.*;
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.EnumMap;
+import java.util.List;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ScheduledFuture;
+import java.util.concurrent.ThreadFactory;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicReference;
+
 import org.apache.commons.lang3.tuple.ImmutablePair;
-import org.opencv.core.Point3;
+
+import controller_msgs.msg.dds.BodyPathPlanMessage;
+import controller_msgs.msg.dds.FootstepDataListMessage;
+import controller_msgs.msg.dds.FootstepDataMessage;
+import controller_msgs.msg.dds.FootstepPlannerParametersPacket;
+import controller_msgs.msg.dds.FootstepPlanningRequestPacket;
+import controller_msgs.msg.dds.FootstepPlanningToolboxOutputStatus;
+import controller_msgs.msg.dds.TextToSpeechPacket;
+import controller_msgs.msg.dds.VisibilityGraphsParametersPacket;
 import us.ihmc.affinity.CPUTopology;
 import us.ihmc.commons.Conversions;
-import us.ihmc.commons.MathTools;
 import us.ihmc.commons.PrintTools;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.communication.IHMCRealtimeROS2Publisher;
 import us.ihmc.communication.controllerAPI.StatusMessageOutputManager;
 import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.communication.packets.PlanarRegionMessageConverter;
-import us.ihmc.euclid.geometry.Pose2D;
 import us.ihmc.euclid.referenceFrame.FramePoint2D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple2D.Vector2D;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
-import us.ihmc.footstepPlanning.*;
+import us.ihmc.footstepPlanning.FootstepPlan;
+import us.ihmc.footstepPlanning.FootstepPlannerGoal;
+import us.ihmc.footstepPlanning.FootstepPlannerGoalType;
+import us.ihmc.footstepPlanning.FootstepPlannerObjective;
+import us.ihmc.footstepPlanning.FootstepPlannerStatus;
+import us.ihmc.footstepPlanning.FootstepPlannerType;
+import us.ihmc.footstepPlanning.FootstepPlanningResult;
+import us.ihmc.footstepPlanning.VisibilityGraphMessagesConverter;
 import us.ihmc.footstepPlanning.graphSearch.graph.visualization.MultiStagePlannerListener;
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParameters;
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepProcessingParameters;
 import us.ihmc.footstepPlanning.graphSearch.parameters.YoFootstepPlannerParameters;
-import us.ihmc.footstepPlanning.tools.FootstepPlannerIOTools;
 import us.ihmc.footstepPlanning.tools.FootstepPlannerMessageTools;
-import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.idl.IDLSequence.Object;
 import us.ihmc.pathPlanning.bodyPathPlanner.WaypointDefinedBodyPathPlanner;
 import us.ihmc.pathPlanning.statistics.ListOfStatistics;
@@ -39,10 +59,8 @@ import us.ihmc.pathPlanning.visibilityGraphs.YoVisibilityGraphParameters;
 import us.ihmc.pathPlanning.visibilityGraphs.interfaces.VisibilityGraphsParameters;
 import us.ihmc.pathPlanning.visibilityGraphs.tools.BodyPathPlan;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
-import us.ihmc.robotics.graphics.YoGraphicPlanarRegionsList;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
-import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.tools.lists.PairList;
 import us.ihmc.wholeBodyController.RobotContactPointParameters;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
@@ -50,10 +68,6 @@ import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoEnum;
 import us.ihmc.yoVariables.variable.YoInteger;
-
-import java.util.*;
-import java.util.concurrent.*;
-import java.util.concurrent.atomic.AtomicReference;
 
 public class MultiStageFootstepPlanningManager implements PlannerCompletionCallback
 {
@@ -979,7 +993,7 @@ public class MultiStageFootstepPlanningManager implements PlannerCompletionCallb
          {
             FramePose3D footPose = new FramePose3D();
             footstepPlan.getFootstep(i).getSoleFramePose(footPose);
-            footPose.getPosition().addZ(groundHeight);
+            footPose.getPosition().setZ(groundHeight);
             footstepPlan.getFootstep(i).setSoleFramePose(footPose);
          }
       }

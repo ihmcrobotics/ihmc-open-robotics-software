@@ -3,13 +3,14 @@ package us.ihmc.atlas.commonWalkingControlModules.sensors;
 import java.util.Random;
 import java.util.stream.DoubleStream;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import us.ihmc.atlas.AtlasRobotModel;
 import us.ihmc.atlas.AtlasRobotVersion;
 import us.ihmc.avatar.drcRobot.RobotTarget;
 import us.ihmc.commonWalkingControlModules.sensors.ProvidedMassMatrixToolRigidBodyTest;
-import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
+import org.junit.jupiter.api.Tag;
+import org.junit.jupiter.api.Disabled;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.partNames.LimbName;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -36,8 +37,7 @@ public class AtlasProvidedMassMatrixToolRigidBodyTest extends ProvidedMassMatrix
    }
 
    @Override
-   @ContinuousIntegrationTest(estimatedDuration = 0.1)
-   @Test(timeout = 30000)
+   @Test
    public void testprovidedMassMatrixToolRigidBody()
    {
       super.testprovidedMassMatrixToolRigidBody();

@@ -5,16 +5,11 @@ import us.ihmc.avatar.drcRobot.RobotTarget;
 import us.ihmc.avatar.initialSetup.OffsetAndYawRobotInitialSetup;
 import us.ihmc.avatar.networkProcessor.DRCNetworkModuleParameters;
 import us.ihmc.avatar.simulationStarter.DRCSimulationStarter;
-import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.robotEnvironmentAwareness.tools.ConstantPlanarRegionsPublisher;
 import us.ihmc.robotEnvironmentAwareness.ui.io.PlanarRegionDataImporter;
+import us.ihmc.robotics.PlanarRegionFileTools;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.simulationConstructionSetTools.util.environments.PlanarRegionsListDefinedEnvironment;
-import us.ihmc.simulationConstructionSetTools.util.environments.planarRegionEnvironments.TwoBollardEnvironment;
-
-import java.io.File;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 
 public class ValkyrieCTTSOSimulation
 {
@@ -45,8 +40,7 @@ public class ValkyrieCTTSOSimulation
    public static void main(String[] args)
    {
       DRCRobotModel robotModel = new ValkyrieRobotModel(RobotTarget.SCS, false);
-      Path path = Paths.get(Thread.currentThread().getContextClassLoader().getResource("environmentData/" + environment.fileName).getPath());
-      PlanarRegionsList planarRegionsList = PlanarRegionDataImporter.importPlanarRegionData(path.toFile());
+      PlanarRegionsList planarRegionsList = PlanarRegionDataImporter.importPlanarRegionData(PlanarRegionFileTools.getResourceFile("environmentData/" + environment.fileName));
       PlanarRegionsListDefinedEnvironment simEnvironment = new PlanarRegionsListDefinedEnvironment(planarRegionsList, 0.001, environment.generateGroundPlane);
 
       DRCSimulationStarter simulationStarter = new DRCSimulationStarter(robotModel, simEnvironment);
@@ -59,6 +53,8 @@ public class ValkyrieCTTSOSimulation
       // talk to controller and footstep planner
       networkProcessorParameters.enableControllerCommunicator(true);
       networkProcessorParameters.enableFootstepPlanningToolbox(true);
+      networkProcessorParameters.enableWalkingPreviewToolbox(true);
+
       networkProcessorParameters.enablePerceptionModule(true);
 
       // disable everything else

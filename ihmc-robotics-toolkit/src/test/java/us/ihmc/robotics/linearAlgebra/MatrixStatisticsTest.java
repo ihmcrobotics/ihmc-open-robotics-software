@@ -4,12 +4,12 @@ import static us.ihmc.robotics.Assert.*;
 
 import java.util.Random;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import Jama.Matrix;
-import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
-import us.ihmc.continuousIntegration.IntegrationCategory;
+import org.junit.jupiter.api.Tag;
+import org.junit.jupiter.api.Disabled;
 import us.ihmc.commons.MathTools;
 
 public class MatrixStatisticsTest
@@ -21,7 +21,7 @@ public class MatrixStatisticsTest
    private static final double DELTA = 1e-3;
    private Random random;
 
-   @Before
+   @BeforeEach
    public void setUp()
    {
       random = new Random();
@@ -40,8 +40,7 @@ public class MatrixStatisticsTest
       return random.nextDouble() * MAXDOUBLE * 2.0 - MAXDOUBLE;
    }
 
-	@ContinuousIntegrationTest(estimatedDuration = 0.0)
-	@Test(timeout = 30000)
+	@Test
    public void testIndecesOfMaxElement()
    {
       for (int i = 0; i < ITERATIONS; i++)
@@ -66,8 +65,7 @@ public class MatrixStatisticsTest
 
    }
 
-	@ContinuousIntegrationTest(estimatedDuration = 0.0)
-	@Test(timeout = 30000)
+	@Test
    public void testGetCovarianceMatrix()
    {
       for (int i = 0; i < ITERATIONS; i++)
@@ -120,8 +118,7 @@ public class MatrixStatisticsTest
       }
    }
 
-	@ContinuousIntegrationTest(estimatedDuration = 0.0)
-	@Test(timeout = 30000)
+	@Test
    public void testSubtractAverageColumnFromEachRow()
    {
       for (int i = 0; i < ITERATIONS; i++)
@@ -156,8 +153,7 @@ public class MatrixStatisticsTest
       }
    }
 
-	@ContinuousIntegrationTest(estimatedDuration = 0.0)
-	@Test(timeout = 30000)
+	@Test
    public void testSumAllElements()
    {
       for (int i = 0; i < ITERATIONS; i++)
@@ -182,8 +178,7 @@ public class MatrixStatisticsTest
       }
    }
 
-	@ContinuousIntegrationTest(estimatedDuration = 0.0)
-	@Test(timeout = 30000)
+	@Test
    public void testDivideEachRowByStdDevOfRow()
    {
       for (int i = 0; i < ITERATIONS; i++)
@@ -215,8 +210,7 @@ public class MatrixStatisticsTest
       }
    }
 
-	@ContinuousIntegrationTest(estimatedDuration = 0.0)
-	@Test(timeout = 30000)
+	@Test
    public void testGetVarianceOfEachRow()
    {
       for (int i = 0; i < ITERATIONS; i++)
@@ -258,8 +252,7 @@ public class MatrixStatisticsTest
       }
    }
 
-	@ContinuousIntegrationTest(estimatedDuration = 0.0)
-	@Test(timeout = 30000)
+	@Test
    public void testGetAverageColumnVector()
    {
       for (int i = 0; i < ITERATIONS; i++)
@@ -290,8 +283,7 @@ public class MatrixStatisticsTest
       }
    }
 
-	@ContinuousIntegrationTest(estimatedDuration = 0.0)
-	@Test(timeout = 30000)
+	@Test
    public void testCreateColumnVectorIntDouble()
    {
       for (int i = 0; i < ITERATIONS; i++)
@@ -311,8 +303,7 @@ public class MatrixStatisticsTest
       }
    }
 
-	@ContinuousIntegrationTest(estimatedDuration = 0.0)
-	@Test(timeout = 30000)
+	@Test
    public void testCreateRowVectorIntDouble()
    {
       for (int i = 0; i < ITERATIONS; i++)
@@ -332,8 +323,7 @@ public class MatrixStatisticsTest
       }
    }
 
-	@ContinuousIntegrationTest(estimatedDuration = 0.0)
-	@Test(timeout = 30000)
+	@Test
    public void testCreateColumnVectorInt()
    {
       for (int i = 0; i < ITERATIONS; i++)
@@ -352,8 +342,7 @@ public class MatrixStatisticsTest
       }
    }
 
-	@ContinuousIntegrationTest(estimatedDuration = 0.0)
-	@Test(timeout = 30000)
+	@Test
    public void testCreateRowVectorInt()
    {
       for (int i = 0; i < ITERATIONS; i++)
@@ -372,15 +361,15 @@ public class MatrixStatisticsTest
       }
    }
 
-	@ContinuousIntegrationTest(estimatedDuration = 0.1, categoriesOverride = IntegrationCategory.EXCLUDE)
-	@Test(timeout=300000)
+	@Disabled
+	@Test
    public void testGetRowNumber()
    {
       fail("Not yet implemented");
    }
 
-	@ContinuousIntegrationTest(estimatedDuration = 0.1, categoriesOverride = IntegrationCategory.EXCLUDE)
-	@Test(timeout=300000)
+	@Disabled
+	@Test
    public void testGetColumnNumber()
    {
       fail("Not yet implemented");

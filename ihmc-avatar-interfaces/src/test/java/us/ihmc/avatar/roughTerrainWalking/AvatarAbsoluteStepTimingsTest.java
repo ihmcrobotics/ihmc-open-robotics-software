@@ -6,10 +6,10 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
-import org.junit.After;
+import org.junit.jupiter.api.AfterEach;
 import us.ihmc.robotics.Assert;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import controller_msgs.msg.dds.FootstepDataListMessage;
 import controller_msgs.msg.dds.FootstepDataMessage;
@@ -29,7 +29,8 @@ import us.ihmc.commons.PrintTools;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.communication.packets.ExecutionMode;
 import us.ihmc.communication.packets.ExecutionTiming;
-import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
+import org.junit.jupiter.api.Tag;
+import org.junit.jupiter.api.Disabled;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.Point3D;
@@ -59,8 +60,7 @@ public abstract class AvatarAbsoluteStepTimingsTest implements MultiRobotTestInt
 
    private static final double swingStartTimeEpsilon = 0.005;
 
-   @ContinuousIntegrationTest(estimatedDuration = 142.2)
-   @Test(timeout = 900000)
+   @Test
    public void testTakingStepsWithAbsoluteTimings() throws SimulationExceededMaximumTimeException
    {
       String className = getClass().getSimpleName();
@@ -256,8 +256,7 @@ public abstract class AvatarAbsoluteStepTimingsTest implements MultiRobotTestInt
 
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 22.0)
-   @Test(timeout = 110000)
+   @Test
    public void testMinimumTransferTimeIsRespected() throws SimulationExceededMaximumTimeException
    {
       String className = getClass().getSimpleName();
@@ -436,13 +435,13 @@ public abstract class AvatarAbsoluteStepTimingsTest implements MultiRobotTestInt
 
    }
 
-   @Before
+   @BeforeEach
    public void showMemoryUsageBeforeTest()
    {
       BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
    }
 
-   @After
+   @AfterEach
    public void destroySimulationAndRecycleMemory()
    {
       if (simulationTestingParameters.getKeepSCSUp())

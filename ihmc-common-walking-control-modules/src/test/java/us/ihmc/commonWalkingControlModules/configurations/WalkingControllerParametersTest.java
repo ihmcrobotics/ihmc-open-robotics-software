@@ -4,18 +4,14 @@ import static us.ihmc.robotics.Assert.*;
 
 import java.lang.reflect.Method;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import us.ihmc.commons.PrintTools;
-import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationPlan;
-import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
-import us.ihmc.continuousIntegration.IntegrationCategory;
-
-@ContinuousIntegrationPlan(categories = {IntegrationCategory.FAST})
+import org.junit.jupiter.api.Tag;
+import org.junit.jupiter.api.Disabled;
 public class WalkingControllerParametersTest
 {
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(timeout = 30000)
+   @Test
    public void testNoParameters() throws ClassNotFoundException, InstantiationException, IllegalAccessException
    {
       Class<?> c = Class.forName("us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters");

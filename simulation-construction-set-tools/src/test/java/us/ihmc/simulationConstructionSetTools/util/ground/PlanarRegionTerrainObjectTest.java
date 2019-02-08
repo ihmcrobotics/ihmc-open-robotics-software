@@ -4,10 +4,11 @@ import static us.ihmc.robotics.Assert.*;
 
 import java.util.Random;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import us.ihmc.commons.RandomNumbers;
-import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
+import org.junit.jupiter.api.Tag;
+import org.junit.jupiter.api.Disabled;
 import us.ihmc.euclid.geometry.BoundingBox3D;
 import us.ihmc.euclid.tools.EuclidCoreTestTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
@@ -23,8 +24,7 @@ public class PlanarRegionTerrainObjectTest
 {
    private static final double DEFAULT_ALLOWABLE_PENETRATION_THICKNESS = 1e5;
 
-   @ContinuousIntegrationTest(estimatedDuration = 5.0)
-   @Test(timeout = 30000)
+   @Test
    public void testHeightAt() throws Exception
    {
       Random random = new Random(1776L);
@@ -55,8 +55,7 @@ public class PlanarRegionTerrainObjectTest
       }
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 4.2)
-   @Test(timeout = 30000)
+   @Test
    public void testHeightAndNormalAt() throws Exception
    {
       Random random = new Random(1776L);
@@ -95,8 +94,7 @@ public class PlanarRegionTerrainObjectTest
       }
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 4.5)
-   @Test(timeout = 30000)
+   @Test
    public void testGetBoundingBox() throws Exception
    {
       Random random = new Random(1776L);
@@ -138,8 +136,7 @@ public class PlanarRegionTerrainObjectTest
       }
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 4.9)
-   @Test(timeout = 30000)
+   @Test
    public void testIsClose() throws Exception
    {
       Random random = new Random(1776L);
@@ -168,8 +165,7 @@ public class PlanarRegionTerrainObjectTest
       }
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 4.4)
-   @Test(timeout = 30000)
+   @Test
    public void testCheckIfInside() throws Exception
    {
       Random random = new Random(1776L);

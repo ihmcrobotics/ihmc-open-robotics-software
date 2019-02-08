@@ -2,9 +2,9 @@ package us.ihmc.avatar;
 
 import static us.ihmc.robotics.Assert.*;
 
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import controller_msgs.msg.dds.FootstepDataListMessage;
 import controller_msgs.msg.dds.FootstepDataMessage;
@@ -14,8 +14,8 @@ import us.ihmc.avatar.initialSetup.OffsetAndYawRobotInitialSetup;
 import us.ihmc.avatar.testTools.DRCSimulationTestHelper;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.walkingController.states.WalkingStateEnum;
 import us.ihmc.commons.thread.ThreadTools;
-import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
-import us.ihmc.continuousIntegration.IntegrationCategory;
+import org.junit.jupiter.api.Tag;
+import org.junit.jupiter.api.Disabled;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.Point3D;
@@ -32,6 +32,7 @@ import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoEnum;
 
+@Tag("humanoid-flat-ground")
 public abstract class AvatarPauseWalkingTest implements MultiRobotTestInterface
 {
    private SimulationTestingParameters simulationTestingParameters = SimulationTestingParameters.createFromSystemProperties();
@@ -57,14 +58,14 @@ public abstract class AvatarPauseWalkingTest implements MultiRobotTestInterface
 
    public abstract double getMaxICPPlanError();
 
-   @Before
+   @BeforeEach
    public void showMemoryUsageBeforeTest()
    {
       MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " before test.");
       BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
    }
 
-   @After
+   @AfterEach
    public void destroySimulationAndRecycleMemory()
    {
       if (simulationTestingParameters.getKeepSCSUp())
@@ -84,8 +85,8 @@ public abstract class AvatarPauseWalkingTest implements MultiRobotTestInterface
       BambooTools.reportTestFinishedMessage(simulationTestingParameters.getShowWindows());
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 100.0, categoriesOverride = IntegrationCategory.SLOW)
-   @Test(timeout = 100000)
+   @Tag("allocation-slow")
+   @Test
    public void testPauseWalking() throws SimulationExceededMaximumTimeException
    {
       setupTest();
@@ -103,8 +104,8 @@ public abstract class AvatarPauseWalkingTest implements MultiRobotTestInterface
       assertTrue(drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(getNumberOfFootsteps() * (getSwingTime() + getTransferTime())));
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 50, categoriesOverride = IntegrationCategory.SLOW)
-   @Test(timeout = 100000)
+   @Tag("allocation-slow")
+   @Test
    public void testTwoIndependentSteps() throws SimulationExceededMaximumTimeException
    {
       setupTest();
@@ -131,8 +132,8 @@ public abstract class AvatarPauseWalkingTest implements MultiRobotTestInterface
       assertTrue(drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(3.0));
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 50, categoriesOverride = IntegrationCategory.SLOW)
-   @Test(timeout = 100000)
+   @Tag("allocation-slow")
+   @Test
    public void testStartSecondStepWhileTransitioningToStand() throws SimulationExceededMaximumTimeException
    {
       setupTest();
@@ -159,8 +160,7 @@ public abstract class AvatarPauseWalkingTest implements MultiRobotTestInterface
       assertTrue(drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(3.0));
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 100.0)
-   @Test(timeout = 100000)
+   @Test
    public void testPauseWalkingForward() throws SimulationExceededMaximumTimeException
    {
       setupTest();
@@ -178,8 +178,7 @@ public abstract class AvatarPauseWalkingTest implements MultiRobotTestInterface
       assertTrue(drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(getNumberOfFootsteps() * (getSwingTime() + getTransferTime())));
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 100.0)
-   @Test(timeout = 100000)
+   @Test
    public void testPauseWalkingInitialTransfer() throws SimulationExceededMaximumTimeException
    {
       setupTest();
@@ -201,8 +200,7 @@ public abstract class AvatarPauseWalkingTest implements MultiRobotTestInterface
       assertTrue(drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(getNumberOfFootsteps() * (getSwingTime() + getTransferTime())));
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 60.0)
-   @Test(timeout = 100000)
+   @Test
    public void testPauseWalkingInitialTransferOneStep() throws SimulationExceededMaximumTimeException
    {
       setupTest();
@@ -234,8 +232,8 @@ public abstract class AvatarPauseWalkingTest implements MultiRobotTestInterface
       assertTrue(drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(swingTime + getTransferTime() + getFinalTransferDuration()));
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 100.0, categoriesOverride = IntegrationCategory.SLOW)
-   @Test(timeout = 100000)
+   @Tag("allocation-slow")
+   @Test
    public void testPauseWalkingForwardInitialTransfer() throws SimulationExceededMaximumTimeException
    {
       setupTest();

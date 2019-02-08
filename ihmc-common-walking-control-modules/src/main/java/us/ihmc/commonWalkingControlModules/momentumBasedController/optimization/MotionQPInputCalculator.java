@@ -31,7 +31,6 @@ import us.ihmc.mecano.spatial.SpatialVector;
 import us.ihmc.mecano.spatial.interfaces.MomentumReadOnly;
 import us.ihmc.mecano.spatial.interfaces.SpatialForceReadOnly;
 import us.ihmc.mecano.tools.MultiBodySystemTools;
-import us.ihmc.robotics.linearAlgebra.DampedLeastSquaresNullspaceCalculator;
 import us.ihmc.robotics.linearAlgebra.MatrixTools;
 import us.ihmc.robotics.linearAlgebra.commonOps.NativeCommonOps;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;

@@ -1,10 +1,9 @@
 package us.ihmc.quadrupedFootstepPlanning.footstepPlanning.graphSearch.footstepSnapping;
 
-import org.junit.Before;
-import org.junit.Test;
-import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations;
-import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
-import us.ihmc.continuousIntegration.IntegrationCategory;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Tag;
+import org.junit.jupiter.api.Disabled;
 import us.ihmc.euclid.axisAngle.AxisAngle;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.tools.EuclidCoreRandomTools;
@@ -26,7 +25,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
-@ContinuousIntegrationAnnotations.ContinuousIntegrationPlan(categories = IntegrationCategory.FAST)
 public class SimplePlanarRegionFootstepNodeSnapperTest
 {
    private final Random random = new Random(1209L);
@@ -36,7 +34,7 @@ public class SimplePlanarRegionFootstepNodeSnapperTest
 
    private static final int iters = 100;
 
-   @Before
+   @BeforeEach
    public void setup()
    {
       unitSquare.addVertex(-0.5, -0.5);
@@ -46,8 +44,7 @@ public class SimplePlanarRegionFootstepNodeSnapperTest
       unitSquare.update();
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(timeout = 30000)
+   @Test
    public void testIdentity()
    {
       FootstepNode nodeToSnap = new FootstepNode(RobotQuadrant.FRONT_LEFT, -0.3, 2.2, -0.35, 1.9, -0.85, 2.1, -0.8, 1.8);
@@ -69,8 +66,7 @@ public class SimplePlanarRegionFootstepNodeSnapperTest
       doAFullFootholdTest(transformsToWorld, nodeToSnap);
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(timeout = 30000)
+   @Test
    public void testVerticalTranslation()
    {
       FootstepNode nodeToSnap = new FootstepNode(RobotQuadrant.FRONT_LEFT, 2.5, -0.5, 2.3, -0.9, 1.5, -0.4, 1.4, -0.8);
@@ -93,8 +89,7 @@ public class SimplePlanarRegionFootstepNodeSnapperTest
       doAFullFootholdTest(transformsToWorld, nodeToSnap);
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(timeout = 30000)
+   @Test
    public void testSimpleRotation()
    {
       FootstepNode nodeToSnap = new FootstepNode(RobotQuadrant.FRONT_LEFT, 0.25, 0.25, 0.25, -0.25, -0.25, 0.25, -0.25, -0.25);
@@ -117,8 +112,7 @@ public class SimplePlanarRegionFootstepNodeSnapperTest
       doAFullFootholdTest(transformsToWorld, nodeToSnap);
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(timeout = 30000)
+   @Test
    public void testSimpleTranslationAndRotation()
    {
       FootstepNode nodeToSnap = new FootstepNode(RobotQuadrant.FRONT_LEFT, 1.1, 0.0, 1.1, -0.5, 0.1, 0.0, 0.1, -0.5);
@@ -142,8 +136,7 @@ public class SimplePlanarRegionFootstepNodeSnapperTest
       doAFullFootholdTest(transformsToWorld, nodeToSnap);
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(timeout = 30000)
+   @Test
    public void testRandomFullFootholds()
    {
       RigidBodyTransform nodeToWorldTransform = new RigidBodyTransform();

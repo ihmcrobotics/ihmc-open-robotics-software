@@ -372,6 +372,7 @@ public class ContinuousCMPBasedICPPlanner extends AbstractICPPlanner
    public void initializeForSingleSupport(double initialTime)
    {
       isHoldingPosition.set(false);
+      icpPositionToHold.setToNaN();
 
       isStanding.set(false);
       isInitialTransfer.set(false);
@@ -548,7 +549,6 @@ public class ContinuousCMPBasedICPPlanner extends AbstractICPPlanner
          singleSupportFinalICP.setIncludingFrame(icpPositionToHold);
          singleSupportInitialICPVelocity.set(0.0, 0.0, 0.0);
          setCornerPointsToNaN();
-         icpPositionToHold.setToNaN();
          isDoneWalking = true;
          requestedHoldPosition.set(false);
          isHoldingPosition.set(true);
@@ -560,6 +560,7 @@ public class ContinuousCMPBasedICPPlanner extends AbstractICPPlanner
          singleSupportInitialICPVelocity.set(0.0, 0.0, 0.0);
          setCornerPointsToNaN();
          isHoldingPosition.set(false);
+         icpPositionToHold.setToNaN();
       }
       else
       {
@@ -595,6 +596,7 @@ public class ContinuousCMPBasedICPPlanner extends AbstractICPPlanner
          entryCornerPoints.get(1).changeFrame(finalFrame);
          changeFrameOfRemainingCornerPoints(2, worldFrame);
          isHoldingPosition.set(false);
+         icpPositionToHold.setToNaN();
       }
 
       if (isStanding.getBooleanValue() && !isDoneWalking)

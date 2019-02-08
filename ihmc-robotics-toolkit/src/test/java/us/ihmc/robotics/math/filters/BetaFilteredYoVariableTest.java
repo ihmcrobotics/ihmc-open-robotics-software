@@ -4,9 +4,10 @@ import static us.ihmc.robotics.Assert.*;
 
 import java.util.Random;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
-import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
+import org.junit.jupiter.api.Tag;
+import org.junit.jupiter.api.Disabled;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 
@@ -14,8 +15,7 @@ public class BetaFilteredYoVariableTest
 {
    private final Random rng = new Random();
 
-	@ContinuousIntegrationTest(estimatedDuration = 0.2)
-	@Test(timeout=300000)
+	@Test
    public void testBetaFilteredYoVariable()
    {
       int beta = 5000;

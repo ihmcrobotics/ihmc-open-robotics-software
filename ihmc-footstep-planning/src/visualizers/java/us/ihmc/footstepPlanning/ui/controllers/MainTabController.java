@@ -1,41 +1,52 @@
 package us.ihmc.footstepPlanning.ui.controllers;
 
-import static us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI.AbortPlanningTopic;
-import static us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI.ComputePathTopic;
-import static us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI.GlobalResetTopic;
-import static us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI.GoalOrientationTopic;
-import static us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI.GoalPositionTopic;
-import static us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI.StartOrientationTopic;
-import static us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI.StartPositionTopic;
+import static us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI.*;
 
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 
 import controller_msgs.msg.dds.FootstepDataListMessage;
+import controller_msgs.msg.dds.KinematicsToolboxOutputStatus;
+import controller_msgs.msg.dds.WalkingControllerPreviewInputMessage;
+import controller_msgs.msg.dds.WalkingControllerPreviewOutputMessage;
 import javafx.animation.AnimationTimer;
+import javafx.beans.value.ChangeListener;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
 import javafx.scene.control.SpinnerValueFactory.DoubleSpinnerValueFactory;
+import us.ihmc.commons.MathTools;
 import us.ihmc.commons.PrintTools;
 import us.ihmc.communication.packets.ExecutionMode;
+import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
+import us.ihmc.footstepPlanning.FootstepDataMessageConverter;
 import us.ihmc.footstepPlanning.FootstepPlan;
 import us.ihmc.footstepPlanning.FootstepPlannerType;
 import us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI;
-import us.ihmc.footstepPlanning.FootstepDataMessageConverter;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
+import us.ihmc.idl.IDLSequence.Float;
+import us.ihmc.idl.IDLSequence.Object;
 import us.ihmc.javaFXToolkit.messager.JavaFXMessager;
 import us.ihmc.javaFXToolkit.messager.MessageBidirectionalBinding.PropertyToMessageTypeConverter;
-import us.ihmc.mecano.frames.MovingReferenceFrame;
+import us.ihmc.log.LogTools;
+import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
+import us.ihmc.messager.Messager;
 import us.ihmc.messager.TopicListener;
 import us.ihmc.pathPlanning.visibilityGraphs.ui.properties.Point3DProperty;
 import us.ihmc.pathPlanning.visibilityGraphs.ui.properties.YawProperty;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
+import us.ihmc.robotics.geometry.PlanarRegion;
+import us.ihmc.robotics.geometry.PlanarRegionsList;
+import us.ihmc.robotics.robotSide.RobotSide;
+import us.ihmc.robotModels.FullRobotModelUtils;
 
 public class MainTabController
 {
@@ -68,14 +79,14 @@ public class MainTabController
 
    // goal placement
    @FXML
-   private ToggleButton placeStart;
+   private Button placeStart;
    @FXML
-   private ToggleButton placeGoal;
+   private Button placeGoal;
 
    @FXML
-   private ToggleButton rotateStart;
+   private Button computePath;
    @FXML
-   private ToggleButton rotateGoal;
+   private Button abortPlanning;
 
    @FXML
    private Spinner<Double> startXPosition;
@@ -89,6 +100,8 @@ public class MainTabController
    private Spinner<Double> goalYPosition;
    @FXML
    private Spinner<Double> goalZPosition;
+   @FXML
+   private ComboBox<RobotSide> initialSupportSide;
 
    @FXML
    private Spinner<Double> startYaw;
@@ -99,6 +112,9 @@ public class MainTabController
    private Spinner<Double> swingTimeSpinner;
    @FXML
    private Spinner<Double> transferTimeSpinner;
+
+   @FXML
+   private Slider previewSlider;
 
    @FXML
    public void computePath()
@@ -129,14 +145,38 @@ public class MainTabController
          return;
       double swingTime = 1.2;
       double transferTime = 0.8;
-      FootstepDataListMessage footstepDataListMessage = FootstepDataMessageConverter
-            .createFootstepDataListFromPlan(footstepPlan, swingTime, transferTime, ExecutionMode.OVERRIDE);
+      FootstepDataListMessage footstepDataListMessage = FootstepDataMessageConverter.createFootstepDataListFromPlan(footstepPlan, swingTime, transferTime,
+                                                                                                                    ExecutionMode.OVERRIDE);
       messager.submitMessage(FootstepPlannerMessagerAPI.FootstepDataListTopic, footstepDataListMessage);
+   }
+
+   @FXML
+   public void clearFlat()
+   {
+      acceptNewRegions.setSelected(false);
+      assumeFlatGround.setSelected(true);
+      messager.submitMessage(FootstepPlannerMessagerAPI.PlanarRegionDataTopic, buildFlatGround());
+   }
+
+   private PlanarRegionsList buildFlatGround()
+   {
+      humanoidReferenceFrames.updateFrames();
+      RigidBodyTransform transformToWorld = humanoidReferenceFrames.getMidFeetZUpFrame().getTransformToWorldFrame();
+      ConvexPolygon2D convexPolygon = new ConvexPolygon2D();
+      convexPolygon.addVertex(10.0, 10.0);
+      convexPolygon.addVertex(-10.0, 10.0);
+      convexPolygon.addVertex(-10.0, -10.0);
+      convexPolygon.addVertex(10.0, -10.0);
+      convexPolygon.update();
+      PlanarRegion groundPlane = new PlanarRegion(transformToWorld, convexPolygon);
+      return new PlanarRegionsList(groundPlane);
    }
 
    private JavaFXMessager messager;
 
    private AtomicReference<Integer> currentPlannerRequestId;
+   private AnimationTimer robotPoseHandler;
+   private WalkingPreviewPlaybackManager walkingPreviewPlaybackManager;
    private HumanoidReferenceFrames humanoidReferenceFrames;
    private AtomicReference<FootstepPlan> footstepPlanReference;
 
@@ -145,6 +185,8 @@ public class MainTabController
 
    private final YawProperty startRotationProperty = new YawProperty(this, "startRotationProperty", 0.0);
    private final YawProperty goalRotationProperty = new YawProperty(this, "goalRotationProperty", 0.0);
+
+   private final AtomicInteger walkingPreviewRequestId = new AtomicInteger(0);
 
    public void attachMessager(JavaFXMessager messager)
    {
@@ -176,6 +218,9 @@ public class MainTabController
 
       timeout.setValueFactory(createTimeoutValueFactory());
       horizonLength.setValueFactory(createHorizonValueFactory());
+
+      initialSupportSide.setItems(FXCollections.observableArrayList(RobotSide.values));
+      initialSupportSide.setValue(RobotSide.LEFT);
    }
 
    public void bindControls()
@@ -198,27 +243,14 @@ public class MainTabController
                                  true);
 
       // set goal
-      messager.bindBidirectional(FootstepPlannerMessagerAPI.StartPositionEditModeEnabledTopic, placeStart.selectedProperty(), false);
-      messager.bindBidirectional(FootstepPlannerMessagerAPI.GoalPositionEditModeEnabledTopic, placeGoal.selectedProperty(), false);
-      messager.bindBidirectional(FootstepPlannerMessagerAPI.StartOrientationEditModeEnabledTopic, rotateStart.selectedProperty(), false);
-      messager.bindBidirectional(FootstepPlannerMessagerAPI.GoalOrientationEditModeEnabledTopic, rotateGoal.selectedProperty(), false);
+      messager.bindPropertyToTopic(FootstepPlannerMessagerAPI.EditModeEnabledTopic, placeStart.disableProperty());
+      messager.bindPropertyToTopic(FootstepPlannerMessagerAPI.EditModeEnabledTopic, placeGoal.disableProperty());
+      messager.bindPropertyToTopic(FootstepPlannerMessagerAPI.EditModeEnabledTopic, computePath.disableProperty());
+      messager.bindPropertyToTopic(FootstepPlannerMessagerAPI.EditModeEnabledTopic, abortPlanning.disableProperty());
 
-      messager.bindPropertyToTopic(FootstepPlannerMessagerAPI.GoalPositionEditModeEnabledTopic, placeStart.disableProperty());
-      messager.bindPropertyToTopic(FootstepPlannerMessagerAPI.StartOrientationEditModeEnabledTopic, placeStart.disableProperty());
-      messager.bindPropertyToTopic(FootstepPlannerMessagerAPI.GoalOrientationEditModeEnabledTopic, placeStart.disableProperty());
-
-      messager.bindPropertyToTopic(FootstepPlannerMessagerAPI.StartPositionEditModeEnabledTopic, placeGoal.disableProperty());
-      messager.bindPropertyToTopic(FootstepPlannerMessagerAPI.StartOrientationEditModeEnabledTopic, placeGoal.disableProperty());
-      messager.bindPropertyToTopic(FootstepPlannerMessagerAPI.GoalOrientationEditModeEnabledTopic, placeGoal.disableProperty());
-
-      messager.bindPropertyToTopic(FootstepPlannerMessagerAPI.StartPositionEditModeEnabledTopic, rotateStart.disableProperty());
-      messager.bindPropertyToTopic(FootstepPlannerMessagerAPI.GoalPositionEditModeEnabledTopic, rotateStart.disableProperty());
-      messager.bindPropertyToTopic(FootstepPlannerMessagerAPI.GoalOrientationEditModeEnabledTopic, rotateStart.disableProperty());
-
-      messager.bindPropertyToTopic(FootstepPlannerMessagerAPI.StartPositionEditModeEnabledTopic, rotateGoal.disableProperty());
-      messager.bindPropertyToTopic(FootstepPlannerMessagerAPI.GoalPositionEditModeEnabledTopic, rotateGoal.disableProperty());
-      messager.bindPropertyToTopic(FootstepPlannerMessagerAPI.StartOrientationEditModeEnabledTopic, rotateGoal.disableProperty());
       messager.bindBidirectional(FootstepPlannerMessagerAPI.AssumeFlatGround, assumeFlatGround.selectedProperty(), false);
+
+      messager.bindBidirectional(FootstepPlannerMessagerAPI.InitialSupportSideTopic, initialSupportSide.valueProperty(), true);
 
       startPositionProperty.bindBidirectionalX(startXPosition.getValueFactory().valueProperty());
       startPositionProperty.bindBidirectionalY(startYPosition.getValueFactory().valueProperty());
@@ -240,27 +272,78 @@ public class MainTabController
       messager.bindBidirectional(GoalOrientationTopic, goalRotationProperty, false);
 
       messager.registerTopicListener(GlobalResetTopic, reset -> clearStartGoalTextFields());
+
+      walkingPreviewPlaybackManager = new WalkingPreviewPlaybackManager(messager);
+      previewSlider.valueProperty()
+                   .addListener((ChangeListener<Number>) (observable, oldValue,
+                                                          newValue) -> walkingPreviewPlaybackManager.requestSpecificPercentageInPreview(newValue.doubleValue()));
+   }
+
+   @FXML
+   public void placeStart()
+   {
+      messager.submitMessage(FootstepPlannerMessagerAPI.StartPositionEditModeEnabledTopic, true);
+      messager.submitMessage(FootstepPlannerMessagerAPI.EditModeEnabledTopic, true);
+   }
+
+   @FXML
+   public void placeGoal()
+   {
+      messager.submitMessage(FootstepPlannerMessagerAPI.GoalPositionEditModeEnabledTopic, true);
+      messager.submitMessage(FootstepPlannerMessagerAPI.EditModeEnabledTopic, true);
    }
 
    private void setStartFromRobot()
    {
       humanoidReferenceFrames.updateFrames();
-      MovingReferenceFrame midFeetZUpFrame = humanoidReferenceFrames.getMidFeetZUpFrame();
-      FramePose3D startPose = new FramePose3D();
-      startPose.setToZero(midFeetZUpFrame);
+      FramePose3D startPose = new FramePose3D(humanoidReferenceFrames.getSoleFrame(initialSupportSide.getValue()));
       startPose.changeFrame(ReferenceFrame.getWorldFrame());
+      startPositionProperty.set(new Point3D(startPose.getPosition()));
+      startRotationProperty.set(new Quaternion(startPose.getYaw(), 0.0, 0.0));
+   }
 
-      double x = startPose.getX();
-      double y = startPose.getY();
-      double yaw = startPose.getYaw();
+   @FXML
+   private void requestWalkingPreview()
+   {
+      WalkingControllerPreviewInputMessage requestMessage = new WalkingControllerPreviewInputMessage();
+      requestMessage.setSequenceId(walkingPreviewRequestId.incrementAndGet());
 
-      startPositionProperty.set(new Point3D(x, y, startPositionProperty.get().getZ()));
-      startRotationProperty.set(new Quaternion(yaw, 0.0, 0.0));
+      FootstepPlan footstepPlan = footstepPlanReference.get();
+      if (footstepPlan == null)
+         return;
+
+      double swingTime = 1.2;
+      double transferTime = 1.0;
+      requestMessage.footsteps_.set(FootstepDataMessageConverter.createFootstepDataListFromPlan(footstepPlan, swingTime, transferTime, ExecutionMode.OVERRIDE));
+      messager.submitMessage(FootstepPlannerMessagerAPI.RequestWalkingPreview, requestMessage);
+   }
+
+   @FXML
+   private void playWalkingPreview()
+   {
+      walkingPreviewPlaybackManager.start();
+   }
+
+   @FXML
+   private void pauseWalkingPreview()
+   {
+      walkingPreviewPlaybackManager.playbackModeActive.set(false);
+   }
+
+   @FXML
+   private void stopWalkingPreview()
+   {
+      walkingPreviewPlaybackManager.stop();
    }
 
    public void setFullRobotModel(FullHumanoidRobotModel fullHumanoidRobotModel)
    {
       this.humanoidReferenceFrames = new HumanoidReferenceFrames(fullHumanoidRobotModel);
+   }
+
+   public void setPreviewModel(FullHumanoidRobotModel previewRobotModel)
+   {
+      this.walkingPreviewPlaybackManager.setRobotModel(previewRobotModel);
    }
 
    public void setDefaultTiming(double swingTime, double transferTime)
@@ -333,15 +416,152 @@ public class MainTabController
    private class TextViewerListener<T> implements TopicListener<T>
    {
       private final TextField textField;
+
       public TextViewerListener(TextField textField)
       {
          this.textField = textField;
       }
 
+      @Override
       public void receivedMessageForTopic(T messageContent)
       {
          if (messageContent != null)
             textField.promptTextProperty().setValue(messageContent.toString());
+      }
+   }
+
+   private class WalkingPreviewPlaybackManager extends AnimationTimer
+   {
+      final AtomicReference<WalkingControllerPreviewOutputMessage> walkingPreviewOutput;
+
+      // frames per call to handle()
+      final int playbackSpeed = 1;
+
+      int playbackCounter = 0;
+      FullHumanoidRobotModel previewRobotModel = null;
+      OneDoFJointBasics[] previewModelOneDoFJoints = null;
+
+      // whether to show ghost robot
+      final AtomicBoolean active = new AtomicBoolean(false);
+
+      // whether to animate ghost robot
+      final AtomicBoolean playbackModeActive = new AtomicBoolean(false);
+
+      WalkingPreviewPlaybackManager(Messager messager)
+      {
+         walkingPreviewOutput = messager.createInput(FootstepPlannerMessagerAPI.WalkingPreviewOutput);
+         messager.registerTopicListener(FootstepPlannerMessagerAPI.WalkingPreviewOutput, output -> start());
+      }
+
+      void setRobotModel(FullHumanoidRobotModel previewRobotModel)
+      {
+         this.previewRobotModel = previewRobotModel;
+         previewModelOneDoFJoints = FullRobotModelUtils.getAllJointsExcludingHands(previewRobotModel);
+      }
+
+      @Override
+      public void start()
+      {
+         playbackCounter = 0;
+         super.start();
+         active.set(true);
+         playbackModeActive.set(true);
+      }
+
+      @Override
+      public void stop()
+      {
+         previewRobotModel.getRootJoint().setJointPosition(new Vector3D(Double.NaN, Double.NaN, Double.NaN));
+         super.stop();
+         active.set(false);
+      }
+
+      @Override
+      public void handle(long now)
+      {
+         if (playbackModeActive.get())
+         {
+            WalkingControllerPreviewOutputMessage walkingControllerPreviewOutputMessage = walkingPreviewOutput.get();
+
+            if (walkingControllerPreviewOutputMessage == null)
+            {
+               LogTools.info("No preview in memory.");
+               playbackModeActive.set(false);
+               stop();
+               return;
+            }
+
+            if (playbackCounter >= walkingControllerPreviewOutputMessage.getRobotConfigurations().size())
+            {
+               playbackCounter = 0;
+            }
+
+            setToFrame(playbackCounter);
+            playbackCounter += playbackSpeed;
+            double alpha = ((double) playbackCounter) / (walkingPreviewOutput.get().getRobotConfigurations().size() - 1);
+            previewSlider.setValue(MathTools.clamp(alpha, 0.0, 1.0));
+         }
+      }
+
+      void requestSpecificPercentageInPreview(double alpha)
+      {
+         if(playbackModeActive.get())
+            return;
+
+         alpha = MathTools.clamp(alpha, 0.0, 1.0);
+         WalkingControllerPreviewOutputMessage walkingControllerPreviewOutputMessage = walkingPreviewOutput.get();
+
+         if (walkingControllerPreviewOutputMessage == null)
+         {
+            LogTools.info("No preview in memory.");
+            playbackModeActive.set(false);
+            stop();
+            return;
+         }
+
+         int frameIndex = (int) (alpha * (walkingControllerPreviewOutputMessage.getRobotConfigurations().size() - 1));
+         setToFrame(frameIndex);
+      }
+
+      private void setToFrame(int frameIndex)
+      {
+         WalkingControllerPreviewOutputMessage walkingControllerPreviewOutputMessage = walkingPreviewOutput.get();
+
+         if (walkingControllerPreviewOutputMessage == null)
+         {
+            LogTools.info("No preview in memory.");
+            playbackModeActive.set(false);
+            stop();
+            return;
+         }
+
+         Object<KinematicsToolboxOutputStatus> robotConfigurations = walkingControllerPreviewOutputMessage.getRobotConfigurations();
+
+         if (frameIndex >= robotConfigurations.size())
+         {
+            LogTools.info("frameIndex out of bound.");
+            stop();
+            return;
+         }
+
+         KinematicsToolboxOutputStatus kinematicsToolboxOutputStatus = robotConfigurations.get(frameIndex);
+
+         Float jointAngles = kinematicsToolboxOutputStatus.getDesiredJointAngles();
+
+         if (jointAngles.size() != previewModelOneDoFJoints.length)
+         {
+            System.err.println("Received " + jointAngles.size() + " from walking controller preview toolbox, expected " + previewModelOneDoFJoints.length);
+            walkingPreviewOutput.set(null);
+            return;
+         }
+
+         for (int i = 0; i < jointAngles.size(); i++)
+         {
+            previewModelOneDoFJoints[i].setQ(jointAngles.get(i));
+         }
+
+         previewRobotModel.getRootJoint().setJointPosition(kinematicsToolboxOutputStatus.getDesiredRootTranslation());
+         previewRobotModel.getRootJoint().setJointOrientation(kinematicsToolboxOutputStatus.getDesiredRootOrientation());
       }
    }
 }

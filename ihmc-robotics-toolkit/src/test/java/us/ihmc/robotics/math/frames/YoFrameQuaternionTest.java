@@ -4,11 +4,12 @@ import static us.ihmc.robotics.Assert.*;
 
 import java.util.Random;
 
-import org.junit.After;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.Test;
 
 import us.ihmc.commons.RandomNumbers;
-import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
+import org.junit.jupiter.api.Tag;
+import org.junit.jupiter.api.Disabled;
 import us.ihmc.euclid.axisAngle.AxisAngle;
 import us.ihmc.euclid.matrix.RotationMatrix;
 import us.ihmc.euclid.referenceFrame.FrameQuaternion;
@@ -29,14 +30,13 @@ public class YoFrameQuaternionTest
 
    private static final double EPS = 1e-8;
 
-   @After
+   @AfterEach
    public void tearDown()
    {
       ReferenceFrameTools.clearWorldFrameTree();
    }
 
-	@ContinuousIntegrationTest(estimatedDuration = 0.0)
-	@Test(timeout=300000)
+	@Test
    public void testInitialization()
    {
       YoVariableRegistry registry = new YoVariableRegistry("blop");
@@ -67,8 +67,7 @@ public class YoFrameQuaternionTest
       assertArrayEquals(yawPitchRollExpected, yawPitchRollActual, EPS);
    }
 
-	@ContinuousIntegrationTest(estimatedDuration = 0.0)
-	@Test(timeout=300000)
+	@Test
    public void testSetters()
    {
       Random random = new Random(1972L);
@@ -111,8 +110,7 @@ public class YoFrameQuaternionTest
       assertTrue(matrix3dActual.epsilonEquals(matrix3dExpected, EPS));
    }
 
-	@ContinuousIntegrationTest(estimatedDuration = 0.0)
-	@Test(timeout=300000)
+	@Test
    public void testReferenceFramesMismatching()
    {
       Random random = new Random(1984L);
@@ -146,8 +144,7 @@ public class YoFrameQuaternionTest
       assertFalse(hasReferenceFrameMismatchExceptionBeenThrown);
    }
 
-	@ContinuousIntegrationTest(estimatedDuration = 0.0)
-	@Test(timeout=300000)
+	@Test
    public void testMultiplication()
    {
       Random random = new Random(1776L);
@@ -180,8 +177,7 @@ public class YoFrameQuaternionTest
       }
    }
 
-	@ContinuousIntegrationTest(estimatedDuration = 0.0)
-	@Test(timeout=300000)
+	@Test
    public void testInterpolate()
    {
       Random random = new Random(1776L);

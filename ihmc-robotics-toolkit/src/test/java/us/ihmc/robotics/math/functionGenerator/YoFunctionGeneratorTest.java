@@ -2,30 +2,30 @@ package us.ihmc.robotics.math.functionGenerator;
 
 import static us.ihmc.robotics.Assert.*;
 
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
-import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
+import org.junit.jupiter.api.Tag;
+import org.junit.jupiter.api.Disabled;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 
 public class YoFunctionGeneratorTest
 {
 	YoFunctionGenerator yoFunctionGenerator;
-   @Before
+   @BeforeEach
    public void setUp() throws Exception
    {
 	   YoVariableRegistry registry = new YoVariableRegistry("testRegistry");
 	   yoFunctionGenerator = new YoFunctionGenerator("test", registry);
    }
 
-   @After
+   @AfterEach
    public void tearDown() throws Exception
    {
    }
 
-	@ContinuousIntegrationTest(estimatedDuration = 0.0)
-	@Test(timeout=300000)
+	@Test
    public void testZeroFrequencyDC()
    {
 	   yoFunctionGenerator.setMode(YoFunctionGeneratorMode.DC);
@@ -41,8 +41,7 @@ public class YoFunctionGeneratorTest
 	   }
    }
 
-	@ContinuousIntegrationTest(estimatedDuration = 0.0)
-	@Test(timeout=300000)
+	@Test
    public void testOutputContinuityDuringFrequencyChange()
    {
 	   double freq0=10,amp0=10;
@@ -78,8 +77,7 @@ public class YoFunctionGeneratorTest
 	   assertEquals("|"+output0+"-"+output1+"|<" + tolerance,0,output1-output0, tolerance);
    }
 
-	@ContinuousIntegrationTest(estimatedDuration = 0.0)
-	@Test(timeout=300000)
+	@Test
    public void testZeroFrequencySine()
    {
 	   yoFunctionGenerator.setMode(YoFunctionGeneratorMode.SINE);
@@ -96,8 +94,7 @@ public class YoFunctionGeneratorTest
 	   }
    }
 
-	@ContinuousIntegrationTest(estimatedDuration = 0.0)
-	@Test(timeout=300000)
+	@Test
    public void testTriangle()
    {
       yoFunctionGenerator.setMode(YoFunctionGeneratorMode.TRIANGLE);

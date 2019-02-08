@@ -2,15 +2,14 @@ package us.ihmc.utilities.parameterOptimization;
 
 import static us.ihmc.robotics.Assert.*;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
-import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
-
+import org.junit.jupiter.api.Tag;
+import org.junit.jupiter.api.Disabled;
 public class IntegerParameterToOptimizeTest
 {
 
-	@ContinuousIntegrationTest(estimatedDuration = 0.0)
-	@Test(timeout = 30000)
+	@Test
    public void testGetBitsOfResolution()
    {
       testNBit(0, 0, 1);
@@ -38,8 +37,7 @@ public class IntegerParameterToOptimizeTest
       assertEquals(expectedNumberOfBits, integerParameterToOptimize.getBitsOfResolution());
    }
 
-	@ContinuousIntegrationTest(estimatedDuration = 0.0)
-	@Test(timeout = 30000)
+	@Test
    public void testZeroToOneConversions()
    {
       testZeroToOneConversion(0, 100);

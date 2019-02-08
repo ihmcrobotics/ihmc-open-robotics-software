@@ -4,11 +4,12 @@ import static us.ihmc.robotics.Assert.*;
 
 import java.util.Random;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import us.ihmc.commons.MathTools;
 import us.ihmc.commons.RandomNumbers;
-import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
+import org.junit.jupiter.api.Tag;
+import org.junit.jupiter.api.Disabled;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 
@@ -16,8 +17,7 @@ public class ElasticityCompensatorYoVariableTest
 {
    private static final double EPSILON = 1e-10;
 
-	@ContinuousIntegrationTest(estimatedDuration = 0.0)
-	@Test(timeout = 30000)
+	@Test
    public void testZeroJointTau1()
    {
       Random random = new Random(1561651L);
@@ -51,8 +51,7 @@ public class ElasticityCompensatorYoVariableTest
       }
    }
 
-	@ContinuousIntegrationTest(estimatedDuration = 0.0)
-	@Test(timeout = 30000)
+	@Test
    public void testZeroJointTau2()
    {
       Random random = new Random(1561651L);
@@ -86,8 +85,7 @@ public class ElasticityCompensatorYoVariableTest
       }
    }
 
-	@ContinuousIntegrationTest(estimatedDuration = 0.0)
-	@Test(timeout = 30000)
+	@Test
    public void testZeroJointTau3()
    {
       Random random = new Random(1561651L);
@@ -111,8 +109,7 @@ public class ElasticityCompensatorYoVariableTest
       }
    }
 
-	@ContinuousIntegrationTest(estimatedDuration = 0.0)
-	@Test(timeout = 30000)
+	@Test
    public void testZeroJointTau4()
    {
       Random random = new Random(1561651L);
@@ -136,8 +133,7 @@ public class ElasticityCompensatorYoVariableTest
       }
    }
 
-	@ContinuousIntegrationTest(estimatedDuration = 0.0)
-	@Test(timeout = 30000)
+	@Test
    public void testZeroStiffness4()
    {
       Random random = new Random(1561651L);
@@ -169,8 +165,7 @@ public class ElasticityCompensatorYoVariableTest
       }
    }
 
-	@ContinuousIntegrationTest(estimatedDuration = 0.0)
-	@Test(timeout = 30000)
+	@Test
    public void testZeroMaximumDeflection4()
    {
       Random random = new Random(1561651L);
@@ -195,8 +190,7 @@ public class ElasticityCompensatorYoVariableTest
       }
    }
 
-	@ContinuousIntegrationTest(estimatedDuration = 0.0)
-	@Test(timeout = 30000)
+	@Test
    public void testDefaultMaximumDeflection4()
    {
       Random random = new Random(1561651L);
@@ -223,8 +217,7 @@ public class ElasticityCompensatorYoVariableTest
       }
    }
 
-	@ContinuousIntegrationTest(estimatedDuration = 0.0)
-	@Test(timeout = 30000)
+	@Test
    public void testInfiniteMaximumDeflection4()
    {
       Random random = new Random(1561651L);
@@ -250,8 +243,7 @@ public class ElasticityCompensatorYoVariableTest
       }
    }
 
-	@ContinuousIntegrationTest(estimatedDuration = 0.0)
-	@Test(timeout = 30000)
+	@Test
    public void testRandomMaximumDeflection4()
    {
       Random random = new Random(1561651L);

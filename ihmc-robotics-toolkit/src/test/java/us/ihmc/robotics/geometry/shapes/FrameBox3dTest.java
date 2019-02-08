@@ -4,14 +4,13 @@ import static us.ihmc.robotics.Assert.*;
 
 import java.util.Random;
 
-import org.junit.After;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.Test;
 
 import us.ihmc.commons.Epsilons;
 import us.ihmc.commons.MathTools;
-import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationPlan;
-import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
-import us.ihmc.continuousIntegration.IntegrationCategory;
+import org.junit.jupiter.api.Tag;
+import org.junit.jupiter.api.Disabled;
 import us.ihmc.euclid.matrix.RotationMatrix;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
@@ -25,17 +24,15 @@ import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 
-@ContinuousIntegrationPlan(categories = {IntegrationCategory.FAST})
 public class FrameBox3dTest
 {
-   @After
+   @AfterEach
    public void tearDown()
    {
       ReferenceFrameTools.clearWorldFrameTree();
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(timeout = 30000)
+   @Test
    public void testDistance()
    {
       ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
@@ -72,8 +69,7 @@ public class FrameBox3dTest
       assertEquals(expectedDistance, box.distance(pointOnTheVertexBetweenXandYandZ), 1e-14);
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(timeout = 30000)
+   @Test
    public void testOrthogonalProjection()
    {
       ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
@@ -120,8 +116,7 @@ public class FrameBox3dTest
 
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(timeout = 30000)
+   @Test
    public void testChangeFrame() throws Exception
    {
       // This test ensures consistency between the changeFrame of FrameBox3d and FramePose.
@@ -167,8 +162,7 @@ public class FrameBox3dTest
       }
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(timeout = 30000)
+   @Test
    public void testgetClosestPointAndNormalAt()
    {
       ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
@@ -196,8 +190,7 @@ public class FrameBox3dTest
       assertTrue(expectedNormal.epsilonEquals(returnedNormal, 1e-14));
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(timeout = 30000)
+   @Test
    public void testIsInsideOrOnSurface()
    {
       ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
@@ -220,8 +213,7 @@ public class FrameBox3dTest
       assertFalse(box.isInsideOrOnSurface(pointOutsideBox, 1e-7));
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.1)
-   @Test(timeout = 30000)
+   @Test
    public void testApplyTransform()
    {
       ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
@@ -258,8 +250,7 @@ public class FrameBox3dTest
       }
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(timeout = 30000)
+   @Test
    public void testSetTransform3DAndGetters()
    {
       ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
