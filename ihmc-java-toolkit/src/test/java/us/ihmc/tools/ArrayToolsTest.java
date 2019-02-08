@@ -1,5 +1,6 @@
 package us.ihmc.tools;
 
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static us.ihmc.robotics.Assert.*;
 
 import java.io.BufferedReader;
@@ -261,22 +262,24 @@ public class ArrayToolsTest
 	@Test
    public void testParseDoubleArrayFromBufferedReaderWithIOException() throws IOException
    {
-      BufferedReader mockBufferedReader = new BufferedReader(new Reader()
-      {
-         @Override
-         public int read(char[] cbuf, int off, int len) throws IOException
+      assertThrows(IOException.class, () -> {
+         BufferedReader mockBufferedReader = new BufferedReader(new Reader()
          {
-            throw new IOException();
-         }
+            @Override
+            public int read(char[] cbuf, int off, int len) throws IOException
+            {
+               throw new IOException();
+            }
 
-         @Override
-         public void close() throws IOException
-         {
-            return;
-         }
+            @Override
+            public void close() throws IOException
+            {
+               return;
+            }
+         });
+
+         ArrayTools.parseDoubleArray(mockBufferedReader);
       });
-
-      ArrayTools.parseDoubleArray(mockBufferedReader);
    }
 	
    private StringBuilder generateParseableArrayString(Random random, int arraySize, NumberFormat formatter, double[] originalArrayOfRandomNumbers)

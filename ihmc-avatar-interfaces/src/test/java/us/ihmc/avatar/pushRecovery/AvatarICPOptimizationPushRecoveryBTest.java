@@ -12,6 +12,7 @@ import java.util.Random;
 
 import static us.ihmc.robotics.Assert.*;
 
+@Tag("humanoid-push-recovery")
 public abstract class AvatarICPOptimizationPushRecoveryBTest extends AvatarICPOptimizationPushRecoveryTestSetup
 {
    @Test

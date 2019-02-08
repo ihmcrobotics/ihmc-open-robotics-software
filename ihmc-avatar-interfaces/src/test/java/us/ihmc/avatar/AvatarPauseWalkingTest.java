@@ -32,6 +32,7 @@ import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoEnum;
 
+@Tag("humanoid-flat-ground")
 public abstract class AvatarPauseWalkingTest implements MultiRobotTestInterface
 {
    private SimulationTestingParameters simulationTestingParameters = SimulationTestingParameters.createFromSystemProperties();
@@ -84,7 +85,7 @@ public abstract class AvatarPauseWalkingTest implements MultiRobotTestInterface
       BambooTools.reportTestFinishedMessage(simulationTestingParameters.getShowWindows());
    }
 
-   @Tag("allocation")
+   @Tag("allocation-slow")
    @Test
    public void testPauseWalking() throws SimulationExceededMaximumTimeException
    {
@@ -103,7 +104,7 @@ public abstract class AvatarPauseWalkingTest implements MultiRobotTestInterface
       assertTrue(drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(getNumberOfFootsteps() * (getSwingTime() + getTransferTime())));
    }
 
-   @Tag("allocation")
+   @Tag("allocation-slow")
    @Test
    public void testTwoIndependentSteps() throws SimulationExceededMaximumTimeException
    {
@@ -131,7 +132,7 @@ public abstract class AvatarPauseWalkingTest implements MultiRobotTestInterface
       assertTrue(drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(3.0));
    }
 
-   @Tag("allocation")
+   @Tag("allocation-slow")
    @Test
    public void testStartSecondStepWhileTransitioningToStand() throws SimulationExceededMaximumTimeException
    {
@@ -231,7 +232,7 @@ public abstract class AvatarPauseWalkingTest implements MultiRobotTestInterface
       assertTrue(drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(swingTime + getTransferTime() + getFinalTransferDuration()));
    }
 
-   @Tag("allocation")
+   @Tag("allocation-slow")
    @Test
    public void testPauseWalkingForwardInitialTransfer() throws SimulationExceededMaximumTimeException
    {

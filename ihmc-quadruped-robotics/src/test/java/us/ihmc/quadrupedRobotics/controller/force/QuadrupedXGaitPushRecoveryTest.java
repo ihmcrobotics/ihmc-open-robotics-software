@@ -25,6 +25,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
+@Tag("quadruped-xgait")
 public abstract class QuadrupedXGaitPushRecoveryTest implements QuadrupedMultiRobotTestInterface
 {
    private GoalOrientedTestConductor conductor;

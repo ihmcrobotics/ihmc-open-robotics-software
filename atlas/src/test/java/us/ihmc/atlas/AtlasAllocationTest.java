@@ -65,6 +65,7 @@ import us.ihmc.simulationconstructionset.util.simulationTesting.SimulationTestin
 import us.ihmc.tools.MemoryTools;
 import us.ihmc.wholeBodyController.DRCControllerThread;
 
+@Tag("allocation-slow")
 public class AtlasAllocationTest
 {
    private static final SimulationTestingParameters simulationTestingParameters = SimulationTestingParameters.createFromSystemProperties();
@@ -110,7 +111,6 @@ public class AtlasAllocationTest
       setup();
    }
 
-   @Tag("allocation")
    @Test
    public void testForAllocationsStanding() throws SimulationExceededMaximumTimeException
    {
@@ -126,7 +126,6 @@ public class AtlasAllocationTest
       });
    }
 
-   @Tag("allocation")
    @Test
    public void testForAllocationsWalking() throws SimulationExceededMaximumTimeException
    {
@@ -155,7 +154,6 @@ public class AtlasAllocationTest
       testHelper.assertRobotsRootJointIsInBoundingBox(new BoundingBox3D(0.9, -0.1, 0.0, 1.1, 0.1, 5.0));
    }
 
-   @Tag("allocation")
    @Test
    public void testForAllocationsDuringPelvisMotion() throws SimulationExceededMaximumTimeException
    {
@@ -178,7 +176,6 @@ public class AtlasAllocationTest
       });
    }
 
-   @Tag("allocation")
    @Test
    public void testForAllocationsWithPelvisUserControl() throws SimulationExceededMaximumTimeException
    {
@@ -204,7 +201,6 @@ public class AtlasAllocationTest
       });
    }
 
-   @Tag("allocation")
    @Test
    public void testForAllocationsDuringArmMotion() throws SimulationExceededMaximumTimeException
    {
@@ -225,7 +221,6 @@ public class AtlasAllocationTest
       });
    }
 
-   @Tag("allocation")
    @Test
    public void testForAllocationsDuringChestMotion() throws SimulationExceededMaximumTimeException
    {

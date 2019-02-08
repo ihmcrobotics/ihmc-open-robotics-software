@@ -32,6 +32,7 @@ import us.ihmc.tools.MemoryTools;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.yoVariables.variable.YoBoolean;
 
+@Tag("humanoid-flat-ground")
 public abstract class DRCFlatGroundRewindabilityTest implements MultiRobotTestInterface
 {
    private SimulationTestingParameters simulationTestingParameters;

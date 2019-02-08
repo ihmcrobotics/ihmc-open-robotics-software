@@ -15,9 +15,9 @@ import us.ihmc.javaFXToolkit.messager.SharedMemoryJavaFXMessager;
 import us.ihmc.pubsub.DomainFactory;
 
 /**
- * This class provides a visualizer for the remote footstep planner found in the footstep planner toolbox.
- * It allows users to view the resulting plans calculated by the toolbox. It also allows the user to tune
- * the planner parameters, and request a new plan from the planning toolboxs.
+ * This class provides a visualizer for the remote footstep planner found in the footstep planner
+ * toolbox. It allows users to view the resulting plans calculated by the toolbox. It also allows
+ * the user to tune the planner parameters, and request a new plan from the planning toolboxs.
  */
 public class AtlasRemoteFootstepPlannerUI extends Application
 {
@@ -32,14 +32,15 @@ public class AtlasRemoteFootstepPlannerUI extends Application
    public void start(Stage primaryStage) throws Exception
    {
       DRCRobotModel drcRobotModel = new AtlasRobotModel(AtlasRobotVersion.ATLAS_UNPLUGGED_V5_NO_HANDS, RobotTarget.REAL_ROBOT, false);
+      DRCRobotModel previewRobotModel = new AtlasRobotModel(AtlasRobotVersion.ATLAS_UNPLUGGED_V5_NO_HANDS, RobotTarget.REAL_ROBOT, false);
       messager = new SharedMemoryJavaFXMessager(FootstepPlannerMessagerAPI.API);
       messageConverter = RemoteUIMessageConverter.createConverter(messager, drcRobotModel.getSimpleRobotName(), DomainFactory.PubSubImplementation.FAST_RTPS);
 
       messager.startMessager();
 
       ui = FootstepPlannerUI.createMessagerUI(primaryStage, messager, drcRobotModel.getFootstepPlannerParameters(),
-                                              drcRobotModel.getVisibilityGraphsParameters(), drcRobotModel, drcRobotModel.getContactPointParameters(),
-                                              drcRobotModel.getWalkingControllerParameters());
+                                              drcRobotModel.getVisibilityGraphsParameters(), drcRobotModel, previewRobotModel,
+                                              drcRobotModel.getContactPointParameters(), drcRobotModel.getWalkingControllerParameters());
       ui.show();
 
       if (launchPlannerToolbox)

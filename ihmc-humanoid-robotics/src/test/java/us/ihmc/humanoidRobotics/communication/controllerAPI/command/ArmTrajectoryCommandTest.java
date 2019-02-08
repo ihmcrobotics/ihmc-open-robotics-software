@@ -1,6 +1,10 @@
 package us.ihmc.humanoidRobotics.communication.controllerAPI.command;
 
-import static us.ihmc.robotics.Assert.*;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static us.ihmc.robotics.Assert.assertEquals;
+import static us.ihmc.robotics.Assert.assertFalse;
+import static us.ihmc.robotics.Assert.assertNull;
+import static us.ihmc.robotics.Assert.assertTrue;
 
 import java.util.Random;
 
@@ -10,10 +14,8 @@ import controller_msgs.msg.dds.ArmTrajectoryMessage;
 import controller_msgs.msg.dds.TrajectoryPoint1DMessage;
 import us.ihmc.commons.MutationTestFacilitator;
 import us.ihmc.communication.controllerAPI.command.QueueableCommand;
-import us.ihmc.communication.packets.Packet;
-import org.junit.jupiter.api.Tag;
-import org.junit.jupiter.api.Disabled;
 import us.ihmc.communication.packets.ExecutionMode;
+import us.ihmc.communication.packets.Packet;
 import us.ihmc.humanoidRobotics.communication.packets.RandomHumanoidMessages;
 import us.ihmc.robotics.math.trajectories.trajectorypoints.OneDoFTrajectoryPoint;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -34,7 +36,7 @@ public class ArmTrajectoryCommandTest
       assertEquals(0, armTrajectoryCommand.getJointspaceTrajectory().getNumberOfJoints());
       assertEquals(Packet.INVALID_MESSAGE_ID, armTrajectoryCommand.getJointspaceTrajectory().getPreviousCommandId());
       assertEquals(0, armTrajectoryCommand.getJointspaceTrajectory().getTrajectoryPointLists().size());
-      armTrajectoryCommand.getJointspaceTrajectory().getJointTrajectoryPoint(0, 0);
+      assertThrows(IndexOutOfBoundsException.class, () -> armTrajectoryCommand.getJointspaceTrajectory().getJointTrajectoryPoint(0, 0));
    }
 
    @Test

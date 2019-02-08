@@ -40,6 +40,7 @@ import us.ihmc.simulationconstructionset.util.simulationRunner.VariableDifferenc
 import us.ihmc.simulationconstructionset.util.simulationTesting.SimulationTestingParameters;
 import us.ihmc.tools.MemoryTools;
 
+@Tag("humanoid-obstacle")
 public abstract class DRCObstacleCoursePlatformTest implements MultiRobotTestInterface
 {
    protected SimulationTestingParameters simulationTestingParameters;

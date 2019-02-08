@@ -1,5 +1,6 @@
 package us.ihmc.robotics.robotSide;
 
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static us.ihmc.robotics.Assert.*;
 
 import java.util.ArrayList;
@@ -76,19 +77,21 @@ public class SideDependentListTest
 	@Test
    public void testIndexOutOfBoundsException()
    {
-      Object leftObject = new Object();
-      Object rightObject = new Object();
-      
-      SideDependentList<Object> sideDependentList = new SideDependentList<Object>(leftObject, rightObject);
-      
-      Iterator<Object> iterator = sideDependentList.iterator();
-      
-      while(iterator.hasNext())
-      {
+      assertThrows(IndexOutOfBoundsException.class, () -> {
+         Object leftObject = new Object();
+         Object rightObject = new Object();
+
+         SideDependentList<Object> sideDependentList = new SideDependentList<Object>(leftObject, rightObject);
+
+         Iterator<Object> iterator = sideDependentList.iterator();
+
+         while (iterator.hasNext())
+         {
+            iterator.next();
+         }
+
          iterator.next();
-      }
-      
-      iterator.next();
+      });
    }
 
 	@Test
@@ -100,7 +103,7 @@ public class SideDependentListTest
       SideDependentList<Object> sideDependentList = new SideDependentList<Object>(leftObject, rightObject);
       
       Iterator<Object> iterator = sideDependentList.iterator();
-      iterator.remove();
+      assertThrows(UnsupportedOperationException.class, () -> iterator.remove());
    }
 
 	@Test
