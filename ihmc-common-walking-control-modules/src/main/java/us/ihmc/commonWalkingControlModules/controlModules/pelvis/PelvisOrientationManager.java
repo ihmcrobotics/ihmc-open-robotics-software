@@ -125,7 +125,8 @@ public class PelvisOrientationManager
 
    public void goToHomeFromCurrentDesired(double trajectoryTime)
    {
-      updateOffsetInWalkingManager();
+      if (stateMachine.getCurrentStateKey() == PelvisOrientationControlMode.USER)
+         walkingManager.setOffset(userManager.getDesiredOrientation());
       walkingManager.goToHomeFromCurrentDesired(trajectoryTime);
       requestState(PelvisOrientationControlMode.WALKING_CONTROLLER);
    }
