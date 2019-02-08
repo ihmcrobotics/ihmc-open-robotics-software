@@ -445,6 +445,15 @@ public class WalkingHighLevelHumanoidController implements JointLoadStatusProvid
          controllerToolbox.setDesiredCenterOfPressure(feet.get(robotSide), footDesiredCoPs.get(robotSide));
       }
 
+      stateMachine.resetToInitialState();
+
+      initializeManagers();
+
+      commandConsumer.avoidManipulationAbortForDuration(RigidBodyControlManager.INITIAL_GO_HOME_TIME);
+   }
+
+   private void initializeManagers()
+   {
       balanceManager.disablePelvisXYControl();
 
       double stepTime = walkingMessageHandler.getDefaultStepTime();
@@ -462,11 +471,6 @@ public class WalkingHighLevelHumanoidController implements JointLoadStatusProvid
       feetManager.initialize();
       comHeightManager.initialize();
       feetManager.resetHeightCorrectionParametersForSingularityAvoidance();
-      //      requestICPPlannerToHoldCurrent(); // Not sure if we want to do this. Might cause robot to fall. Might just be better to recenter ICP whenever switching to walking.
-
-      stateMachine.resetToInitialState();
-
-      commandConsumer.avoidManipulationAbortForDuration(RigidBodyControlManager.INITIAL_GO_HOME_TIME);
    }
 
    /**
@@ -490,8 +494,6 @@ public class WalkingHighLevelHumanoidController implements JointLoadStatusProvid
       pelvisOrientationManager.setToHoldCurrentInWorldFrame();
       comHeightManager.initializeDesiredHeightToCurrent();
       balanceManager.requestICPPlannerToHoldCurrentCoM();
-
-      commandConsumer.avoidManipulationAbortForDuration(RigidBodyControlManager.INITIAL_GO_HOME_TIME);
    }
 
    private void initializeContacts()
