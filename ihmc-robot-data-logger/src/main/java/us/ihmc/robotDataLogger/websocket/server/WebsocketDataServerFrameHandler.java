@@ -45,7 +45,7 @@ class WebsocketDataServerFrameHandler extends SimpleChannelInboundHandler<WebSoc
    private WebsocketFramePool binaryPool;
    private WebsocketFramePool textPool = new WebsocketFramePool(DataServerCommand.MaxCommandSize(), TEXT_POOL_SIZE, TextWebSocketFrame.class);
    private Channel channel = null;
-   private CustomGCAvoidingByteBufAllocator alloc = null;
+   private RecyclingByteBufAllocator alloc = null;
 
 
    private final VariableChangeRequestPubSubType variableChangeRequestType = new VariableChangeRequestPubSubType();
@@ -83,7 +83,7 @@ class WebsocketDataServerFrameHandler extends SimpleChannelInboundHandler<WebSoc
          this.lock = new Object();
          this.binaryPool = new WebsocketFramePool(dataSize, BINARY_POOL_SIZE, BinaryWebSocketFrame.class);
 
-         alloc = new CustomGCAvoidingByteBufAllocator(ctx.alloc());
+         alloc = new RecyclingByteBufAllocator(ctx.alloc());
          ctx.channel().config().setAllocator(alloc);
 
          channel = ctx.channel();
