@@ -1,5 +1,6 @@
 package us.ihmc.robotics.statistics;
 
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static us.ihmc.robotics.Assert.*;
 
 import org.junit.jupiter.api.*;
@@ -57,7 +58,7 @@ public class OnePassMeanAndStandardDeviationTest
    {
       meanAndStandardDeviation.compute(65.0);
       double delta = 1e-10;
-      assertEquals(0.0, meanAndStandardDeviation.getSampleVariance(), delta);
+      assertThrows(InsufficientMeasurementsException.class, () -> assertEquals(0.0, meanAndStandardDeviation.getSampleVariance(), delta));
    }
 
 	@Test
