@@ -1,6 +1,7 @@
 package us.ihmc.avatar.controllerAPI;
 
-import static us.ihmc.robotics.Assert.*;
+import static us.ihmc.robotics.Assert.assertEquals;
+import static us.ihmc.robotics.Assert.assertTrue;
 
 import org.jcodec.common.Assert;
 import org.junit.jupiter.api.AfterEach;
@@ -25,8 +26,6 @@ import us.ihmc.commonWalkingControlModules.controlModules.rigidBody.RigidBodyTas
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.communication.packets.ExecutionMode;
 import us.ihmc.communication.packets.MessageTools;
-import org.junit.jupiter.api.Tag;
-import org.junit.jupiter.api.Disabled;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
@@ -62,7 +61,7 @@ public abstract class EndToEndPelvisOrientationTest implements MultiRobotTestInt
    @Test
    public void testGoHome() throws SimulationExceededMaximumTimeException
    {
-      double epsilon = 1.0e-5;
+      double epsilon = 1.0e-4;
       double yaw = Math.toRadians(15.0);
       double trajectoryTime = 0.5;
 
