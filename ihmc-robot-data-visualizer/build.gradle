@@ -36,7 +36,7 @@ mainDependencies {
 }
 
 testDependencies {
-   
+    compile group: "us.ihmc", name: "ihmc-robotics-toolkit-test", version: "source"
 }
 
 mainClassName = hasProperty("mainClass") ? mainClass : "us.ihmc.robotDataVisualizer.visualizer.SCSVisualizer"
