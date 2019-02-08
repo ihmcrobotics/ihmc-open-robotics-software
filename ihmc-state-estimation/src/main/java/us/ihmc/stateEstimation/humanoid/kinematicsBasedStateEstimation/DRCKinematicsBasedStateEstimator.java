@@ -9,13 +9,13 @@ import java.util.concurrent.atomic.AtomicReference;
 import gnu.trove.map.TObjectDoubleMap;
 import us.ihmc.commonWalkingControlModules.visualizer.EstimatedFromTorquesWrenchVisualizer;
 import us.ihmc.commons.Conversions;
-import us.ihmc.commons.PrintTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicReferenceFrame;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.communication.packets.sensing.StateEstimatorMode;
 import us.ihmc.humanoidRobotics.communication.subscribers.PelvisPoseCorrectionCommunicatorInterface;
 import us.ihmc.humanoidRobotics.model.CenterOfPressureDataHolder;
+import us.ihmc.log.LogTools;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.robotics.contactable.ContactablePlaneBody;
 import us.ihmc.robotics.sensors.CenterOfMassDataHolder;
@@ -132,7 +132,7 @@ public class DRCKinematicsBasedStateEstimator implements StateEstimatorControlle
       }
       else
       {
-         PrintTools.warn(this, "No IMUs, setting up with: " + ConstantPelvisRotationalStateUpdater.class.getSimpleName(), true);
+         LogTools.warn("No IMUs, setting up with: " + ConstantPelvisRotationalStateUpdater.class.getSimpleName(), true);
          pelvisRotationalStateUpdater = new ConstantPelvisRotationalStateUpdater(inverseDynamicsStructure, registry);
       }
 
@@ -207,10 +207,7 @@ public class DRCKinematicsBasedStateEstimator implements StateEstimatorControlle
       jointStateUpdater.initialize();
       if (pelvisRotationalStateUpdater != null)
       {
-         if (operatingMode.getEnumValue() == StateEstimatorMode.FROZEN)
-            pelvisRotationalStateUpdater.initializeForFrozenState();
-         else
-            pelvisRotationalStateUpdater.initialize();
+         pelvisRotationalStateUpdater.initialize();
       }
       pelvisLinearStateUpdater.initialize();
 
@@ -236,29 +233,24 @@ public class DRCKinematicsBasedStateEstimator implements StateEstimatorControlle
       }
 
       jointStateUpdater.updateJointState();
+      if (pelvisRotationalStateUpdater != null)
+      {
+         pelvisRotationalStateUpdater.updateRootJointOrientationAndAngularVelocity();
+      }
 
       switch (operatingMode.getEnumValue())
       {
       case FROZEN:
-         if (pelvisRotationalStateUpdater != null)
-         {
-            pelvisRotationalStateUpdater.updateForFrozenState();
-         }
          pelvisLinearStateUpdater.updateForFrozenState();
          break;
-
       case NORMAL:
       default:
-         if (pelvisRotationalStateUpdater != null)
-         {
-            pelvisRotationalStateUpdater.updateRootJointOrientationAndAngularVelocity();
-         }
          pelvisLinearStateUpdater.updateRootJointPositionAndLinearVelocity();
-
-         List<RigidBodyBasics> trustedFeet = pelvisLinearStateUpdater.getCurrentListOfTrustedFeet();
-         imuBiasStateEstimator.compute(trustedFeet);
          break;
       }
+
+      List<RigidBodyBasics> trustedFeet = pelvisLinearStateUpdater.getCurrentListOfTrustedFeet();
+      imuBiasStateEstimator.compute(trustedFeet);
 
       if (usePelvisCorrector.getBooleanValue() && pelvisPoseHistoryCorrection != null)
       {
