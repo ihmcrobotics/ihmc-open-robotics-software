@@ -20,6 +20,7 @@ import us.ihmc.commonWalkingControlModules.controllerCore.WholeBodyControlCoreTo
 import us.ihmc.commonWalkingControlModules.controllerCore.WholeBodyControllerCore;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.ControllerCoreCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.FeedbackControlCommandList;
+import us.ihmc.commonWalkingControlModules.controllers.Updatable;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.ContactableBodiesFactory;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.ControllerAPIDefinition;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.HighLevelControlManagerFactory;
@@ -93,6 +94,8 @@ public class WalkingControllerPreviewToolboxController extends ToolboxController
    private final YoBoolean hasControllerFailed = new YoBoolean("hasControllerFailed", registry);
 
    private final List<KinematicsToolboxOutputStatus> previewFrames = new ArrayList<>();
+
+   private final List<Updatable> updatables = new ArrayList<>();
 
    public WalkingControllerPreviewToolboxController(DRCRobotModel robotModel, double integrationDT, CommandInputManager toolboxInputManager,
                                                     StatusMessageOutputManager statusOutputManager, YoGraphicsListRegistry yoGraphicsListRegistry,
@@ -344,6 +347,13 @@ public class WalkingControllerPreviewToolboxController extends ToolboxController
          reportMessage(output);
          taskExecutor.clear();
       }
+
+      updatables.forEach(updatable -> updatable.update(previewTime.getValue()));
+   }
+
+   public void addUpdatable(Updatable updatable)
+   {
+      this.updatables.add(updatable);
    }
 
    @Override
