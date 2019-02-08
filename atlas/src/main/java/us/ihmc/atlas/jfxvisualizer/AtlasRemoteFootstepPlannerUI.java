@@ -1,5 +1,6 @@
 package us.ihmc.atlas.jfxvisualizer;
 
+import controller_msgs.msg.dds.HighLevelStateMessage;
 import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.stage.Stage;
@@ -8,6 +9,7 @@ import us.ihmc.atlas.AtlasRobotVersion;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.RobotTarget;
 import us.ihmc.avatar.footstepPlanning.MultiStageFootstepPlanningModule;
+import us.ihmc.communication.controllerAPI.RobotLowLevelMessenger;
 import us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI;
 import us.ihmc.footstepPlanning.ui.FootstepPlannerUI;
 import us.ihmc.footstepPlanning.ui.RemoteUIMessageConverter;
@@ -41,6 +43,7 @@ public class AtlasRemoteFootstepPlannerUI extends Application
       ui = FootstepPlannerUI.createMessagerUI(primaryStage, messager, drcRobotModel.getFootstepPlannerParameters(),
                                               drcRobotModel.getVisibilityGraphsParameters(), drcRobotModel, previewRobotModel,
                                               drcRobotModel.getContactPointParameters(), drcRobotModel.getWalkingControllerParameters());
+      ui.setRobotLowLevelMessenger(new AtlasLowLevelMessenger());
       ui.show();
 
       if (launchPlannerToolbox)
@@ -64,5 +67,24 @@ public class AtlasRemoteFootstepPlannerUI extends Application
    public static void main(String[] args)
    {
       launch(args);
+   }
+
+   private class AtlasLowLevelMessenger implements RobotLowLevelMessenger
+   {
+      @Override
+      public void sendFreezeRequest()
+      {
+         HighLevelStateMessage message = new HighLevelStateMessage();
+         message.setHighLevelControllerName(HighLevelStateMessage.FREEZE_STATE);
+         messager.submitMessage(FootstepPlannerMessagerAPI.HighLevelStateTopic, message);
+      }
+
+      @Override
+      public void sendStandRequest()
+      {
+         HighLevelStateMessage message = new HighLevelStateMessage();
+         message.setHighLevelControllerName(HighLevelStateMessage.STAND_PREP_STATE);
+         messager.submitMessage(FootstepPlannerMessagerAPI.HighLevelStateTopic, message);
+      }
    }
 }

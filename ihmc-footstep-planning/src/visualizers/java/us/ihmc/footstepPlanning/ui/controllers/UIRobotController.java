@@ -1,14 +1,35 @@
 package us.ihmc.footstepPlanning.ui.controllers;
 
 import controller_msgs.msg.dds.GoHomeMessage;
-import controller_msgs.msg.dds.HighLevelStateMessage;
 import javafx.fxml.FXML;
+import javafx.scene.control.Button;
+import us.ihmc.communication.controllerAPI.RobotLowLevelMessenger;
 import us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI;
 import us.ihmc.javaFXToolkit.messager.JavaFXMessager;
 
 public class UIRobotController
 {
    private JavaFXMessager messager;
+   private RobotLowLevelMessenger robotLowLevelMessenger;
+
+   @FXML
+   private Button homeAll;
+   @FXML
+   private Button freeze;
+   @FXML
+   private Button standPrep;
+
+   public void initialize()
+   {
+      updateButtons();
+   }
+
+   private void updateButtons()
+   {
+      homeAll.setDisable(messager == null);
+      freeze.setDisable(robotLowLevelMessenger == null);
+      standPrep.setDisable(robotLowLevelMessenger == null);
+   }
 
    @FXML
    public void homeAll()
@@ -27,21 +48,24 @@ public class UIRobotController
    @FXML
    public void freeze()
    {
-      HighLevelStateMessage message = new HighLevelStateMessage();
-      message.setHighLevelControllerName(HighLevelStateMessage.FREEZE_STATE);
-      messager.submitMessage(FootstepPlannerMessagerAPI.HighLevelStateTopic, message);
+      robotLowLevelMessenger.sendFreezeRequest();
    }
 
    @FXML
    public void standPrep()
    {
-      HighLevelStateMessage message = new HighLevelStateMessage();
-      message.setHighLevelControllerName(HighLevelStateMessage.STAND_PREP_STATE);
-      messager.submitMessage(FootstepPlannerMessagerAPI.HighLevelStateTopic, message);
+      robotLowLevelMessenger.sendStandRequest();
    }
 
    public void attachMessager(JavaFXMessager messager)
    {
       this.messager = messager;
+      updateButtons();
+   }
+
+   public void setRobotLowLevelMessenger(RobotLowLevelMessenger robotLowLevelMessenger)
+   {
+      this.robotLowLevelMessenger = robotLowLevelMessenger;
+      updateButtons();
    }
 }
