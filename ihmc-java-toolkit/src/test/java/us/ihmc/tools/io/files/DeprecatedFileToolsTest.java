@@ -1,5 +1,6 @@
 package us.ihmc.tools.io.files;
 
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static us.ihmc.robotics.Assert.*;
 
 import java.io.BufferedReader;
@@ -25,13 +26,14 @@ import us.ihmc.commons.nio.FileTools;
 import us.ihmc.commons.nio.WriteOption;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Disabled;
+
 public class DeprecatedFileToolsTest
 {
    private static final Path FILE_TOOLS_TEST_PATH = getResourcesPathForTestClass(DeprecatedFileToolsTest.class);
    private static final Path TEXT_DIRECTORY_PATH = FILE_TOOLS_TEST_PATH.resolve("exampleTextFiles");
    private static final Path JAVA_DIRECTORY_PATH = FILE_TOOLS_TEST_PATH.resolve("exampleJavaFiles");
    private static final Path EMPTY_DIRECTORY_PATH = FILE_TOOLS_TEST_PATH.resolve("exampleEmptyFiles");
-   
+
    private static final String EXAMPLE_FILE_1_TEXT_LINE_1 = "This is example File 1 !!&&#))(";
    private static final String EXAMPLE_FILE_2_TEXT_LINE_1 = "This is example File 2 *@&&%*@";
    private static final String EXAMPLE_FILE_2_TEXT_LINE_2 = "It has two lines";
@@ -43,13 +45,13 @@ public class DeprecatedFileToolsTest
    private static final String FILE_TOOLS_EXAMPLE_FILE1_TXT = "FileToolsExampleFile1.txt";
    private static final String FILE_TOOLS_EXAMPLE_FILE2_TXT = "FileToolsExampleFile2.txt";
    private static final String TEST_READ_ALL_LINES_TXT = "testReadAllLines.txt";
-   
+
    private static final Path EXAMPLE_JAVA_FILE1_PATH = JAVA_DIRECTORY_PATH.resolve(EXAMPLE_JAVA_FILE1_JAVA);
    private static final Path EXAMPLE_JAVA_FILE2_PATH = JAVA_DIRECTORY_PATH.resolve(EXAMPLE_JAVA_FILE2_JAVA);
    private static final Path FILE_TOOLS_EXAMPLE_FILE1_PATH = TEXT_DIRECTORY_PATH.resolve(FILE_TOOLS_EXAMPLE_FILE1_TXT);
    private static final Path FILE_TOOLS_EXAMPLE_FILE2_PATH = TEXT_DIRECTORY_PATH.resolve(FILE_TOOLS_EXAMPLE_FILE2_TXT);
    private static final Path READ_ALL_LINES_PATH = FILE_TOOLS_TEST_PATH.resolve(TEST_READ_ALL_LINES_TXT);
-   
+
    @BeforeEach
    public void setUp()
    {
@@ -57,14 +59,14 @@ public class DeprecatedFileToolsTest
       FileTools.ensureDirectoryExists(TEXT_DIRECTORY_PATH, DefaultExceptionHandler.PRINT_STACKTRACE);
       FileTools.ensureDirectoryExists(JAVA_DIRECTORY_PATH, DefaultExceptionHandler.PRINT_STACKTRACE);
       FileTools.ensureDirectoryExists(EMPTY_DIRECTORY_PATH, DefaultExceptionHandler.PRINT_STACKTRACE);
-      
+
       createJavaFile1();
       createJavaFile2();
       createTestFile1();
       createTestFile2();
       createReadAllLinesFile();
    }
-   
+
    @AfterEach
    public void tearDown()
    {
@@ -74,19 +76,19 @@ public class DeprecatedFileToolsTest
       FileTools.deleteQuietly(FILE_TOOLS_EXAMPLE_FILE2_PATH);
       FileTools.deleteQuietly(READ_ALL_LINES_PATH);
    }
-   
+
    private static Path getResourcesPathForTestClass(Class<?> clazz)
    {
       List<String> pathNames = new ArrayList<String>();
-      
+
       String[] packageNames = clazz.getPackage().getName().split("\\.");
-      
+
       pathNames.addAll(Arrays.asList(packageNames));
       pathNames.add(StringUtils.uncapitalize(clazz.getSimpleName()));
-      
+
       return Paths.get("testResources", pathNames.toArray(new String[0]));
    }
-   
+
    private static void createTestFile1()
    {
       PrintWriter writer = FileTools.newPrintWriter(FILE_TOOLS_EXAMPLE_FILE1_PATH, WriteOption.TRUNCATE, DefaultExceptionHandler.PRINT_STACKTRACE);
@@ -135,14 +137,14 @@ public class DeprecatedFileToolsTest
       writer.flush();
       writer.close();
    }
-   
+
    private static void createReadAllLinesFile()
    {
       PrintWriter writer = FileTools.newPrintWriter(READ_ALL_LINES_PATH, WriteOption.TRUNCATE, DefaultExceptionHandler.PRINT_STACKTRACE);
       writer.print("line1\r\nline2\nline3\r");
       writer.close();
    }
-   
+
    @SuppressWarnings("deprecation")
    @Test
    public void testGetBufferedReader()
@@ -150,7 +152,7 @@ public class DeprecatedFileToolsTest
       File testFile1 = FILE_TOOLS_EXAMPLE_FILE1_PATH.toFile();
       if (!testFile1.exists())
          createTestFile1();
-   
+
       try
       {
          BufferedReader reader = DeprecatedFileTools.getFileReader(testFile1.getAbsolutePath());
@@ -173,7 +175,7 @@ public class DeprecatedFileToolsTest
    @Test
    public void testGetBufferedReaderWithFileNotFoundException() throws FileNotFoundException
    {
-      DeprecatedFileTools.getFileReader(TEST_FILE_BAD_TXT);
+      assertThrows(FileNotFoundException.class, () -> DeprecatedFileTools.getFileReader(TEST_FILE_BAD_TXT));
    }
 
    @SuppressWarnings("deprecation")
@@ -183,7 +185,7 @@ public class DeprecatedFileToolsTest
       File testFile1 = FILE_TOOLS_EXAMPLE_FILE1_PATH.toFile();
       if (!testFile1.exists())
          createTestFile1();
-   
+
       try
       {
          PrintWriter writer = DeprecatedFileTools.getFileWriter(testFile1.getAbsolutePath());
@@ -200,7 +202,7 @@ public class DeprecatedFileToolsTest
          e.printStackTrace();
          fail();
       }
-   
+
       testFile1.delete();
       createTestFile1();
    }
@@ -212,7 +214,7 @@ public class DeprecatedFileToolsTest
       File testFile1 = FILE_TOOLS_EXAMPLE_FILE1_PATH.toFile();
       if (!testFile1.exists())
          createTestFile1();
-   
+
       try
       {
          PrintWriter writer = DeprecatedFileTools.getFileWriterWithAppend(testFile1.getAbsolutePath());
@@ -229,7 +231,7 @@ public class DeprecatedFileToolsTest
          e.printStackTrace();
          fail();
       }
-   
+
       testFile1.delete();
       createTestFile1();
    }
@@ -241,7 +243,7 @@ public class DeprecatedFileToolsTest
       File testFile1 = FILE_TOOLS_EXAMPLE_FILE1_PATH.toFile();
       if (!testFile1.exists())
          createTestFile1();
-   
+
       try
       {
          DataOutputStream outStream = DeprecatedFileTools.getFileDataOutputStream(testFile1.getAbsolutePath());
@@ -258,7 +260,7 @@ public class DeprecatedFileToolsTest
          e.printStackTrace();
          fail();
       }
-   
+
       testFile1.delete();
       createTestFile1();
    }
@@ -270,7 +272,7 @@ public class DeprecatedFileToolsTest
       File testFile1 = FILE_TOOLS_EXAMPLE_FILE1_PATH.toFile();
       if (!testFile1.exists())
          createTestFile1();
-   
+
       try
       {
          DataInputStream inStream = DeprecatedFileTools.getFileDataInputStream(testFile1.getAbsolutePath());
@@ -293,8 +295,10 @@ public class DeprecatedFileToolsTest
    @Test
    public void testGetFileDataInputStreamWithFileNotFoundException() throws FileNotFoundException, IOException
    {
-      DataInputStream inStream = DeprecatedFileTools.getFileDataInputStream(TEST_FILE_BAD_TXT);
-      inStream.close();
+      assertThrows(FileNotFoundException.class, () -> {
+         DataInputStream inStream = DeprecatedFileTools.getFileDataInputStream(TEST_FILE_BAD_TXT);
+         inStream.close();
+      });
    }
 
    @SuppressWarnings("deprecation")
@@ -310,15 +314,15 @@ public class DeprecatedFileToolsTest
          listOfFileNames.add(f.getName());
          errorMessage = errorMessage + f.getName() + " ";
       }
-   
+
       assertTrue(listOfFileNames.contains(FILE_TOOLS_EXAMPLE_FILE1_TXT));
       assertTrue(listOfFileNames.contains(FILE_TOOLS_EXAMPLE_FILE2_TXT));
       assertTrue(listOfFileNames.contains(EXAMPLE_JAVA_FILE1_JAVA));
       assertTrue(listOfFileNames.contains(EXAMPLE_JAVA_FILE2_JAVA));
-   
+
       boolean thrown = false;
       File notADirectoryExceptionTestFile = EXAMPLE_JAVA_FILE1_PATH.toFile();
-   
+
       try
       {
          DeprecatedFileTools.getAllFilesInDirectoryRecursive(notADirectoryExceptionTestFile);
@@ -327,7 +331,7 @@ public class DeprecatedFileToolsTest
       {
          thrown = true;
       }
-   
+
       assertTrue(thrown);
    }
 
@@ -340,7 +344,7 @@ public class DeprecatedFileToolsTest
       File javaFileDirectory = JAVA_DIRECTORY_PATH.toFile();
       ArrayList<File> textFiles = DeprecatedFileTools.getAllFilesInDirectoryWithSuffix("txt", textFileDirectory);
       ArrayList<File> javaFiles = DeprecatedFileTools.getAllFilesInDirectoryWithSuffix("java.txt", javaFileDirectory);
-   
+
       ArrayList<String> listOfTextFileNames = new ArrayList<String>();
       String errorMessage = "listOfTextFileNames that were found: ";
       for (File f : textFiles)
@@ -348,26 +352,25 @@ public class DeprecatedFileToolsTest
          listOfTextFileNames.add(f.getName());
          errorMessage = errorMessage + f.getName() + " ";
       }
-   
+
       assertEquals(errorMessage, 2, textFiles.size());
-   
+
       ArrayList<String> listOfJavaFileNames = new ArrayList<String>();
       errorMessage = "listOfJavaFileNames that were found: ";
-   
+
       for (File f : javaFiles)
       {
          listOfJavaFileNames.add(f.getName());
          errorMessage = errorMessage + f.getName();
       }
-   
+
       assertEquals(errorMessage, 2, javaFiles.size());
-   
-   
+
       assertTrue(listOfTextFileNames.contains(FILE_TOOLS_EXAMPLE_FILE1_TXT));
       assertTrue(listOfTextFileNames.contains(FILE_TOOLS_EXAMPLE_FILE2_TXT));
       assertTrue(listOfJavaFileNames.contains(EXAMPLE_JAVA_FILE1_JAVA));
       assertTrue(listOfJavaFileNames.contains(EXAMPLE_JAVA_FILE2_JAVA));
-   
+
       // test non directory search
       boolean thrown = false;
       try
@@ -378,12 +381,12 @@ public class DeprecatedFileToolsTest
       {
          thrown = true;
       }
-   
+
       assertTrue(thrown);
-   
+
       // test searching empty directory
       File emptyDirectory = EMPTY_DIRECTORY_PATH.toFile();
-   
+
       ArrayList<File> testEmptyDir = DeprecatedFileTools.getAllFilesInDirectoryWithSuffix("*", emptyDirectory);
       assertEquals(0, testEmptyDir.size());
    }
