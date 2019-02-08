@@ -11,12 +11,10 @@ import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.mecano.multiBodySystem.interfaces.FloatingJointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.mecano.spatial.Twist;
-import us.ihmc.robotics.geometry.AngleTools;
 import us.ihmc.robotics.math.filters.FiniteDifferenceAngularVelocityYoFrameVector;
 import us.ihmc.sensorProcessing.stateEstimation.IMUSensorReadOnly;
 import us.ihmc.sensorProcessing.stateEstimation.evaluation.FullInverseDynamicsStructure;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoFrameQuaternion;
 import us.ihmc.yoVariables.variable.YoFrameVector3D;
 import us.ihmc.yoVariables.variable.YoFrameYawPitchRoll;
@@ -33,7 +31,6 @@ public class IMUBasedPelvisRotationalStateUpdater implements PelvisRotationalSta
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
    private final YoFrameYawPitchRoll yoRootJointFrameOrientation;
    private final YoFrameQuaternion yoRootJointFrameQuaternion;
-   private final YoDouble rootJointYawOffsetFromFrozenState;
 
    private final YoFrameVector3D yoRootJointAngularVelocityMeasFrame;
    private final YoFrameVector3D yoRootJointAngularVelocity;
@@ -75,8 +72,6 @@ public class IMUBasedPelvisRotationalStateUpdater implements PelvisRotationalSta
       yoRootJointFrameOrientation = new YoFrameYawPitchRoll("estimatedRootJoint", worldFrame, registry);
       yoRootJointFrameQuaternion = new YoFrameQuaternion("estimatedRootJoint", worldFrame, registry);
 
-      rootJointYawOffsetFromFrozenState = new YoDouble("rootJointYawOffsetFromFrozenState", registry);
-
       yoRootJointAngularVelocity = new YoFrameVector3D("estimatedRootJointAngularVelocity", rootJointFrame, registry);
       yoRootJointAngularVelocityInWorld = new YoFrameVector3D("estimatedRootJointAngularVelocityWorld", worldFrame, registry);
       yoRootJointAngularVelocityMeasFrame = new YoFrameVector3D("estimatedRootJointAngularVelocityMeasFrame", measurementFrame, registry);
@@ -105,77 +100,7 @@ public class IMUBasedPelvisRotationalStateUpdater implements PelvisRotationalSta
    @Override
    public void initialize()
    {
-      rotationFrozenOffset.setIdentity();
       updateRootJointOrientationAndAngularVelocity();
-   }
-
-   @Override
-   public void initializeForFrozenState()
-   {
-      rotationFrozenOffset.setIdentity();
-
-      // R_{measurementFrame}^{world}
-      orientationMeasurement.set(imuProcessedOutput.getOrientationMeasurement());
-      transformFromMeasurementFrameToWorld.setRotationAndZeroTranslation(orientationMeasurement);
-
-      // R_{root}^{measurementFrame}
-      rootJointFrame.getTransformToDesiredFrame(transformFromRootJointFrameToMeasurementFrame, measurementFrame);
-
-      // R_{root}^{world} = R_{estimationLink}^{world} * R_{root}^{estimationLink}
-      transformFromRootJointFrameToWorld.set(transformFromMeasurementFrameToWorld);
-      transformFromRootJointFrameToWorld.multiply(transformFromRootJointFrameToMeasurementFrame);
-      transformFromRootJointFrameToWorld.getRotation(rotationFromRootJointFrameToWorld);
-      
-      double initialYaw = rotationFromRootJointFrameToWorld.getYaw();
-
-      rootJointYawOffsetFromFrozenState.set(initialYaw);
-      rotationFrozenOffset.setToYawMatrix(initialYaw);
-
-      yoRootJointFrameQuaternion.setToZero();
-      yoRootJointFrameOrientation.setToZero();
-
-      rootJoint.setJointOrientation(yoRootJointFrameQuaternion);
-
-      // Set the rootJoint twist to zero.
-      twistRootBodyRelativeToWorld.setIncludingFrame(rootJoint.getJointTwist());
-      twistRootBodyRelativeToWorld.setToZero();
-      rootJoint.setJointTwist(twistRootBodyRelativeToWorld);
-   }
-
-   private final RotationMatrix rotationFrozenOffset = new RotationMatrix();
-   private final double[] lastComputedYawPitchRoll = new double[3];
-
-   @Override
-   public void updateForFrozenState()
-   {
-      // R_{measurementFrame}^{world}
-      orientationMeasurement.set(imuProcessedOutput.getOrientationMeasurement());
-      transformFromMeasurementFrameToWorld.setRotationAndZeroTranslation(orientationMeasurement);
-
-      // R_{root}^{measurementFrame}
-      rootJointFrame.getTransformToDesiredFrame(transformFromRootJointFrameToMeasurementFrame, measurementFrame);
-
-      // R_{root}^{world} = R_{estimationLink}^{world} * R_{root}^{estimationLink}
-      transformFromRootJointFrameToWorld.set(transformFromMeasurementFrameToWorld);
-      transformFromRootJointFrameToWorld.multiply(transformFromRootJointFrameToMeasurementFrame);
-      transformFromRootJointFrameToWorld.getRotation(rotationFromRootJointFrameToWorld);
-
-      yoRootJointFrameQuaternion.getYawPitchRoll(lastComputedYawPitchRoll);
-      double currentYaw = rotationFromRootJointFrameToWorld.getYaw();
-
-      double yawDifference = AngleTools.computeAngleDifferenceMinusPiToPi(lastComputedYawPitchRoll[0], currentYaw);
-      rootJointYawOffsetFromFrozenState.set(yawDifference);
-      rotationFrozenOffset.setToYawMatrix(yawDifference);
-
-      // Keep setting the orientation so that the localization updater works properly.
-      rootJoint.setJointOrientation(yoRootJointFrameQuaternion);
-
-      // Set the rootJoint twist to zero.
-      twistRootBodyRelativeToWorld.setIncludingFrame(rootJoint.getJointTwist());
-      twistRootBodyRelativeToWorld.setToZero();
-      rootJoint.setJointTwist(twistRootBodyRelativeToWorld);
-
-      updateViz();
    }
 
    @Override
@@ -209,8 +134,6 @@ public class IMUBasedPelvisRotationalStateUpdater implements PelvisRotationalSta
       transformFromRootJointFrameToWorld.set(transformFromMeasurementFrameToWorld);
       transformFromRootJointFrameToWorld.multiply(transformFromRootJointFrameToMeasurementFrame);
       transformFromRootJointFrameToWorld.getRotation(rotationFromRootJointFrameToWorld);
-
-      rotationFromRootJointFrameToWorld.preMultiply(rotationFrozenOffset);
 
       rootJoint.setJointOrientation(rotationFromRootJointFrameToWorld);
       rootJointFrame.update();
