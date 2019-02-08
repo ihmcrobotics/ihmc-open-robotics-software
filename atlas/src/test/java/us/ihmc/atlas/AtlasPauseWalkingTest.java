@@ -97,7 +97,7 @@ public class AtlasPauseWalkingTest extends AvatarPauseWalkingTest
       return 5;
    }
 
-   @Tag("allocation")
+   @Tag("allocation-slow")
    @Test
    @Override
    public void testPauseWalking() throws SimulationExceededMaximumTimeException
@@ -105,7 +105,7 @@ public class AtlasPauseWalkingTest extends AvatarPauseWalkingTest
       super.testPauseWalking();
    }
 
-   @Tag("allocation")
+   @Tag("allocation-slow")
    @Test
    @Override
    public void testTwoIndependentSteps()throws SimulationExceededMaximumTimeException
@@ -113,7 +113,7 @@ public class AtlasPauseWalkingTest extends AvatarPauseWalkingTest
       super.testTwoIndependentSteps();
    }
 
-   @Tag("allocation")
+   @Tag("allocation-slow")
    @Test
    @Override
    public void testStartSecondStepWhileTransitioningToStand()throws SimulationExceededMaximumTimeException
@@ -135,7 +135,7 @@ public class AtlasPauseWalkingTest extends AvatarPauseWalkingTest
       super.testPauseWalkingInitialTransfer();
    }
 
-   @Tag("allocation")
+   @Tag("allocation-slow")
    @Test
    @Override
    public void testPauseWalkingForwardInitialTransfer() throws SimulationExceededMaximumTimeException

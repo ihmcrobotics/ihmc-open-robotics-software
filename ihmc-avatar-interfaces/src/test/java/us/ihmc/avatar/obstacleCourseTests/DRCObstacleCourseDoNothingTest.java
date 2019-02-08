@@ -6,6 +6,7 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeEach;
 
+import org.junit.jupiter.api.Tag;
 import us.ihmc.avatar.DRCObstacleCourseStartingLocation;
 import us.ihmc.avatar.MultiRobotTestInterface;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
@@ -20,6 +21,7 @@ import us.ihmc.simulationconstructionset.util.simulationTesting.SimulationTestin
 import us.ihmc.tools.MemoryTools;
 import us.ihmc.commons.thread.ThreadTools;
 
+@Tag("humanoid-do-nothing")
 public abstract class DRCObstacleCourseDoNothingTest implements MultiRobotTestInterface
 {
    private SimulationTestingParameters simulationTestingParameters;

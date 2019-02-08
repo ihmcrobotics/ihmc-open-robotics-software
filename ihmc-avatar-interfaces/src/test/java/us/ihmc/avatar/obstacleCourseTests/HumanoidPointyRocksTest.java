@@ -67,6 +67,7 @@ import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoFrameConvexPolygon2D;
 
+@Tag("humanoid-obstacle")
 public abstract class HumanoidPointyRocksTest implements MultiRobotTestInterface
 {
    private final static double defaultSwingTime = 0.6;

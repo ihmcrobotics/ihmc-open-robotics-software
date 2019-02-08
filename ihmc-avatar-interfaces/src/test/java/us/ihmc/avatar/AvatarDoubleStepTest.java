@@ -27,6 +27,7 @@ import us.ihmc.yoVariables.variable.YoEnum;
 
 import static us.ihmc.robotics.Assert.*;
 
+@Tag("humanoid-flat-ground")
 public abstract class AvatarDoubleStepTest implements MultiRobotTestInterface
 {
    private SimulationTestingParameters simulationTestingParameters = SimulationTestingParameters.createFromSystemProperties();
@@ -87,7 +88,7 @@ public abstract class AvatarDoubleStepTest implements MultiRobotTestInterface
       assertTrue(drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(9.0));
    }
 
-   @Tag("allocation")
+   @Tag("allocation-slow")
    @Test
    public void testTwoStepsInARowSameSideAfterFirstSep() throws SimulationExceededMaximumTimeException
    {
@@ -121,7 +122,7 @@ public abstract class AvatarDoubleStepTest implements MultiRobotTestInterface
    }
 
 
-   @Tag("allocation")
+   @Tag("allocation-slow")
    @Test
    public void testTwoStepsInARowLongTransferSameSide() throws SimulationExceededMaximumTimeException
    {

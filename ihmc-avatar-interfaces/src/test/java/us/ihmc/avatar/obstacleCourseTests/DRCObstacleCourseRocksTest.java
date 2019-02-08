@@ -24,6 +24,7 @@ import us.ihmc.simulationconstructionset.util.simulationTesting.SimulationTestin
 import us.ihmc.tools.MemoryTools;
 import us.ihmc.commons.thread.ThreadTools;
 
+@Tag("humanoid-obstacle")
 public abstract class DRCObstacleCourseRocksTest implements MultiRobotTestInterface
 {
    private static final SimulationTestingParameters simulationTestingParameters = SimulationTestingParameters.createFromSystemProperties();

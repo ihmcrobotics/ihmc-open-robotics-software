@@ -52,6 +52,7 @@ import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulatio
 import us.ihmc.simulationconstructionset.util.simulationTesting.SimulationTestingParameters;
 import us.ihmc.tools.MemoryTools;
 
+@Tag("humanoid-obstacle")
 public abstract class DRCObstacleCourseRampFootstepSnapperTest implements MultiRobotTestInterface
 {
    private final SimulationTestingParameters simulationTestingParameters = SimulationTestingParameters.createFromSystemProperties();
