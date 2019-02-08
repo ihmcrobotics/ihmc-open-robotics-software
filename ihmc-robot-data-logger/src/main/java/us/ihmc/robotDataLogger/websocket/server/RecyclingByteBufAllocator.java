@@ -17,7 +17,7 @@ import io.netty.buffer.ByteBufAllocator;
  * @author Jesper Smith
  *
  */
-class CustomGCAvoidingByteBufAllocator extends AbstractByteBufAllocator
+class RecyclingByteBufAllocator extends AbstractByteBufAllocator
 {
    private final static int INITIAL_MAX_CAPACITY = 2048;
    private final static int POOL_SIZE = 128;
@@ -30,7 +30,7 @@ class CustomGCAvoidingByteBufAllocator extends AbstractByteBufAllocator
 
    private final ByteBufAllocator backupAllocator;
 
-   public CustomGCAvoidingByteBufAllocator(ByteBufAllocator backupAllocator)
+   public RecyclingByteBufAllocator(ByteBufAllocator backupAllocator)
    {
       super(true);
       refill(INITIAL_MAX_CAPACITY);

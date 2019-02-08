@@ -9,7 +9,7 @@ import io.netty.buffer.UnpooledUnsafeDirectByteBuf;
  * 
  * Netty ByteBuf that allows changing the internal capacity without re-allocating the bytebuffer.
  * 
- * Used by the {@link CustomGCAvoidingByteBufAllocator}
+ * Used by the {@link RecyclingByteBufAllocator}
  * 
  * @author Jesper Smith
  *
