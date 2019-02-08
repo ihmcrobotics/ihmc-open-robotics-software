@@ -4,6 +4,7 @@ import java.util.Random;
 
 import controller_msgs.msg.dds.ArmTrajectoryMessage;
 import controller_msgs.msg.dds.ChestTrajectoryMessage;
+import controller_msgs.msg.dds.PelvisTrajectoryMessage;
 import us.ihmc.commons.RandomNumbers;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameQuaternion;
@@ -55,8 +56,8 @@ public class AvatarRandomTestMessages
       return HumanoidMessageTools.createChestTrajectoryMessage(trajectoryTime, desiredOrientation, trajectoryFrame);
    }
 
-   public static Object nextPelvisTrajectoryMessage(Random random, double trajectoryTime, FullHumanoidRobotModel robot, double maxTranslation,
-                                                    double maxRotation)
+   public static PelvisTrajectoryMessage nextPelvisTrajectoryMessage(Random random, double trajectoryTime, FullHumanoidRobotModel robot, double maxTranslation,
+                                                                     double maxRotation)
    {
       MovingReferenceFrame pelvisFrame = robot.getPelvis().getBodyFixedFrame();
 

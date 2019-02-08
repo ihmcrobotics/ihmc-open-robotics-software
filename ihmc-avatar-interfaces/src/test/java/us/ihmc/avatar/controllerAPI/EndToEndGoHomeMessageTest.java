@@ -116,7 +116,7 @@ public abstract class EndToEndGoHomeMessageTest implements MultiRobotTestInterfa
       FrameQuaternion pelvisHomeOrientation = new FrameQuaternion(testHelper.getReferenceFrames().getMidFeetZUpFrame());
       AvatarCommonAsserts.assertDesiredPelvisOrientation(pelvisHomeOrientation, robot, scs, 1.0e-3);
       AvatarCommonAsserts.assertDesiredPelvisAngularVelocityZero(robot, scs, 1.0e-6);
-      AvatarCommonAsserts.assertPelvisHeightOffsetZero(scs, 1.0e-10);
+      AvatarCommonAsserts.assertDesiredPelvisHeightOffsetZero(scs, 1.0e-10);
       AvatarCommonAsserts.assertDesiredICPOffsetZero(scs, 1.0e-3);
    }
 

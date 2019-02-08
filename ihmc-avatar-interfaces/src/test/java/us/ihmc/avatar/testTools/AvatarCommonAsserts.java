@@ -179,7 +179,7 @@ public class AvatarCommonAsserts
       EuclidCoreTestTools.assertTuple2DEquals(new Vector2D(), desiredICPOffset, epsilon);
    }
 
-   public static void assertPelvisHeightOffsetZero(YoVariableHolder scs, double epsilon)
+   public static void assertDesiredPelvisHeightOffsetZero(YoVariableHolder scs, double epsilon)
    {
       String namespace = LookAheadCoMHeightTrajectoryGenerator.class.getSimpleName();
       double offset = getDoubleYoVariable(scs, "offsetHeightAboveGroundTrajectoryOutput", namespace).getValue();
