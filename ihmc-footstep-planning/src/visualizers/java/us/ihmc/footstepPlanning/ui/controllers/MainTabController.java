@@ -8,34 +8,41 @@ import static us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI.
 import static us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI.StartOrientationTopic;
 import static us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI.StartPositionTopic;
 
-import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 
 import controller_msgs.msg.dds.FootstepDataListMessage;
-import javafx.animation.AnimationTimer;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
-import javafx.scene.control.*;
+import javafx.scene.control.Button;
+import javafx.scene.control.CheckBox;
+import javafx.scene.control.ComboBox;
+import javafx.scene.control.Spinner;
+import javafx.scene.control.SpinnerValueFactory;
 import javafx.scene.control.SpinnerValueFactory.DoubleSpinnerValueFactory;
+import javafx.scene.control.TextField;
 import us.ihmc.commons.PrintTools;
 import us.ihmc.communication.packets.ExecutionMode;
+import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
+import us.ihmc.footstepPlanning.FootstepDataMessageConverter;
 import us.ihmc.footstepPlanning.FootstepPlan;
 import us.ihmc.footstepPlanning.FootstepPlannerType;
 import us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI;
-import us.ihmc.footstepPlanning.FootstepDataMessageConverter;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.javaFXToolkit.messager.JavaFXMessager;
 import us.ihmc.javaFXToolkit.messager.MessageBidirectionalBinding.PropertyToMessageTypeConverter;
-import us.ihmc.mecano.frames.MovingReferenceFrame;
 import us.ihmc.messager.TopicListener;
 import us.ihmc.pathPlanning.visibilityGraphs.ui.properties.Point3DProperty;
 import us.ihmc.pathPlanning.visibilityGraphs.ui.properties.YawProperty;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
+import us.ihmc.robotics.geometry.PlanarRegion;
+import us.ihmc.robotics.geometry.PlanarRegionsList;
+import us.ihmc.robotics.robotSide.RobotSide;
 
 public class MainTabController
 {
@@ -68,14 +75,14 @@ public class MainTabController
 
    // goal placement
    @FXML
-   private ToggleButton placeStart;
+   private Button placeStart;
    @FXML
-   private ToggleButton placeGoal;
+   private Button placeGoal;
 
    @FXML
-   private ToggleButton rotateStart;
+   private Button computePath;
    @FXML
-   private ToggleButton rotateGoal;
+   private Button abortPlanning;
 
    @FXML
    private Spinner<Double> startXPosition;
@@ -89,6 +96,8 @@ public class MainTabController
    private Spinner<Double> goalYPosition;
    @FXML
    private Spinner<Double> goalZPosition;
+   @FXML
+   private ComboBox<RobotSide> initialSupportSide;
 
    @FXML
    private Spinner<Double> startYaw;
@@ -134,6 +143,28 @@ public class MainTabController
       messager.submitMessage(FootstepPlannerMessagerAPI.FootstepDataListTopic, footstepDataListMessage);
    }
 
+   @FXML
+   public void clearFlat()
+   {
+      acceptNewRegions.setSelected(false);
+      assumeFlatGround.setSelected(true);
+      messager.submitMessage(FootstepPlannerMessagerAPI.PlanarRegionDataTopic, buildFlatGround());
+   }
+
+   private PlanarRegionsList buildFlatGround()
+   {
+      humanoidReferenceFrames.updateFrames();
+      RigidBodyTransform transformToWorld = humanoidReferenceFrames.getMidFeetZUpFrame().getTransformToWorldFrame();
+      ConvexPolygon2D convexPolygon = new ConvexPolygon2D();
+      convexPolygon.addVertex(10.0, 10.0);
+      convexPolygon.addVertex(-10.0, 10.0);
+      convexPolygon.addVertex(-10.0, -10.0);
+      convexPolygon.addVertex(10.0, -10.0);
+      convexPolygon.update();
+      PlanarRegion groundPlane = new PlanarRegion(transformToWorld, convexPolygon);
+      return new PlanarRegionsList(groundPlane);
+   }
+
    private JavaFXMessager messager;
 
    private AtomicReference<Integer> currentPlannerRequestId;
@@ -176,6 +207,9 @@ public class MainTabController
 
       timeout.setValueFactory(createTimeoutValueFactory());
       horizonLength.setValueFactory(createHorizonValueFactory());
+
+      initialSupportSide.setItems(FXCollections.observableArrayList(RobotSide.values));
+      initialSupportSide.setValue(RobotSide.LEFT);
    }
 
    public void bindControls()
@@ -198,27 +232,14 @@ public class MainTabController
                                  true);
 
       // set goal
-      messager.bindBidirectional(FootstepPlannerMessagerAPI.StartPositionEditModeEnabledTopic, placeStart.selectedProperty(), false);
-      messager.bindBidirectional(FootstepPlannerMessagerAPI.GoalPositionEditModeEnabledTopic, placeGoal.selectedProperty(), false);
-      messager.bindBidirectional(FootstepPlannerMessagerAPI.StartOrientationEditModeEnabledTopic, rotateStart.selectedProperty(), false);
-      messager.bindBidirectional(FootstepPlannerMessagerAPI.GoalOrientationEditModeEnabledTopic, rotateGoal.selectedProperty(), false);
+      messager.bindPropertyToTopic(FootstepPlannerMessagerAPI.EditModeEnabledTopic, placeStart.disableProperty());
+      messager.bindPropertyToTopic(FootstepPlannerMessagerAPI.EditModeEnabledTopic, placeGoal.disableProperty());
+      messager.bindPropertyToTopic(FootstepPlannerMessagerAPI.EditModeEnabledTopic, computePath.disableProperty());
+      messager.bindPropertyToTopic(FootstepPlannerMessagerAPI.EditModeEnabledTopic, abortPlanning.disableProperty());
 
-      messager.bindPropertyToTopic(FootstepPlannerMessagerAPI.GoalPositionEditModeEnabledTopic, placeStart.disableProperty());
-      messager.bindPropertyToTopic(FootstepPlannerMessagerAPI.StartOrientationEditModeEnabledTopic, placeStart.disableProperty());
-      messager.bindPropertyToTopic(FootstepPlannerMessagerAPI.GoalOrientationEditModeEnabledTopic, placeStart.disableProperty());
-
-      messager.bindPropertyToTopic(FootstepPlannerMessagerAPI.StartPositionEditModeEnabledTopic, placeGoal.disableProperty());
-      messager.bindPropertyToTopic(FootstepPlannerMessagerAPI.StartOrientationEditModeEnabledTopic, placeGoal.disableProperty());
-      messager.bindPropertyToTopic(FootstepPlannerMessagerAPI.GoalOrientationEditModeEnabledTopic, placeGoal.disableProperty());
-
-      messager.bindPropertyToTopic(FootstepPlannerMessagerAPI.StartPositionEditModeEnabledTopic, rotateStart.disableProperty());
-      messager.bindPropertyToTopic(FootstepPlannerMessagerAPI.GoalPositionEditModeEnabledTopic, rotateStart.disableProperty());
-      messager.bindPropertyToTopic(FootstepPlannerMessagerAPI.GoalOrientationEditModeEnabledTopic, rotateStart.disableProperty());
-
-      messager.bindPropertyToTopic(FootstepPlannerMessagerAPI.StartPositionEditModeEnabledTopic, rotateGoal.disableProperty());
-      messager.bindPropertyToTopic(FootstepPlannerMessagerAPI.GoalPositionEditModeEnabledTopic, rotateGoal.disableProperty());
-      messager.bindPropertyToTopic(FootstepPlannerMessagerAPI.StartOrientationEditModeEnabledTopic, rotateGoal.disableProperty());
       messager.bindBidirectional(FootstepPlannerMessagerAPI.AssumeFlatGround, assumeFlatGround.selectedProperty(), false);
+
+      messager.bindBidirectional(FootstepPlannerMessagerAPI.InitialSupportSideTopic, initialSupportSide.valueProperty(), true);
 
       startPositionProperty.bindBidirectionalX(startXPosition.getValueFactory().valueProperty());
       startPositionProperty.bindBidirectionalY(startYPosition.getValueFactory().valueProperty());
@@ -242,20 +263,27 @@ public class MainTabController
       messager.registerTopicListener(GlobalResetTopic, reset -> clearStartGoalTextFields());
    }
 
+   @FXML
+   public void placeStart()
+   {
+      messager.submitMessage(FootstepPlannerMessagerAPI.StartPositionEditModeEnabledTopic, true);
+      messager.submitMessage(FootstepPlannerMessagerAPI.EditModeEnabledTopic, true);
+   }
+
+   @FXML
+   public void placeGoal()
+   {
+      messager.submitMessage(FootstepPlannerMessagerAPI.GoalPositionEditModeEnabledTopic, true);
+      messager.submitMessage(FootstepPlannerMessagerAPI.EditModeEnabledTopic, true);
+   }
+
    private void setStartFromRobot()
    {
       humanoidReferenceFrames.updateFrames();
-      MovingReferenceFrame midFeetZUpFrame = humanoidReferenceFrames.getMidFeetZUpFrame();
-      FramePose3D startPose = new FramePose3D();
-      startPose.setToZero(midFeetZUpFrame);
+      FramePose3D startPose = new FramePose3D(humanoidReferenceFrames.getSoleFrame(initialSupportSide.getValue()));
       startPose.changeFrame(ReferenceFrame.getWorldFrame());
-
-      double x = startPose.getX();
-      double y = startPose.getY();
-      double yaw = startPose.getYaw();
-
-      startPositionProperty.set(new Point3D(x, y, startPositionProperty.get().getZ()));
-      startRotationProperty.set(new Quaternion(yaw, 0.0, 0.0));
+      startPositionProperty.set(new Point3D(startPose.getPosition()));
+      startRotationProperty.set(new Quaternion(startPose.getYaw(), 0.0, 0.0));
    }
 
    public void setFullRobotModel(FullHumanoidRobotModel fullHumanoidRobotModel)
@@ -338,6 +366,7 @@ public class MainTabController
          this.textField = textField;
       }
 
+      @Override
       public void receivedMessageForTopic(T messageContent)
       {
          if (messageContent != null)

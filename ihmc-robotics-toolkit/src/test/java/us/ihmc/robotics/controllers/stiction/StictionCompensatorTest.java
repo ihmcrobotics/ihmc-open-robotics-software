@@ -1,11 +1,10 @@
 package us.ihmc.robotics.controllers.stiction;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import us.ihmc.commons.MathTools;
 import us.ihmc.commons.RandomNumbers;
-import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationPlan;
-import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
-import us.ihmc.continuousIntegration.IntegrationCategory;
+import org.junit.jupiter.api.Tag;
+import org.junit.jupiter.api.Disabled;
 import us.ihmc.robotics.controllers.stiction.StictionCompensator.StictionActionMode;
 import us.ihmc.yoVariables.parameters.DefaultParameterReader;
 import us.ihmc.yoVariables.parameters.XmlParameterReader;
@@ -19,15 +18,13 @@ import static us.ihmc.robotics.Assert.*;
 
 import static us.ihmc.robotics.controllers.stiction.StictionCompensator.StictionActionMode.Moving;
 
-@ContinuousIntegrationPlan(categories = {IntegrationCategory.FAST})
 public class StictionCompensatorTest
 {
    private static final int iters = 100;
    private static final double epsilon = 1e-8;
    private static final double controlDT = 1e-2;
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(timeout = 30000)
+   @Test
    public void testSetDesiredTorque()
    {
       YoVariableRegistry registry = new YoVariableRegistry("test");
@@ -46,8 +43,7 @@ public class StictionCompensatorTest
       }
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(timeout = 30000)
+   @Test
    public void testResetStictionCompensation()
    {
       YoVariableRegistry registry = new YoVariableRegistry("test");
@@ -75,8 +71,7 @@ public class StictionCompensatorTest
       }
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(timeout = 30000)
+   @Test
    public void testComputeStictionCompensation()
    {
       YoVariableRegistry registry = new YoVariableRegistry("test");
@@ -139,8 +134,7 @@ public class StictionCompensatorTest
       }
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(timeout = 30000)
+   @Test
    public void testActionForwardMode()
    {
       YoVariableRegistry registry = new YoVariableRegistry("test");
@@ -201,8 +195,7 @@ public class StictionCompensatorTest
       assertEquals(currentExpectedMode, actionMode.getEnumValue());
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(timeout = 30000)
+   @Test
    public void testActionBackwardMode()
    {
       YoVariableRegistry registry = new YoVariableRegistry("test");

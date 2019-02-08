@@ -1,8 +1,9 @@
 package us.ihmc.footstepPlanning.flatGroundPlanning;
 
-import org.junit.After;
-import org.junit.Test;
-import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Tag;
+import org.junit.jupiter.api.Disabled;
 import us.ihmc.euclid.referenceFrame.FramePose2D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
@@ -27,14 +28,13 @@ public abstract class FootstepPlannerOnFlatGroundTest implements PlanningTest
 
    public abstract boolean assertPlannerReturnedResult();
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(timeout = 30000)
+   @Test
    public void testJustStraightLine()
    {
       runJustStraightLine(assertPlannerReturnedResult());
    }
 
-   @After
+   @AfterEach
    public void tearDown()
    {
       ReferenceFrameTools.clearWorldFrameTree();
@@ -66,8 +66,7 @@ public abstract class FootstepPlannerOnFlatGroundTest implements PlanningTest
       if (assertPlannerReturnedResult) assertTrue(PlannerTools.isGoalNextToLastStep(goalPose3d, footstepPlan));
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.2)
-   @Test(timeout = 30000)
+   @Test
    public void testATightTurn()
    {
       boolean assertPlannerReturnedResult = assertPlannerReturnedResult();
@@ -96,8 +95,7 @@ public abstract class FootstepPlannerOnFlatGroundTest implements PlanningTest
          PlanningTestTools.visualizeAndSleep(null, footstepPlan, goalPose3d);
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.1)
-   @Test(timeout = 30000)
+   @Test
    public void testStraightLineWithInitialTurn()
    {
       boolean assertPlannerReturnedResult = assertPlannerReturnedResult();
@@ -151,8 +149,7 @@ public abstract class FootstepPlannerOnFlatGroundTest implements PlanningTest
    }
 
 
-   @ContinuousIntegrationTest(estimatedDuration = 2.0)
-   @Test(timeout = 30000)
+   @Test
    public void testRandomPoses()
    {
       boolean assertPlannerReturnedResult = assertPlannerReturnedResult();

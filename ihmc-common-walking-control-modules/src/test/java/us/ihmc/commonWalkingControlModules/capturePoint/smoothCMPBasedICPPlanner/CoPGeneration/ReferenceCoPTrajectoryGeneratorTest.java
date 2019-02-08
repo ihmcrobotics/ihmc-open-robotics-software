@@ -5,19 +5,18 @@ import static us.ihmc.robotics.Assert.*;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.junit.After;
+import org.junit.jupiter.api.AfterEach;
 import us.ihmc.robotics.Assert;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.BipedSupportPolygons;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.ListOfPointsContactableFoot;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.YoPlaneContactState;
 import us.ihmc.commonWalkingControlModules.configurations.CoPPointName;
 import us.ihmc.commonWalkingControlModules.configurations.SmoothCMPPlannerParameters;
-import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationPlan;
-import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
-import us.ihmc.continuousIntegration.IntegrationCategory;
+import org.junit.jupiter.api.Tag;
+import org.junit.jupiter.api.Disabled;
 import us.ihmc.euclid.geometry.LineSegment2D;
 import us.ihmc.euclid.referenceFrame.FramePoint2D;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
@@ -44,7 +43,6 @@ import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoInteger;
 
-@ContinuousIntegrationPlan(categories = {IntegrationCategory.FAST})
 public class ReferenceCoPTrajectoryGeneratorTest
 {
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
@@ -81,7 +79,7 @@ public class ReferenceCoPTrajectoryGeneratorTest
    private final ArrayList<YoDouble> transferSplitFractions = new ArrayList<>();
    private final ArrayList<FootstepData> upcomingFootstepsData = new ArrayList<>();
 
-   @Before
+   @BeforeEach
    public void setUp()
    {
       for (RobotSide side : RobotSide.values)
@@ -152,7 +150,7 @@ public class ReferenceCoPTrajectoryGeneratorTest
       assertTrue("Object not initialized", testCoPGenerator != null);
    }
 
-   @After
+   @AfterEach
    public void clearAllVariables()
    {
       parentRegistry.clear();
@@ -187,8 +185,7 @@ public class ReferenceCoPTrajectoryGeneratorTest
       numberOfUpcomingFootsteps.set(upcomingFootstepsData.size());
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.3)
-   @Test(timeout = 30000)
+   @Test
    public void testDoubleSupportFootstepPlanFromRest()
    {
       int numberOfFootsteps = 3;
@@ -279,8 +276,7 @@ public class ReferenceCoPTrajectoryGeneratorTest
       assertTrue("Planned footsteps not removed", testCoPGenerator.getNumberOfFootstepsRegistered() == 0);
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.3)
-   @Test(timeout = 30000)
+   @Test
    public void testDoubleSupportFootstepPlanMoving()
    {
       sendFootStepMessages(10);
@@ -365,8 +361,7 @@ public class ReferenceCoPTrajectoryGeneratorTest
       }
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.4)
-   @Test(timeout = 30000)
+   @Test
    public void testSingleSupportFootstepPlan()
    {
       int numberOfFootsteps = 10;

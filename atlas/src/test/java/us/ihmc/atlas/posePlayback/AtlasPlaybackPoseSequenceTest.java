@@ -1,13 +1,14 @@
 package us.ihmc.atlas.posePlayback;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import us.ihmc.atlas.AtlasRobotModel;
 import us.ihmc.atlas.AtlasRobotVersion;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.RobotTarget;
 import us.ihmc.avatar.posePlayback.PlaybackPoseSequenceDRCTest;
-import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
+import org.junit.jupiter.api.Tag;
+import org.junit.jupiter.api.Disabled;
 import us.ihmc.simulationConstructionSetTools.bambooTools.BambooTools;
 
 public class AtlasPlaybackPoseSequenceTest extends PlaybackPoseSequenceDRCTest
@@ -26,8 +27,7 @@ public class AtlasPlaybackPoseSequenceTest extends PlaybackPoseSequenceDRCTest
    }
 
    @Override
-   @ContinuousIntegrationTest(estimatedDuration = 0.1)
-   @Test(timeout = 30000)
+   @Test
    public void testReadAndWriteWithRandomSequence()
    {
       super.testReadAndWriteWithRandomSequence();

@@ -5,11 +5,12 @@ import static us.ihmc.robotics.Assert.*;
 import java.io.IOException;
 import java.util.Random;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import us.ihmc.commons.RandomNumbers;
 import us.ihmc.communication.util.NetworkPorts;
-import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
+import org.junit.jupiter.api.Tag;
+import org.junit.jupiter.api.Disabled;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
@@ -17,8 +18,7 @@ import us.ihmc.yoVariables.variable.YoInteger;
 
 public class CoactiveElementYoWhiteBoardSynchronizerTest
 {
-   @ContinuousIntegrationTest(estimatedDuration = 0.1)
-   @Test(timeout = 30000)
+   @Test
    public void testCoactiveElementTCPYoWhiteBoardSynchronizer() throws IOException, InterruptedException
    {
       int port = NetworkPorts.COACTIVE_ELEMENTS_PORT.getPort();

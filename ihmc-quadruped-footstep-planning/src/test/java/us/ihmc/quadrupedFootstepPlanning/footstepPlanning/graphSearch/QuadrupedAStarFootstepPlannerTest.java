@@ -1,9 +1,10 @@
 package us.ihmc.quadrupedFootstepPlanning.footstepPlanning.graphSearch;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import us.ihmc.commons.thread.ThreadTools;
-import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
-import us.ihmc.continuousIntegration.ContinuousIntegrationTools;
+import org.junit.jupiter.api.Tag;
+import org.junit.jupiter.api.Disabled;
+import us.ihmc.commons.ContinuousIntegrationTools;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.tools.EuclidCoreTestTools;
 import us.ihmc.euclid.tuple3D.Point3D;
@@ -37,8 +38,9 @@ import us.ihmc.yoVariables.registry.YoVariableRegistry;
 
 import java.util.List;
 
-import static junit.framework.TestCase.assertTrue;
-import static org.junit.Assert.assertEquals;
+import static us.ihmc.robotics.Assert.*;
+
+import static us.ihmc.robotics.Assert.*;
 
 public class QuadrupedAStarFootstepPlannerTest
 {
@@ -49,8 +51,7 @@ public class QuadrupedAStarFootstepPlannerTest
 
    private static final QuadrantDependentList<AppearanceDefinition> colorDefinitions = new QuadrantDependentList<>(YoAppearance.Red(), YoAppearance.Green(), YoAppearance.DarkRed(), YoAppearance.DarkGreen());
 
-   @ContinuousIntegrationTest(estimatedDuration = 120)
-   @Test(timeout = timeout)
+   @Test
    public void testSimpleWalkForward()
    {
       YoVariableRegistry registry = new YoVariableRegistry("test");
@@ -99,8 +100,7 @@ public class QuadrupedAStarFootstepPlannerTest
       assertPlanIsValid(steps, goalPose.getPosition(), goalPose.getYaw());
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 120)
-   @Test(timeout = timeout)
+   @Test
    public void testWalkAndTurn()
    {
       YoVariableRegistry registry = new YoVariableRegistry("test");
@@ -150,8 +150,7 @@ public class QuadrupedAStarFootstepPlannerTest
       assertPlanIsValid(steps, goalPose.getPosition(), goalPose.getYaw());
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 120)
-   @Test(timeout = timeout)
+   @Test
    public void testSimpleForwardPoint()
    {
       YoVariableRegistry registry = new YoVariableRegistry("test");

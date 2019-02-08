@@ -1,17 +1,15 @@
 package us.ihmc.avatar.networkProcessor.footstepPlanningToolboxModule;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import us.ihmc.commons.PrintTools;
 import us.ihmc.commons.thread.ThreadTools;
-import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations;
-import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
-import us.ihmc.continuousIntegration.IntegrationCategory;
+import org.junit.jupiter.api.Tag;
+import org.junit.jupiter.api.Disabled;
 import us.ihmc.footstepPlanning.FootstepPlannerType;
 import us.ihmc.pubsub.DomainFactory;
 
 import static us.ihmc.footstepPlanning.testTools.PlannerTestEnvironments.*;
 
-@ContinuousIntegrationAnnotations.ContinuousIntegrationPlan(categories = IntegrationCategory.FAST)
 public class VisGraphWithAStarRoughTerrainToolboxTest extends RoughTerrainDataSetTest
 {
    @Override
@@ -21,8 +19,7 @@ public class VisGraphWithAStarRoughTerrainToolboxTest extends RoughTerrainDataSe
    }
 
    @Override
-   @ContinuousIntegrationTest(estimatedDuration = 2.5)
-   @Test(timeout = 1000000)
+   @Test
    public void testDownCorridor()
    {
       setCheckForBodyBoxCollision(true);
@@ -30,8 +27,7 @@ public class VisGraphWithAStarRoughTerrainToolboxTest extends RoughTerrainDataSe
    }
 
    @Override
-   @ContinuousIntegrationTest(estimatedDuration = 2.5)
-   @Test(timeout = 1000000)
+   @Test
    public void testBetweenTwoBollards()
    {
       setCheckForBodyBoxCollision(true);

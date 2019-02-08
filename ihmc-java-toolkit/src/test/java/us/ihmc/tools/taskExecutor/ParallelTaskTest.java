@@ -2,15 +2,14 @@ package us.ihmc.tools.taskExecutor;
 
 import static us.ihmc.robotics.Assert.*;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
-import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
-
+import org.junit.jupiter.api.Tag;
+import org.junit.jupiter.api.Disabled;
 public class ParallelTaskTest
 {
 
-	@ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(timeout = 30000)
+   @Test
    public void testOneSerialTask()
    {
       TaskExecutor taskExecutor = new TaskExecutor();
@@ -47,8 +46,7 @@ public class ParallelTaskTest
 
    }
 
-	@ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(timeout = 30000)
+   @Test
    public void testTwoSerialTasks()
    {
       TaskExecutor taskExecutor = new TaskExecutor();
@@ -103,8 +101,7 @@ public class ParallelTaskTest
 
    }
 
-	@ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(timeout = 30000)
+   @Test
    public void testTwoParallelTasks()
    {
       TaskExecutor taskExecutor = new TaskExecutor();
@@ -153,8 +150,7 @@ public class ParallelTaskTest
       assertTrue(exampleTaskB0.checkNumberOfCalls(1, 3, 1));
    }
 
-	@ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(timeout = 30000)
+   @Test
    public void testABunchOfParallelAndSeriesTasks()
    {
       TaskExecutor taskExecutor = new TaskExecutor();
