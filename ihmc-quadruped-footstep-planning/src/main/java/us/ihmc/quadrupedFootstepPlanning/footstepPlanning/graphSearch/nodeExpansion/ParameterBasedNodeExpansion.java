@@ -59,11 +59,12 @@ public class ParameterBasedNodeExpansion implements FootstepNodeExpansion
 
    private void addDefaultFootsteps(FootstepNode node, HashSet<FootstepNode> neighboringNodesToPack)
    {
-      Orientation3DReadOnly nodeOrientation = new AxisAngle(node.getYaw(), 0.0, 0.0);
+      Point2DReadOnly xGaitCenterPoint = node.getOrComputeXGaitCenterPoint();
+      double previousYaw = node.getYaw();
+      Orientation3DReadOnly nodeOrientation = new AxisAngle(previousYaw, 0.0, 0.0);
 
       Vector2D clearanceVector = new Vector2D(parameters.getMinXClearanceFromFoot(), parameters.getMinYClearanceFromFoot());
       nodeOrientation.transform(clearanceVector);
-
 
       for (double movingX = parameters.getMinimumStepLength(); movingX < parameters.getMaximumStepReach(); movingX += FootstepNode.gridSizeXY)
       {
@@ -72,15 +73,17 @@ public class ParameterBasedNodeExpansion implements FootstepNodeExpansion
             Vector2D movingVector = new Vector2D(movingX, movingY);
             nodeOrientation.transform(movingVector);
 
-            Point2D newXGaitPosition = new Point2D(node.getOrComputeXGaitCenterPoint());
+            Point2D newXGaitPosition = new Point2D(xGaitCenterPoint);
             newXGaitPosition.add(movingVector);
 
             for (double yawChange = parameters.getMinimumStepYaw(); yawChange < parameters.getMaximumStepYaw(); yawChange += FootstepNode.gridSizeYaw)
             {
-               Vector2D footOffset = new Vector2D(xGaitSettings.getStanceLength(), xGaitSettings.getStanceWidth());
+               RobotQuadrant nextQuadrant = node.getMovingQuadrant().getNextRegularGaitSwingQuadrant();
+               Vector2D footOffset = new Vector2D(nextQuadrant.getEnd().negateIfHindEnd(xGaitSettings.getStanceLength()),
+                                                  nextQuadrant.getSide().negateIfRightSide(xGaitSettings.getStanceWidth()));
                footOffset.scale(0.5);
 
-               double newYaw = node.getYaw() + yawChange;
+               double newYaw = previousYaw + yawChange;
                Orientation3DReadOnly newOrientation =  new AxisAngle(newYaw, 0.0, 0.0);
                newOrientation.transform(footOffset);
 
@@ -94,8 +97,8 @@ public class ParameterBasedNodeExpansion implements FootstepNodeExpansion
 
                FootstepNode offsetNode = constructNodeInPreviousNodeFrame(newNodePosition, newYaw, node, xGaitSettings);
 
-               if (offsetNode.geometricallyEquals(node))
-                  throw new RuntimeException("This shouldn't be created.");
+//               if (offsetNode.geometricallyEquals(node))
+//                  throw new RuntimeException("This shouldn't be created.");
 
                neighboringNodesToPack.add(offsetNode);
             }
