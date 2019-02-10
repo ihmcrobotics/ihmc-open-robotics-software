@@ -38,7 +38,7 @@ import static us.ihmc.robotics.Assert.*;
 public class ParameterBasedNodeExpansionTest
 {
    private static final int iters = 1000;
-   private static final RobotQuadrant quadrantToCheck = RobotQuadrant.FRONT_LEFT;
+   private static final RobotQuadrant quadrantToCheck = RobotQuadrant.HIND_LEFT;
 
    private static final double epsilon = 1e-7;
 
@@ -235,7 +235,8 @@ public class ParameterBasedNodeExpansionTest
       for (FootstepNode neighboringNode : neighboringNodes)
       {
          RobotQuadrant quadrant = neighboringNode.getMovingQuadrant();
-         Point3D point = new Point3D(neighboringNode.getX(quadrant), neighboringNode.getY(quadrant), 0.0);
+         double height = 0.05 * neighboringNode.getYaw() / FootstepNode.gridSizeYaw;
+         Point3D point = new Point3D(neighboringNode.getX(quadrant), neighboringNode.getY(quadrant), height);
 
          graphics3DObject.identity();
          graphics3DObject.translate(point);
