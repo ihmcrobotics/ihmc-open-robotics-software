@@ -3,11 +3,10 @@ package us.ihmc.quadrupedFootstepPlanning.footstepPlanning;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
+import org.junit.jupiter.api.Disabled;
+import us.ihmc.commons.ContinuousIntegrationTools;
 import us.ihmc.commons.MathTools;
 import us.ihmc.commons.thread.ThreadTools;
-import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
-import us.ihmc.continuousIntegration.ContinuousIntegrationTools;
-import us.ihmc.continuousIntegration.IntegrationCategory;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DBasics;
@@ -66,16 +65,15 @@ public abstract class FootstepPlannerDataSetTest
       planner = null;
    }
 
-   @Test(timeout = 500000)
-   @ContinuousIntegrationTest(estimatedDuration = 13.0)
+   @Test
    public void testDatasetsWithoutOcclusion()
    {
       List<FootstepPlannerUnitTestDataset> allDatasets = FootstepPlannerIOTools.loadAllFootstepPlannerDatasetsWithoutOcclusions(FootstepPlannerIOTools.class);
       runAssertionsOnAllDatasets(this::runAssertions, allDatasets);
    }
 
-   @Test(timeout = 500000)
-   @ContinuousIntegrationTest(estimatedDuration = 13.0, categoriesOverride = IntegrationCategory.IN_DEVELOPMENT)
+   @Disabled
+   @Test
    public void testDatasetsWithoutOcclusionInDevelopment()
    {
       List<FootstepPlannerUnitTestDataset> allDatasets = FootstepPlannerIOTools
