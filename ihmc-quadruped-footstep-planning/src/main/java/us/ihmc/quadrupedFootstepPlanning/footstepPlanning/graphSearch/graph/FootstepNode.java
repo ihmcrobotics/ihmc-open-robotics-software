@@ -31,6 +31,7 @@ public class FootstepNode
    private final QuadrantDependentList<Double> xPositions = new QuadrantDependentList<>();
    private final QuadrantDependentList<Double> yPositions = new QuadrantDependentList<>();
    private final double yaw;
+   private final double nominalYaw;
 
    private final double nominalStanceLength;
    private final double nominalStanceWidth;
@@ -110,6 +111,9 @@ public class FootstepNode
       yPositions.put(RobotQuadrant.HIND_RIGHT,  gridSizeXY * yHindRightIndex);
 
       this.yaw = gridSizeYaw * yawIndex;
+      this.nominalYaw = computeNominalYaw(gridSizeXY * xFrontLeftIndex, gridSizeXY * yFrontLeftIndex, gridSizeXY * xFrontRightIndex,
+                                          gridSizeXY * yFrontRightIndex, gridSizeXY * xHindLeftIndex, gridSizeXY * yHindLeftIndex,
+                                          gridSizeXY * xHindRightIndex, gridSizeXY * yHindRightIndex);
 
       hashCode = computeHashCode(this);
       planarRegionsHashCode = computePlanarRegionsHashCode(this);
@@ -133,6 +137,11 @@ public class FootstepNode
    public double getYaw()
    {
       return yaw;
+   }
+
+   public double getNominalYaw()
+   {
+      return nominalYaw;
    }
 
    public double getNominalStanceLength()
@@ -238,15 +247,9 @@ public class FootstepNode
       final int prime = 31;
       int result = 1;
       result = prime * result + ((node.movingQuadrant == null) ? 0 : node.movingQuadrant.hashCode());
-      /*
-      for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
-      {
-         result = prime * result + node.getXIndex(robotQuadrant);
-         result = prime * result + node.getYIndex(robotQuadrant);
-      }
-      */
       result = prime * result + node.getXIndex(node.movingQuadrant);
       result = prime * result + node.getYIndex(node.movingQuadrant);
+      result = prime * result + node.yawIndex;
       return result;
    }
 
@@ -358,6 +361,7 @@ public class FootstepNode
    {
       String string = "Node: ";
       string += "\n\t moving quadrant = " + movingQuadrant;
+      string += "\n\t yaw = " + yaw;
       for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
       {
          string += "\n\t quadrant= " + robotQuadrant.getCamelCaseName() + ", x= " + getX(robotQuadrant) + ", y= " + getY(robotQuadrant);
