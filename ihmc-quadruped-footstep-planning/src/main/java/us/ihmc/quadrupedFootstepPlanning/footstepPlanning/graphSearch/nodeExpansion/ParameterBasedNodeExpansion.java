@@ -59,6 +59,8 @@ public class ParameterBasedNodeExpansion implements FootstepNodeExpansion
 
    private void addDefaultFootsteps(FootstepNode node, HashSet<FootstepNode> neighboringNodesToPack)
    {
+      RobotQuadrant movingQuadrant = node.getMovingQuadrant();
+      Point2DReadOnly oldNodePosition = new Point2D(node.getX(movingQuadrant), node.getY(movingQuadrant));
       Point2DReadOnly xGaitCenterPoint = node.getOrComputeXGaitCenterPoint();
       double previousYaw = node.getYaw();
       Orientation3DReadOnly nodeOrientation = new AxisAngle(previousYaw, 0.0, 0.0);
@@ -78,7 +80,7 @@ public class ParameterBasedNodeExpansion implements FootstepNodeExpansion
 
             for (double yawChange = parameters.getMinimumStepYaw(); yawChange < parameters.getMaximumStepYaw(); yawChange += FootstepNode.gridSizeYaw)
             {
-               RobotQuadrant nextQuadrant = node.getMovingQuadrant().getNextRegularGaitSwingQuadrant();
+               RobotQuadrant nextQuadrant = movingQuadrant.getNextRegularGaitSwingQuadrant();
                Vector2D footOffset = new Vector2D(nextQuadrant.getEnd().negateIfHindEnd(xGaitSettings.getStanceLength()),
                                                   nextQuadrant.getSide().negateIfRightSide(xGaitSettings.getStanceWidth()));
                footOffset.scale(0.5);
@@ -92,7 +94,7 @@ public class ParameterBasedNodeExpansion implements FootstepNodeExpansion
 
                if (!checkNodeIsFarEnoughFromOtherFeet(newNodePosition, clearanceVector, node))
                   continue;
-               if (MathTools.epsilonEquals(movingVector.lengthSquared(), 0.0, 1e-3))
+               if (MathTools.epsilonEquals(oldNodePosition.distance(newNodePosition), 0.0, 0.5 * FootstepNode.gridSizeXY))
                   continue;
 
                FootstepNode offsetNode = constructNodeInPreviousNodeFrame(newNodePosition, newYaw, node, xGaitSettings);
