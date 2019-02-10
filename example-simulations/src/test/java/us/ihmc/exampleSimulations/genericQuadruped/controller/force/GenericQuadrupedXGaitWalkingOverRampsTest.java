@@ -1,7 +1,5 @@
 package us.ihmc.exampleSimulations.genericQuadruped.controller.force;
 
-import org.junit.jupiter.api.Tag;
-import org.junit.jupiter.api.Disabled;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.exampleSimulations.genericQuadruped.GenericQuadrupedTestFactory;
