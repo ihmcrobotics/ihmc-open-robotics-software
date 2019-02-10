@@ -59,7 +59,7 @@ public class ParameterBasedNodeExpansionTest
       FootstepNodeExpansion expansion = new ParameterBasedNodeExpansion(parameters, xGaitSettingsReadOnly);
 
       FootstepNode baseNode = new FootstepNode(RobotQuadrant.FRONT_LEFT, 0.5 * stanceLength, 0.5 * stanceWidth, 0.5 * stanceLength, -0.5 * stanceWidth,
-                                               -0.5 * stanceLength, 0.5 * stanceWidth, -0.5 * stanceLength, -0.5 * stanceWidth);
+                                               -0.5 * stanceLength, 0.5 * stanceWidth, -0.5 * stanceLength, -0.5 * stanceWidth, 0.0, stanceLength, stanceWidth);
 
       HashSet<FootstepNode> expandedNodes = expansion.expandNode(baseNode);
 
@@ -123,7 +123,7 @@ public class ParameterBasedNodeExpansionTest
       hindLeft.changeFrame(ReferenceFrame.getWorldFrame());
       hindRight.changeFrame(ReferenceFrame.getWorldFrame());
 
-      FootstepNode baseNode = new FootstepNode(RobotQuadrant.FRONT_LEFT, frontLeft, frontRight, hindLeft, hindRight);
+      FootstepNode baseNode = new FootstepNode(RobotQuadrant.FRONT_LEFT, frontLeft, frontRight, hindLeft, hindRight, Math.PI / 4.0, stanceLength, stanceWidth);
 
       HashSet<FootstepNode> expandedNodes = expansion.expandNode(baseNode);
 

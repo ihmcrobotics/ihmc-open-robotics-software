@@ -28,6 +28,7 @@ public class QuadrupedAStarFootstepPlannerDataSetTest extends FootstepPlannerDat
       return QuadrupedAStarFootstepPlanner.createPlanner(parameters, xGaitSettings, null, expansion, registry);
    }
 
+   @Override
    @Test
    public void testDatasetsWithoutOcclusion()
    {

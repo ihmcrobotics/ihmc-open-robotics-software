@@ -3,6 +3,7 @@ package us.ihmc.quadrupedFootstepPlanning.footstepPlanning.graphSearch.graph;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Disabled;
+import us.ihmc.commons.RandomNumbers;
 import us.ihmc.euclid.tools.EuclidCoreRandomTools;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
 import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.graphSearch.FootstepPlanningRandomTools;
@@ -51,8 +52,11 @@ public class FootstepNodeTest
          Point2DReadOnly hindRight = EuclidCoreRandomTools.nextPoint2D(random, 1.0);
          Point2DReadOnly otherHindRight = EuclidCoreRandomTools.nextPoint2D(random, 1.0);
 
-         nodeA = new FootstepNode(robotQuadrant, frontLeft, frontRight, hindLeft, hindRight);
-         nodeB = new FootstepNode(robotQuadrant, frontLeft, otherFrontRight, otherHindLeft, otherHindRight);
+         double yaw = RandomNumbers.nextDouble(random, Math.PI);
+         double otherYaw = RandomNumbers.nextDouble(random, Math.PI);
+
+         nodeA = new FootstepNode(robotQuadrant, frontLeft, frontRight, hindLeft, hindRight, yaw, 1.5, 0.5);
+         nodeB = new FootstepNode(robotQuadrant, frontLeft, otherFrontRight, otherHindLeft, otherHindRight, otherYaw, 1.5, 0.5);
 
          assertTrue(nodeA.quadrantGeometricallyEquals(nodeB));
       }

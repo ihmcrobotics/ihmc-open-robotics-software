@@ -5,6 +5,7 @@ import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.graphSearch.graph.Foot
 import us.ihmc.robotics.robotSide.QuadrantDependentList;
 import us.ihmc.robotics.robotSide.RobotQuadrant;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoEnum;
 import us.ihmc.yoVariables.variable.YoFramePoint2D;
 
@@ -13,12 +14,21 @@ public class YoFootstepNode
    private final YoEnum<RobotQuadrant> movingQuadrant;
    private final YoFramePoint2D movingNodePosition;
    private final QuadrantDependentList<YoFramePoint2D> nodePositions = new QuadrantDependentList<>();
+   private final YoDouble nodeYaw;
+   private final YoDouble nominalStanceLength;
+   private final YoDouble nominalStanceWidth;
 
    public YoFootstepNode(YoVariableRegistry registry)
    {
       movingQuadrant = YoEnum.create("movingQuadrant", RobotQuadrant.class, registry);
       movingNodePosition = new YoFramePoint2D("movingNodePosition", ReferenceFrame.getWorldFrame(), registry);
       movingNodePosition.setToNaN();
+      nodeYaw = new YoDouble("nodeYaw", registry);
+      nominalStanceLength = new YoDouble("nominalStanceLength", registry);
+      nominalStanceWidth = new YoDouble("nominalStanceWidth", registry);
+      nodeYaw.setToNaN();
+      nominalStanceLength.setToNaN();
+      nominalStanceWidth.setToNaN();
       for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
       {
          YoFramePoint2D nodePosition =  new YoFramePoint2D(robotQuadrant.getShortName() + "NodePosition", ReferenceFrame.getWorldFrame(), registry);
@@ -33,6 +43,9 @@ public class YoFootstepNode
       for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
          nodePositions.get(robotQuadrant).set(node.getX(robotQuadrant), node.getY(robotQuadrant));
       movingNodePosition.set(nodePositions.get(movingQuadrant.getEnumValue()));
+      nodeYaw.set(node.getYaw());
+      nominalStanceLength.set(node.getNominalStanceLength());
+      nominalStanceWidth.set(node.getNominalStanceWidth());
    }
 
    public YoFramePoint2D getYoPosition(RobotQuadrant robotQuadrant)
@@ -54,6 +67,7 @@ public class YoFootstepNode
       }
 
       return new FootstepNode(movingQuadrant.getEnumValue(), nodePositions.get(RobotQuadrant.FRONT_LEFT), nodePositions.get(RobotQuadrant.FRONT_RIGHT),
-                              nodePositions.get(RobotQuadrant.HIND_LEFT), nodePositions.get(RobotQuadrant.HIND_RIGHT));
+                              nodePositions.get(RobotQuadrant.HIND_LEFT), nodePositions.get(RobotQuadrant.HIND_RIGHT), nodeYaw.getDoubleValue(),
+                              nominalStanceLength.getDoubleValue(), nominalStanceWidth.getDoubleValue());
    }
 }

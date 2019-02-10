@@ -64,9 +64,14 @@ public class FootstepNodeToolsTest
                                    double frontRightXOffset, double frontRightYOffset, double hindLeftXOffset, double hindLeftYOffset, double hindRightXOffset,
                                    double hindRightYOffset)
    {
+      double yaw = FootstepNode.computeNominalYaw(frontLeftX + frontLeftXOffset, frontLeftY + frontLeftYOffset, frontRightX + frontRightXOffset,
+                                                  frontRightY + frontRightYOffset, hindLeftX + hindLeftXOffset, hindLeftY + hindLeftYOffset,
+                                                  hindRightX + hindRightXOffset, hindRightY + hindLeftYOffset);
+      double length = frontLeftX + frontLeftXOffset - hindRightX - hindRightXOffset;
+      double width = frontLeftY + frontLeftYOffset - hindRightY - hindRightYOffset;
       FootstepNode node = new FootstepNode(quadrant, frontLeftX + frontLeftXOffset, frontLeftY + frontLeftYOffset, frontRightX + frontRightXOffset,
                                            frontRightY + frontRightYOffset, hindLeftX + hindLeftXOffset, hindLeftY + hindLeftYOffset,
-                                           hindRightX + hindRightXOffset, hindRightY + hindRightYOffset);
+                                           hindRightX + hindRightXOffset, hindRightY + hindRightYOffset, yaw, length, width);
 
       RigidBodyTransform frontLeftNodeTransform = new RigidBodyTransform();
       RigidBodyTransform frontRightNodeTransform = new RigidBodyTransform();
@@ -128,7 +133,12 @@ public class FootstepNodeToolsTest
          double hindRightX = EuclidCoreRandomTools.nextDouble(random, 1.0);
          double hindRightY = EuclidCoreRandomTools.nextDouble(random, 1.0);
 
-         FootstepNode node = new FootstepNode(robotQuadrant, frontLeftX, frontLeftY, frontRightX, frontRightY, hindLeftX, hindLeftY, hindRightX, hindRightY);
+         double yaw = FootstepNode.computeNominalYaw(frontLeftX, frontLeftY, frontRightX, frontRightY, hindLeftX, hindLeftY, hindRightX, hindRightY);
+         double length = frontLeftX - hindRightX;
+         double width = frontLeftY - hindRightY;
+
+         FootstepNode node = new FootstepNode(robotQuadrant, frontLeftX, frontLeftY, frontRightX, frontRightY, hindLeftX, hindLeftY, hindRightX, hindRightY,
+                                              yaw, length, width);
 
          RigidBodyTransform frontLeftSnapTransform = EuclidCoreRandomTools.nextRigidBodyTransform(random);
          RigidBodyTransform frontRightSnapTransform = EuclidCoreRandomTools.nextRigidBodyTransform(random);
