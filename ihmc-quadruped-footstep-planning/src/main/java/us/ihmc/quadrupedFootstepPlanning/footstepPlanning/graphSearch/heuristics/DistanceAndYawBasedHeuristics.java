@@ -23,7 +23,8 @@ public class DistanceAndYawBasedHeuristics extends CostToGoHeuristics
    protected double computeHeuristics(FootstepNode node, FootstepNode goalNode)
    {
       double yaw = AngleTools.computeAngleDifferenceMinusPiToPi(node.getYaw(), goalNode.getYaw());
-      double bodyDistance = node.getOrComputeMidStancePoint().distance(node.getOrComputeMidStancePoint());
+//      double yaw = AngleTools.computeAngleDifferenceMinusPiToPi(node.getNominalYaw(), goalNode.getNominalYaw());
+      double bodyDistance = node.getOrComputeXGaitCenterPoint().distance(node.getOrComputeXGaitCenterPoint());
       double minSteps = 4.0 * bodyDistance / parameters.getMaximumStepCycleDistance();
       double distanceWeight = 0.5 * (parameters.getForwardWeight() + parameters.getLateralWeight());
 

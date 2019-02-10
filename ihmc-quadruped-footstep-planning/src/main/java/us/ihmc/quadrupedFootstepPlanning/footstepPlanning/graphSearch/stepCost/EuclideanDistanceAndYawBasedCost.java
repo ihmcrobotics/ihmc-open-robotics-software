@@ -19,10 +19,12 @@ public class EuclideanDistanceAndYawBasedCost implements FootstepCost
    public double compute(FootstepNode startNode, FootstepNode endNode)
    {
       RobotQuadrant robotQuadrant = endNode.getMovingQuadrant();
-      double euclideanDistance = Math.sqrt(MathTools.square(startNode.getX(robotQuadrant) - endNode.getX(robotQuadrant)) + MathTools
-            .square(startNode.getY(robotQuadrant) - endNode.getY(robotQuadrant)));
+//      double euclideanDistance = Math.sqrt(MathTools.square(startNode.getX(robotQuadrant) - endNode.getX(robotQuadrant)) + MathTools
+//            .square(startNode.getY(robotQuadrant) - endNode.getY(robotQuadrant)));
+      double euclideanDistance = startNode.getOrComputeXGaitCenterPoint().distance(endNode.getOrComputeXGaitCenterPoint());
 
-      double yaw = AngleTools.computeAngleDifferenceMinusPiToPi(startNode.getYaw(), endNode.getYaw());
+//      double yaw = AngleTools.computeAngleDifferenceMinusPiToPi(startNode.getYaw(), endNode.getYaw());
+      double yaw = AngleTools.computeAngleDifferenceMinusPiToPi(startNode.getNominalYaw(), endNode.getNominalYaw());
       double distanceWeight = 0.5 * (parameters.getForwardWeight() + parameters.getLateralWeight());
       double totalCost = distanceWeight * euclideanDistance + parameters.getYawWeight() * Math.abs(yaw) + parameters.getCostPerStep();
 
