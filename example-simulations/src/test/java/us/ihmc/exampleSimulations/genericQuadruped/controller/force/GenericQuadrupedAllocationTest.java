@@ -124,7 +124,6 @@ public class GenericQuadrupedAllocationTest
    }
 
 
-   @Disabled
    @Test
    public void testForAllocationStepping()
    {
