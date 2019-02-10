@@ -47,7 +47,7 @@ public class QuadrupedAStarFootstepPlannerTest
    private static final long timeout = 30000 * 100;
    private static final double epsilon = 1e-3;
    private static final boolean visualize = false;
-   private static final boolean activelyVisualize = false;
+   private static final boolean activelyVisualize = true;
 
    private static final QuadrantDependentList<AppearanceDefinition> colorDefinitions = new QuadrantDependentList<>(YoAppearance.Red(), YoAppearance.Green(), YoAppearance.DarkRed(), YoAppearance.DarkGreen());
 
