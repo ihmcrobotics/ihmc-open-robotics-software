@@ -1,29 +1,38 @@
 package us.ihmc.quadrupedFootstepPlanning.footstepPlanning.graphSearch.graph;
 
 import us.ihmc.commons.MathTools;
+import us.ihmc.commons.RandomNumbers;
 import us.ihmc.euclid.tools.EuclidCoreRandomTools;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
 import us.ihmc.euclid.tuple2D.interfaces.Tuple2DReadOnly;
+import us.ihmc.robotics.geometry.AngleTools;
 import us.ihmc.robotics.robotSide.QuadrantDependentList;
 import us.ihmc.robotics.robotSide.RobotQuadrant;
-import us.ihmc.robotics.robotSide.RobotSide;
 
 import java.util.Random;
 
 public class FootstepNode
 {
    public static final double gridSizeXY = 0.05;
+   public static final double gridSizeYaw = Math.PI / 18.0;
 
    public static final double PRECISION = 0.05;
    public static final double INV_PRECISION = 1.0 / PRECISION;
 
    private final QuadrantDependentList<Integer> xIndices = new QuadrantDependentList<>();
    private final QuadrantDependentList<Integer> yIndices = new QuadrantDependentList<>();
+   private final int yawIndex;
 
-   private double nominalYaw;
+   private final QuadrantDependentList<Double> xPositions = new QuadrantDependentList<>();
+   private final QuadrantDependentList<Double> yPositions = new QuadrantDependentList<>();
+   private final double yaw;
+
+   private final double nominalStanceLength;
+   private final double nominalStanceWidth;
 
    private Point2D midStancePoint;
+   private Point2D xGaitCenterPoint;
 
    private final int hashCode;
    private final int planarRegionsHashCode;
@@ -34,25 +43,29 @@ public class FootstepNode
    {
       this(other.getMovingQuadrant(), other.getX(RobotQuadrant.FRONT_LEFT), other.getY(RobotQuadrant.FRONT_LEFT), other.getX(RobotQuadrant.FRONT_RIGHT),
            other.getY(RobotQuadrant.FRONT_RIGHT), other.getX(RobotQuadrant.HIND_LEFT), other.getY(RobotQuadrant.HIND_LEFT), other.getX(RobotQuadrant.HIND_RIGHT),
-           other.getY(RobotQuadrant.HIND_RIGHT));
+           other.getY(RobotQuadrant.HIND_RIGHT), other.getYaw(), other.nominalStanceLength, other.nominalStanceWidth);
    }
 
-   public FootstepNode(RobotQuadrant movingQuadrant, QuadrantDependentList<Point2DReadOnly> locations)
+   public FootstepNode(RobotQuadrant movingQuadrant, QuadrantDependentList<Point2DReadOnly> locations, double yaw, double nominalStanceLength,
+                       double nominalStanceWidth)
    {
       this(movingQuadrant, locations.get(RobotQuadrant.FRONT_LEFT), locations.get(RobotQuadrant.FRONT_RIGHT), locations.get(RobotQuadrant.HIND_LEFT),
-           locations.get(RobotQuadrant.HIND_RIGHT));
+           locations.get(RobotQuadrant.HIND_RIGHT), yaw, nominalStanceLength, nominalStanceWidth);
    }
 
-   public FootstepNode(RobotQuadrant movingQuadrant, Tuple2DReadOnly frontLeft, Tuple2DReadOnly frontRight, Tuple2DReadOnly hindLeft, Tuple2DReadOnly hindRight)
+   public FootstepNode(RobotQuadrant movingQuadrant, Tuple2DReadOnly frontLeft, Tuple2DReadOnly frontRight, Tuple2DReadOnly hindLeft, Tuple2DReadOnly hindRight,
+                       double yaw, double nominalStanceLength, double nominalStanceWidth)
    {
       this(movingQuadrant, frontLeft.getX(), frontLeft.getY(), frontRight.getX(), frontRight.getY(), hindLeft.getX(), hindLeft.getY(), hindRight.getX(),
-           hindRight.getY());
+           hindRight.getY(), yaw, nominalStanceLength, nominalStanceWidth);
    }
 
    public FootstepNode(RobotQuadrant movingQuadrant, double frontLeftX, double frontLeftY, double frontRightX, double frontRightY, double hindLeftX,
-                       double hindLeftY, double hindRightX, double hindRightY)
+                       double hindLeftY, double hindRightX, double hindRightY, double yaw, double nominalStanceLength, double nominalStanceWidth)
    {
       this.movingQuadrant = movingQuadrant;
+      this.nominalStanceLength = nominalStanceLength;
+      this.nominalStanceWidth = nominalStanceWidth;
 
       int xFrontLeftIndex = (int) Math.round(frontLeftX / gridSizeXY);
       int yFrontLeftIndex = (int) Math.round(frontLeftY / gridSizeXY);
@@ -66,8 +79,6 @@ public class FootstepNode
       int xHindRightIndex = (int) Math.round(hindRightX / gridSizeXY);
       int yHindRightIndex = (int) Math.round(hindRightY / gridSizeXY);
 
-      nominalYaw = computeNominalYaw(frontLeftX, frontLeftY, frontRightX, frontRightY, hindLeftX, hindLeftY, hindRightX, hindRightY);
-
       xIndices.put(RobotQuadrant.FRONT_LEFT, xFrontLeftIndex);
       yIndices.put(RobotQuadrant.FRONT_LEFT, yFrontLeftIndex);
 
@@ -80,6 +91,22 @@ public class FootstepNode
       xIndices.put(RobotQuadrant.HIND_RIGHT, xHindRightIndex);
       yIndices.put(RobotQuadrant.HIND_RIGHT, yHindRightIndex);
 
+      yawIndex = (int) Math.round(AngleTools.trimAngleMinusPiToPi(yaw) / gridSizeYaw);
+
+      xPositions.put(RobotQuadrant.FRONT_LEFT,  gridSizeXY * xFrontLeftIndex);
+      yPositions.put(RobotQuadrant.FRONT_LEFT,  gridSizeXY * yFrontLeftIndex);
+
+      xPositions.put(RobotQuadrant.FRONT_RIGHT,  gridSizeXY * xFrontRightIndex);
+      yPositions.put(RobotQuadrant.FRONT_RIGHT,  gridSizeXY * yFrontRightIndex);
+
+      xPositions.put(RobotQuadrant.HIND_LEFT,  gridSizeXY * xHindLeftIndex);
+      yPositions.put(RobotQuadrant.HIND_LEFT,  gridSizeXY * yHindLeftIndex);
+
+      xPositions.put(RobotQuadrant.HIND_RIGHT,  gridSizeXY * xHindRightIndex);
+      yPositions.put(RobotQuadrant.HIND_RIGHT,  gridSizeXY * yHindRightIndex);
+
+      this.yaw = gridSizeYaw * yawIndex;
+
       hashCode = computeHashCode(this);
       planarRegionsHashCode = computePlanarRegionsHashCode(this);
    }
@@ -91,27 +118,37 @@ public class FootstepNode
 
    public double getX(RobotQuadrant robotQuadrant)
    {
-      return gridSizeXY * xIndices.get(robotQuadrant);
+      return xPositions.get(robotQuadrant);
    }
 
    public double getY(RobotQuadrant robotQuadrant)
    {
-      return gridSizeXY * yIndices.get(robotQuadrant);
+      return yPositions.get(robotQuadrant);
    }
 
-   public int getXIndex(RobotQuadrant robotQuadrant)
+   public double getYaw()
+   {
+      return yaw;
+   }
+
+   public double getNominalStanceLength()
+   {
+      return nominalStanceLength;
+   }
+
+   public double getNominalStanceWidth()
+   {
+      return nominalStanceWidth;
+   }
+
+   private int getXIndex(RobotQuadrant robotQuadrant)
    {
       return xIndices.get(robotQuadrant);
    }
 
-   public int getYIndex(RobotQuadrant robotQuadrant)
+   private int getYIndex(RobotQuadrant robotQuadrant)
    {
       return yIndices.get(robotQuadrant);
-   }
-
-   public double getNominalYaw()
-   {
-      return nominalYaw;
    }
 
    public double euclideanDistance(FootstepNode other)
@@ -129,8 +166,9 @@ public class FootstepNode
    public static FootstepNode generateRandomFootstepNode(Random random, double minMaxXY)
    {
       return new FootstepNode(RobotQuadrant.generateRandomRobotQuadrant(random),
-            new QuadrantDependentList<>(EuclidCoreRandomTools.nextPoint2D(random, minMaxXY), EuclidCoreRandomTools.nextPoint2D(random, minMaxXY),
-                                        EuclidCoreRandomTools.nextPoint2D(random, minMaxXY), EuclidCoreRandomTools.nextPoint2D(random, minMaxXY)));
+                              new QuadrantDependentList<>(EuclidCoreRandomTools.nextPoint2D(random, minMaxXY), EuclidCoreRandomTools.nextPoint2D(random, minMaxXY),
+                                        EuclidCoreRandomTools.nextPoint2D(random, minMaxXY), EuclidCoreRandomTools.nextPoint2D(random, minMaxXY)),
+                              RandomNumbers.nextDouble(random, Math.PI), 1.0, 0.5);
    }
 
    public Point2DReadOnly getOrComputeMidStancePoint()
@@ -142,7 +180,16 @@ public class FootstepNode
       return midStancePoint;
    }
 
-   public static Point2D computeMidStancePoint(FootstepNode node)
+   public Point2DReadOnly getOrComputeXGaitCenterPoint()
+   {
+      if (xGaitCenterPoint == null)
+      {
+         xGaitCenterPoint = computeXGaitCenterPoint(this);
+      }
+      return xGaitCenterPoint;
+   }
+
+   private static Point2D computeMidStancePoint(FootstepNode node)
    {
       double x = 0.0;
       double y = 0.0;
@@ -154,6 +201,14 @@ public class FootstepNode
 
       x /= 4.0;
       y /= 4.0;
+      return new Point2D(x, y);
+   }
+
+   private static Point2D computeXGaitCenterPoint(FootstepNode node)
+   {
+      RobotQuadrant movingQuadrant = node.getMovingQuadrant();
+      double x = node.getX(movingQuadrant) + 0.5 * movingQuadrant.getEnd().negateIfHindEnd(node.nominalStanceLength);
+      double y = node.getY(movingQuadrant) + 0.5 * movingQuadrant.getSide().negateIfRightSide(node.nominalStanceWidth);
       return new Point2D(x, y);
    }
 

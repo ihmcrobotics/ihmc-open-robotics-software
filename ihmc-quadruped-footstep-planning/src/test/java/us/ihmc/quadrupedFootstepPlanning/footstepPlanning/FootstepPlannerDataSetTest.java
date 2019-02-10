@@ -3,6 +3,8 @@ package us.ihmc.quadrupedFootstepPlanning.footstepPlanning;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
 import us.ihmc.commons.ContinuousIntegrationTools;
 import us.ihmc.commons.MathTools;
@@ -51,7 +53,7 @@ public abstract class FootstepPlannerDataSetTest
 
    protected abstract QuadrupedBodyPathAndFootstepPlanner createPlanner();
 
-   @Before
+   @BeforeEach
    public void setup()
    {
       VISUALIZE = VISUALIZE && !ContinuousIntegrationTools.isRunningOnContinuousIntegrationServer();
@@ -59,7 +61,7 @@ public abstract class FootstepPlannerDataSetTest
       planner = createPlanner();
    }
 
-   @After
+   @AfterEach
    public void tearDown()
    {
       planner = null;

@@ -7,6 +7,7 @@ import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple2D.Vector2D;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
 import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.graphSearch.graph.FootstepNode;
+import us.ihmc.robotics.robotSide.QuadrantDependentList;
 import us.ihmc.robotics.robotSide.RobotQuadrant;
 
 import java.util.Random;
@@ -15,13 +16,15 @@ public class FootstepPlanningRandomTools
 {
    public static FootstepNode createRandomFootstepNode(Random random)
    {
-      RobotQuadrant robotQuadrant = RobotQuadrant.generateRandomRobotQuadrant(random);
-      Point2DReadOnly frontLeft = EuclidCoreRandomTools.nextPoint2D(random, 1.0);
-      Point2DReadOnly frontRight= EuclidCoreRandomTools.nextPoint2D(random, 1.0);
-      Point2DReadOnly hindLeft = EuclidCoreRandomTools.nextPoint2D(random, 1.0);
-      Point2DReadOnly hindRight = EuclidCoreRandomTools.nextPoint2D(random, 1.0);
+      return createRandomFootstepNode(random, 1.0);
+   }
 
-      return new FootstepNode(robotQuadrant, frontLeft, frontRight, hindLeft, hindRight);
+   public static FootstepNode createRandomFootstepNode(Random random, double minMaxXY)
+   {
+      return new FootstepNode(RobotQuadrant.generateRandomRobotQuadrant(random),
+                              new QuadrantDependentList<>(EuclidCoreRandomTools.nextPoint2D(random, minMaxXY), EuclidCoreRandomTools.nextPoint2D(random, minMaxXY),
+                                                          EuclidCoreRandomTools.nextPoint2D(random, minMaxXY), EuclidCoreRandomTools.nextPoint2D(random, minMaxXY)),
+                              RandomNumbers.nextDouble(random, Math.PI), 1.0, 0.5);
    }
 
    public static FootstepNode createRandomFootstepNode(Random random, double length, double width)
@@ -46,6 +49,6 @@ public class FootstepPlanningRandomTools
       hindLeft.add(-offsetFromCenter.getX(), offsetFromCenter.getY());
       hindRight.add(-offsetFromCenter.getX(), -offsetFromCenter.getY());
 
-      return new FootstepNode(robotQuadrant, frontLeft, frontRight, hindLeft, hindRight);
+      return new FootstepNode(robotQuadrant, frontLeft, frontRight, hindLeft, hindRight, yaw, length, width);
    }
 }

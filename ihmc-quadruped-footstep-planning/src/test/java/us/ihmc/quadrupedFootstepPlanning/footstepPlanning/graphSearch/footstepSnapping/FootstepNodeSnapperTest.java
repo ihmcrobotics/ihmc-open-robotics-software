@@ -55,15 +55,29 @@ public class FootstepNodeSnapperTest
                            {
                               RobotQuadrant robotQuadrant = RobotQuadrant.generateRandomRobotQuadrant(random);
 
+                              double frontLeftX = FootstepNode.gridSizeXY * frontLeftXIndices[i];
+                              double frontLeftY = FootstepNode.gridSizeXY * frontLeftYIndices[j];
+                              double frontRightX = FootstepNode.gridSizeXY * frontRightXIndices[k];
+                              double frontRightY = FootstepNode.gridSizeXY * frontRightYIndices[l];
+                              double hindLeftX = FootstepNode.gridSizeXY * hindLeftXIndices[m];
+                              double hindLeftY = FootstepNode.gridSizeXY * hindLeftYIndices[n];
+                              double hindRightX = FootstepNode.gridSizeXY * hindRightXIndices[o];
+                              double hindRightY = FootstepNode.gridSizeXY * hindRightYIndices[p];
+
+                              double yaw = FootstepNode.computeNominalYaw(frontLeftX, frontLeftY, frontRightX, frontRightY, hindLeftX, hindLeftY, hindRightX,
+                                                                          hindRightY);
+                              double length = 1.0;
+                              double width = 0.5;
+
                               testSnapper.snapFootstepNode(
-                                    new FootstepNode(robotQuadrant, frontLeftXIndices[i], frontLeftYIndices[j], frontRightXIndices[k], frontRightYIndices[l],
-                                                     hindLeftXIndices[m], hindLeftYIndices[n], hindRightXIndices[o], hindRightYIndices[p]));
+                                    new FootstepNode(robotQuadrant, frontLeftX, frontLeftY, frontRightX, frontRightY, hindLeftX, hindLeftY, hindRightX,
+                                                     hindRightY, yaw, length, width));
                               assertTrue(testSnapper.dirtyBit);
                               testSnapper.dirtyBit = false;
 
                               testSnapper.snapFootstepNode(
-                                    new FootstepNode(robotQuadrant, frontLeftXIndices[i], frontLeftYIndices[j], frontRightXIndices[k], frontRightYIndices[l],
-                                                     hindLeftXIndices[m], hindLeftYIndices[n], hindRightXIndices[o], hindRightYIndices[p]));
+                                    new FootstepNode(robotQuadrant, frontLeftX, frontLeftY, frontRightX, frontRightY, hindLeftX, hindLeftY, hindRightX,
+                                                      hindRightY, yaw, length, width));
                               assertTrue(!testSnapper.dirtyBit);
                            }
                         }
@@ -99,9 +113,23 @@ public class FootstepNodeSnapperTest
                            {
                               RobotQuadrant newQuadrant = RobotQuadrant.generateRandomRobotQuadrant(random);
 
+                              double frontLeftX = FootstepNode.gridSizeXY * frontLeftXIndices[i];
+                              double frontLeftY = FootstepNode.gridSizeXY * frontLeftYIndices[j];
+                              double frontRightX = FootstepNode.gridSizeXY * frontRightXIndices[k];
+                              double frontRightY = FootstepNode.gridSizeXY * frontRightYIndices[l];
+                              double hindLeftX = FootstepNode.gridSizeXY * hindLeftXIndices[m];
+                              double hindLeftY = FootstepNode.gridSizeXY * hindLeftYIndices[n];
+                              double hindRightX = FootstepNode.gridSizeXY * hindRightXIndices[o];
+                              double hindRightY = FootstepNode.gridSizeXY * hindRightYIndices[p];
+
+                              double yaw = FootstepNode.computeNominalYaw(frontLeftX, frontLeftY, frontRightX, frontRightY, hindLeftX, hindLeftY, hindRightX,
+                                                                          hindRightY);
+                              double length = 1.0;
+                              double width = 0.5;
+
                               FootstepNodeSnapData snapData = testSnapper.snapFootstepNode(
-                                    new FootstepNode(newQuadrant, frontLeftXIndices[i], frontLeftYIndices[j], frontRightXIndices[k], frontRightYIndices[l],
-                                                     hindLeftXIndices[m], hindLeftYIndices[n], hindRightXIndices[o], hindRightYIndices[p]));
+                                    new FootstepNode(newQuadrant, frontLeftX, frontLeftY, frontRightX, frontRightY, hindLeftX, hindLeftY, hindRightX,
+                                                     hindRightY, yaw, length, width));
                               assertTrue(!testSnapper.dirtyBit);
 
                               for (RobotQuadrant robotQuadrant : RobotQuadrant.values())

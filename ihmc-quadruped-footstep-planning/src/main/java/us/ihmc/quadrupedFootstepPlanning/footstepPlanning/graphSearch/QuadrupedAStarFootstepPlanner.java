@@ -157,7 +157,7 @@ public class QuadrupedAStarFootstepPlanner implements QuadrupedBodyPathAndFootst
       snapper.addSnapData(startNode, new FootstepNodeSnapData(startNodeSnapTransforms));
       nodeChecker.addStartNode(startNode, startNodeSnapTransforms);
 
-      FramePose2DReadOnly startPose = new FramePose2D(worldFrame, startNode.getOrComputeMidStancePoint(), startNode.getNominalYaw());
+      FramePose2DReadOnly startPose = new FramePose2D(worldFrame, startNode.getOrComputeMidStancePoint(), startNode.getYaw());
       startAndGoalListeners.parallelStream().forEach(listener -> listener.setInitialPose(startPose));
    }
 
@@ -168,7 +168,7 @@ public class QuadrupedAStarFootstepPlanner implements QuadrupedBodyPathAndFootst
 
       goalNode = getNodeFromTarget(goal);
 
-      goalPoseInWorld.set(goalNode.getOrComputeMidStancePoint(), goalNode.getNominalYaw());
+      goalPoseInWorld.set(goalNode.getOrComputeMidStancePoint(), goalNode.getYaw());
       startAndGoalListeners.parallelStream().forEach(listener -> listener.setGoalPose(goalPoseInWorld));
    }
 
@@ -192,7 +192,8 @@ public class QuadrupedAStarFootstepPlanner implements QuadrupedBodyPathAndFootst
          hindLeftStepPosition.changeFrameAndProjectToXYPlane(worldFrame);
          hindRightStepPosition.changeFrameAndProjectToXYPlane(worldFrame);
 
-         nodeToReturn = new FootstepNode(defaultFirstQuadrant, frontLeftStepPosition, frontRightStepPosition, hindLeftStepPosition, hindRightStepPosition);
+         nodeToReturn = new FootstepNode(defaultFirstQuadrant, frontLeftStepPosition, frontRightStepPosition, hindLeftStepPosition, hindRightStepPosition,
+                                         goalPose.getYaw(), xGaitSettings.getStanceLength(), xGaitSettings.getStanceWidth());
       }
       else if (target.getTargetType().equals(FootstepPlannerTargetType.FOOTSTEPS))
       {
@@ -206,9 +207,13 @@ public class QuadrupedAStarFootstepPlanner implements QuadrupedBodyPathAndFootst
          hindLeftGoalPosition.changeFrame(worldFrame);
          hindRightGoalPosition.changeFrame(worldFrame);
 
+         double yaw = FootstepNode.computeNominalYaw(frontLeftGoalPosition.getX(), frontLeftGoalPosition.getY(), frontRightGoalPosition.getX(),
+                                                     frontRightGoalPosition.getY(), hindLeftGoalPosition.getX(), hindLeftGoalPosition.getY(),
+                                                     hindRightGoalPosition.getX(), hindRightGoalPosition.getY());
+
          nodeToReturn = new FootstepNode(defaultFirstQuadrant, frontLeftGoalPosition.getX(), frontLeftGoalPosition.getY(), frontRightGoalPosition.getX(),
                                          frontRightGoalPosition.getY(), hindLeftGoalPosition.getX(), hindLeftGoalPosition.getY(), hindRightGoalPosition.getX(),
-                                         hindRightGoalPosition.getY());
+                                         hindRightGoalPosition.getY(), yaw, xGaitSettings.getStanceLength(), xGaitSettings.getStanceWidth());
       }
 
       return nodeToReturn;
@@ -464,35 +469,6 @@ public class QuadrupedAStarFootstepPlanner implements QuadrupedBodyPathAndFootst
             abortPlanning.set(false);
             break;
          }
-      }
-
-      while (endNode != null && !endNode.geometricallyEquals(goalNode))
-      {
-         RobotQuadrant nextQuadrant = endNode.getMovingQuadrant().getNextRegularGaitSwingQuadrant();
-         Point2D nextFrontLeft = new Point2D(endNode.getX(RobotQuadrant.FRONT_LEFT), endNode.getY(RobotQuadrant.FRONT_LEFT));
-         Point2D nextFrontRight = new Point2D(endNode.getX(RobotQuadrant.FRONT_RIGHT), endNode.getY(RobotQuadrant.FRONT_RIGHT));
-         Point2D nextHindLeft = new Point2D(endNode.getX(RobotQuadrant.HIND_LEFT), endNode.getY(RobotQuadrant.HIND_LEFT));
-         Point2D nextHindRight = new Point2D(endNode.getX(RobotQuadrant.HIND_RIGHT), endNode.getY(RobotQuadrant.HIND_RIGHT));
-
-         switch (nextQuadrant)
-         {
-         case FRONT_LEFT:
-            nextFrontLeft.set(goalNode.getX(nextQuadrant), goalNode.getY(nextQuadrant));
-            break;
-         case FRONT_RIGHT:
-            nextFrontRight.set(goalNode.getX(nextQuadrant), goalNode.getY(nextQuadrant));
-            break;
-         case HIND_LEFT:
-            nextHindLeft.set(goalNode.getX(nextQuadrant), goalNode.getY(nextQuadrant));
-            break;
-         case HIND_RIGHT:
-            nextHindRight.set(goalNode.getX(nextQuadrant), goalNode.getY(nextQuadrant));
-            break;
-         }
-
-         FootstepNode nextNode = new FootstepNode(nextQuadrant, nextFrontLeft, nextFrontRight, nextHindLeft, nextHindRight);
-         graph.checkAndSetEdge(endNode, nextNode, stepCostCalculator.compute(endNode, nextNode));
-         endNode = nextNode;
       }
 
       long timeInNano = System.nanoTime();
