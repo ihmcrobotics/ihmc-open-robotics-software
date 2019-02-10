@@ -104,7 +104,7 @@ public class DefaultFootstepPlannerParameters implements FootstepPlannerParamete
 
    public double getHeuristicsWeight()
    {
-      return 5.0;
+      return 1.5;
    }
 
    @Override
