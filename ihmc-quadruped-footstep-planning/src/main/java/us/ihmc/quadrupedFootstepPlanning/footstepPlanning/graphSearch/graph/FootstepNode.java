@@ -2,10 +2,14 @@ package us.ihmc.quadrupedFootstepPlanning.footstepPlanning.graphSearch.graph;
 
 import us.ihmc.commons.MathTools;
 import us.ihmc.commons.RandomNumbers;
+import us.ihmc.euclid.axisAngle.AxisAngle;
+import us.ihmc.euclid.orientation.interfaces.Orientation3DReadOnly;
 import us.ihmc.euclid.tools.EuclidCoreRandomTools;
 import us.ihmc.euclid.tuple2D.Point2D;
+import us.ihmc.euclid.tuple2D.Vector2D;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
 import us.ihmc.euclid.tuple2D.interfaces.Tuple2DReadOnly;
+import us.ihmc.euclid.tuple4D.interfaces.QuaternionReadOnly;
 import us.ihmc.robotics.geometry.AngleTools;
 import us.ihmc.robotics.robotSide.QuadrantDependentList;
 import us.ihmc.robotics.robotSide.RobotQuadrant;
@@ -207,9 +211,15 @@ public class FootstepNode
    private static Point2D computeXGaitCenterPoint(FootstepNode node)
    {
       RobotQuadrant movingQuadrant = node.getMovingQuadrant();
-      double x = node.getX(movingQuadrant) + 0.5 * movingQuadrant.getEnd().negateIfHindEnd(node.nominalStanceLength);
-      double y = node.getY(movingQuadrant) + 0.5 * movingQuadrant.getSide().negateIfRightSide(node.nominalStanceWidth);
-      return new Point2D(x, y);
+      Vector2D offset = new Vector2D(movingQuadrant.getEnd().negateIfFrontEnd(node.nominalStanceLength), movingQuadrant.getSide().negateIfLeftSide(node.nominalStanceWidth));
+      offset.scale(0.5);
+      Orientation3DReadOnly rotation = new AxisAngle(node.getYaw(), 0.0, 0.0);
+      rotation.transform(offset);
+
+      Point2D newPoint =  new Point2D(node.getX(movingQuadrant), node.getY(movingQuadrant));
+      newPoint.add(offset);
+
+      return newPoint;
    }
 
    @Override
