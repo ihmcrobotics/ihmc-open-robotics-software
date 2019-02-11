@@ -24,15 +24,16 @@ public class LoggerStatusVisualizer
    
    private final Object schedulerLock = new Object();
 
-   private static final String LOGGER_OFFLINE = "[Offline]";
-   private static final String CAMERA_OFF = "[Off]";
-   private static final String CAMERA_RECODRING = "Recording";
+   private static final String LOGGER_OFFLINE = "<html>Log duration: <br>[Log Offline]</html>";
+   private static final String LOGGING_FOR = "<html>Log duration: <br>";
+   private static final String LOGGER_SECONDS = " s</html>";
+   
+   private static final String CAMERA_OFF = "<html>Camera: <br>[Off]</html>";
+   private static final String CAMERA_RECORDING = "<html>Camera: <br>[Off]</html>";
 
 
-   private final JLabel logger = new JLabel("Logger: ");
-   private final JLabel status = new JLabel("");
-   private final JLabel camera = new JLabel("Camera: ");
-   private final JLabel cameraStatus = new JLabel("");
+   private final JLabel logger = new JLabel(LOGGER_OFFLINE);
+   private final JLabel camera = new JLabel(CAMERA_OFF);
 
    private final ScheduledExecutorService offlineExecutor = Executors.newSingleThreadScheduledExecutor();
    private ScheduledFuture<?> offlineExecutorFuture = null;
@@ -46,9 +47,7 @@ public class LoggerStatusVisualizer
    public void addToSimulationConstructionSet(SimulationConstructionSet scs)
    {
       scs.addJLabel(logger);
-      scs.addJLabel(status);
       scs.addJLabel(camera);
-      scs.addJLabel(cameraStatus);
    }
    
 
@@ -65,8 +64,8 @@ public class LoggerStatusVisualizer
       if (command == DataServerCommand.LOG_ACTIVE_WITH_CAMERA)
       {
          SwingUtilities.invokeLater(() -> {
-            status.setText(String.valueOf(argument) + " seconds");
-            cameraStatus.setText(CAMERA_RECODRING);
+            logger.setText(LOGGING_FOR + String.valueOf(argument) + LOGGER_SECONDS);
+            camera.setText(CAMERA_RECORDING);
          });
          startLoggerOfflineTimeout();
       }
@@ -74,8 +73,8 @@ public class LoggerStatusVisualizer
       {
          SwingUtilities.invokeLater(() -> {
 
-            status.setText(String.valueOf(argument) + " seconds");
-            cameraStatus.setText(CAMERA_OFF);
+            logger.setText(LOGGING_FOR + String.valueOf(argument) + LOGGER_SECONDS);
+            camera.setText(CAMERA_OFF);
          });
          startLoggerOfflineTimeout();
       }
@@ -97,8 +96,8 @@ public class LoggerStatusVisualizer
    private void reportLoggerOffline()
    {
       SwingUtilities.invokeLater(() -> {
-         status.setText(LOGGER_OFFLINE);
-         cameraStatus.setText(CAMERA_OFF);
+         logger.setText(LOGGER_OFFLINE);
+         camera.setText(CAMERA_OFF);
       });
    }
 
