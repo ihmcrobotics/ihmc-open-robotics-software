@@ -65,6 +65,9 @@ import us.ihmc.yoVariables.variable.YoInteger;
 public class KinematicsToolboxController extends ToolboxController
 {
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
+   private static final double DEFAULT_PRIVILEGED_CONFIGURATION_WEIGHT = 0.025;
+   private static final double DEFAULT_PRIVILEGED_CONFIGURATION_GAIN = 50.0;
+
    /**
     * Indicates the duration of a control tick. It should match the thread period in
     * {@link ToolboxModule}.
@@ -238,8 +241,8 @@ public class KinematicsToolboxController extends ToolboxController
       gains.setProportionalGains(1200.0); // Gains used for everything. It is as high as possible to reduce the convergence time.
       gains.setMaxFeedbackAndFeedbackRate(1500.0, Double.POSITIVE_INFINITY);
 
-      privilegedWeight.set(0.001);
-      privilegedConfigurationGain.set(50.0);
+      privilegedWeight.set(DEFAULT_PRIVILEGED_CONFIGURATION_WEIGHT);
+      privilegedConfigurationGain.set(DEFAULT_PRIVILEGED_CONFIGURATION_GAIN);
       privilegedMaxVelocity.set(Double.POSITIVE_INFINITY);
    }
 
@@ -381,6 +384,8 @@ public class KinematicsToolboxController extends ToolboxController
 
       // Sets the privileged configuration to match the current robot configuration such that the solution will be as close as possible to the current robot configuration.
       snapPrivilegedConfigurationToCurrent();
+      privilegedWeight.set(DEFAULT_PRIVILEGED_CONFIGURATION_WEIGHT);
+      privilegedConfigurationGain.set(DEFAULT_PRIVILEGED_CONFIGURATION_GAIN);
 
       return true;
    }
@@ -470,6 +475,14 @@ public class KinematicsToolboxController extends ToolboxController
             robotConfigurationReinitialized();
          if (command.hasPrivilegedJointAngles())
             snapPrivilegedConfigurationToCurrent();
+         if (command.getPrivilegedWeight() < 0.0)
+            privilegedWeight.set(DEFAULT_PRIVILEGED_CONFIGURATION_WEIGHT);
+         else
+            privilegedWeight.set(command.getPrivilegedWeight());
+         if (command.getPrivilegedGain() < 0.0)
+            privilegedConfigurationGain.set(DEFAULT_PRIVILEGED_CONFIGURATION_GAIN);
+         else
+            privilegedConfigurationGain.set(command.getPrivilegedGain());
       }
 
       if (commandInputManager.isNewCommandAvailable(KinematicsToolboxCenterOfMassCommand.class))
