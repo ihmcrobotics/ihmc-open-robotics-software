@@ -1,6 +1,7 @@
 package us.ihmc.simulationConstructionSetTools.whiteBoard;
 
 
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static us.ihmc.robotics.Assert.*;
 
 import java.io.IOException;
@@ -24,14 +25,14 @@ public class YoWhiteBoardTest
    public void testWriteNotConnected() throws IOException
    {
       YoWhiteBoard whiteBoard = new DoNothingWhiteBoard();
-      whiteBoard.writeData();
+      assertThrows(RuntimeException.class, () -> whiteBoard.writeData());
    }
 
 	@Test
    public void testReadNotConnected() throws IOException
    {
       YoWhiteBoard whiteBoard = new DoNothingWhiteBoard();
-      whiteBoard.readData();
+      assertThrows(RuntimeException.class, () -> whiteBoard.readData());
    }
 
    protected void doASynchronizedWriteThenReadTest(YoWhiteBoard leftWhiteBoard, YoWhiteBoard rightWhiteBoard, int numberOfTests,

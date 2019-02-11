@@ -1,5 +1,6 @@
 package us.ihmc.footstepPlanning.nodeChecking;
 
+import org.junit.jupiter.api.Assertions;
 import us.ihmc.robotics.Assert;
 import org.junit.Rule;
 import org.junit.jupiter.api.Test;
@@ -234,7 +235,7 @@ public class SnapBasedNodeCheckerTest
 
       // the checker should not allow checking a node against itself since this
       // is likely caused by a mistake inside the planning logic.
-      checker.isNodeValid(node, node);
+      Assertions.assertThrows(RuntimeException.class, () -> checker.isNodeValid(node, node));
    }
 
    @Test
