@@ -83,6 +83,8 @@ public class SCSVisualizer implements YoVariablesUpdatedListener, ExitActionList
    private boolean showOverheadView;
 
    private YoGraphicsListRegistry yoGraphicsListRegistry;
+   
+   private final LoggerStatusVisualizer loggerStatusVisualizer = new LoggerStatusVisualizer();
 
    public SCSVisualizer(int bufferSize)
    {
@@ -373,6 +375,8 @@ public class SCSVisualizer implements YoVariablesUpdatedListener, ExitActionList
       scs.addJLabel(delayValue);
       scs.addJLabel(new JLabel("ms"));
 
+      loggerStatusVisualizer.addToSimulationConstructionSet(scs);
+      
       YoVariableRegistry yoVariableRegistry = handshakeParser.getRootRegistry();
       this.registry.addChild(yoVariableRegistry);
       this.registry.addChild(yoVariableClientInterface.getDebugRegistry());
@@ -487,6 +491,7 @@ public class SCSVisualizer implements YoVariablesUpdatedListener, ExitActionList
    @Override
    public void receivedCommand(DataServerCommand command, int argument)
    {
+      loggerStatusVisualizer.updateStatus(command, argument);
       System.out.println("Received command " + command + " with argument " + argument);
    }
 }

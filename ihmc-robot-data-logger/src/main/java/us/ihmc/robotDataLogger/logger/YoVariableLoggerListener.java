@@ -249,7 +249,7 @@ public class YoVariableLoggerListener implements YoVariablesUpdatedListener
             
             if(now > (lastStatusUpdateTimestamp + STATUS_PACKET_RATE))
             {
-               
+              
                boolean recordingVideo = false;
                for(int i = 0; i < videoDataLoggers.size(); i++)
                {
@@ -262,11 +262,11 @@ public class YoVariableLoggerListener implements YoVariablesUpdatedListener
                int time = (int) MathTools.clamp(Conversions.nanosecondsToSeconds(now - logStartedTimestamp), 0, DataServerCommand.getMaximumArgumentValue());
                if(recordingVideo)
                {
-                  yoVariableClientInterface.sendCommand(DataServerCommand.LOG_ACTIVE, time);
+                  yoVariableClientInterface.sendCommand(DataServerCommand.LOG_ACTIVE_WITH_CAMERA, time);
                }
                else
                {
-                  yoVariableClientInterface.sendCommand(DataServerCommand.LOG_ACTIVE_WITH_CAMERA, time);                  
+                  yoVariableClientInterface.sendCommand(DataServerCommand.LOG_ACTIVE, time);                  
                }
                
                

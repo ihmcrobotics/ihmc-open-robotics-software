@@ -83,7 +83,7 @@ public enum DataServerCommand
    {
       for (DataServerCommand cmd : values)
       {
-         if (cmd.startsWith(in))
+         if (cmd.isThisCommand(in))
          {
             return cmd;
          }
@@ -116,9 +116,10 @@ public enum DataServerCommand
     * @param test Test buffer, not changed
     * @return true if starts with this command
     */
-   public boolean startsWith(ByteBuf test)
+   public boolean isThisCommand(ByteBuf test)
    {
-      if (test.readableBytes() < content.readableBytes())
+      
+      if(test.readableBytes() != content.readableBytes() && test.readableBytes() != content.readableBytes() + MAX_ARGUMENT_SIZE)
       {
          return false;
       }
@@ -131,6 +132,18 @@ public enum DataServerCommand
          if (in != orig)
          {
             return false;
+         }
+      }
+      
+      if(test.readableBytes() == content.readableBytes() + MAX_ARGUMENT_SIZE)
+      {
+         for(int i = content.readableBytes(); i < test.readableBytes(); i++)
+         {
+            byte in = test.getByte(test.readerIndex() + i);
+            if(in < 48 || in > 57)
+            {
+               return false;
+            }
          }
       }
 

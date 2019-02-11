@@ -1,10 +1,8 @@
 package us.ihmc.robotDataLogger.websocket.command;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import static us.ihmc.robotics.Assert.*;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
@@ -12,28 +10,42 @@ import io.netty.util.CharsetUtil;
 
 public class DataServerCommandTest
 {
-   @Test(timeout = 30000)
+   @Test
    public void testStartsWith()
    {
       ByteBuf str = Unpooled.copiedBuffer("CLEAR_LOG", CharsetUtil.UTF_8);
-      assertTrue(DataServerCommand.CLEAR_LOG.startsWith(str));
-      assertTrue(DataServerCommand.CLEAR_LOG.startsWith(str));
-      assertFalse(DataServerCommand.START_LOG.startsWith(str));
+      assertTrue(DataServerCommand.CLEAR_LOG.isThisCommand(str));
+      assertTrue(DataServerCommand.CLEAR_LOG.isThisCommand(str));
+      assertFalse(DataServerCommand.START_LOG.isThisCommand(str));
       
       
       str = Unpooled.copiedBuffer("NOT_CLEAR_LOG", CharsetUtil.UTF_8);
-      assertFalse(DataServerCommand.CLEAR_LOG.startsWith(str));
+      assertFalse(DataServerCommand.CLEAR_LOG.isThisCommand(str));
       str.readerIndex(4);
-      assertTrue(DataServerCommand.CLEAR_LOG.startsWith(str));
+      assertTrue(DataServerCommand.CLEAR_LOG.isThisCommand(str));
       
       str = Unpooled.copiedBuffer("CLEAR_LOG_GARBAGE", CharsetUtil.UTF_8);
-      assertTrue(DataServerCommand.CLEAR_LOG.startsWith(str));
+      assertFalse(DataServerCommand.CLEAR_LOG.isThisCommand(str));
+      
+      str = Unpooled.copiedBuffer("CLEAR_LOG_GARB", CharsetUtil.UTF_8);
+      assertFalse(DataServerCommand.CLEAR_LOG.isThisCommand(str));
+
+      str = Unpooled.copiedBuffer("CLEAR_LOG56789", CharsetUtil.UTF_8);
+      assertTrue(DataServerCommand.CLEAR_LOG.isThisCommand(str));
+      
+      str = Unpooled.copiedBuffer("CLEAR_LOG5678", CharsetUtil.UTF_8);
+      assertFalse(DataServerCommand.CLEAR_LOG.isThisCommand(str));
       
       str.writerIndex(4);
-      assertFalse(DataServerCommand.CLEAR_LOG.startsWith(str));
+      assertFalse(DataServerCommand.CLEAR_LOG.isThisCommand(str));
+      
+      
+      // Test if startsWith doesn't return false positives if a command starts with another command name
+      str = Unpooled.copiedBuffer("LOG_ACTIVE", CharsetUtil.UTF_8);
+      assertFalse(DataServerCommand.LOG_ACTIVE_WITH_CAMERA.isThisCommand(str));
    }
    
-   @Test(timeout = 3000)
+   @Test
    public void testGetBytes()
    {
       ByteBuf target = Unpooled.buffer(DataServerCommand.MaxCommandSize());
