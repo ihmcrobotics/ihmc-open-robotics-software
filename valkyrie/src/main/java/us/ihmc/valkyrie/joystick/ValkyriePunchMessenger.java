@@ -56,7 +56,7 @@ public class ValkyriePunchMessenger implements HumanoidRobotPunchMessenger, Huma
       jointAngles[index++] = robotSide.negateIfRightSide(0.0); // forearmYaw
       jointAngles[index++] = robotSide.negateIfRightSide(0.0); // wristRoll
       jointAngles[index++] = 0.0; // wristPitch
-      ArmTrajectoryMessage message = HumanoidMessageTools.createArmTrajectoryMessage(robotSide, 0.4, jointAngles);
+      ArmTrajectoryMessage message = HumanoidMessageTools.createArmTrajectoryMessage(robotSide, 0.4 * trajectoryDuration, jointAngles);
       armTrajectoryPublisher.publish(message);
    }
 
