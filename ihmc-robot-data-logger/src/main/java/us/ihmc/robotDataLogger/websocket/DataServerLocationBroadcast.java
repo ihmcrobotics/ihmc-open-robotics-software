@@ -14,6 +14,7 @@ import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import us.ihmc.log.LogTools;
 import us.ihmc.robotDataLogger.Host;
 import us.ihmc.robotDataLogger.StaticHostList;
 
@@ -89,11 +90,18 @@ public abstract class DataServerLocationBroadcast
       List<MulticastSocket> sockets = new ArrayList<MulticastSocket>();
       for (NetworkInterface iface : Collections.list(NetworkInterface.getNetworkInterfaces()))
       {
-         if(iface.isUp() && !iface.isLoopback() && iface.supportsMulticast())
+         try
          {
-            MulticastSocket socket = new MulticastSocket(bindPort);
-            socket.setNetworkInterface(iface);
-            sockets.add(socket);
+            if(iface.isUp() && !iface.isLoopback() && iface.supportsMulticast())
+            {
+               MulticastSocket socket = new MulticastSocket(bindPort);
+               socket.setNetworkInterface(iface);
+               sockets.add(socket);
+            }
+         }
+         catch (IOException e)
+         {
+            LogTools.warn("Cannot add " + iface.getDisplayName() + " to list of broadcast sockets. " + e.getMessage());
          }
       }
       
