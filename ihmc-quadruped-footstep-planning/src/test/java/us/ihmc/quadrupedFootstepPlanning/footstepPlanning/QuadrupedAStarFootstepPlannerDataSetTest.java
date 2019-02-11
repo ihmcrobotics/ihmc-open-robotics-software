@@ -7,11 +7,15 @@ import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.graphSearch.nodeExpans
 import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.graphSearch.nodeExpansion.ParameterBasedNodeExpansion;
 import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.graphSearch.parameters.DefaultFootstepPlannerParameters;
 import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.graphSearch.parameters.FootstepPlannerParameters;
+import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.graphSearch.visualization.QuadrupedAStarFootstepPlannerVisualizer;
 import us.ihmc.quadrupedPlanning.QuadrupedXGaitSettings;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 
 public class QuadrupedAStarFootstepPlannerDataSetTest extends FootstepPlannerDataSetTest
 {
+   private static final boolean activelyVisualize = true;
+   private QuadrupedAStarFootstepPlannerVisualizer visualizer;
+
    public FootstepPlannerType getPlannerType()
    {
       return FootstepPlannerType.A_STAR;
@@ -25,7 +29,11 @@ public class QuadrupedAStarFootstepPlannerDataSetTest extends FootstepPlannerDat
       xGaitSettings.setStanceWidth(0.5);
       FootstepPlannerParameters parameters = new DefaultFootstepPlannerParameters();
       FootstepNodeExpansion expansion = new ParameterBasedNodeExpansion(parameters, xGaitSettings);
-      return QuadrupedAStarFootstepPlanner.createPlanner(parameters, xGaitSettings, null, expansion, registry);
+      if (activelyVisualize)
+         visualizer = new QuadrupedAStarFootstepPlannerVisualizer(null);
+      else
+         visualizer = null;
+      return QuadrupedAStarFootstepPlanner.createPlanner(parameters, xGaitSettings, visualizer, expansion, registry);
    }
 
    @Override
@@ -39,9 +47,10 @@ public class QuadrupedAStarFootstepPlannerDataSetTest extends FootstepPlannerDat
    {
       QuadrupedAStarFootstepPlannerDataSetTest test = new QuadrupedAStarFootstepPlannerDataSetTest();
       String prefix = "unitTestDataSets/test/";
-      VISUALIZE = true;
+      VISUALIZE = false;
       test.setup();
-      test.runAssertionsOnDataset(dataset -> test.runAssertions(dataset), prefix + "20171215_214730_CinderBlockField");
+      test.runAssertionsOnDataset(dataset -> test.runAssertions(dataset), prefix + "20171218_204953_FlatGroundWithWall");
+      test.visualizer.showAndSleep(true);
       ThreadTools.sleepForever();
       test.tearDown();
 

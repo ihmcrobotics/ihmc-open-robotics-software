@@ -14,7 +14,6 @@ public class YoFootstepNode
    private final YoEnum<RobotQuadrant> movingQuadrant;
    private final YoFramePoint2D movingNodePosition;
    private final QuadrantDependentList<YoFramePoint2D> nodePositions = new QuadrantDependentList<>();
-   private final YoDouble nodeYaw;
    private final YoDouble nominalStanceLength;
    private final YoDouble nominalStanceWidth;
 
@@ -23,10 +22,8 @@ public class YoFootstepNode
       movingQuadrant = YoEnum.create("movingQuadrant", RobotQuadrant.class, registry);
       movingNodePosition = new YoFramePoint2D("movingNodePosition", ReferenceFrame.getWorldFrame(), registry);
       movingNodePosition.setToNaN();
-      nodeYaw = new YoDouble("nodeYaw", registry);
       nominalStanceLength = new YoDouble("nominalStanceLength", registry);
       nominalStanceWidth = new YoDouble("nominalStanceWidth", registry);
-      nodeYaw.setToNaN();
       nominalStanceLength.setToNaN();
       nominalStanceWidth.setToNaN();
       for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
@@ -43,7 +40,6 @@ public class YoFootstepNode
       for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
          nodePositions.get(robotQuadrant).set(node.getX(robotQuadrant), node.getY(robotQuadrant));
       movingNodePosition.set(nodePositions.get(movingQuadrant.getEnumValue()));
-      nodeYaw.set(node.getYaw());
       nominalStanceLength.set(node.getNominalStanceLength());
       nominalStanceWidth.set(node.getNominalStanceWidth());
    }
@@ -67,7 +63,7 @@ public class YoFootstepNode
       }
 
       return new FootstepNode(movingQuadrant.getEnumValue(), nodePositions.get(RobotQuadrant.FRONT_LEFT), nodePositions.get(RobotQuadrant.FRONT_RIGHT),
-                              nodePositions.get(RobotQuadrant.HIND_LEFT), nodePositions.get(RobotQuadrant.HIND_RIGHT), nodeYaw.getDoubleValue(),
-                              nominalStanceLength.getDoubleValue(), nominalStanceWidth.getDoubleValue());
+                              nodePositions.get(RobotQuadrant.HIND_LEFT), nodePositions.get(RobotQuadrant.HIND_RIGHT), nominalStanceLength.getDoubleValue(),
+                              nominalStanceWidth.getDoubleValue());
    }
 }

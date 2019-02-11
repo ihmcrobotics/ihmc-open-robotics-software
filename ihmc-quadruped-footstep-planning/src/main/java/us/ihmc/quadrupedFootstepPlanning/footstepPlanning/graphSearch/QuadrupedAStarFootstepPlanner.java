@@ -157,7 +157,7 @@ public class QuadrupedAStarFootstepPlanner implements QuadrupedBodyPathAndFootst
       snapper.addSnapData(startNode, new FootstepNodeSnapData(startNodeSnapTransforms));
       nodeChecker.addStartNode(startNode, startNodeSnapTransforms);
 
-      FramePose2DReadOnly startPose = new FramePose2D(worldFrame, startNode.getOrComputeMidStancePoint(), startNode.getYaw());
+      FramePose2DReadOnly startPose = new FramePose2D(worldFrame, startNode.getOrComputeMidStancePoint(), startNode.getNominalYaw());
       startAndGoalListeners.parallelStream().forEach(listener -> listener.setInitialPose(startPose));
    }
 
@@ -168,7 +168,7 @@ public class QuadrupedAStarFootstepPlanner implements QuadrupedBodyPathAndFootst
 
       goalNode = getNodeFromTarget(goal);
 
-      goalPoseInWorld.set(goalNode.getOrComputeMidStancePoint(), goalNode.getYaw());
+      goalPoseInWorld.set(goalNode.getOrComputeMidStancePoint(), goalNode.getNominalYaw());
       startAndGoalListeners.parallelStream().forEach(listener -> listener.setGoalPose(goalPoseInWorld));
    }
 
@@ -193,7 +193,7 @@ public class QuadrupedAStarFootstepPlanner implements QuadrupedBodyPathAndFootst
          hindRightStepPosition.changeFrameAndProjectToXYPlane(worldFrame);
 
          nodeToReturn = new FootstepNode(defaultFirstQuadrant, frontLeftStepPosition, frontRightStepPosition, hindLeftStepPosition, hindRightStepPosition,
-                                         goalPose.getYaw(), xGaitSettings.getStanceLength(), xGaitSettings.getStanceWidth());
+                                         xGaitSettings.getStanceLength(), xGaitSettings.getStanceWidth());
       }
       else if (target.getTargetType().equals(FootstepPlannerTargetType.FOOTSTEPS))
       {
@@ -213,7 +213,7 @@ public class QuadrupedAStarFootstepPlanner implements QuadrupedBodyPathAndFootst
 
          nodeToReturn = new FootstepNode(defaultFirstQuadrant, frontLeftGoalPosition.getX(), frontLeftGoalPosition.getY(), frontRightGoalPosition.getX(),
                                          frontRightGoalPosition.getY(), hindLeftGoalPosition.getX(), hindLeftGoalPosition.getY(), hindRightGoalPosition.getX(),
-                                         hindRightGoalPosition.getY(), yaw, xGaitSettings.getStanceLength(), xGaitSettings.getStanceWidth());
+                                         hindRightGoalPosition.getY(), xGaitSettings.getStanceLength(), xGaitSettings.getStanceWidth());
       }
 
       return nodeToReturn;
