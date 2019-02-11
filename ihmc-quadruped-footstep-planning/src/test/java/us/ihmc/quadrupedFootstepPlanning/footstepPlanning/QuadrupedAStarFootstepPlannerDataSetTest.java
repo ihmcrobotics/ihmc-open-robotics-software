@@ -13,7 +13,7 @@ import us.ihmc.yoVariables.registry.YoVariableRegistry;
 
 public class QuadrupedAStarFootstepPlannerDataSetTest extends FootstepPlannerDataSetTest
 {
-   private static final boolean activelyVisualize = true;
+   private static final boolean activelyVisualize = false;
    private QuadrupedAStarFootstepPlannerVisualizer visualizer;
 
    public FootstepPlannerType getPlannerType()
@@ -47,10 +47,11 @@ public class QuadrupedAStarFootstepPlannerDataSetTest extends FootstepPlannerDat
    {
       QuadrupedAStarFootstepPlannerDataSetTest test = new QuadrupedAStarFootstepPlannerDataSetTest();
       String prefix = "unitTestDataSets/test/";
-      VISUALIZE = false;
+      VISUALIZE = true;
       test.setup();
-      test.runAssertionsOnDataset(dataset -> test.runAssertions(dataset), prefix + "20171218_204953_FlatGroundWithWall");
-      test.visualizer.showAndSleep(true);
+      test.runAssertionsOnDataset(dataset -> test.runAssertions(dataset), prefix + "20171115_171243_SimplePlaneAndWall");
+      if (activelyVisualize)
+         test.visualizer.showAndSleep(true);
       ThreadTools.sleepForever();
       test.tearDown();
 

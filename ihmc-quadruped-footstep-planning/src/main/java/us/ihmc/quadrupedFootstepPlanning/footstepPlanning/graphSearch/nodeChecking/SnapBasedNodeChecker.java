@@ -72,40 +72,38 @@ public class SnapBasedNodeChecker extends FootstepNodeChecker
 
 
       RobotQuadrant movingQuadrant = node.getMovingQuadrant();
-//      for (RobotQuadrant movingQuadrant : RobotQuadrant.values)
-//      {
-         RigidBodyTransform previousFootSnapTransform = previousNodeSnapData.getSnapTransform(movingQuadrant);
-         RigidBodyTransform snapTransform = snapData.getSnapTransform(movingQuadrant);
+      RigidBodyTransform previousFootSnapTransform = previousNodeSnapData.getSnapTransform(movingQuadrant);
+      RigidBodyTransform snapTransform = snapData.getSnapTransform(movingQuadrant);
 
-         Point3D stepPosition = new Point3D(node.getX(movingQuadrant), node.getY(movingQuadrant), 0.0);
-         Point3D previousStepPosition = new Point3D(previousNode.getX(movingQuadrant), previousNode.getY(movingQuadrant), 0.0);
+      Point3D stepPosition = new Point3D(node.getX(movingQuadrant), node.getY(movingQuadrant), 0.0);
+      Point3D previousStepPosition = new Point3D(previousNode.getX(movingQuadrant), previousNode.getY(movingQuadrant), 0.0);
 
-         snapTransform.transform(stepPosition);
-         previousFootSnapTransform.transform(previousStepPosition);
+      snapTransform.transform(stepPosition);
+      previousFootSnapTransform.transform(previousStepPosition);
 
-         double heightChange = Math.abs(stepPosition.getZ() - previousStepPosition.getZ());
-         if (heightChange > parameters.getMaximumStepChangeZ())
+      double heightChange = Math.abs(stepPosition.getZ() - previousStepPosition.getZ());
+      if (heightChange > parameters.getMaximumStepChangeZ())
+      {
+         if (DEBUG)
          {
-            if (DEBUG)
-            {
-               LogTools.debug("Too much height difference (" + Math.round(100.0 * heightChange) + "cm) to previous node:\n" + node);
-            }
-            rejectNode(node, previousNode, QuadrupedFootstepPlannerNodeRejectionReason.STEP_TOO_HIGH_OR_LOW);
-            return false;
+            LogTools.debug("Too much height difference (" + Math.round(100.0 * heightChange) + "cm) to previous node:\n" + node);
          }
+         rejectNode(node, previousNode, QuadrupedFootstepPlannerNodeRejectionReason.STEP_TOO_HIGH_OR_LOW);
+         return false;
+      }
 
 
-         if (hasPlanarRegions() && isObstacleBetweenSteps(stepPosition, previousStepPosition,
-                                                          snapper.getOrCreateNearbyRegions(node.getRoundedX(movingQuadrant), node.getRoundedY(movingQuadrant)),
-                                                          parameters.getBodyGroundClearance()))
+      if (hasPlanarRegions() && isObstacleBetweenSteps(stepPosition, previousStepPosition,
+                                                       snapper.getOrCreateNearbyRegions(node.getRoundedX(movingQuadrant), node.getRoundedY(movingQuadrant)),
+                                                       parameters.getBodyGroundClearance()))
+      {
+         if (DEBUG)
          {
-            if (DEBUG)
-            {
-               LogTools.debug("Found a obstacle between the nodes " + node + " and " + previousNode);
-            }
-            rejectNode(node, previousNode, QuadrupedFootstepPlannerNodeRejectionReason.OBSTACLE_BLOCKING_STEP);
-            return false;
+            LogTools.debug("Found a obstacle between the nodes " + node + " and " + previousNode);
          }
+         rejectNode(node, previousNode, QuadrupedFootstepPlannerNodeRejectionReason.OBSTACLE_BLOCKING_STEP);
+         return false;
+      }
 
          /* TODO check between all the feet
          if (hasPlanarRegions() && isObstacleBetweenFeet(stepPosition, previousStepPosition,
@@ -118,9 +116,8 @@ public class SnapBasedNodeChecker extends FootstepNodeChecker
             }
             rejectNode(node, previousNode, QuadrupedFootstepPlannerNodeRejectionReason.OBSTACLE_BLOCKING_BODY);
             return false;
-         }
-         */
-//      }
+       }
+      */
 
 
 
