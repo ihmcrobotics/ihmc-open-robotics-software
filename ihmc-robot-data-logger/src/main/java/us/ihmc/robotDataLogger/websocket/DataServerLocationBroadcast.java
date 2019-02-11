@@ -92,7 +92,7 @@ public abstract class DataServerLocationBroadcast
       {
          try
          {
-            if(iface.isUp() && !iface.isLoopback() && iface.supportsMulticast())
+            if(iface.isUp() && !iface.isLoopback() && iface.supportsMulticast() && !iface.isVirtual())
             {
                MulticastSocket socket = new MulticastSocket(bindPort);
                socket.setNetworkInterface(iface);
