@@ -85,7 +85,7 @@ public class DataServerLocationBroadcastSender extends DataServerLocationBroadca
       }
       catch (IOException e)
       {
-         LogTools.warn(e.getMessage());
+         e.printStackTrace();
       }
    }
 
