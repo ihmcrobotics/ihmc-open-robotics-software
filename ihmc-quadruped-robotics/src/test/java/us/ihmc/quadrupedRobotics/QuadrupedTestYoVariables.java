@@ -15,14 +15,16 @@ public abstract class QuadrupedTestYoVariables
    private final YoDouble robotBodyZ;
    private final YoDouble robotBodyYaw;
 
+   private final YoBoolean isFallDetected;
+
    private final QuadrantDependentList<YoBoolean> controllerFootSwitches = new QuadrantDependentList<>();
    private final QuadrantDependentList<YoBoolean> footSwitches = new QuadrantDependentList<>();
    private final QuadrantDependentList<YoDouble> solePositionXs = new QuadrantDependentList<>();
    private final QuadrantDependentList<YoDouble> solePositionYs = new QuadrantDependentList<>();
    private final QuadrantDependentList<YoDouble> solePositionZs = new QuadrantDependentList<>();
-   
+
    private final YoBoolean limitJointTorques;
-   
+
    public QuadrupedTestYoVariables(SimulationConstructionSet scs)
    {
       yoTime = (YoDouble) scs.getVariable("t");
@@ -31,7 +33,9 @@ public abstract class QuadrupedTestYoVariables
       robotBodyY = (YoDouble) scs.getVariable("q_y");
       robotBodyZ = (YoDouble) scs.getVariable("q_z");
       robotBodyYaw = (YoDouble) scs.getVariable("q_yaw");
-      
+
+      isFallDetected = (YoBoolean) scs.getVariable("isFallDetected");
+
       for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
       {
          controllerFootSwitches.set(robotQuadrant, (YoBoolean) scs.getVariable(robotQuadrant.getCamelCaseName() + "QuadrupedTouchdownFootSwitch_controllerThinksHasTouchedDown"));
@@ -40,7 +44,7 @@ public abstract class QuadrupedTestYoVariables
          solePositionYs.set(robotQuadrant, (YoDouble) scs.getVariable(robotQuadrant.getCamelCaseName() + "SolePositionY"));
          solePositionZs.set(robotQuadrant, (YoDouble) scs.getVariable(robotQuadrant.getCamelCaseName() + "SolePositionZ"));
       }
-      
+
       limitJointTorques = (YoBoolean) scs.getVariable("limitJointTorques");
    }
 
@@ -97,5 +101,10 @@ public abstract class QuadrupedTestYoVariables
    public YoBoolean getLimitJointTorques()
    {
       return limitJointTorques;
+   }
+
+   public YoBoolean getIsFallDetected()
+   {
+      return isFallDetected;
    }
 }

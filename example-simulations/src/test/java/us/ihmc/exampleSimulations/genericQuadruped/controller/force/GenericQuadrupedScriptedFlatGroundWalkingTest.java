@@ -2,15 +2,13 @@ package us.ihmc.exampleSimulations.genericQuadruped.controller.force;
 
 import controller_msgs.msg.dds.QuadrupedTimedStepMessage;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.Tag;
-import org.junit.jupiter.api.Disabled;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.exampleSimulations.genericQuadruped.GenericQuadrupedTestFactory;
-import us.ihmc.robotics.time.TimeInterval;
 import us.ihmc.quadrupedCommunication.QuadrupedMessageTools;
 import us.ihmc.quadrupedRobotics.QuadrupedTestFactory;
 import us.ihmc.quadrupedRobotics.controller.force.QuadrupedScriptedFlatGroundWalkingTest;
 import us.ihmc.robotics.robotSide.RobotQuadrant;
+import us.ihmc.robotics.time.TimeInterval;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner;
 
 import java.util.ArrayList;

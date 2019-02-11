@@ -19,6 +19,7 @@ import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.Pane;
 import javafx.stage.Stage;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
+import us.ihmc.communication.controllerAPI.RobotLowLevelMessenger;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI;
 import us.ihmc.footstepPlanning.graphSearch.parameters.DefaultFootstepPlanningParameters;
@@ -244,6 +245,11 @@ public class FootstepPlannerUI
 
       primaryStage.setScene(mainScene);
       primaryStage.setOnCloseRequest(event -> stop());
+   }
+
+   public void setRobotLowLevelMessenger(RobotLowLevelMessenger robotLowLevelMessenger)
+   {
+      uiRobotController.setRobotLowLevelMessenger(robotLowLevelMessenger);
    }
 
    public JavaFXMessager getMessager()

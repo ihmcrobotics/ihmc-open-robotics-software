@@ -122,6 +122,16 @@ public class AtlasRobotModel implements DRCRobotModel, SDFDescriptionMutator
 
    private final RobotDescription robotDescription;
 
+   public AtlasRobotModel(AtlasRobotVersion atlasVersion)
+   {
+      this(atlasVersion, RobotTarget.SCS);
+   }
+
+   public AtlasRobotModel(AtlasRobotVersion atlasVersion, RobotTarget target)
+   {
+      this(atlasVersion, target, false);
+   }
+
    public AtlasRobotModel(AtlasRobotVersion atlasVersion, RobotTarget target, boolean headless)
    {
       this(atlasVersion, target, headless, null, false, false);

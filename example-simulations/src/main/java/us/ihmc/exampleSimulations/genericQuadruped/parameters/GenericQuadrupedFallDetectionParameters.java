@@ -32,6 +32,6 @@ public class GenericQuadrupedFallDetectionParameters implements QuadrupedFallDet
    @Override
    public double getMaxHeightError()
    {
-      return 0.1;
+      return 0.15;
    }
 }

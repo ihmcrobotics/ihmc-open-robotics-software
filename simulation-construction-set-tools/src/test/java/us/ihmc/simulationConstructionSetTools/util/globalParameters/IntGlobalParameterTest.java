@@ -7,6 +7,8 @@ import org.junit.jupiter.api.Test;
 
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Disabled;
+
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static us.ihmc.robotics.Assert.*;
 
 public class IntGlobalParameterTest
@@ -71,7 +73,7 @@ public class IntGlobalParameterTest
       @SuppressWarnings("unused")
       IntGlobalParameter invalidChild = new IntGlobalParameter("invalidChild", "test description", new GlobalParameter[] {parent}, null);
 
-      parent.set(1);
+      assertThrows(RuntimeException.class, () -> parent.set(1));
    }
 
 	@Test
@@ -80,6 +82,6 @@ public class IntGlobalParameterTest
       IntGlobalParameter parent = new IntGlobalParameter("parent", "", 0, null);
       IntGlobalParameter child = new IntGlobalParameter("child", "", new GlobalParameter[] {parent}, null);
 
-      child.set(2, "Shouldn't be able to change this!");
+      assertThrows(RuntimeException.class, () -> child.set(2, "Shouldn't be able to change this!"));
    }
 }
