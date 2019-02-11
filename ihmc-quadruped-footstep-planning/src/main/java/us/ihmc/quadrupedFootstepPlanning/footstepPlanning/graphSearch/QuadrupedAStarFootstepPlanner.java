@@ -11,10 +11,10 @@ import us.ihmc.euclid.referenceFrame.*;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePose2DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DReadOnly;
 import us.ihmc.euclid.transform.RigidBodyTransform;
-import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
+import us.ihmc.log.LogTools;
 import us.ihmc.pathPlanning.visibilityGraphs.tools.BodyPathPlan;
 import us.ihmc.pathPlanning.visibilityGraphs.tools.PlanarRegionTools;
 import us.ihmc.quadrupedBasics.gait.QuadrupedTimedOrientedStep;
@@ -253,7 +253,7 @@ public class QuadrupedAStarFootstepPlanner implements QuadrupedBodyPathAndFootst
 
       if (debug)
       {
-         PrintTools.info("A* Footstep planning statistics for " + result);
+         LogTools.info("A* Footstep planning statistics for " + result);
          System.out.println("   Finished planning after " + Precision.round(planningTime.getDoubleValue(), 2) + " seconds.");
          System.out.println("   Expanded each node to an average of " + numberOfExpandedNodes.getLongValue() + " children nodes.");
          System.out.println("   Planning took a total of " + iterationCount.getLongValue() + " iterations.");
@@ -293,8 +293,8 @@ public class QuadrupedAStarFootstepPlanner implements QuadrupedBodyPathAndFootst
          timeInterval.setEndTime(currentTime);
 
          Point3D position = new Point3D(node.getX(robotQuadrant), node.getY(robotQuadrant), 0.0);
-         FootstepNodeSnapData snapData = snapper.getSnapData(node);
-         //         position.applyTransform(snapData.getSnapTransform(robotQuadrant));
+         FootstepNodeSnapData snapData = snapper.snapFootstepNode(path.get(i));
+         position.applyTransform(snapData.getSnapTransform(robotQuadrant));
 
          newStep.setGoalPosition(position);
 
