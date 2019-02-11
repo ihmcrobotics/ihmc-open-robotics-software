@@ -249,7 +249,7 @@ public abstract class AvatarHumanoidKinematicsToolboxControllerTest implements M
          double solutionQuality = toolboxController.getSolution().getSolutionQuality();
          if (VERBOSE)
             LogTools.info("Solution quality: " + solutionQuality);
-         assertTrue("Poor solution quality: " + solutionQuality, solutionQuality < 2.0e-3);
+         assertTrue("Poor solution quality: " + solutionQuality, solutionQuality < 3.0e-3);
       }
    }
 
@@ -354,8 +354,7 @@ public abstract class AvatarHumanoidKinematicsToolboxControllerTest implements M
             FramePoint3D desiredPosition = new FramePoint3D(rigidBody.getBodyFixedFrame());
             desiredPosition.changeFrame(worldFrame);
             KinematicsToolboxRigidBodyMessage message = MessageTools.createKinematicsToolboxRigidBodyMessage(rigidBody, desiredPosition);
-            message.getAngularWeightMatrix().set(MessageTools.createWeightMatrix3DMessage(20.0));
-            message.getLinearWeightMatrix().set(MessageTools.createWeightMatrix3DMessage(20.0));
+            message.getLinearWeightMatrix().set(MessageTools.createWeightMatrix3DMessage(1.0));
             commandInputManager.submitMessage(message);
          }
 
