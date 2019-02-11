@@ -1,6 +1,6 @@
 package us.ihmc.footstepPlanning;
 
-import static us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI.FootstepPlanTopic;
+import static us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI.FootstepPlanResponseTopic;
 import static us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI.PlannerTypeTopic;
 import static us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI.PlanningResultTopic;
 
@@ -12,13 +12,13 @@ import org.junit.jupiter.api.AfterEach;
 import us.ihmc.robotics.Assert;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import controller_msgs.msg.dds.FootstepDataListMessage;
 
 import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.stage.Stage;
 import us.ihmc.commons.Conversions;
 import us.ihmc.commons.thread.ThreadTools;
-import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Disabled;
 import us.ihmc.commons.ContinuousIntegrationTools;
 import us.ihmc.euclid.tuple3D.Point3D;
@@ -53,7 +53,7 @@ public abstract class FootstepPlannerDataSetTest
    private final AtomicReference<Boolean> plannerReceivedPlan = new AtomicReference<>(false);
    private final AtomicReference<Boolean> plannerReceivedResult = new AtomicReference<>(false);
 
-   private AtomicReference<FootstepPlan> uiFootstepPlanReference;
+   private AtomicReference<FootstepDataListMessage> uiFootstepPlanReference;
    private AtomicReference<FootstepPlanningResult> uiPlanningResultReference;
    private final AtomicReference<Boolean> uiReceivedPlan = new AtomicReference<>(false);
    private final AtomicReference<Boolean> uiReceivedResult = new AtomicReference<>(false);
@@ -96,10 +96,10 @@ public abstract class FootstepPlannerDataSetTest
 
       ThreadTools.sleep(1000);
 
-      messager.registerTopicListener(FootstepPlanTopic, request -> uiReceivedPlan.set(true));
+      messager.registerTopicListener(FootstepPlanResponseTopic, request -> uiReceivedPlan.set(true));
       messager.registerTopicListener(PlanningResultTopic, request -> uiReceivedResult.set(true));
 
-      uiFootstepPlanReference = messager.createInput(FootstepPlanTopic);
+      uiFootstepPlanReference = messager.createInput(FootstepPlanResponseTopic);
       uiPlanningResultReference = messager.createInput(PlanningResultTopic);
    }
 
@@ -368,7 +368,7 @@ public abstract class FootstepPlannerDataSetTest
       {
          if (DEBUG)
             LogTools.info("Received a plan from the UI.");
-         actualPlan.set(uiFootstepPlanReference.getAndSet(null));
+         actualPlan.set(FootstepDataMessageConverter.convertToFootstepPlan(uiFootstepPlanReference.getAndSet(null)));
          uiReceivedPlan.set(false);
       }
 

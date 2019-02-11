@@ -23,7 +23,6 @@ import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.Co
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.ControllerAPIDefinition;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.HighLevelHumanoidControllerFactory;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.WalkingProvider;
-import us.ihmc.commons.PrintTools;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.controllerAPI.CommandInputManager;
 import us.ihmc.communication.controllerAPI.StatusMessageOutputManager;
@@ -31,10 +30,12 @@ import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelControllerName;
 import us.ihmc.humanoidRobotics.communication.subscribers.PelvisPoseCorrectionCommunicator;
 import us.ihmc.humanoidRobotics.communication.subscribers.PelvisPoseCorrectionCommunicatorInterface;
+import us.ihmc.log.LogTools;
 import us.ihmc.multicastLogDataProtocol.modelLoaders.LogModelProvider;
 import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
 import us.ihmc.robotDataLogger.YoVariableServer;
 import us.ihmc.robotDataLogger.logger.LogSettings;
+import us.ihmc.robotDataLogger.util.JVMStatisticsGenerator;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.ros2.RealtimeRos2Node;
@@ -398,6 +399,15 @@ public class ValkyrieRosControlController extends IHMCWholeRobotControlJavaBridg
       sensorReaderFactory.setupLowLevelControlCommunication(robotName, estimatorRealtimeRos2Node);
 
       /*
+       * Setup and start the JVM memory statistics
+       */
+
+      PeriodicRealtimeThreadSchedulerFactory schedulerFactory = new PeriodicRealtimeThreadSchedulerFactory(ValkyriePriorityParameters.JVM_STATISTICS_PRIORITY);
+      JVMStatisticsGenerator jvmStatisticsGenerator = new JVMStatisticsGenerator(yoVariableServer, schedulerFactory);
+      jvmStatisticsGenerator.addVariablesToStatisticsGenerator(yoVariableServer);
+      jvmStatisticsGenerator.start();
+
+      /*
        * Connect all servers
        */
       estimatorRealtimeRos2Node.spin();
@@ -406,7 +416,7 @@ public class ValkyrieRosControlController extends IHMCWholeRobotControlJavaBridg
 
       if (isGazebo)
       {
-         PrintTools.info(ValkyrieRosControlController.class, "Running with blocking synchronous execution between estimator and controller");
+         LogTools.info("Running with blocking synchronous execution between estimator and controller");
          SynchronousMultiThreadedRobotController coordinator = new SynchronousMultiThreadedRobotController(estimatorThread, timestampProvider);
          coordinator.addController(controllerThread, (int) (robotModel.getControllerDT() / robotModel.getEstimatorDT()));
 
@@ -414,7 +424,7 @@ public class ValkyrieRosControlController extends IHMCWholeRobotControlJavaBridg
       }
       else
       {
-         PrintTools.info(ValkyrieRosControlController.class, "Running with multi-threaded RT threads for estimator and controller");
+         LogTools.info("Running with multi-threaded RT threads for estimator and controller");
          MultiThreadedRealTimeRobotController coordinator = new MultiThreadedRealTimeRobotController(estimatorThread);
          if (valkyrieAffinity.setAffinity())
          {
