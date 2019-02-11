@@ -142,7 +142,7 @@ public class FootRotationHelper
    {
       if (footPolygon.intersectionWith(lineOfRotation, intersection1ToPack, intersection2ToPack) < 2)
       {
-         LogTools.warn("Line of rotation does not fully intersect the support plygon.");
+         LogTools.warn("Line of rotation does not fully intersect the support polygon.");
          return false;
       }
       if (intersection1ToPack.epsilonEquals(intersection2ToPack, 1.0e-5))
