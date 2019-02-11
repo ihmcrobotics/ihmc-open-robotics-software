@@ -89,7 +89,7 @@ public abstract class DataServerLocationBroadcast
       List<MulticastSocket> sockets = new ArrayList<MulticastSocket>();
       for (NetworkInterface iface : Collections.list(NetworkInterface.getNetworkInterfaces()))
       {
-         if(iface.isUp() && !iface.isLoopback())
+         if(iface.isUp() && !iface.isLoopback() && iface.supportsMulticast())
          {
             MulticastSocket socket = new MulticastSocket(bindPort);
             socket.setNetworkInterface(iface);
