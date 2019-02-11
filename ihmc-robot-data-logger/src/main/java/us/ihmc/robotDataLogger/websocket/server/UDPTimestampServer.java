@@ -1,11 +1,13 @@
 package us.ihmc.robotDataLogger.websocket.server;
 
 import java.io.IOException;
-import java.net.DatagramPacket;
-import java.net.DatagramSocket;
 import java.net.InetAddress;
-import java.net.SocketException;
+import java.net.InetSocketAddress;
+import java.net.SocketAddress;
 import java.nio.ByteBuffer;
+import java.nio.channels.DatagramChannel;
+
+import us.ihmc.log.LogTools;
 
 public class UDPTimestampServer
 {
@@ -13,26 +15,32 @@ public class UDPTimestampServer
    
    private final Object lock = new Object();
    
-   private final DatagramSocket serverSocket ;
-   private final byte[] sendData = new byte[12];
-   private final ByteBuffer sendDataBuffer = ByteBuffer.wrap(sendData);
-   private final DatagramPacket sendPacket = new DatagramPacket(sendData, sendData.length);
+   private final DatagramChannel channel;
    
-   private InetAddress address;
-   private int port;
+   private final ByteBuffer sendDataBuffer = ByteBuffer.allocateDirect(12);
+   
+   private SocketAddress address;
    private boolean active = false;
    
-   public UDPTimestampServer() throws SocketException
+   public UDPTimestampServer() throws IOException
    {
-      serverSocket = new DatagramSocket();
+      channel = DatagramChannel.open();
+      channel.configureBlocking(false);
    }
    
    public void startSending(InetAddress target, int port)
    {
       synchronized (lock)
       {
-         this.address = target;
-         this.port = port;
+         this.address = new InetSocketAddress(target, port);
+         try
+         {
+            channel.connect(address);
+         }
+         catch (IOException e)
+         {
+            LogTools.warn("Cannot start UDP timestamp server: " + e.getMessage());
+         }
          active = true;         
       }
    }
@@ -44,13 +52,15 @@ public class UDPTimestampServer
       {
          if(active)
          {
-            sendDataBuffer.putInt(0, TIMESTAMP_HEADER);
-            sendDataBuffer.putLong(4, timestamp);
-            sendPacket.setAddress(address);
-            sendPacket.setPort(port);
+            sendDataBuffer.clear();
+            sendDataBuffer.putInt(TIMESTAMP_HEADER);
+            sendDataBuffer.putLong(timestamp);
+            sendDataBuffer.flip();
+            
+            
             try
             {
-               serverSocket.send(sendPacket);
+               channel.write(sendDataBuffer);
             }
             catch (IOException e)
             {
@@ -65,7 +75,14 @@ public class UDPTimestampServer
       synchronized(lock)
       {
          active = false;
-         serverSocket.close();
+         try
+         {
+            channel.close();
+         }
+         catch (IOException e)
+         {
+            e.printStackTrace();
+         }
       }
    }
 }
