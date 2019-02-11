@@ -1,5 +1,6 @@
 package us.ihmc.quadrupedFootstepPlanning.footstepPlanning.graphSearch.graph;
 
+import gnu.trove.list.array.TIntArrayList;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Disabled;
@@ -9,6 +10,8 @@ import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
 import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.graphSearch.FootstepPlanningRandomTools;
 import us.ihmc.robotics.robotSide.RobotQuadrant;
 
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Random;
 
 import static us.ihmc.robotics.Assert.*;
@@ -55,7 +58,16 @@ public class FootstepNodeTest
          nodeA = new FootstepNode(robotQuadrant, frontLeft, frontRight, hindLeft, hindRight, 1.5, 0.5);
          nodeB = new FootstepNode(robotQuadrant, frontLeft, otherFrontRight, otherHindLeft, otherHindRight, 1.5, 0.5);
 
-         assertTrue(nodeA.quadrantGeometricallyEquals(nodeB));
+         assertTrue("number : " + i, nodeA.quadrantGeometricallyEquals(nodeB));
+
+         TIntArrayList expandedNodes = new TIntArrayList();
+
+         assertFalse("number : " + i, expandedNodes.contains(nodeB.hashCode()));
+
+         expandedNodes.add(nodeA.hashCode());
+
+         assertEquals("number : " + i, nodeA.hashCode(), nodeB.hashCode());
+         assertTrue("number : " + i, expandedNodes.contains(nodeB.hashCode()));
       }
    }
 }
