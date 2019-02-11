@@ -11,6 +11,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Consumer;
 
+import us.ihmc.commons.Conversions;
+import us.ihmc.commons.MathTools;
 import us.ihmc.idl.IDLSequence;
 import us.ihmc.idl.serializers.extra.YAMLSerializer;
 import us.ihmc.log.LogTools;
@@ -32,6 +34,8 @@ import us.ihmc.yoVariables.variable.YoVariable;
 public class YoVariableLoggerListener implements YoVariablesUpdatedListener
 {
    private static final int FLUSH_EVERY_N_PACKETS = 250;
+   private static final long STATUS_PACKET_RATE = Conversions.secondsToNanoseconds(5.0);
+   private static final long VIDEO_RECORDING_TIMEOUT = Conversions.secondsToNanoseconds(1.0);
    
    public static final String propertyFile = "robotData.log";
    private static final String handshakeFilename = "handshake.yaml";
@@ -78,6 +82,12 @@ public class YoVariableLoggerListener implements YoVariablesUpdatedListener
    private List<JointState> jointStates;
    private ByteBuffer dataBuffer;
    private LongBuffer dataBufferAsLong;
+   
+   
+   private YoVariableClientInterface yoVariableClientInterface = null;
+   
+   private long lastStatusUpdateTimestamp = 0;
+   private long logStartedTimestamp = 0;
    
    public YoVariableLoggerListener(File tempDirectory, File finalDirectory, String timestamp, Announcement request, YoVariableLoggerOptions options, Consumer<Announcement> doneListener)
    {
@@ -216,10 +226,51 @@ public class YoVariableLoggerListener implements YoVariablesUpdatedListener
                {
                   yoVariableSummarizer.update();
                }
+
+               updateStatus();
             }
             catch (IOException e)
             {
                throw new RuntimeException(e);
+            }
+         }
+         
+      }
+      
+   }
+
+   private void updateStatus()
+   {
+      synchronized (synchronizer)
+      {
+         if(yoVariableClientInterface != null)
+         {
+            long now = System.nanoTime();
+            
+            if(now > (lastStatusUpdateTimestamp + STATUS_PACKET_RATE))
+            {
+               
+               boolean recordingVideo = false;
+               for(int i = 0; i < videoDataLoggers.size(); i++)
+               {
+                  if((videoDataLoggers.get(i).getLastFrameReceivedTimestamp() + VIDEO_RECORDING_TIMEOUT) > now)
+                  {
+                     recordingVideo = true;
+                  }
+               }
+               
+               int time = (int) MathTools.clamp(Conversions.nanosecondsToSeconds(now - logStartedTimestamp), 0, DataServerCommand.getMaximumArgumentValue());
+               if(recordingVideo)
+               {
+                  yoVariableClientInterface.sendCommand(DataServerCommand.LOG_ACTIVE, time);
+               }
+               else
+               {
+                  yoVariableClientInterface.sendCommand(DataServerCommand.LOG_ACTIVE_WITH_CAMERA, time);                  
+               }
+               
+               
+               lastStatusUpdateTimestamp = now;
             }
          }
       }
@@ -379,44 +430,50 @@ public class YoVariableLoggerListener implements YoVariablesUpdatedListener
          {
             throw new RuntimeException(e);
          }
-      }
-
-      if (!options.getDisableVideo())
-      {
-         for (CameraAnnouncement camera : cameras)
+         
+      
+         if (!options.getDisableVideo())
          {
-            try
+            for (CameraAnnouncement camera : cameras)
             {
-               switch(camera.getType())
+               try
                {
-               case CAPTURE_CARD:
-                  videoDataLoggers.add(new BlackmagicVideoDataLogger(camera.getNameAsString(), tempDirectory, logProperties, Byte.parseByte(camera.getIdentifierAsString()), options));
-                  break;
-               case NETWORK_STREAM:
-                  videoDataLoggers.add(new NetworkStreamVideoDataLogger(tempDirectory, logProperties, LogParticipantSettings.videoDomain, camera.getIdentifierAsString()));
-                  break;
+                  switch(camera.getType())
+                  {
+                  case CAPTURE_CARD:
+                     videoDataLoggers.add(new BlackmagicVideoDataLogger(camera.getNameAsString(), tempDirectory, logProperties, Byte.parseByte(camera.getIdentifierAsString()), options));
+                     break;
+                  case NETWORK_STREAM:
+                     videoDataLoggers.add(new NetworkStreamVideoDataLogger(tempDirectory, logProperties, LogParticipantSettings.videoDomain, camera.getIdentifierAsString()));
+                     break;
+                  }
+               }
+               catch (IOException e)
+               {
+                  System.err.println("Cannot start video data logger");
+                  e.printStackTrace();
                }
             }
-            catch (IOException e)
-            {
-               System.err.println("Cannot start video data logger");
-               e.printStackTrace();
-            }
          }
+         
+         // Write data to file, force it to exist
+         try
+         {
+            logProperties.store();
+      
+            dataChannel.force(true);
+            indexChannel.force(true);
+         }
+         catch (IOException e)
+         {
+            e.printStackTrace();
+         }
+
+         this.yoVariableClientInterface = yoVariableClientInterface;
+         
+         logStartedTimestamp = System.nanoTime();
       }
       
-      // Write data to file, force it to exist
-      try
-      {
-         logProperties.store();
-
-         dataChannel.force(true);
-         indexChannel.force(true);
-      }
-      catch (IOException e)
-      {
-         e.printStackTrace();
-      }
    }
 
    @Override
@@ -463,6 +520,8 @@ public class YoVariableLoggerListener implements YoVariablesUpdatedListener
       synchronized (synchronizer)
       {
          clearingLog = false;
+         
+         logStartedTimestamp = System.nanoTime();
       }
    }
 
