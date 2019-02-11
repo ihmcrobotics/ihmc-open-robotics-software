@@ -72,17 +72,17 @@ public class FootstepNode
       this.nominalStanceLength = nominalStanceLength;
       this.nominalStanceWidth = nominalStanceWidth;
 
-      int xFrontLeftIndex = (int) Math.round(frontLeftX / gridSizeXY);
-      int yFrontLeftIndex = (int) Math.round(frontLeftY / gridSizeXY);
+      int xFrontLeftIndex = snapToGrid(frontLeftX);
+      int yFrontLeftIndex = snapToGrid(frontLeftY);
 
-      int xFrontRightIndex = (int) Math.round(frontRightX / gridSizeXY);
-      int yFrontRightIndex = (int) Math.round(frontRightY / gridSizeXY);
+      int xFrontRightIndex = snapToGrid(frontRightX);
+      int yFrontRightIndex = snapToGrid(frontRightY);
 
-      int xHindLeftIndex = (int) Math.round(hindLeftX / gridSizeXY);
-      int yHindLeftIndex = (int) Math.round(hindLeftY / gridSizeXY);
+      int xHindLeftIndex = snapToGrid(hindLeftX);
+      int yHindLeftIndex = snapToGrid(hindLeftY);
 
-      int xHindRightIndex = (int) Math.round(hindRightX / gridSizeXY);
-      int yHindRightIndex = (int) Math.round(hindRightY / gridSizeXY);
+      int xHindRightIndex = snapToGrid(hindRightX);
+      int yHindRightIndex = snapToGrid(hindRightY);
 
       xIndices.put(RobotQuadrant.FRONT_LEFT, xFrontLeftIndex);
       yIndices.put(RobotQuadrant.FRONT_LEFT, yFrontLeftIndex);
@@ -154,12 +154,12 @@ public class FootstepNode
       return nominalStanceWidth;
    }
 
-   private int getXIndex(RobotQuadrant robotQuadrant)
+   public int getXIndex(RobotQuadrant robotQuadrant)
    {
       return xIndices.get(robotQuadrant);
    }
 
-   private int getYIndex(RobotQuadrant robotQuadrant)
+   public int getYIndex(RobotQuadrant robotQuadrant)
    {
       return yIndices.get(robotQuadrant);
    }
@@ -282,6 +282,11 @@ public class FootstepNode
    public static double round(double value)
    {
       return Math.round(value * INV_PRECISION) * PRECISION;
+   }
+
+   public static int snapToGrid(double location)
+   {
+      return (int) Math.round(location / gridSizeXY);
    }
 
    public boolean quadrantGeometricallyEquals(Object obj)
