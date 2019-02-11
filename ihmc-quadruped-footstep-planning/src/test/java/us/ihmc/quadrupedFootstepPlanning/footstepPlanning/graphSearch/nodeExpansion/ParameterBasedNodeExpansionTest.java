@@ -60,9 +60,14 @@ public class ParameterBasedNodeExpansionTest
       FootstepNodeExpansion expansion = new ParameterBasedNodeExpansion(parameters, xGaitSettingsReadOnly);
 
       FootstepNode baseNode = new FootstepNode(quadrantToCheck, 0.5 * stanceLength, 0.5 * stanceWidth, 0.5 * stanceLength, -0.5 * stanceWidth,
-                                               -0.5 * stanceLength, 0.5 * stanceWidth, -0.5 * stanceLength, -0.5 * stanceWidth, 0.0, stanceLength, stanceWidth);
+                                               -0.5 * stanceLength, 0.5 * stanceWidth, -0.5 * stanceLength, -0.5 * stanceWidth, stanceLength, stanceWidth);
 
       HashSet<FootstepNode> expandedNodes = expansion.expandNode(baseNode);
+      for (FootstepNode expandedNode : expandedNodes)
+      {
+         if (baseNode.quadrantGeometricallyEquals(expandedNode))
+            throw new RuntimeException("Error in expansion");
+      }
 
       double stepBoxLength = parameters.getMaximumStepReach() - parameters.getMinimumStepLength();
       double stepBoxWidth = parameters.getMaximumStepWidth() - parameters.getMinimumStepWidth();
@@ -124,7 +129,7 @@ public class ParameterBasedNodeExpansionTest
       hindLeft.changeFrame(ReferenceFrame.getWorldFrame());
       hindRight.changeFrame(ReferenceFrame.getWorldFrame());
 
-      FootstepNode baseNode = new FootstepNode(quadrantToCheck, frontLeft, frontRight, hindLeft, hindRight, Math.PI / 4.0, stanceLength, stanceWidth);
+      FootstepNode baseNode = new FootstepNode(quadrantToCheck, frontLeft, frontRight, hindLeft, hindRight, stanceLength, stanceWidth);
 
       HashSet<FootstepNode> expandedNodes = expansion.expandNode(baseNode);
 
@@ -235,8 +240,7 @@ public class ParameterBasedNodeExpansionTest
       for (FootstepNode neighboringNode : neighboringNodes)
       {
          RobotQuadrant quadrant = neighboringNode.getMovingQuadrant();
-         double height = 0.05 * neighboringNode.getYaw() / FootstepNode.gridSizeYaw;
-         Point3D point = new Point3D(neighboringNode.getX(quadrant), neighboringNode.getY(quadrant), height);
+         Point3D point = new Point3D(neighboringNode.getX(quadrant), neighboringNode.getY(quadrant), 0.0);
 
          graphics3DObject.identity();
          graphics3DObject.translate(point);

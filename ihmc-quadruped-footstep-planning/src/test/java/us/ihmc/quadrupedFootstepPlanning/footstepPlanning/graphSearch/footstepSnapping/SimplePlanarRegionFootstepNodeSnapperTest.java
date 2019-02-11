@@ -56,9 +56,8 @@ public class SimplePlanarRegionFootstepNodeSnapperTest
       double hindLeftY = 2.1;
       double hindRightX = -0.8;
       double hindRightY = 1.8;
-      double yaw = FootstepNode.computeNominalYaw(frontLeftX, frontLeftY, frontRightX, frontRightY, hindLeftX, hindLeftY, hindRightX, hindRightY);
       FootstepNode nodeToSnap = new FootstepNode(RobotQuadrant.FRONT_LEFT, frontLeftX, frontLeftY, frontRightX, frontRightY, hindLeftX, hindLeftY, hindRightX,
-                                                 hindRightY, yaw, frontLeftX - hindRightX, frontLeftY - hindRightY);
+                                                 hindRightY, frontLeftX - hindRightX, frontLeftY - hindRightY);
 
       QuadrantDependentList<RigidBodyTransform> nodeTransforms = new QuadrantDependentList<>();
       QuadrantDependentList<RigidBodyTransform> transformsToWorld = new QuadrantDependentList<>();
@@ -88,9 +87,8 @@ public class SimplePlanarRegionFootstepNodeSnapperTest
       double hindLeftY = -0.4;
       double hindRightX = 1.4;
       double hindRightY = -0.8;
-      double yaw = FootstepNode.computeNominalYaw(frontLeftX, frontLeftY, frontRightX, frontRightY, hindLeftX, hindLeftY, hindRightX, hindRightY);
       FootstepNode nodeToSnap = new FootstepNode(RobotQuadrant.FRONT_LEFT, frontLeftX, frontLeftY, frontRightX, frontRightY, hindLeftX, hindLeftY, hindRightX,
-                                                 hindRightY, yaw, frontLeftX - hindRightX, frontLeftY - hindRightY);
+                                                 hindRightY, frontLeftX - hindRightX, frontLeftY - hindRightY);
 
       QuadrantDependentList<RigidBodyTransform> nodeTransforms = new QuadrantDependentList<>();
       QuadrantDependentList<RigidBodyTransform> transformsToWorld = new QuadrantDependentList<>();
@@ -121,9 +119,8 @@ public class SimplePlanarRegionFootstepNodeSnapperTest
       double hindLeftY = 0.25;
       double hindRightX = -0.25;
       double hindRightY = -0.25;
-      double yaw = FootstepNode.computeNominalYaw(frontLeftX, frontLeftY, frontRightX, frontRightY, hindLeftX, hindLeftY, hindRightX, hindRightY);
       FootstepNode nodeToSnap = new FootstepNode(RobotQuadrant.FRONT_LEFT, frontLeftX, frontLeftY, frontRightX, frontRightY, hindLeftX, hindLeftY, hindRightX,
-                                                 hindRightY, yaw, frontLeftX - hindRightX, frontLeftY - hindRightY);
+                                                 hindRightY, frontLeftX - hindRightX, frontLeftY - hindRightY);
 
       QuadrantDependentList<RigidBodyTransform> nodeTransforms = new QuadrantDependentList<>();
       QuadrantDependentList<RigidBodyTransform> transformsToWorld = new QuadrantDependentList<>();
@@ -154,9 +151,8 @@ public class SimplePlanarRegionFootstepNodeSnapperTest
       double hindLeftY = 0.0;
       double hindRightX = 0.1;
       double hindRightY = -0.5;
-      double yaw = FootstepNode.computeNominalYaw(frontLeftX, frontLeftY, frontRightX, frontRightY, hindLeftX, hindLeftY, hindRightX, hindRightY);
       FootstepNode nodeToSnap = new FootstepNode(RobotQuadrant.FRONT_LEFT, frontLeftX, frontLeftY, frontRightX, frontRightY, hindLeftX, hindLeftY, hindRightX,
-                                                 hindRightY, yaw, frontLeftX - hindRightX, frontLeftY - hindRightY);
+                                                 hindRightY, frontLeftX - hindRightX, frontLeftY - hindRightY);
 
       QuadrantDependentList<RigidBodyTransform> nodeTransforms = new QuadrantDependentList<>();
       QuadrantDependentList<RigidBodyTransform> transformsToWorld = new QuadrantDependentList<>();

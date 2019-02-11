@@ -67,7 +67,8 @@ public class ParameterBasedNodeExpansion implements FootstepNodeExpansion
       int oldYIndex = node.getYIndex(nextQuadrant);
 
       Point2DReadOnly xGaitCenterPoint = node.getOrComputeXGaitCenterPoint();
-      double previousYaw = node.getYaw();
+//      double previousYaw = node.getYaw();
+      double previousYaw = node.getNominalYaw();
       Orientation3DReadOnly nodeOrientation = new AxisAngle(previousYaw, 0.0, 0.0);
 
       Vector2D clearanceVector = new Vector2D(parameters.getMinXClearanceFromFoot(), parameters.getMinYClearanceFromFoot());
@@ -83,31 +84,26 @@ public class ParameterBasedNodeExpansion implements FootstepNodeExpansion
             Point2D newXGaitPosition = new Point2D(xGaitCenterPoint);
             newXGaitPosition.add(movingVector);
 
-            for (double yawChange = parameters.getMinimumStepYaw(); yawChange < parameters.getMaximumStepYaw(); yawChange += FootstepNode.gridSizeYaw)
-            {
-               Vector2D footOffset = new Vector2D(nextQuadrant.getEnd().negateIfHindEnd(xGaitSettings.getStanceLength()),
-                                                  nextQuadrant.getSide().negateIfRightSide(xGaitSettings.getStanceWidth()));
-               footOffset.scale(0.5);
+            Vector2D footOffset = new Vector2D(nextQuadrant.getEnd().negateIfHindEnd(xGaitSettings.getStanceLength()),
+                                               nextQuadrant.getSide().negateIfRightSide(xGaitSettings.getStanceWidth()));
+            footOffset.scale(0.5);
 
-               double newYaw = previousYaw + yawChange;
-               Orientation3DReadOnly newOrientation =  new AxisAngle(newYaw, 0.0, 0.0);
-               newOrientation.transform(footOffset);
+            nodeOrientation.transform(footOffset);
 
-               Point2D newNodePosition = new Point2D(newXGaitPosition);
-               newNodePosition.add(footOffset);
+            Point2D newNodePosition = new Point2D(newXGaitPosition);
+            newNodePosition.add(footOffset);
 
-               int xIndex = FootstepNode.snapToGrid(newNodePosition.getX());
-               int yIndex = FootstepNode.snapToGrid(newNodePosition.getY());
+            int xIndex = FootstepNode.snapToGrid(newNodePosition.getX());
+            int yIndex = FootstepNode.snapToGrid(newNodePosition.getY());
 
-               if (!checkNodeIsFarEnoughFromOtherFeet(newNodePosition, clearanceVector, node))
-                  continue;
-               if (xIndex == oldXIndex && yIndex == oldYIndex)
-                  continue;
+            if (!checkNodeIsFarEnoughFromOtherFeet(newNodePosition, clearanceVector, node))
+               continue;
+            if (xIndex == oldXIndex && yIndex == oldYIndex)
+               continue;
 
-               FootstepNode offsetNode = constructNodeInPreviousNodeFrame(newNodePosition, newYaw, node, xGaitSettings);
+            FootstepNode offsetNode = constructNodeInPreviousNodeFrame(newNodePosition, node, xGaitSettings);
 
-               neighboringNodesToPack.add(offsetNode);
-            }
+            neighboringNodesToPack.add(offsetNode);
          }
       }
    }
@@ -152,7 +148,7 @@ public class ParameterBasedNodeExpansion implements FootstepNodeExpansion
          return true;
    }
 
-   private static FootstepNode constructNodeInPreviousNodeFrame(Point2DReadOnly newNodePosition, double newNodeYaw, FootstepNode previousNode,
+   private static FootstepNode constructNodeInPreviousNodeFrame(Point2DReadOnly newNodePosition, FootstepNode previousNode,
                                                                 QuadrupedXGaitSettingsReadOnly xGaitSettings)
    {
       RobotQuadrant nextQuadrant = previousNode.getMovingQuadrant().getNextRegularGaitSwingQuadrant();
@@ -177,7 +173,7 @@ public class ParameterBasedNodeExpansion implements FootstepNodeExpansion
          break;
       }
 
-      return new FootstepNode(nextQuadrant, frontLeft, frontRight, hindLeft, hindRight, newNodeYaw, xGaitSettings.getStanceLength(),
+      return new FootstepNode(nextQuadrant, frontLeft, frontRight, hindLeft, hindRight, xGaitSettings.getStanceLength(),
                               xGaitSettings.getStanceWidth());
    }
 }
