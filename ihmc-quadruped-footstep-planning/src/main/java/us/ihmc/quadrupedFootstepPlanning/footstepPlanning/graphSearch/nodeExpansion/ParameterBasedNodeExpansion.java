@@ -7,6 +7,7 @@ import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple2D.Vector2D;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
 import us.ihmc.euclid.tuple2D.interfaces.Vector2DReadOnly;
+import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.graphSearch.graph.FootstepNode;
 import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.graphSearch.parameters.FootstepPlannerParameters;
 import us.ihmc.quadrupedPlanning.QuadrupedXGaitSettingsReadOnly;
@@ -60,7 +61,11 @@ public class ParameterBasedNodeExpansion implements FootstepNodeExpansion
    private void addDefaultFootsteps(FootstepNode node, HashSet<FootstepNode> neighboringNodesToPack)
    {
       RobotQuadrant movingQuadrant = node.getMovingQuadrant();
-      Point2DReadOnly oldNodePosition = new Point2D(node.getX(movingQuadrant), node.getY(movingQuadrant));
+      RobotQuadrant nextQuadrant = movingQuadrant.getNextRegularGaitSwingQuadrant();
+
+      int oldXIndex = node.getXIndex(nextQuadrant);
+      int oldYIndex = node.getYIndex(nextQuadrant);
+
       Point2DReadOnly xGaitCenterPoint = node.getOrComputeXGaitCenterPoint();
       double previousYaw = node.getYaw();
       Orientation3DReadOnly nodeOrientation = new AxisAngle(previousYaw, 0.0, 0.0);
@@ -80,7 +85,6 @@ public class ParameterBasedNodeExpansion implements FootstepNodeExpansion
 
             for (double yawChange = parameters.getMinimumStepYaw(); yawChange < parameters.getMaximumStepYaw(); yawChange += FootstepNode.gridSizeYaw)
             {
-               RobotQuadrant nextQuadrant = movingQuadrant.getNextRegularGaitSwingQuadrant();
                Vector2D footOffset = new Vector2D(nextQuadrant.getEnd().negateIfHindEnd(xGaitSettings.getStanceLength()),
                                                   nextQuadrant.getSide().negateIfRightSide(xGaitSettings.getStanceWidth()));
                footOffset.scale(0.5);
@@ -92,15 +96,15 @@ public class ParameterBasedNodeExpansion implements FootstepNodeExpansion
                Point2D newNodePosition = new Point2D(newXGaitPosition);
                newNodePosition.add(footOffset);
 
+               int xIndex = FootstepNode.snapToGrid(newNodePosition.getX());
+               int yIndex = FootstepNode.snapToGrid(newNodePosition.getY());
+
                if (!checkNodeIsFarEnoughFromOtherFeet(newNodePosition, clearanceVector, node))
                   continue;
-               if (MathTools.epsilonEquals(oldNodePosition.distance(newNodePosition), 0.0, 0.5 * FootstepNode.gridSizeXY))
+               if (xIndex == oldXIndex && yIndex == oldYIndex)
                   continue;
 
                FootstepNode offsetNode = constructNodeInPreviousNodeFrame(newNodePosition, newYaw, node, xGaitSettings);
-
-//               if (offsetNode.geometricallyEquals(node))
-//                  throw new RuntimeException("This shouldn't be created.");
 
                neighboringNodesToPack.add(offsetNode);
             }
