@@ -67,6 +67,16 @@
                             <registry name="ToeOffManager">
 <parameter name="lookAtTwoStepCapturabilityForToeOff" type="BooleanParameter" value="false"/>
                             </registry>
+                            <registry name="FootRotationDetectorParameters">
+<parameter name="omegaThresholdForEstimation" type="DoubleParameter" min="0.0" max="1.0" value="3.0"/>
+<parameter name="rotationThreshold" type="DoubleParameter" min="0.0" max="1.0" value="0.1"/>
+                            </registry>
+                            <registry name="FootRotationHelperParameters">
+<parameter name="AreaPecentToSelect" type="DoubleParameter" min="0.0" max="1.0" value="0.6"/>
+                            </registry>
+                            <registry name="SupportStateParameters">
+<parameter name="avoidFootRotations" type="BooleanParameter" value="true"/>
+                            </registry>
                         </registry>
                     </registry>
                     <registry name="MomentumOptimizationSettings">
