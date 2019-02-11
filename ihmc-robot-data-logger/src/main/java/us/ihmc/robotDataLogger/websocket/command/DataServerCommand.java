@@ -33,6 +33,20 @@ public enum DataServerCommand
     * Broadcast a clear log message. All loggers will restart their log session
     */
    CLEAR_LOG(true),
+   /**   
+    * Broadcast logger status
+    * 
+    * Argument: Length of log session in seconds  
+    * 
+    */
+   LOG_ACTIVE(true),
+   /**   
+    * Broadcast logger status
+    * 
+    * Argument: Length of log session in seconds 
+    * 
+    */
+   LOG_ACTIVE_WITH_CAMERA(true),
    /**
     * Broadcast a start log message. 
     * 
@@ -176,6 +190,12 @@ public enum DataServerCommand
          out.writeByte(val + 48);
 
       }
+
+   }
+   
+   public static int getMaximumArgumentValue()
+   {
+      return (int) Math.pow(10, MAX_ARGUMENT_SIZE) - 1;
    }
 
 }
