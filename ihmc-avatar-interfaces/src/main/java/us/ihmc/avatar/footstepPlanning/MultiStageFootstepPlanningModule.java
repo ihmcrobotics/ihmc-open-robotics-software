@@ -13,6 +13,7 @@ import us.ihmc.communication.controllerAPI.CommandInputManager;
 import us.ihmc.communication.controllerAPI.StatusMessageOutputManager;
 import us.ihmc.communication.packets.ToolboxState;
 import us.ihmc.footstepPlanning.communication.FootstepPlannerCommunicationProperties;
+import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParameters;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.multicastLogDataProtocol.modelLoaders.LogModelProvider;
 import us.ihmc.pathPlanning.visibilityGraphs.interfaces.VisibilityGraphsParameters;
@@ -104,8 +105,11 @@ public class MultiStageFootstepPlanningModule
 
       IHMCRealtimeROS2Publisher<TextToSpeechPacket> textToSpeechPublisher = ROS2Tools
             .createPublisher(realtimeRos2Node, TextToSpeechPacket.class, ROS2Tools::generateDefaultTopicName);
+      IHMCRealtimeROS2Publisher<FootstepPlannerParametersPacket> parametersPublisher = ROS2Tools
+            .createPublisher(realtimeRos2Node, FootstepPlannerParametersPacket.class, FootstepPlannerCommunicationProperties.subscriberTopicNameGenerator(robotName));
 
       footstepPlanningController.setTextToSpeechPublisher(textToSpeechPublisher);
+      footstepPlanningController.setParametersPublisher(parametersPublisher);
 
       realtimeRos2Node.spin();
 
