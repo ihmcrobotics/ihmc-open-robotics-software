@@ -1,6 +1,7 @@
 package us.ihmc.quadrupedFootstepPlanning.footstepPlanning.graphSearch;
 
 import controller_msgs.msg.dds.QuadrupedGroundPlaneMessage;
+import gnu.trove.list.array.TIntArrayList;
 import org.apache.commons.math3.util.Precision;
 import us.ihmc.commons.Conversions;
 import us.ihmc.commons.PrintTools;
@@ -65,7 +66,7 @@ public class QuadrupedAStarFootstepPlanner implements QuadrupedBodyPathAndFootst
    private final FootstepPlannerParameters parameters;
    private final QuadrupedXGaitSettingsReadOnly xGaitSettings;
 
-   private HashSet<FootstepNode> expandedNodes;
+   private TIntArrayList expandedNodes;
    private PriorityQueue<FootstepNode> stack;
    private FootstepNode startNode;
    private FootstepNode goalNode;
@@ -207,10 +208,6 @@ public class QuadrupedAStarFootstepPlanner implements QuadrupedBodyPathAndFootst
          hindLeftGoalPosition.changeFrame(worldFrame);
          hindRightGoalPosition.changeFrame(worldFrame);
 
-         double yaw = FootstepNode.computeNominalYaw(frontLeftGoalPosition.getX(), frontLeftGoalPosition.getY(), frontRightGoalPosition.getX(),
-                                                     frontRightGoalPosition.getY(), hindLeftGoalPosition.getX(), hindLeftGoalPosition.getY(),
-                                                     hindRightGoalPosition.getX(), hindRightGoalPosition.getY());
-
          nodeToReturn = new FootstepNode(defaultFirstQuadrant, frontLeftGoalPosition.getX(), frontLeftGoalPosition.getY(), frontRightGoalPosition.getX(),
                                          frontRightGoalPosition.getY(), hindLeftGoalPosition.getX(), hindLeftGoalPosition.getY(), hindRightGoalPosition.getX(),
                                          hindRightGoalPosition.getY(), xGaitSettings.getStanceLength(), xGaitSettings.getStanceWidth());
@@ -339,7 +336,7 @@ public class QuadrupedAStarFootstepPlanner implements QuadrupedBodyPathAndFootst
       }
 
       stack.add(startNode);
-      expandedNodes = new HashSet<>();
+      expandedNodes = new TIntArrayList();
       endNode = null;
 
       for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
@@ -422,9 +419,12 @@ public class QuadrupedAStarFootstepPlanner implements QuadrupedBodyPathAndFootst
          iterations++;
 
          FootstepNode nodeToExpand = stack.poll();
-         if (expandedNodes.contains(nodeToExpand))
+         if (expandedNodes.contains(nodeToExpand.hashCode()))
+         {
             continue;
-         expandedNodes.add(nodeToExpand);
+         }
+
+         expandedNodes.add(nodeToExpand.hashCode());
 
          if (checkAndHandleNodeAtAnyGoal(nodeToExpand))
          {
