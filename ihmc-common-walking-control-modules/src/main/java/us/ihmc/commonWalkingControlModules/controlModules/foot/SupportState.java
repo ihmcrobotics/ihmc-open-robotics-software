@@ -25,13 +25,18 @@ import us.ihmc.mecano.frames.MovingReferenceFrame;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.mecano.spatial.Twist;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
+import us.ihmc.robotics.controllers.pidGains.PID3DGains;
+import us.ihmc.robotics.controllers.pidGains.PID3DGainsReadOnly;
+import us.ihmc.robotics.controllers.pidGains.PIDSE3Gains;
 import us.ihmc.robotics.controllers.pidGains.PIDSE3GainsReadOnly;
+import us.ihmc.robotics.controllers.pidGains.implementations.DefaultPIDSE3Gains;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 import us.ihmc.robotics.screwTheory.SelectionMatrix6D;
 import us.ihmc.robotics.sensors.FootSwitchInterface;
 import us.ihmc.robotics.weightMatrices.SolverWeightLevels;
 import us.ihmc.yoVariables.parameters.BooleanParameter;
 import us.ihmc.yoVariables.providers.BooleanProvider;
+import us.ihmc.yoVariables.providers.DoubleProvider;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
@@ -116,6 +121,11 @@ public class SupportState extends AbstractFootControlState
    private final PIDSE3GainsReadOnly gains;
 
    private final BooleanProvider avoidFootRotations;
+   private final BooleanProvider dampFootRotations;
+   private final BooleanProvider replanIcpForFootRotations;
+   private final DoubleProvider footDamping;
+   private final PIDSE3Gains localGains = new DefaultPIDSE3Gains();
+
    private final FootRotationDetector footRotationDetector;
    private final FootRotationHelper footRotationHelper;
    private final FramePoint2D capturePoint = new FramePoint2D();
@@ -204,6 +214,9 @@ public class SupportState extends AbstractFootControlState
       String feetManagerName = FeetManager.class.getSimpleName();
       String paramRegistryName = getClass().getSimpleName() + "Parameters";
       avoidFootRotations = ParameterProvider.getOrCreateParameter(feetManagerName, paramRegistryName, "avoidFootRotations", registry, false);
+      replanIcpForFootRotations = ParameterProvider.getOrCreateParameter(feetManagerName, paramRegistryName, "replanIcpForFootRotations", registry, false);
+      dampFootRotations = ParameterProvider.getOrCreateParameter(feetManagerName, paramRegistryName, "dampFootRotations", registry, false);
+      footDamping = ParameterProvider.getOrCreateParameter(feetManagerName, paramRegistryName, "footDamping", registry, 0.0);
    }
 
    @Override
@@ -308,6 +321,26 @@ public class SupportState extends AbstractFootControlState
       if (neverHoldPosition.getValue())
          footBarelyLoaded.set(false);
 
+      localGains.set(gains);
+      if (footRotationDetector.compute() && avoidFootRotations.getValue())
+      {
+         if (dampFootRotations.getValue())
+         {
+            PID3DGainsReadOnly orientationGains = gains.getOrientationGains();
+            PID3DGains localOrientationGains = localGains.getOrientationGains();
+            localOrientationGains.setProportionalGains(0.0, 0.0, orientationGains.getProportionalGains()[2]);
+            localOrientationGains.setDerivativeGains(footDamping.getValue(), footDamping.getValue(), orientationGains.getDerivativeGains()[2]);
+            copOnEdge.set(true);
+         }
+         if (replanIcpForFootRotations.getValue())
+         {
+            controllerToolbox.getCapturePoint(tempPoint);
+            tempPoint.changeFrame(footPolygon.getReferenceFrame());
+            capturePoint.setIncludingFrame(tempPoint);
+            footRotationHelper.compute(footRotationDetector.getLineOfRotation(), footPolygon, capturePoint);
+         }
+      }
+
       updateHoldPositionSetpoints();
 
       // update the control frame
@@ -336,7 +369,7 @@ public class SupportState extends AbstractFootControlState
       spatialFeedbackControlCommand.set(desiredOrientation, desiredAngularVelocity);
       spatialFeedbackControlCommand.setFeedForwardAction(desiredAngularAcceleration, desiredLinearAcceleration);
       spatialFeedbackControlCommand.setWeightsForSolver(angularWeight, linearWeight);
-      spatialFeedbackControlCommand.setGains(gains);
+      spatialFeedbackControlCommand.setGains(localGains);
 
       // set selection matrices
       accelerationSelectionMatrix.resetSelection();
@@ -371,14 +404,6 @@ public class SupportState extends AbstractFootControlState
       // update visualization
       if (frameViz != null)
          frameViz.setToReferenceFrame(controlFrame);
-
-      if (footRotationDetector.compute() && avoidFootRotations.getValue())
-      {
-         controllerToolbox.getCapturePoint(tempPoint);
-         tempPoint.changeFrame(footPolygon.getReferenceFrame());
-         capturePoint.setIncludingFrame(tempPoint);
-         footRotationHelper.compute(footRotationDetector.getLineOfRotation(), footPolygon, capturePoint);
-      }
    }
 
 
