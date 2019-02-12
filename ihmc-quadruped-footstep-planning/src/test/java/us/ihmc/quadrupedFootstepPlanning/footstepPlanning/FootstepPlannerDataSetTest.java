@@ -205,7 +205,7 @@ public abstract class FootstepPlannerDataSetTest
       return errorMessage;
    }
 
-   private static String assertPlanIsValid(String datasetName, List<? extends QuadrupedTimedStep> plannedSteps, Point3DReadOnly goalPosition, Quaternion goalOrientation)
+   private static String assertPlanIsValid(String datasetName, FootstepPlan plannedSteps, Point3DReadOnly goalPosition, Quaternion goalOrientation)
    {
       QuadrantDependentList<Point3DBasics> finalSteps = getFinalStepPositions(plannedSteps);
 
@@ -238,12 +238,12 @@ public abstract class FootstepPlannerDataSetTest
       return errorMessage;
    }
 
-   private static QuadrantDependentList<Point3DBasics> getFinalStepPositions(List<? extends QuadrupedTimedStep> plannedSteps)
+   private static QuadrantDependentList<Point3DBasics> getFinalStepPositions(FootstepPlan plannedSteps)
    {
       QuadrantDependentList<Point3DBasics> finalSteps = new QuadrantDependentList<>();
-      for (int i = plannedSteps.size() - 1; i >= 0; i--)
+      for (int i = plannedSteps.getNumberOfSteps() - 1; i >= 0; i--)
       {
-         QuadrupedTimedStep step = plannedSteps.get(i);
+         QuadrupedTimedStep step = plannedSteps.getFootstep(i);
          if (finalSteps.containsKey(step.getRobotQuadrant()))
             continue;
          else
@@ -258,7 +258,7 @@ public abstract class FootstepPlannerDataSetTest
       String testDataset(FootstepPlannerUnitTestDataset dataset);
    }
 
-   private void visualizePlan(List<? extends QuadrupedTimedStep> steps, PlanarRegionsList planarRegionsList, Point3DReadOnly start, Point3DReadOnly goal)
+   private void visualizePlan(FootstepPlan plan, PlanarRegionsList planarRegionsList, Point3DReadOnly start, Point3DReadOnly goal)
    {
       if (!VISUALIZE || ContinuousIntegrationTools.isRunningOnContinuousIntegrationServer())
          return;
@@ -280,12 +280,12 @@ public abstract class FootstepPlannerDataSetTest
       graphics3DObject.translate(0.0, 0.0, 0.05);
       graphics3DObject.addCone(0.3, 0.05, YoAppearance.Black());
 
-      if (steps != null)
+      if (plan != null)
       {
-         for (int i = 0; i < steps.size(); i++)
+         for (int i = 0; i < plan.getNumberOfSteps(); i++)
          {
-            Point3DReadOnly point = steps.get(i).getGoalPosition();
-            AppearanceDefinition appearanceDefinition = colorDefinitions.get(steps.get(i).getRobotQuadrant());
+            Point3DReadOnly point = plan.getFootstep(i).getGoalPosition();
+            AppearanceDefinition appearanceDefinition = colorDefinitions.get(plan.getFootstep(i).getRobotQuadrant());
 
             graphics3DObject.identity();
             graphics3DObject.translate(point);

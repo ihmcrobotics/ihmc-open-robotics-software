@@ -1,10 +1,5 @@
 package us.ihmc.quadrupedFootstepPlanning.ui;
 
-import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.tools.FootstepPlannerDataExporter;
-import us.ihmc.quadrupedFootstepPlanning.ui.components.NodeCheckerEditor;
-import us.ihmc.quadrupedFootstepPlanning.ui.components.OccupancyMapRenderer;
-import us.ihmc.quadrupedFootstepPlanning.ui.components.StartGoalOrientationEditor;
-import us.ihmc.quadrupedFootstepPlanning.ui.controllers.*;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Scene;
@@ -16,7 +11,6 @@ import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.javaFXToolkit.messager.JavaFXMessager;
 import us.ihmc.javaFXToolkit.messager.SharedMemoryJavaFXMessager;
 import us.ihmc.javaFXToolkit.scenes.View3DFactory;
-import us.ihmc.javaFXVisualizers.JavaFXRobotVisualizer;
 import us.ihmc.pathPlanning.visibilityGraphs.DefaultVisibilityGraphParameters;
 import us.ihmc.pathPlanning.visibilityGraphs.interfaces.VisibilityGraphsParameters;
 import us.ihmc.pathPlanning.visibilityGraphs.ui.StartGoalPositionEditor;
@@ -24,8 +18,14 @@ import us.ihmc.pathPlanning.visibilityGraphs.ui.viewers.PlanarRegionViewer;
 import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.communication.FootstepPlannerMessagerAPI;
 import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.graphSearch.parameters.DefaultFootstepPlannerParameters;
 import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.graphSearch.parameters.FootstepPlannerParameters;
-import us.ihmc.robotModels.FullHumanoidRobotModelFactory;
+import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.tools.FootstepPlannerDataExporter;
+import us.ihmc.quadrupedFootstepPlanning.ui.components.NodeCheckerEditor;
+import us.ihmc.quadrupedFootstepPlanning.ui.components.OccupancyMapRenderer;
+import us.ihmc.quadrupedFootstepPlanning.ui.components.StartGoalOrientationEditor;
+import us.ihmc.quadrupedFootstepPlanning.ui.controllers.*;
 import us.ihmc.quadrupedFootstepPlanning.ui.viewers.*;
+import us.ihmc.quadrupedUI.JavaFXQuadrupedVisualizer;
+import us.ihmc.robotModels.FullQuadrupedRobotModelFactory;
 
 import static us.ihmc.quadrupedFootstepPlanning.footstepPlanning.communication.FootstepPlannerMessagerAPI.*;
 
@@ -53,8 +53,8 @@ public class FootstepPlannerUI
    private final BodyPathMeshViewer bodyPathMeshViewer;
    private final VisibilityGraphsRenderer visibilityGraphsRenderer;
    private final OccupancyMapRenderer graphRenderer;
-   private final JavaFXRobotVisualizer robotVisualizer;
-   private final JavaFXRobotVisualizer walkingPreviewVisualizer;
+   private final JavaFXQuadrupedVisualizer robotVisualizer;
+   private final JavaFXQuadrupedVisualizer walkingPreviewVisualizer;
 
    @FXML
    private FootstepPlannerMenuUIController footstepPlannerMenuUIController;
@@ -86,14 +86,14 @@ public class FootstepPlannerUI
    }
 
    public FootstepPlannerUI(Stage primaryStage, JavaFXMessager messager, FootstepPlannerParameters plannerParameters,
-                            VisibilityGraphsParameters visibilityGraphsParameters, FullHumanoidRobotModelFactory fullHumanoidRobotModelFactory) throws Exception
+                            VisibilityGraphsParameters visibilityGraphsParameters, FullQuadrupedRobotModelFactory fullQuadrupedRobotModelFactory) throws Exception
    {
-      this(primaryStage, messager, plannerParameters, visibilityGraphsParameters, fullHumanoidRobotModelFactory, null);
+      this(primaryStage, messager, plannerParameters, visibilityGraphsParameters, fullQuadrupedRobotModelFactory, null);
    }
 
    public FootstepPlannerUI(Stage primaryStage, JavaFXMessager messager, FootstepPlannerParameters plannerParameters,
-                            VisibilityGraphsParameters visibilityGraphsParameters, FullHumanoidRobotModelFactory fullHumanoidRobotModelFactory,
-                            FullHumanoidRobotModelFactory previewModelFactory) throws Exception
+                            VisibilityGraphsParameters visibilityGraphsParameters, FullQuadrupedRobotModelFactory fullQuadrupedRobotModelFactory,
+                            FullQuadrupedRobotModelFactory previewModelFactory) throws Exception
    {
       this.primaryStage = primaryStage;
       this.messager = messager;
@@ -141,7 +141,7 @@ public class FootstepPlannerUI
       this.nodeCheckerEditor = new NodeCheckerEditor(messager, subScene);
       this.orientationEditor = new StartGoalOrientationEditor(messager, view3dFactory.getSubScene());
       this.pathViewer = new FootstepPathMeshViewer(messager);
-      this.nodeCheckerRenderer = new NodeCheckerRenderer(messager, contactPointParameters);
+      this.nodeCheckerRenderer = new NodeCheckerRenderer(messager);
       this.dataExporter = new FootstepPlannerDataExporter(messager);
       this.bodyPathMeshViewer = new BodyPathMeshViewer(messager);
       this.visibilityGraphsRenderer = new VisibilityGraphsRenderer(messager);
@@ -156,13 +156,13 @@ public class FootstepPlannerUI
       view3dFactory.addNodeToView(visibilityGraphsRenderer.getRoot());
       view3dFactory.addNodeToView(graphRenderer.getRoot());
 
-      if(fullHumanoidRobotModelFactory == null)
+      if(fullQuadrupedRobotModelFactory == null)
       {
          robotVisualizer = null;
       }
       else
       {
-         robotVisualizer = new JavaFXRobotVisualizer(fullHumanoidRobotModelFactory);
+         robotVisualizer = new JavaFXQuadrupedVisualizer(fullQuadrupedRobotModelFactory);
          messager.registerTopicListener(RobotConfigurationDataTopic, robotVisualizer::submitNewConfiguration);
          mainTabController.setFullRobotModel(robotVisualizer.getFullRobotModel());
          view3dFactory.addNodeToView(robotVisualizer.getRootNode());
@@ -175,7 +175,7 @@ public class FootstepPlannerUI
       }
       else
       {
-         walkingPreviewVisualizer = new JavaFXRobotVisualizer(previewModelFactory);
+         walkingPreviewVisualizer = new JavaFXQuadrupedVisualizer(previewModelFactory);
          view3dFactory.addNodeToView(walkingPreviewVisualizer.getRootNode());
          mainTabController.setPreviewModel(walkingPreviewVisualizer.getFullRobotModel());
          walkingPreviewVisualizer.getFullRobotModel().getRootJoint().setJointPosition(new Vector3D(Double.NaN, Double.NaN, Double.NaN));
@@ -244,10 +244,10 @@ public class FootstepPlannerUI
 
    public static FootstepPlannerUI createMessagerUI(Stage primaryStage, JavaFXMessager messager, FootstepPlannerParameters plannerParameters,
                                                     VisibilityGraphsParameters visibilityGraphsParameters,
-                                                    FullHumanoidRobotModelFactory fullHumanoidRobotModelFactory,
-                                                    FullHumanoidRobotModelFactory previewModelFactory)
+                                                    FullQuadrupedRobotModelFactory fullQuadrupedRobotModelFactory,
+                                                    FullQuadrupedRobotModelFactory previewModelFactory)
          throws Exception
    {
-      return new FootstepPlannerUI(primaryStage, messager, plannerParameters, visibilityGraphsParameters, fullHumanoidRobotModelFactory, previewModelFactory);
+      return new FootstepPlannerUI(primaryStage, messager, plannerParameters, visibilityGraphsParameters, fullQuadrupedRobotModelFactory, previewModelFactory);
    }
 }

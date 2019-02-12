@@ -1,5 +1,9 @@
 package us.ihmc.quadrupedFootstepPlanning.ui.viewers;
 
+import us.ihmc.euclid.orientation.interfaces.Orientation3DReadOnly;
+import us.ihmc.euclid.referenceFrame.FramePoint2D;
+import us.ihmc.euclid.tuple2D.Vector2D;
+import us.ihmc.euclid.tuple4D.interfaces.QuaternionReadOnly;
 import us.ihmc.quadrupedFootstepPlanning.ui.components.SettableFootstepPlannerParameters;
 import javafx.animation.AnimationTimer;
 import javafx.scene.Node;
@@ -23,12 +27,10 @@ import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.graphSearch.nodeChecki
 import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.graphSearch.nodeChecking.FootstepNodeCheckerOfCheckers;
 import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.graphSearch.nodeChecking.SnapBasedNodeChecker;
 import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.graphSearch.parameters.DefaultFootstepPlannerParameters;
+import us.ihmc.quadrupedPlanning.QuadrupedXGaitSettings;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
-import us.ihmc.robotics.robotSide.RobotSide;
-import us.ihmc.robotics.robotSide.SegmentDependentList;
-import us.ihmc.robotics.robotSide.SideDependentList;
+import us.ihmc.robotics.robotSide.RobotQuadrant;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.concurrent.atomic.AtomicReference;
 
@@ -38,10 +40,10 @@ public class NodeCheckerRenderer extends AnimationTimer
    private final AtomicReference<PlanarRegionsList> planarRegionsReference;
    private final AtomicReference<Point3D> footPositionReference;
    private final AtomicReference<Quaternion> footOrientationReference;
-   private final AtomicReference<RobotSide> initialSupportSideReference;
+   private final AtomicReference<RobotQuadrant> initialSupportQuadrantReference;
 
-   private final SideDependentList<ConvexPolygon2D> footPolygons;
    private final SettableFootstepPlannerParameters parameters = new SettableFootstepPlannerParameters(new DefaultFootstepPlannerParameters());
+   private final QuadrupedXGaitSettings xGaitSettings = new QuadrupedXGaitSettings();
    private final SimplePlanarRegionFootstepNodeSnapper snapper;
 
    private final FootstepNodeChecker nodeChecker;
@@ -51,43 +53,25 @@ public class NodeCheckerRenderer extends AnimationTimer
 
    private static final Color ghostFootstepColor = Color.color(0.2, 0.2, 0.2, 0.2);
 
-   public NodeCheckerRenderer(Messager messager, RobotContactPointParameters<RobotSide> robotContactPointParameters)
+   public NodeCheckerRenderer(Messager messager)
    {
       nodeCheckerEnabled = messager.createInput(FootstepPlannerMessagerAPI.EnableNodeChecking, false);
       planarRegionsReference = messager.createInput(FootstepPlannerMessagerAPI.PlanarRegionDataTopic);
       footPositionReference = messager.createInput(FootstepPlannerMessagerAPI.NodeCheckingPosition);
       footOrientationReference = messager.createInput(FootstepPlannerMessagerAPI.NodeCheckingOrientation, new Quaternion());
-      initialSupportSideReference = messager.createInput(FootstepPlannerMessagerAPI.InitialSupportSideTopic, RobotSide.LEFT);
+      initialSupportQuadrantReference = messager.createInput(FootstepPlannerMessagerAPI.InitialSupportQuadrantTopic, RobotQuadrant.FRONT_LEFT);
 
       TextureColorPalette2D colorPalette = new TextureColorPalette2D();
       colorPalette.setHueBrightnessBased(0.9);
       meshBuilder = new JavaFXMultiColorMeshBuilder(colorPalette);
 
-      if(robotContactPointParameters == null)
-      {
-         footPolygons = PlannerTools.createDefaultFootPolygons();
-      }
-      else
-      {
-         SegmentDependentList<RobotSide, ArrayList<Point2D>> controllerFootGroundContactPoints = robotContactPointParameters
-               .getControllerFootGroundContactPoints();
+      snapper = new SimplePlanarRegionFootstepNodeSnapper(parameters);
 
-         footPolygons = new SideDependentList<>();
-         for(RobotSide robotSide : RobotSide.values)
-         {
-            ConvexPolygon2D footPolygon = new ConvexPolygon2D();
-            controllerFootGroundContactPoints.get(robotSide).forEach(footPolygon::addVertex);
-            footPolygon.update();
-            footPolygons.put(robotSide, footPolygon);
-         }
-      }
-
-      snapper = new SimplePlanarRegionFootstepNodeSnapper(footPolygons);
-
-      SnapBasedNodeChecker snapBasedNodeChecker = new SnapBasedNodeChecker(parameters, footPolygons, snapper);
+      SnapBasedNodeChecker snapBasedNodeChecker = new SnapBasedNodeChecker(parameters, snapper);
       nodeChecker = new FootstepNodeCheckerOfCheckers(Arrays.asList(snapBasedNodeChecker));
 
       messager.registerTopicListener(FootstepPlannerMessagerAPI.PlannerParametersTopic, parameters::set);
+      messager.registerTopicListener(FootstepPlannerMessagerAPI.XGaitSettingsTopic, xGaitSettings::set);
    }
 
    @Override
@@ -100,13 +84,100 @@ public class NodeCheckerRenderer extends AnimationTimer
          return;
 
       Point3D footPosition = footPositionReference.get();
-      double footOrientation = footOrientationReference.get().getYaw();
+      Orientation3DReadOnly footOrientation = footOrientationReference.get();
       PlanarRegionsList planarRegionsList = planarRegionsReference.get();
 
       if(footPosition == null || planarRegionsList == null)
          return;
 
-      FootstepNode node = new FootstepNode(footPosition.getX(), footPosition.getY(), footOrientation, initialSupportSideReference.get());
+      FramePoint2D frontLeftPosition = new FramePoint2D();
+      FramePoint2D frontRightPosition = new FramePoint2D();
+      FramePoint2D hindLeftPosition = new FramePoint2D();
+      FramePoint2D hindRightPosition = new FramePoint2D();
+
+
+      switch (initialSupportQuadrantReference.get())
+      {
+      case FRONT_LEFT:
+         frontLeftPosition.set(footPosition.getX(), footPosition.getY());
+
+         Vector2D toFrontRight = new Vector2D(0.0, -xGaitSettings.getStanceWidth());
+         Vector2D toHindLeft = new Vector2D(-xGaitSettings.getStanceLength(), 0.0);
+         Vector2D toHindRight = new Vector2D(-xGaitSettings.getStanceLength(), -xGaitSettings.getStanceWidth());
+
+         footOrientation.transform(toFrontRight);
+         footOrientation.transform(toHindLeft);
+         footOrientation.transform(toHindRight);
+
+         frontRightPosition.set(frontLeftPosition);
+         hindLeftPosition.set(frontLeftPosition);
+         hindRightPosition.set(frontLeftPosition);
+
+         frontRightPosition.add(toFrontRight);
+         hindLeftPosition.add(toHindLeft);
+         hindRightPosition.add(toHindRight);
+         break;
+      case FRONT_RIGHT:
+         frontRightPosition.set(footPosition.getX(), footPosition.getY());
+
+         Vector2D toFrontLeft = new Vector2D(0.0, xGaitSettings.getStanceWidth());
+         toHindRight = new Vector2D(-xGaitSettings.getStanceLength(), 0.0);
+         toHindLeft = new Vector2D(-xGaitSettings.getStanceLength(), xGaitSettings.getStanceWidth());
+
+         footOrientation.transform(toFrontLeft);
+         footOrientation.transform(toHindLeft);
+         footOrientation.transform(toHindRight);
+
+         frontLeftPosition.set(frontRightPosition);
+         hindLeftPosition.set(frontRightPosition);
+         hindRightPosition.set(frontRightPosition);
+
+         frontLeftPosition.add(toFrontLeft);
+         hindLeftPosition.add(toHindLeft);
+         hindRightPosition.add(toHindRight);
+         break;
+      case HIND_LEFT:
+         hindLeftPosition.set(footPosition.getX(), footPosition.getY());
+
+         toFrontLeft = new Vector2D(xGaitSettings.getStanceLength(), 0.0);
+         toFrontRight = new Vector2D(xGaitSettings.getStanceLength(), -xGaitSettings.getStanceWidth());
+         toHindRight = new Vector2D(0.0, -xGaitSettings.getStanceWidth());
+
+         footOrientation.transform(toFrontLeft);
+         footOrientation.transform(toFrontRight);
+         footOrientation.transform(toHindRight);
+
+         frontLeftPosition.set(hindLeftPosition);
+         frontRightPosition.set(hindLeftPosition);
+         hindRightPosition.set(hindLeftPosition);
+
+         frontLeftPosition.add(toFrontLeft);
+         frontRightPosition.add(toFrontRight);
+         hindRightPosition.add(toHindRight);
+         break;
+      case HIND_RIGHT:
+         hindRightPosition.set(footPosition.getX(), footPosition.getY());
+
+         toFrontLeft = new Vector2D(xGaitSettings.getStanceLength(), xGaitSettings.getStanceWidth());
+         toFrontRight = new Vector2D(xGaitSettings.getStanceLength(), 0.0);
+         toHindLeft = new Vector2D(0.0, xGaitSettings.getStanceWidth());
+
+         footOrientation.transform(toFrontLeft);
+         footOrientation.transform(toFrontRight);
+         footOrientation.transform(toHindLeft);
+
+         frontLeftPosition.set(hindRightPosition);
+         frontRightPosition.set(hindRightPosition);
+         hindLeftPosition.set(hindRightPosition);
+
+         frontLeftPosition.add(toFrontLeft);
+         frontRightPosition.add(toFrontRight);
+         hindLeftPosition.add(toHindLeft);
+         break;
+      }
+
+      FootstepNode node = new FootstepNode(initialSupportQuadrantReference.get(), frontLeftPosition, frontRightPosition, hindLeftPosition, hindRightPosition,
+                                           xGaitSettings.getStanceLength(), xGaitSettings.getStanceWidth());
       snapper.setPlanarRegions(planarRegionsList);
       nodeChecker.setPlanarRegions(planarRegionsList);
 
@@ -121,14 +192,13 @@ public class NodeCheckerRenderer extends AnimationTimer
       meshBuilder.clear();
 
       RigidBodyTransform planarTransformToWorld = new RigidBodyTransform();
-      FootstepNodeTools.getNodeTransform(node, planarTransformToWorld);
+      FootstepNodeTools.getNodeTransform(node.getMovingQuadrant(), node, planarTransformToWorld);
 
       RigidBodyTransform snappedTransformToWorld = new RigidBodyTransform();
-      ConvexPolygon2D foothold = snapData.getCroppedFoothold();
 
       try
       {
-         FootstepNodeTools.getSnappedNodeTransform(node, snapData.getSnapTransform(), snappedTransformToWorld);
+         FootstepNodeTools.getSnappedNodeTransform(node.getMovingQuadrant(), node, snapData.getSnapTransform(node.getMovingQuadrant()), snappedTransformToWorld);
       }
       catch(NotARotationMatrixException e)
       {
@@ -141,14 +211,7 @@ public class NodeCheckerRenderer extends AnimationTimer
       Color regionColor = valid ? Color.GREEN : Color.RED;
       regionColor = Color.hsb(regionColor.getHue(), 0.9, 1.0);
 
-      Point2D[] vertices = new Point2D[foothold.getNumberOfVertices()];
-      for (int j = 0; j < vertices.length; j++)
-      {
-         vertices[j] = new Point2D(foothold.getVertex(j));
-      }
-
-      meshBuilder.addMultiLine(snappedTransformToWorld, vertices, 0.01, regionColor, true);
-      meshBuilder.addPolygon(snappedTransformToWorld, foothold, regionColor);
+      meshBuilder.addSphere(0.1, snappedTransformToWorld.getTranslationVector(), regionColor);
 
       // TODO add mesh of planar footstep
 
