@@ -17,9 +17,7 @@ public class FootstepPlannerVisualizationController
    @FXML
    private CheckBox showAllInvalidNodes;
    @FXML
-   private CheckBox showValidNodesThisTick;
-   @FXML
-   private CheckBox showInvalidNodesThisTick;
+   private CheckBox showNodesThisTick;
    @FXML
    private CheckBox showNodesRejectedByReason;
    @FXML
@@ -55,8 +53,7 @@ public class FootstepPlannerVisualizationController
 
       messager.bindBidirectional(FootstepPlannerMessagerAPI.ShowAllValidNodesTopic, showAllValidNodes.selectedProperty(), true);
       messager.bindBidirectional(FootstepPlannerMessagerAPI.ShowAllInvalidNodesTopic, showAllInvalidNodes.selectedProperty(), true);
-      messager.bindBidirectional(FootstepPlannerMessagerAPI.ShowValidNodesThisTickTopic, showValidNodesThisTick.selectedProperty(), true);
-      messager.bindBidirectional(FootstepPlannerMessagerAPI.ShowInvalidNodesThisTickTopic, showInvalidNodesThisTick.selectedProperty(), true);
+      messager.bindBidirectional(FootstepPlannerMessagerAPI.ShowNodesThisTickTopic, showNodesThisTick.selectedProperty(), true);
       messager.bindBidirectional(FootstepPlannerMessagerAPI.ShowNodesRejectedByReasonTopic, showNodesRejectedByReason.selectedProperty(), true);
 
       messager.bindBidirectional(FootstepPlannerMessagerAPI.RejectionReasonToShowTopic, rejectionReasonToShow.valueProperty(), true);

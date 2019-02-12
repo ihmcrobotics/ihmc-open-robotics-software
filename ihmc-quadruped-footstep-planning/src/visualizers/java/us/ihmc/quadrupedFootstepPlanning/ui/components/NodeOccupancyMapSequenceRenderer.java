@@ -24,19 +24,24 @@ public class NodeOccupancyMapSequenceRenderer extends AnimationTimer
 
    private final Group root = new Group();
 
-   private final Color childNodeColor;
+   private final Color validChildNodeColor;
+   private final Color invalidChildNodeColor;
    private final Color parentNodeColor;
 
    private final List<Collection<SimpleFootstepNode>> nodesBeingExpandedBuffer = new ArrayList<>();
-   private final List<Collection<SimpleFootstepNode>> childNodesBuffer = new ArrayList<>();
+   private final List<Collection<SimpleFootstepNode>> validChildNodesBuffer = new ArrayList<>();
+   private final List<Collection<SimpleFootstepNode>> invalidChildNodesBuffer = new ArrayList<>();
 
-   private final NodeOccupancyMapRenderer occupancyMapRenderer;
+   private final NodeOccupancyMapRenderer validChildNodeRenderer;
+   private final NodeOccupancyMapRenderer invalidChildNodeRenderer;
    private final NodeOccupancyMapRenderer parentMapRenderer;
 
-   public NodeOccupancyMapSequenceRenderer(Messager messager, Color nodeBeingExpandedColor, Color childNodeColor, ExecutorService executorService)
+   public NodeOccupancyMapSequenceRenderer(Messager messager, Color nodeBeingExpandedColor, Color validChildNodeColor, Color invalidChildNodeColor,
+                                           ExecutorService executorService)
    {
       this.parentNodeColor = nodeBeingExpandedColor;
-      this.childNodeColor = childNodeColor;
+      this.validChildNodeColor = validChildNodeColor;
+      this.invalidChildNodeColor = invalidChildNodeColor;
 
       isExecutorServiceProvided = executorService == null;
 
@@ -45,27 +50,30 @@ public class NodeOccupancyMapSequenceRenderer extends AnimationTimer
       else
          this.executorService = executorService;
 
-      this.occupancyMapRenderer = new NodeOccupancyMapRenderer(messager, executorService);
+      this.validChildNodeRenderer = new NodeOccupancyMapRenderer(messager, executorService);
+      this.invalidChildNodeRenderer = new NodeOccupancyMapRenderer(messager, executorService);
       this.parentMapRenderer = new NodeOccupancyMapRenderer(messager, executorService);
 
-      root.getChildren().addAll(occupancyMapRenderer.getRoot(), parentMapRenderer.getRoot());
+      root.getChildren().addAll(validChildNodeRenderer.getRoot(), invalidChildNodeRenderer.getRoot(), parentMapRenderer.getRoot());
    }
 
    public void show(boolean show)
    {
-      occupancyMapRenderer.show(show);
+      validChildNodeRenderer.show(show);
+      invalidChildNodeRenderer.show(show);
       parentMapRenderer.show(show);
    }
 
    public void reset()
    {
-      occupancyMapRenderer.reset();
+      validChildNodeRenderer.reset();
+      invalidChildNodeRenderer.reset();
       parentMapRenderer.reset();
    }
 
    public void requestSpecificPercentageInPlayback(double alpha)
    {
-      if (nodesBeingExpandedBuffer.size() != childNodesBuffer.size())
+      if (nodesBeingExpandedBuffer.size() != validChildNodesBuffer.size() && nodesBeingExpandedBuffer.size() != invalidChildNodesBuffer.size())
          throw new RuntimeException("The buffers are not the same size.");
 
       int size = nodesBeingExpandedBuffer.size();
@@ -75,17 +83,20 @@ public class NodeOccupancyMapSequenceRenderer extends AnimationTimer
 
    private void setToFrame(int frameIndex)
    {
-      occupancyMapRenderer.reset();
+      validChildNodeRenderer.reset();
+      invalidChildNodeRenderer.reset();
       parentMapRenderer.reset();
 
-      occupancyMapRenderer.processNodesToRenderOnThread(childNodesBuffer.get(frameIndex), childNodeColor);
+      validChildNodeRenderer.processNodesToRenderOnThread(validChildNodesBuffer.get(frameIndex), validChildNodeColor);
+      invalidChildNodeRenderer.processNodesToRenderOnThread(invalidChildNodesBuffer.get(frameIndex), invalidChildNodeColor);
       parentMapRenderer.processNodesToRenderOnThread(nodesBeingExpandedBuffer.get(frameIndex), parentNodeColor);
    }
 
-   public void processNodesToRender(Collection<SimpleFootstepNode> nodesBeingExpanded, Collection<SimpleFootstepNode> childNodes)
+   public void processNodesToRender(Collection<SimpleFootstepNode> nodesBeingExpanded, Collection<SimpleFootstepNode> validChildNodes, Collection<SimpleFootstepNode> invalidChildNodes)
    {
       nodesBeingExpandedBuffer.add(nodesBeingExpanded);
-      childNodesBuffer.add(childNodes);
+      validChildNodesBuffer.add(validChildNodes);
+      invalidChildNodesBuffer.add(invalidChildNodes);
    }
 
    @Override
@@ -93,11 +104,10 @@ public class NodeOccupancyMapSequenceRenderer extends AnimationTimer
    {
       if (reset.getAndSet(false))
       {
-         childNodesBuffer.clear();
+         validChildNodesBuffer.clear();
+         invalidChildNodesBuffer.clear();
          nodesBeingExpandedBuffer.clear();
-         return;
       }
-
    }
 
    @Override
@@ -105,7 +115,8 @@ public class NodeOccupancyMapSequenceRenderer extends AnimationTimer
    {
       super.start();
 
-      occupancyMapRenderer.start();
+      validChildNodeRenderer.start();
+      invalidChildNodeRenderer.start();
       parentMapRenderer.start();
    }
 
@@ -124,7 +135,8 @@ public class NodeOccupancyMapSequenceRenderer extends AnimationTimer
       if (!isExecutorServiceProvided)
          executorService.shutdownNow();
 
-      occupancyMapRenderer.stop();
+      validChildNodeRenderer.stop();
+      invalidChildNodeRenderer.stop();
       parentMapRenderer.stop();
    }
 

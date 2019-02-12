@@ -1,6 +1,7 @@
 package us.ihmc.quadrupedFootstepPlanning.footstepPlanning.communication;
 
 import controller_msgs.msg.dds.*;
+import org.apache.commons.lang3.tuple.Pair;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
@@ -58,11 +59,12 @@ public class FootstepPlannerMessagerAPI
 
    private static final CategoryTheme Parameters = apiFactory.createCategoryTheme("Parameters");
 
-   private static final CategoryTheme AllValidNodes = apiFactory.createCategoryTheme("AllValidFootstepNodes");
-   private static final CategoryTheme AllInvalidNodes = apiFactory.createCategoryTheme("AllInvalidFootstepNodes");
-   private static final CategoryTheme ValidNodesThisTick = apiFactory.createCategoryTheme("ValidFootstepNodesThisTick");
-   private static final CategoryTheme InvalidNodesThisTick = apiFactory.createCategoryTheme("InvalidFootstepNodesThisTick");
+   private static final CategoryTheme AllNodes = apiFactory.createCategoryTheme("AllFootstepNodes");
+   private static final CategoryTheme NodesThisTick = apiFactory.createCategoryTheme("FootstepNodesThisTick");
    private static final CategoryTheme NodesRejectedByReason = apiFactory.createCategoryTheme("FootstepNodesRejectedByReason");
+
+   private static final CategoryTheme Valid = apiFactory.createCategoryTheme("Valid");
+   private static final CategoryTheme Invalid = apiFactory.createCategoryTheme("Invalid");
 
 
    private static final TypedTopicTheme<Boolean> Show = apiFactory.createTypedTopicTheme("Show");
@@ -174,15 +176,13 @@ public class FootstepPlannerMessagerAPI
    public static final Topic<Boolean> ShowInterRegionVisibilityMap = Root.child(VisibilityGraphs).child(InterRegion).child(Map).topic(Show);
    public static final Topic<Boolean> ShowNavigableRegionVisibilityMaps = Root.child(VisibilityGraphs).child(Map).topic(Show);
 
-   public static final Topic<HashMap<FootstepNode, List<FootstepNode>>> ValidNodesThisTickTopic = Root.child(PlannerData).child(NodeOccupancyMap).child(ValidNodesThisTick).topic(Data);
-   public static final Topic<HashMap<FootstepNode, List<FootstepNode>>> InvalidNodesThisTickTopic = Root.child(PlannerData).child(NodeOccupancyMap).child(InvalidNodesThisTick).topic(Data);
+   public static final Topic<HashMap<FootstepNode, Pair<List<FootstepNode>, List<FootstepNode>>>> NodesThisTickTopic = Root.child(PlannerData).child(NodeOccupancyMap).child(NodesThisTick).topic(Data);
    public static final Topic<HashMap<QuadrupedFootstepPlannerNodeRejectionReason, List<FootstepNode>>> NodesRejectedThisTickTopic = Root.child(PlannerData).child(NodeOccupancyMap).child(
          NodesRejectedByReason).topic(Data);
 
-   public static final Topic<Boolean> ShowAllValidNodesTopic = Root.child(PlannerData).child(NodeOccupancyMap).child(AllValidNodes).topic(Show);
-   public static final Topic<Boolean> ShowAllInvalidNodesTopic = Root.child(PlannerData).child(NodeOccupancyMap).child(AllInvalidNodes).topic(Show);
-   public static final Topic<Boolean> ShowValidNodesThisTickTopic = Root.child(PlannerData).child(NodeOccupancyMap).child(ValidNodesThisTick).topic(Show);
-   public static final Topic<Boolean> ShowInvalidNodesThisTickTopic = Root.child(PlannerData).child(NodeOccupancyMap).child(InvalidNodesThisTick).topic(Show);
+   public static final Topic<Boolean> ShowAllValidNodesTopic = Root.child(PlannerData).child(NodeOccupancyMap).child(AllNodes).child(Valid).topic(Show);
+   public static final Topic<Boolean> ShowAllInvalidNodesTopic = Root.child(PlannerData).child(NodeOccupancyMap).child(AllNodes).child(Invalid).topic(Show);
+   public static final Topic<Boolean> ShowNodesThisTickTopic = Root.child(PlannerData).child(NodeOccupancyMap).child(NodesThisTick).topic(Show);
    public static final Topic<Boolean> ShowNodesRejectedByReasonTopic = Root.child(PlannerData).child(NodeOccupancyMap).child(NodesRejectedByReason).topic(Show);
 
    public static final Topic<QuadrupedFootstepPlannerNodeRejectionReason> RejectionReasonToShowTopic = Root.child(PlannerData).child(NodeOccupancyMap).child(NodesRejectedByReason).topic(RejectionReason);
