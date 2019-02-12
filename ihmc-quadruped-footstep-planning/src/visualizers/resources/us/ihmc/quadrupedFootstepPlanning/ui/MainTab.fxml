@@ -175,7 +175,7 @@
                                    <!--wrappingWidth="214.7294921875"/>-->
                              <!--<GridPane layoutX="10.0" layoutY="24.0">-->
                                  <!--<Button mnemonicParsing="false" onAction="#requestWalkingPreview" prefWidth="130.0" text="Preview Steps" GridPane.halignment="CENTER" />-->
-                                 <!--<Slider fx:id="previewSlider" blockIncrement="0.01" majorTickUnit="0.05" max="1.0" minorTickCount="4" prefHeight="38.0" prefWidth="300.0" GridPane.columnIndex="1" />-->
+                                 <!--<Slider fx:id="plannerPlaybackSlider" blockIncrement="0.01" majorTickUnit="0.05" max="1.0" minorTickCount="4" prefHeight="38.0" prefWidth="300.0" GridPane.columnIndex="1" />-->
                                  <!--<Button fx:id="previewPlayButton" onAction="#playWalkingPreview" GridPane.columnIndex="3">-->
                                      <!--<graphic>-->
                                          <!--<ImageView fitWidth="20.0" pickOnBounds="true" preserveRatio="true">-->

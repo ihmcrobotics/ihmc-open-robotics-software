@@ -14,12 +14,15 @@ import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.FootstepPlan;
 import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.FootstepPlannerStatus;
 import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.FootstepPlannerType;
 import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.FootstepPlanningResult;
+import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.graphSearch.QuadrupedFootstepPlannerNodeRejectionReason;
+import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.graphSearch.graph.FootstepNode;
 import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.graphSearch.parameters.FootstepPlannerParameters;
 import us.ihmc.quadrupedPlanning.QuadrupedXGaitSettingsReadOnly;
 import us.ihmc.robotics.geometry.PlanarRegion;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.robotSide.RobotQuadrant;
 
+import java.util.HashMap;
 import java.util.List;
 
 public class FootstepPlannerMessagerAPI
@@ -36,7 +39,6 @@ public class FootstepPlannerMessagerAPI
    private static final CategoryTheme OrientationTheme = apiFactory.createCategoryTheme("OrientationTheme");
    private static final CategoryTheme EditMode = apiFactory.createCategoryTheme("EditMode");
    private static final CategoryTheme FootstepPlan = apiFactory.createCategoryTheme("FootstepPlan");
-   private static final CategoryTheme GoHome = apiFactory.createCategoryTheme("GoHome");
    private static final CategoryTheme BodyPath = apiFactory.createCategoryTheme("BodyPath");
    private static final CategoryTheme VisibilityGraphs = apiFactory.createCategoryTheme("VisibilityGraphs");
    private static final CategoryTheme NodeChecking = apiFactory.createCategoryTheme("NodeChecking");
@@ -48,12 +50,19 @@ public class FootstepPlannerMessagerAPI
    private static final CategoryTheme Raw = apiFactory.createCategoryTheme("Raw");
    private static final CategoryTheme Navigable = apiFactory.createCategoryTheme("Navigable");
    private static final CategoryTheme NonNavigable = apiFactory.createCategoryTheme("NonNavigable");
-   private static final CategoryTheme OccupancyMap = apiFactory.createCategoryTheme("OccupancyMap");
+   private static final CategoryTheme NodeOccupancyMap = apiFactory.createCategoryTheme("NodeOccupancyMap");
    private static final CategoryTheme PlannerData = apiFactory.createCategoryTheme("PlannerData");
    private static final CategoryTheme FlatGround = apiFactory.createCategoryTheme("FlatGround");
    private static final CategoryTheme Preview = apiFactory.createCategoryTheme("Preview");
 
    private static final CategoryTheme Parameters = apiFactory.createCategoryTheme("Parameters");
+
+   private static final CategoryTheme AllValidNodes = apiFactory.createCategoryTheme("AllValidFootstepNodes");
+   private static final CategoryTheme AllInvalidNodes = apiFactory.createCategoryTheme("AllInvalidFootstepNodes");
+   private static final CategoryTheme ValidNodesThisTick = apiFactory.createCategoryTheme("ValidFootstepNodesThisTick");
+   private static final CategoryTheme InvalidNodesThisTick = apiFactory.createCategoryTheme("InvalidFootstepNodesThisTick");
+   private static final CategoryTheme NodesRejectedByReason = apiFactory.createCategoryTheme("FootstepNodesRejectedByReason");
+
 
    private static final TypedTopicTheme<Boolean> Show = apiFactory.createTypedTopicTheme("Show");
    private static final TypedTopicTheme<Boolean> Enable = apiFactory.createTypedTopicTheme("Enable");
@@ -73,8 +82,8 @@ public class FootstepPlannerMessagerAPI
    private static final TypedTopicTheme<FootstepPlannerStatus> FootstepPlannerStatus = apiFactory.createTypedTopicTheme("FootstepPlannerStatus");
    private static final TypedTopicTheme<FootstepPlannerParameters> FootstepPlannerParameters = apiFactory.createTypedTopicTheme("FootstepPlannerParameters");
    private static final TypedTopicTheme<QuadrupedXGaitSettingsReadOnly> XGaitSettings = apiFactory.createTypedTopicTheme("XGaitSettings");
-   private static final TypedTopicTheme<FootstepDataListMessage> FootstepDataListMessage = apiFactory.createTypedTopicTheme("FootstepDataListMessage");
-   private static final TypedTopicTheme<GoHomeMessage> GoHomeMessage = apiFactory.createTypedTopicTheme("GoHomeMessage");
+   private static final TypedTopicTheme<QuadrupedTimedStepListMessage> FootstepDataListMessage = apiFactory.createTypedTopicTheme("FootstepDataListMessage");
+   private static final TypedTopicTheme<QuadrupedFootstepPlannerNodeRejectionReason> RejectionReason = apiFactory.createTypedTopicTheme("RejectionReason");
 
    private static final TypedTopicTheme<WalkingControllerPreviewInputMessage> PreviewRequest = apiFactory.createTypedTopicTheme("WalkingPreviewInput");
    private static final TypedTopicTheme<WalkingControllerPreviewOutputMessage> PreviewResponse = apiFactory.createTypedTopicTheme("WalkingPreviewOutput");
@@ -83,8 +92,6 @@ public class FootstepPlannerMessagerAPI
    private static final TypedTopicTheme<Boolean> Export = apiFactory.createTypedTopicTheme("Export");
 
    private static final TypedTopicTheme<String> Path = apiFactory.createTypedTopicTheme("Path");
-   private static final TypedTopicTheme<FootstepNodeDataListMessage> NodeData = apiFactory.createTypedTopicTheme("NodeData");
-   private static final TypedTopicTheme<FootstepPlannerOccupancyMapMessage> OccupancyMapData = apiFactory.createTypedTopicTheme("OccupancyMapData");
 
    private static final TopicTheme Data = apiFactory.createTopicTheme("Data");
    private static final TopicTheme RobotConfigurationData = apiFactory.createTopicTheme("RobotConfigurationData");
@@ -106,8 +113,7 @@ public class FootstepPlannerMessagerAPI
    public static final Topic<Boolean> AssumeFlatGround = Root.child(FlatGround).topic(Enable);
    public static final Topic<FootstepPlannerParameters> PlannerParametersTopic = Root.child(Parameters).topic(FootstepPlannerParameters);
    public static final Topic<QuadrupedXGaitSettingsReadOnly> XGaitSettingsTopic = Root.child(Parameters).topic(XGaitSettings);
-   public static final Topic<FootstepDataListMessage> FootstepDataListTopic = Root.child(FootstepPlan).topic(FootstepDataListMessage);
-   public static final Topic<GoHomeMessage> GoHomeTopic = Root.child(GoHome).topic(GoHomeMessage);
+   public static final Topic<QuadrupedTimedStepListMessage> FootstepDataListTopic = Root.child(FootstepPlan).topic(FootstepDataListMessage);
 
    public static final Topic<VisibilityGraphsParameters> VisibilityGraphsParametersTopic = Root.child(Parameters).topic(VisibilityGraphsParameters);
    public static final Topic<Double> PlannerTimeoutTopic = Root.child(FootstepPlan).topic(PlannerTimeout);
@@ -164,12 +170,22 @@ public class FootstepPlannerMessagerAPI
    public static final Topic<Boolean> ShowGoalVisibilityMap = Root.child(VisibilityGraphs).child(Goal).child(Map).topic(Show);
 
    public static final Topic<Boolean> ShowInterRegionVisibilityMap = Root.child(VisibilityGraphs).child(InterRegion).child(Map).topic(Show);
-
    public static final Topic<Boolean> ShowNavigableRegionVisibilityMaps = Root.child(VisibilityGraphs).child(Map).topic(Show);
-   public static final Topic<FootstepNodeDataListMessage> NodeDataTopic = Root.child(PlannerData).topic(NodeData);
-   public static final Topic<Boolean> ShowNodeDataTopic = Root.child(PlannerData).topic(Show);
-   public static final Topic<FootstepPlannerOccupancyMapMessage> OccupancyMapTopic = Root.child(OccupancyMap).topic(OccupancyMapData);
-   public static final Topic<Boolean> ShowOccupancyMap = Root.child(OccupancyMap).topic(Show);
+
+   public static final Topic<HashMap<FootstepNode, List<FootstepNode>>> ValidNodesThisTickTopic = Root.child(PlannerData).child(NodeOccupancyMap).child(ValidNodesThisTick).topic(Data);
+   public static final Topic<HashMap<FootstepNode, List<FootstepNode>>> InvalidNodesThisTickTopic = Root.child(PlannerData).child(NodeOccupancyMap).child(InvalidNodesThisTick).topic(Data);
+   public static final Topic<HashMap<QuadrupedFootstepPlannerNodeRejectionReason, List<FootstepNode>>> NodesRejectedThisTickTopic = Root.child(PlannerData).child(NodeOccupancyMap).child(
+         NodesRejectedByReason).topic(Data);
+
+   public static final Topic<Boolean> ShowAllValidNodesTopic = Root.child(PlannerData).child(NodeOccupancyMap).child(AllValidNodes).topic(Show);
+   public static final Topic<Boolean> ShowAllInvalidNodesTopic = Root.child(PlannerData).child(NodeOccupancyMap).child(AllInvalidNodes).topic(Show);
+   public static final Topic<Boolean> ShowValidNodesThisTickTopic = Root.child(PlannerData).child(NodeOccupancyMap).child(ValidNodesThisTick).topic(Show);
+   public static final Topic<Boolean> ShowInvalidNodesThisTickTopic = Root.child(PlannerData).child(NodeOccupancyMap).child(ValidNodesThisTick).topic(Show);
+   public static final Topic<Boolean> ShowNodesRejectedByReasonTopic = Root.child(PlannerData).child(NodeOccupancyMap).child(NodesRejectedByReason).topic(Show);
+
+   public static final Topic<QuadrupedFootstepPlannerNodeRejectionReason> RejectionReasonToShowTopic = Root.child(PlannerData).child(NodeOccupancyMap).child(NodesRejectedByReason).topic(RejectionReason);
+
+   public static final Topic<Number> PlannerPlaybackFractionTopic = Root.child(PlannerData).child(NodeOccupancyMap).topic(Data);
 
    public static final Topic<WalkingControllerPreviewInputMessage> RequestWalkingPreview = Root.child(Preview).topic(PreviewRequest);
    public static final Topic<WalkingControllerPreviewOutputMessage> WalkingPreviewOutput = Root.child(Preview).topic(PreviewResponse);

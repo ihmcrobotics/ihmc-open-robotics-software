@@ -29,11 +29,7 @@ public class VisualizationController
    @FXML
    private CheckBox showClusterNonNavigableExtrusionsToggleButton;
    @FXML
-   private CheckBox showOccupancyMap;
-   @FXML
    private CheckBox showSolution;
-   @FXML
-   private CheckBox showIntermediateSolution;
    @FXML
    public void requestStatistics()
    {
@@ -63,8 +59,6 @@ public class VisualizationController
       messager.bindBidirectional(FootstepPlannerMessagerAPI.ShowInterRegionVisibilityMap, showInterRegionMapToggleButton.selectedProperty(), true);
       messager.bindBidirectional(FootstepPlannerMessagerAPI.ShowStartVisibilityMap, showStartMapToggleButton.selectedProperty(), true);
       messager.bindBidirectional(FootstepPlannerMessagerAPI.ShowGoalVisibilityMap, showGoalMapToggleButton.selectedProperty(), true);
-      messager.bindBidirectional(FootstepPlannerMessagerAPI.ShowOccupancyMap, showOccupancyMap.selectedProperty(), true);
       messager.bindBidirectional(FootstepPlannerMessagerAPI.ShowFootstepPlanTopic, showSolution.selectedProperty(), true);
-      messager.bindBidirectional(FootstepPlannerMessagerAPI.ShowNodeDataTopic, showIntermediateSolution.selectedProperty(), true);
    }
 }

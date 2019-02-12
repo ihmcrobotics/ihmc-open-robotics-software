@@ -15,47 +15,42 @@ import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
-import us.ihmc.idl.IDLSequence.Object;
 import us.ihmc.javaFXToolkit.shapes.JavaFXMultiColorMeshBuilder;
 import us.ihmc.javaFXToolkit.shapes.TextureColorAdaptivePalette;
 import us.ihmc.messager.Messager;
 import us.ihmc.pathPlanning.visibilityGraphs.tools.PlanarRegionTools;
 import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.communication.FootstepPlannerMessagerAPI;
 import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.graphSearch.graph.FootstepNode;
+import us.ihmc.quadrupedFootstepPlanning.ui.SimpleFootstepNode;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
+import us.ihmc.robotics.robotSide.RobotQuadrant;
 
+import java.util.Collection;
+import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 
-public class OccupancyMapRenderer extends AnimationTimer
+public class NodeOccupancyMapRenderer extends AnimationTimer
 {
    private static final double cellWidth = 0.02;
    private static final double nodeOffsetZ = 0.05;
-   private static final double cellOpacity = 0.9;
-   private static final Color validCellColor = Color.rgb(219, 124, 87, cellOpacity);
-   private static final Color rejectedCellColor = Color.rgb(139, 0, 0, cellOpacity);
 
    private ExecutorService executorService = Executors.newSingleThreadExecutor(ThreadTools.getNamedThreadFactory(getClass().getSimpleName()));
 
    private final Group root = new Group();
-   private final AtomicReference<Pair<Mesh, Material>> footstepGraphToRender = new AtomicReference<>(null);
+   private final AtomicReference<Pair<Mesh, Material>> nodeGraphToRender = new AtomicReference<>(null);
    private final AtomicReference<PlanarRegionsList> planarRegionsList = new AtomicReference<>(null);
-   private final AtomicReference<Boolean> show;
+   private final AtomicBoolean show = new AtomicBoolean();
    private final AtomicBoolean reset = new AtomicBoolean(false);
 
-   private final MeshView footstepGraphMeshView = new MeshView();
+   private final MeshView nodeGraphMeshView = new MeshView();
    private final TextureColorAdaptivePalette palette = new TextureColorAdaptivePalette(1024, false);
    private final ConvexPolygon2D cellPolygon = new ConvexPolygon2D();
 
-   public OccupancyMapRenderer(Messager messager)
+   public NodeOccupancyMapRenderer(Messager messager)
    {
-      messager
-            .registerTopicListener(FootstepPlannerMessagerAPI.OccupancyMapTopic, message -> executorService.execute(() -> processOccupancyMapMessage(message)));
-      messager.registerTopicListener(FootstepPlannerMessagerAPI.PlanarRegionDataTopic, planarRegionsList::set);
-      this.show = messager.createInput(FootstepPlannerMessagerAPI.ShowOccupancyMap, true);
-      messager.registerTopicListener(FootstepPlannerMessagerAPI.PlanarRegionDataTopic, data -> reset.set(true));
       messager.registerTopicListener(FootstepPlannerMessagerAPI.ComputePathTopic, data -> reset.set(true));
 
       cellPolygon.addVertex(cellWidth, 0.0);
@@ -66,31 +61,36 @@ public class OccupancyMapRenderer extends AnimationTimer
       cellPolygon.addVertex(0.5 * cellWidth, -0.5 * Math.sqrt(3.0) * cellWidth);
       cellPolygon.update();
 
-      root.getChildren().add(footstepGraphMeshView);
+      root.getChildren().add(nodeGraphMeshView);
    }
 
-   private void processOccupancyMapMessage(FootstepPlannerOccupancyMapMessage message)
+   public void show(boolean show)
+   {
+      this.show.set(show);
+   }
+
+   public void reset()
+   {
+      this.reset.set(true);
+   }
+
+   public void processNodesToRender(Collection<SimpleFootstepNode> nodes, Color color)
    {
       palette.clearPalette();
       JavaFXMultiColorMeshBuilder meshBuilder = new JavaFXMultiColorMeshBuilder(palette);
 
-      Object<FootstepPlannerCellMessage> occupiedCells = message.getOccupiedCells();
-      for (int i = 0; i < occupiedCells.size(); i++)
+      for (SimpleFootstepNode node : nodes)
       {
-         FootstepPlannerCellMessage cell = occupiedCells.get(i);
-         double x = cell.getXIndex() * FootstepNode.gridSizeXY;
-         double y = cell.getYIndex() * FootstepNode.gridSizeXY;
+         double x = node.getXIndex() * FootstepNode.gridSizeXY;
+         double y = node.getYIndex() * FootstepNode.gridSizeXY;
          double z = getHeightAtPoint(x, y) + nodeOffsetZ;
          RigidBodyTransform transform = new RigidBodyTransform();
          transform.setTranslation(x, y, z);
 
-         if (cell.getNodeIsValid())
-            meshBuilder.addPolygon(transform, cellPolygon, validCellColor);
-         else
-            meshBuilder.addPolygon(transform, cellPolygon, rejectedCellColor);
+         meshBuilder.addPolygon(transform, cellPolygon, color);
       }
 
-      footstepGraphToRender.set(new Pair<>(meshBuilder.generateMesh(), meshBuilder.generateMaterial()));
+      nodeGraphToRender.set(new Pair<>(meshBuilder.generateMesh(), meshBuilder.generateMaterial()));
    }
 
    private double getHeightAtPoint(double x, double y)
@@ -106,23 +106,23 @@ public class OccupancyMapRenderer extends AnimationTimer
    public void handle(long now)
    {
       if (show.get() && root.getChildren().isEmpty())
-         root.getChildren().add(footstepGraphMeshView);
+         root.getChildren().add(nodeGraphMeshView);
       else if (!show.get() && !root.getChildren().isEmpty())
          root.getChildren().clear();
 
       if (reset.getAndSet(false))
       {
-         footstepGraphToRender.set(null);
-         footstepGraphMeshView.setMesh(null);
-         footstepGraphMeshView.setMaterial(null);
+         nodeGraphToRender.set(null);
+         nodeGraphMeshView.setMesh(null);
+         nodeGraphMeshView.setMaterial(null);
          return;
       }
 
-      Pair<Mesh, Material> newMesh = footstepGraphToRender.get();
+      Pair<Mesh, Material> newMesh = nodeGraphToRender.get();
       if (newMesh != null)
       {
-         footstepGraphMeshView.setMesh(newMesh.getKey());
-         footstepGraphMeshView.setMaterial(newMesh.getValue());
+         nodeGraphMeshView.setMesh(newMesh.getKey());
+         nodeGraphMeshView.setMaterial(newMesh.getValue());
       }
    }
 

@@ -6,7 +6,6 @@ import javafx.scene.Scene;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.Pane;
 import javafx.stage.Stage;
-import us.ihmc.communication.controllerAPI.RobotLowLevelMessenger;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.javaFXToolkit.messager.JavaFXMessager;
 import us.ihmc.javaFXToolkit.messager.SharedMemoryJavaFXMessager;
@@ -20,7 +19,7 @@ import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.graphSearch.parameters
 import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.graphSearch.parameters.FootstepPlannerParameters;
 import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.tools.FootstepPlannerDataExporter;
 import us.ihmc.quadrupedFootstepPlanning.ui.components.NodeCheckerEditor;
-import us.ihmc.quadrupedFootstepPlanning.ui.components.OccupancyMapRenderer;
+import us.ihmc.quadrupedFootstepPlanning.ui.components.NodeOccupancyMapRenderer;
 import us.ihmc.quadrupedFootstepPlanning.ui.components.StartGoalOrientationEditor;
 import us.ihmc.quadrupedFootstepPlanning.ui.controllers.*;
 import us.ihmc.quadrupedFootstepPlanning.ui.viewers.*;
@@ -52,9 +51,10 @@ public class FootstepPlannerUI
    private final FootstepPlannerDataExporter dataExporter;
    private final BodyPathMeshViewer bodyPathMeshViewer;
    private final VisibilityGraphsRenderer visibilityGraphsRenderer;
-   private final OccupancyMapRenderer graphRenderer;
+   private final NodeOccupancyMapRenderer graphRenderer;
    private final JavaFXQuadrupedVisualizer robotVisualizer;
    private final JavaFXQuadrupedVisualizer walkingPreviewVisualizer;
+   private final FootstepPlannerProcessViewer footstepPlannerProcessViewer;
 
    @FXML
    private FootstepPlannerMenuUIController footstepPlannerMenuUIController;
@@ -69,7 +69,7 @@ public class FootstepPlannerUI
    @FXML
    private MainTabController mainTabController;
    @FXML
-   private UIRobotController uiRobotController;
+   private FootstepPlannerVisualizationController plannerVisualizationController;
 
    @FXML
    private VisualizationController visibilityGraphsUIController;
@@ -114,7 +114,7 @@ public class FootstepPlannerUI
       footstepNodeCheckingUIController.attachMessager(messager);
       visibilityGraphsUIController.attachMessager(messager);
       dataExporterAnchorPaneController.attachMessager(messager);
-      uiRobotController.attachMessager(messager);
+      plannerVisualizationController.attachMessager(messager);
 
       footstepPlannerMenuUIController.setMainWindow(primaryStage);
 
@@ -145,7 +145,8 @@ public class FootstepPlannerUI
       this.dataExporter = new FootstepPlannerDataExporter(messager);
       this.bodyPathMeshViewer = new BodyPathMeshViewer(messager);
       this.visibilityGraphsRenderer = new VisibilityGraphsRenderer(messager);
-      this.graphRenderer = new OccupancyMapRenderer(messager);
+      this.graphRenderer = new NodeOccupancyMapRenderer(messager);
+      this.footstepPlannerProcessViewer = new FootstepPlannerProcessViewer(messager);
 
       view3dFactory.addNodeToView(planarRegionViewer.getRoot());
       view3dFactory.addNodeToView(startGoalPositionViewer.getRoot());
@@ -155,6 +156,7 @@ public class FootstepPlannerUI
       view3dFactory.addNodeToView(bodyPathMeshViewer.getRoot());
       view3dFactory.addNodeToView(visibilityGraphsRenderer.getRoot());
       view3dFactory.addNodeToView(graphRenderer.getRoot());
+      view3dFactory.addNodesToView(footstepPlannerProcessViewer.getNodesToView());
 
       if(fullQuadrupedRobotModelFactory == null)
       {
@@ -194,6 +196,7 @@ public class FootstepPlannerUI
       bodyPathMeshViewer.start();
       visibilityGraphsRenderer.start();
       graphRenderer.start();
+      footstepPlannerProcessViewer.start();
 
       mainPane.setCenter(subScene);
       primaryStage.setTitle(getClass().getSimpleName());
@@ -202,11 +205,6 @@ public class FootstepPlannerUI
 
       primaryStage.setScene(mainScene);
       primaryStage.setOnCloseRequest(event -> stop());
-   }
-
-   public void setRobotLowLevelMessenger(RobotLowLevelMessenger robotLowLevelMessenger)
-   {
-      uiRobotController.setRobotLowLevelMessenger(robotLowLevelMessenger);
    }
 
    public JavaFXMessager getMessager()
@@ -232,6 +230,7 @@ public class FootstepPlannerUI
       bodyPathMeshViewer.stop();
       visibilityGraphsRenderer.stop();
       graphRenderer.stop();
+      footstepPlannerProcessViewer.start();
 
       if(robotVisualizer != null)
          robotVisualizer.stop();
