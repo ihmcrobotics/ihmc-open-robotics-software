@@ -68,14 +68,16 @@
 <parameter name="lookAtTwoStepCapturabilityForToeOff" type="BooleanParameter" value="false"/>
                             </registry>
                             <registry name="FootRotationDetectorParameters">
-<parameter name="omegaThresholdForEstimation" type="DoubleParameter" min="0.0" max="1.0" value="3.0"/>
-<parameter name="rotationThreshold" type="DoubleParameter" min="0.0" max="1.0" value="0.1"/>
+<parameter name="omegaThresholdForEstimation" type="DoubleParameter" min="0.0" max="1.0" value="1.5"/>
+<parameter name="rotationThreshold" type="DoubleParameter" min="0.0" max="1.0" value="0.05"/>
                             </registry>
                             <registry name="FootRotationHelperParameters">
 <parameter name="AreaPecentToSelect" type="DoubleParameter" min="0.0" max="1.0" value="0.6"/>
                             </registry>
                             <registry name="SupportStateParameters">
 <parameter name="avoidFootRotations" type="BooleanParameter" value="true"/>
+<parameter name="dampFootRotations" type="BooleanParameter" value="true"/>
+<parameter name="footDamping" type="DoubleParameter" min="0.0" max="1.0" value="20.0"/>
                             </registry>
                         </registry>
                     </registry>
