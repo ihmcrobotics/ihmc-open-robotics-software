@@ -2,14 +2,18 @@ package us.ihmc.robotDataLogger.websocket.server;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
-import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.concurrent.locks.LockSupport;
 
+import io.netty.channel.Channel;
 import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelFutureListener;
 import us.ihmc.robotDataLogger.websocket.command.DataServerCommand;
 
 /**
- * Helper class that keep track of active connections and writes data to all connections
+ * Helper class that keep track of active connections and writes data to all connections.
+ * 
+ * It also has an internal thread for the timestamp publisher to avoid the overhead of having a thread per connection for timestamp publishing
  * 
  * @author Jesper Smith
  *
@@ -17,11 +21,17 @@ import us.ihmc.robotDataLogger.websocket.command.DataServerCommand;
 class WebsocketDataBroadcaster implements ChannelFutureListener
 {
    private final Object channelLock = new Object();
+   private final TimestampPublishingThread timestampPublishingThread = new TimestampPublishingThread();
 
-   private final ArrayList<WebsocketDataServerFrameHandler> channels = new ArrayList<WebsocketDataServerFrameHandler>();
+   // Implement channels as copy on write array to avoid blocking in the timestamp update thread
+   private volatile WebsocketDataServerFrameHandler[] channels = new WebsocketDataServerFrameHandler[0];
+
+   private volatile boolean active = true;
+   private volatile long newTimestamp = Long.MIN_VALUE;
 
    public WebsocketDataBroadcaster()
    {
+      timestampPublishingThread.start();
    }
 
    public void addClient(WebsocketDataServerFrameHandler websocketLogFrameHandler)
@@ -29,60 +39,129 @@ class WebsocketDataBroadcaster implements ChannelFutureListener
 
       synchronized (channelLock)
       {
-         channels.add(websocketLogFrameHandler);
+
+         WebsocketDataServerFrameHandler[] newChannels = Arrays.copyOf(channels, channels.length + 1);
+         newChannels[newChannels.length - 1] = websocketLogFrameHandler;
+         channels = newChannels;
+
          websocketLogFrameHandler.addCloseFutureListener(this);
       }
    }
 
    public void write(int bufferID, long timestamp, ByteBuffer frame) throws IOException
    {
-      synchronized (channelLock)
-      {
-         for (int i = 0; i < channels.size(); i++)
-         {
-            channels.get(i).write(bufferID, timestamp, frame);
-         }
-      }
+      // Localize channels
+      WebsocketDataServerFrameHandler[] localChannels = channels;
 
+      for (int i = 0; i < localChannels.length; i++)
+      {
+         localChannels[i].write(bufferID, timestamp, frame);
+      }
    }
 
+   /**
+    * Remove channel on completion
+    */
    @Override
    public void operationComplete(ChannelFuture future) throws Exception
    {
       synchronized (channelLock)
       {
-         for (int i = 0; i < channels.size(); i++)
+         Channel channel = future.channel();
+         WebsocketDataServerFrameHandler[] newChannels = new WebsocketDataServerFrameHandler[channels.length - 1];
+
+         int newI = 0;
+         for (int i = 0; i < channels.length; i++)
          {
-            if (channels.get(i).channel() == future.channel())
+            if (channels[i].channel() == channel)
             {
-               channels.remove(i).release();
-               return;
+               channels[i].release();
+            }
+            else
+            {
+               if (newI >= newChannels.length)
+               {
+                  // Channel not found, returning
+                  return;
+               }
+
+               newChannels[newI] = channels[i];
+               ++newI;
             }
          }
+         
+         channels = newChannels;
       }
    }
 
    public void writeCommand(DataServerCommand command, int argument)
    {
-      synchronized (channelLock)
+      // Localize channels
+      WebsocketDataServerFrameHandler[] localChannels = channels;
+
+      for (int i = 0; i < localChannels.length; i++)
       {
-         for (int i = 0; i < channels.size(); i++)
-         {
-            channels.get(i).writeCommand(command, argument);
-         }
+         localChannels[i].writeCommand(command, argument);
       }
 
    }
 
    public void publishTimestamp(long timestamp)
    {
-      synchronized (channelLock)
+      newTimestamp = timestamp;
+
+   }
+
+   public void stop()
+   {
+      active = false;
+   }
+
+   /**
+    * Internal thread that sends timestamps over a UDP connection.
+    * 
+    * Polls for new timestamps at approximately 10kHz
+    * 
+    * @author Jesper Smith
+    *
+    */
+   private class TimestampPublishingThread extends Thread
+   {
+
+      private TimestampPublishingThread()
       {
-         for (int i = 0; i < channels.size(); i++)
-         {
-            channels.get(i).publishTimestamp(timestamp);
-         }
+         super(TimestampPublishingThread.class.getSimpleName());
       }
+
+      @Override
+      public void run()
+      {
+         long lastSendTimestamp = Long.MIN_VALUE;
+
+         while (active)
+         {
+            // Localize variable so it doesn't change in this thread
+            long newTimestampLocal = newTimestamp;
+
+            if (lastSendTimestamp != newTimestampLocal)
+            {
+
+               // Localize variables
+               WebsocketDataServerFrameHandler[] localChannels = channels;
+
+               for (int i = 0; i < localChannels.length; i++)
+               {
+                  localChannels[i].publishTimestamp(newTimestampLocal);
+               }
+               
+               lastSendTimestamp = newTimestampLocal;
+            }
+
+            LockSupport.parkNanos(100000); // 0.1 ms pause
+         }
+
+      }
+
    }
 
 }
