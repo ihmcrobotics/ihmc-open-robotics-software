@@ -50,14 +50,12 @@ public abstract class FootstepNodeSnapper implements FootstepNodeSnapperReadOnly
 
    public FootstepNodeSnapData snapFootstepNode(FootstepNode footstepNode)
    {
-      /*
-      if (snapDataHolder.containsKey(footstepNode.hashCode()))
+      if (snapDataHolder.containsKey(footstepNode.getSnapDataHashCode()))
       {
-         return snapDataHolder.get(footstepNode.hashCode());
+         return snapDataHolder.get(footstepNode.getSnapDataHashCode());
       }
-      */
-//      else if (planarRegionsList == null || planarRegionsList.isEmpty())
-      if (planarRegionsList == null || planarRegionsList.isEmpty())
+      else if (planarRegionsList == null || planarRegionsList.isEmpty())
+//      if (planarRegionsList == null || planarRegionsList.isEmpty())
       {
          return FootstepNodeSnapData.identityData();
       }
@@ -108,7 +106,7 @@ public abstract class FootstepNodeSnapper implements FootstepNodeSnapperReadOnly
     */
    public void addSnapData(FootstepNode footstepNode, FootstepNodeSnapData snapData)
    {
-      snapDataHolder.put(footstepNode.hashCode(), snapData);
+      snapDataHolder.put(footstepNode.getSnapDataHashCode(), snapData);
    }
 
    @Override

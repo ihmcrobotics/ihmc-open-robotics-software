@@ -15,7 +15,7 @@ import java.util.Random;
 
 public class FootstepNode
 {
-   public static final double gridSizeXY = 0.10;
+   public static final double gridSizeXY = 0.08;
 
    public static final double PRECISION = 0.05;
    public static final double INV_PRECISION = 1.0 / PRECISION;
@@ -34,6 +34,7 @@ public class FootstepNode
    private Point2D xGaitCenterPoint;
 
    private final int hashCode;
+   private final int snapDataHashCode;
    private final int planarRegionsHashCode;
 
    private final RobotQuadrant movingQuadrant;
@@ -108,6 +109,7 @@ public class FootstepNode
 
       hashCode = computeHashCode(this);
       planarRegionsHashCode = computePlanarRegionsHashCode(this);
+      snapDataHashCode = computeSnapDataHashCode(this);
    }
 
    public RobotQuadrant getMovingQuadrant()
@@ -227,13 +229,32 @@ public class FootstepNode
       return planarRegionsHashCode;
    }
 
+   public int getSnapDataHashCode()
+   {
+      return snapDataHashCode;
+   }
+
    private static int computeHashCode(FootstepNode node)
    {
       final int prime = 31;
       int result = 1;
       result = prime * result + ((node.movingQuadrant == null) ? 0 : node.movingQuadrant.hashCode());
+//      for (RobotQuadrant robotQuadrant)
       result = prime * result + node.getXIndex(node.movingQuadrant);
       result = prime * result + node.getYIndex(node.movingQuadrant);
+      return result;
+   }
+
+   private static int computeSnapDataHashCode(FootstepNode node)
+   {
+      final int prime = 31;
+      int result = 1;
+      result = prime * result + ((node.movingQuadrant == null) ? 0 : node.movingQuadrant.hashCode());
+      for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
+      {
+         result = prime * result + node.getXIndex(robotQuadrant);
+         result = prime * result + node.getYIndex(robotQuadrant);
+      }
       return result;
    }
 
