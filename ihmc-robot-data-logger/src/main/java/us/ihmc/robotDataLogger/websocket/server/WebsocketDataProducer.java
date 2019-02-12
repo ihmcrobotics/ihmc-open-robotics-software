@@ -97,7 +97,7 @@ public class WebsocketDataProducer implements DataProducer
          try
          {
             broadcastSender.stop();
-            
+            broadcaster.stop();
             ch.close().sync();
             
             bossGroup.shutdownGracefully();

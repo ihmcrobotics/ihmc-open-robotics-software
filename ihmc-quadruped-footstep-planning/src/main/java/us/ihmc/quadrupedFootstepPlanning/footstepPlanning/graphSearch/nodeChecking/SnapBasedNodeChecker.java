@@ -1,11 +1,11 @@
 package us.ihmc.quadrupedFootstepPlanning.footstepPlanning.graphSearch.nodeChecking;
 
-import us.ihmc.commons.PrintTools;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.geometry.LineSegment3D;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.log.LogTools;
 import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.graphSearch.QuadrupedFootstepPlannerNodeRejectionReason;
 import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.graphSearch.footstepSnapping.FootstepNodeSnapData;
 import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.graphSearch.footstepSnapping.FootstepNodeSnapper;
@@ -54,7 +54,7 @@ public class SnapBasedNodeChecker extends FootstepNodeChecker
          {
             if (DEBUG)
             {
-               PrintTools.debug("Was not able to snap node:\n" + node);
+               LogTools.debug("Was not able to snap node:\n" + node);
             }
             rejectNode(node, previousNode, QuadrupedFootstepPlannerNodeRejectionReason.COULD_NOT_SNAP);
             return false;
@@ -71,13 +71,14 @@ public class SnapBasedNodeChecker extends FootstepNodeChecker
 
 
 
-      for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
-      {
-         RigidBodyTransform previousFootSnapTransform = previousNodeSnapData.getSnapTransform(robotQuadrant);
-         RigidBodyTransform snapTransform = snapData.getSnapTransform(robotQuadrant);
+      RobotQuadrant movingQuadrant = node.getMovingQuadrant();
+//      for (RobotQuadrant movingQuadrant : RobotQuadrant.values)
+//      {
+         RigidBodyTransform previousFootSnapTransform = previousNodeSnapData.getSnapTransform(movingQuadrant);
+         RigidBodyTransform snapTransform = snapData.getSnapTransform(movingQuadrant);
 
-         Point3D stepPosition = new Point3D(node.getX(robotQuadrant), node.getY(robotQuadrant), 0.0);
-         Point3D previousStepPosition = new Point3D(previousNode.getX(robotQuadrant), previousNode.getY(robotQuadrant), 0.0);
+         Point3D stepPosition = new Point3D(node.getX(movingQuadrant), node.getY(movingQuadrant), 0.0);
+         Point3D previousStepPosition = new Point3D(previousNode.getX(movingQuadrant), previousNode.getY(movingQuadrant), 0.0);
 
          snapTransform.transform(stepPosition);
          previousFootSnapTransform.transform(previousStepPosition);
@@ -87,25 +88,39 @@ public class SnapBasedNodeChecker extends FootstepNodeChecker
          {
             if (DEBUG)
             {
-               PrintTools.debug("Too much height difference (" + Math.round(100.0 * heightChange) + "cm) to previous node:\n" + node);
+               LogTools.debug("Too much height difference (" + Math.round(100.0 * heightChange) + "cm) to previous node:\n" + node);
             }
             rejectNode(node, previousNode, QuadrupedFootstepPlannerNodeRejectionReason.STEP_TOO_HIGH_OR_LOW);
             return false;
          }
 
 
-         if (hasPlanarRegions() && isObstacleBetweenNodes(stepPosition, previousStepPosition,
+         if (hasPlanarRegions() && isObstacleBetweenSteps(stepPosition, previousStepPosition,
+                                                          snapper.getOrCreateNearbyRegions(node.getRoundedX(movingQuadrant), node.getRoundedY(movingQuadrant)),
+                                                          parameters.getBodyGroundClearance()))
+         {
+            if (DEBUG)
+            {
+               LogTools.debug("Found a obstacle between the nodes " + node + " and " + previousNode);
+            }
+            rejectNode(node, previousNode, QuadrupedFootstepPlannerNodeRejectionReason.OBSTACLE_BLOCKING_STEP);
+            return false;
+         }
+
+         /* TODO check between all the feet
+         if (hasPlanarRegions() && isObstacleBetweenFeet(stepPosition, previousStepPosition,
                                                           snapper.getOrCreateNearbyRegions(node.getRoundedX(robotQuadrant), node.getRoundedY(robotQuadrant)),
                                                           parameters.getBodyGroundClearance()))
          {
             if (DEBUG)
             {
-               PrintTools.debug("Found a obstacle between the nodes " + node + " and " + previousNode);
+               LogTools.debug("Found a obstacle between the nodes " + node + " and " + previousNode);
             }
             rejectNode(node, previousNode, QuadrupedFootstepPlannerNodeRejectionReason.OBSTACLE_BLOCKING_BODY);
             return false;
          }
-      }
+         */
+//      }
 
 
 
@@ -118,9 +133,9 @@ public class SnapBasedNodeChecker extends FootstepNodeChecker
     * This is meant to test if there is a wall that the body of the robot would run into when shifting
     * from one step to the next. It is not meant to eliminate swing overs.
     */
-   private static boolean isObstacleBetweenNodes(Point3D nodePosition, Point3D previousNodePosition, List<PlanarRegion> planarRegions, double groundClearance)
+   private static boolean isObstacleBetweenSteps(Point3D footPosition, Point3D previousFootPosition, List<PlanarRegion> planarRegions, double groundClearance)
    {
-      PlanarRegion bodyPath = createBodyRegionFromNodes(nodePosition, previousNodePosition, groundClearance, 2.0);
+      PlanarRegion bodyPath = createBodyRegionFromNodes(footPosition, previousFootPosition, groundClearance, 2.0);
 
       for (PlanarRegion region : planarRegions)
       {
@@ -135,17 +150,20 @@ public class SnapBasedNodeChecker extends FootstepNodeChecker
    }
 
    /**
-    * Given two footstep position this will create a vertical planar region above the nodes. The region
+    * Given two footstep positions this will create a vertical planar region above the points. The region
     * will be aligned with the vector connecting the nodes. It's lower edge will be the specified
-    * distance above the higher of the two nodes and the plane will have the specified hight.
+    * distance above the higher of the two nodes and the plane will have the specified height.
     */
-   public static PlanarRegion createBodyRegionFromNodes(Point3D nodeA, Point3D nodeB, double clearance, double height)
+   public static PlanarRegion createBodyRegionFromNodes(Point3D footA, Point3D footB, double clearance, double height)
    {
-      double lowerZ = Math.max(nodeA.getZ(), nodeB.getZ()) + clearance;
-      Point3D point0 = new Point3D(nodeA.getX(), nodeA.getY(), lowerZ);
-      Point3D point1 = new Point3D(nodeA.getX(), nodeA.getY(), lowerZ + height);
-      Point3D point2 = new Point3D(nodeB.getX(), nodeB.getY(), lowerZ);
-      Point3D point3 = new Point3D(nodeB.getX(), nodeB.getY(), lowerZ + height);
+      if (footA.epsilonEquals(footB, 1e-3))
+         throw new RuntimeException("These points should be different.");
+
+      double lowerZ = Math.max(footA.getZ(), footB.getZ()) + clearance;
+      Point3D point0 = new Point3D(footA.getX(), footA.getY(), lowerZ);
+      Point3D point1 = new Point3D(footA.getX(), footA.getY(), lowerZ + height);
+      Point3D point2 = new Point3D(footB.getX(), footB.getY(), lowerZ);
+      Point3D point3 = new Point3D(footB.getX(), footB.getY(), lowerZ + height);
 
       Vector3D xAxisInPlane = new Vector3D();
       xAxisInPlane.sub(point2, point0);

@@ -14,17 +14,20 @@ import controller_msgs.msg.dds.FootstepPlannerStatusMessage;
 import controller_msgs.msg.dds.FootstepPlanningRequestPacket;
 import controller_msgs.msg.dds.FootstepPlanningToolboxOutputStatus;
 import controller_msgs.msg.dds.GoHomeMessage;
-import controller_msgs.msg.dds.HighLevelStateMessage;
 import controller_msgs.msg.dds.PlanarRegionsListMessage;
 import controller_msgs.msg.dds.PlanningStatisticsRequestMessage;
 import controller_msgs.msg.dds.RobotConfigurationData;
 import controller_msgs.msg.dds.ToolboxStateMessage;
 import controller_msgs.msg.dds.VisibilityGraphsParametersPacket;
+import controller_msgs.msg.dds.WalkingControllerPreviewInputMessage;
+import controller_msgs.msg.dds.WalkingControllerPreviewOutputMessage;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.ControllerAPIDefinition;
 import us.ihmc.commons.PrintTools;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.communication.IHMCRealtimeROS2Publisher;
 import us.ihmc.communication.ROS2Tools;
+import us.ihmc.communication.ROS2Tools.MessageTopicNameGenerator;
+import us.ihmc.communication.ROS2Tools.ROS2TopicQualifier;
 import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.communication.packets.PlanarRegionMessageConverter;
 import us.ihmc.communication.packets.ToolboxState;
@@ -100,7 +103,8 @@ public class RemoteUIMessageConverter
    private IHMCRealtimeROS2Publisher<PlanningStatisticsRequestMessage> plannerStatisticsRequestPublisher;
    private IHMCRealtimeROS2Publisher<FootstepDataListMessage> footstepDataListPublisher;
    private IHMCRealtimeROS2Publisher<GoHomeMessage> goHomePublisher;
-   private IHMCRealtimeROS2Publisher<HighLevelStateMessage> highLevelStatePublisher;
+   private IHMCRealtimeROS2Publisher<ToolboxStateMessage> walkingPreviewToolboxStatePublisher;
+   private IHMCRealtimeROS2Publisher<WalkingControllerPreviewInputMessage> walkingPreviewRequestPublisher;
 
    public static RemoteUIMessageConverter createRemoteConverter(Messager messager, String robotName)
    {
@@ -184,6 +188,9 @@ public class RemoteUIMessageConverter
                                            ControllerAPIDefinition.getPublisherTopicNameGenerator(robotName),
                                            s -> messager.submitMessage(FootstepPlannerMessagerAPI.RobotConfigurationDataTopic, s.takeNextData()));
 
+      MessageTopicNameGenerator controllerPreviewOutputTopicNameGenerator = ROS2Tools.getTopicNameGenerator(robotName, ROS2Tools.WALKING_PREVIEW_TOOLBOX, ROS2TopicQualifier.OUTPUT);
+      ROS2Tools.createCallbackSubscription(ros2Node, WalkingControllerPreviewOutputMessage.class, controllerPreviewOutputTopicNameGenerator, s -> messager.submitMessage(FootstepPlannerMessagerAPI.WalkingPreviewOutput, s.takeNextData()));
+
       // publishers
       plannerParametersPublisher = ROS2Tools
             .createPublisher(ros2Node, FootstepPlannerParametersPacket.class, FootstepPlannerCommunicationProperties.subscriberTopicNameGenerator(robotName));
@@ -197,14 +204,23 @@ public class RemoteUIMessageConverter
             .createPublisher(ros2Node, PlanningStatisticsRequestMessage.class, FootstepPlannerCommunicationProperties.subscriberTopicNameGenerator(robotName));
       footstepDataListPublisher = ROS2Tools.createPublisher(ros2Node, FootstepDataListMessage.class, ControllerAPIDefinition.getSubscriberTopicNameGenerator(robotName));
       goHomePublisher = ROS2Tools.createPublisher(ros2Node, GoHomeMessage.class, ControllerAPIDefinition.getSubscriberTopicNameGenerator(robotName));
-      highLevelStatePublisher = ROS2Tools.createPublisher(ros2Node, HighLevelStateMessage.class, ControllerAPIDefinition.getSubscriberTopicNameGenerator(robotName));
+
+      MessageTopicNameGenerator controllerPreviewInputTopicNameGenerator = ROS2Tools.getTopicNameGenerator(robotName, ROS2Tools.WALKING_PREVIEW_TOOLBOX, ROS2TopicQualifier.INPUT);
+      walkingPreviewToolboxStatePublisher = ROS2Tools.createPublisher(ros2Node, ToolboxStateMessage.class, controllerPreviewInputTopicNameGenerator);
+      walkingPreviewRequestPublisher = ROS2Tools.createPublisher(ros2Node, WalkingControllerPreviewInputMessage.class, controllerPreviewInputTopicNameGenerator);
 
       messager.registerTopicListener(FootstepPlannerMessagerAPI.ComputePathTopic, request -> requestNewPlan());
       messager.registerTopicListener(FootstepPlannerMessagerAPI.RequestPlannerStatistics, request -> requestPlannerStatistics());
       messager.registerTopicListener(FootstepPlannerMessagerAPI.AbortPlanningTopic, request -> requestAbortPlanning());
       messager.registerTopicListener(FootstepPlannerMessagerAPI.FootstepDataListTopic, footstepDataListPublisher::publish);
       messager.registerTopicListener(FootstepPlannerMessagerAPI.GoHomeTopic, goHomePublisher::publish);
-      messager.registerTopicListener(FootstepPlannerMessagerAPI.HighLevelStateTopic, highLevelStatePublisher::publish);
+      messager.registerTopicListener(FootstepPlannerMessagerAPI.RequestWalkingPreview, request ->
+      {
+         ToolboxStateMessage toolboxStateMessage = new ToolboxStateMessage();
+         toolboxStateMessage.setRequestedToolboxState(ToolboxState.WAKE_UP.toByte());
+         walkingPreviewToolboxStatePublisher.publish(toolboxStateMessage);
+         walkingPreviewRequestPublisher.publish(request);
+      });
    }
 
    private void processFootstepPlanningRequestPacket(FootstepPlanningRequestPacket packet)

@@ -1,6 +1,5 @@
 package us.ihmc.footstepPlanning.tools;
 
-import us.ihmc.robotics.Assert;
 import us.ihmc.commons.PrintTools;
 import us.ihmc.euclid.tools.EuclidCoreIOTools;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
@@ -165,7 +164,7 @@ public class FootstepPlannerIOTools extends VisibilityGraphsIOTools
       List<FootstepPlannerUnitTestDataset> datasets = new ArrayList<>();
 
       if (DEBUG && childDirectories.size() < 1)
-         Assert.fail("Unable to find the directory contents.");
+         throw new RuntimeException("Unable to find the directory contents.");
 
 
       for (int i = 0; i < childDirectories.size(); i++)
@@ -177,7 +176,7 @@ public class FootstepPlannerIOTools extends VisibilityGraphsIOTools
       }
 
       if (DEBUG && datasets.size() < 1)
-         Assert.fail("Could not find any datasets.");
+         throw new RuntimeException("Could not find any datasets.");
 
       return datasets;
    }

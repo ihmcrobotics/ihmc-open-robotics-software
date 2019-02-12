@@ -58,7 +58,7 @@ public class QuadrupedFallDetector
 
    private final YoDouble yoDcmDistanceOutsideSupportPolygon = new YoDouble("dcmDistanceOutsideSupportPolygon", registry);
    private final YoDouble yoDcmDistanceOutsideUpcomingPolygon = new YoDouble("dcmDistanceOutsideUpcomingPolygon", registry);
-   private final YoEnum<FallDetectionType> fallDetectionType = YoEnum.create("getFallDetectionType", FallDetectionType.class, registry);
+   private final YoEnum<FallDetectionType> fallDetectionType = YoEnum.create("fallDetectionType", FallDetectionType.class, registry);
    private final GlitchFilteredYoBoolean isFallDetected;
 
    public QuadrupedFallDetector(ReferenceFrame bodyFrame, QuadrantDependentList<MovingReferenceFrame> soleFrames,
