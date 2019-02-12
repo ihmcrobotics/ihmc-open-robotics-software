@@ -18,6 +18,9 @@ public class KinematicsToolboxConfigurationCommand implements Command<Kinematics
    private final TIntArrayList jointHashCodes = new TIntArrayList();
    private final TFloatArrayList privilegedJointAngles = new TFloatArrayList();
 
+   private double privilegedWeight = -1.0;
+   private double privilegedGain = -1.0;
+
    @Override
    public void clear()
    {
@@ -25,6 +28,8 @@ public class KinematicsToolboxConfigurationCommand implements Command<Kinematics
       privilegedRootJointPosition.setToNaN();
       hasPrivilegedRootJointOrientation = false;
       privilegedRootJointOrientation.setToNaN();
+      privilegedWeight = -1.0;
+      privilegedGain = -1.0;
    }
 
    @Override
@@ -51,6 +56,9 @@ public class KinematicsToolboxConfigurationCommand implements Command<Kinematics
          jointHashCodes.addAll(other.getJointHashCodes());
          privilegedJointAngles.addAll(other.getPrivilegedJointAngles());
       }
+
+      privilegedWeight = other.privilegedWeight;
+      privilegedGain = other.privilegedGain;
    }
 
    @Override
@@ -80,6 +88,9 @@ public class KinematicsToolboxConfigurationCommand implements Command<Kinematics
          jointHashCodes.addAll(messageHashCodes);
          privilegedJointAngles.addAll(messageJointAngles);
       }
+
+      privilegedWeight = message.getPrivilegedWeight();
+      privilegedGain = message.getPrivilegedGain();
    }
 
    public boolean hasPrivilegedRootJointPosition()
@@ -115,6 +126,16 @@ public class KinematicsToolboxConfigurationCommand implements Command<Kinematics
    public TFloatArrayList getPrivilegedJointAngles()
    {
       return privilegedJointAngles;
+   }
+
+   public double getPrivilegedWeight()
+   {
+      return privilegedWeight;
+   }
+
+   public double getPrivilegedGain()
+   {
+      return privilegedGain;
    }
 
    @Override
