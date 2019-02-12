@@ -56,7 +56,7 @@ public abstract class FootstepPlannerDataSetTest
    protected static boolean VERBOSE = true;
 
    private FootstepPlannerUI ui = null;
-   private Messager messager = null;
+   protected Messager messager = null;
 
    private QuadrupedBodyPathAndFootstepPlanner planner = null;
 
@@ -225,7 +225,7 @@ public abstract class FootstepPlannerDataSetTest
       packPlanningRequest(dataset);
       String errorMessage = findPlanAndAssertGoodResult(dataset);
 
-      visualizePlan(planner.getPlan(), dataset.getPlanarRegionsList(), dataset.getStart(), dataset.getGoal());
+//      visualizePlan(planner.getPlan(), dataset.getPlanarRegionsList(), dataset.getStart(), dataset.getGoal());
 
       return errorMessage;
    }

@@ -26,10 +26,10 @@ public class AStarMessagerListener implements QuadrupedFootstepPlannerListener
    @Override
    public void addNode(FootstepNode node, FootstepNode previousNode)
    {
-      if (!validNodesThisTick.containsKey(node))
-         validNodesThisTick.put(node, new ArrayList<>());
+      if (!validNodesThisTick.containsKey(previousNode))
+         validNodesThisTick.put(previousNode, new ArrayList<>());
 
-      validNodesThisTick.get(node).add(previousNode);
+      validNodesThisTick.get(previousNode).add(node);
    }
 
    @Override

@@ -182,7 +182,7 @@ public class FootstepPlannerMessagerAPI
    public static final Topic<Boolean> ShowAllValidNodesTopic = Root.child(PlannerData).child(NodeOccupancyMap).child(AllValidNodes).topic(Show);
    public static final Topic<Boolean> ShowAllInvalidNodesTopic = Root.child(PlannerData).child(NodeOccupancyMap).child(AllInvalidNodes).topic(Show);
    public static final Topic<Boolean> ShowValidNodesThisTickTopic = Root.child(PlannerData).child(NodeOccupancyMap).child(ValidNodesThisTick).topic(Show);
-   public static final Topic<Boolean> ShowInvalidNodesThisTickTopic = Root.child(PlannerData).child(NodeOccupancyMap).child(ValidNodesThisTick).topic(Show);
+   public static final Topic<Boolean> ShowInvalidNodesThisTickTopic = Root.child(PlannerData).child(NodeOccupancyMap).child(InvalidNodesThisTick).topic(Show);
    public static final Topic<Boolean> ShowNodesRejectedByReasonTopic = Root.child(PlannerData).child(NodeOccupancyMap).child(NodesRejectedByReason).topic(Show);
 
    public static final Topic<QuadrupedFootstepPlannerNodeRejectionReason> RejectionReasonToShowTopic = Root.child(PlannerData).child(NodeOccupancyMap).child(NodesRejectedByReason).topic(RejectionReason);

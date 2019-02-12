@@ -17,22 +17,22 @@ import us.ihmc.quadrupedFootstepPlanning.ui.components.NodeOccupancyMapSequenceR
 import java.util.*;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import java.util.concurrent.RejectedExecutionException;
 import java.util.concurrent.atomic.AtomicReference;
 
 public class FootstepPlannerProcessViewer extends AnimationTimer
 {
-   private final List<Node> nodesToView = new ArrayList<>();
    private final ExecutorService executorService = Executors.newSingleThreadExecutor(ThreadTools.getNamedThreadFactory(getClass().getSimpleName()));
+
+   private final Group root = new Group();
 
    private final NodeOccupancyMapRenderer allValidNodesRenderer;
    private final NodeOccupancyMapRenderer allInvalidNodesRenderer;
-   private final NodeOccupancyMapSequenceRenderer validNodeExpansionPlaybackRenderer;
-   private final NodeOccupancyMapSequenceRenderer invalidNodeExpansionPlaybackRenderer;
+//   private final NodeOccupancyMapSequenceRenderer validNodeExpansionPlaybackRenderer;
+//   private final NodeOccupancyMapSequenceRenderer invalidNodeExpansionPlaybackRenderer;
 
    private final Map<QuadrupedFootstepPlannerNodeRejectionReason, NodeOccupancyMapRenderer> rejectedNodesByReasonRenderers = new HashMap<>();
 
-   private final AtomicReference<QuadrupedFootstepPlannerNodeRejectionReason> rejectionReasonToShow = new AtomicReference<>();
+   private final AtomicReference<QuadrupedFootstepPlannerNodeRejectionReason> rejectionReasonToShow;
    private final AtomicReference<Boolean> showNodesByRejectionReason;
 
    private static final double cellOpacity = 0.9;
@@ -45,20 +45,15 @@ public class FootstepPlannerProcessViewer extends AnimationTimer
 
    public FootstepPlannerProcessViewer(Messager messager)
    {
-      allValidNodesRenderer = new NodeOccupancyMapRenderer(messager);
-      nodesToView.add(allValidNodesRenderer.getRoot());
-      allInvalidNodesRenderer = new NodeOccupancyMapRenderer(messager);
-      nodesToView.add(allInvalidNodesRenderer.getRoot());
+      allValidNodesRenderer = new NodeOccupancyMapRenderer(messager, executorService);
+      allInvalidNodesRenderer = new NodeOccupancyMapRenderer(messager, executorService);
 
-      validNodeExpansionPlaybackRenderer = new NodeOccupancyMapSequenceRenderer(messager, parentCellColor, currentValidCellColor);
-      nodesToView.addAll(validNodeExpansionPlaybackRenderer.getNodesToView());
-      invalidNodeExpansionPlaybackRenderer = new NodeOccupancyMapSequenceRenderer(messager, parentCellColor, currentRejectedCellColor);
-      nodesToView.addAll(invalidNodeExpansionPlaybackRenderer.getNodesToView());
+//      validNodeExpansionPlaybackRenderer = new NodeOccupancyMapSequenceRenderer(messager, parentCellColor, currentValidCellColor, executorService);
+//      invalidNodeExpansionPlaybackRenderer = new NodeOccupancyMapSequenceRenderer(messager, parentCellColor, currentRejectedCellColor, executorService);
 
       for (QuadrupedFootstepPlannerNodeRejectionReason rejectionReason : QuadrupedFootstepPlannerNodeRejectionReason.values)
       {
-         NodeOccupancyMapRenderer renderer = new NodeOccupancyMapRenderer(messager);
-         nodesToView.add(renderer.getRoot());
+         NodeOccupancyMapRenderer renderer = new NodeOccupancyMapRenderer(messager, executorService);
          rejectedNodesByReasonRenderers.put(rejectionReason, renderer);
       }
 
@@ -66,31 +61,70 @@ public class FootstepPlannerProcessViewer extends AnimationTimer
 
       messager.registerTopicListener(FootstepPlannerMessagerAPI.ShowAllValidNodesTopic, allValidNodesRenderer::show);
       messager.registerTopicListener(FootstepPlannerMessagerAPI.ShowAllInvalidNodesTopic, allInvalidNodesRenderer::show);
-      messager.registerTopicListener(FootstepPlannerMessagerAPI.ShowValidNodesThisTickTopic, validNodeExpansionPlaybackRenderer::show);
-      messager.registerTopicListener(FootstepPlannerMessagerAPI.ShowInvalidNodesThisTickTopic, invalidNodeExpansionPlaybackRenderer::show);
+//      messager.registerTopicListener(FootstepPlannerMessagerAPI.ShowValidNodesThisTickTopic, validNodeExpansionPlaybackRenderer::show);
+//      messager.registerTopicListener(FootstepPlannerMessagerAPI.ShowInvalidNodesThisTickTopic, invalidNodeExpansionPlaybackRenderer::show);
+
 
       messager.registerTopicListener(FootstepPlannerMessagerAPI.ValidNodesThisTickTopic, this::handleValidNodesThisTick);
       messager.registerTopicListener(FootstepPlannerMessagerAPI.InvalidNodesThisTickTopic, this::handleInvalidNodesThisTick);
       messager.registerTopicListener(FootstepPlannerMessagerAPI.NodesRejectedThisTickTopic, this::handleNodesRejectedThisTick);
       messager.registerTopicListener(FootstepPlannerMessagerAPI.PlannerPlaybackFractionTopic, this::handlePlaybackFraction);
 
-      showNodesByRejectionReason = messager.createInput(FootstepPlannerMessagerAPI.ShowNodesRejectedByReasonTopic);
+      rejectionReasonToShow = messager.createInput(FootstepPlannerMessagerAPI.RejectionReasonToShowTopic, QuadrupedFootstepPlannerNodeRejectionReason.OBSTACLE_BLOCKING_STEP);
+      showNodesByRejectionReason = messager.createInput(FootstepPlannerMessagerAPI.ShowNodesRejectedByReasonTopic, false);
+
+      root.getChildren().addAll(allValidNodesRenderer.getRoot(), allInvalidNodesRenderer.getRoot());//, validNodeExpansionPlaybackRenderer.getRoot(),
+//                                invalidNodeExpansionPlaybackRenderer.getRoot());
+      for (QuadrupedFootstepPlannerNodeRejectionReason rejectionReason : QuadrupedFootstepPlannerNodeRejectionReason.values)
+      {
+         root.getChildren().add(rejectedNodesByReasonRenderers.get(rejectionReason).getRoot());
+      }
+   }
+
+   public void start()
+   {
+      super.start();
+
+      allValidNodesRenderer.start();
+      allInvalidNodesRenderer.start();
+//      validNodeExpansionPlaybackRenderer.start();
+//      invalidNodeExpansionPlaybackRenderer.start();
+
+      for (QuadrupedFootstepPlannerNodeRejectionReason rejectionReason : QuadrupedFootstepPlannerNodeRejectionReason.values)
+         rejectedNodesByReasonRenderers.get(rejectionReason).start();
+   }
+
+   public void stop()
+   {
+      super.stop();
+
+      allValidNodesRenderer.stop();
+      allInvalidNodesRenderer.stop();
+//      validNodeExpansionPlaybackRenderer.stop();
+//      invalidNodeExpansionPlaybackRenderer.stop();
+      for (QuadrupedFootstepPlannerNodeRejectionReason rejectionReason : QuadrupedFootstepPlannerNodeRejectionReason.values)
+         rejectedNodesByReasonRenderers.get(rejectionReason).stop();
+
+      executorService.shutdownNow();
    }
 
    private void reset()
    {
       allValidNodesRenderer.reset();
       allInvalidNodesRenderer.reset();
-      validNodeExpansionPlaybackRenderer.reset();
-      invalidNodeExpansionPlaybackRenderer.reset();
+//      validNodeExpansionPlaybackRenderer.reset();
+//      invalidNodeExpansionPlaybackRenderer.reset();
+
+      for (QuadrupedFootstepPlannerNodeRejectionReason rejectionReason : QuadrupedFootstepPlannerNodeRejectionReason.values)
+         rejectedNodesByReasonRenderers.get(rejectionReason).reset();
    }
 
    private synchronized void handlePlaybackFraction(Number playbackFraction)
    {
       double alpha = playbackFraction.doubleValue();
       alpha = MathTools.clamp(alpha, 0.0, 1.0);
-      validNodeExpansionPlaybackRenderer.requestSpecificPercentageInPlayback(alpha);
-      invalidNodeExpansionPlaybackRenderer.requestSpecificPercentageInPlayback(alpha);
+//      validNodeExpansionPlaybackRenderer.requestSpecificPercentageInPlayback(alpha);
+//      invalidNodeExpansionPlaybackRenderer.requestSpecificPercentageInPlayback(alpha);
    }
 
    private synchronized void handleValidNodesThisTick(HashMap<FootstepNode, List<FootstepNode>> validNodesThisTick)
@@ -99,12 +133,25 @@ public class FootstepPlannerProcessViewer extends AnimationTimer
       Set<SimpleFootstepNode> parentNodes = new HashSet<>();
       for (FootstepNode parentNode : validNodesThisTick.keySet())
       {
-         validNodesThisTick.get(parentNode).forEach(node -> validNodes.add(new SimpleFootstepNode(node)));
+         if (parentNode == null)
+            continue;
+
+         List<FootstepNode> nodes = validNodesThisTick.get(parentNode);
+         if (nodes == null)
+            continue;
+
+         for (FootstepNode node : nodes)
+         {
+            if (node != null)
+               validNodes.add(new SimpleFootstepNode(node));
+         }
          parentNodes.add(new SimpleFootstepNode(parentNode));
       }
 
-      allValidNodesRenderer.processNodesToRender(validNodes, validCellColor);
-      validNodeExpansionPlaybackRenderer.processNodesToRender(parentNodes, validNodes);
+      if (validNodes.size() > 0)
+         allValidNodesRenderer.processNodesToRenderOnThread(validNodes, validCellColor);
+//      if (parentNodes.size() > 0 && validNodes.size() > 0)
+//         validNodeExpansionPlaybackRenderer.processNodesToRender(parentNodes, validNodes);
    }
 
    private synchronized void handleInvalidNodesThisTick(HashMap<FootstepNode, List<FootstepNode>> invalidNodesThisTick)
@@ -117,8 +164,10 @@ public class FootstepPlannerProcessViewer extends AnimationTimer
          parentNodes.add(new SimpleFootstepNode(parentNode));
       }
 
-      allInvalidNodesRenderer.processNodesToRender(invalidNodes, rejectedCellColor);
-      invalidNodeExpansionPlaybackRenderer.processNodesToRender(parentNodes, invalidNodes);
+      if (invalidNodes.size() > 0)
+         allInvalidNodesRenderer.processNodesToRenderOnThread(invalidNodes, rejectedCellColor);
+//      if (parentNodes.size() > 0 && invalidNodes.size() > 0)
+//         invalidNodeExpansionPlaybackRenderer.processNodesToRender(parentNodes, invalidNodes);
    }
 
    private synchronized void handleNodesRejectedThisTick(HashMap<QuadrupedFootstepPlannerNodeRejectionReason, List<FootstepNode>> rejectedNodes)
@@ -127,7 +176,8 @@ public class FootstepPlannerProcessViewer extends AnimationTimer
       {
          Set<SimpleFootstepNode> invalidNodes = new HashSet<>();
          rejectedNodes.get(rejectionReason).forEach(node -> invalidNodes.add(new SimpleFootstepNode(node)));
-         rejectedNodesByReasonRenderers.get(rejectionReason).processNodesToRender(invalidNodes, rejectionByReasonColor);
+         if (invalidNodes.size() > 0)
+            rejectedNodesByReasonRenderers.get(rejectionReason).processNodesToRenderOnThread(invalidNodes, rejectionByReasonColor);
       }
    }
 
@@ -144,15 +194,8 @@ public class FootstepPlannerProcessViewer extends AnimationTimer
       }
    }
 
-   @Override
-   public void stop()
+   public Node getRoot()
    {
-      super.stop();
-      executorService.shutdownNow();
-   }
-
-   public List<Node> getNodesToView()
-   {
-      return nodesToView;
+      return root;
    }
 }
