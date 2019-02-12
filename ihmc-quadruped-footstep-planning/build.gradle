@@ -22,4 +22,7 @@ testDependencies {
 
 visualizersDependencies {
     compile ihmc.sourceSetProject("main")
+
+    compile group: "us.ihmc", name: "ihmc-robot-models-visualizers", version: "source"
+    compile group: "us.ihmc", name: "ihmc-path-planning-visualizers", version: "source"
 }

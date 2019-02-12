@@ -1,7 +1,5 @@
 package us.ihmc.quadrupedFootstepPlanning.footstepPlanning;
 
-import org.junit.After;
-import org.junit.Before;
 import org.junit.Test;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -155,7 +153,7 @@ public abstract class FootstepPlannerDataSetTest
       packPlanningRequest(dataset);
       String errorMessage = findPlanAndAssertGoodResult(dataset);
 
-      visualizePlan(planner.getSteps(), dataset.getPlanarRegionsList(), dataset.getStart(), dataset.getGoal());
+      visualizePlan(planner.getPlan(), dataset.getPlanarRegionsList(), dataset.getStart(), dataset.getGoal());
 
       return errorMessage;
    }
@@ -201,7 +199,7 @@ public abstract class FootstepPlannerDataSetTest
       if (!planResult.validForExecution())
          return "Footstep plan for " + datasetName + " is invalid.";
 
-      String errorMessage = assertPlanIsValid(datasetName, planner.getSteps(), dataset.getGoal(), dataset.getGoalOrientation());
+      String errorMessage = assertPlanIsValid(datasetName, planner.getPlan(), dataset.getGoal(), dataset.getGoalOrientation());
 
       ThreadTools.sleep(1000);
       return errorMessage;

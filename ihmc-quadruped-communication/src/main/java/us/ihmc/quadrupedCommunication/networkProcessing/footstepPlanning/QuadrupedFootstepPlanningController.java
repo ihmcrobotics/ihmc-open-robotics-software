@@ -185,7 +185,7 @@ public class QuadrupedFootstepPlanningController extends QuadrupedToolboxControl
       planner.planPath();
       planner.plan();
 
-      reportMessage(convertToMessage(planner.getSteps()));
+      reportMessage(convertToMessage(planner.getPlan()));
       isDone.set(true);
    }
 
