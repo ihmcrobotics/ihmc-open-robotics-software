@@ -69,10 +69,9 @@ public class FootstepPlannerUI
    @FXML
    private MainTabController mainTabController;
    @FXML
-   private FootstepPlannerVisualizationController plannerVisualizationController;
-
+   private FootstepPlannerVisualizationController footstepPlannerVizController;
    @FXML
-   private VisualizationController visibilityGraphsUIController;
+   private VisualizationController visibilityGraphsVizController;
 
    public FootstepPlannerUI(Stage primaryStage, FootstepPlannerParameters plannerParameters, VisibilityGraphsParameters visibilityGraphsParameters) throws Exception
    {
@@ -112,9 +111,9 @@ public class FootstepPlannerUI
       footstepPlannerParametersUIController.attachMessager(messager);
       visibilityGraphsParametersUIController.attachMessager(messager);
       footstepNodeCheckingUIController.attachMessager(messager);
-      visibilityGraphsUIController.attachMessager(messager);
       dataExporterAnchorPaneController.attachMessager(messager);
-      plannerVisualizationController.attachMessager(messager);
+      footstepPlannerVizController.attachMessager(messager);
+      visibilityGraphsVizController.attachMessager(messager);
 
       footstepPlannerMenuUIController.setMainWindow(primaryStage);
 
@@ -122,7 +121,8 @@ public class FootstepPlannerUI
       footstepPlannerParametersUIController.bindControls();
       visibilityGraphsParametersUIController.bindControls();
       footstepNodeCheckingUIController.bindControls();
-      visibilityGraphsUIController.bindControls();
+      visibilityGraphsVizController.bindControls();
+      footstepPlannerVizController.bindControls();
 
       footstepPlannerParametersUIController.loadFromFile();
 

@@ -53,7 +53,7 @@
                     <content>
                         <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0" />
                         <children>
-                            <fx:include fx:id="visibilityGraphsUI" source="Visualization.fxml" />
+                            <fx:include fx:id="visibilityGraphsViz" source="Visualization.fxml" />
                         </children>
                     </content>
                 </Tab>
@@ -67,11 +67,11 @@
                     </content>
                 </Tab>
 
-                <Tab text="Robot Control">
+                <Tab text="Planner Visualization Control">
                     <content>
                         <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0" />
                         <children>
-                            <fx:include fx:id="uiRobot" source="UIRobot.fxml" />
+                            <fx:include fx:id="footstepPlannerViz" source="FootstepPlannerVisualization.fxml" />
                         </children>
                     </content>
                 </Tab>
