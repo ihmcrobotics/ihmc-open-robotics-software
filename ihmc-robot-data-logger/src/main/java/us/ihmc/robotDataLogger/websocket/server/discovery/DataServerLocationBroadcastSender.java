@@ -7,7 +7,6 @@ import java.net.MulticastSocket;
 import java.util.List;
 
 import io.netty.util.CharsetUtil;
-import us.ihmc.log.LogTools;
 import us.ihmc.robotDataLogger.websocket.DataServerLocationBroadcast;
 
 /**

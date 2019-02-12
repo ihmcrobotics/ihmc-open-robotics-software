@@ -2,7 +2,6 @@ package us.ihmc.robotDataLogger.websocket.server;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;
-import java.net.SocketException;
 import java.nio.ByteBuffer;
 
 import io.netty.channel.Channel;
