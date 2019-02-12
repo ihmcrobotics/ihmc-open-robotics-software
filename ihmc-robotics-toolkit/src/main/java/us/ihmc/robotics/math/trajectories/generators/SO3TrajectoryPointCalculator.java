@@ -49,7 +49,7 @@ public class SO3TrajectoryPointCalculator
          euclideanTrajectoryPointCalculator.appendTrajectoryPoint(trajectoryPoint.getTime(), new Point3D(orientation));
       }
 
-      euclideanTrajectoryPointCalculator.computeTrajectoryPointVelocities(false);
+      euclideanTrajectoryPointCalculator.computeTrajectoryPointVelocities(true);
 
       RecyclingArrayList<FrameEuclideanTrajectoryPoint> euclideanTrajectoryPoints = euclideanTrajectoryPointCalculator.getTrajectoryPoints();
 
