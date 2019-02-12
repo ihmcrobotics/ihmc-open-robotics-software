@@ -7,9 +7,9 @@
 	<children>
 		<GridPane hgap="15.0" vgap="15.0" layoutX="15.0" layoutY="17.0">
 			<children>
-				<Button onAction="#homeAll" prefWidth="130.0" text="Home All" />
-				<Button onAction="#freeze" prefWidth="130.0" text="Freeze" GridPane.rowIndex="1" />
-				<Button onAction="#standPrep" prefWidth="130.0" text="Stand Prep" GridPane.rowIndex="2" />
+				<Button fx:id="homeAll" onAction="#homeAll" prefWidth="130.0" text="Home All" />
+				<Button fx:id="freeze" onAction="#freeze" prefWidth="130.0" text="Freeze" GridPane.rowIndex="1" />
+				<Button fx:id="standPrep" onAction="#standPrep" prefWidth="130.0" text="Stand Prep" GridPane.rowIndex="2" />
 			</children>
 		</GridPane>
 	</children>

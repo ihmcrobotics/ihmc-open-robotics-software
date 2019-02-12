@@ -53,6 +53,7 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 
 import static us.ihmc.robotics.Assert.*;
 
+@Tag("humanoid-flat-ground")
 public abstract class DRCObstacleCourseFlatWithErrorsTest implements MultiRobotTestInterface
 {
    private static final SimulationTestingParameters simulationTestingParameters = SimulationTestingParameters.createFromSystemProperties();

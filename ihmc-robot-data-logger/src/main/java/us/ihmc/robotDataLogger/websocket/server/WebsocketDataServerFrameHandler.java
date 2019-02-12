@@ -1,7 +1,7 @@
 package us.ihmc.robotDataLogger.websocket.server;
 
+import java.io.IOException;
 import java.net.InetSocketAddress;
-import java.net.SocketException;
 import java.nio.ByteBuffer;
 
 import io.netty.channel.Channel;
@@ -60,7 +60,7 @@ class WebsocketDataServerFrameHandler extends SimpleChannelInboundHandler<WebSoc
    private long requestedUpdateDT = 0;
 
    public WebsocketDataServerFrameHandler(WebsocketDataBroadcaster broadcaster, int dataSize, int numberOfRegistryBuffers, VariableChangedListener variableChangedListener)
-         throws SocketException
+         throws IOException
    {
       this.broadcaster = broadcaster;
       this.dataSize = dataSize;

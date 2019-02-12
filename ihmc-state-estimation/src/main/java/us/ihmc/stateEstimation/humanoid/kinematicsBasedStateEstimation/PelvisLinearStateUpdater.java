@@ -289,6 +289,9 @@ public class PelvisLinearStateUpdater
       // Keep setting the position so the localization updater works properly.
       tempRootJointTranslation.set(yoRootJointPosition);
       rootJoint.setJointPosition(tempRootJointTranslation);
+      kinematicsBasedLinearStateCalculator.updateKinematics();
+      kinematicsBasedLinearStateCalculator.updateFeetPositionsWhenTrustingIMUOnly(yoRootJointPosition);
+      kinematicsBasedLinearStateCalculator.setPelvisLinearVelocityToZero();
 
       // Set the rootJoint twist to zero.
       rootJointTwist.setIncludingFrame(rootJoint.getJointTwist());

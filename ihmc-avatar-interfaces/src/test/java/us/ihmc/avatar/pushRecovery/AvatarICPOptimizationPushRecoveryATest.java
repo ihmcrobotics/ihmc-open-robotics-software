@@ -10,6 +10,7 @@ import us.ihmc.robotics.stateMachine.core.StateTransitionCondition;
 
 import static us.ihmc.robotics.Assert.*;
 
+@Tag("humanoid-push-recovery")
 public abstract class AvatarICPOptimizationPushRecoveryATest extends AvatarICPOptimizationPushRecoveryTestSetup
 {
    @Test
