@@ -29,7 +29,7 @@ public class LoggerStatusVisualizer
    private static final String LOGGER_SECONDS = " s</html>";
    
    private static final String CAMERA_OFF = "<html>Camera: <br>[Off]</html>";
-   private static final String CAMERA_RECORDING = "<html>Camera: <br>[Off]</html>";
+   private static final String CAMERA_RECORDING = "<html>Camera: <br>Recording</html>";
 
 
    private final JLabel logger = new JLabel(LOGGER_OFFLINE);
