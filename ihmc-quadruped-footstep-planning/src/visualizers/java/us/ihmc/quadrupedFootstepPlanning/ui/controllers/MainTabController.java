@@ -108,10 +108,6 @@ public class MainTabController
    @FXML
    private Spinner<Double> goalYaw;
 
-   @FXML
-   private Spinner<Double> swingTimeSpinner;
-   @FXML
-   private Spinner<Double> transferTimeSpinner;
 
    @FXML
    private Slider previewSlider;
@@ -219,8 +215,6 @@ public class MainTabController
       startYaw.setValueFactory(createStartGoalOrientationValueFactory());
       goalYaw.setValueFactory(createStartGoalOrientationValueFactory());
 
-      swingTimeSpinner.setValueFactory(new DoubleSpinnerValueFactory(0.3, 3.5, 1.2, 0.1));
-      transferTimeSpinner.setValueFactory(new DoubleSpinnerValueFactory(0.3, 3.5, 0.8, 0.1));
 
       ObservableList<FootstepPlannerType> plannerTypeOptions = FXCollections.observableArrayList(FootstepPlannerType.values);
       plannerType.setItems(plannerTypeOptions);
@@ -357,11 +351,6 @@ public class MainTabController
 //      this.walkingPreviewPlaybackManager.setRobotModel(previewRobotModel);
    }
 
-   public void setDefaultTiming(double swingTime, double transferTime)
-   {
-      swingTimeSpinner.getValueFactory().setValue(swingTime);
-      transferTimeSpinner.getValueFactory().setValue(transferTime);
-   }
 
    private void clearStartGoalTextFields()
    {
