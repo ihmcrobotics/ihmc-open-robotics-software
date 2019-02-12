@@ -3,14 +3,10 @@ package us.ihmc.avatar.networkProcessor.footstepPlanningToolboxModule;
 import org.junit.jupiter.api.Test;
 import us.ihmc.commons.PrintTools;
 import us.ihmc.commons.thread.ThreadTools;
-import org.junit.jupiter.api.Tag;
-import org.junit.jupiter.api.Disabled;
 import us.ihmc.footstepPlanning.FootstepPlannerType;
 import us.ihmc.pubsub.DomainFactory;
 
-import static us.ihmc.footstepPlanning.testTools.PlannerTestEnvironments.bollards;
-import static us.ihmc.footstepPlanning.testTools.PlannerTestEnvironments.corridor;
-import static us.ihmc.footstepPlanning.testTools.PlannerTestEnvironments.getTestData;
+import static us.ihmc.footstepPlanning.testTools.PlannerTestEnvironments.*;
 
 public class AStarRoughTerrainToolboxTest extends RoughTerrainDataSetTest
 {

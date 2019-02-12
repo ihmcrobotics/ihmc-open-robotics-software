@@ -15,6 +15,9 @@
 <?import javafx.scene.layout.RowConstraints?>
 <?import javafx.scene.text.Text?>
 
+<?import javafx.scene.image.ImageView?>
+<?import javafx.scene.control.Slider?>
+<?import javafx.scene.image.Image?>
 <SplitPane dividerPositions="0.5874125874125874" orientation="VERTICAL" xmlns="http://javafx.com/javafx/8.0.121" xmlns:fx="http://javafx.com/fxml/1" fx:controller="us.ihmc.footstepPlanning.ui.controllers.MainTabController">
   <items>
     <AnchorPane minHeight="0.0" minWidth="0.0">
@@ -113,7 +116,11 @@
          </children></AnchorPane>
     <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="127.0" prefWidth="995.0">
          <children>
-            <Text layoutX="247.0" layoutY="24.0" strokeType="OUTSIDE" strokeWidth="0.0" text="Goal Selection" textAlignment="CENTER" wrappingWidth="414.7294921875" />
+             <SplitPane dividerPositions="0.65, 1.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+                 <items>
+                     <AnchorPane minHeight="0.0" minWidth="0.0">
+                         <children>
+                         <Text layoutX="247.0" layoutY="24.0" strokeType="OUTSIDE" strokeWidth="0.0" text="Goal Selection" textAlignment="CENTER" wrappingWidth="414.7294921875" />
             <GridPane layoutX="57.0" layoutY="27.0">
               <columnConstraints>
                   <ColumnConstraints hgrow="SOMETIMES" minWidth="90.0" prefWidth="100.0" />
@@ -159,6 +166,52 @@
                   <ComboBox fx:id="initialSupportSide" prefHeight="26.0" prefWidth="100.0" GridPane.columnIndex="12" GridPane.halignment="RIGHT" GridPane.rowIndex="0" />
                </children>
             </GridPane>
-         </children></AnchorPane>
+         </children>
+                     </AnchorPane>
+
+                     <AnchorPane minHeight="0.0" minWidth="0.0">
+                         <children>
+                             <Text layoutX="46.0" layoutY="19.0" strokeType="OUTSIDE" strokeWidth="0.0" text="Walking Preview" textAlignment="CENTER"
+                                   wrappingWidth="214.7294921875"/>
+                             <GridPane layoutX="10.0" layoutY="24.0">
+                                 <Button mnemonicParsing="false" onAction="#requestWalkingPreview" prefWidth="130.0" text="Preview Steps" GridPane.halignment="CENTER" />
+                                 <Slider fx:id="previewSlider" blockIncrement="0.01" majorTickUnit="0.05" max="1.0" minorTickCount="4" prefHeight="38.0" prefWidth="300.0" GridPane.columnIndex="1" />
+                                 <Button fx:id="previewPlayButton" onAction="#playWalkingPreview" GridPane.columnIndex="3">
+                                     <graphic>
+                                         <ImageView fitWidth="20.0" pickOnBounds="true" preserveRatio="true">
+                                             <image>
+                                                 <Image url="/icons/play.png" />
+                                             </image>
+                                         </ImageView>
+                                     </graphic>
+                                 </Button>
+
+                                 <Button fx:id="previewPauseButton" onAction="#pauseWalkingPreview" GridPane.columnIndex="4">
+                                     <graphic>
+                                         <ImageView fitWidth="20.0" pickOnBounds="true" preserveRatio="true">
+                                             <image>
+                                                 <Image url="/icons/pause.png" />
+                                             </image>
+                                         </ImageView>
+                                     </graphic>
+                                 </Button>
+
+                                 <Button fx:id="previewStopButton" onAction="#stopWalkingPreview" GridPane.columnIndex="5">
+                                     <graphic>
+                                         <ImageView fitWidth="20.0" pickOnBounds="true" preserveRatio="true">
+                                             <image>
+                                                 <Image url="/icons/stop.png" />
+                                             </image>
+                                         </ImageView>
+                                     </graphic>
+                                 </Button>
+                             </GridPane>
+                         </children>
+                     </AnchorPane>
+                 </items>
+             </SplitPane>
+         </children>
+
+   </AnchorPane>
   </items>
 </SplitPane>

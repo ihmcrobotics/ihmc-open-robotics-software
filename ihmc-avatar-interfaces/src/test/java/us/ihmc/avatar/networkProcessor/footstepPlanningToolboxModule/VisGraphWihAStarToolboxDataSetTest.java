@@ -3,12 +3,9 @@ package us.ihmc.avatar.networkProcessor.footstepPlanningToolboxModule;
 import org.junit.jupiter.api.Test;
 import us.ihmc.commons.PrintTools;
 import us.ihmc.commons.thread.ThreadTools;
-import org.junit.jupiter.api.Tag;
-import org.junit.jupiter.api.Disabled;
 import us.ihmc.footstepPlanning.FootstepPlannerType;
 import us.ihmc.pubsub.DomainFactory;
 
-@Disabled
 public class VisGraphWihAStarToolboxDataSetTest extends FootstepPlannerToolboxDataSetTest
 {
    @Override

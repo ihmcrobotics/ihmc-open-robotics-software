@@ -88,9 +88,15 @@ public class RobotDescriptionFromSDFLoader
    public RobotDescription loadRobotDescriptionFromSDF(GeneralizedSDFRobotModel generalizedSDFRobotModel, JointNameMap jointNameMap,
                                                        ContactPointDefinitionHolder contactPointHolder, boolean useCollisionMeshes)
    {
+      return loadRobotDescriptionFromSDF(generalizedSDFRobotModel, jointNameMap, contactPointHolder, useCollisionMeshes, Double.NaN);
+   }
+
+   public RobotDescription loadRobotDescriptionFromSDF(GeneralizedSDFRobotModel generalizedSDFRobotModel, JointNameMap jointNameMap,
+                                                       ContactPointDefinitionHolder contactPointHolder, boolean useCollisionMeshes, double transparency)
+   {
       this.resourceDirectories = generalizedSDFRobotModel.getResourceDirectories();
 
-      RobotDescription robotDescription = loadModelFromSDF(generalizedSDFRobotModel, jointNameMap, useCollisionMeshes);
+      RobotDescription robotDescription = loadModelFromSDF(generalizedSDFRobotModel, jointNameMap, useCollisionMeshes, transparency);
 
       if (jointNameMap != null && !Precision.equals(jointNameMap.getModelScale(), 1.0, 1))
       {
@@ -152,7 +158,7 @@ public class RobotDescriptionFromSDFLoader
       }
    }
 
-   private RobotDescription loadModelFromSDF(GeneralizedSDFRobotModel generalizedSDFRobotModel, JointNameMap jointNameMap, boolean useCollisionMeshes)
+   private RobotDescription loadModelFromSDF(GeneralizedSDFRobotModel generalizedSDFRobotModel, JointNameMap jointNameMap, boolean useCollisionMeshes, double transparency)
    {
       String name = generalizedSDFRobotModel.getName();
       RobotDescription robotDescription = new RobotDescription(name);
@@ -171,6 +177,8 @@ public class RobotDescriptionFromSDFLoader
       generalizedSDFRobotModel.getTransformToRoot().get(orientation, offset);
       FloatingJointDescription rootJointDescription = new FloatingJointDescription(rootLink.getName());
 
+      if(!Double.isNaN(transparency))
+         rootLink.getVisuals().forEach(visual -> visual.setTransparency(Double.toString(transparency)));
       LinkDescription rootLinkDescription = createLinkDescription(rootLink, new RigidBodyTransform(), useCollisionMeshes);
       rootJointDescription.setLink(rootLinkDescription);
       addSensors(rootJointDescription, rootLink);
@@ -192,7 +200,7 @@ public class RobotDescriptionFromSDFLoader
          {
             lastSimulatedJoints = new HashSet<>();
          }
-         addJointsRecursively(child, rootJointDescription, useCollisionMeshes, lastSimulatedJoints, false, jointNameMap);
+         addJointsRecursively(child, rootJointDescription, useCollisionMeshes, lastSimulatedJoints, false, jointNameMap, transparency);
       }
 
       // Ground contact points from model
@@ -273,6 +281,12 @@ public class RobotDescriptionFromSDFLoader
 
    protected void addJointsRecursively(SDFJointHolder joint, JointDescription scsParentJoint, boolean useCollisionMeshes, Set<String> lastSimulatedJoints,
                                        boolean doNotSimulateJoint, JointNameMap jointNameMap)
+   {
+      addJointsRecursively(joint, scsParentJoint, useCollisionMeshes, lastSimulatedJoints, doNotSimulateJoint, jointNameMap, Double.NaN);
+   }
+
+   protected void addJointsRecursively(SDFJointHolder joint, JointDescription scsParentJoint, boolean useCollisionMeshes, Set<String> lastSimulatedJoints,
+                                       boolean doNotSimulateJoint, JointNameMap jointNameMap, double transparency)
    {
       Vector3D jointAxis = new Vector3D(joint.getAxisInModelFrame());
       Vector3D offset = new Vector3D(joint.getOffsetFromParentJoint());
@@ -371,6 +385,8 @@ public class RobotDescriptionFromSDFLoader
       if (doNotSimulateJoint)
          scsJoint.setIsDynamic(false);
 
+      if(!Double.isNaN(transparency))
+         joint.getChildLinkHolder().getVisuals().forEach(visual -> visual.setTransparency(Double.toString(transparency)));
       scsJoint.setLink(createLinkDescription(joint.getChildLinkHolder(), visualTransform, useCollisionMeshes));
       scsParentJoint.addJoint(scsJoint);
 
@@ -384,7 +400,7 @@ public class RobotDescriptionFromSDFLoader
 
       for (SDFJointHolder child : joint.getChildLinkHolder().getChildren())
       {
-         addJointsRecursively(child, scsJoint, useCollisionMeshes, lastSimulatedJoints, doNotSimulateJoint, jointNameMap);
+         addJointsRecursively(child, scsJoint, useCollisionMeshes, lastSimulatedJoints, doNotSimulateJoint, jointNameMap, transparency);
       }
 
    }

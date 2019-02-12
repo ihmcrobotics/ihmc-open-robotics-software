@@ -15,7 +15,6 @@ import java.util.List;
 
 import static us.ihmc.footstepPlanning.testTools.PlannerTestEnvironments.*;
 
-@Disabled
 public class AStarToolboxDataSetTest extends FootstepPlannerToolboxDataSetTest
 {
    @Override
