@@ -1,4 +1,4 @@
-package components;
+package us.ihmc.quadrupedFootstepPlanning.ui.components;
 
 import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.graphSearch.parameters.FootstepPlannerParameters;
 

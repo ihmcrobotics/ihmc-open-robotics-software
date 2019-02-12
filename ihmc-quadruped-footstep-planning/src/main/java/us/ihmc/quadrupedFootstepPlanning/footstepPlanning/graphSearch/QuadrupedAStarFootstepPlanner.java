@@ -266,12 +266,13 @@ public class QuadrupedAStarFootstepPlanner implements QuadrupedBodyPathAndFootst
    }
 
    @Override
-   public List<? extends QuadrupedTimedStep> getSteps()
+   public FootstepPlan getPlan()
    {
       if (endNode == null || !graph.doesNodeExist(endNode))
          return null;
 
-      List<QuadrupedTimedOrientedStep> steps = new ArrayList<>();
+      FootstepPlan plan = new FootstepPlan();
+
       List<FootstepNode> path = graph.getPathFromStart(endNode);
 
       double currentTime = 0;
@@ -298,10 +299,10 @@ public class QuadrupedAStarFootstepPlanner implements QuadrupedBodyPathAndFootst
 
          newStep.setGoalPosition(position);
 
-         steps.add(newStep);
+         plan.addFootstep(newStep);
       }
 
-      return steps;
+      return plan;
    }
 
    @Override
