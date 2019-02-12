@@ -6,14 +6,14 @@ public class DefaultFootstepPlannerParameters implements FootstepPlannerParamete
    @Override
    public double getMaximumStepReach()
    {
-      return 0.3;
+      return 0.7;
    }
 
    /** {@inheritDoc} */
    @Override
    public double getMaximumStepWidth()
    {
-      return 0.2;
+      return 0.3;
    }
 
    /** {@inheritDoc} */
@@ -84,7 +84,7 @@ public class DefaultFootstepPlannerParameters implements FootstepPlannerParamete
 
    public double getYawWeight()
    {
-      return 0.2;
+      return 0.05;
    }
 
    public double getCostPerStep()
@@ -104,7 +104,7 @@ public class DefaultFootstepPlannerParameters implements FootstepPlannerParamete
 
    public double getHeuristicsWeight()
    {
-      return 1.5;
+      return 2.5;
    }
 
    @Override
