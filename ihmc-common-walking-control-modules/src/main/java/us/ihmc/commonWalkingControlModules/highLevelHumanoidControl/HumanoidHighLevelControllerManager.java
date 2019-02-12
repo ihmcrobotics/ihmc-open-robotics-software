@@ -96,7 +96,8 @@ public class HumanoidHighLevelControllerManager implements RobotController
       controllerFactoryHelper.setRequestedHighLevelControllerState(requestedHighLevelControllerState);
       controllerFactoryHelper.setForceSensorDataHolder(forceSensorDataHolder);
 
-      stateMachine = setUpStateMachine(initialControllerState, controllerStateFactories, controllerTransitionFactories, managerFactory, controllerToolbox.getYoTime(), registry);
+      stateMachine = setUpStateMachine(initialControllerState, controllerStateFactories, controllerTransitionFactories, managerFactory,
+                                       controllerToolbox.getYoTime(), registry);
       isListeningToHighLevelStateMessage.set(true);
       for (HighLevelControllerState highLevelControllerState : highLevelControllerStates.values())
       {
@@ -141,8 +142,18 @@ public class HumanoidHighLevelControllerManager implements RobotController
       }
 
       highLevelControllerTimer.startMeasurement();
-      controllerToolbox.update();
-      stateMachine.doActionAndTransition();
+
+      try
+      {
+         controllerToolbox.update();
+         stateMachine.doActionAndTransition();
+      }
+      catch (Exception e)
+      {
+         e.printStackTrace();
+         controllerToolbox.reportControllerFailureToListeners(null);
+      }
+
       highLevelControllerTimer.stopMeasurement();
 
       copyJointDesiredsToJoints();
@@ -167,7 +178,8 @@ public class HumanoidHighLevelControllerManager implements RobotController
       return getName();
    }
 
-   private StateMachine<HighLevelControllerName, HighLevelControllerState> setUpStateMachine(HighLevelControllerName initialControllerState, EnumMap<HighLevelControllerName, HighLevelControllerStateFactory> controllerStateFactories,
+   private StateMachine<HighLevelControllerName, HighLevelControllerState> setUpStateMachine(HighLevelControllerName initialControllerState,
+                                                                                             EnumMap<HighLevelControllerName, HighLevelControllerStateFactory> controllerStateFactories,
                                                                                              ArrayList<ControllerStateTransitionFactory<HighLevelControllerName>> controllerTransitionFactories,
                                                                                              HighLevelControlManagerFactory managerFactory, YoDouble yoTime,
                                                                                              YoVariableRegistry registry)
