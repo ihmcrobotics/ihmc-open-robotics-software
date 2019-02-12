@@ -1,5 +1,7 @@
 package us.ihmc.quadrupedFootstepPlanning.footstepPlanning.graphSearch.visualization;
 
+import org.apache.commons.lang3.tuple.ImmutablePair;
+import org.apache.commons.lang3.tuple.Pair;
 import us.ihmc.messager.Messager;
 import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.communication.FootstepPlannerMessagerAPI;
 import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.graphSearch.QuadrupedFootstepPlannerNodeRejectionReason;
@@ -14,8 +16,7 @@ public class AStarMessagerListener implements QuadrupedFootstepPlannerListener
 {
    private final Messager messager;
 
-   private final HashMap<FootstepNode, List<FootstepNode>> validNodesThisTick = new HashMap<>();
-   private final HashMap<FootstepNode, List<FootstepNode>> invalidNodesThisTick = new HashMap<>();
+   private final HashMap<FootstepNode, Pair<List<FootstepNode>, List<FootstepNode>>> nodesThisTick = new HashMap<>();
    private final HashMap<QuadrupedFootstepPlannerNodeRejectionReason, List<FootstepNode>> nodesRejectedThisTick = new HashMap<>();
 
    public AStarMessagerListener(Messager messager)
@@ -26,24 +27,26 @@ public class AStarMessagerListener implements QuadrupedFootstepPlannerListener
    @Override
    public void addNode(FootstepNode node, FootstepNode previousNode)
    {
-      if (!validNodesThisTick.containsKey(previousNode))
-         validNodesThisTick.put(previousNode, new ArrayList<>());
+      if (!nodesThisTick.containsKey(previousNode))
+         nodesThisTick.put(previousNode, new ImmutablePair<>(new ArrayList<>(), new ArrayList<>()));
 
-      validNodesThisTick.get(previousNode).add(node);
+      nodesThisTick.get(previousNode).getLeft().add(node);
    }
 
    @Override
    public void rejectNode(FootstepNode rejectedNode, FootstepNode parentNode, QuadrupedFootstepPlannerNodeRejectionReason reason)
    {
-      if (!validNodesThisTick.containsKey(parentNode))
-         validNodesThisTick.put(parentNode, new ArrayList<>());
-      if (!invalidNodesThisTick.containsKey(parentNode))
-         invalidNodesThisTick.put(parentNode, new ArrayList<>());
+      if (!nodesThisTick.containsKey(parentNode))
+      {
+         nodesThisTick.put(parentNode, new ImmutablePair<>(new ArrayList<>(), new ArrayList<>()));
+      }
       if (!nodesRejectedThisTick.containsKey(reason))
+      {
          nodesRejectedThisTick.put(reason, new ArrayList<>());
+      }
 
-      validNodesThisTick.get(parentNode).remove(rejectedNode);
-      invalidNodesThisTick.get(parentNode).add(rejectedNode);
+      nodesThisTick.get(parentNode).getLeft().remove(rejectedNode);
+      nodesThisTick.get(parentNode).getRight().add(rejectedNode);
       nodesRejectedThisTick.get(reason).add(rejectedNode);
    }
 
@@ -62,12 +65,10 @@ public class AStarMessagerListener implements QuadrupedFootstepPlannerListener
    @Override
    public void tickAndUpdate()
    {
-      messager.submitMessage(FootstepPlannerMessagerAPI.ValidNodesThisTickTopic, validNodesThisTick);
-      messager.submitMessage(FootstepPlannerMessagerAPI.InvalidNodesThisTickTopic, invalidNodesThisTick);
+      messager.submitMessage(FootstepPlannerMessagerAPI.NodesThisTickTopic, nodesThisTick);
       messager.submitMessage(FootstepPlannerMessagerAPI.NodesRejectedThisTickTopic, nodesRejectedThisTick);
 
-      validNodesThisTick.clear();
-      invalidNodesThisTick.clear();
+      nodesThisTick.clear();
       nodesRejectedThisTick.clear();
    }
 }

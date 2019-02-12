@@ -4,6 +4,7 @@ import javafx.animation.AnimationTimer;
 import javafx.scene.Group;
 import javafx.scene.Node;
 import javafx.scene.paint.Color;
+import org.apache.commons.lang3.tuple.Pair;
 import us.ihmc.commons.MathTools;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.messager.Messager;
@@ -27,8 +28,7 @@ public class FootstepPlannerProcessViewer extends AnimationTimer
 
    private final NodeOccupancyMapRenderer allValidNodesRenderer;
    private final NodeOccupancyMapRenderer allInvalidNodesRenderer;
-   private final NodeOccupancyMapSequenceRenderer validNodeExpansionPlaybackRenderer;
-   private final NodeOccupancyMapSequenceRenderer invalidNodeExpansionPlaybackRenderer;
+   private final NodeOccupancyMapSequenceRenderer nodeExpansionPlaybackRenderer;
 
    private final Map<QuadrupedFootstepPlannerNodeRejectionReason, NodeOccupancyMapRenderer> rejectedNodesByReasonRenderers = new HashMap<>();
 
@@ -49,8 +49,7 @@ public class FootstepPlannerProcessViewer extends AnimationTimer
       allInvalidNodesRenderer = new NodeOccupancyMapRenderer(messager, executorService);
       allValidNodesRenderer.show(true);
 
-      validNodeExpansionPlaybackRenderer = new NodeOccupancyMapSequenceRenderer(messager, parentCellColor, currentValidCellColor, executorService);
-      invalidNodeExpansionPlaybackRenderer = new NodeOccupancyMapSequenceRenderer(messager, parentCellColor, currentRejectedCellColor, executorService);
+      nodeExpansionPlaybackRenderer = new NodeOccupancyMapSequenceRenderer(messager, parentCellColor, currentValidCellColor, currentRejectedCellColor, executorService);
 
       for (QuadrupedFootstepPlannerNodeRejectionReason rejectionReason : QuadrupedFootstepPlannerNodeRejectionReason.values)
       {
@@ -62,24 +61,19 @@ public class FootstepPlannerProcessViewer extends AnimationTimer
 
       messager.registerTopicListener(FootstepPlannerMessagerAPI.ShowAllValidNodesTopic, allValidNodesRenderer::show);
       messager.registerTopicListener(FootstepPlannerMessagerAPI.ShowAllInvalidNodesTopic, allInvalidNodesRenderer::show);
-      messager.registerTopicListener(FootstepPlannerMessagerAPI.ShowValidNodesThisTickTopic, validNodeExpansionPlaybackRenderer::show);
-      messager.registerTopicListener(FootstepPlannerMessagerAPI.ShowInvalidNodesThisTickTopic, invalidNodeExpansionPlaybackRenderer::show);
+      messager.registerTopicListener(FootstepPlannerMessagerAPI.ShowNodesThisTickTopic, nodeExpansionPlaybackRenderer::show);
 
 
-      messager.registerTopicListener(FootstepPlannerMessagerAPI.ValidNodesThisTickTopic, this::handleValidNodesThisTick);
-      messager.registerTopicListener(FootstepPlannerMessagerAPI.InvalidNodesThisTickTopic, this::handleInvalidNodesThisTick);
+      messager.registerTopicListener(FootstepPlannerMessagerAPI.NodesThisTickTopic, this::handleNodesThisTick);
       messager.registerTopicListener(FootstepPlannerMessagerAPI.NodesRejectedThisTickTopic, this::handleNodesRejectedThisTick);
       messager.registerTopicListener(FootstepPlannerMessagerAPI.PlannerPlaybackFractionTopic, this::handlePlaybackFraction);
 
       rejectionReasonToShow = messager.createInput(FootstepPlannerMessagerAPI.RejectionReasonToShowTopic, QuadrupedFootstepPlannerNodeRejectionReason.OBSTACLE_BLOCKING_STEP);
       showNodesByRejectionReason = messager.createInput(FootstepPlannerMessagerAPI.ShowNodesRejectedByReasonTopic, false);
 
-      root.getChildren().addAll(allValidNodesRenderer.getRoot(), allInvalidNodesRenderer.getRoot(), validNodeExpansionPlaybackRenderer.getRoot(),
-                                invalidNodeExpansionPlaybackRenderer.getRoot());
+      root.getChildren().addAll(allValidNodesRenderer.getRoot(), allInvalidNodesRenderer.getRoot(), nodeExpansionPlaybackRenderer.getRoot());
       for (QuadrupedFootstepPlannerNodeRejectionReason rejectionReason : QuadrupedFootstepPlannerNodeRejectionReason.values)
-      {
          root.getChildren().add(rejectedNodesByReasonRenderers.get(rejectionReason).getRoot());
-      }
    }
 
    public void start()
@@ -88,9 +82,7 @@ public class FootstepPlannerProcessViewer extends AnimationTimer
 
       allValidNodesRenderer.start();
       allInvalidNodesRenderer.start();
-      validNodeExpansionPlaybackRenderer.start();
-      invalidNodeExpansionPlaybackRenderer.start();
-
+      nodeExpansionPlaybackRenderer.start();
       for (QuadrupedFootstepPlannerNodeRejectionReason rejectionReason : QuadrupedFootstepPlannerNodeRejectionReason.values)
          rejectedNodesByReasonRenderers.get(rejectionReason).start();
    }
@@ -101,8 +93,7 @@ public class FootstepPlannerProcessViewer extends AnimationTimer
 
       allValidNodesRenderer.stop();
       allInvalidNodesRenderer.stop();
-      validNodeExpansionPlaybackRenderer.stop();
-      invalidNodeExpansionPlaybackRenderer.stop();
+      nodeExpansionPlaybackRenderer.stop();
       for (QuadrupedFootstepPlannerNodeRejectionReason rejectionReason : QuadrupedFootstepPlannerNodeRejectionReason.values)
          rejectedNodesByReasonRenderers.get(rejectionReason).stop();
 
@@ -113,9 +104,7 @@ public class FootstepPlannerProcessViewer extends AnimationTimer
    {
       allValidNodesRenderer.reset();
       allInvalidNodesRenderer.reset();
-      validNodeExpansionPlaybackRenderer.reset();
-      invalidNodeExpansionPlaybackRenderer.reset();
-
+      nodeExpansionPlaybackRenderer.reset();
       for (QuadrupedFootstepPlannerNodeRejectionReason rejectionReason : QuadrupedFootstepPlannerNodeRejectionReason.values)
          rejectedNodesByReasonRenderers.get(rejectionReason).reset();
    }
@@ -124,51 +113,41 @@ public class FootstepPlannerProcessViewer extends AnimationTimer
    {
       double alpha = playbackFraction.doubleValue();
       alpha = MathTools.clamp(alpha, 0.0, 1.0);
-      validNodeExpansionPlaybackRenderer.requestSpecificPercentageInPlayback(alpha);
-      invalidNodeExpansionPlaybackRenderer.requestSpecificPercentageInPlayback(alpha);
+      nodeExpansionPlaybackRenderer.requestSpecificPercentageInPlayback(alpha);
    }
 
-   private synchronized void handleValidNodesThisTick(HashMap<FootstepNode, List<FootstepNode>> validNodesThisTick)
+   private synchronized void handleNodesThisTick(HashMap<FootstepNode, Pair<List<FootstepNode>, List<FootstepNode>>> validNodesThisTick)
    {
-      Set<SimpleFootstepNode> validNodes = new HashSet<>();
+      Set<SimpleFootstepNode> validNodesToRender = new HashSet<>();
+      Set<SimpleFootstepNode> invalidNodesToRender = new HashSet<>();
       Set<SimpleFootstepNode> parentNodes = new HashSet<>();
       for (FootstepNode parentNode : validNodesThisTick.keySet())
       {
          if (parentNode == null)
             continue;
 
-         List<FootstepNode> nodes = validNodesThisTick.get(parentNode);
-         if (nodes == null)
-            continue;
+         List<FootstepNode> validNodes = validNodesThisTick.get(parentNode).getLeft();
+         List<FootstepNode> invalidNodes = validNodesThisTick.get(parentNode).getRight();
 
-         for (FootstepNode node : nodes)
+         for (FootstepNode node : validNodes)
          {
             if (node != null)
-               validNodes.add(new SimpleFootstepNode(node));
+               validNodesToRender.add(new SimpleFootstepNode(node));
+         }
+         for (FootstepNode node : invalidNodes)
+         {
+            if (node != null)
+               invalidNodesToRender.add(new SimpleFootstepNode(node));
          }
          parentNodes.add(new SimpleFootstepNode(parentNode));
       }
 
-      if (validNodes.size() > 0)
-         allValidNodesRenderer.processNodesToRenderOnThread(validNodes, validCellColor);
-      if (parentNodes.size() > 0 && validNodes.size() > 0)
-         validNodeExpansionPlaybackRenderer.processNodesToRender(parentNodes, validNodes);
-   }
-
-   private synchronized void handleInvalidNodesThisTick(HashMap<FootstepNode, List<FootstepNode>> invalidNodesThisTick)
-   {
-      Set<SimpleFootstepNode> invalidNodes = new HashSet<>();
-      Set<SimpleFootstepNode> parentNodes = new HashSet<>();
-      for (FootstepNode parentNode : invalidNodesThisTick.keySet())
-      {
-         invalidNodesThisTick.get(parentNode).forEach(node -> invalidNodes.add(new SimpleFootstepNode(node)));
-         parentNodes.add(new SimpleFootstepNode(parentNode));
-      }
-
-      if (invalidNodes.size() > 0)
-         allInvalidNodesRenderer.processNodesToRenderOnThread(invalidNodes, rejectedCellColor);
-      if (parentNodes.size() > 0 && invalidNodes.size() > 0)
-         invalidNodeExpansionPlaybackRenderer.processNodesToRender(parentNodes, invalidNodes);
+      if (validNodesToRender.size() > 0)
+         allValidNodesRenderer.processNodesToRenderOnThread(validNodesToRender, validCellColor);
+      if (invalidNodesToRender.size() > 0)
+         allInvalidNodesRenderer.processNodesToRenderOnThread(invalidNodesToRender, rejectedCellColor);
+      if (parentNodes.size() > 0 && validNodesToRender.size() > 0)
+         nodeExpansionPlaybackRenderer.processNodesToRender(parentNodes, validNodesToRender, invalidNodesToRender);
    }
 
    private synchronized void handleNodesRejectedThisTick(HashMap<QuadrupedFootstepPlannerNodeRejectionReason, List<FootstepNode>> rejectedNodes)

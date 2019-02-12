@@ -23,14 +23,13 @@
                 <CheckBox fx:id="showAllValidNodes" mnemonicParsing="false" selected="true" text="Show all valid nodes" />
 
                 <CheckBox fx:id="showAllInvalidNodes" mnemonicParsing="false" selected="true" text="Show all invalid nodes" GridPane.rowIndex="2"/>
-                <CheckBox fx:id="showValidNodesThisTick" mnemonicParsing="false" text="Show valid nodes this tick" GridPane.rowIndex="3"/>
-                <CheckBox fx:id="showInvalidNodesThisTick" mnemonicParsing="false" text="Show invalid nodes this tick" GridPane.rowIndex="4"/>
-                <CheckBox fx:id="showNodesRejectedByReason" mnemonicParsing="false" text="Show nodes rejected by reason" GridPane.rowIndex="5"/>
+                <CheckBox fx:id="showNodesRejectedByReason" mnemonicParsing="false" text="Show nodes rejected by reason" GridPane.rowIndex="3"/>
+                <CheckBox fx:id="showNodesThisTick" mnemonicParsing="false" text="Show valid nodes this tick" GridPane.rowIndex="4"/>
 
-                <Label text="Rejection To Show" GridPane.columnIndex="2" GridPane.halignment="LEFT" GridPane.rowIndex="5" />
-                <ComboBox fx:id="rejectionReasonToShow" prefHeight="26.0" prefWidth="200.0" GridPane.columnIndex="3" GridPane.halignment="RIGHT" GridPane.rowIndex="5" />
-                <Label text="Planner Slider" GridPane.columnIndex="4" GridPane.halignment="LEFT" GridPane.rowIndex="5" />
-                <Slider fx:id="plannerPlaybackSlider" blockIncrement="0.01" majorTickUnit="0.05" max="1.0" minorTickCount="4" prefHeight="38.0" prefWidth="300.0" GridPane.columnIndex="6" GridPane.rowIndex="5"/>
+                <Label text="Rejection To Show" GridPane.columnIndex="2" GridPane.halignment="LEFT" GridPane.rowIndex="3" />
+                <ComboBox fx:id="rejectionReasonToShow" prefHeight="26.0" prefWidth="200.0" GridPane.columnIndex="3" GridPane.halignment="RIGHT" GridPane.rowIndex="3" />
+                <Label text="Planner Slider" GridPane.columnIndex="2" GridPane.halignment="LEFT" GridPane.rowIndex="4" />
+                <Slider fx:id="plannerPlaybackSlider" blockIncrement="0.01" majorTickUnit="0.05" max="1.0" minorTickCount="4" prefHeight="38.0" prefWidth="300.0" GridPane.columnIndex="3" GridPane.rowIndex="4"/>
             </children>
         </GridPane>
     </children>
