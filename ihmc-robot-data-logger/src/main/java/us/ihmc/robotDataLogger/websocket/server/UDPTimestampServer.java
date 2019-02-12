@@ -3,6 +3,7 @@ package us.ihmc.robotDataLogger.websocket.server;
 import java.io.IOException;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
+import java.net.PortUnreachableException;
 import java.net.SocketAddress;
 import java.nio.ByteBuffer;
 import java.nio.channels.DatagramChannel;
@@ -71,6 +72,11 @@ public class UDPTimestampServer
                   channel.write(sendDataBuffer);
                }
             }
+         }
+         catch (PortUnreachableException e)
+         {
+            // Remote host disconnected
+            active = false;
          }
          catch (IOException e)
          {
