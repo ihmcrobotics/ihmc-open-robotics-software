@@ -13,6 +13,7 @@ import controller_msgs.msg.dds.KinematicsToolboxConfigurationMessage;
 import controller_msgs.msg.dds.KinematicsToolboxOutputStatus;
 import controller_msgs.msg.dds.KinematicsToolboxRigidBodyMessage;
 import controller_msgs.msg.dds.RobotConfigurationData;
+import controller_msgs.msg.dds.WholeBodyTrajectoryMessage;
 import gnu.trove.list.array.TDoubleArrayList;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.networkProcessor.kinematicsToolboxModule.HumanoidKinematicsToolboxController;
@@ -36,6 +37,7 @@ import us.ihmc.humanoidRobotics.communication.kinematicsPlanningToolboxAPI.Kinem
 import us.ihmc.humanoidRobotics.communication.kinematicsPlanningToolboxAPI.KinematicsPlanningToolboxRigidBodyCommand;
 import us.ihmc.humanoidRobotics.communication.kinematicsToolboxAPI.KinematicsToolboxConfigurationCommand;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
+import us.ihmc.humanoidRobotics.communication.packets.KinematicsPlanningToolboxOutputConverter;
 import us.ihmc.humanoidRobotics.communication.packets.KinematicsToolboxMessageFactory;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.log.LogTools;
@@ -59,6 +61,7 @@ public class KinematicsPlanningToolboxController extends ToolboxController
    private final CommandInputManager commandInputManager;
 
    private final KinematicsPlanningToolboxOutputStatus solution;
+   private final KinematicsPlanningToolboxOutputConverter outputConverter;
 
    private final YoBoolean isDone;
 
@@ -92,6 +95,7 @@ public class KinematicsPlanningToolboxController extends ToolboxController
 
       solution = HumanoidMessageTools.createKinematicsPlanningToolboxOutputStatus();
       solution.setDestination(-1);
+      outputConverter = new KinematicsPlanningToolboxOutputConverter(drcRobotModel);
 
       this.commandInputManager = commandInputManager;
 
@@ -315,6 +319,12 @@ public class KinematicsPlanningToolboxController extends ToolboxController
          {
             isDone.set(true);
             solution.setDestination(PacketDestination.BEHAVIOR_MODULE.ordinal());
+            WholeBodyTrajectoryMessage wholeBodyTrajectoryMessage = new WholeBodyTrajectoryMessage();
+            wholeBodyTrajectoryMessage.setDestination(PacketDestination.CONTROLLER.ordinal());
+            outputConverter.setMessageToCreate(wholeBodyTrajectoryMessage);
+            outputConverter.computeWholeBodyTrajectoryMessage(solution);
+            solution.getSuggestedControllerMessage().set(wholeBodyTrajectoryMessage);
+
             if (DEBUG)
                System.out.println("total computation time is " + solutionQualityConvergenceDetector.getComputationTime());
             reportMessage(solution);
