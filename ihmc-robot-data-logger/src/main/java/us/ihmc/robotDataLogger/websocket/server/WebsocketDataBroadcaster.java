@@ -20,6 +20,12 @@ import us.ihmc.robotDataLogger.websocket.command.DataServerCommand;
  */
 class WebsocketDataBroadcaster implements ChannelFutureListener
 {
+   /**
+    * How much time the timestamp publishing thread should wait between successive polling for a new timestamp.
+    */
+   public static final int TIMESTAMP_PUBLISHING_SLEEP_NS = 500000;  
+   
+   
    private final Object channelLock = new Object();
    private final TimestampPublishingThread timestampPublishingThread = new TimestampPublishingThread();
 
@@ -157,7 +163,7 @@ class WebsocketDataBroadcaster implements ChannelFutureListener
                lastSendTimestamp = newTimestampLocal;
             }
 
-            LockSupport.parkNanos(100000); // 0.1 ms pause
+            LockSupport.parkNanos(TIMESTAMP_PUBLISHING_SLEEP_NS);
          }
 
       }
