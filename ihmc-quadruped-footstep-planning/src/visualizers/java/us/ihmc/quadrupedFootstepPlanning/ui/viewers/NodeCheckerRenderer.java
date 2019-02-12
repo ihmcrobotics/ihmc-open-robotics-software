@@ -62,7 +62,7 @@ public class NodeCheckerRenderer extends AnimationTimer
       footPositionReference = messager.createInput(FootstepPlannerMessagerAPI.NodeCheckingPosition);
       footOrientationReference = messager.createInput(FootstepPlannerMessagerAPI.NodeCheckingOrientation, new Quaternion());
       initialSupportQuadrantReference = messager.createInput(FootstepPlannerMessagerAPI.InitialSupportQuadrantTopic, RobotQuadrant.FRONT_LEFT);
-      checkNodeUsingPoseBetweenFeet = messager.createInput(FootstepPlannerMessagerAPI.NodeCheckingPoseBetweenFeetTopic);
+      checkNodeUsingPoseBetweenFeet = messager.createInput(FootstepPlannerMessagerAPI.NodeCheckingPoseBetweenFeetTopic, false);
 
       TextureColorPalette2D colorPalette = new TextureColorPalette2D();
       colorPalette.setHueBrightnessBased(0.9);
