@@ -371,7 +371,7 @@ public abstract class AvatarHumanoidKinematicsToolboxControllerTest implements M
          toolboxController.updateRobotConfigurationData(robotConfigurationData);
          toolboxController.updateCapturabilityBasedStatus(createCapturabilityBasedStatus(true, false));
 
-         int numberOfIterations = 250;
+         int numberOfIterations = 350;
 
          runKinematicsToolboxController(numberOfIterations);
 
@@ -388,7 +388,7 @@ public abstract class AvatarHumanoidKinematicsToolboxControllerTest implements M
          LogTools.info("Solution quality: average = " + averageSolutionQuality + ", worst = " + worstSolutionQuality);
       }
       assertTrue("Poor worst solution quality: " + worstSolutionQuality, worstSolutionQuality < 3.0e-2);
-      assertTrue("Poor average solution quality: " + averageSolutionQuality, averageSolutionQuality < 2.0e-3);
+      assertTrue("Poor average solution quality: " + averageSolutionQuality, averageSolutionQuality < 6.5e-3);
    }
 
    private void runKinematicsToolboxController(int numberOfIterations) throws SimulationExceededMaximumTimeException
