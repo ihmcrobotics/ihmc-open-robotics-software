@@ -2,6 +2,7 @@ package us.ihmc.quadrupedFootstepPlanning.ui.controllers;
 
 import javafx.event.EventHandler;
 import javafx.fxml.FXML;
+import javafx.scene.control.CheckBox;
 import javafx.scene.control.Spinner;
 import javafx.scene.control.SpinnerValueFactory;
 import javafx.scene.control.ToggleButton;
@@ -18,6 +19,8 @@ public class FootstepNodeCheckingUIController
    private ToggleButton enableNodeChecking;
    @FXML
    private ToggleButton nodeCheckerPositionToggleButton;
+   @FXML
+   private CheckBox checkNodesUsingPoseBetweenFeet;
 
    @FXML
    private Spinner<Double> nodeCheckerFootXSpinner;
@@ -50,6 +53,7 @@ public class FootstepNodeCheckingUIController
       messager.bindBidirectional(FootstepPlannerMessagerAPI.NodeCheckingPosition, nodeCheckerFootPosition, false);
 
       messager.bindBidirectional(FootstepPlannerMessagerAPI.EnableNodeCheckingPositionEditing, nodeCheckerPositionToggleButton.selectedProperty(), false);
+      messager.bindBidirectional(FootstepPlannerMessagerAPI.NodeCheckingPoseBetweenFeetTopic, checkNodesUsingPoseBetweenFeet.selectedProperty(), false);
 
       nodeCheckerFootYawProperty.bindBidirectionalYaw(nodeCheckerFootYaw.getValueFactory().valueProperty());
       messager.bindBidirectional(FootstepPlannerMessagerAPI.NodeCheckingOrientation, nodeCheckerFootYawProperty, false);

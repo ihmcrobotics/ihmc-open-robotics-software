@@ -54,6 +54,7 @@ public class FootstepPlannerMessagerAPI
    private static final CategoryTheme PlannerData = apiFactory.createCategoryTheme("PlannerData");
    private static final CategoryTheme FlatGround = apiFactory.createCategoryTheme("FlatGround");
    private static final CategoryTheme Preview = apiFactory.createCategoryTheme("Preview");
+   private static final CategoryTheme PoseBetweenFeet = apiFactory.createCategoryTheme("PoseBetweenFeet");
 
    private static final CategoryTheme Parameters = apiFactory.createCategoryTheme("Parameters");
 
@@ -147,6 +148,7 @@ public class FootstepPlannerMessagerAPI
    public static final Topic<Point3D> NodeCheckingPosition = Root.child(NodeChecking).topic(Position);
    public static final Topic<Quaternion> NodeCheckingOrientation = Root.child(NodeChecking).topic(Orientation);
    public static final Topic<Boolean> EnableNodeCheckingPositionEditing = Root.child(NodeChecking).child(PositionTheme).topic(Enable);
+   public static final Topic<Boolean> NodeCheckingPoseBetweenFeetTopic = Root.child(NodeChecking).child(PoseBetweenFeet).topic(Enable);
 
    public static final Topic<Boolean> exportUnitTestDataFile = Root.child(UnitTest).topic(Export);
    public static final Topic<String> exportUnitTestPath = Root.child(UnitTest).topic(Path);

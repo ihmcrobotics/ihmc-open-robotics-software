@@ -26,6 +26,7 @@
             <children>
                 <ToggleButton fx:id="enableNodeChecking" mnemonicParsing="false" text="Enable" />
                 <ToggleButton fx:id="nodeCheckerPositionToggleButton" mnemonicParsing="false" text="Place Step" GridPane.rowIndex="1"/>
+                <CheckBox fx:id="checkNodesUsingPoseBetweenFeet" mnemonicParsing="false" text="Use Pose Between Feet" GridPane.rowIndex="2"/>
 
                 <Label text="yaw" GridPane.columnIndex="1" GridPane.rowIndex="1" />
                 <Label text="x" GridPane.columnIndex="1" GridPane.rowIndex="0"/>

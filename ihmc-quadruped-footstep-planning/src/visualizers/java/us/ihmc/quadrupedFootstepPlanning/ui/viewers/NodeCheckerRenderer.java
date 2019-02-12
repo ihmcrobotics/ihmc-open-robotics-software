@@ -1,5 +1,6 @@
 package us.ihmc.quadrupedFootstepPlanning.ui.viewers;
 
+import sandia_hand_msgs.Parameter;
 import us.ihmc.euclid.orientation.interfaces.Orientation3DReadOnly;
 import us.ihmc.euclid.referenceFrame.FramePoint2D;
 import us.ihmc.euclid.tuple2D.Vector2D;
@@ -37,6 +38,7 @@ import java.util.concurrent.atomic.AtomicReference;
 public class NodeCheckerRenderer extends AnimationTimer
 {
    private final AtomicReference<Boolean> nodeCheckerEnabled;
+   private final AtomicReference<Boolean> checkNodeUsingPoseBetweenFeet;
    private final AtomicReference<PlanarRegionsList> planarRegionsReference;
    private final AtomicReference<Point3D> footPositionReference;
    private final AtomicReference<Quaternion> footOrientationReference;
@@ -60,6 +62,7 @@ public class NodeCheckerRenderer extends AnimationTimer
       footPositionReference = messager.createInput(FootstepPlannerMessagerAPI.NodeCheckingPosition);
       footOrientationReference = messager.createInput(FootstepPlannerMessagerAPI.NodeCheckingOrientation, new Quaternion());
       initialSupportQuadrantReference = messager.createInput(FootstepPlannerMessagerAPI.InitialSupportQuadrantTopic, RobotQuadrant.FRONT_LEFT);
+      checkNodeUsingPoseBetweenFeet = messager.createInput(FootstepPlannerMessagerAPI.NodeCheckingPoseBetweenFeetTopic);
 
       TextureColorPalette2D colorPalette = new TextureColorPalette2D();
       colorPalette.setHueBrightnessBased(0.9);
@@ -96,84 +99,102 @@ public class NodeCheckerRenderer extends AnimationTimer
       FramePoint2D hindRightPosition = new FramePoint2D();
 
 
-      switch (initialSupportQuadrantReference.get())
+      if (!checkNodeUsingPoseBetweenFeet.get())
       {
-      case FRONT_LEFT:
+         switch (initialSupportQuadrantReference.get())
+         {
+         case FRONT_LEFT:
+            frontLeftPosition.set(footPosition.getX(), footPosition.getY());
+
+            Vector2D toFrontRight = new Vector2D(0.0, -xGaitSettings.getStanceWidth());
+            Vector2D toHindLeft = new Vector2D(-xGaitSettings.getStanceLength(), 0.0);
+            Vector2D toHindRight = new Vector2D(-xGaitSettings.getStanceLength(), -xGaitSettings.getStanceWidth());
+
+            footOrientation.transform(toFrontRight);
+            footOrientation.transform(toHindLeft);
+            footOrientation.transform(toHindRight);
+
+            frontRightPosition.set(frontLeftPosition);
+            hindLeftPosition.set(frontLeftPosition);
+            hindRightPosition.set(frontLeftPosition);
+
+            frontRightPosition.add(toFrontRight);
+            hindLeftPosition.add(toHindLeft);
+            hindRightPosition.add(toHindRight);
+            break;
+         case FRONT_RIGHT:
+            frontRightPosition.set(footPosition.getX(), footPosition.getY());
+
+            Vector2D toFrontLeft = new Vector2D(0.0, xGaitSettings.getStanceWidth());
+            toHindRight = new Vector2D(-xGaitSettings.getStanceLength(), 0.0);
+            toHindLeft = new Vector2D(-xGaitSettings.getStanceLength(), xGaitSettings.getStanceWidth());
+
+            footOrientation.transform(toFrontLeft);
+            footOrientation.transform(toHindLeft);
+            footOrientation.transform(toHindRight);
+
+            frontLeftPosition.set(frontRightPosition);
+            hindLeftPosition.set(frontRightPosition);
+            hindRightPosition.set(frontRightPosition);
+
+            frontLeftPosition.add(toFrontLeft);
+            hindLeftPosition.add(toHindLeft);
+            hindRightPosition.add(toHindRight);
+            break;
+         case HIND_LEFT:
+            hindLeftPosition.set(footPosition.getX(), footPosition.getY());
+
+            toFrontLeft = new Vector2D(xGaitSettings.getStanceLength(), 0.0);
+            toFrontRight = new Vector2D(xGaitSettings.getStanceLength(), -xGaitSettings.getStanceWidth());
+            toHindRight = new Vector2D(0.0, -xGaitSettings.getStanceWidth());
+
+            footOrientation.transform(toFrontLeft);
+            footOrientation.transform(toFrontRight);
+            footOrientation.transform(toHindRight);
+
+            frontLeftPosition.set(hindLeftPosition);
+            frontRightPosition.set(hindLeftPosition);
+            hindRightPosition.set(hindLeftPosition);
+
+            frontLeftPosition.add(toFrontLeft);
+            frontRightPosition.add(toFrontRight);
+            hindRightPosition.add(toHindRight);
+            break;
+         case HIND_RIGHT:
+            hindRightPosition.set(footPosition.getX(), footPosition.getY());
+
+            toFrontLeft = new Vector2D(xGaitSettings.getStanceLength(), xGaitSettings.getStanceWidth());
+            toFrontRight = new Vector2D(xGaitSettings.getStanceLength(), 0.0);
+            toHindLeft = new Vector2D(0.0, xGaitSettings.getStanceWidth());
+
+            footOrientation.transform(toFrontLeft);
+            footOrientation.transform(toFrontRight);
+            footOrientation.transform(toHindLeft);
+
+            frontLeftPosition.set(hindRightPosition);
+            frontRightPosition.set(hindRightPosition);
+            hindLeftPosition.set(hindRightPosition);
+
+            frontLeftPosition.add(toFrontLeft);
+            frontRightPosition.add(toFrontRight);
+            hindLeftPosition.add(toHindLeft);
+            break;
+         }
+      }
+      else
+      {
+         Vector2D toFoot = new Vector2D(xGaitSettings.getStanceLength(), xGaitSettings.getStanceWidth());
+         footOrientation.transform(toFoot);
+
          frontLeftPosition.set(footPosition.getX(), footPosition.getY());
-
-         Vector2D toFrontRight = new Vector2D(0.0, -xGaitSettings.getStanceWidth());
-         Vector2D toHindLeft = new Vector2D(-xGaitSettings.getStanceLength(), 0.0);
-         Vector2D toHindRight = new Vector2D(-xGaitSettings.getStanceLength(), -xGaitSettings.getStanceWidth());
-
-         footOrientation.transform(toFrontRight);
-         footOrientation.transform(toHindLeft);
-         footOrientation.transform(toHindRight);
-
-         frontRightPosition.set(frontLeftPosition);
-         hindLeftPosition.set(frontLeftPosition);
-         hindRightPosition.set(frontLeftPosition);
-
-         frontRightPosition.add(toFrontRight);
-         hindLeftPosition.add(toHindLeft);
-         hindRightPosition.add(toHindRight);
-         break;
-      case FRONT_RIGHT:
          frontRightPosition.set(footPosition.getX(), footPosition.getY());
-
-         Vector2D toFrontLeft = new Vector2D(0.0, xGaitSettings.getStanceWidth());
-         toHindRight = new Vector2D(-xGaitSettings.getStanceLength(), 0.0);
-         toHindLeft = new Vector2D(-xGaitSettings.getStanceLength(), xGaitSettings.getStanceWidth());
-
-         footOrientation.transform(toFrontLeft);
-         footOrientation.transform(toHindLeft);
-         footOrientation.transform(toHindRight);
-
-         frontLeftPosition.set(frontRightPosition);
-         hindLeftPosition.set(frontRightPosition);
-         hindRightPosition.set(frontRightPosition);
-
-         frontLeftPosition.add(toFrontLeft);
-         hindLeftPosition.add(toHindLeft);
-         hindRightPosition.add(toHindRight);
-         break;
-      case HIND_LEFT:
          hindLeftPosition.set(footPosition.getX(), footPosition.getY());
-
-         toFrontLeft = new Vector2D(xGaitSettings.getStanceLength(), 0.0);
-         toFrontRight = new Vector2D(xGaitSettings.getStanceLength(), -xGaitSettings.getStanceWidth());
-         toHindRight = new Vector2D(0.0, -xGaitSettings.getStanceWidth());
-
-         footOrientation.transform(toFrontLeft);
-         footOrientation.transform(toFrontRight);
-         footOrientation.transform(toHindRight);
-
-         frontLeftPosition.set(hindLeftPosition);
-         frontRightPosition.set(hindLeftPosition);
-         hindRightPosition.set(hindLeftPosition);
-
-         frontLeftPosition.add(toFrontLeft);
-         frontRightPosition.add(toFrontRight);
-         hindRightPosition.add(toHindRight);
-         break;
-      case HIND_RIGHT:
          hindRightPosition.set(footPosition.getX(), footPosition.getY());
 
-         toFrontLeft = new Vector2D(xGaitSettings.getStanceLength(), xGaitSettings.getStanceWidth());
-         toFrontRight = new Vector2D(xGaitSettings.getStanceLength(), 0.0);
-         toHindLeft = new Vector2D(0.0, xGaitSettings.getStanceWidth());
-
-         footOrientation.transform(toFrontLeft);
-         footOrientation.transform(toFrontRight);
-         footOrientation.transform(toHindLeft);
-
-         frontLeftPosition.set(hindRightPosition);
-         frontRightPosition.set(hindRightPosition);
-         hindLeftPosition.set(hindRightPosition);
-
-         frontLeftPosition.add(toFrontLeft);
-         frontRightPosition.add(toFrontRight);
-         hindLeftPosition.add(toHindLeft);
-         break;
+         frontLeftPosition.add(toFoot.getX(), toFoot.getY());
+         frontRightPosition.add(toFoot.getX(), -toFoot.getY());
+         hindLeftPosition.add(-toFoot.getX(), toFoot.getY());
+         hindRightPosition.add(-toFoot.getX(), -toFoot.getY());
       }
 
       FootstepNode node = new FootstepNode(initialSupportQuadrantReference.get(), frontLeftPosition, frontRightPosition, hindLeftPosition, hindRightPosition,
