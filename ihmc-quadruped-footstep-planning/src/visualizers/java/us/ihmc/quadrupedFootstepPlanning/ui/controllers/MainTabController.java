@@ -185,8 +185,8 @@ public class MainTabController
    private JavaFXMessager messager;
 
    private AtomicReference<Integer> currentPlannerRequestId;
-   private AnimationTimer robotPoseHandler;
-   private WalkingPreviewPlaybackManager walkingPreviewPlaybackManager;
+//   private AnimationTimer robotPoseHandler;
+//   private WalkingPreviewPlaybackManager walkingPreviewPlaybackManager;
    private QuadrupedReferenceFrames quadrupedReferenceFrames;
    private AtomicReference<FootstepPlan> footstepPlanReference;
 
@@ -283,10 +283,10 @@ public class MainTabController
 
       messager.registerTopicListener(FootstepPlannerMessagerAPI.GlobalResetTopic, reset -> clearStartGoalTextFields());
 
-      walkingPreviewPlaybackManager = new WalkingPreviewPlaybackManager(messager);
-      previewSlider.valueProperty()
-                   .addListener((ChangeListener<Number>) (observable, oldValue,
-                                                          newValue) -> walkingPreviewPlaybackManager.requestSpecificPercentageInPreview(newValue.doubleValue()));
+//      walkingPreviewPlaybackManager = new WalkingPreviewPlaybackManager(messager);
+//      previewSlider.valueProperty()
+//                   .addListener((ChangeListener<Number>) (observable, oldValue,
+//                                                          newValue) -> walkingPreviewPlaybackManager.requestSpecificPercentageInPreview(newValue.doubleValue()));
    }
 
    @FXML
@@ -329,23 +329,23 @@ public class MainTabController
 //      messager.submitMessage(FootstepPlannerMessagerAPI.RequestWalkingPreview, requestMessage);
    }
 
-   @FXML
-   private void playWalkingPreview()
-   {
-      walkingPreviewPlaybackManager.start();
-   }
-
-   @FXML
-   private void pauseWalkingPreview()
-   {
-      walkingPreviewPlaybackManager.playbackModeActive.set(false);
-   }
-
-   @FXML
-   private void stopWalkingPreview()
-   {
-      walkingPreviewPlaybackManager.stop();
-   }
+//   @FXML
+//   private void playWalkingPreview()
+//   {
+//      walkingPreviewPlaybackManager.start();
+//   }
+//
+//   @FXML
+//   private void pauseWalkingPreview()
+//   {
+//      walkingPreviewPlaybackManager.playbackModeActive.set(false);
+//   }
+//
+//   @FXML
+//   private void stopWalkingPreview()
+//   {
+//      walkingPreviewPlaybackManager.stop();
+//   }
 
    public void setFullRobotModel(FullQuadrupedRobotModel fullQuadrupedRobotModel)
    {
@@ -354,7 +354,7 @@ public class MainTabController
 
    public void setPreviewModel(FullQuadrupedRobotModel previewRobotModel)
    {
-      this.walkingPreviewPlaybackManager.setRobotModel(previewRobotModel);
+//      this.walkingPreviewPlaybackManager.setRobotModel(previewRobotModel);
    }
 
    public void setDefaultTiming(double swingTime, double transferTime)
