@@ -7,10 +7,12 @@ import javafx.scene.paint.Color;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.messager.Messager;
 import us.ihmc.quadrupedFootstepPlanning.ui.SimpleFootstepNode;
+import us.ihmc.quadrupedFootstepPlanning.ui.viewers.FootstepPathMeshViewer;
 
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.Set;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -87,9 +89,17 @@ public class NodeOccupancyMapSequenceRenderer extends AnimationTimer
       invalidChildNodeRenderer.reset();
       parentMapRenderer.reset();
 
+      Collection<SimpleFootstepNode> nodesBeingExpanded = nodesBeingExpandedBuffer.get(frameIndex);
+      Color parentNodeColor = this.parentNodeColor;
+      for (SimpleFootstepNode node : nodesBeingExpanded)
+      {
+         parentNodeColor = FootstepPathMeshViewer.solutionFootstepColors.get(node.getMovingQuadrant());
+         break;
+      }
+
       validChildNodeRenderer.processNodesToRenderOnThread(validChildNodesBuffer.get(frameIndex), validChildNodeColor);
       invalidChildNodeRenderer.processNodesToRenderOnThread(invalidChildNodesBuffer.get(frameIndex), invalidChildNodeColor);
-      parentMapRenderer.processNodesToRenderOnThread(nodesBeingExpandedBuffer.get(frameIndex), parentNodeColor);
+      parentMapRenderer.processNodesToRenderOnThread(nodesBeingExpanded, parentNodeColor);
    }
 
    public void processNodesToRender(Collection<SimpleFootstepNode> nodesBeingExpanded, Collection<SimpleFootstepNode> validChildNodes, Collection<SimpleFootstepNode> invalidChildNodes)
