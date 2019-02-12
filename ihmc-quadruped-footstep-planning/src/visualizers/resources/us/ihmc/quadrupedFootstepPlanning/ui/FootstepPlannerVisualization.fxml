@@ -20,9 +20,9 @@
                 <RowConstraints minHeight="10.0" vgrow="SOMETIMES"/>
             </rowConstraints>
             <children>
-                <CheckBox fx:id="showAllValidNodes" mnemonicParsing="false" text="Show all valid nodes" />
+                <CheckBox fx:id="showAllValidNodes" mnemonicParsing="false" selected="true" text="Show all valid nodes" />
 
-                <CheckBox fx:id="showAllInvalidNodes" mnemonicParsing="false" text="Show all invalid nodes" GridPane.rowIndex="2"/>
+                <CheckBox fx:id="showAllInvalidNodes" mnemonicParsing="false" selected="true" text="Show all invalid nodes" GridPane.rowIndex="2"/>
                 <CheckBox fx:id="showValidNodesThisTick" mnemonicParsing="false" text="Show valid nodes this tick" GridPane.rowIndex="3"/>
                 <CheckBox fx:id="showInvalidNodesThisTick" mnemonicParsing="false" text="Show invalid nodes this tick" GridPane.rowIndex="4"/>
                 <CheckBox fx:id="showNodesRejectedByReason" mnemonicParsing="false" text="Show nodes rejected by reason" GridPane.rowIndex="5"/>
