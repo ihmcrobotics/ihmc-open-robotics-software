@@ -3,10 +3,12 @@ package us.ihmc.quadrupedFootstepPlanning.footstepPlanning;
 import org.junit.Test;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.graphSearch.QuadrupedAStarFootstepPlanner;
+import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.graphSearch.listeners.QuadrupedFootstepPlannerListener;
 import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.graphSearch.nodeExpansion.FootstepNodeExpansion;
 import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.graphSearch.nodeExpansion.ParameterBasedNodeExpansion;
 import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.graphSearch.parameters.DefaultFootstepPlannerParameters;
 import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.graphSearch.parameters.FootstepPlannerParameters;
+import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.graphSearch.visualization.AStarMessagerListener;
 import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.graphSearch.visualization.QuadrupedAStarFootstepPlannerVisualizer;
 import us.ihmc.quadrupedPlanning.QuadrupedXGaitSettings;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
@@ -14,7 +16,7 @@ import us.ihmc.yoVariables.registry.YoVariableRegistry;
 public class QuadrupedAStarFootstepPlannerDataSetTest extends FootstepPlannerDataSetTest
 {
    private static final boolean activelyVisualize = false;
-   private QuadrupedAStarFootstepPlannerVisualizer visualizer;
+   private QuadrupedFootstepPlannerListener visualizer;
 
    public FootstepPlannerType getPlannerType()
    {
@@ -32,7 +34,7 @@ public class QuadrupedAStarFootstepPlannerDataSetTest extends FootstepPlannerDat
       if (activelyVisualize)
          visualizer = new QuadrupedAStarFootstepPlannerVisualizer(null);
       else
-         visualizer = null;
+         visualizer = new AStarMessagerListener(messager);
       return QuadrupedAStarFootstepPlanner.createPlanner(parameters, xGaitSettings, visualizer, expansion, registry);
    }
 

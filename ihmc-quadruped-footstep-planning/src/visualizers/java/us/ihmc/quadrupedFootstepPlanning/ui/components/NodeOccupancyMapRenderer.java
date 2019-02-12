@@ -1,15 +1,10 @@
 package us.ihmc.quadrupedFootstepPlanning.ui.components;
 
-import controller_msgs.msg.dds.FootstepPlannerCellMessage;
-import controller_msgs.msg.dds.FootstepPlannerOccupancyMapMessage;
 import javafx.animation.AnimationTimer;
 import javafx.scene.Group;
 import javafx.scene.Node;
 import javafx.scene.paint.Color;
-import javafx.scene.paint.Material;
-import javafx.scene.shape.Mesh;
 import javafx.scene.shape.MeshView;
-import javafx.util.Pair;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.transform.RigidBodyTransform;
@@ -23,8 +18,8 @@ import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.communication.Footstep
 import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.graphSearch.graph.FootstepNode;
 import us.ihmc.quadrupedFootstepPlanning.ui.SimpleFootstepNode;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
-import us.ihmc.robotics.robotSide.RobotQuadrant;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
@@ -34,24 +29,35 @@ import java.util.concurrent.atomic.AtomicReference;
 
 public class NodeOccupancyMapRenderer extends AnimationTimer
 {
+   private final boolean isExecutorServiceProvided;
+   private final ExecutorService executorService;
+
    private static final double cellWidth = 0.02;
    private static final double nodeOffsetZ = 0.05;
 
-   private ExecutorService executorService = Executors.newSingleThreadExecutor(ThreadTools.getNamedThreadFactory(getClass().getSimpleName()));
-
    private final Group root = new Group();
-   private final AtomicReference<Pair<Mesh, Material>> nodeGraphToRender = new AtomicReference<>(null);
-   private final AtomicReference<PlanarRegionsList> planarRegionsList = new AtomicReference<>(null);
+
+   private final AtomicReference<JavaFXMultiColorMeshBuilder> meshBuilderToRender = new AtomicReference<>(null);
+   private final AtomicReference<PlanarRegionsList> planarRegionsList;
    private final AtomicBoolean show = new AtomicBoolean();
    private final AtomicBoolean reset = new AtomicBoolean(false);
 
-   private final MeshView nodeGraphMeshView = new MeshView();
    private final TextureColorAdaptivePalette palette = new TextureColorAdaptivePalette(1024, false);
+   private final JavaFXMultiColorMeshBuilder meshBuilder = new JavaFXMultiColorMeshBuilder(palette);
+
    private final ConvexPolygon2D cellPolygon = new ConvexPolygon2D();
 
-   public NodeOccupancyMapRenderer(Messager messager)
+   public NodeOccupancyMapRenderer(Messager messager, ExecutorService executorService)
    {
+      isExecutorServiceProvided = executorService == null;
+
+      if (isExecutorServiceProvided)
+         this.executorService = Executors.newSingleThreadExecutor(ThreadTools.getNamedThreadFactory(getClass().getSimpleName()));
+      else
+         this.executorService = executorService;
+
       messager.registerTopicListener(FootstepPlannerMessagerAPI.ComputePathTopic, data -> reset.set(true));
+      planarRegionsList = messager.createInput(FootstepPlannerMessagerAPI.PlanarRegionDataTopic);
 
       cellPolygon.addVertex(cellWidth, 0.0);
       cellPolygon.addVertex(0.5 * cellWidth, 0.5 * Math.sqrt(3.0) * cellWidth);
@@ -60,13 +66,14 @@ public class NodeOccupancyMapRenderer extends AnimationTimer
       cellPolygon.addVertex(-0.5 * cellWidth, -0.5 * Math.sqrt(3.0) * cellWidth);
       cellPolygon.addVertex(0.5 * cellWidth, -0.5 * Math.sqrt(3.0) * cellWidth);
       cellPolygon.update();
-
-      root.getChildren().add(nodeGraphMeshView);
    }
 
    public void show(boolean show)
    {
       this.show.set(show);
+
+      if (show)
+         meshBuilderToRender.set(meshBuilder);
    }
 
    public void reset()
@@ -74,11 +81,13 @@ public class NodeOccupancyMapRenderer extends AnimationTimer
       this.reset.set(true);
    }
 
-   public void processNodesToRender(Collection<SimpleFootstepNode> nodes, Color color)
+   public void processNodesToRenderOnThread(Collection<SimpleFootstepNode> nodes, Color color)
    {
-      palette.clearPalette();
-      JavaFXMultiColorMeshBuilder meshBuilder = new JavaFXMultiColorMeshBuilder(palette);
+      executorService.execute(() -> processNodesToRender(nodes, color));
+   }
 
+   private void processNodesToRender(Collection<SimpleFootstepNode> nodes, Color color)
+   {
       for (SimpleFootstepNode node : nodes)
       {
          double x = node.getXIndex() * FootstepNode.gridSizeXY;
@@ -90,7 +99,7 @@ public class NodeOccupancyMapRenderer extends AnimationTimer
          meshBuilder.addPolygon(transform, cellPolygon, color);
       }
 
-      nodeGraphToRender.set(new Pair<>(meshBuilder.generateMesh(), meshBuilder.generateMaterial()));
+      meshBuilderToRender.set(meshBuilder);
    }
 
    private double getHeightAtPoint(double x, double y)
@@ -105,24 +114,25 @@ public class NodeOccupancyMapRenderer extends AnimationTimer
    @Override
    public void handle(long now)
    {
-      if (show.get() && root.getChildren().isEmpty())
-         root.getChildren().add(nodeGraphMeshView);
-      else if (!show.get() && !root.getChildren().isEmpty())
+      if (show.get() && meshBuilderToRender.get() != null)
+      {
+         JavaFXMultiColorMeshBuilder meshBuilder = meshBuilderToRender.getAndSet(null);
+         MeshView meshView = new MeshView();
+         meshView.setMesh(meshBuilder.generateMesh());
+         meshView.setMaterial(meshBuilder.generateMaterial());
+
          root.getChildren().clear();
+         root.getChildren().add(meshView);
+      }
+      else if (!show.get() && !root.getChildren().isEmpty())
+      {
+         root.getChildren().clear();
+      }
 
       if (reset.getAndSet(false))
       {
-         nodeGraphToRender.set(null);
-         nodeGraphMeshView.setMesh(null);
-         nodeGraphMeshView.setMaterial(null);
-         return;
-      }
-
-      Pair<Mesh, Material> newMesh = nodeGraphToRender.get();
-      if (newMesh != null)
-      {
-         nodeGraphMeshView.setMesh(newMesh.getKey());
-         nodeGraphMeshView.setMaterial(newMesh.getValue());
+         meshBuilder.clear();
+         meshBuilderToRender.set(null);
       }
    }
 
@@ -130,7 +140,9 @@ public class NodeOccupancyMapRenderer extends AnimationTimer
    public void stop()
    {
       super.stop();
-      executorService.shutdownNow();
+
+      if (!isExecutorServiceProvided)
+         executorService.shutdownNow();
    }
 
    public Node getRoot()

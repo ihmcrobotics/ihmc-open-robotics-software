@@ -51,7 +51,7 @@ public class FootstepPlannerUI
    private final FootstepPlannerDataExporter dataExporter;
    private final BodyPathMeshViewer bodyPathMeshViewer;
    private final VisibilityGraphsRenderer visibilityGraphsRenderer;
-   private final NodeOccupancyMapRenderer graphRenderer;
+//   private final NodeOccupancyMapRenderer graphRenderer;
    private final JavaFXQuadrupedVisualizer robotVisualizer;
    private final JavaFXQuadrupedVisualizer walkingPreviewVisualizer;
    private final FootstepPlannerProcessViewer footstepPlannerProcessViewer;
@@ -145,7 +145,7 @@ public class FootstepPlannerUI
       this.dataExporter = new FootstepPlannerDataExporter(messager);
       this.bodyPathMeshViewer = new BodyPathMeshViewer(messager);
       this.visibilityGraphsRenderer = new VisibilityGraphsRenderer(messager);
-      this.graphRenderer = new NodeOccupancyMapRenderer(messager);
+//      this.graphRenderer = new NodeOccupancyMapRenderer(messager);
       this.footstepPlannerProcessViewer = new FootstepPlannerProcessViewer(messager);
 
       view3dFactory.addNodeToView(planarRegionViewer.getRoot());
@@ -155,8 +155,8 @@ public class FootstepPlannerUI
       view3dFactory.addNodeToView(nodeCheckerRenderer.getRoot());
       view3dFactory.addNodeToView(bodyPathMeshViewer.getRoot());
       view3dFactory.addNodeToView(visibilityGraphsRenderer.getRoot());
-      view3dFactory.addNodeToView(graphRenderer.getRoot());
-      view3dFactory.addNodesToView(footstepPlannerProcessViewer.getNodesToView());
+//      view3dFactory.addNodeToView(graphRenderer.getRoot());
+      view3dFactory.addNodeToView(footstepPlannerProcessViewer.getRoot());
 
       if(fullQuadrupedRobotModelFactory == null)
       {
@@ -195,7 +195,7 @@ public class FootstepPlannerUI
       nodeCheckerEditor.start();
       bodyPathMeshViewer.start();
       visibilityGraphsRenderer.start();
-      graphRenderer.start();
+//      graphRenderer.start();
       footstepPlannerProcessViewer.start();
 
       mainPane.setCenter(subScene);
@@ -229,8 +229,7 @@ public class FootstepPlannerUI
       dataExporter.stop();
       bodyPathMeshViewer.stop();
       visibilityGraphsRenderer.stop();
-      graphRenderer.stop();
-      footstepPlannerProcessViewer.start();
+      footstepPlannerProcessViewer.stop();
 
       if(robotVisualizer != null)
          robotVisualizer.stop();

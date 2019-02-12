@@ -4,23 +4,9 @@ import javafx.animation.AnimationTimer;
 import javafx.scene.Group;
 import javafx.scene.Node;
 import javafx.scene.paint.Color;
-import javafx.scene.paint.Material;
-import javafx.scene.shape.Mesh;
-import javafx.scene.shape.MeshView;
-import javafx.util.Pair;
 import us.ihmc.commons.thread.ThreadTools;
-import us.ihmc.euclid.geometry.ConvexPolygon2D;
-import us.ihmc.euclid.transform.RigidBodyTransform;
-import us.ihmc.euclid.tuple3D.Point3D;
-import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
-import us.ihmc.javaFXToolkit.shapes.JavaFXMultiColorMeshBuilder;
-import us.ihmc.javaFXToolkit.shapes.TextureColorAdaptivePalette;
 import us.ihmc.messager.Messager;
-import us.ihmc.pathPlanning.visibilityGraphs.tools.PlanarRegionTools;
-import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.communication.FootstepPlannerMessagerAPI;
-import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.graphSearch.graph.FootstepNode;
 import us.ihmc.quadrupedFootstepPlanning.ui.SimpleFootstepNode;
-import us.ihmc.robotics.geometry.PlanarRegionsList;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -28,14 +14,15 @@ import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.concurrent.atomic.AtomicReference;
 
 public class NodeOccupancyMapSequenceRenderer extends AnimationTimer
 {
-   private List<Node> nodesToView = new ArrayList<>();
-   private ExecutorService executorService = Executors.newSingleThreadExecutor(ThreadTools.getNamedThreadFactory(getClass().getSimpleName()));
+   private final boolean isExecutorServiceProvided;
+   private final ExecutorService executorService;
 
    private final AtomicBoolean reset = new AtomicBoolean(false);
+
+   private final Group root = new Group();
 
    private final Color childNodeColor;
    private final Color parentNodeColor;
@@ -46,14 +33,22 @@ public class NodeOccupancyMapSequenceRenderer extends AnimationTimer
    private final NodeOccupancyMapRenderer occupancyMapRenderer;
    private final NodeOccupancyMapRenderer parentMapRenderer;
 
-   public NodeOccupancyMapSequenceRenderer(Messager messager, Color nodeBeingExpandedColor, Color childNodeColor)
+   public NodeOccupancyMapSequenceRenderer(Messager messager, Color nodeBeingExpandedColor, Color childNodeColor, ExecutorService executorService)
    {
       this.parentNodeColor = nodeBeingExpandedColor;
       this.childNodeColor = childNodeColor;
-      this.occupancyMapRenderer = new NodeOccupancyMapRenderer(messager);
-      nodesToView.add(occupancyMapRenderer.getRoot());
-      this.parentMapRenderer = new NodeOccupancyMapRenderer(messager);
-      nodesToView.add(parentMapRenderer.getRoot());
+
+      isExecutorServiceProvided = executorService == null;
+
+      if (isExecutorServiceProvided)
+         this.executorService = Executors.newSingleThreadExecutor(ThreadTools.getNamedThreadFactory(getClass().getSimpleName()));
+      else
+         this.executorService = executorService;
+
+      this.occupancyMapRenderer = new NodeOccupancyMapRenderer(messager, executorService);
+      this.parentMapRenderer = new NodeOccupancyMapRenderer(messager, executorService);
+
+      root.getChildren().addAll(occupancyMapRenderer.getRoot(), parentMapRenderer.getRoot());
    }
 
    public void show(boolean show)
@@ -83,8 +78,8 @@ public class NodeOccupancyMapSequenceRenderer extends AnimationTimer
       occupancyMapRenderer.reset();
       parentMapRenderer.reset();
 
-      occupancyMapRenderer.processNodesToRender(childNodesBuffer.get(frameIndex), childNodeColor);
-      parentMapRenderer.processNodesToRender(nodesBeingExpandedBuffer.get(frameIndex), parentNodeColor);
+      occupancyMapRenderer.processNodesToRenderOnThread(childNodesBuffer.get(frameIndex), childNodeColor);
+      parentMapRenderer.processNodesToRenderOnThread(nodesBeingExpandedBuffer.get(frameIndex), parentNodeColor);
    }
 
    public void processNodesToRender(Collection<SimpleFootstepNode> nodesBeingExpanded, Collection<SimpleFootstepNode> childNodes)
@@ -106,15 +101,35 @@ public class NodeOccupancyMapSequenceRenderer extends AnimationTimer
    }
 
    @Override
+   public void start()
+   {
+      super.start();
+
+      occupancyMapRenderer.start();
+      parentMapRenderer.start();
+   }
+
+   @Override
    public void stop()
    {
-      super.stop();
-      executorService.shutdownNow();
+      try
+      {
+         super.stop();
+      }
+      catch (Exception e)
+      {
+         e.printStackTrace();
+      }
+
+      if (!isExecutorServiceProvided)
+         executorService.shutdownNow();
+
+      occupancyMapRenderer.stop();
+      parentMapRenderer.stop();
    }
 
-   public List<Node> getNodesToView()
+   public Node getRoot()
    {
-      return nodesToView;
+      return root;
    }
-
 }
