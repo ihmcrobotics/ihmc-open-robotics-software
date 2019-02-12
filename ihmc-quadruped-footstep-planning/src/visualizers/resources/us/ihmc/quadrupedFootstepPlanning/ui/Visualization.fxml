@@ -40,12 +40,8 @@
                 <CheckBox fx:id="showInnerRegionMapsToggleButton" mnemonicParsing="false" text="Show inner-region maps" GridPane.columnIndex="3"
                               GridPane.rowIndex="4"/>
 
-                <CheckBox fx:id="showOccupancyMap" mnemonicParsing="false" selected="true" text="Show occupancy map" GridPane.columnIndex="4"
-                              GridPane.rowIndex="1"/>
                 <CheckBox fx:id="showSolution" mnemonicParsing="false" selected="true" text="Show solution" GridPane.columnIndex="4"
                               GridPane.rowIndex="2"/>
-                <CheckBox fx:id="showIntermediateSolution" mnemonicParsing="false" selected="true" text="Show intermediate plans" GridPane.columnIndex="4"
-                              GridPane.rowIndex="3"/>
             </children>
         </GridPane>
     </children>
