@@ -31,6 +31,7 @@ import us.ihmc.simulationconstructionset.util.simulationTesting.SimulationTestin
 import us.ihmc.tools.MemoryTools;
 import us.ihmc.wholeBodyController.DRCRobotJointMap;
 
+@Tag("controller-api")
 public abstract class EndToEndMessageDelayTest implements MultiRobotTestInterface
 {
    private static final SimulationTestingParameters simulationTestingParameters = SimulationTestingParameters.createFromSystemProperties();

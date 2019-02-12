@@ -92,6 +92,7 @@ public abstract class DRCFlatGroundWalkingTest implements MultiRobotTestInterfac
 
    public abstract boolean doPelvisWarmup();
 
+   @Tag("video")
    @Test
    public void testFlatGroundWalking() throws SimulationExceededMaximumTimeException, ControllerFailureException
    {

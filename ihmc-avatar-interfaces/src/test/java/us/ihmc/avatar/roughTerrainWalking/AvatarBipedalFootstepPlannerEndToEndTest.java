@@ -62,6 +62,7 @@ import java.util.concurrent.atomic.AtomicReference;
 
 import static us.ihmc.robotics.Assert.*;
 
+@Tag("humanoid-rough-terrain")
 @Disabled
 public abstract class AvatarBipedalFootstepPlannerEndToEndTest implements MultiRobotTestInterface
 {
