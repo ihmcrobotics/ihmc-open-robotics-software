@@ -38,8 +38,7 @@ applicationDependencies {
 
 testDependencies {
    compile ihmc.sourceSetProject("visualizers")
-
-
+   compile group: "us.ihmc", name: "ihmc-robotics-toolkit-test", version: "source"
 }
 
 visualizersDependencies {

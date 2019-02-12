@@ -47,6 +47,7 @@ import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoVariable;
 
+@Tag("humanoid-flat-ground")
 public abstract class AvatarICPPlannerFlatGroundTest implements MultiRobotTestInterface
 {
    private final static double defaultSwingTime = 0.6;

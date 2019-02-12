@@ -43,6 +43,7 @@ import java.util.Random;
 
 import static us.ihmc.robotics.Assert.*;
 
+@Tag("humanoid-flat-ground")
 public abstract class AvatarAngularMomentumWalkingTest implements MultiRobotTestInterface
 {
    private static final String fileName = "angularMomentumData.txt";

@@ -36,6 +36,7 @@ import us.ihmc.simulationconstructionset.util.simulationTesting.SimulationTestin
 import us.ihmc.tools.MemoryTools;
 import us.ihmc.yoVariables.variable.YoEnum;
 
+@Tag("humanoid-flat-ground")
 public abstract class AvatarFlatGroundSideSteppingTest implements MultiRobotTestInterface
 {
    private SimulationTestingParameters simulationTestingParameters = SimulationTestingParameters.createFromSystemProperties();

@@ -26,6 +26,7 @@ import java.io.InputStream;
 
 import static us.ihmc.robotics.Assert.*;
 
+@Tag("humanoid-flat-ground")
 public abstract class AvatarDynamicReachabilityCalculatorTest
 {
    private static final SimulationTestingParameters simulationTestingParameters = SimulationTestingParameters.createFromSystemProperties();

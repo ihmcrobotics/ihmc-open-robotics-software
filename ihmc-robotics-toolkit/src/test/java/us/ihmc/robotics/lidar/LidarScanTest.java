@@ -9,6 +9,7 @@ import java.util.Random;
 import org.apache.commons.lang3.ArrayUtils;
 import us.ihmc.robotics.Assert;
 import org.junit.jupiter.api.Test;
+import org.opentest4j.AssertionFailedError;
 
 import us.ihmc.commons.Assertions;
 import us.ihmc.commons.RandomNumbers;
@@ -58,7 +59,7 @@ public class LidarScanTest
       final LidarScan lidarScan1 = new LidarScan(new LidarScanParameters(), new RigidBodyTransform(), new RigidBodyTransform(), ranges1, random.nextInt());
       final LidarScan lidarScan2 = new LidarScan(new LidarScanParameters(), new RigidBodyTransform(), new RigidBodyTransform(), ranges2, random.nextInt());
 
-      Assertions.assertExceptionThrown(AssertionError.class, new RunnableThatThrows()
+      Assertions.assertExceptionThrown(AssertionFailedError.class, new RunnableThatThrows()
       {
          @Override
          public void run() throws Throwable

@@ -196,7 +196,7 @@ public class GenericQuadrupedStateEstimatorParameters extends StateEstimatorPara
    @Override
    public boolean requestFrozenModeAtStart()
    {
-      return true;
+      return false;
    }
 
 }

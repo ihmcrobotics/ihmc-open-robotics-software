@@ -31,18 +31,6 @@ public class ConstantPelvisRotationalStateUpdater implements PelvisRotationalSta
       updateRootJointOrientationAndAngularVelocity();
    }
 
-   @Override
-   public void initializeForFrozenState()
-   {
-      updateRootJointOrientationAndAngularVelocity();
-   }
-
-   @Override
-   public void updateForFrozenState()
-   {
-      updateRootJointOrientationAndAngularVelocity();
-   }
-
    private final Quaternion rootJointOrientation = new Quaternion();
    private final Twist twistRootBodyRelativeToWorld = new Twist();
 
