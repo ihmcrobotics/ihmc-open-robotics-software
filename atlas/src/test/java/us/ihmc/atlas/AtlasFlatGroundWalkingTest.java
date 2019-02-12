@@ -24,6 +24,7 @@ public class AtlasFlatGroundWalkingTest extends DRCFlatGroundWalkingTest
       return true;
    }
 
+   @Tag("video")
    @Override
    @Test
    public void testFlatGroundWalking() throws SimulationExceededMaximumTimeException, ControllerFailureException
