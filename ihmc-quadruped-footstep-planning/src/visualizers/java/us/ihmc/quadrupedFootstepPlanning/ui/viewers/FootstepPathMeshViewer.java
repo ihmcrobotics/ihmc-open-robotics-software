@@ -30,7 +30,6 @@ public class FootstepPathMeshViewer extends AnimationTimer
    private final ExecutorService executorService = Executors.newSingleThreadExecutor(ThreadTools.getNamedThreadFactory(getClass().getSimpleName()));
 
    private final AtomicReference<Boolean> showSolution;
-   private final AtomicReference<Boolean> showIntermediatePlan;
    private final AtomicBoolean solutionWasReceived = new AtomicBoolean(false);
    private final AtomicBoolean reset = new AtomicBoolean(false);
 
@@ -49,49 +48,12 @@ public class FootstepPathMeshViewer extends AnimationTimer
          processFootstepPath(footstepPlan);
       }));
 
-//      messager.registerTopicListener(FootstepPlannerMessagerAPI.NodeDataTopic, nodeData -> executorService.submit(() -> {
-//         solutionWasReceived.set(false);
-//         processLowestCostNodeList(nodeData);
-//      }));
+
 
       messager.registerTopicListener(FootstepPlannerMessagerAPI.ComputePathTopic, data -> reset.set(true));
 
       showSolution = messager.createInput(FootstepPlannerMessagerAPI.ShowFootstepPlanTopic, true);
-      showIntermediatePlan = messager.createInput(FootstepPlannerMessagerAPI.ShowNodeDataTopic, true);
    }
-
-   /*
-   private void processLowestCostNodeList(FootstepNodeDataListMessage message)
-   {
-      if (message.getIsFootstepGraph())
-         return;
-
-      IDLSequence.Object<FootstepNodeDataMessage> nodeDataList = message.getNodeData();
-      FootstepPlan footstepPlan = new FootstepPlan();
-      for (int i = 0; i < nodeDataList.size(); i++)
-      {
-         addNodeDataToFootstepPlan(footstepPlan, nodeDataList.get(i));
-      }
-
-      processFootstepPath(footstepPlan);
-   }
-
-
-   private static void addNodeDataToFootstepPlan(FootstepPlan footstepPlan, FootstepNodeDataMessage nodeData)
-   {
-      RobotSide robotSide = RobotSide.fromByte(nodeData.getRobotSide());
-
-      RigidBodyTransform footstepPose = new RigidBodyTransform();
-      footstepPose.setRotationYawAndZeroTranslation(nodeData.getYawIndex() * FootstepNode.gridSizeYaw);
-      footstepPose.setTranslationX(nodeData.getXIndex() * FootstepNode.gridSizeXY);
-      footstepPose.setTranslationY(nodeData.getYIndex() * FootstepNode.gridSizeXY);
-
-      RigidBodyTransform snapTransform = new RigidBodyTransform();
-      snapTransform.set(nodeData.getSnapRotation(), nodeData.getSnapTranslation());
-      snapTransform.transform(footstepPose);
-      footstepPlan.addFootstep(robotSide, new FramePose3D(ReferenceFrame.getWorldFrame(), footstepPose));
-   }
-      */
 
 
    private synchronized void processFootstepPath(FootstepPlan plan)
@@ -118,14 +80,12 @@ public class FootstepPathMeshViewer extends AnimationTimer
    @Override
    public void handle(long now)
    {
-      boolean addIntermediatePlan = showIntermediatePlan.get() && !solutionWasReceived.get() && root.getChildren().isEmpty();
       boolean addFinalPlan = showSolution.get() && solutionWasReceived.get() && root.getChildren().isEmpty();
-      if (addIntermediatePlan || addFinalPlan)
+      if (addFinalPlan)
          root.getChildren().add(footstepPathMeshView);
 
-      boolean removeIntermediatePlan = !showIntermediatePlan.get() && !solutionWasReceived.get() && !root.getChildren().isEmpty();
       boolean removeFinalPlan = !showSolution.get() && solutionWasReceived.get() && !root.getChildren().isEmpty();
-      if (removeIntermediatePlan || removeFinalPlan)
+      if (removeFinalPlan)
          root.getChildren().clear();
 
       if (reset.getAndSet(false))
