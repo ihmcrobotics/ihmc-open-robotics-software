@@ -1,10 +1,14 @@
 package us.ihmc.quadrupedFootstepPlanning.footstepPlanning;
 
+import javafx.application.Application;
+import javafx.application.Platform;
+import javafx.stage.Stage;
 import org.junit.Test;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
 import us.ihmc.commons.ContinuousIntegrationTools;
+import us.ihmc.commons.Conversions;
 import us.ihmc.commons.MathTools;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
@@ -15,11 +19,17 @@ import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.graphicsDescription.Graphics3DObject;
 import us.ihmc.graphicsDescription.appearance.AppearanceDefinition;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
+import us.ihmc.javaFXToolkit.messager.SharedMemoryJavaFXMessager;
 import us.ihmc.log.LogTools;
+import us.ihmc.messager.Messager;
+import us.ihmc.messager.SharedMemoryMessager;
 import us.ihmc.quadrupedBasics.gait.QuadrupedTimedStep;
+import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.communication.FootstepPlannerMessagerAPI;
 import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.graphSearch.graph.FootstepNode;
 import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.tools.FootstepPlannerIOTools;
 import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.tools.FootstepPlannerIOTools.FootstepPlannerUnitTestDataset;
+import us.ihmc.quadrupedFootstepPlanning.ui.ApplicationRunner;
+import us.ihmc.quadrupedFootstepPlanning.ui.FootstepPlannerUI;
 import us.ihmc.robotics.Assert;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.graphics.Graphics3DObjectTools;
@@ -45,6 +55,9 @@ public abstract class FootstepPlannerDataSetTest
    protected static boolean DEBUG = true;
    protected static boolean VERBOSE = true;
 
+   private FootstepPlannerUI ui = null;
+   private Messager messager = null;
+
    private QuadrupedBodyPathAndFootstepPlanner planner = null;
 
    protected abstract FootstepPlannerType getPlannerType();
@@ -56,13 +69,72 @@ public abstract class FootstepPlannerDataSetTest
    {
       VISUALIZE = VISUALIZE && !ContinuousIntegrationTools.isRunningOnContinuousIntegrationServer();
 
+      if (VISUALIZE)
+         messager = new SharedMemoryJavaFXMessager(FootstepPlannerMessagerAPI.API);
+      else
+         messager = new SharedMemoryMessager(FootstepPlannerMessagerAPI.API);
+
       planner = createPlanner();
+
+      try
+      {
+         messager.startMessager();
+      }
+      catch (Exception e)
+      {
+         throw new RuntimeException("Failed to start messager.");
+      }
+
+      if (VISUALIZE)
+      {
+         createUI(messager);
+      }
+
+      ThreadTools.sleep(1000);
    }
 
    @AfterEach
-   public void tearDown()
+   public void tearDown() throws Exception
    {
+      messager.closeMessager();
+      if (ui != null)
+         ui.stop();
+
+      ui = null;
+      messager = null;
       planner = null;
+   }
+
+   private void createUI(Messager messager)
+   {
+      ApplicationRunner.runApplication(new Application()
+      {
+         @Override
+         public void start(Stage stage) throws Exception
+         {
+            ui = FootstepPlannerUI.createMessagerUI(stage, (SharedMemoryJavaFXMessager) messager);
+            ui.show();
+         }
+
+         @Override
+         public void stop() throws Exception
+         {
+            ui.stop();
+            Platform.exit();
+         }
+      });
+
+      double maxWaitTime = 5.0;
+      double totalTime = 0.0;
+      long sleepDuration = 100;
+
+      while (ui == null)
+      {
+         if (totalTime > maxWaitTime)
+            throw new RuntimeException("Timed out waiting for the UI to start.");
+         ThreadTools.sleep(sleepDuration);
+         totalTime += Conversions.millisecondsToSeconds(sleepDuration);
+      }
    }
 
    @Test

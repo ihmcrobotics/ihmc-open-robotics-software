@@ -169,45 +169,45 @@
          </children>
                      </AnchorPane>
 
-                     <AnchorPane minHeight="0.0" minWidth="0.0">
-                         <children>
-                             <Text layoutX="46.0" layoutY="19.0" strokeType="OUTSIDE" strokeWidth="0.0" text="Walking Preview" textAlignment="CENTER"
-                                   wrappingWidth="214.7294921875"/>
-                             <GridPane layoutX="10.0" layoutY="24.0">
-                                 <Button mnemonicParsing="false" onAction="#requestWalkingPreview" prefWidth="130.0" text="Preview Steps" GridPane.halignment="CENTER" />
-                                 <Slider fx:id="previewSlider" blockIncrement="0.01" majorTickUnit="0.05" max="1.0" minorTickCount="4" prefHeight="38.0" prefWidth="300.0" GridPane.columnIndex="1" />
-                                 <Button fx:id="previewPlayButton" onAction="#playWalkingPreview" GridPane.columnIndex="3">
-                                     <graphic>
-                                         <ImageView fitWidth="20.0" pickOnBounds="true" preserveRatio="true">
-                                             <image>
-                                                 <Image url="/icons/play.png" />
-                                             </image>
-                                         </ImageView>
-                                     </graphic>
-                                 </Button>
-
-                                 <Button fx:id="previewPauseButton" onAction="#pauseWalkingPreview" GridPane.columnIndex="4">
-                                     <graphic>
-                                         <ImageView fitWidth="20.0" pickOnBounds="true" preserveRatio="true">
-                                             <image>
-                                                 <Image url="/icons/pause.png" />
-                                             </image>
-                                         </ImageView>
-                                     </graphic>
-                                 </Button>
-
-                                 <Button fx:id="previewStopButton" onAction="#stopWalkingPreview" GridPane.columnIndex="5">
-                                     <graphic>
-                                         <ImageView fitWidth="20.0" pickOnBounds="true" preserveRatio="true">
-                                             <image>
-                                                 <Image url="/icons/stop.png" />
-                                             </image>
-                                         </ImageView>
-                                     </graphic>
-                                 </Button>
-                             </GridPane>
-                         </children>
-                     </AnchorPane>
+                     <!--<AnchorPane minHeight="0.0" minWidth="0.0">-->
+                         <!--<children>-->
+                             <!--<Text layoutX="46.0" layoutY="19.0" strokeType="OUTSIDE" strokeWidth="0.0" text="Walking Preview" textAlignment="CENTER"-->
+                                   <!--wrappingWidth="214.7294921875"/>-->
+                             <!--<GridPane layoutX="10.0" layoutY="24.0">-->
+                                 <!--<Button mnemonicParsing="false" onAction="#requestWalkingPreview" prefWidth="130.0" text="Preview Steps" GridPane.halignment="CENTER" />-->
+                                 <!--<Slider fx:id="previewSlider" blockIncrement="0.01" majorTickUnit="0.05" max="1.0" minorTickCount="4" prefHeight="38.0" prefWidth="300.0" GridPane.columnIndex="1" />-->
+                                 <!--<Button fx:id="previewPlayButton" onAction="#playWalkingPreview" GridPane.columnIndex="3">-->
+                                     <!--<graphic>-->
+                                         <!--<ImageView fitWidth="20.0" pickOnBounds="true" preserveRatio="true">-->
+                                             <!--<image>-->
+                                                 <!--<Image url="/icons/play.png" />-->
+                                             <!--</image>-->
+                                         <!--</ImageView>-->
+                                     <!--</graphic>-->
+                                 <!--</Button>-->
+<!---->
+                                 <!--<Button fx:id="previewPauseButton" onAction="#pauseWalkingPreview" GridPane.columnIndex="4">-->
+                                     <!--<graphic>-->
+                                         <!--<ImageView fitWidth="20.0" pickOnBounds="true" preserveRatio="true">-->
+                                             <!--<image>-->
+                                                 <!--<Image url="/icons/pause.png" />-->
+                                             <!--</image>-->
+                                         <!--</ImageView>-->
+                                     <!--</graphic>-->
+                                 <!--</Button>-->
+<!---->
+                                 <!--<Button fx:id="previewStopButton" onAction="#stopWalkingPreview" GridPane.columnIndex="5">-->
+                                     <!--<graphic>-->
+                                         <!--<ImageView fitWidth="20.0" pickOnBounds="true" preserveRatio="true">-->
+                                             <!--<image>-->
+                                                 <!--<Image url="/icons/stop.png" />-->
+                                             <!--</image>-->
+                                         <!--</ImageView>-->
+                                     <!--</graphic>-->
+                                 <!--</Button>-->
+                             <!--</GridPane>-->
+                         <!--</children>-->
+                     <!--</AnchorPane>-->
                  </items>
              </SplitPane>
          </children>
