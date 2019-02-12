@@ -253,6 +253,12 @@ public abstract class FootstepPlannerDataSetTest
       planner.setGoal(goal);
       planner.setPlanarRegionsList(dataset.getPlanarRegionsList());
       planner.setTimeout(timeout);
+
+      messager.submitMessage(FootstepPlannerMessagerAPI.StartPositionTopic, new Point3D(startPose.getPosition()));
+      messager.submitMessage(FootstepPlannerMessagerAPI.GoalPositionTopic, new Point3D(goalPose.getPosition()));
+      messager.submitMessage(FootstepPlannerMessagerAPI.StartOrientationTopic, new Quaternion(goalPose.getOrientation()));
+      messager.submitMessage(FootstepPlannerMessagerAPI.GoalOrientationTopic, new Quaternion(goalPose.getOrientation()));
+      messager.submitMessage(FootstepPlannerMessagerAPI.PlanarRegionDataTopic, dataset.getPlanarRegionsList());
       //      planner.setHorizonLengthTopic(Double.MAX_VALUE);
 
       if (DEBUG)
@@ -271,7 +277,10 @@ public abstract class FootstepPlannerDataSetTest
       if (!planResult.validForExecution())
          return "Footstep plan for " + datasetName + " is invalid.";
 
+      messager.submitMessage(FootstepPlannerMessagerAPI.FootstepPlanTopic, planner.getPlan());
+
       String errorMessage = assertPlanIsValid(datasetName, planner.getPlan(), dataset.getGoal(), dataset.getGoalOrientation());
+
 
       ThreadTools.sleep(1000);
       return errorMessage;
