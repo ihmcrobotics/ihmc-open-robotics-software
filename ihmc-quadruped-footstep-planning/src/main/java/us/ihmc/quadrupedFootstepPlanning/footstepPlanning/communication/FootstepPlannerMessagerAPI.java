@@ -15,9 +15,10 @@ import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.FootstepPlannerStatus;
 import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.FootstepPlannerType;
 import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.FootstepPlanningResult;
 import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.graphSearch.parameters.FootstepPlannerParameters;
+import us.ihmc.quadrupedPlanning.QuadrupedXGaitSettingsReadOnly;
 import us.ihmc.robotics.geometry.PlanarRegion;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
-import us.ihmc.robotics.robotSide.RobotSide;
+import us.ihmc.robotics.robotSide.RobotQuadrant;
 
 import java.util.List;
 
@@ -58,7 +59,7 @@ public class FootstepPlannerMessagerAPI
    private static final TypedTopicTheme<Boolean> Enable = apiFactory.createTypedTopicTheme("Enable");
    private static final TypedTopicTheme<Boolean> Reset = apiFactory.createTypedTopicTheme("Reset");
    private static final TypedTopicTheme<Point3D> Position = apiFactory.createTypedTopicTheme("Position");
-   private static final TypedTopicTheme<RobotSide> Side = apiFactory.createTypedTopicTheme("Side");
+   private static final TypedTopicTheme<RobotQuadrant> Quadrant = apiFactory.createTypedTopicTheme("Quadrant");
    private static final TypedTopicTheme<Quaternion> Orientation = apiFactory.createTypedTopicTheme("Orientation");
    private static final TypedTopicTheme<Boolean> ComputePath = apiFactory.createTypedTopicTheme("ComputePath");
    private static final TypedTopicTheme<Boolean> AbortPlanning = apiFactory.createTypedTopicTheme("AbortPlanning");
@@ -71,6 +72,7 @@ public class FootstepPlannerMessagerAPI
    private static final TypedTopicTheme<FootstepPlanningResult> FootstepPlannerResult = apiFactory.createTypedTopicTheme("FootstepPlannerResult");
    private static final TypedTopicTheme<FootstepPlannerStatus> FootstepPlannerStatus = apiFactory.createTypedTopicTheme("FootstepPlannerStatus");
    private static final TypedTopicTheme<FootstepPlannerParameters> FootstepPlannerParameters = apiFactory.createTypedTopicTheme("FootstepPlannerParameters");
+   private static final TypedTopicTheme<QuadrupedXGaitSettingsReadOnly> XGaitSettings = apiFactory.createTypedTopicTheme("XGaitSettings");
    private static final TypedTopicTheme<FootstepDataListMessage> FootstepDataListMessage = apiFactory.createTypedTopicTheme("FootstepDataListMessage");
    private static final TypedTopicTheme<GoHomeMessage> GoHomeMessage = apiFactory.createTypedTopicTheme("GoHomeMessage");
 
@@ -103,6 +105,7 @@ public class FootstepPlannerMessagerAPI
    public static final Topic<Boolean> RequestPlannerStatistics = Root.child(Statistics).topic(Show);
    public static final Topic<Boolean> AssumeFlatGround = Root.child(FlatGround).topic(Enable);
    public static final Topic<FootstepPlannerParameters> PlannerParametersTopic = Root.child(Parameters).topic(FootstepPlannerParameters);
+   public static final Topic<QuadrupedXGaitSettingsReadOnly> XGaitSettingsTopic = Root.child(Parameters).topic(XGaitSettings);
    public static final Topic<FootstepDataListMessage> FootstepDataListTopic = Root.child(FootstepPlan).topic(FootstepDataListMessage);
    public static final Topic<GoHomeMessage> GoHomeTopic = Root.child(GoHome).topic(GoHomeMessage);
 
@@ -123,7 +126,7 @@ public class FootstepPlannerMessagerAPI
    public static final Topic<Boolean> StartOrientationEditModeEnabledTopic = Root.child(Start).child(EditMode).child(OrientationTheme).topic(Enable);
    public static final Topic<Boolean> GoalOrientationEditModeEnabledTopic = Root.child(Goal).child(EditMode).child(OrientationTheme).topic(Enable);
 
-   public static final Topic<RobotSide> InitialSupportSideTopic = Root.child(Start).topic(Side);
+   public static final Topic<RobotQuadrant> InitialSupportQuadrantTopic = Root.child(Start).topic(Quadrant);
    public static final Topic<Point3D> StartPositionTopic = Root.child(FootstepPlan).child(Start).topic(Position);
    public static final Topic<Point3D> GoalPositionTopic = Root.child(FootstepPlan).child(Goal).topic(Position);
    public static final Topic<Point3D> LowLevelGoalPositionTopic = Root.child(FootstepPlan).child(Intermediate).topic(Position);

@@ -13,13 +13,12 @@ import javafx.scene.control.SpinnerValueFactory.DoubleSpinnerValueFactory;
 import us.ihmc.commons.MathTools;
 import us.ihmc.commons.PrintTools;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
+import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
-import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.idl.IDLSequence.Float;
 import us.ihmc.idl.IDLSequence.Object;
 import us.ihmc.javaFXToolkit.messager.JavaFXMessager;
@@ -30,14 +29,17 @@ import us.ihmc.messager.Messager;
 import us.ihmc.messager.TopicListener;
 import us.ihmc.pathPlanning.visibilityGraphs.ui.properties.Point3DProperty;
 import us.ihmc.pathPlanning.visibilityGraphs.ui.properties.YawProperty;
+import us.ihmc.quadrupedBasics.referenceFrames.QuadrupedReferenceFrames;
 import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.FootstepPlan;
 import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.FootstepPlannerType;
 import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.communication.FootstepPlannerMessagerAPI;
+import us.ihmc.quadrupedRobotics.estimator.GroundPlaneEstimator;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
+import us.ihmc.robotModels.FullQuadrupedRobotModel;
 import us.ihmc.robotModels.FullRobotModelUtils;
 import us.ihmc.robotics.geometry.PlanarRegion;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
-import us.ihmc.robotics.robotSide.RobotSide;
+import us.ihmc.robotics.robotSide.RobotQuadrant;
 
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -99,7 +101,7 @@ public class MainTabController
    @FXML
    private Spinner<Double> goalZPosition;
    @FXML
-   private ComboBox<RobotSide> initialSupportSide;
+   private ComboBox<RobotQuadrant> initialSupportQuadrant;
 
    @FXML
    private Spinner<Double> startYaw;
@@ -143,6 +145,7 @@ public class MainTabController
          return;
       double swingTime = 1.2;
       double transferTime = 0.8;
+      throw new RuntimeException("This feature has not yet been implemented.");
 //      FootstepDataListMessage footstepDataListMessage = FootstepDataMessageConverter.createFootstepDataListFromPlan(footstepPlan, swingTime, transferTime,
 //                                                                                                                    ExecutionMode.OVERRIDE);
 //      messager.submitMessage(FootstepPlannerMessagerAPI.FootstepDataListTopic, footstepDataListMessage);
@@ -158,15 +161,24 @@ public class MainTabController
 
    private PlanarRegionsList buildFlatGround()
    {
-      humanoidReferenceFrames.updateFrames();
-      RigidBodyTransform transformToWorld = humanoidReferenceFrames.getMidFeetZUpFrame().getTransformToWorldFrame();
+      quadrupedReferenceFrames.updateFrames();
+
+      GroundPlaneEstimator groundPlaneEstimator = new GroundPlaneEstimator();
+      for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
+      {
+         FramePoint3D groundPlanePosition = new FramePoint3D(quadrupedReferenceFrames.getSoleFrame(robotQuadrant));
+         groundPlanePosition.changeFrame(ReferenceFrame.getWorldFrame());
+         groundPlaneEstimator.addContactPoint(groundPlanePosition);
+      }
+      groundPlaneEstimator.compute();
+
       ConvexPolygon2D convexPolygon = new ConvexPolygon2D();
       convexPolygon.addVertex(10.0, 10.0);
       convexPolygon.addVertex(-10.0, 10.0);
       convexPolygon.addVertex(-10.0, -10.0);
       convexPolygon.addVertex(10.0, -10.0);
       convexPolygon.update();
-      PlanarRegion groundPlane = new PlanarRegion(transformToWorld, convexPolygon);
+      PlanarRegion groundPlane = new PlanarRegion(groundPlaneEstimator.getGroundPlaneFrame().getTransformToWorldFrame(), convexPolygon);
       return new PlanarRegionsList(groundPlane);
    }
 
@@ -175,7 +187,7 @@ public class MainTabController
    private AtomicReference<Integer> currentPlannerRequestId;
    private AnimationTimer robotPoseHandler;
    private WalkingPreviewPlaybackManager walkingPreviewPlaybackManager;
-   private HumanoidReferenceFrames humanoidReferenceFrames;
+   private QuadrupedReferenceFrames quadrupedReferenceFrames;
    private AtomicReference<FootstepPlan> footstepPlanReference;
 
    private final Point3DProperty startPositionProperty = new Point3DProperty(this, "startPositionProperty", new Point3D());
@@ -217,8 +229,8 @@ public class MainTabController
       timeout.setValueFactory(createTimeoutValueFactory());
       horizonLength.setValueFactory(createHorizonValueFactory());
 
-      initialSupportSide.setItems(FXCollections.observableArrayList(RobotSide.values));
-      initialSupportSide.setValue(RobotSide.LEFT);
+      initialSupportQuadrant.setItems(FXCollections.observableArrayList(RobotQuadrant.values));
+      initialSupportQuadrant.setValue(RobotQuadrant.FRONT_LEFT);
    }
 
    public void bindControls()
@@ -248,7 +260,7 @@ public class MainTabController
 
       messager.bindBidirectional(FootstepPlannerMessagerAPI.AssumeFlatGround, assumeFlatGround.selectedProperty(), false);
 
-      messager.bindBidirectional(FootstepPlannerMessagerAPI.InitialSupportSideTopic, initialSupportSide.valueProperty(), true);
+      messager.bindBidirectional(FootstepPlannerMessagerAPI.InitialSupportQuadrantTopic, initialSupportQuadrant.valueProperty(), true);
 
       startPositionProperty.bindBidirectionalX(startXPosition.getValueFactory().valueProperty());
       startPositionProperty.bindBidirectionalY(startYPosition.getValueFactory().valueProperty());
@@ -293,8 +305,8 @@ public class MainTabController
 
    private void setStartFromRobot()
    {
-      humanoidReferenceFrames.updateFrames();
-      FramePose3D startPose = new FramePose3D(humanoidReferenceFrames.getSoleFrame(initialSupportSide.getValue()));
+      quadrupedReferenceFrames.updateFrames();
+      FramePose3D startPose = new FramePose3D(quadrupedReferenceFrames.getSoleFrame(initialSupportQuadrant.getValue()));
       startPose.changeFrame(ReferenceFrame.getWorldFrame());
       startPositionProperty.set(new Point3D(startPose.getPosition()));
       startRotationProperty.set(new Quaternion(startPose.getYaw(), 0.0, 0.0));
@@ -312,8 +324,9 @@ public class MainTabController
 
       double swingTime = 1.2;
       double transferTime = 1.0;
+      throw new RuntimeException("This feature is not yet implemented.");
 //      requestMessage.footsteps_.set(FootstepDataMessageConverter.createFootstepDataListFromPlan(footstepPlan, swingTime, transferTime, ExecutionMode.OVERRIDE));
-      messager.submitMessage(FootstepPlannerMessagerAPI.RequestWalkingPreview, requestMessage);
+//      messager.submitMessage(FootstepPlannerMessagerAPI.RequestWalkingPreview, requestMessage);
    }
 
    @FXML
@@ -334,12 +347,12 @@ public class MainTabController
       walkingPreviewPlaybackManager.stop();
    }
 
-   public void setFullRobotModel(FullHumanoidRobotModel fullHumanoidRobotModel)
+   public void setFullRobotModel(FullQuadrupedRobotModel fullQuadrupedRobotModel)
    {
-      this.humanoidReferenceFrames = new HumanoidReferenceFrames(fullHumanoidRobotModel);
+      this.quadrupedReferenceFrames = new QuadrupedReferenceFrames(fullQuadrupedRobotModel);
    }
 
-   public void setPreviewModel(FullHumanoidRobotModel previewRobotModel)
+   public void setPreviewModel(FullQuadrupedRobotModel previewRobotModel)
    {
       this.walkingPreviewPlaybackManager.setRobotModel(previewRobotModel);
    }
@@ -436,7 +449,7 @@ public class MainTabController
       final int playbackSpeed = 1;
 
       int playbackCounter = 0;
-      FullHumanoidRobotModel previewRobotModel = null;
+      FullQuadrupedRobotModel previewRobotModel = null;
       OneDoFJointBasics[] previewModelOneDoFJoints = null;
 
       // whether to show ghost robot
@@ -451,10 +464,10 @@ public class MainTabController
          messager.registerTopicListener(FootstepPlannerMessagerAPI.WalkingPreviewOutput, output -> start());
       }
 
-      void setRobotModel(FullHumanoidRobotModel previewRobotModel)
+      void setRobotModel(FullQuadrupedRobotModel previewRobotModel)
       {
          this.previewRobotModel = previewRobotModel;
-         previewModelOneDoFJoints = FullRobotModelUtils.getAllJointsExcludingHands(previewRobotModel);
+         previewModelOneDoFJoints = previewRobotModel.getOneDoFJoints();
       }
 
       @Override

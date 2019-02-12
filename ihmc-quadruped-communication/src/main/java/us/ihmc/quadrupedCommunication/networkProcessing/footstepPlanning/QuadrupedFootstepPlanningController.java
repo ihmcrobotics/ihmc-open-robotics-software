@@ -13,10 +13,7 @@ import us.ihmc.quadrupedCommunication.QuadrupedMessageTools;
 import us.ihmc.quadrupedCommunication.networkProcessing.OutputManager;
 import us.ihmc.quadrupedCommunication.networkProcessing.QuadrupedRobotDataReceiver;
 import us.ihmc.quadrupedCommunication.networkProcessing.QuadrupedToolboxController;
-import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.FootstepPlannerType;
-import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.QuadrupedBodyPathAndFootstepPlanner;
-import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.QuadrupedFootstepPlannerGoal;
-import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.QuadrupedFootstepPlannerStart;
+import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.*;
 import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.graphSearch.QuadrupedAStarFootstepPlanner;
 import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.graphSearch.nodeExpansion.FootstepNodeExpansion;
 import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.graphSearch.nodeExpansion.ParameterBasedNodeExpansion;
@@ -195,15 +192,15 @@ public class QuadrupedFootstepPlanningController extends QuadrupedToolboxControl
       return isDone.getBooleanValue();
    }
 
-   private static QuadrupedTimedStepListMessage convertToMessage(List<? extends QuadrupedTimedStep> steps)
+   private static QuadrupedTimedStepListMessage convertToMessage(FootstepPlan footstepPlan)
    {
-      if (steps == null)
+      if (footstepPlan == null)
          return null;
 
       List<QuadrupedTimedStepMessage> stepMessages = new ArrayList<>();
-      for (int i = 0; i < steps.size(); i++)
+      for (int i = 0; i < footstepPlan.getNumberOfSteps(); i++)
       {
-         stepMessages.add(QuadrupedMessageTools.createQuadrupedTimedStepMessage(steps.get(i)));
+         stepMessages.add(QuadrupedMessageTools.createQuadrupedTimedStepMessage(footstepPlan.getFootstep(i)));
       }
 
       return QuadrupedMessageTools.createQuadrupedTimedStepListMessage(stepMessages, false);

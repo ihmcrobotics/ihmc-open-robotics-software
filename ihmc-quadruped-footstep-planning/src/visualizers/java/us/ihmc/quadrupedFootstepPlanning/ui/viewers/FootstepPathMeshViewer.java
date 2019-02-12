@@ -1,7 +1,5 @@
 package us.ihmc.quadrupedFootstepPlanning.ui.viewers;
 
-import controller_msgs.msg.dds.FootstepNodeDataListMessage;
-import controller_msgs.msg.dds.FootstepNodeDataMessage;
 import javafx.animation.AnimationTimer;
 import javafx.scene.Group;
 import javafx.scene.Node;
@@ -10,21 +8,15 @@ import javafx.scene.paint.Material;
 import javafx.scene.shape.Mesh;
 import javafx.scene.shape.MeshView;
 import us.ihmc.commons.thread.ThreadTools;
-import us.ihmc.euclid.geometry.ConvexPolygon2D;
-import us.ihmc.euclid.referenceFrame.FramePose3D;
-import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.euclid.transform.RigidBodyTransform;
-import us.ihmc.euclid.tuple2D.Point2D;
-import us.ihmc.idl.IDLSequence;
+import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.jMonkeyEngineToolkit.tralala.Pair;
 import us.ihmc.javaFXToolkit.shapes.JavaFXMultiColorMeshBuilder;
 import us.ihmc.javaFXToolkit.shapes.TextureColorAdaptivePalette;
 import us.ihmc.messager.Messager;
+import us.ihmc.quadrupedBasics.gait.QuadrupedTimedStep;
 import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.FootstepPlan;
 import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.communication.FootstepPlannerMessagerAPI;
-import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.graphSearch.graph.FootstepNode;
-import us.ihmc.robotics.robotSide.RobotSide;
-import us.ihmc.robotics.robotSide.SideDependentList;
+import us.ihmc.robotics.robotSide.QuadrantDependentList;
 
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -34,7 +26,6 @@ import java.util.concurrent.atomic.AtomicReference;
 
 public class FootstepPathMeshViewer extends AnimationTimer
 {
-   private static final ConvexPolygon2D defaultFootPolygon = PlannerTools.createDefaultFootPolygon();
    private final Group root = new Group();
    private final ExecutorService executorService = Executors.newSingleThreadExecutor(ThreadTools.getNamedThreadFactory(getClass().getSimpleName()));
 
@@ -48,8 +39,8 @@ public class FootstepPathMeshViewer extends AnimationTimer
    private final TextureColorAdaptivePalette palette = new TextureColorAdaptivePalette(1024, false);
    private final JavaFXMultiColorMeshBuilder meshBuilder = new JavaFXMultiColorMeshBuilder(palette);
 
-   private static final SideDependentList<Color> solutionFootstepColors = new SideDependentList<>(Color.GREEN, Color.RED);
-   private static final SideDependentList<Color> intermediateFootstepColors = new SideDependentList<>(Color.rgb(160, 160, 160), Color.rgb(160, 160, 160));
+   private static final QuadrantDependentList<Color> solutionFootstepColors = new QuadrantDependentList<>(Color.GREEN, Color.RED, Color.DARKGREEN, Color.DARKRED);
+   private static final QuadrantDependentList<Color> intermediateFootstepColors = new QuadrantDependentList<>(Color.rgb(160, 160, 160), Color.rgb(160, 160, 160), Color.rgb(160, 160, 160), Color.rgb(160, 160, 160));
 
    public FootstepPathMeshViewer(Messager messager)
    {
@@ -58,10 +49,10 @@ public class FootstepPathMeshViewer extends AnimationTimer
          processFootstepPath(footstepPlan);
       }));
 
-      messager.registerTopicListener(FootstepPlannerMessagerAPI.NodeDataTopic, nodeData -> executorService.submit(() -> {
-         solutionWasReceived.set(false);
-         processLowestCostNodeList(nodeData);
-      }));
+//      messager.registerTopicListener(FootstepPlannerMessagerAPI.NodeDataTopic, nodeData -> executorService.submit(() -> {
+//         solutionWasReceived.set(false);
+//         processLowestCostNodeList(nodeData);
+//      }));
 
       messager.registerTopicListener(FootstepPlannerMessagerAPI.ComputePathTopic, data -> reset.set(true));
 
@@ -69,6 +60,7 @@ public class FootstepPathMeshViewer extends AnimationTimer
       showIntermediatePlan = messager.createInput(FootstepPlannerMessagerAPI.ShowNodeDataTopic, true);
    }
 
+   /*
    private void processLowestCostNodeList(FootstepNodeDataListMessage message)
    {
       if (message.getIsFootstepGraph())
@@ -84,6 +76,7 @@ public class FootstepPathMeshViewer extends AnimationTimer
       processFootstepPath(footstepPlan);
    }
 
+
    private static void addNodeDataToFootstepPlan(FootstepPlan footstepPlan, FootstepNodeDataMessage nodeData)
    {
       RobotSide robotSide = RobotSide.fromByte(nodeData.getRobotSide());
@@ -98,38 +91,25 @@ public class FootstepPathMeshViewer extends AnimationTimer
       snapTransform.transform(footstepPose);
       footstepPlan.addFootstep(robotSide, new FramePose3D(ReferenceFrame.getWorldFrame(), footstepPose));
    }
+      */
+
 
    private synchronized void processFootstepPath(FootstepPlan plan)
    {
       meshBuilder.clear();
-      SideDependentList<Color> colors = solutionWasReceived.get() ? solutionFootstepColors : intermediateFootstepColors;
+      QuadrantDependentList<Color> colors = solutionWasReceived.get() ? solutionFootstepColors : intermediateFootstepColors;
 
-      FramePose3D footPose = new FramePose3D();
-      RigidBodyTransform transformToWorld = new RigidBodyTransform();
-      ConvexPolygon2D foothold = new ConvexPolygon2D();
+      FramePoint3D footPosition = new FramePoint3D();
 
       for (int i = 0; i < plan.getNumberOfSteps(); i++)
       {
-         SimpleFootstep footstep = plan.getFootstep(i);
-         Color regionColor = colors.get(footstep.getRobotSide());
+         QuadrupedTimedStep footstep = plan.getFootstep(i);
+         Color regionColor = colors.get(footstep.getRobotQuadrant());
 
-         footstep.getSoleFramePose(footPose);
-         footPose.get(transformToWorld);
-         transformToWorld.appendTranslation(0.0, 0.0, 0.01);
+         footstep.getGoalPosition(footPosition);
+         footPosition.addZ(0.01);
 
-         if (footstep.hasFoothold())
-            footstep.getFoothold(foothold);
-         else
-            foothold.set(defaultFootPolygon);
-
-         Point2D[] vertices = new Point2D[foothold.getNumberOfVertices()];
-         for (int j = 0; j < vertices.length; j++)
-         {
-            vertices[j] = new Point2D(foothold.getVertex(j));
-         }
-
-         meshBuilder.addMultiLine(transformToWorld, vertices, 0.01, regionColor, true);
-         meshBuilder.addPolygon(transformToWorld, foothold, regionColor);
+         meshBuilder.addSphere(0.05, footPosition, regionColor);
       }
 
       meshReference.set(new Pair<>(meshBuilder.generateMesh(), meshBuilder.generateMaterial()));

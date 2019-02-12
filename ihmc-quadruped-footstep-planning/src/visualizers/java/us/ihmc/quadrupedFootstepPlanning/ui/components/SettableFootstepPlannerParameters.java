@@ -4,7 +4,6 @@ import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.graphSearch.parameters
 
 public class SettableFootstepPlannerParameters implements FootstepPlannerParameters
 {
-
    private double maximumStepReach;
    private double maximumStepWidth;
    private double maximumStepCycleDistance;
