@@ -1,6 +1,10 @@
 package us.ihmc.robotics.geometry;
 
-import static us.ihmc.robotics.Assert.*;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static us.ihmc.robotics.Assert.assertEquals;
+import static us.ihmc.robotics.Assert.assertFalse;
+import static us.ihmc.robotics.Assert.assertNotNull;
+import static us.ihmc.robotics.Assert.fail;
 
 import java.awt.Color;
 import java.util.ArrayList;
@@ -8,14 +12,11 @@ import java.util.List;
 import java.util.Random;
 
 import org.junit.jupiter.api.AfterEach;
-import us.ihmc.robotics.Assert;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 import us.ihmc.commons.MutationTestFacilitator;
 import us.ihmc.commons.PrintTools;
-import org.junit.jupiter.api.Tag;
-import org.junit.jupiter.api.Disabled;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.geometry.Line2D;
 import us.ihmc.euclid.geometry.LineSegment2D;
@@ -32,6 +33,7 @@ import us.ihmc.euclid.referenceFrame.tools.ReferenceFrameTools;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DBasics;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
+import us.ihmc.robotics.Assert;
 
 public class ConvexPolygonToolsTest
 {
@@ -244,7 +246,7 @@ public class ConvexPolygonToolsTest
          convexPolygonTools.combineDisjointPolygons(polygon1, polygon2, actualPolygon, connectingEdge1, connectingEdge2);
 
          ConvexPolygon2D expectedPolygon = new ConvexPolygon2D(polygon1, polygon2);
-         assertTrue("Iteration: " + i + ", expected\n" + expectedPolygon + "\nactual\n" + actualPolygon, expectedPolygon.epsilonEquals(actualPolygon, epsilon));
+         assertTrue(expectedPolygon.epsilonEquals(actualPolygon, epsilon), "Iteration: " + i + ", expected\n" + expectedPolygon + "\nactual\n" + actualPolygon);
       }
    }
 
@@ -252,15 +254,15 @@ public class ConvexPolygonToolsTest
    public void testLimitVerticesConservative()
    {
       Random random = new Random(123821L);
-      int tests = 100;
+      int tests = 1000;
 
-      //      int increase = 0;
-      //      int decrease = 0;
+//      int increase = 0;
+//      int decrease = 0;
 
       for (int test = 0; test < tests; test++)
       {
          FrameConvexPolygon2D polygon = new FrameConvexPolygon2D();
-         int n = random.nextInt(30) + 1;
+         int n = random.nextInt(29) + 2; // I don't think we should consider the case with 1 vertex.
          for (int i = 0; i < n; i++)
          {
             double x = random.nextDouble();
@@ -272,8 +274,10 @@ public class ConvexPolygonToolsTest
          int desiredNumberOfVertices = random.nextInt(10);
          FrameConvexPolygon2D originalPolygon = new FrameConvexPolygon2D(polygon);
 
-         //         if (desiredNumberOfVertices > polygon.getNumberOfVertices()) increase++;
-         //         if (desiredNumberOfVertices < polygon.getNumberOfVertices()) decrease++;
+//         if (desiredNumberOfVertices > polygon.getNumberOfVertices())
+//            increase++;
+//         if (desiredNumberOfVertices < polygon.getNumberOfVertices())
+//            decrease++;
 
          ConvexPolygonTools.limitVerticesConservative(polygon, desiredNumberOfVertices);
 
@@ -303,11 +307,12 @@ public class ConvexPolygonToolsTest
          // check if the number of vertices is correct
          Assert.assertTrue(desiredNumberOfVertices >= polygon.getNumberOfVertices());
          // check if the new polygon is contained in the old one
-         Assert.assertTrue(ConvexPolygon2dCalculator.isPolygonInside(polygon, 10E-10, originalPolygon));
+         for (Point2DReadOnly vertex : polygon.getPolygonVerticesView())
+            assertTrue(originalPolygon.distance(vertex) <= 4.0e-7, "Expecting less than 3.0e-7: " + originalPolygon.distance(vertex));
       }
 
-      //      System.out.println("Tested " + increase + " point increases");
-      //      System.out.println("Tested " + decrease + " point decreases");
+//      System.out.println("Tested " + increase + " point increases");
+//      System.out.println("Tested " + decrease + " point decreases");
    }
 
    @Test
@@ -928,7 +933,7 @@ public class ConvexPolygonToolsTest
       tools.computeMinimumDistancePoints(polygonOne, polygonTwo, closestPointOnOne, closestPointOnTwo);
 
       assertTrue(closestPointOnOne.epsilonEquals(new Point2D(1.0, 1.0), epsilon));
-      assertTrue("closestPointOnTwo = " + closestPointOnTwo, closestPointOnTwo.epsilonEquals(new Point2D(1.5, 1.5), epsilon));
+      assertTrue(closestPointOnTwo.epsilonEquals(new Point2D(1.5, 1.5), epsilon), "closestPointOnTwo = " + closestPointOnTwo);
    }
 
    @Disabled
@@ -1189,13 +1194,13 @@ public class ConvexPolygonToolsTest
 
                if (inside1 && inside2)
                {
-                  assertTrue("inside1 and inside2, but not inside intersection", insideIntersection);
+                  assertTrue(insideIntersection, "inside1 and inside2, but not inside intersection");
                }
 
                if (insideIntersection)
                {
-                  assertTrue("insideIntersection, but not inside1", inside1);
-                  assertTrue("insideIntersection, but not inside2", inside2);
+                  assertTrue(inside1, "insideIntersection, but not inside1");
+                  assertTrue(inside2, "insideIntersection, but not inside2");
                }
             }
          }
