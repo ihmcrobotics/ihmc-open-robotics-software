@@ -56,7 +56,7 @@ import us.ihmc.valkyrie.parameters.ValkyrieJointMap;
 import us.ihmc.valkyrie.parameters.ValkyrieSensorInformation;
 import us.ihmc.wholeBodyController.DRCControllerThread;
 import us.ihmc.wholeBodyController.DRCOutputProcessor;
-import us.ihmc.wholeBodyController.DRCOutputProcessorWithTorqueOffsets;
+import us.ihmc.wholeBodyController.DRCOutputProcessorWithStateChangeSmoother;
 import us.ihmc.wholeBodyController.RobotContactPointParameters;
 import us.ihmc.wholeBodyController.concurrent.MultiThreadedRealTimeRobotController;
 import us.ihmc.wholeBodyController.concurrent.MultiThreadedRobotControlElementCoordinator;
@@ -120,7 +120,8 @@ public class ValkyrieRosControlController extends IHMCWholeRobotControlJavaBridg
       allValkyrieJoints = allJointsList.toArray(new String[0]);
    }
 
-   public static final boolean USE_YOVARIABLE_DESIREDS = true;
+   public static final boolean USE_STATE_CHANGE_TORQUE_SMOOTHER_PROCESSOR = false;
+   public static final boolean USE_YOVARIABLE_DESIREDS = false;
    public static final boolean USE_USB_MICROSTRAIN_IMUS = false;
    public static final boolean USE_SWITCHABLE_FILTER_HOLDER_FOR_NON_USB_IMUS = false;
    public static final String[] readIMUs = USE_USB_MICROSTRAIN_IMUS ? new String[0] : new String[ValkyrieSensorInformation.imuSensorsToUse.length];
@@ -145,9 +146,6 @@ public class ValkyrieRosControlController extends IHMCWholeRobotControlJavaBridg
    public static final String VALKYRIE_IHMC_ROS_CONTROLLER_NODE_NAME = "valkyrie_ihmc_controller";
 
    private static final WalkingProvider walkingProvider = WalkingProvider.DATA_PRODUCER;
-
-   public static final boolean INTEGRATE_ACCELERATIONS_AND_CONTROL_VELOCITIES = true;
-   private static final boolean DO_SLOW_INTEGRATION_FOR_TORQUE_OFFSET = true;
 
    private MultiThreadedRobotControlElementCoordinator robotController;
 
@@ -357,13 +355,9 @@ public class ValkyrieRosControlController extends IHMCWholeRobotControlJavaBridg
        */
       ValkyrieRosControlLowLevelOutputWriter valkyrieLowLevelOutputWriter = new ValkyrieRosControlLowLevelOutputWriter();
 
-      DRCOutputProcessor drcOutputWriter = null;
-      if (DO_SLOW_INTEGRATION_FOR_TORQUE_OFFSET)
-      {
-         double controllerDT = robotModel.getControllerDT();
-         DRCOutputProcessorWithTorqueOffsets drcOutputWriterWithTorqueOffsets = new DRCOutputProcessorWithTorqueOffsets(drcOutputWriter, controllerDT);
-         drcOutputWriter = drcOutputWriterWithTorqueOffsets;
-      }
+      DRCOutputProcessor drcOutputProcessor = null;
+      if (USE_STATE_CHANGE_TORQUE_SMOOTHER_PROCESSOR)
+         drcOutputProcessor = new DRCOutputProcessorWithStateChangeSmoother(drcOutputProcessor);
 
       PelvisPoseCorrectionCommunicatorInterface externalPelvisPoseSubscriber = null;
       externalPelvisPoseSubscriber = new PelvisPoseCorrectionCommunicator(null, null);
@@ -388,7 +382,7 @@ public class ValkyrieRosControlController extends IHMCWholeRobotControlJavaBridg
       }
 
       DRCControllerThread controllerThread = new DRCControllerThread(robotModel.getSimpleRobotName(), robotModel, sensorInformation, controllerFactory,
-                                                                     threadDataSynchronizer, drcOutputWriter, controllerRealtimeRos2Node, yoVariableServer,
+                                                                     threadDataSynchronizer, drcOutputProcessor, controllerRealtimeRos2Node, yoVariableServer,
                                                                      gravity, estimatorDT);
 
       ValkyrieCalibrationControllerState calibrationControllerState = calibrationStateFactory.getCalibrationControllerState();
