@@ -89,12 +89,18 @@ public class NodeOccupancyMapSequenceRenderer extends AnimationTimer
       invalidChildNodeRenderer.reset();
       parentMapRenderer.reset();
 
+      if (nodesBeingExpandedBuffer.size() < 1)
+         return;
+
       Collection<SimpleFootstepNode> nodesBeingExpanded = nodesBeingExpandedBuffer.get(frameIndex);
       Color parentNodeColor = this.parentNodeColor;
-      for (SimpleFootstepNode node : nodesBeingExpanded)
+      if (nodesBeingExpanded != null && !nodesBeingExpanded.isEmpty())
       {
-         parentNodeColor = FootstepPathMeshViewer.solutionFootstepColors.get(node.getMovingQuadrant());
-         break;
+         for (SimpleFootstepNode node : nodesBeingExpanded)
+         {
+            parentNodeColor = FootstepPathMeshViewer.solutionFootstepColors.get(node.getMovingQuadrant());
+            break;
+         }
       }
 
       validChildNodeRenderer.processNodesToRenderOnThread(validChildNodesBuffer.get(frameIndex), validChildNodeColor);
