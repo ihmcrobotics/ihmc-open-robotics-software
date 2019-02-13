@@ -9,7 +9,7 @@ import java.util.List;
 import static java.nio.charset.StandardCharsets.UTF_8;
 
 /**
- * When adding/removing datasets, run this and copy output to dataSetList.txt
+ * When adding/removing datasets, run this and copy output to DataSetList.txt
  */
 public class DataSetListUpdate
 {
