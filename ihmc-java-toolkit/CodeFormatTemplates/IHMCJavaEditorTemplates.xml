@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="UTF-8" standalone="no"?><templates><template autoinsert="false" context="java-members" deleted="false" description="[IHMC] Continuous IntegrationTest" enabled="true" id="org.eclipse.jdt.us.ihmc.quadrupedFootstepPlanning.ui.templates.test_junit4" name="test">@ContinuousIntegrationTest(estimatedDuration = 0.1)
+<?xml version="1.0" encoding="UTF-8" standalone="no"?><templates><template autoinsert="false" context="java-members" deleted="false" description="[IHMC] Continuous IntegrationTest" enabled="true" id="org.eclipse.jdt.ui.templates.test_junit4" name="test">@ContinuousIntegrationTest(estimatedDuration = 0.1)
 @${testType:newType(org.junit.Test)}(timeout = 30000)
 public void test${Name}()
 {
