@@ -120,7 +120,7 @@ public class ValkyrieRosControlController extends IHMCWholeRobotControlJavaBridg
       allValkyrieJoints = allJointsList.toArray(new String[0]);
    }
 
-   public static final boolean USE_STATE_CHANGE_TORQUE_SMOOTHER_PROCESSOR = false;
+   public static final boolean USE_STATE_CHANGE_TORQUE_SMOOTHER_PROCESSOR = true;
    public static final boolean USE_YOVARIABLE_DESIREDS = false;
    public static final boolean USE_USB_MICROSTRAIN_IMUS = false;
    public static final boolean USE_SWITCHABLE_FILTER_HOLDER_FOR_NON_USB_IMUS = false;
