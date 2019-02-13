@@ -22,6 +22,7 @@ import us.ihmc.avatar.networkProcessor.kinematicsToolboxModule.KinematicsToolbox
 import us.ihmc.avatar.networkProcessor.kinematicsToolboxModule.KinematicsToolboxHelper;
 import us.ihmc.avatar.networkProcessor.kinematicsToolboxModule.KinematicsToolboxModule;
 import us.ihmc.avatar.networkProcessor.modules.ToolboxController;
+import us.ihmc.commons.PrintTools;
 import us.ihmc.communication.controllerAPI.CommandInputManager;
 import us.ihmc.communication.controllerAPI.StatusMessageOutputManager;
 import us.ihmc.communication.packets.MessageTools;
@@ -185,6 +186,9 @@ public class KinematicsPlanningToolboxController extends ToolboxController
       if (!updateToolboxConfiguration())
          return false;
 
+      if (!updateIKMessages())
+         return false;
+
       ikController.updateFootSupportState(true, true);
       boolean initialized = ikController.initialize();
       if (!initialized)
@@ -205,14 +209,70 @@ public class KinematicsPlanningToolboxController extends ToolboxController
       return true;
    }
 
+   private boolean updateIKMessages()
+   {
+      int numberOfKeyFrames = keyFrameTimes.size();
+      int numberOfInterpolatedPoints;
+      if (numberOfKeyFrames == 1)
+         numberOfInterpolatedPoints = 2;
+      else if (numberOfKeyFrames == 2)
+         numberOfInterpolatedPoints = 1;
+      else
+      {
+         PrintTools.info("desired way points are more than 2.");
+         return true;
+      }
+      PrintTools.info("numberOfInterpolatedPoints " + numberOfInterpolatedPoints);
+
+      HumanoidReferenceFrames referenceFrames = new HumanoidReferenceFrames(getDesiredFullRobotModel());
+      referenceFrames.updateFrames();
+      ReferenceFrame worldFrame = referenceFrames.getWorldFrame();
+
+      FramePose3D currentFramePose = new FramePose3D(worldFrame);
+      currentFramePose.set(ikRigidBodies.get(0).getBodyFixedFrame().getTransformToDesiredFrame(worldFrame));
+
+      TDoubleArrayList keyFrameTimesBuffer = new TDoubleArrayList();
+      keyFrameTimesBuffer.addAll(keyFrameTimes);
+      keyFrameTimes.clear();
+      double t1 = 0.0;
+      for (int i = 0; i < numberOfKeyFrames; i++)
+      {
+         for (int j = 0; j < numberOfInterpolatedPoints; j++)
+         {
+            double alpha = ((double) j + 1) / (numberOfInterpolatedPoints + 1);
+            double t2 = keyFrameTimesBuffer.get(i);
+            double keyFrameTime = EuclidCoreTools.interpolate(t1, t2, alpha); 
+            
+            keyFrameTimes.add(keyFrameTime);
+         }
+         t1 = keyFrameTimesBuffer.get(i);
+         keyFrameTimes.add(t1);
+      }
+
+      for (int i = 0; i < getNumberOfKeyFrames(); i++)
+      {
+         PrintTools.info("" + keyFrameTimes.get(i));
+      }
+
+      return false;
+   }
+
    /*
     * Minimum value of numberOfWayPoints is 1. The size of the list which is
     * return type of this method is equal with numberOfWayPoints.
     */
-   private List<FramePose3D> createFramePoses(Pose3D initialPoint, Pose3D desiredPoint, int numberOfWayPoints)
+   private List<Pose3D> createWayPointPoses(Pose3D initialPoint, Pose3D desiredPoint, int numberOfInterpolatedWayPoints)
    {
+      List<Pose3D> wayPointPoses = new ArrayList<Pose3D>();
+      for (int i = 0; i < numberOfInterpolatedWayPoints; i++)
+      {
+         double alpha = (i + 1) / numberOfInterpolatedWayPoints;
+         Pose3D wayPointPose = new Pose3D(initialPoint);
+         initialPoint.interpolate(desiredPoint, alpha);
+         wayPointPoses.add(wayPointPose);
+      }
 
-      return null;
+      return wayPointPoses;
    }
 
    private boolean updateToolboxConfiguration()
@@ -236,12 +296,9 @@ public class KinematicsPlanningToolboxController extends ToolboxController
          RigidBodyBasics endEffector = command.getEndEffector();
          ikRigidBodies.add(endEffector);
 
-         // TODO : print current rigid body pose.
-         FramePose3D currentFramePose = new FramePose3D(worldFrame);
-         currentFramePose.set(endEffector.getBodyFixedFrame().getTransformToDesiredFrame(worldFrame));
-
          List<KinematicsToolboxRigidBodyMessage> rigidBodyMessages = new ArrayList<KinematicsToolboxRigidBodyMessage>();
-         for (int j = 0; j < command.getNumberOfWayPoints(); j++)
+         int numberOfWayPoints = command.getNumberOfWayPoints();
+         for (int j = 0; j < numberOfWayPoints; j++)
          {
             // when the number of way point is less than 3, create and add mid point before the message for each way point is created.
             Pose3D wayPoint = command.getWayPoint(j);
@@ -265,7 +322,7 @@ public class KinematicsPlanningToolboxController extends ToolboxController
 
          if (i == 0) // save key frame times for the first rigid body message.
          {
-            for (int j = 0; j < command.getNumberOfWayPoints(); j++)
+            for (int j = 0; j < numberOfWayPoints; j++)
                keyFrameTimes.add(command.getWayPointTime(j));
          }
          else if (!checkKeyFrameTimes(command.getWayPointTimes()))
