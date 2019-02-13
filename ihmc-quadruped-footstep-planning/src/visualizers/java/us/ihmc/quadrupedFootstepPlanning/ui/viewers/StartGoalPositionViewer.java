@@ -8,14 +8,18 @@ import javafx.scene.paint.Color;
 import javafx.scene.paint.PhongMaterial;
 import javafx.scene.shape.Sphere;
 import us.ihmc.euclid.orientation.interfaces.Orientation3DReadOnly;
+import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple2D.Vector2D;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.euclid.tuple4D.Quaternion;
+import us.ihmc.euclid.tuple4D.interfaces.QuaternionReadOnly;
 import us.ihmc.messager.Messager;
 import us.ihmc.messager.MessagerAPIFactory.Topic;
 import us.ihmc.quadrupedPlanning.QuadrupedXGaitSettings;
 import us.ihmc.quadrupedPlanning.QuadrupedXGaitSettingsReadOnly;
+import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 import us.ihmc.robotics.robotSide.QuadrantDependentList;
 import us.ihmc.robotics.robotSide.RobotQuadrant;
 
@@ -195,35 +199,51 @@ public class StartGoalPositionViewer extends AnimationTimer
       }
    }
 
-   private void setStartPosition(Point3DReadOnly position, Orientation3DReadOnly orientation)
+   private void setStartPosition(Point3DReadOnly position, QuaternionReadOnly orientation)
    {
       startSphere.setTranslateX(position.getX());
       startSphere.setTranslateY(position.getY());
       startSphere.setTranslateZ(position.getZ());
 
-      Vector2D offsetVector = new Vector2D(0.5 * xGaitSettingsReference.get().getStanceLength(), 0.5 * xGaitSettingsReference.get().getStanceWidth());
-      orientation.transform(offsetVector);
+      PoseReferenceFrame xGaitFrame = new PoseReferenceFrame("xGaitFrame", ReferenceFrame.getWorldFrame());
+      xGaitFrame.setPoseAndUpdate(position, orientation);
+
+      double xOffset = 0.5 * xGaitSettingsReference.get().getStanceLength();
+      double yOffset = 0.5 * xGaitSettingsReference.get().getStanceWidth();
+
       for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
       {
-         startFeetSpheres.get(robotQuadrant).setTranslateX(position.getX() + robotQuadrant.getEnd().negateIfHindEnd(offsetVector.getX()));
-         startFeetSpheres.get(robotQuadrant).setTranslateY(position.getY() + robotQuadrant.getSide().negateIfRightSide(offsetVector.getY()));
-         startFeetSpheres.get(robotQuadrant).setTranslateZ(position.getZ());
+         FramePoint3D footPosition = new FramePoint3D(xGaitFrame, robotQuadrant.getEnd().negateIfHindEnd(xOffset),
+                                                      robotQuadrant.getSide().negateIfRightSide(yOffset), 0.0);
+         footPosition.changeFrame(ReferenceFrame.getWorldFrame());
+
+         startFeetSpheres.get(robotQuadrant).setTranslateX(footPosition.getX());
+         startFeetSpheres.get(robotQuadrant).setTranslateY(footPosition.getY());
+         startFeetSpheres.get(robotQuadrant).setTranslateZ(footPosition.getZ());
       }
    }
 
-   private void setGoalPosition(Point3DReadOnly position, Orientation3DReadOnly orientation)
+   private void setGoalPosition(Point3DReadOnly position, QuaternionReadOnly orientation)
    {
       goalSphere.setTranslateX(position.getX());
       goalSphere.setTranslateY(position.getY());
       goalSphere.setTranslateZ(position.getZ());
 
-      Vector2D offsetVector = new Vector2D(0.5 * xGaitSettingsReference.get().getStanceLength(), 0.5 * xGaitSettingsReference.get().getStanceWidth());
-      orientation.transform(offsetVector);
+      PoseReferenceFrame xGaitFrame = new PoseReferenceFrame("xGaitFrame", ReferenceFrame.getWorldFrame());
+      xGaitFrame.setPoseAndUpdate(position, orientation);
+
+      double xOffset = 0.5 * xGaitSettingsReference.get().getStanceLength();
+      double yOffset = 0.5 * xGaitSettingsReference.get().getStanceWidth();
+
       for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
       {
-         goalFeetSpheres.get(robotQuadrant).setTranslateX(position.getX() + robotQuadrant.getEnd().negateIfHindEnd(offsetVector.getX()));
-         goalFeetSpheres.get(robotQuadrant).setTranslateY(position.getY() + robotQuadrant.getSide().negateIfRightSide(offsetVector.getY()));
-         goalFeetSpheres.get(robotQuadrant).setTranslateZ(position.getZ());
+         FramePoint3D footPosition = new FramePoint3D(xGaitFrame, robotQuadrant.getEnd().negateIfHindEnd(xOffset),
+                                                      robotQuadrant.getSide().negateIfRightSide(yOffset), 0.0);
+         footPosition.changeFrame(ReferenceFrame.getWorldFrame());
+
+         goalFeetSpheres.get(robotQuadrant).setTranslateX(footPosition.getX());
+         goalFeetSpheres.get(robotQuadrant).setTranslateY(footPosition.getY());
+         goalFeetSpheres.get(robotQuadrant).setTranslateZ(footPosition.getZ());
       }
    }
 
