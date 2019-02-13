@@ -1,25 +1,21 @@
 package us.ihmc.simulationConstructionSetTools.bambooTools;
 
-import java.io.File;
-import java.io.FileFilter;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.OutputStreamWriter;
-import java.io.PrintStream;
+import org.apache.commons.lang3.SystemUtils;
+import us.ihmc.commons.FormattingTools;
+import us.ihmc.commons.exception.DefaultExceptionHandler;
+import us.ihmc.commons.exception.ExceptionHandler;
+import us.ihmc.commons.nio.FileTools;
+import us.ihmc.commons.nio.PathTools;
+import us.ihmc.log.LogTools;
+import us.ihmc.simulationConstructionSetTools.util.gui.GUIMessageFrame;
+import us.ihmc.simulationconstructionset.SimulationConstructionSet;
+
+import java.io.*;
 import java.net.URL;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.Comparator;
-
-import org.apache.commons.lang3.SystemUtils;
-
-import us.ihmc.commons.PrintTools;
-import us.ihmc.commons.nio.PathTools;
-import us.ihmc.simulationconstructionset.SimulationConstructionSet;
-import us.ihmc.simulationConstructionSetTools.util.gui.GUIMessageFrame;
-import us.ihmc.commons.FormattingTools;
 
 public class BambooTools
 {
@@ -42,7 +38,7 @@ public class BambooTools
 
    /**
     * If you set {@code upload.videos} to {@code true} you must also set the system properties
-    * defined in {@link YouTubeCredentials}.
+    * defined in YouTubeCredentials.
     */
    public static boolean doVideoUpload()
    {
@@ -74,6 +70,7 @@ public class BambooTools
    public static void createVideoWithDateTimeClassMethodAndShareOnSharedDriveIfAvailable(String simplifiedRobotModelName, SimulationConstructionSet scs,
          int additionalStackDepthForRelevantCallingMethod)
    {
+      LogTools.info("Creating video for {}", simplifiedRobotModelName);
       //Get file name from stack trace
       String classAndMethodName = getClassAndMethodName(additionalStackDepthForRelevantCallingMethod + 1);
       String fileName = simplifiedRobotModelName + "_" + classAndMethodName;
@@ -95,7 +92,7 @@ public class BambooTools
     */
    public static void createVideoWithDateTimeAndStoreInDefaultDirectory(SimulationConstructionSet scs, String videoName)
    {
-      PrintTools.info("Trying to create " +  videoName + " video!");
+      LogTools.info("Trying to create video: {}", videoName);
       
       try
       {
@@ -152,7 +149,7 @@ public class BambooTools
      
       String videoFilename = dateTimeString + "_" + videoName + ".mp4";
 
-      PrintTools.debug(videoFilename);
+      LogTools.debug(videoFilename);
       
       File videoFile = scs.createVideo(directoryName + videoFilename);
 
@@ -168,7 +165,7 @@ public class BambooTools
          }
          catch (Exception e)
          {
-            System.err.println("Error in writing data file in BambooTools.createVideoAndDataWithDateTimeClassMethod()");
+            LogTools.error("Error in writing data file in BambooTools.createVideoAndDataWithDateTimeClassMethod()");
             e.printStackTrace();
          }
       }
@@ -203,16 +200,26 @@ public class BambooTools
 
    private static String determineEraseableBambooDataAndVideosRootDirectoryToUse()
    {
-      Path path = Paths.get(System.getProperty("create.videos.dir"));
-
-      PrintTools.info("Bamboo videos path from create.videos.dir: " + path.toString());
-
       String rootDirectoryToTry = System.getProperty("create.videos.dir");
+      Path path = Paths.get(rootDirectoryToTry);
+
+      LogTools.info("Bamboo videos path from create.videos.dir: " + path.toString());
+
       if(rootDirectoryToTry != null)
       {
          if(!rootDirectoryToTry.endsWith("/") && !rootDirectoryToTry.endsWith("\\"))
          {
             rootDirectoryToTry += "/";
+         }
+
+         try
+         {
+            FileTools.ensureDirectoryExists(Paths.get(rootDirectoryToTry));
+            return rootDirectoryToTry;
+         }
+         catch (Exception e)
+         {
+            LogTools.error(e.getMessage());
          }
       }
       
@@ -228,24 +235,30 @@ public class BambooTools
          }
       }
 
-      if (new File(rootDirectoryToTry).exists())
+      try
       {
+         FileTools.ensureDirectoryExists(Paths.get(rootDirectoryToTry));
          return rootDirectoryToTry;
       }
-      else if (doVideoUpload())
+      catch (Exception e)
+      {
+         LogTools.error(e.getMessage());
+      }
+
+      if (doVideoUpload())
       {
          // if we're going to upload the videos, we can just use the tmp dir if
          // the other specified directories don't exist
-         System.out.println("Saving videos to tmp dir before uploading..");
+         LogTools.info("Saving videos to tmp dir before uploading..");
 
          Path temporaryDirectoryPath = PathTools.systemTemporaryDirectory();
          File videoDir = temporaryDirectoryPath.resolve("atlas-videos").toFile();
          if (videoDir.exists() || videoDir.mkdirs())
          {
-            System.out.println("Using " + videoDir.getAbsolutePath());
+            LogTools.info("Using " + videoDir.getAbsolutePath());
             return videoDir.getAbsolutePath();
          }
-         System.err.println("Couldn't create directory: " + videoDir.getAbsolutePath());
+         LogTools.error("Couldn't create directory: " + videoDir.getAbsolutePath());
       }
 
       return determineBambooDataAndVideosRootDirectoryToUse();
@@ -262,7 +275,7 @@ public class BambooTools
    {
       String rootDirectory = determineEraseableBambooDataAndVideosRootDirectoryToUse();
 
-      PrintTools.info(rootDirectory);
+      LogTools.info(rootDirectory);
 
       return getDirectoryWithMostRecentBambooDataAndVideos(Paths.get(rootDirectory));
    }
@@ -327,7 +340,7 @@ public class BambooTools
       String artifactsOut = System.getProperty("artifacts.out");
       if (artifactsOut == null)
       {
-         System.err.println("No artifacts.out system property set, not logging video url.");
+         LogTools.error("No artifacts.out system property set, not logging video url.");
          return;
       }
 
@@ -344,7 +357,7 @@ public class BambooTools
       }
       catch (IOException e)
       {
-         System.err.println("Failed to write video url to " + file.getAbsolutePath() + "\n" + e.toString());
+         LogTools.error("Failed to write video url to " + file.getAbsolutePath() + "\n" + e.toString());
       }
    }
    
@@ -385,7 +398,7 @@ public class BambooTools
                String className = stackTraceElement.getClassName();
                className = className.substring(className.lastIndexOf('.') + 1);
                String classAndMethodName = className + "." + methodName;
-               PrintTools.info(classAndMethodName);
+               LogTools.info(classAndMethodName);
             }
          }
       }
@@ -396,7 +409,7 @@ public class BambooTools
       if (!WRITE_LOG_FILE_ON_SUCCESS)
          return;
 
-      System.out.println("Writing " + successString + " to log file " + logFilename);
+      LogTools.info("Writing " + successString + " to log file " + logFilename);
       File logFile = new File(logFilename);
 
       try
@@ -407,18 +420,18 @@ public class BambooTools
          printStream.println(successString);
          printStream.close();
 
-         System.out.println("Done writing " + successString + " to log file " + logFilename);
+         LogTools.info("Done writing " + successString + " to log file " + logFilename);
 
       }
       catch (FileNotFoundException e1)
       {
-         System.out.println("FileNotFoundException! File = " + logFile);
+         LogTools.info("FileNotFoundException! File = " + logFile);
       }
    }
 
    private static void writeErrorLogFile(Exception exception, String logFilename)
    {
-      System.out.println("Writing error log to log file " + logFilename + ". Exception was " + exception);
+      LogTools.info("Writing error log to log file " + logFilename + ". Exception was " + exception);
 
       File logFile = new File(logFilename);
 
@@ -470,7 +483,7 @@ public class BambooTools
    {
       if (guiMessageFrame == null)
       {
-         PrintTools.error("GUI message frame null. Returning");
+         LogTools.error("GUI message frame null. Returning");
          return;
       }
 
@@ -488,7 +501,7 @@ public class BambooTools
 
    public static void reportErrorMessage(String errorMessage, boolean showGUI)
    {
-      PrintTools.error(BambooTools.class, errorMessage);
+      LogTools.error(errorMessage);
 
       if (showGUI)
       {
@@ -499,7 +512,7 @@ public class BambooTools
 
    public static void reportOutMessage(String outMessage, boolean showGUI)
    {
-      System.out.println(outMessage);
+      LogTools.info(outMessage);
 
       if (showGUI)
       {
@@ -510,7 +523,7 @@ public class BambooTools
 
    public static void reportParameterMessage(String parameterMessage, boolean showGUI)
    {
-      System.out.println(parameterMessage);
+      LogTools.info(parameterMessage);
 
       if (showGUI)
       {
@@ -522,23 +535,27 @@ public class BambooTools
    public static void reportTestStartedMessage(boolean showGUI)
    {
       int usedMemoryInMB = garbageCollectAndGetUsedMemoryInMB();
+      String message = BambooTools.getClassAndMethodName(1) + " started. Used Memory = " + usedMemoryInMB + " MB.";
+      LogTools.info("Test started. {}", message);
 
       if (showGUI)
       {
          createGUIMessageFrame();
-         guiMessageFrame.appendMessageToPanel(junitTestCasesIndex, BambooTools.getClassAndMethodName(1) + " started. Used Memory = " + usedMemoryInMB + " MB.");
+         guiMessageFrame.appendMessageToPanel(junitTestCasesIndex, message);
       }
    }
 
    public static void reportTestFinishedMessage(boolean showGUI)
    {
       int usedMemoryInMB = garbageCollectAndGetUsedMemoryInMB();
+      String message = BambooTools.getClassAndMethodName(1) + " finished. Used Memory = " + usedMemoryInMB + " MB.";
+      LogTools.info("Test finished. {}", message);
 
       if (showGUI)
       {
          createGUIMessageFrame();
          guiMessageFrame
-               .appendMessageToPanel(junitTestCasesIndex, BambooTools.getClassAndMethodName(1) + " finished. Used Memory = " + usedMemoryInMB + " MB.");
+               .appendMessageToPanel(junitTestCasesIndex, message);
       }
    }
 
