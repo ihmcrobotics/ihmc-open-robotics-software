@@ -14,12 +14,6 @@ public class DistanceAndYawBasedHeuristics extends CostToGoHeuristics
    }
 
    @Override
-   public void setGoalHasBeenReached(boolean bodyHasReachedGoal)
-   {
-      this.bodyHasReachedGoal = bodyHasReachedGoal;
-   }
-
-   @Override
    protected double computeHeuristics(FootstepNode node, FootstepNode goalNode)
    {
       double yaw = AngleTools.computeAngleDifferenceMinusPiToPi(node.getNominalYaw(), goalNode.getNominalYaw());

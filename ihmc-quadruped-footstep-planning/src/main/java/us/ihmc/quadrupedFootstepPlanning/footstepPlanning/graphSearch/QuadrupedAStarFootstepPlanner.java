@@ -335,7 +335,6 @@ public class QuadrupedAStarFootstepPlanner implements QuadrupedBodyPathAndFootst
       if (planarRegionsList != null && !planarRegionsList.isEmpty())
          checkStartHasPlanarRegion();
 
-      heuristics.setGoalHasBeenReached(false);
       graph.initialize(startNode);
       NodeComparator nodeComparator = new NodeComparator(graph, goalNode, heuristics);
       stack = new PriorityQueue<>(nodeComparator);
