@@ -5,6 +5,9 @@ import static us.ihmc.pathPlanning.visibilityGraphs.ui.messager.UIVisibilityGrap
 import java.io.File;
 import java.net.URISyntaxException;
 import java.net.URL;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.stream.Collectors;
 
 import com.sun.javafx.scene.control.skin.LabeledText;
 
@@ -17,6 +20,8 @@ import javafx.stage.DirectoryChooser;
 import javafx.stage.Window;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.javaFXToolkit.messager.JavaFXMessager;
+import us.ihmc.pathPlanning.DataSet;
+import us.ihmc.pathPlanning.DataSetLoader;
 import us.ihmc.pathPlanning.visibilityGraphs.tools.VisibilityGraphsIOTools;
 import us.ihmc.pathPlanning.visibilityGraphs.tools.VisibilityGraphsIOTools.VisibilityGraphsUnitTestDataset;
 import us.ihmc.pathPlanning.visibilityGraphs.ui.messager.UIVisibilityGraphsTopics;
@@ -25,7 +30,9 @@ import us.ihmc.robotics.geometry.PlanarRegionsList;
 
 public class DatasetNavigationAccordionController
 {
-   private final File visualizerDataFolder, testDataFolder, inDevelopmentTestDataFolder;
+   private final ArrayList<DataSet> visualizerDataSets = new ArrayList<>();
+   private final ArrayList<DataSet> testableDataSets = new ArrayList<>();
+   private final ArrayList<DataSet> inDevelopmentDataSet = new ArrayList<>();
    private File customDataFolder = null;
 
    @FXML
@@ -37,22 +44,28 @@ public class DatasetNavigationAccordionController
    private JavaFXMessager messager;
    private Window ownerWindow;
 
-   public DatasetNavigationAccordionController() throws URISyntaxException
+   public DatasetNavigationAccordionController()
    {
-      URL planarRegionDataFolderURL = Thread.currentThread().getContextClassLoader().getResource(VisibilityGraphsIOTools.PLANAR_REGION_DATA_URL);
-      URL testDataFolderURL = Thread.currentThread().getContextClassLoader().getResource(VisibilityGraphsIOTools.TEST_DATA_URL);
-      URL inDevelopmentDataFolderURL = Thread.currentThread().getContextClassLoader().getResource(VisibilityGraphsIOTools.IN_DEVELOLOPMENT_TEST_DATA_URL);
-
-      visualizerDataFolder = new File(planarRegionDataFolderURL.toURI());
-      testDataFolder = new File(testDataFolderURL.toURI());
-      inDevelopmentTestDataFolder = new File(inDevelopmentDataFolderURL.toURI());
-
-      if (!visualizerDataFolder.exists())
-         throw new RuntimeException("Wrong path to the visualizer data folder, please update me.");
-      if (!testDataFolder.exists())
-         throw new RuntimeException("Wrong path to the test data folder, please update me.");
-      if (!inDevelopmentTestDataFolder.exists())
-         throw new RuntimeException("Wrong path to the in development test data folder, please update me");
+      List<DataSet> dataSets = DataSetLoader.loadDataSets();
+      for (int i = 0; i < dataSets.size(); i++)
+      {
+         DataSet dataSet = dataSets.get(i);
+         if(dataSet.hasPlannerInput())
+         {
+            if(dataSet.getPlannerInput().getBooleanFlag(VisibilityGraphsIOTools.TESTABLE_FLAG))
+            {
+               testableDataSets.add(dataSet);
+            }
+            else
+            {
+               inDevelopmentDataSet.add(dataSet);
+            }
+         }
+         else
+         {
+            visualizerDataSets.add(dataSet);
+         }
+      }
    }
 
    public void attachMessager(JavaFXMessager messager)
@@ -73,13 +86,13 @@ public class DatasetNavigationAccordionController
    public void load()
    {
       visualizerDataListView.getItems().clear();
-      visualizerDataListView.getItems().addAll(VisibilityGraphsIOTools.getPlanarRegionAndVizGraphsFilenames(visualizerDataFolder));
+      visualizerDataListView.getItems().addAll(visualizerDataSets.stream().map(DataSet::getName).collect(Collectors.toList()));
 
       testDataListView.getItems().clear();
-      testDataListView.getItems().addAll(VisibilityGraphsIOTools.getPlanarRegionAndVizGraphsFilenames(testDataFolder));
+      testDataListView.getItems().addAll(testableDataSets.stream().map(DataSet::getName).collect(Collectors.toList()));
 
       inDevelopmentTestDataListView.getItems().clear();
-      inDevelopmentTestDataListView.getItems().addAll(VisibilityGraphsIOTools.getPlanarRegionAndVizGraphsFilenames(inDevelopmentTestDataFolder));
+      inDevelopmentTestDataListView.getItems().addAll(inDevelopmentDataSet.stream().map(DataSet::getName).collect(Collectors.toList()));
 
       customDataListView.getItems().clear();
       if (customDataFolder != null && customDataFolder.exists() && customDataFolder.isDirectory())

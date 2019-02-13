@@ -150,8 +150,8 @@ public class VisibilityGraphsFrameworkTest
                                                              {
                                                                 if(!dataSet.hasPlannerInput())
                                                                    return false;
-                                                                List<String> testVisGraph = dataSet.getPlannerInput().getAdditionalData("testVisGraph");
-                                                                return testVisGraph != null && testVisGraph.get(0).equals("true");
+                                                                else
+                                                                   return dataSet.getPlannerInput().getBooleanFlag(VisibilityGraphsIOTools.TESTABLE_FLAG);
                                                              });
 
       if (DEBUG)
