@@ -210,9 +210,6 @@ public class SnapBasedNodeChecker extends FootstepNodeChecker
     */
    public static PlanarRegion createBodyCollisionRegionFromTwoFeet(Point3DReadOnly footA, Point3DReadOnly footB, double clearance, double height)
    {
-      if (footA.epsilonEquals(footB, 1e-3))
-         throw new RuntimeException("These points should be different.");
-
       double lowerZ = Math.max(footA.getZ(), footB.getZ()) + clearance;
       Point3D point0 = new Point3D(footA.getX(), footA.getY(), lowerZ);
       Point3D point1 = new Point3D(footA.getX(), footA.getY(), lowerZ + height);
