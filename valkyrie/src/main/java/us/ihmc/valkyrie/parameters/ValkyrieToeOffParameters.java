@@ -52,7 +52,7 @@ public class ValkyrieToeOffParameters extends ToeOffParameters
    @Override
    public boolean doToeOffWhenHittingAnkleLimit()
    {
-      return false;
+      return true;
    }
 
    @Override
