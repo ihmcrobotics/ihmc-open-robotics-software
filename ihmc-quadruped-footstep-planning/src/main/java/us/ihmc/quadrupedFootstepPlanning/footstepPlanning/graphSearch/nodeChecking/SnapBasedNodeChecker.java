@@ -45,7 +45,7 @@ public class SnapBasedNodeChecker extends FootstepNodeChecker
    @Override
    public boolean isNodeValid(FootstepNode node, FootstepNode previousNode)
    {
-      if (previousNode != null && node.completelyEquals(previousNode))
+      if (previousNode != null && node.equals(previousNode))
       {
          throw new IllegalArgumentException("Checking node assuming it is following itself.");
       }
