@@ -1,6 +1,6 @@
 package us.ihmc.avatar.behaviorTests;
 
-import static us.ihmc.robotics.Assert.*;
+import static us.ihmc.robotics.Assert.assertTrue;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -17,8 +17,6 @@ import us.ihmc.avatar.initialSetup.OffsetAndYawRobotInitialSetup;
 import us.ihmc.avatar.networkProcessor.kinematicsPlanningToolboxModule.KinematicsPlanningToolboxModule;
 import us.ihmc.avatar.testTools.DRCBehaviorTestHelper;
 import us.ihmc.commons.thread.ThreadTools;
-import org.junit.jupiter.api.Tag;
-import org.junit.jupiter.api.Disabled;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
@@ -107,7 +105,7 @@ public abstract class KinematicsPlanningBehaviorTest implements MultiRobotTestIn
       drcBehaviorTestHelper = new DRCBehaviorTestHelper(envrionment, getSimpleRobotName(), startingLocation, simulationTestingParameters, getRobotModel());
 
       setUpCamera(startingLocation.getStartingLocationOffset().getAdditionalOffset());
-      
+
       boolean success = drcBehaviorTestHelper.simulateAndBlockAndCatchExceptions(2.5);
       assertTrue(success);
 
@@ -160,7 +158,7 @@ public abstract class KinematicsPlanningBehaviorTest implements MultiRobotTestIn
 
       BambooTools.reportTestFinishedMessage(simulationTestingParameters.getShowWindows());
    }
-   
+
    @Test
    public void testSingleKeyFrameInput() throws SimulationExceededMaximumTimeException, IOException
    {
@@ -181,7 +179,7 @@ public abstract class KinematicsPlanningBehaviorTest implements MultiRobotTestIn
       drcBehaviorTestHelper = new DRCBehaviorTestHelper(envrionment, getSimpleRobotName(), startingLocation, simulationTestingParameters, getRobotModel());
 
       setUpCamera(startingLocation.getStartingLocationOffset().getAdditionalOffset());
-      
+
       boolean success = drcBehaviorTestHelper.simulateAndBlockAndCatchExceptions(2.5);
       assertTrue(success);
 
@@ -251,7 +249,7 @@ public abstract class KinematicsPlanningBehaviorTest implements MultiRobotTestIn
 
       return object;
    }
-   
+
    private void setUpCamera(Tuple3DReadOnly robotRootPosition)
    {
       Point3D cameraFix = new Point3D(robotRootPosition);

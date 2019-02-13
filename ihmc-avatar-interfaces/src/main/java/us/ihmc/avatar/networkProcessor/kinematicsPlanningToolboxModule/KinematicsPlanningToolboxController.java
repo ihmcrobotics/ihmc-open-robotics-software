@@ -27,9 +27,9 @@ import us.ihmc.communication.controllerAPI.StatusMessageOutputManager;
 import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.communication.packets.PacketDestination;
 import us.ihmc.euclid.geometry.Pose3D;
+import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
 import us.ihmc.euclid.tools.EuclidCoreTools;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.communication.kinematicsPlanningToolboxAPI.KinematicsPlanningToolboxCenterOfMassCommand;
@@ -41,7 +41,6 @@ import us.ihmc.humanoidRobotics.communication.packets.KinematicsPlanningToolboxO
 import us.ihmc.humanoidRobotics.communication.packets.KinematicsToolboxMessageFactory;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.log.LogTools;
-import us.ihmc.mecano.algorithms.CenterOfMassCalculator;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotModels.FullRobotModelUtils;
@@ -206,6 +205,16 @@ public class KinematicsPlanningToolboxController extends ToolboxController
       return true;
    }
 
+   /*
+    * Minimum value of numberOfWayPoints is 1. The size of the list which is
+    * return type of this method is equal with numberOfWayPoints.
+    */
+   private List<FramePose3D> createFramePoses(Pose3D initialPoint, Pose3D desiredPoint, int numberOfWayPoints)
+   {
+
+      return null;
+   }
+
    private boolean updateToolboxConfiguration()
    {
       if (rigidBodyCommands.size() == 0)
@@ -218,7 +227,7 @@ public class KinematicsPlanningToolboxController extends ToolboxController
 
       HumanoidReferenceFrames referenceFrames = new HumanoidReferenceFrames(getDesiredFullRobotModel());
       referenceFrames.updateFrames();
-      ReferenceFrame midFeetZUpFrame = referenceFrames.getMidFootZUpGroundFrame();
+      ReferenceFrame worldFrame = referenceFrames.getWorldFrame();
 
       for (int i = 0; i < rigidBodyCommands.size(); i++)
       {
@@ -227,12 +236,17 @@ public class KinematicsPlanningToolboxController extends ToolboxController
          RigidBodyBasics endEffector = command.getEndEffector();
          ikRigidBodies.add(endEffector);
 
+         // TODO : print current rigid body pose.
+         FramePose3D currentFramePose = new FramePose3D(worldFrame);
+         currentFramePose.set(endEffector.getBodyFixedFrame().getTransformToDesiredFrame(worldFrame));
+
          List<KinematicsToolboxRigidBodyMessage> rigidBodyMessages = new ArrayList<KinematicsToolboxRigidBodyMessage>();
          for (int j = 0; j < command.getNumberOfWayPoints(); j++)
          {
+            // when the number of way point is less than 3, create and add mid point before the message for each way point is created.
             Pose3D wayPoint = command.getWayPoint(j);
 
-            FramePose3D wayPointFramePose = new FramePose3D(midFeetZUpFrame, wayPoint);
+            FramePose3D wayPointFramePose = new FramePose3D(worldFrame, wayPoint);
 
             KinematicsToolboxRigidBodyMessage rigidBodyMessage = MessageTools.createKinematicsToolboxRigidBodyMessage(endEffector,
                                                                                                                       wayPointFramePose.getPosition(),
@@ -254,7 +268,7 @@ public class KinematicsPlanningToolboxController extends ToolboxController
             for (int j = 0; j < command.getNumberOfWayPoints(); j++)
                keyFrameTimes.add(command.getWayPointTime(j));
          }
-         else if (!checkKeyFrameTimes(command))
+         else if (!checkKeyFrameTimes(command.getWayPointTimes()))
          {
             throw new RuntimeException(command.getClass().getSimpleName()
                   + " must have same key frame times with the first KinematicsPlanningToolboxRigidBodyMessage.");
@@ -262,20 +276,20 @@ public class KinematicsPlanningToolboxController extends ToolboxController
       }
 
       if (centerOfMassCommand.get() != null && centerOfMassCommand.get().getNumberOfWayPoints() != 0)
-
       {
-         if (!checkKeyFrameTimes(centerOfMassCommand.get()))
-            throw new RuntimeException(centerOfMassCommand.get().getClass().getSimpleName()
-                  + " must have same key frame times with KinematicsPlanningToolboxRigidBodyMessage.");
-
          for (int i = 0; i < centerOfMassCommand.get().getNumberOfWayPoints(); i++)
          {
-            KinematicsToolboxCenterOfMassMessage comMessage = MessageTools.createKinematicsToolboxCenterOfMassMessage(centerOfMassCommand.get().getWayPoint(i));
+            FramePoint3D wayPointFramePoint = new FramePoint3D(worldFrame, centerOfMassCommand.get().getWayPoint(i));
+            KinematicsToolboxCenterOfMassMessage comMessage = MessageTools.createKinematicsToolboxCenterOfMassMessage(wayPointFramePoint);
             comMessage.getWeights().set(MessageTools.createWeightMatrix3DMessage(centerOfMassCommand.get().getWeightMatrix()));
             comMessage.getSelectionMatrix().set(MessageTools.createSelectionMatrix3DMessage(centerOfMassCommand.get().getSelectionMatrix()));
 
             ikCenterOfMassMessages.add(comMessage);
          }
+
+         if (!checkKeyFrameTimes(centerOfMassCommand.get().getWayPointTimes()))
+            throw new RuntimeException(centerOfMassCommand.get().getClass().getSimpleName()
+                  + " must have same key frame times with KinematicsPlanningToolboxRigidBodyMessage.");
       }
       else
       {
@@ -300,12 +314,6 @@ public class KinematicsPlanningToolboxController extends ToolboxController
       }
 
       return true;
-   }
-
-   private FramePoint3DReadOnly computeCenterOfMass3D(FullHumanoidRobotModel fullHumanoidRobotModel)
-   {
-      CenterOfMassCalculator calculator = new CenterOfMassCalculator(fullHumanoidRobotModel.getElevator(), ReferenceFrame.getWorldFrame());
-      return calculator.getCenterOfMass();
    }
 
    @Override
@@ -411,23 +419,19 @@ public class KinematicsPlanningToolboxController extends ToolboxController
       return true;
    }
 
-   private boolean checkKeyFrameTimes(KinematicsPlanningToolboxRigidBodyCommand command)
+   private void defineKeyFrameTimes(TDoubleArrayList wayPointTimes)
    {
-      if (command.getNumberOfWayPoints() != getNumberOfKeyFrames())
-         return false;
-      for (int i = 0; i < getNumberOfKeyFrames(); i++)
-         if (!EuclidCoreTools.epsilonEquals(command.getWayPointTime(i), keyFrameTimes.get(i), keyFrameTimeEpsilon))
-            return false;
-
-      return true;
+      keyFrameTimes.clear();
+      for (int i = 0; i < wayPointTimes.size(); i++)
+         keyFrameTimes.add(wayPointTimes.get(i));
    }
 
-   private boolean checkKeyFrameTimes(KinematicsPlanningToolboxCenterOfMassCommand command)
+   private boolean checkKeyFrameTimes(TDoubleArrayList wayPointTimes)
    {
-      if (command.getNumberOfWayPoints() != getNumberOfKeyFrames())
+      if (wayPointTimes.size() != getNumberOfKeyFrames())
          return false;
       for (int i = 0; i < getNumberOfKeyFrames(); i++)
-         if (!EuclidCoreTools.epsilonEquals(command.getWayPointTime(i), keyFrameTimes.get(i), keyFrameTimeEpsilon))
+         if (!EuclidCoreTools.epsilonEquals(wayPointTimes.get(i), keyFrameTimes.get(i), keyFrameTimeEpsilon))
             return false;
 
       return true;
