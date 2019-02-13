@@ -1,5 +1,7 @@
 package us.ihmc.quadrupedFootstepPlanning.footstepPlanning.graphSearch.graph;
 
+import us.ihmc.robotics.robotSide.RobotQuadrant;
+
 public class FootstepEdge
 {
    private final FootstepNode startNode;
@@ -23,6 +25,20 @@ public class FootstepEdge
    public FootstepNode getEndNode()
    {
       return endNode;
+   }
+
+   public boolean isValidEdge()
+   {
+      for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
+      {
+         if (robotQuadrant == endNode.getMovingQuadrant())
+            continue;
+
+         if (!startNode.quadrantGeometricallyEquals(robotQuadrant, endNode))
+            return false;
+      }
+
+      return true;
    }
 
    @Override
