@@ -92,8 +92,8 @@ public class ParameterBasedNodeExpansionTest
                double upperYBound = foot.getY() + (robotQuadrant.getSide() == RobotSide.LEFT ? parameters.getMaximumStepWidth() : -parameters.getMinimumStepWidth());
                double xFoot = node.getX(robotQuadrant);
                double yFoot = node.getY(robotQuadrant);
-               assertTrue(robotQuadrant.getCamelCaseName() + " foot X " + xFoot + " is not within bounds " + lowerXBound + " < x < " + upperXBound, MathTools.intervalContains(xFoot, lowerXBound, upperXBound));
-               assertTrue(robotQuadrant.getCamelCaseName() + " foot Y " + yFoot + " is not within bounds " + lowerYBound + " < x < " + upperYBound, MathTools.intervalContains(yFoot, lowerYBound, upperYBound));
+               assertTrue(robotQuadrant.getCamelCaseName() + " foot X " + xFoot + " is not within bounds " + lowerXBound + " < x < " + upperXBound, MathTools.intervalContains(xFoot, lowerXBound, upperXBound, FootstepNode.gridSizeXY));
+               assertTrue(robotQuadrant.getCamelCaseName() + " foot Y " + yFoot + " is not within bounds " + lowerYBound + " < x < " + upperYBound, MathTools.intervalContains(yFoot, lowerYBound, upperYBound, FootstepNode.gridSizeXY));
             }
             else
             {
