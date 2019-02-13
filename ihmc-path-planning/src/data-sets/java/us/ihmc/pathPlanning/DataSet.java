@@ -35,12 +35,12 @@ public class DataSet
       return planarRegionsList;
    }
 
-   public Point3DReadOnly getStartPosition()
+   public Point3D getStartPosition()
    {
       return startPosition;
    }
 
-   public Point3DReadOnly getGoalPosition()
+   public Point3D getGoalPosition()
    {
       return goalPosition;
    }
