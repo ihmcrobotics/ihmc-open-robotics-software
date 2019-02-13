@@ -488,15 +488,16 @@ public class QuadrupedAStarFootstepPlanner implements QuadrupedBodyPathAndFootst
 
       boolean footIsAtGoal = goalNode.quadrantGeometricallyEquals(nodeToExpand);
       boolean midstanceIsAtGoal = goalNode.midstanceGeometricallyEquals(nodeToExpand) && !midstanceReachedTheGoal.getBooleanValue(); // don't check this if we've already reached
+      boolean xGaitIsAtGoal = goalNode.xGaitGeometricallyEquals(nodeToExpand) && !midstanceReachedTheGoal.getBooleanValue(); // don't check this if we've already reached
 
-      if (footIsAtGoal || midstanceIsAtGoal)
+      if (footIsAtGoal || midstanceIsAtGoal || xGaitIsAtGoal)
       {
          if (footIsAtGoal)
          {
             heuristics.setGoalHasBeenReached(true);
             footReachedTheGoal.get(nodeToExpand.getMovingQuadrant()).set(true);
          }
-         if (midstanceIsAtGoal)
+         if (midstanceIsAtGoal || xGaitIsAtGoal)
          {
             heuristics.setGoalHasBeenReached(true);
             midstanceReachedTheGoal.set(true);
