@@ -67,7 +67,7 @@
                     </content>
                 </Tab>
 
-                <Tab text="Planner Visualization Control">
+                <Tab text="Planner Process Visualization">
                     <content>
                         <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0" />
                         <children>

@@ -2,13 +2,19 @@ package us.ihmc.quadrupedFootstepPlanning.ui.controllers;
 
 import javafx.fxml.FXML;
 import javafx.scene.control.CheckBox;
+import javafx.scene.control.Slider;
 import us.ihmc.commons.PrintTools;
 import us.ihmc.javaFXToolkit.messager.JavaFXMessager;
+import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.FootstepPlan;
 import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.communication.FootstepPlannerMessagerAPI;
+
+import java.util.concurrent.atomic.AtomicReference;
 
 public class VisualizationController
 {
    private static final boolean verbose = false;
+
+   private AtomicReference<FootstepPlan> footstepPlanReference;
 
    @FXML
    private CheckBox showBodyPathToggleButton;
@@ -31,6 +37,8 @@ public class VisualizationController
    @FXML
    private CheckBox showSolution;
    @FXML
+   private Slider plannerPlaybackSlider;
+   @FXML
    public void requestStatistics()
    {
       if (verbose)
@@ -44,6 +52,8 @@ public class VisualizationController
    public void attachMessager(JavaFXMessager messager)
    {
       this.messager = messager;
+
+      footstepPlanReference = messager.createInput(FootstepPlannerMessagerAPI.FootstepPlanTopic);
    }
 
    public void bindControls()
@@ -60,5 +70,7 @@ public class VisualizationController
       messager.bindBidirectional(FootstepPlannerMessagerAPI.ShowStartVisibilityMap, showStartMapToggleButton.selectedProperty(), true);
       messager.bindBidirectional(FootstepPlannerMessagerAPI.ShowGoalVisibilityMap, showGoalMapToggleButton.selectedProperty(), true);
       messager.bindBidirectional(FootstepPlannerMessagerAPI.ShowFootstepPlanTopic, showSolution.selectedProperty(), true);
+
+      messager.bindBidirectional(FootstepPlannerMessagerAPI.PlannerPlaybackFractionTopic, plannerPlaybackSlider.valueProperty(), false);
    }
 }
