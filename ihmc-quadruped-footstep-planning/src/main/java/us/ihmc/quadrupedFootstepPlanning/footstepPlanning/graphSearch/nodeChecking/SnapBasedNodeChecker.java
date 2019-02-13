@@ -106,7 +106,7 @@ public class SnapBasedNodeChecker extends FootstepNodeChecker
       }
 
       double yaw = AngleTools.computeAngleDifferenceMinusPiToPi(node.getNominalYaw(), previousNode.getNominalYaw());
-      if (MathTools.intervalContains(yaw, parameters.getMinimumStepYaw(), parameters.getMaximumStepYaw()))
+      if (!MathTools.intervalContains(yaw, parameters.getMinimumStepYaw(), parameters.getMaximumStepYaw()))
       {
          if (DEBUG)
          {
