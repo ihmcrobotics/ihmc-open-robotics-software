@@ -34,7 +34,6 @@ public class FootstepNode
    private Point2D xGaitCenterPoint;
 
    private final int hashCode;
-   private final int snapDataHashCode;
    private final int planarRegionsHashCode;
 
    private final RobotQuadrant movingQuadrant;
@@ -109,7 +108,6 @@ public class FootstepNode
 
       hashCode = computeHashCode(this);
       planarRegionsHashCode = computePlanarRegionsHashCode(this);
-      snapDataHashCode = computeSnapDataHashCode(this);
    }
 
    public RobotQuadrant getMovingQuadrant()
@@ -229,11 +227,6 @@ public class FootstepNode
       return planarRegionsHashCode;
    }
 
-   public int getSnapDataHashCode()
-   {
-      return snapDataHashCode;
-   }
-
    private static int computeHashCode(FootstepNode node)
    {
       final int prime = 31;
@@ -242,19 +235,6 @@ public class FootstepNode
 //      for (RobotQuadrant robotQuadrant)
       result = prime * result + node.getXIndex(node.movingQuadrant);
       result = prime * result + node.getYIndex(node.movingQuadrant);
-      return result;
-   }
-
-   private static int computeSnapDataHashCode(FootstepNode node)
-   {
-      final int prime = 31;
-      int result = 1;
-      result = prime * result + ((node.movingQuadrant == null) ? 0 : node.movingQuadrant.hashCode());
-      for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
-      {
-         result = prime * result + node.getXIndex(robotQuadrant);
-         result = prime * result + node.getYIndex(robotQuadrant);
-      }
       return result;
    }
 
@@ -343,8 +323,7 @@ public class FootstepNode
       return true;
    }
 
-   @Override
-   public boolean equals(Object obj)
+   public boolean completelyEquals(Object obj)
    {
       if (this == obj)
          return true;
@@ -364,6 +343,24 @@ public class FootstepNode
             return false;
       }
       return true;
+   }
+
+   @Override
+   public boolean equals(Object obj)
+   {
+      if (this == obj)
+         return true;
+      if (obj == null)
+         return false;
+      if (getClass() != obj.getClass())
+         return false;
+      FootstepNode other = (FootstepNode) obj;
+
+      if (xIndices.get(movingQuadrant) != other.xIndices.get(movingQuadrant))
+         return false;
+      if (yIndices.get(movingQuadrant) != other.yIndices.get(movingQuadrant))
+         return false;
+      return movingQuadrant == other.movingQuadrant;
    }
 
    @Override

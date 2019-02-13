@@ -66,7 +66,7 @@ public class QuadrupedAStarFootstepPlanner implements QuadrupedBodyPathAndFootst
    private final FootstepPlannerParameters parameters;
    private final QuadrupedXGaitSettingsReadOnly xGaitSettings;
 
-   private TIntArrayList expandedNodes;
+   private HashSet<FootstepNode> expandedNodes;
    private PriorityQueue<FootstepNode> stack;
    private FootstepNode startNode;
    private FootstepNode goalNode;
@@ -337,7 +337,7 @@ public class QuadrupedAStarFootstepPlanner implements QuadrupedBodyPathAndFootst
       }
 
       stack.add(startNode);
-      expandedNodes = new TIntArrayList();
+      expandedNodes = new HashSet<>();
       endNode = null;
 
       for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
@@ -420,12 +420,12 @@ public class QuadrupedAStarFootstepPlanner implements QuadrupedBodyPathAndFootst
          iterations++;
 
          FootstepNode nodeToExpand = stack.poll();
-         if (expandedNodes.contains(nodeToExpand.hashCode()))
+         if (expandedNodes.contains(nodeToExpand))
          {
             continue;
          }
 
-         expandedNodes.add(nodeToExpand.hashCode());
+         expandedNodes.add(nodeToExpand);
 
          if (checkAndHandleNodeAtAnyGoal(nodeToExpand))
          {
