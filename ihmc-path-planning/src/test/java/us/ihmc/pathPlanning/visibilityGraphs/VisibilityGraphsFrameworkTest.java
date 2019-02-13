@@ -11,6 +11,7 @@ import java.util.stream.Collectors;
 import org.junit.jupiter.api.AfterEach;
 import us.ihmc.pathPlanning.DataSet;
 import us.ihmc.pathPlanning.DataSetLoader;
+import us.ihmc.pathPlanning.PlannerInput;
 import us.ihmc.robotics.Assert;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
@@ -147,7 +148,9 @@ public class VisibilityGraphsFrameworkTest
    {
       List<DataSet> allDatasets = DataSetLoader.loadDataSets(dataSet ->
                                                              {
-                                                                List<String> testVisGraph = dataSet.getAdditionalData("testVisGraph");
+                                                                if(!dataSet.hasPlannerInput())
+                                                                   return false;
+                                                                List<String> testVisGraph = dataSet.getPlannerInput().getAdditionalData("testVisGraph");
                                                                 return testVisGraph != null && testVisGraph.get(0).equals("true");
                                                              });
 
@@ -317,8 +320,9 @@ public class VisibilityGraphsFrameworkTest
 
       PlanarRegionsList planarRegionsList = dataset.getPlanarRegionsList();
 
-      Point3D start = dataset.getStartPosition();
-      Point3D goal = dataset.getGoalPosition();
+      PlannerInput plannerInput = dataset.getPlannerInput();
+      Point3D start = plannerInput.getStartPosition();
+      Point3D goal = plannerInput.getGoalPosition();
 
       if (VISUALIZE)
       {
@@ -339,8 +343,9 @@ public class VisibilityGraphsFrameworkTest
 
       PlanarRegionsList planarRegionsList = dataset.getPlanarRegionsList();
 
-      Point3D start = dataset.getStartPosition();
-      Point3D goal = dataset.getGoalPosition();
+      PlannerInput plannerInput = dataset.getPlannerInput();
+      Point3D start = plannerInput.getStartPosition();
+      Point3D goal = plannerInput.getGoalPosition();
       AtomicReference<Boolean> stopWalkerRequest = null;
 
       if (VISUALIZE)
