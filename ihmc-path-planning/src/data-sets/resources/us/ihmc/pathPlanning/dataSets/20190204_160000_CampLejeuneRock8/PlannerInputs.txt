@@ -2,3 +2,4 @@ startPosition 1.8 2.24 -0.25
 goalPosition 3.78 -0.71 0.15
 startYaw 0.0
 goalYaw 0.0
+testVisGraph false

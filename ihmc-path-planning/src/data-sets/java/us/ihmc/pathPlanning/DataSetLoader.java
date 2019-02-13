@@ -4,9 +4,13 @@ import org.apache.commons.io.IOUtils;
 import us.ihmc.robotics.PlanarRegionFileTools;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 
-import java.io.*;
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.Predicate;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
 
@@ -18,6 +22,11 @@ public class DataSetLoader
    private static final String PLANNER_INPUTS_FILENAME = "PlannerInputs.txt";
 
    public static List<DataSet> loadDataSets()
+   {
+      return loadDataSets(dataSet -> true);
+   }
+
+   public static List<DataSet> loadDataSets(Predicate<DataSet> dataSetFilter)
    {
       Class<DataSetLoader> loadingClass = DataSetLoader.class;
       InputStream dataSetList = loadingClass.getResourceAsStream(DATA_SET_LIST_FILENAME);
@@ -55,6 +64,7 @@ public class DataSetLoader
          dataSets.add(dataSet);
       }
 
+      dataSets.removeIf(dataSetFilter.negate());
       return dataSets;
    }
 
