@@ -22,7 +22,6 @@ import us.ihmc.avatar.networkProcessor.kinematicsToolboxModule.KinematicsToolbox
 import us.ihmc.avatar.networkProcessor.kinematicsToolboxModule.KinematicsToolboxHelper;
 import us.ihmc.avatar.networkProcessor.kinematicsToolboxModule.KinematicsToolboxModule;
 import us.ihmc.avatar.networkProcessor.modules.ToolboxController;
-import us.ihmc.commons.PrintTools;
 import us.ihmc.communication.controllerAPI.CommandInputManager;
 import us.ihmc.communication.controllerAPI.StatusMessageOutputManager;
 import us.ihmc.communication.packets.MessageTools;
@@ -32,6 +31,7 @@ import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tools.EuclidCoreTools;
+import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.communication.kinematicsPlanningToolboxAPI.KinematicsPlanningToolboxCenterOfMassCommand;
 import us.ihmc.humanoidRobotics.communication.kinematicsPlanningToolboxAPI.KinematicsPlanningToolboxInputCommand;
@@ -40,8 +40,8 @@ import us.ihmc.humanoidRobotics.communication.kinematicsToolboxAPI.KinematicsToo
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.humanoidRobotics.communication.packets.KinematicsPlanningToolboxOutputConverter;
 import us.ihmc.humanoidRobotics.communication.packets.KinematicsToolboxMessageFactory;
-import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.log.LogTools;
+import us.ihmc.mecano.algorithms.CenterOfMassCalculator;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotModels.FullRobotModelUtils;
@@ -52,6 +52,8 @@ import us.ihmc.yoVariables.variable.YoInteger;
 
 public class KinematicsPlanningToolboxController extends ToolboxController
 {
+   private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
+
    private final boolean DEBUG = true;
 
    private final AtomicReference<RobotConfigurationData> latestRobotConfigurationDataReference = new AtomicReference<>(null);
@@ -218,19 +220,9 @@ public class KinematicsPlanningToolboxController extends ToolboxController
       else if (numberOfKeyFrames == 2)
          numberOfInterpolatedPoints = 1;
       else
-      {
-         PrintTools.info("desired way points are more than 2.");
          return true;
-      }
-      PrintTools.info("numberOfInterpolatedPoints " + numberOfInterpolatedPoints);
 
-      HumanoidReferenceFrames referenceFrames = new HumanoidReferenceFrames(getDesiredFullRobotModel());
-      referenceFrames.updateFrames();
-      ReferenceFrame worldFrame = referenceFrames.getWorldFrame();
-
-      FramePose3D currentFramePose = new FramePose3D(worldFrame);
-      currentFramePose.set(ikRigidBodies.get(0).getBodyFixedFrame().getTransformToDesiredFrame(worldFrame));
-
+      // re-create key frame times with interpolated times.
       TDoubleArrayList keyFrameTimesBuffer = new TDoubleArrayList();
       keyFrameTimesBuffer.addAll(keyFrameTimes);
       keyFrameTimes.clear();
@@ -241,38 +233,80 @@ public class KinematicsPlanningToolboxController extends ToolboxController
          {
             double alpha = ((double) j + 1) / (numberOfInterpolatedPoints + 1);
             double t2 = keyFrameTimesBuffer.get(i);
-            double keyFrameTime = EuclidCoreTools.interpolate(t1, t2, alpha); 
-            
+            double keyFrameTime = EuclidCoreTools.interpolate(t1, t2, alpha);
+
             keyFrameTimes.add(keyFrameTime);
          }
          t1 = keyFrameTimesBuffer.get(i);
          keyFrameTimes.add(t1);
       }
 
-      for (int i = 0; i < getNumberOfKeyFrames(); i++)
+      // create interpolated way point poses for each rigid bodies.
+      for (int i = 0; i < ikRigidBodies.size(); i++)
       {
-         PrintTools.info("" + keyFrameTimes.get(i));
+         RigidBodyBasics rigidBody = ikRigidBodies.get(i);
+         List<KinematicsToolboxRigidBodyMessage> ikRigidBodyMessages = ikRigidBodyMessageMap.get(rigidBody);
+         List<Pose3D> ikRigidBodyPoses = new ArrayList<Pose3D>();
+         Pose3D currentPose = new Pose3D(rigidBody.getBodyFixedFrame().getTransformToDesiredFrame(worldFrame));
+         for (int j = 0; j < numberOfKeyFrames; j++)
+         {
+            KinematicsToolboxRigidBodyMessage nextMessage = ikRigidBodyMessages.get(j);
+            Pose3D nextDesiredPose = new Pose3D(nextMessage.getDesiredPositionInWorld(), nextMessage.getDesiredOrientationInWorld());
+            for (int k = 0; k < numberOfInterpolatedPoints; k++)
+            {
+               double alpha = ((double) k + 1) / (numberOfInterpolatedPoints + 1);
+               Pose3D interpolatedPose = new Pose3D(currentPose);
+               interpolatedPose.interpolate(nextDesiredPose, alpha);
+               ikRigidBodyPoses.add(interpolatedPose);
+            }
+            currentPose.set(nextDesiredPose);
+            ikRigidBodyPoses.add(nextDesiredPose);
+         }
+
+         // re-create ik rigid body messages with the interpolated way points.
+         KinematicsToolboxRigidBodyMessage rigidBodyMessageBuffer = new KinematicsToolboxRigidBodyMessage();
+         rigidBodyMessageBuffer.set(ikRigidBodyMessages.get(0));
+         ikRigidBodyMessages.clear();
+         for (int j = 0; j < ikRigidBodyPoses.size(); j++)
+         {
+            KinematicsToolboxRigidBodyMessage messageToAdd = new KinematicsToolboxRigidBodyMessage(rigidBodyMessageBuffer);
+            messageToAdd.getDesiredPositionInWorld().set(ikRigidBodyPoses.get(j).getPosition());
+            messageToAdd.getDesiredOrientationInWorld().set(ikRigidBodyPoses.get(j).getOrientation());
+            ikRigidBodyMessages.add(messageToAdd);
+         }
       }
 
-      return false;
-   }
-
-   /*
-    * Minimum value of numberOfWayPoints is 1. The size of the list which is
-    * return type of this method is equal with numberOfWayPoints.
-    */
-   private List<Pose3D> createWayPointPoses(Pose3D initialPoint, Pose3D desiredPoint, int numberOfInterpolatedWayPoints)
-   {
-      List<Pose3D> wayPointPoses = new ArrayList<Pose3D>();
-      for (int i = 0; i < numberOfInterpolatedWayPoints; i++)
+      // create interpolated way points for com.
+      List<Point3D> comPoints = new ArrayList<Point3D>();
+      CenterOfMassCalculator calculator = new CenterOfMassCalculator(getDesiredFullRobotModel().getRootBody(), worldFrame);
+      calculator.reset();
+      Point3D currentPoint = new Point3D(calculator.getCenterOfMass());
+      for (int i = 0; i < ikCenterOfMassMessages.size(); i++)
       {
-         double alpha = (i + 1) / numberOfInterpolatedWayPoints;
-         Pose3D wayPointPose = new Pose3D(initialPoint);
-         initialPoint.interpolate(desiredPoint, alpha);
-         wayPointPoses.add(wayPointPose);
+         Point3D nextDesiredPoint = new Point3D(ikCenterOfMassMessages.get(i).getDesiredPositionInWorld());
+         for (int j = 0; j < numberOfInterpolatedPoints; j++)
+         {
+            double alpha = ((double) j + 1) / (numberOfInterpolatedPoints + 1);
+            Point3D interpolatedPoint = new Point3D(currentPoint);
+            interpolatedPoint.interpolate(nextDesiredPoint, alpha);
+            comPoints.add(interpolatedPoint);
+         }
+         currentPoint.set(nextDesiredPoint);
+         comPoints.add(nextDesiredPoint);
       }
 
-      return wayPointPoses;
+      // re-create ik rigid body messages with the interpolated way points.
+      KinematicsToolboxCenterOfMassMessage comMessageBuffer = new KinematicsToolboxCenterOfMassMessage();
+      comMessageBuffer.set(ikCenterOfMassMessages.get(0));
+      ikCenterOfMassMessages.clear();
+      for (int j = 0; j < comPoints.size(); j++)
+      {
+         KinematicsToolboxCenterOfMassMessage messageToAdd = new KinematicsToolboxCenterOfMassMessage(comMessageBuffer);
+         messageToAdd.getDesiredPositionInWorld().set(comPoints.get(j));
+         ikCenterOfMassMessages.add(messageToAdd);
+      }
+
+      return true;
    }
 
    private boolean updateToolboxConfiguration()
@@ -284,10 +318,6 @@ public class KinematicsPlanningToolboxController extends ToolboxController
       ikRigidBodyMessageMap.clear();
       ikCenterOfMassMessages.clear();
       keyFrameTimes.clear();
-
-      HumanoidReferenceFrames referenceFrames = new HumanoidReferenceFrames(getDesiredFullRobotModel());
-      referenceFrames.updateFrames();
-      ReferenceFrame worldFrame = referenceFrames.getWorldFrame();
 
       for (int i = 0; i < rigidBodyCommands.size(); i++)
       {
@@ -474,13 +504,6 @@ public class KinematicsPlanningToolboxController extends ToolboxController
 
       ikController.updateCapturabilityBasedStatus(capturabilityBasedStatus);
       return true;
-   }
-
-   private void defineKeyFrameTimes(TDoubleArrayList wayPointTimes)
-   {
-      keyFrameTimes.clear();
-      for (int i = 0; i < wayPointTimes.size(); i++)
-         keyFrameTimes.add(wayPointTimes.get(i));
    }
 
    private boolean checkKeyFrameTimes(TDoubleArrayList wayPointTimes)

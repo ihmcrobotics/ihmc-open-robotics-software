@@ -190,7 +190,7 @@ public abstract class KinematicsPlanningBehaviorTest implements MultiRobotTestIn
                                                                            getRobotModel(), sdfFullRobotModel);
 
       double trajectoryTime = 5.0;
-      int numberOfKeyFrames = 1;
+      int numberOfKeyFrames = 2;
       RobotSide robotSide = RobotSide.RIGHT;
 
       List<Pose3DReadOnly> desiredPoses = new ArrayList<>();
