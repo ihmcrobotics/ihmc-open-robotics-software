@@ -3,6 +3,7 @@ package us.ihmc.avatar.roughTerrainWalking;
 import java.util.Random;
 
 import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.Tag;
 import us.ihmc.robotics.Assert;
 import org.junit.jupiter.api.BeforeEach;
 
@@ -30,6 +31,7 @@ import us.ihmc.simulationconstructionset.util.ground.TerrainObject3D;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
 import us.ihmc.simulationconstructionset.util.simulationTesting.SimulationTestingParameters;
 
+@Tag("humanoid-rough-terrain")
 public abstract class AvatarFootWobbleTest implements MultiRobotTestInterface
 {
    private SimulationTestingParameters simulationTestingParameters;
