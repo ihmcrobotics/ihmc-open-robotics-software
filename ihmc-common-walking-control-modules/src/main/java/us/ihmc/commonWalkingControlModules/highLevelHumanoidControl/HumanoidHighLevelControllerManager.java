@@ -15,6 +15,8 @@ import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelSta
 import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHumanoidControllerToolbox;
 import us.ihmc.communication.controllerAPI.CommandInputManager;
 import us.ihmc.communication.controllerAPI.StatusMessageOutputManager;
+import us.ihmc.communication.packets.ControllerCrashLocation;
+import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.euclid.referenceFrame.FramePoint2D;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.HighLevelControllerStateCommand;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelControllerName;
@@ -56,8 +58,6 @@ public class HumanoidHighLevelControllerManager implements RobotController
    private final JointDesiredOutputList lowLevelControllerOutput;
    private final CommandInputManager commandInputManager;
    private final StatusMessageOutputManager statusMessageOutputManager;
-   private final HighLevelControlManagerFactory managerFactory;
-
    private final HighLevelControllerFactoryHelper controllerFactoryHelper;
 
    private final EnumMap<HighLevelControllerName, HighLevelControllerState> highLevelControllerStates = new EnumMap<>(HighLevelControllerName.class);
@@ -80,7 +80,6 @@ public class HumanoidHighLevelControllerManager implements RobotController
       this.statusMessageOutputManager = statusMessageOutputManager;
       this.controllerToolbox = controllerToolbox;
       this.requestedHighLevelControllerState = requestedHighLevelControllerState;
-      this.managerFactory = managerFactory;
       this.centerOfPressureDataHolderForEstimator = centerOfPressureDataHolderForEstimator;
       this.lowLevelControllerOutput = lowLevelControllerOutput;
 
@@ -151,6 +150,8 @@ public class HumanoidHighLevelControllerManager implements RobotController
       catch (Exception e)
       {
          e.printStackTrace();
+         statusMessageOutputManager.reportStatusMessage(MessageTools.createControllerCrashNotificationPacket(ControllerCrashLocation.CONTROLLER_RUN,
+                                                                                                             e.getMessage()));
          controllerToolbox.reportControllerFailureToListeners(null);
       }
 
