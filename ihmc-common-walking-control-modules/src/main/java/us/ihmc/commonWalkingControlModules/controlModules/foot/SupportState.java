@@ -123,6 +123,7 @@ public class SupportState extends AbstractFootControlState
    private final BooleanProvider avoidFootRotations;
    private final BooleanProvider dampFootRotations;
    private final BooleanProvider replanIcpForFootRotations;
+   private final BooleanProvider cropFootholdForFootRotations;
    private final DoubleProvider footDamping;
    private final PIDSE3Gains localGains = new DefaultPIDSE3Gains();
 
@@ -215,6 +216,7 @@ public class SupportState extends AbstractFootControlState
       String paramRegistryName = getClass().getSimpleName() + "Parameters";
       avoidFootRotations = ParameterProvider.getOrCreateParameter(feetManagerName, paramRegistryName, "avoidFootRotations", registry, false);
       replanIcpForFootRotations = ParameterProvider.getOrCreateParameter(feetManagerName, paramRegistryName, "replanIcpForFootRotations", registry, false);
+      cropFootholdForFootRotations = ParameterProvider.getOrCreateParameter(feetManagerName, paramRegistryName, "cropFootholdForFootRotations", registry, false);
       dampFootRotations = ParameterProvider.getOrCreateParameter(feetManagerName, paramRegistryName, "dampFootRotations", registry, false);
       footDamping = ParameterProvider.getOrCreateParameter(feetManagerName, paramRegistryName, "footDamping", registry, 0.0);
    }
@@ -321,27 +323,36 @@ public class SupportState extends AbstractFootControlState
       if (neverHoldPosition.getValue())
          footBarelyLoaded.set(false);
 
+      updateHoldPositionSetpoints();
       localGains.set(gains);
+      boolean dampingRotations = false;
+
       if (footRotationDetector.compute() && avoidFootRotations.getValue())
       {
+         controllerToolbox.getCapturePoint(tempPoint);
+         tempPoint.changeFrame(footPolygon.getReferenceFrame());
+         capturePoint.setIncludingFrame(tempPoint);
+         footRotationHelper.compute(footRotationDetector.getLineOfRotation(), footPolygon, capturePoint);
+
          if (dampFootRotations.getValue())
          {
             PID3DGainsReadOnly orientationGains = gains.getOrientationGains();
             PID3DGains localOrientationGains = localGains.getOrientationGains();
             localOrientationGains.setProportionalGains(0.0, 0.0, orientationGains.getProportionalGains()[2]);
             localOrientationGains.setDerivativeGains(footDamping.getValue(), footDamping.getValue(), orientationGains.getDerivativeGains()[2]);
-            copOnEdge.set(true);
+            dampingRotations = true;
          }
+
          if (replanIcpForFootRotations.getValue())
          {
-            controllerToolbox.getCapturePoint(tempPoint);
-            tempPoint.changeFrame(footPolygon.getReferenceFrame());
-            capturePoint.setIncludingFrame(tempPoint);
-            footRotationHelper.compute(footRotationDetector.getLineOfRotation(), footPolygon, capturePoint);
+            footRotationHelper.adjustICPPlan();
+         }
+
+         if (cropFootholdForFootRotations.getValue())
+         {
+            footRotationHelper.reduceFoothold();
          }
       }
-
-      updateHoldPositionSetpoints();
 
       // update the control frame
       footSwitch.computeAndPackCoP(cop2d);
@@ -384,7 +395,7 @@ public class SupportState extends AbstractFootControlState
          isDirectionFeedbackControlled[4] = true; // control y position
          isDirectionFeedbackControlled[2] = true; // control z orientation
       }
-      if (copOnEdge.getBooleanValue())
+      if (copOnEdge.getBooleanValue() || dampingRotations)
       {
          isDirectionFeedbackControlled[0] = true; // control x orientation
          isDirectionFeedbackControlled[1] = true; // control y orientation

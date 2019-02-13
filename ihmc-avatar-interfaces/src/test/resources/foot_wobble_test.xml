@@ -8,6 +8,7 @@
 						<registry name="FeetManager">
 							<registry name="SupportStateParameters">
 								<parameter name="avoidFootRotations" type="BooleanParameter" value="true" />
+								<parameter name="replanIcpForFootRotations" type="BooleanParameter" value="true" />
 							</registry>
 						</registry>
 					</registry>
