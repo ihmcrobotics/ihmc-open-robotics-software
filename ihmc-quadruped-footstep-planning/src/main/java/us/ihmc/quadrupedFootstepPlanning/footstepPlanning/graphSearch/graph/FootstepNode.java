@@ -325,25 +325,6 @@ public class FootstepNode
       return true;
    }
 
-   public boolean completelyEquals(FootstepNode other)
-   {
-      if (this == other)
-         return true;
-      if (other == null)
-         return false;
-
-      for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
-      {
-         if (getXIndex(robotQuadrant) != other.getXIndex(robotQuadrant))
-            return false;
-         if (getXIndex(robotQuadrant) != other.getYIndex(robotQuadrant))
-            return false;
-         if (getMovingQuadrant() != other.getMovingQuadrant())
-            return false;
-      }
-      return true;
-   }
-
    @Override
    public boolean equals(Object obj)
    {
