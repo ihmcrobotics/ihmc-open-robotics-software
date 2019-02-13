@@ -16,13 +16,12 @@ import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
-import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.humanoidBehaviors.behaviors.AbstractBehavior;
 import us.ihmc.humanoidBehaviors.communication.ConcurrentListeningQueue;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.idl.IDLSequence.Double;
+import us.ihmc.mecano.algorithms.CenterOfMassCalculator;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotModels.FullHumanoidRobotModelFactory;
@@ -197,11 +196,12 @@ public class KinematicsPlanningBehavior extends AbstractBehavior
          rigidBodyMessagePublisher.publish(message);
       }
 
-      Vector3DReadOnly translationVector = fullRobotModel.getRootBody().getBodyFixedFrame().getTransformToWorldFrame().getTranslationVector();
+      CenterOfMassCalculator calculator = new CenterOfMassCalculator(fullRobotModel.getRootBody(), worldFrame);
+      calculator.reset();
 
       List<Point3DReadOnly> desiredCOMPoints = new ArrayList<Point3DReadOnly>();
       for (int i = 0; i < keyFrameTimes.size(); i++)
-         desiredCOMPoints.add(new Point3D(translationVector));
+         desiredCOMPoints.add(calculator.getCenterOfMass());
 
       KinematicsPlanningToolboxCenterOfMassMessage comMessage = HumanoidMessageTools.createKinematicsPlanningToolboxCenterOfMassMessage(keyFrameTimes,
                                                                                                                                         desiredCOMPoints);
@@ -209,6 +209,7 @@ public class KinematicsPlanningBehavior extends AbstractBehavior
       selectionMatrix.selectZAxis(false);
       comMessage.getSelectionMatrix().set(MessageTools.createSelectionMatrix3DMessage(selectionMatrix));
       comMessage.getWeights().set(MessageTools.createWeightMatrix3DMessage(defaultCOMWeight));
+
       comMessagePublisher.publish(comMessage);
 
       System.out.println("published");
