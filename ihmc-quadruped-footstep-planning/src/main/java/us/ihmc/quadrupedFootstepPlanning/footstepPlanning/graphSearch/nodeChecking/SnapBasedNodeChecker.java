@@ -15,6 +15,7 @@ import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.graphSearch.footstepSn
 import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.graphSearch.footstepSnapping.FootstepNodeSnapper;
 import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.graphSearch.graph.FootstepNode;
 import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.graphSearch.parameters.FootstepPlannerParameters;
+import us.ihmc.robotics.geometry.AngleTools;
 import us.ihmc.robotics.geometry.PlanarRegion;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.robotSide.QuadrantDependentList;
@@ -102,6 +103,17 @@ public class SnapBasedNodeChecker extends FootstepNodeChecker
             rejectNode(node, previousNode, QuadrupedFootstepPlannerNodeRejectionReason.STEP_ON_OTHER_FOOT);
             return false;
          }
+      }
+
+      double yaw = AngleTools.computeAngleDifferenceMinusPiToPi(node.getNominalYaw(), previousNode.getNominalYaw());
+      if (MathTools.intervalContains(yaw, parameters.getMinimumStepYaw(), parameters.getMaximumStepYaw()))
+      {
+         if (DEBUG)
+         {
+            PrintTools.info("The node " + node + " results in too much yaw.");
+         }
+         rejectNode(node, previousNode, QuadrupedFootstepPlannerNodeRejectionReason.STEP_YAWING_TOO_MUCH);
+         return false;
       }
 
       FootstepNodeSnapData previousNodeSnapData = snapper.snapFootstepNode(previousNode);
