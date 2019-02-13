@@ -148,10 +148,23 @@ public class QuadrupedAStarFootstepPlanner implements QuadrupedBodyPathAndFootst
 
       startNode = getNodeFromTarget(start);
       QuadrantDependentList<RigidBodyTransform> startNodeSnapTransforms = new QuadrantDependentList<>();
-      for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
+
+      if (start.getTargetType() == FootstepPlannerTargetType.FOOTSTEPS)
       {
-         startNodeSnapTransforms.put(robotQuadrant, FootstepNodeSnappingTools
-               .computeSnapTransform(robotQuadrant, startNode, new Point3D(startNode.getX(robotQuadrant), startNode.getY(robotQuadrant), 0.0)));
+         for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
+         {
+            startNodeSnapTransforms.put(robotQuadrant, FootstepNodeSnappingTools
+                  .computeSnapTransform(robotQuadrant, startNode, start.getFootGoalPosition(robotQuadrant)));
+         }
+      }
+      else if (start.getTargetType() == FootstepPlannerTargetType.POSE_BETWEEN_FEET)
+      {
+         for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
+         {
+            Point3D startPoint = new Point3D(startNode.getX(robotQuadrant), startNode.getY(robotQuadrant), 0.0);
+            Point3DReadOnly projectedPoint = PlanarRegionTools.projectPointToPlanesVertically(startPoint, planarRegionsList);
+            startNodeSnapTransforms.put(robotQuadrant, FootstepNodeSnappingTools.computeSnapTransform(robotQuadrant, startNode, projectedPoint));
+         }
       }
       snapper.addSnapData(startNode, new FootstepNodeSnapData(startNodeSnapTransforms));
       nodeChecker.addStartNode(startNode, startNodeSnapTransforms);
