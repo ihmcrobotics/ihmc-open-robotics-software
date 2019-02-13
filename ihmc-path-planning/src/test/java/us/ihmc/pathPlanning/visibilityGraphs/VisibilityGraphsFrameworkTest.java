@@ -7,18 +7,18 @@ import java.util.Random;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
 
-import org.junit.After;
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Ignore;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import us.ihmc.robotics.Assert;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
 
 import javafx.util.Pair;
 import us.ihmc.commons.MathTools;
 import us.ihmc.commons.thread.ThreadTools;
-import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
-import us.ihmc.continuousIntegration.ContinuousIntegrationTools;
-import us.ihmc.continuousIntegration.IntegrationCategory;
+import org.junit.jupiter.api.Tag;
+import org.junit.jupiter.api.Disabled;
+import us.ihmc.commons.ContinuousIntegrationTools;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.geometry.LineSegment3D;
 import us.ihmc.euclid.geometry.Plane3D;
@@ -78,7 +78,7 @@ public class VisibilityGraphsFrameworkTest
       return new DefaultVisibilityGraphParameters();
    }
 
-   @Before
+   @BeforeEach
    public void setup() throws InterruptedException, Exception
    {
       VISUALIZE = VISUALIZE && !ContinuousIntegrationTools.isRunningOnContinuousIntegrationServer();
@@ -93,7 +93,7 @@ public class VisibilityGraphsFrameworkTest
       }
    }
 
-   @After
+   @AfterEach
    public void tearDown() throws Exception
    {
       if (VISUALIZE)
@@ -104,8 +104,7 @@ public class VisibilityGraphsFrameworkTest
       }
    }
 
-   @Test(timeout = TIMEOUT)
-   @ContinuousIntegrationTest(estimatedDuration = 13.0)
+   @Test
    public void testDatasetsWithoutOcclusion() throws Exception
    {
       if (VISUALIZE)
@@ -118,9 +117,8 @@ public class VisibilityGraphsFrameworkTest
    }
 
    //TODO: Fix and make this pass.
-   @Ignore("This needs to be fixed for when start and goal are invalid.")
-   @Test(timeout = TIMEOUT)
-   @ContinuousIntegrationTest(estimatedDuration = 10.0, categoriesOverride = {IntegrationCategory.IN_DEVELOPMENT})
+   @Disabled("This needs to be fixed for when start and goal are invalid.")
+   @Test
    public void testDatasetsNoOcclusionSimulateDynamicReplanning() throws Exception
    {
       if (VISUALIZE)
@@ -131,9 +129,8 @@ public class VisibilityGraphsFrameworkTest
    }
 
    //TODO: Fix and make this pass.
-   @Ignore("Occlusion planning needs to be implemented better.")
-   @Test(timeout = TIMEOUT)
-   @ContinuousIntegrationTest(estimatedDuration = 10.0, categoriesOverride = {IntegrationCategory.IN_DEVELOPMENT})
+   @Disabled("Occlusion planning needs to be implemented better.")
+   @Test
    public void testDatasetsSimulateOcclusionAndDynamicReplanning() throws Exception
    {
       if (VISUALIZE)

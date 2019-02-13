@@ -3,12 +3,29 @@ package us.ihmc.footstepPlanning.ui;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
 
-import controller_msgs.msg.dds.*;
+import controller_msgs.msg.dds.BodyPathPlanMessage;
+import controller_msgs.msg.dds.BodyPathPlanStatisticsMessage;
+import controller_msgs.msg.dds.FootstepDataListMessage;
+import controller_msgs.msg.dds.FootstepNodeDataListMessage;
+import controller_msgs.msg.dds.FootstepPlannerOccupancyMapMessage;
+import controller_msgs.msg.dds.FootstepPlannerParametersPacket;
+import controller_msgs.msg.dds.FootstepPlannerStatusMessage;
+import controller_msgs.msg.dds.FootstepPlanningRequestPacket;
+import controller_msgs.msg.dds.FootstepPlanningToolboxOutputStatus;
+import controller_msgs.msg.dds.GoHomeMessage;
+import controller_msgs.msg.dds.PlanarRegionsListMessage;
+import controller_msgs.msg.dds.PlanningStatisticsRequestMessage;
+import controller_msgs.msg.dds.RobotConfigurationData;
+import controller_msgs.msg.dds.ToolboxStateMessage;
+import controller_msgs.msg.dds.VisibilityGraphsParametersPacket;
+import controller_msgs.msg.dds.WalkingControllerPreviewInputMessage;
+import controller_msgs.msg.dds.WalkingControllerPreviewOutputMessage;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.ControllerAPIDefinition;
-import us.ihmc.commons.PrintTools;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.communication.IHMCRealtimeROS2Publisher;
 import us.ihmc.communication.ROS2Tools;
+import us.ihmc.communication.ROS2Tools.MessageTopicNameGenerator;
+import us.ihmc.communication.ROS2Tools.ROS2TopicQualifier;
 import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.communication.packets.PlanarRegionMessageConverter;
 import us.ihmc.communication.packets.ToolboxState;
@@ -21,6 +38,7 @@ import us.ihmc.footstepPlanning.communication.FootstepPlannerCommunicationProper
 import us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI;
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParameters;
 import us.ihmc.footstepPlanning.tools.FootstepPlannerMessageTools;
+import us.ihmc.log.LogTools;
 import us.ihmc.messager.Messager;
 import us.ihmc.pathPlanning.visibilityGraphs.dataStructure.VisibilityMapWithNavigableRegion;
 import us.ihmc.pathPlanning.visibilityGraphs.interfaces.VisibilityGraphsParameters;
@@ -75,6 +93,9 @@ public class RemoteUIMessageConverter
    private IHMCRealtimeROS2Publisher<FootstepPlanningRequestPacket> footstepPlanningRequestPublisher;
    private IHMCRealtimeROS2Publisher<PlanningStatisticsRequestMessage> plannerStatisticsRequestPublisher;
    private IHMCRealtimeROS2Publisher<FootstepDataListMessage> footstepDataListPublisher;
+   private IHMCRealtimeROS2Publisher<GoHomeMessage> goHomePublisher;
+   private IHMCRealtimeROS2Publisher<ToolboxStateMessage> walkingPreviewToolboxStatePublisher;
+   private IHMCRealtimeROS2Publisher<WalkingControllerPreviewInputMessage> walkingPreviewRequestPublisher;
 
    public static RemoteUIMessageConverter createRemoteConverter(Messager messager, String robotName)
    {
@@ -158,6 +179,9 @@ public class RemoteUIMessageConverter
                                            ControllerAPIDefinition.getPublisherTopicNameGenerator(robotName),
                                            s -> messager.submitMessage(FootstepPlannerMessagerAPI.RobotConfigurationDataTopic, s.takeNextData()));
 
+      MessageTopicNameGenerator controllerPreviewOutputTopicNameGenerator = ROS2Tools.getTopicNameGenerator(robotName, ROS2Tools.WALKING_PREVIEW_TOOLBOX, ROS2TopicQualifier.OUTPUT);
+      ROS2Tools.createCallbackSubscription(ros2Node, WalkingControllerPreviewOutputMessage.class, controllerPreviewOutputTopicNameGenerator, s -> messager.submitMessage(FootstepPlannerMessagerAPI.WalkingPreviewOutput, s.takeNextData()));
+
       // publishers
       plannerParametersPublisher = ROS2Tools
             .createPublisher(ros2Node, FootstepPlannerParametersPacket.class, FootstepPlannerCommunicationProperties.subscriberTopicNameGenerator(robotName));
@@ -170,17 +194,31 @@ public class RemoteUIMessageConverter
       plannerStatisticsRequestPublisher = ROS2Tools
             .createPublisher(ros2Node, PlanningStatisticsRequestMessage.class, FootstepPlannerCommunicationProperties.subscriberTopicNameGenerator(robotName));
       footstepDataListPublisher = ROS2Tools.createPublisher(ros2Node, FootstepDataListMessage.class, ControllerAPIDefinition.getSubscriberTopicNameGenerator(robotName));
+      goHomePublisher = ROS2Tools.createPublisher(ros2Node, GoHomeMessage.class, ControllerAPIDefinition.getSubscriberTopicNameGenerator(robotName));
+
+      MessageTopicNameGenerator controllerPreviewInputTopicNameGenerator = ROS2Tools.getTopicNameGenerator(robotName, ROS2Tools.WALKING_PREVIEW_TOOLBOX, ROS2TopicQualifier.INPUT);
+      walkingPreviewToolboxStatePublisher = ROS2Tools.createPublisher(ros2Node, ToolboxStateMessage.class, controllerPreviewInputTopicNameGenerator);
+      walkingPreviewRequestPublisher = ROS2Tools.createPublisher(ros2Node, WalkingControllerPreviewInputMessage.class, controllerPreviewInputTopicNameGenerator);
 
       messager.registerTopicListener(FootstepPlannerMessagerAPI.ComputePathTopic, request -> requestNewPlan());
       messager.registerTopicListener(FootstepPlannerMessagerAPI.RequestPlannerStatistics, request -> requestPlannerStatistics());
       messager.registerTopicListener(FootstepPlannerMessagerAPI.AbortPlanningTopic, request -> requestAbortPlanning());
+      messager.registerTopicListener(FootstepPlannerMessagerAPI.FootstepDataListTopic, footstepDataListPublisher::publish);
+      messager.registerTopicListener(FootstepPlannerMessagerAPI.GoHomeTopic, goHomePublisher::publish);
+      messager.registerTopicListener(FootstepPlannerMessagerAPI.RequestWalkingPreview, request ->
+      {
+         ToolboxStateMessage toolboxStateMessage = new ToolboxStateMessage();
+         toolboxStateMessage.setRequestedToolboxState(ToolboxState.WAKE_UP.toByte());
+         walkingPreviewToolboxStatePublisher.publish(toolboxStateMessage);
+         walkingPreviewRequestPublisher.publish(request);
+      });
       messager.registerTopicListener(FootstepPlannerMessagerAPI.FootstepPlanToRobotTopic, footstepDataListPublisher::publish);
    }
 
    private void processFootstepPlanningRequestPacket(FootstepPlanningRequestPacket packet)
    {
       if (verbose)
-         PrintTools.info("Received a planning request.");
+         LogTools.info("Received a planning request.");
 
       Point3D goalPosition = packet.getGoalPositionInWorld();
       Quaternion goalOrientation = packet.getGoalOrientationInWorld();
@@ -221,7 +259,7 @@ public class RemoteUIMessageConverter
       messager.submitMessage(FootstepPlannerMessagerAPI.BodyPathDataTopic, bodyPath);
 
       if (verbose)
-         PrintTools.info("Received a body path planning result from the toolbox.");
+         LogTools.info("Received a body path planning result from the toolbox.");
    }
 
    private void processBodyPathPlanStatistics(BodyPathPlanStatisticsMessage packet)
@@ -268,7 +306,7 @@ public class RemoteUIMessageConverter
       }
 
       if (verbose)
-         PrintTools.info("Received a footstep planning result from the toolbox.");
+         LogTools.info("Received a footstep planning result from the toolbox.");
    }
 
    private void processIncomingPlanarRegionMessage(PlanarRegionsListMessage packet)
@@ -278,16 +316,21 @@ public class RemoteUIMessageConverter
          messager.submitMessage(FootstepPlannerMessagerAPI.PlanarRegionDataTopic, PlanarRegionMessageConverter.convertToPlanarRegionsList(packet));
 
          if (verbose)
-            PrintTools.info("Received updated planner regions.");
+            LogTools.info("Received updated planner regions.");
       }
    }
 
    private void requestNewPlan()
    {
+      if (!checkRequireds())
+      {
+         return;
+      }
+
       toolboxStatePublisher.publish(MessageTools.createToolboxStateMessage(ToolboxState.WAKE_UP));
 
       if (verbose)
-         PrintTools.info("Told the toolbox to wake up.");
+         LogTools.info("Told the toolbox to wake up.");
       
       FootstepPlannerParametersPacket plannerParametersPacket = new FootstepPlannerParametersPacket();
       FootstepPlannerParameters footstepPlannerParameters = plannerParametersReference.get();
@@ -302,9 +345,24 @@ public class RemoteUIMessageConverter
       visibilityGraphsParametersPublisher.publish(visibilityGraphsParametersPacket);
       
       if (verbose)
-         PrintTools.info("Sent out some parameters");
+         LogTools.info("Sent out some parameters");
 
       submitFootstepPlanningRequestPacket();
+   }
+
+   private boolean checkRequireds()
+   {
+      if (plannerStartPositionReference.get() == null)
+      {
+         LogTools.warn("Need to set start position.");
+         return false;
+      }
+      if (plannerGoalPositionReference.get() == null)
+      {
+         LogTools.warn("Need to set goal position.");
+         return false;
+      }
+      return true;
    }
 
    private void requestPlannerStatistics()
@@ -315,7 +373,7 @@ public class RemoteUIMessageConverter
    private void requestAbortPlanning()
    {
       if (verbose)
-         PrintTools.info("Sending out a sleep request.");
+         LogTools.info("Sending out a sleep request.");
       toolboxStatePublisher.publish(MessageTools.createToolboxStateMessage(ToolboxState.SLEEP));
    }
 

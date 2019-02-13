@@ -1,6 +1,6 @@
 package us.ihmc.atlas.roughTerrainWalking;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import us.ihmc.atlas.AtlasJointMap;
 import us.ihmc.atlas.AtlasRobotModel;
@@ -15,16 +15,14 @@ import us.ihmc.avatar.roughTerrainWalking.HumanoidPointyRocksEnvironmentContacts
 import us.ihmc.commonWalkingControlModules.capturePoint.optimization.ICPOptimizationParameters;
 import us.ihmc.commonWalkingControlModules.configurations.ToeOffParameters;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
-import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationPlan;
-import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
-import us.ihmc.continuousIntegration.IntegrationCategory;
+import org.junit.jupiter.api.Tag;
+import org.junit.jupiter.api.Disabled;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.simulationConstructionSetTools.bambooTools.BambooTools;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
 import us.ihmc.wholeBodyController.AdditionalSimulationContactPoints;
 import us.ihmc.wholeBodyController.FootContactPoints;
 
-@ContinuousIntegrationPlan(categories = {IntegrationCategory.FAST, IntegrationCategory.VIDEO})
 public class AtlasPointyRocksEnvironmentContactsTest extends HumanoidPointyRocksEnvironmentContactsTest
 {
    @Override
@@ -48,8 +46,8 @@ public class AtlasPointyRocksEnvironmentContactsTest extends HumanoidPointyRocks
    }
 
    @Override
-   @ContinuousIntegrationTest(estimatedDuration = 210.0, categoriesOverride = {IntegrationCategory.EXCLUDE}) // fix the contacts
-   @Test(timeout = 690000)
+   @Disabled
+   @Test
    public void testWalkingOnLinesInEnvironment() throws SimulationExceededMaximumTimeException
    {
       try
@@ -69,8 +67,8 @@ public class AtlasPointyRocksEnvironmentContactsTest extends HumanoidPointyRocks
    }
 
    @Override
-   @ContinuousIntegrationTest(estimatedDuration = 100.0, categoriesOverride = {IntegrationCategory.EXCLUDE}) // fix the contacts
-   @Test(timeout = 350000)
+   @Disabled
+   @Test
    public void testWalkingOnPointInEnvironment() throws SimulationExceededMaximumTimeException
    {
       super.testWalkingOnPointInEnvironment();

@@ -1,11 +1,11 @@
 package us.ihmc.valkyrie.simulation;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.RobotTarget;
 import us.ihmc.avatar.roughTerrainWalking.AvatarBipedalFootstepPlannerEndToEndTest;
-import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations;
-import us.ihmc.continuousIntegration.IntegrationCategory;
+import org.junit.jupiter.api.Tag;
+import org.junit.jupiter.api.Disabled;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.graphicsDescription.Graphics3DObject;
 import us.ihmc.graphicsDescription.appearance.AppearanceDefinition;
@@ -23,7 +23,7 @@ import us.ihmc.simulationconstructionset.physics.collision.simple.SimpleCollisio
 import us.ihmc.simulationconstructionset.physics.collision.simple.SimpleCollisionShapeFactory;
 import us.ihmc.valkyrie.ValkyrieRobotModel;
 
-@ContinuousIntegrationAnnotations.ContinuousIntegrationPlan(categories = {IntegrationCategory.EXCLUDE})
+@Disabled
 public class ValkyrieFootstepPlannerEndToEndTest extends AvatarBipedalFootstepPlannerEndToEndTest
 {
    private static final boolean showCollisionGraphics = true;
@@ -42,16 +42,14 @@ public class ValkyrieFootstepPlannerEndToEndTest extends AvatarBipedalFootstepPl
    }
 
    @Override
-   @ContinuousIntegrationAnnotations.ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(timeout = 120000)
+   @Test
    public void testWalkingOnFlatGround()
    {
       super.testWalkingOnFlatGround();
    }
 
    @Override
-   @ContinuousIntegrationAnnotations.ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(timeout = 300000)
+   @Test
    public void testWalkingBetweenBollardsAStarPlanner()
    {
       super.testWalkingBetweenBollardsAStarPlanner();

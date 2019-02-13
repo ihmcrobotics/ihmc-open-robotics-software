@@ -1,11 +1,11 @@
 package us.ihmc.robotics.math.filters;
 
-import static org.junit.Assert.assertTrue;
+import static us.ihmc.robotics.Assert.*;
 
 import java.util.Random;
 
-import org.junit.After;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.Test;
 
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.tools.EuclidFrameRandomTools;
@@ -19,13 +19,13 @@ import us.ihmc.yoVariables.variable.YoFrameVector3D;
 
 public class YoIMUMahonyFilterTest
 {
-   @After
+   @AfterEach
    public void tearDown()
    {
       ReferenceFrameTools.clearWorldFrameTree();
    }
 
-   @Test(timeout=10000)
+   @Test
    public void testInitialization() throws Exception
    {
       String imuName = "test";
@@ -62,7 +62,7 @@ public class YoIMUMahonyFilterTest
       assertTrue(currentError <= 1.0e-10);
    }
 
-   @Test(timeout=10000)
+   @Test
    public void testConvergenceToStaticOrientation() throws Exception
    {
       String imuName = "test";
@@ -109,7 +109,7 @@ public class YoIMUMahonyFilterTest
       assertTrue(currentError <= 3.0e-4);
    }
 
-   @Test(timeout=10000)
+   @Test
    public void testConvergenceToStaticOrientationWithGyroBias() throws Exception
    {
       String imuName = "test";

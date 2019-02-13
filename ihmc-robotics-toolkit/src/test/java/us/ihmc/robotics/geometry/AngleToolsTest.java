@@ -1,20 +1,18 @@
 package us.ihmc.robotics.geometry;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import static us.ihmc.robotics.Assert.*;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Modifier;
 import java.util.Random;
 
-import org.junit.After;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.Test;
 
 import us.ihmc.commons.RandomNumbers;
-import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
-import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationPlan;
-import us.ihmc.continuousIntegration.IntegrationCategory;
+import org.junit.jupiter.api.Tag;
+import org.junit.jupiter.api.Disabled;
 import us.ihmc.euclid.referenceFrame.FramePoint2D;
 import us.ihmc.euclid.referenceFrame.FramePose2D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
@@ -22,17 +20,15 @@ import us.ihmc.euclid.referenceFrame.tools.ReferenceFrameTools;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple2D.Vector2D;
 
-@ContinuousIntegrationPlan(categories = {IntegrationCategory.FAST})
 public class AngleToolsTest
 {
-   @After
+   @AfterEach
    public void tearDown()
    {
       ReferenceFrameTools.clearWorldFrameTree();
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(timeout = 30000)
+   @Test
    public void testConstructor()
            throws NoSuchMethodException, SecurityException, InstantiationException, IllegalAccessException, IllegalArgumentException, InvocationTargetException
    {
@@ -44,8 +40,7 @@ public class AngleToolsTest
       constructor.newInstance();
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(timeout = 30000)
+   @Test
    public void testComputeAngleDifferenceMinusTwoPiToZero()
    {
       Random random = new Random(123456);
@@ -68,8 +63,7 @@ public class AngleToolsTest
 
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(timeout = 30000)
+   @Test
    public void testComputeAngleDifferenceMinusPiToPi()
    {
       Random random = new Random(123456);
@@ -92,8 +86,7 @@ public class AngleToolsTest
 
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(timeout = 30000)
+   @Test
    public void testComputeAngleDifferenceMinusPiToPiUsingTrim()
    {
       Random random = new Random(123456);
@@ -116,8 +109,7 @@ public class AngleToolsTest
 
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(timeout = 30000)
+   @Test
    public void testFindClosestNinetyDegreeYaw()
    {
       double yawInRadians;
@@ -151,8 +143,7 @@ public class AngleToolsTest
       assertEquals(expectedReturn, actualReturn);
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(timeout = 30000)
+   @Test
    public void testGenerateRandomAngle()
    {
       Random random = new Random(0);
@@ -165,8 +156,7 @@ public class AngleToolsTest
       }
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(timeout = 30000)
+   @Test
    public void testGenerateArrayOfTestAngles()
    {
       double[] anglesWithoutZeroOrPlusMinusPi = AngleTools.generateArrayOfTestAngles(100, 1e-1, false, false);
@@ -274,8 +264,7 @@ public class AngleToolsTest
       assertEquals("Should have found one angle equal to -2PI!", 1, numberOfAnglesEqualToMinus2PI);
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(timeout = 30000)
+   @Test
    public void testShiftAngleToStartOfRange()
    {
       double angleToShift = 0.5;
@@ -299,8 +288,7 @@ public class AngleToolsTest
 
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(timeout = 30000)
+   @Test
    public void testShiftAngleToStartOfRangeUnitless()
    {
       double range = Math.pow(2.0, 13.0);
@@ -341,8 +329,7 @@ public class AngleToolsTest
       }
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(timeout = 30000)
+   @Test
    public void testTrimAngleMinusPiToPi()
    {
       Random random = new Random(0);
@@ -356,8 +343,7 @@ public class AngleToolsTest
       }
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(timeout = 30000)
+   @Test
    public void testComputeAngleAverage()
    {
       double angleA, angleB;
@@ -398,8 +384,7 @@ public class AngleToolsTest
 
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(timeout = 30000)
+   @Test
    public void testAngleMinusPiToPi()
    {
       Vector2D vectorA, vectorB;
@@ -433,8 +418,7 @@ public class AngleToolsTest
       assertTrue(Double.isNaN(expected));
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(timeout = 30000)
+   @Test
    public void testAngleFromZeroToTwoPi()
    {
       assertEquals("not equal", 0.0, AngleTools.angleFromZeroToTwoPi(0.0, 0.0), 1e-7);
@@ -442,8 +426,7 @@ public class AngleToolsTest
       assertEquals("not equal", 7.0 * Math.PI / 4.0, AngleTools.angleFromZeroToTwoPi(1.0, -1.0), 1e-7);
    }
    
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(timeout = 30000)
+   @Test
    public void testCalculateHeading()
    {
 	   FramePose2D start = new FramePose2D(ReferenceFrame.getWorldFrame(), new Point2D(0.0,0.0), 0.0);

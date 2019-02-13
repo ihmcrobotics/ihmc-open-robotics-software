@@ -1,6 +1,6 @@
 package us.ihmc.avatar.testTools;
 
-import static org.junit.Assert.*;
+import static us.ihmc.robotics.Assert.*;
 
 import java.io.InputStream;
 import java.util.ArrayList;

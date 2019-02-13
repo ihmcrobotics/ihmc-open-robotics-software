@@ -1,17 +1,16 @@
 package us.ihmc.robotics.statistics;
 
-import static org.junit.Assert.assertEquals;
+import static us.ihmc.robotics.Assert.*;
 
 import java.util.ArrayList;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
-import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
-
+import org.junit.jupiter.api.Tag;
+import org.junit.jupiter.api.Disabled;
 public class PermutationTest
 {
-	@ContinuousIntegrationTest(estimatedDuration = 0.0)
-	@Test(timeout = 30000)
+	@Test
    public void testNumberOfPossiblePermutations()
    {
       // Test: calculates the number of possible permutations for different
@@ -49,8 +48,7 @@ public class PermutationTest
 
    }
 
-	@ContinuousIntegrationTest(estimatedDuration = 0.0)
-	@Test(timeout = 30000)
+	@Test
    public void testCreateResultContainer()
    {
       // Test: Tests for the size of the Results array created from an input
@@ -81,8 +79,7 @@ public class PermutationTest
 
    }
 
-	@ContinuousIntegrationTest(estimatedDuration = 0.0)
-	@Test(timeout = 30000)
+	@Test
    public void testPermutate()
    {
       // Test: Tests for the permutated resulting set to be right. It is also
@@ -186,8 +183,7 @@ public class PermutationTest
 
    }
 
-	@ContinuousIntegrationTest(estimatedDuration = 0.0)
-	@Test(timeout = 30000)
+	@Test
    public void testDifferentElementTypes()
    {
       // Test: Tests for the permutation to be accomplished correctly using

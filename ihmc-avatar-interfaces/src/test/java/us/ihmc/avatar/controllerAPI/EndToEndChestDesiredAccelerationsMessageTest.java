@@ -1,14 +1,14 @@
 package us.ihmc.avatar.controllerAPI;
 
-import static org.junit.Assert.assertArrayEquals;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import static us.ihmc.robotics.Assert.assertArrayEquals;
+import static us.ihmc.robotics.Assert.assertEquals;
+import static us.ihmc.robotics.Assert.assertTrue;
 
 import java.util.Random;
 
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import controller_msgs.msg.dds.SpineDesiredAccelerationsMessage;
 import us.ihmc.avatar.DRCObstacleCourseStartingLocation;
@@ -19,18 +19,15 @@ import us.ihmc.commonWalkingControlModules.controllerCore.WholeBodyInverseDynami
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.manipulation.individual.states.HandUserControlModeState;
 import us.ihmc.commons.RandomNumbers;
 import us.ihmc.commons.thread.ThreadTools;
-import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.mecano.tools.MultiBodySystemTools;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
-import us.ihmc.robotics.screwTheory.ScrewTools;
 import us.ihmc.simulationConstructionSetTools.bambooTools.BambooTools;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.util.simulationTesting.SimulationTestingParameters;
 import us.ihmc.tools.MemoryTools;
-import us.ihmc.yoVariables.variable.YoEnum;
 
 public abstract class EndToEndChestDesiredAccelerationsMessageTest implements MultiRobotTestInterface
 {
@@ -38,8 +35,7 @@ public abstract class EndToEndChestDesiredAccelerationsMessageTest implements Mu
 
    private DRCSimulationTestHelper drcSimulationTestHelper;
 
-   @ContinuousIntegrationTest(estimatedDuration = 18.1)
-   @Test(timeout = 90000)
+   @Test
    public void testSimpleCommands() throws Exception
    {
       BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
@@ -69,13 +65,13 @@ public abstract class EndToEndChestDesiredAccelerationsMessageTest implements Mu
       if (defaultControlState == null)
          defaultControlState = RigidBodyControlMode.JOINTSPACE;
 
-      assertEquals(defaultControlState, findControllerState(scs));
+      assertEquals(defaultControlState, EndToEndArmTrajectoryMessageTest.findControllerState(chest.getName(), scs));
 
       drcSimulationTestHelper.publishToController(desiredAccelerationsMessage);
       success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(HandUserControlModeState.TIME_WITH_NO_MESSAGE_BEFORE_ABORT - 0.05);
       assertTrue(success);
 
-      assertEquals(RigidBodyControlMode.USER, findControllerState(scs));
+      assertEquals(RigidBodyControlMode.USER, EndToEndArmTrajectoryMessageTest.findControllerState(chest.getName(), scs));
       double[] controllerDesiredJointAccelerations = findControllerDesiredJointAccelerations(spineJoints, scs);
       assertArrayEquals(chestDesiredJointAccelerations, controllerDesiredJointAccelerations, 1.0e-10);
       double[] qpOutputJointAccelerations = findQPOutputJointAccelerations(spineJoints, scs);
@@ -84,15 +80,7 @@ public abstract class EndToEndChestDesiredAccelerationsMessageTest implements Mu
       success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(0.07);
       assertTrue(success);
 
-      assertEquals(defaultControlState, findControllerState(scs));
-   }
-
-   @SuppressWarnings("unchecked")
-   public RigidBodyControlMode findControllerState(SimulationConstructionSet scs)
-   {
-      String namespace = "utorsoManager";
-      String state = namespace + "State";
-      return ((YoEnum<RigidBodyControlMode>) scs.getVariable(namespace, state)).getEnumValue();
+      assertEquals(defaultControlState, EndToEndArmTrajectoryMessageTest.findControllerState(chest.getName(), scs));
    }
 
    public double[] findQPOutputJointAccelerations(OneDoFJointBasics[] joints, SimulationConstructionSet scs)
@@ -117,13 +105,13 @@ public abstract class EndToEndChestDesiredAccelerationsMessageTest implements Mu
       return qdd_ds;
    }
 
-   @Before
+   @BeforeEach
    public void showMemoryUsageBeforeTest()
    {
       MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " before test.");
    }
 
-   @After
+   @AfterEach
    public void destroySimulationAndRecycleMemory()
    {
       if (simulationTestingParameters.getKeepSCSUp())

@@ -43,14 +43,11 @@ public class FootstepDataMessageConverter
             ConvexPolygon2D foothold = new ConvexPolygon2D();
             footstep.getFoothold(foothold);
 
-            if(foothold.getNumberOfVertices() < 4)
-               continue;
-
             if (foothold.getNumberOfVertices() != 4)
                ConvexPolygonTools.limitVerticesConservative(foothold, 4);
 
             ArrayList<Point2D> contactPoints = new ArrayList<>();
-            for (int contactPointIdx = 0; contactPointIdx < 4; contactPointIdx++)
+            for (int contactPointIdx = 0; contactPointIdx < foothold.getNumberOfVertices(); contactPointIdx++)
                contactPoints.add(new Point2D(foothold.getVertex(contactPointIdx)));
             HumanoidMessageTools.packPredictedContactPoints(contactPoints, footstepData);
          }

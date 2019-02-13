@@ -1,14 +1,13 @@
 package us.ihmc.avatar;
 
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
+import static us.ihmc.robotics.Assert.*;
 
 import java.util.ArrayList;
 
-import org.junit.After;
-import org.junit.Before;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.factory.AvatarSimulation;
 import us.ihmc.avatar.initialSetup.DRCGuiInitialSetup;
@@ -17,7 +16,8 @@ import us.ihmc.avatar.initialSetup.DRCSCSInitialSetup;
 import us.ihmc.avatar.testTools.DRCSimulationTestHelper;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.footstepGenerator.HeadingAndVelocityEvaluationScriptParameters;
 import us.ihmc.commons.thread.ThreadTools;
-import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
+import org.junit.jupiter.api.Tag;
+import org.junit.jupiter.api.Disabled;
 import us.ihmc.jMonkeyEngineToolkit.GroundProfile3D;
 import us.ihmc.jMonkeyEngineToolkit.camera.CameraConfiguration;
 import us.ihmc.robotDataLogger.RobotVisualizer;
@@ -36,6 +36,7 @@ import us.ihmc.tools.MemoryTools;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 
+@Tag("humanoid-flat-ground")
 public abstract class DRCFlatGroundWalkingTest implements MultiRobotTestInterface
 {
    private SimulationTestingParameters simulationTestingParameters = SimulationTestingParameters.createFromSystemProperties();
@@ -56,13 +57,13 @@ public abstract class DRCFlatGroundWalkingTest implements MultiRobotTestInterfac
    private static final boolean cheatWithGroundHeightAtForFootstep = false;
    private static final boolean drawGroundProfile = false;
 
-   @Before
+   @BeforeEach
    public void showMemoryUsageBeforeTest()
    {
       MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " before test.");
    }
 
-   @After
+   @AfterEach
    public void destroySimulationAndRecycleMemory()
    {
       if (simulationTestingParameters.getKeepSCSUp())
@@ -90,8 +91,7 @@ public abstract class DRCFlatGroundWalkingTest implements MultiRobotTestInterfac
 
    public abstract boolean doPelvisWarmup();
 
-   @ContinuousIntegrationTest(estimatedDuration = 348.7)
-   @Test(timeout = 1700000)
+   @Test
    public void testFlatGroundWalking() throws SimulationExceededMaximumTimeException, ControllerFailureException
    {
       runFlatGroundWalking();
@@ -194,7 +194,7 @@ public abstract class DRCFlatGroundWalkingTest implements MultiRobotTestInterfac
 
    //TODO: Get rid of the stuff below and use a test helper.....
 
-   @After
+   @AfterEach
    public void destroyOtherStuff()
    {
       if (avatarSimulation != null)

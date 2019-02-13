@@ -209,6 +209,7 @@ public class HighLevelHumanoidControllerFactory implements CloseableAndDisposabl
                                                                                  walkingControllerParameters, referenceFrames, contactableFeet, controlDT,
                                                                                  useHeadingAndVelocityScript, registry);
 
+         controllerToolbox.attachRobotMotionStatusChangedListener(queuedControllerCommandGenerator);
          controllerToolbox.addUpdatables(queuedControllerCommandGenerator.getModulesToUpdate());
       }
       else
@@ -461,7 +462,10 @@ public class HighLevelHumanoidControllerFactory implements CloseableAndDisposabl
 
    public void addUpdatable(Updatable updatable)
    {
-      this.updatables.add(updatable);
+      if (controllerToolbox == null)
+         this.updatables.add(updatable);
+      else
+         controllerToolbox.addUpdatable(updatable);
    }
 
    @Override

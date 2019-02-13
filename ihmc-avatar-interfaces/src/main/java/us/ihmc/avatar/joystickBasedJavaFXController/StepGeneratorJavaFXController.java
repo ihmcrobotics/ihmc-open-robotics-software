@@ -48,6 +48,7 @@ import us.ihmc.commons.MathTools;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.communication.IHMCROS2Publisher;
 import us.ihmc.communication.ROS2Tools;
+import us.ihmc.communication.controllerAPI.RobotLowLevelMessenger;
 import us.ihmc.communication.packets.PlanarRegionMessageConverter;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.geometry.interfaces.ConvexPolygon2DReadOnly;
@@ -124,7 +125,7 @@ public class StepGeneratorJavaFXController
 
    public StepGeneratorJavaFXController(String robotName, JavaFXMessager messager, WalkingControllerParameters walkingControllerParameters, Ros2Node ros2Node,
                                         JavaFXRobotVisualizer javaFXRobotVisualizer, HumanoidRobotKickMessenger kickMessenger,
-                                        HumanoidRobotPunchMessenger punchMessenger, HumanoidRobotLowLevelMessenger lowLevelMessenger,
+                                        HumanoidRobotPunchMessenger punchMessenger, RobotLowLevelMessenger lowLevelMessenger,
                                         SideDependentList<? extends ConvexPolygon2DReadOnly> footPolygons)
    {
       this.javaFXRobotVisualizer = javaFXRobotVisualizer;

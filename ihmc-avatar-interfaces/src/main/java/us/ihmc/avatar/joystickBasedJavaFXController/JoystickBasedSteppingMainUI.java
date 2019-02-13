@@ -17,6 +17,7 @@ import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParam
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.ControllerAPIDefinition;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.communication.ROS2Tools;
+import us.ihmc.communication.controllerAPI.RobotLowLevelMessenger;
 import us.ihmc.euclid.geometry.interfaces.ConvexPolygon2DReadOnly;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
@@ -48,7 +49,7 @@ public class JoystickBasedSteppingMainUI
 
    public JoystickBasedSteppingMainUI(String robotName, Stage primaryStage, Ros2Node ros2Node, FullHumanoidRobotModelFactory fullRobotModelFactory,
                                       WalkingControllerParameters walkingControllerParameters, HumanoidRobotKickMessenger kickMessenger,
-                                      HumanoidRobotPunchMessenger punchMessenger, HumanoidRobotLowLevelMessenger lowLevelMessenger,
+                                      HumanoidRobotPunchMessenger punchMessenger, RobotLowLevelMessenger lowLevelMessenger,
                                       SideDependentList<? extends ConvexPolygon2DReadOnly> footPolygons)
          throws Exception
    {

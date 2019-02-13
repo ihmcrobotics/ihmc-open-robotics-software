@@ -61,6 +61,7 @@ import us.ihmc.robotics.weightMatrices.WeightMatrix3D;
 public class MessageTools
 {
    public static final boolean DEBUG = false;
+   public static final int WALKING_PREVIEW_MAX_NUMBER_OF_FRAMES = 1000;
 
    public static TextToSpeechPacket createTextToSpeechPacket(String textToSpeak)
    {
@@ -287,6 +288,15 @@ public class MessageTools
       return message;
    }
 
+   public static SelectionMatrix3DMessage createSelectionMatrix3DMessage(boolean xSelected, boolean ySelected, boolean zSelected)
+   {
+      SelectionMatrix3DMessage message = new SelectionMatrix3DMessage();
+      message.setXSelected(xSelected);
+      message.setYSelected(ySelected);
+      message.setZSelected(zSelected);
+      return message;
+   }
+
    /**
     * Copy constructor.
     * 
@@ -337,14 +347,41 @@ public class MessageTools
       return message;
    }
 
-   public static WalkingControllerPreviewOutputMessage createWalkingControllerPreviewOutputMessage(double dt, List<KinematicsToolboxOutputStatus> previewFrames)
+   public static WalkingControllerPreviewOutputMessage createWalkingControllerPreviewOutputMessage(double inputDT,
+                                                                                                   List<KinematicsToolboxOutputStatus> previewFrames)
    {
-      // TODO down-sample frames when going over the message maximum size.
       WalkingControllerPreviewOutputMessage message = new WalkingControllerPreviewOutputMessage();
-      message.setFrameDt(dt);
-      for (KinematicsToolboxOutputStatus frame : previewFrames)
+
+      if (previewFrames.size() <= WALKING_PREVIEW_MAX_NUMBER_OF_FRAMES)
       {
-         message.getRobotConfigurations().add().set(frame);
+         message.setFrameDt(inputDT);
+         for (KinematicsToolboxOutputStatus frame : previewFrames)
+         {
+            message.getRobotConfigurations().add().set(frame);
+         }
+      }
+      else
+      {
+         double outputDT = inputDT * (double) previewFrames.size() / (double) WALKING_PREVIEW_MAX_NUMBER_OF_FRAMES;
+
+         for (int outputFrameIndex = 0; outputFrameIndex < WALKING_PREVIEW_MAX_NUMBER_OF_FRAMES; outputFrameIndex++)
+         {
+            double outputFrameTime = outputFrameIndex * outputDT;
+            int firstInputFrameIndex = (int) Math.floor(outputFrameTime / inputDT);
+            int secondInputFrameIndex = (int) Math.ceil(outputFrameTime / inputDT);
+            if (firstInputFrameIndex == secondInputFrameIndex)
+            {
+               message.getRobotConfigurations().add().set(previewFrames.get(firstInputFrameIndex));
+            }
+            else
+            {
+               double firstInputFrameTime = firstInputFrameIndex * inputDT;
+               double secondInputFrameTime = secondInputFrameIndex * inputDT;
+               double alpha = (secondInputFrameTime - outputFrameTime) / (secondInputFrameTime - firstInputFrameTime);
+               message.getRobotConfigurations().add()
+                      .set(interpolateMessages(previewFrames.get(firstInputFrameIndex), previewFrames.get(secondInputFrameIndex), alpha));
+            }
+         }
       }
       return message;
    }
@@ -891,5 +928,13 @@ public class MessageTools
          scanPoints[index] = scanPoint;
       }
       return scanPoints;
+   }
+
+   public static void unpackScanPoint(StereoVisionPointCloudMessage stereoVisionPointCloudMessage, int index, Point3DBasics scanPointToPack)
+   {
+      index *= 3;
+      scanPointToPack.setX(stereoVisionPointCloudMessage.getPointCloud().get(index++));
+      scanPointToPack.setY(stereoVisionPointCloudMessage.getPointCloud().get(index++));
+      scanPointToPack.setZ(stereoVisionPointCloudMessage.getPointCloud().get(index++));
    }
 }

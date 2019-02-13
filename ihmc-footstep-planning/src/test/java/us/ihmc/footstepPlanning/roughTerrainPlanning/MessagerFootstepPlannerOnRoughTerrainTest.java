@@ -1,6 +1,7 @@
 package us.ihmc.footstepPlanning.roughTerrainPlanning;
 
-import static org.junit.Assert.assertTrue;
+import static us.ihmc.robotics.Assert.*;
+
 import static us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI.ComputePathTopic;
 import static us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI.FootstepPlanResponseTopic;
 import static us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI.PlannerTypeTopic;
@@ -25,20 +26,18 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
 
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
 import controller_msgs.msg.dds.FootstepDataListMessage;
-import org.junit.After;
-import org.junit.Before;
 
 import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.stage.Stage;
 import us.ihmc.commons.Conversions;
-import us.ihmc.commons.PrintTools;
 import us.ihmc.commons.thread.ThreadTools;
-import us.ihmc.continuousIntegration.ContinuousIntegrationTools;
+import us.ihmc.commons.ContinuousIntegrationTools;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.footstepPlanning.FootstepDataMessageConverter;
-import us.ihmc.footstepPlanning.FootstepPlan;
 import us.ihmc.footstepPlanning.FootstepPlannerType;
 import us.ihmc.footstepPlanning.FootstepPlanningResult;
 import us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI;
@@ -48,6 +47,7 @@ import us.ihmc.footstepPlanning.ui.ApplicationRunner;
 import us.ihmc.footstepPlanning.ui.FootstepPlannerUI;
 import us.ihmc.footstepPlanning.ui.components.FootstepPathCalculatorModule;
 import us.ihmc.javaFXToolkit.messager.SharedMemoryJavaFXMessager;
+import us.ihmc.log.LogTools;
 import us.ihmc.messager.SharedMemoryMessager;
 
 public abstract class MessagerFootstepPlannerOnRoughTerrainTest
@@ -63,7 +63,7 @@ public abstract class MessagerFootstepPlannerOnRoughTerrainTest
 
    private static boolean visualize = false;
 
-   @Before
+   @BeforeEach
    public void setup()
    {
       visualize = visualize && !ContinuousIntegrationTools.isRunningOnContinuousIntegrationServer();
@@ -121,7 +121,7 @@ public abstract class MessagerFootstepPlannerOnRoughTerrainTest
 
    }
 
-   @After
+   @AfterEach
    public void tearDown() throws Exception
    {
       module.stop();
@@ -139,9 +139,9 @@ public abstract class MessagerFootstepPlannerOnRoughTerrainTest
       List<String> testsToRun = getTestsToRun();
       for (String test : testsToRun)
       {
-         PrintTools.info("Running test " + test);
+         LogTools.info("Running test " + test);
          runTestAndAssert(getTestData(test));
-         PrintTools.info("Test " + test + " passed.");
+         LogTools.info("Test " + test + " passed.");
          ThreadTools.sleep(100);
       }
    }

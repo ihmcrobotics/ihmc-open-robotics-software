@@ -1,6 +1,6 @@
 package us.ihmc.robotics.optimization;
 
-import static org.junit.Assert.assertTrue;
+import static us.ihmc.robotics.Assert.*;
 
 import java.util.Random;
 
@@ -8,11 +8,10 @@ import org.ejml.data.DenseMatrix64F;
 import org.ejml.ops.CommonOps;
 import org.ejml.ops.MatrixFeatures;
 import org.ejml.ops.RandomMatrices;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
-import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
-import us.ihmc.continuousIntegration.IntegrationCategory;
-
+import org.junit.jupiter.api.Tag;
+import org.junit.jupiter.api.Disabled;
 /**
  * @author twan
  *         Date: 8/9/13
@@ -20,8 +19,7 @@ import us.ihmc.continuousIntegration.IntegrationCategory;
 public class ActiveSearchQuadraticProgramOptimizerTest
 {
 
-	@ContinuousIntegrationTest(estimatedDuration = 0.0)
-	@Test(timeout = 30000)
+	@Test
    public void testUnconstrained()
    {
       Random random = new Random(12355L);
@@ -43,8 +41,7 @@ public class ActiveSearchQuadraticProgramOptimizerTest
       assertTrue(MatrixFeatures.isConstantVal(axMinusB, 0.0, 1e-12));
    }
 
-	@ContinuousIntegrationTest(estimatedDuration = 0.0)
-	@Test(timeout = 30000)
+	@Test
    public void testConstrainedSimple()
    {
       int objectiveSize = 3;
@@ -83,8 +80,8 @@ public class ActiveSearchQuadraticProgramOptimizerTest
 	/**
 	 * Not working, but probably not critical right now. Get this to work some day TODO
 	 */
-	@ContinuousIntegrationTest(estimatedDuration = 0.0, categoriesOverride = IntegrationCategory.EXCLUDE)
-	@Test(timeout = 525)
+	@Disabled
+	@Test
    public void testFullyConstrained()
    {	   
       int objectiveSize = 3;

@@ -1,8 +1,7 @@
 package us.ihmc.footstepPlanning.graphSearch.collision;
 
 import org.junit.Assert;
-import org.junit.Test;
-import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations;
+import org.junit.jupiter.api.Test;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.footstepPlanning.graphSearch.parameters.DefaultFootstepPlannerCostParameters;
@@ -17,8 +16,7 @@ import java.util.Arrays;
 
 public class BoundingBoxCollisionDetectorTest
 {
-   @ContinuousIntegrationAnnotations.ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(timeout = 30000)
+   @Test
    public void testBodyCollisionWithZeroYaw()
    {
       FootstepPlannerParameters plannerParameters = new DefaultFootstepPlanningParameters()
@@ -116,8 +114,7 @@ public class BoundingBoxCollisionDetectorTest
       Assert.assertTrue(collisionData.isCollisionDetected());
    }
 
-   @ContinuousIntegrationAnnotations.ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(timeout = 30000)
+   @Test
    public void testCollisionWithRotatedBody()
    {
       FootstepPlannerParameters plannerParameters = new DefaultFootstepPlanningParameters()
@@ -176,8 +173,7 @@ public class BoundingBoxCollisionDetectorTest
       Assert.assertTrue(collisionData.isCollisionDetected());
    }
 
-   @ContinuousIntegrationAnnotations.ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(timeout = 30000)
+   @Test
    public void testHeightDetection()
    {
       FootstepPlannerParameters plannerParameters = new DefaultFootstepPlanningParameters()
@@ -235,8 +231,7 @@ public class BoundingBoxCollisionDetectorTest
       Assert.assertTrue(collisionChecker.checkForCollision().isCollisionDetected());
    }
 
-   @ContinuousIntegrationAnnotations.ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(timeout = 30000)
+   @Test
    public void testCollidingWithACube()
    {
       FootstepPlannerParameters plannerParameters = new DefaultFootstepPlanningParameters()

@@ -1,7 +1,6 @@
 package us.ihmc.tools.io;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import static us.ihmc.robotics.Assert.*;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -9,16 +8,16 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.PrintStream;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
-import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
+import org.junit.jupiter.api.Tag;
+import org.junit.jupiter.api.Disabled;
 import us.ihmc.commons.thread.ThreadTools;
 
 public class StreamGobblerTest
 {
 
-	@ContinuousIntegrationTest(estimatedDuration = 0.0)
-	@Test(timeout = 30000)
+	@Test
    public void testStreamGobblerWithASingleLine() throws IOException
    {
       String string = "This is some input! Yep, this is one fine line of input!";
@@ -45,8 +44,7 @@ public class StreamGobblerTest
       assertEquals(0, inputStream.available());
    }
 
-	@ContinuousIntegrationTest(estimatedDuration = 0.0)
-	@Test(timeout = 30000)
+	@Test
    public void testStreamGobblerToGobbleMultipleLines() throws IOException
    {
       String string = "This is some input! \nHere's a second line of input!";

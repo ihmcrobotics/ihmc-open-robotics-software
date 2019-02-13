@@ -1,9 +1,9 @@
 package us.ihmc.quadrupedRobotics.controller.force;
 
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
-import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Tag;
+import org.junit.jupiter.api.Test;
 import us.ihmc.quadrupedCommunication.teleop.RemoteQuadrupedTeleopManager;
 import us.ihmc.quadrupedRobotics.*;
 import us.ihmc.quadrupedRobotics.controller.QuadrupedControlMode;
@@ -16,6 +16,7 @@ import us.ihmc.tools.MemoryTools;
 
 import java.io.IOException;
 
+@Tag("quadruped-xgait")
 public abstract class QuadrupedXGaitBumpyTerrainWalkingTest implements QuadrupedMultiRobotTestInterface
 {
    protected GoalOrientedTestConductor conductor;
@@ -23,13 +24,13 @@ public abstract class QuadrupedXGaitBumpyTerrainWalkingTest implements Quadruped
    private RemoteQuadrupedTeleopManager stepTeleopManager;
    private QuadrupedTestFactory quadrupedTestFactory;
 
-   @Before
+   @BeforeEach
    public void setup()
    {
       MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " before test.");
    }
 
-   @After
+   @AfterEach
    public void tearDown()
    {
       quadrupedTestFactory.close();
@@ -41,8 +42,7 @@ public abstract class QuadrupedXGaitBumpyTerrainWalkingTest implements Quadruped
       MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " after test.");
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 30.0)
-   @Test(timeout = 520000)
+   @Test
    public void testWalkingOverShallowBumpyTerrain() throws IOException
    {
       testWalkingOverShallowBumpyTerrain(1.0);
@@ -78,8 +78,7 @@ public abstract class QuadrupedXGaitBumpyTerrainWalkingTest implements Quadruped
       stepTeleopManager = quadrupedTestFactory.getRemoteStepTeleopManager();
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 45.0)
-   @Test(timeout = 650000)
+   @Test
    public void testWalkingOverMediumBumpyTerrain() throws SimulationExceededMaximumTimeException, ControllerFailureException, IOException
    {
       double xAmp1 = 0.02, xFreq1 = 0.5, xAmp2 = 0.01, xFreq2 = 0.5;
@@ -97,8 +96,7 @@ public abstract class QuadrupedXGaitBumpyTerrainWalkingTest implements Quadruped
       conductor.simulate();
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 70.0)
-   @Test(timeout = 350000)
+   @Test
    public void testTrottingOverAggressiveBumpyTerrain() throws SimulationExceededMaximumTimeException, ControllerFailureException, IOException
    {
       double xAmp1 = 0.03, xFreq1 = 0.5, xAmp2 = 0.02, xFreq2 = 0.5;

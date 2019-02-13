@@ -1,17 +1,15 @@
 package us.ihmc.stateEstimation.humanoid.kinematicsBasedStateEstimation;
 
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import static us.ihmc.robotics.Assert.*;
 
 import java.util.Random;
 
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
-import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationPlan;
-import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
-import us.ihmc.continuousIntegration.IntegrationCategory;
+import org.junit.jupiter.api.Tag;
+import org.junit.jupiter.api.Disabled;
 import us.ihmc.euclid.axisAngle.AxisAngle;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
@@ -32,7 +30,6 @@ import us.ihmc.simulationconstructionset.SimulationConstructionSetParameters;
 import us.ihmc.simulationconstructionset.util.simulationTesting.SimulationTestingParameters;
 import us.ihmc.tools.MemoryTools;
 
-@ContinuousIntegrationPlan(categories={IntegrationCategory.FAST})
 public class ClippedSpeedOffsetErrorInterpolatorTest
 {
    SimulationTestingParameters simulationTestingParameters = new SimulationTestingParameters();
@@ -63,20 +60,20 @@ public class ClippedSpeedOffsetErrorInterpolatorTest
    private final YoDouble alphaFilterBreakFrequency = new YoDouble("alphaFilterBreakFrequency", registry);
    private final double dt = 0.001;
 
-   @Before
+   @BeforeEach
    public void setUp()
    {
       MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " before test.");
    }
 
-   @After
+   @AfterEach
    public void showMemoryAfterTests()
    {
       MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " after test.");
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 6.6, categoriesOverride = {IntegrationCategory.EXCLUDE})
-   @Test(timeout = 33000)
+   @Disabled
+   @Test
    public void testRandomTranslationErrorInterpolation()
    {
       Random random = new Random();
@@ -151,8 +148,8 @@ public class ClippedSpeedOffsetErrorInterpolatorTest
    }
 
    //TODO
-   @ContinuousIntegrationTest(estimatedDuration = 10.0, categoriesOverride = IntegrationCategory.EXCLUDE)
-   @Test(timeout = 600000)
+   @Disabled
+   @Test
    public void testRandomRotationErrorInterpolation()
    {
       Random random = new Random();
@@ -238,8 +235,8 @@ public class ClippedSpeedOffsetErrorInterpolatorTest
    }
 
    // TODO
-   @ContinuousIntegrationTest(estimatedDuration = 10.0, categoriesOverride = IntegrationCategory.EXCLUDE)
-   @Test(timeout = 600000)
+   @Disabled
+   @Test
    public void testTranslationAndRotationErrorsInterpolation()
    {
       Random random = new Random();
@@ -314,8 +311,7 @@ public class ClippedSpeedOffsetErrorInterpolatorTest
       }
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.5)
-   @Test(timeout = 30000)
+   @Test
    public void testMaxTranslationalCorrectionSpeedClip()
    {
       int numberOfTicks = 10000;
@@ -397,8 +393,8 @@ public class ClippedSpeedOffsetErrorInterpolatorTest
    }
 
    //TODO
-   @ContinuousIntegrationTest(estimatedDuration = 0.3, categoriesOverride = IntegrationCategory.EXCLUDE)
-   @Test(timeout = 60000)
+   @Disabled
+   @Test
    public void testMaxRotationalCorrectionSpeedClip()
    {
       int numberOfTicks = 10000;
@@ -480,8 +476,8 @@ public class ClippedSpeedOffsetErrorInterpolatorTest
    }
 
    // TODO
-   @ContinuousIntegrationTest(estimatedDuration = 0.3, categoriesOverride = IntegrationCategory.EXCLUDE)
-   @Test(timeout = 30000)
+   @Disabled
+   @Test
    public void testMaxCorrectionSpeedClipWorksWhenTranslationAndRotationOffsetsAreBig()
    {
       int numberOfTicks = 10000;
@@ -626,8 +622,7 @@ public class ClippedSpeedOffsetErrorInterpolatorTest
       }
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 12.0)
-   @Test(timeout = 60000)
+   @Test
    public void testRotationCorrectionIsActuallyDeactivatedWhenAskedTo()
    {
       Random random = new Random();
@@ -702,8 +697,7 @@ public class ClippedSpeedOffsetErrorInterpolatorTest
       }
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.4)
-   @Test(timeout = 30000)
+   @Test
    public void testErrorRotationCheckIsBehavingProperly()
    {
       Random random = new Random();

@@ -6,10 +6,7 @@ import java.util.List;
 import org.ejml.alg.dense.decomposition.chol.CholeskyDecompositionCommon_D64;
 import org.ejml.alg.dense.decomposition.lu.LUDecompositionBase_D64;
 import org.ejml.data.DenseMatrix64F;
-import org.junit.After;
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.*;
 
 import gnu.trove.list.array.TDoubleArrayList;
 import gnu.trove.list.array.TIntArrayList;
@@ -18,8 +15,10 @@ import us.ihmc.commons.allocations.AllocationProfiler;
 import us.ihmc.commons.allocations.AllocationRecord;
 import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.communication.controllerAPI.StatusMessageOutputManager;
-import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
-import us.ihmc.continuousIntegration.IntegrationCategory;
+import org.junit.jupiter.api.Tag;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.referenceFrame.FrameConvexPolygon2D;
 import us.ihmc.euclid.referenceFrame.tools.ReferenceFrameTools;
@@ -40,6 +39,7 @@ import us.ihmc.simulationconstructionset.dataBuffer.MirroredYoVariableRegistry;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
 import us.ihmc.tools.MemoryTools;
 
+@Tag("allocation-slow")
 public class GenericQuadrupedAllocationTest
 {
    private QuadrupedTestFactory quadrupedTestFactory;
@@ -48,7 +48,7 @@ public class GenericQuadrupedAllocationTest
    private RemoteQuadrupedTeleopManager stepTeleopManager;
    private AllocationProfiler allocationProfiler = new AllocationProfiler();
 
-   @Before
+   @BeforeEach
    public void before() throws SimulationExceededMaximumTimeException
    {
       MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " before test.");
@@ -80,7 +80,7 @@ public class GenericQuadrupedAllocationTest
       setup();
    }
 
-   @After
+   @AfterEach
    public void tearDown()
    {
       quadrupedTestFactory.close();
@@ -111,8 +111,7 @@ public class GenericQuadrupedAllocationTest
       }
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 300.0, categoriesOverride = {IntegrationCategory.SLOW})
-   @Test(timeout = 600000)
+   @Test
    public void testForAllocationStanding()
    {
       QuadrupedTestBehaviors.standUp(conductor, variables);
@@ -125,8 +124,7 @@ public class GenericQuadrupedAllocationTest
    }
 
 
-   @ContinuousIntegrationTest(estimatedDuration = 300.0, categoriesOverride = {IntegrationCategory.SLOW})
-   @Test(timeout = 600000)
+   @Test
    public void testForAllocationStepping()
    {
       QuadrupedTestBehaviors.readyXGait(conductor, variables, stepTeleopManager);

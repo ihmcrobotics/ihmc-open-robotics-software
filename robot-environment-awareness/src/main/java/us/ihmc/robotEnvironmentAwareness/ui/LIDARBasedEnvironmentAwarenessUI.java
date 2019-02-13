@@ -113,6 +113,16 @@ public class LIDARBasedEnvironmentAwarenessUI
    private void initializeControllers(REAUIMessager uiMessager)
    {
       File configurationFile = new File(UI_CONFIGURATION_FILE_NAME);
+      try
+      {
+         configurationFile.getParentFile().mkdirs();
+         configurationFile.createNewFile();
+      }
+      catch (IOException e)
+      {
+         System.out.println(configurationFile.getAbsolutePath());
+         e.printStackTrace();
+      }
 
       pointCloudAnchorPaneController.setConfigurationFile(configurationFile);
       pointCloudAnchorPaneController.attachREAMessager(uiMessager);

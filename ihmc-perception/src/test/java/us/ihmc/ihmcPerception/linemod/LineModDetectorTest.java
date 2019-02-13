@@ -1,8 +1,6 @@
 package us.ihmc.ihmcPerception.linemod;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
+import static us.ihmc.robotics.Assert.*;
 
 import java.awt.image.BufferedImage;
 import java.io.File;
@@ -11,25 +9,23 @@ import java.util.ArrayList;
 
 import javax.imageio.ImageIO;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import com.jme3.math.FastMath;
 
-import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationPlan;
-import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
-import us.ihmc.continuousIntegration.IntegrationCategory;
+import org.junit.jupiter.api.Tag;
+import org.junit.jupiter.api.Disabled;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.tools.UnitConversions;
 
-@ContinuousIntegrationPlan(categories = IntegrationCategory.EXCLUDE) // Doesn't work right on all machines
+@Disabled
 public class LineModDetectorTest
 {
 
    static final String modelFile="drill_DCS551/drillUI.obj";
 //   static final String modelFile=""/examples/drill/drill.obj";
          
-   @ContinuousIntegrationTest(estimatedDuration = 1.0)
-   @Test(timeout=3000)
+   @Test
    public void testGenerateVertexes()
    {
       LineModDetector detector = new LineModDetector(null);
@@ -39,8 +35,7 @@ public class LineModDetectorTest
       org.junit.Assert.assertEquals(257,vertexes.size());
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 3.0)
-   @Test(timeout=3000)
+   @Test
    public void trainOneTestOne() throws IOException
    {
       LineModDetector detector = new LineModDetector(modelFile);
@@ -74,8 +69,7 @@ public class LineModDetectorTest
       }
    }
    
-   @ContinuousIntegrationTest(estimatedDuration = 1.0)
-   @Test(timeout = 3000)
+   @Test
    public void trainOneTestOneScaled() throws IOException
    {
       LineModDetector detector = new LineModDetector(modelFile);
@@ -102,8 +96,7 @@ public class LineModDetectorTest
       assertTrue(bestDetection.score> 0.94);
    }
    
-   @ContinuousIntegrationTest(estimatedDuration = 1.0)
-   @Test(timeout = 5000)
+   @Test
    public void testFeatureSaveLoad()
    {
       LineModDetector detector = new LineModDetector(modelFile);
@@ -128,8 +121,7 @@ public class LineModDetectorTest
       System.out.println("score:"+bestDetection.score);
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 3.0)
-   @Test(timeout=120000)
+   @Test
    public void testYawAngles() 
    {
       LineModDetector detector = new LineModDetector(modelFile);

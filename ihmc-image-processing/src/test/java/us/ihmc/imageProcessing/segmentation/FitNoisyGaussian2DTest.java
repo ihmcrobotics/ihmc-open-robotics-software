@@ -1,16 +1,16 @@
 package us.ihmc.imageProcessing.segmentation;
 
-import static org.junit.Assert.assertEquals;
+import static us.ihmc.robotics.Assert.*;
 
 import java.util.Random;
 
 import org.ejml.data.DenseMatrix64F;
 import org.ejml.ops.CommonOps;
 import org.ejml.ops.CovarianceRandomDraw;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
-import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
-
+import org.junit.jupiter.api.Tag;
+import org.junit.jupiter.api.Disabled;
 /**
  * @author Peter Abeles
  */
@@ -22,8 +22,7 @@ public class FitNoisyGaussian2DTest {
     * Test with no noise added
     */
 
-	@ContinuousIntegrationTest(estimatedDuration = 0.0)
-	@Test(timeout=300000)
+	@Test
    public void perfectTest() {
       double meanX = 5;
       double meanY = 10;
@@ -58,8 +57,7 @@ public class FitNoisyGaussian2DTest {
     * Test with a few outliers added
     */
 
-	@ContinuousIntegrationTest(estimatedDuration = 0.1)
-	@Test(timeout=300000)
+	@Test
    public void obviousOutliers() {
       double meanX = 5;
       double meanY = 10;

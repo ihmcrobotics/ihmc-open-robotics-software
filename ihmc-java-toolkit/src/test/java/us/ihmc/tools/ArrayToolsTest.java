@@ -1,9 +1,7 @@
 package us.ihmc.tools;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static us.ihmc.robotics.Assert.*;
 
 import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
@@ -22,15 +20,14 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.Random;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
-import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
-
+import org.junit.jupiter.api.Tag;
+import org.junit.jupiter.api.Disabled;
 public class ArrayToolsTest
 {
 
-	@ContinuousIntegrationTest(estimatedDuration = 0.0)
-	@Test(timeout = 30000)
+	@Test
    public void testParseDoubleArrayFromMATLABString()
    {
       try
@@ -53,8 +50,7 @@ public class ArrayToolsTest
       }
    }
 
-	@ContinuousIntegrationTest(estimatedDuration = 0.0)
-	@Test(timeout = 30000)
+	@Test
    public void testParseDoubleArrayFromMATLABBufferedReader()
    {
       try
@@ -78,8 +74,7 @@ public class ArrayToolsTest
       }
    }
 
-	@ContinuousIntegrationTest(estimatedDuration = 0.0)
-	@Test(timeout = 30000)
+	@Test
    public void testParseDoubleArrayFromDataInputStream()
    {
       try
@@ -105,8 +100,7 @@ public class ArrayToolsTest
       }
    }
 
-	@ContinuousIntegrationTest(estimatedDuration = 0.0)
-	@Test(timeout = 30000)
+	@Test
    public void testParseIntegerArrayFromString()
    {
       try
@@ -125,8 +119,7 @@ public class ArrayToolsTest
       }
    }
 
-	@ContinuousIntegrationTest(estimatedDuration = 0.0)
-	@Test(timeout = 30000)
+	@Test
    public void testParseIntegerArrayFromBufferedReader()
    {
       try
@@ -146,8 +139,7 @@ public class ArrayToolsTest
       }
    }
 
-	@ContinuousIntegrationTest(estimatedDuration = 0.0)
-	@Test(timeout = 30000)
+	@Test
    public void testParseIntegerArrayFromDataInputStream()
    {
       try
@@ -174,8 +166,7 @@ public class ArrayToolsTest
    }
 
 
-	@ContinuousIntegrationTest(estimatedDuration = 0.0)
-	@Test(timeout = 30000)
+	@Test
    public void testDeltaEquals()
    {
       double[] array1 = generateDoubleArray();
@@ -192,8 +183,7 @@ public class ArrayToolsTest
       assertFalse(ArrayTools.deltaEquals(array1, array2, largestDifference - 1));
    }
 	
-	@ContinuousIntegrationTest(estimatedDuration = 0.0)
-	@Test(timeout = 30000)
+	@Test
 	public void testDeltaEqualsWithNull()
 	{
 	   double[] array1 = null;
@@ -208,8 +198,7 @@ public class ArrayToolsTest
 
 
 
-	@ContinuousIntegrationTest(estimatedDuration = 0.9)
-	@Test(timeout = 30000)
+	@Test
    public void testParseDoubleArrayFromString() throws IOException
    {
       Random random = new Random();
@@ -234,8 +223,7 @@ public class ArrayToolsTest
       }
    }
 
-	@ContinuousIntegrationTest(estimatedDuration = 0.1)
-	@Test(timeout = 30000)
+	@Test
    public void testParseDoubleArrayFromBufferedReader()
    {
       Random random = new Random();
@@ -271,26 +259,27 @@ public class ArrayToolsTest
       }
    }
 
-	@ContinuousIntegrationTest(estimatedDuration = 0.0)
-	@Test(timeout = 30000 , expected = IOException.class)
+	@Test
    public void testParseDoubleArrayFromBufferedReaderWithIOException() throws IOException
    {
-      BufferedReader mockBufferedReader = new BufferedReader(new Reader()
-      {
-         @Override
-         public int read(char[] cbuf, int off, int len) throws IOException
+      assertThrows(IOException.class, () -> {
+         BufferedReader mockBufferedReader = new BufferedReader(new Reader()
          {
-            throw new IOException();
-         }
+            @Override
+            public int read(char[] cbuf, int off, int len) throws IOException
+            {
+               throw new IOException();
+            }
 
-         @Override
-         public void close() throws IOException
-         {
-            return;
-         }
+            @Override
+            public void close() throws IOException
+            {
+               return;
+            }
+         });
+
+         ArrayTools.parseDoubleArray(mockBufferedReader);
       });
-
-      ArrayTools.parseDoubleArray(mockBufferedReader);
    }
 	
    private StringBuilder generateParseableArrayString(Random random, int arraySize, NumberFormat formatter, double[] originalArrayOfRandomNumbers)
@@ -350,8 +339,7 @@ public class ArrayToolsTest
       return array;
    }
 	
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(timeout = 30000)
+   @Test
    public void testGetRearrangedArrayList()
    {
       ArrayList<Integer> arrayList = new ArrayList<Integer>();
@@ -375,8 +363,7 @@ public class ArrayToolsTest
    }
 
 	
-	@ContinuousIntegrationTest(estimatedDuration = 0.0)
-	@Test(timeout = 30000)
+	@Test
    public void testGetMaximumAbsoluteChangeBetweenTicks()
    {
       double[] array = new double[]{1.7};
@@ -400,8 +387,7 @@ public class ArrayToolsTest
       assertEquals(0.02, maxChange, 1e-7);
    }
 
-	@ContinuousIntegrationTest(estimatedDuration = 0.0)
-	@Test(timeout = 30000)
+	@Test
    public void testIsContinuous()
    {
       double[] array = new double[]{1.7};

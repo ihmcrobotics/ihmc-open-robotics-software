@@ -1,11 +1,8 @@
 package us.ihmc.footstepPlanning.flatGroundPlanning;
 
 import org.junit.Test;
-import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.euclid.tools.EuclidCoreRandomTools;
-import us.ihmc.footstepPlanning.graphSearch.graph.FootstepNode;
 import us.ihmc.footstepPlanning.graphSearch.graph.LatticeNode;
-import us.ihmc.robotics.robotSide.RobotSide;
 
 import java.util.Random;
 
@@ -13,7 +10,6 @@ import static org.junit.Assert.assertTrue;
 
 public class LatticeNodeTest
 {
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testEqualsAndHashMethodsWithRandomTransforms()
    {

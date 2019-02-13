@@ -1,11 +1,12 @@
 package us.ihmc.simulationConstructionSetTools.util.environments;
 
-import static org.junit.Assert.*;
+import static us.ihmc.robotics.Assert.*;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import us.ihmc.commons.PrintTools;
-import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
+import org.junit.jupiter.api.Tag;
+import org.junit.jupiter.api.Disabled;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
@@ -28,8 +29,7 @@ public class ContactableDoorRobotTest
    
    RigidBodyTransform doorToWorldTransform = new RigidBodyTransform();
    
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(timeout = 30000)
+   @Test
    public void testPointIsClose()
    {      
       double epsilon = 1e-4;
@@ -49,8 +49,7 @@ public class ContactableDoorRobotTest
       assertTrue(door.isPointOnOrInside(diagonal));
    }
    
-   @ContinuousIntegrationTest(estimatedDuration = 1.9)
-   @Test(timeout=300000)
+   @Test
    public void testDoorIsClosing()
    {
       doorTestRegistry = new YoVariableRegistry("doorTestRegistry");

@@ -1,9 +1,9 @@
 package us.ihmc.quadrupedRobotics.controller.force;
 
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
-import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Tag;
+import org.junit.jupiter.api.Test;
 import us.ihmc.quadrupedCommunication.teleop.RemoteQuadrupedTeleopManager;
 import us.ihmc.quadrupedRobotics.*;
 import us.ihmc.quadrupedRobotics.controller.QuadrupedControlMode;
@@ -17,6 +17,7 @@ import us.ihmc.tools.MemoryTools;
 import java.io.IOException;
 import java.util.Random;
 
+@Tag("quadruped-xgait")
 public abstract class QuadrupedXGaitRandomWalkingTest implements QuadrupedMultiRobotTestInterface
 {
    private GoalOrientedTestConductor conductor;
@@ -24,7 +25,7 @@ public abstract class QuadrupedXGaitRandomWalkingTest implements QuadrupedMultiR
    private RemoteQuadrupedTeleopManager stepTeleopManager;
    private QuadrupedTestFactory quadrupedTestFactory;
 
-   @Before
+   @BeforeEach
    public void setup()
    {
       try
@@ -45,7 +46,7 @@ public abstract class QuadrupedXGaitRandomWalkingTest implements QuadrupedMultiR
       }
    }
 
-   @After
+   @AfterEach
    public void tearDown()
    {
       quadrupedTestFactory.close();
@@ -73,8 +74,7 @@ public abstract class QuadrupedXGaitRandomWalkingTest implements QuadrupedMultiR
       return random.nextDouble() * 2.0 + 0.25;
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 45.0)
-   @Test(timeout = 500000)
+   @Test
    public void testExtremeRandomWalking() throws SimulationExceededMaximumTimeException, ControllerFailureException, IOException
    {
       QuadrupedTestBehaviors.readyXGait(conductor, variables, stepTeleopManager);
@@ -95,8 +95,7 @@ public abstract class QuadrupedXGaitRandomWalkingTest implements QuadrupedMultiR
       }
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 45.0)
-   @Test(timeout = 1200000)
+   @Test
    public void testWalkingRandomly() throws SimulationExceededMaximumTimeException, ControllerFailureException, IOException
    {
       QuadrupedTestBehaviors.readyXGait(conductor, variables, stepTeleopManager);
@@ -121,8 +120,7 @@ public abstract class QuadrupedXGaitRandomWalkingTest implements QuadrupedMultiR
       }
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 60.0)
-   @Test(timeout = 860000)
+   @Test
    public void testWalkingAtRandomSpeedsWithStops() throws SimulationExceededMaximumTimeException, ControllerFailureException, IOException
    {
       QuadrupedTestBehaviors.readyXGait(conductor, variables, stepTeleopManager);
@@ -150,8 +148,7 @@ public abstract class QuadrupedXGaitRandomWalkingTest implements QuadrupedMultiR
       }
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 65.0)
-   @Test(timeout = 1200000)
+   @Test
    public void testWalkingRandomVelocitiesStoppingAndTurning() throws SimulationExceededMaximumTimeException, ControllerFailureException, IOException
    {
       QuadrupedTestBehaviors.readyXGait(conductor, variables, stepTeleopManager);

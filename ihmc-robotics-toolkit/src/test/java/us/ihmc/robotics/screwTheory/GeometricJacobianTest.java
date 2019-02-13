@@ -1,17 +1,18 @@
 package us.ihmc.robotics.screwTheory;
 
-import static org.junit.Assert.assertEquals;
+import static us.ihmc.robotics.Assert.*;
 
 import java.util.List;
 import java.util.Random;
 
 import org.ejml.data.DenseMatrix64F;
 import org.ejml.ops.CommonOps;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
-import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
+import org.junit.jupiter.api.Tag;
+import org.junit.jupiter.api.Disabled;
 import us.ihmc.euclid.matrix.Matrix3D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
@@ -44,7 +45,7 @@ public class GeometricJacobianTest
 
 
 
-   @Before
+   @BeforeEach
    public void setUp() throws Exception
    {
       buildMechanismAndJacobians();
@@ -55,14 +56,13 @@ public class GeometricJacobianTest
       joint3.setQ(random.nextDouble());
    }
 
-   @After
+   @AfterEach
    public void tearDown() throws Exception
    {
       ReferenceFrameTools.clearWorldFrameTree();
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.2)
-   @Test(timeout = 30000)
+   @Test
    public void testAgainstTwistCalculatorChainRobot() throws Exception
    {
       Random random = new Random(4324342L);
@@ -108,8 +108,7 @@ public class GeometricJacobianTest
       }
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.3)
-   @Test(timeout = 30000)
+   @Test
    public void testAgainstTwistCalculatorFloatingJointRobot() throws Exception
    {
       Random random = new Random(4324342L);
@@ -167,8 +166,7 @@ public class GeometricJacobianTest
     * Jacobian was also computed manually using a Matlab script.
     */
 
-	@ContinuousIntegrationTest(estimatedDuration = 0.0)
-	@Test(timeout = 30000)
+	@Test
    public void testDuindamExample()
    {
       // compute

@@ -1,32 +1,35 @@
 package us.ihmc.atlas.roughTerrainWalking;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import us.ihmc.atlas.AtlasRobotModel;
 import us.ihmc.atlas.AtlasRobotVersion;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.RobotTarget;
 import us.ihmc.avatar.roughTerrainWalking.AvatarSwingWithWaypointsTest;
-import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationPlan;
-import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
-import us.ihmc.continuousIntegration.IntegrationCategory;
+import org.junit.jupiter.api.Tag;
+import org.junit.jupiter.api.Disabled;
 import us.ihmc.simulationConstructionSetTools.bambooTools.BambooTools;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
 
-@ContinuousIntegrationPlan(categories = {IntegrationCategory.FAST, IntegrationCategory.VIDEO})
 public class AtlasSwingWithWaypointsTest extends AvatarSwingWithWaypointsTest
 {
    @Override
-   @ContinuousIntegrationTest(estimatedDuration = 137.9)
-   @Test(timeout = 690000)
+   @Test
+   public void testSwingWithWaypointsAndNotTrustingHeight() throws SimulationExceededMaximumTimeException
+   {
+      super.testSwingWithWaypointsAndNotTrustingHeight();
+   }
+
+   @Override
+   @Test
    public void testRegularSwingWithWaypoints() throws SimulationExceededMaximumTimeException
    {
       super.testRegularSwingWithWaypoints();
    }
 
    @Override
-   @ContinuousIntegrationTest(estimatedDuration = 33.9)
-   @Test(timeout = 170000)
+   @Test
    public void testSwingWithWaypointsRotated() throws SimulationExceededMaximumTimeException
    {
       super.testSwingWithWaypointsRotated();

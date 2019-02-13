@@ -1,6 +1,6 @@
 plugins {
     id("us.ihmc.ihmc-build") version "0.15.5"
-    id("us.ihmc.ihmc-ci-plugin") version "0.18.0"
+    id("us.ihmc.ihmc-ci") version "4.7"
     id("us.ihmc.log-tools") version "0.2.2"
 }
 
@@ -11,15 +11,15 @@ ihmc {
     configurePublications()
 }
 
-testSuites {
-    def prefix = "LIBS-IHMCOPENROBOTICSSOFTWARE"
-    bambooPlanKeys = [prefix + "FAST", prefix + "INDEVELOPMENT", prefix + "UI", prefix + "VIDEO"]
-}
-
 mainDependencies {
     compile group: "us.ihmc", name: "ihmc-quadruped-planning", version: "source"
 }
 
 testDependencies {
+    compile ihmc.sourceSetProject("visualizers")
     compile group: "us.ihmc", name: "ihmc-quadruped-planning-test", version: "source"
+}
+
+visualizersDependencies {
+    compile ihmc.sourceSetProject("main")
 }

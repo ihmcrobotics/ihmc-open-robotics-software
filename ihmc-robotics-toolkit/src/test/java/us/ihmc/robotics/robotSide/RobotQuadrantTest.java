@@ -1,15 +1,13 @@
 package us.ihmc.robotics.robotSide;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import static us.ihmc.robotics.Assert.*;
 
 import java.util.ArrayList;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
-import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
-
+import org.junit.jupiter.api.Tag;
+import org.junit.jupiter.api.Disabled;
 public class RobotQuadrantTest
 {
    private RobotQuadrant frontLeft = RobotQuadrant.FRONT_LEFT;
@@ -17,8 +15,7 @@ public class RobotQuadrantTest
    private RobotQuadrant hindRight = RobotQuadrant.HIND_RIGHT;
    private RobotQuadrant hindLeft = RobotQuadrant.HIND_LEFT;
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(timeout = 30000)
+   @Test
    public void testGetAcrossBodyLeg()
    {
       assertEquals(frontLeft, frontRight.getAcrossBodyQuadrant());
@@ -27,8 +24,7 @@ public class RobotQuadrantTest
       assertEquals(hindRight, hindLeft.getAcrossBodyQuadrant());
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(timeout = 30000)
+   @Test
    public void testGetAllLegs()
    {
       ArrayList<RobotQuadrant> actualReturn = RobotQuadrant.getAllQuadrants();
@@ -40,7 +36,7 @@ public class RobotQuadrantTest
    }
 
 //   @DeployableTestMethod(duration = 0.1)
-//   @Test(timeout = 30000)
+//   @Test
 //   public void testGetBodyQuadrant()
 //   {
 //      ReferenceFrame frame = LittleDogFrames.getBodyFrame();
@@ -71,8 +67,7 @@ public class RobotQuadrantTest
 //      }
 //   }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(timeout = 30000)
+   @Test
    public void testGetDiagonalOppositeLeg()
    {
       assertEquals(hindRight, frontLeft.getDiagonalOppositeQuadrant());
@@ -81,8 +76,7 @@ public class RobotQuadrantTest
       assertEquals(frontRight, hindLeft.getDiagonalOppositeQuadrant());
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(timeout = 30000)
+   @Test
    public void testGetLegName()
    {
       assertEquals(frontLeft, RobotQuadrant.getQuadrantName("FRONT_LEFT"));
@@ -91,8 +85,7 @@ public class RobotQuadrantTest
       assertEquals(hindRight, RobotQuadrant.getQuadrantName("HIND_RIGHT"));
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(timeout = 30000)
+   @Test
    public void testGetLegName1()
    {
       assertEquals(frontLeft, RobotQuadrant.getQuadrantNameFromOrdinal(0));
@@ -101,8 +94,7 @@ public class RobotQuadrantTest
       assertEquals(hindLeft, RobotQuadrant.getQuadrantNameFromOrdinal(3));
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(timeout = 30000)
+   @Test
    public void testGetSameSideLeg()
    {
       assertEquals(hindLeft, frontLeft.getSameSideQuadrant());
@@ -111,8 +103,7 @@ public class RobotQuadrantTest
       assertEquals(frontLeft, hindLeft.getSameSideQuadrant());
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(timeout = 30000)
+   @Test
    public void testGetShortName()
    {
       assertEquals("FL", frontLeft.getShortName());
@@ -121,8 +112,7 @@ public class RobotQuadrantTest
       assertEquals("HL", hindLeft.getShortName());
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(timeout = 30000)
+   @Test
    public void testIsLegAFrontLeg()
    {
       assertTrue(frontLeft.isQuadrantInFront());
@@ -131,8 +121,7 @@ public class RobotQuadrantTest
       assertFalse(hindLeft.isQuadrantInFront());
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(timeout = 30000)
+   @Test
    public void testIsLegAHindLeg()
    {
       assertFalse(frontLeft.isQuadrantInHind());
@@ -141,8 +130,7 @@ public class RobotQuadrantTest
       assertTrue(hindLeft.isQuadrantInHind());
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(timeout = 30000)
+   @Test
    public void testIsLegALeftSideLeg()
    {
       assertTrue(frontLeft.isQuadrantOnLeftSide());
@@ -151,8 +139,7 @@ public class RobotQuadrantTest
       assertTrue(hindLeft.isQuadrantOnLeftSide());
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(timeout = 30000)
+   @Test
    public void testIsLegARightSideLeg()
    {
       assertFalse(frontLeft.isQuadrantOnRightSide());

@@ -101,6 +101,7 @@ public class ValkyrieRobotModel implements DRCRobotModel, SDFDescriptionMutator
 
    private boolean useShapeCollision = false;
    private final boolean useOBJGraphics;
+   private final double transparency;
 
    private final String[] resourceDirectories;
    {
@@ -143,6 +144,11 @@ public class ValkyrieRobotModel implements DRCRobotModel, SDFDescriptionMutator
 
    public ValkyrieRobotModel(RobotTarget target, boolean headless, String model, FootContactPoints<RobotSide> simulationContactPoints, boolean useShapeCollision, boolean useOBJGraphics)
    {
+      this(target, headless, model, simulationContactPoints, useShapeCollision, useOBJGraphics, Double.NaN);
+   }
+
+   public ValkyrieRobotModel(RobotTarget target, boolean headless, String model, FootContactPoints<RobotSide> simulationContactPoints, boolean useShapeCollision, boolean useOBJGraphics, double transparency)
+   {
       this.target = target;
       this.useOBJGraphics = useOBJGraphics;
       jointMap = new ValkyrieJointMap();
@@ -176,6 +182,7 @@ public class ValkyrieRobotModel implements DRCRobotModel, SDFDescriptionMutator
       }
 
       this.loader = DRCRobotSDFLoader.loadDRCRobot(getResourceDirectories(), sdf, this);
+      this.transparency = transparency;
 
       for (String forceSensorNames : ValkyrieSensorInformation.forceSensorNames)
       {
@@ -224,14 +231,14 @@ public class ValkyrieRobotModel implements DRCRobotModel, SDFDescriptionMutator
 
       if (useShapeCollision)
       {
-         robotDescription = descriptionLoader.loadRobotDescriptionFromSDF(generalizedSDFRobotModel, jointMap, useShapeCollision);
+         robotDescription = descriptionLoader.loadRobotDescriptionFromSDF(generalizedSDFRobotModel, jointMap, null, false, transparency);
          collisionMeshDefinitionDataHolder.setVisible(false);
 
          robotDescription.addCollisionMeshDefinitionData(collisionMeshDefinitionDataHolder);
       }
       else
       {
-         robotDescription = descriptionLoader.loadRobotDescriptionFromSDF(generalizedSDFRobotModel, jointMap, getContactPointParameters(), useCollisionMeshes);
+         robotDescription = descriptionLoader.loadRobotDescriptionFromSDF(generalizedSDFRobotModel, jointMap, getContactPointParameters(), useCollisionMeshes, transparency);
       }
 
       return robotDescription;

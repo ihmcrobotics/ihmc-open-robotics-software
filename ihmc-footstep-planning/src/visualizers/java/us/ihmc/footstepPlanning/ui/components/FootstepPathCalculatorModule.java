@@ -1,6 +1,36 @@
 package us.ihmc.footstepPlanning.ui.components;
 
-import us.ihmc.commons.PrintTools;
+import static us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI.BodyPathDataTopic;
+import static us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI.ComputePathTopic;
+import static us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI.GoalOrientationTopic;
+import static us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI.GoalPositionTopic;
+import static us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI.GoalVisibilityMap;
+import static us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI.InitialSupportSideTopic;
+import static us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI.InterRegionVisibilityMap;
+import static us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI.LowLevelGoalOrientationTopic;
+import static us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI.LowLevelGoalPositionTopic;
+import static us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI.PlanarRegionDataTopic;
+import static us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI.PlannerHorizonLengthTopic;
+import static us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI.PlannerParametersTopic;
+import static us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI.PlannerStatusTopic;
+import static us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI.PlannerTimeTakenTopic;
+import static us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI.PlannerTimeoutTopic;
+import static us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI.PlannerTypeTopic;
+import static us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI.PlanningResultTopic;
+import static us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI.RequestPlannerStatistics;
+import static us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI.StartOrientationTopic;
+import static us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI.StartPositionTopic;
+import static us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI.StartVisibilityMap;
+import static us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI.VisibilityGraphsParametersTopic;
+import static us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI.VisibilityMapWithNavigableRegionData;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.atomic.AtomicReference;
+
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.communication.packets.ExecutionMode;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
@@ -34,6 +64,7 @@ import us.ihmc.footstepPlanning.graphSearch.stepCost.FootstepCostBuilder;
 import us.ihmc.footstepPlanning.simplePlanners.PlanThenSnapPlanner;
 import us.ihmc.footstepPlanning.simplePlanners.TurnWalkTurnPlanner;
 import us.ihmc.footstepPlanning.tools.PlannerTools;
+import us.ihmc.log.LogTools;
 import us.ihmc.messager.Messager;
 import us.ihmc.messager.SharedMemoryMessager;
 import us.ihmc.pathPlanning.statistics.ListOfStatistics;
@@ -135,7 +166,7 @@ public class FootstepPathCalculatorModule
    {
       if (VERBOSE)
       {
-         PrintTools.info(this, "Starting to compute path...");
+         LogTools.info("Starting to compute path...");
       }
 
       PlanarRegionsList planarRegionsList = planarRegionsReference.get();
@@ -154,7 +185,7 @@ public class FootstepPathCalculatorModule
          return;
 
       if (VERBOSE)
-         PrintTools.info(this, "Computing footstep path.");
+         LogTools.info("Computing footstep path.");
 
       try
       {
@@ -196,9 +227,9 @@ public class FootstepPathCalculatorModule
 
          if (VERBOSE)
          {
-            PrintTools.info(this, "Planner result: " + planningResult);
+            LogTools.info("Planner result: " + planningResult);
             if (planningResult.validForExecution())
-               PrintTools.info(this, "Planner result: " + planner.getPlan().getNumberOfSteps() + " steps, taking " + planner.getPlanningDuration() + " s.");
+               LogTools.info("Planner result: " + planner.getPlan().getNumberOfSteps() + " steps, taking " + planner.getPlanningDuration() + " s.");
          }
 
          messager.submitMessage(PlanningResultTopic, planningResult);
@@ -217,7 +248,7 @@ public class FootstepPathCalculatorModule
       }
       catch (Exception e)
       {
-         PrintTools.error(this, e.getMessage());
+         LogTools.error(e.getMessage());
          e.printStackTrace();
       }
    }
@@ -254,16 +285,19 @@ public class FootstepPathCalculatorModule
    {
       VisibilityMapHolder startMap = new VisibilityMapHolder()
       {
+         @Override
          public int getMapId()
          {
             return statistics.getStartMapId();
          }
 
+         @Override
          public VisibilityMap getVisibilityMapInLocal()
          {
             return statistics.getStartVisibilityMap();
          }
 
+         @Override
          public VisibilityMap getVisibilityMapInWorld()
          {
             return statistics.getStartVisibilityMap();
@@ -271,16 +305,19 @@ public class FootstepPathCalculatorModule
       };
       VisibilityMapHolder goalMap = new VisibilityMapHolder()
       {
+         @Override
          public int getMapId()
          {
             return statistics.getGoalMapId();
          }
 
+         @Override
          public VisibilityMap getVisibilityMapInLocal()
          {
             return statistics.getGoalVisibilityMap();
          }
 
+         @Override
          public VisibilityMap getVisibilityMapInWorld()
          {
             return statistics.getGoalVisibilityMap();
@@ -309,7 +346,7 @@ public class FootstepPathCalculatorModule
       case PLANAR_REGION_BIPEDAL:
          return createPlanarRegionBipedalPlanner(contactPointsInSoleFrame, registry);
       case PLAN_THEN_SNAP:
-         return new PlanThenSnapPlanner(new TurnWalkTurnPlanner(), contactPointsInSoleFrame);
+         return new PlanThenSnapPlanner(new TurnWalkTurnPlanner(parameters.get()), contactPointsInSoleFrame);
       case A_STAR:
          return createAStarPlanner(contactPointsInSoleFrame, registry);
       case SIMPLE_BODY_PATH:

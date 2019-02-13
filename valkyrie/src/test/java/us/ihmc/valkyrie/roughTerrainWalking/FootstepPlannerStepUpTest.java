@@ -3,7 +3,6 @@ package us.ihmc.valkyrie.roughTerrainWalking;
 import org.junit.Assert;
 import org.junit.Test;
 import us.ihmc.avatar.drcRobot.RobotTarget;
-import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.geometry.interfaces.Vertex2DSupplier;
 import us.ihmc.euclid.transform.RigidBodyTransform;
@@ -24,8 +23,7 @@ import java.util.ArrayList;
 
 public class FootstepPlannerStepUpTest
 {
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(timeout = 30000)
+   @Test
    public void testGrandparentNodeCheck()
    {
       FootstepNode node1 = new FootstepNode(1.0, 0.15, -0.349, RobotSide.LEFT);

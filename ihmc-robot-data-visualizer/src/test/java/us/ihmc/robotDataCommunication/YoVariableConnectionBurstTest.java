@@ -1,6 +1,6 @@
 package us.ihmc.robotDataCommunication;
 
-import static org.junit.Assert.assertEquals;
+import static us.ihmc.robotics.Assert.*;
 
 import us.ihmc.robotDataLogger.YoVariableClient;
 import us.ihmc.robotDataLogger.YoVariableServer;
@@ -29,7 +29,7 @@ public class YoVariableConnectionBurstTest
 
    
    
-//   @Test(timeout=300000)
+//   @Test
    public void TestYoVariableConnectionBurst()
    {
       
