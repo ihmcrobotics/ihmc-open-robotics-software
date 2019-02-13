@@ -47,7 +47,6 @@ public class FootstepPlannerProcessViewer extends AnimationTimer
    {
       allValidNodesRenderer = new NodeOccupancyMapRenderer(messager, executorService);
       allInvalidNodesRenderer = new NodeOccupancyMapRenderer(messager, executorService);
-      allValidNodesRenderer.show(true);
 
       nodeExpansionPlaybackRenderer = new NodeOccupancyMapSequenceRenderer(messager, parentCellColor, currentValidCellColor, currentRejectedCellColor, executorService);
 

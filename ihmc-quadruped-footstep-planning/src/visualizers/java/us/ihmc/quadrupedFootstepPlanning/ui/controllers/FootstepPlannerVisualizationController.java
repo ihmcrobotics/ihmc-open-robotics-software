@@ -51,13 +51,13 @@ public class FootstepPlannerVisualizationController
    {
       setupControls();
 
-      messager.bindBidirectional(FootstepPlannerMessagerAPI.ShowAllValidNodesTopic, showAllValidNodes.selectedProperty(), true);
-      messager.bindBidirectional(FootstepPlannerMessagerAPI.ShowAllInvalidNodesTopic, showAllInvalidNodes.selectedProperty(), true);
-      messager.bindBidirectional(FootstepPlannerMessagerAPI.ShowNodesThisTickTopic, showNodesThisTick.selectedProperty(), true);
-      messager.bindBidirectional(FootstepPlannerMessagerAPI.ShowNodesRejectedByReasonTopic, showNodesRejectedByReason.selectedProperty(), true);
+      messager.bindBidirectional(FootstepPlannerMessagerAPI.ShowAllValidNodesTopic, showAllValidNodes.selectedProperty(), false);
+      messager.bindBidirectional(FootstepPlannerMessagerAPI.ShowAllInvalidNodesTopic, showAllInvalidNodes.selectedProperty(), false);
+      messager.bindBidirectional(FootstepPlannerMessagerAPI.ShowNodesThisTickTopic, showNodesThisTick.selectedProperty(), false);
+      messager.bindBidirectional(FootstepPlannerMessagerAPI.ShowNodesRejectedByReasonTopic, showNodesRejectedByReason.selectedProperty(), false);
 
-      messager.bindBidirectional(FootstepPlannerMessagerAPI.RejectionReasonToShowTopic, rejectionReasonToShow.valueProperty(), true);
+      messager.bindBidirectional(FootstepPlannerMessagerAPI.RejectionReasonToShowTopic, rejectionReasonToShow.valueProperty(), false);
 
-      messager.bindBidirectional(FootstepPlannerMessagerAPI.PlannerPlaybackFractionTopic, plannerPlaybackSlider.valueProperty(), true);
+      messager.bindBidirectional(FootstepPlannerMessagerAPI.PlannerPlaybackFractionTopic, plannerPlaybackSlider.valueProperty(), false);
    }
 }
