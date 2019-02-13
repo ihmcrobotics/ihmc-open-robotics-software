@@ -15,6 +15,7 @@ import javax.swing.JComboBox;
 import javax.swing.JFrame;
 import javax.swing.JOptionPane;
 
+import us.ihmc.robotDataLogger.logger.DataServerSettings;
 import us.ihmc.robotDataLogger.logger.LogSettings;
 import us.ihmc.robotDataLogger.logger.NetworkStreamVideoDataLogger;
 
@@ -23,7 +24,7 @@ public class GUICaptureRecorder extends JFrame
    private static final long serialVersionUID = -5900895574333786847L;
    public final JButton start = new JButton("start");
    public final JButton stop = new JButton("stop");
-   private final JComboBox<LogSettings> gui = new JComboBox<>();
+   private final JComboBox<DataServerSettings> gui = new JComboBox<>();
    public NetworkStreamVideoDataLogger currentLogger = null;
    
    private File target;
@@ -35,7 +36,7 @@ public class GUICaptureRecorder extends JFrame
       BoxLayout layout = new BoxLayout(getContentPane(), BoxLayout.X_AXIS);
       getContentPane().setLayout(layout);
 
-      for (LogSettings logSetting : LogSettings.values())
+      for (DataServerSettings logSetting : LogSettings.values())
       {
          if (logSetting.getVideoStream() != null)
          {
@@ -98,7 +99,7 @@ public class GUICaptureRecorder extends JFrame
          Calendar calendar = Calendar.getInstance();
          String timestamp = dateFormat.format(calendar.getTime());
          
-         LogSettings settings = (LogSettings) gui.getSelectedItem();
+         DataServerSettings settings = (DataServerSettings) gui.getSelectedItem();
          target = new File(System.getProperty("user.home") + "/robotLogs/", timestamp + "_" + settings.toString() + "_UILog");
          target.mkdirs();
 
