@@ -7,6 +7,7 @@ import org.junit.Test;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
+import us.ihmc.commonWalkingControlModules.capturePoint.smoothCMPBasedICPPlanner.AMGeneration.FootstepAngularMomentumPredictor;
 import us.ihmc.commons.ContinuousIntegrationTools;
 import us.ihmc.commons.Conversions;
 import us.ihmc.commons.MathTools;
@@ -30,6 +31,8 @@ import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.tools.FootstepPlannerI
 import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.tools.FootstepPlannerIOTools.FootstepPlannerUnitTestDataset;
 import us.ihmc.quadrupedFootstepPlanning.ui.ApplicationRunner;
 import us.ihmc.quadrupedFootstepPlanning.ui.FootstepPlannerUI;
+import us.ihmc.quadrupedPlanning.QuadrupedXGaitSettings;
+import us.ihmc.quadrupedPlanning.QuadrupedXGaitSettingsReadOnly;
 import us.ihmc.robotics.Assert;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.graphics.Graphics3DObjectTools;
@@ -58,9 +61,12 @@ public abstract class FootstepPlannerDataSetTest
    private FootstepPlannerUI ui = null;
    protected Messager messager = null;
 
+   private QuadrupedXGaitSettingsReadOnly xGaitSettings = null;
    private QuadrupedBodyPathAndFootstepPlanner planner = null;
 
    protected abstract FootstepPlannerType getPlannerType();
+
+   protected abstract QuadrupedXGaitSettingsReadOnly getXGaitSettings();
 
    protected abstract QuadrupedBodyPathAndFootstepPlanner createPlanner();
 
@@ -75,6 +81,8 @@ public abstract class FootstepPlannerDataSetTest
          messager = new SharedMemoryMessager(FootstepPlannerMessagerAPI.API);
 
       planner = createPlanner();
+      if (xGaitSettings == null)
+         xGaitSettings = getXGaitSettings();
 
       try
       {
@@ -84,6 +92,8 @@ public abstract class FootstepPlannerDataSetTest
       {
          throw new RuntimeException("Failed to start messager.");
       }
+
+      messager.submitMessage(FootstepPlannerMessagerAPI.XGaitSettingsTopic, xGaitSettings);
 
       if (VISUALIZE)
       {
@@ -158,7 +168,7 @@ public abstract class FootstepPlannerDataSetTest
       FootstepPlannerUnitTestDataset dataset = FootstepPlannerIOTools.loadDataset(FootstepPlannerIOTools.class, datasetName);
 
       String errorMessages = datasetTestRunner.testDataset(dataset);
-//      Assert.assertTrue("Errors:" + errorMessages, errorMessages.isEmpty());
+      //      Assert.assertTrue("Errors:" + errorMessages, errorMessages.isEmpty());
    }
 
    private void runAssertionsOnAllDatasets(DatasetTestRunner datasetTestRunner, List<FootstepPlannerUnitTestDataset> allDatasets)
@@ -225,7 +235,7 @@ public abstract class FootstepPlannerDataSetTest
       packPlanningRequest(dataset);
       String errorMessage = findPlanAndAssertGoodResult(dataset);
 
-//      visualizePlan(planner.getPlan(), dataset.getPlanarRegionsList(), dataset.getStart(), dataset.getGoal());
+      //      visualizePlan(planner.getPlan(), dataset.getPlanarRegionsList(), dataset.getStart(), dataset.getGoal());
 
       return errorMessage;
    }
@@ -249,16 +259,17 @@ public abstract class FootstepPlannerDataSetTest
       start.setStartPose(startPose);
       goal.setGoalPose(goalPose);
 
+      planner.setPlanarRegionsList(dataset.getPlanarRegionsList());
       planner.setStart(start);
       planner.setGoal(goal);
-      planner.setPlanarRegionsList(dataset.getPlanarRegionsList());
       planner.setTimeout(timeout);
 
+      messager.submitMessage(FootstepPlannerMessagerAPI.XGaitSettingsTopic, xGaitSettings);
+      messager.submitMessage(FootstepPlannerMessagerAPI.PlanarRegionDataTopic, dataset.getPlanarRegionsList());
       messager.submitMessage(FootstepPlannerMessagerAPI.StartPositionTopic, new Point3D(startPose.getPosition()));
       messager.submitMessage(FootstepPlannerMessagerAPI.GoalPositionTopic, new Point3D(goalPose.getPosition()));
       messager.submitMessage(FootstepPlannerMessagerAPI.StartOrientationTopic, new Quaternion(goalPose.getOrientation()));
       messager.submitMessage(FootstepPlannerMessagerAPI.GoalOrientationTopic, new Quaternion(goalPose.getOrientation()));
-      messager.submitMessage(FootstepPlannerMessagerAPI.PlanarRegionDataTopic, dataset.getPlanarRegionsList());
       //      planner.setHorizonLengthTopic(Double.MAX_VALUE);
 
       if (DEBUG)
@@ -280,7 +291,6 @@ public abstract class FootstepPlannerDataSetTest
       messager.submitMessage(FootstepPlannerMessagerAPI.FootstepPlanTopic, planner.getPlan());
 
       String errorMessage = assertPlanIsValid(datasetName, planner.getPlan(), dataset.getGoal(), dataset.getGoalOrientation());
-
 
       ThreadTools.sleep(1000);
       return errorMessage;
