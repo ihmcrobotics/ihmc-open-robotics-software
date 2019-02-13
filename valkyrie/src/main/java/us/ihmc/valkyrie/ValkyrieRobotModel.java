@@ -70,6 +70,7 @@ import us.ihmc.valkyrie.parameters.ValkyrieJointMap;
 import us.ihmc.valkyrie.parameters.ValkyriePlanarRegionFootstepPlannerParameters;
 import us.ihmc.valkyrie.parameters.ValkyrieSensorInformation;
 import us.ihmc.valkyrie.parameters.ValkyrieSliderBoardParameters;
+import us.ihmc.valkyrie.parameters.ValkyrieSmoothCMPPlannerParameters;
 import us.ihmc.valkyrie.parameters.ValkyrieStateEstimatorParameters;
 import us.ihmc.valkyrie.parameters.ValkyrieUIParameters;
 import us.ihmc.valkyrie.parameters.ValkyrieWalkingControllerParameters;
@@ -83,6 +84,7 @@ import us.ihmc.wholeBodyController.concurrent.ThreadDataSynchronizerInterface;
 public class ValkyrieRobotModel implements DRCRobotModel, SDFDescriptionMutator
 {
    private static final boolean PRINT_MODEL = false;
+   private static final boolean USE_SMOOTH_CMP_PLANNER = true;
 
    private final ICPWithTimeFreezingPlannerParameters capturePointPlannerParameters;
    private final WalkingControllerParameters walkingControllerParameters;
@@ -212,7 +214,10 @@ public class ValkyrieRobotModel implements DRCRobotModel, SDFDescriptionMutator
       }
 
       planarRegionFootstepPlanningParameters = new ValkyriePlanarRegionFootstepPlannerParameters();
-      capturePointPlannerParameters = new ValkyrieCapturePointPlannerParameters(target);
+      if (USE_SMOOTH_CMP_PLANNER)
+         capturePointPlannerParameters = new ValkyrieSmoothCMPPlannerParameters();
+      else
+         capturePointPlannerParameters = new ValkyrieCapturePointPlannerParameters(target);
       walkingControllerParameters = new ValkyrieWalkingControllerParameters(jointMap, target);
       stateEstimatorParamaters = new ValkyrieStateEstimatorParameters(target, getEstimatorDT(), sensorInformation, jointMap);
       collisionMeshDefinitionDataHolder = new ValkyrieCollisionMeshDefinitionDataHolder(jointMap);
