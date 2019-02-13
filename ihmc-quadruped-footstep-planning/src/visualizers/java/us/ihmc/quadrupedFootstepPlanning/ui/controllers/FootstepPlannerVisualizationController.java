@@ -58,6 +58,6 @@ public class FootstepPlannerVisualizationController
 
       messager.bindBidirectional(FootstepPlannerMessagerAPI.RejectionReasonToShowTopic, rejectionReasonToShow.valueProperty(), false);
 
-      messager.bindBidirectional(FootstepPlannerMessagerAPI.PlannerPlaybackFractionTopic, plannerPlaybackSlider.valueProperty(), false);
+      messager.bindBidirectional(FootstepPlannerMessagerAPI.PlannerThoughtPlaybackFractionTopic, plannerPlaybackSlider.valueProperty(), false);
    }
 }

@@ -42,6 +42,8 @@
 
                 <CheckBox fx:id="showSolution" mnemonicParsing="false" selected="true" text="Show solution" GridPane.columnIndex="4"
                               GridPane.rowIndex="2"/>
+                <Slider fx:id="plannerPlaybackSlider" blockIncrement="0.01" majorTickUnit="0.05" max="1.0" minorTickCount="4" prefHeight="38.0" prefWidth="300.0" GridPane.columnIndex="2" GridPane.rowIndex="4"/>
+
             </children>
         </GridPane>
     </children>

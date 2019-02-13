@@ -564,4 +564,139 @@ public class MainTabController
          previewRobotModel.getRootJoint().setJointOrientation(kinematicsToolboxOutputStatus.getDesiredRootOrientation());
       }
    }
+
+   private class WalkingPreviewPlaybackManager extends AnimationTimer
+   {
+      final AtomicReference<WalkingControllerPreviewOutputMessage> walkingPreviewOutput;
+
+      // frames per call to handle()
+      final int playbackSpeed = 1;
+
+      int playbackCounter = 0;
+      FullHumanoidRobotModel previewRobotModel = null;
+      OneDoFJointBasics[] previewModelOneDoFJoints = null;
+
+      // whether to show ghost robot
+      final AtomicBoolean active = new AtomicBoolean(false);
+
+      // whether to animate ghost robot
+      final AtomicBoolean playbackModeActive = new AtomicBoolean(false);
+
+      WalkingPreviewPlaybackManager(Messager messager)
+      {
+         walkingPreviewOutput = messager.createInput(FootstepPlannerMessagerAPI.WalkingPreviewOutput);
+         messager.registerTopicListener(FootstepPlannerMessagerAPI.WalkingPreviewOutput, output -> start());
+      }
+
+      void setRobotModel(FullHumanoidRobotModel previewRobotModel)
+      {
+         this.previewRobotModel = previewRobotModel;
+         previewModelOneDoFJoints = FullRobotModelUtils.getAllJointsExcludingHands(previewRobotModel);
+      }
+
+      @Override
+      public void start()
+      {
+         playbackCounter = 0;
+         super.start();
+         active.set(true);
+         playbackModeActive.set(true);
+      }
+
+      @Override
+      public void stop()
+      {
+         previewRobotModel.getRootJoint().setJointPosition(new Vector3D(Double.NaN, Double.NaN, Double.NaN));
+         super.stop();
+         active.set(false);
+      }
+
+      @Override
+      public void handle(long now)
+      {
+         if (playbackModeActive.get())
+         {
+            WalkingControllerPreviewOutputMessage walkingControllerPreviewOutputMessage = walkingPreviewOutput.get();
+
+            if (walkingControllerPreviewOutputMessage == null)
+            {
+               LogTools.info("No preview in memory.");
+               playbackModeActive.set(false);
+               stop();
+               return;
+            }
+
+            if (playbackCounter >= walkingControllerPreviewOutputMessage.getRobotConfigurations().size())
+            {
+               playbackCounter = 0;
+            }
+
+            setToFrame(playbackCounter);
+            playbackCounter += playbackSpeed;
+            double alpha = ((double) playbackCounter) / (walkingPreviewOutput.get().getRobotConfigurations().size() - 1);
+            previewSlider.setValue(MathTools.clamp(alpha, 0.0, 1.0));
+         }
+      }
+
+      void requestSpecificPercentageInPreview(double alpha)
+      {
+         if(playbackModeActive.get())
+            return;
+
+         alpha = MathTools.clamp(alpha, 0.0, 1.0);
+         WalkingControllerPreviewOutputMessage walkingControllerPreviewOutputMessage = walkingPreviewOutput.get();
+
+         if (walkingControllerPreviewOutputMessage == null)
+         {
+            LogTools.info("No preview in memory.");
+            playbackModeActive.set(false);
+            stop();
+            return;
+         }
+
+         int frameIndex = (int) (alpha * (walkingControllerPreviewOutputMessage.getRobotConfigurations().size() - 1));
+         setToFrame(frameIndex);
+      }
+
+      private void setToFrame(int frameIndex)
+      {
+         WalkingControllerPreviewOutputMessage walkingControllerPreviewOutputMessage = walkingPreviewOutput.get();
+
+         if (walkingControllerPreviewOutputMessage == null)
+         {
+            LogTools.info("No preview in memory.");
+            playbackModeActive.set(false);
+            stop();
+            return;
+         }
+
+         Object<KinematicsToolboxOutputStatus> robotConfigurations = walkingControllerPreviewOutputMessage.getRobotConfigurations();
+
+         if (frameIndex >= robotConfigurations.size())
+         {
+            LogTools.info("frameIndex out of bound.");
+            stop();
+            return;
+         }
+
+         KinematicsToolboxOutputStatus kinematicsToolboxOutputStatus = robotConfigurations.get(frameIndex);
+
+         Float jointAngles = kinematicsToolboxOutputStatus.getDesiredJointAngles();
+
+         if (jointAngles.size() != previewModelOneDoFJoints.length)
+         {
+            System.err.println("Received " + jointAngles.size() + " from walking controller preview toolbox, expected " + previewModelOneDoFJoints.length);
+            walkingPreviewOutput.set(null);
+            return;
+         }
+
+         for (int i = 0; i < jointAngles.size(); i++)
+         {
+            previewModelOneDoFJoints[i].setQ(jointAngles.get(i));
+         }
+
+         previewRobotModel.getRootJoint().setJointPosition(kinematicsToolboxOutputStatus.getDesiredRootTranslation());
+         previewRobotModel.getRootJoint().setJointOrientation(kinematicsToolboxOutputStatus.getDesiredRootOrientation());
+      }
+   }
 }

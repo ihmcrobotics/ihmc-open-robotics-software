@@ -65,7 +65,7 @@ public class FootstepPlannerProcessViewer extends AnimationTimer
 
       messager.registerTopicListener(FootstepPlannerMessagerAPI.NodesThisTickTopic, this::handleNodesThisTick);
       messager.registerTopicListener(FootstepPlannerMessagerAPI.NodesRejectedThisTickTopic, this::handleNodesRejectedThisTick);
-      messager.registerTopicListener(FootstepPlannerMessagerAPI.PlannerPlaybackFractionTopic, this::handlePlaybackFraction);
+      messager.registerTopicListener(FootstepPlannerMessagerAPI.PlannerThoughtPlaybackFractionTopic, this::handlePlaybackFraction);
 
       rejectionReasonToShow = messager.createInput(FootstepPlannerMessagerAPI.RejectionReasonToShowTopic, QuadrupedFootstepPlannerNodeRejectionReason.OBSTACLE_BLOCKING_STEP);
       showNodesByRejectionReason = messager.createInput(FootstepPlannerMessagerAPI.ShowNodesRejectedByReasonTopic, false);

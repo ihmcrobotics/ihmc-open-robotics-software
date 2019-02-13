@@ -109,6 +109,8 @@ public class FootstepPlannerMessagerAPI
 
    public static final Topic<FootstepPlan> FootstepPlanTopic = Root.child(FootstepPlan).topic(Data);
    public static final Topic<Boolean> ShowFootstepPlanTopic = Root.child(FootstepPlan).topic(Show);
+   public static final Topic<Number> PlannerPlaybackFractionTopic = Root.child(FootstepPlan).child(Preview).topic(Data);
+
 
    public static final Topic<Boolean> ComputePathTopic = Root.child(FootstepPlan).topic(ComputePath);
    public static final Topic<Boolean> AbortPlanningTopic = Root.child(FootstepPlan).topic(AbortPlanning);
@@ -187,7 +189,7 @@ public class FootstepPlannerMessagerAPI
 
    public static final Topic<QuadrupedFootstepPlannerNodeRejectionReason> RejectionReasonToShowTopic = Root.child(PlannerData).child(NodeOccupancyMap).child(NodesRejectedByReason).topic(RejectionReason);
 
-   public static final Topic<Number> PlannerPlaybackFractionTopic = Root.child(PlannerData).child(NodeOccupancyMap).topic(Data);
+   public static final Topic<Number> PlannerThoughtPlaybackFractionTopic = Root.child(PlannerData).child(NodeOccupancyMap).topic(Data);
 
    public static final Topic<WalkingControllerPreviewInputMessage> RequestWalkingPreview = Root.child(Preview).topic(PreviewRequest);
    public static final Topic<WalkingControllerPreviewOutputMessage> WalkingPreviewOutput = Root.child(Preview).topic(PreviewResponse);
