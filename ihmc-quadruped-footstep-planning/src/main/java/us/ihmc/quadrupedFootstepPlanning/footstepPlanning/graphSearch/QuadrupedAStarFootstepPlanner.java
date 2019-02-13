@@ -1,7 +1,6 @@
 package us.ihmc.quadrupedFootstepPlanning.footstepPlanning.graphSearch;
 
 import controller_msgs.msg.dds.QuadrupedGroundPlaneMessage;
-import gnu.trove.list.array.TIntArrayList;
 import org.apache.commons.math3.util.Precision;
 import us.ihmc.commons.Conversions;
 import us.ihmc.commons.PrintTools;
@@ -18,7 +17,6 @@ import us.ihmc.log.LogTools;
 import us.ihmc.pathPlanning.visibilityGraphs.tools.BodyPathPlan;
 import us.ihmc.pathPlanning.visibilityGraphs.tools.PlanarRegionTools;
 import us.ihmc.quadrupedBasics.gait.QuadrupedTimedOrientedStep;
-import us.ihmc.quadrupedBasics.gait.QuadrupedTimedStep;
 import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.*;
 import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.graphSearch.footstepSnapping.FootstepNodeSnapData;
 import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.graphSearch.footstepSnapping.FootstepNodeSnapper;
@@ -455,6 +453,16 @@ public class QuadrupedAStarFootstepPlanner implements QuadrupedBodyPathAndFootst
             double cost = stepCostCalculator.compute(nodeToExpand, neighbor);
             graph.checkAndSetEdge(nodeToExpand, neighbor, cost);
 
+            if (midstanceReachedTheGoal.getBooleanValue())
+            {
+               if (checkAndHandleNodeAtAnyGoal(nodeToExpand))
+               {
+                  stack.clear();
+                  stack.add(neighbor);
+                  break;
+               }
+            }
+
             if (/*!parameters.getReturnBestEffortPlan() || */endNode == null || stack.comparator().compare(neighbor, endNode) < 0)
                stack.add(neighbor);
          }
@@ -486,16 +494,19 @@ public class QuadrupedAStarFootstepPlanner implements QuadrupedBodyPathAndFootst
       if (!validGoalNode.getBooleanValue())
          return false;
 
-      boolean footIsAtGoal = goalNode.quadrantGeometricallyEquals(nodeToExpand);
-      boolean midstanceIsAtGoal = goalNode.midstanceGeometricallyEquals(nodeToExpand) && !midstanceReachedTheGoal.getBooleanValue(); // don't check this if we've already reached
-      boolean xGaitIsAtGoal = goalNode.xGaitGeometricallyEquals(nodeToExpand) && !midstanceReachedTheGoal.getBooleanValue(); // don't check this if we've already reached
+      RobotQuadrant equalQuadrant = findQuadrantThatEqualsNode(nodeToExpand);
+      boolean footIsAtGoal = equalQuadrant != null && !footReachedTheGoal.get(equalQuadrant).getBooleanValue();
+      boolean midstanceIsAtGoal =
+            goalNode.midstanceGeometricallyEquals(nodeToExpand) && !midstanceReachedTheGoal.getBooleanValue(); // don't check this if we've already reached
+      boolean xGaitIsAtGoal =
+            goalNode.xGaitGeometricallyEquals(nodeToExpand) && !midstanceReachedTheGoal.getBooleanValue(); // don't check this if we've already reached
 
       if (footIsAtGoal || midstanceIsAtGoal || xGaitIsAtGoal)
       {
          if (footIsAtGoal)
          {
             heuristics.setGoalHasBeenReached(true);
-            footReachedTheGoal.get(nodeToExpand.getMovingQuadrant()).set(true);
+            footReachedTheGoal.get(equalQuadrant).set(true);
          }
          if (midstanceIsAtGoal || xGaitIsAtGoal)
          {
@@ -509,12 +520,42 @@ public class QuadrupedAStarFootstepPlanner implements QuadrupedBodyPathAndFootst
       return false;
    }
 
+   private boolean isAnyNodeEqualOnAnyQuadrant(Collection<FootstepNode> nodes)
+   {
+      for (FootstepNode node : nodes)
+      {
+         if (findQuadrantThatEqualsNode(node) != null)
+            return true;
+      }
+
+      return false;
+   }
+
+
+   private RobotQuadrant findQuadrantThatEqualsNode(FootstepNode node)
+   {
+         for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
+         {
+            if (node.getXIndex(robotQuadrant) == goalNode.getXIndex(robotQuadrant) && node.getYIndex(robotQuadrant) == goalNode.getYIndex(robotQuadrant))
+               return robotQuadrant;
+         }
+
+      return null;
+   }
+
    private boolean checkAndHandleNodeAtFinalGoal(FootstepNode nodeToExpand)
    {
       if (!validGoalNode.getBooleanValue())
          return false;
 
-      if (goalNode.geometricallyEquals(nodeToExpand))// || goalNode.midstanceGeometricallyEquals(nodeToExpand))
+      boolean allEqual = true;
+      for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
+      {
+         if (!footReachedTheGoal.get(robotQuadrant).getBooleanValue())
+            allEqual = false;
+      }
+
+      if (goalNode.geometricallyEquals(nodeToExpand) || allEqual)// || goalNode.midstanceGeometricallyEquals(nodeToExpand))
       {
          endNode = nodeToExpand;
          return true;
@@ -539,7 +580,7 @@ public class QuadrupedAStarFootstepPlanner implements QuadrupedBodyPathAndFootst
             listener.reportLowestCostNodeList(graph.getPathFromStart(nodeToExpand));
          endNode = nodeToExpand;
       }
-   }\
+   }
    */
 
    private FootstepPlanningResult checkResult()
