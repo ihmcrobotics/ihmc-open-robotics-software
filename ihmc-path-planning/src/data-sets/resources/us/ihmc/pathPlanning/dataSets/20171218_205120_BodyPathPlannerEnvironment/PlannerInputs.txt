@@ -1,2 +1,4 @@
-<Start, 0.400, 0.500, 0.001,Start>
-<Goal, 8.500,-3.500, 0.010,Goal>
+startPosition 0.400 0.500 0.001
+goalPosition 8.500 -3.500 0.010
+startYaw 0.0
+goalYaw 0.0

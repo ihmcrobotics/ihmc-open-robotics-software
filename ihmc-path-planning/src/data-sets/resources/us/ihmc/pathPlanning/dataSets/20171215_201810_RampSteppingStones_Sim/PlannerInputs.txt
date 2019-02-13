@@ -1,2 +1,4 @@
-<Start, 3.336, 0.056,-0.000,Start>
-<Goal,12.746, 0.055,-0.000,Goal>
+startPosition 3.336 0.056 -0.000
+goalPosition 12.746 0.055 -0.000
+startYaw 0.0
+goalYaw 0.0
