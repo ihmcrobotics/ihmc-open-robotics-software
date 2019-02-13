@@ -56,6 +56,20 @@ public class ValkyrieToeOffParameters extends ToeOffParameters
    }
 
    @Override
+   public boolean lookAtTwoStepCapturabilityForToeOff()
+   {
+      switch (target)
+      {
+      case SCS:
+         return true;
+      case GAZEBO:
+      case REAL_ROBOT:
+      default:
+         return false;
+      }
+   }
+
+   @Override
    public double getMaximumToeOffAngle()
    {
       return Math.toRadians(30.0);
