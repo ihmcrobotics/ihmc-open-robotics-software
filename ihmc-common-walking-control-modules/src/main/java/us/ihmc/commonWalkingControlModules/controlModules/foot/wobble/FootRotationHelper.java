@@ -35,6 +35,7 @@ public class FootRotationHelper
    private final FramePoint2DBasics intersection2 = new FramePoint2D();
    private final FrameConvexPolygon2DBasics polygonA = new FrameConvexPolygon2D();
    private final FrameConvexPolygon2DBasics polygonB = new FrameConvexPolygon2D();
+   private FrameConvexPolygon2DReadOnly bestPolygon;
 
    private final YoFrameConvexPolygon2D yoPolygonA;
    private final YoFrameConvexPolygon2D yoPolygonB;
@@ -81,9 +82,10 @@ public class FootRotationHelper
 
    public void compute(FrameLine2DReadOnly lineOfRotation, FrameConvexPolygon2DReadOnly footPolygon, FramePoint2DReadOnly icp)
    {
-      footPolygon.checkReferenceFrameMatch(desiredCop);
-      lineOfRotation.checkReferenceFrameMatch(desiredCop);
-      icp.checkReferenceFrameMatch(desiredCop);
+      ReferenceFrame soleFrame = polygonA.getReferenceFrame();
+      footPolygon.checkReferenceFrameMatch(soleFrame);
+      lineOfRotation.checkReferenceFrameMatch(soleFrame);
+      icp.checkReferenceFrameMatch(soleFrame);
 
       // Do not update the foothold continuously. If we have committed to a partial foothold stick with it.
       if (sideSelected.getValue())
@@ -101,12 +103,41 @@ public class FootRotationHelper
       int index2 = footPolygon.getClosestEdgeIndex(intersection2);
       extractPartialFoothold(footPolygon, intersection1, intersection2, index1, index2, polygonA);
       extractPartialFoothold(footPolygon, intersection1, intersection2, index2, index1, polygonB);
-
-      desiredCop.set(findBestPolygon(polygonA, polygonB, icp, areaPecentToSelect.getValue()).getCentroid());
-      rotationInformation.setRotating(side, desiredCop);
+      bestPolygon = findBestPolygon(polygonA, polygonB, icp, areaPecentToSelect.getValue());
 
       updateViz();
       sideSelected.set(true);
+   }
+
+   public void adjustICPPlan()
+   {
+      if (!checkIfComputed())
+      {
+         return;
+      }
+
+      desiredCop.set(bestPolygon.getCentroid());
+      rotationInformation.setRotating(side, desiredCop);
+   }
+
+   public void reduceFoothold()
+   {
+      if (!checkIfComputed())
+      {
+         return;
+      }
+
+      // TODO.
+   }
+
+   private boolean checkIfComputed()
+   {
+      if (!sideSelected.getValue())
+      {
+         LogTools.warn("Neet to compute adjusted polygon first.");
+         return false;
+      }
+      return true;
    }
 
    private static FrameConvexPolygon2DReadOnly findBestPolygon(FrameConvexPolygon2DReadOnly polygonA, FrameConvexPolygon2DReadOnly polygonB,
