@@ -145,7 +145,11 @@ public class VisibilityGraphsFrameworkTest
 
    private void runAssertionsOnAllDatasets(Function<DataSet, String> dataSetTester) throws Exception
    {
-      List<DataSet> allDatasets = DataSetLoader.loadDataSets();
+      List<DataSet> allDatasets = DataSetLoader.loadDataSets(dataSet ->
+                                                             {
+                                                                List<String> testVisGraph = dataSet.getAdditionalData("testVisGraph");
+                                                                return testVisGraph != null && testVisGraph.get(0).equals("true");
+                                                             });
 
       if (DEBUG)
       {
@@ -264,7 +268,7 @@ public class VisibilityGraphsFrameworkTest
                         errorMessages.isEmpty());
    }
 
-   private void runAssertionsOnDataset(Function<DataSet, String> dataSetTester, String datasetname) throws Exception
+   private void runAssertionsOnDataset(Function<DataSet, String> dataSetTester, String datasetname)
    {
       List<DataSet> allDatasets = DataSetLoader.loadDataSets();
 

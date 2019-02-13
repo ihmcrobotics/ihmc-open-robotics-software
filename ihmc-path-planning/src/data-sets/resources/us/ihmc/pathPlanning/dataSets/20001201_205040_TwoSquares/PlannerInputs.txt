@@ -2,3 +2,4 @@ startPosition -2.000 -.500 0.000
 goalPosition 5.000 0.500 0.000
 startYaw 0.0
 goalYaw 0.0
+testVisGraph true
