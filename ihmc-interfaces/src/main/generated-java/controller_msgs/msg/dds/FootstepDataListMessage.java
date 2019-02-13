@@ -62,9 +62,13 @@ public class FootstepDataListMessage extends Packet<FootstepDataListMessage> imp
             */
    public boolean are_footsteps_adjustable_;
    /**
-            * If true the controller will adjust upcoming footsteps with the location error of previous steps.
+            * If true the controller will adjust the x and y coordinates of the upcoming footsteps with the location error of previous steps.
             */
    public boolean offset_footsteps_with_execution_error_;
+   /**
+            * If true the controller will adjust the z coordinate of the adjust upcoming footsteps with the location error of previous steps.
+            */
+   public boolean offset_footsteps_height_with_execution_error_;
    /**
             * Properties for queueing footstep lists.
             */
@@ -101,6 +105,8 @@ public class FootstepDataListMessage extends Packet<FootstepDataListMessage> imp
       are_footsteps_adjustable_ = other.are_footsteps_adjustable_;
 
       offset_footsteps_with_execution_error_ = other.offset_footsteps_with_execution_error_;
+
+      offset_footsteps_height_with_execution_error_ = other.offset_footsteps_height_with_execution_error_;
 
       controller_msgs.msg.dds.QueueableMessagePubSubType.staticCopy(other.queueing_properties_, queueing_properties_);
    }
@@ -248,18 +254,33 @@ public class FootstepDataListMessage extends Packet<FootstepDataListMessage> imp
    }
 
    /**
-            * If true the controller will adjust upcoming footsteps with the location error of previous steps.
+            * If true the controller will adjust the x and y coordinates of the upcoming footsteps with the location error of previous steps.
             */
    public void setOffsetFootstepsWithExecutionError(boolean offset_footsteps_with_execution_error)
    {
       offset_footsteps_with_execution_error_ = offset_footsteps_with_execution_error;
    }
    /**
-            * If true the controller will adjust upcoming footsteps with the location error of previous steps.
+            * If true the controller will adjust the x and y coordinates of the upcoming footsteps with the location error of previous steps.
             */
    public boolean getOffsetFootstepsWithExecutionError()
    {
       return offset_footsteps_with_execution_error_;
+   }
+
+   /**
+            * If true the controller will adjust the z coordinate of the adjust upcoming footsteps with the location error of previous steps.
+            */
+   public void setOffsetFootstepsHeightWithExecutionError(boolean offset_footsteps_height_with_execution_error)
+   {
+      offset_footsteps_height_with_execution_error_ = offset_footsteps_height_with_execution_error;
+   }
+   /**
+            * If true the controller will adjust the z coordinate of the adjust upcoming footsteps with the location error of previous steps.
+            */
+   public boolean getOffsetFootstepsHeightWithExecutionError()
+   {
+      return offset_footsteps_height_with_execution_error_;
    }
 
 
@@ -312,6 +333,8 @@ public class FootstepDataListMessage extends Packet<FootstepDataListMessage> imp
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsBoolean(this.offset_footsteps_with_execution_error_, other.offset_footsteps_with_execution_error_, epsilon)) return false;
 
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsBoolean(this.offset_footsteps_height_with_execution_error_, other.offset_footsteps_height_with_execution_error_, epsilon)) return false;
+
       if (!this.queueing_properties_.epsilonEquals(other.queueing_properties_, epsilon)) return false;
 
       return true;
@@ -343,6 +366,8 @@ public class FootstepDataListMessage extends Packet<FootstepDataListMessage> imp
 
       if(this.offset_footsteps_with_execution_error_ != otherMyClass.offset_footsteps_with_execution_error_) return false;
 
+      if(this.offset_footsteps_height_with_execution_error_ != otherMyClass.offset_footsteps_height_with_execution_error_) return false;
+
       if (!this.queueing_properties_.equals(otherMyClass.queueing_properties_)) return false;
 
       return true;
@@ -372,6 +397,8 @@ public class FootstepDataListMessage extends Packet<FootstepDataListMessage> imp
       builder.append(this.are_footsteps_adjustable_);      builder.append(", ");
       builder.append("offset_footsteps_with_execution_error=");
       builder.append(this.offset_footsteps_with_execution_error_);      builder.append(", ");
+      builder.append("offset_footsteps_height_with_execution_error=");
+      builder.append(this.offset_footsteps_height_with_execution_error_);      builder.append(", ");
       builder.append("queueing_properties=");
       builder.append(this.queueing_properties_);
       builder.append("}");
