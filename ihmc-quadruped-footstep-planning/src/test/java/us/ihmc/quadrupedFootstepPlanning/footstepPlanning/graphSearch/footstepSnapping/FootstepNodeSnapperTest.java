@@ -72,16 +72,18 @@ public class FootstepNodeSnapperTest
                               double length = 1.0;
                               double width = 0.5;
 
+                              testSnapper.dirtyBit = true;
+                              String string = "i " + i + " j " + j + " k " + k + " l " + l + " m " + m + " n " + n + " o " + o + " p " + p;
                               testSnapper.snapFootstepNode(
                                     new FootstepNode(robotQuadrant, frontLeftX, frontLeftY, frontRightX, frontRightY, hindLeftX, hindLeftY, hindRightX,
                                                      hindRightY, length, width));
-                              assertTrue(testSnapper.dirtyBit);
+                              assertTrue(string, testSnapper.dirtyBit);
                               testSnapper.dirtyBit = false;
 
                               testSnapper.snapFootstepNode(
                                     new FootstepNode(robotQuadrant, frontLeftX, frontLeftY, frontRightX, frontRightY, hindLeftX, hindLeftY, hindRightX,
                                                       hindRightY, length, width));
-                              assertTrue(!testSnapper.dirtyBit);
+                              assertFalse(string, testSnapper.dirtyBit);
                            }
                         }
                      }
