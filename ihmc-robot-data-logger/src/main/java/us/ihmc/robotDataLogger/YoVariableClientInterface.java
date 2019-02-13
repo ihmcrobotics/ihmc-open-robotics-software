@@ -16,6 +16,12 @@ public interface YoVariableClientInterface
 
    /**
     * 
+    * @return true if the client interface is connected
+    */
+   boolean isConnected();
+   
+   /**
+    * 
     * @return YoVariableRegistry with debug variables for this instance of the YoVariableClient
     */
    YoVariableRegistry getDebugRegistry();
@@ -27,6 +33,17 @@ public interface YoVariableClientInterface
     */
    void sendClearLogRequest();
 
+   
+   /**
+    * Set the variable update rate for this client
+    * 
+    * Note: If the controller does not send monotonically increasing timestamps this could result in no received data. 
+    * 
+    * @param updateRate Desired update rate in milliseconds
+    */
+   void setVariableUpdateRate(int updateRate);
+   
+   
    /**
     * Stops the client completely. 
     * 
