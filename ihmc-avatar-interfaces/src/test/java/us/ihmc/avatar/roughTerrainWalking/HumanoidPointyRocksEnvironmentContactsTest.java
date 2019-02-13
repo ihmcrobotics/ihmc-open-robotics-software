@@ -35,6 +35,7 @@ import us.ihmc.tools.MemoryTools;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 
+@Tag("humanoid-rough-terrain")
 public abstract class HumanoidPointyRocksEnvironmentContactsTest implements MultiRobotTestInterface
 {
    private SimulationTestingParameters simulationTestingParameters = SimulationTestingParameters.createFromSystemProperties();

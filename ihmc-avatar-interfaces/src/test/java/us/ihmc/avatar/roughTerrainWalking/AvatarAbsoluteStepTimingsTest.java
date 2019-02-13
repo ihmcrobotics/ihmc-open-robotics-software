@@ -53,6 +53,7 @@ import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoEnum;
 import us.ihmc.yoVariables.variable.YoVariable;
 
+@Tag("humanoid-rough-terrain")
 public abstract class AvatarAbsoluteStepTimingsTest implements MultiRobotTestInterface
 {
    protected final static SimulationTestingParameters simulationTestingParameters = SimulationTestingParameters.createFromSystemProperties();
