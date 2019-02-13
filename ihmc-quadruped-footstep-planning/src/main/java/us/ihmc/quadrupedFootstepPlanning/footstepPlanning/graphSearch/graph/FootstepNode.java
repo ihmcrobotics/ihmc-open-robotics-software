@@ -300,7 +300,20 @@ public class FootstepNode
          return false;
       FootstepNode other = (FootstepNode) obj;
 
-      return getOrComputeMidStancePoint().geometricallyEquals((other).getOrComputeMidStancePoint(), PRECISION);
+      return getOrComputeMidStancePoint().geometricallyEquals((other).getOrComputeMidStancePoint(), gridSizeXY);
+   }
+
+   public boolean xGaitGeometricallyEquals(Object obj)
+   {
+      if (this == obj)
+         return true;
+      if (obj == null)
+         return false;
+      if (getClass() != obj.getClass())
+         return false;
+      FootstepNode other = (FootstepNode) obj;
+
+      return getOrComputeXGaitCenterPoint().geometricallyEquals((other).getOrComputeXGaitCenterPoint(), gridSizeXY);
    }
 
    public boolean geometricallyEquals(Object obj)
