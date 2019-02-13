@@ -24,7 +24,7 @@ import java.util.List;
 
 public class SnapBasedNodeChecker extends FootstepNodeChecker
 {
-   private static final boolean DEBUG = true;
+   private static final boolean DEBUG = false;
 
    private final FootstepPlannerParameters parameters;
    private final FootstepNodeSnapper snapper;
@@ -85,6 +85,23 @@ public class SnapBasedNodeChecker extends FootstepNodeChecker
          }
          rejectNode(node, previousNode, QuadrupedFootstepPlannerNodeRejectionReason.STEP_IN_PLACE);
          return false;
+      }
+
+      for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
+      {
+         if (robotQuadrant == movingQuadrant)
+            continue;
+
+         if (MathTools.epsilonEquals(node.getX(movingQuadrant), previousNode.getX(robotQuadrant), Math.abs(clearanceVector.getX())) && MathTools
+               .epsilonEquals(node.getY(movingQuadrant), previousNode.getY(robotQuadrant), Math.abs(clearanceVector.getY())))
+         {
+            if (DEBUG)
+            {
+               PrintTools.info("The node " + node + " is stepping on another foot.");
+            }
+            rejectNode(node, previousNode, QuadrupedFootstepPlannerNodeRejectionReason.STEP_ON_OTHER_FOOT);
+            return false;
+         }
       }
 
       FootstepNodeSnapData previousNodeSnapData = snapper.snapFootstepNode(previousNode);
