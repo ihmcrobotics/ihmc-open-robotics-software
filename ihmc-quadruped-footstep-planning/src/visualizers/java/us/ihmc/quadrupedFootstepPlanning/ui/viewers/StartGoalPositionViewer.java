@@ -7,9 +7,17 @@ import javafx.scene.Node;
 import javafx.scene.paint.Color;
 import javafx.scene.paint.PhongMaterial;
 import javafx.scene.shape.Sphere;
+import us.ihmc.euclid.orientation.interfaces.Orientation3DReadOnly;
+import us.ihmc.euclid.tuple2D.Vector2D;
 import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
+import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.messager.Messager;
 import us.ihmc.messager.MessagerAPIFactory.Topic;
+import us.ihmc.quadrupedPlanning.QuadrupedXGaitSettings;
+import us.ihmc.quadrupedPlanning.QuadrupedXGaitSettingsReadOnly;
+import us.ihmc.robotics.robotSide.QuadrantDependentList;
+import us.ihmc.robotics.robotSide.RobotQuadrant;
 
 import java.util.concurrent.atomic.AtomicReference;
 
@@ -22,17 +30,12 @@ public class StartGoalPositionViewer extends AnimationTimer
 
    private final Sphere startSphere = new Sphere(RADIUS);
    private final Sphere goalSphere = new Sphere(RADIUS);
+   private final QuadrantDependentList<Sphere> startFeetSpheres = new QuadrantDependentList<>();
+   private final QuadrantDependentList<Sphere> goalFeetSpheres = new QuadrantDependentList<>();
    private final Sphere lowLevelGoalSphere = new Sphere(RADIUS);
    private boolean isStartCurrentlyShown;
    private boolean isGoalCurrentlyShown;
    private boolean isIntermediateGoalCurrentlyShown;
-
-   public enum StartGoalViewMode
-   {
-      TRANSLUCENT, OPAQUE
-   }
-
-   ;
 
    public static final PhongMaterial startOpaqueMaterial = new PhongMaterial(Color.GREEN);
    public static final PhongMaterial startTransparentMaterial = new PhongMaterial(toTransparentColor(Color.ORANGE, 0.7));
@@ -46,14 +49,29 @@ public class StartGoalPositionViewer extends AnimationTimer
    private AtomicReference<Boolean> startEditModeEnabled = null;
    private AtomicReference<Boolean> goalEditModeEnabled = null;
    private AtomicReference<Point3D> startPositionReference = null;
+   private AtomicReference<Quaternion> startOrientationReference = null;
    private AtomicReference<Point3D> goalPositionReference = null;
+   private AtomicReference<Quaternion> goalOrientationReference = null;
    private AtomicReference<Point3D> lowLevelGoalPositionReference = null;
+   private final AtomicReference<QuadrupedXGaitSettingsReadOnly> xGaitSettingsReference = new AtomicReference<>(new QuadrupedXGaitSettings());
 
    private final Messager messager;
 
    public StartGoalPositionViewer(Messager messager)
    {
       this.messager = messager;
+
+      for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
+      {
+         Sphere startFootSphere = new Sphere(0.5 * RADIUS);
+         Sphere goalFootSphere = new Sphere(0.5 * RADIUS);
+         startFootSphere.setMouseTransparent(true);
+         goalFootSphere.setMouseTransparent(true);
+
+         startFeetSpheres.put(robotQuadrant, startFootSphere);
+         goalFeetSpheres.put(robotQuadrant, goalFootSphere);
+      }
+
       startSphere.setMouseTransparent(true);
       goalSphere.setMouseTransparent(true);
       lowLevelGoalSphere.setMouseTransparent(true);
@@ -64,19 +82,25 @@ public class StartGoalPositionViewer extends AnimationTimer
    }
 
    public StartGoalPositionViewer(Messager messager, Topic<Boolean> startEditModeEnabledTopic, Topic<Boolean> goalEditModeEnabledTopic,
-                                  Topic<Point3D> startPositionTopic, Topic<Point3D> lowLevelGoalPositionTopic, Topic<Point3D> goalPositionTopic)
+                                  Topic<Point3D> startPositionTopic, Topic<Quaternion> startOrientationTopic, Topic<Point3D> lowLevelGoalPositionTopic,
+                                  Topic<Point3D> goalPositionTopic, Topic<Quaternion> goalOrientationTopic,
+                                  Topic<QuadrupedXGaitSettingsReadOnly> xGaitSettingsTopic)
    {
       this(messager);
 
       setEditStartGoalTopics(startEditModeEnabledTopic, goalEditModeEnabledTopic);
-      setPositionStartGoalTopics(startPositionTopic, lowLevelGoalPositionTopic, goalPositionTopic);
+      setPositionStartGoalTopics(startPositionTopic, startOrientationTopic, lowLevelGoalPositionTopic, goalPositionTopic, goalOrientationTopic);
+      setXGaitSettingsTopic(xGaitSettingsTopic);
    }
 
-   public void setPositionStartGoalTopics(Topic<Point3D> startPositionTopic, Topic<Point3D> lowLevelGoalPositionTopic, Topic<Point3D> goalPositionTopic)
+   public void setPositionStartGoalTopics(Topic<Point3D> startPositionTopic, Topic<Quaternion> startOrientationTopic, Topic<Point3D> lowLevelGoalPositionTopic,
+                                          Topic<Point3D> goalPositionTopic, Topic<Quaternion> goalOrientationTopic)
    {
       startPositionReference = messager.createInput(startPositionTopic, new Point3D());
+      startOrientationReference = messager.createInput(startOrientationTopic, new Quaternion());
       lowLevelGoalPositionReference = messager.createInput(lowLevelGoalPositionTopic, new Point3D());
       goalPositionReference = messager.createInput(goalPositionTopic, new Point3D());
+      goalOrientationReference = messager.createInput(goalOrientationTopic, new Quaternion());
    }
 
    // TODO
@@ -93,6 +117,16 @@ public class StartGoalPositionViewer extends AnimationTimer
       showGoalPosition = messager.createInput(showGoalTopic, true);
    }
 
+   public void setXGaitSettingsTopic(Topic<QuadrupedXGaitSettingsReadOnly> xGaitSettingsTopic)
+   {
+      messager.registerTopicListener(xGaitSettingsTopic, this::handleXGaitSettings);
+   }
+
+   private void handleXGaitSettings(QuadrupedXGaitSettingsReadOnly xGaitSettings)
+   {
+      xGaitSettingsReference.set(xGaitSettings);
+   }
+
    @Override
    public void handle(long now)
    {
@@ -106,30 +140,46 @@ public class StartGoalPositionViewer extends AnimationTimer
          showLowLevelGoal(showLowLevelGoalPosition.get());
 
       if (startEditModeEnabled != null && startEditModeEnabled.get())
+      {
          startSphere.setMaterial(startTransparentMaterial);
+         for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
+            startFeetSpheres.get(robotQuadrant).setMaterial(startTransparentMaterial);
+      }
       else
+      {
          startSphere.setMaterial(startOpaqueMaterial);
+         for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
+            startFeetSpheres.get(robotQuadrant).setMaterial(startOpaqueMaterial);
+      }
 
       if (startPositionReference != null)
       {
          Point3D startPosition = startPositionReference.get();
          if (startPosition != null)
          {
-            setStartPosition(startPosition);
+            setStartPosition(startPosition, startOrientationReference.get());
          }
       }
 
       if (goalEditModeEnabled != null && goalEditModeEnabled.get())
+      {
          goalSphere.setMaterial(goalTransparentMaterial);
+         for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
+            goalFeetSpheres.get(robotQuadrant).setMaterial(goalTransparentMaterial);
+      }
       else
+      {
          goalSphere.setMaterial(goalOpaqueMaterial);
+         for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
+            goalFeetSpheres.get(robotQuadrant).setMaterial(goalOpaqueMaterial);
+      }
 
       if (goalPositionReference != null)
       {
          Point3D goalPosition = goalPositionReference.get();
          if (goalPosition != null)
          {
-            setGoalPosition(goalPosition);
+            setGoalPosition(goalPosition, goalOrientationReference.get());
          }
       }
 
@@ -145,18 +195,36 @@ public class StartGoalPositionViewer extends AnimationTimer
       }
    }
 
-   private void setStartPosition(Point3D position)
+   private void setStartPosition(Point3DReadOnly position, Orientation3DReadOnly orientation)
    {
       startSphere.setTranslateX(position.getX());
       startSphere.setTranslateY(position.getY());
       startSphere.setTranslateZ(position.getZ());
+
+      Vector2D offsetVector = new Vector2D(0.5 * xGaitSettingsReference.get().getStanceLength(), 0.5 * xGaitSettingsReference.get().getStanceWidth());
+      orientation.transform(offsetVector);
+      for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
+      {
+         startFeetSpheres.get(robotQuadrant).setTranslateX(position.getX() + robotQuadrant.getEnd().negateIfHindEnd(offsetVector.getX()));
+         startFeetSpheres.get(robotQuadrant).setTranslateY(position.getY() + robotQuadrant.getSide().negateIfRightSide(offsetVector.getY()));
+         startFeetSpheres.get(robotQuadrant).setTranslateZ(position.getZ());
+      }
    }
 
-   private void setGoalPosition(Point3D position)
+   private void setGoalPosition(Point3DReadOnly position, Orientation3DReadOnly orientation)
    {
       goalSphere.setTranslateX(position.getX());
       goalSphere.setTranslateY(position.getY());
       goalSphere.setTranslateZ(position.getZ());
+
+      Vector2D offsetVector = new Vector2D(0.5 * xGaitSettingsReference.get().getStanceLength(), 0.5 * xGaitSettingsReference.get().getStanceWidth());
+      orientation.transform(offsetVector);
+      for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
+      {
+         goalFeetSpheres.get(robotQuadrant).setTranslateX(position.getX() + robotQuadrant.getEnd().negateIfHindEnd(offsetVector.getX()));
+         goalFeetSpheres.get(robotQuadrant).setTranslateY(position.getY() + robotQuadrant.getSide().negateIfRightSide(offsetVector.getY()));
+         goalFeetSpheres.get(robotQuadrant).setTranslateZ(position.getZ());
+      }
    }
 
    private void setIntermediateGoalPosition(Point3D position)
@@ -171,12 +239,20 @@ public class StartGoalPositionViewer extends AnimationTimer
       if (show)
       {
          if (!isStartCurrentlyShown)
+         {
             rootChildren.add(startSphere);
+            for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
+               rootChildren.add(startFeetSpheres.get(robotQuadrant));
+         }
       }
       else
       {
          if (isStartCurrentlyShown)
+         {
             rootChildren.remove(startSphere);
+            for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
+               rootChildren.remove(startFeetSpheres.get(robotQuadrant));
+         }
       }
       isStartCurrentlyShown = show;
    }
@@ -186,12 +262,20 @@ public class StartGoalPositionViewer extends AnimationTimer
       if (show)
       {
          if (!isGoalCurrentlyShown)
+         {
             rootChildren.add(goalSphere);
+            for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
+               rootChildren.add(goalFeetSpheres.get(robotQuadrant));
+         }
       }
       else
       {
          if (isGoalCurrentlyShown)
+         {
             rootChildren.remove(goalSphere);
+            for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
+               rootChildren.remove(goalFeetSpheres.get(robotQuadrant));
+         }
       }
       isGoalCurrentlyShown = show;
    }
