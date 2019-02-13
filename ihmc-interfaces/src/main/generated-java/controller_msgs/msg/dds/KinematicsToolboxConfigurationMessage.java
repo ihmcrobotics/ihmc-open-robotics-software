@@ -33,6 +33,18 @@ public class KinematicsToolboxConfigurationMessage extends Packet<KinematicsTool
             * When provided, the solver will attempt to find the solution that is the closest to the privileged configuration.
             */
    public us.ihmc.idl.IDLSequence.Float  privileged_joint_angles_;
+   /**
+            * The weight to use in the optimization for the privileged configuration.
+            * When remaining close to the privileged configuration is important, raise this weight to a value higher than the
+            * weight of the main objectives.
+            * Any value less than zero will be ignored.
+            */
+   public double privileged_weight_ = -1.0;
+   /**
+            * The feedback proportional gain to use for the privileged configuration.
+            * It is coupled to some extent to the privileged_weight
+            */
+   public double privileged_gain_ = -1.0;
 
    public KinematicsToolboxConfigurationMessage()
    {
@@ -58,6 +70,10 @@ public class KinematicsToolboxConfigurationMessage extends Packet<KinematicsTool
       geometry_msgs.msg.dds.QuaternionPubSubType.staticCopy(other.privileged_root_joint_orientation_, privileged_root_joint_orientation_);
       privileged_joint_hash_codes_.set(other.privileged_joint_hash_codes_);
       privileged_joint_angles_.set(other.privileged_joint_angles_);
+      privileged_weight_ = other.privileged_weight_;
+
+      privileged_gain_ = other.privileged_gain_;
+
    }
 
    /**
@@ -112,6 +128,44 @@ public class KinematicsToolboxConfigurationMessage extends Packet<KinematicsTool
       return privileged_joint_angles_;
    }
 
+   /**
+            * The weight to use in the optimization for the privileged configuration.
+            * When remaining close to the privileged configuration is important, raise this weight to a value higher than the
+            * weight of the main objectives.
+            * Any value less than zero will be ignored.
+            */
+   public void setPrivilegedWeight(double privileged_weight)
+   {
+      privileged_weight_ = privileged_weight;
+   }
+   /**
+            * The weight to use in the optimization for the privileged configuration.
+            * When remaining close to the privileged configuration is important, raise this weight to a value higher than the
+            * weight of the main objectives.
+            * Any value less than zero will be ignored.
+            */
+   public double getPrivilegedWeight()
+   {
+      return privileged_weight_;
+   }
+
+   /**
+            * The feedback proportional gain to use for the privileged configuration.
+            * It is coupled to some extent to the privileged_weight
+            */
+   public void setPrivilegedGain(double privileged_gain)
+   {
+      privileged_gain_ = privileged_gain;
+   }
+   /**
+            * The feedback proportional gain to use for the privileged configuration.
+            * It is coupled to some extent to the privileged_weight
+            */
+   public double getPrivilegedGain()
+   {
+      return privileged_gain_;
+   }
+
 
    public static Supplier<KinematicsToolboxConfigurationMessagePubSubType> getPubSubType()
    {
@@ -138,6 +192,10 @@ public class KinematicsToolboxConfigurationMessage extends Packet<KinematicsTool
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsFloatSequence(this.privileged_joint_angles_, other.privileged_joint_angles_, epsilon)) return false;
 
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.privileged_weight_, other.privileged_weight_, epsilon)) return false;
+
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.privileged_gain_, other.privileged_gain_, epsilon)) return false;
+
 
       return true;
    }
@@ -157,6 +215,10 @@ public class KinematicsToolboxConfigurationMessage extends Packet<KinematicsTool
       if (!this.privileged_root_joint_orientation_.equals(otherMyClass.privileged_root_joint_orientation_)) return false;
       if (!this.privileged_joint_hash_codes_.equals(otherMyClass.privileged_joint_hash_codes_)) return false;
       if (!this.privileged_joint_angles_.equals(otherMyClass.privileged_joint_angles_)) return false;
+      if(this.privileged_weight_ != otherMyClass.privileged_weight_) return false;
+
+      if(this.privileged_gain_ != otherMyClass.privileged_gain_) return false;
+
 
       return true;
    }
@@ -176,7 +238,11 @@ public class KinematicsToolboxConfigurationMessage extends Packet<KinematicsTool
       builder.append("privileged_joint_hash_codes=");
       builder.append(this.privileged_joint_hash_codes_);      builder.append(", ");
       builder.append("privileged_joint_angles=");
-      builder.append(this.privileged_joint_angles_);
+      builder.append(this.privileged_joint_angles_);      builder.append(", ");
+      builder.append("privileged_weight=");
+      builder.append(this.privileged_weight_);      builder.append(", ");
+      builder.append("privileged_gain=");
+      builder.append(this.privileged_gain_);
       builder.append("}");
       return builder.toString();
    }

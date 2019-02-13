@@ -6,7 +6,6 @@ import java.util.List;
 
 import us.ihmc.robotDataLogger.LogDataType;
 import us.ihmc.robotDataLogger.jointState.JointHolder;
-import us.ihmc.robotDataLogger.rtps.LogParticipantTools;
 import us.ihmc.yoVariables.variable.YoVariable;
 
 public class RegistrySendBuffer extends RegistryBuffer
@@ -43,9 +42,9 @@ public class RegistrySendBuffer extends RegistryBuffer
    protected RegistrySendBuffer(int registeryID, List<YoVariable<?>> variables, List<JointHolder> jointHolders)
    {
       int numberOfJointStates = RegistrySendBufferBuilder.getNumberOfJointStates(jointHolders);
-      int maximumNumberOfVariables = LogParticipantTools.calculateMaximumNumberOfVariables(variables.size(), numberOfJointStates);
+      int maximumNumberOfVariables = variables.size() + numberOfJointStates;//LogParticipantTools.calculateMaximumNumberOfVariables(variables.size(), numberOfJointStates);
       this.buffer = ByteBuffer.allocate(maximumNumberOfVariables * 8);
-
+      
       this.data = this.buffer.asLongBuffer();
       this.registryID = registeryID;
 

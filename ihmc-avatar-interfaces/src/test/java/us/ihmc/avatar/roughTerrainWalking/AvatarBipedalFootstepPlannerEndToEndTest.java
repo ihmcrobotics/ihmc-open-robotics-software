@@ -62,7 +62,6 @@ import java.util.concurrent.atomic.AtomicReference;
 
 import static us.ihmc.robotics.Assert.*;
 
-@Disabled
 public abstract class AvatarBipedalFootstepPlannerEndToEndTest implements MultiRobotTestInterface
 {
    private SimulationTestingParameters simulationTestingParameters = SimulationTestingParameters.createFromSystemProperties();
@@ -176,6 +175,8 @@ public abstract class AvatarBipedalFootstepPlannerEndToEndTest implements MultiR
       MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " after test.");
    }
 
+   @Tag("humanoid-rough-terrain")
+   @Disabled
    @Test
    public void testShortCinderBlockFieldWithAStar()
    {
@@ -188,6 +189,8 @@ public abstract class AvatarBipedalFootstepPlannerEndToEndTest implements MultiR
       runEndToEndTestAndKeepSCSUpIfRequested(FootstepPlannerType.A_STAR, cinderBlockField, goalPose);
    }
 
+   @Tag("humanoid-rough-terrain")
+   @Disabled
    @Test
    public void testShortCinderBlockFieldWithVisibilityGraph()
    {
@@ -200,6 +203,8 @@ public abstract class AvatarBipedalFootstepPlannerEndToEndTest implements MultiR
       runEndToEndTestAndKeepSCSUpIfRequested(FootstepPlannerType.VIS_GRAPH_WITH_A_STAR, cinderBlockField, goalPose);
    }
 
+   @Tag("humanoid-rough-terrain")
+   @Disabled
    @Test
    public void testShortCinderBlockFieldWithPlanarRegionBipedalPlanner()
    {
@@ -212,6 +217,7 @@ public abstract class AvatarBipedalFootstepPlannerEndToEndTest implements MultiR
       runEndToEndTestAndKeepSCSUpIfRequested(FootstepPlannerType.PLANAR_REGION_BIPEDAL, cinderBlockField, goalPose);
    }
 
+   @Tag("video")
    @Test
    public void testSteppingStonesWithAStar()
    {
@@ -224,6 +230,8 @@ public abstract class AvatarBipedalFootstepPlannerEndToEndTest implements MultiR
       runEndToEndTestAndKeepSCSUpIfRequested(FootstepPlannerType.A_STAR, steppingStoneField, goalPose);
    }
 
+   @Tag("humanoid-rough-terrain")
+   @Disabled
    @Test
    public void testSteppingStonesWithPlanarRegionBipedalPlanner()
    {
@@ -236,6 +244,8 @@ public abstract class AvatarBipedalFootstepPlannerEndToEndTest implements MultiR
       runEndToEndTestAndKeepSCSUpIfRequested(FootstepPlannerType.PLANAR_REGION_BIPEDAL, steppingStoneField, goalPose);
    }
 
+   @Tag("humanoid-rough-terrain")
+   @Disabled
    @Test
    public void testWalkingOnFlatGround()
    {
@@ -247,6 +257,8 @@ public abstract class AvatarBipedalFootstepPlannerEndToEndTest implements MultiR
       runEndToEndTestAndKeepSCSUpIfRequested(FootstepPlannerType.A_STAR, null, goalPose);
    }
 
+   @Tag("humanoid-rough-terrain")
+   @Disabled
    @Test
    public void testWalkingBetweenBollardsAStarPlanner()
    {

@@ -46,6 +46,7 @@ import us.ihmc.yoVariables.variable.YoEnum;
 import us.ihmc.yoVariables.variable.YoInteger;
 import us.ihmc.yoVariables.variable.YoVariable;
 
+@Tag("controller-api")
 public abstract class EndToEndArmTrajectoryMessageTest implements MultiRobotTestInterface
 {
    private static boolean DEBUG = false;

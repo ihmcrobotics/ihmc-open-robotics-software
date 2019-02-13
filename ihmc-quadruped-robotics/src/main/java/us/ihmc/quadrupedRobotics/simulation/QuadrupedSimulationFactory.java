@@ -318,12 +318,6 @@ public class QuadrupedSimulationFactory
       }
 
       controllerManager = new QuadrupedControllerManager(runtimeEnvironment, physicalProperties.get(), initialForceControlState.get(), null);
-
-
-      if(useStateEstimator.get())
-      {
-         controllerManager.setStateEstimatorModeSubscriber(stateEstimator);
-      }
    }
 
    private void createPoseCommunicator()
