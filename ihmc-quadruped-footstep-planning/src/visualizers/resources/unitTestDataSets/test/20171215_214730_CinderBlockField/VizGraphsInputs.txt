@@ -1,5 +1,7 @@
 <Start, 2.555, 2.631, 0.000,Start>
 <Goal,10.5,10.698, 0.000,Goal>
+<StartOrientation, 0.00, 0.00, 0.3826834, 0.9238795,StartOrientation>
+<GoalOrientation, 0.00, 0.00, 0.3826834, 0.9238795,GoalOrientation>
 <Type,A_STAR,Type>
 <Timeout,15.0,Timeout>
 
