@@ -56,7 +56,6 @@ public abstract class FootstepNodeSnapper implements FootstepNodeSnapperReadOnly
          return snapDataHolder.get(footstepNode);
       }
       else if (planarRegionsList == null || planarRegionsList.isEmpty())
-//      if (planarRegionsList == null || planarRegionsList.isEmpty())
       {
          return FootstepNodeSnapData.identityData();
       }

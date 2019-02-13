@@ -6,7 +6,6 @@ import us.ihmc.robotics.geometry.AngleTools;
 
 public class DistanceAndYawBasedHeuristics extends CostToGoHeuristics
 {
-   private boolean bodyHasReachedGoal = false;
 
    public DistanceAndYawBasedHeuristics(FootstepPlannerParameters parameters)
    {
@@ -22,16 +21,10 @@ public class DistanceAndYawBasedHeuristics extends CostToGoHeuristics
       double distanceWeight = 0.5 * (parameters.getForwardWeight() + parameters.getLateralWeight());
 
       double bodyBasedHeuristicDistance = node.euclideanDistance(goalNode);
-      double quadrantBasedDistance = node.quadrantEuclideanDistance(node.getMovingQuadrant(), goalNode);
-      double distance;
-      if (bodyHasReachedGoal)
-         distance = quadrantBasedDistance;
-      else
-         distance = bodyBasedHeuristicDistance;
 
       double yawHeuristicCost = parameters.getYawWeight() * Math.abs(yaw);
       double stepHeuristicCost = parameters.getCostPerStep() * minSteps;
-      double distanceCost = distanceWeight * distance;
+      double distanceCost = distanceWeight * bodyBasedHeuristicDistance;
 
       return distanceCost + yawHeuristicCost + stepHeuristicCost;
    }
