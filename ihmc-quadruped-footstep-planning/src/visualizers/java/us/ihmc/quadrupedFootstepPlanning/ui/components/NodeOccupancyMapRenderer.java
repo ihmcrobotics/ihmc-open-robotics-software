@@ -88,6 +88,9 @@ public class NodeOccupancyMapRenderer extends AnimationTimer
 
    private void processNodesToRender(Collection<SimpleFootstepNode> nodes, Color color)
    {
+      if (nodes == null || nodes.isEmpty())
+         return;
+
       for (SimpleFootstepNode node : nodes)
       {
          double x = node.getXIndex() * FootstepNode.gridSizeXY;
