@@ -1,12 +1,15 @@
 package us.ihmc.quadrupedFootstepPlanning.footstepPlanning.graphSearch.nodeChecking;
 
+import us.ihmc.commons.MathTools;
+import us.ihmc.commons.PrintTools;
+import us.ihmc.euclid.axisAngle.AxisAngle;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.geometry.LineSegment3D;
 import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.tuple2D.Vector2D;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
-import us.ihmc.log.LogTools;
 import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.graphSearch.QuadrupedFootstepPlannerNodeRejectionReason;
 import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.graphSearch.footstepSnapping.FootstepNodeSnapData;
 import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.graphSearch.footstepSnapping.FootstepNodeSnapper;
@@ -55,7 +58,7 @@ public class SnapBasedNodeChecker extends FootstepNodeChecker
          {
             if (DEBUG)
             {
-               LogTools.debug("Was not able to snap node:\n" + node);
+               PrintTools.debug("Was not able to snap node:\n" + node);
             }
             rejectNode(node, previousNode, QuadrupedFootstepPlannerNodeRejectionReason.COULD_NOT_SNAP);
             return false;
@@ -67,9 +70,25 @@ public class SnapBasedNodeChecker extends FootstepNodeChecker
          return true;
       }
 
+      RobotQuadrant movingQuadrant = node.getMovingQuadrant();
+
+      Vector2D clearanceVector = new Vector2D(parameters.getMinXClearanceFromFoot(), parameters.getMinYClearanceFromFoot());
+      AxisAngle previousOrientation = new AxisAngle(previousNode.getNominalYaw(), 0.0, 0.0);
+      previousOrientation.transform(clearanceVector);
+
+      if (MathTools.epsilonEquals(node.getX(movingQuadrant), previousNode.getX(movingQuadrant), Math.abs(clearanceVector.getX())) && MathTools
+            .epsilonEquals(node.getY(movingQuadrant), previousNode.getY(movingQuadrant), Math.abs(clearanceVector.getY())))
+      {
+         if (DEBUG)
+         {
+            PrintTools.info("The node " + node + " is trying to step in place.");
+         }
+         rejectNode(node, previousNode, QuadrupedFootstepPlannerNodeRejectionReason.STEP_IN_PLACE);
+         return false;
+      }
+
       FootstepNodeSnapData previousNodeSnapData = snapper.snapFootstepNode(previousNode);
 
-      RobotQuadrant movingQuadrant = node.getMovingQuadrant();
       RigidBodyTransform previousFootSnapTransform = previousNodeSnapData.getSnapTransform(movingQuadrant);
       RigidBodyTransform snapTransform = snapData.getSnapTransform(movingQuadrant);
 
@@ -84,7 +103,7 @@ public class SnapBasedNodeChecker extends FootstepNodeChecker
       {
          if (DEBUG)
          {
-            LogTools.debug("Too much height difference (" + Math.round(100.0 * heightChange) + "cm) to previous node:\n" + node);
+            PrintTools.debug("Too much height difference (" + Math.round(100.0 * heightChange) + "cm) to previous node:\n" + node);
          }
          rejectNode(node, previousNode, QuadrupedFootstepPlannerNodeRejectionReason.STEP_TOO_HIGH_OR_LOW);
          return false;
@@ -95,7 +114,7 @@ public class SnapBasedNodeChecker extends FootstepNodeChecker
       {
          if (DEBUG)
          {
-            LogTools.debug("Found a obstacle between the nodes " + node + " and " + previousNode);
+            PrintTools.debug("Found an obstacle between the nodes " + node + " and " + previousNode);
          }
          rejectNode(node, previousNode, QuadrupedFootstepPlannerNodeRejectionReason.OBSTACLE_BLOCKING_STEP);
          return false;
@@ -106,7 +125,7 @@ public class SnapBasedNodeChecker extends FootstepNodeChecker
       {
          if (DEBUG)
          {
-            LogTools.debug("Found a obstacle between the nodes " + node + " and " + previousNode);
+            PrintTools.debug("Found an obstacle between the nodes " + node + " and " + previousNode);
          }
          rejectNode(node, previousNode, QuadrupedFootstepPlannerNodeRejectionReason.OBSTACLE_BLOCKING_BODY);
          return false;
