@@ -30,10 +30,15 @@ public class DistanceAndYawBasedHeuristics extends CostToGoHeuristics
 
       double bodyBasedHeuristicDistance = node.euclideanDistance(goalNode);
       double quadrantBasedDistance = node.quadrantEuclideanDistance(node.getMovingQuadrant(), goalNode);
+      double distance;
+      if (bodyHasReachedGoal)
+         distance = quadrantBasedDistance;
+      else
+         distance = bodyBasedHeuristicDistance;
 
       double yawHeuristicCost = parameters.getYawWeight() * Math.abs(yaw);
       double stepHeuristicCost = parameters.getCostPerStep() * minSteps;
-      double distanceCost = distanceWeight * (bodyHasReachedGoal ? quadrantBasedDistance : bodyBasedHeuristicDistance);
+      double distanceCost = distanceWeight * distance;
 
       return distanceCost + yawHeuristicCost + stepHeuristicCost;
    }
