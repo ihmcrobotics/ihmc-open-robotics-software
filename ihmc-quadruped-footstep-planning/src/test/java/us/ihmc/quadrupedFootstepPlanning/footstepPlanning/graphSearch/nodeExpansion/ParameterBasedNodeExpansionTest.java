@@ -26,6 +26,7 @@ import us.ihmc.quadrupedPlanning.QuadrupedXGaitSettings;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 import us.ihmc.robotics.robotSide.QuadrantDependentList;
 import us.ihmc.robotics.robotSide.RobotQuadrant;
+import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 
 import java.util.HashSet;
@@ -44,7 +45,7 @@ public class ParameterBasedNodeExpansionTest
 
    private static final double stanceLength = 1.0;
    private static final double stanceWidth = 0.5;
-   private static final boolean visualize = true;
+   private static final boolean visualize = false;
    private static final QuadrantDependentList<AppearanceDefinition> colorDefinitions = new QuadrantDependentList<>(YoAppearance.Red(), YoAppearance.Green(),
                                                                                                                    YoAppearance.DarkRed(),
                                                                                                                    YoAppearance.DarkGreen());
@@ -65,22 +66,13 @@ public class ParameterBasedNodeExpansionTest
       HashSet<FootstepNode> expandedNodes = expansion.expandNode(baseNode);
       for (FootstepNode expandedNode : expandedNodes)
       {
-         if (baseNode.quadrantGeometricallyEquals(expandedNode))
-            throw new RuntimeException("Error in expansion");
+         assertFalse("baseNode " + expandedNode + " is not supposed to be equal to " + baseNode, expandedNode.quadrantGeometricallyEquals(baseNode));
       }
-
-      double stepBoxLength = parameters.getMaximumStepReach() - parameters.getMinimumStepLength();
-      double stepBoxWidth = parameters.getMaximumStepWidth() - parameters.getMinimumStepWidth();
-
-      int numberWide = (int) (stepBoxWidth / FootstepNode.gridSizeXY);
-      int numberLong = (int) (stepBoxLength / FootstepNode.gridSizeXY);
 
       if (visualize)
          visualizeNodes(expandedNodes, baseNode);
 
-//      assertEquals(numberLong * numberWide, expandedNodes.size());
-
-      RobotQuadrant expectedNewQuadrant = RobotQuadrant.FRONT_LEFT.getNextRegularGaitSwingQuadrant();
+      RobotQuadrant expectedNewQuadrant = quadrantToCheck.getNextRegularGaitSwingQuadrant();
 
       for (FootstepNode node : expandedNodes)
       {
@@ -90,10 +82,18 @@ public class ParameterBasedNodeExpansionTest
          {
             if (expectedNewQuadrant == robotQuadrant)
             {
-               assertTrue(MathTools.intervalContains(node.getX(robotQuadrant), baseNode.getX(robotQuadrant) - 0.5 * stepBoxLength,
-                                                     baseNode.getX(robotQuadrant) + 0.5 * stepBoxLength, true, true));
-               assertTrue(MathTools.intervalContains(node.getY(robotQuadrant), baseNode.getY(robotQuadrant) - 0.5 * stepBoxWidth,
-                                                     baseNode.getY(robotQuadrant) + 0.5 * stepBoxWidth, true, true));
+               Point2DReadOnly center = baseNode.getOrComputeXGaitCenterPoint();
+               Point2D foot = new Point2D(center);
+               foot.add(0.5 * expectedNewQuadrant.getEnd().negateIfHindEnd(baseNode.getNominalStanceLength()),
+                        0.5 * expectedNewQuadrant.getSide().negateIfRightSide(baseNode.getNominalStanceWidth()));
+               double lowerXBound = foot.getX() + parameters.getMinimumStepLength();
+               double upperXBound = foot.getX() + parameters.getMaximumStepReach();
+               double lowerYBound = foot.getY() - (robotQuadrant.getSide() == RobotSide.LEFT ? -parameters.getMinimumStepWidth() : parameters.getMaximumStepWidth());
+               double upperYBound = foot.getY() + (robotQuadrant.getSide() == RobotSide.LEFT ? parameters.getMaximumStepWidth() : -parameters.getMinimumStepWidth());
+               double xFoot = node.getX(robotQuadrant);
+               double yFoot = node.getY(robotQuadrant);
+               assertTrue(robotQuadrant.getCamelCaseName() + " foot X " + xFoot + " is not within bounds " + lowerXBound + " < x < " + upperXBound, MathTools.intervalContains(xFoot, lowerXBound, upperXBound));
+               assertTrue(robotQuadrant.getCamelCaseName() + " foot Y " + yFoot + " is not within bounds " + lowerYBound + " < x < " + upperYBound, MathTools.intervalContains(yFoot, lowerYBound, upperYBound));
             }
             else
             {
@@ -136,7 +136,7 @@ public class ParameterBasedNodeExpansionTest
       if (visualize)
          visualizeNodes(expandedNodes, baseNode);
 
-      RobotQuadrant expectedNewQuadrant = RobotQuadrant.FRONT_LEFT.getNextRegularGaitSwingQuadrant();
+      RobotQuadrant expectedNewQuadrant = quadrantToCheck.getNextRegularGaitSwingQuadrant();
 
       for (FootstepNode node : expandedNodes)
       {
