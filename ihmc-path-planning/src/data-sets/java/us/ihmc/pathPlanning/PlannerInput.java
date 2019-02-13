@@ -69,4 +69,9 @@ public class PlannerInput
    {
       additionalData.computeIfAbsent(key, k -> new ArrayList<>()).add(value);
    }
+
+   public boolean getBooleanFlag(String key)
+   {
+      return additionalData.containsKey(key) && additionalData.get(key).get(0).equals("true");
+   }
 }

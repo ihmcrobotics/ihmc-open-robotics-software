@@ -42,6 +42,8 @@ public class VisibilityGraphsIOTools
    protected static final String GOAL_FIELD_OPEN = "<Goal,";
    protected static final String GOAL_FIELD_END = ",Goal>";
 
+   public static final String TESTABLE_FLAG = "testVisGraph";
+
    public static boolean exportDataset(Path containingFolder, String datasetName, PlanarRegionsList planarRegionsList, Point3DReadOnly start,
                                        Point3DReadOnly goal)
    {
@@ -211,22 +213,6 @@ public class VisibilityGraphsIOTools
    protected static interface Writer
    {
       String getStringToWrite();
-   }
-
-   public static List<VisibilityGraphsUnitTestDataset> loadAllDatasets(Class<?> loadingClass)
-   {
-      List<String> childDirectories = PlanarRegionFileTools.listResourceDirectoryContents(loadingClass, TEST_DATA_URL);
-      List<VisibilityGraphsUnitTestDataset> datasets = new ArrayList<>();
-
-      for (int i = 0; i < childDirectories.size(); i++)
-      {
-         LogTools.info("trying to load:");
-         LogTools.info(TEST_DATA_URL + "/" + childDirectories.get(i));
-
-         datasets.add(loadDataset(loadingClass, TEST_DATA_URL + "/" + childDirectories.get(i)));
-      }
-
-      return datasets;
    }
 
    /**
