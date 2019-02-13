@@ -210,7 +210,8 @@ public class FootstepNode
    private static Point2D computeXGaitCenterPoint(FootstepNode node)
    {
       RobotQuadrant movingQuadrant = node.getMovingQuadrant();
-      Vector2D offset = new Vector2D(movingQuadrant.getEnd().negateIfFrontEnd(node.nominalStanceLength), movingQuadrant.getSide().negateIfLeftSide(node.nominalStanceWidth));
+      Vector2D offset = new Vector2D(movingQuadrant.getEnd().negateIfFrontEnd(node.getNominalStanceLength()),
+                                     movingQuadrant.getSide().negateIfLeftSide(node.getNominalStanceWidth()));
       offset.scale(0.5);
       Orientation3DReadOnly rotation = new AxisAngle(node.getNominalYaw(), 0.0, 0.0);
       rotation.transform(offset);
@@ -236,10 +237,10 @@ public class FootstepNode
    {
       final int prime = 31;
       int result = 1;
-      result = prime * result + ((node.movingQuadrant == null) ? 0 : node.movingQuadrant.hashCode());
+      result = prime * result + ((node.getMovingQuadrant() == null) ? 0 : node.getMovingQuadrant().hashCode());
 //      for (RobotQuadrant robotQuadrant)
-      result = prime * result + node.getXIndex(node.movingQuadrant);
-      result = prime * result + node.getYIndex(node.movingQuadrant);
+      result = prime * result + node.getXIndex(node.getMovingQuadrant());
+      result = prime * result + node.getYIndex(node.getMovingQuadrant());
       return result;
    }
 
@@ -354,9 +355,9 @@ public class FootstepNode
          return false;
       FootstepNode other = (FootstepNode) obj;
 
-      if (getXIndex(movingQuadrant) != other.getXIndex(movingQuadrant))
+      if (getXIndex(getMovingQuadrant()) != other.getXIndex(getMovingQuadrant()))
          return false;
-      if (getYIndex(movingQuadrant) != other.getYIndex(movingQuadrant))
+      if (getYIndex(getMovingQuadrant()) != other.getYIndex(getMovingQuadrant()))
          return false;
       return getMovingQuadrant() == other.getMovingQuadrant();
    }
