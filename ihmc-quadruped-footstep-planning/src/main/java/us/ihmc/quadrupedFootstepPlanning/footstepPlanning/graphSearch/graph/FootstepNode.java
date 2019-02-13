@@ -62,21 +62,16 @@ public class FootstepNode
    public FootstepNode(RobotQuadrant movingQuadrant, double frontLeftX, double frontLeftY, double frontRightX, double frontRightY, double hindLeftX,
                        double hindLeftY, double hindRightX, double hindRightY, double nominalStanceLength, double nominalStanceWidth)
    {
+      this(movingQuadrant, snapToGrid(frontLeftX), snapToGrid(frontLeftY), snapToGrid(frontRightX), snapToGrid(frontRightY), snapToGrid(hindLeftX),
+           snapToGrid(hindLeftY), snapToGrid(hindRightX), snapToGrid(hindRightY), nominalStanceLength, nominalStanceWidth);
+   }
+
+   public FootstepNode(RobotQuadrant movingQuadrant, int xFrontLeftIndex, int yFrontLeftIndex, int xFrontRightIndex, int yFrontRightIndex, int xHindLeftIndex,
+                       int yHindLeftIndex, int xHindRightIndex, int yHindRightIndex, double nominalStanceLength, double nominalStanceWidth)
+   {
       this.movingQuadrant = movingQuadrant;
       this.nominalStanceLength = nominalStanceLength;
       this.nominalStanceWidth = nominalStanceWidth;
-
-      int xFrontLeftIndex = snapToGrid(frontLeftX);
-      int yFrontLeftIndex = snapToGrid(frontLeftY);
-
-      int xFrontRightIndex = snapToGrid(frontRightX);
-      int yFrontRightIndex = snapToGrid(frontRightY);
-
-      int xHindLeftIndex = snapToGrid(hindLeftX);
-      int yHindLeftIndex = snapToGrid(hindLeftY);
-
-      int xHindRightIndex = snapToGrid(hindRightX);
-      int yHindRightIndex = snapToGrid(hindRightY);
 
       xIndices.put(RobotQuadrant.FRONT_LEFT, xFrontLeftIndex);
       yIndices.put(RobotQuadrant.FRONT_LEFT, yFrontLeftIndex);
@@ -90,21 +85,31 @@ public class FootstepNode
       xIndices.put(RobotQuadrant.HIND_RIGHT, xHindRightIndex);
       yIndices.put(RobotQuadrant.HIND_RIGHT, yHindRightIndex);
 
-      xPositions.put(RobotQuadrant.FRONT_LEFT,  gridSizeXY * xFrontLeftIndex);
-      yPositions.put(RobotQuadrant.FRONT_LEFT,  gridSizeXY * yFrontLeftIndex);
+      double xFrontLeft = gridSizeXY * xFrontLeftIndex;
+      double yFrontLeft = gridSizeXY * yFrontLeftIndex;
 
-      xPositions.put(RobotQuadrant.FRONT_RIGHT,  gridSizeXY * xFrontRightIndex);
-      yPositions.put(RobotQuadrant.FRONT_RIGHT,  gridSizeXY * yFrontRightIndex);
+      double xFrontRight = gridSizeXY * xFrontRightIndex;
+      double yFrontRight = gridSizeXY * yFrontRightIndex;
 
-      xPositions.put(RobotQuadrant.HIND_LEFT,  gridSizeXY * xHindLeftIndex);
-      yPositions.put(RobotQuadrant.HIND_LEFT,  gridSizeXY * yHindLeftIndex);
+      double xHindLeft = gridSizeXY * xHindLeftIndex;
+      double yHindLeft = gridSizeXY * yHindLeftIndex;
 
-      xPositions.put(RobotQuadrant.HIND_RIGHT,  gridSizeXY * xHindRightIndex);
-      yPositions.put(RobotQuadrant.HIND_RIGHT,  gridSizeXY * yHindRightIndex);
+      double xHindRight = gridSizeXY * xHindRightIndex;
+      double yHindRight = gridSizeXY * yHindRightIndex;
 
-      this.nominalYaw = computeNominalYaw(gridSizeXY * xFrontLeftIndex, gridSizeXY * yFrontLeftIndex, gridSizeXY * xFrontRightIndex,
-                                          gridSizeXY * yFrontRightIndex, gridSizeXY * xHindLeftIndex, gridSizeXY * yHindLeftIndex,
-                                          gridSizeXY * xHindRightIndex, gridSizeXY * yHindRightIndex);
+      xPositions.put(RobotQuadrant.FRONT_LEFT, xFrontLeft);
+      yPositions.put(RobotQuadrant.FRONT_LEFT, yFrontLeft);
+
+      xPositions.put(RobotQuadrant.FRONT_RIGHT, xFrontRight);
+      yPositions.put(RobotQuadrant.FRONT_RIGHT, yFrontRight);
+
+      xPositions.put(RobotQuadrant.HIND_LEFT, xHindLeft);
+      yPositions.put(RobotQuadrant.HIND_LEFT, yHindLeft);
+
+      xPositions.put(RobotQuadrant.HIND_RIGHT, xHindRight);
+      yPositions.put(RobotQuadrant.HIND_RIGHT, yHindRight);
+
+      nominalYaw = computeNominalYaw(xFrontLeft, yFrontLeft, xFrontRight, yFrontRight, xHindLeft, yHindLeft, xHindRight, yHindRight);
 
       hashCode = computeHashCode(this);
       planarRegionsHashCode = computePlanarRegionsHashCode(this);
@@ -276,21 +281,10 @@ public class FootstepNode
 
    public boolean quadrantGeometricallyEquals(Object obj)
    {
-      if (this == obj)
-         return true;
-      if (obj == null)
-         return false;
-      if (getClass() != obj.getClass())
-         return false;
-      FootstepNode other = (FootstepNode) obj;
-
-      if (xIndices.get(movingQuadrant) != other.xIndices.get(movingQuadrant))
-         return false;
-
-      return yIndices.get(movingQuadrant) == other.yIndices.get(movingQuadrant);
+      return quadrantGeometricallyEquals(movingQuadrant, obj);
    }
 
-   public boolean midstanceGeometricallyEquals(Object obj)
+   public boolean quadrantGeometricallyEquals(RobotQuadrant quadrant, Object obj)
    {
       if (this == obj)
          return true;
@@ -300,7 +294,10 @@ public class FootstepNode
          return false;
       FootstepNode other = (FootstepNode) obj;
 
-      return getOrComputeMidStancePoint().geometricallyEquals((other).getOrComputeMidStancePoint(), gridSizeXY);
+      if (xIndices.get(quadrant) != other.xIndices.get(quadrant))
+         return false;
+
+      return yIndices.get(quadrant) == other.yIndices.get(quadrant);
    }
 
    public boolean xGaitGeometricallyEquals(Object obj)
