@@ -279,77 +279,65 @@ public class FootstepNode
       return (int) Math.round(location / gridSizeXY);
    }
 
-   public boolean quadrantGeometricallyEquals(Object obj)
+   public boolean quadrantGeometricallyEquals(FootstepNode other)
    {
-      return quadrantGeometricallyEquals(movingQuadrant, obj);
+      return quadrantGeometricallyEquals(movingQuadrant, other);
    }
 
-   public boolean quadrantGeometricallyEquals(RobotQuadrant quadrant, Object obj)
+   public boolean quadrantGeometricallyEquals(RobotQuadrant quadrant, FootstepNode other)
    {
-      if (this == obj)
+      if (this == other)
          return true;
-      if (obj == null)
-         return false;
-      if (getClass() != obj.getClass())
-         return false;
-      FootstepNode other = (FootstepNode) obj;
-
-      if (xIndices.get(quadrant) != other.xIndices.get(quadrant))
+      if (other == null)
          return false;
 
-      return yIndices.get(quadrant) == other.yIndices.get(quadrant);
+      if (getXIndex(quadrant) != other.getXIndex(quadrant))
+         return false;
+
+      return getYIndex(quadrant) == other.getYIndex(quadrant);
    }
 
-   public boolean xGaitGeometricallyEquals(Object obj)
+   public boolean xGaitGeometricallyEquals(FootstepNode other)
    {
-      if (this == obj)
+      if (this == other)
          return true;
-      if (obj == null)
+      if (other == null)
          return false;
-      if (getClass() != obj.getClass())
-         return false;
-      FootstepNode other = (FootstepNode) obj;
 
       return getOrComputeXGaitCenterPoint().geometricallyEquals((other).getOrComputeXGaitCenterPoint(), gridSizeXY);
    }
 
-   public boolean geometricallyEquals(Object obj)
+   public boolean geometricallyEquals(FootstepNode other)
    {
-      if (this == obj)
+      if (this == other)
          return true;
-      if (obj == null)
+      if (other == null)
          return false;
-      if (getClass() != obj.getClass())
-         return false;
-      FootstepNode other = (FootstepNode) obj;
 
       for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
       {
-         if (xIndices.get(robotQuadrant) != other.xIndices.get(robotQuadrant))
+         if (getXIndex(robotQuadrant) != other.getXIndex(robotQuadrant))
             return false;
-         if (yIndices.get(robotQuadrant) != other.yIndices.get(robotQuadrant))
+         if (getYIndex(robotQuadrant) != other.getYIndex(robotQuadrant))
             return false;
       }
       return true;
    }
 
-   public boolean completelyEquals(Object obj)
+   public boolean completelyEquals(FootstepNode other)
    {
-      if (this == obj)
+      if (this == other)
          return true;
-      if (obj == null)
+      if (other == null)
          return false;
-      if (getClass() != obj.getClass())
-         return false;
-      FootstepNode other = (FootstepNode) obj;
 
       for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
       {
-         if (xIndices.get(robotQuadrant) != other.xIndices.get(robotQuadrant))
+         if (getXIndex(robotQuadrant) != other.getXIndex(robotQuadrant))
             return false;
-         if (yIndices.get(robotQuadrant) != other.yIndices.get(robotQuadrant))
+         if (getXIndex(robotQuadrant) != other.getYIndex(robotQuadrant))
             return false;
-         if (movingQuadrant != other.movingQuadrant)
+         if (getMovingQuadrant() != other.getMovingQuadrant())
             return false;
       }
       return true;
@@ -366,18 +354,18 @@ public class FootstepNode
          return false;
       FootstepNode other = (FootstepNode) obj;
 
-      if (xIndices.get(movingQuadrant) != other.xIndices.get(movingQuadrant))
+      if (getXIndex(movingQuadrant) != other.getXIndex(movingQuadrant))
          return false;
-      if (yIndices.get(movingQuadrant) != other.yIndices.get(movingQuadrant))
+      if (getYIndex(movingQuadrant) != other.getYIndex(movingQuadrant))
          return false;
-      return movingQuadrant == other.movingQuadrant;
+      return getMovingQuadrant() == other.getMovingQuadrant();
    }
 
    @Override
    public String toString()
    {
       String string = "Node: ";
-      string += "\n\t moving quadrant = " + movingQuadrant;
+      string += "\n\t moving quadrant = " + getMovingQuadrant();
       for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
       {
          string += "\n\t quadrant= " + robotQuadrant.getCamelCaseName() + ", x= " + getX(robotQuadrant) + ", y= " + getY(robotQuadrant);
