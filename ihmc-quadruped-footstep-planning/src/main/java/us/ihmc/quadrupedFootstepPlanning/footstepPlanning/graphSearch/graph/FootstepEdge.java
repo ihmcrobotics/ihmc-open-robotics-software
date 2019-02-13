@@ -55,14 +55,16 @@ public class FootstepEdge
          if (other.endNode != null)
             return false;
       }
-      else if (!endNode.equals(other.endNode))
+      // FIXME was equals
+      else if (!endNode.completelyEquals(other.endNode))
          return false;
       if (startNode == null)
       {
          if (other.startNode != null)
             return false;
       }
-      else if (!startNode.equals(other.startNode))
+      // FIXME was equals
+      else if (!startNode.completelyEquals(other.startNode))
          return false;
       return true;
    }

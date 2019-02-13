@@ -10,6 +10,7 @@ import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.graphSearch.parameters
 import us.ihmc.robotics.geometry.PlanarRegion;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -17,7 +18,7 @@ public abstract class FootstepNodeSnapper implements FootstepNodeSnapperReadOnly
 {
    private static final double proximityForPlanarRegionsNearby = 2.0;
 
-   private final TIntObjectHashMap<FootstepNodeSnapData> snapDataHolder = new TIntObjectHashMap<>();
+   private final HashMap<FootstepNode, FootstepNodeSnapData> snapDataHolder = new HashMap<>();
    protected PlanarRegionsList planarRegionsList;
    private final TIntObjectMap<List<PlanarRegion>> nearbyPlanarRegions = new TIntObjectHashMap<>();
    private final TIntObjectMap<List<PlanarRegion>> nearbyNavigablePlanarRegions = new TIntObjectHashMap<>();
@@ -50,9 +51,9 @@ public abstract class FootstepNodeSnapper implements FootstepNodeSnapperReadOnly
 
    public FootstepNodeSnapData snapFootstepNode(FootstepNode footstepNode)
    {
-      if (snapDataHolder.containsKey(footstepNode.getSnapDataHashCode()))
+      if (snapDataHolder.containsKey(footstepNode))
       {
-         return snapDataHolder.get(footstepNode.getSnapDataHashCode());
+         return snapDataHolder.get(footstepNode);
       }
       else if (planarRegionsList == null || planarRegionsList.isEmpty())
 //      if (planarRegionsList == null || planarRegionsList.isEmpty())
@@ -106,13 +107,13 @@ public abstract class FootstepNodeSnapper implements FootstepNodeSnapperReadOnly
     */
    public void addSnapData(FootstepNode footstepNode, FootstepNodeSnapData snapData)
    {
-      snapDataHolder.put(footstepNode.getSnapDataHashCode(), snapData);
+      snapDataHolder.put(footstepNode, snapData);
    }
 
    @Override
    public FootstepNodeSnapData getSnapData(FootstepNode node)
    {
-      return snapDataHolder.get(node.hashCode());
+      return snapDataHolder.get(node);
    }
 
    protected abstract FootstepNodeSnapData snapInternal(FootstepNode footstepNode);
