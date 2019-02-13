@@ -19,7 +19,7 @@ public class DataSetLoader
    static final String DATA_SET_DIRECTORY_PATH = "us/ihmc/pathPlanning/dataSets";
    private static final String DATA_SET_LIST_FILENAME = "DataSetList.txt";
    private static final String PLANAR_REGIONS_DIRECTORY = "PlanarRegions";
-   private static final String PLANNER_INPUTS_FILENAME = "PlannerInput.txt";
+   private static final String PLANNER_INPUTS_FILENAME = "PlannerInputs.txt";
 
    public static List<DataSet> loadDataSets()
    {
@@ -45,31 +45,39 @@ public class DataSetLoader
       for (int i = 0; i < dataSetNamesList.size(); i++)
       {
          String dataSetName = dataSetNamesList.get(i);
-         String dataSetPlanarRegionsPath = DATA_SET_DIRECTORY_PATH + "/" + dataSetName + "/" + PLANAR_REGIONS_DIRECTORY;
-         PlanarRegionsList planarRegionsList = PlanarRegionFileTools.importPlanarRegionData(loadingClass.getClassLoader(), dataSetPlanarRegionsPath);
-
-         DataSet dataSet = new DataSet(dataSetName, planarRegionsList);
-         InputStream plannerInputsStream = loadingClass.getClassLoader()
-                                                    .getResourceAsStream(DATA_SET_DIRECTORY_PATH + "/" + dataSetName + "/" + PLANNER_INPUTS_FILENAME);
-         if(plannerInputsStream != null)
-         {
-            try
-            {
-               PlannerInput plannerInput = loadPlannerInputs(plannerInputsStream);
-               dataSet.setPlannerInput(plannerInput);
-            }
-            catch(IOException e)
-            {
-               System.err.println("Unable to read planner inputs for dataset: " + dataSetName + ". Skipping dataset");
-               continue;
-            }
-
-            dataSets.add(dataSet);
-         }
+         DataSet dataSet = loadDataSet(dataSetName);
+         dataSets.add(dataSet);
       }
 
       dataSets.removeIf(dataSetFilter.negate());
       return dataSets;
+   }
+
+   public static DataSet loadDataSet(String dataSetName)
+   {
+      Class<DataSetLoader> loadingClass = DataSetLoader.class;
+
+      String dataSetPlanarRegionsPath = DATA_SET_DIRECTORY_PATH + "/" + dataSetName + "/" + PLANAR_REGIONS_DIRECTORY;
+      PlanarRegionsList planarRegionsList = PlanarRegionFileTools.importPlanarRegionData(loadingClass.getClassLoader(), dataSetPlanarRegionsPath);
+
+      DataSet dataSet = new DataSet(dataSetName, planarRegionsList);
+      InputStream plannerInputsStream = loadingClass.getClassLoader()
+                                                    .getResourceAsStream(DATA_SET_DIRECTORY_PATH + "/" + dataSetName + "/" + PLANNER_INPUTS_FILENAME);
+      if(plannerInputsStream != null)
+      {
+         try
+         {
+            PlannerInput plannerInput = loadPlannerInputs(plannerInputsStream);
+            dataSet.setPlannerInput(plannerInput);
+         }
+         catch(IOException e)
+         {
+            System.err.println("Unable to read planner inputs for dataset: " + dataSetName);
+            return null;
+         }
+      }
+
+      return dataSet;
    }
 
    private static PlannerInput loadPlannerInputs(InputStream inputStream) throws IOException
