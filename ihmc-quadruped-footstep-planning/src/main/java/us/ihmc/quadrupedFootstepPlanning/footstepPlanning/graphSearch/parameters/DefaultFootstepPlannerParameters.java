@@ -55,21 +55,21 @@ public class DefaultFootstepPlannerParameters implements FootstepPlannerParamete
    @Override
    public double getMaximumStepChangeZ()
    {
-      return 0.2;
+      return 0.35;
    }
 
    /** {@inheritDoc} */
    @Override
    public double getMaximumStepCycleChangeZ()
    {
-      return 0.15;
+      return 0.3;
    }
 
    /** {@inheritDoc} */
    @Override
    public double getBodyGroundClearance()
    {
-      return 0.1;
+      return 0.35;
    }
 
    public double getForwardWeight()
