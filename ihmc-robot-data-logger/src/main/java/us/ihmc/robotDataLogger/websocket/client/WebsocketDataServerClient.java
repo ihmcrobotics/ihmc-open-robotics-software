@@ -7,7 +7,6 @@ import java.util.concurrent.TimeUnit;
 
 import io.netty.bootstrap.Bootstrap;
 import io.netty.buffer.ByteBuf;
-import io.netty.buffer.Unpooled;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelInitializer;
 import io.netty.channel.ChannelOption;
@@ -140,9 +139,12 @@ public class WebsocketDataServerClient
          VariableChangeRequest msg = new VariableChangeRequest();
          msg.setVariableID(identifier);
          msg.setRequestedValue(valueAsDouble);
+         
+         variableChangeRequestPayload.getData().clear();
          variableChangeRequestType.serialize(msg, variableChangeRequestPayload);
 
-         ByteBuf data = Unpooled.wrappedBuffer(variableChangeRequestPayload.getData());
+         ByteBuf data = ch.alloc().buffer(variableChangeRequestPayload.getLength());
+         data.writeBytes(variableChangeRequestPayload.getData());
          BinaryWebSocketFrame frame = new BinaryWebSocketFrame(data);
          ch.writeAndFlush(frame);
       }

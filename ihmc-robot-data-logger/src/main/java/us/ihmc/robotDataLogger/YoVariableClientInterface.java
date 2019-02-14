@@ -2,6 +2,7 @@ package us.ihmc.robotDataLogger;
 
 import java.io.IOException;
 
+import us.ihmc.robotDataLogger.websocket.command.DataServerCommand;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 
 /**
@@ -32,6 +33,15 @@ public interface YoVariableClientInterface
     * If no session is available, this request gets silently ignored.
     */
    void sendClearLogRequest();
+   
+   
+   /**
+    * Send a command to the server
+    * 
+    * @param command
+    * @param argument
+    */
+   void sendCommand(DataServerCommand command, int argument);
 
    
    /**

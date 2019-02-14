@@ -8,10 +8,9 @@ public class RegistryBuffer implements Comparable<RegistryBuffer>
    protected int registryID;
    protected long timestamp;
    protected long transmitTime;
-   protected int offset;
    protected int numberOfVariables;
    private LogDataType type = LogDataType.DATA_PACKET;
-   
+
    public long getTransmitTime()
    {
       return transmitTime;
@@ -24,9 +23,6 @@ public class RegistryBuffer implements Comparable<RegistryBuffer>
 
    protected long uid = 0;
 
-   
-   
-   
    public LogDataType getType()
    {
       return type;
@@ -36,18 +32,6 @@ public class RegistryBuffer implements Comparable<RegistryBuffer>
    {
       this.type = type;
    }
-
-   public int getOffset()
-   {
-      return offset;
-   }
-
-   public void setOffset(int offset)
-   {
-      this.offset = offset;
-   }
-   
-   
 
    public int getNumberOfVariables()
    {
@@ -69,7 +53,6 @@ public class RegistryBuffer implements Comparable<RegistryBuffer>
       return uid;
    }
 
-
    public void setUid(long uid)
    {
       this.uid = uid;
@@ -85,12 +68,12 @@ public class RegistryBuffer implements Comparable<RegistryBuffer>
    {
       return (this.timestamp < o.timestamp) ? -1 : ((this.timestamp == o.timestamp) ? Long.compare(this.uid, o.uid) : 1);
    }
-   
+
    public int getRegistryID()
    {
       return registryID;
    }
-   
+
    public void setRegistryID(int registryID)
    {
       this.registryID = registryID;

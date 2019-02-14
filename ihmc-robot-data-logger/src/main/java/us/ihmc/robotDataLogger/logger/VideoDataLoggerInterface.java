@@ -54,5 +54,12 @@ public abstract class VideoDataLoggerInterface
    }
 
    public abstract void timestampChanged(long newTimestamp);
+   
+   
+   /**
+    * 
+    * @return The value of "System.nanotime()" when the last frame was received.
+    */
+   public abstract long getLastFrameReceivedTimestamp();
 
 }
