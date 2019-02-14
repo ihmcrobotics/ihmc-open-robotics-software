@@ -41,8 +41,6 @@ import us.ihmc.footstepPlanning.communication.FootstepPlannerCommunicationProper
 import us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI;
 import us.ihmc.footstepPlanning.graphSearch.parameters.DefaultFootstepPlanningParameters;
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParameters;
-import us.ihmc.footstepPlanning.tools.FootstepPlannerIOTools.FootstepPlannerUnitTestDataset;
-import us.ihmc.footstepPlanning.tools.FootstepPlannerMessageTools;
 import us.ihmc.footstepPlanning.tools.PlannerTools;
 import us.ihmc.footstepPlanning.ui.ApplicationRunner;
 import us.ihmc.footstepPlanning.ui.FootstepPlannerUI;
@@ -626,56 +624,6 @@ public abstract class FootstepPlannerToolboxDataSetTest
          expectedResult.set(plannerResultReference.getAndSet(null));
          plannerReceivedResult.set(false);
       }
-   }
-
-   public void submitDataSet(FootstepPlannerUnitTestDataset testData)
-   {
-      for (int i = 0; i < 100; i++)
-         ThreadTools.sleep(10);
-
-      toolboxStatePublisher.publish(MessageTools.createToolboxStateMessage(ToolboxState.WAKE_UP));
-
-      for (int i = 0; i < 100; i++)
-         ThreadTools.sleep(10);
-
-      FootstepPlannerParametersPacket parametersPacket = new FootstepPlannerParametersPacket();
-      FootstepPlannerParameters parameters = getRobotModel().getFootstepPlannerParameters();
-
-      if (messager != null)
-      {
-         messager.submitMessage(FootstepPlannerMessagerAPI.PlannerParametersTopic, parameters);
-         messager.submitMessage(FootstepPlannerMessagerAPI.PlanarRegionDataTopic, testData.getPlanarRegionsList());
-      }
-
-      FootstepPlannerMessageTools.copyParametersToPacket(parametersPacket, parameters);
-
-      footstepPlannerParametersPublisher.publish(parametersPacket);
-
-      FootstepPlanningRequestPacket packet = new FootstepPlanningRequestPacket();
-
-      byte plannerType = getPlannerType().toByte();
-      PlanarRegionsListMessage planarRegions = PlanarRegionMessageConverter.convertToPlanarRegionsListMessage(testData.getPlanarRegionsList());
-
-      packet.getStanceFootOrientationInWorld().set(testData.getStartOrientation());
-      packet.getStanceFootPositionInWorld().set(testData.getStart());
-      packet.getGoalPositionInWorld().set(testData.getGoal());
-      packet.getGoalOrientationInWorld().set(testData.getGoalOrientation());
-      packet.setRequestedFootstepPlannerType(plannerType);
-      packet.getPlanarRegionsListMessage().set(planarRegions);
-
-      double timeout = 60.0;
-      double timeoutMultiplier = ContinuousIntegrationTools.isRunningOnContinuousIntegrationServer() ? bambooTimeScaling : 1.0;
-      packet.setTimeout(timeoutMultiplier * timeout);
-
-      packet.setHorizonLength(Double.MAX_VALUE);
-
-      packet.getGoalOrientationInWorld().set(testData.getGoalOrientation());
-      packet.getStanceFootOrientationInWorld().set(testData.getStartOrientation());
-
-      if (DEBUG)
-         PrintTools.info("Sending out planning request packet.");
-
-      footstepPlanningRequestPublisher.publish(packet);
    }
 
    public String findPlanAndAssertGoodResult(DataSet dataset)

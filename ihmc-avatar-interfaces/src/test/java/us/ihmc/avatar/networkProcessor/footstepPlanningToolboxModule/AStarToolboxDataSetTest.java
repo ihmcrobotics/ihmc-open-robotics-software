@@ -6,14 +6,7 @@ import us.ihmc.commons.thread.ThreadTools;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Disabled;
 import us.ihmc.footstepPlanning.FootstepPlannerType;
-import us.ihmc.footstepPlanning.tools.FootstepPlannerDataExporter;
-import us.ihmc.footstepPlanning.tools.FootstepPlannerIOTools;
-import us.ihmc.footstepPlanning.tools.FootstepPlannerIOTools.FootstepPlannerUnitTestDataset;
 import us.ihmc.pubsub.DomainFactory;
-
-import java.util.List;
-
-import static us.ihmc.footstepPlanning.testTools.PlannerTestEnvironments.*;
 
 public class AStarToolboxDataSetTest extends FootstepPlannerToolboxDataSetTest
 {
@@ -33,7 +26,6 @@ public class AStarToolboxDataSetTest extends FootstepPlannerToolboxDataSetTest
    public static void main(String[] args) throws Exception
    {
       AStarToolboxDataSetTest test = new AStarToolboxDataSetTest();
-      String prefix = "unitTestDataSets/test/";
 
       test.pubSubImplementation = DomainFactory.PubSubImplementation.INTRAPROCESS;
       VISUALIZE = true;
