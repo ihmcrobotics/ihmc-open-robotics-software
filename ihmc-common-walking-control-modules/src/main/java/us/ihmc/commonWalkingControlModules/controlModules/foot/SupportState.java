@@ -1,5 +1,6 @@
 package us.ihmc.commonWalkingControlModules.controlModules.foot;
 
+import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.PlaneContactState;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.YoContactPoint;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.YoPlaneContactState;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
@@ -210,7 +211,8 @@ public class SupportState extends AbstractFootControlState
       footRotationDetector = new FootRotationDetector(robotSide, soleFrame, dt, registry, graphicsListRegistry);
 
       FootRotationInformation rotationInformation = footControlHelper.getHighLevelHumanoidControllerToolbox().getFootRotationInformation();
-      footRotationHelper = new FootRotationHelper(robotSide, soleFrame, rotationInformation, registry, graphicsListRegistry);
+      PlaneContactState contactState = controllerToolbox.getFootContactState(robotSide);
+      footRotationHelper = new FootRotationHelper(robotSide, soleFrame, contactState, rotationInformation, registry, graphicsListRegistry);
 
       String feetManagerName = FeetManager.class.getSimpleName();
       String paramRegistryName = getClass().getSimpleName() + "Parameters";
