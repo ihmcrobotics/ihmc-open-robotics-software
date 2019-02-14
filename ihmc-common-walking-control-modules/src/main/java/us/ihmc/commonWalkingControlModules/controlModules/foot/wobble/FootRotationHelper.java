@@ -2,6 +2,8 @@ package us.ihmc.commonWalkingControlModules.controlModules.foot.wobble;
 
 import java.awt.Color;
 
+import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.ContactPointInterface;
+import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.PlaneContactState;
 import us.ihmc.commonWalkingControlModules.controlModules.foot.FeetManager;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.ParameterProvider;
 import us.ihmc.euclid.referenceFrame.FrameConvexPolygon2D;
@@ -17,6 +19,7 @@ import us.ihmc.euclid.referenceFrame.interfaces.FramePoint2DReadOnly;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.graphicsDescription.yoGraphics.plotting.YoArtifactPolygon;
 import us.ihmc.log.LogTools;
+import us.ihmc.robotics.geometry.ConvexPolygonTools;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.yoVariables.providers.DoubleProvider;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
@@ -28,6 +31,7 @@ public class FootRotationHelper
    private static final boolean visualize = false;
 
    private final RobotSide side;
+   private final PlaneContactState contactState;
    private final FootRotationInformation rotationInformation;
    private final FixedFramePoint3DBasics desiredCop;
 
@@ -43,11 +47,15 @@ public class FootRotationHelper
    private final DoubleProvider areaPecentToSelect;
    private final YoBoolean sideSelected;
 
+   private final FrameConvexPolygon2DBasics reducedPolygon = new FrameConvexPolygon2D();
+   private final YoBoolean footholdWasAdjusted;
+
    @SuppressWarnings("unused")
-   public FootRotationHelper(RobotSide side, ReferenceFrame soleFrame, FootRotationInformation rotationInformation, YoVariableRegistry parentRegistry,
-                             YoGraphicsListRegistry graphicsRegistry)
+   public FootRotationHelper(RobotSide side, ReferenceFrame soleFrame, PlaneContactState contactState, FootRotationInformation rotationInformation,
+                             YoVariableRegistry parentRegistry, YoGraphicsListRegistry graphicsRegistry)
    {
       this.side = side;
+      this.contactState = contactState;
       this.rotationInformation = rotationInformation;
 
       desiredCop = new FramePoint3D(soleFrame);
@@ -61,6 +69,7 @@ public class FootRotationHelper
       String paramRegistryName = getClass().getSimpleName() + "Parameters";
       areaPecentToSelect = ParameterProvider.getOrCreateParameter(feetManagerName, paramRegistryName, "AreaPecentToSelect", registry, 0.7);
       sideSelected = new YoBoolean(side.getPascalCaseName() + "SelectedSide", registry);
+      footholdWasAdjusted = new YoBoolean(side.getPascalCaseName() + "FootholdWasAdjusted", registry);
 
       if (graphicsRegistry != null && visualize)
       {
@@ -122,12 +131,29 @@ public class FootRotationHelper
 
    public void reduceFoothold()
    {
-      if (!checkIfComputed())
+      if (!checkIfComputed() || footholdWasAdjusted.getValue())
       {
          return;
       }
 
-      // TODO.
+      int numberOfContactPoints = contactState.getTotalNumberOfContactPoints();
+      reducedPolygon.setIncludingFrame(bestPolygon);
+      ConvexPolygonTools.limitVerticesConservative(reducedPolygon, numberOfContactPoints);
+
+      for (int i = 0; i < reducedPolygon.getNumberOfVertices(); i++)
+      {
+         ContactPointInterface contactPoint = contactState.getContactPoints().get(i);
+         contactPoint.setPosition2d(reducedPolygon.getVertex(i));
+         contactState.getContactPoints().get(i).setInContact(true);
+      }
+
+      for (int i = reducedPolygon.getNumberOfVertices(); i < numberOfContactPoints; i++)
+      {
+         contactState.getContactPoints().get(i).setInContact(false);
+      }
+
+      contactState.notifyContactStateHasChanged();
+      footholdWasAdjusted.set(true);
    }
 
    private boolean checkIfComputed()
@@ -220,6 +246,7 @@ public class FootRotationHelper
    {
       hideViz();
       sideSelected.set(false);
+      footholdWasAdjusted.set(false);
       rotationInformation.reset(side);
    }
 }
