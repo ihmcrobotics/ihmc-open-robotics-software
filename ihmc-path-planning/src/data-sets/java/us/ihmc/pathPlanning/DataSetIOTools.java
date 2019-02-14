@@ -8,6 +8,7 @@ import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.function.Predicate;
@@ -68,7 +69,6 @@ public class DataSetIOTools
       }
 
       return dataSetNamesList;
-
    }
 
    public static DataSet loadDataSet(String dataSetName)
@@ -223,5 +223,25 @@ public class DataSetIOTools
 
       fileWriter.flush();
       fileWriter.close();
+   }
+
+   public static boolean isDataSetFile(File file, boolean requirePlannerInputsFile)
+   {
+      if(!file.exists() || !file.isDirectory())
+         return false;
+
+      File[] files = file.listFiles();
+      boolean hasPlanarRegions = false;
+      boolean hasPlannerInputs = false;
+
+      for (int i = 0; i < files.length; i++)
+      {
+         if(files[i].isDirectory() && files[i].getName().equals(PLANAR_REGIONS_DIRECTORY))
+            hasPlanarRegions = true;
+         if(files[i].getName().equals(PLANNER_INPUTS_FILENAME))
+            hasPlannerInputs = true;
+      }
+
+      return hasPlanarRegions && (hasPlannerInputs || !requirePlannerInputsFile);
    }
 }

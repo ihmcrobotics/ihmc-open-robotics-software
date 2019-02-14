@@ -6,6 +6,9 @@ import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.euclid.tuple4D.interfaces.QuaternionReadOnly;
 import us.ihmc.messager.Messager;
+import us.ihmc.pathPlanning.DataSet;
+import us.ihmc.pathPlanning.DataSetIOTools;
+import us.ihmc.pathPlanning.PlannerInput;
 import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.FootstepPlannerType;
 import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.communication.FootstepPlannerMessagerAPI;
 import us.ihmc.robotEnvironmentAwareness.tools.ExecutorServiceTools;
@@ -92,11 +95,13 @@ public class FootstepPlannerDataExporter
          return;
       }
 
-      Path folderPath = Paths.get(dataDirectoryPath.get());
-      String datasetName = PlanarRegionFileTools.createDefaultTimeStampedFolderName();
-      FootstepPlannerIOTools
-            .exportDataset(folderPath, datasetName, planarRegionData, startPosition, startOrientation, goalPosition, goalOrientation, footstepPlannerType,
-                           timeout);
+      DataSet dataSet = new DataSet(PlanarRegionFileTools.getDate() + "_DataSet", planarRegionData);
+      PlannerInput plannerInput = new PlannerInput();
+      plannerInput.setStartPosition(startPosition);
+      plannerInput.setGoalPosition(goalPosition);
+      plannerInput.setStartYaw(startOrientation.getYaw());
+      plannerInput.setGoalYaw(goalOrientation.getYaw());
+      DataSetIOTools.exportDataSet(dataDirectoryPath.get(), dataSet);
    }
 
    public void stop()

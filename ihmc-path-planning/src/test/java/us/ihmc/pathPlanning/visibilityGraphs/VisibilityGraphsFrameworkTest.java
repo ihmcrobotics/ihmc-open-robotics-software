@@ -12,6 +12,7 @@ import org.junit.jupiter.api.AfterEach;
 import us.ihmc.pathPlanning.DataSet;
 import us.ihmc.pathPlanning.DataSetIOTools;
 import us.ihmc.pathPlanning.PlannerInput;
+import us.ihmc.pathPlanning.visibilityGraphs.ui.controllers.DatasetNavigationAccordionController;
 import us.ihmc.robotics.Assert;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
@@ -37,7 +38,6 @@ import us.ihmc.javaFXToolkit.messager.JavaFXMessager;
 import us.ihmc.log.LogTools;
 import us.ihmc.pathPlanning.visibilityGraphs.interfaces.VisibilityGraphsParameters;
 import us.ihmc.pathPlanning.visibilityGraphs.tools.PlanarRegionTools;
-import us.ihmc.pathPlanning.visibilityGraphs.tools.VisibilityGraphsIOTools;
 import us.ihmc.pathPlanning.visibilityGraphs.ui.messager.UIVisibilityGraphsTopics;
 import us.ihmc.robotEnvironmentAwareness.geometry.ConcaveHullDecomposition;
 import us.ihmc.robotics.geometry.PlanarRegion;
@@ -147,7 +147,8 @@ public class VisibilityGraphsFrameworkTest
                                                                 if(!dataSet.hasPlannerInput())
                                                                    return false;
                                                                 else
-                                                                   return dataSet.getPlannerInput().getBooleanFlag(VisibilityGraphsIOTools.TESTABLE_FLAG);
+                                                                   return dataSet.getPlannerInput().getBooleanFlag(
+                                                                         DatasetNavigationAccordionController.TESTABLE_FLAG);
                                                              });
 
       if (DEBUG)

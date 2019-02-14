@@ -4,6 +4,7 @@ import static us.ihmc.pathPlanning.visibilityGraphs.ui.messager.UIVisibilityGrap
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -20,8 +21,9 @@ import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.javaFXToolkit.messager.JavaFXMessager;
 import us.ihmc.pathPlanning.DataSet;
 import us.ihmc.pathPlanning.DataSetIOTools;
-import us.ihmc.pathPlanning.visibilityGraphs.tools.VisibilityGraphsIOTools;
 import us.ihmc.pathPlanning.visibilityGraphs.ui.messager.UIVisibilityGraphsTopics;
+import us.ihmc.robotics.PlanarRegionFileTools;
+import us.ihmc.robotics.geometry.PlanarRegionsList;
 
 public class DatasetNavigationAccordionController
 {
@@ -29,6 +31,8 @@ public class DatasetNavigationAccordionController
    private final ArrayList<DataSet> testableDataSets = new ArrayList<>();
    private final ArrayList<DataSet> inDevelopmentDataSet = new ArrayList<>();
    private File customDataFolder = null;
+
+   public static final String TESTABLE_FLAG = "testVisGraph";
 
    @FXML
    private Accordion datasetNavigationAccordion;
@@ -47,7 +51,7 @@ public class DatasetNavigationAccordionController
          DataSet dataSet = dataSets.get(i);
          if(dataSet.hasPlannerInput())
          {
-            if(dataSet.getPlannerInput().getBooleanFlag(VisibilityGraphsIOTools.TESTABLE_FLAG))
+            if(dataSet.getPlannerInput().getBooleanFlag(TESTABLE_FLAG))
             {
                testableDataSets.add(dataSet);
             }
@@ -91,7 +95,16 @@ public class DatasetNavigationAccordionController
 
       customDataListView.getItems().clear();
       if (customDataFolder != null && customDataFolder.exists() && customDataFolder.isDirectory())
-         customDataListView.getItems().addAll(VisibilityGraphsIOTools.getPlanarRegionAndVizGraphsFilenames(customDataFolder));
+         customDataListView.getItems().addAll(getPlanarRegionAndDataSetFilenames(customDataFolder));
+   }
+
+   public static String[] getPlanarRegionAndDataSetFilenames(File parentFolder)
+   {
+      if (!parentFolder.exists() || !parentFolder.isDirectory())
+         return null;
+
+      return Arrays.stream(parentFolder.listFiles(file -> DataSetIOTools.isDataSetFile(file, false) || PlanarRegionFileTools.isPlanarRegionFile(file))).map(File::getName)
+         .toArray(String[]::new);
    }
 
    @FXML
@@ -115,28 +128,49 @@ public class DatasetNavigationAccordionController
    @FXML
    private void requestNewVisualizerData(MouseEvent event)
    {
-      requestNewData(visualizerDataListView, event);
+      loadDataSet(visualizerDataListView, event);
    }
 
    @FXML
    private void requestNewTestData(MouseEvent event)
    {
-      requestNewData(testDataListView, event);
+      loadDataSet(testDataListView, event);
    }
 
    @FXML
    private void requestNewInDevelopmentTestData(MouseEvent event)
    {
-      requestNewData(inDevelopmentTestDataListView, event);
+      loadDataSet(inDevelopmentTestDataListView, event);
    }
 
    @FXML
    private void requestNewCustomData(MouseEvent event)
    {
-      requestNewData(customDataListView, event);
+      loadPlanarRegionsOrDataSet(customDataListView, event);
    }
 
-   private void requestNewData(ListView<String> listViewOwner, MouseEvent event)
+   private void loadPlanarRegionsOrDataSet(ListView<String> listViewOwner, MouseEvent event)
+   {
+      if (!hasListViewCellBeenDoubleClicked(event))
+         return;
+
+      String directoryName = listViewOwner.getSelectionModel().getSelectedItem();
+      File file = new File(customDataFolder.getAbsolutePath() + File.separator + directoryName);
+      if(DataSetIOTools.isDataSetFile(file, false))
+      {
+         loadDataSet(listViewOwner, event);
+      }
+      else
+      {
+         PlanarRegionsList loadedPlanarRegions = PlanarRegionFileTools.importPlanarRegionData(file);
+         messager.submitMessage(UIVisibilityGraphsTopics.GlobalReset, true);
+         messager.submitMessage(UIVisibilityGraphsTopics.PlanarRegionData, loadedPlanarRegions);
+         messager.submitMessage(UIVisibilityGraphsTopics.StartPosition, new Point3D());
+         messager.submitMessage(UIVisibilityGraphsTopics.GoalPosition, new Point3D());
+      }
+   }
+
+   private void loadDataSet(ListView<String> listViewOwner, MouseEvent event)
    {
       if (!hasListViewCellBeenDoubleClicked(event))
          return;
