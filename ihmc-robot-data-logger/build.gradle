@@ -5,7 +5,7 @@ buildscript {
       maven { url "http://dl.bintray.com/ihmcrobotics/maven-vendor" }
    }
    dependencies {
-      classpath group: "us.ihmc", name: "ihmc-pub-sub-generator", version: "0.10.1"
+      classpath group: "us.ihmc", name: "ihmc-pub-sub-generator", version: "0.10.2"
    }
 }
 
@@ -46,8 +46,8 @@ mainDependencies {
    compile group: "us.ihmc", name: "ihmc-video-codecs", version: "2.1.5"
    compile group: "us.ihmc", name: "ihmc-realtime", version: "1.2.2"
    compile group: "us.ihmc", name: "ihmc-java-decklink-capture", version: "0.3"
-   compile group: "us.ihmc", name: "ihmc-pub-sub", version: "0.10.1"
-   compile group: "us.ihmc", name: "ihmc-pub-sub-serializers-extra", version: "0.10.1"
+   compile group: "us.ihmc", name: "ihmc-pub-sub", version: "0.10.2"
+   compile group: "us.ihmc", name: "ihmc-pub-sub-serializers-extra", version: "0.10.2"
    compile group: "us.ihmc", name: "ihmc-commons", version: "0.25.1"
    compile group: "us.ihmc", name: "ihmc-graphics-description", version: "0.12.9"
    compile group: "us.ihmc", name: "ihmc-robot-description", version: "0.12.5"
