@@ -68,7 +68,7 @@ public class RegistryDecompressor
       }
       int numberOfVariables = buffer.getNumberOfVariables();
       
-      int offset = registryOffset + buffer.getOffset();
+      int offset = registryOffset;
       for(int i = 0; i < numberOfVariables; i++)
       {
          setAndNotify(variables.get(i + offset), longData.get());

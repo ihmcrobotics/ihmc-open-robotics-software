@@ -59,8 +59,6 @@ public class CustomLogDataSubscriberType implements TopicDataType<RegistryReceiv
       
       data.setRegistryID(deserializeCDR.read_type_2());
       
-      data.setOffset(deserializeCDR.read_type_2());
-      
       data.setNumberOfVariables(deserializeCDR.read_type_2());
       
       if(data.getType() == LogDataType.DATA_PACKET)

@@ -24,7 +24,6 @@ mainDependencies {
    compile group: "org.ejml", name: "dense64", version: "0.30"
    compile group: "org.ejml", name: "core", version: "0.30"
    compile group: "jgraph", name: "jgraph", version: "5.13.0.0"
-   compile group: "us.ihmc", name: "ihmc-realtime", version: "1.2.2"
    compile group: "org.jmonkeyengine", name: "jme3-core", version: "3.2.0-171208"
    compile "org.boofcv:geo:0.19"
 

@@ -33,6 +33,20 @@ public enum DataServerCommand
     * Broadcast a clear log message. All loggers will restart their log session
     */
    CLEAR_LOG(true),
+   /**   
+    * Broadcast logger status
+    * 
+    * Argument: Length of log session in seconds  
+    * 
+    */
+   LOG_ACTIVE(true),
+   /**   
+    * Broadcast logger status
+    * 
+    * Argument: Length of log session in seconds 
+    * 
+    */
+   LOG_ACTIVE_WITH_CAMERA(true),
    /**
     * Broadcast a start log message. 
     * 
@@ -69,7 +83,7 @@ public enum DataServerCommand
    {
       for (DataServerCommand cmd : values)
       {
-         if (cmd.startsWith(in))
+         if (cmd.isThisCommand(in))
          {
             return cmd;
          }
@@ -102,9 +116,10 @@ public enum DataServerCommand
     * @param test Test buffer, not changed
     * @return true if starts with this command
     */
-   public boolean startsWith(ByteBuf test)
+   public boolean isThisCommand(ByteBuf test)
    {
-      if (test.readableBytes() < content.readableBytes())
+      
+      if(test.readableBytes() != content.readableBytes() && test.readableBytes() != content.readableBytes() + MAX_ARGUMENT_SIZE)
       {
          return false;
       }
@@ -117,6 +132,18 @@ public enum DataServerCommand
          if (in != orig)
          {
             return false;
+         }
+      }
+      
+      if(test.readableBytes() == content.readableBytes() + MAX_ARGUMENT_SIZE)
+      {
+         for(int i = content.readableBytes(); i < test.readableBytes(); i++)
+         {
+            byte in = test.getByte(test.readerIndex() + i);
+            if(in < 48 || in > 57)
+            {
+               return false;
+            }
          }
       }
 
@@ -176,6 +203,12 @@ public enum DataServerCommand
          out.writeByte(val + 48);
 
       }
+
+   }
+   
+   public static int getMaximumArgumentValue()
+   {
+      return (int) Math.pow(10, MAX_ARGUMENT_SIZE) - 1;
    }
 
 }

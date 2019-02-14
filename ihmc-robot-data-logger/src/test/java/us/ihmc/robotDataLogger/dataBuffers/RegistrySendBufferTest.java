@@ -10,6 +10,7 @@ import java.util.Random;
 
 import org.junit.jupiter.api.Test;
 
+import us.ihmc.commons.Conversions;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.mecano.multiBodySystem.RevoluteJoint;
@@ -128,7 +129,6 @@ public class RegistrySendBufferTest
       Random random = new Random(23589735l);
       
       
-      SerializedPayload payload = new SerializedPayload(MAX_PACKET_SIZE);
       
 //      int numberOfVariables = 10000;
       for(int numberOfVariables = 1000; numberOfVariables <= 33000; numberOfVariables+= 1000)
@@ -154,13 +154,12 @@ public class RegistrySendBufferTest
 
          // Transmit data
          CustomLogDataPublisherType publisherType = new CustomLogDataPublisherType(numberOfVariables, numberOfJointStates);
+         SerializedPayload payload = new SerializedPayload(publisherType.getMaximumTypeSize());
 
          
          long timestamp = random.nextLong();
          long uid = random.nextLong();
          
-         int[] sizes = calculateLogSegmentSizes(numberOfVariables, numberOfJointStates);
-         int[] offsets = calculateOffsets(sizes);
        
          
          YoVariableRegistry sendRegistry = new YoVariableRegistry("sendRegistry");
@@ -182,18 +181,16 @@ public class RegistrySendBufferTest
          
          
          // Test
-         for(int segment = 0; segment < sizes.length; segment++)
-         {
-            RegistrySendBuffer sendBuffer = new RegistrySendBuffer(1, sendRegistry.getAllVariables(), sendJointHolders);
-            sendBuffer.updateBufferFromVariables(timestamp, uid, segment, offsets[segment], sizes[segment]);
-            payload.getData().clear();
-            publisherType.serialize(sendBuffer, payload);
-            
-            RegistryReceiveBuffer receiveBuffer = new RegistryReceiveBuffer(sendBuffer.getTimestamp());
-            subscriberType.deserialize(payload, receiveBuffer);
-            registryDecompressor.decompressSegment(receiveBuffer, 0);
-
-         }
+         RegistrySendBuffer sendBuffer = new RegistrySendBuffer(1, sendRegistry.getAllVariables(), sendJointHolders);
+         long start = System.nanoTime();
+         sendBuffer.updateBufferFromVariables(timestamp, uid, numberOfVariables);
+         System.out.println("Time taken for update if " + (numberOfVariables + numberOfJointStates) + " "  + Conversions.nanosecondsToSeconds(System.nanoTime() - start));
+         payload.getData().clear();
+         publisherType.serialize(sendBuffer, payload);
+         
+         RegistryReceiveBuffer receiveBuffer = new RegistryReceiveBuffer(sendBuffer.getTimestamp());
+         subscriberType.deserialize(payload, receiveBuffer);
+         registryDecompressor.decompressSegment(receiveBuffer, 0);
          
          List<YoVariable<?>> sendVariables = sendRegistry.getAllVariables();
          List<YoVariable<?>> receiveVariables = receiveRegistry.getAllVariables();
