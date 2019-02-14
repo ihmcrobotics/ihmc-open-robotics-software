@@ -3,3 +3,5 @@ goalPosition 8.500 -3.500 0.010
 startYaw 0.0
 goalYaw 0.0
 testVisGraph true
+a_star_timeout 10.0
+vis_graph_with_a_star_timeout 45.0

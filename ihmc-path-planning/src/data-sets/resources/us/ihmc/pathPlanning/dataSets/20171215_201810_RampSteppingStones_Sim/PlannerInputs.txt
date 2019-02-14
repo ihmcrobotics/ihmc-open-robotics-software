@@ -3,3 +3,8 @@ goalPosition 12.746 0.055 -0.000
 startYaw 0.0
 goalYaw 0.0
 testVisGraph true
+planar_region_bipedal_timeout
+plan_then_snap_timeout 5.0
+a_star_timeout 5.0
+simple_body_path_timeout 5.0
+vis_graph_with_a_star_timeout 10.0
