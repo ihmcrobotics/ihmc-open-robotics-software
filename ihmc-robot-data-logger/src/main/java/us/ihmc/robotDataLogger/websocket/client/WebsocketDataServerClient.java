@@ -140,9 +140,12 @@ public class WebsocketDataServerClient
          VariableChangeRequest msg = new VariableChangeRequest();
          msg.setVariableID(identifier);
          msg.setRequestedValue(valueAsDouble);
+         
+         variableChangeRequestPayload.getData().clear();
          variableChangeRequestType.serialize(msg, variableChangeRequestPayload);
 
-         ByteBuf data = Unpooled.wrappedBuffer(variableChangeRequestPayload.getData());
+         ByteBuf data = ch.alloc().buffer(variableChangeRequestPayload.getLength());
+         data.writeBytes(variableChangeRequestPayload.getData());
          BinaryWebSocketFrame frame = new BinaryWebSocketFrame(data);
          ch.writeAndFlush(frame);
       }
