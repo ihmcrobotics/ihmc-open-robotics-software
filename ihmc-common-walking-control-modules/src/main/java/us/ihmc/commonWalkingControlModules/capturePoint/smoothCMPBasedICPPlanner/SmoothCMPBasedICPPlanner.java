@@ -37,6 +37,7 @@ import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.graphicsDescription.yoGraphics.plotting.ArtifactList;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.humanoidRobotics.footstep.FootstepTiming;
+import us.ihmc.log.LogTools;
 import us.ihmc.robotModels.FullRobotModel;
 import us.ihmc.robotics.contactable.ContactablePlaneBody;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -429,6 +430,8 @@ public class SmoothCMPBasedICPPlanner extends AbstractICPPlanner
    @Override
    protected void updateTransferPlan(boolean maintainContinuity)
    {
+      updateCount();
+
       clearPlanWithoutClearingPlannedFootsteps();
       RobotSide transferToSide = this.transferToSide.getEnumValue();
       if (transferToSide == null)
@@ -497,6 +500,8 @@ public class SmoothCMPBasedICPPlanner extends AbstractICPPlanner
    @Override
    protected void updateSingleSupportPlan(boolean maintainContinuity)
    {
+      updateCount();
+
       clearPlanWithoutClearingPlannedFootsteps();
       RobotSide supportSide = this.supportSide.getEnumValue();
 
@@ -814,5 +819,42 @@ public class SmoothCMPBasedICPPlanner extends AbstractICPPlanner
    AngularMomentumTrajectoryMultiplexer getAngularMomentumTrajectoryGenerator()
    {
       return angularMomentumTrajectoryGenerator;
+   }
+
+   private static final boolean printTracesIfComputedSeveralTimes = false;
+   private int icpComputeCount = 0;
+   private final YoInteger icpPlannerComputeCount = new YoInteger("ICPPlannnerComputeCount", registry);
+   private final List<Throwable> traces = printTracesIfComputedSeveralTimes ? new ArrayList<>() : null;
+
+   public void endTick()
+   {
+      if (icpComputeCount > 1)
+      {
+         LogTools.error("Computed " + getClass().getSimpleName() + " " + icpComputeCount + " times!");
+
+         if (printTracesIfComputedSeveralTimes)
+         {
+            traces.forEach(t -> t.printStackTrace());
+            System.err.println("");
+         }
+      }
+
+      icpPlannerComputeCount.set(icpComputeCount);
+      icpComputeCount = 0;
+
+      if (printTracesIfComputedSeveralTimes)
+      {
+         traces.clear();
+      }
+   }
+
+   private void updateCount()
+   {
+      icpComputeCount++;
+
+      if (printTracesIfComputedSeveralTimes)
+      {
+         traces.add(new Throwable());
+      }
    }
 }
