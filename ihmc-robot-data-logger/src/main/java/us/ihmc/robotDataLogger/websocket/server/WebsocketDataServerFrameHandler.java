@@ -112,11 +112,6 @@ class WebsocketDataServerFrameHandler extends SimpleChannelInboundHandler<WebSoc
             // Do nothing
       }
       
-      
-      if (command == DataServerCommand.SEND_TIMESTAMPS)
-      {
-         
-      }
 
       if (command.broadcast())
       {
@@ -335,6 +330,7 @@ class WebsocketDataServerFrameHandler extends SimpleChannelInboundHandler<WebSoc
 
    public void writeCommand(DataServerCommand command, int argument)
    {
+
       if(!channel.eventLoop().inEventLoop())
       {
          throw new RuntimeException("Call this function from the channels event loop");
@@ -344,11 +340,10 @@ class WebsocketDataServerFrameHandler extends SimpleChannelInboundHandler<WebSoc
          WebSocketFrame websocketFrame = textPool.createFrame();
          if (websocketFrame != null)
          {
-
-            command.getBytes(websocketFrame.content(), argument);
             if (channel.isActive()) // Do not check if the channel is writable. We want the commands to go out.
             {
-               channel.writeAndFlush(command);
+               command.getBytes(websocketFrame.content(), argument);
+               channel.writeAndFlush(websocketFrame);
             }
 
          }

@@ -68,7 +68,7 @@ public class SCSVisualizer implements YoVariablesUpdatedListener, ExitActionList
 
    private final Object disconnectLock = new Object();
    private final JButton disconnectButton = new JButton("Waiting for connection...");
-   private final JButton clearLogButton = new JButton("Clear log");
+   private final JButton clearLogButton = new JButton("<html><center>Clear<br>log</center></html>");
    private final JTextField updateRateField = new JTextField("", 6);
 
    private final DecimalFormat delayFormat = new DecimalFormat("0000");
@@ -83,6 +83,8 @@ public class SCSVisualizer implements YoVariablesUpdatedListener, ExitActionList
    private boolean showOverheadView;
 
    private YoGraphicsListRegistry yoGraphicsListRegistry;
+   
+   private final LoggerStatusVisualizer loggerStatusVisualizer = new LoggerStatusVisualizer();
 
    public SCSVisualizer(int bufferSize)
    {
@@ -107,7 +109,7 @@ public class SCSVisualizer implements YoVariablesUpdatedListener, ExitActionList
    public void receivedTimestampAndData(long timestamp)
    {
       long delay = Conversions.nanosecondsToMilliseconds(lastTimestamp - timestamp);
-      delayValue.setText(delayFormat.format(delay));
+      delayValue.setText("<html>Delay:<br>" + delayFormat.format(delay) + " ms</html>");
 
       for (int i = 0; i < jointUpdaters.size(); i++)
       {
@@ -369,10 +371,10 @@ public class SCSVisualizer implements YoVariablesUpdatedListener, ExitActionList
       
       
 
-      scs.addJLabel(new JLabel("Delay: "));
       scs.addJLabel(delayValue);
-      scs.addJLabel(new JLabel("ms"));
 
+      loggerStatusVisualizer.addToSimulationConstructionSet(scs);
+      
       YoVariableRegistry yoVariableRegistry = handshakeParser.getRootRegistry();
       this.registry.addChild(yoVariableRegistry);
       this.registry.addChild(yoVariableClientInterface.getDebugRegistry());
@@ -487,6 +489,6 @@ public class SCSVisualizer implements YoVariablesUpdatedListener, ExitActionList
    @Override
    public void receivedCommand(DataServerCommand command, int argument)
    {
-      System.out.println("Received command " + command + " with argument " + argument);
+      loggerStatusVisualizer.updateStatus(command, argument);
    }
 }
