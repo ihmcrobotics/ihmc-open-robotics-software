@@ -25,13 +25,8 @@ public class VisibilityGraphsIOTools
 {
    protected static final boolean DEBUG = true;
 
-   public static final String TEST_DATA_URL = "unitTestData/testable";
-   public static final String IN_DEVELOLOPMENT_TEST_DATA_URL = "unitTestData/inDevelopment";
-   public static final String PLANAR_REGION_DATA_URL = "planarRegionData";
-
    private static final String VIZ_GRAPHS_DATA_FOLDER_SUFFIX = "VizGraphs";
    public static final String INPUTS_PARAMETERS_FILENAME = "VizGraphsInputs.txt";
-   private static final String PLANAR_REGION_DIRECTORY_KEYWORD = "PlanarRegion";
 
    private static final String PATH_SIZE_FIELD_OPEN = "<PathSize,";
    private static final String PATH_SIZE_FIELD_END = ",PathSize>";
@@ -43,62 +38,6 @@ public class VisibilityGraphsIOTools
    protected static final String GOAL_FIELD_END = ",Goal>";
 
    public static final String TESTABLE_FLAG = "testVisGraph";
-
-   public static boolean exportDataset(Path containingFolder, String datasetName, PlanarRegionsList planarRegionsList, Point3DReadOnly start,
-                                       Point3DReadOnly goal)
-   {
-      File datasetFolder = new File(containingFolder + File.separator + datasetName);
-      if (datasetFolder.exists())
-      {
-         LogTools.error("DatasetFolder already exists: " + datasetFolder);
-         return false;
-      }
-
-      boolean success = datasetFolder.mkdir();
-      if (!success)
-      {
-         LogTools.error("Could not make directory: " + datasetFolder);
-         return false;
-      }
-
-      Path planarRegionsFolder = Paths.get(datasetFolder.getPath() + File.separator + PlanarRegionFileTools.createDefaultTimeStampedFolderName());
-      success = PlanarRegionFileTools.exportPlanarRegionData(planarRegionsFolder, planarRegionsList);
-      if (!success)
-      {
-         LogTools.error("Could not export planar region data to " + planarRegionsFolder);
-         return false;
-      }
-
-      success = exportParameters(datasetFolder, start, goal);
-      if (!success)
-      {
-         LogTools.error("Could not export parameters " + datasetFolder);
-         return false;
-      }
-
-      return true;
-   }
-
-   protected static boolean exportParameters(File containingFolder, Point3DReadOnly start, Point3DReadOnly goal)
-   {
-      if (containingFolder == null || !containingFolder.exists())
-      {
-         LogTools.error("The given folder does not exist or is null.");
-         return false;
-      }
-
-      if (start == null || goal == null)
-      {
-         LogTools.error("Must export start AND goal.");
-         return false;
-      }
-
-      File parametersFile = new File(containingFolder.getAbsolutePath() + File.separator + INPUTS_PARAMETERS_FILENAME);
-      writeField(parametersFile, START_FIELD_OPEN, START_FIELD_CLOSE, () -> getPoint3DString(start));
-      writeField(parametersFile, GOAL_FIELD_OPEN, GOAL_FIELD_END, () -> getPoint3DString(goal));
-
-      return true;
-   }
 
    /**
     * Generates a default timestamped name that can be used to generate automated and unique

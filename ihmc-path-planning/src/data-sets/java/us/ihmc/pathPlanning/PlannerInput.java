@@ -1,6 +1,7 @@
 package us.ihmc.pathPlanning;
 
 import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -10,15 +11,9 @@ public class PlannerInput
 {
    private Point3D startPosition = new Point3D();
    private Point3D goalPosition = new Point3D();
-   private double startYaw = Double.NaN;
-   private double goalYaw = Double.NaN;
+   private double startYaw = 0.0;
+   private double goalYaw = 0.0;
    private HashMap<String, List<String>> additionalData = new HashMap<>();
-
-   PlannerInput()
-   {
-      startPosition.setToNaN();
-      goalPosition.setToNaN();
-   }
 
    public Point3D getStartPosition()
    {
@@ -45,27 +40,37 @@ public class PlannerInput
       return additionalData.get(key);
    }
 
-   void setStartPosition(double x, double y, double z)
+   public void setStartPosition(Point3DReadOnly startPosition)
+   {
+      this.startPosition.set(startPosition);
+   }
+
+   public void setStartPosition(double x, double y, double z)
    {
       this.startPosition.set(x, y, z);
    }
 
-   void setGoalPosition(double x, double y, double z)
+   public void setGoalPosition(Point3DReadOnly goalPosition)
+   {
+      this.goalPosition.set(goalPosition);
+   }
+
+   public void setGoalPosition(double x, double y, double z)
    {
       this.goalPosition.set(x, y, z);
    }
 
-   void setStartYaw(double yaw)
+   public void setStartYaw(double yaw)
    {
       this.startYaw = yaw;
    }
 
-   void setGoalYaw(double yaw)
+   public void setGoalYaw(double yaw)
    {
       this.goalYaw = yaw;
    }
 
-   void addAdditionalData(String key, String value)
+   public void addAdditionalData(String key, String value)
    {
       additionalData.computeIfAbsent(key, k -> new ArrayList<>()).add(value);
    }
@@ -73,5 +78,11 @@ public class PlannerInput
    public boolean getBooleanFlag(String key)
    {
       return additionalData.containsKey(key) && additionalData.get(key).get(0).equals("true");
+   }
+
+   /* package-private */
+   HashMap<String, List<String>> getAdditionDataMap()
+   {
+      return additionalData;
    }
 }

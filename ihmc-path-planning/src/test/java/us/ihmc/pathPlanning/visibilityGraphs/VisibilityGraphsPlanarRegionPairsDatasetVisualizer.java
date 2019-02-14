@@ -9,6 +9,9 @@ import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.javaFXToolkit.messager.SharedMemoryJavaFXMessager;
 import us.ihmc.log.LogTools;
+import us.ihmc.pathPlanning.DataSet;
+import us.ihmc.pathPlanning.DataSetLoader;
+import us.ihmc.pathPlanning.PlannerInput;
 import us.ihmc.pathPlanning.visibilityGraphs.clusterManagement.Cluster;
 import us.ihmc.pathPlanning.visibilityGraphs.dataStructure.NavigableRegion;
 import us.ihmc.pathPlanning.visibilityGraphs.dataStructure.VisibilityMapSolution;
@@ -16,6 +19,7 @@ import us.ihmc.pathPlanning.visibilityGraphs.tools.VisibilityGraphsIOTools;
 import us.ihmc.pathPlanning.visibilityGraphs.tools.VisibilityGraphsIOTools.VisibilityGraphsUnitTestDataset;
 import us.ihmc.pathPlanning.visibilityGraphs.ui.VisibilityGraphsDataExporter;
 import us.ihmc.pathPlanning.visibilityGraphs.ui.messager.UIVisibilityGraphsTopics;
+import us.ihmc.robotics.PlanarRegionFileTools;
 import us.ihmc.robotics.geometry.PlanarRegion;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 
@@ -29,16 +33,14 @@ public class VisibilityGraphsPlanarRegionPairsDatasetVisualizer
 {
    private static final boolean fullyExpandVisibilityGraph = true;
 
-   public static void openResourceAndVisualizePairs(String resourceName, String folderToSavePairsTo)
+   public static void openResourceAndVisualizePairs(String dataSetName)
    {
-      Class<VisibilityGraphsDataExporter> loadingClass = VisibilityGraphsDataExporter.class;
-      VisibilityGraphsUnitTestDataset dataSet = VisibilityGraphsIOTools.loadDataset(loadingClass, resourceName);
-
-      String datasetName = dataSet.getDatasetName();
+      DataSet dataSet = DataSetLoader.loadDataSet(dataSetName);
+      String datasetName = dataSet.getName();
       LogTools.info("Loaded " + datasetName);
 
-      Point3D start = dataSet.getStart();
-      Point3D goal = dataSet.getGoal();
+      Point3D start = dataSet.getPlannerInput().getStartPosition();
+      Point3D goal = dataSet.getPlannerInput().getGoalPosition();
 
       PlanarRegionsList planarRegionsList = dataSet.getPlanarRegionsList();
 
@@ -108,7 +110,7 @@ public class VisibilityGraphsPlanarRegionPairsDatasetVisualizer
                {
                   if (reloadDatasetRequested.get())
                   {
-                     exportPlanarRegionPairDataset(folderToSavePairsTo, pairNumber, indexOne, indexTwo, planarRegionOne, planarRegionTwo, start, goal);
+                     exportPlanarRegionPairDataset(pairNumber, indexOne, indexTwo, planarRegionOne, planarRegionTwo, start, goal);
                      messager.submitMessage(UIVisibilityGraphsTopics.ReloadDatasetRequest, false);
                      ThreadTools.sleep(300);
                   }
@@ -200,30 +202,27 @@ public class VisibilityGraphsPlanarRegionPairsDatasetVisualizer
       visualizerApplication.submitVisibilityGraphSolutionToVisualizer(visibilityMapSolution);
    }
 
-   private static void exportPlanarRegionPairDataset(String folderName, int pairIndex, int indexOne, int indexTwo, PlanarRegion planarRegionOne,
+   private static void exportPlanarRegionPairDataset(int pairIndex, int indexOne, int indexTwo, PlanarRegion planarRegionOne,
                                                      PlanarRegion planarRegionTwo, Point3D start, Point3D goal)
    {
       PlanarRegionsList planarRegionsListToExport = new PlanarRegionsList();
       planarRegionsListToExport.addPlanarRegion(planarRegionOne);
       planarRegionsListToExport.addPlanarRegion(planarRegionTwo);
 
-      Path folderPath = Paths.get(folderName);
-      String datasetNameToExport = VisibilityGraphsIOTools.createDefaultTimeStampedDatasetFolderName() + "_" + pairIndex + "_" + indexOne + "_" + indexTwo;
-
-      System.out.println(datasetNameToExport);
-      System.out.println(folderPath);
-
-      VisibilityGraphsIOTools.exportDataset(folderPath, datasetNameToExport, planarRegionsListToExport, start, goal);
+      String datasetNameToExport = PlanarRegionFileTools.getDate() + "_" + pairIndex + "_" + indexOne + "_" + indexTwo;
+      DataSet dataSet = new DataSet(datasetNameToExport, planarRegionsListToExport);
+      PlannerInput plannerInput = new PlannerInput();
+      plannerInput.setStartPosition(start);
+      plannerInput.setGoalPosition(goal);
+      dataSet.setPlannerInput(plannerInput);
+      DataSetLoader.exportDataSet(dataSet);
    }
 
    public static void main(String[] args)
    {
       LogTools.info("Click on Next to cycle through the PlanarRegion pairs.");
-
-      String resourceName = "unitTestData/testable/20171215_214730_CinderBlockField";
-      String folderToSavePairsTo = "D://PlanarRegionDatasets";
-
-      openResourceAndVisualizePairs(resourceName, folderToSavePairsTo);
+      String resourceName = "20171215_214730_CinderBlockField";
+      openResourceAndVisualizePairs(resourceName);
    }
 
 }
