@@ -7,7 +7,6 @@ import org.junit.Test;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
-import us.ihmc.commonWalkingControlModules.capturePoint.smoothCMPBasedICPPlanner.AMGeneration.FootstepAngularMomentumPredictor;
 import us.ihmc.commons.ContinuousIntegrationTools;
 import us.ihmc.commons.Conversions;
 import us.ihmc.commons.MathTools;
@@ -24,6 +23,9 @@ import us.ihmc.javaFXToolkit.messager.SharedMemoryJavaFXMessager;
 import us.ihmc.log.LogTools;
 import us.ihmc.messager.Messager;
 import us.ihmc.messager.SharedMemoryMessager;
+import us.ihmc.pathPlanning.DataSet;
+import us.ihmc.pathPlanning.DataSetIOTools;
+import us.ihmc.pathPlanning.PlannerInput;
 import us.ihmc.quadrupedBasics.gait.QuadrupedTimedStep;
 import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.communication.FootstepPlannerMessagerAPI;
 import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.graphSearch.graph.FootstepNode;
@@ -31,7 +33,6 @@ import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.tools.FootstepPlannerI
 import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.tools.FootstepPlannerIOTools.FootstepPlannerUnitTestDataset;
 import us.ihmc.quadrupedFootstepPlanning.ui.ApplicationRunner;
 import us.ihmc.quadrupedFootstepPlanning.ui.FootstepPlannerUI;
-import us.ihmc.quadrupedPlanning.QuadrupedXGaitSettings;
 import us.ihmc.quadrupedPlanning.QuadrupedXGaitSettingsReadOnly;
 import us.ihmc.robotics.Assert;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
@@ -42,11 +43,14 @@ import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.Function;
 
 public abstract class FootstepPlannerDataSetTest
 {
    protected static final double bambooTimeScaling = 4.0;
    private static final double epsilon = 1e-3;
+   public static final String TESTABLE_FLAG = "testQuadrupedPlanner";
+   public static final String TIMEOUT_FLAG = "quadruped_timeout";
 
    private static final QuadrantDependentList<AppearanceDefinition> colorDefinitions = new QuadrantDependentList<>(YoAppearance.Red(), YoAppearance.Green(),
                                                                                                                    YoAppearance.DarkRed(),
@@ -150,28 +154,39 @@ public abstract class FootstepPlannerDataSetTest
    @Test
    public void testDatasetsWithoutOcclusion()
    {
-      List<FootstepPlannerUnitTestDataset> allDatasets = FootstepPlannerIOTools.loadAllFootstepPlannerDatasetsWithoutOcclusions(FootstepPlannerIOTools.class);
-      runAssertionsOnAllDatasets(this::runAssertions, allDatasets);
+      List<DataSet> dataSets = DataSetIOTools.loadDataSets(dataSet ->
+                                                             {
+                                                                if(!dataSet.hasPlannerInput())
+                                                                   return false;
+                                                                return dataSet.getPlannerInput().getBooleanFlag(TESTABLE_FLAG);
+                                                             });
+      runAssertionsOnAllDatasets(this::runAssertions, dataSets);
    }
 
    @Disabled
    @Test
    public void testDatasetsWithoutOcclusionInDevelopment()
    {
-      List<FootstepPlannerUnitTestDataset> allDatasets = FootstepPlannerIOTools
-            .loadAllFootstepPlannerDatasetsWithoutOcclusionsInDevelopment(FootstepPlannerIOTools.class);
-      runAssertionsOnAllDatasets(this::runAssertions, allDatasets);
+      List<DataSet> dataSets = DataSetIOTools.loadDataSets(dataSet ->
+                                                           {
+                                                              if(!dataSet.hasPlannerInput())
+                                                                 return false;
+                                                              // only considered "in-development" if testable flag is present and false
+                                                              else if(!dataSet.getPlannerInput().containsFlag(TESTABLE_FLAG))
+                                                                 return false;
+                                                              return !dataSet.getPlannerInput().getBooleanFlag(TESTABLE_FLAG);
+                                                           });
+      runAssertionsOnAllDatasets(this::runAssertions, dataSets);
    }
 
-   protected void runAssertionsOnDataset(DatasetTestRunner datasetTestRunner, String datasetName)
+   protected void runAssertionsOnDataset(Function<DataSet, String> dataSetTester, String datasetName)
    {
-      FootstepPlannerUnitTestDataset dataset = FootstepPlannerIOTools.loadDataset(FootstepPlannerIOTools.class, datasetName);
-
-      String errorMessages = datasetTestRunner.testDataset(dataset);
-      //      Assert.assertTrue("Errors:" + errorMessages, errorMessages.isEmpty());
+      DataSet dataSet = DataSetIOTools.loadDataSet(datasetName);
+      String errorMessages = dataSetTester.apply(dataSet);
+      Assert.assertTrue("Errors:" + errorMessages, errorMessages.isEmpty());
    }
 
-   private void runAssertionsOnAllDatasets(DatasetTestRunner datasetTestRunner, List<FootstepPlannerUnitTestDataset> allDatasets)
+   private void runAssertionsOnAllDatasets(Function<DataSet, String> dataSetTester, List<DataSet> allDatasets)
    {
       if (VERBOSE || DEBUG)
          LogTools.info("Unit test files found: " + allDatasets.size());
@@ -184,29 +199,22 @@ public abstract class FootstepPlannerDataSetTest
       int numbberOfTestedSets = 0;
       for (int i = 0; i < allDatasets.size(); i++)
       {
-         FootstepPlannerUnitTestDataset dataset = allDatasets.get(i);
+         DataSet dataset = allDatasets.get(i);
          if (DEBUG || VERBOSE)
-            LogTools.info("Testing file: " + dataset.getDatasetName());
-
-         if (!dataset.getTypes().contains(getPlannerType()))
-         {
-            if (DEBUG || VERBOSE)
-               LogTools.info(dataset.getDatasetName() + " does not contain planner type " + getPlannerType() + ", skipping");
-            continue;
-         }
+            LogTools.info("Testing file: " + dataset.getName());
 
          numbberOfTestedSets++;
-         String errorMessagesForCurrentFile = datasetTestRunner.testDataset(dataset);
+         String errorMessagesForCurrentFile = dataSetTester.apply(dataset);
          if (!errorMessagesForCurrentFile.isEmpty())
          {
             numberOfFailingTests++;
-            failingDatasets.add(dataset.getDatasetName());
+            failingDatasets.add(dataset.getName());
          }
 
          if (DEBUG || VERBOSE)
          {
             String result = errorMessagesForCurrentFile.isEmpty() ? "passed" : "failed";
-            LogTools.info(dataset.getDatasetName() + " " + result);
+            LogTools.info(dataset.getName() + " " + result);
          }
 
          ThreadTools.sleep(500); // Apparently need to give some time for the prints to appear in the right order.
@@ -229,30 +237,30 @@ public abstract class FootstepPlannerDataSetTest
       }
    }
 
-   protected String runAssertions(FootstepPlannerUnitTestDataset dataset)
+   protected String runAssertions(DataSet dataset)
    {
       ThreadTools.sleep(1000);
       packPlanningRequest(dataset);
       String errorMessage = findPlanAndAssertGoodResult(dataset);
 
-      //      visualizePlan(planner.getPlan(), dataset.getPlanarRegionsList(), dataset.getStart(), dataset.getGoal());
-
+//      visualizePlan(planner.getPlan(), dataset.getPlanarRegionsList(), dataset.getPlannerInput().getStartPosition(), dataset.getPlannerInput().getGoalPosition());
       return errorMessage;
    }
 
-   protected void packPlanningRequest(FootstepPlannerUnitTestDataset dataset)
+   protected void packPlanningRequest(DataSet dataset)
    {
+      PlannerInput plannerInput = dataset.getPlannerInput();
       FramePose3D startPose = new FramePose3D();
       FramePose3D goalPose = new FramePose3D();
-      startPose.setPosition(dataset.getStart());
-      goalPose.setPosition(dataset.getGoal());
-      if (dataset.hasStartOrientation())
-         startPose.setOrientation(dataset.getStartOrientation());
-      if (dataset.hasGoalOrientation())
-         goalPose.setOrientation(dataset.getGoalOrientation());
+      startPose.setPosition(plannerInput.getStartPosition());
+      goalPose.setPosition(plannerInput.getGoalPosition());
+      if (plannerInput.hasStartOrientation())
+         startPose.setOrientation(new Quaternion(plannerInput.getStartYaw(), 0.0, 0.0));
+      if (plannerInput.hasGoalOrientation())
+         goalPose.setOrientation(new Quaternion(plannerInput.getGoalYaw(), 0.0, 0.0));
 
       double timeMultiplier = ContinuousIntegrationTools.isRunningOnContinuousIntegrationServer() ? bambooTimeScaling : 1.0;
-      double timeout = timeMultiplier * dataset.getTimeout(getPlannerType());
+      double timeout = timeMultiplier * plannerInput.getDoubleFlag(TIMEOUT_FLAG);
 
       QuadrupedFootstepPlannerStart start = new QuadrupedFootstepPlannerStart();
       QuadrupedFootstepPlannerGoal goal = new QuadrupedFootstepPlannerGoal();
@@ -276,9 +284,9 @@ public abstract class FootstepPlannerDataSetTest
          LogTools.info("Set planner parameters.");
    }
 
-   private String findPlanAndAssertGoodResult(FootstepPlannerUnitTestDataset dataset)
+   private String findPlanAndAssertGoodResult(DataSet dataset)
    {
-      String datasetName = dataset.getDatasetName();
+      String datasetName = dataset.getName();
 
       FootstepPlanningResult pathResult = planner.planPath();
       if (!pathResult.validForExecution())
@@ -290,13 +298,14 @@ public abstract class FootstepPlannerDataSetTest
 
       messager.submitMessage(FootstepPlannerMessagerAPI.FootstepPlanTopic, planner.getPlan());
 
-      String errorMessage = assertPlanIsValid(datasetName, planner.getPlan(), dataset.getGoal(), dataset.getGoalOrientation());
+      PlannerInput plannerInput = dataset.getPlannerInput();
+      String errorMessage = assertPlanIsValid(datasetName, planner.getPlan(), plannerInput.getGoalPosition(), plannerInput.getGoalYaw());
 
       ThreadTools.sleep(1000);
       return errorMessage;
    }
 
-   private static String assertPlanIsValid(String datasetName, FootstepPlan plannedSteps, Point3DReadOnly goalPosition, Quaternion goalOrientation)
+   private static String assertPlanIsValid(String datasetName, FootstepPlan plannedSteps, Point3DReadOnly goalPosition, double goalYaw)
    {
       QuadrantDependentList<Point3DBasics> finalSteps = getFinalStepPositions(plannedSteps);
 
@@ -316,9 +325,8 @@ public abstract class FootstepPlannerDataSetTest
       String errorMessage = "";
       if (!goalPosition.epsilonEquals(centerPoint, epsilon))
          errorMessage = datasetName + " did not reach goal position. Made it to " + centerPoint + ", trying to get to " + goalPosition;
-      if (goalOrientation != null)
+      if (!Double.isNaN(goalYaw))
       {
-         double goalYaw = goalOrientation.getYaw();
          if (!MathTools.epsilonEquals(goalYaw, nominalYaw, 0.02))
             errorMessage = datasetName + " did not reach goal yaw. Made it to " + nominalYaw + ", trying to get to " + goalYaw;
       }
@@ -342,11 +350,6 @@ public abstract class FootstepPlannerDataSetTest
       }
 
       return finalSteps;
-   }
-
-   protected interface DatasetTestRunner
-   {
-      String testDataset(FootstepPlannerUnitTestDataset dataset);
    }
 
    private void visualizePlan(FootstepPlan plan, PlanarRegionsList planarRegionsList, Point3DReadOnly start, Point3DReadOnly goal)

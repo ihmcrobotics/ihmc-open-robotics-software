@@ -10,6 +10,7 @@ import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.FootstepPlannerType;
 import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.communication.FootstepPlannerMessagerAPI;
 import us.ihmc.robotEnvironmentAwareness.tools.ExecutorServiceTools;
 import us.ihmc.robotEnvironmentAwareness.tools.ExecutorServiceTools.ExceptionHandling;
+import us.ihmc.robotics.PlanarRegionFileTools;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 
 import java.nio.file.Path;
@@ -92,7 +93,7 @@ public class FootstepPlannerDataExporter
       }
 
       Path folderPath = Paths.get(dataDirectoryPath.get());
-      String datasetName = FootstepPlannerIOTools.createDefaultTimeStampedDatasetFolderName();
+      String datasetName = PlanarRegionFileTools.createDefaultTimeStampedFolderName();
       FootstepPlannerIOTools
             .exportDataset(folderPath, datasetName, planarRegionData, startPosition, startOrientation, goalPosition, goalOrientation, footstepPlannerType,
                            timeout);
