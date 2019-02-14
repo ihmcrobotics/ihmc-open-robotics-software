@@ -18,6 +18,7 @@ import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.idl.IDLSequence.Float;
 import us.ihmc.idl.IDLSequence.Object;
@@ -29,18 +30,25 @@ import us.ihmc.messager.Messager;
 import us.ihmc.messager.TopicListener;
 import us.ihmc.pathPlanning.visibilityGraphs.ui.properties.Point3DProperty;
 import us.ihmc.pathPlanning.visibilityGraphs.ui.properties.YawProperty;
+import us.ihmc.quadrupedBasics.gait.QuadrupedTimedStep;
 import us.ihmc.quadrupedBasics.referenceFrames.QuadrupedReferenceFrames;
 import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.FootstepPlan;
 import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.FootstepPlannerType;
 import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.communication.FootstepPlannerMessagerAPI;
+import us.ihmc.quadrupedPlanning.QuadrupedXGaitSettingsReadOnly;
 import us.ihmc.quadrupedRobotics.estimator.GroundPlaneEstimator;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotModels.FullQuadrupedRobotModel;
 import us.ihmc.robotModels.FullRobotModelUtils;
 import us.ihmc.robotics.geometry.PlanarRegion;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
+import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
+import us.ihmc.robotics.robotSide.QuadrantDependentList;
 import us.ihmc.robotics.robotSide.RobotQuadrant;
+import us.ihmc.robotics.time.TimeIntervalTools;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
@@ -182,7 +190,7 @@ public class MainTabController
 
    private AtomicReference<Integer> currentPlannerRequestId;
 //   private AnimationTimer robotPoseHandler;
-//   private WalkingPreviewPlaybackManager walkingPreviewPlaybackManager;
+   private FootstepPlanPreviewPlaybackManager footstepPlanPreviewPlaybackManager;
    private QuadrupedReferenceFrames quadrupedReferenceFrames;
    private AtomicReference<FootstepPlan> footstepPlanReference;
 
@@ -278,9 +286,8 @@ public class MainTabController
       messager.registerTopicListener(FootstepPlannerMessagerAPI.GlobalResetTopic, reset -> clearStartGoalTextFields());
 
 //      walkingPreviewPlaybackManager = new WalkingPreviewPlaybackManager(messager);
-//      previewSlider.valueProperty()
-//                   .addListener((ChangeListener<Number>) (observable, oldValue,
-//                                                          newValue) -> walkingPreviewPlaybackManager.requestSpecificPercentageInPreview(newValue.doubleValue()));
+      previewSlider.valueProperty()
+                   .addListener((observable, oldValue, newValue) -> footstepPlanPreviewPlaybackManager.requestSpecificPercentageInPreview(newValue.doubleValue()));
    }
 
    @FXML
@@ -323,23 +330,23 @@ public class MainTabController
 //      messager.submitMessage(FootstepPlannerMessagerAPI.RequestWalkingPreview, requestMessage);
    }
 
-//   @FXML
-//   private void playWalkingPreview()
-//   {
-//      walkingPreviewPlaybackManager.start();
-//   }
-//
-//   @FXML
-//   private void pauseWalkingPreview()
-//   {
-//      walkingPreviewPlaybackManager.playbackModeActive.set(false);
-//   }
-//
-//   @FXML
-//   private void stopWalkingPreview()
-//   {
-//      walkingPreviewPlaybackManager.stop();
-//   }
+   @FXML
+   private void playFootstepPlanPreview()
+   {
+      footstepPlanPreviewPlaybackManager.start();
+   }
+
+   @FXML
+   private void pauseFootstepPlanPreview()
+   {
+      footstepPlanPreviewPlaybackManager.playbackModeActive.set(false);
+   }
+
+   @FXML
+   private void stopFootstepPlanPreview()
+   {
+      footstepPlanPreviewPlaybackManager.stop();
+   }
 
    public void setFullRobotModel(FullQuadrupedRobotModel fullQuadrupedRobotModel)
    {
@@ -349,6 +356,11 @@ public class MainTabController
    public void setPreviewModel(FullQuadrupedRobotModel previewRobotModel)
    {
 //      this.walkingPreviewPlaybackManager.setRobotModel(previewRobotModel);
+   }
+
+   public void setPreviewFootstepPositions(QuadrantDependentList<Point3D> footstepPositions)
+   {
+      footstepPlanPreviewPlaybackManager.setPreviewFootstepPositions(footstepPositions);
    }
 
 
@@ -430,33 +442,76 @@ public class MainTabController
       }
    }
 
-   private class WalkingPreviewPlaybackManager extends AnimationTimer
+   private class FootstepPlanPreviewPlaybackManager extends AnimationTimer
    {
-      final AtomicReference<WalkingControllerPreviewOutputMessage> walkingPreviewOutput;
+      private final AtomicReference<FootstepPlan> footstepPlanReference;
+      private final AtomicReference<QuadrupedXGaitSettingsReadOnly> xGaitSettingsReference;
 
+      private final double frameDt = 0.1;
       // frames per call to handle()
       final int playbackSpeed = 1;
-
       int playbackCounter = 0;
-      FullQuadrupedRobotModel previewRobotModel = null;
-      OneDoFJointBasics[] previewModelOneDoFJoints = null;
 
       // whether to show ghost robot
       final AtomicBoolean active = new AtomicBoolean(false);
 
       // whether to animate ghost robot
       final AtomicBoolean playbackModeActive = new AtomicBoolean(false);
+      private final List<QuadrantDependentList<Point3DReadOnly>> footPositionScene = new ArrayList<>();
 
-      WalkingPreviewPlaybackManager(Messager messager)
+      QuadrantDependentList<Point3D> previewFootstepPositions;
+
+      FootstepPlanPreviewPlaybackManager(Messager messager)
       {
-         walkingPreviewOutput = messager.createInput(FootstepPlannerMessagerAPI.WalkingPreviewOutput);
-         messager.registerTopicListener(FootstepPlannerMessagerAPI.WalkingPreviewOutput, output -> start());
+         footstepPlanReference = messager.createInput(FootstepPlannerMessagerAPI.FootstepPlanTopic);
+         xGaitSettingsReference = messager.createInput(FootstepPlannerMessagerAPI.XGaitSettingsTopic);
+
+         messager.registerTopicListener(FootstepPlannerMessagerAPI.FootstepPlanTopic, output -> calculateFrames());
       }
 
-      void setRobotModel(FullQuadrupedRobotModel previewRobotModel)
+      void setPreviewFootstepPositions(QuadrantDependentList<Point3D> previewFootstepPositions)
       {
-         this.previewRobotModel = previewRobotModel;
-         previewModelOneDoFJoints = previewRobotModel.getOneDoFJoints();
+         this.previewFootstepPositions = previewFootstepPositions;
+      }
+
+      private void calculateFrames()
+      {
+         FootstepPlan footstepPlan = footstepPlanReference.getAndSet(null);
+         List<QuadrupedTimedStep> steps = new ArrayList<>();
+         for (int i = 0; i < footstepPlan.getNumberOfSteps(); i++)
+            steps.add(footstepPlan.getFootstep(i));
+         TimeIntervalTools.sortByEndTime(steps);
+         double endTime = steps.get(footstepPlan.getNumberOfSteps() - 1).getTimeInterval().getEndTime();
+         TimeIntervalTools.sortByStartTime(steps);
+         double startTime = steps.get(0).getTimeInterval().getStartTime() - 1.0;
+         int totalNumberOfFrames = (int) ((endTime - startTime) / frameDt);
+
+         footPositionScene.clear();
+
+         // TODO
+         PoseReferenceFrame xGaitFrame = new PoseReferenceFrame("xGaitFrame", ReferenceFrame.getWorldFrame());
+         xGaitFrame.setPoseAndUpdate(footstepPlan.getStartPose());
+
+         double xOffset = 0.5 * xGaitSettingsReference.get().getStanceLength();
+         double yOffset = 0.5 * xGaitSettingsReference.get().getStanceWidth();
+
+         QuadrantDependentList<Point3DReadOnly> currentFootstepPositions = new QuadrantDependentList<>();
+         for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
+         {
+            FramePoint3D footPosition = new FramePoint3D(xGaitFrame, robotQuadrant.getEnd().negateIfHindEnd(xOffset),
+                                                         robotQuadrant.getSide().negateIfRightSide(yOffset), 0.0);
+            footPosition.changeFrame(ReferenceFrame.getWorldFrame());
+            currentFootstepPositions.put(robotQuadrant, footPosition);
+         }
+
+         footPositionScene.add(currentFootstepPositions);
+
+         double time = startTime;
+         while (time <= endTime)
+         {
+            // FIXME finish
+            time += frameDt;
+         }
       }
 
       @Override
@@ -471,7 +526,8 @@ public class MainTabController
       @Override
       public void stop()
       {
-         previewRobotModel.getRootJoint().setJointPosition(new Vector3D(Double.NaN, Double.NaN, Double.NaN));
+         for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
+            previewFootstepPositions.get(robotQuadrant).setToNaN();
          super.stop();
          active.set(false);
       }
@@ -481,222 +537,73 @@ public class MainTabController
       {
          if (playbackModeActive.get())
          {
-            WalkingControllerPreviewOutputMessage walkingControllerPreviewOutputMessage = walkingPreviewOutput.get();
-
-            if (walkingControllerPreviewOutputMessage == null)
+            if (footPositionScene.size() == 0)
             {
-               LogTools.info("No preview in memory.");
+               LogTools.info("No footstep plan preview in memory.");
                playbackModeActive.set(false);
                stop();
                return;
             }
 
-            if (playbackCounter >= walkingControllerPreviewOutputMessage.getRobotConfigurations().size())
+            if (playbackCounter >= footPositionScene.size())
             {
                playbackCounter = 0;
             }
 
             setToFrame(playbackCounter);
             playbackCounter += playbackSpeed;
-            double alpha = ((double) playbackCounter) / (walkingPreviewOutput.get().getRobotConfigurations().size() - 1);
+            double alpha = ((double) playbackCounter) / (footPositionScene.size() - 1);
             previewSlider.setValue(MathTools.clamp(alpha, 0.0, 1.0));
          }
       }
 
       void requestSpecificPercentageInPreview(double alpha)
-      {
-         if(playbackModeActive.get())
-            return;
-
-         alpha = MathTools.clamp(alpha, 0.0, 1.0);
-         WalkingControllerPreviewOutputMessage walkingControllerPreviewOutputMessage = walkingPreviewOutput.get();
-
-         if (walkingControllerPreviewOutputMessage == null)
-         {
-            LogTools.info("No preview in memory.");
-            playbackModeActive.set(false);
-            stop();
-            return;
-         }
-
-         int frameIndex = (int) (alpha * (walkingControllerPreviewOutputMessage.getRobotConfigurations().size() - 1));
-         setToFrame(frameIndex);
-      }
-
-      private void setToFrame(int frameIndex)
-      {
-         WalkingControllerPreviewOutputMessage walkingControllerPreviewOutputMessage = walkingPreviewOutput.get();
-
-         if (walkingControllerPreviewOutputMessage == null)
-         {
-            LogTools.info("No preview in memory.");
-            playbackModeActive.set(false);
-            stop();
-            return;
-         }
-
-         Object<KinematicsToolboxOutputStatus> robotConfigurations = walkingControllerPreviewOutputMessage.getRobotConfigurations();
-
-         if (frameIndex >= robotConfigurations.size())
-         {
-            LogTools.info("frameIndex out of bound.");
-            stop();
-            return;
-         }
-
-         KinematicsToolboxOutputStatus kinematicsToolboxOutputStatus = robotConfigurations.get(frameIndex);
-
-         Float jointAngles = kinematicsToolboxOutputStatus.getDesiredJointAngles();
-
-         if (jointAngles.size() != previewModelOneDoFJoints.length)
-         {
-            System.err.println("Received " + jointAngles.size() + " from walking controller preview toolbox, expected " + previewModelOneDoFJoints.length);
-            walkingPreviewOutput.set(null);
-            return;
-         }
-
-         for (int i = 0; i < jointAngles.size(); i++)
-         {
-            previewModelOneDoFJoints[i].setQ(jointAngles.get(i));
-         }
-
-         previewRobotModel.getRootJoint().setJointPosition(kinematicsToolboxOutputStatus.getDesiredRootTranslation());
-         previewRobotModel.getRootJoint().setJointOrientation(kinematicsToolboxOutputStatus.getDesiredRootOrientation());
-      }
-   }
-
-   private class WalkingPreviewPlaybackManager extends AnimationTimer
-   {
-      final AtomicReference<WalkingControllerPreviewOutputMessage> walkingPreviewOutput;
-
-      // frames per call to handle()
-      final int playbackSpeed = 1;
-
-      int playbackCounter = 0;
-      FullHumanoidRobotModel previewRobotModel = null;
-      OneDoFJointBasics[] previewModelOneDoFJoints = null;
-
-      // whether to show ghost robot
-      final AtomicBoolean active = new AtomicBoolean(false);
-
-      // whether to animate ghost robot
-      final AtomicBoolean playbackModeActive = new AtomicBoolean(false);
-
-      WalkingPreviewPlaybackManager(Messager messager)
-      {
-         walkingPreviewOutput = messager.createInput(FootstepPlannerMessagerAPI.WalkingPreviewOutput);
-         messager.registerTopicListener(FootstepPlannerMessagerAPI.WalkingPreviewOutput, output -> start());
-      }
-
-      void setRobotModel(FullHumanoidRobotModel previewRobotModel)
-      {
-         this.previewRobotModel = previewRobotModel;
-         previewModelOneDoFJoints = FullRobotModelUtils.getAllJointsExcludingHands(previewRobotModel);
-      }
-
-      @Override
-      public void start()
-      {
-         playbackCounter = 0;
-         super.start();
-         active.set(true);
-         playbackModeActive.set(true);
-      }
-
-      @Override
-      public void stop()
-      {
-         previewRobotModel.getRootJoint().setJointPosition(new Vector3D(Double.NaN, Double.NaN, Double.NaN));
-         super.stop();
-         active.set(false);
-      }
-
-      @Override
-      public void handle(long now)
       {
          if (playbackModeActive.get())
-         {
-            WalkingControllerPreviewOutputMessage walkingControllerPreviewOutputMessage = walkingPreviewOutput.get();
-
-            if (walkingControllerPreviewOutputMessage == null)
-            {
-               LogTools.info("No preview in memory.");
-               playbackModeActive.set(false);
-               stop();
-               return;
-            }
-
-            if (playbackCounter >= walkingControllerPreviewOutputMessage.getRobotConfigurations().size())
-            {
-               playbackCounter = 0;
-            }
-
-            setToFrame(playbackCounter);
-            playbackCounter += playbackSpeed;
-            double alpha = ((double) playbackCounter) / (walkingPreviewOutput.get().getRobotConfigurations().size() - 1);
-            previewSlider.setValue(MathTools.clamp(alpha, 0.0, 1.0));
-         }
-      }
-
-      void requestSpecificPercentageInPreview(double alpha)
-      {
-         if(playbackModeActive.get())
             return;
 
          alpha = MathTools.clamp(alpha, 0.0, 1.0);
-         WalkingControllerPreviewOutputMessage walkingControllerPreviewOutputMessage = walkingPreviewOutput.get();
 
-         if (walkingControllerPreviewOutputMessage == null)
+         if (footPositionScene.size() == 0)
          {
-            LogTools.info("No preview in memory.");
+            LogTools.info("No footstep plan in memory.");
             playbackModeActive.set(false);
             stop();
             return;
          }
 
-         int frameIndex = (int) (alpha * (walkingControllerPreviewOutputMessage.getRobotConfigurations().size() - 1));
+         int frameIndex = (int) (alpha * (footPositionScene.size() - 1));
          setToFrame(frameIndex);
       }
 
       private void setToFrame(int frameIndex)
       {
-         WalkingControllerPreviewOutputMessage walkingControllerPreviewOutputMessage = walkingPreviewOutput.get();
-
-         if (walkingControllerPreviewOutputMessage == null)
+         if (footPositionScene.size() == 0)
          {
-            LogTools.info("No preview in memory.");
+            LogTools.info("No footstep plan in memory.");
             playbackModeActive.set(false);
             stop();
             return;
          }
 
-         Object<KinematicsToolboxOutputStatus> robotConfigurations = walkingControllerPreviewOutputMessage.getRobotConfigurations();
-
-         if (frameIndex >= robotConfigurations.size())
+         if (frameIndex >= footPositionScene.size())
          {
             LogTools.info("frameIndex out of bound.");
             stop();
             return;
          }
 
-         KinematicsToolboxOutputStatus kinematicsToolboxOutputStatus = robotConfigurations.get(frameIndex);
+         QuadrantDependentList<Point3DReadOnly> footPositions = footPositionScene.get(frameIndex);
 
-         Float jointAngles = kinematicsToolboxOutputStatus.getDesiredJointAngles();
-
-         if (jointAngles.size() != previewModelOneDoFJoints.length)
+         for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
          {
-            System.err.println("Received " + jointAngles.size() + " from walking controller preview toolbox, expected " + previewModelOneDoFJoints.length);
-            walkingPreviewOutput.set(null);
-            return;
+            if (footPositions.get(robotQuadrant) == null)
+               previewFootstepPositions.get(robotQuadrant).setToNaN();
+            else
+               previewFootstepPositions.get(robotQuadrant).set(footPositions.get(robotQuadrant));
          }
-
-         for (int i = 0; i < jointAngles.size(); i++)
-         {
-            previewModelOneDoFJoints[i].setQ(jointAngles.get(i));
-         }
-
-         previewRobotModel.getRootJoint().setJointPosition(kinematicsToolboxOutputStatus.getDesiredRootTranslation());
-         previewRobotModel.getRootJoint().setJointOrientation(kinematicsToolboxOutputStatus.getDesiredRootOrientation());
       }
    }
+
+
 }
