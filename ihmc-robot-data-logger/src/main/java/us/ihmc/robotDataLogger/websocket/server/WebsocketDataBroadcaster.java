@@ -8,6 +8,9 @@ import java.util.concurrent.locks.LockSupport;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelFutureListener;
+import us.ihmc.robotDataLogger.util.PaddedVolatileBoolean;
+import us.ihmc.robotDataLogger.util.PaddedVolatileLong;
+import us.ihmc.robotDataLogger.util.PaddedVolatileReference;
 import us.ihmc.robotDataLogger.websocket.command.DataServerCommand;
 
 /**
@@ -30,10 +33,11 @@ class WebsocketDataBroadcaster implements ChannelFutureListener
    private final TimestampPublishingThread timestampPublishingThread = new TimestampPublishingThread();
 
    // Implement channels as copy on write array to avoid blocking in the timestamp update thread
-   private volatile WebsocketDataServerFrameHandler[] channels = new WebsocketDataServerFrameHandler[0];
+   
+   private final PaddedVolatileReference<WebsocketDataServerFrameHandler[]> channels = new PaddedVolatileReference<>(new WebsocketDataServerFrameHandler[0]);
 
-   private volatile boolean active = true;
-   private volatile long newTimestamp = Long.MIN_VALUE;
+   private final PaddedVolatileBoolean active = new PaddedVolatileBoolean(true);
+   private final PaddedVolatileLong newTimestamp = new PaddedVolatileLong(Long.MIN_VALUE);
 
    public WebsocketDataBroadcaster()
    {
@@ -45,10 +49,10 @@ class WebsocketDataBroadcaster implements ChannelFutureListener
 
       synchronized (channelLock)
       {
-
-         WebsocketDataServerFrameHandler[] newChannels = Arrays.copyOf(channels, channels.length + 1);
+         
+         WebsocketDataServerFrameHandler[] newChannels = Arrays.copyOf(channels.get(), channels.get().length + 1);
          newChannels[newChannels.length - 1] = websocketLogFrameHandler;
-         channels = newChannels;
+         channels.set(newChannels);
 
          websocketLogFrameHandler.addCloseFutureListener(this);
       }
@@ -57,7 +61,7 @@ class WebsocketDataBroadcaster implements ChannelFutureListener
    public void write(int bufferID, long timestamp, ByteBuffer frame) throws IOException
    {
       // Localize channels
-      WebsocketDataServerFrameHandler[] localChannels = channels;
+      WebsocketDataServerFrameHandler[] localChannels = channels.get();
 
       for (int i = 0; i < localChannels.length; i++)
       {
@@ -74,14 +78,15 @@ class WebsocketDataBroadcaster implements ChannelFutureListener
       synchronized (channelLock)
       {
          Channel channel = future.channel();
-         WebsocketDataServerFrameHandler[] newChannels = new WebsocketDataServerFrameHandler[channels.length - 1];
+         WebsocketDataServerFrameHandler[] oldChannels = channels.get();
+         WebsocketDataServerFrameHandler[] newChannels = new WebsocketDataServerFrameHandler[oldChannels.length - 1];
 
          int newI = 0;
-         for (int i = 0; i < channels.length; i++)
+         for (int i = 0; i < oldChannels.length; i++)
          {
-            if (channels[i].channel() == channel)
+            if (oldChannels[i].channel() == channel)
             {
-               channels[i].release();
+               oldChannels[i].release();
             }
             else
             {
@@ -91,19 +96,19 @@ class WebsocketDataBroadcaster implements ChannelFutureListener
                   return;
                }
 
-               newChannels[newI] = channels[i];
+               newChannels[newI] = oldChannels[i];
                ++newI;
             }
          }
          
-         channels = newChannels;
+         channels.set(newChannels);
       }
    }
 
    public void writeCommand(DataServerCommand command, int argument)
    {
       // Localize channels
-      WebsocketDataServerFrameHandler[] localChannels = channels;
+      WebsocketDataServerFrameHandler[] localChannels = channels.get();
 
       for (int i = 0; i < localChannels.length; i++)
       {
@@ -114,13 +119,13 @@ class WebsocketDataBroadcaster implements ChannelFutureListener
 
    public void publishTimestamp(long timestamp)
    {
-      newTimestamp = timestamp;
+      newTimestamp.set(timestamp);
 
    }
 
    public void stop()
    {
-      active = false;
+      active.set(false);;
    }
 
    /**
@@ -144,16 +149,16 @@ class WebsocketDataBroadcaster implements ChannelFutureListener
       {
          long lastSendTimestamp = Long.MIN_VALUE;
 
-         while (active)
+         while (active.getBoolean())
          {
             // Localize variable so it doesn't change in this thread
-            long newTimestampLocal = newTimestamp;
+            long newTimestampLocal = newTimestamp.getLong();
 
             if (lastSendTimestamp != newTimestampLocal)
             {
 
                // Localize variables
-               WebsocketDataServerFrameHandler[] localChannels = channels;
+               WebsocketDataServerFrameHandler[] localChannels = channels.get();
 
                for (int i = 0; i < localChannels.length; i++)
                {

@@ -100,7 +100,7 @@ class WebsocketRegistryPublisher implements RegistryPublisher
       RegistrySendBuffer buffer = ringBuffer.next();
       if (buffer != null)
       {
-         buffer.updateBufferFromVariables(timestamp, uid, 0, 0, numberOfVariables);
+         buffer.updateBufferFromVariables(timestamp, uid, numberOfVariables);
          ringBuffer.commit();
       }
       else
