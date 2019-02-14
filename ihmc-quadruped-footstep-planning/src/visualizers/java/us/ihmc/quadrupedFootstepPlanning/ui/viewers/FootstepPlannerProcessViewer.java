@@ -10,7 +10,13 @@ import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.messager.Messager;
 import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.communication.FootstepPlannerMessagerAPI;
 import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.graphSearch.QuadrupedFootstepPlannerNodeRejectionReason;
+import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.graphSearch.footstepSnapping.SimplePlanarRegionFootstepNodeSnapper;
+import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.graphSearch.graph.FootstepGraph;
 import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.graphSearch.graph.FootstepNode;
+import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.graphSearch.parameters.DefaultFootstepPlannerParameters;
+import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.graphSearch.parameters.FootstepPlannerParameters;
+import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.graphSearch.stepCost.FootstepCost;
+import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.graphSearch.stepCost.FootstepCostBuilder;
 import us.ihmc.quadrupedFootstepPlanning.ui.SimpleFootstepNode;
 import us.ihmc.quadrupedFootstepPlanning.ui.components.NodeOccupancyMapRenderer;
 import us.ihmc.quadrupedFootstepPlanning.ui.components.NodeOccupancyMapSequenceRenderer;
@@ -19,6 +25,7 @@ import java.util.*;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicReference;
+import java.util.stream.Collectors;
 
 public class FootstepPlannerProcessViewer extends AnimationTimer
 {
@@ -43,12 +50,31 @@ public class FootstepPlannerProcessViewer extends AnimationTimer
    private static final Color currentRejectedCellColor = Color.rgb(255, 0, 0, cellOpacity);
    private static final Color rejectionByReasonColor = Color.rgb(20, 20, 20, cellOpacity);
 
+   private final FootstepCost costCalculator;
+   private final FootstepGraph graph = new FootstepGraph();
+
    public FootstepPlannerProcessViewer(Messager messager)
    {
+      FootstepPlannerParameters parameters = new DefaultFootstepPlannerParameters();
+      SimplePlanarRegionFootstepNodeSnapper snapper = new SimplePlanarRegionFootstepNodeSnapper(parameters);
+
+      FootstepCostBuilder costBuilder = new FootstepCostBuilder();
+      costBuilder.setFootstepPlannerParameters(parameters);
+      costBuilder.setSnapper(snapper);
+      costBuilder.setIncludeHeightCost(true);
+      costBuilder.setIncludePitchAndRollCost(true);
+
+      costCalculator = costBuilder.buildCost();
+
+
+
       allValidNodesRenderer = new NodeOccupancyMapRenderer(messager, executorService);
       allInvalidNodesRenderer = new NodeOccupancyMapRenderer(messager, executorService);
 
       nodeExpansionPlaybackRenderer = new NodeOccupancyMapSequenceRenderer(messager, parentCellColor, currentValidCellColor, currentRejectedCellColor, executorService);
+
+
+
 
       for (QuadrupedFootstepPlannerNodeRejectionReason rejectionReason : QuadrupedFootstepPlannerNodeRejectionReason.values)
       {
@@ -120,6 +146,7 @@ public class FootstepPlannerProcessViewer extends AnimationTimer
       Set<SimpleFootstepNode> validNodesToRender = new HashSet<>();
       Set<SimpleFootstepNode> invalidNodesToRender = new HashSet<>();
       Set<SimpleFootstepNode> parentNodes = new HashSet<>();
+      Set<List<SimpleFootstepNode>> optimalPaths = new HashSet<>();
       for (FootstepNode parentNode : validNodesThisTick.keySet())
       {
          if (parentNode == null)
@@ -131,7 +158,12 @@ public class FootstepPlannerProcessViewer extends AnimationTimer
          for (FootstepNode node : validNodes)
          {
             if (node != null)
+            {
                validNodesToRender.add(new SimpleFootstepNode(node));
+               if (!graph.doesNodeExist(parentNode))
+                  graph.initialize(parentNode);
+               graph.checkAndSetEdge(parentNode, node, costCalculator.compute(parentNode, node));
+            }
          }
          for (FootstepNode node : invalidNodes)
          {
@@ -139,14 +171,17 @@ public class FootstepPlannerProcessViewer extends AnimationTimer
                invalidNodesToRender.add(new SimpleFootstepNode(node));
          }
          parentNodes.add(new SimpleFootstepNode(parentNode));
+
+         List<FootstepNode> pathFromStart = graph.getPathFromStart(parentNode);
+         optimalPaths.add(pathFromStart.stream().map(SimpleFootstepNode::new).collect(Collectors.toList()));
       }
 
       if (validNodesToRender.size() > 0)
          allValidNodesRenderer.processNodesToRenderOnThread(validNodesToRender, validCellColor);
       if (invalidNodesToRender.size() > 0)
          allInvalidNodesRenderer.processNodesToRenderOnThread(invalidNodesToRender, rejectedCellColor);
-      if (parentNodes.size() > 0 && validNodesToRender.size() > 0)
-         nodeExpansionPlaybackRenderer.processNodesToRender(parentNodes, validNodesToRender, invalidNodesToRender);
+      if (parentNodes.size() > 0 && validNodesToRender.size() > 0)// && optimalPaths.size() > 0)
+         nodeExpansionPlaybackRenderer.processNodesToRender(parentNodes, validNodesToRender, invalidNodesToRender, optimalPaths);
    }
 
    private synchronized void handleNodesRejectedThisTick(HashMap<QuadrupedFootstepPlannerNodeRejectionReason, List<FootstepNode>> rejectedNodes)
