@@ -156,6 +156,7 @@ public class BalanceManager
 
    private final InverseDynamicsCommandList inverseDynamicsCommandList = new InverseDynamicsCommandList();
 
+   private final SmoothCMPBasedICPPlanner smoothCMPPlanner;
    private final YoBoolean icpPlannerDone = new YoBoolean("ICPPlannerDone", registry);
 
    public BalanceManager(HighLevelHumanoidControllerToolbox controllerToolbox, WalkingControllerParameters walkingControllerParameters,
@@ -213,11 +214,12 @@ public class BalanceManager
       {
          icpPlanner = new ContinuousCMPBasedICPPlanner(bipedSupportPolygons, contactableFeet, icpPlannerParameters.getNumberOfFootstepsToConsider(),
                                                                            registry, yoGraphicsListRegistry);
+         smoothCMPPlanner = null;
       }
       else
       {
          MomentumTrajectoryHandler momentumTrajectoryHandler = walkingMessageHandler == null ? null : walkingMessageHandler.getMomentumTrajectoryHandler();
-         SmoothCMPBasedICPPlanner smoothCMPPlanner = new SmoothCMPBasedICPPlanner(fullRobotModel, bipedSupportPolygons, contactableFeet, icpPlannerParameters.getNumberOfFootstepsToConsider(),
+         smoothCMPPlanner = new SmoothCMPBasedICPPlanner(fullRobotModel, bipedSupportPolygons, contactableFeet, icpPlannerParameters.getNumberOfFootstepsToConsider(),
                                                                                   momentumTrajectoryHandler, yoTime, registry, yoGraphicsListRegistry, controllerToolbox.getGravityZ());
          smoothCMPPlanner.setDefaultPhaseTimes(walkingControllerParameters.getDefaultSwingTime(), walkingControllerParameters.getDefaultTransferTime());
          icpPlanner = smoothCMPPlanner;
@@ -415,6 +417,14 @@ public class BalanceManager
    {
       icpPlanner.setTransferFromSide(robotSide);
       linearMomentumRateOfChangeControlModule.setTransferFromSide(robotSide);
+   }
+
+   public void endTick()
+   {
+      if (smoothCMPPlanner != null)
+      {
+         smoothCMPPlanner.endTick();
+      }
    }
 
    private final FramePoint3D copEstimate = new FramePoint3D();
