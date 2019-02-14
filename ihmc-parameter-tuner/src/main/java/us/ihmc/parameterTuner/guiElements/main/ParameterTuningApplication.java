@@ -9,6 +9,7 @@ import javafx.scene.Scene;
 import javafx.scene.image.Image;
 import javafx.scene.layout.Pane;
 import javafx.stage.Stage;
+import us.ihmc.parameterTuner.JavaFXExceptionTools;
 import us.ihmc.parameterTuner.guiElements.GuiParameter;
 import us.ihmc.parameterTuner.guiElements.GuiRegistry;
 
@@ -75,6 +76,9 @@ public abstract class ParameterTuningApplication extends Application
       primaryStage.setScene(mainScene);
       primaryStage.setHeight(800.0);
       primaryStage.setWidth(1400.0);
+
+      JavaFXExceptionTools.setupExceptionHandling();
+
       primaryStage.show();
    }
 
