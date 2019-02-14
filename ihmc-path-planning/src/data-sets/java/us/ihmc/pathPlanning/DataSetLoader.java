@@ -4,11 +4,12 @@ import org.apache.commons.io.IOUtils;
 import us.ihmc.robotics.PlanarRegionFileTools;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
+import java.io.*;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.function.Predicate;
 
@@ -16,7 +17,9 @@ import static java.nio.charset.StandardCharsets.UTF_8;
 
 public class DataSetLoader
 {
-   static final String DATA_SET_DIRECTORY_PATH = "us/ihmc/pathPlanning/dataSets";
+   public static final String RESOURCES_DIRECTORY = "ihmc-open-robotics-software/ihmc-path-planning/src/data-sets/resources";
+   public static final String DATA_SET_DIRECTORY_PATH = "us/ihmc/pathPlanning/dataSets";
+
    private static final String DATA_SET_LIST_FILENAME = "DataSetList.txt";
    private static final String PLANAR_REGIONS_DIRECTORY = "PlanarRegions";
    private static final String PLANNER_INPUTS_FILENAME = "PlannerInputs.txt";
@@ -36,7 +39,7 @@ public class DataSetLoader
       {
          dataSetNamesList = IOUtils.readLines(dataSetList, UTF_8);
       }
-      catch(IOException e)
+      catch (IOException e)
       {
          throw new RuntimeException("Unable to read dataset names list. expected filename: " + DATA_SET_LIST_FILENAME);
       }
@@ -63,14 +66,14 @@ public class DataSetLoader
       DataSet dataSet = new DataSet(dataSetName, planarRegionsList);
       InputStream plannerInputsStream = loadingClass.getClassLoader()
                                                     .getResourceAsStream(DATA_SET_DIRECTORY_PATH + "/" + dataSetName + "/" + PLANNER_INPUTS_FILENAME);
-      if(plannerInputsStream != null)
+      if (plannerInputsStream != null)
       {
          try
          {
             PlannerInput plannerInput = loadPlannerInputs(plannerInputsStream);
             dataSet.setPlannerInput(plannerInput);
          }
-         catch(IOException e)
+         catch (IOException e)
          {
             System.err.println("Unable to read planner inputs for dataset: " + dataSetName);
             return null;
@@ -87,9 +90,9 @@ public class DataSetLoader
       String line;
       PlannerInput plannerInput = new PlannerInput();
 
-      while((line = reader.readLine()) != null)
+      while ((line = reader.readLine()) != null)
       {
-         if(line.equals(""))
+         if (line.equals(""))
             continue;
 
          String[] lineSubstrings = line.split(" ");
@@ -117,7 +120,7 @@ public class DataSetLoader
          }
          default:
          {
-            if(lineSubstrings.length > 1)
+            if (lineSubstrings.length > 1)
             {
                for (int i = 1; i < lineSubstrings.length; i++)
                {
@@ -130,5 +133,80 @@ public class DataSetLoader
       }
 
       return plannerInput;
+   }
+
+   public static boolean exportDataSet(DataSet dataSet)
+   {
+      String exportDirectory = RESOURCES_DIRECTORY.replace('/', File.separatorChar) + File.separator + DATA_SET_DIRECTORY_PATH.replace('/', File.separatorChar);
+      return exportDataSet(exportDirectory, dataSet);
+   }
+
+   public static boolean exportDataSet(String exportDirectory, DataSet dataSet)
+   {
+      try
+      {
+         String dataSetPath = exportDirectory + File.separator + dataSet.getName();
+         File dataSetFile = new File(dataSetPath);
+         if (dataSetFile.exists())
+         {
+            System.err.println("Unable to export dataset, file already exists");
+            return false;
+         }
+
+         Files.createDirectories(new File(dataSetPath).toPath());
+
+         Path planarRegionsPath = new File(dataSetPath + File.separator + PLANAR_REGIONS_DIRECTORY).toPath();
+         Files.createDirectories(planarRegionsPath);
+         PlanarRegionFileTools.exportPlanarRegionData(planarRegionsPath, dataSet.getPlanarRegionsList());
+
+         if(!dataSet.hasPlannerInput())
+            return true;
+
+         File plannerInputsFile = new File(dataSetPath + File.separator + PLANNER_INPUTS_FILENAME);
+         plannerInputsFile.createNewFile();
+         exportPlannerInputs(plannerInputsFile, dataSet.getPlannerInput());
+
+         return true;
+      }
+      catch (IOException e)
+      {
+         e.printStackTrace();
+         return false;
+      }
+   }
+
+   private static void exportPlannerInputs(File file, PlannerInput plannerInput) throws IOException
+   {
+      FileWriter fileWriter = new FileWriter(file);
+
+      fileWriter.write("startPosition " + plannerInput.getStartPosition().getX() + " " + plannerInput.getStartPosition().getY() + " " + plannerInput.getStartPosition().getZ());
+      fileWriter.write("\n");
+
+      fileWriter.write("goalPosition " + plannerInput.getGoalPosition().getX() + " " + plannerInput.getGoalPosition().getY() + " " + plannerInput.getGoalPosition().getZ());
+      fileWriter.write("\n");
+
+      fileWriter.write("startYaw " + plannerInput.getStartYaw());
+      fileWriter.write("\n");
+
+      fileWriter.write("goalYaw " + plannerInput.getGoalYaw());
+      fileWriter.write("\n");
+
+      HashMap<String, List<String>> additionalDataMap = plannerInput.getAdditionDataMap();
+      for(String key : additionalDataMap.keySet())
+      {
+         StringBuilder stringBuilder = new StringBuilder();
+         stringBuilder.append(key + " ");
+
+         for(String value : additionalDataMap.get(key))
+         {
+            stringBuilder.append(value + " ");
+         }
+
+         fileWriter.write(stringBuilder.toString());
+         fileWriter.write("\n");
+      }
+
+      fileWriter.flush();
+      fileWriter.close();
    }
 }

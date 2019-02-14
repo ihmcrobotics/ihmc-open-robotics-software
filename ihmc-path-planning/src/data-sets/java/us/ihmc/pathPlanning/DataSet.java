@@ -11,7 +11,7 @@ public class DataSet
    private final PlanarRegionsList planarRegionsList;
    private PlannerInput plannerInput = null;
 
-   DataSet(String name, PlanarRegionsList planarRegionsList)
+   public DataSet(String name, PlanarRegionsList planarRegionsList)
    {
       this.name = name;
       this.planarRegionsList = planarRegionsList;
@@ -37,7 +37,7 @@ public class DataSet
       return plannerInput;
    }
 
-   void setPlannerInput(PlannerInput plannerInput)
+   public void setPlannerInput(PlannerInput plannerInput)
    {
       this.plannerInput = plannerInput;
    }
