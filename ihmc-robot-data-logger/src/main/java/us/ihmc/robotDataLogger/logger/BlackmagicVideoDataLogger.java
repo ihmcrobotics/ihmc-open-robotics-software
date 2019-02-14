@@ -27,6 +27,8 @@ public class BlackmagicVideoDataLogger extends VideoDataLoggerInterface implemen
    private FileWriter timestampWriter;
    
    private int frame;
+   
+   private volatile long lastFrameTimestamp = 0;
 
    public BlackmagicVideoDataLogger(String name, File logPath, LogProperties logProperties, int decklinkID, YoVariableLoggerOptions options) throws IOException
    {
@@ -157,6 +159,8 @@ public class BlackmagicVideoDataLogger extends VideoDataLoggerInterface implemen
                timestampWriter.write(timeScaleDenumerator + "\n");
             }
             timestampWriter.write(robotTimestamp + " " + pts + "\n");
+            
+            lastFrameTimestamp = System.nanoTime();
          }
          catch (IOException e)
          {
@@ -165,6 +169,12 @@ public class BlackmagicVideoDataLogger extends VideoDataLoggerInterface implemen
          ++frame;
       }
       
+   }
+
+   @Override
+   public long getLastFrameReceivedTimestamp()
+   {
+      return lastFrameTimestamp;
    }
 
 

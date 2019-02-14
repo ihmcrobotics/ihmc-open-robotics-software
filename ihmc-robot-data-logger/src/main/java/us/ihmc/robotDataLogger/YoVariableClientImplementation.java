@@ -262,4 +262,17 @@ public class YoVariableClientImplementation implements YoVariableClientInterface
    {
       return dataConsumer.isSessionActive();
    }
+
+   @Override
+   public void sendCommand(DataServerCommand command, int argument)
+   {
+      try
+      {
+         dataConsumer.sendCommand(command, argument);
+      }
+      catch (IOException e)
+      {
+         e.printStackTrace();
+      }
+   }
 }
