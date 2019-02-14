@@ -10,7 +10,7 @@ import java.util.stream.Collectors;
 
 import org.junit.jupiter.api.AfterEach;
 import us.ihmc.pathPlanning.DataSet;
-import us.ihmc.pathPlanning.DataSetLoader;
+import us.ihmc.pathPlanning.DataSetIOTools;
 import us.ihmc.pathPlanning.PlannerInput;
 import us.ihmc.robotics.Assert;
 import org.junit.jupiter.api.BeforeEach;
@@ -20,8 +20,6 @@ import org.junit.jupiter.api.Test;
 import javafx.util.Pair;
 import us.ihmc.commons.MathTools;
 import us.ihmc.commons.thread.ThreadTools;
-import org.junit.jupiter.api.Tag;
-import org.junit.jupiter.api.Disabled;
 import us.ihmc.commons.ContinuousIntegrationTools;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.geometry.LineSegment3D;
@@ -40,8 +38,6 @@ import us.ihmc.log.LogTools;
 import us.ihmc.pathPlanning.visibilityGraphs.interfaces.VisibilityGraphsParameters;
 import us.ihmc.pathPlanning.visibilityGraphs.tools.PlanarRegionTools;
 import us.ihmc.pathPlanning.visibilityGraphs.tools.VisibilityGraphsIOTools;
-import us.ihmc.pathPlanning.visibilityGraphs.tools.VisibilityGraphsIOTools.VisibilityGraphsUnitTestDataset;
-import us.ihmc.pathPlanning.visibilityGraphs.ui.VisibilityGraphsDataExporter;
 import us.ihmc.pathPlanning.visibilityGraphs.ui.messager.UIVisibilityGraphsTopics;
 import us.ihmc.robotEnvironmentAwareness.geometry.ConcaveHullDecomposition;
 import us.ihmc.robotics.geometry.PlanarRegion;
@@ -146,7 +142,7 @@ public class VisibilityGraphsFrameworkTest
 
    private void runAssertionsOnAllDatasets(Function<DataSet, String> dataSetTester) throws Exception
    {
-      List<DataSet> allDatasets = DataSetLoader.loadDataSets(dataSet ->
+      List<DataSet> allDatasets = DataSetIOTools.loadDataSets(dataSet ->
                                                              {
                                                                 if(!dataSet.hasPlannerInput())
                                                                    return false;
@@ -273,7 +269,7 @@ public class VisibilityGraphsFrameworkTest
 
    private void runAssertionsOnDataset(Function<DataSet, String> dataSetTester, String datasetname)
    {
-      List<DataSet> allDatasets = DataSetLoader.loadDataSets();
+      List<DataSet> allDatasets = DataSetIOTools.loadDataSets();
 
       if (DEBUG)
       {

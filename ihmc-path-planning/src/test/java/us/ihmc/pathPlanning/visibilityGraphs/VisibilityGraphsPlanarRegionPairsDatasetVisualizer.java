@@ -1,7 +1,5 @@
 package us.ihmc.pathPlanning.visibilityGraphs;
 
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
 
@@ -10,14 +8,11 @@ import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.javaFXToolkit.messager.SharedMemoryJavaFXMessager;
 import us.ihmc.log.LogTools;
 import us.ihmc.pathPlanning.DataSet;
-import us.ihmc.pathPlanning.DataSetLoader;
+import us.ihmc.pathPlanning.DataSetIOTools;
 import us.ihmc.pathPlanning.PlannerInput;
 import us.ihmc.pathPlanning.visibilityGraphs.clusterManagement.Cluster;
 import us.ihmc.pathPlanning.visibilityGraphs.dataStructure.NavigableRegion;
 import us.ihmc.pathPlanning.visibilityGraphs.dataStructure.VisibilityMapSolution;
-import us.ihmc.pathPlanning.visibilityGraphs.tools.VisibilityGraphsIOTools;
-import us.ihmc.pathPlanning.visibilityGraphs.tools.VisibilityGraphsIOTools.VisibilityGraphsUnitTestDataset;
-import us.ihmc.pathPlanning.visibilityGraphs.ui.VisibilityGraphsDataExporter;
 import us.ihmc.pathPlanning.visibilityGraphs.ui.messager.UIVisibilityGraphsTopics;
 import us.ihmc.robotics.PlanarRegionFileTools;
 import us.ihmc.robotics.geometry.PlanarRegion;
@@ -35,7 +30,7 @@ public class VisibilityGraphsPlanarRegionPairsDatasetVisualizer
 
    public static void openResourceAndVisualizePairs(String dataSetName)
    {
-      DataSet dataSet = DataSetLoader.loadDataSet(dataSetName);
+      DataSet dataSet = DataSetIOTools.loadDataSet(dataSetName);
       String datasetName = dataSet.getName();
       LogTools.info("Loaded " + datasetName);
 
@@ -215,7 +210,7 @@ public class VisibilityGraphsPlanarRegionPairsDatasetVisualizer
       plannerInput.setStartPosition(start);
       plannerInput.setGoalPosition(goal);
       dataSet.setPlannerInput(plannerInput);
-      DataSetLoader.exportDataSet(dataSet);
+      DataSetIOTools.exportDataSet(dataSet);
    }
 
    public static void main(String[] args)

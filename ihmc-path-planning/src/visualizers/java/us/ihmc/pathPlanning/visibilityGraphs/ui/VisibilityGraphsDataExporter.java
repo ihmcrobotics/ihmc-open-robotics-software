@@ -3,7 +3,7 @@ package us.ihmc.pathPlanning.visibilityGraphs.ui;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.messager.Messager;
 import us.ihmc.pathPlanning.DataSet;
-import us.ihmc.pathPlanning.DataSetLoader;
+import us.ihmc.pathPlanning.DataSetIOTools;
 import us.ihmc.pathPlanning.PlannerInput;
 import us.ihmc.pathPlanning.visibilityGraphs.ui.messager.UIVisibilityGraphsTopics;
 import us.ihmc.robotEnvironmentAwareness.tools.ExecutorServiceTools;
@@ -47,7 +47,7 @@ public class VisibilityGraphsDataExporter
       plannerInput.setGoalPosition(goal);
       dataSet.setPlannerInput(plannerInput);
 
-      DataSetLoader.exportDataSet(dataDirectoryPath.get(), dataSet);
+      DataSetIOTools.exportDataSet(dataDirectoryPath.get(), dataSet);
    }
 
    public void stop()

@@ -1,8 +1,6 @@
 package us.ihmc.pathPlanning.visibilityGraphs.ui.controllers;
 
 import java.io.File;
-import java.net.URISyntaxException;
-import java.net.URL;
 
 import javafx.application.Platform;
 import javafx.fxml.FXML;
@@ -10,10 +8,7 @@ import javafx.scene.control.TextField;
 import javafx.stage.DirectoryChooser;
 import javafx.stage.Window;
 import us.ihmc.javaFXToolkit.messager.JavaFXMessager;
-import us.ihmc.log.LogTools;
-import us.ihmc.pathPlanning.DataSet;
-import us.ihmc.pathPlanning.DataSetLoader;
-import us.ihmc.pathPlanning.visibilityGraphs.tools.VisibilityGraphsIOTools;
+import us.ihmc.pathPlanning.DataSetIOTools;
 import us.ihmc.pathPlanning.visibilityGraphs.ui.messager.UIVisibilityGraphsTopics;
 
 public class VisibilityGraphsDataExporterAnchorPaneController
@@ -28,7 +23,7 @@ public class VisibilityGraphsDataExporterAnchorPaneController
 
    public VisibilityGraphsDataExporterAnchorPaneController()
    {
-      this.defaultDataFolder = new File(DataSetLoader.RESOURCES_DIRECTORY + File.separator + DataSetLoader.DATA_SET_DIRECTORY_PATH);
+      this.defaultDataFolder = new File(DataSetIOTools.RESOURCES_DIRECTORY + File.separator + DataSetIOTools.DATA_SET_DIRECTORY_PATH);
    }
 
    public void setMainWindow(Window ownerWindow)
