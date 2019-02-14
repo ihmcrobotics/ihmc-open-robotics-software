@@ -1,6 +1,7 @@
 startPosition -1.758328852831343 -0.17956084255495805 -0.0316614212211838
 goalPosition 2.0 1.969615506024416 0.3472963553338607
 testVisGraph true
+testStepPlanners true
 planar_region_bipedal_timeout 5.0
 plan_then_snap_timeout 10.0
 a_star_timeout 10.0
