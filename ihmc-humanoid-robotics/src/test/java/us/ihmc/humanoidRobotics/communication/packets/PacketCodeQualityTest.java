@@ -23,6 +23,7 @@ import java.util.stream.Collectors;
 import controller_msgs.msg.dds.*;
 import org.apache.commons.lang3.StringUtils;
 import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.reflections.Reflections;
 
@@ -595,6 +596,7 @@ public class PacketCodeQualityTest
    }
 
    @SuppressWarnings("rawtypes")
+   @Disabled
    @Test
    public void testPacketByteFieldNameRefersToEnumType() throws NoSuchFieldException, SecurityException
    {
@@ -676,6 +678,7 @@ public class PacketCodeQualityTest
    }
 
    @SuppressWarnings("rawtypes")
+   @Disabled
    @Test
    public void testPacketWithByteFieldDeclareEnumValuesAsStaticByteFields() throws NoSuchFieldException, SecurityException
    {
