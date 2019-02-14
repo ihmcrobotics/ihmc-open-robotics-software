@@ -35,7 +35,14 @@ public class FootstepPathMeshViewer extends AnimationTimer
    private final Group root = new Group();
    private final ExecutorService executorService = Executors.newSingleThreadExecutor(ThreadTools.getNamedThreadFactory(getClass().getSimpleName()));
 
-   private final AtomicReference<Boolean> showSolution;
+   private final AtomicBoolean showingSolution = new AtomicBoolean(false);
+   private final AtomicBoolean showSolution = new AtomicBoolean(true);
+   private final AtomicBoolean clearSolution = new AtomicBoolean(false);
+
+   private final AtomicBoolean showingPreviewSteps = new AtomicBoolean(false);
+   private final AtomicBoolean showPreviewSteps = new AtomicBoolean(false);
+   private final AtomicBoolean clearPreviewSteps = new AtomicBoolean(false);
+
    private final AtomicBoolean solutionWasReceived = new AtomicBoolean(false);
    private final AtomicBoolean reset = new AtomicBoolean(false);
 
@@ -50,8 +57,12 @@ public class FootstepPathMeshViewer extends AnimationTimer
    public static final QuadrantDependentList<Color> solutionFootstepColors = new QuadrantDependentList<>(Color.GREEN, Color.RED, Color.DARKGREEN, Color.DARKRED);
    private static final QuadrantDependentList<Color> intermediateFootstepColors = new QuadrantDependentList<>(Color.rgb(160, 160, 160), Color.rgb(160, 160, 160), Color.rgb(160, 160, 160), Color.rgb(160, 160, 160));
 
+   private final Messager messager;
+
    public FootstepPathMeshViewer(Messager messager)
    {
+      this.messager = messager;
+
       messager.registerTopicListener(FootstepPlannerMessagerAPI.FootstepPlanTopic, footstepPlan -> executorService.submit(() -> {
          solutionWasReceived.set(true);
          processFootstepPath(footstepPlan);
@@ -67,17 +78,33 @@ public class FootstepPathMeshViewer extends AnimationTimer
 
          previewFootstepPositions.put(robotQuadrant, position);
          footstepPreviewSpheres.put(robotQuadrant, previewSphere);
-//         root.getChildren().add(previewSphere);
+         root.getChildren().add(previewSphere);
       }
 
       messager.registerTopicListener(FootstepPlannerMessagerAPI.ComputePathTopic, data -> reset.set(true));
-
-      showSolution = messager.createInput(FootstepPlannerMessagerAPI.ShowFootstepPlanTopic, true);
+      messager.registerTopicListener(FootstepPlannerMessagerAPI.ShowFootstepPlanTopic, this::handleShowSolution);
+      messager.registerTopicListener(FootstepPlannerMessagerAPI.ShowFootstepPreviewTopic, this::handleShowPreview);
    }
 
    public QuadrantDependentList<Point3D> getPreviewFootstepPositions()
    {
       return previewFootstepPositions;
+   }
+
+   private void handleShowSolution(boolean show)
+   {
+      showSolution.set(show);
+      if (show)
+         messager.submitMessage(FootstepPlannerMessagerAPI.ShowFootstepPreviewTopic, false);
+      else
+         clearSolution.set(true);
+   }
+
+   private void handleShowPreview(boolean show)
+   {
+      showPreviewSteps.set(show);
+      if (show)
+         messager.submitMessage(FootstepPlannerMessagerAPI.ShowFootstepPlanTopic, false);
    }
 
 
@@ -105,19 +132,39 @@ public class FootstepPathMeshViewer extends AnimationTimer
    @Override
    public void handle(long now)
    {
-      boolean addFinalPlan = showSolution.get() && solutionWasReceived.get() && root.getChildren().isEmpty();
-      if (addFinalPlan)
+      boolean addSolution = showSolution.get() && solutionWasReceived.get() && !showingSolution.get();
+      if (addSolution)
+      {
+         showingSolution.set(true);
          root.getChildren().add(footstepPathMeshView);
+      }
 
-      boolean removeFinalPlan = !showSolution.get() && solutionWasReceived.get() && !root.getChildren().isEmpty();
-      if (removeFinalPlan)
+      boolean addPreviewSteps = showPreviewSteps.get() && !showingPreviewSteps.get();
+      if (addPreviewSteps)
+      {
+         showingPreviewSteps.set(true);
+         for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
+            root.getChildren().add(footstepPreviewSpheres.get(robotQuadrant));
+      }
+
+      boolean removeSolution = !showSolution.get() && solutionWasReceived.get() && clearSolution.get() && showingSolution.get();
+      boolean removePreview = !showPreviewSteps.get() && clearPreviewSteps.get() && showingPreviewSteps.get();
+      if (removeSolution || removePreview)
+      {
+         showingSolution.set(false);
+         showingPreviewSteps.set(false);
+         clearSolution.set(false);
+         clearPreviewSteps.set(false);
          root.getChildren().clear();
+      }
 
       if (reset.getAndSet(false))
       {
          footstepPathMeshView.setMesh(null);
          footstepPathMeshView.setMaterial(null);
          meshReference.set(null);
+         for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
+            previewFootstepPositions.get(robotQuadrant).setToNaN();
          return;
       }
 
@@ -134,7 +181,7 @@ public class FootstepPathMeshViewer extends AnimationTimer
          Point3DReadOnly position = previewFootstepPositions.get(robotQuadrant);
          previewSphere.setTranslateX(position.getX());
          previewSphere.setTranslateY(position.getY());
-         previewSphere.setTranslateZ(position.getZ() + zOffset);
+         previewSphere.setTranslateZ(position.getZ() + 2 * zOffset);
       }
    }
 

@@ -66,6 +66,8 @@ public class QuadrupedAStarFootstepPlanner implements QuadrupedBodyPathAndFootst
 
    private HashSet<FootstepNode> expandedNodes;
    private PriorityQueue<FootstepNode> stack;
+   private FramePose3DReadOnly startPose;
+   private FramePose3DReadOnly goalPose;
    private FootstepNode startNode;
    private FootstepNode goalNode;
    private FootstepNode endNode;
@@ -146,6 +148,8 @@ public class QuadrupedAStarFootstepPlanner implements QuadrupedBodyPathAndFootst
    {
       checkGoalType(start);
 
+      startPose = start.getTargetPose();
+
       startNode = getNodeFromTarget(start);
       QuadrantDependentList<RigidBodyTransform> startNodeSnapTransforms = new QuadrantDependentList<>();
 
@@ -183,6 +187,8 @@ public class QuadrupedAStarFootstepPlanner implements QuadrupedBodyPathAndFootst
    public void setGoal(QuadrupedFootstepPlannerGoal goal)
    {
       checkGoalType(goal);
+
+      goalPose = goal.getTargetPose();
 
       goalNode = getNodeFromTarget(goal);
 
@@ -289,6 +295,9 @@ public class QuadrupedAStarFootstepPlanner implements QuadrupedBodyPathAndFootst
          return null;
 
       FootstepPlan plan = new FootstepPlan();
+
+      plan.setStartPose(startPose);
+      plan.setGoalPose(goalPose);
 
       List<FootstepNode> path = graph.getPathFromStart(endNode);
       addGoalNodesToEnd(path);

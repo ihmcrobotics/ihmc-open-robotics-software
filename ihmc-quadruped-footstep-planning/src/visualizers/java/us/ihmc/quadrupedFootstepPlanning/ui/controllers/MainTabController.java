@@ -191,7 +191,6 @@ public class MainTabController
    private JavaFXMessager messager;
 
    private AtomicReference<Integer> currentPlannerRequestId;
-//   private AnimationTimer robotPoseHandler;
    private FootstepPlanPreviewPlaybackManager footstepPlanPreviewPlaybackManager;
    private QuadrupedReferenceFrames quadrupedReferenceFrames;
    private AtomicReference<FootstepPlan> footstepPlanReference;
@@ -201,8 +200,6 @@ public class MainTabController
 
    private final YawProperty startRotationProperty = new YawProperty(this, "startRotationProperty", 0.0);
    private final YawProperty goalRotationProperty = new YawProperty(this, "goalRotationProperty", 0.0);
-
-   private final AtomicInteger walkingPreviewRequestId = new AtomicInteger(0);
 
    public void attachMessager(JavaFXMessager messager)
    {
@@ -341,6 +338,7 @@ public class MainTabController
    private void playFootstepPlanPreview()
    {
       footstepPlanPreviewPlaybackManager.start();
+      messager.submitMessage(FootstepPlannerMessagerAPI.ShowFootstepPreviewTopic, true);
    }
 
    @FXML
@@ -353,7 +351,10 @@ public class MainTabController
    private void stopFootstepPlanPreview()
    {
       footstepPlanPreviewPlaybackManager.stop();
+      messager.submitMessage(FootstepPlannerMessagerAPI.ShowFootstepPreviewTopic, false);
+      messager.submitMessage(FootstepPlannerMessagerAPI.ShowFootstepPlanTopic, true);
    }
+
 
    public void setFullRobotModel(FullQuadrupedRobotModel fullQuadrupedRobotModel)
    {
@@ -495,7 +496,6 @@ public class MainTabController
 
          footPositionScene.clear();
 
-         // TODO
          PoseReferenceFrame xGaitFrame = new PoseReferenceFrame("xGaitFrame", ReferenceFrame.getWorldFrame());
          xGaitFrame.setPoseAndUpdate(footstepPlan.getStartPose());
 

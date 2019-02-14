@@ -30,6 +30,8 @@ public class QuadrupedAStarFootstepPlannerDataSetTest extends FootstepPlannerDat
       QuadrupedXGaitSettings settings = new QuadrupedXGaitSettings();
       settings.setStanceLength(1.0);
       settings.setStanceWidth(0.5);
+      settings.setEndDoubleSupportDuration(0.25);
+      settings.setStepDuration(0.5);
       return settings;
    }
 
