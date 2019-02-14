@@ -318,6 +318,7 @@ public class MainTabController
       startRotationProperty.set(new Quaternion(startPose.getYaw(), 0.0, 0.0));
    }
 
+   /*
    @FXML
    private void requestWalkingPreview()
    {
@@ -334,6 +335,7 @@ public class MainTabController
 //      requestMessage.footsteps_.set(FootstepDataMessageConverter.createFootstepDataListFromPlan(footstepPlan, swingTime, transferTime, ExecutionMode.OVERRIDE));
 //      messager.submitMessage(FootstepPlannerMessagerAPI.RequestWalkingPreview, requestMessage);
    }
+   */
 
    @FXML
    private void playFootstepPlanPreview()
