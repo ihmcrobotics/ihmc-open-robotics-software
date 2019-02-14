@@ -1,10 +1,8 @@
 package us.ihmc.robotDataLogger.websocket.command;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
@@ -12,7 +10,7 @@ import io.netty.util.CharsetUtil;
 
 public class DataServerCommandTest
 {
-   @Test(timeout = 30000)
+   @Test
    public void testStartsWith()
    {
       ByteBuf str = Unpooled.copiedBuffer("CLEAR_LOG", CharsetUtil.UTF_8);
@@ -33,7 +31,7 @@ public class DataServerCommandTest
       assertFalse(DataServerCommand.CLEAR_LOG.startsWith(str));
    }
    
-   @Test(timeout = 3000)
+   @Test
    public void testGetBytes()
    {
       ByteBuf target = Unpooled.buffer(DataServerCommand.MaxCommandSize());
