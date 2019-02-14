@@ -35,6 +35,7 @@ import us.ihmc.quadrupedBasics.referenceFrames.QuadrupedReferenceFrames;
 import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.FootstepPlan;
 import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.FootstepPlannerType;
 import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.communication.FootstepPlannerMessagerAPI;
+import us.ihmc.quadrupedFootstepPlanning.ui.viewers.FootstepPlannerProcessViewer;
 import us.ihmc.quadrupedPlanning.QuadrupedXGaitSettingsReadOnly;
 import us.ihmc.quadrupedRobotics.estimator.GroundPlaneEstimator;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
@@ -45,6 +46,7 @@ import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 import us.ihmc.robotics.robotSide.QuadrantDependentList;
 import us.ihmc.robotics.robotSide.RobotQuadrant;
+import us.ihmc.robotics.time.TimeInterval;
 import us.ihmc.robotics.time.TimeIntervalTools;
 
 import java.util.ArrayList;
@@ -285,7 +287,10 @@ public class MainTabController
 
       messager.registerTopicListener(FootstepPlannerMessagerAPI.GlobalResetTopic, reset -> clearStartGoalTextFields());
 
-//      walkingPreviewPlaybackManager = new WalkingPreviewPlaybackManager(messager);
+      messager.bindBidirectional(FootstepPlannerMessagerAPI.PlannerPlaybackFractionTopic, previewSlider.valueProperty(), false);
+
+      //      walkingPreviewPlaybackManager = new WalkingPreviewPlaybackManager(messager);
+      footstepPlanPreviewPlaybackManager = new FootstepPlanPreviewPlaybackManager(messager);
       previewSlider.valueProperty()
                    .addListener((observable, oldValue, newValue) -> footstepPlanPreviewPlaybackManager.requestSpecificPercentageInPreview(newValue.doubleValue()));
    }
@@ -509,7 +514,21 @@ public class MainTabController
          double time = startTime;
          while (time <= endTime)
          {
-            // FIXME finish
+            // copy the previous positions
+            currentFootstepPositions = new QuadrantDependentList<>(currentFootstepPositions);
+
+            // handle steps just completed
+            List<QuadrupedTimedStep> stepsFinished = TimeIntervalTools.removeAndReturnEndTimesLessThan(time, steps);
+            for (QuadrupedTimedStep stepFinished : stepsFinished)
+               currentFootstepPositions.put(stepFinished.getRobotQuadrant(), stepFinished.getGoalPosition());
+
+            // remove steps in progress
+            List<QuadrupedTimedStep> currentSteps = TimeIntervalTools.getIntervalsContainingTime(time, steps);
+            for (QuadrupedTimedStep currentStep : currentSteps)
+               currentFootstepPositions.put(currentStep.getRobotQuadrant(), null);
+
+            footPositionScene.add(currentFootstepPositions);
+
             time += frameDt;
          }
       }
