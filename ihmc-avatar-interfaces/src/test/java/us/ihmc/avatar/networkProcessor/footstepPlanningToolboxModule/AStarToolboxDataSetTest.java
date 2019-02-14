@@ -30,7 +30,6 @@ public class AStarToolboxDataSetTest extends FootstepPlannerToolboxDataSetTest
       super.testDatasetsWithoutOcclusion();
    }
 
-
    public static void main(String[] args) throws Exception
    {
       AStarToolboxDataSetTest test = new AStarToolboxDataSetTest();
@@ -39,7 +38,7 @@ public class AStarToolboxDataSetTest extends FootstepPlannerToolboxDataSetTest
       test.pubSubImplementation = DomainFactory.PubSubImplementation.INTRAPROCESS;
       VISUALIZE = true;
       test.setup();
-      test.runAssertionsOnDataset(dataset -> test.runAssertions(dataset), prefix + "20171218_204917_FlatGround");
+      test.runAssertionsOnDataset(dataset -> test.runAssertions(dataset), "20171218_204917_FlatGround");
 
       ThreadTools.sleepForever();
       test.tearDown();

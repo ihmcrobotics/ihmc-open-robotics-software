@@ -11,8 +11,8 @@ public class PlannerInput
 {
    private Point3D startPosition = new Point3D();
    private Point3D goalPosition = new Point3D();
-   private double startYaw = 0.0;
-   private double goalYaw = 0.0;
+   private double startYaw = Double.NaN;
+   private double goalYaw = Double.NaN;
    private HashMap<String, List<String>> additionalData = new HashMap<>();
 
    public Point3D getStartPosition()
@@ -83,6 +83,16 @@ public class PlannerInput
    public boolean getBooleanFlag(String key)
    {
       return additionalData.containsKey(key) && additionalData.get(key).get(0).equals("true");
+   }
+
+   public boolean hasStartOrientation()
+   {
+      return !Double.isNaN(startYaw);
+   }
+
+   public boolean hasGoalOrientation()
+   {
+      return !Double.isNaN(goalYaw);
    }
 
    /* package-private */
