@@ -426,6 +426,23 @@ public class SmoothCMPBasedICPPlanner extends AbstractICPPlanner
       yoSingleSupportFinalCoM.set(singleSupportFinalCoM);
    }
 
+   @Override
+   public void updateCurrentPlan()
+   {
+      if (isInStanding() && !doContinuousReplanningForStanding.getValue())
+      {
+         updateTransferPlan(true);
+      }
+      else if (isInDoubleSupport() && !isInStanding() && !doContinuousReplanningForTransfer.getValue())
+      {
+         updateTransferPlan(true);
+      }
+      else if (!isInDoubleSupport() && !doContinuousReplanningForSwing.getValue())
+      {
+         updateSingleSupportPlan(true);
+      }
+   }
+
    /** {@inheritDoc} */
    @Override
    protected void updateTransferPlan(boolean maintainContinuity)
