@@ -120,51 +120,45 @@ public class DatasetNavigationAccordionController
    @FXML
    private void requestNewVisualizerData(MouseEvent event)
    {
-      requestNewData(visualizerDataListView, VisibilityGraphsIOTools.PLANAR_REGION_DATA_URL, event);
+      requestNewData(visualizerDataListView, event);
    }
 
    @FXML
    private void requestNewTestData(MouseEvent event)
    {
-      requestNewData(testDataListView, VisibilityGraphsIOTools.TEST_DATA_URL, event);
+      requestNewData(testDataListView, event);
    }
 
    @FXML
    private void requestNewInDevelopmentTestData(MouseEvent event)
    {
-      requestNewData(inDevelopmentTestDataListView, VisibilityGraphsIOTools.IN_DEVELOLOPMENT_TEST_DATA_URL, event);
+      requestNewData(inDevelopmentTestDataListView, event);
    }
 
    @FXML
    private void requestNewCustomData(MouseEvent event)
    {
-      requestNewData(customDataListView, "", event);
+      requestNewData(customDataListView, event);
    }
 
-   private void requestNewData(ListView<String> listViewOwner, String datasetResourceName, MouseEvent event)
+   private void requestNewData(ListView<String> listViewOwner, MouseEvent event)
    {
-      if (datasetResourceName == null)
-         return;
       if (!hasListViewCellBeenDoubleClicked(event))
          return;
 
-      String filename = listViewOwner.getSelectionModel().getSelectedItem();
-      String selectedDatasetResource = datasetResourceName + "/" + filename;
-      File file = PlanarRegionFileTools.getResourceFile(selectedDatasetResource);
+      String dataSetName = listViewOwner.getSelectionModel().getSelectedItem();
+      DataSet dataSet = DataSetLoader.loadDataSet(dataSetName);
 
-      if (VisibilityGraphsIOTools.isVisibilityGraphsDataset(file))
+      messager.submitMessage(UIVisibilityGraphsTopics.GlobalReset, true);
+      messager.submitMessage(UIVisibilityGraphsTopics.PlanarRegionData, dataSet.getPlanarRegionsList());
+
+      if(dataSet.hasPlannerInput())
       {
-         VisibilityGraphsUnitTestDataset dataset = VisibilityGraphsIOTools.loadDataset(getClass(), selectedDatasetResource);
-         messager.submitMessage(UIVisibilityGraphsTopics.GlobalReset, true);
-         messager.submitMessage(UIVisibilityGraphsTopics.PlanarRegionData, dataset.getPlanarRegionsList());
-         messager.submitMessage(UIVisibilityGraphsTopics.StartPosition, dataset.getStart());
-         messager.submitMessage(UIVisibilityGraphsTopics.GoalPosition, dataset.getGoal());
+         messager.submitMessage(UIVisibilityGraphsTopics.StartPosition, dataSet.getPlannerInput().getStartPosition());
+         messager.submitMessage(UIVisibilityGraphsTopics.GoalPosition, dataSet.getPlannerInput().getGoalPosition());
       }
       else
       {
-         PlanarRegionsList loadedPlanarRegions = VisibilityGraphsIOTools.importPlanarRegionData(file);
-         messager.submitMessage(UIVisibilityGraphsTopics.GlobalReset, true);
-         messager.submitMessage(UIVisibilityGraphsTopics.PlanarRegionData, loadedPlanarRegions);
          messager.submitMessage(UIVisibilityGraphsTopics.StartPosition, new Point3D());
          messager.submitMessage(UIVisibilityGraphsTopics.GoalPosition, new Point3D());
       }

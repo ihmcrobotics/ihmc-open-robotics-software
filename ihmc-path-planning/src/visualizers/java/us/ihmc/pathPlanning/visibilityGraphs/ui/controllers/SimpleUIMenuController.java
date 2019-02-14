@@ -10,6 +10,7 @@ import javafx.stage.Window;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.log.LogTools;
 import us.ihmc.messager.Messager;
+import us.ihmc.pathPlanning.DataSetLoader;
 import us.ihmc.pathPlanning.visibilityGraphs.tools.VisibilityGraphsIOTools;
 import us.ihmc.pathPlanning.visibilityGraphs.ui.messager.UIVisibilityGraphsTopics;
 import us.ihmc.robotics.PlanarRegionFileTools;
@@ -31,10 +32,7 @@ public class SimpleUIMenuController
 
    public SimpleUIMenuController()
    {
-      File defaultDataFolder = new File("..\\visualizers\\resources\\Data");
-      if (!defaultDataFolder.exists())
-         defaultDataFolder = new File(".");
-      directoryChooser.setInitialDirectory(defaultDataFolder);
+      directoryChooser.setInitialDirectory(new File("."));
    }
 
    public void attachMessager(Messager messager)
@@ -55,11 +53,7 @@ public class SimpleUIMenuController
       if (result == null)
          return;
 
-      File[] vizGraphsParameterFile = result.listFiles((FilenameFilter) (dir, name) -> name.equals(VisibilityGraphsIOTools.INPUTS_PARAMETERS_FILENAME));
-      if (vizGraphsParameterFile != null && vizGraphsParameterFile.length == 1)
-         loadedFile = result.listFiles(File::isDirectory)[0];
-      else
-         loadedFile = result;
+      loadedFile = result;
       loadAndSubmitPlanarRegions();
    }
 
