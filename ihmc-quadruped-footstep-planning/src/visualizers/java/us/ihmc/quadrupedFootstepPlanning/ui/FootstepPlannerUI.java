@@ -186,6 +186,9 @@ public class FootstepPlannerUI
       }
 
 
+      mainTabController.setPreviewFootstepPositions(pathViewer.getPreviewFootstepPositions());
+
+
       planarRegionViewer.start();
       startGoalPositionViewer.start();
       startGoalOrientationViewer.start();

@@ -7,8 +7,11 @@ import javafx.scene.paint.Color;
 import javafx.scene.paint.Material;
 import javafx.scene.shape.Mesh;
 import javafx.scene.shape.MeshView;
+import javafx.scene.shape.Sphere;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.jMonkeyEngineToolkit.tralala.Pair;
 import us.ihmc.javaFXToolkit.shapes.JavaFXMultiColorMeshBuilder;
 import us.ihmc.javaFXToolkit.shapes.TextureColorAdaptivePalette;
@@ -17,6 +20,7 @@ import us.ihmc.quadrupedBasics.gait.QuadrupedTimedStep;
 import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.FootstepPlan;
 import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.communication.FootstepPlannerMessagerAPI;
 import us.ihmc.robotics.robotSide.QuadrantDependentList;
+import us.ihmc.robotics.robotSide.RobotQuadrant;
 
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -26,12 +30,17 @@ import java.util.concurrent.atomic.AtomicReference;
 
 public class FootstepPathMeshViewer extends AnimationTimer
 {
+   private static final double RADIUS = 0.05;
+   private static final double zOffset = 0.01;
    private final Group root = new Group();
    private final ExecutorService executorService = Executors.newSingleThreadExecutor(ThreadTools.getNamedThreadFactory(getClass().getSimpleName()));
 
    private final AtomicReference<Boolean> showSolution;
    private final AtomicBoolean solutionWasReceived = new AtomicBoolean(false);
    private final AtomicBoolean reset = new AtomicBoolean(false);
+
+   private final QuadrantDependentList<Sphere> footstepPreviewSpheres = new QuadrantDependentList<>();
+   private final QuadrantDependentList<Point3D> previewFootstepPositions = new QuadrantDependentList<>();
 
    private final MeshView footstepPathMeshView = new MeshView();
    private final AtomicReference<Pair<Mesh, Material>> meshReference = new AtomicReference<>(null);
@@ -48,11 +57,27 @@ public class FootstepPathMeshViewer extends AnimationTimer
          processFootstepPath(footstepPlan);
       }));
 
+      for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
+      {
+         Sphere previewSphere = new Sphere(RADIUS);
+         previewSphere.setMouseTransparent(true);
 
+         Point3D position = new Point3D();
+         position.setToNaN();
+
+         previewFootstepPositions.put(robotQuadrant, position);
+         footstepPreviewSpheres.put(robotQuadrant, previewSphere);
+//         root.getChildren().add(previewSphere);
+      }
 
       messager.registerTopicListener(FootstepPlannerMessagerAPI.ComputePathTopic, data -> reset.set(true));
 
       showSolution = messager.createInput(FootstepPlannerMessagerAPI.ShowFootstepPlanTopic, true);
+   }
+
+   public QuadrantDependentList<Point3D> getPreviewFootstepPositions()
+   {
+      return previewFootstepPositions;
    }
 
 
@@ -69,9 +94,9 @@ public class FootstepPathMeshViewer extends AnimationTimer
          Color regionColor = colors.get(footstep.getRobotQuadrant());
 
          footstep.getGoalPosition(footPosition);
-         footPosition.addZ(0.01);
+         footPosition.addZ(zOffset);
 
-         meshBuilder.addSphere(0.05, footPosition, regionColor);
+         meshBuilder.addSphere(RADIUS, footPosition, regionColor);
       }
 
       meshReference.set(new Pair<>(meshBuilder.generateMesh(), meshBuilder.generateMaterial()));
@@ -101,6 +126,15 @@ public class FootstepPathMeshViewer extends AnimationTimer
       {
          footstepPathMeshView.setMesh(newMeshAndMaterial.getKey());
          footstepPathMeshView.setMaterial(newMeshAndMaterial.getValue());
+      }
+
+      for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
+      {
+         Sphere previewSphere = footstepPreviewSpheres.get(robotQuadrant);
+         Point3DReadOnly position = previewFootstepPositions.get(robotQuadrant);
+         previewSphere.setTranslateX(position.getX());
+         previewSphere.setTranslateY(position.getY());
+         previewSphere.setTranslateZ(position.getZ() + zOffset);
       }
    }
 

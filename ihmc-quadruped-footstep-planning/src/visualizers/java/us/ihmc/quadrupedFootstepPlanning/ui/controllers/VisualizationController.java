@@ -37,8 +37,6 @@ public class VisualizationController
    @FXML
    private CheckBox showSolution;
    @FXML
-   private Slider plannerPlaybackSlider;
-   @FXML
    public void requestStatistics()
    {
       if (verbose)
@@ -70,7 +68,5 @@ public class VisualizationController
       messager.bindBidirectional(FootstepPlannerMessagerAPI.ShowStartVisibilityMap, showStartMapToggleButton.selectedProperty(), true);
       messager.bindBidirectional(FootstepPlannerMessagerAPI.ShowGoalVisibilityMap, showGoalMapToggleButton.selectedProperty(), true);
       messager.bindBidirectional(FootstepPlannerMessagerAPI.ShowFootstepPlanTopic, showSolution.selectedProperty(), true);
-
-      messager.bindBidirectional(FootstepPlannerMessagerAPI.PlannerPlaybackFractionTopic, plannerPlaybackSlider.valueProperty(), false);
    }
 }
