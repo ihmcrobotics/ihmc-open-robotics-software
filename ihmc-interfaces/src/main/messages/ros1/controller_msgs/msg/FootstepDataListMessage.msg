@@ -44,8 +44,11 @@ bool trust_height_of_footsteps
 # Contains information on whether the robot can automatically adjust its footsteps to retain balance.
 bool are_footsteps_adjustable
 
-# If true the controller will adjust upcoming footsteps with the location error of previous steps.
+# If true the controller will adjust the x and y coordinates of the upcoming footsteps with the location error of previous steps.
 bool offset_footsteps_with_execution_error
+
+# If true the controller will adjust the z coordinate of the adjust upcoming footsteps with the location error of previous steps.
+bool offset_footsteps_height_with_execution_error
 
 # Properties for queueing footstep lists.
 controller_msgs/QueueableMessage queueing_properties
