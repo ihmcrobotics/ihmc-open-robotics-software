@@ -85,6 +85,13 @@ public class PlannerInput
       return additionalData.containsKey(key) && additionalData.get(key).get(0).equals("true");
    }
 
+   public double getDoubleFlag(String key)
+   {
+      if(!additionalData.containsKey(key))
+         return Double.NaN;
+      return Double.parseDouble(additionalData.get(key).get(0));
+   }
+
    public boolean hasStartOrientation()
    {
       return !Double.isNaN(startYaw);

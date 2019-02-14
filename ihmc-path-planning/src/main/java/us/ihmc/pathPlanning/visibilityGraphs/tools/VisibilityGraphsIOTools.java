@@ -25,7 +25,6 @@ public class VisibilityGraphsIOTools
 {
    protected static final boolean DEBUG = true;
 
-   private static final String VIZ_GRAPHS_DATA_FOLDER_SUFFIX = "VizGraphs";
    public static final String INPUTS_PARAMETERS_FILENAME = "VizGraphsInputs.txt";
 
    private static final String PATH_SIZE_FIELD_OPEN = "<PathSize,";
@@ -38,17 +37,6 @@ public class VisibilityGraphsIOTools
    protected static final String GOAL_FIELD_END = ",Goal>";
 
    public static final String TESTABLE_FLAG = "testVisGraph";
-
-   /**
-    * Generates a default timestamped name that can be used to generate automated and unique
-    * folders.
-    *
-    * @return a {@code String} of the form: "20171201_163422_VizGraphs".
-    */
-   public static String createDefaultTimeStampedDatasetFolderName()
-   {
-      return PlanarRegionFileTools.getDate() + "_" + VIZ_GRAPHS_DATA_FOLDER_SUFFIX;
-   }
 
    protected static String getPoint3DString(Point3DReadOnly point3D)
    {
@@ -154,35 +142,6 @@ public class VisibilityGraphsIOTools
       String getStringToWrite();
    }
 
-   /**
-    * Loads either directly the planar regions from the given file, or from the first child
-    * directory if the file is a visibility graphs dataset.
-    *
-    * @param inputFile the file to load the planar regions from. Can be an actual planar regions
-    *           data file or a visibility graphs dataset file.
-    * @return the loaded planar regions or {@code null} if not able to load them.
-    */
-   public static PlanarRegionsList importPlanarRegionData(File inputFile)
-   {
-      return PlanarRegionFileTools.importPlanarRegionData(adjustPlanarRegionsDataFile(inputFile));
-   }
-
-   /**
-    * Adjust the file path such that the given file is returned if it is a planar regions file, or
-    * the first child directory is returned if it is a visibility graphs dataset file.
-    *
-    * @param inputFile the planar regions file to be adjusted. Can be an actual planar regions data
-    *           file or a visibility graphs dataset file.
-    * @return
-    */
-   private static File adjustPlanarRegionsDataFile(File inputFile)
-   {
-      File[] vizGraphsParameterFile = inputFile.listFiles((FilenameFilter) (dir, name) -> name.equals(VisibilityGraphsIOTools.INPUTS_PARAMETERS_FILENAME));
-      if (vizGraphsParameterFile != null && vizGraphsParameterFile.length == 1)
-         inputFile = inputFile.listFiles(File::isDirectory)[0];
-      return inputFile;
-   }
-
    public static String[] getPlanarRegionAndVizGraphsFilenames(File parentFolder)
    {
       if (!parentFolder.exists() || !parentFolder.isDirectory())
@@ -231,11 +190,6 @@ public class VisibilityGraphsIOTools
       InputStreamReader inputStreamReader = new InputStreamReader(parametersFile);
       BufferedReader bufferedReader = new BufferedReader(inputStreamReader);
       return bufferedReader;
-   }
-
-   public static VisibilityGraphsUnitTestDataset loadDataset(Class<?> clazz, String datasetResourceName)
-   {
-      return new VisibilityGraphsUnitTestDataset(clazz, datasetResourceName);
    }
 
    public static class VisibilityGraphsUnitTestDataset
