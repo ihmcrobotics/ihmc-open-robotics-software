@@ -62,7 +62,7 @@ public class QuadrupedAStarFootstepPlannerDataSetTest extends FootstepPlannerDat
       String prefix = "unitTestDataSets/test/";
       VISUALIZE = true;
       test.setup();
-      test.runAssertionsOnDataset(dataset -> test.runAssertions(dataset), prefix + "20171215_214730_CinderBlockField");
+      test.runAssertionsOnDataset(dataset -> test.runAssertions(dataset), prefix + "20171115_171243_SimplePlaneAndWall");
 //      if (activelyVisualize)
 //         test.visualizer.showAndSleep(true);
       ThreadTools.sleepForever();
