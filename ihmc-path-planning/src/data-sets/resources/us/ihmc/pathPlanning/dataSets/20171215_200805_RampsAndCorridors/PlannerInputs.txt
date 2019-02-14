@@ -2,8 +2,10 @@ startPosition -1.774 -3.090 0.000
 goalPosition 2.818 3.105 -0.000
 testVisGraph true
 testStepPlanners false
-PLANAR_REGION_BIPEDAL 5.0
-PLAN_THEN_SNAP 5.0
-A_STAR 10.0
-SIMPLE_BODY_PATH 5.0
-VIS_GRAPH_WITH_A_STAR 5.0
+planar_region_bipedal_timeout 5.0
+plan_then_snap_timeout 5.0
+a_star_timeout 10.0
+simple_body_path_timeout 5.0
+vis_graph_with_a_star_timeout 5.0
+testQuadrupedPlanner false
+quadruped_timeout 10.0

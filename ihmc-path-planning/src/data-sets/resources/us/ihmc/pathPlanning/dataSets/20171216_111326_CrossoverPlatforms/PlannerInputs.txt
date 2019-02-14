@@ -5,3 +5,5 @@ testStepPlanners true
 planar_region_bipedal_timeout 5.0
 plan_then_snap_timeout 5.0
 a_star_timeout 45.0
+testQuadrupedPlanner true
+quadruped_timeout 45.0
