@@ -139,11 +139,6 @@ public class RegistryConsumer extends Thread
          
          decompressBuffer(buffer);
          
-         if(buffer.getOffset() > 0)
-         {
-            debugRegistry.getFirstSegmentsMissing().increment();
-         }
-         
          while(!orderedBuffers.isEmpty() && orderedBuffers.peek().getTimestamp() == timestamp)
          {
             RegistryReceiveBuffer next = orderedBuffers.take();

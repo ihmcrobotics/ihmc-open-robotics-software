@@ -94,9 +94,6 @@ public class CustomLogDataPublisherType implements TopicDataType<RegistrySendBuf
 
       serializeCDR.write_type_2(data.getRegistryID());
       
-
-      serializeCDR.write_type_2(data.getOffset());
-      
       serializeCDR.write_type_2(data.getNumberOfVariables());
 
 
@@ -180,8 +177,6 @@ public class CustomLogDataPublisherType implements TopicDataType<RegistrySendBuf
 
       current_alignment += 4 + CDR.alignment(current_alignment, 4);
       
-      current_alignment += 4 + CDR.alignment(current_alignment, 4);
-
       current_alignment += 4 + CDR.alignment(current_alignment, 4);
       
       current_alignment += 4 + CDR.alignment(current_alignment, 4);
