@@ -29,8 +29,6 @@ import us.ihmc.pathPlanning.PlannerInput;
 import us.ihmc.quadrupedBasics.gait.QuadrupedTimedStep;
 import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.communication.FootstepPlannerMessagerAPI;
 import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.graphSearch.graph.FootstepNode;
-import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.tools.FootstepPlannerIOTools;
-import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.tools.FootstepPlannerIOTools.FootstepPlannerUnitTestDataset;
 import us.ihmc.quadrupedFootstepPlanning.ui.ApplicationRunner;
 import us.ihmc.quadrupedFootstepPlanning.ui.FootstepPlannerUI;
 import us.ihmc.quadrupedPlanning.QuadrupedXGaitSettingsReadOnly;
