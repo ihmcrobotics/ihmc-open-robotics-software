@@ -1,6 +1,6 @@
 package us.ihmc.pathPlanning;
 
-import org.apache.commons.io.IOUtils;
+import org.apache.commons.io.Charsets;
 import us.ihmc.robotics.PlanarRegionFileTools;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 
@@ -30,13 +30,11 @@ public class DataSetIOTools
 
    public static List<DataSet> loadDataSets(Predicate<DataSet> dataSetFilter)
    {
-      Class<DataSetIOTools> loadingClass = DataSetIOTools.class;
-      InputStream dataSetList = loadingClass.getResourceAsStream(DATA_SET_LIST_FILENAME);
       List<String> dataSetNamesList;
 
       try
       {
-         dataSetNamesList = IOUtils.readLines(dataSetList, UTF_8);
+         dataSetNamesList = loadDataSetNames();
       }
       catch (IOException e)
       {
@@ -53,6 +51,24 @@ public class DataSetIOTools
 
       dataSets.removeIf(dataSetFilter.negate());
       return dataSets;
+   }
+
+   private static List<String> loadDataSetNames() throws IOException
+   {
+      Class<?> loadingClass = DataSetIOTools.class;
+      InputStream dataSetListStream = loadingClass.getResourceAsStream(DATA_SET_LIST_FILENAME);
+      InputStreamReader reader = new InputStreamReader(dataSetListStream, Charsets.toCharset(UTF_8));
+      BufferedReader bufferedReader = new BufferedReader(reader);
+
+      List<String> dataSetNamesList = new ArrayList<>();
+      String line = bufferedReader.readLine();
+      while (line != null) {
+         dataSetNamesList.add(line);
+         line = bufferedReader.readLine();
+      }
+
+      return dataSetNamesList;
+
    }
 
    public static DataSet loadDataSet(String dataSetName)
