@@ -58,6 +58,7 @@ public class PipeLine<T>
    private static final boolean DEBUG = false;
    /** The master TaskExecutor is used to execute the different stages sequentially. */
    private final TaskExecutor masterTaskExecutor = new TaskExecutor();
+   private final NullTask nullTask = new NullTask();
 
    /**
     * Create a new stage in the master TaskExecutor.
@@ -65,7 +66,7 @@ public class PipeLine<T>
     */
    public void requestNewStage()
    {
-      submitSingleTaskStage(new NullTask());
+      submitSingleTaskStage(nullTask);
    }
 
    /**
@@ -180,17 +181,17 @@ public class PipeLine<T>
 
    public void submitAll(List<Task> tasks)
    {
-      for (Task task : tasks)
+      for (int i = 0; i < tasks.size(); i++)
       {
-         submitSingleTaskStage(task);
+         submitSingleTaskStage(tasks.get(i));
       }
    }
 
    public void submitAll(T executorKey, List<Task> tasks)
    {
-      for (Task task : tasks)
+      for (int i = 0; i < tasks.size(); i++)
       {
-         submitTaskForPallelPipesStage(executorKey, task);
+         submitTaskForPallelPipesStage(executorKey, tasks.get(i));
       }
    }
 
