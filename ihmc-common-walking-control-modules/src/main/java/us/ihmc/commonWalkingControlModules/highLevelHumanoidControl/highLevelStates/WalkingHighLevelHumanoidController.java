@@ -559,6 +559,7 @@ public class WalkingHighLevelHumanoidController implements JointLoadStatusProvid
       // Do transitions will request ICP planner updates.
       stateMachine.doTransitions();
       // This updates the ICP plan continuously.
+      handleChangeInContactState();
       balanceManager.update();
       // Do action is relying on the ICP plan being valid.
       stateMachine.doAction();
@@ -566,8 +567,6 @@ public class WalkingHighLevelHumanoidController implements JointLoadStatusProvid
       currentState = stateMachine.getCurrentState();
 
       updateManagers(currentState);
-
-      handleChangeInContactState();
 
       submitControllerCoreCommands();
 
@@ -597,7 +596,6 @@ public class WalkingHighLevelHumanoidController implements JointLoadStatusProvid
          return;
 
       controllerToolbox.updateBipedSupportPolygons();
-      balanceManager.updateCurrentICPPlan();
    }
 
    public void updateFailureDetection()
