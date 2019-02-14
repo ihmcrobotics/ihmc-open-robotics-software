@@ -109,6 +109,7 @@ public class FootstepPlannerMessagerAPI
 
    public static final Topic<FootstepPlan> FootstepPlanTopic = Root.child(FootstepPlan).topic(Data);
    public static final Topic<Boolean> ShowFootstepPlanTopic = Root.child(FootstepPlan).topic(Show);
+   public static final Topic<Boolean> ShowFootstepPreviewTopic = Root.child(FootstepPlan).child(Preview).topic(Show);
    public static final Topic<Number> PlannerPlaybackFractionTopic = Root.child(FootstepPlan).child(Preview).topic(Data);
 
 
