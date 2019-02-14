@@ -638,7 +638,6 @@ public class BalanceManager
 
    public void initialize()
    {
-      update();
       yoFinalDesiredICP.set(Double.NaN, Double.NaN);
       controllerToolbox.getCapturePoint(tempCapturePoint);
       yoDesiredCapturePoint.set(tempCapturePoint);
