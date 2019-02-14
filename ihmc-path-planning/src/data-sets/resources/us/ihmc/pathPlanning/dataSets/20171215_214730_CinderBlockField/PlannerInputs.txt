@@ -1,7 +1,5 @@
 startPosition 2.555 2.631 0.000
 goalPosition 11.031 10.698 0.000
-startYaw 0.0
-goalYaw 0.0
 testVisGraph true
 planar_region_bipedal_timeout 5.0
 a_star_timeout 10.0
