@@ -3,8 +3,6 @@ package us.ihmc.pathPlanning.visibilityGraphs.ui.controllers;
 import static us.ihmc.pathPlanning.visibilityGraphs.ui.messager.UIVisibilityGraphsTopics.RandomizePlanarRegionIDRequest;
 
 import java.io.File;
-import java.net.URISyntaxException;
-import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -21,12 +19,9 @@ import javafx.stage.Window;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.javaFXToolkit.messager.JavaFXMessager;
 import us.ihmc.pathPlanning.DataSet;
-import us.ihmc.pathPlanning.DataSetLoader;
+import us.ihmc.pathPlanning.DataSetIOTools;
 import us.ihmc.pathPlanning.visibilityGraphs.tools.VisibilityGraphsIOTools;
-import us.ihmc.pathPlanning.visibilityGraphs.tools.VisibilityGraphsIOTools.VisibilityGraphsUnitTestDataset;
 import us.ihmc.pathPlanning.visibilityGraphs.ui.messager.UIVisibilityGraphsTopics;
-import us.ihmc.robotics.PlanarRegionFileTools;
-import us.ihmc.robotics.geometry.PlanarRegionsList;
 
 public class DatasetNavigationAccordionController
 {
@@ -46,7 +41,7 @@ public class DatasetNavigationAccordionController
 
    public DatasetNavigationAccordionController()
    {
-      List<DataSet> dataSets = DataSetLoader.loadDataSets();
+      List<DataSet> dataSets = DataSetIOTools.loadDataSets();
       for (int i = 0; i < dataSets.size(); i++)
       {
          DataSet dataSet = dataSets.get(i);
@@ -147,7 +142,7 @@ public class DatasetNavigationAccordionController
          return;
 
       String dataSetName = listViewOwner.getSelectionModel().getSelectedItem();
-      DataSet dataSet = DataSetLoader.loadDataSet(dataSetName);
+      DataSet dataSet = DataSetIOTools.loadDataSet(dataSetName);
 
       messager.submitMessage(UIVisibilityGraphsTopics.GlobalReset, true);
       messager.submitMessage(UIVisibilityGraphsTopics.PlanarRegionData, dataSet.getPlanarRegionsList());

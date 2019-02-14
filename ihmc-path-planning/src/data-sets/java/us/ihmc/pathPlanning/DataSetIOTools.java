@@ -7,7 +7,6 @@ import us.ihmc.robotics.geometry.PlanarRegionsList;
 import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -15,7 +14,7 @@ import java.util.function.Predicate;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
 
-public class DataSetLoader
+public class DataSetIOTools
 {
    public static final String RESOURCES_DIRECTORY = "ihmc-open-robotics-software/ihmc-path-planning/src/data-sets/resources";
    public static final String DATA_SET_DIRECTORY_PATH = "us/ihmc/pathPlanning/dataSets";
@@ -31,7 +30,7 @@ public class DataSetLoader
 
    public static List<DataSet> loadDataSets(Predicate<DataSet> dataSetFilter)
    {
-      Class<DataSetLoader> loadingClass = DataSetLoader.class;
+      Class<DataSetIOTools> loadingClass = DataSetIOTools.class;
       InputStream dataSetList = loadingClass.getResourceAsStream(DATA_SET_LIST_FILENAME);
       List<String> dataSetNamesList;
 
@@ -58,7 +57,7 @@ public class DataSetLoader
 
    public static DataSet loadDataSet(String dataSetName)
    {
-      Class<DataSetLoader> loadingClass = DataSetLoader.class;
+      Class<DataSetIOTools> loadingClass = DataSetIOTools.class;
 
       String dataSetPlanarRegionsPath = DATA_SET_DIRECTORY_PATH + "/" + dataSetName + "/" + PLANAR_REGIONS_DIRECTORY;
       PlanarRegionsList planarRegionsList = PlanarRegionFileTools.importPlanarRegionData(loadingClass.getClassLoader(), dataSetPlanarRegionsPath);

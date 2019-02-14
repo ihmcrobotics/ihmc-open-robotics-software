@@ -1,7 +1,6 @@
 package us.ihmc.pathPlanning.visibilityGraphs.ui.controllers;
 
 import java.io.File;
-import java.io.FilenameFilter;
 
 import javafx.fxml.FXML;
 import javafx.scene.control.MenuItem;
@@ -10,8 +9,6 @@ import javafx.stage.Window;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.log.LogTools;
 import us.ihmc.messager.Messager;
-import us.ihmc.pathPlanning.DataSetLoader;
-import us.ihmc.pathPlanning.visibilityGraphs.tools.VisibilityGraphsIOTools;
 import us.ihmc.pathPlanning.visibilityGraphs.ui.messager.UIVisibilityGraphsTopics;
 import us.ihmc.robotics.PlanarRegionFileTools;
 import us.ihmc.robotics.geometry.PlanarRegionsList;

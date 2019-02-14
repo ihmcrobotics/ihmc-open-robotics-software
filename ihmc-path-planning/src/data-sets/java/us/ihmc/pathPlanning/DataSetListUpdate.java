@@ -15,7 +15,7 @@ public class DataSetListUpdate
 {
    private DataSetListUpdate() throws IOException
    {
-      InputStream dataSetStream = getClass().getResourceAsStream("/" + DataSetLoader.DATA_SET_DIRECTORY_PATH);
+      InputStream dataSetStream = getClass().getResourceAsStream("/" + DataSetIOTools.DATA_SET_DIRECTORY_PATH);
       List<String> dataSetNames = IOUtils.readLines(dataSetStream, UTF_8);
 
       for (int i = 0; i < dataSetNames.size(); i++)
