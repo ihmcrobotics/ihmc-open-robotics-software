@@ -229,7 +229,6 @@ public class BalanceManager
          smoothCMPPlanner = new SmoothCMPBasedICPPlanner(fullRobotModel, bipedSupportPolygons, contactableFeet, icpPlannerParameters.getNumberOfFootstepsToConsider(),
                                                                                   momentumTrajectoryHandler, yoTime, registry, yoGraphicsListRegistry, controllerToolbox.getGravityZ());
          smoothCMPPlanner.setDefaultPhaseTimes(walkingControllerParameters.getDefaultSwingTime(), walkingControllerParameters.getDefaultTransferTime());
-         smoothCMPPlanner.setFootRotationIndicator(controllerToolbox.getFootRotationInformation());
          icpPlanner = smoothCMPPlanner;
       }
 
