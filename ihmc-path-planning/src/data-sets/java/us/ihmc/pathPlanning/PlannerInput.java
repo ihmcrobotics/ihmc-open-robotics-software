@@ -35,6 +35,51 @@ public class PlannerInput
       return goalYaw;
    }
 
+   public boolean getVisGraphIsTestable()
+   {
+      return flagEquals(DataSetIOTools.VIS_GRAPH_TAG, DataSetIOTools.TESTABLE_FLAG);
+   }
+
+   public boolean getStepPlannerIsTestable()
+   {
+      return flagEquals(DataSetIOTools.STEP_PLANNERS_TAG, DataSetIOTools.TESTABLE_FLAG);
+   }
+
+   public boolean getQuadrupedPlannerIsTestable()
+   {
+      return flagEquals(DataSetIOTools.QUADRUPED_PLANNER_TAG, DataSetIOTools.TESTABLE_FLAG);
+   }
+
+   public boolean getVisGraphIsInDevelopment()
+   {
+      return flagEquals(DataSetIOTools.VIS_GRAPH_TAG, DataSetIOTools.IN_DEVELOPMENT_FLAG);
+   }
+
+   public boolean getStepPlannerIsInDevelopment()
+   {
+      return flagEquals(DataSetIOTools.STEP_PLANNERS_TAG, DataSetIOTools.IN_DEVELOPMENT_FLAG);
+   }
+
+   public boolean getQuadrupedPlannerIsInDevelopment()
+   {
+      return flagEquals(DataSetIOTools.QUADRUPED_PLANNER_TAG, DataSetIOTools.IN_DEVELOPMENT_FLAG);
+   }
+
+   public boolean containsTimeoutFlag(String prefix)
+   {
+      return containsFlag(prefix + DataSetIOTools.TIMEOUT_SUFFIX);
+   }
+
+   public double getQuadrupedTimeout()
+   {
+      return getDoubleFlag(DataSetIOTools.QUADRUPED_TIMEOUT_TAG);
+   }
+
+   public double getTimeoutFlag(String prefix)
+   {
+      return getDoubleFlag(prefix + DataSetIOTools.TIMEOUT_SUFFIX);
+   }
+
    public List<String> getAdditionalData(String key)
    {
       return additionalData.get(key);
@@ -80,12 +125,12 @@ public class PlannerInput
       return additionalData.containsKey(key);
    }
 
-   public boolean getBooleanFlag(String key)
+   public boolean flagEquals(String key, String value)
    {
-      return additionalData.containsKey(key) && additionalData.get(key).get(0).equals("true");
+      return containsFlag(key) && additionalData.get(key).get(0).equals(value);
    }
 
-   public double getDoubleFlag(String key)
+   private double getDoubleFlag(String key)
    {
       if(!additionalData.containsKey(key))
          return Double.NaN;

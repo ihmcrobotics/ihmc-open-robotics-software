@@ -1,6 +1,7 @@
 package us.ihmc.pathPlanning;
 
 import org.apache.commons.io.Charsets;
+import org.apache.commons.io.IOUtils;
 import us.ihmc.robotics.PlanarRegionFileTools;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 
@@ -19,6 +20,19 @@ public class DataSetIOTools
 {
    public static final String RESOURCES_DIRECTORY = "ihmc-open-robotics-software/ihmc-path-planning/src/data-sets/resources";
    public static final String DATA_SET_DIRECTORY_PATH = "us/ihmc/pathPlanning/dataSets";
+
+   public static final String START_POSITION_TAG = "start_position";
+   public static final String GOAL_POSITION_TAG = "goal_position";
+   public static final String START_YAW_TAG = "start_yaw";
+   public static final String GOAL_YAW_TAG = "goal_yaw";
+   public static final String VIS_GRAPH_TAG = "vis_graph_status";
+   public static final String STEP_PLANNERS_TAG = "step_planner_status";
+   public static final String TIMEOUT_SUFFIX = "_timeout";
+   public static final String QUADRUPED_PLANNER_TAG = "quadruped_planner_status";
+   public static final String QUADRUPED_TIMEOUT_TAG = "quadruped" + TIMEOUT_SUFFIX;
+
+   public static final String TESTABLE_FLAG = "test";
+   public static final String IN_DEVELOPMENT_FLAG = "dev";
 
    private static final String DATA_SET_LIST_FILENAME = "DataSetList.txt";
    private static final String PLANAR_REGIONS_DIRECTORY = "PlanarRegions";
@@ -58,12 +72,14 @@ public class DataSetIOTools
    {
       Class<?> loadingClass = DataSetIOTools.class;
       InputStream dataSetListStream = loadingClass.getResourceAsStream(DATA_SET_LIST_FILENAME);
+
       InputStreamReader reader = new InputStreamReader(dataSetListStream, Charsets.toCharset(UTF_8));
       BufferedReader bufferedReader = new BufferedReader(reader);
 
       List<String> dataSetNamesList = new ArrayList<>();
       String line = bufferedReader.readLine();
-      while (line != null) {
+      while (line != null)
+      {
          dataSetNamesList.add(line);
          line = bufferedReader.readLine();
       }
@@ -113,22 +129,22 @@ public class DataSetIOTools
          String[] lineSubstrings = line.split(" ");
          switch (lineSubstrings[0])
          {
-         case "startPosition":
+         case START_POSITION_TAG:
          {
             plannerInput.setStartPosition(Double.parseDouble(lineSubstrings[1]), Double.parseDouble(lineSubstrings[2]), Double.parseDouble(lineSubstrings[3]));
             break;
          }
-         case "goalPosition":
+         case GOAL_POSITION_TAG:
          {
             plannerInput.setGoalPosition(Double.parseDouble(lineSubstrings[1]), Double.parseDouble(lineSubstrings[2]), Double.parseDouble(lineSubstrings[3]));
             break;
          }
-         case "startYaw":
+         case START_YAW_TAG:
          {
             plannerInput.setStartYaw(Double.parseDouble(lineSubstrings[1]));
             break;
          }
-         case "goalYaw":
+         case GOAL_YAW_TAG:
          {
             plannerInput.setGoalYaw(Double.parseDouble(lineSubstrings[1]));
             break;
@@ -194,16 +210,16 @@ public class DataSetIOTools
    {
       FileWriter fileWriter = new FileWriter(file);
 
-      fileWriter.write("startPosition " + plannerInput.getStartPosition().getX() + " " + plannerInput.getStartPosition().getY() + " " + plannerInput.getStartPosition().getZ());
+      fileWriter.write(START_POSITION_TAG + " " + plannerInput.getStartPosition().getX() + " " + plannerInput.getStartPosition().getY() + " " + plannerInput.getStartPosition().getZ());
       fileWriter.write("\n");
 
-      fileWriter.write("goalPosition " + plannerInput.getGoalPosition().getX() + " " + plannerInput.getGoalPosition().getY() + " " + plannerInput.getGoalPosition().getZ());
+      fileWriter.write(GOAL_POSITION_TAG + " " + plannerInput.getGoalPosition().getX() + " " + plannerInput.getGoalPosition().getY() + " " + plannerInput.getGoalPosition().getZ());
       fileWriter.write("\n");
 
-      fileWriter.write("startYaw " + plannerInput.getStartYaw());
+      fileWriter.write(START_YAW_TAG + " " + plannerInput.getStartYaw());
       fileWriter.write("\n");
 
-      fileWriter.write("goalYaw " + plannerInput.getGoalYaw());
+      fileWriter.write(GOAL_YAW_TAG + " " + plannerInput.getGoalYaw());
       fileWriter.write("\n");
 
       HashMap<String, List<String>> additionalDataMap = plannerInput.getAdditionDataMap();

@@ -1,8 +1,8 @@
-startPosition -0.087 -0.427 0.001
-goalPosition 10.494 10.000 0.001
-testVisGraph true
+start_position -0.087 -0.427 0.001
+goal_position 10.494 10.000 0.001
+vis_graph_status test
 planar_region_bipedal_timeout 5.0
 a_star_timeout 20.0
 vis_graph_with_a_star_timeout 5.0
-testQuadrupedPlanner true
+quadruped_planner_status test
 quadruped_timeout 20.0

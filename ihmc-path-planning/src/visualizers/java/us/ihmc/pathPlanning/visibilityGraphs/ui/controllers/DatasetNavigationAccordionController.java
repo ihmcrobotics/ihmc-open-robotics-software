@@ -32,8 +32,6 @@ public class DatasetNavigationAccordionController
    private final ArrayList<DataSet> inDevelopmentDataSet = new ArrayList<>();
    private File customDataFolder = null;
 
-   public static final String TESTABLE_FLAG = "testVisGraph";
-
    @FXML
    private Accordion datasetNavigationAccordion;
 
@@ -51,11 +49,11 @@ public class DatasetNavigationAccordionController
          DataSet dataSet = dataSets.get(i);
          if(dataSet.hasPlannerInput())
          {
-            if(dataSet.getPlannerInput().getBooleanFlag(TESTABLE_FLAG))
+            if(dataSet.getPlannerInput().getVisGraphIsTestable())
             {
                testableDataSets.add(dataSet);
             }
-            else
+            else if(dataSet.getPlannerInput().getVisGraphIsInDevelopment())
             {
                inDevelopmentDataSet.add(dataSet);
             }
