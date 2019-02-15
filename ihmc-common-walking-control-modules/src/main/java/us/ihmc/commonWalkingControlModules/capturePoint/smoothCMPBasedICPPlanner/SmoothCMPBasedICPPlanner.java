@@ -12,13 +12,11 @@ import us.ihmc.commonWalkingControlModules.capturePoint.smoothCMPBasedICPPlanner
 import us.ihmc.commonWalkingControlModules.capturePoint.smoothCMPBasedICPPlanner.CMPGeneration.ReferenceCMPTrajectoryGenerator;
 import us.ihmc.commonWalkingControlModules.capturePoint.smoothCMPBasedICPPlanner.CoMGeneration.ReferenceCoMTrajectoryGenerator;
 import us.ihmc.commonWalkingControlModules.capturePoint.smoothCMPBasedICPPlanner.CoPGeneration.CoPPointsInFoot;
-import us.ihmc.commonWalkingControlModules.capturePoint.smoothCMPBasedICPPlanner.CoPGeneration.CoPTrajectory;
 import us.ihmc.commonWalkingControlModules.capturePoint.smoothCMPBasedICPPlanner.CoPGeneration.FootstepData;
 import us.ihmc.commonWalkingControlModules.capturePoint.smoothCMPBasedICPPlanner.CoPGeneration.ReferenceCoPTrajectoryGenerator;
 import us.ihmc.commonWalkingControlModules.capturePoint.smoothCMPBasedICPPlanner.ICPGeneration.ReferenceICPTrajectoryGenerator;
 import us.ihmc.commonWalkingControlModules.configurations.ICPPlannerParameters;
 import us.ihmc.commonWalkingControlModules.configurations.SmoothCMPPlannerParameters;
-import us.ihmc.commonWalkingControlModules.controlModules.foot.wobble.FootRotationInformation;
 import us.ihmc.commonWalkingControlModules.messageHandlers.MomentumTrajectoryHandler;
 import us.ihmc.commons.MathTools;
 import us.ihmc.commons.PrintTools;
@@ -42,7 +40,6 @@ import us.ihmc.humanoidRobotics.footstep.FootstepTiming;
 import us.ihmc.log.LogTools;
 import us.ihmc.robotModels.FullRobotModel;
 import us.ihmc.robotics.contactable.ContactablePlaneBody;
-import us.ihmc.robotics.math.trajectories.FrameTrajectory3D;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
@@ -115,9 +112,6 @@ public class SmoothCMPBasedICPPlanner extends AbstractICPPlanner
    private final YoBoolean areCoMDynamicsSatisfied;
 
    private final List<ImmutablePair<FrameTuple3DReadOnly, FixedFrameTuple3DBasics>> visualizationUpdatables = new ArrayList<>();
-
-   private FootRotationInformation footRotationInformation;
-   private final FramePoint3D tempCoP = new FramePoint3D();
 
    public SmoothCMPBasedICPPlanner(FullRobotModel fullRobotModel, BipedSupportPolygons bipedSupportPolygons,
                                    SideDependentList<? extends ContactablePlaneBody> contactableFeet, int maxNumberOfFootstepsToConsider,
@@ -254,16 +248,6 @@ public class SmoothCMPBasedICPPlanner extends AbstractICPPlanner
 
       yoGraphicsListRegistry.registerYoGraphicsList(yoGraphicsList);
       yoGraphicsListRegistry.registerArtifactList(artifactList);
-   }
-
-   public void setFootRotationIndicator(FootRotationInformation footRotationInformation)
-   {
-      this.footRotationInformation = footRotationInformation;
-   }
-
-   private boolean isRotating(RobotSide supportSide)
-   {
-      return footRotationInformation != null && footRotationInformation.isRotating(supportSide) && !isStanding.getValue();
    }
 
    /** {@inheritDoc} */
@@ -470,45 +454,16 @@ public class SmoothCMPBasedICPPlanner extends AbstractICPPlanner
       if (transferToSide == null)
          transferToSide = defaultTransferToSide;
 
-      boolean isTransferToSideRotating = isRotating(transferToSide);
-      boolean isTransferFromSideRotating = isRotating(transferToSide.getOppositeSide());
-
       boolean smoothForInitialContinuity = (adjustPlanForInitialDSContinuity.getBooleanValue() && (isStanding.getBooleanValue() || isInitialTransfer
             .getBooleanValue()));
       boolean smoothForFinalContinuity = numberOfUpcomingFootsteps.getIntegerValue() == 0 && adjustPlanForStandingContinuity.getBooleanValue();
       boolean smoothForContinuity = adjustPlanForDSContinuity.getBooleanValue() || smoothForInitialContinuity || smoothForFinalContinuity;
-      boolean performSmoothingAdjustment = maintainContinuity && smoothForContinuity && !isTransferToSideRotating && !isTransferFromSideRotating;
+      boolean performSmoothingAdjustment = maintainContinuity && smoothForContinuity;
       referenceCoPGenerator.setGoingToPerformDSSmoothingAdjustment(performSmoothingAdjustment);
 
       // TODO set up the CoP Generator to be able to only update the current Support Feet CMPs
       referenceCoPGenerator
             .computeReferenceCoPsStartingFromDoubleSupport(isInitialTransfer.getBooleanValue(), transferToSide, previousTransferToSide.getEnumValue());
-
-      if (isTransferFromSideRotating)
-      {
-         tempCoP.setIncludingFrame(footRotationInformation.getDesiredCoP(transferToSide.getOppositeSide()));
-         tempCoP.changeFrame(worldFrame);
-         CoPTrajectory copTrajectory = referenceCoPGenerator.getTransferCoPTrajectories().get(0);
-         FrameTrajectory3D segment = copTrajectory.getSegment(0);
-         segment.compute(segment.getFinalTime());
-         segment.setLinear(segment.getInitialTime(), segment.getFinalTime(), tempCoP, segment.getFramePosition());
-      }
-      if (isTransferToSideRotating)
-      {
-         tempCoP.setIncludingFrame(footRotationInformation.getDesiredCoP(transferToSide));
-         tempCoP.changeFrame(worldFrame);
-         CoPTrajectory copTrajectory = referenceCoPGenerator.getTransferCoPTrajectories().get(0);
-         FrameTrajectory3D segment = copTrajectory.getSegment(copTrajectory.getNumberOfSegments() - 1);
-         segment.compute(segment.getInitialTime());
-         segment.setLinear(segment.getInitialTime(), segment.getFinalTime(), segment.getFramePosition(), tempCoP);
-         copTrajectory = referenceCoPGenerator.getSwingCoPTrajectories().get(0);
-         for (int i = 0; i < copTrajectory.getNumberOfSegments(); i++)
-         {
-            segment = copTrajectory.getSegment(i);
-            segment.setConstant(segment.getInitialTime(), segment.getFinalTime(), tempCoP);
-         }
-      }
-
       referenceCMPGenerator.setNumberOfRegisteredSteps(referenceCoPGenerator.getNumberOfFootstepsRegistered());
       referenceICPGenerator.setNumberOfRegisteredSteps(referenceCoPGenerator.getNumberOfFootstepsRegistered());
 
@@ -567,29 +522,11 @@ public class SmoothCMPBasedICPPlanner extends AbstractICPPlanner
       clearPlanWithoutClearingPlannedFootsteps();
       RobotSide supportSide = this.supportSide.getEnumValue();
 
-      boolean isSupportRotating = isRotating(supportSide);
-      boolean goingToPerformSmoothingAdjustment = maintainContinuity && adjustPlanForSSContinuity.getBooleanValue() && !isSupportRotating;
+      boolean goingToPerformSmoothingAdjustment = maintainContinuity && adjustPlanForSSContinuity.getBooleanValue();
       referenceCoPGenerator.setGoingToPerformSSSmoothingAdjustment(goingToPerformSmoothingAdjustment);
 
       // TODO set up the CoP Generator to be able to only update the current Support Feet CMPs
       referenceCoPGenerator.computeReferenceCoPsStartingFromSingleSupport(supportSide);
-
-      if (isSupportRotating)
-      {
-         tempCoP.setIncludingFrame(footRotationInformation.getDesiredCoP(supportSide));
-         tempCoP.changeFrame(worldFrame);
-         CoPTrajectory copTrajectory = referenceCoPGenerator.getSwingCoPTrajectories().get(0);
-         for (int i = 0; i < copTrajectory.getNumberOfSegments(); i++)
-         {
-            FrameTrajectory3D segment = copTrajectory.getSegment(i);
-            segment.setConstant(segment.getInitialTime(), segment.getFinalTime(), tempCoP);
-         }
-         copTrajectory = referenceCoPGenerator.getTransferCoPTrajectories().get(1);
-         FrameTrajectory3D segment = copTrajectory.getSegment(0);
-         segment.compute(segment.getFinalTime());
-         segment.setLinear(segment.getInitialTime(), segment.getFinalTime(), tempCoP, segment.getFramePosition());
-      }
-
       referenceCMPGenerator.setNumberOfRegisteredSteps(referenceCoPGenerator.getNumberOfFootstepsRegistered());
       referenceICPGenerator.setNumberOfRegisteredSteps(referenceCoPGenerator.getNumberOfFootstepsRegistered());
 
@@ -901,7 +838,7 @@ public class SmoothCMPBasedICPPlanner extends AbstractICPPlanner
       return angularMomentumTrajectoryGenerator;
    }
 
-   private static final boolean printTracesIfComputedSeveralTimes = false;
+   private static final boolean printTracesIfComputedSeveralTimes = true;
    private int icpComputeCount = 0;
    private final YoInteger icpPlannerComputeCount = new YoInteger("ICPPlannnerComputeCount", registry);
    private final List<Throwable> traces = printTracesIfComputedSeveralTimes ? new ArrayList<>() : null;
