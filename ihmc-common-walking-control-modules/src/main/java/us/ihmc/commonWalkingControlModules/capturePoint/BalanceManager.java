@@ -157,6 +157,7 @@ public class BalanceManager
 
    private final InverseDynamicsCommandList inverseDynamicsCommandList = new InverseDynamicsCommandList();
 
+   private final SmoothCMPBasedICPPlanner smoothCMPPlanner;
    private final YoBoolean icpPlannerDone = new YoBoolean("ICPPlannerDone", registry);
 
    private final DoubleProvider maxAdjustmentForRotation = new DoubleParameter("MaxAdjustmentForRotation", registry, 0.2);
@@ -220,11 +221,12 @@ public class BalanceManager
       {
          icpPlanner = new ContinuousCMPBasedICPPlanner(bipedSupportPolygons, contactableFeet, icpPlannerParameters.getNumberOfFootstepsToConsider(),
                                                                            registry, yoGraphicsListRegistry);
+         smoothCMPPlanner = null;
       }
       else
       {
          MomentumTrajectoryHandler momentumTrajectoryHandler = walkingMessageHandler == null ? null : walkingMessageHandler.getMomentumTrajectoryHandler();
-         SmoothCMPBasedICPPlanner smoothCMPPlanner = new SmoothCMPBasedICPPlanner(fullRobotModel, bipedSupportPolygons, contactableFeet, icpPlannerParameters.getNumberOfFootstepsToConsider(),
+         smoothCMPPlanner = new SmoothCMPBasedICPPlanner(fullRobotModel, bipedSupportPolygons, contactableFeet, icpPlannerParameters.getNumberOfFootstepsToConsider(),
                                                                                   momentumTrajectoryHandler, yoTime, registry, yoGraphicsListRegistry, controllerToolbox.getGravityZ());
          smoothCMPPlanner.setDefaultPhaseTimes(walkingControllerParameters.getDefaultSwingTime(), walkingControllerParameters.getDefaultTransferTime());
          smoothCMPPlanner.setFootRotationIndicator(controllerToolbox.getFootRotationInformation());
@@ -462,6 +464,14 @@ public class BalanceManager
       return false;
    }
 
+   public void endTick()
+   {
+      if (smoothCMPPlanner != null)
+      {
+         smoothCMPPlanner.endTick();
+      }
+   }
+
    private final FramePoint3D copEstimate = new FramePoint3D();
    private final FrameVector2D emptyVector = new FrameVector2D();
    public void compute(RobotSide supportLeg, double desiredCoMHeightAcceleration, boolean keepCMPInsideSupportPolygon, boolean controlHeightWithMomentum)
@@ -673,7 +683,6 @@ public class BalanceManager
 
    public void initialize()
    {
-      update();
       yoFinalDesiredICP.set(Double.NaN, Double.NaN);
       controllerToolbox.getCapturePoint(tempCapturePoint);
       yoDesiredCapturePoint.set(tempCapturePoint);

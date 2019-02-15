@@ -1,20 +1,23 @@
 package us.ihmc.tools.taskExecutor;
 
+import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
 public class ParallelTask<T> implements Task
 {
    // TODO convert to ObjectObjectMap<T, TaskExecutor>
-   private final Map<T, TaskExecutor> executors = new LinkedHashMap<T, TaskExecutor>();
+   private final Map<T, TaskExecutor> executorMap = new LinkedHashMap<T, TaskExecutor>();
+   private final ArrayList<TaskExecutor> executors = new ArrayList<>();
 
    public void submit(T executorKey, Task task)
    {
-      TaskExecutor executor = executors.get(executorKey);
+      TaskExecutor executor = executorMap.get(executorKey);
       if (executor == null)
       {
          executor = new TaskExecutor();
-         executors.put(executorKey, executor);
+         executorMap.put(executorKey, executor);
+         executors.add(executor);
       }
 
       executor.submit(task);
@@ -22,26 +25,27 @@ public class ParallelTask<T> implements Task
 
    public void clear(T executorKey)
    {
-      TaskExecutor taskExecutor = executors.get(executorKey);
+      TaskExecutor taskExecutor = executorMap.get(executorKey);
       if (taskExecutor != null)
          taskExecutor.clear();
+      
    }
 
    @Override
    public void doTransitionIntoAction()
    {
-      for (TaskExecutor taskExecutor : executors.values())
+      for (int i = 0; i < executors.size(); i++)
       {
-         taskExecutor.handleTransitions();
+         executors.get(i).handleTransitions();
       }
    }
 
    @Override
    public void doAction()
    {
-      for (TaskExecutor taskExecutor : executors.values())
+      for (int i = 0; i < executors.size(); i++)
       {
-         taskExecutor.doControl();
+         executors.get(i).doControl();
       }
    }
 
@@ -54,12 +58,21 @@ public class ParallelTask<T> implements Task
    @Override
    public boolean isDone()
    {
-      for (TaskExecutor taskExecutor : executors.values())
+      for (int i = 0; i < executors.size(); i++)
       {
-         if (!taskExecutor.isDone())
+         
+         if (!executors.get(i).isDone())
             return false;
       }
 
       return true;
+   }
+
+   public void clearAll()
+   {
+      for (int i = 0; i < executors.size(); i++)
+      {
+         executors.get(i).clear();
+      }
    }
 }
