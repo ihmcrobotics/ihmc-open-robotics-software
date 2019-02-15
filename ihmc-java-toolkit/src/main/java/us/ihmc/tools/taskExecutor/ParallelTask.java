@@ -67,4 +67,12 @@ public class ParallelTask<T> implements Task
 
       return true;
    }
+
+   public void clearAll()
+   {
+      for (int i = 0; i < executors.size(); i++)
+      {
+         executors.get(i).clear();
+      }
+   }
 }
