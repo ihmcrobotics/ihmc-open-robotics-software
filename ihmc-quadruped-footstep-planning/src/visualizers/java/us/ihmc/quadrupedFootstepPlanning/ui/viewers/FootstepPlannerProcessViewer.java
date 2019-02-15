@@ -143,10 +143,10 @@ public class FootstepPlannerProcessViewer extends AnimationTimer
 
    private synchronized void handleNodesThisTick(HashMap<FootstepNode, Pair<List<FootstepNode>, List<FootstepNode>>> validNodesThisTick)
    {
-      Set<SimpleFootstepNode> validNodesToRender = new HashSet<>();
-      Set<SimpleFootstepNode> invalidNodesToRender = new HashSet<>();
-      Set<SimpleFootstepNode> parentNodes = new HashSet<>();
-      Set<List<SimpleFootstepNode>> optimalPaths = new HashSet<>();
+      Set<FootstepNode> validNodesToRender = new HashSet<>();
+      Set<FootstepNode> invalidNodesToRender = new HashSet<>();
+      Set<FootstepNode> parentNodes = new HashSet<>();
+      Set<List<FootstepNode>> optimalPaths = new HashSet<>();
       for (FootstepNode parentNode : validNodesThisTick.keySet())
       {
          if (parentNode == null)
@@ -159,7 +159,7 @@ public class FootstepPlannerProcessViewer extends AnimationTimer
          {
             if (node != null)
             {
-               validNodesToRender.add(new SimpleFootstepNode(node));
+               validNodesToRender.add(node);
                if (!graph.doesNodeExist(parentNode))
                   graph.initialize(parentNode);
                graph.checkAndSetEdge(parentNode, node, costCalculator.compute(parentNode, node));
@@ -168,12 +168,11 @@ public class FootstepPlannerProcessViewer extends AnimationTimer
          for (FootstepNode node : invalidNodes)
          {
             if (node != null)
-               invalidNodesToRender.add(new SimpleFootstepNode(node));
+               invalidNodesToRender.add(node);
          }
-         parentNodes.add(new SimpleFootstepNode(parentNode));
+         parentNodes.add(parentNode);
 
-         List<FootstepNode> pathFromStart = graph.getPathFromStart(parentNode);
-         optimalPaths.add(pathFromStart.stream().map(SimpleFootstepNode::new).collect(Collectors.toList()));
+         optimalPaths.add(graph.getPathFromStart(parentNode));
       }
 
       if (validNodesToRender.size() > 0)
@@ -188,8 +187,7 @@ public class FootstepPlannerProcessViewer extends AnimationTimer
    {
       for (QuadrupedFootstepPlannerNodeRejectionReason rejectionReason : rejectedNodes.keySet())
       {
-         Set<SimpleFootstepNode> invalidNodes = new HashSet<>();
-         rejectedNodes.get(rejectionReason).forEach(node -> invalidNodes.add(new SimpleFootstepNode(node)));
+         Set<FootstepNode> invalidNodes = new HashSet<>(rejectedNodes.get(rejectionReason));
          if (invalidNodes.size() > 0)
             rejectedNodesByReasonRenderers.get(rejectionReason).processNodesToRenderOnThread(invalidNodes, rejectionByReasonColor);
       }

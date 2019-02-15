@@ -45,7 +45,7 @@ public class ParameterBasedNodeExpansionTest
 
    private static final double stanceLength = 1.0;
    private static final double stanceWidth = 0.5;
-   private static final boolean visualize = false;
+   private static final boolean visualize = true;
    private static final QuadrantDependentList<AppearanceDefinition> colorDefinitions = new QuadrantDependentList<>(YoAppearance.Red(), YoAppearance.Green(),
                                                                                                                    YoAppearance.DarkRed(),
                                                                                                                    YoAppearance.DarkGreen());
@@ -153,6 +153,7 @@ public class ParameterBasedNodeExpansionTest
       }
    }
 
+
    @Test
    public void testCheckNodeIsFarEnoughFromOtherFoot()
    {
@@ -237,6 +238,12 @@ public class ParameterBasedNodeExpansionTest
          graphics3DObject.addCone(0.3, 0.05, colorDefinitions.get(robotQuadrant));
       }
 
+      graphics3DObject.identity();
+      graphics3DObject.translate(baseNode.getOrComputeXGaitCenterPoint().getX(), baseNode.getOrComputeXGaitCenterPoint().getY(), 0.0);
+      graphics3DObject.translate(0.0, 0.0, 0.05);
+      graphics3DObject.addSphere(0.04, YoAppearance.Orange());
+
+
       for (FootstepNode neighboringNode : neighboringNodes)
       {
          RobotQuadrant quadrant = neighboringNode.getMovingQuadrant();
@@ -244,7 +251,7 @@ public class ParameterBasedNodeExpansionTest
 
          graphics3DObject.identity();
          graphics3DObject.translate(point);
-         graphics3DObject.addSphere(0.01, YoAppearance.Orange());
+         graphics3DObject.addSphere(0.02, YoAppearance.Blue());
       }
 
       scs.addStaticLinkGraphics(graphics3DObject);
