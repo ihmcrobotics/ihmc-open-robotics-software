@@ -111,7 +111,7 @@ public class PipeLine<T>
          // Thus, create a new stage in the master TaskExecutor for a new series of parallel tasks.
 
          // Create a new stage of parallel tasks.
-         lastParallelTask = new ParallelTask<T>(); //is there a nice way to pull this from a pool
+         lastParallelTask = new ParallelTask<T>(); //generates garbage, be careful when using in a realtime setting
 
          // Submit a new stage to the master TaskExecutor
          submitSingleTaskStage(lastParallelTask);
