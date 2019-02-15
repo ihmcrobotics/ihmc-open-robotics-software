@@ -45,7 +45,7 @@ public class ParameterBasedNodeExpansionTest
 
    private static final double stanceLength = 1.0;
    private static final double stanceWidth = 0.5;
-   private static final boolean visualize = true;
+   private static final boolean visualize = false;
    private static final QuadrantDependentList<AppearanceDefinition> colorDefinitions = new QuadrantDependentList<>(YoAppearance.Red(), YoAppearance.Green(),
                                                                                                                    YoAppearance.DarkRed(),
                                                                                                                    YoAppearance.DarkGreen());

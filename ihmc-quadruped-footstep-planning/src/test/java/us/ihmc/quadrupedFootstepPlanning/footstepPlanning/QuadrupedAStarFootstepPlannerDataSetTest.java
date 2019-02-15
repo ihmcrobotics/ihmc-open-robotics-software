@@ -17,7 +17,6 @@ import us.ihmc.yoVariables.registry.YoVariableRegistry;
 
 public class QuadrupedAStarFootstepPlannerDataSetTest extends FootstepPlannerDataSetTest
 {
-   private static final boolean activelyVisualize = false;
    private QuadrupedFootstepPlannerListener visualizer;
 
    public FootstepPlannerType getPlannerType()
@@ -41,10 +40,7 @@ public class QuadrupedAStarFootstepPlannerDataSetTest extends FootstepPlannerDat
       QuadrupedXGaitSettingsReadOnly xGaitSettings = getXGaitSettings();
       FootstepPlannerParameters parameters = new DefaultFootstepPlannerParameters();
       FootstepNodeExpansion expansion = new ParameterBasedNodeExpansion(parameters, xGaitSettings);
-      if (activelyVisualize)
-         visualizer = new QuadrupedAStarFootstepPlannerVisualizer(null);
-      else
-         visualizer = new AStarMessagerListener(messager);
+      visualizer = new AStarMessagerListener(messager);
 
       return QuadrupedAStarFootstepPlanner.createPlanner(parameters, xGaitSettings, visualizer, expansion, registry);
    }
