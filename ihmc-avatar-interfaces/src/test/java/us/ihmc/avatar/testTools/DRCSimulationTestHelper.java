@@ -50,6 +50,7 @@ import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelContr
 import us.ihmc.humanoidRobotics.communication.subscribers.PelvisPoseCorrectionCommunicatorInterface;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.jMonkeyEngineToolkit.camera.CameraConfiguration;
+import us.ihmc.log.LogTools;
 import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -437,6 +438,10 @@ public class DRCSimulationTestHelper
       {
          BambooTools.createVideoWithDateTimeClassMethodAndShareOnSharedDriveIfAvailable(simplifiedRobotModelName, scs, callStackHeight);
       }
+      else
+      {
+         LogTools.info("Skipping video generation.");
+      }
    }
 
    public void createVideo(String videoName)
@@ -444,6 +449,10 @@ public class DRCSimulationTestHelper
       if (simulationTestingParameters.getCreateSCSVideos())
       {
          BambooTools.createVideoWithDateTimeAndStoreInDefaultDirectory(scs, videoName);
+      }
+      else
+      {
+         LogTools.info("Skipping video generation.");
       }
    }
 
