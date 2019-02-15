@@ -122,6 +122,7 @@ public class MainTabController
    @FXML
    private Slider previewSlider;
 
+
    @FXML
    public void computePath()
    {
@@ -290,6 +291,8 @@ public class MainTabController
       footstepPlanPreviewPlaybackManager = new FootstepPlanPreviewPlaybackManager(messager);
       previewSlider.valueProperty()
                    .addListener((observable, oldValue, newValue) -> footstepPlanPreviewPlaybackManager.requestSpecificPercentageInPreview(newValue.doubleValue()));
+
+
    }
 
    @FXML
@@ -455,9 +458,9 @@ public class MainTabController
       private final AtomicReference<FootstepPlan> footstepPlanReference;
       private final AtomicReference<QuadrupedXGaitSettingsReadOnly> xGaitSettingsReference;
 
-      private final double frameDt = 0.1;
+      private final double frameDt = 0.01;
       // frames per call to handle()
-      final int playbackSpeed = 1;
+      final int playbackSpeed = 5;
       int playbackCounter = 0;
 
       // whether to show ghost robot
@@ -492,7 +495,6 @@ public class MainTabController
          double endTime = steps.get(footstepPlan.getNumberOfSteps() - 1).getTimeInterval().getEndTime();
          TimeIntervalTools.sortByStartTime(steps);
          double startTime = steps.get(0).getTimeInterval().getStartTime() - 1.0;
-         int totalNumberOfFrames = (int) ((endTime - startTime) / frameDt);
 
          footPositionScene.clear();
 
@@ -533,6 +535,8 @@ public class MainTabController
 
             time += frameDt;
          }
+
+         previewSlider.setBlockIncrement(1.0 / footPositionScene.size());
       }
 
       @Override
