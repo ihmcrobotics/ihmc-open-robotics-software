@@ -9,17 +9,21 @@ import javafx.stage.Stage;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.communication.controllerAPI.RobotLowLevelMessenger;
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParameters;
+import us.ihmc.footstepPlanning.ui.components.StartGoalOrientationEditor;
+import us.ihmc.footstepPlanning.ui.viewers.StartGoalOrientationViewer;
+import us.ihmc.footstepPlanning.ui.viewers.StartGoalPositionViewer;
 import us.ihmc.humanoidBehaviors.ui.controllers.PatrolUIController;
 import us.ihmc.javaFXToolkit.messager.JavaFXMessager;
 import us.ihmc.javaFXToolkit.scenes.View3DFactory;
 import us.ihmc.javaFXVisualizers.JavaFXRobotVisualizer;
 import us.ihmc.pathPlanning.visibilityGraphs.interfaces.VisibilityGraphsParameters;
+import us.ihmc.pathPlanning.visibilityGraphs.ui.StartGoalPositionEditor;
 import us.ihmc.pathPlanning.visibilityGraphs.ui.viewers.PlanarRegionViewer;
 import us.ihmc.robotModels.FullHumanoidRobotModelFactory;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.wholeBodyController.RobotContactPointParameters;
 
-import static us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI.*;
+import static us.ihmc.humanoidBehaviors.ui.BehaviorUIMessagerAPI.*;
 
 /**
  * This class constructs a UI for behavior operation.
@@ -31,6 +35,10 @@ public class BehaviorUI
    private final BorderPane mainPane;
 
    private final PlanarRegionViewer planarRegionViewer;
+   private final StartGoalPositionEditor startGoalEditor;
+   private final StartGoalOrientationEditor orientationEditor;
+   private final StartGoalPositionViewer startGoalPositionViewer;
+   private final StartGoalOrientationViewer startGoalOrientationViewer;
    private final JavaFXRobotVisualizer robotVisualizer;
 
    @FXML private PatrolUIController patrolUIController;
@@ -53,7 +61,18 @@ public class BehaviorUI
       view3dFactory.addWorldCoordinateSystem(0.3);
       Pane subScene = view3dFactory.getSubSceneWrappedInsidePane();
 
-      this.planarRegionViewer = new PlanarRegionViewer(messager, PlanarRegionDataTopic, ShowPlanarRegionsTopic);
+      planarRegionViewer = new PlanarRegionViewer(messager, PlanarRegionDataTopic, ShowPlanarRegionsTopic);
+      startGoalPositionViewer = new StartGoalPositionViewer(messager, WaypointAPositionEditModeEnabledTopic, WaypointBPositionEditModeEnabledTopic,
+                                                            WaypointAPositionTopic, LowLevelGoalPositionTopic, WaypointBPositionTopic);
+      startGoalOrientationViewer = new StartGoalOrientationViewer(messager);
+      startGoalEditor = new StartGoalPositionEditor(messager, subScene, WaypointAPositionEditModeEnabledTopic, WaypointBPositionEditModeEnabledTopic,
+                                                    WaypointAPositionTopic, WaypointBPositionTopic, PlanarRegionDataTopic, SelectedRegionTopic,
+                                                    WaypointAOrientationEditModeEnabledTopic, WaypointBOrientationEditModeEnabledTopic);
+      orientationEditor = new StartGoalOrientationEditor(messager, view3dFactory.getSubScene());
+
+      view3dFactory.addNodeToView(planarRegionViewer.getRoot());
+      view3dFactory.addNodeToView(startGoalPositionViewer.getRoot());
+      view3dFactory.addNodeToView(startGoalOrientationViewer.getRoot());
 
       if(fullHumanoidRobotModelFactory == null)
       {
@@ -68,10 +87,16 @@ public class BehaviorUI
          robotVisualizer.start();
       }
 
+      planarRegionViewer.start();
+      startGoalPositionViewer.start();
+      startGoalOrientationViewer.start();
+      startGoalEditor.start();
+      orientationEditor.start();
+
       mainPane.setCenter(subScene);
       primaryStage.setTitle(getClass().getSimpleName());
-      primaryStage.setMaximized(true);
-      Scene mainScene = new Scene(mainPane, 600, 400);
+      primaryStage.setMaximized(false);
+      Scene mainScene = new Scene(mainPane, 1200, 800);
 
       primaryStage.setScene(mainScene);
       primaryStage.setOnCloseRequest(event -> stop());
@@ -90,6 +115,10 @@ public class BehaviorUI
    public void stop()
    {
       planarRegionViewer.stop();
+      startGoalPositionViewer.stop();
+      startGoalOrientationViewer.stop();
+      startGoalEditor.stop();
+      orientationEditor.stop();
 
       if(robotVisualizer != null)
          robotVisualizer.stop();
