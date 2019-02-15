@@ -46,7 +46,7 @@ import us.ihmc.simulationconstructionset.util.simulationTesting.SimulationTestin
 import us.ihmc.tools.MemoryTools;
 import us.ihmc.yoVariables.variable.YoEnum;
 
-@Tag("humanoid-obstacle")
+@Tag("humanoid-obstacle-3")
 public abstract class AvatarPushRecoveryOverSteppingStonesTest implements MultiRobotTestInterface
 {
    private static final SimulationTestingParameters simulationTestingParameters = SimulationTestingParameters.createFromEnvironmentVariables();
