@@ -304,11 +304,27 @@ public class QuadrupedAStarFootstepPlanner implements QuadrupedBodyPathAndFootst
 
       double currentTime = 0;
 
+      FootstepNode parentNode = null;
       for (int i = 0; i < path.size(); i++)
       {
+
          currentTime += xGaitSettings.getEndDoubleSupportDuration();
 
          FootstepNode node = path.get(i);
+
+         /*
+         if (i > 0)
+         {
+            for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
+            {
+               if (robotQuadrant == node.getMovingQuadrant())
+                  continue;
+
+               if (!parentNode.quadrantGeometricallyEquals(robotQuadrant, node))
+                  throw new RuntimeException("I moved more than one foot here.");
+            }
+         }
+         */
 
          RobotQuadrant robotQuadrant = node.getMovingQuadrant();
 
@@ -327,6 +343,8 @@ public class QuadrupedAStarFootstepPlanner implements QuadrupedBodyPathAndFootst
          newStep.setGoalPosition(position);
 
          plan.addFootstep(newStep);
+
+         parentNode = node;
       }
 
       return plan;

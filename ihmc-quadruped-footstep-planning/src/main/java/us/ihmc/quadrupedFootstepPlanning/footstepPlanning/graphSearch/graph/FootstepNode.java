@@ -34,6 +34,7 @@ public class FootstepNode
    private Point2D xGaitCenterPoint;
 
    private final int hashCode;
+   private final int fullHashCode;
    private final int planarRegionsHashCode;
 
    private final RobotQuadrant movingQuadrant;
@@ -112,6 +113,7 @@ public class FootstepNode
       nominalYaw = computeNominalYaw(xFrontLeft, yFrontLeft, xFrontRight, yFrontRight, xHindLeft, yHindLeft, xHindRight, yHindRight);
 
       hashCode = computeHashCode(this);
+      fullHashCode = computeFullHashCode(this);
       planarRegionsHashCode = computePlanarRegionsHashCode(this);
    }
 
@@ -228,6 +230,11 @@ public class FootstepNode
       return hashCode;
    }
 
+   public int fullHashCode()
+   {
+      return fullHashCode;
+   }
+
    public int getPlanarRegionsHashCode()
    {
       return planarRegionsHashCode;
@@ -238,9 +245,21 @@ public class FootstepNode
       final int prime = 31;
       int result = 1;
       result = prime * result + ((node.getMovingQuadrant() == null) ? 0 : node.getMovingQuadrant().hashCode());
-//      for (RobotQuadrant robotQuadrant)
       result = prime * result + node.getXIndex(node.getMovingQuadrant());
       result = prime * result + node.getYIndex(node.getMovingQuadrant());
+      return result;
+   }
+
+   private static int computeFullHashCode(FootstepNode node)
+   {
+      final int prime = 31;
+      int result = 1;
+      result = prime * result + ((node.getMovingQuadrant() == null) ? 0 : node.getMovingQuadrant().hashCode());
+      for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
+      {
+         result = prime * result + node.getXIndex(robotQuadrant);
+         result = prime * result + node.getYIndex(robotQuadrant);
+      }
       return result;
    }
 

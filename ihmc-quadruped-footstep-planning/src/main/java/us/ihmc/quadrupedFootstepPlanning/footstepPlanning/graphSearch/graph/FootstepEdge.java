@@ -51,8 +51,8 @@ public class FootstepEdge
    {
       final int prime = 31;
       int result = 1;
-      result = prime * result + ((edge.endNode == null) ? 0 : edge.endNode.hashCode());
-      result = prime * result + ((edge.startNode == null) ? 0 : edge.startNode.hashCode());
+      result = prime * result + ((edge.endNode == null) ? 0 : edge.endNode.fullHashCode());
+      result = prime * result + ((edge.startNode == null) ? 0 : edge.startNode.fullHashCode());
       return result;
    }
 
