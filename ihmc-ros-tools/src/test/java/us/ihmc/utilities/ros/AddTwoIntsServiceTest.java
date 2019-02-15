@@ -92,7 +92,7 @@ public class AddTwoIntsServiceTest extends IHMCRosTestWithRosCore
       for (int i = 0; i < nTry; i++)
       {
          long answer = serviceClient.simpleCall(i, 0);
-         org.junit.Assert.assertEquals(i + 0, answer);
+         assertEquals(i + 0, answer);
       }
    }
 }
