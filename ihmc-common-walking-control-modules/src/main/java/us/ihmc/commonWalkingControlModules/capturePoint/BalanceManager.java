@@ -926,7 +926,6 @@ public class BalanceManager
    public void updateCurrentICPPlan()
    {
       icpPlanner.updateCurrentPlan();
-      computeICPPlan();
    }
 
    public void updateSwingTimeRemaining(double timeRemainingInSwing)
