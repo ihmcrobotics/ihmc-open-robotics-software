@@ -1,10 +1,11 @@
 package us.ihmc.humanoidBehaviors.ui.controllers;
 
+import controller_msgs.msg.dds.GoHomeMessage;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
+import us.ihmc.communication.controllerAPI.RobotLowLevelMessenger;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.transform.RigidBodyTransform;
-import us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI;
 import us.ihmc.humanoidBehaviors.ui.BehaviorUIMessagerAPI;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.javaFXToolkit.messager.JavaFXMessager;
@@ -25,14 +26,16 @@ public class PatrolUIController
    @FXML private Button placeWaypointB;
 
    private JavaFXMessager messager;
+   private RobotLowLevelMessenger robotLowLevelMessenger;
+
    private HumanoidReferenceFrames humanoidReferenceFrames;
 
    public void attachMessager(JavaFXMessager messager)
    {
       this.messager = messager;
 
-      messager.bindPropertyToTopic(FootstepPlannerMessagerAPI.EditModeEnabledTopic, placeWaypointA.disableProperty());
-      messager.bindPropertyToTopic(FootstepPlannerMessagerAPI.EditModeEnabledTopic, placeWaypointB.disableProperty());
+      messager.bindPropertyToTopic(BehaviorUIMessagerAPI.EditModeEnabledTopic, placeWaypointA.disableProperty());
+      messager.bindPropertyToTopic(BehaviorUIMessagerAPI.EditModeEnabledTopic, placeWaypointB.disableProperty());
    }
 
    public void setFullRobotModel(FullHumanoidRobotModel fullHumanoidRobotModel)
@@ -40,19 +43,40 @@ public class PatrolUIController
       this.humanoidReferenceFrames = new HumanoidReferenceFrames(fullHumanoidRobotModel);
    }
 
+   public void setRobotLowLevelMessenger(RobotLowLevelMessenger robotLowLevelMessenger)
+   {
+      this.robotLowLevelMessenger = robotLowLevelMessenger;
+      updateButtons();
+   }
+
+   private void updateButtons()
+   {
+      homeAll.setDisable(messager == null);
+      freeze.setDisable(robotLowLevelMessenger == null);
+      standPrep.setDisable(robotLowLevelMessenger == null);
+   }
+
    @FXML public void homeAll()
    {
+      GoHomeMessage homeLeftArm = new GoHomeMessage();
+      homeLeftArm.setHumanoidBodyPart(GoHomeMessage.HUMANOID_BODY_PART_ARM);
+      homeLeftArm.setRobotSide(GoHomeMessage.ROBOT_SIDE_LEFT);
+      messager.submitMessage(BehaviorUIMessagerAPI.GoHomeTopic, homeLeftArm);
 
+      GoHomeMessage homeRightArm = new GoHomeMessage();
+      homeRightArm.setHumanoidBodyPart(GoHomeMessage.HUMANOID_BODY_PART_ARM);
+      homeRightArm.setRobotSide(GoHomeMessage.ROBOT_SIDE_RIGHT);
+      messager.submitMessage(BehaviorUIMessagerAPI.GoHomeTopic, homeRightArm);
    }
 
    @FXML public void freeze()
    {
-
+      robotLowLevelMessenger.sendFreezeRequest();
    }
 
    @FXML public void standPrep()
    {
-
+      robotLowLevelMessenger.sendStandRequest();
    }
 
    @FXML public void continuePatrol()
@@ -72,7 +96,7 @@ public class PatrolUIController
 
    @FXML public void clearFlat()
    {
-      messager.submitMessage(FootstepPlannerMessagerAPI.PlanarRegionDataTopic, buildFlatGround());
+      messager.submitMessage(BehaviorUIMessagerAPI.PlanarRegionDataTopic, buildFlatGround());
    }
 
    @FXML public void placeWaypointA()

@@ -76,31 +76,4 @@ public class AtlasRemoteFootstepPlannerUI extends Application
    {
       launch(args);
    }
-
-   private class AtlasLowLevelMessenger implements RobotLowLevelMessenger
-   {
-      private final IHMCRealtimeROS2Publisher<AtlasLowLevelControlModeMessage> lowLevelModePublisher;
-
-      public AtlasLowLevelMessenger(RealtimeRos2Node ros2Node, String robotName)
-      {
-         lowLevelModePublisher = ROS2Tools.createPublisher(ros2Node, AtlasLowLevelControlModeMessage.class,
-                                                           ControllerAPIDefinition.getSubscriberTopicNameGenerator(robotName));
-      }
-
-      @Override
-      public void sendFreezeRequest()
-      {
-         AtlasLowLevelControlModeMessage message = new AtlasLowLevelControlModeMessage();
-         message.setRequestedAtlasLowLevelControlMode(AtlasLowLevelControlMode.FREEZE.toByte());
-         lowLevelModePublisher.publish(message);
-      }
-
-      @Override
-      public void sendStandRequest()
-      {
-         AtlasLowLevelControlModeMessage message = new AtlasLowLevelControlModeMessage();
-         message.setRequestedAtlasLowLevelControlMode(AtlasLowLevelControlMode.STAND_PREP.toByte());
-         lowLevelModePublisher.publish(message);
-      }
-   }
 }
