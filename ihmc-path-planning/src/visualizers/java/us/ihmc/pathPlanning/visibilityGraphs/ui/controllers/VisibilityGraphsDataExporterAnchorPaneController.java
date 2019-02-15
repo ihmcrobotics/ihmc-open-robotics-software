@@ -52,6 +52,7 @@ public class VisibilityGraphsDataExporterAnchorPaneController
    @FXML
    private void exportDataSet()
    {
+      messager.submitMessage(UIVisibilityGraphsTopics.exportUnitTestPath, currentPlanarRegionDataFolderTextField.getText());
       messager.submitMessage(UIVisibilityGraphsTopics.exportUnitTestDataFile, true);
    }
 }

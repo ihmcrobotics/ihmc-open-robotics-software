@@ -148,9 +148,9 @@ public abstract class FootstepPlannerDataSetTest
                                                            {
                                                               if(!dataSet.hasPlannerInput())
                                                                  return false;
-                                                              if(!dataSet.getPlannerInput().getBooleanFlag(FootstepPlannerDataExporter.TESTABLE_FLAG))
+                                                              if(!dataSet.getPlannerInput().getStepPlannerIsTestable())
                                                                  return false;
-                                                              return dataSet.getPlannerInput().containsFlag(getTimeoutFlag());
+                                                              return dataSet.getPlannerInput().containsTimeoutFlag(getPlannerType().toString().toLowerCase());
                                                            });
       runAssertionsOnAllDatasets(this::runAssertions, dataSets);
    }
@@ -163,12 +163,9 @@ public abstract class FootstepPlannerDataSetTest
                                                            {
                                                               if(!dataSet.hasPlannerInput())
                                                                  return false;
-                                                              // must have false testable flag to be"in-development"
-                                                              if(!dataSet.getPlannerInput().containsFlag(FootstepPlannerDataExporter.TESTABLE_FLAG))
+                                                              if(!dataSet.getPlannerInput().getStepPlannerIsInDevelopment())
                                                                  return false;
-                                                              if(dataSet.getPlannerInput().getBooleanFlag(FootstepPlannerDataExporter.TESTABLE_FLAG))
-                                                                 return false;
-                                                              return dataSet.getPlannerInput().containsFlag(getTimeoutFlag());
+                                                              return dataSet.getPlannerInput().containsTimeoutFlag(getPlannerType().toString().toLowerCase());
                                                            });
       runAssertionsOnAllDatasets(this::runAssertions, dataSets);
    }
@@ -179,11 +176,6 @@ public abstract class FootstepPlannerDataSetTest
       resetAllAtomics();
       String errorMessages = datasetTestRunner.apply(dataset);
       Assert.assertTrue("Errors:" + errorMessages, errorMessages.isEmpty());
-   }
-
-   private String getTimeoutFlag()
-   {
-      return getPlannerType().toString().toLowerCase() + "_timeout";
    }
 
    private void runAssertionsOnAllDatasets(Function<DataSet, String> dataSetTester, List<DataSet> allDatasets)
@@ -254,7 +246,7 @@ public abstract class FootstepPlannerDataSetTest
       messager.submitMessage(FootstepPlannerMessagerAPI.PlanarRegionDataTopic, dataset.getPlanarRegionsList());
 
       double timeMultiplier = ContinuousIntegrationTools.isRunningOnContinuousIntegrationServer() ? bambooTimeScaling : 1.0;
-      double timeout = plannerInput.getDoubleFlag(getTimeoutFlag());
+      double timeout = plannerInput.getTimeoutFlag(getPlannerType().toString().toLowerCase());
       messager.submitMessage(FootstepPlannerMessagerAPI.PlannerTimeoutTopic, timeMultiplier * timeout);
 
       messager.submitMessage(FootstepPlannerMessagerAPI.PlannerHorizonLengthTopic, Double.MAX_VALUE);
@@ -421,7 +413,7 @@ public abstract class FootstepPlannerDataSetTest
       PlannerInput plannerInput = dataset.getPlannerInput();
       totalTimeTaken = 0.0;
       double timeoutMultiplier = ContinuousIntegrationTools.isRunningOnContinuousIntegrationServer() ? bambooTimeScaling : 1.0;
-      double maxTimeToWait = 2.0 * timeoutMultiplier * plannerInput.getDoubleFlag(getTimeoutFlag());
+      double maxTimeToWait = 2.0 * timeoutMultiplier * plannerInput.getTimeoutFlag(getPlannerType().toString().toLowerCase());
       String datasetName = dataset.getName();
 
       String errorMessage = waitForResult(maxTimeToWait, datasetName);

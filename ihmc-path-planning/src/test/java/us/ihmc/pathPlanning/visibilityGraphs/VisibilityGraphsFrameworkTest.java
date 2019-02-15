@@ -79,7 +79,7 @@ public class VisibilityGraphsFrameworkTest
    }
 
    @BeforeEach
-   public void setup() throws InterruptedException, Exception
+   public void setup()
    {
       VISUALIZE = VISUALIZE && !ContinuousIntegrationTools.isRunningOnContinuousIntegrationServer();
       DEBUG = (VISUALIZE || (DEBUG && !ContinuousIntegrationTools.isRunningOnContinuousIntegrationServer()));
@@ -105,7 +105,7 @@ public class VisibilityGraphsFrameworkTest
    }
 
    @Test
-   public void testDatasetsWithoutOcclusion() throws Exception
+   public void testDatasetsWithoutOcclusion()
    {
       if (VISUALIZE)
       {
@@ -119,7 +119,7 @@ public class VisibilityGraphsFrameworkTest
    //TODO: Fix and make this pass.
    @Disabled("This needs to be fixed for when start and goal are invalid.")
    @Test
-   public void testDatasetsNoOcclusionSimulateDynamicReplanning() throws Exception
+   public void testDatasetsNoOcclusionSimulateDynamicReplanning()
    {
       if (VISUALIZE)
       {
@@ -131,7 +131,7 @@ public class VisibilityGraphsFrameworkTest
    //TODO: Fix and make this pass.
    @Disabled("Occlusion planning needs to be implemented better.")
    @Test
-   public void testDatasetsSimulateOcclusionAndDynamicReplanning() throws Exception
+   public void testDatasetsSimulateOcclusionAndDynamicReplanning()
    {
       if (VISUALIZE)
       {
@@ -140,15 +140,14 @@ public class VisibilityGraphsFrameworkTest
       runAssertionsOnAllDatasets(dataset -> runAssertionsSimulateDynamicReplanning(dataset, 0.20, 1000, true));
    }
 
-   private void runAssertionsOnAllDatasets(Function<DataSet, String> dataSetTester) throws Exception
+   private void runAssertionsOnAllDatasets(Function<DataSet, String> dataSetTester)
    {
       List<DataSet> allDatasets = DataSetIOTools.loadDataSets(dataSet ->
                                                              {
                                                                 if(!dataSet.hasPlannerInput())
                                                                    return false;
                                                                 else
-                                                                   return dataSet.getPlannerInput().getBooleanFlag(
-                                                                         DatasetNavigationAccordionController.TESTABLE_FLAG);
+                                                                   return dataSet.getPlannerInput().getVisGraphIsTestable();
                                                              });
 
       if (DEBUG)

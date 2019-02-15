@@ -47,8 +47,6 @@ public abstract class FootstepPlannerDataSetTest
 {
    protected static final double bambooTimeScaling = 4.0;
    private static final double epsilon = 1e-3;
-   public static final String TESTABLE_FLAG = "testQuadrupedPlanner";
-   public static final String TIMEOUT_FLAG = "quadruped_timeout";
 
    private static final QuadrantDependentList<AppearanceDefinition> colorDefinitions = new QuadrantDependentList<>(YoAppearance.Red(), YoAppearance.Green(),
                                                                                                                    YoAppearance.DarkRed(),
@@ -153,26 +151,21 @@ public abstract class FootstepPlannerDataSetTest
    public void testDatasetsWithoutOcclusion()
    {
       List<DataSet> dataSets = DataSetIOTools.loadDataSets(dataSet ->
-                                                             {
-                                                                if(!dataSet.hasPlannerInput())
-                                                                   return false;
-                                                                return dataSet.getPlannerInput().getBooleanFlag(TESTABLE_FLAG);
-                                                             });
+                                                           {
+                                                              if (!dataSet.hasPlannerInput())
+                                                                 return false;
+                                                              return dataSet.getPlannerInput().getQuadrupedPlannerIsTestable();
+                                                           });
       runAssertionsOnAllDatasets(this::runAssertions, dataSets);
    }
 
-   @Disabled
-   @Test
-   public void testDatasetsWithoutOcclusionInDevelopment()
+   @Disabled @Test public void testDatasetsWithoutOcclusionInDevelopment()
    {
       List<DataSet> dataSets = DataSetIOTools.loadDataSets(dataSet ->
                                                            {
-                                                              if(!dataSet.hasPlannerInput())
+                                                              if (!dataSet.hasPlannerInput())
                                                                  return false;
-                                                              // only considered "in-development" if testable flag is present and false
-                                                              else if(!dataSet.getPlannerInput().containsFlag(TESTABLE_FLAG))
-                                                                 return false;
-                                                              return !dataSet.getPlannerInput().getBooleanFlag(TESTABLE_FLAG);
+                                                              return dataSet.getPlannerInput().getQuadrupedPlannerIsInDevelopment();
                                                            });
       runAssertionsOnAllDatasets(this::runAssertions, dataSets);
    }
@@ -241,7 +234,9 @@ public abstract class FootstepPlannerDataSetTest
       packPlanningRequest(dataset);
       String errorMessage = findPlanAndAssertGoodResult(dataset);
 
-//      visualizePlan(planner.getPlan(), dataset.getPlanarRegionsList(), dataset.getPlannerInput().getStartPosition(), dataset.getPlannerInput().getGoalPosition());
+      visualizePlan(planner.getPlan(), dataset.getPlanarRegionsList(), dataset.getPlannerInput().getStartPosition(),
+                    dataset.getPlannerInput().getGoalPosition());
+
       return errorMessage;
    }
 
@@ -258,7 +253,7 @@ public abstract class FootstepPlannerDataSetTest
          goalPose.setOrientation(new Quaternion(plannerInput.getGoalYaw(), 0.0, 0.0));
 
       double timeMultiplier = ContinuousIntegrationTools.isRunningOnContinuousIntegrationServer() ? bambooTimeScaling : 1.0;
-      double timeout = timeMultiplier * plannerInput.getDoubleFlag(TIMEOUT_FLAG);
+      double timeout = timeMultiplier * plannerInput.getQuadrupedTimeout();
 
       QuadrupedFootstepPlannerStart start = new QuadrupedFootstepPlannerStart();
       QuadrupedFootstepPlannerGoal goal = new QuadrupedFootstepPlannerGoal();
