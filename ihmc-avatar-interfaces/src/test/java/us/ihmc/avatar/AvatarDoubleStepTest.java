@@ -27,7 +27,7 @@ import us.ihmc.yoVariables.variable.YoEnum;
 
 import static us.ihmc.robotics.Assert.*;
 
-@Tag("humanoid-flat-ground")
+@Tag("humanoid-flat-ground-2")
 public abstract class AvatarDoubleStepTest implements MultiRobotTestInterface
 {
    private SimulationTestingParameters simulationTestingParameters = SimulationTestingParameters.createFromSystemProperties();
