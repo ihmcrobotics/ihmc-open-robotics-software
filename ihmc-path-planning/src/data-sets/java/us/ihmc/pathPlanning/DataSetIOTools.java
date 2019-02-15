@@ -1,7 +1,6 @@
 package us.ihmc.pathPlanning;
 
 import org.apache.commons.io.Charsets;
-import org.apache.commons.io.IOUtils;
 import us.ihmc.robotics.PlanarRegionFileTools;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 
@@ -9,7 +8,6 @@ import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.function.Predicate;
@@ -34,7 +32,6 @@ public class DataSetIOTools
    public static final String TESTABLE_FLAG = "test";
    public static final String IN_DEVELOPMENT_FLAG = "dev";
 
-   private static final String DATA_SET_LIST_FILENAME = "DataSetList.txt";
    private static final String PLANAR_REGIONS_DIRECTORY = "PlanarRegions";
    private static final String PLANNER_INPUTS_FILENAME = "PlannerInputs.txt";
 
@@ -53,7 +50,7 @@ public class DataSetIOTools
       }
       catch (IOException e)
       {
-         throw new RuntimeException("Unable to read dataset names list. expected filename: " + DATA_SET_LIST_FILENAME);
+         throw new RuntimeException("Unable to read list of data set directories");
       }
 
       ArrayList<DataSet> dataSets = new ArrayList<>();
@@ -71,7 +68,7 @@ public class DataSetIOTools
    private static List<String> loadDataSetNames() throws IOException
    {
       Class<?> loadingClass = DataSetIOTools.class;
-      InputStream dataSetListStream = loadingClass.getResourceAsStream(DATA_SET_LIST_FILENAME);
+      InputStream dataSetListStream = loadingClass.getResourceAsStream("/" + DATA_SET_DIRECTORY_PATH);
 
       InputStreamReader reader = new InputStreamReader(dataSetListStream, Charsets.toCharset(UTF_8));
       BufferedReader bufferedReader = new BufferedReader(reader);
