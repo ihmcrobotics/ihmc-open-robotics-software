@@ -14,9 +14,11 @@ import static us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI.
 
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
+import javafx.scene.AmbientLight;
 import javafx.scene.Scene;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.Pane;
+import javafx.scene.paint.Color;
 import javafx.stage.Stage;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.communication.controllerAPI.RobotLowLevelMessenger;
@@ -168,6 +170,19 @@ public class FootstepPlannerUI
       View3DFactory view3dFactory = View3DFactory.createSubscene();
       view3dFactory.addCameraController(true);
       view3dFactory.addWorldCoordinateSystem(0.3);
+      {
+         /** TODO: Replace with View3DFactory.addDefaultLighting() when javafx-toolkit 0.12.8+ is released */
+         double ambientValue = 0.7;
+         double pointValue = 0.2;
+         double pointDistance = 1000.0;
+         Color ambientColor = Color.color(ambientValue, ambientValue, ambientValue);
+         view3dFactory.addNodeToView(new AmbientLight(ambientColor));
+         Color indoorColor = Color.color(pointValue, pointValue, pointValue);
+         view3dFactory.addPointLight(pointDistance, pointDistance, pointDistance, indoorColor);
+         view3dFactory.addPointLight(-pointDistance, pointDistance, pointDistance, indoorColor);
+         view3dFactory.addPointLight(-pointDistance, -pointDistance, pointDistance, indoorColor);
+         view3dFactory.addPointLight(pointDistance, -pointDistance, pointDistance, indoorColor);
+      }
       Pane subScene = view3dFactory.getSubSceneWrappedInsidePane();
 
       this.planarRegionViewer = new PlanarRegionViewer(messager, PlanarRegionDataTopic, ShowPlanarRegionsTopic);
