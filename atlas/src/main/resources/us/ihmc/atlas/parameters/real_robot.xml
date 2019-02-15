@@ -68,7 +68,7 @@
 <parameter name="lookAtTwoStepCapturabilityForToeOff" type="BooleanParameter" value="false"/>
                             </registry>
                             <registry name="FootRotationDetectorParameters">
-<parameter name="omegaThresholdForEstimation" type="DoubleParameter" min="0.0" max="1.0" value="1.5"/>
+<parameter name="omegaThresholdForEstimation" type="DoubleParameter" min="0.0" max="1.0" value="2.0"/>
 <parameter name="rotationThreshold" type="DoubleParameter" min="0.0" max="1.0" value="0.05"/>
                             </registry>
                             <registry name="FootRotationHelperParameters">
@@ -78,6 +78,16 @@
 <parameter name="avoidFootRotations" type="BooleanParameter" value="true"/>
 <parameter name="dampFootRotations" type="BooleanParameter" value="true"/>
 <parameter name="footDamping" type="DoubleParameter" min="0.0" max="1.0" value="20.0"/>
+                            </registry>
+                        </registry>
+                        <registry name="BalanceManager">
+                            <registry name="ICPOptimizationLinearMomentumRateOfChangeControlModule">
+<registry name="ICPOptimizationController">
+    <parameter name="controllerForwardAdjustmentLimit" type="DoubleParameter" min="0.0" max="1.0" value="0.05"/>
+    <parameter name="controllerBackwardAdjustmentLimit" type="DoubleParameter" min="0.0" max="1.0" value="0.05"/>
+    <parameter name="controllerInwardAdjustmentLimit" type="DoubleParameter" min="0.0" max="1.0" value="0.05"/>
+    <parameter name="controllerOutwardAdjustmentLimit" type="DoubleParameter" min="0.0" max="1.0" value="0.05"/>
+</registry>
                             </registry>
                         </registry>
                     </registry>
