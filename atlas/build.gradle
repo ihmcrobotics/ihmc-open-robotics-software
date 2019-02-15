@@ -71,6 +71,7 @@ mainDependencies {
    compile group: "us.ihmc", name: "ihmc-manipulation-planning", version: "source"
    compile group: "us.ihmc", name: "ihmc-parameter-tuner", version: "source"
    compile group: "us.ihmc", name: "ihmc-footstep-planning-visualizers", version: "source"
+   compile group: "us.ihmc", name: "ihmc-humanoid-behaviors-fx-ui", version: "source"
 }
 
 testDependencies {
