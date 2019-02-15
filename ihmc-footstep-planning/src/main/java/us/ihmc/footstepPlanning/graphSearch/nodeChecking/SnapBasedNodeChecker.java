@@ -60,7 +60,9 @@ public class SnapBasedNodeChecker extends FootstepNodeChecker
       ConvexPolygon2D footholdAfterSnap = snapData.getCroppedFoothold();
       double area = footholdAfterSnap.getArea();
       double footArea = footPolygons.get(node.getRobotSide()).getArea();
-      if (!footholdAfterSnap.isEmpty() && area < parameters.getMinimumFootholdPercent() * footArea)
+
+      double epsilonAreaPercentage = 1e-4;
+      if (!footholdAfterSnap.isEmpty() && area < (parameters.getMinimumFootholdPercent() - epsilonAreaPercentage) * footArea)
       {
          if (DEBUG)
          {
