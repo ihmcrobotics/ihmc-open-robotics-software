@@ -413,9 +413,7 @@ public class KinematicsPlanningToolboxController extends ToolboxController
          if (!appendRobotConfigurationOnToolboxSolution() || indexOfCurrentKeyFrame.getIntegerValue() == getNumberOfKeyFrames())
          {
             isDone.set(true);
-            solution.setDestination(PacketDestination.BEHAVIOR_MODULE.ordinal());
             WholeBodyTrajectoryMessage wholeBodyTrajectoryMessage = new WholeBodyTrajectoryMessage();
-            wholeBodyTrajectoryMessage.setDestination(PacketDestination.CONTROLLER.ordinal());
             outputConverter.setMessageToCreate(wholeBodyTrajectoryMessage);
             outputConverter.computeWholeBodyTrajectoryMessage(solution);
             solution.getSuggestedControllerMessage().set(wholeBodyTrajectoryMessage);
