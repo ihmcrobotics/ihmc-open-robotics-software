@@ -58,7 +58,7 @@ import us.ihmc.simulationconstructionset.util.simulationTesting.SimulationTestin
 import us.ihmc.tools.MemoryTools;
 import us.ihmc.yoVariables.variable.YoEnum;
 
-@Tag("humanoid-flat-ground")
+@Tag("humanoid-flat-ground-3")
 public abstract class AvatarEndToEndForwardDynamicsCalculatorTest implements MultiRobotTestInterface
 {
    private SimulationTestingParameters simulationTestingParameters;
