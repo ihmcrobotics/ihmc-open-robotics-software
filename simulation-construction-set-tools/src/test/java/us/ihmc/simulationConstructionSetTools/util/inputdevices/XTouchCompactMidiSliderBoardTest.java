@@ -13,7 +13,7 @@ import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoVariable;
 
-@Tag("gui")
+@Tag("gui-slow")
 public class XTouchCompactMidiSliderBoardTest
 {
    @BeforeEach
