@@ -18,6 +18,7 @@ import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.communication.Footstep
 import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.graphSearch.graph.FootstepNode;
 import us.ihmc.quadrupedFootstepPlanning.ui.SimpleFootstepNode;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
+import us.ihmc.robotics.robotSide.RobotQuadrant;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -81,20 +82,21 @@ public class NodeOccupancyMapRenderer extends AnimationTimer
       this.reset.set(true);
    }
 
-   public void processNodesToRenderOnThread(Collection<SimpleFootstepNode> nodes, Color color)
+   public void processNodesToRenderOnThread(Collection<FootstepNode> nodes, Color color)
    {
       executorService.execute(() -> processNodesToRender(nodes, color));
    }
 
-   private void processNodesToRender(Collection<SimpleFootstepNode> nodes, Color color)
+   private void processNodesToRender(Collection<FootstepNode> nodes, Color color)
    {
       if (nodes == null || nodes.isEmpty())
          return;
 
-      for (SimpleFootstepNode node : nodes)
+      for (FootstepNode node : nodes)
       {
-         double x = node.getXIndex() * FootstepNode.gridSizeXY;
-         double y = node.getYIndex() * FootstepNode.gridSizeXY;
+         RobotQuadrant movingQuadrant = node.getMovingQuadrant();
+         double x = node.getXIndex(movingQuadrant) * FootstepNode.gridSizeXY;
+         double y = node.getYIndex(movingQuadrant) * FootstepNode.gridSizeXY;
          double z = getHeightAtPoint(x, y) + nodeOffsetZ;
          RigidBodyTransform transform = new RigidBodyTransform();
          transform.setTranslation(x, y, z);
