@@ -144,7 +144,7 @@ public class FootstepGraph
 
    private void checkNodeExists(FootstepNode node)
    {
-      if (!nodeCostMap.containsKey(node))
+      if (!doesNodeExist(node))
          throw new RuntimeException("Node has not been added to graph yet.");
    }
 }
