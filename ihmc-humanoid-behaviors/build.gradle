@@ -43,8 +43,15 @@ mainDependencies {
    compile group: "us.ihmc", name: "ihmc-footstep-planning", version: "source"
 }
 
-testDependencies {
+fxUiDependencies {
+   compile ihmc.sourceSetProject("main")
+   compile group: "us.ihmc", name: "ihmc-javafx-toolkit", version: "0.12.7"
+   compile group: "us.ihmc", name: "ihmc-robot-models-visualizers", version: "source"
+   compile group: "us.ihmc", name: "ihmc-path-planning-visualizers", version: "source"
+   compile group: "us.ihmc", name: "robot-environment-awareness-visualizers", version: "source"
+}
 
+testDependencies {
    compile group: "us.ihmc", name: "ihmc-commons-testing", version: "0.25.1"
    compile group: "us.ihmc", name: "ihmc-robotics-toolkit-test", version: "source"
 }
