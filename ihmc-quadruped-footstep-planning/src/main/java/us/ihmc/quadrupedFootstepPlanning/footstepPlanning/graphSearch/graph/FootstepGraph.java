@@ -52,7 +52,7 @@ public class FootstepGraph
          throw new RuntimeException("Edge exists already.");
 
       if (!outgoingEdges.containsKey(startNode))
-         outgoingEdges.put(startNode, new HashSet<FootstepEdge>());
+         outgoingEdges.put(startNode, new HashSet<>());
       EdgeCost cost = new EdgeCost(transitionCost);
       edgeCostMap.put(edge, cost);
       outgoingEdges.get(startNode).add(edge);
@@ -91,7 +91,6 @@ public class FootstepGraph
     */
    public List<FootstepNode> getPathFromStart(FootstepNode endNode)
    {
-      // FIXME this guy has a problem.
       checkNodeExists(endNode);
 
       ArrayList<FootstepNode> path = new ArrayList<>();
@@ -100,8 +99,8 @@ public class FootstepGraph
       FootstepEdge edgeFromParent = incomingBestEdge.get(endNode);
       while (edgeFromParent.getStartNode() != null)
       {
-          FootstepNode parentNode = edgeFromParent.getStartNode();
-          FootstepNode childNode = edgeFromParent.getEndNode();
+         FootstepNode parentNode = edgeFromParent.getStartNode();
+         FootstepNode childNode = edgeFromParent.getEndNode();
 
          if (!edgeFromParent.isValidEdge())
             throw new RuntimeException("Edge moves more than one footstep, making it invalid.");
@@ -116,13 +115,11 @@ public class FootstepGraph
 
          }
 
-         int currentPathSize = path.size();
          path.add(parentNode);
          edgeFromParent = incomingBestEdge.get(parentNode);
       }
 
       Collections.reverse(path);
-      
       return path;
    }
 
