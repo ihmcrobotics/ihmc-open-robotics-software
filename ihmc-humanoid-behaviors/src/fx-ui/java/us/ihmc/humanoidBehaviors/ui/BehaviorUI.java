@@ -12,17 +12,25 @@ import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParam
 import us.ihmc.communication.controllerAPI.RobotLowLevelMessenger;
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParameters;
 import us.ihmc.humanoidBehaviors.ui.controllers.PatrolUIController;
+import us.ihmc.humanoidBehaviors.ui.editors.FXUIEditor;
 import us.ihmc.humanoidBehaviors.ui.editors.SnappedPositionEditor;
+import us.ihmc.humanoidBehaviors.ui.editors.SnappedPositionEditor.API;
+import us.ihmc.humanoidBehaviors.ui.graphics.PlanarRegionsGraphic;
+import us.ihmc.humanoidBehaviors.ui.graphics.SnappedPositionGraphic;
 import us.ihmc.javaFXToolkit.messager.JavaFXMessager;
 import us.ihmc.javaFXToolkit.scenes.View3DFactory;
 import us.ihmc.javaFXVisualizers.JavaFXRobotVisualizer;
+import us.ihmc.messager.MessagerAPIFactory;
+import us.ihmc.messager.MessagerAPIFactory.MessagerAPI;
+import us.ihmc.messager.MessagerAPIFactory.Topic;
+import us.ihmc.messager.MessagerAPIFactory.TopicTheme;
 import us.ihmc.pathPlanning.visibilityGraphs.interfaces.VisibilityGraphsParameters;
 import us.ihmc.pathPlanning.visibilityGraphs.ui.viewers.PlanarRegionViewer;
 import us.ihmc.robotModels.FullHumanoidRobotModelFactory;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.wholeBodyController.RobotContactPointParameters;
 
-import static us.ihmc.humanoidBehaviors.ui.BehaviorUIMessagerAPI.*;
+import static us.ihmc.humanoidBehaviors.ui.BehaviorUI.API.*;
 
 /**
  * This class constructs a UI for behavior operation.
@@ -33,8 +41,9 @@ public class BehaviorUI
    private final Stage primaryStage;
    private final BorderPane mainPane;
 
-   private final PlanarRegionViewer planarRegionViewer;
+   private final PlanarRegionViewer planarRegionsGraphic;
    private final SnappedPositionEditor snappedPositionEditor;
+   private final SnappedPositionGraphic snappedPositionGraphic;
 //   private final StartGoalPositionEditor startGoalEditor;
 //   private final StartGoalOrientationEditor orientationEditor;
 //   private final StartGoalPositionViewer startGoalPositionViewer;
@@ -74,8 +83,9 @@ public class BehaviorUI
       }
       Pane subScene = view3dFactory.getSubSceneWrappedInsidePane();
 
-      planarRegionViewer = new PlanarRegionViewer(messager, PlanarRegionDataTopic, ShowPlanarRegionsTopic);
-      snappedPositionEditor = new SnappedPositionEditor(messager, subScene, PlanarRegionDataTopic);
+      planarRegionsGraphic = new PlanarRegionsGraphic(messager, PlanarRegionDataTopic);
+      snappedPositionEditor = new SnappedPositionEditor(messager, subScene, PlanarRegionDataTopic, ActiveEditor);
+      snappedPositionGraphic = new SnappedPositionGraphic(messager, Color.GREEN, SnappedPositionEditor.API.SelectedPosition);
 //      startGoalPositionViewer = new StartGoalPositionViewer(messager, WaypointAPositionEditModeEnabledTopic, WaypointBPositionEditModeEnabledTopic,
 //                                                            WaypointAPositionTopic, LowLevelGoalPositionTopic, WaypointBPositionTopic);
 //      startGoalOrientationViewer = new StartGoalOrientationViewer(messager);
@@ -84,7 +94,7 @@ public class BehaviorUI
 //                                                    WaypointAOrientationEditModeEnabledTopic, WaypointBOrientationEditModeEnabledTopic);
 //      orientationEditor = new StartGoalOrientationEditor(messager, view3dFactory.getSubScene());
 
-      view3dFactory.addNodeToView(planarRegionViewer.getRoot());
+      view3dFactory.addNodeToView(planarRegionsGraphic.getRoot());
 //      view3dFactory.addNodeToView(startGoalPositionViewer.getRoot());
 //      view3dFactory.addNodeToView(startGoalOrientationViewer.getRoot());
 
@@ -101,7 +111,7 @@ public class BehaviorUI
          robotVisualizer.start();
       }
 
-      planarRegionViewer.start();
+      planarRegionsGraphic.start();
       snappedPositionEditor.start();
 //      startGoalPositionViewer.start();
 //      startGoalOrientationViewer.start();
@@ -129,7 +139,7 @@ public class BehaviorUI
 
    public void stop()
    {
-      planarRegionViewer.stop();
+      planarRegionsGraphic.stop();
       snappedPositionEditor.stop();
 //      startGoalPositionViewer.stop();
 //      startGoalOrientationViewer.stop();
@@ -150,5 +160,19 @@ public class BehaviorUI
    {
       return new BehaviorUI(primaryStage, messager, plannerParameters, visibilityGraphsParameters, fullHumanoidRobotModelFactory,
                                    contactPointParameters, walkingControllerParameters);
+   }
+
+   public static class API
+   {
+      private static final MessagerAPIFactory apiFactory = new MessagerAPIFactory();
+      private static final MessagerAPIFactory.Category Category = apiFactory.createRootCategory(apiFactory.createCategoryTheme(SnappedPositionEditor.class.getSimpleName()));
+      private static final TopicTheme Theme = apiFactory.createTopicTheme("Default");
+
+      public static final Topic<FXUIEditor> ActiveEditor = Category.topic(Theme);
+
+      public static final MessagerAPI create()
+      {
+         return apiFactory.getAPIAndCloseFactory();
+      }
    }
 }
