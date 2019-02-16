@@ -19,7 +19,6 @@ import static us.ihmc.robotics.robotSide.RobotQuadrant.*;
 
 public class ParameterBasedNodeExpansion implements FootstepNodeExpansion
 {
-   private FootstepNode goalNode;
    private final FootstepPlannerParameters parameters;
    private final QuadrupedXGaitSettingsReadOnly xGaitSettings;
 
@@ -29,11 +28,6 @@ public class ParameterBasedNodeExpansion implements FootstepNodeExpansion
       this.xGaitSettings = xGaitSettings;
    }
 
-   public void setGoalNode(FootstepNode goalNode)
-   {
-      this.goalNode = goalNode;
-   }
-
    @Override
    public HashSet<FootstepNode> expandNode(FootstepNode node)
    {
@@ -41,21 +35,6 @@ public class ParameterBasedNodeExpansion implements FootstepNodeExpansion
       addDefaultFootsteps(node, expansion);
 
       return expansion;
-   }
-
-   private void addGoalNodeIfReachable(FootstepNode node, HashSet<FootstepNode> expansion)
-   {
-      if (node.euclideanDistance(goalNode) < parameters.getMaximumStepCycleDistance())
-      {
-         for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
-         {
-            if (node.quadrantEuclideanDistance(robotQuadrant, goalNode) >= parameters.getMaximumStepReach())
-               return;
-         }
-
-         expansion.add(goalNode);
-      }
-
    }
 
    private void addDefaultFootsteps(FootstepNode node, HashSet<FootstepNode> neighboringNodesToPack)
