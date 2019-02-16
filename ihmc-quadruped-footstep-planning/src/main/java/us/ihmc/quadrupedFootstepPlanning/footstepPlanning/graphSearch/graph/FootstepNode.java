@@ -16,12 +16,14 @@ import java.util.Random;
 public class FootstepNode
 {
    public static final double gridSizeXY = 0.08;
+   public static final double gridSizeYaw = 1;
 
    public static final double PRECISION = 0.05;
    public static final double INV_PRECISION = 1.0 / PRECISION;
 
    private final QuadrantDependentList<Integer> xIndices = new QuadrantDependentList<>();
    private final QuadrantDependentList<Integer> yIndices = new QuadrantDependentList<>();
+   private final int yawIndex;
 
    private final QuadrantDependentList<Double> xPositions = new QuadrantDependentList<>();
    private final QuadrantDependentList<Double> yPositions = new QuadrantDependentList<>();
@@ -111,6 +113,7 @@ public class FootstepNode
       yPositions.put(RobotQuadrant.HIND_RIGHT, yHindRight);
 
       nominalYaw = computeNominalYaw(xFrontLeft, yFrontLeft, xFrontRight, yFrontRight, xHindLeft, yHindLeft, xHindRight, yHindRight);
+      yawIndex = (int) Math.round(nominalYaw / gridSizeXY);
 
       hashCode = computeHashCode(this);
       fullHashCode = computeFullHashCode(this);
@@ -155,6 +158,11 @@ public class FootstepNode
    public int getYIndex(RobotQuadrant robotQuadrant)
    {
       return yIndices.get(robotQuadrant);
+   }
+
+   private int getYawIndex()
+   {
+      return yawIndex;
    }
 
    public double euclideanDistance(FootstepNode other)
@@ -247,6 +255,7 @@ public class FootstepNode
       result = prime * result + ((node.getMovingQuadrant() == null) ? 0 : node.getMovingQuadrant().hashCode());
       result = prime * result + node.getXIndex(node.getMovingQuadrant());
       result = prime * result + node.getYIndex(node.getMovingQuadrant());
+      result = prime * result + node.getYawIndex();
       return result;
    }
 
