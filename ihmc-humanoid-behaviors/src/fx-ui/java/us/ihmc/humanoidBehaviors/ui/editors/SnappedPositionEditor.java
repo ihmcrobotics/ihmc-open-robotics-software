@@ -24,31 +24,68 @@ import java.util.concurrent.atomic.AtomicReference;
 
 import static us.ihmc.humanoidBehaviors.ui.editors.SnappedPositionEditor.API.*;
 
-public class SnappedPositionEditor extends AnimationTimer
+public class SnappedPositionEditor extends FXUIEditor
 {
-   private boolean isRayCastInterceptorAttached = false;
-   private final AtomicReference<Point3D> latestInterception = new AtomicReference<>(null);
-   private final AtomicReference<PlanarRegion> selectedRegion = new AtomicReference<>(null);
-
-   private boolean isLeftClickInterceptorAttached = false;
-   private final AtomicBoolean positionValidated = new AtomicBoolean(false);
-
    private final Messager messager;
    private final Node sceneNode;
 
-   private final ChangingReference<Boolean> editModeEnabled;
+   private final Topic<FXUIEditor> activeEditorTopic;
+
+   private final ChangingReference<FXUIEditor> activeEditor;
    private final AtomicReference<PlanarRegionsList> planarRegionsList;
+   private final AtomicBoolean userLeftClicked = new AtomicBoolean(false);
+   private final AtomicReference<Point3D> latestInterception = new AtomicReference<>(null);
+   private final AtomicReference<PlanarRegion> selectedRegion = new AtomicReference<>(null);
 
 //   private final Topic<Boolean> orientationEditModeEnabledTopic;
 
    public SnappedPositionEditor(Messager messager, Node sceneNode,
-                                Topic<PlanarRegionsList> planarRegionDataTopic)
+                                Topic<PlanarRegionsList> planarRegionDataTopic,
+                                Topic<FXUIEditor> activeEditorTopic)
    {
       this.messager = messager;
       this.sceneNode = sceneNode;
 
-      editModeEnabled = new ChangingReference<>(messager.createInput(EditModeEnabled, false));
+      this.activeEditorTopic = activeEditorTopic;
+
+      activeEditor = new ChangingReference<>(messager.createInput(activeEditorTopic, FXUIEditor.NONE));
       planarRegionsList = messager.createInput(planarRegionDataTopic);
+   }
+
+   @Override
+   public void handle(long now)
+   {
+      if (activeEditor.get() == this)
+      {
+         if (activeEditor.hasChanged())
+         {
+            sceneNode.addEventHandler(MouseEvent.MOUSE_MOVED, this::rayCastInterceptor);
+            sceneNode.addEventHandler(MouseEvent.MOUSE_CLICKED, this::leftClickInterceptor);
+         }
+
+         Point3D interception = latestInterception.getAndSet(null);
+         if (interception != null)
+         {
+            messager.submitMessage(SelectedPlanarRegion, selectedRegion.get());
+            messager.submitMessage(SelectedPosition, interception);
+         }
+
+         if (userLeftClicked.getAndSet(false))
+         {
+            LogTools.debug("Start position is validated: " + interception, this);
+            messager.submitMessage(activeEditorTopic, FXUIEditor.NONE);
+//            if (orientationEditModeEnabledTopic != null)
+//            {
+//               LogTools.debug("submitMessage  startOrientationEditModeEnabledTopic");
+//               messager.submitMessage(orientationEditModeEnabledTopic, true);
+//            }
+         }
+      }
+      else if (activeEditor.hasChanged())
+      {
+         sceneNode.removeEventHandler(MouseEvent.ANY, this::rayCastInterceptor);
+         sceneNode.removeEventHandler(MouseEvent.ANY, this::leftClickInterceptor);
+      }
    }
 
    private void rayCastInterceptor(MouseEvent event)
@@ -79,48 +116,9 @@ public class SnappedPositionEditor extends AnimationTimer
 
    private void leftClickInterceptor(MouseEvent event)
    {
-      if (event.getButton() != MouseButton.PRIMARY)
-         return;
-
-      if (event.isStillSincePress() && event.getEventType() == MouseEvent.MOUSE_CLICKED)
-         positionValidated.set(true);
-   }
-
-   @Override
-   public void handle(long now)
-   {
-      if (editModeEnabled.get())
+      if (event.getButton() == MouseButton.PRIMARY && event.isStillSincePress())
       {
-         if (editModeEnabled.hasChanged())
-         {
-            LogTools.debug("Attaching ray cast event handler");
-            sceneNode.addEventHandler(MouseEvent.ANY, this::rayCastInterceptor);
-            LogTools.debug("Attaching left click event handler");
-            sceneNode.addEventHandler(MouseEvent.ANY, this::leftClickInterceptor);
-         }
-
-         Point3D interception = latestInterception.getAndSet(null);
-         if (interception != null)
-         {
-            messager.submitMessage(SelectedPlanarRegion, selectedRegion.get());
-            messager.submitMessage(SelectedPosition, interception);
-         }
-
-         if (positionValidated.getAndSet(false))
-         {
-            LogTools.debug("Start position is validated: " + interception, this);
-            messager.submitMessage(EditModeEnabled, false);
-//            if (orientationEditModeEnabledTopic != null)
-//            {
-//               LogTools.debug("submitMessage  startOrientationEditModeEnabledTopic");
-//               messager.submitMessage(orientationEditModeEnabledTopic, true);
-//            }
-         }
-      }
-      else if (editModeEnabled.hasChanged())
-      {
-         sceneNode.removeEventHandler(MouseEvent.ANY, this::rayCastInterceptor);
-         sceneNode.removeEventHandler(MouseEvent.ANY, this::leftClickInterceptor);
+         userLeftClicked.set(true);
       }
    }
 
@@ -142,7 +140,6 @@ public class SnappedPositionEditor extends AnimationTimer
       private static final Category Category = apiFactory.createRootCategory(apiFactory.createCategoryTheme(SnappedPositionEditor.class.getSimpleName()));
       private static final TopicTheme Theme = apiFactory.createTopicTheme("Default");
 
-      public static final Topic<Boolean> EditModeEnabled = Category.topic(Theme);
       public static final Topic<Point3D> SelectedPosition = Category.topic(Theme);
       public static final Topic<PlanarRegion> SelectedPlanarRegion = Category.topic(Theme);
 
