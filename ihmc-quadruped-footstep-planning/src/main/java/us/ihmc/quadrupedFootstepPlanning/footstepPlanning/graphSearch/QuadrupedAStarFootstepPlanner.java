@@ -179,7 +179,7 @@ public class QuadrupedAStarFootstepPlanner implements QuadrupedBodyPathAndFootst
       snapper.addSnapData(startNode, new FootstepNodeSnapData(startNodeSnapTransforms));
       nodeChecker.addStartNode(startNode, startNodeSnapTransforms);
 
-      FramePose2DReadOnly startPose = new FramePose2D(worldFrame, startNode.getOrComputeMidStancePoint(), startNode.getNominalYaw());
+      FramePose2DReadOnly startPose = new FramePose2D(worldFrame, startNode.getOrComputeXGaitCenterPoint(), startNode.getNominalYaw());
       startAndGoalListeners.parallelStream().forEach(listener -> listener.setInitialPose(startPose));
    }
 
@@ -192,7 +192,7 @@ public class QuadrupedAStarFootstepPlanner implements QuadrupedBodyPathAndFootst
 
       goalNode = getNodeFromTarget(goal);
 
-      goalPoseInWorld.set(goalNode.getOrComputeMidStancePoint(), goalNode.getNominalYaw());
+      goalPoseInWorld.set(goalNode.getOrComputeXGaitCenterPoint(), goalNode.getNominalYaw());
       startAndGoalListeners.parallelStream().forEach(listener -> listener.setGoalPose(goalPoseInWorld));
    }
 
@@ -304,27 +304,11 @@ public class QuadrupedAStarFootstepPlanner implements QuadrupedBodyPathAndFootst
 
       double currentTime = 0;
 
-      FootstepNode parentNode = null;
       for (int i = 0; i < path.size(); i++)
       {
-
          currentTime += xGaitSettings.getEndDoubleSupportDuration();
 
          FootstepNode node = path.get(i);
-
-         /*
-         if (i > 0)
-         {
-            for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
-            {
-               if (robotQuadrant == node.getMovingQuadrant())
-                  continue;
-
-               if (!parentNode.quadrantGeometricallyEquals(robotQuadrant, node))
-                  throw new RuntimeException("I moved more than one foot here.");
-            }
-         }
-         */
 
          RobotQuadrant robotQuadrant = node.getMovingQuadrant();
 
@@ -343,8 +327,6 @@ public class QuadrupedAStarFootstepPlanner implements QuadrupedBodyPathAndFootst
          newStep.setGoalPosition(position);
 
          plan.addFootstep(newStep);
-
-         parentNode = node;
       }
 
       return plan;
