@@ -11,15 +11,12 @@ import javafx.stage.Stage;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.communication.controllerAPI.RobotLowLevelMessenger;
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParameters;
-import us.ihmc.footstepPlanning.ui.components.StartGoalOrientationEditor;
-import us.ihmc.footstepPlanning.ui.viewers.StartGoalOrientationViewer;
-import us.ihmc.footstepPlanning.ui.viewers.StartGoalPositionViewer;
 import us.ihmc.humanoidBehaviors.ui.controllers.PatrolUIController;
+import us.ihmc.humanoidBehaviors.ui.editors.SnappedPositionEditor;
 import us.ihmc.javaFXToolkit.messager.JavaFXMessager;
 import us.ihmc.javaFXToolkit.scenes.View3DFactory;
 import us.ihmc.javaFXVisualizers.JavaFXRobotVisualizer;
 import us.ihmc.pathPlanning.visibilityGraphs.interfaces.VisibilityGraphsParameters;
-import us.ihmc.pathPlanning.visibilityGraphs.ui.StartGoalPositionEditor;
 import us.ihmc.pathPlanning.visibilityGraphs.ui.viewers.PlanarRegionViewer;
 import us.ihmc.robotModels.FullHumanoidRobotModelFactory;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -37,10 +34,11 @@ public class BehaviorUI
    private final BorderPane mainPane;
 
    private final PlanarRegionViewer planarRegionViewer;
-   private final StartGoalPositionEditor startGoalEditor;
-   private final StartGoalOrientationEditor orientationEditor;
-   private final StartGoalPositionViewer startGoalPositionViewer;
-   private final StartGoalOrientationViewer startGoalOrientationViewer;
+   private final SnappedPositionEditor snappedPositionEditor;
+//   private final StartGoalPositionEditor startGoalEditor;
+//   private final StartGoalOrientationEditor orientationEditor;
+//   private final StartGoalPositionViewer startGoalPositionViewer;
+//   private final StartGoalOrientationViewer startGoalOrientationViewer;
    private final JavaFXRobotVisualizer robotVisualizer;
 
    @FXML private PatrolUIController patrolUIController;
@@ -77,17 +75,18 @@ public class BehaviorUI
       Pane subScene = view3dFactory.getSubSceneWrappedInsidePane();
 
       planarRegionViewer = new PlanarRegionViewer(messager, PlanarRegionDataTopic, ShowPlanarRegionsTopic);
-      startGoalPositionViewer = new StartGoalPositionViewer(messager, WaypointAPositionEditModeEnabledTopic, WaypointBPositionEditModeEnabledTopic,
-                                                            WaypointAPositionTopic, LowLevelGoalPositionTopic, WaypointBPositionTopic);
-      startGoalOrientationViewer = new StartGoalOrientationViewer(messager);
-      startGoalEditor = new StartGoalPositionEditor(messager, subScene, WaypointAPositionEditModeEnabledTopic, WaypointBPositionEditModeEnabledTopic,
-                                                    WaypointAPositionTopic, WaypointBPositionTopic, PlanarRegionDataTopic, SelectedRegionTopic,
-                                                    WaypointAOrientationEditModeEnabledTopic, WaypointBOrientationEditModeEnabledTopic);
-      orientationEditor = new StartGoalOrientationEditor(messager, view3dFactory.getSubScene());
+      snappedPositionEditor = new SnappedPositionEditor(messager, subScene, PlanarRegionDataTopic);
+//      startGoalPositionViewer = new StartGoalPositionViewer(messager, WaypointAPositionEditModeEnabledTopic, WaypointBPositionEditModeEnabledTopic,
+//                                                            WaypointAPositionTopic, LowLevelGoalPositionTopic, WaypointBPositionTopic);
+//      startGoalOrientationViewer = new StartGoalOrientationViewer(messager);
+//      startGoalEditor = new StartGoalPositionEditor(messager, subScene, WaypointAPositionEditModeEnabledTopic, WaypointBPositionEditModeEnabledTopic,
+//                                                    WaypointAPositionTopic, WaypointBPositionTopic, PlanarRegionDataTopic, SelectedRegionTopic,
+//                                                    WaypointAOrientationEditModeEnabledTopic, WaypointBOrientationEditModeEnabledTopic);
+//      orientationEditor = new StartGoalOrientationEditor(messager, view3dFactory.getSubScene());
 
       view3dFactory.addNodeToView(planarRegionViewer.getRoot());
-      view3dFactory.addNodeToView(startGoalPositionViewer.getRoot());
-      view3dFactory.addNodeToView(startGoalOrientationViewer.getRoot());
+//      view3dFactory.addNodeToView(startGoalPositionViewer.getRoot());
+//      view3dFactory.addNodeToView(startGoalOrientationViewer.getRoot());
 
       if(fullHumanoidRobotModelFactory == null)
       {
@@ -103,10 +102,11 @@ public class BehaviorUI
       }
 
       planarRegionViewer.start();
-      startGoalPositionViewer.start();
-      startGoalOrientationViewer.start();
-      startGoalEditor.start();
-      orientationEditor.start();
+      snappedPositionEditor.start();
+//      startGoalPositionViewer.start();
+//      startGoalOrientationViewer.start();
+//      startGoalEditor.start();
+//      orientationEditor.start();
 
       mainPane.setCenter(subScene);
       primaryStage.setTitle(getClass().getSimpleName());
@@ -130,10 +130,11 @@ public class BehaviorUI
    public void stop()
    {
       planarRegionViewer.stop();
-      startGoalPositionViewer.stop();
-      startGoalOrientationViewer.stop();
-      startGoalEditor.stop();
-      orientationEditor.stop();
+      snappedPositionEditor.stop();
+//      startGoalPositionViewer.stop();
+//      startGoalOrientationViewer.stop();
+//      startGoalEditor.stop();
+//      orientationEditor.stop();
 
       if(robotVisualizer != null)
          robotVisualizer.stop();
