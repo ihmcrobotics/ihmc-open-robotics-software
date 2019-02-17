@@ -71,7 +71,7 @@ public interface FootstepPlannerParameters
     */
    default double getCliffHeightToAvoid()
    {
-      return Double.MAX_VALUE;
+      return 0.1;
    }
 
    /**
@@ -87,7 +87,7 @@ public interface FootstepPlannerParameters
     */
    default double getMinimumDistanceFromCliffBottoms()
    {
-      return 0.0;
+      return 0.03;
    }
 
    default SteppableRegionFilter getSteppableRegionFilter()
