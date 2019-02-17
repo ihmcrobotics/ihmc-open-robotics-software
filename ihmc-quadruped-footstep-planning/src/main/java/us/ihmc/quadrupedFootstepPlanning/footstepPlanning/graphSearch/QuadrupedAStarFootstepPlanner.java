@@ -20,10 +20,10 @@ import us.ihmc.quadrupedBasics.gait.QuadrupedTimedOrientedStep;
 import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.*;
 import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.graphSearch.footstepSnapping.FootstepNodeSnapData;
 import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.graphSearch.footstepSnapping.FootstepNodeSnapper;
-import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.graphSearch.footstepSnapping.FootstepNodeSnappingTools;
 import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.graphSearch.footstepSnapping.SimplePlanarRegionFootstepNodeSnapper;
 import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.graphSearch.graph.FootstepGraph;
 import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.graphSearch.graph.FootstepNode;
+import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.graphSearch.graph.FootstepNodeTools;
 import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.graphSearch.heuristics.CostToGoHeuristics;
 import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.graphSearch.heuristics.DistanceAndYawBasedHeuristics;
 import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.graphSearch.heuristics.NodeComparator;
@@ -160,7 +160,7 @@ public class QuadrupedAStarFootstepPlanner implements QuadrupedBodyPathAndFootst
          {
             int xIndex = startNode.getXIndex(robotQuadrant);
             int yIndex = startNode.getYIndex(robotQuadrant);
-            RigidBodyTransform snapTransform = FootstepNodeSnappingTools.computeSnapTransform(xIndex, yIndex, start.getFootGoalPosition(robotQuadrant));
+            RigidBodyTransform snapTransform = FootstepNodeTools.computeSnapTransform(xIndex, yIndex, start.getFootGoalPosition(robotQuadrant));
             snapper.addSnapData(xIndex, yIndex, new FootstepNodeSnapData(snapTransform));
             startNodeSnapTransforms.put(robotQuadrant, snapTransform);
          }
@@ -179,7 +179,7 @@ public class QuadrupedAStarFootstepPlanner implements QuadrupedBodyPathAndFootst
             }
             int xIndex = startNode.getXIndex(robotQuadrant);
             int yIndex = startNode.getYIndex(robotQuadrant);
-            RigidBodyTransform snapTransform = FootstepNodeSnappingTools.computeSnapTransform(xIndex, yIndex, projectedPoint);
+            RigidBodyTransform snapTransform = FootstepNodeTools.computeSnapTransform(xIndex, yIndex, projectedPoint);
             snapper.addSnapData(xIndex, yIndex, new FootstepNodeSnapData(snapTransform));
             startNodeSnapTransforms.put(robotQuadrant, snapTransform);
          }

@@ -2,14 +2,10 @@ package us.ihmc.quadrupedFootstepPlanning.footstepPlanning.graphSearch.footstepS
 
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple2D.Point2D;
-import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.graphSearch.graph.FootstepNode;
 import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.graphSearch.graph.FootstepNodeTools;
 import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.graphSearch.parameters.DefaultFootstepPlannerParameters;
 import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.graphSearch.parameters.FootstepPlannerParameters;
-import us.ihmc.quadrupedPlanning.footstepChooser.PlanarRegionsListPointSnapper;
 import us.ihmc.robotics.geometry.PlanarRegion;
-import us.ihmc.robotics.robotSide.QuadrantDependentList;
-import us.ihmc.robotics.robotSide.RobotQuadrant;
 
 public class SimplePlanarRegionFootstepNodeSnapper extends FootstepNodeSnapper
 {

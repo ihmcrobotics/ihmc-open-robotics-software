@@ -179,7 +179,7 @@ public class FootstepPlannerProcessViewer extends AnimationTimer
          allValidNodesRenderer.processNodesToRenderOnThread(validNodesToRender, validCellColor);
       if (invalidNodesToRender.size() > 0)
          allInvalidNodesRenderer.processNodesToRenderOnThread(invalidNodesToRender, rejectedCellColor);
-      if (parentNodes.size() > 0 && validNodesToRender.size() > 0)// && optimalPaths.size() > 0)
+      if (parentNodes.size() > 0 && validNodesToRender.size() > 0 && optimalPaths.size() > 0)
          nodeExpansionPlaybackRenderer.processNodesToRender(parentNodes, validNodesToRender, invalidNodesToRender, optimalPaths);
    }
 
