@@ -31,7 +31,7 @@ import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.graphSearch.listeners.
 import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.graphSearch.listeners.StartAndGoalListener;
 import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.graphSearch.nodeChecking.FootstepNodeChecker;
 import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.graphSearch.nodeChecking.FootstepNodeCheckerOfCheckers;
-import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.graphSearch.nodeChecking.PlanarRegionBaseOfCliffAvoider;
+import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.graphSearch.nodeChecking.PlanarRegionCliffAvoider;
 import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.graphSearch.nodeChecking.SnapBasedNodeChecker;
 import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.graphSearch.nodeExpansion.FootstepNodeExpansion;
 import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.graphSearch.parameters.FootstepPlannerParameters;
@@ -619,7 +619,7 @@ public class QuadrupedAStarFootstepPlanner implements QuadrupedBodyPathAndFootst
       SimplePlanarRegionFootstepNodeSnapper postProcessingSnapper = new SimplePlanarRegionFootstepNodeSnapper(parameters);
 
       SnapBasedNodeChecker snapBasedNodeChecker = new SnapBasedNodeChecker(parameters, snapper);
-      PlanarRegionBaseOfCliffAvoider cliffAvoider = new PlanarRegionBaseOfCliffAvoider(parameters, snapper);
+      PlanarRegionCliffAvoider cliffAvoider = new PlanarRegionCliffAvoider(parameters, snapper);
 
       DistanceAndYawBasedHeuristics heuristics = new DistanceAndYawBasedHeuristics(parameters);
 
