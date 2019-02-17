@@ -72,17 +72,35 @@ public class FootstepNodeSnapperTest
                               double length = 1.0;
                               double width = 0.5;
 
+                              int xIndex;
+                              int yIndex;
+                              switch (robotQuadrant)
+                              {
+                              case FRONT_LEFT:
+                                 xIndex = FootstepNode.snapToGrid(frontLeftX);
+                                 yIndex = FootstepNode.snapToGrid(frontLeftY);
+                                 break;
+                              case FRONT_RIGHT:
+                                 xIndex = FootstepNode.snapToGrid(frontRightX);
+                                 yIndex = FootstepNode.snapToGrid(frontRightY);
+                                 break;
+                              case HIND_LEFT:
+                                 xIndex = FootstepNode.snapToGrid(hindLeftX);
+                                 yIndex = FootstepNode.snapToGrid(hindLeftY);
+                                 break;
+                              default:
+                                 xIndex = FootstepNode.snapToGrid(hindRightX);
+                                 yIndex = FootstepNode.snapToGrid(hindRightY);
+                                 break;
+                              }
+
                               testSnapper.dirtyBit = true;
                               String string = "i " + i + " j " + j + " k " + k + " l " + l + " m " + m + " n " + n + " o " + o + " p " + p;
-                              testSnapper.snapFootstepNode(
-                                    new FootstepNode(robotQuadrant, frontLeftX, frontLeftY, frontRightX, frontRightY, hindLeftX, hindLeftY, hindRightX,
-                                                     hindRightY, length, width));
+                              testSnapper.snapFootstepNode(xIndex, yIndex);
                               assertTrue(string, testSnapper.dirtyBit);
                               testSnapper.dirtyBit = false;
 
-                              testSnapper.snapFootstepNode(
-                                    new FootstepNode(robotQuadrant, frontLeftX, frontLeftY, frontRightX, frontRightY, hindLeftX, hindLeftY, hindRightX,
-                                                      hindRightY, length, width));
+                              testSnapper.snapFootstepNode(xIndex, yIndex);
                               assertFalse(string, testSnapper.dirtyBit);
                            }
                         }
@@ -130,15 +148,31 @@ public class FootstepNodeSnapperTest
                               double length = 1.0;
                               double width = 0.5;
 
-                              FootstepNodeSnapData snapData = testSnapper.snapFootstepNode(
-                                    new FootstepNode(newQuadrant, frontLeftX, frontLeftY, frontRightX, frontRightY, hindLeftX, hindLeftY, hindRightX,
-                                                     hindRightY, length, width));
-                              assertTrue(!testSnapper.dirtyBit);
-
-                              for (RobotQuadrant robotQuadrant : RobotQuadrant.values())
+                              int xIndex;
+                              int yIndex;
+                              switch (newQuadrant)
                               {
-                                 assertTrue(snapData.getSnapTransform(robotQuadrant).epsilonEquals(new RigidBodyTransform(), epsilon));
+                              case FRONT_LEFT:
+                                 xIndex = FootstepNode.snapToGrid(frontLeftX);
+                                 yIndex = FootstepNode.snapToGrid(frontLeftY);
+                                 break;
+                              case FRONT_RIGHT:
+                                 xIndex = FootstepNode.snapToGrid(frontRightX);
+                                 yIndex = FootstepNode.snapToGrid(frontRightY);
+                                 break;
+                              case HIND_LEFT:
+                                 xIndex = FootstepNode.snapToGrid(hindLeftX);
+                                 yIndex = FootstepNode.snapToGrid(hindLeftY);
+                                 break;
+                              default:
+                                 xIndex = FootstepNode.snapToGrid(hindRightX);
+                                 yIndex = FootstepNode.snapToGrid(hindRightY);
+                                 break;
                               }
+
+                              FootstepNodeSnapData snapData = testSnapper.snapFootstepNode(xIndex, yIndex);
+                              assertTrue(!testSnapper.dirtyBit);
+                              assertTrue(snapData.getSnapTransform().epsilonEquals(new RigidBodyTransform(), epsilon));
                            }
                         }
                      }
@@ -190,7 +224,7 @@ public class FootstepNodeSnapperTest
       boolean dirtyBit = false;
 
       @Override
-      protected FootstepNodeSnapData snapInternal(FootstepNode footstepNode)
+      protected FootstepNodeSnapData snapInternal(int xIndex, int yIndex)
       {
          dirtyBit = true;
          return FootstepNodeSnapData.emptyData();

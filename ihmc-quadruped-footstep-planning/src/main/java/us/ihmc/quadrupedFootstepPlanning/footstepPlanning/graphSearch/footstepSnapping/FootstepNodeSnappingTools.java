@@ -48,5 +48,22 @@ public class FootstepNodeSnappingTools
       return snapTransform;
    }
 
+   /**
+    * Computes the snap transform which snaps the given node to the given position
+    *
+    * @param node
+    * @param footstepPosition
+    * @return
+    */
+   public static RigidBodyTransform computeSnapTransform(int xIndex, int yIndex, Point3DReadOnly footstepPosition)
+   {
+      RigidBodyTransform snapTransform = new RigidBodyTransform();
+      RigidBodyTransform stepTransform = new RigidBodyTransform();
+      stepTransform.setTranslation(footstepPosition);
 
+      FootstepNodeTools.getNodeTransformToWorld(xIndex, yIndex, snapTransform);
+      snapTransform.preMultiplyInvertThis(stepTransform);
+
+      return snapTransform;
+   }
 }

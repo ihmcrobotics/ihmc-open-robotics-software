@@ -28,20 +28,15 @@ public class SimplePlanarRegionFootstepNodeSnapper extends FootstepNodeSnapper
    }
 
    @Override
-   public FootstepNodeSnapData snapInternal(FootstepNode footstepNode)
+   public FootstepNodeSnapData snapInternal(int xIndex, int yIndex)
    {
-      QuadrantDependentList<RigidBodyTransform> snapTransforms = new QuadrantDependentList<>();
-      for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
-      {
-         FootstepNodeTools.getFootPosition(robotQuadrant, footstepNode, footPosition);
-         RigidBodyTransform snapTransform = PlanarRegionsListPointSnapper.snapPointToPlanarRegionsList(footPosition, planarRegionsList.getPlanarRegionsAsList(),
-                                                                                                       planarRegionToPack);
+      FootstepNodeTools.getFootPosition(xIndex, yIndex, footPosition);
+      RigidBodyTransform snapTransform = PlanarRegionsListPointSnapper
+            .snapPointToPlanarRegionsList(footPosition, planarRegionsList.getPlanarRegionsAsList(), planarRegionToPack);
 
-         if (snapTransform == null)
-            return FootstepNodeSnapData.emptyData();
+      if (snapTransform == null)
+         return FootstepNodeSnapData.emptyData();
 
-         snapTransforms.put(robotQuadrant, snapTransform);
-      }
-      return new FootstepNodeSnapData(snapTransforms);
+      return new FootstepNodeSnapData(snapTransform);
    }
 }
