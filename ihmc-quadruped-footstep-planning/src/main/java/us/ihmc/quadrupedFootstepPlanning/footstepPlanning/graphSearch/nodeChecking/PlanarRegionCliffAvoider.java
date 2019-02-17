@@ -18,14 +18,14 @@ import us.ihmc.robotics.robotSide.RobotQuadrant;
 import java.util.ArrayList;
 import java.util.List;
 
-public class PlanarRegionBaseOfCliffAvoider extends FootstepNodeChecker
+public class PlanarRegionCliffAvoider extends FootstepNodeChecker
 {
    private final FootstepPlannerParameters parameters;
    private final FootstepNodeSnapperReadOnly snapper;
 
    private FootstepNode startNode;
 
-   public PlanarRegionBaseOfCliffAvoider(FootstepPlannerParameters parameters, FootstepNodeSnapperReadOnly snapper)
+   public PlanarRegionCliffAvoider(FootstepPlannerParameters parameters, FootstepNodeSnapperReadOnly snapper)
    {
       this.parameters = parameters;
       this.snapper = snapper;
