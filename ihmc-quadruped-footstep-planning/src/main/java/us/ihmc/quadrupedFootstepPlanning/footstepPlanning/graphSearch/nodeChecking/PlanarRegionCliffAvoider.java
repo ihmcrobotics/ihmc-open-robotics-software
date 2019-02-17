@@ -3,6 +3,7 @@ package us.ihmc.quadrupedFootstepPlanning.footstepPlanning.graphSearch.nodeCheck
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.euclid.tuple3D.interfaces.Point3DBasics;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.pathPlanning.visibilityGraphs.tools.PlanarRegionTools;
 import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.graphSearch.QuadrupedFootstepPlannerNodeRejectionReason;
@@ -15,7 +16,6 @@ import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.robotSide.QuadrantDependentList;
 import us.ihmc.robotics.robotSide.RobotQuadrant;
 
-import java.util.ArrayList;
 import java.util.List;
 
 public class PlanarRegionCliffAvoider extends FootstepNodeChecker
@@ -40,76 +40,104 @@ public class PlanarRegionCliffAvoider extends FootstepNodeChecker
    @Override
    public boolean isNodeValidInternal(FootstepNode node, FootstepNode previousNode)
    {
-      if(startNode != null && startNode.equals(node))
+      if (startNode != null && startNode.equals(node))
          return true;
 
-      if(!hasPlanarRegions())
-         return true;
-
-      if(parameters.getMinimumDistanceFromCliffBottoms() <= 0.0 || Double.isInfinite(parameters.getCliffHeightToAvoid()))
+      if (!hasPlanarRegions())
          return true;
 
       double cliffHeightToAvoid = parameters.getCliffHeightToAvoid();
-      double minimumDistanceFromCliffBottoms = parameters.getMinimumDistanceFromCliffBottoms();
-
-      if ((cliffHeightToAvoid <= 0.0) || (minimumDistanceFromCliffBottoms <= 0.0))
+      if (!Double.isFinite(cliffHeightToAvoid))
          return true;
 
-      RigidBodyTransform footTransformToWorld = new RigidBodyTransform();
+      double minimumDistanceFromCliffBottoms = parameters.getMinimumDistanceFromCliffBottoms();
+      double minimumDistanceFromCliffTops = parameters.getMinimumDistanceFromCliffTops();
+
       RobotQuadrant movingQuadrant = node.getMovingQuadrant();
-      FootstepNodeTools.getSnappedNodeTransformToWorld(movingQuadrant, node, snapper.getSnapData(node.getXIndex(movingQuadrant), node.getYIndex(movingQuadrant)).getSnapTransform(), footTransformToWorld);
+      int xIndex = node.getXIndex(movingQuadrant);
+      int yIndex = node.getYIndex(movingQuadrant);
+      RigidBodyTransform footTransformToWorld = new RigidBodyTransform();
+      FootstepNodeTools.getSnappedNodeTransformToWorld(xIndex, yIndex, snapper.getSnapData(xIndex, yIndex).getSnapTransform(), footTransformToWorld);
 
-      double maximumCliffZInSoleFrame = findHighestPointInFrame(planarRegionsList, footTransformToWorld, new Point3D(),
-                                                                cliffHeightToAvoid, minimumDistanceFromCliffBottoms);
+      Point3D footInWorld = new Point3D();
+      footTransformToWorld.transform(footInWorld);
 
-      if (maximumCliffZInSoleFrame > cliffHeightToAvoid)
+      if (minimumDistanceFromCliffBottoms > 0.0)
       {
-         rejectNode(node, previousNode, QuadrupedFootstepPlannerNodeRejectionReason.AT_CLIFF_BOTTOM);
-         return false;
+         Point3D highestNearbyPoint = new Point3D();
+         double maximumCliffZInSoleFrame = findHighestNearbyPoint(planarRegionsList, footInWorld, highestNearbyPoint, minimumDistanceFromCliffBottoms);
+
+         if (maximumCliffZInSoleFrame > cliffHeightToAvoid)
+         {
+            rejectNode(node, previousNode, QuadrupedFootstepPlannerNodeRejectionReason.AT_CLIFF_BOTTOM);
+            return false;
+         }
       }
+
+      /*
+      if (minimumDistanceFromCliffTops > 0.0)
+      {
+         Point3D lowestNearbyPoint = new Point3D();
+         double minimumCliffZInSoleFrame = findLowestNearbyPoint(planarRegionsList, footInWorld, lowestNearbyPoint, minimumDistanceFromCliffTops);
+
+         if (minimumCliffZInSoleFrame < -cliffHeightToAvoid)
+         {
+            rejectNode(node, previousNode, QuadrupedFootstepPlannerNodeRejectionReason.AT_CLIFF_TOP);
+            return false;
+         }
+      }
+      */
 
       return true;
    }
 
-   public static double findHighestPointInFrame(PlanarRegionsList planarRegionsList, RigidBodyTransform footTransformToWorld, Point3D closestCliffPointToPack,
-                                                double minimumCliffHeight, double minimumDistanceFromCliffBottoms)
-     {
-        double maxZInSoleFrame = Double.NEGATIVE_INFINITY;
-        double closestCliffPointDistance = minimumDistanceFromCliffBottoms;
+   private static double findHighestNearbyPoint(PlanarRegionsList planarRegionsList, Point3DReadOnly footInWorld, Point3DBasics highestNearbyPointToPack,
+                                                double minimumDistanceFromCliffBottoms)
+   {
+      double maxZInSoleFrame = Double.NEGATIVE_INFINITY;
 
-        Point3D footPointInWorldFrame = new Point3D();
-        footTransformToWorld.transform(footPointInWorldFrame);
+      List<PlanarRegion> intersectingRegionsToPack = PlanarRegionTools
+            .filterPlanarRegionsWithBoundingCircle(new Point2D(footInWorld), minimumDistanceFromCliffBottoms, planarRegionsList.getPlanarRegionsAsList());
 
-        List<PlanarRegion> intersectingRegionsToPack = PlanarRegionTools.filterPlanarRegionsWithBoundingCircle(new Point2D(footPointInWorldFrame),
-                                                                                                               minimumDistanceFromCliffBottoms, planarRegionsList.getPlanarRegionsAsList());
+      for (PlanarRegion intersectingRegion : intersectingRegionsToPack)
+      {
+         Point3DReadOnly closestPointInWorld = PlanarRegionTools.closestPointOnPlane(footInWorld, intersectingRegion);
 
+         double heightOfPointFromFoot = closestPointInWorld.getZ() - footInWorld.getZ();
+         double distanceToPoint = footInWorld.distanceXY(closestPointInWorld);
 
-        planarRegionsList.findPlanarRegionsWithinEpsilonOfPoint(footPointInWorldFrame, minimumDistanceFromCliffBottoms, intersectingRegionsToPack);
+         if (distanceToPoint < minimumDistanceFromCliffBottoms && heightOfPointFromFoot > maxZInSoleFrame)
+         {
+            maxZInSoleFrame = heightOfPointFromFoot;
+            highestNearbyPointToPack.set(closestPointInWorld);
+         }
+      }
 
-        for (PlanarRegion intersectingRegion : intersectingRegionsToPack)
-        {
-           Point3DReadOnly closestPointInWorld = PlanarRegionTools.closestPointOnPlane(footPointInWorldFrame, intersectingRegion);
+      return maxZInSoleFrame;
+   }
 
-           double heightOfPointFromFoot = closestPointInWorld.getZ() - footPointInWorldFrame.getZ();
-           double distanceToPoint = footPointInWorldFrame.distanceXY(closestPointInWorld);
+   private static double findLowestNearbyPoint(PlanarRegionsList planarRegionsList, Point3DReadOnly footInWorld, Point3DBasics lowestNearbyPointToPack,
+                                               double minimumDistanceFromCliffTops)
+   {
+      double minZInSoleFrame = Double.POSITIVE_INFINITY;
 
-           if (distanceToPoint < minimumDistanceFromCliffBottoms)
-           {
-              if (heightOfPointFromFoot > maxZInSoleFrame)
-                 maxZInSoleFrame = heightOfPointFromFoot;
+      List<PlanarRegion> intersectingRegionsToPack = PlanarRegionTools
+            .filterPlanarRegionsWithBoundingCircle(new Point2D(footInWorld), minimumDistanceFromCliffTops, planarRegionsList.getPlanarRegionsAsList());
 
-              if (heightOfPointFromFoot > minimumCliffHeight && distanceToPoint < closestCliffPointDistance)
-              {
-                 closestCliffPointDistance = distanceToPoint;
-                 closestCliffPointToPack.set(closestPointInWorld);
-              }
-           }
-        }
+      for (PlanarRegion intersectingRegion : intersectingRegionsToPack)
+      {
+         Point3DReadOnly closestPointInWorld = PlanarRegionTools.closestPointOnPlane(footInWorld, intersectingRegion);
 
-        if (maxZInSoleFrame > 0.1)
-           return maxZInSoleFrame;
+         double heightOfPointFromFoot = closestPointInWorld.getZ() - footInWorld.getZ();
+         double distanceToPoint = footInWorld.distanceXY(closestPointInWorld);
 
-        return maxZInSoleFrame;
-     }
+         if (distanceToPoint < minimumDistanceFromCliffTops && heightOfPointFromFoot < minZInSoleFrame)
+         {
+            minZInSoleFrame = heightOfPointFromFoot;
+            lowestNearbyPointToPack.set(closestPointInWorld);
+         }
+      }
 
+      return minZInSoleFrame;
+   }
 }
