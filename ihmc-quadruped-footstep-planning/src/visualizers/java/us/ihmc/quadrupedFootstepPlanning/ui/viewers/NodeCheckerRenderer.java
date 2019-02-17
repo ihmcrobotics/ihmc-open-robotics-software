@@ -1,19 +1,15 @@
 package us.ihmc.quadrupedFootstepPlanning.ui.viewers;
 
-import sandia_hand_msgs.Parameter;
 import us.ihmc.euclid.orientation.interfaces.Orientation3DReadOnly;
 import us.ihmc.euclid.referenceFrame.FramePoint2D;
 import us.ihmc.euclid.tuple2D.Vector2D;
-import us.ihmc.euclid.tuple4D.interfaces.QuaternionReadOnly;
 import us.ihmc.quadrupedFootstepPlanning.ui.components.SettableFootstepPlannerParameters;
 import javafx.animation.AnimationTimer;
 import javafx.scene.Node;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.MeshView;
 import us.ihmc.euclid.exceptions.NotARotationMatrixException;
-import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.transform.RigidBodyTransform;
-import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.javaFXToolkit.shapes.JavaFXMultiColorMeshBuilder;
@@ -213,13 +209,13 @@ public class NodeCheckerRenderer extends AnimationTimer
       meshBuilder.clear();
 
       RigidBodyTransform planarTransformToWorld = new RigidBodyTransform();
-      FootstepNodeTools.getNodeTransform(node.getMovingQuadrant(), node, planarTransformToWorld);
+      FootstepNodeTools.getNodeTransformToWorld(node.getMovingQuadrant(), node, planarTransformToWorld);
 
       RigidBodyTransform snappedTransformToWorld = new RigidBodyTransform();
 
       try
       {
-         FootstepNodeTools.getSnappedNodeTransform(node.getMovingQuadrant(), node, snapData.getSnapTransform(node.getMovingQuadrant()), snappedTransformToWorld);
+         FootstepNodeTools.getSnappedNodeTransformToWorld(node.getMovingQuadrant(), node, snapData.getSnapTransform(node.getMovingQuadrant()), snappedTransformToWorld);
       }
       catch(NotARotationMatrixException e)
       {

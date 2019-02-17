@@ -20,7 +20,7 @@ public class FootstepNodeSnappingTools
       planarRegion.getTransformToWorld(regionToWorld);
 
       RigidBodyTransform soleTransform = new RigidBodyTransform();
-      FootstepNodeTools.getSnappedNodeTransform(robotQuadrant, footstepNode, snapTransform, soleTransform);
+      FootstepNodeTools.getSnappedNodeTransformToWorld(robotQuadrant, footstepNode, snapTransform, soleTransform);
 
       RigidBodyTransform regionToSole = new RigidBodyTransform();
       regionToSole.setAndInvert(soleTransform);
@@ -42,7 +42,7 @@ public class FootstepNodeSnappingTools
       RigidBodyTransform stepTransform = new RigidBodyTransform();
       stepTransform.setTranslation(footstepPosition);
 
-      FootstepNodeTools.getNodeTransform(robotQuadrant, node, snapTransform);
+      FootstepNodeTools.getNodeTransformToWorld(robotQuadrant, node, snapTransform);
       snapTransform.preMultiplyInvertThis(stepTransform);
 
       return snapTransform;

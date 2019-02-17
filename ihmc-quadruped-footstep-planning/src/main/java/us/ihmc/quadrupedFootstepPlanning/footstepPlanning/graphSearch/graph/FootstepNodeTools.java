@@ -2,7 +2,6 @@ package us.ihmc.quadrupedFootstepPlanning.footstepPlanning.graphSearch.graph;
 
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DBasics;
-import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.robotics.robotSide.RobotQuadrant;
 
 public class FootstepNodeTools
@@ -11,10 +10,9 @@ public class FootstepNodeTools
     * Computes a node-to-world RigidBodyTransform from the node's x and y position. This transform
     * will always have no z translation..
     */
-   public static void getNodeTransform(RobotQuadrant robotQuadrant, FootstepNode node, RigidBodyTransform nodeToWorldTransformToPack)
+   public static void getNodeTransformToWorld(RobotQuadrant robotQuadrant, FootstepNode node, RigidBodyTransform nodeTransformToWorldToPack)
    {
-      Point3D solePosition = new Point3D(node.getX(robotQuadrant), node.getY(robotQuadrant), 0.0);
-      nodeToWorldTransformToPack.setTranslation(solePosition);
+      nodeTransformToWorldToPack.setTranslation(node.getX(robotQuadrant), node.getY(robotQuadrant), 0.0);
    }
 
    /**
@@ -23,11 +21,11 @@ public class FootstepNodeTools
     *
     * @param snapTransform pre-snap to post-snap transform
     */
-   public static void getSnappedNodeTransform(RobotQuadrant robotQuadrant, FootstepNode node, RigidBodyTransform snapTransform,
-                                              RigidBodyTransform transformToPack)
+   public static void getSnappedNodeTransformToWorld(RobotQuadrant robotQuadrant, FootstepNode node, RigidBodyTransform snapTransform,
+                                                     RigidBodyTransform nodeTransformToWorldToPack)
    {
-      getNodeTransform(robotQuadrant, node, transformToPack);
-      snapTransform.transform(transformToPack);
+      getNodeTransformToWorld(robotQuadrant, node, nodeTransformToWorldToPack);
+      snapTransform.transform(nodeTransformToWorldToPack);
    }
 
    /**
@@ -38,7 +36,7 @@ public class FootstepNodeTools
       footPositionToPack.setToZero();
 
       RigidBodyTransform nodeTransform = new RigidBodyTransform();
-      FootstepNodeTools.getNodeTransform(robotQuadrant, node, nodeTransform);
+      FootstepNodeTools.getNodeTransformToWorld(robotQuadrant, node, nodeTransform);
 
       footPositionToPack.applyTransform(nodeTransform);
    }

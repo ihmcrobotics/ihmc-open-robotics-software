@@ -35,8 +35,8 @@ public class LinearHeightCost implements FootstepCost
 
       for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
       {
-         FootstepNodeTools.getSnappedNodeTransform(robotQuadrant, startNode, startNodeData.getSnapTransform(robotQuadrant), startNodeTransform);
-         FootstepNodeTools.getSnappedNodeTransform(robotQuadrant, endNode, endNodeData.getSnapTransform(robotQuadrant), endNodeTransform);
+         FootstepNodeTools.getSnappedNodeTransformToWorld(robotQuadrant, startNode, startNodeData.getSnapTransform(robotQuadrant), startNodeTransform);
+         FootstepNodeTools.getSnappedNodeTransformToWorld(robotQuadrant, endNode, endNodeData.getSnapTransform(robotQuadrant), endNodeTransform);
 
          double heightChange = endNodeTransform.getTranslationVector().getZ() - startNodeTransform.getTranslationVector().getZ();
 
