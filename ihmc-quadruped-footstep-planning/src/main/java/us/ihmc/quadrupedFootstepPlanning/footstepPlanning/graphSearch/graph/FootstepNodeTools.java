@@ -2,6 +2,7 @@ package us.ihmc.quadrupedFootstepPlanning.footstepPlanning.graphSearch.graph;
 
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DBasics;
+import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.robotics.robotSide.RobotQuadrant;
 
 public class FootstepNodeTools
@@ -50,21 +51,25 @@ public class FootstepNodeTools
       snapTransform.transform(nodeTransformToWorldToPack);
    }
 
-   /**
-    * Computes the foot position in world frame that corresponds to the give footstep node
-    */
-   public static void getFootPosition(RobotQuadrant robotQuadrant, FootstepNode node, Point2DBasics footPositionToPack)
-   {
-      getFootPosition(node.getXIndex(robotQuadrant), node.getYIndex(robotQuadrant), footPositionToPack);
-   }
 
    public static void getFootPosition(int xIndex, int yIndex, Point2DBasics footPositionToPack)
    {
       footPositionToPack.setToZero();
+      footPositionToPack.set(FootstepNode.gridSizeXY * xIndex, FootstepNode.gridSizeXY * yIndex);
+   }
 
-      RigidBodyTransform nodeTransform = new RigidBodyTransform();
-      FootstepNodeTools.getNodeTransformToWorld(xIndex, yIndex, nodeTransform);
+   /**
+    * Computes the snap transform which snaps the given node to the given position
+    */
+   public static RigidBodyTransform computeSnapTransform(int xIndex, int yIndex, Point3DReadOnly footstepPosition)
+   {
+      RigidBodyTransform snapTransform = new RigidBodyTransform();
+      RigidBodyTransform stepTransform = new RigidBodyTransform();
+      stepTransform.setTranslation(footstepPosition);
 
-      footPositionToPack.applyTransform(nodeTransform);
+      getNodeTransformToWorld(xIndex, yIndex, snapTransform);
+      snapTransform.preMultiplyInvertThis(stepTransform);
+
+      return snapTransform;
    }
 }
