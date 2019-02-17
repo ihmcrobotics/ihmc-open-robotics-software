@@ -215,7 +215,7 @@ public class NodeCheckerRenderer extends AnimationTimer
 
       try
       {
-         FootstepNodeTools.getSnappedNodeTransformToWorld(node.getMovingQuadrant(), node, snapData.getSnapTransform(node.getMovingQuadrant()), snappedTransformToWorld);
+         FootstepNodeTools.getSnappedNodeTransformToWorld(node.getMovingQuadrant(), node, snapData.getSnapTransform(), snappedTransformToWorld);
       }
       catch(NotARotationMatrixException e)
       {

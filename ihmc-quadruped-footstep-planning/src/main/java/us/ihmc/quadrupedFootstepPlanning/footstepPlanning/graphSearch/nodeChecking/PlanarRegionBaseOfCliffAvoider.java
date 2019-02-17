@@ -56,7 +56,7 @@ public class PlanarRegionBaseOfCliffAvoider extends FootstepNodeChecker
 
       RigidBodyTransform footTransformToWorld = new RigidBodyTransform();
       RobotQuadrant movingQuadrant = node.getMovingQuadrant();
-      FootstepNodeTools.getSnappedNodeTransformToWorld(movingQuadrant, node, snapper.getSnapData(node).getSnapTransform(movingQuadrant), footTransformToWorld);
+      FootstepNodeTools.getSnappedNodeTransformToWorld(movingQuadrant, node, snapper.getSnapData(node.getXIndex(movingQuadrant), node.getYIndex(movingQuadrant)).getSnapTransform(), footTransformToWorld);
 
       Point3D footPointInNodeFrame = new Point3D(node.getX(movingQuadrant), node.getY(movingQuadrant), 0.0);
 

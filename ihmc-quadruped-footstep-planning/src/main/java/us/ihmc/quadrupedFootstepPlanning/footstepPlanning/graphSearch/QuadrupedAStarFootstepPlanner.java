@@ -158,8 +158,11 @@ public class QuadrupedAStarFootstepPlanner implements QuadrupedBodyPathAndFootst
       {
          for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
          {
-            startNodeSnapTransforms.put(robotQuadrant, FootstepNodeSnappingTools
-                  .computeSnapTransform(robotQuadrant, startNode, start.getFootGoalPosition(robotQuadrant)));
+            int xIndex = startNode.getXIndex(robotQuadrant);
+            int yIndex = startNode.getYIndex(robotQuadrant);
+            RigidBodyTransform snapTransform = FootstepNodeSnappingTools.computeSnapTransform(xIndex, yIndex, start.getFootGoalPosition(robotQuadrant));
+            snapper.addSnapData(xIndex, yIndex, new FootstepNodeSnapData(snapTransform));
+            startNodeSnapTransforms.put(robotQuadrant, snapTransform);
          }
       }
       else if (start.getTargetType() == FootstepPlannerTargetType.POSE_BETWEEN_FEET)
@@ -174,10 +177,13 @@ public class QuadrupedAStarFootstepPlanner implements QuadrupedBodyPathAndFootst
                addPlanarRegionAtHeight(startPoint.getX(), startPoint.getY(), 0.0);
                projectedPoint = startPoint;
             }
-            startNodeSnapTransforms.put(robotQuadrant, FootstepNodeSnappingTools.computeSnapTransform(robotQuadrant, startNode, projectedPoint));
+            int xIndex = startNode.getXIndex(robotQuadrant);
+            int yIndex = startNode.getYIndex(robotQuadrant);
+            RigidBodyTransform snapTransform = FootstepNodeSnappingTools.computeSnapTransform(xIndex, yIndex, projectedPoint);
+            snapper.addSnapData(xIndex, yIndex, new FootstepNodeSnapData(snapTransform));
+            startNodeSnapTransforms.put(robotQuadrant, snapTransform);
          }
       }
-      snapper.addSnapData(startNode, new FootstepNodeSnapData(startNodeSnapTransforms));
       nodeChecker.addStartNode(startNode, startNodeSnapTransforms);
 
       FramePose2DReadOnly startPose = new FramePose2D(worldFrame, startNode.getOrComputeXGaitCenterPoint(), startNode.getNominalYaw());
@@ -322,8 +328,8 @@ public class QuadrupedAStarFootstepPlanner implements QuadrupedBodyPathAndFootst
          timeInterval.setEndTime(currentTime);
 
          Point3D position = new Point3D(node.getX(robotQuadrant), node.getY(robotQuadrant), 0.0);
-         FootstepNodeSnapData snapData = snapper.snapFootstepNode(path.get(i));
-         position.applyTransform(snapData.getSnapTransform(robotQuadrant));
+         FootstepNodeSnapData snapData = snapper.snapFootstepNode(node.getXIndex(robotQuadrant), node.getYIndex(robotQuadrant));
+         position.applyTransform(snapData.getSnapTransform());
 
          newStep.setGoalPosition(position);
 

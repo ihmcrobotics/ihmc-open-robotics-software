@@ -27,16 +27,25 @@ public class LinearHeightCost implements FootstepCost
       RigidBodyTransform startNodeTransform = new RigidBodyTransform();
       RigidBodyTransform endNodeTransform = new RigidBodyTransform();
 
-      FootstepNodeSnapData endNodeData = snapper.getSnapData(endNode);
-      FootstepNodeSnapData startNodeData = snapper.getSnapData(startNode);
 
-      if (startNodeData == null || endNodeData == null)
-         return 0.0;
+
+
 
       for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
       {
-         FootstepNodeTools.getSnappedNodeTransformToWorld(robotQuadrant, startNode, startNodeData.getSnapTransform(robotQuadrant), startNodeTransform);
-         FootstepNodeTools.getSnappedNodeTransformToWorld(robotQuadrant, endNode, endNodeData.getSnapTransform(robotQuadrant), endNodeTransform);
+         int endNodeXIndex = endNode.getXIndex(robotQuadrant);
+         int endNodeYIndex = endNode.getYIndex(robotQuadrant);
+         int startNodeXIndex = startNode.getXIndex(robotQuadrant);
+         int startNodeYIndex = startNode.getYIndex(robotQuadrant);
+
+         FootstepNodeSnapData endNodeData = snapper.getSnapData(endNodeXIndex, endNodeYIndex);
+         FootstepNodeSnapData startNodeData = snapper.getSnapData(startNodeXIndex, startNodeYIndex);
+
+         if (startNodeData == null || endNodeData == null)
+            return 0.0;
+
+         FootstepNodeTools.getSnappedNodeTransformToWorld(startNodeXIndex, startNodeYIndex, startNodeData.getSnapTransform(), startNodeTransform);
+         FootstepNodeTools.getSnappedNodeTransformToWorld(endNodeXIndex, endNodeYIndex, endNodeData.getSnapTransform(), endNodeTransform);
 
          double heightChange = endNodeTransform.getTranslationVector().getZ() - startNodeTransform.getTranslationVector().getZ();
 

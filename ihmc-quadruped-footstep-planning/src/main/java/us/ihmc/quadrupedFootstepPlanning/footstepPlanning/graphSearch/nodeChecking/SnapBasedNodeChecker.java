@@ -54,19 +54,18 @@ public class SnapBasedNodeChecker extends FootstepNodeChecker
    @Override
    public boolean isNodeValidInternal(FootstepNode node, FootstepNode previousNode)
    {
+      RobotQuadrant movingQuadrant = node.getMovingQuadrant();
+
       FootstepNodeSnapData snapData = snapper.snapFootstepNode(node);
-      for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
+      RigidBodyTransform snapTransform = snapData.getSnapTransform();
+      if (snapTransform.containsNaN())
       {
-         RigidBodyTransform snapTransform = snapData.getSnapTransform(robotQuadrant);
-         if (snapTransform.containsNaN())
+         if (DEBUG)
          {
-            if (DEBUG)
-            {
-               PrintTools.debug("Was not able to snap node:\n" + node);
-            }
-            rejectNode(node, previousNode, QuadrupedFootstepPlannerNodeRejectionReason.COULD_NOT_SNAP);
-            return false;
+            PrintTools.debug("Was not able to snap node:\n" + node);
          }
+         rejectNode(node, previousNode, QuadrupedFootstepPlannerNodeRejectionReason.COULD_NOT_SNAP);
+         return false;
       }
 
       if (previousNode == null)
@@ -74,7 +73,6 @@ public class SnapBasedNodeChecker extends FootstepNodeChecker
          return true;
       }
 
-      RobotQuadrant movingQuadrant = node.getMovingQuadrant();
 
       double previousYaw = previousNode.getNominalYaw();
       double currentYaw = node.getNominalYaw();
@@ -124,8 +122,6 @@ public class SnapBasedNodeChecker extends FootstepNodeChecker
          rejectNode(node, previousNode, QuadrupedFootstepPlannerNodeRejectionReason.STEP_YAWING_TOO_MUCH);
          return false;
       }
-
-      RigidBodyTransform snapTransform = snapData.getSnapTransform(movingQuadrant);
 
       FramePoint3D newStepPosition = new FramePoint3D(worldFrame, node.getX(movingQuadrant), node.getY(movingQuadrant), 0.0);
       snapTransform.transform(newStepPosition);
@@ -227,11 +223,13 @@ public class SnapBasedNodeChecker extends FootstepNodeChecker
 
    private QuadrantDependentList<Point3D> getSnappedStepPositions(FootstepNode node)
    {
-      FootstepNodeSnapData snapData = snapper.snapFootstepNode(node);
       QuadrantDependentList<Point3D> snappedStepPositions = new QuadrantDependentList<>();
+      snapper.snapFootstepNode(node);
+
       for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
       {
-         RigidBodyTransform footSnapTransform = snapData.getSnapTransform(robotQuadrant);
+         FootstepNodeSnapData snapData = snapper.getSnapData(node.getXIndex(robotQuadrant), node.getYIndex(robotQuadrant));
+         RigidBodyTransform footSnapTransform = snapData.getSnapTransform();
          Point3D stepPosition = new Point3D(node.getX(robotQuadrant), node.getY(robotQuadrant), 0.0);
          footSnapTransform.transform(stepPosition);
          snappedStepPositions.put(robotQuadrant, stepPosition);
@@ -346,6 +344,9 @@ public class SnapBasedNodeChecker extends FootstepNodeChecker
    @Override
    public void addStartNode(FootstepNode startNode, QuadrantDependentList<RigidBodyTransform> startNodeTransforms)
    {
-      snapper.addSnapData(startNode, new FootstepNodeSnapData(startNodeTransforms));
+      for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
+      {
+         snapper.addSnapData(startNode.getXIndex(robotQuadrant), startNode.getYIndex(robotQuadrant), new FootstepNodeSnapData(startNodeTransforms.get(robotQuadrant)));
+      }
    }
 }
