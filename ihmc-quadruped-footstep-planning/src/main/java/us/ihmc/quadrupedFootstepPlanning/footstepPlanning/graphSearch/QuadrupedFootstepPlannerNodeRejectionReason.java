@@ -19,7 +19,8 @@ public enum QuadrupedFootstepPlannerNodeRejectionReason
 //   TOO_MUCH_PENETRATION_AFTER_WIGGLE,
    OBSTACLE_BLOCKING_STEP,
    OBSTACLE_BLOCKING_BODY,
-   AT_CLIFF_BOTTOM;
+   AT_CLIFF_BOTTOM,
+   AT_CLIFF_TOP;
 //   OBSTACLE_HITTING_BODY;
 
    public static final QuadrupedFootstepPlannerNodeRejectionReason[] values = values();
