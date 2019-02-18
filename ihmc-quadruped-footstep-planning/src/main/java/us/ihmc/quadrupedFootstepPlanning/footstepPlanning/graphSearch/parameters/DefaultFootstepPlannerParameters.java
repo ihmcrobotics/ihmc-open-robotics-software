@@ -41,14 +41,14 @@ public class DefaultFootstepPlannerParameters implements FootstepPlannerParamete
    @Override
    public double getMaximumStepYaw()
    {
-      return 0.2;
+      return 0.5;
    }
 
    /** {@inheritDoc} */
    @Override
    public double getMinimumStepYaw()
    {
-      return -0.2;
+      return -0.5;
    }
 
    /** {@inheritDoc} */
