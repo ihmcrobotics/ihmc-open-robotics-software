@@ -2,7 +2,7 @@ package us.ihmc.quadrupedFootstepPlanning.footstepPlanning.graphSearch.graph;
 
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DBasics;
-import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.robotics.robotSide.RobotQuadrant;
 
 public class FootstepNodeTools
@@ -11,10 +11,32 @@ public class FootstepNodeTools
     * Computes a node-to-world RigidBodyTransform from the node's x and y position. This transform
     * will always have no z translation..
     */
-   public static void getNodeTransform(RobotQuadrant robotQuadrant, FootstepNode node, RigidBodyTransform nodeToWorldTransformToPack)
+   public static void getNodeTransformToWorld(RobotQuadrant robotQuadrant, FootstepNode node, RigidBodyTransform nodeTransformToWorldToPack)
    {
-      Point3D solePosition = new Point3D(node.getX(robotQuadrant), node.getY(robotQuadrant), 0.0);
-      nodeToWorldTransformToPack.setTranslation(solePosition);
+      getNodeTransformToWorld(node.getXIndex(robotQuadrant), node.getYIndex(robotQuadrant), nodeTransformToWorldToPack);
+   }
+
+   /**
+    * Computes a node-to-world RigidBodyTransform from the node's x and y position. This transform
+    * will always have no z translation..
+    */
+   public static void getNodeTransformToWorld(int xIndex, int yIndex, RigidBodyTransform nodeTransformToWorldToPack)
+   {
+      nodeTransformToWorldToPack.setTranslation(FootstepNode.gridSizeXY * xIndex, FootstepNode.gridSizeXY * yIndex, 0.0);
+   }
+
+
+   /**
+    * Computes a node-to-world RigidBodyTransform which transforms from node frame to world frame
+    * by applying snapTransform to the given node's transform
+    *
+    * @param snapTransform pre-snap to post-snap transform
+    */
+   public static void getSnappedNodeTransformToWorld(RobotQuadrant robotQuadrant, FootstepNode node, RigidBodyTransform snapTransform,
+                                                     RigidBodyTransform nodeTransformToWorldToPack)
+   {
+      getNodeTransformToWorld(robotQuadrant, node, nodeTransformToWorldToPack);
+      snapTransform.transform(nodeTransformToWorldToPack);
    }
 
    /**
@@ -23,23 +45,31 @@ public class FootstepNodeTools
     *
     * @param snapTransform pre-snap to post-snap transform
     */
-   public static void getSnappedNodeTransform(RobotQuadrant robotQuadrant, FootstepNode node, RigidBodyTransform snapTransform,
-                                              RigidBodyTransform transformToPack)
+   public static void getSnappedNodeTransformToWorld(int xIndex, int yIndex, RigidBodyTransform snapTransform, RigidBodyTransform nodeTransformToWorldToPack)
    {
-      getNodeTransform(robotQuadrant, node, transformToPack);
-      snapTransform.transform(transformToPack);
+      getNodeTransformToWorld(xIndex, yIndex, nodeTransformToWorldToPack);
+      snapTransform.transform(nodeTransformToWorldToPack);
+   }
+
+
+   public static void getFootPosition(int xIndex, int yIndex, Point2DBasics footPositionToPack)
+   {
+      footPositionToPack.setToZero();
+      footPositionToPack.set(FootstepNode.gridSizeXY * xIndex, FootstepNode.gridSizeXY * yIndex);
    }
 
    /**
-    * Computes the foot position in world frame that corresponds to the give footstep node
+    * Computes the snap transform which snaps the given node to the given position
     */
-   public static void getFootPosition(RobotQuadrant robotQuadrant, FootstepNode node, Point2DBasics footPositionToPack)
+   public static RigidBodyTransform computeSnapTransform(int xIndex, int yIndex, Point3DReadOnly footstepPosition)
    {
-      footPositionToPack.setToZero();
+      RigidBodyTransform snapTransform = new RigidBodyTransform();
+      RigidBodyTransform stepTransform = new RigidBodyTransform();
+      stepTransform.setTranslation(footstepPosition);
 
-      RigidBodyTransform nodeTransform = new RigidBodyTransform();
-      FootstepNodeTools.getNodeTransform(robotQuadrant, node, nodeTransform);
+      getNodeTransformToWorld(xIndex, yIndex, snapTransform);
+      snapTransform.preMultiplyInvertThis(stepTransform);
 
-      footPositionToPack.applyTransform(nodeTransform);
+      return snapTransform;
    }
 }

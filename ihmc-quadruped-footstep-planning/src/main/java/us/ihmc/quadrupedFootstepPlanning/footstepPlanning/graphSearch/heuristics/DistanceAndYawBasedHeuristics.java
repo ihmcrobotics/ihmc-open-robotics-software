@@ -6,7 +6,6 @@ import us.ihmc.robotics.geometry.AngleTools;
 
 public class DistanceAndYawBasedHeuristics extends CostToGoHeuristics
 {
-
    public DistanceAndYawBasedHeuristics(FootstepPlannerParameters parameters)
    {
       super(parameters);

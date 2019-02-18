@@ -4,7 +4,9 @@ import us.ihmc.commons.MathTools;
 import us.ihmc.commons.PrintTools;
 import us.ihmc.euclid.axisAngle.AxisAngle;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
-import us.ihmc.euclid.geometry.LineSegment3D;
+import us.ihmc.euclid.orientation.interfaces.Orientation3DReadOnly;
+import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple2D.Vector2D;
 import us.ihmc.euclid.tuple3D.Point3D;
@@ -18,10 +20,15 @@ import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.graphSearch.parameters
 import us.ihmc.robotics.geometry.AngleTools;
 import us.ihmc.robotics.geometry.PlanarRegion;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
+import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 import us.ihmc.robotics.robotSide.QuadrantDependentList;
+import us.ihmc.robotics.robotSide.RobotEnd;
 import us.ihmc.robotics.robotSide.RobotQuadrant;
+import us.ihmc.robotics.robotSide.RobotSide;
 
 import java.util.List;
+
+import static us.ihmc.humanoidRobotics.footstep.FootstepUtils.worldFrame;
 
 public class SnapBasedNodeChecker extends FootstepNodeChecker
 {
@@ -44,26 +51,20 @@ public class SnapBasedNodeChecker extends FootstepNodeChecker
    }
 
    @Override
-   public boolean isNodeValid(FootstepNode node, FootstepNode previousNode)
+   public boolean isNodeValidInternal(FootstepNode node, FootstepNode previousNode)
    {
-      if (previousNode != null && node.equals(previousNode))
-      {
-         throw new IllegalArgumentException("Checking node assuming it is following itself.");
-      }
+      RobotQuadrant movingQuadrant = node.getMovingQuadrant();
 
       FootstepNodeSnapData snapData = snapper.snapFootstepNode(node);
-      for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
+      RigidBodyTransform snapTransform = snapData.getSnapTransform();
+      if (snapTransform.containsNaN())
       {
-         RigidBodyTransform snapTransform = snapData.getSnapTransform(robotQuadrant);
-         if (snapTransform.containsNaN())
+         if (DEBUG)
          {
-            if (DEBUG)
-            {
-               PrintTools.debug("Was not able to snap node:\n" + node);
-            }
-            rejectNode(node, previousNode, QuadrupedFootstepPlannerNodeRejectionReason.COULD_NOT_SNAP);
-            return false;
+            PrintTools.debug("Was not able to snap node:\n" + node);
          }
+         rejectNode(node, previousNode, QuadrupedFootstepPlannerNodeRejectionReason.COULD_NOT_SNAP);
+         return false;
       }
 
       if (previousNode == null)
@@ -71,10 +72,12 @@ public class SnapBasedNodeChecker extends FootstepNodeChecker
          return true;
       }
 
-      RobotQuadrant movingQuadrant = node.getMovingQuadrant();
+
+      double previousYaw = previousNode.getNominalYaw();
+      double currentYaw = node.getNominalYaw();
 
       Vector2D clearanceVector = new Vector2D(parameters.getMinXClearanceFromFoot(), parameters.getMinYClearanceFromFoot());
-      AxisAngle previousOrientation = new AxisAngle(previousNode.getNominalYaw(), 0.0, 0.0);
+      AxisAngle previousOrientation = new AxisAngle(previousYaw, 0.0, 0.0);
       previousOrientation.transform(clearanceVector);
 
       if (MathTools.epsilonEquals(node.getX(movingQuadrant), previousNode.getX(movingQuadrant), Math.abs(clearanceVector.getX())) && MathTools
@@ -105,7 +108,10 @@ public class SnapBasedNodeChecker extends FootstepNodeChecker
          }
       }
 
-      double yaw = AngleTools.computeAngleDifferenceMinusPiToPi(node.getNominalYaw(), previousNode.getNominalYaw());
+
+
+
+      double yaw = AngleTools.computeAngleDifferenceMinusPiToPi(currentYaw, previousYaw);
       if (!MathTools.intervalContains(yaw, parameters.getMinimumStepYaw(), parameters.getMaximumStepYaw()))
       {
          if (DEBUG)
@@ -116,16 +122,12 @@ public class SnapBasedNodeChecker extends FootstepNodeChecker
          return false;
       }
 
-      FootstepNodeSnapData previousNodeSnapData = snapper.snapFootstepNode(previousNode);
-
-      RigidBodyTransform previousFootSnapTransform = previousNodeSnapData.getSnapTransform(movingQuadrant);
-      RigidBodyTransform snapTransform = snapData.getSnapTransform(movingQuadrant);
-
-      Point3D newStepPosition = new Point3D(node.getX(movingQuadrant), node.getY(movingQuadrant), 0.0);
-      Point3D previousStepPosition = new Point3D(previousNode.getX(movingQuadrant), previousNode.getY(movingQuadrant), 0.0);
-
+      FramePoint3D newStepPosition = new FramePoint3D(worldFrame, node.getX(movingQuadrant), node.getY(movingQuadrant), 0.0);
       snapTransform.transform(newStepPosition);
-      previousFootSnapTransform.transform(previousStepPosition);
+
+      QuadrantDependentList<Point3D> previousSnappedStepPositions = getSnappedStepPositions(previousNode);
+      Point3D previousStepPosition = previousSnappedStepPositions.get(movingQuadrant);
+
 
       double heightChange = Math.abs(newStepPosition.getZ() - previousStepPosition.getZ());
       if (heightChange > parameters.getMaximumStepChangeZ())
@@ -138,6 +140,61 @@ public class SnapBasedNodeChecker extends FootstepNodeChecker
          return false;
       }
 
+      QuadrantDependentList<PoseReferenceFrame> footFrames = getFootFrames(previousSnappedStepPositions, previousOrientation);
+      for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
+      {
+         FramePoint3D expectedXGaitPoint = new FramePoint3D(footFrames.get(robotQuadrant));
+
+         double forwardOffset = movingQuadrant.getEnd() == robotQuadrant.getEnd() ? 0.0 : movingQuadrant.getEnd() == RobotEnd.FRONT ? previousNode.getNominalStanceLength() : -previousNode.getNominalStanceLength();
+         double sideOffset = movingQuadrant.getSide() == robotQuadrant.getSide() ? 0.0 : movingQuadrant.getSide() == RobotSide.LEFT ? previousNode.getNominalStanceWidth() : -previousNode.getNominalStanceWidth();
+         expectedXGaitPoint.add(forwardOffset, sideOffset, 0.0);
+
+         newStepPosition.changeFrame(footFrames.get(robotQuadrant));
+
+         // check forward/backward
+         if ((newStepPosition.getX() - expectedXGaitPoint.getX()) > parameters.getMaximumStepReach())
+         {
+            rejectNode(node, previousNode, QuadrupedFootstepPlannerNodeRejectionReason.STEP_TOO_FAR_FORWARD);
+            return false;
+         }
+         else if (newStepPosition.getX() - expectedXGaitPoint.getX() < parameters.getMinimumStepLength())
+         {
+            rejectNode(node, previousNode, QuadrupedFootstepPlannerNodeRejectionReason.STEP_TOO_FAR_BACKWARD);
+            return false;
+         }
+
+         // check left/right
+         if (movingQuadrant.getSide() == RobotSide.LEFT)
+         {
+            if (newStepPosition.getY() - expectedXGaitPoint.getY() > parameters.getMaximumStepWidth())
+            {
+               rejectNode(node, previousNode, QuadrupedFootstepPlannerNodeRejectionReason.STEP_TOO_FAR_OUTWARD);
+               return false;
+            }
+            if (newStepPosition.getY() - expectedXGaitPoint.getY() < parameters.getMinimumStepWidth())
+            {
+               rejectNode(node, previousNode, QuadrupedFootstepPlannerNodeRejectionReason.STEP_TOO_FAR_INWARD);
+               return false;
+            }
+         }
+         else
+         {
+            if (newStepPosition.getY() - expectedXGaitPoint.getY() < -parameters.getMaximumStepWidth())
+            {
+               rejectNode(node, previousNode, QuadrupedFootstepPlannerNodeRejectionReason.STEP_TOO_FAR_OUTWARD);
+               return false;
+            }
+            if (newStepPosition.getY() - expectedXGaitPoint.getY() > -parameters.getMinimumStepWidth())
+            {
+               rejectNode(node, previousNode, QuadrupedFootstepPlannerNodeRejectionReason.STEP_TOO_FAR_INWARD);
+               return false;
+            }
+         }
+      }
+      newStepPosition.changeFrame(worldFrame);
+
+
+
       if (hasPlanarRegions() && isObstacleBetweenSteps(newStepPosition, previousStepPosition, planarRegionsList.getPlanarRegionsAsList(),
                                                        parameters.getBodyGroundClearance()))
       {
@@ -149,8 +206,8 @@ public class SnapBasedNodeChecker extends FootstepNodeChecker
          return false;
       }
 
-      if (hasPlanarRegions() && isObstacleBetweenFeet(newStepPosition, movingQuadrant, previousNode, previousNodeSnapData,
-                                                      planarRegionsList.getPlanarRegionsAsList(), parameters.getBodyGroundClearance()))
+      if (hasPlanarRegions() && isObstacleBetweenFeet(newStepPosition, movingQuadrant, previousSnappedStepPositions, planarRegionsList.getPlanarRegionsAsList(),
+                                                      parameters.getBodyGroundClearance()))
       {
          if (DEBUG)
          {
@@ -161,6 +218,36 @@ public class SnapBasedNodeChecker extends FootstepNodeChecker
       }
 
       return true;
+   }
+
+   private QuadrantDependentList<Point3D> getSnappedStepPositions(FootstepNode node)
+   {
+      QuadrantDependentList<Point3D> snappedStepPositions = new QuadrantDependentList<>();
+
+      for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
+      {
+         FootstepNodeSnapData snapData = snapper.snapFootstepNode(node.getXIndex(robotQuadrant), node.getYIndex(robotQuadrant));
+         RigidBodyTransform footSnapTransform = snapData.getSnapTransform();
+         Point3D stepPosition = new Point3D(node.getX(robotQuadrant), node.getY(robotQuadrant), 0.0);
+         footSnapTransform.transform(stepPosition);
+         snappedStepPositions.put(robotQuadrant, stepPosition);
+      }
+
+      return snappedStepPositions;
+   }
+
+   private QuadrantDependentList<PoseReferenceFrame> getFootFrames(QuadrantDependentList<Point3D> stepPositions, Orientation3DReadOnly orientation)
+   {
+      QuadrantDependentList<PoseReferenceFrame> footFrames = new QuadrantDependentList<>();
+      for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
+      {
+         PoseReferenceFrame footFrame = new PoseReferenceFrame(robotQuadrant.getCamelCaseName() + "FootFrame", ReferenceFrame.getWorldFrame());
+         footFrame.setPoseAndUpdate(stepPositions.get(robotQuadrant), orientation);
+
+         footFrames.put(robotQuadrant, footFrame);
+      }
+
+      return footFrames;
    }
 
    /**
@@ -174,11 +261,8 @@ public class SnapBasedNodeChecker extends FootstepNodeChecker
 
       for (PlanarRegion region : planarRegions)
       {
-         List<LineSegment3D> intersections = region.intersect(bodyPath);
-         if (!intersections.isEmpty())
-         {
+         if (!region.intersect(bodyPath).isEmpty())
             return true;
-         }
       }
 
       return false;
@@ -188,27 +272,20 @@ public class SnapBasedNodeChecker extends FootstepNodeChecker
     * This is meant to test if there is a wall that the body of the robot would run into when shifting
     * from one step to the next. It is not meant to eliminate swing overs.
     */
-   private static boolean isObstacleBetweenFeet(Point3DReadOnly newFootPosition, RobotQuadrant newFootQuadrant, FootstepNode previousNode,
-                                                FootstepNodeSnapData previousNodeSnapData, List<PlanarRegion> planarRegions, double groundClearance)
+   private static boolean isObstacleBetweenFeet(Point3DReadOnly newFootPosition, RobotQuadrant newFootQuadrant,
+                                                QuadrantDependentList<Point3D> previousStepPositions, List<PlanarRegion> planarRegions, double groundClearance)
    {
       for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
       {
          if (robotQuadrant == newFootQuadrant)
             continue;
 
-         RigidBodyTransform previousFootSnapTransform = previousNodeSnapData.getSnapTransform(robotQuadrant);
-         Point3D previousFootPosition = new Point3D(previousNode.getX(robotQuadrant), previousNode.getY(robotQuadrant), 0.0);
-         previousFootSnapTransform.transform(previousFootPosition);
-
-         PlanarRegion bodyPath = createBodyCollisionRegionFromTwoFeet(newFootPosition, previousFootPosition, groundClearance, 2.0);
+         PlanarRegion bodyPath = createBodyCollisionRegionFromTwoFeet(newFootPosition, previousStepPositions.get(robotQuadrant), groundClearance, 2.0);
 
          for (PlanarRegion region : planarRegions)
          {
-            List<LineSegment3D> intersections = region.intersect(bodyPath);
-            if (!intersections.isEmpty())
-            {
+            if (!region.intersect(bodyPath).isEmpty())
                return true;
-            }
          }
       }
 
@@ -259,6 +336,9 @@ public class SnapBasedNodeChecker extends FootstepNodeChecker
    @Override
    public void addStartNode(FootstepNode startNode, QuadrantDependentList<RigidBodyTransform> startNodeTransforms)
    {
-      snapper.addSnapData(startNode, new FootstepNodeSnapData(startNodeTransforms));
+      for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
+      {
+         snapper.addSnapData(startNode.getXIndex(robotQuadrant), startNode.getYIndex(robotQuadrant), new FootstepNodeSnapData(startNodeTransforms.get(robotQuadrant)));
+      }
    }
 }

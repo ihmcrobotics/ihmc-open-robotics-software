@@ -17,8 +17,11 @@ import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.euclid.tuple4D.interfaces.QuaternionReadOnly;
 import us.ihmc.messager.Messager;
 import us.ihmc.messager.MessagerAPIFactory.Topic;
+import us.ihmc.pathPlanning.visibilityGraphs.tools.PlanarRegionTools;
+import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.communication.FootstepPlannerMessagerAPI;
 import us.ihmc.quadrupedPlanning.QuadrupedXGaitSettings;
 import us.ihmc.quadrupedPlanning.QuadrupedXGaitSettingsReadOnly;
+import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 import us.ihmc.robotics.robotSide.QuadrantDependentList;
 import us.ihmc.robotics.robotSide.RobotQuadrant;
@@ -59,11 +62,16 @@ public class StartGoalPositionViewer extends AnimationTimer
    private AtomicReference<Point3D> lowLevelGoalPositionReference = null;
    private final AtomicReference<QuadrupedXGaitSettingsReadOnly> xGaitSettingsReference = new AtomicReference<>(new QuadrupedXGaitSettings());
 
+   private final AtomicReference<PlanarRegionsList> planarRegionsList;
+
+
    private final Messager messager;
 
    public StartGoalPositionViewer(Messager messager)
    {
       this.messager = messager;
+
+      planarRegionsList = messager.createInput(FootstepPlannerMessagerAPI.PlanarRegionDataTopic);
 
       for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
       {
@@ -216,6 +224,7 @@ public class StartGoalPositionViewer extends AnimationTimer
          FramePoint3D footPosition = new FramePoint3D(xGaitFrame, robotQuadrant.getEnd().negateIfHindEnd(xOffset),
                                                       robotQuadrant.getSide().negateIfRightSide(yOffset), 0.0);
          footPosition.changeFrame(ReferenceFrame.getWorldFrame());
+         footPosition.setZ(getHeightAtPoint(footPosition.getX(), footPosition.getY()));
 
          startFeetSpheres.get(robotQuadrant).setTranslateX(footPosition.getX());
          startFeetSpheres.get(robotQuadrant).setTranslateY(footPosition.getY());
@@ -240,6 +249,7 @@ public class StartGoalPositionViewer extends AnimationTimer
          FramePoint3D footPosition = new FramePoint3D(xGaitFrame, robotQuadrant.getEnd().negateIfHindEnd(xOffset),
                                                       robotQuadrant.getSide().negateIfRightSide(yOffset), 0.0);
          footPosition.changeFrame(ReferenceFrame.getWorldFrame());
+         footPosition.setZ(getHeightAtPoint(footPosition.getX(), footPosition.getY()));
 
          goalFeetSpheres.get(robotQuadrant).setTranslateX(footPosition.getX());
          goalFeetSpheres.get(robotQuadrant).setTranslateY(footPosition.getY());
@@ -321,6 +331,15 @@ public class StartGoalPositionViewer extends AnimationTimer
       double green = opaqueColor.getGreen();
       double blue = opaqueColor.getBlue();
       return new Color(red, green, blue, opacity);
+   }
+
+   private double getHeightAtPoint(double x, double y)
+   {
+      PlanarRegionsList planarRegionsList = this.planarRegionsList.get();
+      if (planarRegionsList == null)
+         return 0.0;
+      Point3DReadOnly projectedPoint = PlanarRegionTools.projectPointToPlanesVertically(new Point3D(x, y, 100.0), planarRegionsList);
+      return projectedPoint == null ? 0.0 : projectedPoint.getZ();
    }
 
    public Node getRoot()
