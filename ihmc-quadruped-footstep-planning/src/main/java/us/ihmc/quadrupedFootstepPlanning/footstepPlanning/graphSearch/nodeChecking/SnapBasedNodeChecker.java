@@ -4,7 +4,6 @@ import us.ihmc.commons.MathTools;
 import us.ihmc.commons.PrintTools;
 import us.ihmc.euclid.axisAngle.AxisAngle;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
-import us.ihmc.euclid.geometry.LineSegment3D;
 import us.ihmc.euclid.orientation.interfaces.Orientation3DReadOnly;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
@@ -262,11 +261,8 @@ public class SnapBasedNodeChecker extends FootstepNodeChecker
 
       for (PlanarRegion region : planarRegions)
       {
-         List<LineSegment3D> intersections = region.intersect(bodyPath);
-         if (!intersections.isEmpty())
-         {
+         if (!region.intersect(bodyPath).isEmpty())
             return true;
-         }
       }
 
       return false;
@@ -288,11 +284,8 @@ public class SnapBasedNodeChecker extends FootstepNodeChecker
 
          for (PlanarRegion region : planarRegions)
          {
-            List<LineSegment3D> intersections = region.intersect(bodyPath);
-            if (!intersections.isEmpty())
-            {
+            if (!region.intersect(bodyPath).isEmpty())
                return true;
-            }
          }
       }
 
