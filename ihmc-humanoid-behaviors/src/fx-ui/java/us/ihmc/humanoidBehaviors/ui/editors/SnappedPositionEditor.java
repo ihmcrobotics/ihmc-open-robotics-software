@@ -1,20 +1,18 @@
 package us.ihmc.humanoidBehaviors.ui.editors;
 
-import javafx.animation.AnimationTimer;
 import javafx.scene.Node;
 import javafx.scene.input.MouseButton;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.input.PickResult;
 import javafx.scene.shape.MeshView;
 import us.ihmc.euclid.tuple3D.Point3D;
-import us.ihmc.humanoidBehaviors.ui.ChangingReference;
+import us.ihmc.humanoidBehaviors.ui.ActivationReference;
+import us.ihmc.humanoidBehaviors.ui.BehaviorUI;
+import us.ihmc.humanoidBehaviors.ui.SimpleMessagerAPIFactory;
 import us.ihmc.log.LogTools;
 import us.ihmc.messager.Messager;
-import us.ihmc.messager.MessagerAPIFactory;
-import us.ihmc.messager.MessagerAPIFactory.Category;
 import us.ihmc.messager.MessagerAPIFactory.MessagerAPI;
 import us.ihmc.messager.MessagerAPIFactory.Topic;
-import us.ihmc.messager.MessagerAPIFactory.TopicTheme;
 import us.ihmc.pathPlanning.visibilityGraphs.tools.PlanarRegionTools;
 import us.ihmc.robotics.geometry.PlanarRegion;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
@@ -22,16 +20,15 @@ import us.ihmc.robotics.geometry.PlanarRegionsList;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 
-import static us.ihmc.humanoidBehaviors.ui.editors.SnappedPositionEditor.API.*;
+import static us.ihmc.humanoidBehaviors.ui.editors.SnappedPositionEditor.API.SelectedPlanarRegion;
+import static us.ihmc.humanoidBehaviors.ui.editors.SnappedPositionEditor.API.SelectedPosition;
 
 public class SnappedPositionEditor extends FXUIEditor
 {
    private final Messager messager;
    private final Node sceneNode;
 
-   private final Topic<FXUIEditor> activeEditorTopic;
-
-   private final ChangingReference<FXUIEditor> activeEditor;
+   private final ActivationReference<FXUIEditor> activeEditor;
    private final AtomicReference<PlanarRegionsList> planarRegionsList;
    private final AtomicBoolean userLeftClicked = new AtomicBoolean(false);
    private final AtomicReference<Point3D> latestInterception = new AtomicReference<>(null);
@@ -39,27 +36,24 @@ public class SnappedPositionEditor extends FXUIEditor
 
 //   private final Topic<Boolean> orientationEditModeEnabledTopic;
 
-   public SnappedPositionEditor(Messager messager, Node sceneNode,
-                                Topic<PlanarRegionsList> planarRegionDataTopic,
-                                Topic<FXUIEditor> activeEditorTopic)
+   public SnappedPositionEditor(Messager messager, Node sceneNode)
    {
       this.messager = messager;
       this.sceneNode = sceneNode;
 
-      this.activeEditorTopic = activeEditorTopic;
-
-      activeEditor = new ChangingReference<>(messager.createInput(activeEditorTopic, FXUIEditor.NONE));
-      planarRegionsList = messager.createInput(planarRegionDataTopic);
+      activeEditor = new ActivationReference<>(messager.createInput(BehaviorUI.API.ActiveEditor, FXUIEditor.NONE), this);
+      planarRegionsList = messager.createInput(BehaviorUI.API.PlanarRegionsList);
    }
 
    @Override
    public void handle(long now)
    {
-      if (activeEditor.get() == this)
+      if (activeEditor.checkActivated())
       {
-         if (activeEditor.hasChanged())
+         if (activeEditor.activationChanged())
          {
-            sceneNode.addEventHandler(MouseEvent.MOUSE_MOVED, this::rayCastInterceptor);
+            LogTools.debug("SnappedPositionEditor activated");
+            sceneNode.addEventHandler(MouseEvent.ANY, this::rayCastInterceptor);
             sceneNode.addEventHandler(MouseEvent.MOUSE_CLICKED, this::leftClickInterceptor);
          }
 
@@ -69,20 +63,15 @@ public class SnappedPositionEditor extends FXUIEditor
             messager.submitMessage(SelectedPlanarRegion, selectedRegion.get());
             messager.submitMessage(SelectedPosition, interception);
          }
-
          if (userLeftClicked.getAndSet(false))
          {
-            LogTools.debug("Start position is validated: " + interception, this);
-            messager.submitMessage(activeEditorTopic, FXUIEditor.NONE);
-//            if (orientationEditModeEnabledTopic != null)
-//            {
-//               LogTools.debug("submitMessage  startOrientationEditModeEnabledTopic");
-//               messager.submitMessage(orientationEditModeEnabledTopic, true);
-//            }
+            LogTools.debug("Selected position is validated: {}", interception);
+            messager.submitMessage(BehaviorUI.API.ActiveEditor, FXUIEditor.NONE);
          }
       }
-      else if (activeEditor.hasChanged())
+      else if (activeEditor.activationChanged())
       {
+         LogTools.debug("SnappedPositionEditor deactivated");
          sceneNode.removeEventHandler(MouseEvent.ANY, this::rayCastInterceptor);
          sceneNode.removeEventHandler(MouseEvent.ANY, this::leftClickInterceptor);
       }
@@ -92,6 +81,7 @@ public class SnappedPositionEditor extends FXUIEditor
    {
       PickResult pickResult = event.getPickResult();
       Node intersectedNode = pickResult.getIntersectedNode();
+//      LogTools.debug("intersected node: {}", intersectedNode);
       if (intersectedNode == null || !(intersectedNode instanceof MeshView))
          return;
       javafx.geometry.Point3D localPoint = pickResult.getIntersectedPoint();
@@ -118,6 +108,7 @@ public class SnappedPositionEditor extends FXUIEditor
    {
       if (event.getButton() == MouseButton.PRIMARY && event.isStillSincePress())
       {
+         LogTools.debug("User left clicked");
          userLeftClicked.set(true);
       }
    }
@@ -136,12 +127,10 @@ public class SnappedPositionEditor extends FXUIEditor
 
    public static class API
    {
-      private static final MessagerAPIFactory apiFactory = new MessagerAPIFactory();
-      private static final Category Category = apiFactory.createRootCategory(apiFactory.createCategoryTheme(SnappedPositionEditor.class.getSimpleName()));
-      private static final TopicTheme Theme = apiFactory.createTopicTheme("Default");
+      private static final SimpleMessagerAPIFactory apiFactory = new SimpleMessagerAPIFactory(SnappedPositionEditor.class);
 
-      public static final Topic<Point3D> SelectedPosition = Category.topic(Theme);
-      public static final Topic<PlanarRegion> SelectedPlanarRegion = Category.topic(Theme);
+      public static final Topic<Point3D> SelectedPosition = apiFactory.createTopic("SelectedPosition", Point3D.class);
+      public static final Topic<PlanarRegion> SelectedPlanarRegion = apiFactory.createTopic("SelectedPlanarRegion", PlanarRegion.class);
 
       public static final MessagerAPI create()
       {

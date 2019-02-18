@@ -14,23 +14,19 @@ import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParameters
 import us.ihmc.humanoidBehaviors.ui.controllers.PatrolUIController;
 import us.ihmc.humanoidBehaviors.ui.editors.FXUIEditor;
 import us.ihmc.humanoidBehaviors.ui.editors.SnappedPositionEditor;
-import us.ihmc.humanoidBehaviors.ui.editors.SnappedPositionEditor.API;
+import us.ihmc.humanoidBehaviors.ui.graphics.FXUIGraphic;
 import us.ihmc.humanoidBehaviors.ui.graphics.PlanarRegionsGraphic;
 import us.ihmc.humanoidBehaviors.ui.graphics.SnappedPositionGraphic;
 import us.ihmc.javaFXToolkit.messager.JavaFXMessager;
 import us.ihmc.javaFXToolkit.scenes.View3DFactory;
 import us.ihmc.javaFXVisualizers.JavaFXRobotVisualizer;
-import us.ihmc.messager.MessagerAPIFactory;
 import us.ihmc.messager.MessagerAPIFactory.MessagerAPI;
 import us.ihmc.messager.MessagerAPIFactory.Topic;
-import us.ihmc.messager.MessagerAPIFactory.TopicTheme;
 import us.ihmc.pathPlanning.visibilityGraphs.interfaces.VisibilityGraphsParameters;
-import us.ihmc.pathPlanning.visibilityGraphs.ui.viewers.PlanarRegionViewer;
 import us.ihmc.robotModels.FullHumanoidRobotModelFactory;
+import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.wholeBodyController.RobotContactPointParameters;
-
-import static us.ihmc.humanoidBehaviors.ui.BehaviorUI.API.*;
 
 /**
  * This class constructs a UI for behavior operation.
@@ -41,9 +37,12 @@ public class BehaviorUI
    private final Stage primaryStage;
    private final BorderPane mainPane;
 
-   private final PlanarRegionViewer planarRegionsGraphic;
-   private final SnappedPositionEditor snappedPositionEditor;
-   private final SnappedPositionGraphic snappedPositionGraphic;
+   // Editors
+   public static SnappedPositionEditor SNAPPED_POSITION_EDITOR;
+
+   private final PlanarRegionsGraphic planarRegionsGraphic;
+   public static SnappedPositionGraphic waypointOneGraphic;
+   public static SnappedPositionGraphic waypointTwoGraphic;
 //   private final StartGoalPositionEditor startGoalEditor;
 //   private final StartGoalOrientationEditor orientationEditor;
 //   private final StartGoalPositionViewer startGoalPositionViewer;
@@ -83,9 +82,10 @@ public class BehaviorUI
       }
       Pane subScene = view3dFactory.getSubSceneWrappedInsidePane();
 
-      planarRegionsGraphic = new PlanarRegionsGraphic(messager, PlanarRegionDataTopic);
-      snappedPositionEditor = new SnappedPositionEditor(messager, subScene, PlanarRegionDataTopic, ActiveEditor);
-      snappedPositionGraphic = new SnappedPositionGraphic(messager, Color.GREEN, SnappedPositionEditor.API.SelectedPosition);
+      planarRegionsGraphic = new PlanarRegionsGraphic(messager);
+      SNAPPED_POSITION_EDITOR = new SnappedPositionEditor(messager, subScene);
+      waypointOneGraphic = new SnappedPositionGraphic(messager, Color.GREEN);
+      waypointTwoGraphic = new SnappedPositionGraphic(messager, Color.YELLOW);
 //      startGoalPositionViewer = new StartGoalPositionViewer(messager, WaypointAPositionEditModeEnabledTopic, WaypointBPositionEditModeEnabledTopic,
 //                                                            WaypointAPositionTopic, LowLevelGoalPositionTopic, WaypointBPositionTopic);
 //      startGoalOrientationViewer = new StartGoalOrientationViewer(messager);
@@ -95,6 +95,8 @@ public class BehaviorUI
 //      orientationEditor = new StartGoalOrientationEditor(messager, view3dFactory.getSubScene());
 
       view3dFactory.addNodeToView(planarRegionsGraphic.getRoot());
+      view3dFactory.addNodeToView(waypointOneGraphic.getRoot());
+      view3dFactory.addNodeToView(waypointTwoGraphic.getRoot());
 //      view3dFactory.addNodeToView(startGoalPositionViewer.getRoot());
 //      view3dFactory.addNodeToView(startGoalOrientationViewer.getRoot());
 
@@ -105,14 +107,17 @@ public class BehaviorUI
       else
       {
          robotVisualizer = new JavaFXRobotVisualizer(fullHumanoidRobotModelFactory);
-         messager.registerTopicListener(RobotConfigurationDataTopic, robotVisualizer::submitNewConfiguration);
+//         messager.registerTopicListener(RobotConfigurationDataTopic, robotVisualizer::submitNewConfiguration);
          patrolUIController.setFullRobotModel(robotVisualizer.getFullRobotModel());
          view3dFactory.addNodeToView(robotVisualizer.getRootNode());
          robotVisualizer.start();
       }
 
+      SNAPPED_POSITION_EDITOR.start();
+
       planarRegionsGraphic.start();
-      snappedPositionEditor.start();
+      waypointOneGraphic.start();
+      waypointTwoGraphic.start();
 //      startGoalPositionViewer.start();
 //      startGoalOrientationViewer.start();
 //      startGoalEditor.start();
@@ -139,8 +144,11 @@ public class BehaviorUI
 
    public void stop()
    {
+      SNAPPED_POSITION_EDITOR.stop();
+
       planarRegionsGraphic.stop();
-      snappedPositionEditor.stop();
+      waypointOneGraphic.stop();
+      waypointTwoGraphic.stop();
 //      startGoalPositionViewer.stop();
 //      startGoalOrientationViewer.stop();
 //      startGoalEditor.stop();
@@ -164,11 +172,11 @@ public class BehaviorUI
 
    public static class API
    {
-      private static final MessagerAPIFactory apiFactory = new MessagerAPIFactory();
-      private static final MessagerAPIFactory.Category Category = apiFactory.createRootCategory(apiFactory.createCategoryTheme(SnappedPositionEditor.class.getSimpleName()));
-      private static final TopicTheme Theme = apiFactory.createTopicTheme("Default");
+      private static final SimpleMessagerAPIFactory apiFactory = new SimpleMessagerAPIFactory(BehaviorUI.class);
 
-      public static final Topic<FXUIEditor> ActiveEditor = Category.topic(Theme);
+      public static final Topic<FXUIEditor> ActiveEditor = apiFactory.createTopic("ActiveEditor", FXUIEditor.class);
+      public static final Topic<PlanarRegionsList> PlanarRegionsList = apiFactory.createTopic("PlanarRegionsList", PlanarRegionsList.class);
+      public static final Topic<FXUIGraphic> SelectedGraphic = apiFactory.createTopic("SelectedGraphic", FXUIGraphic.class);
 
       public static final MessagerAPI create()
       {

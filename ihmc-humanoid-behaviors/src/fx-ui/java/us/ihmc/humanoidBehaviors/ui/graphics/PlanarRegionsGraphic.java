@@ -1,19 +1,13 @@
 package us.ihmc.humanoidBehaviors.ui.graphics;
 
-import com.google.common.util.concurrent.AtomicDouble;
-import javafx.animation.AnimationTimer;
-import javafx.scene.Group;
-import javafx.scene.Node;
 import javafx.scene.paint.Color;
 import javafx.scene.paint.PhongMaterial;
 import javafx.scene.shape.MeshView;
-import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.humanoidBehaviors.ui.BehaviorUI.API;
+import us.ihmc.javaFXToolkit.messager.JavaFXMessager;
 import us.ihmc.javaFXToolkit.shapes.JavaFXMeshBuilder;
-import us.ihmc.log.LogTools;
-import us.ihmc.messager.Messager;
-import us.ihmc.messager.MessagerAPIFactory.Topic;
 import us.ihmc.pathPlanning.visibilityGraphs.ui.VisualizationParameters;
 import us.ihmc.robotics.geometry.PlanarRegion;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
@@ -21,80 +15,26 @@ import us.ihmc.robotics.geometry.PlanarRegionsList;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.atomic.AtomicReference;
 
-public class PlanarRegionsGraphic
+public class PlanarRegionsGraphic extends FXUIGraphic
 {
-   private ExecutorService executorService = Executors.newSingleThreadExecutor(ThreadTools.getNamedThreadFactory(getClass().getSimpleName()));
-
-   private final Group root = new Group();
-
-   private final AtomicReference<List<MeshView>> graphicsToRender = new AtomicReference<>(null);
-   private List<MeshView> graphicsRendered = null;
-
-   private final AtomicDouble opacity = new AtomicDouble(1.0);
-
-   private final AnimationTimer renderMeshAnimation;
-   private final AtomicReference<Boolean> show;
-
    private static final PlanarRegionColorPicker colorPicker = new PlanarRegionColorPicker();
 
-   public PlanarRegionsGraphic(Messager messager, Topic<PlanarRegionsList> planarRegionDataTopic, Topic<Boolean> showPlanarRegionsTopic)
+   private JavaFXMessager messager;
+   private final PlanarRegionsList planarRegionsList;
+
+   public PlanarRegionsGraphic(JavaFXMessager messager)
    {
-      messager.registerTopicListener(planarRegionDataTopic, this::buildMeshAndMaterialOnThread);
-      show = messager.createInput(showPlanarRegionsTopic, true);
+      this.messager = messager;
 
-      renderMeshAnimation = new AnimationTimer()
-      {
-         @Override
-         public void handle(long now)
-         {
-            if (!show.get())
-               root.getChildren().clear();               
-
-            List<MeshView> localReference = graphicsToRender.getAndSet(null);
-
-            if (localReference != null)
-            {
-               LogTools.debug("Rendering new planar regions.");
-               graphicsRendered = localReference;
-               root.getChildren().clear();
-            }
-
-            if (graphicsRendered != null && show.get() && root.getChildren().isEmpty())
-               root.getChildren().addAll(graphicsRendered);
-         }
-      };
-   }
-
-   public void setOpacity(double newOpacity)
-   {
-      opacity.set(newOpacity);
-   }
-
-   public void start()
-   {
-      renderMeshAnimation.start();
-   }
-
-   public void stop()
-   {
-      renderMeshAnimation.stop();
-      executorService.shutdownNow();
-   }
-
-   private void buildMeshAndMaterialOnThread(PlanarRegionsList planarRegionsList)
-   {
-      executorService.submit(() -> buildMeshAndMaterial(planarRegionsList));
-   }
-
-   private void buildMeshAndMaterial(PlanarRegionsList planarRegionsList)
-   {
-      LogTools.debug("Creating mesh and material for new planar regions.", this);
-
-      RigidBodyTransform transformToWorld = new RigidBodyTransform();
+      ConvexPolygon2D convexPolygon = new ConvexPolygon2D();
+      convexPolygon.addVertex(10.0, 10.0);
+      convexPolygon.addVertex(-10.0, 10.0);
+      convexPolygon.addVertex(-10.0, -10.0);
+      convexPolygon.addVertex(10.0, -10.0);
+      convexPolygon.update();
+      PlanarRegion groundPlane = new PlanarRegion(new RigidBodyTransform(), convexPolygon);
+      planarRegionsList = new PlanarRegionsList(groundPlane);
 
       List<MeshView> regionMeshViews = new ArrayList<>();
 
@@ -104,6 +44,7 @@ public class PlanarRegionsGraphic
          PlanarRegion planarRegion = planarRegionsList.getPlanarRegion(regionIndex);
 
          int regionId = planarRegion.getRegionId();
+         RigidBodyTransform transformToWorld = new RigidBodyTransform();
          planarRegion.getTransformToWorld(transformToWorld);
 
          meshBuilder.addMultiLine(transformToWorld, Arrays.asList(planarRegion.getConcaveHull()), VisualizationParameters.CONCAVEHULL_LINE_THICKNESS, true);
@@ -119,9 +60,14 @@ public class PlanarRegionsGraphic
          regionMeshViews.add(regionMeshView);
       }
 
-      graphicsToRender.set(regionMeshViews);
+      rootChildren.addAll(regionMeshViews);
    }
 
+   @Override
+   public void handle(long now)
+   {
+      messager.submitMessage(API.PlanarRegionsList, planarRegionsList);
+   }
 
    public static Color getRegionColor(int regionId)
    {
@@ -132,11 +78,6 @@ public class PlanarRegionsGraphic
    {
       java.awt.Color awtColor = colorPicker.getColor(regionId);
       return Color.rgb(awtColor.getRed(), awtColor.getGreen(), awtColor.getBlue(), opacity);
-   }
-
-   public Node getRoot()
-   {
-      return root;
    }
 
    /**
