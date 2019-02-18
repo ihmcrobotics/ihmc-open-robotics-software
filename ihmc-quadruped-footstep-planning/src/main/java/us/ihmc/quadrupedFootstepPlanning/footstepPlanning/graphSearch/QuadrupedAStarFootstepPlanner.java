@@ -151,7 +151,7 @@ public class QuadrupedAStarFootstepPlanner implements QuadrupedBodyPathAndFootst
 
       startPose = start.getTargetPose();
 
-      startNode = getNodeFromTarget(start);
+      startNode = getNodeFromTarget(start.getInitialQuadrant(), start);
       QuadrantDependentList<RigidBodyTransform> startNodeSnapTransforms = new QuadrantDependentList<>();
 
       if (start.getTargetType() == FootstepPlannerTargetType.FOOTSTEPS)
@@ -213,6 +213,14 @@ public class QuadrupedAStarFootstepPlanner implements QuadrupedBodyPathAndFootst
 
    private FootstepNode getNodeFromTarget(QuadrupedFootstepPlannerTarget target)
    {
+      return getNodeFromTarget(defaultFirstQuadrant, target);
+   }
+
+   private FootstepNode getNodeFromTarget(RobotQuadrant quadrant, QuadrupedFootstepPlannerTarget target)
+   {
+      if (quadrant == null)
+         quadrant = defaultFirstQuadrant;
+
       FootstepNode nodeToReturn = null;
 
       if (target.getTargetType().equals(FootstepPlannerTargetType.POSE_BETWEEN_FEET))
@@ -231,7 +239,7 @@ public class QuadrupedAStarFootstepPlanner implements QuadrupedBodyPathAndFootst
          hindLeftStepPosition.changeFrameAndProjectToXYPlane(worldFrame);
          hindRightStepPosition.changeFrameAndProjectToXYPlane(worldFrame);
 
-         nodeToReturn = new FootstepNode(defaultFirstQuadrant, frontLeftStepPosition, frontRightStepPosition, hindLeftStepPosition, hindRightStepPosition,
+         nodeToReturn = new FootstepNode(quadrant, frontLeftStepPosition, frontRightStepPosition, hindLeftStepPosition, hindRightStepPosition,
                                          xGaitSettings.getStanceLength(), xGaitSettings.getStanceWidth());
       }
       else if (target.getTargetType().equals(FootstepPlannerTargetType.FOOTSTEPS))
@@ -246,7 +254,7 @@ public class QuadrupedAStarFootstepPlanner implements QuadrupedBodyPathAndFootst
          hindLeftGoalPosition.changeFrame(worldFrame);
          hindRightGoalPosition.changeFrame(worldFrame);
 
-         nodeToReturn = new FootstepNode(defaultFirstQuadrant, frontLeftGoalPosition.getX(), frontLeftGoalPosition.getY(), frontRightGoalPosition.getX(),
+         nodeToReturn = new FootstepNode(quadrant, frontLeftGoalPosition.getX(), frontLeftGoalPosition.getY(), frontRightGoalPosition.getX(),
                                          frontRightGoalPosition.getY(), hindLeftGoalPosition.getX(), hindLeftGoalPosition.getY(), hindRightGoalPosition.getX(),
                                          hindRightGoalPosition.getY(), xGaitSettings.getStanceLength(), xGaitSettings.getStanceWidth());
       }
