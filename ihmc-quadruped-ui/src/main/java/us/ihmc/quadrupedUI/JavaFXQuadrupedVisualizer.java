@@ -34,20 +34,23 @@ public class JavaFXQuadrupedVisualizer
    private final OneDoFJointBasics[] allJoints;
    private final int jointNameHash;
 
-   private final AtomicReference<RobotConfigurationData> robotConfigurationDataReference;
+   private final AtomicReference<RobotConfigurationData> robotConfigurationDataReference = new AtomicReference<>();
 
    private boolean isRobotLoaded = false;
    private final Group rootNode = new Group();
 
    private final AnimationTimer animationTimer;
 
+   public JavaFXQuadrupedVisualizer(FullQuadrupedRobotModelFactory fullRobotModelFactory)
+   {
+      this(null, fullRobotModelFactory);
+   }
+
    public JavaFXQuadrupedVisualizer(Messager messager, FullQuadrupedRobotModelFactory fullRobotModelFactory)
    {
       fullRobotModel = fullRobotModelFactory.createFullRobotModel();
       allJoints = fullRobotModel.getOneDoFJoints();
       referenceFrames = new QuadrupedReferenceFrames(fullRobotModel);
-
-      robotConfigurationDataReference = messager.createInput(QuadrupedUIMessagerAPI.RobotConfigurationDataTopic);
 
       jointNameHash = calculateJointNameHash(allJoints, fullRobotModel.getForceSensorDefinitions(), fullRobotModel.getIMUDefinitions());
 
@@ -83,8 +86,11 @@ public class JavaFXQuadrupedVisualizer
             robotRootNode.update();
             referenceFrames.updateFrames();
 
-            messager.submitMessage(QuadrupedUIMessagerAPI.RobotModelTopic, fullRobotModel);
-            messager.submitMessage(QuadrupedUIMessagerAPI.ReferenceFramesTopic, referenceFrames);
+            if (messager != null)
+            {
+               messager.submitMessage(QuadrupedUIMessagerAPI.RobotModelTopic, fullRobotModel);
+               messager.submitMessage(QuadrupedUIMessagerAPI.ReferenceFramesTopic, referenceFrames);
+            }
          }
       };
    }
@@ -139,6 +145,13 @@ public class JavaFXQuadrupedVisualizer
       graphics3dNode.getChildrenNodes().forEach(child -> addNodesRecursively(child, node));
    }
 
+   public void submitNewConfiguration(RobotConfigurationData robotConfigurationData)
+   {
+      if (robotConfigurationData.getJointNameHash() != jointNameHash)
+         throw new RuntimeException("Joint names do not match for RobotConfigurationData");
+
+      robotConfigurationDataReference.set(robotConfigurationData);
+   }
 
    public FullQuadrupedRobotModel getFullRobotModel()
    {

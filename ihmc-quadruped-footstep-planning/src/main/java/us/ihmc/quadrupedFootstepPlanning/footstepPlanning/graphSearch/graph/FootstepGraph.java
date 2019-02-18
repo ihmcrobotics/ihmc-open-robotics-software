@@ -101,6 +101,8 @@ public class FootstepGraph
       FootstepEdge edgeFromParent = incomingBestEdge.get(endNode);
       while (edgeFromParent.getStartNode() != null)
       {
+//         if (!edgeFromParent.isValidEdge())
+//            throw new RuntimeException("Edge moves more than one footstep, making it invalid.");
          FootstepNode parentNode = edgeFromParent.getStartNode();
          path.add(parentNode);
          edgeFromParent = incomingBestEdge.get(parentNode);
