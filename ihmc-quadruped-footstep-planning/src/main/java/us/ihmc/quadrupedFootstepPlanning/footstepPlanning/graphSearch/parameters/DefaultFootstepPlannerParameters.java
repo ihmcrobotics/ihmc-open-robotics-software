@@ -6,7 +6,7 @@ public class DefaultFootstepPlannerParameters implements FootstepPlannerParamete
    @Override
    public double getMaximumStepReach()
    {
-      return 0.7;
+      return 0.4;
    }
 
    /** {@inheritDoc} */
