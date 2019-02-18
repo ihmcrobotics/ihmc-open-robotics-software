@@ -170,11 +170,19 @@ public class QuadrupedAStarFootstepPlanner implements QuadrupedBodyPathAndFootst
          for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
          {
             Point3D startPoint = new Point3D(startNode.getX(robotQuadrant), startNode.getY(robotQuadrant), 0.0);
-            Point3DReadOnly projectedPoint = PlanarRegionTools.projectPointToPlanesVertically(startPoint, planarRegionsList);
-            if (projectedPoint == null)
+            Point3DReadOnly projectedPoint;
+            if (planarRegionsList != null)
             {
-               // FIXME should probably not be at 0.0
-               addPlanarRegionAtHeight(startPoint.getX(), startPoint.getY(), 0.0);
+               projectedPoint = PlanarRegionTools.projectPointToPlanesVertically(startPoint, planarRegionsList);
+               if (projectedPoint == null)
+               {
+                  // FIXME should probably not be at 0.0
+                  addPlanarRegionAtHeight(startPoint.getX(), startPoint.getY(), 0.0);
+                  projectedPoint = startPoint;
+               }
+            }
+            else
+            {
                projectedPoint = startPoint;
             }
             int xIndex = startNode.getXIndex(robotQuadrant);
