@@ -255,6 +255,7 @@ public class NodeOccupancyMapSequenceRenderer extends AnimationTimer
             FramePoint3D xGaitFoot = new FramePoint3D(xGaitFrame, 0.5 * robotQuadrant.getEnd().negateIfHindEnd(parentNode.getNominalStanceLength()),
                                                       0.5 * robotQuadrant.getSide().negateIfRightSide(parentNode.getNominalStanceWidth()), 0.0);
             xGaitFoot.changeFrame(ReferenceFrame.getWorldFrame());
+            xGaitFoot.setZ(getHeightAtPoint(xGaitFoot.getX(), xGaitFoot.getY()) + nodeOffsetZ);
 
             parentFeetMeshBuilder.addCone(coneHeight, coneRadius, transform.getTranslationVector(), color);
             parentFeetMeshBuilder.addCone(0.5 * coneHeight, coneRadius, xGaitFoot, Color.LIGHTBLUE);

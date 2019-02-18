@@ -1,4 +1,4 @@
-package us.ihmc.quadrupedPlanning.footstepChooser;
+package us.ihmc.quadrupedFootstepPlanning.footstepPlanning.graphSearch.footstepSnapping;
 
 import us.ihmc.euclid.matrix.RotationMatrix;
 import us.ihmc.euclid.transform.RigidBodyTransform;
@@ -13,12 +13,12 @@ import java.util.List;
 
 public class PlanarRegionsListPointSnapper
 {
-   public static RigidBodyTransform snapPointToPlanarRegionsList(Point2DReadOnly pointToSnap, List<PlanarRegion> planarRegionsListToSnapTo,
+   public static RigidBodyTransform snapPointToPlanarRegionsList(Point2DReadOnly pointInWorldToSnap, List<PlanarRegion> planarRegionsListToSnapTo,
                                                                  PlanarRegion regionToPack)
    {
       double allowableExtraZ = 0.003; // For close ones. When close, take one that is flatter...
       List<PlanarRegion> intersectingRegions = PlanarRegionTools
-            .findPlanarRegionsContainingPointByProjectionOntoXYPlane(planarRegionsListToSnapTo, pointToSnap);
+            .findPlanarRegionsContainingPointByProjectionOntoXYPlane(planarRegionsListToSnapTo, pointInWorldToSnap);
 
       if ((intersectingRegions == null) || (intersectingRegions.isEmpty()))
       {
@@ -36,7 +36,7 @@ public class PlanarRegionsListPointSnapper
       {
          PlanarRegion planarRegion = intersectingRegions.get(i);
 
-         double regionHeight = intersectingRegions.get(i).getPlaneZGivenXY(pointToSnap.getX(), pointToSnap.getY());
+         double regionHeight = intersectingRegions.get(i).getPlaneZGivenXY(pointInWorldToSnap.getX(), pointInWorldToSnap.getY());
 
          if (regionHeight > highestZ + allowableExtraZ)
          {
@@ -57,12 +57,13 @@ public class PlanarRegionsListPointSnapper
          }
       }
 
+
       RigidBodyTransform highestPlanarRegionTransform = new RigidBodyTransform();
 
       highestPlanarRegion.getNormal(highestSurfaceNormal);
       highestPlanarRegion.getTransformToWorld(highestPlanarRegionTransform);
 
-      Point3D highestIntersectionPointInWorldFrame = new Point3D(pointToSnap.getX(), pointToSnap.getY(), 0.0);
+      Point3D highestIntersectionPointInWorldFrame = new Point3D(pointInWorldToSnap.getX(), pointInWorldToSnap.getY(), 0.0);
       highestPlanarRegionTransform.transform(highestIntersectionPointInWorldFrame);
 
       RigidBodyTransform highestTransform = createTransformToMatchSurfaceNormalPreserveX(highestSurfaceNormal);

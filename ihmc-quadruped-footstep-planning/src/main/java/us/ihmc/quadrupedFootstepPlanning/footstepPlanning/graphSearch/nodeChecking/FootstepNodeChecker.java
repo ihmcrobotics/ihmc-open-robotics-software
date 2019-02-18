@@ -36,7 +36,19 @@ public abstract class FootstepNodeChecker
          listeners.add(listener);
    }
 
-   public abstract boolean isNodeValid(FootstepNode node, FootstepNode previousNode);
+   public boolean isNodeValid(FootstepNode node, FootstepNode previousNode)
+   {
+      if(node.equals(previousNode))
+      {
+         throw new RuntimeException("Cannot check a node with itself");
+      }
+      else
+      {
+         return isNodeValidInternal(node, previousNode);
+      }
+   }
+
+   public abstract boolean isNodeValidInternal(FootstepNode node, FootstepNode previousNode);
 
    public abstract void addStartNode(FootstepNode startNode, QuadrantDependentList<RigidBodyTransform> startNodeTransforms);
 }

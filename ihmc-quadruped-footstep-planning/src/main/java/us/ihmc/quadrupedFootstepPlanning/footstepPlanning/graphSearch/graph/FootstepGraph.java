@@ -1,5 +1,7 @@
 package us.ihmc.quadrupedFootstepPlanning.footstepPlanning.graphSearch.graph;
 
+import us.ihmc.robotics.robotSide.RobotQuadrant;
+
 import java.util.*;
 
 /**
@@ -40,10 +42,6 @@ public class FootstepGraph
    /**
     * Adds an edge to the graph and updates all path and node costs affected. The edge must
     * originate at a known node and the cost associated to moving along the edge must be given.
-    *
-    * @param startNode
-    * @param endNode
-    * @param transitionCost
     */
    public void checkAndSetEdge(FootstepNode startNode, FootstepNode endNode, double transitionCost)
    {
@@ -54,7 +52,7 @@ public class FootstepGraph
          throw new RuntimeException("Edge exists already.");
 
       if (!outgoingEdges.containsKey(startNode))
-         outgoingEdges.put(startNode, new HashSet<FootstepEdge>());
+         outgoingEdges.put(startNode, new HashSet<>());
       EdgeCost cost = new EdgeCost(transitionCost);
       edgeCostMap.put(edge, cost);
       outgoingEdges.get(startNode).add(edge);
@@ -101,9 +99,22 @@ public class FootstepGraph
       FootstepEdge edgeFromParent = incomingBestEdge.get(endNode);
       while (edgeFromParent.getStartNode() != null)
       {
-//         if (!edgeFromParent.isValidEdge())
-//            throw new RuntimeException("Edge moves more than one footstep, making it invalid.");
          FootstepNode parentNode = edgeFromParent.getStartNode();
+         FootstepNode childNode = edgeFromParent.getEndNode();
+
+         if (!edgeFromParent.isValidEdge())
+            throw new RuntimeException("Edge moves more than one footstep, making it invalid.");
+
+         for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
+         {
+            if (childNode.getMovingQuadrant() == robotQuadrant)
+               continue;
+
+            if (!edgeFromParent.getEndNode().quadrantGeometricallyEquals(robotQuadrant, edgeFromParent.getStartNode()))
+               throw new RuntimeException("Edge moves more than one step, and I missed it somehow.");
+
+         }
+
          path.add(parentNode);
          edgeFromParent = incomingBestEdge.get(parentNode);
       }
@@ -144,7 +155,7 @@ public class FootstepGraph
 
    private void checkNodeExists(FootstepNode node)
    {
-      if (!nodeCostMap.containsKey(node))
+      if (!doesNodeExist(node))
          throw new RuntimeException("Node has not been added to graph yet.");
    }
 }

@@ -1,8 +1,6 @@
 package us.ihmc.quadrupedFootstepPlanning.footstepPlanning.graphSearch.graph;
 
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.Tag;
-import org.junit.jupiter.api.Disabled;
 import us.ihmc.euclid.tools.EuclidCoreRandomTools;
 import us.ihmc.euclid.tools.EuclidCoreTestTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
@@ -74,10 +72,10 @@ public class FootstepNodeToolsTest
       RigidBodyTransform frontRightNodeTransform = new RigidBodyTransform();
       RigidBodyTransform hindLeftNodeTransform = new RigidBodyTransform();
       RigidBodyTransform hindRightNodeTransform = new RigidBodyTransform();
-      FootstepNodeTools.getNodeTransform(RobotQuadrant.FRONT_LEFT, node, frontLeftNodeTransform);
-      FootstepNodeTools.getNodeTransform(RobotQuadrant.FRONT_RIGHT, node, frontRightNodeTransform);
-      FootstepNodeTools.getNodeTransform(RobotQuadrant.HIND_LEFT, node, hindLeftNodeTransform);
-      FootstepNodeTools.getNodeTransform(RobotQuadrant.HIND_RIGHT, node, hindRightNodeTransform);
+      FootstepNodeTools.getNodeTransformToWorld(RobotQuadrant.FRONT_LEFT, node, frontLeftNodeTransform);
+      FootstepNodeTools.getNodeTransformToWorld(RobotQuadrant.FRONT_RIGHT, node, frontRightNodeTransform);
+      FootstepNodeTools.getNodeTransformToWorld(RobotQuadrant.HIND_LEFT, node, hindLeftNodeTransform);
+      FootstepNodeTools.getNodeTransformToWorld(RobotQuadrant.HIND_RIGHT, node, hindRightNodeTransform);
 
       double[] frontLeftRotationYawPitchRoll = new double[3];
       double[] frontRightRotationYawPitchRoll = new double[3];
@@ -145,19 +143,19 @@ public class FootstepNodeToolsTest
          RigidBodyTransform frontRightSnappedNodeTransform = new RigidBodyTransform();
          RigidBodyTransform hindLeftSnappedNodeTransform = new RigidBodyTransform();
          RigidBodyTransform hindRightSnappedNodeTransform = new RigidBodyTransform();
-         FootstepNodeTools.getSnappedNodeTransform(RobotQuadrant.FRONT_LEFT, node, frontLeftSnapTransform, frontLeftSnappedNodeTransform);
-         FootstepNodeTools.getSnappedNodeTransform(RobotQuadrant.FRONT_RIGHT, node, frontRightSnapTransform, frontRightSnappedNodeTransform);
-         FootstepNodeTools.getSnappedNodeTransform(RobotQuadrant.HIND_LEFT, node, hindLeftSnapTransform, hindLeftSnappedNodeTransform);
-         FootstepNodeTools.getSnappedNodeTransform(RobotQuadrant.HIND_RIGHT, node, hindRightSnapTransform, hindRightSnappedNodeTransform);
+         FootstepNodeTools.getSnappedNodeTransformToWorld(RobotQuadrant.FRONT_LEFT, node, frontLeftSnapTransform, frontLeftSnappedNodeTransform);
+         FootstepNodeTools.getSnappedNodeTransformToWorld(RobotQuadrant.FRONT_RIGHT, node, frontRightSnapTransform, frontRightSnappedNodeTransform);
+         FootstepNodeTools.getSnappedNodeTransformToWorld(RobotQuadrant.HIND_LEFT, node, hindLeftSnapTransform, hindLeftSnappedNodeTransform);
+         FootstepNodeTools.getSnappedNodeTransformToWorld(RobotQuadrant.HIND_RIGHT, node, hindRightSnapTransform, hindRightSnappedNodeTransform);
 
          RigidBodyTransform frontLeftExpectedSnappedNodeTransform = new RigidBodyTransform();
          RigidBodyTransform frontRightExpectedSnappedNodeTransform = new RigidBodyTransform();
          RigidBodyTransform hindLeftExpectedSnappedNodeTransform = new RigidBodyTransform();
          RigidBodyTransform hindRightExpectedSnappedNodeTransform = new RigidBodyTransform();
-         FootstepNodeTools.getNodeTransform(RobotQuadrant.FRONT_LEFT, node, frontLeftExpectedSnappedNodeTransform);
-         FootstepNodeTools.getNodeTransform(RobotQuadrant.FRONT_RIGHT, node, frontRightExpectedSnappedNodeTransform);
-         FootstepNodeTools.getNodeTransform(RobotQuadrant.HIND_LEFT, node, hindLeftExpectedSnappedNodeTransform);
-         FootstepNodeTools.getNodeTransform(RobotQuadrant.HIND_RIGHT, node, hindRightExpectedSnappedNodeTransform);
+         FootstepNodeTools.getNodeTransformToWorld(RobotQuadrant.FRONT_LEFT, node, frontLeftExpectedSnappedNodeTransform);
+         FootstepNodeTools.getNodeTransformToWorld(RobotQuadrant.FRONT_RIGHT, node, frontRightExpectedSnappedNodeTransform);
+         FootstepNodeTools.getNodeTransformToWorld(RobotQuadrant.HIND_LEFT, node, hindLeftExpectedSnappedNodeTransform);
+         FootstepNodeTools.getNodeTransformToWorld(RobotQuadrant.HIND_RIGHT, node, hindRightExpectedSnappedNodeTransform);
          frontLeftSnapTransform.transform(frontLeftExpectedSnappedNodeTransform);
          frontRightSnapTransform.transform(frontRightExpectedSnappedNodeTransform);
          hindLeftSnapTransform.transform(hindLeftExpectedSnappedNodeTransform);

@@ -6,9 +6,12 @@ import javafx.fxml.FXML;
 import javafx.scene.control.CheckBox;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.Slider;
+import us.ihmc.commonWalkingControlModules.capturePoint.smoothCMPBasedICPPlanner.AMGeneration.FootstepAngularMomentumPredictor;
 import us.ihmc.javaFXToolkit.messager.JavaFXMessager;
 import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.communication.FootstepPlannerMessagerAPI;
 import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.graphSearch.QuadrupedFootstepPlannerNodeRejectionReason;
+
+import java.util.concurrent.atomic.AtomicInteger;
 
 public class FootstepPlannerVisualizationController
 {
@@ -24,17 +27,19 @@ public class FootstepPlannerVisualizationController
    private ComboBox<QuadrupedFootstepPlannerNodeRejectionReason> rejectionReasonToShow;
    @FXML
    private Slider plannerPlaybackSlider;
-//   @FXML
-//   public void requestStatistics()
-//   {
-//      throw new RuntimeException("This feature is currently not implemented.");
-//      if (verbose)
-//         PrintTools.info(this, "Clicked request statistics...");
-//
-//      messager.submitMessage(FootstepPlannerMessagerAPI.RequestPlannerStatistics, true);
-//   }
+   //   @FXML
+   //   public void requestStatistics()
+   //   {
+   //      throw new RuntimeException("This feature is currently not implemented.");
+   //      if (verbose)
+   //         PrintTools.info(this, "Clicked request statistics...");
+   //
+   //      messager.submitMessage(FootstepPlannerMessagerAPI.RequestPlannerStatistics, true);
+   //   }
 
    private JavaFXMessager messager;
+
+   private AtomicInteger bufferSize = new AtomicInteger(0);
 
    public void attachMessager(JavaFXMessager messager)
    {
@@ -43,10 +48,12 @@ public class FootstepPlannerVisualizationController
 
    public void setupControls()
    {
-      ObservableList<QuadrupedFootstepPlannerNodeRejectionReason> plannerTypeOptions = FXCollections.observableArrayList(QuadrupedFootstepPlannerNodeRejectionReason.values);
+      ObservableList<QuadrupedFootstepPlannerNodeRejectionReason> plannerTypeOptions = FXCollections
+            .observableArrayList(QuadrupedFootstepPlannerNodeRejectionReason.values);
       rejectionReasonToShow.setItems(plannerTypeOptions);
       rejectionReasonToShow.setValue(QuadrupedFootstepPlannerNodeRejectionReason.OBSTACLE_BLOCKING_STEP);
    }
+
    public void bindControls()
    {
       setupControls();
@@ -59,5 +66,9 @@ public class FootstepPlannerVisualizationController
       messager.bindBidirectional(FootstepPlannerMessagerAPI.RejectionReasonToShowTopic, rejectionReasonToShow.valueProperty(), false);
 
       messager.bindBidirectional(FootstepPlannerMessagerAPI.PlannerThoughtPlaybackFractionTopic, plannerPlaybackSlider.valueProperty(), false);
+
+      messager.registerTopicListener(FootstepPlannerMessagerAPI.NodesThisTickTopic,
+                                     nodes -> plannerPlaybackSlider.setBlockIncrement(1.0 / bufferSize.incrementAndGet()));
+      messager.registerTopicListener(FootstepPlannerMessagerAPI.ComputePathTopic, data -> bufferSize.set(0));
    }
 }
