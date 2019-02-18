@@ -5,5 +5,7 @@ step_planner_status test
 planar_region_bipedal_timeout 5.0
 plan_then_snap_timeout 5.0
 a_star_timeout 45.0
+
+quadruped_goal_yaw 3.141
 quadruped_planner_status test
 quadruped_timeout 45.0

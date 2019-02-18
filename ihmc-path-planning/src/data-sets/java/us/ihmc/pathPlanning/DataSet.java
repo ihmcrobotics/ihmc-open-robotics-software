@@ -1,9 +1,7 @@
 package us.ihmc.pathPlanning;
 
+import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
-
-import java.util.ArrayList;
-import java.util.List;
 
 public class DataSet
 {
@@ -40,5 +38,11 @@ public class DataSet
    public void setPlannerInput(PlannerInput plannerInput)
    {
       this.plannerInput = plannerInput;
+   }
+
+   public static void main(String[] args)
+   {
+      Quaternion q = new Quaternion(0.0, 0.0, 1.0, 0.0);
+      System.out.println(q.getYaw());
    }
 }
