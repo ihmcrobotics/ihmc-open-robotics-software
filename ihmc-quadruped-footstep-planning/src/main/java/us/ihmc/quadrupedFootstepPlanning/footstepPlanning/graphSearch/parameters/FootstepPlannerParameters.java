@@ -71,7 +71,7 @@ public interface FootstepPlannerParameters
     */
    default double getCliffHeightToAvoid()
    {
-      return 0.1;
+      return 0.15;
    }
 
    /**
@@ -87,7 +87,23 @@ public interface FootstepPlannerParameters
     */
    default double getMinimumDistanceFromCliffBottoms()
    {
-      return 0.03;
+      return 0.1;
+   }
+
+   /**
+    * The planner can be setup to avoid footsteps near the bottom of "cliffs". When the footstep has a planar region
+    * nearby that is {@link #getCliffHeightToAvoid} higher than the candidate footstep, it will move away from it
+    * until it is minimumDistanceFromCliffBottoms away from it.
+    *
+    * <p>
+    * If these values are set to zero, cliff avoidance will be turned off. This creates a risk that the robot will
+    * hit the cliff with its swing foot. Therefore, these parameters should be set according to what the swing trajectory
+    * generator is capable of swinging over.
+    * </p>
+    */
+   default double getMinimumDistanceFromCliffTops()
+   {
+      return 0.01;
    }
 
    default SteppableRegionFilter getSteppableRegionFilter()
