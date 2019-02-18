@@ -16,6 +16,10 @@ public interface FootstepPlannerParameters
 
    double getMinimumStepWidth();
 
+   double getMinimumStepYaw();
+
+   double getMaximumStepYaw();
+
    double getMaximumStepChangeZ();
 
    double getMaximumStepCycleChangeZ();
