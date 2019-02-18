@@ -8,7 +8,7 @@
 20171026_135647_PlanarRegion_MetalStairs
 20171030_144754_LargeCinderBlockField
 20171114_090937_PartialShallowMaze
-20171114_135559_PlanarRegion_UnitTest
+20171114_135559_PartialShallowMaze
 20171115_171243_SimplePlaneAndWall
 20171121_103600_ShallowOcclusion
 20171127_124222_SimpleStepsUp
@@ -33,4 +33,4 @@
 20180124_114334_StepsAndRamp
 20190204_155900_CampLejeuneRock4
 20190204_160000_CampLejeuneRock8
-SpiralStaircase
+20190218_150700_SpiralStaircase
