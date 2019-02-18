@@ -74,7 +74,7 @@ public class DCMPlanner
 
    private final FramePoint3D tempPoint = new FramePoint3D();
 
-   private final DoubleProvider maximumWeightShiftForward = new DoubleParameter("maximumWeightShiftForward", registry, 0.8);
+   private final DoubleProvider maximumWeightShiftForward = new DoubleParameter("maximumWeightShiftForward", registry, 0.0);
    private final DoubleProvider angleForMaxWeightShiftForward = new DoubleParameter("angleForMaxWeightShiftForward", registry, Math.toRadians(20.0));
 
    private final boolean debug;
@@ -96,15 +96,11 @@ public class DCMPlanner
       this.debug = debug;
       this.dcmTransitionTrajectory = new YoFrameTrajectory3D("dcmTransitionTrajectory", 4, supportFrame, registry);
 
-      WeightDistributionCalculator weightDistributionCalculator = new WeightDistributionCalculator()
+      WeightDistributionCalculator weightDistributionCalculator = (pitchAngle ->
       {
-         @Override
-         public double getFractionOfWeightForward(double pitchAngle)
-         {
-            double percentTotal = MathTools.clamp(pitchAngle / angleForMaxWeightShiftForward.getValue(), 1.0);
-            return percentTotal * maximumWeightShiftForward.getValue();
-         }
-      };
+         double percentTotal = MathTools.clamp(pitchAngle / angleForMaxWeightShiftForward.getValue(), 1.0);
+         return percentTotal * maximumWeightShiftForward.getValue();
+      });
 
       dcmTrajectory = new PiecewiseReverseDcmTrajectory(STEP_SEQUENCE_CAPACITY, gravity, nominalHeight, registry);
       piecewiseConstantCopTrajectory = new QuadrupedPiecewiseConstantCopTrajectory(2 * STEP_SEQUENCE_CAPACITY, weightDistributionCalculator, registry);
