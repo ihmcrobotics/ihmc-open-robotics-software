@@ -112,7 +112,10 @@ public class PlanarRegionTools
     */
    public static Point3DReadOnly projectPointToPlanesVertically(Point3DReadOnly pointInWorld, PlanarRegionsList regions)
    {
-      return projectPointToPlanesVertically(pointInWorld, regions.getPlanarRegionsAsList());
+      if (regions == null)
+         return projectPointToPlanesVertically(pointInWorld, (List<PlanarRegion>) null);
+      else
+         return projectPointToPlanesVertically(pointInWorld, regions.getPlanarRegionsAsList());
    }
 
    /**
@@ -128,6 +131,9 @@ public class PlanarRegionTools
 
       Line3D verticalLine = new Line3D();
       verticalLine.set(pointInWorld, new Vector3D(0.0, 0.0, 1.0));
+
+      if (regions == null)
+         return null;
 
       for (PlanarRegion region : regions)
       {
