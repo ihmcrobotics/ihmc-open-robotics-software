@@ -24,6 +24,7 @@ import us.ihmc.quadrupedPlanning.QuadrupedXGaitSettingsReadOnly;
 import us.ihmc.quadrupedPlanning.YoQuadrupedXGaitSettings;
 import us.ihmc.quadrupedPlanning.footstepChooser.PointFootSnapperParameters;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
+import us.ihmc.robotics.robotSide.RobotQuadrant;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
@@ -155,8 +156,10 @@ public class QuadrupedFootstepPlanningController extends QuadrupedToolboxControl
       QuadrupedFootstepPlannerStart start = new QuadrupedFootstepPlannerStart();
       QuadrupedFootstepPlannerGoal goal = new QuadrupedFootstepPlannerGoal();
       start.setStartPose(initialPose);
+      start.setInitialQuadrant(RobotQuadrant.fromByte(request.getInitialStepRobotQuadrant()));
       goal.setGoalPose(goalPose);
 
+      planner.setTimeout(request.getTimeout());
       planner.setStart(start);
       planner.setGoal(goal);
 
