@@ -44,27 +44,14 @@ public class PitchEstimator
       double x_inv = (xy * y - x * yy) / det;
       double yy_inv = (xx * n - x * x) / det;
       double y_inv = -(xx * y - xy * x) / det;
-      double n_inv = (xx - yy - xy * xy) / det;
+//      double n_inv = (xx - yy - xy * xy) / det;
 
       double A = -xx_inv * xz - xy_inv * yz - x_inv * z;
       double B = -xy_inv * xz - yy_inv * yz - y_inv * z;
-      double C = -x_inv * xz - y_inv * yz - n_inv * z;
-
-
-      double xSolution = x / n;
-      double ySolution = y / n;
-      double zSolution = -A * xSolution - B * ySolution - C;
-
-      double normalX = A;
-      double normalY = B;
-      double normalZ = 1.0;
-
-
+//      double C = -x_inv * xz - y_inv * yz - n_inv * z;
 
       double nominalYaw = computeNominalYaw(contacts);
-      double pitch = Math.atan2(Math.cos(nominalYaw) * normalX + Math.sin(nominalYaw) * normalY, normalZ);
-
-      return pitch;
+      return Math.atan2(Math.cos(nominalYaw) * A + Math.sin(nominalYaw) * B, 1.0);
    }
 
    public static double computeNominalYaw(QuadrantDependentList<? extends Point3DReadOnly> contactPositions)
