@@ -224,11 +224,10 @@ public class SnapBasedNodeChecker extends FootstepNodeChecker
    private QuadrantDependentList<Point3D> getSnappedStepPositions(FootstepNode node)
    {
       QuadrantDependentList<Point3D> snappedStepPositions = new QuadrantDependentList<>();
-      snapper.snapFootstepNode(node);
 
       for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
       {
-         FootstepNodeSnapData snapData = snapper.getSnapData(node.getXIndex(robotQuadrant), node.getYIndex(robotQuadrant));
+         FootstepNodeSnapData snapData = snapper.snapFootstepNode(node.getXIndex(robotQuadrant), node.getYIndex(robotQuadrant));
          RigidBodyTransform footSnapTransform = snapData.getSnapTransform();
          Point3D stepPosition = new Point3D(node.getX(robotQuadrant), node.getY(robotQuadrant), 0.0);
          footSnapTransform.transform(stepPosition);
