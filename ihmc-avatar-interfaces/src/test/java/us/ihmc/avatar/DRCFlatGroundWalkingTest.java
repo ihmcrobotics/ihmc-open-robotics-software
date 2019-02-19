@@ -20,6 +20,7 @@ import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Disabled;
 import us.ihmc.jMonkeyEngineToolkit.GroundProfile3D;
 import us.ihmc.jMonkeyEngineToolkit.camera.CameraConfiguration;
+import us.ihmc.log.LogTools;
 import us.ihmc.robotDataLogger.RobotVisualizer;
 import us.ihmc.simulationConstructionSetTools.bambooTools.BambooTools;
 import us.ihmc.simulationConstructionSetTools.simulationTesting.SimulationRunsSameWayTwiceVerifier;
@@ -36,7 +37,7 @@ import us.ihmc.tools.MemoryTools;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 
-@Tag("humanoid-flat-ground")
+@Tag("video")
 public abstract class DRCFlatGroundWalkingTest implements MultiRobotTestInterface
 {
    private SimulationTestingParameters simulationTestingParameters = SimulationTestingParameters.createFromSystemProperties();
@@ -281,6 +282,10 @@ public abstract class DRCFlatGroundWalkingTest implements MultiRobotTestInterfac
       if (simulationTestingParameters.getCreateSCSVideos())
       {
          BambooTools.createVideoWithDateTimeClassMethodAndShareOnSharedDriveIfAvailable(getSimpleRobotName(), scs, 2);
+      }
+      else
+      {
+         LogTools.info("Skipping video generation.");
       }
    }
 

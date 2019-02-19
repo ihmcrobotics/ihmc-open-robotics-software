@@ -2,28 +2,30 @@ package us.ihmc.quadrupedFootstepPlanning.footstepPlanning.graphSearch.footstepS
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.Tag;
-import org.junit.jupiter.api.Disabled;
 import us.ihmc.euclid.axisAngle.AxisAngle;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
+import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.tools.EuclidCoreRandomTools;
+import us.ihmc.euclid.tools.EuclidCoreTestTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
+import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple4D.Vector4D;
+import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.graphSearch.FootstepPlanningRandomTools;
 import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.graphSearch.graph.FootstepNode;
 import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.graphSearch.graph.FootstepNodeTools;
 import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.graphSearch.parameters.DefaultFootstepPlannerParameters;
-import us.ihmc.quadrupedPlanning.footstepChooser.PlanarRegionsListPointSnapperTest;
 import us.ihmc.robotics.geometry.PlanarRegion;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.robotSide.QuadrantDependentList;
 import us.ihmc.robotics.robotSide.RobotQuadrant;
-import us.ihmc.robotics.robotSide.RobotSide;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
+
+import static us.ihmc.robotics.Assert.assertEquals;
 
 public class SimplePlanarRegionFootstepNodeSnapperTest
 {
@@ -47,7 +49,16 @@ public class SimplePlanarRegionFootstepNodeSnapperTest
    @Test
    public void testIdentity()
    {
-      FootstepNode nodeToSnap = new FootstepNode(RobotQuadrant.FRONT_LEFT, -0.3, 2.2, -0.35, 1.9, -0.85, 2.1, -0.8, 1.8);
+      double frontLeftX = -0.3;
+      double frontLeftY = 2.2;
+      double frontRightX = -0.35;
+      double frontRightY = 1.9;
+      double hindLeftX = -0.85;
+      double hindLeftY = 2.1;
+      double hindRightX = -0.8;
+      double hindRightY = 1.8;
+      FootstepNode nodeToSnap = new FootstepNode(RobotQuadrant.FRONT_LEFT, frontLeftX, frontLeftY, frontRightX, frontRightY, hindLeftX, hindLeftY, hindRightX,
+                                                 hindRightY, frontLeftX - hindRightX, frontLeftY - hindRightY);
 
       QuadrantDependentList<RigidBodyTransform> nodeTransforms = new QuadrantDependentList<>();
       QuadrantDependentList<RigidBodyTransform> transformsToWorld = new QuadrantDependentList<>();
@@ -55,7 +66,7 @@ public class SimplePlanarRegionFootstepNodeSnapperTest
       for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
       {
          RigidBodyTransform nodeTransform = new RigidBodyTransform();
-         FootstepNodeTools.getNodeTransform(robotQuadrant, nodeToSnap, nodeTransform);
+         FootstepNodeTools.getNodeTransformToWorld(robotQuadrant, nodeToSnap, nodeTransform);
 
          RigidBodyTransform transformToWorld = new RigidBodyTransform();
 
@@ -69,7 +80,16 @@ public class SimplePlanarRegionFootstepNodeSnapperTest
    @Test
    public void testVerticalTranslation()
    {
-      FootstepNode nodeToSnap = new FootstepNode(RobotQuadrant.FRONT_LEFT, 2.5, -0.5, 2.3, -0.9, 1.5, -0.4, 1.4, -0.8);
+      double frontLeftX = 2.5;
+      double frontLeftY = -0.5;
+      double frontRightX = 2.3;
+      double frontRightY = -0.9;
+      double hindLeftX = 1.5;
+      double hindLeftY = -0.4;
+      double hindRightX = 1.4;
+      double hindRightY = -0.8;
+      FootstepNode nodeToSnap = new FootstepNode(RobotQuadrant.FRONT_LEFT, frontLeftX, frontLeftY, frontRightX, frontRightY, hindLeftX, hindLeftY, hindRightX,
+                                                 hindRightY, frontLeftX - hindRightX, frontLeftY - hindRightY);
 
       QuadrantDependentList<RigidBodyTransform> nodeTransforms = new QuadrantDependentList<>();
       QuadrantDependentList<RigidBodyTransform> transformsToWorld = new QuadrantDependentList<>();
@@ -77,7 +97,7 @@ public class SimplePlanarRegionFootstepNodeSnapperTest
       for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
       {
          RigidBodyTransform nodeTransform = new RigidBodyTransform();
-         FootstepNodeTools.getNodeTransform(robotQuadrant, nodeToSnap, nodeTransform);
+         FootstepNodeTools.getNodeTransformToWorld(robotQuadrant, nodeToSnap, nodeTransform);
 
          RigidBodyTransform transformToWorld = new RigidBodyTransform();
          transformToWorld.setTranslationZ(-1.0);
@@ -92,7 +112,16 @@ public class SimplePlanarRegionFootstepNodeSnapperTest
    @Test
    public void testSimpleRotation()
    {
-      FootstepNode nodeToSnap = new FootstepNode(RobotQuadrant.FRONT_LEFT, 0.25, 0.25, 0.25, -0.25, -0.25, 0.25, -0.25, -0.25);
+      double frontLeftX = 0.25;
+      double frontLeftY = 0.25;
+      double frontRightX = 0.25;
+      double frontRightY = -0.25;
+      double hindLeftX = -0.25;
+      double hindLeftY = 0.25;
+      double hindRightX = -0.25;
+      double hindRightY = -0.25;
+      FootstepNode nodeToSnap = new FootstepNode(RobotQuadrant.FRONT_LEFT, frontLeftX, frontLeftY, frontRightX, frontRightY, hindLeftX, hindLeftY, hindRightX,
+                                                 hindRightY, frontLeftX - hindRightX, frontLeftY - hindRightY);
 
       QuadrantDependentList<RigidBodyTransform> nodeTransforms = new QuadrantDependentList<>();
       QuadrantDependentList<RigidBodyTransform> transformsToWorld = new QuadrantDependentList<>();
@@ -100,7 +129,7 @@ public class SimplePlanarRegionFootstepNodeSnapperTest
       for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
       {
          RigidBodyTransform nodeTransform = new RigidBodyTransform();
-         FootstepNodeTools.getNodeTransform(robotQuadrant, nodeToSnap, nodeTransform);
+         FootstepNodeTools.getNodeTransformToWorld(robotQuadrant, nodeToSnap, nodeTransform);
 
          RigidBodyTransform transformToWorld = new RigidBodyTransform();
          transformToWorld.setRotation(new AxisAngle(0.0, 1.0, 0.0, 0.25 * Math.PI));
@@ -115,7 +144,16 @@ public class SimplePlanarRegionFootstepNodeSnapperTest
    @Test
    public void testSimpleTranslationAndRotation()
    {
-      FootstepNode nodeToSnap = new FootstepNode(RobotQuadrant.FRONT_LEFT, 1.1, 0.0, 1.1, -0.5, 0.1, 0.0, 0.1, -0.5);
+      double frontLeftX = 1.1;
+      double frontLeftY = 0.0;
+      double frontRightX = 1.1;
+      double frontRightY = -0.5;
+      double hindLeftX = 0.1;
+      double hindLeftY = 0.0;
+      double hindRightX = 0.1;
+      double hindRightY = -0.5;
+      FootstepNode nodeToSnap = new FootstepNode(RobotQuadrant.FRONT_LEFT, frontLeftX, frontLeftY, frontRightX, frontRightY, hindLeftX, hindLeftY, hindRightX,
+                                                 hindRightY, frontLeftX - hindRightX, frontLeftY - hindRightY);
 
       QuadrantDependentList<RigidBodyTransform> nodeTransforms = new QuadrantDependentList<>();
       QuadrantDependentList<RigidBodyTransform> transformsToWorld = new QuadrantDependentList<>();
@@ -123,7 +161,7 @@ public class SimplePlanarRegionFootstepNodeSnapperTest
       for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
       {
          RigidBodyTransform nodeTransform = new RigidBodyTransform();
-         FootstepNodeTools.getNodeTransform(robotQuadrant, nodeToSnap, nodeTransform);
+         FootstepNodeTools.getNodeTransformToWorld(robotQuadrant, nodeToSnap, nodeTransform);
 
          RigidBodyTransform transformToWorld = new RigidBodyTransform();
          transformToWorld.setRotation(new AxisAngle(0.0, 1.0, 0.0, 0.25 * Math.PI));
@@ -136,6 +174,77 @@ public class SimplePlanarRegionFootstepNodeSnapperTest
       doAFullFootholdTest(transformsToWorld, nodeToSnap);
    }
 
+
+   @Test
+   public void testSimpleTranslationAndRotation2()
+   {
+      double frontLeftX = 1.1;
+      double frontLeftY = 0.0;
+
+      double frontRightX = 1.1;
+      double frontRightY = -0.5;
+      double hindLeftX = 0.1;
+      double hindLeftY = 0.0;
+      double hindRightX = 0.1;
+      double hindRightY = -0.5;
+
+      ConvexPolygon2D groundPlane = new ConvexPolygon2D();
+      groundPlane.addVertex(2.0, 2.0);
+      groundPlane.addVertex(2.0, -2.0);
+      groundPlane.addVertex(-2.0, -2.0);
+      groundPlane.addVertex(-2.0, 2.0);
+      groundPlane.update();
+      PlanarRegion groundPlaneRegion = new PlanarRegion(new RigidBodyTransform(), groundPlane);
+
+      ConvexPolygon2D smallRegions = new ConvexPolygon2D();
+      smallRegions.addVertex(0.2, 0.2);
+      smallRegions.addVertex(0.2, -0.2);
+      smallRegions.addVertex(-0.2, 0.2);
+      smallRegions.addVertex(-0.2, -0.2);
+      smallRegions.update();
+
+      FramePose3D frontLeftPose = new FramePose3D();
+      frontLeftPose.setPosition(1.05, 0.05, 0.16);
+      frontLeftPose.setOrientationYawPitchRoll(Math.toRadians(5.0), Math.toRadians(5.0), Math.toRadians(5.0));
+      RigidBodyTransform frontLeftTransform = new RigidBodyTransform();
+      frontLeftPose.get(frontLeftTransform);
+//      frontLeftTransform.invert();
+
+      PlanarRegion frontLeftRegion = new PlanarRegion(frontLeftTransform, smallRegions);
+
+      PlanarRegionsList planarRegionsList = new PlanarRegionsList();
+      planarRegionsList.addPlanarRegion(groundPlaneRegion);
+      planarRegionsList.addPlanarRegion(frontLeftRegion);
+
+
+
+      FootstepNode nodeToSnap = new FootstepNode(RobotQuadrant.FRONT_LEFT, frontLeftX, frontLeftY, frontRightX, frontRightY, hindLeftX, hindLeftY, hindRightX,
+                                                 hindRightY, frontLeftX - hindRightX, frontLeftY - hindRightY);
+
+      SimplePlanarRegionFootstepNodeSnapper snapper = new SimplePlanarRegionFootstepNodeSnapper(new DefaultFootstepPlannerParameters());
+      snapper.setPlanarRegions(planarRegionsList);
+
+      RigidBodyTransform transform = new RigidBodyTransform();
+      Point3D frontLeftInPlanarFrame = new Point3D(frontLeftX, frontLeftY, frontLeftRegion.getPlaneZGivenXY(frontLeftX, frontLeftY));
+      frontLeftRegion.getTransformToWorld(transform);
+      transform.inverseTransform(frontLeftInPlanarFrame);
+      assertEquals(frontLeftInPlanarFrame.getZ(), 0.0, 1e-5);
+
+
+
+      double snappedX = nodeToSnap.getX(RobotQuadrant.FRONT_LEFT);
+      double snappedY = nodeToSnap.getY(RobotQuadrant.FRONT_LEFT);
+
+      FootstepNodeSnapData snapData = snapper.snapFootstepNode(nodeToSnap.getXIndex(RobotQuadrant.FRONT_LEFT), nodeToSnap.getYIndex(RobotQuadrant.FRONT_LEFT));
+      RigidBodyTransform snapTransform = snapData.getSnapTransform();
+      Point3D snappedPoint = new Point3D(snappedX, snappedY, 0.0);
+      snapTransform.transform(snappedPoint);
+
+
+      Point3D snappedPointExpected = new Point3D(snappedX, snappedY, frontLeftRegion.getPlaneZGivenXY(snappedX, snappedY));
+      EuclidCoreTestTools.assertPoint3DGeometricallyEquals(snappedPointExpected, snappedPoint, 1e-3);
+   }
+
    @Test
    public void testRandomFullFootholds()
    {
@@ -145,11 +254,11 @@ public class SimplePlanarRegionFootstepNodeSnapperTest
       {
          QuadrantDependentList<RigidBodyTransform> regionToWorldTransforms = new QuadrantDependentList<>();
 
-         FootstepNode node = FootstepNode.generateRandomFootstepNode(random, 5.0);
+         FootstepNode node = FootstepPlanningRandomTools.createRandomFootstepNode(random, 5.0);
 
          for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
          {
-            FootstepNodeTools.getNodeTransform(robotQuadrant, node, nodeToWorldTransform);
+            FootstepNodeTools.getNodeTransformToWorld(robotQuadrant, node, nodeToWorldTransform);
 
             RigidBodyTransform regionToWorldTransform = new RigidBodyTransform(nodeToWorldTransform);
             double xRotation = EuclidCoreRandomTools.nextDouble(random, 0.15 * Math.PI);
@@ -171,7 +280,7 @@ public class SimplePlanarRegionFootstepNodeSnapperTest
       for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
       {
          RigidBodyTransform nodeTransform = new RigidBodyTransform();
-         FootstepNodeTools.getNodeTransform(robotQuadrant, nodeToSnap, nodeTransform);
+         FootstepNodeTools.getNodeTransformToWorld(robotQuadrant, nodeToSnap, nodeTransform);
 
          Point2D footPosition = new Point2D();
          footPosition.applyTransform(nodeTransform, false);
@@ -183,12 +292,12 @@ public class SimplePlanarRegionFootstepNodeSnapperTest
       PlanarRegionsList planarRegionsList = new PlanarRegionsList(planarRegions);
       snapper.setPlanarRegions(planarRegionsList);
 
-      FootstepNodeSnapData snapData = snapper.snapFootstepNode(nodeToSnap);
 
       for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
       {
+         FootstepNodeSnapData snapData = snapper.snapFootstepNode(nodeToSnap.getXIndex(robotQuadrant), nodeToSnap.getYIndex(robotQuadrant));
          PlanarRegionsListPointSnapperTest
-               .assertSurfaceNormalsMatchAndSnapPreservesXFromAbove(snapData.getSnapTransform(robotQuadrant), regionToWorldFrameTransforms.get(robotQuadrant));
+               .assertSurfaceNormalsMatchAndSnapPreservesXFromAbove(snapData.getSnapTransform(), regionToWorldFrameTransforms.get(robotQuadrant));
       }
    }
 

@@ -3,33 +3,29 @@ package us.ihmc.robotDataLogger;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.lang3.tuple.ImmutablePair;
 
 import gnu.trove.list.array.TByteArrayList;
-import us.ihmc.commons.Conversions;
+import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.concurrent.ConcurrentRingBuffer;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.multicastLogDataProtocol.modelLoaders.LogModelProvider;
+import us.ihmc.robotDataLogger.dataBuffers.CustomLogDataPublisherType;
 import us.ihmc.robotDataLogger.dataBuffers.RegistrySendBufferBuilder;
 import us.ihmc.robotDataLogger.handshake.SummaryProvider;
 import us.ihmc.robotDataLogger.handshake.YoVariableHandShakeBuilder;
+import us.ihmc.robotDataLogger.interfaces.DataProducer;
+import us.ihmc.robotDataLogger.interfaces.RegistryPublisher;
 import us.ihmc.robotDataLogger.listeners.VariableChangedListener;
-import us.ihmc.robotDataLogger.logger.LogSettings;
-import us.ihmc.robotDataLogger.rtps.CustomLogDataPublisherType;
-import us.ihmc.robotDataLogger.rtps.DataProducerParticipant;
-import us.ihmc.robotDataLogger.rtps.RegistryPublisher;
-import us.ihmc.robotDataLogger.rtps.TimestampPublisher;
-import us.ihmc.simulationconstructionset.util.TickAndUpdatable;
-import us.ihmc.commons.thread.ThreadTools;
-import us.ihmc.util.PeriodicThreadScheduler;
+import us.ihmc.robotDataLogger.logger.DataServerSettings;
+import us.ihmc.robotDataLogger.websocket.server.WebsocketDataProducer;
 import us.ihmc.util.PeriodicThreadSchedulerFactory;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoVariable;
 
-public class YoVariableServer implements RobotVisualizer, TickAndUpdatable, VariableChangedListener
+public class YoVariableServer implements RobotVisualizer, VariableChangedListener
 {
    private static final int CHANGED_BUFFER_CAPACITY = 128;
 
@@ -48,32 +44,57 @@ public class YoVariableServer implements RobotVisualizer, TickAndUpdatable, Vari
    private boolean started = false;
    private boolean stopped = false;
 
-   private final PeriodicThreadSchedulerFactory schedulerFactory;
-
    // Servers
-   private final DataProducerParticipant dataProducerParticipant;
+   private final DataProducer dataProducer;
    private YoVariableHandShakeBuilder handshakeBuilder;
-
-   private boolean sendKeepAlive = false;
 
    private volatile long latestTimestamp;
    
    private final SummaryProvider summaryProvider = new SummaryProvider();
-   private final PeriodicThreadScheduler timestampScheduler;
-   private final TimestampPublisher timestampPublisher;
-
+   
+   @Deprecated
+   /**
+    * A thread scheduler is not necessary anymore. This function is left in for backwards compatibility.
+    * 
+    * @param mainClazz
+    * @param schedulerFactory
+    * @param logModelProvider
+    * @param dataServerSettings
+    * @param dt
+    */
+   public YoVariableServer(Class<?> mainClazz, PeriodicThreadSchedulerFactory schedulerFactory, LogModelProvider logModelProvider, DataServerSettings dataServerSettings, double dt)
+   {
+      this(mainClazz, logModelProvider, dataServerSettings, dt);
+   }
+   
+   
+   @Deprecated
+   /**
+    * A thread scheduler is not necessary anymore. This function is left in for backwards compatibility.
+    * 
+    * @param mainClazz
+    * @param schedulerFactory
+    * @param logModelProvider
+    * @param dataServerSettings
+    * @param dt
+    */
+   public YoVariableServer(String mainClazz, PeriodicThreadSchedulerFactory schedulerFactory, LogModelProvider logModelProvider, DataServerSettings dataServerSettings, double dt)
+   {
+      this(mainClazz, logModelProvider, dataServerSettings, dt);
+   }
+   
    /**
     * Create a YoVariable server with mainClazz.getSimpleName(). For example, see other constructor.
     *
     * @param mainClazz
     * @param schedulerFactory
     * @param logModelProvider
-    * @param logSettings
+    * @param dataServerSettings
     * @param dt
     */
-   public YoVariableServer(Class<?> mainClazz, PeriodicThreadSchedulerFactory schedulerFactory, LogModelProvider logModelProvider, LogSettings logSettings, double dt)
+   public YoVariableServer(Class<?> mainClazz, LogModelProvider logModelProvider, DataServerSettings dataServerSettings, double dt)
    {
-      this(mainClazz.getSimpleName(), schedulerFactory, logModelProvider, logSettings, dt);
+      this(mainClazz.getSimpleName(), logModelProvider, dataServerSettings, dt);
    }
 
    /**
@@ -113,10 +134,10 @@ public class YoVariableServer implements RobotVisualizer, TickAndUpdatable, Vari
     * @param mainClazz
     * @param schedulerFactory
     * @param logModelProvider
-    * @param logSettings
+    * @param dataServerSettings
     * @param dt
     */
-   public YoVariableServer(String mainClazz, PeriodicThreadSchedulerFactory schedulerFactory, LogModelProvider logModelProvider, LogSettings logSettings, double dt)
+   public YoVariableServer(String mainClazz, LogModelProvider logModelProvider, DataServerSettings dataServerSettings, double dt)
    {
       LoggerConfigurationLoader config;
       try
@@ -129,23 +150,10 @@ public class YoVariableServer implements RobotVisualizer, TickAndUpdatable, Vari
       }
 
       this.dt = dt;
-      this.schedulerFactory = schedulerFactory;
 
-      try
-      {
-         this.dataProducerParticipant = new DataProducerParticipant(mainClazz, logModelProvider, this, config.getPublicBroadcast());
-         this.dataProducerParticipant.setLog(logSettings.isLog());
-         addCameras(config, logSettings);
-         
-         this.timestampScheduler = schedulerFactory.createPeriodicThreadScheduler("timestampPublisher");
-         this.timestampPublisher = new TimestampPublisher(dataProducerParticipant);
-
-      }
-      catch (IOException e)
-      {
-         throw new RuntimeException(e);
-      }
-
+      this.dataProducer = new WebsocketDataProducer(mainClazz, logModelProvider, this, dataServerSettings);
+      addCameras(config, dataServerSettings);
+      
    }
    
    public void setRootRegistryName(String name)
@@ -153,17 +161,17 @@ public class YoVariableServer implements RobotVisualizer, TickAndUpdatable, Vari
       this.rootRegistryName = name;
    }
 
-   private void addCameras(LoggerConfigurationLoader config, LogSettings logSettings)
+   private void addCameras(LoggerConfigurationLoader config, DataServerSettings logSettings)
    {
       TByteArrayList cameras = config.getCameras();
       for (int i = 0; i < cameras.size(); i++)
       {
-         dataProducerParticipant.addCamera(CameraType.CAPTURE_CARD, "Camera-" + cameras.get(i), String.valueOf(cameras.get(i)));
+         dataProducer.addCamera(CameraType.CAPTURE_CARD, "Camera-" + cameras.get(i), String.valueOf(cameras.get(i)));
       }
 
       if (logSettings.getVideoStream() != null)
       {
-         dataProducerParticipant.addCamera(CameraType.NETWORK_STREAM, logSettings.getVideoStream(), logSettings.getVideoStream());
+         dataProducer.addCamera(CameraType.NETWORK_STREAM, logSettings.getVideoStream(), logSettings.getVideoStream());
       }
    }
 
@@ -206,7 +214,7 @@ public class YoVariableServer implements RobotVisualizer, TickAndUpdatable, Vari
          
          try
          {
-            publishers.put(registry, dataProducerParticipant.createRegistryPublisher(type, schedulerFactory, builder));
+            publishers.put(registry, dataProducer.createRegistryPublisher(type, builder));
          }
          catch (IOException e)
          {
@@ -225,16 +233,8 @@ public class YoVariableServer implements RobotVisualizer, TickAndUpdatable, Vari
             publishers.get(registry).start();
          }
 
-         if(sendKeepAlive)
-         {
-            dataProducerParticipant.sendKeepAlive(schedulerFactory);
-         }
-         
-         dataProducerParticipant.setHandshake(handshakeBuilder.getHandShake());
-         dataProducerParticipant.announce();
-         
-         timestampScheduler.schedule(timestampPublisher, 100, TimeUnit.MICROSECONDS);
-         
+         dataProducer.setHandshake(handshakeBuilder.getHandShake());
+         dataProducer.announce();
          
       }
       catch (IOException e)
@@ -242,11 +242,6 @@ public class YoVariableServer implements RobotVisualizer, TickAndUpdatable, Vari
          throw new RuntimeException(e);
       }
       started = true;
-   }
-
-   public void setSendKeepAlive(boolean sendKeepAlive)
-   {
-      this.sendKeepAlive = sendKeepAlive;
    }
 
    public synchronized void close()
@@ -260,25 +255,16 @@ public class YoVariableServer implements RobotVisualizer, TickAndUpdatable, Vari
             YoVariableRegistry registry = builder.getYoVariableRegistry();
             publishers.get(registry).stop();
          }
-         dataProducerParticipant.remove();
+         dataProducer.remove();
          
       }
    }
 
-   @Override
-   public void tickAndUpdate()
-   {
-      this.tickAndUpdate(0.0);
-   }
-
-   @Override
-   public void tickAndUpdate(double timeToSetInSeconds)
-   {
-      this.update(Conversions.secondsToNanoseconds(timeToSetInSeconds));
-   }
 
    /**
     * Update main buffer data.
+    * 
+    * Note: If the timestamp is not increasing between updates(), no data might be send to clients.
     * 
     * @param timestamp timestamp to send to logger
     */
@@ -289,6 +275,8 @@ public class YoVariableServer implements RobotVisualizer, TickAndUpdatable, Vari
 
    /**
     * Update registry data
+    * 
+    * Note: If the timestamp is not increasing between updates(), no data might be send to clients.
     * 
     * @param timestamp timestamp to send to the logger
     * @param registry Top level registry to update
@@ -301,7 +289,7 @@ public class YoVariableServer implements RobotVisualizer, TickAndUpdatable, Vari
       }
       if (registry == mainRegistry)
       {
-         timestampPublisher.setTimestamp(timestamp);
+         dataProducer.publishTimestamp(timestamp);
          latestTimestamp = timestamp;
       }
 

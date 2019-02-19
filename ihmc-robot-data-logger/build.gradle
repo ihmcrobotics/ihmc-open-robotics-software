@@ -5,13 +5,13 @@ buildscript {
       maven { url "http://dl.bintray.com/ihmcrobotics/maven-vendor" }
    }
    dependencies {
-      classpath group: "us.ihmc", name: "ihmc-pub-sub-generator", version: "0.10.1"
+      classpath group: "us.ihmc", name: "ihmc-pub-sub-generator", version: "0.10.2"
    }
 }
 
 plugins {
    id("us.ihmc.ihmc-build") version "0.15.5"
-   id("us.ihmc.ihmc-ci") version "4.7"
+   id("us.ihmc.ihmc-ci") version "4.9"
    id("us.ihmc.log-tools") version "0.2.2"
    id("org.hidetake.ssh") version "2.9.0"
    id "application"
@@ -39,24 +39,30 @@ mainDependencies {
    compile group: "org.tukaani", name: "xz", version: "1.5"
    compile group: "org.xerial.snappy", name: "snappy-java", version: "1.1.1-M1"
    compile group: "net.jpountz.lz4", name: "lz4", version: "1.3.0"
+   compile group: "io.netty", name: "netty-all", version: "4.1.32.Final"
 
    compile group: "us.ihmc", name: "euclid", version: "0.11.0"
    compile group: "us.ihmc", name: "ihmc-yovariables", version: "0.3.7"
-   compile group: "us.ihmc", name: "IHMCVideoCodecs", version: "2.1.3"
-   compile group: "us.ihmc", name: "IHMCRealtime", version: "1.1.8"
-   compile group: "us.ihmc", name: "IHMCJavaDecklinkCapture", version: "0.2"
-   compile group: "us.ihmc", name: "ihmc-pub-sub", version: "0.10.1"
-   compile group: "us.ihmc", name: "ihmc-pub-sub-serializers-extra", version: "0.10.1"
-   compile group: "us.ihmc", name: "ihmc-commons", version: "0.25.0"
+   compile group: "us.ihmc", name: "ihmc-video-codecs", version: "2.1.5"
+   compile group: "us.ihmc", name: "ihmc-realtime", version: "1.2.2"
+   compile group: "us.ihmc", name: "ihmc-java-decklink-capture", version: "0.3"
+   compile group: "us.ihmc", name: "ihmc-pub-sub", version: "0.10.2"
+   compile group: "us.ihmc", name: "ihmc-pub-sub-serializers-extra", version: "0.10.2"
+   compile group: "us.ihmc", name: "ihmc-commons", version: "0.25.2"
    compile group: "us.ihmc", name: "ihmc-graphics-description", version: "0.12.9"
    compile group: "us.ihmc", name: "ihmc-robot-description", version: "0.12.5"
+   compile group: "us.ihmc", name: "mecano", version: "0.0.17"
+   compile group: "us.ihmc", name: "mecano-yovariables", version: "0.0.17"
+   
    compile group: "us.ihmc", name: "ihmc-model-file-loader", version: "source"
-   compile group: "us.ihmc", name: "ihmc-robotics-toolkit", version: "source"
+   
+   compile group: "org.openjdk.jol", name: "jol-core", version: "0.9"
+   
 }
 
 testDependencies {
 
-   compile group: "us.ihmc", name: "ihmc-commons-testing", version: "0.25.0"
+   compile group: "us.ihmc", name: "ihmc-commons-testing", version: "0.25.2"
    compile group: "us.ihmc", name: "ihmc-robotics-toolkit-test", version: "source"
 }
 

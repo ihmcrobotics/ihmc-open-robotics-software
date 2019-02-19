@@ -55,6 +55,7 @@ import us.ihmc.yoVariables.variable.YoDouble;
 /**
  * Created by agrabertilton on 2/25/15.
  */
+@Tag("humanoid-rough-terrain")
 public abstract class DRCSwingTrajectoryTest implements MultiRobotTestInterface
 {
    private SimulationTestingParameters simulationTestingParameters;

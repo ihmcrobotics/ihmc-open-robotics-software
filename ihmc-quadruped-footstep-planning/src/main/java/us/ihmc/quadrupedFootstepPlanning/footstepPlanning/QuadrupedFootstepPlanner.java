@@ -23,7 +23,7 @@ public interface QuadrupedFootstepPlanner
 
    void cancelPlanning();
 
-   List<? extends QuadrupedTimedStep> getSteps();
+  FootstepPlan getPlan();
 
    double getPlanningDuration();
 }

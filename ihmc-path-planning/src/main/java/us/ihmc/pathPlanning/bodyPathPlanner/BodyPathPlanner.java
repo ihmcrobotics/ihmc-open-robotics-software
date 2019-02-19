@@ -5,6 +5,7 @@ import java.util.List;
 
 import us.ihmc.euclid.geometry.Pose2D;
 import us.ihmc.euclid.tuple2D.Point2D;
+import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.pathPlanning.visibilityGraphs.tools.BodyPathPlan;
@@ -61,7 +62,7 @@ public interface BodyPathPlanner
     * Computes the pose along the curve closest to the given point
     * @return alpha corresponding to the packed point
     */
-   double getClosestPoint(Point2D point, Pose2D poseToPack);
+   double getClosestPoint(Point2DReadOnly point, Pose2D poseToPack);
 
    /**
     * Returns arc length of the body path from alpha to the goal point

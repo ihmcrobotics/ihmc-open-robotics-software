@@ -16,6 +16,7 @@ import us.ihmc.euclid.geometry.Plane3D;
 import us.ihmc.euclid.geometry.interfaces.BoundingBox2DReadOnly;
 import us.ihmc.euclid.geometry.interfaces.ConvexPolygon2DBasics;
 import us.ihmc.euclid.geometry.interfaces.ConvexPolygon2DReadOnly;
+import us.ihmc.euclid.geometry.interfaces.LineSegment2DReadOnly;
 import us.ihmc.euclid.geometry.tools.EuclidGeometryRandomTools;
 import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
 import us.ihmc.euclid.interfaces.Transformable;
@@ -156,7 +157,7 @@ public class PlanarRegion
     * @param lineSegmentInWorld
     * @return true if the lineSegment intersects this PlanarRegion.
     */
-   public boolean isLineSegmentIntersecting(LineSegment2D lineSegmentInWorld)
+   public boolean isLineSegmentIntersecting(LineSegment2DReadOnly lineSegmentInWorld)
    {
       // Instead of projecting all the polygons of this region onto the world XY-plane,
       // the given lineSegment is projected along the z-world axis to be snapped onto plane.
@@ -391,7 +392,7 @@ public class PlanarRegion
     * @param lineSegmentInWorld LineSegment2d to project
     * @return new projected LineSegment2d
     */
-   private LineSegment2D projectLineSegmentVerticallyToRegion(LineSegment2D lineSegmentInWorld)
+   private LineSegment2D projectLineSegmentVerticallyToRegion(LineSegment2DReadOnly lineSegmentInWorld)
    {
       Point2DReadOnly originalVertex = lineSegmentInWorld.getFirstEndpoint();
       Point3D snappedVertex3d = new Point3D();
@@ -522,12 +523,22 @@ public class PlanarRegion
     */
    public boolean isPointInWorld2DInside(Point3DReadOnly point3dInWorld)
    {
+      return isPointInWorld2DInside(point3dInWorld, 0.0);
+   }
+
+   /**
+    * Checks to see if a given point is on the plane or above it by the specified distance.
+    *
+    * @param point3dInWorld the point to check
+    * @param epsilon epsilon to use in the test
+    * @return True if the point is on the plane or no more than distanceFromPlane above it.
+    */
+   public boolean isPointInWorld2DInside(Point3DReadOnly point3dInWorld, double epsilon)
+   {
       Point3D localPoint = new Point3D();
       fromWorldToLocalTransform.transform(point3dInWorld, localPoint);
 
-      boolean isInsideXY = isPointInside(localPoint.getX(), localPoint.getY());
-
-      return isInsideXY;
+      return isPointInside(localPoint.getX(), localPoint.getY(), epsilon);
    }
 
    /**
@@ -715,16 +726,16 @@ public class PlanarRegion
    {
       return concaveHullsVertices;
    }
-   
+
    private void checkConcaveHullRepeatVertices(boolean throwException)
    {
       for (int i=0; i<concaveHullsVertices.length; i++)
       {
          int nextIndex = (i + 1) % concaveHullsVertices.length;
-         
+
          Point2D vertex = concaveHullsVertices[i];
          Point2D nextVertex = concaveHullsVertices[nextIndex];
-         
+
          if (vertex.distance(nextVertex) < 1e-7)
          {
             LogTools.error("Setting concave hull with repeat vertices" + vertex);
@@ -1016,7 +1027,7 @@ public class PlanarRegion
    /**
     * Transforms the planar region
     *
-    * @param rigidBodyTransform transform from current frame to desired frame
+    * @param fromDesiredToCurrentTransform transform from current frame to desired frame
     */
    public void transform(RigidBodyTransform fromDesiredToCurrentTransform)
    {

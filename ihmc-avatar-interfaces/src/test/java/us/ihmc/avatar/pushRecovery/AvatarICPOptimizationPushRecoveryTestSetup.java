@@ -1,6 +1,6 @@
 package us.ihmc.avatar.pushRecovery;
 
-import static us.ihmc.robotics.Assert.*;
+import static us.ihmc.robotics.Assert.assertTrue;
 
 import java.util.List;
 
@@ -106,10 +106,10 @@ public abstract class AvatarICPOptimizationPushRecoveryTestSetup
 
    protected void setupAndRunTest(FootstepDataListMessage message) throws SimulationExceededMaximumTimeException, ControllerFailureException
    {
-      FlatGroundEnvironment flatGround = new FlatGroundEnvironment();
-      drcSimulationTestHelper = new DRCSimulationTestHelper(simulationTestingParameters, getRobotModel());
-      drcSimulationTestHelper.setTestEnvironment(flatGround);
-      drcSimulationTestHelper.createSimulation("DRCSimpleFlatGroundScriptTest");
+      drcSimulationTestHelper = new DRCSimulationTestHelper(simulationTestingParameters, getRobotModel(), new FlatGroundEnvironment());
+      drcSimulationTestHelper.createSimulation("ICPOptimizationTest");
+      setupCamera();
+
       FullHumanoidRobotModel fullRobotModel = getRobotModel().createFullRobotModel();
       totalMass = fullRobotModel.getTotalMass();
 
@@ -120,7 +120,6 @@ public abstract class AvatarICPOptimizationPushRecoveryTestSetup
       scs.addYoGraphic(pushRobotController.getForceVisualizer());
 
       drcSimulationTestHelper.simulateAndBlock(0.5);
-
       drcSimulationTestHelper.publishToController(message);
 
       for (RobotSide robotSide : RobotSide.values)
@@ -134,9 +133,6 @@ public abstract class AvatarICPOptimizationPushRecoveryTestSetup
          singleSupportStartConditions.put(robotSide, new SingleSupportStartCondition(footConstraintType));
          doubleSupportStartConditions.put(robotSide, new DoubleSupportStartCondition(walkingState, robotSide));
       }
-
-      setupCamera();
-      ThreadTools.sleep(1000);
    }
 
    protected void validateTest(FootstepDataListMessage footsteps) throws SimulationExceededMaximumTimeException
@@ -162,7 +158,7 @@ public abstract class AvatarICPOptimizationPushRecoveryTestSetup
       goalPoint.interpolate(lastStep, secondToLastStep, 0.5);
       goalPoint.addZ(getNominalHeight());
 
-      BoundingBox3D boundingBox = BoundingBox3D.createUsingCenterAndPlusMinusVector(goalPoint, new Vector3D(0.2, 0.2, 0.4));
+      BoundingBox3D boundingBox = BoundingBox3D.createUsingCenterAndPlusMinusVector(goalPoint, new Vector3D(0.3, 0.3, 0.4));
       drcSimulationTestHelper.assertRobotsRootJointIsInBoundingBox(boundingBox);
    }
 

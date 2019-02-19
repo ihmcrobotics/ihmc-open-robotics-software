@@ -117,7 +117,7 @@ public class StictionCompensatorTest
          double stictionCompensation = stictionCompensator.computeStictionCompensation();
 
          assertEquals(stictionCompensation, yoStictionCompensation.getDoubleValue(), epsilon);
-         assertEquals(stictionCompensation, stictionCompensator.getStictionCompensation(), expectedDesiredTorque);
+         assertEquals(stictionCompensation, stictionCompensator.getStictionCompensation(), epsilon);
 
          double torqueSign = Math.signum(expectedDesiredTorque);
          double maxCompensationFromTorque = torqueSign * limitFactor * expectedDesiredTorque;
