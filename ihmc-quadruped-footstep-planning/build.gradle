@@ -13,6 +13,7 @@ ihmc {
 
 mainDependencies {
     compile group: "us.ihmc", name: "ihmc-quadruped-planning", version: "source"
+    compile group: "us.ihmc", name: "ihmc-path-planning-data-sets", version: "source"
 }
 
 testDependencies {

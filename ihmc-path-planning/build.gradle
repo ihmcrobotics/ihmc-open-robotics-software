@@ -26,6 +26,7 @@ mainDependencies {
 
 visualizersDependencies {
    compile ihmc.sourceSetProject("main")
+   compile ihmc.sourceSetProject("data-sets")
 
    compile group: "us.ihmc", name: "ihmc-javafx-toolkit", version: "0.12.7"
    compile group: "us.ihmc", name: "robot-environment-awareness-application", version: "source"
@@ -34,9 +35,17 @@ visualizersDependencies {
 
 testDependencies {
    compile ihmc.sourceSetProject("visualizers")
+   compile ihmc.sourceSetProject("data-sets")
 
    compile group: "us.ihmc", name: "ihmc-commons-testing", version: "0.25.2"
    compile group: "us.ihmc", name: "simulation-construction-set", version: "0.12.9"
    compile group: "us.ihmc", name: "robot-environment-awareness-application", version: "source"
    compile group: "us.ihmc", name: "ihmc-robotics-toolkit-test", version: "source"
+}
+
+dataSetsDependencies {
+   compile ihmc.sourceSetProject("main")
+
+   compile group: "us.ihmc", name: "ihmc-commons-testing", version: "0.25.0"
+   compile group: "us.ihmc", name: "robot-environment-awareness", version: "source"
 }
