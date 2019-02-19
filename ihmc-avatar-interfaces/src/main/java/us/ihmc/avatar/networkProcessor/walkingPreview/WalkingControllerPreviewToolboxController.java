@@ -154,7 +154,7 @@ public class WalkingControllerPreviewToolboxController extends ToolboxController
       FeedbackControlCommandList feedbackControlTemplate = managerFactory.createFeedbackControlTemplate();
       JointDesiredOutputList jointDesiredOutputList = new JointDesiredOutputList(controllerToolbox.getControlledOneDoFJoints());
 
-      controllerCore = new WholeBodyControllerCore(controlCoreToolbox, feedbackControlTemplate, jointDesiredOutputList, registry);
+      controllerCore = new WholeBodyControllerCore(controlCoreToolbox, feedbackControlTemplate, jointDesiredOutputList, walkingParentRegistry);
       walkingController.setControllerCoreOutput(controllerCore.getOutputForHighLevelController());
 
       //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

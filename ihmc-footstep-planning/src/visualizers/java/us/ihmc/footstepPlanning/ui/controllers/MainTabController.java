@@ -12,13 +12,14 @@ import controller_msgs.msg.dds.WalkingControllerPreviewInputMessage;
 import controller_msgs.msg.dds.WalkingControllerPreviewOutputMessage;
 import javafx.animation.AnimationTimer;
 import javafx.beans.value.ChangeListener;
+
+import controller_msgs.msg.dds.FootstepDataMessage;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
 import javafx.scene.control.SpinnerValueFactory.DoubleSpinnerValueFactory;
 import us.ihmc.commons.MathTools;
-import us.ihmc.commons.PrintTools;
 import us.ihmc.communication.packets.ExecutionMode;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
@@ -33,6 +34,7 @@ import us.ihmc.footstepPlanning.FootstepPlannerType;
 import us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.idl.IDLSequence.Float;
+
 import us.ihmc.idl.IDLSequence.Object;
 import us.ihmc.javaFXToolkit.messager.JavaFXMessager;
 import us.ihmc.javaFXToolkit.messager.MessageBidirectionalBinding.PropertyToMessageTypeConverter;
@@ -109,9 +111,15 @@ public class MainTabController
    private Spinner<Double> goalYaw;
 
    @FXML
+   private CheckBox overrideTiming;
+   @FXML
    private Spinner<Double> swingTimeSpinner;
    @FXML
    private Spinner<Double> transferTimeSpinner;
+   @FXML
+   private CheckBox overrideSwingHeight;
+   @FXML
+   private Spinner<Double> swingHeightSpinner;
 
    @FXML
    private Slider previewSlider;
@@ -120,7 +128,7 @@ public class MainTabController
    public void computePath()
    {
       if (verbose)
-         PrintTools.info(this, "Clicked compute path...");
+         LogTools.info("Clicked compute path...");
 
       setStartFromRobot();
       int newRequestID = currentPlannerRequestId.get() + 1;
@@ -132,7 +140,7 @@ public class MainTabController
    public void abortPlanning()
    {
       if (verbose)
-         PrintTools.info(this, "Clicked abort planning...");
+         LogTools.info("Clicked abort planning...");
 
       messager.submitMessage(AbortPlanningTopic, true);
    }
@@ -140,14 +148,32 @@ public class MainTabController
    @FXML
    public void sendPlan()
    {
-      FootstepPlan footstepPlan = footstepPlanReference.get();
-      if (footstepPlan == null)
+      FootstepDataListMessage footstepDataListMessage = footstepPlanReference.get();
+      if (footstepDataListMessage == null)
          return;
-      double swingTime = 1.2;
-      double transferTime = 0.8;
-      FootstepDataListMessage footstepDataListMessage = FootstepDataMessageConverter.createFootstepDataListFromPlan(footstepPlan, swingTime, transferTime,
-                                                                                                                    ExecutionMode.OVERRIDE);
-      messager.submitMessage(FootstepPlannerMessagerAPI.FootstepDataListTopic, footstepDataListMessage);
+
+      if(overrideTiming.isSelected())
+      {
+         Object<FootstepDataMessage> footstepDataList = footstepDataListMessage.getFootstepDataList();
+         for (int i = 0; i < footstepDataList.size(); i++)
+         {
+            FootstepDataMessage footstepDataMessage = footstepDataList.get(i);
+            footstepDataMessage.setSwingDuration(swingTimeSpinner.getValue());
+            footstepDataMessage.setTransferDuration(transferTimeSpinner.getValue());
+         }
+      }
+
+      if(overrideSwingHeight.isSelected())
+      {
+         Object<FootstepDataMessage> footstepDataList = footstepDataListMessage.getFootstepDataList();
+         for (int i = 0; i < footstepDataList.size(); i++)
+         {
+            FootstepDataMessage footstepDataMessage = footstepDataList.get(i);
+            footstepDataMessage.setSwingHeight(swingHeightSpinner.getValue());
+         }
+      }
+
+      messager.submitMessage(FootstepPlannerMessagerAPI.FootstepPlanToRobotTopic, footstepDataListMessage);
    }
 
    @FXML
@@ -178,7 +204,7 @@ public class MainTabController
    private AnimationTimer robotPoseHandler;
    private WalkingPreviewPlaybackManager walkingPreviewPlaybackManager;
    private HumanoidReferenceFrames humanoidReferenceFrames;
-   private AtomicReference<FootstepPlan> footstepPlanReference;
+   private AtomicReference<FootstepDataListMessage> footstepPlanReference;
 
    private final Point3DProperty startPositionProperty = new Point3DProperty(this, "startPositionProperty", new Point3D());
    private final Point3DProperty goalPositionProperty = new Point3DProperty(this, "goalPositionProperty", new Point3D());
@@ -193,7 +219,7 @@ public class MainTabController
       this.messager = messager;
 
       currentPlannerRequestId = messager.createInput(FootstepPlannerMessagerAPI.PlannerRequestIdTopic, -1);
-      footstepPlanReference = messager.createInput(FootstepPlannerMessagerAPI.FootstepPlanTopic, null);
+      footstepPlanReference = messager.createInput(FootstepPlannerMessagerAPI.FootstepPlanResponseTopic, null);
    }
 
    private void setupControls()
@@ -209,8 +235,20 @@ public class MainTabController
       startYaw.setValueFactory(createStartGoalOrientationValueFactory());
       goalYaw.setValueFactory(createStartGoalOrientationValueFactory());
 
-      swingTimeSpinner.setValueFactory(new SpinnerValueFactory.DoubleSpinnerValueFactory(0.3, 3.5, 1.2, 0.1));
-      transferTimeSpinner.setValueFactory(new SpinnerValueFactory.DoubleSpinnerValueFactory(0.3, 3.5, 0.8, 0.1));
+      swingTimeSpinner.setValueFactory(new SpinnerValueFactory.DoubleSpinnerValueFactory(0.0, 3.5, 1.2, 0.1));
+      transferTimeSpinner.setValueFactory(new SpinnerValueFactory.DoubleSpinnerValueFactory(0.0, 3.5, 0.8, 0.1));
+      swingHeightSpinner.setValueFactory(new SpinnerValueFactory.DoubleSpinnerValueFactory(0.0, 1.0, 0.05, 0.01));
+
+      overrideTiming.setSelected(true);
+      overrideSwingHeight.setSelected(true);
+
+      overrideTiming.selectedProperty().addListener(s ->
+                                                    {
+                                                       swingTimeSpinner.disableProperty().set(!overrideTiming.isSelected());
+                                                       transferTimeSpinner.disableProperty().set(!overrideTiming.isSelected());
+                                                    });
+
+      overrideSwingHeight.selectedProperty().addListener(s -> swingHeightSpinner.disableProperty().set(!overrideSwingHeight.isSelected()));
 
       ObservableList<us.ihmc.footstepPlanning.FootstepPlannerType> plannerTypeOptions = FXCollections.observableArrayList(FootstepPlannerType.values);
       plannerType.setItems(plannerTypeOptions);
@@ -308,13 +346,11 @@ public class MainTabController
       WalkingControllerPreviewInputMessage requestMessage = new WalkingControllerPreviewInputMessage();
       requestMessage.setSequenceId(walkingPreviewRequestId.incrementAndGet());
 
-      FootstepPlan footstepPlan = footstepPlanReference.get();
-      if (footstepPlan == null)
+      FootstepDataListMessage footstepDataListMessage = footstepPlanReference.get();
+      if (footstepDataListMessage == null)
          return;
-
-      double swingTime = 1.2;
-      double transferTime = 1.0;
-      requestMessage.footsteps_.set(FootstepDataMessageConverter.createFootstepDataListFromPlan(footstepPlan, swingTime, transferTime, ExecutionMode.OVERRIDE));
+      
+      requestMessage.getFootsteps().set(footstepDataListMessage);
       messager.submitMessage(FootstepPlannerMessagerAPI.RequestWalkingPreview, requestMessage);
    }
 
@@ -350,6 +386,11 @@ public class MainTabController
    {
       swingTimeSpinner.getValueFactory().setValue(swingTime);
       transferTimeSpinner.getValueFactory().setValue(transferTime);
+   }
+
+   public void setDefaultSwingHeight(double swingHeight)
+   {
+      swingHeightSpinner.getValueFactory().setValue(swingHeight);
    }
 
    private void clearStartGoalTextFields()

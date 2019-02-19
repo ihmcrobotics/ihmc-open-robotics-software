@@ -60,6 +60,10 @@
                             <Label text="Min step length" GridPane.columnIndex="1" GridPane.halignment="RIGHT" GridPane.rowIndex="1" />
                             <Label text="Max step z" GridPane.columnIndex="5" GridPane.halignment="RIGHT" />
                             <Label text="Max surface incline" GridPane.columnIndex="5" GridPane.halignment="RIGHT" GridPane.rowIndex="3" />
+                            <Label text="Max step up X" GridPane.columnIndex="5" GridPane.halignment="RIGHT" GridPane.rowIndex="4" />
+                            <Label text="Step up height" GridPane.columnIndex="5" GridPane.halignment="RIGHT" GridPane.rowIndex="5" />
+                            <Label text="Max step down X" GridPane.columnIndex="5" GridPane.halignment="RIGHT" GridPane.rowIndex="6" />
+                            <Label text="Step down height" GridPane.columnIndex="5" GridPane.halignment="RIGHT" GridPane.rowIndex="7" />
 
                             <Label text="Max step yaw" GridPane.columnIndex="3" GridPane.halignment="RIGHT" />
                             <Label text="Min step yaw" GridPane.columnIndex="3" GridPane.halignment="RIGHT" GridPane.rowIndex="1" />
@@ -76,6 +80,10 @@
                             <Spinner fx:id="minStepLength" editable="true" GridPane.columnIndex="2" GridPane.rowIndex="1" />
                             <Spinner fx:id="maxStepZ" editable="true" GridPane.columnIndex="6" />
                             <Spinner fx:id="minSurfaceIncline" editable="true" GridPane.columnIndex="6" GridPane.rowIndex="3" />
+                            <Spinner fx:id="maxStepUpX" editable="true" GridPane.columnIndex="6" GridPane.halignment="RIGHT" GridPane.rowIndex="4" />
+                            <Spinner fx:id="stepUpHeight" editable="true" GridPane.columnIndex="6" GridPane.halignment="RIGHT" GridPane.rowIndex="5" />
+                            <Spinner fx:id="maxStepDownX" editable="true" GridPane.columnIndex="6" GridPane.halignment="RIGHT" GridPane.rowIndex="6" />
+                            <Spinner fx:id="stepDownHeight" editable="true" GridPane.columnIndex="6" GridPane.halignment="RIGHT" GridPane.rowIndex="7" />
 
                             <Spinner fx:id="maxStepYaw" editable="true" GridPane.columnIndex="4" />
                             <Spinner fx:id="minStepYaw" editable="true" GridPane.columnIndex="4" GridPane.rowIndex="1" />

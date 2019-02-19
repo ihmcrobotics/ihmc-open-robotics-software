@@ -3,7 +3,7 @@ package us.ihmc.footstepPlanning.roughTerrainPlanning;
 import static us.ihmc.robotics.Assert.*;
 
 import static us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI.ComputePathTopic;
-import static us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI.FootstepPlanTopic;
+import static us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI.FootstepPlanResponseTopic;
 import static us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI.PlannerTypeTopic;
 import static us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI.PlanningResultTopic;
 import static us.ihmc.footstepPlanning.testTools.PlannerTestEnvironments.box;
@@ -28,16 +28,16 @@ import java.util.concurrent.atomic.AtomicReference;
 
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
+import controller_msgs.msg.dds.FootstepDataListMessage;
 
 import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.stage.Stage;
 import us.ihmc.commons.Conversions;
-import us.ihmc.commons.PrintTools;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.commons.ContinuousIntegrationTools;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.footstepPlanning.FootstepPlan;
+import us.ihmc.footstepPlanning.FootstepDataMessageConverter;
 import us.ihmc.footstepPlanning.FootstepPlannerType;
 import us.ihmc.footstepPlanning.FootstepPlanningResult;
 import us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI;
@@ -47,6 +47,7 @@ import us.ihmc.footstepPlanning.ui.ApplicationRunner;
 import us.ihmc.footstepPlanning.ui.FootstepPlannerUI;
 import us.ihmc.footstepPlanning.ui.components.FootstepPathCalculatorModule;
 import us.ihmc.javaFXToolkit.messager.SharedMemoryJavaFXMessager;
+import us.ihmc.log.LogTools;
 import us.ihmc.messager.SharedMemoryMessager;
 
 public abstract class MessagerFootstepPlannerOnRoughTerrainTest
@@ -138,9 +139,9 @@ public abstract class MessagerFootstepPlannerOnRoughTerrainTest
       List<String> testsToRun = getTestsToRun();
       for (String test : testsToRun)
       {
-         PrintTools.info("Running test " + test);
+         LogTools.info("Running test " + test);
          runTestAndAssert(getTestData(test));
-         PrintTools.info("Test " + test + " passed.");
+         LogTools.info("Test " + test + " passed.");
          ThreadTools.sleep(100);
       }
    }
@@ -153,9 +154,9 @@ public abstract class MessagerFootstepPlannerOnRoughTerrainTest
 
       AtomicReference<Boolean> receivedPlan = new AtomicReference<>(false);
       AtomicReference<Boolean> receivedResult = new AtomicReference<>(false);
-      messager.registerTopicListener(FootstepPlanTopic, request -> receivedPlan.set(true));
+      messager.registerTopicListener(FootstepPlanResponseTopic, request -> receivedPlan.set(true));
       messager.registerTopicListener(PlanningResultTopic, request -> receivedResult.set(true));
-      AtomicReference<FootstepPlan> footstepPlanReference = messager.createInput(FootstepPlanTopic);
+      AtomicReference<FootstepDataListMessage> footstepPlanReference = messager.createInput(FootstepPlanResponseTopic);
       AtomicReference<FootstepPlanningResult> footstepPlanningResult = messager.createInput(PlanningResultTopic);
 
       messager.submitMessage(ComputePathTopic, true);
@@ -175,7 +176,7 @@ public abstract class MessagerFootstepPlannerOnRoughTerrainTest
       ThreadTools.sleep(10);
 
       assertTrue("Planning result is invalid, result was " + footstepPlanningResult.get(), footstepPlanningResult.get().validForExecution());
-      assertTrue(PlannerTools.isGoalNextToLastStep(testData.getGoalPose(), footstepPlanReference.get()));
+      assertTrue(PlannerTools.isGoalNextToLastStep(testData.getGoalPose(), FootstepDataMessageConverter.convertToFootstepPlan(footstepPlanReference.get())));
 
       if (keepUIUp)
          ThreadTools.sleepForever();

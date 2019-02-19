@@ -6,7 +6,6 @@ import java.util.concurrent.atomic.AtomicReference;
 import controller_msgs.msg.dds.BodyPathPlanMessage;
 import controller_msgs.msg.dds.BodyPathPlanStatisticsMessage;
 import controller_msgs.msg.dds.FootstepDataListMessage;
-import controller_msgs.msg.dds.FootstepDataMessage;
 import controller_msgs.msg.dds.FootstepNodeDataListMessage;
 import controller_msgs.msg.dds.FootstepPlannerOccupancyMapMessage;
 import controller_msgs.msg.dds.FootstepPlannerParametersPacket;
@@ -22,7 +21,6 @@ import controller_msgs.msg.dds.VisibilityGraphsParametersPacket;
 import controller_msgs.msg.dds.WalkingControllerPreviewInputMessage;
 import controller_msgs.msg.dds.WalkingControllerPreviewOutputMessage;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.ControllerAPIDefinition;
-import us.ihmc.commons.PrintTools;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.communication.IHMCRealtimeROS2Publisher;
 import us.ihmc.communication.ROS2Tools;
@@ -31,23 +29,16 @@ import us.ihmc.communication.ROS2Tools.ROS2TopicQualifier;
 import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.communication.packets.PlanarRegionMessageConverter;
 import us.ihmc.communication.packets.ToolboxState;
-import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.geometry.Pose3D;
-import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.euclid.tuple4D.Quaternion;
-import us.ihmc.footstepPlanning.FootstepPlan;
-import us.ihmc.footstepPlanning.FootstepPlannerStatus;
-import us.ihmc.footstepPlanning.FootstepPlannerType;
-import us.ihmc.footstepPlanning.FootstepPlanningResult;
-import us.ihmc.footstepPlanning.SimpleFootstep;
-import us.ihmc.footstepPlanning.VisibilityGraphMessagesConverter;
+import us.ihmc.footstepPlanning.*;
 import us.ihmc.footstepPlanning.communication.FootstepPlannerCommunicationProperties;
 import us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI;
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParameters;
 import us.ihmc.footstepPlanning.tools.FootstepPlannerMessageTools;
-import us.ihmc.idl.IDLSequence;
+import us.ihmc.log.LogTools;
 import us.ihmc.messager.Messager;
 import us.ihmc.pathPlanning.visibilityGraphs.dataStructure.VisibilityMapWithNavigableRegion;
 import us.ihmc.pathPlanning.visibilityGraphs.interfaces.VisibilityGraphsParameters;
@@ -221,12 +212,13 @@ public class RemoteUIMessageConverter
          walkingPreviewToolboxStatePublisher.publish(toolboxStateMessage);
          walkingPreviewRequestPublisher.publish(request);
       });
+      messager.registerTopicListener(FootstepPlannerMessagerAPI.FootstepPlanToRobotTopic, footstepDataListPublisher::publish);
    }
 
    private void processFootstepPlanningRequestPacket(FootstepPlanningRequestPacket packet)
    {
       if (verbose)
-         PrintTools.info("Received a planning request.");
+         LogTools.info("Received a planning request.");
 
       Point3D goalPosition = packet.getGoalPositionInWorld();
       Quaternion goalOrientation = packet.getGoalOrientationInWorld();
@@ -267,7 +259,7 @@ public class RemoteUIMessageConverter
       messager.submitMessage(FootstepPlannerMessagerAPI.BodyPathDataTopic, bodyPath);
 
       if (verbose)
-         PrintTools.info("Received a body path planning result from the toolbox.");
+         LogTools.info("Received a body path planning result from the toolbox.");
    }
 
    private void processBodyPathPlanStatistics(BodyPathPlanStatisticsMessage packet)
@@ -294,7 +286,6 @@ public class RemoteUIMessageConverter
       FootstepDataListMessage footstepDataListMessage = packet.getFootstepDataList();
       int plannerRequestId = packet.getPlanId();
       FootstepPlanningResult result = FootstepPlanningResult.fromByte(packet.getFootstepPlanningResult());
-      FootstepPlan footstepPlan = convertToFootstepPlan(footstepDataListMessage);
       List<? extends Point3DReadOnly> bodyPath = packet.getBodyPath();
       Pose3D lowLevelGoal = packet.getLowLevelPlannerGoal();
 
@@ -303,7 +294,7 @@ public class RemoteUIMessageConverter
      
       ThreadTools.sleep(100);
 
-      messager.submitMessage(FootstepPlannerMessagerAPI.FootstepPlanTopic, footstepPlan);
+      messager.submitMessage(FootstepPlannerMessagerAPI.FootstepPlanResponseTopic, footstepDataListMessage);
       messager.submitMessage(FootstepPlannerMessagerAPI.ReceivedPlanIdTopic, plannerRequestId);
       messager.submitMessage(FootstepPlannerMessagerAPI.PlanningResultTopic, result);
       messager.submitMessage(FootstepPlannerMessagerAPI.PlannerTimeTakenTopic, packet.getTimeTaken());
@@ -315,7 +306,7 @@ public class RemoteUIMessageConverter
       }
 
       if (verbose)
-         PrintTools.info("Received a footstep planning result from the toolbox.");
+         LogTools.info("Received a footstep planning result from the toolbox.");
    }
 
    private void processIncomingPlanarRegionMessage(PlanarRegionsListMessage packet)
@@ -325,7 +316,7 @@ public class RemoteUIMessageConverter
          messager.submitMessage(FootstepPlannerMessagerAPI.PlanarRegionDataTopic, PlanarRegionMessageConverter.convertToPlanarRegionsList(packet));
 
          if (verbose)
-            PrintTools.info("Received updated planner regions.");
+            LogTools.info("Received updated planner regions.");
       }
    }
 
@@ -339,7 +330,7 @@ public class RemoteUIMessageConverter
       toolboxStatePublisher.publish(MessageTools.createToolboxStateMessage(ToolboxState.WAKE_UP));
 
       if (verbose)
-         PrintTools.info("Told the toolbox to wake up.");
+         LogTools.info("Told the toolbox to wake up.");
       
       FootstepPlannerParametersPacket plannerParametersPacket = new FootstepPlannerParametersPacket();
       FootstepPlannerParameters footstepPlannerParameters = plannerParametersReference.get();
@@ -354,7 +345,7 @@ public class RemoteUIMessageConverter
       visibilityGraphsParametersPublisher.publish(visibilityGraphsParametersPacket);
       
       if (verbose)
-         PrintTools.info("Sent out some parameters");
+         LogTools.info("Sent out some parameters");
 
       submitFootstepPlanningRequestPacket();
    }
@@ -363,12 +354,12 @@ public class RemoteUIMessageConverter
    {
       if (plannerStartPositionReference.get() == null)
       {
-         PrintTools.warn("Need to set start position.");
+         LogTools.warn("Need to set start position.");
          return false;
       }
       if (plannerGoalPositionReference.get() == null)
       {
-         PrintTools.warn("Need to set goal position.");
+         LogTools.warn("Need to set goal position.");
          return false;
       }
       return true;
@@ -382,7 +373,7 @@ public class RemoteUIMessageConverter
    private void requestAbortPlanning()
    {
       if (verbose)
-         PrintTools.info("Sending out a sleep request.");
+         LogTools.info("Sending out a sleep request.");
       toolboxStatePublisher.publish(MessageTools.createToolboxStateMessage(ToolboxState.SLEEP));
    }
 
@@ -408,32 +399,5 @@ public class RemoteUIMessageConverter
       packet.setAssumeFlatGround(assumeFlatGround.get());
 
       footstepPlanningRequestPublisher.publish(packet);
-   }
-
-   private static FootstepPlan convertToFootstepPlan(FootstepDataListMessage footstepDataListMessage)
-   {
-      FootstepPlan footstepPlan = new FootstepPlan();
-
-      for (FootstepDataMessage footstepMessage : footstepDataListMessage.getFootstepDataList())
-      {
-         FramePose3D stepPose = new FramePose3D();
-         stepPose.setPosition(footstepMessage.getLocation());
-         stepPose.setOrientation(footstepMessage.getOrientation());
-         SimpleFootstep simpleFootstep = footstepPlan.addFootstep(RobotSide.fromByte(footstepMessage.getRobotSide()), stepPose);
-
-         IDLSequence.Object<Point3D> predictedContactPoints = footstepMessage.getPredictedContactPoints2d();
-         if (!predictedContactPoints.isEmpty())
-         {
-            ConvexPolygon2D foothold = new ConvexPolygon2D();
-            for (int i = 0; i < predictedContactPoints.size(); i++)
-            {
-               foothold.addVertex(predictedContactPoints.get(i));
-            }
-            foothold.update();
-            simpleFootstep.setFoothold(foothold);
-         }
-      }
-
-      return footstepPlan;
    }
 }

@@ -52,7 +52,21 @@ public class ValkyrieToeOffParameters extends ToeOffParameters
    @Override
    public boolean doToeOffWhenHittingAnkleLimit()
    {
-      return false;
+      return true;
+   }
+
+   @Override
+   public boolean lookAtTwoStepCapturabilityForToeOff()
+   {
+      switch (target)
+      {
+      case SCS:
+         return true;
+      case GAZEBO:
+      case REAL_ROBOT:
+      default:
+         return false;
+      }
    }
 
    @Override
