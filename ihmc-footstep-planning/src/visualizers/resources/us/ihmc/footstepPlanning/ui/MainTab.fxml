@@ -22,7 +22,7 @@
   <items>
     <AnchorPane minHeight="0.0" minWidth="0.0">
          <children>
-            <SplitPane dividerPositions="0.35, 0.7, 1.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+            <SplitPane dividerPositions="0.4, 0.72, 1.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
               <items>
                 <AnchorPane minHeight="0.0" minWidth="0.0">
                      <children>
@@ -43,6 +43,7 @@
                               <Button mnemonicParsing="false" onAction="#abortPlanning" fx:id="abortPlanning" prefWidth="130.0" text="Cancel Planning" GridPane.halignment="CENTER" GridPane.rowIndex="1" />
                               <CheckBox fx:id="acceptNewRegions" mnemonicParsing="false" text="Accept New Planar Regions" GridPane.columnIndex="1" GridPane.columnSpan="2" />
                               <CheckBox fx:id="assumeFlatGround" text="Flat ground" GridPane.columnIndex="3" GridPane.columnSpan="2"/>
+                               <CheckBox fx:id="ignorePartialFootholds" text="Ignore partial footholds" GridPane.columnIndex="3" GridPane.columnSpan="2" GridPane.rowIndex="1"/>
                               <Region prefHeight="26.0" prefWidth="20.0" GridPane.columnIndex="5" GridPane.halignment="RIGHT" />
                               <Button onAction="#clearFlat" text="Clear Flat" GridPane.columnIndex="6" GridPane.columnSpan="1"/>
                               <ComboBox fx:id="plannerType" prefHeight="26.0" prefWidth="200.0" GridPane.columnIndex="1" GridPane.halignment="RIGHT" GridPane.rowIndex="1" />

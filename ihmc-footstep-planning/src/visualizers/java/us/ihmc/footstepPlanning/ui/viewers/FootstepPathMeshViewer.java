@@ -1,10 +1,7 @@
 package us.ihmc.footstepPlanning.ui.viewers;
 
-import static us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI.FootstepPlanResponseTopic;
-import static us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI.NodeDataTopic;
-import static us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI.ShowFootstepPlanTopic;
-import static us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI.ShowNodeDataTopic;
-
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -21,6 +18,7 @@ import javafx.scene.paint.Color;
 import javafx.scene.paint.Material;
 import javafx.scene.shape.Mesh;
 import javafx.scene.shape.MeshView;
+import jdk.nashorn.internal.ir.annotations.Ignore;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.communication.packets.ExecutionMode;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
@@ -28,6 +26,7 @@ import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple2D.Point2D;
+import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.footstepPlanning.FootstepDataMessageConverter;
 import us.ihmc.footstepPlanning.FootstepPlan;
 import us.ihmc.footstepPlanning.SimpleFootstep;
@@ -40,16 +39,22 @@ import us.ihmc.javaFXToolkit.shapes.JavaFXMultiColorMeshBuilder;
 import us.ihmc.javaFXToolkit.shapes.TextureColorAdaptivePalette;
 import us.ihmc.messager.Messager;
 import us.ihmc.robotics.robotSide.RobotSide;
+import us.ihmc.robotics.robotSide.SegmentDependentList;
 import us.ihmc.robotics.robotSide.SideDependentList;
+import us.ihmc.wholeBodyController.RobotContactPointParameters;
+
+import static us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI.*;
 
 public class FootstepPathMeshViewer extends AnimationTimer
 {
-   private static final ConvexPolygon2D defaultFootPolygon = PlannerTools.createDefaultFootPolygon();
    private final Group root = new Group();
    private final ExecutorService executorService = Executors.newSingleThreadExecutor(ThreadTools.getNamedThreadFactory(getClass().getSimpleName()));
+   private SideDependentList<ConvexPolygon2D> defaultContactPoints = new SideDependentList<>();
 
    private final AtomicReference<Boolean> showSolution;
    private final AtomicReference<Boolean> showIntermediatePlan;
+   private final AtomicReference<FootstepDataListMessage> footstepDataListMessage;
+   private final AtomicReference<Boolean> ignorePartialFootholds;
    private final AtomicBoolean solutionWasReceived = new AtomicBoolean(false);
    private final AtomicBoolean reset = new AtomicBoolean(false);
 
@@ -63,6 +68,9 @@ public class FootstepPathMeshViewer extends AnimationTimer
 
    public FootstepPathMeshViewer(Messager messager)
    {
+      ignorePartialFootholds = messager.createInput(IgnorePartialFootholdsTopic, false);
+      footstepDataListMessage = messager.createInput(FootstepPlanResponseTopic, null);
+
       messager.registerTopicListener(FootstepPlanResponseTopic, footstepPlan -> executorService.submit(() -> {
          solutionWasReceived.set(true);
          processFootstepPath(footstepPlan);
@@ -73,6 +81,7 @@ public class FootstepPathMeshViewer extends AnimationTimer
          processLowestCostNodeList(nodeData);
       }));
 
+      messager.registerTopicListener(IgnorePartialFootholdsTopic, b -> processFootstepPath(footstepDataListMessage.get()));
       messager.registerTopicListener(FootstepPlannerMessagerAPI.ComputePathTopic, data -> reset.set(true));
 
       showSolution = messager.createInput(ShowFootstepPlanTopic, true);
@@ -120,6 +129,14 @@ public class FootstepPathMeshViewer extends AnimationTimer
       ConvexPolygon2D foothold = new ConvexPolygon2D();
       FootstepPlan plan = FootstepDataMessageConverter.convertToFootstepPlan(footstepDataListMessage);
 
+      if(ignorePartialFootholds.get())
+      {
+         for (int i = 0; i < plan.getNumberOfSteps(); i++)
+         {
+            plan.getFootstep(i).setFoothold(defaultContactPoints.get(plan.getFootstep(i).getRobotSide()));
+         }
+      }
+
       for (int i = 0; i < plan.getNumberOfSteps(); i++)
       {
          SimpleFootstep footstep = plan.getFootstep(i);
@@ -132,7 +149,7 @@ public class FootstepPathMeshViewer extends AnimationTimer
          if (footstep.hasFoothold())
             footstep.getFoothold(foothold);
          else
-            foothold.set(defaultFootPolygon);
+            foothold.set(defaultContactPoints.get(plan.getFootstep(i).getRobotSide()));
 
          Point2D[] vertices = new Point2D[foothold.getNumberOfVertices()];
          for (int j = 0; j < vertices.length; j++)
@@ -173,6 +190,23 @@ public class FootstepPathMeshViewer extends AnimationTimer
       {
          footstepPathMeshView.setMesh(newMeshAndMaterial.getKey());
          footstepPathMeshView.setMaterial(newMeshAndMaterial.getValue());
+      }
+   }
+
+   public void setDefaultContactPoints(RobotContactPointParameters<RobotSide> defaultContactPointParameters)
+   {
+      SegmentDependentList<RobotSide, ArrayList<Point2D>> controllerFootGroundContactPoints = defaultContactPointParameters.getControllerFootGroundContactPoints();
+      for(RobotSide robotSide : RobotSide.values)
+      {
+         ConvexPolygon2D defaultFoothold = new ConvexPolygon2D();
+         ArrayList<Point2D> defaultContactPoints = controllerFootGroundContactPoints.get(robotSide);
+         for (int i = 0; i < defaultContactPoints.size(); i++)
+         {
+            defaultFoothold.addVertex(defaultContactPoints.get(i));
+         }
+
+         defaultFoothold.update();
+         this.defaultContactPoints.put(robotSide, defaultFoothold);
       }
    }
 

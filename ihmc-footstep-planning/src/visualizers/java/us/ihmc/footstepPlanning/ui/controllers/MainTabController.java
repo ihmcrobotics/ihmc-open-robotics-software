@@ -1,26 +1,15 @@
 package us.ihmc.footstepPlanning.ui.controllers;
 
-import static us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI.*;
-
-import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.concurrent.atomic.AtomicInteger;
-import java.util.concurrent.atomic.AtomicReference;
-
 import controller_msgs.msg.dds.FootstepDataListMessage;
-import controller_msgs.msg.dds.KinematicsToolboxOutputStatus;
-import controller_msgs.msg.dds.WalkingControllerPreviewInputMessage;
-import controller_msgs.msg.dds.WalkingControllerPreviewOutputMessage;
+import controller_msgs.msg.dds.*;
 import javafx.animation.AnimationTimer;
 import javafx.beans.value.ChangeListener;
-
-import controller_msgs.msg.dds.FootstepDataMessage;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
 import javafx.scene.control.SpinnerValueFactory.DoubleSpinnerValueFactory;
 import us.ihmc.commons.MathTools;
-import us.ihmc.communication.packets.ExecutionMode;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
@@ -28,13 +17,10 @@ import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
-import us.ihmc.footstepPlanning.FootstepDataMessageConverter;
-import us.ihmc.footstepPlanning.FootstepPlan;
 import us.ihmc.footstepPlanning.FootstepPlannerType;
 import us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.idl.IDLSequence.Float;
-
 import us.ihmc.idl.IDLSequence.Object;
 import us.ihmc.javaFXToolkit.messager.JavaFXMessager;
 import us.ihmc.javaFXToolkit.messager.MessageBidirectionalBinding.PropertyToMessageTypeConverter;
@@ -45,10 +31,21 @@ import us.ihmc.messager.TopicListener;
 import us.ihmc.pathPlanning.visibilityGraphs.ui.properties.Point3DProperty;
 import us.ihmc.pathPlanning.visibilityGraphs.ui.properties.YawProperty;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
+import us.ihmc.robotModels.FullRobotModelUtils;
 import us.ihmc.robotics.geometry.PlanarRegion;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.robotSide.RobotSide;
-import us.ihmc.robotModels.FullRobotModelUtils;
+import us.ihmc.robotics.robotSide.SideDependentList;
+import us.ihmc.wholeBodyController.RobotContactPointParameters;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicReference;
+import java.util.stream.Collectors;
+
+import static us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI.*;
 
 public class MainTabController
 {
@@ -61,6 +58,8 @@ public class MainTabController
    private CheckBox acceptNewRegions;
    @FXML
    private CheckBox assumeFlatGround;
+   @FXML
+   private CheckBox ignorePartialFootholds;
    @FXML
    private Spinner<Double> timeout;
    @FXML
@@ -205,6 +204,8 @@ public class MainTabController
    private WalkingPreviewPlaybackManager walkingPreviewPlaybackManager;
    private HumanoidReferenceFrames humanoidReferenceFrames;
    private AtomicReference<FootstepDataListMessage> footstepPlanReference;
+   private final ArrayList<List<Point3D>> contactPointHolder = new ArrayList<>();
+   private SideDependentList<ArrayList<Point3D>> defaultContactPoints = new SideDependentList<>();
 
    private final Point3DProperty startPositionProperty = new Point3DProperty(this, "startPositionProperty", new Point3D());
    private final Point3DProperty goalPositionProperty = new Point3DProperty(this, "goalPositionProperty", new Point3D());
@@ -259,6 +260,8 @@ public class MainTabController
 
       initialSupportSide.setItems(FXCollections.observableArrayList(RobotSide.values));
       initialSupportSide.setValue(RobotSide.LEFT);
+
+      messager.bindTopic(IgnorePartialFootholdsTopic, ignorePartialFootholds.selectedProperty());
    }
 
    public void bindControls()
@@ -386,6 +389,17 @@ public class MainTabController
    {
       swingTimeSpinner.getValueFactory().setValue(swingTime);
       transferTimeSpinner.getValueFactory().setValue(transferTime);
+   }
+
+   public void setContactPointParameters(RobotContactPointParameters<RobotSide> contactPointParameters)
+   {
+      for(RobotSide robotSide : RobotSide.values)
+      {
+         ArrayList<Point3D> contactPoints = new ArrayList<>(
+               contactPointParameters.getControllerFootGroundContactPoints().get(robotSide).stream().map(p -> new Point3D(p.getX(), p.getY(), 0.0))
+                                     .collect(Collectors.toList()));
+         defaultContactPoints.put(robotSide, contactPoints);
+      }
    }
 
    public void setDefaultSwingHeight(double swingHeight)

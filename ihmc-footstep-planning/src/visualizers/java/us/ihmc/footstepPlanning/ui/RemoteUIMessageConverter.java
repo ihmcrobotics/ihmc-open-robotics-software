@@ -3,23 +3,7 @@ package us.ihmc.footstepPlanning.ui;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
 
-import controller_msgs.msg.dds.BodyPathPlanMessage;
-import controller_msgs.msg.dds.BodyPathPlanStatisticsMessage;
-import controller_msgs.msg.dds.FootstepDataListMessage;
-import controller_msgs.msg.dds.FootstepNodeDataListMessage;
-import controller_msgs.msg.dds.FootstepPlannerOccupancyMapMessage;
-import controller_msgs.msg.dds.FootstepPlannerParametersPacket;
-import controller_msgs.msg.dds.FootstepPlannerStatusMessage;
-import controller_msgs.msg.dds.FootstepPlanningRequestPacket;
-import controller_msgs.msg.dds.FootstepPlanningToolboxOutputStatus;
-import controller_msgs.msg.dds.GoHomeMessage;
-import controller_msgs.msg.dds.PlanarRegionsListMessage;
-import controller_msgs.msg.dds.PlanningStatisticsRequestMessage;
-import controller_msgs.msg.dds.RobotConfigurationData;
-import controller_msgs.msg.dds.ToolboxStateMessage;
-import controller_msgs.msg.dds.VisibilityGraphsParametersPacket;
-import controller_msgs.msg.dds.WalkingControllerPreviewInputMessage;
-import controller_msgs.msg.dds.WalkingControllerPreviewOutputMessage;
+import controller_msgs.msg.dds.*;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.ControllerAPIDefinition;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.communication.IHMCRealtimeROS2Publisher;
@@ -38,6 +22,7 @@ import us.ihmc.footstepPlanning.communication.FootstepPlannerCommunicationProper
 import us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI;
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParameters;
 import us.ihmc.footstepPlanning.tools.FootstepPlannerMessageTools;
+import us.ihmc.idl.IDLSequence.Object;
 import us.ihmc.log.LogTools;
 import us.ihmc.messager.Messager;
 import us.ihmc.pathPlanning.visibilityGraphs.dataStructure.VisibilityMapWithNavigableRegion;
@@ -85,7 +70,7 @@ public class RemoteUIMessageConverter
    private final AtomicReference<Boolean> acceptNewPlanarRegionsReference;
    private final AtomicReference<Integer> currentPlanRequestId;
    private final AtomicReference<Boolean> assumeFlatGround;
-
+   private final AtomicReference<Boolean> ignorePartialFootholds;
 
    private IHMCRealtimeROS2Publisher<ToolboxStateMessage> toolboxStatePublisher;
    private IHMCRealtimeROS2Publisher<FootstepPlannerParametersPacket> plannerParametersPublisher;
@@ -134,6 +119,7 @@ public class RemoteUIMessageConverter
       acceptNewPlanarRegionsReference = messager.createInput(FootstepPlannerMessagerAPI.AcceptNewPlanarRegions, true);
       currentPlanRequestId = messager.createInput(FootstepPlannerMessagerAPI.PlannerRequestIdTopic, 0);
       assumeFlatGround = messager.createInput(FootstepPlannerMessagerAPI.AssumeFlatGround, false);
+      ignorePartialFootholds = messager.createInput(FootstepPlannerMessagerAPI.IgnorePartialFootholdsTopic, false);
 
       registerPubSubs(ros2Node);
 
@@ -203,7 +189,6 @@ public class RemoteUIMessageConverter
       messager.registerTopicListener(FootstepPlannerMessagerAPI.ComputePathTopic, request -> requestNewPlan());
       messager.registerTopicListener(FootstepPlannerMessagerAPI.RequestPlannerStatistics, request -> requestPlannerStatistics());
       messager.registerTopicListener(FootstepPlannerMessagerAPI.AbortPlanningTopic, request -> requestAbortPlanning());
-      messager.registerTopicListener(FootstepPlannerMessagerAPI.FootstepDataListTopic, footstepDataListPublisher::publish);
       messager.registerTopicListener(FootstepPlannerMessagerAPI.GoHomeTopic, goHomePublisher::publish);
       messager.registerTopicListener(FootstepPlannerMessagerAPI.RequestWalkingPreview, request ->
       {
@@ -212,7 +197,16 @@ public class RemoteUIMessageConverter
          walkingPreviewToolboxStatePublisher.publish(toolboxStateMessage);
          walkingPreviewRequestPublisher.publish(request);
       });
-      messager.registerTopicListener(FootstepPlannerMessagerAPI.FootstepPlanToRobotTopic, footstepDataListPublisher::publish);
+
+      messager.registerTopicListener(FootstepPlannerMessagerAPI.FootstepPlanToRobotTopic, footstepDataListMessage ->
+      {
+         if(ignorePartialFootholds.get())
+         {
+            footstepDataListMessage.getFootstepDataList().forEach(m -> m.getPredictedContactPoints2d().clear());
+         }
+
+         footstepDataListPublisher.publish(footstepDataListMessage);
+      });
    }
 
    private void processFootstepPlanningRequestPacket(FootstepPlanningRequestPacket packet)
