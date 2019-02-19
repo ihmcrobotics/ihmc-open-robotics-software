@@ -92,7 +92,6 @@ public class FootstepPlannerMessageTools
       packet.setBodyBoxBaseZ(parameters.getBodyBoxBaseZ());
       packet.setMinXClearanceFromStance(parameters.getMinXClearanceFromStance());
       packet.setMinYClearanceFromStance(parameters.getMinYClearanceFromStance());
-      packet.setStepTranslationBoundingBoxScaleFactor(parameters.getStepTranslationBoundingBoxScaleFactor());
 
       FootstepPlannerCostParameters costParameters = parameters.getCostParameters();
 
@@ -112,6 +111,8 @@ public class FootstepPlannerMessageTools
       packet.getCostParameters().setForwardWeight(costParameters.getForwardWeight());
       packet.getCostParameters().setLateralWeight(costParameters.getLateralWeight());
       packet.getCostParameters().setCostPerStep(costParameters.getCostPerStep());
+      packet.getCostParameters().setBoundingBoxCost(costParameters.getBoundingBoxCost());
+      packet.getCostParameters().setMaximum2dDistanceFromBoundingBoxToPenalize(costParameters.getMaximum2dDistanceFromBoundingBoxToPenalize());
    }
 
    public static void copyParametersToPacket(VisibilityGraphsParametersPacket packet, VisibilityGraphsParameters parameters)

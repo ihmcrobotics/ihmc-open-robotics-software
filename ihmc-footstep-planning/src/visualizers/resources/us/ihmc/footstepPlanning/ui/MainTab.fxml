@@ -22,7 +22,7 @@
   <items>
     <AnchorPane minHeight="0.0" minWidth="0.0">
          <children>
-            <SplitPane dividerPositions="0.4, 0.8, 1.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+            <SplitPane dividerPositions="0.35, 0.7, 1.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
               <items>
                 <AnchorPane minHeight="0.0" minWidth="0.0">
                      <children>
@@ -103,12 +103,18 @@
                                   <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
                               </rowConstraints>
 
-                              <Label text="Swing time (s)" GridPane.halignment="RIGHT" GridPane.columnIndex="0" GridPane.rowIndex="0" />
-                              <Label text="Transfer time (s)" GridPane.halignment="RIGHT" GridPane.columnIndex="0" GridPane.rowIndex="1" />
-                              <Spinner fx:id="swingTimeSpinner" GridPane.columnIndex="1" GridPane.rowIndex="0" />
-                              <Spinner fx:id="transferTimeSpinner" GridPane.columnIndex="1" GridPane.rowIndex="1" />
+                              <CheckBox fx:id="overrideTiming" text="Override" GridPane.columnIndex="0" GridPane.rowIndex="0"/>
+                              <CheckBox fx:id="overrideSwingHeight" text="Override" GridPane.columnIndex="0" GridPane.rowIndex="2"/>
 
-                              <Button mnemonicParsing="false" onAction="#sendPlan" prefWidth="130.0" text="Send Plan" GridPane.halignment="CENTER" GridPane.columnIndex="0" GridPane.rowIndex="2" />
+                              <Label text="Swing time (s)" GridPane.halignment="RIGHT" GridPane.columnIndex="1" GridPane.rowIndex="0" />
+                              <Label text="Transfer time (s)" GridPane.halignment="RIGHT" GridPane.columnIndex="1" GridPane.rowIndex="1" />
+                              <Label text="Swing height (m)" GridPane.halignment="RIGHT" GridPane.columnIndex="1" GridPane.rowIndex="2" />
+
+                              <Spinner fx:id="swingTimeSpinner" GridPane.columnIndex="2" GridPane.rowIndex="0" />
+                              <Spinner fx:id="transferTimeSpinner" GridPane.columnIndex="2" GridPane.rowIndex="1" />
+                              <Spinner fx:id="swingHeightSpinner" GridPane.columnIndex="2" GridPane.rowIndex="2" />
+
+                              <Button mnemonicParsing="false" onAction="#sendPlan" prefWidth="130.0" text="Send Plan" GridPane.halignment="CENTER" GridPane.columnIndex="0" GridPane.rowIndex="3" />
                           </GridPane>
                       </children></AnchorPane>
               </items>

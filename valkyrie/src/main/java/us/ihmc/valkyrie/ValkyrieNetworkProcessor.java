@@ -14,7 +14,7 @@ import us.ihmc.communication.configuration.NetworkParameters;
 public class ValkyrieNetworkProcessor
 {
    private static final DRCRobotModel model = new ValkyrieRobotModel(RobotTarget.REAL_ROBOT, true);
-
+   public static final boolean launchFootstepPlannerModule = true;
    
    public static void main(String[] args) throws URISyntaxException, JSAPException
    {
@@ -28,10 +28,11 @@ public class ValkyrieNetworkProcessor
       networkModuleParams.enableRobotEnvironmentAwerenessModule(false);
       networkModuleParams.enableKinematicsToolbox(true);
       networkModuleParams.enableKinematicsPlanningToolbox(true);
-      networkModuleParams.enableFootstepPlanningToolbox(true);
+      networkModuleParams.enableFootstepPlanningToolbox(launchFootstepPlannerModule);
       networkModuleParams.enableFootstepPlanningToolboxVisualizer(false);
       networkModuleParams.setEnableJoystickBasedStepping(true);
       networkModuleParams.enableBipedalSupportPlanarRegionPublisher(true);
+      networkModuleParams.enableWalkingPreviewToolbox(true);
 
 //      uncomment these for the sensors
       URI rosuri = NetworkParameters.getROSURI();
