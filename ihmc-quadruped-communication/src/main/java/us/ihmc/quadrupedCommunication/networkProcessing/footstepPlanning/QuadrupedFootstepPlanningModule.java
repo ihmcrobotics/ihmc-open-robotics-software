@@ -86,9 +86,11 @@ public class QuadrupedFootstepPlanningModule extends QuadrupedToolboxModule
    {
       Map<Class<? extends Settable<?>>, MessageTopicNameGenerator> messages = new HashMap<>();
 
-      MessageTopicNameGenerator controllerSubGenerator = QuadrupedControllerAPIDefinition.getSubscriberTopicNameGenerator(robotName);
-      messages.put(QuadrupedTimedStepListMessage.class, controllerSubGenerator);
-      messages.put(QuadrupedBodyOrientationMessage.class, controllerSubGenerator);
+      messages.put(QuadrupedFootstepPlanningToolboxOutputStatus.class, getPublisherTopicNameGenerator());
+      messages.put(QuadrupedBodyOrientationMessage.class, getPublisherTopicNameGenerator());
+      messages.put(BodyPathPlanMessage.class, getPublisherTopicNameGenerator());
+      messages.put(QuadrupedFootstepPlannerParametersPacket.class, getPublisherTopicNameGenerator());
+      messages.put(FootstepPlannerStatusMessage.class, getPublisherTopicNameGenerator());
 
       return messages;
    }
