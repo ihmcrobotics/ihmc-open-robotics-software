@@ -29,6 +29,11 @@ public class DataSetIOTools
    public static final String QUADRUPED_PLANNER_TAG = "quadruped_planner_status";
    public static final String QUADRUPED_TIMEOUT_TAG = "quadruped" + TIMEOUT_SUFFIX;
 
+   public static final String QUADRUPED_START_POSITION_TAG = "quadruped_" + START_POSITION_TAG;
+   public static final String QUADRUPED_GOAL_POSITION_TAG = "quadruped_" + GOAL_POSITION_TAG;
+   public static final String QUADRUPED_START_YAW_TAG = "quadruped_" + START_YAW_TAG;
+   public static final String QUADRUPED_GOAL_YAW_TAG = "quadruped_" + GOAL_YAW_TAG;
+
    public static final String TESTABLE_FLAG = "test";
    public static final String IN_DEVELOPMENT_FLAG = "dev";
 

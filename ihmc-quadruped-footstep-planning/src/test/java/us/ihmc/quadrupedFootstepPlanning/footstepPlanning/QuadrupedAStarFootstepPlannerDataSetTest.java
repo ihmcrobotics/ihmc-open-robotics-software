@@ -34,6 +34,7 @@ public class QuadrupedAStarFootstepPlannerDataSetTest extends FootstepPlannerDat
       return settings;
    }
 
+   @Override
    public QuadrupedBodyPathAndFootstepPlanner createPlanner()
    {
       YoVariableRegistry registry = new YoVariableRegistry("test");

@@ -234,8 +234,8 @@ public abstract class FootstepPlannerDataSetTest
       packPlanningRequest(dataset);
       String errorMessage = findPlanAndAssertGoodResult(dataset);
 
-      visualizePlan(planner.getPlan(), dataset.getPlanarRegionsList(), dataset.getPlannerInput().getStartPosition(),
-                    dataset.getPlannerInput().getGoalPosition());
+      visualizePlan(planner.getPlan(), dataset.getPlanarRegionsList(), dataset.getPlannerInput().getQuadrupedStartPosition(),
+                    dataset.getPlannerInput().getQuadrupedGoalPosition());
 
       return errorMessage;
    }
@@ -245,12 +245,14 @@ public abstract class FootstepPlannerDataSetTest
       PlannerInput plannerInput = dataset.getPlannerInput();
       FramePose3D startPose = new FramePose3D();
       FramePose3D goalPose = new FramePose3D();
+
       startPose.setPosition(plannerInput.getStartPosition());
       goalPose.setPosition(plannerInput.getGoalPosition());
-      if (plannerInput.hasStartOrientation())
-         startPose.setOrientation(new Quaternion(plannerInput.getStartYaw(), 0.0, 0.0));
-      if (plannerInput.hasGoalOrientation())
-         goalPose.setOrientation(new Quaternion(plannerInput.getGoalYaw(), 0.0, 0.0));
+
+      if(plannerInput.getHasQuadrupedStartYaw())
+         startPose.setOrientation(new Quaternion(plannerInput.getQuadrupedStartYaw(), 0.0, 0.0));
+      if(plannerInput.getHasQuadrupedGoalYaw())
+         goalPose.setOrientation(new Quaternion(plannerInput.getQuadrupedGoalYaw(), 0.0, 0.0));
 
       double timeMultiplier = ContinuousIntegrationTools.isRunningOnContinuousIntegrationServer() ? bambooTimeScaling : 1.0;
       double timeout = timeMultiplier * plannerInput.getQuadrupedTimeout();
@@ -292,7 +294,7 @@ public abstract class FootstepPlannerDataSetTest
       messager.submitMessage(FootstepPlannerMessagerAPI.FootstepPlanTopic, planner.getPlan());
 
       PlannerInput plannerInput = dataset.getPlannerInput();
-      String errorMessage = assertPlanIsValid(datasetName, planner.getPlan(), plannerInput.getGoalPosition(), plannerInput.getGoalYaw());
+      String errorMessage = assertPlanIsValid(datasetName, planner.getPlan(), plannerInput.getQuadrupedGoalPosition(), plannerInput.getQuadrupedGoalYaw());
 
       ThreadTools.sleep(1000);
       return errorMessage;

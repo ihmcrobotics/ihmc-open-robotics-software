@@ -130,11 +130,19 @@ public class PlannerInput
       return containsFlag(key) && additionalData.get(key).get(0).equals(value);
    }
 
-   private double getDoubleFlag(String key)
+   public double getDoubleFlag(String key)
    {
       if(!additionalData.containsKey(key))
          return Double.NaN;
       return Double.parseDouble(additionalData.get(key).get(0));
+   }
+
+   public Point3D getPositionFlag(String key)
+   {
+      if(!additionalData.containsKey(key))
+         return null;
+      List<String> values = additionalData.get(key);
+      return new Point3D(Double.parseDouble(values.get(0)), Double.parseDouble(values.get(1)), Double.parseDouble(values.get(2)));
    }
 
    public boolean hasStartOrientation()
@@ -151,5 +159,47 @@ public class PlannerInput
    HashMap<String, List<String>> getAdditionDataMap()
    {
       return additionalData;
+   }
+
+   public Point3D getQuadrupedStartPosition()
+   {
+      if(additionalData.containsKey(DataSetIOTools.QUADRUPED_START_POSITION_TAG))
+         return getPositionFlag(DataSetIOTools.QUADRUPED_START_POSITION_TAG);
+      else
+         return getStartPosition();
+   }
+
+   public Point3D getQuadrupedGoalPosition()
+   {
+      if(additionalData.containsKey(DataSetIOTools.QUADRUPED_GOAL_POSITION_TAG))
+         return getPositionFlag(DataSetIOTools.QUADRUPED_GOAL_POSITION_TAG);
+      else
+         return getGoalPosition();
+   }
+
+   public double getQuadrupedStartYaw()
+   {
+      if(additionalData.containsKey(DataSetIOTools.QUADRUPED_START_YAW_TAG))
+         return getDoubleFlag(DataSetIOTools.QUADRUPED_START_YAW_TAG);
+      else
+         return getStartYaw();
+   }
+
+   public double getQuadrupedGoalYaw()
+   {
+      if(additionalData.containsKey(DataSetIOTools.QUADRUPED_GOAL_YAW_TAG))
+         return getDoubleFlag(DataSetIOTools.QUADRUPED_GOAL_YAW_TAG);
+      else
+         return getGoalYaw();
+   }
+
+   public boolean getHasQuadrupedStartYaw()
+   {
+      return containsFlag(DataSetIOTools.QUADRUPED_START_YAW_TAG) || hasStartOrientation();
+   }
+
+   public boolean getHasQuadrupedGoalYaw()
+   {
+      return containsFlag(DataSetIOTools.QUADRUPED_GOAL_YAW_TAG) || hasGoalOrientation();
    }
 }

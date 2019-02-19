@@ -5,14 +5,11 @@ import javafx.fxml.FXML;
 import javafx.scene.control.TextField;
 import javafx.stage.DirectoryChooser;
 import javafx.stage.Window;
-import us.ihmc.commons.PrintTools;
 import us.ihmc.javaFXToolkit.messager.JavaFXMessager;
+import us.ihmc.pathPlanning.DataSetIOTools;
 import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.communication.FootstepPlannerMessagerAPI;
-import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.tools.FootstepPlannerIOTools;
 
 import java.io.File;
-import java.net.URISyntaxException;
-import java.net.URL;
 
 public class FootstepPlannerDataExporterAnchorPaneController
 {
@@ -26,20 +23,7 @@ public class FootstepPlannerDataExporterAnchorPaneController
 
    public FootstepPlannerDataExporterAnchorPaneController()
    {
-      File file = new File(".");
-
-      try
-      {
-         URL testDataFolderURL = Thread.currentThread().getContextClassLoader().getResource(FootstepPlannerIOTools.IN_DEVELOPMENT_TEST_DATA_URL);
-         file = new File(testDataFolderURL.toURI());
-      }
-      catch(URISyntaxException e)
-      {
-         PrintTools.error("Could not load test data folder with URL: " + FootstepPlannerIOTools.IN_DEVELOPMENT_TEST_DATA_URL);
-         e.printStackTrace();
-      }
-
-      defaultDataFolder = file;
+      this.defaultDataFolder = new File(DataSetIOTools.RESOURCES_DIRECTORY + File.separator + DataSetIOTools.DATA_SET_DIRECTORY_PATH);
    }
 
    public void setMainWindow(Window ownerWindow)
