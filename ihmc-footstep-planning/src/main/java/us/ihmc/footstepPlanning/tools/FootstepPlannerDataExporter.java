@@ -1,7 +1,5 @@
 package us.ihmc.footstepPlanning.tools;
 
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.atomic.AtomicReference;
 
@@ -13,13 +11,18 @@ import us.ihmc.euclid.tuple4D.interfaces.QuaternionReadOnly;
 import us.ihmc.footstepPlanning.FootstepPlannerType;
 import us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI;
 import us.ihmc.messager.Messager;
+import us.ihmc.pathPlanning.DataSet;
+import us.ihmc.pathPlanning.DataSetIOTools;
+import us.ihmc.pathPlanning.PlannerInput;
 import us.ihmc.robotEnvironmentAwareness.tools.ExecutorServiceTools;
 import us.ihmc.robotEnvironmentAwareness.tools.ExecutorServiceTools.ExceptionHandling;
+import us.ihmc.robotics.PlanarRegionFileTools;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 
 public class FootstepPlannerDataExporter
 {
    private final ExecutorService executor = ExecutorServiceTools.newSingleThreadScheduledExecutor(getClass(), ExceptionHandling.CANCEL_AND_REPORT);
+   public static final String TESTABLE_FLAG = "testStepPlanners";
 
    private final AtomicReference<PlanarRegionsList> planarRegionsState;
    private final AtomicReference<String> dataDirectoryPath;
@@ -91,11 +94,17 @@ public class FootstepPlannerDataExporter
          return;
       }
 
-      Path folderPath = Paths.get(dataDirectoryPath.get());
-      String datasetName = FootstepPlannerIOTools.createDefaultTimeStampedDatasetFolderName();
-      FootstepPlannerIOTools
-            .exportDataset(folderPath, datasetName, planarRegionData, startPosition, startOrientation, goalPosition, goalOrientation, footstepPlannerType,
-                           timeout);
+      DataSet dataSet = new DataSet(PlanarRegionFileTools.getDate() + "_DataSet", planarRegionData);
+      PlannerInput plannerInput = new PlannerInput();
+      plannerInput.setStartPosition(startPosition);
+      plannerInput.setGoalPosition(goalPosition);
+      plannerInput.setStartYaw(startOrientation.getYaw());
+      plannerInput.setGoalYaw(goalOrientation.getYaw());
+      plannerInput.addAdditionalData(TESTABLE_FLAG, "true");
+      plannerInput.addAdditionalData(plannerType.get().toString().toLowerCase() + "_timeout", Double.toString(timeout));
+      dataSet.setPlannerInput(plannerInput);
+
+      DataSetIOTools.exportDataSet(dataDirectoryPath.get(), dataSet);
    }
 
    public void stop()

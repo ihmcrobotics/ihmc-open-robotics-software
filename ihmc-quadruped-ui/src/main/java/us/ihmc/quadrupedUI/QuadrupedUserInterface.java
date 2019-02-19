@@ -24,6 +24,8 @@ import us.ihmc.quadrupedUI.uiControllers.XGaitSettingsController;
 import us.ihmc.tools.inputDevices.joystick.exceptions.JoystickNotFoundException;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 
+import static us.ihmc.quadrupedFootstepPlanning.footstepPlanning.communication.FootstepPlannerMessagerAPI.RobotConfigurationDataTopic;
+
 public class QuadrupedUserInterface
 {
    private final Stage primaryStage;
@@ -67,6 +69,8 @@ public class QuadrupedUserInterface
       Pane subScene = view3dFactory.getSubSceneWrappedInsidePane();
 
       robotVisualizer = new JavaFXQuadrupedVisualizer(messager, modelFactory);
+      messager.registerTopicListener(RobotConfigurationDataTopic, robotVisualizer::submitNewConfiguration);
+
 
       view3dFactory.addNodeToView(robotVisualizer.getRootNode());
 

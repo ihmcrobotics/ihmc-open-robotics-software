@@ -50,6 +50,10 @@ public class KinematicsToolboxConfigurationMessagePubSubType implements us.ihmc.
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);current_alignment += (100 * 4) + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
+
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
+
 
       return current_alignment - initial_alignment;
    }
@@ -78,6 +82,12 @@ public class KinematicsToolboxConfigurationMessagePubSubType implements us.ihmc.
       current_alignment += (data.getPrivilegedJointAngles().size() * 4) + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 
 
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
+
+
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
+
+
 
       return current_alignment - initial_alignment;
    }
@@ -96,6 +106,10 @@ public class KinematicsToolboxConfigurationMessagePubSubType implements us.ihmc.
       cdr.write_type_e(data.getPrivilegedJointAngles());else
           throw new RuntimeException("privileged_joint_angles field exceeds the maximum length");
 
+      cdr.write_type_6(data.getPrivilegedWeight());
+
+      cdr.write_type_6(data.getPrivilegedGain());
+
    }
 
    public static void read(controller_msgs.msg.dds.KinematicsToolboxConfigurationMessage data, us.ihmc.idl.CDR cdr)
@@ -106,6 +120,10 @@ public class KinematicsToolboxConfigurationMessagePubSubType implements us.ihmc.
       geometry_msgs.msg.dds.QuaternionPubSubType.read(data.getPrivilegedRootJointOrientation(), cdr);	
       cdr.read_type_e(data.getPrivilegedJointHashCodes());	
       cdr.read_type_e(data.getPrivilegedJointAngles());	
+      data.setPrivilegedWeight(cdr.read_type_6());
+      	
+      data.setPrivilegedGain(cdr.read_type_6());
+      	
 
    }
 
@@ -119,6 +137,8 @@ public class KinematicsToolboxConfigurationMessagePubSubType implements us.ihmc.
 
       ser.write_type_e("privileged_joint_hash_codes", data.getPrivilegedJointHashCodes());
       ser.write_type_e("privileged_joint_angles", data.getPrivilegedJointAngles());
+      ser.write_type_6("privileged_weight", data.getPrivilegedWeight());
+      ser.write_type_6("privileged_gain", data.getPrivilegedGain());
    }
 
    @Override
@@ -131,6 +151,8 @@ public class KinematicsToolboxConfigurationMessagePubSubType implements us.ihmc.
 
       ser.read_type_e("privileged_joint_hash_codes", data.getPrivilegedJointHashCodes());
       ser.read_type_e("privileged_joint_angles", data.getPrivilegedJointAngles());
+      data.setPrivilegedWeight(ser.read_type_6("privileged_weight"));
+      data.setPrivilegedGain(ser.read_type_6("privileged_gain"));
    }
 
    public static void staticCopy(controller_msgs.msg.dds.KinematicsToolboxConfigurationMessage src, controller_msgs.msg.dds.KinematicsToolboxConfigurationMessage dest)

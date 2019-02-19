@@ -28,6 +28,7 @@ import us.ihmc.simulationconstructionset.util.simulationTesting.SimulationTestin
 import us.ihmc.tools.MemoryTools;
 import us.ihmc.yoVariables.variable.YoDouble;
 
+@Tag("controller-api-2")
 public abstract class EndToEndNeckTrajectoryMessageTest implements MultiRobotTestInterface
 {
    private static boolean DEBUG = false;
