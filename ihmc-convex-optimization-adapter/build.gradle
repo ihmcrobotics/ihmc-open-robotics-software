@@ -21,7 +21,7 @@ mainDependencies {
 
    compile group: "us.ihmc", name: "IHMCOptimizerWrappers", version: "0.0.26"
    compile group: "us.ihmc", name: "ihmc-yovariables", version: "0.3.7"
-   compile group: "us.ihmc", name: "ihmc-commons", version: "0.25.2"
+   compile group: "us.ihmc", name: "ihmc-commons", version: "0.25.3"
    compile group: "us.ihmc", name: "ihmc-java-toolkit", version: "source"
    compile group: "us.ihmc", name: "ihmc-robotics-toolkit", version: "source"
 }
@@ -29,6 +29,6 @@ mainDependencies {
 testDependencies {
    compile group: "org.yaml", name: "snakeyaml", version: "1.13"
 
-   compile group: "us.ihmc", name: "ihmc-commons-testing", version: "0.25.2"
+   compile group: "us.ihmc", name: "ihmc-commons-testing", version: "0.25.3"
    compile group: "us.ihmc", name: "ihmc-robotics-toolkit-test", version: "source"
 }
