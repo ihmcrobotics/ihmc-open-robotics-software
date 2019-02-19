@@ -24,7 +24,7 @@ public class FootstepNodeCheckerOfCheckers extends FootstepNodeChecker
    }
 
    @Override
-   public boolean isNodeValid(FootstepNode node, FootstepNode previousNode)
+   public boolean isNodeValidInternal(FootstepNode node, FootstepNode previousNode)
    {
       for(FootstepNodeChecker checker : nodeCheckers)
       {

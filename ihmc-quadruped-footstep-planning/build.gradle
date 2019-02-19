@@ -13,6 +13,7 @@ ihmc {
 
 mainDependencies {
     compile group: "us.ihmc", name: "ihmc-quadruped-planning", version: "source"
+    compile group: "us.ihmc", name: "ihmc-path-planning-data-sets", version: "source"
 }
 
 testDependencies {
@@ -22,4 +23,8 @@ testDependencies {
 
 visualizersDependencies {
     compile ihmc.sourceSetProject("main")
+
+    compile group: "us.ihmc", name: "ihmc-robot-models-visualizers", version: "source"
+    compile group: "us.ihmc", name: "ihmc-path-planning-visualizers", version: "source"
+    compile group: "us.ihmc", name: "ihmc-quadruped-ui", version: "source"
 }

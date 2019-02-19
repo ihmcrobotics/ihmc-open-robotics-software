@@ -66,10 +66,10 @@ public class PlanarRegionTools
    }
 
    /**
-    * Projects the given point onto the planar region, returning the closest point on the region to
+    * Projects the given point in the world onto the planar region, returning the closest point in the world on the region to
     * the provided point.
     */
-   public static Point3D closestPointOnPlane(Point3DReadOnly point, PlanarRegion region)
+   public static Point3D closestPointOnPlane(Point3DReadOnly pointInWorld, PlanarRegion region)
    {
       RigidBodyTransform regionToWorld = new RigidBodyTransform();
       region.getTransformToWorld(regionToWorld);
@@ -81,7 +81,7 @@ public class PlanarRegionTools
       pointOnPlane.set(region.getConvexPolygon(0).getVertex(0));
       pointOnPlane.applyTransform(regionToWorld);
 
-      Point3D intersectionWithPlane = EuclidGeometryTools.intersectionBetweenLine3DAndPlane3D(pointOnPlane, planeNormal, point, planeNormal);
+      Point3D intersectionWithPlane = EuclidGeometryTools.intersectionBetweenLine3DAndPlane3D(pointOnPlane, planeNormal, pointInWorld, planeNormal);
       if (intersectionWithPlane == null)
       {
          return null;
@@ -112,7 +112,10 @@ public class PlanarRegionTools
     */
    public static Point3DReadOnly projectPointToPlanesVertically(Point3DReadOnly pointInWorld, PlanarRegionsList regions)
    {
-      return projectPointToPlanesVertically(pointInWorld, regions.getPlanarRegionsAsList());
+      if (regions == null)
+         return projectPointToPlanesVertically(pointInWorld, (List<PlanarRegion>) null);
+      else
+         return projectPointToPlanesVertically(pointInWorld, regions.getPlanarRegionsAsList());
    }
 
    /**
@@ -128,6 +131,9 @@ public class PlanarRegionTools
 
       Line3D verticalLine = new Line3D();
       verticalLine.set(pointInWorld, new Vector3D(0.0, 0.0, 1.0));
+
+      if (regions == null)
+         return null;
 
       for (PlanarRegion region : regions)
       {
@@ -402,9 +408,9 @@ public class PlanarRegionTools
    /**
     * Return true if the given point is contained inside the boundary.
     * https://stackoverflow.com/questions/8721406/how-to-determine-if-a-point-is-inside-a-2d-convex-polygon
-    * 
+    *
     * Also check https://en.wikipedia.org/wiki/Point_in_polygon.
-    * 
+    *
     * @param test The point to check
     * @return true if the point is inside the boundary, false otherwise
     *
@@ -727,11 +733,11 @@ public class PlanarRegionTools
    }
 
    /**
-    * Finds the minimum height between the convex hulls of two PlanarRegions when projected vertically. 
+    * Finds the minimum height between the convex hulls of two PlanarRegions when projected vertically.
     * It does this by projecting all the vertices of one of the convex hulls to the other PlanarRegion's plane vertically in world. It then finds the minimum distance of those projections.
     * Next it does the same thing for the other convex hull projected vertically onto the other region's plane. Finally, it takes the max of the two.
     * If one of the Planar Regions are vertical, such that the points of the other cannot be projected vertical on it, then that projection is ignored.
-    * 
+    *
     * @param regionA PlanarRegion to test height of points of its convex hull above the plane. Not modified.
     * @param regionB PlanarRegion that defines the plane that the points will be projected down onto. Not modified.
     * @return Minimum vertical projection of {@code regionA} vertices onto the plane of regionB. The returned value is negative if the lowest vertex is below {@code region B}.
@@ -776,7 +782,7 @@ public class PlanarRegionTools
 
       if (Double.isInfinite(minZOfAProjectedToB))
          return minZOfBProjectedToA;
-      
+
       if (Double.isInfinite(minZOfBProjectedToA))
          return minZOfAProjectedToB;
 
@@ -785,7 +791,7 @@ public class PlanarRegionTools
 
    /**
     * Projects a point in world frame vertically down or up onto a PlanarRegion and returns the intersection in world frame.
-    * 
+    *
     * @param pointInWorldToProjectInZ
     * @param planarRegion
     * @return the vertically projected point
@@ -1095,7 +1101,7 @@ public class PlanarRegionTools
    /**
     * Checks to see if regionA is above regionB in terms of not ever having to "step up" from regionA to regionB.
     * If regionA is above regionB, then regionB should not be able to be an obstacle of regionA.
-    * 
+    *
     * @param regionA PlanarRegion to check to see if it is above the other region.
     * @param regionB PlanarRegion to check to see if it is below the other region.
     * @param epsilon Margin of error. If epsilon is positive, then will still return true even if there are points in regionB higher than regionA by at most epsilon.
