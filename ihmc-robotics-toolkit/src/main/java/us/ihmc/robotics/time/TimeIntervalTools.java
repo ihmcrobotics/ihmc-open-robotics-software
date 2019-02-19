@@ -1,5 +1,6 @@
 package us.ihmc.robotics.time;
 
+import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 
@@ -144,6 +145,36 @@ public class TimeIntervalTools
             timeIntervalProviders.remove(i);
          }
       }
+   }
+
+   static public <T extends TimeIntervalProvider> List<T> removeAndReturnEndTimesLessThan(double time, List<T> timeIntervalProviders)
+   {
+      List<T> timeIntervalProvidersToRemove = new ArrayList<>();
+
+      for (int i = 0; i < timeIntervalProviders.size(); i++)
+      {
+         if (timeIntervalProviders.get(i).getTimeInterval().getEndTime() < time)
+         {
+            timeIntervalProvidersToRemove.add(timeIntervalProviders.get(i));
+         }
+      }
+
+      return timeIntervalProvidersToRemove;
+   }
+
+   static public <T extends TimeIntervalProvider> List<T> getIntervalsContainingTime(double time, List<T> timeIntervalProviders)
+   {
+      List<T> timeIntervalProvidersToRemove = new ArrayList<>();
+
+      for (int i = 0; i < timeIntervalProviders.size(); i++)
+      {
+         if (timeIntervalProviders.get(i).getTimeInterval().intervalContains(time))
+         {
+            timeIntervalProvidersToRemove.add(timeIntervalProviders.get(i));
+         }
+      }
+
+      return timeIntervalProvidersToRemove;
    }
 
    public static Comparator<TimeIntervalProvider> startTimeComparator = (TimeIntervalProvider a, TimeIntervalProvider b) -> {

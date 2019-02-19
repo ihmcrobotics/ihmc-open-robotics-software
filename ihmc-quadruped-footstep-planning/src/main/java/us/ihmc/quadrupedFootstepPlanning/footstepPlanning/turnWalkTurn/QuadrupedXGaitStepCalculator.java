@@ -141,7 +141,7 @@ public class QuadrupedXGaitStepCalculator
       computeOnlinePlan(currentTime);
    }
 
-   public List<? extends QuadrupedTimedStep> getSteps()
+   public List<QuadrupedTimedOrientedStep> getSteps()
    {
       return getCompleteStepSequence(timestamp.getDoubleValue());
    }
