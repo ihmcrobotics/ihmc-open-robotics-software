@@ -1,6 +1,6 @@
 package us.ihmc.quadrupedFootstepPlanning.footstepPlanning;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.communication.FootstepPlannerMessagerAPI;
 import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.graphSearch.QuadrupedAStarFootstepPlanner;
@@ -34,6 +34,7 @@ public class QuadrupedAStarFootstepPlannerDataSetTest extends FootstepPlannerDat
       return settings;
    }
 
+   @Override
    public QuadrupedBodyPathAndFootstepPlanner createPlanner()
    {
       YoVariableRegistry registry = new YoVariableRegistry("test");
@@ -52,17 +53,12 @@ public class QuadrupedAStarFootstepPlannerDataSetTest extends FootstepPlannerDat
       super.testDatasetsWithoutOcclusion();
    }
 
-   public static void main(String[] args) throws Exception
+   public static void main(String[] args)
    {
       QuadrupedAStarFootstepPlannerDataSetTest test = new QuadrupedAStarFootstepPlannerDataSetTest();
-      String prefix = "unitTestDataSets/test/";
       VISUALIZE = true;
       test.setup();
-      test.runAssertionsOnDataset(dataset -> test.runAssertions(dataset), prefix + "20171115_171243_SimplePlaneAndWall");
-//      if (activelyVisualize)
-//         test.visualizer.showAndSleep(true);
+      test.runAssertionsOnDataset(dataset -> test.runAssertions(dataset), "20171115_171243_SimplePlaneAndWall");
       ThreadTools.sleepForever();
-      test.tearDown();
-
    }
 }

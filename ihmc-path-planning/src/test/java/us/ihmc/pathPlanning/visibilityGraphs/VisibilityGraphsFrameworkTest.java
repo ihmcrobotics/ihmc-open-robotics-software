@@ -5,9 +5,14 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Random;
 import java.util.concurrent.atomic.AtomicReference;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import org.junit.jupiter.api.AfterEach;
+import us.ihmc.pathPlanning.DataSet;
+import us.ihmc.pathPlanning.DataSetIOTools;
+import us.ihmc.pathPlanning.PlannerInput;
+import us.ihmc.pathPlanning.visibilityGraphs.ui.controllers.DatasetNavigationAccordionController;
 import us.ihmc.robotics.Assert;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
@@ -16,8 +21,6 @@ import org.junit.jupiter.api.Test;
 import javafx.util.Pair;
 import us.ihmc.commons.MathTools;
 import us.ihmc.commons.thread.ThreadTools;
-import org.junit.jupiter.api.Tag;
-import org.junit.jupiter.api.Disabled;
 import us.ihmc.commons.ContinuousIntegrationTools;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.geometry.LineSegment3D;
@@ -35,9 +38,6 @@ import us.ihmc.javaFXToolkit.messager.JavaFXMessager;
 import us.ihmc.log.LogTools;
 import us.ihmc.pathPlanning.visibilityGraphs.interfaces.VisibilityGraphsParameters;
 import us.ihmc.pathPlanning.visibilityGraphs.tools.PlanarRegionTools;
-import us.ihmc.pathPlanning.visibilityGraphs.tools.VisibilityGraphsIOTools;
-import us.ihmc.pathPlanning.visibilityGraphs.tools.VisibilityGraphsIOTools.VisibilityGraphsUnitTestDataset;
-import us.ihmc.pathPlanning.visibilityGraphs.ui.VisibilityGraphsDataExporter;
 import us.ihmc.pathPlanning.visibilityGraphs.ui.messager.UIVisibilityGraphsTopics;
 import us.ihmc.robotEnvironmentAwareness.geometry.ConcaveHullDecomposition;
 import us.ihmc.robotics.geometry.PlanarRegion;
@@ -79,7 +79,7 @@ public class VisibilityGraphsFrameworkTest
    }
 
    @BeforeEach
-   public void setup() throws InterruptedException, Exception
+   public void setup()
    {
       VISUALIZE = VISUALIZE && !ContinuousIntegrationTools.isRunningOnContinuousIntegrationServer();
       DEBUG = (VISUALIZE || (DEBUG && !ContinuousIntegrationTools.isRunningOnContinuousIntegrationServer()));
@@ -105,7 +105,7 @@ public class VisibilityGraphsFrameworkTest
    }
 
    @Test
-   public void testDatasetsWithoutOcclusion() throws Exception
+   public void testDatasetsWithoutOcclusion()
    {
       if (VISUALIZE)
       {
@@ -119,7 +119,7 @@ public class VisibilityGraphsFrameworkTest
    //TODO: Fix and make this pass.
    @Disabled("This needs to be fixed for when start and goal are invalid.")
    @Test
-   public void testDatasetsNoOcclusionSimulateDynamicReplanning() throws Exception
+   public void testDatasetsNoOcclusionSimulateDynamicReplanning()
    {
       if (VISUALIZE)
       {
@@ -131,7 +131,7 @@ public class VisibilityGraphsFrameworkTest
    //TODO: Fix and make this pass.
    @Disabled("Occlusion planning needs to be implemented better.")
    @Test
-   public void testDatasetsSimulateOcclusionAndDynamicReplanning() throws Exception
+   public void testDatasetsSimulateOcclusionAndDynamicReplanning()
    {
       if (VISUALIZE)
       {
@@ -140,9 +140,15 @@ public class VisibilityGraphsFrameworkTest
       runAssertionsOnAllDatasets(dataset -> runAssertionsSimulateDynamicReplanning(dataset, 0.20, 1000, true));
    }
 
-   private void runAssertionsOnAllDatasets(DatasetTestRunner datasetTestRunner) throws Exception
+   private void runAssertionsOnAllDatasets(Function<DataSet, String> dataSetTester)
    {
-      List<VisibilityGraphsUnitTestDataset> allDatasets = VisibilityGraphsIOTools.loadAllDatasets(VisibilityGraphsDataExporter.class);
+      List<DataSet> allDatasets = DataSetIOTools.loadDataSets(dataSet ->
+                                                             {
+                                                                if(!dataSet.hasPlannerInput())
+                                                                   return false;
+                                                                else
+                                                                   return dataSet.getPlannerInput().getVisGraphIsTestable();
+                                                             });
 
       if (DEBUG)
       {
@@ -156,7 +162,7 @@ public class VisibilityGraphsFrameworkTest
 
       if (VISUALIZE)
       {
-         List<String> allDatasetNames = allDatasets.stream().map(VisibilityGraphsUnitTestDataset::getDatasetName).collect(Collectors.toList());
+         List<String> allDatasetNames = allDatasets.stream().map(DataSet::getName).collect(Collectors.toList());
          messager.submitMessage(UIVisibilityGraphsTopics.AllDatasetPaths, allDatasetNames);
 
          nextDatasetRequested = messager.createInput(UIVisibilityGraphsTopics.NextDatasetRequest, false);
@@ -174,25 +180,25 @@ public class VisibilityGraphsFrameworkTest
 
       // Randomizing the regionIds so the viz is better
       Random random = new Random(324);
-      allDatasets.stream().map(VisibilityGraphsUnitTestDataset::getPlanarRegionsList).map(PlanarRegionsList::getPlanarRegionsAsList)
+      allDatasets.stream().map(DataSet::getPlanarRegionsList).map(PlanarRegionsList::getPlanarRegionsAsList)
                  .forEach(regionsList -> regionsList.forEach(region -> region.setRegionId(random.nextInt())));
 
-      VisibilityGraphsUnitTestDataset dataset = allDatasets.get(currentDatasetIndex);
+      DataSet dataset = allDatasets.get(currentDatasetIndex);
 
       while (dataset != null)
       {
          if (VISUALIZE)
          {
             messager.submitMessage(UIVisibilityGraphsTopics.GlobalReset, true);
-            messager.submitMessage(UIVisibilityGraphsTopics.CurrentDatasetPath, dataset.getDatasetName());
+            messager.submitMessage(UIVisibilityGraphsTopics.CurrentDatasetPath, dataset.getName());
          }
 
          if (DEBUG)
          {
-            LogTools.info("Processing file: " + dataset.getDatasetName());
+            LogTools.info("Processing file: " + dataset.getName());
          }
 
-         String errorMessagesForCurrentFile = datasetTestRunner.testDataset(dataset);
+         String errorMessagesForCurrentFile = dataSetTester.apply(dataset);
          if (!errorMessagesForCurrentFile.isEmpty())
             numberOfFailingDatasets++;
          errorMessages += errorMessagesForCurrentFile;
@@ -204,7 +210,7 @@ public class VisibilityGraphsFrameworkTest
             messager.submitMessage(UIVisibilityGraphsTopics.PreviousDatasetRequest, false);
 
             while (!nextDatasetRequested.get() && !reloadDatasetRequested.get() && !previousDatasetRequested.get()
-                  && dataset.getDatasetName().equals(requestedDatasetPathReference.get()))
+                  && dataset.getName().equals(requestedDatasetPathReference.get()))
             {
                if (!messager.isMessagerOpen())
                   return; // The ui has been closed
@@ -229,7 +235,7 @@ public class VisibilityGraphsFrameworkTest
             else if (requestedDatasetPathReference.get() != null)
             {
                String path = requestedDatasetPathReference.get();
-               VisibilityGraphsUnitTestDataset requestedDataset = allDatasets.stream().filter(d -> d.getDatasetName().equals(path)).findFirst().orElse(null);
+               DataSet requestedDataset = allDatasets.stream().filter(d -> d.getName().equals(path)).findFirst().orElse(null);
                if (requestedDataset == null)
                {
                   LogTools.error("Could not find the requested dataset with name: " + path);
@@ -261,9 +267,9 @@ public class VisibilityGraphsFrameworkTest
                         errorMessages.isEmpty());
    }
 
-   private void runAssertionsOnDataset(DatasetTestRunner datasetTestRunner, String datasetname) throws Exception
+   private void runAssertionsOnDataset(Function<DataSet, String> dataSetTester, String datasetname)
    {
-      List<VisibilityGraphsUnitTestDataset> allDatasets = VisibilityGraphsIOTools.loadAllDatasets(VisibilityGraphsDataExporter.class);
+      List<DataSet> allDatasets = DataSetIOTools.loadDataSets();
 
       if (DEBUG)
       {
@@ -272,7 +278,7 @@ public class VisibilityGraphsFrameworkTest
 
       if (VISUALIZE)
       {
-         List<String> allDatasetNames = allDatasets.stream().map(VisibilityGraphsUnitTestDataset::getDatasetName).collect(Collectors.toList());
+         List<String> allDatasetNames = allDatasets.stream().map(DataSet::getName).collect(Collectors.toList());
          messager.submitMessage(UIVisibilityGraphsTopics.AllDatasetPaths, allDatasetNames);
 
       }
@@ -282,36 +288,37 @@ public class VisibilityGraphsFrameworkTest
 
       // Randomizing the regionIds so the viz is better
       Random random = new Random(324);
-      allDatasets.stream().map(VisibilityGraphsUnitTestDataset::getPlanarRegionsList).map(PlanarRegionsList::getPlanarRegionsAsList)
+      allDatasets.stream().map(DataSet::getPlanarRegionsList).map(PlanarRegionsList::getPlanarRegionsAsList)
                  .forEach(regionsList -> regionsList.forEach(region -> region.setRegionId(random.nextInt())));
 
-      VisibilityGraphsUnitTestDataset dataset = allDatasets.stream().filter(d -> d.getDatasetName().equals(datasetname)).findFirst().orElse(null);
+      DataSet dataset = allDatasets.stream().filter(d -> d.getName().equals(datasetname)).findFirst().orElse(null);
 
       if (VISUALIZE)
       {
          messager.submitMessage(UIVisibilityGraphsTopics.GlobalReset, true);
-         messager.submitMessage(UIVisibilityGraphsTopics.CurrentDatasetPath, dataset.getDatasetName());
+         messager.submitMessage(UIVisibilityGraphsTopics.CurrentDatasetPath, dataset.getName());
       }
 
       if (DEBUG)
       {
-         LogTools.info("Processing file: " + dataset.getDatasetName());
+         LogTools.info("Processing file: " + dataset.getName());
       }
 
-      String errorMessages = datasetTestRunner.testDataset(dataset);
+      String errorMessages = dataSetTester.apply(dataset);
 
       Assert.assertTrue("Errors: " + errorMessages, errorMessages.isEmpty());
       ThreadTools.sleepForever(); // Apparently need to give some time for the prints to appear in the right order.
    }
 
-   private String runAssertionsWithoutOcclusion(VisibilityGraphsUnitTestDataset dataset)
+   private String runAssertionsWithoutOcclusion(DataSet dataset)
    {
-      String datasetName = dataset.getDatasetName();
+      String datasetName = dataset.getName();
 
       PlanarRegionsList planarRegionsList = dataset.getPlanarRegionsList();
 
-      Point3D start = dataset.getStart();
-      Point3D goal = dataset.getGoal();
+      PlannerInput plannerInput = dataset.getPlannerInput();
+      Point3D start = plannerInput.getStartPosition();
+      Point3D goal = plannerInput.getGoalPosition();
 
       if (VISUALIZE)
       {
@@ -325,15 +332,16 @@ public class VisibilityGraphsFrameworkTest
       return addPrefixToErrorMessages(datasetName, errorMessages);
    }
 
-   private String runAssertionsSimulateDynamicReplanning(VisibilityGraphsUnitTestDataset dataset, double walkerSpeed, long maxSolveTimeInMilliseconds,
+   private String runAssertionsSimulateDynamicReplanning(DataSet dataset, double walkerSpeed, long maxSolveTimeInMilliseconds,
                                                          boolean simulateOcclusions)
    {
-      String datasetName = dataset.getDatasetName();
+      String datasetName = dataset.getName();
 
       PlanarRegionsList planarRegionsList = dataset.getPlanarRegionsList();
 
-      Point3D start = dataset.getStart();
-      Point3D goal = dataset.getGoal();
+      PlannerInput plannerInput = dataset.getPlannerInput();
+      Point3D start = plannerInput.getStartPosition();
+      Point3D goal = plannerInput.getGoalPosition();
       AtomicReference<Boolean> stopWalkerRequest = null;
 
       if (VISUALIZE)
@@ -744,17 +752,12 @@ public class VisibilityGraphsFrameworkTest
       return !condition ? "\n" + message : "";
    }
 
-   private static interface DatasetTestRunner
-   {
-      String testDataset(VisibilityGraphsUnitTestDataset dataset);
-   }
-
    public static void main(String[] args) throws Exception
    {
       VisibilityGraphsFrameworkTest test = new VisibilityGraphsFrameworkTest();
-      String prefix = "unitTestData/testable/";
+      String dataSetName = "20171218_204953_FlatGroundWithWall";
       test.setup();
-      test.runAssertionsOnDataset(dataset -> test.runAssertionsWithoutOcclusion(dataset), prefix + "20171218_204953_FlatGroundWithWall");
+      test.runAssertionsOnDataset(dataset -> test.runAssertionsWithoutOcclusion(dataset), dataSetName);
       test.tearDown();
 
    }

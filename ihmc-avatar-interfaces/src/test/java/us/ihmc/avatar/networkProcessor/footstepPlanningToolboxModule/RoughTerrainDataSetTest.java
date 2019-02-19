@@ -40,7 +40,6 @@ import us.ihmc.footstepPlanning.graphSearch.parameters.DefaultFootstepPlanningPa
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParameters;
 import us.ihmc.footstepPlanning.testTools.PlannerTestEnvironments;
 import us.ihmc.footstepPlanning.testTools.PlannerTestEnvironments.*;
-import us.ihmc.footstepPlanning.tools.FootstepPlannerIOTools.FootstepPlannerUnitTestDataset;
 import us.ihmc.footstepPlanning.tools.FootstepPlannerMessageTools;
 import us.ihmc.footstepPlanning.tools.PlannerTools;
 import us.ihmc.footstepPlanning.ui.ApplicationRunner;
@@ -657,11 +656,6 @@ public abstract class RoughTerrainDataSetTest
          ThreadTools.sleep(10);
 
       return errorMessage;
-   }
-
-   protected static interface DatasetTestRunner
-   {
-      String testDataset(FootstepPlannerUnitTestDataset dataset);
    }
 
    protected static interface ConditionChecker
