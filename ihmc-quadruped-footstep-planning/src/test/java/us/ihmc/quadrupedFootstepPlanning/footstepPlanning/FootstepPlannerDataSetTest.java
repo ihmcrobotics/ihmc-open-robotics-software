@@ -3,10 +3,10 @@ package us.ihmc.quadrupedFootstepPlanning.footstepPlanning;
 import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.stage.Stage;
-import org.junit.Test;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
 import us.ihmc.commons.ContinuousIntegrationTools;
 import us.ihmc.commons.Conversions;
 import us.ihmc.commons.MathTools;
@@ -159,7 +159,9 @@ public abstract class FootstepPlannerDataSetTest
       runAssertionsOnAllDatasets(this::runAssertions, dataSets);
    }
 
-   @Disabled @Test public void testDatasetsWithoutOcclusionInDevelopment()
+   @Disabled
+   @Test
+   public void testDatasetsWithoutOcclusionInDevelopment()
    {
       List<DataSet> dataSets = DataSetIOTools.loadDataSets(dataSet ->
                                                            {
