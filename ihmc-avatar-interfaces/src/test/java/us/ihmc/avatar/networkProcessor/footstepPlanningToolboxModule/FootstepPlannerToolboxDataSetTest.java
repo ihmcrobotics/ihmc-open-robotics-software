@@ -192,9 +192,10 @@ public abstract class FootstepPlannerToolboxDataSetTest
    {
       List<DataSet> dataSets = DataSetIOTools.loadDataSets(dataset ->
                                                            {
-                                                              if(!dataset.hasPlannerInput())
+                                                              if (!dataset.hasPlannerInput())
                                                                  return false;
-                                                              return dataset.getPlannerInput().containsFlag(getTimeoutFlag());
+                                                              return dataset.getPlannerInput().getStepPlannerIsTestable() && dataset.getPlannerInput()
+                                                                                                                                    .containsFlag(getTimeoutFlag());
                                                            });
       runAssertionsOnAllDatasets(this::runAssertions, dataSets);
    }
