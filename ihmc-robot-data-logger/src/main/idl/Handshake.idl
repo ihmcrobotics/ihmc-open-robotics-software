@@ -70,7 +70,14 @@ module robotDataLogger{
 		AppearanceDefinitionMessage appearance;
 		string listName;
 	};
-	
+
+	struct ReferenceFrameInformation
+	{
+		sequence<unsigned short, 1024> frameVariables
+		sequence<unsigned long, 1024> frameIndeces
+		sequence<string, 1024> frameNames
+	}
+
 	struct EnumType
 	{
 		string name;
@@ -93,6 +100,7 @@ module robotDataLogger{
 		sequence<GraphicObjectMessage, 2048> graphicObjects;
 		sequence<GraphicObjectMessage, 2048> artifacts;
 		sequence<EnumType, 1024> enumTypes;
+		ReferenceFrameInformation referenceFrameInformation
 		Summary summary;
 	};
 
