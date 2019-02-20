@@ -40,6 +40,7 @@ import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.SimulationConstructionSetParameters;
 import us.ihmc.simulationconstructionset.gui.SimulationOverheadPlotter;
 import us.ihmc.simulationconstructionset.gui.tools.SimulationOverheadPlotterFactory;
+import us.ihmc.simulationconstructionset.util.AdditionalPanelTools;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoVariable;
 
@@ -213,7 +214,7 @@ public class LogVisualizer
       YoVariableLogVisualizerGUI gui = new YoVariableLogVisualizerGUI(selectedFile, logProperties, players, parser, robot, scs);
       scs.getStandardSimulationGUI().addJComponentToMainPanel(gui, BorderLayout.SOUTH);
 
-      SCSVisualizer.setupFramePanel(scs, parser.getFrameIndexMap());
+      AdditionalPanelTools.setupFramePanel(scs, parser.getFrameIndexMap()::getReferenceFrame, SCSVisualizer.createFrameFilter());
 
 //      ErrorPanel errorPanel = new ErrorPanel(scs.getRootRegistry());
 //      scs.getStandardSimulationGUI().addJComponentToMainPanel(errorPanel,  BorderLayout.EAST);

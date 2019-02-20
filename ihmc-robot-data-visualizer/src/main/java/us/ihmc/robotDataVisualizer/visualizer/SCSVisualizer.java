@@ -3,10 +3,10 @@ package us.ihmc.robotDataVisualizer.visualizer;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.IOException;
-import java.lang.reflect.Field;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.Predicate;
 
 import javax.swing.AbstractButton;
 import javax.swing.JButton;
@@ -19,8 +19,6 @@ import org.apache.commons.lang3.StringUtils;
 import gnu.trove.map.hash.TObjectDoubleHashMap;
 import us.ihmc.commons.Conversions;
 import us.ihmc.commons.MathTools;
-import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.graphicsDescription.graphInterfaces.SelectedVariableHolder;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphic;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsList;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
@@ -40,13 +38,12 @@ import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.simulationconstructionset.RobotFromDescription;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.SimulationConstructionSetParameters;
-import us.ihmc.simulationconstructionset.gui.StandardSimulationGUI;
 import us.ihmc.simulationconstructionset.gui.tools.SimulationOverheadPlotterFactory;
+import us.ihmc.simulationconstructionset.util.AdditionalPanelTools;
 import us.ihmc.yoVariables.dataBuffer.DataBuffer;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoLong;
 import us.ihmc.yoVariables.variable.YoVariable;
-import us.ihmc.yoVariables.variable.frameObjects.FrameIndexMap;
 
 /**
  * Main entry point for the visualizer. 
@@ -422,56 +419,15 @@ public class SCSVisualizer implements YoVariablesUpdatedListener, ExitActionList
          });
       }
 
-      setupFramePanel(scs, handshakeParser.getFrameIndexMap());
+      AdditionalPanelTools.setupFramePanel(scs, handshakeParser.getFrameIndexMap()::getReferenceFrame, createFrameFilter());
 
       new Thread(scs, "SCSVisualizer").start();
    }
 
-   public static void setupFramePanel(SimulationConstructionSet scs, FrameIndexMap frameIndexMap)
+   public static Predicate<YoVariable<?>> createFrameFilter()
    {
-      JLabel frameNameLabel = new JLabel();
-      scs.addExtraJpanel(frameNameLabel, "Frame Information", false);
-      updateFrameLabel(frameIndexMap, frameNameLabel, null);
-      try
-      {
-         Field declaredField = StandardSimulationGUI.class.getDeclaredField("selectedVariableHolder");
-         declaredField.setAccessible(true);
-         SelectedVariableHolder holder = (SelectedVariableHolder) declaredField.get(scs.getStandardSimulationGUI());
-         holder.addChangeListener(e -> {
-            YoVariable<?> variable = holder.getSelectedVariable();
-            updateFrameLabel(frameIndexMap, frameNameLabel, variable);
-         });
-      }
-      catch (Exception e)
-      {
-         e.printStackTrace();
-      }
+      return v -> v instanceof YoLong && StringUtils.containsIgnoreCase(v.getName(), "frame");
    }
-
-   private static void updateFrameLabel(FrameIndexMap frameIndexMap, JLabel frameNameLabel, YoVariable<?> variable)
-   {
-      if (variable == null)
-      {
-         frameNameLabel.setText("No variable selected.");
-         return;
-      }
-
-      String text = "Not a frame.";
-      if (variable instanceof YoLong && StringUtils.containsIgnoreCase(variable.getName(), "frame"))
-      {
-         ReferenceFrame frame = frameIndexMap.getReferenceFrame(variable.getValueAsLongBits());
-         if (frame != null)
-         {
-            text = frame.getName();
-         }
-         else
-         {
-            text = "Unknown Frame";
-         }
-      }
-      frameNameLabel.setText("<html>" + variable.getName() + "<br/>" + text);
-   }
-
 
    @Override
    public void starting(SimulationConstructionSet scs, Robot robot, YoVariableRegistry registry)
