@@ -152,7 +152,7 @@ public class ValkyrieSensorSuiteManager implements DRCSensorSuiteManager
             neckFrame.getTransformToDesiredFrame(transformFromNeckToWorld, ReferenceFrame.getWorldFrame());
 
             transformFromNeckToWorld.multiply(transformFromHeadToNeck);
-            pointCloudDataToTransformToWorld.setTransform(transformFromNeckToWorld);
+            pointCloudDataToTransformToWorld.applyTransform(transformFromNeckToWorld);
 
          }
       };

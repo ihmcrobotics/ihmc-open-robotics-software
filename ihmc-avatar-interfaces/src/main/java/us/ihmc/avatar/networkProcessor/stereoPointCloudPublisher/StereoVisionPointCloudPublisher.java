@@ -1,7 +1,7 @@
 package us.ihmc.avatar.networkProcessor.stereoPointCloudPublisher;
 
-import java.awt.Color;
 import java.net.URI;
+import java.util.Arrays;
 import java.util.Random;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
@@ -26,6 +26,7 @@ import us.ihmc.ros2.Ros2Node;
 import us.ihmc.sensorProcessing.communication.producers.RobotConfigurationDataBuffer;
 import us.ihmc.utilities.ros.RosMainNode;
 import us.ihmc.utilities.ros.subscriber.RosPointCloudSubscriber;
+import us.ihmc.utilities.ros.subscriber.RosPointCloudSubscriber.UnpackedPointCloud;
 
 public class StereoVisionPointCloudPublisher
 {
@@ -37,7 +38,7 @@ public class StereoVisionPointCloudPublisher
    private final String name = getClass().getSimpleName();
    private final ScheduledExecutorService executorService = Executors.newSingleThreadScheduledExecutor(ThreadTools.getNamedThreadFactory(name));
 
-   private final AtomicReference<ColorPointCloudData> pointCloudDataToPublish = new AtomicReference<>(null);
+   private final AtomicReference<PointCloud2> rosPointCloud2ToPublish = new AtomicReference<>(null);
 
    private final String robotName;
    private final FullHumanoidRobotModel fullRobotModel;
@@ -100,15 +101,10 @@ public class StereoVisionPointCloudPublisher
          @Override
          public void onNewMessage(PointCloud2 pointCloud)
          {
-            UnpackedPointCloud pointCloudData = unpackPointsAndIntensities(pointCloud);
-            Point3D[] scanPoints = pointCloudData.getPoints();
-            Color[] colors = pointCloudData.getPointColors();
-            long timestamp = pointCloud.getHeader().getStamp().totalNsecs();
+            rosPointCloud2ToPublish.set(pointCloud);
 
             if (Debug)
-               System.out.println("Receiving point cloud, n points: " + scanPoints.length);
-
-            pointCloudDataToPublish.set(new ColorPointCloudData(timestamp, scanPoints, colors));
+               System.out.println("Receiving point cloud, n points: " + pointCloud.getHeight() * pointCloud.getWidth());
          }
       };
    }
@@ -122,9 +118,12 @@ public class StereoVisionPointCloudPublisher
          @Override
          public void run()
          {
-            ColorPointCloudData pointCloudData = pointCloudDataToPublish.getAndSet(null);
-            if (pointCloudData == null)
+            PointCloud2 pointCloud2 = rosPointCloud2ToPublish.getAndSet(null);
+
+            if (pointCloud2 == null)
                return;
+
+            ColorPointCloudData pointCloudData = new ColorPointCloudData(pointCloud2, MAX_NUMBER_OF_POINTS);
 
             long robotTimestamp;
 
@@ -150,7 +149,7 @@ public class StereoVisionPointCloudPublisher
             else if (!stereoVisionPointsFrame.isWorldFrame())
             {
                stereoVisionPointsFrame.getTransformToDesiredFrame(transformToWorld, worldFrame);
-               pointCloudData.setTransform(transformToWorld);
+               pointCloudData.applyTransform(transformToWorld);
             }
 
             StereoVisionPointCloudMessage message = pointCloudData.createStereoVisionPointCloudMessage(MAX_NUMBER_OF_POINTS);
@@ -164,19 +163,38 @@ public class StereoVisionPointCloudPublisher
    public class ColorPointCloudData
    {
       private final long timestamp;
+      private final int numberOfPoints;
       private final Point3D[] pointCloud;
       private final int[] colors;
-      private RigidBodyTransform transform = new RigidBodyTransform();
 
-      public ColorPointCloudData(long timestamp, Point3D[] pointCloud, Color[] colors)
+      public ColorPointCloudData(PointCloud2 rosPointCloud2, int maxSize)
       {
-         this.timestamp = timestamp;
-         this.pointCloud = pointCloud;
-         this.colors = new int[colors.length];
+         timestamp = rosPointCloud2.getHeader().getStamp().totalNsecs();
 
-         for (int i = 0; i < colors.length; i++)
+         UnpackedPointCloud unpackPointsAndIntensities = RosPointCloudSubscriber.unpackPointsAndIntensities(rosPointCloud2);
+         pointCloud = unpackPointsAndIntensities.getPoints();
+         colors = unpackPointsAndIntensities.getPointColorsRGB();
+
+         if (unpackPointsAndIntensities.getPoints().length <= maxSize)
          {
-            this.getColors()[i] = colors[i].getRGB();
+            numberOfPoints = pointCloud.length;
+         }
+         else
+         {
+            Random random = new Random();
+            int currentSize = pointCloud.length;
+
+            while (currentSize > maxSize)
+            {
+               int nextToRemove = random.nextInt(currentSize);
+               pointCloud[nextToRemove] = pointCloud[currentSize - 1];
+               colors[nextToRemove] = colors[currentSize - 1];
+               pointCloud[currentSize - 1] = null;
+               colors[currentSize - 1] = -1;
+
+               currentSize--;
+            }
+            numberOfPoints = maxSize;
          }
       }
 
@@ -192,26 +210,14 @@ public class StereoVisionPointCloudPublisher
 
       public StereoVisionPointCloudMessage createStereoVisionPointCloudMessage(int maximumSize)
       {
-         int numberOfPoints = pointCloud.length;
-
-         Random random = new Random();
-         while (numberOfPoints > maximumSize)
-         {
-            int indexToRemove = random.nextInt(numberOfPoints);
-            int lastIndex = numberOfPoints - 1;
-
-            pointCloud[indexToRemove] = pointCloud[lastIndex];
-            colors[indexToRemove] = colors[lastIndex];
-
-            numberOfPoints--;
-         }
-
-         for (int i = 0; i < numberOfPoints; i++)
-            this.transform.transform(pointCloud[i]);
-
          long timestamp = this.timestamp;
          float[] pointCloudBuffer = new float[3 * numberOfPoints];
-         int[] colorsInteger = new int[numberOfPoints];
+         int[] colorsInteger;
+
+         if (colors.length == numberOfPoints)
+            colorsInteger = colors;
+         else
+            colorsInteger = Arrays.copyOf(colors, numberOfPoints);
 
          for (int i = 0; i < numberOfPoints; i++)
          {
@@ -220,16 +226,17 @@ public class StereoVisionPointCloudPublisher
             pointCloudBuffer[3 * i + 0] = (float) scanPoint.getX();
             pointCloudBuffer[3 * i + 1] = (float) scanPoint.getY();
             pointCloudBuffer[3 * i + 2] = (float) scanPoint.getZ();
-
-            colorsInteger[i] = colors[i];
          }
 
          return MessageTools.createStereoVisionPointCloudMessage(timestamp, pointCloudBuffer, colorsInteger);
       }
 
-      public void setTransform(RigidBodyTransform transform)
+      public void applyTransform(RigidBodyTransform transform)
       {
-         this.transform.set(transform);
+         for (Point3D point : pointCloud)
+         {
+            point.applyTransform(transform);
+         }
       }
    }
 
