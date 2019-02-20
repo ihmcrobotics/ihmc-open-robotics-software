@@ -1,22 +1,20 @@
-package us.ihmc.humanoidBehaviors.ui.controllers;
+package us.ihmc.humanoidBehaviors.ui.behaviors;
 
 import controller_msgs.msg.dds.GoHomeMessage;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
+import javafx.scene.paint.Color;
 import us.ihmc.communication.controllerAPI.RobotLowLevelMessenger;
-import us.ihmc.euclid.geometry.ConvexPolygon2D;
-import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.humanoidBehaviors.ui.BehaviorUI;
-import us.ihmc.humanoidBehaviors.ui.BehaviorUI.API;
-import us.ihmc.humanoidBehaviors.ui.editors.SnappedPositionEditor;
+import us.ihmc.humanoidBehaviors.ui.SimpleMessagerAPIFactory;
+import us.ihmc.humanoidBehaviors.ui.graphics.SnappedPositionGraphic;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.javaFXToolkit.messager.JavaFXMessager;
 import us.ihmc.log.LogTools;
+import us.ihmc.messager.MessagerAPIFactory.MessagerAPI;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
-import us.ihmc.robotics.geometry.PlanarRegion;
-import us.ihmc.robotics.geometry.PlanarRegionsList;
 
-public class PatrolUIController
+public class PatrolBehaviorUIController extends FXUIBehavior
 {
    @FXML private Button homeAll;
    @FXML private Button freeze;
@@ -33,12 +31,27 @@ public class PatrolUIController
 
    private HumanoidReferenceFrames humanoidReferenceFrames;
 
-   public void attachMessager(JavaFXMessager messager)
+   private SnappedPositionGraphic waypointOneGraphic;
+   private SnappedPositionGraphic waypointTwoGraphic;
+
+   public PatrolBehaviorUIController()
+   {
+      // created by JavaFX
+   }
+
+   /**
+    * Nece
+    * @param messager
+    */
+   public void init(JavaFXMessager messager)
    {
       this.messager = messager;
 
-//      messager.bindPropertyToTopic(API.ActiveEditor, placeWaypointA.disableProperty());
-//      messager.bindPropertyToTopic(BehaviorUIMessagerAPI.EditModeEnabledTopic, placeWaypointB.disableProperty());
+      waypointOneGraphic = new SnappedPositionGraphic(messager, Color.GREEN);
+      waypointTwoGraphic = new SnappedPositionGraphic(messager, Color.YELLOW);
+
+      registerGraphic(waypointOneGraphic);
+      registerGraphic(waypointTwoGraphic);
    }
 
    public void setFullRobotModel(FullHumanoidRobotModel fullHumanoidRobotModel)
@@ -104,32 +117,26 @@ public class PatrolUIController
 
    @FXML public void placeWaypointA()
    {
-//      messager.submitMessage(BehaviorUIMessagerAPI.WaypointAPositionEditModeEnabledTopic, true);
-//      messager.submitMessage(BehaviorUIMessagerAPI.EditModeEnabledTopic, true);
       LogTools.debug("placeWaypointA");
-      messager.submitMessage(API.ActiveEditor, BehaviorUI.SNAPPED_POSITION_EDITOR);
-      messager.submitMessage(API.SelectedGraphic, BehaviorUI.waypointOneGraphic);
+      messager.submitMessage(BehaviorUI.API.ActiveEditor, BehaviorUI.SNAPPED_POSITION_EDITOR);
+      messager.submitMessage(BehaviorUI.API.SelectedGraphic, waypointOneGraphic);
    }
 
    @FXML public void placeWaypointB()
    {
-//      messager.submitMessage(BehaviorUIMessagerAPI.WaypointBPositionEditModeEnabledTopic, true);
-//      messager.submitMessage(BehaviorUIMessagerAPI.EditModeEnabledTopic, true);
-      messager.submitMessage(API.ActiveEditor, BehaviorUI.SNAPPED_POSITION_EDITOR);
-      messager.submitMessage(API.SelectedGraphic, BehaviorUI.waypointTwoGraphic);
+      LogTools.debug("placeWaypointB");
+      messager.submitMessage(BehaviorUI.API.ActiveEditor, BehaviorUI.SNAPPED_POSITION_EDITOR);
+      messager.submitMessage(BehaviorUI.API.SelectedGraphic, waypointTwoGraphic);
    }
 
-   private PlanarRegionsList buildFlatGround()
+   public static class API
    {
-      humanoidReferenceFrames.updateFrames();
-      RigidBodyTransform transformToWorld = humanoidReferenceFrames.getMidFeetZUpFrame().getTransformToWorldFrame();
-      ConvexPolygon2D convexPolygon = new ConvexPolygon2D();
-      convexPolygon.addVertex(10.0, 10.0);
-      convexPolygon.addVertex(-10.0, 10.0);
-      convexPolygon.addVertex(-10.0, -10.0);
-      convexPolygon.addVertex(10.0, -10.0);
-      convexPolygon.update();
-      PlanarRegion groundPlane = new PlanarRegion(transformToWorld, convexPolygon);
-      return new PlanarRegionsList(groundPlane);
+      private static final SimpleMessagerAPIFactory apiFactory = new SimpleMessagerAPIFactory(BehaviorUI.class);
+
+
+      public static final MessagerAPI create()
+      {
+         return apiFactory.getAPIAndCloseFactory();
+      }
    }
 }

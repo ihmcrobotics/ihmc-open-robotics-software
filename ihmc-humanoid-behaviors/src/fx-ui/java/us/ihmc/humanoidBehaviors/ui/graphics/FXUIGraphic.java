@@ -4,7 +4,6 @@ import javafx.animation.AnimationTimer;
 import javafx.collections.ObservableList;
 import javafx.scene.Group;
 import javafx.scene.Node;
-import us.ihmc.humanoidBehaviors.ui.editors.FXUIEditor;
 
 public abstract class FXUIGraphic extends AnimationTimer
 {
