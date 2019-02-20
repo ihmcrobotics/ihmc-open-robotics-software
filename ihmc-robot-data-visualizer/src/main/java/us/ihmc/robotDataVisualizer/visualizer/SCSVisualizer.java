@@ -422,10 +422,16 @@ public class SCSVisualizer implements YoVariablesUpdatedListener, ExitActionList
          });
       }
 
-      FrameIndexMap frameIndexMap = handshakeParser.getFrameIndexMap();
+      setupFramePanel(scs, handshakeParser.getFrameIndexMap());
+
+      new Thread(scs, "SCSVisualizer").start();
+   }
+
+   public static void setupFramePanel(SimulationConstructionSet scs, FrameIndexMap frameIndexMap)
+   {
       JLabel frameNameLabel = new JLabel();
       scs.addExtraJpanel(frameNameLabel, "Frame Information", false);
-      updateFrameLabel(frameIndexMap, frameNameLabel, registry.getVariable("t"));
+      updateFrameLabel(frameIndexMap, frameNameLabel, null);
       try
       {
          Field declaredField = StandardSimulationGUI.class.getDeclaredField("selectedVariableHolder");
@@ -440,12 +446,16 @@ public class SCSVisualizer implements YoVariablesUpdatedListener, ExitActionList
       {
          e.printStackTrace();
       }
-
-      new Thread(scs, "SCSVisualizer").start();
    }
 
    private static void updateFrameLabel(FrameIndexMap frameIndexMap, JLabel frameNameLabel, YoVariable<?> variable)
    {
+      if (variable == null)
+      {
+         frameNameLabel.setText("No variable selected.");
+         return;
+      }
+
       String text = "Not a frame.";
       if (variable instanceof YoLong && StringUtils.containsIgnoreCase(variable.getName(), "frame"))
       {
