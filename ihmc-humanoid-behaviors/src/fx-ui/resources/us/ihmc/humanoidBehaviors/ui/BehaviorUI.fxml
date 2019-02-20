@@ -12,10 +12,11 @@
 
                 <Tab text="Patrol">
                     <content>
-                        <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0" />
-                        <children>
-                            <fx:include fx:id="patrolUI" source="PatrolUI.fxml" />
-                        </children>
+                        <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0" >
+                            <children>
+                                <fx:include fx:id="patrolBehaviorUI" source="PatrolBehaviorUI.fxml" />
+                            </children>
+                        </AnchorPane>
                     </content>
                 </Tab>
 

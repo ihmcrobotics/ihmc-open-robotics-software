@@ -11,12 +11,11 @@ import javafx.stage.Stage;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.communication.controllerAPI.RobotLowLevelMessenger;
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParameters;
-import us.ihmc.humanoidBehaviors.ui.controllers.PatrolUIController;
+import us.ihmc.humanoidBehaviors.ui.behaviors.PatrolBehaviorUIController;
 import us.ihmc.humanoidBehaviors.ui.editors.FXUIEditor;
 import us.ihmc.humanoidBehaviors.ui.editors.SnappedPositionEditor;
 import us.ihmc.humanoidBehaviors.ui.graphics.FXUIGraphic;
 import us.ihmc.humanoidBehaviors.ui.graphics.PlanarRegionsGraphic;
-import us.ihmc.humanoidBehaviors.ui.graphics.SnappedPositionGraphic;
 import us.ihmc.javaFXToolkit.messager.JavaFXMessager;
 import us.ihmc.javaFXToolkit.scenes.View3DFactory;
 import us.ihmc.javaFXVisualizers.JavaFXRobotVisualizer;
@@ -41,15 +40,9 @@ public class BehaviorUI
    public static SnappedPositionEditor SNAPPED_POSITION_EDITOR;
 
    private final PlanarRegionsGraphic planarRegionsGraphic;
-   public static SnappedPositionGraphic waypointOneGraphic;
-   public static SnappedPositionGraphic waypointTwoGraphic;
-//   private final StartGoalPositionEditor startGoalEditor;
-//   private final StartGoalOrientationEditor orientationEditor;
-//   private final StartGoalPositionViewer startGoalPositionViewer;
-//   private final StartGoalOrientationViewer startGoalOrientationViewer;
    private final JavaFXRobotVisualizer robotVisualizer;
 
-   @FXML private PatrolUIController patrolUIController;
+   @FXML private PatrolBehaviorUIController patrolBehaviorUIController;
 
    public BehaviorUI(Stage primaryStage, JavaFXMessager messager, FootstepPlannerParameters plannerParameters, VisibilityGraphsParameters visibilityGraphsParameters, FullHumanoidRobotModelFactory fullHumanoidRobotModelFactory, RobotContactPointParameters<RobotSide> contactPointParameters, WalkingControllerParameters walkingControllerParameters) throws Exception
    {
@@ -62,7 +55,7 @@ public class BehaviorUI
 
       mainPane = loader.load();
 
-      patrolUIController.attachMessager(messager);
+      patrolBehaviorUIController.init(messager);
 
       View3DFactory view3dFactory = View3DFactory.createSubscene();
       view3dFactory.addCameraController(true);
@@ -84,21 +77,9 @@ public class BehaviorUI
 
       planarRegionsGraphic = new PlanarRegionsGraphic(messager);
       SNAPPED_POSITION_EDITOR = new SnappedPositionEditor(messager, subScene);
-      waypointOneGraphic = new SnappedPositionGraphic(messager, Color.GREEN);
-      waypointTwoGraphic = new SnappedPositionGraphic(messager, Color.YELLOW);
-//      startGoalPositionViewer = new StartGoalPositionViewer(messager, WaypointAPositionEditModeEnabledTopic, WaypointBPositionEditModeEnabledTopic,
-//                                                            WaypointAPositionTopic, LowLevelGoalPositionTopic, WaypointBPositionTopic);
-//      startGoalOrientationViewer = new StartGoalOrientationViewer(messager);
-//      startGoalEditor = new StartGoalPositionEditor(messager, subScene, WaypointAPositionEditModeEnabledTopic, WaypointBPositionEditModeEnabledTopic,
-//                                                    WaypointAPositionTopic, WaypointBPositionTopic, PlanarRegionDataTopic, SelectedRegionTopic,
-//                                                    WaypointAOrientationEditModeEnabledTopic, WaypointBOrientationEditModeEnabledTopic);
-//      orientationEditor = new StartGoalOrientationEditor(messager, view3dFactory.getSubScene());
 
       view3dFactory.addNodeToView(planarRegionsGraphic.getRoot());
-      view3dFactory.addNodeToView(waypointOneGraphic.getRoot());
-      view3dFactory.addNodeToView(waypointTwoGraphic.getRoot());
-//      view3dFactory.addNodeToView(startGoalPositionViewer.getRoot());
-//      view3dFactory.addNodeToView(startGoalOrientationViewer.getRoot());
+      view3dFactory.addNodeToView(patrolBehaviorUIController.getRoot());
 
       if(fullHumanoidRobotModelFactory == null)
       {
@@ -108,7 +89,7 @@ public class BehaviorUI
       {
          robotVisualizer = new JavaFXRobotVisualizer(fullHumanoidRobotModelFactory);
 //         messager.registerTopicListener(RobotConfigurationDataTopic, robotVisualizer::submitNewConfiguration);
-         patrolUIController.setFullRobotModel(robotVisualizer.getFullRobotModel());
+         patrolBehaviorUIController.setFullRobotModel(robotVisualizer.getFullRobotModel());
          view3dFactory.addNodeToView(robotVisualizer.getRootNode());
          robotVisualizer.start();
       }
@@ -116,12 +97,7 @@ public class BehaviorUI
       SNAPPED_POSITION_EDITOR.start();
 
       planarRegionsGraphic.start();
-      waypointOneGraphic.start();
-      waypointTwoGraphic.start();
-//      startGoalPositionViewer.start();
-//      startGoalOrientationViewer.start();
-//      startGoalEditor.start();
-//      orientationEditor.start();
+      patrolBehaviorUIController.start();
 
       mainPane.setCenter(subScene);
       primaryStage.setTitle(getClass().getSimpleName());
@@ -134,7 +110,7 @@ public class BehaviorUI
 
    public void setRobotLowLevelMessenger(RobotLowLevelMessenger robotLowLevelMessenger)
    {
-      patrolUIController.setRobotLowLevelMessenger(robotLowLevelMessenger);
+      patrolBehaviorUIController.setRobotLowLevelMessenger(robotLowLevelMessenger);
    }
 
    public void show()
@@ -147,12 +123,7 @@ public class BehaviorUI
       SNAPPED_POSITION_EDITOR.stop();
 
       planarRegionsGraphic.stop();
-      waypointOneGraphic.stop();
-      waypointTwoGraphic.stop();
-//      startGoalPositionViewer.stop();
-//      startGoalOrientationViewer.stop();
-//      startGoalEditor.stop();
-//      orientationEditor.stop();
+      patrolBehaviorUIController.stop();
 
       if(robotVisualizer != null)
          robotVisualizer.stop();
