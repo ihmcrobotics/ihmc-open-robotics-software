@@ -60,6 +60,7 @@ import us.ihmc.simulationconstructionset.gui.tools.SimulationOverheadPlotterFact
 import us.ihmc.simulationconstructionset.physics.collision.DefaultCollisionHandler;
 import us.ihmc.simulationconstructionset.physics.collision.HybridImpulseSpringDamperCollisionHandler;
 import us.ihmc.simulationconstructionset.physics.collision.simple.CollisionManager;
+import us.ihmc.simulationconstructionset.util.AdditionalPanelTools;
 import us.ihmc.tools.factories.FactoryTools;
 import us.ihmc.tools.factories.OptionalFactoryField;
 import us.ihmc.tools.factories.RequiredFactoryField;
@@ -167,7 +168,10 @@ public class AvatarSimulationFactory
 
       simulationConstructionSet = new SimulationConstructionSet(allSimulatedRobotList.toArray(new Robot[0]), guiInitialSetup.get().getGraphics3DAdapter(),
                                                                 simulationConstructionSetParameters);
-      SCSVisualizer.setupFramePanel(simulationConstructionSet, new FrameIndexMap.FrameIndexFinder(ReferenceFrame.getWorldFrame()));
+
+      FrameIndexMap.FrameIndexFinder frameIndexMap = new FrameIndexMap.FrameIndexFinder(ReferenceFrame.getWorldFrame());
+      AdditionalPanelTools.setupFramePanel(simulationConstructionSet, frameIndexMap::getReferenceFrame, SCSVisualizer.createFrameFilter());
+
       simulationConstructionSet.setDT(robotModel.get().getSimulateDT(), 1);
    }
 
