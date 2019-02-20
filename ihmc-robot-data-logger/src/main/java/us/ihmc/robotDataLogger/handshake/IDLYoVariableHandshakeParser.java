@@ -1,12 +1,23 @@
 package us.ihmc.robotDataLogger.handshake;
 
+import static gnu.trove.impl.Constants.DEFAULT_CAPACITY;
+import static gnu.trove.impl.Constants.DEFAULT_LOAD_FACTOR;
+import static us.ihmc.yoVariables.variable.frameObjects.FrameIndexMap.NO_ENTRY_KEY;
+
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
+import gnu.trove.map.TLongObjectMap;
+import gnu.trove.map.TObjectLongMap;
 import gnu.trove.map.hash.TIntIntHashMap;
+import gnu.trove.map.hash.TLongObjectHashMap;
+import gnu.trove.map.hash.TObjectLongHashMap;
 import us.ihmc.commons.PrintTools;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.tools.ReferenceFrameTools;
+import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.graphicsDescription.appearance.AppearanceDefinition;
 import us.ihmc.graphicsDescription.appearance.YoAppearanceRGBColor;
 import us.ihmc.graphicsDescription.color.MutableColor;
@@ -23,6 +34,7 @@ import us.ihmc.robotDataLogger.Handshake;
 import us.ihmc.robotDataLogger.HandshakeFileType;
 import us.ihmc.robotDataLogger.HandshakePubSubType;
 import us.ihmc.robotDataLogger.JointDefinition;
+import us.ihmc.robotDataLogger.ReferenceFrameInformation;
 import us.ihmc.robotDataLogger.YoRegistryDefinition;
 import us.ihmc.robotDataLogger.YoType;
 import us.ihmc.robotDataLogger.YoVariableDefinition;
@@ -42,6 +54,7 @@ import us.ihmc.yoVariables.variable.YoEnum;
 import us.ihmc.yoVariables.variable.YoInteger;
 import us.ihmc.yoVariables.variable.YoLong;
 import us.ihmc.yoVariables.variable.YoVariable;
+import us.ihmc.yoVariables.variable.frameObjects.FrameIndexMap;
 
 /**
  * Class to decode variable data from handshakes
@@ -109,6 +122,7 @@ public class IDLYoVariableHandshakeParser extends YoVariableHandshakeParser
 
       addJointStates(handshake);
       addGraphicObjects(handshake);
+      frameIndexMap = parseReferenceFrames(handshake);
 
       this.numberOfVariables = handshake.getVariables().size();
       this.numberOfJointStateVariables = getNumberOfJointStateVariables(handshake);
@@ -356,5 +370,44 @@ public class IDLYoVariableHandshakeParser extends YoVariableHandshakeParser
                                                                  graphicObjectMessage.getAppearance().getTransparency());
 
       return yoGraphicFromMessage(registrationID, name, vars, consts, appearance);
+   }
+
+   private static FrameIndexMap parseReferenceFrames(Handshake handshake)
+   {
+      ReferenceFrameInformation referenceFrameInformation = handshake.getReferenceFrameInformation();
+      TObjectLongMap<ReferenceFrame> frameToIndex = new TObjectLongHashMap<ReferenceFrame>(DEFAULT_CAPACITY, DEFAULT_LOAD_FACTOR, NO_ENTRY_KEY);
+      TLongObjectMap<ReferenceFrame> indexToframe = new TLongObjectHashMap<ReferenceFrame>(DEFAULT_CAPACITY, DEFAULT_LOAD_FACTOR, NO_ENTRY_KEY);
+      for (int i = 0; i < referenceFrameInformation.getFrameNames().size(); i++)
+      {
+         // TODO: one day we can actually fix this frame tree to match the controller, back the transforms by yo variables and have rviz kinda.
+         RigidBodyTransform transform = new RigidBodyTransform();
+
+         String name = referenceFrameInformation.getFrameNames().get(i).toString();
+         ReferenceFrame frame = ReferenceFrameTools.constructFrameWithUnchangingTransformToParent(name, ReferenceFrame.getWorldFrame(), transform);
+         long index = referenceFrameInformation.getFrameIndeces().get(i);
+         frameToIndex.put(frame, index);
+         indexToframe.put(index, frame);
+      }
+
+      return new FrameIndexMap()
+      {
+         @Override
+         public void put(ReferenceFrame referenceFrame)
+         {
+            throw new UnsupportedOperationException();
+         }
+
+         @Override
+         public ReferenceFrame getReferenceFrame(long frameIndex)
+         {
+            return indexToframe.get(frameIndex);
+         }
+
+         @Override
+         public long getFrameIndex(ReferenceFrame referenceFrame)
+         {
+            return frameToIndex.get(referenceFrame);
+         }
+      };
    }
 }

@@ -1,6 +1,7 @@
 package us.ihmc.robotDataLogger.handshake;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 
@@ -8,6 +9,8 @@ import org.apache.commons.lang3.NotImplementedException;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 
 import gnu.trove.map.hash.TObjectIntHashMap;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.tools.ReferenceFrameTools;
 import us.ihmc.graphicsDescription.plotting.artifact.Artifact;
 import us.ihmc.graphicsDescription.yoGraphics.RemoteYoGraphic;
 import us.ihmc.graphicsDescription.yoGraphics.RemoteYoGraphicFactory;
@@ -21,6 +24,7 @@ import us.ihmc.robotDataLogger.GraphicObjectMessage;
 import us.ihmc.robotDataLogger.Handshake;
 import us.ihmc.robotDataLogger.JointDefinition;
 import us.ihmc.robotDataLogger.LoadStatus;
+import us.ihmc.robotDataLogger.ReferenceFrameInformation;
 import us.ihmc.robotDataLogger.YoRegistryDefinition;
 import us.ihmc.robotDataLogger.YoType;
 import us.ihmc.robotDataLogger.YoVariableDefinition;
@@ -407,4 +411,13 @@ public class YoVariableHandShakeBuilder
       }
    }
 
+   public void setFrames(ReferenceFrame rootFrame)
+   {
+      Collection<ReferenceFrame> frames = ReferenceFrameTools.getAllFramesInTree(rootFrame);
+      ReferenceFrameInformation referenceFrameInformation = handshake.getReferenceFrameInformation();
+      frames.forEach(frame -> {
+         referenceFrameInformation.getFrameNames().add(frame.getName());
+         referenceFrameInformation.getFrameIndeces().add(frame.getFrameIndex());
+      });
+   }
 }
