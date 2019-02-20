@@ -40,8 +40,6 @@ public class ReferenceFrameInformationPubSubType implements us.ihmc.pubsub.Topic
    {
       int initial_alignment = current_alignment;
 
-      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);current_alignment += (1024 * 2) + us.ihmc.idl.CDR.alignment(current_alignment, 2);
-
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);current_alignment += (1024 * 4) + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);for(int i0 = 0; i0 < 1024; ++i0)
@@ -62,10 +60,6 @@ public class ReferenceFrameInformationPubSubType implements us.ihmc.pubsub.Topic
       int initial_alignment = current_alignment;
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
-      current_alignment += (data.getFrameVariables().size() * 2) + us.ihmc.idl.CDR.alignment(current_alignment, 2);
-
-
-      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
       current_alignment += (data.getFrameIndeces().size() * 4) + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 
 
@@ -80,10 +74,6 @@ public class ReferenceFrameInformationPubSubType implements us.ihmc.pubsub.Topic
 
    public static void write(us.ihmc.robotDataLogger.ReferenceFrameInformation data, us.ihmc.idl.CDR cdr)
    {
-      if(data.getFrameVariables().size() <= 1024)
-      cdr.write_type_e(data.getFrameVariables());else
-          throw new RuntimeException("frameVariables field exceeds the maximum length");
-
       if(data.getFrameIndeces().size() <= 1024)
       cdr.write_type_e(data.getFrameIndeces());else
           throw new RuntimeException("frameIndeces field exceeds the maximum length");
@@ -96,7 +86,6 @@ public class ReferenceFrameInformationPubSubType implements us.ihmc.pubsub.Topic
 
    public static void read(us.ihmc.robotDataLogger.ReferenceFrameInformation data, us.ihmc.idl.CDR cdr)
    {
-      cdr.read_type_e(data.getFrameVariables());	
       cdr.read_type_e(data.getFrameIndeces());	
       cdr.read_type_e(data.getFrameNames());	
 
@@ -105,7 +94,6 @@ public class ReferenceFrameInformationPubSubType implements us.ihmc.pubsub.Topic
    @Override
    public final void serialize(us.ihmc.robotDataLogger.ReferenceFrameInformation data, us.ihmc.idl.InterchangeSerializer ser)
    {
-      ser.write_type_e("frameVariables", data.getFrameVariables());
       ser.write_type_e("frameIndeces", data.getFrameIndeces());
       ser.write_type_e("frameNames", data.getFrameNames());
    }
@@ -113,7 +101,6 @@ public class ReferenceFrameInformationPubSubType implements us.ihmc.pubsub.Topic
    @Override
    public final void deserialize(us.ihmc.idl.InterchangeSerializer ser, us.ihmc.robotDataLogger.ReferenceFrameInformation data)
    {
-      ser.read_type_e("frameVariables", data.getFrameVariables());
       ser.read_type_e("frameIndeces", data.getFrameIndeces());
       ser.read_type_e("frameNames", data.getFrameNames());
    }
