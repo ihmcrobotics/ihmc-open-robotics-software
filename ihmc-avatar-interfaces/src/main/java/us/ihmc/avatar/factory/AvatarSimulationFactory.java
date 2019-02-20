@@ -62,7 +62,6 @@ import us.ihmc.tools.factories.FactoryTools;
 import us.ihmc.tools.factories.OptionalFactoryField;
 import us.ihmc.tools.factories.RequiredFactoryField;
 import us.ihmc.tools.thread.CloseableAndDisposableRegistry;
-import us.ihmc.util.PeriodicNonRealtimeThreadSchedulerFactory;
 import us.ihmc.wholeBodyController.DRCControllerThread;
 import us.ihmc.wholeBodyController.DRCOutputProcessor;
 import us.ihmc.wholeBodyController.DRCOutputProcessorWithStateChangeSmoother;
@@ -143,8 +142,8 @@ public class AvatarSimulationFactory
    {
       if (createYoVariableServer.get())
       {
-         yoVariableServer = new YoVariableServer(getClass(), new PeriodicNonRealtimeThreadSchedulerFactory(), robotModel.get().getLogModelProvider(),
-                                                 robotModel.get().getLogSettings(), robotModel.get().getEstimatorDT());
+         yoVariableServer = new YoVariableServer(getClass(), robotModel.get().getLogModelProvider(), robotModel.get().getLogSettings(),
+                                                 robotModel.get().getEstimatorDT());
       }
    }
 
