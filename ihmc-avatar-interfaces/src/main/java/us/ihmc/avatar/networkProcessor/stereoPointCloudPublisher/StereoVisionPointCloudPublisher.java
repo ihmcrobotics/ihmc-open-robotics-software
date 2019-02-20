@@ -118,6 +118,19 @@ public class StereoVisionPointCloudPublisher
          @Override
          public void run()
          {
+            try
+            {
+               transformDataAndPublish();
+            }
+            catch (Exception e)
+            {
+               e.printStackTrace();
+               executorService.shutdown();
+            }
+         }
+
+         private void transformDataAndPublish()
+         {
             PointCloud2 pointCloud2 = rosPointCloud2ToPublish.getAndSet(null);
 
             if (pointCloud2 == null)
@@ -233,9 +246,9 @@ public class StereoVisionPointCloudPublisher
 
       public void applyTransform(RigidBodyTransform transform)
       {
-         for (Point3D point : pointCloud)
+         for (int i = 0; i < numberOfPoints; i++)
          {
-            point.applyTransform(transform);
+            pointCloud[i].applyTransform(transform);
          }
       }
    }
