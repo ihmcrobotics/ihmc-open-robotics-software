@@ -8,14 +8,11 @@ import us.ihmc.pubsub.TopicDataType;
 
 public class ReferenceFrameInformation extends Packet<ReferenceFrameInformation> implements Settable<ReferenceFrameInformation>, EpsilonComparable<ReferenceFrameInformation>
 {
-   public us.ihmc.idl.IDLSequence.Integer  frameVariables_;
    public us.ihmc.idl.IDLSequence.Long  frameIndeces_;
    public us.ihmc.idl.IDLSequence.StringBuilderHolder  frameNames_;
 
    public ReferenceFrameInformation()
    {
-      frameVariables_ = new us.ihmc.idl.IDLSequence.Integer (1024, "type_3");
-
       frameIndeces_ = new us.ihmc.idl.IDLSequence.Long (1024, "type_4");
 
       frameNames_ = new us.ihmc.idl.IDLSequence.StringBuilderHolder (1024, "type_d");
@@ -29,15 +26,8 @@ public class ReferenceFrameInformation extends Packet<ReferenceFrameInformation>
 
    public void set(ReferenceFrameInformation other)
    {
-      frameVariables_.set(other.frameVariables_);
       frameIndeces_.set(other.frameIndeces_);
       frameNames_.set(other.frameNames_);
-   }
-
-
-   public us.ihmc.idl.IDLSequence.Integer  getFrameVariables()
-   {
-      return frameVariables_;
    }
 
 
@@ -70,8 +60,6 @@ public class ReferenceFrameInformation extends Packet<ReferenceFrameInformation>
       if(other == null) return false;
       if(other == this) return true;
 
-      if (!us.ihmc.idl.IDLTools.epsilonEqualsIntegerSequence(this.frameVariables_, other.frameVariables_, epsilon)) return false;
-
       if (!us.ihmc.idl.IDLTools.epsilonEqualsLongSequence(this.frameIndeces_, other.frameIndeces_, epsilon)) return false;
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsStringBuilderSequence(this.frameNames_, other.frameNames_, epsilon)) return false;
@@ -89,7 +77,6 @@ public class ReferenceFrameInformation extends Packet<ReferenceFrameInformation>
 
       ReferenceFrameInformation otherMyClass = (ReferenceFrameInformation) other;
 
-      if (!this.frameVariables_.equals(otherMyClass.frameVariables_)) return false;
       if (!this.frameIndeces_.equals(otherMyClass.frameIndeces_)) return false;
       if (!this.frameNames_.equals(otherMyClass.frameNames_)) return false;
 
@@ -102,8 +89,6 @@ public class ReferenceFrameInformation extends Packet<ReferenceFrameInformation>
       StringBuilder builder = new StringBuilder();
 
       builder.append("ReferenceFrameInformation {");
-      builder.append("frameVariables=");
-      builder.append(this.frameVariables_);      builder.append(", ");
       builder.append("frameIndeces=");
       builder.append(this.frameIndeces_);      builder.append(", ");
       builder.append("frameNames=");
