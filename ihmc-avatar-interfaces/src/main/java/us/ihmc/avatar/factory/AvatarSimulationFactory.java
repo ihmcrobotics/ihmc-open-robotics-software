@@ -20,6 +20,7 @@ import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.Hi
 import us.ihmc.commons.PrintTools;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.ROS2Tools.MessageTopicNameGenerator;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
@@ -27,6 +28,7 @@ import us.ihmc.humanoidRobotics.communication.subscribers.PelvisPoseCorrectionCo
 import us.ihmc.humanoidRobotics.communication.subscribers.PelvisPoseCorrectionCommunicatorInterface;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.robotDataLogger.YoVariableServer;
+import us.ihmc.robotDataVisualizer.visualizer.SCSVisualizer;
 import us.ihmc.robotModels.FullRobotModel;
 import us.ihmc.robotics.controllers.pidGains.implementations.YoPDGains;
 import us.ihmc.robotics.partNames.JointRole;
@@ -70,6 +72,7 @@ import us.ihmc.wholeBodyController.concurrent.SingleThreadedThreadDataSynchroniz
 import us.ihmc.wholeBodyController.concurrent.ThreadDataSynchronizer;
 import us.ihmc.wholeBodyController.concurrent.ThreadDataSynchronizerInterface;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.frameObjects.FrameIndexMap;
 
 public class AvatarSimulationFactory
 {
@@ -164,6 +167,7 @@ public class AvatarSimulationFactory
 
       simulationConstructionSet = new SimulationConstructionSet(allSimulatedRobotList.toArray(new Robot[0]), guiInitialSetup.get().getGraphics3DAdapter(),
                                                                 simulationConstructionSetParameters);
+      SCSVisualizer.setupFramePanel(simulationConstructionSet, new FrameIndexMap.FrameIndexFinder(ReferenceFrame.getWorldFrame()));
       simulationConstructionSet.setDT(robotModel.get().getSimulateDT(), 1);
    }
 
