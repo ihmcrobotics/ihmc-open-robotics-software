@@ -70,12 +70,14 @@ public class QuadrupedFootstepPlanningController extends QuadrupedToolboxControl
       this.visibilityGraphParameters = new YoVisibilityGraphParameters(visibilityGraphParameters, registry);
 
       FootstepNodeExpansion expansion = new ParameterBasedNodeExpansion(footstepPlannerParameters, xGaitSettings);
-      plannerMap.put(FootstepPlannerType.SIMPLE_PATH_TURN_WALK_TURN,
-                     new QuadrupedSplineWithTurnWalkTurnPlanner(xGaitSettings, robotTimestamp, pointFootSnapperParameters,
-                                                                robotDataReceiver.getReferenceFrames(), null, registry));
-      plannerMap.put(FootstepPlannerType.VIS_GRAPH_WITH_TURN_WALK_TURN,
-                     new QuadrupedVisGraphWithTurnWalkTurnPlanner(xGaitSettings, this.visibilityGraphParameters, robotTimestamp, pointFootSnapperParameters,
-                                                                  robotDataReceiver.getReferenceFrames(), null, registry));
+      if (robotDataReceiver != null)
+      {
+         plannerMap.put(FootstepPlannerType.SIMPLE_PATH_TURN_WALK_TURN,
+                        new QuadrupedSplineWithTurnWalkTurnPlanner(xGaitSettings, robotTimestamp, pointFootSnapperParameters, robotDataReceiver.getReferenceFrames(), null, registry));
+         plannerMap.put(FootstepPlannerType.VIS_GRAPH_WITH_TURN_WALK_TURN,
+                        new QuadrupedVisGraphWithTurnWalkTurnPlanner(xGaitSettings, this.visibilityGraphParameters, robotTimestamp, pointFootSnapperParameters,
+                                                                     robotDataReceiver.getReferenceFrames(), null, registry));
+      }
       plannerMap.put(FootstepPlannerType.A_STAR,
                      QuadrupedAStarFootstepPlanner.createPlanner(footstepPlannerParameters, defaultXGaitSettings, null, expansion, registry));
       activePlanner.set(FootstepPlannerType.SIMPLE_PATH_TURN_WALK_TURN);

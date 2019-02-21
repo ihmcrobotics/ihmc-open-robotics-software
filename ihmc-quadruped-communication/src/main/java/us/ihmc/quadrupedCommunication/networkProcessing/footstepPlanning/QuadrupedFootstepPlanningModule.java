@@ -15,6 +15,7 @@ import us.ihmc.quadrupedPlanning.QuadrupedXGaitSettingsReadOnly;
 import us.ihmc.quadrupedPlanning.footstepChooser.PointFootSnapperParameters;
 import us.ihmc.quadrupedCommunication.networkProcessing.QuadrupedToolboxController;
 import us.ihmc.quadrupedCommunication.networkProcessing.QuadrupedToolboxModule;
+import us.ihmc.robotModels.FullQuadrupedRobotModel;
 import us.ihmc.robotModels.FullQuadrupedRobotModelFactory;
 import us.ihmc.ros2.RealtimeRos2Node;
 import us.ihmc.yoVariables.parameters.DefaultParameterReader;
@@ -37,8 +38,16 @@ public class QuadrupedFootstepPlanningModule extends QuadrupedToolboxModule
                                           LogModelProvider modelProvider, boolean startYoVariableServer,
                                           DomainFactory.PubSubImplementation pubSubImplementation)
    {
-      super(modelFactory.getRobotDescription().getName(), modelFactory.createFullRobotModel(), modelProvider, startYoVariableServer, updatePeriodMilliseconds,
-            pubSubImplementation);
+      this(modelFactory.getRobotDescription().getName(), modelFactory.createFullRobotModel(), defaultFootstepPlannerParameters, defaultXGaitSettings,
+           pointFootSnapperParameters, modelProvider, startYoVariableServer, pubSubImplementation);
+   }
+
+   public QuadrupedFootstepPlanningModule(String name, FullQuadrupedRobotModel fulRobotModel, FootstepPlannerParameters defaultFootstepPlannerParameters,
+                                          QuadrupedXGaitSettingsReadOnly defaultXGaitSettings, PointFootSnapperParameters pointFootSnapperParameters,
+                                          LogModelProvider modelProvider, boolean startYoVariableServer,
+                                          DomainFactory.PubSubImplementation pubSubImplementation)
+   {
+      super(name, fulRobotModel, modelProvider, startYoVariableServer, updatePeriodMilliseconds, pubSubImplementation);
 
 
       footstepPlanningController = new QuadrupedFootstepPlanningController(defaultXGaitSettings, new DefaultVisibilityGraphParameters(), defaultFootstepPlannerParameters,

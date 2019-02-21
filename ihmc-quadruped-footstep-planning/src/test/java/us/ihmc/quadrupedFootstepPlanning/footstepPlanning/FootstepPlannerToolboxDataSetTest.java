@@ -105,11 +105,12 @@ public abstract class FootstepPlannerToolboxDataSetTest
       else
          messager = new SharedMemoryMessager(FootstepPlannerMessagerAPI.API);
 
-      footstepPlanningModule = new QuadrupedFootstepPlanningModule(null, new DefaultFootstepPlannerParameters(), xGaitSettings,
-                                                                   new DefaultPointFootSnapperParameters(), null, false, pubSubImplementation);
-
       if (xGaitSettings == null)
          xGaitSettings = getXGaitSettings();
+
+      footstepPlanningModule = new QuadrupedFootstepPlanningModule(robotName, null, new DefaultFootstepPlannerParameters(), xGaitSettings,
+                                                                   new DefaultPointFootSnapperParameters(), null, false, pubSubImplementation);
+
 
       ros2Node = ROS2Tools.createRealtimeRos2Node(pubSubImplementation, "ihmc_footstep_planner_test");
 
@@ -291,8 +292,6 @@ public abstract class FootstepPlannerToolboxDataSetTest
       packPlanningRequest(dataset);
       String errorMessage = findPlanAndAssertGoodResult(dataset);
 
-      //      visualizePlan(planner.getPlan(), dataset.getPlanarRegionsList(), dataset.getStart(), dataset.getGoal());
-
       return errorMessage;
    }
 
@@ -316,7 +315,7 @@ public abstract class FootstepPlannerToolboxDataSetTest
       goal.setGoalPose(goalPose);
 
       messager.submitMessage(FootstepPlannerMessagerAPI.PlannerTypeTopic, getPlannerType());
-      messager.submitMessage(FootstepPlannerMessagerAPI.PlannerTimeoutTopic, timeMultiplier * dataset.getTimeout(getPlannerType()));
+      messager.submitMessage(FootstepPlannerMessagerAPI.PlannerTimeoutTopic, timeout);
 
       messager.submitMessage(FootstepPlannerMessagerAPI.XGaitSettingsTopic, xGaitSettings);
       messager.submitMessage(FootstepPlannerMessagerAPI.PlanarRegionDataTopic, dataset.getPlanarRegionsList());
