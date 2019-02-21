@@ -1,34 +1,32 @@
 package us.ihmc.quadrupedFootstepPlanning.footstepPlanning;
 
-import controller_msgs.msg.dds.*;
+import controller_msgs.msg.dds.QuadrupedFootstepPlanningToolboxOutputStatus;
+import controller_msgs.msg.dds.QuadrupedTimedStepListMessage;
+import controller_msgs.msg.dds.QuadrupedTimedStepMessage;
 import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.stage.Stage;
-import org.junit.Test;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
 import us.ihmc.commons.ContinuousIntegrationTools;
 import us.ihmc.commons.Conversions;
 import us.ihmc.commons.MathTools;
 import us.ihmc.commons.PrintTools;
 import us.ihmc.commons.thread.ThreadTools;
-import us.ihmc.communication.IHMCRealtimeROS2Publisher;
 import us.ihmc.communication.ROS2Tools;
-import us.ihmc.euclid.geometry.ConvexPolygon2D;
-import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DBasics;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.euclid.tuple4D.Quaternion;
-import us.ihmc.graphicsDescription.Graphics3DObject;
-import us.ihmc.graphicsDescription.appearance.AppearanceDefinition;
-import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.javaFXToolkit.messager.SharedMemoryJavaFXMessager;
 import us.ihmc.log.LogTools;
 import us.ihmc.messager.Messager;
 import us.ihmc.messager.SharedMemoryMessager;
+import us.ihmc.pathPlanning.DataSet;
+import us.ihmc.pathPlanning.DataSetIOTools;
 import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
 import us.ihmc.quadrupedBasics.gait.QuadrupedTimedOrientedStep;
 import us.ihmc.quadrupedBasics.gait.QuadrupedTimedStep;
@@ -37,30 +35,24 @@ import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.communication.Footstep
 import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.communication.FootstepPlannerMessagerAPI;
 import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.graphSearch.graph.FootstepNode;
 import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.graphSearch.parameters.DefaultFootstepPlannerParameters;
-import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.tools.FootstepPlannerIOTools;
-import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.tools.FootstepPlannerIOTools.FootstepPlannerUnitTestDataset;
 import us.ihmc.quadrupedFootstepPlanning.ui.ApplicationRunner;
 import us.ihmc.quadrupedFootstepPlanning.ui.FootstepPlannerUI;
 import us.ihmc.quadrupedFootstepPlanning.ui.RemoteUIMessageConverter;
 import us.ihmc.quadrupedPlanning.QuadrupedXGaitSettingsReadOnly;
 import us.ihmc.quadrupedPlanning.footstepChooser.DefaultPointFootSnapperParameters;
 import us.ihmc.robotics.Assert;
-import us.ihmc.robotics.geometry.PlanarRegionsList;
-import us.ihmc.robotics.graphics.Graphics3DObjectTools;
 import us.ihmc.robotics.robotSide.QuadrantDependentList;
 import us.ihmc.robotics.robotSide.RobotQuadrant;
-import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.ros2.RealtimeRos2Node;
-import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
+import java.util.function.Function;
 
 public abstract class FootstepPlannerToolboxDataSetTest
 {
    protected static final double bambooTimeScaling = 4.0;
-   private static final double epsilon = 1e-3;
 
 
    // Whether to start the UI or not.
@@ -77,9 +69,6 @@ public abstract class FootstepPlannerToolboxDataSetTest
 
    private RealtimeRos2Node ros2Node;
    private RemoteUIMessageConverter converter;
-   private IHMCRealtimeROS2Publisher<QuadrupedFootstepPlannerParametersPacket> footstepPlannerParametersPublisher;
-   private IHMCRealtimeROS2Publisher<QuadrupedFootstepPlanningRequestPacket> footstepPlanningRequestPublisher;
-   private IHMCRealtimeROS2Publisher<ToolboxStateMessage> toolboxStatePublisher;
 
    private final AtomicReference<FootstepPlan> plannerPlanReference = new AtomicReference<>(null);
    private final AtomicReference<FootstepPlanningResult> plannerResultReference = new AtomicReference<>(null);
@@ -115,13 +104,6 @@ public abstract class FootstepPlannerToolboxDataSetTest
 
 
       ros2Node = ROS2Tools.createRealtimeRos2Node(pubSubImplementation, "ihmc_footstep_planner_test");
-
-      footstepPlanningRequestPublisher = ROS2Tools
-            .createPublisher(ros2Node, QuadrupedFootstepPlanningRequestPacket.class, FootstepPlannerCommunicationProperties.subscriberTopicNameGenerator(robotName));
-      footstepPlannerParametersPublisher = ROS2Tools
-            .createPublisher(ros2Node, QuadrupedFootstepPlannerParametersPacket.class, FootstepPlannerCommunicationProperties.subscriberTopicNameGenerator(robotName));
-      toolboxStatePublisher = ROS2Tools
-            .createPublisher(ros2Node, ToolboxStateMessage.class, FootstepPlannerCommunicationProperties.subscriberTopicNameGenerator(robotName));
 
       ROS2Tools.createCallbackSubscription(ros2Node, QuadrupedFootstepPlanningToolboxOutputStatus.class,
                                            FootstepPlannerCommunicationProperties.publisherTopicNameGenerator(robotName),
@@ -212,28 +194,36 @@ public abstract class FootstepPlannerToolboxDataSetTest
    @Test
    public void testDatasetsWithoutOcclusion()
    {
-      List<FootstepPlannerUnitTestDataset> allDatasets = FootstepPlannerIOTools.loadAllFootstepPlannerDatasetsWithoutOcclusions(FootstepPlannerIOTools.class);
-      runAssertionsOnAllDatasets(this::runAssertions, allDatasets);
+      List<DataSet> dataSets = DataSetIOTools.loadDataSets(dataSet ->
+                                                           {
+                                                              if (!dataSet.hasPlannerInput())
+                                                                 return false;
+                                                              return dataSet.getPlannerInput().getQuadrupedPlannerIsTestable();
+                                                           });
+      runAssertionsOnAllDatasets(this::runAssertions, dataSets);
    }
 
    @Disabled
    @Test
    public void testDatasetsWithoutOcclusionInDevelopment()
    {
-      List<FootstepPlannerUnitTestDataset> allDatasets = FootstepPlannerIOTools
-            .loadAllFootstepPlannerDatasetsWithoutOcclusionsInDevelopment(FootstepPlannerIOTools.class);
-      runAssertionsOnAllDatasets(this::runAssertions, allDatasets);
+      List<DataSet> dataSets = DataSetIOTools.loadDataSets(dataSet ->
+                                                           {
+                                                              if (!dataSet.hasPlannerInput())
+                                                                 return false;
+                                                              return dataSet.getPlannerInput().getQuadrupedPlannerIsInDevelopment();
+                                                           });
+      runAssertionsOnAllDatasets(this::runAssertions, dataSets);
    }
 
-   protected void runAssertionsOnDataset(DatasetTestRunner datasetTestRunner, String datasetName)
+   protected void runAssertionsOnDataset(Function<DataSet, String> dataSetTester, String datasetName)
    {
-      FootstepPlannerUnitTestDataset dataset = FootstepPlannerIOTools.loadDataset(FootstepPlannerIOTools.class, datasetName);
-
-      String errorMessages = datasetTestRunner.testDataset(dataset);
-      //      Assert.assertTrue("Errors:" + errorMessages, errorMessages.isEmpty());
+      DataSet dataset = DataSetIOTools.loadDataSet(datasetName);
+      String errorMessages = dataSetTester.apply(dataset);
+      Assert.assertTrue("Errors:" + errorMessages, errorMessages.isEmpty());
    }
 
-   private void runAssertionsOnAllDatasets(DatasetTestRunner datasetTestRunner, List<FootstepPlannerUnitTestDataset> allDatasets)
+   private void runAssertionsOnAllDatasets(Function<DataSet, String> dataSetTester, List<DataSet> allDatasets)
    {
       if (VERBOSE || DEBUG)
          LogTools.info("Unit test files found: " + allDatasets.size());
@@ -246,29 +236,23 @@ public abstract class FootstepPlannerToolboxDataSetTest
       int numbberOfTestedSets = 0;
       for (int i = 0; i < allDatasets.size(); i++)
       {
-         FootstepPlannerUnitTestDataset dataset = allDatasets.get(i);
+         DataSet dataset = allDatasets.get(i);
          if (DEBUG || VERBOSE)
-            LogTools.info("Testing file: " + dataset.getDatasetName());
-
-         if (!dataset.getTypes().contains(getPlannerType()))
-         {
-            if (DEBUG || VERBOSE)
-               LogTools.info(dataset.getDatasetName() + " does not contain planner type " + getPlannerType() + ", skipping");
-            continue;
-         }
+            LogTools.info("Testing file: " + dataset.getName());
 
          numbberOfTestedSets++;
-         String errorMessagesForCurrentFile = datasetTestRunner.testDataset(dataset);
+         resetAllAtomics();
+         String errorMessagesForCurrentFile = dataSetTester.apply(dataset);
          if (!errorMessagesForCurrentFile.isEmpty())
          {
             numberOfFailingTests++;
-            failingDatasets.add(dataset.getDatasetName());
+            failingDatasets.add(dataset.getName());
          }
 
          if (DEBUG || VERBOSE)
          {
             String result = errorMessagesForCurrentFile.isEmpty() ? "passed" : "failed";
-            LogTools.info(dataset.getDatasetName() + " " + result);
+            LogTools.info(dataset.getName() + " " + result);
          }
 
          ThreadTools.sleep(500); // Apparently need to give some time for the prints to appear in the right order.
@@ -291,7 +275,7 @@ public abstract class FootstepPlannerToolboxDataSetTest
       }
    }
 
-   protected String runAssertions(FootstepPlannerUnitTestDataset dataset)
+   protected String runAssertions(DataSet dataset)
    {
       resetAllAtomics();
       ThreadTools.sleep(1000);
@@ -301,19 +285,19 @@ public abstract class FootstepPlannerToolboxDataSetTest
       return errorMessage;
    }
 
-   protected void packPlanningRequest(FootstepPlannerUnitTestDataset dataset)
+   protected void packPlanningRequest(DataSet dataset)
    {
       FramePose3D startPose = new FramePose3D();
       FramePose3D goalPose = new FramePose3D();
-      startPose.setPosition(dataset.getStart());
-      goalPose.setPosition(dataset.getGoal());
-      if (dataset.hasStartOrientation())
-         startPose.setOrientation(dataset.getStartOrientation());
-      if (dataset.hasGoalOrientation())
-         goalPose.setOrientation(dataset.getGoalOrientation());
+      startPose.setPosition(dataset.getPlannerInput().getQuadrupedStartPosition());
+      goalPose.setPosition(dataset.getPlannerInput().getQuadrupedGoalPosition());
+      if (dataset.getPlannerInput().getHasQuadrupedStartYaw())
+         startPose.setOrientationYawPitchRoll(dataset.getPlannerInput().getQuadrupedStartYaw(), 0.0, 0.0);
+      if (dataset.getPlannerInput().getHasQuadrupedGoalYaw())
+         goalPose.setOrientationYawPitchRoll(dataset.getPlannerInput().getQuadrupedGoalYaw(), 0.0, 0.0);
 
       double timeMultiplier = ContinuousIntegrationTools.isRunningOnContinuousIntegrationServer() ? bambooTimeScaling : 1.0;
-      double timeout = timeMultiplier * dataset.getTimeout(getPlannerType());
+      double timeout = timeMultiplier * Double.parseDouble(dataset.getPlannerInput().getAdditionalData(getTimeoutFlag()).get(0));
 
       QuadrupedFootstepPlannerStart start = new QuadrupedFootstepPlannerStart();
       QuadrupedFootstepPlannerGoal goal = new QuadrupedFootstepPlannerGoal();
@@ -367,7 +351,12 @@ public abstract class FootstepPlannerToolboxDataSetTest
       return footstepPlan;
    }
 
-   private String findPlanAndAssertGoodResult(FootstepPlannerUnitTestDataset dataset)
+   private String getTimeoutFlag()
+   {
+      return getPlannerType().toString().toLowerCase() + "_timeout";
+   }
+
+   private String findPlanAndAssertGoodResult(DataSet dataset)
    {
       totalTimeTaken = 0.0;
       double timeoutMultiplier = ContinuousIntegrationTools.isRunningOnContinuousIntegrationServer() ? bambooTimeScaling : 1.0;
@@ -405,7 +394,7 @@ public abstract class FootstepPlannerToolboxDataSetTest
       plannerReceivedPlan.set(false);
       plannerReceivedResult.set(false);
 
-      errorMessage += assertPlanIsValid(datasetName, result, plan, dataset.getGoal(), dataset.getGoalOrientation());
+      errorMessage += assertPlanIsValid(datasetName, result, plan, dataset.getPlannerInput().getQuadrupedGoalPosition(), dataset.getPlannerInput().getQuadrupedGoalYaw());
 
       for (int i = 0; i < 100; i++)
          ThreadTools.sleep(10);
@@ -491,7 +480,8 @@ public abstract class FootstepPlannerToolboxDataSetTest
    }
 
 
-   private static String assertPlanIsValid(String datasetName, FootstepPlanningResult result, FootstepPlan plannedSteps, Point3DReadOnly goalPosition, Quaternion goalOrientation)
+   private static String assertPlanIsValid(String datasetName, FootstepPlanningResult result, FootstepPlan plannedSteps, Point3DReadOnly goalPosition,
+                                           double goalYaw)
    {
       QuadrantDependentList<Point3DBasics> finalSteps = getFinalStepPositions(plannedSteps);
 
@@ -515,9 +505,8 @@ public abstract class FootstepPlannerToolboxDataSetTest
 
       if (!goalPosition.epsilonEquals(centerPoint, FootstepNode.gridSizeXY))
          errorMessage += datasetName + " did not reach goal position. Made it to " + centerPoint + ", trying to get to " + goalPosition;
-      if (goalOrientation != null)
+      if (Double.isFinite(goalYaw))
       {
-         double goalYaw = goalOrientation.getYaw();
          if (!MathTools.epsilonEquals(goalYaw, nominalYaw, FootstepNode.gridSizeYaw))
             errorMessage += datasetName + " did not reach goal yaw. Made it to " + nominalYaw + ", trying to get to " + goalYaw;
       }
@@ -541,11 +530,6 @@ public abstract class FootstepPlannerToolboxDataSetTest
       }
 
       return finalSteps;
-   }
-
-   protected interface DatasetTestRunner
-   {
-      String testDataset(FootstepPlannerUnitTestDataset dataset);
    }
 
    private static interface ConditionChecker
