@@ -5,7 +5,11 @@ import java.util.concurrent.atomic.AtomicReference;
 
 import controller_msgs.msg.dds.LidarScanMessage;
 import controller_msgs.msg.dds.StereoVisionPointCloudMessage;
+import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
+import us.ihmc.idl.IDLSequence.Float;
 import us.ihmc.jOctoMap.ocTree.NormalOcTree;
+import us.ihmc.jOctoMap.pointCloud.PointCloud;
+import us.ihmc.jOctoMap.pointCloud.Scan;
 import us.ihmc.jOctoMap.pointCloud.ScanCollection;
 import us.ihmc.messager.Messager;
 import us.ihmc.messager.MessagerAPIFactory.Topic;
@@ -116,7 +120,6 @@ public class REAOcTreeBuffer
             bufferOctree.insertScanCollection(newScan, false);
             messageCounter++;
 
-
             if (messageCounter >= messageCapacity.get().intValue())
             {
                isBufferFull.set(true);
@@ -186,8 +189,8 @@ public class REAOcTreeBuffer
          ScanCollection scanCollection = new ScanCollection();
          newFullScanReference.set(scanCollection);
          scanCollection.setSubSampleSize(NUMBER_OF_SAMPLES);
-         // FIXME the following make several copies in a row of the data which is very likely to be slow depending on the input size.
-         scanCollection.addScan(lidarMessage.getScan().toArray(), lidarMessage.getLidarPosition());
+         // FIXME Not downsizing the scan anymore, this needs to be reviewed to improve speed.
+         scanCollection.addScan(toScan(lidarMessage.getScan(), lidarMessage.getLidarPosition()));
       }
 
       if (stereoMessage != null)
@@ -195,8 +198,18 @@ public class REAOcTreeBuffer
          ScanCollection scanCollection = new ScanCollection();
          newFullScanReference.set(scanCollection);
          scanCollection.setSubSampleSize(NUMBER_OF_SAMPLES);
-         // FIXME the following make several copies in a row of the data which is very likely to be slow depending on the input size.
-         scanCollection.addScan(stereoMessage.getPointCloud().toArray(), stereoMessage.getSensorPosition());
+         // FIXME Not downsizing the scan anymore, this needs to be reviewed to improve speed.
+         scanCollection.addScan(toScan(stereoMessage.getPointCloud(), stereoMessage.getSensorPosition()));
       }
+   }
+
+   private static Scan toScan(Float data, Point3DReadOnly sensorPosition)
+   {
+      PointCloud pointCloud = new PointCloud();
+      for (int i = 0; i < data.size() / 3; i += 3)
+      {
+         pointCloud.add(data.getQuick(i), data.getQuick(i + 1), data.getQuick(i + 2));
+      }
+      return new Scan(sensorPosition, pointCloud);
    }
 }
