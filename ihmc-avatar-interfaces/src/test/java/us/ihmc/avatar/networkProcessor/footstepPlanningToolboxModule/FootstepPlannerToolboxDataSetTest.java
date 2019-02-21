@@ -1,14 +1,31 @@
 package us.ihmc.avatar.networkProcessor.footstepPlanningToolboxModule;
 
+import static us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI.*;
+
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.atomic.AtomicReference;
+import java.util.function.Function;
+
+import org.junit.Assert;
+import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+
 import com.jme3.math.Transform;
+
 import controller_msgs.msg.dds.FootstepDataListMessage;
-import controller_msgs.msg.dds.*;
+import controller_msgs.msg.dds.FootstepDataMessage;
+import controller_msgs.msg.dds.FootstepPlannerParametersPacket;
+import controller_msgs.msg.dds.FootstepPlanningRequestPacket;
+import controller_msgs.msg.dds.FootstepPlanningToolboxOutputStatus;
+import controller_msgs.msg.dds.PlanarRegionsListMessage;
+import controller_msgs.msg.dds.ToolboxStateMessage;
 import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.stage.Stage;
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.footstepPlanning.MultiStageFootstepPlanningModule;
 import us.ihmc.avatar.handControl.packetsAndConsumers.HandModel;
@@ -20,7 +37,6 @@ import us.ihmc.commonWalkingControlModules.configurations.ICPWithTimeFreezingPla
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commons.ContinuousIntegrationTools;
 import us.ihmc.commons.Conversions;
-import us.ihmc.commons.PrintTools;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.communication.IHMCRealtimeROS2Publisher;
 import us.ihmc.communication.ROS2Tools;
@@ -33,6 +49,7 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
+import us.ihmc.footstepPlanning.FootstepDataMessageConverter;
 import us.ihmc.footstepPlanning.FootstepPlan;
 import us.ihmc.footstepPlanning.FootstepPlannerType;
 import us.ihmc.footstepPlanning.FootstepPlanningResult;
@@ -41,6 +58,7 @@ import us.ihmc.footstepPlanning.communication.FootstepPlannerCommunicationProper
 import us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI;
 import us.ihmc.footstepPlanning.graphSearch.parameters.DefaultFootstepPlanningParameters;
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParameters;
+import us.ihmc.footstepPlanning.tools.FootstepPlannerMessageTools;
 import us.ihmc.footstepPlanning.tools.PlannerTools;
 import us.ihmc.footstepPlanning.ui.ApplicationRunner;
 import us.ihmc.footstepPlanning.ui.FootstepPlannerUI;
@@ -64,8 +82,12 @@ import us.ihmc.pathPlanning.visibilityGraphs.interfaces.VisibilityGraphsParamete
 import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
 import us.ihmc.robotDataLogger.logger.LogSettings;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
-import us.ihmc.robotics.Assert;
-import us.ihmc.robotics.partNames.*;
+import us.ihmc.robotics.partNames.ArmJointName;
+import us.ihmc.robotics.partNames.LegJointName;
+import us.ihmc.robotics.partNames.LimbName;
+import us.ihmc.robotics.partNames.NeckJointName;
+import us.ihmc.robotics.partNames.RobotSpecificJointNames;
+import us.ihmc.robotics.partNames.SpineJointName;
 import us.ihmc.robotics.robotDescription.RobotDescription;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
@@ -82,15 +104,6 @@ import us.ihmc.tools.thread.CloseableAndDisposableRegistry;
 import us.ihmc.wholeBodyController.DRCRobotJointMap;
 import us.ihmc.wholeBodyController.RobotContactPointParameters;
 import us.ihmc.wholeBodyController.concurrent.ThreadDataSynchronizerInterface;
-
-import java.io.IOException;
-import java.io.InputStream;
-import java.util.List;
-import java.util.Map;
-import java.util.concurrent.atomic.AtomicReference;
-import java.util.function.Function;
-
-import static us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI.*;
 
 public abstract class FootstepPlannerToolboxDataSetTest
 {
@@ -110,7 +123,7 @@ public abstract class FootstepPlannerToolboxDataSetTest
    private final AtomicReference<Boolean> plannerReceivedPlan = new AtomicReference<>(false);
    private final AtomicReference<Boolean> plannerReceivedResult = new AtomicReference<>(false);
 
-   private AtomicReference<FootstepPlan> uiFootstepPlanReference;
+   private AtomicReference<FootstepDataListMessage> uiFootstepPlanReference;
    private AtomicReference<FootstepPlanningResult> uiPlanningResultReference;
    private final AtomicReference<Boolean> uiReceivedPlan = new AtomicReference<>(false);
    private final AtomicReference<Boolean> uiReceivedResult = new AtomicReference<>(false);
@@ -148,10 +161,10 @@ public abstract class FootstepPlannerToolboxDataSetTest
 
       tryToStartModule(() -> setupFootstepPlanningToolboxModule());
 
-      messager.registerTopicListener(FootstepPlanTopic, request -> uiReceivedPlan.set(true));
+      messager.registerTopicListener(FootstepPlanResponseTopic, request -> uiReceivedPlan.set(true));
       messager.registerTopicListener(PlanningResultTopic, request -> uiReceivedResult.set(true));
 
-      uiFootstepPlanReference = messager.createInput(FootstepPlanTopic);
+      uiFootstepPlanReference = messager.createInput(FootstepPlanResponseTopic);
       uiPlanningResultReference = messager.createInput(PlanningResultTopic);
 
       ros2Node = ROS2Tools.createRealtimeRos2Node(pubSubImplementation, "ihmc_footstep_planner_test");
@@ -255,7 +268,7 @@ public abstract class FootstepPlannerToolboxDataSetTest
       }
       catch (RuntimeException | IOException e)
       {
-         PrintTools.error(this, "Failed to start a module in the network processor, stack trace:");
+         LogTools.error("Failed to start a module in the network processor, stack trace:");
          e.printStackTrace();
       }
    }
@@ -368,7 +381,7 @@ public abstract class FootstepPlannerToolboxDataSetTest
    private void processFootstepPlanningOutputStatus(FootstepPlanningToolboxOutputStatus packet)
    {
       if (DEBUG)
-         PrintTools.info("Processed an output from a remote planner.");
+         LogTools.info("Processed an output from a remote planner.");
 
       plannerResultReference.set(FootstepPlanningResult.fromByte(packet.getFootstepPlanningResult()));
       plannerPlanReference.set(convertToFootstepPlan(packet.getFootstepDataList()));
@@ -448,7 +461,7 @@ public abstract class FootstepPlannerToolboxDataSetTest
       if (VISUALIZE || DEBUG)
       {
          if (!condition)
-            PrintTools.error(datasetName + ": " + message);
+            LogTools.error(datasetName + ": " + message);
       }
       return !condition ? "\n" + message : "";
    }
@@ -594,15 +607,15 @@ public abstract class FootstepPlannerToolboxDataSetTest
       if (uiReceivedPlan.get() && uiFootstepPlanReference.get() != null && actualPlan.get() == null)
       {
          if (DEBUG)
-            PrintTools.info("Received a plan from the UI.");
-         actualPlan.set(uiFootstepPlanReference.getAndSet(null));
+            LogTools.info("Received a plan from the UI.");
+         actualPlan.set(FootstepDataMessageConverter.convertToFootstepPlan(uiFootstepPlanReference.getAndSet(null)));
          uiReceivedPlan.set(false);
       }
 
       if (uiReceivedResult.get() && uiPlanningResultReference.get() != null)
       {
          if (DEBUG)
-            PrintTools.info("Received a result " + uiPlanningResultReference.get() + " from the UI.");
+            LogTools.info("Received a result " + uiPlanningResultReference.get() + " from the UI.");
          actualResult.set(uiPlanningResultReference.getAndSet(null));
          uiReceivedResult.set(false);
       }
@@ -613,7 +626,7 @@ public abstract class FootstepPlannerToolboxDataSetTest
       if (plannerReceivedPlan.get() && plannerPlanReference.get() != null && expectedPlan.get() == null)
       {
          if (DEBUG)
-            PrintTools.info("Received a plan from the planner.");
+            LogTools.info("Received a plan from the planner.");
          expectedPlan.set(plannerPlanReference.getAndSet(null));
          plannerReceivedPlan.set(false);
       }
@@ -621,10 +634,60 @@ public abstract class FootstepPlannerToolboxDataSetTest
       if (plannerReceivedResult.get() && plannerResultReference.get() != null)
       {
          if (DEBUG)
-            PrintTools.info("Received a result " + plannerResultReference.get() + " from the planner.");
+            LogTools.info("Received a result " + plannerResultReference.get() + " from the planner.");
          expectedResult.set(plannerResultReference.getAndSet(null));
          plannerReceivedResult.set(false);
       }
+   }
+
+   public void submitDataSet(DataSet testData)
+   {
+      for (int i = 0; i < 100; i++)
+         ThreadTools.sleep(10);
+
+      toolboxStatePublisher.publish(MessageTools.createToolboxStateMessage(ToolboxState.WAKE_UP));
+
+      for (int i = 0; i < 100; i++)
+         ThreadTools.sleep(10);
+
+      FootstepPlannerParametersPacket parametersPacket = new FootstepPlannerParametersPacket();
+      FootstepPlannerParameters parameters = getRobotModel().getFootstepPlannerParameters();
+
+      if (messager != null)
+      {
+         messager.submitMessage(FootstepPlannerMessagerAPI.PlannerParametersTopic, parameters);
+         messager.submitMessage(FootstepPlannerMessagerAPI.PlanarRegionDataTopic, testData.getPlanarRegionsList());
+      }
+
+      FootstepPlannerMessageTools.copyParametersToPacket(parametersPacket, parameters);
+
+      footstepPlannerParametersPublisher.publish(parametersPacket);
+
+      FootstepPlanningRequestPacket packet = new FootstepPlanningRequestPacket();
+
+      byte plannerType = getPlannerType().toByte();
+      PlanarRegionsListMessage planarRegions = PlanarRegionMessageConverter.convertToPlanarRegionsListMessage(testData.getPlanarRegionsList());
+
+      packet.getStanceFootOrientationInWorld().setToYawQuaternion(testData.getPlannerInput().getStartYaw());
+      packet.getStanceFootPositionInWorld().set(testData.getPlannerInput().getStartPosition());
+      packet.getGoalPositionInWorld().set(testData.getPlannerInput().getGoalPosition());
+      packet.getGoalOrientationInWorld().setToYawQuaternion(testData.getPlannerInput().getGoalYaw());
+      packet.setRequestedFootstepPlannerType(plannerType);
+      packet.getPlanarRegionsListMessage().set(planarRegions);
+
+      double timeout = 60.0;
+      double timeoutMultiplier = ContinuousIntegrationTools.isRunningOnContinuousIntegrationServer() ? bambooTimeScaling : 1.0;
+      packet.setTimeout(timeoutMultiplier * timeout);
+
+      packet.setHorizonLength(Double.MAX_VALUE);
+
+      packet.getGoalOrientationInWorld().setToYawQuaternion(testData.getPlannerInput().getGoalYaw());
+      packet.getStanceFootOrientationInWorld().setToYawQuaternion(testData.getPlannerInput().getStartYaw());
+
+      if (DEBUG)
+         LogTools.info("Sending out planning request packet.");
+
+      footstepPlanningRequestPublisher.publish(packet);
    }
 
    public String findPlanAndAssertGoodResult(DataSet dataset)
@@ -640,28 +703,28 @@ public abstract class FootstepPlannerToolboxDataSetTest
       String errorMessage = "";
 
       if (DEBUG)
-         PrintTools.info("Waiting for result.");
+         LogTools.info("Waiting for result.");
 
       errorMessage += waitForResult(() -> actualResult.get() == null || expectedResult.get() == null, maxTimeToWait, datasetName);
       if (!errorMessage.isEmpty())
          return errorMessage;
 
       if (DEBUG)
-         PrintTools.info("Received a result (actual = " + actualResult.get() + " expected = " + expectedResult.get() + ", checking it's validity.");
+         LogTools.info("Received a result (actual = " + actualResult.get() + " expected = " + expectedResult.get() + ", checking it's validity.");
 
       errorMessage += validateResult(() -> actualResult.get().validForExecution() && expectedResult.get().validForExecution(), actualResult.get(), datasetName);
       if (!errorMessage.isEmpty())
          return errorMessage;
 
       if (DEBUG)
-         PrintTools.info("Results are valid, waiting for plan.");
+         LogTools.info("Results are valid, waiting for plan.");
 
       errorMessage += waitForPlan(() -> expectedPlan.get() == null || actualPlan.get() == null, maxTimeToWait, datasetName);
       if (!errorMessage.isEmpty())
          return errorMessage;
 
       if (DEBUG)
-         PrintTools.info("Received a plan, checking it's validity.");
+         LogTools.info("Received a plan, checking it's validity.");
 
       FootstepPlanningResult expectedResult = this.expectedResult.getAndSet(null);
       FootstepPlanningResult actualResult = this.actualResult.getAndSet(null);
