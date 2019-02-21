@@ -32,6 +32,7 @@ public class WalkingControllerPreviewToolboxModule extends ToolboxModule
       setTimeWithoutInputsBeforeGoingToSleep(60.0);
 
       controller = new WalkingControllerPreviewToolboxController(robotModel, 0.02, commandInputManager, statusOutputManager, yoGraphicsListRegistry, registry);
+      startYoVariableServer();
    }
 
    @Override

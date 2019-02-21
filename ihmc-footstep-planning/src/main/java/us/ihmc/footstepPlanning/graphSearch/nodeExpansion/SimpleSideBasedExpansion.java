@@ -4,6 +4,7 @@ import java.util.HashSet;
 
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.footstepPlanning.graphSearch.graph.LatticeNode;
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParameters;
 import us.ihmc.footstepPlanning.graphSearch.graph.FootstepNode;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
@@ -25,9 +26,9 @@ public class SimpleSideBasedExpansion implements FootstepNodeExpansion
       double maxYaw = parameters.getMaximumStepYaw();
       double defaultStepWidth = parameters.getIdealFootstepWidth();
       double defaultStepLength = parameters.getIdealFootstepLength();
-      double[] stepLengths = new double[] {parameters.getMinimumStepLength(), defaultStepLength - FootstepNode.gridSizeXY, defaultStepLength, defaultStepLength + FootstepNode.gridSizeXY, parameters.getMaximumStepReach()};
-      double[] stepWidths = new double[] {parameters.getMinimumStepWidth(), defaultStepWidth - FootstepNode.gridSizeXY, defaultStepWidth, defaultStepWidth + FootstepNode.gridSizeXY, parameters.getMaximumStepWidth()};
-      double[] stepYaws = new double[] {parameters.getMinimumStepYaw(), FootstepNode.gridSizeYaw, maxYaw};
+      double[] stepLengths = new double[] {parameters.getMinimumStepLength(), defaultStepLength - LatticeNode.gridSizeXY, defaultStepLength, defaultStepLength + LatticeNode.gridSizeXY, parameters.getMaximumStepReach()};
+      double[] stepWidths = new double[] {parameters.getMinimumStepWidth(), defaultStepWidth - LatticeNode.gridSizeXY, defaultStepWidth, defaultStepWidth + LatticeNode.gridSizeXY, parameters.getMaximumStepWidth()};
+      double[] stepYaws = new double[] {parameters.getMinimumStepYaw(), LatticeNode.gridSizeYaw, maxYaw};
 
       HashSet<FootstepNode> neighbors = new HashSet<>();
 

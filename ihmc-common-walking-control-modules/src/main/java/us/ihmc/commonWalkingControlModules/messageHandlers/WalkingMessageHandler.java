@@ -109,7 +109,9 @@ public class WalkingMessageHandler
    private final CenterOfMassTrajectoryHandler comTrajectoryHandler;
    private final PlanarRegionsListHandler planarRegionsListHandler;
 
-   private final YoBoolean offsettingPlanWithFootstepError = new YoBoolean("offsettingPlanWithFootstepError", registry);
+   private final YoBoolean offsettingXYPlanWithFootstepError = new YoBoolean("offsettingXYPlanWithFootstepError", registry);
+   private final YoBoolean offsettingHeightPlanWithFootstepError = new YoBoolean("offsettingHeightPlanWithFootstepError", registry);
+
    private final YoFrameVector3D planOffsetInWorld = new YoFrameVector3D("planOffsetInWorld", worldFrame, registry);
    private final YoFrameVector3D planOffsetFromAdjustment = new YoFrameVector3D("comPlanOffsetFromAdjustment", worldFrame, registry);
 
@@ -163,15 +165,20 @@ public class WalkingMessageHandler
          switch (command.getExecutionMode())
          {
          case OVERRIDE:
-            offsettingPlanWithFootstepError.set(command.isOffsetFootstepsWithExecutionError());
+            offsettingXYPlanWithFootstepError.set(command.isOffsetFootstepsWithExecutionError());
+            offsettingHeightPlanWithFootstepError.set(command.isOffsetFootstepsHeightWithExecutionError());
             planOffsetInWorld.setToZero();
             clearFootsteps();
             clearFootTrajectory();
             break;
          case QUEUE:
-            if (offsettingPlanWithFootstepError.getValue() != command.isOffsetFootstepsWithExecutionError())
+            if (offsettingXYPlanWithFootstepError.getValue() != command.isOffsetFootstepsWithExecutionError())
             {
-               PrintTools.warn("Recieved a queued message that has a different setting for offsetting footsteps with exectuion error!");
+               PrintTools.warn("Recieved a queued message that has a different setting for offsetting footsteps with execution error!");
+            }
+            if (offsettingHeightPlanWithFootstepError.getValue() != command.isOffsetFootstepsHeightWithExecutionError())
+            {
+               PrintTools.warn("Recieved a queued message that has a different setting for offsetting height of footsteps with execution error!");
             }
             if (currentNumberOfFootsteps.getIntegerValue() < 1 && !executingFootstep.getBooleanValue())
             {
@@ -790,11 +797,7 @@ public class WalkingMessageHandler
    private void setFootstep(FootstepDataCommand footstepData, boolean trustHeight, boolean isAdjustable, Footstep footstepToSet)
    {
       footstepToSet.set(footstepData, trustHeight, isAdjustable);
-
-      if (offsettingPlanWithFootstepError.getBooleanValue())
-      {
-         footstepToSet.addOffset(planOffsetInWorld);
-      }
+      footstepToSet.addOffset(planOffsetInWorld);
    }
 
    private void setFootstepTiming(FootstepDataCommand footstep, ExecutionTiming executionTiming, FootstepTiming timingToSet, MutableDouble pauseDurationToSet,
@@ -918,20 +921,34 @@ public class WalkingMessageHandler
       return true;
    }
 
+   private final FrameVector3D footstepOffsetVector = new FrameVector3D();
+
    public void addOffsetVectorOnTouchdown(FrameVector3DReadOnly offset)
    {
-      if (!offsettingPlanWithFootstepError.getBooleanValue())
+      if (!offsettingXYPlanWithFootstepError.getValue() && !offsettingHeightPlanWithFootstepError.getValue())
       {
          return;
+      }
+
+      footstepOffsetVector.setIncludingFrame(offset);
+
+      if (!offsettingXYPlanWithFootstepError.getValue())
+      {
+         footstepOffsetVector.setX(0.0);
+         footstepOffsetVector.setY(0.0);
+      }
+      if (!offsettingHeightPlanWithFootstepError.getValue())
+      {
+         footstepOffsetVector.setZ(0.0);
       }
 
       for (int stepIdx = 0; stepIdx < upcomingFootsteps.size(); stepIdx++)
       {
          Footstep footstep = upcomingFootsteps.get(stepIdx);
-         footstep.addOffset(offset);
+         footstep.addOffset(footstepOffsetVector);
       }
 
-      this.planOffsetInWorld.add(offset);
+      this.planOffsetInWorld.add(footstepOffsetVector);
       setPlanOffsetInternal(planOffsetInWorld);
 
       planOffsetFromAdjustment.setToZero();

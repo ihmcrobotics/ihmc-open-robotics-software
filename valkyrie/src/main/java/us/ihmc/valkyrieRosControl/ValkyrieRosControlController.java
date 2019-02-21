@@ -23,7 +23,6 @@ import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.Co
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.ControllerAPIDefinition;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.HighLevelHumanoidControllerFactory;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.WalkingProvider;
-import us.ihmc.commons.PrintTools;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.controllerAPI.CommandInputManager;
 import us.ihmc.communication.controllerAPI.StatusMessageOutputManager;
@@ -31,10 +30,12 @@ import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelControllerName;
 import us.ihmc.humanoidRobotics.communication.subscribers.PelvisPoseCorrectionCommunicator;
 import us.ihmc.humanoidRobotics.communication.subscribers.PelvisPoseCorrectionCommunicatorInterface;
+import us.ihmc.log.LogTools;
 import us.ihmc.multicastLogDataProtocol.modelLoaders.LogModelProvider;
 import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
 import us.ihmc.robotDataLogger.YoVariableServer;
 import us.ihmc.robotDataLogger.logger.LogSettings;
+import us.ihmc.robotDataLogger.util.JVMStatisticsGenerator;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.ros2.RealtimeRos2Node;
@@ -55,7 +56,7 @@ import us.ihmc.valkyrie.parameters.ValkyrieJointMap;
 import us.ihmc.valkyrie.parameters.ValkyrieSensorInformation;
 import us.ihmc.wholeBodyController.DRCControllerThread;
 import us.ihmc.wholeBodyController.DRCOutputProcessor;
-import us.ihmc.wholeBodyController.DRCOutputProcessorWithTorqueOffsets;
+import us.ihmc.wholeBodyController.DRCOutputProcessorWithStateChangeSmoother;
 import us.ihmc.wholeBodyController.RobotContactPointParameters;
 import us.ihmc.wholeBodyController.concurrent.MultiThreadedRealTimeRobotController;
 import us.ihmc.wholeBodyController.concurrent.MultiThreadedRobotControlElementCoordinator;
@@ -119,7 +120,8 @@ public class ValkyrieRosControlController extends IHMCWholeRobotControlJavaBridg
       allValkyrieJoints = allJointsList.toArray(new String[0]);
    }
 
-   public static final boolean USE_YOVARIABLE_DESIREDS = true;
+   public static final boolean USE_STATE_CHANGE_TORQUE_SMOOTHER_PROCESSOR = true;
+   public static final boolean USE_YOVARIABLE_DESIREDS = false;
    public static final boolean USE_USB_MICROSTRAIN_IMUS = false;
    public static final boolean USE_SWITCHABLE_FILTER_HOLDER_FOR_NON_USB_IMUS = false;
    public static final String[] readIMUs = USE_USB_MICROSTRAIN_IMUS ? new String[0] : new String[ValkyrieSensorInformation.imuSensorsToUse.length];
@@ -144,9 +146,6 @@ public class ValkyrieRosControlController extends IHMCWholeRobotControlJavaBridg
    public static final String VALKYRIE_IHMC_ROS_CONTROLLER_NODE_NAME = "valkyrie_ihmc_controller";
 
    private static final WalkingProvider walkingProvider = WalkingProvider.DATA_PRODUCER;
-
-   public static final boolean INTEGRATE_ACCELERATIONS_AND_CONTROL_VELOCITIES = true;
-   private static final boolean DO_SLOW_INTEGRATION_FOR_TORQUE_OFFSET = true;
 
    private MultiThreadedRobotControlElementCoordinator robotController;
 
@@ -356,13 +355,9 @@ public class ValkyrieRosControlController extends IHMCWholeRobotControlJavaBridg
        */
       ValkyrieRosControlLowLevelOutputWriter valkyrieLowLevelOutputWriter = new ValkyrieRosControlLowLevelOutputWriter();
 
-      DRCOutputProcessor drcOutputWriter = null;
-      if (DO_SLOW_INTEGRATION_FOR_TORQUE_OFFSET)
-      {
-         double controllerDT = robotModel.getControllerDT();
-         DRCOutputProcessorWithTorqueOffsets drcOutputWriterWithTorqueOffsets = new DRCOutputProcessorWithTorqueOffsets(drcOutputWriter, controllerDT);
-         drcOutputWriter = drcOutputWriterWithTorqueOffsets;
-      }
+      DRCOutputProcessor drcOutputProcessor = null;
+      if (USE_STATE_CHANGE_TORQUE_SMOOTHER_PROCESSOR)
+         drcOutputProcessor = new DRCOutputProcessorWithStateChangeSmoother(drcOutputProcessor);
 
       PelvisPoseCorrectionCommunicatorInterface externalPelvisPoseSubscriber = null;
       externalPelvisPoseSubscriber = new PelvisPoseCorrectionCommunicator(null, null);
@@ -387,7 +382,7 @@ public class ValkyrieRosControlController extends IHMCWholeRobotControlJavaBridg
       }
 
       DRCControllerThread controllerThread = new DRCControllerThread(robotModel.getSimpleRobotName(), robotModel, sensorInformation, controllerFactory,
-                                                                     threadDataSynchronizer, drcOutputWriter, controllerRealtimeRos2Node, yoVariableServer,
+                                                                     threadDataSynchronizer, drcOutputProcessor, controllerRealtimeRos2Node, yoVariableServer,
                                                                      gravity, estimatorDT);
 
       ValkyrieCalibrationControllerState calibrationControllerState = calibrationStateFactory.getCalibrationControllerState();
@@ -398,6 +393,15 @@ public class ValkyrieRosControlController extends IHMCWholeRobotControlJavaBridg
       sensorReaderFactory.setupLowLevelControlCommunication(robotName, estimatorRealtimeRos2Node);
 
       /*
+       * Setup and start the JVM memory statistics
+       */
+
+      PeriodicRealtimeThreadSchedulerFactory schedulerFactory = new PeriodicRealtimeThreadSchedulerFactory(ValkyriePriorityParameters.JVM_STATISTICS_PRIORITY);
+      JVMStatisticsGenerator jvmStatisticsGenerator = new JVMStatisticsGenerator(yoVariableServer, schedulerFactory);
+      jvmStatisticsGenerator.addVariablesToStatisticsGenerator(yoVariableServer);
+      jvmStatisticsGenerator.start();
+
+      /*
        * Connect all servers
        */
       estimatorRealtimeRos2Node.spin();
@@ -406,7 +410,7 @@ public class ValkyrieRosControlController extends IHMCWholeRobotControlJavaBridg
 
       if (isGazebo)
       {
-         PrintTools.info(ValkyrieRosControlController.class, "Running with blocking synchronous execution between estimator and controller");
+         LogTools.info("Running with blocking synchronous execution between estimator and controller");
          SynchronousMultiThreadedRobotController coordinator = new SynchronousMultiThreadedRobotController(estimatorThread, timestampProvider);
          coordinator.addController(controllerThread, (int) (robotModel.getControllerDT() / robotModel.getEstimatorDT()));
 
@@ -414,7 +418,7 @@ public class ValkyrieRosControlController extends IHMCWholeRobotControlJavaBridg
       }
       else
       {
-         PrintTools.info(ValkyrieRosControlController.class, "Running with multi-threaded RT threads for estimator and controller");
+         LogTools.info("Running with multi-threaded RT threads for estimator and controller");
          MultiThreadedRealTimeRobotController coordinator = new MultiThreadedRealTimeRobotController(estimatorThread);
          if (valkyrieAffinity.setAffinity())
          {
