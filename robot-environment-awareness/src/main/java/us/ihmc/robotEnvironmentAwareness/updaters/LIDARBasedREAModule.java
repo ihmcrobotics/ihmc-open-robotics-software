@@ -71,11 +71,12 @@ public class LIDARBasedREAModule
       this.reaMessager = reaMessager;
 
       moduleStateReporter = new REAModuleStateReporter(reaMessager);
-      lidarBufferUpdater = new REAOcTreeBuffer(mainOctree.getResolution(), reaMessager, moduleStateReporter, REAModuleAPI.LidarBufferEnable, true,
-                                               REAModuleAPI.LidarBufferOcTreeCapacity, 10000, REAModuleAPI.LidarBufferMessageCapacity, 500);
-      stereoVisionBufferUpdater = new REAOcTreeBuffer(mainOctree.getResolution(), reaMessager, moduleStateReporter, REAModuleAPI.StereoVisionBufferEnable,
-                                                      false, REAModuleAPI.StereoVisionBufferOcTreeCapacity, 0, REAModuleAPI.StereoVisionBufferMessageCapacity,
-                                                      1);
+      lidarBufferUpdater = new REAOcTreeBuffer(mainOctree.getResolution(), reaMessager, REAModuleAPI.LidarBufferEnable, true,
+                                               REAModuleAPI.LidarBufferOcTreeCapacity, 10000, REAModuleAPI.LidarBufferMessageCapacity, 500,
+                                               REAModuleAPI.RequestLidarBuffer, REAModuleAPI.LidarBufferState);
+      stereoVisionBufferUpdater = new REAOcTreeBuffer(mainOctree.getResolution(), reaMessager, REAModuleAPI.StereoVisionBufferEnable, false,
+                                                      REAModuleAPI.StereoVisionBufferOcTreeCapacity, 0, REAModuleAPI.StereoVisionBufferMessageCapacity, 1,
+                                                      REAModuleAPI.RequestStereoVisionBuffer, REAModuleAPI.StereoVisionBufferState);
       REAOcTreeBuffer[] bufferUpdaters = new REAOcTreeBuffer[] {lidarBufferUpdater, stereoVisionBufferUpdater};
       mainUpdater = new REAOcTreeUpdater(mainOctree, bufferUpdaters, reaMessager);
       planarRegionFeatureUpdater = new REAPlanarRegionFeatureUpdater(mainOctree, reaMessager);
