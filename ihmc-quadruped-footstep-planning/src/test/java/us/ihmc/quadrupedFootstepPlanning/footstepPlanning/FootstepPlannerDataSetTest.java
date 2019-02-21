@@ -46,7 +46,6 @@ import java.util.function.Function;
 public abstract class FootstepPlannerDataSetTest
 {
    protected static final double bambooTimeScaling = 4.0;
-   private static final double epsilon = 1e-3;
 
    private static final QuadrantDependentList<AppearanceDefinition> colorDefinitions = new QuadrantDependentList<>(YoAppearance.Red(), YoAppearance.Green(),
                                                                                                                    YoAppearance.DarkRed(),
@@ -55,8 +54,8 @@ public abstract class FootstepPlannerDataSetTest
    // Whether to start the UI or not.
    protected static boolean VISUALIZE = false;
    // For enabling helpful prints.
-   protected static boolean DEBUG = true;
-   protected static boolean VERBOSE = true;
+   protected static boolean DEBUG = false;
+   protected static boolean VERBOSE = false;
 
    private FootstepPlannerUI ui = null;
    protected Messager messager = null;
@@ -320,11 +319,11 @@ public abstract class FootstepPlannerDataSetTest
       centerPoint.scale(0.25);
 
       String errorMessage = "";
-      if (!goalPosition.epsilonEquals(centerPoint, epsilon))
+      if (!goalPosition.epsilonEquals(centerPoint, 3.0 * FootstepNode.gridSizeXY))
          errorMessage = datasetName + " did not reach goal position. Made it to " + centerPoint + ", trying to get to " + goalPosition;
       if (!Double.isNaN(goalYaw))
       {
-         if (!MathTools.epsilonEquals(goalYaw, nominalYaw, 0.02))
+         if (!MathTools.epsilonEquals(goalYaw, nominalYaw, FootstepNode.gridSizeYaw))
             errorMessage = datasetName + " did not reach goal yaw. Made it to " + nominalYaw + ", trying to get to " + goalYaw;
       }
 
