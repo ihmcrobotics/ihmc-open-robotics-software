@@ -495,6 +495,11 @@ public abstract class FootstepPlannerToolboxDataSetTest
    {
       QuadrantDependentList<Point3DBasics> finalSteps = getFinalStepPositions(plannedSteps);
 
+      String errorMessage = "";
+      if (!result.validForExecution())
+         errorMessage = datasetName + " was not valid for execution " + result + ".\n";
+
+
       Point3D centerPoint = new Point3D();
       for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
       {
@@ -508,14 +513,13 @@ public abstract class FootstepPlannerToolboxDataSetTest
 
       centerPoint.scale(0.25);
 
-      String errorMessage = "";
-      if (!goalPosition.epsilonEquals(centerPoint, epsilon))
-         errorMessage = datasetName + " did not reach goal position. Made it to " + centerPoint + ", trying to get to " + goalPosition;
+      if (!goalPosition.epsilonEquals(centerPoint, FootstepNode.gridSizeXY))
+         errorMessage += datasetName + " did not reach goal position. Made it to " + centerPoint + ", trying to get to " + goalPosition;
       if (goalOrientation != null)
       {
          double goalYaw = goalOrientation.getYaw();
-         if (!MathTools.epsilonEquals(goalYaw, nominalYaw, 0.02))
-            errorMessage = datasetName + " did not reach goal yaw. Made it to " + nominalYaw + ", trying to get to " + goalYaw;
+         if (!MathTools.epsilonEquals(goalYaw, nominalYaw, FootstepNode.gridSizeYaw))
+            errorMessage += datasetName + " did not reach goal yaw. Made it to " + nominalYaw + ", trying to get to " + goalYaw;
       }
 
       if ((VISUALIZE || DEBUG) && !errorMessage.isEmpty())
