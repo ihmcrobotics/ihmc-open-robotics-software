@@ -23,6 +23,7 @@ public class SnappedPositionGraphic extends FXUIGraphic
       sphere = new Sphere(0.05);
       material = new PhongMaterial(color);
       sphere.setMaterial(material);
+      sphere.setMouseTransparent(true);
 
       positionReference = new ChangingReference<>(messager.createInput(SnappedPositionEditor.API.SelectedPosition, new Point3D()));
       selectedReference = new ActivationReference<>(messager.createInput(BehaviorUI.API.SelectedGraphic, FXUIGraphic.NONE), this);
