@@ -7,14 +7,14 @@ import controller_msgs.msg.dds.RobotConfigurationData;
 import us.ihmc.avatar.drcRobot.RobotTarget;
 import us.ihmc.avatar.networkProcessor.lidarScanPublisher.LidarScanPublisher;
 import us.ihmc.avatar.networkProcessor.stereoPointCloudPublisher.StereoVisionPointCloudPublisher;
-import us.ihmc.avatar.networkProcessor.stereoPointCloudPublisher.StereoVisionPointCloudPublisher.ColorPointCloudData;
-import us.ihmc.avatar.networkProcessor.stereoPointCloudPublisher.StereoVisionPointCloudPublisher.StereoVisionTransformer;
+import us.ihmc.avatar.networkProcessor.stereoPointCloudPublisher.StereoVisionPointCloudPublisher.StereoVisionWorldTransformCalculator;
 import us.ihmc.avatar.ros.DRCROSPPSTimestampOffsetProvider;
 import us.ihmc.avatar.sensors.DRCSensorSuiteManager;
 import us.ihmc.avatar.sensors.multisense.MultiSenseSensorManager;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.ControllerAPIDefinition;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.net.ObjectCommunicator;
+import us.ihmc.euclid.geometry.interfaces.Pose3DBasics;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.ihmcPerception.camera.CameraDataReceiver;
@@ -68,7 +68,7 @@ public class ValkyrieSensorSuiteManager implements DRCSensorSuiteManager
       {
          stereoVisionPointCloudPublisher = new StereoVisionPointCloudPublisher(fullRobotModelFactory, ros2Node, rcdTopicName);
          stereoVisionPointCloudPublisher.setPPSTimestampOffsetProvider(ppsTimestampOffsetProvider);
-         stereoVisionPointCloudPublisher.setCustomStereoVisionTransformer(createCustonStereoTransformer());
+         stereoVisionPointCloudPublisher.setCustomStereoVisionTransformer(createCustomStereoTransformCalculator());
       }
       else
       {
@@ -135,25 +135,19 @@ public class ValkyrieSensorSuiteManager implements DRCSensorSuiteManager
    {
    }
 
-   private StereoVisionTransformer createCustonStereoTransformer()
+   private StereoVisionWorldTransformCalculator createCustomStereoTransformCalculator()
    {
-      return new StereoVisionTransformer()
+      return new StereoVisionWorldTransformCalculator()
       {
-         private RigidBodyTransform transformFromNeckToWorld = new RigidBodyTransform();
+         private final RigidBodyTransform transformFromHeadToUpperNeckPitchLink = ValkyrieSensorInformation.getTransformFromHeadToUpperNeckPitchLink();
 
          @Override
-         public void transform(FullHumanoidRobotModel fullRobotModel, ReferenceFrame scanPointsFrame, ColorPointCloudData pointCloudDataToTransformToWorld)
+         public void computeTransformToWorld(FullHumanoidRobotModel fullRobotModel, ReferenceFrame scanPointsFrame, RigidBodyTransform transformToWorldToPack, Pose3DBasics sensorPoseToPack)
          {
-            transformFromNeckToWorld = new RigidBodyTransform();
-
             ReferenceFrame neckFrame = fullRobotModel.getHeadBaseFrame();
-            RigidBodyTransform transformFromHeadToNeck = new RigidBodyTransform(ValkyrieSensorInformation.getTransformFromHeadToUpperNeckPitchLink());
-
-            neckFrame.getTransformToDesiredFrame(transformFromNeckToWorld, ReferenceFrame.getWorldFrame());
-
-            transformFromNeckToWorld.multiply(transformFromHeadToNeck);
-            pointCloudDataToTransformToWorld.applyTransform(transformFromNeckToWorld);
-
+            neckFrame.getTransformToDesiredFrame(transformToWorldToPack, ReferenceFrame.getWorldFrame());
+            transformToWorldToPack.multiply(transformFromHeadToUpperNeckPitchLink);
+            sensorPoseToPack.set(transformToWorldToPack);
          }
       };
    }

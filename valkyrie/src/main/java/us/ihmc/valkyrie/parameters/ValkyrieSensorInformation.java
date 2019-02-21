@@ -11,6 +11,7 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
+import us.ihmc.euclid.yawPitchRoll.YawPitchRoll;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.sensors.ContactSensorType;
@@ -23,7 +24,6 @@ import us.ihmc.valkyrie.configuration.ValkyrieConfigurationRoot;
 
 public class ValkyrieSensorInformation implements DRCRobotSensorInformation
 {
-
    public static final String[] forceSensorNames;
    private static final SideDependentList<String> feetForceSensorNames;
    private final ArrayList<ImmutableTriple<String, String, RigidBodyTransform>> staticTranformsForRos = new ArrayList<ImmutableTriple<String,String,RigidBodyTransform>>();
@@ -46,6 +46,8 @@ public class ValkyrieSensorInformation implements DRCRobotSensorInformation
    private static final SideDependentList<String> footContactSensorNames = new SideDependentList<String>("leftFootContactSensor","rightFootContactSensor");
    private static final SideDependentList<String> urdfFeetForceSensorNames = new SideDependentList<>("leftFootSixAxis_Offset", "rightFootSixAxis_Offset");
    public static final SideDependentList<LinkedHashMap<String, LinkedHashMap<String,ContactSensorType>>> contactSensors = new SideDependentList<LinkedHashMap<String,LinkedHashMap<String,ContactSensorType>>>();
+
+   private static final RigidBodyTransform transformFromHeadToUpperNeckPitchLink = new RigidBodyTransform(new YawPitchRoll(0.0, 0.130899694, -Math.PI), new Vector3D(0.183585961, 0.0, 0.075353826));
 
    public static final boolean USE_JSC_FOOT_MASS_TARING = false;
 
@@ -363,7 +365,7 @@ public class ValkyrieSensorInformation implements DRCRobotSensorInformation
 
    private void setupStaticTransformsForRos()
    {
-      RigidBodyTransform staticTransform = getTransformFromHeadToUpperNeckPitchLink();
+      RigidBodyTransform staticTransform = new RigidBodyTransform(transformFromHeadToUpperNeckPitchLink);
       ImmutableTriple<String, String, RigidBodyTransform> headToHeadRootStaticTransform = new ImmutableTriple<String, String, RigidBodyTransform>("upperNeckPitchLink", "multisense/head",
             staticTransform);
       staticTranformsForRos.add(headToHeadRootStaticTransform);
@@ -371,10 +373,6 @@ public class ValkyrieSensorInformation implements DRCRobotSensorInformation
 
    public static RigidBodyTransform getTransformFromHeadToUpperNeckPitchLink()
    {
-      Quaternion orientation = new Quaternion();
-      Vector3D translation = new Vector3D(0.183585961, 0.0, 0.075353826);
-      orientation.setYawPitchRoll(0.0, 0.130899694, -Math.PI);
-      RigidBodyTransform staticTransform = new RigidBodyTransform(orientation, translation);
-      return staticTransform;
+      return transformFromHeadToUpperNeckPitchLink;
    }
 }
