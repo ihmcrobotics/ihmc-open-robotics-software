@@ -249,15 +249,17 @@ public class LIDARBasedREAModule
 
    public static LIDARBasedREAModule createRemoteModule(String configurationFilePath) throws Exception
    {
-      Messager server = KryoMessager.createTCPServer(REAModuleAPI.API, NetworkPorts.REA_MODULE_UI_PORT, REACommunicationProperties.getPrivateNetClassList());
+      KryoMessager server = KryoMessager.createTCPServer(REAModuleAPI.API, NetworkPorts.REA_MODULE_UI_PORT, REACommunicationProperties.getPrivateNetClassList());
+      server.setAllowSelfSubmit(true);
       server.startMessager();
       return new LIDARBasedREAModule(server, new File(configurationFilePath));
    }
 
    public static LIDARBasedREAModule createIntraprocessModule(String configurationFilePath) throws Exception
    {
-      Messager messager = KryoMessager.createIntraprocess(REAModuleAPI.API, NetworkPorts.REA_MODULE_UI_PORT,
+      KryoMessager messager = KryoMessager.createIntraprocess(REAModuleAPI.API, NetworkPorts.REA_MODULE_UI_PORT,
                                                           REACommunicationProperties.getPrivateNetClassList());
+      messager.setAllowSelfSubmit(true);
       messager.startMessager();
 
       File configurationFile = new File(configurationFilePath);
