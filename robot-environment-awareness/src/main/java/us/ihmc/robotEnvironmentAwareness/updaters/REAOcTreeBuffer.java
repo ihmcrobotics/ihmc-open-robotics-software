@@ -206,7 +206,8 @@ public class REAOcTreeBuffer
    private static Scan toScan(Float data, Point3DReadOnly sensorPosition)
    {
       PointCloud pointCloud = new PointCloud();
-      for (int i = 0; i < data.size() / 3; i += 3)
+      int numberOfPoints = data.size() / 3;
+      for (int i = 0; i < numberOfPoints; i += 3)
       {
          pointCloud.add(data.getQuick(i), data.getQuick(i + 1), data.getQuick(i + 2));
       }
