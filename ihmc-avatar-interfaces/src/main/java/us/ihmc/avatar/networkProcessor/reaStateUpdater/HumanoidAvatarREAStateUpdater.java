@@ -86,9 +86,11 @@ public class HumanoidAvatarREAStateUpdater
       switch (WalkingStatus.fromByte(newMessage.getWalkingStatus()))
       {
       case STARTED:
+      case RESUMED:
          executorService.execute(() -> reaStateRequestPublisher.publish(pauseRequestMessage));
          break;
       case COMPLETED:
+      case PAUSED:
          executorService.execute(() -> reaStateRequestPublisher.publish(resumeRequestMessage));
          break;
       case ABORT_REQUESTED:
