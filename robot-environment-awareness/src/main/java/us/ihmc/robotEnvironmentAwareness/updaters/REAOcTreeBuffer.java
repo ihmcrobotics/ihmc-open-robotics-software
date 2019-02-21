@@ -14,6 +14,8 @@ import us.ihmc.jOctoMap.pointCloud.ScanCollection;
 import us.ihmc.messager.Messager;
 import us.ihmc.messager.MessagerAPIFactory.Topic;
 import us.ihmc.robotEnvironmentAwareness.communication.REAModuleAPI;
+import us.ihmc.robotEnvironmentAwareness.communication.converters.OcTreeMessageConverter;
+import us.ihmc.robotEnvironmentAwareness.communication.packets.NormalOcTreeMessage;
 import us.ihmc.robotEnvironmentAwareness.io.FilePropertyHelper;
 
 public class REAOcTreeBuffer
@@ -34,32 +36,35 @@ public class REAOcTreeBuffer
    private final AtomicBoolean isBufferRequested = new AtomicBoolean(false);
    private final AtomicReference<NormalOcTree> newBuffer = new AtomicReference<>(null);
 
+   private final AtomicReference<Boolean> isBufferStateRequested;
+
    private final double octreeResolution;
    private int messageCounter = 0;
-
-   private final REAModuleStateReporter moduleStateReporter;
 
    private final Messager reaMessager;
 
    private final Topic<Boolean> enableBufferTopic;
    private final Topic<Integer> ocTreeCapacityTopic;
    private final Topic<Integer> messageCapacityTopic;
+   private final Topic<NormalOcTreeMessage> stateTopic;
 
-   public REAOcTreeBuffer(double octreeResolution, Messager reaMessager, REAModuleStateReporter moduleStateReporter, Topic<Boolean> enableBufferTopic,
-                          boolean enableBufferInitialValue, Topic<Integer> ocTreeCapacityTopic, int ocTreeCapacityValue, Topic<Integer> messageCapacityTopic,
-                          int messageCapacityInitialValue)
+   public REAOcTreeBuffer(double octreeResolution, Messager reaMessager, Topic<Boolean> enableBufferTopic, boolean enableBufferInitialValue,
+                          Topic<Integer> ocTreeCapacityTopic, int ocTreeCapacityValue, Topic<Integer> messageCapacityTopic, int messageCapacityInitialValue,
+                          Topic<Boolean> requestStateTopic, Topic<NormalOcTreeMessage> stateTopic)
    {
       this.octreeResolution = octreeResolution;
       this.reaMessager = reaMessager;
-      this.moduleStateReporter = moduleStateReporter;
       this.enableBufferTopic = enableBufferTopic;
       this.ocTreeCapacityTopic = ocTreeCapacityTopic;
       this.messageCapacityTopic = messageCapacityTopic;
+      this.stateTopic = stateTopic;
 
       enable = reaMessager.createInput(REAModuleAPI.OcTreeEnable, true);
       enableBuffer = reaMessager.createInput(enableBufferTopic, enableBufferInitialValue);
       ocTreeCapacity = reaMessager.createInput(ocTreeCapacityTopic, ocTreeCapacityValue);
       messageCapacity = reaMessager.createInput(messageCapacityTopic, messageCapacityInitialValue);
+
+      isBufferStateRequested = reaMessager.createInput(requestStateTopic, false);
 
       reaMessager.registerTopicListener(REAModuleAPI.RequestEntireModuleState, (messageContent) -> sendCurrentState());
    }
@@ -141,7 +146,8 @@ public class REAOcTreeBuffer
                messageCounter = 0;
             }
 
-            moduleStateReporter.reportBufferOcTreeState(bufferOctree);
+            if (isBufferStateRequested.getAndSet(false))
+               reaMessager.submitMessage(stateTopic, OcTreeMessageConverter.convertToMessage(bufferOctree));
          }
       };
    }
@@ -206,10 +212,15 @@ public class REAOcTreeBuffer
    private static Scan toScan(Float data, Point3DReadOnly sensorPosition)
    {
       PointCloud pointCloud = new PointCloud();
-      int numberOfPoints = data.size() / 3;
-      for (int i = 0; i < numberOfPoints; i += 3)
+
+      int bufferIndex = 0;
+
+      while (bufferIndex < data.size())
       {
-         pointCloud.add(data.getQuick(i), data.getQuick(i + 1), data.getQuick(i + 2));
+         float x = data.getQuick(bufferIndex++);
+         float y = data.getQuick(bufferIndex++);
+         float z = data.getQuick(bufferIndex++);
+         pointCloud.add(x, y, z);
       }
       return new Scan(sensorPosition, pointCloud);
    }
