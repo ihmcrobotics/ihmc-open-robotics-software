@@ -116,15 +116,23 @@ public abstract class QuadrupedToolboxModule
          }
       });
 
-      robotDataReceiver = new QuadrupedRobotDataReceiver(fullRobotModel, null);
+      ROS2Tools.MessageTopicNameGenerator controllerPubGenerator = QuadrupedControllerAPIDefinition.getPublisherTopicNameGenerator(robotName);
+      if (fullRobotModel != null)
+      {
+         robotDataReceiver = new QuadrupedRobotDataReceiver(fullRobotModel, null);
+         ROS2Tools.createCallbackSubscription(realtimeRos2Node, RobotConfigurationData.class, controllerPubGenerator,
+                                              s -> robotDataReceiver.receivedPacket(s.takeNextData()));
+      }
+      else
+      {
+         robotDataReceiver = null;
+      }
 
       networkSubscriber.addMessageFilter(createMessageFilter());
 
       ROS2Tools
             .createCallbackSubscription(realtimeRos2Node, ToolboxStateMessage.class, getSubscriberTopicNameGenerator(), s -> receivedPacket(s.takeNextData()));
-      ROS2Tools.MessageTopicNameGenerator controllerPubGenerator = QuadrupedControllerAPIDefinition.getPublisherTopicNameGenerator(robotName);
-      ROS2Tools.createCallbackSubscription(realtimeRos2Node, RobotConfigurationData.class, controllerPubGenerator,
-                                           s -> robotDataReceiver.receivedPacket(s.takeNextData()));
+
 
       registerExtraSubscribers(realtimeRos2Node);
       realtimeRos2Node.spin();
@@ -308,7 +316,8 @@ public abstract class QuadrupedToolboxModule
             if (Thread.interrupted())
                return;
 
-            robotDataReceiver.updateRobotModel();
+            if (robotDataReceiver != null)
+               robotDataReceiver.updateRobotModel();
 
             try
             {
