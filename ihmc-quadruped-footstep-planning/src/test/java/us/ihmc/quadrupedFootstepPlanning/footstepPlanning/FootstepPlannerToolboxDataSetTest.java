@@ -58,8 +58,8 @@ public abstract class FootstepPlannerToolboxDataSetTest
    // Whether to start the UI or not.
    protected static boolean VISUALIZE = false;
    // For enabling helpful prints.
-   protected static boolean DEBUG = true;
-   protected static boolean VERBOSE = true;
+   protected static boolean DEBUG = false;
+   protected static boolean VERBOSE = false;
 
    private FootstepPlannerUI ui = null;
    protected Messager messager = null;

@@ -51,7 +51,7 @@ import java.util.concurrent.atomic.AtomicReference;
  */
 public class RemoteUIMessageConverter
 {
-   private static final boolean verbose = true;
+   private static final boolean verbose = false;
 
    private final RealtimeRos2Node ros2Node;
 
