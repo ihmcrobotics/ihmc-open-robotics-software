@@ -15,6 +15,8 @@ import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.communication.IHMCROS2Publisher;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.packets.MessageTools;
+import us.ihmc.euclid.geometry.Pose3D;
+import us.ihmc.euclid.geometry.interfaces.Pose3DBasics;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
@@ -43,7 +45,7 @@ public class StereoVisionPointCloudPublisher
    private final String robotName;
    private final FullHumanoidRobotModel fullRobotModel;
    private ReferenceFrame stereoVisionPointsFrame = worldFrame;
-   private StereoVisionTransformer stereoVisionTransformer = null;
+   private StereoVisionWorldTransformCalculator stereoVisionTransformer = null;
 
    private final RobotConfigurationDataBuffer robotConfigurationDataBuffer = new RobotConfigurationDataBuffer();
 
@@ -88,7 +90,7 @@ public class StereoVisionPointCloudPublisher
       this.ppsTimestampOffsetProvider = ppsTimestampOffsetProvider;
    }
 
-   public void setCustomStereoVisionTransformer(StereoVisionTransformer transformer)
+   public void setCustomStereoVisionTransformer(StereoVisionWorldTransformCalculator transformer)
    {
       LogTools.info("setCustomStereoVisionTransformer()");
       stereoVisionTransformer = transformer;
@@ -114,6 +116,7 @@ public class StereoVisionPointCloudPublisher
       return new Runnable()
       {
          private final RigidBodyTransform transformToWorld = new RigidBodyTransform();
+         private final Pose3D sensorPose = new Pose3D();
 
          @Override
          public void run()
@@ -157,15 +160,25 @@ public class StereoVisionPointCloudPublisher
 
             if (stereoVisionTransformer != null)
             {
-               stereoVisionTransformer.transform(fullRobotModel, stereoVisionPointsFrame, pointCloudData);
-            }
-            else if (!stereoVisionPointsFrame.isWorldFrame())
-            {
-               stereoVisionPointsFrame.getTransformToDesiredFrame(transformToWorld, worldFrame);
+               stereoVisionTransformer.computeTransformToWorld(fullRobotModel, stereoVisionPointsFrame, transformToWorld, sensorPose);
                pointCloudData.applyTransform(transformToWorld);
             }
+            else
+            {
+               if (!stereoVisionPointsFrame.isWorldFrame())
+               {
+                  stereoVisionPointsFrame.getTransformToDesiredFrame(transformToWorld, worldFrame);
+                  pointCloudData.applyTransform(transformToWorld);
+               }
 
-            StereoVisionPointCloudMessage message = pointCloudData.createStereoVisionPointCloudMessage(MAX_NUMBER_OF_POINTS);
+               fullRobotModel.getHeadBaseFrame().getTransformToDesiredFrame(transformToWorld, worldFrame);
+               sensorPose.set(transformToWorld);
+            }
+
+            StereoVisionPointCloudMessage message = pointCloudData.toStereoVisionPointCloudMessage();
+            message.getSensorPosition().set(sensorPose.getPosition());
+            message.getSensorOrientation().set(sensorPose.getOrientation());
+
             if (Debug)
                System.out.println("Publishing stereo data, number of points: " + (message.getPointCloud().size() / 3));
             pointcloudPublisher.publish(message);
@@ -221,7 +234,7 @@ public class StereoVisionPointCloudPublisher
          return colors;
       }
 
-      public StereoVisionPointCloudMessage createStereoVisionPointCloudMessage(int maximumSize)
+      public StereoVisionPointCloudMessage toStereoVisionPointCloudMessage()
       {
          long timestamp = this.timestamp;
          float[] pointCloudBuffer = new float[3 * numberOfPoints];
@@ -253,8 +266,9 @@ public class StereoVisionPointCloudPublisher
       }
    }
 
-   public static interface StereoVisionTransformer
+   public static interface StereoVisionWorldTransformCalculator
    {
-      public void transform(FullHumanoidRobotModel fullRobotModel, ReferenceFrame scanPointsFrame, ColorPointCloudData scanDataToTransformToWorld);
+      public void computeTransformToWorld(FullHumanoidRobotModel fullRobotModel, ReferenceFrame scanPointsFrame, RigidBodyTransform transformToWorldToPack,
+                                          Pose3DBasics sensorPoseToPack);
    }
 }
