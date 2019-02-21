@@ -353,7 +353,8 @@ public abstract class FootstepPlannerToolboxDataSetTest
 
    private String getTimeoutFlag()
    {
-      return getPlannerType().toString().toLowerCase() + "_timeout";
+//      return getPlannerType().toString().toLowerCase() + "_timeout";
+      return "quadruped_timeout";
    }
 
    private String findPlanAndAssertGoodResult(DataSet dataset)
@@ -503,7 +504,7 @@ public abstract class FootstepPlannerToolboxDataSetTest
 
       centerPoint.scale(0.25);
 
-      if (!goalPosition.epsilonEquals(centerPoint, FootstepNode.gridSizeXY))
+      if (!goalPosition.epsilonEquals(centerPoint, 3.0 * FootstepNode.gridSizeXY))
          errorMessage += datasetName + " did not reach goal position. Made it to " + centerPoint + ", trying to get to " + goalPosition;
       if (Double.isFinite(goalYaw))
       {
