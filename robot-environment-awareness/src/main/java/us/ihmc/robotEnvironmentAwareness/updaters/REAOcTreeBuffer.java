@@ -186,6 +186,7 @@ public class REAOcTreeBuffer
          ScanCollection scanCollection = new ScanCollection();
          newFullScanReference.set(scanCollection);
          scanCollection.setSubSampleSize(NUMBER_OF_SAMPLES);
+         // FIXME the following make several copies in a row of the data which is very likely to be slow depending on the input size.
          scanCollection.addScan(lidarMessage.getScan().toArray(), lidarMessage.getLidarPosition());
       }
 
@@ -194,6 +195,7 @@ public class REAOcTreeBuffer
          ScanCollection scanCollection = new ScanCollection();
          newFullScanReference.set(scanCollection);
          scanCollection.setSubSampleSize(NUMBER_OF_SAMPLES);
+         // FIXME the following make several copies in a row of the data which is very likely to be slow depending on the input size.
          scanCollection.addScan(stereoMessage.getPointCloud().toArray(), stereoMessage.getSensorPosition());
       }
    }
