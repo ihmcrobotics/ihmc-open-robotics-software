@@ -15,14 +15,18 @@ import com.google.common.util.concurrent.AtomicDouble;
 
 import controller_msgs.msg.dds.LidarScanMessage;
 import controller_msgs.msg.dds.PlanarRegionsListMessage;
+import controller_msgs.msg.dds.REAStateRequestMessage;
+import controller_msgs.msg.dds.RequestPlanarRegionsListMessage;
 import controller_msgs.msg.dds.StereoVisionPointCloudMessage;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.packets.PlanarRegionMessageConverter;
+import us.ihmc.communication.packets.PlanarRegionsRequestType;
 import us.ihmc.communication.util.NetworkPorts;
 import us.ihmc.jOctoMap.ocTree.NormalOcTree;
 import us.ihmc.jOctoMap.tools.JOctoMapTools;
 import us.ihmc.log.LogTools;
 import us.ihmc.messager.Messager;
+import us.ihmc.messager.MessagerAPIFactory.Topic;
 import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
 import us.ihmc.pubsub.subscriber.Subscriber;
 import us.ihmc.robotEnvironmentAwareness.communication.KryoMessager;
@@ -86,6 +90,9 @@ public class LIDARBasedREAModule
                                            this::dispatchStereoVisionPointCloudMessage);
       ROS2Tools.createCallbackSubscription(ros2Node, PlanarRegionsListMessage.class, subscriberCustomRegionsTopicNameGenerator,
                                            this::dispatchCustomPlanarRegion);
+      ROS2Tools.createCallbackSubscription(ros2Node, RequestPlanarRegionsListMessage.class, subscriberTopicNameGenerator,
+                                           this::handleRequestPlanarRegionsListMessage);
+      ROS2Tools.createCallbackSubscription(ros2Node, REAStateRequestMessage.class, subscriberTopicNameGenerator, this::handleREAStateRequestMessage);
 
       FilePropertyHelper filePropertyHelper = new FilePropertyHelper(configurationFile);
       loadConfigurationFile(filePropertyHelper);
@@ -121,6 +128,26 @@ public class LIDARBasedREAModule
       PlanarRegionsListMessage message = subscriber.takeNextData();
       PlanarRegionsList customPlanarRegions = PlanarRegionMessageConverter.convertToPlanarRegionsList(message);
       customPlanarRegions.getPlanarRegionsAsList().forEach(planarRegionFeatureUpdater::registerCustomPlanarRegion);
+   }
+
+   private void handleRequestPlanarRegionsListMessage(Subscriber<RequestPlanarRegionsListMessage> subscriber)
+   {
+      RequestPlanarRegionsListMessage newMessage = subscriber.takeNextData();
+      PlanarRegionsRequestType requestType = PlanarRegionsRequestType.fromByte(newMessage.getPlanarRegionsRequestType());
+      if (requestType == PlanarRegionsRequestType.CLEAR)
+         clearOcTree.set(true);
+   }
+
+   private void handleREAStateRequestMessage(Subscriber<REAStateRequestMessage> subscriber)
+   {
+      REAStateRequestMessage newMessage = subscriber.takeNextData();
+
+      if (newMessage.getRequestResume())
+         reaMessager.submitMessage(REAModuleAPI.OcTreeEnable, true);
+      else if (newMessage.getRequestPause()) // We guarantee to resume if requested, regardless of the pause request.
+         reaMessager.submitMessage(REAModuleAPI.OcTreeEnable, false);
+      if (newMessage.getRequestClear())
+         clearOcTree.set(true);
    }
 
    private void loadConfigurationFile(FilePropertyHelper filePropertyHelper)
@@ -167,9 +194,6 @@ public class LIDARBasedREAModule
 
          if (isThreadInterrupted())
             return;
-
-         if (planarRegionNetworkProvider.pollClearRequest())
-            clearOcTree.set(true);
       }
       catch (Exception e)
       {
