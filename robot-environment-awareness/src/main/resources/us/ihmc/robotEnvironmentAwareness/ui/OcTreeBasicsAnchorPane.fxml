@@ -25,7 +25,7 @@
                   <Button fx:id="saveButton" maxWidth="1.7976931348623157E308" mnemonicParsing="false" onAction="#save" text="Save" />
                </children>
             </VBox>
-            <VBox>
+            <VBox style="-fx-border-color: lightblue; -fx-padding: 3; -fx-border-radius: 5; -fx-border-width: 2;">
                <children>
                   <Label alignment="CENTER" contentDisplay="CENTER" maxWidth="1.7976931348623157E308" prefWidth="104.0" text="Main OcTree" textAlignment="CENTER">
                      <font>
@@ -53,7 +53,7 @@
                   </GridPane>
                </children>
             </VBox>
-            <VBox>
+            <VBox prefHeight="146.0" prefWidth="222.0" style="-fx-border-color: lightblue; -fx-padding: 3; -fx-border-radius: 5; -fx-border-width: 2;">
                <children>
                   <Label alignment="CENTER" contentDisplay="CENTER" maxWidth="1.7976931348623157E308" prefHeight="20.0" text="Lidar Buffer" textAlignment="CENTER">
                      <font>
@@ -74,7 +74,7 @@
                   <ToggleButton fx:id="showInputLidarScanButton" maxWidth="1.7976931348623157E308" mnemonicParsing="false" text="Show input scan" />
                </children>
             </VBox>
-            <VBox>
+            <VBox style="-fx-border-color: lightblue; -fx-padding: 3; -fx-border-radius: 5; -fx-border-width: 2;">
                <children>
                   <Label alignment="CENTER" contentDisplay="CENTER" maxWidth="1.7976931348623157E308" text="Stereo vision Buffer" textAlignment="CENTER">
                      <font>
