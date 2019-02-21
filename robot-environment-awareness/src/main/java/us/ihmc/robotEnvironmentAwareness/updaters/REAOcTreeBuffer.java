@@ -111,9 +111,10 @@ public class REAOcTreeBuffer
             updateScanCollection();
             ScanCollection newScan = newFullScanReference.getAndSet(null);
 
-            if (clearBuffer.getAndSet(false))
+            if (!enable.get() || !enableBuffer.get() || clearBuffer.getAndSet(false))
             {
                bufferOctree.clear();
+               messageCounter = 0;
                isBufferFull.set(false);
                isBufferRequested.set(false);
                return;
