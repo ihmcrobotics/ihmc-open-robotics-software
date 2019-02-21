@@ -41,6 +41,7 @@ import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.tools.FootstepPlannerI
 import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.tools.FootstepPlannerIOTools.FootstepPlannerUnitTestDataset;
 import us.ihmc.quadrupedFootstepPlanning.ui.ApplicationRunner;
 import us.ihmc.quadrupedFootstepPlanning.ui.FootstepPlannerUI;
+import us.ihmc.quadrupedFootstepPlanning.ui.RemoteUIMessageConverter;
 import us.ihmc.quadrupedPlanning.QuadrupedXGaitSettingsReadOnly;
 import us.ihmc.quadrupedPlanning.footstepChooser.DefaultPointFootSnapperParameters;
 import us.ihmc.robotics.Assert;
@@ -75,6 +76,7 @@ public abstract class FootstepPlannerToolboxDataSetTest
    private QuadrupedFootstepPlanningModule footstepPlanningModule = null;
 
    private RealtimeRos2Node ros2Node;
+   private RemoteUIMessageConverter converter;
    private IHMCRealtimeROS2Publisher<QuadrupedFootstepPlannerParametersPacket> footstepPlannerParametersPublisher;
    private IHMCRealtimeROS2Publisher<QuadrupedFootstepPlanningRequestPacket> footstepPlanningRequestPublisher;
    private IHMCRealtimeROS2Publisher<ToolboxStateMessage> toolboxStatePublisher;
@@ -125,6 +127,8 @@ public abstract class FootstepPlannerToolboxDataSetTest
                                            FootstepPlannerCommunicationProperties.publisherTopicNameGenerator(robotName),
                                            s -> processFootstepPlanningOutputStatus(s.takeNextData()));
 
+      converter = RemoteUIMessageConverter.createConverter(messager, robotName, pubSubImplementation);
+
       ros2Node.spin();
 
       try
@@ -151,9 +155,11 @@ public abstract class FootstepPlannerToolboxDataSetTest
    {
       messager.closeMessager();
       footstepPlanningModule.destroy();
+      converter.destroy();
       if (ui != null)
          ui.stop();
 
+      converter = null;
       footstepPlanningModule = null;
       ui = null;
       messager = null;
