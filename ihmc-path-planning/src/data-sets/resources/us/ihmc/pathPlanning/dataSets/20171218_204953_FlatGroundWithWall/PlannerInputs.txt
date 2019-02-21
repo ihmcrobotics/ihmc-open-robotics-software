@@ -1,0 +1,10 @@
+start_position -4.805 0.001 0.000
+goal_position 4.805 0.001 0.000
+vis_graph_status test
+step_planner_status test
+planar_region_bipedal_timeout 5.0
+plan_then_snap_timeout 5.0
+a_star_timeout 20.0
+vis_graph_with_a_star_timeout 5.0
+quadruped_planner_status test
+quadruped_timeout 20.0

@@ -33,10 +33,8 @@ public class MessagerPlanThenSnapDataSetTest extends FootstepPlannerDataSetTest
    public static void main(String[] args) throws Exception
    {
       MessagerPlanThenSnapDataSetTest test = new MessagerPlanThenSnapDataSetTest();
-      String prefix = "unitTestData/testable/";
       test.setup();
-      test.runAssertionsOnDataset(dataset -> test.runAssertions(dataset), prefix + "20171218_205040_SimpleMaze");
+      test.runAssertionsOnDataset(dataset -> test.runAssertions(dataset), "20171218_205040_SimpleMaze");
       test.tearDown();
-
    }
 }

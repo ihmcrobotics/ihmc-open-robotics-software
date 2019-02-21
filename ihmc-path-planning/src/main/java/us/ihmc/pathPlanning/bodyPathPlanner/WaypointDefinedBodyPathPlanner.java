@@ -103,7 +103,7 @@ public class WaypointDefinedBodyPathPlanner implements BodyPathPlanner
    }
 
    @Override
-   public double getClosestPoint(Point2D point, Pose2D poseToPack)
+   public double getClosestPoint(Point2DReadOnly point, Pose2D poseToPack)
    {
       double closestPointDistance = Double.POSITIVE_INFINITY;
       double alpha = Double.NaN;

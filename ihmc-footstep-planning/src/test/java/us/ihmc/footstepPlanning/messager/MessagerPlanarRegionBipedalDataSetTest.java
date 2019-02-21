@@ -35,10 +35,9 @@ public class MessagerPlanarRegionBipedalDataSetTest extends FootstepPlannerDataS
    {
 //      VISUALIZE = true;
       MessagerPlanarRegionBipedalDataSetTest test = new MessagerPlanarRegionBipedalDataSetTest();
-      String prefix = "unitTestDataSets/test/";
       test.setup();
       LogTools.info("Running test.");
-      test.runAssertionsOnDataset(dataset -> test.runAssertions(dataset), prefix + "20171215_214801_StairsUpDown");
+      test.runAssertionsOnDataset(dataset -> test.runAssertions(dataset), "20171215_214801_StairsUpDown");
       LogTools.info("Test finished.");
       test.tearDown();
 

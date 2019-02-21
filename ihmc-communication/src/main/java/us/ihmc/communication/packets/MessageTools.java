@@ -288,6 +288,15 @@ public class MessageTools
       return message;
    }
 
+   public static SelectionMatrix3DMessage createSelectionMatrix3DMessage(boolean xSelected, boolean ySelected, boolean zSelected)
+   {
+      SelectionMatrix3DMessage message = new SelectionMatrix3DMessage();
+      message.setXSelected(xSelected);
+      message.setYSelected(ySelected);
+      message.setZSelected(zSelected);
+      return message;
+   }
+
    /**
     * Copy constructor.
     * 

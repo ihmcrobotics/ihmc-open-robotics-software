@@ -1,5 +1,5 @@
 plugins {
-    id("us.ihmc.ihmc-build") version "0.15.5"
+    id("us.ihmc.ihmc-build") version "0.15.6"
     id("us.ihmc.ihmc-ci") version "4.9"
     id("us.ihmc.log-tools") version "0.2.2"
 }
@@ -13,6 +13,7 @@ ihmc {
 
 mainDependencies {
     compile group: "us.ihmc", name: "ihmc-quadruped-planning", version: "source"
+    compile group: "us.ihmc", name: "ihmc-path-planning-data-sets", version: "source"
 }
 
 testDependencies {
@@ -22,4 +23,8 @@ testDependencies {
 
 visualizersDependencies {
     compile ihmc.sourceSetProject("main")
+
+    compile group: "us.ihmc", name: "ihmc-robot-models-visualizers", version: "source"
+    compile group: "us.ihmc", name: "ihmc-path-planning-visualizers", version: "source"
+    compile group: "us.ihmc", name: "ihmc-quadruped-ui", version: "source"
 }

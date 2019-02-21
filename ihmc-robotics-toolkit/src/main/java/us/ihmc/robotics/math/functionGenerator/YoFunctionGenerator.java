@@ -70,7 +70,7 @@ public class YoFunctionGenerator
 
    public YoFunctionGenerator(String name, YoVariableRegistry registry, boolean smoothParameters)
    {
-      this(name, null, registry);
+      this(name, null, registry, smoothParameters, -1.0);
    }
 
    public YoFunctionGenerator(String name, YoDouble time, YoVariableRegistry parentRegistry)

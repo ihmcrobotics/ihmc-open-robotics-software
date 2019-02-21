@@ -21,10 +21,12 @@ import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.packets.PlanarRegionMessageConverter;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.geometry.interfaces.Vertex2DSupplier;
+import us.ihmc.euclid.matrix.interfaces.RotationMatrixReadOnly;
 import us.ihmc.euclid.referenceFrame.FramePoint2D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
+import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
 import us.ihmc.robotEnvironmentAwareness.communication.REACommunicationProperties;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
@@ -56,6 +58,7 @@ public class BipedalSupportPlanarRegionPublisher
    private ScheduledFuture<?> task;
 
    private final FullHumanoidRobotModel fullRobotModel;
+   private final OneDoFJointBasics[] allJointsExcludingHands;
    private final HumanoidReferenceFrames referenceFrames;
    private final SideDependentList<ContactablePlaneBody> contactableFeet;
    private final List<PlanarRegion> supportRegions = new ArrayList<>();
@@ -64,6 +67,7 @@ public class BipedalSupportPlanarRegionPublisher
    {
       String robotName = robotModel.getSimpleRobotName();
       fullRobotModel = robotModel.createFullRobotModel();
+      allJointsExcludingHands = FullRobotModelUtils.getAllJointsExcludingHands(fullRobotModel);
       referenceFrames = new HumanoidReferenceFrames(fullRobotModel);
       ContactableBodiesFactory<RobotSide> contactableBodiesFactory = new ContactableBodiesFactory<>();
       contactableBodiesFactory.setFullRobotModel(fullRobotModel);
@@ -82,7 +86,7 @@ public class BipedalSupportPlanarRegionPublisher
                                            (NewMessageListener<RobotConfigurationData>) subscriber -> latestRobotConfigurationData.set(subscriber.takeNextData()));
       regionPublisher = ROS2Tools.createPublisher(ros2Node, PlanarRegionsListMessage.class,
                                                   REACommunicationProperties.subscriberCustomRegionsTopicNameGenerator);
-      
+
       for (int i = 0; i < 3; i++)
       {
          supportRegions.add(new PlanarRegion());
@@ -105,10 +109,8 @@ public class BipedalSupportPlanarRegionPublisher
       if (robotConfigurationData == null)
          return;
 
-      KinematicsToolboxHelper.setRobotStateFromRobotConfigurationData(robotConfigurationData, fullRobotModel.getRootJoint(),
-                                                                      FullRobotModelUtils.getAllJointsExcludingHands(fullRobotModel));
+      KinematicsToolboxHelper.setRobotStateFromRobotConfigurationData(robotConfigurationData, fullRobotModel.getRootJoint(), allJointsExcludingHands);
 
-      fullRobotModel.getElevator().updateFramesRecursively();
       referenceFrames.updateFrames();
 
       SideDependentList<Boolean> isInSupport = new SideDependentList<Boolean>(!capturabilityBasedStatus.getLeftFootSupportPolygon2d().isEmpty(),
@@ -120,13 +122,14 @@ public class BipedalSupportPlanarRegionPublisher
          ReferenceFrame leftSoleFrame = leftContactableFoot.getSoleFrame();
 
          List<FramePoint2D> allContactPoints = new ArrayList<>();
-         allContactPoints.addAll(leftContactableFoot.getContactPoints2d());
-         allContactPoints.addAll(rightContactableFoot.getContactPoints2d());
+         leftContactableFoot.getContactPoints2d().stream().map(FramePoint2D::new).forEach(allContactPoints::add);
+         rightContactableFoot.getContactPoints2d().stream().map(FramePoint2D::new).forEach(allContactPoints::add);
          allContactPoints.forEach(p -> p.changeFrameAndProjectToXYPlane(leftSoleFrame));
 
          supportRegions.set(0, new PlanarRegion());
          supportRegions.set(1, new PlanarRegion());
-         supportRegions.set(2, new PlanarRegion(leftSoleFrame.getTransformToWorldFrame(), new ConvexPolygon2D(Vertex2DSupplier.asVertex2DSupplier(allContactPoints))));
+         supportRegions.set(2, new PlanarRegion(leftSoleFrame.getTransformToWorldFrame(),
+                                                new ConvexPolygon2D(Vertex2DSupplier.asVertex2DSupplier(allContactPoints))));
       }
       else
       {
@@ -136,8 +139,9 @@ public class BipedalSupportPlanarRegionPublisher
             {
                ContactablePlaneBody contactableFoot = contactableFeet.get(robotSide);
                List<FramePoint2D> contactPoints = contactableFoot.getContactPoints2d();
-               RigidBodyTransform transformToWorld = referenceFrames.getSoleFrames().get(robotSide).getTransformToWorldFrame();
-               supportRegions.set(robotSide.ordinal(), new PlanarRegion(transformToWorld, new ConvexPolygon2D(Vertex2DSupplier.asVertex2DSupplier(contactPoints))));
+               RigidBodyTransform transformToWorld = contactableFoot.getSoleFrame().getTransformToWorldFrame();
+               supportRegions.set(robotSide.ordinal(),
+                                  new PlanarRegion(transformToWorld, new ConvexPolygon2D(Vertex2DSupplier.asVertex2DSupplier(contactPoints))));
             }
             else
             {
@@ -158,17 +162,22 @@ public class BipedalSupportPlanarRegionPublisher
 
    private boolean feetAreInSamePlane(SideDependentList<Boolean> isInSupport)
    {
-      boolean inDoubleSupport = isInSupport.get(RobotSide.LEFT) && isInSupport.get(RobotSide.RIGHT);
+      for (RobotSide robotSide : RobotSide.values)
+      {
+         if (!isInSupport.get(robotSide))
+         {
+            return false;
+         }
+      }
       ReferenceFrame leftSoleFrame = contactableFeet.get(RobotSide.LEFT).getSoleFrame();
       ReferenceFrame rightSoleFrame = contactableFeet.get(RobotSide.RIGHT).getSoleFrame();
       RigidBodyTransform relativeSoleTransform = leftSoleFrame.getTransformToDesiredFrame(rightSoleFrame);
+      RotationMatrixReadOnly relativeOrientation = relativeSoleTransform.getRotationMatrix();
 
       double rotationEpsilon = Math.toRadians(3.0);
       double translationEpsilon = 0.02;
-      return inDoubleSupport && 
-            Math.abs(relativeSoleTransform.getRotationMatrix().getPitch()) < rotationEpsilon && 
-            Math.abs(relativeSoleTransform.getRotationMatrix().getRoll()) < rotationEpsilon &&
-            Math.abs(relativeSoleTransform.getTranslationZ()) < translationEpsilon;
+      return Math.abs(relativeOrientation.getPitch()) < rotationEpsilon && Math.abs(relativeOrientation.getRoll()) < rotationEpsilon
+            && Math.abs(relativeSoleTransform.getTranslationZ()) < translationEpsilon;
    }
 
    public void stop()

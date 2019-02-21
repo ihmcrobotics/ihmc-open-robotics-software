@@ -10,4 +10,5 @@ public class ValkyriePriorityParameters
    public static final PriorityParameters LOGGER_PRIORITY = new PriorityParameters(40);
    public static final PriorityParameters HAND_COMMUNICATOR_PRIORITY = new PriorityParameters(35);
    public static final PriorityParameters POSECOMMUNICATOR_PRIORITY = new PriorityParameters(45);
+   public static final PriorityParameters JVM_STATISTICS_PRIORITY = new PriorityParameters(10);
 }
