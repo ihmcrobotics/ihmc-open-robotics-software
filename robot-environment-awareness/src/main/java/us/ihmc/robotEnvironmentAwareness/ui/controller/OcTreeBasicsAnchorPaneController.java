@@ -92,7 +92,8 @@ public class OcTreeBasicsAnchorPaneController extends REABasicUIController
       uiMessager.bindBidirectionalInternal(REAModuleAPI.UIOcTreeDepth, depthSlider.valueProperty(), numberToIntegerConverter, true);
       uiMessager.bindBidirectionalInternal(REAModuleAPI.UIOcTreeDisplayType, displayTypeComboBox.valueProperty(), true);
       uiMessager.bindBidirectionalInternal(REAModuleAPI.UIOcTreeColoringMode, coloringTypeComboBox.valueProperty(), true);
-      uiMessager.bindBidirectionalInternal(REAModuleAPI.UIOcTreeShowBuffer, showLidarBufferButton.selectedProperty(), true);
+      uiMessager.bindBidirectionalInternal(REAModuleAPI.UIOcTreeShowLidarBuffer, showLidarBufferButton.selectedProperty(), true);
+      uiMessager.bindBidirectionalInternal(REAModuleAPI.UIOcTreeShowStereoVisionBuffer, showStereoBufferButton.selectedProperty(), true);
       uiMessager.bindBidirectionalInternal(REAModuleAPI.UILidarScanShow, showInputLidarScanButton.selectedProperty(), true);
       uiMessager.bindBidirectionalInternal(REAModuleAPI.UIStereoVisionShow, showInputStereoPointCloudButton.selectedProperty(), true);
 
@@ -122,7 +123,7 @@ public class OcTreeBasicsAnchorPaneController extends REABasicUIController
       saveUIControlProperty(REAModuleAPI.UIOcTreeDepth, depthSlider);
       saveUIControlProperty(REAModuleAPI.UIOcTreeDisplayType, displayTypeComboBox);
       saveUIControlProperty(REAModuleAPI.UIOcTreeColoringMode, coloringTypeComboBox);
-      saveUIControlProperty(REAModuleAPI.UIOcTreeShowBuffer, showLidarBufferButton);
+      saveUIControlProperty(REAModuleAPI.UIOcTreeShowLidarBuffer, showLidarBufferButton);
       saveUIControlProperty(REAModuleAPI.UILidarScanShow, showInputLidarScanButton);
    }
 
@@ -131,7 +132,7 @@ public class OcTreeBasicsAnchorPaneController extends REABasicUIController
       loadUIControlProperty(REAModuleAPI.UIOcTreeDepth, depthSlider);
       loadUIControlProperty(REAModuleAPI.UIOcTreeDisplayType, displayTypeComboBox);
       loadUIControlProperty(REAModuleAPI.UIOcTreeColoringMode, coloringTypeComboBox);
-      loadUIControlProperty(REAModuleAPI.UIOcTreeShowBuffer, showLidarBufferButton);
+      loadUIControlProperty(REAModuleAPI.UIOcTreeShowLidarBuffer, showLidarBufferButton);
       loadUIControlProperty(REAModuleAPI.UILidarScanShow, showInputLidarScanButton);
    }
 }
