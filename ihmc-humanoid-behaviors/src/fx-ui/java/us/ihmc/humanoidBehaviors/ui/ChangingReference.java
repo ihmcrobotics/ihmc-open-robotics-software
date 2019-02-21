@@ -21,7 +21,14 @@ public class ChangingReference<T>
    public T get()
    {
       T newValue = atomicReference.get();
-      changed = !newValue.equals(lastValue);
+
+      if (newValue == lastValue)
+         changed = false;
+      else if (newValue == null)
+         changed = true;
+      else
+         changed = !newValue.equals(lastValue);
+
       lastValue = newValue;
       return newValue;
    }
