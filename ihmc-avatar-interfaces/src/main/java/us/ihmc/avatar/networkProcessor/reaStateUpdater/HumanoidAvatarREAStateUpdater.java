@@ -20,7 +20,7 @@ import us.ihmc.ros2.RealtimeRos2Node;
 
 public class HumanoidAvatarREAStateUpdater
 {
-   private final RealtimeRos2Node ros2Node = ROS2Tools.createRealtimeRos2Node(PubSubImplementation.FAST_RTPS, "avatar_rea_state_updater");
+   private final RealtimeRos2Node ros2Node;
    private final IHMCRealtimeROS2Publisher<REAStateRequestMessage> reaStateRequestPublisher;
 
    private final ExecutorService executorService = Executors.newSingleThreadExecutor(ThreadTools.getNamedThreadFactory(getClass().getSimpleName()));
@@ -30,7 +30,7 @@ public class HumanoidAvatarREAStateUpdater
    private final REAStateRequestMessage resumeRequestMessage = new REAStateRequestMessage();
    private final REAStateRequestMessage clearAndResumeRequestMessage = new REAStateRequestMessage();
 
-   public HumanoidAvatarREAStateUpdater(DRCRobotModel robotModel)
+   public HumanoidAvatarREAStateUpdater(DRCRobotModel robotModel, PubSubImplementation implementation)
    {
       String robotName = robotModel.getSimpleRobotName();
 
@@ -39,6 +39,8 @@ public class HumanoidAvatarREAStateUpdater
       resumeRequestMessage.setRequestResume(true);
       clearAndResumeRequestMessage.setRequestClear(true);
       clearAndResumeRequestMessage.setRequestResume(true);
+
+      ros2Node = ROS2Tools.createRealtimeRos2Node(implementation, "avatar_rea_state_updater");
 
       reaStateRequestPublisher = ROS2Tools.createPublisher(ros2Node, REAStateRequestMessage.class, REACommunicationProperties.subscriberTopicNameGenerator);
       ROS2Tools.createCallbackSubscription(ros2Node, HighLevelStateChangeStatusMessage.class, ControllerAPIDefinition.getPublisherTopicNameGenerator(robotName),
@@ -49,6 +51,8 @@ public class HumanoidAvatarREAStateUpdater
       Runtime.getRuntime().addShutdownHook(new Thread(() -> {
          shutdown();
       }, "HumanoidAvatarREAStateUpdater-StopAll"));
+
+      ros2Node.spin();
    }
 
    private void handleHighLevelStateChangeMessage(Subscriber<HighLevelStateChangeStatusMessage> subscriber)
@@ -96,7 +100,7 @@ public class HumanoidAvatarREAStateUpdater
 
    private void shutdown()
    {
-      ros2Node.destroy();
       executorService.shutdownNow();
+      ros2Node.destroy();
    }
 }
