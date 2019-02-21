@@ -5,11 +5,13 @@ import javafx.application.Platform;
 import javafx.stage.Stage;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.RobotTarget;
+import us.ihmc.avatar.footstepPlanning.MultiStageFootstepPlanningModule;
 import us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI;
 import us.ihmc.footstepPlanning.ui.FootstepPlannerUI;
 import us.ihmc.footstepPlanning.ui.RemoteUIMessageConverter;
 import us.ihmc.javaFXToolkit.messager.SharedMemoryJavaFXMessager;
 import us.ihmc.pubsub.DomainFactory;
+import us.ihmc.valkyrie.ValkyrieNetworkProcessor;
 import us.ihmc.valkyrie.ValkyrieRobotModel;
 
 /**
@@ -19,7 +21,6 @@ import us.ihmc.valkyrie.ValkyrieRobotModel;
  */
 public class ValkyrieRemoteFootstepPlannerUI extends Application
 {
-
    private SharedMemoryJavaFXMessager messager;
    private RemoteUIMessageConverter messageConverter;
 
@@ -39,6 +40,11 @@ public class ValkyrieRemoteFootstepPlannerUI extends Application
       ui = FootstepPlannerUI.createMessagerUI(primaryStage, messager, model.getFootstepPlannerParameters(), model.getVisibilityGraphsParameters(), model,
                                               previewModel, model.getContactPointParameters(), model.getWalkingControllerParameters());
       ui.show();
+
+      if(!ValkyrieNetworkProcessor.launchFootstepPlannerModule)
+      {
+         new MultiStageFootstepPlanningModule(model, model.getLogModelProvider(), false);
+      }
    }
 
    @Override

@@ -6,16 +6,16 @@ import us.ihmc.robotics.robotSide.RobotQuadrant;
 
 public class FootstepNodeSnapData
 {
-   private final QuadrantDependentList<RigidBodyTransform> snapTransforms;
+   private final RigidBodyTransform snapTransform;
 
-   public FootstepNodeSnapData(QuadrantDependentList<RigidBodyTransform> snapTransforms)
+   public FootstepNodeSnapData(RigidBodyTransform snapTransform)
    {
-      this.snapTransforms = snapTransforms;
+      this.snapTransform = snapTransform;
    }
 
-   public RigidBodyTransform getSnapTransform(RobotQuadrant robotQuadrant)
+   public RigidBodyTransform getSnapTransform()
    {
-      return snapTransforms.get(robotQuadrant);
+      return snapTransform;
    }
 
    private static final FootstepNodeSnapData EMPTY_SNAP_DATA;
@@ -23,19 +23,12 @@ public class FootstepNodeSnapData
 
    static
    {
-      IDENTITY_SNAP_DATA = new FootstepNodeSnapData(new QuadrantDependentList<>(new RigidBodyTransform(), new RigidBodyTransform(), new RigidBodyTransform(),
-                                                                                new RigidBodyTransform()));
+      IDENTITY_SNAP_DATA = new FootstepNodeSnapData(new RigidBodyTransform());
 
-      QuadrantDependentList<RigidBodyTransform> emptySnapTransforms = new QuadrantDependentList<>();
+      RigidBodyTransform emptySnapTransform = new RigidBodyTransform();
+      emptySnapTransform.setToNaN();
 
-      for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
-      {
-         RigidBodyTransform snapTransform = new RigidBodyTransform();
-         snapTransform.setToNaN();
-         emptySnapTransforms.put(robotQuadrant, snapTransform);
-      }
-
-      EMPTY_SNAP_DATA = new FootstepNodeSnapData(emptySnapTransforms);
+      EMPTY_SNAP_DATA = new FootstepNodeSnapData(emptySnapTransform);
    }
 
    public static FootstepNodeSnapData emptyData()

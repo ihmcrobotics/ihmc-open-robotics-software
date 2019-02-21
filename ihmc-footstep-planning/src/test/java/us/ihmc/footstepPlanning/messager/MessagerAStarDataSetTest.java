@@ -32,9 +32,8 @@ public class MessagerAStarDataSetTest extends FootstepPlannerDataSetTest
    public static void main(String[] args) throws Exception
    {
       MessagerAStarDataSetTest test = new MessagerAStarDataSetTest();
-      String prefix = "unitTestDataSets/test/";
       test.setup();
-      test.runAssertionsOnDataset(dataset -> test.runAssertions(dataset), prefix + "20171218_204917_FlatGround");
+      test.runAssertionsOnDataset(dataset -> test.runAssertions(dataset), "20171218_204917_FlatGround");
       test.tearDown();
 
    }
