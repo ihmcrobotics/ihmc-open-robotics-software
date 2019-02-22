@@ -116,7 +116,7 @@ public abstract class FootstepPlannerToolboxDataSetTest
    private static boolean VERBOSE = true;
 
    private FootstepPlannerUI ui = null;
-   private Messager messager = null;
+   protected Messager messager = null;
 
    private final AtomicReference<FootstepPlan> plannerPlanReference = new AtomicReference<>(null);
    private final AtomicReference<FootstepPlanningResult> plannerResultReference = new AtomicReference<>(null);
