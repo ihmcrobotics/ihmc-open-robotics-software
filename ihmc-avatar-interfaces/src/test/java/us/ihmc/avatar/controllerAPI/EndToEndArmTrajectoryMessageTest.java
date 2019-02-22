@@ -192,6 +192,7 @@ public abstract class EndToEndArmTrajectoryMessageTest implements MultiRobotTest
    @Test
    public void testMessageWithTooManyTrajectoryPoints() throws Exception
    {
+      simulationTestingParameters.setRunMultiThreaded(false);
       BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
 
       drcSimulationTestHelper = new DRCSimulationTestHelper(simulationTestingParameters, getRobotModel());
