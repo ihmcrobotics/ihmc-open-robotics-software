@@ -170,7 +170,7 @@ public class AvatarSimulationFactory
                                                                 simulationConstructionSetParameters);
 
       FrameIndexMap.FrameIndexFinder frameIndexMap = new FrameIndexMap.FrameIndexFinder(ReferenceFrame.getWorldFrame());
-      AdditionalPanelTools.setupFramePanel(simulationConstructionSet, frameIndexMap::getReferenceFrame, SCSVisualizer.createFrameFilter());
+      AdditionalPanelTools.setupFrameView(simulationConstructionSet, frameIndexMap::getReferenceFrame, SCSVisualizer.createFrameFilter());
 
       simulationConstructionSet.setDT(robotModel.get().getSimulateDT(), 1);
    }

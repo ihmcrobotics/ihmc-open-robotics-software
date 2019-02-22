@@ -214,7 +214,7 @@ public class LogVisualizer
       YoVariableLogVisualizerGUI gui = new YoVariableLogVisualizerGUI(selectedFile, logProperties, players, parser, robot, scs);
       scs.getStandardSimulationGUI().addJComponentToMainPanel(gui, BorderLayout.SOUTH);
 
-      AdditionalPanelTools.setupFramePanel(scs, parser.getFrameIndexMap()::getReferenceFrame, SCSVisualizer.createFrameFilter());
+      AdditionalPanelTools.setupFrameView(scs, parser.getFrameIndexMap()::getReferenceFrame, SCSVisualizer.createFrameFilter());
 
 //      ErrorPanel errorPanel = new ErrorPanel(scs.getRootRegistry());
 //      scs.getStandardSimulationGUI().addJComponentToMainPanel(errorPanel,  BorderLayout.EAST);
