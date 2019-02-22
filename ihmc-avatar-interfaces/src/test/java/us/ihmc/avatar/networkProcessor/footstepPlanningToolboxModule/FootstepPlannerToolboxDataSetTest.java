@@ -9,10 +9,7 @@ import java.util.Map;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Function;
 
-import org.junit.Assert;
-import org.junit.Test;
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.*;
 
 import com.jme3.math.Transform;
 
@@ -26,7 +23,6 @@ import controller_msgs.msg.dds.ToolboxStateMessage;
 import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.stage.Stage;
-import org.junit.jupiter.api.Disabled;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.footstepPlanning.MultiStageFootstepPlanningModule;
 import us.ihmc.avatar.handControl.packetsAndConsumers.HandModel;
@@ -308,7 +304,7 @@ public abstract class FootstepPlannerToolboxDataSetTest
 
       resetAllAtomics();
       String errorMessages = dataSetTester.apply(dataset);
-      Assert.assertTrue("Errors:" + errorMessages, errorMessages.isEmpty());
+      Assertions.assertTrue(errorMessages.isEmpty(), "Errors:" + errorMessages);
    }
 
 
@@ -318,7 +314,7 @@ public abstract class FootstepPlannerToolboxDataSetTest
          LogTools.info("Unit test files found: " + allDatasets.size());
 
       if (allDatasets.isEmpty())
-         Assert.fail("Did not find any datasets to test.");
+         Assertions.fail("Did not find any datasets to test.");
 
       int numberOfFailingTests = 0;
       int numbberOfTestedSets = 0;
@@ -351,7 +347,7 @@ public abstract class FootstepPlannerToolboxDataSetTest
       }
       else
       {
-         Assert.assertEquals(message, numberOfFailingTests, 0);
+         Assertions.assertEquals(numberOfFailingTests, 0, message);
       }
    }
 
