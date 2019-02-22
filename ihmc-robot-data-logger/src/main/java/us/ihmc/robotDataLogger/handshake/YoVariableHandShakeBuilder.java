@@ -417,7 +417,7 @@ public class YoVariableHandShakeBuilder
       ReferenceFrameInformation referenceFrameInformation = handshake.getReferenceFrameInformation();
       frames.forEach(frame -> {
          referenceFrameInformation.getFrameNames().add(frame.getName());
-         referenceFrameInformation.getFrameIndeces().add(frame.getFrameIndex());
+         referenceFrameInformation.getFrameIndices().add(frame.getFrameIndex());
       });
    }
 }

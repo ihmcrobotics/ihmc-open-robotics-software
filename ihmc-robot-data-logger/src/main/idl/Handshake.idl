@@ -73,7 +73,7 @@ module robotDataLogger{
 
 	struct ReferenceFrameInformation
 	{
-		sequence<unsigned long, 1024> frameIndeces
+		sequence<unsigned long, 1024> frameIndices
 		sequence<string, 1024> frameNames
 	}
 

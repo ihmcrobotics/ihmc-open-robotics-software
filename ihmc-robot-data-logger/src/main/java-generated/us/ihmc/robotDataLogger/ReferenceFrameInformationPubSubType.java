@@ -60,7 +60,7 @@ public class ReferenceFrameInformationPubSubType implements us.ihmc.pubsub.Topic
       int initial_alignment = current_alignment;
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
-      current_alignment += (data.getFrameIndeces().size() * 4) + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+      current_alignment += (data.getFrameIndices().size() * 4) + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
@@ -74,9 +74,9 @@ public class ReferenceFrameInformationPubSubType implements us.ihmc.pubsub.Topic
 
    public static void write(us.ihmc.robotDataLogger.ReferenceFrameInformation data, us.ihmc.idl.CDR cdr)
    {
-      if(data.getFrameIndeces().size() <= 1024)
-      cdr.write_type_e(data.getFrameIndeces());else
-          throw new RuntimeException("frameIndeces field exceeds the maximum length");
+      if(data.getFrameIndices().size() <= 1024)
+      cdr.write_type_e(data.getFrameIndices());else
+          throw new RuntimeException("frameIndices field exceeds the maximum length");
 
       if(data.getFrameNames().size() <= 1024)
       cdr.write_type_e(data.getFrameNames());else
@@ -86,7 +86,7 @@ public class ReferenceFrameInformationPubSubType implements us.ihmc.pubsub.Topic
 
    public static void read(us.ihmc.robotDataLogger.ReferenceFrameInformation data, us.ihmc.idl.CDR cdr)
    {
-      cdr.read_type_e(data.getFrameIndeces());	
+      cdr.read_type_e(data.getFrameIndices());	
       cdr.read_type_e(data.getFrameNames());	
 
    }
@@ -94,14 +94,14 @@ public class ReferenceFrameInformationPubSubType implements us.ihmc.pubsub.Topic
    @Override
    public final void serialize(us.ihmc.robotDataLogger.ReferenceFrameInformation data, us.ihmc.idl.InterchangeSerializer ser)
    {
-      ser.write_type_e("frameIndeces", data.getFrameIndeces());
+      ser.write_type_e("frameIndices", data.getFrameIndices());
       ser.write_type_e("frameNames", data.getFrameNames());
    }
 
    @Override
    public final void deserialize(us.ihmc.idl.InterchangeSerializer ser, us.ihmc.robotDataLogger.ReferenceFrameInformation data)
    {
-      ser.read_type_e("frameIndeces", data.getFrameIndeces());
+      ser.read_type_e("frameIndices", data.getFrameIndices());
       ser.read_type_e("frameNames", data.getFrameNames());
    }
 
