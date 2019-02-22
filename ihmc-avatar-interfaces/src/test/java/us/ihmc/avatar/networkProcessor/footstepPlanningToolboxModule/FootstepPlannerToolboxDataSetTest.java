@@ -376,6 +376,7 @@ public abstract class FootstepPlannerToolboxDataSetTest
       messager.submitMessage(FootstepPlannerMessagerAPI.PlannerTimeoutTopic, timeMultiplier * timeout);
 
       messager.submitMessage(FootstepPlannerMessagerAPI.PlannerHorizonLengthTopic, Double.MAX_VALUE);
+      messager.submitMessage(FootstepPlannerMessagerAPI.PlannerParametersTopic, getRobotModel().getFootstepPlannerParameters());
 
       if(dataset.getPlannerInput().hasStartOrientation())
          messager.submitMessage(FootstepPlannerMessagerAPI.StartOrientationTopic, new Quaternion(dataset.getPlannerInput().getStartYaw(), 0.0, 0.0));
@@ -648,56 +649,6 @@ public abstract class FootstepPlannerToolboxDataSetTest
          expectedResult.set(plannerResultReference.getAndSet(null));
          plannerReceivedResult.set(false);
       }
-   }
-
-   public void submitDataSet(DataSet testData)
-   {
-      for (int i = 0; i < 100; i++)
-         ThreadTools.sleep(10);
-
-      toolboxStatePublisher.publish(MessageTools.createToolboxStateMessage(ToolboxState.WAKE_UP));
-
-      for (int i = 0; i < 100; i++)
-         ThreadTools.sleep(10);
-
-      FootstepPlannerParametersPacket parametersPacket = new FootstepPlannerParametersPacket();
-      FootstepPlannerParameters parameters = getRobotModel().getFootstepPlannerParameters();
-
-      if (messager != null)
-      {
-         messager.submitMessage(FootstepPlannerMessagerAPI.PlannerParametersTopic, parameters);
-         messager.submitMessage(FootstepPlannerMessagerAPI.PlanarRegionDataTopic, testData.getPlanarRegionsList());
-      }
-
-      FootstepPlannerMessageTools.copyParametersToPacket(parametersPacket, parameters);
-
-      footstepPlannerParametersPublisher.publish(parametersPacket);
-
-      FootstepPlanningRequestPacket packet = new FootstepPlanningRequestPacket();
-
-      byte plannerType = getPlannerType().toByte();
-      PlanarRegionsListMessage planarRegions = PlanarRegionMessageConverter.convertToPlanarRegionsListMessage(testData.getPlanarRegionsList());
-
-      packet.getStanceFootOrientationInWorld().setToYawQuaternion(testData.getPlannerInput().getStartYaw());
-      packet.getStanceFootPositionInWorld().set(testData.getPlannerInput().getStartPosition());
-      packet.getGoalPositionInWorld().set(testData.getPlannerInput().getGoalPosition());
-      packet.getGoalOrientationInWorld().setToYawQuaternion(testData.getPlannerInput().getGoalYaw());
-      packet.setRequestedFootstepPlannerType(plannerType);
-      packet.getPlanarRegionsListMessage().set(planarRegions);
-
-      double timeout = 60.0;
-      double timeoutMultiplier = ContinuousIntegrationTools.isRunningOnContinuousIntegrationServer() ? bambooTimeScaling : 1.0;
-      packet.setTimeout(timeoutMultiplier * timeout);
-
-      packet.setHorizonLength(Double.MAX_VALUE);
-
-      packet.getGoalOrientationInWorld().setToYawQuaternion(testData.getPlannerInput().getGoalYaw());
-      packet.getStanceFootOrientationInWorld().setToYawQuaternion(testData.getPlannerInput().getStartYaw());
-
-      if (DEBUG)
-         LogTools.info("Sending out planning request packet.");
-
-      footstepPlanningRequestPublisher.publish(packet);
    }
 
    public String findPlanAndAssertGoodResult(DataSet dataset)
