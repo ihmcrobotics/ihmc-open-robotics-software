@@ -1,10 +1,9 @@
 package us.ihmc.avatar.networkProcessor.footstepPlanningToolboxModule;
 
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import us.ihmc.commons.PrintTools;
 import us.ihmc.commons.thread.ThreadTools;
-import org.junit.jupiter.api.Tag;
-import org.junit.jupiter.api.Disabled;
 import us.ihmc.footstepPlanning.FootstepPlannerType;
 import us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI;
 import us.ihmc.footstepPlanning.graphSearch.parameters.DefaultFootstepPlanningParameters;
@@ -22,9 +21,17 @@ public class AStarToolboxDataSetTest extends FootstepPlannerToolboxDataSetTest
 
    @Override
    @Test
-   public void testDatasetsWithoutOcclusion()
+   public void testDataSets()
    {
-      super.testDatasetsWithoutOcclusion();
+      super.testDataSets();
+   }
+
+   @Override
+   @Test
+   @Disabled
+   public void runInDevelopmentDataSets()
+   {
+      super.runInDevelopmentDataSets();
    }
 
    @Test

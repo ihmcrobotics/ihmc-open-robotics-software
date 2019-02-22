@@ -1,12 +1,13 @@
 package us.ihmc.avatar.networkProcessor.footstepPlanningToolboxModule;
 
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import us.ihmc.commons.PrintTools;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.footstepPlanning.FootstepPlannerType;
 import us.ihmc.pubsub.DomainFactory;
 
-public class VisGraphWihAStarToolboxDataSetTest extends FootstepPlannerToolboxDataSetTest
+public class VisGraphWithAStarToolboxDataSetTest extends FootstepPlannerToolboxDataSetTest
 {
    @Override
    public FootstepPlannerType getPlannerType()
@@ -16,21 +17,27 @@ public class VisGraphWihAStarToolboxDataSetTest extends FootstepPlannerToolboxDa
 
    @Override
    @Test
-   public void testDatasetsWithoutOcclusion()
+   public void testDataSets()
    {
-      super.testDatasetsWithoutOcclusion();
+      super.testDataSets();
    }
 
+   @Override
+   @Test
+   @Disabled
+   public void runInDevelopmentDataSets()
+   {
+      super.runInDevelopmentDataSets();
+   }
 
    public static void main(String[] args) throws Exception
    {
-      VisGraphWihAStarToolboxDataSetTest test = new VisGraphWihAStarToolboxDataSetTest();
-      String prefix = "unitTestDataSets/test/";
+      VisGraphWithAStarToolboxDataSetTest test = new VisGraphWithAStarToolboxDataSetTest();
 
       test.pubSubImplementation = DomainFactory.PubSubImplementation.INTRAPROCESS;
       VISUALIZE = true;
       test.setup();
-      test.runAssertionsOnDataset(dataset -> test.runAssertions(dataset), prefix + "20171216_111326_CrossoverPlatforms");
+      test.runAssertionsOnDataset(test::runAssertions, "20171216_111326_CrossoverPlatforms");
 
       ThreadTools.sleepForever();
       test.tearDown();

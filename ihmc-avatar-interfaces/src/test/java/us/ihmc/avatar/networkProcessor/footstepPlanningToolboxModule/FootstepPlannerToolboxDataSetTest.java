@@ -26,6 +26,7 @@ import controller_msgs.msg.dds.ToolboxStateMessage;
 import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.stage.Stage;
+import org.junit.jupiter.api.Disabled;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.footstepPlanning.MultiStageFootstepPlanningModule;
 import us.ihmc.avatar.handControl.packetsAndConsumers.HandModel;
@@ -201,7 +202,7 @@ public abstract class FootstepPlannerToolboxDataSetTest
    }
 
    @Test
-   public void testDatasetsWithoutOcclusion()
+   public void testDataSets()
    {
       List<DataSet> dataSets = DataSetIOTools.loadDataSets(dataset ->
                                                            {
@@ -213,6 +214,19 @@ public abstract class FootstepPlannerToolboxDataSetTest
       runAssertionsOnAllDatasets(this::runAssertions, dataSets);
    }
 
+   @Test
+   @Disabled
+   public void runInDevelopmentDataSets()
+   {
+      List<DataSet> dataSets = DataSetIOTools.loadDataSets(dataset ->
+                                                           {
+                                                              if (!dataset.hasPlannerInput())
+                                                                 return false;
+                                                              return dataset.getPlannerInput().getStepPlannerIsInDevelopment() && dataset.getPlannerInput()
+                                                                                                                                    .containsFlag(getTimeoutFlag());
+                                                           });
+      runAssertionsOnAllDatasets(this::runAssertions, dataSets);
+   }
 
    @AfterEach
    public void tearDown() throws Exception
