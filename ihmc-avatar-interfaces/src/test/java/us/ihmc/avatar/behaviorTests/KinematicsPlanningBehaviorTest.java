@@ -150,7 +150,7 @@ public abstract class KinematicsPlanningBehaviorTest implements MultiRobotTestIn
       Pose3D finalPose = new Pose3D(sdfFullRobotModel.getHand(robotSide).getBodyFixedFrame().getTransformToWorldFrame());
 
       double positionDistance = desiredFramePose.getPositionDistance(finalPose);
-      assertTrue("Position Distance: " + positionDistance, positionDistance < 0.01);
+      assertTrue("Position Distance: " + positionDistance, positionDistance < 0.02);
       double orientationDistance = Math.abs(desiredFramePose.getPositionDistance(finalPose));
       double orientationDistanceRotation = Math.abs(desiredFramePose.getOrientationDistance(finalPose) - Math.PI * 2);
       assertTrue("orientation Distance: " + orientationDistance, orientationDistance < 0.1 || orientationDistanceRotation < 0.1);
