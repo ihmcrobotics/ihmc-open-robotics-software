@@ -46,10 +46,10 @@ import us.ihmc.yoVariables.variable.YoLong;
 import us.ihmc.yoVariables.variable.YoVariable;
 
 /**
- * Main entry point for the visualizer. 
- * 
- * To make a custom visualizer for your robot, do NOT copy, instead extend. 
- *  
+ * Main entry point for the visualizer.
+ *
+ * To make a custom visualizer for your robot, do NOT copy, instead extend.
+ *
  * @author jesper
  *
  */
@@ -57,12 +57,12 @@ public class SCSVisualizer implements YoVariablesUpdatedListener, ExitActionList
 {
    private final static String DISCONNECT_DISCONNECT = "Disconnect";
    private final static String DISCONNECT_RECONNECT = "Reconnect";
-   
-   
+
+
    private YoVariableRegistry registry;
    private SimulationConstructionSet scs;
 
-   
+
    private final ArrayList<JointUpdater> jointUpdaters = new ArrayList<>();
    private YoVariableClientInterface yoVariableClientInterface;
    private ArrayList<SCSVisualizerStateListener> stateListeners = new ArrayList<>();
@@ -88,7 +88,7 @@ public class SCSVisualizer implements YoVariablesUpdatedListener, ExitActionList
    private boolean showOverheadView;
 
    private YoGraphicsListRegistry yoGraphicsListRegistry;
-   
+
    private final LoggerStatusVisualizer loggerStatusVisualizer = new LoggerStatusVisualizer();
 
    public SCSVisualizer(int bufferSize)
@@ -143,7 +143,7 @@ public class SCSVisualizer implements YoVariablesUpdatedListener, ExitActionList
       synchronized(disconnectLock)
       {
          setVariableUpdateRate(variableUpdateRate);
-         
+
          scs.setInPoint();
          disconnectButton.setText(DISCONNECT_DISCONNECT);
          disconnectButton.setEnabled(true);
@@ -192,14 +192,14 @@ public class SCSVisualizer implements YoVariablesUpdatedListener, ExitActionList
       }
    }
 
-   
+
    /**
     * On connect, the variable update rate is send to the server. The server will limit the amount of data to approximately the desired rate, depending on the update rate of the underlying threads.
     *
     * Set to zero to update variables as fast as the server produces them.
-    * 
-    * Note: If the server does not send data at a constant period or does not set the timestamp, setting the variable update rate will result in no data being received. 
-    * 
+    *
+    * Note: If the server does not send data at a constant period or does not set the timestamp, setting the variable update rate will result in no data being received.
+    *
     * @param updateRateInMilliseconds Update rate in milliseconds. Set to zero to disable rate limiting
     */
    public void setVariableUpdateRate(int updateRateInMilliseconds)
@@ -213,16 +213,16 @@ public class SCSVisualizer implements YoVariablesUpdatedListener, ExitActionList
                yoVariableClientInterface.setVariableUpdateRate(updateRateInMilliseconds);
             }
          }
-         
+
          variableUpdateRate = updateRateInMilliseconds;
-         
+
          updateRateField.setText(String.valueOf(updateRateInMilliseconds));
       }
-      
-      
+
+
    }
-   
-   
+
+
 
    private void setVariableUpdateRate(String text)
    {
@@ -241,9 +241,9 @@ public class SCSVisualizer implements YoVariablesUpdatedListener, ExitActionList
    @Deprecated
    /**
     * This functionality has been replaced with setVariableUpdateRate()
-    * 
+    *
     * For backwards compatibility, this function will print a big fat warning and set the variable update rate to displayOneInNPackets * 1 ms
-    * 
+    *
     * @param displayOneInNPackets
     */
    public void setDisplayOneInNPackets(int displayOneInNPackets)
@@ -277,7 +277,7 @@ public class SCSVisualizer implements YoVariablesUpdatedListener, ExitActionList
    public final void start(YoVariableClientInterface yoVariableClientInterface, LogHandshake handshake, YoVariableHandshakeParser handshakeParser)
    {
       this.yoVariableClientInterface = yoVariableClientInterface;
-      
+
       Robot robot = new Robot("DummyRobot");
       if (handshake.getModelLoaderClass() != null)
       {
@@ -352,14 +352,14 @@ public class SCSVisualizer implements YoVariablesUpdatedListener, ExitActionList
          }
 
       });
-      
+
       scs.addJLabel(new JLabel(" Rate: "));
       scs.addTextField(updateRateField);
       scs.addJLabel(new JLabel("ms "));
-      
-      updateRateField.addActionListener((e) -> setVariableUpdateRate(updateRateField.getText())); 
 
-      
+      updateRateField.addActionListener((e) -> setVariableUpdateRate(updateRateField.getText()));
+
+
       scs.addButton(clearLogButton);
       clearLogButton.addActionListener(new ActionListener()
       {
@@ -373,18 +373,18 @@ public class SCSVisualizer implements YoVariablesUpdatedListener, ExitActionList
             }
          }
       });
-      
-      
+
+
 
       scs.addJLabel(delayValue);
 
       loggerStatusVisualizer.addToSimulationConstructionSet(scs);
-      
+
       YoVariableRegistry yoVariableRegistry = handshakeParser.getRootRegistry();
       this.registry.addChild(yoVariableRegistry);
       this.registry.addChild(yoVariableClientInterface.getDebugRegistry());
       scs.setParameterRootPath(yoVariableRegistry);
-      
+
       List<JointState> jointStates = handshakeParser.getJointStates();
       JointUpdater.getJointUpdaterList(robot.getRootJoints(), jointStates, jointUpdaters);
 
@@ -419,7 +419,7 @@ public class SCSVisualizer implements YoVariablesUpdatedListener, ExitActionList
          });
       }
 
-      AdditionalPanelTools.setupFramePanel(scs, handshakeParser.getFrameIndexMap()::getReferenceFrame, createFrameFilter());
+      AdditionalPanelTools.setupFrameView(scs, handshakeParser.getFrameIndexMap()::getReferenceFrame, createFrameFilter());
 
       new Thread(scs, "SCSVisualizer").start();
    }
@@ -433,15 +433,15 @@ public class SCSVisualizer implements YoVariablesUpdatedListener, ExitActionList
    public void starting(SimulationConstructionSet scs, Robot robot, YoVariableRegistry registry)
    {
    }
-   
+
    /**
     * Overridable method to update local variables.
-    * 
+    *
     * Needs to return in less than your visualization dt.
     */
    public void updateLocalVariables()
    {
-      
+
    }
 
    public static void main(String[] args)
