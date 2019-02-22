@@ -96,6 +96,7 @@ public abstract class AvatarPushRecoveryOverSteppingStonesTest implements MultiR
       drcSimulationTestHelper.setStartingLocation(selectedLocation);
       drcSimulationTestHelper.createSimulation("DRCSimpleFlatGroundScriptTest");
 
+      assertTrue(drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(0.05));
       PlanarRegionsListMessage planarRegionsListMessage = createPlanarRegionsListMessage();
       drcSimulationTestHelper.publishToController(planarRegionsListMessage);
 
