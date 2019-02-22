@@ -384,7 +384,7 @@ public class IDLYoVariableHandshakeParser extends YoVariableHandshakeParser
 
          String name = referenceFrameInformation.getFrameNames().get(i).toString();
          ReferenceFrame frame = ReferenceFrameTools.constructFrameWithUnchangingTransformToParent(name, ReferenceFrame.getWorldFrame(), transform);
-         long index = referenceFrameInformation.getFrameIndeces().get(i);
+         long index = referenceFrameInformation.getFrameIndices().get(i);
          frameToIndex.put(frame, index);
          indexToframe.put(index, frame);
       }
