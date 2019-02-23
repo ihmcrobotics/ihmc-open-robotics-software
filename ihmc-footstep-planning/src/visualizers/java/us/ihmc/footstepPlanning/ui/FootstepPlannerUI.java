@@ -241,8 +241,12 @@ public class FootstepPlannerUI
       {
          mainTabController.setDefaultTiming(walkingControllerParameters.getDefaultSwingTime(), walkingControllerParameters.getDefaultTransferTime());
       }
-      mainTabController.setContactPointParameters(contactPointParameters);
-      pathViewer.setDefaultContactPoints(contactPointParameters);
+
+      if(contactPointParameters != null)
+      {
+         mainTabController.setContactPointParameters(contactPointParameters);
+         pathViewer.setDefaultContactPoints(contactPointParameters);
+      }
 
       planarRegionViewer.start();
       startGoalPositionViewer.start();

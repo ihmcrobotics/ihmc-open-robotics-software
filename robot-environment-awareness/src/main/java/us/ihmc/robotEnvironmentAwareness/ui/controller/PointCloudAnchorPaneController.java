@@ -18,7 +18,7 @@ public class PointCloudAnchorPaneController extends REABasicUIController
    private ToggleButton enableStereoButton;
    @FXML
    private Spinner<Integer> sizeOfPointCloudSpinner;
-   
+
    private static final int maximumSizeOfPointCloud = 200000;
    private static final int minimumSizeOfPointCloud = 10000;
    public static final int initialSizeOfPointCloud = 50000;
@@ -48,8 +48,8 @@ public class PointCloudAnchorPaneController extends REABasicUIController
       sizeOfPointCloudSpinner.setValueFactory(createNumberOfPointsValueFactory(initialSizeOfPointCloud));
       uiMessager.bindBidirectionalInternal(REAModuleAPI.UILidarScanShow, enableLidarButton.selectedProperty(), true);
       uiMessager.bindBidirectionalInternal(REAModuleAPI.UILidarScanSize, scanHistorySizeSlider.valueProperty(), numberToIntegerConverter, true);
-      uiMessager.bindBidirectionalInternal(REAModuleAPI.UIStereoVisionPointCloudShow, enableStereoButton.selectedProperty(), true);
-      uiMessager.bindBidirectionalGlobal(REAModuleAPI.UIStereoVisionPointCloudSize, sizeOfPointCloudSpinner.getValueFactory().valueProperty());
+      uiMessager.bindBidirectionalInternal(REAModuleAPI.UIStereoVisionShow, enableStereoButton.selectedProperty(), true);
+      uiMessager.bindBidirectionalGlobal(REAModuleAPI.UIStereoVisionSize, sizeOfPointCloudSpinner.getValueFactory().valueProperty());
    }
 
    @FXML
@@ -61,7 +61,7 @@ public class PointCloudAnchorPaneController extends REABasicUIController
    @FXML
    public void clearStereo()
    {
-      uiMessager.submitMessageInternal(REAModuleAPI.UIStereoVisionPointCloudClear, true);
+      uiMessager.submitMessageInternal(REAModuleAPI.UIStereoVisionClear, true);
    }
 
    @FXML
@@ -69,14 +69,14 @@ public class PointCloudAnchorPaneController extends REABasicUIController
    {
       saveUIControlProperty(REAModuleAPI.UILidarScanShow, enableLidarButton);
       saveUIControlProperty(REAModuleAPI.UILidarScanSize, scanHistorySizeSlider);
-      saveUIControlProperty(REAModuleAPI.UIStereoVisionPointCloudShow, enableStereoButton);
+      saveUIControlProperty(REAModuleAPI.UIStereoVisionShow, enableStereoButton);
    }
 
    public void load()
    {
       loadUIControlProperty(REAModuleAPI.UILidarScanShow, enableLidarButton);
       loadUIControlProperty(REAModuleAPI.UILidarScanSize, scanHistorySizeSlider);
-      loadUIControlProperty(REAModuleAPI.UIStereoVisionPointCloudShow, enableStereoButton);
+      loadUIControlProperty(REAModuleAPI.UIStereoVisionShow, enableStereoButton);
    }
 
    private IntegerSpinnerValueFactory createNumberOfPointsValueFactory(int initialValue)
