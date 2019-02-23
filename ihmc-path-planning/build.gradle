@@ -47,5 +47,6 @@ dataSetsDependencies {
    compile ihmc.sourceSetProject("main")
 
    compile group: "us.ihmc", name: "ihmc-commons-testing", version: "0.25.4"
+   compile group: "us.ihmc", name: "simulation-construction-set-tools", version: "source"
    compile group: "us.ihmc", name: "robot-environment-awareness", version: "source"
 }

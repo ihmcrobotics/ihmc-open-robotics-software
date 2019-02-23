@@ -9,10 +9,7 @@ import java.util.Map;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Function;
 
-import org.junit.Assert;
-import org.junit.Test;
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.*;
 
 import com.jme3.math.Transform;
 
@@ -116,7 +113,7 @@ public abstract class FootstepPlannerToolboxDataSetTest
    private static boolean VERBOSE = true;
 
    private FootstepPlannerUI ui = null;
-   private Messager messager = null;
+   protected Messager messager = null;
 
    private final AtomicReference<FootstepPlan> plannerPlanReference = new AtomicReference<>(null);
    private final AtomicReference<FootstepPlanningResult> plannerResultReference = new AtomicReference<>(null);
@@ -201,7 +198,7 @@ public abstract class FootstepPlannerToolboxDataSetTest
    }
 
    @Test
-   public void testDatasetsWithoutOcclusion()
+   public void testDataSets()
    {
       List<DataSet> dataSets = DataSetIOTools.loadDataSets(dataset ->
                                                            {
@@ -213,6 +210,19 @@ public abstract class FootstepPlannerToolboxDataSetTest
       runAssertionsOnAllDatasets(this::runAssertions, dataSets);
    }
 
+   @Test
+   @Disabled
+   public void runInDevelopmentDataSets()
+   {
+      List<DataSet> dataSets = DataSetIOTools.loadDataSets(dataset ->
+                                                           {
+                                                              if (!dataset.hasPlannerInput())
+                                                                 return false;
+                                                              return dataset.getPlannerInput().getStepPlannerIsInDevelopment() && dataset.getPlannerInput()
+                                                                                                                                    .containsFlag(getTimeoutFlag());
+                                                           });
+      runAssertionsOnAllDatasets(this::runAssertions, dataSets);
+   }
 
    @AfterEach
    public void tearDown() throws Exception
@@ -294,7 +304,7 @@ public abstract class FootstepPlannerToolboxDataSetTest
 
       resetAllAtomics();
       String errorMessages = dataSetTester.apply(dataset);
-      Assert.assertTrue("Errors:" + errorMessages, errorMessages.isEmpty());
+      Assertions.assertTrue(errorMessages.isEmpty(), "Errors:" + errorMessages);
    }
 
 
@@ -304,7 +314,7 @@ public abstract class FootstepPlannerToolboxDataSetTest
          LogTools.info("Unit test files found: " + allDatasets.size());
 
       if (allDatasets.isEmpty())
-         Assert.fail("Did not find any datasets to test.");
+         Assertions.fail("Did not find any datasets to test.");
 
       int numberOfFailingTests = 0;
       int numbberOfTestedSets = 0;
@@ -337,7 +347,7 @@ public abstract class FootstepPlannerToolboxDataSetTest
       }
       else
       {
-         Assert.assertEquals(message, numberOfFailingTests, 0);
+         Assertions.assertEquals(numberOfFailingTests, 0, message);
       }
    }
 
@@ -366,6 +376,7 @@ public abstract class FootstepPlannerToolboxDataSetTest
       messager.submitMessage(FootstepPlannerMessagerAPI.PlannerTimeoutTopic, timeMultiplier * timeout);
 
       messager.submitMessage(FootstepPlannerMessagerAPI.PlannerHorizonLengthTopic, Double.MAX_VALUE);
+      messager.submitMessage(FootstepPlannerMessagerAPI.PlannerParametersTopic, getRobotModel().getFootstepPlannerParameters());
 
       if(dataset.getPlannerInput().hasStartOrientation())
          messager.submitMessage(FootstepPlannerMessagerAPI.StartOrientationTopic, new Quaternion(dataset.getPlannerInput().getStartYaw(), 0.0, 0.0));
@@ -638,56 +649,6 @@ public abstract class FootstepPlannerToolboxDataSetTest
          expectedResult.set(plannerResultReference.getAndSet(null));
          plannerReceivedResult.set(false);
       }
-   }
-
-   public void submitDataSet(DataSet testData)
-   {
-      for (int i = 0; i < 100; i++)
-         ThreadTools.sleep(10);
-
-      toolboxStatePublisher.publish(MessageTools.createToolboxStateMessage(ToolboxState.WAKE_UP));
-
-      for (int i = 0; i < 100; i++)
-         ThreadTools.sleep(10);
-
-      FootstepPlannerParametersPacket parametersPacket = new FootstepPlannerParametersPacket();
-      FootstepPlannerParameters parameters = getRobotModel().getFootstepPlannerParameters();
-
-      if (messager != null)
-      {
-         messager.submitMessage(FootstepPlannerMessagerAPI.PlannerParametersTopic, parameters);
-         messager.submitMessage(FootstepPlannerMessagerAPI.PlanarRegionDataTopic, testData.getPlanarRegionsList());
-      }
-
-      FootstepPlannerMessageTools.copyParametersToPacket(parametersPacket, parameters);
-
-      footstepPlannerParametersPublisher.publish(parametersPacket);
-
-      FootstepPlanningRequestPacket packet = new FootstepPlanningRequestPacket();
-
-      byte plannerType = getPlannerType().toByte();
-      PlanarRegionsListMessage planarRegions = PlanarRegionMessageConverter.convertToPlanarRegionsListMessage(testData.getPlanarRegionsList());
-
-      packet.getStanceFootOrientationInWorld().setToYawQuaternion(testData.getPlannerInput().getStartYaw());
-      packet.getStanceFootPositionInWorld().set(testData.getPlannerInput().getStartPosition());
-      packet.getGoalPositionInWorld().set(testData.getPlannerInput().getGoalPosition());
-      packet.getGoalOrientationInWorld().setToYawQuaternion(testData.getPlannerInput().getGoalYaw());
-      packet.setRequestedFootstepPlannerType(plannerType);
-      packet.getPlanarRegionsListMessage().set(planarRegions);
-
-      double timeout = 60.0;
-      double timeoutMultiplier = ContinuousIntegrationTools.isRunningOnContinuousIntegrationServer() ? bambooTimeScaling : 1.0;
-      packet.setTimeout(timeoutMultiplier * timeout);
-
-      packet.setHorizonLength(Double.MAX_VALUE);
-
-      packet.getGoalOrientationInWorld().setToYawQuaternion(testData.getPlannerInput().getGoalYaw());
-      packet.getStanceFootOrientationInWorld().setToYawQuaternion(testData.getPlannerInput().getStartYaw());
-
-      if (DEBUG)
-         LogTools.info("Sending out planning request packet.");
-
-      footstepPlanningRequestPublisher.publish(packet);
    }
 
    public String findPlanAndAssertGoodResult(DataSet dataset)
