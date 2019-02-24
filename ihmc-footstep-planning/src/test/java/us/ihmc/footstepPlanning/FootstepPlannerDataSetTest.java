@@ -366,6 +366,10 @@ public abstract class FootstepPlannerDataSetTest
 
          ThreadTools.sleep(waitTime);
          totalTimeTaken += Conversions.millisecondsToSeconds(waitTime);
+
+         String resultAgain = validateResult(prefix);
+         if (!resultAgain.isEmpty())
+            return resultAgain;
       }
 
       return "";
