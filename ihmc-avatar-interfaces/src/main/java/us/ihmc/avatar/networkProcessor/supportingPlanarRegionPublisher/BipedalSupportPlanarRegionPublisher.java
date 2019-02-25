@@ -8,6 +8,7 @@ import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
 
+import controller_msgs.msg.dds.BipedalSupportPlanarRegionParametersMessage;
 import controller_msgs.msg.dds.CapturabilityBasedStatus;
 import controller_msgs.msg.dds.PlanarRegionsListMessage;
 import controller_msgs.msg.dds.RobotConfigurationData;
@@ -18,6 +19,7 @@ import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.Co
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.communication.IHMCRealtimeROS2Publisher;
 import us.ihmc.communication.ROS2Tools;
+import us.ihmc.communication.ROS2Tools.ROS2TopicQualifier;
 import us.ihmc.communication.packets.PlanarRegionMessageConverter;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.geometry.interfaces.Vertex2DSupplier;
@@ -39,13 +41,18 @@ import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.ros2.NewMessageListener;
 import us.ihmc.ros2.RealtimeRos2Node;
 
+import static us.ihmc.communication.ROS2Tools.getTopicNameGenerator;
+
 public class BipedalSupportPlanarRegionPublisher
 {
+   private static final double defaultScaleFactor = 2.0;
+
    private final RealtimeRos2Node ros2Node = ROS2Tools.createRealtimeRos2Node(PubSubImplementation.FAST_RTPS, "supporting_planar_region_publisher");
    private final IHMCRealtimeROS2Publisher<PlanarRegionsListMessage> regionPublisher;
 
    private final AtomicReference<CapturabilityBasedStatus> latestCapturabilityBasedStatusMessage = new AtomicReference<>(null);
    private final AtomicReference<RobotConfigurationData> latestRobotConfigurationData = new AtomicReference<>(null);
+   private final AtomicReference<BipedalSupportPlanarRegionParametersMessage> latestParametersMessage = new AtomicReference<>(null);
 
    private final ScheduledExecutorService executorService = Executors.newSingleThreadScheduledExecutor(ThreadTools.getNamedThreadFactory(getClass().getSimpleName()));
    private ScheduledFuture<?> task;
@@ -56,7 +63,6 @@ public class BipedalSupportPlanarRegionPublisher
    private final SideDependentList<ContactablePlaneBody> contactableFeet;
    private final SideDependentList<List<FramePoint2D>> scaledContactPointList = new SideDependentList<>(new ArrayList<>(), new ArrayList<>());
    private final List<PlanarRegion> supportRegions = new ArrayList<>();
-   private final BipedalSupportPlanarRegionParameters parameters = new BipedalSupportPlanarRegionParameters();
 
    public BipedalSupportPlanarRegionPublisher(DRCRobotModel robotModel)
    {
@@ -76,6 +82,13 @@ public class BipedalSupportPlanarRegionPublisher
                                            (NewMessageListener<RobotConfigurationData>) subscriber -> latestRobotConfigurationData.set(subscriber.takeNextData()));
       regionPublisher = ROS2Tools.createPublisher(ros2Node, PlanarRegionsListMessage.class,
                                                   REACommunicationProperties.subscriberCustomRegionsTopicNameGenerator);
+      ROS2Tools.createCallbackSubscription(ros2Node, BipedalSupportPlanarRegionParametersMessage.class,
+                                           ROS2Tools.getTopicNameGenerator(robotName, ROS2Tools.BIPED_SUPPORT_REGION_PUBLISHER, ROS2TopicQualifier.INPUT), s -> latestParametersMessage.set(s.takeNextData()));
+
+      BipedalSupportPlanarRegionParametersMessage defaultParameters = new BipedalSupportPlanarRegionParametersMessage();
+      defaultParameters.setEnable(true);
+      defaultParameters.setSupportRegionScaleFactor(defaultScaleFactor);
+      latestParametersMessage.set(defaultParameters);
 
       for (int i = 0; i < 3; i++)
       {
@@ -91,7 +104,8 @@ public class BipedalSupportPlanarRegionPublisher
 
    private void run()
    {
-      if (!parameters.isEnableBipedalSupportPlanarRegions())
+      BipedalSupportPlanarRegionParametersMessage parameters = latestParametersMessage.get();
+      if (!parameters.getEnable() || parameters.getSupportRegionScaleFactor() <= 0.0)
       {
          supportRegions.set(0, new PlanarRegion());
          supportRegions.set(1, new PlanarRegion());
