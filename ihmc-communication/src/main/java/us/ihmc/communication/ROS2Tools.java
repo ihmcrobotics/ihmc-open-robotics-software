@@ -191,19 +191,20 @@ public class ROS2Tools
       }
    }
 
-   public static <T> Ros2QueuedSubscription<T> createQueuedSubscription(Ros2Node ros2Node, Class<T> messageType, MessageTopicNameGenerator topicNameGenerator)
+   public static <T> Ros2QueuedSubscription<T> createQueuedSubscription(Ros2Node ros2Node, Class<T> messageType,
+                                                                        MessageTopicNameGenerator topicNameGenerator)
    {
       String topicName = topicNameGenerator.generateTopicName(messageType);
       return createQueuedSubscription(ros2Node, messageType, topicName, RUNTIME_EXCEPTION);
    }
 
-   public static <T> Ros2QueuedSubscription<T> createQueuedSubscription(Ros2Node ros2Node, Class<T> messageType, String topicName)
+   public static <T> Ros2QueuedSubscription<T> createQueuedSubscription(Ros2Node ros2Node, Class<T> messageType,
+                                                                        String topicName)
    {
       return createQueuedSubscription(ros2Node, messageType, topicName, RUNTIME_EXCEPTION);
    }
 
-   public static <T> Ros2QueuedSubscription<T> createQueuedSubscription(Ros2Node ros2Node, Class<T> messageType, String topicName,
-                                                                        ExceptionHandler exceptionHandler)
+   public static <T> Ros2QueuedSubscription<T> createQueuedSubscription(Ros2Node ros2Node, Class<T> messageType, String topicName, ExceptionHandler exceptionHandler)
    {
       try
       {
@@ -212,7 +213,8 @@ public class ROS2Tools
          NewMessageListener<T> newMessageListener = (Subscriber<T> subscriber) -> {
 
          };
-         ros2QueuedSubscription.setRos2Subscription(ros2Node.createSubscription(topicDataType, ros2QueuedSubscription, topicName, Ros2QosProfile.DEFAULT()));
+         ros2QueuedSubscription.setRos2Subscription(
+               ros2Node.createSubscription(topicDataType, ros2QueuedSubscription, topicName, Ros2QosProfile.DEFAULT()));
          return ros2QueuedSubscription;
       }
       catch (IOException e)
@@ -249,8 +251,7 @@ public class ROS2Tools
       }
    }
 
-   public static <T> RealtimeRos2Subscription<T> createQueuedSubscription(RealtimeRos2Node realtimeRos2Node, Class<T> messageType,
-                                                                          MessageTopicNameGenerator topicNameGenerator)
+   public static <T> RealtimeRos2Subscription<T> createQueuedSubscription(RealtimeRos2Node realtimeRos2Node, Class<T> messageType, MessageTopicNameGenerator topicNameGenerator)
    {
       String topicName = topicNameGenerator.generateTopicName(messageType);
       return createQueuedSubscription(realtimeRos2Node, messageType, topicName, RUNTIME_EXCEPTION);
@@ -261,8 +262,7 @@ public class ROS2Tools
       return createQueuedSubscription(realtimeRos2Node, messageType, topicName, RUNTIME_EXCEPTION);
    }
 
-   public static <T> RealtimeRos2Subscription<T> createQueuedSubscription(RealtimeRos2Node realtimeRos2Node, Class<T> messageType, String topicName,
-                                                                          ExceptionHandler exceptionHandler)
+   public static <T> RealtimeRos2Subscription<T> createQueuedSubscription(RealtimeRos2Node realtimeRos2Node, Class<T> messageType, String topicName, ExceptionHandler exceptionHandler)
    {
       try
       {
@@ -331,14 +331,15 @@ public class ROS2Tools
    /**
     * Creates a default topic name generator that uses {@value #IHMC_ROS_TOPIC_PREFIX} as prefix.
     * <p>
-    * This generator is not great at all as the topic name does not include the name of the robot, the
-    * name of the module, nor info about whether the topic is an input or output of the module
+    * This generator is not great at all as the topic name does not include the name of the robot,
+    * the name of the module, nor info about whether the topic is an input or output of the module
     * declaring it.
     * </p>
     * <p>
     * Here is a couple examples for this generator:
     * <ul>
-    * <li>For {@code TextToSpeechPacket} this generates the topic name: {@code "/ihmc/text_to_speech"}.
+    * <li>For {@code TextToSpeechPacket} this generates the topic name:
+    * {@code "/ihmc/text_to_speech"}.
     * <li>For {@code ArmTrajectoryMessage} this generates the topic name:
     * {@code "/ihmc/arm_trajectory"}.
     * </ul>
@@ -352,11 +353,11 @@ public class ROS2Tools
    }
 
    /**
-    * Creates a default topic name generator that uses {@value #IHMC_ROS_TOPIC_PREFIX} plus the name of
-    * the robot as prefix.
+    * Creates a default topic name generator that uses {@value #IHMC_ROS_TOPIC_PREFIX} plus the name
+    * of the robot as prefix.
     * <p>
-    * This generator is not great as the topic name does not include the name of the module, nor info
-    * about whether the topic is an input or output of the module declaring it.
+    * This generator is not great as the topic name does not include the name of the module, nor
+    * info about whether the topic is an input or output of the module declaring it.
     * </p>
     * <p>
     * Here is a couple examples for this generator:
@@ -376,11 +377,11 @@ public class ROS2Tools
    }
 
    /**
-    * Creates a default topic name generator that uses {@value #IHMC_ROS_TOPIC_PREFIX} plus the name of
-    * the robot as prefix.
+    * Creates a default topic name generator that uses {@value #IHMC_ROS_TOPIC_PREFIX} plus the name
+    * of the robot as prefix.
     * <p>
-    * This generator is not great as the topic name does not include the name of the module, nor info
-    * about whether the topic is an input or output of the module declaring it.
+    * This generator is not great as the topic name does not include the name of the module, nor
+    * info about whether the topic is an input or output of the module declaring it.
     * </p>
     * <p>
     * Here is a couple examples for this generator:
@@ -425,7 +426,8 @@ public class ROS2Tools
    }
 
    /**
-    * Generates a topic name in a similar way to {@link #generateDefaultTopicName(Class, String)}:<br>
+    * Generates a topic name in a similar way to
+    * {@link #generateDefaultTopicName(Class, String)}:<br>
     * For {@code TextToSpeechPacket} when running Valkyrie this generates the topic name:<br>
     * {@code "/ihmc/valkyrie/" + moduleName.toLowerCase() + qualifier + "/text_to_speech"}.
     *
