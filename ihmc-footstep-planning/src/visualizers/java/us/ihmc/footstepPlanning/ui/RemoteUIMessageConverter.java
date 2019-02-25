@@ -208,6 +208,11 @@ public class RemoteUIMessageConverter
 
          footstepDataListPublisher.publish(footstepDataListMessage);
       });
+
+      IHMCRealtimeROS2Publisher<BipedalSupportPlanarRegionParametersMessage> supportRegionsParametersPublisher = ROS2Tools
+            .createPublisher(ros2Node, BipedalSupportPlanarRegionParametersMessage.class,
+                             ROS2Tools.getTopicNameGenerator(robotName, ROS2Tools.BIPED_SUPPORT_REGION_PUBLISHER, ROS2TopicQualifier.INPUT));
+      messager.registerTopicListener(FootstepPlannerMessagerAPI.BipedalSupportRegionsParametersTopic, supportRegionsParametersPublisher::publish);
    }
 
    private void processFootstepPlanningRequestPacket(FootstepPlanningRequestPacket packet)
