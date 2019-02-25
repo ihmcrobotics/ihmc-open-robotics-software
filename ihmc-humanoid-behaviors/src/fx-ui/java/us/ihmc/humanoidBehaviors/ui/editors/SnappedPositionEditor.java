@@ -7,7 +7,6 @@ import javafx.scene.input.PickResult;
 import javafx.scene.shape.MeshView;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.humanoidBehaviors.ui.*;
-import us.ihmc.humanoidBehaviors.ui.BehaviorUI.API;
 import us.ihmc.humanoidBehaviors.ui.behaviors.FXUIStateMachine;
 import us.ihmc.humanoidBehaviors.ui.behaviors.FXUIStateTransition;
 import us.ihmc.log.LogTools;
@@ -64,7 +63,6 @@ public class SnappedPositionEditor extends FXUIEditor
          if (mouseClickedMeshIntersection.hasNext())
          {
             LogTools.debug("Selected position is validated: {}", mouseClickedMeshIntersection.read());
-//            messager.submitMessage(BehaviorUI.API.ActiveEditor, FXUIEditor.NONE);
             activeStateMachine.get().transition(now, FXUIStateTransition.SNAPPED_POSITION_LEFT_CLICK);
          }
 
@@ -134,7 +132,9 @@ public class SnappedPositionEditor extends FXUIEditor
       else
       {
          if (event.getEventType() == MouseEvent.MOUSE_CLICKED)
+         {
             LogTools.debug("pick failed. pickResult: {}, intersectedNode: {}", pickResult, intersectedNode);
+         }
          return null;
       }
    }
