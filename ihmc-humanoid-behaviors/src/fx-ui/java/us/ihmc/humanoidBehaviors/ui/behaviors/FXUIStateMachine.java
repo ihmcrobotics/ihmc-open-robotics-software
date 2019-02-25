@@ -5,6 +5,15 @@ import java.util.HashMap;
 
 public abstract class FXUIStateMachine
 {
+   public static final FXUIStateMachine NONE = new FXUIStateMachine()
+   {
+      @Override
+      protected void handleTransition(FXUIStateTransition transition)
+      {
+         // empty
+      }
+   };
+
    private final ArrayDeque<Object> deque = new ArrayDeque<>();
 
    private long lastStateTime = 0L;

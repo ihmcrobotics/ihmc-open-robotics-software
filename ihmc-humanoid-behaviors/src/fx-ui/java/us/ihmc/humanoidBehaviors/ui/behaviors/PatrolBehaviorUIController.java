@@ -5,7 +5,6 @@ import javafx.scene.control.Button;
 import javafx.scene.paint.Color;
 import us.ihmc.communication.controllerAPI.RobotLowLevelMessenger;
 import us.ihmc.humanoidBehaviors.ui.BehaviorUI;
-import us.ihmc.humanoidBehaviors.ui.BehaviorUI.API;
 import us.ihmc.humanoidBehaviors.ui.SimpleMessagerAPIFactory;
 import us.ihmc.humanoidBehaviors.ui.editors.FXUIEditor;
 import us.ihmc.humanoidBehaviors.ui.graphics.FXUIGraphic;
@@ -34,10 +33,6 @@ public class PatrolBehaviorUIController extends FXUIBehavior
 
    private FXUIStateMachine waypointPlacementStateMachine;
 
-   /**
-    * Nece
-    * @param messager
-    */
    public void init(JavaFXMessager messager)
    {
       this.messager = messager;
@@ -62,8 +57,13 @@ public class PatrolBehaviorUIController extends FXUIBehavior
             else if (transition == FXUIStateTransition.SNAPPED_POSITION_RIGHT_CLICK)
             {
                LogTools.debug("Completed waypoint placement.");
+
+               removeWaypointGraphic(waypoints.get(waypoints.size() - 1));
+
                messager.submitMessage(BehaviorUI.API.ActiveEditor, FXUIEditor.NONE);
                messager.submitMessage(BehaviorUI.API.SelectedGraphic, FXUIGraphic.NONE);
+               messager.submitMessage(BehaviorUI.API.ActiveStateMachine, FXUIStateMachine.NONE);
+
             }
          }
       };
@@ -85,6 +85,12 @@ public class PatrolBehaviorUIController extends FXUIBehavior
       LogTools.debug("Removing all waypoint graphics.");
       waypoints.forEach(this::removeGraphic);
       waypoints.clear();
+   }
+
+   private void removeWaypointGraphic(SnappedPositionGraphic waypointGraphic)
+   {
+      removeGraphic(waypointGraphic);
+      waypoints.remove(waypointGraphic);
    }
 
    public void setFullRobotModel(FullHumanoidRobotModel fullHumanoidRobotModel)
