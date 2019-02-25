@@ -33,9 +33,11 @@ public class ValkyrieNetworkProcessor
       networkModuleParams.setEnableJoystickBasedStepping(true);
       networkModuleParams.enableBipedalSupportPlanarRegionPublisher(true);
       networkModuleParams.enableWalkingPreviewToolbox(true);
+      networkModuleParams.enableAutoREAStateUpdater(true);
 
 //      uncomment these for the sensors
       URI rosuri = NetworkParameters.getROSURI();
+
       if(rosuri != null)
       {
          networkModuleParams.enableRosModule(true);

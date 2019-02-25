@@ -1,6 +1,6 @@
 plugins {
    id("us.ihmc.ihmc-build") version "0.15.6"
-   id("us.ihmc.ihmc-ci") version "4.9"
+   id("us.ihmc.ihmc-ci") version "4.23"
    id("us.ihmc.scs") version "0.4"
    id("us.ihmc.log-tools") version "0.2.2"
 }
@@ -31,7 +31,7 @@ applicationDependencies {
    compile ihmc.sourceSetProject("main")
 
    compile group: "us.ihmc", name: "ihmc-ros-tools", version: "source"
-   compile group: "us.ihmc", name: "ihmc-jmonkey-engine-toolkit", version: "0.12.5"
+   compile group: "us.ihmc", name: "ihmc-jmonkey-engine-toolkit", version: "0.12.6"
    compile group: "us.ihmc", name: "simulation-construction-set", version: "0.12.9"
    compile group: "us.ihmc", name: "simulation-construction-set-tools", version: "source"
 }

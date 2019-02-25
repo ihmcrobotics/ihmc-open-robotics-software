@@ -5,7 +5,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import controller_msgs.msg.dds.BoundingBox3DMessage;
 import controller_msgs.msg.dds.BoundingBoxesPacket;
 import controller_msgs.msg.dds.ControllerCrashNotificationPacket;
 import controller_msgs.msg.dds.DetectedFacesPacket;
@@ -18,7 +17,6 @@ import controller_msgs.msg.dds.KinematicsToolboxRigidBodyMessage;
 import controller_msgs.msg.dds.LidarScanMessage;
 import controller_msgs.msg.dds.LidarScanParametersMessage;
 import controller_msgs.msg.dds.ObjectDetectorResultPacket;
-import controller_msgs.msg.dds.RequestPlanarRegionsListMessage;
 import controller_msgs.msg.dds.SelectionMatrix3DMessage;
 import controller_msgs.msg.dds.SimulatedLidarScanPacket;
 import controller_msgs.msg.dds.StereoVisionPointCloudMessage;
@@ -35,7 +33,6 @@ import gnu.trove.list.array.TLongArrayList;
 import us.ihmc.commons.MathTools;
 import us.ihmc.commons.PrintTools;
 import us.ihmc.commons.lists.RecyclingArrayList;
-import us.ihmc.euclid.geometry.BoundingBox3D;
 import us.ihmc.euclid.interfaces.EpsilonComparable;
 import us.ihmc.euclid.interfaces.Settable;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
@@ -423,39 +420,6 @@ public class MessageTools
    {
       ToolboxStateMessage message = new ToolboxStateMessage();
       message.setRequestedToolboxState(requestedState.toByte());
-      return message;
-   }
-
-   public static RequestPlanarRegionsListMessage createRequestPlanarRegionsListMessage(PlanarRegionsRequestType requestType)
-   {
-      return createRequestPlanarRegionsListMessage(requestType, null, null);
-   }
-
-   public static RequestPlanarRegionsListMessage createRequestPlanarRegionsListMessage(PlanarRegionsRequestType requestType,
-                                                                                       BoundingBox3D boundingBoxInWorldForRequest)
-   {
-      return createRequestPlanarRegionsListMessage(requestType, boundingBoxInWorldForRequest, null);
-   }
-
-   public static RequestPlanarRegionsListMessage createRequestPlanarRegionsListMessage(PlanarRegionsRequestType requestType, PacketDestination destination)
-   {
-      return createRequestPlanarRegionsListMessage(requestType, null, destination);
-   }
-
-   public static RequestPlanarRegionsListMessage createRequestPlanarRegionsListMessage(PlanarRegionsRequestType requestType,
-                                                                                       BoundingBox3D boundingBoxInWorldForRequest,
-                                                                                       PacketDestination destination)
-   {
-      RequestPlanarRegionsListMessage message = new RequestPlanarRegionsListMessage();
-      message.setPlanarRegionsRequestType(requestType.toByte());
-      message.getBoundingBoxInWorldForRequest().set(new BoundingBox3DMessage());
-      if (boundingBoxInWorldForRequest != null)
-      {
-         message.getBoundingBoxInWorldForRequest().getMinPoint().set(boundingBoxInWorldForRequest.getMinPoint());
-         message.getBoundingBoxInWorldForRequest().getMaxPoint().set(boundingBoxInWorldForRequest.getMaxPoint());
-      }
-      if (destination != null)
-         message.setDestination(destination.ordinal());
       return message;
    }
 
