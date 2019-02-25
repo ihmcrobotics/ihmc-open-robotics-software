@@ -44,7 +44,7 @@ public class QuadrupedCoMTrajectoryPlanner implements CoMTrajectoryPlannerInterf
                                         double nominalHeight, YoVariableRegistry parentRegistry, YoGraphicsListRegistry graphicsListRegistry)
    {
       this.timestamp = timestamp;
-      contactSequenceUpdater = new QuadrupedContactSequenceUpdater(soleFrames, 4, 10);
+      contactSequenceUpdater = new QuadrupedContactSequenceUpdater(soleFrames, 4, 10, registry, graphicsListRegistry);
 
       comTrajectoryPlanner = new CoMTrajectoryPlanner(contactSequenceUpdater.getContactSequence(), omega, gravity, nominalHeight, registry,
                                                                graphicsListRegistry);
