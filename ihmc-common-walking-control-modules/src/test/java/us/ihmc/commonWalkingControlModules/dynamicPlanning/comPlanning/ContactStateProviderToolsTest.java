@@ -1,20 +1,18 @@
 package us.ihmc.commonWalkingControlModules.dynamicPlanning.comPlanning;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import us.ihmc.commons.RandomNumbers;
-import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
-import static junit.framework.TestCase.assertTrue;
-import static org.junit.Assert.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class ContactStateProviderToolsTest
 {
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(timeout = 30000)
+   @Test
    public void testCheckContactSequenceDoesNotEndInFlight()
    {
       SettableContactStateProvider contactState1 = new SettableContactStateProvider();
@@ -40,8 +38,7 @@ public class ContactStateProviderToolsTest
       assertTrue(ContactStateProviderTools.checkContactSequenceDoesNotEndInFlight(contactSequence));
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(timeout = 30000)
+   @Test
    public void testCheckContactSequenceIsContinuous()
    {
       SettableContactStateProvider contactState1 = new SettableContactStateProvider();

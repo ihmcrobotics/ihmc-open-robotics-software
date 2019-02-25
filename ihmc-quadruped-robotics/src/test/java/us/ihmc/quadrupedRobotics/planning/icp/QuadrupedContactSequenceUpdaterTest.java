@@ -1,7 +1,6 @@
 package us.ihmc.quadrupedRobotics.planning.icp;
 
-import org.junit.Test;
-import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
+import org.junit.jupiter.api.Test;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tools.EuclidCoreTestTools;
@@ -16,15 +15,14 @@ import us.ihmc.robotics.time.TimeInterval;
 import java.util.ArrayList;
 import java.util.List;
 
-import static junit.framework.TestCase.assertTrue;
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static us.ihmc.robotics.Assert.assertEquals;
 
 public class QuadrupedContactSequenceUpdaterTest
 {
    private static final double epsilon = 1e-8;
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(timeout = 30000)
+   @Test
    public void testNoSteps()
    {
       double nominalLength = 1.0;
@@ -64,8 +62,7 @@ public class QuadrupedContactSequenceUpdaterTest
       assertEquals(Double.POSITIVE_INFINITY, contactSequence.get(0).getTimeInterval().getEndTime(), epsilon);
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(timeout = 30000)
+   @Test
    public void testOneSimpleStep()
    {
       double stepLength = 0.2;
@@ -204,8 +201,7 @@ public class QuadrupedContactSequenceUpdaterTest
 
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(timeout = 30000)
+   @Test
    public void testFourStepsInFutureUsingCrawl()
    {
       double stepLength = 0.2;

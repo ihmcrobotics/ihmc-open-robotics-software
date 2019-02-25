@@ -19,7 +19,7 @@ import us.ihmc.quadrupedPlanning.footstepChooser.PointFootSnapper;
 import us.ihmc.quadrupedPlanning.stepStream.bodyPath.QuadrupedBodyPathPlan;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 import us.ihmc.robotics.robotSide.*;
-import us.ihmc.robotics.time.TimeInterval;
+import us.ihmc.robotics.time.TimeIntervalBasics;
 import us.ihmc.yoVariables.providers.DoubleProvider;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
@@ -251,7 +251,7 @@ public class QuadrupedXGaitStepCalculator
          RobotQuadrant thisStepQuadrant = pastStepOnSameEnd.getRobotQuadrant().getAcrossBodyQuadrant();
          thisStep.setRobotQuadrant(thisStepQuadrant);
          computeStepTimeInterval(thisStep, pastStepOnSameEnd, pastStepOnOppositeEnd, xGaitSettings);
-         TimeInterval thisTimeInterval = thisStep.getTimeInterval();
+         TimeIntervalBasics thisTimeInterval = thisStep.getTimeInterval();
          if (currentTime > thisTimeInterval.getStartTime())
             thisTimeInterval.shiftInterval(currentTime - thisTimeInterval.getStartTime());
 
@@ -379,7 +379,7 @@ public class QuadrupedXGaitStepCalculator
             return false;
 
          stepPosition.changeFrame(worldFrame);
-         step.getGoalPosition(stepPosition);
+         stepPosition.set(step.getGoalPosition());
          stepPosition.changeFrame(xGaitRectangleFrame);
 
          RobotQuadrant quadrant = step.getRobotQuadrant();

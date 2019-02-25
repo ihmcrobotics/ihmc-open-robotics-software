@@ -1,9 +1,8 @@
 package us.ihmc.quadrupedRobotics.planning.icp;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import us.ihmc.commons.RandomNumbers;
 import us.ihmc.commons.lists.RecyclingArrayList;
-import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tools.EuclidCoreRandomTools;
@@ -14,15 +13,14 @@ import us.ihmc.robotics.time.TimeInterval;
 
 import java.util.*;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class QuadrupedContactSequenceToolsTest
 {
    private static final double epsilon = 1e-8;
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(timeout = 30000)
+   @Test
    public void testTrimPastContactSequences()
    {
       Random random = new Random(1738L);
@@ -98,8 +96,7 @@ public class QuadrupedContactSequenceToolsTest
       }
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(timeout = 30000)
+   @Test
    public void testComputeStepTransitionsFromStepSequence()
    {
       Random random = new Random(1738L);

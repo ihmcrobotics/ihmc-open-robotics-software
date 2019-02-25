@@ -157,8 +157,8 @@ public class DCMPlanner implements DCMPlannerInterface
       dcmTrajectory.resetVariables();
    }
 
-   public void initializeForStepping(QuadrantDependentList<YoEnum<ContactState>> currentContactStates, FramePoint3DReadOnly dcmPosition,
-                                     FrameVector3DReadOnly dcmVelocity)
+   public void initializeForStepping(QuadrantDependentList<YoEnum<ContactState>> currentContactStates, FramePoint3DReadOnly currentDCMPosition,
+                                     FrameVector3DReadOnly currentDCMVelocity)
    {
       isStanding.set(false);
 
@@ -170,8 +170,8 @@ public class DCMPlanner implements DCMPlannerInterface
          // compute dcm trajectory
          computeDcmTrajectory(currentContactStates);
 
-         dcmPositionAtStartOfState.setMatchingFrame(dcmPosition);
-         dcmVelocityAtStartOfState.setMatchingFrame(dcmVelocity);
+         dcmPositionAtStartOfState.setMatchingFrame(currentDCMPosition);
+         dcmVelocityAtStartOfState.setMatchingFrame(currentDCMVelocity);
          timeAtStartOfState.set(controllerTime.getDoubleValue());
          computeTransitionTrajectory();
       }
