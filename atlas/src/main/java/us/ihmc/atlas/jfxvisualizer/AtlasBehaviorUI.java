@@ -33,9 +33,6 @@ public class AtlasBehaviorUI extends Application
       apiFactory.includeMessagerAPIs(SnappedPositionEditor.API.create());
       messager = new SharedMemoryJavaFXMessager(apiFactory.getAPIAndCloseFactory());
 
-      RealtimeRos2Node ros2Node = ROS2Tools.createRealtimeRos2Node(DomainFactory.PubSubImplementation.FAST_RTPS, "ihmc_behavior_ui");
-      AtlasLowLevelMessenger robotLowLevelMessenger = new AtlasLowLevelMessenger(ros2Node, drcRobotModel.getSimpleRobotName());
-
       messager.startMessager();
 
       ui = BehaviorUI.createMessagerUI(primaryStage, messager,
@@ -44,7 +41,6 @@ public class AtlasBehaviorUI extends Application
                                        drcRobotModel,
                                        drcRobotModel.getContactPointParameters(),
                                        drcRobotModel.getWalkingControllerParameters());
-      ui.setRobotLowLevelMessenger(robotLowLevelMessenger);
       ui.show();
 
       if (launchBehaviorModule)

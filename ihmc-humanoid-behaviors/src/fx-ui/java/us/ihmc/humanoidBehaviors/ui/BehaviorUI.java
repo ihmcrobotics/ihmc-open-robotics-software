@@ -11,6 +11,7 @@ import javafx.stage.Stage;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.communication.controllerAPI.RobotLowLevelMessenger;
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParameters;
+import us.ihmc.humanoidBehaviors.ui.behaviors.FXUIStateMachine;
 import us.ihmc.humanoidBehaviors.ui.behaviors.PatrolBehaviorUIController;
 import us.ihmc.humanoidBehaviors.ui.editors.FXUIEditor;
 import us.ihmc.humanoidBehaviors.ui.editors.SnappedPositionEditor;
@@ -88,7 +89,6 @@ public class BehaviorUI
       else
       {
          robotVisualizer = new JavaFXRobotVisualizer(fullHumanoidRobotModelFactory);
-//         messager.registerTopicListener(RobotConfigurationDataTopic, robotVisualizer::submitNewConfiguration);
          patrolBehaviorUIController.setFullRobotModel(robotVisualizer.getFullRobotModel());
          view3dFactory.addNodeToView(robotVisualizer.getRootNode());
          robotVisualizer.start();
@@ -106,11 +106,6 @@ public class BehaviorUI
 
       primaryStage.setScene(mainScene);
       primaryStage.setOnCloseRequest(event -> stop());
-   }
-
-   public void setRobotLowLevelMessenger(RobotLowLevelMessenger robotLowLevelMessenger)
-   {
-      patrolBehaviorUIController.setRobotLowLevelMessenger(robotLowLevelMessenger);
    }
 
    public void show()
@@ -148,6 +143,7 @@ public class BehaviorUI
       public static final Topic<FXUIEditor> ActiveEditor = apiFactory.createTopic("ActiveEditor", FXUIEditor.class);
       public static final Topic<PlanarRegionsList> PlanarRegionsList = apiFactory.createTopic("PlanarRegionsList", PlanarRegionsList.class);
       public static final Topic<FXUIGraphic> SelectedGraphic = apiFactory.createTopic("SelectedGraphic", FXUIGraphic.class);
+      public static final Topic<FXUIStateMachine> ActiveStateMachine = apiFactory.createTopic("ActiveStateMachine", FXUIStateMachine.class);
 
       public static final MessagerAPI create()
       {

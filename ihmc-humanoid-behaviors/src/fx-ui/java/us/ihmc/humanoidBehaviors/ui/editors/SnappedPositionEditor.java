@@ -5,19 +5,17 @@ import javafx.scene.input.MouseButton;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.input.PickResult;
 import javafx.scene.shape.MeshView;
-import org.lwjgl.input.Mouse;
 import us.ihmc.euclid.tuple3D.Point3D;
-import us.ihmc.humanoidBehaviors.ui.ActivationReference;
-import us.ihmc.humanoidBehaviors.ui.BehaviorUI;
-import us.ihmc.humanoidBehaviors.ui.QueueReference;
-import us.ihmc.humanoidBehaviors.ui.SimpleMessagerAPIFactory;
+import us.ihmc.humanoidBehaviors.ui.*;
+import us.ihmc.humanoidBehaviors.ui.BehaviorUI.API;
+import us.ihmc.humanoidBehaviors.ui.behaviors.FXUIStateMachine;
+import us.ihmc.humanoidBehaviors.ui.behaviors.FXUIStateTransition;
 import us.ihmc.log.LogTools;
 import us.ihmc.messager.Messager;
 import us.ihmc.messager.MessagerAPIFactory.MessagerAPI;
 import us.ihmc.messager.MessagerAPIFactory.Topic;
-import us.ihmc.pathPlanning.visibilityGraphs.tools.PlanarRegionTools;
-import us.ihmc.robotics.geometry.PlanarRegion;
-import us.ihmc.robotics.geometry.PlanarRegionsList;
+
+import java.util.concurrent.atomic.AtomicReference;
 
 public class SnappedPositionEditor extends FXUIEditor
 {
@@ -27,6 +25,8 @@ public class SnappedPositionEditor extends FXUIEditor
    private final ActivationReference<FXUIEditor> activeEditor;
    private final QueueReference<Point3D> mouseMovedMeshIntersection = new QueueReference<>();
    private final QueueReference<Point3D> mouseClickedMeshIntersection = new QueueReference<>();
+   private final NotificationReference mouseRightClicked = new NotificationReference();
+   private final AtomicReference<FXUIStateMachine> activeStateMachine;
 
    public SnappedPositionEditor(Messager messager, Node sceneNode)
    {
@@ -34,6 +34,7 @@ public class SnappedPositionEditor extends FXUIEditor
       this.sceneNode = sceneNode;
 
       activeEditor = new ActivationReference<>(messager.createInput(BehaviorUI.API.ActiveEditor, FXUIEditor.NONE), this);
+      activeStateMachine = messager.createInput(BehaviorUI.API.ActiveStateMachine, null);
    }
 
    @Override
@@ -63,7 +64,13 @@ public class SnappedPositionEditor extends FXUIEditor
          if (mouseClickedMeshIntersection.hasNext())
          {
             LogTools.debug("Selected position is validated: {}", mouseClickedMeshIntersection.read());
-            messager.submitMessage(BehaviorUI.API.ActiveEditor, FXUIEditor.NONE);
+//            messager.submitMessage(BehaviorUI.API.ActiveEditor, FXUIEditor.NONE);
+            activeStateMachine.get().transition(now, FXUIStateTransition.SNAPPED_POSITION_LEFT_CLICK);
+         }
+
+         if (mouseRightClicked.poll())
+         {
+            activeStateMachine.get().transition(now, FXUIStateTransition.SNAPPED_POSITION_RIGHT_CLICK);
          }
 
       }
@@ -86,16 +93,23 @@ public class SnappedPositionEditor extends FXUIEditor
 
    private void mouseClicked(MouseEvent event)
    {
-      if (event.getButton() == MouseButton.PRIMARY && event.isStillSincePress())
+      if (event.isStillSincePress())
       {
-         Point3D intersection = calculateMouseIntersection(event);
-         if (intersection != null)
+         if (event.getButton() == MouseButton.PRIMARY)
          {
-            mouseClickedMeshIntersection.add(intersection);
+            Point3D intersection = calculateMouseIntersection(event);
+            if (intersection != null)
+            {
+               mouseClickedMeshIntersection.add(intersection);
+            }
+            else
+            {
+               LogTools.debug("Click mesh couldn't be found");
+            }
          }
-         else
+         else if (event.getButton() == MouseButton.SECONDARY)
          {
-            LogTools.debug("Click mesh couldn't be found");
+            mouseRightClicked.set();
          }
       }
    }

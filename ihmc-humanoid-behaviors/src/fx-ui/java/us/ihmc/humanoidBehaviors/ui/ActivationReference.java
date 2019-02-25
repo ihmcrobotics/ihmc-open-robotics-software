@@ -30,9 +30,23 @@ public class ActivationReference<T>
    {
       T newValue = atomicReference.get();
 
-      boolean newValueActivated = newValue.equals(activatedValue);
+      boolean newValueActivated;
+      if (newValue == activatedValue)
+         newValueActivated = true;
+      else if (newValue == null)
+         newValueActivated = false;
+      else
+         newValueActivated = newValue.equals(activatedValue);
 
-      activationChanged = newValueActivated != lastValue.equals(activatedValue);
+      boolean lastValueActivated;
+      if (lastValue == activatedValue)
+         lastValueActivated = true;
+      else if (lastValue == null)
+         lastValueActivated = false;
+      else
+         lastValueActivated = lastValue.equals(activatedValue);
+
+      activationChanged = newValueActivated != lastValueActivated;
 
       lastValue = newValue;
 
