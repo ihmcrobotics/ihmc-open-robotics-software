@@ -4,5 +4,4 @@ start_yaw 1.5707963267948963
 goal_yaw 0.0
 planar_region_bipedal_timeout 10.0 
 a_star_timeout 5.0 
-plan_then_snap_timeout 2.0 
-step_planner_status test 
+step_planner_status test
