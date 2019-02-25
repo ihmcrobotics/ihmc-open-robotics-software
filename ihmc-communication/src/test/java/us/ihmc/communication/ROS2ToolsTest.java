@@ -12,13 +12,19 @@ class ROS2ToolsTest
    @Test
    void testToROSTopicFormat()
    {
-      compareAgainstGuava("");
-      compareAgainstGuava("a");
-      compareAgainstGuava("A");
-      compareAgainstGuava("ArmTrajectory");
-      compareAgainstGuava("BehaviorControlMode");
-      compareAgainstGuava("ThereIsAPineTree");
-      compareAgainstGuava("youAreDahBest");
+      compareAgainstGuava("", "");
+      compareAgainstGuava("a", "a");
+      compareAgainstGuava("a", "A");
+      compareAgainstGuava("arm_trajectory", "ArmTrajectory");
+      compareAgainstGuava("behavior_control_mode", "BehaviorControlMode");
+      compareAgainstGuava("there_is_a_pine_tree", "ThereIsAPineTree");
+      compareAgainstGuava("you_are_dah_best", "youAreDahBest");
+      compareAgainstGuava("v2_forge", "V2Forge");
+      compareAgainstGuava("v578_forge", "V578Forge");
+      compareAgainstGuava("forge_v578", "ForgeV578");
+      compareAgainstGuava("forge578", "Forge578");
+      compareAgainstGuava("578_forge", "578Forge");
+
       String troublingString = "REAIsAnAcronymAndIsNotHandledByGuava";
       String guavaExpectedAnswer = "r_e_a_is_an_acronym_and_is_not_handled_by_guava";
       String rosTopicExpectedName = "rea_is_an_acronym_and_is_not_handled_by_guava";
@@ -32,10 +38,11 @@ class ROS2ToolsTest
       assertEquals(rosTopicExpectedName, ROS2Tools.toROSTopicFormat(troublingString));
    }
 
-   private static void compareAgainstGuava(String stringToEvaluate)
+   private static void compareAgainstGuava(String expectedOutput, String stringToEvaluate)
    {
-      String expected =  CaseFormat.UPPER_CAMEL.to(CaseFormat.LOWER_UNDERSCORE, stringToEvaluate);
-      String actual = ROS2Tools.toROSTopicFormat(stringToEvaluate);
-      assertEquals(expected, actual);
+      String guavaOutput = CaseFormat.UPPER_CAMEL.to(CaseFormat.LOWER_UNDERSCORE, stringToEvaluate);
+      String ros2ToolsOutput = ROS2Tools.toROSTopicFormat(stringToEvaluate);
+      assertEquals(guavaOutput, ros2ToolsOutput);
+      assertEquals(expectedOutput, ros2ToolsOutput);
    }
 }
