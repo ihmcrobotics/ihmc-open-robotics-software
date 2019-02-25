@@ -1,9 +1,8 @@
 package us.ihmc.quadrupedRobotics.planning.icp;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import us.ihmc.commonWalkingControlModules.dynamicPlanning.comPlanning.ContactStateProvider;
 import us.ihmc.commonWalkingControlModules.dynamicPlanning.comPlanning.SettableContactStateProvider;
-import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
@@ -26,8 +25,7 @@ public class QuadrupedCoMTrajectoryPlannerTest
 {
    private static final double epsilon = 1e-6;
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(timeout = 30000)
+   @Test
    public void testStanding()
    {
       YoVariableRegistry registry = new YoVariableRegistry("test");
@@ -76,8 +74,7 @@ public class QuadrupedCoMTrajectoryPlannerTest
       }
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(timeout = 30000)
+   @Test
    public void testOneStep()
    {
       YoVariableRegistry registry = new YoVariableRegistry("test");

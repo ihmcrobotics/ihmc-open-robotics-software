@@ -1,10 +1,8 @@
 package us.ihmc.quadrupedRobotics.planning;
 
-import org.apache.commons.lang3.mutable.Mutable;
 import org.apache.commons.lang3.mutable.MutableDouble;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import us.ihmc.commons.RandomNumbers;
-import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.tools.EuclidFrameRandomTools;
@@ -16,14 +14,13 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class QuadrupedCenterOfPressureToolsTest
 {
    private static final double epsilon = 1e-9;
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(timeout = 30000)
+   @Test
    public void testComputeNominalNormalizedContactPressure()
    {
       QuadrantDependentList<MutableDouble> normalizedContactPressures = new QuadrantDependentList<>();
@@ -458,8 +455,7 @@ public class QuadrupedCenterOfPressureToolsTest
       assertEquals(0.0, normalizedContactPressures2.get(RobotQuadrant.FRONT_RIGHT).getValue(), epsilon);
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(timeout = 30000)
+   @Test
    public void testComputeCenterOfPressure()
    {
       Random random = new Random(1738L);

@@ -1,13 +1,11 @@
 package us.ihmc.commonWalkingControlModules.dynamicPlanning.comPlanning;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import us.ihmc.commons.RandomNumbers;
-import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 
 import java.util.Random;
 
 import static junit.framework.TestCase.assertTrue;
-import static org.junit.Assert.fail;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static us.ihmc.commonWalkingControlModules.dynamicPlanning.comPlanning.CoMTrajectoryPlannerTools.sufficientlyLarge;
 
@@ -16,8 +14,7 @@ public class CoMTrajectoryPlannerToolsTest
    private static final double epsilon = 1e-8;
    private static final int iters = 1000;
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(timeout = 30000)
+   @Test
    public void testGetFirstCoefficientCoMPositionMultiplier()
    {
       Random random = new Random(1738L);
@@ -42,8 +39,7 @@ public class CoMTrajectoryPlannerToolsTest
       }
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(timeout = 30000)
+   @Test
    public void testGetSecondCoefficientCoMPositionMultiplier()
    {
       Random random = new Random(1738L);
@@ -68,8 +64,7 @@ public class CoMTrajectoryPlannerToolsTest
       }
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(timeout = 30000)
+   @Test
    public void testGetThirdCoefficientCoMPositionMultiplier()
    {
       Random random = new Random(1738L);
@@ -93,8 +88,7 @@ public class CoMTrajectoryPlannerToolsTest
       }
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(timeout = 30000)
+   @Test
    public void testGetFourthCoefficientCoMPositionMultiplier()
    {
       double multiplier = CoMTrajectoryPlannerTools.getFourthCoefficientCoMPositionMultiplier(ContactState.IN_CONTACT, ContactMotion.LINEAR);
@@ -104,8 +98,7 @@ public class CoMTrajectoryPlannerToolsTest
       assertEquals(expectedMultiplier, multiplier, epsilon);
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(timeout = 30000)
+   @Test
    public void testGetFirstCoefficientCoMVelocityMultiplier()
    {
       Random random = new Random(1738L);
@@ -132,8 +125,7 @@ public class CoMTrajectoryPlannerToolsTest
       }
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(timeout = 30000)
+   @Test
    public void testGetSecondCoefficientCoMVelocityMultiplier()
    {
       Random random = new Random(1738L);
@@ -160,8 +152,7 @@ public class CoMTrajectoryPlannerToolsTest
       }
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(timeout = 30000)
+   @Test
    public void testGetThirdCoefficientCoMVelocityMultiplier()
    {
       double multiplier = CoMTrajectoryPlannerTools.getThirdCoefficientCoMVelocityMultiplier(ContactState.IN_CONTACT, ContactMotion.LINEAR);
@@ -175,8 +166,7 @@ public class CoMTrajectoryPlannerToolsTest
       assertEquals(0.0, multiplier, epsilon);
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(timeout = 30000)
+   @Test
    public void testGetFourthCoefficientCoMVelocityMultiplier()
    {
       double multiplier = CoMTrajectoryPlannerTools.getFourthCoefficientCoMVelocityMultiplier(ContactState.IN_CONTACT, ContactMotion.LINEAR);
@@ -185,8 +175,7 @@ public class CoMTrajectoryPlannerToolsTest
       assertEquals(0.0, multiplier, epsilon);
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(timeout = 30000)
+   @Test
    public void testGetFirstCoefficientCoMAccelerationMultiplier()
    {
       Random random = new Random(1738L);
@@ -214,8 +203,7 @@ public class CoMTrajectoryPlannerToolsTest
       }
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(timeout = 30000)
+   @Test
    public void testGetSecondCoefficientAccelerationMultiplier()
    {
       Random random = new Random(1738L);
@@ -243,8 +231,7 @@ public class CoMTrajectoryPlannerToolsTest
       }
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(timeout = 30000)
+   @Test
    public void testGetThirdCoefficientCoMAccelerationMultiplier()
    {
       double multiplier = CoMTrajectoryPlannerTools.getThirdCoefficientCoMAccelerationMultiplier(ContactState.IN_CONTACT);
@@ -258,8 +245,7 @@ public class CoMTrajectoryPlannerToolsTest
       assertEquals(0.0, multiplier, epsilon);
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(timeout = 30000)
+   @Test
    public void testGetFourthCoefficientCoMAccelerationMultiplier()
    {
       double multiplier = CoMTrajectoryPlannerTools.getFourthCoefficientCoMAccelerationMultiplier(ContactState.IN_CONTACT, ContactMotion.LINEAR);
@@ -268,8 +254,7 @@ public class CoMTrajectoryPlannerToolsTest
       assertEquals(0.0, multiplier, epsilon);
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(timeout = 30000)
+   @Test
    public void testGetFirstCoefficientVRPPositionMultiplier()
    {
       Random random = new Random(1738L);
@@ -294,8 +279,7 @@ public class CoMTrajectoryPlannerToolsTest
       }
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(timeout = 30000)
+   @Test
    public void testGetSecondCoefficientVRPPositionMultiplier()
    {
       Random random = new Random(1738L);
@@ -320,8 +304,7 @@ public class CoMTrajectoryPlannerToolsTest
       }
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(timeout = 30000)
+   @Test
    public void testGetThirdCoefficientVRPPositionMultiplier()
    {
       Random random = new Random(1738L);
@@ -346,8 +329,7 @@ public class CoMTrajectoryPlannerToolsTest
       }
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(timeout = 30000)
+   @Test
    public void testGetFourthCoefficientVRPPositionMultiplier()
    {
       double multiplier = CoMTrajectoryPlannerTools.getFourthCoefficientCoMPositionMultiplier(ContactState.IN_CONTACT, ContactMotion.LINEAR);
@@ -357,8 +339,7 @@ public class CoMTrajectoryPlannerToolsTest
       assertEquals(expectedMultiplier, multiplier, epsilon);
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(timeout = 30000)
+   @Test
    public void testGetGravityPositionEffect()
    {
       Random random = new Random(1738L);
@@ -380,8 +361,7 @@ public class CoMTrajectoryPlannerToolsTest
       }
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(timeout = 30000)
+   @Test
    public void testGetGravityVelocityEffect()
    {
       Random random = new Random(1738L);
@@ -403,8 +383,7 @@ public class CoMTrajectoryPlannerToolsTest
       }
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(timeout = 30000)
+   @Test
    public void testGetGravityAccelerationEffect()
    {
       Random random = new Random(1738L);

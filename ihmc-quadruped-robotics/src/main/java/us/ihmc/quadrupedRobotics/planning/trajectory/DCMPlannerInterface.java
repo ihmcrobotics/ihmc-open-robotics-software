@@ -1,9 +1,6 @@
 package us.ihmc.quadrupedRobotics.planning.trajectory;
 
-import us.ihmc.euclid.referenceFrame.interfaces.FixedFramePoint3DBasics;
-import us.ihmc.euclid.referenceFrame.interfaces.FixedFrameVector3DBasics;
-import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DBasics;
-import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
+import us.ihmc.euclid.referenceFrame.interfaces.*;
 import us.ihmc.quadrupedBasics.gait.QuadrupedTimedStep;
 import us.ihmc.quadrupedRobotics.planning.ContactState;
 import us.ihmc.robotics.robotSide.QuadrantDependentList;
@@ -19,7 +16,8 @@ public interface DCMPlannerInterface
 
    void initializeForStanding();
 
-   void initializeForStepping(QuadrantDependentList<YoEnum<ContactState>> currentContactStates, FramePoint3DReadOnly dcmPosition);
+   void initializeForStepping(QuadrantDependentList<YoEnum<ContactState>> currentContactStates, FramePoint3DReadOnly currentDCMPosition,
+                              FrameVector3DReadOnly currentDCMVelocity);
 
    void computeDcmSetpoints(QuadrantDependentList<YoEnum<ContactState>> currentContactStates, FixedFramePoint3DBasics desiredDCMPositionToPack,
                                    FixedFrameVector3DBasics desiredDCMVelocityToPack);

@@ -1,8 +1,7 @@
 package us.ihmc.commonWalkingControlModules.dynamicPlanning.comPlanning;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import us.ihmc.commons.RandomNumbers;
-import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
@@ -24,8 +23,7 @@ public class CoMTrajectoryPlannerTest
 {
    private static final double epsilon = 1e-4;
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(timeout = 30000)
+   @Test
    public void testNoStepsConstant()
    {
       YoVariableRegistry registry = new YoVariableRegistry("test");
@@ -119,8 +117,7 @@ public class CoMTrajectoryPlannerTest
       }
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(timeout = 60000)
+   @Test
    public void testNoStepsLinear()
    {
       YoVariableRegistry registry = new YoVariableRegistry("test");
@@ -213,8 +210,7 @@ public class CoMTrajectoryPlannerTest
       }
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(timeout = 30000)
+   @Test
    public void testOneSimpleMovingSegmentInContactConstant()
    {
       YoVariableRegistry registry = new YoVariableRegistry("test");
@@ -289,8 +285,7 @@ public class CoMTrajectoryPlannerTest
       }
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(timeout = 30000)
+   @Test
    public void testOneSimpleMovingSegmentInContactLinear()
    {
       YoVariableRegistry registry = new YoVariableRegistry("test");
@@ -370,8 +365,7 @@ public class CoMTrajectoryPlannerTest
       }
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(timeout = 30000)
+   @Test
    public void testOneMovingSegmentInContactConstant()
    {
       YoVariableRegistry registry = new YoVariableRegistry("test");
@@ -440,8 +434,7 @@ public class CoMTrajectoryPlannerTest
       }
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(timeout = 30000)
+   @Test
    public void testOneMovingSegmentInContactLinear()
    {
       YoVariableRegistry registry = new YoVariableRegistry("test");
@@ -515,8 +508,7 @@ public class CoMTrajectoryPlannerTest
       }
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(timeout = 30000)
+   @Test
    public void testTwoMovingSegmentsInContactConstant()
    {
       YoVariableRegistry registry = new YoVariableRegistry("test");
@@ -582,8 +574,7 @@ public class CoMTrajectoryPlannerTest
       }
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(timeout = 30000)
+   @Test
    public void testTwoMovingSegmentsInContactLinear()
    {
       YoVariableRegistry registry = new YoVariableRegistry("test");
@@ -691,8 +682,7 @@ public class CoMTrajectoryPlannerTest
       return initialDCM;
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(timeout = 30000)
+   @Test
    public void testManyMovingSegmentsInContact3DConstant()
    {
       YoVariableRegistry registry = new YoVariableRegistry("test");
@@ -782,8 +772,7 @@ public class CoMTrajectoryPlannerTest
       }
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(timeout = 30000)
+   @Test
    public void testManyMovingSegmentsInContact3DLinear()
    {
       YoVariableRegistry registry = new YoVariableRegistry("test");
@@ -881,8 +870,7 @@ public class CoMTrajectoryPlannerTest
       }
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(timeout = 30000)
+   @Test
    public void testTwoMovingSegmentsOneFlightConstant()
    {
       YoVariableRegistry registry = new YoVariableRegistry("test");
@@ -951,8 +939,7 @@ public class CoMTrajectoryPlannerTest
       }
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(timeout = 30000)
+   @Test
    public void testTwoMovingSegmentsOneFlightLinear()
    {
       YoVariableRegistry registry = new YoVariableRegistry("test");
@@ -1019,8 +1006,7 @@ public class CoMTrajectoryPlannerTest
       }
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(timeout = 30000)
+   @Test
    public void testStartingInFlightConstant()
    {
       YoVariableRegistry registry = new YoVariableRegistry("test");
@@ -1072,8 +1058,7 @@ public class CoMTrajectoryPlannerTest
    }
 
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(timeout = 30000)
+   @Test
    public void testStartingInFlightLinear()
    {
       YoVariableRegistry registry = new YoVariableRegistry("test");
