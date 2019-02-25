@@ -1,19 +1,25 @@
 package us.ihmc.communication;
 
-import com.google.common.base.CaseFormat;
-import org.apache.commons.lang3.StringUtils;
-import us.ihmc.commons.exception.ExceptionHandler;
-import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
-import us.ihmc.pubsub.TopicDataType;
-import us.ihmc.pubsub.subscriber.Subscriber;
-import us.ihmc.ros2.*;
-import us.ihmc.util.PeriodicNonRealtimeThreadSchedulerFactory;
-import us.ihmc.util.PeriodicThreadSchedulerFactory;
-
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.function.Supplier;
+
+import org.apache.commons.lang3.StringUtils;
+
+import us.ihmc.commons.exception.ExceptionHandler;
+import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
+import us.ihmc.pubsub.TopicDataType;
+import us.ihmc.pubsub.subscriber.Subscriber;
+import us.ihmc.ros2.NewMessageListener;
+import us.ihmc.ros2.RealtimeRos2Node;
+import us.ihmc.ros2.RealtimeRos2Subscription;
+import us.ihmc.ros2.Ros2Node;
+import us.ihmc.ros2.Ros2QosProfile;
+import us.ihmc.ros2.Ros2Subscription;
+import us.ihmc.util.PeriodicNonRealtimeThreadSchedulerFactory;
+import us.ihmc.util.PeriodicRealtimeThreadSchedulerFactory;
+import us.ihmc.util.PeriodicThreadSchedulerFactory;
 
 public class ROS2Tools
 {
@@ -185,20 +191,19 @@ public class ROS2Tools
       }
    }
 
-   public static <T> Ros2QueuedSubscription<T> createQueuedSubscription(Ros2Node ros2Node, Class<T> messageType,
-                                                                        MessageTopicNameGenerator topicNameGenerator)
+   public static <T> Ros2QueuedSubscription<T> createQueuedSubscription(Ros2Node ros2Node, Class<T> messageType, MessageTopicNameGenerator topicNameGenerator)
    {
       String topicName = topicNameGenerator.generateTopicName(messageType);
       return createQueuedSubscription(ros2Node, messageType, topicName, RUNTIME_EXCEPTION);
    }
 
-   public static <T> Ros2QueuedSubscription<T> createQueuedSubscription(Ros2Node ros2Node, Class<T> messageType,
-                                                                        String topicName)
+   public static <T> Ros2QueuedSubscription<T> createQueuedSubscription(Ros2Node ros2Node, Class<T> messageType, String topicName)
    {
       return createQueuedSubscription(ros2Node, messageType, topicName, RUNTIME_EXCEPTION);
    }
 
-   public static <T> Ros2QueuedSubscription<T> createQueuedSubscription(Ros2Node ros2Node, Class<T> messageType, String topicName, ExceptionHandler exceptionHandler)
+   public static <T> Ros2QueuedSubscription<T> createQueuedSubscription(Ros2Node ros2Node, Class<T> messageType, String topicName,
+                                                                        ExceptionHandler exceptionHandler)
    {
       try
       {
@@ -207,8 +212,7 @@ public class ROS2Tools
          NewMessageListener<T> newMessageListener = (Subscriber<T> subscriber) -> {
 
          };
-         ros2QueuedSubscription.setRos2Subscription(
-               ros2Node.createSubscription(topicDataType, ros2QueuedSubscription, topicName, Ros2QosProfile.DEFAULT()));
+         ros2QueuedSubscription.setRos2Subscription(ros2Node.createSubscription(topicDataType, ros2QueuedSubscription, topicName, Ros2QosProfile.DEFAULT()));
          return ros2QueuedSubscription;
       }
       catch (IOException e)
@@ -245,7 +249,8 @@ public class ROS2Tools
       }
    }
 
-   public static <T> RealtimeRos2Subscription<T> createQueuedSubscription(RealtimeRos2Node realtimeRos2Node, Class<T> messageType, MessageTopicNameGenerator topicNameGenerator)
+   public static <T> RealtimeRos2Subscription<T> createQueuedSubscription(RealtimeRos2Node realtimeRos2Node, Class<T> messageType,
+                                                                          MessageTopicNameGenerator topicNameGenerator)
    {
       String topicName = topicNameGenerator.generateTopicName(messageType);
       return createQueuedSubscription(realtimeRos2Node, messageType, topicName, RUNTIME_EXCEPTION);
@@ -256,7 +261,8 @@ public class ROS2Tools
       return createQueuedSubscription(realtimeRos2Node, messageType, topicName, RUNTIME_EXCEPTION);
    }
 
-   public static <T> RealtimeRos2Subscription<T> createQueuedSubscription(RealtimeRos2Node realtimeRos2Node, Class<T> messageType, String topicName, ExceptionHandler exceptionHandler)
+   public static <T> RealtimeRos2Subscription<T> createQueuedSubscription(RealtimeRos2Node realtimeRos2Node, Class<T> messageType, String topicName,
+                                                                          ExceptionHandler exceptionHandler)
    {
       try
       {
@@ -325,15 +331,14 @@ public class ROS2Tools
    /**
     * Creates a default topic name generator that uses {@value #IHMC_ROS_TOPIC_PREFIX} as prefix.
     * <p>
-    * This generator is not great at all as the topic name does not include the name of the robot,
-    * the name of the module, nor info about whether the topic is an input or output of the module
+    * This generator is not great at all as the topic name does not include the name of the robot, the
+    * name of the module, nor info about whether the topic is an input or output of the module
     * declaring it.
     * </p>
     * <p>
     * Here is a couple examples for this generator:
     * <ul>
-    * <li>For {@code TextToSpeechPacket} this generates the topic name:
-    * {@code "/ihmc/text_to_speech"}.
+    * <li>For {@code TextToSpeechPacket} this generates the topic name: {@code "/ihmc/text_to_speech"}.
     * <li>For {@code ArmTrajectoryMessage} this generates the topic name:
     * {@code "/ihmc/arm_trajectory"}.
     * </ul>
@@ -347,11 +352,11 @@ public class ROS2Tools
    }
 
    /**
-    * Creates a default topic name generator that uses {@value #IHMC_ROS_TOPIC_PREFIX} plus the name
-    * of the robot as prefix.
+    * Creates a default topic name generator that uses {@value #IHMC_ROS_TOPIC_PREFIX} plus the name of
+    * the robot as prefix.
     * <p>
-    * This generator is not great as the topic name does not include the name of the module, nor
-    * info about whether the topic is an input or output of the module declaring it.
+    * This generator is not great as the topic name does not include the name of the module, nor info
+    * about whether the topic is an input or output of the module declaring it.
     * </p>
     * <p>
     * Here is a couple examples for this generator:
@@ -371,11 +376,11 @@ public class ROS2Tools
    }
 
    /**
-    * Creates a default topic name generator that uses {@value #IHMC_ROS_TOPIC_PREFIX} plus the name
-    * of the robot as prefix.
+    * Creates a default topic name generator that uses {@value #IHMC_ROS_TOPIC_PREFIX} plus the name of
+    * the robot as prefix.
     * <p>
-    * This generator is not great as the topic name does not include the name of the module, nor
-    * info about whether the topic is an input or output of the module declaring it.
+    * This generator is not great as the topic name does not include the name of the module, nor info
+    * about whether the topic is an input or output of the module declaring it.
     * </p>
     * <p>
     * Here is a couple examples for this generator:
@@ -420,8 +425,7 @@ public class ROS2Tools
    }
 
    /**
-    * Generates a topic name in a similar way to
-    * {@link #generateDefaultTopicName(Class, String)}:<br>
+    * Generates a topic name in a similar way to {@link #generateDefaultTopicName(Class, String)}:<br>
     * For {@code TextToSpeechPacket} when running Valkyrie this generates the topic name:<br>
     * {@code "/ihmc/valkyrie/" + moduleName.toLowerCase() + qualifier + "/text_to_speech"}.
     *
@@ -473,8 +477,68 @@ public class ROS2Tools
       String topicName = messageClass.getSimpleName();
       topicName = StringUtils.removeEnd(topicName, "Packet"); // This makes BehaviorControlModePacket => BehaviorControlMode
       topicName = StringUtils.removeEnd(topicName, "Message"); // This makes ArmTrajectoryMessage => ArmTrajectory
-      topicName = "/" + CaseFormat.UPPER_CAMEL.to(CaseFormat.LOWER_UNDERSCORE, topicName); // This makes ArmTrajectory => arm_trajectory
+      topicName = "/" + toROSTopicFormat(topicName); // This makes ArmTrajectory => arm_trajectory & handle acronyms as follows: REAStateRequest => rea_state_request
       return prefix + topicName;
+   }
+
+   /**
+    * Converts the given {@code String} from a camel-case convention to ROS topic name convention which
+    * is lower-case with underscores.
+    * <p>
+    * This method in general behaves as from Guava:
+    * {@code CaseFormat.UPPER_CAMEL.to(CaseFormat.LOWER_UNDERSCORE, camelCase)}. The only difference is
+    * the handling of acronyms. For instance, given the {@code String} {@code "REAStatusMessage"}:
+    * <ul>
+    * <li>result from Guava: {@code "r_e_a_status_message"} which breaks the acronym 'REA'.
+    * <li>result from this method: {@code "rea_status_message"} which conserves the acronym as one
+    * word.
+    * </p>
+    * 
+    * @param camelCase the camel-case {@code String} to be converted.
+    * @return the converted {@code String} using lower-case with underscores.
+    */
+   public static String toROSTopicFormat(String camelCase)
+   {
+      if (camelCase == null)
+         return null;
+
+      if (camelCase.isEmpty())
+         return camelCase;
+
+      if (camelCase.length() == 1)
+         return camelCase.toLowerCase();
+
+      StringBuilder stringBuilder = new StringBuilder();
+
+      boolean isNewWord = true;
+      boolean isPreviousUpper = false;
+
+      for (int charIndex = 0; charIndex < camelCase.length(); charIndex++)
+      {
+         boolean isCharUpper = Character.isUpperCase(camelCase.charAt(charIndex));
+
+         if (charIndex == 0 || !isCharUpper)
+         {
+            isNewWord = false;
+         }
+         else if (!isPreviousUpper)
+         { // This is clearly the beginning of new word as the previous character is lower-case.
+            isNewWord = true;
+         }
+         else
+         { // This might still be an acronym.
+            int nextIndex = charIndex + 1;
+            boolean isNextUpper = nextIndex == camelCase.length() || Character.isUpperCase(camelCase.charAt(nextIndex));
+            isNewWord = !isNextUpper; // If next is lower-case, this is clearly a new word, but otherwise we're going through an acronym.
+         }
+
+         isPreviousUpper = isCharUpper;
+
+         if (isNewWord)
+            stringBuilder.append("_"); // Any new word but the first, starts with an underscore.
+         stringBuilder.append(Character.toLowerCase(camelCase.charAt(charIndex)));
+      }
+      return stringBuilder.toString();
    }
 
    public static final String pubSubTypeGetterName = "getPubSubType";
