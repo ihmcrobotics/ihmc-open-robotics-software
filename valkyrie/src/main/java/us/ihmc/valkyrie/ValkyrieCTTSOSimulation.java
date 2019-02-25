@@ -58,6 +58,7 @@ public class ValkyrieCTTSOSimulation
       networkProcessorParameters.enableKinematicsPlanningToolbox(false);
       networkProcessorParameters.enableRobotEnvironmentAwerenessModule(false);
       networkProcessorParameters.enableMocapModule(false);
+      networkProcessorParameters.enableAutoREAStateUpdater(true);
 
       // start sim
       simulationStarter.startSimulation(networkProcessorParameters, false);
