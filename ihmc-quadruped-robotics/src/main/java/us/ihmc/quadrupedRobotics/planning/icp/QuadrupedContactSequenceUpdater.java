@@ -3,17 +3,27 @@ package us.ihmc.quadrupedRobotics.planning.icp;
 import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.graphicsDescription.appearance.YoAppearance;
+import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition;
+import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsList;
+import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
+import us.ihmc.graphicsDescription.yoGraphics.plotting.ArtifactList;
 import us.ihmc.mecano.frames.MovingReferenceFrame;
 import us.ihmc.quadrupedBasics.gait.QuadrupedTimedStep;
 import us.ihmc.robotics.robotSide.QuadrantDependentList;
 import us.ihmc.robotics.robotSide.RobotQuadrant;
 import us.ihmc.robotics.time.TimeIntervalTools;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoFramePoint3D;
 
 import java.util.ArrayList;
 import java.util.List;
 
 public class QuadrupedContactSequenceUpdater
 {
+   private static final boolean VISUALIZE = true;
+   private static final double POINT_SIZE = 0.005;
+
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
 
    private final RecyclingArrayList<QuadrupedStepTransition> stepTransitionsInAbsoluteTime = new RecyclingArrayList<>(QuadrupedStepTransition::new);
@@ -26,7 +36,15 @@ public class QuadrupedContactSequenceUpdater
    private final RecyclingArrayList<QuadrupedContactPhase> contactSequenceInRelativeTime;
    private final RecyclingArrayList<QuadrupedContactPhase> contactSequenceInAbsoluteTime;
 
+   private final List<YoFramePoint3D> copKnots = new ArrayList<>();
+
    public QuadrupedContactSequenceUpdater(QuadrantDependentList<MovingReferenceFrame> soleFrames, int pastContactPhaseCapacity, int futureContactPhaseCapacity)
+   {
+      this(soleFrames, pastContactPhaseCapacity, futureContactPhaseCapacity, null, null);
+   }
+
+   public QuadrupedContactSequenceUpdater(QuadrantDependentList<MovingReferenceFrame> soleFrames, int pastContactPhaseCapacity, int futureContactPhaseCapacity,
+                                          YoVariableRegistry registry, YoGraphicsListRegistry yoGraphicsListRegistry)
    {
       contactSequenceInRelativeTime = new RecyclingArrayList<>(pastContactPhaseCapacity + futureContactPhaseCapacity + 1, QuadrupedContactPhase::new);
       contactSequenceInAbsoluteTime = new RecyclingArrayList<>(pastContactPhaseCapacity + futureContactPhaseCapacity + 1, QuadrupedContactPhase::new);
@@ -46,6 +64,30 @@ public class QuadrupedContactSequenceUpdater
       {
          feetInContact.add(robotQuadrant);
          solePositions.set(robotQuadrant, new FramePoint3D());
+      }
+
+      String packageName = "contactPlanner";
+      YoGraphicsList graphicsList = new YoGraphicsList(packageName);
+      ArtifactList artifactList = new ArtifactList(packageName);
+
+      for (int i = 0; i < maxCapacity; i++)
+      {
+         YoFramePoint3D copKnot = new YoFramePoint3D("copKnot" + i, worldFrame, registry);
+         copKnots.add(copKnot);
+
+         YoGraphicPosition copKnotViz = new YoGraphicPosition("CoPKnot" + i, copKnot, POINT_SIZE, YoAppearance.Green(),
+                                                              YoGraphicPosition.GraphicType.BALL);
+         graphicsList.add(copKnotViz);
+         artifactList.add(copKnotViz.createArtifact());
+      }
+
+      artifactList.setVisible(VISUALIZE);
+      graphicsList.setVisible(VISUALIZE);
+
+      if (yoGraphicsListRegistry != null)
+      {
+         yoGraphicsListRegistry.registerYoGraphicsList(graphicsList);
+         yoGraphicsListRegistry.registerArtifactList(artifactList);
       }
    }
 
@@ -84,6 +126,7 @@ public class QuadrupedContactSequenceUpdater
          contactPhase.set(contactSequenceInAbsoluteTime.get(i));
       }
 
+      // FIXME this isn't working correctly.
       QuadrupedContactSequenceTools.shiftContactSequencesToRelativeTime(contactSequenceInRelativeTime, currentTime);
 
       int currentSize = contactSequenceInRelativeTime.size();
@@ -91,6 +134,12 @@ public class QuadrupedContactSequenceUpdater
 
       if (contactSequenceInRelativeTime.size() < currentSize)
          throw new RuntimeException("This should have already been addressed.");
+
+      int copKnotIndex = 0;
+      for (; copKnotIndex < Math.min(copKnots.size(), contactSequenceInRelativeTime.size()); copKnotIndex++)
+         copKnots.get(copKnotIndex).set(contactSequenceInRelativeTime.get(copKnotIndex).getCopStartPosition());
+      for (; copKnotIndex < copKnots.size(); copKnotIndex++)
+         copKnots.get(copKnotIndex).setToNaN();
    }
 
 
