@@ -10,6 +10,12 @@
 				<Button fx:id="homeAll" onAction="#homeAll" prefWidth="130.0" text="Home All" />
 				<Button fx:id="freeze" onAction="#freeze" prefWidth="130.0" text="Freeze" GridPane.rowIndex="1" />
 				<Button fx:id="standPrep" onAction="#standPrep" prefWidth="130.0" text="Stand Prep" GridPane.rowIndex="2" />
+
+				<TextField text="Enable support regions" GridPane.columnIndex="1" GridPane.rowIndex="0"/>
+				<TextField text="Support regions scale" GridPane.columnIndex="1" GridPane.rowIndex="1"/>
+				<Button fx:id="sendSupportRegionParameters" onAction="#sendSupportRegionParameters"/>
+				<CheckBox fx:id="enableSupportRegions" prefWidth="130.0"  GridPane.columnIndex="2" GridPane.rowIndex="0" />
+				<Spinner fx:id="supportRegionScale" prefWidth="130.0" editable="true" GridPane.columnIndex="2" GridPane.rowIndex="1" />
 			</children>
 		</GridPane>
 	</children>
