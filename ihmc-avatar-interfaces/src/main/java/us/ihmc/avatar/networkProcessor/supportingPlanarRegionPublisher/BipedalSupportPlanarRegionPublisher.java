@@ -47,6 +47,10 @@ public class BipedalSupportPlanarRegionPublisher
 {
    private static final double defaultScaleFactor = 2.0;
 
+   private static final int LEFT_FOOT_INDEX = 0;
+   private static final int RIGHT_FOOT_INDEX = 1;
+   private static final int CONVEX_HULL_INDEX = 2;
+
    private final RealtimeRos2Node ros2Node = ROS2Tools.createRealtimeRos2Node(PubSubImplementation.FAST_RTPS, "supporting_planar_region_publisher");
    private final IHMCRealtimeROS2Publisher<PlanarRegionsListMessage> regionPublisher;
 
@@ -107,9 +111,9 @@ public class BipedalSupportPlanarRegionPublisher
       BipedalSupportPlanarRegionParametersMessage parameters = latestParametersMessage.get();
       if (!parameters.getEnable() || parameters.getSupportRegionScaleFactor() <= 0.0)
       {
-         supportRegions.set(0, new PlanarRegion());
-         supportRegions.set(1, new PlanarRegion());
-         supportRegions.set(2, new PlanarRegion());
+         supportRegions.set(LEFT_FOOT_INDEX, new PlanarRegion());
+         supportRegions.set(RIGHT_FOOT_INDEX, new PlanarRegion());
+         supportRegions.set(CONVEX_HULL_INDEX, new PlanarRegion());
 
          publishRegions();
          return;
@@ -149,9 +153,9 @@ public class BipedalSupportPlanarRegionPublisher
          allContactPoints.addAll(scaledContactPointList.get(RobotSide.RIGHT));
          allContactPoints.forEach(p -> p.changeFrameAndProjectToXYPlane(leftSoleFrame));
 
-         supportRegions.set(0, new PlanarRegion());
-         supportRegions.set(1, new PlanarRegion());
-         supportRegions.set(2, new PlanarRegion(leftSoleFrame.getTransformToWorldFrame(),
+         supportRegions.set(LEFT_FOOT_INDEX, new PlanarRegion());
+         supportRegions.set(RIGHT_FOOT_INDEX, new PlanarRegion());
+         supportRegions.set(CONVEX_HULL_INDEX, new PlanarRegion(leftSoleFrame.getTransformToWorldFrame(),
                                                 new ConvexPolygon2D(Vertex2DSupplier.asVertex2DSupplier(allContactPoints))));
       }
       else
@@ -172,7 +176,7 @@ public class BipedalSupportPlanarRegionPublisher
             }
          }
 
-         supportRegions.set(2, new PlanarRegion());
+         supportRegions.set(CONVEX_HULL_INDEX, new PlanarRegion());
       }
 
       publishRegions();
