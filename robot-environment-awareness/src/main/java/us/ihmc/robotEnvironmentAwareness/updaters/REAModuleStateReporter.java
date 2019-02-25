@@ -35,7 +35,7 @@ public class REAModuleStateReporter
    {
       if (isOcTreeRequested.getAndSet(false))
          reaMessager.submitMessage(REAModuleAPI.OcTreeState, OcTreeMessageConverter.convertToMessage(ocTree));
-      if (isOcTreeBoundingBoxRequested.get())
+      if (isOcTreeBoundingBoxRequested.getAndSet(false))
          reaMessager.submitMessage(REAModuleAPI.OcTreeBoundingBoxState, BoundingBoxMessageConverter.convertToMessage(ocTree.getBoundingBox()));
    }
 
