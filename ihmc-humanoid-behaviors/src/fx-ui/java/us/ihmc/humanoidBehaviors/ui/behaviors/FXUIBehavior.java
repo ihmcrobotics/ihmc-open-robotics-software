@@ -19,6 +19,13 @@ public class FXUIBehavior
    {
       graphics.add(graphic);
       rootChildren.add(graphic.getRoot());
+      graphic.start();
+   }
+
+   protected void removeGraphic(FXUIGraphic graphic)
+   {
+      rootChildren.remove(graphic.getRoot());
+      graphics.remove(graphic);
    }
 
    public Group getRoot()
