@@ -1,6 +1,8 @@
 #ifndef __controller_msgs__msg__StereoVisionPointCloudMessage__idl__
 #define __controller_msgs__msg__StereoVisionPointCloudMessage__idl__
 
+#include "geometry_msgs/msg/./Point_.idl"
+#include "geometry_msgs/msg/./Quaternion_.idl"
 module controller_msgs
 {
   module msg
@@ -19,6 +21,8 @@ module controller_msgs
          */
         unsigned long sequence_id;
         long long robot_timestamp;
+        geometry_msgs::msg::dds::Point sensor_position;
+        geometry_msgs::msg::dds::Quaternion sensor_orientation;
         sequence<float, 600000> point_cloud;
         sequence<long, 200000> colors;
       };
