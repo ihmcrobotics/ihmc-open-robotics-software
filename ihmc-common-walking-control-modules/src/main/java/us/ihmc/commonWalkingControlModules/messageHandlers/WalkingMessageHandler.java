@@ -82,6 +82,7 @@ public class WalkingMessageHandler
    private final YoInteger currentFootstepIndex = new YoInteger("currentFootstepIndex", registry);
    private final YoInteger currentNumberOfFootsteps = new YoInteger("currentNumberOfFootsteps", registry);
    private final YoBoolean isWalkingPaused = new YoBoolean("isWalkingPaused", registry);
+   private final YoBoolean isWalkingResuming = new YoBoolean("isWalkingResuming", registry);
    private final YoDouble defaultTransferTime = new YoDouble("defaultTransferTime", registry);
    private final YoDouble finalTransferTime = new YoDouble("finalTransferTime", registry);
    private final YoDouble defaultSwingTime = new YoDouble("defaultSwingTime", registry);
@@ -214,6 +215,17 @@ public class WalkingMessageHandler
       }
 
       lastCommandID.set(command.getCommandId());
+
+      if (isWalkingPaused.getValue())
+      { 
+         /*
+          * The walking was paused, when paused isWalking remains true. We're
+          * receiving a new series of footsteps, let's reset isWalking so the
+          * controller reports that it starts walking.
+          */
+         isWalking.set(false);
+      }
+
       isWalkingPaused.set(false);
       double commandDefaultTransferTime = command.getDefaultTransferDuration();
       double commandDefaultSwingTime = command.getDefaultSwingDuration();
@@ -275,6 +287,9 @@ public class WalkingMessageHandler
 
    public void handlePauseWalkingCommand(PauseWalkingCommand command)
    {
+      if (!command.isPauseRequested() && isWalkingPaused.getValue())
+         isWalkingResuming.set(true);
+
       isWalkingPaused.set(command.isPauseRequested());
    }
 
@@ -583,6 +598,13 @@ public class WalkingMessageHandler
    {
       if (isWalking.getValue())
       {
+         if (isWalkingResuming.getValue())
+         {
+            walkingStatusMessage.setWalkingStatus(WalkingStatus.RESUMED.toByte());
+            statusOutputManager.reportStatusMessage(walkingStatusMessage);
+            isWalkingResuming.set(false);
+         }
+
          return;
       }
 
@@ -604,6 +626,8 @@ public class WalkingMessageHandler
       // transfer. In that case do not report walking complete. Instead compute when to continue walking.
       if (!upcomingFootsteps.isEmpty())
       {
+         walkingStatusMessage.setWalkingStatus(WalkingStatus.PAUSED.toByte());
+         statusOutputManager.reportStatusMessage(walkingStatusMessage);
          checkForPause();
          return;
       }
