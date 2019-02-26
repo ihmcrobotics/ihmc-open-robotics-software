@@ -46,19 +46,6 @@ public class AtlasStepInPlaceTest extends AvatarStepInPlaceTest
 
 
 
-   @Override
-   @Test
-   public void testStepInPlace() throws SimulationExceededMaximumTimeException
-   {
-      super.testStepInPlace();
-   }
-
-   @Test
-   public void testStepInPlaceWithPush() throws SimulationExceededMaximumTimeException
-   {
-      super.testStepInPlaceWithPush();
-   }
-
 
    @Override
    public DRCRobotModel getRobotModel()
