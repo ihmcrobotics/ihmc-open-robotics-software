@@ -259,8 +259,9 @@ public class QuadrupedReferenceFrames extends AbstractQuadrupedReferenceFrames
    private void updateCenterOfFeetUsingNominalsForRotationPart()
    {
       updateSupportPolygon(null, supportPolygonForCentroids);
-      supportPolygonForCentroids.getCentroidFramePoseAveragingLowestZHeightsAcrossEnds(supportPolygonCentroidWithNominalRotation);
-      supportPolygonCentroidFrameWithNominalRotation.setPoseAndUpdate(supportPolygonCentroidWithNominalRotation);
+      // only update if getting the centroid was successful.
+      if (supportPolygonForCentroids.getCentroidFramePoseAveragingLowestZHeightsAcrossEnds(supportPolygonCentroidWithNominalRotation))
+         supportPolygonCentroidFrameWithNominalRotation.setPoseAndUpdate(supportPolygonCentroidWithNominalRotation);
       supportPolygonCentroidZUpFrame.update();
    }
 
