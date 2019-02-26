@@ -7,7 +7,7 @@ import us.ihmc.footstepPlanning.FootstepPlannerDataSetTest;
 import us.ihmc.footstepPlanning.FootstepPlannerType;
 import us.ihmc.log.LogTools;
 
-@Tag("footstep-planner-slow")
+@Tag("footstep-planning-slow")
 public class MessagerPlanarRegionBipedalDataSetTest extends FootstepPlannerDataSetTest
 {
    @Override
