@@ -1,4 +1,4 @@
-package us.ihmc.humanoidBehaviors.ui;
+package us.ihmc.humanoidBehaviors.ui.model;
 
 import us.ihmc.messager.MessagerAPIFactory;
 import us.ihmc.messager.MessagerAPIFactory.Category;
@@ -6,12 +6,12 @@ import us.ihmc.messager.MessagerAPIFactory.CategoryTheme;
 import us.ihmc.messager.MessagerAPIFactory.MessagerAPI;
 import us.ihmc.messager.MessagerAPIFactory.Topic;
 
-public class SimpleMessagerAPIFactory
+public class FXUIMessagerAPIFactory
 {
    private final MessagerAPIFactory apiFactory = new MessagerAPIFactory();
    private final Category rootCategory;
 
-   public SimpleMessagerAPIFactory(Class<?> applicationClazz)
+   public FXUIMessagerAPIFactory(Class<?> applicationClazz)
    {
       this.rootCategory = apiFactory.createRootCategory(apiFactory.createCategoryTheme(applicationClazz.getSimpleName()));
    }

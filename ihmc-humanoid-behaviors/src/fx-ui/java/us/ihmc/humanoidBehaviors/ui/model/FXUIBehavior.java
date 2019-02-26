@@ -3,7 +3,6 @@ package us.ihmc.humanoidBehaviors.ui.model;
 import javafx.collections.ObservableList;
 import javafx.scene.Group;
 import javafx.scene.Node;
-import us.ihmc.humanoidBehaviors.ui.model.FXUIGraphic;
 
 import java.util.ArrayList;
 
