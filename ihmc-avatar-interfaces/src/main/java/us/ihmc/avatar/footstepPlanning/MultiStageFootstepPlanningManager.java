@@ -425,7 +425,7 @@ public class MultiStageFootstepPlanningManager implements PlannerCompletionCallb
    }
 
    @Override
-   public void pathPlanningIsComplete(FootstepPlanningResult pathPlanningResult, PathPlanningStage stageFinished)
+   public synchronized void pathPlanningIsComplete(FootstepPlanningResult pathPlanningResult, PathPlanningStage stageFinished)
    {
       completedPathResults.add(pathPlanningResult);
 
@@ -443,7 +443,7 @@ public class MultiStageFootstepPlanningManager implements PlannerCompletionCallb
    }
 
    @Override
-   public void stepPlanningIsComplete(FootstepPlanningResult stepPlanningResult, FootstepPlanningStage stageFinished)
+   public synchronized void stepPlanningIsComplete(FootstepPlanningResult stepPlanningResult, FootstepPlanningStage stageFinished)
    {
       completedStepResults.add(stepPlanningResult);
 
