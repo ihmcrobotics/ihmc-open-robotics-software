@@ -127,7 +127,7 @@ public class QuadrupedContactSequenceUpdater
       }
 
       // FIXME this isn't working correctly.
-      QuadrupedContactSequenceTools.shiftContactSequencesToRelativeTime(contactSequenceInRelativeTime, currentTime);
+//      QuadrupedContactSequenceTools.shiftContactSequencesToRelativeTime(contactSequenceInRelativeTime, currentTime);
 
       int currentSize = contactSequenceInRelativeTime.size();
       TimeIntervalTools.removeEndTimesLessThan(0.0, contactSequenceInRelativeTime);
