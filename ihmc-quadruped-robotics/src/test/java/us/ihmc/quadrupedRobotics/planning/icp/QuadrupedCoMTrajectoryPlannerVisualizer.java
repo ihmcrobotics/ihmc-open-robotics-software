@@ -37,7 +37,9 @@ public class QuadrupedCoMTrajectoryPlannerVisualizer
    private static final double stepDuration = 0.4;
    private static final double stanceDuration = 0.2;
    private static final double stepLength = 0.5;
-   private static final int numberOfSteps = 5;
+   private static final int numberOfSteps = 3;
+
+   private static final boolean doTrot = true;
 
    private static final double simDt = 1e-3;
 
@@ -183,7 +185,10 @@ public class QuadrupedCoMTrajectoryPlannerVisualizer
          QuadrupedTimedStep step2 = new QuadrupedTimedStep();
 
          step1.getTimeInterval().setInterval(currentTime, currentTime + stepDuration);
-         step2.getTimeInterval().setInterval(currentTime + 0.5 * stepDuration, currentTime + 1.5 * stepDuration);
+         if (doTrot)
+            step2.getTimeInterval().setInterval(currentTime, currentTime + stepDuration);
+         else
+            step2.getTimeInterval().setInterval(currentTime + 0.5 * stepDuration, currentTime + 1.5 * stepDuration);
 
          if (stepInterval == 0)
          {
