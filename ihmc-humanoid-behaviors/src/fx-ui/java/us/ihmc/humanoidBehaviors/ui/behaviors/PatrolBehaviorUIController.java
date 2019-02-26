@@ -5,7 +5,7 @@ import javafx.scene.control.Button;
 import javafx.scene.paint.Color;
 import us.ihmc.communication.controllerAPI.RobotLowLevelMessenger;
 import us.ihmc.humanoidBehaviors.ui.BehaviorUI;
-import us.ihmc.humanoidBehaviors.ui.SimpleMessagerAPIFactory;
+import us.ihmc.humanoidBehaviors.ui.model.FXUIMessagerAPIFactory;
 import us.ihmc.humanoidBehaviors.ui.model.*;
 import us.ihmc.humanoidBehaviors.ui.graphics.SnappedPositionGraphic;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
@@ -121,7 +121,7 @@ public class PatrolBehaviorUIController extends FXUIBehavior
 
    public static class API
    {
-      private static final SimpleMessagerAPIFactory apiFactory = new SimpleMessagerAPIFactory(BehaviorUI.class);
+      private static final FXUIMessagerAPIFactory apiFactory = new FXUIMessagerAPIFactory(BehaviorUI.class);
 
 
       public static final MessagerAPI create()
