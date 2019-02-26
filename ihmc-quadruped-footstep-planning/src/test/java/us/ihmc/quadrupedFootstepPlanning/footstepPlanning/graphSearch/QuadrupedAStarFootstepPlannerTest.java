@@ -2,22 +2,18 @@ package us.ihmc.quadrupedFootstepPlanning.footstepPlanning.graphSearch;
 
 import org.junit.jupiter.api.Test;
 import us.ihmc.commons.thread.ThreadTools;
-import org.junit.jupiter.api.Tag;
-import org.junit.jupiter.api.Disabled;
 import us.ihmc.commons.ContinuousIntegrationTools;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.tools.EuclidCoreTestTools;
 import us.ihmc.euclid.tuple3D.Point3D;
-import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DBasics;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.graphicsDescription.Graphics3DObject;
 import us.ihmc.graphicsDescription.appearance.AppearanceDefinition;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
-import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.quadrupedBasics.gait.QuadrupedTimedStep;
+import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.FootstepPlan;
 import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.FootstepPlanningResult;
-import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.QuadrupedFootstepPlanner;
 import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.QuadrupedFootstepPlannerGoal;
 import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.QuadrupedFootstepPlannerStart;
 import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.graphSearch.graph.FootstepNode;
@@ -32,13 +28,9 @@ import us.ihmc.robotics.graphics.Graphics3DObjectTools;
 import us.ihmc.robotics.robotSide.QuadrantDependentList;
 import us.ihmc.robotics.robotSide.RobotQuadrant;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
-import us.ihmc.simulationconstructionset.SimulationConstructionSetParameters;
-import us.ihmc.simulationconstructionset.gui.YoGraph;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 
 import java.util.List;
-
-import static us.ihmc.robotics.Assert.*;
 
 import static us.ihmc.robotics.Assert.*;
 
@@ -92,7 +84,7 @@ public class QuadrupedAStarFootstepPlannerTest
       }
 
       assertTrue(result.validForExecution());
-      List<? extends QuadrupedTimedStep> steps = planner.getSteps();
+      FootstepPlan steps = planner.getPlan();
 
       if (visualize && !activelyVisualize)
          visualizePlan(steps, null, startPose.getPosition(), goalPose.getPosition());
@@ -142,7 +134,7 @@ public class QuadrupedAStarFootstepPlannerTest
       }
 
       assertTrue(result.validForExecution());
-      List<? extends QuadrupedTimedStep> steps = planner.getSteps();
+      FootstepPlan steps = planner.getPlan();
 
       if (visualize && !activelyVisualize)
          visualizePlan(steps, null, startPose.getPosition(), goalPose.getPosition());
@@ -192,7 +184,7 @@ public class QuadrupedAStarFootstepPlannerTest
       }
 
       assertTrue(result.validForExecution());
-      List<? extends QuadrupedTimedStep> steps = planner.getSteps();
+      FootstepPlan steps = planner.getPlan();
 
       if (visualize && !activelyVisualize)
          visualizePlan(steps, null, startPose.getPosition(), goalPose.getPosition());
@@ -200,7 +192,7 @@ public class QuadrupedAStarFootstepPlannerTest
       assertPlanIsValid(steps, goalPose.getPosition(), goalPose.getYaw());
    }
 
-   private static void assertPlanIsValid(List<? extends QuadrupedTimedStep> plannedSteps, Point3DReadOnly goalPosition, double goalYaw)
+   private static void assertPlanIsValid(FootstepPlan plannedSteps, Point3DReadOnly goalPosition, double goalYaw)
    {
       QuadrantDependentList<Point3DBasics> finalSteps = getFinalStepPositions(plannedSteps);
 
@@ -221,12 +213,12 @@ public class QuadrupedAStarFootstepPlannerTest
       assertEquals(goalYaw, nominalYaw, 0.02);
    }
 
-   private static QuadrantDependentList<Point3DBasics> getFinalStepPositions(List<? extends QuadrupedTimedStep> plannedSteps)
+   private static QuadrantDependentList<Point3DBasics> getFinalStepPositions(FootstepPlan plannedSteps)
    {
       QuadrantDependentList<Point3DBasics> finalSteps = new QuadrantDependentList<>();
-      for (int i = plannedSteps.size() - 1; i >= 0; i--)
+      for (int i = plannedSteps.getNumberOfSteps() - 1; i >= 0; i--)
       {
-         QuadrupedTimedStep step = plannedSteps.get(i);
+         QuadrupedTimedStep step = plannedSteps.getFootstep(i);
          if (finalSteps.containsKey(step.getRobotQuadrant()))
             continue;
          else
@@ -236,7 +228,7 @@ public class QuadrupedAStarFootstepPlannerTest
       return finalSteps;
    }
 
-   private void visualizePlan(List<? extends QuadrupedTimedStep> steps, PlanarRegionsList planarRegionsList, Point3DReadOnly start, Point3DReadOnly goal)
+   private void visualizePlan(FootstepPlan steps, PlanarRegionsList planarRegionsList, Point3DReadOnly start, Point3DReadOnly goal)
    {
       if (!visualize || ContinuousIntegrationTools.isRunningOnContinuousIntegrationServer())
          return;
@@ -260,10 +252,10 @@ public class QuadrupedAStarFootstepPlannerTest
 
       if (steps != null)
       {
-         for (int i = 0; i < steps.size(); i++)
+         for (int i = 0; i < steps.getNumberOfSteps(); i++)
          {
-            Point3DReadOnly point = steps.get(i).getGoalPosition();
-            AppearanceDefinition appearanceDefinition = colorDefinitions.get(steps.get(i).getRobotQuadrant());
+            Point3DReadOnly point = steps.getFootstep(i).getGoalPosition();
+            AppearanceDefinition appearanceDefinition = colorDefinitions.get(steps.getFootstep(i).getRobotQuadrant());
 
             graphics3DObject.identity();
             graphics3DObject.translate(point);

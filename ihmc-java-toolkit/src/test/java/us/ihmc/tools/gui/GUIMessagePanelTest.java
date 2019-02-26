@@ -6,7 +6,7 @@ import org.junit.jupiter.api.Test;
 
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Disabled;
-@Tag("gui")
+@Tag("gui-slow")
 public class GUIMessagePanelTest
 {
 	@Test

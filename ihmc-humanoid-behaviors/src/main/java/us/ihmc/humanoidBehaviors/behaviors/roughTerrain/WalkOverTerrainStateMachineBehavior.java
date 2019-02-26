@@ -8,7 +8,7 @@ import controller_msgs.msg.dds.FootstepPlanningToolboxOutputStatus;
 import controller_msgs.msg.dds.FootstepStatusMessage;
 import controller_msgs.msg.dds.HeadTrajectoryMessage;
 import controller_msgs.msg.dds.PlanarRegionsListMessage;
-import controller_msgs.msg.dds.RequestPlanarRegionsListMessage;
+import controller_msgs.msg.dds.REAStateRequestMessage;
 import controller_msgs.msg.dds.ToolboxStateMessage;
 import controller_msgs.msg.dds.WalkOverTerrainGoalPacket;
 import controller_msgs.msg.dds.WalkingStatusMessage;
@@ -16,7 +16,6 @@ import us.ihmc.commons.PrintTools;
 import us.ihmc.communication.IHMCROS2Publisher;
 import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.communication.packets.PacketDestination;
-import us.ihmc.communication.packets.PlanarRegionsRequestType;
 import us.ihmc.communication.packets.ToolboxState;
 import us.ihmc.euclid.axisAngle.AxisAngle;
 import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
@@ -77,7 +76,7 @@ public class WalkOverTerrainStateMachineBehavior extends AbstractBehavior
    private final IHMCROS2Publisher<FootstepDataListMessage> footstepPublisher;
    private final IHMCROS2Publisher<ToolboxStateMessage> toolboxStatePublisher;
    private final IHMCROS2Publisher<FootstepPlanningRequestPacket> planningRequestPublisher;
-   private final IHMCROS2Publisher<RequestPlanarRegionsListMessage> planarRegionsRequestPublisher;
+   private final IHMCROS2Publisher<REAStateRequestMessage> reaStateRequestPublisher;
    private final IHMCROS2Publisher<HeadTrajectoryMessage> headTrajectoryPublisher;
 
    public WalkOverTerrainStateMachineBehavior(String robotName, Ros2Node ros2Node, YoDouble yoTime, WholeBodyControllerParameters wholeBodyControllerParameters,
@@ -104,7 +103,7 @@ public class WalkOverTerrainStateMachineBehavior extends AbstractBehavior
       headTrajectoryPublisher = createPublisherForController(HeadTrajectoryMessage.class);
       toolboxStatePublisher = createPublisher(ToolboxStateMessage.class, footstepPlanningToolboxSubGenerator);
       planningRequestPublisher = createPublisher(FootstepPlanningRequestPacket.class, footstepPlanningToolboxSubGenerator);
-      planarRegionsRequestPublisher = createPublisher(RequestPlanarRegionsListMessage.class, REACommunicationProperties.subscriberTopicNameGenerator);
+      reaStateRequestPublisher = createPublisher(REAStateRequestMessage.class, REACommunicationProperties.subscriberTopicNameGenerator);
 
       stateMachine = setupStateMachine(yoTime);
    }
@@ -232,9 +231,9 @@ public class WalkOverTerrainStateMachineBehavior extends AbstractBehavior
 
       private void clearPlanarRegionsList()
       {
-         RequestPlanarRegionsListMessage requestPlanarRegionsListMessage = MessageTools.createRequestPlanarRegionsListMessage(PlanarRegionsRequestType.CLEAR);
-         requestPlanarRegionsListMessage.setDestination(PacketDestination.REA_MODULE.ordinal());
-         planarRegionsRequestPublisher.publish(requestPlanarRegionsListMessage);
+         REAStateRequestMessage clearRequest = new REAStateRequestMessage();
+         clearRequest.setRequestClear(true);
+         reaStateRequestPublisher.publish(clearRequest);
       }
 
       @Override

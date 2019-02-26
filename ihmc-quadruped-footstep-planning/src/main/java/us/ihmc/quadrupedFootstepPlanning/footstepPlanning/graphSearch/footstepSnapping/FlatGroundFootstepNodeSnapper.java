@@ -10,7 +10,7 @@ public class FlatGroundFootstepNodeSnapper extends FootstepNodeSnapper
    }
 
    @Override
-   public FootstepNodeSnapData snapInternal(FootstepNode footstepNode)
+   public FootstepNodeSnapData snapInternal(int xIndex, int yIndex)
    {
       return FootstepNodeSnapData.identityData();
    }

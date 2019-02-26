@@ -6,7 +6,7 @@ import org.junit.jupiter.api.Disabled;
 import us.ihmc.footstepPlanning.FootstepPlannerDataSetTest;
 import us.ihmc.footstepPlanning.FootstepPlannerType;
 
-@Tag("allocation")
+@Tag("footstep-planner-slow")
 public class MessagerSimpleBodyPathDataSetTest extends FootstepPlannerDataSetTest
 {
    @Override
@@ -33,9 +33,8 @@ public class MessagerSimpleBodyPathDataSetTest extends FootstepPlannerDataSetTes
    public static void main(String[] args) throws Exception
    {
       MessagerSimpleBodyPathDataSetTest test = new MessagerSimpleBodyPathDataSetTest();
-      String prefix = "unitTestDataSets/test/";
       test.setup();
-      test.runAssertionsOnDataset(dataset -> test.runAssertions(dataset), prefix + "20171218_204917_FlatGround");
+      test.runAssertionsOnDataset(dataset -> test.runAssertions(dataset), "20171218_204917_FlatGround");
       test.tearDown();
 
    }

@@ -37,7 +37,7 @@ import us.ihmc.yoVariables.variable.YoVariable;
 /**
  * Created by agrabertilton on 4/15/15.
  */
-@Tag("humanoid-flat-ground")
+@Tag("humanoid-flat-ground-3")
 public abstract class DRCHighSwingTest implements MultiRobotTestInterface
 {
    protected SimulationTestingParameters simulationTestingParameters;

@@ -3,6 +3,7 @@ package us.ihmc.footstepPlanning.graphSearch.nodeExpansion;
 import java.util.HashSet;
 
 import us.ihmc.footstepPlanning.graphSearch.graph.FootstepNode;
+import us.ihmc.footstepPlanning.graphSearch.graph.LatticeNode;
 
 /**
  * This class expands nodes in a 8 connected way.
@@ -21,8 +22,8 @@ public class SimpleGridResolutionBasedExpansion implements FootstepNodeExpansion
          {
             if (i == 0 && j == 0)
                continue;
-            double xOffset = FootstepNode.gridSizeXY * i;
-            double yOffset = FootstepNode.gridSizeXY * j;
+            double xOffset = LatticeNode.gridSizeXY * i;
+            double yOffset = LatticeNode.gridSizeXY * j;
             neighbors.add(new FootstepNode(node.getX() + xOffset, node.getY() + yOffset));
          }
       }

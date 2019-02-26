@@ -31,7 +31,7 @@ import us.ihmc.simulationconstructionset.util.simulationTesting.SimulationTestin
 import us.ihmc.tools.MemoryTools;
 import us.ihmc.yoVariables.variable.YoBoolean;
 
-@Tag("humanoid-flat-ground")
+@Tag("humanoid-push-recovery")
 public abstract class DRCPushRecoveryStandingTest implements MultiRobotTestInterface
 {
    private static final SimulationTestingParameters simulationTestingParameters = SimulationTestingParameters.createFromSystemProperties();

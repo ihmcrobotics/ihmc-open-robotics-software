@@ -2,7 +2,6 @@ package us.ihmc.robotEnvironmentAwareness.communication;
 
 import java.util.ArrayList;
 
-import controller_msgs.msg.dds.BoundingBox3DMessage;
 import controller_msgs.msg.dds.BoundingBox3DMessagePubSubType;
 import controller_msgs.msg.dds.LidarScanMessage;
 import controller_msgs.msg.dds.LidarScanMessagePubSubType;
@@ -12,9 +11,7 @@ import controller_msgs.msg.dds.PlanarRegionsListMessage;
 import controller_msgs.msg.dds.PlanarRegionsListMessagePubSubType;
 import controller_msgs.msg.dds.Polygon2DMessage;
 import controller_msgs.msg.dds.Polygon2DMessagePubSubType;
-import controller_msgs.msg.dds.RequestLidarScanMessage;
 import controller_msgs.msg.dds.RequestLidarScanMessagePubSubType;
-import controller_msgs.msg.dds.RequestPlanarRegionsListMessage;
 import controller_msgs.msg.dds.RequestPlanarRegionsListMessagePubSubType;
 import geometry_msgs.msg.dds.PointPubSubType;
 import geometry_msgs.msg.dds.QuaternionPubSubType;
@@ -24,17 +21,13 @@ import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.ROS2Tools.MessageTopicNameGenerator;
 import us.ihmc.communication.ROS2Tools.ROS2TopicQualifier;
 import us.ihmc.communication.net.NetClassList;
-import us.ihmc.communication.packets.Packet;
 import us.ihmc.communication.packets.PacketDestination;
-import us.ihmc.communication.packets.PlanarRegionsRequestType;
 import us.ihmc.euclid.tuple2D.Point2D;
-import us.ihmc.euclid.tuple2D.Point2D32;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Point3D32;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.Vector3D32;
 import us.ihmc.euclid.tuple4D.Quaternion;
-import us.ihmc.euclid.tuple4D.Quaternion32;
 import us.ihmc.idl.IDLSequence;
 import us.ihmc.jOctoMap.normalEstimation.NormalEstimationParameters;
 import us.ihmc.messager.Message;
@@ -125,63 +118,6 @@ public class REACommunicationProperties
       privateNetClassList.registerPacketField(TopicDataType.class);
       privateNetClassList.registerPacketField(RecyclingArrayList.class);
       privateNetClassList.registerPacketField(us.ihmc.idl.CDR.class);
-   }
-
-   private static final NetClassList publicNetClassList = new NetClassList();
-
-   static
-   {
-      publicNetClassList.registerPacketClass(Packet.class);
-      publicNetClassList.registerPacketClass(LidarScanMessage.class);
-      publicNetClassList.registerPacketClass(PlanarRegionsListMessage.class);
-      publicNetClassList.registerPacketClass(RequestPlanarRegionsListMessage.class);
-      publicNetClassList.registerPacketClass(RequestLidarScanMessage.class);
-
-      publicNetClassList.registerPacketField(PacketDestination.class);
-
-      publicNetClassList.registerPacketField(float[].class);
-      publicNetClassList.registerPacketField(ArrayList.class);
-      publicNetClassList.registerPacketField(Vector3D.class);
-      publicNetClassList.registerPacketField(Point3D.class);
-      publicNetClassList.registerPacketField(Point3D32.class);
-      publicNetClassList.registerPacketField(Point2D32.class);
-      publicNetClassList.registerPacketField(Vector3D32.class);
-      publicNetClassList.registerPacketField(Quaternion32.class);
-      publicNetClassList.registerPacketField(Quaternion.class);
-      publicNetClassList.registerPacketField(Point2D32[].class);
-      publicNetClassList.registerPacketField(PlanarRegionsRequestType.class);
-
-      publicNetClassList.registerPacketField(Polygon2DMessage.class);
-      publicNetClassList.registerPacketField(PlanarRegionMessage.class);
-      publicNetClassList.registerPacketField(BoundingBox3DMessage.class);
-
-      publicNetClassList.registerPacketField(Vector3PubSubType.class);
-      publicNetClassList.registerPacketField(PointPubSubType.class);
-      publicNetClassList.registerPacketField(QuaternionPubSubType.class);
-      publicNetClassList.registerPacketField(Polygon2DMessagePubSubType.class);
-      publicNetClassList.registerPacketField(BoundingBox3DMessagePubSubType.class);
-      publicNetClassList.registerPacketField(RequestPlanarRegionsListMessagePubSubType.class);
-      publicNetClassList.registerPacketField(RequestLidarScanMessagePubSubType.class);
-      publicNetClassList.registerPacketField(PlanarRegionsListMessagePubSubType.class);
-      publicNetClassList.registerPacketField(LidarScanMessagePubSubType.class);
-      publicNetClassList.registerPacketField(PlanarRegionMessagePubSubType.class);
-
-      publicNetClassList.registerPacketField(IDLSequence.Object.class);
-      publicNetClassList.registerPacketField(IDLSequence.Float.class);
-      publicNetClassList.registerPacketField(IDLSequence.Boolean.class);
-      publicNetClassList.registerPacketField(IDLSequence.Double.class);
-      publicNetClassList.registerPacketField(IDLSequence.Integer.class);
-      publicNetClassList.registerPacketField(IDLSequence.Byte.class);
-      publicNetClassList.registerPacketField(IDLSequence.Long.class);
-      publicNetClassList.registerPacketField(IDLSequence.StringBuilderHolder.class);
-      publicNetClassList.registerPacketField(TopicDataType.class);
-      publicNetClassList.registerPacketField(RecyclingArrayList.class);
-      publicNetClassList.registerPacketField(us.ihmc.idl.CDR.class);
-   }
-
-   public static NetClassList getPublicNetClassList()
-   {
-      return publicNetClassList;
    }
    
    public static NetClassList getPrivateNetClassList()

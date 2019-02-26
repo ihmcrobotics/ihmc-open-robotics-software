@@ -430,7 +430,7 @@ public class RemoteFootstepPlannerUIMessagingTest
 
       localNode.spin();
       AtomicReference<PlanarRegionsList> planarRegionsListReference = messager.createInput(FootstepPlannerMessagerAPI.PlanarRegionDataTopic);
-      AtomicReference<FootstepPlan> footstepPlanReference = messager.createInput(FootstepPlannerMessagerAPI.FootstepPlanTopic);
+      AtomicReference<FootstepDataListMessage> footstepPlanReference = messager.createInput(FootstepPlannerMessagerAPI.FootstepPlanResponseTopic);
       AtomicReference<Integer> receivedPlanIdReference = messager.createInput(FootstepPlannerMessagerAPI.ReceivedPlanIdTopic);
       AtomicReference<FootstepPlanningResult> plannerResultReference = messager.createInput(FootstepPlannerMessagerAPI.PlanningResultTopic);
       AtomicReference<Double> timeTakenReference = messager.createInput(FootstepPlannerMessagerAPI.PlannerTimeTakenTopic);
@@ -734,32 +734,9 @@ public class RemoteFootstepPlannerUIMessagingTest
       }
    }
 
-   private static void checkFootstepPlansAreEqual(FootstepDataListMessage footstepDataListMessage, FootstepPlan footstepPlan)
+   private static void checkFootstepPlansAreEqual(FootstepDataListMessage footstepDataListMessageA, FootstepDataListMessage footstepDataListMessageB)
    {
-      List<FootstepDataMessage> footstepsList = footstepDataListMessage.getFootstepDataList();
-
-      assertEquals("Footstep plans are different sizes.", footstepsList.size(), footstepPlan.getNumberOfSteps());
-
-      for (int i = 0; i < footstepsList.size(); i++)
-      {
-         checkFootstepsAreEqual(i, footstepsList.get(i), footstepPlan.getFootstep(i));
-      }
-   }
-
-   private static void checkFootstepsAreEqual(int stepNumber, FootstepDataMessage footstepMessage, SimpleFootstep footstep)
-   {
-      assertEquals("Robot sides of step " + stepNumber + " aren't equal.", RobotSide.fromByte(footstepMessage.getRobotSide()), footstep.getRobotSide());
-
-      FramePose3D footstepPose = new FramePose3D();
-
-      footstep.getSoleFramePose(footstepPose);
-
-      EuclidCoreTestTools
-            .assertPoint3DGeometricallyEquals("Step positions " + stepNumber + " aren't equal.", footstepMessage.getLocation(), footstepPose.getPosition(),
-                                              epsilon);
-      EuclidCoreTestTools
-            .assertQuaternionEquals("Step orientations " + stepNumber + " aren't equal.", footstepMessage.getOrientation(), footstepPose.getOrientation(),
-                                    epsilon);
+      footstepDataListMessageA.epsilonEquals(footstepDataListMessageB, epsilon);
    }
 
    private static void checkFootstepPlannerParameters(FootstepPlannerParameters parameters, FootstepPlannerParametersPacket packet)

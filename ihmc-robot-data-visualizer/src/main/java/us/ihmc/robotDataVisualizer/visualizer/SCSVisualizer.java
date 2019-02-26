@@ -11,10 +11,11 @@ import javax.swing.AbstractButton;
 import javax.swing.JButton;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
+import javax.swing.JTextField;
 
 import gnu.trove.map.hash.TObjectDoubleHashMap;
-import sun.rmi.runtime.Log;
 import us.ihmc.commons.Conversions;
+import us.ihmc.commons.MathTools;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphic;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsList;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
@@ -27,6 +28,7 @@ import us.ihmc.robotDataLogger.YoVariablesUpdatedListener;
 import us.ihmc.robotDataLogger.handshake.LogHandshake;
 import us.ihmc.robotDataLogger.handshake.YoVariableHandshakeParser;
 import us.ihmc.robotDataLogger.jointState.JointState;
+import us.ihmc.robotDataLogger.websocket.command.DataServerCommand;
 import us.ihmc.simulationconstructionset.ExitActionListener;
 import us.ihmc.simulationconstructionset.PlaybackListener;
 import us.ihmc.simulationconstructionset.Robot;
@@ -60,14 +62,14 @@ public class SCSVisualizer implements YoVariablesUpdatedListener, ExitActionList
    private YoVariableClientInterface yoVariableClientInterface;
    private ArrayList<SCSVisualizerStateListener> stateListeners = new ArrayList<>();
 
-   private int displayOneInNPackets = 1;
-   private long counter = 0;
+   private int variableUpdateRate = 0;
 
    private final TObjectDoubleHashMap<String> buttons = new TObjectDoubleHashMap<>();
 
    private final Object disconnectLock = new Object();
    private final JButton disconnectButton = new JButton("Waiting for connection...");
-   private final JButton clearLogButton = new JButton("Clear log");
+   private final JButton clearLogButton = new JButton("<html><center>Clear<br>log</center></html>");
+   private final JTextField updateRateField = new JTextField("", 6);
 
    private final DecimalFormat delayFormat = new DecimalFormat("0000");
    private final JLabel delayValue = new JLabel();
@@ -81,6 +83,8 @@ public class SCSVisualizer implements YoVariablesUpdatedListener, ExitActionList
    private boolean showOverheadView;
 
    private YoGraphicsListRegistry yoGraphicsListRegistry;
+   
+   private final LoggerStatusVisualizer loggerStatusVisualizer = new LoggerStatusVisualizer();
 
    public SCSVisualizer(int bufferSize)
    {
@@ -104,19 +108,16 @@ public class SCSVisualizer implements YoVariablesUpdatedListener, ExitActionList
    @Override
    public void receivedTimestampAndData(long timestamp)
    {
-      if(++counter % displayOneInNPackets == 0)
+      long delay = Conversions.nanosecondsToMilliseconds(lastTimestamp - timestamp);
+      delayValue.setText("<html>Delay:<br>" + delayFormat.format(delay) + " ms</html>");
+
+      for (int i = 0; i < jointUpdaters.size(); i++)
       {
-         long delay = Conversions.nanosecondsToMilliseconds(lastTimestamp - timestamp);
-         delayValue.setText(delayFormat.format(delay));
-   
-         for (int i = 0; i < jointUpdaters.size(); i++)
-         {
-            jointUpdaters.get(i).update();
-         }
-         scs.setTime(Conversions.nanosecondsToSeconds(timestamp));
-         updateLocalVariables();
-         scs.tickAndUpdate();
+         jointUpdaters.get(i).update();
       }
+      scs.setTime(Conversions.nanosecondsToSeconds(timestamp));
+      updateLocalVariables();
+      scs.tickAndUpdate();
    }
 
    @Override
@@ -136,6 +137,8 @@ public class SCSVisualizer implements YoVariablesUpdatedListener, ExitActionList
    {
       synchronized(disconnectLock)
       {
+         setVariableUpdateRate(variableUpdateRate);
+         
          scs.setInPoint();
          disconnectButton.setText(DISCONNECT_DISCONNECT);
          disconnectButton.setEnabled(true);
@@ -184,15 +187,64 @@ public class SCSVisualizer implements YoVariablesUpdatedListener, ExitActionList
       }
    }
 
-   @Override
-   public int getDisplayOneInNPackets()
+   
+   /**
+    * On connect, the variable update rate is send to the server. The server will limit the amount of data to approximately the desired rate, depending on the update rate of the underlying threads.
+    *
+    * Set to zero to update variables as fast as the server produces them.
+    * 
+    * Note: If the server does not send data at a constant period or does not set the timestamp, setting the variable update rate will result in no data being received. 
+    * 
+    * @param updateRateInMilliseconds Update rate in milliseconds. Set to zero to disable rate limiting
+    */
+   public void setVariableUpdateRate(int updateRateInMilliseconds)
    {
-      return displayOneInNPackets;
+      synchronized (disconnectLock)
+      {
+         if(yoVariableClientInterface != null)
+         {
+            if(yoVariableClientInterface.isConnected())
+            {
+               yoVariableClientInterface.setVariableUpdateRate(updateRateInMilliseconds);
+            }
+         }
+         
+         variableUpdateRate = updateRateInMilliseconds;
+         
+         updateRateField.setText(String.valueOf(updateRateInMilliseconds));
+      }
+      
+      
+   }
+   
+   
+
+   private void setVariableUpdateRate(String text)
+   {
+      int newUpdateRate;
+      try
+      {
+         newUpdateRate = MathTools.clamp(Integer.parseInt(text.trim()), 0, 99999);
+      }
+      catch(NumberFormatException e)
+      {
+         newUpdateRate = 0;
+      }
+      setVariableUpdateRate(newUpdateRate);
    }
 
-   public void setDisplayOneInNPackets(int val)
+   @Deprecated
+   /**
+    * This functionality has been replaced with setVariableUpdateRate()
+    * 
+    * For backwards compatibility, this function will print a big fat warning and set the variable update rate to displayOneInNPackets * 1 ms
+    * 
+    * @param displayOneInNPackets
+    */
+   public void setDisplayOneInNPackets(int displayOneInNPackets)
    {
-      displayOneInNPackets = val;
+      LogTools.warn("setDisplayOneInNPackets is DEPRECATED. Setting the variable update rate to " + displayOneInNPackets + " ms instead");
+      setVariableUpdateRate(displayOneInNPackets);
    }
 
    public void updateGraphsLessFrequently(boolean enable, int numberOfTicksBeforeUpdatingGraphs)
@@ -250,7 +302,6 @@ public class SCSVisualizer implements YoVariablesUpdatedListener, ExitActionList
       scs.attachExitActionListener(this);
       scs.attachPlaybackListener(createYoGraphicsUpdater());
       scs.setRunName(yoVariableClientInterface.getServerName());
-      //scs.setFastSimulate(true, 50);
 
       scs.addButton(disconnectButton);
       disconnectButton.addActionListener(new ActionListener()
@@ -297,6 +348,13 @@ public class SCSVisualizer implements YoVariablesUpdatedListener, ExitActionList
 
       });
       
+      scs.addJLabel(new JLabel(" Rate: "));
+      scs.addTextField(updateRateField);
+      scs.addJLabel(new JLabel("ms "));
+      
+      updateRateField.addActionListener((e) -> setVariableUpdateRate(updateRateField.getText())); 
+
+      
       scs.addButton(clearLogButton);
       clearLogButton.addActionListener(new ActionListener()
       {
@@ -310,11 +368,13 @@ public class SCSVisualizer implements YoVariablesUpdatedListener, ExitActionList
             }
          }
       });
+      
+      
 
-      scs.addJLabel(new JLabel("Delay: "));
       scs.addJLabel(delayValue);
-      scs.addJLabel(new JLabel("ms"));
 
+      loggerStatusVisualizer.addToSimulationConstructionSet(scs);
+      
       YoVariableRegistry yoVariableRegistry = handshakeParser.getRootRegistry();
       this.registry.addChild(yoVariableRegistry);
       this.registry.addChild(yoVariableClientInterface.getDebugRegistry());
@@ -357,6 +417,7 @@ public class SCSVisualizer implements YoVariablesUpdatedListener, ExitActionList
       new Thread(scs, "SCSVisualizer").start();
    }
 
+
    @Override
    public void starting(SimulationConstructionSet scs, Robot robot, YoVariableRegistry registry)
    {
@@ -378,7 +439,7 @@ public class SCSVisualizer implements YoVariablesUpdatedListener, ExitActionList
       visualizer.setShowOverheadView(false);
 
       YoVariableClient client = new YoVariableClient(visualizer);
-      client.start();
+      client.startWithHostSelector();
    }
 
    @Override
@@ -387,10 +448,6 @@ public class SCSVisualizer implements YoVariablesUpdatedListener, ExitActionList
       lastTimestamp = timestamp;
    }
 
-   @Override
-   public void clearLog(String guid)
-   {
-   }
 
    private PlaybackListener createYoGraphicsUpdater()
    {
@@ -427,5 +484,11 @@ public class SCSVisualizer implements YoVariablesUpdatedListener, ExitActionList
             yoGraphic.update();
       }
       yoGraphicsListRegistry.update();
+   }
+
+   @Override
+   public void receivedCommand(DataServerCommand command, int argument)
+   {
+      loggerStatusVisualizer.updateStatus(command, argument);
    }
 }

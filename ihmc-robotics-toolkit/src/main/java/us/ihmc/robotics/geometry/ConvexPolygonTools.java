@@ -6,6 +6,7 @@ import java.util.PriorityQueue;
 import gnu.trove.list.array.TIntArrayList;
 import us.ihmc.commons.MathTools;
 import us.ihmc.commons.PrintTools;
+import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.geometry.Line2D;
 import us.ihmc.euclid.geometry.LineSegment2D;
@@ -21,13 +22,14 @@ import us.ihmc.euclid.referenceFrame.interfaces.FrameConvexPolygon2DBasics;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameConvexPolygon2DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameLine2DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameLineSegment2DBasics;
+import us.ihmc.euclid.tools.EuclidCoreTools;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple2D.Vector2D;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DBasics;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
+import us.ihmc.log.LogTools;
 import us.ihmc.robotics.EuclidCoreMissingTools;
 import us.ihmc.robotics.geometry.algorithms.FrameConvexPolygonWithLineIntersector2d;
-import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.robotics.robotSide.RobotSide;
 
 public class ConvexPolygonTools
@@ -938,56 +940,76 @@ public class ConvexPolygonTools
          vertices = polygon.getNumberOfVertices();
       }
 
-      //      while (vertices < desiredVertices)
-      //      {
-      //         int index = -1;
-      //         double longestEdgeLength = Double.NEGATIVE_INFINITY;
-      //         Point2DReadOnly lastVertex = polygon.getVertex(0);
-      //         for (int i = 1; i < vertices+1; i++)
-      //         {
-      //            Point2DReadOnly nextVertex = null;
-      //            if (i == vertices)
-      //            {
-      //               nextVertex = polygon.getVertex(0);
-      //            }
-      //            else
-      //            {
-      //               nextVertex = polygon.getVertex(i);
-      //            }
-      //
-      //            double edgeLength = lastVertex.distance(nextVertex);
-      //            if (edgeLength > longestEdgeLength)
-      //            {
-      //               longestEdgeLength = edgeLength;
-      //               index = i;
-      //            }
-      //            lastVertex = nextVertex;
-      //         }
-      //
-      //         int idx1 = -1;
-      //         int idx2 = -1;
-      //         if (index == vertices)
-      //         {
-      //            idx1 = vertices-1;
-      //            idx2 = 0;
-      //         }
-      //         else
-      //         {
-      //            idx1 = index;
-      //            idx2 = index-1;
-      //         }
-      //
-      //         Point2DReadOnly vertexA = polygon.getVertex(idx1);
-      //         Point2DReadOnly vertexB = polygon.getVertex(idx2);
-      //         double xNew = (vertexA.getX() + vertexB.getX()) / 2.0;
-      //         double yNew = (vertexA.getY() + vertexB.getY()) / 2.0;
-      //
-      //         polygon.scale(1.0 - 10E-10);
-      //         polygon.addVertex(xNew, yNew);
-      //         polygon.update();
-      //
-      //         vertices = polygon.getNumberOfVertices();
-      //      }
+      int numberOfFailedIterations = 0;
+
+      while (vertices < desiredVertices)
+      {
+         int index = -1;
+         double longestEdgeLength = Double.NEGATIVE_INFINITY;
+         Point2DReadOnly lastVertex = polygon.getVertex(0);
+         for (int i = 1; i < vertices + 1; i++)
+         {
+            Point2DReadOnly nextVertex = null;
+            if (i == vertices)
+            {
+               nextVertex = polygon.getVertex(0);
+            }
+            else
+            {
+               nextVertex = polygon.getVertex(i);
+            }
+
+            double edgeLength = lastVertex.distance(nextVertex);
+            if (edgeLength > longestEdgeLength)
+            {
+               longestEdgeLength = edgeLength;
+               index = i;
+            }
+            lastVertex = nextVertex;
+         }
+
+         int idx1 = -1;
+         int idx2 = -1;
+
+         if (index == vertices)
+         {
+            idx1 = vertices - 1;
+            idx2 = 0;
+         }
+         else
+         {
+            idx1 = index - 1;
+            idx2 = index;
+         }
+
+         Point2DReadOnly vertexA = polygon.getVertex(idx1);
+         Point2DReadOnly vertexB = polygon.getVertex(idx2);
+         double xNew = (vertexA.getX() + vertexB.getX()) / 2.0;
+         double yNew = (vertexA.getY() + vertexB.getY()) / 2.0;
+         double dx = -(vertexB.getY() - vertexA.getY());
+         double dy = (vertexB.getX() - vertexA.getX());
+         double length = Math.sqrt(EuclidCoreTools.normSquared(dx, dy));
+         double scale = 1.0e-7 / length;
+         xNew += dx * scale;
+         yNew += dy * scale;
+         
+         polygon.addVertex(xNew, yNew);
+         polygon.update();
+
+         int verticesPreviousValue = vertices;
+         vertices = polygon.getNumberOfVertices();
+
+         if (vertices == verticesPreviousValue)
+            numberOfFailedIterations++;
+         else
+            numberOfFailedIterations = 0;
+
+         if (numberOfFailedIterations >= 5)
+         {
+            LogTools.warn("Not able to increase number of polygon vertices.");
+            break;
+         }
+      }
    }
 
    /**

@@ -13,6 +13,13 @@
 <parameter name="maxContactPointRate" type="DoubleParameter" min="0.0" max="1.0" value="1.0"/>
                             </registry>
                         </registry>
+                        <registry name="CenterOfMassHeightManager">
+                            <registry name="PelvisHeightControlState">
+<parameter name="PelvisHeightControlStateDefaultHeight" type="DoubleParameter" min="0.0" max="1.0" value="0.8"/>
+<parameter name="PelvisHeightControlStateOffsetTrajectoryTime" type="DoubleParameter" min="0.0" max="1.0" value="0.5"/>
+<parameter name="PelvisHeightControlStateMaxDistanceAnklePelvis" type="DoubleParameter" min="0.0" max="1.0" value="0.9"/>
+                            </registry>
+                        </registry>
                     </registry>
                     <registry name="RigidBodyGains">
                         <parameter name="kpXYPelvisOrientation" type="DoubleParameter" min="0.0" max="1.0" value="100.0"/>
@@ -31,6 +38,10 @@
                         <parameter name="kpZSwingFootOrientation" type="DoubleParameter" min="0.0" max="1.0" value="150.0"/>
                         <parameter name="zetaXSwingFootPosition" type="DoubleParameter" min="0.0" max="1.0" value="0.7"/>
                         <parameter name="zetaYSwingFootPosition" type="DoubleParameter" min="0.0" max="1.0" value="0.7"/>
+                        <parameter name="zetaZSwingFootPosition" type="DoubleParameter" min="0.0" max="1.0" value="0.8"/>
+                        <parameter name="zetaXSwingFootOrientation" type="DoubleParameter" min="0.0" max="1.0" value="0.8"/>
+                        <parameter name="zetaYSwingFootOrientation" type="DoubleParameter" min="0.0" max="1.0" value="0.8"/>
+                        <parameter name="zetaZSwingFootOrientation" type="DoubleParameter" min="0.0" max="1.0" value="0.8"/>
                     </registry>
                 </registry>
                 <registry name="WalkingControllerState">

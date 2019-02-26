@@ -26,6 +26,8 @@ public class YoFootstepPlannerCostParameters implements FootstepPlannerCostParam
    private final YoDouble stepUpWeight = new YoDouble("stepUpWeight", registry);
    private final YoDouble stepDownWeight = new YoDouble("stepDownWeight", registry);
    private final YoDouble costPerStep = new YoDouble("costPerStep", registry);
+   private final YoDouble maximum2dDistanceFromBoundingBoxToPenalize = new YoDouble("maximum2dDistanceFromBoundingBoxToPenalize", registry);
+   private final YoDouble boundingBoxCost = new YoDouble("boundingBoxCost", registry);
 
    public YoFootstepPlannerCostParameters(YoVariableRegistry parentRegistry, FootstepPlannerCostParameters defaults)
    {
@@ -51,6 +53,8 @@ public class YoFootstepPlannerCostParameters implements FootstepPlannerCostParam
       setStepUpWeight(defaults.getStepUpWeight());
       setStepDownWeight(defaults.getStepDownWeight());
       setCostPerStep(defaults.getCostPerStep());
+      setMaximum2dDistanceFromBoundingBoxToPenalize(defaults.getMaximum2dDistanceFromBoundingBoxToPenalize());
+      setBoundingBoxCost(defaults.getBoundingBoxCost());
    }
 
    @Override
@@ -137,6 +141,18 @@ public class YoFootstepPlannerCostParameters implements FootstepPlannerCostParam
       return costPerStep.getDoubleValue();
    }
 
+   @Override
+   public double getMaximum2dDistanceFromBoundingBoxToPenalize()
+   {
+      return maximum2dDistanceFromBoundingBoxToPenalize.getDoubleValue();
+   }
+
+   @Override
+   public double getBoundingBoxCost()
+   {
+      return boundingBoxCost.getDoubleValue();
+   }
+
    public void set(FootstepPlannerCostParametersPacket parametersPacket)
    {
       setUseQuadraticDistanceCost(parametersPacket.getUseQuadraticDistanceCost());
@@ -167,6 +183,10 @@ public class YoFootstepPlannerCostParameters implements FootstepPlannerCostParam
          setStepDownWeight(parametersPacket.getStepDownWeight());
       if (parametersPacket.getCostPerStep() != -1.0)
          setCostPerStep(parametersPacket.getCostPerStep());
+      if (parametersPacket.getMaximum2dDistanceFromBoundingBoxToPenalize() != -1.0)
+         setMaximum2dDistanceFromBoundingBoxToPenalize(parametersPacket.getMaximum2dDistanceFromBoundingBoxToPenalize());
+      if (parametersPacket.getBoundingBoxCost() != -1.0)
+         setBoundingBoxCost(parametersPacket.getBoundingBoxCost());
    }
 
    public void setUseQuadraticDistanceCost(boolean useQuadraticDistanceCost)
@@ -237,5 +257,15 @@ public class YoFootstepPlannerCostParameters implements FootstepPlannerCostParam
    public void setCostPerStep(double costPerStep)
    {
       this.costPerStep.set(costPerStep);
+   }
+
+   public void setMaximum2dDistanceFromBoundingBoxToPenalize(double maximum2dDistanceFromBoundingBoxToPenalize)
+   {
+      this.maximum2dDistanceFromBoundingBoxToPenalize.set(maximum2dDistanceFromBoundingBoxToPenalize);
+   }
+
+   public void setBoundingBoxCost(double boundingBoxCost)
+   {
+      this.boundingBoxCost.set(boundingBoxCost);
    }
 }
