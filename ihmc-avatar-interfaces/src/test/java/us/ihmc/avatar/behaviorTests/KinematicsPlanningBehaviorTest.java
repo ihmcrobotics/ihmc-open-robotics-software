@@ -1,5 +1,6 @@
 package us.ihmc.avatar.behaviorTests;
 
+import static us.ihmc.robotics.Assert.assertEquals;
 import static us.ihmc.robotics.Assert.assertTrue;
 
 import java.io.IOException;
@@ -8,6 +9,7 @@ import java.util.List;
 
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import us.ihmc.avatar.DRCStartingLocation;
@@ -226,7 +228,7 @@ public abstract class KinematicsPlanningBehaviorTest implements MultiRobotTestIn
       Pose3D finalPose = new Pose3D(sdfFullRobotModel.getHand(robotSide).getBodyFixedFrame().getTransformToWorldFrame());
 
       double positionDistance = desiredFramePose.getPositionDistance(finalPose);
-      assertTrue("Position Distance: " + positionDistance, positionDistance < 0.01);
+      assertEquals("Hand too far from doorknob", 0.0, positionDistance, 0.011);
       double orientationDistance = Math.abs(desiredFramePose.getPositionDistance(finalPose));
       double orientationDistanceRotation = Math.abs(desiredFramePose.getOrientationDistance(finalPose) - Math.PI * 2);
       assertTrue("orientation Distance: " + orientationDistance, orientationDistance < 0.1 || orientationDistanceRotation < 0.1);
