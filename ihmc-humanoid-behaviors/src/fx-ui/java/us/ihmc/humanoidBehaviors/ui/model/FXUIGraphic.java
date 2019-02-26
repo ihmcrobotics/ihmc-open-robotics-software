@@ -14,12 +14,4 @@ public abstract class FXUIGraphic extends AnimationTimer
    {
       return root;
    }
-
-   public static final FXUIGraphic NONE = new FXUIGraphic() {
-      @Override
-      public void handle(long now)
-      {
-
-      }
-   };
 }

@@ -12,12 +12,4 @@ import javafx.animation.AnimationTimer;
 public abstract class FXUIEditor extends AnimationTimer
 {
 
-
-   public static final FXUIEditor NONE = new FXUIEditor() {
-      @Override
-      public void handle(long now)
-      {
-
-      }
-   };
 }

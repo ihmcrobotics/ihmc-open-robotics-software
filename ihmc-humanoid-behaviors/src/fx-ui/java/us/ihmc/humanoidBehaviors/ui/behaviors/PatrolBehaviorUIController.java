@@ -53,7 +53,7 @@ public class PatrolBehaviorUIController extends FXUIBehavior
                SnappedPositionGraphic waypointGraphic = createWaypointGraphic(messager);
                LogTools.debug("Placing waypoint {}", waypoints.size());
                messager.submitMessage(BehaviorUI.API.ActiveEditor, BehaviorUI.SNAPPED_POSITION_EDITOR);
-               messager.submitMessage(BehaviorUI.API.SelectedGraphic, waypointGraphic);
+               messager.submitMessage(BehaviorUI.API.SelectedGraphic, waypointGraphic.getSphere());
             }
             else if (transition == FXUIStateTransition.SNAPPED_POSITION_RIGHT_CLICK)
             {
@@ -61,8 +61,8 @@ public class PatrolBehaviorUIController extends FXUIBehavior
 
                removeWaypointGraphic(waypoints.get(waypoints.size() - 1));
 
-               messager.submitMessage(BehaviorUI.API.ActiveEditor, FXUIEditor.NONE);
-               messager.submitMessage(BehaviorUI.API.SelectedGraphic, FXUIGraphic.NONE);
+               messager.submitMessage(BehaviorUI.API.ActiveEditor, null);
+               messager.submitMessage(BehaviorUI.API.SelectedGraphic, null);
             }
          }
       };

@@ -1,23 +1,23 @@
 package us.ihmc.humanoidBehaviors.ui.graphics;
 
-import javafx.scene.input.MouseEvent;
+import javafx.scene.Node;
 import javafx.scene.paint.Color;
 import javafx.scene.paint.PhongMaterial;
 import javafx.scene.shape.Sphere;
 import us.ihmc.euclid.tuple3D.Point3D;
-import us.ihmc.humanoidBehaviors.ui.references.ActivationReference;
 import us.ihmc.humanoidBehaviors.ui.BehaviorUI;
-import us.ihmc.humanoidBehaviors.ui.references.ChangingReference;
 import us.ihmc.humanoidBehaviors.ui.editors.SnappedPositionEditor;
 import us.ihmc.humanoidBehaviors.ui.model.FXUIGraphic;
+import us.ihmc.humanoidBehaviors.ui.references.ActivationReference;
+import us.ihmc.humanoidBehaviors.ui.references.ChangingReference;
 import us.ihmc.messager.Messager;
 
 public class SnappedPositionGraphic extends FXUIGraphic
 {
-   public final Sphere sphere;
-   public final PhongMaterial material;
+   private final Sphere sphere;
+   private final PhongMaterial material;
 
-   private final ActivationReference<FXUIGraphic> selectedReference;
+   private final ActivationReference<Node> selectedReference;
    private final ChangingReference<Point3D> positionReference;
 
    public SnappedPositionGraphic(Messager messager, Color color)
@@ -27,7 +27,7 @@ public class SnappedPositionGraphic extends FXUIGraphic
       sphere.setMaterial(material);
 
       positionReference = new ChangingReference<>(messager.createInput(SnappedPositionEditor.API.SelectedPosition, new Point3D()));
-      selectedReference = new ActivationReference<>(messager.createInput(BehaviorUI.API.SelectedGraphic, FXUIGraphic.NONE), this);
+      selectedReference = new ActivationReference<>(messager.createInput(BehaviorUI.API.SelectedGraphic, null), sphere);
 
       rootChildren.add(sphere);
    }
@@ -54,5 +54,10 @@ public class SnappedPositionGraphic extends FXUIGraphic
       {
          sphere.setMouseTransparent(false);
       }
+   }
+
+   public Sphere getSphere()
+   {
+      return sphere;
    }
 }
