@@ -1,5 +1,7 @@
 package us.ihmc.quadrupedRobotics.planning.icp;
 
+import gnu.trove.list.array.TDoubleArrayList;
+import us.ihmc.commons.MathTools;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
@@ -38,10 +40,14 @@ public class QuadrupedCoMTrajectoryPlannerVisualizer
    private static final double initialTransferTime = 1.0;
    private static final double stepDuration = 0.4;
    private static final double stanceDuration = 0.2;
+   private static final double flightTime = 0.1;
    private static final double stepLength = 0.5;
-   private static final int numberOfSteps = 3;
+   private static final int numberOfSteps = 6;
+
+   private final TDoubleArrayList changeOfStateEvents = new TDoubleArrayList();
 
    private static final boolean doTrot = false;
+   private static final boolean planForFlight = true;
 
    private static final double simDt = 1e-3;
 
@@ -186,11 +192,18 @@ public class QuadrupedCoMTrajectoryPlannerVisualizer
          QuadrupedTimedStep step1 = new QuadrupedTimedStep();
          QuadrupedTimedStep step2 = new QuadrupedTimedStep();
 
-         step1.getTimeInterval().setInterval(currentTime, currentTime + stepDuration);
-         if (doTrot)
-            step2.getTimeInterval().setInterval(currentTime, currentTime + stepDuration);
-         else
-            step2.getTimeInterval().setInterval(currentTime + 0.5 * stepDuration, currentTime + 1.5 * stepDuration);
+         double step1Start = currentTime;
+         double step1End = step1Start + stepDuration;
+         double step2Start = (doTrot || planForFlight) ? currentTime : currentTime + 0.5 * stepDuration;
+         double step2End = step2Start + stepDuration;
+
+         step1.getTimeInterval().setInterval(step1Start, step1End);
+         step2.getTimeInterval().setInterval(step2Start, step2End);
+
+         changeOfStateEvents.add(step1Start);
+         changeOfStateEvents.add(step1End);
+         changeOfStateEvents.add(step2Start);
+         changeOfStateEvents.add(step2End);
 
          if (stepInterval == 0)
          {
@@ -214,7 +227,17 @@ public class QuadrupedCoMTrajectoryPlannerVisualizer
          steps.add(step1);
          steps.add(step2);
 
-         currentTime += stepDuration + stanceDuration;
+         currentTime += stepDuration + (planForFlight ? -flightTime : stanceDuration);
+      }
+
+      changeOfStateEvents.sort();
+      int index = 0;
+      while (index < changeOfStateEvents.size() - 1)
+      {
+         if (MathTools.epsilonEquals(changeOfStateEvents.get(index), changeOfStateEvents.get(index + 1), 1e-4))
+            changeOfStateEvents.removeAt(index + 1);
+         else
+            index++;
       }
 
       return steps;
@@ -257,9 +280,11 @@ public class QuadrupedCoMTrajectoryPlannerVisualizer
       for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
          feetInContact.add(robotQuadrant);
 
-      List<QuadrupedTimedStep> finishedSteps = TimeIntervalTools.removeAndReturnEndTimesLessThan(currentTime, steps);
-      if (finishedSteps.size() > 0)
+      if (changeOfStateEvents.size() > 0 && (changeOfStateEvents.get(0) < currentTime))
+      {
          planner.setInitialCenterOfMassState(desiredCoMPosition, desiredCoMVelocity);
+         changeOfStateEvents.removeAt(0);
+      }
 
       for (int i = 0; i < steps.size(); i++)
       {
