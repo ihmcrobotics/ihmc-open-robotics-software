@@ -10,6 +10,7 @@ import us.ihmc.graphicsDescription.Graphics3DObject;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.graphicsDescription.yoGraphics.BagOfBalls;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition;
+import us.ihmc.graphicsDescription.yoGraphics.YoGraphicVector;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.mecano.frames.MovingReferenceFrame;
 import us.ihmc.quadrupedBasics.gait.QuadrupedTimedStep;
@@ -33,7 +34,7 @@ public class QuadrupedCoMTrajectoryPlannerVisualizer
    private static final double stanceLength = 1.0;
    private static final double stanceWidth = 0.5;
    private static final double gravity = 9.81;
-   private static final double nominalHeight = 0.75;
+   private static final double nominalHeight = 0.5;
 
    private static final double finalExtraTime = 1.5;
 
@@ -49,6 +50,7 @@ public class QuadrupedCoMTrajectoryPlannerVisualizer
    private static final boolean doTrot = false;
    private static final boolean planForFlight = true;
 
+   private static final double mass = 1.0;
    private static final double simDt = 1e-3;
 
    private static final int BUFFER_SIZE = 160000;
@@ -67,9 +69,11 @@ public class QuadrupedCoMTrajectoryPlannerVisualizer
    private final YoFramePoint3D desiredCoMPosition;
    private final YoFrameVector3D desiredCoMVelocity;
    private final YoFrameVector3D desiredCoMAcceleration;
+   private final YoFrameVector3D desiredForce;
    private final YoFramePoint3D desiredDCMPosition;
    private final YoFrameVector3D desiredDCMVelocity;
    private final YoFramePoint3D desiredVRPPosition;
+   private final YoFramePoint3D desiredCoPPosition;
 
    private final BagOfBalls dcmTrajectory;
    private final BagOfBalls comTrajectory;
@@ -88,9 +92,11 @@ public class QuadrupedCoMTrajectoryPlannerVisualizer
       desiredCoMPosition = new YoFramePoint3D("desiredCoMPosition", worldFrame, registry);
       desiredCoMVelocity = new YoFrameVector3D("desiredCoMVelocity", worldFrame, registry);
       desiredCoMAcceleration = new YoFrameVector3D("desiredCoMAcceleration", worldFrame, registry);
+      desiredForce = new YoFrameVector3D("desiredForce", worldFrame, registry);
       desiredDCMPosition = new YoFramePoint3D("desiredDCMPosition", worldFrame, registry);
       desiredDCMVelocity = new YoFrameVector3D("desiredDCMVelocity", worldFrame, registry);
       desiredVRPPosition = new YoFramePoint3D("desiredVRPPosition", worldFrame, registry);
+      desiredCoPPosition = new YoFramePoint3D("desiredCoPPosition", worldFrame, registry);
 
       YoDouble omega = new YoDouble("omega", registry);
       omega.set(Math.sqrt(gravity / nominalHeight));
@@ -107,6 +113,9 @@ public class QuadrupedCoMTrajectoryPlannerVisualizer
       YoGraphicPosition vrpViz = new YoGraphicPosition("desiredVRP", desiredVRPPosition, 0.02, YoAppearance.Purple(),
                                                        YoGraphicPosition.GraphicType.BALL_WITH_ROTATED_CROSS);
 
+      YoGraphicVector forceVector = new YoGraphicVector("desiredForce", desiredCoPPosition, desiredForce, 0.05, YoAppearance.Red());
+
+      yoGraphicsListRegistry.registerYoGraphic("dcmPlanner", forceVector);
       yoGraphicsListRegistry.registerArtifact("dcmPlanner", dcmViz.createArtifact());
       yoGraphicsListRegistry.registerArtifact("dcmPlanner", comViz.createArtifact());
       yoGraphicsListRegistry.registerArtifact("dcmPlanner", vrpViz.createArtifact());
@@ -127,7 +136,7 @@ public class QuadrupedCoMTrajectoryPlannerVisualizer
       scs.setDT(simDt, 1);
       scs.addYoVariableRegistry(registry);
       scs.addYoGraphicsListRegistry(yoGraphicsListRegistry);
-      scs.setPlaybackRealTimeRate(0.25);
+      scs.setPlaybackRealTimeRate(0.5);
       Graphics3DObject linkGraphics = new Graphics3DObject();
       linkGraphics.addCoordinateSystem(0.3);
       scs.addStaticLinkGraphics(linkGraphics);
@@ -262,6 +271,12 @@ public class QuadrupedCoMTrajectoryPlannerVisualizer
          desiredDCMPosition.set(planner.getDesiredDCMPosition());
          desiredDCMVelocity.set(planner.getDesiredDCMVelocity());
          desiredVRPPosition.set(planner.getDesiredVRPPosition());
+         desiredCoPPosition.set(desiredVRPPosition);
+         desiredCoPPosition.setZ(0.0);
+
+         desiredForce.set(desiredCoMAcceleration);
+         desiredForce.addZ(gravity);
+         desiredForce.scale(mass);
 
          dcmTrajectory.setBallLoop(desiredDCMPosition);
          comTrajectory.setBallLoop(desiredCoMPosition);
