@@ -1,6 +1,5 @@
 package us.ihmc.quadrupedBasics.supportPolygon;
 
-import com.sun.xml.internal.fastinfoset.tools.PrintTable;
 import us.ihmc.commons.PrintTools;
 import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
 import us.ihmc.euclid.referenceFrame.*;
