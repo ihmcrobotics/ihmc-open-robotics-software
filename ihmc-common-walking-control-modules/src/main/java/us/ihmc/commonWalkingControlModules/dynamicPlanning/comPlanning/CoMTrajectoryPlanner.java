@@ -75,7 +75,6 @@ public class CoMTrajectoryPlanner implements CoMTrajectoryPlannerInterface
 
    private final List<YoFramePoint3D> dcmCornerPoints = new ArrayList<>();
    private final List<YoFramePoint3D> comCornerPoints = new ArrayList<>();
-   private final List<YoFramePoint3D> vrpCornerPoints = new ArrayList<>();
 
    private int numberOfConstraints = 0;
 
@@ -99,39 +98,33 @@ public class CoMTrajectoryPlanner implements CoMTrajectoryPlannerInterface
       {
          dcmCornerPoints.add(new YoFramePoint3D("dcmCornerPoint" + i, worldFrame, registry));
          comCornerPoints.add(new YoFramePoint3D("comCornerPoint" + i, worldFrame, registry));
-         vrpCornerPoints.add(new YoFramePoint3D("vrpCornerPoint" + i, worldFrame, registry));
       }
 
       String packageName = "dcmPlanner";
-      YoGraphicsList graphicsList = new YoGraphicsList(packageName);
+//      YoGraphicsList graphicsList = new YoGraphicsList(packageName);
       ArtifactList artifactList = new ArtifactList(packageName);
 
       for (int i = 0; i < dcmCornerPoints.size(); i++)
       {
          YoFramePoint3D dcmCornerPoint = dcmCornerPoints.get(i);
          YoFramePoint3D comCornerPoint = comCornerPoints.get(i);
-         YoFramePoint3D vrpCornerPoint = vrpCornerPoints.get(i);
          YoGraphicPosition dcmCornerPointViz = new YoGraphicPosition("DCMCornerPoint" + i, dcmCornerPoint, POINT_SIZE, YoAppearance.Blue(),
                                                                      YoGraphicPosition.GraphicType.BALL);
          YoGraphicPosition comCornerPointViz = new YoGraphicPosition("CoMCornerPoint" + i, comCornerPoint, POINT_SIZE, YoAppearance.Black(),
                                                                      YoGraphicPosition.GraphicType.BALL);
-         YoGraphicPosition vrpCornerPointViz = new YoGraphicPosition("VRPCornerPoint" + i, vrpCornerPoint, POINT_SIZE, YoAppearance.Green(),
-                                                                     YoGraphicPosition.GraphicType.SOLID_BALL);
-         graphicsList.add(dcmCornerPointViz);
-         graphicsList.add(comCornerPointViz);
-         graphicsList.add(vrpCornerPointViz);
+//         graphicsList.add(dcmCornerPointViz);
+//         graphicsList.add(comCornerPointViz);
 
          artifactList.add(dcmCornerPointViz.createArtifact());
          artifactList.add(comCornerPointViz.createArtifact());
-         artifactList.add(vrpCornerPointViz.createArtifact());
       }
 
       artifactList.setVisible(VISUALIZE);
-      graphicsList.setVisible(VISUALIZE);
+//      graphicsList.setVisible(VISUALIZE);
 
       if (yoGraphicsListRegistry != null)
       {
-         yoGraphicsListRegistry.registerYoGraphicsList(graphicsList);
+//         yoGraphicsListRegistry.registerYoGraphicsList(graphicsList);
          yoGraphicsListRegistry.registerArtifactList(artifactList);
       }
 
@@ -257,6 +250,7 @@ public class CoMTrajectoryPlanner implements CoMTrajectoryPlannerInterface
    private final FrameVector3D comVelocityToThrowAway = new FrameVector3D();
    private final FrameVector3D comAccelerationToThrowAway = new FrameVector3D();
    private final FrameVector3D dcmVelocityToThrowAway = new FrameVector3D();
+   private final FramePoint3D vrpPositionToThrowAway = new FramePoint3D();
 
    private void updateCornerPoints(int size)
    {
@@ -264,14 +258,13 @@ public class CoMTrajectoryPlanner implements CoMTrajectoryPlannerInterface
       for (; segmentId < Math.min(size, maxCapacity + 1); segmentId++)
       {
          compute(segmentId, 0.0, comCornerPoints.get(segmentId), comVelocityToThrowAway, comAccelerationToThrowAway, dcmCornerPoints.get(segmentId),
-                 dcmVelocityToThrowAway, vrpCornerPoints.get(segmentId));
+                 dcmVelocityToThrowAway, vrpPositionToThrowAway);
       }
 
       for (; segmentId < maxCapacity + 1; segmentId++)
       {
          comCornerPoints.get(segmentId).setToNaN();
          dcmCornerPoints.get(segmentId).setToNaN();
-         vrpCornerPoints.get(segmentId).setToNaN();
       }
    }
 
