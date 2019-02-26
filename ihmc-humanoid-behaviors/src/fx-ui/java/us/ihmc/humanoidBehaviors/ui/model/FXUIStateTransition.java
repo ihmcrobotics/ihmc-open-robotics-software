@@ -1,4 +1,4 @@
-package us.ihmc.humanoidBehaviors.ui.behaviors;
+package us.ihmc.humanoidBehaviors.ui.model;
 
 public enum FXUIStateTransition
 {

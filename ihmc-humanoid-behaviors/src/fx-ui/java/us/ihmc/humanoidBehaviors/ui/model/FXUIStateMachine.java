@@ -1,4 +1,4 @@
-package us.ihmc.humanoidBehaviors.ui.behaviors;
+package us.ihmc.humanoidBehaviors.ui.model;
 
 import java.util.ArrayDeque;
 import java.util.HashMap;

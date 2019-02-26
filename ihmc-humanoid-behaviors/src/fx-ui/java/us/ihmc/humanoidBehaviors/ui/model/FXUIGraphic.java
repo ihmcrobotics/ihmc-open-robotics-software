@@ -1,4 +1,4 @@
-package us.ihmc.humanoidBehaviors.ui.graphics;
+package us.ihmc.humanoidBehaviors.ui.model;
 
 import javafx.animation.AnimationTimer;
 import javafx.collections.ObservableList;

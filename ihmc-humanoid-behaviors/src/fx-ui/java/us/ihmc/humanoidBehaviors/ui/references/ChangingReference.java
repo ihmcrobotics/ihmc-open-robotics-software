@@ -1,4 +1,4 @@
-package us.ihmc.humanoidBehaviors.ui;
+package us.ihmc.humanoidBehaviors.ui.references;
 
 import java.util.concurrent.atomic.AtomicReference;
 
@@ -18,7 +18,7 @@ public class ChangingReference<T>
       lastValue = atomicReference.get();
    }
 
-   public T get()
+   public T poll()
    {
       T newValue = atomicReference.get();
 

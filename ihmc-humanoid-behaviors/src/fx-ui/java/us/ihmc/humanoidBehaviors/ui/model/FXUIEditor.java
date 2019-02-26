@@ -1,7 +1,6 @@
-package us.ihmc.humanoidBehaviors.ui.editors;
+package us.ihmc.humanoidBehaviors.ui.model;
 
 import javafx.animation.AnimationTimer;
-import javafx.event.Event;
 
 /**
  * An editor such that:

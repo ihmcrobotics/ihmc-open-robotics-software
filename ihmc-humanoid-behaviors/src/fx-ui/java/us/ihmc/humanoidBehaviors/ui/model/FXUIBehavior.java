@@ -1,10 +1,9 @@
-package us.ihmc.humanoidBehaviors.ui.behaviors;
+package us.ihmc.humanoidBehaviors.ui.model;
 
 import javafx.collections.ObservableList;
 import javafx.scene.Group;
 import javafx.scene.Node;
-import javafx.scene.layout.AnchorPane;
-import us.ihmc.humanoidBehaviors.ui.graphics.FXUIGraphic;
+import us.ihmc.humanoidBehaviors.ui.model.FXUIGraphic;
 
 import java.util.ArrayList;
 

@@ -1,4 +1,4 @@
-package us.ihmc.humanoidBehaviors.ui;
+package us.ihmc.humanoidBehaviors.ui.references;
 
 import java.util.concurrent.atomic.AtomicReference;
 
@@ -26,7 +26,7 @@ public class ActivationReference<T>
     *
     * @return current value equals activated value
     */
-   public boolean checkActivated()
+   public boolean pollActivated()
    {
       T newValue = atomicReference.get();
 
@@ -69,7 +69,7 @@ public class ActivationReference<T>
    }
 
    /**
-    * @return if the activation changed on the last call to {@link #checkActivated()}
+    * @return if the activation changed on the last call to {@link #pollActivated()}
     */
    public boolean activationChanged()
    {
