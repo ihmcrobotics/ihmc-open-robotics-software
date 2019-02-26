@@ -5,6 +5,7 @@ import controller_msgs.msg.dds.QuadrupedSteppingStateChangeMessage;
 import controller_msgs.msg.dds.QuadrupedTeleopDesiredPose;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.euclid.tuple4D.interfaces.QuaternionReadOnly;
+import us.ihmc.quadrupedBasics.QuadrupedSteppingStateEnum;
 import us.ihmc.quadrupedCommunication.networkProcessing.OutputManager;
 import us.ihmc.quadrupedCommunication.networkProcessing.QuadrupedRobotDataReceiver;
 import us.ihmc.quadrupedCommunication.networkProcessing.QuadrupedToolboxController;
@@ -51,12 +52,15 @@ public class QuadrupedBodyTeleopController extends QuadrupedToolboxController
    {
       Point3DReadOnly position = message.getPose().getPosition();
       QuaternionReadOnly orientation = message.getPose().getOrientation();
-      teleopManager.setDesiredBodyPose(position.getX(), position.getY(), orientation.getYaw(), orientation.getPitch(), orientation.getRoll(), message.getPoseShiftTime());
+//      teleopManager.setDesiredBodyPose(position.getX(), position.getY(), orientation.getYaw(), orientation.getPitch(), orientation.getRoll(), message.getPoseShiftTime());
+      teleopManager.setDesiredBodyPose(0.0, 0.0, orientation.getYaw(), orientation.getPitch(), orientation.getRoll(), message.getPoseShiftTime());
    }
 
    @Override
    public boolean initializeInternal()
    {
+      teleopManager.initialize();
+
       return true;
    }
 
@@ -71,6 +75,15 @@ public class QuadrupedBodyTeleopController extends QuadrupedToolboxController
    @Override
    public boolean isDone()
    {
-      return false;
+      if (controllerStateChangeMessage.get() == null)
+         return false;
+
+      if (controllerStateChangeMessage.get().getEndHighLevelControllerName() != HighLevelStateChangeStatusMessage.WALKING)
+         return true;
+
+      if (steppingStateChangeMessage.get() == null)
+         return false;
+
+      return steppingStateChangeMessage.get().getEndQuadrupedSteppingStateEnum() != QuadrupedSteppingStateEnum.STAND.toByte();
    }
 }
