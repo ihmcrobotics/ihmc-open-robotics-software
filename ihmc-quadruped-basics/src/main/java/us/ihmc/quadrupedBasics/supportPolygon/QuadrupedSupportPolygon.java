@@ -552,7 +552,8 @@ public class QuadrupedSupportPolygon extends FrameConvexPolygon2D implements Ser
 
    private final FramePoint3D tempFramePointForCentroids = new FramePoint3D();
 
-   public void getCentroidFramePoseAveragingLowestZHeightsAcrossEnds(FramePose3DBasics framePose)
+   /** returns success **/
+   public boolean getCentroidFramePoseAveragingLowestZHeightsAcrossEnds(FramePose3DBasics framePose)
    {
       double nominalPitch = getNominalPitch();
       double nominalRoll = getNominalRoll();
@@ -561,29 +562,31 @@ public class QuadrupedSupportPolygon extends FrameConvexPolygon2D implements Ser
       if (!Double.isFinite(nominalPitch))
       {
          PrintTools.warn("Nominal pitch is not finite " + nominalPitch + ", not updating the pose.");
-         return;
+         return false;
       }
 
       if (!Double.isFinite(nominalRoll))
       {
          PrintTools.warn("Nominal roll is not finite " + nominalRoll + ", not updating the pose.");
-         return;
+         return false;
       }
 
       if (!Double.isFinite(nominalYaw))
       {
          PrintTools.warn("Nominal yaw is not finite " + nominalYaw + ", not updating the pose.");
-         return;
+         return false;
       }
 
       if (!getCentroidAveragingLowestZHeightsAcrossEnds(tempFramePointForCentroids))
       {
          PrintTools.warn("Centroid contains NaN, not updating the pose.");
-         return;
+         return false;
       }
 
       framePose.setOrientationYawPitchRoll(nominalYaw, nominalPitch, nominalRoll);
       framePose.setPosition(tempFramePointForCentroids);
+
+      return true;
    }
 
    public void getWeightedCentroidFramePoseAveragingLowestZHeightsAcrossEnds(FramePose3D framePose)
@@ -715,11 +718,7 @@ public class QuadrupedSupportPolygon extends FrameConvexPolygon2D implements Ser
     * This method assumes the points are in a specific order (U-shape).
     * It returns the InCircle Point based on the two angles formed by the three line segments
     *
-    * @param p1 Point2d point defining the three line segments (must be in order)
-    * @param p2 Point2d point defining the three line segments (must be in order)
-    * @param p3 Point2d point defining the three line segments (must be in order)
-    * @param p4 Point2d point defining the three line segments (must be in order)
-    * @return Point2d incirlce point
+    * @return Point2d in circle point
     */
    public void getInCirclePoint2d(FramePoint3D intersectionToPack)
    {
@@ -802,6 +801,11 @@ public class QuadrupedSupportPolygon extends FrameConvexPolygon2D implements Ser
             deltaY += getFootstep(FRONT_RIGHT).getY() - getFootstep(HIND_RIGHT).getY();
          }
 
+         if (!Double.isFinite(deltaX))
+            throw new IllegalArgumentException("deltaX is invalid = " + deltaX);
+         if (!Double.isFinite(deltaY))
+            throw new IllegalArgumentException("deltaY is invalid = " + deltaY);
+
          return Math.atan2(deltaY, deltaX);
       }
       else
@@ -858,6 +862,9 @@ public class QuadrupedSupportPolygon extends FrameConvexPolygon2D implements Ser
          if (length < 1e-3)
             throw new UndefinedOperationException("Polygon is too small");
 
+         if (deltaZ > length)
+            throw new IllegalArgumentException("Somehow ended up with a delta Z bigger than the length. deltaZ = " + deltaZ + ", length = " + length);
+
          return -Math.asin(deltaZ / length);
       }
       else
@@ -896,6 +903,9 @@ public class QuadrupedSupportPolygon extends FrameConvexPolygon2D implements Ser
          double length = Math.sqrt(deltaX * deltaX + deltaY * deltaY + deltaZ * deltaZ);
          if (length < 1e-3)
             throw new UndefinedOperationException("Polygon is too small");
+
+         if (deltaZ > length)
+            throw new IllegalArgumentException("Somehow ended up with a delta Z bigger than the length. deltaZ = " + deltaZ + ", length = " + length);
 
          return Math.asin(deltaZ / length);
       }
