@@ -134,6 +134,7 @@ public abstract class AvatarStepInPlaceTest implements MultiRobotTestInterface
       MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " after test.");
    }
 
+   @Tag("humanoid-flat-ground-slow")
    @Test
    public void testStepInPlace() throws SimulationExceededMaximumTimeException
    {
