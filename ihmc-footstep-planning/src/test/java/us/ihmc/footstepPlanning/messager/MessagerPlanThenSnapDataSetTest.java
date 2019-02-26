@@ -6,7 +6,7 @@ import org.junit.jupiter.api.Disabled;
 import us.ihmc.footstepPlanning.FootstepPlannerDataSetTest;
 import us.ihmc.footstepPlanning.FootstepPlannerType;
 
-@Tag("allocation")
+@Tag("footstep-planning-slow")
 public class MessagerPlanThenSnapDataSetTest extends FootstepPlannerDataSetTest
 {
    @Override
