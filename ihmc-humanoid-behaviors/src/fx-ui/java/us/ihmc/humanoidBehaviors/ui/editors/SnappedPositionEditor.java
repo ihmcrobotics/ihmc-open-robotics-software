@@ -5,10 +5,13 @@ import javafx.scene.input.MouseButton;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.input.PickResult;
 import javafx.scene.shape.MeshView;
+import javafx.scene.shape.Sphere;
 import us.ihmc.euclid.tuple3D.Point3D;
-import us.ihmc.humanoidBehaviors.ui.*;
-import us.ihmc.humanoidBehaviors.ui.behaviors.FXUIStateMachine;
-import us.ihmc.humanoidBehaviors.ui.behaviors.FXUIStateTransition;
+import us.ihmc.humanoidBehaviors.ui.BehaviorUI;
+import us.ihmc.humanoidBehaviors.ui.model.*;
+import us.ihmc.humanoidBehaviors.ui.references.ActivationReference;
+import us.ihmc.humanoidBehaviors.ui.references.NotificationReference;
+import us.ihmc.humanoidBehaviors.ui.references.QueueReference;
 import us.ihmc.log.LogTools;
 import us.ihmc.messager.Messager;
 import us.ihmc.messager.MessagerAPIFactory.MessagerAPI;
@@ -27,25 +30,48 @@ public class SnappedPositionEditor extends FXUIEditor
    private final NotificationReference mouseRightClicked = new NotificationReference();
    private final AtomicReference<FXUIStateMachine> activeStateMachine;
 
+   private final FXUIStateMachine positionEditorStateMachine;
+
    public SnappedPositionEditor(Messager messager, Node sceneNode)
    {
       this.messager = messager;
       this.sceneNode = sceneNode;
 
-      activeEditor = new ActivationReference<>(messager.createInput(BehaviorUI.API.ActiveEditor, FXUIEditor.NONE), this);
+
+      activeEditor = new ActivationReference<>(messager.createInput(BehaviorUI.API.ActiveEditor, null), this);
       activeStateMachine = messager.createInput(BehaviorUI.API.ActiveStateMachine, null);
+
+      positionEditorStateMachine = new FXUIStateMachine(messager,
+                                                        FXUIState.SNAPPED_POSITION_EDITOR,
+                                                        FXUIStateTransition.SNAPPED_POSITION_LEFT_CLICK)
+      {
+         @Override
+         protected void handleTransition(FXUIStateTransition transition)
+         {
+            if (transition.isStart())
+            {
+               messager.submitMessage(BehaviorUI.API.ActiveEditor, BehaviorUI.SNAPPED_POSITION_EDITOR);
+            }
+            else if (transition == FXUIStateTransition.SNAPPED_POSITION_LEFT_CLICK)
+            {
+               messager.submitMessage(BehaviorUI.API.ActiveEditor, null);
+               messager.submitMessage(BehaviorUI.API.SelectedGraphic, null);
+            }
+         }
+      };
+
+      sceneNode.addEventHandler(MouseEvent.MOUSE_CLICKED, this::mouseClicked);
    }
 
    @Override
    public void handle(long now)
    {
-      if (activeEditor.checkActivated())
+      if (activeEditor.pollActivated())
       {
          if (activeEditor.activationChanged())
          {
             LogTools.debug("SnappedPositionEditor activated");
             sceneNode.addEventHandler(MouseEvent.MOUSE_MOVED, this::mouseMoved);
-            sceneNode.addEventHandler(MouseEvent.MOUSE_CLICKED, this::mouseClicked);
          }
 
          mouseMovedMeshIntersection.poll();
@@ -76,7 +102,6 @@ public class SnappedPositionEditor extends FXUIEditor
       {
          LogTools.debug("Snapped position editor deactivated.");
          sceneNode.removeEventHandler(MouseEvent.MOUSE_MOVED, this::mouseMoved);
-         sceneNode.removeEventHandler(MouseEvent.MOUSE_CLICKED, this::mouseClicked);
       }
    }
 
@@ -93,21 +118,42 @@ public class SnappedPositionEditor extends FXUIEditor
    {
       if (event.isStillSincePress())
       {
-         if (event.getButton() == MouseButton.PRIMARY)
+         if (activeEditor.peekActivated())
          {
-            Point3D intersection = calculateMouseIntersection(event);
-            if (intersection != null)
+            if (event.getButton() == MouseButton.PRIMARY)
             {
-               mouseClickedMeshIntersection.add(intersection);
+               Point3D intersection = calculateMouseIntersection(event);
+               if (intersection != null)
+               {
+                  mouseClickedMeshIntersection.add(intersection);
+               }
+               else
+               {
+                  LogTools.debug("Click mesh couldn't be found");
+               }
             }
-            else
+            else if (event.getButton() == MouseButton.SECONDARY)  // maybe move this to patrol controller? or implement cancel
             {
-               LogTools.debug("Click mesh couldn't be found");
+               mouseRightClicked.set();
             }
          }
-         else if (event.getButton() == MouseButton.SECONDARY)
+         else
          {
-            mouseRightClicked.set();
+            if (event.getButton() == MouseButton.PRIMARY)
+            {
+               PickResult pickResult = event.getPickResult();
+               Node intersectedNode = pickResult.getIntersectedNode();
+
+               LogTools.debug("intersectedNode: {}", intersectedNode);
+
+               if (intersectedNode instanceof Sphere)
+               {
+                  messager.submitMessage(BehaviorUI.API.ActiveStateMachine, positionEditorStateMachine);
+                  messager.submitMessage(BehaviorUI.API.SelectedGraphic, intersectedNode);
+
+                  positionEditorStateMachine.start();
+               }
+            }
          }
       }
    }
@@ -141,7 +187,7 @@ public class SnappedPositionEditor extends FXUIEditor
 
    public static class API
    {
-      private static final SimpleMessagerAPIFactory apiFactory = new SimpleMessagerAPIFactory(SnappedPositionEditor.class);
+      private static final FXUIMessagerAPIFactory apiFactory = new FXUIMessagerAPIFactory(SnappedPositionEditor.class);
 
       public static final Topic<Point3D> SelectedPosition = apiFactory.createTopic("SelectedPosition", Point3D.class);
 

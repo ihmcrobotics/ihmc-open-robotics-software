@@ -3,10 +3,12 @@ package us.ihmc.humanoidBehaviors.ui;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.AmbientLight;
+import javafx.scene.Node;
 import javafx.scene.Scene;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.Pane;
 import javafx.scene.paint.Color;
+import javafx.scene.shape.Sphere;
 import javafx.stage.Stage;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParameters;
@@ -142,7 +144,7 @@ public class BehaviorUI
 
       public static final Topic<FXUIEditor> ActiveEditor = apiFactory.createTopic("ActiveEditor", FXUIEditor.class);
       public static final Topic<PlanarRegionsList> PlanarRegionsList = apiFactory.createTopic("PlanarRegionsList", PlanarRegionsList.class);
-      public static final Topic<FXUIGraphic> SelectedGraphic = apiFactory.createTopic("SelectedGraphic", FXUIGraphic.class);
+      public static final Topic<Node> SelectedGraphic = apiFactory.createTopic("SelectedGraphic", Node.class);
       public static final Topic<FXUIStateMachine> ActiveStateMachine = apiFactory.createTopic("ActiveStateMachine", FXUIStateMachine.class);
 
       public static final MessagerAPI create()
