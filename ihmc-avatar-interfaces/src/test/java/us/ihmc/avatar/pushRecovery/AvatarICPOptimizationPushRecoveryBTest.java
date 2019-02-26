@@ -42,6 +42,7 @@ public abstract class AvatarICPOptimizationPushRecoveryBTest extends AvatarICPOp
       validateTest(footsteps);
    }
 
+   @Tag("humanoid-push-recovery-slow")
    @Test
    public void testPushICPOptimizationOutwardPushInSlowSwing() throws Exception
    {
@@ -62,6 +63,7 @@ public abstract class AvatarICPOptimizationPushRecoveryBTest extends AvatarICPOp
       validateTest(footsteps);
    }
 
+   @Tag("humanoid-push-recovery-slow")
    @Test
    public void testPushICPOptimizationDiagonalOutwardPushInSwing() throws Exception
    {
@@ -82,6 +84,7 @@ public abstract class AvatarICPOptimizationPushRecoveryBTest extends AvatarICPOp
       validateTest(footsteps);
    }
 
+   @Tag("humanoid-push-recovery-slow")
    @Test
    public void testPushICPOptimizationDiagonalYawingOutwardPushInSwing() throws Exception
    {
@@ -177,6 +180,7 @@ public abstract class AvatarICPOptimizationPushRecoveryBTest extends AvatarICPOp
       validateTest(footsteps);
    }
 
+   @Tag("humanoid-push-recovery-slow")
    @Test
    public void testPushICPOptimizationLongBackwardPushInSwing() throws Exception
    {
