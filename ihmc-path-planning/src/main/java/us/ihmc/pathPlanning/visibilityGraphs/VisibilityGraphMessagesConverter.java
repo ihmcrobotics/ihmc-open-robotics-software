@@ -1,4 +1,4 @@
-package us.ihmc.footstepPlanning;
+package us.ihmc.pathPlanning.visibilityGraphs;
 
 import controller_msgs.msg.dds.*;
 import us.ihmc.communication.packets.PlanarRegionMessageConverter;

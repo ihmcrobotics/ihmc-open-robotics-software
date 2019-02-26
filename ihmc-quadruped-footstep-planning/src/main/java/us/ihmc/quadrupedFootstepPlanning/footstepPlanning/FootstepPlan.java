@@ -61,10 +61,15 @@ public class FootstepPlan
 
    public QuadrupedTimedOrientedStep addFootstep(RobotQuadrant robotQuadrant, FramePoint3D soleFramePoint, TimeInterval timeInterval)
    {
+      return addFootstep(robotQuadrant, soleFramePoint, timeInterval.getStartTime(), timeInterval.getEndTime());
+   }
+
+   public QuadrupedTimedOrientedStep addFootstep(RobotQuadrant robotQuadrant, FramePoint3D soleFramePoint, double startTime, double endTime)
+   {
       QuadrupedTimedOrientedStep footstep = new QuadrupedTimedOrientedStep();
       footstep.setRobotQuadrant(robotQuadrant);
       footstep.setGoalPosition(soleFramePoint);
-      footstep.setTimeInterval(timeInterval);
+      footstep.getTimeInterval().setInterval(startTime, endTime);
       footsteps.add(footstep);
       return footstep;
    }
