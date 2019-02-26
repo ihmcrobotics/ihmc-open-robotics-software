@@ -3,6 +3,7 @@ package us.ihmc.commonWalkingControlModules.dynamicPlanning.comPlanning;
 import org.junit.jupiter.api.Test;
 import us.ihmc.commons.RandomNumbers;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.FrameVector2D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
@@ -1040,7 +1041,12 @@ public class CoMTrajectoryPlannerTest
 
       planner.solveForTrajectory();
       planner.compute(0.0);
-      checkPlannerDynamics(planner, omega.getDoubleValue());
+      FrameVector3DReadOnly acceleration = planner.getDesiredCoMAcceleration();
+
+      assertEquals(gravityZ, acceleration.getZ(), 1e-3);
+      assertEquals(0.0, acceleration.getX(), 1e-3);
+      assertEquals(0.0, acceleration.getY(), 1e-3);
+      checkPlannerDynamics(planner, -omega.getDoubleValue());
 
 
       EuclidCoreTestTools.assertPoint3DGeometricallyEquals("Desired CoM is invalid.", comPosition, planner.getDesiredCoMPosition(), epsilon);
@@ -1057,6 +1063,10 @@ public class CoMTrajectoryPlannerTest
          double time = RandomNumbers.nextDouble(random, 0.0, contactSequence.get(0).getTimeInterval().getDuration());
          planner.compute(time);
          checkPlannerDynamics(planner, omega.getDoubleValue());
+         acceleration = planner.getDesiredCoMAcceleration();
+         assertEquals(gravityZ, acceleration.getZ(), 1e-3);
+         assertEquals(0.0, acceleration.getX(), 1e-3);
+         assertEquals(0.0, acceleration.getY(), 1e-3);
       }
    }
 
