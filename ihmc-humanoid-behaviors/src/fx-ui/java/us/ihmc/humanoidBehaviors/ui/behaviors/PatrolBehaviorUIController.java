@@ -36,14 +36,16 @@ public class PatrolBehaviorUIController extends FXUIBehavior
    {
       this.messager = messager;
 
-      waypointPlacementStateMachine = new FXUIStateMachine()
+      waypointPlacementStateMachine = new FXUIStateMachine(messager,
+                                                           FXUIState.SNAPPED_POSITION_EDITOR,
+                                                           FXUIStateTransition.SNAPPED_POSITION_RIGHT_CLICK)
       {
          @Override
          protected void handleTransition(FXUIStateTransition transition)
          {
-            if (transition == FXUIStateTransition.BEGIN || transition == FXUIStateTransition.SNAPPED_POSITION_LEFT_CLICK)
+            if (transition.isStart() || transition == FXUIStateTransition.SNAPPED_POSITION_LEFT_CLICK)
             {
-               if (transition == FXUIStateTransition.BEGIN)
+               if (transition.isStart())
                {
                   removeAllWaypointGraphics();
                }
@@ -61,14 +63,10 @@ public class PatrolBehaviorUIController extends FXUIBehavior
 
                messager.submitMessage(BehaviorUI.API.ActiveEditor, FXUIEditor.NONE);
                messager.submitMessage(BehaviorUI.API.SelectedGraphic, FXUIGraphic.NONE);
-               messager.submitMessage(BehaviorUI.API.ActiveStateMachine, FXUIStateMachine.NONE);
-
             }
          }
       };
-      waypointPlacementStateMachine.mapTransitionToState(FXUIStateTransition.BEGIN, FXUIState.SNAPPED_POSITION_EDITOR);
       waypointPlacementStateMachine.mapTransitionToState(FXUIStateTransition.SNAPPED_POSITION_LEFT_CLICK, FXUIState.SNAPPED_POSITION_EDITOR);
-      waypointPlacementStateMachine.mapTransitionToState(FXUIStateTransition.SNAPPED_POSITION_RIGHT_CLICK, FXUIState.INACTIVE);
    }
 
    private SnappedPositionGraphic createWaypointGraphic(JavaFXMessager messager)
@@ -101,7 +99,7 @@ public class PatrolBehaviorUIController extends FXUIBehavior
    {
       messager.submitMessage(BehaviorUI.API.ActiveStateMachine, waypointPlacementStateMachine);
 
-      waypointPlacementStateMachine.begin();
+      waypointPlacementStateMachine.start();
    }
 
    @FXML public void continuePatrol()
