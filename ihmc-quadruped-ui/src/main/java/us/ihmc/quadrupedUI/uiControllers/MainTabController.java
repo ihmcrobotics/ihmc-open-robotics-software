@@ -44,7 +44,7 @@ public class MainTabController
    public void attachMessager(JavaFXMessager messager)
    {
       this.messager = messager;
-      currentControllerState = messager.createInput(QuadrupedUIMessagerAPI.CurrentControllerNameTopic, HighLevelControllerName.WALKING);
+      currentControllerState = messager.createInput(QuadrupedUIMessagerAPI.CurrentControllerNameTopic, null);
 
       messager.registerTopicListener(QuadrupedUIMessagerAPI.EnableBodyTeleopTopic, this::validateBodyTopic);
       messager.registerTopicListener(QuadrupedUIMessagerAPI.EnableStepTeleopTopic, this::validateWalkingTopic);
@@ -55,7 +55,7 @@ public class MainTabController
       if (request)
       {
          messager.submitMessage(QuadrupedUIMessagerAPI.EnableStepTeleopTopic, false);
-         if (currentControllerState.get() != HighLevelControllerName.WALKING)
+         if (currentControllerState.get() != null && currentControllerState.get() != HighLevelControllerName.WALKING)
             messager.submitMessage(QuadrupedUIMessagerAPI.EnableBodyTeleopTopic, false);
       }
    }
@@ -65,7 +65,7 @@ public class MainTabController
       if (request)
       {
          messager.submitMessage(QuadrupedUIMessagerAPI.EnableBodyTeleopTopic, false);
-         if (currentControllerState.get() != HighLevelControllerName.WALKING)
+         if (currentControllerState.get() != null && currentControllerState.get() != HighLevelControllerName.WALKING)
             messager.submitMessage(QuadrupedUIMessagerAPI.EnableStepTeleopTopic, false);
       }
       else
