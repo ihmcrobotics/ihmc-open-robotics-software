@@ -53,6 +53,21 @@ public class ActivationReference<T>
       return newValueActivated;
    }
 
+   public boolean peekActivated()
+   {
+      T newValue = atomicReference.get();
+
+      boolean newValueActivated;
+      if (newValue == activatedValue)
+         newValueActivated = true;
+      else if (newValue == null)
+         newValueActivated = false;
+      else
+         newValueActivated = newValue.equals(activatedValue);
+
+      return newValueActivated;
+   }
+
    /**
     * @return if the activation changed on the last call to {@link #checkActivated()}
     */
