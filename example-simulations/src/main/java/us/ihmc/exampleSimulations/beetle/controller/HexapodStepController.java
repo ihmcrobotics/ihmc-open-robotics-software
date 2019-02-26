@@ -57,6 +57,7 @@ public class HexapodStepController
          RobotSextant.class);
    private final SegmentDependentList<RobotSextant, YoFramePoint3D> desiredPositions = new SegmentDependentList<>(RobotSextant.class);
    private final SegmentDependentList<RobotSextant, YoFramePoint3D> currentPositions = new SegmentDependentList<>(RobotSextant.class);
+   private static final double[] swingWaypointProportions = new double[]{0.15, 0.85};
    
    private int legIndex = 0;
    private YoBoolean replanTrajectories;
@@ -110,7 +111,7 @@ public class HexapodStepController
          footInShinFrame.changeFrame(shinRigidBody.getBodyFixedFrame());
          shinRigidBodies.set(robotSextant, shinRigidBody);
          rigidBodiesToControl[i] = shinRigidBody;
-         swingTrajectoryGenerators.set(robotSextant, new TwoWaypointSwingGenerator(name, 0.02, groundClearance.getDoubleValue(), registry, yoGraphicsListRegistry));
+         swingTrajectoryGenerators.set(robotSextant, new TwoWaypointSwingGenerator(name, swingWaypointProportions, swingWaypointProportions, 0.02, groundClearance.getDoubleValue(), registry, yoGraphicsListRegistry));
 
          YoFramePoint3D desiredPosition = new YoFramePoint3D(name + "desiredPosition", ReferenceFrame.getWorldFrame(), registry);
          desiredPositions.set(robotSextant, desiredPosition);

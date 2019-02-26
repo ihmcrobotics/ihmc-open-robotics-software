@@ -783,6 +783,7 @@ public class SwingState extends AbstractFootControlState
       swingTrajectoryOptimizer.setTrajectoryType(activeTrajectoryType.getEnumValue(), positionWaypointsForSole);
       swingTrajectoryOptimizer.setSwingHeight(swingHeight.getDoubleValue());
       swingTrajectoryOptimizer.setStanceFootPosition(stanceFootPosition);
+      swingTrajectoryOptimizer.setWaypointProportionsToDefaults(activeTrajectoryType.getEnumValue());
       swingTrajectoryOptimizer.initialize();
    }
 
