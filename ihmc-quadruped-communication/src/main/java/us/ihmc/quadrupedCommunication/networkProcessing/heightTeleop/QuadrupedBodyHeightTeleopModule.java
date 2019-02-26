@@ -22,7 +22,7 @@ import static us.ihmc.communication.ROS2Tools.getTopicNameGenerator;
 
 public class QuadrupedBodyHeightTeleopModule extends QuadrupedToolboxModule
 {
-   private static final int updatePeriodMilliseconds = 10;
+   private static final int updatePeriodMilliseconds = 100;
 
    private final QuadrupedBodyHeightTeleopController heightTeleopController;
 
@@ -41,13 +41,31 @@ public class QuadrupedBodyHeightTeleopModule extends QuadrupedToolboxModule
    {
       // status messages from the controller
       ROS2Tools.MessageTopicNameGenerator controllerPubGenerator = QuadrupedControllerAPIDefinition.getPublisherTopicNameGenerator(robotName);
-      ROS2Tools.createCallbackSubscription(realtimeRos2Node, HighLevelStateMessage.class, controllerPubGenerator, s -> heightTeleopController.setPaused(true));
+      ROS2Tools.createCallbackSubscription(realtimeRos2Node, HighLevelStateMessage.class, controllerPubGenerator, s -> setPaused(true));
       ROS2Tools.createCallbackSubscription(realtimeRos2Node, HighLevelStateChangeStatusMessage.class, controllerPubGenerator,
-                                           s -> heightTeleopController.processHighLevelStateChangeMessage(s.takeNextData()));
+                                           s -> processHighLevelStateChangeMessage(s.takeNextData()));
 
       // inputs to this module
       ROS2Tools.createCallbackSubscription(realtimeRos2Node, QuadrupedTeleopDesiredHeight.class, getSubscriberTopicNameGenerator(),
-                                           s -> heightTeleopController.setDesiredBodyHeight(s.takeNextData().getDesiredHeight()));
+                                           s -> setDesiredBodyHeight(s.takeNextData().getDesiredHeight()));
+   }
+
+   private void setPaused(boolean paused)
+   {
+      if (heightTeleopController != null)
+         heightTeleopController.setPaused(paused);
+   }
+
+   private void processHighLevelStateChangeMessage(HighLevelStateChangeStatusMessage message)
+   {
+      if (heightTeleopController != null)
+         heightTeleopController.processHighLevelStateChangeMessage(message);
+   }
+
+   private void setDesiredBodyHeight(double desiredBodyHeight)
+   {
+      if (heightTeleopController != null)
+         heightTeleopController.setDesiredBodyHeight(desiredBodyHeight);
    }
 
    @Override

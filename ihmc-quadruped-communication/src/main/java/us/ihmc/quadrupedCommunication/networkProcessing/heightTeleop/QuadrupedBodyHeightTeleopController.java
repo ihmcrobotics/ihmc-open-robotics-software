@@ -55,6 +55,9 @@ public class QuadrupedBodyHeightTeleopController extends QuadrupedToolboxControl
    @Override
    public boolean isDone()
    {
+      if (controllerStateChangeMessage.get() == null)
+         return false;
+
       return controllerStateChangeMessage.get().getEndHighLevelControllerName() != HighLevelStateChangeStatusMessage.WALKING;
    }
 }
