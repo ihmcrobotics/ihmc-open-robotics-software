@@ -314,6 +314,8 @@ public abstract class QuadrupedXGaitFlatGroundWalkingTest implements QuadrupedMu
    private void testPacingInASemiCircle(double walkingSpeed, double angularVelocity)
    {
       stepTeleopManager.setStanceWidth(getPacingWidth());
+      stepTeleopManager.setStepDuration(getPacingStepDuration());
+      stepTeleopManager.setEndDoubleSupportDuration(getPacingEndDoubleSupportDuration());
 
       stepTeleopManager.setShiftPlanBasedOnStepAdjustment(false);
       QuadrupedTestBehaviors.readyXGait(conductor, variables, stepTeleopManager);

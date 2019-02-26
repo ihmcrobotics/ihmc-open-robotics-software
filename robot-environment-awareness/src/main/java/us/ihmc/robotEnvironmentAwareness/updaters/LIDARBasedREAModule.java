@@ -15,6 +15,7 @@ import com.google.common.util.concurrent.AtomicDouble;
 
 import controller_msgs.msg.dds.LidarScanMessage;
 import controller_msgs.msg.dds.PlanarRegionsListMessage;
+import controller_msgs.msg.dds.REASensorDataFilterParametersMessage;
 import controller_msgs.msg.dds.REAStateRequestMessage;
 import controller_msgs.msg.dds.RequestPlanarRegionsListMessage;
 import controller_msgs.msg.dds.StereoVisionPointCloudMessage;
@@ -31,6 +32,7 @@ import us.ihmc.pubsub.subscriber.Subscriber;
 import us.ihmc.robotEnvironmentAwareness.communication.KryoMessager;
 import us.ihmc.robotEnvironmentAwareness.communication.REACommunicationProperties;
 import us.ihmc.robotEnvironmentAwareness.communication.REAModuleAPI;
+import us.ihmc.robotEnvironmentAwareness.communication.packets.BoundingBoxParametersMessage;
 import us.ihmc.robotEnvironmentAwareness.io.FilePropertyHelper;
 import us.ihmc.robotEnvironmentAwareness.tools.ExecutorServiceTools;
 import us.ihmc.robotEnvironmentAwareness.tools.ExecutorServiceTools.ExceptionHandling;
@@ -92,6 +94,8 @@ public class LIDARBasedREAModule
       ROS2Tools.createCallbackSubscription(ros2Node, RequestPlanarRegionsListMessage.class, subscriberTopicNameGenerator,
                                            this::handleRequestPlanarRegionsListMessage);
       ROS2Tools.createCallbackSubscription(ros2Node, REAStateRequestMessage.class, subscriberTopicNameGenerator, this::handleREAStateRequestMessage);
+      ROS2Tools.createCallbackSubscription(ros2Node, REASensorDataFilterParametersMessage.class, subscriberTopicNameGenerator,
+                                           this::handleREASensorDataFilterParametersMessage);
 
       FilePropertyHelper filePropertyHelper = new FilePropertyHelper(configurationFile);
       loadConfigurationFile(filePropertyHelper);
@@ -102,9 +106,12 @@ public class LIDARBasedREAModule
       reaMessager.registerTopicListener(REAModuleAPI.SaveRegionUpdaterConfiguration,
                                         (content) -> planarRegionFeatureUpdater.saveConfiguration(filePropertyHelper));
 
-      planarRegionNetworkProvider = new REAPlanarRegionPublicNetworkProvider(planarRegionFeatureUpdater, ros2Node, publisherTopicNameGenerator,
+      planarRegionNetworkProvider = new REAPlanarRegionPublicNetworkProvider(reaMessager, planarRegionFeatureUpdater, ros2Node, publisherTopicNameGenerator,
                                                                              subscriberTopicNameGenerator);
       clearOcTree = reaMessager.createInput(REAModuleAPI.OcTreeClear, false);
+
+      // At the very end, we force the modules to submit their state so duplicate inputs have consistent values.
+      reaMessager.submitMessage(REAModuleAPI.RequestEntireModuleState, true);
    }
 
    private void dispatchLidarScanMessage(Subscriber<LidarScanMessage> subscriber)
@@ -149,6 +156,23 @@ public class LIDARBasedREAModule
          clearOcTree.set(true);
    }
 
+   private void handleREASensorDataFilterParametersMessage(Subscriber<REASensorDataFilterParametersMessage> subscriber)
+   {
+      REASensorDataFilterParametersMessage newMessage = subscriber.takeNextData();
+
+      if (!newMessage.getBoundingBoxMin().containsNaN() && !newMessage.getBoundingBoxMax().containsNaN())
+      {
+         BoundingBoxParametersMessage boundingBox = new BoundingBoxParametersMessage();
+         boundingBox.getMin().set(newMessage.getBoundingBoxMin());
+         boundingBox.getMax().set(newMessage.getBoundingBoxMax());
+         reaMessager.submitMessage(REAModuleAPI.OcTreeBoundingBoxParameters, boundingBox);
+      }
+      if (newMessage.getSensorMinRange() >= 0.0)
+         reaMessager.submitMessage(REAModuleAPI.LidarMinRange, newMessage.getSensorMinRange());
+      if (newMessage.getSensorMaxRange() >= 0.0)
+         reaMessager.submitMessage(REAModuleAPI.LidarMaxRange, newMessage.getSensorMaxRange());
+   }
+
    private void loadConfigurationFile(FilePropertyHelper filePropertyHelper)
    {
       lidarBufferUpdater.loadConfiguration(filePropertyHelper);
@@ -189,6 +213,7 @@ public class LIDARBasedREAModule
             timeReporter.run(() -> moduleStateReporter.reportPlanarRegionsState(planarRegionFeatureUpdater), reportPlanarRegionsStateTimeReport);
 
             planarRegionNetworkProvider.update(ocTreeUpdateSuccess);
+            planarRegionNetworkProvider.publishCurrentState();
          }
 
          if (isThreadInterrupted())
@@ -249,7 +274,8 @@ public class LIDARBasedREAModule
 
    public static LIDARBasedREAModule createRemoteModule(String configurationFilePath) throws Exception
    {
-      KryoMessager server = KryoMessager.createTCPServer(REAModuleAPI.API, NetworkPorts.REA_MODULE_UI_PORT, REACommunicationProperties.getPrivateNetClassList());
+      KryoMessager server = KryoMessager.createTCPServer(REAModuleAPI.API, NetworkPorts.REA_MODULE_UI_PORT,
+                                                         REACommunicationProperties.getPrivateNetClassList());
       server.setAllowSelfSubmit(true);
       server.startMessager();
       return new LIDARBasedREAModule(server, new File(configurationFilePath));
@@ -258,7 +284,7 @@ public class LIDARBasedREAModule
    public static LIDARBasedREAModule createIntraprocessModule(String configurationFilePath) throws Exception
    {
       KryoMessager messager = KryoMessager.createIntraprocess(REAModuleAPI.API, NetworkPorts.REA_MODULE_UI_PORT,
-                                                          REACommunicationProperties.getPrivateNetClassList());
+                                                              REACommunicationProperties.getPrivateNetClassList());
       messager.setAllowSelfSubmit(true);
       messager.startMessager();
 
