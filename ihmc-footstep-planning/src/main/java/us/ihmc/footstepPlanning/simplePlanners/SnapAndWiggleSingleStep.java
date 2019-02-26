@@ -71,6 +71,10 @@ public class SnapAndWiggleSingleStep
       checkAndHandleTopOfCliff(solePoseBeforeSnapping, solePose, walkingForward, footStepPolygon, footPolygon);
       checkAndHandleBottomOfCliff(solePose);
 
+      RigidBodyTransform soleTransform = new RigidBodyTransform();
+      solePose.get(soleTransform);
+      foothold.applyInverseTransform(soleTransform, false);
+
       return foothold;
    }
 

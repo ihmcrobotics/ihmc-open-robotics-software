@@ -10,18 +10,14 @@ import com.google.common.util.concurrent.AtomicDouble;
 
 import controller_msgs.msg.dds.TextToSpeechPacket;
 import us.ihmc.commons.Conversions;
-import us.ihmc.commons.PrintTools;
 import us.ihmc.communication.IHMCRealtimeROS2Publisher;
 import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.geometry.interfaces.Vertex2DSupplier;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.tuple2D.Point2D;
-import us.ihmc.footstepPlanning.FootstepPlan;
-import us.ihmc.footstepPlanning.FootstepPlanner;
-import us.ihmc.footstepPlanning.FootstepPlannerGoal;
-import us.ihmc.footstepPlanning.FootstepPlannerType;
-import us.ihmc.footstepPlanning.FootstepPlanningResult;
+import us.ihmc.footstepPlanning.*;
+import us.ihmc.footstepPlanning.graphSearch.collision.FootstepNodeBodyCollisionDetector;
 import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.FootstepNodeSnapAndWiggler;
 import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.SimplePlanarRegionFootstepNodeSnapper;
 import us.ihmc.footstepPlanning.graphSearch.graph.visualization.MultiStagePlannerListener;
@@ -43,6 +39,7 @@ import us.ihmc.footstepPlanning.graphSearch.stepCost.FootstepCostBuilder;
 import us.ihmc.footstepPlanning.simplePlanners.PlanThenSnapPlanner;
 import us.ihmc.footstepPlanning.simplePlanners.TurnWalkTurnPlanner;
 import us.ihmc.footstepPlanning.tools.PlannerTools;
+import us.ihmc.log.LogTools;
 import us.ihmc.pathPlanning.bodyPathPlanner.BodyPathPlanner;
 import us.ihmc.pathPlanning.statistics.PlannerStatistics;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
@@ -150,9 +147,10 @@ public class FootstepPlanningStage implements FootstepPlanner
 
       SimplePlanarRegionFootstepNodeSnapper snapper = new SimplePlanarRegionFootstepNodeSnapper(footPolygons);
       FootstepNodeSnapAndWiggler postProcessingSnapper = new FootstepNodeSnapAndWiggler(footPolygons, footstepPlanningParameters);
+      FootstepNodeBodyCollisionDetector collisionDetector = new FootstepNodeBodyCollisionDetector(footstepPlanningParameters);
 
       SnapBasedNodeChecker snapBasedNodeChecker = new SnapBasedNodeChecker(footstepPlanningParameters, footPolygons, snapper);
-      BodyCollisionNodeChecker bodyCollisionNodeChecker = new BodyCollisionNodeChecker(footstepPlanningParameters, snapper);
+      BodyCollisionNodeChecker bodyCollisionNodeChecker = new BodyCollisionNodeChecker(collisionDetector, footstepPlanningParameters, snapper);
       PlanarRegionBaseOfCliffAvoider cliffAvoider = new PlanarRegionBaseOfCliffAvoider(footstepPlanningParameters, snapper, footPolygons);
 
       DistanceAndYawBasedHeuristics heuristics = new DistanceAndYawBasedHeuristics(footstepPlanningParameters.getCostParameters().getAStarHeuristicsWeight(),
@@ -167,8 +165,9 @@ public class FootstepPlanningStage implements FootstepPlanner
       costBuilder.setFootstepPlannerParameters(footstepPlanningParameters);
       costBuilder.setSnapper(snapper);
       costBuilder.setIncludeHeightCost(true);
-      costBuilder.setIncludeHeightCost(true);
       costBuilder.setIncludePitchAndRollCost(true);
+      costBuilder.setIncludeBoundingBoxCost(true);
+      costBuilder.setCollisionDetector(collisionDetector);
 
       FootstepCost footstepCost = costBuilder.buildCost();
 
@@ -274,7 +273,7 @@ public class FootstepPlanningStage implements FootstepPlanner
       if (stageRunnable != null)
       {
          if (debug)
-            PrintTools.error(this, "stageRunnable is not null.");
+            LogTools.error("StageRunnable is not null.");
          return null;
       }
 
@@ -349,7 +348,7 @@ public class FootstepPlanningStage implements FootstepPlanner
       if (stageTime.getDoubleValue() > 20.0)
       {
          if (debug)
-            PrintTools.info("Hard timeout at " + stageTime.getDoubleValue());
+            LogTools.error("Hard timeout at " + stageTime.getDoubleValue());
          return;
       }
 
@@ -358,7 +357,7 @@ public class FootstepPlanningStage implements FootstepPlanner
                   + " on stage " + stageId);
 
       if (debug)
-         PrintTools.info("Stage " + stageId + " planning steps.");
+         LogTools.error("Stage " + stageId + " planning steps.");
 
       stepPlanResult = plan();
 

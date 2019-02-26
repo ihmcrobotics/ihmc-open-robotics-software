@@ -52,6 +52,7 @@ import us.ihmc.yoVariables.variable.YoFrameQuaternion;
 import us.ihmc.yoVariables.variable.YoInteger;
 import us.ihmc.yoVariables.variable.YoVariable;
 
+@Tag("controller-api-2")
 public abstract class EndToEndSpineJointTrajectoryMessageTest implements MultiRobotTestInterface
 {
    private static final double DESIRED_EPSILON = 1.0E-10;

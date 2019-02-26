@@ -15,6 +15,7 @@ import us.ihmc.robotDataLogger.YoVariableClientInterface;
 import us.ihmc.robotDataLogger.YoVariablesUpdatedListener;
 import us.ihmc.robotDataLogger.handshake.LogHandshake;
 import us.ihmc.robotDataLogger.handshake.YoVariableHandshakeParser;
+import us.ihmc.robotDataLogger.websocket.command.DataServerCommand;
 import us.ihmc.yoVariables.listener.ParameterChangedListener;
 import us.ihmc.yoVariables.parameters.YoParameter;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
@@ -44,10 +45,6 @@ public class ParameterUpdateListener implements YoVariablesUpdatedListener
    {
    }
 
-   @Override
-   public void clearLog(String guid)
-   {
-   }
 
    public void exitActionPerformed()
    {
@@ -115,12 +112,6 @@ public class ParameterUpdateListener implements YoVariablesUpdatedListener
    @Override
    public void disconnected()
    {
-   }
-
-   @Override
-   public int getDisplayOneInNPackets()
-   {
-      return 0;
    }
 
    @Override
@@ -311,5 +302,11 @@ public class ParameterUpdateListener implements YoVariablesUpdatedListener
    private static String getUniqueName(YoParameter<?> yoParameter)
    {
       return yoParameter.getNameSpace() + "." + yoParameter.getName();
+   }
+
+   @Override
+   public void receivedCommand(DataServerCommand command, int argument)
+   {
+      
    }
 }

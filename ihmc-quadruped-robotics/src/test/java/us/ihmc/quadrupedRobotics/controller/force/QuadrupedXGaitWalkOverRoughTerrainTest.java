@@ -53,8 +53,10 @@ public abstract class QuadrupedXGaitWalkOverRoughTerrainTest implements Quadrupe
       double walkTime = 12.0;
       double walkingSpeed = 0.25;
       double minimumXPositionAfterWalking = 2.0;
+      // Lower a bit the robot so it doesn't fall off by too much, so the state estimator is not thrown off right from the beginning.
+      QuadrupedInitialOffsetAndYaw offsetAndYaw = new QuadrupedInitialOffsetAndYaw(0.0, 0.0, -0.04);
 
-      runWalkingOverTerrain(environment, walkTime, walkingSpeed, minimumXPositionAfterWalking, getXGaitSettings(), null, Double.NaN);
+      runWalkingOverTerrain(environment, walkTime, walkingSpeed, minimumXPositionAfterWalking, getXGaitSettings(), offsetAndYaw, Double.NaN);
    }
 
    public void testWalkingOverSingleStepUp(double desiredBodyHeight) throws IOException

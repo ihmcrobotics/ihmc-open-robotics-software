@@ -27,7 +27,7 @@ public class ValkyrieFootstepPlannerParameters implements FootstepPlannerParamet
    @Override
    public double getMaximumStepReach()
    {
-      return 0.35;
+      return 0.4;
    }
 
    @Override
@@ -69,7 +69,7 @@ public class ValkyrieFootstepPlannerParameters implements FootstepPlannerParamet
    @Override
    public double getBodyBoxBaseX()
    {
-      return 0.0;
+      return 0.03;
    }
 
    @Override
@@ -123,19 +123,13 @@ public class ValkyrieFootstepPlannerParameters implements FootstepPlannerParamet
    @Override
    public double getWiggleInsideDelta()
    {
-      return 0.01;
+      return 0.03;
    }
 
    @Override
    public boolean getWiggleIntoConvexHullOfPlanarRegions()
    {
       return true;
-   }
-
-   @Override
-   public double getStepTranslationBoundingBoxScaleFactor()
-   {
-      return 0.65;
    }
 
    @Override
@@ -160,5 +154,29 @@ public class ValkyrieFootstepPlannerParameters implements FootstepPlannerParamet
    public FootstepProcessingParameters getFootstepProcessingParameters()
    {
       return new ValkyrieFootstepProcessingParameters();
+   }
+
+   @Override
+   public double getMaximumStepZWhenSteppingUp()
+   {
+      return 0.05;
+   }
+
+   @Override
+   public double getMaximumStepReachWhenSteppingUp()
+   {
+      return 0.32;
+   }
+
+   @Override
+   public double getMaximumStepZWhenForwardAndDown()
+   {
+      return 0.05;
+   }
+
+   @Override
+   public double getMaximumStepXWhenForwardAndDown()
+   {
+      return 0.23;
    }
 }

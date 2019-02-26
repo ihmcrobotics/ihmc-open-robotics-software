@@ -1,6 +1,8 @@
 package us.ihmc.avatar.controllerAPI;
 
-import static us.ihmc.robotics.Assert.*;
+import static us.ihmc.robotics.Assert.assertArrayEquals;
+import static us.ihmc.robotics.Assert.assertEquals;
+import static us.ihmc.robotics.Assert.assertTrue;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -8,6 +10,7 @@ import java.util.Random;
 
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import controller_msgs.msg.dds.ArmTrajectoryMessage;
@@ -23,8 +26,6 @@ import us.ihmc.commonWalkingControlModules.controlModules.rigidBody.RigidBodyTas
 import us.ihmc.commons.RandomNumbers;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.communication.packets.ExecutionMode;
-import org.junit.jupiter.api.Tag;
-import org.junit.jupiter.api.Disabled;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
@@ -46,6 +47,7 @@ import us.ihmc.yoVariables.variable.YoEnum;
 import us.ihmc.yoVariables.variable.YoInteger;
 import us.ihmc.yoVariables.variable.YoVariable;
 
+@Tag("controller-api-4")
 public abstract class EndToEndArmTrajectoryMessageTest implements MultiRobotTestInterface
 {
    private static boolean DEBUG = false;
@@ -191,6 +193,7 @@ public abstract class EndToEndArmTrajectoryMessageTest implements MultiRobotTest
    @Test
    public void testMessageWithTooManyTrajectoryPoints() throws Exception
    {
+      simulationTestingParameters.setRunMultiThreaded(false);
       BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
 
       drcSimulationTestHelper = new DRCSimulationTestHelper(simulationTestingParameters, getRobotModel());

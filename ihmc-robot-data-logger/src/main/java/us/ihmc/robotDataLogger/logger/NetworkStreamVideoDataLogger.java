@@ -24,6 +24,9 @@ public class NetworkStreamVideoDataLogger extends VideoDataLoggerInterface imple
    private int dts = 0;
    
    private volatile long timestamp = 0;
+
+   private volatile long lastFrameTimestamp = 0;
+
    
    public NetworkStreamVideoDataLogger(File logPath, LogProperties logProperties, int domainId, String topicName) throws IOException
    {
@@ -112,6 +115,8 @@ public class NetworkStreamVideoDataLogger extends VideoDataLoggerInterface imple
             buffer.clear();
             
             dts = 0;
+            
+            lastFrameTimestamp = System.nanoTime();
          }
          catch (IOException e)
          {
@@ -132,6 +137,12 @@ public class NetworkStreamVideoDataLogger extends VideoDataLoggerInterface imple
          // TODO Auto-generated catch block
          e.printStackTrace();
       }
+   }
+
+   @Override
+   public long getLastFrameReceivedTimestamp()
+   {
+      return lastFrameTimestamp;
    }
 
 }

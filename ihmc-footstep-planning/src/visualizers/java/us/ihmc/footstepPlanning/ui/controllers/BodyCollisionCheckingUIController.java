@@ -19,10 +19,9 @@ public class BodyCollisionCheckingUIController
    private CheckBox enableBodyCollisionChecking;
 
    @FXML
-   private Spinner<Double> bodyWidth;
-   @FXML
    private Spinner<Double> bodyDepth;
-
+   @FXML
+   private Spinner<Double> bodyWidth;
    @FXML
    private Spinner<Double> bodyHeight;
 
@@ -32,9 +31,11 @@ public class BodyCollisionCheckingUIController
    private Spinner<Double> bodyBoxBaseY;
    @FXML
    private Spinner<Double> bodyBoxBaseZ;
-   @FXML
-   private Spinner<Double> stepBBScale;
 
+   @FXML
+   private Spinner<Double> maximum2dDistanceFromBoundingBoxToPenalize;
+   @FXML
+   private Spinner<Double> boundingBoxCost;
 
    public void attachMessager(JavaFXMessager messager)
    {
@@ -43,14 +44,16 @@ public class BodyCollisionCheckingUIController
 
    public void setupControls()
    {
-      bodyWidth.setValueFactory(new SpinnerValueFactory.DoubleSpinnerValueFactory(0.25, 1.5, 0.0, 0.05));
-      bodyDepth.setValueFactory(new SpinnerValueFactory.DoubleSpinnerValueFactory(0.25, 1.0, 0.0, 0.05));
-      bodyHeight.setValueFactory(new SpinnerValueFactory.DoubleSpinnerValueFactory(0.5, 2.0, 0.0, 0.1));
+      bodyWidth.setValueFactory(new SpinnerValueFactory.DoubleSpinnerValueFactory(0.0, 1.5, 0.0, 0.05));
+      bodyDepth.setValueFactory(new SpinnerValueFactory.DoubleSpinnerValueFactory(0.0, 1.0, 0.0, 0.05));
+      bodyHeight.setValueFactory(new SpinnerValueFactory.DoubleSpinnerValueFactory(0.0, 2.0, 0.0, 0.1));
 
-      bodyBoxBaseX.setValueFactory(new SpinnerValueFactory.DoubleSpinnerValueFactory(-0.5, 0.5, 0.0, 0.05));
-      bodyBoxBaseY.setValueFactory(new SpinnerValueFactory.DoubleSpinnerValueFactory(-0.5, 0.5, 0.0, 0.05));
+      bodyBoxBaseX.setValueFactory(new SpinnerValueFactory.DoubleSpinnerValueFactory(-1.0, 1.0, 0.0, 0.05));
+      bodyBoxBaseY.setValueFactory(new SpinnerValueFactory.DoubleSpinnerValueFactory(-1.0, 1.0, 0.0, 0.05));
       bodyBoxBaseZ.setValueFactory(new SpinnerValueFactory.DoubleSpinnerValueFactory(0.0, 1.5, 0.0, 0.1));
-      stepBBScale.setValueFactory(new DoubleSpinnerValueFactory(0.0, 1.0, 0.0, 0.1));
+
+      maximum2dDistanceFromBoundingBoxToPenalize.setValueFactory(new SpinnerValueFactory.DoubleSpinnerValueFactory(0.0, 1.0, 0.0, 0.05));
+      boundingBoxCost.setValueFactory(new SpinnerValueFactory.DoubleSpinnerValueFactory(0.0, 10000.0, 0.0, 10.0));
    }
 
    public void bindControls()
@@ -65,7 +68,8 @@ public class BodyCollisionCheckingUIController
       parametersProperty.bidirectionalBindBodyBoxBaseX(bodyBoxBaseX.getValueFactory().valueProperty());
       parametersProperty.bidirectionalBindBodyBoxBaseY(bodyBoxBaseY.getValueFactory().valueProperty());
       parametersProperty.bidirectionalBindBodyBoxBaseZ(bodyBoxBaseZ.getValueFactory().valueProperty());
-      parametersProperty.bidirectionalBindStepTranslationBoundingBoxScaleFactor(stepBBScale.getValueFactory().valueProperty());
+      parametersProperty.bidirectionalBindBoundingBoxCost(boundingBoxCost.getValueFactory().valueProperty());
+      parametersProperty.bidirectionalBindMaximum2dDistanceFromBoundingBoxToPenalize(maximum2dDistanceFromBoundingBoxToPenalize.getValueFactory().valueProperty());
 
       messager.bindBidirectional(FootstepPlannerMessagerAPI.PlannerParametersTopic, parametersProperty, createConverter(), true);
    }

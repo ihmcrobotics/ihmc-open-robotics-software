@@ -12,7 +12,7 @@ import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoVariable;
 
-@Tag("gui")
+@Tag("gui-slow")
 public class MidiSliderBoardTest
 {
    @BeforeEach

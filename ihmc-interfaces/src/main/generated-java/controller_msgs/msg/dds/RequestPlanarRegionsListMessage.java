@@ -7,8 +7,10 @@ import java.util.function.Supplier;
 import us.ihmc.pubsub.TopicDataType;
 
 /**
-       * This message is part of the IHMC robot environment awareness module.
+       * This message is obsolete and will be removed in the near future.
+       * This message is part of the IHMC robot environment awareness (REA) module.
        * Use this message to request new planar regions
+       * @deprecated REA always publishes planar regions when running. To request REA to clear its internal state, see REAStateRequestMessage.
        */
 public class RequestPlanarRegionsListMessage extends Packet<RequestPlanarRegionsListMessage> implements Settable<RequestPlanarRegionsListMessage>, EpsilonComparable<RequestPlanarRegionsListMessage>
 {

@@ -72,6 +72,7 @@ import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoEnum;
 import us.ihmc.yoVariables.variable.YoFrameConvexPolygon2D;
 
+@Tag("humanoid-behaviors")
 public abstract class HumanoidBehaviorDispatcherTest implements MultiRobotTestInterface
 {
    private static final SimulationTestingParameters simulationTestingParameters = SimulationTestingParameters.createFromSystemProperties();

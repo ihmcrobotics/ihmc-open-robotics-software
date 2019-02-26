@@ -10,13 +10,11 @@ import com.google.common.util.concurrent.AtomicDouble;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 
-import org.junit.jupiter.api.Tag;
-import org.junit.jupiter.api.Disabled;
-import us.ihmc.commons.ContinuousIntegrationTools;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.tools.ReferenceFrameTools;
 import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.footstepPlanning.graphSearch.graph.LatticeNode;
 import us.ihmc.footstepPlanning.graphSearch.parameters.DefaultFootstepPlannerCostParameters;
 import us.ihmc.footstepPlanning.graphSearch.parameters.DefaultFootstepPlanningParameters;
 import us.ihmc.footstepPlanning.FootstepPlan;
@@ -116,8 +114,8 @@ public class AStarPlanarRegionsPlannerTest
    @Test
    public void testFootstepNode()
    {
-      double gridX = FootstepNode.gridSizeXY;
-      double gridY = FootstepNode.gridSizeXY;
+      double gridX = LatticeNode.gridSizeXY;
+      double gridY = LatticeNode.gridSizeXY;
       FootstepNode node;
 
       node = new FootstepNode(gridX * 0.3, 0.0);
@@ -247,7 +245,7 @@ public class AStarPlanarRegionsPlannerTest
          lastStep.getSoleFramePose(achievedGoalPose);
 
          goalPose.setY(-parameters.getIdealFootstepWidth() / 2.0);
-         assertTrue(goalPose.epsilonEquals(achievedGoalPose, FootstepNode.gridSizeXY));
+         assertTrue(goalPose.epsilonEquals(achievedGoalPose, LatticeNode.gridSizeXY));
 
          heuristicCost.set(5.0);
 

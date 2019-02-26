@@ -1,6 +1,6 @@
 plugins {
-   id("us.ihmc.ihmc-build") version "0.15.5"
-   id("us.ihmc.ihmc-ci") version "4.7"
+   id("us.ihmc.ihmc-build") version "0.15.6"
+   id("us.ihmc.ihmc-ci") version "4.23"
    id("us.ihmc.log-tools") version "0.2.2"
 }
 
@@ -15,7 +15,7 @@ mainDependencies {
    compile group: "com.martiansoftware", name: "jsap", version: "2.1"
    compile group: "org.apache.commons", name: "commons-lang3", version: "3.8.1"
    compile group: "org.apache.poi", name: "poi", version: "3.15" // I/O library for xls files.
-   compile group: "us.ihmc.thirdparty.jinput", name: "jinput", version: "180727"
+   compile group: "us.ihmc.thirdparty.jinput", name: "jinput", version: "190214"
    compile group: "org.ros.rosjava_core", name: "rosjava", version: "0.2.1"
    compile group: "org.ros.rosjava_bootstrap", name: "message_generation", version: "0.2.1"
    compile group: "org.ejml", name: "core", version: "0.30"
@@ -31,11 +31,10 @@ mainDependencies {
    compile group: "com.github.wendykierp", name: "JTransforms", version: "3.1"
    compile group: "org.reflections", name: "reflections", version: "0.9.10"
 
-   compile group: "us.ihmc", name: "IHMCRealtime", version: "1.1.8"
    compile group: "us.ihmc", name: "euclid", version: "0.11.0"
    compile group: "us.ihmc", name: "ihmc-yovariables", version: "0.3.7"
-   compile group: "us.ihmc", name: "ihmc-commons", version: "0.25.0"
-   compile group: "us.ihmc", name: "ihmc-jmonkey-engine-toolkit", version: "0.12.5"
+   compile group: "us.ihmc", name: "ihmc-commons", version: "0.25.4"
+   compile group: "us.ihmc", name: "ihmc-jmonkey-engine-toolkit", version: "0.12.6"
    compile group: "us.ihmc", name: "simulation-construction-set", version: "0.12.9"
    compile group: "us.ihmc", name: "ihmc-graphics-description", version: "0.12.9"
    compile group: "us.ihmc", name: "robot-environment-awareness", version: "source"
@@ -65,7 +64,7 @@ mainDependencies {
 
 testDependencies {
 
-   compile group: "us.ihmc", name: "ihmc-commons-testing", version: "0.25.0"
+   compile group: "us.ihmc", name: "ihmc-commons-testing", version: "0.25.4"
    compile group: "us.ihmc", name: "ihmc-robotics-toolkit-test", version: "source"
    compile group: "us.ihmc", name: "ihmc-footstep-planning-test", version: "source"
    compile group: "us.ihmc", name: "ihmc-humanoid-robotics-test", version: "source"

@@ -26,7 +26,6 @@ import us.ihmc.robotDataLogger.YoType;
 import us.ihmc.robotDataLogger.YoVariableDefinition;
 import us.ihmc.robotDataLogger.dataBuffers.RegistrySendBufferBuilder;
 import us.ihmc.robotDataLogger.jointState.JointHolder;
-import us.ihmc.robotics.graphics.RoboticsRemoteYoGraphicFactory;
 import us.ihmc.yoVariables.parameters.ParameterLoadStatus;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoEnum;
@@ -66,9 +65,13 @@ public class YoVariableHandShakeBuilder
                {
                   throw new RuntimeException("The number of YoGraphics exceeds the maximum amount for the logger (" + handshake.getGraphicObjects().capacity() + ")");
                }
-               GraphicObjectMessage msg = handshake.getGraphicObjects().add();
-               msg.setListName(yoGraphicsList.getLabel());
-               messageFromDynamicGraphicObject((RemoteYoGraphic) yoGraphic, msg);
+               
+               if(verifyDynamicGraphicObject((RemoteYoGraphic) yoGraphic))
+               {
+                  GraphicObjectMessage msg = handshake.getGraphicObjects().add();
+                  msg.setListName(yoGraphicsList.getLabel());
+                  messageFromDynamicGraphicObject((RemoteYoGraphic) yoGraphic, msg);
+               }
 
             }
             else
@@ -92,8 +95,12 @@ public class YoVariableHandShakeBuilder
                {
                   throw new RuntimeException("The number of Artifacts exceeds the maximum amount for the logger (" + handshake.getArtifacts().capacity() + ")");
                }
-               GraphicObjectMessage msg = handshake.getArtifacts().add();
-               messageFromDynamicGraphicObject((RemoteYoGraphic) artifact, msg);
+               
+               if(verifyDynamicGraphicObject((RemoteYoGraphic) artifact))
+               {
+                  GraphicObjectMessage msg = handshake.getArtifacts().add();
+                  messageFromDynamicGraphicObject((RemoteYoGraphic) artifact, msg);
+               }
             }
             else
             {
@@ -313,6 +320,21 @@ public class YoVariableHandShakeBuilder
       }
 
    }
+   
+   private boolean verifyDynamicGraphicObject(RemoteYoGraphic obj)
+   {
+      for (YoVariable<?> yoVar : obj.getVariables())
+      {
+         if (!this.yoVariableIndices.containsKey(yoVar))
+         {
+            System.err.println("Backing YoVariableRegistry not added for " + obj.getName() + ", variable: " + yoVar + ". Disabling visualizer for " + obj.getName());
+            return false;
+         }
+      }
+      
+      return true;
+   }
+   
 
    private void messageFromDynamicGraphicObject(RemoteYoGraphic obj, GraphicObjectMessage objectMessage)
    {
