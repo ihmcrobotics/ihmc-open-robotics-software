@@ -121,7 +121,7 @@ public class PoseReferenceFrame extends ReferenceFrame
       update();
    }
 
-   public void setOrientationAndUpdate(FrameQuaternionReadOnly frameOrientation)
+   public void setOrientationAndUpdate(FrameOrientation3DReadOnly frameOrientation)
    {
       frameOrientation.checkReferenceFrameMatch(getParent());
       originPose.setOrientation(frameOrientation);

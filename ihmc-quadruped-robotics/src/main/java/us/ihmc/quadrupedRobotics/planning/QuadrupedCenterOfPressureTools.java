@@ -5,6 +5,8 @@ import org.apache.commons.lang3.mutable.MutableDouble;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FixedFramePoint3DBasics;
+import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
+import us.ihmc.quadrupedRobotics.estimator.PitchEstimator;
 import us.ihmc.robotics.robotSide.QuadrantDependentList;
 import us.ihmc.robotics.robotSide.RobotQuadrant;
 
@@ -76,6 +78,66 @@ public class QuadrupedCenterOfPressureTools
       {
          double pressure = contactPressure.get(robotQuadrant).doubleValue();
          pressure /= Math.max(numberOfEndsInContact, 1.0);
+         pressure /= Math.max((robotQuadrant.isQuadrantInFront() ? numberOfFrontFeetInContact : numberOfHindFeetInContact), 1.0);
+         contactPressure.get(robotQuadrant).setValue(pressure);
+      }
+   }
+
+   /**
+    * Compute nominal pressure distribution for a given contact state.
+    * @param contactPressure nominal vertical ground reaction forces for each quadrant
+    * @param contactState contact state for each quadrant
+    */
+   public static void computeNominalNormalizedContactPressure(QuadrantDependentList<MutableDouble> contactPressure,
+                                                              QuadrantDependentList<ContactState> contactState,
+                                                              QuadrantDependentList<? extends Point3DReadOnly> contactPositions,
+                                                              WeightDistributionCalculator weightDistributionCalculator)
+   {
+      double nominalPitch = PitchEstimator.computeGroundPitchFromContacts(contactPositions);
+
+      // If +1.0, all the weight on the front. If -1.0, all the weight on the back
+      double forwardFraction = weightDistributionCalculator.getFractionOfWeightForward(nominalPitch);
+
+      // Compute vertical force distribution assuming equal loading of hind and front ends.
+      int numberOfHindFeetInContact = 0;
+      int numberOfFrontFeetInContact = 0;
+      for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
+      {
+         if (contactState.get(robotQuadrant) == ContactState.IN_CONTACT)
+         {
+            if (robotQuadrant.isQuadrantInFront())
+            {
+               numberOfFrontFeetInContact++;
+            }
+            else
+            {
+               numberOfHindFeetInContact++;
+            }
+            contactPressure.get(robotQuadrant).setValue(1.0);
+         }
+         else
+         {
+            contactPressure.get(robotQuadrant).setValue(0.0);
+         }
+      }
+
+      double forwardWeightDistribution = 1.0;
+      double rearWeightDistribution = 1.0;
+      if ((numberOfHindFeetInContact > 0) ^ (numberOfFrontFeetInContact > 0))
+      {
+         forwardWeightDistribution = 1.0;
+         rearWeightDistribution = 1.0;
+      }
+      if ((numberOfHindFeetInContact > 0) && (numberOfFrontFeetInContact > 0))
+      {
+         forwardWeightDistribution = 0.5 * forwardFraction + 0.5;
+         rearWeightDistribution = 1.0 - forwardWeightDistribution;
+      }
+
+      for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
+      {
+         double pressure = contactPressure.get(robotQuadrant).doubleValue();
+         pressure *= robotQuadrant.isQuadrantInFront() ? forwardWeightDistribution : rearWeightDistribution;
          pressure /= Math.max((robotQuadrant.isQuadrantInFront() ? numberOfFrontFeetInContact : numberOfHindFeetInContact), 1.0);
          contactPressure.get(robotQuadrant).setValue(pressure);
       }
