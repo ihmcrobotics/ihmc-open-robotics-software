@@ -13,6 +13,7 @@ import us.ihmc.mecano.frames.MovingReferenceFrame;
 import us.ihmc.quadrupedBasics.gait.QuadrupedTimedStep;
 import us.ihmc.robotics.robotSide.QuadrantDependentList;
 import us.ihmc.robotics.robotSide.RobotQuadrant;
+import us.ihmc.robotics.time.TimeIntervalTools;
 import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.SimulationConstructionSetParameters;
@@ -39,7 +40,7 @@ public class QuadrupedCoMTrajectoryPlannerVisualizer
    private static final double stepLength = 0.5;
    private static final int numberOfSteps = 3;
 
-   private static final boolean doTrot = true;
+   private static final boolean doTrot = false;
 
    private static final double simDt = 1e-3;
 
@@ -254,6 +255,10 @@ public class QuadrupedCoMTrajectoryPlannerVisualizer
       feetInContact.clear();
       for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
          feetInContact.add(robotQuadrant);
+
+      List<QuadrupedTimedStep> finishedSteps = TimeIntervalTools.removeAndReturnEndTimesLessThan(currentTime, steps);
+      if (finishedSteps.size() > 0)
+         planner.setInitialCenterOfMassState(desiredCoMPosition, desiredCoMVelocity);
 
       for (int i = 0; i < steps.size(); i++)
       {
