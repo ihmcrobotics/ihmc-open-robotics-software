@@ -33,6 +33,7 @@ public class QuadrupedCoMTrajectoryPlannerVisualizer
    private static final double gravity = 9.81;
    private static final double nominalHeight = 0.75;
 
+   private static final double finalExtraTime = 1.5;
 
    private static final double initialTransferTime = 1.0;
    private static final double stepDuration = 0.4;
@@ -107,7 +108,7 @@ public class QuadrupedCoMTrajectoryPlannerVisualizer
       planner = new QuadrupedCoMTrajectoryPlanner(soleFrames, yoTime, omega, gravity, nominalHeight, registry, yoGraphicsListRegistry);
       steps = createSteps(soleFrames);
 
-      simDuration = steps.get(steps.size() - 1).getTimeInterval().getEndTime() + 5.0;
+      simDuration = steps.get(steps.size() - 1).getTimeInterval().getEndTime() + finalExtraTime;
 
 
       SimulationConstructionSetParameters scsParameters = new SimulationConstructionSetParameters(true, BUFFER_SIZE);
