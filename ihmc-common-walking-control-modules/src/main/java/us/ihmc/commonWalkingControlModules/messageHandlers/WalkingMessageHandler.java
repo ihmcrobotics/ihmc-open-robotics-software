@@ -1021,7 +1021,7 @@ public class WalkingMessageHandler
             List<FramePoint3D> positionWaypoints = footstep.getCustomPositionWaypoints();
             for (int j = 0; j < positionWaypoints.size(); j++)
             {
-               FramePoint3DReadOnly position = positionWaypoints.get(i);
+               FramePoint3DReadOnly position = positionWaypoints.get(j);
                if (!checkPositionIsValid(position, tempStepOrigin, stepPosition, maxSwingDistance))
                {
                   return false;
