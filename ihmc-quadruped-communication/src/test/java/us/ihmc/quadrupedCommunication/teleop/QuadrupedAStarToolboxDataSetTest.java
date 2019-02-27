@@ -1,7 +1,8 @@
-package us.ihmc.quadrupedFootstepPlanning.footstepPlanning;
+package us.ihmc.quadrupedCommunication.teleop;
 
 import org.junit.jupiter.api.Test;
 import us.ihmc.commons.thread.ThreadTools;
+import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.FootstepPlannerType;
 import us.ihmc.quadrupedPlanning.QuadrupedXGaitSettings;
 import us.ihmc.quadrupedPlanning.QuadrupedXGaitSettingsReadOnly;
 
