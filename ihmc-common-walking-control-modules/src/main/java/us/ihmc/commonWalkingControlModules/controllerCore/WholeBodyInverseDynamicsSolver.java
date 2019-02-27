@@ -36,7 +36,6 @@ import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
 import us.ihmc.humanoidRobotics.model.CenterOfPressureDataHolder;
 import us.ihmc.mecano.algorithms.InverseDynamicsCalculator;
-import us.ihmc.mecano.algorithms.interfaces.RigidBodyAccelerationProvider;
 import us.ihmc.mecano.multiBodySystem.interfaces.FloatingJointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.JointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
@@ -72,7 +71,6 @@ public class WholeBodyInverseDynamicsSolver
    private final PlaneContactWrenchProcessor planeContactWrenchProcessor;
    private final WrenchVisualizer wrenchVisualizer;
    private final JointAccelerationIntegrationCalculator jointAccelerationIntegrationCalculator;
-   private final RigidBodyAccelerationProvider rigidBodyAccelerationProvider;
 
    private final OneDoFJointBasics[] controlledOneDoFJoints;
    private final JointBasics[] jointsToOptimizeFor;
@@ -103,7 +101,6 @@ public class WholeBodyInverseDynamicsSolver
       WrenchMatrixCalculator wrenchMatrixCalculator = toolbox.getWrenchMatrixCalculator();
       dynamicsMatrixCalculator = new DynamicsMatrixCalculator(toolbox, wrenchMatrixCalculator);
       optimizationControlModule = new InverseDynamicsOptimizationControlModule(toolbox, dynamicsMatrixCalculator, registry);
-      rigidBodyAccelerationProvider = toolbox.getRigidBodyAccelerationProvider();
 
       JointIndexHandler jointIndexHandler = toolbox.getJointIndexHandler();
       jointsToOptimizeFor = jointIndexHandler.getIndexedJoints();

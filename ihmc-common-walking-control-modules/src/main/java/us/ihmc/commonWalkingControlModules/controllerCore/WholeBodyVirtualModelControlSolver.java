@@ -1,13 +1,9 @@
 package us.ihmc.commonWalkingControlModules.controllerCore;
 
-import static us.ihmc.humanoidRobotics.footstep.FootstepUtils.worldFrame;
-
 import java.util.List;
 import java.util.Map;
 
 import org.ejml.data.DenseMatrix64F;
-
-import org.ejml.ops.CommonOps;
 
 import us.ihmc.commonWalkingControlModules.controllerCore.command.OptimizationSettingsCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.ExternalWrenchCommand;
@@ -57,6 +53,8 @@ import us.ihmc.yoVariables.variable.YoFrameVector3D;
 
 public class WholeBodyVirtualModelControlSolver
 {
+   private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
+
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
 
    private final VirtualModelControlOptimizationControlModule optimizationControlModule;

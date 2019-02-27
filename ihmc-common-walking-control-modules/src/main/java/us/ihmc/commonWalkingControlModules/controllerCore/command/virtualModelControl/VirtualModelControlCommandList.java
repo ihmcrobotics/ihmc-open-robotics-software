@@ -1,12 +1,11 @@
 package us.ihmc.commonWalkingControlModules.controllerCore.command.virtualModelControl;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import us.ihmc.commonWalkingControlModules.controllerCore.WholeBodyVirtualModelControlSolver;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.ControllerCoreCommandType;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.FeedbackControlCommand;
-import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.InverseDynamicsCommand;
-
-import java.util.ArrayList;
-import java.util.List;
 
 /**
  * A {@link VirtualModelControlCommandList} gathers several commands to be submitted to the controller
