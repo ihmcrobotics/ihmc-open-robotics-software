@@ -5,20 +5,20 @@ import javafx.fxml.FXMLLoader;
 import javafx.scene.AmbientLight;
 import javafx.scene.Node;
 import javafx.scene.Scene;
+import javafx.scene.SubScene;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.Pane;
 import javafx.scene.paint.Color;
-import javafx.scene.shape.Sphere;
 import javafx.stage.Stage;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParameters;
+import us.ihmc.humanoidBehaviors.ui.behaviors.PatrolBehaviorUIController;
+import us.ihmc.humanoidBehaviors.ui.editors.OrientationYawEditor;
+import us.ihmc.humanoidBehaviors.ui.editors.SnappedPositionEditor;
+import us.ihmc.humanoidBehaviors.ui.graphics.PlanarRegionsGraphic;
+import us.ihmc.humanoidBehaviors.ui.model.FXUIEditor;
 import us.ihmc.humanoidBehaviors.ui.model.FXUIMessagerAPIFactory;
 import us.ihmc.humanoidBehaviors.ui.model.FXUIStateMachine;
-import us.ihmc.humanoidBehaviors.ui.behaviors.PatrolBehaviorUIController;
-import us.ihmc.humanoidBehaviors.ui.model.FXUIEditor;
-import us.ihmc.humanoidBehaviors.ui.editors.SnappedPositionEditor;
-import us.ihmc.humanoidBehaviors.ui.model.FXUIGraphic;
-import us.ihmc.humanoidBehaviors.ui.graphics.PlanarRegionsGraphic;
 import us.ihmc.javaFXToolkit.messager.JavaFXMessager;
 import us.ihmc.javaFXToolkit.scenes.View3DFactory;
 import us.ihmc.javaFXVisualizers.JavaFXRobotVisualizer;
@@ -41,6 +41,7 @@ public class BehaviorUI
 
    // Editors
    public static SnappedPositionEditor SNAPPED_POSITION_EDITOR;
+   public static OrientationYawEditor ORIENTATION_EDITOR;
 
    private final PlanarRegionsGraphic planarRegionsGraphic;
    private final JavaFXRobotVisualizer robotVisualizer;
@@ -58,8 +59,6 @@ public class BehaviorUI
 
       mainPane = loader.load();
 
-      patrolBehaviorUIController.init(messager);
-
       View3DFactory view3dFactory = View3DFactory.createSubscene();
       view3dFactory.addCameraController(true);
       view3dFactory.addWorldCoordinateSystem(0.3);
@@ -76,10 +75,14 @@ public class BehaviorUI
          view3dFactory.addPointLight(-pointDistance, -pointDistance, pointDistance, indoorColor);
          view3dFactory.addPointLight(pointDistance, -pointDistance, pointDistance, indoorColor);
       }
-      Pane subScene = view3dFactory.getSubSceneWrappedInsidePane();
+      SubScene subScene = view3dFactory.getSubScene();
+      Pane subSceneWrappedInsidePane = view3dFactory.getSubSceneWrappedInsidePane();
+
+      patrolBehaviorUIController.init(messager, subScene);
 
       planarRegionsGraphic = new PlanarRegionsGraphic(messager);
       SNAPPED_POSITION_EDITOR = new SnappedPositionEditor(messager, subScene);
+      ORIENTATION_EDITOR = new OrientationYawEditor(messager, subScene);
 
       view3dFactory.addNodeToView(planarRegionsGraphic.getRoot());
       view3dFactory.addNodeToView(patrolBehaviorUIController.getRoot());
@@ -97,11 +100,12 @@ public class BehaviorUI
       }
 
       SNAPPED_POSITION_EDITOR.start();
+      ORIENTATION_EDITOR.start();
 
       planarRegionsGraphic.start();
       patrolBehaviorUIController.start();
 
-      mainPane.setCenter(subScene);
+      mainPane.setCenter(subSceneWrappedInsidePane);
       primaryStage.setTitle(getClass().getSimpleName());
       primaryStage.setMaximized(false);
       Scene mainScene = new Scene(mainPane, 1200, 800);
@@ -118,6 +122,7 @@ public class BehaviorUI
    public void stop()
    {
       SNAPPED_POSITION_EDITOR.stop();
+      ORIENTATION_EDITOR.stop();
 
       planarRegionsGraphic.stop();
       patrolBehaviorUIController.stop();

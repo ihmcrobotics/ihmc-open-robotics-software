@@ -9,6 +9,7 @@ import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.RobotTarget;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.humanoidBehaviors.ui.BehaviorUI;
+import us.ihmc.humanoidBehaviors.ui.editors.OrientationYawEditor;
 import us.ihmc.humanoidBehaviors.ui.editors.SnappedPositionEditor;
 import us.ihmc.javaFXToolkit.messager.SharedMemoryJavaFXMessager;
 import us.ihmc.messager.MessagerAPIFactory;
@@ -31,6 +32,7 @@ public class AtlasBehaviorUI extends Application
       apiFactory.createRootCategory(getClass().getSimpleName());
       apiFactory.includeMessagerAPIs(BehaviorUI.API.create());
       apiFactory.includeMessagerAPIs(SnappedPositionEditor.API.create());
+      apiFactory.includeMessagerAPIs(OrientationYawEditor.API.create());
       messager = new SharedMemoryJavaFXMessager(apiFactory.getAPIAndCloseFactory());
 
       messager.startMessager();

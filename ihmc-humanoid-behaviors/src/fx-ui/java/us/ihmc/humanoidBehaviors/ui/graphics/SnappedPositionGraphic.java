@@ -22,6 +22,8 @@ public class SnappedPositionGraphic extends FXUIGraphic
 
    public SnappedPositionGraphic(Messager messager, Color color)
    {
+      super(messager);
+
       sphere = new Sphere(0.05);
       material = new PhongMaterial(color);
       sphere.setMaterial(material);
