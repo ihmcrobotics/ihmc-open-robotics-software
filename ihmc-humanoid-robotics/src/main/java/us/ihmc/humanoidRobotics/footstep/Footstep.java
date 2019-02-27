@@ -2,6 +2,7 @@ package us.ihmc.humanoidRobotics.footstep;
 
 import java.util.List;
 
+import org.apache.commons.lang3.mutable.MutableDouble;
 import us.ihmc.commons.MathTools;
 import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.euclid.interfaces.Settable;
@@ -41,6 +42,7 @@ public class Footstep implements Settable<Footstep>
    private final FramePose3D footstepPose = new FramePose3D();
 
    private final RecyclingArrayList<Point2D> predictedContactPoints = new RecyclingArrayList<>(6, Point2D.class);
+   private final RecyclingArrayList<MutableDouble> customWaypointProportions = new RecyclingArrayList<>(2, MutableDouble.class);
    private final RecyclingArrayList<FramePoint3D> customPositionWaypoints = new RecyclingArrayList<>(2, FramePoint3D.class);
    private final RecyclingArrayList<FrameSE3TrajectoryPoint> swingTrajectory = new RecyclingArrayList<>(maxNumberOfSwingWaypoints,
                                                                                                         FrameSE3TrajectoryPoint.class);
@@ -60,6 +62,7 @@ public class Footstep implements Settable<Footstep>
       predictedContactPoints.clear();
       customPositionWaypoints.clear();
       swingTrajectory.clear();
+      customWaypointProportions.clear();
    }
 
    public Footstep(RobotSide robotSide, FramePose3D footstepPose, boolean trustHeight)
@@ -129,6 +132,12 @@ public class Footstep implements Settable<Footstep>
          this.predictedContactPoints.add().set(other.predictedContactPoints.get(i));
       }
 
+      this.customWaypointProportions.clear();
+      for (int i = 0; i < other.customWaypointProportions.size(); i++)
+      {
+         this.customWaypointProportions.add().setValue(other.customWaypointProportions.get(i));
+      }
+
       this.customPositionWaypoints.clear();
       for (int i = 0; i < other.customPositionWaypoints.size(); i++)
       {
@@ -166,6 +175,16 @@ public class Footstep implements Settable<Footstep>
          }
       }
 
+      this.customWaypointProportions.clear();
+      RecyclingArrayList<MutableDouble> commandWaypointProportions = command.getCustomWaypointProportions();
+      if(commandWaypointProportions != null)
+      {
+         for (int i = 0; i < commandWaypointProportions.size(); i++)
+         {
+            this.customWaypointProportions.add().setValue(commandWaypointProportions.get(i));
+         }
+      }
+
       this.customPositionWaypoints.clear();
       RecyclingArrayList<FramePoint3D> commandCustomPositionWaypoints = command.getCustomPositionWaypoints();
       if (commandCustomPositionWaypoints != null)
@@ -196,6 +215,7 @@ public class Footstep implements Settable<Footstep>
       footstepType = FootstepType.FULL_FOOTSTEP;
       footstepPose.setToZero(ReferenceFrame.getWorldFrame());
       predictedContactPoints.clear();
+      customWaypointProportions.clear();
       customPositionWaypoints.clear();
       swingTrajectory.clear();
       swingTrajectoryBlendDuration = 0.0;
@@ -214,6 +234,11 @@ public class Footstep implements Settable<Footstep>
    public void setTrajectoryType(TrajectoryType trajectoryType)
    {
       this.trajectoryType = trajectoryType;
+   }
+
+   public RecyclingArrayList<MutableDouble> getCustomWaypointProportions()
+   {
+      return customWaypointProportions;
    }
 
    public List<FramePoint3D> getCustomPositionWaypoints()
