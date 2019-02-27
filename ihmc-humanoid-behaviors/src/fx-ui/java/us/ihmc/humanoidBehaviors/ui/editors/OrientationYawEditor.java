@@ -11,7 +11,9 @@ import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.humanoidBehaviors.ui.BehaviorUI;
 import us.ihmc.humanoidBehaviors.ui.model.*;
+import us.ihmc.humanoidBehaviors.ui.model.interfaces.OrientationEditable;
 import us.ihmc.humanoidBehaviors.ui.references.NotificationReference;
+import us.ihmc.humanoidBehaviors.ui.references.OverTypedReference;
 import us.ihmc.humanoidBehaviors.ui.references.QueueReference;
 import us.ihmc.log.LogTools;
 import us.ihmc.messager.Messager;
@@ -25,6 +27,7 @@ public class OrientationYawEditor extends FXUIEditor
    private final NotificationReference mouseRightClicked = new NotificationReference();
 
    private final FXUIStateMachine orientationEditorStateMachine;
+   private final OverTypedReference<OrientationEditable> selectedGraphicReference;
 
    public OrientationYawEditor(Messager messager, SubScene sceneNode)
    {
@@ -46,6 +49,8 @@ public class OrientationYawEditor extends FXUIEditor
             }
          }
       };
+
+      selectedGraphicReference = new OverTypedReference<>(messager.createInput(BehaviorUI.API.SelectedGraphic));
    }
 
    public void activate()
@@ -64,6 +69,7 @@ public class OrientationYawEditor extends FXUIEditor
             LogTools.debug("Orientation editor activated");
             subScene.addEventHandler(MouseEvent.MOUSE_MOVED, mouseMoved);
             subScene.addEventHandler(MouseEvent.MOUSE_CLICKED, mouseClicked);
+            selectedGraphicReference.get().setMouseTransparent(true);
          }
 
          mouseMovedOrientation.poll();
@@ -71,30 +77,34 @@ public class OrientationYawEditor extends FXUIEditor
 
          if (mouseClickedOrientation.hasNext())  // use the clicked position if clicked
          {
-            messager.submitMessage(OrientationYawEditor.API.SelectedOrientation, mouseClickedOrientation.read());
+            selectedGraphicReference.get().setOrientation(mouseClickedOrientation.read());
          }
          else if (mouseMovedOrientation.hasNext())  // just for selection preview
          {
-            messager.submitMessage(OrientationYawEditor.API.SelectedOrientation, mouseMovedOrientation.read());
+            selectedGraphicReference.get().setOrientation(mouseMovedOrientation.read());
          }
 
          if (mouseClickedOrientation.hasNext())
          {
             LogTools.debug("Selected orientation is validated: {}", mouseClickedOrientation.read());
+            deactivate();
             activeStateMachine.get().transition(now, FXUIStateTransition.ORIENTATION_LEFT_CLICK);
          }
 
          if (mouseRightClicked.poll())
          {
+            deactivate();
             activeStateMachine.get().transition(now, FXUIStateTransition.RIGHT_CLICK);
          }
       }
-      else if (activeEditor.activationChanged())
-      {
-         LogTools.debug("Orientation editor deactivated.");
-         subScene.removeEventHandler(MouseEvent.MOUSE_MOVED, mouseMoved);
-         subScene.removeEventHandler(MouseEvent.MOUSE_CLICKED, mouseClicked);
-      }
+   }
+
+   private void deactivate()
+   {
+      LogTools.debug("Orientation editor deactivated.");
+      subScene.removeEventHandler(MouseEvent.MOUSE_MOVED, mouseMoved);
+      subScene.removeEventHandler(MouseEvent.MOUSE_CLICKED, mouseClicked);
+      selectedGraphicReference.get().setMouseTransparent(false);
    }
 
    @Override

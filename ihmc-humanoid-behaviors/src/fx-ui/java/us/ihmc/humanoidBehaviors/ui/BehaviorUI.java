@@ -3,7 +3,6 @@ package us.ihmc.humanoidBehaviors.ui;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.AmbientLight;
-import javafx.scene.Node;
 import javafx.scene.Scene;
 import javafx.scene.SubScene;
 import javafx.scene.layout.BorderPane;
@@ -19,6 +18,7 @@ import us.ihmc.humanoidBehaviors.ui.graphics.PlanarRegionsGraphic;
 import us.ihmc.humanoidBehaviors.ui.model.FXUIEditor;
 import us.ihmc.humanoidBehaviors.ui.model.FXUIMessagerAPIFactory;
 import us.ihmc.humanoidBehaviors.ui.model.FXUIStateMachine;
+import us.ihmc.humanoidBehaviors.ui.model.interfaces.FXUIEditableGraphic;
 import us.ihmc.javaFXToolkit.messager.JavaFXMessager;
 import us.ihmc.javaFXToolkit.scenes.View3DFactory;
 import us.ihmc.javaFXVisualizers.JavaFXRobotVisualizer;
@@ -80,7 +80,7 @@ public class BehaviorUI
 
       patrolBehaviorUIController.init(messager, subScene);
 
-      planarRegionsGraphic = new PlanarRegionsGraphic(messager);
+      planarRegionsGraphic = new PlanarRegionsGraphic();
       SNAPPED_POSITION_EDITOR = new SnappedPositionEditor(messager, subScene);
       ORIENTATION_EDITOR = new OrientationYawEditor(messager, subScene);
 
@@ -102,9 +102,6 @@ public class BehaviorUI
       SNAPPED_POSITION_EDITOR.start();
       ORIENTATION_EDITOR.start();
 
-      planarRegionsGraphic.start();
-      patrolBehaviorUIController.start();
-
       mainPane.setCenter(subSceneWrappedInsidePane);
       primaryStage.setTitle(getClass().getSimpleName());
       primaryStage.setMaximized(false);
@@ -123,9 +120,6 @@ public class BehaviorUI
    {
       SNAPPED_POSITION_EDITOR.stop();
       ORIENTATION_EDITOR.stop();
-
-      planarRegionsGraphic.stop();
-      patrolBehaviorUIController.stop();
 
       if(robotVisualizer != null)
          robotVisualizer.stop();
@@ -149,7 +143,7 @@ public class BehaviorUI
 
       public static final Topic<FXUIEditor> ActiveEditor = apiFactory.createTopic("ActiveEditor", FXUIEditor.class);
       public static final Topic<PlanarRegionsList> PlanarRegionsList = apiFactory.createTopic("PlanarRegionsList", PlanarRegionsList.class);
-      public static final Topic<Node> SelectedGraphic = apiFactory.createTopic("SelectedGraphic", Node.class);
+      public static final Topic<FXUIEditableGraphic> SelectedGraphic = apiFactory.createTopic("SelectedGraphic", FXUIEditableGraphic.class);
       public static final Topic<FXUIStateMachine> ActiveStateMachine = apiFactory.createTopic("ActiveStateMachine", FXUIStateMachine.class);
 
       public static final MessagerAPI create()

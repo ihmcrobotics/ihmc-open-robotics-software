@@ -7,14 +7,11 @@ import us.ihmc.atlas.AtlasRobotModel;
 import us.ihmc.atlas.AtlasRobotVersion;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.RobotTarget;
-import us.ihmc.communication.ROS2Tools;
 import us.ihmc.humanoidBehaviors.ui.BehaviorUI;
 import us.ihmc.humanoidBehaviors.ui.editors.OrientationYawEditor;
 import us.ihmc.humanoidBehaviors.ui.editors.SnappedPositionEditor;
 import us.ihmc.javaFXToolkit.messager.SharedMemoryJavaFXMessager;
 import us.ihmc.messager.MessagerAPIFactory;
-import us.ihmc.pubsub.DomainFactory;
-import us.ihmc.ros2.RealtimeRos2Node;
 
 public class AtlasBehaviorUI extends Application
 {

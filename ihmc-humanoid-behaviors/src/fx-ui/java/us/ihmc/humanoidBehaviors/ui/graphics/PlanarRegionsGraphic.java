@@ -23,10 +23,8 @@ public class PlanarRegionsGraphic extends FXUIGraphic
 
    private final PlanarRegionsList planarRegionsList;
 
-   public PlanarRegionsGraphic(JavaFXMessager messager)
+   public PlanarRegionsGraphic()
    {
-      super(messager);
-
       ConvexPolygon2D convexPolygon = new ConvexPolygon2D();
       convexPolygon.addVertex(10.0, 10.0);
       convexPolygon.addVertex(-10.0, 10.0);
@@ -61,12 +59,6 @@ public class PlanarRegionsGraphic extends FXUIGraphic
       }
 
       rootChildren.addAll(regionMeshViews);
-   }
-
-   @Override
-   public void handle(long now)
-   {
-      messager.submitMessage(API.PlanarRegionsList, planarRegionsList);
    }
 
    public static Color getRegionColor(int regionId)
